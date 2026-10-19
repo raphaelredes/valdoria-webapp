@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T06:46:41Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T07:05:29Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -20523,167 +20523,279 @@ function formatTurnsLeftLabel(st) {
    halfDmg / selfAtkVulnerable de buffs/debuffs em actor.se e target.se.
    Cancelamento PHB: vantagem + desvantagem = rolagem normal.
    ============================================================ */
+/**
+ * D&D 5e (PHB Apêndice A: Condições).
+ * Avalia se uma unidade possui determinada condição física ou mágica ativa (direta ou em .se).
+ */
+function simHasCondition(unit, condKey) {
+    if (!unit) return false;
+    var k = String(condKey || '').toLowerCase().trim();
+    if (k === 'blind' || k === 'blinded' || k === 'cego') {
+        if (unit.blind || unit.blinded) return true;
+    } else if (k === 'invisible' || k === 'invisivel') {
+        if (unit.invisible) return true;
+    } else if (k === 'poisoned' || k === 'envenenado') {
+        if (unit.poisoned) return true;
+    } else if (k === 'frightened' || k === 'amedrontado') {
+        if (unit.frightened) return true;
+    } else if (k === 'restrained' || k === 'contido' || k === 'impedido') {
+        if (unit.restrained) return true;
+    } else if (k === 'paralyzed' || k === 'paralisado') {
+        if (unit.paralyzed) return true;
+    } else if (k === 'stunned' || k === 'atordoado') {
+        if (unit.stunned) return true;
+    } else if (k === 'unconscious' || k === 'inconsciente') {
+        if (unit.unconscious) return true;
+    } else if (k === 'petrified' || k === 'petrificado') {
+        if (unit.petrified) return true;
+    } else if (k === 'prone' || k === 'caido' || k === 'prostrado') {
+        if (unit.prone) return true;
+    } else if (k === 'dodge' || k === 'dodging' || k === 'esquiva') {
+        if (unit.dodging) return true;
+    } else if (k === 'incapacitated' || k === 'incapacitado') {
+        if (unit.incapacitated || unit.paralyzed || unit.stunned || unit.unconscious || unit.petrified) return true;
+    } else if (unit[k]) {
+        return true;
+    }
+
+    if (!Array.isArray(unit.se)) return false;
+    for (var i = 0; i < unit.se.length; i++) {
+        var st = unit.se[i];
+        if (!st) continue;
+        var stId = String(st.id || '').toLowerCase();
+        var stCond = String(st.dndCondition || st.n || '').toLowerCase();
+
+        if (k === 'blind' || k === 'blinded' || k === 'cego') {
+            if (st.blind || st.blinded || stId === 'cego' || stId === 'blindness' || stCond.indexOf('cego') >= 0 || stCond.indexOf('blind') >= 0) return true;
+        } else if (k === 'invisible' || k === 'invisivel') {
+            if (st.invisible || stId === 'invisivel' || stId === 'invisibility' || stCond.indexOf('invis') >= 0) return true;
+        } else if (k === 'poisoned' || k === 'envenenado') {
+            if (st.poisoned || stId === 'envenenado' || stId === 'poisoned' || stCond.indexOf('envenen') >= 0 || stCond.indexOf('poison') >= 0) return true;
+        } else if (k === 'frightened' || k === 'amedrontado') {
+            if (st.frightened || stId === 'amedrontado' || stId === 'frightened' || stCond.indexOf('amedront') >= 0 || stCond.indexOf('fear') >= 0) return true;
+        } else if (k === 'restrained' || k === 'contido' || k === 'impedido') {
+            if (st.restrained || stId === 'contido' || stId === 'restrained' || stId === 'impedido' || stCond.indexOf('contid') >= 0 || stCond.indexOf('restrain') >= 0) return true;
+        } else if (k === 'paralyzed' || k === 'paralisado') {
+            if (st.paralyzed || stId === 'paralisado' || stId === 'paralyzed' || stCond.indexOf('paralis') >= 0) return true;
+        } else if (k === 'stunned' || k === 'atordoado') {
+            if (st.stunned || stId === 'atordoado' || stId === 'stunned' || stCond.indexOf('atordo') >= 0 || stCond.indexOf('stun') >= 0) return true;
+        } else if (k === 'unconscious' || k === 'inconsciente') {
+            if (st.unconscious || stId === 'inconsciente' || stId === 'unconscious' || stCond.indexOf('inconscien') >= 0) return true;
+        } else if (k === 'petrified' || k === 'petrificado') {
+            if (st.petrified || stId === 'petrificado' || stId === 'petrified' || stCond.indexOf('petrific') >= 0) return true;
+        } else if (k === 'prone' || k === 'caido' || k === 'prostrado') {
+            if (st.prone || stId === 'caido' || stId === 'prostrado' || stCond.indexOf('caído') >= 0 || stCond.indexOf('prone') >= 0) return true;
+        } else if (k === 'dodge' || k === 'dodging' || k === 'esquiva') {
+            if (st.dodging || stId === 'dodge' || stId === 'esquiva' || stCond.indexOf('esquiv') >= 0 || stCond.indexOf('dodge') >= 0) return true;
+        } else if (k === 'incapacitated' || k === 'incapacitado') {
+            if (st.incapacitated || st.paralyzed || st.stunned || st.unconscious || st.petrified || st.skipTurn || stId === 'paralisado' || stId === 'paralyzed' || stId === 'stunned' || stId === 'atordoado' || stId === 'inconsciente' || stId === 'unconscious' || stId === 'banishment') return true;
+        } else {
+            if (st[k] || stId === k || stCond.indexOf(k) >= 0) return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Avalia detalhadamente as fontes canônicas de Vantagem e Desvantagem D&D 5e (PHB p. 173).
+ * Retorna as razões discriminadas e detecta quando ambos ocorrem, anulando-se mutuamente ('cancelled').
+ */
 function _simAttackAdvDetails(actor, target, skill) {
+    if (!actor || !target) {
+        return { state: 'normal', mode: 'normal', reason: '', adv: false, dis: false, advReasons: [], disReasons: [] };
+    }
     var advReasons = [];
     var disReasons = [];
 
-    /* D&D 5e Tactical Hex Grid (PHB p. 195):
-       Desvantagem em ataques à distância quando há inimigo hostil a 5 pés (1 hex). */
+    // D&D 5e Tactical Hex Grid (PHB p. 195): Ataque à distância com inimigo hostil adjacente consciente
     var reachInfo = (typeof simGetAttackReach === 'function') ? simGetAttackReach(actor, skill) : null;
-    var isRanged = reachInfo ? reachInfo.isRanged : (actor && (actor.is_ranged || actor.ranged));
+    var isRanged = reachInfo ? reachInfo.isRanged : (actor.is_ranged || actor.ranged);
     if (isRanged && typeof simHasHostileAdjacent === 'function' && currentState && currentState.order) {
         if (simHasHostileAdjacent(actor, currentState.order)) {
-            disReasons.push('🏹 Inimigo Adjacente (Disparo)');
+            disReasons.push('Inimigo hostil adjacente (ataque à distância, PHB p. 195)');
         }
     }
 
     var simDist = null;
-    if (actor && actor.pos && target && target.pos && typeof hexDistance === 'function') {
+    if (actor.pos && target.pos && typeof hexDistance === 'function') {
         simDist = hexDistance(actor.pos.col, actor.pos.row, target.pos.col, target.pos.row);
     }
-    var targetProne = target && target.se && target.se.some(function (st) { return st && st.prone; });
 
-    /* C3.4 #90: Assassinar (Assassino, PHB p.97) — vantagem na 1ª rodada
-       (aprox. de 'criatura que ainda não agiu'). Espelha o motor. */
-    if (actor && _subclassKeyNorm(actor.subclass) === 'assassin'
-            && currentState && (currentState.rn | 0) <= 1) {
-        advReasons.push('🗡️ Emboscada de Assassino');
+    // Assassinar (Assassino, PHB p. 97) - vantagem no 1º turno
+    if (typeof _subclassKeyNorm === 'function' && _subclassKeyNorm(actor.subclass) === 'assassin' && currentState && (currentState.rn | 0) <= 1) {
+        advReasons.push('Assassinar no 1º turno (PHB p. 97)');
     }
-    if (actor && actor.se) {
-        actor.se.forEach(function (st) {
-            if (!st) return;
-            /* Flags no ATACANTE — buffs/debuffs que alteram SEUS ataques */
+
+    // Buffs e condições no ATACANTE
+    if (actor.se && actor.se.length) {
+        for (var ai = 0; ai < actor.se.length; ai++) {
+            var st = actor.se[ai];
+            if (!st) continue;
             if (st.atkAdvantage) {
-                if (st.markedTargetOnly && st.markedTargetName && target && target.n !== st.markedTargetName) {
-                    /* atkAdvantage não aplica: target diferente do marcado */
+                if (st.markedTargetOnly && st.markedTargetName && target.n !== st.markedTargetName) {
+                    // marcado diferente
                 } else {
-                    advReasons.push(st.n ? ('✨ ' + st.n) : '✨ Vantagem no Ataque');
+                    advReasons.push(st.n ? ('Efeito ativo: ' + st.n) : 'Vantagem no ataque');
                 }
             }
             if (st.atkDisadvantage) {
-                disReasons.push(st.n ? ('⚠️ ' + st.n) : '⚠️ Desvantagem no Ataque');
+                disReasons.push(st.n ? ('Efeito ativo: ' + st.n) : 'Desvantagem no ataque');
             }
-            /* V1.7 Sprint-6 (2026-04-21 closeout) — PHB p.255 Invisibilidade */
-            if (st.attackAdvantage) advReasons.push('👤 Atacante Invisível');
-            if (st.blinded || st.id === 'cego') disReasons.push('👁️ Atacante Cego');
-            if (st.poisoned || st.id === 'envenenado') disReasons.push('🧪 Atacante Envenenado');
-            if (st.frightened || st.id === 'amedrontado') disReasons.push('😱 Atacante Amedrontado');
-            if (st.restrained || st.id === 'contido') disReasons.push('🕸️ Atacante Contido');
-            if (st.prone) disReasons.push('⚠️ Atacante Caído');
-        });
-    }
-    if (target && target.se) {
-        target.se.forEach(function (st) {
-            if (!st) return;
-            /* Flags no ALVO — efeitos sobre o alvo que afetam ataques CONTRA ele */
-            if (st.enemyAtkDisadvantage) disReasons.push('⚠️ Defesa Intimidante');
-            if (st.selfAtkVulnerable) advReasons.push('💥 Alvo Temerário');
-            if (st.targetedAdvantage) {
-                if (targetProne && simDist !== null) {
-                    if (simDist <= 1) advReasons.push('⚔️ Alvo Caído (Corpo a Corpo)');
-                    else disReasons.push('🏹 Alvo Caído (À Distância)');
-                } else {
-                    var _condTag = st.paralyzed ? '⚡ Alvo Paralisado' :
-                                   st.stunned ? '💫 Alvo Atordoado' :
-                                   st.unconscious ? '💤 Alvo Inconsciente' :
-                                   st.restrained ? '🕸️ Alvo Contido' :
-                                   st.blinded ? '👁️ Alvo Cego' : '🎯 Alvo Vulnerável';
-                    advReasons.push(_condTag);
-                }
-            }
-            if (st.attackerDisadvantage) {
-                if (st.invisible || st.id === 'invisivel') disReasons.push('👤 Alvo Invisível');
-                else if (st.dodge || st.id === 'esquiva') disReasons.push('💨 Alvo em Esquiva');
-                else disReasons.push('🛡️ Alvo com Defesa Evasiva');
-            }
-        });
-    }
-    /* PHB p.292: Alvo prostrado (prone) — vantagem corpo a corpo (<= 1 hex / melee), desvantagem a distância (> 1 hex / ranged) */
-    if (targetProne) {
-        if (simDist !== null) {
-            if (simDist <= 1) {
-                if (advReasons.indexOf('⚔️ Alvo Caído (Corpo a Corpo)') === -1) advReasons.push('⚔️ Alvo Caído (Corpo a Corpo)');
-            } else {
-                if (disReasons.indexOf('🏹 Alvo Caído (À Distância)') === -1) disReasons.push('🏹 Alvo Caído (À Distância)');
-            }
-        } else {
-            if (isRanged) {
-                if (disReasons.indexOf('🏹 Alvo Caído (À Distância)') === -1) disReasons.push('🏹 Alvo Caído (À Distância)');
-            } else {
-                if (advReasons.indexOf('⚔️ Alvo Caído (Corpo a Corpo)') === -1) advReasons.push('⚔️ Alvo Caído (Corpo a Corpo)');
+            if (st.attackAdvantage) {
+                advReasons.push(st.n ? ('Efeito ativo: ' + st.n) : 'Vantagem no ataque');
             }
         }
     }
-    /* PHB p.72: Estilo de Luta Proteção */
+
+    // Condições D&D 5e no Atacante
+    if (simHasCondition(actor, 'invisible') && !target.blindsight && !target.truesight) {
+        advReasons.push('Atacante invisível (PHB p. 291)');
+    }
+    if (simHasCondition(actor, 'blind')) {
+        disReasons.push('Atacante cego (PHB p. 290)');
+    }
+    if (simHasCondition(actor, 'poisoned')) {
+        disReasons.push('Atacante envenenado (PHB p. 292)');
+    }
+    if (simHasCondition(actor, 'frightened')) {
+        disReasons.push('Atacante amedrontado (PHB p. 290)');
+    }
+    if (simHasCondition(actor, 'restrained')) {
+        disReasons.push('Atacante contido (PHB p. 292)');
+    }
+    if (simHasCondition(actor, 'prone')) {
+        disReasons.push('Atacante caído no chão (PHB p. 292)');
+    }
+
+    // Debuffs e condições no ALVO
+    if (target.se && target.se.length) {
+        for (var ti = 0; ti < target.se.length; ti++) {
+            var tst = target.se[ti];
+            if (!tst) continue;
+            if (tst.enemyAtkDisadvantage) {
+                disReasons.push(tst.n ? ('Defesa do alvo: ' + tst.n) : 'Desvantagem no ataque');
+            }
+            if (tst.selfAtkVulnerable) {
+                advReasons.push(tst.n ? ('Vulnerabilidade do alvo: ' + tst.n) : 'Vantagem no ataque');
+            }
+            if (tst.targetedAdvantage || tst.targetedAdvantageByAlly || tst.id === 'help_distracted') {
+                advReasons.push('Ajudado por aliado / Distraído (PHB p. 192)');
+            }
+            if (tst.attackerDisadvantage) {
+                disReasons.push(tst.n ? ('Efeito no alvo: ' + tst.n) : 'Desvantagem no ataque');
+            }
+        }
+    }
+
+    // Condições D&D 5e no Alvo
+    if (simHasCondition(target, 'blind')) {
+        advReasons.push('Alvo cego (PHB p. 290)');
+    }
+    if (simHasCondition(target, 'invisible') && !actor.blindsight && !actor.truesight) {
+        disReasons.push('Alvo invisível (PHB p. 291)');
+    }
+    if (simHasCondition(target, 'restrained')) {
+        advReasons.push('Alvo contido (PHB p. 292)');
+    }
+    if (simHasCondition(target, 'paralyzed')) {
+        advReasons.push('Alvo paralisado (PHB p. 291)');
+    }
+    if (simHasCondition(target, 'stunned')) {
+        advReasons.push('Alvo atordoado (PHB p. 292)');
+    }
+    if (simHasCondition(target, 'unconscious')) {
+        advReasons.push('Alvo inconsciente (PHB p. 292)');
+    }
+    if (simHasCondition(target, 'petrified')) {
+        advReasons.push('Alvo petrificado (PHB p. 291)');
+    }
+    if (simHasCondition(target, 'dodge')) {
+        disReasons.push('Alvo em esquiva (PHB p. 192)');
+    }
+
+    // Alvo Caído / Prostrado (PHB p. 190 / 292)
+    if (simHasCondition(target, 'prone')) {
+        if (simDist !== null) {
+            if (simDist <= 1) advReasons.push('Alvo caído no chão (corpo a corpo ≤ 1,5m, PHB p. 292)');
+            else disReasons.push('Alvo caído no chão (à distância > 1,5m, PHB p. 292)');
+        } else {
+            if (isRanged) disReasons.push('Alvo caído no chão (à distância, PHB p. 292)');
+            else advReasons.push('Alvo caído no chão (corpo a corpo, PHB p. 292)');
+        }
+    }
+
+    // Estilo de Luta: Proteção (PHB p. 72)
     if (target && currentState && currentState.order) {
         var targetTeam = target.t;
         for (var pi = 0; pi < currentState.order.length; pi++) {
             var ally = currentState.order[pi];
             if (ally && ally !== target && ally.alive && !ally.isDead && ally.t === targetTeam) {
                 var acq = ally.acquired || [];
-                if (acq.indexOf('fighting_style_protection') >= 0 && (ally.hasShield || ally.has_shield) && !ally.reaction_spent) {
-                    var allyIncap = ally.se && ally.se.some(function(st) {
-                        return st && (st.skipTurn || st.incapacitated || st.paralyzed || st.stunned || st.unconscious);
-                    });
+                if (acq.indexOf('fighting_style_protection') >= 0 && (ally.hasShield || ally.has_shield) && !ally.reaction_spent && !ally.reactionSpent) {
+                    var allyIncap = simHasCondition(ally, 'incapacitated');
                     if (!allyIncap && typeof hexDistance === 'function' && target.pos && ally.pos) {
                         if (hexDistance(target.pos.col, target.pos.row, ally.pos.col, ally.pos.row) <= 1) {
-                            disReasons.push('🛡️ Estilo de Proteção do Aliado');
+                            disReasons.push('Protegido por aliado c/ escudo (PHB p. 72)');
                         }
                     }
                 }
             }
         }
     }
-    /* G1 Pack Tactics PHB MM p.341 */
-    if (actor && actor.packTactics && currentState && currentState.order) {
+
+    // Táticas de Matilha / Pack Tactics (PHB MM p. 341)
+    if (actor.packTactics && currentState && currentState.order) {
         var alliesAlive = 0;
-        for (var pi = 0; pi < currentState.order.length; pi++) {
-            var a = currentState.order[pi];
-            if (a && a !== actor && a.alive && (a.t === 'p' || a.t === 'a')) {
+        for (var pti = 0; pti < currentState.order.length; pti++) {
+            var pa = currentState.order[pti];
+            if (pa && pa !== actor && pa.alive && !pa.isDead && (pa.t === 'p' || pa.t === 'a')) {
                 alliesAlive++;
             }
         }
-        if (alliesAlive >= 1) advReasons.push('🐺 Táticas de Matilha');
+        if (alliesAlive >= 1) advReasons.push('Táticas de Matilha (aliado consciente adjacente)');
     }
-    /* V1.7 Sprint-10 — PHB p.291 Exhaustion nv 3+ */
+
+    // Exaustão Nível 3+ (PHB p. 291)
     if (typeof _simExhaustionLevel === 'function') {
         var _exLvl = _simExhaustionLevel(actor);
-        if (_exLvl >= 3) disReasons.push('Exaustão Nv ' + _exLvl);
+        if (_exLvl >= 3) disReasons.push('Exaustão Nv ' + _exLvl + ' (PHB p. 291)');
     }
-    /* firstAttackAdvantage */
-    if (actor && actor.firstAttackAdvantage) {
-        advReasons.push('⚡ Iniciativa Feroz');
+
+    // First attack advantage
+    if (actor.firstAttackAdvantage) {
+        advReasons.push('Iniciativa feroz (1º ataque)');
     }
-    /* D&D 5e DMG p. 251: Flanqueamento em Grid Hexagonal */
+
+    // Flanqueamento D&D 5e (DMG p. 251): corpo a corpo com aliado adjacente oposto
     if (!isRanged && typeof simCheckFlanking === 'function' && currentState && currentState.order) {
         if (simCheckFlanking(actor, target, currentState.order)) {
-            advReasons.push('⚔️ Flanqueamento');
+            advReasons.push('Flanqueamento com aliado oposto (DMG p. 251)');
         }
     }
 
-    // Deduplicate
-    advReasons = advReasons.filter(function(v, i, a) { return a.indexOf(v) === i; });
-    disReasons = disReasons.filter(function(v, i, a) { return a.indexOf(v) === i; });
+    // Deduplicação
+    advReasons = advReasons.filter(function (v, i, a) { return a.indexOf(v) === i; });
+    disReasons = disReasons.filter(function (v, i, a) { return a.indexOf(v) === i; });
 
-    var adv = advReasons.length > 0;
-    var dis = disReasons.length > 0;
-    var mode = 'normal';
-    var reason = '';
-
-    if (adv && dis) {
-        mode = 'normal';
-        reason = 'Vantagem e Desvantagem se anulam (PHB p. 173)';
-    } else if (adv) {
-        mode = 'advantage';
-        reason = advReasons.join(' · ');
-    } else if (dis) {
-        mode = 'disadvantage';
-        reason = disReasons.join(' · ');
+    var hasAdv = advReasons.length > 0;
+    var hasDis = disReasons.length > 0;
+    var state = 'normal';
+    if (hasAdv && hasDis) {
+        state = 'cancelled';
+    } else if (hasAdv) {
+        state = 'advantage';
+    } else if (hasDis) {
+        state = 'disadvantage';
     }
 
     return {
-        mode: mode,
-        reason: reason,
+        state: state,
+        mode: (state === 'cancelled') ? 'normal' : state,
+        reason: (state === 'cancelled')
+            ? 'Vantagem e Desvantagem se anulam (PHB p. 173)'
+            : (hasAdv ? advReasons.join(' · ') : (hasDis ? disReasons.join(' · ') : '')),
+        adv: hasAdv,
+        dis: hasDis,
         advReasons: advReasons,
         disReasons: disReasons
     };
@@ -21065,6 +21177,16 @@ function resolveHit(a, d, r, opts) {
     if (r === 1) return { hit: false, miss: true, reason: 'falha_critica', total: total, effAc: effAc, atkExtra: atkExtra };
     if (r >= critThreshold) return { hit: true, crit: true, total: total, effAc: effAc, atkExtra: atkExtra };
     if (total < effAc) return { hit: false, miss: true, reason: 'errou', total: total, effAc: effAc, atkExtra: atkExtra };
+    // D&D 5e PHB p. 291/292: Qualquer acerto contra criatura paralisada ou inconsciente a 1,5m (<= 1 hex) é acerto crítico automático
+    var distAd = (a.pos && d.pos && typeof hexDistance === 'function') ? hexDistance(a.pos.col, a.pos.row, d.pos.col, d.pos.row) : 1;
+    var isDHelpless = (typeof simHasCondition === 'function')
+        ? (simHasCondition(d, 'paralyzed') || simHasCondition(d, 'unconscious'))
+        : !!(d.paralyzed || d.unconscious || (d.se && d.se.some(function (st) {
+            return st && (st.paralyzed || st.unconscious || st.id === 'paralyzed' || st.id === 'unconscious' || /paralis|inconscient/i.test(st.dndCondition || st.n || ''));
+        })));
+    if (isDHelpless && distAd <= 1) {
+        return { hit: true, crit: true, total: total, effAc: effAc, atkExtra: atkExtra, autoCritNear: true };
+    }
     return { hit: true, crit: false, total: total, effAc: effAc, atkExtra: atkExtra };
 }
 
@@ -24453,13 +24575,23 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
     // Popula o HUD tático ancorado (#bfTacticalPreviewBar) com todos os detalhes sem poluir o mapa
     if (options.showBar !== false) {
         var chips = [];
+        var isDisengaged = (pUnit && pUnit.se && pUnit.se.some(function (st) {
+            return st && (st.id === 'desengajar' || st.preventOpportunityAttacks);
+        })) || !!(pUnit && pUnit.disengaged) || !!(currentState && currentState._disengaged);
+
         if (provokedAoOList.length > 0) {
             var aooNames = [];
             for (var pi = 0; pi < provokedAoOList.length; pi++) {
                 var uN = (provokedAoOList[pi].unit && provokedAoOList[pi].unit.n) || 'Inimigo';
                 if (aooNames.indexOf(uN) < 0) aooNames.push(uN);
             }
-            chips.push({ kind: 'danger', text: '⚠️ AoO (' + provokedAoOList.length + '): ' + aooNames.join(', ') });
+            if (isDisengaged) {
+                chips.push({ kind: 'danger', text: '⚠️ Sentinela ignora Desengajar: ' + aooNames.join(', ') + ' (PHB p. 169)' });
+            } else {
+                chips.push({ kind: 'danger', text: '⚠️ AoO (' + provokedAoOList.length + '): ' + aooNames.join(', ') });
+            }
+        } else if (isDisengaged) {
+            chips.push({ kind: 'good', text: '💨 Desengajado (Sem AoO, PHB p. 192)' });
         }
         if (crossesHazard) {
             chips.push({ kind: 'danger', text: '🔥 Cruza Terreno Perigoso' });
@@ -24616,145 +24748,8 @@ function simComputeCover(state, attacker, target) {
     };
 }
 
-/**
- * Avalia detalhadamente as fontes canônicas de Vantagem e Desvantagem D&D 5e (PHB p. 173).
- * Retorna as razões discriminadas e detecta quando ambos ocorrem, anulando-se mutuamente ('cancelled').
- */
-function _simAttackAdvDetails(actor, target, skill) {
-    if (!actor || !target) {
-        return { state: 'normal', adv: false, dis: false, advReasons: [], disReasons: [] };
-    }
-    var advReasons = [];
-    var disReasons = [];
+// Nota: _simAttackAdvDetails canônica D&D 5e é declarada acima (seção de mecânica de combate) com suporte completo a condições e cancelamento mútuo (PHB p. 173).
 
-    // Ataque à distância com inimigo hostil adjacente consciente (PHB p. 195)
-    var reachInfo = (typeof simGetAttackReach === 'function') ? simGetAttackReach(actor, skill) : null;
-    var isRanged = reachInfo ? reachInfo.isRanged : (actor.is_ranged || actor.ranged);
-    if (isRanged && typeof simHasHostileAdjacent === 'function' && currentState && currentState.order) {
-        if (simHasHostileAdjacent(actor, currentState.order)) {
-            disReasons.push('Inimigo hostil adjacente (ataque à distância, PHB p. 195)');
-        }
-    }
-
-    var simDist = null;
-    if (actor.pos && target.pos && typeof hexDistance === 'function') {
-        simDist = hexDistance(actor.pos.col, actor.pos.row, target.pos.col, target.pos.row);
-    }
-    var targetProne = !!(target.prone || (target.se && target.se.some(function (st) { return st && st.prone; })));
-
-    // Assassinar (PHB p. 97)
-    if (typeof _subclassKeyNorm === 'function' && _subclassKeyNorm(actor.subclass) === 'assassin' && currentState && (currentState.rn | 0) <= 1) {
-        advReasons.push('Assassinar no 1º turno (PHB p. 97)');
-    }
-
-    // Buffs no atacante
-    if (actor.se && actor.se.length) {
-        for (var ai = 0; ai < actor.se.length; ai++) {
-            var st = actor.se[ai];
-            if (!st) continue;
-            if (st.atkAdvantage) {
-                if (st.markedTargetOnly && st.markedTargetName && target.n !== st.markedTargetName) {
-                    // diferente do marcado
-                } else {
-                    advReasons.push(st.n ? ('Efeito ativo: ' + st.n) : 'Vantagem no ataque');
-                }
-            }
-            if (st.atkDisadvantage) {
-                disReasons.push(st.n ? ('Efeito ativo: ' + st.n) : 'Desvantagem no ataque');
-            }
-            if (st.attackAdvantage) {
-                advReasons.push(st.n ? ('Efeito ativo: ' + st.n) : 'Vantagem no ataque');
-            }
-            if (st.prone && isRanged) {
-                disReasons.push('Atacante caído no chão (ataque à distância, PHB p. 292)');
-            }
-        }
-    }
-
-    // Debuffs / condições no alvo
-    if (target.se && target.se.length) {
-        for (var ti = 0; ti < target.se.length; ti++) {
-            var tst = target.se[ti];
-            if (!tst) continue;
-            if (tst.enemyAtkDisadvantage) {
-                disReasons.push(tst.n ? ('Defesa do alvo: ' + tst.n) : 'Desvantagem no ataque');
-            }
-            if (tst.selfAtkVulnerable) {
-                advReasons.push(tst.n ? ('Vulnerabilidade do alvo: ' + tst.n) : 'Vantagem no ataque');
-            }
-            if (tst.targetedAdvantage || tst.targetedAdvantageByAlly || tst.id === 'help_distracted') {
-                if (targetProne && simDist !== null) {
-                    if (simDist <= 1) advReasons.push('Alvo vulnerável / Ajudado (PHB p. 192)');
-                    else disReasons.push('Alvo caído à distância (PHB p. 292)');
-                } else {
-                    advReasons.push('Ajudado por aliado / Distraído (PHB p. 192)');
-                }
-            }
-            if (tst.attackerDisadvantage) {
-                disReasons.push(tst.n ? ('Efeito no alvo: ' + tst.n) : 'Desvantagem no ataque');
-            }
-        }
-    }
-
-    // Alvo Caído (PHB p. 190 / 292)
-    if (targetProne) {
-        if (simDist !== null) {
-            if (simDist <= 1) advReasons.push('Alvo caído no chão (corpo a corpo ≤ 1,5m, PHB p. 292)');
-            else disReasons.push('Alvo caído no chão (à distância > 1,5m, PHB p. 292)');
-        } else {
-            if (isRanged) disReasons.push('Alvo caído no chão (à distância, PHB p. 292)');
-            else advReasons.push('Alvo caído no chão (corpo a corpo, PHB p. 292)');
-        }
-    }
-
-    // Pack Tactics (PHB MM p. 341)
-    if (actor.packTactics && currentState && currentState.order) {
-        var alliesAlive = 0;
-        for (var pi = 0; pi < currentState.order.length; pi++) {
-            var a = currentState.order[pi];
-            if (a && a !== actor && a.alive && (a.t === 'p' || a.t === 'a')) alliesAlive++;
-        }
-        if (alliesAlive >= 1) advReasons.push('Táticas de Matilha (aliado consciente adjacente)');
-    }
-
-    // Exaustão nv 3+
-    if (typeof _simExhaustionLevel === 'function' && _simExhaustionLevel(actor) >= 3) {
-        disReasons.push('Exaustão Nível 3+ (PHB p. 291)');
-    }
-
-    // First attack advantage (leitura sem consumo)
-    if (actor.firstAttackAdvantage) {
-        advReasons.push('Vantagem no primeiro ataque');
-    }
-
-    // Flanqueamento D&D 5e (DMG p. 251): ataque corpo a corpo com aliado adjacente oposto
-    if (!isRanged && typeof simCheckFlanking === 'function' && currentState && currentState.order) {
-        if (simCheckFlanking(actor, target, currentState.order)) {
-            advReasons.push('Flanqueamento com aliado oposto (DMG p. 251)');
-        }
-    }
-
-    var hasAdv = advReasons.length > 0;
-    var hasDis = disReasons.length > 0;
-    var state = 'normal';
-    if (hasAdv && hasDis) {
-        state = 'cancelled';
-    } else if (hasAdv) {
-        state = 'advantage';
-    } else if (hasDis) {
-        state = 'disadvantage';
-    }
-
-    return {
-        state: state,
-        mode: (state === 'cancelled') ? 'normal' : state,
-        reason: (state === 'cancelled') ? 'Vantagem e Desvantagem se anulam (PHB p. 173)' : (hasAdv ? advReasons.join(' · ') : (hasDis ? disReasons.join(' · ') : '')),
-        adv: hasAdv,
-        dis: hasDis,
-        advReasons: advReasons,
-        disReasons: disReasons
-    };
-}
 
 /**
  * Avalia o estado de Vantagem / Desvantagem D&D 5e (PHB p. 173) de forma pura para HUD e UI.
@@ -25037,6 +25032,12 @@ function previewTacticalTargetOnBoard(targetIdx) {
     } else if (aimRes.isTotalCover) {
         chips.push({ kind: 'danger', text: '⛔ Cobertura Total (' + ((aimRes.coverEval && aimRes.coverEval.blockerName) || 'Bloqueado') + ')' });
     } else {
+        var isTargetHelpless = (typeof simHasCondition === 'function')
+            ? (simHasCondition(tUnit, 'paralyzed') || simHasCondition(tUnit, 'unconscious'))
+            : !!(tUnit.paralyzed || tUnit.unconscious);
+        if (isTargetHelpless && (aimRes.distHex || 1) <= 1 && !isShove) {
+            chips.push({ kind: 'good', text: '✦ Acerto é Crítico (Alvo Imóvel a 1,5m, PHB p. 291)' });
+        }
         if (advDetails && advDetails.state === 'cancelled') {
             chips.push({ kind: 'info', text: '⚖ Anuladas (Vantagem vs Desvantagem, PHB p. 173)' });
         } else if (aimRes.canFlank) {
@@ -25050,6 +25051,14 @@ function previewTacticalTargetOnBoard(targetIdx) {
                 else if (_r.indexOf('Flanqueamento') !== -1) advText = '▲ Vantagem (Flanqueado)';
                 else if (_r.indexOf('Assassinar') !== -1) advText = '▲ Vantagem (Assassinar)';
                 else if (_r.indexOf('Táticas de Matilha') !== -1) advText = '▲ Vantagem (Matilha)';
+                else if (_r.indexOf('Alvo cego') !== -1) advText = '▲ Vantagem (Alvo Cego)';
+                else if (_r.indexOf('Alvo contido') !== -1) advText = '▲ Vantagem (Alvo Contido)';
+                else if (_r.indexOf('Alvo paralisado') !== -1) advText = '▲ Vantagem (Alvo Paralisado)';
+                else if (_r.indexOf('Alvo atordoado') !== -1) advText = '▲ Vantagem (Alvo Atordoado)';
+                else if (_r.indexOf('Alvo inconsciente') !== -1) advText = '▲ Vantagem (Alvo Inconsciente)';
+                else if (_r.indexOf('Alvo petrificado') !== -1) advText = '▲ Vantagem (Alvo Petrificado)';
+                else if (_r.indexOf('Atacante invisível') !== -1) advText = '▲ Vantagem (Invisível)';
+                else if (_r.indexOf('Ajudado por aliado') !== -1) advText = '▲ Vantagem (Ajudado)';
                 else advText = '▲ Vantagem (' + _r.replace(/ \(PHB.*\)/, '') + ')';
             }
             chips.push({ kind: 'good', text: advText });
@@ -25058,7 +25067,15 @@ function previewTacticalTargetOnBoard(targetIdx) {
             if (advDetails && advDetails.disReasons && advDetails.disReasons.length > 0) {
                 var _dr = advDetails.disReasons[0];
                 if (_dr.indexOf('Alvo caído') !== -1) disText = '▼ Desvantagem (Alvo Caído à Distância)';
-                else if (_dr.indexOf('Inimigo hostil adjacente') !== -1 || _dr.indexOf('Inimigo Adjacente') !== -1) disText = '▼ Desvantagem (Inimigo Próximo)';
+                else if (_dr.indexOf('Inimigo hostil adjacente') !== -1 || _dr.indexOf('Inimigo Adjacente') !== -1) disText = '▼ Desvantagem (Inimigo Hostil Próximo)';
+                else if (_dr.indexOf('Atacante caído') !== -1) disText = '▼ Desvantagem (Atacante Caído)';
+                else if (_dr.indexOf('Atacante cego') !== -1) disText = '▼ Desvantagem (Atacante Cego)';
+                else if (_dr.indexOf('Atacante envenenado') !== -1) disText = '▼ Desvantagem (Envenenado)';
+                else if (_dr.indexOf('Atacante amedrontado') !== -1) disText = '▼ Desvantagem (Amedrontado)';
+                else if (_dr.indexOf('Atacante contido') !== -1) disText = '▼ Desvantagem (Contido)';
+                else if (_dr.indexOf('Alvo em esquiva') !== -1) disText = '▼ Desvantagem (Alvo Esquivando)';
+                else if (_dr.indexOf('Alvo invisível') !== -1) disText = '▼ Desvantagem (Alvo Invisível)';
+                else if (_dr.indexOf('Protegido por aliado') !== -1) disText = '▼ Desvantagem (Estilo Proteção)';
                 else if (_dr.indexOf('Exaustão') !== -1) disText = '▼ Desvantagem (Exaustão)';
                 else disText = '▼ Desvantagem (' + _dr.replace(/ \(PHB.*\)/, '') + ')';
             }
@@ -25099,6 +25116,9 @@ function previewTacticalTargetOnBoard(targetIdx) {
             kind: 'info',
             text: aoeS.shapeLabelPt + ' ' + aoeS.aoeMeters + (aoeS.enemiesInAoe > 0 ? (' · 🎯 ' + aoeS.enemiesInAoe + ' alvo(s)') : '')
         });
+        if (aoeS.saveStr) {
+            chips.push({ kind: 'warn', text: '🛡️ TR ' + aoeS.saveStr });
+        }
         if (aoeS.alliesInAoe > 0) {
             chips.push({ kind: 'danger', text: '⚠️ ' + aoeS.alliesInAoe + ' aliado(s) na área!' });
         }
