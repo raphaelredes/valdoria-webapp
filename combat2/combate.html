@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T09:14:04Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T09:41:39Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -6494,7 +6494,19 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .tcc-stats .hp-high { color: #7ec060; }
 .tcc-stats .hp-mid  { color: #e0b040; }
 .tcc-stats .hp-low  { color: #e06050; }
-.tcc-actions { display: flex; gap: var(--v-space-md, 8px); }
+.tcc-actions {
+  display: flex;
+  gap: var(--v-space-md, 8px);
+  position: sticky;
+  bottom: calc(-1 * var(--v-space-lg, 14px));
+  margin: var(--v-space-md, 8px) -16px calc(-1 * var(--v-space-lg, 14px));
+  padding: 10px 16px;
+  background: linear-gradient(180deg, rgba(42, 36, 32, 0.9) 0%, rgba(35, 29, 25, 0.98) 100%);
+  border-top: 1px solid rgba(192, 106, 58, 0.25);
+  border-radius: 0 0 12px 12px;
+  z-index: 5;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.35);
+}
 .tcc-actions .action-btn { flex: 1; }
 
 /* Confirmacao in-game ao pular rolagens (substitui window.confirm) */
@@ -52179,11 +52191,13 @@ async function __combatAnimateOneEvent(ev) {
                     var _advMode = ev.advMode || ev.adv || null;
                     var _raw1 = ev.d20Raw1 != null ? ev.d20Raw1 : ev.advRaw1;
                     var _raw2 = ev.d20Raw2 != null ? ev.d20Raw2 : ev.advRaw2;
+                    var _advReason = ev.advReason || (ev.advReasons && ev.advReasons.length ? ev.advReasons.join(' · ') : (ev.disReasons && ev.disReasons.length ? ev.disReasons.join(' · ') : null));
                     showDice(rollValueForDice, rD, roller, rollTitle, {
                         combatTarget: opponent,
                         advMode: _advMode,
                         advRaw1: _raw1,
                         advRaw2: _raw2,
+                        advReason: _advReason,
                         postResult: function () {
                             if (isSaveRoll) {
                                 var _kicker = 'TESTE DE RESISTÊNCIA DE ' + abLabel.toUpperCase();
@@ -52301,6 +52315,11 @@ async function __combatAnimateOneEvent(ev) {
                             if (ev.actionSurge) _tacticalPills.push('<span class="dmg-pill dmg-pill--buff">⚡ Surto de Ação</span>');
                             if (ev.flanked) _tacticalPills.push('<span class="dmg-pill dmg-pill--type">⚔️ Flanqueamento</span>');
                             if (ev.coverBonus > 0) _tacticalPills.push('<span class="dmg-pill dmg-pill--resist">⛨ Cobertura (+' + ev.coverBonus + ' CA)</span>');
+                            if (_advMode === 'advantage') {
+                                _tacticalPills.push('<span class="dmg-pill dmg-pill--buff">🎲 Vantagem' + (_advReason ? ' (' + _advReason + ')' : '') + '</span>');
+                            } else if (_advMode === 'disadvantage') {
+                                _tacticalPills.push('<span class="dmg-pill dmg-pill--crit">⚠️ Desvantagem' + (_advReason ? ' (' + _advReason + ')' : '') + '</span>');
+                            }
                             if (_isRemImm) _tacticalPills.push('<span class="dmg-pill dmg-pill--immune">🚫 Imune a ' + (_dtInfo ? _dtInfo.lb : 'Dano') + '</span>');
                             else if (_isRemVuln) _tacticalPills.push('<span class="dmg-pill dmg-pill--vuln">💥 Vulnerabilidade (2×)</span>');
                             else if (_isRemRes) _tacticalPills.push('<span class="dmg-pill dmg-pill--resist">🛡️ Resistência (½)</span>');
@@ -52336,6 +52355,9 @@ async function __combatAnimateOneEvent(ev) {
                                 { l: 'Defensor', v: targetForDice.n || 'Defensor' },
                                 { l: 'CA Base do Alvo', v: String(ev.ac || '?') }
                             ];
+                            if (_advMode && _advReason) {
+                                _detailsRows.push({ l: (_advMode === 'advantage' ? 'Motivo da Vantagem' : 'Motivo da Desvantagem'), v: _advReason });
+                            }
                             if (ev.multiAttackTotal > 1) {
                                 _detailsRows.push({ l: 'Ataque Múltiplo', v: (ev.multiAttackCurrent || 1) + ' de ' + ev.multiAttackTotal + ' (D&D 5e MM p. 11)' });
                             } else if (ev.attackTotal > 1) {
