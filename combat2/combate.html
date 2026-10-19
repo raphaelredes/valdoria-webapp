@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T06:03:52Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T06:23:04Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -1615,7 +1615,52 @@ canvas#vfxCanvas {
   max-width: 100% !important;
 }
 /* Acima do .sim-side-panel (9999), do #vfxCanvas e do #app — rolagens sempre visiveis */
-.dice-overlay { background: radial-gradient(ellipse at center, rgba(46,38,32,.80), rgba(20,16,12,.86)); backdrop-filter: blur(2px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--v-space-md-lg, 10px); z-index: 101000; padding: 20px; text-align: center; font-family: var(--v-font, 'MedievalSharp', serif); animation: diceOvIn .3s ease; }
+.dice-overlay { 
+  background: radial-gradient(ellipse at center, rgba(46,38,32,.80), rgba(20,16,12,.86)); 
+  backdrop-filter: blur(2px); 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  justify-content: center; 
+  justify-content: safe center; 
+  gap: var(--v-space-md-lg, 10px); 
+  z-index: 101000; 
+  padding: 16px 12px calc(20px + env(safe-area-inset-bottom, 0px)); 
+  text-align: center; 
+  font-family: var(--v-font, 'MedievalSharp', serif); 
+  animation: diceOvIn .3s ease; 
+  overflow-y: auto; 
+  overflow-x: hidden; 
+  -webkit-overflow-scrolling: touch; 
+  box-sizing: border-box; 
+}
+@media (max-height: 680px) {
+  .dice-overlay {
+    justify-content: flex-start;
+    padding-top: 10px;
+    gap: 6px;
+  }
+  .dice-canvas-holder {
+    width: 150px;
+    height: 150px;
+    flex-shrink: 0;
+  }
+  .dice-canvas-holder canvas {
+    width: 150px;
+    height: 150px;
+  }
+  .dice-canvas-holder--dual .adv-die-slot {
+    width: 110px;
+    height: 110px;
+  }
+  .dice-canvas-holder--dual {
+    gap: 12px;
+  }
+  .dice-combat-header-row {
+    margin-bottom: 2px;
+    gap: 6px;
+  }
+}
 .dice-overlay.dice-overlay--frozen, .dice-overlay.dice-overlay--frozen * { animation-play-state: paused !important; transition: none !important; }
 body.sim-paused-bg, body.sim-paused-bg * { animation-play-state: paused !important; }
 body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confirm-overlay * { animation-play-state: running !important; }
@@ -13656,6 +13701,32 @@ canvas#vfxCanvas,
   stroke: rgba(52, 211, 153, 0.68);
   filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.45));
 }
+.hex-active-aura-ring--abjuration {
+  fill: rgba(56, 189, 248, 0.06);
+  stroke: rgba(56, 189, 248, 0.75);
+  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.5));
+}
+.hex-active-aura-ring--fire {
+  fill: rgba(249, 115, 22, 0.07);
+  stroke: rgba(251, 146, 60, 0.78);
+  filter: drop-shadow(0 0 7px rgba(249, 115, 22, 0.55));
+}
+.hex-active-aura-ring--cold {
+  fill: rgba(147, 197, 253, 0.06);
+  stroke: rgba(147, 197, 253, 0.75);
+  filter: drop-shadow(0 0 6px rgba(147, 197, 253, 0.5));
+}
+.hex-active-aura-ring--radiant {
+  fill: rgba(250, 204, 21, 0.08);
+  stroke: rgba(250, 204, 21, 0.78);
+  filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.55));
+}
+.hex-active-aura-badge-bg {
+  fill: rgba(14, 11, 8, 0.88);
+  stroke: rgba(250, 204, 21, 0.65);
+  stroke-width: 0.8px;
+  pointer-events: none;
+}
 @keyframes activeAuraSpin {
   0% { stroke-dashoffset: 44; }
   100% { stroke-dashoffset: 0; }
@@ -24915,6 +24986,25 @@ function previewTacticalTargetOnBoard(targetIdx) {
         if (covInfo.bonus > 0) {
             chips.push({ kind: 'info', text: '⛨ +' + covInfo.bonus + ' CA (' + (covInfo.blockerName || 'Cobertura') + ')' });
         }
+        var predDmgType = (_pendingSkill && _pendingSkill.dmgType)
+            ? _pendingSkill.dmgType
+            : (pUnit.dmgType || (typeof resolveSkillHitDmgType === 'function' ? resolveSkillHitDmgType(pUnit, _pendingSkill) : 'slashing'));
+        if (predDmgType && tUnit.t === 'e' && !isShove) {
+            var dtLow = String(predDmgType).toLowerCase().trim();
+            var dtInfo = (typeof simDmgTypeInfoPt === 'function') ? simDmgTypeInfoPt(predDmgType) : null;
+            var dtName = dtInfo ? (dtInfo.ico + ' ' + dtInfo.lb) : predDmgType;
+            if (tUnit.immunities && tUnit.immunities.some(function (im) { return String(im).toLowerCase().trim() === dtLow; })) {
+                chips.push({ kind: 'danger', text: '🚫 Imune (' + dtName + ')' });
+            } else if (tUnit.vulnerabilities && tUnit.vulnerabilities.some(function (vl) { return String(vl).toLowerCase().trim() === dtLow; })) {
+                chips.push({ kind: 'good', text: '💥 Vulnerável (' + dtName + ' 2×)' });
+            } else if (tUnit.resistances && tUnit.resistances.some(function (rs) { return String(rs).toLowerCase().trim() === dtLow; })) {
+                chips.push({ kind: 'warn', text: '🛡️ Resistente (' + dtName + ' ½)' });
+            }
+            if (tUnit.wetTurns > 0) {
+                if (dtLow === 'cold') chips.push({ kind: 'good', text: '💧 Molhado: Vulnerável Frio (2×)' });
+                else if (dtLow === 'fire') chips.push({ kind: 'warn', text: '💧 Molhado: Resiste Fogo (½)' });
+            }
+        }
     }
 
     if (aimRes.aoeSummary) {
@@ -24946,6 +25036,10 @@ function previewTacticalTargetOnBoard(targetIdx) {
         chips: chips,
         primaryLabel: pLabel,
         onPrimary: pAction,
+        infoLabel: 'ℹ️ Ficha',
+        onInfo: function () {
+            if (typeof openUnitDetail === 'function') openUnitDetail(tUid);
+        },
         onClose: function () {
             _previewAimTargetIdx = null;
             drawTacticalAimVector(null, null, null, null);
@@ -28220,26 +28314,50 @@ function buildHexActiveAurasSvg(s, partyVisionMap) {
             var auraTitle = '';
 
             if (stId === 'espiritos_guardioes' || stId === 'spirit_guardians' || stName.indexOf('espíritos guardiões') >= 0 || stName.indexOf('espiritos guardioes') >= 0) {
-                radiusHex = 3; // 4,5m (15 ft)
-                auraStyleCls = (u.t === 'e') ? ' hex-active-aura-ring--necrotic' : '';
-                auraTitle = '✦ Espíritos Guardiões (4,5m)';
+                radiusHex = st.auraRadius || 3; // 4,5m (15 ft)
+                auraStyleCls = (u.t === 'e' || st.dmgType === 'necrotic') ? ' hex-active-aura-ring--necrotic' : ' hex-active-aura-ring--radiant';
+                auraTitle = '✦ Espíritos Guardiões (' + (radiusHex * 1.5) + 'm)';
             } else if (stId === 'halo_sagrado' || stId === 'holy_nimbus' || stName.indexOf('halo sagrado') >= 0) {
-                radiusHex = 6; // 9m (30 ft)
-                auraTitle = '☀️ Halo Sagrado (9m)';
+                radiusHex = st.auraRadius || 6; // 9m (30 ft)
+                auraStyleCls = ' hex-active-aura-ring--radiant';
+                auraTitle = '☀️ Halo Sagrado (' + (radiusHex * 1.5) + 'm)';
             } else if (stId === 'campeao_anciao' || stName.indexOf('campeão ancião') >= 0 || stName.indexOf('campeao anciao') >= 0) {
-                radiusHex = 2; // 3m (10 ft)
+                radiusHex = st.auraRadius || 2; // 3m (10 ft)
                 auraStyleCls = ' hex-active-aura-ring--nature';
                 auraTitle = '🌿 Campeão Ancião (3m)';
             } else if (stId === 'anjo_vingador' || stName.indexOf('anjo vingador') >= 0) {
-                radiusHex = 6; // 9m (30 ft)
-                auraTitle = '🪽 Aura de Menace (9m)';
+                radiusHex = st.auraRadius || 6; // 9m (30 ft)
+                auraStyleCls = ' hex-active-aura-ring--necrotic';
+                auraTitle = '🪽 Aura de Ameaça (9m)';
+            } else if (stId === 'aura_prot' || stId === 'aura_protecao' || stName.indexOf('aura de proteção') >= 0 || stName.indexOf('aura de protecao') >= 0) {
+                radiusHex = st.auraRadius || 2; // 3m (10 ft)
+                auraStyleCls = ' hex-active-aura-ring--abjuration';
+                auraTitle = '🛡️ Aura de Proteção (3m)';
+            } else if (st.isAura || st.auraRadius) {
+                radiusHex = st.auraRadius || 2;
+                var dtAura = String(st.dmgType || '').toLowerCase();
+                if (dtAura === 'necrotic') auraStyleCls = ' hex-active-aura-ring--necrotic';
+                else if (dtAura === 'radiant') auraStyleCls = ' hex-active-aura-ring--radiant';
+                else if (dtAura === 'fire') auraStyleCls = ' hex-active-aura-ring--fire';
+                else if (dtAura === 'cold') auraStyleCls = ' hex-active-aura-ring--cold';
+                else if (st.kind === 'buff') auraStyleCls = ' hex-active-aura-ring--abjuration';
+                else auraStyleCls = '';
+                auraTitle = '✦ ' + (st.n || 'Aura') + ' (' + (radiusHex * 1.5) + 'm)';
             }
 
             if (radiusHex > 0) {
                 var center = hexCenter(u.pos.col, u.pos.row);
                 var radiusPx = Math.round(radiusHex * HEX_COL_STEP);
+                var labelY = Math.max(12, center.cy - radiusPx + 11);
+                var approxW = Math.max(70, Math.round(auraTitle.length * 6.2) + 12);
+                var badgeH = 15;
+                var badgeX = Math.round(center.cx - approxW / 2);
+                var badgeY = Math.round(labelY - 8);
                 svg += '<circle cx="' + center.cx + '" cy="' + center.cy + '" r="' + radiusPx + '" class="hex-active-aura-ring' + auraStyleCls + '" />';
-                svg += '<text x="' + center.cx + '" y="' + Math.max(12, center.cy - radiusPx + 11) + '" text-anchor="middle" class="hex-active-aura-label">' + escHtml(auraTitle) + '</text>';
+                svg += '<g class="hex-active-aura-badge">';
+                svg += '<rect x="' + badgeX + '" y="' + badgeY + '" width="' + approxW + '" height="' + badgeH + '" rx="4" class="hex-active-aura-badge-bg" />';
+                svg += '<text x="' + center.cx + '" y="' + (labelY + 1) + '" text-anchor="middle" class="hex-active-aura-label">' + escHtml(auraTitle) + '</text>';
+                svg += '</g>';
                 hasAura = true;
             }
         }
@@ -46906,6 +47024,12 @@ async function playTurn(aIdx, tIdx, opts) {
         if (_actorElMa && typeof spawnSkillImpactLabel === 'function') {
             try { spawnSkillImpactLabel(_actorElMa, '⚔️ ATAQUE MÚLTIPLO (' + opts.multiAttackCurrent + '/' + opts.multiAttackTotal + ')', 'attack'); } catch (_) {}
         }
+    } else if (opts.attackTotal > 1) {
+        var _actorUidEa = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, aIdx) : null;
+        var _actorElEa = _actorUidEa ? document.querySelector('[data-unit-id="' + _actorUidEa + '"]') : null;
+        if (_actorElEa && typeof spawnSkillImpactLabel === 'function') {
+            try { spawnSkillImpactLabel(_actorElEa, '⚔️ ATAQUE EXTRA (' + opts.attackIndex + '/' + opts.attackTotal + ')', 'attack'); } catch (_) {}
+        }
     }
 
     /* D&D 5e: Posicionamento e movimentação tática no grid hexagonal */
@@ -51224,6 +51348,10 @@ async function __combatAnimateOneEvent(ev) {
         /* 2) D20 animation se temos o valor de ataque OU salvaguarda (TR). Pula em OAs (rapid-fire). */
         if (kind === 'oa' && elA && typeof spawnSkillImpactLabel === 'function') {
             try { spawnSkillImpactLabel(elA, '⚡ ATAQUE DE OPORTUNIDADE!', 'attack'); } catch (eOaLbl) {}
+        } else if (ev.multiAttackTotal > 1 && elA && typeof spawnSkillImpactLabel === 'function') {
+            try { spawnSkillImpactLabel(elA, '⚔️ ATAQUE MÚLTIPLO (' + (ev.multiAttackCurrent || 1) + '/' + ev.multiAttackTotal + ')', 'attack'); } catch (eMaLbl) {}
+        } else if (ev.attackTotal > 1 && elA && typeof spawnSkillImpactLabel === 'function') {
+            try { spawnSkillImpactLabel(elA, '⚔️ ATAQUE EXTRA (' + (ev.attackIndex || 1) + '/' + ev.attackTotal + ')', 'attack'); } catch (eEaLbl) {}
         }
         var isSaveRoll = (ev.d20 == null && ev.saveD20 != null);
         var rollValueForDice = isSaveRoll ? ev.saveD20 : ev.d20;
@@ -51617,18 +51745,46 @@ async function __combatAnimateOneEvent(ev) {
         }
 
         // Labels de impacto DOM e Números de Dano Flutuante
+        var _attackSeqSuffix = '';
+        if (ev.multiAttackTotal > 1) {
+            _attackSeqSuffix = ' (' + (ev.multiAttackCurrent || 1) + '/' + ev.multiAttackTotal + ')';
+        } else if (ev.attackTotal > 1) {
+            _attackSeqSuffix = ' (' + (ev.attackIndex || 1) + '/' + ev.attackTotal + ')';
+        }
+
+        var _isRemImm = !!(ev.damageImmunity || ev.naturesWardImmunity);
+        var _isRemVuln = !!ev.damageVulnerability;
+        var _isRemRes = !!(ev.damageResistance || ev.rageResisted || ev.bearTotemResist || ev.auraOfWarding || ev.spellResistance || ev.emptyBodyResistance || ev.fiendishResilience || ev.inuredToUndeathResist || ev.underwaterFireResistance || ev.dampenElements);
+        var _cDt = String(dmgType || ev.dmgType || '').toLowerCase().trim();
+        if (_cDt && tU && !_isRemImm && !_isRemVuln && !_isRemRes) {
+            if (tU.immunities && tU.immunities.some(function (im) { return String(im).toLowerCase().trim() === _cDt; })) {
+                _isRemImm = true;
+            } else if (tU.vulnerabilities && tU.vulnerabilities.some(function (vul) { return String(vul).toLowerCase().trim() === _cDt; })) {
+                _isRemVuln = true;
+            } else if (tU.resistances && tU.resistances.some(function (res) { return String(res).toLowerCase().trim() === _cDt; })) {
+                _isRemRes = true;
+            }
+        }
+
         if (typeof spawnSkillImpactLabel === 'function' && elT) {
             var _lblTxt = (ev.d20 === 20 || ev.crit)
-                ? (kind === 'oa' ? '✦ NAT 20 OPORTUNIDADE!' : '✦ NAT 20 CRÍTICO!')
+                ? (kind === 'oa' ? '✦ NAT 20 OPORTUNIDADE!' : ('✦ NAT 20 CRÍTICO' + _attackSeqSuffix + '!'))
                 : (kind === 'oa'
                     ? '⚡ GOLPE DE OPORTUNIDADE!'
-                    : (ev.skillName ? ev.skillName.toUpperCase() + '!' : 'ATAQUE!'));
+                    : (ev.skillName ? (ev.skillName.toUpperCase() + _attackSeqSuffix + '!') : ('ATAQUE' + _attackSeqSuffix + '!')));
             spawnSkillImpactLabel(elT, _lblTxt, ev.crit ? 'crit' : 'attack');
             if (ev.sneakAttack && ev.sneakTotal) {
                 spawnSkillImpactLabel(elT, '🗡️ ATAQUE FURTIVO (+' + (ev.sneakTotal | 0) + ')!', 'crit');
             }
             if (ev.divineSmite && ev.smiteTotal) {
                 spawnSkillImpactLabel(elT, '✦ PUNIÇÃO DIVINA (+' + (ev.smiteTotal | 0) + ')!', 'crit');
+            }
+            if (_isRemImm) {
+                spawnSkillImpactLabel(elT, '🚫 IMUNE (0 DANO)!', 'buff');
+            } else if (_isRemVuln) {
+                spawnSkillImpactLabel(elT, '💥 VULNERABILIDADE (2× DANO)!', 'crit');
+            } else if (_isRemRes) {
+                spawnSkillImpactLabel(elT, '🛡️ RESISTÊNCIA (½ DANO)!', 'buff');
             }
             if (ev.uncannyDodge) {
                 spawnSkillImpactLabel(elT, '🛡️ ESQUIVA SOBRENATURAL (½ DANO)!', 'buff');
@@ -51649,19 +51805,6 @@ async function __combatAnimateOneEvent(ev) {
         }
         if (typeof _spawnFloatingDmgNumber === 'function' && tU) {
             try {
-                var _isRemImm = !!(ev.damageImmunity || ev.naturesWardImmunity);
-                var _isRemVuln = !!ev.damageVulnerability;
-                var _isRemRes = !!(ev.damageResistance || ev.rageResisted || ev.bearTotemResist || ev.auraOfWarding || ev.spellResistance || ev.emptyBodyResistance || ev.fiendishResilience || ev.inuredToUndeathResist || ev.underwaterFireResistance || ev.dampenElements);
-                var _cDt = String(dmgType || '').toLowerCase().trim();
-                if (_cDt && tU && !_isRemImm && !_isRemVuln && !_isRemRes) {
-                    if (tU.immunities && tU.immunities.some(function (im) { return String(im).toLowerCase().trim() === _cDt; })) {
-                        _isRemImm = true;
-                    } else if (tU.vulnerabilities && tU.vulnerabilities.some(function (vul) { return String(vul).toLowerCase().trim() === _cDt; })) {
-                        _isRemVuln = true;
-                    } else if (tU.resistances && tU.resistances.some(function (res) { return String(res).toLowerCase().trim() === _cDt; })) {
-                        _isRemRes = true;
-                    }
-                }
                 _spawnFloatingDmgNumber(tU, ev.dmgTotal | 0, {
                     crit: !!ev.crit,
                     dmgType: dmgType,
