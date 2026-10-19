@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T04:55:08Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T05:13:12Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -8471,6 +8471,19 @@ body.perf-lite .lp-help-title::after, body.perf-medium .lp-help-title::after {
         0 2px 3px rgba(0,0,0,0.95);
     font-size: calc(14px * var(--v-font-scale, 1));
 }
+.cell-skill-impact-label.cell-skill-impact-buff,
+.cell-skill-impact-label.cell-skill-impact-save {
+    color: #93c5fd;
+    background: rgba(15, 23, 42, 0.92);
+    border: 1px solid rgba(96, 165, 250, 0.8);
+    border-radius: 6px;
+    padding: 3px 9px;
+    box-shadow: 0 0 16px rgba(59, 130, 246, 0.6), 0 4px 10px rgba(0, 0, 0, 0.95);
+    text-shadow:
+        0 0 8px rgba(147, 197, 253, 0.95),
+        0 2px 4px rgba(0, 0, 0, 0.95);
+    font-size: calc(14px * var(--v-font-scale, 1));
+}
 .cell-skill-impact-label.cell-skill-impact-condition,
 .cell-skill-impact-label.cell-skill-impact-debuff {
     color: #ffda79;
@@ -10001,6 +10014,12 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     border: 1px solid #f87171;
     color: #fecaca;
     box-shadow: 0 0 6px rgba(248, 113, 113, 0.45);
+}
+.floating-dmg .fct-mod--save {
+    background: rgba(30, 58, 138, 0.9);
+    border: 1px solid #60a5fa;
+    color: #dbeafe;
+    box-shadow: 0 0 6px rgba(96, 165, 250, 0.45);
 }
 
 /* Death Saving Throws D&D 5e HUD nos Tokens (PHB p. 197-198) */
@@ -21983,6 +22002,10 @@ function _spawnFloatingDmgNumber(target, dmg, opts) {
     }
     if (opts.immune) {
         fctInner += '<span class="fct-mod-tag fct-mod--immune">🚫 Imunidade (0 Dano)</span>';
+    } else if (opts.saveNegated) {
+        fctInner += '<span class="fct-mod-tag fct-mod--save">🛡️ 0 Dano (TR Sucesso)</span>';
+    } else if (opts.saveHalved) {
+        fctInner += '<span class="fct-mod-tag fct-mod--save">½ TR Sucesso</span>';
     } else if (opts.resisted) {
         fctInner += '<span class="fct-mod-tag fct-mod--resist">½ Resistência</span>';
     } else if (opts.vulnerable) {
@@ -22114,6 +22137,8 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             immune: _isTargetImmune,
             resisted: _isTargetResistant,
             vulnerable: _isTargetVulnerable,
+            saveHalved: !!dmgMeta.saveHalved,
+            saveNegated: !!dmgMeta.saveNegated,
             /* V1 Invocações Phase 4 — summon damage herda cor da classe do conjurador */
             summonCasterCls: dmgMeta.summonCasterCls || null
         });
@@ -22493,11 +22518,34 @@ function describeDeathSavePreview(u, r) {
 function applyDeathSaveFromRoll(s, u, r) {
     if (!u || u.isDead || !u.dying || u.stable) return;
     ensureDeathSaves(u);
+
+    var _getUnitEl = function () {
+        var _uid = null;
+        if (s && s.order) {
+            for (var _di = 0; _di < s.order.length; _di++) {
+                if (s.order[_di] === u) {
+                    _uid = (typeof unitUidForOrderIndex === 'function')
+                        ? unitUidForOrderIndex(s, _di)
+                        : (_di === s.p_idx ? 'player' : 'ally_' + _di);
+                    break;
+                }
+            }
+        }
+        return _uid ? document.querySelector('[data-unit-id="' + _uid + '"]') : null;
+    };
+
     if (r === 20) {
         u.hp = 1;
         u.alive = true;
         clearDownedMeta(u);
         s.log.push(u.n + ' — 20 Natural no teste contra a morte: recupera 1 PV e volta a agir!');
+        try {
+            var _el20 = _getUnitEl();
+            if (_el20 && typeof spawnSkillImpactLabel === 'function') {
+                spawnSkillImpactLabel(_el20, '✦ NAT 20: VOLTOU COM 1 PV!', 'crit');
+                _el20.classList.add('buff-flash');
+            }
+        } catch (_e20) {}
         return;
     }
     /* V1.7 Sprint-17 Ronda 30 (2026-04-21 QA log breakdown) — death save progress counter.
@@ -22524,6 +22572,25 @@ function applyDeathSaveFromRoll(s, u, r) {
         u.stable = false;
         s.log.push(u.n + ' falece (3 falhas).');
     }
+
+    try {
+        var _elDs = _getUnitEl();
+        if (_elDs && typeof spawnSkillImpactLabel === 'function') {
+            if (r === 1) {
+                var _isDeadOn1 = (u.deathSaves && u.deathSaves.f >= 3) || u.isDead;
+                spawnSkillImpactLabel(_elDs, _isDeadOn1 ? '💀 FALECEU (NAT 1: 3 FALHAS)!' : '✕ NAT 1: DUAS FALHAS!', 'fumble');
+                _elDs.classList.add('cell-skill-impact-flash--debuff');
+            } else if (r >= 10) {
+                var _isNowStable = (u.deathSaves && u.deathSaves.s >= 3) || u.stable;
+                spawnSkillImpactLabel(_elDs, _isNowStable ? '✦ ESTABILIZOU (3 SUCESSOS)!' : ('🛡️ SUCESSO CONTRA A MORTE (' + ((u.deathSaves && u.deathSaves.s) || 1) + '/3)!'), 'buff');
+                _elDs.classList.add('buff-flash');
+            } else {
+                var _isNowDead = (u.deathSaves && u.deathSaves.f >= 3) || u.isDead;
+                spawnSkillImpactLabel(_elDs, _isNowDead ? '💀 FALECEU (3 FALHAS)!' : ('✕ FALHA CONTRA A MORTE (' + ((u.deathSaves && u.deathSaves.f) || 1) + '/3)!'), 'fumble');
+                _elDs.classList.add('cell-skill-impact-flash--debuff');
+            }
+        }
+    } catch (_eDs) {}
 }
 
 function checkEnd(s) {
@@ -41337,8 +41404,9 @@ function playHitVFX(uid, crit, dmgType, opts) {
     return sleep(SIM_VFX_POST_DELAY_MS);
 }
 
-/** VFX de erro (miss): dodge quando alvo tem Esquiva; senão nada extra. */
-function playMissVFX(uid, target) {
+/** VFX de erro (miss): dodge quando alvo tem Esquiva; senão nada extra. Suporta opts.customLabel */
+function playMissVFX(uid, target, opts) {
+    opts = opts || {};
     var el = document.querySelector('[data-unit-id="' + uid + '"]');
     if (!el) {
         try { _simLog('[SIM:VFX]', { event: 'miss', target_uid: uid, miss_el: true }); } catch (_e) {}
@@ -41350,6 +41418,7 @@ function playMissVFX(uid, target) {
             event: 'miss',
             target_uid: uid,
             target_name: target ? target.n : null,
+            custom_label: opts.customLabel || null,
             has_dodge: !!(target && target.se && target.se.some(function (x) {
                 return x && (x.id === 'esquiva' || x.attackAdvantage);
             }))
@@ -41369,8 +41438,8 @@ function playMissVFX(uid, target) {
         // Flash CSS do card para reforçar o miss mesmo em modo "pular dados".
         el.classList.add('miss-target-flash');
         setTimeout(function () { el.classList.remove('miss-target-flash'); }, 700);
-        // Label "Errou" flutuando pra cima com glow branco.
-        spawnMissFloatLabel(el);
+        // Label "Errou" (ou customLabel: Cobertura / Esquiva) flutuando pra cima com glow branco.
+        spawnMissFloatLabel(el, opts.customLabel);
     } catch (e) {
         console.warn('[SIM]', 'vfx_miss_failed', e || '');
     }
@@ -47631,8 +47700,24 @@ async function playTurn(aIdx, tIdx, opts) {
         /* User sessão #69: errar = a rolagem não passou a CA → o alvo DESVIOU/o golpe
            passou (D&D 5e), NÃO que "defendeu". NAT 1 = o atacante erra feio. */
         var _oaLogPrefix = opts.oa ? '⚡ [Ataque de Oportunidade] ' : '';
-        if (r === 1) s.log.push(_oaLogPrefix + actor.n + ' erra feio o golpe contra ' + target.n + ' — ' + _missAtkPart + '.');
-        else s.log.push(_oaLogPrefix + target.n + ' se desvia do golpe de ' + actor.n + ' — ' + _missAtkPart + '.');
+        var _isCoverBlocked = (_atkCover && _atkCover.bonus > 0 && hitRes.total >= (effAc - _atkCover.bonus));
+        var _hasTargetDodge = !!(target && target.se && target.se.some(function (x) {
+            return x && (x.id === 'esquiva' || x.attackAdvantage);
+        }));
+
+        var _missCustomLabel = null;
+        if (_isCoverBlocked) {
+            _missCustomLabel = '⛨ Cobertura Bloqueou!';
+            s.log.push(_oaLogPrefix + '⛨ O golpe de ' + actor.n + ' foi BLOQUEADO PELA COBERTURA (+' + _atkCover.bonus + ' CA) que protegia ' + target.n + ' — ' + _missAtkPart + '.');
+        } else if (r === 1) {
+            _missCustomLabel = '⚠️ Erro Crítico!';
+            s.log.push(_oaLogPrefix + actor.n + ' erra feio o golpe contra ' + target.n + ' — ' + _missAtkPart + '.');
+        } else if (_hasTargetDodge) {
+            _missCustomLabel = '💨 Esquivou!';
+            s.log.push(_oaLogPrefix + target.n + ' se esquiva agilmente do golpe de ' + actor.n + ' (Ação de Esquiva) — ' + _missAtkPart + '.');
+        } else {
+            s.log.push(_oaLogPrefix + target.n + ' se desvia do golpe de ' + actor.n + ' — ' + _missAtkPart + '.');
+        }
         s.last = { a: actor.n, t: target.n, r: r, hit: false, tIdx: tIdx };
         var missUid = unitUidForOrderIndex(s, tIdx);
         var actorUid = unitUidForOrderIndex(s, aIdx);
@@ -47646,7 +47731,7 @@ async function playTurn(aIdx, tIdx, opts) {
                 }
             } catch (_) {}
         }
-        if (missUid) await playMissVFX(missUid, target);
+        if (missUid) await playMissVFX(missUid, target, { customLabel: _missCustomLabel });
         return;
     }
 
@@ -47983,6 +48068,8 @@ async function playTurn(aIdx, tIdx, opts) {
            Se skill teve save:{ability:'dex'} E save falhou, contexto aplica halfDmgDexSaveOnly. */
         saveAbility: atkSkill && atkSkill.save ? atkSkill.save.ability : null,
         saveFailed: saveSuccess === false,
+        saveHalved: !!(atkSkill && atkSkill.save && saveSuccess === true && !atkSkill.saveNegates),
+        saveNegated: !!(atkSkill && atkSkill.save && saveSuccess === true && atkSkill.saveNegates),
         deferFct: _rebukeWillOffer
     });
 
@@ -48524,6 +48611,28 @@ async function playTurn(aIdx, tIdx, opts) {
         }
         s.log.push(actor.n + ' — ' + (atkSkill.n || 'Magia') + _svDicePart +
             ' → ' + target.n + ' ' + _svRollTxt + ' → ' + total + ' dano.');
+        try {
+            var _svTgtUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, tIdx) : null;
+            var _svTgtEl = _svTgtUid ? document.querySelector('[data-unit-id="' + _svTgtUid + '"]') : null;
+            if (_svTgtEl && typeof spawnSkillImpactLabel === 'function') {
+                var _svScore = ' [' + saveTotal + ' vs CD ' + saveDc + ']';
+                var _svImpactLabel = '';
+                var _svImpactTone = saveSuccess ? 'save' : 'condition';
+                if (_svAutoFail) {
+                    _svImpactLabel = '⛓️ AUTO-FALHA TR ' + _sabPt + '!';
+                } else if (saveRoll === 20) {
+                    _svImpactLabel = '👑 NAT 20! TR ' + _sabPt + ' PASSOU' + _svScore + (atkSkill.saveNegates ? ' (0 Dano)' : ' (½ Dano)');
+                } else if (saveRoll === 1) {
+                    _svImpactLabel = '⚠️ NAT 1! TR ' + _sabPt + ' FALHOU' + _svScore + '!';
+                } else if (saveSuccess) {
+                    _svImpactLabel = '🛡️ TR ' + _sabPt + ' PASSOU' + _svScore + (atkSkill.saveNegates ? ' (0 Dano)' : ' (½ Dano)');
+                } else {
+                    _svImpactLabel = '💥 TR ' + _sabPt + ' FALHOU' + _svScore + '!';
+                }
+                spawnSkillImpactLabel(_svTgtEl, _svImpactLabel, _svImpactTone);
+                _svTgtEl.classList.add(saveSuccess ? 'buff-flash' : 'cell-skill-impact-flash--debuff');
+            }
+        } catch (_eSvLabel) {}
     } else if (atkSkill && atkSkill.autoHit) {
         if (isMagicMissiles && mmPack && mmPack.darts) {
             /* MM: mostra dardos individuais (ex: "3 dardos: 4+3+5 = 12") com die info */
