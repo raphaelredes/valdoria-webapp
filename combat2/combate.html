@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T05:13:12Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T05:30:59Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -8425,9 +8425,12 @@ body.perf-lite .lp-help-title::after, body.perf-medium .lp-help-title::after {
     font-family: var(--v-font-display, 'Cinzel'), serif;
     font-weight: 800;
     font-size: calc(13px * var(--v-font-scale, 1));
-    letter-spacing: 1.5px;
+    letter-spacing: 1.2px;
     text-transform: uppercase;
-    white-space: nowrap;
+    white-space: normal;
+    text-align: center;
+    max-width: min(260px, calc(100vw - 32px));
+    line-height: 1.25;
     animation: simSkillImpactLabelFloat 1.0s cubic-bezier(.22,.68,.32,1.2) forwards;
 }
 .cell-skill-impact-label.cell-skill-impact-attack {
@@ -12329,7 +12332,8 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   white-space: nowrap;
   z-index: 18;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.85);
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .token-elev-chip--low {
@@ -12806,7 +12810,8 @@ canvas#vfxCanvas,
   z-index: 28;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 8px rgba(212, 175, 55, 0.35);
   white-space: nowrap;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: pointer;
   animation: tokenAdvPulse 2.4s ease-in-out infinite;
 }
 
@@ -12837,7 +12842,8 @@ canvas#vfxCanvas,
   z-index: 28;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 8px rgba(156, 107, 181, 0.35);
   white-space: nowrap;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .token-active-halo {
@@ -13198,7 +13204,8 @@ canvas#vfxCanvas,
   z-index: 28;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 8px rgba(74, 185, 255, 0.4);
   white-space: nowrap;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: pointer;
   animation: tokenConcPulse 2.8s ease-in-out infinite;
 }
 
@@ -13230,7 +13237,8 @@ canvas#vfxCanvas,
   z-index: 29;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.85);
   white-space: nowrap;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .token-cond-chip {
@@ -13248,7 +13256,8 @@ canvas#vfxCanvas,
   z-index: 29;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.85);
   white-space: nowrap;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: pointer;
 }
 .token-cond-chip--bless {
   background: linear-gradient(180deg, #2b220d, #141005);
@@ -21983,9 +21992,18 @@ function _spawnFloatingDmgNumber(target, dmg, opts) {
     if (dmg >= 25) lbl.classList.add('tier-huge');
     else if (dmg >= 12) lbl.classList.add('tier-big');
     else if (dmg < 4) lbl.classList.add('tier-small');
-    var jitterX = (Math.random() - 0.5) * 40;
+    var jitterX = (Math.random() - 0.5) * 30;
+    var posX = cx + jitterX;
+    var frameEl = document.getElementById('app') || document.body;
+    var fRect = frameEl ? frameEl.getBoundingClientRect() : { left: 0, right: window.innerWidth };
+    var minX = fRect.left + 50;
+    var maxX = fRect.right - 50;
+    if (maxX > minX) {
+        if (posX < minX) posX = minX;
+        if (posX > maxX) posX = maxX;
+    }
     lbl.style.position = 'fixed';
-    lbl.style.left = (cx + jitterX) + 'px';
+    lbl.style.left = posX + 'px';
     lbl.style.top = cy + 'px';
     lbl.style.setProperty('animation-duration', opts.crit ? '1.6s' : '1.4s', 'important');
     lbl.style.setProperty('animation-iteration-count', '1', 'important');
@@ -22004,12 +22022,20 @@ function _spawnFloatingDmgNumber(target, dmg, opts) {
         fctInner += '<span class="fct-mod-tag fct-mod--immune">🚫 Imunidade (0 Dano)</span>';
     } else if (opts.saveNegated) {
         fctInner += '<span class="fct-mod-tag fct-mod--save">🛡️ 0 Dano (TR Sucesso)</span>';
-    } else if (opts.saveHalved) {
-        fctInner += '<span class="fct-mod-tag fct-mod--save">½ TR Sucesso</span>';
-    } else if (opts.resisted) {
-        fctInner += '<span class="fct-mod-tag fct-mod--resist">½ Resistência</span>';
-    } else if (opts.vulnerable) {
-        fctInner += '<span class="fct-mod-tag fct-mod--vuln">×2 Vulnerabilidade</span>';
+    } else {
+        if (opts.saveHalved && opts.resisted) {
+            fctInner += '<span class="fct-mod-tag fct-mod--save">¼ TR + Resistência</span>';
+        } else {
+            if (opts.saveHalved) {
+                fctInner += '<span class="fct-mod-tag fct-mod--save">½ TR Sucesso</span>';
+            }
+            if (opts.resisted) {
+                fctInner += '<span class="fct-mod-tag fct-mod--resist">½ Resistência</span>';
+            }
+        }
+        if (opts.vulnerable) {
+            fctInner += '<span class="fct-mod-tag fct-mod--vuln">×2 Vulnerabilidade</span>';
+        }
     }
     lbl.innerHTML = fctInner;
     if (typeof mountInGameFrame === 'function') mountInGameFrame(lbl);
@@ -22056,9 +22082,9 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
     }
 
     // 2026-10-12 D&D 5e: Imunidades, Vulnerabilidades e Resistências de Criatura (PHB p. 197 & MM p. 11)
-    var _isTargetImmune = false;
-    var _isTargetResistant = false;
-    var _isTargetVulnerable = false;
+    var _isTargetImmune = !!dmgMeta.immune;
+    var _isTargetResistant = !!(dmgMeta.resisted || dmgMeta.rageResisted);
+    var _isTargetVulnerable = !!dmgMeta.vulnerable;
     if (damageApplied > 0 && target && dmgMeta.dmgType) {
         var _canonDt = String(dmgMeta.dmgType).toLowerCase().trim();
         if (target.immunities && target.immunities.some(function (im) { return String(im).toLowerCase().trim() === _canonDt; })) {
@@ -30167,11 +30193,22 @@ function simBuildAttackSkipRows(r, atkShown, hitRes, effAc, actor, target, dmgRo
         parts += ' + ' + reductionMeta.subclassBonusDmg + ' (subclasse)';
     }
     parts += ' · ' + dtInfo.lb;
-    if (reductionMeta && reductionMeta.isImmune) parts += ' [Imune: 0 dano]';
-    else if (reductionMeta && reductionMeta.isVulnerable) parts += ' [Vulnerabilidade 2×]';
-    else if (reductionMeta && (reductionMeta.isResistant || reductionMeta.rageResisted)) parts += ' [Resistência ½]';
-    else if (reductionMeta && reductionMeta.saveSuccess) parts += ' [TR Sucesso ½]';
-    else if (reductionMeta && reductionMeta.uncannyDodge) parts += ' [Esquiva ½]';
+    if (reductionMeta && reductionMeta.isImmune) {
+        parts += ' [Imune: 0 dano]';
+    } else {
+        if (reductionMeta && reductionMeta.saveSuccess) {
+            parts += (reductionMeta.saveNegates ? ' [TR Sucesso: 0 dano]' : ' [TR Sucesso ½]');
+        }
+        if (reductionMeta && (reductionMeta.isResistant || reductionMeta.rageResisted)) {
+            parts += ' [Resistência ½]';
+        }
+        if (reductionMeta && reductionMeta.isVulnerable) {
+            parts += ' [Vulnerabilidade 2×]';
+        }
+        if (reductionMeta && reductionMeta.uncannyDodge) {
+            parts += ' [Esquiva ½]';
+        }
+    }
     if (reductionMeta && reductionMeta.hasConcentration) parts += ' [TR CON CD ' + (reductionMeta.concDc || 10) + ']';
 
     var actorUtype = actor.t === 'p' ? 'player' : (actor.t === 'a' ? 'ally' : 'enemy');
@@ -43874,10 +43911,20 @@ function spawnSkillImpactLabel(el, text, kind) {
     var lbl = document.createElement('div');
     lbl.className = 'cell-skill-impact-label cell-skill-impact-' + (kind || 'attack');
     lbl.textContent = text;
-    /* Anchor: centro horizontal do card, 8px acima do topo. CSS aplica
-       translate(-50%, Y) — Y vem da animação, label sobe a partir desse anchor. */
-    lbl.style.left = (rect.left + rect.width / 2) + 'px';
-    lbl.style.top = (rect.top - 8) + 'px';
+    /* Anchor: centro horizontal do card, 8px acima do topo. Clamping horizontal
+       assegura que tokens nas bordas da tela mobile não façam o label cortar fora do frame. */
+    var anchorX = rect.left + rect.width / 2;
+    var anchorY = rect.top - 8;
+    var frameEl = document.getElementById('app') || document.body;
+    var fRect = frameEl ? frameEl.getBoundingClientRect() : { left: 0, right: window.innerWidth };
+    var minX = fRect.left + 80;
+    var maxX = fRect.right - 80;
+    if (maxX > minX) {
+        if (anchorX < minX) anchorX = minX;
+        if (anchorX > maxX) anchorX = maxX;
+    }
+    lbl.style.left = anchorX + 'px';
+    lbl.style.top = anchorY + 'px';
     /* X-6.5.51AE (2026-05-07): força animation-duration inline com !important
        (ver _spawnFloatingDmgNumber pra contexto). */
     lbl.style.setProperty('animation-duration', '1.0s', 'important');
@@ -47056,6 +47103,10 @@ async function playTurn(aIdx, tIdx, opts) {
                     advRaw2: d20Pack.raw2,
                     postResult: function () {
                         var _oaSuffix = opts.oa ? ' (Oportunidade)' : '';
+                        var _isCoverBlocked = (_atkCover && _atkCover.bonus > 0 && hitRes.total >= (effAc - _atkCover.bonus));
+                        var _hasTargetDodge = !!(target && target.se && target.se.some(function (x) {
+                            return x && (x.id === 'esquiva' || x.attackAdvantage);
+                        }));
                         var _title = '';
                         var _cls = '';
                         if (hitRes.crit) {
@@ -47064,8 +47115,14 @@ async function playTurn(aIdx, tIdx, opts) {
                         } else if (hitRes.hit) {
                             _title = 'ACERTOU' + _oaSuffix;
                             _cls = 'hit';
-                        } else if (hitRes.reason === 'falha_critica') {
+                        } else if (hitRes.reason === 'falha_critica' || r === 1) {
                             _title = 'FALHA CRÍTICA' + _oaSuffix;
+                            _cls = 'miss';
+                        } else if (_isCoverBlocked) {
+                            _title = 'BLOQUEADO PELA COBERTURA' + _oaSuffix;
+                            _cls = 'miss';
+                        } else if (_hasTargetDodge) {
+                            _title = target.n.toUpperCase() + ' ESQUIVOU' + _oaSuffix;
                             _cls = 'miss';
                         } else {
                             _title = target.n.toUpperCase() + ' DESVIOU' + _oaSuffix;
@@ -47103,7 +47160,7 @@ async function playTurn(aIdx, tIdx, opts) {
                         var _attackPills = [];
                         if (hitRes.crit) {
                             _attackPills.push('<span class="dmg-pill dmg-pill--crit">💥 Crítico Natural (D&D 5e)</span>');
-                        } else if (hitRes.reason === 'falha_critica') {
+                        } else if (hitRes.reason === 'falha_critica' || r === 1) {
                             _attackPills.push('<span class="dmg-pill dmg-pill--crit">⚠️ Falha Crítica (Nat 1)</span>');
                         }
                         if (opts.oa) {
@@ -47124,8 +47181,13 @@ async function playTurn(aIdx, tIdx, opts) {
                         if (_atkElev && _atkElev.bonus !== 0) {
                             _attackPills.push('<span class="dmg-pill dmg-pill--save">' + (_atkElev.bonus > 0 ? '⛰️ Terreno Elevado (+2)' : '▼ Terreno Baixo (-2)') + '</span>');
                         }
-                        if (_atkCover && _atkCover.bonus > 0) {
+                        if (_isCoverBlocked) {
+                            _attackPills.push('<span class="dmg-pill dmg-pill--resist">⛨ Bloqueado por Cobertura (+' + _atkCover.bonus + ' CA)</span>');
+                        } else if (_atkCover && _atkCover.bonus > 0) {
                             _attackPills.push('<span class="dmg-pill dmg-pill--resist">⛨ ' + (_atkCover.cover === 'half' ? 'Meia Cobertura (+2 CA)' : '¾ Cobertura (+5 CA)') + '</span>');
+                        }
+                        if (_hasTargetDodge) {
+                            _attackPills.push('<span class="dmg-pill dmg-pill--save">💨 Ação de Esquiva Ativa</span>');
                         }
 
                         var _note = '';
@@ -47133,8 +47195,12 @@ async function playTurn(aIdx, tIdx, opts) {
                             _note = 'Natural 20! Acerto garantido e dados de dano duplicados (D&D 5e PHB p. 194).';
                         } else if (hitRes.hit) {
                             _note = 'Total ' + hitRes.total + ' ≥ CA ' + effAc + ' — Golpe acertou em cheio!';
-                        } else if (hitRes.reason === 'falha_critica') {
+                        } else if (hitRes.reason === 'falha_critica' || r === 1) {
                             _note = 'Natural 1! Erro automático feio independente de bônus (D&D 5e PHB p. 194).';
+                        } else if (_isCoverBlocked) {
+                            _note = 'Total ' + hitRes.total + ' superaria a CA base ' + (effAc - _atkCover.bonus) + ', mas foi bloqueado pelos +' + _atkCover.bonus + ' de cobertura (PHB p. 196)!';
+                        } else if (_hasTargetDodge) {
+                            _note = 'Total ' + hitRes.total + ' < CA ' + effAc + ' — A ação de Esquiva de ' + target.n + ' garantiu a evasão (PHB p. 192)!';
                         } else {
                             _note = 'Total ' + hitRes.total + ' < CA ' + effAc + ' — O golpe não superou a defesa do alvo.';
                         }
@@ -48064,6 +48130,9 @@ async function playTurn(aIdx, tIdx, opts) {
         deathFailCrit: !!critForDeath,
         dmgType: dmgTypeFinal,
         rawDmg: total,
+        resisted: !!(_isTargetResistant || rageResisted),
+        vulnerable: !!_isTargetVulnerable,
+        immune: !!_isTargetImmune,
         /* V1.7 Sprint-17 Ronda 13 (2026-04-21 QA PHB p.96) — contexto de save pra Evasion.
            Se skill teve save:{ability:'dex'} E save falhou, contexto aplica halfDmgDexSaveOnly. */
         saveAbility: atkSkill && atkSkill.save ? atkSkill.save.ability : null,
