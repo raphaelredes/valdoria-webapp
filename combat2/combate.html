@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T15:45:21Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T16:16:57Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -1663,6 +1663,11 @@ canvas#vfxCanvas {
     margin-bottom: 2px;
     gap: 6px;
   }
+  .dice-overlay.dice-settled .dice-canvas-holder {
+    height: 100px;
+    transform: scale(0.68);
+    margin: -12px 0 -4px;
+  }
 }
 .dice-overlay.dice-overlay--frozen, .dice-overlay.dice-overlay--frozen * { animation-play-state: paused !important; transition: none !important; }
 body.sim-paused-bg, body.sim-paused-bg * { animation-play-state: paused !important; }
@@ -1715,7 +1720,26 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   padding: 0 var(--v-space-xs, 4px);
   align-self: center;
 }
-.dice-canvas-holder { width: 180px; height: 180px; position: relative; z-index: 2; }
+.dice-canvas-holder {
+  width: 180px;
+  height: 180px;
+  position: relative;
+  z-index: 2;
+  transition: height 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), margin 0.35s ease;
+}
+/* Estado assentado: rolagem concluída, compacta suavemente o canvas 3D liberando espaço para o card tático e botão Continuar no mobile/Telegram */
+.dice-overlay.dice-settled {
+  gap: var(--v-space-sm, 6px);
+}
+.dice-overlay.dice-settled .dice-canvas-holder {
+  height: 124px;
+  transform: scale(0.74);
+  transform-origin: center center;
+  margin: -8px 0 -4px;
+}
+.dice-overlay.dice-settled .dice-combat-header-row {
+  margin-bottom: 2px;
+}
 .dice-result-label { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: calc(16px * var(--v-font-scale, 1)); color: var(--v-text, #d4c8b0); letter-spacing: 2px; opacity: 0; transition: opacity .3s ease; text-shadow: 0 0 12px rgba(196,149,58,.4); min-height: 22px; display: flex; flex-direction: column; gap: var(--v-space-sm, 4px); align-items: center; max-width: 280px; text-align: center; }
 .dice-result-label.drl-has-structured,
 .dice-result-label:has(.drl-sub--structured),
@@ -1835,7 +1859,108 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
     0 0 10px rgba(130,180,255,.45),
     0 0 20px rgba(130,180,255,.22),
     0 1px 2px rgba(0,0,0,.95);
+/* Card de PV animado do combatente no cabeçalho do overlay (resolução de dano D&D 5e) */
+.dice-combat-hp-card {
+  width: 100%;
+  max-width: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px auto 0;
 }
+.dice-combat-hp-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(196, 149, 58, 0.35);
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.7);
+}
+.dice-combat-hp-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.1s linear, background 0.3s ease;
+}
+.dice-combat-hp-fill.fill-hp-high { background: linear-gradient(90deg, #5a8a3e, #8ab04e); }
+.dice-combat-hp-fill.fill-hp-mid  { background: linear-gradient(90deg, #b08038, #d0a040); }
+.dice-combat-hp-fill.fill-hp-low  { background: linear-gradient(90deg, #8a2a20, #c04030); animation: dtcLowPulse 1s ease-in-out infinite; }
+.dice-combat-hp-label {
+  font-family: var(--v-font, 'MedievalSharp'), serif;
+  font-size: var(--v-font-sm, 11px);
+  color: var(--v-text-dim, #a09484);
+  letter-spacing: 0.05em;
+  text-align: center;
+  line-height: 1.1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.dice-combat-hp-cur {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-weight: 700;
+  color: #fff;
+}
+.dice-combat-hp-max {
+  color: var(--v-text-dim, #a09484);
+}
+.dice-combat-hp-diff {
+  color: #ff6040;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-weight: 800;
+  font-size: 10px;
+  margin-left: 2px;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 0.2s, transform 0.2s;
+  text-shadow: 0 0 6px rgba(255, 96, 64, 0.6);
+}
+.dice-combat-hp-diff.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.dice-overlay-combatant.defeated {
+  opacity: 0.55;
+  filter: grayscale(0.7);
+  transition: opacity 0.5s, filter 0.5s;
+}
+.dice-overlay-conds {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  margin: 1px 0;
+  max-width: 100%;
+}
+.dice-overlay-conds .c-cond-chip {
+  padding: 1px 5px;
+  font-size: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(196, 149, 58, 0.3);
+  color: var(--v-text, #d4c8b0);
+  line-height: 1.2;
+}
+.dice-overlay-conds .c-cond-chip.buff {
+  border-color: rgba(138, 176, 78, 0.6);
+  color: #c8e8a8;
+}
+.dice-overlay-conds .c-cond-chip.debuff {
+  border-color: rgba(200, 80, 80, 0.6);
+  color: #fca5a5;
+}
+.c-cond-more {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--v-text-dim, #a09484);
+  background: rgba(0, 0, 0, 0.45);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
 /* Scene legado (sem uso após refator, mas mantido pra não quebrar overlays antigos) */
 .dice-init-cell-scene { display: none; }
 .dice-result-label.dmg-result-stack { max-width: min(100%, 360px); gap: var(--v-space-md, 10px); }
@@ -2173,9 +2298,13 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .dice-result-label.hit .drl-structured-val { color: #b8e888; }
 .dice-result-label.crit .drl-structured-val { color: #ffd700; }
 .dice-result-label.miss .drl-structured-val { color: #d4c8b0; }
+.dice-result-label.save-pass .drl-structured-val { color: #70d8f0; }
+.dice-result-label.save-fail .drl-structured-val { color: #f07050; }
 .drl-structured-note { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: 11.5px; color: #e4d8c8; text-align: center; margin-top: 2px; }
 .dice-result-label.hit .drl-structured-note { color: #a8d898; font-weight: 600; }
 .dice-result-label.miss .drl-structured-note { color: #c06a3a; font-style: italic; }
+.dice-result-label.save-pass .drl-structured-note { color: #90e0f0; font-weight: 600; }
+.dice-result-label.save-fail .drl-structured-note { color: #f08060; font-style: italic; }
 .drl-structured-pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin: 3px 0; }
 .drl-structured-tracker { display: flex; justify-content: center; margin: 4px 0 2px; }
 .drl-step-pips { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; background: rgba(0,0,0,0.45); border: 1px solid rgba(196,149,58,0.35); border-radius: 12px; }
@@ -2223,6 +2352,8 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .dice-result-label.miss .drl-big { color: var(--v-text-dim, #a09484); text-shadow: 0 1px 2px rgba(0,0,0,.9); }
 .dice-result-label.dmg .drl-big { color: #e06040; text-shadow: 0 0 14px rgba(224,96,64,.6), 0 1px 2px rgba(0,0,0,.9); }
 .dice-result-label.dmg.crit .drl-big { color: #ff6040; text-shadow: 0 0 18px rgba(255,51,51,.7), 0 0 36px rgba(255,51,51,.3), 0 1px 2px rgba(0,0,0,.9); }
+.dice-result-label.save-pass .drl-big { color: #70d8f0; text-shadow: 0 0 14px rgba(112,216,240,.6), 0 1px 2px rgba(0,0,0,.9); }
+.dice-result-label.save-fail .drl-big { color: #f07050; text-shadow: 0 0 14px rgba(240,112,80,.6), 0 1px 2px rgba(0,0,0,.9); }
 
 /* Card do alvo de dano com HP animado (substitui text label no dmg) */
 /* X-6.5.51x (2026-04-25): responsivo touch-aware. min-width 240px (legibilidade)
@@ -3438,7 +3569,7 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   position: fixed; inset: 0;
   background: radial-gradient(ellipse at center, rgba(30,22,14,0.72), rgba(0,0,0,0.88));
   display: flex; align-items: center; justify-content: center;
-  z-index: 100600 !important;
+  z-index: 102000 !important;
   animation: v8CondOvIn 0.22s ease-out;
   padding: 16px;
   box-sizing: border-box;
@@ -20745,7 +20876,7 @@ async function simResolveEndTurnConditions(s, unitIdx) {
 
                             return {
                                 title: ok ? 'EFEITO ENCERRADO' : 'EFEITO MANTÉM-SE',
-                                cls: ok ? 'hit' : 'miss',
+                                cls: ok ? 'save-pass' : 'save-fail',
                                 subStructured: {
                                     kicker: _kicker,
                                     rows: _rows,
@@ -23997,18 +24128,18 @@ function buildHealResultCellHtml(target) {
     return '<div class="' + meta.classes + '" data-dice-heal-result-card="1" aria-hidden="true">' + inner + '</div>';
 }
 
-/** Um lado do cabecalho VS: nome + subtitle (classe/nivel) + linha meta opcional (skill, conjurador, etc.).
-    Cards completos removidos (2026-04-19) — overlay de rolagem mostra só texto elegante. */
-function appendDiceCombatArenaSide(parent, actor, metaLine) {
+/** Um lado do cabecalho VS: nome + subtitle (classe/nivel) + condicoes ativas + card de PV opcional + metaLine.
+    Design compacto touch-aware otimizado para visualização em smartphones e Telegram WebApp. */
+function appendDiceCombatArenaSide(parent, actor, metaLine, hpData) {
     if (!actor) return;
     var wrap = document.createElement('div');
     wrap.className = 'dice-overlay-combatant';
     var utype = actor.t === 'p' ? 'player' : (actor.t === 'a' ? 'ally' : 'enemy');
     wrap.setAttribute('data-utype', utype);
-    /* Phase 5b polish v6 (2026-04-26): heraldic icon ACIMA do nome no dice
-       overlay. User feedback "icones tosco de Windows, sem fallback, somente
-       heraldicos no combate sempre". Sem icone se _heraldicIconOf retornar
-       null (zero fallback emoji). */
+    if (actor.alive === false || actor.isDead || (actor.hp != null && actor.hp <= 0 && utype === 'enemy')) {
+        wrap.classList.add('defeated');
+    }
+    /* Phase 5b polish v6 (2026-04-26): heraldic icon ACIMA do nome no dice overlay. */
     var heraldId = (typeof _heraldicIconOf === 'function') ? _heraldicIconOf(actor, utype) : null;
     var heraldSlug = (typeof _heraldicClsSlugOf === 'function') ? _heraldicClsSlugOf(actor, utype) : '';
     if (heraldId) {
@@ -24017,10 +24148,6 @@ function appendDiceCombatArenaSide(parent, actor, metaLine) {
         icoBox.setAttribute('aria-hidden', 'true');
         icoBox.innerHTML = '<svg viewBox="0 0 120 120"><use href="#' + heraldId + '"/></svg>';
         wrap.appendChild(icoBox);
-        /* 2026-05-18 USER REPORT: dice screens "continuam usando icones antigos
-           (SVG)". asset-resolver tem MutationObserver mas pode perder timing de
-           re-renders. Force upgrade explicito apos append pra garantir PNG.
-           NO-OP se vAssets nao disponível (file:// sem PNG, etc). */
         try { if (window.vAssets && window.vAssets.upgradeAll) window.vAssets.upgradeAll(icoBox); } catch(_) {}
     }
     var title = document.createElement('div');
@@ -24033,6 +24160,84 @@ function appendDiceCombatArenaSide(parent, actor, metaLine) {
         subEl.className = 'dice-overlay-subtitle';
         subEl.textContent = sub;
         wrap.appendChild(subEl);
+    }
+    /* Condições ativas D&D 5e: chips compactos clicáveis que abrem detalhes */
+    if (Array.isArray(actor.se) && actor.se.length) {
+        var visibleEffects = actor.se.filter(function (st) {
+            if (!st) return false;
+            if (st.decOn && !st.tickCombat2 && !(st.turnsLeft | 0)) return false;
+            return true;
+        });
+        if (visibleEffects.length) {
+            var condsWrap = document.createElement('div');
+            condsWrap.className = 'dice-overlay-conds';
+            var maxChips = 3;
+            var shownChips = visibleEffects.slice(0, maxChips);
+            shownChips.forEach(function (st) {
+                var kindCls = st.kind === 'debuff' ? 'debuff' : 'buff';
+                var tl = st.turnsLeft;
+                var tlStr = '';
+                if (tl != null && (tl | 0) > 0) tlStr = ' <span class="c-cond-tl">' + tl + '</span>';
+                else if (st.repeatSave && st.saveDc != null) tlStr = ' <span class="c-cond-tl c-cond-tl--save">\u221e</span>';
+                var label = st.dndCondition || st.condName || st.n || st.id || '';
+                var popPayload = {
+                    id: st.id || '', ico: st.ico || '\u2022', kind: kindCls,
+                    name: label, desc: st.desc || '', rule: st.condRule || '',
+                    turnsLeft: (tl | 0) || null,
+                    saveDc: st.saveDc || null, saveAbility: st.saveAbility || ''
+                };
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'c-cond-chip ' + kindCls;
+                btn.setAttribute('data-cond-payload', JSON.stringify(popPayload));
+                btn.setAttribute('aria-label', label);
+                btn.title = label + ' — toque para detalhes';
+                btn.innerHTML = (st.ico || '\u2022') + tlStr;
+                condsWrap.appendChild(btn);
+            });
+            if (visibleEffects.length > maxChips) {
+                var moreSpan = document.createElement('span');
+                moreSpan.className = 'c-cond-more';
+                moreSpan.textContent = '+' + (visibleEffects.length - maxChips);
+                condsWrap.appendChild(moreSpan);
+            }
+            wrap.appendChild(condsWrap);
+        }
+    }
+    /* Card de PV animado com barra de vida e valores quando hpData for fornecido */
+    if (hpData && hpData.maxHp > 0) {
+        var hpCard = document.createElement('div');
+        hpCard.className = 'dice-combat-hp-card';
+        var curVal = (hpData.oldHp != null) ? hpData.oldHp : (actor.hp || 0);
+        var maxVal = hpData.maxHp;
+        var initPct = Math.max(0, Math.min(100, Math.round((curVal / maxVal) * 100)));
+        var hpTier = (typeof vBarHpTier === 'function') ? vBarHpTier(initPct) : (initPct > 50 ? 'high' : (initPct > 25 ? 'mid' : 'low'));
+
+        var hpBar = document.createElement('div');
+        hpBar.className = 'dice-combat-hp-bar';
+        var hpFill = document.createElement('div');
+        hpFill.className = 'dice-combat-hp-fill fill-hp-' + hpTier;
+        hpFill.style.width = initPct + '%';
+        hpBar.appendChild(hpFill);
+        hpCard.appendChild(hpBar);
+
+        var hpLbl = document.createElement('div');
+        hpLbl.className = 'dice-combat-hp-label';
+        var curSpan = document.createElement('span');
+        curSpan.className = 'dice-combat-hp-cur';
+        curSpan.textContent = curVal;
+        var maxSpan = document.createElement('span');
+        maxSpan.className = 'dice-combat-hp-max';
+        maxSpan.textContent = '/' + maxVal;
+        var diffSpan = document.createElement('span');
+        diffSpan.className = 'dice-combat-hp-diff';
+        diffSpan.textContent = '';
+
+        hpLbl.appendChild(curSpan);
+        hpLbl.appendChild(maxSpan);
+        hpLbl.appendChild(diffSpan);
+        hpCard.appendChild(hpLbl);
+        wrap.appendChild(hpCard);
     }
     if (metaLine) {
         var meta = document.createElement('div');
@@ -46964,7 +47169,7 @@ function disposeCtaDice3d() {
 
 /* ========= VFX + Dice 3D ========= */
 /** Cabecalho visual: celulas da arena + nomes (como iniciativa), VS no meio; meta ATQ/CA abaixo de cada card. */
-function appendDiceCombatHeader(parent, actor, combatTarget, singleMetaLine, pairMeta) {
+function appendDiceCombatHeader(parent, actor, combatTarget, singleMetaLine, pairMeta, targetHpData) {
     if (!actor) return;
     pairMeta = pairMeta || {};
     var row = document.createElement('div');
@@ -46980,9 +47185,9 @@ function appendDiceCombatHeader(parent, actor, combatTarget, singleMetaLine, pai
         vsEl.className = 'dice-vs';
         vsEl.textContent = 'VS';
         row.appendChild(vsEl);
-        appendDiceCombatArenaSide(row, combatTarget, rightM);
+        appendDiceCombatArenaSide(row, combatTarget, rightM, targetHpData);
     } else {
-        appendDiceCombatArenaSide(row, actor, singleMetaLine || null);
+        appendDiceCombatArenaSide(row, actor, singleMetaLine || null, targetHpData);
     }
     parent.appendChild(row);
 }
@@ -47190,6 +47395,7 @@ function showDice(value, cb, actor, context, opts) {
     }, duration + (manualPlayerDice ? 15000 : 5000));
 
     function _applyPostResultAndContinue() {
+        ov.classList.add('dice-settled');
         /* Result label: enriquecido se houver postResult, simples senao */
         var info = opts.postResult ? opts.postResult() : null;
         if (info) {
@@ -47633,7 +47839,11 @@ function showDamageDice(rolls, die, crit, actor, target, oldHp, newHp, dmgMod, o
         var hpCur = (oldHp != null) ? oldHp : (target && target.hp != null ? target.hp : null);
         var hpMax = (target && target.mhp != null) ? target.mhp : null;
         var rightMetaDmg = (hpCur != null) ? ('PV ' + hpCur + (hpMax != null ? ('/' + hpMax) : '')) : (target && target.ac != null ? ('CA ' + target.ac) : '—');
-        appendDiceCombatHeader(ov, actor, target, null, { left: leftMetaDmg, right: rightMetaDmg });
+        var targetHpData = null;
+        if (hpCur != null && hpMax != null) {
+            targetHpData = { oldHp: oldHp, newHp: newHp, maxHp: hpMax };
+        }
+        appendDiceCombatHeader(ov, actor, target, null, { left: leftMetaDmg, right: rightMetaDmg }, targetHpData);
         var hasOrbit = !!(opts.magicMissile || opts.variant);
         var diceStage = document.createElement('div');
         diceStage.className = 'mm-dice-stage';
@@ -47707,6 +47917,7 @@ function showDamageDice(rolls, die, crit, actor, target, oldHp, newHp, dmgMod, o
                     i = rolls.length;
                 }
                 if (i >= rolls.length) {
+                    ov.classList.add('dice-settled');
                     _playImpactSfx();  /* Frente 9 (#83): som no IMPACTO (dano aparece + PV cai) */
                     /* Resumo dos dados + celula igual ao grid, PV animado */
                     while (resultEl.firstChild) resultEl.removeChild(resultEl.firstChild);
@@ -47718,18 +47929,25 @@ function showDamageDice(rolls, die, crit, actor, target, oldHp, newHp, dmgMod, o
                     var cellRoot = getDiceCombatOverlayTargetCell(ov);
                     if (cellRoot) cellRoot.classList.add('dmg-header-target-pop');
 
-                    var hpBarRow = cellRoot && cellRoot.querySelector('.cell-bars > .bar-row');
-                    var fill = hpBarRow && hpBarRow.querySelector('.mini-bar .fill');
-                    var hpNum = hpBarRow && hpBarRow.querySelector('.bar-num');
-                    var oldPct = Math.max(0, Math.min(100, Math.round((oldHp / target.mhp) * 100)));
-                    var newPct = Math.max(0, Math.min(100, Math.round((newHp / target.mhp) * 100)));
+                    var fill = cellRoot && cellRoot.querySelector('.dice-combat-hp-fill');
+                    var curNum = cellRoot && cellRoot.querySelector('.dice-combat-hp-cur');
+                    var diffNum = cellRoot && cellRoot.querySelector('.dice-combat-hp-diff');
+                    var targetMaxHp = (target && target.mhp != null) ? target.mhp : (oldHp || 10);
+                    var oldPct = Math.max(0, Math.min(100, Math.round((oldHp / targetMaxHp) * 100)));
+                    var newPct = Math.max(0, Math.min(100, Math.round((newHp / targetMaxHp) * 100)));
+                    var dmgAmount = Math.max(0, oldHp - newHp);
+
+                    if (diffNum && dmgAmount > 0) {
+                        diffNum.textContent = '-' + dmgAmount;
+                        diffNum.classList.add('visible');
+                    }
 
                     function bandFromWidthPct(pt) {
                         return vBarHpTier(pt);  /* FASE 4 single-source 60/25 */
                     }
 
                     setTimeout(function () {
-                        if (!cellRoot || !fill || !hpNum) {
+                        if (!cellRoot || !fill || !curNum) {
                             setTimeout(function () { continueBtn.style.display = ''; }, 400);
                             return;
                         }
@@ -47744,17 +47962,20 @@ function showDamageDice(rolls, die, crit, actor, target, oldHp, newHp, dmgMod, o
                             var wPct = oldPct + (newPct - oldPct) * p;
                             var b = bandFromWidthPct(wPct);
                             fill.style.width = wPct + '%';
-                            fill.className = 'fill fill-hp-' + b;
+                            fill.className = 'dice-combat-hp-fill fill-hp-' + b;
                             var cur = Math.round(oldHp - (oldHp - newHp) * p);
-                            hpNum.textContent = cur + '/' + target.mhp;
-                            hpNum.className = 'bar-num hp-' + b;
+                            curNum.textContent = cur;
                             if (p < 1) requestAnimationFrame(tick);
                             else {
-                                hpNum.textContent = newHp + '/' + target.mhp;
-                                hpNum.className = 'bar-num hp-' + bandFromWidthPct(newPct);
-                                fill.className = 'fill fill-hp-' + bandFromWidthPct(newPct);
+                                curNum.textContent = newHp;
+                                fill.className = 'dice-combat-hp-fill fill-hp-' + bandFromWidthPct(newPct);
                                 fill.style.width = newPct + '%';
-                                if (newHp <= 0) cellRoot.classList.add('dead');
+                                if (newHp <= 0) {
+                                    cellRoot.classList.add('defeated');
+                                    if (diffNum) {
+                                        diffNum.textContent = (target.t === 'p' || target.t === 'a') ? '⚠️ CAÍDO' : '💀 DERROTADO';
+                                    }
+                                }
                             }
                         }
                         requestAnimationFrame(tick);
@@ -47890,6 +48111,7 @@ function showHealDice(rolls, die, mod, actor, target, oldHp, newHp, rolledTotal,
                         i = rolls.length;
                     }
                     if (i >= rolls.length) {
+                        ov.classList.add('dice-settled');
                         while (resultEl.firstChild) resultEl.removeChild(resultEl.firstChild);
                         resultEl.className = 'dice-result-label visible heal-dice-result-stack';
                         var stack = document.createElement('div');
@@ -50024,7 +50246,7 @@ async function playTurn(aIdx, tIdx, opts) {
 
                         return {
                             title: _resTitle,
-                            cls: saveSuccess ? 'miss' : 'hit',
+                            cls: saveSuccess ? 'save-pass' : 'save-fail',
                             subStructured: {
                                 kicker: _kicker,
                                 rows: _rows,
@@ -54250,7 +54472,7 @@ async function __combatAnimateOneEvent(ev) {
 
                                 return {
                                     title: _ok ? (targetForDice.n + ' Resistiu') : (targetForDice.n + ' Falhou no TR'),
-                                    cls: _ok ? 'miss' : 'hit',
+                                    cls: _ok ? 'save-pass' : 'save-fail',
                                     subStructured: {
                                         kicker: _kicker,
                                         rows: _rows,
