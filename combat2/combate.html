@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T16:16:57Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T17:02:00Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -14944,6 +14944,277 @@ canvas#vfxCanvas,
   25% { opacity: 1; }
   100% { opacity: 0; }
 }
+
+/* ==========================================================================
+   OPÇÃO 1: "TÁTICA CLÁSSICA UNIFICADA" — TELEGRAM WEBAPP DESKTOP LAYOUT
+   ========================================================================== */
+.turn-queue {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: linear-gradient(180deg, #221a13, #15100c);
+  border-bottom: 1px solid rgba(196, 149, 58, 0.35);
+  overflow-x: auto;
+  scrollbar-width: none;
+  min-height: 44px;
+  flex-shrink: 0;
+  z-index: 100;
+}
+.turn-queue::-webkit-scrollbar { display: none; }
+
+.tl-unified-badge {
+  background: rgba(14, 10, 7, 0.85);
+  border: 1px solid rgba(196, 149, 58, 0.45);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--v-gold, #c4953a);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+  user-select: none;
+}
+.tl-unified-badge .tl-ub-round {
+  color: #ffd700;
+  letter-spacing: 0.5px;
+}
+.tl-unified-badge .tl-ub-weather {
+  font-size: 11px;
+}
+
+#turn-queue .tl-node.active-player-turn {
+  border-color: #ffd700 !important;
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.85), inset 0 0 6px rgba(255, 215, 0, 0.4);
+  background: linear-gradient(180deg, #3d2f20, #251c14);
+  transform: scale(1.1) translateY(-1px);
+}
+
+/* Live Combat Ticker */
+.combat-ticker {
+  background: rgba(15, 12, 9, 0.94);
+  border-top: 1px solid rgba(196, 149, 58, 0.25);
+  border-bottom: 1px solid rgba(196, 149, 58, 0.25);
+  padding: 5px 10px;
+  font-size: 11px;
+  color: var(--v-text, #e6dfd5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  z-index: 90;
+  user-select: none;
+}
+.combat-ticker:hover {
+  background: rgba(35, 26, 18, 0.98);
+}
+.combat-ticker .ticker-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+.combat-ticker .ticker-tag {
+  color: var(--v-gold, #c4953a);
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+.combat-ticker .ticker-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #d4c8b0;
+  font-size: 11px;
+}
+.combat-ticker .ticker-btn {
+  font-size: 10px;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-weight: 700;
+  background: rgba(196, 149, 58, 0.18);
+  border: 1px solid rgba(196, 149, 58, 0.45);
+  color: var(--v-gold-light, #ffd680);
+  padding: 2px 7px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.combat-ticker .ticker-btn:hover {
+  background: var(--v-gold, #c4953a);
+  color: #1a1510;
+  border-color: #ffd700;
+}
+
+/* Action Dock da Opção 1 */
+.opt1-action-dock {
+  background: linear-gradient(180deg, #1d1712, #110d0a);
+  border-top: 1px solid rgba(196, 149, 58, 0.35);
+  padding: 6px 8px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex-shrink: 0;
+  z-index: 100;
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.6);
+}
+
+.opt1-economy-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  padding: 0 2px;
+  gap: 4px;
+}
+.opt1-economy-row .econ-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.08);
+  font-size: 9.5px;
+  color: var(--v-text-dim, #9e9182);
+  user-select: none;
+}
+.opt1-economy-row .econ-pill.active {
+  border-color: rgba(196, 149, 58, 0.5);
+  color: var(--v-gold-bright, #e8c45a);
+  background: rgba(196, 149, 58, 0.12);
+}
+.opt1-economy-row .econ-pill.spent {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+/* Grade Primária de 5 Botões */
+.action-dock-primary-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr 1fr 1fr 0.95fr;
+  gap: 5px;
+}
+.opt-btn {
+  background: linear-gradient(180deg, #2d2218, #1c150e);
+  border: 1px solid rgba(140, 115, 75, 0.4);
+  border-radius: 6px;
+  color: var(--v-text, #e6dfd5);
+  padding: 7px 3px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 10.5px;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  user-select: none;
+}
+.opt-btn:hover {
+  background: linear-gradient(180deg, #3d2f21, #251b13);
+  border-color: var(--v-gold, #c4953a);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.opt-btn:active {
+  transform: translateY(0);
+}
+.opt-btn.primary {
+  background: linear-gradient(180deg, #583c18, #35230e);
+  border-color: #c4953a;
+  color: #ffd680;
+  box-shadow: 0 0 8px rgba(196, 149, 58, 0.35);
+}
+.opt-btn.primary:hover {
+  background: linear-gradient(180deg, #6b491e, #422c12);
+  border-color: #ffd700;
+  color: #fff;
+}
+.opt-btn.end-turn {
+  background: linear-gradient(180deg, #381e1c, #221210);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
+.opt-btn.end-turn:hover {
+  background: linear-gradient(180deg, #4d2624, #301715);
+  border-color: #ef4444;
+  color: #fff;
+}
+.opt-btn.active-drawer {
+  background: linear-gradient(180deg, #4a3824, #2c2014);
+  border-color: #ffd700;
+  color: #ffd680;
+  box-shadow: 0 0 10px rgba(196, 149, 58, 0.5);
+}
+.opt-btn.spent {
+  opacity: 0.45;
+  filter: grayscale(0.6);
+  pointer-events: none;
+}
+.opt-btn .opt-btn-ico {
+  font-size: 15px;
+  line-height: 1;
+}
+.opt-btn .opt-btn-label {
+  font-size: 10px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.opt-btn .action-btn-res-icon {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-size: 8px;
+  color: var(--v-gold, #c4953a);
+  opacity: 0.8;
+}
+
+/* Gaveta Retrátil de Manobras Táticas */
+.sim-tactics-drawer-wrap {
+  position: relative;
+  z-index: 95;
+}
+.sim-tactics-drawer {
+  background: rgba(22, 17, 13, 0.98);
+  border-top: 1px solid var(--v-gold, #c4953a);
+  border-bottom: 1px solid rgba(196, 149, 58, 0.3);
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  animation: tacticsSlideUp 0.18s ease-out;
+  box-shadow: 0 -6px 20px rgba(0,0,0,0.8);
+}
+@keyframes tacticsSlideUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.sim-tactics-drawer .action-btn {
+  font-size: 10px;
+  padding: 7px 4px;
+  border-radius: 5px;
+  text-align: center;
+  justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 </style>
 <script>
 /* Garante classe no <html> (copias antigas) e reaplica skin no fim da cascata após todos os CSS do CDN. */
@@ -24271,7 +24542,9 @@ function buildTurnQueue(s) {
     }
     var parts = ['<div class="turn-queue" id="turn-queue">'];
     if (s.ph === 'active' && s.rn > 0) {
-        parts.push('<span class="tl-round">Rodada ' + s.rn + '</span>');
+        var _hdrWKey = (typeof getBattlefieldWeatherKey === 'function') ? getBattlefieldWeatherKey(s) : 'clear';
+        var _hdrWData = (typeof BATTLEFIELD_WEATHER_LABELS !== 'undefined' && BATTLEFIELD_WEATHER_LABELS[_hdrWKey]) || { icon: '☀️', label: 'Céu Limpo' };
+        parts.push('<div class="tl-unified-badge" title="Rodada ' + s.rn + ' · Clima: ' + escHtml(_hdrWData.label) + '"><span class="tl-ub-round">R' + s.rn + '</span><span class="tl-ub-weather">' + _hdrWData.icon + '</span></div>');
     }
     for (var i = 0; i < list.length; i++) {
         var entry = list[i];
@@ -24284,7 +24557,10 @@ function buildTurnQueue(s) {
            para o turn queue herdar a cor de classe do card. */
         var entrySlug = _heraldicClsSlugOf(entry, entryUtype);
         if (entrySlug) cls += ' ' + entrySlug;
-        if (origIdx === s.active_idx && (s.ph === 'active')) cls += ' active';
+        if (origIdx === s.active_idx && (s.ph === 'active')) {
+            cls += ' active';
+            if (entry.t === 'p') cls += ' active-player-turn';
+        }
         /* Na fase ativa, os nao-ativos viram previsao em cinza (forecast)
            — serao influenciaveis por condições/habilidades no futuro */
         else if (s.ph === 'active') cls += ' forecast';
@@ -33838,7 +34114,7 @@ function _updateActionSheetState(s) {
        - Passar turno / Pular rolagens / Log: sempre ativos.
        Bug corrigido desta rodada: Habilidades ficava disabled junto com
        actionSpent mesmo quando BAs estavam disponíveis (evidente no Monge). */
-    var mainBtns = document.querySelectorAll('.action-btns-grid--main .action-btn, .action-btns-grid--secondary .action-btn');
+    var mainBtns = document.querySelectorAll('.action-dock-primary-grid .action-btn, .sim-tactics-drawer .action-btn, .action-btns-grid--main .action-btn, .action-btns-grid--secondary .action-btn');
     var anySkillOk = (typeof _simAnySkillUsable === 'function') ? _simAnySkillUsable(s, p) : true;
     /* Buttons que SEMPRE ativos (meta/UI, sem custo de ação).
        2026-06-14 FIX ("Pular dados" desativava sem ação): o data-act real do botão
@@ -33846,7 +34122,7 @@ function _updateActionSheetState(s) {
        só tinha nomes LEGADOS ('skip-non-player-dice'/'skip-combat-dice-others' que
        não existem mais) → o botão caía no fallback action-gated e ganhava .spent
        (pointer-events:none) quando p.actionSpent. É só preferência de UI: sempre ativo. */
-    var ALWAYS_ACTIVE = { 'pass': true, 'toggle-skip-dice': true, 'log': true };
+    var ALWAYS_ACTIVE = { 'pass': true, 'end-turn': true, 'toggle-actions': true, 'toggle-skip-dice': true, 'log': true };
     /* Buttons que requerem ação principal (PHB) */
     var ACTION_GATED = { 'attack': true, 'dodge': true, 'flee': true, 'bag': true, 'use-item': true, 'shove': true, 'help': true, 'ready': true };
     for (var bi = 0; bi < mainBtns.length; bi++) {
@@ -35338,50 +35614,25 @@ function render(s) {
         return;
     }
 
-    /* Active */
+    /* Active — Top Ribbon Unificada (Opção 1) */
     html += buildTurnQueue(s);
-    /* Indicador de turno atual no topo */
     var activeNow = s.order[s.active_idx];
     var isPlayerTurn = s.active_idx === s.p_idx;
-    if (activeNow) {
-        if (isPlayerTurn) {
-            html += '<div class="current-turn player-turn">' +
-                '<div class="ct-info"><span class="ct-chevron">▸</span><span class="ct-text">SEU TURNO</span><span class="ct-chevron">◂</span></div>' +
-                '<button type="button" class="top-end-turn-btn" data-act="end-turn" title="Encerrar seu turno ativo sem precisar rolar a tela">' +
-                '<span class="tet-icon">⏳</span><span class="tet-label">Encerrar Turno</span></button>' +
-                '</div>';
-        } else {
-            /* 2026-06-08 (user): resolve a IMAGEM da classe (ex.: Guerreiro do Thorne)
-               em vez de imprimir o id cru 'IC_GUERREIRO' como texto. */
-            var _ctUtype = activeNow.t === 'p' ? 'player' : (activeNow.t === 'a' ? 'ally' : 'enemy');
-            var _ctIcoId = (typeof _heraldicIconOf === 'function') ? _heraldicIconOf(activeNow, _ctUtype) : null;
-            var _ctPortrait = _ctIcoId ? _combatPortraitHTML(_ctIcoId, activeNow, _ctUtype) : escHtml(activeNow.ico || '');
-            var _isAiEnemy = (_ctUtype === 'enemy');
-            var _aiBadge = _isAiEnemy ? 'TURNO DA IA (INIMIGO)' : 'TURNO DA IA (ALIADO)';
-            var _aiClass = _isAiEnemy ? 'ai-turn--enemy' : 'ai-turn--ally';
-            html += '<div class="current-turn ai-turn ' + _aiClass + '">' +
-                '<span class="ai-turn-pill"><span class="ai-turn-pulse"></span>' + _aiBadge + '</span>' +
-                '<span class="ct-ico">' + _ctPortrait + '</span>' +
-                '<span class="ct-name">' + escHtml(activeNow.n) + '</span>' +
-                '</div>';
-        }
-    }
-    var _hdrBiomeKey = getBattlefieldBiomeKey(s);
-    var _hdrWeatherKey = getBattlefieldWeatherKey(s);
-    var _hdrBiomeLabel = BATTLEFIELD_BIOME_LABELS[_hdrBiomeKey] || 'Floresta';
-    var _hdrWInfo = BATTLEFIELD_WEATHER_LABELS[_hdrWeatherKey] || BATTLEFIELD_WEATHER_LABELS.clear;
-    html += '<div class="arena-header compact-header"><div class="arena-subtitle"><span class="round-badge">Rodada ' + s.rn + '</span> ' + escHtml(_hdrBiomeLabel) + ' <span class="weather-badge ' + _hdrWInfo.cls + '" title="Clima ativo: ' + escHtml(_hdrWInfo.label) + '">' + _hdrWInfo.icon + ' ' + escHtml(_hdrWInfo.label) + '</span></div></div>';
-    /* V1 Invocações Phase 4 (2026-04-19, c) — HUD de recursos D&D 5e no topo:
-         · Player turn: 3 pílulas completas (◆ Ação / ▲ Bônus / Reação) — ref completa
-         · NPC turn: pílula compacta Reação SOMENTE — PHB p.190 reação pode ser
-           triggered no turno de outro combatente (Ataque de Oportunidade, Escudo
-           Arcano em resposta a ataque, Contramágica em resposta a magia inimiga).
-           Fica como lembrete visual de que o player ainda pode reagir. */
-    var pHud = s.order[s.p_idx];
-    if (pHud) {
-        if (isPlayerTurn) {
-            html += _buildDndResourcesBarHtml(s, pHud);
-        } else {
+    if (activeNow && !isPlayerTurn) {
+        /* Turno de NPC / Inimigo / Aliado: exibe banner compacto da IA e reação do jogador */
+        var _ctUtype = activeNow.t === 'p' ? 'player' : (activeNow.t === 'a' ? 'ally' : 'enemy');
+        var _ctIcoId = (typeof _heraldicIconOf === 'function') ? _heraldicIconOf(activeNow, _ctUtype) : null;
+        var _ctPortrait = _ctIcoId ? _combatPortraitHTML(_ctIcoId, activeNow, _ctUtype) : escHtml(activeNow.ico || '');
+        var _isAiEnemy = (_ctUtype === 'enemy');
+        var _aiBadge = _isAiEnemy ? 'TURNO DA IA (INIMIGO)' : 'TURNO DA IA (ALIADO)';
+        var _aiClass = _isAiEnemy ? 'ai-turn--enemy' : 'ai-turn--ally';
+        html += '<div class="current-turn ai-turn ' + _aiClass + '">' +
+            '<span class="ai-turn-pill"><span class="ai-turn-pulse"></span>' + _aiBadge + '</span>' +
+            '<span class="ct-ico">' + _ctPortrait + '</span>' +
+            '<span class="ct-name">' + escHtml(activeNow.n) + '</span>' +
+            '</div>';
+        var pHud = s.order[s.p_idx];
+        if (pHud) {
             html += _buildDndResourcesBarHtml(s, pHud, { compactReaction: true });
         }
     }
@@ -35507,14 +35758,14 @@ function render(s) {
                 html += '<button type="button" class="action-btn secondary" data-act="log">Log</button></div></div>';
             } else {
                 html += '<div class="action-bar action-bar--player-dock">';
-                /* V1 Invocações Phase 4 (2026-04-19, b) — HUD de recursos D&D 5e
-                   foi movido para o TOPO da tela (logo abaixo do header de turno/cenário,
-                   antes do battlefield). Aqui no action-bar não rendera mais. */
-                if (_actionSheetOpen) {
-                    html += '<div class="sim-action-backdrop" data-act="close-action-sheet" aria-hidden="true"></div>';
-                }
-                html += '<div class="sim-action-sheet' + (_actionSheetOpen ? ' open' : '') + '">';
-                html += '<div class="sim-action-sheet-title">Escolha uma ação</div>';
+
+                /* 1. Live Combat Ticker */
+                var _latestLog = (typeof getLatestCombatLogMessage === 'function') ? getLatestCombatLogMessage(s) : 'Batalha iniciada.';
+                html += '<div class="combat-ticker" data-act="log" title="Toque para abrir o Diário Tático de Combate">' +
+                    '<div class="ticker-left"><span class="ticker-tag">Última Ação:</span> <span class="ticker-text">' + escHtml(_latestLog) + '</span></div>' +
+                    '<button type="button" class="ticker-btn" data-act="log">📜 Log</button>' +
+                    '</div>';
+
                 var actAvail = pCur && !pCur.actionSpent;
                 var bnsAvail = pCur && !pCur.bonusActionSpent;
                 var movLeft = (pCur && pCur.movement_left != null) ? pCur.movement_left : (pCur && pCur.speed ? pCur.speed : 6);
@@ -35525,110 +35776,91 @@ function render(s) {
                     if (cSt) concSpell = cSt.n || cSt.id;
                 }
                 var concPillHtml = concSpell
-                    ? '<span class="sim-turn-economy-pill concentration" title="D&D 5e (PHB p. 203): Concentrando em ' + escHtml(concSpell) + '. Conjurar outra magia de concentração encerrará esta.">✦ Conc: ' + escHtml(concSpell) + '</span>'
+                    ? '<span class="econ-pill concentration" title="D&D 5e (PHB p. 203): Concentrando em ' + escHtml(concSpell) + '. Conjurar outra magia de concentração encerrará esta.">✦ Conc: ' + escHtml(concSpell) + '</span>'
                     : '';
-                html += '<div class="sim-turn-economy-bar" role="status" aria-label="Recursos do Turno D&D 5e">' +
-                    '<span class="sim-turn-economy-pill ' + (actAvail ? 'available' : 'spent') + '" title="' + (actAvail ? 'Ação Principal disponível' : 'Ação Principal já gasta') + '">◆ Ação' + (actAvail ? '' : ' ✕') + '</span>' +
-                    '<span class="sim-turn-economy-pill ' + (bnsAvail ? 'available' : 'spent') + '" title="' + (bnsAvail ? 'Ação Bônus disponível' : 'Ação Bônus já gasta') + '">▲ Bônus' + (bnsAvail ? '' : ' ✕') + '</span>' +
-                    '<span class="sim-turn-economy-pill ' + (movLeft > 0 ? 'available' : 'spent') + '" title="Deslocamento restante no turno">👣 ' + formatHexDistanceMeters(movLeft) + '</span>' +
-                    '<span class="sim-turn-economy-pill ' + (rxAvail ? 'available' : 'spent') + '" title="' + (rxAvail ? 'Reação pronta (1 por rodada)' : 'Reação já gasta') + '">⚡ Reação' + (rxAvail ? '' : ' ✕') + '</span>' +
-                    concPillHtml +
-                    '</div>';
-                /* X-6.5.51AB (2026-04-26): texto explicativo verboso REMOVIDO.
-                   "Sem grade de posicao..." consumia 2-3 linhas a cada abertura
-                   do sheet — botoes (Atacar/Esquivar/Fugir/etc) ja sao self-
-                   explanatory pra qualquer jogador D&D. Espaco recuperado vai
-                   pra grids principais. */
-                if (pCur && pCur.actionSpent && (typeof _simHasUsableBonusAction === 'function') && !_simHasUsableBonusAction(s, pCur)) {
-                    html += '<div class="sim-actions-spent-banner" style="background:rgba(40,30,20,0.85);border:1px solid rgba(196,149,58,0.4);border-radius:6px;padding:8px 12px;margin:0 12px 10px 12px;text-align:center;color:#e6dfd5;font-size:12px;">' +
-                        '◆ <strong>Ação principal já utilizada neste turno</strong><br>' +
-                        '<span style="font-size:11px;color:#c4953a;">Mova-se no tabuleiro ou clique em <strong>Encerrar Turno</strong>.</span>' +
-                        '</div>';
-                }
-                html += '<div class="sim-action-sheet-grids">';
-                html += '<div class="action-btns-grid action-btns-grid--main">';
-                /* V1 Invocações Phase 4 (2026-04-19) — Habilidades fica .spent
-                   se NENHUMA skill é utilizável agora (MP, BA, PHB p.202, requiresBuff).
-                   Substitui o popup PHB p.202 por gating direto na UI.
-                   V1-Visual Phase 4 (2026-04-19, c): mini-badge ◆ em cada botão de
-                   ação principal para o jogador saber que vai consumir AÇÃO.
-                   c-fix 2026-04-19: PHB p.202 só afeta MAGIAS — Atacar/Mochila/Esquivar/
-                   Fugir/Passar permanecem OK. Apenas Habilidades () ganha sub-indicador
-                   "só truque" quando bonusActionWasSpell ativo (botão segue clicável,
-                   skills bloqueadas têm chip individual; cantrips ficam disponíveis). */
                 var anySkillOk = (typeof _simAnySkillUsable === 'function') ? _simAnySkillUsable(s, pCur) : true;
-                var skillsBtnCls = 'action-btn' + (anySkillOk ? '' : ' spent');
-                var actionGlyph = '<span class="action-btn-res-icon res-action" aria-hidden="true">◆</span>';
-                /* Sub-indicador "só truque" no botão Habilidades quando aplicável.
-                   Renderiza um pequeno chip embaixo do botão indicando a restrição
-                   PHB p.202 — exclusivo a este botão (não confunde com as outras
-                   ações que continuam OK). */
                 var skillsExtraChip = '';
                 if (pCur && pCur.bonusActionWasSpell && !pCur.actionSpent && anySkillOk) {
                     skillsExtraChip = '<span class="action-btn-sub-chip" title="PHB p.202: só TRUQUE (cantrip) como ação principal — magias leveled bloqueadas até o próximo turno">só truque</span>';
                 }
-                html += '<button type="button" class="action-btn primary" data-act="attack">' + _actBtnIco('acao-atacar') + '<span class="action-btn-label">Atacar</span>' + actionGlyph + '</button>';
-                html += '<button type="button" class="' + skillsBtnCls + '" data-act="skills"' + (anySkillOk ? '' : ' aria-disabled="true" title="Nenhuma habilidade utilizável neste turno"') + '>' + _actBtnIco('acao-habilidades') + '<span class="action-btn-label">Habilidades</span>' + actionGlyph + skillsExtraChip + '</button>';
-                html += '<button type="button" class="action-btn" data-act="bag">' + _actBtnIco('mochila') + '<span class="action-btn-label">Mochila</span>' + actionGlyph + '</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="dodge">' + _actBtnIco('acao-esquivar') + '<span class="action-btn-label">Esquivar</span>' + actionGlyph + '</button>';
-                html += '</div>';
-                html += '<div class="sim-action-sheet-sep" aria-hidden="true"></div>';
-                html += '<div class="action-btns-grid action-btns-grid--secondary">';
-                var isPlayerProneSheet = pCur && (pCur.se || []).some(function (st) { return st && (st.prone || st.id === 'prone'); });
-                if (isPlayerProneSheet) {
-                    var standCostHexesSheet = Math.floor((pCur.speed || 6) / 2);
-                    var standCostMSheet = formatHexDistanceMeters(standCostHexesSheet);
-                    var canStandSheet = (pCur.movement_left || 0) >= standCostHexesSheet;
-                    html += '<button type="button" class="action-btn action-btn--stand-up primary' + (canStandSheet ? '' : ' spent') + '" style="grid-column: 1 / -1;" data-act="stand-up"' + (canStandSheet ? '' : ' aria-disabled="true" title="Deslocamento insuficiente para se levantar"') + '><span class="action-btn-label">▲ Levantar-se (' + standCostMSheet + ')</span></button>';
-                }
-                var isRogueCunningSheet = pCur && (((pCur.cls || '').toLowerCase() === 'ladino' && (pCur.lvl || 1) >= 2) || (pCur.skills || []).some(function(s){ return s && (s.n === 'Ação Ardilosa' || s.id === 'cunning_action'); }));
-                var cunningGlyph = isRogueCunningSheet
-                    ? '<span class="action-btn-res-icon res-bonus" aria-hidden="true" title="Ação Ardilosa (PHB p. 96): Ação Bônus">▲</span>'
-                    : actionGlyph;
-                html += '<button type="button" class="action-btn secondary" data-act="dash">' + _actBtnIco('acao-disparada') + '<span class="action-btn-label">Disparada</span>' + cunningGlyph + '</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="disengage">' + _actBtnIco('acao-desengajar') + '<span class="action-btn-label">Desengajar</span>' + cunningGlyph + '</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="shove">' + _actBtnIco('acao-empurrar') + '<span class="action-btn-label">Empurrar</span>' + actionGlyph + '</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="grapple">' + _actBtnIco('acao-agarrar') + '<span class="action-btn-label">Agarrar</span>' + actionGlyph + '</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="help">' + _actBtnIco('acao-ajudar') + '<span class="action-btn-label">Ajudar</span>' + actionGlyph + '</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="hide">' + _actBtnIco('acao-esconder') + '<span class="action-btn-label">Esconder</span>' + cunningGlyph + '</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="ready" title="Preparar uma ação para disparar como Reação (PHB p. 193)">' + _actBtnIco('alerta') + '<span class="action-btn-label">Preparar</span>' + actionGlyph + '</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="delay" title="Adiar iniciativa dentro do bloco compartilhado">' + _actBtnIco('tempo') + '<span class="action-btn-label">Adiar Vez</span></button>';
-                /* 2026-06-23: CD + chance aprox. direto no botão Fugir */
-                var _fleeDc = (typeof simFleeEscapeDc === 'function' && currentState) ? simFleeEscapeDc(currentState) : 0;
-                var _fleePI = (currentState && currentState.order) ? currentState.order[currentState.p_idx] : null;
-                var _fleeDx = _fleePI ? Math.floor(((_fleePI.dex | 0) - 10) / 2) : 0;
-                var _fleeSc = 0; for (var _rf = 1; _rf <= 20; _rf++) { if (_rf + _fleeDx >= _fleeDc) _fleeSc++; }
-                var _fleePct = Math.round((_fleeSc / 20) * 100);
-                var _fleeChip = _fleeDc ? ' <span class="act-flee-dc" title="Fugir: CD ' + _fleeDc + ' · ~' + _fleePct + '%">CD ' + _fleeDc + '</span>' : '';
-                html += '<button type="button" class="action-btn secondary" data-act="flee">' + _actBtnIco('acao-fugir') + '<span class="action-btn-label">Fugir' + _fleeChip + '</span>' + actionGlyph + '</button>';
-                html += '<button type="button" class="action-btn secondary" data-act="log">' + _actBtnIco('acao-log') + '<span class="action-btn-label">Log</span></button>';
-                html += '<button type="button" class="action-btn secondary" style="grid-column: 1 / -1;" data-act="toggle-skip-dice" aria-pressed="' + (_skipAllDiceAnim ? 'true' : 'false') + '" title="' + (_skipAllDiceAnim ? 'Animações de dados DESLIGADAS — resultado instantâneo. Toque para ver rolagens 3D.' : 'Pular as animações de dados — vê só o resultado final.') + '">' +
-                    '<span class="action-btn-label">' + (_skipAllDiceAnim ? '✓ Pulando dados (Instantâneo)' : '🎲 Pular animações de dados') + '</span></button>';
-                html += '</div>';
-                /* V1 Invocações Phase 1+2 — seção BÔNUS + Encerrar Turno (oculto até estado).
-                   X-6.5.51AB (2026-04-26): "Focar Familiar" REMOVIDO — PHB p.240 (Find
-                   Familiar) RAW: "Your familiar can't attack". Sprite (Bardo Magical
-                   Secrets) idem — passive summon que nao agride. Botao era confuso /
-                   inutil. Beast Master Wolf usa botao separado "Comandar Companheiro"
-                   (que CONSOME ação principal — fluxo distinto). */
-                html += '<div class="action-btns-grid action-btns-grid--bonus" id="bonus-action-grid"></div>';
-                /* F1 (escolha autor 2026-04-19) — PHB-fiel Beast Master:
-                   botão "Comandar Companheiro" CONSOME a ação principal do Patrulheiro
-                   (PHB p.93). Patrulheiro nível 5+ (Extra Attack) pode comandar+atacar
-                   no mesmo turno. Visibilidade controlada em _updateActionSheetState. */
-                html += '<button type="button" class="command-companion-btn" id="command-companion-btn" data-act="command-companion">' + _actBtnIco('acao-comandar') + 'Comandar Companheiro <span class="action-btn-res-icon res-action" aria-hidden="true">◆</span></button>';
-                /* E2 (escolha autor) — Mount buff: botão Montar/Desmontar quando Steed vivo. */
-                html += '<button type="button" class="mount-toggle-btn" id="mount-toggle-btn" data-act="mount-toggle">' + _actBtnIco('cavalo') + 'Montar</button>';
-                html += '<button type="button" class="end-turn-btn" id="end-turn-btn" data-act="end-turn">' + _actBtnIco('acao-encerrar-turno') + 'Encerrar turno</button>';
-                html += '</div>';
-                html += '</div>';
+                var actionGlyph = '<span class="action-btn-res-icon res-action" aria-hidden="true">◆</span>';
+
+                /* 2. Gaveta Retrátil de Manobras Táticas (Secundárias do PHB) */
                 if (_actionSheetOpen) {
-                    html += '<div class="sim-action-dock"><button type="button" class="action-btn primary sim-btn-agir" data-act="close-action-sheet">✕ Fechar</button></div>';
-                } else if (!_actionTaken) {
-                    html += '<div class="sim-action-dock"><button type="button" class="action-btn primary sim-btn-agir" data-act="toggle-actions">Agir</button></div>';
+                    html += '<div class="sim-action-backdrop" data-act="close-action-sheet" aria-hidden="true"></div>';
+                    html += '<div class="sim-tactics-drawer-wrap">';
+                    html += '<div class="sim-tactics-drawer">';
+                    var isPlayerProneSheet = pCur && (pCur.se || []).some(function (st) { return st && (st.prone || st.id === 'prone'); });
+                    if (isPlayerProneSheet) {
+                        var standCostHexesSheet = Math.floor((pCur.speed || 6) / 2);
+                        var standCostMSheet = formatHexDistanceMeters(standCostHexesSheet);
+                        var canStandSheet = (pCur.movement_left || 0) >= standCostHexesSheet;
+                        html += '<button type="button" class="action-btn action-btn--stand-up primary' + (canStandSheet ? '' : ' spent') + '" style="grid-column: 1 / -1;" data-act="stand-up"' + (canStandSheet ? '' : ' aria-disabled="true" title="Deslocamento insuficiente para se levantar"') + '><span class="action-btn-label">▲ Levantar-se (' + standCostMSheet + ')</span></button>';
+                    }
+                    var isRogueCunningSheet = pCur && (((pCur.cls || '').toLowerCase() === 'ladino' && (pCur.lvl || 1) >= 2) || (pCur.skills || []).some(function(sk){ return sk && (sk.n === 'Ação Ardilosa' || sk.id === 'cunning_action'); }));
+                    var cunningGlyph = isRogueCunningSheet
+                        ? '<span class="action-btn-res-icon res-bonus" aria-hidden="true" title="Ação Ardilosa (PHB p. 96): Ação Bônus">▲</span>'
+                        : actionGlyph;
+                    html += '<button type="button" class="action-btn secondary" data-act="dash">' + _actBtnIco('acao-disparada') + '<span class="action-btn-label">Disparada</span>' + cunningGlyph + '</button>';
+                    html += '<button type="button" class="action-btn secondary" data-act="disengage">' + _actBtnIco('acao-desengajar') + '<span class="action-btn-label">Desengajar</span>' + cunningGlyph + '</button>';
+                    html += '<button type="button" class="action-btn secondary" data-act="dodge">' + _actBtnIco('acao-esquivar') + '<span class="action-btn-label">Esquivar</span>' + actionGlyph + '</button>';
+                    html += '<button type="button" class="action-btn secondary" data-act="shove">' + _actBtnIco('acao-empurrar') + '<span class="action-btn-label">Empurrar</span>' + actionGlyph + '</button>';
+                    html += '<button type="button" class="action-btn secondary" data-act="grapple">' + _actBtnIco('acao-agarrar') + '<span class="action-btn-label">Agarrar</span>' + actionGlyph + '</button>';
+                    html += '<button type="button" class="action-btn secondary" data-act="help">' + _actBtnIco('acao-ajudar') + '<span class="action-btn-label">Ajudar</span>' + actionGlyph + '</button>';
+                    html += '<button type="button" class="action-btn secondary" data-act="hide">' + _actBtnIco('acao-esconder') + '<span class="action-btn-label">Esconder</span>' + cunningGlyph + '</button>';
+                    html += '<button type="button" class="action-btn secondary" data-act="ready" title="Preparar uma ação para disparar como Reação (PHB p. 193)">' + _actBtnIco('alerta') + '<span class="action-btn-label">Preparar</span>' + actionGlyph + '</button>';
+                    html += '<button type="button" class="action-btn secondary" data-act="delay" title="Adiar iniciativa dentro do bloco compartilhado">' + _actBtnIco('tempo') + '<span class="action-btn-label">Adiar Vez</span></button>';
+                    var _fleeDc = (typeof simFleeEscapeDc === 'function' && currentState) ? simFleeEscapeDc(currentState) : 0;
+                    var _fleePI = (currentState && currentState.order) ? currentState.order[currentState.p_idx] : null;
+                    var _fleeDx = _fleePI ? Math.floor(((_fleePI.dex | 0) - 10) / 2) : 0;
+                    var _fleeSc = 0; for (var _rf = 1; _rf <= 20; _rf++) { if (_rf + _fleeDx >= _fleeDc) _fleeSc++; }
+                    var _fleePct = Math.round((_fleeSc / 20) * 100);
+                    var _fleeChip = _fleeDc ? ' <span class="act-flee-dc" title="Fugir: CD ' + _fleeDc + ' · ~' + _fleePct + '%">CD ' + _fleeDc + '</span>' : '';
+                    html += '<button type="button" class="action-btn secondary" data-act="flee">' + _actBtnIco('acao-fugir') + '<span class="action-btn-label">Fugir' + _fleeChip + '</span>' + actionGlyph + '</button>';
+                    html += '<button type="button" class="action-btn secondary" data-act="log">' + _actBtnIco('acao-log') + '<span class="action-btn-label">Log</span></button>';
+                    html += '<button type="button" class="action-btn secondary" style="grid-column: 1 / -1;" data-act="toggle-skip-dice" aria-pressed="' + (_skipAllDiceAnim ? 'true' : 'false') + '" title="' + (_skipAllDiceAnim ? 'Animações de dados DESLIGADAS — resultado instantâneo. Toque para ver rolagens 3D.' : 'Pular as animações de dados — vê só o resultado final.') + '">' +
+                        '<span class="action-btn-label">' + (_skipAllDiceAnim ? '✓ Pulando dados (Instantâneo)' : '🎲 Pular animações de dados') + '</span></button>';
+                    html += '<div class="action-btns-grid action-btns-grid--bonus" id="bonus-action-grid" style="grid-column: 1 / -1;"></div>';
+                    html += '<button type="button" class="command-companion-btn" id="command-companion-btn" data-act="command-companion" style="grid-column: 1 / -1;">' + _actBtnIco('acao-comandar') + 'Comandar Companheiro <span class="action-btn-res-icon res-action" aria-hidden="true">◆</span></button>';
+                    html += '<button type="button" class="mount-toggle-btn" id="mount-toggle-btn" data-act="mount-toggle" style="grid-column: 1 / -1;">' + _actBtnIco('cavalo') + 'Montar</button>';
+                    html += '</div></div>';
                 }
-                // else: popup/ação em andamento → dock vazio (Agir escondido temporariamente)
-                html += '</div>';
+
+                /* 3. Action Dock Primário Fixo (Opção 1) */
+                html += '<div class="opt1-action-dock">';
+                html += '<div class="opt1-economy-row" role="status" aria-label="Recursos do Turno D&D 5e">' +
+                    '<span class="econ-pill ' + (actAvail ? 'active' : 'spent') + '" title="' + (actAvail ? 'Ação Principal disponível' : 'Ação Principal já gasta') + '">◆ Ação' + (actAvail ? '' : ' ✕') + '</span>' +
+                    '<span class="econ-pill ' + (bnsAvail ? 'active' : 'spent') + '" title="' + (bnsAvail ? 'Ação Bônus disponível' : 'Ação Bônus já gasta') + '">▲ Bônus' + (bnsAvail ? '' : ' ✕') + '</span>' +
+                    '<span class="econ-pill ' + (movLeft > 0 ? 'active' : 'spent') + '" title="Deslocamento restante no turno">👣 ' + formatHexDistanceMeters(movLeft) + '</span>' +
+                    '<span class="econ-pill ' + (rxAvail ? 'active' : 'spent') + '" title="' + (rxAvail ? 'Reação pronta (1 por rodada)' : 'Reação já gasta') + '">⚡ Reação' + (rxAvail ? '' : ' ✕') + '</span>' +
+                    concPillHtml +
+                    '</div>';
+
+                if (pCur && pCur.actionSpent && (typeof _simHasUsableBonusAction === 'function') && !_simHasUsableBonusAction(s, pCur)) {
+                    html += '<div class="sim-actions-spent-banner" style="background:rgba(40,30,20,0.85);border:1px solid rgba(196,149,58,0.4);border-radius:6px;padding:4px 8px;text-align:center;color:#e6dfd5;font-size:10.5px;">' +
+                        '◆ <strong>Ação utilizada</strong> · Mova-se no tabuleiro ou clique em <strong>Encerrar</strong>.' +
+                        '</div>';
+                }
+
+                html += '<div class="action-dock-primary-grid">';
+                html += '<button type="button" class="opt-btn primary action-btn" data-act="attack" title="Atacar com arma equipada">' +
+                    '<span class="opt-btn-ico">' + _actBtnIco('acao-atacar') + '</span><span class="opt-btn-label">Atacar</span><span class="action-btn-res-icon res-action">◆</span></button>';
+
+                html += '<button type="button" class="opt-btn action-btn ' + (anySkillOk ? '' : 'spent') + '" data-act="skills"' + (anySkillOk ? '' : ' aria-disabled="true" title="Nenhuma habilidade utilizável neste turno"') + '>' +
+                    '<span class="opt-btn-ico">' + _actBtnIco('acao-habilidades') + '</span><span class="opt-btn-label">Habilidades</span><span class="action-btn-res-icon res-action">◆</span>' + skillsExtraChip + '</button>';
+
+                html += '<button type="button" class="opt-btn action-btn" data-act="bag" title="Mochila e Consumíveis">' +
+                    '<span class="opt-btn-ico">' + _actBtnIco('mochila') + '</span><span class="opt-btn-label">Mochila</span><span class="action-btn-res-icon res-action">◆</span></button>';
+
+                html += '<button type="button" class="opt-btn action-btn' + (_actionSheetOpen ? ' active-drawer' : '') + '" data-act="toggle-actions" title="Manobras situacionais (Disparada, Esquivar, etc.)">' +
+                    '<span class="opt-btn-ico">' + _actBtnIco('acao-esquivar') + '</span><span class="opt-btn-label">' + (_actionSheetOpen ? 'Táticas ▴' : 'Táticas ▾') + '</span></button>';
+
+                html += '<button type="button" class="opt-btn end-turn action-btn" data-act="end-turn" title="Encerrar seu turno ativo">' +
+                    '<span class="opt-btn-ico">' + _actBtnIco('acao-encerrar-turno') + '</span><span class="opt-btn-label">Encerrar</span></button>';
+                html += '</div>'; // .action-dock-primary-grid
+
+                html += '</div>'; // .opt1-action-dock
+                html += '</div>'; // .action-bar--player-dock
             }
         }
     }
@@ -40097,6 +40329,17 @@ async function passPlayerMetaAction(kind, opts) {
     }
 
     await _maybeAdvanceOrStay();
+}
+
+/** Retorna a última mensagem relevante do log de combate para o Live Combat Ticker */
+function getLatestCombatLogMessage(s) {
+    if (!s || !s.log || !s.log.length) return 'Batalha iniciada. Escolha sua ação no dock abaixo.';
+    for (var i = s.log.length - 1; i >= 0; i--) {
+        var line = String(s.log[i] || '').trim();
+        if (!line || /^::/.test(line)) continue;
+        return line;
+    }
+    return 'Batalha iniciada. Escolha sua ação no dock abaixo.';
 }
 
 function openCombatLog() {
