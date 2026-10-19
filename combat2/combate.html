@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T12:25:36Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T12:55:45Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2671,23 +2671,24 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 }
 
 /* =========================================================================
-   MOBILE-FIRST TACTICAL PREVIEW BAR (#bfTacticalPreviewBar)
-   Substitui tooltips flutuantes gigantes de mousehover por barra ancorada limpa
-   com suporte a 1º Toque (Preview no Mapa) e 2º Toque / Botão (Confirmação).
+   BARRA DE PREVIEW TÁTICO (#bfTacticalPreviewBar) — Foco Exclusivo em Cliques
+   Dockada no rodapé da viewport com z-index elevado (92300 > 92200).
+   Quando aberta, esconde defensivamente o .sim-action-dock (botão Agir)
+   assegurando 100% de legibilidade dos dados de rota, AoO e botões [✓ Mover], [ℹ] e [✕].
    ========================================================================= */
 .bf-tactical-preview-bar {
   display: none;
-  position: absolute;
+  position: fixed;
   left: 8px;
   right: 8px;
-  bottom: 8px;
-  z-index: 145;
-  background: linear-gradient(180deg, rgba(24, 18, 12, 0.88) 0%, rgba(14, 10, 7, 0.94) 100%);
-  border: 1.5px solid rgba(196, 149, 58, 0.82);
+  bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  z-index: 92300;
+  background: linear-gradient(180deg, rgba(24, 18, 12, 0.94) 0%, rgba(14, 10, 7, 0.98) 100%);
+  border: 1.5px solid rgba(196, 149, 58, 0.85);
   border-radius: 8px;
-  padding: 4px 8px;
-  max-height: 48px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.82), 0 0 10px rgba(196, 149, 58, 0.2);
+  padding: 6px 10px;
+  min-height: 48px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.92), 0 0 14px rgba(196, 149, 58, 0.3);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   pointer-events: auto !important;
@@ -2718,6 +2719,11 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .bf-tactical-preview-bar.bf-tactical-preview-bar--adv {
   border-color: rgba(72, 187, 120, 0.9);
   box-shadow: 0 6px 22px rgba(0, 0, 0, 0.9), 0 0 14px rgba(72, 187, 120, 0.36);
+}
+/* Oculta defensivamente o dock do botão Agir quando a barra de preview tático está aberta */
+.bf-tactical-preview-open .sim-action-dock {
+  display: none !important;
+  pointer-events: none !important;
 }
 @keyframes bfTpbSlideUp {
   0% { opacity: 0; transform: translateY(6px); }
@@ -24765,6 +24771,9 @@ var _previewAimTargetIdx = null;
 var _bfTacticalLayerActive = false;
 
 function hideBfTacticalPreviewBar() {
+    if (typeof document !== 'undefined' && document.body) {
+        document.body.classList.remove('bf-tactical-preview-open');
+    }
     var bar = document.getElementById('bfTacticalPreviewBar');
     if (bar) {
         bar.classList.remove('bf-tactical-preview-bar--open', 'is-visible', 'bf-tactical-preview-bar--hazard', 'bf-tactical-preview-bar--adv', 'is-hazard');
@@ -24896,6 +24905,9 @@ function showBfTacticalPreviewBar(config) {
         '</div>' +
         actionsHtml;
     bar.classList.add('bf-tactical-preview-bar--open', 'is-visible');
+    if (typeof document !== 'undefined' && document.body) {
+        document.body.classList.add('bf-tactical-preview-open');
+    }
 
     bindTpbBtn(bar, '[data-tpb-act="primary"]', config.onPrimary);
     bindTpbBtn(bar, '[data-tpb-act="info"]', config.onInfo);
@@ -35591,9 +35603,8 @@ function bindActions() {
                         }
                         return;
                     }
-                    // No celular (touch), tocar em um inimigo diferente primeiro projeta o arco balístico,
-                    // cobertura, flanqueamento e raio de explosão AoE no tabuleiro; 2º toque (ou botão Confirmar) abre o modal.
-                    if (card.__pDownType === 'touch' && _previewAimTargetIdx !== idx && typeof previewTacticalTargetOnBoard === 'function') {
+                    // Sistema exclusivo por clique (1º clique projeta a mira tática; 2º clique confirma a ação):
+                    if (_previewAimTargetIdx !== idx && typeof previewTacticalTargetOnBoard === 'function') {
                         previewTacticalTargetOnBoard(idx);
                         return;
                     }
@@ -35623,39 +35634,6 @@ function bindActions() {
                 openUnitDetail(uid);
             };
             card.addEventListener('click', onCardTrigger);
-            card.addEventListener('pointerenter', function (ev) {
-                if (ev && ev.pointerType === 'touch') return;
-                var uid = card.getAttribute('data-unit-id');
-                if (uid && uid.indexOf('enemy_') === 0) {
-                    var eIdx = parseInt(uid.slice(6), 10);
-                    if (!isNaN(eIdx) && typeof setEnemyThreatHighlight === 'function') setEnemyThreatHighlight(eIdx, true);
-                } else if (uid === 'player' || (uid && uid.indexOf('ally_') === 0)) {
-                    var myTgtIdx = (uid === 'player') ? (currentState ? currentState.p_idx : 0) : parseInt(uid.slice(5), 10);
-                    if (!isNaN(myTgtIdx) && typeof setTargetThreatHighlight === 'function') setTargetThreatHighlight(myTgtIdx, true);
-                }
-
-                if (!_selectingTarget || !currentState) return;
-                var tgtIdx = -1;
-                if (uid === 'player') tgtIdx = currentState.p_idx;
-                else if (uid && uid.indexOf('ally_') === 0) tgtIdx = parseInt(uid.slice(5), 10);
-                else if (uid && uid.indexOf('enemy_') === 0) tgtIdx = parseInt(uid.slice(6), 10);
-                if (tgtIdx >= 0 && currentState.order[tgtIdx] && typeof previewTacticalTargetOnBoard === 'function') {
-                    previewTacticalTargetOnBoard(tgtIdx);
-                }
-            });
-            card.addEventListener('pointerleave', function (ev) {
-                if (ev && ev.pointerType === 'touch') return;
-                var uid = card.getAttribute('data-unit-id');
-                if (!_bfTacticalLayerActive) {
-                    if (uid && uid.indexOf('enemy_') === 0) {
-                        var eIdx = parseInt(uid.slice(6), 10);
-                        if (!isNaN(eIdx) && typeof setEnemyThreatHighlight === 'function') setEnemyThreatHighlight(eIdx, false);
-                    } else if (uid === 'player' || (uid && uid.indexOf('ally_') === 0)) {
-                        var myTgtIdx = (uid === 'player') ? (currentState ? currentState.p_idx : 0) : parseInt(uid.slice(5), 10);
-                        if (!isNaN(myTgtIdx) && typeof setTargetThreatHighlight === 'function') setTargetThreatHighlight(myTgtIdx, false);
-                    }
-                }
-            });
         })(cards[j]);
     }
 
@@ -35703,27 +35681,7 @@ function bindActions() {
                 tile.__pDownTs = Date.now();
                 tile.__pDownType = ev.pointerType || '';
             });
-            tile.addEventListener('pointerenter', function (ev) {
-                if (ev.pointerType === 'touch') return;
-                if (_selectingTarget) return; // Não desenha rastro de movimento se o jogador estiver mirando ataque/habilidade
-                if (_previewMoveHex) return; // Se já há destino fixado por toque/clique, preserva até trocar ou fechar
-                if (!currentState || currentState.ph !== 'active') return;
-                if (currentState.active_idx !== currentState.p_idx) return;
-                var pUnit = currentState.order[currentState.p_idx];
-                if (!pUnit || !pUnit.pos) return;
-                var tCol = parseInt(tile.getAttribute('data-col'), 10);
-                var tRow = parseInt(tile.getAttribute('data-row'), 10);
-                if (!isNaN(tCol) && !isNaN(tRow)) {
-                    drawMovementPathPreview(pUnit.pos.col, pUnit.pos.row, tCol, tRow, { showBar: true });
-                }
-            });
-            tile.addEventListener('pointerleave', function (ev) {
-                if (ev && ev.pointerType === 'touch') return;
-                if (_selectingTarget) return;
-                if (_previewMoveHex) return;
-                clearMovementTrailPreview();
-                hideBfTacticalPreviewBar();
-            });
+            // Foco 100% no sistema com cliques: banimento de qualquer mouseover/hover automático
             var onTileTrigger = function (ev) {
                 var now = Date.now();
                 if (now - _lastTileActionTime < 260) return;
@@ -38346,6 +38304,11 @@ function onBtnClick(ev) {
     }
     if (act === 'toggle-actions') {
         _actionSheetOpen = !_actionSheetOpen;
+        if (_previewMoveHex) {
+            _previewMoveHex = null;
+            clearMovementTrailPreview();
+            hideBfTacticalPreviewBar();
+        }
         render(currentState);
         return;
     }
@@ -40215,13 +40178,8 @@ function _bindSkillListListeners(listEl, skills, ov, reopenFn) {
             var updatePreview = function () {
                 if (txt) previewEl.textContent = txt;
             };
-            var resetPreview = function () {
-                previewEl.textContent = defaultPreview;
-            };
-            item.addEventListener('mouseenter', updatePreview);
-            item.addEventListener('pointerenter', updatePreview);
+            // Foco exclusivo no sistema de cliques / toques (sem mouseenter/mouseover)
             item.addEventListener('pointerdown', updatePreview);
-            item.addEventListener('mouseleave', resetPreview);
         });
     }
 }
