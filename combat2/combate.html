@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T17:25:44Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T18:54:30Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -1869,6 +1869,7 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
     0 0 10px rgba(130,180,255,.45),
     0 0 20px rgba(130,180,255,.22),
     0 1px 2px rgba(0,0,0,.95);
+}
 /* Card de PV animado do combatente no cabeçalho do overlay (resolução de dano D&D 5e) */
 .dice-combat-hp-card {
   width: 100%;
@@ -14962,7 +14963,7 @@ canvas#vfxCanvas,
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 10px;
+  padding: 6px 48px 6px 10px;
   background: linear-gradient(180deg, #221a13, #15100c);
   border-bottom: 1px solid rgba(196, 149, 58, 0.35);
   overflow-x: auto;
@@ -15019,7 +15020,8 @@ canvas#vfxCanvas,
   flex-shrink: 0;
   cursor: pointer;
   transition: background 0.15s ease;
-  z-index: 90;
+  position: relative;
+  z-index: 92200;
   user-select: none;
 }
 .combat-ticker:hover {
@@ -15077,7 +15079,8 @@ canvas#vfxCanvas,
   flex-direction: column;
   gap: 5px;
   flex-shrink: 0;
-  z-index: 100;
+  position: relative;
+  z-index: 92200;
   box-shadow: 0 -4px 16px rgba(0,0,0,0.6);
 }
 
@@ -15088,6 +15091,7 @@ canvas#vfxCanvas,
   font-size: 10px;
   padding: 0 2px;
   gap: 4px;
+  flex-wrap: wrap;
 }
 .opt1-economy-row .econ-pill {
   display: inline-flex;
@@ -15110,6 +15114,12 @@ canvas#vfxCanvas,
   opacity: 0.45;
   text-decoration: line-through;
 }
+.opt1-economy-row .econ-pill.concentration {
+  border-color: rgba(168, 85, 247, 0.7);
+  color: #e9d8fd;
+  background: rgba(107, 33, 168, 0.25);
+  box-shadow: 0 0 8px rgba(168, 85, 247, 0.3);
+}
 
 /* Grade Primária de 5 Botões */
 .action-dock-primary-grid {
@@ -15122,12 +15132,12 @@ canvas#vfxCanvas,
   border: 1px solid rgba(140, 115, 75, 0.4);
   border-radius: 6px;
   color: var(--v-text, #e6dfd5);
-  padding: 7px 3px 6px;
+  padding: 6px 3px 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 3px;
   font-size: 10.5px;
   font-family: var(--v-font-display, 'Cinzel'), serif;
   font-weight: 700;
@@ -15135,6 +15145,8 @@ canvas#vfxCanvas,
   transition: all 0.15s ease;
   position: relative;
   user-select: none;
+  margin: 0;
+  min-height: 44px;
 }
 .opt-btn:hover {
   background: linear-gradient(180deg, #3d2f21, #251b13);
@@ -15180,9 +15192,19 @@ canvas#vfxCanvas,
 .opt-btn .opt-btn-ico {
   font-size: 15px;
   line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 18px;
+}
+.opt-btn .action-btn-ico {
+  width: 18px;
+  height: 18px;
+  margin-right: 0 !important;
+  display: block;
 }
 .opt-btn .opt-btn-label {
-  font-size: 10px;
+  font-size: 9.5px;
   line-height: 1.1;
   white-space: nowrap;
 }
@@ -15195,35 +15217,125 @@ canvas#vfxCanvas,
   opacity: 0.8;
 }
 
-/* Gaveta Retrátil de Manobras Táticas */
+/* Gaveta Retrátil de Manobras Táticas (flutuante acima do dock sem encolher o mapa) */
 .sim-tactics-drawer-wrap {
-  position: relative;
-  z-index: 95;
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  z-index: 92100;
 }
 .sim-tactics-drawer {
-  background: rgba(22, 17, 13, 0.98);
+  background: linear-gradient(180deg, rgba(32, 25, 19, 0.98), rgba(18, 14, 10, 0.99));
   border-top: 1px solid var(--v-gold, #c4953a);
-  border-bottom: 1px solid rgba(196, 149, 58, 0.3);
-  padding: 8px;
+  border-bottom: 1px solid rgba(196, 149, 58, 0.35);
+  border-radius: 12px 12px 0 0;
+  padding: 10px 8px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
   animation: tacticsSlideUp 0.18s ease-out;
-  box-shadow: 0 -6px 20px rgba(0,0,0,0.8);
+  box-shadow: 0 -8px 24px rgba(0,0,0,0.85);
+  max-height: 55vh;
+  overflow-y: auto;
 }
 @keyframes tacticsSlideUp {
   from { transform: translateY(12px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 .sim-tactics-drawer .action-btn {
-  font-size: 10px;
-  padding: 7px 4px;
-  border-radius: 5px;
-  text-align: center;
-  justify-content: center;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  margin: 0;
+  width: 100%;
+  min-height: 36px;
+  height: 36px;
+  font-size: 10.5px;
+  padding: 4px 7px;
+  border-radius: 6px;
+  box-sizing: border-box;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  position: relative;
+}
+.sim-tactics-drawer .action-btn .action-btn-ico {
+  width: 16px;
+  height: 16px;
+  margin-right: 3px;
+  flex-shrink: 0;
+}
+.sim-tactics-drawer .action-btn .action-btn-label {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  text-align: left;
+}
+.sim-tactics-drawer .action-btn .action-btn-res-icon {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 9px;
+  color: var(--v-gold, #c4953a);
+  opacity: 0.9;
+}
+.sim-tactics-drawer .action-btn .act-flee-dc {
+  display: inline-block;
+  margin-left: 3px;
+  padding: 1px 4px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--v-text-dim, #a09484);
+  background: rgba(196, 149, 58, 0.14);
+  border: 1px solid rgba(196, 149, 58, 0.3);
+  border-radius: 20px;
+}
+.sim-tactics-drawer .action-btn[aria-pressed="true"] {
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.34), rgba(196, 149, 58, 0.16));
+  border: 1px solid var(--v-gold, #c4953a);
+  color: var(--v-gold-bright, #e8c45a);
+  font-weight: 700;
+  justify-content: center;
+}
+.sim-tactics-drawer .action-btn.spent {
+  opacity: 0.38;
+  cursor: not-allowed;
+  filter: grayscale(0.85);
+}
+.sim-tactics-drawer .action-btns-grid--bonus {
+  display: none;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--v-border, #4a3828);
+}
+.sim-tactics-drawer .action-btns-grid--bonus.has-bonus {
+  display: grid;
+}
+.sim-tactics-drawer .command-companion-btn,
+.sim-tactics-drawer .mount-toggle-btn {
+  display: none;
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.sim-tactics-drawer .command-companion-btn {
+  background: linear-gradient(180deg, rgba(80, 160, 80, 0.25), rgba(40, 90, 40, 0.4));
+  border: 1px solid rgba(160, 220, 130, 0.55);
+  color: #d8f0c0;
+}
+.sim-tactics-drawer .mount-toggle-btn {
+  background: linear-gradient(180deg, rgba(180, 130, 60, 0.3), rgba(110, 80, 30, 0.45));
+  border: 1px solid rgba(255, 200, 100, 0.55);
+  color: #ffe0a0;
 }
 </style>
 <script>
@@ -34191,31 +34303,34 @@ function _updateActionSheetState(s) {
             btnEl.classList.toggle('spent', !!p.actionSpent);
         }
     }
-    var ecoBar = document.querySelector('.sim-turn-economy-bar');
+    var ecoBar = document.querySelector('.opt1-economy-row, .sim-turn-economy-bar');
     if (ecoBar) {
+        var isOpt1 = ecoBar.classList.contains('opt1-economy-row');
+        var baseCls = isOpt1 ? 'econ-pill' : 'sim-turn-economy-pill';
+        var availCls = isOpt1 ? 'active' : 'available';
         var actAvail = !p.actionSpent;
         var bnsAvail = !p.bonusActionSpent;
         var movLeft = (p.movement_left != null) ? p.movement_left : (p.speed || 6);
         var rxAvail = !(p.reactionSpent || p.reaction_spent);
-        var pills = ecoBar.querySelectorAll('.sim-turn-economy-pill');
+        var pills = ecoBar.querySelectorAll('.' + baseCls + ':not(.concentration)');
         if (pills && pills.length >= 4) {
-            pills[0].className = 'sim-turn-economy-pill ' + (actAvail ? 'available' : 'spent');
+            pills[0].className = baseCls + ' ' + (actAvail ? availCls : 'spent');
             pills[0].textContent = '◆ Ação' + (actAvail ? '' : ' ✕');
             pills[0].title = actAvail ? 'Ação Principal disponível' : 'Ação Principal já gasta';
 
-            pills[1].className = 'sim-turn-economy-pill ' + (bnsAvail ? 'available' : 'spent');
+            pills[1].className = baseCls + ' ' + (bnsAvail ? availCls : 'spent');
             pills[1].textContent = '▲ Bônus' + (bnsAvail ? '' : ' ✕');
             pills[1].title = bnsAvail ? 'Ação Bônus disponível' : 'Ação Bônus já gasta';
 
-            pills[2].className = 'sim-turn-economy-pill ' + (movLeft > 0 ? 'available' : 'spent');
+            pills[2].className = baseCls + ' ' + (movLeft > 0 ? availCls : 'spent');
             pills[2].textContent = '👣 ' + formatHexDistanceMeters(movLeft);
             pills[2].title = 'Deslocamento restante no turno';
 
-            pills[3].className = 'sim-turn-economy-pill ' + (rxAvail ? 'available' : 'spent');
+            pills[3].className = baseCls + ' ' + (rxAvail ? availCls : 'spent');
             pills[3].textContent = '⚡ Reação' + (rxAvail ? '' : ' ✕');
             pills[3].title = rxAvail ? 'Reação pronta (1 por rodada)' : 'Reação já gasta';
         }
-        var concPill = ecoBar.querySelector('.sim-turn-economy-pill.concentration');
+        var concPill = ecoBar.querySelector('.' + baseCls + '.concentration');
         var curConc = p && (p.concentrationSpell || (p.concentrating && (p.concentrating.spellName || p.concentrating.n)) || null);
         if (!curConc && p && p.se) {
             var _cSt = p.se.find(function (st) { return st && (st.concentration || st.concentrating); });
@@ -34224,7 +34339,7 @@ function _updateActionSheetState(s) {
         if (curConc) {
             if (!concPill) {
                 concPill = document.createElement('span');
-                concPill.className = 'sim-turn-economy-pill concentration';
+                concPill.className = baseCls + ' concentration';
                 ecoBar.appendChild(concPill);
             }
             concPill.textContent = '✦ Conc: ' + curConc;
