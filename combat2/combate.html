@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T13:42:20Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T14:08:12Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -5572,6 +5572,10 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .udc-sub { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 1.5px; text-transform: uppercase; margin-top: var(--v-space-xs, 2px); }
 .udc-section { margin-bottom: var(--v-space-lg, 12px); }
 .udc-section-title { font-family: var(--v-font-display, 'Cinzel'), serif; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 6px; padding-left: var(--v-space-xs, 2px); }
+details.udc-section--collapsible summary.udc-section-title { cursor: pointer; display: flex; align-items: center; justify-content: space-between; user-select: none; list-style: none; }
+details.udc-section--collapsible summary.udc-section-title::-webkit-details-marker { display: none; }
+details.udc-section--collapsible summary.udc-section-title::after { content: '▾'; font-size: 11px; color: var(--v-gold, #c4953a); transition: transform .15s ease; }
+details.udc-section--collapsible:not([open]) summary.udc-section-title::after { content: '▸'; }
 .udc-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px var(--v-space-md-lg, 10px); }
 .udc-stat { display: flex; justify-content: space-between; align-items: baseline; padding: 5px var(--v-space-md, 8px); background: rgba(15,12,8,.4); border: 1px solid var(--v-border, #4a3828); border-radius: var(--v-radius-sm, 6px); font-family: var(--v-font, 'MedievalSharp'), serif; }
 .udc-stat-lbl { font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); letter-spacing: 1px; text-transform: uppercase; }
@@ -30717,6 +30721,9 @@ function _actBtnIco(slug) {
     if (slug === 'acao-empurrar') {
         return '<svg class="action-btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#f59e0b;"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
     }
+    if (slug === 'acao-agarrar') {
+        return '<svg class="action-btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#f87171;"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v5"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>';
+    }
     if (slug === 'acao-ajudar') {
         return '<svg class="action-btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#34d399;"><path d="M18 15l-6-6-6 6"/><circle cx="12" cy="12" r="9"/></svg>';
     }
@@ -35233,6 +35240,7 @@ function render(s) {
                 html += '<button type="button" class="action-btn secondary" data-act="dash">' + _actBtnIco('acao-disparada') + '<span class="action-btn-label">Disparada</span>' + cunningGlyph + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="disengage">' + _actBtnIco('acao-desengajar') + '<span class="action-btn-label">Desengajar</span>' + cunningGlyph + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="shove">' + _actBtnIco('acao-empurrar') + '<span class="action-btn-label">Empurrar</span>' + actionGlyph + '</button>';
+                html += '<button type="button" class="action-btn secondary" data-act="grapple">' + _actBtnIco('acao-agarrar') + '<span class="action-btn-label">Agarrar</span>' + actionGlyph + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="help">' + _actBtnIco('acao-ajudar') + '<span class="action-btn-label">Ajudar</span>' + actionGlyph + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="hide">' + _actBtnIco('acao-esconder') + '<span class="action-btn-label">Esconder</span>' + cunningGlyph + '</button>';
                 html += '<button type="button" class="action-btn secondary" data-act="ready" title="Preparar uma ação para disparar como Reação (PHB p. 193)">' + _actBtnIco('alerta') + '<span class="action-btn-label">Preparar</span>' + actionGlyph + '</button>';
@@ -35740,6 +35748,33 @@ function bindActions() {
                                 void __combatRemoteAction({ type: 'help', target: _helpTgt });
                             } else {
                                 void passPlayerMetaAction('help', { target: _helpTgt });
+                            }
+                        });
+                        return;
+                    }
+                    if (_pendingSpecialAction === 'grapple') {
+                        if (card.__pDownType === 'touch' && _previewAimTargetIdx !== idx && typeof previewTacticalTargetOnBoard === 'function') {
+                            previewTacticalTargetOnBoard(idx);
+                            return;
+                        }
+                        _selectingTarget = false;
+                        var _grappleTgt = idx;
+                        _pendingSpecialAction = null;
+                        _previewAimTargetIdx = null;
+                        hideBfTacticalPreviewBar();
+                        render(currentState);
+                        showGrappleConfirmModal(_grappleTgt).then(function(ok) {
+                            if (!ok) {
+                                _actionTaken = false;
+                                render(currentState);
+                                return;
+                            }
+                            _actionTaken = true;
+                            render(currentState);
+                            if (window.__COMBAT_MODE === 'remote' || window.__COMBAT_REMOTE_ACTIVE) {
+                                void __combatRemoteAction({ type: 'grapple', target: _grappleTgt });
+                            } else {
+                                void passPlayerMetaAction('grapple', { target: _grappleTgt });
                             }
                         });
                         return;
@@ -36350,6 +36385,34 @@ function showTargetActionMenu(targetIdx, uid) {
     html +=   '<div class="tam-act-chev">▸</div>';
     html += '</button>';
 
+    // 3.1 AGARRAR (GRAPPLE - PHB p. 195)
+    var grappleDisabled = !isActionAvailable || !isAdjacent;
+    var grappleDesc = !isActionAvailable
+        ? 'Ação principal já gasta neste turno'
+        : (!isAdjacent ? 'Requer adjacência (1,5m · atual ' + distM + ')' : 'Teste oposto de Atletismo para imobilizar o deslocamento (0m)');
+    html += '<button type="button" class="tam-act-btn tam-act--grapple' + (grappleDisabled ? ' is-disabled' : '') + '" data-tam-act="grapple">';
+    html +=   '<div class="tam-act-ico">✊</div>';
+    html +=   '<div class="tam-act-text">';
+    html +=     '<div class="tam-act-label">Agarrar Alvo (Manobra)</div>';
+    html +=     '<div class="tam-act-desc">' + grappleDesc + '</div>';
+    html +=   '</div>';
+    html +=   '<div class="tam-act-chev">▸</div>';
+    html += '</button>';
+
+    // 3.2 AJUDAR ALIADO CONTRA ESTE ALVO (HELP - PHB p. 192)
+    var helpDisabled = !isActionAvailable || !isAdjacent;
+    var helpDesc = !isActionAvailable
+        ? 'Ação principal já gasta neste turno'
+        : (!isAdjacent ? 'Requer adjacência (1,5m · atual ' + distM + ')' : 'Distrai este alvo para conceder Vantagem no próximo ataque de um companheiro');
+    html += '<button type="button" class="tam-act-btn tam-act--help' + (helpDisabled ? ' is-disabled' : '') + '" data-tam-act="help">';
+    html +=   '<div class="tam-act-ico">🤝</div>';
+    html +=   '<div class="tam-act-text">';
+    html +=     '<div class="tam-act-label">Ajudar Companheiro (Distrair Alvo)</div>';
+    html +=     '<div class="tam-act-desc">' + helpDesc + '</div>';
+    html +=   '</div>';
+    html +=   '<div class="tam-act-chev">▸</div>';
+    html += '</button>';
+
     // 4. APROXIMAR-SE (SE NÃO ESTIVER ADJACENTE E TIVER MOVIMENTO)
     if (!isAdjacent) {
         var moveDisabled = (moveLeft <= 0);
@@ -36458,6 +36521,72 @@ function showTargetActionMenu(targetIdx, uid) {
                     void __combatRemoteAction({ type: 'shove', target: targetIdx, shove_mode: mode });
                 } else {
                     void passPlayerMetaAction('shove', { target: targetIdx, shove_mode: mode });
+                }
+            });
+        });
+    }
+
+    var grappleBtn = sheet.querySelector('[data-tam-act="grapple"]');
+    if (grappleBtn) {
+        grappleBtn.addEventListener('click', function () {
+            closeTamOverlay();
+            if (!isActionAvailable) {
+                if (typeof showFloatingToast === 'function') {
+                    showFloatingToast('Ação principal já gasta neste turno!', 'warn');
+                }
+                return;
+            }
+            if (!isAdjacent) {
+                if (typeof showFloatingToast === 'function') {
+                    showFloatingToast('▲ Alvo fora do alcance corpo a corpo (1,5m)! Aproxime-se primeiro.', 'warn');
+                }
+                return;
+            }
+            showGrappleConfirmModal(targetIdx).then(function (ok) {
+                if (!ok) {
+                    _actionTaken = false;
+                    render(currentState);
+                    return;
+                }
+                _actionTaken = true;
+                render(currentState);
+                if (window.__COMBAT_MODE === 'remote' || window.__COMBAT_REMOTE_ACTIVE) {
+                    void __combatRemoteAction({ type: 'grapple', target: targetIdx });
+                } else {
+                    void passPlayerMetaAction('grapple', { target: targetIdx });
+                }
+            });
+        });
+    }
+
+    var helpTgtBtn = sheet.querySelector('[data-tam-act="help"]');
+    if (helpTgtBtn) {
+        helpTgtBtn.addEventListener('click', function () {
+            closeTamOverlay();
+            if (!isActionAvailable) {
+                if (typeof showFloatingToast === 'function') {
+                    showFloatingToast('Ação principal já gasta neste turno!', 'warn');
+                }
+                return;
+            }
+            if (!isAdjacent) {
+                if (typeof showFloatingToast === 'function') {
+                    showFloatingToast('▲ Alvo fora do alcance corpo a corpo (1,5m)! Aproxime-se primeiro.', 'warn');
+                }
+                return;
+            }
+            showHelpChoiceModal(targetIdx).then(function (ok) {
+                if (!ok) {
+                    _actionTaken = false;
+                    render(currentState);
+                    return;
+                }
+                _actionTaken = true;
+                render(currentState);
+                if (window.__COMBAT_MODE === 'remote' || window.__COMBAT_REMOTE_ACTIVE) {
+                    void __combatRemoteAction({ type: 'help', target: targetIdx });
+                } else {
+                    void passPlayerMetaAction('help', { target: targetIdx });
                 }
             });
         });
@@ -38715,6 +38844,38 @@ function onBtnClick(ev) {
         render(currentState);
         return;
     }
+    if (act === 'grapple') {
+        _actionSheetOpen = false;
+        var aliveIdxsGrappleL = [];
+        if (currentState && currentState.order) {
+            for (var axGL = 0; axGL < currentState.order.length; axGL++) {
+                var ocGL = currentState.order[axGL];
+                if (ocGL && ocGL.t === 'e' && ocGL.alive && !ocGL.isDead) aliveIdxsGrappleL.push(axGL);
+            }
+        }
+        if (aliveIdxsGrappleL.length === 0) return;
+        if (aliveIdxsGrappleL.length === 1) {
+            render(currentState);
+            showGrappleConfirmModal(aliveIdxsGrappleL[0]).then(function(ok) {
+                if (ok) {
+                    _actionTaken = true;
+                    render(currentState);
+                    if (window.__COMBAT_MODE === 'remote' || window.__COMBAT_REMOTE_ACTIVE) {
+                        void __combatRemoteAction({ type: 'grapple', target: aliveIdxsGrappleL[0] });
+                    } else {
+                        void passPlayerMetaAction('grapple', { target: aliveIdxsGrappleL[0] });
+                    }
+                } else {
+                    render(currentState);
+                }
+            });
+            return;
+        }
+        _selectingTarget = true;
+        _pendingSpecialAction = 'grapple';
+        render(currentState);
+        return;
+    }
     if (act === 'help') {
         _actionSheetOpen = false;
         var aliveIdxsHelpL = [];
@@ -39455,6 +39616,64 @@ async function passPlayerMetaAction(kind, opts) {
                     }
                 }
                 s.log.push(p.n + ' tenta empurrar ' + sTgt.n + ', mas o alvo resiste ao teste oposto [' + totDef + ' vs ' + totAtk + ']!');
+            }
+        }
+        render(s);
+    } else if (kind === 'grapple') {
+        p.actionSpent = true;
+        var gTgtIdx = (opts.target != null && s.order[opts.target]) ? opts.target : null;
+        var gTgt = (gTgtIdx != null) ? s.order[gTgtIdx] : null;
+        if (gTgt) {
+            var pProf = (p.prof != null ? p.prof : (typeof simProfBonus === 'function' ? simProfBonus(p.lvl || 1) : 2));
+            var pStrMod = (typeof simAttrMod === 'function' ? simAttrMod(p.str || 10) : Math.floor(((p.str || 10) - 10) / 2));
+            var pCls = String(p.cls || '').toLowerCase();
+            var hasAthletics = (pCls === 'guerreiro' || pCls === 'barbaro' || pCls === 'paladino') || ((p.proficiencies || []).indexOf('athletics') !== -1);
+            var atkMod = pStrMod + (hasAthletics ? pProf : 0);
+            var d20Atk = rollN(20);
+            var totAtk = d20Atk + atkMod;
+
+            var defProf = (gTgt.prof != null ? gTgt.prof : (typeof simProfBonus === 'function' ? simProfBonus(gTgt.lvl || 1) : 2));
+            var defStrMod = (typeof simAttrMod === 'function' ? simAttrMod(gTgt.str || 10) : Math.floor(((gTgt.str || 10) - 10) / 2));
+            var defDexMod = (typeof simAttrMod === 'function' ? simAttrMod(gTgt.dex || 10) : Math.floor(((gTgt.dex || 10) - 10) / 2));
+            var defHasAth = (gTgt.proficiencies || []).indexOf('athletics') !== -1;
+            var defHasAcro = (gTgt.proficiencies || []).indexOf('acrobatics') !== -1;
+            var defMod = Math.max(defStrMod + (defHasAth ? defProf : 0), defDexMod + (defHasAcro ? defProf : 0));
+            var d20Def = rollN(20);
+            var totDef = d20Def + defMod;
+            var success = (totAtk >= totDef);
+
+            var gTgtUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, gTgtIdx) : null;
+            var gTgtEl = gTgtUid ? document.querySelector('[data-unit-id="' + gTgtUid + '"]') : null;
+            var pUid = (typeof unitUidForOrderIndex === 'function') ? unitUidForOrderIndex(s, s.p_idx) : 'player';
+            var pEl = document.querySelector('[data-unit-id="' + pUid + '"]');
+
+            if (pEl && gTgtEl && typeof animHexTokenAttack === 'function') {
+                await animHexTokenAttack(pEl, gTgtEl, false);
+            }
+
+            var resPart = ' [' + totAtk + ' vs ' + totDef + ']';
+            if (success) {
+                gTgt.grappled = true;
+                if (!gTgt.se) gTgt.se = [];
+                if (!gTgt.se.some(function (st) { return st && (st.grappled || st.id === 'grappled' || st.id === 'agarrado'); })) {
+                    gTgt.se.push({ id: 'grappled', n: 'Agarrado', grappled: true, kind: 'debuff', ico: '✊', dndCondition: 'Deslocamento reduzido a 0 (PHB p. 290).' });
+                }
+                if (gTgtEl) {
+                    gTgtEl.classList.add('token-grappled');
+                    if (typeof spawnSkillImpactLabel === 'function') {
+                        spawnSkillImpactLabel(gTgtEl, '✊ AGARRADO (DESLOCAMENTO 0)' + resPart + '!', 'attack');
+                    }
+                }
+                s.log.push(p.n + ' agarra ' + gTgt.n + ' imobilizando seu deslocamento (Agarrado)' + resPart + '!');
+            } else {
+                if (gTgtEl) {
+                    gTgtEl.classList.add('miss-target-flash');
+                    setTimeout(function () { gTgtEl.classList.remove('miss-target-flash'); }, 350);
+                    if (typeof spawnSkillImpactLabel === 'function') {
+                        spawnSkillImpactLabel(gTgtEl, '🛡️ RESISTIU AGARRÃO [' + totDef + ' vs ' + totAtk + ']!', 'miss');
+                    }
+                }
+                s.log.push(p.n + ' tenta agarrar ' + gTgt.n + ', mas o alvo resiste ao teste oposto [' + totDef + ' vs ' + totAtk + ']!');
             }
         }
         render(s);
@@ -42914,6 +43133,79 @@ function showShoveChoiceModal(targetIdx) {
         row.appendChild(btnProne);
         row.appendChild(btnPush);
         row.appendChild(btnBack);
+
+        card.appendChild(titleEl);
+        card.appendChild(subEl);
+        card.appendChild(msgEl);
+        card.appendChild(row);
+        ov.appendChild(card);
+        mountInGameFrame(ov);
+    });
+}
+
+/** Modal de confirmação para Agarrar (PHB p. 195) em total conformidade com a Regra Soberana #24 */
+function showGrappleConfirmModal(targetIdx) {
+    return new Promise(function(resolve) {
+        var s = currentState;
+        var u = s && s.order && s.order[targetIdx];
+        if (!u) { resolve(false); return; }
+
+        var dup = document.querySelector('.sim-skip-confirm-overlay');
+        if (dup) dup.remove();
+        var ov = document.createElement('div');
+        ov.className = 'sim-skip-confirm-overlay';
+        ov.setAttribute('role', 'dialog');
+        ov.setAttribute('aria-modal', 'true');
+        var card = document.createElement('div');
+        card.className = 'sim-skip-confirm-card';
+        card.style.maxWidth = '380px';
+
+        var titleEl = document.createElement('div');
+        titleEl.className = 'sim-skip-confirm-title';
+        titleEl.textContent = 'Agarrar Inimigo';
+
+        var subEl = document.createElement('div');
+        subEl.style.cssText = 'font-size:11px;color:var(--v-gold,#c4953a);text-align:center;margin-bottom:8px;font-weight:600;';
+        subEl.textContent = 'Manobra Especial de Ataque (PHB p. 195) · Alvo: ' + (u.n || 'Inimigo');
+
+        var msgEl = document.createElement('div');
+        msgEl.className = 'sim-skip-confirm-msg';
+        msgEl.style.textAlign = 'left';
+        msgEl.style.fontSize = '12px';
+        msgEl.style.lineHeight = '1.45';
+        msgEl.innerHTML =
+            '<div style="margin-bottom:6px;"><strong>O Que Está Sendo Escolhido:</strong><br>' +
+            'Você tenta subjugar o oponente usando uma de suas mãos para imobilizá-lo com sua força física.</div>' +
+            '<div style="margin-bottom:6px;"><strong>Consequências & Benefícios:</strong><br>' +
+            '• <em>Teste Resistido:</em> Seu teste de Força (Atletismo) vs maior entre Força (Atletismo) ou Destreza (Acrobacia) do alvo.<br>' +
+            '• <strong>Condição Agarrado:</strong> O deslocamento do alvo é reduzido a <strong>0 metros</strong> até que ele se liberte ou você seja afastado.<br>' +
+            '• O alvo pode gastar uma Ação em seu turno para tentar escapar do agarrão.<br>' +
+            '• <em>Custo:</em> Gasta sua Ação principal (e desloca-se até o alvo se necessário).</div>';
+
+        var row = document.createElement('div');
+        row.className = 'sim-skip-confirm-actions';
+
+        var btnBack = document.createElement('button');
+        btnBack.type = 'button';
+        btnBack.className = 'sim-skip-confirm-btn sim-skip-confirm-cancel';
+        btnBack.textContent = '← Voltar às opções';
+
+        var btnConfirm = document.createElement('button');
+        btnConfirm.type = 'button';
+        btnConfirm.className = 'sim-skip-confirm-btn sim-skip-confirm-ok';
+        btnConfirm.textContent = '✔ Agarrar Inimigo';
+
+        function done(ok) {
+            try { ov.remove(); } catch(e){}
+            resolve(!!ok);
+        }
+
+        btnConfirm.addEventListener('click', function() { done(true); });
+        btnBack.addEventListener('click', function() { done(false); });
+        ov.addEventListener('click', function(e) { if (e.target === ov) done(false); });
+
+        row.appendChild(btnBack);
+        row.appendChild(btnConfirm);
 
         card.appendChild(titleEl);
         card.appendChild(subEl);
@@ -47993,7 +48285,7 @@ function openUnitDetail(uid) {
         { k: 'wis', lb: 'SAB', v: (u.wis != null ? u.wis : (u.wisdom != null ? u.wisdom : 10)), png: 'sabedoria.webp' },
         { k: 'cha', lb: 'CAR', v: (u.cha != null ? u.cha : (u.charisma != null ? u.charisma : 10)), png: 'carisma.webp' }
     ];
-    html += '<div class="udc-section"><div class="udc-section-title">Atributos D&D 5e</div>';
+    html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Atributos D&D 5e</summary>';
     html += '<div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">';
     for (var si = 0; si < statsData.length; si++) {
         var sObj = statsData[si];
@@ -48008,11 +48300,11 @@ function openUnitDetail(uid) {
             + '</div>'
             + '</div>';
     }
-    html += '</div></div>';
+    html += '</div></details>';
 
     /* Salvaguardas D&D 5e */
     var profSaves = u.saving_throw_proficiencies || [];
-    html += '<div class="udc-section"><div class="udc-section-title">Salvaguardas D&D 5e</div>';
+    html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Salvaguardas D&D 5e</summary>';
     html += '<div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:4px;">';
     for (var si2 = 0; si2 < statsData.length; si2++) {
         var sObj2 = statsData[si2];
@@ -48026,12 +48318,12 @@ function openUnitDetail(uid) {
             + '<span style="color:' + (isSaveProf ? '#ffd700' : '#d4c8b0') + '; font-weight:700;">' + saveStr + '</span>'
             + '</div>';
     }
-    html += '</div></div>';
+    html += '</div></details>';
 
     /* Traços, Passivas & Regras D&D 5e (Monster Manual / Classes por Nível) */
     var uTraits = (typeof simResolveUnitTraitsDnd5e === 'function') ? simResolveUnitTraitsDnd5e(u) : (u.traits || []);
     if (uTraits && uTraits.length) {
-        html += '<div class="udc-section"><div class="udc-section-title">Traços & Características D&D 5e</div>';
+        html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Traços & Características D&D 5e</summary>';
         html += '<div style="display:flex; flex-direction:column; gap:5px;">';
         for (var ti = 0; ti < uTraits.length; ti++) {
             var trObj = uTraits[ti];
@@ -48041,7 +48333,7 @@ function openUnitDetail(uid) {
                 + (trObj.desc ? '<div style="color:#d4c8b0; font-size:9.5px; margin-top:1px;">' + escHtml(trObj.desc) + '</div>' : '')
                 + '</div>';
         }
-        html += '</div></div>';
+        html += '</div></details>';
     }
 
     /* Defesas, Resistências e Imunidades */
