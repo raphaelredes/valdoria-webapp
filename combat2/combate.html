@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T07:18:44Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T07:34:09Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -31040,7 +31040,21 @@ function _buildDndResourcesBarHtml(s, p, opts) {
         if (p.superiorityDice > 0) {
             tacChips.push('<button type="button" class="dnd-tac-chip dnd-tac-chip--gold" data-rule-title="⚔️ Dados de Superioridade (PHB p. 73)" data-rule-desc="Recurso tático de Mestre de Batalha: você possui ' + p.superiorityDice + ' dados de superioridade para enriquecer seus ataques com manobras.">⚔ Sup: ' + p.superiorityDice + '</button>');
         }
-        var concName = (p.concentrating && (p.concentrating.spellName || p.concentrating.n)) || (s && s.concentration && s.concentration.casterIdx === s.p_idx && s.concentration.spellName) || null;
+        var concStEntry = null;
+        if (p.se && p.se.length) {
+            for (var _csi = 0; _csi < p.se.length; _csi++) {
+                var _cst = p.se[_csi];
+                if (_cst && (_cst.concentration || _cst.isConcentration) && (_cst.turnsLeft == null || _cst.turnsLeft > 0)) {
+                    concStEntry = _cst;
+                    break;
+                }
+            }
+        }
+        var concName = (p.concentrationSpell)
+            || (p.concentrating && (p.concentrating.spellName || p.concentrating.n))
+            || (concStEntry && (concStEntry.spellName || concStEntry.n || concStEntry.id))
+            || (s && s.concentration && s.concentration.casterIdx === s.p_idx && s.concentration.spellName)
+            || null;
         if (concName) {
             tacChips.push('<button type="button" class="dnd-tac-chip" style="background:rgba(46,125,50,0.28);border-color:rgba(129,199,132,0.65);color:#a5d6a7;" data-rule-title="◈ Concentração Ativa (PHB p. 203)" data-rule-desc="Você está mantendo a magia \'' + escHtml(concName) + '\'. Sofrer dano exige TR de Constituição CD 10 ou metade do dano sofrido para não quebrar. Conjurar outra magia com concentração encerra esta.">◈ Conc: ' + escHtml(concName) + '</button>');
         }
@@ -34362,15 +34376,21 @@ function inspectTurnQueueUnitOnBar(orderIdx, nodeEl) {
         chips.push({ kind: 'danger', text: '🎯 Intenção: ' + (u.it.ic || '⚔') + ' ' + u.it.lb + itTarget + (u.it.dmg ? ' (~' + u.it.dmg + ')' : '') });
     }
 
-    // Vulnerabilidades / Imunidades / Resistências conhecidas
+    // Vulnerabilidades / Imunidades / Resistências conhecidas (PT-BR com glifos D&D 5e)
+    var _fmtDmgChipList = function (arr) {
+        return (arr || []).slice(0, 2).map(function (dt) {
+            var info = (typeof simDmgTypeInfoPt === 'function') ? simDmgTypeInfoPt(dt) : { lb: dt, ico: '' };
+            return (info.ico ? info.ico + ' ' : '') + info.lb;
+        }).join(', ');
+    };
     if (u.immunities && u.immunities.length > 0) {
-        chips.push({ kind: 'danger', text: '🚫 Imune: ' + u.immunities.slice(0, 2).join(', ') });
+        chips.push({ kind: 'danger', text: '🚫 Imune: ' + _fmtDmgChipList(u.immunities) });
     }
     if (u.vulnerabilities && u.vulnerabilities.length > 0) {
-        chips.push({ kind: 'good', text: '💥 Vuln: ' + u.vulnerabilities.slice(0, 2).join(', ') });
+        chips.push({ kind: 'good', text: '💥 Vuln: ' + _fmtDmgChipList(u.vulnerabilities) });
     }
     if (u.resistances && u.resistances.length > 0) {
-        chips.push({ kind: 'warn', text: '🛡️ Res: ' + u.resistances.slice(0, 2).join(', ') });
+        chips.push({ kind: 'warn', text: '🛡️ Res: ' + _fmtDmgChipList(u.resistances) });
     }
 
     if (Array.isArray(u.se) && u.se.length > 0) {
@@ -34899,6 +34919,20 @@ function bindActions() {
                 ]
             });
         });
+    }
+    /* Chips de condição dos tokens (.token-cond-chip, .token-conc-chip, .token-prone-chip): toque abre a ficha da criatura */
+    var condChips = document.querySelectorAll('.token-cond-chip, .token-conc-chip, .token-prone-chip');
+    for (var cci = 0; cci < condChips.length; cci++) {
+        (function (chipEl) {
+            chipEl.addEventListener('click', function (ev) {
+                ev.stopPropagation();
+                var tokenEl = chipEl.closest('.hex-token');
+                var uid = tokenEl ? tokenEl.getAttribute('data-unit-id') : null;
+                if (uid && typeof openUnitDetail === 'function') {
+                    openUnitDetail(uid);
+                }
+            });
+        })(condChips[cci]);
     }
     /* Linhas de loot clicáveis na tela de vitória (abre popup com descrição) */
     var lootRows = document.querySelectorAll('.rr-loot-row--clickable');
@@ -44386,7 +44420,12 @@ function _showEndTurnConfirm(s, onConfirm) {
     var actionAvail = !p.actionSpent;
     var bonusAvail = !p.bonusActionSpent && ((typeof _simHasUsableBonusAction === 'function') ? _simHasUsableBonusAction(s, p) : false);
     var anySkillUsable = (typeof _simAnySkillUsable === 'function') ? _simAnySkillUsable(s, p) : false;
-    var hasAvailable = actionAvail || bonusAvail;
+    var isProne = !!(p.prone || (p.se || []).some(function (st) {
+        return st && (st.prone || st.id === 'prone' || String(st.n || '').toLowerCase() === 'caído');
+    }));
+    var standCost = Math.floor((p.speed || 6) / 2);
+    var canStandUp = isProne && ((p.movement_left != null ? p.movement_left : (p.speed || 6)) >= standCost);
+    var hasAvailable = actionAvail || bonusAvail || canStandUp;
 
     /* Remove overlay anterior se existir */
     var prev = document.getElementById('end-turn-confirm-overlay');
@@ -44403,6 +44442,12 @@ function _showEndTurnConfirm(s, onConfirm) {
     if (hasAvailable) {
         html += '<div class="etc-subtitle">Você ainda pode usar:</div>';
         html += '<ul class="etc-list">';
+        if (canStandUp) {
+            html += '<li class="etc-li etc-li-action" style="border-left-color:#f59e0b;">'
+                + '<span class="etc-li-glyph" style="color:#f59e0b;">▾</span>'
+                + '<span class="etc-li-text"><strong style="color:#fde68a;">Levantar-se (Caído)</strong>'
+                + ' — Você tem ' + formatHexDistanceMeters(p.movement_left != null ? p.movement_left : 0) + ' de deslocamento; passar o turno no chão concede Vantagem a atacantes corpo a corpo (PHB p. 190)!</span></li>';
+        }
         if (actionAvail) {
             html += '<li class="etc-li etc-li-action">'
                 + '<span class="etc-li-glyph">◆</span>'
