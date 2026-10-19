@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T11:59:34Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T12:25:36Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2680,21 +2680,28 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   position: absolute;
   left: 8px;
   right: 8px;
-  bottom: 52px;
+  bottom: 8px;
   z-index: 145;
-  background: linear-gradient(180deg, rgba(24, 18, 12, 0.96) 0%, rgba(14, 10, 7, 0.98) 100%);
+  background: linear-gradient(180deg, rgba(24, 18, 12, 0.88) 0%, rgba(14, 10, 7, 0.94) 100%);
   border: 1.5px solid rgba(196, 149, 58, 0.82);
-  border-radius: 9px;
-  padding: 6px 9px;
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.88), 0 0 12px rgba(196, 149, 58, 0.22);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  border-radius: 8px;
+  padding: 4px 8px;
+  max-height: 48px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.82), 0 0 10px rgba(196, 149, 58, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   pointer-events: auto !important;
   touch-action: manipulation !important;
   animation: bfTpbSlideUp 0.16s cubic-bezier(0.2, 0.85, 0.3, 1);
+  box-sizing: border-box;
 }
-.bf-outer--selecting-target .bf-tactical-preview-bar {
-  bottom: 8px;
+/* Quando selecionando alvo, oculta a barra flutuante interna do mapa
+   porque a mira tática é renderizada no tray inferior (#simTargetSelectionHud),
+   mantendo a arena de combate 100% VISÍVEL e livre de qualquer obstrução! */
+.bf-outer--selecting-target .bf-tactical-preview-bar,
+.bf-outer--selecting-target #bfTacticalPreviewBar {
+  display: none !important;
+  pointer-events: none !important;
 }
 .bf-tactical-preview-bar.is-visible,
 .bf-tactical-preview-bar.bf-tactical-preview-bar--open {
@@ -2721,18 +2728,20 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 .bf-tpb-title {
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 800;
   color: #f6e6bf;
-  line-height: 1.25;
+  line-height: 1.2;
   display: flex;
   align-items: center;
   gap: 5px;
-  flex-wrap: wrap;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .bf-tpb-sub {
   font-family: var(--v-font-ui, sans-serif);
@@ -2742,9 +2751,14 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 }
 .bf-tpb-chips {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 4px;
   align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.bf-tpb-chips::-webkit-scrollbar {
+  display: none;
 }
 .bf-tpb-chip {
   display: inline-flex;
@@ -11797,12 +11811,12 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   color: #fca5a5 !important;
 }
 
-/* HUD Superior de Seleção de Alvo e Alcance D&D 5e */
+/* HUD Inferior de Seleção de Alvo e Alcance D&D 5e */
 .target-selection-hud {
   display: flex;
   flex-direction: column;
   gap: 3px;
-  padding: 7px 12px;
+  padding: 6px 10px;
   background: linear-gradient(180deg, rgba(32, 24, 18, 0.96), rgba(18, 14, 10, 0.98));
   border-top: 1.5px solid var(--v-gold, #c4953a);
   border-bottom: 1.5px solid var(--v-gold, #c4953a);
@@ -11810,10 +11824,119 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   user-select: none;
   z-index: 100;
   animation: tshSlideDown 0.22s ease-out;
+  box-sizing: border-box;
 }
 @keyframes tshSlideDown {
   from { opacity: 0; transform: translateY(-6px); }
   to { opacity: 1; transform: translateY(0); }
+}
+.tsh-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.tsh-badge-action {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(196, 149, 58, 0.22);
+  border: 1px solid rgba(196, 149, 58, 0.5);
+  color: var(--v-gold, #c4953a);
+  text-transform: uppercase;
+}
+.tsh-title {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.tsh-reach-chip {
+  font-family: var(--v-font-ui, sans-serif);
+  font-size: 10px;
+  color: #a09484;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.tsh-instruction {
+  font-family: var(--v-font-ui, sans-serif);
+  font-size: 11px;
+  color: #d4c8b0;
+  line-height: 1.35;
+}
+.tsh-default-view {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+}
+
+/* Estado de Mira Tática Ativa no HUD Inferior (zero poluição na arena) */
+.tsh-preview-view {
+  display: none;
+  width: 100%;
+  animation: tshFadeIn 0.14s ease-out;
+}
+@keyframes tshFadeIn {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.tsh-preview-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+.tsh-preview-card--hazard {
+  border-left: 3px solid #ef4444;
+  padding-left: 6px;
+}
+.tsh-preview-card--adv {
+  border-left: 3px solid #22c55e;
+  padding-left: 6px;
+}
+.tsh-preview-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.tsh-preview-title {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 11px;
+  font-weight: 800;
+  color: #f6e6bf;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.tsh-preview-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  max-height: 48px;
+  overflow-y: auto;
+}
+.tsh-preview-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
 }
 .tsh-top {
   display: flex;
@@ -24647,6 +24770,13 @@ function hideBfTacticalPreviewBar() {
         bar.classList.remove('bf-tactical-preview-bar--open', 'is-visible', 'bf-tactical-preview-bar--hazard', 'bf-tactical-preview-bar--adv', 'is-hazard');
         bar.innerHTML = '';
     }
+    var tshPreview = document.getElementById('tshPreviewView');
+    var tshDefault = document.getElementById('tshDefaultView');
+    if (tshPreview && tshDefault) {
+        tshPreview.style.display = 'none';
+        tshPreview.innerHTML = '';
+        tshDefault.style.display = '';
+    }
     document.querySelectorAll('.hex-tile--preview-dest').forEach(function (el) {
         el.classList.remove('hex-tile--preview-dest');
     });
@@ -24659,8 +24789,79 @@ function hideBfTacticalPreviewBar() {
 }
 
 function showBfTacticalPreviewBar(config) {
+    if (!config) return;
+    var tshPreview = document.getElementById('tshPreviewView');
+    var tshDefault = document.getElementById('tshDefaultView');
+    var tshContainer = document.getElementById('simTargetSelectionHud');
+
+    // Regra Soberana #20: Suporte omnidirecional (click, pointerup, touchend) com debounce de 180ms, sem stopPropagation em pointerdown/touchstart
+    function bindTpbBtn(container, sel, fn) {
+        if (!container) return;
+        var btn = container.querySelector(sel);
+        if (!btn || typeof fn !== 'function') return;
+        var lastT = 0;
+        function handler(ev) {
+            var now = Date.now();
+            if (now - lastT < 180) return;
+            lastT = now;
+            if (ev && ev.cancelable && ev.type === 'touchend') ev.preventDefault();
+            fn(ev);
+        }
+        btn.addEventListener('click', handler);
+        btn.addEventListener('pointerup', handler);
+        btn.addEventListener('touchend', handler);
+    }
+
+    if (_selectingTarget && tshPreview && tshDefault && tshContainer) {
+        // MODO MIRA / SELEÇÃO DE ALVO:
+        // Renderiza no tray inferior dedicado (#simTargetSelectionHud), mantendo a arena 100% LIMPA e VISÍVEL!
+        var innerBar = document.getElementById('bfTacticalPreviewBar');
+        if (innerBar) {
+            innerBar.classList.remove('bf-tactical-preview-bar--open', 'is-visible', 'bf-tactical-preview-bar--hazard', 'bf-tactical-preview-bar--adv');
+            innerBar.innerHTML = '';
+        }
+
+        var chipsHtml = '';
+        if (Array.isArray(config.chips) && config.chips.length > 0) {
+            chipsHtml = '<div class="tsh-preview-chips">';
+            for (var ci = 0; ci < config.chips.length; ci++) {
+                var ch = config.chips[ci];
+                if (!ch || !ch.text) continue;
+                var chCls = 'bf-tpb-chip' + (ch.kind ? (' bf-tpb-chip--' + ch.kind) : '');
+                chipsHtml += '<span class="' + chCls + '">' + escHtml(ch.text) + '</span>';
+            }
+            chipsHtml += '</div>';
+        }
+
+        var actionsHtml = '<div class="tsh-preview-actions">';
+        if (config.primaryLabel && typeof config.onPrimary === 'function') {
+            var pCls = 'bf-tpb-btn ' + (config.primaryDanger ? 'bf-tpb-btn--danger' : 'bf-tpb-btn--primary');
+            actionsHtml += '<button type="button" class="' + pCls + '" data-tpb-act="primary">' + escHtml(config.primaryLabel) + '</button>';
+        }
+        if (config.infoLabel && typeof config.onInfo === 'function') {
+            actionsHtml += '<button type="button" class="bf-tpb-btn bf-tpb-btn--info" data-tpb-act="info" aria-label="Detalhes táticos">' + escHtml(config.infoLabel) + '</button>';
+        }
+        actionsHtml += '</div>';
+
+        tshPreview.innerHTML =
+            '<div class="tsh-preview-card' + (config.tone ? (' tsh-preview-card--' + config.tone) : '') + '">' +
+                '<div class="tsh-preview-main">' +
+                    '<div class="tsh-preview-title">' + (config.titleHtml || escHtml(config.title || '')) + '</div>' +
+                    chipsHtml +
+                '</div>' +
+                actionsHtml +
+            '</div>';
+
+        tshDefault.style.display = 'none';
+        tshPreview.style.display = 'block';
+
+        bindTpbBtn(tshPreview, '[data-tpb-act="primary"]', config.onPrimary);
+        bindTpbBtn(tshPreview, '[data-tpb-act="info"]', config.onInfo);
+        return;
+    }
+
     var bar = document.getElementById('bfTacticalPreviewBar');
-    if (!bar || !config) return;
+    if (!bar) return;
     bar.classList.remove('bf-tactical-preview-bar--hazard', 'bf-tactical-preview-bar--adv');
     if (config.tone === 'hazard') bar.classList.add('bf-tactical-preview-bar--hazard');
     else if (config.tone === 'adv') bar.classList.add('bf-tactical-preview-bar--adv');
@@ -24696,26 +24897,9 @@ function showBfTacticalPreviewBar(config) {
         actionsHtml;
     bar.classList.add('bf-tactical-preview-bar--open', 'is-visible');
 
-    // Regra Soberana #20: Suporte omnidirecional (click, pointerup, touchend) com debounce de 180ms, sem stopPropagation em pointerdown/touchstart
-    function bindTpbBtn(sel, fn) {
-        var btn = bar.querySelector(sel);
-        if (!btn || typeof fn !== 'function') return;
-        var lastT = 0;
-        function handler(ev) {
-            var now = Date.now();
-            if (now - lastT < 180) return;
-            lastT = now;
-            if (ev && ev.cancelable && ev.type === 'touchend') ev.preventDefault();
-            fn(ev);
-        }
-        btn.addEventListener('click', handler);
-        btn.addEventListener('pointerup', handler);
-        btn.addEventListener('touchend', handler);
-    }
-
-    bindTpbBtn('[data-tpb-act="primary"]', config.onPrimary);
-    bindTpbBtn('[data-tpb-act="info"]', config.onInfo);
-    bindTpbBtn('[data-tpb-act="close"]', function () {
+    bindTpbBtn(bar, '[data-tpb-act="primary"]', config.onPrimary);
+    bindTpbBtn(bar, '[data-tpb-act="info"]', config.onInfo);
+    bindTpbBtn(bar, '[data-tpb-act="close"]', function () {
         if (typeof config.onClose === 'function') {
             config.onClose();
         } else {
@@ -25564,7 +25748,7 @@ function previewTacticalTargetOnBoard(targetIdx) {
             kind: 'info',
             text: aoeS.shapeLabelPt + ' ' + aoeS.aoeMeters + (aoeS.enemiesInAoe > 0 ? (' · 🎯 ' + aoeS.enemiesInAoe + ' alvo(s)') : '')
         });
-        if (aoeS.saveStr) {
+        if (aoeS.saveStr && (!hpv || !hpv.label || hpv.mode !== 'save')) {
             chips.push({ kind: 'warn', text: '🛡️ TR ' + aoeS.saveStr });
         }
         if (aoeS.alliesInAoe > 0) {
@@ -34714,13 +34898,16 @@ function render(s) {
             hintSub = 'Toque no inimigo para focar ' + escHtml(passiveName);
         }
 
-        html += '<div class="target-selection-hud' + themeClass + '">';
+        html += '<div class="target-selection-hud' + themeClass + '" id="simTargetSelectionHud">';
+        html += '<div class="tsh-default-view" id="tshDefaultView">';
         html += '<div class="tsh-header">';
         html += '<span class="tsh-badge-action">' + hudTypeBadge + '</span>';
         html += '<strong class="tsh-title">' + hudIconHtml + escHtml(hudTitle) + '</strong>';
         html += '<span class="tsh-reach-chip" title="Regras D&D 5e: alcance máximo desta ação">' + _combatTargetIconSVG(11) + ' Alcance: ' + reachMeta.label + '</span>';
         html += '</div>';
         html += '<div class="tsh-instruction">' + hintSub + '</div>';
+        html += '</div>';
+        html += '<div class="tsh-preview-view" id="tshPreviewView" style="display:none;"></div>';
         html += '</div>';
     }
 
@@ -35518,6 +35705,7 @@ function bindActions() {
             });
             tile.addEventListener('pointerenter', function (ev) {
                 if (ev.pointerType === 'touch') return;
+                if (_selectingTarget) return; // Não desenha rastro de movimento se o jogador estiver mirando ataque/habilidade
                 if (_previewMoveHex) return; // Se já há destino fixado por toque/clique, preserva até trocar ou fechar
                 if (!currentState || currentState.ph !== 'active') return;
                 if (currentState.active_idx !== currentState.p_idx) return;
@@ -35531,6 +35719,7 @@ function bindActions() {
             });
             tile.addEventListener('pointerleave', function (ev) {
                 if (ev && ev.pointerType === 'touch') return;
+                if (_selectingTarget) return;
                 if (_previewMoveHex) return;
                 clearMovementTrailPreview();
                 hideBfTacticalPreviewBar();
@@ -35540,6 +35729,7 @@ function bindActions() {
                 if (now - _lastTileActionTime < 260) return;
                 if (window.__bfIsDragging) return;
                 if (window.__bfLastDragTs && (now - window.__bfLastDragTs < 500)) return;
+                if (_selectingTarget) return; // Não dispara movimentação acidental enquanto estiver mirando ação
                 if (typeof tile.__pDownX === 'number' && typeof tile.__pDownY === 'number') {
                     var tDx = Math.abs(ev.clientX - tile.__pDownX);
                     var tDy = Math.abs(ev.clientY - tile.__pDownY);
