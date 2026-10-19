@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T09:41:39Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T10:14:26Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -6494,6 +6494,36 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .tcc-stats .hp-high { color: #7ec060; }
 .tcc-stats .hp-mid  { color: #e0b040; }
 .tcc-stats .hp-low  { color: #e06050; }
+.tcc-conds-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 5px;
+}
+.tcc-cond-pill {
+  font-family: var(--v-font, 'MedievalSharp'), serif;
+  font-size: calc(10px * var(--v-font-scale, 1));
+  line-height: 1.25;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(192, 106, 58, 0.4);
+  color: var(--v-text, #d4c8b0);
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+.tcc-cond-pill--conc { border-color: #38bdf8; color: #bae6fd; background: rgba(14, 116, 144, 0.35); }
+.tcc-cond-pill--prone { border-color: #fb923c; color: #fed7aa; background: rgba(194, 65, 12, 0.35); }
+.tcc-cond-pill--blind { border-color: #a855f7; color: #e9d5ff; background: rgba(107, 33, 168, 0.35); }
+.tcc-cond-pill--poison { border-color: #4ade80; color: #bbf7d0; background: rgba(22, 101, 52, 0.35); }
+.tcc-cond-pill--paralyzed, .tcc-cond-pill--stunned { border-color: #facc15; color: #fef08a; background: rgba(161, 98, 7, 0.35); }
+.tcc-cond-pill--frightened { border-color: #c084fc; color: #f3e8ff; background: rgba(126, 34, 206, 0.35); }
+.tcc-cond-pill--restrained { border-color: #94a3b8; color: #e2e8f0; background: rgba(51, 65, 85, 0.35); }
+.tcc-cond-pill--dodge { border-color: #60a5fa; color: #bfdbfe; background: rgba(30, 64, 175, 0.35); }
+.tcc-cond-pill--rage { border-color: #f87171; color: #fecaca; background: rgba(185, 28, 28, 0.35); }
+.tcc-cond-pill--bless { border-color: #fbbf24; color: #fef08a; background: rgba(180, 83, 9, 0.35); }
+.tcc-cond-pill--bane { border-color: #f43f5e; color: #fecdd3; background: rgba(159, 18, 57, 0.35); }
+.tcc-cond-pill--reaction { border-color: #818cf8; color: #e0e7ff; background: rgba(67, 56, 202, 0.3); }
 .tcc-actions {
   display: flex;
   gap: var(--v-space-md, 8px);
@@ -25501,6 +25531,89 @@ function simGetAttackReach(unit, skill) {
 }
 
 /**
+ * D&D 5e / Mobile WebApp: Gera pílulas compactas de condições e concentração ativas no alvo
+ * para exibição contextual imediata no cabeçalho dos popups de confirmação de alvo (showTargetConfirm / showHealTargetConfirm).
+ */
+function simFormatTargetConditionPills(u) {
+    if (!u) return '';
+    var pills = [];
+    var seen = {};
+
+    // Concentração ativa (PHB p. 203)
+    var isConc = !!(u.concentrationSpell || u.concentrating);
+    var concSpell = u.concentrationSpell || (u.concentrating && (u.concentrating.spellName || u.concentrating.n)) || '';
+    if (!isConc && u.se && Array.isArray(u.se)) {
+        var cst = u.se.find(function (x) { return x && (x.concentration || x.isConcentration); });
+        if (cst) {
+            isConc = true;
+            concSpell = cst.n || cst.id || '';
+        }
+    }
+    if (isConc) {
+        var cLabel = '✦ Conc' + (concSpell ? ': ' + concSpell : '');
+        pills.push('<span class="tcc-cond-pill tcc-cond-pill--conc" title="Concentrando em ' + escHtml(concSpell || 'Magia') + ' (PHB p. 203)">' + escHtml(cLabel) + '</span>');
+        seen['conc'] = true;
+    }
+
+    // Caído no Chão / Prone (PHB p. 292)
+    if (u.prone || (u.se && u.se.some(function (x) { return x && (x.prone || x.id === 'prone' || String(x.n || '').toLowerCase().indexOf('caíd') >= 0); }))) {
+        pills.push('<span class="tcc-cond-pill tcc-cond-pill--prone" title="Caído no Chão (PHB p. 292): Ataques corpo a corpo têm Vantagem; à distância têm Desvantagem">💤 Caído</span>');
+        seen['prone'] = true;
+    }
+
+    // Reação Utilizada nesta rodada (PHB p. 190)
+    if (u.reactionSpent || u.reaction_spent) {
+        pills.push('<span class="tcc-cond-pill tcc-cond-pill--reaction" title="Reação Utilizada nesta rodada (PHB p. 190): Não pode realizar reações até o próximo turno">⚡ Sem Reação</span>');
+        seen['reaction'] = true;
+    }
+
+    // Demais condições em u.se
+    if (u.se && Array.isArray(u.se)) {
+        for (var i = 0; i < u.se.length; i++) {
+            var st = u.se[i];
+            if (!st) continue;
+            var stId = String(st.id || '').toLowerCase();
+            var stN = String(st.n || '').toLowerCase();
+
+            if (!seen['blind'] && (st.blinded || stId.indexOf('blind') >= 0 || stN.indexOf('cego') >= 0)) {
+                pills.push('<span class="tcc-cond-pill tcc-cond-pill--blind" title="Cego (PHB p. 290): Ataques sofrem Desvantagem; ataques recebidos têm Vantagem">👁️ Cego</span>');
+                seen['blind'] = true;
+            } else if (!seen['poison'] && (st.poisoned || stId.indexOf('poison') >= 0 || stN.indexOf('envenenad') >= 0)) {
+                pills.push('<span class="tcc-cond-pill tcc-cond-pill--poison" title="Envenenado (PHB p. 292): Desvantagem em ataques e testes de habilidade">🧪 Envenenado</span>');
+                seen['poison'] = true;
+            } else if (!seen['paralyzed'] && (st.paralyzed || stId.indexOf('paraly') >= 0 || stN.indexOf('paralisad') >= 0)) {
+                pills.push('<span class="tcc-cond-pill tcc-cond-pill--paralyzed" title="Paralisado (PHB p. 291): Incapacitado; falha automática em TR FOR/DES; ataques a até 1,5m são críticos">⚡ Paralisado</span>');
+                seen['paralyzed'] = true;
+            } else if (!seen['stun'] && (st.stunned || stId.indexOf('stun') >= 0 || stN.indexOf('atordoad') >= 0)) {
+                pills.push('<span class="tcc-cond-pill tcc-cond-pill--stunned" title="Atordoado (PHB p. 292): Incapacitado; falha automática em TR FOR/DES; ataques recebidos com Vantagem">💫 Atordoado</span>');
+                seen['stun'] = true;
+            } else if (!seen['frightened'] && (st.frightened || stId.indexOf('fright') >= 0 || stN.indexOf('amedrontad') >= 0)) {
+                pills.push('<span class="tcc-cond-pill tcc-cond-pill--frightened" title="Amedrontado (PHB p. 290): Desvantagem em testes e ataques enquanto a fonte do medo estiver visível">😨 Amedrontado</span>');
+                seen['frightened'] = true;
+            } else if (!seen['restrained'] && (st.restrained || stId.indexOf('restrain') >= 0 || stN.indexOf('contid') >= 0)) {
+                pills.push('<span class="tcc-cond-pill tcc-cond-pill--restrained" title="Contido (PHB p. 292): Deslocamento 0; ataques recebidos com Vantagem; desvantagem em TR DES">⛓️ Contido</span>');
+                seen['restrained'] = true;
+            } else if (!seen['dodge'] && (stId === 'esquiva' || st.dodge || stN.indexOf('esquiv') >= 0)) {
+                pills.push('<span class="tcc-cond-pill tcc-cond-pill--dodge" title="Ação Esquivar (PHB p. 192): Ataques contra este alvo sofrem Desvantagem">🛡️ Esquiva</span>');
+                seen['dodge'] = true;
+            } else if (!seen['rage'] && (st.rageDmg || st.rageResistance || stId === 'furia' || stN.indexOf('fúria') >= 0 || stN.indexOf('furia') >= 0)) {
+                pills.push('<span class="tcc-cond-pill tcc-cond-pill--rage" title="Fúria Bárbara ativa (PHB p. 48): Resistência a dano físico">🔥 Fúria</span>');
+                seen['rage'] = true;
+            } else if (!seen['bless'] && (stId === 'bless' || st.blessSpell || stN.indexOf('bênção') >= 0 || stN.indexOf('bencao') >= 0)) {
+                pills.push('<span class="tcc-cond-pill tcc-cond-pill--bless" title="Bênção (PHB p. 219): +1d4 em ataques e salvaguardas">✨ Bênção</span>');
+                seen['bless'] = true;
+            } else if (!seen['bane'] && (stId === 'bane' || st.baneSpell || stN.indexOf('perdição') >= 0 || stN.indexOf('perdicao') >= 0)) {
+                pills.push('<span class="tcc-cond-pill tcc-cond-pill--bane" title="Perdição (PHB p. 216): -1d4 em ataques e salvaguardas">▼ Perdição</span>');
+                seen['bane'] = true;
+            }
+        }
+    }
+
+    if (!pills.length) return '';
+    return '<div class="tcc-conds-row">' + pills.join('') + '</div>';
+}
+
+/**
  * Retorna metadados completos de alcance D&D 5e (pés, metros, hexes, rótulo e tipo)
  * para a ação ou magia atualmente selecionada pelo jogador.
  */
@@ -41488,6 +41601,7 @@ function showTargetConfirm(tgtIdx) {
     html += '<div class="tcc-info">';
     html += '<div class="tcc-name">' + escHtml(u.n) + '</div>';
     html += '<div class="tcc-stats"><span class="tcc-n-ca">CA ' + u.ac + '</span> · <span class="' + hpCls + '">' + u.hp + '/' + u.mhp + ' HP</span>' + _tccCrBadge + '</div>';
+    html += simFormatTargetConditionPills(u);
     html += '</div></div>';
 
     /* Bloco de previsao de dano */
@@ -42206,6 +42320,7 @@ function showHealTargetConfirm(tgtIdx) {
     html += '<div class="tcc-name">' + escHtml(u.n) + '</div>';
     html += '<div class="tcc-stats">PV <span class="' + hpCls + '">' + u.hp + '/' + u.mhp + '</span> · ' + escHtml(skill.n) +
         (inconsc ? ' <span class="tcc-down-tag">(inconsciente)</span>' : '') + '</div>';
+    html += simFormatTargetConditionPills(u);
     if (inconsc && !isBuffAlly) {
         html += '<div class="tcc-phb-note">Qualquer cura recebida com 0 PV estabiliza o aventureiro e devolve a consciência com esses PV.</div>';
     }
@@ -52232,6 +52347,9 @@ async function __combatAnimateOneEvent(ev) {
                                 if (ev.aoeSharedDamage) {
                                     _savePills.push('<span class="dmg-pill dmg-pill--type">💥 Dano de Área</span>');
                                 }
+                                if (ev.evasionUsed) {
+                                    _savePills.push('<span class="dmg-pill dmg-pill--buff">🛡️ Evasão (PHB p. 96)</span>');
+                                }
 
                                 var _saveDetailsRows = [
                                     { l: 'Defensor', v: targetForDice.n || 'Defensor' },
@@ -52244,6 +52362,21 @@ async function __combatAnimateOneEvent(ev) {
                                 }
                                 if (ev.aoeSharedDamage) {
                                     _saveDetailsRows.push({ l: 'Regra de Área', v: 'PHB p. 196: dano rolado uma vez pelo conjurador' });
+                                }
+                                if (ev.evasionUsed) {
+                                    _saveDetailsRows.push({ l: 'Evasão (D&D 5e)', v: 'Ladino/Monge: sucesso = 0 dano; falha = metade do dano (PHB p. 96)' });
+                                }
+                                if (ev.potentCantripUsed) {
+                                    _saveDetailsRows.push({ l: 'Truque Potente', v: 'Sucesso no TR ainda sofre metade do dano (PHB p. 117)' });
+                                }
+                                if (ev.spellBombardmentExtra) {
+                                    _saveDetailsRows.push({ l: 'Bombardeio Mágico', v: '+' + ev.spellBombardmentExtra + ' dano extra por dado máximo (PHB p. 104)' });
+                                }
+                                if (ev.bendLuckSaveUsed) {
+                                    _saveDetailsRows.push({ l: 'Dobrar a Sorte', v: 'Feiticeiro gastou feitiçaria e reação para alterar o TR (PHB p. 103)' });
+                                }
+                                if (ev.hasMagicResistance) {
+                                    _saveDetailsRows.push({ l: 'Resistência à Magia', v: 'Vantagem nos testes de resistência contra magias (MM p. 11)' });
                                 }
 
                                 return {
@@ -52367,7 +52500,34 @@ async function __combatAnimateOneEvent(ev) {
                             if (ev.elevationBonus) _detailsRows.push({ l: 'Desnível', v: (ev.elevationBonus > 0 ? '+' : '') + ev.elevationBonus });
                             if (ev.blessRoll != null && ev.blessRoll > 0) _detailsRows.push({ l: 'Bênção', v: '+' + ev.blessRoll + ' (1d4)' });
                             if (ev.bardicRoll != null && ev.bardicRoll > 0) _detailsRows.push({ l: 'Inspiração Bárdica', v: '+' + ev.bardicRoll });
+                            if (ev.archeryBonus) _detailsRows.push({ l: 'Estilo: Arquearia', v: '+' + ev.archeryBonus + ' na jogada de ataque (PHB p. 72)' });
+                            if (ev.sacredWeaponBonus) _detailsRows.push({ l: 'Arma Sagrada', v: '+' + ev.sacredWeaponBonus + ' carisma no ataque (PHB p. 86)' });
+                            if (ev.powerAttack) _detailsRows.push({ l: 'Ataque Poderoso', v: '-5 no ataque / +10 no dano (PHB p. 167-170)' });
+                            if (ev.sneakAttack) {
+                                var _snVal = '+' + (ev.sneakTotal || 0) + ' (' + (ev.sneakDiceCount || 1) + 'd' + (ev.sneakDieSize || 6) + ')';
+                                _detailsRows.push({ l: 'Ataque Furtivo', v: _snVal + ' (PHB p. 96)' });
+                            }
+                            if (ev.smiteTotal || ev.divineSmite) {
+                                _detailsRows.push({ l: 'Destruição Divina', v: '+' + (ev.smiteTotal || 0) + ' dano radiante (PHB p. 85)' });
+                            }
+                            if (ev.improvedDivineSmiteTotal) {
+                                _detailsRows.push({ l: 'Destruição Divina Aprimorada', v: '+' + ev.improvedDivineSmiteTotal + ' dano radiante (PHB p. 85)' });
+                            }
+                            if (ev.shieldAbsorbed || ev.shieldBlocked) {
+                                _detailsRows.push({ l: 'Escudo Arcano (Reação)', v: '+5 CA bloqueou o ataque (PHB p. 275)' });
+                            }
                             if (ev.dmgType && _dtInfo) _detailsRows.push({ l: 'Tipo de Dano', v: _dtInfo.ico + ' ' + _dtInfo.lb });
+                            if (_isRemImm) {
+                                _detailsRows.push({ l: 'Imunidade a Dano', v: 'Reduz dano de ' + (_dtInfo ? _dtInfo.lb : 'dano') + ' a 0 (PHB p. 197)' });
+                            } else if (_isRemVuln) {
+                                _detailsRows.push({ l: 'Vulnerabilidade', v: 'Dano de ' + (_dtInfo ? _dtInfo.lb : 'dano') + ' duplicado (2×) (PHB p. 197)' });
+                            } else if (_isRemRes) {
+                                var _resReason = 'Resistência a dano (½)';
+                                if (ev.rageResisted) _resReason = 'Fúria Bárbara: resistência a dano físico (PHB p. 48)';
+                                else if (ev.bearTotemResist) _resReason = 'Totem do Urso: resistência a todo dano exceto psíquico (PHB p. 50)';
+                                else if (ev.auraOfWarding) _resReason = 'Aura de Proteção: resistência a dano de magias (PHB p. 87)';
+                                _detailsRows.push({ l: 'Resistência a Dano', v: _resReason + ' (PHB p. 197)' });
+                            }
 
                             return {
                                 title: ev.hit ? (ev.crit ? 'CRÍTICO' : 'Acertou') : 'Errou',
@@ -53129,7 +53289,9 @@ async function __combatAnimateOneEvent(ev) {
             if (scU && scU.t === 'a') scUid = 'ally_' + ev.aIdx;
             else if (scU && scU.t === 'e') scUid = 'enemy_' + ev.aIdx;
         }
-        var scEl = document.querySelector('[data-unit-id="' + scUid + '"]');
+        var scEl = (typeof getUnitTokenEl === 'function' && ev.aIdx != null)
+            ? (getUnitTokenEl(currentState, ev.aIdx) || document.querySelector('[data-unit-id="' + scUid + '"]'))
+            : document.querySelector('[data-unit-id="' + scUid + '"]');
         if (scEl) {
             scEl.classList.add('buff-flash');
             if (typeof spawnSkillImpactLabel === 'function' && kind !== 'summon_attack') {
@@ -53159,7 +53321,9 @@ async function __combatAnimateOneEvent(ev) {
         var csU = currentState && currentState.order ? currentState.order[ev.tIdx] : null;
         if (csU && csU.t === 'p') csUid = 'player';
         else if (csU && csU.t === 'a') csUid = 'ally_' + ev.tIdx;
-        var csEl = document.querySelector('[data-unit-id="' + csUid + '"]');
+        var csEl = (typeof getUnitTokenEl === 'function' && ev.tIdx != null)
+            ? (getUnitTokenEl(currentState, ev.tIdx) || document.querySelector('[data-unit-id="' + csUid + '"]'))
+            : document.querySelector('[data-unit-id="' + csUid + '"]');
         if (csEl) {
             csEl.classList.add(ev.saveSuccess ? 'buff-flash' : 'dodged');
             if (typeof spawnSkillImpactLabel === 'function') {
@@ -53187,7 +53351,9 @@ async function __combatAnimateOneEvent(ev) {
             if (ccU && ccU.t === 'a') ccUid = 'ally_' + _ccIdx;
             else if (ccU && ccU.t === 'e') ccUid = 'enemy_' + _ccIdx;
         }
-        var ccEl = document.querySelector('[data-unit-id="' + ccUid + '"]');
+        var ccEl = (typeof getUnitTokenEl === 'function' && _ccIdx != null)
+            ? (getUnitTokenEl(currentState, _ccIdx) || document.querySelector('[data-unit-id="' + ccUid + '"]'))
+            : document.querySelector('[data-unit-id="' + ccUid + '"]');
         if (ccEl) {
             ccEl.classList.add(kind === 'concentration_lost' ? 'dodged' : 'buff-flash');
             if (typeof spawnSkillImpactLabel === 'function') {
@@ -53235,7 +53401,9 @@ async function __combatAnimateOneEvent(ev) {
             if (_evU && _evU.t === 'a') _evUid = 'ally_' + _evIdx;
             else if (_evU && _evU.t === 'e') _evUid = 'enemy_' + _evIdx;
         }
-        var _evEl = document.querySelector('[data-unit-id="' + _evUid + '"]');
+        var _evEl = (typeof getUnitTokenEl === 'function' && _evIdx != null)
+            ? (getUnitTokenEl(currentState, _evIdx) || document.querySelector('[data-unit-id="' + _evUid + '"]'))
+            : document.querySelector('[data-unit-id="' + _evUid + '"]');
         if (_evEl && typeof spawnSkillImpactLabel === 'function') {
             var _lblTxt = '';
             var _lblTone = 'buff';
