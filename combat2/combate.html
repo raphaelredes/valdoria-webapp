@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T17:02:00Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T17:25:44Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -939,22 +939,32 @@ html body .va-backdrop {
       ESCUDO BRASONADO. Brasão heráldico emergindo do topo + divisor +
       botão primary alto (com tag "Ação Padrão") + secundário tracejado. */
 #intro-choice-popup {
-    background: radial-gradient(ellipse at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.95) 100%);
-    /* PERF #32: disabled blur */ /* backdrop-filter: blur(2px); */
-    /* -webkit-backdrop-filter: blur(2px); */
+    background: radial-gradient(ellipse at center, rgba(14, 10, 8, 0.94) 0%, rgba(6, 4, 3, 0.98) 100%) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding-top: 56px !important;
+    padding-bottom: 24px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    box-sizing: border-box !important;
+    overflow-y: auto !important;
 }
 #intro-choice-popup .iop-card {
     /* Overriding default iop-card — Opção 3 palette */
-    background: radial-gradient(ellipse at top, rgba(196,149,58,0.12) 0%, #2a2118 50%, #1a1510 100%) !important;
-    border: 1px solid rgba(196,149,58,0.4) !important;
+    background: radial-gradient(ellipse at top, rgba(196,149,58,0.14) 0%, #2a2118 50%, #1a1510 100%) !important;
+    border: 1px solid rgba(196,149,58,0.45) !important;
     border-radius: 16px 16px 24px 24px !important;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 40px rgba(196,149,58,0.12) !important;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.85), 0 0 40px rgba(196,149,58,0.15) !important;
     padding: 44px var(--v-space-2xl, 24px) 26px !important;
     max-width: 340px !important;
-    width: calc(100vw - 40px);
-    position: relative;
+    width: min(100%, 340px) !important;
+    margin: auto !important;
+    position: relative !important;
     overflow: visible !important;
     animation: introPopupInBras 0.45s cubic-bezier(0.34,1.56,0.64,1);
+    flex-shrink: 0 !important;
 }
 @keyframes introPopupInBras {
     0% { opacity: 0; transform: scale(0.85) translateY(-14px); }
@@ -35573,11 +35583,8 @@ function render(s) {
     }
 
     if (ph === 'intro' || ph === 'init' || ph === 'init_done') {
-        /* Banner epico apenas no intro */
         if (ph === 'intro') {
-            html += '<div class="epic-banner"><div class="epic-title">COMBATE INICIADO</div><div class="epic-sub">Prepare-se para a batalha</div></div>';
             html += buildAllyIntroLines(s);
-            html += '<div class="sim-setup-bar"><a href="combate-setup-frontend-testes.html">Cenário de testes (frontend)</a></div>';
         } else {
             html += buildTurnQueue(s);
         }
@@ -46770,11 +46777,16 @@ function _clampModalOverlayToViewport(ov, cardEl) {
             cardEl = ov.querySelector('.unit-detail-card, .target-action-menu-sheet, .target-confirm-card, .list-panel-card, .iop-card');
         }
         if (cardEl) {
-            var maxCardH = Math.max(220, Math.floor(availH * 0.82) - 16);
+            var hasDiceMount = !!cardEl.querySelector('.intro-choice-dice-mount');
+            var topClearance = hasDiceMount ? 56 : 16;
+            var maxCardH = Math.max(220, Math.floor(availH * 0.82) - topClearance);
             cardEl.style.setProperty('max-height', maxCardH + 'px', 'important');
             cardEl.style.setProperty('margin-top', 'auto', 'important');
             cardEl.style.setProperty('margin-bottom', 'auto', 'important');
             cardEl.scrollTop = 0;
+            if (hasDiceMount) {
+                ov.style.setProperty('padding-top', '56px', 'important');
+            }
         }
     } catch (_eClamp) {
         /* Fail-safe: regras de CSS padrão garantem fallback limpo */
@@ -46789,7 +46801,8 @@ function mountInGameFrame(el) {
         el.classList.contains('unit-detail-overlay') ||
         el.classList.contains('target-action-menu-overlay') ||
         el.classList.contains('target-confirm-overlay') ||
-        el.classList.contains('list-panel-overlay')
+        el.classList.contains('list-panel-overlay') ||
+        el.classList.contains('iop-overlay')
     )) {
         _clampModalOverlayToViewport(el);
         var _onVpChange = function () {
