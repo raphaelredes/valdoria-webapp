@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T08:16:31Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T08:35:35Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -6416,8 +6416,8 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .etc-actions .action-btn { flex: 1; }
 
 /* Popup de confirmacao de alvo */
-.target-confirm-overlay { background: rgba(15,12,8,.85); display: flex; align-items: center; justify-content: center; z-index: 95000; padding: 20px; animation: udcFadeIn .2s ease; }
-.target-confirm-card { width: 100%; max-width: 320px; padding: var(--v-space-xl, 16px) 18px; background: linear-gradient(180deg, var(--v-bg-raised, #332a22), var(--v-bg, #2a2420)); border: 1px solid #c06a3a; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.7), 0 0 24px rgba(192,106,58,.3); animation: udcPop .3s cubic-bezier(.34,1.56,.64,1); }
+.target-confirm-overlay { background: rgba(15,12,8,.85); display: flex; align-items: center; justify-content: center; z-index: 95000; padding: 12px; animation: udcFadeIn .2s ease; }
+.target-confirm-card { width: 100%; max-width: min(calc(var(--sim-frame-w, 430px) - 20px), calc(100% - 8px)); max-height: min(84dvh, calc(100% - 24px)) !important; min-height: 0 !important; margin: auto !important; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: var(--v-space-lg, 14px) 16px; background: linear-gradient(180deg, var(--v-bg-raised, #332a22), var(--v-bg, #2a2420)); border: 1px solid #c06a3a; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.7), 0 0 24px rgba(192,106,58,.3); animation: udcPop .3s cubic-bezier(.34,1.56,.64,1); box-sizing: border-box; }
 .tcc-title { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: calc(12px * var(--v-font-scale, 1)); color: var(--v-text-dim, #a09484); letter-spacing: 2.5px; text-transform: uppercase; text-align: center; padding-bottom: var(--v-space-md-lg, 10px); border-bottom: 1px solid rgba(192,106,58,.25); margin-bottom: var(--v-space-lg, 12px); }
 .tcc-preview { display: flex; align-items: center; gap: var(--v-space-lg, 12px); padding: var(--v-space-md-lg, 10px) var(--v-space-lg, 12px); background: rgba(15,12,8,.4); border: 1px solid rgba(192,106,58,.3); border-radius: 8px; margin-bottom: 14px; }
 .tcc-ico { font-size: calc(32px * var(--v-font-scale, 1)); filter: drop-shadow(0 0 8px rgba(224,96,64,.4)); }
@@ -34750,6 +34750,13 @@ function bindActions() {
                     '.token-cond-chip, .token-conc-chip, .token-prone-chip, .token-adv-chip, .token-disadv-chip, .token-elev-chip, .token-death-saves, .token-stable-chip'
                 ) : null;
                 if (clickedChip) {
+                    var uObj = null;
+                    if (currentState && currentState.order) {
+                        if (uid === 'player') uObj = currentState.order[currentState.p_idx];
+                        else if (uid && uid.indexOf('ally_') === 0) uObj = currentState.order[parseInt(uid.slice(5), 10)];
+                        else if (uid && uid.indexOf('enemy_') === 0) uObj = currentState.order[parseInt(uid.slice(6), 10)];
+                    }
+                    var uPrefix = uObj ? (uObj.n + ' · ') : '';
                     var cTip = clickedChip.getAttribute('title') || clickedChip.textContent.trim();
                     var cText = clickedChip.textContent.trim();
                     var cTitle = '📜 Regra Tática D&D 5e';
@@ -34767,10 +34774,76 @@ function bindActions() {
                         cTitle = '✦ Estabilizado (PHB p. 197–198)';
                         cTone = 'adv';
                     } else if (clickedChip.classList.contains('token-elev-chip')) {
-                        cTitle = '⛰️ Terreno Elevado (Vantagem Tática)';
+                        cTitle = '⛰️ Terreno Elevado (DMG p. 251)';
                         cTone = 'adv';
                     } else if (clickedChip.classList.contains('token-cond-chip--reaction-spent')) {
                         cTitle = '⚡ Reação Utilizada (PHB p. 190)';
+                        cTone = 'warn';
+                    } else if (clickedChip.classList.contains('token-cond-chip--grappled')) {
+                        cTitle = '✊ Agarrado (PHB p. 290)';
+                        cTone = 'hazard';
+                    } else if (clickedChip.classList.contains('token-cond-chip--restrained')) {
+                        cTitle = '🕸️ Contido (PHB p. 292)';
+                        cTone = 'hazard';
+                    } else if (clickedChip.classList.contains('token-cond-chip--paralyzed')) {
+                        cTitle = '⚡ Paralisado (PHB p. 291)';
+                        cTone = 'hazard';
+                    } else if (clickedChip.classList.contains('token-cond-chip--stun')) {
+                        cTitle = '💫 Atordoado (PHB p. 290)';
+                        cTone = 'hazard';
+                    } else if (clickedChip.classList.contains('token-cond-chip--blind')) {
+                        cTitle = '◉ Cego (PHB p. 290)';
+                        cTone = 'hazard';
+                    } else if (clickedChip.classList.contains('token-cond-chip--poison')) {
+                        cTitle = '▲ Envenenado (PHB p. 292)';
+                        cTone = 'hazard';
+                    } else if (clickedChip.classList.contains('token-cond-chip--frightened')) {
+                        cTitle = '🚫 Amedrontado (PHB p. 290)';
+                        cTone = 'hazard';
+                    } else if (clickedChip.classList.contains('token-cond-chip--charmed')) {
+                        cTitle = '✦ Enfeitiçado (PHB p. 291)';
+                        cTone = 'hazard';
+                    } else if (clickedChip.classList.contains('token-cond-chip--petrified')) {
+                        cTitle = '🗿 Petrificado (PHB p. 291)';
+                        cTone = 'hazard';
+                    } else if (clickedChip.classList.contains('token-cond-chip--incapacitated')) {
+                        cTitle = '🚫 Incapacitado (PHB p. 290)';
+                        cTone = 'hazard';
+                    } else if (clickedChip.classList.contains('token-cond-chip--surprised')) {
+                        cTitle = '⚡ Surpreso (PHB p. 189)';
+                        cTone = 'hazard';
+                    } else if (clickedChip.classList.contains('token-cond-chip--bane')) {
+                        cTitle = '▼ Perdição (-1d4, PHB p. 216)';
+                        cTone = 'hazard';
+                    } else if (clickedChip.classList.contains('token-cond-chip--invisible')) {
+                        cTitle = '✦ Invisível (PHB p. 291)';
+                        cTone = 'adv';
+                    } else if (clickedChip.classList.contains('token-cond-chip--dodge')) {
+                        cTitle = '🛡️ Esquiva (PHB p. 192)';
+                        cTone = 'adv';
+                    } else if (clickedChip.classList.contains('token-cond-chip--disengage')) {
+                        cTitle = '💨 Desengajado (PHB p. 192)';
+                        cTone = 'adv';
+                    } else if (clickedChip.classList.contains('token-cond-chip--rage')) {
+                        cTitle = '🔥 Fúria Bárbara (PHB p. 48)';
+                        cTone = 'adv';
+                    } else if (clickedChip.classList.contains('token-cond-chip--shield')) {
+                        cTitle = '⛨ Escudo Arcano (+5 CA, PHB p. 275)';
+                        cTone = 'adv';
+                    } else if (clickedChip.classList.contains('token-cond-chip--bless')) {
+                        cTitle = '✦ Bênção (+1d4, PHB p. 219)';
+                        cTone = 'adv';
+                    } else if (clickedChip.classList.contains('token-cond-chip--paladin-aura')) {
+                        cTitle = '⛨ Aura de Proteção (PHB p. 85)';
+                        cTone = 'adv';
+                    } else if (clickedChip.classList.contains('token-cond-chip--wildshape')) {
+                        cTitle = '🐾 Forma Selvagem (PHB p. 66)';
+                        cTone = 'adv';
+                    } else if (clickedChip.classList.contains('token-cond-chip--regen')) {
+                        cTitle = '🌿 Regeneração Ativa';
+                        cTone = 'adv';
+                    } else if (clickedChip.classList.contains('token-cond-chip--more')) {
+                        cTitle = '📜 Condições Adicionais';
                         cTone = 'warn';
                     } else if (clickedChip.classList.contains('token-cond-chip')) {
                         cTitle = '✨ ' + (cText || 'Condição D&D 5e');
@@ -34784,15 +34857,24 @@ function bindActions() {
                                  clickedChip.classList.contains('token-cond-chip--incapacitated') ||
                                  clickedChip.classList.contains('token-cond-chip--bane')) ? 'hazard' : 'adv';
                     }
+                    var previewChips = [{ kind: (cTone === 'hazard' ? 'danger' : (cTone === 'warn' ? 'warn' : 'good')), text: cTip || cText }];
+                    if (clickedChip.classList.contains('token-cond-chip--more') && uObj && Array.isArray(uObj.se) && uObj.se.length) {
+                        for (var _sei = 0; _sei < uObj.se.length; _sei++) {
+                            var _seObj = uObj.se[_sei];
+                            if (_seObj && (_seObj.n || _seObj.dndCondition)) {
+                                previewChips.push({ kind: (_seObj.kind === 'buff' ? 'good' : 'warn'), text: _seObj.n || _seObj.dndCondition });
+                            }
+                        }
+                    }
                     showBfTacticalPreviewBar({
                         tone: cTone,
-                        title: cTitle,
-                        chips: [{ kind: (cTone === 'hazard' ? 'danger' : (cTone === 'warn' ? 'warn' : 'good')), text: cTip || cText }],
-                        primaryLabel: '👁 Ver Ficha',
-                        onPrimary: function () {
+                        title: uPrefix + cTitle,
+                        chips: previewChips,
+                        primaryLabel: uid ? '👁 Ver Ficha' : null,
+                        onPrimary: uid ? function () {
                             hideBfTacticalPreviewBar();
                             openUnitDetail(uid);
-                        }
+                        } : null
                     });
                     return;
                 }
@@ -35185,20 +35267,6 @@ function bindActions() {
                 });
             });
         })(tacChips[tci]);
-    }
-    /* Chips de condição dos tokens (.token-cond-chip, .token-conc-chip, .token-prone-chip): toque abre a ficha da criatura */
-    var condChips = document.querySelectorAll('.token-cond-chip, .token-conc-chip, .token-prone-chip');
-    for (var cci = 0; cci < condChips.length; cci++) {
-        (function (chipEl) {
-            chipEl.addEventListener('click', function (ev) {
-                ev.stopPropagation();
-                var tokenEl = chipEl.closest('.hex-token');
-                var uid = tokenEl ? tokenEl.getAttribute('data-unit-id') : null;
-                if (uid && typeof openUnitDetail === 'function') {
-                    openUnitDetail(uid);
-                }
-            });
-        })(condChips[cci]);
     }
     /* Linhas de loot clicáveis na tela de vitória (abre popup com descrição) */
     var lootRows = document.querySelectorAll('.rr-loot-row--clickable');
@@ -41320,9 +41388,15 @@ function showTargetConfirm(tgtIdx) {
     } else if (isFlanked) {
         advBadge = ' <span class="badge adv" style="background:#1b4d24;color:#c6f6d5;border:1px solid #2ecc71;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;" title="Flanqueamento D&D 5e (DMG p. 251): Aliado em posição oposta">▲ FLANQUEADO (VANT)</span>';
     } else if (advMode === 'advantage') {
-        advBadge = ' <span class="badge adv" style="background:#1b4d24;color:#c6f6d5;border:1px solid #2ecc71;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;">▲ VANTAGEM</span>';
+        var _advShort = (advDetails.advReasons && advDetails.advReasons[0])
+            ? (' (' + advDetails.advReasons[0].replace(/ \(PHB.*\)/, '') + ')')
+            : '';
+        advBadge = ' <span class="badge adv" style="background:#1b4d24;color:#c6f6d5;border:1px solid #2ecc71;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;" title="' + escHtml((advDetails.advReasons || []).join('; ') || 'Vantagem') + '">▲ VANTAGEM' + escHtml(_advShort) + '</span>';
     } else if (advMode === 'disadvantage') {
-        advBadge = ' <span class="badge dis" style="background:#4a1515;color:#fecaca;border:1px solid #e74c3c;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;">▼ DESVANTAGEM</span>';
+        var _disShort = (advDetails.disReasons && advDetails.disReasons[0])
+            ? (' (' + advDetails.disReasons[0].replace(/ \(PHB.*\)/, '') + ')')
+            : '';
+        advBadge = ' <span class="badge dis" style="background:#4a1515;color:#fecaca;border:1px solid #e74c3c;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;" title="' + escHtml((advDetails.disReasons || []).join('; ') || 'Desvantagem') + '">▼ DESVANTAGEM' + escHtml(_disShort) + '</span>';
     }
     if (elevMod.bonus > 0) {
         advBadge += ' <span class="badge adv" style="background:#1b3a4d;color:#bee3f8;border:1px solid #63b3ed;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;" title="Terreno Elevado (+2 no ataque à distância)">⛰️ +' + elevMod.bonus + ' ELEV.</span>';
