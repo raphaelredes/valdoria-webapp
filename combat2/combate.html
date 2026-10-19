@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T12:55:45Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T13:42:20Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -6068,6 +6068,149 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
 .combat-msg-card.dmg.crit { border-color: #ff3333; box-shadow: 0 10px 40px rgba(0,0,0,.7), 0 0 36px rgba(255,51,51,.5); }
 .combat-msg-card.dmg.crit .combat-msg-text { color: #ff6040; text-shadow: 0 0 20px rgba(255,51,51,.9), 0 0 40px rgba(255,51,51,.4), 0 1px 3px rgba(0,0,0,.9); }
 @keyframes critShimmer { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.3); } }
+
+/* Modal de Regras e Economia de Turno D&D 5e (◆ Ação, ▲ Bônus, ⚡ Reação) */
+.dnd-res-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(15,12,8,.86), rgba(8,6,4,.96));
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 102000 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  animation: diceOvIn .25s ease;
+}
+.dnd-res-modal-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 360px;
+  max-height: min(85vh, 520px);
+  overflow-y: auto;
+  background: linear-gradient(180deg, rgba(38,30,24,.97), rgba(16,13,10,.99));
+  border: 1.5px solid var(--v-gold, #c4953a);
+  border-radius: var(--v-radius-lg, 12px);
+  padding: 14px 16px;
+  box-shadow: 0 12px 36px rgba(0,0,0,.85), 0 0 20px rgba(196,149,58,.22);
+  color: var(--v-text, #d4c8b0);
+  font-family: var(--v-font, 'MedievalSharp'), serif;
+  box-sizing: border-box;
+}
+.dnd-res-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid rgba(196,149,58,.3);
+  padding-bottom: 6px;
+}
+.dnd-res-modal-title {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--v-gold, #c4953a);
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+.dnd-res-modal-close {
+  background: transparent;
+  border: none;
+  color: #a09484;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+.dnd-res-modal-close:hover {
+  color: #ffd700;
+}
+.dnd-res-modal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  letter-spacing: 0.5px;
+}
+.dnd-res-modal-badge--avail {
+  background: rgba(34, 197, 94, 0.16);
+  border: 1px solid rgba(34, 197, 94, 0.6);
+  color: #86efac;
+  text-shadow: 0 0 6px rgba(34,197,94,0.4);
+}
+.dnd-res-modal-badge--spent {
+  background: rgba(160, 148, 132, 0.12);
+  border: 1px solid rgba(160, 148, 132, 0.4);
+  color: #a09484;
+  text-decoration: line-through;
+}
+.dnd-res-modal-section {
+  background: rgba(22, 17, 13, 0.65);
+  border: 1px solid rgba(196, 149, 58, 0.22);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.dnd-res-modal-sec-title {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #ffd700;
+  margin-bottom: 4px;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.dnd-res-modal-pill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 5px;
+}
+.dnd-res-modal-pill {
+  background: rgba(35, 27, 20, 0.85);
+  border: 1px solid rgba(196, 149, 58, 0.35);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 10px;
+  color: #e8d8be;
+}
+.dnd-res-modal-alert {
+  background: rgba(234, 179, 8, 0.12);
+  border: 1px solid rgba(234, 179, 8, 0.55);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 10.5px;
+  line-height: 1.35;
+}
+.dnd-res-modal-btn {
+  background: linear-gradient(180deg, #3d2d1e 0%, #261a10 100%);
+  border: 1.5px solid var(--v-gold, #c4953a);
+  border-radius: 6px;
+  padding: 7px 14px;
+  color: #ffd700;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  margin-top: 4px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.dnd-res-modal-btn:hover {
+  background: linear-gradient(180deg, #4d3926 0%, #342416 100%);
+  border-color: #ffd700;
+}
 
 /* Alvos selecionaveis (modo de selecao de ataque) */
 .cell.occupied.enemy.selectable { cursor: crosshair; animation: tgtPulse 1s ease-in-out infinite; }
@@ -23565,6 +23708,12 @@ function simClassifyLogLineDnd5e(ln) {
     if (/CRITA|CRÍTICO|NAT 20/i.test(ln)) {
         return { cat: 'atk', badge: '<span style="background:rgba(212,175,55,0.22);border:1px solid #ffd700;color:#ffd700;border-radius:3px;padding:0 4px;font-size:8.5px;font-weight:700;margin-right:4px;">★ CRÍTICO</span>' };
     }
+    if (/AÇÃO LENDÁRIA|RESISTÊNCIA LENDÁRIA/i.test(ln)) {
+        return { cat: 'cond', badge: '<span style="background:rgba(255,165,0,0.22);border:1px solid #ffa500;color:#ffd700;border-radius:3px;padding:0 4px;font-size:8.5px;font-weight:700;margin-right:4px;">👑 LENDÁRIO</span>' };
+    }
+    if (/Sentinela|Resposta|Retaliação|Oportunidade|Reação/i.test(ln)) {
+        return { cat: 'cond', badge: '<span style="background:rgba(52,152,219,0.22);border:1px solid #3498db;color:#85c1e9;border-radius:3px;padding:0 4px;font-size:8.5px;font-weight:700;margin-right:4px;">⚡ REAÇÃO</span>' };
+    }
     if (/acerta|ataca|golpeia|dispara|morde|arranha|dano/i.test(ln) && !/cura|recupera/i.test(ln)) {
         return { cat: 'atk', badge: '<span style="background:rgba(231,76,60,0.18);border:1px solid rgba(231,76,60,0.45);color:#ff8a80;border-radius:3px;padding:0 4px;font-size:8.5px;font-weight:700;margin-right:4px;">⚔ ATQ</span>' };
     }
@@ -24850,6 +24999,7 @@ function showBfTacticalPreviewBar(config) {
         if (config.infoLabel && typeof config.onInfo === 'function') {
             actionsHtml += '<button type="button" class="bf-tpb-btn bf-tpb-btn--info" data-tpb-act="info" aria-label="Detalhes táticos">' + escHtml(config.infoLabel) + '</button>';
         }
+        actionsHtml += '<button type="button" class="bf-tpb-btn bf-tpb-btn--close" data-tpb-act="close" aria-label="Desmarcar alvo">✕</button>';
         actionsHtml += '</div>';
 
         tshPreview.innerHTML =
@@ -24866,6 +25016,20 @@ function showBfTacticalPreviewBar(config) {
 
         bindTpbBtn(tshPreview, '[data-tpb-act="primary"]', config.onPrimary);
         bindTpbBtn(tshPreview, '[data-tpb-act="info"]', config.onInfo);
+        bindTpbBtn(tshPreview, '[data-tpb-act="close"]', function () {
+            if (typeof config.onClose === 'function') {
+                config.onClose();
+            } else {
+                _previewAimTargetIdx = null;
+                document.querySelectorAll('.token--aim-preview').forEach(function (el) {
+                    el.classList.remove('token--aim-preview');
+                });
+                if (typeof drawTacticalAimVector === 'function') {
+                    drawTacticalAimVector(null, null, null, null);
+                }
+                hideBfTacticalPreviewBar();
+            }
+        });
         return;
     }
 
@@ -31221,7 +31385,22 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
     if (reductionMeta.multiSeqText) {
         tacticalPills.push('<span class="dmg-pill dmg-pill--buff">⚔️ ' + escHtml(reductionMeta.multiSeqText) + '</span>');
     }
-    if (reductionMeta.oa) {
+    if (reductionMeta.reactionKind && reductionMeta.reactionKind !== 'attack') {
+        var _rkLabel = '⚡ Reação (D&D 5e)';
+        if (reductionMeta.reactionKind === 'reaction_sentinel') _rkLabel = '⚡ Reação (Sentinela)';
+        else if (reductionMeta.reactionKind === 'reaction_riposte') _rkLabel = '⚔️ Reação (Resposta)';
+        else if (reductionMeta.reactionKind === 'reaction_retaliation') _rkLabel = '🔥 Reação (Retaliação)';
+        else if (reductionMeta.reactionKind === 'reaction_giant_killer') _rkLabel = '🏹 Reação (Matador de Gigantes)';
+        else if (reductionMeta.reactionKind === 'reaction_opportunist') _rkLabel = '🥋 Reação (Oportunista)';
+        else if (reductionMeta.reactionKind === 'reaction_soul_of_vengeance') _rkLabel = '⚖️ Reação (Alma da Vingança)';
+        else if (reductionMeta.reactionKind === 'reaction_stand_against_the_tide') _rkLabel = '🌊 Reação (Contra a Maré)';
+        else if (reductionMeta.reactionKind === 'whirlwind_sub') _rkLabel = '🌪️ Ataque Giratório';
+        else if (reductionMeta.reactionKind === 'volley_sub') _rkLabel = '🏹 Salva de Flechas';
+        else if (reductionMeta.reactionKind === 'horde_breaker_sub') _rkLabel = '⚔️ Quebrador de Hordas';
+        else if (reductionMeta.reactionKind === 'split_enchantment_sub') _rkLabel = '✨ Encantamento Dividido';
+        else if (reductionMeta.oa || reductionMeta.reactionKind === 'oa' || reductionMeta.reactionKind === 'reaction_oa') _rkLabel = '⚡ Reação (Oportunidade)';
+        tacticalPills.push('<span class="dmg-pill dmg-pill--type">' + _rkLabel + '</span>');
+    } else if (reductionMeta.oa) {
         tacticalPills.push('<span class="dmg-pill dmg-pill--type">⚡ Reação (Oportunidade)</span>');
     }
     if (reductionMeta.stepTrackerHtml) {
@@ -31275,8 +31454,20 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
     if (reductionMeta && reductionMeta.multiSeqText) {
         rowsHtml += '<div class="dmg-math-breakdown-row"><span>Sequência de Ataque:</span><strong>' + escHtml(reductionMeta.multiSeqText) + '</strong></div>';
     }
-    if (reductionMeta && reductionMeta.oa) {
-        rowsHtml += '<div class="dmg-math-breakdown-row"><span>Economia de Ação:</span><strong>Ataque de Oportunidade (Reação, PHB p. 195)</strong></div>';
+    if (reductionMeta && (reductionMeta.reactionKind || reductionMeta.oa)) {
+        var _rkRule = 'Ataque de Oportunidade (Reação, PHB p. 195)';
+        if (reductionMeta.reactionKind === 'reaction_sentinel') _rkRule = 'Sentinela (Reação quando inimigo ataca aliado adjacente, PHB p. 169)';
+        else if (reductionMeta.reactionKind === 'reaction_riposte') _rkRule = 'Resposta (Reação com Manobra quando inimigo erra ataque corpo a corpo, PHB p. 74)';
+        else if (reductionMeta.reactionKind === 'reaction_retaliation') _rkRule = 'Retaliação (Reação quando sofre dano enquanto em Fúria, PHB p. 50)';
+        else if (reductionMeta.reactionKind === 'reaction_giant_killer') _rkRule = 'Matador de Gigantes (Reação quando criatura Grande ou maior erra ataque, PHB p. 93)';
+        else if (reductionMeta.reactionKind === 'reaction_opportunist') _rkRule = 'Oportunista (Reação quando criatura é atingida por outro atacante, PHB p. 80)';
+        else if (reductionMeta.reactionKind === 'reaction_soul_of_vengeance') _rkRule = 'Alma da Vingança (Reação quando alvo do Voto ataca outro alvo, PHB p. 88)';
+        else if (reductionMeta.reactionKind === 'reaction_stand_against_the_tide') _rkRule = 'Contra a Maré (Reação redirecionando ataque inimigo que errou, PHB p. 93)';
+        else if (reductionMeta.reactionKind === 'whirlwind_sub') _rkRule = 'Ataque Giratório (Ação atacando todos os inimigos a até 1,5m, PHB p. 93)';
+        else if (reductionMeta.reactionKind === 'volley_sub') _rkRule = 'Salva de Flechas (Ação atacando alvos em cubo de 3m à distância, PHB p. 93)';
+        else if (reductionMeta.reactionKind === 'horde_breaker_sub') _rkRule = 'Quebrador de Hordas (1 ataque adicional contra criatura a 1,5m do alvo, PHB p. 93)';
+        else if (reductionMeta.reactionKind === 'split_enchantment_sub') _rkRule = 'Encantamento Dividido (Magia de alvo único alvejando dois alvos, PHB p. 117)';
+        rowsHtml += '<div class="dmg-math-breakdown-row"><span>Economia de Ação / Regra:</span><strong>' + escHtml(_rkRule) + '</strong></div>';
     }
     rowsHtml += '<div class="dmg-math-breakdown-row"><span>Dados de Dano:</span><strong>' + rolls.length + 'd' + die + ' [' + rolls.join('+') + '] = ' + sumDice + '</strong></div>';
     var baseMod = (typeof reductionMeta.baseMod === 'number') ? reductionMeta.baseMod : mod;
@@ -38644,58 +38835,156 @@ function onBtnClick(ev) {
         ).then(function (ok) { if (ok) void passDownedPlayerSlot(); else render(currentState); });
         return;
     }
+function openDndResourceInfoModal(resKind, p) {
+    p = p || (currentState && currentState.order ? currentState.order[currentState.p_idx] : null);
+    var actionUsed = p ? !!p.actionSpent : false;
+    var baUsed = p ? !!p.bonusActionSpent : false;
+    var reactionUsed = p ? !!p.reactionSpent : false;
+    var baWasSpell = p ? !!p.bonusActionWasSpell : false;
+
+    var ov = document.createElement('div');
+    ov.className = 'dnd-res-modal-overlay';
+
+    var card = document.createElement('div');
+    card.className = 'dnd-res-modal-card';
+
+    var title = '';
+    var glyph = '';
+    var isSpent = false;
+    var statusText = '';
+    var ruleText = '';
+    var optionsList = [];
+    var resetText = '';
+    var alertBox = null;
+
+    if (resKind === 'action') {
+        glyph = '◆';
+        title = 'Ação do Turno (D&D 5e)';
+        isSpent = actionUsed;
+        statusText = actionUsed ? 'GASTA NESTE TURNO' : 'DISPONÍVEL';
+        ruleText = 'Conforme o Livro do Jogador (PHB p. 189, 192), cada combatente possui 1 ação principal em seu turno. A ação é o recurso primário para desferir ataques, conjurar a grande maioria das magias ou realizar manobras táticas.';
+        optionsList = [
+            '⚔️ Atacar (Arma corpo a corpo ou à distância)',
+            '✨ Conjurar Magia (Tempo de 1 Ação)',
+            '🏃 Disparada (Dobra o deslocamento no turno)',
+            '💨 Desengajar (Movimento livre de ataques de oportunidade)',
+            '🛡️ Esquivar (Ataques contra você têm Desvantagem)',
+            '🤝 Ajudar (Concede Vantagem ao aliado adjacente)',
+            '👤 Esconder-se (Teste de Furtividade vs Percepção Passiva)',
+            '✊ Empurrar (Derrubar Caído ou empurrar 1,5m em teste de Força)',
+            '🎒 Usar Objeto (Item, poção ou dispositivo da mochila)'
+        ];
+        resetText = 'Reseta automaticamente no início de cada um dos seus turnos.';
+        if (baWasSpell) {
+            alertBox = {
+                title: '⚡ Regra de Magia com Ação Bônus (PHB p. 202)',
+                body: 'Você conjurou uma magia com Ação Bônus neste turno.<br><br>' +
+                      '<strong style="color:#86efac;">Permitido como Ação:</strong> Atacar com arma, Usar item da Mochila, Esquivar, Fugir, Passar turno ou conjurar um <strong>TRUQUE</strong> com tempo de 1 Ação.<br>' +
+                      '<strong style="color:#f87171;">Bloqueado:</strong> Conjurar qualquer outra magia de 1º círculo ou superior.'
+            };
+        }
+    } else if (resKind === 'bonus') {
+        glyph = '▲';
+        title = 'Ação Bônus (D&D 5e)';
+        isSpent = baUsed;
+        statusText = baUsed ? 'GASTA NESTE TURNO' : 'DISPONÍVEL';
+        ruleText = 'Conforme o Livro do Jogador (PHB p. 189), você só pode realizar uma Ação Bônus quando uma característica de classe, magia ou efeito especial conceder explicitamente esse uso adicional no turno.';
+        optionsList = [
+            '🗡️ Combate com Duas Armas (Ataque bônus com arma leve secundária)',
+            '✨ Magias Rápidas (Palavra de Cura, Passo Brumoso, Marca do Caçador)',
+            '🎭 Ladino: Ação Ardilosa (Disparada, Desengajar, Esconder)',
+            '🥋 Monge: Artes Marciais / Passo do Vento / Rajada de Golpes',
+            '⚔️ Guerreiro: Retomar o Fôlego (Cura de 1d10 + Nível)',
+            '🪓 Bárbaro: Entrar em Fúria (Rage)',
+            '🎵 Bardo: Conceder Inspiração de Bardo a um aliado'
+        ];
+        resetText = 'Limite de 1 Ação Bônus por turno. Reseta no início do seu próximo turno.';
+        if (baWasSpell) {
+            alertBox = {
+                title: '✨ Magia Conjurada como Ação Bônus',
+                body: 'Esta Ação Bônus foi utilizada para conjurar uma magia. Pela regra D&D 5e (PHB p. 202), sua ação principal do turno fica restrita a truques, ataques ou manobras físicas.'
+            };
+        }
+    } else if (resKind === 'reaction') {
+        glyph = '⚡';
+        title = 'Reação de Combate (D&D 5e)';
+        isSpent = reactionUsed;
+        statusText = reactionUsed ? 'GASTA NESTA RODADA' : 'DISPONÍVEL (PRONTA)';
+        ruleText = 'Conforme o Livro do Jogador (PHB p. 190), uma Reação é uma resposta instantânea a um gatilho específico de combate. Diferente de Ações normais, uma Reação pode ocorrer no seu turno ou no turno de QUALQUER outro combatente.';
+        optionsList = [
+            '⚔️ Ataque de Oportunidade (Inimigo se afasta do seu alcance sem desengajar)',
+            '🛡️ Escudo Arcano (+5 CA contra ataque iminente ou Mísseis Mágicos)',
+            '🔥 Repreensão Infernal (Reage imediatamente ao sofrer dano)',
+            '💨 Esquiva Sobrenatural (Ladino Nv 5+: reduz dano à metade)',
+            '✋ Desviar Projéteis (Monge Nv 3+: absorve dano de disparos)',
+            '🚫 Contramágica (Interrompe magia inimiga a até 18m)',
+            '🛡️ Estilo de Combate: Proteção (Impõe desvantagem contra aliado adjacente)'
+        ];
+        resetText = 'Limite rigoroso de 1 Reação por RODADA. Reseta no início do seu próximo turno.';
+    }
+
+    var badgeCls = isSpent ? 'dnd-res-modal-badge--spent' : 'dnd-res-modal-badge--avail';
+
+    var html = '<div class="dnd-res-modal-header">' +
+        '<div style="display:flex;align-items:center;gap:6px;">' +
+            '<span style="font-size:16px;color:var(--v-gold,#c4953a);">' + glyph + '</span>' +
+            '<div class="dnd-res-modal-title">' + escHtml(title) + '</div>' +
+        '</div>' +
+        '<button type="button" class="dnd-res-modal-close" data-close="1" aria-label="Fechar">✕</button>' +
+    '</div>';
+
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">' +
+        '<span style="font-size:10px;color:var(--v-text-dim,#a09484);font-family:var(--v-font-display,serif);text-transform:uppercase;letter-spacing:1px;">Status no Turno:</span>' +
+        '<span class="dnd-res-modal-badge ' + badgeCls + '">' + (isSpent ? '✗ ' : '✓ ') + escHtml(statusText) + '</span>' +
+    '</div>';
+
+    if (alertBox) {
+        html += '<div class="dnd-res-modal-alert">' +
+            '<div style="font-weight:700;color:#fde047;font-family:var(--v-font-display,serif);margin-bottom:3px;">' + escHtml(alertBox.title) + '</div>' +
+            '<div style="color:#fef08a;">' + alertBox.body + '</div>' +
+        '</div>';
+    }
+
+    html += '<div class="dnd-res-modal-section">' +
+        '<div class="dnd-res-modal-sec-title">📜 Regra Oficial D&D 5e</div>' +
+        '<div>' + escHtml(ruleText) + '</div>' +
+    '</div>';
+
+    html += '<div class="dnd-res-modal-section">' +
+        '<div class="dnd-res-modal-sec-title">🎯 Usos & Ações Típicas</div>' +
+        '<div class="dnd-res-modal-pill-list">';
+    optionsList.forEach(function (opt) {
+        html += '<div class="dnd-res-modal-pill">' + escHtml(opt) + '</div>';
+    });
+    html += '</div></div>';
+
+    html += '<div class="dnd-res-modal-section">' +
+        '<div class="dnd-res-modal-sec-title">⏱️ Ciclo de Recuperação</div>' +
+        '<div style="color:#86efac;font-weight:600;">' + escHtml(resetText) + '</div>' +
+    '</div>';
+
+    html += '<button type="button" class="dnd-res-modal-btn" data-close="1">← Voltar ao Combate</button>';
+
+    setHTML(card, html);
+    ov.appendChild(card);
+    mountInGameFrame(ov);
+
+    var closeFn = function () { ov.remove(); };
+    ov.addEventListener('click', function (e) {
+        if (e.target === ov) closeFn();
+    });
+    card.querySelectorAll('[data-close]').forEach(function (el) {
+        el.addEventListener('click', closeFn);
+    });
+}
+
     /* V1 Invocações Phase 4 (2026-04-19, b) — popup de regra D&D pra cada pílula
        de recurso. PHB references diretas. Símbolos geométricos no título. */
     if (act === 'dnd-res-info') {
         var resKind = b.dataset.res;
         var sDr = currentState;
         var pDr = sDr && sDr.order ? sDr.order[sDr.p_idx] : null;
-        var info;
-        if (resKind === 'action') {
-            /* Refinado 2026-04-19 (c): texto explícito que PHB p.202 só restringe
-               MAGIAS leveled — outras ações (Atacar, Mochila, Esquivar, Fugir,
-               Passar) continuam permitidas mesmo com a regra ativa. */
-            var phbBlock = pDr && pDr.bonusActionWasSpell
-                ? '<p style="color:#ffe080"><strong>Regra de Conjuração de Ação Bônus:</strong></p>' +
-                  '<p style="color:#ffe080">Você conjurou uma magia como Ação Bônus neste turno. Como sua ação principal:</p>' +
-                  '<p style="color:#a0e8a0"><strong>Permitido:</strong> Atacar com arma, Usar item da Mochila, Esquivar, Fugir, Passar turno, ou conjurar um <strong>TRUQUE</strong>.</p>' +
-                  '<p style="color:#e0a0a0"><strong>Bloqueado:</strong> Conjurar qualquer outra magia de 1º círculo ou superior (Cura, Bola de Fogo, Bênção, etc.).</p>' +
-                  '<p style="color:var(--v-text-dim, #a09484); font-size:0.95em">A restrição reseta no início do seu próximo turno.</p>'
-                : '';
-            info = {
-                title: '◆ Ação',
-                rule: 'Cada combatente tem 1 ação por turno: Atacar, Conjurar Magia, Esquivar, Desengajar, Ajudar, Esconder-se, Empurrar, Procurar, Usar Objeto ou habilidades de classe.',
-                state: pDr && pDr.actionSpent ? 'GASTA neste turno (reseta no início do próximo).' : 'DISPONÍVEL.',
-                extra: phbBlock
-            };
-        } else if (resKind === 'bonus') {
-            info = {
-                title: '▲ Ação Bônus',
-                rule: 'Disponível apenas quando uma habilidade de classe ou magia específica conceder. Ex.: Atacar com arma secundária (combate com duas armas), Inspiração de Bardo, Comandar Arma Espiritual, Ação Astuta do Ladino, etc.',
-                state: pDr && pDr.bonusActionSpent ? 'GASTA neste turno (reseta no início do próximo).' : 'DISPONÍVEL.',
-                extra: pDr && pDr.bonusActionWasSpell ? '<p>Esta ação bônus foi uma <strong>conjuração de magia</strong> (limita a ação principal a truques).</p>' : ''
-            };
-        } else if (resKind === 'reaction') {
-            info = {
-                title: '⚡ Reação',
-                rule: 'Resposta instantânea a um gatilho de combate; pode ocorrer no seu turno ou no de outro combatente.<br><br>' +
-                      '<strong>Regras:</strong><br>' +
-                      '· 1 reação por RODADA (não por turno).<br>' +
-                      '· Reseta no INÍCIO do seu próximo turno.<br>' +
-                      '· Se interrompe outra criatura, ela continua o turno após a reação.<br><br>' +
-                      '<strong>Gatilhos comuns:</strong><br>' +
-                      '· Ataque de Oportunidade: inimigo se afasta da sua zona de ameaça.<br>' +
-                      '· Escudo Arcano: alvejado por ataque ou Mísseis Mágicos → +5 CA até o início do seu próximo turno.<br>' +
-                      '· Contramágica: outro conjurador dispara uma magia diante de seus olhos.<br>' +
-                      '· Proteção: aliado sofre ataque próximo → impõe desvantagem ao agressor.<br>' +
-                      '· Castigo Divino (Paladino): descarrega poder radiante após um ataque que acerta.',
-                state: pDr && pDr.reactionSpent ? 'GASTA nesta rodada (reseta no início do seu próximo turno).' : 'DISPONÍVEL — pronta para interceptar.',
-                extra: ''
-            };
-        }
-        if (info && typeof showMessage === 'function') {
-            showMessage(info.title, 'info', info.rule + '<br><br><strong>Status:</strong> ' + info.state + (info.extra || ''));
-        }
+        openDndResourceInfoModal(resKind, pDr);
         return;
     }
     /* Barra de deslocamento D&D 5e: toque exibe status e regras táticas na preview bar */
@@ -44232,18 +44521,99 @@ function showAllySpellOverlay(actor, target, dart, s, skill, themeKey) {
             titleEl.className = 'drl-rollup mm-summary-title mm-summary-title--' + themeSuffix;
             titleEl.textContent = lbl.title + (dart.dmg ? ' — ' + dart.dmg + ' PV' : '');
             resultEl.appendChild(titleEl);
-            if (dart.rolls.length) {
-                var row = document.createElement('div');
-                row.className = 'drl-rollup mm-summary-row';
-                row.textContent = '▸ ' + (target.n || '?') + ' (' + dart.rolls.join(' + ') +
-                    (dart.flat ? ' + ' + dart.flat : '') + ') = ' + dart.dmg + ' PV curados';
-                resultEl.appendChild(row);
-            } else {
-                var rowEff = document.createElement('div');
-                rowEff.className = 'drl-rollup mm-summary-row';
-                rowEff.textContent = '▸ ' + (target.n || '?') + ' recebe o efeito.';
-                resultEl.appendChild(rowEff);
+
+            var structCard = document.createElement('div');
+            structCard.className = 'drl-structured-card';
+
+            var kicker = document.createElement('div');
+            kicker.className = 'drl-structured-kicker';
+            kicker.textContent = themeKey === 'holy'
+                ? '✨ Evocação Divina · Restauração de Pontos de Vida (PHB p. 197)'
+                : (themeKey === 'radiant'
+                    ? '☀️ Abjuração Sagrada · Bênção Celestial (PHB p. 219)'
+                    : '🔮 Abjuração Arcana · Barreira Protetora (PHB p. 275)');
+            structCard.appendChild(kicker);
+
+            var metrics = document.createElement('div');
+            metrics.className = 'drl-structured-metrics';
+            if (dart.rolls && dart.rolls.length > 0) {
+                var cellRoll = document.createElement('div');
+                cellRoll.className = 'drl-structured-cell';
+                cellRoll.innerHTML = '<span class="drl-structured-lbl">Rolagem</span><span class="drl-structured-val">' + dart.rolls.length + 'd' + dart.d + ' [' + dart.rolls.join('+') + ']' + '</span>';
+                metrics.appendChild(cellRoll);
+
+                if (dart.flat) {
+                    var cellMod = document.createElement('div');
+                    cellMod.className = 'drl-structured-cell';
+                    cellMod.innerHTML = '<span class="drl-structured-lbl">Modificador</span><span class="drl-structured-val">+' + dart.flat + '</span>';
+                    metrics.appendChild(cellMod);
+                }
+
+                var cellTotal = document.createElement('div');
+                cellTotal.className = 'drl-structured-cell';
+                cellTotal.innerHTML = '<span class="drl-structured-lbl">Cura Total</span><span class="drl-structured-val" style="color:#86efac;">+' + dart.dmg + ' PV</span>';
+                metrics.appendChild(cellTotal);
             }
+
+            var cellTarget = document.createElement('div');
+            cellTarget.className = 'drl-structured-cell';
+            cellTarget.innerHTML = '<span class="drl-structured-lbl">Alvo</span><span class="drl-structured-val">' + escHtml(target ? target.n : 'Alvo') + '</span>';
+            metrics.appendChild(cellTarget);
+            structCard.appendChild(metrics);
+
+            var pillsWrap = document.createElement('div');
+            pillsWrap.className = 'drl-structured-pills';
+            var pillsList = [];
+            if (dart.dmg) {
+                pillsList.push('<span class="dmg-pill dmg-pill--heal">❤️ +' + dart.dmg + ' PV Restaurados</span>');
+                pillsList.push('<span class="dmg-pill dmg-pill--buff">✨ Cura Divina (D&D 5e)</span>');
+                if (target && target.hp <= 0) {
+                    pillsList.push('<span class="dmg-pill dmg-pill--conc-pass">✦ Consciência Restaurada</span>');
+                }
+            } else {
+                pillsList.push('<span class="dmg-pill dmg-pill--buff">🛡️ Efeito Protetor Ativo</span>');
+                pillsList.push('<span class="dmg-pill dmg-pill--type">✦ D&D 5e PHB</span>');
+            }
+            pillsWrap.innerHTML = pillsList.join(' ');
+            structCard.appendChild(pillsWrap);
+
+            var toggleBtn = document.createElement('button');
+            toggleBtn.type = 'button';
+            toggleBtn.className = 'drl-structured-toggle-btn';
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            toggleBtn.textContent = 'ℹ️ Detalhes da Regra';
+
+            var detailsBody = document.createElement('div');
+            detailsBody.className = 'drl-structured-details-body';
+
+            var dRows = [
+                { l: 'Habilidade', v: skill.n || 'Magia de Suporte' },
+                { l: 'Conjurador', v: actor ? actor.n : 'Conjurador' },
+                { l: 'Alvo', v: target ? target.n : 'Alvo' }
+            ];
+            if (dart.rolls && dart.rolls.length > 0) {
+                var rollBreakdown = dart.rolls.join(' + ') + (dart.flat ? (' + ' + dart.flat) : '') + ' = ' + dart.dmg + ' PV';
+                dRows.push({ l: 'Fórmula D&D 5e', v: dart.rolls.length + 'd' + dart.d + ': (' + rollBreakdown + ')' });
+                dRows.push({ l: 'Regra de Cura', v: 'PHB p. 197: A cura restaura pontos de vida perdidos até o limite máximo de PV. Se o alvo estiver a 0 PV, ele recupera a consciência e zera suas salvaguardas de morte acumuladas.' });
+            } else if (skill.desc) {
+                dRows.push({ l: 'Efeito D&D 5e', v: skill.desc });
+            }
+
+            detailsBody.innerHTML = dRows.map(function (rw) {
+                return '<div class="drl-details-row"><span>' + escHtml(rw.l) + ':</span> <strong>' + escHtml(rw.v) + '</strong></div>';
+            }).join('');
+
+            toggleBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var isOpen = detailsBody.classList.toggle('is-open');
+                toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                toggleBtn.textContent = isOpen ? '▲ Ocultar Detalhes' : 'ℹ️ Detalhes da Regra';
+            });
+
+            structCard.appendChild(toggleBtn);
+            structCard.appendChild(detailsBody);
+
+            resultEl.appendChild(structCard);
             setTimeout(function () { continueBtn.style.display = ''; }, 400);
         }
         setTimeout(function () {
@@ -45011,6 +45381,7 @@ async function playTurnUndead(casterIdx, undeadIdxs, skill) {
         } catch (eTuBurst) {}
     }
     await sleep(500);
+    var tuResults = [];
     for (var i = 0; i < undeadIdxs.length; i++) {
         var u = s.order[undeadIdxs[i]];
         if (!u || !u.alive) continue;
@@ -45020,6 +45391,15 @@ async function playTurnUndead(casterIdx, undeadIdxs, skill) {
         var _roll = (typeof _simRollD20WithAdv === 'function') ? _simRollD20WithAdv(_mode, false).r : rollN(20);
         var _mod = (typeof simSaveMod === 'function') ? simSaveMod(u, 'wis') : 0;
         var _total = _roll + _mod;
+        var _ok = _total >= dc;
+        tuResults.push({
+            name: u.n,
+            roll: _roll,
+            mod: _mod,
+            total: _total,
+            dc: dc,
+            success: _ok
+        });
         if (_total >= dc) {
             s.log.push('  → ' + u.n + ' — TR SAB ' + _roll + '+' + _mod + '=' + _total + ' vs CD ' + dc + ' (resiste à expulsão).');
             if (_elU && typeof spawnSkillImpactLabel === 'function') {
@@ -45042,7 +45422,144 @@ async function playTurnUndead(casterIdx, undeadIdxs, skill) {
         }
     }
     render(s);
-    await sleep(1100);
+    if (!_skipAllDiceAnim && tuResults.length > 0 && typeof showTurnUndeadSummaryOverlay === 'function') {
+        await showTurnUndeadSummaryOverlay(caster, tuResults, dc, skill, s);
+    } else {
+        await sleep(1100);
+    }
+}
+
+function showTurnUndeadSummaryOverlay(caster, results, dc, skill, s) {
+    if (_skipAllDiceAnim) return Promise.resolve();
+    return new Promise(function (resolve) {
+        var ov = document.createElement('div');
+        ov.className = 'dice-overlay';
+        if (s && s.rn) {
+            var rb = document.createElement('div');
+            rb.className = 'dice-round-badge';
+            rb.textContent = 'Rodada ' + s.rn;
+            ov.appendChild(rb);
+        }
+
+        appendDiceCombatHeader(ov, caster, null, 'Canalizar Divindade');
+
+        var resultEl = document.createElement('div');
+        resultEl.className = 'dice-result-label visible dmg-result-stack';
+
+        var turnedCount = results.filter(function (r) { return !r.success; }).length;
+        var resistedCount = results.length - turnedCount;
+
+        var titleEl = document.createElement('div');
+        titleEl.className = 'drl-rollup mm-summary-title mm-summary-title--holy';
+        titleEl.textContent = 'Expulsar Mortos-Vivos — ' + turnedCount + ' Expulso(s)';
+        resultEl.appendChild(titleEl);
+
+        var structCard = document.createElement('div');
+        structCard.className = 'drl-structured-card';
+
+        var kicker = document.createElement('div');
+        kicker.className = 'drl-structured-kicker';
+        kicker.textContent = '☀️ Canalizar Divindade (Clérigo) · Raio de 9m (6 Hexes)';
+        structCard.appendChild(kicker);
+
+        var metrics = document.createElement('div');
+        metrics.className = 'drl-structured-metrics';
+
+        var cellDc = document.createElement('div');
+        cellDc.className = 'drl-structured-cell';
+        cellDc.innerHTML = '<span class="drl-structured-lbl">CD Magia</span><span class="drl-structured-val">CD ' + dc + '</span>';
+        metrics.appendChild(cellDc);
+
+        var cellTurned = document.createElement('div');
+        cellTurned.className = 'drl-structured-cell';
+        cellTurned.innerHTML = '<span class="drl-structured-lbl">Expulsos</span><span class="drl-structured-val" style="color:#fcd34d;">' + turnedCount + '</span>';
+        metrics.appendChild(cellTurned);
+
+        var cellResisted = document.createElement('div');
+        cellResisted.className = 'drl-structured-cell';
+        cellResisted.innerHTML = '<span class="drl-structured-lbl">Resistiram</span><span class="drl-structured-val" style="color:#94a3b8;">' + resistedCount + '</span>';
+        metrics.appendChild(cellResisted);
+
+        var cellTotal = document.createElement('div');
+        cellTotal.className = 'drl-structured-cell';
+        cellTotal.innerHTML = '<span class="drl-structured-lbl">Total Alvos</span><span class="drl-structured-val">' + results.length + '</span>';
+        metrics.appendChild(cellTotal);
+
+        structCard.appendChild(metrics);
+
+        var pillsWrap = document.createElement('div');
+        pillsWrap.className = 'drl-structured-pills';
+        var pills = [
+            '<span class="dmg-pill dmg-pill--buff">☀️ Canalizar Divindade (PHB p. 58-59)</span>',
+            '<span class="dmg-pill dmg-pill--save">✨ TR Sabedoria CD ' + dc + '</span>'
+        ];
+        if (turnedCount > 0) {
+            pills.push('<span class="dmg-pill dmg-pill--debuff">🏃 Fuga Forçada (3 Rodadas)</span>');
+            pills.push('<span class="dmg-pill dmg-pill--type">💥 Quebra ao Sofrer Dano</span>');
+        }
+        pillsWrap.innerHTML = pills.join(' ');
+        structCard.appendChild(pillsWrap);
+
+        var toggleBtn = document.createElement('button');
+        toggleBtn.type = 'button';
+        toggleBtn.className = 'drl-structured-toggle-btn';
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        toggleBtn.textContent = 'ℹ️ Detalhes da Regra';
+
+        var detailsBody = document.createElement('div');
+        detailsBody.className = 'drl-structured-details-body';
+
+        var dRows = [
+            { l: 'Habilidade', v: 'Canalizar Divindade: Expulsar Mortos-Vivos' },
+            { l: 'Conjurador', v: caster ? caster.n : 'Clérigo' },
+            { l: 'Salvaguarda Exigida', v: 'TR de Sabedoria vs CD ' + dc }
+        ];
+
+        results.forEach(function (r) {
+            var sign = r.mod >= 0 ? '+' : '';
+            var rStr = 'TR ' + r.roll + sign + r.mod + ' = ' + r.total + ' vs CD ' + r.dc + ' (' + (r.success ? 'Resistiu' : 'FALHOU: Expulso') + ')';
+            dRows.push({ l: r.name, v: rStr });
+        });
+
+        dRows.push({
+            l: 'Regra D&D 5e',
+            v: 'PHB p. 58-59: Como uma ação, você ergue o símbolo sagrado e ora. Cada morto-vivo a até 9m que possa ver ou ouvir deve fazer uma salvaguarda de Sabedoria. Se falhar, fica expulso por 1 minuto (ou até sofrer dano). Uma criatura expulsa deve gastar seus turnos tentando fugir, não pode usar reações e só pode usar Disparada ou Esquivar.'
+        });
+
+        detailsBody.innerHTML = dRows.map(function (rw) {
+            return '<div class="drl-details-row"><span>' + escHtml(rw.l) + ':</span> <strong>' + escHtml(rw.v) + '</strong></div>';
+        }).join('');
+
+        toggleBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var isOpen = detailsBody.classList.toggle('is-open');
+            toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            toggleBtn.textContent = isOpen ? '▲ Ocultar Detalhes' : 'ℹ️ Detalhes da Regra';
+        });
+
+        structCard.appendChild(toggleBtn);
+        structCard.appendChild(detailsBody);
+
+        resultEl.appendChild(structCard);
+        ov.appendChild(resultEl);
+
+        var continueBtn = document.createElement('button');
+        continueBtn.className = 'dice-continue-btn';
+        continueBtn.textContent = 'Continuar →';
+        ov.appendChild(continueBtn);
+
+        ov.style.zIndex = '101000';
+        mountInGameFrame(ov);
+
+        var closed = false;
+        function close() {
+            if (closed) return;
+            closed = true;
+            ov.remove();
+            resolve();
+        }
+        continueBtn.addEventListener('click', close);
+    });
 }
 
 async function playFireballSpellTurn(aIdx, tIdx, skill) {
@@ -52757,17 +53274,127 @@ async function __combatAnimateOneEvent(ev) {
         await new Promise(function (r) { setTimeout(r, 220); });
         return;
     }
-    if (kind === 'action_fizzle') {
+    if (kind === 'action_fizzle' || kind === 'skill_fizzle') {
         var fzUid = 'player';
         var fzEl = document.querySelector('[data-unit-id="' + fzUid + '"]');
         if (fzEl && typeof spawnSkillImpactLabel === 'function') {
-            spawnSkillImpactLabel(fzEl, '✕ AÇÃO JÁ GASTA NESTE TURNO!', 'miss');
+            var fzTxt = kind === 'skill_fizzle'
+                ? ('✕ ' + (ev.skillName ? ev.skillName.toUpperCase() + ': ' : '') + 'CONDIÇÃO NÃO ATENDIDA!')
+                : '✕ AÇÃO JÁ GASTA NESTE TURNO!';
+            spawnSkillImpactLabel(fzEl, fzTxt, 'miss');
         }
         render(currentState);
         await new Promise(function (r) { setTimeout(r, 220); });
         return;
     }
-    if (kind === 'attack' || kind === 'oa' || kind === 'skill') {
+    if (kind === 'out_of_range') {
+        var oorUid = 'player';
+        var oorEl = document.querySelector('[data-unit-id="' + oorUid + '"]');
+        if (oorEl && typeof spawnSkillImpactLabel === 'function') {
+            var oorDist = ev.distFeet != null ? (' (' + ev.distFeet + ' pés)') : '';
+            spawnSkillImpactLabel(oorEl, '🏹 FORA DE ALCANCE' + oorDist + '!', 'miss');
+        }
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 240); });
+        return;
+    }
+    if (kind === 'help') {
+        var hlActorIdx = ev.actorIdx != null ? ev.actorIdx : (currentState ? currentState.p_idx : 0);
+        var hlTargetIdx = ev.targetIdx != null ? ev.targetIdx : (ev.tIdx != null ? ev.tIdx : 0);
+        var hlTargetUid = (typeof unitUidForOrderIndex === 'function')
+            ? unitUidForOrderIndex(currentState, hlTargetIdx)
+            : (hlTargetIdx === (currentState ? currentState.p_idx : 0) ? 'player' : 'enemy_' + hlTargetIdx);
+        var hlElT = document.querySelector('[data-unit-id="' + hlTargetUid + '"]');
+        if (hlElT) {
+            hlElT.classList.add('miss-target-flash');
+            setTimeout(function () { if (hlElT) hlElT.classList.remove('miss-target-flash'); }, 400);
+            if (typeof spawnSkillImpactLabel === 'function') {
+                spawnSkillImpactLabel(hlElT, '👁️ AJUDAR: ALVO DISTRAÍDO (VANTAGEM)!', 'buff');
+            }
+        }
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 260); });
+        return;
+    }
+    if (kind === 'hide') {
+        var hdActorIdx = ev.actorIdx != null ? ev.actorIdx : (currentState ? currentState.p_idx : 0);
+        var hdActorUid = (typeof unitUidForOrderIndex === 'function')
+            ? unitUidForOrderIndex(currentState, hdActorIdx)
+            : (hdActorIdx === (currentState ? currentState.p_idx : 0) ? 'player' : 'enemy_' + hdActorIdx);
+        var hdEl = document.querySelector('[data-unit-id="' + hdActorUid + '"]');
+        if (hdEl) {
+            var hdScore = (ev.stealthRoll != null && ev.minPassivePerception != null)
+                ? ' [' + ev.stealthRoll + ' vs PP ' + ev.minPassivePerception + ']'
+                : '';
+            if (ev.success) {
+                hdEl.classList.add('buff-flash');
+                setTimeout(function () { if (hdEl) hdEl.classList.remove('buff-flash'); }, 450);
+                if (typeof spawnSkillImpactLabel === 'function') {
+                    spawnSkillImpactLabel(hdEl, '🌫️ ESCONDER-SE: OCULTO' + hdScore + '!', 'buff');
+                }
+            } else {
+                hdEl.classList.add('miss-target-flash');
+                setTimeout(function () { if (hdEl) hdEl.classList.remove('miss-target-flash'); }, 400);
+                if (typeof spawnSkillImpactLabel === 'function') {
+                    spawnSkillImpactLabel(hdEl, '👁️ ESCONDER-SE FALHOU: VISTO' + hdScore + '!', 'miss');
+                }
+            }
+        }
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 280); });
+        return;
+    }
+    if (kind === 'grapple') {
+        var gpActorIdx = ev.actorIdx != null ? ev.actorIdx : (currentState ? currentState.p_idx : 0);
+        var gpTargetIdx = ev.targetIdx != null ? ev.targetIdx : (ev.tIdx != null ? ev.tIdx : 0);
+        var gpActorUid = (typeof unitUidForOrderIndex === 'function')
+            ? unitUidForOrderIndex(currentState, gpActorIdx)
+            : (gpActorIdx === (currentState ? currentState.p_idx : 0) ? 'player' : 'enemy_' + gpActorIdx);
+        var gpTargetUid = (typeof unitUidForOrderIndex === 'function')
+            ? unitUidForOrderIndex(currentState, gpTargetIdx)
+            : (gpTargetIdx === (currentState ? currentState.p_idx : 0) ? 'player' : 'enemy_' + gpTargetIdx);
+        var gpTargetUnit = (currentState && currentState.order) ? currentState.order[gpTargetIdx] : null;
+        var gpElA = document.querySelector('[data-unit-id="' + gpActorUid + '"]');
+        var gpElT = document.querySelector('[data-unit-id="' + gpTargetUid + '"]');
+
+        if (typeof animHexTokenAttack === 'function' && gpElA && gpElT) {
+            await animHexTokenAttack(gpElA, gpElT, false);
+        }
+        var _gpScore = (ev.actorTotal != null && ev.targetTotal != null) ? ' [' + ev.actorTotal + ' vs ' + ev.targetTotal + ']' : '';
+        if (ev.success) {
+            if (gpTargetUnit) {
+                gpTargetUnit.grappled = true;
+                gpTargetUnit.se = gpTargetUnit.se || [];
+                if (!gpTargetUnit.se.some(function (st) { return st && (st.grappled || st.id === 'grappled'); })) {
+                    gpTargetUnit.se.push({ id: 'grappled', n: 'Agarrado', grappled: true, kind: 'debuff', ico: '✊' });
+                }
+            }
+            if (gpElT) {
+                gpElT.classList.add('miss-target-flash');
+                setTimeout(function () { if (gpElT) gpElT.classList.remove('miss-target-flash'); }, 400);
+                if (typeof spawnSkillImpactLabel === 'function') {
+                    spawnSkillImpactLabel(gpElT, '✊ AGARRADO (DESLOCAMENTO 0)' + _gpScore + '!', 'attack');
+                }
+            }
+        } else {
+            if (gpElT) {
+                gpElT.classList.add('miss-target-flash');
+                setTimeout(function () { if (gpElT) gpElT.classList.remove('miss-target-flash'); }, 350);
+                if (typeof spawnSkillImpactLabel === 'function') {
+                    spawnSkillImpactLabel(gpElT, '🛡️ RESISTIU AGARRÃO' + _gpScore + '!', 'miss');
+                }
+            }
+        }
+        render(currentState);
+        await new Promise(function (r) { setTimeout(r, 280); });
+        return;
+    }
+    var _isAttackKind = (kind === 'attack' || kind === 'oa' || kind === 'skill'
+        || kind === 'reaction_oa' || kind === 'reaction_sentinel' || kind === 'reaction_riposte'
+        || kind === 'reaction_retaliation' || kind === 'reaction_giant_killer' || kind === 'reaction_opportunist'
+        || kind === 'reaction_soul_of_vengeance' || kind === 'reaction_stand_against_the_tide'
+        || kind === 'whirlwind_sub' || kind === 'volley_sub' || kind === 'horde_breaker_sub' || kind === 'split_enchantment_sub');
+    if (_isAttackKind) {
         /* Mostra o d20 do ataque (dice 3D se disponível), depois lunge/cast + hit VFX + FCT. */
         var tUid = 'enemy_' + ev.tIdx;
         var tU = currentState && currentState.order ? currentState.order[ev.tIdx] : null;
@@ -52841,7 +53468,30 @@ async function __combatAnimateOneEvent(ev) {
         }
 
         /* 2) D20 animation se temos o valor de ataque OU salvaguarda (TR). Pula em OAs (rapid-fire). */
-        if (kind === 'oa' && elA && typeof spawnSkillImpactLabel === 'function') {
+        var _isOaLike = (kind === 'oa' || kind === 'reaction_oa' || kind === 'reaction_sentinel');
+        if (kind === 'reaction_sentinel' && elA && typeof spawnSkillImpactLabel === 'function') {
+            try { spawnSkillImpactLabel(elA, '⚡ REAÇÃO SENTINELA!', 'attack'); } catch (eSentLbl) {}
+        } else if (kind === 'reaction_riposte' && elA && typeof spawnSkillImpactLabel === 'function') {
+            try { spawnSkillImpactLabel(elA, '⚔️ REAÇÃO: RESPOSTA!', 'attack'); } catch (eRipLbl) {}
+        } else if (kind === 'reaction_retaliation' && elA && typeof spawnSkillImpactLabel === 'function') {
+            try { spawnSkillImpactLabel(elA, '🔥 REAÇÃO: RETALIAÇÃO!', 'attack'); } catch (eRetLbl) {}
+        } else if (kind === 'reaction_giant_killer' && elA && typeof spawnSkillImpactLabel === 'function') {
+            try { spawnSkillImpactLabel(elA, '🏹 MATADOR DE GIGANTES!', 'attack'); } catch (eGkLbl) {}
+        } else if (kind === 'reaction_opportunist' && elA && typeof spawnSkillImpactLabel === 'function') {
+            try { spawnSkillImpactLabel(elA, '🥋 OPORTUNISTA!', 'attack'); } catch (eOppLbl) {}
+        } else if (kind === 'reaction_soul_of_vengeance' && elA && typeof spawnSkillImpactLabel === 'function') {
+            try { spawnSkillImpactLabel(elA, '⚖️ ALMA DA VINGANÇA!', 'attack'); } catch (eSovLbl) {}
+        } else if (kind === 'reaction_stand_against_the_tide' && elA && typeof spawnSkillImpactLabel === 'function') {
+            try { spawnSkillImpactLabel(elA, '🌊 CONTRA A MARÉ!', 'attack'); } catch (eSatLbl) {}
+        } else if (kind === 'whirlwind_sub' && elA && typeof spawnSkillImpactLabel === 'function') {
+            try { spawnSkillImpactLabel(elA, '🌪️ ATAQUE GIRATÓRIO!', 'attack'); } catch (eWhLbl) {}
+        } else if (kind === 'volley_sub' && elA && typeof spawnSkillImpactLabel === 'function') {
+            try { spawnSkillImpactLabel(elA, '🏹 SALVA DE FLECHAS!', 'attack'); } catch (eVolLbl) {}
+        } else if (kind === 'horde_breaker_sub' && elA && typeof spawnSkillImpactLabel === 'function') {
+            try { spawnSkillImpactLabel(elA, '⚔️ QUEBRADOR DE HORDAS!', 'attack'); } catch (eHbLbl) {}
+        } else if (kind === 'split_enchantment_sub' && elA && typeof spawnSkillImpactLabel === 'function') {
+            try { spawnSkillImpactLabel(elA, '✨ ENCANTAMENTO DIVIDIDO!', 'attack'); } catch (eSpLbl) {}
+        } else if (_isOaLike && elA && typeof spawnSkillImpactLabel === 'function') {
             try { spawnSkillImpactLabel(elA, '⚡ ATAQUE DE OPORTUNIDADE!', 'attack'); } catch (eOaLbl) {}
         } else if (ev.multiAttackTotal > 1 && elA && typeof spawnSkillImpactLabel === 'function') {
             try { spawnSkillImpactLabel(elA, '⚔️ ATAQUE MÚLTIPLO (' + (ev.multiAttackCurrent || 1) + '/' + ev.multiAttackTotal + ')', 'attack'); } catch (eMaLbl) {}
@@ -52850,7 +53500,7 @@ async function __combatAnimateOneEvent(ev) {
         }
         var isSaveRoll = (ev.d20 == null && ev.saveD20 != null);
         var rollValueForDice = isSaveRoll ? ev.saveD20 : ev.d20;
-        if (typeof showDice === 'function' && rollValueForDice != null && kind !== 'oa') {
+        if (typeof showDice === 'function' && rollValueForDice != null && !_isOaLike) {
             var actorForDice = aU || { n: ev.actorName, t: (ev.actorName || '').indexOf('Orc') >= 0 ? 'e' : 'p' };
             var targetForDice = tU || { n: ev.targetName };
             var roller = isSaveRoll ? targetForDice : actorForDice;
@@ -53036,6 +53686,18 @@ async function __combatAnimateOneEvent(ev) {
                             } else if (_advMode === 'cancelled' || ev.advCancelled) {
                                 _tacticalPills.push('<span class="dmg-pill dmg-pill--type">⚖️ Vantagem/Desvantagem Anuladas (PHB p. 173)</span>');
                             }
+                            if (kind === 'reaction_sentinel') _tacticalPills.push('<span class="dmg-pill dmg-pill--type">⚡ Sentinela (PHB p. 169)</span>');
+                            else if (kind === 'reaction_riposte') _tacticalPills.push('<span class="dmg-pill dmg-pill--type">⚔️ Resposta (PHB p. 74)</span>');
+                            else if (kind === 'reaction_retaliation') _tacticalPills.push('<span class="dmg-pill dmg-pill--type">🔥 Retaliação (PHB p. 50)</span>');
+                            else if (kind === 'reaction_giant_killer') _tacticalPills.push('<span class="dmg-pill dmg-pill--type">🏹 Matador de Gigantes (PHB p. 93)</span>');
+                            else if (kind === 'reaction_opportunist') _tacticalPills.push('<span class="dmg-pill dmg-pill--type">🥋 Oportunista (PHB p. 80)</span>');
+                            else if (kind === 'reaction_soul_of_vengeance') _tacticalPills.push('<span class="dmg-pill dmg-pill--type">⚖️ Alma da Vingança (PHB p. 88)</span>');
+                            else if (kind === 'reaction_stand_against_the_tide') _tacticalPills.push('<span class="dmg-pill dmg-pill--type">🌊 Contra a Maré (PHB p. 93)</span>');
+                            else if (kind === 'whirlwind_sub') _tacticalPills.push('<span class="dmg-pill dmg-pill--type">🌪️ Ataque Giratório (PHB p. 93)</span>');
+                            else if (kind === 'volley_sub') _tacticalPills.push('<span class="dmg-pill dmg-pill--type">🏹 Salva de Flechas (PHB p. 93)</span>');
+                            else if (kind === 'horde_breaker_sub') _tacticalPills.push('<span class="dmg-pill dmg-pill--type">⚔️ Quebrador de Hordas (PHB p. 93)</span>');
+                            else if (kind === 'split_enchantment_sub') _tacticalPills.push('<span class="dmg-pill dmg-pill--type">✨ Encantamento Dividido (PHB p. 117)</span>');
+                            else if (_isOaLike) _tacticalPills.push('<span class="dmg-pill dmg-pill--type">⚡ Oportunidade (PHB p. 195)</span>');
                             if (_isRemImm) _tacticalPills.push('<span class="dmg-pill dmg-pill--immune">🚫 Imune a ' + (_dtInfo ? _dtInfo.lb : 'Dano') + '</span>');
                             else if (_isRemVuln) _tacticalPills.push('<span class="dmg-pill dmg-pill--vuln">💥 Vulnerabilidade (2×)</span>');
                             else if (_isRemRes) _tacticalPills.push('<span class="dmg-pill dmg-pill--resist">🛡️ Resistência (½)</span>');
@@ -53090,6 +53752,18 @@ async function __combatAnimateOneEvent(ev) {
                             } else if (ev.attackTotal > 1) {
                                 _detailsRows.push({ l: 'Ataque Extra / Ação', v: (ev.attackIndex || 1) + ' de ' + ev.attackTotal + ' (D&D 5e PHB p. 72)' });
                             }
+                            if (kind === 'reaction_sentinel') _detailsRows.push({ l: 'Reação Tática', v: 'Sentinela — ataque de reação quando criatura ataca aliado (PHB p. 169)' });
+                            else if (kind === 'reaction_riposte') _detailsRows.push({ l: 'Reação Tática', v: 'Resposta — manobra de reação quando criatura erra ataque (PHB p. 74)' });
+                            else if (kind === 'reaction_retaliation') _detailsRows.push({ l: 'Reação Tática', v: 'Retaliação — ataque de reação ao sofrer dano em Fúria (PHB p. 50)' });
+                            else if (kind === 'reaction_giant_killer') _detailsRows.push({ l: 'Reação Tática', v: 'Matador de Gigantes — reação contra criatura Grande+ que errou (PHB p. 93)' });
+                            else if (kind === 'reaction_opportunist') _detailsRows.push({ l: 'Reação Tática', v: 'Oportunista — reação ao atingir alvo atingido por companheiro (PHB p. 80)' });
+                            else if (kind === 'reaction_soul_of_vengeance') _detailsRows.push({ l: 'Reação Tática', v: 'Alma da Vingança — reação contra inimigo do Voto de Inimizade (PHB p. 88)' });
+                            else if (kind === 'reaction_stand_against_the_tide') _detailsRows.push({ l: 'Reação Tática', v: 'Contra a Maré — reação redirecionando golpe errado (PHB p. 93)' });
+                            else if (kind === 'whirlwind_sub') _detailsRows.push({ l: 'Ação Tática', v: 'Ataque Giratório — golpe contra criatura a 1,5m (PHB p. 93)' });
+                            else if (kind === 'volley_sub') _detailsRows.push({ l: 'Ação Tática', v: 'Salva de Flechas — disparo contra alvos na área (PHB p. 93)' });
+                            else if (kind === 'horde_breaker_sub') _detailsRows.push({ l: 'Ação Tática', v: 'Quebrador de Hordas — ataque bônus em alvo adjacente (PHB p. 93)' });
+                            else if (kind === 'split_enchantment_sub') _detailsRows.push({ l: 'Magia Bifurcada', v: 'Encantamento Dividido — magia atinge alvo extra (PHB p. 117)' });
+                            else if (_isOaLike) _detailsRows.push({ l: 'Ataque de Oportunidade', v: 'Reação disparada quando criatura sai do alcance sem Desengajar (PHB p. 195)' });
                             if (ev.coverBonus > 0) _detailsRows.push({ l: 'Bônus de Cobertura', v: '+' + ev.coverBonus + ' CA (PHB p. 196)' });
                             if (ev.elevationBonus) _detailsRows.push({ l: 'Desnível', v: (ev.elevationBonus > 0 ? '+' : '') + ev.elevationBonus });
                             if (ev.blessRoll != null && ev.blessRoll > 0) _detailsRows.push({ l: 'Bênção', v: '+' + ev.blessRoll + ' (1d4)' });
@@ -53157,17 +53831,17 @@ async function __combatAnimateOneEvent(ev) {
                     try { spawnFumbleDramaticBanner(aU, tU, ev); } catch (eFB) {}
                 }
                 if (elA && typeof spawnSkillImpactLabel === 'function') {
-                    try { spawnSkillImpactLabel(elA, kind === 'oa' ? '⚡ NAT 1 ERROU OPORTUNIDADE!' : '✕ NAT 1 FALHA CRÍTICA!', 'fumble'); } catch (eFum) {}
+                    try { spawnSkillImpactLabel(elA, _isOaLike ? '⚡ NAT 1 ERROU OPORTUNIDADE!' : '✕ NAT 1 FALHA CRÍTICA!', 'fumble'); } catch (eFum) {}
                 }
                 if (elT && typeof spawnMissFloatLabel === 'function') {
-                    try { spawnMissFloatLabel(elT, kind === 'oa' ? '⚡ Errou Oportunidade' : 'Errou (Falha Crítica)'); } catch (eMS) {}
+                    try { spawnMissFloatLabel(elT, _isOaLike ? '⚡ Errou Oportunidade' : 'Errou (Falha Crítica)'); } catch (eMS) {}
                 }
             } else {
-                if (elA && kind === 'oa' && typeof spawnSkillImpactLabel === 'function') {
+                if (elA && _isOaLike && typeof spawnSkillImpactLabel === 'function') {
                     try { spawnSkillImpactLabel(elA, '⚡ ERROU OPORTUNIDADE!', 'miss'); } catch (eOaMiss) {}
                 }
                 if (elT && typeof spawnMissFloatLabel === 'function') {
-                    try { spawnMissFloatLabel(elT, kind === 'oa' ? '⚡ Errou Oportunidade' : 'Errou'); } catch (eMS) {}
+                    try { spawnMissFloatLabel(elT, _isOaLike ? '⚡ Errou Oportunidade' : 'Errou'); } catch (eMS) {}
                 }
             }
             if (window._combatVfx && elT) {
@@ -53221,6 +53895,8 @@ async function __combatAnimateOneEvent(ev) {
                         dartCount: spellVariant ? 1 : 0,
                         skill: ev.skillName,
                         dmgType: ev.dmgType,
+                        oa: _isOaLike || !!(kind && kind.indexOf('reaction_') === 0),
+                        reactionKind: kind,
                         appliedTotal: ev.dmgTotal != null ? (ev.dmgTotal | 0) : Math.max(0, (ev.oldHp | 0) - (ev.newHp | 0)),
                         isImmune: _isRemImm,
                         isVulnerable: _isRemVuln,
@@ -53376,10 +54052,26 @@ async function __combatAnimateOneEvent(ev) {
 
         if (typeof spawnSkillImpactLabel === 'function' && elT) {
             var _lblTxt = (ev.d20 === 20 || ev.crit)
-                ? (kind === 'oa' ? '✦ NAT 20 OPORTUNIDADE!' : ('✦ NAT 20 CRÍTICO' + _attackSeqSuffix + '!'))
-                : (kind === 'oa'
+                ? (_isOaLike ? '✦ NAT 20 OPORTUNIDADE!' : ('✦ NAT 20 CRÍTICO' + _attackSeqSuffix + '!'))
+                : (_isOaLike
                     ? '⚡ GOLPE DE OPORTUNIDADE!'
-                    : (ev.skillName ? (ev.skillName.toUpperCase() + _attackSeqSuffix + '!') : ('ATAQUE' + _attackSeqSuffix + '!')));
+                    : (kind === 'reaction_sentinel'
+                        ? '⚡ SENTINELA!'
+                        : (kind === 'reaction_riposte'
+                            ? '⚔️ RESPOSTA!'
+                            : (kind === 'reaction_retaliation'
+                                ? '🔥 RETALIAÇÃO!'
+                                : (kind === 'reaction_giant_killer'
+                                    ? '🏹 MATADOR DE GIGANTES!'
+                                    : (kind === 'whirlwind_sub'
+                                        ? '🌪️ ATAQUE GIRATÓRIO!'
+                                        : (kind === 'volley_sub'
+                                            ? '🏹 SALVA DE FLECHAS!'
+                                            : (kind === 'horde_breaker_sub'
+                                                ? '⚔️ QUEBRADOR DE HORDAS!'
+                                                : (kind === 'split_enchantment_sub'
+                                                    ? '✨ ENCANTAMENTO DIVIDIDO!'
+                                                    : (ev.skillName ? (ev.skillName.toUpperCase() + _attackSeqSuffix + '!') : ('ATAQUE' + _attackSeqSuffix + '!')))))))))));
             spawnSkillImpactLabel(elT, _lblTxt, ev.crit ? 'crit' : 'attack');
             if (ev.sneakAttack && ev.sneakTotal) {
                 spawnSkillImpactLabel(elT, '🗡️ ATAQUE FURTIVO (+' + (ev.sneakTotal | 0) + ')!', 'crit');
@@ -54014,7 +54706,8 @@ async function __combatAnimateOneEvent(ev) {
             || kind === 'condition_expire' || kind === 'banished' || kind === 'maze_banish' || kind === 'maze_escape'
             || kind === 'instant_kill' || kind === 'power_word_kill' || kind === 'destroy_undead'
             || kind === 'time_stop' || kind === 'wildshape_transform' || kind === 'wildshape_revert'
-            || kind === 'sanctuary_save' || kind === 'rebuke_damage' || kind === 'turn_skipped') {
+            || kind === 'sanctuary_save' || kind === 'rebuke_damage' || kind === 'turn_skipped'
+            || kind === 'legendary_action' || kind === 'legendary_action_used') {
         var _evIdx = kind === 'rebuke_damage' ? ev.aIdx : (ev.tIdx != null ? ev.tIdx : ev.aIdx);
         var _evUid = 'player';
         if (_evIdx != null && currentState && currentState.order) {
@@ -54029,7 +54722,22 @@ async function __combatAnimateOneEvent(ev) {
             var _lblTxt = '';
             var _lblTone = 'buff';
             if (kind === 'legendary_resistance_used') {
+                if (_evU && ev.remaining != null) {
+                    var _lrMax = _evU.legendary_resistances || _evU.legendaryResistances || 3;
+                    _evU.legendary_resistances_used = Math.max(0, _lrMax - ev.remaining);
+                    _evU.legendaryResistancesUsed = _evU.legendary_resistances_used;
+                }
                 _lblTxt = '👑 RESISTÊNCIA LENDÁRIA!' + (ev.remaining != null ? ' (' + ev.remaining + ' rest.)' : '');
+                _lblTone = 'buff';
+            } else if (kind === 'legendary_action' || kind === 'legendary_action_used') {
+                if (_evU && ev.remaining != null) {
+                    _evU.legendary_actions_remaining = ev.remaining;
+                    _evU.legendaryActionsRemaining = ev.remaining;
+                }
+                var _laName = String(ev.actionName || ev.name || ev.skillName || 'AÇÃO LENDÁRIA').toUpperCase();
+                var _laMax = (ev.max != null) ? ev.max : ((_evU && (_evU.legendary_actions_max || _evU.legendaryActionsMax)) || 3);
+                var _laRem = ev.remaining != null ? (' (' + ev.remaining + '/' + _laMax + ')') : '';
+                _lblTxt = '👑 AÇÃO LENDÁRIA: ' + _laName + '!' + _laRem;
                 _lblTone = 'buff';
             } else if (kind === 'save_result') {
                 var _svAb = String(ev.saveAbility || ev.ability || ev.save || 'TR').toUpperCase();
