@@ -135,11 +135,9 @@
     --v-space-2xl: 24px;
     /* Área mínima tocável (Apple ~44pt, WCAG AAA 44px, web.dev ~48px) — usar com .v-hit-min */
     --v-touch-min: 44px;
-    /* #58: Typography readability on mobile. --v-font-sm bumped from 11px
-     * to 12px to match the design system minimum for readable text.
-     * --v-font-xs stays at 10px but should only be used for tiny badges
-     * (it's flagged in the preflight check_webapp_hardcoded_font_sizes). */
-    --v-font-xs: 10px;
+    /* #58: Typography readability on mobile and Telegram Desktop.
+     * Piso mínimo absoluto de 11px para rótulos/metadados/badges, eliminando microtextos. */
+    --v-font-xs: 11px;
     --v-font-sm: 12px;
     --v-font-md: 12px;
     --v-font-base: 13px;
@@ -157,7 +155,7 @@
     --v-bar-height: 8px;
     --v-bar-height-sm: 6px;
     --v-bar-height-mini: 4px;
-    --v-font-micro: 10px;
+    --v-font-micro: 11px;
     --v-font-label: 12px;
     /* HP bar colors — CANONICAL (use ONLY these, never hardcode)
      * Thresholds: >60% = high (green), >25% = warn (orange), ≤25% = crit (red)
@@ -834,7 +832,7 @@
     display: inline-block;
     padding: 2px 8px;
     border-radius: 10px;
-    font-size: calc(10px * var(--v-font-scale, 1));
+    font-size: calc(var(--v-font-xs, 11px) * var(--v-font-scale, 1));
     font-weight: 600;
   }
   .v-badge-hp {
@@ -1247,7 +1245,7 @@
     color: var(--v-success);
   }
   .v-accordion-arrow {
-    font-size: calc(10px * var(--v-font-scale, 1));
+    font-size: calc(var(--v-font-xs, 11px) * var(--v-font-scale, 1));
     color: var(--v-text-dim);
     flex-shrink: 0;
     transition: transform 0.2s ease;
@@ -1594,7 +1592,7 @@
     margin: var(--v-space-md, 8px) auto var(--v-space-lg, 16px);
     max-width: 200px;
     color: var(--v-gold, #c4953a);
-    font-size: var(--v-font-xs, 10px);
+    font-size: var(--v-font-xs, 11px);
     opacity: 0.6;
   }
   .displaced-divider::before,
@@ -2322,18 +2320,18 @@ body.perf-lite html.app-frame::before {
    .v-caption (label 12px) e .dm-bubble (label 12px) nao escalavam. */
 html[data-font-size="small"],
 body[data-font-size="small"]  {
-  --v-font-scale: 0.82;
-  --v-font-body-scaled: 11.5px;
-  --v-font-xs: 9px;      /* 10 * 0.82 = 8.2 → 9 */
-  --v-font-sm: 10px;     /* 12 * 0.82 = 9.84 → 10 */
-  --v-font-md: 10px;
-  --v-font-base: 11px;   /* 13 * 0.82 = 10.66 → 11 */
-  --v-font-body: 11px;   /* 14 * 0.82 = 11.48 → 11 */
-  --v-font-lg: 13px;     /* 15 * 0.82 = 12.3 → 13 */
-  --v-font-xl: 13px;     /* 16 * 0.82 = 13.12 → 13 */
-  --v-font-2xl: 15px;    /* 18 * 0.82 = 14.76 → 15 */
-  --v-font-micro: 8px;   /* 10 * 0.82 = 8.2 → 8 */
-  --v-font-label: 10px;  /* 12 * 0.82 = 9.84 → 10 */
+  --v-font-scale: 0.88;
+  --v-font-body-scaled: 12.5px;
+  --v-font-xs: 11px;     /* Piso mínimo absoluto oficial */
+  --v-font-sm: 11.5px;
+  --v-font-md: 11.5px;
+  --v-font-base: 12px;
+  --v-font-body: 12.5px;
+  --v-font-lg: 14px;
+  --v-font-xl: 15px;
+  --v-font-2xl: 16px;
+  --v-font-micro: 11px;  /* Piso mínimo absoluto oficial */
+  --v-font-label: 11.5px;
 }
 /* 2026-06-11 (user): "o tamanho do texto normal esta muito pequeno, faca ajuste
    no tamanho normal para ficar um pouco maior". Normal subiu de 1.0 -> 1.10 — a

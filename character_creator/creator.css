@@ -37,7 +37,7 @@
     font-size: var(--v-font-xs, 11px) !important;
     line-height: 1.35 !important;
   }
-  .dm-bubble::before { font-size: 9px !important; margin-bottom: var(--v-space-xs, 2px) !important; }
+  .dm-bubble::before { font-size: var(--v-font-xs, 11px) !important; margin-bottom: var(--v-space-xs, 2px) !important; }
   .v-title-sm {
     font-size: var(--v-font-base, 13px) !important;
     margin-bottom: var(--v-space-xs, 2px) !important;
@@ -134,26 +134,26 @@
     margin-bottom: var(--v-space-sm, 4px) !important;
   }
   .combat-stat-box { padding: var(--v-space-sm, 4px) var(--v-space-xs, 2px) !important; }
-  .combat-stat-label { font-size: 8px !important; }
-  .combat-stat-value { font-size: clamp(13px, 4vw, 16px) !important; margin-top: 0 !important; }
-  .combat-stat-detail { font-size: 8px !important; }
+  .combat-stat-label { font-size: var(--v-font-xs, 11px) !important; }
+  .combat-stat-value { font-size: clamp(14px, 4vw, 16px) !important; margin-top: 0 !important; }
+  .combat-stat-detail { font-size: var(--v-font-xs, 11px) !important; }
   .attr-grid {
     gap: var(--v-space-sm, 4px) !important;
     margin-bottom: var(--v-space-sm, 4px) !important;
   }
   .attr-box { padding: var(--v-space-sm, 4px) var(--v-space-xs, 2px) !important; }
-  .attr-box-label { font-size: 8px !important; }
+  .attr-box-label { font-size: var(--v-font-xs, 11px) !important; }
   .attr-box-value { font-size: clamp(15px, 4.2vw, 18px) !important; }
-  .attr-box-mod { font-size: 9px !important; }
+  .attr-box-mod { font-size: var(--v-font-xs, 11px) !important; }
   /* Listas internas (saves/skills) — limitar altura + scroll interno */
   .save-list, .skill-list { gap: var(--v-space-xs, 2px) !important; }
   .save-row, .skill-row {
-    font-size: 9px !important;
+    font-size: var(--v-font-xs, 11px) !important;
     padding: 1px 0 !important;
     gap: var(--v-space-sm, 4px) !important;
   }
-  .skill-attr-tag { font-size: 8px !important; }
-  .skill-mod { font-size: 9px !important; min-width: 20px !important; }
+  .skill-attr-tag { font-size: var(--v-font-xs, 11px) !important; }
+  .skill-mod { font-size: var(--v-font-xs, 11px) !important; min-width: 22px !important; }
   .prof-dot { width: 6px !important; height: 6px !important; }
   /* Detail sections do summary (proficiências, equipment, etc) */
   #summarySections .detail-section {

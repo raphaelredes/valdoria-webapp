@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T20:10:21Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T20:44:11Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -1231,14 +1231,14 @@ html body .va-backdrop {
   /* V1 Invocações Phase 3 (2026-04-18) — cor de summon (azul-arcano arroxeado, distinto de aliado normal). */
   --summon-arcane: #8c70d0;     --summon-arcane-dark: #3a2a6a;
 
-  /* ==== VISUAL STANDARDS (Fase 7 — 2026-04-30) — padronização entre
-     cidade/exploracao/combate. Mobile-first: min 10px text, 36px touch
-     targets. Espelha valdoria-design.css tokens. ==== */
-  --v-font-micro: 10px;     /* timer/badge denso APENAS */
+  /* ==== VISUAL STANDARDS (Ordem do Usuário 2026-10) — padronização oficial de tipografia entre
+     cidade/exploracao/combate. Mobile-first no Telegram Desktop: piso mínimo de 11px em rótulos e metadados,
+     corpo legível 14px, botões 12px-13px. Proibição de fontes minúsculas (8px/9px/10px). ==== */
+  --v-font-micro: 11px;     /* timer/badge denso/pills (piso mínimo) */
   --v-font-xs:    11px;     /* labels mínimos legíveis */
-  --v-font-sm:    12px;     /* secondary text */
-  --v-font-md:    12px;     /* labels */
-  --v-font-base:  13px;     /* data, atributos */
+  --v-font-sm:    12px;     /* secondary text, botões secundários */
+  --v-font-md:    13px;     /* labels e atributos */
+  --v-font-base:  13.5px;   /* data, atributos e ticker */
   --v-font-body:  14px;     /* body DEFAULT */
   --v-font-lg:    15px;     /* sub-headings */
   --v-font-xl:    16px;     /* section headings */
@@ -1252,15 +1252,37 @@ html body .va-backdrop {
   --v-space-xs:   2px;  --v-space-sm:  4px;  --v-space-md: 8px;
   --v-space-md-lg: 10px; --v-space-lg: 12px; --v-space-xl: 16px;
 }
-/* Mobile readability bump (Fase 7) — selectores user-facing < 10px → 10px.
-   Aplicado via !important pra override CSS local. Painéis de DEV (sim-log-*)
-   ficam tiny por serem ferramentas internas. */
+/* Mobile readability bump — seletores de interface com piso mínimo oficial de 11px.
+   Aplicado via !important para anular estilos legados e garantir nitidez no Telegram Desktop. */
 .c-cond-tl, .c-class-tag, .c-stat-label,
 .action-btn-sub-chip, .epic-cta-tag,
 .dnd-res-chip, .dnd-res-label, .dnd-res-pill,
 .rcb-lbl, .se-lbl,
-.lp-item-block-chip, .lp-filter-count {
-  font-size: var(--v-font-micro, 10px) !important;
+.lp-item-block-chip, .lp-filter-count,
+.opt1-economy-row .econ-pill,
+.opt-btn .opt-btn-label,
+.sim-tactics-drawer .action-btn,
+.sim-tactics-drawer .action-btn .act-flee-dc,
+.ehs-vital-lbl, .ehs-attr-lbl, .ehs-tag-row,
+.combat-ticker .ticker-tag, .combat-ticker .ticker-btn,
+.ds-row, .ds-lbl, .ds-dot, .token-stable-chip,
+.tl-init-badge, .tl-active-tag, .tl-active-hp-txt, .tl-round-sep,
+.token-ac-chip, .token-ac-chip span, .token-adv-chip, .token-disadv-chip,
+.token-conc-chip, .token-prone-chip, .token-cond-chip, .token-init-chip,
+.token-dist-chip, .token-nameplate, .token-hp-text, .token-temphp-pill,
+.bf-scale-badge, .bf-vision-badge, .bf-rhythm-title, .bf-rhythm-sub,
+.bf-tpb-title, .bf-tpb-sub, .bf-tpb-chip, .bf-hud-toggle-btn,
+.dnd-mov-cond-badge, .dnd-tac-strip, .dnd-tac-chip,
+.tam-vital-chip, .tam-vital-lbl, .tam-meta-badge,
+.dnd-res-modal-badge, .dnd-res-modal-pill,
+.tcc-oa-badge, .sim-turn-economy-pill, .weather-badge,
+.tsh-badge-action, .tsh-reach-chip, .tsh-action-tag .tsh-cost, .tsh-reach-lbl,
+.dice-combat-hp-diff, .dice-overlay-conds .c-cond-chip, .c-cond-more,
+.drl-structured-kicker, .drl-structured-lbl, .drl-step-pip, .drl-step-pip-label,
+.floating-dmg .fct-type-tag, .floating-dmg .fct-mod-tag,
+.ai-turn-pill, .lp-quick-help-btn, .tcc-details-toggle,
+.hex-dest-cover-text, .hex-turn-hud .hth-hint {
+  font-size: var(--v-font-micro, 11px) !important;
 }
 @supports (height: 100dvh) {
   /* 2026-05-12 USER REQUEST: removido cap 960px, prefere 100dvh real */
@@ -10734,18 +10756,18 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     align-items: center;
     gap: 4px;
     font-family: var(--v-font-display, 'Cinzel'), serif;
-    font-size: 7.5px;
+    font-size: var(--v-font-xs, 11px);
     font-weight: 700;
     letter-spacing: 0.5px;
 }
 .ds-row.ds-successes { color: #f7e7b4; }
 .ds-row.ds-failures { color: #ff9999; }
-.ds-lbl { font-size: 7px; opacity: 0.85; text-transform: uppercase; width: 44px; }
+.ds-lbl { font-size: var(--v-font-xs, 11px); opacity: 0.85; text-transform: uppercase; width: auto; min-width: 44px; }
 .ds-dot {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 8px;
+    font-size: var(--v-font-xs, 11px);
     opacity: 0.25;
     transition: all 0.2s ease;
 }
@@ -10770,7 +10792,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     border-radius: 5px;
     padding: 1px 6px;
     font-family: var(--v-font-display, 'Cinzel'), serif;
-    font-size: 8px;
+    font-size: var(--v-font-xs, 11px);
     font-weight: 700;
     color: #c6f6d5;
     z-index: 28;
@@ -10802,11 +10824,11 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     border: 1px solid #c4953a;
     border-radius: 4px;
     font-family: var(--v-font-display, 'Cinzel'), serif;
-    font-size: 7.5px;
+    font-size: var(--v-font-xs, 11px);
     font-weight: 700;
     color: #ffd54f;
     line-height: 1;
-    padding: 1px 3px;
+    padding: 1px 4px;
     z-index: 5;
     box-shadow: 0 1px 3px rgba(0,0,0,0.9);
 }
@@ -10829,7 +10851,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     position: absolute;
     top: -4px;
     left: -4px;
-    font-size: 8px;
+    font-size: var(--v-font-xs, 11px);
     color: #38bdf8;
     filter: drop-shadow(0 0 4px #0284c7);
     z-index: 5;
@@ -10838,7 +10860,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     position: absolute;
     bottom: 2px;
     right: -3px;
-    font-size: 9px;
+    font-size: var(--v-font-xs, 11px);
     color: #f97316;
     font-weight: 800;
     line-height: 1;
@@ -10849,7 +10871,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     position: absolute;
     top: -4px;
     right: 12px;
-    font-size: 8px;
+    font-size: var(--v-font-xs, 11px);
     color: #7dd3fc;
     line-height: 1;
     filter: drop-shadow(0 0 3px #0284c7);
@@ -15131,8 +15153,8 @@ canvas#vfxCanvas,
   bottom: 1px;
   left: 21px;
   right: auto;
-  font-size: 7px;
-  padding: 0 2.5px;
+  font-size: var(--v-font-xs, 11px);
+  padding: 0 3px;
 }
 #turn-queue .tl-node.active > .tl-hp-track {
   display: none;
@@ -15153,7 +15175,7 @@ canvas#vfxCanvas,
 }
 .tl-active-tag {
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 7.5px;
+  font-size: var(--v-font-xs, 11px);
   font-weight: 800;
   letter-spacing: 0.4px;
   text-transform: uppercase;
@@ -15163,19 +15185,19 @@ canvas#vfxCanvas,
 #turn-queue .tl-node.active.t-ally .tl-active-tag { color: #93c5fd; }
 #turn-queue .tl-node.active.t-enemy .tl-active-tag { color: #fca5a5; }
 .tl-active-hp-txt {
-  font-size: 8px;
+  font-size: var(--v-font-xs, 11px);
   font-weight: 700;
   color: #d6cbb9;
   white-space: nowrap;
 }
 .tl-active-name {
-  font-size: 10.5px;
+  font-size: var(--v-font-sm, 12px);
   font-weight: 700;
   color: #fffdf9;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 108px;
+  max-width: 120px;
   margin: 1px 0 2px 0;
 }
 .tl-active-hpbar {
@@ -15209,7 +15231,7 @@ canvas#vfxCanvas,
   background: rgba(196, 149, 58, 0.14);
   border: 1px dashed rgba(196, 149, 58, 0.45);
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 8.5px;
+  font-size: var(--v-font-xs, 11px);
   font-weight: 700;
   color: #d4af37;
   flex-shrink: 0;
@@ -15222,7 +15244,7 @@ canvas#vfxCanvas,
   border-top: 1px solid rgba(196, 149, 58, 0.25);
   border-bottom: 1px solid rgba(196, 149, 58, 0.25);
   padding: 5px 10px;
-  font-size: 11px;
+  font-size: var(--v-font-base, 13px);
   color: var(--v-text, #e6dfd5);
   display: flex;
   align-items: center;
@@ -15250,7 +15272,7 @@ canvas#vfxCanvas,
 .combat-ticker .ticker-tag {
   color: var(--v-gold, #c4953a);
   font-weight: 700;
-  font-size: 10px;
+  font-size: var(--v-font-sm, 12px);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   flex-shrink: 0;
@@ -15260,10 +15282,10 @@ canvas#vfxCanvas,
   text-overflow: ellipsis;
   white-space: nowrap;
   color: #d4c8b0;
-  font-size: 11px;
+  font-size: var(--v-font-base, 13px);
 }
 .combat-ticker .ticker-btn {
-  font-size: 10px;
+  font-size: var(--v-font-sm, 12px);
   font-family: var(--v-font-display, 'Cinzel'), serif;
   font-weight: 700;
   background: rgba(196, 149, 58, 0.18);
@@ -15299,7 +15321,7 @@ canvas#vfxCanvas,
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 10px;
+  font-size: var(--v-font-xs, 11px);
   padding: 0 2px;
   gap: 4px;
   flex-wrap: wrap;
@@ -15312,7 +15334,7 @@ canvas#vfxCanvas,
   border-radius: 4px;
   background: rgba(0,0,0,0.4);
   border: 1px solid rgba(255,255,255,0.08);
-  font-size: 9.5px;
+  font-size: var(--v-font-xs, 11px);
   color: var(--v-text-dim, #9e9182);
   user-select: none;
 }
@@ -15349,7 +15371,7 @@ canvas#vfxCanvas,
   align-items: center;
   justify-content: center;
   gap: 3px;
-  font-size: 10.5px;
+  font-size: var(--v-font-sm, 12px);
   font-family: var(--v-font-display, 'Cinzel'), serif;
   font-weight: 700;
   cursor: pointer;
@@ -15415,7 +15437,7 @@ canvas#vfxCanvas,
   display: block;
 }
 .opt-btn .opt-btn-label {
-  font-size: 9.5px;
+  font-size: var(--v-font-xs, 11px);
   line-height: 1.1;
   white-space: nowrap;
 }
@@ -15423,7 +15445,7 @@ canvas#vfxCanvas,
   position: absolute;
   top: 2px;
   right: 3px;
-  font-size: 8px;
+  font-size: var(--v-font-xs, 11px);
   color: var(--v-gold, #c4953a);
   opacity: 0.8;
 }
@@ -15464,7 +15486,7 @@ canvas#vfxCanvas,
   width: 100%;
   min-height: 36px;
   height: 36px;
-  font-size: 10.5px;
+  font-size: var(--v-font-sm, 12px);
   padding: 4px 7px;
   border-radius: 6px;
   box-sizing: border-box;
@@ -15490,7 +15512,7 @@ canvas#vfxCanvas,
 .sim-tactics-drawer .action-btn .action-btn-res-icon {
   margin-left: auto;
   flex-shrink: 0;
-  font-size: 9px;
+  font-size: var(--v-font-xs, 11px);
   color: var(--v-gold, #c4953a);
   opacity: 0.9;
 }
@@ -15498,7 +15520,7 @@ canvas#vfxCanvas,
   display: inline-block;
   margin-left: 3px;
   padding: 1px 4px;
-  font-size: 9px;
+  font-size: var(--v-font-xs, 11px);
   font-weight: 700;
   color: var(--v-text-dim, #a09484);
   background: rgba(196, 149, 58, 0.14);
@@ -24492,25 +24514,25 @@ function simLogPushTurnHeader(s, unit) {
 function simClassifyLogLineDnd5e(ln) {
     if (!ln || typeof ln !== 'string') return { cat: 'other', badge: '' };
     if (/CRITA|CRÍTICO|NAT 20/i.test(ln)) {
-        return { cat: 'atk', badge: '<span style="background:rgba(212,175,55,0.22);border:1px solid #ffd700;color:#ffd700;border-radius:3px;padding:0 4px;font-size:8.5px;font-weight:700;margin-right:4px;">★ CRÍTICO</span>' };
+        return { cat: 'atk', badge: '<span style="background:rgba(212,175,55,0.22);border:1px solid #ffd700;color:#ffd700;border-radius:3px;padding:1px 5px;font-size:11px;font-weight:700;margin-right:4px;">★ CRÍTICO</span>' };
     }
     if (/AÇÃO LENDÁRIA|RESISTÊNCIA LENDÁRIA/i.test(ln)) {
-        return { cat: 'cond', badge: '<span style="background:rgba(255,165,0,0.22);border:1px solid #ffa500;color:#ffd700;border-radius:3px;padding:0 4px;font-size:8.5px;font-weight:700;margin-right:4px;">👑 LENDÁRIO</span>' };
+        return { cat: 'cond', badge: '<span style="background:rgba(255,165,0,0.22);border:1px solid #ffa500;color:#ffd700;border-radius:3px;padding:1px 5px;font-size:11px;font-weight:700;margin-right:4px;">👑 LENDÁRIO</span>' };
     }
     if (/Sentinela|Resposta|Retaliação|Oportunidade|Reação/i.test(ln)) {
-        return { cat: 'cond', badge: '<span style="background:rgba(52,152,219,0.22);border:1px solid #3498db;color:#85c1e9;border-radius:3px;padding:0 4px;font-size:8.5px;font-weight:700;margin-right:4px;">⚡ REAÇÃO</span>' };
+        return { cat: 'cond', badge: '<span style="background:rgba(52,152,219,0.22);border:1px solid #3498db;color:#85c1e9;border-radius:3px;padding:1px 5px;font-size:11px;font-weight:700;margin-right:4px;">⚡ REAÇÃO</span>' };
     }
     if (/acerta|ataca|golpeia|dispara|morde|arranha|dano/i.test(ln) && !/cura|recupera/i.test(ln)) {
-        return { cat: 'atk', badge: '<span style="background:rgba(231,76,60,0.18);border:1px solid rgba(231,76,60,0.45);color:#ff8a80;border-radius:3px;padding:0 4px;font-size:8.5px;font-weight:700;margin-right:4px;">⚔ ATQ</span>' };
+        return { cat: 'atk', badge: '<span style="background:rgba(231,76,60,0.18);border:1px solid rgba(231,76,60,0.45);color:#ff8a80;border-radius:3px;padding:1px 5px;font-size:11px;font-weight:700;margin-right:4px;">⚔ ATQ</span>' };
     }
     if (/\berra\b|NAT 1|errou/i.test(ln)) {
-        return { cat: 'atk', badge: '<span style="background:rgba(140,140,140,0.18);border:1px solid rgba(160,160,160,0.4);color:#b0a89e;border-radius:3px;padding:0 4px;font-size:8.5px;font-weight:700;margin-right:4px;">✕ ERRO</span>' };
+        return { cat: 'atk', badge: '<span style="background:rgba(140,140,140,0.18);border:1px solid rgba(160,160,160,0.4);color:#b0a89e;border-radius:3px;padding:1px 5px;font-size:11px;font-weight:700;margin-right:4px;">✕ ERRO</span>' };
     }
     if (/cura|recupera|Poção|Retomar o Fôlego|Cura Pelas Mãos/i.test(ln)) {
-        return { cat: 'heal', badge: '<span style="background:rgba(46,204,113,0.18);border:1px solid rgba(46,204,113,0.45);color:#7cdb7c;border-radius:3px;padding:0 4px;font-size:8.5px;font-weight:700;margin-right:4px;">✚ CURA</span>' };
+        return { cat: 'heal', badge: '<span style="background:rgba(46,204,113,0.18);border:1px solid rgba(46,204,113,0.45);color:#7cdb7c;border-radius:3px;padding:1px 5px;font-size:11px;font-weight:700;margin-right:4px;">✚ CURA</span>' };
     }
     if (/\bTR\b|\bCD\b|Salvaguarda|Concentração|Caído|Amedrontad|Envenenad|Cego|Atordoad|Paralisad|Oculto|Esquivar|Desengajar/i.test(ln)) {
-        return { cat: 'cond', badge: '<span style="background:rgba(162,155,254,0.18);border:1px solid rgba(162,155,254,0.45);color:#c3b8ff;border-radius:3px;padding:0 4px;font-size:8.5px;font-weight:700;margin-right:4px;">◈ REGRA</span>' };
+        return { cat: 'cond', badge: '<span style="background:rgba(162,155,254,0.18);border:1px solid rgba(162,155,254,0.45);color:#c3b8ff;border-radius:3px;padding:1px 5px;font-size:11px;font-weight:700;margin-right:4px;">◈ REGRA</span>' };
     }
     return { cat: 'other', badge: '' };
 }
@@ -40831,10 +40853,10 @@ function openCombatLog() {
     var html = '<div class="lp-title">Diário Tático de Combate</div>';
     html += '<div class="lp-sub">Rodada ' + (s.rn || 1) + ' · ' + cntAtk + ' ataques' + (cntCrit ? ' (' + cntCrit + ' ★ crít.)' : '') + ' · ' + cntCond + ' testes/condições</div>';
     html += '<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin:4px 0 6px 0;" data-log-filters>';
-    html += '<button type="button" data-log-filter="all" style="background:rgba(212,175,55,0.25);border:1px solid #d4af37;color:#ffd700;border-radius:4px;padding:2px 7px;font-size:9.5px;font-weight:700;cursor:pointer;">Todos</button>';
-    html += '<button type="button" data-log-filter="atk" style="background:rgba(25,20,16,0.75);border:1px solid rgba(196,149,58,0.35);color:#d4c8b0;border-radius:4px;padding:2px 7px;font-size:9.5px;font-weight:600;cursor:pointer;">⚔ Ataques (' + cntAtk + ')</button>';
-    html += '<button type="button" data-log-filter="heal" style="background:rgba(25,20,16,0.75);border:1px solid rgba(196,149,58,0.35);color:#d4c8b0;border-radius:4px;padding:2px 7px;font-size:9.5px;font-weight:600;cursor:pointer;">✚ Curas (' + cntHeal + ')</button>';
-    html += '<button type="button" data-log-filter="cond" style="background:rgba(25,20,16,0.75);border:1px solid rgba(196,149,58,0.35);color:#d4c8b0;border-radius:4px;padding:2px 7px;font-size:9.5px;font-weight:600;cursor:pointer;">◈ Regras & TRs (' + cntCond + ')</button>';
+    html += '<button type="button" data-log-filter="all" style="background:rgba(212,175,55,0.25);border:1px solid #d4af37;color:#ffd700;border-radius:4px;padding:3px 8px;font-size:11.5px;font-weight:700;cursor:pointer;">Todos</button>';
+    html += '<button type="button" data-log-filter="atk" style="background:rgba(25,20,16,0.75);border:1px solid rgba(196,149,58,0.35);color:#d4c8b0;border-radius:4px;padding:3px 8px;font-size:11.5px;font-weight:600;cursor:pointer;">⚔ Ataques (' + cntAtk + ')</button>';
+    html += '<button type="button" data-log-filter="heal" style="background:rgba(25,20,16,0.75);border:1px solid rgba(196,149,58,0.35);color:#d4c8b0;border-radius:4px;padding:3px 8px;font-size:11.5px;font-weight:600;cursor:pointer;">✚ Curas (' + cntHeal + ')</button>';
+    html += '<button type="button" data-log-filter="cond" style="background:rgba(25,20,16,0.75);border:1px solid rgba(196,149,58,0.35);color:#d4c8b0;border-radius:4px;padding:3px 8px;font-size:11.5px;font-weight:600;cursor:pointer;">◈ Regras & TRs (' + cntCond + ')</button>';
     html += '</div>';
     html += '<div class="lp-log-scroll" data-log-scroll>';
     html += simBuildCombatLogHtml(s, 'all');
@@ -43726,7 +43748,7 @@ function showTargetConfirm(tgtIdx) {
     /* 2026-06-07: retrato WebP (OpenAI) do alvo no popup de confirmação — antes era
        SVG cru (o "lobo tosco"). _combatPortraitHTML resolve a imagem (fallback SVG). */
     var _tccIconHtml = _combatPortraitHTML(_tccIconId, u, _tccUtype) || escHtml(u.ico || '?');
-    var _tccCrBadge = (u.cr != null) ? ' · <span style="color:#d4af37;font-size:10px;">ND ' + escHtml(String(u.cr)) + '</span>' : '';
+    var _tccCrBadge = (u.cr != null) ? ' · <span style="color:#d4af37;font-size:11px;">ND ' + escHtml(String(u.cr)) + '</span>' : '';
     html += '<div class="tcc-preview">';
     html += '<div class="tcc-ico tcc-ico--svg">' + _tccIconHtml + '</div>';
     html += '<div class="tcc-info">';
@@ -43750,24 +43772,24 @@ function showTargetConfirm(tgtIdx) {
         : { bonus: 0, label: null };
     var advBadge = '';
     if (advDetails.state === 'cancelled') {
-        advBadge = ' <span class="badge" style="background:#2d3748;color:#e2e8f0;border:1px solid #718096;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;" title="D&D 5e (PHB p. 173): Vantagem e Desvantagem ativas se anulam mutuamente">⚖️ VANT & DESV ANULADAS</span>';
+        advBadge = ' <span class="badge" style="background:#2d3748;color:#e2e8f0;border:1px solid #718096;padding:1px 6px;border-radius:3px;font-size:11px;font-weight:bold;letter-spacing:0.5px;" title="D&D 5e (PHB p. 173): Vantagem e Desvantagem ativas se anulam mutuamente">⚖️ VANT & DESV ANULADAS</span>';
     } else if (isFlanked) {
-        advBadge = ' <span class="badge adv" style="background:#1b4d24;color:#c6f6d5;border:1px solid #2ecc71;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;" title="Flanqueamento D&D 5e (DMG p. 251): Aliado em posição oposta">▲ FLANQUEADO (VANT)</span>';
+        advBadge = ' <span class="badge adv" style="background:#1b4d24;color:#c6f6d5;border:1px solid #2ecc71;padding:1px 6px;border-radius:3px;font-size:11px;font-weight:bold;letter-spacing:0.5px;" title="Flanqueamento D&D 5e (DMG p. 251): Aliado em posição oposta">▲ FLANQUEADO (VANT)</span>';
     } else if (advMode === 'advantage') {
         var _advShort = (advDetails.advReasons && advDetails.advReasons[0])
             ? (' (' + advDetails.advReasons[0].replace(/ \(PHB.*\)/, '') + ')')
             : '';
-        advBadge = ' <span class="badge adv" style="background:#1b4d24;color:#c6f6d5;border:1px solid #2ecc71;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;" title="' + escHtml((advDetails.advReasons || []).join('; ') || 'Vantagem') + '">▲ VANTAGEM' + escHtml(_advShort) + '</span>';
+        advBadge = ' <span class="badge adv" style="background:#1b4d24;color:#c6f6d5;border:1px solid #2ecc71;padding:1px 6px;border-radius:3px;font-size:11px;font-weight:bold;letter-spacing:0.5px;" title="' + escHtml((advDetails.advReasons || []).join('; ') || 'Vantagem') + '">▲ VANTAGEM' + escHtml(_advShort) + '</span>';
     } else if (advMode === 'disadvantage') {
         var _disShort = (advDetails.disReasons && advDetails.disReasons[0])
             ? (' (' + advDetails.disReasons[0].replace(/ \(PHB.*\)/, '') + ')')
             : '';
-        advBadge = ' <span class="badge dis" style="background:#4a1515;color:#fecaca;border:1px solid #e74c3c;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;" title="' + escHtml((advDetails.disReasons || []).join('; ') || 'Desvantagem') + '">▼ DESVANTAGEM' + escHtml(_disShort) + '</span>';
+        advBadge = ' <span class="badge dis" style="background:#4a1515;color:#fecaca;border:1px solid #e74c3c;padding:1px 6px;border-radius:3px;font-size:11px;font-weight:bold;letter-spacing:0.5px;" title="' + escHtml((advDetails.disReasons || []).join('; ') || 'Desvantagem') + '">▼ DESVANTAGEM' + escHtml(_disShort) + '</span>';
     }
     if (elevMod.bonus > 0) {
-        advBadge += ' <span class="badge adv" style="background:#1b3a4d;color:#bee3f8;border:1px solid #63b3ed;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;" title="Terreno Elevado (+2 no ataque à distância)">⛰️ +' + elevMod.bonus + ' ELEV.</span>';
+        advBadge += ' <span class="badge adv" style="background:#1b3a4d;color:#bee3f8;border:1px solid #63b3ed;padding:1px 6px;border-radius:3px;font-size:11px;font-weight:bold;letter-spacing:0.5px;" title="Terreno Elevado (+2 no ataque à distância)">⛰️ +' + elevMod.bonus + ' ELEV.</span>';
     } else if (elevMod.bonus < 0) {
-        advBadge += ' <span class="badge dis" style="background:#4a2515;color:#fbd38d;border:1px solid #ed8936;padding:1px 6px;border-radius:3px;font-size:9.5px;font-weight:bold;letter-spacing:0.5px;" title="Terreno Baixo (-2 no ataque à distância)">▼ ' + elevMod.bonus + ' ELEV.</span>';
+        advBadge += ' <span class="badge dis" style="background:#4a2515;color:#fbd38d;border:1px solid #ed8936;padding:1px 6px;border-radius:3px;font-size:11px;font-weight:bold;letter-spacing:0.5px;" title="Terreno Baixo (-2 no ataque à distância)">▼ ' + elevMod.bonus + ' ELEV.</span>';
     }
 
     var coverInfo = (typeof simComputeCover === 'function') ? simComputeCover(s, p, u) : { cover: 'none', bonus: 0, blocksLoS: false };
@@ -43811,9 +43833,9 @@ function showTargetConfirm(tgtIdx) {
             html += '<div style="background:linear-gradient(90deg, rgba(234,88,12,0.22), rgba(20,16,12,0.85));border:1px solid rgba(251,146,60,0.6);border-radius:6px;padding:6px 10px;margin-bottom:6px;">'
                 + '<div style="display:flex;justify-content:space-between;align-items:center;">'
                 + '<span style="font-family:Cinzel,serif;font-size:12px;font-weight:800;color:#fdba74;">💥 ' + aoeShapePt.toUpperCase() + ' DE ' + aoeRadiusM + ' (' + aoeGeo.radiusHex + ' hexes)</span>'
-                + '<span style="font-size:9.5px;color:#fed7aa;background:rgba(0,0,0,0.4);border:1px solid rgba(251,146,60,0.4);padding:1px 6px;border-radius:4px;">🎯 ' + nEnemies + ' Alvo(s) Hostil(is)</span>'
+                + '<span style="font-size:11px;color:#fed7aa;background:rgba(0,0,0,0.4);border:1px solid rgba(251,146,60,0.4);padding:1px 6px;border-radius:4px;">🎯 ' + nEnemies + ' Alvo(s) Hostil(is)</span>'
                 + '</div>'
-                + '<div style="font-size:9px;color:#fdba74;opacity:0.9;margin-top:2px;">D&D 5e (PHB p. 204): Afeta todas as criaturas na área a partir do ponto de mira.</div>'
+                + '<div style="font-size:11px;color:#fdba74;opacity:0.9;margin-top:2px;">D&D 5e (PHB p. 204): Afeta todas as criaturas na área a partir do ponto de mira.</div>'
                 + ffWarning
                 + '</div>';
         }
@@ -43825,7 +43847,7 @@ function showTargetConfirm(tgtIdx) {
         html += '<div style="background:linear-gradient(90deg, rgba(' + (_pwkLethal ? '46,204,113,0.22' : '231,76,60,0.22') + '), rgba(20,16,12,0.75));border:1px solid ' + (_pwkLethal ? '#2ecc71' : '#e74c3c') + ';border-radius:6px;padding:6px 10px;margin-bottom:6px;">'
             + '<div style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:' + (_pwkLethal ? '#7cdb7c' : '#ff8585') + ';">'
             + (_pwkLethal ? '☠️ MORTE INSTANTÂNEA (≤ 100 PV)' : '🛡️ ACIMA DO LIMIAR (> 100 PV)') + '</div>'
-            + '<div style="font-size:9.5px;color:#c9b896;">'
+            + '<div style="font-size:11.5px;color:#c9b896;">'
             + (_pwkLethal ? 'Alvo com ' + u.hp + ' PV morre imediatamente sem Teste de Resistência (PHB p. 266).' : 'Alvo tem ' + u.hp + ' PV — a magia não surte efeito acima de 100 PV (PHB p. 266).')
             + '</div></div>';
     } else if (skill && skill.hpThreshold) {
@@ -43833,19 +43855,19 @@ function showTargetConfirm(tgtIdx) {
         html += '<div style="background:linear-gradient(90deg, rgba(' + (_thrOk ? '46,204,113,0.22' : '231,76,60,0.22') + '), rgba(20,16,12,0.75));border:1px solid ' + (_thrOk ? '#2ecc71' : '#e74c3c') + ';border-radius:6px;padding:6px 10px;margin-bottom:6px;">'
             + '<div style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:' + (_thrOk ? '#7cdb7c' : '#ff8585') + ';">'
             + (_thrOk ? '⚡ LIMIAR ATINGIDO (≤ ' + skill.hpThreshold + ' PV)' : '🛡️ ACIMA DO LIMIAR (> ' + skill.hpThreshold + ' PV)') + '</div>'
-            + '<div style="font-size:9.5px;color:#c9b896;">Alvo está com ' + u.hp + ' PV (limiar da magia: ' + skill.hpThreshold + ' PV).</div></div>';
+            + '<div style="font-size:11.5px;color:#c9b896;">Alvo está com ' + u.hp + ' PV (limiar da magia: ' + skill.hpThreshold + ' PV).</div></div>';
     } else if (skill && skill.sleepHpPool) {
         html += '<div style="background:linear-gradient(90deg, rgba(129,140,248,0.22), rgba(20,16,12,0.75));border:1px solid rgba(129,140,248,0.55);border-radius:6px;padding:6px 10px;margin-bottom:6px;">'
             + '<div style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:#c7d2fe;">💤 PISCINA DE PV (' + skill.sleepHpPool.n + 'd' + skill.sleepHpPool.d + ' vs ' + u.hp + ' PV)</div>'
-            + '<div style="font-size:9.5px;color:#b8a9c9;">Sem Salvaguarda: adormece se o total rolado igualar ou superar os PV atuais (PHB p. 276).</div></div>';
+            + '<div style="font-size:11.5px;color:#b8a9c9;">Sem Salvaguarda: adormece se o total rolado igualar ou superar os PV atuais (PHB p. 276).</div></div>';
     } else if (skill && skill.mazeBanish) {
         html += '<div style="background:linear-gradient(90deg, rgba(162,155,254,0.22), rgba(20,16,12,0.75));border:1px solid rgba(162,155,254,0.55);border-radius:6px;padding:6px 10px;margin-bottom:6px;">'
             + '<div style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:#d6bcfa;">🌀 BANIMENTO AUTOMÁTICO (SEM TR)</div>'
-            + '<div style="font-size:9.5px;color:#b8a9c9;">Alvo banido para semiplano labiríntico; exige teste de INT CD 20 para escapar (PHB p. 254).</div></div>';
+            + '<div style="font-size:11.5px;color:#b8a9c9;">Alvo banido para semiplano labiríntico; exige teste de INT CD 20 para escapar (PHB p. 254).</div></div>';
     } else if (isAutoHitSpell) {
         html += '<div style="background:linear-gradient(90deg, rgba(162,155,254,0.22), rgba(20,16,12,0.75));border:1px solid rgba(162,155,254,0.55);border-radius:6px;padding:6px 10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">'
             + '<div><div style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:#d6bcfa;">✦ 100% ACERTO AUTOMÁTICO</div>'
-            + '<div style="font-size:9.5px;color:#b8a9c9;">Infalível (PHB p. 257 — Mísseis Mágicos atingem automaticamente)</div></div>'
+            + '<div style="font-size:11.5px;color:#b8a9c9;">Infalível (PHB p. 257 — Mísseis Mágicos atingem automaticamente)</div></div>'
             + '</div>';
     } else if (isSaveSpell && typeof simCalcSaveFailChanceDnd5e === 'function') {
         var svProb = simCalcSaveFailChanceDnd5e(s, p, u, skill);
@@ -43853,12 +43875,12 @@ function showTargetConfirm(tgtIdx) {
         html += '<div style="background:linear-gradient(90deg, rgba(40,32,20,0.85), rgba(20,16,12,0.75));border:1px solid rgba(212,175,55,0.45);border-radius:6px;padding:6px 10px;margin-bottom:6px;">'
             + '<div style="display:flex;justify-content:space-between;align-items:baseline;">'
             + '<span style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:' + svCol + ';">🎯 ' + svProb.failPct + '% CHANCE DE FALHA NO TR</span>'
-            + '<span style="font-size:9.5px;color:#c9b896;">Alvo resiste com ' + svProb.minRollToSave + '+ no d20</span>'
+            + '<span style="font-size:11.5px;color:#c9b896;">Alvo resiste com ' + svProb.minRollToSave + '+ no d20</span>'
             + '</div>'
             + '<div style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;margin:4px 0;">'
             + '<div style="height:100%;width:' + svProb.failPct + '%;background:' + svCol + ';"></div>'
             + '</div>'
-            + '<div style="font-size:9.5px;color:#a09484;">Salvaguarda do Alvo: <strong style="color:#e8dfc8;">' + escHtml(svProb.breakdown) + '</strong></div>'
+            + '<div style="font-size:11.5px;color:#a09484;">Salvaguarda do Alvo: <strong style="color:#e8dfc8;">' + escHtml(svProb.breakdown) + '</strong></div>'
             + '</div>';
     } else if (!isSaveSpell && typeof simCalcHitChanceDnd5e === 'function') {
         var hitProb = simCalcHitChanceDnd5e(s, p, u, skill);
@@ -43866,12 +43888,12 @@ function showTargetConfirm(tgtIdx) {
         html += '<div style="background:linear-gradient(90deg, rgba(40,32,20,0.85), rgba(20,16,12,0.75));border:1px solid rgba(212,175,55,0.45);border-radius:6px;padding:6px 10px;margin-bottom:6px;">'
             + '<div style="display:flex;justify-content:space-between;align-items:baseline;">'
             + '<span style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:' + hitCol + ';">🎯 ' + hitProb.pct + '% CHANCE DE ACERTO</span>'
-            + '<span style="font-size:9.5px;color:#ffd700;">★ Crítico: ' + hitProb.critPct + '% (d20 ≥ ' + hitProb.critMin + ')</span>'
+            + '<span style="font-size:11.5px;color:#ffd700;">★ Crítico: ' + hitProb.critPct + '% (d20 ≥ ' + hitProb.critMin + ')</span>'
             + '</div>'
             + '<div style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;margin:4px 0;">'
             + '<div style="height:100%;width:' + hitProb.pct + '%;background:' + hitCol + ';"></div>'
             + '</div>'
-            + '<div style="font-size:9.5px;color:#a09484;display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;">'
+            + '<div style="font-size:11.5px;color:#a09484;display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;">'
             + '<span>Rolagem: <strong style="color:#e8dfc8;">' + escHtml(hitProb.atkBreakdown) + '</strong></span>'
             + '<span>Defesa: <strong style="color:#e8dfc8;">' + escHtml(hitProb.acBreakdown) + '</strong> (d20 ≥ ' + hitProb.neededRoll + ')</span>'
             + '</div>'
@@ -43883,38 +43905,38 @@ function showTargetConfirm(tgtIdx) {
     var _hasDirectDmg = (!isSaveSpell ? true : (minDmg > 0 || maxDmg > 0)) && (!pr || !pr.noDamage);
     if (_canonRawDt && _hasDirectDmg) {
         if (immunities.some(function (im) { return String(im).toLowerCase().trim() === _canonRawDt; })) {
-            html += '<div style="background:rgba(180,30,30,0.28);border:1px solid #ff6b6b;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:10.5px;color:#fecaca;font-weight:700;text-align:center;">🚫 ALVO IMUNE A ' + escHtml(dmgTypeInfo.pt.toUpperCase()) + ' — Causará 0 de dano (PHB p. 197)</div>';
+            html += '<div style="background:rgba(180,30,30,0.28);border:1px solid #ff6b6b;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:11.5px;color:#fecaca;font-weight:700;text-align:center;">🚫 ALVO IMUNE A ' + escHtml(dmgTypeInfo.pt.toUpperCase()) + ' — Causará 0 de dano (PHB p. 197)</div>';
         } else if (vulnerabilities.some(function (vl) { return String(vl).toLowerCase().trim() === _canonRawDt; })) {
-            html += '<div style="background:rgba(30,130,60,0.26);border:1px solid #4ade80;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:10.5px;color:#bbf7d0;font-weight:700;text-align:center;">🔥 ALVO VULNERÁVEL A ' + escHtml(dmgTypeInfo.pt.toUpperCase()) + ' — Causará 2× dano (PHB p. 197)</div>';
+            html += '<div style="background:rgba(30,130,60,0.26);border:1px solid #4ade80;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:11.5px;color:#bbf7d0;font-weight:700;text-align:center;">🔥 ALVO VULNERÁVEL A ' + escHtml(dmgTypeInfo.pt.toUpperCase()) + ' — Causará 2× dano (PHB p. 197)</div>';
         } else if (reductions.some(function (rs) { return String(rs).toLowerCase().trim() === _canonRawDt; }) || (typeof _simRacialResists === 'function' && _simRacialResists(u, _canonRawDt))) {
-            html += '<div style="background:rgba(180,120,20,0.22);border:1px solid #fbbf24;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:10.5px;color:#fde68a;font-weight:700;text-align:center;">🛡️ ALVO RESISTENTE A ' + escHtml(dmgTypeInfo.pt.toUpperCase()) + ' — Causará ½ dano (PHB p. 197)</div>';
+            html += '<div style="background:rgba(180,120,20,0.22);border:1px solid #fbbf24;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:11.5px;color:#fde68a;font-weight:700;text-align:center;">🛡️ ALVO RESISTENTE A ' + escHtml(dmgTypeInfo.pt.toUpperCase()) + ' — Causará ½ dano (PHB p. 197)</div>';
         }
     }
     var _condCheckObj = (skill && skill.save && skill.save.onFailApply) || (skill && skill.afterAttackEnemyDebuff) || null;
     if (_condCheckObj && typeof simIsImmuneToCondition === 'function' && simIsImmuneToCondition(u, _condCheckObj)) {
-        html += '<div style="background:rgba(180,30,30,0.28);border:1px solid #ff6b6b;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:10.5px;color:#fecaca;font-weight:700;text-align:center;">🚫 IMUNE À CONDIÇÃO (' + escHtml((_condCheckObj.n || 'Controle').toUpperCase()) + ') — Criatura imune ao efeito</div>';
+        html += '<div style="background:rgba(180,30,30,0.28);border:1px solid #ff6b6b;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:11.5px;color:#fecaca;font-weight:700;text-align:center;">🚫 IMUNE À CONDIÇÃO (' + escHtml((_condCheckObj.n || 'Controle').toUpperCase()) + ') — Criatura imune ao efeito</div>';
     }
     if (skill && skill.requiresTargetTag) {
         var _reqTag = String(skill.requiresTargetTag).toLowerCase();
         var _uTags = [].concat(u.tags || [], u.creatureType ? [u.creatureType] : [], u.type ? [u.type] : []).map(function (t) { return String(t).toLowerCase(); });
         if (_uTags.length > 0 && _uTags.indexOf(_reqTag) === -1) {
-            html += '<div style="background:rgba(180,30,30,0.28);border:1px solid #ff6b6b;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:10.5px;color:#fecaca;font-weight:700;text-align:center;">🚫 TIPO DE CRIATURA INVÁLIDO: Exige alvo ' + escHtml(_reqTag.toUpperCase()) + ' (PHB)</div>';
+            html += '<div style="background:rgba(180,30,30,0.28);border:1px solid #ff6b6b;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:11.5px;color:#fecaca;font-weight:700;text-align:center;">🚫 TIPO DE CRIATURA INVÁLIDO: Exige alvo ' + escHtml(_reqTag.toUpperCase()) + ' (PHB)</div>';
         }
     }
     if (skill && skill.concentration && (p.concentrationSpell || p.concentrating)) {
         var _prevConc = p.concentrationSpell || (p.concentrating && (p.concentrating.spellName || p.concentrating.n)) || 'magia ativa';
-        html += '<div style="background:rgba(30,90,140,0.24);border:1px solid #38bdf8;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:10px;color:#bae6fd;text-align:center;">◈ <strong>Concentração D&D 5e:</strong> Conjurar encerrará <em>' + escHtml(_prevConc) + '</em> (PHB p. 203).</div>';
+        html += '<div style="background:rgba(30,90,140,0.24);border:1px solid #38bdf8;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:11.5px;color:#bae6fd;text-align:center;">◈ <strong>Concentração D&D 5e:</strong> Conjurar encerrará <em>' + escHtml(_prevConc) + '</em> (PHB p. 203).</div>';
     }
     if (isSaveSpell && legRes > 0) {
         var _legRem = Math.max(0, legRes - legResUsed);
         if (_legRem > 0) {
-            html += '<div style="background:rgba(217,119,6,0.22);border:1px solid #f59e0b;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:10px;color:#fde68a;font-weight:700;text-align:center;">👑 RESISTÊNCIA LENDÁRIA: ' + _legRem + '/' + legRes + ' restantes — O alvo pode escolher passar no TR (MM p. 11)</div>';
+            html += '<div style="background:rgba(217,119,6,0.22);border:1px solid #f59e0b;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:11.5px;color:#fde68a;font-weight:700;text-align:center;">👑 RESISTÊNCIA LENDÁRIA: ' + _legRem + '/' + legRes + ' restantes — O alvo pode escolher passar no TR (MM p. 11)</div>';
         } else {
-            html += '<div style="background:rgba(30,130,60,0.22);border:1px solid #4ade80;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:10px;color:#bbf7d0;text-align:center;">👑 Resistências Lendárias Esgotadas (0/' + legRes + ') — O alvo sofrerá o efeito se falhar!</div>';
+            html += '<div style="background:rgba(30,130,60,0.22);border:1px solid #4ade80;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:11.5px;color:#bbf7d0;text-align:center;">👑 Resistências Lendárias Esgotadas (0/' + legRes + ') — O alvo sofrerá o efeito se falhar!</div>';
         }
     }
     if (u.reactionSpent || u.reaction_spent) {
-        html += '<div style="background:rgba(59,130,246,0.18);border:1px solid rgba(96,165,250,0.5);border-radius:4px;padding:3px 8px;margin-bottom:5px;font-size:10px;color:#bfdbfe;text-align:center;">⚡ <strong>Reação Gasta:</strong> Este alvo não pode reagir (sem Escudo Arcano ou Ataque de Oportunidade).</div>';
+        html += '<div style="background:rgba(59,130,246,0.18);border:1px solid rgba(96,165,250,0.5);border-radius:4px;padding:3px 8px;margin-bottom:5px;font-size:11.5px;color:#bfdbfe;text-align:center;">⚡ <strong>Reação Gasta:</strong> Este alvo não pode reagir (sem Escudo Arcano ou Ataque de Oportunidade).</div>';
     }
 
     /* Linhas Essenciais Compactas (Sempre Visíveis) */
@@ -43928,7 +43950,7 @@ function showTargetConfirm(tgtIdx) {
         var dexCoverNote = ((rawAb === 'dex' || saveAb === 'DES') && coverInfo.bonus > 0) ? ' (+ ' + coverInfo.bonus + ' Cobertura no TR)' : '';
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Salvaguarda</span><span class="tcc-dmg-val"><span class="tcc-n-key">TR ' + saveAb + dexCoverNote + '</span> <span class="tcc-vs">vs</span> <span class="tcc-n-ca">CD ' + saveDc + '</span></span></div>';
         if (minDmg > 0 || maxDmg > 0) {
-            html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano (' + escHtml(dmgTypeInfo.pt) + ')</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span> <span style="color:' + dmgTypeInfo.col + ';font-size:10px;">' + dmgTypeInfo.ico + '</span>)</span></div>';
+            html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano (' + escHtml(dmgTypeInfo.pt) + ')</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span> <span style="color:' + dmgTypeInfo.col + ';font-size:11.5px;">' + dmgTypeInfo.ico + '</span>)</span></div>';
         } else if (skill.afterAttackEnemyDebuff || (skill.save && skill.save.onFailApply)) {
             var _effObj = skill.afterAttackEnemyDebuff || skill.save.onFailApply;
             var debuffN = _effObj.n || 'Condição';
@@ -43938,11 +43960,11 @@ function showTargetConfirm(tgtIdx) {
     } else {
         var acDisplay = '<span class="tcc-n-ca">CA ' + effectiveAc + '</span>';
         if (coverInfo.bonus > 0) {
-            acDisplay += ' <span style="font-size:10px;opacity:0.85;">(' + u.ac + ' + ' + coverInfo.bonus + ' ' + (coverInfo.cover === 'half' ? '½ Cobertura' : '¾ Cobertura') + ')</span>';
+            acDisplay += ' <span style="font-size:11px;opacity:0.85;">(' + u.ac + ' + ' + coverInfo.bonus + ' ' + (coverInfo.cover === 'half' ? '½ Cobertura' : '¾ Cobertura') + ')</span>';
         }
         var effAtkVal = (p.atk | 0) + (elevMod.bonus | 0);
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque</span><span class="tcc-dmg-val"><span class="tcc-n-muted">d20</span>' + advBadge + ' + <span class="tcc-n-key">' + effAtkVal + '</span> <span class="tcc-vs">vs</span> ' + acDisplay + '</span></div>';
-        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano (' + escHtml(dmgTypeInfo.pt) + ')</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span> <span style="color:' + dmgTypeInfo.col + ';font-size:10px;">' + dmgTypeInfo.ico + '</span>)</span></div>';
+        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano (' + escHtml(dmgTypeInfo.pt) + ')</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span> <span style="color:' + dmgTypeInfo.col + ';font-size:11.5px;">' + dmgTypeInfo.ico + '</span>)</span></div>';
     }
 
     /* Gaveta Colapsável de Divulgação Progressiva (Detalhes & Matemática D&D 5e sob demanda) */
@@ -44041,9 +44063,9 @@ function showTargetConfirm(tgtIdx) {
 
     if (advDetails.state === 'cancelled') {
         drawerHtml += '<div class="tcc-dmg-row" style="background:rgba(45,55,72,0.35);border:1px solid rgba(113,128,150,0.5);border-radius:4px;padding:5px 8px;margin-top:4px;display:flex;flex-direction:column;gap:3px;">'
-            + '<div style="font-size:10.5px;color:#e2e8f0;font-weight:700;">⚖️ Anulação Mútua D&D 5e (PHB p. 173):</div>'
-            + '<div style="font-size:9.5px;color:#86efac;">▲ <strong>Vantagem:</strong> ' + escHtml(advDetails.advReasons.join('; ')) + '</div>'
-            + '<div style="font-size:9.5px;color:#fca5a5;">▼ <strong>Desvantagem:</strong> ' + escHtml(advDetails.disReasons.join('; ')) + '</div>'
+            + '<div style="font-size:11.5px;color:#e2e8f0;font-weight:700;">⚖️ Anulação Mútua D&D 5e (PHB p. 173):</div>'
+            + '<div style="font-size:11px;color:#86efac;">▲ <strong>Vantagem:</strong> ' + escHtml(advDetails.advReasons.join('; ')) + '</div>'
+            + '<div style="font-size:11px;color:#fca5a5;">▼ <strong>Desvantagem:</strong> ' + escHtml(advDetails.disReasons.join('; ')) + '</div>'
             + '</div>';
     } else if (advDetails.state === 'advantage' && advDetails.advReasons.length > 0) {
         drawerHtml += '<div class="tcc-dmg-row" style="color:#86efac;"><span class="tcc-dmg-lbl">▲ Razão Vantagem</span><span class="tcc-dmg-val">' + escHtml(advDetails.advReasons.join('; ')) + '</span></div>';
@@ -44210,14 +44232,14 @@ function showShoveChoiceModal(targetIdx) {
         var pushSubtitleHtml = '';
         if (shDest) {
             if (shDest.isBlocked) {
-                pushSubtitleHtml = '<span style="display:block;font-size:10px;color:#e74c3c;font-weight:normal;margin-top:2px;">✕ Recuo bloqueado por ' + escHtml(shDest.collisionReason || 'obstáculo') + '</span>';
+                pushSubtitleHtml = '<span style="display:block;font-size:11px;color:#e74c3c;font-weight:normal;margin-top:2px;">✕ Recuo bloqueado por ' + escHtml(shDest.collisionReason || 'obstáculo') + '</span>';
             } else if (shDest.surface) {
                 var sType = String(shDest.surface.type || shDest.surface.surface_type || 'superfície').toUpperCase();
-                pushSubtitleHtml = '<span style="display:block;font-size:10px;color:#ffd54f;font-weight:normal;margin-top:2px;">▲ Alvo será projetado em Superfície (' + escHtml(sType) + ')!</span>';
+                pushSubtitleHtml = '<span style="display:block;font-size:11px;color:#ffd54f;font-weight:normal;margin-top:2px;">▲ Alvo será projetado em Superfície (' + escHtml(sType) + ')!</span>';
             } else if (shDest.hazard) {
-                pushSubtitleHtml = '<span style="display:block;font-size:10px;color:#ffd54f;font-weight:normal;margin-top:2px;">▲ Alvo será projetado em ' + escHtml(shDest.hazard.name || 'Terreno Perigoso') + '!</span>';
+                pushSubtitleHtml = '<span style="display:block;font-size:11px;color:#ffd54f;font-weight:normal;margin-top:2px;">▲ Alvo será projetado em ' + escHtml(shDest.hazard.name || 'Terreno Perigoso') + '!</span>';
             } else {
-                pushSubtitleHtml = '<span style="display:block;font-size:10px;color:#80deea;font-weight:normal;margin-top:2px;">⇥ Trajetória livre (recuo de 1 hexágono)</span>';
+                pushSubtitleHtml = '<span style="display:block;font-size:11px;color:#80deea;font-weight:normal;margin-top:2px;">⇥ Trajetória livre (recuo de 1 hexágono)</span>';
             }
         }
         btnPush.innerHTML = '✔ Empurrar 1,5m para Trás' + pushSubtitleHtml;
