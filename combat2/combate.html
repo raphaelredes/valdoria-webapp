@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T15:14:00Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T15:45:21Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -1676,7 +1676,7 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   align-items: center;
   justify-content: center;
   gap: var(--v-space-md, 10px);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   width: 100%;
   max-width: min(100%, 400px);
   margin: 0 auto var(--v-space-sm, 8px);
@@ -1701,6 +1701,8 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   line-height: 1.25;
   max-width: 100%;
   padding: 0 var(--v-space-xs, 4px);
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 .dice-vs {
   font-family: var(--v-font-display, 'Cinzel'), serif;
@@ -1816,6 +1818,8 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   text-align: center;
   line-height: 1.2;
   opacity: 0.88;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 /* Variante por tipo: leve tint no nome conforme player/ally/enemy */
 .dice-overlay-combatant[data-utype="enemy"] .dice-init-name {
@@ -1881,6 +1885,9 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
     font-weight: 700;
     line-height: 1.35;
     letter-spacing: 0.2px;
+    max-width: 100%;
+    word-break: break-word;
+    box-sizing: border-box;
 }
 .dmg-pill--type {
     background: rgba(0, 0, 0, 0.45);
@@ -1982,10 +1989,15 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
     margin: 2px 0;
     display: flex;
     justify-content: space-between;
+    align-items: baseline;
     gap: 8px;
+    flex-wrap: wrap;
+    word-break: break-word;
 }
 .dmg-math-breakdown-row strong {
     color: var(--v-gold, #c4953a);
+    text-align: right;
+    margin-left: auto;
 }
 /* D&D 5e: Pips visuais de Testes contra a Morte */
 .death-saves-modal-tracker {
@@ -2175,9 +2187,9 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .drl-structured-toggle-btn:hover { background: rgba(196, 149, 58, 0.22); border-color: rgba(196, 149, 58, 0.5); }
 .drl-structured-details-body { display: none; flex-direction: column; gap: 2px; background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(196, 149, 58, 0.2); border-radius: 4px; padding: 4px 8px; margin-top: 4px; text-align: left; animation: ctFade 0.2s ease; width: 100%; box-sizing: border-box; max-height: 160px; overflow-y: auto; overscroll-behavior: contain; }
 .drl-structured-details-body.is-open { display: flex; }
-.drl-details-row { display: flex; justify-content: space-between; font-size: 11px; font-family: var(--v-font, 'MedievalSharp'), serif; color: var(--v-text-dim, #a09484); }
+.drl-details-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; word-break: break-word; font-size: 11px; font-family: var(--v-font, 'MedievalSharp'), serif; color: var(--v-text-dim, #a09484); }
 .drl-details-row span { color: var(--v-text-dim, #a09484); }
-.drl-details-row strong { color: var(--v-text, #f0e6d2); font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; }
+.drl-details-row strong { color: var(--v-text, #f0e6d2); font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; text-align: right; margin-left: auto; }
 .dice-heal-result-stack { display: flex; flex-direction: column; align-items: center; gap: var(--v-space-sm, 8px); width: 100%; max-width: min(100%, 320px); }
 .dice-init-cell-scene.dice-heal-scene-wrap { position: relative; }
 .cell-heal-gain-pill {
@@ -6827,9 +6839,9 @@ details.udc-section--collapsible:not([open]) summary.udc-section-title::after { 
 .flee-info-actions .action-btn { flex: 1; padding: 11px var(--v-space-md, 8px); font-size: calc(12px * var(--v-font-scale, 1)); }
 /* Bloco de previsao de dano + reducoes */
 .tcc-dmg { display: flex; flex-direction: column; gap: var(--v-space-sm, 4px); padding: var(--v-space-md-lg, 10px) var(--v-space-lg, 12px); background: rgba(15,12,8,.4); border: 1px solid var(--v-border, #4a3828); border-radius: 8px; margin-bottom: var(--v-space-lg, 12px); }
-.tcc-dmg-row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--v-space-md-lg, 10px); font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); }
+.tcc-dmg-row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--v-space-md-lg, 10px); flex-wrap: wrap; word-break: break-word; font-family: var(--v-font, 'MedievalSharp'), serif; font-size: var(--v-font-sm, 12px); }
 .tcc-dmg-lbl { color: var(--v-text-dim, #a09484); letter-spacing: 1.2px; text-transform: uppercase; font-size: var(--v-font-sm, 12px); }
-.tcc-dmg-val { color: var(--v-text, #d4c8b0); font-weight: 700; font-family: var(--v-font-display, 'Cinzel'), serif; letter-spacing: 1px; }
+.tcc-dmg-val { color: var(--v-text, #d4c8b0); font-weight: 700; font-family: var(--v-font-display, 'Cinzel'), serif; letter-spacing: 1px; text-align: right; margin-left: auto; }
 .tcc-n-muted { font-size: var(--v-font-sm, 12px); font-weight: 600; color: var(--v-text-dim, #a09484); letter-spacing: 1px; }
 .tcc-n-key { font-size: calc(13px * var(--v-font-scale, 1)); color: var(--v-gold, #c4953a); text-shadow: 0 0 8px rgba(196,149,58,.25); }
 .tcc-n-ca { color: #9ec8f0; font-weight: 800; text-shadow: 0 0 6px rgba(140,180,240,.25); }
@@ -23860,14 +23872,65 @@ function buildCellHtmlForInitDiceOverlay(actor) {
     return '<div class="' + classes + '" data-dice-init-card="1" aria-hidden="true">' + inner + '</div>';
 }
 
+/**
+ * Traduz o tipo de criatura D&D 5e (MM p. 6-7) para rótulo canônico em PT-BR.
+ * Suporta string direta ou objeto da unidade combatente (com tags).
+ */
+function simCreatureTypeLabelPt(val) {
+    if (!val) return '';
+    var raw = '';
+    if (typeof val === 'string') {
+        raw = val;
+    } else if (typeof val === 'object') {
+        raw = val.creatureType || val.creature_type || val.type || val.species || val.kind || '';
+        if (!raw && Array.isArray(val.tags)) {
+            var knownTypes = ['humanoid', 'beast', 'undead', 'monstrosity', 'dragon', 'fiend', 'fey', 'elemental', 'ooze', 'construct', 'plant', 'aberration', 'giant', 'celestial'];
+            for (var i = 0; i < val.tags.length; i++) {
+                var t = String(val.tags[i]).toLowerCase();
+                if (knownTypes.indexOf(t) !== -1) {
+                    raw = t;
+                    break;
+                }
+            }
+        }
+    }
+    if (!raw) return '';
+    var k = String(raw).toLowerCase().trim();
+    var map = {
+        humanoid: 'Humanoide', humanoide: 'Humanoide',
+        beast: 'Fera', fera: 'Fera', animal: 'Fera',
+        undead: 'Morto-vivo', 'morto-vivo': 'Morto-vivo', 'morto vivo': 'Morto-vivo', morto_vivo: 'Morto-vivo',
+        monstrosity: 'Monstruosidade', monstruosidade: 'Monstruosidade', monster: 'Monstro', monstro: 'Monstro',
+        dragon: 'Dragão', dragao: 'Dragão', 'dragão': 'Dragão',
+        fiend: 'Ínfero', infero: 'Ínfero', 'ínfero': 'Ínfero', demon: 'Demônio', devil: 'Diabo',
+        fey: 'Feérico', feerico: 'Feérico', 'feérico': 'Feérico', fada: 'Feérico',
+        elemental: 'Elemental',
+        ooze: 'Gosma', gosma: 'Gosma', limo: 'Gosma',
+        construct: 'Construto', construto: 'Construto',
+        plant: 'Planta', planta: 'Planta',
+        aberration: 'Aberração', aberracao: 'Aberração', 'aberração': 'Aberração',
+        giant: 'Gigante', gigante: 'Gigante',
+        celestial: 'Celestial'
+    };
+    return map[k] || (k.charAt(0).toUpperCase() + k.slice(1));
+}
+
 /** Helper: subtítulo do combatente no overlay — classe + nível (jogador/aliado) ou
-    tier de inimigo. Usado pra contextualizar sem poluir com a cell completa. */
+    tipo/tier de criatura D&D 5e (MM p. 6-7). Usado pra contextualizar sem poluir com a cell completa. */
 function _diceOverlaySubtitleOf(actor) {
     if (!actor) return '';
     var utype = actor.t === 'p' ? 'player' : (actor.t === 'a' ? 'ally' : 'enemy');
     var base;
-    if (utype === 'enemy') base = actor.isBoss ? 'Chefe' : 'Inimigo';
-    else base = actor.cls || 'Aliado';
+    if (utype === 'enemy') {
+        var ctype = typeof simCreatureTypeLabelPt === 'function' ? simCreatureTypeLabelPt(actor) : '';
+        if (actor.isBoss) {
+            base = ctype ? ('Chefe · ' + ctype) : 'Chefe';
+        } else {
+            base = ctype || 'Inimigo';
+        }
+    } else {
+        base = actor.cls || 'Aliado';
+    }
     var lvl = (actor.lvl != null) ? (actor.lvl | 0) : 0;
     if (lvl > 0) return base + ' · Nv ' + lvl;
     return base;
@@ -31071,11 +31134,17 @@ document.addEventListener('click', function (e) {
     }
 }, true);
 
-/** Helper: formata o subtítulo da classe (class tag) do card V8 — classe + nível do combatente.
-    Inimigos sem lvl definido omitem o nível (pools do simulador usam u.hd como nd). */
+/** Helper: formata o subtítulo da classe (class tag) do card V8 — classe + nível do combatente
+    ou tipo de criatura canônico D&D 5e (MM p. 6-7). Inimigos sem lvl definido omitem o nível (pools do simulador usam u.hd como nd). */
 function _v8ClassTagOf(u, utype) {
     if (utype === 'enemy') {
-        var baseE = u.isBoss ? 'Chefe' : 'Inimigo';
+        var ctype = typeof simCreatureTypeLabelPt === 'function' ? simCreatureTypeLabelPt(u) : '';
+        var baseE;
+        if (u && u.isBoss) {
+            baseE = ctype ? ('Chefe · ' + ctype) : 'Chefe';
+        } else {
+            baseE = ctype || 'Inimigo';
+        }
         var lvlE = (u && u.lvl != null) ? (u.lvl | 0) : 0;
         return lvlE > 0 ? baseE + ' · Nv ' + lvlE : baseE;
     }
@@ -33053,8 +33122,13 @@ async function _resolvePassiveSummonAttack(s, summonOrderIdx, targetIdx) {
 
     if (!simShouldSkipDiceForActor(p)) {
         await new Promise(function (done) {
+            var _pairMetaSummon = {
+                left: 'ATQ ' + (atk >= 0 ? '+' : '') + atk + (summon.n ? (' · ' + summon.n) : ''),
+                right: 'CA ' + (target.ac != null ? target.ac : '—')
+            };
             showDice(d20, done, summonActor, null, {
                 combatTarget: target,
+                pairMeta: _pairMetaSummon,
                 /* V1.7 (2026-04-21, QA) — passa vantagem/desvantagem visível
                    (Pack Tactics e outros). */
                 advMode: advMode,
@@ -33138,7 +33212,10 @@ async function _resolvePassiveSummonAttack(s, summonOrderIdx, targetIdx) {
         }
         var dmgTotal = rolls.reduce(function (a, b) { return a + b; }, 0) + (spec.flat | 0);
         if (!simShouldSkipDiceForActor(p)) {
-            await showDamageDice(rolls, spec.d | 0 || 4, crit, summonActor, target, target.hp, Math.max(0, target.hp - dmgTotal), spec.flat | 0);
+            await showDamageDice(rolls, spec.d | 0 || 4, crit, summonActor, target, target.hp, Math.max(0, target.hp - dmgTotal), spec.flat | 0, {
+                skill: summon.n,
+                dmgType: summon.dmgType
+            });
         }
         var oldHp = target.hp;
         applyHpAfterDamage(s, target, oldHp, Math.max(0, oldHp - dmgTotal), { dmgType: summon.dmgType });
@@ -33230,8 +33307,13 @@ async function _resolveAttachedSummonAttack(s, attachedIdx, targetIdx) {
         /* atkBonus do swActor pra render correto do header (ATQ +X). */
         swActor.atk = atk;
         await new Promise(function (done) {
+            var _pairMetaSw = {
+                left: 'ATQ ' + (atk >= 0 ? '+' : '') + atk + (sw.name ? (' · ' + sw.name) : ''),
+                right: 'CA ' + (target.ac != null ? target.ac : '—')
+            };
             showDice(d20, done, swActor, null, {
                 combatTarget: target,
+                pairMeta: _pairMetaSw,
                 postResult: function () {
                     var _kicker = '✨ ATAQUE MÁGICO • ' + escHtml(sw.name).toUpperCase();
                     var _rows = [
@@ -33303,7 +33385,7 @@ async function _resolveAttachedSummonAttack(s, attachedIdx, targetIdx) {
             await showDamageDice(
                 rolls, sw.damageSpec.d, crit, swActor, target,
                 target.hp, Math.max(0, target.hp - dmgTotal), sw.damageSpec.flat,
-                { summonCasterCls: casterClsForPopup }
+                { summonCasterCls: casterClsForPopup, skill: sw.name, dmgType: sw.dmgType }
             );
         }
         var oldHp = target.hp;
@@ -46979,7 +47061,7 @@ function showDice(value, cb, actor, context, opts) {
         } else {
             var ct = opts.combatTarget != null ? opts.combatTarget : null;
             var singleMeta = ct && ct !== actor ? null : (context || null);
-            appendDiceCombatHeader(ov, actor, ct, singleMeta);
+            appendDiceCombatHeader(ov, actor, ct, singleMeta, opts.pairMeta);
         }
     }
     var container = document.createElement('div');
@@ -47541,7 +47623,17 @@ function showDamageDice(rolls, die, crit, actor, target, oldHp, newHp, dmgMod, o
             rb.textContent = 'Rodada ' + currentState.rn;
             ov.appendChild(rb);
         }
-        appendDiceCombatHeader(ov, actor, target, null);
+        var skName = '';
+        if (opts) {
+            if (typeof opts.skill === 'string') skName = opts.skill;
+            else if (opts.skill && (opts.skill.n || opts.skill.name)) skName = opts.skill.n || opts.skill.name;
+            else if (opts.skillName) skName = opts.skillName;
+        }
+        var leftMetaDmg = crit ? (skName ? (skName + ' · ✦ CRÍTICO') : '✦ CRÍTICO') : (skName || 'Dano');
+        var hpCur = (oldHp != null) ? oldHp : (target && target.hp != null ? target.hp : null);
+        var hpMax = (target && target.mhp != null) ? target.mhp : null;
+        var rightMetaDmg = (hpCur != null) ? ('PV ' + hpCur + (hpMax != null ? ('/' + hpMax) : '')) : (target && target.ac != null ? ('CA ' + target.ac) : '—');
+        appendDiceCombatHeader(ov, actor, target, null, { left: leftMetaDmg, right: rightMetaDmg });
         var hasOrbit = !!(opts.magicMissile || opts.variant);
         var diceStage = document.createElement('div');
         diceStage.className = 'mm-dice-stage';
@@ -49878,8 +49970,14 @@ async function playTurn(aIdx, tIdx, opts) {
             var _svPillRowHtml = '<div class="dmg-tactical-pills" style="margin-top:4px;justify-content:center;">' + _svTacticalPills.join(' ') + '</div>';
 
             await new Promise(function (x) {
+                var _svSign = (saveMod >= 0 ? '+' : '') + saveMod;
+                var _pairMetaSave = {
+                    left: 'TR ' + _svAblName + ' (' + _svSign + ')',
+                    right: 'CD ' + saveDc + (atkSkill.n ? (' · ' + atkSkill.n) : '')
+                };
                 showDice(saveRoll, x, target, null, {
                     combatTarget: actor,
+                    pairMeta: _pairMetaSave,
                     skill: atkSkill,
                     advMode: saveAdvMode,
                     advReason: _saveDetails.reason,
@@ -49944,8 +50042,13 @@ async function playTurn(aIdx, tIdx, opts) {
             });
         } else {
             await new Promise(function (x) {
+                var _pairMetaAtk = {
+                    left: 'ATQ +' + atkShown + (atkSkill && atkSkill.n ? (' · ' + atkSkill.n) : ''),
+                    right: 'CA ' + effAc + (_atkCover && _atkCover.bonus > 0 ? (' (+' + _atkCover.bonus + ' Cob.)') : '')
+                };
                 showDice(r, x, actor, null, {
                     combatTarget: target,
+                    pairMeta: _pairMetaAtk,
                     skill: atkSkill,
                     /* V1.7 (2026-04-21, QA) — passa vantagem/desvantagem visível. */
                     advMode: advMode,
@@ -53968,7 +54071,7 @@ async function __combatAnimateOneEvent(ev) {
                         aU || { n: ev.actorName, atk: ev.atk },
                         tU || { n: ev.targetName, hp: ev.oldHp, ac: ev.ac },
                         ev.oldHp | 0, ev.newHp | 0, 0,
-                        { magicMissile: true, dartCount: darts.length || 3, theme: 'force' }
+                        { magicMissile: true, dartCount: darts.length || 3, theme: 'force', skill: 'Mísseis Mágicos' }
                     );
                 } catch (_) {}
             }
@@ -54032,7 +54135,23 @@ async function __combatAnimateOneEvent(ev) {
             var opponent = isSaveRoll ? actorForDice : targetForDice;
             var abLabel = isSaveRoll ? (typeof simAbilityLabelPt === 'function' ? simAbilityLabelPt(ev.saveAbility) : String(ev.saveAbility || 'DES').toUpperCase()) : null;
             var rollTitle = isSaveRoll ? ('TR de ' + abLabel + ' vs CD ' + (ev.saveDc || 10)) : (ev.skillName || null);
-            /* Passa combatTarget pra ativar layout VS (2 combatant blocks lado-a-lado). */
+            /* Passa combatTarget e pairMeta pra ativar layout VS com dados táticos precisos. */
+            var _pairMetaRem;
+            if (isSaveRoll) {
+                var _svSignRem = (ev.saveMod >= 0 ? '+' : '') + (ev.saveMod || 0);
+                _pairMetaRem = {
+                    left: 'TR ' + abLabel + ' (' + _svSignRem + ')',
+                    right: 'CD ' + (ev.saveDc || 10) + (ev.skillName ? (' · ' + ev.skillName) : '')
+                };
+            } else {
+                var _atkSignRem = (ev.atk >= 0 ? '+' : '') + (ev.atk || 0);
+                var _covRem = (ev.coverBonus > 0 ? (' (+' + ev.coverBonus + ' Cob.)') : '');
+                var _acRem = ev.ac != null ? ev.ac : (targetForDice && targetForDice.ac != null ? targetForDice.ac : '—');
+                _pairMetaRem = {
+                    left: 'ATQ ' + _atkSignRem + (ev.skillName ? (' · ' + ev.skillName) : ''),
+                    right: 'CA ' + _acRem + _covRem
+                };
+            }
             await new Promise(function (rD) {
                 try {
                     var _advMode = ev.advMode || ev.adv || (ev.advCancelled ? 'cancelled' : null);
@@ -54041,6 +54160,7 @@ async function __combatAnimateOneEvent(ev) {
                     var _advReason = ev.advReason || (ev.advReasons && ev.advReasons.length && ev.disReasons && ev.disReasons.length ? 'Vantagem e Desvantagem se anulam (PHB p. 173)' : (ev.advReasons && ev.advReasons.length ? ev.advReasons.join(' · ') : (ev.disReasons && ev.disReasons.length ? ev.disReasons.join(' · ') : null)));
                     showDice(rollValueForDice, rD, roller, rollTitle, {
                         combatTarget: opponent,
+                        pairMeta: _pairMetaRem,
                         advMode: _advMode,
                         advRaw1: _raw1,
                         advRaw2: _raw2,
