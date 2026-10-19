@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T14:47:41Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T15:14:00Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -11837,6 +11837,12 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   color: #8c827a;
   text-decoration: line-through;
 }
+.sim-turn-economy-pill.concentration {
+  border-color: rgba(168, 85, 247, 0.7);
+  color: #e9d8fd;
+  background: rgba(107, 33, 168, 0.25);
+  box-shadow: 0 0 8px rgba(168, 85, 247, 0.3);
+}
 .sim-action-dock {
   position: fixed;
   left: 0;
@@ -22213,19 +22219,22 @@ function simCalcSaveFailChanceDnd5e(s, caster, defender, skill) {
             return st && st.autoFailStrDex && (st.turnsLeft == null || st.turnsLeft > 0);
         });
     }
+    var abMap = { 'str': 'FOR', 'dex': 'DES', 'con': 'CON', 'int': 'INT', 'wis': 'SAB', 'cha': 'CAR' };
+    var saveAbPt = abMap[saveAb] || saveAb.toUpperCase();
+
     if (autoFail) {
         return {
             failPct: 100,
             passPct: 0,
             minRollToSave: 20,
-            saveAb: saveAb.toUpperCase(),
+            saveAb: saveAbPt,
             saveDc: saveDc,
             targetSaveMod: totalSaveMod,
             isTargetProf: svInfo.isProf,
             coverBonus: coverBonus,
             paladinAuraBonus: paladinAuraBonus,
             saveAdvState: 'auto_fail',
-            breakdown: 'FALHA AUTOMÁTICA em TR ' + saveAb.toUpperCase() + ' (Alvo incapacitado/paralisado — PHB Apêndice A)'
+            breakdown: 'FALHA AUTOMÁTICA em TR de ' + saveAbPt + ' (Alvo incapacitado/paralisado — PHB Apêndice A)'
         };
     }
 
@@ -22256,14 +22265,14 @@ function simCalcSaveFailChanceDnd5e(s, caster, defender, skill) {
         failPct: failPct,
         passPct: 100 - failPct,
         minRollToSave: Math.min(20, minPassD20),
-        saveAb: saveAb.toUpperCase(),
+        saveAb: saveAbPt,
         saveDc: saveDc,
         targetSaveMod: totalSaveMod,
         isTargetProf: svInfo.isProf,
         coverBonus: coverBonus,
         paladinAuraBonus: paladinAuraBonus,
         saveAdvState: saveAdvState,
-        breakdown: 'Alvo rola 1d20 ' + (totalSaveMod >= 0 ? '+ ' + totalSaveMod : '- ' + Math.abs(totalSaveMod)) + (svInfo.isProf ? ' (Prof.)' : '') + (coverBonus > 0 ? ' (+' + coverBonus + ' Cob.)' : '') + auraNote + advNote + ' vs CD ' + saveDc
+        breakdown: 'Alvo rola 1d20 ' + (totalSaveMod >= 0 ? '+ ' + totalSaveMod : '- ' + Math.abs(totalSaveMod)) + (svInfo.isProf ? ' (Prof.)' : '') + (coverBonus > 0 ? ' (+' + coverBonus + ' Cob.)' : '') + auraNote + advNote + ' vs CD ' + saveDc + ' (' + saveAbPt + ')'
     };
 }
 
@@ -30998,7 +31007,7 @@ function openConditionPopup(payload) {
     if (payload.turnsLeft && (payload.turnsLeft | 0) > 0) {
         dur.textContent = 'Duração: ' + payload.turnsLeft + ' turno' + (payload.turnsLeft > 1 ? 's' : '') + ' restante' + (payload.turnsLeft > 1 ? 's' : '');
     } else if (payload.saveDc) {
-        var ab = (payload.saveAbility || '').toUpperCase() || 'atributo';
+        var ab = (typeof simAbilityLabelPt === 'function' ? simAbilityLabelPt(payload.saveAbility) : (payload.saveAbility || '').toUpperCase()) || 'atributo';
         dur.textContent = 'Até passar em Teste de Resistência ' + ab + ' CD ' + payload.saveDc + ' (fim de cada turno)';
     } else {
         dur.textContent = 'Duração: até resolução narrativa';
@@ -31351,14 +31360,14 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
         tacticalPills.push('<span class="dmg-pill dmg-pill--resist">🛡️ ' + rSrc + ' a ' + escHtml(dtInfo.lb) + ' (½)</span>');
     }
     if (reductionMeta.saveSuccess === true) {
-        var abLabel = String(reductionMeta.saveAbility || 'DES').toUpperCase();
+        var abLabel = (typeof simAbilityLabelPt === 'function') ? simAbilityLabelPt(reductionMeta.saveAbility) : String(reductionMeta.saveAbility || 'DES').toUpperCase();
         var svTxt = reductionMeta.saveNegates ? 'Sucesso (0 Dano)' : 'Sucesso (½)';
         if (reductionMeta.evasion || reductionMeta.evasionUsed) {
             svTxt = 'Sucesso • Evasão (0 Dano)';
         }
         tacticalPills.push('<span class="dmg-pill dmg-pill--save">✦ TR ' + abLabel + ' ' + svTxt + '</span>');
     } else if (reductionMeta.saveSuccess === false) {
-        var abLabel = String(reductionMeta.saveAbility || 'DES').toUpperCase();
+        var abLabel = (typeof simAbilityLabelPt === 'function') ? simAbilityLabelPt(reductionMeta.saveAbility) : String(reductionMeta.saveAbility || 'DES').toUpperCase();
         if (reductionMeta.evasion || reductionMeta.evasionUsed) {
             tacticalPills.push('<span class="dmg-pill dmg-pill--save">✦ TR ' + abLabel + ' Falha • Evasão (½)</span>');
         } else {
@@ -31537,7 +31546,7 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
         rowsHtml += '<div class="dmg-math-breakdown-row"><span>Regra de Área (PHB p. 196):</span><strong>Rolagem única compartilhada por todas as criaturas na área</strong></div>';
     }
     if (reductionMeta && reductionMeta.saveSuccess !== null && reductionMeta.saveSuccess !== undefined) {
-        var abLabel = String(reductionMeta.saveAbility || 'DES').toUpperCase();
+        var abLabel = (typeof simAbilityLabelPt === 'function') ? simAbilityLabelPt(reductionMeta.saveAbility) : String(reductionMeta.saveAbility || 'DES').toUpperCase();
         var svResultTxt = reductionMeta.saveSuccess
             ? (reductionMeta.saveNegates ? 'Sucesso no TR — Efeito anulado (0 dano)' : 'Sucesso no TR — Dano reduzido à metade (½)')
             : 'Falha no TR — Sofre dano pleno';
@@ -33633,6 +33642,23 @@ function _updateActionSheetState(s) {
             pills[3].textContent = '⚡ Reação' + (rxAvail ? '' : ' ✕');
             pills[3].title = rxAvail ? 'Reação pronta (1 por rodada)' : 'Reação já gasta';
         }
+        var concPill = ecoBar.querySelector('.sim-turn-economy-pill.concentration');
+        var curConc = p && (p.concentrationSpell || (p.concentrating && (p.concentrating.spellName || p.concentrating.n)) || null);
+        if (!curConc && p && p.se) {
+            var _cSt = p.se.find(function (st) { return st && (st.concentration || st.concentrating); });
+            if (_cSt) curConc = _cSt.n || _cSt.id;
+        }
+        if (curConc) {
+            if (!concPill) {
+                concPill = document.createElement('span');
+                concPill.className = 'sim-turn-economy-pill concentration';
+                ecoBar.appendChild(concPill);
+            }
+            concPill.textContent = '✦ Conc: ' + curConc;
+            concPill.title = 'D&D 5e (PHB p. 203): Concentrando em ' + curConc + '. Conjurar outra magia de concentração encerrará esta.';
+        } else if (concPill) {
+            concPill.remove();
+        }
     }
     var bonusGrid = document.getElementById('bonus-action-grid');
     if (bonusGrid) {
@@ -35206,11 +35232,20 @@ function render(s) {
                 var bnsAvail = pCur && !pCur.bonusActionSpent;
                 var movLeft = (pCur && pCur.movement_left != null) ? pCur.movement_left : (pCur && pCur.speed ? pCur.speed : 6);
                 var rxAvail = pCur && !(pCur.reactionSpent || pCur.reaction_spent);
+                var concSpell = pCur && (pCur.concentrationSpell || (pCur.concentrating && (pCur.concentrating.spellName || pCur.concentrating.n)) || null);
+                if (!concSpell && pCur && pCur.se) {
+                    var cSt = pCur.se.find(function (st) { return st && (st.concentration || st.concentrating); });
+                    if (cSt) concSpell = cSt.n || cSt.id;
+                }
+                var concPillHtml = concSpell
+                    ? '<span class="sim-turn-economy-pill concentration" title="D&D 5e (PHB p. 203): Concentrando em ' + escHtml(concSpell) + '. Conjurar outra magia de concentração encerrará esta.">✦ Conc: ' + escHtml(concSpell) + '</span>'
+                    : '';
                 html += '<div class="sim-turn-economy-bar" role="status" aria-label="Recursos do Turno D&D 5e">' +
                     '<span class="sim-turn-economy-pill ' + (actAvail ? 'available' : 'spent') + '" title="' + (actAvail ? 'Ação Principal disponível' : 'Ação Principal já gasta') + '">◆ Ação' + (actAvail ? '' : ' ✕') + '</span>' +
                     '<span class="sim-turn-economy-pill ' + (bnsAvail ? 'available' : 'spent') + '" title="' + (bnsAvail ? 'Ação Bônus disponível' : 'Ação Bônus já gasta') + '">▲ Bônus' + (bnsAvail ? '' : ' ✕') + '</span>' +
                     '<span class="sim-turn-economy-pill ' + (movLeft > 0 ? 'available' : 'spent') + '" title="Deslocamento restante no turno">👣 ' + formatHexDistanceMeters(movLeft) + '</span>' +
                     '<span class="sim-turn-economy-pill ' + (rxAvail ? 'available' : 'spent') + '" title="' + (rxAvail ? 'Reação pronta (1 por rodada)' : 'Reação já gasta') + '">⚡ Reação' + (rxAvail ? '' : ' ✕') + '</span>' +
+                    concPillHtml +
                     '</div>';
                 /* X-6.5.51AB (2026-04-26): texto explicativo verboso REMOVIDO.
                    "Sem grade de posicao..." consumia 2-3 linhas a cada abertura
@@ -40183,14 +40218,20 @@ function openSkillHelpMini(overlayEl, skill) {
             .replace(/\b1 action\b/gi, '1 Ação')
             .replace(/\b1 bonus action\b/gi, '1 Ação Bônus')
             .replace(/\bbonus action\b/gi, 'Ação Bônus')
-            .replace(/\bBA\b/g, 'Ação Bônus')
-            .replace(/\bTR DES\b/g, 'TR de Destreza')
-            .replace(/\bTR SAB\b/g, 'TR de Sabedoria')
-            .replace(/\bTR CON\b/g, 'TR de Constituição')
-            .replace(/\bTR INT\b/g, 'TR de Inteligência')
-            .replace(/\bTR FOR\b/g, 'TR de Força')
-            .replace(/\bTR CAR\b/g, 'TR de Carisma')
-            .replace(/\bTRs DES\b/g, 'TRs de Destreza')
+            .replace(/\bTR\s+(?:DES|DEX)\b/gi, 'TR de Destreza')
+            .replace(/\bTR\s+(?:SAB|WIS)\b/gi, 'TR de Sabedoria')
+            .replace(/\bTR\s+(?:CON)\b/gi, 'TR de Constituição')
+            .replace(/\bTR\s+(?:INT)\b/gi, 'TR de Inteligência')
+            .replace(/\bTR\s+(?:FOR|STR)\b/gi, 'TR de Força')
+            .replace(/\bTR\s+(?:CAR|CHA)\b/gi, 'TR de Carisma')
+            .replace(/\bTRs\s+(?:DES|DEX)\b/gi, 'TRs de Destreza')
+            .replace(/\bTRs\s+(?:FOR|STR)\b/gi, 'TRs de Força')
+            .replace(/\bSave\s+(?:DEX|DES)\b/gi, 'TR de Destreza')
+            .replace(/\bSave\s+(?:WIS|SAB)\b/gi, 'TR de Sabedoria')
+            .replace(/\bSave\s+(?:CON)\b/gi, 'TR de Constituição')
+            .replace(/\bSave\s+(?:INT)\b/gi, 'TR de Inteligência')
+            .replace(/\bSave\s+(?:STR|FOR)\b/gi, 'TR de Força')
+            .replace(/\bSave\s+(?:CHA|CAR)\b/gi, 'TR de Carisma')
             .replace(/\(só Attack, Dash, Disengage, Hide, ou Use an Object\)/gi, '(apenas Atacar, Disparar, Desengajar, Esconder-se ou Usar Objeto)')
             .trim();
         if (!trimmed) return;
@@ -40555,12 +40596,10 @@ function _buildSkillListHtml(skills, filter, resIco, resValue, page, pageSize) {
                 tacMetaParts.push('<span style="color:#90caf9;font-weight:700;">' + mmCnt + '× (1d4+1) Energia · Auto-Acerto</span>');
             } else if (typeof simTargetAttackDamagePreview === 'function' && pCur) {
                 var skPr = simTargetAttackDamagePreview(pCur, sk);
-                var dtInf = (typeof simDmgTypeInfoPt === 'function') ? simDmgTypeInfoPt(sk.dmgType || 'slashing') : { lb: 'Dano', ico: '⚔️', col: '#ffd54f' };
-                tacMetaParts.push('<span style="color:' + dtInf.col + ';font-weight:700;">' + escHtml(skPr.dmgFormula) + ' ' + dtInf.ico + ' ' + escHtml(dtInf.lb) + '</span>');
-            }
-            if (sk.save && sk.save.ability) {
-                var skDc = (sk.save.dc | 0) || (typeof simSpellSaveDc === 'function' && pCur ? simSpellSaveDc(pCur) : 13);
-                tacMetaParts.push('<span style="color:#ffd54f;">TR ' + escHtml(String(sk.save.ability).toUpperCase()) + ' CD ' + skDc + '</span>');
+                if (!skPr.noDamage) {
+                    var dtInf = (typeof simDmgTypeInfoPt === 'function') ? simDmgTypeInfoPt(sk.dmgType || 'slashing') : { lb: 'Dano', ico: '⚔️', col: '#ffd54f' };
+                    tacMetaParts.push('<span style="color:' + dtInf.col + ';font-weight:700;">' + escHtml(skPr.dmgFormula) + ' ' + dtInf.ico + ' ' + escHtml(dtInf.lb) + '</span>');
+                }
             }
         } else if (sk.kind === 'heal' && sk.healSpec) {
             var hs = sk.healSpec;
@@ -40568,6 +40607,15 @@ function _buildSkillListHtml(skills, filter, resIco, resValue, page, pageSize) {
             tacMetaParts.push('<span style="color:#81c784;font-weight:700;">💚 ' + escHtml(hForm) + (sk.tempHp ? ' PV Temp' : ' PV') + '</span>');
         } else if (sk.buffSim && sk.buffSim.turns) {
             tacMetaParts.push('<span style="color:#b39ddb;">⏱ ' + sk.buffSim.turns + ' rodadas</span>');
+        }
+        var saveAbRaw = (sk.save && sk.save.ability) ? sk.save.ability : (sk.saveAbility || null);
+        if (saveAbRaw) {
+            var abPt = (typeof simAbilityLabelPt === 'function') ? simAbilityLabelPt(saveAbRaw) : String(saveAbRaw).toUpperCase();
+            var skDc = (sk.save && sk.save.dc | 0) || (typeof simSpellSaveDc === 'function' && pCur ? simSpellSaveDc(pCur) : 13);
+            tacMetaParts.push('<span style="color:#ffd54f;font-weight:700;">TR ' + escHtml(abPt) + ' CD ' + skDc + '</span>');
+        }
+        if (sk.afterAttackEnemyDebuff && sk.afterAttackEnemyDebuff.n) {
+            tacMetaParts.push('<span style="color:#ef5350;font-weight:700;">' + escHtml(sk.afterAttackEnemyDebuff.ico || '🔒') + ' ' + escHtml(sk.afterAttackEnemyDebuff.n) + '</span>');
         }
         if (typeof formatDndActionReach === 'function' && pCur) {
             var rMeta = formatDndActionReach(pCur, sk);
@@ -40673,15 +40721,20 @@ function _buildSkillButtonsGridHtml(skills, filter, resIco, resValue) {
         previewParts.push(actLabel);
         if (sk.damageSpec && typeof simTargetAttackDamagePreview === 'function' && pCur) {
             var _skPr = simTargetAttackDamagePreview(pCur, sk);
-            if (_skPr && _skPr.dmgFormula) previewParts.push(_skPr.dmgFormula);
+            if (_skPr && _skPr.dmgFormula && !_skPr.noDamage) previewParts.push(_skPr.dmgFormula);
         } else if (sk.healSpec) {
             var _hs = sk.healSpec;
             var _hForm = (_hs.n > 0 && _hs.d > 0) ? (_hs.n + 'd' + _hs.d + (_hs.flat ? '+' + _hs.flat : '')) : ('+' + (_hs.flat || 5));
             previewParts.push('💚 ' + _hForm);
         }
-        if (sk.save && sk.save.ability) {
-            var _skDc = (sk.save.dc | 0) || (typeof simSpellSaveDc === 'function' && pCur ? simSpellSaveDc(pCur) : 13);
-            previewParts.push('TR ' + String(sk.save.ability).toUpperCase() + ' CD ' + _skDc);
+        var _gridSaveAb = (sk.save && sk.save.ability) ? sk.save.ability : (sk.saveAbility || null);
+        if (_gridSaveAb) {
+            var _skAb = (typeof simAbilityLabelPt === 'function') ? simAbilityLabelPt(_gridSaveAb) : String(_gridSaveAb).toUpperCase();
+            var _skDc = (sk.save && sk.save.dc | 0) || (typeof simSpellSaveDc === 'function' && pCur ? simSpellSaveDc(pCur) : 13);
+            previewParts.push('TR ' + _skAb + ' CD ' + _skDc);
+        }
+        if (sk.afterAttackEnemyDebuff && sk.afterAttackEnemyDebuff.n) {
+            previewParts.push((sk.afterAttackEnemyDebuff.ico || '🔒') + ' ' + sk.afterAttackEnemyDebuff.n);
         }
         if (typeof formatDndActionReach === 'function' && pCur) {
             var _rMeta = formatDndActionReach(pCur, sk);
@@ -42596,6 +42649,9 @@ function simTargetAttackDamagePreview(p, skill) {
     var n = 1;
     var die = (p.die | 0) || 8;
     if (spec && spec.n != null && spec.d != null) {
+        if ((spec.n | 0) === 0 && (spec.d | 0) === 0 && !(spec.flat | 0)) {
+            return { dmgFormula: 'Sem Dano', critFormula: 'Sem Dano', minDmg: 0, maxDmg: 0, critMin: 0, critMax: 0, noDamage: true };
+        }
         n = spec.n | 0;
         die = spec.d | 0;
         if (n < 1) n = 1;
@@ -42612,7 +42668,7 @@ function simTargetAttackDamagePreview(p, skill) {
     var maxDmg = n * die + flat + mod;
     var critMin = critN + flat + mod;
     var critMax = critN * die + flat + mod;
-    return { dmgFormula: dmgFormula, critFormula: critFormula, minDmg: minDmg, maxDmg: maxDmg, critMin: critMin, critMax: critMax };
+    return { dmgFormula: dmgFormula, critFormula: critFormula, minDmg: minDmg, maxDmg: maxDmg, critMin: critMin, critMax: critMax, noDamage: false };
 }
 
 /* Popup de confirmacao de alvo: mostra card mini do alvo acima,
@@ -42828,7 +42884,7 @@ function showTargetConfirm(tgtIdx) {
 
     /* Alertas Contextuais Inteligentes D&D 5e (Exibidos imediatamente quando relevantes para a ação atual) */
     var _canonRawDt = String(rawDmgType || '').toLowerCase().trim();
-    var _hasDirectDmg = (!isSaveSpell || minDmg > 0 || maxDmg > 0 || (skill && skill.damageSpec));
+    var _hasDirectDmg = (!isSaveSpell ? true : (minDmg > 0 || maxDmg > 0)) && (!pr || !pr.noDamage);
     if (_canonRawDt && _hasDirectDmg) {
         if (immunities.some(function (im) { return String(im).toLowerCase().trim() === _canonRawDt; })) {
             html += '<div style="background:rgba(180,30,30,0.28);border:1px solid #ff6b6b;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:10.5px;color:#fecaca;font-weight:700;text-align:center;">🚫 ALVO IMUNE A ' + escHtml(dmgTypeInfo.pt.toUpperCase()) + ' — Causará 0 de dano (PHB p. 197)</div>';
@@ -42870,9 +42926,10 @@ function showTargetConfirm(tgtIdx) {
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Distância</span><span class="tcc-dmg-val">' + distStr + reachStatusBadge + '</span></div>';
     }
     if (isSaveSpell) {
-        var saveAb = (skill.save.ability || 'con').toUpperCase();
+        var rawAb = String((skill.save && skill.save.ability) || skill.saveAbility || 'con').toLowerCase();
+        var saveAb = (typeof simAbilityLabelPt === 'function') ? simAbilityLabelPt(rawAb) : rawAb.toUpperCase();
         var saveDc = (skill.save.dc | 0) || (typeof simSpellSaveDc === 'function' ? simSpellSaveDc(p) : 13);
-        var dexCoverNote = (saveAb === 'DEX' && coverInfo.bonus > 0) ? ' (+ ' + coverInfo.bonus + ' Cobertura no TR)' : '';
+        var dexCoverNote = ((rawAb === 'dex' || saveAb === 'DES') && coverInfo.bonus > 0) ? ' (+ ' + coverInfo.bonus + ' Cobertura no TR)' : '';
         html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Salvaguarda</span><span class="tcc-dmg-val"><span class="tcc-n-key">TR ' + saveAb + dexCoverNote + '</span> <span class="tcc-vs">vs</span> <span class="tcc-n-ca">CD ' + saveDc + '</span></span></div>';
         if (minDmg > 0 || maxDmg > 0) {
             html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano (' + escHtml(dmgTypeInfo.pt) + ')</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span> <span style="color:' + dmgTypeInfo.col + ';font-size:10px;">' + dmgTypeInfo.ico + '</span>)</span></div>';
@@ -54668,7 +54725,7 @@ async function __combatAnimateOneEvent(ev) {
         }
         if (elH) elH.classList.add('heal-flash');
         setTimeout(function () { if (elH) elH.classList.remove('heal-flash'); }, 620);
-        /* X-6.5.51AD fix (2026-05-07): heal float label correto.
+        /* X-6.5.51AD fix (2026-05-07): heal float label correto com clamping viewport mobile.
            _spawnFloatingDmgNumber é só pra dano (cor vermelha). Heal usa
            cell-float-label.heal (verde, sobe do card). */
         if (elH && (ev.healGained | 0) > 0) {
@@ -54677,7 +54734,7 @@ async function __combatAnimateOneEvent(ev) {
                 var _hLbl = document.createElement('div');
                 _hLbl.className = 'cell-float-label heal';
                 _hLbl.textContent = '+' + (ev.healGained | 0) + ' PV';
-                _hLbl.style.left = (_hRect.left + _hRect.width / 2) + 'px';
+                _hLbl.style.left = Math.max(32, Math.min((window.innerWidth || 360) - 32, _hRect.left + _hRect.width / 2)) + 'px';
                 _hLbl.style.top = (_hRect.top - 8) + 'px';
                 _hLbl.style.setProperty('animation-duration', '1.4s', 'important');
                 _hLbl.style.setProperty('animation-iteration-count', '1', 'important');
@@ -54709,7 +54766,7 @@ async function __combatAnimateOneEvent(ev) {
                     var _bhLbl = document.createElement('div');
                     _bhLbl.className = 'cell-float-label heal';
                     _bhLbl.textContent = '+' + (ev.blessedHealerGained | 0) + ' PV';
-                    _bhLbl.style.left = (_bhRect.left + _bhRect.width / 2) + 'px';
+                    _bhLbl.style.left = Math.max(32, Math.min((window.innerWidth || 360) - 32, _bhRect.left + _bhRect.width / 2)) + 'px';
                     _bhLbl.style.top = (_bhRect.top - 8) + 'px';
                     _bhLbl.style.setProperty('animation-duration', '1.4s', 'important');
                     _bhLbl.style.setProperty('animation-iteration-count', '1', 'important');
@@ -54929,7 +54986,7 @@ async function __combatAnimateOneEvent(ev) {
                     var _iLbl = document.createElement('div');
                     _iLbl.className = 'cell-float-label heal';
                     _iLbl.textContent = '+' + (ev.healGained | 0) + ' PV';
-                    _iLbl.style.left = (_iRect.left + _iRect.width / 2) + 'px';
+                    _iLbl.style.left = Math.max(32, Math.min((window.innerWidth || 360) - 32, _iRect.left + _iRect.width / 2)) + 'px';
                     _iLbl.style.top = (_iRect.top - 8) + 'px';
                     _iLbl.style.setProperty('animation-duration', '1.4s', 'important');
                     _iLbl.style.setProperty('animation-iteration-count', '1', 'important');
@@ -55208,7 +55265,8 @@ async function __combatAnimateOneEvent(ev) {
                 _lblTxt = '👑 AÇÃO LENDÁRIA: ' + _laName + '!' + _laRem;
                 _lblTone = 'buff';
             } else if (kind === 'save_result') {
-                var _svAb = String(ev.saveAbility || ev.ability || ev.save || 'TR').toUpperCase();
+                var _svRaw = ev.saveAbility || ev.ability || ev.save || 'TR';
+                var _svAb = (typeof simAbilityLabelPt === 'function') ? simAbilityLabelPt(_svRaw) : String(_svRaw).toUpperCase();
                 var _svTot = ev.total != null ? ev.total : ev.saveTotal;
                 var _svDc = ev.dc != null ? ev.dc : ev.saveDc;
                 var _svScore = (_svTot != null && _svDc != null) ? ' [' + _svTot + ' vs CD ' + _svDc + ']' : '';
