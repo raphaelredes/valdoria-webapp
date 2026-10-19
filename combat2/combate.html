@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T07:05:29Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T07:18:44Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -22437,7 +22437,34 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             newHp = oldHp - reduced;
             damageApplied = reduced;
             if (s && s.log) s.log.push(target.n + ' usa Reflexos Evasivos: ' + _origDmg + ' → ' + reduced + ' dano (−' + diff + ' evasão).');
+            try {
+                var _evUid = target.id || (target.t === 'p' ? 'player' : (target.t === 'e' ? 'enemy_' + (s && s.order ? s.order.indexOf(target) : '') : ''));
+                var _evEl = _evUid ? document.querySelector('[data-unit-id="' + _evUid + '"]') : null;
+                if (_evEl && typeof spawnSkillImpactLabel === 'function') {
+                    if (reduced === 0) {
+                        spawnSkillImpactLabel(_evEl, '🛡️ EVASÃO (0 DANO)!', 'buff');
+                    } else {
+                        spawnSkillImpactLabel(_evEl, '🛡️ EVASÃO (½ DANO)!', 'buff');
+                    }
+                }
+            } catch (_eEv) {}
+        } else if (dmgMeta.saveHalved && damageApplied > 0) {
+            try {
+                var _shUid = target.id || (target.t === 'p' ? 'player' : (target.t === 'e' ? 'enemy_' + (s && s.order ? s.order.indexOf(target) : '') : ''));
+                var _shEl = _shUid ? document.querySelector('[data-unit-id="' + _shUid + '"]') : null;
+                if (_shEl && typeof spawnSkillImpactLabel === 'function') {
+                    spawnSkillImpactLabel(_shEl, '🛡️ TR PASSOU (½ DANO)!', 'buff');
+                }
+            } catch (_eSh) {}
         }
+    } else if (dmgMeta.saveNegated) {
+        try {
+            var _snUid = target.id || (target.t === 'p' ? 'player' : (target.t === 'e' ? 'enemy_' + (s && s.order ? s.order.indexOf(target) : '') : ''));
+            var _snEl = _snUid ? document.querySelector('[data-unit-id="' + _snUid + '"]') : null;
+            if (_snEl && typeof spawnSkillImpactLabel === 'function') {
+                spawnSkillImpactLabel(_snEl, '🛡️ TR PASSOU (0 DANO)!', 'buff');
+            }
+        } catch (_eSn) {}
     }
     /* V1.7 Sprint-8 (2026-04-21 closeout POLISH) — Sleep:
        "The effect also ends if the creature takes damage."
@@ -38864,15 +38891,44 @@ function _buildSkillListHtml(skills, filter, resIco, resValue, page, pageSize) {
         } else if (sk.buffSim && sk.buffSim.turns) {
             tacMetaParts.push('<span style="color:#b39ddb;">⏱ ' + sk.buffSim.turns + ' rodadas</span>');
         }
-        if (typeof formatDndActionReach === 'function' && pCur && sk.kind === 'attack') {
+        if (typeof formatDndActionReach === 'function' && pCur) {
             var rMeta = formatDndActionReach(pCur, sk);
-            if (rMeta && rMeta.meters) tacMetaParts.push('<span>⌖ ' + escHtml(rMeta.meters) + '</span>');
+            if (rMeta) {
+                if (rMeta.isSelf) {
+                    tacMetaParts.push('<span>⌖ Pessoal</span>');
+                } else if (rMeta.meters) {
+                    tacMetaParts.push('<span>⌖ ' + escHtml(rMeta.meters) + '</span>');
+                }
+            }
+        }
+        var skNameLow = sk.n ? String(sk.n).toLowerCase() : '';
+        var isSkillAoe = !!(sk && (
+            sk.fireball || sk.aoeRadius || sk.radiusHexes || sk.isAoe || sk.aoe ||
+            sk.coneOfCold || sk.spiritGuardians || sk.sleepPool ||
+            sk.shape === 'cone' || sk.shape === 'line' || sk.shape === 'cube' ||
+            skNameLow.indexOf('mãos flamejantes') >= 0 || skNameLow.indexOf('sopro') >= 0 ||
+            skNameLow.indexOf('onda de trovão') >= 0 || skNameLow.indexOf('relâmpago') >= 0 ||
+            skNameLow.indexOf('fogo feérico') >= 0 || skNameLow.indexOf('despedaçar') >= 0 ||
+            skNameLow.indexOf('crescimento espinhoso') >= 0 || skNameLow.indexOf('sono') >= 0
+        ));
+        if (isSkillAoe && typeof simComputeSkillAoeGeometry === 'function' && pCur) {
+            var aoeG = simComputeSkillAoeGeometry(pCur, (pCur.pos ? pCur.pos.col : 0), (pCur.pos ? pCur.pos.row : 0), sk);
+            if (aoeG && aoeG.radiusHex > 0) {
+                var aoeShp = aoeG.aoeShape;
+                var shpIco = (aoeShp === 'cone') ? '◢' : ((aoeShp === 'line') ? '═' : ((aoeShp === 'cube') ? '❖' : '◈'));
+                var shpName = (aoeShp === 'cone') ? 'Cone' : ((aoeShp === 'line') ? 'Linha' : ((aoeShp === 'cube') ? 'Cubo' : 'Esfera'));
+                var aoeDist = formatHexDistanceMeters(aoeG.radiusHex);
+                tacMetaParts.push('<span style="color:#ffb74d;font-weight:700;">' + shpIco + ' ' + shpName + ' ' + aoeDist + '</span>');
+            }
         }
         if (sk.concentration) {
             tacMetaParts.push('<span style="color:#a5d6a7;font-weight:700;" title="Exige Concentração D&D 5e (PHB p.203)">◈ Conc.</span>');
         }
         if (sk.scale === 'cantrip') {
             tacMetaParts.push('<span style="color:#ce93d8;">Truque</span>');
+        }
+        if (sk.ritual) {
+            tacMetaParts.push('<span style="color:#80deea;font-weight:700;" title="Pode ser conjurada como Ritual (PHB p. 201)">📜 Ritual</span>');
         }
         var tacLineHtml = tacMetaParts.length
             ? '<div class="lp-item-dnd-meta" style="font-size:9.5px;color:var(--v-text-dim,#b5a692);display:flex;flex-wrap:wrap;gap:6px;margin-top:1px;line-height:1.2;">' + tacMetaParts.join('<span style="opacity:0.45;">·</span>') + '</div>'
@@ -38934,7 +38990,28 @@ function _buildSkillButtonsGridHtml(skills, filter, resIco, resValue) {
             : '<span class="lp-qb-cost-val">0</span>';
         var costBadgeHtml = '<span class="lp-qb-cost-badge' + (canUse ? '' : ' cant') + '">' + costBadgeInner + '</span>';
         var fullTitle = (sk.n || 'Habilidade') + ' (' + costTxt + ' · ' + actLabel + ')' + (blockReason ? ' — ' + blockReason : '');
-        var previewText = (sk.n || '') + '  ·  ' + costTxt + '  ·  ' + actLabel + (blockReason ? ' (' + blockReason + ')' : '');
+        var previewParts = [sk.n || 'Habilidade'];
+        if (costTxt && costTxt !== '0') previewParts.push(costTxt);
+        previewParts.push(actLabel);
+        if (sk.damageSpec && typeof simTargetAttackDamagePreview === 'function' && pCur) {
+            var _skPr = simTargetAttackDamagePreview(pCur, sk);
+            if (_skPr && _skPr.dmgFormula) previewParts.push(_skPr.dmgFormula);
+        } else if (sk.healSpec) {
+            var _hs = sk.healSpec;
+            var _hForm = (_hs.n > 0 && _hs.d > 0) ? (_hs.n + 'd' + _hs.d + (_hs.flat ? '+' + _hs.flat : '')) : ('+' + (_hs.flat || 5));
+            previewParts.push('💚 ' + _hForm);
+        }
+        if (sk.save && sk.save.ability) {
+            var _skDc = (sk.save.dc | 0) || (typeof simSpellSaveDc === 'function' && pCur ? simSpellSaveDc(pCur) : 13);
+            previewParts.push('TR ' + String(sk.save.ability).toUpperCase() + ' CD ' + _skDc);
+        }
+        if (typeof formatDndActionReach === 'function' && pCur) {
+            var _rMeta = formatDndActionReach(pCur, sk);
+            if (_rMeta && _rMeta.meters && !_rMeta.isSelf) previewParts.push('⌖ ' + _rMeta.meters);
+        }
+        if (sk.concentration) previewParts.push('◈ Conc.');
+        if (blockReason) previewParts.push('(' + blockReason + ')');
+        var previewText = previewParts.join('  ·  ');
 
         html += '<div class="lp-quick-item" data-cat="' + cat + '" data-skill-preview="' + escHtml(previewText) + '">';
         html += '<button type="button" class="lp-quick-btn lp-item--' + theme + (canUse ? '' : ' disabled') + '" data-skill="' + i + '"' + (canUse ? '' : ' disabled') + ' title="' + escHtml(fullTitle) + '">';
@@ -47541,7 +47618,14 @@ async function playTurn(aIdx, tIdx, opts) {
             } else if (saveAdvMode === 'disadvantage') {
                 _svTacticalPills.push('<span class="dmg-pill dmg-pill--crit">⚠️ Desvantagem no TR</span>');
             }
-            if (saveSuccess) {
+            var hasEvasion = (target.se || []).some(function (st) { return st && st.halfDmgDexSaveOnly; });
+            if (hasEvasion && _svAb === 'dex') {
+                if (saveSuccess) {
+                    _svTacticalPills.push('<span class="dmg-pill dmg-pill--resist">🛡️ Evasão: 0 Dano (PHB p. 96)</span>');
+                } else {
+                    _svTacticalPills.push('<span class="dmg-pill dmg-pill--resist">🛡️ Evasão: Metade do Dano (½, PHB p. 96)</span>');
+                }
+            } else if (saveSuccess) {
                 _svTacticalPills.push('<span class="dmg-pill dmg-pill--resist">✓ ' + (atkSkill.saveNegates ? 'Anulado (0 Dano)' : 'Metade do Dano (½)') + '</span>');
             } else {
                 _svTacticalPills.push('<span class="dmg-pill dmg-pill--crit">✗ Dano Integral</span>');
@@ -47569,9 +47653,16 @@ async function playTurn(aIdx, tIdx, opts) {
                         _rows.push({ l: 'Total', v: String(saveTotal) });
                         _rows.push({ l: 'CD Alvo', v: String(saveDc) });
 
-                        var _note = saveSuccess
-                            ? (atkSkill.saveNegates ? 'Passou na salvaguarda — Anulou o efeito (0 Dano, D&D 5e PHB p. 196).' : 'Passou na salvaguarda — Sofre metade do dano (½, D&D 5e PHB p. 196).')
-                            : 'Falhou na salvaguarda — Sofre dano integral (D&D 5e PHB p. 196).';
+                        var _note = '';
+                        if (hasEvasion && _svAb === 'dex') {
+                            _note = saveSuccess
+                                ? 'Passou na salvaguarda — Evasão reduz o dano a zero (0 Dano, D&D 5e PHB p. 96)!'
+                                : 'Falhou na salvaguarda — Evasão reduz o dano à metade (½ Dano, D&D 5e PHB p. 96)!';
+                        } else {
+                            _note = saveSuccess
+                                ? (atkSkill.saveNegates ? 'Passou na salvaguarda — Anulou o efeito (0 Dano, D&D 5e PHB p. 196).' : 'Passou na salvaguarda — Sofre metade do dano (½, D&D 5e PHB p. 196).')
+                                : 'Falhou na salvaguarda — Sofre dano integral (D&D 5e PHB p. 196).';
+                        }
 
                         var _detailsRows = [
                             { l: 'Habilidade', v: atkSkill.n || 'Magia' },
@@ -47623,7 +47714,7 @@ async function playTurn(aIdx, tIdx, opts) {
                         var _title = '';
                         var _cls = '';
                         if (hitRes.crit) {
-                            _title = 'ACERTO CRÍTICO' + _oaSuffix;
+                            _title = (hitRes.autoCritNear ? 'ACERTO CRÍTICO (ALVO INDEFESO)' : 'ACERTO CRÍTICO') + _oaSuffix;
                             _cls = 'crit';
                         } else if (hitRes.hit) {
                             _title = 'ACERTOU' + _oaSuffix;
@@ -47672,7 +47763,11 @@ async function playTurn(aIdx, tIdx, opts) {
 
                         var _attackPills = [];
                         if (hitRes.crit) {
-                            _attackPills.push('<span class="dmg-pill dmg-pill--crit">💥 Crítico Natural (D&D 5e)</span>');
+                            if (hitRes.autoCritNear) {
+                                _attackPills.push('<span class="dmg-pill dmg-pill--crit">✦ Crítico Automático (Alvo Indefeso)</span>');
+                            } else {
+                                _attackPills.push('<span class="dmg-pill dmg-pill--crit">💥 Crítico Natural (D&D 5e)</span>');
+                            }
                         } else if (hitRes.reason === 'falha_critica' || r === 1) {
                             _attackPills.push('<span class="dmg-pill dmg-pill--crit">⚠️ Falha Crítica (Nat 1)</span>');
                         }
@@ -47705,7 +47800,9 @@ async function playTurn(aIdx, tIdx, opts) {
 
                         var _note = '';
                         if (hitRes.crit) {
-                            _note = 'Natural 20! Acerto garantido e dados de dano duplicados (D&D 5e PHB p. 194).';
+                            _note = hitRes.autoCritNear
+                                ? 'Alvo paralisado ou inconsciente a 1,5m: qualquer acerto se torna acerto crítico automático (D&D 5e PHB p. 291/292)!'
+                                : 'Natural 20! Acerto garantido e dados de dano duplicados (D&D 5e PHB p. 194).';
                         } else if (hitRes.hit) {
                             _note = 'Total ' + hitRes.total + ' ≥ CA ' + effAc + ' — Golpe acertou em cheio!';
                         } else if (hitRes.reason === 'falha_critica' || r === 1) {
