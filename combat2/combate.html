@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T14:08:12Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T14:47:41Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -8939,6 +8939,30 @@ body.perf-lite .lp-help-title::after, body.perf-medium .lp-help-title::after {
         0 0 8px rgba(255, 190, 60, 0.95),
         0 2px 4px rgba(0, 0, 0, 0.95);
     font-size: calc(14px * var(--v-font-scale, 1));
+}
+.cell-skill-impact-label.cell-skill-impact-miss {
+    color: #e2e8f0;
+    background: rgba(36, 16, 14, 0.94);
+    border: 1px solid rgba(239, 68, 68, 0.8);
+    border-radius: 6px;
+    padding: 3px 9px;
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.55), 0 4px 10px rgba(0, 0, 0, 0.95);
+    text-shadow:
+        0 0 8px rgba(248, 113, 113, 0.95),
+        0 2px 4px rgba(0, 0, 0, 0.95);
+    font-size: calc(13px * var(--v-font-scale, 1));
+}
+.cell-skill-impact-label.cell-skill-impact-grapple {
+    color: #fef08a;
+    background: rgba(40, 25, 10, 0.94);
+    border: 1px solid rgba(245, 158, 11, 0.85);
+    border-radius: 6px;
+    padding: 3px 9px;
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.6), 0 4px 10px rgba(0, 0, 0, 0.95);
+    text-shadow:
+        0 0 8px rgba(251, 191, 36, 0.95),
+        0 2px 4px rgba(0, 0, 0, 0.95);
+    font-size: calc(13.5px * var(--v-font-scale, 1));
 }
 @keyframes simSkillImpactLabelFloat {
     /* Flash unico de 1.0s: aparece, sobe um pouco, some. Sem rebote ou pulse. */
@@ -22822,8 +22846,10 @@ function _spawnFloatingDmgNumber(target, dmg, opts) {
     var posX = cx + jitterX;
     var frameEl = document.getElementById('app') || document.body;
     var fRect = frameEl ? frameEl.getBoundingClientRect() : { left: 0, right: window.innerWidth };
-    var minX = fRect.left + 50;
-    var maxX = fRect.right - 50;
+    var frameW = (fRect.right - fRect.left) || window.innerWidth;
+    var halfFctW = Math.min(80, Math.floor((frameW - 20) / 2));
+    var minX = fRect.left + halfFctW + 8;
+    var maxX = fRect.right - halfFctW - 8;
     if (maxX > minX) {
         if (posX < minX) posX = minX;
         if (posX > maxX) posX = maxX;
@@ -36294,6 +36320,12 @@ function showTargetActionMenu(targetIdx, uid) {
     else if (advState === 'disadvantage') metaBadges.push('<span class="tam-meta-badge danger">▼ Desvantagem</span>');
 
     if (u.prone) metaBadges.push('<span class="tam-meta-badge warn">▾ Caído no Chão</span>');
+    if (u.grappled) metaBadges.push('<span class="tam-meta-badge danger" title="D&D 5e (PHB p. 290): Agarrado — Deslocamento é 0m e não pode ser aumentado. Termina se o agarrador for incapacitado ou empurrado.">✊ Agarrado (0m)</span>');
+    if (u.restrained) metaBadges.push('<span class="tam-meta-badge danger" title="D&D 5e (PHB p. 292): Contido — Deslocamento é 0m; ataques contra têm Vantagem; ataques do alvo têm Desvantagem">🕸️ Contido (0m)</span>');
+    if (u.blinded || u.blind) metaBadges.push('<span class="tam-meta-badge warn" title="D&D 5e (PHB p. 290): Cego — Ataques contra têm Vantagem; ataques do alvo têm Desvantagem">◉ Cego</span>');
+    if (u.paralyzed) metaBadges.push('<span class="tam-meta-badge danger" title="D&D 5e (PHB p. 291): Paralisado — Incapacitado; ataques a até 1,5m são acertos críticos automáticos">⚡ Paralisado (Crítico!)</span>');
+    if (u.stunned) metaBadges.push('<span class="tam-meta-badge danger" title="D&D 5e (PHB p. 292): Atordoado — Incapacitado; ataques contra têm Vantagem">💫 Atordoado</span>');
+    if (u.poisoned) metaBadges.push('<span class="tam-meta-badge warn" title="D&D 5e (PHB p. 292): Envenenado — Desvantagem em ataques e testes">🧪 Envenenado</span>');
     if (u.packTactics) metaBadges.push('<span class="tam-meta-badge warn" title="Vantagem no ataque quando há aliado adjacente">🐺 Táticas de Matilha</span>');
     if ((u.multiAttack | 0) > 1) metaBadges.push('<span class="tam-meta-badge danger" title="Realiza múltiplos ataques por turno">⚔ Ataque Múltiplo (' + u.multiAttack + '×)</span>');
     if (u.vulnerabilities && u.vulnerabilities.length) {
@@ -36386,10 +36418,11 @@ function showTargetActionMenu(targetIdx, uid) {
     html += '</button>';
 
     // 3.1 AGARRAR (GRAPPLE - PHB p. 195)
-    var grappleDisabled = !isActionAvailable || !isAdjacent;
+    var isAlreadyGrappled = !!u.grappled;
+    var grappleDisabled = !isActionAvailable || !isAdjacent || isAlreadyGrappled;
     var grappleDesc = !isActionAvailable
         ? 'Ação principal já gasta neste turno'
-        : (!isAdjacent ? 'Requer adjacência (1,5m · atual ' + distM + ')' : 'Teste oposto de Atletismo para imobilizar o deslocamento (0m)');
+        : (!isAdjacent ? 'Requer adjacência (1,5m · atual ' + distM + ')' : (isAlreadyGrappled ? 'Alvo já está agarrado (deslocamento 0m)' : 'Teste oposto de Atletismo para imobilizar o deslocamento (0m)'));
     html += '<button type="button" class="tam-act-btn tam-act--grapple' + (grappleDisabled ? ' is-disabled' : '') + '" data-tam-act="grapple">';
     html +=   '<div class="tam-act-ico">✊</div>';
     html +=   '<div class="tam-act-text">';
@@ -36722,6 +36755,27 @@ function showAllyActionMenu(targetIdx, uid) {
     }
     if (u.tempHp > 0) {
         allyBadges.push('<span class="tam-meta-badge good" title="Pontos de vida temporários ativos">🛡 +' + u.tempHp + ' PV Temp</span>');
+    }
+    if (u.prone) {
+        allyBadges.push('<span class="tam-meta-badge warn" title="D&D 5e (PHB p. 290): Caído no Chão">▾ Caído</span>');
+    }
+    if (u.grappled) {
+        allyBadges.push('<span class="tam-meta-badge danger" title="D&D 5e (PHB p. 290): Agarrado — Deslocamento é 0m">✊ Agarrado (0m)</span>');
+    }
+    if (u.restrained) {
+        allyBadges.push('<span class="tam-meta-badge danger" title="D&D 5e (PHB p. 292): Contido — Deslocamento é 0m">🕸️ Contido (0m)</span>');
+    }
+    if (u.blinded || u.blind) {
+        allyBadges.push('<span class="tam-meta-badge warn" title="D&D 5e (PHB p. 290): Cego — Ataques contra o companheiro têm Vantagem">◉ Cego</span>');
+    }
+    if (u.paralyzed) {
+        allyBadges.push('<span class="tam-meta-badge danger" title="D&D 5e (PHB p. 291): Paralisado — Incapacitado">⚡ Paralisado</span>');
+    }
+    if (u.stunned) {
+        allyBadges.push('<span class="tam-meta-badge danger" title="D&D 5e (PHB p. 292): Atordoado — Incapacitado">💫 Atordoado</span>');
+    }
+    if (u.poisoned) {
+        allyBadges.push('<span class="tam-meta-badge warn" title="D&D 5e (PHB p. 292): Envenenado — Desvantagem em ataques e testes">🧪 Envenenado</span>');
     }
     var aConcBuff = (u.se || []).find(function (st) { return st && st.concentration; });
     if (aConcBuff) {
@@ -46489,14 +46543,16 @@ function spawnSkillImpactLabel(el, text, kind) {
     var lbl = document.createElement('div');
     lbl.className = 'cell-skill-impact-label cell-skill-impact-' + (kind || 'attack');
     lbl.textContent = text;
-    /* Anchor: centro horizontal do card, 8px acima do topo. Clamping horizontal
-       assegura que tokens nas bordas da tela mobile não façam o label cortar fora do frame. */
+    /* Anchor: centro horizontal do card, 8px acima do topo. Clamping horizontal adaptativo
+       assegura que tokens nas bordas da tela mobile (< 384px) não façam o label cortar fora do frame. */
     var anchorX = rect.left + rect.width / 2;
     var anchorY = rect.top - 8;
     var frameEl = document.getElementById('app') || document.body;
     var fRect = frameEl ? frameEl.getBoundingClientRect() : { left: 0, right: window.innerWidth };
-    var minX = fRect.left + 80;
-    var maxX = fRect.right - 80;
+    var frameW = (fRect.right - fRect.left) || window.innerWidth;
+    var halfLabelW = Math.min(130, Math.floor((frameW - 24) / 2));
+    var minX = fRect.left + halfLabelW + 10;
+    var maxX = fRect.right - halfLabelW - 10;
     if (maxX > minX) {
         if (anchorX < minX) anchorX = minX;
         if (anchorX > maxX) anchorX = maxX;
@@ -48348,13 +48404,13 @@ function openUnitDetail(uid) {
     var hasImm = (u.immunities && u.immunities.length);
     var hasCondImm = (u.condition_immunities && u.condition_immunities.length);
     if (hasRes || hasVuln || hasImm || hasCondImm) {
-        html += '<div class="udc-section"><div class="udc-section-title">Propriedades & Defesas</div>';
+        html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Propriedades & Defesas</summary>';
         html += '<div style="display:flex; flex-direction:column; gap:3px; font-size:10px; line-height:1.3;">';
         if (hasVuln) html += '<div style="color:#ff8a4a;"><b>▲ Vulnerável (2× dano):</b> ' + escHtml(_udcFmtDmgList(u.vulnerabilities)) + '</div>';
         if (hasRes) html += '<div style="color:#ffd700;"><b>⛨ Resistências (½ dano):</b> ' + escHtml(_udcFmtDmgList(u.resistances)) + '</div>';
         if (hasImm) html += '<div style="color:#7cdb7c;"><b>✦ Imunidades a Dano (0 dano):</b> ' + escHtml(_udcFmtDmgList(u.immunities)) + '</div>';
         if (hasCondImm) html += '<div style="color:#9adfe8;"><b>◈ Imunidades a Condições:</b> ' + escHtml(u.condition_immunities.join(', ')) + '</div>';
-        html += '</div></div>';
+        html += '</div></details>';
     }
 
     /* Habilidades — X-6.5.51AB (2026-04-26): paginacao quando lista excede
@@ -48409,7 +48465,7 @@ function openUnitDetail(uid) {
     }
 
     /* Condição (PV + efeitos D&D / simulador com duração em turnos ou rodadas) */
-    html += '<div class="udc-section"><div class="udc-section-title">Condição & Efeitos D&D 5e</div>';
+    html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Condição & Efeitos D&D 5e</summary>';
     var conds = [];
     if (!u.alive || (u.hp != null && u.hp <= 0)) conds.push({ ico: '☠️', n: 'Inconsciente (0 PV)' });
     else if (hpPct <= 25) conds.push({ ico: '⚠️', n: 'Ferido grave (≤25%)' });
@@ -48432,7 +48488,7 @@ function openUnitDetail(uid) {
         html += '</div>';
     }
 
-    /* Compilação de efeitos ativos (u.se + flags de Caído, Concentração, Reação, Surpreso) */
+    /* Compilação de efeitos ativos (u.se + flags canônicas de Caído, Agarrado, Contido, Cego, etc.) */
     var allEffects = [];
     if (u.se && u.se.length) {
         u.se.forEach(function (st) {
@@ -48456,6 +48512,126 @@ function openUnitDetail(uid) {
             kind: 'debuff',
             turnsLeft: null,
             condRule: (typeof simGetDndConditionRule === 'function' ? simGetDndConditionRule('prone').rule : null)
+        });
+    }
+
+    // Agarrado / Grappled (PHB p. 290)
+    var isGrappled = !!(u.grappled || allEffects.some(function (st) {
+        return st && (st.grappled || st.id === 'grappled' || String(st.n || '').toLowerCase().indexOf('agarrad') >= 0);
+    }));
+    if (isGrappled && !allEffects.some(function (st) { return st && (st.id === 'grappled' || st.grappled); })) {
+        allEffects.push({
+            id: 'grappled',
+            n: 'Agarrado',
+            ico: '✊',
+            kind: 'debuff',
+            turnsLeft: null,
+            condRule: (typeof simGetDndConditionRule === 'function' ? simGetDndConditionRule('grappled').rule : null)
+        });
+    }
+
+    // Contido / Restrained (PHB p. 292)
+    var isRestrained = !!(u.restrained || allEffects.some(function (st) {
+        return st && (st.restrained || st.id === 'restrained' || String(st.n || '').toLowerCase().indexOf('contido') >= 0);
+    }));
+    if (isRestrained && !allEffects.some(function (st) { return st && (st.id === 'restrained' || st.restrained); })) {
+        allEffects.push({
+            id: 'restrained',
+            n: 'Contido',
+            ico: '🕸️',
+            kind: 'debuff',
+            turnsLeft: null,
+            condRule: (typeof simGetDndConditionRule === 'function' ? simGetDndConditionRule('restrained').rule : null)
+        });
+    }
+
+    // Cego / Blinded (PHB p. 290)
+    var isBlinded = !!(u.blinded || u.blind || (typeof isUnitBlinded === 'function' && isUnitBlinded(u)) || allEffects.some(function (st) {
+        return st && (st.blinded || st.blind || st.id === 'blinded' || st.id === 'blindness' || String(st.n || '').toLowerCase().indexOf('cego') >= 0);
+    }));
+    if (isBlinded && !allEffects.some(function (st) { return st && (st.id === 'blinded' || st.id === 'blindness'); })) {
+        allEffects.push({
+            id: 'blinded',
+            n: 'Cego',
+            ico: '◉',
+            kind: 'debuff',
+            turnsLeft: null,
+            condRule: (typeof simGetDndConditionRule === 'function' ? simGetDndConditionRule('blinded').rule : null)
+        });
+    }
+
+    // Envenenado / Poisoned (PHB p. 292)
+    var isPoisoned = !!(u.poisoned || allEffects.some(function (st) {
+        return st && (st.poisoned || st.id === 'poisoned' || String(st.n || '').toLowerCase().indexOf('envenenad') >= 0);
+    }));
+    if (isPoisoned && !allEffects.some(function (st) { return st && st.id === 'poisoned'; })) {
+        allEffects.push({
+            id: 'poisoned',
+            n: 'Envenenado',
+            ico: '🧪',
+            kind: 'debuff',
+            turnsLeft: null,
+            condRule: (typeof simGetDndConditionRule === 'function' ? simGetDndConditionRule('poisoned').rule : null)
+        });
+    }
+
+    // Paralisado / Paralyzed (PHB p. 291)
+    var isParalyzed = !!(u.paralyzed || allEffects.some(function (st) {
+        return st && (st.paralyzed || st.id === 'paralyzed' || String(st.n || '').toLowerCase().indexOf('paralis') >= 0);
+    }));
+    if (isParalyzed && !allEffects.some(function (st) { return st && st.id === 'paralyzed'; })) {
+        allEffects.push({
+            id: 'paralyzed',
+            n: 'Paralisado',
+            ico: '⚡',
+            kind: 'debuff',
+            turnsLeft: null,
+            condRule: (typeof simGetDndConditionRule === 'function' ? simGetDndConditionRule('paralyzed').rule : null)
+        });
+    }
+
+    // Atordoado / Stunned (PHB p. 292)
+    var isStunned = !!(u.stunned || allEffects.some(function (st) {
+        return st && (st.stunned || st.id === 'stunned' || String(st.n || '').toLowerCase().indexOf('atordo') >= 0);
+    }));
+    if (isStunned && !allEffects.some(function (st) { return st && st.id === 'stunned'; })) {
+        allEffects.push({
+            id: 'stunned',
+            n: 'Atordoado',
+            ico: '💫',
+            kind: 'debuff',
+            turnsLeft: null,
+            condRule: (typeof simGetDndConditionRule === 'function' ? simGetDndConditionRule('stunned').rule : null)
+        });
+    }
+
+    // Esquiva / Dodge (PHB p. 192)
+    var isDodging = !!(u.dodge || u.dodging || allEffects.some(function (st) {
+        return st && (st.dodge || st.id === 'dodge' || st.id === 'esquiva' || String(st.n || '').toLowerCase().indexOf('esquiv') >= 0);
+    }));
+    if (isDodging && !allEffects.some(function (st) { return st && (st.id === 'dodge' || st.id === 'esquiva'); })) {
+        allEffects.push({
+            id: 'dodge',
+            n: 'Esquiva',
+            ico: '🛡️',
+            kind: 'buff',
+            turnsLeft: null,
+            condRule: (typeof simGetDndConditionRule === 'function' ? simGetDndConditionRule('dodge').rule : null)
+        });
+    }
+
+    // Desengajar / Disengaged (PHB p. 192)
+    var isDisengaged = !!(u.disengaged || allEffects.some(function (st) {
+        return st && (st.disengaged || st.id === 'acao_desengajar' || st.id === 'disengage' || String(st.n || '').toLowerCase().indexOf('desengaj') >= 0);
+    }));
+    if (isDisengaged && !allEffects.some(function (st) { return st && (st.id === 'acao_desengajar' || st.id === 'disengage'); })) {
+        allEffects.push({
+            id: 'acao_desengajar',
+            n: 'Desengajado',
+            ico: '💨',
+            kind: 'buff',
+            turnsLeft: null,
+            condRule: 'PHB p. 192: A ação Desengajar impede que o movimento provoque Ataques de Oportunidade até o final do turno.'
         });
     }
 
@@ -48512,7 +48688,7 @@ function openUnitDetail(uid) {
             var dispName = (ruleInfo && ruleInfo.name) || st.dndCondition || st.n || 'Efeito';
             var turnLbl = (st.turnsLeft != null)
                 ? formatTurnsLeftLabel(st)
-                : (st.repeatSave ? 'Salvaguarda no fim de cada turno' : (st.id === 'reaction_spent' ? 'Recupera no início do próximo turno' : (st.id === 'surprised' ? 'Até o fim da 1ª rodada' : 'Ativo')));
+                : (st.repeatSave ? 'Salvaguarda no fim de cada turno' : (st.id === 'reaction_spent' ? 'Recupera no início do próximo turno' : (st.id === 'surprised' ? 'Até o fim da 1ª rodada' : (st.id === 'dodge' ? 'Até o início do próximo turno' : (st.id === 'acao_desengajar' ? 'Até o fim do turno' : 'Ativo')))));
             var ruleText = st.condRule || (ruleInfo && ruleInfo.rule) || '';
 
             html += '<div class="' + rowCls.trim() + '">';
@@ -48526,7 +48702,7 @@ function openUnitDetail(uid) {
     } else {
         html += '<div class="udc-empty" style="padding:6px 0 2px;font-size:10px;color:var(--v-text-dim,#a09484);">— sem condições ou efeitos ativos —</div>';
     }
-    html += '</div>';
+    html += '</details>';
 
     setHTML(card, html);
     card.querySelector('.udc-close').addEventListener('click', function () {
@@ -55038,10 +55214,10 @@ async function __combatAnimateOneEvent(ev) {
                 var _svScore = (_svTot != null && _svDc != null) ? ' [' + _svTot + ' vs CD ' + _svDc + ']' : '';
                 var _svOk = ev.success !== undefined ? !!ev.success : !!ev.saveSuccess;
                 _lblTxt = _svOk ? ('🛡️ TR ' + _svAb + ' PASSOU' + _svScore + '!') : ('💥 TR ' + _svAb + ' FALHOU' + _svScore + '!');
-                _lblTone = _svOk ? 'buff' : 'hit';
+                _lblTone = _svOk ? 'save' : 'miss';
             } else if (kind === 'condition_apply') {
                 _lblTxt = '⛓️ +' + String(ev.conditionName || ev.condName || ev.condition || 'CONDIÇÃO').toUpperCase() + '!';
-                _lblTone = 'miss';
+                _lblTone = 'condition';
             } else if (kind === 'condition_expire') {
                 _lblTxt = '✨ FIM: ' + String(ev.conditionName || ev.condName || ev.condition || 'CONDIÇÃO').toUpperCase();
                 _lblTone = 'buff';
