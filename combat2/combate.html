@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T03:15:40Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T03:34:25Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -19984,11 +19984,49 @@ async function simResolveEndTurnConditions(s, unitIdx) {
                 await new Promise(function (res) {
                     showDice(d20, res, u, null, {
                         postResult: function () {
+                            var _kicker = '🛡️ SALVAGUARDA DE FIM DE TURNO (' + abPt + ')';
+                            var _rows = [
+                                { l: 'Dado (d20)', v: String(d20) },
+                                { l: 'Mod ' + abPt, v: (smod >= 0 ? '+' : '') + smod },
+                                { l: 'Total', v: String(total) },
+                                { l: 'CD Alvo', v: String(dc) }
+                            ];
+                            var _pills = [];
+                            if (ok) {
+                                _pills.push('<span class="dmg-pill dmg-pill--save">✓ Sucesso (Efeito Encerrado)</span>');
+                            } else {
+                                _pills.push('<span class="dmg-pill dmg-pill--crit">✗ Falha (Efeito Mantém-se)</span>');
+                            }
+                            if (_rsAdv && _rsAdv.adv) {
+                                _pills.push('<span class="dmg-pill dmg-pill--type">✨ ' + escHtml(_rsAdv.label || 'Vantagem Racial') + '</span>');
+                            }
+                            _pills.push('<span class="dmg-pill dmg-pill--conc">Condição: ' + escHtml(_condLbl) + '</span>');
+
+                            var _note = ok
+                                ? ('Total ' + total + ' ≥ CD ' + dc + ' — ' + name + ' superou a condição e recuperou-se!')
+                                : ('Total ' + total + ' < CD ' + dc + ' — A condição permanece ativa sobre ' + name + '.');
+
+                            var _detailsRows = [
+                                { l: 'Combatente', v: name },
+                                { l: 'Condição Alvo', v: _condLbl },
+                                { l: 'Atributo do TR', v: abPt + ' (' + (smod >= 0 ? '+' : '') + smod + ')' },
+                                { l: 'CD da Salvaguarda', v: String(dc) },
+                                { l: 'Regra D&D 5e', v: 'Salvaguarda no fim do turno (PHB p. 205 / SRD)' },
+                                { l: 'Resultado', v: ok ? 'Efeito dissipado imediatamente' : 'Permanece ativo até a próxima rodada' }
+                            ];
+
                             return {
-                                title: ok ? 'Efeito termina' : 'Efeito mantém-se',
+                                title: ok ? 'EFEITO ENCERRADO' : 'EFEITO MANTÉM-SE',
+                                cls: ok ? 'hit' : 'miss',
+                                subStructured: {
+                                    kicker: _kicker,
+                                    rows: _rows,
+                                    pills: _pills,
+                                    note: _note,
+                                    details: { rows: _detailsRows }
+                                },
                                 subHtml: simFormatVsDcHTML(d20, smod, total, dc, ok) +
-                                    '<div class="drl-crit-rule">TR no fim do turno (PHB/SRD) — condição: ' + escHtml(st.n || '') + '.</div>',
-                                cls: ok ? 'hit' : 'miss'
+                                    '<div class="drl-crit-rule">TR no fim do turno (PHB/SRD) — condição: ' + escHtml(_condLbl) + '.</div>'
                             };
                         }
                     });
@@ -21749,8 +21787,13 @@ function addDeathFailuresAndMaybeDie(s, u, n) {
 function simCheckConcentrationOnDamage(target, damageAmount) {
     if (!target || !target.se || damageAmount <= 0) return;
     var hasConc = false;
+    var concSpellName = '';
     for (var i = 0; i < target.se.length; i++) {
-        if (target.se[i] && target.se[i].concentration) { hasConc = true; break; }
+        if (target.se[i] && target.se[i].concentration) {
+            hasConc = true;
+            concSpellName = target.se[i].n || target.se[i].id || 'Magia';
+            break;
+        }
     }
     if (!hasConc) return;
     var dc = Math.max(10, Math.floor(damageAmount / 2));
@@ -21787,7 +21830,7 @@ function simCheckConcentrationOnDamage(target, damageAmount) {
                         try {
                             spawnSkillImpactLabel(
                                 el,
-                                success ? ('✦ CONCENTRAÇÃO MANTIDA (CD ' + dc + ')') : '💥 CONCENTRAÇÃO QUEBRADA!',
+                                success ? ('✦ CONCENTRAÇÃO MANTIDA' + (concSpellName ? ': ' + concSpellName.toUpperCase() : '') + ' (CD ' + dc + ')') : ('💥 CONCENTRAÇÃO QUEBRADA' + (concSpellName ? ': ' + concSpellName.toUpperCase() : '') + '!'),
                                 success ? 'attack' : 'condition'
                             );
                         } catch (_eCL) {}
@@ -21798,12 +21841,12 @@ function simCheckConcentrationOnDamage(target, damageAmount) {
     } catch (eVfx) { console.warn('[SIM]', 'concentration_vfx_failed', eVfx || ''); }
     if (currentState && currentState.log) {
         if (success) {
-            currentState.log.push(target.n + ' mantém concentração (CON ' + roll + '+' + conMod + '=' + total + ' vs CD ' + dc + ').');
+            currentState.log.push(target.n + ' mantém concentração' + (concSpellName ? ' em ' + concSpellName : '') + ' (CON ' + roll + '+' + conMod + '=' + total + ' vs CD ' + dc + ').');
         } else {
             var lost = [];
             target.se = target.se.filter(function (x) {
                 if (x && x.concentration) {
-                    lost.push(x.id || 'buff');
+                    lost.push(x.n || x.id || 'buff');
                     /* PHB p.204 — quebra de concentração dissipa as criaturas
                        conjuradas (Conjurar Animais). */
                     if (x.concSummonSpellId && typeof _dissipateConjuredSummons === 'function') {
@@ -22347,33 +22390,89 @@ function describeDeathSavePreview(u, r) {
         '<div class="ds-modal-group"><span style="font-size:10px;font-weight:700;color:#fc8181;margin-right:2px;">Falhas:</span>' + fPips + '</div>' +
         '</div>';
 
-    if (r === 20) {
-        return {
-            title: '★ NATURAL 20',
-            subHtml: simFormatD20EqualsHTML(r) + ' <strong style="color:#ffd700;">— Levanta com 1 PV!</strong>' + trackerHtml + '<div class="drl-crit-rule">D&D 5e (PHB p. 197): 20 Natural no teste contra a morte recupera 1 PV de imediato e acorda.</div>',
-            cls: 'crit'
-        };
-    }
-    if (r === 1) {
-        return {
-            title: 'NATURAL 1',
-            subHtml: simFormatD20EqualsHTML(r) + ' <span class="drl-miss-strong">— duas falhas críticas!</span>' + trackerHtml + '<div class="drl-crit-rule">D&D 5e (PHB p. 197): 1 Natural conta como duas falhas no teste contra a morte.</div>',
-            cls: 'miss'
-        };
-    }
-    if (r >= 10) {
-        var isStableNow = (ns >= 3);
-        return {
-            title: isStableNow ? 'ESTABILIZOU (3 Sucessos)' : 'Sucesso no teste de morte',
-            subHtml: simFormatD20EqualsHTML(r) + ' <span style="color:#68d391;font-weight:700;">≥10 Sucesso</span>' + trackerHtml + '<div class="drl-crit-rule">' + (isStableNow ? 'Estabilizado a 0 PV — não precisa mais rolar salvaguardas.' : 'Acumula ' + ns + '/3 sucessos para estabilizar (PHB p. 197).') + '</div>',
-            cls: 'hit'
-        };
-    }
+    var isStableNow = (ns >= 3);
     var isDeadNow = (nf >= 3);
+
+    var resTitle = '';
+    var resCls = '';
+    var resLabel = '';
+    var resNote = '';
+    var resPills = [];
+    var ruleLine = '';
+
+    if (r === 20) {
+        resTitle = '★ NATURAL 20';
+        resCls = 'crit';
+        resLabel = '★ Crítico (Recupera 1 PV)';
+        resNote = '20 Natural! O combatente recupera 1 PV de imediato, desperta e volta a agir (PHB p. 197).';
+        resPills.push('<span class="dmg-pill dmg-pill--crit">★ 20 Natural</span>');
+        resPills.push('<span class="dmg-pill dmg-pill--buff">✨ Recupera 1 PV</span>');
+        resPills.push('<span class="dmg-pill dmg-pill--save">Consciência Restaurada</span>');
+        ruleLine = 'D&D 5e (PHB p. 197): 20 Natural no teste contra a morte recupera 1 PV de imediato e acorda.';
+    } else if (r === 1) {
+        resTitle = isDeadNow ? 'FALECIMENTO (3 Falhas)' : 'NATURAL 1';
+        resCls = 'miss';
+        resLabel = '⚠️ Duas Falhas Críticas';
+        resNote = isDeadNow
+            ? 'Natural 1! Acumulou 2 falhas, atingindo 3 falhas e causando o falecimento do personagem.'
+            : 'Natural 1! A gravidade dos ferimentos inflige duas falhas imediatas no teste de morte!';
+        resPills.push('<span class="dmg-pill dmg-pill--crit">⚠️ 1 Natural (2 Falhas)</span>');
+        if (isDeadNow) resPills.push('<span class="dmg-pill dmg-pill--vuln">💀 Óbito</span>');
+        ruleLine = 'D&D 5e (PHB p. 197): 1 Natural conta como duas falhas no teste contra a morte.';
+    } else if (r >= 10) {
+        resTitle = isStableNow ? 'ESTABILIZOU (3 Sucessos)' : 'Sucesso no teste de morte';
+        resCls = 'hit';
+        resLabel = '✓ Sucesso (≥10)';
+        resNote = isStableNow
+            ? 'Acumulou 3 sucessos e estabilizou! Permanece a 0 PV inconsciente, fora de perigo imediato.'
+            : 'Rolagem ' + r + ' ≥ 10 bem-sucedida! Acumula ' + ns + '/3 sucessos para estabilizar.';
+        resPills.push('<span class="dmg-pill dmg-pill--save">✓ Sucesso (≥10)</span>');
+        if (isStableNow) resPills.push('<span class="dmg-pill dmg-pill--type">✦ Estabilizado (3 Sucessos)</span>');
+        ruleLine = isStableNow ? 'Estabilizado a 0 PV — não precisa mais rolar salvaguardas (PHB p. 197).' : 'Acumula ' + ns + '/3 sucessos para estabilizar (PHB p. 197).';
+    } else {
+        resTitle = isDeadNow ? 'FALECIMENTO (3 Falhas)' : 'Falha no teste de morte';
+        resCls = 'miss';
+        resLabel = '✗ Falha (<10)';
+        resNote = isDeadNow
+            ? 'Três falhas acumuladas resultam no falecimento do personagem (D&D 5e PHB p. 197).'
+            : 'Rolagem ' + r + ' < 10 falhou! Acumula ' + nf + '/3 falhas (3 falhas causam a morte).';
+        resPills.push('<span class="dmg-pill dmg-pill--crit">✗ Falha (<10)</span>');
+        if (isDeadNow) resPills.push('<span class="dmg-pill dmg-pill--vuln">💀 Óbito</span>');
+        ruleLine = isDeadNow ? 'Três falhas acumuladas resultam em morte (PHB p. 197).' : 'Acumula ' + nf + '/3 falhas (PHB p. 197).';
+    }
+
+    var detailsRows = [
+        { l: 'Combatente', v: u.n },
+        { l: 'Condição Atual', v: 'Inconsciente (0 PV)' },
+        { l: 'Regra D&D 5e', v: 'PHB p. 197 (d20 sem modificador de atributo)' },
+        { l: 'CD Alvo', v: '10 (55% de chance de sucesso)' },
+        { l: 'Sucessos Atuais', v: ns + ' de 3 necessários para estabilizar' },
+        { l: 'Falhas Atuais', v: nf + ' de 3 que causam óbito' }
+    ];
+    if (r === 20) detailsRows.push({ l: 'Efeito Crítico', v: 'Desperta com 1 PV imediatamente' });
+    if (r === 1) detailsRows.push({ l: 'Efeito Crítico', v: 'Soma 2 falhas simultâneas' });
+
+    var subHtml = simFormatD20EqualsHTML(r) +
+        ' <span class="' + (r >= 10 ? 'drl-hit-strong' : 'drl-miss-strong') + '">' + escHtml(resLabel) + '</span>' +
+        trackerHtml +
+        '<div class="drl-crit-rule">' + ruleLine + '</div>';
+
     return {
-        title: isDeadNow ? 'FALECIMENTO (3 Falhas)' : 'Falha no teste de morte',
-        subHtml: simFormatD20EqualsHTML(r) + ' <span class="drl-miss-strong">&lt;10 Falha</span>' + trackerHtml + '<div class="drl-crit-rule">' + (isDeadNow ? 'Três falhas acumuladas resultam em morte (PHB p. 197).' : 'Acumula ' + nf + '/3 falhas (PHB p. 197).') + '</div>',
-        cls: 'miss'
+        title: resTitle,
+        cls: resCls,
+        subStructured: {
+            kicker: '💀 TESTE CONTRA A MORTE (PHB p. 197)',
+            rows: [
+                { l: 'Rolagem', v: String(r) },
+                { l: 'CD Alvo', v: '10' },
+                { l: 'Resultado', v: resLabel.replace(/^[★⚠️✓✗]\s*/, '') },
+                { l: 'Progresso', v: ns + '/3 S · ' + nf + '/3 F' }
+            ],
+            pills: resPills,
+            note: resNote,
+            details: { rows: detailsRows }
+        },
+        subHtml: subHtml
     };
 }
 
@@ -36776,11 +36875,38 @@ async function runPlayerStabilizeMedicine() {
         showDice(r, done, stabilizer, 'Medicina (aliado) · CD ' + DC, {
             postResult: function () {
                 var ok = tot >= DC;
+                var detailsRows = [
+                    { l: 'Socorrista', v: stabilizer.n },
+                    { l: 'Alvo', v: p.n },
+                    { l: 'Perícia', v: 'Sabedoria (Medicina)' },
+                    { l: 'CD Alvo', v: '10' },
+                    { l: 'Regra D&D 5e', v: 'PHB p. 197: Teste de Sabedoria (Medicina) CD 10 para estabilizar criatura inconsciente a 0 PV.' },
+                    { l: 'Efeito', v: ok ? 'Estabiliza a 0 PV e cessa os testes contra a morte.' : 'Permanece instável, devendo rolar novo teste contra a morte no seu turno.' }
+                ];
+                var pills = [
+                    ok ? '<span class="dmg-pill dmg-pill--save">✓ Sucesso (≥10)</span>' : '<span class="dmg-pill dmg-pill--crit">✗ Falhou (<10)</span>',
+                    ok ? '<span class="dmg-pill dmg-pill--buff">✦ Estabilizado</span>' : '<span class="dmg-pill dmg-pill--vuln">Sangrando</span>',
+                    '<span class="dmg-pill dmg-pill--type">Socorrista: ' + escHtml(stabilizer.n) + '</span>'
+                ];
                 return {
-                    title: ok ? 'Estabilizado' : 'Falhou',
+                    title: ok ? 'ESTABILIZOU O ALIADO!' : 'FALHA NO SOCORRO',
+                    cls: ok ? 'hit' : 'miss',
+                    subStructured: {
+                        kicker: '🩺 SABEDORIA (MEDICINA) — CD 10 (PHB p. 197)',
+                        rows: [
+                            { l: 'Rolagem d20', v: String(r) },
+                            { l: 'Mod SAB', v: (mod >= 0 ? '+' : '') + mod },
+                            { l: 'Total', v: String(tot) },
+                            { l: 'CD Alvo', v: '10' }
+                        ],
+                        pills: pills,
+                        note: ok
+                            ? (stabilizer.n + ' prestou primeiros socorros e estabilizou ' + p.n + ' com sucesso!')
+                            : (stabilizer.n + ' tentou estancar os ferimentos de ' + p.n + ', mas não conseguiu estabilizá-lo.'),
+                        details: { rows: detailsRows }
+                    },
                     subHtml: simFormatVsDcHTML(r, mod, tot, DC, ok) +
-                        '<div class="drl-crit-rule">Sabedoria (Medicina) CD 10. Socorrista: ' + escHtml(stabilizer.n) + ' · alvo: ' + escHtml(p.n) + '.</div>',
-                    cls: ok ? 'hit' : 'miss'
+                        '<div class="drl-crit-rule">Sabedoria (Medicina) CD 10. Socorrista: ' + escHtml(stabilizer.n) + ' · alvo: ' + escHtml(p.n) + '.</div>'
                 };
             }
         });
@@ -39577,11 +39703,38 @@ async function attemptFlee() {
         showDice(r, x, p, 'Fuga — Destreza (Acrobacia) · CD ' + DC, {
             postResult: function () {
                 var ok = totalFlee >= DC;
+                var detailsRows = [
+                    { l: 'Combatente', v: p.n },
+                    { l: 'Ação Tática', v: 'Fuga do Combate (Retirada)' },
+                    { l: 'Perícia', v: 'Destreza (Acrobacia)' },
+                    { l: 'CD Alvo', v: DC + ' (calculada com base nos oponentes ativos)' },
+                    { l: 'Regra D&D 5e', v: 'PHB p. 192: Ao sair da área de ameaça sem a ação Desengajar, o combatente provoca ataques de oportunidade.' },
+                    { l: 'Consequência de Falha', v: 'Cada inimigo ativo no combate realiza um ataque de oportunidade imediato.' }
+                ];
+                var pills = [
+                    ok ? '<span class="dmg-pill dmg-pill--save">✓ Sucesso (≥CD)</span>' : '<span class="dmg-pill dmg-pill--crit">✗ Falhou (<CD)</span>',
+                    ok ? '<span class="dmg-pill dmg-pill--buff">🏃 Escapou</span>' : '<span class="dmg-pill dmg-pill--vuln">⚡ Ataque de Oportunidade</span>',
+                    '<span class="dmg-pill dmg-pill--type">CD ' + DC + '</span>'
+                ];
                 return {
-                    title: ok ? 'Passou — escapou' : 'Falhou — sofre OA',
+                    title: ok ? 'FUGA BEM-SUCEDIDA!' : 'FALHA NA FUGA',
+                    cls: ok ? 'hit' : 'miss',
+                    subStructured: {
+                        kicker: '🏃 TESTE DE FUGA — DESTREZA (ACROBACIA)',
+                        rows: [
+                            { l: 'Rolagem d20', v: String(r) },
+                            { l: 'Mod DES', v: (dexMod >= 0 ? '+' : '') + dexMod },
+                            { l: 'Total', v: String(totalFlee) },
+                            { l: 'CD Alvo', v: String(DC) }
+                        ],
+                        pills: pills,
+                        note: ok
+                            ? (p.n + ' conseguiu abrir distância e escapar do confronto em segurança!')
+                            : (p.n + ' tropeçou ou foi cercado ao tentar recuar — os inimigos ganham ataques de oportunidade!'),
+                        details: { rows: detailsRows }
+                    },
                     subHtml: simFormatVsDcHTML(r, dexMod, totalFlee, DC, ok) +
-                        '<div class="drl-crit-rule">Abrir caminho tático para desengajar e sair do encontro. A CD reflete os oponentes ativos em combate.</div>',
-                    cls: ok ? 'hit' : 'miss'
+                        '<div class="drl-crit-rule">Abrir caminho tático para desengajar e sair do encontro. A CD reflete os oponentes ativos em combate.</div>'
                 };
             }
         });
@@ -44182,6 +44335,52 @@ function showHealDice(rolls, die, mod, actor, target, oldHp, newHp, rolledTotal,
                             note.textContent = 'Rolagem ' + totalRolled + ' PV · PV máximo limitou o ganho';
                             stack.appendChild(note);
                         }
+
+                        /* Pílulas táticas de cura (Progressive Disclosure) */
+                        var pillsWrap = document.createElement('div');
+                        pillsWrap.className = 'drl-structured-pills';
+                        var healPills = [];
+                        healPills.push('<span class="dmg-pill dmg-pill--buff">✨ +' + gained + ' PV</span>');
+                        if (showReviveLine) {
+                            healPills.push('<span class="dmg-pill dmg-pill--save">Consciência Restaurada</span>');
+                        }
+                        if (gained < totalRolled && totalRolled > 0) {
+                            healPills.push('<span class="dmg-pill dmg-pill--resist">PV Máx Limitou Ganho</span>');
+                        }
+                        healPills.push('<span class="dmg-pill dmg-pill--type">' + rolls.length + dieType + (mod ? (mod > 0 ? '+' + mod : mod) : '') + '</span>');
+                        pillsWrap.innerHTML = healPills.join(' ');
+                        stack.appendChild(pillsWrap);
+
+                        /* Gaveta colapsável de regras D&D 5e */
+                        var toggleBtn = document.createElement('button');
+                        toggleBtn.type = 'button';
+                        toggleBtn.className = 'dmg-inspect-toggle-btn';
+                        toggleBtn.setAttribute('aria-expanded', 'false');
+                        toggleBtn.textContent = 'ℹ️ Detalhes da Regra';
+                        var detailsBody = document.createElement('div');
+                        detailsBody.className = 'dmg-math-breakdown';
+                        var dRows = [
+                            { l: 'Alvo', v: target.n },
+                            { l: 'Habilidade', v: sk },
+                            { l: 'Fórmula D&D 5e', v: rolls.length + dieType + (mod ? (mod > 0 ? ' +' + mod : ' ' + mod) : '') },
+                            { l: 'Rolagem dos Dados', v: rolls.join(' + ') + (mod ? (mod > 0 ? ' +' + mod : ' ' + mod) : '') + ' = ' + totalRolled + ' PV' },
+                            { l: 'Ganho Efetivo', v: '+' + gained + ' PV (' + oldHp + ' ➔ ' + newHp + '/' + (target.mhp || target.hp) + ')' },
+                            { l: 'Regra D&D 5e', v: 'PHB p. 197: Pontos de vida recuperados não excedem o PV máximo. A criatura desperta de imediato ao recuperar PV a 0.' }
+                        ];
+                        if (showReviveLine) {
+                            dRows.push({ l: 'Retorno da Inconsciência', v: 'Recupera sentidos e pode agir normalmente no seu próximo turno.' });
+                        }
+                        detailsBody.innerHTML = dRows.map(function (rw) {
+                            return '<div class="dmg-math-breakdown-row"><span>' + escHtml(rw.l) + ':</span><strong>' + escHtml(rw.v) + '</strong></div>';
+                        }).join('');
+                        toggleBtn.addEventListener('click', function (e) {
+                            e.stopPropagation();
+                            var isOpen = detailsBody.classList.toggle('is-open');
+                            toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                            toggleBtn.textContent = isOpen ? '▲ Ocultar Detalhes' : 'ℹ️ Detalhes da Regra';
+                        });
+                        stack.appendChild(toggleBtn);
+                        stack.appendChild(detailsBody);
                         resultEl.appendChild(stack);
                         var cellRoot = scene.querySelector('[data-dice-heal-result-card="1"]');
                         if (cellRoot) cellRoot.classList.add('dmg-header-target-pop');
@@ -44640,7 +44839,72 @@ async function animInit(preSkip) {
         var d20 = (typeof c.init_roll === 'number' && c.init_roll >= 1 && c.init_roll <= 20)
             ? c.init_roll
             : Math.max(1, Math.min(20, c.init - Math.floor(((c.dex || 10) - 10) / 2)));
-        await new Promise(function (r) { showDice(d20, r, c, 'Iniciativa', { initiativeSequence: true }); });
+        await new Promise(function (r) {
+            var dexMod = Math.floor(((c.dex || 10) - 10) / 2);
+            var extraMod = c.init - (d20 + dexMod);
+            showDice(d20, r, c, 'Iniciativa', {
+                initiativeSequence: true,
+                postResult: function () {
+                    var rows = [
+                        { l: 'Dado d20', v: String(d20) },
+                        { l: 'Mod DES', v: (dexMod >= 0 ? '+' : '') + dexMod }
+                    ];
+                    if (extraMod !== 0) {
+                        rows.push({ l: 'Bônus Extra', v: (extraMod > 0 ? '+' : '') + extraMod });
+                    }
+                    rows.push({ l: 'Iniciativa Total', v: String(c.init) });
+
+                    var pills = [];
+                    if (d20 === 20) pills.push('<span class="dmg-pill dmg-pill--crit">★ 20 Natural</span>');
+                    else if (d20 === 1) pills.push('<span class="dmg-pill dmg-pill--crit">⚠️ 1 Natural</span>');
+
+                    if (c.surprised) {
+                        pills.push('<span class="dmg-pill dmg-pill--vuln">⚠️ Surpreso</span>');
+                    }
+                    if (c.t === 'p') {
+                        pills.push('<span class="dmg-pill dmg-pill--buff">Aventureiro</span>');
+                    } else if (c.t === 'a') {
+                        pills.push('<span class="dmg-pill dmg-pill--buff">Aliado</span>');
+                    } else {
+                        pills.push('<span class="dmg-pill dmg-pill--type">Inimigo</span>');
+                    }
+                    if (dexMod !== 0) {
+                        pills.push('<span class="dmg-pill dmg-pill--save">DES ' + (dexMod > 0 ? '+' : '') + dexMod + '</span>');
+                    }
+
+                    var note = c.surprised
+                        ? (c.n + ' está surpreso! Não poderá agir ou reagir até o término do seu primeiro turno (PHB p. 189).')
+                        : (c.n + ' obteve iniciativa ' + c.init + ' para definir a ordem dos turnos.');
+
+                    var detailsRows = [
+                        { l: 'Combatente', v: c.n },
+                        { l: 'Regra D&D 5e', v: 'PHB p. 189 (d20 + modificador de Destreza)' },
+                        { l: 'Rolagem d20', v: String(d20) },
+                        { l: 'Modificador de Destreza', v: (dexMod >= 0 ? '+' : '') + dexMod + ' (DES ' + (c.dex || 10) + ')' }
+                    ];
+                    if (extraMod !== 0) {
+                        detailsRows.push({ l: 'Bônus Adicional', v: (extraMod > 0 ? '+' : '') + extraMod });
+                    }
+                    detailsRows.push({ l: 'Resultado Final', v: String(c.init) });
+                    detailsRows.push({ l: 'Critério de Desempate', v: 'Maior valor de Destreza, com prioridade para personagens dos jogadores' });
+                    if (c.surprised) {
+                        detailsRows.push({ l: 'Condição Surpreso', v: 'Perde o primeiro turno de combate; reações bloqueadas até o fim do turno' });
+                    }
+
+                    return {
+                        title: c.n.toUpperCase() + ' — INICIATIVA ' + c.init,
+                        cls: d20 === 20 ? 'crit' : (d20 === 1 ? 'miss' : 'hit'),
+                        subStructured: {
+                            kicker: '⚡ ROLAGEM DE INICIATIVA (PHB p. 189)',
+                            rows: rows,
+                            pills: pills,
+                            note: note,
+                            details: { rows: detailsRows }
+                        }
+                    };
+                }
+            });
+        });
         /* Skip pode ter fechado o overlay durante a rolagem */
         c.initRolling = false;
         c.initRevealed = true;
@@ -44821,7 +45085,8 @@ function showInitiativeOrderPopup() {
             /* Fallback pro emoji legado se helper indisponível */
             parts.push('<span class="iop-ico">' + (c.ico || '') + '</span>');
         }
-        parts.push('<span class="iop-name">' + escHtml(c.n) + '</span>');
+        var surprisedBadge = c.surprised ? ' <span class="dmg-pill dmg-pill--vuln" style="font-size:9.5px;padding:1px 5px;vertical-align:middle;margin-left:4px;">⚠️ Surpreso</span>' : '';
+        parts.push('<span class="iop-name">' + escHtml(c.n) + surprisedBadge + '</span>');
         parts.push('<span class="iop-roll">' + c.init + '</span>');
         parts.push('</div>');
     });
@@ -50113,17 +50378,63 @@ async function __combatAnimateOneEvent(ev) {
             var actor = currentState.order[ev.aIdx] || { n: ev.actorName || '?' };
             await new Promise(function (rI) {
                 try {
+                    var dexMod = (actor && actor.dex != null) ? Math.floor((actor.dex - 10) / 2) : ((ev.mod != null) ? ev.mod : 0);
+                    var initTot = ev.total || (ev.d20 + dexMod);
+                    var extraMod = initTot - (ev.d20 + dexMod);
                     showDice(ev.d20, rI, actor, 'Iniciativa', {
+                        initiativeSequence: true,
                         postResult: function () {
+                            var rows = [
+                                { l: 'Dado d20', v: String(ev.d20) },
+                                { l: 'Mod DES', v: (dexMod >= 0 ? '+' : '') + dexMod }
+                            ];
+                            if (extraMod !== 0) {
+                                rows.push({ l: 'Bônus Extra', v: (extraMod > 0 ? '+' : '') + extraMod });
+                            }
+                            rows.push({ l: 'Iniciativa Total', v: String(initTot) });
+
+                            var pills = [];
+                            if (ev.d20 === 20) pills.push('<span class="dmg-pill dmg-pill--crit">★ 20 Natural</span>');
+                            else if (ev.d20 === 1) pills.push('<span class="dmg-pill dmg-pill--crit">⚠️ 1 Natural</span>');
+                            if (actor.surprised || ev.surprised) {
+                                pills.push('<span class="dmg-pill dmg-pill--vuln">⚠️ Surpreso</span>');
+                            }
+                            if (actor.t === 'p') {
+                                pills.push('<span class="dmg-pill dmg-pill--buff">Aventureiro</span>');
+                            } else if (actor.t === 'a') {
+                                pills.push('<span class="dmg-pill dmg-pill--buff">Aliado</span>');
+                            } else {
+                                pills.push('<span class="dmg-pill dmg-pill--type">Inimigo</span>');
+                            }
+                            if (dexMod !== 0) {
+                                pills.push('<span class="dmg-pill dmg-pill--save">DES ' + (dexMod > 0 ? '+' : '') + dexMod + '</span>');
+                            }
+
+                            var note = (actor.surprised || ev.surprised)
+                                ? (actor.n + ' está surpreso! Não poderá agir ou reagir até o término do seu primeiro turno (PHB p. 189).')
+                                : (actor.n + ' obteve iniciativa ' + initTot + ' para definir a ordem dos turnos.');
+
+                            var detailsRows = [
+                                { l: 'Combatente', v: actor.n },
+                                { l: 'Regra D&D 5e', v: 'PHB p. 189 (d20 + modificador de Destreza)' },
+                                { l: 'Rolagem d20', v: String(ev.d20) },
+                                { l: 'Modificador de Destreza', v: (dexMod >= 0 ? '+' : '') + dexMod + ' (DES ' + (actor.dex || 10) + ')' }
+                            ];
+                            if (extraMod !== 0) {
+                                detailsRows.push({ l: 'Bônus Adicional', v: (extraMod > 0 ? '+' : '') + extraMod });
+                            }
+                            detailsRows.push({ l: 'Resultado Final', v: String(initTot) });
+                            detailsRows.push({ l: 'Critério de Desempate', v: 'Maior valor de Destreza, com prioridade para personagens dos jogadores' });
+
                             return {
-                                title: actor.n,
-                                cls: 'hit',
+                                title: actor.n.toUpperCase() + ' — INICIATIVA ' + initTot,
+                                cls: ev.d20 === 20 ? 'crit' : (ev.d20 === 1 ? 'miss' : 'hit'),
                                 subStructured: {
-                                    kicker: 'd20 + DES',
-                                    rows: [
-                                        { l: 'd20', v: String(ev.d20) },
-                                        { l: 'Total', v: String(ev.total || ev.d20) }
-                                    ]
+                                    kicker: '⚡ ROLAGEM DE INICIATIVA (PHB p. 189)',
+                                    rows: rows,
+                                    pills: pills,
+                                    note: note,
+                                    details: { rows: detailsRows }
                                 }
                             };
                         }
