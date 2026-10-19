@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T07:53:23Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T08:16:31Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -4703,6 +4703,34 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   height: 100%;
   background: linear-gradient(90deg, #65a30d, #a3e635);
   transition: width 0.25s ease;
+}
+.dnd-mov-cond-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  line-height: 1.3;
+}
+.dnd-mov-cond-badge--danger {
+  background: rgba(220, 38, 38, 0.22);
+  border: 1px solid rgba(239, 68, 68, 0.65);
+  color: #fca5a5;
+}
+.dnd-mov-cond-badge--warn {
+  background: rgba(217, 119, 6, 0.22);
+  border: 1px solid rgba(245, 158, 11, 0.65);
+  color: #fde68a;
+}
+.dnd-mov-cond-badge--info {
+  background: rgba(37, 99, 235, 0.22);
+  border: 1px solid rgba(59, 130, 246, 0.65);
+  color: #bfdbfe;
 }
 
 /* Faixa tática D&D 5e compacta no topo (Prof, CD, Ataque Extra, Furtivo, Concentração) */
@@ -13468,6 +13496,12 @@ canvas#vfxCanvas,
   color: #fed7aa;
   box-shadow: 0 0 6px rgba(249, 115, 22, 0.45);
 }
+.token-cond-chip--grappled {
+  background: linear-gradient(180deg, #2e1c12, #140b06);
+  border-color: #f97316;
+  color: #fdba74;
+  box-shadow: 0 0 6px rgba(249, 115, 22, 0.4);
+}
 .token-cond-chip--petrified {
   background: linear-gradient(180deg, #262626, #141414);
   border-color: #a3a3a3;
@@ -20540,6 +20574,8 @@ function simHasCondition(unit, condKey) {
         if (unit.frightened) return true;
     } else if (k === 'restrained' || k === 'contido' || k === 'impedido') {
         if (unit.restrained) return true;
+    } else if (k === 'grappled' || k === 'agarrado') {
+        if (unit.grappled) return true;
     } else if (k === 'paralyzed' || k === 'paralisado') {
         if (unit.paralyzed) return true;
     } else if (k === 'stunned' || k === 'atordoado') {
@@ -20575,6 +20611,8 @@ function simHasCondition(unit, condKey) {
             if (st.frightened || stId === 'amedrontado' || stId === 'frightened' || stCond.indexOf('amedront') >= 0 || stCond.indexOf('fear') >= 0) return true;
         } else if (k === 'restrained' || k === 'contido' || k === 'impedido') {
             if (st.restrained || stId === 'contido' || stId === 'restrained' || stId === 'impedido' || stCond.indexOf('contid') >= 0 || stCond.indexOf('restrain') >= 0) return true;
+        } else if (k === 'grappled' || k === 'agarrado') {
+            if (st.grappled || stId === 'agarrado' || stId === 'grappled' || stCond.indexOf('agarrad') >= 0 || stCond.indexOf('grapple') >= 0) return true;
         } else if (k === 'paralyzed' || k === 'paralisado') {
             if (st.paralyzed || stId === 'paralisado' || stId === 'paralyzed' || stCond.indexOf('paralis') >= 0) return true;
         } else if (k === 'stunned' || k === 'atordoado') {
@@ -25266,6 +25304,20 @@ function previewTacticalTargetOnBoard(targetIdx) {
                 if (dtLow === 'cold') chips.push({ kind: 'good', text: '💧 Molhado: Vulnerável Frio (2×)' });
                 else if (dtLow === 'fire') chips.push({ kind: 'warn', text: '💧 Molhado: Resiste Fogo (½)' });
             }
+            if (tUnit.reactionSpent || tUnit.reaction_spent) {
+                chips.push({ kind: 'good', text: '⚡ Reação Gasta (Sem AoO)' });
+            }
+            var legMax = tUnit.legendary_resistances || tUnit.legendaryResistances || 0;
+            var legUsed = tUnit.legendary_resistances_used || tUnit.legendaryResistancesUsed || 0;
+            if (legMax > 0) {
+                var legRem = Math.max(0, legMax - legUsed);
+                chips.push({ kind: legRem > 0 ? 'warn' : 'info', text: '👑 Res. Lendária: ' + legRem + '/' + legMax });
+            }
+            var legActMax = tUnit.legendary_actions_max || tUnit.legendaryActionsMax || 0;
+            if (legActMax > 0) {
+                var legActRem = (tUnit.legendary_actions_remaining != null) ? tUnit.legendary_actions_remaining : legActMax;
+                chips.push({ kind: 'warn', text: '⚡ Ações Lendárias: ' + legActRem + '/' + legActMax });
+            }
         }
     }
 
@@ -27658,6 +27710,11 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
                     html: '<div class="token-cond-chip token-cond-chip--restrained" title="D&D 5e (PHB p. 292): Contido (Deslocamento 0; ataques recebidos com Vantagem)">⛨ Contido</div>',
                     name: 'Contido'
                 });
+            } else if (stObj.grappled || stId.indexOf('grapple') >= 0 || stName.indexOf('agarrad') >= 0) {
+                condChipList.push({
+                    html: '<div class="token-cond-chip token-cond-chip--grappled" title="D&D 5e (PHB p. 290): Agarrado (Deslocamento 0; não pode se beneficiar de bônus ao deslocamento)">✊ Agarrado</div>',
+                    name: 'Agarrado'
+                });
             } else if (stId.indexOf('invis') >= 0 || stId === 'hidden' || stName.indexOf('invisív') >= 0 || stName.indexOf('invisiv') >= 0 || stName.indexOf('oculto') >= 0) {
                 condChipList.push({
                     html: '<div class="token-cond-chip token-cond-chip--invisible" title="D&D 5e (PHB p. 291): Invisível / Oculto (Ataques com Vantagem; atacantes com Desvantagem)">✦ Invisível</div>',
@@ -27705,6 +27762,12 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
                 });
             }
         }
+    }
+    if (fogState !== 'shrouded' && u.alive && !u.isDead && u.grappled && !condChipList.some(function (c) { return c.name === 'Agarrado'; })) {
+        condChipList.push({
+            html: '<div class="token-cond-chip token-cond-chip--grappled" title="D&D 5e (PHB p. 290): Agarrado (Deslocamento 0; não pode se beneficiar de bônus ao deslocamento)">✊ Agarrado</div>',
+            name: 'Agarrado'
+        });
     }
     if (fogState !== 'shrouded' && u.alive && !u.isDead && (u.reactionSpent || u.reaction_spent)) {
         condChipList.push({
@@ -31179,11 +31242,33 @@ function _buildDndResourcesBarHtml(s, p, opts) {
         var movHexes = p.movement_left != null ? p.movement_left : (p.speed || 6);
         var maxHexes = p.speed || 6;
         var movPct = Math.min(100, Math.max(0, Math.round((movHexes / Math.max(1, maxHexes)) * 100)));
+        var movCondBadge = '';
+        if (typeof simHasCondition === 'function') {
+            if (simHasCondition(p, 'restrained')) {
+                movCondBadge = '<span class="dnd-mov-cond-badge dnd-mov-cond-badge--danger" title="Contido (PHB p. 290): Deslocamento é 0m e não pode ser aumentado. Ataques contra você têm Vantagem e seus ataques têm Desvantagem.">🕸️ CONTIDO (0m)</span>';
+            } else if (simHasCondition(p, 'grappled')) {
+                movCondBadge = '<span class="dnd-mov-cond-badge dnd-mov-cond-badge--danger" title="Agarrado (PHB p. 290): Deslocamento é 0m e não pode ser aumentado. Termina se o agarrador for incapacitado ou empurrado.">✊ AGARRADO (0m)</span>';
+            } else if (simHasCondition(p, 'paralyzed')) {
+                movCondBadge = '<span class="dnd-mov-cond-badge dnd-mov-cond-badge--danger" title="Paralisado (PHB p. 291): Incapacitado e não pode se mover nem falar.">⚡ PARALISADO (0m)</span>';
+            } else if (simHasCondition(p, 'petrified')) {
+                movCondBadge = '<span class="dnd-mov-cond-badge dnd-mov-cond-badge--danger" title="Petrificado (PHB p. 291): Transformado em pedra e incapacitado, deslocamento 0m.">🗿 PETRIFICADO (0m)</span>';
+            } else if (simHasCondition(p, 'unconscious')) {
+                movCondBadge = '<span class="dnd-mov-cond-badge dnd-mov-cond-badge--danger" title="Inconsciente (PHB p. 291): Incapacitado e caído, deslocamento 0m.">💤 INCONSCIENTE (0m)</span>';
+            } else if (simHasCondition(p, 'stunned')) {
+                movCondBadge = '<span class="dnd-mov-cond-badge dnd-mov-cond-badge--danger" title="Atordoado (PHB p. 290): Incapacitado e não pode se mover.">💫 ATORDOADO (0m)</span>';
+            } else if (simHasCondition(p, 'prone')) {
+                var standCostM = formatHexDistanceMeters(Math.ceil(maxHexes / 2));
+                movCondBadge = '<span class="dnd-mov-cond-badge dnd-mov-cond-badge--warn" title="Caído (PHB p. 290): Rastejar custa o dobro de deslocamento. Levantar custa metade do deslocamento base (' + standCostM + ').">▾ CAÍDO (' + standCostM + ' p/ levantar)</span>';
+            } else if (simHasCondition(p, 'frightened')) {
+                movCondBadge = '<span class="dnd-mov-cond-badge dnd-mov-cond-badge--warn" title="Amedrontado (PHB p. 290): Desvantagem em testes e ataques enquanto a fonte do medo estiver visível. Não pode se aproximar voluntariamente.">🚫 AMEDRONTADO</span>';
+            }
+        }
         html += '<div class="dnd-movement-bar" data-act="dnd-mov-info" aria-label="Deslocamento restante no turno" title="Deslocamento restante no turno (D&D 5e PHB p. 190) — Toque para detalhes">' +
             '<span class="dnd-mov-icon" aria-hidden="true">' + _combatDistanceIconSVG(16) + '</span>' +
             '<span class="dnd-mov-label">DESLOCAMENTO:</span>' +
             '<span class="dnd-mov-val"><strong>' + curMovM + '</strong> / ' + maxMovM + '</span>' +
             '<span class="dnd-mov-hexes">(' + movHexes + ' de ' + maxHexes + ' hexes)</span>' +
+            (movCondBadge ? (' ' + movCondBadge) : '') +
             '<div class="dnd-mov-track"><div class="dnd-mov-fill" style="width:' + movPct + '%;"></div></div>' +
             '</div>';
         /* Barra tática D&D 5e por Nível/Classe (Padrão Solasta / BG3): Proficiência, CD, Concentração, Ataque Extra e Passivas */
@@ -34537,6 +34622,26 @@ function inspectTurnQueueUnitOnBar(orderIdx, nodeEl) {
         chips.push({ kind: 'info', text: '◈ ' + (concSpell ? ('Conc: ' + concSpell) : 'Concentrando') });
     }
 
+    // Reação D&D 5e (PHB p. 190)
+    if (u.reactionSpent || u.reaction_spent) {
+        chips.push({ kind: 'warn', text: '⚡ Reação Gasta' });
+    } else {
+        chips.push({ kind: 'good', text: '⚡ Reação Pronta' });
+    }
+
+    // Resistência e Ações Lendárias (MM p. 11)
+    var legMax = u.legendary_resistances || u.legendaryResistances || 0;
+    var legUsed = u.legendary_resistances_used || u.legendaryResistancesUsed || 0;
+    if (legMax > 0) {
+        var legRem = Math.max(0, legMax - legUsed);
+        chips.push({ kind: legRem > 0 ? 'warn' : 'info', text: '👑 Res. Lendária: ' + legRem + '/' + legMax });
+    }
+    var legActMax = u.legendary_actions_max || u.legendaryActionsMax || 0;
+    if (legActMax > 0) {
+        var legActRem = (u.legendary_actions_remaining != null) ? u.legendary_actions_remaining : legActMax;
+        chips.push({ kind: 'warn', text: '⚡ Ações Lendárias: ' + legActRem + '/' + legActMax });
+    }
+
     // Salvaguardas Contra a Morte (PHB p. 197) se a 0 PV
     if (u.hp <= 0 && !u.isDead && (u.t === 'p' || u.t === 'a')) {
         if (u.stable) {
@@ -35080,21 +35185,6 @@ function bindActions() {
                 });
             });
         })(tacChips[tci]);
-    }
-    /* Barra de deslocamento: toque abre a explicação tática de movimentação D&D 5e */
-    var movBar = document.querySelector('.dnd-movement-bar');
-    if (movBar) {
-        movBar.addEventListener('click', function () {
-            showBfTacticalPreviewBar({
-                tone: 'normal',
-                title: '⇥ Deslocamento Tático (PHB p. 190)',
-                chips: [
-                    { kind: 'good', text: 'Você pode dividir seu movimento livremente antes e depois das ações' },
-                    { kind: 'warn', text: 'Levantar-se consome metade do seu deslocamento base' },
-                    { kind: 'danger', text: 'Terreno difícil exige 3,0m (2 hexes) por passo' }
-                ]
-            });
-        });
     }
     /* Chips de condição dos tokens (.token-cond-chip, .token-conc-chip, .token-prone-chip): toque abre a ficha da criatura */
     var condChips = document.querySelectorAll('.token-cond-chip, .token-conc-chip, .token-prone-chip');
@@ -36845,7 +36935,7 @@ function onBtnClick(ev) {
            Pular, UI ignorava, phase ficava intro, skills eram rejeitadas
            pelo servidor ("ph != active" → return sem ação). */
         var UI_ONLY = ['toggle-actions', 'close-action-sheet', 'cancel-target',
-            'close', 'log', 'dnd-res-info', 'toggle-skip-dice',
+            'close', 'log', 'dnd-res-info', 'dnd-mov-info', 'toggle-skip-dice',
             'skills', 'bag'];
         if (UI_ONLY.indexOf(act) !== -1) {
             console.info('[C-REM:BTN] ui_only act=' + act + ' (local handler)');
@@ -37839,6 +37929,42 @@ function onBtnClick(ev) {
         }
         if (info && typeof showMessage === 'function') {
             showMessage(info.title, 'info', info.rule + '<br><br><strong>Status:</strong> ' + info.state + (info.extra || ''));
+        }
+        return;
+    }
+    /* Barra de deslocamento D&D 5e: toque exibe status e regras táticas na preview bar */
+    if (act === 'dnd-mov-info') {
+        var sMb = currentState;
+        var pMb = sMb && sMb.order ? sMb.order[sMb.p_idx] : null;
+        var curHex = pMb && pMb.movement_left != null ? pMb.movement_left : (pMb ? pMb.speed || 6 : 6);
+        var maxHex = pMb ? (pMb.speed || 6) : 6;
+        var curM = formatHexDistanceMeters(curHex);
+        var maxM = formatHexDistanceMeters(maxHex);
+        var movChips = [
+            { kind: 'info', text: 'Restante: ' + curM + ' de ' + maxM + ' (' + curHex + '/' + maxHex + ' hexes)' }
+        ];
+        if (pMb && typeof simHasCondition === 'function') {
+            if (simHasCondition(pMb, 'restrained')) {
+                movChips.unshift({ kind: 'danger', text: '🕸️ Contido (PHB p. 290): Deslocamento é 0m e não pode ser aumentado.' });
+            } else if (simHasCondition(pMb, 'grappled')) {
+                movChips.unshift({ kind: 'danger', text: '✊ Agarrado (PHB p. 290): Deslocamento é 0m. Termina ao empurrar ou incapacitar o agressor.' });
+            } else if (simHasCondition(pMb, 'paralyzed') || simHasCondition(pMb, 'petrified') || simHasCondition(pMb, 'unconscious') || simHasCondition(pMb, 'stunned')) {
+                movChips.unshift({ kind: 'danger', text: '🚫 Incapacitado: Deslocamento é 0m.' });
+            } else if (simHasCondition(pMb, 'prone')) {
+                var standCostM = formatHexDistanceMeters(Math.ceil(maxHex / 2));
+                movChips.unshift({ kind: 'warn', text: '▾ Caído (PHB p. 290): Levantar-se consome metade do deslocamento base (' + standCostM + '). Rastejar custa dobro.' });
+            } else if (simHasCondition(pMb, 'frightened')) {
+                movChips.unshift({ kind: 'warn', text: '🚫 Amedrontado (PHB p. 290): Não pode se aproximar voluntariamente da fonte de medo.' });
+            }
+        }
+        movChips.push({ kind: 'good', text: 'Você pode dividir seu movimento livremente antes e depois das ações' });
+        movChips.push({ kind: 'warn', text: 'Terreno difícil (lama, espinhos, brasas, gelo) custa dobro (3,0m por hex)' });
+        if (typeof showBfTacticalPreviewBar === 'function') {
+            showBfTacticalPreviewBar({
+                tone: 'normal',
+                title: '⇥ Deslocamento Tático (PHB p. 190)',
+                chips: movChips
+            });
         }
         return;
     }
@@ -41338,6 +41464,17 @@ function showTargetConfirm(tgtIdx) {
     if (skill && skill.concentration && (p.concentrationSpell || p.concentrating)) {
         var _prevConc = p.concentrationSpell || (p.concentrating && (p.concentrating.spellName || p.concentrating.n)) || 'magia ativa';
         html += '<div style="background:rgba(30,90,140,0.24);border:1px solid #38bdf8;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:10px;color:#bae6fd;text-align:center;">◈ <strong>Concentração D&D 5e:</strong> Conjurar encerrará <em>' + escHtml(_prevConc) + '</em> (PHB p. 203).</div>';
+    }
+    if (isSaveSpell && legRes > 0) {
+        var _legRem = Math.max(0, legRes - legResUsed);
+        if (_legRem > 0) {
+            html += '<div style="background:rgba(217,119,6,0.22);border:1px solid #f59e0b;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:10px;color:#fde68a;font-weight:700;text-align:center;">👑 RESISTÊNCIA LENDÁRIA: ' + _legRem + '/' + legRes + ' restantes — O alvo pode escolher passar no TR (MM p. 11)</div>';
+        } else {
+            html += '<div style="background:rgba(30,130,60,0.22);border:1px solid #4ade80;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:10px;color:#bbf7d0;text-align:center;">👑 Resistências Lendárias Esgotadas (0/' + legRes + ') — O alvo sofrerá o efeito se falhar!</div>';
+        }
+    }
+    if (u.reactionSpent || u.reaction_spent) {
+        html += '<div style="background:rgba(59,130,246,0.18);border:1px solid rgba(96,165,250,0.5);border-radius:4px;padding:3px 8px;margin-bottom:5px;font-size:10px;color:#bfdbfe;text-align:center;">⚡ <strong>Reação Gasta:</strong> Este alvo não pode reagir (sem Escudo Arcano ou Ataque de Oportunidade).</div>';
     }
 
     /* Linhas Essenciais Compactas (Sempre Visíveis) */
