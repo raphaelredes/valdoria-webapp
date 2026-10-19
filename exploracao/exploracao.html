@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-19T01:33:58Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-19T22:59:58Z - do not edit directly, edit source -->
 
 
 
@@ -14823,6 +14823,9 @@ function parseRewardString(s) {
     verboseBtn.addEventListener('click', function() {
       window._LOG_ENABLED = !window._LOG_ENABLED;
       try { localStorage.setItem('valdoria_verbose_logs', window._LOG_ENABLED ? '1' : '0'); } catch (_) {}
+      if (window._LOG_ENABLED && typeof window._ensureVerboseBooted === 'function') {
+        try { window._ensureVerboseBooted(); } catch (_) {}
+      }
       _refreshVerboseBtn();
       // 1 linha de notice via warn (sempre visivel) pra confirmar mudanca
       try { console.warn('[EXPLORACAO:VERBOSE]', 'logs verbose =', window._LOG_ENABLED ? 'ON' : 'OFF'); } catch (_) {}
@@ -14831,19 +14834,23 @@ function parseRewardString(s) {
 
   /* 2026-04-29: METRICS UPDATER — atualiza FPS/CPU/RAM/FRAME/TIER no painel
      central a cada 500ms. CPU estimado via frame-time variation (jitter),
-     RAM via performance.memory (Chrome), FPS via _fpsValue global. */
+     RAM via performance.memory (Chrome), FPS via _fpsValue global.
+     2026-10 PERF MOBILE: rAF paralelo desativado em produção mobile (evita
+     segundo loop 120Hz competindo com renderFrame). */
   (function _initMetricsUpdater() {
     var fpsEl = document.getElementById('slp-fps-val');
     var cpuEl = document.getElementById('slp-cpu-val');
     var ramEl = document.getElementById('slp-ram-val');
     var frameEl = document.getElementById('slp-frame-val');
     var tierEl = document.getElementById('slp-tier-val');
-    if (!fpsEl) return;  // panel nao carregado em mobile
+    var isLocalDev = (typeof location !== 'undefined') && (location.protocol === 'file:' || location.hostname === '127.0.0.1' || location.hostname === 'localhost');
+    if (!fpsEl || (!isLocalDev && !window._LOG_ENABLED)) return;
 
     // CPU est: frame-time samples ringbuffer
     var _frameTimeSamples = [];
     var _lastFrameTs = performance.now();
     function _captureFrameTime() {
+      if (!isLocalDev && !window._LOG_ENABLED) return;
       var now = performance.now();
       var dt = now - _lastFrameTs;
       _lastFrameTs = now;
@@ -20720,8 +20727,11 @@ function _logViaImage(batch) {
   flush();
 }
 
+var _IS_LOCAL_SINK_ENV = (typeof location !== 'undefined') && (location.protocol === 'file:' || location.hostname === '127.0.0.1' || location.hostname === 'localhost');
+
 // Enfileira pra envio async; chamado direto dos helpers LOG/LOGW/LOGE
 function _tryServerPost(line) {
+  if (!_IS_LOCAL_SINK_ENV) return;
   if (typeof line !== 'string' || line.length === 0) return;
   _LOG_SINK_PENDING.push(line);
   // Se muitos logs acumularam, flush imediato
@@ -20735,21 +20745,23 @@ function _tryServerPost(line) {
 }
 
 // Flush periódico (intervalo fixo) — pega logs que não atingiram batch size
-setInterval(_flushLogSinkNow, _LOG_SINK_FLUSH_MS);
-window.addEventListener('beforeunload', _flushLogSinkNow);
+if (_IS_LOCAL_SINK_ENV) {
+  setInterval(_flushLogSinkNow, _LOG_SINK_FLUSH_MS);
+  window.addEventListener('beforeunload', _flushLogSinkNow);
 
-// Health check inicial — roda DEPOIS do DOMContentLoaded pra garantir que o btn existe
-document.addEventListener('DOMContentLoaded', function() {
-  _LOG_SINK_LAST_CHECK = Date.now();
-  _checkLogSinkAlive();
-  // Re-check periódico leve (30s) mesmo quando online — detecta queda do servidor
-  setInterval(() => {
-    if (Date.now() - _LOG_SINK_LAST_CHECK > _LOG_SINK_CHECK_INTERVAL_MS) {
-      _LOG_SINK_LAST_CHECK = Date.now();
-      _checkLogSinkAlive();
-    }
-  }, 30000);
-});
+  // Health check inicial — roda DEPOIS do DOMContentLoaded pra garantir que o btn existe
+  document.addEventListener('DOMContentLoaded', function() {
+    _LOG_SINK_LAST_CHECK = Date.now();
+    _checkLogSinkAlive();
+    // Re-check periódico leve (30s) mesmo quando online — detecta queda do servidor
+    setInterval(() => {
+      if (Date.now() - _LOG_SINK_LAST_CHECK > _LOG_SINK_CHECK_INTERVAL_MS) {
+        _LOG_SINK_LAST_CHECK = Date.now();
+        _checkLogSinkAlive();
+      }
+    }, 30000);
+  });
+}
 
 // ---- Download helpers (user-facing) ---------------------------------------
 function downloadExploracaoLogs(filename) {
@@ -24180,12 +24192,13 @@ function scheduleRender() {
   // CPU em idle clear/fog: 100% → ~10% (V4 original target).
   // Storm/rain mantêm rAF full-rate — sem regressão do V8 incident.
   if (_isIdle()) {
-    // 2026-10-08 PERF MOBILE: em masmorras (interior coberto/sem fauna de ar livre) ou mobile touch,
-    // o idle dorme a 150ms (~6.6fps). A CPU/GPU esfriam e poupam bateria. Ao tocar/mover,
-    // _markActive reativa full-rate (60fps) imediatamente.
+    // 2026-10 PERF MOBILE FIX: em masmorras (interior coberto/sem fauna de ar livre), lite tier,
+    // reducedMotion ou deep idle (>30s sem toque), o loop dorme a 150ms (~6.6fps) poupando bateria.
+    // Nos primeiros 30s após o toque em medium/full, mantém LIVING_TICK_MS (~30fps) para que aves,
+    // água, nuvens e tocha não engasguem a 6.6fps logo 3s após parar o dedo.
     var _isDungIdle = !!(S && ((S.mapDef && (S.mapDef.dungeon || S.mapDef.is_dungeon)) || S.biome === 'dungeon' || S.mapId === 'orc_chief_tent'));
-    var _isMobIdle = (typeof window !== 'undefined') && (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth <= 850));
-    var _idleMs = (_isDungIdle || _isMobIdle || (window._valdoriaPerformanceTier === 'lite') || window.vReducedMotion)
+    var _isDeepIdle = (typeof _lastInputAt === 'number') && ((now - _lastInputAt) > 30000);
+    var _idleMs = (_isDungIdle || _isDeepIdle || (window._valdoriaPerformanceTier === 'lite') || window.vReducedMotion)
                   ? IDLE_TICK_MS : LIVING_TICK_MS;
     setTimeout(function() { renderFrame(performance.now()); }, _idleMs);
   } else {
@@ -24473,26 +24486,12 @@ function renderFrame(ts, force) {
         var cacheScale = Math.min(1, MAX_CACHE_DIM / Math.max(canvasW, canvasH));
         var cacheW = Math.ceil(canvasW * cacheScale);
         var cacheH = Math.ceil(canvasH * cacheScale);
-        // Cache key inclui hex_decorations flag — invalida quando user toggle.
-        // V8.5: quando decorations ON E player em forest/plains/swamp (biomas
-        // com mata 'g' ou árvore 'T'), inclui anim-tick (8 fps) na key pra que
-        // scene cache invalide periodicamente — restaura sway das árvores
-        // (drawTreeAAA + mata forest scene). User pediu animação back.
+        // 2026-10 PERF MOBILE FIX: _sceneCacheCanvas guarda apenas o terreno estático (bases + copas)
+        // e só reconstrói quando o aventureiro se move, revela fog ou dá zoom (~0.4ms por frame em vez
+        // de spikes de 60-90ms reconstruindo 600 hexágonos e 300 ctx.clip() 4-8x por segundo).
+        // As aves das copas (tucano, cardeal, bem-te-vi) são desenhadas ao vivo a 30fps em
+        // drawForestCanopyBirdsLive(mainCtx) logo abaixo.
         var _animTick = '';
-        if (F.hex_decorations && S && (S.biome === 'forest' || S.biome === 'plains' || S.biome === 'swamp')) {
-          // Sessão #38 Fase 4.6: tier-aware anim rebuild rate.
-          // Antes: 8fps fixo independente de device. Agora: lite=static (sem
-          // rebuild), medium=4fps, full=8fps. Em Android 2GB com forest, cache
-          // rebuild era 30% do frame budget — gone agora em lite.
-          var _scTier = window._valdoriaPerformanceTier;
-          if (_scTier === 'lite') {
-            _animTick = '';  // static — sem rebuild por anim
-          } else if (_scTier === 'medium') {
-            _animTick = '|a' + Math.floor(_animTime / 250);  // 4 fps anim rebuilds
-          } else {
-            _animTick = '|a' + Math.floor(_animTime / 125);  // 8 fps anim rebuilds (full)
-          }
-        }
         var sceneKey = _cullStartCol + '_' + _cullStartRow + '_' + _cullEndCol + '_' + _cullEndRow
                      + '|' + HEX_W + '|' + (S && S.biome) + '|' + cacheW + 'x' + cacheH
                      + '|' + (S && S.player ? S.player.col + ',' + S.player.row : '')
@@ -24582,11 +24581,14 @@ function renderFrame(ts, force) {
       });
     }
   }
-  // ── TERRAIN LIFE — água cintila + grama balança ao vento (2026-07-06) ─────
+  // ── TERRAIN LIFE — água cintila + grama balança ao vento + aves das copas ──
   // Overlays leves sobre os tiles cacheados (não tocam o scene-cache). Água só em
   // medium+; vento em TODOS os tiers (barato) pra o mapa ter vida até no lite.
   if (typeof drawWaterShimmer === 'function') { try { drawWaterShimmer(mainCtx); } catch (_) {} }
   if (typeof drawWindGrass === 'function') { try { drawWindGrass(mainCtx); } catch (_) {} }
+  if (F.scene_cache && F.hex_decorations && typeof drawForestCanopyBirdsLive === 'function') {
+    try { drawForestCanopyBirdsLive(mainCtx); } catch (_) {}
+  }
   // ── AMBIENT GROUND (mapa vivo — re-religado 2026-06-14) ───────────────────
   // Camadas ambientes órfãs (cortadas num A/B FPS-test antigo) religadas ao
   // pipeline. _ambientOK é calculado UMA ÚNICA vez por frame: _shouldRenderAmbient()
@@ -24738,7 +24740,7 @@ function renderFrame(ts, force) {
 // player e (0,0) do canvas tá fora da tela. Atualizado a cada frame.
 // Canvas: magenta cross no player pra confirmar coord math do hex.
 // Toggle via tecla '`' (backtick) ou window.toggleDebugHud()
-var _debugHudOn = true;  // ligado por padrão enquanto diagnosticamos bugs de render
+var _debugHudOn = !!_IS_LOCAL_SINK_ENV;  // ligado por padrão apenas em file:///localhost; desligado em produção mobile
 var _debugHudEl = null;
 function _getDebugHudEl() {
   if (!_debugHudEl) _debugHudEl = document.getElementById('debug-hud');
@@ -24808,7 +24810,7 @@ window.toggleDebugHud = function() { _debugHudOn = !_debugHudOn; scheduleRender(
 // Assim, mesmo renderFrame quebrado mostra estado atual no HUD DOM.
 function _updateHudDomFailsafe() {
   try {
-    const el = document.getElementById('debug-hud');
+    const el = _getDebugHudEl();
     if (!el) return;
     if (!_debugHudOn) { el.style.display = 'none'; return; }
     el.style.display = 'block';
@@ -24836,7 +24838,9 @@ function _updateHudDomFailsafe() {
     } catch (_) {}
   }
 }
-setInterval(_updateHudDomFailsafe, 500);
+if (_IS_LOCAL_SINK_ENV) {
+  setInterval(_updateHudDomFailsafe, 500);
+}
 // Roda uma vez ja no load pra aparecer antes do primeiro frame
 document.addEventListener('DOMContentLoaded', _updateHudDomFailsafe);
 
@@ -24844,6 +24848,7 @@ document.addEventListener('DOMContentLoaded', _updateHudDomFailsafe);
 // Independente do buffer de logs. Envia snapshot de estado a cada 2s. Assim,
 // mesmo se _pushLogLine falhar silenciosamente, temos prova de vida + estado.
 function _sendHeartbeat() {
+  if (!_IS_LOCAL_SINK_ENV) return;
   try {
     const snap = S ? ('p=' + S.ph + ',ph=' + S.dayPhase + ',w=' + S.weather + ',b=' + S.biome +
       ',pc=' + (S.player ? S.player.col : '?') + ',pr=' + (S.player ? S.player.row : '?') +
@@ -24862,7 +24867,9 @@ function _sendHeartbeat() {
     img.src = _LOG_SINK_URL + '/log?line=' + encodeURIComponent(truncated) + '&_=' + Date.now();
   } catch (_) {}
 }
-setInterval(_sendHeartbeat, 5000);  // V3.0 PERF: 2s \u2192 5s (reduz spam de image GET)
+if (_IS_LOCAL_SINK_ENV) {
+  setInterval(_sendHeartbeat, 5000);  // V3.0 PERF: 2s \u2192 5s (reduz spam de image GET)
+}
 
 // ---- DECORATIONS (objetos estáticos raros espalhados pelo mapa) ----
 function drawDecorations(ctx) {
@@ -25188,6 +25195,60 @@ function drawWindGrass(ctx) {
     }
   }
   ctx.stroke();
+  ctx.restore();
+}
+
+// 2026-10 PERF MOBILE FIX: desenha as aves das copas (tucano em 'T', cardeal e bem-te-vi em 'g')
+// ao vivo a 30fps direto em mainCtx apenas nos hexes visíveis próximos ao aventureiro,
+// sem reconstruir os ~600 hexágonos do _sceneCacheCanvas a cada 125-250ms.
+function drawForestCanopyBirdsLive(ctx) {
+  if (window.vReducedMotion) return;
+  var tier = window._valdoriaPerformanceTier || 'medium';
+  if (tier === 'lite') return;
+  if (!S || !S.grid || !S.player || !S.fogState || S.biome === 'dungeon' || (S.mapDef && S.mapDef.dungeon)) return;
+  if (HEX_W < 22) return;
+  var maxDist = 5;
+  var px = S.player.col, py = S.player.row;
+  var W = HEX_W, H = HEX_H;
+  ctx.save();
+  for (var r = Math.max(0, py - maxDist); r <= Math.min(ROWS - 1, py + maxDist); r++) {
+    var rowArr = S.grid[r]; if (!rowArr) continue;
+    for (var c = Math.max(0, px - maxDist); c <= Math.min(COLS - 1, px + maxDist); c++) {
+      var t = rowArr[c];
+      if (t !== 'T' && t !== 'g') continue;
+      var fs = S.fogState[c + ',' + r];
+      if (fs !== 'visible' && fs !== 'dim') continue;
+      var pos = hexToScreen(c, r);
+      var cx = pos.x;
+      var cy = pos.y - effectiveTileHeightPx(c, r);
+      var hashSeed = (c * 73 + r * 31) & 0xFFFF;
+      var jx = ((hashSeed >> 2) & 7) / 70;
+      var jy = ((hashSeed >> 5) & 7) / 90;
+      if (t === 'T') {
+        var treesT = [
+          { ox: -0.18 + jx * 0.5, oy: -0.10 - jy * 0.5 },
+          { ox:  0.20 - jy * 0.5, oy: -0.06 + jx * 0.2 },
+          { ox: -0.14 - jx * 0.3, oy:  0.16 + jy * 0.5 },
+          { ox:  0.16 + jy * 0.5, oy:  0.18 - jx * 0.2 }
+        ];
+        treesT.sort(function(a, b) { return a.oy - b.oy; });
+        _drawForestBird(ctx, cx, cy, W, H, treesT[0], treesT[2], 0.0013, 0.0, hashSeed, '232, 120, 48', 1.0);
+      } else {
+        var treesG = [
+          { ox: -0.18 + jx * 0.5, oy:  0.12 - jy * 0.5 },
+          { ox:  0.20 - jy * 0.5, oy: -0.04 + jx * 0.2 },
+          { ox: -0.18 - jx * 0.3, oy: -0.16 + jy * 0.5 },
+          { ox:  0.10 + jy * 0.5, oy:  0.16 - jx * 0.3 },
+          { ox:  0.02 + jx * 0.4, oy: -0.20 + jy * 0.3 },
+          { ox: -0.04 + jy * 0.5, oy:  0.22 - jx * 0.2 },
+          { ox:  0.22 + jx * 0.3, oy:  0.22 + jy * 0.2 }
+        ];
+        treesG.sort(function(a, b) { return a.oy - b.oy; });
+        _drawForestBird(ctx, cx, cy, W, H, treesG[0], treesG[3], 0.0014, 0.0, hashSeed, '215, 32, 32', 1.0);
+        _drawForestBird(ctx, cx, cy, W, H, treesG[1], treesG[4], 0.0011, 1.7, hashSeed + 7919, '244, 200, 32', 1.0);
+      }
+    }
+  }
   ctx.restore();
 }
 
@@ -28020,8 +28081,9 @@ function _drawTreeAAA(ctx, cx, cy, col, row) {
     ctx.restore(); // V1.5.3: fecha rotação pivot
   }
   // V1.7.4 rev3: 1 bird laranja entre 2 árvores do hex T (era 2 birds, exagerado).
+  // Quando scene_cache está ativo, drawForestCanopyBirdsLive desenha as aves ao vivo em mainCtx.
   try {
-    if (tier !== 'lite' && typeof _animTime === 'number' && trees.length >= 2) {
+    if (ctx !== _sceneCacheCtx && tier !== 'lite' && typeof _animTime === 'number' && trees.length >= 2) {
       var i1Idx = Math.min(trees.length - 1, Math.floor(trees.length / 2));
       _drawForestBird(ctx, cx, cy, W, H,
                       trees[0], trees[i1Idx],
@@ -30716,8 +30778,9 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
     }
     // V1.7.4 rev3: 2 birds COLORIDOS na Mata (era 3, exagerado).
     // Cardeal vermelho + bem-te-vi amarelo — par contrastante brasileiro.
+    // Quando scene_cache está ativo, drawForestCanopyBirdsLive desenha as aves ao vivo em mainCtx.
     try {
-      if (tierMata !== 'lite' && typeof _animTime === 'number' && trees.length >= 2) {
+      if (ctx !== _sceneCacheCtx && tierMata !== 'lite' && typeof _animTime === 'number' && trees.length >= 2) {
         var birdPairs = [
           { i0: 0, i1: 3, speed: 0.0014, phase: 0.0, color: '215, 32, 32' },   // cardeal vermelho
           { i0: 1, i1: 4, speed: 0.0011, phase: 1.7, color: '244, 200, 32' }   // bem-te-vi amarelo
@@ -34338,6 +34401,9 @@ function _buildHardFogCache() {
   hfCtx.clearRect(0, 0, canvasW, canvasH);
   hfCtx.save();
   hfCtx.fillStyle = 'rgba(15, 12, 8, 1.0)';
+  // 2026-10 PERF MOBILE FIX: batch de todos os polígonos de fog num único beginPath() + fill(),
+  // reduzindo ~2.400 chamadas de draw call para 1 única operação raster na GPU a cada passo.
+  hfCtx.beginPath();
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       const key = fogKey(c, r);
@@ -34346,33 +34412,26 @@ function _buildHardFogCache() {
       const sc = hexToScreen(c, r);
       const h = effectiveTileHeightPx(c, r);
       const verts = hexTopVertices(sc.x, sc.y - h);
-      hfCtx.beginPath();
       hfCtx.moveTo(verts[0].x, verts[0].y);
       for (let i = 1; i < verts.length; i++) hfCtx.lineTo(verts[i].x, verts[i].y);
       hfCtx.closePath();
-      hfCtx.fill();
       if (h > 0) {
         const left = hexLeftSideVertices(sc.x, sc.y - h, h);
-        hfCtx.beginPath();
         hfCtx.moveTo(left[0].x, left[0].y);
         for (let i = 1; i < left.length; i++) hfCtx.lineTo(left[i].x, left[i].y);
         hfCtx.closePath();
-        hfCtx.fill();
         const right = hexRightSideVertices(sc.x, sc.y - h, h);
-        hfCtx.beginPath();
         hfCtx.moveTo(right[0].x, right[0].y);
         for (let i = 1; i < right.length; i++) hfCtx.lineTo(right[i].x, right[i].y);
         hfCtx.closePath();
-        hfCtx.fill();
         const front = hexFrontSideVertices(sc.x, sc.y - h, h);
-        hfCtx.beginPath();
         hfCtx.moveTo(front[0].x, front[0].y);
         for (let i = 1; i < front.length; i++) hfCtx.lineTo(front[i].x, front[i].y);
         hfCtx.closePath();
-        hfCtx.fill();
       }
     }
   }
+  hfCtx.fill();
   hfCtx.restore();
   LOG('FOG', 'hardFog cache rebuilt');
 }
@@ -51731,20 +51790,27 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
   // Logs aparecem na coluna VERBOSE do #sim-log-panel (split layout).
   // Pra desativar pontualmente, remova este IIFE inteiro do HTML.
 
-  // Aguarda LOG/LOGW/LOGE existirem (definidos em ~16122) + S inicializar
-  var bootAttempts = 0;
-  var bootIv = setInterval(function () {
-    bootAttempts++;
-    if (typeof LOG === 'function' && typeof S !== 'undefined' && S && S.player) {
-      clearInterval(bootIv);
-      _bootVerbose();
-    } else if (bootAttempts > 200) {
-      clearInterval(bootIv);
-      console.error('[VERBOSE] failed to bootstrap — LOG=' + (typeof LOG)
-        + ' S=' + (typeof S) + ' S.player=' + !!(typeof S !== 'undefined' && S && S.player)
-        + ' (after 20s)');
-    }
-  }, 100);
+  var _verboseBooted = false;
+  function _tryBootVerboseNow() {
+    if (_verboseBooted) return;
+    var isLocal = (typeof _IS_LOCAL_SINK_ENV !== 'undefined') ? _IS_LOCAL_SINK_ENV : (typeof location !== 'undefined' && (location.protocol === 'file:' || location.hostname === '127.0.0.1' || location.hostname === 'localhost'));
+    if (!isLocal && !window._LOG_ENABLED) return;
+    var bootAttempts = 0;
+    var bootIv = setInterval(function () {
+      bootAttempts++;
+      if (typeof LOG === 'function' && typeof S !== 'undefined' && S && S.player) {
+        clearInterval(bootIv);
+        if (!_verboseBooted) {
+          _verboseBooted = true;
+          _bootVerbose();
+        }
+      } else if (bootAttempts > 200) {
+        clearInterval(bootIv);
+      }
+    }, 100);
+  }
+  window._ensureVerboseBooted = _tryBootVerboseNow;
+  _tryBootVerboseNow();
 
   function _bootVerbose() {
     LOG('VERBOSE', 'verbose mode online — instrumentation hooks ativando');
