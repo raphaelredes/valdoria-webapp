@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T21:35:09Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T23:43:57Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -11723,11 +11723,11 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 @keyframes initReveal { 0% { transform: scale(0) rotate(-180deg); } 60% { transform: scale(1.25) rotate(10deg); } 100% { transform: scale(1) rotate(0); } }
 
 /* Celula em rolagem de iniciativa */
-.cell.init-rolling { position: relative; border-color: var(--v-gold, #c4953a) !important; box-shadow: 0 0 20px rgba(196,149,58,.8), inset 0 0 12px rgba(196,149,58,.3) !important; animation: rollingPulse .8s ease infinite; }
-@keyframes rollingPulse { 0%,100% { box-shadow: 0 0 15px rgba(196,149,58,.5), inset 0 0 8px rgba(196,149,58,.2); } 50% { box-shadow: 0 0 28px rgba(196,149,58,.95), inset 0 0 16px rgba(196,149,58,.4); } }
+.cell.init-rolling { position: relative; border-color: var(--v-gold, #c4953a) !important; box-shadow: 0 0 22px rgba(196,149,58,.85), inset 0 0 12px rgba(196,149,58,.35) !important; animation: rollingPulse .8s ease infinite; }
+@keyframes rollingPulse { 0%,100% { opacity: 0.88; } 50% { opacity: 1; } }
 /* Seta epica apontando para o combatente atual — ornamento + chevron duplo */
-.cell.init-rolling::before { content: ''; position: absolute; top: -34px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent; border-top: 20px solid var(--v-gold, #c4953a); filter: drop-shadow(0 0 10px rgba(196,149,58,.9)) drop-shadow(0 0 18px rgba(196,149,58,.5)); animation: arrowBob .7s ease-in-out infinite; z-index: 20; pointer-events: none; }
-.cell.init-rolling::after { content: '◆'; position: absolute; top: -58px; left: 50%; transform: translateX(-50%); color: var(--v-gold, #c4953a); font-size: calc(14px * var(--v-font-scale, 1)); text-shadow: 0 0 12px rgba(196,149,58,.9), 0 0 24px rgba(196,149,58,.5); animation: arrowBob .7s ease-in-out infinite, arrowShimmer 1.4s ease infinite; z-index: 20; pointer-events: none; letter-spacing: 0; font-family: var(--v-font-display, 'Cinzel'), serif; }
+.cell.init-rolling::before { content: ''; position: absolute; top: -34px; left: 50%; transform: translate(-50%, 0); width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent; border-top: 20px solid var(--v-gold, #c4953a); filter: drop-shadow(0 0 10px rgba(196,149,58,.9)) drop-shadow(0 0 18px rgba(196,149,58,.5)); animation: arrowBob .7s ease-in-out infinite; z-index: 20; pointer-events: none; will-change: transform; }
+.cell.init-rolling::after { content: '◆'; position: absolute; top: -58px; left: 50%; transform: translate(-50%, 0); color: var(--v-gold, #c4953a); font-size: calc(14px * var(--v-font-scale, 1)); text-shadow: 0 0 12px rgba(196,149,58,.9), 0 0 24px rgba(196,149,58,.5); animation: arrowBob .7s ease-in-out infinite, arrowShimmer 1.4s ease infinite; z-index: 20; pointer-events: none; letter-spacing: 0; font-family: var(--v-font-display, 'Cinzel'), serif; will-change: transform, opacity; }
 /* Replica da celula no overlay de dado (iniciativa): borda de destaque ok, sem seta/◆ da arena */
 .dice-init-cell-scene .cell.init-rolling::before,
 .dice-init-cell-scene .cell.init-rolling::after,
@@ -11743,8 +11743,8 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   border: none !important;
   box-shadow: none !important;
 }
-@keyframes arrowBob { 0%,100% { margin-top: 0; } 50% { margin-top: 8px; } }
-@keyframes arrowShimmer { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.6) drop-shadow(0 0 8px rgba(255,215,130,.9)); } }
+@keyframes arrowBob { 0%,100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 8px); } }
+@keyframes arrowShimmer { 0%,100% { opacity: 0.82; } 50% { opacity: 1; } }
 
 /* Epic CTA flutuante — ancorado logo abaixo da retaguarda aliada */
 .epic-cta-overlay { display: flex; justify-content: center; align-items: center; gap: var(--v-space-md-lg, 10px); padding: var(--v-space-xl, 16px) var(--v-space-lg, 12px) 20px; pointer-events: auto; flex-wrap: wrap; }
@@ -13330,21 +13330,25 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 }
 
 .battlefield-hex-arena .cell.hex-token.selectable {
+  filter: drop-shadow(0 0 10px rgba(255, 60, 30, 0.9)) drop-shadow(0 0 18px rgba(255, 120, 50, 0.65));
   animation: tokenSelectablePulse 1.4s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
 .battlefield-hex-arena .cell.hex-token.selectable-heal {
+  filter: drop-shadow(0 0 10px rgba(39, 174, 96, 0.9)) drop-shadow(0 0 18px rgba(100, 240, 150, 0.65));
   animation: tokenHealPulse 1.4s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
 @keyframes tokenSelectablePulse {
-  0%, 100% { filter: drop-shadow(0 0 6px rgba(230, 80, 50, 0.7)); }
-  50% { filter: drop-shadow(0 0 16px rgba(255, 60, 30, 1)) drop-shadow(0 0 22px rgba(255, 120, 50, 0.8)); }
+  0%, 100% { transform: scale(1); opacity: 0.88; }
+  50% { transform: scale(1.05); opacity: 1; }
 }
 
 @keyframes tokenHealPulse {
-  0%, 100% { filter: drop-shadow(0 0 6px rgba(46, 204, 113, 0.7)); }
-  50% { filter: drop-shadow(0 0 16px rgba(39, 174, 96, 1)) drop-shadow(0 0 22px rgba(100, 240, 150, 0.8)); }
+  0%, 100% { transform: scale(1); opacity: 0.88; }
+  50% { transform: scale(1.05); opacity: 1; }
 }
 
 .token-hex, .token-disc {
@@ -13410,22 +13414,22 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   inset: -4px;
   clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
   background: #f1c40f;
+  filter: drop-shadow(0 0 12px rgba(241, 196, 15, 0.9));
   animation: tokenTurnGlowHexAnim 1.6s ease-in-out infinite;
   pointer-events: none;
   z-index: -1;
   border-radius: 0 !important;
+  will-change: transform, opacity;
 }
 
 @keyframes tokenTurnGlowHexAnim {
   0%, 100% {
     transform: scale(1);
     opacity: 0.65;
-    filter: drop-shadow(0 0 8px rgba(241, 196, 15, 0.7));
   }
   50% {
     transform: scale(1.12);
     opacity: 1;
-    filter: drop-shadow(0 0 18px rgba(241, 196, 15, 1));
   }
 }
 
@@ -15771,8 +15775,10 @@ window.__onIntroTap = function() {
     var pauseBtn = document.getElementById('sim-log-panel-pause');
     if (!listEl) return;
 
+    var isLocalFile = false;
+    try { isLocalFile = (window.location && window.location.protocol === 'file:'); } catch (_e) {}
     var MAX_LINES = 600;
-    var MAX_BUFFER = 5000;  /* buffer in-memory que sobrevive limite visual */
+    var MAX_BUFFER = isLocalFile ? 5000 : 250;  /* buffer in-memory (reduzido em webview/mobile para evitar JSON.stringify pesado a cada 30s) */
     var paused = false;
     /* X-6.5.51AC: buffer in-memory de TODOS os logs do panel.
        Auto-saved em localStorage (30s) E POSTado ao server (batch 800ms).
@@ -15815,35 +15821,39 @@ window.__onIntroTap = function() {
     function _appendLine(level, args) {
         if (paused) return;
         try {
-            var line = document.createElement('div');
-            line.className = 'sim-log-line log-' + level;
-            var time = document.createElement('span');
-            time.className = 'sim-log-time';
             var d = new Date();
-            time.textContent = String(d.getHours()).padStart(2, '0') + ':' +
-                String(d.getMinutes()).padStart(2, '0') + ':' +
-                String(d.getSeconds()).padStart(2, '0');
-            line.appendChild(time);
             var msg = Array.prototype.slice.call(args).map(function (a) {
                 if (a == null) return String(a);
                 if (typeof a === 'string') return a;
                 if (a instanceof Error) return a.message + (a.stack ? '\n  ' + a.stack.slice(0, 240) : '');
                 try { return JSON.stringify(a); } catch (e) { return String(a); }
             }).join(' ');
-            var msgEl = document.createElement('span');
-            msgEl.textContent = msg;
-            line.appendChild(msgEl);
-            /* X-6.5.51AE: aplica filter ativo na linha nova ANTES de append */
-            if (!_matchesFilter(level, msg)) {
-                line.classList.add('hidden-by-filter');
+            /* Em mobile/Telegram WebView (#sim-log-panel oculto via display:none),
+               pula criação de nós DOM e reflow síncrono de scrollHeight */
+            if (listEl.offsetParent !== null) {
+                var line = document.createElement('div');
+                line.className = 'sim-log-line log-' + level;
+                var time = document.createElement('span');
+                time.className = 'sim-log-time';
+                time.textContent = String(d.getHours()).padStart(2, '0') + ':' +
+                    String(d.getMinutes()).padStart(2, '0') + ':' +
+                    String(d.getSeconds()).padStart(2, '0');
+                line.appendChild(time);
+                var msgEl = document.createElement('span');
+                msgEl.textContent = msg;
+                line.appendChild(msgEl);
+                /* X-6.5.51AE: aplica filter ativo na linha nova ANTES de append */
+                if (!_matchesFilter(level, msg)) {
+                    line.classList.add('hidden-by-filter');
+                }
+                listEl.appendChild(line);
+                while (listEl.children.length > MAX_LINES) {
+                    listEl.removeChild(listEl.firstChild);
+                }
+                /* Auto-scroll só se user já estava no fim (não atrapalha leitura) */
+                var nearBottom = (listEl.scrollHeight - listEl.scrollTop - listEl.clientHeight) < 80;
+                if (nearBottom) listEl.scrollTop = listEl.scrollHeight;
             }
-            listEl.appendChild(line);
-            while (listEl.children.length > MAX_LINES) {
-                listEl.removeChild(listEl.firstChild);
-            }
-            /* Auto-scroll só se user já estava no fim (não atrapalha leitura) */
-            var nearBottom = (listEl.scrollHeight - listEl.scrollTop - listEl.clientHeight) < 80;
-            if (nearBottom) listEl.scrollTop = listEl.scrollHeight;
             /* X-6.5.51AC: buffer pra exportar (sobrevive limite visual + serve file://) */
             _exportBuf.push({
                 ts: d.toISOString(),
@@ -35877,10 +35887,28 @@ function mountBattlefieldWeather(s) {
             }
             ctx.fill();
         } else if (curWeather === 'fog') {
-            // Névoa densa com tint uniforme e faixas suaves de bruma
+            // Névoa densa com tint uniforme e faixas suaves de bruma (sprite cacheado — zero createRadialGradient por frame)
             ctx.fillStyle = 'rgba(220, 225, 235, 0.26)';
             ctx.fillRect(0, 0, w, h);
 
+            if (!window._combatFogPuffSprite) {
+                var fc = document.createElement('canvas');
+                fc.width = 128; fc.height = 64;
+                var fctx = fc.getContext('2d');
+                fctx.save();
+                fctx.scale(1, 0.5);
+                var fgGrad = fctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+                fgGrad.addColorStop(0, 'rgba(230, 235, 245, 1)');
+                fgGrad.addColorStop(0.6, 'rgba(225, 230, 240, 0.4)');
+                fgGrad.addColorStop(1, 'rgba(220, 225, 235, 0)');
+                fctx.fillStyle = fgGrad;
+                fctx.beginPath();
+                fctx.arc(64, 64, 64, 0, Math.PI * 2);
+                fctx.fill();
+                fctx.restore();
+                window._combatFogPuffSprite = fc;
+            }
+            var fogSpr = window._combatFogPuffSprite;
             for (var fgIdx = 0; fgIdx < particles.length; fgIdx++) {
                 var fg = particles[fgIdx];
                 fg.x += fg.speed * dtFactor * 1.5;
@@ -35888,15 +35916,10 @@ function mountBattlefieldWeather(s) {
                     fg.x = -fg.radius;
                     fg.y = Math.random() * h;
                 }
-                var grad = ctx.createRadialGradient(fg.x, fg.y, 0, fg.x, fg.y, fg.radius);
-                grad.addColorStop(0, 'rgba(230, 235, 245, ' + fg.alpha + ')');
-                grad.addColorStop(0.6, 'rgba(225, 230, 240, ' + (fg.alpha * 0.4) + ')');
-                grad.addColorStop(1, 'rgba(220, 225, 235, 0)');
-                ctx.fillStyle = grad;
-                ctx.beginPath();
-                ctx.ellipse(fg.x, fg.y, fg.radius, fg.radius * 0.5, 0, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.globalAlpha = fg.alpha;
+                ctx.drawImage(fogSpr, fg.x - fg.radius, fg.y - fg.radius * 0.5, fg.radius * 2, fg.radius);
             }
+            ctx.globalAlpha = 1;
         }
 
         _bfWeatherRafId = requestAnimationFrame(stepWeather);

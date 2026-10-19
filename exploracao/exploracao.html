@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-19T22:59:58Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-19T23:39:32Z - do not edit directly, edit source -->
 
 
 
@@ -2155,8 +2155,8 @@ html body .camp-screen {
   text-shadow: 0 0 6px rgba(255, 140, 40, 0.6), 0 1px 2px #000;
 }
 @keyframes tbDungeonPulse {
-  0%, 100% { box-shadow: 0 0 8px rgba(220, 50, 25, 0.45), inset 0 1px 0 rgba(255, 220, 130, 0.4); border-color: rgba(255, 180, 75, 0.7); }
-  50%      { box-shadow: 0 0 16px rgba(255, 75, 35, 0.8), inset 0 1px 0 rgba(255, 240, 160, 0.65); border-color: rgba(255, 215, 120, 0.98); }
+  0%, 100% { opacity: 0.88; }
+  50%      { opacity: 1; }
 }
 
 /* X-6.5.51i: popup tip sobre condicao da exploracao (biome/weather/phase).
@@ -2572,39 +2572,39 @@ body.perf-lite .boss-intro-ember { animation-duration: 1500ms !important; }
 /* Container pulsa borda + sombra vermelhas — intensidade por tier */
 #top-danger.tdng-alert-2 {
   border-color: rgba(232, 130, 40, 0.85);
+  box-shadow: 0 0 8px rgba(232, 130, 40, 0.5);
   animation: tdngPulseMild 2.2s ease-in-out infinite;
 }
 #top-danger.tdng-alert-3 {
   border-color: rgba(232, 60, 40, 0.9);
+  box-shadow: 0 0 12px rgba(232, 60, 40, 0.8);
   animation: tdngPulseMed 1.4s ease-in-out infinite;
 }
 #top-danger.tdng-alert-4 {
-  border-color: rgba(255, 30, 20, 1);
+  border-color: rgba(255, 60, 40, 1);
+  box-shadow: 0 0 16px rgba(255, 60, 40, 0.9), 0 0 24px rgba(255, 30, 20, 0.45);
   animation: tdngPulseStrong 0.9s ease-in-out infinite;
 }
 #top-danger.tdng-alert-5 {
-  border-color: rgba(255, 30, 20, 1);
+  border-color: rgba(255, 70, 50, 1);
+  box-shadow: 0 0 20px rgba(255, 30, 20, 0.95), inset 0 0 6px rgba(255, 30, 20, 0.5);
   animation: tdngPulseDeath 0.5s ease-in-out infinite;
 }
 @keyframes tdngPulseMild {
-  0%, 100% { box-shadow: 0 0 0 rgba(232, 130, 40, 0); }
-  50%      { box-shadow: 0 0 8px rgba(232, 130, 40, 0.55); }
+  0%, 100% { opacity: 0.86; }
+  50%      { opacity: 1; }
 }
 @keyframes tdngPulseMed {
-  0%, 100% { box-shadow: 0 0 4px rgba(232, 60, 40, 0.5); }
-  50%      { box-shadow: 0 0 14px rgba(232, 60, 40, 0.95); }
+  0%, 100% { opacity: 0.82; }
+  50%      { opacity: 1; }
 }
 @keyframes tdngPulseStrong {
-  0%, 100% { box-shadow: 0 0 6px rgba(232, 60, 40, 0.65); border-color: rgba(232, 60, 40, 0.9); }
-  50%      { box-shadow: 0 0 18px rgba(255, 60, 40, 1), 0 0 26px rgba(255, 30, 20, 0.55);
-             border-color: rgba(255, 90, 70, 1); }
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50%      { opacity: 1; transform: scale(1.015); }
 }
 @keyframes tdngPulseDeath {
-  0%, 100% { box-shadow: 0 0 10px rgba(255, 30, 20, 0.85), inset 0 0 4px rgba(255, 30, 20, 0.35);
-             border-color: rgba(255, 30, 20, 1); }
-  50%      { box-shadow: 0 0 22px rgba(255, 30, 20, 1), 0 0 32px rgba(255, 60, 40, 0.7),
-             inset 0 0 8px rgba(255, 30, 20, 0.6);
-             border-color: rgba(255, 100, 80, 1); }
+  0%, 100% { opacity: 0.78; transform: scale(1); }
+  50%      { opacity: 1; transform: scale(1.025); }
 }
 body.perf-lite #top-danger { animation: none !important; }
 @media (prefers-reduced-motion: reduce) { #top-danger { animation: none !important; } }
@@ -3506,11 +3506,11 @@ body.pace-cautious #btn-forage { display: block; }
 }
 .fill.hp { background: linear-gradient(180deg, #e96550, #c44a3a 50%, #a03828); }
 .fill.hp.warn { background: linear-gradient(180deg, #e8a840, #c48a42 50%, #a47332); }
-.fill.hp.crit { background: linear-gradient(180deg, #c44a3a, #9a2a20 50%, #7a2a28); animation: critPulse 1.5s ease-in-out infinite; }
+.fill.hp.crit { background: linear-gradient(180deg, #c44a3a, #9a2a20 50%, #7a2a28); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 10px rgba(200, 50, 40, 0.7); animation: critPulse 1.5s ease-in-out infinite; }
 .fill.mp { background: linear-gradient(180deg, #5a8ac8, #4a7ab5 50%, #2a5a8a); }
 @keyframes critPulse {
-  0%, 100% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 8px rgba(200, 50, 40, 0.5); }
-  50% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 14px rgba(200, 50, 40, 0.8); }
+  0%, 100% { opacity: 0.78; }
+  50% { opacity: 1; }
 }
 .hud-float-bar .val {
   font-size: calc(11px * var(--v-font-scale, 1));
@@ -3712,9 +3712,10 @@ body.perf-lite .hud-cond-chip .dot, body.reduced-motion .hud-cond-chip .dot { an
   text-shadow: 0 0 6px rgba(251, 215, 112, 0.6);
 }
 @keyframes questPulse {
-  0%, 100% { box-shadow: 0 2px 10px rgba(196, 149, 58, 0.35), 0 0 8px rgba(196, 149, 58, 0.4); }
-  50% { box-shadow: 0 2px 14px rgba(196, 149, 58, 0.55), 0 0 14px rgba(196, 149, 58, 0.7); }
+  0%, 100% { opacity: 0.88; }
+  50% { opacity: 1; }
 }
+body.perf-lite #quest-indicator { animation: none; }
 
 /* #ally-indicator removido 2026-05-12 (USER REQUEST) — btn-party é canonical pra ver grupo. */
 .ai-icon { font-size: calc(13px * var(--v-font-scale, 1)); }
@@ -5964,7 +5965,7 @@ body.remote-mode #debug-hud { display: none !important; }
     opacity: .92;
     transition: opacity .25s ease;
 }
-.v-scroll-hint-arrow.v-scroll-hint-hidden { opacity: 0; }
+.v-scroll-hint-arrow.v-scroll-hint-hidden { opacity: 0; animation: none; }
 .v-scroll-hint-arrow svg { width: 16px; height: 16px; display: block; }
 @keyframes vScrollHintBounce {
     0%,100% { transform: translateX(-50%) translateY(0); }
@@ -14739,6 +14740,7 @@ function parseRewardString(s) {
 
   function _appendLine(level, args) {
     try {
+      if (listEl.offsetParent === null) return;
       var line = document.createElement('div');
       line.className = 'sim-log-line log-' + level;
       var time = document.createElement('span');
@@ -15133,7 +15135,7 @@ function parseRewardString(s) {
   var _sinkFailCount = 0;
   var _SINK_FAIL_THRESHOLD = 5;
   var _exportBuf = [];
-  var _MAX_BUF = 5000;
+  var _MAX_BUF = (_sinkEnv === 'local') ? 5000 : 250;
 
   function _sinkFlush() {
     _sinkTimer = null;
@@ -25201,6 +25203,7 @@ function drawWindGrass(ctx) {
 // 2026-10 PERF MOBILE FIX: desenha as aves das copas (tucano em 'T', cardeal e bem-te-vi em 'g')
 // ao vivo a 30fps direto em mainCtx apenas nos hexes visíveis próximos ao aventureiro,
 // sem reconstruir os ~600 hexágonos do _sceneCacheCanvas a cada 125-250ms.
+var _birdTreeJitterCache = new Array(64);
 function drawForestCanopyBirdsLive(ctx) {
   if (window.vReducedMotion) return;
   var tier = window._valdoriaPerformanceTier || 'medium';
@@ -25222,9 +25225,11 @@ function drawForestCanopyBirdsLive(ctx) {
       var cx = pos.x;
       var cy = pos.y - effectiveTileHeightPx(c, r);
       var hashSeed = (c * 73 + r * 31) & 0xFFFF;
-      var jx = ((hashSeed >> 2) & 7) / 70;
-      var jy = ((hashSeed >> 5) & 7) / 90;
-      if (t === 'T') {
+      var jKey = (hashSeed >> 2) & 63;
+      var jEntry = _birdTreeJitterCache[jKey];
+      if (!jEntry) {
+        var jx = (jKey & 7) / 70;
+        var jy = ((jKey >> 3) & 7) / 90;
         var treesT = [
           { ox: -0.18 + jx * 0.5, oy: -0.10 - jy * 0.5 },
           { ox:  0.20 - jy * 0.5, oy: -0.06 + jx * 0.2 },
@@ -25232,8 +25237,6 @@ function drawForestCanopyBirdsLive(ctx) {
           { ox:  0.16 + jy * 0.5, oy:  0.18 - jx * 0.2 }
         ];
         treesT.sort(function(a, b) { return a.oy - b.oy; });
-        _drawForestBird(ctx, cx, cy, W, H, treesT[0], treesT[2], 0.0013, 0.0, hashSeed, '232, 120, 48', 1.0);
-      } else {
         var treesG = [
           { ox: -0.18 + jx * 0.5, oy:  0.12 - jy * 0.5 },
           { ox:  0.20 - jy * 0.5, oy: -0.04 + jx * 0.2 },
@@ -25244,8 +25247,16 @@ function drawForestCanopyBirdsLive(ctx) {
           { ox:  0.22 + jx * 0.3, oy:  0.22 + jy * 0.2 }
         ];
         treesG.sort(function(a, b) { return a.oy - b.oy; });
-        _drawForestBird(ctx, cx, cy, W, H, treesG[0], treesG[3], 0.0014, 0.0, hashSeed, '215, 32, 32', 1.0);
-        _drawForestBird(ctx, cx, cy, W, H, treesG[1], treesG[4], 0.0011, 1.7, hashSeed + 7919, '244, 200, 32', 1.0);
+        jEntry = _birdTreeJitterCache[jKey] = {
+          t0: treesT[0], t2: treesT[2],
+          g0: treesG[0], g1: treesG[1], g3: treesG[3], g4: treesG[4]
+        };
+      }
+      if (t === 'T') {
+        _drawForestBird(ctx, cx, cy, W, H, jEntry.t0, jEntry.t2, 0.0013, 0.0, hashSeed, '232, 120, 48', 1.0);
+      } else {
+        _drawForestBird(ctx, cx, cy, W, H, jEntry.g0, jEntry.g3, 0.0014, 0.0, hashSeed, '215, 32, 32', 1.0);
+        _drawForestBird(ctx, cx, cy, W, H, jEntry.g1, jEntry.g4, 0.0011, 1.7, hashSeed + 7919, '244, 200, 32', 1.0);
       }
     }
   }
@@ -30543,6 +30554,8 @@ function _drawDungeonPatioTile(ctx, cx, cy, col, row) {
   ctx.restore();
 }
 
+var _dungeonVigGrad = null;
+var _dungeonVigGradKey = '';
 function _drawDungeonAtmosphere(ctx) {
   if (!S || !canvasW || !canvasH) return;
   var isDungMap = !!(S && ((S.mapDef && (S.mapDef.dungeon || S.mapDef.is_dungeon)) || S.biome === 'dungeon'));
@@ -30551,23 +30564,28 @@ function _drawDungeonAtmosphere(ctx) {
   var tier = window._valdoriaPerformanceTier;
   if (tier === 'lite') return;
 
-  // Vinheta atmosférica imersiva suave cobrindo todo o canvas (sem cortes retangulares nem saltos visuais)
-  var cx = canvasW * 0.5;
-  var cy = canvasH * 0.5;
-  var maxR = Math.hypot(canvasW, canvasH) * 0.55;
-  var minR = Math.min(canvasW, canvasH) * 0.20;
-  var vigGrad = ctx.createRadialGradient(cx, cy, minR, cx, cy, maxR);
-  vigGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
-  vigGrad.addColorStop(0.55, 'rgba(18, 9, 6, 0.38)');
-  vigGrad.addColorStop(1, 'rgba(8, 4, 3, 0.72)');
+  // Vinheta atmosférica imersiva suave cobrindo todo o canvas (cacheada por dimensão)
+  var gKey = canvasW + 'x' + canvasH;
+  if (!_dungeonVigGrad || _dungeonVigGradKey !== gKey) {
+    var cx = canvasW * 0.5;
+    var cy = canvasH * 0.5;
+    var maxR = Math.hypot(canvasW, canvasH) * 0.55;
+    var minR = Math.min(canvasW, canvasH) * 0.20;
+    _dungeonVigGrad = ctx.createRadialGradient(cx, cy, minR, cx, cy, maxR);
+    _dungeonVigGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    _dungeonVigGrad.addColorStop(0.55, 'rgba(18, 9, 6, 0.38)');
+    _dungeonVigGrad.addColorStop(1, 'rgba(8, 4, 3, 0.72)');
+    _dungeonVigGradKey = gKey;
+  }
 
   ctx.save();
-  ctx.fillStyle = vigGrad;
+  ctx.fillStyle = _dungeonVigGrad;
   ctx.fillRect(0, 0, canvasW, canvasH);
 
   var isMob = (typeof window !== 'undefined') && (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth <= 850));
   if (tier !== 'lite' && !window.vReducedMotion && !isMob) {
     ctx.fillStyle = 'rgba(255, 130, 40, 0.65)';
+    ctx.beginPath();
     for (var ci = 0; ci < 8; ci++) {
       var seed = ci * 1337;
       var cSpeed = 0.0003 + (ci % 4) * 0.0001;
@@ -30575,10 +30593,10 @@ function _drawDungeonAtmosphere(ctx) {
       var cpx = ((seed * 17) % canvasW + Math.sin(_animTime * 0.001 + ci) * 18) % canvasW;
       var cpy = canvasH - (cOff * canvasH);
       var cSize = 1.2 + (ci % 3) * 0.6;
-      ctx.beginPath();
+      ctx.moveTo(cpx + cSize, cpy);
       ctx.arc(cpx, cpy, cSize, 0, Math.PI * 2);
-      ctx.fill();
     }
+    ctx.fill();
   }
   ctx.restore();
 }
@@ -33365,17 +33383,26 @@ function drawPlayer(ctx) {
       ctx.beginPath();
       ctx.ellipse(4.3 * s + torchSway, -9.5 * s, 1.1 * s, 0.7 * s, 0, 0, Math.PI * 2);
       ctx.fill();
-      // Glow warm
+      // Glow warm (offscreen sprite cacheado — zero createRadialGradient por frame)
       const glowX = 4.3 * s + torchSway;
       const glowY = -11.5 * s;
-      const grad = ctx.createRadialGradient(glowX, glowY, 0, glowX, glowY, 9 * s);
-      grad.addColorStop(0, 'rgba(255, 210, 110, ' + (0.55 + flick * 0.12).toFixed(3) + ')');
-      grad.addColorStop(0.4, 'rgba(240, 150, 60, ' + (0.3 + flick * 0.08).toFixed(3) + ')');
-      grad.addColorStop(1, 'rgba(220, 100, 30, 0)');
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(glowX, glowY, 9 * s, 0, Math.PI * 2);
-      ctx.fill();
+      const glowR = 9 * s;
+      if (!window._torchHandGlowSprite) {
+        const gc = document.createElement('canvas');
+        gc.width = 64; gc.height = 64;
+        const gctx = gc.getContext('2d');
+        const g = gctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+        g.addColorStop(0, 'rgba(255, 210, 110, 1)');
+        g.addColorStop(0.4, 'rgba(240, 150, 60, 0.545)');
+        g.addColorStop(1, 'rgba(220, 100, 30, 0)');
+        gctx.fillStyle = g;
+        gctx.fillRect(0, 0, 64, 64);
+        window._torchHandGlowSprite = gc;
+      }
+      const prevAlpha = ctx.globalAlpha;
+      ctx.globalAlpha = prevAlpha * Math.max(0.05, Math.min(1, 0.55 + flick * 0.12));
+      ctx.drawImage(window._torchHandGlowSprite, glowX - glowR, glowY - glowR, glowR * 2, glowR * 2);
+      ctx.globalAlpha = prevAlpha;
       // Chama
       ctx.fillStyle = 'rgba(230, 110, 40, 0.95)';
       ctx.beginPath();
@@ -34549,31 +34576,49 @@ function drawBirdFlock(ctx) {
 }
 
 // God rays sutis da direção do sol (só dia limpo, plains/desert)
+let _sunRaysCache = null;
 function drawSunRays(ctx) {
   if (!S) return;
   if (S.biome === 'dungeon' || (S.mapDef && S.mapDef.dungeon)) return;
   if (S.biome !== 'plains' && S.biome !== 'desert') return;
   if (S.dayPhase !== 'day' || S.weather !== 's') return;
-  const srcX = canvasW * 0.15;
-  const srcY = -40;
+  const cacheKey = canvasW + 'x' + canvasH;
+  if (!_sunRaysCache || _sunRaysCache.key !== cacheKey) {
+    const srcX = canvasW * 0.15;
+    const srcY = -40;
+    const len = canvasH * 0.9;
+    const rays = [];
+    for (let i = 0; i < 4; i++) {
+      const angle = 0.4 + i * 0.08;
+      const endX = srcX + Math.sin(angle) * len;
+      const endY = srcY + Math.cos(angle) * len;
+      const grad = ctx.createLinearGradient(srcX, srcY, endX, endY);
+      grad.addColorStop(0, 'rgba(255, 230, 160, 1)');
+      grad.addColorStop(0.5, 'rgba(255, 220, 140, 0.667)');
+      grad.addColorStop(1, 'rgba(255, 220, 140, 0)');
+      rays.push({
+        grad: grad,
+        x0: srcX - 3, y0: srcY,
+        x1: endX - 40 - i * 20, y1: endY,
+        x2: endX + 40 + i * 20, y2: endY,
+        x3: srcX + 3, y3: srcY
+      });
+    }
+    _sunRaysCache = { key: cacheKey, rays: rays };
+  }
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
+  const rays = _sunRaysCache.rays;
   for (let i = 0; i < 4; i++) {
-    const angle = 0.4 + i * 0.08;
-    const len = canvasH * 0.9;
-    const endX = srcX + Math.sin(angle) * len;
-    const endY = srcY + Math.cos(angle) * len;
+    const r = rays[i];
     const alpha = 0.018 + Math.sin(_animTime * 0.0008 + i) * 0.006;
-    const grad = ctx.createLinearGradient(srcX, srcY, endX, endY);
-    grad.addColorStop(0, 'rgba(255, 230, 160, ' + (alpha * 1.5).toFixed(3) + ')');
-    grad.addColorStop(0.5, 'rgba(255, 220, 140, ' + alpha.toFixed(3) + ')');
-    grad.addColorStop(1, 'rgba(255, 220, 140, 0)');
-    ctx.fillStyle = grad;
+    ctx.globalAlpha = alpha * 1.5;
+    ctx.fillStyle = r.grad;
     ctx.beginPath();
-    ctx.moveTo(srcX - 3, srcY);
-    ctx.lineTo(endX - 40 - i * 20, endY);
-    ctx.lineTo(endX + 40 + i * 20, endY);
-    ctx.lineTo(srcX + 3, srcY);
+    ctx.moveTo(r.x0, r.y0);
+    ctx.lineTo(r.x1, r.y1);
+    ctx.lineTo(r.x2, r.y2);
+    ctx.lineTo(r.x3, r.y3);
     ctx.closePath();
     ctx.fill();
   }
@@ -35507,12 +35552,22 @@ function drawMovableHexes(ctx) {
     const s = hexToScreen(node.col, node.row);
     // Mais longe/caro = mais fraco → leitura do "alcance" do ritmo (custo 1≈1.0 .. budget≈0.6)
     var fo = 1 - (node.dist - 1) / Math.max(1, R) * 0.5;
-    if (tier !== 'lite' && node.dist === 1) {   // glow só no anel adjacente (barato + destaca o próximo passo)
-      const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, HEX_W * 0.24);
-      g.addColorStop(0, 'rgba(232,200,100,' + (0.15 + 0.08 * breathe) + ')');
-      g.addColorStop(1, 'rgba(232,200,100,0)');
-      ctx.fillStyle = g;
-      ctx.beginPath(); ctx.arc(s.x, s.y, HEX_W * 0.24, 0, Math.PI * 2); ctx.fill();
+    if (tier !== 'lite' && node.dist === 1) {   // glow só no anel adjacente (sprite cacheado — zero createRadialGradient por frame)
+      if (!window._moveHexGlowSprite) {
+        const gc = document.createElement('canvas');
+        gc.width = 64; gc.height = 64;
+        const gctx = gc.getContext('2d');
+        const g = gctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+        g.addColorStop(0, 'rgba(232,200,100,1)');
+        g.addColorStop(1, 'rgba(232,200,100,0)');
+        gctx.fillStyle = g;
+        gctx.fillRect(0, 0, 64, 64);
+        window._moveHexGlowSprite = gc;
+      }
+      const gr = HEX_W * 0.24;
+      ctx.globalAlpha = 0.15 + 0.08 * breathe;
+      ctx.drawImage(window._moveHexGlowSprite, s.x - gr, s.y - gr, gr * 2, gr * 2);
+      ctx.globalAlpha = 1;
     }
     ctx.fillStyle = 'rgba(232,200,100,' + ((0.42 + 0.22 * breathe) * fo) + ')';     // dot central
     ctx.beginPath(); ctx.arc(s.x, s.y, HEX_W * 0.05, 0, Math.PI * 2); ctx.fill();
@@ -35530,7 +35585,7 @@ function drawMarkedDestination(ctx, mi) {
   const tier = window._valdoriaPerformanceTier || 'full';
   const t = ((_animTime || 0) % 1200) / 1200, pulse = 0.5 + 0.5 * Math.sin(t * Math.PI * 2);
   ctx.save();
-  ctx.strokeStyle = 'rgba(232,200,100,0.9)';                    // trilha herói → alvo
+  ctx.strokeStyle = 'rgba(232,200,100,0.9)';                    // trilha personagem → alvo
   ctx.lineWidth = 3.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.setLineDash([3, 8]);
   ctx.beginPath(); ctx.moveTo(h.x, h.y);
   if (mi.path && mi.path.length) {                              // M11: polilinha por cada hex do caminho
@@ -35546,12 +35601,21 @@ function drawMarkedDestination(ctx, mi) {
   for (let i = 1; i < v.length; i++) ctx.lineTo(v[i].x, v[i].y);
   ctx.closePath();
   if (tier !== 'lite') {
-    const rg = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, HEX_W * 0.5);
-    rg.addColorStop(0, 'rgba(232,200,100,' + (0.20 + 0.10 * pulse) + ')');
-    rg.addColorStop(1, 'rgba(232,200,100,0.04)');
-    ctx.fillStyle = rg;
-  } else { ctx.fillStyle = 'rgba(232,200,100,0.15)'; }
-  ctx.fill();
+    const gKey = s.x + ',' + s.y + ',' + HEX_W;
+    if (!window._markedDestGradCache || window._markedDestGradCache.key !== gKey) {
+      const rg = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, HEX_W * 0.5);
+      rg.addColorStop(0, 'rgba(232,200,100,1)');
+      rg.addColorStop(1, 'rgba(232,200,100,0.16)');
+      window._markedDestGradCache = { key: gKey, grad: rg };
+    }
+    ctx.fillStyle = window._markedDestGradCache.grad;
+    ctx.globalAlpha = 0.20 + 0.10 * pulse;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  } else {
+    ctx.fillStyle = 'rgba(232,200,100,0.15)';
+    ctx.fill();
+  }
   ctx.strokeStyle = 'rgba(232,200,100,' + (0.30 + 0.25 * pulse) + ')'; ctx.lineWidth = 6; ctx.stroke();  // glow
   ctx.strokeStyle = 'rgba(255,240,190,0.95)'; ctx.lineWidth = 2; ctx.stroke();                            // linha clara
   if (tier !== 'lite') {                                        // ping expansivo (sonar)

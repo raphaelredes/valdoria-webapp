@@ -12354,7 +12354,7 @@ function _logCity(msg){
 }
 function _renderLogPanel(){
   var el = document.getElementById('sim-log-panel');
-  if (!el) return;
+  if (!el || !el.classList.contains('active')) return;
   el.innerHTML = _cityLogEntries.map(function(e){
     return '<div>' + e.replace(/[<>]/g, '') + '</div>';
   }).join('');
@@ -12372,7 +12372,10 @@ function _toggleLogPanel(){
     if (!isFile && !hasDev) return;
   } catch (_) { return; }
   var el = document.getElementById('sim-log-panel');
-  if (el) el.classList.toggle('active');
+  if (el) {
+    el.classList.toggle('active');
+    if (el.classList.contains('active')) _renderLogPanel();
+  }
 }
 
 // === SIM LOG SINK (Fase 7 — 2026-04-30) ===================================
@@ -12401,7 +12404,7 @@ function _toggleLogPanel(){
     }
   } catch(_e) { _sinkApi = null; }
   var _q = [], _t = null, _ok = !!_sinkApi, _failN = 0, _SINK_FAIL = 5;
-  var _exportBuf = [], _expBufMax = 1000;
+  var _exportBuf = [], _expBufMax = (_sinkEnv === 'local') ? 1000 : 250;
   function _flush(){
     _t = null;
     if (!_sinkApi || !_ok || _q.length === 0) return;
@@ -68316,18 +68319,26 @@ function _drawQuestFocusHalo(ctx, biome, w, h, questTitle){
   var pulse = 0.5 + 0.5 * Math.sin(t);
   var rBase = 40;
   var rOuter = rBase + 6 + pulse * 8;
-  // Anel exterior dourado pulsante
+  // Anel exterior dourado pulsante (cached offscreen sprite)
+  if (!window._cityQuestRingSprite) {
+    var qC = document.createElement('canvas');
+    qC.width = 128; qC.height = 128;
+    var qCtx = qC.getContext('2d');
+    var qG = qCtx.createRadialGradient(64, 64, 24, 64, 64, 64);
+    qG.addColorStop(0, 'rgba(255,215,0,0)');
+    qG.addColorStop(0.55, 'rgba(255,200,80,0.38)');
+    qG.addColorStop(0.85, 'rgba(255,170,40,0.60)');
+    qG.addColorStop(1, 'rgba(255,140,30,0)');
+    qCtx.fillStyle = qG;
+    qCtx.beginPath();
+    qCtx.arc(64, 64, 64, 0, Math.PI * 2);
+    qCtx.fill();
+    window._cityQuestRingSprite = qC;
+  }
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
-  var grad = ctx.createRadialGradient(cx, cy, rBase * 0.6, cx, cy, rOuter);
-  grad.addColorStop(0, 'rgba(255,215,0,0)');
-  grad.addColorStop(0.55, 'rgba(255,200,80,' + (0.18 + pulse * 0.20) + ')');
-  grad.addColorStop(0.85, 'rgba(255,170,40,' + (0.32 + pulse * 0.28) + ')');
-  grad.addColorStop(1, 'rgba(255,140,30,0)');
-  ctx.fillStyle = grad;
-  ctx.beginPath();
-  ctx.arc(cx, cy, rOuter, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.globalAlpha = 0.55 + pulse * 0.45;
+  ctx.drawImage(window._cityQuestRingSprite, cx - rOuter, cy - rOuter, rOuter * 2, rOuter * 2);
   ctx.restore();
   // Anel discreto dourado contínuo
   ctx.save();
@@ -73561,6 +73572,23 @@ function _playCityWalkAnimation(opts, onComplete) {
     ctx.globalAlpha = 1;
   }
 
+  function _makeRadialGlowSprite(stops) {
+    var c = document.createElement('canvas');
+    c.width = 64; c.height = 64;
+    var gCtx = c.getContext('2d');
+    var g = gCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    for (var s = 0; s < stops.length; s++) g.addColorStop(stops[s][0], stops[s][1]);
+    gCtx.fillStyle = g;
+    gCtx.fillRect(0, 0, 64, 64);
+    return c;
+  }
+  var _doorLanternSprite = _makeRadialGlowSprite([[0, 'rgba(255,200,100,0.55)'], [1, 'rgba(255,200,100,0)']]);
+  var _wallTorchSprite = _makeRadialGlowSprite([[0, 'rgba(' + PAL.torchGlow + ',0.55)'], [0.4, 'rgba(' + PAL.torchGlow + ',0.18)'], [1, 'rgba(' + PAL.torchGlow + ',0)']]);
+  var _lanternGoldSprite = _makeRadialGlowSprite([[0, 'rgba(255,200,100,0.55)'], [0.5, 'rgba(255,200,100,0.18)'], [1, 'rgba(255,200,100,0)']]);
+  var _lanternAmberSprite = _makeRadialGlowSprite([[0, 'rgba(255,180,80,0.55)'], [0.5, 'rgba(255,180,80,0.18)'], [1, 'rgba(255,180,80,0)']]);
+  var _gateTorchSprite = _makeRadialGlowSprite([[0, 'rgba(' + PAL.torchGlow + ',0.6)'], [1, 'rgba(' + PAL.torchGlow + ',0)']]);
+  var _fogTorchHaloSprite = _makeRadialGlowSprite([[0, 'rgba(' + PAL.torchGlow + ',0.18)'], [1, 'rgba(' + PAL.torchGlow + ',0)']]);
+
   function drawMidLayer(scroll, t){
     var baseY = H * 0.68;
     var WINDOWS_LIT = (period === 'night' || period === 'dusk' || period === 'dawn');
@@ -73679,12 +73707,8 @@ function _playCityWalkAnimation(opts, onComplete) {
         var lhy = dY - 2;
         ctx.fillStyle = '#0a0604';
         ctx.fillRect(lhx - 0.3, lhy - 3, 0.6, 3);
-        // Glow
-        var lhg = ctx.createRadialGradient(lhx, lhy, 0, lhx, lhy, 9);
-        lhg.addColorStop(0, 'rgba(255,200,100,0.55)');
-        lhg.addColorStop(1, 'rgba(255,200,100,0)');
-        ctx.fillStyle = lhg;
-        ctx.fillRect(lhx - 9, lhy - 9, 18, 18);
+        // Glow (cached offscreen sprite)
+        ctx.drawImage(_doorLanternSprite, lhx - 9, lhy - 9, 18, 18);
         ctx.fillStyle = '#ffd494';
         ctx.beginPath(); ctx.arc(lhx, lhy, 0.9, 0, Math.PI * 2); ctx.fill();
       }
@@ -73938,13 +73962,9 @@ function _playCityWalkAnimation(opts, onComplete) {
         // Chama pulsante
         var flick = 1 + Math.sin(t / 90 + tr.flicker) * 0.25;
         var fy = ty - 4;
-        // Glow radial grande
-        var fg = ctx.createRadialGradient(tx, fy, 0, tx, fy, 28 * flick);
-        fg.addColorStop(0, 'rgba(' + PAL.torchGlow + ',0.55)');
-        fg.addColorStop(0.4, 'rgba(' + PAL.torchGlow + ',0.18)');
-        fg.addColorStop(1, 'rgba(' + PAL.torchGlow + ',0)');
-        ctx.fillStyle = fg;
-        ctx.fillRect(tx - 30, fy - 30, 60, 60);
+        // Glow radial grande (cached offscreen sprite)
+        var tR = 28 * flick;
+        ctx.drawImage(_wallTorchSprite, tx - tR, fy - tR, tR * 2, tR * 2);
         // Núcleo da chama
         ctx.fillStyle = PAL.torch;
         ctx.beginPath();
@@ -73997,13 +74017,9 @@ function _playCityWalkAnimation(opts, onComplete) {
       // Glow + chama (period-aware)
       if (TORCHES_LIT) {
         var lflick = 1 + Math.sin(t / 110 + lan.swing) * 0.18;
-        var lhg = ctx.createRadialGradient(lcX, lcY, 0, lcX, lcY, 18 * lflick);
-        var hueGlow = lan.hue === 'gold' ? '255,200,100' : '255,180,80';
-        lhg.addColorStop(0, 'rgba(' + hueGlow + ',0.55)');
-        lhg.addColorStop(0.5, 'rgba(' + hueGlow + ',0.18)');
-        lhg.addColorStop(1, 'rgba(' + hueGlow + ',0)');
-        ctx.fillStyle = lhg;
-        ctx.fillRect(lcX - 22, lcY - 22, 44, 44);
+        var lR = 18 * lflick;
+        var lSpr = lan.hue === 'gold' ? _lanternGoldSprite : _lanternAmberSprite;
+        ctx.drawImage(lSpr, lcX - lR, lcY - lR, lR * 2, lR * 2);
         // Núcleo (pequena chama dentro)
         ctx.fillStyle = lan.hue === 'gold' ? '#ffd494' : '#ffaa54';
         ctx.beginPath();
@@ -74132,11 +74148,8 @@ function _playCityWalkAnimation(opts, onComplete) {
           var flick = 1 + Math.sin(t / 80 + tgx * 0.1) * 0.22;
           ctx.fillStyle = '#0a0604';
           ctx.fillRect(tgx - 0.7, tgy, 1.4, 6);
-          var gg = ctx.createRadialGradient(tgx, tgy - 2, 0, tgx, tgy - 2, 26 * flick);
-          gg.addColorStop(0, 'rgba(' + PAL.torchGlow + ',0.6)');
-          gg.addColorStop(1, 'rgba(' + PAL.torchGlow + ',0)');
-          ctx.fillStyle = gg;
-          ctx.fillRect(tgx - 28, tgy - 28, 56, 56);
+          var gR = 26 * flick;
+          ctx.drawImage(_gateTorchSprite, tgx - gR, tgy - 2 - gR, gR * 2, gR * 2);
           ctx.fillStyle = PAL.torch;
           ctx.beginPath();
           ctx.ellipse(tgx, tgy - 2, 1.8 * flick, 4 * flick, 0, 0, Math.PI * 2);
@@ -74628,16 +74641,13 @@ function _playCityWalkAnimation(opts, onComplete) {
       if ((period === 'night' || period === 'dusk') && torches.length) {
         ctx.save();
         ctx.globalCompositeOperation = 'lighter';
+        var nwY = nearWallY() + 24;
         for (var ht = 0; ht < torches.length; ht++) {
           var trh = torches[ht];
           var thx = trh.x;  // approximate
           // Skip se fora — não temos scroll info aqui, então usa todas
           if (thx < -100 || thx > W + 100) continue;
-          var hg = ctx.createRadialGradient(thx, nearWallY() + 24, 0, thx, nearWallY() + 24, 50);
-          hg.addColorStop(0, 'rgba(' + PAL.torchGlow + ',0.18)');
-          hg.addColorStop(1, 'rgba(' + PAL.torchGlow + ',0)');
-          ctx.fillStyle = hg;
-          ctx.fillRect(thx - 60, nearWallY() - 30, 120, 100);
+          ctx.drawImage(_fogTorchHaloSprite, thx - 50, nwY - 50, 100, 100);
         }
         ctx.restore();
       }
