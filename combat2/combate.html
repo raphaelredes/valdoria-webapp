@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T07:34:09Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T07:53:23Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -24156,6 +24156,38 @@ function simBuildElevationsLookup(state) {
     return map;
 }
 
+/**
+ * Converte s.battlefield.surfaces num dicionário rápido {'col,row': surfObj}.
+ */
+function simBuildSurfacesLookup(state) {
+    var map = {};
+    if (!state || !state.battlefield || !Array.isArray(state.battlefield.surfaces)) return map;
+    var list = state.battlefield.surfaces;
+    for (var i = 0; i < list.length; i++) {
+        var s = list[i];
+        if (s && s.col != null && s.row != null) {
+            map[s.col + ',' + s.row] = s;
+        }
+    }
+    return map;
+}
+
+/**
+ * Converte chave de atributo D&D 5e (str, dex, con, int, wis, cha) em sigla canônica oficial em PT-BR.
+ */
+function simAbilityLabelPt(ab) {
+    var k = String(ab || 'dex').toLowerCase().trim();
+    var map = {
+        str: 'FOR', forca: 'FOR', força: 'FOR',
+        dex: 'DES', destreza: 'DES',
+        con: 'CON', constituicao: 'CON', constituição: 'CON',
+        int: 'INT', inteligencia: 'INT', inteligência: 'INT',
+        wis: 'SAB', sabedoria: 'SAB',
+        cha: 'CAR', carisma: 'CAR'
+    };
+    return map[k] || k.toUpperCase();
+}
+
 function simGetHexElevation(state, col, row) {
     if (!state || !state.battlefield || !Array.isArray(state.battlefield.elevations)) return 0;
     for (var i = 0; i < state.battlefield.elevations.length; i++) {
@@ -24457,13 +24489,17 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
     var pUnit = currentState.order[currentState.p_idx];
     var moveLeft = pUnit ? (pUnit.movement_left || 0) : 6;
     var ignoreClimb = !!(pUnit && (pUnit.has_lands_stride || ((pUnit.feats || []).indexOf('athlete') >= 0)));
+    var ignoreDiff = !!(pUnit && pUnit.has_lands_stride);
     var difficultMap = simBuildDifficultTerrainLookup(currentState);
     var elevMap = simBuildElevationsLookup(currentState);
+    var surfaceMap = (typeof simBuildSurfacesLookup === 'function') ? simBuildSurfacesLookup(currentState) : {};
 
     var svgParts = [];
     var totalCostHexes = 0;
     var provokedAoOList = [];
     var crossesHazard = false;
+    var crossesDifficultTerrain = false;
+    var encounteredHazards = [];
 
     // Limpa realces de ameaça anteriores antes de destacar inimigos que fariam AoO nesta rota
     if (!_bfTacticalLayerActive && Array.isArray(currentState.order) && typeof setEnemyThreatHighlight === 'function') {
@@ -24481,13 +24517,26 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
         var curKey = curStep.col + ',' + curStep.row;
         var nextKey = nextStep.col + ',' + nextStep.row;
         var dtStep = difficultMap[nextKey];
-        var stepCost = dtStep ? 2 : 1;
+        var surfStep = surfaceMap[nextKey];
+        var isDiff = !ignoreDiff && !!dtStep;
+        if (isDiff) crossesDifficultTerrain = true;
+        var stepCost = isDiff ? 2 : 1;
         if (!ignoreClimb) {
             var curEl = elevMap[curKey] ? (parseInt(elevMap[curKey].elevation, 10) || 0) : 0;
             var nxtEl = elevMap[nextKey] ? (parseInt(elevMap[nextKey].elevation, 10) || 0) : 0;
             if (nxtEl > curEl) stepCost += (nxtEl - curEl);
         }
-        if (dtStep && dtStep.hazard_kind) crossesHazard = true;
+        var isHazardOnStep = false;
+        if (dtStep && dtStep.hazard_kind) {
+            crossesHazard = true;
+            isHazardOnStep = true;
+            if (encounteredHazards.indexOf(dtStep) < 0) encounteredHazards.push(dtStep);
+        }
+        if (surfStep && (surfStep.hazard_kind || surfStep.type === 'fire' || surfStep.type === 'ice' || surfStep.type === 'electrified_water')) {
+            crossesHazard = true;
+            isHazardOnStep = true;
+            if (encounteredHazards.indexOf(surfStep) < 0) encounteredHazards.push(surfStep);
+        }
         totalCostHexes += stepCost;
 
         var pFrom = hexCenter(curStep.col, curStep.row);
@@ -24499,7 +24548,7 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
             aooProvoked = simCheckOpportunityAttacks(currentState.p_idx, curStep.col, curStep.row, nextStep.col, nextStep.row);
         }
 
-        var isStepHazard = (aooProvoked && aooProvoked.length > 0) || !!(dtStep && dtStep.hazard_kind);
+        var isStepHazard = (aooProvoked && aooProvoked.length > 0) || isHazardOnStep;
         if (aooProvoked && aooProvoked.length > 0) {
             for (var ai = 0; ai < aooProvoked.length; ai++) {
                 var aooEntry = aooProvoked[ai];
@@ -24577,7 +24626,7 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
     var reticleCls = 'hex-dest-reticle' + (isRouteHazard ? ' hex-dest-reticle--hazard' : '');
     svgParts.push('<circle cx="' + destCenter.cx + '" cy="' + destCenter.cy + '" r="18" class="' + reticleCls + '" />');
 
-    var shortDestText = (provokedAoOList.length > 0 ? '⚠️ ' : '⇥ ') + totalM;
+    var shortDestText = (provokedAoOList.length > 0 ? '⚠️ ' : (crossesHazard ? '🔥 ' : (crossesDifficultTerrain ? '🌱 ' : '⇥ '))) + totalM;
     var destBadgeW = Math.max(46, shortDestText.length * 6.2 + 14);
     var destBadgeH = 16;
     var destX = Math.round(destCenter.cx - destBadgeW / 2);
@@ -24620,7 +24669,26 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
         } else if (isDisengaged) {
             chips.push({ kind: 'good', text: '💨 Desengajado (Sem AoO, PHB p. 192)' });
         }
-        if (crossesHazard) {
+        if (crossesDifficultTerrain) {
+            chips.push({ kind: 'warn', text: '🌱 Terreno Difícil (Custo 2× — PHB p. 190)' });
+        }
+        if (encounteredHazards.length > 0) {
+            for (var eh = 0; eh < Math.min(2, encounteredHazards.length); eh++) {
+                var hz = encounteredHazards[eh];
+                var hzName = hz.name || hz.label || 'Perigo';
+                var hzSym = hz.symbol || hz.ico || '🔥';
+                if (hz.hazard_kind === 'damage' || hz.damage_dice || hz.type === 'fire' || hz.type === 'electrified_water') {
+                    var dDice = (hz.damage_dice && typeof hz.damage_dice === 'object') ? (hz.damage_dice.n + 'd' + hz.damage_dice.d) : (hz.damage_dice || '1d4');
+                    var dType = hz.damage_type || (hz.type === 'fire' ? 'fogo' : 'dano');
+                    chips.push({ kind: 'danger', text: hzSym + ' ' + hzName + ' (' + dDice + ' ' + dType + ')' });
+                } else if (hz.hazard_kind === 'save_prone' || hz.type === 'ice') {
+                    var dc = hz.save_dc || 10;
+                    chips.push({ kind: 'warn', text: hzSym + ' ' + hzName + ' (CD ' + dc + ' DES ou Caído)' });
+                } else {
+                    chips.push({ kind: 'danger', text: hzSym + ' Cruza ' + hzName });
+                }
+            }
+        } else if (crossesHazard) {
             chips.push({ kind: 'danger', text: '🔥 Cruza Terreno Perigoso' });
         }
         if (destFlanksEnemy) {
@@ -24990,6 +25058,70 @@ function drawTacticalAimVector(fromCol, fromRow, toCol, toRow, options) {
         shoveDest: shoveDest,
         aoeSummary: aoeSummary
     };
+}
+
+/**
+ * D&D 5e: Computa estimativa tática determinística de acerto ou Salvaguarda (PHB p. 194 / 205).
+ * Retorna { mode: 'attack'|'save', label: string, pct: number, ... } para exibição no HUD.
+ */
+function computeTargetHitPreview(actor, target, skill) {
+    if (!actor || !target) return null;
+    var isSave = !!(skill && (skill.save || (skill.saveDc && !skill.damageSpec && !skill.attackRoll)));
+    if (isSave) {
+        var saveObj = skill.save || {};
+        var dc = (saveObj.dc | 0) || (typeof simSpellSaveDc === 'function' ? simSpellSaveDc(actor) : 13);
+        var ab = (saveObj.ability || skill.saveAbility || 'dex').toLowerCase();
+        var svModInfo = (typeof simSaveModStatic === 'function') ? simSaveModStatic(target, ab) : { mod: 0 };
+        var tgtMod = svModInfo.mod || 0;
+        // PHB: Para passar no TR, precisa rolar d20 + tgtMod >= dc -> d20 >= dc - tgtMod
+        var needRoll = Math.max(1, Math.min(20, dc - tgtMod));
+        // Chance de falha do alvo (efeito aplica dano total / condição)
+        var failChance = Math.round(Math.max(5, Math.min(95, (needRoll - 1) * 5)));
+        var abPt = (typeof simAbilityLabelPt === 'function') ? simAbilityLabelPt(ab) : ab.toUpperCase();
+        return {
+            mode: 'save',
+            label: 'TR ' + abPt + ' vs CD ' + dc + ' (~' + failChance + '% falha)',
+            failChance: failChance,
+            dc: dc,
+            ability: ab
+        };
+    } else {
+        // Ataque com jogada de ataque (PHB p. 194)
+        var baseAtk = (actor.atk != null) ? actor.atk : (actor.dmgMod || 3);
+        var itemAtk = (actor.itemBuffs && actor.itemBuffs.luck) ? (actor.itemBuffs.luck | 0) : 0;
+        var atkTot = baseAtk + itemAtk;
+        var effAc = (typeof getEffectiveAc === 'function') ? getEffectiveAc(target) : (target.ac || 10);
+        // Avalia cobertura se aplicável
+        if (typeof simComputeCover === 'function' && actor.pos && target.pos) {
+            var cov = simComputeCover(currentState, actor, target);
+            if (cov && cov.bonus) effAc += cov.bonus;
+        }
+        var targetDie = Math.max(1, Math.min(20, effAc - atkTot));
+        // Determina vantagem / desvantagem para estimativa
+        var advMode = 'normal';
+        if (typeof _simAttackAdvDetails === 'function') {
+            var advDet = _simAttackAdvDetails(actor, target, skill);
+            if (advDet) advMode = advDet.state;
+        } else if (typeof simPeekAttackAdvState === 'function') {
+            advMode = simPeekAttackAdvState(actor, target, skill);
+        }
+        var baseProb = Math.max(0.05, Math.min(0.95, (21 - targetDie) / 20));
+        var hitPct = baseProb;
+        if (advMode === 'advantage') {
+            hitPct = 1 - Math.pow(1 - baseProb, 2);
+        } else if (advMode === 'disadvantage') {
+            hitPct = Math.pow(baseProb, 2);
+        }
+        var hitPercentStr = Math.round(hitPct * 100);
+        var sign = atkTot >= 0 ? '+' : '';
+        return {
+            mode: 'attack',
+            label: 'Acerto: ~' + hitPercentStr + '% (d20' + sign + atkTot + ' vs CA ' + effAc + ')',
+            hitChance: hitPercentStr,
+            effAc: effAc,
+            atkTot: atkTot
+        };
+    }
 }
 
 /**
@@ -26658,16 +26790,22 @@ function showMoveConfirm(tCol, tRow) {
     var difficultMap = (typeof simBuildDifficultTerrainLookup === 'function')
         ? simBuildDifficultTerrainLookup(currentState)
         : {};
+    var surfaceMap = (typeof simBuildSurfacesLookup === 'function')
+        ? simBuildSurfacesLookup(currentState)
+        : {};
     var ignoreDiff = !!p.has_lands_stride;
     var ignoreClimb = !!(p.has_lands_stride || ((p.feats || []).indexOf('athlete') >= 0));
 
     var totalCost = 0;
     var hasDifficult = false;
     var hasClimbCost = false;
+    var encounteredHazardsInConfirm = [];
     for (var i = 1; i < path.length; i++) {
         var prevCoord = path[i - 1];
         var stepCoord = path[i];
-        var isDiff = !ignoreDiff && !!difficultMap[stepCoord.col + ',' + stepCoord.row];
+        var dtStep = difficultMap[stepCoord.col + ',' + stepCoord.row];
+        var surfStep = surfaceMap[stepCoord.col + ',' + stepCoord.row];
+        var isDiff = !ignoreDiff && !!dtStep;
         if (isDiff) hasDifficult = true;
         var stepCost = isDiff ? 2 : 1;
         if (!ignoreClimb && typeof simGetHexElevation === 'function') {
@@ -26679,6 +26817,12 @@ function showMoveConfirm(tCol, tRow) {
             }
         }
         totalCost += stepCost;
+        if (dtStep && dtStep.hazard_kind) {
+            if (encounteredHazardsInConfirm.indexOf(dtStep) < 0) encounteredHazardsInConfirm.push(dtStep);
+        }
+        if (surfStep && (surfStep.hazard_kind || surfStep.type === 'fire' || surfStep.type === 'ice' || surfStep.type === 'electrified_water')) {
+            if (encounteredHazardsInConfirm.indexOf(surfStep) < 0) encounteredHazardsInConfirm.push(surfStep);
+        }
     }
 
     var moveLeft = p.movement_left || 0;
@@ -26806,6 +26950,34 @@ function showMoveConfirm(tCol, tRow) {
         html += '  <button type="button" class="tcc-oa-details-btn" data-act="oa-details">';
         html += '    <span class="tcc-oa-btn-ico">⚡</span> Ver Regras D&amp;D 5e e Como Evitar ▸';
         html += '  </button>';
+        html += '</div>';
+    }
+
+    if (encounteredHazardsInConfirm.length > 0) {
+        html += '<div class="tcc-oa-banner" style="border-left-color:#ef4444;background:rgba(239,68,68,0.12);margin-bottom:12px;">';
+        html += '  <div class="tcc-oa-header">';
+        html += '    <span class="tcc-oa-badge" style="background:#ef4444;color:#fff;">🔥 PERIGO DE TERRENO</span>';
+        html += '    <span class="tcc-oa-title" style="color:#fca5a5;">Superfície ou Terreno Perigoso!</span>';
+        html += '  </div>';
+        html += '  <div class="tcc-oa-summary" style="color:#fecaca;">';
+        var hzDescriptions = [];
+        for (var hzi = 0; hzi < encounteredHazardsInConfirm.length; hzi++) {
+            var ehz = encounteredHazardsInConfirm[hzi];
+            var ehzName = ehz.name || ehz.label || 'Perigo';
+            var ehzSym = ehz.symbol || ehz.ico || '🔥';
+            if (ehz.hazard_kind === 'damage' || ehz.damage_dice || ehz.type === 'fire' || ehz.type === 'electrified_water') {
+                var ehzDice = (ehz.damage_dice && typeof ehz.damage_dice === 'object') ? (ehz.damage_dice.n + 'd' + ehz.damage_dice.d) : (ehz.damage_dice || '1d4');
+                var ehzType = ehz.damage_type || (ehz.type === 'fire' ? 'fogo' : 'dano');
+                hzDescriptions.push('<strong>' + ehzSym + ' ' + escHtml(ehzName) + '</strong> (' + ehzDice + ' de dano ' + ehzType + ')');
+            } else if (ehz.hazard_kind === 'save_prone' || ehz.type === 'ice') {
+                var ehzDc = ehz.save_dc || 10;
+                hzDescriptions.push('<strong>' + ehzSym + ' ' + escHtml(ehzName) + '</strong> (TR Destreza CD ' + ehzDc + ' ou fica Caído)');
+            } else {
+                hzDescriptions.push('<strong>' + ehzSym + ' ' + escHtml(ehzName) + '</strong>');
+            }
+        }
+        html += 'A rota atravessa: ' + hzDescriptions.join(', ') + '. Você sofrerá os efeitos do terreno ao entrar (DMG p. 110-112)!';
+        html += '  </div>';
         html += '</div>';
     }
 
@@ -31123,7 +31295,7 @@ async function _playSpiritualWeaponFlightVfx(s, originIdx, targetIdx, opts) {
     var phase1 = 500;  /* outbound — arco em direção ao alvo */
     var phase2 = 280;  /* impacto — shake reforçado (era 200ms) */
     var phase3 = 400;  /* inbound — volta pro slot da arma */
-    var start = performance.now();
+    var start = null;
     var impactApplied = false;
     var isCrit = !!opts.crit;
 
@@ -31145,7 +31317,11 @@ async function _playSpiritualWeaponFlightVfx(s, originIdx, targetIdx, opts) {
         var _safety = setTimeout(finish, phase1 + phase2 + phase3 + 600);
         function tick(now) {
             if (_done) return;
-            var t = now - start;
+            if (start === null) {
+                start = (typeof now === 'number' && now > 0) ? now : ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now());
+            }
+            var curNow = (typeof now === 'number' && now > 0) ? now : ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now());
+            var t = Math.max(0, curNow - start);
             if (t < phase1) {
                 /* Outbound arco — sword aponta na direção do voo (rotate) */
                 var p = t / phase1;
@@ -45573,9 +45749,14 @@ function showDamageDice(rolls, die, crit, actor, target, oldHp, newHp, dmgMod, o
                             setTimeout(function () { continueBtn.style.display = ''; }, 400);
                             return;
                         }
-                        var startMs = performance.now(), dur = 800;
+                        var startMs = null, dur = 800;
                         function tick(t) {
-                            var p = Math.min(1, (t - startMs) / dur);
+                            if (startMs === null) {
+                                startMs = (typeof t === 'number' && t > 0) ? t : ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now());
+                            }
+                            var curT = (typeof t === 'number' && t > 0) ? t : ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now());
+                            var elapsed = Math.max(0, curT - startMs);
+                            var p = Math.min(1, elapsed / dur);
                             var wPct = oldPct + (newPct - oldPct) * p;
                             var b = bandFromWidthPct(wPct);
                             fill.style.width = wPct + '%';
@@ -45815,9 +45996,14 @@ function showHealDice(rolls, die, mod, actor, target, oldHp, newHp, rolledTotal,
                                 setTimeout(function () { continueBtn.style.display = ''; }, 400);
                                 return;
                             }
-                            var startMs = performance.now(), dur = 800;
+                            var startMs = null, dur = 800;
                             function tick(t) {
-                                var p = Math.min(1, (t - startMs) / dur);
+                                if (startMs === null) {
+                                    startMs = (typeof t === 'number' && t > 0) ? t : ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now());
+                                }
+                                var curT = (typeof t === 'number' && t > 0) ? t : ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now());
+                                var elapsed = Math.max(0, curT - startMs);
+                                var p = Math.min(1, elapsed / dur);
                                 var wPct = oldPct + (newPct - oldPct) * p;
                                 var b = bandFromWidthPct(wPct);
                                 fill.style.width = wPct + '%';
