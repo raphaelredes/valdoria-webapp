@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T08:35:35Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T08:56:56Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -6210,6 +6210,44 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   color: #f0d080;
   text-shadow: 0 0 8px rgba(220, 170, 90, .35);
 }
+.tcc-rx-comparison {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
+  font-size: calc(11.5px * var(--v-font-scale, 1));
+  line-height: 1.4;
+  text-align: center;
+}
+.tcc-rx-comparison strong {
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.tcc-rx-comparison--win {
+  background: rgba(46, 125, 50, 0.28);
+  border: 1px solid rgba(76, 175, 80, 0.55);
+  color: #c8e6c9;
+  text-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
+}
+.tcc-rx-comparison--loss {
+  background: rgba(198, 40, 40, 0.25);
+  border: 1px solid rgba(239, 83, 80, 0.55);
+  color: #ffcdd2;
+  text-shadow: 0 0 8px rgba(239, 83, 80, 0.35);
+}
+.tcc-rx-comparison--chance {
+  background: rgba(245, 124, 0, 0.25);
+  border: 1px solid rgba(255, 167, 38, 0.55);
+  color: #ffe0b2;
+  text-shadow: 0 0 8px rgba(255, 167, 38, 0.35);
+}
+.tcc-rx-comparison--info {
+  background: rgba(30, 136, 229, 0.25);
+  border: 1px solid rgba(66, 165, 245, 0.55);
+  color: #bbdefb;
+  text-shadow: 0 0 8px rgba(66, 165, 245, 0.35);
+}
 .tcc-rx-effect {
   background: linear-gradient(180deg, rgba(40, 60, 100, .32), rgba(30, 40, 70, .22));
   border: 1px solid rgba(120, 180, 240, .35);
@@ -6254,7 +6292,17 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   border-top: 1px dashed rgba(180, 140, 60, .3);
   margin-bottom: var(--v-space-lg, 12px);
 }
-.target-confirm-card--reaction .tcc-actions { gap: var(--v-space-md-lg, 10px); }
+.target-confirm-card--reaction .tcc-actions {
+  gap: var(--v-space-md-lg, 10px);
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(35, 30, 48, 0.94) 0%, rgba(26, 22, 38, 0.98) 100%);
+  padding-top: 10px;
+  margin-top: 8px;
+  z-index: 5;
+  border-top: 1px solid rgba(100, 170, 230, 0.25);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.35);
+}
 .target-confirm-card--reaction .action-btn {
   min-height: 44px;
   font-family: var(--v-font-display, 'Cinzel'), serif;
@@ -6293,6 +6341,10 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
     0 0 34px rgba(160, 100, 220, .3),
     inset 0 1px 0 rgba(200, 180, 230, .1);
 }
+.target-confirm-card--reaction-mm .tcc-actions {
+  background: linear-gradient(180deg, rgba(42, 24, 58, 0.94) 0%, rgba(30, 18, 44, 0.98) 100%);
+  border-top-color: rgba(180, 120, 220, 0.3);
+}
 .target-confirm-card--reaction-mm .tcc-title {
   color: #d0a0ff;
   text-shadow: 0 0 10px rgba(180, 100, 240, .45);
@@ -6309,6 +6361,10 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
     0 14px 44px rgba(0, 0, 0, .8),
     0 0 34px rgba(220, 160, 80, .3),
     inset 0 1px 0 rgba(240, 220, 180, .12);
+}
+.target-confirm-card--reaction-crit .tcc-actions {
+  background: linear-gradient(180deg, rgba(48, 34, 20, 0.94) 0%, rgba(36, 24, 14, 0.98) 100%);
+  border-top-color: rgba(230, 180, 100, 0.3);
 }
 .target-confirm-card--reaction-crit .tcc-title {
   color: #ffc880;
@@ -30637,10 +30693,16 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
         var rSrc = reductionMeta.rageResisted ? 'Fúria' : 'Resistência';
         tacticalPills.push('<span class="dmg-pill dmg-pill--resist">🛡️ ' + rSrc + ' a ' + escHtml(dtInfo.lb) + ' (½)</span>');
     }
-    if (reductionMeta.saveSuccess) {
+    if (reductionMeta.saveSuccess === true) {
         var abLabel = String(reductionMeta.saveAbility || 'DES').toUpperCase();
         var svTxt = reductionMeta.saveNegates ? 'Sucesso (0 Dano)' : 'Sucesso (½)';
         tacticalPills.push('<span class="dmg-pill dmg-pill--save">✦ TR ' + abLabel + ' ' + svTxt + '</span>');
+    } else if (reductionMeta.saveSuccess === false) {
+        var abLabel = String(reductionMeta.saveAbility || 'DES').toUpperCase();
+        tacticalPills.push('<span class="dmg-pill dmg-pill--vuln">✗ Falha TR ' + abLabel + ' (Dano Pleno)</span>');
+    }
+    if (reductionMeta.aoeSharedDamage) {
+        tacticalPills.push('<span class="dmg-pill dmg-pill--type">💥 Dano de Área (D&D 5e)</span>');
     }
     if (reductionMeta.heavyArmorMaster > 0) {
         tacticalPills.push('<span class="dmg-pill dmg-pill--resist">🛡️ Armadura Pesada (−' + reductionMeta.heavyArmorMaster + ')</span>');
@@ -30763,6 +30825,16 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
     }
     if (reductionMeta && reductionMeta.hasConcentration) {
         rowsHtml += '<div class="dmg-math-breakdown-row"><span>Salvaguarda de Concentração:</span><strong>TR CON CD ' + (reductionMeta.concDc || 10) + ' (PHB p. 203)</strong></div>';
+    }
+    if (reductionMeta && reductionMeta.aoeSharedDamage) {
+        rowsHtml += '<div class="dmg-math-breakdown-row"><span>Regra de Área (PHB p. 196):</span><strong>Rolagem única compartilhada por todas as criaturas na área</strong></div>';
+    }
+    if (reductionMeta && reductionMeta.saveSuccess !== null && reductionMeta.saveSuccess !== undefined) {
+        var abLabel = String(reductionMeta.saveAbility || 'DES').toUpperCase();
+        var svResultTxt = reductionMeta.saveSuccess
+            ? (reductionMeta.saveNegates ? 'Sucesso no TR — Efeito anulado (0 dano)' : 'Sucesso no TR — Dano reduzido à metade (½)')
+            : 'Falha no TR — Sofre dano pleno';
+        rowsHtml += '<div class="dmg-math-breakdown-row"><span>Salvaguarda ' + abLabel + ':</span><strong>' + svResultTxt + '</strong></div>';
     }
     breakdownEl.innerHTML = rowsHtml;
 
@@ -36496,8 +36568,38 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             { l: 'Regra de Reação', v: 'PHB p. 190 — Você possui 1 reação por rodada. Ela se esgota até o início do seu próximo turno.' },
             { l: 'Efeito Canônico', v: ruleDetailText }
         ];
+        var comparisonHtml = '';
         if (variant === 'shield' && effAc != null && total != null) {
-            dRows.splice(3, 0, { l: 'Cálculo de CA', v: 'CA ' + effAc + ' + 5 = ' + (effAc + 5) + ' vs Ataque ' + total + ((effAc + 5 > total) ? ' (TRANSFORMA EM ERRO)' : ' (ainda acerta)') });
+            if ((effAc + 5) > total) {
+                comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--win">🛡️ Com Escudo: CA ' + effAc + ' + 5 = <strong>' + (effAc + 5) + '</strong> &gt; ' + total + ' → <strong>ATAQUE ERRA!</strong></div>';
+            } else {
+                comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--loss">⚠️ Com Escudo: CA ' + effAc + ' + 5 = <strong>' + (effAc + 5) + '</strong> ≤ ' + total + ' → <strong>Ainda Acerta!</strong> (+5 CA protege próximos ataques)</div>';
+            }
+        } else if (variant === 'cutting' && effAc != null && total != null) {
+            var _tLvl = (target && target.lvl) || 1;
+            var _maxCut = _tLvl >= 15 ? 12 : (_tLvl >= 10 ? 10 : (_tLvl >= 5 ? 8 : 6));
+            var _diff = total - effAc + 1;
+            if (_diff <= 1) {
+                comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--win">🎵 Palavras Cortantes (1d' + _maxCut + '): Superou a CA por 1 ponto → <strong>100% de chance de virar ERRO!</strong></div>';
+            } else if (_diff <= _maxCut) {
+                var _chancePct = Math.round(((_maxCut - _diff + 1) / _maxCut) * 100);
+                comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--win">🎵 Palavras Cortantes (1d' + _maxCut + '): Precisa subtrair ' + _diff + '+ → <strong>' + _chancePct + '% de chance de virar ERRO!</strong></div>';
+            } else {
+                comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--loss">⚠️ Palavras Cortantes (1d' + _maxCut + '): Superou a CA por ' + (_diff - 1) + ' pontos (máx do dado: ' + _maxCut + ') — não evitará o acerto.</div>';
+            }
+        } else if (variant === 'deflect') {
+            var _dexSc = (target && target.dex != null) ? target.dex : 14;
+            var _dMod = Math.floor((_dexSc - 10) / 2);
+            var _mLvl = (target && target.lvl != null) ? target.lvl : 1;
+            var _minD = 1 + _dMod + _mLvl;
+            var _maxD = 10 + _dMod + _mLvl;
+            comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--info">✋ Redução Estimada: 1d10 + ' + _dMod + ' (DES) + ' + _mLvl + ' (Monge) = <strong>' + _minD + ' a ' + _maxD + ' PV reduzidos</strong> (se zerar dano, projétil cai inofensivo)</div>';
+        } else if (variant === 'uncanny') {
+            comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--info">💨 Esquiva Sobrenatural (PHB p. 96): <strong>Reduz o dano sofrido à METADE (½)</strong> contra este ataque.</div>';
+        } else if (variant === 'mm') {
+            comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--win">✨ Imunidade Absoluta: Escudo Arcano <strong>anula 100% dos dardos</strong> de Mísseis Mágicos (PHB p. 275).</div>';
+        } else if (variant === 'rebuke') {
+            comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--chance">🔥 Contra-ataque Infernal: <strong>' + esc(aName) + '</strong> sofre <strong>2d10 de fogo</strong> (TR Destreza para metade).</div>';
         }
 
         var html = '';
@@ -36506,6 +36608,7 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
         html += '<span class="tcc-rx-trigger-label">' + esc(triggerLabel) + '</span>';
         html += '<div class="tcc-rx-trigger-who">' + triggerWho + '</div>';
         if (mathHtml) html += '<div class="tcc-rx-math">' + mathHtml + '</div>';
+        if (comparisonHtml) html += comparisonHtml;
         html += '</div>';
         html += '<div class="drl-structured-pills" style="margin-bottom:8px;justify-content:center;">' + reactionPills.join(' ') + '</div>';
         html += '<div class="tcc-rx-effect">';
@@ -52100,6 +52203,9 @@ async function __combatAnimateOneEvent(ev) {
                                 if (ev.coverBonus > 0) {
                                     _savePills.push('<span class="dmg-pill dmg-pill--resist">⛨ Cobertura (+' + ev.coverBonus + ')</span>');
                                 }
+                                if (ev.aoeSharedDamage) {
+                                    _savePills.push('<span class="dmg-pill dmg-pill--type">💥 Dano de Área</span>');
+                                }
 
                                 var _saveDetailsRows = [
                                     { l: 'Defensor', v: targetForDice.n || 'Defensor' },
@@ -52109,6 +52215,9 @@ async function __combatAnimateOneEvent(ev) {
                                 ];
                                 if (ev.coverBonus > 0) {
                                     _saveDetailsRows.push({ l: 'Bônus de Cobertura', v: '+' + ev.coverBonus + ' no TR (PHB p. 196)' });
+                                }
+                                if (ev.aoeSharedDamage) {
+                                    _saveDetailsRows.push({ l: 'Regra de Área', v: 'PHB p. 196: dano rolado uma vez pelo conjurador' });
                                 }
 
                                 return {
@@ -52322,6 +52431,7 @@ async function __combatAnimateOneEvent(ev) {
                         saveSuccess: ev.saveSuccess != null ? !!ev.saveSuccess : null,
                         saveAbility: ev.saveAbility,
                         saveNegates: !!ev.saveNegates,
+                        aoeSharedDamage: !!ev.aoeSharedDamage,
                         heavyArmorMaster: ev.heavyArmorMasterReduced | 0,
                         uncannyDodge: !!ev.uncannyDodge,
                         rageResisted: !!(ev.rageResisted || ev.bearTotemResist),
