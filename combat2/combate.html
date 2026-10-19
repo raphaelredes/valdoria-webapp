@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T06:23:04Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T06:46:41Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -10261,6 +10261,27 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     font-size: 8px;
     color: #38bdf8;
     filter: drop-shadow(0 0 4px #0284c7);
+    z-index: 5;
+}
+#turn-queue .tl-node .tl-prone-icon {
+    position: absolute;
+    bottom: 2px;
+    right: -3px;
+    font-size: 9px;
+    color: #f97316;
+    font-weight: 800;
+    line-height: 1;
+    filter: drop-shadow(0 0 3px #000);
+    z-index: 5;
+}
+#turn-queue .tl-node .tl-temphp-icon {
+    position: absolute;
+    top: -4px;
+    right: 12px;
+    font-size: 8px;
+    color: #7dd3fc;
+    line-height: 1;
+    filter: drop-shadow(0 0 3px #0284c7);
     z-index: 5;
 }
 #turn-queue .tl-node.tl-dying .tl-ico {
@@ -21905,6 +21926,15 @@ function simDropConcentration(s, caster, logReason) {
         if (logReason) s.log.push(logReason);
         else s.log.push((caster.n || '?') + ' encerra concentração — ' + lost.join(', ') + '.');
     }
+    if (lost.length) {
+        try {
+            var _cstUid = caster.id || (caster.t === 'p' ? 'player' : (s && s.order ? ('enemy_' + s.order.indexOf(caster)) : ''));
+            var _cstEl = _cstUid ? (document.querySelector('[data-unit-id="' + _cstUid + '"]') || document.querySelector('.hex-token[data-unit-id="' + _cstUid + '"]')) : null;
+            if (_cstEl && typeof spawnSkillImpactLabel === 'function') {
+                spawnSkillImpactLabel(_cstEl, '💔 CONCENTRAÇÃO QUEBRADA!', 'miss');
+            }
+        } catch (_eConc) {}
+    }
     return lost;
 }
 
@@ -22236,7 +22266,7 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             try {
                 var _imUid = target.id || (target.t === 'p' ? 'player' : (target.t === 'e' ? 'enemy_' + (s && s.order ? s.order.indexOf(target) : '') : ''));
                 var _imEl = _imUid ? document.querySelector('[data-unit-id="' + _imUid + '"]') : null;
-                if (_imEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_imEl, 'IMUNE', 'buff');
+                if (_imEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_imEl, '🚫 IMUNE (0 DANO)!', 'buff');
             } catch (_eIm) {}
         } else if (damageApplied > 0 && target.vulnerabilities && target.vulnerabilities.some(function (vul) { return String(vul).toLowerCase().trim() === _canonDt; })) {
             _isTargetVulnerable = true;
@@ -22247,7 +22277,7 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             try {
                 var _vulUid = target.id || (target.t === 'p' ? 'player' : (target.t === 'e' ? 'enemy_' + (s && s.order ? s.order.indexOf(target) : '') : ''));
                 var _vulEl = _vulUid ? document.querySelector('[data-unit-id="' + _vulUid + '"]') : null;
-                if (_vulEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_vulEl, 'VULNERÁVEL', 'crit');
+                if (_vulEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_vulEl, '💥 VULNERABILIDADE (2× DANO)!', 'crit');
             } catch (_eVul) {}
         } else if (damageApplied > 0 && target.resistances && target.resistances.some(function (res) { return String(res).toLowerCase().trim() === _canonDt; })) {
             _isTargetResistant = true;
@@ -22258,9 +22288,18 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             try {
                 var _resUid = target.id || (target.t === 'p' ? 'player' : (target.t === 'e' ? 'enemy_' + (s && s.order ? s.order.indexOf(target) : '') : ''));
                 var _resEl = _resUid ? document.querySelector('[data-unit-id="' + _resUid + '"]') : null;
-                if (_resEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_resEl, 'RESISTENTE', 'attack');
+                if (_resEl && typeof spawnSkillImpactLabel === 'function') spawnSkillImpactLabel(_resEl, '🛡️ RESISTÊNCIA (½ DANO)!', 'buff');
             } catch (_eRes) {}
         }
+    }
+    if (dmgMeta && dmgMeta.flanked) {
+        try {
+            var _flkUid = target.id || (target.t === 'p' ? 'player' : (target.t === 'e' ? 'enemy_' + (s && s.order ? s.order.indexOf(target) : '') : ''));
+            var _flkEl = _flkUid ? document.querySelector('[data-unit-id="' + _flkUid + '"]') : null;
+            if (_flkEl && typeof spawnSkillImpactLabel === 'function') {
+                spawnSkillImpactLabel(_flkEl, '⚔️ FLANQUEADO (+VANTAGEM)!', 'attack');
+            }
+        } catch (_eFlk) {}
     }
     // Redução por Reflexos Evasivos (halfDmg) — só se não for cura/skip
     if (damageApplied > 0 && !dmgMeta.noReduction) {
@@ -23257,11 +23296,34 @@ function buildTurnQueue(s) {
         var nodeInner = '<div class="tl-ico">' + iconHtml + '</div>';
         nodeInner += '<span class="tl-init-badge" title="Iniciativa: ' + initNum + '">' + initNum + '</span>';
         nodeInner += '<div class="tl-hp-track"><div class="tl-hp-fill fill-' + hpCls + '" style="width:' + hpPct + '%;"></div></div>';
-        if (entry.concentrationSpell) {
-            nodeInner += '<span class="tl-conc-icon" title="Concentrando em ' + escHtml(entry.concentrationSpell) + '">◈</span>';
+        var concSt = (entry.se || []).find(function (st) {
+            return st && (st.concentration || st.isConcentration || st.id === 'concentrating' || String(st.n || '').toLowerCase().indexOf('concentra') !== -1);
+        });
+        var isConc = !!(entry.concentrationSpell || entry.concentrating || concSt);
+        var concSpell = entry.concentrationSpell || (entry.concentrating && (entry.concentrating.spellName || entry.concentrating.n)) || (concSt && (concSt.spellName || concSt.n)) || 'Concentrando';
+        if (isConc) {
+            nodeInner += '<span class="tl-conc-icon" title="Concentrando em ' + escHtml(concSpell) + '">◈</span>';
         }
 
-        parts.push('<div class="' + cls + '" id="' + id + '" data-order-idx="' + origIdx + '" title="' + escHtml(entry.n) + ' (Init: ' + initNum + ' · PV: ' + hpVal + '/' + entry.mhp + ')">' + nodeInner + '</div>');
+        var isProne = !!(entry.prone || (entry.se || []).some(function (st) {
+            return st && (st.prone || st.id === 'prone' || String(st.n || '').toLowerCase() === 'caído');
+        }));
+        if (isProne) {
+            nodeInner += '<span class="tl-prone-icon" title="Caído no Chão (PHB p. 190 / 292)">▾</span>';
+        }
+
+        var tempHpVal = (entry.tempHp && entry.tempHp > 0) ? (entry.tempHp | 0) : 0;
+        if (tempHpVal > 0) {
+            nodeInner += '<span class="tl-temphp-icon" title="+' + tempHpVal + ' PV Temp (PHB p. 198)">🛡</span>';
+        }
+
+        var extraTitleParts = [];
+        if (tempHpVal > 0) extraTitleParts.push('+' + tempHpVal + ' Temp');
+        if (isConc) extraTitleParts.push('Conc: ' + concSpell);
+        if (isProne) extraTitleParts.push('Caído');
+        var fullTitle = escHtml(entry.n) + ' (Init: ' + initNum + ' · PV: ' + hpVal + '/' + entry.mhp + (extraTitleParts.length ? ' · ' + extraTitleParts.join(' · ') : '') + ')';
+
+        parts.push('<div class="' + cls + '" id="' + id + '" data-order-idx="' + origIdx + '" title="' + fullTitle + '">' + nodeInner + '</div>');
     }
     parts.push('</div>');
     return parts.join('');
@@ -24685,6 +24747,8 @@ function _simAttackAdvDetails(actor, target, skill) {
 
     return {
         state: state,
+        mode: (state === 'cancelled') ? 'normal' : state,
+        reason: (state === 'cancelled') ? 'Vantagem e Desvantagem se anulam (PHB p. 173)' : (hasAdv ? advReasons.join(' · ') : (hasDis ? disReasons.join(' · ') : '')),
         adv: hasAdv,
         dis: hasDis,
         advReasons: advReasons,
@@ -24935,16 +24999,19 @@ function previewTacticalTargetOnBoard(targetIdx) {
     var flkInfo = (!isShove && !reachInfo.isRanged && tUnit.t === 'e' && typeof simCheckFlanking === 'function')
         ? simCheckFlanking(pUnit, tUnit, currentState.order)
         : null;
-    var advPreview = (!isShove && tUnit.t === 'e' && typeof simPeekAttackAdvState === 'function')
+    var advDetails = (!isShove && tUnit.t === 'e' && typeof _simAttackAdvDetails === 'function')
+        ? _simAttackAdvDetails(pUnit, tUnit, _pendingSkill)
+        : null;
+    var advPreview = advDetails ? advDetails.state : ((!isShove && tUnit.t === 'e' && typeof simPeekAttackAdvState === 'function')
         ? simPeekAttackAdvState(pUnit, tUnit, _pendingSkill)
-        : 'normal';
+        : 'normal');
 
     var aimRes = drawTacticalAimVector(pUnit.pos.col, pUnit.pos.row, tUnit.pos.col, tUnit.pos.row, {
         reach: reachInfo.reach,
         cover: covInfo.bonus > 0,
         coverType: covInfo.cover,
         coverText: covLabel,
-        advState: advPreview,
+        advState: (advPreview === 'cancelled') ? 'normal' : advPreview,
         flankingInfo: flkInfo,
         isShove: isShove,
         skill: _pendingSkill
@@ -24970,13 +25037,32 @@ function previewTacticalTargetOnBoard(targetIdx) {
     } else if (aimRes.isTotalCover) {
         chips.push({ kind: 'danger', text: '⛔ Cobertura Total (' + ((aimRes.coverEval && aimRes.coverEval.blockerName) || 'Bloqueado') + ')' });
     } else {
-        if (aimRes.canFlank) {
+        if (advDetails && advDetails.state === 'cancelled') {
+            chips.push({ kind: 'info', text: '⚖ Anuladas (Vantagem vs Desvantagem, PHB p. 173)' });
+        } else if (aimRes.canFlank) {
             var pName = (flkInfo && flkInfo.partner && flkInfo.partner.n) ? flkInfo.partner.n.split(' ')[0] : 'Aliado';
             chips.push({ kind: 'good', text: '▲ Flanqueio c/ ' + pName + ' (+Vantagem)' });
-        } else if (advPreview === 'advantage') {
-            chips.push({ kind: 'good', text: '▲ Vantagem' });
-        } else if (advPreview === 'disadvantage') {
-            chips.push({ kind: 'warn', text: '▼ Desvantagem' });
+        } else if (advPreview === 'advantage' || (advDetails && advDetails.state === 'advantage')) {
+            var advText = '▲ Vantagem';
+            if (advDetails && advDetails.advReasons && advDetails.advReasons.length > 0) {
+                var _r = advDetails.advReasons[0];
+                if (_r.indexOf('Alvo caído') !== -1) advText = '▲ Vantagem (Alvo Caído)';
+                else if (_r.indexOf('Flanqueamento') !== -1) advText = '▲ Vantagem (Flanqueado)';
+                else if (_r.indexOf('Assassinar') !== -1) advText = '▲ Vantagem (Assassinar)';
+                else if (_r.indexOf('Táticas de Matilha') !== -1) advText = '▲ Vantagem (Matilha)';
+                else advText = '▲ Vantagem (' + _r.replace(/ \(PHB.*\)/, '') + ')';
+            }
+            chips.push({ kind: 'good', text: advText });
+        } else if (advPreview === 'disadvantage' || (advDetails && advDetails.state === 'disadvantage')) {
+            var disText = '▼ Desvantagem';
+            if (advDetails && advDetails.disReasons && advDetails.disReasons.length > 0) {
+                var _dr = advDetails.disReasons[0];
+                if (_dr.indexOf('Alvo caído') !== -1) disText = '▼ Desvantagem (Alvo Caído à Distância)';
+                else if (_dr.indexOf('Inimigo hostil adjacente') !== -1 || _dr.indexOf('Inimigo Adjacente') !== -1) disText = '▼ Desvantagem (Inimigo Próximo)';
+                else if (_dr.indexOf('Exaustão') !== -1) disText = '▼ Desvantagem (Exaustão)';
+                else disText = '▼ Desvantagem (' + _dr.replace(/ \(PHB.*\)/, '') + ')';
+            }
+            chips.push({ kind: 'warn', text: disText });
         }
         if (aimRes.elevDelta > 0) {
             chips.push({ kind: 'good', text: '⛰️ Terreno Elevado (+2 Atq)' });
@@ -34186,23 +34272,73 @@ function inspectTurnQueueUnitOnBar(orderIdx, nodeEl) {
     }
 
     var displayAc = (typeof getEffectiveAc === 'function') ? getEffectiveAc(u) : (u.ac != null ? u.ac : 10);
+    var tempHpVal = (u.tempHp && u.tempHp > 0) ? (u.tempHp | 0) : 0;
+    var hpText = '❤️ PV ' + (u.hp != null ? u.hp : 0) + '/' + (u.mhp || 0);
+    if (tempHpVal > 0) hpText += ' (+' + tempHpVal + '🛡)';
+
     var chips = [
-        { kind: (u.hp <= u.mhp * 0.3) ? 'danger' : 'good', text: '❤️ PV ' + (u.hp != null ? u.hp : 0) + '/' + (u.mhp || 0) },
+        { kind: (u.hp <= u.mhp * 0.3) ? 'danger' : 'good', text: hpText },
         { kind: 'info', text: '🛡️ CA ' + displayAc },
         { kind: 'info', text: '⚡ Inic ' + (u.init != null ? u.init : '—') }
     ];
+
+    // Condição Caído D&D 5e (PHB p. 190 / 292)
+    var isProne = !!(u.prone || (u.se || []).some(function (st) {
+        return st && (st.prone || st.id === 'prone' || String(st.n || '').toLowerCase() === 'caído');
+    }));
+    if (isProne) {
+        chips.push({ kind: 'warn', text: '▾ Caído no Chão' });
+    }
+
+    // Concentração D&D 5e (PHB p. 203)
+    var concSt = (u.se || []).find(function (st) {
+        return st && (st.concentration || st.isConcentration || st.id === 'concentrating' || String(st.n || '').toLowerCase().indexOf('concentra') !== -1);
+    });
+    var isConc = !!(u.concentrationSpell || u.concentrating || concSt);
+    var concSpell = u.concentrationSpell || (u.concentrating && (u.concentrating.spellName || u.concentrating.n)) || (concSt && (concSt.spellName || concSt.n));
+    if (isConc) {
+        chips.push({ kind: 'info', text: '◈ ' + (concSpell ? ('Conc: ' + concSpell) : 'Concentrando') });
+    }
+
+    // Salvaguardas Contra a Morte (PHB p. 197) se a 0 PV
+    if (u.hp <= 0 && !u.isDead && (u.t === 'p' || u.t === 'a')) {
+        if (u.stable) {
+            chips.push({ kind: 'good', text: '✦ Estabilizado (Inconsciente)' });
+        } else {
+            var ds = u.deathSaves || { s: 0, f: 0 };
+            chips.push({ kind: 'danger', text: '💀 Testes de Morte: ' + (ds.s || 0) + '✓ · ' + (ds.f || 0) + '✗' });
+        }
+    }
+
     if (u.t === 'e' && u.it && u.it.lb) {
         var itTarget = u.it.targetName ? (' → ' + u.it.targetName) : '';
         chips.push({ kind: 'danger', text: '🎯 Intenção: ' + (u.it.ic || '⚔') + ' ' + u.it.lb + itTarget + (u.it.dmg ? ' (~' + u.it.dmg + ')' : '') });
     }
+
+    // Vulnerabilidades / Imunidades / Resistências conhecidas
+    if (u.immunities && u.immunities.length > 0) {
+        chips.push({ kind: 'danger', text: '🚫 Imune: ' + u.immunities.slice(0, 2).join(', ') });
+    }
+    if (u.vulnerabilities && u.vulnerabilities.length > 0) {
+        chips.push({ kind: 'good', text: '💥 Vuln: ' + u.vulnerabilities.slice(0, 2).join(', ') });
+    }
+    if (u.resistances && u.resistances.length > 0) {
+        chips.push({ kind: 'warn', text: '🛡️ Res: ' + u.resistances.slice(0, 2).join(', ') });
+    }
+
     if (Array.isArray(u.se) && u.se.length > 0) {
         var condNames = [];
         for (var si = 0; si < u.se.length; si++) {
             var st = u.se[si];
-            if (st && (st.n || st.dndCondition)) condNames.push(st.n || st.dndCondition);
+            if (st && (st.n || st.dndCondition)) {
+                var cName = st.n || st.dndCondition;
+                if (cName !== 'Caído' && cName.indexOf('Concentra') === -1) {
+                    condNames.push(cName);
+                }
+            }
         }
         if (condNames.length > 0) {
-            chips.push({ kind: 'warn', text: '✨ ' + condNames.slice(0, 3).join(', ') });
+            chips.push({ kind: 'warn', text: '✨ ' + condNames.slice(0, 2).join(', ') });
         }
     }
 
@@ -48496,6 +48632,7 @@ async function playTurn(aIdx, tIdx, opts) {
         resisted: !!(_isTargetResistant || rageResisted),
         vulnerable: !!_isTargetVulnerable,
         immune: !!_isTargetImmune,
+        flanked: typeof _atkFlanked !== 'undefined' ? !!_atkFlanked : false,
         /* V1.7 Sprint-17 Ronda 13 (2026-04-21 QA PHB p.96) — contexto de save pra Evasion.
            Se skill teve save:{ability:'dex'} E save falhou, contexto aplica halfDmgDexSaveOnly. */
         saveAbility: atkSkill && atkSkill.save ? atkSkill.save.ability : null,
@@ -51778,6 +51915,9 @@ async function __combatAnimateOneEvent(ev) {
             }
             if (ev.divineSmite && ev.smiteTotal) {
                 spawnSkillImpactLabel(elT, '✦ PUNIÇÃO DIVINA (+' + (ev.smiteTotal | 0) + ')!', 'crit');
+            }
+            if (ev.flanked) {
+                spawnSkillImpactLabel(elT, '⚔️ FLANQUEADO (+VANTAGEM)!', 'attack');
             }
             if (_isRemImm) {
                 spawnSkillImpactLabel(elT, '🚫 IMUNE (0 DANO)!', 'buff');
