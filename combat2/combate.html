@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T05:45:46Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-19T06:03:52Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -4613,6 +4613,15 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   color: #e6dfd5;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
   flex-wrap: wrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.dnd-movement-bar:hover, .dnd-movement-bar:active {
+  border-color: rgba(196, 149, 58, 0.85);
+  background: rgba(38, 30, 20, 0.95);
+  transform: translateY(-1px);
+}
 .dnd-mov-icon {
   display: inline-flex;
   align-items: center;
@@ -4622,6 +4631,7 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   line-height: 1;
 }
 .dnd-mov-icon svg, .dnd-mov-svg { display: block; }
+.dnd-mov-label {
   font-family: var(--v-font-display, 'Cinzel'), serif;
   font-size: 11px;
   letter-spacing: 0.8px;
@@ -4648,6 +4658,52 @@ body.perf-lite .reinforce-countdown-badge { animation: none !important; }
   height: 100%;
   background: linear-gradient(90deg, #65a30d, #a3e635);
   transition: width 0.25s ease;
+}
+
+/* Faixa tática D&D 5e compacta no topo (Prof, CD, Ataque Extra, Furtivo, Concentração) */
+.dnd-tac-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  padding: 3px 6px 1px;
+  font-size: 9.5px;
+}
+.dnd-tac-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(30, 24, 18, 0.88);
+  border: 1px solid rgba(196, 149, 58, 0.35);
+  color: #d4c8b0;
+  font-size: 9.5px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  user-select: none;
+}
+.dnd-tac-chip:hover, .dnd-tac-chip:active {
+  transform: translateY(-1px);
+  border-color: rgba(196, 149, 58, 0.85);
+  background: rgba(48, 38, 26, 0.96);
+  color: #fff;
+}
+.dnd-tac-chip--gold {
+  border-color: rgba(212, 175, 55, 0.55);
+  color: #f6e05e;
+}
+.cell-miss-float-label--long {
+  font-size: calc(13px * var(--v-font-scale, 1)) !important;
+  letter-spacing: 1.2px !important;
+  text-transform: none !important;
+  padding: 2px 8px;
+  background: rgba(15, 12, 10, 0.85);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
 }
 
 /* V1-Visual Phase 4 (2026-04-19, c) — mini-badge de recurso ao lado de cada
@@ -22183,6 +22239,22 @@ function applyHpAfterDamage(s, target, oldHp, newHp, dmgMeta) {
             summonCasterCls: dmgMeta.summonCasterCls || null
         });
     }
+    // D&D 5e Salvaguardas (TR): feedback visual tático flutuante sobre o token no tabuleiro
+    if (dmgMeta && (dmgMeta.saveHalved || dmgMeta.saveNegated || dmgMeta.saveFailed)) {
+        try {
+            var _svLblUid = target.id || (target.t === 'p' ? 'player' : (target.t === 'e' ? 'enemy_' + (s && s.order ? s.order.indexOf(target) : '') : (target.t === 'a' ? 'ally_' + (s && s.order ? s.order.indexOf(target) : '') : '')));
+            var _svLblEl = _svLblUid ? document.querySelector('[data-unit-id="' + _svLblUid + '"]') : null;
+            if (_svLblEl && typeof spawnSkillImpactLabel === 'function') {
+                if (dmgMeta.saveNegated) {
+                    spawnSkillImpactLabel(_svLblEl, '🛡️ TR ANULADO (0 DANO)!', 'buff');
+                } else if (dmgMeta.saveHalved) {
+                    spawnSkillImpactLabel(_svLblEl, '🛡️ TR SUCESSO (½ DANO)!', 'buff');
+                } else if (dmgMeta.saveFailed) {
+                    spawnSkillImpactLabel(_svLblEl, '💥 TR FALHOU!', 'save-fail');
+                }
+            }
+        } catch (_eSvLbl) {}
+    }
     // Consumo de PV temporários (Grito de Guerra / Armadura de Agathys / Vitalidade Falsa) antes do PV real (PHB p. 198)
     if (damageApplied > 0 && target.tempHp > 0) {
         var absorbed = Math.min(target.tempHp, damageApplied);
@@ -30601,7 +30673,7 @@ async function _maybeAdvanceOrStay() {
 function _resourceGlyphFor(kind) {
     if (kind === 'action') return '◆';
     if (kind === 'bonus') return '▲';
-    if (kind === 'reaction') return '';
+    if (kind === 'reaction') return '⚡';
     return '';
 }
 /* Determina o tipo de recurso consumido por uma skill.
@@ -30627,7 +30699,7 @@ function _skillResourceKind(sk) {
    Símbolos geométricos distintos por recurso:
      · Ação    = ◆ (losango/diamond) — recurso primário decisivo
      · Bônus   = ▲ (triângulo) — pico rápido, ação curta
-     · Reação  = (hexágono) — defesa all-around, off-turn principal
+     · Reação  = ⚡ (raio/instantâneo) — resposta tática off-turn
 
    Modos:
      · default (player turn): mostra 3 pílulas completas + chip PHB p.202 se aplicável
@@ -30673,7 +30745,7 @@ function _buildDndResourcesBarHtml(s, p, opts) {
     html += '<button type="button" class="dnd-res-pill dnd-res-reaction ' + (reactionUsed ? 'spent' : 'available') +
             (compactReaction ? ' dnd-res-pill--compact-only' : '') +
             '" data-act="dnd-res-info" data-res="reaction" aria-label="Reação (1 por rodada)">';
-    html += '<span class="dnd-res-glyph" aria-hidden="true"></span>';
+    html += '<span class="dnd-res-glyph" aria-hidden="true">⚡</span>';
     html += '<span class="dnd-res-label">' + reactionLabel + '</span>';
     html += '<span class="dnd-res-state">' + (reactionUsed ? '✗' : '✓') + '</span>';
     html += '</button>';
@@ -30684,7 +30756,7 @@ function _buildDndResourcesBarHtml(s, p, opts) {
         var movHexes = p.movement_left != null ? p.movement_left : (p.speed || 6);
         var maxHexes = p.speed || 6;
         var movPct = Math.min(100, Math.max(0, Math.round((movHexes / Math.max(1, maxHexes)) * 100)));
-        html += '<div class="dnd-movement-bar" aria-label="Deslocamento restante no turno">' +
+        html += '<div class="dnd-movement-bar" data-act="dnd-mov-info" aria-label="Deslocamento restante no turno" title="Deslocamento restante no turno (D&D 5e PHB p. 190) — Toque para detalhes">' +
             '<span class="dnd-mov-icon" aria-hidden="true">' + _combatDistanceIconSVG(16) + '</span>' +
             '<span class="dnd-mov-label">DESLOCAMENTO:</span>' +
             '<span class="dnd-mov-val"><strong>' + curMovM + '</strong> / ' + maxMovM + '</span>' +
@@ -30694,34 +30766,35 @@ function _buildDndResourcesBarHtml(s, p, opts) {
         /* Barra tática D&D 5e por Nível/Classe (Padrão Solasta / BG3): Proficiência, CD, Concentração, Ataque Extra e Passivas */
         var tacChips = [];
         var pProf = (p.prof != null) ? (p.prof | 0) : (typeof simProficiencyBonus === 'function' ? simProficiencyBonus(p.lvl || 1) : 2);
-        tacChips.push('<span class="dnd-tac-chip" title="Bônus de Proficiência D&D 5e (Nível ' + (p.lvl || 1) + ')">✦ Prof +' + pProf + '</span>');
+        tacChips.push('<button type="button" class="dnd-tac-chip" data-rule-title="✦ Bônus de Proficiência (PHB p. 12)" data-rule-desc="Bônus de +' + pProf + ' adicionado a testes de ataque com armas treinadas, salvaguardas da sua classe e testes de perícias treinadas (Nível ' + (p.lvl || 1) + ').">✦ Prof +' + pProf + '</button>');
         var isCasterCls = ['Mago', 'Clérigo', 'Druida', 'Bardo', 'Feiticeiro', 'Bruxo', 'Paladino', 'Patrulheiro'].indexOf(p.cls) >= 0;
         if (isCasterCls && typeof simSpellSaveDc === 'function') {
-            tacChips.push('<span class="dnd-tac-chip" title="Classe de Dificuldade (CD) das suas magias (8 + Prof + Mod)">🔮 CD ' + simSpellSaveDc(p) + '</span>');
+            var sDc = simSpellSaveDc(p);
+            tacChips.push('<button type="button" class="dnd-tac-chip" data-rule-title="🔮 Classe de Dificuldade da Magia (PHB p. 205)" data-rule-desc="CD ' + sDc + ' das suas magias (8 + Proficiência +' + pProf + ' + Mod de Conjuração). Inimigos devem igualar ou superar este valor nos seus Testes de Resistência para não sofrerem o efeito pleno.">🔮 CD ' + sDc + '</button>');
         }
         var extraAtksHud = (typeof simClassExtraAttacks === 'function') ? simClassExtraAttacks(p.cls, p.lvl || 1) : 0;
         if (extraAtksHud > 0) {
-            tacChips.push('<span class="dnd-tac-chip dnd-tac-chip--gold" title="Ataque Extra D&D 5e (PHB p.72): ' + (1 + extraAtksHud) + ' ataques por ação Atacar">⚔ ' + (1 + extraAtksHud) + '× Ataques</span>');
+            tacChips.push('<button type="button" class="dnd-tac-chip dnd-tac-chip--gold" data-rule-title="⚔️ Ataque Extra (PHB p. 72)" data-rule-desc="Você desfere ' + (1 + extraAtksHud) + ' ataques por ação de Atacar neste turno.">⚔ ' + (1 + extraAtksHud) + '× Ataques</button>');
         }
         if (p.cls === 'Ladino') {
             var snkD = Math.ceil((p.lvl || 1) / 2);
-            tacChips.push('<span class="dnd-tac-chip dnd-tac-chip--gold" title="Ataque Furtivo D&D 5e (PHB p.96): +' + snkD + 'd6 com Vantagem ou aliado adjacente">🗡 Furtivo ' + snkD + 'd6</span>');
+            tacChips.push('<button type="button" class="dnd-tac-chip dnd-tac-chip--gold" data-rule-title="🗡️ Ataque Furtivo (PHB p. 96)" data-rule-desc="1x por turno, você causa +' + snkD + 'd6 de dano extra com arma de acuidade ou à distância se tiver Vantagem no ataque OU se houver aliado adjacente ao alvo.">🗡 Furtivo ' + snkD + 'd6</button>');
         }
         if (p.critRange && p.critRange < 20) {
-            tacChips.push('<span class="dnd-tac-chip dnd-tac-chip--gold" title="Crítico Aprimorado (PHB p.72)">🎯 Crítico ' + p.critRange + '–20</span>');
+            tacChips.push('<button type="button" class="dnd-tac-chip dnd-tac-chip--gold" data-rule-title="🎯 Crítico Aprimorado (PHB p. 72)" data-rule-desc="Seus ataques com arma conseguem um acerto crítico com rolagem de ' + p.critRange + ' a 20 no d20.">🎯 Crítico ' + p.critRange + '–20</button>');
         }
         if (p.arcaneWardMax > 0) {
-            tacChips.push('<span class="dnd-tac-chip" style="border-color:rgba(100,181,246,0.55);color:#90caf9;" title="Égide Arcana (Escola de Abjuração — PHB p.115)">🛡 Égide ' + (p.arcaneWardHp || 0) + '/' + p.arcaneWardMax + '</span>');
+            tacChips.push('<button type="button" class="dnd-tac-chip" style="border-color:rgba(100,181,246,0.55);color:#90caf9;" data-rule-title="🛡️ Égide Arcana (PHB p. 115)" data-rule-desc="Barreira mágica que absorve dano direcionado a você antes dos seus pontos de vida (atual ' + (p.arcaneWardHp || 0) + '/' + p.arcaneWardMax + '). Recarrega ao conjurar magias de Abjuração.">🛡 Égide ' + (p.arcaneWardHp || 0) + '/' + p.arcaneWardMax + '</button>');
         }
         if (p.superiorityDice > 0) {
-            tacChips.push('<span class="dnd-tac-chip dnd-tac-chip--gold" title="Dados de Superioridade (Mestre de Batalha — PHB p.73)">⚔ Sup: ' + p.superiorityDice + '</span>');
+            tacChips.push('<button type="button" class="dnd-tac-chip dnd-tac-chip--gold" data-rule-title="⚔️ Dados de Superioridade (PHB p. 73)" data-rule-desc="Recurso tático de Mestre de Batalha: você possui ' + p.superiorityDice + ' dados de superioridade para enriquecer seus ataques com manobras.">⚔ Sup: ' + p.superiorityDice + '</button>');
         }
         var concName = (p.concentrating && (p.concentrating.spellName || p.concentrating.n)) || (s && s.concentration && s.concentration.casterIdx === s.p_idx && s.concentration.spellName) || null;
         if (concName) {
-            tacChips.push('<span class="dnd-tac-chip" style="background:rgba(46,125,50,0.28);border-color:rgba(129,199,132,0.65);color:#a5d6a7;" title="Concentração Ativa (PHB p.203): sofrer dano exige TR de CON">◈ Conc: ' + escHtml(concName) + '</span>');
+            tacChips.push('<button type="button" class="dnd-tac-chip" style="background:rgba(46,125,50,0.28);border-color:rgba(129,199,132,0.65);color:#a5d6a7;" data-rule-title="◈ Concentração Ativa (PHB p. 203)" data-rule-desc="Você está mantendo a magia \'' + escHtml(concName) + '\'. Sofrer dano exige TR de Constituição CD 10 ou metade do dano sofrido para não quebrar. Conjurar outra magia com concentração encerra esta.">◈ Conc: ' + escHtml(concName) + '</button>');
         }
         if (tacChips.length) {
-            html += '<div class="dnd-tac-strip" style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;padding:3px 6px 1px;font-size:9.5px;">' + tacChips.join('') + '</div>';
+            html += '<div class="dnd-tac-strip">' + tacChips.join('') + '</div>';
         }
     }
     return html;
@@ -34496,6 +34569,36 @@ function bindActions() {
             });
         })(infoBadges[ibi]);
     }
+    /* Chips táticos do personagem no topo (Proficiência, CD de Magia, Ataques, Furtivo, Concentração): toque no mobile abre a barra tática */
+    var tacChips = document.querySelectorAll('.dnd-tac-chip[data-rule-title]');
+    for (var tci = 0; tci < tacChips.length; tci++) {
+        (function (cEl) {
+            cEl.addEventListener('click', function () {
+                var rTitle = cEl.getAttribute('data-rule-title') || '📜 Recurso Tático D&D 5e';
+                var rDesc = cEl.getAttribute('data-rule-desc') || cEl.getAttribute('title') || '';
+                showBfTacticalPreviewBar({
+                    tone: 'normal',
+                    title: rTitle,
+                    chips: [{ kind: 'info', text: rDesc }]
+                });
+            });
+        })(tacChips[tci]);
+    }
+    /* Barra de deslocamento: toque abre a explicação tática de movimentação D&D 5e */
+    var movBar = document.querySelector('.dnd-movement-bar');
+    if (movBar) {
+        movBar.addEventListener('click', function () {
+            showBfTacticalPreviewBar({
+                tone: 'normal',
+                title: '⇥ Deslocamento Tático (PHB p. 190)',
+                chips: [
+                    { kind: 'good', text: 'Você pode dividir seu movimento livremente antes e depois das ações' },
+                    { kind: 'warn', text: 'Levantar-se consome metade do seu deslocamento base' },
+                    { kind: 'danger', text: 'Terreno difícil exige 3,0m (2 hexes) por passo' }
+                ]
+            });
+        });
+    }
     /* Linhas de loot clicáveis na tela de vitória (abre popup com descrição) */
     var lootRows = document.querySelectorAll('.rr-loot-row--clickable');
     for (var lri = 0; lri < lootRows.length; lri++) {
@@ -37207,7 +37310,7 @@ function onBtnClick(ev) {
             };
         } else if (resKind === 'reaction') {
             info = {
-                title: 'Reação',
+                title: '⚡ Reação',
                 rule: 'Resposta instantânea a um gatilho de combate; pode ocorrer no seu turno ou no de outro combatente.<br><br>' +
                       '<strong>Regras:</strong><br>' +
                       '· 1 reação por RODADA (não por turno).<br>' +
@@ -43994,8 +44097,21 @@ function spawnMissFloatLabel(el, customText) {
     var rect = el.getBoundingClientRect();
     var lbl = document.createElement('div');
     lbl.className = 'cell-miss-float-label';
-    lbl.textContent = customText || 'Errou';
-    lbl.style.left = (rect.left + rect.width / 2) + 'px';
+    var text = customText || 'Errou';
+    lbl.textContent = text;
+    if (text.length > 10) {
+        lbl.classList.add('cell-miss-float-label--long');
+    }
+    var posX = rect.left + rect.width / 2;
+    var frameEl = document.getElementById('app') || document.body;
+    var fRect = frameEl ? frameEl.getBoundingClientRect() : { left: 0, right: window.innerWidth };
+    var minX = fRect.left + 70;
+    var maxX = fRect.right - 70;
+    if (maxX > minX) {
+        if (posX < minX) posX = minX;
+        if (posX > maxX) posX = maxX;
+    }
+    lbl.style.left = posX + 'px';
     lbl.style.top = (rect.top - 8) + 'px';
     /* X-6.5.51AE (2026-05-07): força animation-duration inline com !important
        (ver _spawnFloatingDmgNumber pra contexto completo). */
@@ -47884,12 +48000,18 @@ async function playTurn(aIdx, tIdx, opts) {
            passou (D&D 5e), NÃO que "defendeu". NAT 1 = o atacante erra feio. */
         var _oaLogPrefix = opts.oa ? '⚡ [Ataque de Oportunidade] ' : '';
         var _isCoverBlocked = (_atkCover && _atkCover.bonus > 0 && hitRes.total >= (effAc - _atkCover.bonus));
+        var _isShieldBlocked = !!(target && target.se && target.se.some(function (x) {
+            return x && (x.id === 'escudo_arcano' || x.id === 'escudo_arcano_npc');
+        }) && hitRes.total < effAc && hitRes.total >= (effAc - 5));
         var _hasTargetDodge = !!(target && target.se && target.se.some(function (x) {
             return x && (x.id === 'esquiva' || x.attackAdvantage);
         }));
 
         var _missCustomLabel = null;
-        if (_isCoverBlocked) {
+        if (_isShieldBlocked) {
+            _missCustomLabel = '🛡️ Escudo Arcano Bloqueou!';
+            s.log.push(_oaLogPrefix + '🛡️ O ataque de ' + actor.n + ' foi BLOQUEADO PELO ESCUDO ARCANO (+5 CA) de ' + target.n + ' — ' + _missAtkPart + '.');
+        } else if (_isCoverBlocked) {
             _missCustomLabel = '⛨ Cobertura Bloqueou!';
             s.log.push(_oaLogPrefix + '⛨ O golpe de ' + actor.n + ' foi BLOQUEADO PELA COBERTURA (+' + _atkCover.bonus + ' CA) que protegia ' + target.n + ' — ' + _missAtkPart + '.');
         } else if (r === 1) {
