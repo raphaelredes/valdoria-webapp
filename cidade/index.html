@@ -14227,7 +14227,7 @@ var _NAMED_NPC_PORTRAITS = {
   'bjorn o seleiro': 'merchants/bjorn-anao.webp',
   'bjorn': 'merchants/bjorn-anao.webp',
   // 2026-06-13: nomes de Lyra desambiguados (3 NPCs distintos não podem mais colidir).
-  'lyra sylwen': 'npcs/lyra-herbalista.webp',
+  'lyra sylwen': 'npcs/sylwen-ervanaria.webp', 'sylwen': 'npcs/sylwen-ervanaria.webp', 'talia': 'npcs/talia-costureira.webp',
   // Thorne e Padre Brevon (autoridade de retrato canônico)
   'thorne': 'npcs/thorne-armeiro.webp',
   'mestre thorne': 'npcs/thorne-armeiro.webp',
@@ -27089,7 +27089,7 @@ var RELATIONS_NPCS = [
 // Vínculos (relations.list) mas NÃO estão no RELATIONS_NPCS. key (NPC_INFO) → slug WebP.
 var NPC_PORTRAIT_BY_KEY = {
   npc_citizen_tessa: 'tessa-fruteira', npc_traveler_bram: 'bram-marinheiro',
-  npc_citizen_lyra: 'lyra-costureira', npc_citizen_wenn: 'wenn-carpinteiro',
+  npc_citizen_lyra: 'talia-costureira', npc_citizen_talia: 'talia-costureira', npc_citizen_wenn: 'wenn-carpinteiro',
   npc_beggar_kira: 'kira-mendiga', npc_traveler_olen: 'olen-trovador',
   npc_citizen_pip: 'pip-recadeiro', npc_citizen_greta: 'greta-padeira',
   npc_beggar_drax: 'drax-veterano', npc_citizen_nyssa: 'nyssa-curandeira',
@@ -27230,11 +27230,11 @@ var CITY_NPC_DETAILS = {
     portrait: '/shared/img/npcs/tessa-fruteira.webp'
   },
   npc_citizen_lyra: {
-    name: 'Lyra', role: 'Costureira', venue: 'market', venue_label: 'Mercado Central', category: 'citizen',
+    name: 'Talia', role: 'Costureira', venue: 'market', venue_label: 'Mercado Central', category: 'citizen',
     perk: 'Ponto Firme — Remendos rápidos e bolsos secretos em mantos de viagem',
     lore: 'Costureira detalhista capaz de remendar capas rasgadas por garras de feras sem deixar marca.',
     quote: 'Um bom ponto de linha sustenta a capa contra o vento mais cortante do inverno.',
-    portrait: '/shared/img/npcs/lyra-costureira.webp'
+    portrait: '/shared/img/npcs/talia-costureira.webp'
   },
   npc_citizen_berta: {
     name: 'Berta', role: 'Cozinheira da Estalagem', venue: 'inn', venue_label: 'Estalagem da Colina', category: 'social',
@@ -72575,7 +72575,7 @@ var _NPC_DEFAULTS = {
   bjorn:       { name: 'Bjorn, o Seleiro',    desc: 'Anão selador e coureiro',            portrait: '/shared/img/merchants/bjorn-anao.webp', icon: 'ic-patrulheiro' },
   alchemist:   { name: 'Mirena Virelle',      desc: 'Alquimista do Mercado',              portrait: '/shared/img/merchants/mirena.webp',     icon: 'ic-druida' },
   gossip:      { name: 'Velho Mendigo',       desc: 'Boateiro da Praça',                  portrait: '',  icon: 'ic-aldeao' },
-  npc_herbalist_lyra: { name: 'Sylwen, a Ervanária', desc: 'Conhecedora de plantas',     portrait: '/shared/img/npcs/lyra-herbalista.webp', icon: 'ic-druida' },
+  npc_herbalist_lyra: { name: 'Sylwen, a Ervanária', desc: 'Conhecedora de plantas',     portrait: '/shared/img/npcs/sylwen-ervanaria.webp', icon: 'ic-druida' },
   itinerant_merchant: { name: 'Mercador Errante', desc: 'Comerciante de passagem',        portrait: '/shared/img/npcs/mercador-errante.webp',    icon: 'ic-ladino' }
 };
 
