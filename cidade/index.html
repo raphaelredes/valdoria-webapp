@@ -14229,9 +14229,9 @@ var _NAMED_NPC_PORTRAITS = {
   // 2026-06-13: nomes de Lyra desambiguados (3 NPCs distintos não podem mais colidir).
   'lyra sylwen': 'npcs/sylwen-ervanaria.webp', 'sylwen': 'npcs/sylwen-ervanaria.webp', 'talia': 'npcs/talia-costureira.webp',
   // Thorne e Padre Brevon (autoridade de retrato canônico)
-  'thorne': 'npcs/thorne-armeiro.webp',
-  'mestre thorne': 'npcs/thorne-armeiro.webp',
-  'ferreiro thorne': 'npcs/thorne-armeiro.webp',
+  'thorne': 'merchants/thorne.webp',
+  'mestre thorne': 'merchants/thorne.webp',
+  'ferreiro thorne': 'merchants/thorne.webp',
   'padre brevon': 'npcs/padre-brevon.webp',
   'brevon': 'npcs/padre-brevon.webp',
   'sereniel escriva': 'npcs/sereniel-escriva.webp',
@@ -14320,7 +14320,7 @@ function _discoverySpeakerPortrait(speaker) {
   if (s.indexOf('kaelen') >= 0)   return '/shared/img/npcs/kaelen-refugiado.webp';
   if (s.indexOf('anci') >= 0)     return '/shared/img/npcs/ancia-valdoria.webp';
   if (s.indexOf('mirena') >= 0)   return '/shared/img/merchants/mirena.webp';  /* canonical = retrato do mercado (alquimista humana, com faixa do nome). mirena-armadureira.webp (armadureira pequenina) era colisão de raça+papel. */
-  if (s.indexOf('thorne') >= 0)   return '/shared/img/npcs/thorne-armeiro.webp';  /* canonical = ferreiro humano do prelúdio */
+  if (s.indexOf('thorne') >= 0)   return '/shared/img/merchants/thorne.webp';  /* canonical = ferreiro humano do prelúdio */
   if (s.indexOf('velithra') >= 0) return '/shared/img/merchants/velithra.webp';  /* canonical = retrato do mercado (joalheira élfica). velithra-alquimista.webp reservado p/ outra NPC élfica. */
   if (s.indexOf('tharos') >= 0)   return '/shared/img/npcs/tharos-mestre-armas.webp';
   if (s.indexOf('ysoria') >= 0)   return '/shared/img/npcs/capita-ysoria.webp';
@@ -24881,11 +24881,11 @@ var MERCHANT_NAME_MAP = {
 // Override de filename quando o retrato canônico do mercador NÃO é merchants/{id}.webp
 // (Bjorn foi convertido em ANÃO → bjorn-anao.webp; Corvus → corvus-veltharion.webp;
 // Thorne é o ferreiro humano do prelúdio → thorne-armeiro.webp em shared/img/npcs/).
-var _MERCHANT_PORTRAIT_FILE = { bjorn: 'bjorn-anao.webp', corvus: 'corvus-veltharion.webp', thorne: 'thorne-armeiro.webp' };
+var _MERCHANT_PORTRAIT_FILE = { bjorn: 'bjorn-anao.webp', corvus: 'corvus-veltharion.webp' };
 function _merchantPortrait(id){
   var fullName = MERCHANT_NAME_MAP[id] || id;
   var file = _MERCHANT_PORTRAIT_FILE[id] || (id + '.webp');
-  var src = (id === 'thorne') ? ('/shared/img/npcs/' + file) : ('/shared/img/merchants/' + file);
+  var src = '/shared/img/merchants/' + file;
   return '<img src="' + src + '" alt="' + fullName +
     '" class="merchant-portrait vlb-zoomable" loading="lazy" ' +
     'data-lb-caption="' + fullName.replace(/"/g, '&quot;') + '" title="Toque para ampliar" />';
@@ -27071,7 +27071,7 @@ var RELATIONS_NPCS = [
   { id: 'rel_aldric',  icon: '<img src="/shared/img/npcs/guarda-aldric.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',  name: 'Guarda Aldric',   role: 'Capitão Portões',  ref_id: 'gates_aldric',    portraitImg: '/shared/img/npcs/guarda-aldric.webp' },
   { id: 'rel_aldwin',  icon: '<img src="/shared/img/npcs/aldenmar-banqueiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',     name: 'Aldwin',          role: 'Banqueiro',        ref_id: 'bank_aldwin',     portraitImg: '/shared/img/npcs/aldenmar-banqueiro.webp' },
   { id: 'rel_elara',   icon: '<img src="/shared/img/npcs/irma-elara.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Irmã Elara',      role: 'Sacerdotisa',      ref_id: 'temple_elara',    portraitImg: '/shared/img/npcs/irma-elara.webp' },
-  { id: 'rel_thorne',  icon: '<img src="/shared/img/npcs/thorne-armeiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne',          portraitImg: '/shared/img/npcs/thorne-armeiro.webp' },
+  { id: 'rel_thorne',  icon: '<img src="/shared/img/merchants/thorne.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',name: 'Thorne',          role: 'Ferreiro',         ref_id: 'thorne',          portraitImg: '/shared/img/merchants/thorne.webp' },
   { id: 'rel_mirena',  icon: '<img src="/shared/img/merchants/mirena.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',    name: 'Mirena',          role: 'Alquimista',       ref_id: 'mirena',          portraitImg: '/shared/img/merchants/mirena.webp' },
   { id: 'rel_tavira',  icon: '<img src="/shared/img/npcs/mestra-tavira.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Tavira Valeriax',role: 'Mestre Guilda',  ref_id: 'guild_tavira',    portraitImg: '/shared/img/npcs/mestra-tavira.webp' },
   { id: 'rel_braun',   icon: '<img src="/shared/img/npcs/braun-quartelmestre.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Braun',       role: 'Quartel-mestre',   ref_id: 'guild_braun',     portraitImg: '/shared/img/npcs/braun-quartelmestre.webp' },
@@ -27082,7 +27082,7 @@ var RELATIONS_NPCS = [
   { id: 'rel_garrick',  icon: '<img src="/shared/img/npcs/mestre-garrick.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Mestre Garrick',role: 'Mestre Artífice', ref_id: 'workshop_garrick',portraitImg: '/shared/img/npcs/mestre-garrick.webp' },
   { id: 'rel_olmiro',   icon: '<img src="/shared/img/npcs/olmiro-festeiro.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', name: 'Olmiro',        role: 'Mestre Cerimônias',ref_id: 'festival_olmiro',portraitImg: '/shared/img/npcs/olmiro-festeiro.webp' },
   { id: 'rel_vorhan',   icon: '<img src="/shared/img/npcs/mestre-vorhan.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',  name: 'Mestre Vorhan', role: 'Mestre da Arena',  ref_id: 'arena_vorhan',    portraitImg: '/shared/img/npcs/mestre-vorhan.webp' },
-  { id: 'rel_kaelen',   icon: '<img src="/shared/img/npcs/guarda-praca.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',   name: 'Capitão Kaelen',role: 'Oficial Recompensas', ref_id: 'square_kaelen',portraitImg: '/shared/img/npcs/guarda-praca.webp' }
+  { id: 'rel_kaelen',   icon: '<img src="/shared/img/npcs/capitao-vane.webp" alt="" style="width:38px;height:38px;object-fit:contain;">',   name: 'Capitão Vane',  role: 'Oficial Recompensas', ref_id: 'square_kaelen',portraitImg: '/shared/img/npcs/capitao-vane.webp' }
 ];
 
 // #92b (2026-06-23): retratos dos NPCs do mundo-2 que aparecem na lista server-driven de
@@ -27150,7 +27150,7 @@ var CITY_NPC_DETAILS = {
     perk: 'Afiação de Batalha — Desconto no forjamento e reparo de armas e armaduras',
     lore: 'Ferreiro forte e compenetrado que forja lâminas e cotas de malha confiáveis para quem desafia o perigo.',
     quote: 'Arma boa canta no choque; armadura boa aguenta o tranco. Meu aço não vai te desapontar.',
-    portrait: '/shared/img/npcs/thorne-armeiro.webp'
+    portrait: '/shared/img/merchants/thorne.webp'
   },
   alchemist: {
     name: 'Mirena', role: 'Alquimista', venue: 'market', venue_label: 'Mercado Central', category: 'craft',
@@ -27216,11 +27216,11 @@ var CITY_NPC_DETAILS = {
     portrait: '/shared/img/npcs/mestre-vorhan.webp'
   },
   npc_square_bounty_officer: {
-    name: 'Capitão Kaelen', role: 'Oficial de Recompensas', venue: 'square', venue_label: 'Praça Central', category: 'civic',
+    name: 'Capitão Vane', role: 'Oficial de Recompensas', venue: 'square', venue_label: 'Praça Central', category: 'civic',
     perk: 'Despacho do Capitão — Recompensas adicionais em caçadas e desafios cívicos',
     lore: 'Oficial pragmático da vigília encarregado dos editais e caçadas aos perigos que cercam Valdoria.',
     quote: 'A ordem de Valdoria depende de homens e mulheres corajosos. Traga resultados e terá ouro.',
-    portrait: '/shared/img/npcs/guarda-praca.webp'
+    portrait: '/shared/img/npcs/capitao-vane.webp'
   },
   npc_citizen_tessa: {
     name: 'Tessa', role: 'Fruteira', venue: 'market', venue_label: 'Mercado Central', category: 'citizen',
@@ -44027,7 +44027,7 @@ function _squareShowBountyOfficerDialogue(p){
       npc: {
         name: 'Capitão Kaelen',
         desc: 'Oficial de Recompensas de Valdoria · Intendente de Editais e Caçadas Cívicas',
-        portrait: '/shared/img/npcs/guarda-praca.webp'
+        portrait: '/shared/img/npcs/capitao-vane.webp'
       },
       script: script,
       choices: choices
@@ -44043,7 +44043,7 @@ function _squareShowBountyOfficerDialogue(p){
             npc: {
               name: 'Capitão Kaelen',
               desc: 'Oficial de Recompensas de Valdoria · Intendente de Editais e Caçadas Cívicas',
-              portrait: '/shared/img/npcs/guarda-praca.webp'
+              portrait: '/shared/img/npcs/capitao-vane.webp'
             },
             script: [
               {
@@ -51913,7 +51913,7 @@ function _showMarketPeacefulArrival(item) {
         npc: {
           name: 'Mercado Central de Valdoria',
           desc: 'Praça de Mercadores e Artífices',
-          portrait: '../shared/img/npcs/thorne-armeiro.webp'
+          portrait: '../shared/img/merchants/thorne.webp'
         },
         script: [
           {
@@ -63125,7 +63125,7 @@ function _startLyanaEncounter(p, forceDay){
       npc: {
         name: 'Guarda da Vigília da Praça',
         desc: 'Patrulha Noturna · Armadura de Ferro e Lanterna de Latão',
-        portrait: '/shared/img/npcs/guarda-praca.webp'
+        portrait: '/shared/img/npcs/capitao-vane.webp'
       },
       script: [
         {
@@ -69535,7 +69535,7 @@ var RECURRING_NPCS = {
   // identidade visual AAA. Fonte canonical das stats em MARKET_MERCHANTS.
   mer_thorne: {
     name: 'Thorne',
-    portraitImg: '/shared/img/npcs/thorne-armeiro.webp',
+    portraitImg: '/shared/img/merchants/thorne.webp',
     desc: 'Ferreiro humano veterano de bigode espesso e avental de couro marcado por faíscas. O mesmo ferreiro que lhe forjou as primeiras armas antes da chegada a Valdoria.'
   },
   mer_mirena: {
@@ -70853,8 +70853,8 @@ var _CITY_APPROACH_SCENES = {
 
   // ── PRAÇA CENTRAL (Oficial de Recompensas e Cidadãos) ───────────────────
   'square:bounty_officer': {
-    npc: { name: 'Capitão Kaelen', desc: 'Oficial de Recompensas · Praça Central', portrait: '/shared/img/npcs/guarda-praca.webp' },
-    narration: 'Junto à mesa de campanha da guarda e ao estandarte de Valdoria, o Capitão Kaelen analisa despachos de caçada e editais cívicos com postura vigilante...'
+    npc: { name: 'Capitão Vane', desc: 'Oficial de Recompensas · Praça Central', portrait: '/shared/img/npcs/capitao-vane.webp' },
+    narration: 'Junto à mesa de campanha da guarda e ao estandarte de Valdoria, o Capitão Vane analisa despachos de caçada e editais cívicos com postura vigilante...'
   },
   'square:*': {
     npc: { name: 'Guarda da Praça', desc: 'Vigilante · Praça Central', portrait: '/shared/img/npcs/guarda-praca.webp' },
@@ -70883,7 +70883,7 @@ var _CITY_APPROACH_SCENES = {
 
   // ── MERCADO CENTRAL ────────────────────────────────────────────────────
   'market:thorne': {
-    npc: { name: 'Thorne', desc: 'Ferreiro do Mercado · Armas e Armaduras', portrait: '/shared/img/npcs/thorne-armeiro.webp' },
+    npc: { name: 'Thorne', desc: 'Ferreiro do Mercado · Armas e Armaduras', portrait: '/shared/img/merchants/thorne.webp' },
     narration: 'O retinir rítmico do martelo na bigorna guia seus passos até a barraca de ferro e aço de Thorne...'
   },
   'market:mirena': {
@@ -70895,7 +70895,7 @@ var _CITY_APPROACH_SCENES = {
     narration: 'Pergaminhos enrolados e mapas detalhados cobrem a bancada de madeira escura do velho Corvus...'
   },
   'market:*': {
-    npc: { name: 'Thorne', desc: 'Ferreiro do Mercado · Armas e Armaduras', portrait: '/shared/img/npcs/thorne-armeiro.webp' },
+    npc: { name: 'Thorne', desc: 'Ferreiro do Mercado · Armas e Armaduras', portrait: '/shared/img/merchants/thorne.webp' },
     narration: 'Barracas coloridas, pregões de mercadores e o tilintar constante de moedas compõem o pulsar do Mercado Central...'
   }
 };
@@ -72568,7 +72568,7 @@ var _NPC_DEFAULTS = {
   martha:      { name: 'Martha',              desc: 'Estalajadeira da Pena-Dourada',     portrait: '/shared/img/npcs/martha.webp',  icon: 'ic-estalajadeira' },
   grom:        { name: 'Grom, o Caolho',    desc: 'Taverneiro anão do Javali Bêbado', portrait: '/shared/img/npcs/grom-o-caolho-v2.webp',    icon: 'ic-taverneiro' },
   elara:       { name: 'Sacerdotisa Elara',   desc: 'Cura do templo de Valdoria',          portrait: '/shared/img/npcs/irma-elara.webp',   icon: 'ic-clerigo' },
-  thorne:      { name: 'Thorne',              desc: 'Ferreiro de Valdoria',                portrait: '/shared/img/npcs/thorne-armeiro.webp',   icon: 'ic-guerreiro' },
+  thorne:      { name: 'Thorne',              desc: 'Ferreiro de Valdoria',                portrait: '/shared/img/merchants/thorne.webp',   icon: 'ic-guerreiro' },
   mirena:      { name: 'Mirena Virelle',  desc: 'Alquimista da Praça',                portrait: '/shared/img/merchants/mirena.webp',   icon: 'ic-druida' },
   velithra:    { name: 'Velithra Olho-Cristal', desc: 'Mercadora arcana',                 portrait: '/shared/img/merchants/velithra.webp', icon: 'ic-mago' },
   corvus:      { name: 'Corvus Veltharion',  desc: 'Cartógrafo da Praça Central',        portrait: '/shared/img/merchants/corvus-veltharion.webp',   icon: 'ic-ladino' },
