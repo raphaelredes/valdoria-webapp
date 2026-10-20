@@ -6734,10 +6734,10 @@ Busca rápida:
                   + `<div class="equip-header-icon">${classIcon}</div>`
                   + `<div class="equip-header-text">`
                   +   `<div class="equip-header-title">Equipamento Inicial</div>`
-                  +   `<div class="equip-header-subtitle">${cls.name} — escolha o kit que define teu começo.</div>`
+                  +   `<div class="equip-header-subtitle">${cls.name} — escolha o kit que define seu começo.</div>`
                   + `</div>`
                   + `</div>`;
-            html += `<div class="equip-hint">${Object.keys(pkgs).length === 2 ? 'Dois caminhos. Cada um molda tua jornada inicial.' : 'Escolha um kit pra começar.'}</div>`;
+            html += `<div class="equip-hint">${Object.keys(pkgs).length === 2 ? 'Dois caminhos. Cada um molda sua jornada inicial.' : 'Escolha um kit pra começar.'}</div>`;
             const pkgEntries = Object.entries(pkgs);
             pkgEntries.forEach(([pkgId, pkg], idx) => {
                 const isSelected = sel.equipmentChoice === pkgId;
