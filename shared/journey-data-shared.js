@@ -278,7 +278,7 @@ var HAZARDS = {
       ] },
 
     { title: 'Bandidos da Estrada',
-      npc: { name: 'Líder dos Bandidos', desc: 'Veterano de guerra desempregado', portrait: '../shared/img/npcs/trail/lider-dos-bandidos.webp' },
+      npc: { name: 'Kragor, o Líder Fora-da-Lei', desc: 'Veterano de guerra desempregado', portrait: '../shared/img/npcs/kragor-bandido.webp' },
       script: [
         { type: 'narration', text: 'Três figuras saem do trigal alto à esquerda. Um homem grisalho de armadura remendada à frente — os outros dois flanqueiam, espadas curtas.' },
         { type: 'speech', speaker: 'Líder dos Bandidos', text: '— Pare aí, viajante. <i>(o tom é cansado, não cruel)</i> Quem cruza nossas terras paga pedágio. Bolsa pra dentro do saco — ou cabeça pra dentro do trigal.' },
@@ -504,7 +504,7 @@ var HAZARDS = {
       ] },
 
     { title: 'Caçador Solitário',
-      npc: { name: 'Caçador do Pântano', desc: 'Eremita que protege o ecossistema', portrait: '../shared/img/npcs/trail/cacador-do-pantano.webp' },
+      npc: { name: 'Tark, o Caçador do Pântano', desc: 'Eremita que protege o ecossistema', portrait: '../shared/img/npcs/tark-cacador.webp' },
       script: [
         { type: 'narration', text: 'Você ouve uma flecha cravar numa árvore a um metro do seu rosto. Aviso, não erro.' },
         { type: 'speech', speaker: 'Caçador do Pântano', text: '— Pare aí. <i>(a voz vem das sombras das árvores)</i> Esse pântano não é estrada. Quem cruza paga.' },
@@ -759,7 +759,7 @@ var HAZARDS = {
 
   snow: [
     { title: 'Lobo Solitário',
-      npc: { name: 'Lobo Alfa', desc: 'Velho macho, sozinho — mais perigoso por isso', portrait: '../shared/img/npcs/trail/lobo-alfa.webp' },
+      npc: { name: 'Presa-Cinzenta, o Lobo Solitário', desc: 'Velho macho, sozinho é mais perigoso por isso', portrait: '../shared/img/npcs/presa-cinzenta-lobo.webp' },
       script: [
         { type: 'narration', text: 'Olhos amarelos brilham na neve à frente. Um lobo enorme, sozinho — o que é incomum. Lobos sozinhos são velhos, expulsos, ou famintos.' },
         { type: 'narration', text: 'Este parece os três. Ele não rosna. Apenas observa. Calcula.' },
@@ -1165,7 +1165,7 @@ var HAZARDS_EXTRA = {
       ] },
 
     { title: 'Encontro com Fada',
-      npc: { name: 'Fada da Trilha', desc: 'Pequena criatura mágica de luz dourada', portrait: '../shared/img/npcs/trail/fada-da-trilha.webp' },
+      npc: { name: 'Aurélia, a Fada da Trilha', desc: 'Pequena criatura mágica de luz dourada', portrait: '../shared/img/npcs/aurelia-fada.webp' },
       script: [
         { type: 'narration', text: 'Uma luz dourada flutua à sua frente. Não é vagalume — tem forma humana minúscula, asas translúcidas batendo rápido.' },
         { type: 'speech', speaker: 'Fada da Trilha', text: '— Aventureiro grandalhão! <i>(voz fina, ágil)</i> Tenho um pedido — e uma oferta. Decide rápido, tenho mais cinco trilhas pra cuidar essa noite.' },
@@ -1307,7 +1307,7 @@ var HAZARDS_EXTRA = {
 
   plains: [
     { title: 'Mendigo de Estrada',
-      npc: { name: 'Mendigo de Estrada', desc: 'Velho com olhos vivos demais pra ser apenas mendigo', portrait: '../shared/img/npcs/trail/mendigo-de-estrada.webp' },
+      npc: { name: 'Gildas, o Mendigo da Estrada', desc: 'Velho com olhos vivos demais pra ser apenas mendigo', portrait: '../shared/img/npcs/gildas-mendigo.webp' },
       script: [
         { type: 'narration', text: 'Um homem maltrapilho está sentado na borda da trilha. Quando você se aproxima, ele ergue o olhar — verde brilhante, lúcido demais pra alguém em condição assim.' },
         { type: 'speech', speaker: 'Mendigo de Estrada', text: '— Aventureiro... <i>(estende mão sem desespero)</i> Uma moeda? Eu te conto uma história em troca. Toda história tem valor de moeda — mais ou menos.' }
@@ -1413,7 +1413,7 @@ var HAZARDS_EXTRA = {
       ] },
 
     { title: 'Mulher do Poço',
-      npc: { name: 'Mulher do Poço', desc: 'Camponesa carregando dois baldes pesados', portrait: '../shared/img/npcs/trail/mulher-do-poco-v2.webp' },
+      npc: { name: 'Maren, a Camponesa do Poço', desc: 'Camponesa carregando dois baldes pesados', portrait: '../shared/img/npcs/maren-camponesa.webp' },
       script: [
         { type: 'narration', text: 'Uma camponesa caminha pela trilha com dois baldes de água, balança difícil. Ela tropeça quando você passa, mas não derrama — equilibrio de quem fez isso muitas vezes.' },
         { type: 'speech', speaker: 'Mulher do Poço', text: '— Bom dia, viajante! <i>(sorriso cansado)</i> Vem dos Portões? Diga-me, ainda há festa esta noite na praça? Ouvi rumor de bardo novo.' }
@@ -1479,7 +1479,7 @@ var HAZARDS_EXTRA = {
       ] },
 
     { title: 'Bivaque dos Guardas da Fronteira',
-      npc: { name: 'Sargento da Fronteira', desc: 'Veterano em vigília nas terras abertas', portrait: '../shared/img/npcs/trail/lider-dos-bandidos.webp' },
+      npc: { name: 'Bravok, o Sargento da Fronteira', desc: 'Veterano em vigília nas terras abertas', portrait: '../shared/img/npcs/bravok-sargento.webp' },
       script: [
         { type: 'narration', text: 'Uma paliçada de estacas e uma tenda com as cores de Valdoria marcam o posto avançado da patrulha real.' },
         { type: 'speech', speaker: 'Sargento da Fronteira', text: '— Alto lá! <i>(o sentinela bate o cabo da alabarda no chão)</i> Identifiquem-se, viajantes. A fronteira leste está em estado de alerta.' }
@@ -1601,7 +1601,7 @@ var HAZARDS_EXTRA = {
       ] },
 
     { title: 'Pescador Solitário',
-      npc: { name: 'Pescador do Pântano', desc: 'Homem velho com canas no ombro', portrait: '../shared/img/npcs/trail/pescador-do-pantano.webp' },
+      npc: { name: 'Branoc, o Pescador do Pântano', desc: 'Homem velho com canas no ombro', portrait: '../shared/img/npcs/branoc-pescador.webp' },
       script: [
         { type: 'narration', text: 'Você vê uma figura solitária à beira da água, pescando. Cana de bambu, paciência infinita.' },
         { type: 'speech', speaker: 'Pescador do Pântano', text: '— Quieto aí, viajante! <i>(sussurra sem virar)</i> Tem uma carpa-fantasma vindo. Vinte minutos esperando ela. Fica quieto cinco minutos comigo, eu te dou rota segura depois.' }

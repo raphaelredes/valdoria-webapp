@@ -26096,9 +26096,22 @@ function _marketShowTransient(p, npc){
   // Imagens em /shared/img/npcs/{npc.id}.webp (migradas pra WebP em 2026-05-27).
   // Bug CEDWYN (misc1): o path ainda apontava .png → 404 → diálogo sem retrato.
   // Todos os transientes (misc1-5, craft1-4, exotic1-3, animal1-2, ...) são .webp.
-  var npcPng = '/shared/img/npcs/' + (npc.id || 'aldeao') + '.webp';
+  var _TRANSIENT_NOMINALS = {
+    'food1': 'tomm-padeiro', 'food2': 'brog-acougueiro', 'food3': 'brunvald-taverneiro', 'food4': 'perric-cozinheiro',
+    'craft1': 'dorgan-artesao', 'craft2': 'aeryndel-arqueiro', 'craft3': 'borin-curtidor', 'craft4': 'mirael-costureira',
+    'herb1': 'ivy-herborista', 'herb2': 'verdana-druida', 'herb3': 'bramble-botanico', 'herb4': 'willow-curandeira',
+    'scout1': 'mapras-cartografo', 'scout2': 'kael-batedor', 'scout3': 'dara-exploradora', 'scout4': 'flint-cacador',
+    'merchant1': 'aldren-mercador', 'merchant2': 'zarek-raridades', 'merchant3': 'ryn-especiarias', 'merchant4': 'grivar-montanhas', 'merchant5': 'corvino-alquimia',
+    'mystic1': 'malakor-mistico', 'mystic2': 'madam-serath-vidente', 'mystic3': 'baltazar-arcano', 'mystic4': 'celestia-adivinha',
+    'exotic1': 'vestrin-sombras', 'exotic2': 'pipwick-engenhoqueiro', 'exotic3': 'valdric-colecionador', 'exotic4': 'drazhen-contrabandista', 'exotic5': 'melodis-bardo',
+    'animal1': 'kaelra-domadora', 'animal2': 'oren-tratador',
+    'misc1': 'cedwyn-livreiro', 'misc2': 'ysmara-joalheira', 'misc3': 'aldwyn-escriba', 'misc4': 'tarvek-andarilho', 'misc5': 'sevara-vidente',
+    'enchanter': 'valdren-encantador'
+  };
+  var _nomSlug = _TRANSIENT_NOMINALS[npc.id] || npc.id || 'aldeao';
+  var npcPng = '/shared/img/npcs/' + _nomSlug + '.webp';
   var _isWebApp = location.protocol.indexOf('http') === 0;
-  if (_isWebApp) npcPng = '/shared/img/npcs/' + (npc.id || 'aldeao') + '.webp';
+  if (_isWebApp) npcPng = '/shared/img/npcs/' + _nomSlug + '.webp';
 
   // Se vEncounter disponível, usar PADRAO_ALDRIC (header + portrait + zoom)
   if (window.vEncounter && typeof window.vEncounter.render === 'function') {
@@ -33560,6 +33573,27 @@ function _plazaPhotoFor(npc){
   var sid = npc._canonKey || npc.id || '';
   if (!sid) return null;
   var slug = String(sid).replace(/^unique_/, '');
+  var _PLAZA_NOMINALS = {
+    'vendor_brokk': 'brokk-armeiro', 'vendor_faelis': 'faelis-cartografa', 'vendor_grimshaw': 'grimshaw-alquimista',
+    'vendor_lunara': 'lunara-mistica', 'vendor_selindra': 'selindra-joalheira', 'vendor_torvik': 'torvik-sucateiro', 'vendor_zephyra': 'zephyra-herbalista',
+    'alchemist_student': 'elgoran-alquimista', 'baker_master': 'odo-padeiro', 'smith_apprentice': 'brenn-aprendiz-ferreiro',
+    'hunter_traine': 'elira-cacadora', 'cleric_acolyte': 'acolito-theron', 'fisher_old': 'garin-pescador',
+    'farmer_lost': 'tobren-fazendeiro', 'miner_gold': 'brask-garimpeiro', 'woodcutter': 'korven-lenhador',
+    'gravedigger': 'nathren-coveiro', 'librarian': 'melvyn-bibliotecaria', 'painter_visionary': 'caelus-pintor',
+    'sculptor': 'halveg-escultor', 'dancer_exotic': 'solenne-bailarina', 'juggler_fire': 'pyros-pirotecnico',
+    'snake_charmer': 'sithek-encantador', 'illusionist': 'misterio-ilusionista', 'beast_tamer': 'vordek-domador',
+    'bard_broken': 'soravel-triste', 'bardo_praca': 'caelum-trovador', 'batedor_carteira': 'pip-batedor',
+    'bebados_briga': 'gorn-e-balin-boemios', 'crianca_pomar': 'tessa-pomar', 'dono_gato': 'ronald-dono-gato',
+    'gourmet': 'korvian-cozinheiro', 'guard_veteran': 'draven-capitao', 'guarda_barricada': 'valen-guarda',
+    'mendigo_praca': 'barnabe-pedinte', 'monk_peace': 'thenlo-monge', 'noble_exile': 'valerius-nobre',
+    'orphan_doll': 'mina-orfa', 'pilgrim_lost': 'silas-peregrino', 'seer_blind': 'tessara-vidente',
+    'square_child': 'lia-crianca', 'square_circus': 'bartolomeu-circense', 'square_homeless': 'tom-andarilho',
+    'square_lyana': 'lyana-costureira-praca', 'square_wanderer': 'isolde-viajante', 'survivor_blizzard': 'mara-das-neves',
+    'survivor_wolves': 'kaelen-refugiado', 'thief_repentant': 'mao-leve-gatuno', 'velha_oculto': 'morrigan-oculto',
+    'wizard_failed': 'thumblen-mago'
+  };
+  var nom = _PLAZA_NOMINALS[slug] || _PLAZA_NOMINALS[sid];
+  if (nom) return '/shared/img/npcs/' + nom + '.webp';
   if (PLAZA_PHOTO_SLUGS.indexOf(slug) < 0) return null;
   return '/shared/img/npcs/plaza/' + slug + '.webp';
 }
