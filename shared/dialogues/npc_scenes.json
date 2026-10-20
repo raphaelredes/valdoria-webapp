@@ -13,11 +13,7 @@
  "script": [
  {
  "type": "narration",
- "text": "Você nota <b>Thorne</b> e <b>Bjorn</b> discutindo algo perto da forja.\n\n<i>\"Esse couro que você me trouxe é resistente demais pra costurar normalmente,\"</i> diz Bjorn.\n\n<i>\"É couro de basilisco."
- },
- {
- "type": "narration",
- "text": "Precisa aquecer primeiro,\"</i> responde Thorne secamente."
+ "text": "Você nota <b>Thorne</b> e <b>Bjorn</b> discutindo algo perto da forja.\n\n<i>\"Esse couro que você me trouxe é resistente demais pra costurar normalmente,\"</i> diz Bjorn.\n\n<i>\"É couro de basilisco. Precisa aquecer primeiro,\"</i> responde Thorne secamente."
  }
  ]
  },
@@ -34,11 +30,7 @@
  "script": [
  {
  "type": "narration",
- "text": "Você vê <b>Mirena</b> e <b>Corvus</b> debruçados sobre um caderno de anotações.\n\n<i>\"Essa planta só cresce nas coordenadas que marquei aqui,\"</i> diz Corvus apontando no mapa.\n\n<i>\"Fascinante!"
- },
- {
- "type": "narration",
- "text": "Se eu cruzar com os dados do meu herbário, posso prever onde encontrar mais,\"</i> Mirena responde empolgada."
+ "text": "Você vê <b>Mirena</b> e <b>Corvus</b> debruçados sobre um caderno de anotações.\n\n<i>\"Essa planta só cresce nas coordenadas que marquei aqui,\"</i> diz Corvus apontando no mapa.\n\n<i>\"Fascinante! Se eu cruzar com os dados do meu herbário, posso prever onde encontrar mais,\"</i> Mirena responde empolgada."
  }
  ]
  },
@@ -74,11 +66,7 @@
  "script": [
  {
  "type": "narration",
- "text": "Você flagra <b>Thorne</b> e <b>Velithra</b> em uma troca cautelosa.\n\n<i>\"Essa prata precisa de uma liga especial pra segurar a gema,\"</i> diz Thorne.\n\n<i>\"Confio no seu trabalho, ferreiro."
- },
- {
- "type": "narration",
- "text": "Mas se arranhar meu rubi, vou cobrar caro,\"</i> avisa Velithra."
+ "text": "Você flagra <b>Thorne</b> e <b>Velithra</b> em uma troca cautelosa.\n\n<i>\"Essa prata precisa de uma liga especial pra segurar a gema,\"</i> diz Thorne.\n\n<i>\"Confio no seu trabalho, ferreiro. Mas se arranhar meu rubi, vou cobrar caro,\"</i> avisa Velithra."
  }
  ]
  },
@@ -95,19 +83,7 @@
  "script": [
  {
  "type": "narration",
- "text": "<b>Bjorn</b> olha por cima do ombro de <b>Corvus</b> para um mapa.\n\n<i>\"Já acampei nesse vale."
- },
- {
- "type": "narration",
- "text": "O melhor ponto é perto do riacho leste,\"</i> comenta Bjorn.\n\n<i>\"Excelente!"
- },
- {
- "type": "narration",
- "text": "Vou marcar no mapa."
- },
- {
- "type": "narration",
- "text": "Informação de campo vale mais que teoria,\"</i> agradece Corvus."
+ "text": "<b>Bjorn</b> olha por cima do ombro de <b>Corvus</b> para um mapa.\n\n<i>\"Já acampei nesse vale. O melhor ponto é perto do riacho leste,\"</i> comenta Bjorn.\n\n<i>\"Excelente! Vou marcar no mapa. Informação de campo vale mais que teoria,\"</i> agradece Corvus."
  }
  ]
  },
@@ -126,15 +102,7 @@
  "script": [
  {
  "type": "narration",
- "text": "<b>Mirena</b> entrega um cristal verde a <b>Velithra</b>.\n\n<i>\"Encontrei isso no fundo de um frasco antigo."
- },
- {
- "type": "narration",
- "text": "Parece ter propriedades mágicas,\"</i> diz Mirena.\n\n<i>\"Jade do Véu... raro."
- },
- {
- "type": "narration",
- "text": "Posso lapidá-lo, mas não será barato,\"</i> avalia Velithra."
+ "text": "<b>Mirena</b> entrega um cristal verde a <b>Velithra</b>.\n\n<i>\"Encontrei isso no fundo de um frasco antigo. Parece ter propriedades mágicas,\"</i> diz Mirena.\n\n<i>\"Jade do Véu... raro. Posso lapidá-lo, mas não será barato,\"</i> avalia Velithra."
  }
  ]
  },
@@ -151,11 +119,7 @@
  "script": [
  {
  "type": "narration",
- "text": "<b>Mirena</b> entrega uma lista a <b>Thorne</b>.\n\n<i>\"Preciso de três almofarizes de ferro e um destilador novo,\"</i> diz ela.\n\n<i>\"Mais um?"
- },
- {
- "type": "narration",
- "text": "Você derrete quantos por semana?\"</i> Thorne levanta uma sobrancelha.\n\n<i>\"Ciência exige sacrifícios, ferreiro,\"</i> sorri Mirena."
+ "text": "<b>Mirena</b> entrega uma lista a <b>Thorne</b>.\n\n<i>\"Preciso de três almofarizes de ferro e um destilador novo,\"</i> diz ela.\n\n<i>\"Mais um? Você derrete quantos por semana?\"</i> Thorne levanta uma sobrancelha.\n\n<i>\"Ciência exige sacrifícios, ferreiro,\"</i> sorri Mirena."
  }
  ]
  },
@@ -172,15 +136,7 @@
  "script": [
  {
  "type": "narration",
- "text": "Você ouve <b>Bjorn</b> e <b>Mirena</b> negociando suprimentos.\n\n<i>\"Preciso de algo pra impermeabilizar as barracas."
- },
- {
- "type": "narration",
- "text": "A última chuva foi desastrosa,\"</i> diz Bjorn.\n\n<i>\"Tenho um óleo alquímico perfeito."
- },
- {
- "type": "narration",
- "text": "Repele água por semanas,\"</i> oferece Mirena com um sorriso comercial."
+ "text": "Você ouve <b>Bjorn</b> e <b>Mirena</b> negociando suprimentos.\n\n<i>\"Preciso de algo pra impermeabilizar as barracas. A última chuva foi desastrosa,\"</i> diz Bjorn.\n\n<i>\"Tenho um óleo alquímico perfeito. Repele água por semanas,\"</i> oferece Mirena com um sorriso comercial."
  }
  ]
  },
@@ -216,11 +172,7 @@
  "script": [
  {
  "type": "narration",
- "text": "<b>Thorne</b> olha para o céu e murmura para <b>Bjorn</b>.\n\n<i>\"Tempestade vindo do norte."
- },
- {
- "type": "narration",
- "text": "Vai chover forte amanhã,\"</i> diz o ferreiro.\n\n<i>\"Melhor eu reforçar as costuras das barracas então,\"</i> suspira Bjorn."
+ "text": "<b>Thorne</b> olha para o céu e murmura para <b>Bjorn</b>.\n\n<i>\"Tempestade vindo do norte. Vai chover forte amanhã,\"</i> diz o ferreiro.\n\n<i>\"Melhor eu reforçar as costuras das barracas então,\"</i> suspira Bjorn."
  }
  ]
  },
@@ -239,11 +191,7 @@
  "script": [
  {
  "type": "narration",
- "text": "Você flagra <b>Thorne</b> e <b>Mirena</b> falando sobre... você?\n\n<i>\"Aquele aventureiro está mudando esta cidade,\"</i> diz Thorne cruzando os braços.\n\n<i>\"Concordo."
- },
- {
- "type": "narration",
- "text": "Faz tempo que não vejo alguém com tanta determinação,\"</i> responde Mirena pensativa."
+ "text": "Você flagra <b>Thorne</b> e <b>Mirena</b> falando sobre... você?\n\n<i>\"Aquele aventureiro está mudando esta cidade,\"</i> diz Thorne cruzando os braços.\n\n<i>\"Concordo. Faz tempo que não vejo alguém com tanta determinação,\"</i> responde Mirena pensativa."
  }
  ]
  },
@@ -264,19 +212,7 @@
  "script": [
  {
  "type": "narration",
- "text": "<b>Corvus</b> mostra um caderno a <b>Bjorn</b>.\n\n<i>\"Encontrei registros de uma expedição que passou por aqui há cem anos."
- },
- {
- "type": "narration",
- "text": "Tinham um acampamento nessa coordenada,\"</i> aponta Corvus.\n\n<i>\"Cem anos?"
- },
- {
- "type": "narration",
- "text": "Se o equipamento sobreviveu, vale uma fortuna."
- },
- {
- "type": "narration",
- "text": "Vou costurar uma mochila reforçada,\"</i> Bjorn já planeja."
+ "text": "<b>Corvus</b> mostra um caderno a <b>Bjorn</b>.\n\n<i>\"Encontrei registros de uma expedição que passou por aqui há cem anos. Tinham um acampamento nessa coordenada,\"</i> aponta Corvus.\n\n<i>\"Cem anos? Se o equipamento sobreviveu, vale uma fortuna. Vou costurar uma mochila reforçada,\"</i> Bjorn já planeja."
  }
  ]
  },
@@ -295,15 +231,7 @@
  "script": [
  {
  "type": "narration",
- "text": "<b>Velithra</b> apresenta uma gema azulada a <b>Thorne</b>.\n\n<i>\"Essa safira tem ressonância arcana."
- },
- {
- "type": "narration",
- "text": "Se embutida corretamente numa lâmina, amplifica o fio,\"</i> explica.\n\n<i>\"Interessante... mas se eu errar a temperatura, a gema estilhaça."
- },
- {
- "type": "narration",
- "text": "Vou precisar de concentração,\"</i> Thorne coça o queixo."
+ "text": "<b>Velithra</b> apresenta uma gema azulada a <b>Thorne</b>.\n\n<i>\"Essa safira tem ressonância arcana. Se embutida corretamente numa lâmina, amplifica o fio,\"</i> explica.\n\n<i>\"Interessante... mas se eu errar a temperatura, a gema estilhaça. Vou precisar de concentração,\"</i> Thorne coça o queixo."
  }
  ]
  },
@@ -320,15 +248,7 @@
  "script": [
  {
  "type": "narration",
- "text": "<b>Mirena</b> entrega um frasco a <b>Bjorn</b> com ar sério.\n\n<i>\"Antídoto contra veneno de serpente."
- },
- {
- "type": "speech",
- "text": "Leve sempre nas expedições,\"</i> instrui a alquimista.\n\n<i>\"Quanto custa?\"</i> pergunta Bjorn cauteloso.\n\n<i>\"Nada."
- },
- {
- "type": "narration",
- "text": "Considere um investimento na sua sobrevivência,\"</i> Mirena sorri de canto."
+ "text": "<b>Mirena</b> entrega um frasco a <b>Bjorn</b> com ar sério.\n\n<i>\"Antídoto contra veneno de serpente. Leve sempre nas expedições,\"</i> instrui a alquimista.\n\n<i>\"Quanto custa?\"</i> pergunta Bjorn cauteloso.\n\n<i>\"Nada. Considere um investimento na sua sobrevivência,\"</i> Mirena sorri de canto."
  }
  ]
  },
@@ -347,19 +267,7 @@
  "script": [
  {
  "type": "narration",
- "text": "<b>Thorne</b> mostra uma lâmina enferrujada a <b>Corvus</b>.\n\n<i>\"Encontrei isso no porão."
- },
- {
- "type": "narration",
- "text": "A marca é de uma forja que não existe mais — da Era do Ferro,\"</i> diz Thorne.\n\n<i>\"Era do Ferro?"
- },
- {
- "type": "narration",
- "text": "Isso tem pelo menos trezentos anos!"
- },
- {
- "type": "narration",
- "text": "Posso registrar nos meus arquivos?\"</i> Corvus quase derruba os óculos de empolgação."
+ "text": "<b>Thorne</b> mostra uma lâmina enferrujada a <b>Corvus</b>.\n\n<i>\"Encontrei isso no porão. A marca é de uma forja que não existe mais — da Era do Ferro,\"</i> diz Thorne.\n\n<i>\"Era do Ferro? Isso tem pelo menos trezentos anos! Posso registrar nos meus arquivos?\"</i> Corvus quase derruba os óculos de empolgação."
  }
  ]
  },
@@ -376,15 +284,7 @@
  "script": [
  {
  "type": "narration",
- "text": "<b>Velithra</b> segura um frasco delicado.\n\n<i>\"Essa essência de âmbar — você a criou?\"</i> pergunta à alquimista.\n\n<i>\"Receita da minha avó."
- },
- {
- "type": "narration",
- "text": "Só faço uma vez por estação,\"</i> confirma <b>Mirena</b> com orgulho.\n\n<i>\"Compro o lote inteiro."
- },
- {
- "type": "narration",
- "text": "Minhas clientes vão enlouquecer,\"</i> Velithra já conta as moedas."
+ "text": "<b>Velithra</b> segura um frasco delicado.\n\n<i>\"Essa essência de âmbar — você a criou?\"</i> pergunta à alquimista.\n\n<i>\"Receita da minha avó. Só faço uma vez por estação,\"</i> confirma <b>Mirena</b> com orgulho.\n\n<i>\"Compro o lote inteiro. Minhas clientes vão enlouquecer,\"</i> Velithra já conta as moedas."
  }
  ]
  },
@@ -401,19 +301,7 @@
  "script": [
  {
  "type": "narration",
- "text": "<b>Bjorn</b> mostra uma fivela decorada a <b>Velithra</b>.\n\n<i>\"Fiz essa fivela de cinto, mas quero um acabamento digno."
- },
- {
- "type": "narration",
- "text": "Pode gravar algo?\"</i>\n\n<i>\"Um dragão entrelaçado com folhas de carvalho."
- },
- {
- "type": "narration",
- "text": "Clássico."
- },
- {
- "type": "narration",
- "text": "Fico com ela até amanhã,\"</i> avalia Velithra.\n\n<i>\"Sem arranhar o couro!\"</i> alerta Bjorn."
+ "text": "<b>Bjorn</b> mostra uma fivela decorada a <b>Velithra</b>.\n\n<i>\"Fiz essa fivela de cinto, mas quero um acabamento digno. Pode gravar algo?\"</i>\n\n<i>\"Um dragão entrelaçado com folhas de carvalho. Clássico. Fico com ela até amanhã,\"</i> avalia Velithra.\n\n<i>\"Sem arranhar o couro!\"</i> alerta Bjorn."
  }
  ]
  },
@@ -432,11 +320,7 @@
  "script": [
  {
  "type": "narration",
- "text": "Você se aproxima e percebe que vários comerciantes estão reunidos, falando baixo.\n\n<i>\"...já derrotou criaturas que faziam veteranos tremerem,\"</i> comenta <b>Thorne</b>.\n\n<i>\"E ainda encontra tempo para ajudar os moradores,\"</i> acrescenta <b>Mirena</b>."
- },
- {
- "type": "narration",
- "text": "Eles percebem sua presença e dispersam, fingindo que nada aconteceu."
+ "text": "Você se aproxima e percebe que vários comerciantes estão reunidos, falando baixo.\n\n<i>\"...já derrotou criaturas que faziam veteranos tremerem,\"</i> comenta <b>Thorne</b>.\n\n<i>\"E ainda encontra tempo para ajudar os moradores,\"</i> acrescenta <b>Mirena</b>.\n\nEles percebem sua presença e dispersam, fingindo que nada aconteceu."
  }
  ]
  }

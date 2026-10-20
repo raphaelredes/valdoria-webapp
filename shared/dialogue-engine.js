@@ -251,19 +251,39 @@
   function rollSkillCheck(option, player){
     if (!option || !option.check) return null;
     var skill = option.check.skill;
-    var dc = option.check.difficulty || 10;
-    // Map skill name → ability score
+    var dc = option.check.difficulty || option.check.dc || 10;
+
+    // Se window.dndRules esta disponivel, usa autoridade canonica D&D 5e
+    if (window.dndRules && typeof window.dndRules.resolveSkillCheck === 'function') {
+      var dndRes = window.dndRules.resolveSkillCheck(option.check, player);
+      return {
+        success: dndRes.success,
+        roll: dndRes.roll,
+        mod: dndRes.mod,
+        total: dndRes.total,
+        dc: dndRes.dc,
+        nextNode: dndRes.success ? option.check.success : option.check.failure,
+        skill: skill
+      };
+    }
+
+    // Map skill name -> ability score (todas as 18 pericias D&D 5e PHB p. 174)
     var ABILITY_MAP = {
-      strength: 'strength', str: 'strength',
-      dexterity: 'dexterity', dex: 'dexterity',
+      strength: 'strength', str: 'strength', athletics: 'strength',
+      dexterity: 'dexterity', dex: 'dexterity', acrobatics: 'dexterity', sleight_of_hand: 'dexterity', stealth: 'dexterity',
       constitution: 'constitution', con: 'constitution',
-      intelligence: 'intelligence', int: 'intelligence',
-      wisdom: 'wisdom', wis: 'wisdom',
-      charisma: 'charisma', cha: 'charisma'
+      intelligence: 'intelligence', int: 'intelligence', arcana: 'intelligence', history: 'intelligence', investigation: 'intelligence', nature: 'intelligence', religion: 'intelligence',
+      wisdom: 'wisdom', wis: 'wisdom', animal_handling: 'wisdom', insight: 'wisdom', medicine: 'wisdom', perception: 'wisdom', survival: 'wisdom',
+      charisma: 'charisma', cha: 'charisma', deception: 'charisma', intimidation: 'charisma', performance: 'charisma', persuasion: 'charisma'
     };
     var ability = ABILITY_MAP[skill] || skill;
     var statVal = (player.stats && player.stats[ability]) || 10;
     var mod = Math.floor((statVal - 10) / 2);
+    // Bonus de proficiencia se o personagem for proficiente
+    var profSkills = (player.skill_proficiencies || []).concat(player.acquired_skills || []).concat(player.skills || []);
+    if (profSkills.indexOf(skill) >= 0) {
+      mod += Math.floor(2 + ((player.level || 1) - 1) / 4);
+    }
     var roll = 1 + Math.floor(Math.random() * 20);
     var total = roll + mod;
     var success = total >= dc;

@@ -61,9 +61,8 @@
  "text": "{speaker} gargalha: 'A última vez que vi {target}, estava tentando ensinar um gato a latir.'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} gargalha: 'A última vez que vi {target}, estava tentando ensinar um gato a latir.'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} gargalha: 'A última vez que vi {target}, estava tentando ensinar um gato a latir.'"
  }
  ]
  },
@@ -72,9 +71,8 @@
  "text": "{speaker} balança a cabeça rindo: '{target} perdeu uma aposta e está proibido de aparecer hoje.'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} balança a cabeça rindo: '{target} perdeu uma aposta e está proibido de aparecer hoje.'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} balança a cabeça rindo: '{target} perdeu uma aposta e está proibido de aparecer hoje.'"
  }
  ]
  },
@@ -97,9 +95,8 @@
  "text": "{speaker} ironiza: '{target} está trabalhando... em sua técnica de ronco.'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} ironiza: '{target} está trabalhando... em sua técnica de ronco.'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} ironiza: '{target} está trabalhando... em sua técnica de ronco.'"
  }
  ]
  },
@@ -238,9 +235,8 @@
  "text": "{speaker} murmura: 'Espero que {target} não tenha se metido com a guilda dos ladrões.'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} murmura: 'Espero que {target} não tenha se metido com a guilda dos ladrões.'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} murmura: 'Espero que {target} não tenha se metido com a guilda dos ladrões.'"
  }
  ]
  },
@@ -263,9 +259,8 @@
  "text": "{speaker} lamenta: 'Pobre {target}... espero que seja apenas um resfriado.'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} lamenta: 'Pobre {target}... espero que seja apenas um resfriado.'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} lamenta: 'Pobre {target}... espero que seja apenas um resfriado.'"
  }
  ]
  },
@@ -302,9 +297,8 @@
  "text": "{speaker} reclama: 'Aquele preguiçoso do {target} deve estar dormindo até tarde.'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} reclama: 'Aquele preguiçoso do {target} deve estar dormindo até tarde.'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} reclama: 'Aquele preguiçoso do {target} deve estar dormindo até tarde.'"
  }
  ]
  },
@@ -313,9 +307,8 @@
  "text": "{speaker} bate na mesa: 'Eu precisava falar com {target}, mas claro que não está aqui!'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} bate na mesa: 'Eu precisava falar com {target}, mas claro que não está aqui!'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} bate na mesa: 'Eu precisava falar com {target}, mas claro que não está aqui!'"
  }
  ]
  },
@@ -338,9 +331,8 @@
  "text": "{speaker} cruza os braços: 'Se ver {target}, diga que estou esperando meu dinheiro!'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} cruza os braços: 'Se ver {target}, diga que estou esperando meu dinheiro!'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} cruza os braços: 'Se ver {target}, diga que estou esperando meu dinheiro!'"
  }
  ]
  },
@@ -349,9 +341,8 @@
  "text": "{speaker} diz secamente: '{target} é uma vergonha para o mercado.'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} diz secamente: '{target} é uma vergonha para o mercado.'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} diz secamente: '{target} é uma vergonha para o mercado.'"
  }
  ]
  },
@@ -402,9 +393,8 @@
  "text": "{speaker} sussurra: '{target} foi em busca de ingredientes raros nas montanhas.'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} sussurra: '{target} foi em busca de ingredientes raros nas montanhas.'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} sussurra: '{target} foi em busca de ingredientes raros nas montanhas.'"
  }
  ]
  },
@@ -455,9 +445,8 @@
  "text": "{speaker} murmura: 'Coisas estranhas acontecem quando {target} some...'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} murmura: 'Coisas estranhas acontecem quando {target} some...'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} murmura: 'Coisas estranhas acontecem quando {target} some...'"
  }
  ]
  },
@@ -466,9 +455,8 @@
  "text": "{speaker} avisa: '{target} está lidando com forças além da sua compreensão.'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} avisa: '{target} está lidando com forças além da sua compreensão.'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} avisa: '{target} está lidando com forças além da sua compreensão.'"
  }
  ]
  },
@@ -477,9 +465,8 @@
  "text": "{speaker} comenta baixo: 'Dizem que {target} encontrou um mapa do tesouro.'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} comenta baixo: 'Dizem que {target} encontrou um mapa do tesouro.'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} comenta baixo: 'Dizem que {target} encontrou um mapa do tesouro.'"
  }
  ]
  },
@@ -488,9 +475,8 @@
  "text": "{speaker} insinua: '{target} tem negócios que não podem ser feitos à luz do dia.'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} insinua: '{target} tem negócios que não podem ser feitos à luz do dia.'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} insinua: '{target} tem negócios que não podem ser feitos à luz do dia.'"
  }
  ]
  },
@@ -513,9 +499,8 @@
  "text": "{speaker} diz vago: '{target} seguiu o chamado do vento.'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} diz vago: '{target} seguiu o chamado do vento.'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} diz vago: '{target} seguiu o chamado do vento.'"
  }
  ]
  },
@@ -524,9 +509,8 @@
  "text": "{speaker} dá de ombros: '{target} foi reabastecer o estoque na cidade vizinha.'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} dá de ombros: '{target} foi reabastecer o estoque na cidade vizinha.'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} dá de ombros: '{target} foi reabastecer o estoque na cidade vizinha.'"
  }
  ]
  },
@@ -549,9 +533,8 @@
  "text": "{speaker} comenta casualmente: '{target} foi visitar a família.'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} comenta casualmente: '{target} foi visitar a família.'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} comenta casualmente: '{target} foi visitar a família.'"
  }
  ]
  },
@@ -560,9 +543,8 @@
  "text": "{speaker} aponta: '{target} saiu para pescar, eu acho.'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} aponta: '{target} saiu para pescar, eu acho.'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} aponta: '{target} saiu para pescar, eu acho.'"
  }
  ]
  },
@@ -571,9 +553,8 @@
  "text": "{speaker} diz simples: '{target} foi ao médico.'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} diz simples: '{target} foi ao médico.'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} diz simples: '{target} foi ao médico.'"
  }
  ]
  },
@@ -582,9 +563,8 @@
  "text": "{speaker} informa: '{target} está consertando o telhado de casa.'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} informa: '{target} está consertando o telhado de casa.'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} informa: '{target} está consertando o telhado de casa.'"
  }
  ]
  },
@@ -607,9 +587,8 @@
  "text": "{speaker} explica: '{target} foi resolver burocracia com a guarda.'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} explica: '{target} foi resolver burocracia com a guarda.'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} explica: '{target} foi resolver burocracia com a guarda.'"
  }
  ]
  },
@@ -618,9 +597,8 @@
  "text": "{speaker} diz: '{target} foi comprar suprimentos.'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} diz: '{target} foi comprar suprimentos.'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} diz: '{target} foi comprar suprimentos.'"
  }
  ]
  },
@@ -629,9 +607,8 @@
  "text": "{speaker} comenta: '{target} está ajudando na colheita.'",
  "script": [
  {
- "type": "speech",
- "text": "{speaker} comenta: '{target} está ajudando na colheita.'",
- "speaker": "Fofoca"
+ "type": "narration",
+ "text": "{speaker} comenta: '{target} está ajudando na colheita.'"
  }
  ]
  }

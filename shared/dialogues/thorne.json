@@ -241,7 +241,7 @@
  },
  "hero_welcome": {
  "text": [
- "Olha quem voltou! O herói de Valdoria! Aris não para de falar de você.",
+ "Olha quem voltou! O salvador de Valdoria! Aris não para de falar de você.",
  "Minha forja está sempre aberta para você, amigo. O que precisa?",
  "Graças a você, esta oficina tem vida novamente. Como posso ajudar?",
  "Aço especial para um cliente especial! Escolha o que quiser."
@@ -300,7 +300,7 @@
  },
  {
  "type": "narration",
- "text": "O herói de Valdoria!"
+ "text": "O salvador de Valdoria!"
  },
  {
  "type": "narration",
