@@ -10,7 +10,7 @@
  *
  * MAPA_IA:
  *   ~30   _SVC_CONFIG_TEMPLE (faction temple + reactions canonical)
- *   ~55   ALDRIC_DIALOGUE (greeting principal — Padre Aldric)
+ *   ~55   BREVON_DIALOGUE (greeting principal — Padre Brevon)
  *   ~80   SERVICE_DIALOGUES_TEMPLE (6 dialogues PADRAO_ALDRIC inline)
  *   ~280  TEMPLE_CB_TO_DIALOGUE (backend cb → dialogue key map)
  *   ~260  TEMPLE_SVC_WEBP (svc icon WebP por sid — CY3)
@@ -36,32 +36,32 @@
       faction: 'temple',
       factionLabel: 'Templo dos Quatro',
       reactions: {
-        very_negative: 'Padre Aldric baixa o olhar lentamente, expressão grave. <i>(faz o sinal sagrado)</i> "Que os Quatro tenham piedade da tua alma. Vai em paz — mas o Templo já não te chama de irmão."',
-        negative: 'Padre Aldric suspira longo. <i>(toca o símbolo sagrado no peito)</i> "Há quem se afaste dos deuses sem perceber. Reflete sobre teus atos — sempre há tempo de retornar ao caminho."',
-        neutral: 'Padre Aldric mantém olhar paciente, indecifrável. <i>(volta às orações)</i> "Que tua jornada seja iluminada."',
-        positive: 'Padre Aldric assente com aprovação contida. <i>(traça o sinal de bênção em tua testa)</i> "Os Quatro caminham contigo, irmão. Que a luz dos vitrais te guie até o próximo retorno."',
-        very_positive: 'Padre Aldric inclina-se, primeira reverência em meses. <i>(coloca uma mão sobre teu ombro)</i> "Palavras como essas honram o Santuário. Tens a graça dos Quatro — e o respeito de seu mais velho servo."'
+        very_negative: 'Padre Brevon baixa o olhar lentamente, expressão grave. <i>(faz o sinal sagrado)</i> "Que os Quatro tenham piedade de sua alma. Vá em paz — mas o Templo já não chama você de irmão."',
+        negative: 'Padre Brevon suspira longo. <i>(toca o símbolo sagrado no peito)</i> "Há quem se afaste dos deuses sem perceber. Reflita sobre seus atos — sempre há tempo de retornar ao caminho."',
+        neutral: 'Padre Brevon mantém olhar paciente, indecifrável. <i>(volta às orações)</i> "Que sua jornada seja iluminada."',
+        positive: 'Padre Brevon assente com aprovação contida. <i>(traça o sinal de bênção em sua testa)</i> "Os Quatro caminham com você, irmão. Que a luz dos vitrais guie você até o próximo retorno."',
+        very_positive: 'Padre Brevon inclina-se, primeira reverência em meses. <i>(coloca uma mão sobre seu ombro)</i> "Palavras como essas honram o Santuário. Você tem a graça dos Quatro — e o respeito de seu mais velho servo."'
       },
       confirmMsgs: {
-        narration: 'Padre Aldric move-se até o altar e acende uma vela votiva em teu nome. <i>(murmura uma prece em língua antiga)</i>',
-        generic: '"Os Quatro recebem tua oferta. Que tua jornada seja bendita." <i>(traça o sinal sagrado entre vocês)</i>'
+        narration: 'Padre Brevon move-se até o altar e acende uma vela votiva em seu nome. <i>(murmura uma prece em língua antiga)</i>',
+        generic: '"Os Quatro recebem sua oferta. Que sua jornada seja bendita." <i>(traça o sinal sagrado entre vocês)</i>'
       }
     };
   }
 })();
 
-/* === ALDRIC_DIALOGUE (greeting principal — opens on NPC row click) ====== */
-var ALDRIC_DIALOGUE = {
+/* === BREVON_DIALOGUE (greeting principal — opens on NPC row click) ====== */
+var BREVON_DIALOGUE = {
   npc: {
-    name: 'Padre Aldric',
+    name: 'Padre Brevon',
     desc: 'Sumo Sacerdote · trinta anos servindo o Templo dos Quatro',
-    portrait: '../shared/img/npcs/padre-aldric.webp'
+    portrait: '../shared/img/npcs/padre-brevon.webp'
   },
   script: [
-    { type: 'narration', text: 'O salão do Templo de Valdoria respira em paz solene. Vitrais redondos onde sol e lua se entrelaçam projetam discos de luz dourada e prateada sobre o mármore antigo. Diante do altar principal, Padre Aldric — vestes de linho branco bordadas em fio de ouro, barba grisalha, terço de contas de âmbar nas mãos — ergue os olhos da oração em silêncio. Ele te reconhece. Sorri.' },
-    { type: 'speech', speaker: 'Padre Aldric', text: 'Bem-vindo ao Santuário dos Quatro, irmão. <i>(fecha o terço com gesto reverente)</i> Que os deuses te guiem em tua jornada. O Templo está aberto a todos — sejam eles peregrinos, doentes, ou apenas almas em busca de paz.' },
-    { type: 'speech', speaker: 'Padre Aldric', text: 'O Santuário oferece quatro grandes dons. <i>(estende a mão indicando os altares)</i> Cura para o corpo, bênçãos para a jornada, oração para o espírito, e — quando a hora chegar — confissão para a alma. Cada um tem seu preço; nenhum tem seu valor verdadeiro em moedas.' },
-    { type: 'speech', speaker: 'Padre Aldric', text: 'O que te traz hoje ao Templo, irmão? <i>(entrelaça as mãos sobre o terço)</i> Conta-me — e que os Quatro nos ouçam.' }
+    { type: 'narration', text: 'O salão do Templo de Valdoria respira em paz solene. Vitrais redondos onde sol e lua se entrelaçam projetam discos de luz dourada e prateada sobre o mármore antigo. Diante do altar principal, Padre Brevon — vestes de linho branco bordadas em fio de ouro, barba grisalha, terço de contas de âmbar nas mãos — ergue os olhos da oração em silêncio. Ele reconhece você. Sorri.' },
+    { type: 'speech', speaker: 'Padre Brevon', text: 'Bem-vindo ao Santuário dos Quatro, irmão. <i>(fecha o terço com gesto reverente)</i> Que os deuses guiem você em sua jornada. O Templo está aberto a todos — sejam eles peregrinos, doentes, ou apenas almas em busca de paz.' },
+    { type: 'speech', speaker: 'Padre Brevon', text: 'O Santuário oferece quatro grandes dons. <i>(estende a mão indicando os altares)</i> Cura para o corpo, bênçãos para a jornada, oração para o espírito, e — quando a hora chegar — confissão para a alma. Cada um tem seu preço; nenhum tem seu valor verdadeiro em moedas.' },
+    { type: 'speech', speaker: 'Padre Brevon', text: 'O que traz você hoje ao Templo, irmão? <i>(entrelaça as mãos sobre o terço)</i> Me conte — e que os Quatro nos ouçam.' }
   ],
   choices: [
     { id: 'heal',    label: '"Preciso de cura."', cb: 'heal' },
@@ -81,42 +81,42 @@ var SERVICE_DIALOGUES_TEMPLE = {
       portrait: '../shared/img/npcs/irma-elara.webp'
     },
     script: [
-      { type: 'narration', text: 'Irmã Elara vem ao teu encontro com passos calmos. As vestes de linho azul-celeste — cor de céu antes do amanhecer — flutuam suaves contra o piso de mármore. Ela carrega uma bacia de água benta numa mão, e sob a outra, atadores de seda branca. Olhos castanhos quentes te observam com a paciência maternal de quem cura há décadas.' },
-      { type: 'speech', speaker: 'Irmã Elara', text: 'Mostre-me onde dói, irmão. <i>(coloca a bacia sobre uma pedra plana, pega tua mão com firmeza gentil)</i> Os Quatro ouvem mesmo o suspiro do mais humilde — e a magia divina não pergunta dívidas antes de fluir. Cura Maior, dois dados de oito mais Sabedoria.' }
+      { type: 'narration', text: 'Irmã Elara vem ao seu encontro com passos calmos. As vestes de linho azul-celeste — cor de céu antes do amanhecer — flutuam suaves contra o piso de mármore. Ela carrega uma bacia de água benta numa mão, e sob a outra, atadores de seda branca. Olhos castanhos quentes te observam com a paciência maternal de quem cura há décadas.' },
+      { type: 'speech', speaker: 'Irmã Elara', text: 'Mostre-me onde dói, irmão. <i>(coloca a bacia sobre uma pedra plana, pega sua mão com firmeza gentil)</i> Os Quatro ouvem mesmo o suspiro do mais humilde — e a magia divina não pergunta dívidas antes de fluir. Cura Maior, dois dados de oito mais Sabedoria.' }
     ],
     choices: [
       // task #64 (2026-05-20) — backend_cb canonical: temple_services.py:46 "temple_pay_<service>"
       // task #84 (2026-05-20): resultText específico por serviço — cohesão.
       { id: 'h_cure',  label: 'Cura de Ferimentos · 1º círculo · 30V · 1d8+3', cb: 'heal-confirm', backend_cb: 'temple_pay_heal',
-        resultNarration: 'Irmã Elara coloca as mãos sobre teus ferimentos. Uma luz dourada e morna pulsa de suas palmas.',
+        resultNarration: 'Irmã Elara coloca as mãos sobre seus ferimentos. Uma luz dourada e morna pulsa de suas palmas.',
         resultText: '"Os Quatro escutam." <i>(murmura prece de cura)</i> <b>+1d8+3 HP recuperado.</b> "Que o sangue circule e a carne se feche, em nome da Mãe-Auroral."' },
       { id: 'h_mass',  label: 'Cura em Massa · 5º círculo · 80V · 3d8+4 (6 alvos)', cb: 'heal-confirm', backend_cb: 'temple_pay_mass_cure',
         resultNarration: 'Irmã Elara ergue ambas as mãos. Uma onda dourada se expande do altar — atinge todos os feridos ao alcance.',
         resultText: '"Magia de quinto círculo, dom dos Quatro." <i>(voz firme em ritual)</i> <b>+3d8+4 HP em até 6 alvos.</b> "Sejam todos restaurados — corpo, espírito, e o juramento que os trouxe aqui."' },
       { id: 'h_pray',  label: 'Tentar prece pessoal · Religião DC 14', check: { skill: 'religion', dc: 14 },
-        resultNarration: 'Ajoelhas diante do altar. As velas oscilam — e por um instante a luz dos vitrais pousa sobre teus ombros como um manto.',
-        resultText: '"Os Quatro ouviram." <i>(Elara inclina a cabeça, sem surpresa)</i> "Eles não respondem em palavras — respondem em caminhos. Mantém os olhos abertos na próxima encruzilhada, irmão."',
+        resultNarration: 'Você se ajoelha diante do altar. As velas oscilam — e por um instante a luz dos vitrais pousa sobre seus ombros como um manto.',
+        resultText: '"Os Quatro ouviram." <i>(Elara inclina a cabeça, sem surpresa)</i> "Eles não respondem em palavras — respondem em caminhos. Mantenha os olhos abertos na próxima encruzilhada, irmão."',
         resultNarrationFail: 'As palavras da prece saem truncadas, fora de ordem. As velas queimam, indiferentes.',
-        resultTextFail: '"Não te aflijas." <i>(Elara reacende a vela que apagou)</i> "Prece torta de coração reto vale mais que salmo perfeito de boca vazia. Volta quando a alma estiver quieta."' },
+        resultTextFail: '"Não se aflija." <i>(Elara reacende a vela que apagou)</i> "Prece torta de coração reto vale mais que salmo perfeito de boca vazia. Volte quando a alma estiver quieta."' },
       { id: 'back',    label: '"Outra hora."', cb: 'close' }
     ]
   },
 
   cure_poison: {
-    npc: ALDRIC_DIALOGUE.npc,
+    npc: BREVON_DIALOGUE.npc,
     script: [
-      { type: 'narration', text: 'Padre Aldric pede que te sentes no banco de pedra ao lado do altar. Ele acende ervas secas num pequeno braseiro de bronze — fumaça branca e adocicada se ergue, ondulando contra os vitrais. Murmura uma prece em língua antiga enquanto coloca a palma da mão sobre tua testa.' },
-      { type: 'speech', speaker: 'Padre Aldric', text: 'Veneno é traição da natureza — o corpo se torna inimigo de si mesmo. <i>(traça o sinal sagrado em tua testa)</i> Purificação Menor, magia de segundo círculo, quarenta Valdoritas. Em cinco minutos, o veneno se torna mais leve que a fumaça.' }
+      { type: 'narration', text: 'Padre Brevon pede que você se sente no banco de pedra ao lado do altar. Ele acende ervas secas num pequeno braseiro de bronze — fumaça branca e adocicada se ergue, ondulando contra os vitrais. Murmura uma prece em língua antiga enquanto coloca a palma da mão sobre sua testa.' },
+      { type: 'speech', speaker: 'Padre Brevon', text: 'Veneno é traição da natureza — o corpo se torna inimigo de si mesmo. <i>(traça o sinal sagrado em sua testa)</i> Purificação Menor, magia de segundo círculo, quarenta Valdoritas. Em cinco minutos, o veneno se torna mais leve que a fumaça.' }
     ],
     choices: [
       { id: 'p_pay',   label: 'Pagar 40V — purificar veneno', cb: 'cure_poison-confirm', backend_cb: 'temple_pay_cure_poison',
-        resultNarration: 'Padre Aldric ergue o braseiro acima de tua cabeça. A fumaça branca encurva-se ao redor — atraída pelo veneno em teu sangue.',
-        resultText: '"Veneno purificado, em nome do Pai-da-Aurora." <i>(traça o sinal sagrado em tua testa)</i> <b>Condição Envenenado removida.</b> "Vai com cuidado — a próxima dose vai exigir mais que prata."' },
+        resultNarration: 'Padre Brevon ergue o braseiro acima de sua cabeça. A fumaça branca encurva-se ao redor — atraída pelo veneno em seu sangue.',
+        resultText: '"Veneno purificado, em nome do Pai-da-Aurora." <i>(traça o sinal sagrado em sua testa)</i> <b>Condição Envenenado removida.</b> "Vá com cuidado — a próxima dose vai exigir mais que prata."' },
       { id: 'p_persuade', label: '"Há quem pague isso?" · Persuasão DC 15', check: { skill: 'persuasion', dc: 15 },
-        resultNarration: 'Padre Aldric corre os olhos pelo salão vazio — e a postura solene cede um dedo.',
+        resultNarration: 'Padre Brevon corre os olhos pelo salão vazio — e a postura solene cede um dedo.',
         resultText: '"Entre nós, irmão? <i>(meia voz)</i> Os nobres pagam o dobro da tabela para furar a fila das bênçãos. É desse ouro que sai o pão de quem não paga nada. Os Quatro perdoam a aritmética."',
         resultNarrationFail: 'A expressão do sacerdote volta a ser pedra de altar: polida, fria, sem fissuras.',
-        resultTextFail: '"O Templo não discute suas contas. <i>(une as mãos)</i> Cada moeda tem destino santo. Se o valor te pesa, os Quatro também aceitam teu trabalho como oferta."' },
+        resultTextFail: '"O Templo não discute suas contas. <i>(une as mãos)</i> Cada moeda tem destino santo. Se o valor pesa para você, os Quatro também aceitam seu trabalho como oferta."' },
       { id: 'back',    label: '"Outra hora."', cb: 'close' }
     ]
   },
@@ -129,20 +129,20 @@ var SERVICE_DIALOGUES_TEMPLE = {
     },
     script: [
       { type: 'narration', text: 'Theron tem dezesseis anos, talvez dezessete — magro, espinhento, vestido com manto branco de iniciado que ainda lhe fica largo nos ombros. Quando você se aproxima, ele endireita-se nervoso, força um sorriso forçado, e tenta parecer mais experiente do que é.' },
-      { type: 'speech', speaker: 'Acólito Theron', text: 'B-bênção da Clareza, irmão! <i>(consulta um pergaminho dobrado, depois enrola apressado)</i> A Irmã Elara me ensinou ontem. Magia de primeiro círculo, concentração, vinte e cinco Valdoritas. Adiciona um dado de quatro a teus ataques e tuas salvaguardas, por um minuto.' }
+      { type: 'speech', speaker: 'Acólito Theron', text: 'B-bênção da Clareza, irmão! <i>(consulta um pergaminho dobrado, depois enrola apressado)</i> A Irmã Elara me ensinou ontem. Magia de primeiro círculo, concentração, vinte e cinco Valdoritas. Adiciona um dado de quatro aos seus ataques e às suas salvaguardas, por um minuto.' }
     ],
     choices: [
       { id: 'b_pay',   label: 'Pagar 25V — Bênção (+1d4 atk/save 1min)', cb: 'bless-confirm', backend_cb: 'temple_pay_bless', renownDelta: 1,
-        resultNarration: 'Theron sussurra a prece três vezes — uma pra cada Quatro menos o Silencioso. Uma luz pálida pousa sobre teus ombros.',
+        resultNarration: 'Theron sussurra a prece três vezes — uma pra cada Quatro menos o Silencioso. Uma luz pálida pousa sobre seus ombros.',
         resultText: '"P-pronto! <i>(suspira aliviado)</i> Pela primeira vez deu certo!" <b>+1d4 em ataques e salvaguardas por 1 minuto (até 3 rolagens).</b>' },
       { id: 'b_guide', label: 'Orientação · 5V · +1d4 perícia única', cb: 'bless-confirm', backend_cb: 'temple_pay_guidance', renownDelta: 1,
-        resultNarration: 'Theron passa o polegar úmido sobre tua testa, deixando um sinal que reluz brevemente.',
+        resultNarration: 'Theron passa o polegar úmido sobre sua testa, deixando um sinal que reluz brevemente.',
         resultText: '"O-orientação, irmão. <i>(pisca esperançoso)</i> Funciona uma vez só, depois passa. Mas funciona bem!" <b>+1d4 na próxima perícia que tentar.</b>' },
       { id: 'b_persuade', label: '"Bênção a um irmão?" · Persuasão DC 13', check: { skill: 'persuasion', dc: 13 },
         resultNarration: 'Theron olha por cima do ombro duas vezes antes de molhar o polegar no óleo sagrado.',
-        resultText: '"S-só desta vez, tá? <i>(traça o sinal rápido na tua testa)</i> Se o Padre perguntar, foi treino. Os Quatro não cobram de quem chega de mãos vazias... mas eu levo bronca."',
+        resultText: '"S-só desta vez, tá? <i>(traça o sinal rápido na sua testa)</i> Se o Padre perguntar, foi treino. Os Quatro não cobram de quem chega de mãos vazias... mas eu levo bronca."',
         resultNarrationFail: 'Theron recua meio passo, as orelhas vermelhas. A coragem do acólito tem limites bem mapeados.',
-        resultTextFail: '"N-não posso! <i>(sussurro aflito)</i> O óleo é contado, o Padre confere o frasco toda noite. Volta com cinco Valdoritas — a Orientação é baratinha, juro."' },
+        resultTextFail: '"N-não posso! <i>(sussurro aflito)</i> O óleo é contado, o Padre confere o frasco toda noite. Volte com cinco Valdoritas — a Orientação é baratinha, juro."' },
       { id: 'back',    label: '"Outra hora."', cb: 'close' }
     ]
   },
@@ -154,15 +154,15 @@ var SERVICE_DIALOGUES_TEMPLE = {
       portrait: '../shared/img/npcs/sacerdotisa-miriel.webp'
     },
     script: [
-      { type: 'narration', text: 'Sacerdotisa Miriel não te recebe no salão principal — ela te conduz a uma câmara lateral selada por símbolos dourados. As paredes pulsam suavemente com runas em níveis quase imperceptíveis. Miriel tira o véu de prata da cabeça e olha direto nos teus olhos.' },
-      { type: 'speech', speaker: 'Sacerdotisa Miriel', text: 'Maldição é parasita de alma. <i>(traça runas no ar com o indicador)</i> Remover Maldição, terceiro círculo, noventa Valdoritas. Vai doer mais que o corte que a recebeu — mas em dez minutos serás livre.' }
+      { type: 'narration', text: 'Sacerdotisa Miriel não te recebe no salão principal — ela te conduz a uma câmara lateral selada por símbolos dourados. As paredes pulsam suavemente com runas em níveis quase imperceptíveis. Miriel tira o véu de prata da cabeça e olha direto nos seus olhos.' },
+      { type: 'speech', speaker: 'Sacerdotisa Miriel', text: 'Maldição é parasita de alma. <i>(traça runas no ar com o indicador)</i> Remover Maldição, terceiro círculo, noventa Valdoritas. Vai doer mais que o corte que a recebeu — mas em dez minutos você estará livre.' }
     ],
     choices: [
       { id: 'rc_pay', label: 'Pagar 90V — Remover Maldição', cb: 'remove_curse-confirm', backend_cb: 'temple_pay_remove_curse', renownDelta: 2,
-        resultNarration: 'Miriel sela a câmara com runas douradas no chão. Tua pele formiga — depois queima. As runas pulsam em sincronia com teu coração.',
-        resultText: '"Quem te amaldiçoou foi habilidoso, mas todo nó pode ser desfeito." <i>(traça o último símbolo)</i> <b>Maldição removida.</b> "Cuida pra não cruzar com quem te marcou — segunda vez a magia custa o dobro."' },
+        resultNarration: 'Miriel sela a câmara com runas douradas no chão. Sua pele formiga — depois queima. As runas pulsam em sincronia com seu coração.',
+        resultText: '"Quem amaldiçoou você foi habilidoso, mas todo nó pode ser desfeito." <i>(traça o último símbolo)</i> <b>Maldição removida.</b> "Cuide para não cruzar com quem marcou você — segunda vez a magia custa o dobro."' },
       { id: 'rc_arcana', label: '"Que tipo de maldição?" · Arcana DC 15', check: { skill: 'arcana', dc: 15 },
-        resultNarration: 'Os termos arcanos saem precisos da tua boca — e o olhar de Miriel muda de sacerdotisa para colega de ofício.',
+        resultNarration: 'Os termos arcanos saem precisos da sua boca — e o olhar de Miriel muda de sacerdotisa para colega de ofício.',
         resultText: '"Estudaste. <i>(baixa a voz)</i> As piores que cruzam estas portas são as de vínculo — agarram-se a um objeto querido e bebem do dono devagar. Se um dia teus pertences pesarem mais que o costume, não esperes para me procurar."',
         resultNarrationFail: 'Os termos se embaralham na tua língua. Miriel ergue a mão antes de a frase terminar.',
         resultTextFail: '"Quem confunde hex com mau agouro precisa de menos perguntas e mais leitura. <i>(sorri sem deboche)</i> Traz o objeto, se houver objeto. O resto é conversa de taverna."' },
@@ -212,17 +212,17 @@ var SERVICE_DIALOGUES_TEMPLE = {
   },
 
   confess: {
-    npc: ALDRIC_DIALOGUE.npc,
+    npc: BREVON_DIALOGUE.npc,
     script: [
-      { type: 'narration', text: 'Padre Aldric te conduz à pequena sala de confissão atrás do altar. Apenas dois bancos de madeira escura, uma vela única, e um símbolo dos Quatro entalhado na parede. Ele se senta, fecha os olhos, espera. Quando finalmente falas, ele apenas escuta — paciente, sem julgar.' },
-      { type: 'speech', speaker: 'Padre Aldric', text: 'Os Quatro já sabem, irmão. <i>(suspira longo)</i> Sempre souberam. A confissão não é pra eles, é pra ti. Vais carregar trinta dias de bênção — a alma mais leve faz teu corpo mais ágil. Vantagem em salvaguardas de Sabedoria. Três Valdoritas como oferta — ou dez, e o Santuário se lembrará de ti. Vai em paz.' }
+      { type: 'narration', text: 'Padre Brevon te conduz à pequena sala de confissão atrás do altar. Apenas dois bancos de madeira escura, uma vela única, e um símbolo dos Quatro entalhado na parede. Ele se senta, fecha os olhos, espera. Quando finalmente falas, ele apenas escuta — paciente, sem julgar.' },
+      { type: 'speech', speaker: 'Padre Brevon', text: 'Os Quatro já sabem, irmão. <i>(suspira longo)</i> Sempre souberam. A confissão não é pra eles, é pra ti. Vais carregar trinta dias de bênção — a alma mais leve faz teu corpo mais ágil. Vantagem em salvaguardas de Sabedoria. Três Valdoritas como oferta — ou dez, e o Santuário se lembrará de ti. Vai em paz.' }
     ],
     choices: [
       { id: 'c_pay',    label: 'Pagar 3V — Confissão (bênção 30 dias)', cb: 'confess-confirm', backend_cb: 'temple_pay_confess_humble', renownDelta: 1,
-        resultNarration: 'Padre Aldric abençoa três velas — uma pra cada Quatro presente. Depois sopra a primeira pra liberar tua alma.',
+        resultNarration: 'Padre Brevon abençoa três velas — uma pra cada Quatro presente. Depois sopra a primeira pra liberar tua alma.',
         resultText: '"Vai em paz, irmão." <i>(traça o sinal sobre tua testa)</i> <b>Vantagem em salvaguardas de Sabedoria por 30 dias.</b> "Volta sempre que precisar — a porta do confessionário não se fecha pra ninguém."' },
       { id: 'c_donate', label: 'Pagar 10V — Confissão + reputação', cb: 'confess-confirm', backend_cb: 'temple_pay_confess_devout', renownDelta: 3,
-        resultNarration: 'Padre Aldric abre o cofrinho do Santuário e deposita as moedas com gesto cuidadoso. Depois te abençoa com prece dobrada.',
+        resultNarration: 'Padre Brevon abre o cofrinho do Santuário e deposita as moedas com gesto cuidadoso. Depois te abençoa com prece dobrada.',
         resultText: '"Tua oferta é lembrada, e tua alma, igual." <i>(faz o sinal duas vezes)</i> <b>Vantagem em saves WIS 30 dias + reconhecimento entre os clérigos. +3 Renome do Templo.</b> "O Sumo-Sacerdote saberá teu nome."' },
       { id: 'back',     label: '"Outra hora."', cb: 'close' }
     ]
@@ -327,15 +327,15 @@ function _tmpBuildCenario(data) {
   return cenarioEl;
 }
 
-/* === NPC row canonical (.row-npc — Padre Aldric main entry) =============== */
+/* === NPC row canonical (.row-npc — Padre Brevon main entry) =============== */
 function _tmpBuildNpcRow(data) {
   var row = vCity.el('div', 'row-npc');
 
   // Portrait
   var portraitWrap = vCity.el('div', 'npc-portrait');
   var img = vCity.el('img');
-  img.src = '../shared/img/npcs/padre-aldric.webp';
-  img.alt = 'Padre Aldric';
+  img.src = '../shared/img/npcs/padre-brevon.webp';
+  img.alt = 'Padre Brevon';
   img.loading = 'lazy';
   img.onerror = function(){ this.style.display = 'none'; };
   portraitWrap.appendChild(img);
@@ -344,7 +344,7 @@ function _tmpBuildNpcRow(data) {
   // Info (nome + quote)
   var info = vCity.el('div', 'npc-info');
   var name = vCity.el('div', 'name');
-  name.textContent = 'Padre Aldric';
+  name.textContent = 'Padre Brevon';
   info.appendChild(name);
   var quote = vCity.el('div', 'quote');
   quote.textContent = '"Bem-vindo ao Santuário dos Quatro, irmão."';
@@ -356,20 +356,20 @@ function _tmpBuildNpcRow(data) {
   chev.textContent = '›';
   row.appendChild(chev);
 
-  // Click → diálogo do Padre Aldric.
+  // Click → diálogo do Padre Brevon.
   row.addEventListener('click', function(){
     window._SVC_CONFIG = window._SVC_CONFIG_TEMPLE;
     // PADRAO_SERVIDOR (2026-07-02): REMOTE abre a saudação SERVER-DRIVEN (venue=temple,
     // node=aldric) — rotativa + lore dos Quatro; as escolhas de serviço roteiam pelos
     // diálogos ricos existentes (cura/bênção/confissão/oferta) via transition:action
-    // → temple_dialogue_<sid>. LOCAL (file://) cai no ALDRIC_DIALOGUE client (dev tool).
+    // → temple_dialogue_<sid>. LOCAL (file://) cai no BREVON_DIALOGUE client (dev tool).
     if (typeof window._openCityDialogue === 'function'
         && typeof window._isRemote === 'function' && window._isRemote()) {
       window._openCityDialogue('temple', 'aldric');
       return;
     }
     if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
-      window.vEncounter.render(ALDRIC_DIALOGUE, { dialogues: SERVICE_DIALOGUES_TEMPLE });
+      window.vEncounter.render(BREVON_DIALOGUE, { dialogues: SERVICE_DIALOGUES_TEMPLE });
     }
   });
 
@@ -572,7 +572,7 @@ function renderTempleHub(container, data) {
   var body = vCity.el('div', 'tmp-body');
   body.style.cssText = 'padding:8px 12px 0;display:flex;flex-direction:column;gap:7px;';
 
-  /* 2a. NPC row (Padre Aldric main entry) */
+  /* 2a. NPC row (Padre Brevon main entry) */
   body.appendChild(_tmpBuildNpcRow(data));
 
   /* 2b. Reputation bar */

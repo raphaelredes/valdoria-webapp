@@ -97,11 +97,11 @@ var MERCHANT_NPCS_MARKET = {
   },
   velithra: {
     npc: { name: 'Velithra', desc: 'Alquimista · três gerações de alquímia', portrait: '../shared/img/npcs/velithra-alquimista.webp' },
-    quote: '"Esta… só tu sabes pra que serve."',
+    quote: '"Esta… só você sabe para que serve."',
     cb: 'market_interact_menu_jeweler',
     script: [
       { type: 'narration', text: 'A barraca de Velithra é toda frascos coloridos. Estantes com vidros borbulhantes em violeta, esmeralda, rubi. Aroma denso de ervas secas, enxofre, e algo doce que faz a pele formigar.' },
-      { type: 'speech', speaker: 'Velithra', text: 'Cura simples, vinte e cinco Valdoritas. Antídoto, quarenta. Heroísmo temporário, oitenta. <i>(ergue um frasco roxo)</i> Esta… só tu sabes pra que serve. Cento e vinte, sem perguntas.' }
+      { type: 'speech', speaker: 'Velithra', text: 'Cura simples, vinte e cinco Valdoritas. Antídoto, quarenta. Heroísmo temporário, oitenta. <i>(ergue um frasco roxo)</i> Esta… só você sabe para que serve. Cento e vinte, sem perguntas.' }
     ],
     choices: [
       { id: 'potions', label: 'Ver poções', cb: 'market_interact_menu_jeweler' },

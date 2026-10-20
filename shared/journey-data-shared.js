@@ -1094,7 +1094,7 @@ var HAZARDS_EXTRA = {
       npc: { name: 'Velho Andarilho', desc: 'Eremita cego que conhece a floresta de cor', portrait: '../shared/img/npcs/velho-andarilho.webp' },
       script: [
         { type: 'narration', text: 'Um velho de barba branca caminha sozinho na trilha, bastão de madeira tateando o chão. Os olhos são leitosos — cego.' },
-        { type: 'speech', speaker: 'Velho Andarilho', text: '— Pare, viajante. <i>(a voz é serena)</i> Sinto teus passos há quinze minutos. Andas com pressa, mas sem rumo claro.' },
+        { type: 'speech', speaker: 'Velho Andarilho', text: '— Pare, viajante. <i>(a voz é serena)</i> Sinto seus passos há quinze minutos. Você anda com pressa, mas sem rumo claro.' },
         { type: 'speech', speaker: 'Velho Andarilho', text: '— A floresta me conta coisas. <b>Adiante há perigo</b> — não preciso vê-lo pra saber. Posso te indicar atalho seguro, em troca de uma palavra de gentileza ou uma moeda. Você decide.' }
       ],
       choices: [

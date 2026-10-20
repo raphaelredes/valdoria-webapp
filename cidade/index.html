@@ -14006,11 +14006,11 @@ var CITY_DISCOVERY_QUESTS = {
   q_disc_rel: { id:'q_disc_rel', name:'Os Laços que Sustentam', targetCb:'rel_main', stages:[
     { id:'s1', speaker:'Padre Brevon',
       narration:'O repicar calmo dos sinos do templo ressoa pelas pedras do adro. Padre Brevon aproxima-se com passos tranquilos e olhar acolhedor.',
-      text:'Aventureiro… percebo que ainda caminhas sozinho. Os deuses honram quem firma laços — não há feito maior que voltar pra casa com os companheiros que partiram contigo. Os teus vínculos precisam ser cultivados.',
+      text:'Aventureiro… percebo que ainda caminha sozinho. Os deuses honram quem firma laços — não há feito maior que voltar pra casa com os companheiros que partiram com você. Seus vínculos precisam ser cultivados.',
       choices:[{ label:'Como cultivo esses laços?', next:'s2' }] },
     { id:'s2', speaker:'Padre Brevon',
       narration:'Brevon indica com a mão a colunata que se abre para um pátio reservado atrás do santuário.',
-      text:'O Pavilhão dos Vínculos, atrás do templo, é onde a cidade registra os pactos de alma — quem te acompanhou, a quem deves favor, quem prometeu retornar. Anota lá, e ofereça lembranças aos que importam. Os deuses leem essas páginas.',
+      text:'O Pavilhão dos Vínculos, atrás do templo, é onde a cidade registra os pactos de alma — quem acompanhou você, a quem você deve favor, quem prometeu retornar. Anote lá, e ofereça lembranças aos que importam. Os deuses leem essas páginas.',
       choices:[{ label:'Vou ao Pavilhão.', next:'unlock' }] }
   ]},
 };
@@ -26096,22 +26096,9 @@ function _marketShowTransient(p, npc){
   // Imagens em /shared/img/npcs/{npc.id}.webp (migradas pra WebP em 2026-05-27).
   // Bug CEDWYN (misc1): o path ainda apontava .png → 404 → diálogo sem retrato.
   // Todos os transientes (misc1-5, craft1-4, exotic1-3, animal1-2, ...) são .webp.
-  var _TRANSIENT_NOMINALS = {
-    'food1': 'tomm-padeiro', 'food2': 'brog-acougueiro', 'food3': 'brunvald-taverneiro', 'food4': 'perric-cozinheiro',
-    'craft1': 'dorgan-artesao', 'craft2': 'aeryndel-arqueiro', 'craft3': 'borin-curtidor', 'craft4': 'mirael-costureira',
-    'herb1': 'ivy-herborista', 'herb2': 'verdana-druida', 'herb3': 'bramble-botanico', 'herb4': 'willow-curandeira',
-    'scout1': 'mapras-cartografo', 'scout2': 'kael-batedor', 'scout3': 'dara-exploradora', 'scout4': 'flint-cacador',
-    'merchant1': 'aldren-mercador', 'merchant2': 'zarek-raridades', 'merchant3': 'ryn-especiarias', 'merchant4': 'grivar-montanhas', 'merchant5': 'corvino-alquimia',
-    'mystic1': 'malakor-mistico', 'mystic2': 'madam-serath-vidente', 'mystic3': 'baltazar-arcano', 'mystic4': 'celestia-adivinha',
-    'exotic1': 'vestrin-sombras', 'exotic2': 'pipwick-engenhoqueiro', 'exotic3': 'valdric-colecionador', 'exotic4': 'drazhen-contrabandista', 'exotic5': 'melodis-bardo',
-    'animal1': 'kaelra-domadora', 'animal2': 'oren-tratador',
-    'misc1': 'cedwyn-livreiro', 'misc2': 'ysmara-joalheira', 'misc3': 'aldwyn-escriba', 'misc4': 'tarvek-andarilho', 'misc5': 'sevara-vidente',
-    'enchanter': 'valdren-encantador'
-  };
-  var _nomSlug = _TRANSIENT_NOMINALS[npc.id] || npc.id || 'aldeao';
-  var npcPng = '/shared/img/npcs/' + _nomSlug + '.webp';
+  var npcPng = '/shared/img/npcs/' + (npc.id || 'aldeao') + '.webp';
   var _isWebApp = location.protocol.indexOf('http') === 0;
-  if (_isWebApp) npcPng = '/shared/img/npcs/' + _nomSlug + '.webp';
+  if (_isWebApp) npcPng = '/shared/img/npcs/' + (npc.id || 'aldeao') + '.webp';
 
   // Se vEncounter disponível, usar PADRAO_ALDRIC (header + portrait + zoom)
   if (window.vEncounter && typeof window.vEncounter.render === 'function') {
@@ -26598,7 +26585,7 @@ function _buildGuildMockData(player, recruitCount){
         desc: 'Contratos de caça ativos',
         cb: 'guild_rewards_open' },
       { icon: _heralIco('ic-grupo'), label: 'Gerenciar meu grupo',
-        desc: partyCount + ' de 3 aventureiros contigo',
+        desc: partyCount + ' de 3 aventureiros com você',
         cb: 'guild_party_open',
         badge: partyCount + '/3' },
       { icon: _heralIco('ic-grupo'), label: 'Reunir Comitiva (Multiplayer)',
@@ -29333,7 +29320,7 @@ function _srvAbandonQuest(serverId){
     _showInfoPopup({
       icon: '',
       title: 'Abandonar Missão?',
-      desc: 'Tens certeza que queres abandonar <b>"' + _qTitle + '"</b>?<br><br>'
+      desc: 'Você tem certeza de que quer abandonar <b>"' + _qTitle + '"</b>?<br><br>'
           + '<span style="color:#d4574a">A missão sairá das ativas e o progresso será perdido.</span>',
       confirmLabel: 'Sim, abandonar',
       cancelLabel: 'Cancelar',
@@ -33573,27 +33560,6 @@ function _plazaPhotoFor(npc){
   var sid = npc._canonKey || npc.id || '';
   if (!sid) return null;
   var slug = String(sid).replace(/^unique_/, '');
-  var _PLAZA_NOMINALS = {
-    'vendor_brokk': 'brokk-armeiro', 'vendor_faelis': 'faelis-cartografa', 'vendor_grimshaw': 'grimshaw-alquimista',
-    'vendor_lunara': 'lunara-mistica', 'vendor_selindra': 'selindra-joalheira', 'vendor_torvik': 'torvik-sucateiro', 'vendor_zephyra': 'zephyra-herbalista',
-    'alchemist_student': 'elgoran-alquimista', 'baker_master': 'odo-padeiro', 'smith_apprentice': 'brenn-aprendiz-ferreiro',
-    'hunter_traine': 'elira-cacadora', 'cleric_acolyte': 'acolito-theron', 'fisher_old': 'garin-pescador',
-    'farmer_lost': 'tobren-fazendeiro', 'miner_gold': 'brask-garimpeiro', 'woodcutter': 'korven-lenhador',
-    'gravedigger': 'nathren-coveiro', 'librarian': 'melvyn-bibliotecaria', 'painter_visionary': 'caelus-pintor',
-    'sculptor': 'halveg-escultor', 'dancer_exotic': 'solenne-bailarina', 'juggler_fire': 'pyros-pirotecnico',
-    'snake_charmer': 'sithek-encantador', 'illusionist': 'misterio-ilusionista', 'beast_tamer': 'vordek-domador',
-    'bard_broken': 'soravel-triste', 'bardo_praca': 'caelum-trovador', 'batedor_carteira': 'pip-batedor',
-    'bebados_briga': 'gorn-e-balin-boemios', 'crianca_pomar': 'tessa-pomar', 'dono_gato': 'ronald-dono-gato',
-    'gourmet': 'korvian-cozinheiro', 'guard_veteran': 'draven-capitao', 'guarda_barricada': 'valen-guarda',
-    'mendigo_praca': 'barnabe-pedinte', 'monk_peace': 'thenlo-monge', 'noble_exile': 'valerius-nobre',
-    'orphan_doll': 'mina-orfa', 'pilgrim_lost': 'silas-peregrino', 'seer_blind': 'tessara-vidente',
-    'square_child': 'lia-crianca', 'square_circus': 'bartolomeu-circense', 'square_homeless': 'tom-andarilho',
-    'square_lyana': 'lyana-costureira-praca', 'square_wanderer': 'isolde-viajante', 'survivor_blizzard': 'mara-das-neves',
-    'survivor_wolves': 'kaelen-refugiado', 'thief_repentant': 'mao-leve-gatuno', 'velha_oculto': 'morrigan-oculto',
-    'wizard_failed': 'thumblen-mago'
-  };
-  var nom = _PLAZA_NOMINALS[slug] || _PLAZA_NOMINALS[sid];
-  if (nom) return '/shared/img/npcs/' + nom + '.webp';
   if (PLAZA_PHOTO_SLUGS.indexOf(slug) < 0) return null;
   return '/shared/img/npcs/plaza/' + slug + '.webp';
 }
@@ -47046,7 +47012,7 @@ var WNPC_DIALOGUES = {
       '"A fé nos protege, viajante. Lembre-se disso."',
       '"Os caminhos divinos são misteriosos. Talvez nosso encontro não seja acaso."',
       'Mãos unidas em oração, o viajante mal ergue o olhar.',
-      '"Paz seja contigo, estranho."'
+      '"A paz esteja com você, viajante."'
     ],
     acquaintance: [
       '"Os deuses te trouxeram de volta, {player_name}. Que bênção."',
@@ -47055,7 +47021,7 @@ var WNPC_DIALOGUES = {
     ],
     familiar: [
       '"Amigo devoto! Os sinais divinos falam de tempos difíceis pela frente."',
-      '"{player_name}, tenho uma visão para compartilhar contigo."'
+      '"{player_name}, tenho uma visão para compartilhar com você."'
     ],
     friend: [
       '"Meu irmão de fé! Recebi uma bênção que devo passar adiante."',
@@ -49569,7 +49535,7 @@ var WNPC_TRAIL_COMPANION_STEP_LINES = [
 var WNPC_TRAIL_COMPANION_DEPART_LINES = [
     "\"Aqui nossos caminhos se separam. Foi uma honra, {player}!\"",
     "\"Preciso seguir meu rumo agora. Boas estradas, {player}!\"",
-    "\"Foi bom viajar contigo. Até a próxima, {player}!\"",
+    "\"Foi bom viajar com você. Até a próxima, {player}!\"",
 ];
 
 
@@ -55878,7 +55844,7 @@ function _guildShowRecruits(p){
         _squareShowListPopup({
           stackKey: 'guild_recruits', icon: '<img src="../shared/img/npcs/mestra-tavira.webp" alt="Mestra Tavira" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', title: 'Recrutar Aliados',
           subtitle: 'Salão de Mestra Tavira', bannerImg: '../shared/img/guilda/guilda-banner.webp',
-          flavor: 'Tavira corre o dedo pela lista e fecha o livro. <i>(dá de ombros)</i> "Por ora, todo aventureiro disponível já marcha contigo. Volta mais tarde — sempre chega gente nova ao Salão."',
+          flavor: 'Tavira corre o dedo pela lista e fecha o livro. <i>(dá de ombros)</i> "Por ora, todo aventureiro disponível já marcha com você. Volte mais tarde — sempre chega gente nova ao Salão."',
           items: [], onPick: function(){}
         });
         return;
@@ -55901,8 +55867,8 @@ function _guildShowRecruits(p){
         stackKey: 'guild_recruits', icon: '<img src="../shared/img/npcs/mestra-tavira.webp" alt="Mestra Tavira" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', title: 'Recrutar Aliados',
         subtitle: 'Salão de Mestra Tavira', bannerImg: '../shared/img/guilda/guilda-banner.webp',
         flavor: (vagas > 0
-          ? 'Tavira aponta o quadro com os contratos selados. <i>(meio-sorriso)</i> "Estes estão prontos pra marchar. ' + (vagas === 1 ? 'Tens uma vaga' : 'Tens ' + vagas + ' vagas') + ' no grupo. Escolhe bem — pagas uma vez, e seguem contigo."'
-          : 'Tavira ergue os olhos do livro. <i>(suspira)</i> "Teu grupo já está completo. Dispensa alguém antes de fechar novo contrato."'),
+          ? 'Tavira aponta o quadro com os contratos selados. <i>(meio-sorriso)</i> "Estes estão prontos pra marchar. ' + (vagas === 1 ? 'Você tem uma vaga' : 'Você tem ' + vagas + ' vagas') + ' no grupo. Escolha bem — pague uma vez, e seguem com você."'
+          : 'Tavira ergue os olhos do livro. <i>(suspira)</i> "Seu grupo já está completo. Dispense alguém antes de fechar novo contrato."'),
         sectionLabel: 'Aventureiros à disposição', items: items,
         onPick: function(item){
           var it = item._it;
@@ -55937,7 +55903,7 @@ function _guildShowRecruits(p){
       stackKey: 'guild_recruits', icon: '<img src="../shared/img/npcs/mestra-tavira.webp" alt="Mestra Tavira" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', title: 'Recrutar Aliados',
       subtitle: 'Salão de Mestra Tavira',
       bannerImg: '../shared/img/guilda/guilda-banner.webp',
-      flavor: 'Tavira corre o dedo pela lista e fecha o livro. <i>(dá de ombros)</i> "Por ora, todo aventureiro disponível já marcha contigo. Volta em 12 horas — sempre chega gente nova ao Salão."',
+      flavor: 'Tavira corre o dedo pela lista e fecha o livro. <i>(dá de ombros)</i> "Por ora, todo aventureiro disponível já marcha com você. Volte em 12 horas — sempre chega gente nova ao Salão."',
       items: [], onPick: function(){}
     });
     return;
@@ -55957,8 +55923,8 @@ function _guildShowRecruits(p){
     subtitle: 'Salão de Mestra Tavira',
     bannerImg: '../shared/img/guilda/guilda-banner.webp',
     flavor: (vagas > 0
-      ? 'Tavira aponta o quadro com os contratos selados. <i>(toca o canto da boca num meio-sorriso)</i> "Estes aqui estão prontos pra marchar. ' + (vagas === 1 ? 'Tens uma vaga' : 'Tens ' + vagas + ' vagas') + ' no grupo. Escolhe bem — pagas uma vez, e seguem contigo até o fim."'
-      : 'Tavira ergue os olhos do livro. <i>(suspira)</i> "Teu grupo já está completo, aventureiro. Dispensa alguém antes de fechar novo contrato."'),
+      ? 'Tavira aponta o quadro com os contratos selados. <i>(toca o canto da boca num meio-sorriso)</i> "Estes aqui estão prontos pra marchar. ' + (vagas === 1 ? 'Você tem uma vaga' : 'Você tem ' + vagas + ' vagas') + ' no grupo. Escolha bem — pague uma vez, e seguem com você até o fim."'
+      : 'Tavira ergue os olhos do livro. <i>(suspira)</i> "Seu grupo já está completo, aventureiro. Dispense alguém antes de fechar novo contrato."'),
     sectionLabel: 'Aventureiros à disposição',
     items: items,
     onPick: function(item){
@@ -56273,7 +56239,7 @@ function _guildShowParty(p){
         stackKey: 'guild_party', icon: _heralIco('ic-grupo', null, '38px'),
         title: 'Meu Grupo (' + party.length + '/' + pmax + ')',
         subtitle: 'Salão de Mestra Tavira', bannerImg: '../shared/img/guilda/guilda-banner.webp',
-        flavor: 'Tavira aponta os nomes no registro. <i>(meio-sorriso)</i> "Eis os que marcham contigo. Toca num nome pra ver a ficha ou dispensar."',
+        flavor: 'Tavira aponta os nomes no registro. <i>(meio-sorriso)</i> "Eis os que marcham com você. Toque em um nome para ver a ficha ou dispensar."',
         sectionLabel: 'Aventureiros no grupo', items: items,
         onPick: function(item){
           var m = item._m;
@@ -56347,7 +56313,7 @@ function _guildShowParty(p){
     title: 'Meu Grupo (' + aliveAllies.length + '/3)',
     subtitle: 'Salão de Mestra Tavira',
     bannerImg: '../shared/img/guilda/guilda-banner.webp',
-    flavor: 'Tavira aponta os nomes no registro. <i>(meio-sorriso)</i> "Eis os que marcham contigo. Honram o nome da Guilda — mantém-nos vivos."',
+    flavor: 'Tavira aponta os nomes no registro. <i>(meio-sorriso)</i> "Eis os que marcham com você. Honram o nome da Guilda — mantém-nos vivos."',
     sectionLabel: 'Aventureiros no grupo',
     items: items,
     onPick: function(item){
@@ -62480,7 +62446,7 @@ var SUBSCREEN_DATA = {
   },
   'guild_recruit': {
     header: 'Recrutar Aliados',
-    flavor: 'Mestra Tavira aponta o quadro de contratos. Aventureiros prontos pra marchar contigo (máx 3 no grupo · rotação 12h).',
+    flavor: 'Mestra Tavira aponta o quadro de contratos. Aventureiros prontos para marchar com você (máx 3 no grupo · rotação 12h).',
     buttons: [
       [_heralIco('ic-guerreiro'),   'Korin — Guerreiro Nv 3',  '60 <span class="vi vi-coin sm"></span> recrut.', 'recruit_korin'],
       [_heralIco('ic-patrulheiro'), 'Lyra — Patrulheira Nv 2', '45 <span class="vi vi-coin sm"></span> recrut.', 'recruit_lyra'],
@@ -62799,7 +62765,7 @@ var SUBSCREEN_DATA = {
   // ========== SUB-SUB-SCREENS — RELATIONSHIPS (1 generic exemplo) ==========
   'rel_martha': {
     header: '<svg class="v-heraldic v-h-banner"><use href="#ic-estalajadeira"/></svg> Martha — Estalajadeira',
-    flavor: '"Tu sempre foste educada comigo. Aqui tens um quarto reservado."',
+    flavor: '"Você sempre foi gentil comigo. Aqui tem um quarto reservado."',
     npcInfo: 'Afinidade 80 — feliz | 6D: Joy 0.8, Trust 0.7, Fear 0.1, Surprise 0.2, Anger 0.0, Anticipation 0.5',
     buttons: [
       [_heralIco('ic-vínculos'), 'Conversa profunda', 'desbloquear história', 'rel_martha_deep_talk'],
@@ -62810,7 +62776,7 @@ var SUBSCREEN_DATA = {
   },
   'rel_grom': {
     header: '<svg class="v-heraldic v-h-banner"><use href="#ic-taverneiro"/></svg> Grom — Taverneiro',
-    flavor: '"Mais uma rodada? A casa não pode dar de graça, sabes."',
+    flavor: '"Mais uma rodada? A casa não pode dar de graça, você sabe."',
     npcInfo: 'Afinidade 60 — neutro | 6D: Joy 0.5, Trust 0.6, Fear 0.0, Surprise 0.1, Anger 0.2, Anticipation 0.3',
     buttons: [
       [_heralIco('ic-vínculos'), 'Conversa profunda', 'desbloq. fofocas', 'rel_grom_deep_talk'],
@@ -63249,7 +63215,7 @@ function _startLyanaEncounter(p, forceDay){
         {
           type: 'speech',
           speaker: 'Lyana',
-          text: '"Aventureiro! Meu pai retornou são e salvo das montanhas! Ele esteve aqui na Praça antes de abrir a Câmara Rúnica. Contou-me tudo sobre o frio do despenhadeiro, as runas que sangravam e como você enfrentou a terrível Sombra do Vazio para mantê-lo vivo! Nossa família tem uma dívida eterna contigo."'
+          text: '"Aventureiro! Meu pai retornou são e salvo das montanhas! Ele esteve aqui na Praça antes de abrir a Câmara Rúnica. Contou-me tudo sobre o frio do despenhadeiro, as runas que sangravam e como você enfrentou a terrível Sombra do Vazio para mantê-lo vivo! Nossa família tem uma dívida eterna com você."'
         }
       ],
       choices: [
@@ -63320,8 +63286,8 @@ function _startLyanaEncounter(p, forceDay){
       desc: 'Examinar o padrão cifrado e os detalhes arcanos da mensagem (Investigação CD 13).',
       check: { skill: 'investigation', dc: 13 },
       continueDialogue: 'approach-curious',
-      resultNarration: 'Cruzas as datas da carta com o que sabes sobre o alinhamento das luas. O padrão salta aos olhos: toda menção às runas coincide com o auge da lua nova — e o pedido do cristal veio três dias antes da próxima conjunção! O cristal não é um amuleto comum, mas uma fechadura arcanotécnica para estancar fendas.',
-      resultText: '<i>(Lyana empalidece de espanto, depois assente)</i> "Tu enxergas o que ele enxerga... Papai dizia que as runas só sangram quando algo do outro lado empurra. O cristal fecha essa passagem. Guarda este Bálsamo Restaurador contigo... e se um dia vires uma runa úmida, não a toques."',
+      resultNarration: 'Você cruza as datas da carta com o que sabe sobre o alinhamento das luas. O padrão salta aos olhos: toda menção às runas coincide com o auge da lua nova — e o pedido do cristal veio três dias antes da próxima conjunção! O cristal não é um amuleto comum, mas uma fechadura arcanotécnica para estancar fendas.',
+      resultText: '<i>(Lyana empalidece de espanto, depois assente)</i> "Você enxerga o que ele enxerga... Papai dizia que as runas só sangram quando algo do outro lado empurra. O cristal fecha essa passagem. Guarde este Bálsamo Restaurador com você... e se um dia vir uma runa úmida, não a toque."',
       resultNarrationFail: 'As linhas da carta se recusam a formar padrão claro. Datas cifradas em runeiro antigo — peças demais para decifrar às pressas na praça.',
       resultTextFail: '<i>(Lyana dobra a carta, protetora)</i> "Perdoa. Já disse mais do que devia — papai sempre pediu segredo sobre as runas. Quando ele voltar das montanhas, perguntaremos a ele."'
     },
@@ -63393,7 +63359,7 @@ function _startLyanaEncounter(p, forceDay){
       npc: LYANA_NPC_HEADER,
       script: [
         { type: 'narration', text: 'Um suspiro sereno escapa dos lábios de Lyana. O alívio de saber que Eirik está vivo ilumina a tenda de ervas.' },
-        { type: 'speech', speaker: 'Lyana', text: '"Jamais esquecerei o que fizeste por nós hoje, aventureiro. Como queres receber tua justa paga?"' }
+        { type: 'speech', speaker: 'Lyana', text: '"Jamais esquecerei o que você fez por nós hoje, aventureiro. Como quer receber tua justa paga?"' }
       ],
       choices: [
         {
@@ -65351,7 +65317,7 @@ function _abandonQuest(questId, displayName, consequencia){
     _showInfoPopup({
       icon: '',
       title: 'Abandonar Missão?',
-      desc: 'Tens certeza que queres abandonar <b>"' + (displayName || questId) + '"</b>?<br><br>'
+      desc: 'Você tem certeza de que quer abandonar <b>"' + (displayName || questId) + '"</b>?<br><br>'
           + '<span style="color:#d4574a">Consequências:</span><br>'
           + (consequencia ? '• ' + consequencia + '<br>' : '')
           + '• A missão sumirá das ativas<br>'
@@ -66468,7 +66434,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
     ],
     choices: [
       { id: 'rumor', label: '"Ouviste algum rumor interessante?"',        renown: 2 },
-      { id: 'past',  label: '"De onde vieste?"',                          renown: 0 },
+      { id: 'past',  label: '"De onde você veio?"',                          renown: 0 },
       { id: 'lift',  label: '"Pega-me algo na multidão. Discreto(a)."',
         check: { skill: 'stealth', dc: 14 },
         resultNarration: '{name} desaparece num parágrafo. Volta antes do próximo suspiro — uma bolsa de couro caída no teu cinto.',
@@ -66504,7 +66470,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
     ],
     choices: [
       { id: 'bless', label: '"Renova-me a fé antes do combate."',          renown: 2 },
-      { id: 'oath',  label: '"Conta-me como fizeste teu juramento."',      renown: 1 },
+      { id: 'oath',  label: '"Me conte como fez seu juramento."',      renown: 1 },
       { id: 'imbue', label: '"Imbui minha arma de luz sagrada."',
         check: { skill: 'religion', dc: 14 },
         resultNarration: '{name} coloca as mãos sobre tua arma. Uma luz dourada flui ao longo do gume — calma como sol de manhã.',
@@ -66575,7 +66541,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { type: 'speech', text: 'Sangue precisa correr ou apodrece. <i>(cospe casca no chão)</i> Hoje vi guardas tremendo com um pardal. Diz-me onde está o inimigo que vou já.' }
     ],
     choices: [
-      { id: 'rage',  label: '"Solta a fúria contigo no próximo combate."', renown: 2 },
+      { id: 'rage',  label: '"Solte a fúria com você no próximo combate."', renown: 2 },
       { id: 'tribe', label: '"Fala-me da tua tribo."',                     renown: 1 },
       { id: 'arm',   label: '"Queda de braço. Quem ganha paga a cerveja."',
         check: { skill: 'athletics', dc: 15 },
@@ -66631,7 +66597,7 @@ var ALLY_DIALOGUE_TEMPLATES = {
 // do aliado), renderizada ANTES de fechar. Conteúdo separado da lógica (regra
 // No Hardcoded Content). Chave: '<classe>:<choice_id>'. {name} → nome do aliado.
 var ALLY_LORE_REPLIES = {
-  'clerigo:pray':   { narration: '{name} ergue o símbolo sagrado e murmura uma litania baixa, a mão livre pousada sobre teu ombro.', speech: 'Que os Quatro firmem teu braço e suavizem tua queda. <i>(traça um sinal no ar)</i> Vai em paz — a luz caminha contigo.' },
+  'clerigo:pray':   { narration: '{name} ergue o símbolo sagrado e murmura uma litania baixa, a mão livre pousada sobre seu ombro.', speech: 'Que os Quatro firmem seu braço e suavizem sua queda. <i>(traça um sinal no ar)</i> Vá em paz — a luz caminha com você.' },
   'clerigo:ask':    { narration: '{name} acaricia o símbolo desgastado, o olhar perdido em alguma manhã antiga.', speech: 'Eu não escolhi a fé — ela me encontrou num campo de mortos, quando rezei por um e dois se levantaram. Desde então sirvo. É tudo o que sei fazer direito.' },
   'guerreiro:tactics': { narration: '{name} risca o chão com a ponta da bota, desenhando duas linhas e um círculo.', speech: 'Eu seguro a frente, tu rodeias pela direita. Quem cair, cai gritando — pra avisar o outro. Sem audácia tola. Audácia tola enche cova.' },
   'guerreiro:story':   { narration: '{name} guarda a pedra de amolar e fica em silêncio por um instante longo demais.', speech: 'Ponte de Karreth. Éramos quarenta ao amanhecer, seis ao pôr do sol. Não conto pra impressionar — conto pra tu lembrares que voltar já é vitória.' },
@@ -66641,9 +66607,9 @@ var ALLY_LORE_REPLIES = {
   'ladino:past':    { narration: '{name} dá de ombros, mas o sorriso some por um segundo.', speech: 'Vim de lugar nenhum e de toda parte. Aprendi a abrir fechaduras antes de aprender a ler. Não pergunta mais — o passado é a única coisa que ninguém me rouba.' },
   'patrulheiro:track': { narration: '{name} ajoelha-se e toca a terra, lendo marcas que teus olhos não captam.', speech: 'Posso. Três adultos, movendo-se contra o vento — espertos. Se formos hoje, vamos calados e a favor da brisa. Lobo que te fareja primeiro é lobo que te come.' },
   'patrulheiro:nature': { narration: '{name} olha pro norte, onde a linha das árvores escurece o horizonte.', speech: 'A floresta do norte é velha e tem memória. Anda por ela com respeito e ela te abriga. Anda com pressa e ela te engole. Já vi as duas coisas.' },
-  'paladino:bless': { narration: '{name} pousa a palma sobre teu peito; um calor breve e sereno atravessa a armadura.', speech: 'Que tua coragem não vacile e tua causa permaneça justa. <i>(retira a mão)</i> A luz não te fará invencível — fará-te digno. O resto é contigo.' },
+  'paladino:bless': { narration: '{name} pousa a palma sobre seu peito; um calor breve e sereno atravessa a armadura.', speech: 'Que sua coragem não vacile e sua causa permaneça justa. <i>(retira a mão)</i> A luz não fará você invencível — fará você digno. O resto é com você.' },
   'paladino:oath':  { narration: '{name} toca o símbolo no peito, e por um instante a postura fica mais ereta.', speech: 'Jurei sobre o corpo de quem eu não consegui salvar. Não foi glória — foi vergonha virando promessa. Carrego os dois desde então, lado a lado.' },
-  'bardo:inspire':  { narration: '{name} dedilha três notas que parecem firmar o ar à tua volta.', speech: 'Pronto — leva essa melodia contigo. Quando o medo apertar, lembra dela. <i>(pisca)</i> Coragem é só uma canção que a gente decide cantar mesmo desafinado.' },
+  'bardo:inspire':  { narration: '{name} dedilha três notas que parecem firmar o ar à sua volta.', speech: 'Pronto — leve essa melodia com você. Quando o medo apertar, lembre-se dela. <i>(pisca)</i> Coragem é só uma canção que a gente decide cantar mesmo desafinado.' },
   'bardo:tale':     { narration: '{name} se acomoda, e a voz baixa ganha o ritmo de quem já contou isto cem vezes.', speech: 'Uma vez derrubei um barão com uma rima. Sério. A verdade certa, no salão certo, na hora certa — derruba mais que espada. Lâmina mata um; palavra muda um reino.' },
   'druida:commune': { narration: '{name} fecha os olhos; um pardal pousa no ombro como se atendesse a um chamado.', speech: 'A terra está inquieta a oeste — algo a feriu. Não corras pra lá sem preparo. <i>(o pardal voa)</i> A natureza avisa quem sabe escutar.' },
   'druida:animal':  { narration: '{name} sorri, e por um instante há algo selvagem demais no fundo dos olhos.', speech: 'O urso, quando preciso de força. O falcão, quando preciso de distância. Mas é o lobo que sinto em casa — correr em matilha, dividir o frio. Talvez eu sempre tenha sido um.' },
@@ -66665,7 +66631,7 @@ var ALLY_LORE_REPLIES = {
 // _pickNonRepeating. {name} → nome do aliado. PADRAO_ALDRIC (narração + fala).
 var ALLY_INTRO_EXTRA = {
   clerigo: [
-    [ { type: 'narration', text: '{name} acende um toco de vela diante de um pequeno altar improvisado, a chama tremulando no vento da praça.' }, { type: 'speech', text: 'A luz é teimosa — basta uma faísca pra afastar muita treva. <i>(protege a chama com a mão)</i> Vieste buscar bênção, ou só um momento de paz antes da estrada?' } ],
+    [ { type: 'narration', text: '{name} acende um toco de vela diante de um pequeno altar improvisado, a chama tremulando no vento da praça.' }, { type: 'speech', text: 'A luz é teimosa — basta uma faísca pra afastar muita treva. <i>(protege a chama com a mão)</i> Veio buscar uma bênção, ou só um momento de paz antes da estrada?' } ],
     [ { type: 'narration', text: '{name} enrola ataduras limpas com cuidado metódico, separando-as por tamanho sobre o joelho.' }, { type: 'speech', text: 'Curar não é só rezar — é estar pronto quando a prece não basta. <i>(ergue os olhos)</i> Diz-me o que pesa em ti. Corpo ou alma, eu trato dos dois.' } ],
   ],
   guerreiro: [
@@ -66678,11 +66644,11 @@ var ALLY_INTRO_EXTRA = {
   ],
   ladino: [
     [ { type: 'narration', text: '{name} embaralha uma moeda entre os dedos, fazendo-a sumir e reaparecer sem nunca olhar pra ela.' }, { type: 'speech', text: 'Mãos ocupadas, mente afiada. <i>(a moeda some de vez)</i> Aprendi que quem observa demais é observado de volta. Tu, por exemplo — chegaste quieto. Gostei. Fala.' } ],
-    [ { type: 'narration', text: '{name} encosta-se na sombra de um toldo, de onde vê a praça inteira sem ser notado.' }, { type: 'speech', text: 'Daqui eu vejo tudo: quem rouba, quem mente, quem tem medo. <i>(sorri de lado)</i> A cidade é um livro aberto pra quem sabe ler nas entrelinhas. O que queres ler hoje?' } ],
+    [ { type: 'narration', text: '{name} encosta-se na sombra de um toldo, de onde vê a praça inteira sem ser notado.' }, { type: 'speech', text: 'Daqui eu vejo tudo: quem rouba, quem mente, quem tem medo. <i>(sorri de lado)</i> A cidade é um livro aberto pra quem sabe ler nas entrelinhas. O que quer ler hoje?' } ],
   ],
   patrulheiro: [
     [ { type: 'narration', text: '{name} testa a tensão da corda do arco contra o ouvido, ajustando-a com pequenos giros até soar certo.' }, { type: 'speech', text: 'Um arco mal-afinado erra o alvo e a vida que dependia dele. <i>(guarda o arco)</i> Tudo na natureza tem seu tom certo. Inclusive o silêncio. Que precisas?' } ],
-    [ { type: 'narration', text: '{name} esfarela uma folha seca entre os dedos e cheira o pó, o olhar voltado pro horizonte além das muralhas.' }, { type: 'speech', text: 'Carvalho do norte. O vento mudou — vem chuva em dois dias. <i>(limpa as mãos)</i> A terra fala o tempo todo; poucos param pra ouvir. Tu vieste falar de quê?' } ],
+    [ { type: 'narration', text: '{name} esfarela uma folha seca entre os dedos e cheira o pó, o olhar voltado pro horizonte além das muralhas.' }, { type: 'speech', text: 'Carvalho do norte. O vento mudou — vem chuva em dois dias. <i>(limpa as mãos)</i> A terra fala o tempo todo; poucos param pra ouvir. Você veio falar de quê?' } ],
   ],
   paladino: [
     [ { type: 'narration', text: '{name} pole o símbolo sagrado com um pano macio, em movimentos lentos e quase reverentes.' }, { type: 'speech', text: 'Mantenho-o limpo pra lembrar por que luto — fácil esquecer no meio do sangue. <i>(ergue o símbolo à luz)</i> A causa primeiro, a espada depois. Em que posso servir-te?' } ],
@@ -66701,15 +66667,15 @@ var ALLY_INTRO_EXTRA = {
     [ { type: 'narration', text: '{name} equilibra um seixo liso sobre o dorso da mão estendida, imóvel como uma estátua.' }, { type: 'speech', text: 'Pedra parada no corpo agitado, ou corpo parado na pedra agitada? <i>(o seixo nem treme)</i> A diferença é só a mente. Acalmaste a tua hoje? Fala-me o que pesa.' } ],
   ],
   barbaro: [
-    [ { type: 'narration', text: '{name} afia o gume do machado contra uma pedra com golpes longos e ritmados, faíscas saltando a cada passada.' }, { type: 'speech', text: 'Aço cego é insulto ao inimigo. <i>(testa o fio no pelo do braço)</i> Quando eu cortar, vai ser limpo e honesto. Nada de sofrimento à toa. Que queres, forasteiro?' } ],
+    [ { type: 'narration', text: '{name} afia o gume do machado contra uma pedra com golpes longos e ritmados, faíscas saltando a cada passada.' }, { type: 'speech', text: 'Aço cego é insulto ao inimigo. <i>(testa o fio no pelo do braço)</i> Quando eu cortar, vai ser limpo e honesto. Nada de sofrimento à toa. O que quer, forasteiro?' } ],
     [ { type: 'narration', text: '{name} arranca um naco de carne com os dentes e mastiga ruidosamente, encarando-te sem cerimônia.' }, { type: 'speech', text: 'Comida primeiro, conversa depois — regra da tribo. <i>(empurra um pedaço na tua direção)</i> Mas senta, divide. Quem parte o pão comigo não é mais estranho. Fala.' } ],
   ],
   feiticeiro: [
-    [ { type: 'narration', text: '{name} observa pequenas faíscas saltarem espontâneas entre os dedos, franzindo a testa como quem repreende a própria mão.' }, { type: 'speech', text: 'Quieto, ainda não te chamei. <i>(as faíscas obedecem a contragosto)</i> Tem dias que o poder tem vontade própria. Hoje está manhoso. Diz logo o que queres antes que ele se entedie.' } ],
+    [ { type: 'narration', text: '{name} observa pequenas faíscas saltarem espontâneas entre os dedos, franzindo a testa como quem repreende a própria mão.' }, { type: 'speech', text: 'Quieto, ainda não te chamei. <i>(as faíscas obedecem a contragosto)</i> Tem dias que o poder tem vontade própria. Hoje está manhoso. Diga logo o que quer antes que ele se entedie.' } ],
     [ { type: 'narration', text: '{name} aquece as mãos numa chama azul que flutua sem fonte, encolhida como quem sente um frio que não é do corpo.' }, { type: 'speech', text: 'Engraçado — faço fogo e ainda sinto frio. <i>(a chama oscila)</i> Talvez o que arde por dentro não aqueça mesmo. Enfim, basta de filosofia. Em que te sirvo?' } ],
   ],
   bruxo: [
-    [ { type: 'narration', text: '{name} traça símbolos no ar com o dedo, símbolos que brilham por um instante e somem antes que consigas decifrá-los.' }, { type: 'speech', text: 'Não tentes ler — alguns sinais olham de volta. <i>(apaga o último com a palma)</i> Falo com quem não deveria, e ouço o que não deveria. É um fardo útil. Que queres de mim?' } ],
+    [ { type: 'narration', text: '{name} traça símbolos no ar com o dedo, símbolos que brilham por um instante e somem antes que consiga decifrá-los.' }, { type: 'speech', text: 'Não tente ler — alguns sinais olham de volta. <i>(apaga o último com a palma)</i> Falo com quem não deveria, e ouço o que não deveria. É um fardo útil. O que quer de mim?' } ],
     [ { type: 'narration', text: '{name} inclina a cabeça de súbito, como quem escuta uma voz vinda de lugar nenhum, e só depois se volta pra ti.' }, { type: 'speech', text: 'Perdão — Ele às vezes fala sem ser chamado. <i>(toca o amuleto)</i> Disse que tu chegarias. Não sei se é bom sinal ou aviso. De qualquer forma: fala, estou ouvindo. Nós dois estamos.' } ],
   ],
 };
@@ -66781,7 +66747,7 @@ function _buildClientAllyTopicNode(cls, topicKey, displayName) {
   var choices = [
     {
       id: 'emp_' + topicKey,
-      label: '"Compreendo teu fardo. Podes sempre contar com meu apoio."',
+      label: '"Compreendo seu fardo. Pode sempre contar com meu apoio."',
       renownDelta: 2,
       cb: 'close',
       _replyScript: [
