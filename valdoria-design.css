@@ -2420,3 +2420,23 @@ body[data-font-size] #csp-body .desc {
   font-size: calc(var(--v-font-body, 14px) * var(--v-font-scale, 1));
   line-height: 1.6;
 }
+
+/* ── 2026-10 Mobile & WebView GPU Framebuffer Optimization ─────────────────
+   Em WebViews mobile (Android System WebView / iOS WKWebView em 1080x2400+),
+   backdrop-filter: blur() sobre canvas ou tabuleiros animados exige readback
+   de textura da GPU a cada frame (custo de 4ms a 9ms por camada).
+   Em dispositivos touch e tiers perf-lite / perf-medium, desativamos o
+   Gaussian blur mantendo os fundos escuros de alta opacidade do tema medieval. */
+html.is-mobile-webview *,
+body.perf-lite *,
+body.perf-medium * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+@media (hover: none) and (pointer: coarse) {
+  *, *::before, *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+

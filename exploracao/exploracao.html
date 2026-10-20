@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-19T23:39:32Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-20T01:37:14Z - do not edit directly, edit source -->
 
 
 
@@ -41739,6 +41739,29 @@ function applyChoiceOutcome(choice, success, total, dc) {
     S.player.xp = (S.player.xp || 0) + outcome.reward_xp;
     LOG('XP', 'outcome.reward_xp applied delta=' + outcome.reward_xp);
   }
+  // Regra do Usuário 2026-10: Itens diretos concedidos na narrativa (reward_items / reward_item)
+  var _directItems = [];
+  if (outcome.reward_items) {
+    if (Array.isArray(outcome.reward_items)) _directItems = _directItems.concat(outcome.reward_items);
+    else _directItems.push(outcome.reward_items);
+  }
+  if (outcome.reward_item) {
+    _directItems.push(outcome.reward_item);
+  }
+  for (var _dii = 0; _dii < _directItems.length; _dii++) {
+    var _dit = _directItems[_dii];
+    var _dId = (typeof _dit === 'string') ? _dit : (_dit && (_dit.item || _dit.id || _dit.item_id));
+    var _dQty = (typeof _dit === 'object' && _dit && _dit.qty) ? _dit.qty : 1;
+    if (_dId) {
+      if (typeof addItem === 'function') addItem(_dId, _dQty);
+      if (S.inventory && Array.isArray(S.inventory)) {
+        var _ex = S.inventory.find(function(it) { return it.id === _dId; });
+        if (_ex) _ex.count = (_ex.count || 1) + _dQty;
+        else S.inventory.push({ id: _dId, count: _dQty });
+      }
+      LOG('INVENTORY', 'reward_item granted: ' + _dId + ' qty=' + _dQty);
+    }
+  }
   if (typeof outcome.hp_delta === 'number' && outcome.hp_delta !== 0) {
     S.player.hp = Math.max(0, Math.min(S.player.mhp, S.player.hp + outcome.hp_delta));
   }
@@ -41973,6 +41996,19 @@ function applyChoiceOutcome(choice, success, total, dc) {
   // X-6.5.51m: gold/xp diretos (eventos procedurais)
   if (typeof outcome.gold === 'number' && outcome.gold > 0) consItems.push({ kind: 'reward', ico: '◉', text: '+' + outcome.gold + ' Valdoritas' });
   if (typeof outcome.xp === 'number' && outcome.xp > 0) consItems.push({ kind: 'reward', ico: '★', text: '+' + outcome.xp + ' XP' });
+  if (typeof outcome.reward_gold === 'number' && outcome.reward_gold > 0) consItems.push({ kind: 'reward', ico: '◉', text: '+' + outcome.reward_gold + ' Valdoritas' });
+  if (typeof outcome.reward_gold === 'number' && outcome.reward_gold < 0) consItems.push({ kind: 'penalty', ico: '◉', text: outcome.reward_gold + ' Valdoritas' });
+  if (typeof outcome.reward_xp === 'number' && outcome.reward_xp > 0) consItems.push({ kind: 'reward', ico: '★', text: '+' + outcome.reward_xp + ' XP' });
+  if (typeof _directItems !== 'undefined' && _directItems && _directItems.length) {
+    for (var _djj = 0; _djj < _directItems.length; _djj++) {
+      var _djt = _directItems[_djj];
+      var _djId = (typeof _djt === 'string') ? _djt : (_djt && (_djt.item || _djt.id || _djt.item_id));
+      var _djQty = (typeof _djt === 'object' && _djt && _djt.qty) ? _djt.qty : 1;
+      if (_djId) {
+        consItems.push({ kind: 'reward', ico: '📦', text: '+' + (_djQty > 1 ? _djQty + 'x ' : '') + _djId });
+      }
+    }
+  }
   if (outcome.hp_loss) consItems.push({ kind: 'penalty', ico: '', text: '−' + outcome.hp_loss + ' HP' });
   if (outcome.mp_loss) consItems.push({ kind: 'penalty', ico: '◆', text: '−' + outcome.mp_loss + ' MP' });
   if (outcome.exh_gain) consItems.push({ kind: 'penalty', ico: '', text: '+' + outcome.exh_gain + ' Exaustão' });
