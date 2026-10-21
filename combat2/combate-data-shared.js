@@ -1652,7 +1652,17 @@ var CHAR_CLASSES = [
                     multiAttack: 1,
                     conditionImmunities: ['charmed']
                 }
-            } }
+            } },
+        /* V1.28 (2026-10-21) — Turbilhão de Golpes / Whirlwind Attack (PHB p.93 — Patrulheiro Caçador nv 11). */
+        { n: 'Turbilhão de Golpes', ico: '🌪️', cost: 3, kind: 'attack', dmgType: 'slashing', minLevel: 11, requiresSubclass: 'hunter', whirlwindAttack: true,
+            damageSpec: { n: 1, d: 8 },
+            desc: 'Turbilhão de Golpes: usa sua ação para desferir um ataque corpo a corpo contra todas as criaturas hostis a até 1,5m (1 hex).',
+            helpDnd5e: 'Turbilhão de Golpes / Whirlwind Attack (PHB p. 93 — Patrulheiro Caçador nv 11): usa sua ação para desferir um ataque corpo a corpo contra qualquer número de criaturas hostis a até 1,5m (1 hexágono) de você, com uma rolagem de ataque e dano separada para cada alvo.' },
+        /* V1.28 (2026-10-21) — Salva de Disparos / Volley (PHB p.93 — Patrulheiro Caçador nv 11). */
+        { n: 'Salva de Disparos', ico: '🏹', cost: 3, kind: 'attack', dmgType: 'piercing', minLevel: 11, requiresSubclass: 'hunter', ranged: true, volleyAttack: true,
+            damageSpec: { n: 1, d: 8 },
+            desc: 'Salva de Disparos: dispara uma chuva de flechas contra todas as criaturas hostis a até 3m (2 hexes) do alvo inicial.',
+            helpDnd5e: 'Salva de Disparos / Volley (PHB p. 93 — Patrulheiro Caçador nv 11): usa sua ação para desferir um ataque à distância com arma contra qualquer número de criaturas a até 3m (2 hexágonos) de um ponto visível a alcance da arma, com uma jogada de ataque e dano separada para cada criatura.' }
       ] },
     { cls: 'Bardo', hp: [20, 28], ac: [13, 15], atk: [4, 5], die: 6, dex: [14, 16], ico: '', dmgMod: 2, attr: 'CHA',
       res: { type: 'energia', name: 'Inspiração', ico: '', max: 8 },
@@ -2208,6 +2218,11 @@ var CHAR_CLASSES = [
         { n: 'Metamagia: Duplicar', ico: '', cost: 3, kind: 'buff', bonus: true, minLevel: 3, desc: 'Ação bônus (PHB p.101 Feiticeiro nv 3+): próxima magia de ataque alvo único atinge 2 alvos.',
             helpDnd5e: 'Feitiço Duplicado / Twinned Spell (PHB p.102 — Feiticeiro Metamagic): gasta pontos de feitiçaria = nível da magia (mín 1). Quando lança magia alvo único, pode direcionar a segundo alvo.\nNo arena: stub como buff bônus que marca próximo ataque como vantagem + 1d6 extra (representa o "segundo alvo" condensado).\nV1.7 Sprint-17 Ronda 24 (2026-04-21 QA audit PHB p.101): adicionada flag `minLevel: 3` (PHB RAW — Feiticeiro escolhe 2 Metamagics no nv 3, nunca no nv 1-2).',
             buffSim: { id: 'metamagia_duplicar', vfx: 'arcane', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Metamagia: Duplicar', condRule: 'PHB p.101 — próxima magia alvo único atinge 2 alvos. Stub arena: vantagem + 1d6 dano no próximo ataque.', atkAdvantage: true, dmgBonusDie: { n: 1, d: 6 } } },
+        /* V1.28 (2026-10-21) — Metamagia: Magia Sutil / Subtle Spell (PHB p.102 — Feiticeiro nv 3+). */
+        { n: 'Metamagia: Magia Sutil', ico: '🤫', cost: 1, kind: 'buff', bonus: true, minLevel: 3,
+            desc: 'Metamagia: Magia Sutil (1 Ponto de Feitiçaria): conjura sem componentes verbais ou somáticos, imune a Contramágica e silêncio.',
+            helpDnd5e: 'Magia Sutil / Subtle Spell (PHB p. 102 — Feiticeiro nv 3+): gasta 1 ponto de feitiçaria para conjurar uma magia sem nenhum componente verbal ou somático. Isso impede que inimigos percebam a conjuração para reagir com Contramágica e permite conjurar sob silêncio.',
+            buffSim: { id: 'metamagia_sutil', turns: 2, subtleSpell: true, counterspellBlocked: true, dndCondition: 'Magia Sutil (imune a contramágica e silêncio)' } },
         /* V1.7 NEW (2026-04-21) — Passo Brumoso (Misty Step PHB p.260) — Feiticeiro tb tem */
         { n: 'Passo Brumoso', ico: '', cost: 2, kind: 'buff', bonus: true, minLevel: 3,
             desc: 'Ação bônus (PHB p.260 — 2º nível, nv 3+): teleport 9m — reposicionamento (vantagem próximo ataque).',
@@ -2314,12 +2329,16 @@ var CHAR_CLASSES = [
             ranged: true, reach: 12, powerWordKill: true, damageSpec: { n: 0, d: 0 },
             desc: 'Pronuncia uma palavra de poder. Se o alvo tiver 100 PV ou menos, morre instantaneamente sem teste de resistência.',
             helpDnd5e: 'Palavra de Poder: Matar / Power Word Kill (PHB p. 266 — Mago e Feiticeiro nv 17, Bruxo via Arcanum Místico): magia de 9º círculo; 1 Ação; alcance 18m (12 hexágonos). Você profere uma palavra de poder que compele uma criatura à vista a morrer instantaneamente. Se a criatura tiver 100 PV ou menos, ela MORRE na hora (sem salvaguardas). Se tiver mais de 100 PV, a magia não tem efeito.' },
-        /* V1.28 (2026-10-21) — Sobrecarga Arcana / Overchannel (PHB p.118 — Mago Evocador nv 14). */
-        { n: 'Sobrecarga Arcana', ico: '⚡', cost: 5, kind: 'attack', minLevel: 14, requiresSubclass: 'evocation',
-            dmgType: 'force', ranged: true, reach: 12, spellLevel: 5, overchannel: true,
-            damageSpec: { n: 5, d: 10, flat: 0 },
-            desc: 'Sobrecarga Arcana (PHB p.118): força o feitiço a causar o dano MÁXIMO possível de seus dados (5d10 de força).',
-            helpDnd5e: 'Sobrecarga Arcana / Overchannel (PHB p. 118 — Mago Evocador nv 14): ao lançar uma magia de evocação de dano de 1º a 5º círculo, causa o dano máximo de todos os dados da magia.' }
+        /* V1.28 (2026-10-21) — Asas de Dragão / Dragon Wings (PHB p.103 — Feiticeiro Dracônico nv 14). */
+        { n: 'Asas de Dragão', ico: '🐉', cost: 0, kind: 'buff', minLevel: 14, requiresSubclass: 'draconic', dragonWings: true,
+            desc: 'Asas de Dragão: manifesta asas de dragão que concedem velocidade de voo e +2 CA permanente por evasão aérea.',
+            helpDnd5e: 'Asas de Dragão / Dragon Wings (PHB p. 103 — Feiticeiro Dracônico nv 14): como uma ação bônus, manifesta um par de asas de dragão em suas costas, ganhando deslocamento de voo e +2 CA por evasão acrobática aérea.',
+            buffSim: { id: 'dragon_wings', turns: 100, acBonus: 2, dragonWings: true, dndCondition: 'Asas de Dragão (Voo 12m, +2 CA)' } },
+        /* V1.28 (2026-10-21) — Presença Dracônica / Draconic Presence (PHB p.103 — Feiticeiro Dracônico nv 18). */
+        { n: 'Presença Dracônica', ico: '🐉', cost: 5, kind: 'debuff', minLevel: 18, requiresSubclass: 'draconic', multiTarget: true, areaHex: 12,
+            save: { ability: 'wis' }, draconicPresence: true,
+            desc: 'Presença Dracônica: gasta 5 pontos de feitiçaria para emanar aura de 18m (12 hexes). Inimigos no raio fazem TR de Sabedoria ou ficam Amedrontados/Enfeitiçados por 1 minuto.',
+            helpDnd5e: 'Presença Dracônica / Draconic Presence (PHB p. 103 — Feiticeiro Dracônico nv 18): como uma ação, gasta 5 pontos de feitiçaria para emanar a presença aterradora ou imponente de seu ancestral dragão em uma aura de 18m (12 hexágonos). Criaturas hostis devem ser bem-sucedidas em um teste de resistência de Sabedoria contra sua CD de magia ou ficarão enfeitiçadas ou amedrontadas por 1 minuto.' }
       ] },
     /* V1.7 Stage 7 (2026-04-21) — Bruxo (PHB p.105-115): CHA caster com pact patron.
        ADAPTAÇÕES vs PHB:
