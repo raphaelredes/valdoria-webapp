@@ -902,7 +902,17 @@ var CHAR_CLASSES = [
                só DEX save area. Antes era halfDmg (stub que reduzia qualquer dano).
                Agora halfDmgDexSaveOnly: 0 dano em sucesso DEX, metade em falha DEX.
                Outros ataques (melee direto, save não-DEX) NÃO ganham redução. */
-            buffSim: { id: 'reflexos_evasivos', vfx: 'dodge', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Reflexos Evasivos', condRule: 'PHB p.96 — Evasão: 0 dano em sucesso TR DES área; metade em falha.', halfDmgDexSaveOnly: true } }
+            buffSim: { id: 'reflexos_evasivos', vfx: 'dodge', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Reflexos Evasivos', condRule: 'PHB p.96 — Evasão: 0 dano em sucesso TR DES área; metade em falha.', halfDmgDexSaveOnly: true } },
+        /* Subclasse Trapaceiro Arcano (PHB p. 98 — Arcane Trickster nv 13 e 17) */
+        { n: 'Truque Versátil', ico: '🖐️', cost: 0, bonus: true, kind: 'buff',
+            minLevel: 13, requiresSubclass: 'arcane_trickster',
+            desc: 'Ação bônus para controlar Mãos Mágicas distraindo um alvo, concedendo vantagem nos ataques contra ele.',
+            helpDnd5e: 'Truque Versátil / Versatile Trickster (PHB p. 98 — Ladino Trapaceiro Arcano nv 13): com uma ação bônus, você pode usar a mão espectral de Mãos Mágicas para distrair um alvo a 1,5m dela, ganhando vantagem nas jogadas de ataque contra ele até o fim do turno.',
+            buffSim: { id: 'truque_versatil', turns: 1, versatileTrickster: true, atkAdvantage: true, dndCondition: 'Truque Versátil (vantagem vs alvo distraído)' } },
+        { n: 'Ladrão de Magia', ico: '🎭', cost: 0, kind: 'buff', reactionOnly: true,
+            minLevel: 17, requiresSubclass: 'arcane_trickster', spellThief: true,
+            desc: 'Ladrão de Magia: reação quando alvo de magia. Força TR de conjuração: em falha, anula a magia e rouba seu conhecimento por 8 horas.',
+            helpDnd5e: 'Ladrão de Magia / Spell Thief (PHB p. 98 — Ladino Trapaceiro Arcano nv 17): reação após criatura lançar magia que o afete. Conjurador faz TR de conjuração vs CD de magias do ladino. Em falha, o efeito da magia é anulado contra você e você rouba o conhecimento da magia, impedindo o inimigo de conjurá-la e permitindo que você a lance gastando seus próprios espaços.' }
       ] },
     { cls: 'Clérigo',   hp: [24, 32], ac: [15, 17], atk: [4, 6], die: 8,  dex: [10, 12], ico: '', dmgMod: 2, attr: 'STR',
       res: { type: 'mp',      name: 'Mana',    ico: '', max: 9 },
@@ -1756,7 +1766,17 @@ var CHAR_CLASSES = [
         { n: 'Palavras Cortantes', ico: '', cost: 1, kind: 'buff', reactionOnly: true,
             desc: 'REAÇÃO (PHB p.55 — Bardo Colégio do Saber nv 3): quando inimigo rola ataque/teste, subtrai 1 dado de Inspiração (1d6/1d8/1d10/1d12 por nível) da rolagem.',
             helpDnd5e: 'Palavras Cortantes / Cutting Words (PHB p.55 — Bardo Colégio do Saber nível 3): **REAÇÃO** quando uma criatura que você possa ver em 18m faz ataque/teste de habilidade/rolagem de dano. Gasta 1 uso de Inspiração do Bardo e subtrai o dado rolado (1d6 lvl 1-4, d8 lvl 5-9, d10 lvl 10-14, d12 lvl 15+) da rolagem.\nV1.7 NEW (2026-04-21): reactionOnly:true — triggada via reaction_prompt quando NPC rola ataque contra Bardo com Inspiração disponível. Stub arena: subtrai 1d6 do d20 do atacante (representa "atrapalha o ataque").\nCusto: 1 uso de Inspiração (flavor: gasta o carisma concentrado).',
-            reactionReduce: { attackRoll: true, subtractDice: { n: 1, d: 6 }, scaleByLevel: { d8: 5, d10: 10, d12: 15 } } }
+            reactionReduce: { attackRoll: true, subtractDice: { n: 1, d: 6 }, scaleByLevel: { d8: 5, d10: 10, d12: 15 } } },
+        /* Subclasses de Bardo: Valor e Conhecimento (PHB p. 55) */
+        { n: 'Inspiração de Combate', ico: '⚔️', cost: 1, kind: 'buff', bonus: true,
+            minLevel: 3, requiresSubclass: 'valor',
+            desc: 'Inspiração de Combate (PHB p. 55 Valor nv 3): concede dado de Inspiração para somar ao dano de arma ou à CA.',
+            helpDnd5e: 'Inspiração de Combate / Combat Inspiration (PHB p. 55 — Bardo Valor nv 3): Uma criatura com dado de Inspiração Bárdica concedido por você pode rolar o dado e adicionar o resultado a uma jogada de dano com arma. Alternativamente, ao ser atingida por ataque, pode usar reação para rolar o dado e somar à CA.' },
+        { n: 'Perícia Incomparável', ico: '🎭', cost: 1, kind: 'buff', bonus: true,
+            minLevel: 14, requiresSubclass: 'lore', peerlessSkill: true,
+            desc: 'Perícia Incomparável (PHB p. 55 Conhecimento nv 14): gasta Inspiração para somar 1d10/1d12 em teste ou ataque, convertendo falhas em acertos.',
+            helpDnd5e: 'Perícia Incomparável / Peerless Skill (PHB p. 55 — Bardo do Colégio do Conhecimento nv 14): ao fazer teste ou ataque e errar, você pode gastar Inspiração Bárdica (1d10 no L14, 1d12 no L15+) para somar ao resultado e transformar falha em acerto.',
+            buffSim: { id: 'peerless_skill', turns: 1, peerlessSkill: true, dndCondition: 'Perícia Incomparável (+Inspiração no teste/ataque)' } }
       ] },
     /* V1.7 Stage 4 (2026-04-21) — Monge (PHB p.76-79): classe ausente no CHAR_CLASSES
        até esta sessão. Martial artist DEX-based com pool de Ki + Martial Arts
@@ -1807,6 +1827,31 @@ var CHAR_CLASSES = [
             desc: 'REAÇÃO (PHB p.78, nv 3+): quando atingido por ataque à distância — reduz dano em 1d10 + DEX + nível. Se reduzir a 0, pode gastar 1 Ki pra devolver.',
             helpDnd5e: 'Desviar Projéteis / Deflect Missiles (PHB p.78 — Monge nível 3): **REAÇÃO** quando atingido por ataque à distância com arma; reduz o dano em 1d10 + modificador de DES + nível de Monge.\nSe o dano zerar e for < 60m, pode gastar 1 ponto de Ki para fazer ataque à distância devolvendo o projétil (atk com prof + DEX, 1d6 + DEX).\nV1.7 NEW (2026-04-21): reactionOnly:true — triggada via reaction_prompt quando NPC acerta player Monge com ataque à distância (ranged). Stub arena: reduz dano 1d10+DEX+nível (sem devolução ativa).',
             reactionReduce: { ranged: true, reduceDice: { n: 1, d: 10 }, reduceStat: 'dex', reduceByLevel: true } },
+        /* Subclasses e Níveis Altos do Monge (PHB p. 79-80) */
+        { n: 'Técnica da Palma Aberta', ico: '✋', cost: 1, kind: 'attack', dmgType: 'bludgeoning',
+            minLevel: 3, requiresSubclass: 'open_hand', martialArtsDie: true,
+            desc: 'Técnica da Palma Aberta: manipula o Ki para derrubar o alvo Prostrado (TR DES), empurrá-lo 3 hexes (TR FOR) ou remover suas reações.',
+            helpDnd5e: 'Técnica da Palma Aberta / Open Hand Technique (PHB p. 79 — Monge Palma Aberta nv 3): Ao acertar um ataque desarmado ou Rajada de Golpes, você pode impor um efeito no alvo: 1. TR de Destreza ou cai Prostrado; 2. TR de Força ou é empurrado até 4,5m (3 hexes); 3. Fica incapaz de realizar reações até o fim do seu próximo turno.' },
+        { n: 'Passo das Sombras', ico: '🌑', cost: 0, bonus: true, kind: 'buff',
+            minLevel: 6, requiresSubclass: 'shadow',
+            desc: 'Passo das Sombras: teletransporta-se pelas sombras com ação bônus, recebendo vantagem no próximo ataque.',
+            helpDnd5e: 'Passo das Sombras / Shadow Step (PHB p. 80 — Monge das Sombras nv 6): ação bônus quando em penumbra ou escuridão para teletransportar-se até 18 metros para outro espaço desocupado em penumbra ou escuridão. Concede vantagem no primeiro ataque corpo a corpo desferido antes do término do seu turno.',
+            buffSim: { id: 'passo_sombras', turns: 1, shadowStep: true, atkAdvantage: true, dndCondition: 'Passo das Sombras (vantagem no próximo ataque)' } },
+        { n: 'Integridade Corporal', ico: '🧘', cost: 0, kind: 'heal',
+            minLevel: 6, requiresSubclass: 'open_hand', wholenessOfBody: true,
+            desc: 'Integridade Corporal: canaliza disciplina ascética para recuperar PV igual a 3 × nível de Monge (1× por descanso longo).',
+            helpDnd5e: 'Integridade Corporal / Wholeness of Body (PHB p. 79 — Monge Palma Aberta nv 6): usa uma ação para curar a si mesmo em uma quantidade de pontos de vida igual a 3 × seu nível de Monge (1× por descanso longo).',
+            healSpec: { n: 0, d: 0, flat: 0 } },
+        { n: 'Palma Trêmula', ico: '💥', cost: 3, cost_type: 'ki', kind: 'attack', dmgType: 'necrotic',
+            minLevel: 17, requiresSubclass: 'open_hand', quiveringPalm: true,
+            desc: 'Palma Trêmula: gasta 3 Ki para iniciar vibrações letais. Ao encerrá-las, o alvo faz TR de Constituição: reduz a 0 PV em falha, ou sofre 10d10 necrótico em sucesso.',
+            helpDnd5e: 'Palma Trêmula / Quivering Palm (PHB p. 79-80 — Monge Palma Aberta nv 17): ao atingir criatura desarmado, gasta 3 Ki para iniciar vibrações letais imperceptíveis. Posteriormente, usa ação para terminá-las: alvo faz TR de CON (CD 8 + prof + SAB). Falha: cai imediatamente a 0 PV! Sucesso: sofre 10d10 de dano necrótico.',
+            damageSpec: { n: 10, d: 10, flat: 0 }, save: { ability: 'con' } },
+        { n: 'Corpo Vazio', ico: '🧘', cost: 4, cost_type: 'ki', kind: 'buff',
+            minLevel: 18, emptyBody: true,
+            desc: 'Corpo Vazio: gasta 4 Ki para ficar invisível por 1 minuto e ganha resistência a todos os danos exceto força.',
+            helpDnd5e: 'Corpo Vazio / Empty Body (PHB p. 79 — Monge nv 18): com uma ação, gasta 4 pontos de Ki para se tornar invisível por 1 minuto (10 rodadas). Durante esse tempo, tem resistência a todos os tipos de dano, exceto dano de força.',
+            buffSim: { id: 'empty_body', turns: 10, emptyBody: true, invisible: true, emptyBodyResistance: true, dndCondition: 'Corpo Vazio (Invisível + Resistência universal exceto Força)' } }
       ] },
     /* V1.7 Stage 5 (2026-04-21) — Druida (PHB p.64-71): classe ausente no CHAR_CLASSES
        até esta sessão. Nature caster WIS-based. ADAPTAÇÕES vs PHB:
