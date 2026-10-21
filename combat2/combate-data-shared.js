@@ -780,7 +780,13 @@ var CHAR_CLASSES = [
         { n: 'Palavra de Poder: Matar', ico: '☠️', cost: 9, kind: 'attack', minLevel: 17,
             ranged: true, reach: 12, powerWordKill: true, damageSpec: { n: 0, d: 0 },
             desc: 'Pronuncia uma palavra de poder. Se o alvo tiver 100 PV ou menos, morre instantaneamente sem teste de resistência.',
-            helpDnd5e: 'Palavra de Poder: Matar / Power Word Kill (PHB p. 266 — Mago e Feiticeiro nv 17, Bruxo via Arcanum Místico): magia de 9º círculo; 1 Ação; alcance 18m (12 hexágonos). Você profere uma palavra de poder que compele uma criatura à vista a morrer instantaneamente. Se a criatura tiver 100 PV ou menos, ela MORRE na hora (sem salvaguardas). Se tiver mais de 100 PV, a magia não tem efeito.' }
+            helpDnd5e: 'Palavra de Poder: Matar / Power Word Kill (PHB p. 266 — Mago e Feiticeiro nv 17, Bruxo via Arcanum Místico): magia de 9º círculo; 1 Ação; alcance 18m (12 hexágonos). Você profere uma palavra de poder que compele uma criatura à vista a morrer instantaneamente. Se a criatura tiver 100 PV ou menos, ela MORRE na hora (sem salvaguardas). Se tiver mais de 100 PV, a magia não tem efeito.' },
+        /* V1.28 (2026-10-21) — Sobrecarga Arcana / Overchannel (PHB p.118 — Mago Evocador nv 14). */
+        { n: 'Sobrecarga Arcana', ico: '⚡', cost: 5, kind: 'attack', minLevel: 14, requiresSubclass: 'evocation',
+            dmgType: 'force', ranged: true, reach: 12, spellLevel: 5, overchannel: true,
+            damageSpec: { n: 5, d: 10, flat: 0 },
+            desc: 'Sobrecarga Arcana (PHB p.118): força o feitiço a causar o dano MÁXIMO possível de seus dados (5d10 de força).',
+            helpDnd5e: 'Sobrecarga Arcana / Overchannel (PHB p. 118 — Mago Evocador nv 14): ao lançar uma magia de evocação de dano de 1º a 5º círculo, causa o dano máximo de todos os dados da magia.' }
       ] },
     { cls: 'Ladino',    hp: [22, 30], ac: [14, 15], atk: [4, 6], die: 8,  dex: [16, 18], ico: '', dmgMod: 3, attr: 'DEX',
       res: { type: 'energia', name: 'Energia', ico: '', max: 6 },
@@ -2165,7 +2171,13 @@ var CHAR_CLASSES = [
         { n: 'Palavra de Poder: Matar', ico: '☠️', cost: 9, kind: 'attack', minLevel: 17,
             ranged: true, reach: 12, powerWordKill: true, damageSpec: { n: 0, d: 0 },
             desc: 'Pronuncia uma palavra de poder. Se o alvo tiver 100 PV ou menos, morre instantaneamente sem teste de resistência.',
-            helpDnd5e: 'Palavra de Poder: Matar / Power Word Kill (PHB p. 266 — Mago e Feiticeiro nv 17, Bruxo via Arcanum Místico): magia de 9º círculo; 1 Ação; alcance 18m (12 hexágonos). Você profere uma palavra de poder que compele uma criatura à vista a morrer instantaneamente. Se a criatura tiver 100 PV ou menos, ela MORRE na hora (sem salvaguardas). Se tiver mais de 100 PV, a magia não tem efeito.' }
+            helpDnd5e: 'Palavra de Poder: Matar / Power Word Kill (PHB p. 266 — Mago e Feiticeiro nv 17, Bruxo via Arcanum Místico): magia de 9º círculo; 1 Ação; alcance 18m (12 hexágonos). Você profere uma palavra de poder que compele uma criatura à vista a morrer instantaneamente. Se a criatura tiver 100 PV ou menos, ela MORRE na hora (sem salvaguardas). Se tiver mais de 100 PV, a magia não tem efeito.' },
+        /* V1.28 (2026-10-21) — Sobrecarga Arcana / Overchannel (PHB p.118 — Mago Evocador nv 14). */
+        { n: 'Sobrecarga Arcana', ico: '⚡', cost: 5, kind: 'attack', minLevel: 14, requiresSubclass: 'evocation',
+            dmgType: 'force', ranged: true, reach: 12, spellLevel: 5, overchannel: true,
+            damageSpec: { n: 5, d: 10, flat: 0 },
+            desc: 'Sobrecarga Arcana (PHB p.118): força o feitiço a causar o dano MÁXIMO possível de seus dados (5d10 de força).',
+            helpDnd5e: 'Sobrecarga Arcana / Overchannel (PHB p. 118 — Mago Evocador nv 14): ao lançar uma magia de evocação de dano de 1º a 5º círculo, causa o dano máximo de todos os dados da magia.' }
       ] },
     /* V1.7 Stage 7 (2026-04-21) — Bruxo (PHB p.105-115): CHA caster com pact patron.
        ADAPTAÇÕES vs PHB:
@@ -2353,7 +2365,19 @@ var CHAR_CLASSES = [
         { n: 'Palavra de Poder: Matar', ico: '☠️', cost: 1, kind: 'attack', minLevel: 17,
             ranged: true, reach: 12, powerWordKill: true, damageSpec: { n: 0, d: 0 },
             desc: 'Arcanum Místico (PHB p.108): pronuncia uma palavra de poder. Se o alvo tiver 100 PV ou menos, morre instantaneamente sem salvaguarda.',
-            helpDnd5e: 'Palavra de Poder: Matar / Power Word Kill (PHB p. 266, Arcanum Místico p. 108 — Bruxo nv 17): Arcanum Místico de 9º círculo; consome 1 Pacto; 1 Ação; alcance 18m (12 hexágonos). Você profere uma palavra de poder que compele uma criatura à vista a morrer instantaneamente. Se a criatura tiver 100 PV ou menos, ela MORRE na hora (sem salvaguardas). Se tiver mais de 100 PV, a magia não tem efeito.' }
+            helpDnd5e: 'Palavra de Poder: Matar / Power Word Kill (PHB p. 266, Arcanum Místico p. 108 — Bruxo nv 17): Arcanum Místico de 9º círculo; consome 1 Pacto; 1 Ação; alcance 18m (12 hexágonos). Você profere uma palavra de poder que compele uma criatura à vista a morrer instantaneamente. Se a criatura tiver 100 PV ou menos, ela MORRE na hora (sem salvaguardas). Se tiver mais de 100 PV, a magia não tem efeito.' },
+        /* V1.28 (2026-10-21) — Presença Feérica / Fey Presence (PHB p.108 — Bruxo Arquifeérico nv 1). */
+        { n: 'Presença Feérica', ico: '🧚', cost: 1, kind: 'debuff', minLevel: 1, requiresSubclass: 'archfey',
+            save: { ability: 'wis' }, multiTarget: true, areaHex: 2,
+            desc: 'Presença Feérica (PHB p.108): cubo de 3m; criaturas fazem TR Sabedoria ou ficam amedrontadas por 2 rodadas.',
+            helpDnd5e: 'Presença Feérica / Fey Presence (PHB p. 108 — Bruxo Arquifeérico nv 1): como uma ação, projeta uma presença temível e sedutora em um cubo de 3m. Criaturas devem ter sucesso em TR Sabedoria ou ficam enfeitiçadas/amedrontadas.',
+            debuffOnSaveFail: { id: 'frightened', name: 'Amedrontado', turns: 2, dndCondition: 'amedrontado' } },
+        /* V1.28 (2026-10-21) — Atirar no Inferno / Hurl Through Hell (PHB p.109 — Bruxo Corruptor nv 14). */
+        { n: 'Atirar no Inferno', ico: '🔥', cost: 0, kind: 'attack', minLevel: 14, requiresSubclass: 'fiend',
+            dmgType: 'psychic', hurlThroughHell: true,
+            damageSpec: { n: 10, d: 10, flat: 0 },
+            desc: 'Atirar no Inferno (PHB p.109): ao acertar, bane o alvo pelos Planos Inferiores; ao retornar sofre 10d10 psíquico.',
+            helpDnd5e: 'Atirar no Inferno / Hurl Through Hell (PHB p. 109 — Bruxo Corruptor nv 14): ao acertar um ataque contra criatura, bane-a instantaneamente pelos Planos Inferiores. No fim do seu próximo turno, retorna e sofre 10d10 de dano psíquico.' }
       ],
       /* PHB p.107 Pacto da Corrente — o familiar é COMANDADO pelo Bruxo na arena
          ("forgo one of your own attacks to allow your familiar to make one attack"):
