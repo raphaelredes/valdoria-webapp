@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-21T05:19:26Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-21T05:30:59Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -55129,6 +55129,14 @@ async function __combatAnimateOneEvent(ev) {
                 _spawnFloatingDmgNumber(hzEl, ev.damage, false, ev.damageType || 'perfurante');
             }
         }
+        if (typeof _spawnOverheadImpactHealthHUD === 'function' && hzActorUnit && (ev.damage | 0) > 0) {
+            var _hzOldHp = (ev.newHp != null) ? ((ev.newHp | 0) + (ev.damage | 0)) : (hzActorUnit.hp | 0);
+            var _hzNewHp = (ev.newHp != null) ? (ev.newHp | 0) : Math.max(0, _hzOldHp - (ev.damage | 0));
+            _spawnOverheadImpactHealthHUD(hzActorUnit, _hzOldHp, _hzNewHp, ev.damage | 0, { dmgType: ev.damageType || 'perfurante' });
+        }
+        if (typeof _syncTokenHpBarDom === 'function' && hzActorUnit && ev.newHp != null) {
+            _syncTokenHpBarDom(hzActorUnit, ev.newHp | 0);
+        }
         if (typeof sfxDamageType === 'function') sfxDamageType(ev.damageType || 'perfurante');
         render(currentState);
         await new Promise(function (r) { setTimeout(r, 250); });
@@ -55518,6 +55526,14 @@ async function __combatAnimateOneEvent(ev) {
             }
             if (typeof animLaunchMagicMissiles === 'function' && elA && elT) {
                 await animLaunchMagicMissiles(elA, elT, darts, tU);
+            }
+            if (typeof _spawnOverheadImpactHealthHUD === 'function' && tU && (ev.dmgTotal | 0) > 0) {
+                var _mmOldHp = ev.oldHp != null ? (ev.oldHp | 0) : (tU.hp | 0);
+                var _mmNewHp = ev.newHp != null ? (ev.newHp | 0) : Math.max(0, _mmOldHp - (ev.dmgTotal | 0));
+                _spawnOverheadImpactHealthHUD(tU, _mmOldHp, _mmNewHp, ev.dmgTotal | 0, { dmgType: 'force', crit: !!ev.crit });
+            }
+            if (typeof _syncTokenHpBarDom === 'function' && tU && ev.newHp != null) {
+                _syncTokenHpBarDom(tU, ev.newHp | 0);
             }
             var isFatalMM = tU && ev.newHp != null && (ev.newHp | 0) <= 0;
             if (isFatalMM && elT) {
@@ -56242,6 +56258,20 @@ async function __combatAnimateOneEvent(ev) {
             } catch (eFCT) { console.warn('[C-REM:VFX] _spawnFloatingDmgNumber failed', eFCT); }
         }
 
+        /* V1.29 (2026-10-21) — Disparo Remoto do Overhead Impact Health HUD & Zero-Latency Token Sync */
+        if (typeof _spawnOverheadImpactHealthHUD === 'function' && tU && ev.hit !== false) {
+            var _oldHpRem = ev.oldHp != null ? (ev.oldHp | 0) : (tU.hp | 0);
+            var _newHpRem = ev.newHp != null ? (ev.newHp | 0) : Math.max(0, _oldHpRem - (ev.dmgTotal | 0));
+            var _dmgAppliedRem = ev.dmgTotal != null ? (ev.dmgTotal | 0) : Math.max(0, _oldHpRem - _newHpRem);
+            if (_dmgAppliedRem > 0) {
+                _spawnOverheadImpactHealthHUD(tU, _oldHpRem, _newHpRem, _dmgAppliedRem, { dmgType: dmgType, crit: !!ev.crit });
+            }
+        }
+        if (typeof _syncTokenHpBarDom === 'function' && tU && ev.hit !== false) {
+            var _newHpDom = ev.newHp != null ? (ev.newHp | 0) : Math.max(0, (tU.hp | 0) - (ev.dmgTotal | 0));
+            _syncTokenHpBarDom(tU, _newHpDom);
+        }
+
         // Pausa para o impacto visual ser absorvido antes de consolidar o DOM
         var isFatalBlow = tU && ev.hit !== false && ev.newHp != null && (ev.newHp | 0) <= 0;
         if (isFatalBlow && elT) {
@@ -56319,6 +56349,9 @@ async function __combatAnimateOneEvent(ev) {
                 hU.isDead = false;
                 if (hU.deathSaves) { hU.deathSaves.s = 0; hU.deathSaves.f = 0; }
             }
+        }
+        if (typeof _syncTokenHpBarDom === 'function' && hU && ev.newHp != null) {
+            _syncTokenHpBarDom(hU, ev.newHp | 0);
         }
         if (elH) elH.classList.add('heal-flash');
         setTimeout(function () { if (elH) elH.classList.remove('heal-flash'); }, 620);
