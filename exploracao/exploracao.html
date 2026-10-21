@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-20T15:39:34Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-21T01:47:58Z - do not edit directly, edit source -->
 
 
 
@@ -36359,8 +36359,43 @@ function _exploreRarityMeta(name) {
   return { color: RC[rar] || '#a09484', label: RL[rar] || rar, emoji: d.emoji || '', desc: d.desc || d.descricao || '' };
 }
 
+function _appendExploreLootToInventory(lootList) {
+  if (!Array.isArray(lootList) || !lootList.length) return;
+  if (!Array.isArray(window.__EXPLORE_SERVER_INV)) window.__EXPLORE_SERVER_INV = [];
+  lootList.forEach(function (li) {
+    if (!li) return;
+    var name = (typeof li === 'string') ? li : (li.item_id || li.name || li.id || li.i);
+    if (!name) return;
+    var qty = (typeof li === 'object' && (li.qty || li.quantity || li.q)) || 1;
+    var found = false;
+    for (var i = 0; i < window.__EXPLORE_SERVER_INV.length; i++) {
+      var it = window.__EXPLORE_SERVER_INV[i];
+      if (it && (it.name === name || it.i === name)) {
+        if (typeof it.quantity === 'number') it.quantity += qty;
+        else if (typeof it.q === 'number') it.q += qty;
+        else it.quantity = (it.quantity || 1) + qty;
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      var DB = window.ITEMS_DB || {};
+      var d = DB[name] || {};
+      window.__EXPLORE_SERVER_INV.push({
+        name: name,
+        quantity: qty,
+        rarity: (typeof li === 'object' && (li.rarity || li.r)) || d.rarity || 'common',
+        desc: (typeof li === 'object' && li.desc) || d.desc || '',
+        value: (typeof li === 'object' && (li.value || li.v)) || d.value || 10,
+        tags: (typeof li === 'object' && (li.tags || li.t)) || d.tags || []
+      });
+    }
+  });
+}
+
 function _showExploreRewardCard(items, deltas, onContinue) {
   items = (items || []).filter(Boolean);
+  try { _appendExploreLootToInventory(items); } catch (_) {}
   if (!items.length) { if (typeof onContinue === 'function') onContinue(); return; }
   if (document.getElementById('explore-reward-overlay')) return;  // anti-reentrada
   var topColor = _exploreRarityMeta(items[0]).color;
@@ -40768,6 +40803,7 @@ function _explEventBodyNode(ev) {
 // o jogador preso sem o evento.
 function _explShowEventVEnc(ev) {
   _explVEncResolving = false;
+  try { if (oc && Array.isArray(oc.loot) && oc.loot.length) _appendExploreLootToInventory(oc.loot); } catch (_) {}
   if (!ev) return;
   // D&D 5e: Teste Cego de Sentidos / Percepção Pré-Combate
   if ((ev.combat || ev.type === 'combat_forced') && !ev._blindCheckDone && typeof rollBlindPerceptionCheck === 'function') {
@@ -40868,6 +40904,7 @@ function _explEventVEncResolve(ev, ch) {
 // pro jogador retentar (o servidor decide a resolucao).
 function _explEventVEncError(ev, reason) {
   _explVEncResolving = false;
+  try { if (oc && Array.isArray(oc.loot) && oc.loot.length) _appendExploreLootToInventory(oc.loot); } catch (_) {}
   LOGW('API', 'vencounter_event_choice recoverable_error reason=' + (reason || '?')
     + ' — nao fabrica (SUPREME RULE #0)');
   try { if (typeof vToast === 'function') vToast('Falha ao resolver (rede). Toque na opcao novamente.', 'warn'); } catch (_) {}
@@ -41005,6 +41042,7 @@ function _explSyncStateFromServer(state) {
 // vEncounter, reseta a fase e (se houve) navega pro combate.
 function _explEventVEncFinish(oc) {
   _explVEncResolving = false;
+  try { if (oc && Array.isArray(oc.loot) && oc.loot.length) _appendExploreLootToInventory(oc.loot); } catch (_) {}
   // Fase 3: chain multi-step marcada pra vEncounter (__venc) — NAO fecha; renderiza
   // o proximo passo (mantem o fluxo continuo, BG3/Pathfinder). O __dungeon roteia o
   // resolve do proximo passo pro /dungeon_event_choice (via onChoice de _explShowEventVEnc).
@@ -41115,6 +41153,7 @@ function _explTileBodyNode(rt) {
 function _explShowTileVEnc(rt) {
   if (!rt) return;
   _explVEncResolving = false;
+  try { if (oc && Array.isArray(oc.loot) && oc.loot.length) _appendExploreLootToInventory(oc.loot); } catch (_) {}
   var node = _explTileBodyNode(rt);
   if (!node.choices || !node.choices.length) { throw new Error('tile_no_eligible_choices'); }
   window.vEncounter.render(node, {
@@ -41128,6 +41167,7 @@ function _explShowTileVEnc(rt) {
 
 function _explTileVEncError(rt) {
   _explVEncResolving = false;
+  try { if (oc && Array.isArray(oc.loot) && oc.loot.length) _appendExploreLootToInventory(oc.loot); } catch (_) {}
   LOGW('API', 'tile_venc recoverable_error — nao fabrica (SUPREME RULE #0)');
   try { if (typeof vToast === 'function') vToast('Falha ao resolver (rede). Toque na opcao novamente.', 'warn'); } catch (_) {}
   try { _explShowTileVEnc(rt); } catch (_) { /* sem como reabrir — desiste silencioso */ }
@@ -41236,6 +41276,7 @@ function _explBuildTileChainRt(chain, parentRt) {
 
 function _explTileVEncFinish(rt, choice, outcome, rollResult, chain) {
   _explVEncResolving = false;
+  try { if (oc && Array.isArray(oc.loot) && oc.loot.length) _appendExploreLootToInventory(oc.loot); } catch (_) {}
   // Chain multi-step: renderiza o proximo passo via vEncounter (mesmo overlay).
   if (chain) {
     try { _explShowTileVEnc(_explBuildTileChainRt(chain, rt)); return; }

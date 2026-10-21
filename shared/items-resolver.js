@@ -478,6 +478,31 @@
     'veste-arcanista': 'veste-do-arcanista',
     'veste-sacerdote': 'veste-do-sacerdote',
     'vestes-canto-estelar': 'vestes-do-canto-estelar',
+    'agua-benta-consagrada': 'agua-benta',
+    'amuleto-de-kaelen': 'amuleto-de-ouro',
+    'copia-da-inscricao': 'pergaminho-em-branco',
+    'escama-iridescente': 'escama-de-dragao-branco',
+    'fardo-de-la': 'tecido-rasgado',
+    'fragmento-de-convergencia': 'fragmento-de-runa',
+    'fragmento-de-raiz-viva': 'raiz-de-mana',
+    'gazua': 'ferramentas-de-ladrao',
+    'grimorio-incompleto': 'grimorio',
+    'lagrima-espectral': 'essencia-espectral',
+    'mapa-da-mina': 'mapa-da-masmorra',
+    'mapa-de-infiltracao': 'mapa-de-contrabandista',
+    'marca-do-patrono': 'medalhao-ancestral',
+    'medalhao-de-jade': 'jade',
+    'medalhao-do-forte-ventania': 'medalhao-ancestral',
+    'ordem-da-guarda': 'insignia-da-guarda',
+    'partitura-incompleta': 'pergaminho-em-branco',
+    'pelo-de-cervo-prateado': 'pelo-de-texugo',
+    'pergaminho-dos-sete-ventos': 'pergaminho-de-escudo',
+    'placa-do-marco-primordial': 'pedra-da-sorte',
+    'pulseira-tribal-de-osso': 'colar-de-ossos',
+    'queijo-de-ovelha': 'racoes-de-viagem',
+    'simbolo-sagrado-partido': 'simbolo-sagrado',
+    'tool-lockpick': 'ferramentas-de-ladrao',
+    'tool_lockpick': 'ferramentas-de-ladrao',
   };
 
   /* Resolve `ic-it-{X}` (X pode ser base-Y ou slug direto) ao slug real. */
@@ -609,6 +634,7 @@
     var href = useEl.getAttribute('href') || useEl.getAttribute('xlink:href') || '';
     if (href.indexOf('#' + SVG_SPRITE_PREFIX) !== 0) return false;
     var rawSlug = href.substring(1 + SVG_SPRITE_PREFIX.length); // strip "#ic-it-"
+    var slug = _resolveItemSlug(rawSlug);
     if (!slug) {
       var svgElNoSlug = useEl.closest('svg');
       if (svgElNoSlug && !svgElNoSlug.closest('defs') && svgElNoSlug.getAttribute('data-img-swapped') !== '1') {
@@ -689,6 +715,7 @@
     // If F and {slug}-f.png exists in manifest, uses female version.
     var alt = (altText || slug || '').replace(/"/g, '&quot;');
     if (manifestState.loaded) {
+      var actualSlug = _resolveItemSlug(slug) || slug;
       // Try female variant if player is female
       var gender = (typeof window !== 'undefined' && window.vPlayerGender) || 'M';
       if (gender === 'F' && hasManifestSlug(slug + '-f')) {
@@ -696,9 +723,9 @@
                '" style="width:100%;height:100%;object-fit:contain" loading="lazy" data-item-slug="' + slug + '-f">';
       }
       // Fallback to default (masculine) version
-      if (hasManifestSlug(slug)) {
-        return '<img src="' + pngBase + slug + '.webp" alt="' + alt +
-               '" style="width:100%;height:100%;object-fit:contain" loading="lazy" data-item-slug="' + slug + '">';
+      if (hasManifestSlug(actualSlug)) {
+        return '<img src="' + pngBase + actualSlug + '.webp" alt="' + alt +
+               '" style="width:100%;height:100%;object-fit:contain" loading="lazy" data-item-slug="' + actualSlug + '">';
       }
     }
     // 2026-10-04 (Ordem do Usuário): se o item não possui imagem oficial,
@@ -712,10 +739,14 @@
     });
   }
 
+  function hasItem(slug) {
+    return !!_resolveItemSlug(slug);
+  }
+
   global.vItems = {
     upgrade: upgrade,
     resolve: resolve,
-    has: hasManifestSlug,
+    has: hasItem,
     iconHTML: iconHTML,
     placeholderHTML: placeholderHTML,
     /* 2026-06-01 (sessão #67): expõe resolveSlug pra que consumidores
