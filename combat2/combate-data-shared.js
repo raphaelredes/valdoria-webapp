@@ -1151,7 +1151,17 @@ var CHAR_CLASSES = [
             multiTarget: true, reach: 12, massHeal: true,
             healSpec: { n: 0, d: 0, flat: 700 },
             desc: 'Inundação colossal de cura divina: restaura até 700 PV divididos entre aliados e purifica todas as condições de cegueira e surdez.',
-            helpDnd5e: 'Cura Completa em Massa / Mass Heal (PHB p. 258 — Clérigo nv 17): magia de 9º círculo; 1 Ação; alcance 18m (12 hexágonos). Uma torrente de energia curativa jorra de você para criaturas feridas. Você restaura até 700 PV divididos entre as criaturas escolhidas. A magia também encerra imediatamente qualquer efeito que cause cegueira ou surdez nas criaturas curadas.' }
+            helpDnd5e: 'Cura Completa em Massa / Mass Heal (PHB p. 258 — Clérigo nv 17): magia de 9º círculo; 1 Ação; alcance 18m (12 hexágonos). Uma torrente de energia curativa jorra de você para criaturas feridas. Você restaura até 700 PV divididos entre as criaturas escolhidas. A magia também encerra imediatamente qualquer efeito que cause cegueira ou surdez nas criaturas curadas.' },
+        /* V1.28 (2026-10-21) — Preservar a Vida / Preserve Life (PHB p.60 — Canalizar Divindade, Clérigo da Vida nv 2). */
+        { n: 'Preservar a Vida', ico: '✨', cost: 0, kind: 'heal', minLevel: 2, unlockLvl: 2, combatOnceId: 'channel_divinity',
+            preserveLife: true, multiTarget: true, target: 'allies', requiresSubclass: 'life',
+            desc: 'Canalizar Divindade (PHB p.60): restaura PV a aliados feridos a até 9m (abaixo de 50% dos PV).',
+            helpDnd5e: 'Preservar a Vida / Preserve Life (PHB p.60 — Canalizar Divindade, Clérigo da Vida nv 2): como uma ação, cura criaturas feridas a até 6 hexes (9m) restaurando um total de 5 × nível de Clérigo em PV, sem curar nenhuma criatura acima da metade de seus PV máximos.' },
+        /* V1.28 (2026-10-21) — Intervenção Divina / Divine Intervention (PHB p.59 — Clérigo nv 10). */
+        { n: 'Intervenção Divina', ico: '🕊️', cost: 0, kind: 'heal', minLevel: 10, divineIntervention: true, multiTarget: true,
+            healSpec: { n: 4, d: 8, flat: 0 },
+            desc: 'Intervenção Divina (PHB p.59): suplica auxílio à sua divindade. Em sucesso, restaura 4d8+SAB PV e purifica toda a comitiva.',
+            helpDnd5e: 'Intervenção Divina / Divine Intervention (PHB p. 59 — Clérigo nv 10): usa uma ação para implorar ajuda divina. Rola d100; se resultado for menor ou igual ao nível de clérigo (ou sucesso garantido no nível 20), a divindade atende a súplica com um milagre sagrado, restaurando pontos de vida de todos os companheiros aliados e purificando condições nocivas (1× por descanso).' }
       ] },
     { cls: 'Paladino', hp: [26, 38], ac: [16, 18], atk: [5, 6], die: 8, dex: [8, 12], ico: '', dmgMod: 2, attr: 'STR',
       /* D&D 5e PHB p.84: Paladino é meio-conjurador — Smite Divino e magias
@@ -2025,7 +2035,12 @@ var CHAR_CLASSES = [
                 dndCondition: 'Ensurdecido (PHB p. 279 — Tempestade da Vingança)'
             },
             desc: 'Nuvem colossal de tempestade causa 2d6 de trovão e ensurdece por 5 rodadas em falha no TR de Constituição (concentração até 10 rodadas).',
-            helpDnd5e: 'Tempestade da Vingança / Storm of Vengeance (PHB p. 279 — Druida nv 17): magia de 9º círculo; 1 Ação; alcance visão (área colossal); Concentração até 1 minuto (10 rodadas). Uma nuvem de tempestade gigantesca surge e ribomba. Cada criatura na área realiza um TR de Constituição. Sofre 2d6 de dano de trovão e fica ensurdecida por 5 rodadas em falha, ou metade sem surdez em sucesso.' }
+            helpDnd5e: 'Tempestade da Vingança / Storm of Vengeance (PHB p. 279 — Druida nv 17): magia de 9º círculo; 1 Ação; alcance visão (área colossal); Concentração até 1 minuto (10 rodadas). Uma nuvem de tempestade gigantesca surge e ribomba. Cada criatura na área realiza um TR de Constituição. Sofre 2d6 de dano de trovão e fica ensurdecida por 5 rodadas em falha, ou metade sem surdez em sucesso.' },
+        /* V1.28 (2026-10-21) — Cura da Forma de Combate / Combat Wild Shape (PHB p.69 — Druida da Lua nv 2). */
+        { n: 'Cura da Forma de Combate', ico: '🐾', cost: 1, kind: 'heal', bonus: true, minLevel: 2, requiresSubclass: 'moon',
+            healTargets: 'self', healSpec: { n: 1, d: 8, flat: 0 },
+            desc: 'Ação Bônus (PHB p.69): enquanto em Forma Selvagem, consome 1 de Mana para recuperar 1d8 PV.',
+            helpDnd5e: 'Forma Selvagem de Combate / Combat Wild Shape (PHB p. 69 — Druida do Círculo da Lua nv 2): enquanto estiver sob a Forma Selvagem ou em combate feroz, pode gastar um espaço de magia como uma ação bônus para recuperar 1d8 pontos de vida por círculo do espaço de magia gasto.' }
       ] },
     /* V1.7 Stage 6 (2026-04-21) — Feiticeiro (PHB p.99-108): CHA caster inato.
        ADAPTAÇÕES vs PHB:
