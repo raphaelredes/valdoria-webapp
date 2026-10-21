@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-21T02:42:32Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-21T03:35:15Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -33700,6 +33700,75 @@ async function castSummonCelestial(s, p, sk) {
     await _maybeAdvanceOrStay();
 }
 
+/* V1.17b (2026-10-21) — Conjurar Elementais (PHB p.226 — Conjure Minor Elementals).
+   Spawna 2 Elementais de Magma (Concentração). */
+async function castSummonElemental(s, p, sk) {
+    var es = sk.elementalSpec || {};
+    var us = es.unitSpec || {};
+    var count = (es.count | 0) || 2;
+    var dur = (es.durTurns | 0) || 10;
+    var summonKind = es.summonKind || 'conjure_minor_elementals_magma';
+    if (p.res && p.res.value < (sk.cost | 0)) {
+        showMessage('Mana insuficiente.');
+        return;
+    }
+    if (sk.minLevel && (p.lvl | 0) < sk.minLevel) {
+        return;
+    }
+    if (typeof _dissipateConjuredSummons === 'function') {
+        _dissipateConjuredSummons(s, p, 'conjure_elementals');
+    }
+    p.res.value = Math.max(0, p.res.value - (sk.cost | 0));
+    p.actionSpent = true;
+    if (typeof simLogPushTurnHeader === 'function') simLogPushTurnHeader(s, p);
+    s.log.push(p.n + ' conjura ' + (sk.n || 'Conjurar Elementais') + ' (PHB p.226 — Concentração) — invoca ' + count + ' ' + (us.name || 'Elemental de Magma') + '!');
+    var pIdx = s.order.indexOf(p);
+    for (var ci = 0; ci < count; ci++) {
+        var baseName = us.name || 'Elemental de Magma';
+        var elemName = count > 1 ? (baseName + ' #' + (ci + 1)) : baseName;
+        var summon = {
+            t: 'a', n: elemName, ico: us.ico || '🔥',
+            hp: us.hp || 22, mhp: us.mhp || us.hp || 22, ac: us.ac || 11,
+            atk: us.atk || 4, die: us.die || 6,
+            dmgMod: (us.damageSpec && us.damageSpec.flat) || 1,
+            dex: us.dex || 12, wis: us.wis || 10, con: us.con || 12,
+            str: us.str || 8, int: us.int || 7, cha: us.cha || 10,
+            attr: 'DEX',
+            speed: 6, movement_left: 6,
+            multiAttack: us.multiAttack || 1,
+            damageSpec: us.damageSpec || { n: 1, d: 6, flat: 1 },
+            dmgType: us.dmgType || 'fire',
+            ranged: false,
+            vulnerabilities: us.vulnerabilities || ['cold'],
+            immunities: us.immunities || ['fire', 'poison'],
+            resistances: us.resistances || [],
+            conditionImmunities: us.conditionImmunities || ['poisoned', 'exhaustion'],
+            alive: true, dying: false, stable: false, isDead: false,
+            deathSaves: { s: 0, f: 0 },
+            se: [],
+            init: (p.init | 0) - 0.2 - (ci * 0.1),
+            initRevealed: true, initRolling: false,
+            species: baseName, sugLvl: 7,
+            it: { ic: us.ico || '🔥', lb: summonKind },
+            summonedBy: pIdx,
+            summonKind: summonKind,
+            iconHeraldic: us.iconHeraldic || 'ic-fire_elemental',
+            focusTarget: null,
+            noDeathSaves: true,
+            durTurns: dur,
+            conjureCasterIdx: pIdx,
+            conjureCaster: p,
+            conjureSpellId: 'conjure_elementals',
+            concentrationSummon: true
+        };
+        s.order.splice(pIdx + 1 + ci, 0, summon);
+    }
+    if (typeof _actionTaken !== 'undefined') _actionTaken = false;
+    _actionSheetOpen = false;
+    render(s);
+    await _maybeAdvanceOrStay();
+}
+
 /* V1.18 (2026-10-16) — Conjurar Elemental (PHB p.225 — Conjure Elemental).
    Spawna 1 Grande Elemental do Fogo (Concentração). */
 async function castSummonGreaterElemental(s, p, sk) {
@@ -42669,6 +42738,11 @@ async function useSkill(skill, opts) {
     /* V1.17 (2026-10-16) — Conjurar Celestial (PHB p.225 — Conjure Celestial). */
     if (skill.kind === 'summon_celestial') {
         castSummonCelestial(currentState, p, skill);
+        return;
+    }
+    /* V1.17b (2026-10-21) — Conjurar Elementais (PHB p.226 — Conjure Minor Elementals). */
+    if (skill.kind === 'summon_elemental') {
+        castSummonElemental(currentState, p, skill);
         return;
     }
     /* V1.18 (2026-10-16) — Conjurar Elemental (PHB p.225 — Conjure Elemental). */
