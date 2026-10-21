@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-21T04:48:57Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-21T05:19:26Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -42926,9 +42926,14 @@ async function useSkill(skill, opts) {
                 return;
             }
         }
-        /* Precisa target? (attack ou heal com targetAlly ou buff targetAlly) */
-        var needsTarget = skill.kind === 'attack' || skill.kind === 'heal' || skill.targetAlly;
-        if (needsTarget && skill.healTargets === 'self') { needsTarget = false; }
+        /* Precisa target? (attack ou heal com targetAlly ou debuff alvo único) */
+        var needsTarget = skill.kind === 'attack' || skill.kind === 'heal' || skill.targetAlly
+            || (skill.kind === 'debuff' && !skill.isAura && !skill.areaHex && !skill.multiTarget)
+            || skill.quiveringPalm || skill.hurlThroughHell || skill.spellThief;
+        if (needsTarget && (skill.healTargets === 'self' || skill.healAllAllies || skill.massHeal
+            || skill.preserveLife || skill.wholenessOfBody || skill.emptyBody || skill.divineIntervention || skill.isAura)) {
+            needsTarget = false;
+        }
         if (needsTarget) {
             _pendingSkill = skill;
             if (typeof _pendingSkillSlot !== 'undefined') window._pendingSkillSlot = slot;
@@ -43110,7 +43115,7 @@ async function useSkill(skill, opts) {
         await _maybeAdvanceOrStay();
         return;
     }
-    if (skill.kind === 'attack') {
+    if (skill.kind === 'attack' || (skill.kind === 'debuff' && !skill.isAura && !skill.areaHex && !skill.multiTarget) || skill.quiveringPalm || skill.hurlThroughHell || skill.spellThief) {
         /* V1.7 Sprint-17 Ronda 21 (2026-04-21 QA PHB p.236) — Chaos Bolt random type:
            PHB rola d8 pra determinar tipo. Sim: randomiza dmgType na skill antes
            de passar pro fluxo de ataque. Pre-cast (mutation permanente no skill copy). */
