@@ -56344,7 +56344,7 @@ function _guildShowParty(p){
         if (typeof renderCityGroupPanel === 'function') renderCityGroupPanel();
         _showServiceResultPopup({
           icon: _allyClsIco(m.c), npc: 'Mestra Tavira',
-          narrative: (res.msg ? '<i>"' + res.msg + '"</i>' : '<i>' + (m.n || 'O aliado') + ' foi dispensado do grupo.</i>') + '<br><br><i>A vaga está livre de novo.</i>',
+          narrative: (res.msg ? '<i>"' + res.msg + '"</i>' : '<i>' + (m.n || 'O companheiro') + ' foi dispensado do grupo.</i>') + '<br><br><i>A vaga está livre de novo.</i>',
           deltas: [], onContinue: function(){ _guildShowParty(p); }
         });
       }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } if (typeof vToast === 'function') vToast('Erro ao dispensar.', 'warn'); });
@@ -56362,7 +56362,7 @@ function _guildShowParty(p){
         _squareShowListPopup({
           stackKey: 'guild_party', icon: '<img src="../shared/img/npcs/mestra-tavira.webp" alt="Mestra Tavira" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', title: 'Meu Grupo',
           subtitle: 'Salão de Mestra Tavira', bannerImg: '../shared/img/guilda/guilda-banner.webp',
-          flavor: 'Tavira folheia o registro e te encara. <i>(bate a pena no balcão)</i> "Marchas sozinho, aventureiro. Recruta aliados aqui ou na Taverna antes que a estrada te engula."',
+          flavor: 'Tavira folheia o registro e encara você. <i>(bate a pena no balcão)</i> "Você marcha sozinho, aventureiro. Recrute aliados aqui ou na Taverna antes que a estrada engula você."',
           items: [], onPick: function(){}
         });
         return;
@@ -56381,8 +56381,8 @@ function _guildShowParty(p){
           var m = item._m;
           if (!(window.vEncounter && typeof window.vEncounter.render === 'function')) {
             _showConfirmPurchase({
-              icon: _allyClsIco(m.c), npc: 'Mestra Tavira', title: 'Dispensar ' + (m.n || 'aliado'),
-              desc: '<b>' + _gpCap(m.c) + ' · Nível ' + (m.l || 1) + '</b><br><br>Dispensar libera a vaga (o equipamento volta à mochila). Recontratar depois sai mais barato.',
+              icon: _allyClsIco(m.c), npc: 'Mestra Tavira', title: 'Dispensar ' + (m.n || 'companheiro'),
+              desc: '<b>' + _gpCap(m.c) + ' · Nível ' + (m.l || 1) + '</b><br><br>Dispensar libera a vaga (o equipamento volta para a sua mochila). Recontratar depois sai mais barato.',
               cost: 0, creditMode: true, onConfirm: function(){ _gpFire(m); }
             });
             return;
@@ -56391,17 +56391,34 @@ function _guildShowParty(p){
           var npc = { id: 'guild_tavira', name: 'Mestra Tavira', desc: 'Salão da Guilda', portrait: portrait || '', portraitHTML: _allyClsIco(m.c) };
           var script = [
             { type: 'narration', text: 'Tavira corre o dedo pelo registro e para no nome.' },
-            { type: 'speech', speaker: 'Mestra Tavira', text: '— ' + (m.n || 'Este') + ', ' + _gpCap(m.c) + ' nível ' + (m.l || 1) + '. HP ' + (m.hp || 0) + '/' + (m.mhp || 0) + (m.mmp ? ' · MP ' + (m.mp || 0) + '/' + (m.mmp || 0) : '') + '. <i>Dispensar libera a vaga — o equipamento dele volta à tua mochila, e recontratar depois sai mais barato.</i>' }
+            { type: 'speech', speaker: 'Mestra Tavira', text: '— ' + (m.n || 'Este aventureiro') + ', ' + _gpCap(m.c) + ' nível ' + (m.l || 1) + '. HP ' + (m.hp || 0) + '/' + (m.mhp || 0) + (m.mmp ? ' · MP ' + (m.mp || 0) + '/' + (m.mmp || 0) : '') + '. <i>Dispensar libera a vaga — o equipamento dele volta para a sua mochila, e recontratar depois sai mais barato.</i>' }
           ];
-          var choices = [
-            { id: 'dismiss', label: 'Dispensar ' + (m.n || 'aliado') },
-            { id: 'leave', label: '↩ "Fica, por ora."' }
-          ];
+          var allyIdx = -1;
+          if (window.GROUP_MEMBERS) {
+            for (var gi = 1; gi < window.GROUP_MEMBERS.length; gi++) {
+              var _gm = window.GROUP_MEMBERS[gi];
+              if (_gm && (_gm.id === m.id || _gm.name === m.n)) {
+                allyIdx = gi;
+                break;
+              }
+            }
+          }
+          var choices = [];
+          if (allyIdx > 0 && typeof _showStatusPopup === 'function') {
+            choices.push({ id: 'ficha', label: '📜 Ver ficha completa de ' + (m.n || 'companheiro') });
+          }
+          choices.push({ id: 'dismiss', label: '⚠️ Dispensar ' + (m.n || 'companheiro') + ' da comitiva' });
+          choices.push({ id: 'leave', label: '↩ "Fica no grupo, por ora."' });
+
           window.vEncounter.render({ npc: npc, script: script, choices: choices }, {
             player: p, closeable: true,
             onChoice: function(ch){
               try { window.vEncounter.close(); } catch(_){}
-              if (ch && ch.id === 'dismiss') { _gpFire(m); }
+              if (ch && ch.id === 'ficha' && allyIdx > 0 && typeof _showStatusPopup === 'function') {
+                _showStatusPopup(allyIdx);
+              } else if (ch && ch.id === 'dismiss') {
+                _gpFire(m);
+              }
             }
           });
         }
