@@ -186,6 +186,19 @@
          POST /api/ally/apply-effect com o dice_result. Backend aplica
          renown REAL + effect + item + gold conforme registry. Toast de
          confirmacao em cima do existente "+1 Renome ·". */
+      /* Registra teste de perícia com companheiro como utilizado (chance-única) */
+      if (opts.ch && (opts.ch.ally_source || (opts.ch.id && String(opts.ch.id).indexOf('check_') === 0))) {
+        try {
+          var aSrc = opts.ch.ally_source || {};
+          var aName = aSrc.name || (opts.dialogue && opts.dialogue.npc && opts.dialogue.npc.name) || '';
+          var aKey = (aName || aSrc.cls || 'ally').toLowerCase().replace(/[^a-z0-9_]/g, '_');
+          var aTopic = aSrc.topic || '';
+          if (typeof window._markAllyChoiceUsed === 'function') {
+            window._markAllyChoiceUsed(aKey, aTopic, opts.ch.id, roll.success);
+          }
+        } catch (_eAllyUsed) { console.warn('[DICE-SVC] mark ally check used failed', _eAllyUsed); }
+      }
+
       if (opts.ch && opts.ch.ally_source && typeof window._postAllyEffect === 'function') {
         try {
           window._postAllyEffect(opts.ch.ally_source, {

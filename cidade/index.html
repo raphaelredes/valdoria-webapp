@@ -67214,6 +67214,63 @@ function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
   return { script: script, choices: choices };
 }
 
+function _allyStorageKey(m, idx) {
+  if (!m) return 'adv_' + (idx || 0);
+  return (m.id || m.name || ('adv_' + idx)).toLowerCase().replace(/[^a-z0-9_]/g, '_');
+}
+
+function _isAllyChoiceUsed(allyKey, topicKey, choiceId, m) {
+  try {
+    var fullKey = topicKey + ':' + choiceId;
+    if (typeof _npcIsUsed === 'function') {
+      if (_npcIsUsed('ally_' + allyKey, fullKey) || _npcIsUsed('ally_' + allyKey, choiceId)) {
+        return true;
+      }
+    }
+    if (m && m.used_choices && (m.used_choices.indexOf(fullKey) !== -1 || m.used_choices.indexOf(choiceId) !== -1)) {
+      return true;
+    }
+    if (m && m.dialogue_history && (m.dialogue_history.indexOf(fullKey) !== -1 || m.dialogue_history.indexOf(choiceId) !== -1)) {
+      return true;
+    }
+    if (m && m._usedChoices && (m._usedChoices[fullKey] || m._usedChoices[choiceId])) {
+      return true;
+    }
+    var storeKey = 'valdoria_ally_choices_used_' + (window._charId || 'default');
+    var raw = localStorage.getItem(storeKey);
+    if (raw) {
+      var map = JSON.parse(raw);
+      if (map && map[allyKey] && (map[allyKey][fullKey] || map[allyKey][choiceId])) {
+        return true;
+      }
+    }
+  } catch(_) {}
+  return false;
+}
+
+function _markAllyChoiceUsed(allyKey, topicKey, choiceId, result) {
+  try {
+    var fullKey = topicKey + ':' + choiceId;
+    if (typeof _npcMarkUsed === 'function') {
+      _npcMarkUsed('ally_' + allyKey, fullKey);
+      _npcMarkUsed('ally_' + allyKey, choiceId);
+    }
+    var storeKey = 'valdoria_ally_choices_used_' + (window._charId || 'default');
+    var map = {};
+    var raw = localStorage.getItem(storeKey);
+    if (raw) {
+      try { map = JSON.parse(raw) || {}; } catch(_) { map = {}; }
+    }
+    map[allyKey] = map[allyKey] || {};
+    map[allyKey][fullKey] = { used: true, result: result, ts: Date.now() };
+    map[allyKey][choiceId] = { used: true, result: result, ts: Date.now() };
+    localStorage.setItem(storeKey, JSON.stringify(map));
+  } catch(_) {}
+}
+window._allyStorageKey = _allyStorageKey;
+window._isAllyChoiceUsed = _isAllyChoiceUsed;
+window._markAllyChoiceUsed = _markAllyChoiceUsed;
+
 function _showAllyTopicsMenu(idx) {
   var m = (window.GROUP_MEMBERS || [])[idx];
   if (!m || m.dead || m.isPlayer) return;
@@ -67244,10 +67301,17 @@ function _showAllyTopicsMenu(idx) {
     return true;
   });
 
+  var allyStorageKey = _allyStorageKey(m, idx);
   var choices = activeTopics.map(function(t) {
+    var tNode = _buildClientAllyTopicNode(cls, t.key, displayName, m);
+    var remaining = (tNode.choices || []).filter(function(c) {
+      return !_isAllyChoiceUsed(allyStorageKey, t.key, c.id, m);
+    });
+    var isDone = (tNode.choices || []).length > 0 && remaining.length === 0;
     return {
       id: 'topic_' + t.key,
-      label: t.label,
+      label: t.label + (isDone ? ' ✓' : ''),
+      desc: isDone ? 'Assunto concluído' : '',
       cb: function() { _showAllyTopicDialogue(idx, t.key); }
     };
   });
@@ -67319,7 +67383,47 @@ function _showAllyTopicDialogue(idx, topicKey) {
   var topicNode = _buildClientAllyTopicNode(cls, topicKey, displayName, m);
   var cfg = ALLY_TOPIC_CONFIG[topicKey] || ALLY_TOPIC_CONFIG.camp_campfire;
 
-  var fullChoices = topicNode.choices.map(function(c) {
+  var allyStorageKey = _allyStorageKey(m, idx);
+  var availableChoices = topicNode.choices.filter(function(c) {
+    return !_isAllyChoiceUsed(allyStorageKey, topicKey, c.id, m);
+  });
+
+  if (availableChoices.length === 0) {
+    var exhaustedDialogue = {
+      npc: {
+        id: 'ally_' + allyStorageKey + '_' + topicKey,
+        name: displayName,
+        desc: _classLabelPT(m.cls) + ' · ' + cfg.title + ' · ' + _allyRelSummary(m),
+        portrait: allyPort,
+        portraitHTML: portraitHTML,
+        gender: allyGender
+      },
+      script: [
+        {
+          type: 'narration',
+          text: displayName + ' acolhe você com um sorriso sereno e um olhar de profunda cumplicidade ao retomar o assunto.'
+        },
+        {
+          type: 'speech',
+          speaker: displayName,
+          text: 'Nós já conversamos com franqueza sobre isso. É reconfortante saber que posso contar com a sua escuta e compreensão na estrada.'
+        }
+      ],
+      choices: [
+        {
+          id: 'back_to_topics_menu',
+          label: '↩ Escolher outro assunto',
+          cb: function() { _showAllyTopicsMenu(idx); }
+        }
+      ]
+    };
+    if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+      window.vEncounter.render(exhaustedDialogue, { closeable: true });
+    }
+    return;
+  }
+
+  var fullChoices = availableChoices.map(function(c) {
     return {
       id: c.id,
       label: c.label,
@@ -67368,6 +67472,11 @@ function _showAllyTopicDialogue(idx, topicKey) {
         if (typeof ch.cb === 'function') {
           try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY-TOPIC] cb failed', e); }
           return;
+        }
+
+        var allyStorageKey = _allyStorageKey(m, idx);
+        if (typeof _markAllyChoiceUsed === 'function') {
+          _markAllyChoiceUsed(allyStorageKey, topicKey, ch.id, null);
         }
 
         // Aplica impacto de aprovação dinamicamente
@@ -67705,7 +67814,7 @@ function _showAllyDialogue(idx){
 
   // Choices canônicas originais de lore e perícia de classe
   var classChoices = (tpl.choices || []).filter(function(c){
-    var oneShot = (c.id !== 'leave' && !c.check);
+    var oneShot = (c.id !== 'leave');
     return !oneShot || typeof _npcIsUsed !== 'function' || !_npcIsUsed(_allyNpcId, c.id);
   }).map(function(c){
     var _reply = (c.id !== 'leave' && !c.check)
