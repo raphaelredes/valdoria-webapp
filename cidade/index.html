@@ -73992,9 +73992,7 @@ function _thorneShowCustomForge(p, merchant, subTopic){
       { type: 'narration', text: '<b>Encomenda de Forja: Espada de Mithral</b>' },
       { type: 'narration', text: '<b>O Que Está Sendo Escolhido:</b> Confecção sob medida de uma Espada de Mithral personalizada forjada a mão por Thorne.' },
       { type: 'narration', text: '<b>Requisitos e Custos:</b> 1x Lingote de Mithral e 500 Valdoritas. Prazo: 3 dias de trabalho na bigorna.' },
-      { type: 'narration', text: '<b>Chances de Resultado:</b><br>'
-        + '🟢 <b>Chance de Sucesso: 75%</b> — Thorne tempera o mithral com maestria e entrega uma arma mágica rara perfeita (+2 ataque, dano 1d8/1d10 versátil, Acuidade/Finesse, metade do peso padrão, ignora resistências a ataques mundanos).<br>'
-        + '🔴 <b>Risco de Falha: 25%</b> — O choque térmico na têmpera com óleo estelar pode trincar a lâmina. Em caso de falha na têmpera, a peça se perde e o lingote e o ouro são consumidos pelo trabalho.' }
+      { type: 'narration', text: 'Thorne inspeciona o lingote de mithral contra o fogo da forja. O trabalho de dobra e têmpera com óleo estelar é uma arte delicada que exige toda a perícia do mestre ferreiro.' }
     ];
     if (!canAfford){
       var missing = [];
@@ -74006,7 +74004,7 @@ function _thorneShowCustomForge(p, merchant, subTopic){
     if (canAfford){
       swordChoices.push({
         id: 'confirm',
-        label: '✔ Confirmar Encomenda da Espada (75% Sucesso)',
+        label: '✔ Confirmar Encomenda da Espada (1x Lingote + 500 V)',
         result: 'thorne_confirm_order',
         _forgeItem: 'Espada de Mithral',
         _ingotCost: 1,
@@ -74039,9 +74037,7 @@ function _thorneShowCustomForge(p, merchant, subTopic){
       { type: 'narration', text: '<b>Encomenda de Forja: Peitoral de Mithral</b>' },
       { type: 'narration', text: '<b>O Que Está Sendo Escolhido:</b> Forja de um Peitoral de Mithral de placas articuladas sob medida para o aventureiro.' },
       { type: 'narration', text: '<b>Requisitos e Custos:</b> 2x Lingotes de Mithral e 800 Valdoritas. Prazo: 5 dias de trabalho na forja.' },
-      { type: 'narration', text: '<b>Chances de Resultado:</b><br>'
-        + '🟢 <b>Chance de Sucesso: 70%</b> — Thorne molda a couraça com perfeição ergonômica (Propriedades: CA 14 + mod Des máx +2, sem desvantagem em testes de Furtividade, sem restrição de Força, peso cortado pela metade).<br>'
-        + '🔴 <b>Risco de Falha: 30%</b> — A conformação de placas articuladas no fogo místico exige alinhamento perfeito. Em caso de falha, Thorne consegue resgatar 1 Lingote de Mithral intacto do refugo e devolve a você, enquanto o outro lingote e o ouro são consumidos pelo trabalho.' }
+      { type: 'narration', text: 'A conformação de placas articuladas no fogo místico exige alinhamento perfeito de têmpera e martelo para atingir a leveza e solidez lendárias do mithral.' }
     ];
     if (!canAffordP){
       var missingP = [];
@@ -74053,7 +74049,7 @@ function _thorneShowCustomForge(p, merchant, subTopic){
     if (canAffordP){
       plateChoices.push({
         id: 'confirm',
-        label: '✔ Confirmar Encomenda do Peitoral (70% Sucesso)',
+        label: '✔ Confirmar Encomenda do Peitoral (2x Lingotes + 800 V)',
         result: 'thorne_confirm_order',
         _forgeItem: 'Peitoral de Mithral',
         _ingotCost: 2,
@@ -74156,8 +74152,8 @@ function _thorneShowCustomForge(p, merchant, subTopic){
     { type: 'narration', text: 'Você possui atualmente: <b>' + mithralIngots + 'x Lingote de Mithral</b> na mochila.' }
   ];
   var choices = [
-    { id: 'order_sword', label: '◆ Encomendar Espada de Mithral (75% Sucesso / 25% Falha · 1x Lingote + 500 V)', result: 'goto_dialog', _encounterRef: 'mer_thorne_confirm_sword' },
-    { id: 'order_breastplate', label: '◆ Encomendar Peitoral de Mithral (70% Sucesso / 30% Falha · 2x Lingotes + 800 V)', result: 'goto_dialog', _encounterRef: 'mer_thorne_confirm_breastplate' },
+    { id: 'order_sword', label: '◆ Encomendar Espada de Mithral (1x Lingote + 500 V)', result: 'goto_dialog', _encounterRef: 'mer_thorne_confirm_sword' },
+    { id: 'order_breastplate', label: '◆ Encomendar Peitoral de Mithral (2x Lingotes + 800 V)', result: 'goto_dialog', _encounterRef: 'mer_thorne_confirm_breastplate' },
     { id: 'ask_ingots', label: '◆ "Onde posso encontrar Lingotes de Mithral?"', result: 'goto_dialog', _encounterRef: 'mer_thorne_lore_mithral' },
     { id: 'back', label: '← Voltar ao balcão', result: 'goto_dialog', _encounterRef: 'mer_thorne_greeting' }
   ];
