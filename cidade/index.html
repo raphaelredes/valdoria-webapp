@@ -14259,9 +14259,52 @@ var _NAMED_NPC_PORTRAITS = {
   'lyana herbalista': 'npcs/lyana-herbalista.webp',
   'lyana a herbalista': 'npcs/lyana-herbalista.webp',
   'malakor': 'npcs/malakor-livreiro.webp',
-  'malakor livreiro': 'npcs/malakor-livreiro.webp'
+  'malakor livreiro': 'npcs/malakor-livreiro.webp',
+  'wrenna': 'adventurers/adv_027.webp',
+  'wrenna korgrim': 'adventurers/adv_027.webp',
+  'wrenna caelwyn': 'npcs/plaza/dancer_exotic.webp'
 };
+function _resolveAllyPortraitUrl(m) {
+  if (!m) return null;
+  if (m.png) return m.png;
+  var port = m.port || (m.id && String(m.id).indexOf('adv_') === 0 ? m.id : null);
+  if (!port && m.name) {
+    var n = String(m.name).toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+    if (n.indexOf('wrenna') === 0) port = 'adv_027';
+  }
+  if (!port) return null;
+  var s = String(port).replace(/\.webp$/i, '');
+  return '/shared/img/adventurers/' + s + '.webp';
+}
+window._resolveAllyPortraitUrl = _resolveAllyPortraitUrl;
+
+function _resolveAllyGender(m) {
+  if (!m) return 'male';
+  if (m.gender) return String(m.gender).toLowerCase();
+  var n = String(m.name || '').toLowerCase().trim();
+  if (n.indexOf('wrenna') === 0 || m.id === 'adv_027') return 'female';
+  return 'male';
+}
+window._resolveAllyGender = _resolveAllyGender;
+
 function _npcPortraitByName(name) {
+  if (!name) return null;
+  var k = String(name).replace(/<[^>]*>/g, '').toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+  if (window.GROUP_MEMBERS && Array.isArray(window.GROUP_MEMBERS)) {
+    for (var gi = 1; gi < window.GROUP_MEMBERS.length; gi++) {
+      var gm = window.GROUP_MEMBERS[gi];
+      if (gm && gm.name) {
+        var gmk = String(gm.name).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+        var gmkFirst = gmk.split(' ')[0];
+        if (k === gmk || k === gmkFirst) {
+          var ap = _resolveAllyPortraitUrl(gm);
+          if (ap) return ap;
+        }
+      }
+    }
+  }
   if (!name) return null;
   var k = String(name).replace(/<[^>]*>/g, '').toLowerCase()
     .normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -17771,6 +17814,7 @@ function _getFichaMember(idx){
 
   var m = (window.GROUP_MEMBERS || [])[idx];
   if (!m) return null;
+  var _allyPng = (typeof _resolveAllyPortraitUrl === 'function') ? _resolveAllyPortraitUrl(m) : null;
   var cKey = _cgpClsKey(m.cls);
   var rKey = (m.race || 'humano').toLowerCase();
   var lvl = m.level || 1;
@@ -17810,6 +17854,7 @@ function _getFichaMember(idx){
     hd: (m.hd != null) ? m.hd : lvl,
     hdMax: (m.hdMax != null) ? m.hdMax : lvl,
     hitDieKind: hitDieKind,
+    png: m.png || _allyPng || null,
     exh: (m.exh != null) ? m.exh : 0,
     exhMax: (m.exhMax != null) ? m.exhMax : 6
   }, m);
@@ -36775,7 +36820,7 @@ var CANON_UNIQUE_NPCS = {
     },
     "reward": {
       "xp": 100,
-      "item": "tool_lockpick"
+      "item": "Ferramentas de Ladrão"
     }
   },
   "unique_wizard_failed": {
@@ -65802,6 +65847,14 @@ function _syncPartyWithGroupMembers(partyList) {
         name: _a.n || _a.name || 'Aliado',
         cls: String(_a.c || _a.cls || 'guerreiro').toLowerCase(),
         race: String(_a.race || _a.r || 'humano').toLowerCase(),
+        gender: _a.gender || _a.g || (_a.id === 'adv_027' || String(_a.name || '').toLowerCase().indexOf('wrenna') === 0 ? 'female' : ''),
+        port: _a.port || (_a.id && String(_a.id).indexOf('adv_') === 0 ? _a.id : null),
+        pers: _a.pers || _a.archetype || '',
+        approval: _a.apr != null ? _a.apr : (_a.approval != null ? _a.approval : (_a.aff || _a.affinity || 0)),
+        relationship_type: _a.rel || _a.relationship_type || 'camaradagem',
+        romance_stage: _a.rom != null ? _a.rom : (_a.romance_stage != null ? _a.romance_stage : 0),
+        active_quest: _a.aq || _a.active_quest || null,
+        completed_quests: _a.cq || _a.completed_quests || [],
         level: _a.l || _a.level || 1,
         hp: _a.hp != null ? _a.hp : 20,
         hpMax: _a.mhp != null ? _a.mhp : (_a.hpMax != null ? _a.hpMax : 20),
@@ -66375,431 +66428,738 @@ var ALLY_DIALOGUE_TEMPLATES = {
   clerigo: {
     desc: 'Clérigo · cura corpo e alma',
     script: [
-      { type: 'narration', text: '{name} repousa o símbolo sagrado sobre o joelho, dedos pousados em prece silenciosa. Ergue os olhos ao perceber-te — calma de manhã antes da batalha.' },
-      { type: 'speech', text: 'Que os Quatro guiem nossos passos. <i>(beija o símbolo)</i> Tens algo a confessar antes da estrada? Ou simplesmente buscas companhia?' }
+      { type: 'narration', text: '{name} repousa o símbolo sagrado sobre o joelho, com as mãos unidas em prece serena. Ergue os olhos com tranquilidade ao perceber sua aproximação.' },
+      { type: 'speech', text: 'Que a luz guie nossos passos na estrada. <i>(beija o símbolo sagrado)</i> Tem algo pesando em sua mente hoje, ou apenas veio buscar um momento de conversa?' }
     ],
     choices: [
-      { id: 'pray',  label: '"Reza por nós antes do próximo combate."',  renown: 2 },
-      { id: 'ask',   label: '"Conta-me sobre tua devoção."',              renown: 1 },
-      { id: 'boon',  label: '"Pede aos Quatro um favor especial."',
+      { id: 'pray',  label: '"Poderia abençoar nosso grupo antes da próxima jornada?"', renown: 2 },
+      { id: 'ask',   label: '"Me conte mais sobre sua fé e sua história."', renown: 1 },
+      { id: 'boon',  label: '"Pedir uma bênção especial para a estrada."',
         check: { skill: 'persuasion', dc: 14 },
-        resultNarration: '{name} fecha os olhos. Luz dourada envolve teus dedos por um instante — bênção rara dos Quatro.',
-        resultText: 'Você se sente fortalecido(a). <b>+1 dado de inspiração</b> guardado até o próximo descanso.',
-        resultNarrationFail: '{name} sorri triste. "A fé não se barganha. Os Quatro decidem quem merece."',
-        resultTextFail: 'A prece volta ao éter. Nenhuma graça concedida.' },
-      { id: 'leave', label: '↩ "Continua tua prece."',                       renown: 0 }
+        resultNarration: '{name} fecha os olhos e estende a mão. Uma luz dourada envolve suas mãos por um instante, transmitindo calma e vigor.',
+        resultText: 'Você sente o espírito revigorado. <b>+1 dado de inspiração</b> guardado até o próximo descanso.',
+        resultNarrationFail: '{name} sorri com gentileza e balança a cabeça. "A fé pede paciência e propósito genuíno. As divindades sabem a hora certa."',
+        resultTextFail: 'A oração termina em silêncio suave. Nenhuma graça extraordinária concedida desta vez.' },
+      { id: 'leave', label: '↩ "Fique em paz com suas preces."', renown: 0 }
     ]
   },
   guerreiro: {
     desc: 'Veterano · centenas de batalhas no corpo',
     script: [
-      { type: 'narration', text: '{name} passa a pedra de amolar pela lâmina, gume contra o sol. Não levanta o olhar — só assente, reconhecendo tua presença.' },
-      { type: 'speech', text: 'A lâmina avisa antes de quebrar — basta escutar. <i>(testa o fio com o polegar)</i> Marcha sem pressa. Quem corre na guerra morre cedo.' }
+      { type: 'narration', text: '{name} desliza a pedra de amolar pela lâmina com ritmo metódico. Não levanta o olhar de imediato, apenas assente com a cabeça, reconhecendo sua presença.' },
+      { type: 'speech', text: 'O aço avisa antes de falhar — basta prestar atenção. <i>(testa o corte com cuidado)</i> Mantenha o passo firme e a calma. Quem se afoba na linha de frente não dura muito.' }
     ],
     choices: [
-      { id: 'tactics', label: '"Que tática usamos no próximo combate?"', renown: 2 },
-      { id: 'story',   label: '"Conta uma batalha que te marcou."',       renown: 1 },
-      { id: 'spar',    label: '"Sparring rápido pra aquecer."',
+      { id: 'tactics', label: '"Que formação recomenda para o nosso próximo confronto?"', renown: 2 },
+      { id: 'story',   label: '"Me conte sobre uma batalha marcante do seu passado."', renown: 1 },
+      { id: 'spar',    label: '"Um treino rápido para aquecer os reflexos."',
         check: { skill: 'athletics', dc: 13 },
-        resultNarration: 'Vocês trocam golpes secos por dois minutos. {name} desarma-te no terceiro lance — sorri, devolve a arma.',
-        resultText: 'Aprendeu um truque novo. <b>Vantagem na primeira jogada de ataque</b> do próximo combate.',
-        resultNarrationFail: 'Você escorrega na lama. {name} agarra teu braço antes da queda — paciente, mas crítico(a).',
-        resultTextFail: 'Torção leve no pulso. <b>Desvantagem na primeira jogada</b> do próximo combate.' },
-      { id: 'leave',   label: '↩ "Termine de afiar a lâmina."',              renown: 0 }
+        resultNarration: 'Vocês trocam golpes firmes por alguns instantes. Com um movimento ágil, {name} encontra uma brecha, sorri e elogia sua guarda.',
+        resultText: 'Você aprendeu uma nova manobra de combate. <b>Vantagem no primeiro ataque</b> do próximo combate.',
+        resultNarrationFail: 'Você dá um passo em falso no piso irregular. {name} segura seu braço a tempo de evitar a queda, com um olhar avaliador.',
+        resultTextFail: 'Um leve estiramento no pulso. <b>Desvantagem no primeiro ataque</b> do próximo combate.' },
+      { id: 'leave',   label: '↩ "Termine de cuidar do equipamento."', renown: 0 }
     ]
   },
   mago: {
     desc: 'Mago · biblioteca ambulante',
     script: [
-      { type: 'narration', text: '{name} folheia um grimório encadernado em couro escuro, dedos manchados de tinta. Ergue o olhar com a paciência de quem foi interrompido(a) muitas vezes.' },
-      { type: 'speech', text: 'Toda magia é traduzir o impossível em palavras. <i>(fecha o livro com gesto comedido)</i> Diz-me — buscas chama controlada ou trovoada arriscada?' }
+      { type: 'narration', text: '{name} folheia com cuidado as páginas amareladas de um grimório antigo. Ergue os olhos devagar, ajustando os óculos e marcando a página com serenidade.' },
+      { type: 'speech', text: 'Conjurar é traduzir leis arcanas em pura vontade. <i>(fecha o tomo com calma)</i> Diga — veio buscar algum conselho teórico ou precisa de suporte mágico para a estrada?' }
     ],
     choices: [
-      { id: 'spell',  label: '"Que magia preparaste pra hoje?"',           renown: 2 },
-      { id: 'theory', label: '"Explica-me a Trama Arcana."',               renown: 1 },
-      { id: 'scribe', label: '"Escreve uma magia pra meu uso."',
+      { id: 'spell',  label: '"Que magias preparou para o dia de hoje?"', renown: 2 },
+      { id: 'theory', label: '"Poderia me explicar como funciona o fluxo da Trama Arcana?"', renown: 1 },
+      { id: 'scribe', label: '"Transcrever um pergaminho para apoiar o grupo."',
         check: { skill: 'arcana', dc: 15 },
-        resultNarration: '{name} disseca uma página, anota fórmulas marginais e entrega-te o pergaminho ainda úmido de tinta.',
-        resultText: 'Recebeu <b>Pergaminho de Mísseis Mágicos</b> (uso único, próximo descanso).',
-        resultNarrationFail: '{name} morde o lábio. "A fórmula resiste. Ou tu não estás concentrado(a)."',
-        resultTextFail: 'A página queima sozinha após cinco segundos. Tinta perdida.' },
-      { id: 'leave',  label: '↩ "Volta aos teus estudos."',                  renown: 0 }
+        resultNarration: '{name} estende uma folha de velino virgem, traçando runas que brilham em azul suave antes de assentar na tinta fresca.',
+        resultText: 'Recebeu um <b>Pergaminho de Mísseis Mágicos</b> (uso único até o próximo descanso).',
+        resultNarrationFail: '{name} sopra a tinta com ar pensativo. "A ressonância arcana dispersou antes da fixação. Precisaremos de outro momento."',
+        resultTextFail: 'A folha se esfarela em pequenas faíscas. Pergaminho inutilizado.' },
+      { id: 'leave',  label: '↩ "Bom estudo com o grimório."', renown: 0 }
     ]
   },
   ladino: {
-    desc: 'Sombra · dedos rápidos, mente afiada',
+    desc: 'Sombra · passos leves e mente afiada',
     script: [
-      { type: 'narration', text: '{name} aparece silenciosamente ao teu lado — como se sempre estivera ali. Mãos enluvadas, olhar atento, sorriso de ironia.' },
-      { type: 'speech', text: 'A cidade tem mais segredos do que ruas. <i>(verifica brevemente a multidão)</i> O truque é saber o que NÃO perguntar. Aprendi isso da pior forma.' }
+      { type: 'narration', text: '{name} surge silenciosamente ao seu lado com passos leves e olhar afiado. Um sorriso sutil e desafiador surge nos lábios.' },
+      { type: 'speech', text: 'A cidade tem mais segredos do que ruas. <i>(vigia a multidão de soslaio)</i> O truque é saber o que NÃO perguntar. O que temos pela frente hoje?' }
     ],
     choices: [
-      { id: 'rumor', label: '"Ouviste algum rumor interessante?"',        renown: 2 },
-      { id: 'past',  label: '"De onde você veio?"',                          renown: 0 },
-      { id: 'lift',  label: '"Pega-me algo na multidão. Discreto(a)."',
+      { id: 'rumor', label: '"Ouviu algum boato interessante pela praça?"', renown: 2 },
+      { id: 'past',  label: '"De onde você veio antes de se juntar ao grupo?"', renown: 1 },
+      { id: 'lift',  label: '"Sondar os arredores e conseguir algo útil na multidão discretamente"',
         check: { skill: 'stealth', dc: 14 },
-        resultNarration: '{name} desaparece num parágrafo. Volta antes do próximo suspiro — uma bolsa de couro caída no teu cinto.',
-        resultText: 'Recebeu <b>+8 Valdoritas</b>. Ninguém percebeu.',
-        resultNarrationFail: 'Um grito atravessa a praça. {name} pisa atrás de ti, mão vazia, olhar tenso. "Apressei o coração demais."',
-        resultTextFail: 'Guardas olham nessa direção. <b>-2 Renome</b> nas próximas 24h.' },
-      { id: 'leave', label: '↩ "Volta a observar a multidão."',             renown: 0 }
+        resultNarration: '{name} se esgueira pela multidão com passos silenciosos e volta em instantes, deslizando uma bolsa pesada para suas mãos.',
+        resultText: 'Recebeu <b>+8 Valdoritas</b> sem levantar suspeitas.',
+        resultNarrationFail: 'Um transeunte esbarra com rispidez e {name} recua depressa, gesticulando para disfarçar.',
+        resultTextFail: 'Guardas olham com desconfiança nesta direção.' },
+      { id: 'leave', label: '↩ "Fique de olhos abertos por aí."', renown: 0 }
     ]
   },
   patrulheiro: {
     desc: 'Trilheiro · conhece cada raiz do bosque',
     script: [
-      { type: 'narration', text: '{name} agacha-se inspecionando pegadas no chão de terra batida da praça. Arco compacto ao ombro, faca curva no cinto. Levanta-se sem som ao te ver.' },
-      { type: 'speech', text: 'A floresta sussurra antes de morder. <i>(aponta vagamente pro norte)</i> Vi rastros de lobos perto do portão na aurora — três adultos, talvez quatro. Movem-se em padrão de caça.' }
+      { type: 'narration', text: '{name} examina marcas no solo com atenção concentrada. O arco repousa firme ao ombro. Ao perceber você, ergue a cabeça sem emitir ruído.' },
+      { type: 'speech', text: 'A floresta fala antes de agir. <i>(aponta discretamente para o norte)</i> Notei pegadas recentes perto dos arredores. O vento está mudando, melhor mantermos a guarda.' }
     ],
     choices: [
-      { id: 'track',  label: '"Pode rastrear esses lobos comigo?"',         renown: 2 },
-      { id: 'nature', label: '"Fala-me da floresta do norte."',             renown: 1 },
-      { id: 'forage', label: '"Coleta ervas curativas pra mim."',
+      { id: 'track',  label: '"Poderia me ajudar a rastrear perigos nos arredores?"', renown: 2 },
+      { id: 'nature', label: '"Me conte sobre a fauna e as trilhas desta região."', renown: 1 },
+      { id: 'forage', label: '"Buscar ervas curativas nas redondezas."',
         check: { skill: 'survival', dc: 13 },
-        resultNarration: '{name} some por dez minutos entre as ruelas da feira. Volta com três folhas amassadas e raízes secas.',
-        resultText: 'Recebeu <b>2× Erva Curativa</b> (cada uma cura 1d4+1 PV fora de combate).',
-        resultNarrationFail: '{name} volta com as mãos vazias e um machucado leve no antebraço. "A cidade não tem o que a floresta tem."',
-        resultTextFail: 'Tempo desperdiçado. <b>-1 hora</b> do próximo descanso longo.' },
-      { id: 'leave',  label: '↩ "Continua a leitura dos rastros."',            renown: 0 }
+        resultNarration: '{name} some por alguns minutos na mata rasteira e volta trazendo ramos frescos de raízes medicinais.',
+        resultText: 'Recebeu <b>2× Erva Curativa</b> (cura 1d4+1 PV fora de combate).',
+        resultNarrationFail: '{name} retorna limpando a terra das botas. "O solo por aqui está seco demais; a colheita rendeu apenas mato comum."',
+        resultTextFail: 'Nenhum ingrediente útil encontrado desta vez.' },
+      { id: 'leave',  label: '↩ "Continue observando as trilhas."', renown: 0 }
     ]
   },
   paladino: {
-    desc: 'Juramento Sagrado · luz contra trevas',
+    desc: 'Juramento Sagrado · luz e determinação',
     script: [
-      { type: 'narration', text: '{name} ergue-se ao te ver, armadura impecável, símbolo sagrado no peito. Mão sobre o punho da espada — não em ameaça, mas em juramento renovado a cada amanhecer.' },
-      { type: 'speech', text: 'O juramento não se quebra mesmo quando a noite é mais funda. <i>(coloca punho sobre o coração)</i> Caminhamos juntos enquanto a luz nos guiar.' }
+      { type: 'narration', text: '{name} permanece em postura solene, mão apoiada no punho da espada embainhada. Os olhos transmitem a serenidade inabalável de um juramento vivo.' },
+      { type: 'speech', text: 'Nossa causa se mantém firme enquanto houver coragem e propósito. <i>(toca o peito com respeito)</i> O que precisa para a nossa próxima marcha?' }
     ],
     choices: [
-      { id: 'bless', label: '"Renova-me a fé antes do combate."',          renown: 2 },
-      { id: 'oath',  label: '"Me conte como fez seu juramento."',      renown: 1 },
-      { id: 'imbue', label: '"Imbui minha arma de luz sagrada."',
+      { id: 'bless', label: '"Renove a determinação do nosso grupo antes do combate."', renown: 2 },
+      { id: 'oath',  label: '"Me conte como fez seu juramento sagrado."', renown: 1 },
+      { id: 'imbue', label: '"Abençoar minha arma com energia radiante."',
         check: { skill: 'religion', dc: 14 },
-        resultNarration: '{name} coloca as mãos sobre tua arma. Uma luz dourada flui ao longo do gume — calma como sol de manhã.',
-        resultText: 'Sua arma recebe <b>+1d8 dano radiante</b> no próximo ataque acertado.',
-        resultNarrationFail: 'O símbolo sagrado treme. {name} retrai as mãos. "Os Deuses pedem mais do que palavras hoje."',
-        resultTextFail: 'A bênção falha. Nenhum efeito.' },
-      { id: 'leave', label: '↩ "Que tua luz te guie."',                       renown: 0 }
+        resultNarration: '{name} pousa a mão sobre sua lâmina e sussurra uma bênção. Um brilho dourado e quente percorre o metal.',
+        resultText: 'Sua arma recebe <b>+1d8 de dano radiante</b> no primeiro ataque bem-sucedido.',
+        resultNarrationFail: '{name} afasta a mão devagar, sentindo a energia dispersar. "A determinação precisa de foco interior. Tentaremos novamente quando o coração estiver sereno."',
+        resultTextFail: 'A bênção não se fixou na lâmina.' },
+      { id: 'leave', label: '↩ "Que a luz continue guiando seus passos."', renown: 0 }
     ]
   },
   bardo: {
-    desc: 'Contador(a) de histórias · alaúde na mão',
+    desc: 'Contador de histórias · alaúde e versos',
     script: [
-      { type: 'narration', text: '{name} dedilha o alaúde sob o telhado de uma barraca, voz baixa testando uma melodia. Sorri largamente ao te ver — público novo recebido.' },
-      { type: 'speech', text: 'Toda guerra termina virando canção. <i>(toca um acorde alegre)</i> A nossa precisa só de uma estrofe boa pra ficar imortal. Tens preferência de tom?' }
+      { type: 'narration', text: '{name} dedilha um alaúde de madeira polida, ajustando o tom de uma melodia vivaz. Abre um sorriso caloroso assim que você se aproxima.' },
+      { type: 'speech', text: 'Toda grande jornada merece uma balada à altura. <i>(arranca um acorde alegre)</i> Nossa história ainda tem muitos versos para escrever. O que traz você aqui?' }
     ],
     choices: [
-      { id: 'inspire', label: '"Toca-me Inspiração antes da batalha."',    renown: 2 },
-      { id: 'tale',    label: '"Conta a melhor história da estrada."',     renown: 1 },
-      { id: 'gossip',  label: '"Sonda boatos da taverna pra mim."',
+      { id: 'inspire', label: '"Toque uma canção inspiradora antes de partirmos."', renown: 2 },
+      { id: 'tale',    label: '"Me conte a melhor história que ouviu pela estrada."', renown: 1 },
+      { id: 'gossip',  label: '"Sondar os boatos mais quentes da taverna."',
         check: { skill: 'persuasion', dc: 12 },
-        resultNarration: '{name} desaparece pela porta da taverna. Volta meia-hora depois com sorriso enviesado e um nome em código.',
-        resultText: 'Aprendeu <b>localização secreta</b> de uma masmorra próxima. Marcada no mapa.',
-        resultNarrationFail: '{name} volta encharcado(a) de cerveja, sem dizer nada. Alguém o(a) reconheceu.',
-        resultTextFail: 'A taverna fechou pra ti hoje. <b>-5 Valdoritas</b> em multa de cerveja derramada.' },
-      { id: 'leave',   label: '↩ "Continua a compor."',                       renown: 0 }
+        resultNarration: '{name} se mistura aos frequentadores da taverna e volta em pouco tempo com um sorriso malicioso e uma pista valiosa.',
+        resultText: 'Descobriu informações sobre uma <b>área de interesse</b> nos arredores.',
+        resultNarrationFail: '{name} volta enxugando uma caneca virada na roupa. "Um beberrão desastrado começou uma briga antes que eu pudesse ouvir o final da história."',
+        resultTextFail: 'A conversa na taverna terminou sem boatos úteis.' },
+      { id: 'leave',   label: '↩ "Continue afinando seus acordes."', renown: 0 }
     ]
   },
   druida: {
-    desc: 'Voz da natureza · guardião(a) do equilíbrio',
+    desc: 'Voz da natureza · equilíbrio primordial',
     script: [
-      { type: 'narration', text: '{name} alimenta um pardal com migalhas de pão na borda da fonte. O pequeno pássaro come da palma sem medo. Ergue o olhar ao te ver — verde como musgo úmido, atento(a).' },
-      { type: 'speech', text: 'Toda vida tem direito à floresta. <i>(o pardal voa)</i> Mesmo os lobos que atacam fazendeiros têm fome. A questão não é matar — é entender por que caçam.' }
+      { type: 'narration', text: '{name} observa com carinho um pequeno pássaro empoleirado em seu dedo. Ao notar sua chegada, cumprimenta com um aceno sereno de cabeça.' },
+      { type: 'speech', text: 'O ciclo natural segue seu curso mesmo nas pedras da cidade. <i>(o pássaro alça voo)</i> A terra tem muito a ensinar a quem tem paciência para ouvir. O que procura hoje?' }
     ],
     choices: [
-      { id: 'commune', label: '"Comunga com a natureza por nós."',         renown: 2 },
-      { id: 'animal',  label: '"Que forma animal preferes assumir?"',      renown: 1 },
-      { id: 'totem',   label: '"Pede um espírito animal pra me guiar."',
+      { id: 'commune', label: '"Comungar com a natureza em busca de presságios."', renown: 2 },
+      { id: 'animal',  label: '"Qual forma selvagem você mais gosta de assumir?"', renown: 1 },
+      { id: 'totem',   label: '"Invocar um espírito protetor para guardar nosso descanso."',
         check: { skill: 'nature', dc: 13 },
-        resultNarration: '{name} murmura uma canção antiga. Sentes algo invisível pousar no teu ombro — leve como pena, vigilante.',
-        resultText: 'Recebeu <b>Espírito Sentinela</b> (avisa de emboscadas no próximo descanso longo).',
-        resultNarrationFail: 'Os pássaros se afastam. {name} balança a cabeça. "Os espíritos não vêm a quem grita por eles."',
-        resultTextFail: 'Os animais da praça evitam-te pelas próximas horas. Sem efeito mecânico.' },
-      { id: 'leave',   label: '↩ "Volta aos teus pequenos."',                  renown: 0 }
+        resultNarration: '{name} entoa uma cantiga suave. Uma brisa fresca envolve seus ombros, trazendo uma sensação agradável de vigilância e proteção.',
+        resultText: 'Recebeu <b>Espírito Sentinela</b> (protege contra surpresas no próximo descanso).',
+        resultNarrationFail: 'O vento dispersa as folhas secas pelo chão. {name} suspira. "A agitação da cidade abafa a voz dos espíritos agora."',
+        resultTextFail: 'Nenhum presságio se manifestou.' },
+      { id: 'leave',   label: '↩ "Fique em harmonia com os animais."', renown: 0 }
     ]
   },
   monge: {
-    desc: 'Disciplina · corpo e mente em harmonia',
+    desc: 'Disciplina · harmonia entre corpo e mente',
     script: [
-      { type: 'narration', text: '{name} está em postura de meditação no canto sombreado da praça — pernas cruzadas, mãos sobre os joelhos, respiração lenta. Olhos abrem-se devagar ao te perceber.' },
-      { type: 'speech', text: 'O ki flui onde a mente permite. <i>(controla a respiração)</i> A tempestade lá fora começa aqui dentro. Estás em paz hoje?' }
+      { type: 'narration', text: '{name} respira fundo em postura de meditação. Abre os olhos calmamente, transmitindo um foco impecável ao cumprimentar você.' },
+      { type: 'speech', text: 'A tempestade ao redor perde a força quando encontramos equilíbrio por dentro. <i>(relaxa a postura)</i> Como está o seu foco hoje?' }
     ],
     choices: [
-      { id: 'train',  label: '"Treina comigo antes da aventura."',         renown: 2 },
-      { id: 'wisdom', label: '"Compartilha um ensinamento."',              renown: 1 },
-      { id: 'focus',  label: '"Ajuda-me a focar minha mente."',
+      { id: 'train',  label: '"Um exercício rápido para aprimorarmos a respiração."', renown: 2 },
+      { id: 'wisdom', label: '"Compartilhe um ensinamento do seu monastério."', renown: 1 },
+      { id: 'focus',  label: '"Me ajude a concentrar o fluxo de energia."',
         check: { stat: 'wis', dc: 13 },
-        resultNarration: '{name} pousa dois dedos no centro de tua testa. Por um instante todo som do mundo desaparece — clareza total.',
-        resultText: 'Recebeu <b>Vantagem em saves de Sabedoria</b> nas próximas 8 horas.',
-        resultNarrationFail: 'Tua mente vagueia pela praça. {name} suspira. "Não posso te focar de fora. O caminho é teu."',
-        resultTextFail: 'Saíste mais agitado(a) do que entraste. <b>-1 em saves de Sabedoria</b> por 1 hora.' },
-      { id: 'leave',  label: '↩ "Continua a meditar."',                       renown: 0 }
+        resultNarration: '{name} orienta o ritmo da sua respiração com toques precisos. Em poucos segundos, sua mente alcança uma clareza cristalina.',
+        resultText: 'Recebeu <b>Vantagem em salvaguardas de Sabedoria</b> nas próximas 8 horas.',
+        resultNarrationFail: 'O barulho da praça quebra sua concentração. {name} assente com calma. "A mente silencia aos poucos; não tente forçar o rio."',
+        resultTextFail: 'A mente continuou agitada. Nenhum bônus aplicado.' },
+      { id: 'leave',  label: '↩ "Continue em sua meditação."', renown: 0 }
     ]
   },
   barbaro: {
-    desc: 'Fúria selvagem · sangue da tribo',
+    desc: 'Fúria indomável · força da natureza',
     script: [
-      { type: 'narration', text: '{name} senta sobre uma pilha de barris improvisada, machado apoiado contra a perna, devorando carne seca. Olha-te com olhos que combinam tribo e tempestade.' },
-      { type: 'speech', text: 'Sangue precisa correr ou apodrece. <i>(cospe casca no chão)</i> Hoje vi guardas tremendo com um pardal. Diz-me onde está o inimigo que vou já.' }
+      { type: 'narration', text: '{name} descansa sobre um tronco, devorando uma porção generosa de carne assada. Olha na sua direção com um sorriso largo e desafiador.' },
+      { type: 'speech', text: 'Guerreiro bem alimentado é guerreiro perigoso! <i>(limpa a lâmina do machado)</i> O que manda? Se for hora de quebrar alguma coisa, já estou pronto.' }
     ],
     choices: [
-      { id: 'rage',  label: '"Solte a fúria com você no próximo combate."', renown: 2 },
-      { id: 'tribe', label: '"Fala-me da tua tribo."',                     renown: 1 },
-      { id: 'arm',   label: '"Queda de braço. Quem ganha paga a cerveja."',
+      { id: 'rage',  label: '"Vamos combinar uma investida agressiva para o próximo confronto."', renown: 2 },
+      { id: 'tribe', label: '"Me conte sobre os costumes da sua terra natal."', renown: 1 },
+      { id: 'arm',   label: '"Uma queda de braço rápida para testar a força."',
         check: { skill: 'athletics', dc: 15 },
-        resultNarration: 'Quase trinta segundos de pulso firme. Tu vences no fim — {name} ri alto e bate na mesa.',
-        resultText: '{name} paga a cerveja. Recebeu <b>+5 Valdoritas</b> (taxa simbólica da vitória).',
-        resultNarrationFail: 'Teu braço bate na mesa em três segundos. {name} ri sem maldade — empurra a cerveja para ti.',
-        resultTextFail: 'Pagaste a cerveja. <b>-5 Valdoritas</b>. Pelo menos a cerveja estava boa.' },
-      { id: 'leave', label: '↩ "Termina a refeição."',                        renown: 0 }
+        resultNarration: 'Após trinta segundos de tensão e risadas, você consegue empurrar o braço de {name} contra a mesa. Ele solta uma gargalhada entusiasmada.',
+        resultText: 'Ganhou o respeito do companheiro! Recebeu <b>+5 Valdoritas</b> da aposta amigável.',
+        resultNarrationFail: 'Com um puxão explosivo, {name} bate seu braço na mesa e dá um tapinha nas suas costas rindo alto.',
+        resultTextFail: 'Você pagou <b>5 Valdoritas</b> pela rodada, mas ganhou um sorriso de admiração.' },
+      { id: 'leave', label: '↩ "Aproveite a sua refeição."', renown: 0 }
     ]
   },
   feiticeiro: {
-    desc: 'Sangue arcano · magia natural',
+    desc: 'Magia inata · poder no próprio sangue',
     script: [
-      { type: 'narration', text: '{name} faz pequenas faíscas brincarem entre os dedos enquanto observa os transeuntes da praça. Curiosidade no rosto, magia leve no ar — sem esforço aparente.' },
-      { type: 'speech', text: 'A magia nasce comigo — não preciso de livros. <i>(uma faísca azul flutua brevemente)</i> Mas mesmo o fogo de dentro tem o seu humor. Hoje está... inquieto.' }
+      { type: 'narration', text: '{name} brinca com pequenas chamas azuis que dançam na ponta dos dedos. Ao notar sua chegada, fecha a mão suavemente, fazendo o fogo desaparecer.' },
+      { type: 'speech', text: 'A magia corre pelas minhas veias como sangue quente. <i>(sorri com entusiasmo)</i> Diga — veio ver algo impressionante ou temos planos para a estrada?' }
     ],
     choices: [
-      { id: 'show',   label: '"Mostra-me um truque novo."',                 renown: 2 },
-      { id: 'origin', label: '"De onde vem teu poder?"',                    renown: 0 },
-      { id: 'spark',  label: '"Empresta-me uma fagulha de poder."',
+      { id: 'show',   label: '"Me mostre uma demonstração do seu poder elemental."', renown: 2 },
+      { id: 'origin', label: '"Como você descobriu essa centelha mágica em você?"', renown: 1 },
+      { id: 'spark',  label: '"Emprestar uma fagulha de energia elemental para minha arma."',
         check: { stat: 'cha', dc: 14 },
-        resultNarration: '{name} toca teu peito com a ponta do dedo. Uma faísca azul mergulha sob tua pele — quente, viva.',
-        resultText: 'Recebeu <b>+1d6 dano elemental</b> no próximo ataque acertado.',
-        resultNarrationFail: 'A faísca se apaga ao tocar-te. {name} ergue uma sobrancelha. "Tu não tens o fogo dentro. Hoje, ao menos."',
-        resultTextFail: 'A energia recuou. Nenhum efeito.' },
-      { id: 'leave',  label: '↩ "Continua a brincar com fagulhas."',           renown: 0 }
+        resultNarration: '{name} toca a sua arma com a ponta dos dedos. Um arco elétrico cintilante percorre o gume, zumbindo com energia pura.',
+        resultText: 'Recebeu <b>+1d6 de dano elemental</b> no primeiro ataque acertado.',
+        resultNarrationFail: 'A faísca faísca e se apaga antes de se fixar. {name} dá de ombros. "O poder hoje quer dançar solto, não ficar preso no ferro."',
+        resultTextFail: 'A energia não se acumulou.' },
+      { id: 'leave',  label: '↩ "Fique à vontade com seus encantamentos."', renown: 0 }
     ]
   },
   bruxo: {
-    desc: 'Pacto sombrio · ouvinte de vozes antigas',
+    desc: 'Pacto arcano · segredos além do véu',
     script: [
-      { type: 'narration', text: '{name} encosta-se numa parede de pedra, longe da multidão. Capuz baixo cobrindo metade do rosto. Pareces estar sendo observado(a) antes mesmo de teres notado a presença.' },
-      { type: 'speech', text: 'Há vozes que falam quando o silêncio é fundo o bastante. <i>(toca um amuleto sob a roupa)</i> O Patrono cobra preço — e o preço é sempre maior do que parece à primeira vista.' }
+      { type: 'narration', text: '{name} permanece à sombra de um pórtico, ajustando o capuz escuro. Ergue o rosto calmamente, olhos profundos fixando-se nos seus.' },
+      { type: 'speech', text: 'Certos mistérios só respondem a quem sabe fazer as perguntas certas. <i>(toca um talismã misterioso)</i> O que traz você até mim nesta hora?' }
     ],
     choices: [
-      { id: 'pact',    label: '"Conta-me sobre teu Patrono."',              renown: 0 },
-      { id: 'gift',    label: '"Pede um favor sombrio pra próxima luta."', renown: 2 },
-      { id: 'whisper', label: '"Escuta o que o Patrono diz sobre mim."',
+      { id: 'pact',    label: '"Me conte sobre a entidade com quem firmou seu pacto."', renown: 1 },
+      { id: 'gift',    label: '"Pedir um presságio de proteção para nosso próximo combate."', renown: 2 },
+      { id: 'whisper', label: '"Consultar o Patrono sobre o destino do nosso grupo."',
         check: { skill: 'intimidation', dc: 14 },
-        resultNarration: '{name} fecha os olhos. Quando os abre, a pupila brilha por um instante. "Ele te conhece. Sabe teu nome verdadeiro."',
-        resultText: 'Recebeu <b>profecia obscura</b> — vantagem no próximo save contra magia.',
-        resultNarrationFail: '{name} abre os olhos depressa. "Ele não falou. Pior — viu-te e calou. Cuidado."',
-        resultTextFail: 'Sente um arrepio nas costas. <b>Desvantagem no primeiro save contra magia</b> do dia.' },
-      { id: 'leave',   label: '↩ "Volta às tuas sombras."',                    renown: 0 }
+        resultNarration: '{name} fecha os olhos. Uma brisa gélida passa entre vocês e seus olhos brilham por um instante com sabedoria oculta.',
+        resultText: 'Recebeu <b>Visão Obscura</b> — vantagem na primeira salvaguarda contra efeitos mágicos.',
+        resultNarrationFail: '{name} balança a cabeça em silêncio. "O véu permaneceu fechado. Algumas respostas precisam ser conquistadas pela espada."',
+        resultTextFail: 'Nenhuma resposta foi obtida desta vez.' },
+      { id: 'leave',   label: '↩ "Nos vemos mais tarde nas sombras."', renown: 0 }
     ]
   }
 };
 
-// === B2.3 #90: respostas das perguntas de LORE do ally chat ==================
-// Antes, escolher uma pergunta sem dado (pray/ask/tactics/story/...) só dava um
-// toast de Renome e fechava — o aliado nunca RESPONDIA. Aqui cada pergunta de
-// lore ganha uma resposta in-character (PADRAO_ALDRIC: narração neutra + fala
-// do aliado), renderizada ANTES de fechar. Conteúdo separado da lógica (regra
-// No Hardcoded Content). Chave: '<classe>:<choice_id>'. {name} → nome do aliado.
 var ALLY_LORE_REPLIES = {
-  'clerigo:pray':   { narration: '{name} ergue o símbolo sagrado e murmura uma litania baixa, a mão livre pousada sobre seu ombro.', speech: 'Que os Quatro firmem seu braço e suavizem sua queda. <i>(traça um sinal no ar)</i> Vá em paz — a luz caminha com você.' },
-  'clerigo:ask':    { narration: '{name} acaricia o símbolo desgastado, o olhar perdido em alguma manhã antiga.', speech: 'Eu não escolhi a fé — ela me encontrou num campo de mortos, quando rezei por um e dois se levantaram. Desde então sirvo. É tudo o que sei fazer direito.' },
-  'guerreiro:tactics': { narration: '{name} risca o chão com a ponta da bota, desenhando duas linhas e um círculo.', speech: 'Eu seguro a frente, tu rodeias pela direita. Quem cair, cai gritando — pra avisar o outro. Sem audácia tola. Audácia tola enche cova.' },
-  'guerreiro:story':   { narration: '{name} guarda a pedra de amolar e fica em silêncio por um instante longo demais.', speech: 'Ponte de Karreth. Éramos quarenta ao amanhecer, seis ao pôr do sol. Não conto pra impressionar — conto pra tu lembrares que voltar já é vitória.' },
-  'mago:spell':     { narration: '{name} abre o grimório numa página marcada com fita vermelha e a vira pra ti.', speech: 'Hoje preparei chama e escudo. Uma pra abrir caminho, outra pra fechar feridas que não deveriam existir. Magia é economia — gasta-se o que se tem.' },
-  'mago:theory':    { narration: '{name} ergue dois dedos e uma teia tênue de luz se desenha entre eles.', speech: 'A Trama é o tecido por baixo do mundo. Nós não criamos magia — apenas puxamos os fios certos e torcemos que não desfie tudo. Geralmente funciona.' },
-  'ladino:rumor':   { narration: '{name} inclina-se, a voz caindo pra um sussurro que mal passa do colarinho.', speech: 'Dizem que o tesoureiro da guilda anda pagando dívidas que não tinha. Dinheiro novo sempre cheira a problema velho. Guarda isso — pode valer mais que ouro.' },
-  'ladino:past':    { narration: '{name} dá de ombros, mas o sorriso some por um segundo.', speech: 'Vim de lugar nenhum e de toda parte. Aprendi a abrir fechaduras antes de aprender a ler. Não pergunta mais — o passado é a única coisa que ninguém me rouba.' },
-  'patrulheiro:track': { narration: '{name} ajoelha-se e toca a terra, lendo marcas que teus olhos não captam.', speech: 'Posso. Três adultos, movendo-se contra o vento — espertos. Se formos hoje, vamos calados e a favor da brisa. Lobo que te fareja primeiro é lobo que te come.' },
-  'patrulheiro:nature': { narration: '{name} olha pro norte, onde a linha das árvores escurece o horizonte.', speech: 'A floresta do norte é velha e tem memória. Anda por ela com respeito e ela te abriga. Anda com pressa e ela te engole. Já vi as duas coisas.' },
-  'paladino:bless': { narration: '{name} pousa a palma sobre seu peito; um calor breve e sereno atravessa a armadura.', speech: 'Que sua coragem não vacile e sua causa permaneça justa. <i>(retira a mão)</i> A luz não fará você invencível — fará você digno. O resto é com você.' },
-  'paladino:oath':  { narration: '{name} toca o símbolo no peito, e por um instante a postura fica mais ereta.', speech: 'Jurei sobre o corpo de quem eu não consegui salvar. Não foi glória — foi vergonha virando promessa. Carrego os dois desde então, lado a lado.' },
-  'bardo:inspire':  { narration: '{name} dedilha três notas que parecem firmar o ar à sua volta.', speech: 'Pronto — leve essa melodia com você. Quando o medo apertar, lembre-se dela. <i>(pisca)</i> Coragem é só uma canção que a gente decide cantar mesmo desafinado.' },
-  'bardo:tale':     { narration: '{name} se acomoda, e a voz baixa ganha o ritmo de quem já contou isto cem vezes.', speech: 'Uma vez derrubei um barão com uma rima. Sério. A verdade certa, no salão certo, na hora certa — derruba mais que espada. Lâmina mata um; palavra muda um reino.' },
-  'druida:commune': { narration: '{name} fecha os olhos; um pardal pousa no ombro como se atendesse a um chamado.', speech: 'A terra está inquieta a oeste — algo a feriu. Não corras pra lá sem preparo. <i>(o pardal voa)</i> A natureza avisa quem sabe escutar.' },
-  'druida:animal':  { narration: '{name} sorri, e por um instante há algo selvagem demais no fundo dos olhos.', speech: 'O urso, quando preciso de força. O falcão, quando preciso de distância. Mas é o lobo que sinto em casa — correr em matilha, dividir o frio. Talvez eu sempre tenha sido um.' },
-  'monge:train':    { narration: '{name} levanta-se num movimento só e assume uma guarda leve, convidando-te com um aceno.', speech: 'Cuidado — eu não bato pra ferir, bato pra ensinar. <i>(equilibra o peso nos pés)</i> Sente meu centro antes de atacar o teu. O corpo aprende o que a mente esquece.' },
-  'monge:wisdom':   { narration: '{name} fecha os olhos um instante antes de falar, como quem busca a frase no fundo de um poço.', speech: 'A tempestade não vence o junco porque o junco não luta — dobra-se e permanece. Sê junco quando puderes, rocha só quando precisares. Saber a diferença é o caminho.' },
-  'barbaro:rage':   { narration: '{name} bate o punho no peito e solta uma risada curta, feroz.', speech: 'No próximo combate, fica perto de mim. Quando o sangue ferver, eu abro caminho e tu segues na brecha. <i>(range os dentes)</i> Juntos somos uma tempestade. Sozinhos, só barulho.' },
-  'barbaro:tribe':  { narration: '{name} para de mastigar e o olhar viaja pra muito longe da praça.', speech: 'Minha tribo dançava sobre o gelo e cantava aos trovões. Já não existe — o inverno e os homens levaram tudo. Carrego o canto deles no peito. Enquanto eu rugir, eles não morreram.' },
-  'feiticeiro:show': { narration: '{name} estala os dedos e uma chama azul dança na palma, mudando de forma ao sabor de um pensamento.', speech: 'Olha — sem encantamento, sem gesto. Só vontade. <i>(a chama vira um pássaro e se apaga)</i> O perigo não é não conseguir. É conseguir demais, e cedo demais.' },
-  'feiticeiro:origin': { narration: '{name} olha a própria mão como quem olha um estranho.', speech: 'Não sei de onde vem. Acordei aos doze com o quarto em chamas e nenhum fósforo à vista. Alguns dizem sangue de dragão. Eu digo: uma sorte que ainda estou aprendendo a não amaldiçoar.' },
-  'bruxo:pact':     { narration: '{name} toca o amuleto sob a roupa, e a sombra do capuz parece adensar.', speech: 'Meu Patrono não tem nome que tua língua suporte. Falamos em sonhos e dívidas. <i>(voz mais baixa)</i> Não perguntes mais — o que se nomeia, escuta. E o que escuta, cobra.' },
-  'bruxo:gift':     { narration: '{name} murmura algo numa língua que arranha o ouvido, e o ar à tua volta esfria um grau.', speech: 'Está feito. Na próxima luta, quando a esperança faltar, algo te puxará de volta. <i>(olhar duro)</i> Mas todo favor sombrio é empréstimo. Um dia, o Patrono cobra os juros — de nós dois.' },
+  'clerigo:pray':   { narration: '{name} ergue o símbolo sagrado e pronuncia uma litania solene, pousando a mão sobre o seu ombro.', speech: 'Que a luz firme seus passos e proteja nosso caminho. <i>(traça um sinal sereno no ar)</i> Siga com fé — a coragem verdadeira caminha conosco.' },
+  'clerigo:ask':    { narration: '{name} acaricia o símbolo desgastado, recordando momentos da juventude.', speech: 'Minha devoção nasceu ao ver a dor do mundo e perceber que curar é o maior ato de resistência. Enquanto eu respirar, ninguém sob minha guarda cai sem socorro.' },
+  'guerreiro:tactics': { narration: '{name} aponta para o horizonte, descrevendo os ângulos de aproximação.', speech: 'Eu assumo o centro e chamo a atenção principal. Você busca o flanco e pune quem tentar me cercar. Comunicação e cobertura mútua — é assim que vencemos.' },
+  'guerreiro:story':   { narration: '{name} guarda a pedra de amolar e reflete por um momento de respeito.', speech: 'Na ponte do vale cinzento, seguramos o dobro de inimigos até os reforços chegarem. Aprendi ali que armadura nenhuma substitui a confiança no parceiro ao lado.' },
+  'mago:spell':     { narration: '{name} abre o grimório numa página cheia de notas marginais e sorri com satisfação.', speech: 'Preparei barreiras de proteção e projéteis concentrados. Magia exige equilíbrio — o segredo é não gastar energia à toa antes do momento decisivo.' },
+  'mago:theory':    { narration: '{name} faz um pequeno círculo de luz flutuar no ar.', speech: 'A Trama está em todo lugar, como fios invisíveis sustentando a realidade. Nós apenas sabemos onde tocar para alterar o tecido do mundo. É uma arte sublime.' },
+  'ladino:rumor':   { narration: '{name} se aproxima e baixa o tom de voz com cumplicidade.', speech: 'Comerciantes da praça andam reclamando de movimentações estranhas nas vielas ao entardecer. Fique atento — onde há fumaça, sempre há ouro ou encrenca.' },
+  'ladino:past':    { narration: '{name} abre um sorriso sutil, olhando além das muralhas.', speech: 'Cresci aprendendo a me virar por conta própria nas sombras dos becos. Mas admito: ter companheiros confiáveis por perto torna a noite bem menos fria.' },
+  'patrulheiro:track': { narration: '{name} aponta as marcas no solo com precisão cirúrgica.', speech: 'Animais e patrulhas deixam rastros claros para quem sabe ler a terra. Se formos avançar, seguiremos contra o vento para mantermos o elemento surpresa.' },
+  'patrulheiro:nature': { narration: '{name} respira o ar puro com satisfação.', speech: 'A floresta daqui é viva e impiedosa com os descuidados. Respeite as trilhas e ela oferece abrigo; ignore os sinais e você se perde em questão de minutos.' },
+  'paladino:bless': { narration: '{name} pousa a mão sobre seu peito; um calor reconfortante se espalha pelo ar.', speech: 'Que sua coragem nunca vacile diante da escuridão. <i>(retira a mão com reverência)</i> A luz nos fortalece, mas a determinação vem do seu próprio coração.' },
+  'paladino:oath':  { narration: '{name} toca o brasão sagrado com orgulho solene.', speech: 'Fiz meu juramento para defender quem não pode lutar por si mesmo. Não busco glória nem riquezas; a única recompensa é saber que cumprimos o dever com honra.' },
+  'bardo:inspire':  { narration: '{name} toca uma sucessão de acordes brilhantes que animam o espírito.', speech: 'Guarde esse ritmo na memória! Quando a situação apertar, lembre-se de que cada batalha é um passo a mais na nossa lenda. Vamos com tudo!' },
+  'bardo:tale':     { narration: '{name} se ajeita confortavelmente e começa a contar com voz expressiva.', speech: 'Uma vez convencemos uma guarnição inteira a depor as armas usando apenas diplomacia e uma canção bem colocada. Palavras certas no momento certo têm o peso de um exército.' },
+  'druida:commune': { narration: '{name} toca o tronco de uma árvore próxima, fechando os olhos em harmonia.', speech: 'Os ventos do oeste trazem calma para os próximos dias. A natureza nos acolhe quando caminhamos sem ganância ou destruição desnecessária.' },
+  'druida:animal':  { narration: '{name} sorri com um brilho selvagem e afetuoso nos olhos.', speech: 'Aprecio a agilidade do falcão para vigiar os céus, mas nada supera o vigor do lobo em matilha. Lutar em grupo é o instinto mais puro da sobrevivência.' },
+  'monge:train':    { narration: '{name} assume uma guarda equilibrada e convida você com um aceno sereno.', speech: 'Mantenha a respiração ritmada. A força de um golpe não vem dos músculos, vem da raiz dos pés e do foco absoluto. Tente mais uma vez.' },
+  'monge:wisdom':   { narration: '{name} olha para a água límpida da fonte da praça.', speech: 'A água é suave, mas com o tempo corta a rocha mais dura. Seja flexível quando as forças contrárias forem grandes, e firme quando seu momento chegar.' },
+  'barbaro:rage':   { narration: '{name} bate no peito com entusiasmo e solta uma gargalhada vigorosa.', speech: 'Na hora do confronto, avance comigo! Eu quebro a primeira linha e você aproveita as brechas. Nenhum obstáculo fica de pé na nossa frente!' },
+  'barbaro:tribe':  { narration: '{name} olha para o horizonte com um brilho de saudade e respeito.', speech: 'Minha tribo vivia sob os céus abertos das montanhas. Lá aprendemos que a lealdade ao companheiro de marcha vale mais do que qualquer ouro.' },
+  'feiticeiro:show': { narration: '{name} faz três pequenas esferas flamejantes orbitarem suas mãos em harmonia.', speech: 'Não há fórmula escrita; é tudo puro instinto e imaginação. Quando me concentro, o fogo responde como um velho amigo pronto para ajudar.' },
+  'feiticeiro:origin': { narration: '{name} sorri ao recordar o passado.', speech: 'Descobri esse dom ainda jovem, quando uma faísca escapou dos meus dedos sem querer. Levei anos para dominar o calor, mas hoje sei exatamente como usá-lo em nosso favor.' },
+  'bruxo:pact':     { narration: '{name} toca discretamente o amuleto sob as vestes.', speech: 'O poder arcano tem suas exigências, mas nos concede visão além do comum. Contanto que mantenhamos nossos objetivos claros, esse conhecimento nos manterá vivos.' },
+  'bruxo:gift':     { narration: '{name} sussurra uma breve invocação protetora no ar.', speech: 'Um véu sutil de proteção está lançado sobre nós. Quando o perigo surgir, você sentirá a agilidade necessária para escapar dos golpes mais perigosos.' }
 };
 
-// === B2.1 #90: intros ROTATIVAS do ally chat ================================
-// Antes, ALLY_DIALOGUE_TEMPLATES[cls].script era a ÚNICA intro por classe —
-// repetia toda visita e dois aliados da mesma classe falavam igual. Aqui cada
-// classe ganha 2 aberturas alternativas (mantendo a voz da classe); o pool de
-// intro = [script original, ...extras] e _showAllyDialogue sorteia via
-// _pickNonRepeating. {name} → nome do aliado. PADRAO_ALDRIC (narração + fala).
 var ALLY_INTRO_EXTRA = {
   clerigo: [
-    [ { type: 'narration', text: '{name} acende um toco de vela diante de um pequeno altar improvisado, a chama tremulando no vento da praça.' }, { type: 'speech', text: 'A luz é teimosa — basta uma faísca pra afastar muita treva. <i>(protege a chama com a mão)</i> Veio buscar uma bênção, ou só um momento de paz antes da estrada?' } ],
-    [ { type: 'narration', text: '{name} enrola ataduras limpas com cuidado metódico, separando-as por tamanho sobre o joelho.' }, { type: 'speech', text: 'Curar não é só rezar — é estar pronto quando a prece não basta. <i>(ergue os olhos)</i> Diz-me o que pesa em ti. Corpo ou alma, eu trato dos dois.' } ],
+    [ { type: 'narration', text: '{name} acende uma vela diante de um pequeno altar improvisado, protegendo a chama do vento.' }, { type: 'speech', text: 'A luz é constante — basta uma fagulha para afastar as sombras. <i>(acomoda as vestes)</i> Veio buscar uma bênção, ou deseja conversar um pouco antes da marcha?' } ],
+    [ { type: 'narration', text: '{name} organiza ataduras limpas e frascos de bálsamo com cuidado metódico.' }, { type: 'speech', text: 'Cuidar do grupo vai além da oração — é estar pronto para agir. <i>(ergue o olhar)</i> Diga o que pesa no seu peito. Posso ajudar com conselhos ou remédios.' } ]
   ],
   guerreiro: [
-    [ { type: 'narration', text: '{name} verifica as correias da armadura uma a uma, testando cada fivela com um puxão seco.' }, { type: 'speech', text: 'Equipamento solto mata mais que inimigo bom. <i>(aperta a última correia)</i> Antes de pensar em vencer, pensa em não morrer por bobagem. Que precisas?' } ],
-    [ { type: 'narration', text: '{name} observa os transeuntes com o olhar treinado de quem mede ameaças por reflexo, mesmo em paz.' }, { type: 'speech', text: 'Velho hábito — conto as saídas de todo lugar onde entro. <i>(aponta o queixo pra ti)</i> Tu também devias. Mas fala: o que te traz ao velho soldado?' } ],
+    [ { type: 'narration', text: '{name} ajusta as correias da armadura uma a uma, conferindo cada fivela com um puxão firme.' }, { type: 'speech', text: 'Equipamento bem cuidado salva vidas no campo de batalha. <i>(aperta a correia)</i> Antes de atacar, certifique-se de que suas defesas estão sólidas. Do que você precisa?' } ],
+    [ { type: 'narration', text: '{name} observa os arredores com a atenção vigilante de um soldado experiente.' }, { type: 'speech', text: 'Hábito antigo — sempre confiro as saídas de qualquer lugar onde piso. <i>(sorri de leve)</i> Recomendo que faça o mesmo. Mas diga: o que manda hoje?' } ]
   ],
   mago: [
-    [ { type: 'narration', text: '{name} sopra a poeira de um pergaminho antigo, os olhos correndo símbolos que dançam à luz fraca.' }, { type: 'speech', text: 'Cada página dessas custou a alguém os olhos ou a sanidade. <i>(enrola o pergaminho)</i> Conhecimento tem preço. Felizmente, conversa é barata. Que desejas saber?' } ],
-    [ { type: 'narration', text: '{name} equilibra uma esfera de luz pálida na ponta do dedo, fazendo-a girar devagar como quem brinca distraído.' }, { type: 'speech', text: 'Um truque de aprendiz — mas até o trivial exige controle absoluto. <i>(a esfera se apaga)</i> Perde-se o controle uma vez só. Enfim — em que posso ser útil?' } ],
+    [ { type: 'narration', text: '{name} remove a poeira de um pergaminho antigo, examinando runas que cintilam levemente.' }, { type: 'speech', text: 'Cada uma destas páginas guarda séculos de estudo e experimentos. <i>(enrola o pergaminho)</i> Conhecimento é poder. O que gostaria de saber hoje?' } ],
+    [ { type: 'narration', text: '{name} faz uma pequena esfera luminosa flutuar acima da palma da mão, girando em silêncio.' }, { type: 'speech', text: 'Controle e paciência são os pilares da verdadeira magia. <i>(dissipa a luz com um gesto)</i> Como posso ajudar você em nossos preparativos?' } ]
   ],
   ladino: [
-    [ { type: 'narration', text: '{name} embaralha uma moeda entre os dedos, fazendo-a sumir e reaparecer sem nunca olhar pra ela.' }, { type: 'speech', text: 'Mãos ocupadas, mente afiada. <i>(a moeda some de vez)</i> Aprendi que quem observa demais é observado de volta. Tu, por exemplo — chegaste quieto. Gostei. Fala.' } ],
-    [ { type: 'narration', text: '{name} encosta-se na sombra de um toldo, de onde vê a praça inteira sem ser notado.' }, { type: 'speech', text: 'Daqui eu vejo tudo: quem rouba, quem mente, quem tem medo. <i>(sorri de lado)</i> A cidade é um livro aberto pra quem sabe ler nas entrelinhas. O que quer ler hoje?' } ],
+    [ { type: 'narration', text: '{name} desliza uma moeda de prata entre os dedos com destreza impecável, sem tirar os olhos da praça.' }, { type: 'speech', text: 'Mãos ocupadas, mente sempre alerta. <i>(a moeda desaparece na manga)</i> Vi que chegou sem fazer barulho. Gostei do estilo. O que manda?' } ],
+    [ { type: 'narration', text: '{name} encosta-se confortavelmente na sombra, de onde observa toda a movimentação sem chamar atenção.' }, { type: 'speech', text: 'Daqui vejo tudo: quem compra, quem vigia e quem está nervoso. <i>(sorri de lado)</i> A cidade é um livro aberto para quem presta atenção. O que temos em pauta?' } ]
   ],
   patrulheiro: [
-    [ { type: 'narration', text: '{name} testa a tensão da corda do arco contra o ouvido, ajustando-a com pequenos giros até soar certo.' }, { type: 'speech', text: 'Um arco mal-afinado erra o alvo e a vida que dependia dele. <i>(guarda o arco)</i> Tudo na natureza tem seu tom certo. Inclusive o silêncio. Que precisas?' } ],
-    [ { type: 'narration', text: '{name} esfarela uma folha seca entre os dedos e cheira o pó, o olhar voltado pro horizonte além das muralhas.' }, { type: 'speech', text: 'Carvalho do norte. O vento mudou — vem chuva em dois dias. <i>(limpa as mãos)</i> A terra fala o tempo todo; poucos param pra ouvir. Você veio falar de quê?' } ],
+    [ { type: 'narration', text: '{name} testa a tensão da corda do arco junto ao ouvido, girando as extremidades até soar perfeito.' }, { type: 'speech', text: 'Um arco bem calibrado nunca falha quando o grupo precisa. <i>(guarda a flecha na aljava)</i> Tudo na natureza tem seu ritmo certo. Do que precisa?' } ],
+    [ { type: 'narration', text: '{name} esfarela folhas secas entre os dedos e avalia o vento com olhar experiente.' }, { type: 'speech', text: 'O ar do norte traz cheiro de chuva para as próximas noites. <i>(limpa as mãos)</i> A terra sempre avisa com antecedência. Veio falar sobre nossa rota?' } ]
   ],
   paladino: [
-    [ { type: 'narration', text: '{name} pole o símbolo sagrado com um pano macio, em movimentos lentos e quase reverentes.' }, { type: 'speech', text: 'Mantenho-o limpo pra lembrar por que luto — fácil esquecer no meio do sangue. <i>(ergue o símbolo à luz)</i> A causa primeiro, a espada depois. Em que posso servir-te?' } ],
-    [ { type: 'narration', text: '{name} ajoelha-se brevemente em prece silenciosa antes de se levantar e te encarar com firmeza serena.' }, { type: 'speech', text: 'Começo todo dia assim — pedindo força pra não falhar com quem confia em mim. <i>(põe a mão no peito)</i> Hoje isso te inclui. Fala, e caminharemos juntos.' } ],
+    [ { type: 'narration', text: '{name} lustra o símbolo sagrado com um pano de flanela, com movimentos cuidadosos e respeitosos.' }, { type: 'speech', text: 'Gosto de mantê-lo brilhando para lembrar por que lutamos. <i>(ergue o símbolo à claridade)</i> A causa vem sempre antes da espada. Em que posso ajudar?' } ],
+    [ { type: 'narration', text: '{name} conclui uma prece silenciosa de pé e se volta com olhar firme e sereno.' }, { type: 'speech', text: 'Começo o dia renovando a determinação de proteger nossos companheiros. <i>(assente com firmeza)</i> Caminhamos juntos. Diga o que precisa.' } ]
   ],
   bardo: [
-    [ { type: 'narration', text: '{name} afina o alaúde com a cabeça inclinada, buscando a nota teimosa que insiste em escapar.' }, { type: 'speech', text: 'Esta corda anda rebelde — como certos aventureiros que conheço. <i>(arranca um acorde limpo)</i> Pronto, domada. Toda discórdia se resolve com paciência e o dedo certo. O que te traz à minha modesta plateia?' } ],
-    [ { type: 'narration', text: '{name} rabisca versos num caderno surrado, riscando metade deles com um muxoxo de quem não se contenta.' }, { type: 'speech', text: 'Uma boa rima é como uma boa estocada: precisa, ou não vale nada. <i>(fecha o caderno)</i> Mas chega de mim — toda história precisa de um segundo personagem. Conta o teu.' } ],
+    [ { type: 'narration', text: '{name} afina o alaúde com a cabeça inclinada, dedilhando cada corda com sensibilidade.' }, { type: 'speech', text: 'Uma boa canção resolve mais conflitos do que dez lâminas desembainhadas. <i>(toca um acorde límpido)</i> O que traz você à minha humilde companhia hoje?' } ],
+    [ { type: 'narration', text: '{name} anota versos em um caderno de capa de couro, marcando o ritmo com o pé.' }, { type: 'speech', text: 'Uma boa rima precisa ser certeira e marcante. <i>(guarda a pena de escrever)</i> Mas chega de rascunhos por agora — que novidade temos para a nossa jornada?' } ]
   ],
   druida: [
-    [ { type: 'narration', text: '{name} agacha-se junto a uma fresta no calçamento, onde uma muda teimosa rompeu a pedra em busca de sol.' }, { type: 'speech', text: 'Vês? Nem a cidade segura a vida que quer crescer. <i>(toca a folhinha com cuidado)</i> A natureza é paciente e implacável. Aprende-se muito só observando. Que buscas?' } ],
-    [ { type: 'narration', text: '{name} sussurra algo a um gato esquálido que, contra todo instinto, se aproxima e se enrosca em suas pernas.' }, { type: 'speech', text: 'Eles sentem quem não traz ameaça. <i>(coça a orelha do bicho)</i> Os animais não mentem — é por isso que confio mais neles que na maioria. Mas tu pareces honesto. Fala.' } ],
+    [ { type: 'narration', text: '{name} observa com admiração uma pequena planta que brotou teimosa entre as frestas da calçada.' }, { type: 'speech', text: 'Viu só? A vida sempre encontra um caminho, mesmo na pedra fria. <i>(toca a folha com gentileza)</i> A natureza é paciente. O que você procura?' } ],
+    [ { type: 'narration', text: '{name} acaricia um gato de rua que se aninha confiante ao lado de suas botas.' }, { type: 'speech', text: 'Os animais reconhecem quando alguém traz boas intenções. <i>(coça a orelha do felino)</i> Você transmite calma. Diga o que está em seus pensamentos.' } ]
   ],
   monge: [
-    [ { type: 'narration', text: '{name} executa um movimento lento e preciso com as mãos, o corpo fluindo de uma postura à outra como água.' }, { type: 'speech', text: 'A forma sem pressa ensina o corpo a lembrar na pressa. <i>(retorna ao repouso)</i> Repetição é a mãe da maestria, e a paciência, o seu pai. Precisas de algo?' } ],
-    [ { type: 'narration', text: '{name} equilibra um seixo liso sobre o dorso da mão estendida, imóvel como uma estátua.' }, { type: 'speech', text: 'Pedra parada no corpo agitado, ou corpo parado na pedra agitada? <i>(o seixo nem treme)</i> A diferença é só a mente. Acalmaste a tua hoje? Fala-me o que pesa.' } ],
+    [ { type: 'narration', text: '{name} realiza uma sequência fluida de posturas marciais, movendo-se com a suavidade da água corrente.' }, { type: 'speech', text: 'A prática constante transforma a técnica em reflexo natural. <i>(retorna à postura neutra)</i> Como posso ajudar no seu treinamento hoje?' } ],
+    [ { type: 'narration', text: '{name} equilibra um seixo perfeitamente sobre a ponta do indicador sem que ele oscile.' }, { type: 'speech', text: 'Corpo e mente alinhados superam qualquer agitação exterior. <i>(fecha a mão calmamente)</i> Acalmou os pensamentos hoje? Conte o que você tem em mente.' } ]
   ],
   barbaro: [
-    [ { type: 'narration', text: '{name} afia o gume do machado contra uma pedra com golpes longos e ritmados, faíscas saltando a cada passada.' }, { type: 'speech', text: 'Aço cego é insulto ao inimigo. <i>(testa o fio no pelo do braço)</i> Quando eu cortar, vai ser limpo e honesto. Nada de sofrimento à toa. O que quer, forasteiro?' } ],
-    [ { type: 'narration', text: '{name} arranca um naco de carne com os dentes e mastiga ruidosamente, encarando-te sem cerimônia.' }, { type: 'speech', text: 'Comida primeiro, conversa depois — regra da tribo. <i>(empurra um pedaço na tua direção)</i> Mas senta, divide. Quem parte o pão comigo não é mais estranho. Fala.' } ],
+    [ { type: 'narration', text: '{name} passa a pedra de afiar pela lâmina do machado, faíscas saltando com o movimento cadenciado.' }, { type: 'speech', text: 'Gume cego só serve para cansar o braço. <i>(testa o fio com cuidado)</i> Quando formos para o combate, a resposta será rápida. O que temos para hoje?' } ],
+    [ { type: 'narration', text: '{name} parte um pedaço generoso de pão e oferece na sua direção com entusiasmo.' }, { type: 'speech', text: 'Comida boa antes da marcha é regra sagrada! <i>(puxa um banco de madeira)</i> Sente-se e divida a mesa. Quem come junto luta melhor.' } ]
   ],
   feiticeiro: [
-    [ { type: 'narration', text: '{name} observa pequenas faíscas saltarem espontâneas entre os dedos, franzindo a testa como quem repreende a própria mão.' }, { type: 'speech', text: 'Quieto, ainda não te chamei. <i>(as faíscas obedecem a contragosto)</i> Tem dias que o poder tem vontade própria. Hoje está manhoso. Diga logo o que quer antes que ele se entedie.' } ],
-    [ { type: 'narration', text: '{name} aquece as mãos numa chama azul que flutua sem fonte, encolhida como quem sente um frio que não é do corpo.' }, { type: 'speech', text: 'Engraçado — faço fogo e ainda sinto frio. <i>(a chama oscila)</i> Talvez o que arde por dentro não aqueça mesmo. Enfim, basta de filosofia. Em que te sirvo?' } ],
+    [ { type: 'narration', text: '{name} observa faíscas azuladas pularem espontâneas entre os nós dos dedos, rindo de leve.' }, { type: 'speech', text: 'O poder por aqui não para quieto nem nas horas de folga. <i>(fecha os punhos com calma)</i> Diga logo o que tem em mente antes que eu invente alguma explosão!' } ],
+    [ { type: 'narration', text: '{name} aquece uma xícara nas mãos usando apenas um brilho tênue de calor mágico.' }, { type: 'speech', text: 'Praticidade mágica no dia a dia é o melhor uso da energia. <i>(toma um gole satisfeito)</i> Em que posso ser útil nos nossos planos?' } ]
   ],
   bruxo: [
-    [ { type: 'narration', text: '{name} traça símbolos no ar com o dedo, símbolos que brilham por um instante e somem antes que consiga decifrá-los.' }, { type: 'speech', text: 'Não tente ler — alguns sinais olham de volta. <i>(apaga o último com a palma)</i> Falo com quem não deveria, e ouço o que não deveria. É um fardo útil. O que quer de mim?' } ],
-    [ { type: 'narration', text: '{name} inclina a cabeça de súbito, como quem escuta uma voz vinda de lugar nenhum, e só depois se volta pra ti.' }, { type: 'speech', text: 'Perdão — Ele às vezes fala sem ser chamado. <i>(toca o amuleto)</i> Disse que tu chegarias. Não sei se é bom sinal ou aviso. De qualquer forma: fala, estou ouvindo. Nós dois estamos.' } ],
-  ],
+    [ { type: 'narration', text: '{name} traça runas sutis no ar com o indicador, que emitem um brilho fosco antes de sumir.' }, { type: 'speech', text: 'Alguns sinais sussurram segredos que a maioria prefere ignorar. <i>(olha na sua direção)</i> O que você gostaria de desvendar hoje?' } ],
+    [ { type: 'narration', text: '{name} apoia o queixo na mão, observando o reflexo das tochas nas pedras úmidas.' }, { type: 'speech', text: 'Tive a impressão de que você viria falar comigo agora. <i>(toca o talismã)</i> Pode falar livremente, estou ouvindo com atenção.' } ]
+  ]
 };
 
-function _allyTplKey(cls){
-  var k = (cls || '').toLowerCase()
-    .replace(/[áàâã]/g, 'a').replace(/é/g, 'e').replace(/í/g, 'i')
-    .replace(/[óô]/g, 'o').replace(/ú/g, 'u')
-    .replace(/[\s].*/, '');
-  var ALIASES = {
-    sacerdotisa: 'clerigo', sacerdote: 'clerigo', cleric: 'clerigo',
-    clerica: 'clerigo',
-    feiticeira: 'feiticeiro',
-    barbara: 'barbaro'
+function _allyRelSummary(m) {
+  if (!m) return 'Neutro';
+  var apr = (m.approval != null) ? m.approval : ((m.apr != null) ? m.apr : 0);
+  var tier = 'Neutro';
+  if (apr >= 75) tier = 'Devoto';
+  else if (apr >= 50) tier = 'Leal';
+  else if (apr >= 25) tier = 'Amigável';
+  else if (apr <= -50) tier = 'Hostil';
+  else if (apr <= -25) tier = 'Frio';
+  var relType = m.relationship_type || m.rel || 'camaradagem';
+  var relLabels = {
+    camaradagem: 'Camaradagem (+1 CA)',
+    rivalidade: 'Rivalidade (+2 Dano)',
+    mentoria: 'Mentoria (+1 Saves Mentais)',
+    romance: 'Romance & Devoção'
   };
-  return ALIASES[k] || k;
+  var label = relLabels[relType] || 'Camaradagem (+1 CA)';
+  var sign = apr > 0 ? '+' : '';
+  return tier + ' (' + sign + apr + ') · ' + label;
 }
+window._allyRelSummary = _allyRelSummary;
 
 // === Tópicos Temáticos de Conversa com Companheiros D&D 5e / BG3 ===
 var ALLY_TOPIC_CONFIG = {
-  camp_campfire:      { id: 'camp_campfire',      label: '🔥 Ao redor da fogueira ▸',         title: 'Ao Redor da Fogueira',  dc: 13, skill: 'persuasion',  skillLabel: 'Persuasão' },
-  backstory_secret:   { id: 'backstory_secret',   label: '🗝️ Segredos e o passado ▸',        title: 'Segredos do Passado',   dc: 14, skill: 'insight',     skillLabel: 'Intuição' },
-  morals_faith:       { id: 'morals_faith',       label: '⚖️ Princípios e crenças ▸',         title: 'Filosofia e Crenças',   dc: 13, skill: 'religion',    skillLabel: 'Religião' },
-  combat_bonds:       { id: 'combat_bonds',       label: '🛡️ Táticas e laços de batalha ▸',   title: 'Laços de Batalha',      dc: 13, skill: 'athletics',   skillLabel: 'Atletismo' },
+  camp_campfire:      { id: 'camp_campfire',      label: '🔥 Ao redor da fogueira ▸',         title: 'Ao Redor da Fogueira',  dc: 13, skill: 'persuasion',    skillLabel: 'Persuasão' },
+  backstory_secret:   { id: 'backstory_secret',   label: '🗝️ Segredos e o passado ▸',        title: 'Segredos do Passado',   dc: 14, skill: 'insight',       skillLabel: 'Intuição' },
+  morals_faith:       { id: 'morals_faith',       label: '⚖️ Princípios e crenças ▸',         title: 'Filosofia e Crenças',   dc: 13, skill: 'religion',      skillLabel: 'Religião' },
+  combat_bonds:       { id: 'combat_bonds',       label: '🛡️ Táticas e laços de batalha ▸',   title: 'Laços de Batalha',      dc: 13, skill: 'athletics',     skillLabel: 'Atletismo' },
   personal_favor:     { id: 'personal_favor',     label: '📜 Assunto pessoal e favor ▸',      title: 'Favor Pessoal',         dc: 14, skill: 'investigation', skillLabel: 'Investigação' },
-  romance_courtship:  { id: 'romance_courtship',  label: '💖 Confidências a dois [Afeto] ▸',  title: 'Confidências e Afeto',  dc: 12, skill: 'persuasion',  skillLabel: 'Persuasão' },
-  sparring_challenge: { id: 'sparring_challenge', label: '⚔️ Desafio de treino rápido ▸',     title: 'Desafio de Treino',     dc: 13, skill: 'acrobatics',  skillLabel: 'Acrobacia' },
+  romance_courtship:  { id: 'romance_courtship',  label: '💖 Confidências a dois [Afeto] ▸',  title: 'Confidências e Afeto',  dc: 12, skill: 'persuasion',    skillLabel: 'Persuasão' },
+  sparring_challenge: { id: 'sparring_challenge', label: '⚔️ Desafio de treino rápido ▸',     title: 'Desafio de Treino',     dc: 13, skill: 'acrobatics',    skillLabel: 'Acrobacia' },
 };
 
-function _buildClientAllyTopicNode(cls, topicKey, displayName) {
+function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
   var cfg = ALLY_TOPIC_CONFIG[topicKey] || ALLY_TOPIC_CONFIG.camp_campfire;
   var dc = cfg.dc || 13;
   var skill = cfg.skill || 'persuasion';
   var skillLabel = cfg.skillLabel || 'Persuasão';
+  var isFem = (m && (m.gender === 'female' || (m.name && String(m.name).toLowerCase().indexOf('wrenna') === 0)));
 
   var intros = {
     camp_campfire: [
       { type: 'narration', text: 'A fogueira crepita com pequenas centelhas douradas subindo para o céu estrelado. ' + displayName + ' senta-se próximo às brasas, o calor suavizando o cansaço da marcha.' },
-      { type: 'speech', speaker: displayName, text: 'A noite está fria, mas as brasas ajudam. Poucas coisas valem tanto quanto uma conversa honesta depois de um dia de marcha puxada. O que tens em mente?' }
+      { type: 'speech', speaker: displayName, text: 'A noite está fresca, mas o fogo ajuda a relaxar. Poucas coisas valem tanto quanto uma conversa honesta depois de um dia de marcha puxada. O que você tem em mente?' }
     ],
     backstory_secret: [
-      { type: 'narration', text: displayName + ' fica em silêncio por um instante, o olhar distante como quem revisita lembranças antigas que o tempo não conseguiu apagar.' },
-      { type: 'speech', speaker: displayName, text: 'Nem tudo começou na guilda de aventureiros. Deixei para trás dívidas e rostos que prefiro não lembrar toda noite... mas quem não deixou?' }
+      { type: 'narration', text: displayName + ' fica em silêncio por um instante, o olhar pensativo revisitando lembranças antigas que o tempo não apagou.' },
+      { type: 'speech', speaker: displayName, text: 'Minha jornada não começou ontem. Deixei para trás lugares e histórias que nem sempre são fáceis de recordar... mas quem não tem suas marcas?' }
     ],
     morals_faith: [
-      { type: 'narration', text: displayName + ' gesticula com moderação, a postura demonstrando a reflexão séria de quem já viu escolhas difíceis pesarem na balança da vida.' },
-      { type: 'speech', speaker: displayName, text: 'O mundo não é simples. Às vezes é preciso firmeza para que os outros durmam em paz nas muralhas da cidade. Qual é o teu limite moral?' }
+      { type: 'narration', text: displayName + ' gesticula com moderação, a postura demonstrando a reflexão séria de quem já enfrentou dilemas complicados na estrada.' },
+      { type: 'speech', speaker: displayName, text: 'O mundo não é preto no branco. Às vezes escolhas difíceis precisam ser feitas para que o grupo sobreviva. Qual é o seu limite moral?' }
     ],
     combat_bonds: [
-      { type: 'narration', text: displayName + ' examina o equipamento de viagem com olhar metódico, assentindo com respeito ao notar tua presença vigilante.' },
-      { type: 'speech', speaker: displayName, text: 'Nosso ritmo de combate está afinado. Saber que estás cobrindo minhas costas quando o confronto aperta faz toda a diferença. Estamos prontos para o que vier.' }
+      { type: 'narration', text: displayName + ' examina o equipamento de viagem com olhar metódico, assentindo com respeito ao notar sua presença.' },
+      { type: 'speech', speaker: displayName, text: 'Nosso ritmo de combate tem evoluído bem. Saber que posso confiar na sua cobertura quando o cerco aperta faz toda a diferença. Estamos prontos para o que vier.' }
     ],
     personal_favor: [
       { type: 'narration', text: displayName + ' respira fundo, hesitando um segundo antes de quebrar a reserva habitual com um tom sincero e confidencial.' },
-      { type: 'speech', speaker: displayName, text: 'Há um assunto pendente do qual não consigo me desvencilhar sozinho(a). Se estiveres disposto(a) a me apoiar quando a hora chegar, eu nunca esquecerei.' }
+      { type: 'speech', speaker: displayName, text: 'Há uma questão pessoal da qual não consigo me desvencilhar por conta própria. Se você puder me dar uma força quando a hora chegar, eu nunca esquecerei.' }
     ],
     romance_courtship: [
-      { type: 'narration', text: 'A brisa noturna agita os galhos ao redor do acampamento. ' + displayName + ' ergue os olhos devagar, um brilho cálido e desarmado transparecendo na penumbra.' },
-      { type: 'speech', speaker: displayName, text: 'O acampamento finalmente dorme... e pela primeira vez hoje sinto que podemos respirar em paz. Gosto de ter-te por perto. O que te trouxe até mim agora?' }
+      { type: 'narration', text: 'A brisa noturna agita suavemente as copas das árvores. ' + displayName + ' ergue os olhos devagar, um brilho cálido e desarmado transparecendo na penumbra.' },
+      { type: 'speech', speaker: displayName, text: 'O acampamento finalmente silenciou... e pela primeira vez hoje sinto que podemos respirar com calma. Gosto da sua companhia. O que trouxe você até aqui agora?' }
     ],
     sparring_challenge: [
-      { type: 'narration', text: displayName + ' assume uma base equilibrada e leve, os olhos brilhando com a centelha sadia da competição entre companheiros.' },
-      { type: 'speech', speaker: displayName, text: 'Um treino leve antes de deitar afasta a rigidez muscular e mantém os reflexos vivos. Guarda alta — mostra-me o que aprendeste hoje!' }
+      { type: 'narration', text: displayName + ' assume uma postura ágil e equilibrada, os olhos brilhando com a centelha sadia da competição entre parceiros.' },
+      { type: 'speech', speaker: displayName, text: 'Um treino leve antes do descanso afasta a rigidez muscular e mantém os reflexos vivos. Guarda alta — me mostre o que aprendeu hoje!' }
     ]
   };
 
   var script = intros[topicKey] || intros.camp_campfire;
 
-  var choices = [
-    {
-      id: 'emp_' + topicKey,
-      label: '"Compreendo seu fardo. Pode sempre contar com meu apoio."',
-      renownDelta: 2,
-      cb: 'close',
-      _replyScript: [
-        { type: 'narration', text: displayName + ' relaxa os ombros, um suspiro contido aliviando a tensão guardada.' },
-        { type: 'speech', speaker: displayName, text: 'Ouvir isso faz a jornada parecer menos pesada. Obrigado(a) por não julgar antes de escutar.' }
-      ]
-    },
-    {
-      id: 'prag_' + topicKey,
-      label: '"Foco na nossa missão e nos recursos. A sobrevivência do grupo vem primeiro."',
-      renownDelta: 1,
-      cb: 'close',
-      _replyScript: [
-        { type: 'narration', text: displayName + ' assente com firmeza prática, reconhecendo o bom senso da prudência.' },
-        { type: 'speech', speaker: displayName, text: 'Pensamento sóbrio. Quem perde o foco na sobrevivência não dura duas semanas fora dos muros.' }
-      ]
-    },
-    {
-      id: 'check_' + topicKey,
-      label: '"Permita-me compartilhar uma perspectiva diferente."',
-      check: { skill: skill, dc: dc },
-      resultNarration: 'Tua colocação atinge o ponto exato da questão. ' + displayName + ' arregala os olhos levemente, demonstrando genuína admiração por tua clareza mental.',
-      resultText: 'A conversa aprofundou vosso laço. <b>+2 de Aprovação</b> e respeito conquistado.',
-      resultNarrationFail: 'Tua colocação soa apressada. ' + displayName + ' cruza os braços e mantém a reserva, preferindo mudar de assunto.',
-      resultTextFail: 'O assunto foi encerrado sem atrito maior, mas a guarda permaneceu fechada.'
-    },
-    {
-      id: 'prov_' + topicKey,
-      label: '"Duvido que consigas manter essa convicção quando a prova real chegar."',
-      renownDelta: 0,
-      cb: 'close',
-      _replyScript: [
-        { type: 'narration', text: displayName + ' esboça um sorriso desafiador, a determinação faiscando no olhar firme.' },
-        { type: 'speech', speaker: displayName, text: 'Estás me desafiando? Vamos ver quem mantém a postura quando a poeira assentar.' }
-      ]
-    }
-  ];
+  // Escolhas ricas contextualizadas para cada tópico
+  var choices = [];
+
+  if (topicKey === 'camp_campfire') {
+    choices = [
+      {
+        id: 'emp_camp_campfire',
+        label: '"A estrada cansa, mas uma conversa tranquila ao seu lado renova o ânimo para o que vier."',
+        deltaApproval: 5, renownDelta: 2, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' relaxa os ombros e sorri calorosamente, sentindo a sinceridade das palavras.' },
+          { type: 'speech', speaker: displayName, text: 'É bom ouvir isso. Saber que temos companheirismo de verdade torna qualquer marcha mais leve.' }
+        ]
+      },
+      {
+        id: 'prag_camp_campfire',
+        label: '"Aproveite para descansar e revisar as provisões. Amanhã a marcha começa cedo."',
+        deltaApproval: 2, renownDelta: 1, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' assente com aprovação prática, organizando as bolsas de viagem.' },
+          { type: 'speech', speaker: displayName, text: 'Tem razão. O descanso é tão importante quanto a lâmina afiada.' }
+        ]
+      },
+      {
+        id: 'check_camp_campfire',
+        label: '"Venha, me conte como você aprendeu a sobreviver nestas paragens."',
+        check: { skill: skill, dc: dc }, deltaApproval: 4,
+        resultNarration: displayName + ' sorri abertamente e passa os minutos seguintes compartilhando memórias valiosas e truques de sobrevivência.',
+        resultText: 'A conversa fortaleceu a afinidade entre vocês. <b>+4 de Aprovação</b>.',
+        resultNarrationFail: displayName + ' dá um sorriso tímido. "Uma longa história para outra noite. Hoje prefiro só escutar o fogo."',
+        resultTextFail: 'A conversa permaneceu amigável, mas reservada.'
+      },
+      {
+        id: 'prov_camp_campfire',
+        label: '"Duvido que você aguente o primeiro turno de vigília sem cochilar nas brasas."',
+        deltaApproval: 1, renownDelta: 0, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' solta uma risada desafiadora e ajeita a postura.' },
+          { type: 'speech', speaker: displayName, text: 'Está duvidando da minha vigília? Vamos ver quem vai estar de pé quando o sol nascer!' }
+        ]
+      }
+    ];
+  } else if (topicKey === 'backstory_secret') {
+    choices = [
+      {
+        id: 'emp_backstory_secret',
+        label: '"Todo mundo carrega marcas do passado. O que importa é quem você escolhe ser hoje."',
+        deltaApproval: 5, renownDelta: 2, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' suspira com alívio, sentindo o peso das lembranças diminuir.' },
+          { type: 'speech', speaker: displayName, text: 'Obrigado por entender. Poucas pessoas olham além das cicatrizes da estrada.' }
+        ]
+      },
+      {
+        id: 'prag_backstory_secret',
+        label: '"O passado ficou para trás. Se alguma dívida antiga bater à porta, resolveremos com aço."',
+        deltaApproval: 2, renownDelta: 1, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' acena com determinação prática e um olhar confiante.' },
+          { type: 'speech', speaker: displayName, text: 'Direto ao ponto. É desse tipo de determinação que nosso grupo precisa.' }
+        ]
+      },
+      {
+        id: 'check_backstory_secret',
+        label: '"Você fala com cautela, mas vejo que há algo mais profundo guardado no seu peito."',
+        check: { skill: skill, dc: dc }, deltaApproval: 5,
+        resultNarration: 'Sua percepção atinge o cerne da questão. ' + displayName + ' respira fundo e confidencia um segredo importante de suas origens.',
+        resultText: 'Um laço de profunda confiança foi estabelecido! <b>+5 de Aprovação</b>.',
+        resultNarrationFail: displayName + ' desvia o olhar com delicadeza. "Algumas portas é melhor manter fechadas por enquanto."',
+        resultTextFail: 'O assunto foi mantido em sigilo respeitoso.'
+      },
+      {
+        id: 'prov_backstory_secret',
+        label: '"Parece que você ainda foge da própria sombra. Quando vai encarar o que deixou para trás?"',
+        deltaApproval: 0, renownDelta: 0, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' cerra os olhos com firmeza, encarando você sem recuar.' },
+          { type: 'speech', speaker: displayName, text: 'Eu não fujo de nada. Apenas escolho a hora certa de acertar as contas.' }
+        ]
+      }
+    ];
+  } else if (topicKey === 'morals_faith') {
+    choices = [
+      {
+        id: 'emp_morals_faith',
+        label: '"A justiça deste mundo pode ser imperfeita, mas lutar pelo que é certo sempre vale a pena."',
+        deltaApproval: 5, renownDelta: 2, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' assente com respeito sincero, admirando seus princípios.' },
+          { type: 'speech', speaker: displayName, text: 'Concordo plenamente. É reconfortante viajar ao lado de quem compartilha dessa visão.' }
+        ]
+      },
+      {
+        id: 'prag_morals_faith',
+        label: '"Na hora do perigo, sobrevive quem age com rapidez. Dogmas não param lâminas inimigas."',
+        deltaApproval: 2, renownDelta: 1, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' reconhece a sobriedade pragmática com um leve aceno.' },
+          { type: 'speech', speaker: displayName, text: 'Visão realista. Idealismo sem capacidade de sobrevivência vira túmulo rápido.' }
+        ]
+      },
+      {
+        id: 'check_morals_faith',
+        label: '"As crenças e os deuses testam nossos limites, mas a convicção nasce das nossas escolhas."',
+        check: { skill: skill, dc: dc }, deltaApproval: 4,
+        resultNarration: displayName + ' reflete sobre suas palavras com profunda admiração filosófica.',
+        resultText: 'A troca de ideias ampliou o respeito mútuo. <b>+4 de Aprovação</b>.',
+        resultNarrationFail: displayName + ' sorri suavemente. "Filosofia interessante, embora a prática na lama seja bem mais crua."',
+        resultTextFail: 'A conversa encerrou sem desacordos.'
+      },
+      {
+        id: 'prov_morals_faith',
+        label: '"Essa nobreza soa bonita na teoria, mas na lama da estrada a sobrevivência fala mais alto."',
+        deltaApproval: 1, renownDelta: 0, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' mantém a compostura, firme em suas convicções.' },
+          { type: 'speech', speaker: displayName, text: 'Se abandonarmos nossos valores na primeira lama, não seremos melhores do que os monstros que caçamos.' }
+        ]
+      }
+    ];
+  } else if (topicKey === 'combat_bonds') {
+    choices = [
+      {
+        id: 'emp_combat_bonds',
+        label: '"Saber que posso confiar nas suas costas me dá a coragem necessária na linha de frente."',
+        deltaApproval: 5, renownDelta: 2, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' bate a mão aberta no peito com lealdade vibrante.' },
+          { type: 'speech', speaker: displayName, text: 'E pode contar com isso. Enquanto eu puder empunhar minha arma, você nunca estará sem apoio na linha de frente.' }
+        ]
+      },
+      {
+        id: 'prag_combat_bonds',
+        label: '"Vamos repassar nossos ângulos de cobertura e sinais de recuo para não termos surpresas."',
+        deltaApproval: 3, renownDelta: 1, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' esboça os movimentos no ar com precisão tática.' },
+          { type: 'speech', speaker: displayName, text: 'Perfeito. Alinhamento tático impecável economiza poções e sangue.' }
+        ]
+      },
+      {
+        id: 'check_combat_bonds',
+        label: '"Se você cobrir minha retaguarda enquanto avanço, podemos quebrar qualquer formação inimiga."',
+        check: { skill: skill, dc: dc }, deltaApproval: 4,
+        resultNarration: displayName + ' vibra com a estratégia proposta e ajusta os detalhes da manobra conjunta.',
+        resultText: 'Sinergia tática aprimorada! <b>+4 de Aprovação</b>.',
+        resultNarrationFail: displayName + ' avalia o plano com prudência. "Arriscado demais sem suporte lateral. Melhor mantermos a formação padrão."',
+        resultTextFail: 'A tática permaneceu a usual.'
+      },
+      {
+        id: 'prov_combat_bonds',
+        label: '"Quero ver se você mantém esse ritmo quando enfrentarmos monstros de verdade e o cerco apertar."',
+        deltaApproval: 1, renownDelta: 0, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' ergue uma sobrancelha com um sorriso irônico e afiado.' },
+          { type: 'speech', speaker: displayName, text: 'Fique de olho na minha lâmina no próximo combate. Depois você me diz se meu ritmo é bom ou não!' }
+        ]
+      }
+    ];
+  } else if (topicKey === 'personal_favor') {
+    choices = [
+      {
+        id: 'emp_personal_favor',
+        label: '"Seja o que for, você faz parte do nosso grupo. Vamos resolver isso juntos."',
+        deltaApproval: 6, renownDelta: 2, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' abre um sorriso emocionado e aliviado, apertando sua mão com firmeza.' },
+          { type: 'speech', speaker: displayName, text: 'Sua lealdade não tem preço. Guardarei esse compromisso com a minha vida.' }
+        ]
+      },
+      {
+        id: 'prag_personal_favor',
+        label: '"Se essa pendência colocar o grupo em perigo, precisamos agir com antecedência."',
+        deltaApproval: 2, renownDelta: 1, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' assente seriamente, compreendendo a prudência.' },
+          { type: 'speech', speaker: displayName, text: 'Compreendo perfeitamente. Vamos planejar isso de forma limpa e sem riscos desnecessários.' }
+        ]
+      },
+      {
+        id: 'check_personal_favor',
+        label: '"Me dê os detalhes concretos desse problema. Toda situação tem uma brecha que podemos explorar."',
+        check: { skill: skill, dc: dc }, deltaApproval: 5,
+        resultNarration: displayName + ' expõe os detalhes da missão com clareza, encontrando esperança na sua capacidade analítica.',
+        resultText: 'Missão pessoal mapeada com sucesso! <b>+5 de Aprovação</b>.',
+        resultNarrationFail: displayName + ' hesita um momento. "Ainda faltam algumas peças nesse quebra-cabeça. Trarei novidades quando tiver certeza."',
+        resultTextFail: 'O assunto foi adiado temporariamente.'
+      },
+      {
+        id: 'prov_personal_favor',
+        label: '"Deixar pendências pelo caminho é descuido. Espero que isso não nos traga encrencas."',
+        deltaApproval: -1, renownDelta: 0, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' contrai a mandíbula por um segundo, contendo o incômodo.' },
+          { type: 'speech', speaker: displayName, text: 'Eu sei lidar com os meus problemas. Só pedi ajuda porque confiei no grupo.' }
+        ]
+      }
+    ];
+  } else if (topicKey === 'romance_courtship') {
+    choices = [
+      {
+        id: 'emp_romance_courtship',
+        label: '"Sua presença torna toda essa jornada mais especial. Fico muito feliz de estarmos juntos aqui."',
+        deltaApproval: 6, renownDelta: 2, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' aproxima-se um passo, um rubor suave surgindo no rosto com um sorriso afetuoso.' },
+          { type: 'speech', speaker: displayName, text: 'Eu sinto o mesmo... Estar ao seu lado faz qualquer perigo parecer pequeno.' }
+        ]
+      },
+      {
+        id: 'prag_romance_courtship',
+        label: '"A estrada é dura, mas ter alguém de confiança mútua faz tudo valer a pena."',
+        deltaApproval: 3, renownDelta: 1, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' pousa a mão suavemente sobre a sua com serenidade e carinho.' },
+          { type: 'speech', speaker: displayName, text: 'Confiança é o laço mais precioso que podíamos ter construído.' }
+        ]
+      },
+      {
+        id: 'check_romance_courtship',
+        label: '"Seus olhos dizem muito mais do que suas palavras. O que você realmente sente agora?"',
+        check: { skill: skill, dc: dc }, deltaApproval: 5,
+        resultNarration: displayName + ' sustenta o seu olhar por longos segundos, desarmando completamente qualquer hesitação e revelando seu afeto sincero.',
+        resultText: 'Momento de íntima cumplicidade e romance! <b>+5 de Aprovação</b>.',
+        resultNarrationFail: displayName + ' desvia o olhar com um sorriso envergonhado. "Você sempre sabe como me desconcertar... mas ainda é cedo para dizer tudo."',
+        resultTextFail: 'O momento passou com carinho e timidez.'
+      },
+      {
+        id: 'prov_romance_courtship',
+        label: isFem ? '"Você é sempre tão misteriosa ou só fica tímida quando estamos a sós?"' : '"Você é sempre tão misterioso ou só fica tímido quando estamos a sós?"',
+        deltaApproval: 2, renownDelta: 0, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' solta uma risada doce e divertida, balançando a cabeça com charme.' },
+          { type: 'speech', speaker: displayName, text: 'Eu, com vergonha? Você que se cuide, aventureiro destemido.' }
+        ]
+      }
+    ];
+  } else if (topicKey === 'sparring_challenge') {
+    choices = [
+      {
+        id: 'emp_sparring_challenge',
+        label: '"Um treino limpo e sem rancor. O melhor jeito de afinarmos nossos reflexos."',
+        deltaApproval: 4, renownDelta: 2, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' gira a arma com maestria e assume a postura inicial com entusiasmo.' },
+          { type: 'speech', speaker: displayName, text: 'É essa a atitude! Vamos ver como você reage a esse jogo de pernas!' }
+        ]
+      },
+      {
+        id: 'prag_sparring_challenge',
+        label: '"Guarda alta e movimentos curtos. Treino serve para consertar erros antes da batalha real."',
+        deltaApproval: 2, renownDelta: 1, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' concorda com firmeza, ajustando a base com seriedade técnica.' },
+          { type: 'speech', speaker: displayName, text: 'Disciplina primeiro. Mostre o que tem de melhor!' }
+        ]
+      },
+      {
+        id: 'check_sparring_challenge',
+        label: '"Tente quebrar minha defesa se puder. Vou te mostrar um contra-ataque que aprendi na estrada."',
+        check: { skill: skill, dc: dc }, deltaApproval: 5,
+        resultNarration: 'Você executa uma finta perfeita seguida de um bloqueio limpo. ' + displayName + ' arregala os olhos e comemora a beleza da manobra.',
+        resultText: 'Maestria reconhecida no treino! <b>+5 de Aprovação</b>.',
+        resultNarrationFail: displayName + ' esquiva com facilidade do seu avanço e toca seu ombro de brincadeira. "Boa tentativa, mas a sua base abriu demais!"',
+        resultTextFail: 'O treino terminou com risadas amigáveis.'
+      },
+      {
+        id: 'prov_sparring_challenge',
+        label: '"Prepare-se para beijar a poeira. Vou te mostrar como se luta de verdade!"',
+        deltaApproval: 2, renownDelta: 0, cb: 'close',
+        _replyScript: [
+          { type: 'narration', text: displayName + ' abre um sorriso feroz e empolgado, partindo para o duelo com vigor.' },
+          { type: 'speech', speaker: displayName, text: 'Adoro quem tem sangue nos olhos! Venha com tudo!' }
+        ]
+      }
+    ];
+  }
 
   return { script: script, choices: choices };
 }
+
+function _showAllyTopicsMenu(idx) {
+  var m = (window.GROUP_MEMBERS || [])[idx];
+  if (!m || m.dead || m.isPlayer) return;
+  var cls = _allyTplKey(m.cls);
+  var displayName = (m.name || '').split(/\s+/)[0];
+  var allyPort = (typeof _resolveAllyPortraitUrl === 'function') ? _resolveAllyPortraitUrl(m) : null;
+  var allyGender = (typeof _resolveAllyGender === 'function') ? _resolveAllyGender(m) : 'male';
+  var heraldicId = (typeof _cgpHeraldicIcon === 'function') ? _cgpHeraldicIcon(m.cls) : 'ic-aldeao';
+  var portraitHTML = (window.vAssets && typeof vAssets.classIconHTML === 'function')
+    ? vAssets.classIconHTML(heraldicId, '100%')
+    : '<svg viewBox="0 0 120 120" style="width:100%;height:100%"><use href="#' + heraldicId + '"/></svg>';
+
+  var topicList = [
+    { key: 'camp_campfire',      label: '🔥 Ao redor da fogueira ▸' },
+    { key: 'backstory_secret',   label: '🗝️ Segredos e o passado ▸' },
+    { key: 'morals_faith',       label: '⚖️ Princípios e crenças ▸' },
+    { key: 'combat_bonds',       label: '🛡️ Táticas e laços de batalha ▸' },
+    { key: 'personal_favor',     label: '📜 Assunto pessoal e favor ▸' },
+    { key: 'romance_courtship',  label: '💖 Confidências a dois [Afeto] ▸' },
+    { key: 'sparring_challenge', label: '⚔️ Desafio de treino rápido ▸' },
+  ];
+
+  var choices = topicList.map(function(t) {
+    return {
+      id: 'topic_' + t.key,
+      label: t.label,
+      cb: function() { _showAllyTopicDialogue(idx, t.key); }
+    };
+  });
+
+  choices.push({
+    id: 'back_to_ally_main',
+    label: '↩ Voltar às ações gerais',
+    cb: function() { _showAllyDialogue(idx); }
+  });
+
+  var dlg = {
+    npc: {
+      id: 'ally_topics_' + idx,
+      name: displayName,
+      desc: _classLabelPT(m.cls) + ' · Conversas & Confidências · ' + _allyRelSummary(m),
+      portrait: allyPort,
+      portraitHTML: portraitHTML,
+      gender: allyGender
+    },
+    script: [
+      {
+        type: 'narration',
+        text: 'Você se aproxima de ' + displayName + ' para uma conversa mais próxima. Na tranquilidade do descanso, os laços entre companheiros se fortalecem com palavras e escuta atenta.'
+      },
+      {
+        type: 'speech',
+        speaker: displayName,
+        text: 'Sempre temos tempo para conversar. O que você gostaria de colocar em pauta hoje?'
+      }
+    ],
+    choices: choices
+  };
+
+  if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+    window.vEncounter.render(dlg, {
+      closeable: true,
+      onChoice: function(ch) {
+        if (typeof ch.cb === 'function') {
+          try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY-TOPICS-MENU] cb failed', e); }
+        }
+      }
+    });
+  }
+}
+window._showAllyTopicsMenu = _showAllyTopicsMenu;
 
 function _showAllyTopicDialogue(idx, topicKey) {
   var m = (window.GROUP_MEMBERS || [])[idx];
   if (!m || m.dead || m.isPlayer) return;
   var cls = _allyTplKey(m.cls);
   var displayName = (m.name || '').split(/\s+/)[0];
+  var allyPort = (typeof _resolveAllyPortraitUrl === 'function') ? _resolveAllyPortraitUrl(m) : null;
+  var allyGender = (typeof _resolveAllyGender === 'function') ? _resolveAllyGender(m) : 'male';
   var heraldicId = (typeof _cgpHeraldicIcon === 'function') ? _cgpHeraldicIcon(m.cls) : 'ic-aldeao';
   var portraitHTML = (window.vAssets && typeof vAssets.classIconHTML === 'function')
     ? vAssets.classIconHTML(heraldicId, '100%')
     : '<svg viewBox="0 0 120 120" style="width:100%;height:100%"><use href="#' + heraldicId + '"/></svg>';
 
-  var topicNode = _buildClientAllyTopicNode(cls, topicKey, displayName);
+  var topicNode = _buildClientAllyTopicNode(cls, topicKey, displayName, m);
   var cfg = ALLY_TOPIC_CONFIG[topicKey] || ALLY_TOPIC_CONFIG.camp_campfire;
 
   var fullChoices = topicNode.choices.map(function(c) {
@@ -66808,6 +67168,7 @@ function _showAllyTopicDialogue(idx, topicKey) {
       label: c.label,
       cb: c.cb || 'close',
       _replyScript: c._replyScript,
+      deltaApproval: c.deltaApproval || 0,
       renownDelta: c.renownDelta || 0,
       check: c.check,
       resultNarration: c.resultNarration,
@@ -66825,17 +67186,19 @@ function _showAllyTopicDialogue(idx, topicKey) {
   });
 
   fullChoices.push({
-    id: 'back_to_ally_hub',
-    label: '↩ Voltar aos outros assuntos',
-    cb: function() { _showAllyDialogue(idx); }
+    id: 'back_to_topics_menu',
+    label: '↩ Escolher outro assunto',
+    cb: function() { _showAllyTopicsMenu(idx); }
   });
 
   var dlg = {
     npc: {
       id: 'ally_' + (m.name || ('idx' + idx)) + '_' + topicKey,
       name: displayName,
-      desc: _classLabelPT(m.cls) + ' · ' + cfg.title + ' · Nv ' + m.level,
-      portraitHTML: portraitHTML
+      desc: _classLabelPT(m.cls) + ' · ' + cfg.title + ' · ' + _allyRelSummary(m),
+      portrait: allyPort,
+      portraitHTML: portraitHTML,
+      gender: allyGender
     },
     script: topicNode.script,
     choices: fullChoices
@@ -66849,10 +67212,41 @@ function _showAllyTopicDialogue(idx, topicKey) {
           try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY-TOPIC] cb failed', e); }
           return;
         }
+
+        // Aplica impacto de aprovação dinamicamente
+        var delta = ch.deltaApproval || 0;
+        if (delta !== 0) {
+          var oldApr = (m.approval != null) ? m.approval : 0;
+          m.approval = Math.max(-100, Math.min(100, oldApr + delta));
+          if (typeof vToast === 'function') {
+            vToast(displayName + ': Aprovação ' + (delta >= 0 ? '+' : '') + delta + ' (' + m.approval + ')');
+          }
+        }
+
+        // Dispara sincronização remota via API quando online
+        if (typeof fetch === 'function') {
+          var token = (typeof _getStoredToken === 'function') ? _getStoredToken() : (localStorage.getItem('token') || '');
+          fetch('/api/ally/interact-choice', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token ? ('Bearer ' + token) : ''
+            },
+            body: JSON.stringify({
+              user_id: (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.id) || 1,
+              ally_id: m.id || ('adv_' + idx),
+              ally_class: m.cls,
+              topic: topicKey,
+              choice_id: ch.id
+            })
+          }).catch(function() {});
+        }
       }
     });
   }
 }
+window._showAllyTopicDialogue = _showAllyTopicDialogue;
+
 function _hasSeenCompanionRelationshipTutorial() {
   try {
     var charKey = 'valdoria_companion_relationship_tutorial_seen_' + (window._charId || 'default');
@@ -66877,39 +67271,39 @@ function _markSeenCompanionRelationshipTutorial() {
 }
 
 function _showCompanionRelationshipTutorial(optAllyName, onDone) {
-  var allyName = optAllyName || 'vosso novo companheiro';
+  var allyName = optAllyName || 'seu companheiro de viagem';
   var dlg = {
     npc: {
       id: 'dm_tutorial_relationships',
       name: 'Laços da Comitiva',
-      desc: 'Harmonia, Convivência e Lealdade na Estrada',
+      desc: 'Convivência, Lealdade e Parceria na Estrada',
       portraitHTML: '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:48px;">📜</div>'
     },
     script: [
       {
         type: 'narration',
-        text: 'A fogueira crepita lançando centelhas ao céu noturno. Ao vosso lado, ' + allyName + ' ajeita o equipamento de viagem. A jornada pelas terras de Valdoria não precisa mais ser percorrida em solidão.'
+        text: 'A fogueira crepita lançando centelhas para o céu estrelado. Ao seu lado, ' + allyName + ' organiza os mantimentos da viagem. A jornada pelas terras de Valdoria se torna muito mais forte quando compartilhada.'
       },
       {
         type: 'speech',
         speaker: 'Crônica da Comitiva',
-        text: '<b>A Convivência e a Afinidade entre Companheiros</b><br><br>' +
-              'A partir de agora, cada postura, conversa e decisão vossa influencia a <b>Aprovação</b> do aliado (escala de <b>-100 a +100</b>):<br>' +
-              '• 💢 <b>Hostil (-100 a -50):</b> Desconfiança extrema e recusa a confidências.<br>' +
-              '• ❄️ <b>Frio (-49 a -25):</b> Distância prudente e diálogo profissional restrito.<br>' +
-              '• 😐 <b>Neutro (-24 a +24):</b> Parceria de armas funcional e cooperação padrão.<br>' +
-              '• 😊 <b>Amigável (+25 a +49):</b> Companheirismo leal, conversas abertas e partilha.<br>' +
-              '• 💛 <b>Leal (+50 a +74):</b> Devoção de sangue, proteção incondicional e missões pessoais.<br>' +
-              '• 💖 <b>Devoto (+75 a +100):</b> Ligação inquebrável, entrega total e bênçãos eternas.'
+        text: '<b>A Afinidade e Convivência entre Companheiros</b><br><br>' +
+              'Cada conversa, escolha e atitude sua influencia diretamente a <b>Aprovação</b> do aliado (de <b>-100 a +100</b>):<br>' +
+              '• 💢 <b>Hostil (-100 a -50):</b> Desconfiança aberta e recusa a confidências.<br>' +
+              '• ❄️ <b>Frio (-49 a -25):</b> Distância prudente e diálogo estritamente profissional.<br>' +
+              '• 😐 <b>Neutro (-24 a +24):</b> Parceria prática de armas e convivência cotidiana.<br>' +
+              '• 😊 <b>Amigável (+25 a +49):</b> Companheirismo leal, trocas abertas e apoio sincero.<br>' +
+              '• 💛 <b>Leal (+50 a +74):</b> Confiança incondicional, proteção mútua e missões pessoais.<br>' +
+              '• 💖 <b>Devoto (+75 a +100):</b> Ligação inquebrável, entrega total e bênçãos permanentes.'
       },
       {
         type: 'narration',
-        text: 'Nem todos os laços são forjados sob o mesmo molde. Conforme conviveis na estrada, vossa dinâmica evolui para uma conexão singular com bônus mecânicos em combate.'
+        text: 'Nem todos os laços são forjados da mesma forma. Conforme vocês viajam juntos pela estrada, sua dinâmica evolui para uma conexão singular com bônus mecânicos em combate.'
       },
       {
         type: 'speech',
         speaker: 'Crônica da Comitiva',
-        text: 'Vós podeis desenvolver 4 tipos de relacionamentos:<br><br>' +
+        text: 'Vocês podem desenvolver 4 tipos de relacionamentos:<br><br>' +
               '• 🛡️ <b>Camaradagem:</b> Laço fraterno de armas. Concede <b>+1 na Classe de Armadura (CA)</b> ao grupo em formação.<br>' +
               '• ⚔️ <b>Rivalidade Sadia:</b> Competição de maestria. Concede <b>+2 de Dano</b> no primeiro ataque bem-sucedido de cada turno.<br>' +
               '• 📜 <b>Mentoria:</b> Troca de sabedoria e conselhos táticos. Concede <b>+1 em Salvaguardas Mentais</b>.<br>' +
@@ -66917,14 +67311,14 @@ function _showCompanionRelationshipTutorial(optAllyName, onDone) {
       },
       {
         type: 'narration',
-        text: 'Nas pausas de descanso e noites de vigília, o silêncio abre espaço para confidências profundas. Vossa oratória e sagacidade ditarão o sucesso das palavras.'
+        text: 'Nas pausas de descanso e noites de vigília, o silêncio abre espaço para confidências profundas. Sua oratória e sagacidade ditarão o sucesso das palavras.'
       },
       {
         type: 'speech',
         speaker: 'Crônica da Comitiva',
-        text: '• 💬 <b>Tópicos de Conversa & Testes Sociais:</b> Escolha entre 7 temas (Fogueira, Segredos do Passado, Princípios, Laços de Batalha, Favores, Confidências e Treino). Testes de perícia (Persuasão, Intuição, Intimidação) usam seus atributos para conquistar saltos imediatos de aprovação.<br><br>' +
-              '• 📜 <b>Missões de Companheiro:</b> Em afinidade alta, o aliado confiará sua missão pessoal a vós, concedendo bênçãos permanentes e relíquias.<br><br>' +
-              '• 🎁 <b>Presentes da Mochila:</b> Itens afins ao gosto do aliado fortalecem o afeto e rendem lembranças raras de retribuição!'
+        text: '• 💬 <b>Tópicos de Conversa & Testes Sociais:</b> Escolha entre 7 temas ricos. Testes de perícia (Persuasão, Intuição, Intimidação) usam seus atributos para conquistar saltos imediatos de aprovação.<br><br>' +
+              '• 📜 <b>Missões de Companheiro:</b> Em afinidade alta, o aliado confiará sua missão pessoal a você, concedendo bênçãos permanentes e relíquias raras.<br><br>' +
+              '• 🎁 <b>Presentes da Mochila:</b> Itens que combinam com o gosto do companheiro fortalecem o afeto e rendem lembranças raras de retribuição!'
       }
     ],
     choices: [
@@ -66957,6 +67351,8 @@ function _showAllyGiftDialogue(idx) {
   if (!m || m.dead || m.isPlayer) return;
   var cls = _allyTplKey(m.cls);
   var displayName = (m.name || '').split(/\s+/)[0];
+  var allyPort = (typeof _resolveAllyPortraitUrl === 'function') ? _resolveAllyPortraitUrl(m) : null;
+  var allyGender = (typeof _resolveAllyGender === 'function') ? _resolveAllyGender(m) : 'male';
   var heraldicId = (typeof _cgpHeraldicIcon === 'function') ? _cgpHeraldicIcon(m.cls) : 'ic-aldeao';
   var portraitHTML = (window.vAssets && typeof vAssets.classIconHTML === 'function')
     ? vAssets.classIconHTML(heraldicId, '100%')
@@ -66964,22 +67360,65 @@ function _showAllyGiftDialogue(idx) {
 
   var p = window.CITY_MOCK_PLAYER;
   var inv = (p && p.inventory) ? p.inventory : [];
-  var uniqueItems = Array.from(new Set(inv)).slice(0, 5);
+  var uniqueItems = Array.from(new Set(inv)).slice(0, 6);
+
+  // Mapeamento de itens favoritos por classe D&D 5e
+  function _isFavoriteGift(item, aCls) {
+    var it = (item || '').toLowerCase();
+    if (aCls === 'ladino') return it.indexOf('adaga') >= 0 || it.indexOf('anel') >= 0 || it.indexOf('invisib') >= 0 || it.indexOf('joia') >= 0 || it.indexOf('moeda') >= 0;
+    if (aCls === 'guerreiro' || aCls === 'barbaro' || aCls === 'paladino') return it.indexOf('espada') >= 0 || it.indexOf('machado') >= 0 || it.indexOf('armadura') >= 0 || it.indexOf('força') >= 0 || it.indexOf('carne') >= 0;
+    if (aCls === 'clerigo' || aCls === 'druida') return it.indexOf('cura') >= 0 || it.indexOf('erva') >= 0 || it.indexOf('incenso') >= 0 || it.indexOf('sagrad') >= 0 || it.indexOf('fruta') >= 0;
+    if (aCls === 'mago' || aCls === 'feiticeiro' || aCls === 'bruxo') return it.indexOf('pergaminho') >= 0 || it.indexOf('grimório') >= 0 || it.indexOf('mana') >= 0 || it.indexOf('cristal') >= 0;
+    return false;
+  }
 
   var giftChoices = uniqueItems.map(function(itemName) {
+    var isFav = _isFavoriteGift(itemName, cls);
+    var delta = isFav ? 10 : 5;
+    var favTag = isFav ? ' [Favorito! +10]' : ' [+5]';
     return {
       id: 'gift_' + itemName,
-      label: '🎁 Entregar ' + itemName + ' (' + inv.filter(function(x){ return x === itemName; }).length + ' na mochila)',
-      cb: 'close',
+      label: '🎁 Entregar ' + itemName + favTag + ' (' + inv.filter(function(x){ return x === itemName; }).length + ' na mochila)',
+      cb: function() {
+        // Remove 1 item da mochila
+        if (p && Array.isArray(p.inventory)) {
+          var itemIdx = p.inventory.indexOf(itemName);
+          if (itemIdx >= 0) p.inventory.splice(itemIdx, 1);
+        }
+        // Aplica aprovação
+        var oldApr = (m.approval != null) ? m.approval : 0;
+        m.approval = Math.max(-100, Math.min(100, oldApr + delta));
+        if (typeof vToast === 'function') {
+          vToast('Presente entregue a ' + displayName + '! Aprovação +' + delta + ' (' + m.approval + ')');
+        }
+        // Sincroniza com API
+        if (typeof fetch === 'function') {
+          var token = (typeof _getStoredToken === 'function') ? _getStoredToken() : (localStorage.getItem('token') || '');
+          fetch('/api/ally/give-gift', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token ? ('Bearer ' + token) : ''
+            },
+            body: JSON.stringify({
+              user_id: (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.id) || 1,
+              ally_id: m.id || ('adv_' + idx),
+              item_name: itemName
+            })
+          }).catch(function() {});
+        }
+      },
       _replyScript: [
         {
           type: 'narration',
-          text: displayName + ' recebe ' + itemName + ' com um brilho de surpresa nos olhos e um sorriso sincero de gratidão.'
+          text: displayName + ' recebe ' + itemName + ' com um brilho sincero nos olhos e um sorriso desarmado de agradecimento.'
         },
         {
           type: 'speech',
           speaker: displayName,
-          text: 'Um gesto muito generoso da tua parte! Guardarei este presente com carinho como prova de nossa camaradagem na estrada.'
+          text: isFav
+            ? 'Incrível! Como você sabia que eu estava procurando exatamente por isso? Vou guardar esse presente com todo o carinho.'
+            : 'Um gesto muito generoso da sua parte! Vou guardar este presente com carinho como prova da nossa parceria na estrada.'
         }
       ]
     };
@@ -66988,14 +67427,14 @@ function _showAllyGiftDialogue(idx) {
   if (giftChoices.length === 0) {
     giftChoices.push({
       id: 'no_gifts',
-      label: 'Nenhum item disponível na mochila para presentear',
+      label: 'Nenhum item disponível na mochila no momento para presentear',
       cb: 'close'
     });
   }
 
   giftChoices.push({
     id: 'back_from_gifts',
-    label: '↩ Voltar aos outros assuntos',
+    label: '↩ Voltar às ações gerais',
     cb: function() { _showAllyDialogue(idx); }
   });
 
@@ -67003,18 +67442,20 @@ function _showAllyGiftDialogue(idx) {
     npc: {
       id: 'ally_gift_' + idx,
       name: displayName,
-      desc: _classLabelPT(m.cls) + ' · Oferecer Presente · Nv ' + m.level,
-      portraitHTML: portraitHTML
+      desc: _classLabelPT(m.cls) + ' · Oferecer Presente · ' + _allyRelSummary(m),
+      portrait: allyPort,
+      portraitHTML: portraitHTML,
+      gender: allyGender
     },
     script: [
       {
         type: 'narration',
-        text: 'Você abre sua mochila de viagem diante de ' + displayName + '. Um pequeno gesto de generosidade pode estreitar laços e aprofundar a cumplicidade de vossa comitiva.'
+        text: 'Você abre sua mochila de viagem diante de ' + displayName + '. Um pequeno gesto de generosidade fortalece a cumplicidade e estreita os laços da comitiva.'
       },
       {
         type: 'speech',
         speaker: displayName,
-        text: 'O que tens aí? Não precisavas te incomodar comigo... mas confesso que aprecio a consideração.'
+        text: 'O que você tem aí? Não precisava se incomodar comigo... mas confesso que aprecio a consideração.'
       }
     ],
     choices: giftChoices
@@ -67034,13 +67475,15 @@ function _showAllyGiftDialogue(idx) {
 }
 window._showAllyGiftDialogue = _showAllyGiftDialogue;
 
-// _showAllyDialogue(memberIdx) — Sessão #28 v2 (2026-05-24): fullscreen
+// _showAllyDialogue(memberIdx) — Menu Geral do Companheiro
 function _showAllyDialogue(idx){
   var m = (window.GROUP_MEMBERS || [])[idx];
   if (!m || m.dead || m.isPlayer) return;
   var cls = _allyTplKey(m.cls);
   var tpl = ALLY_DIALOGUE_TEMPLATES[cls] || ALLY_DIALOGUE_TEMPLATES.guerreiro;
   var displayName = (m.name || '').split(/\s+/)[0];
+  var allyPort = (typeof _resolveAllyPortraitUrl === 'function') ? _resolveAllyPortraitUrl(m) : null;
+  var allyGender = (typeof _resolveAllyGender === 'function') ? _resolveAllyGender(m) : 'male';
 
   var _introPool = [tpl.script || []].concat(ALLY_INTRO_EXTRA[cls] || []);
   var _introScript = tpl.script || [];
@@ -67064,7 +67507,7 @@ function _showAllyDialogue(idx){
   }
   var _allyNpcId = 'ally_' + (m.name || ('idx' + idx));
 
-  // Choices canônicas originais de lore e perícia
+  // Choices canônicas originais de lore e perícia de classe
   var classChoices = (tpl.choices || []).filter(function(c){
     var oneShot = (c.id !== 'leave' && !c.check);
     return !oneShot || typeof _npcIsUsed !== 'function' || !_npcIsUsed(_allyNpcId, c.id);
@@ -67101,15 +67544,14 @@ function _showAllyDialogue(idx){
     };
   });
 
-  var leaveChoice = classChoices.filter(function(c){ return c.id === 'leave'; })[0];
   var otherClassChoices = classChoices.filter(function(c){ return c.id !== 'leave'; });
 
-  // Tópicos profundos de relacionamento D&D 5e / BG3
-  var topicChoices = [
+  // Menu organizado de alto nível com navegação por submenus funcionais
+  var hubChoices = [
     {
-      id: 'nav_tutorial',
-      label: '📜 Compreender a dinâmica e a lealdade do grupo ▸',
-      cb: function() { _showCompanionRelationshipTutorial(displayName, function() { _showAllyDialogue(idx); }); }
+      id: 'nav_topics_menu',
+      label: '💬 Conversas & Confidências (7 Assuntos) ▸',
+      cb: function() { _showAllyTopicsMenu(idx); }
     },
     {
       id: 'nav_gift',
@@ -67117,55 +67559,23 @@ function _showAllyDialogue(idx){
       cb: function() { _showAllyGiftDialogue(idx); }
     },
     {
-      id: 'nav_campfire',
-      label: '🔥 Conversar ao redor da fogueira ▸',
-      cb: function() { _showAllyTopicDialogue(idx, 'camp_campfire'); }
-    },
-    {
-      id: 'nav_backstory',
-      label: '🗝️ Falar sobre lembranças e o passado ▸',
-      cb: function() { _showAllyTopicDialogue(idx, 'backstory_secret'); }
-    },
-    {
-      id: 'nav_morals',
-      label: '⚖️ Refletir sobre princípios e crenças ▸',
-      cb: function() { _showAllyTopicDialogue(idx, 'morals_faith'); }
-    },
-    {
-      id: 'nav_combat',
-      label: '🛡️ Alinhar táticas e laços de batalha ▸',
-      cb: function() { _showAllyTopicDialogue(idx, 'combat_bonds'); }
-    },
-    {
-      id: 'nav_favor',
-      label: '📜 Assunto pessoal e missão pendente ▸',
-      cb: function() { _showAllyTopicDialogue(idx, 'personal_favor'); }
-    },
-    {
-      id: 'nav_romance',
-      label: '💖 Momento a dois e confidências [Afeto] ▸',
-      cb: function() { _showAllyTopicDialogue(idx, 'romance_courtship'); }
-    },
-    {
-      id: 'nav_sparring',
-      label: '⚔️ Desafio de perícia e treino rápido ▸',
-      cb: function() { _showAllyTopicDialogue(idx, 'sparring_challenge'); }
+      id: 'nav_tutorial',
+      label: '📜 Dinâmica e Lealdade do Grupo ▸',
+      cb: function() { _showCompanionRelationshipTutorial(displayName, function() { _showAllyDialogue(idx); }); }
     }
   ];
 
-  var combinedChoices = otherClassChoices.concat(topicChoices);
-  if (leaveChoice) {
-    combinedChoices.push(leaveChoice);
-  } else {
-    combinedChoices.push({ id: 'leave', label: '↩ "Até mais tarde."', cb: 'close', renownDelta: 0 });
-  }
+  var combinedChoices = otherClassChoices.concat(hubChoices);
+  combinedChoices.push({ id: 'leave', label: '↩ "Até mais tarde."', cb: 'close', renownDelta: 0 });
 
   var dlg = {
     npc: {
       id: _allyNpcId,
       name: displayName,
-      desc: tpl.desc + ' · ' + _classLabelPT(m.cls) + ' · Nv ' + m.level,
-      portraitHTML: portraitHTML
+      desc: tpl.desc + ' · ' + _classLabelPT(m.cls) + ' · Nv ' + m.level + ' · ' + _allyRelSummary(m),
+      portrait: allyPort,
+      portraitHTML: portraitHTML,
+      gender: allyGender
     },
     script: personalizedScript,
     choices: combinedChoices

@@ -4279,14 +4279,14 @@
           var displayName = isPlayerSpeaker ? playerName : ((spkHit && spkHit.name) || pageSpkKey);
           var playerDesc = _formatPlayerClassAndSubclass(pData);
           var displayDesc = isPlayerSpeaker ? playerDesc : ((spkHit && spkHit.desc) || npcDesc);
-          var isMainSpeaker = !isPlayerSpeaker && !spkHit && (displayName === npcName || !firstSpeech.speaker || firstSpeech.speaker === npcName || (dialogue.npc && (firstSpeech.speaker === dialogue.npc.id || firstSpeech.speaker === dialogue.npc.npc_id)));
+          var isMainSpeaker = !isPlayerSpeaker && !spkHit && (displayName === npcName || !firstSpeech.speaker || firstSpeech.speaker === npcName || (npcName && displayName && (npcName.indexOf(displayName + ' ') === 0 || displayName.indexOf(npcName + ' ') === 0)) || (dialogue.npc && (firstSpeech.speaker === dialogue.npc.id || firstSpeech.speaker === dialogue.npc.npc_id)));
           var displayPortrait = isPlayerSpeaker
             ? ((pData && (pData.portrait || pData.avatar)) || null)
             : ((spkHit && (spkHit.portraitImg || spkHit.portrait))
               || (isMainSpeaker && npcPortrait ? npcPortrait : null)
               || (typeof window._npcPortraitByName === 'function' ? window._npcPortraitByName(displayName) : null)
-              || (typeof window._discoverySpeakerPortrait === 'function' ? window._discoverySpeakerPortrait(displayName) : null)
               || (npcPortrait || null)
+              || (typeof window._discoverySpeakerPortrait === 'function' ? window._discoverySpeakerPortrait(displayName) : null)
               || (typeof _resolveGenericEncounterPortrait === 'function' ? _resolveGenericEncounterPortrait(displayName, displayDesc) : null));
 
           var nameEl = header.querySelector('.enc-name');
