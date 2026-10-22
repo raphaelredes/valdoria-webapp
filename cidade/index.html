@@ -60086,10 +60086,12 @@ function _showServiceResultPopup(opts){
       var _fsOv = document.createElement('div');
       _fsOv.id = 'srp-dice-fullscreen';
       _fsOv.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(10,8,5,0.92);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--v-text,#d4c8b0);font-family:var(--v-font-display,Cinzel),serif;';
-      var _fsTitle = opts.dice.label || 'Rolagem de dado';
-      var _fsDc = (opts.dice.dc !== undefined && opts.dice.dc !== null)
+      var _isSurprise = !!(opts.dice && opts.dice.is_surprise);
+      var _fsTitle = _isSurprise ? (opts.dice.surprise_title || opts.dice.label || '✦ Reação de Reflexo da Comitiva ✦') : (opts.dice.label || 'Rolagem de dado');
+      var _fsDc = (!_isSurprise && opts.dice.dc !== undefined && opts.dice.dc !== null)
         ? ' <span style="opacity:0.75">vs CD <b>' + opts.dice.dc + '</b></span>' : '';
-      _fsOv.innerHTML = '<div style="font-size:calc(clamp(16px,4.6vw,18px) * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);letter-spacing:2px;text-transform:uppercase;margin-bottom: var(--v-space-lg, 12px);text-align:center;padding:0 16px;">' + _fsTitle + '</div>'
+      var _fsSubText = _isSurprise ? ('<div style="font-size:calc(clamp(13px,3.8vw,15px)*var(--v-font-scale,1));color:var(--v-text-dim,#a89a82);letter-spacing:1px;margin-top:6px;text-align:center;max-width:380px;padding:0 12px;">' + (opts.dice.pre_roll_desc || 'Uma reação rápida é necessária nas sombras...') + '</div>') : '';
+      _fsOv.innerHTML = '<div style="font-size:calc(clamp(16px,4.6vw,18px) * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);letter-spacing:2px;text-transform:uppercase;margin-bottom: var(--v-space-lg, 12px);text-align:center;padding:0 16px;">' + _fsTitle + _fsSubText + '</div>'
         + '<div id="srp-fs-host" style="width:clamp(190px,56vw,240px);height:clamp(190px,56vw,240px);"></div>'
         + '<div id="srp-fs-label" style="margin-top: var(--v-space-md, 10px);font-size:calc(clamp(14px,4vw,16px) * var(--v-font-scale, 1));min-height:1.5em;letter-spacing:1px;text-align:center;">&nbsp;</div>';
       if (window.vOverlay && typeof window.vOverlay.add === 'function') window.vOverlay.add(_fsOv);
@@ -60144,7 +60146,12 @@ function _showServiceResultPopup(opts){
                   else if (opts.dice.degree === 'failure') _degColor = '#d97d7d';
                   _degreeHtml = '<div style="margin-top:6px;font-size:calc(clamp(13px,3.8vw,15px)*var(--v-font-scale,1));font-weight:bold;letter-spacing:1px;color:' + _degColor + ';">' + opts.dice.degree_label + '</div>';
                 }
-                _fsLbl.innerHTML = _fsFormula + ' = <b style="color:var(--v-gold, #c4953a)">' + opts.dice.total + '</b>' + _fsTail + _degreeHtml;
+                if (_isSurprise) {
+                  var _rollerName = (opts.dice && opts.dice.roller_name) ? (opts.dice.roller_name + ' obteve ') : 'Resultado da Comitiva: ';
+                  _fsLbl.innerHTML = _rollerName + '<b style="color:var(--v-gold, #c4953a);font-size:1.15em;">' + opts.dice.total + '</b>' + _degreeHtml;
+                } else {
+                  _fsLbl.innerHTML = _fsFormula + ' = <b style="color:var(--v-gold, #c4953a)">' + opts.dice.total + '</b>' + _fsTail + _degreeHtml;
+                }
               }
               setTimeout(_fsFinish, 1500);
             });
@@ -70630,7 +70637,7 @@ function _arrivalChoice(choiceId){
               : undefined,
             dice: { sides: 20, value: d.d20, total: d.total, formula: 'd20 ' + d.d20 + ' ' + _mod, dc: d.dc, label: 'Teste de ' + _skl,
                     degree: d.degree, degree_label: d.degree_label },
-            narrative: '<b>' + _skl + '</b> — '
+            narrative: d.is_surprise ? (d.pre_roll_desc || 'Uma reação rápida é necessária nas sombras...') : ('<b>' + (d.roller_name ? (d.roller_name + ' — ') : '') + _skl + '</b> — '
                 + (d.success
                     ? '<b style="color:var(--v-success,#6fae6f)">Sucesso</b>'
                     : '<b style="color:var(--v-danger,#c0584a)">Falha</b>')
@@ -71081,6 +71088,14 @@ function _startCityWalk(targetKey, proceedFn, opts) {
 
   var walkNarr = _getCityWalkAtmosphericText(targetKey, isNight, isRain);
 
+  if (!opts._skipBanter && typeof _maybeTriggerCompanionSpontaneousBanter === 'function') {
+    if (_maybeTriggerCompanionSpontaneousBanter('walk', function(){
+      _startCityWalk(targetKey, proceedFn, Object.assign({}, opts, { _skipBanter: true }));
+    })) {
+      return;
+    }
+  }
+
   var rollEvent = (Math.random() < 0.40);
   var chosenEvent = rollEvent ? _CITY_WALK_EVENTS[Math.floor(Math.random() * _CITY_WALK_EVENTS.length)] : null;
 
@@ -71114,6 +71129,12 @@ function _startCityWalk(targetKey, proceedFn, opts) {
           p.veteran_path_tips = true;
           try { sessionStorage.setItem('valdoria_veteran_path_tips', '1'); } catch(_) {}
         }
+        if (typeof _evaluateCompanionWalkIntervention === 'function') {
+          var handled = _evaluateCompanionWalkIntervention(chosenEvent, selected, p, function(success, resultText){
+            _showCityWalkArrival(dest, resultText, proceedFn);
+          });
+          if (handled) return;
+        }
         if (ch.stat && ch.dc) {
           _resolveCityWalkCheck(ch, p, function(success, resultText){
             _showCityWalkArrival(dest, resultText, proceedFn);
@@ -71130,6 +71151,576 @@ function _startCityWalk(targetKey, proceedFn, opts) {
   _showCityWalkArrival(dest, walkNarr, proceedFn);
 }
 window._startCityWalk = _startCityWalk;
+
+// ============================================================================
+// === COMPANION SPONTANEOUS BANTER & INTERVENTIONS (D&D 5e / BG3) ============
+// ============================================================================
+
+function _getActivePartyCompanions() {
+  var comps = [];
+  if (window.GROUP_MEMBERS && Array.isArray(window.GROUP_MEMBERS)) {
+    for (var k = 1; k < window.GROUP_MEMBERS.length; k++) {
+      var gm = window.GROUP_MEMBERS[k];
+      if (gm && !gm.dead) {
+        var cId = gm.id || ('comp_' + k);
+        var cClass = String(gm.cls || 'guerreiro').toLowerCase();
+        var cPort = (cId === 'adv_027' || String(gm.name || '').toLowerCase().indexOf('wrenna') === 0)
+          ? '/shared/img/adventurers/adv_027.webp'
+          : (gm.port ? (String(gm.port).indexOf('/') >= 0 ? gm.port : ('/shared/img/adventurers/' + gm.port + '.webp')) : ('/shared/img/npcs/' + cClass + '_portrait.webp'));
+        comps.push({
+          id: cId,
+          name: gm.name || 'Companheiro',
+          cls: cClass,
+          gender: gm.gender || '',
+          avatar: cPort,
+          approval: gm.approval != null ? gm.approval : 0,
+          affinity: gm.affinity != null ? gm.affinity : 0,
+          status: gm
+        });
+      }
+    }
+  }
+  if (!comps.length && window.CITY_MOCK_PLAYER) {
+    var pParty = window.CITY_MOCK_PLAYER.party || [];
+    var pStatus = window.CITY_MOCK_PLAYER.party_status || {};
+    for (var i = 0; i < pParty.length; i++) {
+      var pid = pParty[i];
+      var st = pStatus[pid] || {};
+      if (st.hp != null && st.hp <= 0) continue;
+      var cClass = String(st.class || 'guerreiro').toLowerCase();
+      var cPort = (pid === 'adv_027' || String(st.name || '').toLowerCase().indexOf('wrenna') === 0)
+        ? '/shared/img/adventurers/adv_027.webp'
+        : (st.avatar || ('/shared/img/npcs/' + cClass + '_portrait.webp'));
+      comps.push({
+        id: String(pid),
+        name: st.name || pid,
+        cls: cClass,
+        gender: st.gender || '',
+        avatar: cPort,
+        approval: st.approval != null ? st.approval : 0,
+        affinity: st.affinity != null ? st.affinity : 0,
+        status: st
+      });
+    }
+  }
+  return comps;
+}
+
+function _updateCompanionApproval(companionId, delta) {
+  if (!companionId || !delta) return;
+  if (window.GROUP_MEMBERS && Array.isArray(window.GROUP_MEMBERS)) {
+    for (var k = 1; k < window.GROUP_MEMBERS.length; k++) {
+      var gm = window.GROUP_MEMBERS[k];
+      if (gm && (gm.id === companionId || gm.name === companionId)) {
+        gm.approval = (gm.approval || 0) + delta;
+        gm.affinity = Math.max(0, Math.min(100, (gm.affinity || 0) + delta));
+        break;
+      }
+    }
+  }
+  if (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.party_status) {
+    var ps = window.CITY_MOCK_PLAYER.party_status[companionId];
+    if (ps) {
+      ps.approval = (ps.approval || 0) + delta;
+      ps.affinity = Math.max(0, Math.min(100, (ps.affinity || 0) + delta));
+    }
+  }
+  if (typeof renderCityGroupPanel === 'function') {
+    try { renderCityGroupPanel(); } catch(_){}
+  }
+  if (typeof refreshHud === 'function') {
+    try { refreshHud(); } catch(_){}
+  }
+}
+
+function _evaluateCompanionWalkIntervention(chosenEvent, selected, player, onResolved) {
+  if (!chosenEvent) return false;
+  var comps = _getActivePartyCompanions();
+  if (!comps || !comps.length) return false;
+
+  // Chance de 45% de um companheiro intervir ativamente
+  if (Math.random() > 0.45) return false;
+
+  // 1. Caso SURPRESA (walk_urchin): perigo repentino nas sombras
+  if (chosenEvent.id === 'walk_urchin') {
+    var comp = comps.find(function(c){ return ['guerreiro','ladino','patrulheiro','monge'].indexOf(c.cls) >= 0; }) || comps[0];
+    var mod = (comp.cls === 'ladino' || comp.cls === 'patrulheiro') ? 5 : ((comp.cls === 'guerreiro' || comp.cls === 'monge') ? 4 : 3);
+    var d20 = Math.floor(Math.random() * 20) + 1;
+    var dc = 12;
+    var total = d20 + mod;
+    var success = (total >= dc);
+
+    var surpriseData = {
+      is_surprise: true,
+      surprise_title: '✦ Reação de Reflexo da Comitiva ✦',
+      pre_roll_desc: 'O que ' + comp.name + ' pressentiu nas sombras?',
+      roller_name: comp.name,
+      sides: 20,
+      d20: d20,
+      roll: d20,
+      mod: mod,
+      total: total,
+      dc: dc,
+      success: success,
+      skill: 'Percepção'
+    };
+
+    var sNarr = comp.name + ' intervém com reflexos admiráveis! No instante em que uma lâmina sutil cortaria a sua bolsa, a manopla de ' + comp.name + ' bloqueia o avanço das sombras. O jovem trombadinha cai de costas, aterrorizado com a vigília da comitiva: "Piedade! Não me partam ao meio!" Ele foge em disparada, deixando cair 6 Valdoritas no calçamento.';
+    var fNarr = comp.name + ' dá um brado repentino ao pressentir um vulto nas sombras, levando a mão ao punho da arma. O barulho ecoa nas vielas e assusta o jovem trombadinha antes que ele alcançasse qualquer bolsa, fazendo-o sumir pelas sarjetas.';
+
+    _showServiceResultPopup({
+      npc: comp.name,
+      icon: comp.avatar ? ('<img src="' + comp.avatar + '" alt="" style="width:96px;height:96px;object-fit:cover;border-radius:var(--v-radius,10px);" onerror="this.style.display=\'none\';">') : undefined,
+      dice: surpriseData,
+      narrative: success ? sNarr : fNarr,
+      onContinue: function(){
+        if (success) {
+          _updateCompanionApproval(comp.id, 3);
+          if (player) {
+            player.gold = (player.gold || 0) + 6;
+            if (typeof refreshHud === 'function') refreshHud();
+          }
+          if (typeof vToast === 'function') vToast('✦ ' + comp.name + ' protegeu o grupo! (+3 Afinidade · +6 Valdoritas)', 'ok');
+        } else {
+          if (typeof vToast === 'function') vToast('◈ Alerta da comitiva: nada foi levado.', 'warn');
+        }
+        onResolved(success, success ? sNarr : fNarr);
+      }
+    });
+    return true;
+  }
+
+  // 2. Caso NÃO SURPRESA (walk_patrol): abordagem da guarda
+  if (chosenEvent.id === 'walk_patrol') {
+    var comp = comps.find(function(c){ return ['clerigo','paladino','bardo','guerreiro'].indexOf(c.cls) >= 0; }) || comps[0];
+    var mod = (comp.cls === 'bardo' || comp.cls === 'paladino') ? 5 : ((comp.cls === 'clerigo' || comp.cls === 'guerreiro') ? 4 : 3);
+    var d20 = Math.floor(Math.random() * 20) + 1;
+    var dc = 11;
+    var total = d20 + mod;
+    var success = (total >= dc);
+
+    var diceData = {
+      is_surprise: false,
+      is_companion: true,
+      roller_name: comp.name,
+      sides: 20,
+      d20: d20,
+      roll: d20,
+      mod: mod,
+      total: total,
+      dc: dc,
+      success: success,
+      skill: 'Persuasão'
+    };
+
+    var sNarr = comp.name + ' dá um passo à frente com postura respeitosa e serena, apresentando as credenciais da comitiva e assegurando a paz das intenções. As sentinelas da guarda batem continência com reverência: "Muito bem, aventureiros. Que a vigília de vocês mantenha Valdoria segura."';
+    var fNarr = comp.name + ' tenta argumentar com a guarda municipal, que inspeciona suas credenciais com rigidez desconfiada antes de autorizar a passagem: "Circulem pelas vias principais sem algazarras."';
+
+    _showServiceResultPopup({
+      npc: comp.name,
+      icon: comp.avatar ? ('<img src="' + comp.avatar + '" alt="" style="width:96px;height:96px;object-fit:cover;border-radius:var(--v-radius,10px);" onerror="this.style.display=\'none\';">') : undefined,
+      dice: diceData,
+      narrative: success ? sNarr : fNarr,
+      onContinue: function(){
+        if (success) {
+          _updateCompanionApproval(comp.id, 3);
+          if (typeof vToast === 'function') vToast('✦ ' + comp.name + ' mediou a conversa com a guarda (+3 Afinidade)', 'ok');
+        }
+        onResolved(success, success ? sNarr : fNarr);
+      }
+    });
+    return true;
+  }
+
+  // 3. Caso Nicho Votivo (walk_shrine)
+  if (chosenEvent.id === 'walk_shrine') {
+    var comp = comps.find(function(c){ return ['clerigo','paladino','druida'].indexOf(c.cls) >= 0; });
+    if (comp) {
+      var mod = 5;
+      var d20 = Math.floor(Math.random() * 20) + 1;
+      var dc = 10;
+      var total = d20 + mod;
+      var success = (total >= dc);
+
+      var diceData = {
+        is_surprise: false,
+        is_companion: true,
+        roller_name: comp.name,
+        sides: 20,
+        d20: d20,
+        roll: d20,
+        mod: mod,
+        total: total,
+        dc: dc,
+        success: success,
+        skill: 'Religião'
+      };
+
+      var sNarr = comp.name + ' se ajoelha diante do nicho votivo e profere uma prece solene aos Guardiões Antigos. Uma sensação de serenidade profunda e alívio das tensões da estrada preenche a comitiva.';
+      var fNarr = comp.name + ' contempla a chama do nicho em silêncio respeitoso antes de retomar a caminhada.';
+
+      _showServiceResultPopup({
+        npc: comp.name,
+        icon: comp.avatar ? ('<img src="' + comp.avatar + '" alt="" style="width:96px;height:96px;object-fit:cover;border-radius:var(--v-radius,10px);" onerror="this.style.display=\'none\';">') : undefined,
+        dice: diceData,
+        narrative: success ? sNarr : fNarr,
+        onContinue: function(){
+          if (success) {
+            _updateCompanionApproval(comp.id, 3);
+            if (typeof vToast === 'function') vToast('✦ ' + comp.name + ' obteve uma bênção no oratório (+3 Afinidade)', 'ok');
+          }
+          onResolved(success, success ? sNarr : fNarr);
+        }
+      });
+      return true;
+    }
+  }
+
+  // 4. Caso Melodia do Bardo (walk_bard)
+  if (chosenEvent.id === 'walk_bard') {
+    var comp = comps.find(function(c){ return ['bardo','ladino'].indexOf(c.cls) >= 0; });
+    if (comp) {
+      var mod = 5;
+      var d20 = Math.floor(Math.random() * 20) + 1;
+      var dc = 11;
+      var total = d20 + mod;
+      var success = (total >= dc);
+
+      var diceData = {
+        is_surprise: false,
+        is_companion: true,
+        roller_name: comp.name,
+        sides: 20,
+        d20: d20,
+        roll: d20,
+        mod: mod,
+        total: total,
+        dc: dc,
+        success: success,
+        skill: 'Atuação'
+      };
+
+      var sNarr = comp.name + ' acompanha o ritmo do alaúde com palmas e versos improvisados. O trovador abre um sorriso largo e dedica a estrofe final à coragem da comitiva.';
+      var fNarr = comp.name + ' troca um olhar de camaradagem com o trovador enquanto avançam pelas ruas de Valdoria.';
+
+      _showServiceResultPopup({
+        npc: comp.name,
+        icon: comp.avatar ? ('<img src="' + comp.avatar + '" alt="" style="width:96px;height:96px;object-fit:cover;border-radius:var(--v-radius,10px);" onerror="this.style.display=\'none\';">') : undefined,
+        dice: diceData,
+        narrative: success ? sNarr : fNarr,
+        onContinue: function(){
+          if (success) {
+            _updateCompanionApproval(comp.id, 3);
+            if (typeof vToast === 'function') vToast('✦ ' + comp.name + ' animou o caminho com o trovador (+3 Afinidade)', 'ok');
+          }
+          onResolved(success, success ? sNarr : fNarr);
+        }
+      });
+      return true;
+    }
+  }
+
+  return false;
+}
+
+var _CITY_LOCAL_BANTERS = {
+  'guerreiro': [
+    {
+      id: 'local_banter_fighter_street',
+      narration: 'O cheiro de carvão mineral e óleo de armadura sopra pelas cantarias de Valdoria. {name} caminha em passo firme ao seu lado, observando com olhar crítico o posicionamento das ameias e das sentinelas municipais.',
+      speech: 'Você repara como os guardas da cidade andam cansados? Quando o serviço de muralha não descansa a mente, o braço vacila na primeira investida de perigo. Bom saber que nossa comitiva marcha com os olhos abertos.',
+      choices: [
+        {
+          id: 'vigilant',
+          label: 'Concordar e reforçar a atenção mútua',
+          speech: 'Nas trilhas ou nas vielas, a disciplina mantém a comitiva inteira. Confio na sua vigília.',
+          delta_approval: 3,
+          reply_narration: '{name} assente com firmeza, um lampejo de respeito sincero transparecendo no olhar calejado.',
+          reply_speech: 'E pode confiar. Minha lâmina responde pelo grupo antes de qualquer dúvida.'
+        },
+        {
+          id: 'practical',
+          label: 'Comentar de forma pragmática sobre o cansaço dos guardas',
+          speech: 'Se eles baixarem a guarda, o problema é do capitão deles. Nós só precisamos cuidar de nossos próprios passos.',
+          delta_approval: 1,
+          reply_narration: '{name} dá de ombros calmamente, ajustando a correia da espada.',
+          reply_speech: 'Faz sentido. Cuidar de quem caminha conosco já é tarefa para o dia todo.'
+        },
+        {
+          id: 'dismissive',
+          label: 'Descartar a preocupação com desdém',
+          speech: 'Você pensa demais em sentinelas. Relaxe os ombros, estamos dentro dos muros.',
+          delta_approval: -2,
+          reply_narration: '{name} franze a testa de leve, mantendo o passo marcial em silêncio por alguns instantes.',
+          reply_speech: 'Muralhas são apenas pedras empilhadas. O perigo nunca pede licença para entrar.'
+        }
+      ]
+    }
+  ],
+  'ladino': [
+    {
+      id: 'local_banter_rogue_alleys',
+      narration: 'As vielas sinuosas de Valdoria formam um labirinto de sombras sob as marquises de carvalho. {name} desliza os passos com leveza felina no calçamento úmido, os olhos atentos a cada fresta e janela entreaberta.',
+      speech: 'Gosto das esquinas desta cidade. Quem olha de cima só vê telhados; quem olha de perto vê rotas de escape e olhares que não querem ser notados. É sempre bom saber para onde correr se o vento mudar de lado.',
+      choices: [
+        {
+          id: 'cunning',
+          label: 'Apreciar a perspicácia e prudência do companheiro',
+          speech: 'Saber sair de uma enrascada vale mais que entrar nela de peito aberto. Guarde essas rotas para nós.',
+          delta_approval: 3,
+          reply_narration: '{name} sorri de lado, girando discretamente uma adaga na bainha oculta sob a capa.',
+          reply_speech: 'Pode deixar comigo. Se as coisas apertarem, você pisca e já estamos a dois quarteirões de distância.'
+        },
+        {
+          id: 'direct',
+          label: 'Pontuar que prefere resolver as coisas de frente',
+          speech: 'Rotas de fuga são úteis, mas prefiro que os nossos adversários tenham que correr primeiro.',
+          delta_approval: 1,
+          reply_narration: '{name} solta uma risadinha abafada diante da audácia.',
+          reply_speech: 'Uma postura corajosa. Só não reclame se eu sugerir a janela enquanto você segura a porta da frente.'
+        },
+        {
+          id: 'judgmental',
+          label: 'Censurar o hábito de pensar como fugitivo',
+          speech: 'Você pensa como quem deve algo à justiça. Caminhamos de cabeça erguida aqui.',
+          delta_approval: -2,
+          reply_narration: '{name} fecha a expressão com frieza, desviando o olhar para os beirais.',
+          reply_speech: 'Quem nunca teve que fugir para sobreviver tem o luxo de julgar quem aprendeu a correr.'
+        }
+      ]
+    }
+  ],
+  'clerigo': [
+    {
+      id: 'local_banter_cleric_peace',
+      narration: 'O toque distante dos sinos de bronze do templo reverbera suavemente pelas ruas de pedra. {name} toca o amuleto sagrado no peito e respira fundo, contemplando a calmaria momentânea entre os transeuntes.',
+      speech: 'Mesmo com tanta agitação pelas praças, sinto que os Quatro ainda derramam uma centelha de paz sobre quem busca abrigo em Valdoria. É revigorante caminhar sem ouvir o rugido das feras dos ermos, não acha?',
+      choices: [
+        {
+          id: 'faithful',
+          label: 'Partilhar da gratidão pela pausa e pela paz',
+          speech: 'A calma deste momento recompõe as forças da alma. Sua presença traz serenidade para a nossa caminhada.',
+          delta_approval: 3,
+          reply_narration: '{name} oferece um sorriso afável e acolhedor, traçando uma bênção silenciosa no ar.',
+          reply_speech: 'A luz dos céus nos acompanha. Que essa serenidade guie as decisões de nossa comitiva.'
+        },
+        {
+          id: 'pragmatic',
+          label: 'Reconhecer o alívio temporário',
+          speech: 'É bom ter um teto e comida quente, mesmo sabendo que amanhã a poeira da estrada volta a nos cobrir.',
+          delta_approval: 1,
+          reply_narration: '{name} assente com compreensão madura.',
+          reply_speech: 'A vida de aventureiro é feita de partidas e pausas. Aproveitemos a pausa enquanto dura.'
+        },
+        {
+          id: 'cynical',
+          label: 'Menosprezar a fé e focar nos perigos',
+          speech: 'Paz não paga mantimentos nem amola aço. Prefiro manter a guarda alta a confiar em preces.',
+          delta_approval: -2,
+          reply_narration: '{name} suspira discretamente, recolhendo o símbolo com ar reservado.',
+          reply_speech: 'A fé não substitui o aço, aventureiro; ela apenas dá força para o braço que o empunha.'
+        }
+      ]
+    }
+  ]
+};
+
+function _renderCompanionSpontaneousBanterScene(banter, proceedAfterFn) {
+  if (!banter || !window.vEncounter || typeof window.vEncounter.render !== 'function') {
+    window._encounterActive = false;
+    if (typeof proceedAfterFn === 'function') proceedAfterFn();
+    return;
+  }
+  var p = (typeof CITY_MOCK_PLAYER !== 'undefined') ? CITY_MOCK_PLAYER : (window.CITY_MOCK_PLAYER || {});
+  var targetNpc = {
+    name: banter.companion_name,
+    title: (banter.npc && banter.npc.title) || banter.companion_name,
+    portrait: banter.companion_avatar || '/shared/img/npcs/companion_default.webp'
+  };
+
+  window._encounterActive = true;
+  window.vEncounter.render({
+    npc: targetNpc,
+    script: banter.script,
+    choices: banter.choices,
+    choicesTitle: 'Conversa com Companheiro',
+    choicesSubtitle: banter.companion_name
+  }, {
+    player: p,
+    onChoice: function(selected) {
+      var cid = banter.companion_id;
+      var chid = selected.id;
+      var did = banter.id;
+      var delta = selected.delta_approval || 1;
+
+      if (window.vCityServer && typeof window.vCityServer.cityAction === 'function' && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
+        window.vCityServer.cityAction('companion.banter_choice', {
+          companion_id: cid,
+          dialogue_id: did,
+          choice_id: chid
+        }).then(function(res){
+          if (res && res.result) {
+            _handleBanterResolved(res.result, targetNpc, proceedAfterFn);
+          } else {
+            _fallbackBanterChoiceResolve(selected, banter, targetNpc, proceedAfterFn);
+          }
+        }).catch(function(){
+          _fallbackBanterChoiceResolve(selected, banter, targetNpc, proceedAfterFn);
+        });
+      } else {
+        _fallbackBanterChoiceResolve(selected, banter, targetNpc, proceedAfterFn);
+      }
+    }
+  });
+}
+
+function _fallbackBanterChoiceResolve(selected, banter, targetNpc, proceedAfterFn) {
+  var delta = selected.delta_approval || 1;
+  var cid = banter.companion_id;
+  _updateCompanionApproval(cid, delta);
+
+  var sign = delta > 0 ? '+' : '';
+  var icon = delta > 0 ? '✦' : (delta < 0 ? '💔' : '◈');
+  var verb = delta > 0 ? 'aprovou' : (delta < 0 ? 'desaprovou' : 'ouviu');
+  var toastText = icon + ' ' + banter.companion_name + ' ' + verb + ' a conversa (' + sign + delta + ' Afinidade)';
+  if (typeof vToast === 'function') vToast(toastText, delta >= 0 ? 'ok' : 'warn');
+
+  var resultScript = [];
+  if (selected.reply_speech) {
+    resultScript.push({
+      type: 'speech',
+      speaker: banter.companion_name,
+      avatar: banter.companion_avatar,
+      text: selected.reply_speech
+    });
+  }
+  if (selected.reply_narration) {
+    resultScript.push({
+      type: 'narration',
+      text: selected.reply_narration
+    });
+  }
+
+  _handleBanterResolved({ result_script: resultScript }, targetNpc, proceedAfterFn);
+}
+
+function _handleBanterResolved(result, targetNpc, proceedAfterFn) {
+  var script = (result && result.result_script && result.result_script.length)
+    ? result.result_script
+    : [{ type: 'narration', text: 'A conversa se encerra em tom tranquilo enquanto a comitiva retoma a marcha.' }];
+
+  window.vEncounter.render({
+    npc: targetNpc,
+    script: script,
+    choices: [{ id: 'done', label: 'Continuar caminhada' }]
+  }, {
+    player: (typeof CITY_MOCK_PLAYER !== 'undefined') ? CITY_MOCK_PLAYER : (window.CITY_MOCK_PLAYER || {}),
+    onChoice: function() {
+      window._encounterActive = false;
+      try { window.vEncounter.close(); } catch(_){}
+      if (typeof refreshHud === 'function') refreshHud();
+      if (typeof proceedAfterFn === 'function') proceedAfterFn();
+    }
+  });
+}
+
+function _renderLocalCompanionBanterFallback(comps, proceedAfterFn) {
+  var comp = comps[Math.floor(Math.random() * comps.length)];
+  var pool = _CITY_LOCAL_BANTERS[comp.cls] || _CITY_LOCAL_BANTERS['guerreiro'];
+  var template = pool[Math.floor(Math.random() * pool.length)];
+
+  var narration = template.narration.replace(/\{name\}/g, comp.name);
+  var speech = template.speech.replace(/\{name\}/g, comp.name);
+  var choices = template.choices.map(function(ch){
+    return {
+      id: ch.id,
+      label: ch.label,
+      speech: ch.speech,
+      delta_approval: ch.delta_approval,
+      reply_narration: ch.reply_narration.replace(/\{name\}/g, comp.name),
+      reply_speech: ch.reply_speech.replace(/\{name\}/g, comp.name)
+    };
+  });
+
+  var banter = {
+    id: template.id,
+    companion_id: comp.id,
+    companion_name: comp.name,
+    companion_class: comp.cls,
+    companion_avatar: comp.avatar,
+    npc: { name: comp.name, title: comp.name + ' (' + comp.cls.toUpperCase() + ')', portrait: comp.avatar },
+    script: [
+      { type: 'narration', text: narration },
+      { type: 'speech', speaker: comp.name, avatar: comp.avatar, text: speech }
+    ],
+    choices: choices
+  };
+
+  _renderCompanionSpontaneousBanterScene(banter, proceedAfterFn);
+}
+
+function _maybeTriggerCompanionSpontaneousBanter(triggerType, proceedAfterFn) {
+  if (window._encounterActive) return false;
+  if (window.vEncounter && typeof window.vEncounter.isOpen === 'function' && window.vEncounter.isOpen()) return false;
+  var csp = document.getElementById('city-subscreen-popup');
+  if (csp && csp.open) return false;
+  var sro = document.getElementById('service-result-overlay');
+  if (sro && sro.style.display !== 'none' && sro.classList.contains('active')) return false;
+  var srf = document.getElementById('srp-dice-fullscreen');
+  if (srf) return false;
+  var eo = document.getElementById('encounter-overlay');
+  if (eo && eo.open) return false;
+  if (window._inCombat) return false;
+
+  var comps = _getActivePartyCompanions();
+  if (!comps || !comps.length) return false;
+
+  var now = Date.now();
+  var lastTs = parseInt(sessionStorage.getItem('valdoria_last_companion_banter_ts') || '0', 10);
+  var cooldownMs = 8 * 60 * 1000;
+  if (now - lastTs < cooldownMs) return false;
+
+  var chance = (triggerType === 'idle') ? 0.35 : 0.06;
+  if (Math.random() > chance) return false;
+
+  sessionStorage.setItem('valdoria_last_companion_banter_ts', String(now));
+
+  if (window.vCityServer && typeof window.vCityServer.cityAction === 'function' && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
+    window._encounterActive = true;
+    window.vCityServer.cityAction('companion.spontaneous_banter', { venue: (typeof _currentVenue !== 'undefined' ? _currentVenue : 'cidade') })
+      .then(function(res){
+        if (res && res.ok && res.banter) {
+          _renderCompanionSpontaneousBanterScene(res.banter, proceedAfterFn);
+        } else {
+          window._encounterActive = false;
+          _renderLocalCompanionBanterFallback(comps, proceedAfterFn);
+        }
+      })
+      .catch(function(){
+        window._encounterActive = false;
+        _renderLocalCompanionBanterFallback(comps, proceedAfterFn);
+      });
+    return true;
+  }
+
+  _renderLocalCompanionBanterFallback(comps, proceedAfterFn);
+  return true;
+}
+window._maybeTriggerCompanionSpontaneousBanter = _maybeTriggerCompanionSpontaneousBanter;
+
+var _companionIdleTimer = null;
+function _resetCompanionIdleTimer() {
+  if (_companionIdleTimer) clearTimeout(_companionIdleTimer);
+  _companionIdleTimer = setTimeout(function(){
+    if (typeof _maybeTriggerCompanionSpontaneousBanter === 'function') {
+      _maybeTriggerCompanionSpontaneousBanter('idle');
+    }
+  }, 100000);
+}
+['mousemove', 'keydown', 'touchstart', 'click'].forEach(function(ev){
+  window.addEventListener(ev, _resetCompanionIdleTimer, { passive: true });
+});
+_resetCompanionIdleTimer();
 
 // ============================================================================
 // === PADRAO_SERVIDOR — Diálogos server-driven genéricos (sessão #71) ========
@@ -71979,10 +72570,13 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
       icon: (data.npc && data.npc.portrait)
         ? ('<img src="' + data.npc.portrait + '" alt="" style="width:96px;height:96px;object-fit:cover;border-radius:var(--v-radius,10px);" onerror="this.style.display=\'none\';">')
         : undefined,
-      dice: { sides: (d.sides || 20), value: d.roll, total: d.total, formula: 'd20 ' + d.roll + ' ' + _mod,
-              dc: d.dc, label: 'Teste de ' + _skl,
+      dice: { sides: (d.sides || 20), value: (d.roll != null ? d.roll : d.d20), total: d.total,
+              formula: d.is_surprise ? (d.roller_name ? (d.roller_name + ' rola 1d20') : '1d20') : ('d20 ' + (d.roll != null ? d.roll : d.d20) + ' ' + _mod),
+              is_surprise: !!d.is_surprise, roller_name: d.roller_name, surprise_title: d.surprise_title, pre_roll_desc: d.pre_roll_desc,
+              dc: d.is_surprise ? null : d.dc,
+              label: d.is_surprise ? (d.surprise_title || '✦ Reação de Reflexo da Comitiva ✦') : ((d.is_companion && d.roller_name) ? ('✦ Intervenção de ' + d.roller_name + ' · ' + _skl + ' ✦') : ('Teste de ' + _skl)),
               degree: d.degree, degree_label: d.degree_label },  // D3: value=roll · dc/label → cena fullscreen do dado
-      narrative: '<b>' + _skl + '</b> — '
+      narrative: d.is_surprise ? (d.pre_roll_desc || 'Uma reação rápida é necessária nas sombras...') : ('<b>' + (d.roller_name ? (d.roller_name + ' — ') : '') + _skl + '</b> — '
           + (d.success
               ? '<b style="color:var(--v-success,#6fae6f)">Sucesso</b>'
               : '<b style="color:var(--v-danger,#c0584a)">Falha</b>')
@@ -71991,7 +72585,17 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
       onContinue: function(){
         // D4: SEMPRE re-fetch da raiz (custo novo + barganha consumida). NÃO renderiza node embutido.
         var nid = (ctx && ctx.npcId) || (data.npc && data.npc.id);
-        if (nid) _openRecrutaDialogue(nid, p);
+        if (venue === 'recruta' && nid) _openRecrutaDialogue(nid, p);
+        else if (data.result_script && window.vEncounter && window.vEncounter.render) {
+          var targetNpc = data.npc || npc || { name: 'Aventureiro' };
+          window.vEncounter.render(
+            { npc: targetNpc, script: data.result_script, choices: (data.choices && data.choices.length) ? data.choices : [{ id: 'done', label: 'Continuar' }] },
+            { player: p, onChoice: function(){
+                try { window.vEncounter.close(); } catch(_){}
+                if (typeof refreshHud === 'function') refreshHud();
+            } }
+          );
+        }
         else { try { window.vEncounter.close(); } catch(_){} }
       }
     });
