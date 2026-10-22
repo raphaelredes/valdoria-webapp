@@ -55762,14 +55762,12 @@ function _openRecrutaDialogue(npcId, p){
     if (typeof _guildShowRecruitFicha === 'function') _guildShowRecruitFicha({ id: npcId }, p);
     return;
   }
-  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Aproximando-se...' }); } catch(_){} }
+  // Regra 14 (Ordem do Usuário 2026-10): PROIBIDO loaders/vProcessing ao abrir diálogos locais.
   // D1: node = npcId (raiz). NÃO mandar npc_id como campo separado.
   window.vCityServer.cityAction('dialogue.get', { venue: 'recruta', node: npcId }).then(function(data){
-    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
     if (!data || !data.ok) { if (typeof vToast === 'function') vToast('Não foi possível conversar.', 'warn'); return; }
     _renderCityDialogue('recruta', data, p, { npcId: npcId });
   }).catch(function(e){
-    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
     console.error('[CITY] recruta dialogue get failed', e);
     if (typeof vToast === 'function') vToast('Erro ao conversar.', 'warn');
   });
