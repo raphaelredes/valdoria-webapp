@@ -72584,6 +72584,38 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
     });
   }
 
+  // 3. Opções de Prestar Auxílio / Ação de Ajuda de Companheiro (D&D 5e PHB p. 175 & BG3)
+  for (var j = 0; j < assistOptions.length; j++) {
+    var hOpt = assistOptions[j];
+    var hName = hOpt.name;
+    var hClass = hOpt.raw_class || hOpt.class;
+    var hLabel = '🤝 [Auxílio: ' + hName + ' (' + hClass + ')] Trabalhar em Conjunto (2d20 Vantagem PHB p. 175)';
+    if (hasGuidance) {
+      hLabel += ' + Orientação (+1d4)';
+    }
+    if (hasBardic) {
+      hLabel += ' + Bardo (+1d6)';
+    }
+    choices.push({
+      id: 'roll_help_' + hOpt.companion_id,
+      label: '✔ ' + hLabel,
+      title: 'Trabalhar em Conjunto com ' + hName,
+      subtitle: sklLabel + ' · Vantagem (2d20) · CD ' + dc,
+      desc: 'Você e seu companheiro ' + hName + ' (' + hClass + ') unem argumentos e presença. O companheiro intervém ativamente no diálogo, concedendo Vantagem (rola 2d20 e escolhe o maior) e fortalecendo o vínculo da comitiva (+1 Aprovação).',
+      possibleResults: '✦ Vantagem: Rola 2d20 escolhendo o maior valor.<br>✦ Trabalho de Equipe: +1 de aprovação e afinidade com ' + hName + ' pelo auxílio cooperativo.<br>✦ Superar a CD ' + dc + ' garante o sucesso na interação.' + (hasGuidance ? '<br>✦ Bônus de +1d4 da Orientação somado ao total.' : '') + (hasBardic ? '<br>✦ Bônus de +1d6 da Inspiração Bárdica somado ao total.' : '') + attitudeNote,
+      dc: dc,
+      skill: skl,
+      advantage: true,
+      requireConfirm: true,
+      _tactical_options: {
+        helper: hOpt.companion_id,
+        use_guidance: hasGuidance,
+        use_bardic_inspiration: hasBardic,
+        use_inspiration: false
+      }
+    });
+  }
+
   choices.push({
     id: 'back',
     label: '← Voltar às opções',
@@ -72903,10 +72935,30 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
   // efeito aplicado → atualiza HUD + narra consequência PADRAO_ALDRIC
   if (data.result_script) {
     _applyHudFromDialogue(data);
-    if (data.stat_changes && data.stat_changes.length && typeof vToast === 'function') {
-      var tmsg = data.stat_changes.map(function(s){ return s.text; }).join(' · ');
-      var ttype = data.stat_changes.some(function(s){ return s.type === 'no_effect'; }) ? 'warn' : 'ok';
-      vToast(tmsg, ttype);
+function _renderCompanionApprovalBG3(scList) {
+  if (!scList || !scList.length || typeof vToast !== 'function') return;
+  for (var i = 0; i < scList.length; i++) {
+    var sc = scList[i];
+    if (sc && (sc.type === 'affinity' || sc.type === 'approval')) {
+      var delta = Number(sc.delta || 0);
+      var text = sc.text || '';
+      var msg = text;
+      if (!msg.startsWith('✦')) {
+        msg = '✦ ' + msg;
+      }
+      vToast(msg, delta >= 0 ? 'ok' : 'warn');
+    }
+  }
+}
+
+    if (data.stat_changes && data.stat_changes.length) {
+      _renderCompanionApprovalBG3(data.stat_changes);
+      var nonAff = data.stat_changes.filter(function(s){ return s.type !== 'affinity' && s.type !== 'approval'; });
+      if (nonAff.length && typeof vToast === 'function') {
+        var tmsg = nonAff.map(function(s){ return s.text; }).join(' · ');
+        var ttype = nonAff.some(function(s){ return s.type === 'no_effect'; }) ? 'warn' : 'ok';
+        vToast(tmsg, ttype);
+      }
     }
     if (window.vEncounter && window.vEncounter.render) {
       // FASE 5d (#3): hire selado do recruta → narra + refresca grupo/HUD (label sem emoji).
