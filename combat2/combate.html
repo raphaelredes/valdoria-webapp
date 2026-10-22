@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-22T15:34:32Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-22T16:31:55Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -38924,10 +38924,10 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             var _maxCut = _tLvl >= 15 ? 12 : (_tLvl >= 10 ? 10 : (_tLvl >= 5 ? 8 : 6));
             var _diff = total - effAc + 1;
             if (_diff <= 1) {
-                comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--win">🎵 Palavras Cortantes (1d' + _maxCut + '): Superou a CA por 1 ponto → <strong>100% de chance de virar ERRO!</strong></div>';
+                comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--win">🎵 Palavras Cortantes (1d' + _maxCut + '): Superou a CA por 1 ponto → <strong>subtrai 1d' + _maxCut + ' para forçar o erro!</strong></div>';
             } else if (_diff <= _maxCut) {
                 var _chancePct = Math.round(((_maxCut - _diff + 1) / _maxCut) * 100);
-                comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--win">🎵 Palavras Cortantes (1d' + _maxCut + '): Precisa subtrair ' + _diff + '+ → <strong>' + _chancePct + '% de chance de virar ERRO!</strong></div>';
+                comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--win">🎵 Palavras Cortantes (1d' + _maxCut + '): Precisa subtrair ' + _diff + ' ou mais do ataque para anular o golpe!</div>';
             } else {
                 comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--loss">⚠️ Palavras Cortantes (1d' + _maxCut + '): Superou a CA por ' + (_diff - 1) + ' pontos (máx do dado: ' + _maxCut + ') — não evitará o acerto.</div>';
             }

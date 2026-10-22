@@ -12757,7 +12757,7 @@ function _isCTA(btn) {
       // agora o decreto selado de proteção (privacy-policy.webp, gerado via OpenAI low).
       // Banner com fundo → moldura dourada arredondada (em vez do glow de ícone isolado).
       + '<div style="position:relative; width:118px; height:90px; margin: 0 auto var(--v-space-md-lg, 10px); border-radius:8px; overflow:hidden; border:1px solid var(--v-gold-40,rgba(196,149,58,0.4)); box-shadow:0 0 18px rgba(196,149,58,0.35), 0 2px 8px rgba(0,0,0,0.5);">'
-      + '<img src="../shared/img/ui/privacy-policy.webp" alt="Decreto de Privacidade — proteção dos teus dados"'
+      + '<img src="../shared/img/ui/privacy-policy.webp" alt="Decreto de Privacidade — proteção dos seus dados"'
       + ' style="width:100%; height:100%; object-fit:cover; display:block;"'
       + ' onerror="this.parentNode.style.display=\'none\';">'
       + '</div>'
@@ -12772,7 +12772,7 @@ function _isCTA(btn) {
 
       // Subtítulo — fonte maior (11 → 13)
       + '<div style="font-family:var(--v-font,MedievalSharp,serif); font-style:italic; color:var(--v-text,#d4c8b0); font-size:calc(13px * var(--v-font-scale, 1)); line-height:1.5; max-width:300px; margin:0 auto;">'
-      + '"Que a luz da <b style="color:var(--v-gold,#c4953a);">Aurora</b> guie teus primeiros passos."'
+      + '"Que a luz da <b style="color:var(--v-gold,#c4953a);">Aurora</b> guie seus primeiros passos."'
       + '</div>'
 
       + '</div>'  // /header
@@ -12988,10 +12988,10 @@ function _isCTA(btn) {
       +   '<div style="font-family:Cinzel,serif;letter-spacing:2px;color:var(--v-gold,#c4953a);font-size:calc(11px * var(--v-font-scale, 1));text-transform:uppercase;margin-bottom:6px;opacity:0.85;">— Pergaminho do Mestre Aldric —</div>'
       +   '<p style="font-style:italic;color:var(--v-text-dim,#a09484);line-height:1.55;font-size:calc(13px * var(--v-font-scale, 1));margin:0 0 14px;padding: 0 var(--v-space-sm, 4px);">'
       +     '"Aventureiro&hellip; passamos juntos <b style=\'color:var(--v-gold,#c4953a);\'>cinco horas</b> nesta jornada. <i>(pousa a pena sobre o pergaminho gasto)</i><br><br>'
-      +     'Tua história foi tecida ao lado de Valdória. Que tua voz ecoe agora — para que aqueles que vierem depois encontrem caminhos mais belos. Tua palavra esculpe o reino."'
+      +     'Sua história foi tecida ao lado de Valdoria. Que sua voz ecoe agora — para que aqueles que vierem depois encontrem caminhos mais belos. Sua palavra esculpe o reino."'
       +   '</p>'
       + '</div>'
-      + '<div style="text-align:center;font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);letter-spacing:1px;margin-bottom:6px;text-transform:uppercase;">Tua nota</div>'
+      + '<div style="text-align:center;font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text-dim,#a09484);letter-spacing:1px;margin-bottom:6px;text-transform:uppercase;">Sua nota</div>'
       + '<div style="display:flex;gap: var(--v-space-md, 8px);justify-content:center;padding: var(--v-space-sm, 4px) 0 14px;" id="rating-stars-auto">'
       + [1,2,3,4,5].map(function(n){
           return '<button type="button" class="rating-star" data-rating="' + n + '" '
@@ -13094,7 +13094,7 @@ function _isCTA(btn) {
         txt = txt.trim().slice(0, 500);
         sug = sug.trim().slice(0, 500);
         if (!rating) {
-          if (typeof vToast === 'function') vToast('Toque numa estrela primeiro — tua nota guia o caminho.');
+          if (typeof vToast === 'function') vToast('Toque numa estrela primeiro — sua nota guia o caminho.');
           return false;
         }
         try {
@@ -13966,7 +13966,7 @@ var CITY_DISCOVERY_QUESTS = {
   q_disc_desafio: { id:'q_disc_desafio', name:'Boletim do Conselho', targetCb:'daily_challenge', stages:[
     { id:'s1', speaker:'Capitã Ysoria',
       narration:'Você se aproxima do quadro de avisos de ferro batido da guilda. Capitã Ysoria cruza os braços com um olhar afiado e atento.',
-      text:'Aventureiro com história. Vimos teu nome no quadro da Guilda — três missões resolvidas no mês. O Conselho está abrindo Desafios Diários para os que provam serviço.',
+      text:'Aventureiro com história. Vimos seu nome no quadro da Guilda — três missões resolvidas no mês. O Conselho está abrindo Desafios Diários para os que provam serviço.',
       choices:[{ label:'O que são?', next:'s2' }] },
     { id:'s2', speaker:'Capitã Ysoria',
       narration:'Ysoria desenrola um pergaminho grosso selado com a cera carmesim do Conselho dos Lordes.',
@@ -17351,7 +17351,7 @@ function _showSettingsPopup(){
 
               // === LORE TAGLINE (compacta — 1 frase só) ===
               + '<div style="text-align:center;font-style:italic;color:var(--v-text-dim,#a09484);font-size:calc(11px * var(--v-font-scale, 1));margin: var(--v-space-xs, 2px) 0 var(--v-space-md, 8px);line-height:1.4;">'
-              + '"Convide um aliado, que tua jornada seja recompensada."'
+              + '"Convide um aliado, que sua jornada seja recompensada."'
               + '</div>'
 
               // === CÓDIGO HERO compactado (font 20px, padding 8/14) ===
@@ -17516,15 +17516,15 @@ function _showSettingsPopup(){
               + '<div style="position:relative;margin: -2px -2px var(--v-space-lg, 12px);border-radius:8px;overflow:hidden;border:1px solid var(--v-gold-40,rgba(196,149,58,0.4));box-shadow:0 6px 20px rgba(0,0,0,0.55),0 0 26px rgba(196,149,58,0.18);">'
               +   '<img src="/shared/img/ui/rate-minstrel.webp" alt="Menestrel sob as estrelas" style="display:block;width:100%;height:132px;object-fit:cover;object-position:center 42%;">'
               +   '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(26,20,16,0) 35%,rgba(26,20,16,0.84) 100%);"></div>'
-              +   '<div style="position:absolute;left:8px;right:8px;bottom:7px;text-align:center;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(11px * var(--v-font-scale, 1));letter-spacing:1.5px;text-transform:uppercase;color:#ffd9a0;text-shadow:0 1px 5px rgba(0,0,0,0.95);">Que tua voz ressoe nas salas do mestre</div>'
+              +   '<div style="position:absolute;left:8px;right:8px;bottom:7px;text-align:center;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(11px * var(--v-font-scale, 1));letter-spacing:1.5px;text-transform:uppercase;color:#ffd9a0;text-shadow:0 1px 5px rgba(0,0,0,0.95);">Que sua voz ressoe nas salas do mestre</div>'
               + '</div>'
               + '<div style="text-align:center;font-style:italic;color:var(--v-text-dim,#a09484);font-size:calc(12px * var(--v-font-scale, 1));margin: 0 0 var(--v-space-md-lg, 10px);line-height:1.5;">'
-              + 'O menestrel canta as lendas de quem ousa vivê-las. <b style="color:var(--v-gold,#c4953a);font-style:normal;">E a tua?</b>'
+              + 'O menestrel canta as lendas de quem ousa vivê-las. <b style="color:var(--v-gold,#c4953a);font-style:normal;">E a sua?</b>'
               + '</div>'
               + (_prevRating
                 ? '<div style="text-align:center;font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);margin-bottom:6px;">Última nota: ' + '★'.repeat(parseInt(_prevRating,10)) + '</div>'
                 : '')
-              + '<div style="text-align:center;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);letter-spacing:2px;text-transform:uppercase;margin-bottom: var(--v-space-sm, 4px);opacity:0.85;">Qual a tua nota?</div>'
+              + '<div style="text-align:center;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10px * var(--v-font-scale, 1));color:var(--v-gold,#c4953a);letter-spacing:2px;text-transform:uppercase;margin-bottom: var(--v-space-sm, 4px);opacity:0.85;">Qual a sua nota?</div>'
               + '<div id="rating-stars" style="display:flex; gap: var(--v-space-xs, 2px); justify-content:center; padding: 6px 0 var(--v-space-sm, 4px);">'
               + [1,2,3,4,5].map(function(n){
                   return '<button class="rating-star" data-rating="' + n + '" aria-label="' + n + ' estrelas">★</button>';
@@ -28194,9 +28194,9 @@ function _shadowShowCrime(p){
             icon: t.icon, npc: 'O Vulto', title: t.name + ' — ' + tier.label,
             desc: '<b>Plano:</b> ' + t.desc + '<br>' +
                   '<b>3 testes</b> contra CD ' + tier.dc + '<br><br>' +
-                  '<b>Sucesso completo:</b> ' + tier.reward_min + '-' + tier.reward_max + ' <span class="vi vi-coin sm"></span><br>' +
-                  '<b>Sucesso parcial:</b> metade da recompensa<br>' +
-                  '<b>Falha:</b> multa de ' + tier.fine + ' <span class="vi vi-coin sm"></span> (preso pela guarda)',
+                  '<i>"A recompensa é generosa se as mãos não tremerem, mas a patrulha da guarda não perdoa deslizes na escuridão."</i>',
+
+
                     onConfirm: function(){
               // Auditoria server-driven 2026-06-25 (#3): em REMOTE o SERVIDOR rola
               // 3×d20 + aplica gold/multa + persiste (service.shadow_crime); o cliente
@@ -33144,7 +33144,7 @@ var BANK_PROPERTIES = [
     cost: 10000,
     desc: 'Pequeno terreno arborizado próximo à muralha norte. Solo bom, vista da floresta.',
     benefits: '+5 slots no cofre · +5 Valdoritas/dia (renda)',
-    flavor: 'Aldwin desdobra um pergaminho amassado. <i>"Lote 47-N. Há quem chame de subúrbio, mas é teu."</i>'
+    flavor: 'Aldwin desdobra um pergaminho amassado. <i>"Lote 47-N. Há quem chame de subúrbio, mas é seu."</i>'
   },
   {
     id: 'casarao_artesaos',
@@ -38451,7 +38451,7 @@ var CANON_PLAZA_ENTRY_INTERACTIVE = [
   },
   { "id": "old_seer", "text": "Uma anciã de véu negro e olhos como pedra-lua estende a mão calejada. Diz ter te visto em sonho.", "weight": 4,
     "choices": [
-      { "id": "pay_truth", "label": "Pagar 3 cobres pela leitura", "stat": null, "dc": null, "success": { "text": "Profecia críptica sobre uma letra que tu temes e a lua gorda. Você guarda as palavras.", "xp": 8, "gold": -1 } },
+      { "id": "pay_truth", "label": "Pagar 3 cobres pela leitura", "stat": null, "dc": null, "success": { "text": "Profecia críptica sobre uma letra que você teme e a lua gorda. Você guarda as palavras.", "xp": 8, "gold": -1 } },
       { "id": "analyze", "label": "[INT 13] Analisar — golpe ou verdade?", "stat": "intelligence", "dc": 13, "success": { "text": "Cegueira real, óleos raros no véu, vocabulário arcaico. Vidente legítima. Ela te dá uma moeda de bronze.", "xp": 12, "gold": 2 }, "fail": { "text": "Você não tira conclusão. Ela ri — sabe exatamente o que pensou.", "xp": 2 } },
       { "id": "flatter", "label": "[CAR 11] Conta de graça — sou amigo dos antigos", "stat": "charisma", "dc": 11, "success": { "text": "Ela ri longamente e te dá uma pista sobre a estrada do oeste — protegida por algo mais velho que a Guarda.", "xp": 8 }, "fail": { "text": "Ela cospe perto do seu pé. Uma moeda some do seu bolso enquanto ela ergue a bengala.", "xp": 2, "gold": -1 } },
       { "id": "leave", "label": "Recusar e seguir", "stat": null, "dc": null, "success": { "text": "Você balança a cabeça. Ela murmura algo em outra língua.", "xp": 0 } }
@@ -39635,17 +39635,17 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
     npc_data: { name: 'Velha do Oculto', desc: 'Mulher idosa de cabelos brancos e olhos como pedra', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/velha_oculto.webp' },
     script: [
       { type: 'narration', text: 'Uma anciã com véu negro sobre os ombros estende a mão calejada quando você passa. <i>Os olhos dela são duas pedras-lua — sem foco, sem juventude, sem medo.</i>' },
-      { type: 'speech', speaker: 'Velha do Oculto', text: '— Aventureiro. <i>(a voz é fina mas firme)</i> Te vi em sonho. Quer saber o que vem? Três cobres, e te falo o que os outros não veem. Recusa, e talvez nunca saiba o nome do teu próximo inimigo.' }
+      { type: 'speech', speaker: 'Velha do Oculto', text: '— Aventureiro. <i>(a voz é fina mas firme)</i> Vi você em sonho. Quer saber o que vem? Três cobres, e falo para você o que os outros não veem. Se recusar, talvez nunca saiba o nome do seu próximo inimigo.' }
     ],
     choices: [
       { id: 'pay_truth', label: 'Pagar 3 cobres pela leitura', result: 'apply_now',
         effect: { gold: -1, xp: 8 },
-        result_text: 'Você paga. <i>Ela fecha os olhos e murmura.</i> <b>"O nome começa com a letra que tu temes. Ele virá quando a lua estiver gorda. Não confia no que te oferecem em troca de honra."</b> <i>Você não entende. Mas guarda as palavras na cabeça.</i>' },
+        result_text: 'Você paga. <i>Ela fecha os olhos e murmura.</i> <b>"O nome começa com a letra que você teme. Ele virá quando a lua estiver gorda. Não confie no que oferecem em troca de honra."</b> <i>Você não entende. Mas guarda as palavras na cabeça.</i>' },
       { id: 'analyze', label: '[INT 13] (Analisar — golpe ou verdade?)',
         result: 'skill_check', stat: 'intelligence', dc: 13,
         effect: { xp: 12, gold: 2 },
         effect_fail: { xp: 2 },
-        result_text: 'Você nota: olhos opacos genuínos (cegueira), véu manchado de óleo de plantas raras, vocabulário arcaico. <i>Não é golpista — é vidente real, dessas que viviam em templos antes da reforma.</i> Você se ajoelha. <b>"Mestra — sem pagamento. Conta o que viu."</b> Ela sorri. <b>"Tu é dos antigos. Aqui — guarda esta moeda de bronze. Vai te servir num dia ruim."</b>',
+        result_text: 'Você nota: olhos opacos genuínos (cegueira), véu manchado de óleo de plantas raras, vocabulário arcaico. <i>Não é golpista — é vidente real, dessas que viviam em templos antes da reforma.</i> Você se ajoelha. <b>"Mestra — sem pagamento. Conta o que viu."</b> Ela sorri. <b>"Você é dos antigos. Aqui — guarde esta moeda de bronze. Vai servir para você num dia ruim."</b>',
         result_text_fail: 'Você examina mas não tira conclusão clara. <i>Ela ri quieta, como se soubesse exatamente o que você pensou.</i> <b>"Pensa demais, aventureiro. Pensa demais. Volta quando souber escutar."</b>' },
       { id: 'flatter', label: '[CAR 11] "Conta de graça — sou amigo dos antigos."',
         result: 'skill_check', stat: 'charisma', dc: 11,
@@ -39677,7 +39677,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
         result: 'skill_check', stat: 'charisma', dc: 14,
         effect: { xp: 14, gold: 0 },
         effect_fail: { xp: 2 },
-        result_text: 'Você grita o nome do irmão morto. <i>Os dois congelam — o gordo da barba ruiva começa a chorar. O outro abaixa o punho.</i> <b>"Tu... tu sabia dele?"</b> Você não sabia — chutou. Mas funcionou. <i>Eles se abraçam, soluçando. A briga acabou.</i>',
+        result_text: 'Você grita o nome do irmão morto. <i>Os dois congelam — o gordo da barba ruiva começa a chorar. O outro abaixa o punho.</i> <b>"Você... você conhecia ele?"</b> Você não sabia — chutou. Mas funcionou. <i>Eles se abraçam, soluçando. A briga acabou.</i>',
         result_text_fail: 'Você grita mas a voz se perde no caos. <i>Eles continuam socando.</i>' },
       { id: 'deduce', label: '[INT 12] (Procurar o motivo real da briga)',
         result: 'skill_check', stat: 'intelligence', dc: 12,
@@ -42594,7 +42594,7 @@ var CANON_MARKET_GREETS = {
   },
   "boss_victory_greetings": {
     "blacksmith": [
-      "Thorne bate no peito. \"Ouvi o que você fez! A cidade inteira está falando. Merecias uma estátua.\"",
+      "Thorne bate no peito. \"Ouvi o que você fez! A cidade inteira está falando. Merecia uma estátua.\"",
       "O ferreiro te cumprimenta com respeito redobrado. \"Vencedor de monstros! O que posso forjar para o aventureiro?\""
     ],
     "alchemist": [
@@ -46706,7 +46706,7 @@ function _tavernShowMuralBoard(p){
     }
     html += '</div></div>'
       + '<div class="mural-grom">' + (items.length
-          ? 'Grom aponta o mural coberto de editais selados. <i>"Contrato selado teu diário registra ao aceitar. O resto é boato e conversa de estrada."</i>'
+          ? 'Grom aponta o mural coberto de editais selados. <i>"Contrato selado seu diário registra ao aceitar. O resto é boato e conversa de estrada."</i>'
           : 'Grom dá de ombros. <i>"Mural vazio. Volta que sempre aparece coisa nova."</i>')
       + '</div></div>';
 
@@ -50331,7 +50331,7 @@ function _tavernShowGather(p){
         icon: t.icon, npc: 'Grom', title: 'Investigar: ' + t.label,
         player: p,
         desc: '<b>' + t.label + '</b> · CD ' + t.dc + '<br>Custo: ' + t.cost + ' Valdoritas<br>' +
-              '<b>Sucesso:</b> ' + t.bonus,
+              '<i>"Pagar umas canecas solta línguas na taverna, mas é preciso lábia para separar boato de informação confiável."</i>',
         cost: t.cost,
         onConfirm: function(){
           // SERVER-AUTHORITATIVE (migração 2026-06-17, SUPREME RULE #0): o SERVIDOR
@@ -56509,7 +56509,7 @@ function _guildShowTraining(p){
       if (!_pay(p, 25)) return;
       _showServiceResultPopup({
         icon: _heralIco('ic-guerreiro'), npc: 'Veterano Braun',
-        narrative: 'Braun não te poupa. <i>(corrige tua guarda com um tapa no ombro)</i> "De novo. E de novo." Ao fim do dia, os músculos ardem — mas a lâmina obedece.'
+        narrative: 'Braun não poupa você. <i>(corrige sua guarda com um tapa no ombro)</i> "De novo. E de novo." Ao fim do dia, os músculos ardem — mas a lâmina obedece.'
           + '<br><br><b>+1 ATK por 7 dias.</b>',
         deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold,1), bar: false }],
         onContinue: function(){ navigateBack(); }
@@ -56561,7 +56561,7 @@ function _guildTrainingMenu(p){
     _squareShowListPopup({
       stackKey: 'guild_training', icon: '<img src="../shared/img/npcs/braun-quartelmestre.webp" alt="Veterano Braun" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', title: 'Sala de Treinamento',
       subtitle: 'Pátio de Armas · Veterano Braun', bannerImg: '/shared/img/guilda/training-banner.webp',
-      flavor: '<i>Braun rola os ombros marcados de cicatrizes e aponta o pátio de areia, racks de armas reluzindo na luz.</i> "Idiomas, ferramentas — escolhe o que aprender. ' + total + ' sessões de suor, ' + cost + ' ' + coin + ' cada. No fim, a habilidade é tua de verdade."',
+      flavor: '<i>Braun rola os ombros marcados de cicatrizes e aponta o pátio de areia, racks de armas reluzindo na luz.</i> "Idiomas, ferramentas — escolha o que aprender. ' + total + ' sessões de suor, ' + cost + ' ' + coin + ' cada. No fim, a habilidade é sua de verdade."',
       sectionLabel: 'O que aprender', items: items,
       onPick: function(item){
         if (item._cat === '_talk') {
@@ -56608,14 +56608,14 @@ function _guildTrainSession(p){
     if (res.completed) {
       _showServiceResultPopup({
         icon: _heralIco('ic-guerreiro'), npc: 'Veterano Braun',
-        narrative: 'Braun assente — raro nele. <i>"Aprendeste. A habilidade é tua agora."</i><br><br><b>' + (res.msg || 'Treinamento concluído!') + '</b>' + compl,
+        narrative: 'Braun assente — raro nele. <i>"Aprendeu bem. A habilidade é sua agora."</i><br><br><b>' + (res.msg || 'Treinamento concluído!') + '</b>' + compl,
         deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
         onContinue: function(){ navigateBack(); }
       });
     } else {
       _showServiceResultPopup({
         icon: _heralIco('ic-guerreiro'), npc: 'Veterano Braun',
-        narrative: 'Mais uma sessão de suor. <i>(corrige tua postura com um tapa no ombro)</i> "De novo."<br><br>Progresso: <b>' + res.sessions_done + '/' + res.sessions_total + '</b> sessões.' + compl,
+        narrative: 'Mais uma sessão de suor. <i>(corrige sua postura com um tapa no ombro)</i> "De novo."<br><br>Progresso: <b>' + res.sessions_done + '/' + res.sessions_total + '</b> sessões.' + compl,
         deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
         onContinue: function(){ _guildTrainingMenu(p); }
       });
@@ -57767,8 +57767,8 @@ function _arenaShowRules(p){
       + '<b>Tiers de Combate </b><br>' + tiersDesc
       + '<br><br><b>Leis da Areia </b><br>'
       + '• Paga a inscrição antes de pisar na areia.<br>'
-      + '• Duas vitórias seguidas e a multidão lembrará teu nome.<br>'
-      + '• Perde mais que ganha e ninguém vai ao teu funeral.<br>'
+      + '• Duas vitórias seguidas e a multidão lembrará seu nome.<br>'
+      + '• Perca mais do que ganha e ninguém vai ao seu funeral.<br>'
       + '• Os curandeiros não entram no meio do combate — entra são, ou não entra.',
     onConfirm: function(){}
   });
@@ -62370,7 +62370,7 @@ var SUBSCREEN_DATA = {
   },
   'relationships': {
     header: 'Vínculos',
-    flavor: 'Pessoas que tu conheces. Suas opiniões e afinidade importam.',
+    flavor: 'Pessoas que você conhece. Suas opiniões e afinidades importam.',
     npcInfo: 'Sistema 6D Emotions: Joy, Trust, Fear, Surprise, Anger, Anticipation',
     buttons: [
       ['<svg class="v-heraldic"><use href="#ic-estalajadeira"/></svg>', 'Martha — Estalajadeira', '80 — feliz',     'nav:rel_martha'],
@@ -62404,7 +62404,7 @@ var SUBSCREEN_DATA = {
   },
   'tavern_carousing': {
     header: 'Socializar na Taverna',
-    flavor: 'Beber com pessoas pode render contatos importantes. Escolhe teu nível social.',
+    flavor: 'Beber com as pessoas certas pode render contatos valiosos. Escolha o ambiente social.',
     buttons: [
       [_heralIco('ic-mochila'), 'Humilde', '10 <span class="vi vi-coin sm"></span> — DC 10 CHA', 'carouse_low'],
       [_heralIco('ic-mochila'), 'Refinada', '50 <span class="vi vi-coin sm"></span> — DC 15 CHA', 'carouse_mid'],
@@ -62796,7 +62796,7 @@ var SUBSCREEN_DATA = {
   },
   'codex_locations': {
     header: 'Locais (8/24)',
-    flavor: 'Lugares que tu visitaste e que estão em tua memória.',
+    flavor: 'Lugares que você visitou e que estão na sua memória.',
     buttons: [
       [_heralIco('ic-lobo'), 'Floresta dos Sussurros', 'visitado 6x', 'codex_loc_wolf_forest'],
       [_heralIco('ic-mochila'), 'Passagem Subterrânea', 'visitado 3x', 'codex_loc_echo_cave'],
@@ -62806,7 +62806,7 @@ var SUBSCREEN_DATA = {
   },
   'codex_items': {
     header: 'Itens (34/120)',
-    flavor: 'Catálogo de objetos. Coleta-os e suas propriedades aparecerão aqui.',
+    flavor: 'Catálogo de objetos. Colete-os e suas propriedades aparecerão aqui.',
     buttons: [
       [_heralIco('ic-mochila'), 'Espada longa', 'comum', 'codex_item_sword'],
       [_heralIco('ic-mochila'), 'Cota de malha', 'comum', 'codex_item_chain'],
@@ -63382,8 +63382,8 @@ function _startLyanaEncounter(p, forceDay){
         {
           id: 'lyana_rescue_thanks',
           tag: 'DIPLOMACIA',
-          speech: 'Fico feliz em ver tua família reunida e em paz, Lyana. Teu pai é um homem sábio e honrado.',
-          label: '◆ "Fico feliz em vê-lo a salvo. Teu pai é um homem de grande valor."',
+          speech: 'Fico feliz em ver sua família reunida e em paz, Lyana. Seu pai é um homem sábio e honrado.',
+          label: '◆ "Fico feliz em vê-lo a salvo. Seu pai é um homem de grande valor."',
           desc: 'Celebrar a segurança de Eirik e a união familiar.',
           cb: 'close'
         },
@@ -63391,7 +63391,7 @@ function _startLyanaEncounter(p, forceDay){
           id: 'lyana_buy_herbs',
           tag: 'COMÉRCIO',
           speech: 'Agradeço suas palavras. Agora que a paz reina, que unguentos e poções você tem disponíveis hoje?',
-          label: '🌿 "Mostre-me os unguentos e ervas medicinais da tua banca."',
+          label: '🌿 "Mostre-me os unguentos e ervas medicinais da sua banca."',
           desc: 'Acessar o comércio de ervas e elixires medicinais com a gratidão da herbalista.',
           cb: 'close'
         }
@@ -63419,7 +63419,7 @@ function _startLyanaEncounter(p, forceDay){
     {
       type: 'speech',
       speaker: 'Lyana',
-      text: '<i>(aperta o pergaminho contra o peito, em lágrimas de alívio)</i> "Ele está vivo! <b>Meu pai está vivo!</b> Pelos Quatro, foram três luas de silêncio e agonia sem saber se a estrada o havia engolido... Mas ele fala de runas que sangram quando há lua nova e pede o cristal de selamento... Aventureiro, tu tiraste um fardo esmagador de meu coração. Toma esta recompensa por teres trazido a carta com segurança."'
+      text: '<i>(aperta o pergaminho contra o peito, em lágrimas de alívio)</i> "Ele está vivo! <b>Meu pai está vivo!</b> Pelos Quatro, foram três luas de silêncio e agonia sem saber se a estrada o havia engolido... Mas ele fala de runas que sangram quando há lua nova e pede o cristal de selamento... Aventureiro, você tirou um fardo esmagador do meu coração. Tome esta recompensa por ter trazido a carta com segurança."'
     }
   ];
 
@@ -63427,15 +63427,15 @@ function _startLyanaEncounter(p, forceDay){
     {
       id: 'lyana-confirm-deliver',
       tag: 'HONESTIDADE',
-      speech: 'Aceito a justa paga, Lyana. Que teu pai retorne em paz de suas andanças.',
-      label: '◆ "Aceito a paga. Que teu pai retorne em paz."',
+      speech: 'Aceito a justa paga, Lyana. Que seu pai retorne em paz de suas andanças.',
+      label: '◆ "Aceito a paga. Que seu pai retorne em paz."',
       desc: 'Receber as vinte moedas de prata ganhas honestamente pela entrega.'
     },
     {
       id: 'lyana-confirm-deliver-modest',
       tag: 'COMPAIXÃO',
-      speech: 'Não preciso de prata, Lyana. Guarde tuas moedas para apoiar teu pai e tuas pesquisas.',
-      label: '↩ "Não preciso de prata, Lyana. Guarde tuas moedas para apoiar teu pai."',
+      speech: 'Não preciso de prata, Lyana. Guarde suas moedas para apoiar seu pai e suas pesquisas.',
+      label: '↩ "Não preciso de prata, Lyana. Guarde suas moedas para apoiar seu pai."',
       desc: 'Recusar o pagamento em respeito à aflição familiar e à nobreza da causa.'
     },
     {
@@ -63460,9 +63460,9 @@ function _startLyanaEncounter(p, forceDay){
       check: { skill: 'persuasion', dc: 12 },
       continueDialogue: 'approach-comfort',
       resultNarration: 'Suas palavras firmes e compassivas dissipam a sombra de desespero que nublava o olhar da jovem herbalista. A postura dela se apruma, e ela respira sem o peso do pânico.',
-      resultText: '<i>(Lyana sorri pela primeira vez, os olhos marejados)</i> "Obrigada... Eu precisava ouvir isso. Que a bênção da terra acompanhe cada passo de tua jornada."',
+      resultText: '<i>(Lyana sorri pela primeira vez, os olhos marejados)</i> "Obrigada... Eu precisava ouvir isso. Que a bênção da terra acompanhe cada passo da sua jornada."',
       resultNarrationFail: 'Lyana assente de forma mecânica, ainda dominada pela incerteza da estrada do norte.',
-      resultTextFail: '<i>(Lyana suspira)</i> "Espero que os deuses te ouçam, andarilho."'
+      resultTextFail: '<i>(Lyana suspira)</i> "Espero que os deuses ouçam você, andarilho."'
     }
   ];
 
@@ -63495,22 +63495,22 @@ function _startLyanaEncounter(p, forceDay){
     'approach-curious': {
       npc: LYANA_NPC_HEADER,
       script: [
-        { type: 'narration', text: 'Lyana guarda o pergaminho junto ao peito com veneração. Ela te olha com olhos marejados e aliviados pela notícia de vida do pai.' },
-        { type: 'speech', speaker: 'Lyana', text: '"Pelo teu caminho e por tua ajuda leal, por favor, escolhe como receber tua recompensa."' }
+        { type: 'narration', text: 'Lyana guarda o pergaminho junto ao peito com veneração. Ela olha para você com olhos marejados e aliviados pela notícia de vida do pai.' },
+        { type: 'speech', speaker: 'Lyana', text: '"Pelo seu caminho e pela sua ajuda leal, por favor, escolha como receber a sua recompensa."' }
       ],
       choices: [
         {
           id: 'lyana-confirm-deliver',
           tag: 'HONESTIDADE',
-          speech: 'Aceito a justa paga, Lyana. Que teu pai retorne em paz de suas andanças.',
-          label: '◆ "Aceito a paga. Que teu pai retorne em paz."',
+          speech: 'Aceito a justa paga, Lyana. Que seu pai retorne em paz de suas andanças.',
+          label: '◆ "Aceito a paga. Que seu pai retorne em paz."',
           desc: 'Receber a recompensa da missão.'
         },
         {
           id: 'lyana-confirm-deliver-modest',
           tag: 'COMPAIXÃO',
-          speech: 'Não preciso de prata, Lyana. Guarde tuas moedas para apoiar teu pai.',
-          label: '↩ "Não preciso de prata, Lyana. Guarde tuas moedas para apoiar teu pai."',
+          speech: 'Não preciso de prata, Lyana. Guarde suas moedas para apoiar seu pai.',
+          label: '↩ "Não preciso de prata, Lyana. Guarde suas moedas para apoiar seu pai."',
           desc: 'Recusar as moedas por gentileza.'
         }
       ]
@@ -63519,21 +63519,21 @@ function _startLyanaEncounter(p, forceDay){
       npc: LYANA_NPC_HEADER,
       script: [
         { type: 'narration', text: 'Um suspiro sereno escapa dos lábios de Lyana. O alívio de saber que Eirik está vivo ilumina a tenda de ervas.' },
-        { type: 'speech', speaker: 'Lyana', text: '"Jamais esquecerei o que você fez por nós hoje, aventureiro. Como quer receber tua justa paga?"' }
+        { type: 'speech', speaker: 'Lyana', text: '"Jamais esquecerei o que você fez por nós hoje, aventureiro. Como quer receber sua justa paga?"' }
       ],
       choices: [
         {
           id: 'lyana-confirm-deliver',
           tag: 'HONESTIDADE',
-          speech: 'Aceito a justa paga, Lyana. Que teu pai retorne em paz de suas andanças.',
-          label: '◆ "Aceito a paga. Que teu pai retorne em paz."',
+          speech: 'Aceito a justa paga, Lyana. Que seu pai retorne em paz de suas andanças.',
+          label: '◆ "Aceito a paga. Que seu pai retorne em paz."',
           desc: 'Receber a recompensa da missão.'
         },
         {
           id: 'lyana-confirm-deliver-modest',
           tag: 'COMPAIXÃO',
-          speech: 'Não preciso de prata, Lyana. Guarde tuas moedas para apoiar teu pai.',
-          label: '↩ "Não preciso de prata, Lyana. Guarde tuas moedas para apoiar teu pai."',
+          speech: 'Não preciso de prata, Lyana. Guarde suas moedas para apoiar seu pai.',
+          label: '↩ "Não preciso de prata, Lyana. Guarde suas moedas para apoiar seu pai."',
           desc: 'Recusar as moedas por gentileza.'
         }
       ]
@@ -63545,14 +63545,14 @@ function _startLyanaEncounter(p, forceDay){
         portrait: '/shared/img/npcs/lyana-herbalista.webp'
       },
       script: [
-        { type: 'narration', text: 'Lyana abre a bolsinha de couro pendurada no cinto. Conta vinte moedas de prata — economia honesta de quem vive de raízes e unguentos. Coloca-as na tua mão e fecha teus dedos por cima com gratidão sincera.' },
-        { type: 'speech', speaker: 'Lyana', text: '<i>(sorri com alívio no peito)</i> Se voltares à Praça e precisares de poções ou emplastros, vem aqui primeiro. Minha banca está sempre aberta para ti.' }
+        { type: 'narration', text: 'Lyana abre a bolsinha de couro pendurada no cinto. Conta vinte moedas de prata — economia honesta de quem vive de raízes e unguentos. Coloca-as na sua mão e fecha seus dedos por cima com gratidão sincera.' },
+        { type: 'speech', speaker: 'Lyana', text: '<i>(sorri com alívio no peito)</i> Se voltar à Praça e precisar de poções ou emplastros, venha aqui primeiro. Minha banca está sempre aberta para você.' }
       ],
       choices: [
         {
           id: 'done',
           tag: 'DESPEDIDA',
-          speech: 'Agradeço, Lyana. Cuidarei para que teus conselhos me acompanhem na estrada. Até breve.',
+          speech: 'Agradeço, Lyana. Cuidarei para que seus conselhos me acompanhem na estrada. Até breve.',
           label: '◆ Despedir-se',
           desc: 'Concluir a conversa e retornar à praça.',
           cb: 'close'
@@ -63570,20 +63570,20 @@ function _startLyanaEncounter(p, forceDay){
       },
       script: [
         { type: 'narration', text: 'Lyana hesita, comovida pelo gesto de nobreza. Dois feirantes idosos que acompanhavam a cena trocam olhares de respeito. Um deles aproxima-se e coloca uma bolsa na sua mão: <i>"Poucos em Valdoria recusam prata por compaixão a uma filha aflita. A cidade honra sua virtude, aventureiro."</i>' },
-        { type: 'speech', speaker: 'Lyana', text: '<i>(curva-se em profunda reverência)</i> Que os ventos do Pai e o espírito das matas te guardem em cada passo. <b>Jamais esquecerei tua generosidade.</b>' }
+        { type: 'speech', speaker: 'Lyana', text: '<i>(curva-se em profunda reverência)</i> Que os ventos do Pai e o espírito das matas guardem você em cada passo. <b>Jamais esquecerei sua generosidade.</b>' }
       ],
       choices: [
         {
           id: 'done',
           tag: 'DESPEDIDA',
-          speech: 'Agradeço, Lyana. Cuidarei para que teus conselhos me acompanhem na estrada. Até breve.',
+          speech: 'Agradeço, Lyana. Cuidarei para que seus conselhos me acompanhem na estrada. Até breve.',
           label: '◆ Despedir-se',
           desc: 'Concluir a conversa e retornar à praça.',
           cb: 'close'
         }
       ],
       onClose: function(){
-        _completeLyanaQuestServer(30, 60, 'Lyana grava teu rosto com eterna gratidão. +30 Valdoritas +60 XP (+15 afinidade). Missão concluída!');
+        _completeLyanaQuestServer(30, 60, 'Lyana grava seu rosto com eterna gratidão. +30 Valdoritas +60 XP (+15 afinidade). Missão concluída!');
       }
     }
   };
@@ -64832,7 +64832,7 @@ var ACTION_HANDLERS = {
   'quest_open_patrol':          function(p){ navigateTo('quest_open_patrol'); },
   'quest_patrol_locate':        function(p){ _questGotoMap('patrol', 'Patrulhar Fronteira'); },
   'quest_patrol_details':       function(p){ vToast('Sobreviver à patrulha noturna. Recompensa: 35 Valdoritas + 80 XP.'); },
-  'quest_patrol_deliver':       function(p){ _deliverQuest('patrol', 35, 80, 'Tomás aperta tua mão ao amanhecer. +35 Valdoritas +80 XP. Patrulha sobreviveu — missão completa!'); },
+  'quest_patrol_deliver':       function(p){ _deliverQuest('patrol', 35, 80, 'Tomás aperta sua mão ao amanhecer. +35 Valdoritas +80 XP. Patrulha sobreviveu — missão completa!'); },
   'quest_patrol_abandon':       function(p){ _abandonQuest('patrol', 'Patrulhar Fronteira', '-5 afinidade com Vigia Tomás'); },
   // 2026-05-12 RAT_DEN — quest nv 2 nova (preenche gap XP nv 1→2)
   'quest_open_rat_den':         function(p){ navigateTo('quest_open_rat_den'); },
@@ -64868,7 +64868,7 @@ var ACTION_HANDLERS = {
   'quest_open_defend':          function(p){ navigateTo('quest_open_defend'); },
   'quest_defend_locate':        function(p){ _questGotoMap('defend', 'Defender Campos Verdes'); },
   'quest_defend_details':       function(p){ vToast('Defender os Campos Verdes do avanço dos orcs. Recompensa: 500 Valdoritas + 400 XP.'); },
-  'quest_defend_deliver':       function(p){ _deliverQuest('defend', 500, 400, 'Helga aperta tua mão. +500 Valdoritas +400 XP. Os Campos Verdes resistiram!'); },
+  'quest_defend_deliver':       function(p){ _deliverQuest('defend', 500, 400, 'Helga aperta sua mão. +500 Valdoritas +400 XP. Os Campos Verdes resistiram!'); },
   'quest_defend_abandon':       function(p){ _abandonQuest('defend', 'Defender Campos Verdes', '-5 afinidade com Capitã Helga'); },
   // X-6.5.51BP: CELLAR (Adega da Estalagem) — Martha
   'quest_open_cellar':          function(p){ navigateTo('quest_open_cellar'); },
@@ -64964,13 +64964,13 @@ var ACTION_HANDLERS = {
   'rel_aldric_war_talk':    function(p){ vToast('Aldric: "A última guerra... vi coisas. Mas paz tem preço também."'); _gainXp(p, 15); },
   'rel_aldric_gift':        function(p){ if (!_pay(p, 15)) return; vToast('Presente a Aldric. +5 affinity (80 → 85).'); },
   'rel_aldric_route':       function(p){ vToast('Aldric desenha rota segura: pela ponte velha, evitar caminho do norte.'); },
-  'rel_elara_spirit':       function(p){ vToast(_uiIcoImg('sucesso','ui-ico-img') + ' Elara: "Há equilíbrio em toda dor. Aceita a luz pra não te perder."'); _gainXp(p, 10); },
+  'rel_elara_spirit':       function(p){ vToast(_uiIcoImg('sucesso','ui-ico-img') + ' Elara: "Há equilíbrio em toda dor. Aceite a luz para não se perder."'); _gainXp(p, 10); },
   'rel_elara_donate':       function(p){ if (!_pay(p, 10)) return; vToast('Doação ao templo. +4 affinity com Elara (50 → 54).'); },
   'rel_aldwin_invest':      function(p){ if (!_pay(p, 100)) return; window._bank = (window._bank || 0) + 105; vToast('Investimento de 100 Valdoritas cresce pra 105 Valdoritas. +1 affinity Aldwin.'); },
   'rel_aldwin_loans':       function(p){ vToast('Aldwin: "Empréstimos exigem garantias. Você tem algo?"'); },
   'rel_aldwin_friend':      function(p){ vToast('Aldwin (25 affinity): "Negócios não criam amigos. Talvez com tempo... volte quando 50+."'); },
   'rel_eirik_lore':         function(p){ vToast('Eirik: "Runas guardam ecos do mundo antigo. Cada uma é uma palavra esquecida."'); _gainXp(p, 15); },
-  'rel_eirik_gift':         function(p){ vToast('Eirik aceita teu fragmento raro. "Inestimável!" +10 affinity.'); }
+  'rel_eirik_gift':         function(p){ vToast('Eirik aceita seu fragmento raro. "Inestimável!" +10 affinity.'); }
 };
 
 // --- State helpers ---
@@ -68420,7 +68420,7 @@ function renderCityHubAmbient(el){
 // Sub-screen: city_more (overlay com todos locais — botão "⋯ Mais" do hotbar)
 SUBSCREEN_DATA['city_more'] = {
   header: 'Todos os Locais de Valdoria',
-  flavor: 'Cada canto da cidade tem uma função. Escolhe teu destino.',
+  flavor: 'Cada canto da cidade tem uma função. Escolha seu destino.',
   buttons: [
     [_heralIco('ic-taverna'), 'Taverna do Urso Cego', 'Grom + bebidas', 'nav:tavern'],
     [_heralIco('ic-mochila'), 'Estalagem Lua Prateada', 'Martha + descanso', 'nav:inn'],
@@ -73648,8 +73648,8 @@ function _merchantGreeting(merchantId){
         { type: 'speech', speaker: 'Mirena Virelle', text: '"Ah — alguém com <i>cheiro de aventura</i>. Bem-vindo."' }
       ],
       [
-        { type: 'narration', text: 'Mirena te estuda de cima a baixo, como quem examina um espécime curioso.' },
-        { type: 'speech', speaker: 'Mirena Virelle', text: '"Vejo cansaço nos teus olhos. Tenho cura disponível — <i>se confias no meu trabalho</i>."' }
+        { type: 'narration', text: 'Mirena observa você de cima a baixo, como quem examina um espécime curioso.' },
+        { type: 'speech', speaker: 'Mirena Virelle', text: '"Vejo cansaço nos seus olhos. Tenho cura disponível — <i>se você confia no meu trabalho</i>."' }
       ]
     ],
     velithra: [
@@ -73730,7 +73730,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     _effect: { gold: -10, xp: 3 },
     // B1.10 #90: pool de variantes — serviço pago repetível não narra igual 2x
     _result_text: [
-      'Thorne empunha o martelo e trabalha em silêncio. Quando devolve teu equipamento, o aço brilha — não novo, mas pronto pra outra jornada.',
+      'Thorne empunha o martelo e trabalha em silêncio. Quando devolve seu equipamento, o aço brilha — não novo, mas pronto pra outra jornada.',
       'Três marteladas certeiras, uma pausa, mais duas. Thorne ergue a peça contra a luz da forja e assente uma vez. <i>"Pronto. Aguenta mais uma estrada."</i>',
       'Thorne passa o polegar pelo fio, franze o cenho, e refaz um trecho sem dizer palavra. Quando entrega, o metal canta limpo ao toque — som de aço são.'
     ],
@@ -73780,7 +73780,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     npc: 'mer_velithra',
     script: [
       { type: 'narration', text: '<i>"Como funcionam os encaixes?"</i>' },
-      { type: 'speech', speaker: 'Velithra Aelmira', text: '"Equipamento precisa ter <i>slot</i>. A forja de Thorne pode adicionar slots — cem Valdoritas cada. Aí trago a gema certa pra ti."' }
+      { type: 'speech', speaker: 'Velithra Aelmira', text: '"Equipamento precisa ter <i>slot</i>. A forja de Thorne pode adicionar slots — cem Valdoritas cada. Aí trago a gema certa para você."' }
     ],
     choices: 'auto'
   },
@@ -73796,9 +73796,9 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     _effect: { gold: -200, xp: 8 },
     // B1.10 #90: pool de variantes — serviço pago repetível não narra igual 2x
     _result_text: [
-      'Velithra murmura uma palavra antiga sobre teu equipamento. A gema absorve a luz por um segundo — depois devolve. Você sente o item mais... presente. <i>Como se tivesse uma alma.</i>',
-      'O olho de cristal de Velithra gira devagar enquanto ela traça um símbolo no ar. O equipamento esquenta, esfria, e por um instante pesa <i>diferente</i> na tua mão. "Feito", ela diz, satisfeita consigo mesma.',
-      'Velithra sopra pó prateado sobre o item e sussurra três sílabas que tua mente se recusa a guardar. Quando o brilho passa, algo mudou — sutil como um nome novo que ainda não aprendeste a usar.'
+      'Velithra murmura uma palavra antiga sobre seu equipamento. A gema absorve a luz por um segundo — depois devolve. Você sente o item mais... presente. <i>Como se tivesse uma alma.</i>',
+      'O olho de cristal de Velithra gira devagar enquanto ela traça um símbolo no ar. O equipamento esquenta, esfria, e por um instante pesa <i>diferente</i> na sua mão. "Feito", ela diz, satisfeita consigo mesma.',
+      'Velithra sopra pó prateado sobre o item e sussurra três sílabas que sua mente se recusa a guardar. Quando o brilho passa, algo mudou — sutil como um nome novo que você ainda não aprendeu a usar.'
     ],
     choices: 'auto_with_cost'
   },
@@ -78399,7 +78399,7 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
     if (typeof vToast === 'function') vToast('Encomenda iniciada: ' + item + '! Prazo: ' + days + ' dias.', 'success');
     var confirmScript = [
       { type: 'narration', text: 'Thorne recebe os lingotes com pinças pesadas e os examina sob a luz da forja. Um sorriso discreto surge sob o bigode grisalho.' },
-      { type: 'speech', speaker: 'Thorne Korvaldr', text: '"Perfeito. Mithral puríssimo. O trabalho começa agora. Volte em <b>' + days + ' dias</b> e tua encomenda estará pronta para a glória."' }
+      { type: 'speech', speaker: 'Thorne Korvaldr', text: '"Perfeito. Mithral puríssimo. O trabalho começa agora. Volte em <b>' + days + ' dias</b> e sua encomenda estará pronta para a glória."' }
     ];
     var confirmEnc = {
       id: 'mer_thorne_ordered',
@@ -79527,7 +79527,7 @@ var SETTLEMENT_DISCOVERY_DATA = {
     header: 'Vila Mineira Descoberta!',
     img: 'korthag',
     narrative: [
-      'Você percorre o Mapa de Valdoria com o dedo, e algo nas montanhas a leste prende teu olhar.',
+      'Você percorre o Mapa de Valdoria com o dedo, e algo nas montanhas a leste prende seu olhar.',
       'Uma coluna fina de fumaça sobe entre os penhascos — constante, alimentada, viva. Não é fogueira de passagem.',
       'Onde a rocha se abre, pequenas luzes alaranjadas pulsam na penumbra: <b>fornalhas</b>. E muitas.',
       'Anões raramente anunciam onde vivem. Mas o calor de mil forjas não se esconde. <b>Korthag</b> revela-se no mapa.'
