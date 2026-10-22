@@ -31001,7 +31001,7 @@ window.__EXPLORACAO_EVENTS = {
     "biome": "volcanic",
     "type": "hazard",
     "title": "Fluxo de Lava!",
-    "text": "O chão treme. De fenda acima, fluxo de lava desce engolindo o caminho. Vermelho incandescente, avança devagar mas imparável. Tens segundos pra decidir — saltar sobre pedras quentes ou recuar e perder o dia.",
+    "text": "O chão treme. De fenda acima, fluxo de lava desce engolindo o caminho. Vermelho incandescente, avança devagar mas imparável. Você tem segundos para decidir — saltar sobre pedras quentes ou recuar e perder o dia.",
     "flavor": "Lava avança a passo humano — mas calor escalda mesmo a metros de distância. Quem toca, morre.",
     "script": [
       {

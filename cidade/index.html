@@ -62350,7 +62350,7 @@ var SUBSCREEN_DATA = {
   'runes': {
     header: 'Escriba Rúnico',
     flavor: 'Pergaminhos com runas antigas cobrem as mesas. Eirik, o escriba, te recebe com olhar atento.',
-    npcInfo: '<svg class="v-heraldic v-h-banner"><use href="#ic-escriba"/></svg> Eirik — "Tens fragmentos? 3 fragmentos = 1 runa aleatória."',
+    npcInfo: '<svg class="v-heraldic v-h-banner"><use href="#ic-escriba"/></svg> Eirik — "Você tem fragmentos? 3 fragmentos = 1 runa aleatória."',
     buttons: [
       [_heralIco('ic-runas'), 'Forjar runa', '3 fragmentos', 'nav:runes_craft'],
       [_heralIco('ic-runas'), 'Catálogo de runas', '12 conhecidas', 'nav:runes_catalog'],
@@ -62413,7 +62413,7 @@ var SUBSCREEN_DATA = {
   },
   'tavern_gather': {
     header: 'Coletar Informações',
-    flavor: 'Grom inclina a cabeça. "Tens algo em mente? Cinco moedas e te conto o que sei."',
+    flavor: 'Grom inclina a cabeça. "Tem algo em mente? Cinco moedas e conto o que sei."',
     buttons: [
       // 2026-05-21 BUG FIX: user pediu PT-BR em toda interface — skills estavam em inglês
       [_heralIco('ic-mochila'), 'Sobre pessoas', '5 <span class="vi vi-coin sm"></span> — Intuição', 'gather_people'],
@@ -62889,9 +62889,9 @@ var SUBSCREEN_DATA = {
     header: 'Forjar Runa — 3 fragmentos = 1 runa',
     flavor: 'Combine 3 fragmentos do mesmo tier. Resultado é aleatório dentro do tier.',
     buttons: [
-      [_heralIco('ic-mochila'), 'Fragmento Menor (Tier 1)', 'tens 0 — precisa 3', 'forge_t1'],
-      [_heralIco('ic-mochila'), 'Fragmento Maior (Tier 2)', 'tens 0 — precisa 3', 'forge_t2'],
-      [_heralIco('ic-mochila'), 'Fragmento Ancestral (Tier 3)', 'tens 0 — precisa 3', 'forge_t3']
+      [_heralIco('ic-mochila'), 'Fragmento Menor (Tier 1)', 'você tem 0 — precisa de 3', 'forge_t1'],
+      [_heralIco('ic-mochila'), 'Fragmento Maior (Tier 2)', 'você tem 0 — precisa de 3', 'forge_t2'],
+      [_heralIco('ic-mochila'), 'Fragmento Ancestral (Tier 3)', 'você tem 0 — precisa de 3', 'forge_t3']
     ]
   },
   'runes_catalog': {
@@ -62976,7 +62976,7 @@ var SUBSCREEN_DATA = {
   },
   'rel_eirik': {
     header: 'Eirik — Escriba Rúnico',
-    flavor: '"Runas guardam segredos antigos. Tens fragmentos pra forjar?"',
+    flavor: '"Runas guardam segredos antigos. Você tem fragmentos para forjar?"',
     npcInfo: 'Afinidade 40 — curioso | 6D: Joy 0.3, Trust 0.5, Fear 0.0, Surprise 0.4, Anger 0.0, Anticipation 0.8',
     buttons: [
       [_heralIco('ic-vínculos'), 'Conversa sobre runas', 'lore arcano', 'rel_eirik_lore'],
@@ -63390,7 +63390,7 @@ function _startLyanaEncounter(p, forceDay){
         {
           id: 'lyana_buy_herbs',
           tag: 'COMÉRCIO',
-          speech: 'Agradeço tuas palavras. Agora que a paz reina, que ungüentos e poções tens disponíveis hoje?',
+          speech: 'Agradeço suas palavras. Agora que a paz reina, que unguentos e poções você tem disponíveis hoje?',
           label: '🌿 "Mostre-me os unguentos e ervas medicinais da tua banca."',
           desc: 'Acessar o comércio de ervas e elixires medicinais com a gratidão da herbalista.',
           cb: 'close'
@@ -63619,7 +63619,7 @@ function _startLyanaEncounter(p, forceDay){
         check: { skill: 'insight', dc: 12 },
         continueDialogue: 'approach-talk',
         resultNarration: 'Você lê a tensão nos ombros e na respiração dela. O medo dela não tem origem em dívidas ou perigos urbanos: é o pavor sufocante de uma filha que teme receber notícias fúnebres sobre a expedição do pai.',
-        resultText: '<i>(Lyana aperta um maço de alfazema contra o peito)</i> "Tens o olhar compreensivo de quem reconhece o fardo da aflição... Por favor, diga se soubeste de algo na estrada."',
+        resultText: '<i>(Lyana aperta um maço de alfazema contra o peito)</i> "Você tem o olhar compreensivo de quem reconhece o fardo da aflição... Por favor, diga se soube de algo na estrada."',
         resultNarrationFail: 'A jovem mantém postura compenetrada em seu ofício botânico sobre a esteira, sem deixar transparecer emoções evidentes de imediato.',
         resultTextFail: '<i>(Lyana ergue a cabeça cordialmente ao notar sua presença)</i> "Saudações, andarilho. Em que posso ser útil?"'
       },
@@ -64933,9 +64933,9 @@ var ACTION_HANDLERS = {
   'workshop_inventory':     function(p){ vToast('Inventário crafting: 0 ervas, 0 minérios, 0 fragmentos. Vai coletar!'); },
 
   // Runes
-  'forge_t1':               function(p){ vToast('Tens 0 fragmentos T1. Coleta na Floresta antes.'); },
-  'forge_t2':               function(p){ vToast('Tens 0 fragmentos T2. Coleta na Caverna.'); },
-  'forge_t3':               function(p){ vToast('Tens 0 fragmentos T3. Vulcânico ou Cemitério.'); },
+  'forge_t1':               function(p){ vToast('Você tem 0 fragmentos T1. Colete na Floresta antes.'); },
+  'forge_t2':               function(p){ vToast('Você tem 0 fragmentos T2. Colete na Caverna.'); },
+  'forge_t3':               function(p){ vToast('Você tem 0 fragmentos T3. Vulcânico ou Cemitério.'); },
   'rune_protection':        function(p){ vToast('T1 Proteção — reduz dano físico em 10%. Inscreve em qualquer slot.'); },
   'rune_vigor':             function(p){ vToast('T1 Vigor — cura 1d4 HP ao matar. Inscreve em arma.'); },
   'rune_precision':         function(p){ vToast('T1 Precisão — +1 ataque vs alvos com HP < 50%. Arma.'); },
@@ -64967,7 +64967,7 @@ var ACTION_HANDLERS = {
   'rel_elara_spirit':       function(p){ vToast(_uiIcoImg('sucesso','ui-ico-img') + ' Elara: "Há equilíbrio em toda dor. Aceita a luz pra não te perder."'); _gainXp(p, 10); },
   'rel_elara_donate':       function(p){ if (!_pay(p, 10)) return; vToast('Doação ao templo. +4 affinity com Elara (50 → 54).'); },
   'rel_aldwin_invest':      function(p){ if (!_pay(p, 100)) return; window._bank = (window._bank || 0) + 105; vToast('Investimento de 100 Valdoritas cresce pra 105 Valdoritas. +1 affinity Aldwin.'); },
-  'rel_aldwin_loans':       function(p){ vToast('Aldwin: "Empréstimos exigem garantias. Tens algo?"'); },
+  'rel_aldwin_loans':       function(p){ vToast('Aldwin: "Empréstimos exigem garantias. Você tem algo?"'); },
   'rel_aldwin_friend':      function(p){ vToast('Aldwin (25 affinity): "Negócios não criam amigos. Talvez com tempo... volte quando 50+."'); },
   'rel_eirik_lore':         function(p){ vToast('Eirik: "Runas guardam ecos do mundo antigo. Cada uma é uma palavra esquecida."'); _gainXp(p, 15); },
   'rel_eirik_gift':         function(p){ vToast('Eirik aceita teu fragmento raro. "Inestimável!" +10 affinity.'); }
