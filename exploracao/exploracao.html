@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-22T05:22:37Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-22T05:34:58Z - do not edit directly, edit source -->
 
 
 
@@ -70632,6 +70632,8 @@ function onMoveEnd(col, row) {
 
   scheduleRender();
 
+  try { _resetWildCompanionIdleTimer(); } catch (_) {}
+
 
 
   // X-4.3: em REMOTE, sincroniza com motor server (fire-and-forget).
@@ -70857,6 +70859,12 @@ function onMoveEnd(col, row) {
           try { openEventModal(); } catch (eM) { LOGE('API', 'openModal err=' + (eM && eM.message)); }
 
         }
+
+      }
+
+      else if (!res.combat_redirect && S.ph === 'idle' && S.steps % 8 === 0) {
+
+        try { _maybeTriggerWildernessCompanionBanter('step'); } catch (_) {}
 
       }
 
@@ -88655,6 +88663,342 @@ function _updateCampDetails() {
     }
 
   }
+
+}
+
+
+
+
+
+// ============================================================================
+
+// === BANTER ESPONTÂNEO DOS ERMOS (DIÁLOGOS DA COMITIVA NA TRILHA) ===========
+
+// ============================================================================
+
+
+
+function _getLivingWildernessCompanions() {
+
+  if (window.S && Array.isArray(window.S.allies) && window.S.allies.length > 0) {
+
+    return window.S.allies.filter(function(a){ return a && !a.dead; });
+
+  }
+
+  if (window.GROUP_MEMBERS && Array.isArray(window.GROUP_MEMBERS)) {
+
+    return window.GROUP_MEMBERS.filter(function(m, i){ return i > 0 && m && !m.dead; });
+
+  }
+
+  return [];
+
+}
+
+
+
+function _maybeTriggerWildernessCompanionBanter(triggerType, proceedAfterFn) {
+
+  if (window._encounterActive) return false;
+
+  if (window.vEncounter && typeof window.vEncounter.isOpen === 'function' && window.vEncounter.isOpen()) return false;
+
+  if (window.S && window.S.ph !== 'idle') return false;
+
+  if (window._inCombat) return false;
+
+  var em = document.getElementById('event-modal');
+
+  if (em && em.style.display !== 'none' && em.classList.contains('visible')) return false;
+
+  var dm = document.getElementById('dice-overlay');
+
+  if (dm && dm.classList.contains('visible')) return false;
+
+
+
+  var comps = _getLivingWildernessCompanions();
+
+  if (!comps || !comps.length) return false;
+
+
+
+  var now = Date.now();
+
+  var lastTs = parseInt(sessionStorage.getItem('valdoria_last_wild_companion_banter_ts') || '0', 10);
+
+  var cooldownMs = 8 * 60 * 1000; // 8 minutos de resguardo estrito
+
+  if (now - lastTs < cooldownMs) return false;
+
+
+
+  var chance = (triggerType === 'idle') ? 0.25 : 0.05;
+
+  if (Math.random() > chance) return false;
+
+
+
+  sessionStorage.setItem('valdoria_last_wild_companion_banter_ts', String(now));
+
+
+
+  if (window.__EXPLORE_MODE === 'remote' && typeof _post === 'function') {
+
+    window._encounterActive = true;
+
+    _post('/api/game/city-action', { intent: 'companion.spontaneous_banter', venue: 'exploracao' })
+
+      .then(function(res){
+
+        if (res && res.ok && res.banter) {
+
+          _renderWildernessCompanionBanterScene(res.banter, proceedAfterFn);
+
+        } else {
+
+          window._encounterActive = false;
+
+        }
+
+      })
+
+      .catch(function(){
+
+        window._encounterActive = false;
+
+      });
+
+    return true;
+
+  }
+
+  return false;
+
+}
+
+window._maybeTriggerWildernessCompanionBanter = _maybeTriggerWildernessCompanionBanter;
+
+
+
+function _renderWildernessCompanionBanterScene(banter, proceedAfterFn) {
+
+  if (!banter || !window.vEncounter || typeof window.vEncounter.render !== 'function') {
+
+    window._encounterActive = false;
+
+    if (typeof proceedAfterFn === 'function') proceedAfterFn();
+
+    return;
+
+  }
+
+  var p = (window.S && window.S.player) ? window.S.player : {};
+
+  var targetNpc = {
+
+    name: banter.companion_name,
+
+    title: (banter.npc && banter.npc.title) || banter.companion_name,
+
+    portrait: banter.companion_avatar || '../shared/img/npcs/companion_default.webp'
+
+  };
+
+
+
+  window._encounterActive = true;
+
+  window.vEncounter.render({
+
+    npc: targetNpc,
+
+    script: banter.script,
+
+    choices: banter.choices,
+
+    choicesTitle: 'Diálogo na Marcha',
+
+    choicesSubtitle: banter.companion_name
+
+  }, {
+
+    player: p,
+
+    onChoice: function(selected) {
+
+      var cid = banter.companion_id;
+
+      var chid = selected.id;
+
+      var did = banter.id;
+
+
+
+      if (window.__EXPLORE_MODE === 'remote' && typeof _post === 'function') {
+
+        _post('/api/game/city-action', {
+
+          intent: 'companion.banter_choice',
+
+          companion_id: cid,
+
+          dialogue_id: did,
+
+          choice_id: chid
+
+        }).then(function(res){
+
+          if (res && res.result) {
+
+            _handleWildBanterResolved(res.result, targetNpc, proceedAfterFn);
+
+          } else {
+
+            _fallbackWildBanterChoiceResolve(selected, banter, targetNpc, proceedAfterFn);
+
+          }
+
+        }).catch(function(){
+
+          _fallbackWildBanterChoiceResolve(selected, banter, targetNpc, proceedAfterFn);
+
+        });
+
+      } else {
+
+        _fallbackWildBanterChoiceResolve(selected, banter, targetNpc, proceedAfterFn);
+
+      }
+
+    }
+
+  });
+
+}
+
+
+
+function _fallbackWildBanterChoiceResolve(selected, banter, targetNpc, proceedAfterFn) {
+
+  var delta = selected.delta_approval || 1;
+
+  var sign = delta > 0 ? '+' : '';
+
+  var icon = delta > 0 ? '✦' : (delta < 0 ? '💔' : '◈');
+
+  var verb = delta > 0 ? 'aprovou' : (delta < 0 ? 'desaprovou' : 'ouviu');
+
+  var toastText = icon + ' ' + banter.companion_name + ' ' + verb + ' a conversa (' + sign + delta + ' Afinidade)';
+
+  if (typeof vToast === 'function') vToast(toastText, delta >= 0 ? 'ok' : 'warn');
+
+
+
+  var resultScript = [];
+
+  if (selected.reply_speech) {
+
+    resultScript.push({
+
+      type: 'speech',
+
+      speaker: banter.companion_name,
+
+      avatar: banter.companion_avatar,
+
+      text: selected.reply_speech
+
+    });
+
+  }
+
+  if (selected.reply_narration) {
+
+    resultScript.push({
+
+      type: 'narration',
+
+      text: selected.reply_narration
+
+    });
+
+  }
+
+
+
+  _handleWildBanterResolved({ result_script: resultScript }, targetNpc, proceedAfterFn);
+
+}
+
+
+
+function _handleWildBanterResolved(result, targetNpc, proceedAfterFn) {
+
+  var script = (result && result.result_script && result.result_script.length)
+
+    ? result.result_script
+
+    : [{ type: 'narration', text: 'A conversa se encerra enquanto a comitiva ajusta as mochilas e retoma a marcha.' }];
+
+
+
+  if (result && result.toast_message && typeof vToast === 'function') {
+
+    var isPositive = (result.delta_approval || 0) >= 0;
+
+    vToast(result.toast_message, isPositive ? 'ok' : 'warn');
+
+  }
+
+
+
+  window.vEncounter.render({
+
+    npc: targetNpc,
+
+    script: script,
+
+    choices: [{ id: 'done', label: 'Continuar marcha' }]
+
+  }, {
+
+    player: (window.S && window.S.player) ? window.S.player : {},
+
+    onChoice: function() {
+
+      window._encounterActive = false;
+
+      try { window.vEncounter.close(); } catch(_){}
+
+      if (typeof updateHud === 'function') updateHud();
+
+      if (typeof proceedAfterFn === 'function') proceedAfterFn();
+
+    }
+
+  });
+
+}
+
+
+
+var _wildCompanionIdleTimer = null;
+
+function _resetWildCompanionIdleTimer() {
+
+  if (_wildCompanionIdleTimer) clearTimeout(_wildCompanionIdleTimer);
+
+  _wildCompanionIdleTimer = setTimeout(function(){
+
+    if (typeof _maybeTriggerWildernessCompanionBanter === 'function') {
+
+      _maybeTriggerWildernessCompanionBanter('idle');
+
+    }
+
+  }, 100000);
 
 }
 
