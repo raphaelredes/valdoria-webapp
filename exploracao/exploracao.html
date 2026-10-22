@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-22T03:20:55Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-22T04:24:57Z - do not edit directly, edit source -->
 
 
 
@@ -40161,8 +40161,24 @@ function _remoteRenderDiceAndResolve(ch, oc, onDone) {
   result.style.display = 'none';
   skipBtn.style.display = 'none';
   overlay.classList.add('visible');
-  var d20 = oc.check.d20, total = oc.check.total, dc = oc.check.dc, success = oc.check.success;
-  var mod = (oc.check.modifier || 0) + (oc.check.proficiency_bonus || 0);
+  var chk = (oc && oc.companion_intervention && oc.companion_intervention.dice)
+    ? oc.companion_intervention.dice
+    : (oc.check || {});
+  var d20 = chk.d20 != null ? chk.d20 : (oc.check ? oc.check.d20 : 10);
+  var total = chk.total != null ? chk.total : (oc.check ? oc.check.total : d20);
+  var dc = chk.dc != null ? chk.dc : (oc.check ? oc.check.dc : 11);
+  var success = chk.success != null ? chk.success : (oc.check ? oc.check.success : (total >= dc));
+  var mod = (chk.modifier || chk.mod || 0) + (chk.proficiency_bonus || 0);
+  var isSurprise = !!(chk.is_surprise || (oc.check && oc.check.is_surprise));
+  var rollerName = chk.roller_name || (oc.companion_intervention && oc.companion_intervention.companion_name) || '';
+
+  if (isSurprise) {
+    var preTitle = chk.surprise_title || '✦ Rolagem de Reação da Comitiva ✦';
+    var preDesc = chk.pre_roll_desc ? ('<div style="font-size:13px;color:var(--v-text-dim,#a89a82);letter-spacing:1px;margin-top:4px;">' + chk.pre_roll_desc + '</div>') : '';
+    formula.innerHTML = '<span style="color:var(--v-gold,#c4953a);font-weight:bold;letter-spacing:1px;">' + preTitle + '</span>' + preDesc;
+  } else if (rollerName) {
+    formula.innerHTML = '<span style="color:var(--v-gold,#c4953a);font-weight:bold;letter-spacing:1px;">✦ Intervenção de ' + rollerName + ' ✦</span>';
+  }
   var advanced = false;
   var lastAdvTime = 0;
   function advance(src) {
@@ -40199,9 +40215,24 @@ function _remoteRenderDiceAndResolve(ch, oc, onDone) {
     try { LOG('DICE', '_remote showResult d20=' + d20 + ' total=' + total + ' dc=' + dc + ' success=' + success); } catch (_) {}
     clearChildren(formula);
     var modStr = (mod >= 0 ? '+' : '') + mod;
-    formula.appendChild(document.createTextNode('d20 ' + d20 + ' ' + modStr + ' = '));
-    var b = document.createElement('b'); b.textContent = String(total); formula.appendChild(b);
-    formula.appendChild(document.createTextNode(' vs CD ' + dc));
+    var degStr = '';
+    if (chk && chk.degree_label) {
+      var dColor = 'var(--v-gold, #c4953a)';
+      if (chk.degree === 'critical_success') dColor = '#ffd700';
+      else if (chk.degree === 'exceptional_success') dColor = '#7bc67b';
+      else if (chk.degree === 'marginal_failure') dColor = '#e0a845';
+      else if (chk.degree === 'catastrophic_failure' || chk.degree === 'critical_failure') dColor = '#e05353';
+      else if (chk.degree === 'failure') dColor = '#d97d7d';
+      degStr = '<div style="margin-top:4px;font-size:13px;font-weight:bold;letter-spacing:1px;color:' + dColor + ';">' + chk.degree_label + '</div>';
+    }
+    if (isSurprise) {
+      var rPrefix = rollerName ? ('<b>' + rollerName + '</b> obteve total ') : 'Resultado da Comitiva: ';
+      formula.innerHTML = rPrefix + '<b style="color:var(--v-gold,#c4953a);font-size:1.15em;">' + total + '</b>' + degStr;
+    } else if (rollerName) {
+      formula.innerHTML = '<b>' + rollerName + '</b>: d20 ' + d20 + ' ' + modStr + ' = <b>' + total + '</b> vs CD ' + dc + degStr;
+    } else {
+      formula.innerHTML = 'd20 ' + d20 + ' ' + modStr + ' = <b>' + total + '</b> vs CD ' + dc + degStr;
+    }
     result.className = success ? 'success' : 'failure';
     result.textContent = success ? 'SUCESSO' : 'FALHA';
     result.style.display = 'inline-block';

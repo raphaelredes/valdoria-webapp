@@ -71522,6 +71522,303 @@ var _CITY_LOCAL_BANTERS = {
         }
       ]
     }
+  ],
+  'mago': [
+    {
+      id: 'local_banter_mage_leylines',
+      narration: 'Ao passarem por arcadas centenárias gravadas com pequenos símbolos arcanos, {name} desacelera o passo, dedilhando as ranhuras do granito com evidente fascínio erudito.',
+      speech: 'Percebe como o ar vibra ligeiramente sobre estas pedras? Não é imaginação; as fundações de Valdoria foram traçadas sobre cruzamentos sutis de correntes arcanas. Quem construiu isto sabia exatamente o que estava ancorando.',
+      choices: [
+        {
+          id: 'curious',
+          label: 'Demonstrar interesse e incentivar a explicação',
+          speech: 'Fascinante. Ter alguém com o seu conhecimento abre portas que a força bruta jamais enxergaria.',
+          delta_approval: 3,
+          reply_narration: 'Os olhos de {name} brilham de entusiasmo acadêmico ao ser ouvido com atenção.',
+          reply_speech: 'É um prazer partilhar isso com você. A maioria dos andarilhos só enxerga cascalho onde há pura história viva.'
+        },
+        {
+          id: 'practical',
+          label: 'Perguntar se essas correntes oferecem alguma utilidade prática',
+          speech: 'Se essas correntes puderem nos conceder alguma vantagem em combate ou proteção, vale a pena investigar.',
+          delta_approval: 1,
+          reply_narration: '{name} ri de leve, admirando o senso de prioridade objetivo.',
+          reply_speech: 'Sempre focado nos resultados práticos, não é? Vou anotar isso nas minhas notas para quando precisarmos.'
+        },
+        {
+          id: 'impatient',
+          label: 'Apressar o passo sem paciência para teorias',
+          speech: 'Temos afazeres urgentes pela cidade. Deixe as pedras antigas para os bibliotecários.',
+          delta_approval: -2,
+          reply_narration: '{name} recolhe a mão do muro com um muxoxo descontente, acelerando o passo.',
+          reply_speech: 'Como quiser. O mundo continuará girando, com ou sem a sua curiosidade.'
+        }
+      ]
+    }
+  ],
+  'bardo': [
+    {
+      id: 'local_banter_bard_rhyme',
+      narration: 'Ao som distante de uma canção de taverna misturada ao burburinho dos mercadores, {name} cantarola baixinho uma melodia ritmada, ajustando o alforge com entusiasmo radiante.',
+      speech: 'Valdoria tem o seu próprio ritmo, percebeu? O trote das montarias, o ranger das rodas de carroça, o pregão das frutas... Toda cidade é uma balada esperando para ser escrita por quem sabe ouvir.',
+      choices: [
+        {
+          id: 'appreciate',
+          label: 'Apreciar o talento e o ânimo do bardo',
+          speech: 'Sua música dá alma a essa comitiva. Nunca deixe esse ânimo se apagar nas trilhas.',
+          delta_approval: 3,
+          reply_narration: '{name} esboça uma reverência graciosa e espirituosa no meio da calçada.',
+          reply_speech: 'Com um companheiro de jornada que sabe apreciar boa arte, as canções nascem quase sozinhas!'
+        },
+        {
+          id: 'humorous',
+          label: 'Brincar sobre colocar suas façanhas na letra',
+          speech: 'Desde que eu apareça como o centro dessa balada, você tem total liberdade poética.',
+          delta_approval: 1,
+          reply_narration: '{name} solta uma gargalhada contagiante que faz alguns passantes olharem curiosos.',
+          reply_speech: 'Pode deixar! Vai ter rima rica para as suas melhores investidas.'
+        },
+        {
+          id: 'annoyed',
+          label: 'Pedir silêncio para não chamar atenção',
+          speech: 'Cante menos e olhe mais ao redor. Discrição evita encrenca com quem não deve.',
+          delta_approval: -2,
+          reply_narration: '{name} estala a língua em tom teatral e finge guardar a voz em um bolso.',
+          reply_speech: 'Que rigor... O mundo seria um túmulo cinzento se todos pensassem assim.'
+        }
+      ]
+    }
+  ],
+  'patrulheiro': [
+    {
+      id: 'local_banter_ranger_breeze',
+      narration: 'Uma brisa fresca traz o aroma úmido de pinheiros das matas além dos muros de Valdoria. {name} ergue a cabeça contra o vento, farejando o ar com o instinto afiado dos ermos.',
+      speech: 'O vento do norte está trazendo umidade dos pântanos. A cidade é confortável para comprar mantimentos e amolar facas, mas meu peito só respira de verdade quando as árvores fecham a visão do céu.',
+      choices: [
+        {
+          id: 'communion',
+          label: 'Partilhar do respeito pela vida ao ar livre',
+          speech: 'As trilhas abertas têm uma verdade que nenhuma muralha reproduz. Logo estaremos lá fora de novo.',
+          delta_approval: 3,
+          reply_narration: '{name} assente com firmeza e cumplicidade silenciosa.',
+          reply_speech: 'E quando estivermos, eu conheço os rastros certos. Estaremos seguros sob a copa das matas.'
+        },
+        {
+          id: 'moderate',
+          label: 'Equilibrar a utilidade da cidade e da floresta',
+          speech: 'A floresta nos dá desafio, mas a cidade nos dá ouro e cura. Um não vive sem o outro para nós.',
+          delta_approval: 1,
+          reply_narration: '{name} concorda com um gesto contido de cabeça.',
+          reply_speech: 'Verdade. O javali corre na mata, mas o couro dele vira alforge aqui no mercado.'
+        },
+        {
+          id: 'urban',
+          label: 'Declarar que prefere o conforto civilizado',
+          speech: 'Lama, chuva e mosquitos não me trazem saudade alguma. Uma boa estalagem supera qualquer clareira.',
+          delta_approval: -2,
+          reply_narration: '{name} torce o nariz de leve com visível pena dos seus hábitos urbanos.',
+          reply_speech: 'Cidades deixam os ossos macios e os reflexos lentos. Lembre-se disso na próxima emboscada.'
+        }
+      ]
+    }
+  ],
+  'paladino': [
+    {
+      id: 'local_banter_paladin_duty',
+      narration: 'O brilho do aço polido e o tabardo imaculado de {name} chamam a atenção dos passantes. Seus passos são cadenciados e firmes, os olhos serenos medindo os mendigos agachados sob os beirais e os nobres apressados em suas liteiras.',
+      speech: 'Esta cidade transborda opulência de um lado e miséria esquecida do outro. Meu juramento não me permite fechar os olhos para quem não tem voz diante dos magistrados. A justiça só é verdadeira quando protege o mais fraco da comitiva e da cidade.',
+      choices: [
+        {
+          id: 'devout',
+          label: 'Apoiar o juramento de proteção aos indefesos',
+          speech: 'A verdadeira nobreza está em proteger quem não pode se defender. Compartilho do seu compromisso.',
+          delta_approval: 3,
+          reply_narration: '{name} assente com solenidade e respeito mútuo, a mão repousando no punho da espada com serenidade.',
+          reply_speech: 'Saber que marchamos sob o mesmo ideal fortalece minha lâmina. A retidão nunca é um fardo quando dividida.'
+        },
+        {
+          id: 'pragmatic',
+          label: 'Recomendar cautela e foco nas missões da comitiva',
+          speech: 'É uma causa honrada, mas não podemos consertar o mundo sozinhos antes de cumprirmos nossas próprias missões.',
+          delta_approval: 1,
+          reply_narration: '{name} pondera suas palavras com seriedade comedida.',
+          reply_speech: 'Paciência e foco também são virtudes. Daremos cada passo no seu devido tempo.'
+        },
+        {
+          id: 'callous',
+          label: 'Rejeitar a preocupação moral como distração',
+          speech: 'Cada um carrega o destino que merece. Guarde sua espada para perigos reais em vez de pregações.',
+          delta_approval: -2,
+          reply_narration: '{name} franze a testa, o olhar faiscando com desapontamento solene.',
+          reply_speech: 'Uma lâmina sem honra é mero ferro cego. Cuidado para que a frieza não endureça sua alma.'
+        }
+      ]
+    }
+  ],
+  'barbaro': [
+    {
+      id: 'local_banter_barbarian_walls',
+      narration: '{name} flexiona os ombros largos com inquietação visível, o couro cru de suas vestes contrastando com a alvenaria cinzenta de Valdoria. O olhar selvagem varre as sacadas e pontes suspensas como se farejasse predadores invisíveis.',
+      speech: 'Essas paredes de pedra apertam meu peito como uma armadilha de urso. Gente demais trancada em caixas de tijolo, cheirando a perfume barato e medo disfarçado. Onde o sangue corre limpo, resolvemos nossas pendências olho no olho, não com papel e tabelião.',
+      choices: [
+        {
+          id: 'respect_wild',
+          label: 'Valorizar a franqueza e a lealdade da selva',
+          speech: 'A selva não mente: ou você é forte e leal, ou perece. Admiro a clareza com que você encara a vida.',
+          delta_approval: 3,
+          reply_narration: '{name} abre um sorriso largo e bate o punho cerrado no peito em saudação guerreira.',
+          reply_speech: 'Você entende o peso do sangue e da terra. Quando a fúria vier, sei que posso confiar nas suas costas.'
+        },
+        {
+          id: 'practical',
+          label: 'Reconhecer que ambos os mundos têm seu valor',
+          speech: 'Paredes e papéis têm suas utilidades para negociar, mas na hora da verdade o aço fala mais alto.',
+          delta_approval: 1,
+          reply_narration: '{name} dá um grunhido complacente, ajeitando a machadinha na cintura.',
+          reply_speech: 'Desde que não esqueça isso quando o perigo descer sobre nós, aguento este ar abafado mais um pouco.'
+        },
+        {
+          id: 'insult',
+          label: 'Criticar a visão rústica em favor da civilização',
+          speech: 'Você fala como quem não compreende o valor da civilização. Aqui as leis evitam a barbárie.',
+          delta_approval: -2,
+          reply_narration: '{name} estala os nós dos dedos com um olhar cortante de desprezo.',
+          reply_speech: 'Suas leis só servem para os covardes se esconderem atrás de guardas pagos. A terra não se importa com seus papéis.'
+        }
+      ]
+    }
+  ],
+  'druida': [
+    {
+      id: 'local_banter_druid_roots',
+      narration: 'Em meio ao tráfego ruidoso da praça, {name} se abaixa junto a uma calha de pedra, tocando com reverência suave um broto de dente-de-leão que rompe as frestas do calçamento.',
+      speech: 'Olhe aqui. As pessoas pisoteiam sem notar, mas a terra sempre encontra uma brecha para respirar. Os mortais erguem torres colossais acreditando que dominaram a criação, mas o musgo e as raízes sabem que no final a terra sempre retoma o que é dela.',
+      choices: [
+        {
+          id: 'reverence',
+          label: 'Acolher a lição dos ciclos naturais',
+          speech: 'A natureza sempre tem a palavra final. É tranquilizador lembrar de nossa pequenez diante dos ciclos da vida.',
+          delta_approval: 3,
+          reply_narration: '{name} sorri suavemente, a íris brilhando com o reflexo calmo das seivas ancestrais.',
+          reply_speech: 'Uma mente aberta aos murmúrios da terra é rara entre andarilhos urbanos. Os espíritos do ermo abençoam a sua jornada.'
+        },
+        {
+          id: 'balance',
+          label: 'Propor harmonia entre criação e natureza',
+          speech: 'A pedra e o broto podem coexistir se houver respeito. Buscamos esse equilíbrio para nossa comitiva.',
+          delta_approval: 1,
+          reply_narration: '{name} assente com benevolência contida.',
+          reply_speech: 'O equilíbrio é uma teia delicada. Enquanto você mantiver essa postura, a harmonia estará conosco.'
+        },
+        {
+          id: 'dismissive',
+          label: 'Tratar o comentário como sentimentalismo vazio',
+          speech: 'É apenas mato crescendo no lixo. Temos coisas mais urgentes a tratar do que ervas daninhas.',
+          delta_approval: -2,
+          reply_narration: '{name} se levanta lentamente, a feição fechando-se como casca de carvalho antigo.',
+          reply_speech: 'Quem chama a vida de erva daninha costuma secar por dentro muito antes de cair no combate.'
+        }
+      ]
+    }
+  ],
+  'monge': [
+    {
+      id: 'local_banter_monk_peace',
+      narration: 'Mesmo em meio ao vaivém caótico de carroças e gritos de mascates, os passos de {name} não produzem ruído perceptível no pavimento. Sua respiração mantém um ritmo lento, profundo e imutável.',
+      speech: 'O barulho desta cidade tenta roubar o silêncio que mora dentro de nós. Cada passante corre com a mente presa no ontem ou no amanhã, esquecendo que o único golpe que realmente importa é o deste exato instante. Você consegue encontrar quietude mesmo no meio da tempestade?',
+      choices: [
+        {
+          id: 'discipline',
+          label: 'Valorizar o foco interior e a presença',
+          speech: 'A mente treinada é o escudo mais impenetrável. Sua serenidade ajuda a comitiva a manter o foco.',
+          delta_approval: 3,
+          reply_narration: '{name} junta as palmas das mãos em uma inclinação respeitosa e harmônica.',
+          reply_speech: 'Quando o corpo e o espírito respiram em uníssono, nenhuma lâmina externa consegue desequilibrar nossos passos.'
+        },
+        {
+          id: 'pragmatic',
+          label: 'Admitir a dificuldade mas reconhecer a importância',
+          speech: 'Tento manter a cabeça fria quando o combate começa, mas admito que o caos ao redor às vezes distrai.',
+          delta_approval: 1,
+          reply_narration: '{name} esboça um sorriso sereno e compreensivo.',
+          reply_speech: 'A admissão sincera é o primeiro passo para o controle. A prática diária lapida a concentração.'
+        },
+        {
+          id: 'dismissive',
+          label: 'Menosprezar a meditação como perda de tempo',
+          speech: 'Quietude não vence batalhas nem paga rações. Quem hesita meditando acaba engolindo pó.',
+          delta_approval: -2,
+          reply_narration: '{name} expira devagar, mantendo a postura inabalável.',
+          reply_speech: 'Confundir quietude com hesitação é o erro que faz o combatente cego desferir golpes no vento.'
+        }
+      ]
+    }
+  ],
+  'bruxo': [
+    {
+      id: 'local_banter_warlock_abyss',
+      narration: 'As sombras parecem se alongar e serpentear de forma ligeiramente incomum aos pés de {name}. Um brilho tênue e enigmático bruxuleia na íris do aliado enquanto ele observa os telhados e o céu carregado sobre Valdoria.',
+      speech: 'As pessoas comuns passam o dia preocupadas com pão e moedas de cobre, cegas para os fios invisíveis tecidos nas dobras da realidade. Meu patrono me sussurra que há forças ancestrais observando esta cidade de lugares onde a luz do sol nunca alcançou. Você teme os segredos que não pode compreender?',
+      choices: [
+        {
+          id: 'intrigued',
+          label: 'Encarar o desconhecido com coragem e discernimento',
+          speech: 'O desconhecido só apavora quem não tem coragem de olhar no abismo. Seus segredos são uma ferramenta valiosa para nós.',
+          delta_approval: 3,
+          reply_narration: '{name} estreita os olhos com um lampejo de fascínio e respeito cúmplice.',
+          reply_speech: 'Uma resposta corajosa. Poucos mortais encaram o véu sem tremer; seu discernimento me agrada.'
+        },
+        {
+          id: 'cautious',
+          label: 'Manter cautela quanto aos termos do pacto',
+          speech: 'Respeito o poder que você comanda, mas espero que essas dívidas arcanas não venham cobrar a comitiva.',
+          delta_approval: 1,
+          reply_narration: '{name} solta um riso baixo e controlado, recolhendo as sombras ao redor dos dedos.',
+          reply_speech: 'Pode ficar em paz. O preço do pacto é meu e de mais ninguém; para o grupo, só trago os frutos do poder.'
+        },
+        {
+          id: 'superstitious',
+          label: 'Rejeitar conversas com forças ocultas',
+          speech: 'Prefiro não me meter com entidades ocultas. Mantenha essas vozes estranhas longe de nós.',
+          delta_approval: -2,
+          reply_narration: '{name} vira o rosto com frieza, as sombras ao redor de suas botas tremulando inquietas.',
+          reply_speech: 'A ignorância é uma capa confortável, mas não oferece proteção alguma quando a escuridão decide morder.'
+        }
+      ]
+    }
+  ],
+  'feiticeiro': [
+    {
+      id: 'local_banter_sorcerer_blood',
+      narration: 'Pequenas faíscas estalam sem aviso nas pontas dos dedos enluvados de {name}, e o ar ao seu redor ondula sutilmente como calor sobre a areia. Ele respira fundo, contendo a torrente de poder que corre viva em seu sangue.',
+      speech: 'Muitos magos passam décadas enfurnados em torres de marfim lendo tomos mofados para aprender um único feitiço. Para mim, a magia não é uma fórmula matemática; é um incêndio que corre nas veias, esperando uma palavra para transbordar. Às vezes, conter essa força no meio de tanta gente é mais difícil do que soltá-la contra um inimigo.',
+      choices: [
+        {
+          id: 'empathy',
+          label: 'Demonstrar confiança no controle e no dom inato',
+          speech: 'Esse dom inato é formidável. Confio no seu controle e sei que quando você libera esse poder, nada fica no nosso caminho.',
+          delta_approval: 3,
+          reply_narration: '{name} relaxa a postura com um suspiro aliviado, as faíscas dançando em tons calorosos ao redor do pulso.',
+          reply_speech: 'Obrigado por confiar. Saber que você não teme o fogo que carrego no peito faz toda a diferença para mim.'
+        },
+        {
+          id: 'practical',
+          label: 'Focar na utilidade estratégica do poder',
+          speech: 'Desde que você mire esse fogo nos nossos inimigos e não na nossa comitiva, temos uma vantagem tremenda.',
+          delta_approval: 1,
+          reply_narration: '{name} pisca um olho com confiança jovial.',
+          reply_speech: 'Pode ter certeza de que cada chama tem o seu destino bem traçado. Não sou descuidado com quem marcha ao meu lado.'
+        },
+        {
+          id: 'fearful',
+          label: 'Demonstrar apreensão com a instabilidade da magia',
+          speech: 'Magia instável perto de multidões é um perigo desnecessário. Tome cuidado antes de incendiar um quarteirão.',
+          delta_approval: -2,
+          reply_narration: '{name} fecha a mão bruscamente, sufocando as centelhas com expressão ofendida.',
+          reply_speech: 'Não confunda poder espontâneo com falta de habilidade. Sei exatamente onde minha centelha toca.'
+        }
+      ]
+    }
   ]
 };
 
