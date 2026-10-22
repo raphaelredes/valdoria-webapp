@@ -66889,7 +66889,7 @@ var ALLY_TOPIC_CONFIG = {
   morals_faith:       { id: 'morals_faith',       label: '⚖️ Princípios e crenças ▸',         title: 'Filosofia e Crenças',   dc: 13, skill: 'religion',      skillLabel: 'Religião' },
   combat_bonds:       { id: 'combat_bonds',       label: '🛡️ Táticas e laços de batalha ▸',   title: 'Laços de Batalha',      dc: 13, skill: 'athletics',     skillLabel: 'Atletismo' },
   personal_favor:     { id: 'personal_favor',     label: '📜 Assunto pessoal e favor ▸',      title: 'Favor Pessoal',         dc: 14, skill: 'investigation', skillLabel: 'Investigação' },
-  romance_courtship:  { id: 'romance_courtship',  label: '💖 Confidências a dois [Afeto] ▸',  title: 'Confidências e Afeto',  dc: 12, skill: 'persuasion',    skillLabel: 'Persuasão' },
+  romance_courtship:  { id: 'romance_courtship',  label: '💖 Confidências a dois ▸',  title: 'Confidências e Afeto',  dc: 12, skill: 'persuasion',    skillLabel: 'Persuasão' },
   sparring_challenge: { id: 'sparring_challenge', label: '⚔️ Desafio de treino rápido ▸',     title: 'Desafio de Treino',     dc: 13, skill: 'acrobatics',    skillLabel: 'Acrobacia' },
 };
 
@@ -67292,7 +67292,7 @@ function _showAllyTopicsMenu(idx) {
     { key: 'morals_faith',       label: '⚖️ Princípios e crenças ▸' },
     { key: 'combat_bonds',       label: '🛡️ Táticas e laços de batalha ▸' },
     { key: 'personal_favor',     label: '📜 Assunto pessoal e favor ▸' },
-    { key: 'romance_courtship',  label: '💖 Confidências a dois [Afeto] ▸' },
+    { key: 'romance_courtship',  label: '💖 Confidências a dois ▸' },
     { key: 'sparring_challenge', label: '⚔️ Desafio de treino rápido ▸' },
   ];
 
@@ -67509,6 +67509,12 @@ function _showAllyTopicDialogue(idx, topicKey) {
         }
 
         if (ch._replyScript && window.vEncounter && typeof window.vEncounter.render === 'function') {
+          if (typeof _npcMarkUsed === 'function' && ch.id) {
+            _npcMarkUsed(_allyNpcId, ch.id);
+          }
+          if (typeof _markAllyChoiceUsed === 'function' && ch.id) {
+            _markAllyChoiceUsed(displayName, 'lore', ch.id);
+          }
           window.vEncounter.render({
             npc: dlg.npc,
             script: ch._replyScript,
@@ -67851,15 +67857,20 @@ function _showAllyDialogue(idx){
 
   var otherClassChoices = classChoices.filter(function(c){ return c.id !== 'leave'; });
 
-  // Menu organizado de alto nível com navegação por submenus funcionais
-  var isAtCampfire = Boolean(window._isAtCampfire || (m && m.isAtCampfire) || (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.isAtCampfire));
-  var topicsCount = isAtCampfire ? 7 : 6;
-
-  var hubChoices = [
+  // Menu organizado de alto nível com navegação por submenus funcionais (Interagir e Ficha no topo)
+  var primaryChoices = [
     {
       id: 'nav_topics_menu',
       label: '💬 Interagir ▸',
       cb: function() { _showAllyTopicsMenu(idx); }
+    },
+    {
+      id: 'nav_inspect_sheet',
+      label: '📜 Ver ficha completa de ' + displayName,
+      cb: function() {
+        try { window.vEncounter.close(); } catch(_) {}
+        if (typeof _showStatusPopup === 'function') _showStatusPopup(idx);
+      }
     },
     {
       id: 'nav_gift',
@@ -67868,7 +67879,7 @@ function _showAllyDialogue(idx){
     }
   ];
 
-  var combinedChoices = otherClassChoices.concat(hubChoices);
+  var combinedChoices = primaryChoices.concat(otherClassChoices);
   combinedChoices.push({ id: 'leave', label: '↩ "Até mais tarde."', cb: 'close', renownDelta: 0 });
 
   var dlg = {
