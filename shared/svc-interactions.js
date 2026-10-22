@@ -240,7 +240,7 @@
             var _rkey = deltaR >= 3 ? 'very_positive' : deltaR > 0 ? 'positive'
               : deltaR <= -2 ? 'very_negative' : deltaR < 0 ? 'negative' : 'neutral';
             rText = _reactions[_rkey] || (success
-              ? 'O olhar diante de ti se ilumina — a sorte sorriu desta vez.'
+              ? 'O olhar diante de você se ilumina — a sorte sorriu desta vez.'
               : 'Um aceno breve encerra o assunto. Não foi desta vez.');
           }
           var _npcObj = (opts.dialogue && opts.dialogue.npc) || null;
@@ -264,6 +264,45 @@
                 }
               }
             });
+          }
+
+          // Marcação imediata de uso de opção e teste social de companheiro (chance-única)
+          var _aSrc = (opts.ch && opts.ch.ally_source) || {};
+          var _aTopic = _aSrc.topic || '';
+          var _aName = _aSrc.name || (_npcObj && _npcObj.name) || '';
+          var _aCls = (_aSrc.cls || '').toLowerCase();
+          var _chId = (opts.ch && opts.ch.id) || '';
+          var _resLabel = success ? 'success' : 'fail';
+
+          if (_chId && typeof window._markAllyChoiceUsed === 'function') {
+            try {
+              if (_aName) window._markAllyChoiceUsed(_aName, _aTopic, _chId, _resLabel);
+              if (_aCls) window._markAllyChoiceUsed(_aCls, _aTopic, _chId, _resLabel);
+              if (_npcObj && _npcObj.id) {
+                var _cleanNpc = String(_npcObj.id).replace(/^ally_topics_|^ally_/, '');
+                if (_aTopic && _cleanNpc.endsWith('_' + _aTopic)) {
+                  _cleanNpc = _cleanNpc.slice(0, -(_aTopic.length + 1));
+                }
+                window._markAllyChoiceUsed(_cleanNpc, _aTopic, _chId, _resLabel);
+              }
+            } catch (_eMark) {}
+          }
+          if (_chId && typeof window._npcMarkUsed === 'function') {
+            try {
+              if (_npcObj && _npcObj.id) {
+                window._npcMarkUsed(_npcObj.id, _chId);
+                if (_aTopic) window._npcMarkUsed(_npcObj.id, _aTopic + ':' + _chId);
+              }
+              if (_aName) {
+                var _lowName = _aName.toLowerCase();
+                window._npcMarkUsed('ally_' + _lowName, _chId);
+                window._npcMarkUsed(_lowName, _chId);
+                if (_aTopic) {
+                  window._npcMarkUsed('ally_' + _lowName, _aTopic + ':' + _chId);
+                  window._npcMarkUsed(_lowName, _aTopic + ':' + _chId);
+                }
+              }
+            } catch (_eNpc) {}
           }
 
           // Registro do desfecho narrativo e renome no histórico

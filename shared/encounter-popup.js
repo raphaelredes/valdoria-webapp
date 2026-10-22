@@ -4840,19 +4840,48 @@
           && ch && ch.id) {
         var _skip = (ch.id === 'leave' || ch.id === 'close' || String(ch.id).indexOf('back_') === 0 || ch.id === '_ally_reply_done');
         if (!_skip) {
+          var _topicKey = (ch.ally_source && ch.ally_source.topic) || '';
+          var _cleanNpcId = dialogue.npc.id.replace(/^ally_topics_|^ally_/, '');
+          if (_topicKey && _cleanNpcId.endsWith('_' + _topicKey)) {
+            _cleanNpcId = _cleanNpcId.slice(0, -(_topicKey.length + 1));
+          }
+          var _allyName = (ch.ally_source && ch.ally_source.name) ? String(ch.ally_source.name).toLowerCase() : '';
+          var _allyCls = (ch.ally_source && ch.ally_source.cls) ? String(ch.ally_source.cls).toLowerCase() : '';
           if (typeof window._npcMarkUsed === 'function') {
             try {
               window._npcMarkUsed(dialogue.npc.id, ch.id);
-              var _cleanNpcId = dialogue.npc.id.replace(/^ally_topics_|^ally_/, '');
+              if (_topicKey) window._npcMarkUsed(dialogue.npc.id, _topicKey + ':' + ch.id);
+              if (_topicKey) {
+                window._npcMarkUsed('ally_' + _cleanNpcId, _topicKey + ':' + ch.id);
+                window._npcMarkUsed(_cleanNpcId, _topicKey + ':' + ch.id);
+              }
+              if (_allyName) {
+                window._npcMarkUsed('ally_' + _allyName, ch.id);
+                window._npcMarkUsed(_allyName, ch.id);
+                if (_topicKey) {
+                  window._npcMarkUsed('ally_' + _allyName, _topicKey + ':' + ch.id);
+                  window._npcMarkUsed(_allyName, _topicKey + ':' + ch.id);
+                }
+              }
+              if (_allyCls) {
+                window._npcMarkUsed('ally_' + _allyCls, ch.id);
+                window._npcMarkUsed(_allyCls, ch.id);
+              }
               window._npcMarkUsed('ally_' + _cleanNpcId, ch.id);
               window._npcMarkUsed(_cleanNpcId, ch.id);
             } catch(_e) {}
           }
           if (typeof window._markAllyChoiceUsed === 'function') {
             try {
-              var _cleanAllyKey = dialogue.npc.id.replace(/^ally_topics_|^ally_/, '');
-              var _topicKey = (ch.ally_source && ch.ally_source.topic) || '';
-              window._markAllyChoiceUsed(_cleanAllyKey, _topicKey, ch.id, null);
+              window._markAllyChoiceUsed(_cleanNpcId, _topicKey, ch.id, null);
+              if (_allyName && _allyName !== _cleanNpcId.toLowerCase()) {
+                window._markAllyChoiceUsed(_allyName, _topicKey, ch.id, null);
+              }
+              if (_allyCls && _allyCls !== _cleanNpcId.toLowerCase()) {
+                window._markAllyChoiceUsed(_allyCls, _topicKey, ch.id, null);
+              }
+
+
             } catch(_e) {}
           }
         }

@@ -67261,10 +67261,41 @@ function _isAllyChoiceUsed(allyKey, topicKey, choiceId, m) {
   return false;
 }
 
-function _markAllyChoiceUsed(allyKey, topicKey, choiceId, result) {
+function _markAllyChoiceUsed(allyKey, topicKey, choiceId, result, m) {
   try {
     var fullKey = topicKey + ':' + choiceId;
+    if (!allyKey && m) allyKey = _allyStorageKey(m);
+    if (!allyKey) return;
+    if (topicKey && typeof allyKey === 'string' && allyKey.endsWith('_' + topicKey)) {
+      allyKey = allyKey.slice(0, -(topicKey.length + 1));
+    }
     var keysToMark = [allyKey];
+    var normAlly = String(allyKey).toLowerCase().replace(/[^a-z0-9_]/g, '_');
+    if (keysToMark.indexOf(normAlly) === -1) keysToMark.push(normAlly);
+
+    if (m) {
+      if (m.id) {
+        var mid = String(m.id).toLowerCase().replace(/[^a-z0-9_]/g, '_');
+        if (keysToMark.indexOf(mid) === -1) keysToMark.push(mid);
+      }
+      if (m.name) {
+        var mname = String(m.name).split(/\s+/)[0].toLowerCase().replace(/[^a-z0-9_]/g, '_');
+        if (keysToMark.indexOf(mname) === -1) keysToMark.push(mname);
+      }
+      if (m.cls) {
+        var mcls = String(m.cls).toLowerCase().trim();
+        if (keysToMark.indexOf(mcls) === -1) keysToMark.push(mcls);
+      }
+      m.used_choices = m.used_choices || [];
+      if (m.used_choices.indexOf(fullKey) === -1) m.used_choices.push(fullKey);
+      if (m.used_choices.indexOf(choiceId) === -1) m.used_choices.push(choiceId);
+      m.attempted_checks = m.attempted_checks || {};
+      m.attempted_checks[fullKey] = { used: true, result: result, ts: Date.now() };
+      m.attempted_checks[choiceId] = { used: true, result: result, ts: Date.now() };
+      m._usedChoices = m._usedChoices || {};
+      m._usedChoices[fullKey] = true;
+      m._usedChoices[choiceId] = true;
+    }
     if (typeof _npcMarkUsed === 'function') {
       _npcMarkUsed('ally_' + allyKey, fullKey);
       _npcMarkUsed('ally_' + allyKey, choiceId);
@@ -67278,7 +67309,15 @@ function _markAllyChoiceUsed(allyKey, topicKey, choiceId, result) {
         var mName = (mem.name || '').split(/\s+/)[0].toLowerCase().replace(/[^a-z0-9_]/g, '_');
         var mCls = (mem.cls || '').toLowerCase().trim();
         var mId = (mem.id || '').toLowerCase().replace(/[^a-z0-9_]/g, '_');
-        if (mKey === allyKey || mName === allyKey || mCls === allyKey || mId === allyKey) {
+        var isMatch = false;
+        for (var ki = 0; ki < keysToMark.length; ki++) {
+          var kTarget = keysToMark[ki];
+          if (kTarget && (kTarget === mKey || kTarget === mName || kTarget === mCls || kTarget === mId || normAlly === mKey || normAlly === mName || normAlly === mCls || normAlly === mId)) {
+            isMatch = true;
+            break;
+          }
+        }
+        if (isMatch) {
           mem.used_choices = mem.used_choices || [];
           if (mem.used_choices.indexOf(fullKey) === -1) mem.used_choices.push(fullKey);
           if (mem.used_choices.indexOf(choiceId) === -1) mem.used_choices.push(choiceId);
@@ -67526,7 +67565,7 @@ function _showAllyTopicDialogue(idx, topicKey) {
 
         var allyStorageKey = _allyStorageKey(m, idx);
         if (typeof _markAllyChoiceUsed === 'function') {
-          _markAllyChoiceUsed(allyStorageKey, topicKey, ch.id, null);
+          _markAllyChoiceUsed(allyStorageKey, topicKey, ch.id, null, m);
         }
 
         // Se a escolha possui um teste de perícia (check), delega para a rolagem 3D canônica
@@ -67569,7 +67608,7 @@ function _showAllyTopicDialogue(idx, topicKey) {
             _npcMarkUsed(_allyNpcId, ch.id);
           }
           if (typeof _markAllyChoiceUsed === 'function' && ch.id) {
-            _markAllyChoiceUsed(displayName, 'lore', ch.id);
+            _markAllyChoiceUsed(displayName, 'lore', ch.id, null, m);
           }
           window.vEncounter.render({
             npc: dlg.npc,
