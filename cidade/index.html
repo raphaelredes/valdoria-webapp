@@ -66745,7 +66745,7 @@ window._allyRelSummary = _allyRelSummary;
 
 // === Tópicos Temáticos de Conversa com Companheiros D&D 5e / BG3 ===
 var ALLY_TOPIC_CONFIG = {
-  camp_campfire:      { id: 'camp_campfire',      label: '🔥 Ao redor da fogueira ▸',         title: 'Ao Redor da Fogueira',  dc: 13, skill: 'persuasion',    skillLabel: 'Persuasão' },
+  camp_campfire:      { id: 'camp_campfire',      label: '🔥 Ao redor da fogueira ▸',         title: 'Ao Redor da Fogueira',  dc: 13, skill: 'persuasion',    skillLabel: 'Persuasão', requiresCampfire: true },
   backstory_secret:   { id: 'backstory_secret',   label: '🗝️ Segredos e o passado ▸',        title: 'Segredos do Passado',   dc: 14, skill: 'insight',       skillLabel: 'Intuição' },
   morals_faith:       { id: 'morals_faith',       label: '⚖️ Princípios e crenças ▸',         title: 'Filosofia e Crenças',   dc: 13, skill: 'religion',      skillLabel: 'Religião' },
   combat_bonds:       { id: 'combat_bonds',       label: '🛡️ Táticas e laços de batalha ▸',   title: 'Laços de Batalha',      dc: 13, skill: 'athletics',     skillLabel: 'Atletismo' },
@@ -67087,8 +67087,11 @@ function _showAllyTopicsMenu(idx) {
     ? vAssets.classIconHTML(heraldicId, '100%')
     : '<svg viewBox="0 0 120 120" style="width:100%;height:100%"><use href="#' + heraldicId + '"/></svg>';
 
+  // "Ao redor da fogueira" aparece EXCLUSIVAMENTE quando de fato estiver ao redor de uma fogueira/acampamento
+  var isAtCampfire = Boolean(window._isAtCampfire || (m && m.isAtCampfire) || (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.isAtCampfire));
+
   var topicList = [
-    { key: 'camp_campfire',      label: '🔥 Ao redor da fogueira ▸' },
+    { key: 'camp_campfire',      label: '🔥 Ao redor da fogueira ▸', requiresCampfire: true },
     { key: 'backstory_secret',   label: '🗝️ Segredos e o passado ▸' },
     { key: 'morals_faith',       label: '⚖️ Princípios e crenças ▸' },
     { key: 'combat_bonds',       label: '🛡️ Táticas e laços de batalha ▸' },
@@ -67097,7 +67100,12 @@ function _showAllyTopicsMenu(idx) {
     { key: 'sparring_challenge', label: '⚔️ Desafio de treino rápido ▸' },
   ];
 
-  var choices = topicList.map(function(t) {
+  var activeTopics = topicList.filter(function(t) {
+    if (t.requiresCampfire && !isAtCampfire) return false;
+    return true;
+  });
+
+  var choices = activeTopics.map(function(t) {
     return {
       id: 'topic_' + t.key,
       label: t.label,
@@ -67120,10 +67128,20 @@ function _showAllyTopicsMenu(idx) {
       portraitHTML: portraitHTML,
       gender: allyGender
     },
-    script: [
+    script: isAtCampfire ? [
       {
         type: 'narration',
-        text: 'Você se aproxima de ' + displayName + ' para uma conversa mais próxima. Na tranquilidade do descanso, os laços entre companheiros se fortalecem com palavras e escuta atenta.'
+        text: 'As brasas da fogueira estalam suavemente na noite. Você e ' + displayName + ' sentam-se próximos ao fogo, aproveitando a quietude do acampamento para conversar.'
+      },
+      {
+        type: 'speech',
+        speaker: displayName,
+        text: 'O calor da fogueira ajuda a relaxar depois de tanta marcha. O que você tem em mente esta noite?'
+      }
+    ] : [
+      {
+        type: 'narration',
+        text: 'Você se aproxima de ' + displayName + ' para uma conversa mais próxima. Na tranquilidade de uma pausa, os laços entre companheiros se fortalecem com palavras e escuta atenta.'
       },
       {
         type: 'speech',
@@ -67282,7 +67300,7 @@ function _showCompanionRelationshipTutorial(optAllyName, onDone) {
     script: [
       {
         type: 'narration',
-        text: 'A fogueira crepita lançando centelhas para o céu estrelado. Ao seu lado, ' + allyName + ' organiza os mantimentos da viagem. A jornada pelas terras de Valdoria se torna muito mais forte quando compartilhada.'
+        text: 'Ao seu lado, ' + allyName + ' organiza os mantimentos e o equipamento. A jornada pelas terras de Valdoria se torna muito mais forte quando compartilhada com companheiros leais.'
       },
       {
         type: 'speech',
@@ -67316,7 +67334,7 @@ function _showCompanionRelationshipTutorial(optAllyName, onDone) {
       {
         type: 'speech',
         speaker: 'Crônica da Comitiva',
-        text: '• 💬 <b>Tópicos de Conversa & Testes Sociais:</b> Escolha entre 7 temas ricos. Testes de perícia (Persuasão, Intuição, Intimidação) usam seus atributos para conquistar saltos imediatos de aprovação.<br><br>' +
+        text: '• 💬 <b>Tópicos de Conversa & Testes Sociais:</b> Escolha entre diversos temas profundos (Segredos do Passado, Princípios, Laços de Batalha, Favores, Confidências, Treino, e Reflexões ao Redor da Fogueira durante acampamentos). Testes de perícia (Persuasão, Intuição, Intimidação) usam seus atributos para conquistar saltos imediatos de aprovação.<br><br>' +
               '• 📜 <b>Missões de Companheiro:</b> Em afinidade alta, o aliado confiará sua missão pessoal a você, concedendo bênçãos permanentes e relíquias raras.<br><br>' +
               '• 🎁 <b>Presentes da Mochila:</b> Itens que combinam com o gosto do companheiro fortalecem o afeto e rendem lembranças raras de retribuição!'
       }
@@ -67547,10 +67565,13 @@ function _showAllyDialogue(idx){
   var otherClassChoices = classChoices.filter(function(c){ return c.id !== 'leave'; });
 
   // Menu organizado de alto nível com navegação por submenus funcionais
+  var isAtCampfire = Boolean(window._isAtCampfire || (m && m.isAtCampfire) || (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.isAtCampfire));
+  var topicsCount = isAtCampfire ? 7 : 6;
+
   var hubChoices = [
     {
       id: 'nav_topics_menu',
-      label: '💬 Conversas & Confidências (7 Assuntos) ▸',
+      label: '💬 Conversas & Confidências (' + topicsCount + ' Assuntos) ▸',
       cb: function() { _showAllyTopicsMenu(idx); }
     },
     {
