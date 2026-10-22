@@ -26408,6 +26408,11 @@ function _marketShowTransient(p, npc){
             + '<b>Preço:</b> ' + item.value + ' <span class="vi vi-coin sm"></span>',
         cost: item.value,
         onConfirm: function(){
+          var groupSize = (window.GROUP_MEMBERS || []).length;
+          if (groupSize >= 4) {
+            if (typeof vToast === 'function') vToast('Grupo cheio (3/3 aliados). Dispense alguém antes de recrutar.', 'warn');
+            return;
+          }
           var preGold = p.gold;
           if (!_pay(p, item.value)) return;
           _showServiceResultPopup({
@@ -56009,7 +56014,7 @@ function _guildShowRecruits(p){
         sectionLabel: 'Aventureiros à disposição', items: items,
         onPick: function(item){
           var it = item._it;
-          if (vagas <= 0) { if (typeof vToast === 'function') vToast('Grupo cheio (3/3 aliados). Dispense alguém antes de recrutar.', 'warn'); return; }
+          // D15: Permite conversar e examinar a ficha mesmo com grupo cheio; trava e narrada no botao de contratar
           // FASE 5d (#3): clicar abre o DIÁLOGO ALDRIC server-driven (apresentação +
           // choices Pechinchar/Intimidar/Ver ficha/Contratar resolvidas no servidor).
           _openRecrutaDialogue(it.id, p);
@@ -56066,12 +56071,6 @@ function _guildShowRecruits(p){
     items: items,
     onPick: function(item){
       var r = item._r;
-      // Bloqueia se grupo cheio (max 4: player + 3 allies)
-      var groupSize = (window.GROUP_MEMBERS || []).length;
-      if (groupSize >= 4) {
-        vToast('Grupo cheio (3/3 aliados). Dispense alguém antes de recrutar.', 'warn');
-        return;
-      }
       // Ficha do recruta em PADRAO_ALDRIC (apresentação da Tavira) antes de confirmar.
       var sheet = ''
         + '<b>' + r.cls + ' · Nível ' + r.level + '</b>'
