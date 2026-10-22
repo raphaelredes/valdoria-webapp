@@ -3075,9 +3075,7 @@
       (ch.cost && ch.cost > 0) ||
       ch.requireConfirm ||
       cid === 'jrn_go' ||
-      cid === 'jrn_cancel' ||
-      (ch.stat && ch.dc) ||
-      (ch.check && ch.check.dc)
+      cid === 'jrn_cancel'
     );
   }
 
@@ -3274,7 +3272,7 @@
       statBadge = '<span class="enc-cd-badge">Teste de ' + sName + '</span>';
     }
     if (chDc && chSkill) {
-      statBadge += '<span class="enc-cd-badge">CD ' + chDc + ' · ' + _skillLabelPT(chSkill) + (ch.chance != null ? ' (' + ch.chance + '%)' : '') + '</span>';
+      statBadge += '<span class="enc-cd-badge">CD ' + chDc + ' · ' + _skillLabelPT(chSkill) + '</span>';
     } else if (ch.cost) {
       statBadge += '<span class="enc-cd-badge" style="color:#ffd700;">' + ch.cost + ' ' + _VCOIN + '</span>';
     }
@@ -3354,8 +3352,7 @@
         if (bench) {
           resultParts.push('<div>✦ <b>Dificuldade D&D 5e (CD ' + dcVal + '): ' + bench.tier + '</b> — ' + bench.desc + '</div>');
         }
-        resultParts.push('<div>✦ <b>Sucesso:</b> Desafio superado com êxito' + (ch.chance != null ? ' (' + ch.chance + '% de chance)' : '') + '.</div>');
-        resultParts.push('<div>◆ <b>Falha:</b> Risco de complicações, perda de recursos ou dano' + (ch.dmg ? ' (~' + ch.dmg + ' PV)' : '') + '.</div>');
+
       } else if (ch.isCombat) {
         resultParts.push('<div style="color:#df7262;">⚔ <b>Combate Iminente:</b> Enfrentará os adversários em batalha tática em grade hexagonal.</div>');
       }
@@ -3370,7 +3367,7 @@
     if (resultParts.length > 0) {
       resultsHtml =
         '<div class="enc-cd-section">' +
-          '<div class="enc-cd-section-title">Possíveis Resultados</div>' +
+          '<div class="enc-cd-section-title">Parâmetros da Ação</div>' +
           '<div class="enc-cd-box" style="display:flex; flex-direction:column; gap:6px;">' +
             resultParts.join('') +
           '</div>' +
@@ -3622,7 +3619,7 @@
         /* sessão #88: "CD" (convenção PT-BR do projeto, não "DC") + tradução
            de key EN ('charisma' → 'Carisma') preservando labels já em PT-BR. */
         var advTag = ch.advantage ? ' · <span class="enc-cho-adv" style="color:#ffd700;font-weight:700;">✦ Vantagem</span>' : '';
-        dcBadge = '<span class="enc-cho-dc">CD ' + chDc + ' · ' + _skillLabelPT(chSkill) + (ch.chance != null ? ' · ' + ch.chance + '%' : '') + advTag + '</span>';
+        dcBadge = '<span class="enc-cho-dc">CD ' + chDc + ' · ' + _skillLabelPT(chSkill) + advTag + '</span>';
       } else if (ch.cost) {
         dcBadge = '<span class="enc-cho-dc enc-cho-cost">' + ch.cost + ' ' + _VCOIN + '</span>';
       }
@@ -4840,8 +4837,25 @@
          normais já fazem seu próprio tracking; este guard é só pra allies. */
       if (dialogue && dialogue.npc && typeof dialogue.npc.id === 'string'
           && dialogue.npc.id.indexOf('ally_') === 0
-          && ch && ch.id && ch._oneShot && typeof window._npcMarkUsed === 'function') {
-        try { window._npcMarkUsed(dialogue.npc.id, ch.id); } catch(_e) {}
+          && ch && ch.id) {
+        var _skip = (ch.id === 'leave' || ch.id === 'close' || String(ch.id).indexOf('back_') === 0 || ch.id === '_ally_reply_done');
+        if (!_skip) {
+          if (typeof window._npcMarkUsed === 'function') {
+            try {
+              window._npcMarkUsed(dialogue.npc.id, ch.id);
+              var _cleanNpcId = dialogue.npc.id.replace(/^ally_topics_|^ally_/, '');
+              window._npcMarkUsed('ally_' + _cleanNpcId, ch.id);
+              window._npcMarkUsed(_cleanNpcId, ch.id);
+            } catch(_e) {}
+          }
+          if (typeof window._markAllyChoiceUsed === 'function') {
+            try {
+              var _cleanAllyKey = dialogue.npc.id.replace(/^ally_topics_|^ally_/, '');
+              var _topicKey = (ch.ally_source && ch.ally_source.topic) || '';
+              window._markAllyChoiceUsed(_cleanAllyKey, _topicKey, ch.id, null);
+            } catch(_e) {}
+          }
+        }
       }
       /* Sessao #29 (2026-05-24): ally_source dispara backend apply-effect.
          Pra non-dice (cb='close' ou empty): chama AGORA antes do close.

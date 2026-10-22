@@ -196,6 +196,12 @@
           if (typeof window._markAllyChoiceUsed === 'function') {
             window._markAllyChoiceUsed(aKey, aTopic, opts.ch.id, roll.success);
           }
+          if (typeof window._npcMarkUsed === 'function') {
+            window._npcMarkUsed('ally_' + aKey, opts.ch.id);
+            if (aTopic) window._npcMarkUsed('ally_' + aKey, aTopic + ':' + opts.ch.id);
+            window._npcMarkUsed(aKey, opts.ch.id);
+            if (aTopic) window._npcMarkUsed(aKey, aTopic + ':' + opts.ch.id);
+          }
         } catch (_eAllyUsed) { console.warn('[DICE-SVC] mark ally check used failed', _eAllyUsed); }
       }
 
@@ -239,6 +245,26 @@
           }
           var _npcObj = (opts.dialogue && opts.dialogue.npc) || null;
           var _npcName = (_npcObj && _npcObj.name) || '';
+
+          // Atualização de aprovação de companheiro ao concluir o teste de perícia
+          if (opts.ch && (opts.ch.ally_source || (opts.ch.id && String(opts.ch.id).indexOf('check_') === 0)) && Array.isArray(window.GROUP_MEMBERS)) {
+            var aSrcTarget = opts.ch.ally_source || {};
+            var aNameTarget = aSrcTarget.name || (opts.dialogue && opts.dialogue.npc && opts.dialogue.npc.name) || '';
+            var aClsTarget = (aSrcTarget.cls || '').toLowerCase();
+            window.GROUP_MEMBERS.forEach(function(mem) {
+              if (!mem) return;
+              var mName = (mem.name || '').split(/\s+/)[0];
+              var mCls = (mem.cls || '').toLowerCase();
+              if ((aNameTarget && mName === aNameTarget) || (aClsTarget && mCls === aClsTarget)) {
+                var deltaA = success ? (opts.ch.delta_approval_success || opts.ch.deltaApproval || 4) : (opts.ch.delta_approval_failure || -2);
+                var oldA = (mem.approval != null) ? mem.approval : 0;
+                mem.approval = Math.max(-100, Math.min(100, oldA + deltaA));
+                if (typeof window.vToast === 'function') {
+                  window.vToast(mName + ': Aprovação ' + (deltaA >= 0 ? '+' : '') + deltaA + ' (' + mem.approval + ')');
+                }
+              }
+            });
+          }
 
           // Registro do desfecho narrativo e renome no histórico
           if (typeof window !== 'undefined' && window.vDialogueHistory && typeof window.vDialogueHistory.recordOutcome === 'function') {
