@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-21T03:06:28Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-22T03:20:55Z - do not edit directly, edit source -->
 
 
 
@@ -9174,6 +9174,26 @@ window.__onIntroTap = function() {
           <div class="camp-card-detail" id="camp-long-detail" style="display:none;"></div>
         </div>
         <div class="camp-card-chevron camp-card-t-long">▸</div>
+      </div>
+
+      <div class="camp-card camp-card-chat" id="camp-btn-chat" role="button" tabindex="0" style="display:none;">
+        <div class="camp-card-icon-wrap camp-card-icon-chat">
+          <svg class="camp-card-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </div>
+        <div class="camp-card-info">
+          <div class="camp-card-head">
+            <span class="camp-card-title camp-card-t-chat">Conversas na Fogueira</span>
+            <span class="camp-pill camp-pill-chat">Companheiros</span>
+          </div>
+          <div class="camp-card-sub">Converse com seus aliados ao calor do fogo sobre táticas, segredos e laços.</div>
+          <div class="camp-chips-row">
+            <span class="camp-chip camp-chip-full" id="camp-chat-chip-topic">🔥 Ao Redor da Fogueira</span>
+            <span class="camp-chip camp-chip-gain" id="camp-chat-chip-count">👥 Grupo</span>
+          </div>
+        </div>
+        <div class="camp-card-chevron camp-card-t-chat">▸</div>
       </div>
 
       <button type="button" class="camp-leave-btn" id="camp-btn-continue">
@@ -44259,6 +44279,24 @@ function _updateCampDetails() {
   if (longD) {
     longD.textContent = 'HP/MP totais + metade dos HD' + ((p.exh || 0) > 0 ? ' + Exaustão -1' : '');
   }
+
+  // Atualiza visibilidade do card de conversas com companheiros na fogueira
+  const chatCard = document.getElementById('camp-btn-chat');
+  const alliesList = (window.S && Array.isArray(window.S.allies) && window.S.allies.length > 0)
+    ? window.S.allies
+    : ((window.GROUP_MEMBERS || []).filter(function(m, i){ return i > 0 && m && !m.dead; }));
+
+  if (chatCard) {
+    if (alliesList.length > 0) {
+      chatCard.style.display = 'flex';
+      var chatCountChip = document.getElementById('camp-chat-chip-count');
+      if (chatCountChip) {
+        chatCountChip.textContent = '👥 ' + alliesList.length + ' companheiro' + (alliesList.length > 1 ? 's' : '');
+      }
+    } else {
+      chatCard.style.display = 'none';
+    }
+  }
 }
 
 function _getCampTileInfo(tile, biome) {
@@ -48592,6 +48630,12 @@ function bindQuickActions() {
       _promptCampActionConfirm('long', doLongRest);
     });
   }
+  var _cbChat = document.getElementById('camp-btn-chat');
+  if (_cbChat) {
+    _cbChat.addEventListener('click', function () {
+      _openCampfireChat();
+    });
+  }
   if (_cbc) _cbc.addEventListener('click', closeCampOverlay);
   if (_cbClose) _cbClose.addEventListener('click', closeCampOverlay);
 
@@ -52481,3 +52525,476 @@ function _openCartographyWithPrompt(){
 </script>
 </body>
 </html>
+
+
+// ── CONVERSAS NA FOGUEIRA COM COMPANHEIROS (D&D 5e / EXPLORAÇÃO) ───────────────
+function _openCampfireChat() {
+  var alliesList = [];
+  if (window.S && Array.isArray(window.S.allies) && window.S.allies.length > 0) {
+    alliesList = window.S.allies;
+  } else if (window.GROUP_MEMBERS && Array.isArray(window.GROUP_MEMBERS)) {
+    alliesList = window.GROUP_MEMBERS.filter(function(m, i){ return i > 0 && m && !m.dead; });
+  }
+
+  if (!alliesList || alliesList.length === 0) {
+    if (typeof vToast === 'function') vToast('Nenhum companheiro no grupo no momento.', 'info');
+    return;
+  }
+
+  window._isAtCampfire = true;
+
+  if (alliesList.length === 1) {
+    _showCampfireCompanionTopics(alliesList[0]);
+  } else {
+    _showCampfireAllyPicker(alliesList);
+  }
+}
+
+function _showCampfireAllyPicker(alliesList) {
+  var choices = alliesList.map(function(ally, idx) {
+    var aName = ally.name || ('Companheiro ' + (idx + 1));
+    var aCls = (ally.cls || 'aventureiro').toUpperCase();
+    return {
+      id: 'pick_ally_' + idx,
+      label: '💬 ' + aName + ' (' + aCls + ') ▸',
+      cb: function() {
+        _showCampfireCompanionTopics(ally);
+      }
+    };
+  });
+
+  choices.push({
+    id: 'cancel_picker',
+    label: '↩ Voltar ao Acampamento',
+    cb: function() {
+      window._isAtCampfire = false;
+      try { if (window.vEncounter) window.vEncounter.close(); } catch(_) {}
+    }
+  });
+
+  if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+    window.vEncounter.render({
+      npc: {
+        id: 'campfire_picker',
+        name: 'Companheiros de Viagem',
+        desc: 'Acampamento de Valdoria · Fogueira Acesa',
+        portrait: null,
+        gender: 'neutral'
+      },
+      script: [
+        {
+          type: 'narration',
+          text: 'A fogueira crepita com força afastando a escuridão da noite. Seus companheiros descansam ao redor das brasas, organizando mantimentos e revisando o equipamento.'
+        },
+        {
+          type: 'speech',
+          speaker: 'Comitiva',
+          text: 'Com quem você gostaria de conversar ao redor do fogo esta noite?'
+        }
+      ],
+      choices: choices
+    }, {
+      onClose: function() { window._isAtCampfire = false; }
+    });
+  }
+}
+
+function _showCampfireCompanionTopics(ally) {
+  window._isAtCampfire = true;
+  var displayName = (ally.name || 'Companheiro').split(/\s+/)[0];
+  var allyPort = ally.portrait || ally.port || null;
+  var allyGender = ally.gender || 'female';
+
+  var topics = [
+    { key: 'camp_campfire',      label: '🔥 Ao redor da fogueira ▸' },
+    { key: 'backstory_secret',   label: '🗝️ Segredos e o passado ▸' },
+    { key: 'morals_faith',       label: '⚖️ Princípios e crenças ▸' },
+    { key: 'combat_bonds',       label: '🛡️ Táticas e laços de batalha ▸' },
+    { key: 'personal_favor',     label: '📜 Assunto pessoal e favor ▸' },
+    { key: 'romance_courtship',  label: '💖 Confidências a dois [Afeto] ▸' },
+    { key: 'sparring_challenge', label: '⚔️ Desafio de treino rápido ▸' }
+  ];
+
+  var choices = topics.map(function(t) {
+    return {
+      id: 'camp_top_' + t.key,
+      label: t.label,
+      cb: function() {
+        _showCampfireTopicDialogue(ally, t.key);
+      }
+    };
+  });
+
+  choices.push({
+    id: 'camp_leave',
+    label: '↩ Voltar ao Acampamento',
+    cb: function() {
+      window._isAtCampfire = false;
+      try { if (window.vEncounter) window.vEncounter.close(); } catch(_) {}
+    }
+  });
+
+  if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+    window.vEncounter.render({
+      npc: {
+        id: ally.id || ('ally_' + (ally.cls || 'guerreiro')),
+        name: ally.name || displayName,
+        desc: (ally.cls || 'Aventureiro') + ' · Ao Redor da Fogueira',
+        portrait: allyPort,
+        gender: allyGender
+      },
+      script: [
+        {
+          type: 'narration',
+          text: 'As brasas da fogueira estalam na noite calma. ' + displayName + ' senta-se próximo ao fogo, aproveitando o calor e a breve pausa na jornada.'
+        },
+        {
+          type: 'speech',
+          speaker: displayName,
+          text: 'O calor do fogo ajuda a aquecer a alma depois de tanta estrada. O que você gostaria de conversar?'
+        }
+      ],
+      choices: choices
+    }, {
+      onClose: function() { window._isAtCampfire = false; }
+    });
+  }
+}
+
+function _showCampfireTopicDialogue(ally, topicKey) {
+  var displayName = (ally.name || 'Companheiro').split(/\s+/)[0];
+  var allyPort = ally.portrait || ally.port || null;
+  var allyGender = ally.gender || 'female';
+
+  var topicData = {
+    camp_campfire: {
+      title: 'Ao Redor da Fogueira',
+      narration: 'A fogueira crepita lançando centelhas alaranjadas contra o breu da noite. Ao seu lado, ' + displayName + ' observa a dança das chamas em silêncio antes de falar.',
+      speech: 'Noites como esta fazem a gente lembrar o motivo de estar na estrada. O que você acha que vamos encontrar quando essa jornada terminar?',
+      choices: [
+        {
+          id: 'emp',
+          label: '"Acho que encontramos mais do que ouro: encontramos pessoas leais em quem confiar."',
+          delta: 6,
+          reply: 'Eu não poderia concordar mais. No final das contas, o ouro acaba, mas a lealdade de quem lutou ao seu lado permanece.'
+        },
+        {
+          id: 'prag',
+          label: '"Glória, reconhecimento e recursos para garantir que nunca mais passemos aperto."',
+          delta: 3,
+          reply: 'Direto ao ponto. Sem recursos e preparo, ninguém sobrevive por muito tempo neste mundo.'
+        },
+        {
+          id: 'check',
+          label: '[Persuasão] "Uma nova era para Valdoria, onde nenhum viajante precise temer as estradas."',
+          delta: 8,
+          reply: 'Você fala com tanta convicção que é impossível não acreditar. Dá esperança para continuar marchando amanhã.'
+        },
+        {
+          id: 'prov',
+          label: '"Mais perigos e desafios maiores. E é exatamente por isso que ainda estamos de pé."',
+          delta: 4,
+          reply: 'Um espírito incansável! Se o mundo trouxer mais perigos, que venham — estaremos prontos.'
+        }
+      ]
+    },
+    combat_bonds: {
+      title: 'Táticas e Laços de Batalha',
+      narration: displayName + ' afia a lâmina com uma pedra-de-amolar enquanto as fagulhas saltam. Seus olhos examinam seus movimentos atentamente.',
+      speech: 'Nossa sincronia tem feito a diferença nos combates. O que você acha que devemos aprimorar na nossa guarda?',
+      choices: [
+        {
+          id: 'emp',
+          label: '"Confio nos seus reflexos. Cobrimos as costas um do outro e ninguém fica para trás."',
+          delta: 6,
+          reply: 'Pode deixar comigo. Se alguém tentar te cercar pelas sombras, vai encontrar a ponta do meu aço.'
+        },
+        {
+          id: 'prag',
+          label: '"Precisamos manter foco nos alvos mais perigosos antes que conjurem magias pesadas."',
+          delta: 4,
+          reply: 'Pragmático e eficiente. Cortamos a cabeça da serpente primeiro.'
+        },
+        {
+          id: 'check',
+          label: '[Intuição] "Percebi que você hesita quando o flanco esquerdo fica exposto. Ajuste o passo."',
+          delta: 7,
+          reply: 'Olhar afiado! Vou corrigir isso nos próximos confrontos. Obrigado pela observação.'
+        },
+        {
+          id: 'prov',
+          label: '"Apenas tente acompanhar o meu ritmo quando a carnificina começar!"',
+          delta: 3,
+          reply: 'Hah! Veja se não é você que vai precisar pedir para eu diminuir a velocidade!'
+        }
+      ]
+    },
+    backstory_secret: {
+      title: 'Segredos e o Passado',
+      narration: displayName + ' olha para o horizonte distante, com uma sombra de saudade e cautela cruzando o rosto.',
+      speech: 'Todo mundo que pega em armas em Valdoria tem uma história que preferia esquecer. O que te trouxe a essa vida de andarilho?',
+      choices: [
+        {
+          id: 'emp',
+          label: '"A busca por um propósito maior e para proteger aqueles que não podem lutar."',
+          delta: 6,
+          reply: 'É uma causa nobre. Poucos mantêm esse fogo aceso depois de ver tanta desolação.'
+        },
+        {
+          id: 'prag',
+          label: '"A sobrevivência. Ficar parado na miséria nunca foi uma opção para mim."',
+          delta: 4,
+          reply: 'Compreendo perfeitamente. O mundo não dá nada de graça para quem não for buscar.'
+        },
+        {
+          id: 'check',
+          label: '[Persuasão] "Cicatrizes ensinam mais do que livros. Eu respeito a sua história."',
+          delta: 7,
+          reply: 'Obrigado por entender. Talvez um dia eu te conte tudo desde o começo.'
+        },
+        {
+          id: 'prov',
+          label: '"O passado ficou para trás. O que importa é o que faremos amanhã cedo."',
+          delta: 3,
+          reply: 'Um jeito prático de encarar a vida. Às vezes olhar para trás só atrasa o passo.'
+        }
+      ]
+    },
+    morals_faith: {
+      title: 'Princípios e Crenças',
+      narration: displayName + ' observa as chamas oscilarem contra o vento noturno, em atitude meditativa.',
+      speech: 'Em um mundo onde templos caem e deuses parecem distantes, em que você realmente se apoia?',
+      choices: [
+        {
+          id: 'emp',
+          label: '"Na lealdade dos meus companheiros e na força dos laços que construímos."',
+          delta: 6,
+          reply: 'É uma fé verdadeira. Deuses podem nos testar, mas quem sangra ao nosso lado nunca mente.'
+        },
+        {
+          id: 'prag',
+          label: '"No meu próprio aço e nas decisões que tomo a cada segundo."',
+          delta: 4,
+          reply: 'Autonomia pura. No fim, somos os únicos responsáveis por cada golpe desferido.'
+        },
+        {
+          id: 'check',
+          label: '[Intuição] "Acredito que há uma ordem justa esperando para ser restabelecida."',
+          delta: 6,
+          reply: 'É reconfortante ouvir isso. Me faz querer lutar ainda com mais garra.'
+        },
+        {
+          id: 'prov',
+          label: '"Acredito na sorte dos audazes e no azar de quem cruzar nosso caminho."',
+          delta: 3,
+          reply: 'Uma filosofia perigosa, mas até agora tem funcionado a nosso favor!'
+        }
+      ]
+    },
+    personal_favor: {
+      title: 'Assunto Pessoal e Favor',
+      narration: displayName + ' inclina-se para a frente, diminuindo o tom de voz para que o vento não leve as palavras.',
+      speech: 'Tem uma questão pessoal que preciso resolver em breve. Uma dívida que não posso deixar em aberto. Posso contar com você quando chegar a hora?',
+      choices: [
+        {
+          id: 'emp',
+          label: '"A sua causa é a nossa causa. Vamos resolver isso juntos, não importa o perigo."',
+          delta: 8,
+          reply: 'Eu sabia que podia contar com você. Não vou esquecer essa lealdade.'
+        },
+        {
+          id: 'prag',
+          label: '"Se isso não colocar a comitiva em perigo desnecessário, você tem o meu apoio."',
+          delta: 4,
+          reply: 'Justo. Vamos planejar cada detalhe com antecedência para evitar surpresas.'
+        },
+        {
+          id: 'check',
+          label: '[Persuasão] "Você tem sido leal desde o primeiro dia. Minha espada é sua."',
+          delta: 7,
+          reply: 'Obrigado de verdade. Saber que tenho você ao meu lado me tira um peso imenso do peito.'
+        },
+        {
+          id: 'prov',
+          label: '"Só se a recompensa ou o desafio valerem a caminhada extra!"',
+          delta: 3,
+          reply: 'Hah! Pode ter certeza de que você não vai se arrepender da empreitada.'
+        }
+      ]
+    },
+    romance_courtship: {
+      title: 'Confidências a Dois',
+      narration: displayName + ' senta-se um pouco mais perto. A luz quente do fogo reflete em seus olhos, criando um instante de calma incomum entre os perigos da floresta.',
+      speech: 'É raro encontrar alguém com quem a gente se sinta seguro de verdade no meio de tanta escuridão. Fico feliz que seja você aqui.',
+      choices: [
+        {
+          id: 'emp',
+          label: '"Eu também sinto isso. Estar ao seu lado torna qualquer jornada mais leve."',
+          delta: 8,
+          reply: 'Você não imagina o quanto é bom ouvir isso... Deixa a fogueira queimar. Fica aqui comigo esta noite.'
+        },
+        {
+          id: 'prag',
+          label: '"Somos uma boa dupla. Trabalhar em harmonia é o que nos mantém vivos."',
+          delta: 4,
+          reply: 'É verdade. Mas às vezes... é bom saber que somos mais do que só uma parceria de sobrevivência.'
+        },
+        {
+          id: 'check',
+          label: '[Persuasão] "Você é especial para mim. Não consigo mais imaginar Valdoria sem você."',
+          delta: 9,
+          reply: 'Nem eu na minha. Vem cá... vamos aproveitar esse momento em silêncio juntos.'
+        },
+        {
+          id: 'prov',
+          label: '"Você sempre tem esse jeito encantador ou é só o reflexo das chamas?"',
+          delta: 5,
+          reply: 'Talvez um pouco dos dois... Mas confesso que com você é diferente.'
+        }
+      ]
+    },
+    sparring_challenge: {
+      title: 'Desafio de Treino Rápido',
+      narration: displayName + ' levanta-se ágil, pegando duas varetas de treino da mochila com um sorriso confiante.',
+      speech: 'Que tal um duelo rápido de reflexos para esquentar o sangue antes de deitar? Nada de magia pesada, só velocidade pura!',
+      choices: [
+        {
+          id: 'emp',
+          label: '"Aceito o desafio! Vamos ver quem aprendeu mais com os últimos combates."',
+          delta: 5,
+          reply: 'É essa a disposição que eu gosto de ver! Em guarda!'
+        },
+        {
+          id: 'prag',
+          label: '"Melhor guardarmos as energias para a sentinela e para a marcha de amanhã."',
+          delta: 3,
+          reply: 'Cauteloso como sempre. Você tem razão, descansar agora é a jogada mais inteligente.'
+        },
+        {
+          id: 'check',
+          label: '[Atletismo] "Prepare-se: não vou pegar leve só porque você é do meu grupo!"',
+          delta: 6,
+          reply: 'Hahaha! Era exatamente isso que eu estava esperando!'
+        },
+        {
+          id: 'prov',
+          label: '"Aposto dez moedas que você não acerta um único golpe na minha guarda."',
+          delta: 4,
+          reply: 'Aposta aceita! Prepare o bolso!'
+        }
+      ]
+    }
+  };
+
+  var cur = topicData[topicKey] || topicData.camp_campfire;
+
+  var choices = cur.choices.map(function(ch) {
+    return {
+      id: 'ch_' + ch.id,
+      label: ch.label,
+      cb: function() {
+        // Atualiza aprovação local
+        ally.approval = (ally.approval || 0) + ch.delta;
+        if (typeof vToast === 'function') {
+          vToast(displayName + ': Aprovação ' + (ch.delta >= 0 ? '+' : '') + ch.delta + ' (' + ally.approval + ')');
+        }
+
+        // Sincroniza via API com context de fogueira
+        if (typeof fetch === 'function') {
+          var token = (typeof _getStoredToken === 'function') ? _getStoredToken() : (localStorage.getItem('token') || '');
+          fetch('/api/ally/interact-choice', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token ? ('Bearer ' + token) : ''
+            },
+            body: JSON.stringify({
+              ally_id: ally.id || ('ally_' + (ally.cls || 'guerreiro')),
+              ally_class: ally.cls,
+              topic: topicKey,
+              choice_id: ch.id,
+              is_at_campfire: true
+            })
+          }).catch(function() {});
+        }
+
+        // Exibe desfecho
+        if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+          window.vEncounter.render({
+            npc: {
+              id: ally.id || ('ally_' + (ally.cls || 'guerreiro')),
+              name: ally.name || displayName,
+              desc: (ally.cls || 'Aventureiro') + ' · Diálogo Concluído',
+              portrait: allyPort,
+              gender: allyGender
+            },
+            script: [
+              {
+                type: 'speech',
+                speaker: displayName,
+                text: ch.reply
+              },
+              {
+                type: 'narration',
+                text: 'A fogueira crepita suavemente. O laço de companheirismo entre vocês se fortaleceu com esta conversa.'
+              }
+            ],
+            choices: [
+              {
+                id: 'back_to_topics',
+                label: '↩ Escolher Outro Assunto',
+                cb: function() {
+                  _showCampfireCompanionTopics(ally);
+                }
+              },
+              {
+                id: 'finish_chat',
+                label: '🏕️ Voltar ao Acampamento',
+                cb: function() {
+                  window._isAtCampfire = false;
+                  try { window.vEncounter.close(); } catch(_) {}
+                }
+              }
+            ]
+          }, {
+            onClose: function() { window._isAtCampfire = false; }
+          });
+        }
+      }
+    };
+  });
+
+  choices.push({
+    id: 'back_topics_prev',
+    label: '↩ Voltar aos Assuntos',
+    cb: function() {
+      _showCampfireCompanionTopics(ally);
+    }
+  });
+
+  if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+    window.vEncounter.render({
+      npc: {
+        id: ally.id || ('ally_' + (ally.cls || 'guerreiro')),
+        name: ally.name || displayName,
+        desc: (ally.cls || 'Aventureiro') + ' · ' + cur.title,
+        portrait: allyPort,
+        gender: allyGender
+      },
+      script: [
+        {
+          type: 'narration',
+          text: cur.narration
+        },
+        {
+          type: 'speech',
+          speaker: displayName,
+          text: cur.speech
+        }
+      ],
+      choices: choices
+    }, {
+      onClose: function() { window._isAtCampfire = false; }
+    });
+  }
+}

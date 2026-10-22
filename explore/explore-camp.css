@@ -835,6 +835,14 @@ body.perf-medium .camp-spark:nth-child(6) { display: none; }
   border-color: rgba(196, 149, 58, 0.6);
   box-shadow: 0 4px 16px rgba(196, 149, 58, 0.25);
 }
+.camp-card-chat {
+  background: linear-gradient(135deg, rgba(58, 30, 20, 0.65) 0%, rgba(28, 14, 10, 0.88) 100%);
+  border: 1px solid rgba(220, 100, 50, 0.35);
+}
+.camp-card-chat:hover {
+  border-color: rgba(220, 100, 50, 0.65);
+  box-shadow: 0 4px 16px rgba(220, 100, 50, 0.28);
+}
 .camp-card--no-hd {
   opacity: 0.55;
   filter: grayscale(0.3);
@@ -859,6 +867,11 @@ body.perf-medium .camp-spark:nth-child(6) { display: none; }
   border: 1px solid rgba(196, 149, 58, 0.35);
   color: #fcd34d;
 }
+.camp-card-icon-chat {
+  background: rgba(220, 100, 50, 0.18);
+  border: 1px solid rgba(220, 100, 50, 0.35);
+  color: #fb923c;
+}
 .camp-card-svg {
   width: 22px;
   height: 22px;
@@ -882,6 +895,7 @@ body.perf-medium .camp-spark:nth-child(6) { display: none; }
 }
 .camp-card-t-short { color: #86efac; }
 .camp-card-t-long { color: #fde047; }
+.camp-card-t-chat { color: #fb923c; }
 
 .camp-pill {
   font-size: 10px;
@@ -901,6 +915,11 @@ body.perf-medium .camp-spark:nth-child(6) { display: none; }
   background: rgba(196, 149, 58, 0.2);
   color: #fde047;
   border: 1px solid rgba(196, 149, 58, 0.4);
+}
+.camp-pill-chat {
+  background: rgba(220, 100, 50, 0.2);
+  color: #fb923c;
+  border: 1px solid rgba(220, 100, 50, 0.4);
 }
 
 .camp-card-sub {
