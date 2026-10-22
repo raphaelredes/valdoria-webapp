@@ -72569,8 +72569,20 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
   var npcAttitude = tactRes.npc_attitude || 'indifferent';
   var assistOptions = tactRes.assist_options || [];
 
+  var isRecruit = (venue === 'recruta');
+  var npcObj = (data && data.npc) || (ctx && ctx.npc) || null;
+  var npcName = (npcObj && npcObj.name) || (data && data.npc_name) || 'seu interlocutor';
+  var isPersuasion = (skl === 'persuasion' || /persua/i.test(sklLabel));
+  var isIntimidation = (skl === 'intimidation' || /intimid/i.test(sklLabel));
+
+  var introText = '';
+  if (isRecruit) {
+    introText = 'Você estuda a expressão e a postura de ' + npcName + ' antes de propor os termos do contrato. Como você deseja conduzir a negociação?';
+  } else {
+    introText = 'Você avalia suas abordagens e recursos antes de realizar o teste de ' + sklLabel + ' (CD ' + dc + '). Como deseja agir?';
+  }
   var script = [
-    { type: 'narration', text: 'Você avalia suas opções e recursos para o teste de ' + sklLabel + ' (CD ' + dc + ').' }
+    { type: 'narration', text: introText }
   ];
 
   var attitudeNote = '';
@@ -72582,13 +72594,13 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
 
   var choices = [];
 
-  // 1. Opções para o próprio aventureiro
+  // 1. Abordagem Pessoal Direta (Você) — com bônus acumulados se houver
   if (hasInsp && hasGuidance && hasBardic) {
     choices.push({
       id: 'roll_self_all_buffs',
-      label: '✔ [Você] Rolar com Inspiração (2d20 Vantagem) + Orientação (+1d4) + Bardo (+1d6)',
-      title: 'Rolar com Todos os Bônus Disponíveis',
-      subtitle: sklLabel + ' · Dificuldade CD ' + dc,
+      label: (isPersuasion ? '🗣️ [Persuasão] Argumentar com foco total' : isIntimidation ? '⚔️ [Intimidação] Pressionar com foco total' : ('🎲 [' + sklLabel + '] Agir com foco total')) + ' (Vantagem 2d20 +1d4 +1d6)',
+      title: 'Agir com Todos os Bônus Disponíveis',
+      subtitle: sklLabel + ' · Vantagem (2d20) · CD ' + dc,
       desc: 'Você combina todos os seus recursos ativos: Inspiração de Mesa (Vantagem 2d20), a bênção de Orientação (+1d4) e o ritmo de Inspiração Bárdica (+1d6).',
       possibleResults: '✦ Vantagem: Rola 2d20 escolhendo o maior valor.<br>✦ Bônus aditivos: +1d4 (Orientação) e +1d6 (Inspiração Bárdica) somados ao resultado.<br>✦ Superar a CD ' + dc + ' garante o sucesso na interação.' + attitudeNote,
       dc: dc,
@@ -72598,12 +72610,12 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
       _tactical_options: { use_inspiration: true, use_guidance: true, use_bardic_inspiration: true }
     });
   }
-  if (hasInsp && hasGuidance) {
+  if (hasInsp && hasGuidance && !hasBardic) {
     choices.push({
       id: 'roll_self_insp_guidance',
-      label: '✔ [Você] Rolar com Inspiração (2d20 Vantagem) + Orientação (+1d4)',
-      title: 'Rolar com Inspiração e Orientação',
-      subtitle: sklLabel + ' · Dificuldade CD ' + dc,
+      label: (isPersuasion ? '🗣️ [Persuasão] Argumentar com foco e bênção' : isIntimidation ? '⚔️ [Intimidação] Pressionar com foco e bênção' : ('🎲 [' + sklLabel + '] Agir com foco e bênção')) + ' (Vantagem 2d20 +1d4)',
+      title: 'Argumentar com Inspiração e Orientação',
+      subtitle: sklLabel + ' · Vantagem (2d20) · CD ' + dc,
       desc: 'Você utiliza sua Inspiração de Mesa para rolar com Vantagem combinada à bênção divinatória da Orientação (+1d4).',
       possibleResults: '✦ Vantagem: Rola 2d20 escolhendo o maior valor.<br>✦ Bônus divinatório: +1d4 somado ao total.<br>✦ Superar a CD ' + dc + ' garante o sucesso na interação.' + attitudeNote,
       dc: dc,
@@ -72613,12 +72625,12 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
       _tactical_options: { use_inspiration: true, use_guidance: true }
     });
   }
-  if (hasInsp) {
+  if (hasInsp && !hasGuidance && !hasBardic) {
     choices.push({
       id: 'roll_self_insp',
-      label: '✔ [Você] Rolar com Inspiração de Mesa (2d20 Vantagem)',
-      title: 'Rolar com Inspiração de Mesa',
-      subtitle: sklLabel + ' · Dificuldade CD ' + dc,
+      label: (isPersuasion ? '⭐ [Inspiração] Argumentar com determinação máxima' : isIntimidation ? '⭐ [Inspiração] Pressionar com determinação máxima' : ('⭐ [Inspiração] Agir com determinação máxima')) + ' (Vantagem 2d20)',
+      title: 'Argumentar com Inspiração de Mesa',
+      subtitle: sklLabel + ' · Vantagem (2d20) · CD ' + dc,
       desc: 'Você consome sua Inspiração de Mesa ativa para rolar com Vantagem (dois dados d20, escolhendo o maior).',
       possibleResults: '✦ Vantagem: Rola dois d20 e escolhe o maior resultado.<br>✦ Superar a CD ' + dc + ' garante o sucesso na interação.' + attitudeNote,
       dc: dc,
@@ -72628,11 +72640,11 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
       _tactical_options: { use_inspiration: true, use_guidance: false }
     });
   }
-  if (hasBardic && hasGuidance) {
+  if (hasBardic && hasGuidance && !hasInsp) {
     choices.push({
       id: 'roll_self_bard_guidance',
-      label: '✔ [Você] Rolar com Orientação (+1d4) + Inspiração Bárdica (+1d6)',
-      title: 'Rolar com Orientação e Bardo',
+      label: (isPersuasion ? '🗣️ [Persuasão] Argumentar com bênção e melodia' : isIntimidation ? '⚔️ [Intimidação] Pressionar com bênção e ritmo' : ('🎲 [' + sklLabel + '] Agir com bênção e melodia')) + ' (+1d4 +1d6)',
+      title: 'Argumentar com Orientação e Bardo',
       subtitle: sklLabel + ' · Dificuldade CD ' + dc,
       desc: 'Você soma o bônus divinatório da Orientação (+1d4) e o ritmo da Inspiração Bárdica (+1d6) ao seu teste.',
       possibleResults: '✦ Bônus aditivos: +1d4 e +1d6 somados ao d20 contra CD ' + dc + '.' + attitudeNote,
@@ -72642,12 +72654,12 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
       _tactical_options: { use_guidance: true, use_bardic_inspiration: true }
     });
   }
-  if (hasBardic) {
+  if (hasBardic && !hasGuidance && !hasInsp) {
     choices.push({
       id: 'roll_self_bard',
-      label: '✔ [Você · 🎵 Inspiração Bárdica] Rolar com +1d6 de Dado de Bardo',
-      title: 'Rolar com Inspiração Bárdica',
-      subtitle: sklLabel + ' · Dificuldade CD ' + dc,
+      label: (isPersuasion ? '🎵 [Inspiração Bárdica] Argumentar no ritmo da melodia' : isIntimidation ? '🎵 [Inspiração Bárdica] Pressionar no ritmo do bardo' : ('🎵 [Inspiração Bárdica] Testar no ritmo da melodia')) + ' (+1d6)',
+      title: 'Argumentar com Inspiração Bárdica',
+      subtitle: sklLabel + ' · Bônus +1d6 · CD ' + dc,
       desc: 'Você canaliza a Inspiração Bárdica concedida por um bardo da comitiva para somar +1d6 ao seu teste de habilidade.',
       possibleResults: '✦ Bônus aditivo: +1d6 somado ao d20 contra CD ' + dc + '.' + attitudeNote,
       dc: dc,
@@ -72656,12 +72668,12 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
       _tactical_options: { use_bardic_inspiration: true, use_guidance: false }
     });
   }
-  if (hasGuidance) {
+  if (hasGuidance && !hasBardic && !hasInsp) {
     choices.push({
       id: 'roll_self_guidance',
-      label: '✔ [Você] Rolar Pessoalmente com Orientação (+1d4)',
-      title: 'Rolar com Orientação Divina',
-      subtitle: sklLabel + ' · Dificuldade CD ' + dc,
+      label: (isPersuasion ? '🕊️ [Orientação] Argumentar sob a bênção divina' : isIntimidation ? '🕊️ [Orientação] Pressionar sob a bênção divina' : ('🕊️ [Orientação] Testar sob a bênção divina')) + ' (+1d4)',
+      title: 'Argumentar com Orientação Divina',
+      subtitle: sklLabel + ' · Bônus +1d4 · CD ' + dc,
       desc: 'Você conjura o truque divinatório Orientação para adicionar +1d4 ao total de sua rolagem.',
       possibleResults: '✦ Bônus divinatório: +1d4 somado ao d20 contra CD ' + dc + '.' + attitudeNote,
       dc: dc,
@@ -72670,30 +72682,64 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
       _tactical_options: { use_inspiration: false, use_guidance: true }
     });
   }
+
+  // Rolagem Direta Normal (sem consumir bônus limitados ou caso queira teste padrão)
+  choices.push({
+    id: 'roll_self_normal',
+    label: isPersuasion ? '🗣️ [Persuasão] Argumentar pessoalmente com diplomacia (1d20)' : isIntimidation ? '⚔️ [Intimidação] Pressionar pessoalmente com firmeza (1d20)' : ('🎲 [' + sklLabel + '] Realizar rolagem padrão (1d20)'),
+    title: isPersuasion ? 'Negociar com Diplomacia Pessoal' : isIntimidation ? 'Pressionar com Firmeza Pessoal' : ('Teste de ' + sklLabel),
+    subtitle: sklLabel + ' · Dificuldade CD ' + dc,
+    desc: 'Você conduz a conversa pessoalmente, confiando na sua própria eloquência e presença contra a CD ' + dc + '.',
+    possibleResults: '✦ Rolagem padrão de 1d20 somando seu modificador de ' + sklLabel + ' contra CD ' + dc + '.<br>✦ Em caso de falha, complicações ou desvantagens na conversa podem ocorrer.' + attitudeNote,
+    dc: dc,
+    skill: skl,
+    requireConfirm: true,
+    _tactical_options: { use_inspiration: false, use_guidance: false }
+  });
+
+  // 2. Opções Táticas & Recursos (Brinde / Magias Arcanas)
   if (canBribe) {
-    choices.push({
-      id: 'roll_self_bribe',
-      label: '✔ [Você · 💰 Suborno (10 Valdoritas)] Rolar com Vantagem',
-      title: 'Oferecer Suborno (10 Valdoritas)',
-      subtitle: sklLabel + ' · Dificuldade CD ' + dc,
-      desc: 'Você desliza 10 Valdoritas discretamente para obter Vantagem no teste de interação social.',
-      possibleResults: '✦ Vantagem: Rola 2d20 escolhendo o maior valor.<br>◆ Custo de 10 Valdoritas debitado de suas posses para confirmar.' + attitudeNote,
-      cost: 10,
-      dc: dc,
-      skill: skl,
-      advantage: true,
-      requireConfirm: true,
-      _tactical_options: { use_bribe: true, use_guidance: hasGuidance, use_bardic_inspiration: hasBardic }
-    });
+    if (isRecruit) {
+      choices.push({
+        id: 'roll_self_bribe',
+        label: '🍺 [Sinal de Boa-fé: 10 💰] Pagar uma rodada para quebrar o gelo (Vantagem 2d20)',
+        title: 'Pagar uma Rodada e Oferecer Sinal (10 Valdoritas)',
+        subtitle: sklLabel + ' · Vantagem (2d20) · CD ' + dc,
+        desc: 'Você paga uma rodada na taverna da guilda e oferece 10 Valdoritas como sinal adiantado. O gesto amigável desarma a postura mercenária do aventureiro, concedendo Vantagem imediata no teste de negociação.',
+        possibleResults: '✦ Vantagem: Rola 2d20 escolhendo o maior valor.<br>◆ Custo de 10 Valdoritas debitado como brinde e sinal de boa-fé.' + attitudeNote,
+        cost: 10,
+        dc: dc,
+        skill: skl,
+        advantage: true,
+        requireConfirm: true,
+        _tactical_options: { use_bribe: true, use_guidance: hasGuidance, use_bardic_inspiration: hasBardic }
+      });
+    } else {
+      choices.push({
+        id: 'roll_self_bribe',
+        label: '💰 [Oferta Discreta: 10 💰] Oferecer moedas para facilitar o acordo (Vantagem 2d20)',
+        title: 'Oferecer um Agrado em Moedas (10 Valdoritas)',
+        subtitle: sklLabel + ' · Vantagem (2d20) · CD ' + dc,
+        desc: 'Você desliza 10 Valdoritas discretamente para abrir caminhos e obter Vantagem no teste de interação social.',
+        possibleResults: '✦ Vantagem: Rola 2d20 escolhendo o maior valor.<br>◆ Custo de 10 Valdoritas debitado de suas posses para confirmar.' + attitudeNote,
+        cost: 10,
+        dc: dc,
+        skill: skl,
+        advantage: true,
+        requireConfirm: true,
+        _tactical_options: { use_bribe: true, use_guidance: hasGuidance, use_bardic_inspiration: hasBardic }
+      });
+    }
   }
+
   if (hasFriends) {
     choices.push({
       id: 'roll_self_friends',
-      label: '✔ [Você · 🎭 Truque Amizade] Rolar com Vantagem (Alvo nota o encanto depois)',
-      title: 'Truque Arcano — Amizade',
-      subtitle: sklLabel + ' · Dificuldade CD ' + dc,
-      desc: 'Você tece o truque arcano Amizade para encantar a mente do alvo, obtendo Vantagem imediata no teste de Carisma.',
-      possibleResults: '✦ Vantagem: Rola 2d20 escolhendo o maior valor.<br><span style="color:#df7262;">⚠️ Consequência: O alvo perceberá que foi manipulado magicamente após o término do diálogo, gerando descontentamento e possível hostilidade.</span>' + attitudeNote,
+      label: '🎭 [Truque Amizade] Encantar o interlocutor com magia arcana (Vantagem 2d20 · ⚠️ Risco)',
+      title: 'Canalizar o Truque Arcano Amizade',
+      subtitle: sklLabel + ' · Vantagem (2d20) · CD ' + dc,
+      desc: 'Você conjura sutilmente o truque Amizade para dobrar o interesse e a simpatia do interlocutor, obtendo Vantagem imediata no teste de Carisma.',
+      possibleResults: '✦ Vantagem: Rola 2d20 escolhendo o maior valor.<br><span style="color:#df7262;">⚠️ Consequência: Quando a magia cessar (em cerca de 1 minuto), o alvo perceberá claramente que foi manipulado magicamente e reagirá com descontentamento ou hostilidade.</span>' + attitudeNote,
       dc: dc,
       skill: skl,
       advantage: true,
@@ -72701,12 +72747,13 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
       _tactical_options: { use_friends: true, use_guidance: hasGuidance }
     });
   }
+
   if (hasThaum) {
     choices.push({
       id: 'roll_self_thaum',
-      label: '✔ [Você · ⚡ Taumaturgia] Rolar com Vantagem em Intimidação',
-      title: 'Taumaturgia Sobrenatural',
-      subtitle: sklLabel + ' · Dificuldade CD ' + dc,
+      label: '⚡ [Taumaturgia] Intimidar com presença sobrenatural (Vantagem 2d20)',
+      title: 'Manifestar Taumaturgia Sobrenatural',
+      subtitle: sklLabel + ' · Vantagem (2d20) · CD ' + dc,
       desc: 'Você manifesta maravilhas sobrenaturais menores (olhos brilhantes, voz trovejante) para obter Vantagem em Intimidação.',
       possibleResults: '✦ Vantagem: Rola 2d20 escolhendo o maior resultado no teste de Intimidação.' + attitudeNote,
       dc: dc,
@@ -72716,37 +72763,24 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
       _tactical_options: { use_thaumaturgy: true, use_guidance: hasGuidance }
     });
   }
-  choices.push({
-    id: 'roll_self_normal',
-    label: '✔ [Você] Rolar Teste Normal de ' + sklLabel + ' (1d20)',
-    title: 'Rolar Teste Normal',
-    subtitle: sklLabel + ' · Dificuldade CD ' + dc,
-    desc: 'Você confia em suas próprias palavras e capacidade, realizando a rolagem padrão sem recursos adicionais.',
-    possibleResults: '✦ Rolagem padrão de 1d20 somando seu modificador de ' + sklLabel + ' contra CD ' + dc + '.<br>✦ Em caso de falha, complicações ou desvantagens na conversa podem ocorrer.' + attitudeNote,
-    dc: dc,
-    skill: skl,
-    requireConfirm: true,
-    _tactical_options: { use_inspiration: false, use_guidance: false }
-  });
 
-  // 2. Opções de Delegar para Companheiros Especialistas (Pilar B)
+  // 3. Opções de Delegar para Companheiros Especialistas (Pilar B)
   for (var i = 0; i < assistOptions.length; i++) {
     var cOpt = assistOptions[i];
+    var cRawClass = (cOpt.raw_class || cOpt.class || '').trim();
+    var cClassFmt = cRawClass ? (cRawClass.charAt(0).toUpperCase() + cRawClass.slice(1)) : '';
+    var cName = (cOpt.name && cOpt.name !== 'Companheiro') ? cOpt.name : (cClassFmt ? ('Companheiro ' + cClassFmt) : 'Companheiro da comitiva');
+    var compTitle = cClassFmt ? (cName + ' (' + cClassFmt + ')') : cName;
+    var cBonusStr = (cOpt.bonus >= 0 ? '+' : '') + cOpt.bonus;
     var cPrefix = cOpt.is_better ? '⭐ [Especialista: ' : '👥 [Companheiro: ';
-    var cLabel = cPrefix + cOpt.name + ' (' + (cOpt.raw_class || cOpt.class) + ')] Delegar Teste (Bônus +' + cOpt.bonus + ')';
-    if (hasGuidance) {
-      cLabel += ' + Orientação (+1d4)';
-    }
-    if (hasBardic) {
-      cLabel += ' + Bardo (+1d6)';
-    }
+    var cBuffs = (hasGuidance ? ' + Orientação' : '') + (hasBardic ? ' + Bardo' : '');
     choices.push({
       id: 'roll_comp_' + cOpt.companion_id,
-      label: '✔ ' + cLabel,
-      title: 'Delegar Teste para ' + cOpt.name,
-      subtitle: (cOpt.raw_class || cOpt.class) + ' · Bônus +' + cOpt.bonus + ' · CD ' + dc,
-      desc: 'Você pede a seu companheiro ' + cOpt.name + ' (' + (cOpt.raw_class || cOpt.class) + ') para assumir a frente do diálogo e realizar o teste com seu bônus de perícia (+' + cOpt.bonus + ').',
-      possibleResults: '✦ Teste realizado por ' + cOpt.name + ' com modificador +' + cOpt.bonus + ' contra CD ' + dc + '.' + (hasGuidance ? '<br>✦ Bônus de +1d4 da Orientação somado ao total.' : '') + (hasBardic ? '<br>✦ Bônus de +1d6 da Inspiração Bárdica somado ao total.' : '') + attitudeNote,
+      label: cPrefix + compTitle + '] Pedir para ' + cName + ' negociar (' + cBonusStr + ')' + cBuffs,
+      title: 'Delegar Negociação para ' + cName,
+      subtitle: (cClassFmt || 'Companheiro') + ' · Bônus ' + cBonusStr + ' · CD ' + dc,
+      desc: 'Você pede a ' + compTitle + ' para assumir a frente do diálogo e realizar o teste com seu bônus de perícia (' + cBonusStr + ').',
+      possibleResults: '✦ Teste realizado por ' + cName + ' com modificador ' + cBonusStr + ' contra CD ' + dc + '.' + (hasGuidance ? '<br>✦ Bônus de +1d4 da Orientação somado ao total.' : '') + (hasBardic ? '<br>✦ Bônus de +1d6 da Inspiração Bárdica somado ao total.' : '') + attitudeNote,
       dc: dc,
       skill: skl,
       requireConfirm: true,
@@ -72759,24 +72793,20 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
     });
   }
 
-  // 3. Opções de Prestar Auxílio / Ação de Ajuda de Companheiro (D&D 5e PHB p. 175 & BG3)
+  // 4. Opções de Prestar Auxílio / Ação de Ajuda de Companheiro (D&D 5e PHB p. 175 & BG3)
   for (var j = 0; j < assistOptions.length; j++) {
     var hOpt = assistOptions[j];
-    var hName = hOpt.name;
-    var hClass = hOpt.raw_class || hOpt.class;
-    var hLabel = '🤝 [Auxílio: ' + hName + ' (' + hClass + ')] Trabalhar em Conjunto (2d20 Vantagem PHB p. 175)';
-    if (hasGuidance) {
-      hLabel += ' + Orientação (+1d4)';
-    }
-    if (hasBardic) {
-      hLabel += ' + Bardo (+1d6)';
-    }
+    var hRawClass = (hOpt.raw_class || hOpt.class || '').trim();
+    var hClassFmt = hRawClass ? (hRawClass.charAt(0).toUpperCase() + hRawClass.slice(1)) : '';
+    var hName = (hOpt.name && hOpt.name !== 'Companheiro') ? hOpt.name : (hClassFmt ? ('Companheiro ' + hClassFmt) : 'Companheiro da comitiva');
+    var hCompTitle = hClassFmt ? (hName + ' (' + hClassFmt + ')') : hName;
+    var hBuffs = (hasGuidance ? ' + Orientação' : '') + (hasBardic ? ' + Bardo' : '');
     choices.push({
       id: 'roll_help_' + hOpt.companion_id,
-      label: '✔ ' + hLabel,
+      label: '🤝 [Auxílio Mútuo: ' + hCompTitle + '] Argumentar em conjunto (Vantagem 2d20)' + hBuffs,
       title: 'Trabalhar em Conjunto com ' + hName,
       subtitle: sklLabel + ' · Vantagem (2d20) · CD ' + dc,
-      desc: 'Você e seu companheiro ' + hName + ' (' + hClass + ') unem argumentos e presença. O companheiro intervém ativamente no diálogo, concedendo Vantagem (rola 2d20 e escolhe o maior) e fortalecendo o vínculo da comitiva (+1 Aprovação).',
+      desc: 'Você e ' + hCompTitle + ' unem argumentos e presença. O companheiro intervém ativamente no diálogo, concedendo Vantagem (rola 2d20 e escolhe o maior) e fortalecendo o vínculo da comitiva (+1 Aprovação).',
       possibleResults: '✦ Vantagem: Rola 2d20 escolhendo o maior valor.<br>✦ Trabalho de Equipe: +1 de aprovação e afinidade com ' + hName + ' pelo auxílio cooperativo.<br>✦ Superar a CD ' + dc + ' garante o sucesso na interação.' + (hasGuidance ? '<br>✦ Bônus de +1d4 da Orientação somado ao total.' : '') + (hasBardic ? '<br>✦ Bônus de +1d6 da Inspiração Bárdica somado ao total.' : '') + attitudeNote,
       dc: dc,
       skill: skl,
