@@ -66351,6 +66351,20 @@ function _cgpClsKey(cls){
     bruxa:     'bruxo',        // 'Bruxa' (feminino) → 'bruxo'
     barbara:   'barbaro',      // 'Bárbara' (feminino após strip) → 'barbaro'
     ladra:     'ladino',       // 'Ladra' (feminino) → 'ladino'
+    rogue:     'ladino',
+    thief:     'ladino',
+    fighter:   'guerreiro',
+    warrior:   'guerreiro',
+    wizard:    'mago',
+    mage:      'mago',
+    ranger:    'patrulheiro',
+    paladin:   'paladino',
+    bard:      'bardo',
+    druid:     'druida',
+    monk:      'monge',
+    sorcerer:  'feiticeiro',
+    warlock:   'bruxo',
+    barbarian: 'barbaro',
     barbaro:   'barbaro',
     'meio-elfo': 'aliado'
   };
@@ -66753,6 +66767,16 @@ function _allyRelSummary(m) {
   return tier + ' (' + sign + apr + ') · ' + label;
 }
 window._allyRelSummary = _allyRelSummary;
+
+function _allyTplKey(cls) {
+  var k = _cgpClsKey(cls);
+  if (k === 'sacerdotisa' || k === 'sacerdote') return 'clerigo';
+  if (typeof ALLY_DIALOGUE_TEMPLATES === 'object' && ALLY_DIALOGUE_TEMPLATES && ALLY_DIALOGUE_TEMPLATES[k]) {
+    return k;
+  }
+  return 'guerreiro';
+}
+window._allyTplKey = _allyTplKey;
 
 // === Tópicos Temáticos de Conversa com Companheiros D&D 5e / BG3 ===
 var ALLY_TOPIC_CONFIG = {
@@ -67270,6 +67294,27 @@ function _showAllyTopicDialogue(idx, topicKey) {
             })
           }).catch(function() {});
         }
+
+        if (ch._replyScript && window.vEncounter && typeof window.vEncounter.render === 'function') {
+          window.vEncounter.render({
+            npc: dlg.npc,
+            script: ch._replyScript,
+            choices: [{ id: 'back_to_topics', label: '↩ Escolher outro assunto', cb: function() { _showAllyTopicsMenu(idx); } }]
+          }, {
+            closeable: true,
+            onChoice: function(rc) {
+              if (typeof rc.cb === 'function') { rc.cb(); return; }
+              try { window.vEncounter.close(); } catch(_) {}
+            }
+          });
+          return;
+        }
+
+        if (typeof window._dispatchSvcChoice === 'function') {
+          var handled = window._dispatchSvcChoice(ch, dlg, {});
+          if (handled) return;
+        }
+        try { window.vEncounter.close(); } catch(_) {}
       }
     });
   }
@@ -67496,6 +67541,24 @@ function _showAllyGiftDialogue(idx) {
       onChoice: function(ch) {
         if (typeof ch.cb === 'function') {
           try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY-GIFT] cb failed', e); }
+          if (ch._replyScript && window.vEncounter && typeof window.vEncounter.render === 'function') {
+            window.vEncounter.render({
+              npc: dlg.npc,
+              script: ch._replyScript,
+              choices: [{ id: 'back_to_ally_main', label: '↩ Continuar', cb: function() { _showAllyDialogue(idx); } }]
+            }, {
+              closeable: true,
+              onChoice: function(rc) {
+                if (typeof rc.cb === 'function') { rc.cb(); return; }
+                try { window.vEncounter.close(); } catch(_) {}
+              }
+            });
+            return;
+          }
+          return;
+        }
+        if (ch.cb === 'close') {
+          try { window.vEncounter.close(); } catch(_) {}
           return;
         }
       }
@@ -67620,6 +67683,29 @@ function _showAllyDialogue(idx){
           try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY] cb failed', e); }
           return;
         }
+        if (ch._replyScript && window.vEncounter && typeof window.vEncounter.render === 'function') {
+          window.vEncounter.render({
+            npc: dlg.npc,
+            script: ch._replyScript,
+            choices: [{ id: 'back_to_ally_main', label: '↩ Continuar', cb: function() { _showAllyDialogue(idx); } }]
+          }, {
+            closeable: true,
+            onChoice: function(rc) {
+              if (typeof rc.cb === 'function') { rc.cb(); return; }
+              try { window.vEncounter.close(); } catch(_) {}
+            }
+          });
+          return;
+        }
+        if (typeof window._dispatchSvcChoice === 'function') {
+          var handled = window._dispatchSvcChoice(ch, dlg, {});
+          if (handled) return;
+        }
+        if (ch.cb === 'close' || ch.id === 'leave') {
+          try { window.vEncounter.close(); } catch(_) {}
+          return;
+        }
+        try { window.vEncounter.close(); } catch(_) {}
       }
     });
   } else if (typeof vToast === 'function') {
