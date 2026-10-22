@@ -17920,6 +17920,61 @@ function _showFichaStatHelp(key, memberIdx){
 // D&D 5E INFORMAÇÕES TÉCNICAS: SALVAGUARDAS, RAÇAS, SUB-RAÇAS, CLASSES E SUB-CLASSES
 // ============================================================================
 
+function _showFichaRelationshipHelp(memberIdx){
+  if (typeof _showInfoPopup !== 'function') return;
+  var curIdx = (memberIdx !== undefined) ? memberIdx : window._fichaMemberIdx;
+  var m = (typeof _getFichaMember === 'function') ? _getFichaMember(curIdx) : null;
+  var entityName = (m && m.name) ? m.name : 'o companheiro';
+  var curRel = (m && typeof _allyRelSummary === 'function') ? _allyRelSummary(m) : 'Neutro (0) · Camaradagem (+1 CA)';
+  var curApr = (m && m.approval != null) ? m.approval : ((m && m.apr != null) ? m.apr : 0);
+
+  _showInfoPopup({
+    icon: '<svg viewBox="0 0 120 120" style="width:34px;height:34px;color:var(--v-gold,#c4953a);"><use href="#ic-grupo"/></svg>',
+    npc: 'Compêndio de Regras',
+    title: 'Afinidade & Convivência da Comitiva',
+    desc: '<div style="text-align:left;color:var(--v-text,#d4c8b0);font-size:calc(12px * var(--v-font-scale,1));line-height:1.55;">'
+      + '<p style="margin:0 0 10px 0;">Nas terras de Valdoria, cada companheiro de viagem possui personalidade, valores e motivações próprias. Suas escolhas éticas, diálogos e atitudes moldam a parceria ao longo da jornada.</p>'
+      + '<div style="margin-bottom:10px;padding:8px 10px;background:rgba(196,149,58,0.12);border:1px solid rgba(196,149,58,0.3);border-radius:6px;">'
+      + '<div style="color:#ffd700;font-weight:700;font-size:calc(11.5px * var(--v-font-scale,1));margin-bottom:3px;">📊 Status Atual com ' + entityName + '</div>'
+      + '<div style="font-size:calc(11px * var(--v-font-scale,1));color:var(--v-text,#d4c8b0);">'
+      + 'Vínculo: <b>' + curRel + '</b> · Aprovação: <b>' + (curApr >= 0 ? '+' : '') + curApr + ' / 100</b>'
+      + '</div>'
+      + '</div>'
+      + '<div style="margin-bottom:10px;padding:8px 10px;background:rgba(20,16,12,0.6);border:1px solid rgba(196,149,58,0.22);border-radius:6px;">'
+      + '<div style="color:var(--v-gold,#c4953a);font-weight:700;font-size:calc(11.5px * var(--v-font-scale,1));margin-bottom:3px;">⚖️ Níveis de Aprovação (-100 a +100)</div>'
+      + '<div style="display:flex;flex-direction:column;gap:3px;font-size:calc(10.5px * var(--v-font-scale,1));">'
+      + '<div>• <b style="color:#e05353;">Hostil (-100 a -50):</b> Desconfiança aberta; recusa diálogos íntimos.</div>'
+      + '<div>• <b style="color:#e0a845;">Frio (-49 a -25):</b> Distância prudente; relação estritamente profissional.</div>'
+      + '<div>• <b style="color:#a89a82;">Neutro (-24 a +24):</b> Parceria prática de armas e convivência cotidiana.</div>'
+      + '<div>• <b style="color:#7bc67b;">Amigável (+25 a +49):</b> Companheirismo leal, trocas abertas e apoio mútuo.</div>'
+      + '<div>• <b style="color:#ffd700;">Leal (+50 a +74):</b> Confiança incondicional, proteção e missões pessoais.</div>'
+      + '<div>• <b style="color:#ff69b4;">Devoto (+75 a +100):</b> Ligação inquebrável com bênçãos permanentes.</div>'
+      + '</div>'
+      + '</div>'
+      + '<div style="margin-bottom:10px;padding:8px 10px;background:rgba(20,16,12,0.6);border:1px solid rgba(196,149,58,0.22);border-radius:6px;">'
+      + '<div style="color:var(--v-gold,#c4953a);font-weight:700;font-size:calc(11.5px * var(--v-font-scale,1));margin-bottom:3px;">⚔️ Laços Dinâmicos & Bônus de Combate</div>'
+      + '<div style="display:flex;flex-direction:column;gap:3px;font-size:calc(10.5px * var(--v-font-scale,1));">'
+      + '<div>• <b>Camaradagem:</b> Laço fraterno de armas. Concede <b>+1 na Classe de Armadura (CA)</b> ao grupo.</div>'
+      + '<div>• <b>Rivalidade Sadia:</b> Competição de maestria. Concede <b>+2 de Dano</b> no primeiro ataque de cada turno.</div>'
+      + '<div>• <b>Mentoria:</b> Troca tática de sabedoria. Concede <b>+1 em Salvaguardas Mentais</b>.</div>'
+      + '<div>• <b>Romance & Devoção:</b> Conexão íntima que traz inspiração e proteção contra medo.</div>'
+      + '</div>'
+      + '</div>'
+      + '<div style="padding:6px 10px;background:rgba(196,149,58,0.08);border:1px dashed rgba(196,149,58,0.3);border-radius:4px;font-size:calc(10px * var(--v-font-scale,1));color:var(--v-text-dim,#a09484);">'
+      + '💡 <b>Como interagir:</b> Toque em <i>Conversar</i> no card do aliado para interagir, discutir temas nas pausas e ao redor da fogueira, ou oferecer presentes da sua mochila.'
+      + '</div>'
+      + '</div>',
+    singleButton: true,
+    cancelLabel: '← Voltar à Ficha',
+    onCancel: function(){
+      if (typeof _showStatusPopup === 'function') {
+        _showStatusPopup(curIdx);
+      }
+    }
+  });
+}
+window._showFichaRelationshipHelp = _showFichaRelationshipHelp;
+
 function _raceCanonical(r){
   var k = (r || '').toLowerCase().trim();
   if (k === 'anao' || k === 'anão' || k === 'dwarf') return 'dwarf';
@@ -19492,8 +19547,13 @@ function _showStatusPopup(memberIdx){
       + '</button>'
       + '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaSubraceHelp(\'' + (m.subrace || '') + '\',\'' + rKey + '\',' + _memArg + ')" title="Sub-linhagem: ' + (subraceLabel || 'Ver Tradições') + ' — toque p/ vantagens exclusivas">'
       + '<span>⚙️</span> <span>' + (subraceLabel || 'Sub-raça') + '</span>'
-      + '</button>'
-      + '</div>';
+      + '</button>';
+    if (!m.isPlayer && !m.isEnemy && !m.isRecruit) {
+      html += '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaRelationshipHelp(' + _memArg + ')" title="Vínculo: ' + _hubEsc((typeof _allyRelSummary === "function") ? _allyRelSummary(m) : "Camaradagem") + ' — toque para entender a Convivência e Lealdade">'
+        + '<span>🤝</span> <b>' + ((typeof _allyRelSummary === "function") ? _allyRelSummary(m) : "Camaradagem") + '</b> <span style="font-size:calc(8px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); opacity:0.85;">ⓘ</span>'
+        + '</button>';
+    }
+    html += '</div>';
   }
   html += '</div>';
 
@@ -19729,6 +19789,36 @@ function _showStatusPopup(memberIdx){
       + '</div>';
   });
   html += '</div></div>';
+
+  // === VÍNCULO & CONVIVÊNCIA DA COMITIVA (Apenas para aliados do grupo) ===
+  if (!m.isPlayer && !m.isEnemy && !m.isRecruit) {
+    var apr = (m.approval != null) ? m.approval : ((m.apr != null) ? m.apr : 0);
+    var aprClamped = Math.max(-100, Math.min(100, apr));
+    var aprPct = Math.round(((aprClamped + 100) / 200) * 100);
+    var aprColor = aprClamped >= 50 ? '#ffd700' : (aprClamped >= 25 ? '#7bc67b' : (aprClamped >= -24 ? '#a89a82' : (aprClamped >= -49 ? '#e0a845' : '#e05353')));
+    var relSum = (typeof _allyRelSummary === 'function') ? _allyRelSummary(m) : 'Neutro (0) · Camaradagem';
+    html += '<div class="ficha-section" style="position:relative; z-index:1; padding: 0 var(--v-space-md-lg, 10px) var(--v-space-sm, 4px); width:100%; max-width:100%; box-sizing:border-box;">';
+    html += '<div class="ficha-section-title fEp-clickable" onclick="_showFichaRelationshipHelp(' + _memArg + ')" title="Toque para entender o sistema de Convivência e Lealdade" style="font-size:calc(10px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a);'
+      + 'text-transform:uppercase; letter-spacing:1.3px; margin-bottom: var(--v-space-sm, 4px); display:flex; align-items:center; gap:5px; cursor:pointer;">'
+      + '<span class="fEp-rune" style="font-size:calc(8px * var(--v-font-scale, 1));">◆</span> Vínculo & Convivência'
+      + '<span style="font-size:calc(8px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); opacity:0.85; border:1px solid rgba(196,149,58,0.35); border-radius:3px; padding:1px 5px; margin-left:3px; letter-spacing:0; text-transform:none;">ⓘ Entenda a Afinidade</span>'
+      + '<span style="flex:1; height:1px; background:linear-gradient(90deg,rgba(196,149,58,0.3),transparent); margin-left: var(--v-space-sm, 4px);"></span>'
+      + '</div>';
+    html += '<div class="ficha-combat-card fEp-clickable" onclick="_showFichaRelationshipHelp(' + _memArg + ')" title="Toque para detalhes do Vínculo e Regras de Convivência" style="padding:7px 9px; display:flex; flex-direction:column; gap:5px;">'
+      + '<div style="display:flex; justify-content:space-between; align-items:center; width:100%;">'
+      + '<span style="font-size:calc(11px * var(--v-font-scale, 1)); font-weight:700; color:#ffd700; display:flex; align-items:center; gap:5px;"><span>🤝</span> ' + relSum + '</span>'
+      + '<span style="font-size:calc(10px * var(--v-font-scale, 1)); color:' + aprColor + '; font-weight:700;">' + (apr >= 0 ? '+' : '') + apr + ' / 100</span>'
+      + '</div>'
+      + '<div style="position:relative; width:100%; height:6px; background:rgba(0,0,0,0.5); border-radius:3px; overflow:hidden; border:1px solid rgba(196,149,58,0.25);">'
+      + '<div style="height:100%; width:' + aprPct + '%; background:' + aprColor + '; border-radius:3px; transition:width 0.4s ease; box-shadow:0 0 5px ' + aprColor + ';"></div>'
+      + '</div>'
+      + '<div style="display:flex; justify-content:space-between; font-size:calc(8.5px * var(--v-font-scale, 1)); color:var(--v-text-dim,#a09484);">'
+      + '<span>Hostil (-100)</span><span>Neutro (0)</span><span>Devoto (+100)</span>'
+      + '</div>'
+      + '</div>';
+    html += '</div>';
+  }
+
 
   // === EFEITOS ATIVOS — bônus temporários (boato/sonho) até o descanso longo ===
   // PADRAO_LOCAIS (indicador de bônus ativo, user #71f): o jogador vê na ficha que
@@ -67158,7 +67248,7 @@ function _showAllyTopicsMenu(idx) {
     npc: {
       id: 'ally_topics_' + idx,
       name: displayName,
-      desc: _classLabelPT(m.cls) + ' · Conversas & Confidências · ' + _allyRelSummary(m),
+      desc: _classLabelPT(m.cls) + ' · Interagir · ' + _allyRelSummary(m),
       portrait: allyPort,
       portraitHTML: portraitHTML,
       gender: allyGender
@@ -67645,18 +67735,13 @@ function _showAllyDialogue(idx){
   var hubChoices = [
     {
       id: 'nav_topics_menu',
-      label: '💬 Conversas & Confidências (' + topicsCount + ' Assuntos) ▸',
+      label: '💬 Interagir ▸',
       cb: function() { _showAllyTopicsMenu(idx); }
     },
     {
       id: 'nav_gift',
       label: '🎁 Oferecer um presente da mochila ▸',
       cb: function() { _showAllyGiftDialogue(idx); }
-    },
-    {
-      id: 'nav_tutorial',
-      label: '📜 Dinâmica e Lealdade do Grupo ▸',
-      cb: function() { _showCompanionRelationshipTutorial(displayName, function() { _showAllyDialogue(idx); }); }
     }
   ];
 
