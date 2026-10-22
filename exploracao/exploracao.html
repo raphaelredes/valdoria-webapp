@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-22T05:07:05Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-22T05:22:37Z - do not edit directly, edit source -->
 
 
 
@@ -80140,7 +80140,7 @@ function resolveChoice(idx) {
 
       }
 
-      if (oc.check && ch.skill) { _remoteRenderDiceAndResolve(ch, oc); }
+      if (oc.check && (ch.skill || oc.companion_intervention || oc.check.is_companion)) { _remoteRenderDiceAndResolve(ch, oc); }
 
       else { _remoteShowOutcome(ch, oc); }
 
@@ -80222,7 +80222,7 @@ function resolveChoice(idx) {
 
       }
 
-      if (oc.check && ch.skill) {
+      if (oc.check && (ch.skill || oc.companion_intervention || (oc.check && oc.check.is_companion))) {
 
         _remoteRenderDiceAndResolve(ch, oc);
 
@@ -81880,7 +81880,7 @@ function _explEventVEncResolve(ev, ch) {
 
     try { window.vEncounter.close(); } catch (_) {}
 
-    if (oc.check && realCh.skill) {
+    if (oc.check && (realCh.skill || oc.companion_intervention || (oc.check && oc.check.is_companion))) {
 
       // Reusa o animador canonico do d20 do servidor; onDone renderiza o outcome.
 
@@ -82012,7 +82012,7 @@ function _explDungeonVEncResolve(ev, ch) {
 
     try { window.vEncounter.close(); } catch (_) {}
 
-    if (oc.check && realCh.skill) {
+    if (oc.check && (realCh.skill || oc.companion_intervention || (oc.check && oc.check.is_companion))) {
 
       _remoteRenderDiceAndResolve(realCh, oc, function () { _explShowOutcomeVEnc(ev, oc); });
 
