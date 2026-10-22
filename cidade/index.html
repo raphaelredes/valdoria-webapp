@@ -45688,9 +45688,13 @@ function _squareShowExploreEvent(p){
       var rolledLine = '';
       var diceData = null;
       if (res.has_check){
+        var advNote = res.advantage ? ' <span style="color:#7bc67b;">(Vantagem 2d20 por auxílio de ' + (res.helper_name || 'aliado') + ')</span>' : '';
         rolledLine = '' + (ch.stat || res.stat) + ': ' + res.rolled + (res.modifier >= 0 ? '+' : '') + res.modifier +
-          ' = <b>' + res.total + '</b> vs CD ' + res.dc + ' — ' + (res.success ? 'Sucesso!' : 'Falha.') + '<br><br>';
+          ' = <b>' + res.total + '</b> vs CD ' + res.dc + advNote + ' — ' + (res.success ? 'Sucesso!' : 'Falha.') + '<br><br>';
         diceData = { formula: '1d20' + (res.modifier >= 0 ? '+' : '') + res.modifier + ' vs CD ' + res.dc, sides: 20, value: res.rolled, total: res.total };
+        if (res.approval_note && typeof vToast === 'function') {
+          vToast(res.approval_note, 'ok');
+        }
       }
       var deltas = [];
       var rewards = [];
