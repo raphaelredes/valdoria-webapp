@@ -70646,7 +70646,7 @@ function _arrivalChoice(choiceId){
                     ? '<b style="color:var(--v-success,#6fae6f)">Sucesso</b>'
                     : '<b style="color:var(--v-danger,#c0584a)">Falha</b>')
                 + ' <span style="opacity:.65">(' + d.total + ' vs CD ' + d.dc + ')</span>'
-                + (d.degree_label ? (' &bull; <b style="color:' + (d.degree === 'critical_success' ? '#ffd700' : d.degree === 'exceptional_success' ? '#7bc67b' : d.degree === 'marginal_failure' ? '#e0a845' : (d.degree === 'catastrophic_failure' || d.degree === 'critical_failure') ? '#e05353' : d.degree === 'failure' ? '#d97d7d' : 'var(--v-gold,#c4953a)') + '">' + d.degree_label + '</b>') : ''),
+                + (d.degree_label ? (' &bull; <b style="color:' + (d.degree === 'critical_success' ? '#ffd700' : d.degree === 'exceptional_success' ? '#7bc67b' : d.degree === 'marginal_failure' ? '#e0a845' : (d.degree === 'catastrophic_failure' || d.degree === 'critical_failure') ? '#e05353' : d.degree === 'failure' ? '#d97d7d' : 'var(--v-gold,#c4953a)') + '">' + d.degree_label + '</b>') : '')),
             onContinue: function(){ _arrivalRenderNode(node); }
           });
           return;
@@ -72914,7 +72914,7 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
               ? '<b style="color:var(--v-success,#6fae6f)">Sucesso</b>'
               : '<b style="color:var(--v-danger,#c0584a)">Falha</b>')
           + ' <span style="opacity:.65">(' + d.total + ' vs CD ' + d.dc + ')</span>'
-          + (d.degree_label ? (' &bull; <b style="color:' + (d.degree === 'critical_success' ? '#ffd700' : d.degree === 'exceptional_success' ? '#7bc67b' : d.degree === 'marginal_failure' ? '#e0a845' : (d.degree === 'catastrophic_failure' || d.degree === 'critical_failure') ? '#e05353' : d.degree === 'failure' ? '#d97d7d' : 'var(--v-gold,#c4953a)') + '">' + d.degree_label + '</b>') : ''),
+          + (d.degree_label ? (' &bull; <b style="color:' + (d.degree === 'critical_success' ? '#ffd700' : d.degree === 'exceptional_success' ? '#7bc67b' : d.degree === 'marginal_failure' ? '#e0a845' : (d.degree === 'catastrophic_failure' || d.degree === 'critical_failure') ? '#e05353' : d.degree === 'failure' ? '#d97d7d' : 'var(--v-gold,#c4953a)') + '">' + d.degree_label + '</b>') : '')),
       onContinue: function(){
         // D4: SEMPRE re-fetch da raiz (custo novo + barganha consumida). NÃO renderiza node embutido.
         var nid = (ctx && ctx.npcId) || (data.npc && data.npc.id);
