@@ -355,54 +355,67 @@
               _closeEncounterCanon();
             }
           } else {
-            // Regra Soberana #16 e #24: encerramento honesto direto no vEncounter com opções inteligentes (BG3 flow)
-            if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-              var outcomeScript = [];
-              if (rNarration) outcomeScript.push({ type: 'narration', text: rNarration });
-              if (rText) outcomeScript.push({ type: 'speech', speaker: _npcName, text: rText });
-              if (!outcomeScript.length) {
-                outcomeScript.push({ type: 'narration', text: success ? 'Sucesso no teste.' : 'Falha no teste.' });
+            var aSrc = opts.ch && opts.ch.ally_source;
+            var mIdx = (aSrc && aSrc.memberIdx != null) ? aSrc.memberIdx : null;
+            if (mIdx == null && Array.isArray(window.GROUP_MEMBERS)) {
+              var aNameTarget = (aSrc && aSrc.name) || (_npcObj && _npcObj.name) || '';
+              var aClsTarget = (aSrc && aSrc.cls ? aSrc.cls : '').toLowerCase();
+              for (var mi = 0; mi < window.GROUP_MEMBERS.length; mi++) {
+                var gm = window.GROUP_MEMBERS[mi];
+                if (!gm) continue;
+                var gmName = (gm.name || '').split(/\s+/)[0];
+                var gmCls = (gm.cls || '').toLowerCase();
+                if ((aNameTarget && gmName === aNameTarget) || (aClsTarget && gmCls === aClsTarget)) {
+                  mIdx = mi;
+                  break;
+                }
               }
-              var outcomeChoices = [];
-              var aSrc = opts.ch && opts.ch.ally_source;
-              var mIdx = (aSrc && aSrc.memberIdx != null) ? aSrc.memberIdx : null;
-              if (mIdx == null && Array.isArray(window.GROUP_MEMBERS)) {
-                var aNameTarget = (aSrc && aSrc.name) || (_npcObj && _npcObj.name) || '';
-                var aClsTarget = (aSrc && aSrc.cls ? aSrc.cls : '').toLowerCase();
-                for (var mi = 0; mi < window.GROUP_MEMBERS.length; mi++) {
-                  var gm = window.GROUP_MEMBERS[mi];
-                  if (!gm) continue;
-                  var gmName = (gm.name || '').split(/\s+/)[0];
-                  var gmCls = (gm.cls || '').toLowerCase();
-                  if ((aNameTarget && gmName === aNameTarget) || (aClsTarget && gmCls === aClsTarget)) {
-                    mIdx = mi;
-                    break;
+            }
+            var outcomeScript = [];
+            if (rNarration) outcomeScript.push({ type: 'narration', text: rNarration });
+            if (rText) outcomeScript.push({ type: 'speech', speaker: _npcName, text: rText });
+            if (!outcomeScript.length) {
+              outcomeScript.push({ type: 'narration', text: success ? 'Sucesso no teste.' : 'Falha no teste.' });
+            }
+            var outcomeChoices = [];
+            if (mIdx != null && typeof window._showAllyDialogue === 'function') {
+              if (aSrc && aSrc.topic && typeof window._showAllyTopicsMenu === 'function') {
+                outcomeChoices.push({
+                  id: 'back_to_topics',
+                  label: '↩ Escolher outro assunto',
+                  cb: function() { window._showAllyTopicsMenu(mIdx); }
+                });
+              }
+              outcomeChoices.push({
+                id: 'back_to_ally_main',
+                label: '↩ "Gostaria de falar de outro assunto."',
+                cb: function() { window._showAllyDialogue(mIdx); }
+              });
+              outcomeChoices.push({
+                id: 'close',
+                label: '↩ "Até mais tarde."',
+                cb: 'close'
+              });
+            } else {
+              var _rootDlg = (opts.dialogues && opts.dialogues.greeting) || opts.dialogue || null;
+              if (_rootDlg && _rootDlg.choices && _rootDlg.choices.length) {
+                outcomeChoices.push({
+                  id: 'back_to_npc_root',
+                  label: '↩ "Gostaria de tratar de outro assunto."',
+                  cb: function() {
+                    if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+                      window.vEncounter.render(_rootDlg, { dialogues: opts.dialogues, player: opts.player });
+                    } else if (typeof window._renderEncounterPopup === 'function') {
+                      window._renderEncounterPopup(_rootDlg);
+                    }
                   }
-                }
-              }
-
-              if (mIdx != null && typeof window._showAllyDialogue === 'function') {
-                if (aSrc && aSrc.topic && typeof window._showAllyTopicsMenu === 'function') {
-                  outcomeChoices.push({
-                    id: 'back_to_topics',
-                    label: '↩ Escolher outro assunto',
-                    cb: function() { window._showAllyTopicsMenu(mIdx); }
-                  });
-                }
-                outcomeChoices.push({
-                  id: 'back_to_ally_main',
-                  label: '↩ "Gostaria de falar de outro assunto."',
-                  cb: function() { window._showAllyDialogue(mIdx); }
                 });
-                outcomeChoices.push({
-                  id: 'close',
-                  label: '↩ "Até mais tarde."',
-                  cb: 'close'
-                });
-              } else {
-                outcomeChoices.push({ id: 'close', label: '↩ Continuar', cb: 'close' });
               }
+              outcomeChoices.push({ id: 'close', label: '↩ Continuar', cb: 'close' });
+            }
 
+            // NUNCA fechar MUDO — Regra Soberana #16 e #24: encerramento honesto direto no vEncounter com opções inteligentes (BG3 flow)
+            if (window.vEncounter && typeof window.vEncounter.render === 'function') {
               window.vEncounter.render({
                 npc: _npcObj || { name: _npcName },
                 script: outcomeScript,
@@ -507,9 +520,14 @@
   /* task #52 (2026-05-20) — UNIFY: prefer vEncounter.render (canonical, shared
      pra cidade + exploracao + futuro) sobre _renderEncounterPopup (legacy,
      cidade-only). Fallback ao legacy mantido pra compat com mockups antigos. */
-  function _renderViaCanonical(dialogue) {
+  function _renderViaCanonical(dialogue, extraOpts) {
     if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-      window.vEncounter.render(dialogue);
+      window.vEncounter.render(dialogue, extraOpts || {
+        onChoice: function(rc) {
+          if (rc && typeof rc.cb === 'function') { rc.cb(); return; }
+          try { window.vEncounter.close(); } catch(_) {}
+        }
+      });
       return true;
     }
     if (typeof window._renderEncounterPopup === 'function') {
@@ -561,26 +579,43 @@
     }
   }
 
-  window._showOpinionReaction = function(npc, optionLabel, renownDelta, ch) {
+  window._showOpinionReaction = function(npc, optionLabel, renownDelta, ch, dialogue, dialogues) {
     var faction = (window._SVC_CONFIG && window._SVC_CONFIG.faction) || 'unknown';
     var reactions = (window._SVC_CONFIG && window._SVC_CONFIG.reactions) || {};
     /* sessão #88: defaults usavam o literal "NPC" como sujeito da narração —
        placeholder de backend exposto. Interpola o nome real do NPC. */
     var _who = (npc && npc.name) || 'O atendente';
     var resp;
-    if (renownDelta < -2) resp = reactions.very_negative || (_who + ' fecha o livro com som seco. <i>(voz cortante)</i> "Vossa Senhoria escolheu como tratar esta casa. Eu não esquecerei."');
+    if (renownDelta < -2) resp = reactions.very_negative || (_who + ' fecha o livro com som seco. <i>(voz cortante)</i> "Você escolheu como tratar esta casa. Eu não esquecerei."');
     else if (renownDelta < 0) resp = reactions.negative || (_who + ' pausa. <i>(sorri sem calor)</i> "Cada um tem sua opinião."');
     else if (renownDelta > 2) resp = reactions.very_positive || (_who + ' curva-se levemente. <i>(sorri com cortesia rara)</i> "Palavras que honram esta casa."');
     else if (renownDelta > 0) resp = reactions.positive || (_who + ' acena com aprovação contida. "Bem dito."');
     else resp = reactions.neutral || (_who + ' mantém o olhar neutro. "Anotado."');
 
+    var _rootDlg = (dialogues && dialogues.greeting) || dialogue || null;
+    var reactionChoices = [];
+    if (_rootDlg && _rootDlg.choices && _rootDlg.choices.length) {
+      reactionChoices.push({
+        id: 'return_npc_root',
+        label: '↩ "Gostaria de tratar de outro assunto."',
+        cb: function() {
+          if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+            window.vEncounter.render(_rootDlg, { dialogues: dialogues });
+          } else if (typeof window._renderEncounterPopup === 'function') {
+            window._renderEncounterPopup(_rootDlg);
+          }
+        }
+      });
+    }
+    reactionChoices.push({ id: 'continue', label: '↩ Voltar', cb: 'close' });
+
     _renderViaCanonical({
       npc: npc,
       script: [
-        { type: 'narration', text: '<b>Vossa Senhoria:</b> "' + optionLabel.replace(/^"|"$/g,'') + '"' },
+        { type: 'narration', text: 'Você dirige a palavra a ' + _who + ': <i>"' + optionLabel.replace(/^"|"$/g,'') + '"</i>' },
         { type: 'speech', speaker: npc.name, text: resp }
       ],
-      choices: [{ id: 'continue', label: '↩ Voltar', cb: 'close' }]
+      choices: reactionChoices
     });
     window._applyRenownDelta(faction, renownDelta);
     _dispatchBackendAction(ch); /* task #62: bot DEV apply effect */
@@ -608,7 +643,7 @@
    *
    * User reportou: "diálogos da cidade estão com resultado sem coesão".
    */
-  window._showPurchaseConfirm = function(npc, optionLabel, renownDelta, ch) {
+  window._showPurchaseConfirm = function(npc, optionLabel, renownDelta, ch, dialogue, dialogues) {
     var faction = (window._SVC_CONFIG && window._SVC_CONFIG.faction) || 'unknown';
     var confirmMsgs = (window._SVC_CONFIG && window._SVC_CONFIG.confirmMsgs) || {};
     /* sessão #88: literal "NPC" → nome real (placeholder exposto na narrativa) */
@@ -631,10 +666,27 @@
       ];
     }
 
+    var _rootDlgP = (dialogues && dialogues.greeting) || dialogue || null;
+    var purchaseChoices = [];
+    if (_rootDlgP && _rootDlgP.choices && _rootDlgP.choices.length) {
+      purchaseChoices.push({
+        id: 'return_npc_root',
+        label: '↩ "Gostaria de tratar de outro assunto."',
+        cb: function() {
+          if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+            window.vEncounter.render(_rootDlgP, { dialogues: dialogues });
+          } else if (typeof window._renderEncounterPopup === 'function') {
+            window._renderEncounterPopup(_rootDlgP);
+          }
+        }
+      });
+    }
+    purchaseChoices.push({ id: 'continue', label: '↩ Voltar', cb: 'close' });
+
     _renderViaCanonical({
       npc: npc,
       script: script,
-      choices: [{ id: 'continue', label: '↩ Voltar', cb: 'close' }]
+      choices: purchaseChoices
     });
     window._applyRenownDelta(faction, renownDelta);
     _dispatchBackendAction(ch); /* task #62: bot DEV apply effect */
@@ -795,11 +847,11 @@
       return true;
     }
     if (cb.indexOf('opinion-') === 0) {
-      window._showOpinionReaction(dialogue.npc, ch.label, ch.renownDelta || 0, ch);
+      window._showOpinionReaction(dialogue.npc, ch.label, ch.renownDelta || 0, ch, dialogue, dialogues);
       return true;
     }
     if (cb.indexOf('-confirm') > 0) {
-      window._showPurchaseConfirm(dialogue.npc, ch.label, ch.renownDelta || 0, ch);
+      window._showPurchaseConfirm(dialogue.npc, ch.label, ch.renownDelta || 0, ch, dialogue, dialogues);
       return true;
     }
     // === FASE B (sessão #11, 2026-05-19) — NPC Living System cascade ===========

@@ -33352,6 +33352,20 @@ function _pickNonRepeatingChat(npcId, chatPool){
 function _npcHandleTalkEncounter(p, npc, opt, opts){
   if (opt.id === 'browse' && npc.id && CANON_MARKET_SHOPS && CANON_MARKET_SHOPS[npc.id]){
     try { window.vEncounter.close(); } catch(_){}
+    var _dlgRestoreKey = 'npc_dlg_return_' + npc.id;
+    if (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] !== _dlgRestoreKey) {
+      _popupStack.push(_dlgRestoreKey);
+      if (!window._popupRestoreFns) window._popupRestoreFns = {};
+      window._popupRestoreFns[_dlgRestoreKey] = function(){
+        if (_popupStack.length > 0 && typeof _renderCityPopup === 'function') {
+          _renderCityPopup(_popupStack[_popupStack.length - 1]);
+        } else {
+          var ov = document.getElementById('city-subscreen-popup');
+          if (ov) ov.classList.remove('active');
+        }
+        _showSharedNpcDialogue(opts);
+      };
+    }
     _showShopPopup(npc.id);
     return;
   }
@@ -33480,23 +33494,40 @@ function _showSharedNpcDialogue(opts, internalState){
     // a "primeira parte" (saudação) reaparecia a CADA opção clicada, independente
     // da escolha (bug reportado). Agora: saudação+desc só na 1ª abertura; ao
     // responder uma pergunta, mostra SÓ a fala da resposta. Vale p/ todos os NPCs.
-    var script;
+    var script = [];
     if (internalState && internalState.answer) {
-      script = [{ type: 'speech', speaker: npc.name || '', text: internalState.answer.text }];
+      var rawAns = String(internalState.answer.text || '');
+      var leadItal = rawAns.match(/^\s*<i>([\s\S]*?)<\/i>\s*([\s\S]*)$/);
+      if (leadItal && leadItal[2].trim()) {
+        script.push({ type: 'narration', text: leadItal[1].trim() });
+        script.push({ type: 'speech', speaker: npc.name || '', text: leadItal[2].trim() });
+      } else {
+        script.push({ type: 'narration', text: (npc.name || 'O interlocutor') + ' ouve com atenção antes de responder.' });
+        script.push({ type: 'speech', speaker: npc.name || '', text: rawAns });
+      }
     } else {
-      var greeting = _npcGreet(npc) || '— Saudações, viajante.';  // PADRAO_ALDRIC: fallback NÃO usa a descrição física como fala (o desc vira narração abaixo)
-      script = [{ type: 'speech', speaker: npc.name || '', text: greeting }];
+      var greeting = _npcGreet(npc) || '— Saudações, viajante.';  // PADRAO_ALDRIC: narração sensorial do Mestre SEMPRE precede a fala (Regra #14)
+      var openLeadItal = String(greeting).match(/^\s*<i>([\s\S]*?)<\/i>\s*([\s\S]*)$/);
       if (npc.desc && npc.desc !== greeting) {
         script.push({ type: 'narration', text: npc.desc });
+      } else if (openLeadItal && openLeadItal[1].trim()) {
+        script.push({ type: 'narration', text: openLeadItal[1].trim() });
+        greeting = openLeadItal[2].trim() || greeting;
+      } else {
+        script.push({ type: 'narration', text: (npc.name || 'O habitante') + ' nota sua aproximação e volta o olhar na sua direção.' });
       }
+      script.push({ type: 'speech', speaker: npc.name || '', text: greeting });
       if (available.length === 0) {
-        script.push({ type: 'narration', text: '— Sem mais perguntas. Volte mais tarde para nova conversa. —' });
+        script.push({ type: 'narration', text: 'Vocês já conversaram sobre todos os assuntos do momento.' });
       }
     }
     // talkOptions → choices (label = pergunta; cost → badge de Valdorita).
     var choices = available.map(function(opt){
       return { id: opt.id, label: opt.q, cost: opt.cost, icon: '' };
     });
+    if (!choices.some(function(c){ return c && c.id === 'leave'; })) {
+      choices.push({ id: 'leave', label: '↩ "Até mais tarde."', cb: 'close' });
+    }
     // Retrato: name + role no resolver (WebP dedicado / fallback por papel / null).
     var portrait = null;
     try { portrait = _discoverySpeakerPortrait((npc.name || '') + ' ' + (npc.role || '')); }
@@ -44181,24 +44212,25 @@ function _squareShowBountyOfficerDialogue(p){
         } else if (ch && ch.id === 'how_it_works') {
           window.vEncounter.render({
             npc: {
-              name: 'Capitão Kaelen',
+              name: 'Capitão Vane',
               desc: 'Oficial de Recompensas de Valdoria · Intendente de Editais e Caçadas Cívicas',
               portrait: '/shared/img/npcs/capitao-vane.webp'
             },
             script: [
               {
                 type: 'narration',
-                text: 'O Capitão Kaelen gesticula na direção do mapa de patrulha aberto sobre a mesa de carvalho.'
+                text: 'O Capitão Vane gesticula na direção do mapa de patrulha aberto sobre a mesa de carvalho.'
               },
               {
                 type: 'speech',
-                speaker: 'Capitão Kaelen',
+                speaker: 'Capitão Vane',
                 text: 'Todos os dias, à meia-noite, o Conselho publica uma requisição urgente — caçar feras e salteadores ou recolher materiais raros nos ermos. Ao aceitar, o progresso é acompanhado em suas viagens e combates. Assim que cumprir a meta, a recompensa é enviada imediatamente pelo tesouro municipal.'
               }
             ],
             choices: [
               { id: 'open_challenge', label: '[📜 Ver Edital de Hoje] Abrir o quadro do edital' },
-              { id: 'leave', label: '"Entendido, Capitão."' }
+              { id: 'back', label: '↩ "Gostaria de voltar ao assunto anterior."' },
+              { id: 'leave', label: '↩ "Entendido, Capitão. Até logo."' }
             ]
           }, {
             player: p,
@@ -44207,6 +44239,8 @@ function _squareShowBountyOfficerDialogue(p){
               if (ch2 && ch2.id === 'open_challenge') {
                 try { window.vEncounter.close(); } catch(_){}
                 _showDailyChallengeEpicPopup(p);
+              } else if (ch2 && ch2.id === 'back') {
+                _squareShowBountyOfficerDialogue(p);
               } else {
                 try { window.vEncounter.close(); } catch(_){}
               }
@@ -44321,6 +44355,7 @@ function _squareArtistTip(p, data, perf){
 
 function _squareRollArtistDie(p, data, perf, res){
   // PADRAO_DADOS: 1d20 visível (valor rolado pelo SERVIDOR). Reusa window.Dice3D.
+  // Regra #10: sem auto-avanço por setTimeout; o jogador avança no botão Continuar.
   var D3D = window.Dice3D, rolled = res.rolled;
   if (typeof D3D === 'function'){
     var ov = document.createElement('div');
@@ -44328,18 +44363,27 @@ function _squareRollArtistDie(p, data, perf, res){
     ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(10,8,5,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#d4c8b0;font-family:var(--v-font-display,Cinzel),serif;';
     ov.innerHTML = '<div style="font-size:calc(clamp(16px,4.6vw,18px) * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);margin-bottom: var(--v-space-lg, 12px);">Teste de inspiração...</div>'
       + '<div id="sad-host" style="width:clamp(180px,52vw,220px);height:clamp(180px,52vw,220px);"></div>'
-      + '<div id="sad-label" style="margin-top: var(--v-space-md, 10px);font-size:calc(clamp(14px,4vw,16px) * var(--v-font-scale, 1));min-height:1.4em;">&nbsp;</div>';
+      + '<div id="sad-label" style="margin-top: var(--v-space-md, 10px);font-size:calc(clamp(14px,4vw,16px) * var(--v-font-scale, 1));min-height:1.4em;">&nbsp;</div>'
+      + '<button id="sad-continue-btn" type="button" style="display:none;margin-top:16px;padding:10px 28px;border-radius:8px;border:1px solid var(--v-gold,#c4953a);background:linear-gradient(180deg,#3d2b18,#24180c);color:#f3d27a;font-family:var(--v-font-display,Cinzel),serif;font-weight:700;font-size:calc(clamp(13px,3.8vw,15px)*var(--v-font-scale,1));cursor:pointer;">Continuar ▸</button>';
     document.body.appendChild(ov);
     var _done = false;
-    var _finish = function(){ if (_done) return; _done = true; if (ov && ov.remove) ov.remove(); _squareArtistResult(p, data, perf, res); };
+    var instance = null;
+    var _finish = function(){
+      if (_done) return;
+      _done = true;
+      try { if (instance && instance.dispose) instance.dispose(); } catch(_e){}
+      if (ov && ov.remove) ov.remove();
+      _squareArtistResult(p, data, perf, res);
+    };
+    var cBtn = ov.querySelector('#sad-continue-btn');
+    if (cBtn) cBtn.addEventListener('click', _finish);
     try {
-      var instance = new D3D(document.getElementById('sad-host'), { dieType: 'd20', size: 200 });
+      instance = new D3D(document.getElementById('sad-host'), { dieType: 'd20', size: 200 });
       instance.roll(rolled, function(){
         var lbl = document.getElementById('sad-label');
         if (lbl) lbl.innerHTML = '1d20: <b style="color:var(--v-gold, #c4953a)">' + rolled + '</b> vs CD <b>' + (res.dc || 13) + '</b>';
-        setTimeout(function(){ try { if (instance.dispose) instance.dispose(); } catch(_e){} _finish(); }, 1400);
+        if (cBtn) cBtn.style.display = 'inline-block';
       });
-      setTimeout(_finish, 9000);
     } catch(_e){ if (window.console && console.warn) console.warn('[CITY] artist die', _e); _finish(); }
   } else {
     _squareArtistResult(p, data, perf, res);
@@ -46011,12 +46055,22 @@ function _squareRollGambleDice(p, stake, res, preGoldBeforeStake){
     ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(10,8,5,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#d4c8b0;font-family:var(--v-font-display,Cinzel),serif;';
     ov.innerHTML = '<div style="font-size:calc(clamp(16px,4.6vw,18px) * var(--v-font-scale, 1));color:var(--v-gold, #c4953a);margin-bottom: var(--v-space-lg, 12px);">Rolando os dados...</div>'
       + '<div id="sgd-host" style="width:clamp(180px,52vw,220px);height:clamp(180px,52vw,220px);"></div>'
-      + '<div id="sgd-label" style="margin-top: var(--v-space-md, 10px);font-size:calc(clamp(14px,4vw,16px) * var(--v-font-scale, 1));min-height:1.4em;">&nbsp;</div>';
+      + '<div id="sgd-label" style="margin-top: var(--v-space-md, 10px);font-size:calc(clamp(14px,4vw,16px) * var(--v-font-scale, 1));min-height:1.4em;">&nbsp;</div>'
+      + '<button id="sgd-continue-btn" type="button" style="display:none;margin-top:16px;padding:10px 28px;border-radius:8px;border:1px solid var(--v-gold,#c4953a);background:linear-gradient(180deg,#3d2b18,#24180c);color:#f3d27a;font-family:var(--v-font-display,Cinzel),serif;font-weight:700;font-size:calc(clamp(13px,3.8vw,15px)*var(--v-font-scale,1));cursor:pointer;">Continuar ▸</button>';
     document.body.appendChild(ov);
     var _done = false;
-    var _finish = function(){ if (_done) return; _done = true; if (ov && ov.remove) ov.remove(); _squareShowGambleResult(p, stake, res, preGoldBeforeStake); };
+    var instance = null;
+    var _finish = function(){
+      if (_done) return;
+      _done = true;
+      try { if (instance && instance.dispose) instance.dispose(); } catch(_e){}
+      if (ov && ov.remove) ov.remove();
+      _squareShowGambleResult(p, stake, res, preGoldBeforeStake);
+    };
+    var cBtn = ov.querySelector('#sgd-continue-btn');
+    if (cBtn) cBtn.addEventListener('click', _finish);
     try {
-      var instance = new D3D(document.getElementById('sgd-host'), { dieType: 'd20', size: 200 });
+      instance = new D3D(document.getElementById('sgd-host'), { dieType: 'd20', size: 200 });
       instance.roll(playerRoll, function(){
         var lbl = document.getElementById('sgd-label');
         if (lbl) lbl.innerHTML = 'Você: <b style="color:var(--v-gold, #c4953a)">' + playerRoll + '</b>';
@@ -46024,11 +46078,10 @@ function _squareRollGambleDice(p, stake, res, preGoldBeforeStake){
           instance.roll(houseRoll, function(){
             var lbl2 = document.getElementById('sgd-label');
             if (lbl2) lbl2.innerHTML = 'Você: <b style="color:var(--v-gold, #c4953a)">' + playerRoll + '</b> vs Casa: <b style="color:#a85050">' + houseRoll + '</b>';
-            setTimeout(function(){ try { if (instance.dispose) instance.dispose(); } catch(_e){} _finish(); }, 1200);
+            if (cBtn) cBtn.style.display = 'inline-block';
           });
         }, 800);
       });
-      setTimeout(_finish, 9000);  // safety: nunca trava se algum callback do dado não disparar
     } catch(_e){ console.warn('[CITY] gamble dice', _e); _finish(); }
   } else {
     // Fallback sem 3D
@@ -63449,13 +63502,13 @@ function _startLyanaEncounter(p, forceDay){
       resultNarration: 'Você cruza as datas da carta com o que sabe sobre o alinhamento das luas. O padrão salta aos olhos: toda menção às runas coincide com o auge da lua nova — e o pedido do cristal veio três dias antes da próxima conjunção! O cristal não é um amuleto comum, mas uma fechadura arcanotécnica para estancar fendas.',
       resultText: '<i>(Lyana empalidece de espanto, depois assente)</i> "Você enxerga o que ele enxerga... Papai dizia que as runas só sangram quando algo do outro lado empurra. O cristal fecha essa passagem. Guarde este Bálsamo Restaurador com você... e se um dia vir uma runa úmida, não a toque."',
       resultNarrationFail: 'As linhas da carta se recusam a formar padrão claro. Datas cifradas em runeiro antigo — peças demais para decifrar às pressas na praça.',
-      resultTextFail: '<i>(Lyana dobra a carta, protetora)</i> "Perdoa. Já disse mais do que devia — papai sempre pediu segredo sobre as runas. Quando ele voltar das montanhas, perguntaremos a ele."'
+      resultTextFail: '<i>(Lyana dobra a carta, protetora)</i> "Me perdoe. Já disse mais do que devia — papai sempre pediu segredo sobre as runas. Quando ele voltar das montanhas, perguntaremos a ele."'
     },
     {
       id: 'comfort',
       tag: 'PERSUASÃO',
-      speech: 'Teu pai é forte e resiliente, Lyana. Não percas a esperança, ele voltará.',
-      label: '🎲 "Teu pai é forte e resiliente. Não percas a esperança." · Persuasão CD 12',
+      speech: 'Seu pai é forte e resiliente, Lyana. Não perca a esperança, ele voltará.',
+      label: '🎲 "Seu pai é forte e resiliente. Não perca a esperança." · Persuasão CD 12',
       desc: 'Confortar a jovem com palavras firmes e inspiradoras (Persuasão CD 12).',
       check: { skill: 'persuasion', dc: 12 },
       continueDialogue: 'approach-comfort',
@@ -68033,6 +68086,20 @@ function _showAllyDialogue(idx){
       label: '📜 Ver ficha completa de ' + displayName,
       cb: function() {
         try { window.vEncounter.close(); } catch(_) {}
+        var _restoreKey = 'ally_dlg_return_' + idx;
+        if (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] !== _restoreKey) {
+          _popupStack.push(_restoreKey);
+          if (!window._popupRestoreFns) window._popupRestoreFns = {};
+          window._popupRestoreFns[_restoreKey] = function() {
+            if (_popupStack.length > 0 && typeof _renderCityPopup === 'function') {
+              _renderCityPopup(_popupStack[_popupStack.length - 1]);
+            } else {
+              var ov = document.getElementById('city-subscreen-popup');
+              if (ov) ov.classList.remove('active');
+            }
+            _showAllyDialogue(idx);
+          };
+        }
         if (typeof _showStatusPopup === 'function') _showStatusPopup(idx);
       }
     }
@@ -72312,7 +72379,7 @@ function _renderCompanionSpontaneousBanterScene(banter, proceedAfterFn) {
   var targetNpc = {
     name: banter.companion_name,
     title: (banter.npc && banter.npc.title) || banter.companion_name,
-    portrait: banter.companion_avatar || '/shared/img/npcs/companion_default.webp'
+    portrait: banter.companion_avatar || (typeof _allyPortrait === 'function' ? _allyPortrait(banter.companion_name, '', 'm') : '') || ''
   };
 
   window._encounterActive = true;
@@ -72363,18 +72430,18 @@ function _fallbackBanterChoiceResolve(selected, banter, targetNpc, proceedAfterF
   if (typeof vToast === 'function') vToast(toastText, delta >= 0 ? 'ok' : 'warn');
 
   var resultScript = [];
+  if (selected.reply_narration) {
+    resultScript.push({
+      type: 'narration',
+      text: selected.reply_narration
+    });
+  }
   if (selected.reply_speech) {
     resultScript.push({
       type: 'speech',
       speaker: banter.companion_name,
       avatar: banter.companion_avatar,
       text: selected.reply_speech
-    });
-  }
-  if (selected.reply_narration) {
-    resultScript.push({
-      type: 'narration',
-      text: selected.reply_narration
     });
   }
 
@@ -72737,6 +72804,7 @@ function _openCityDialogue(venue, node, p){
     }
 
     var choiceHandler = function(ch){
+      if (ch && typeof ch.cb === 'function') { ch.cb(ch); return; }
       var npcId = (data && data.npc && (data.npc.id || data.npc.npc_id)) || '';
       if (venue === 'recruta') {
         if (ch && ch.cb === 'close') { try { window.vEncounter.close(); } catch(_){} return; }
@@ -73195,6 +73263,7 @@ function _renderCityDialogue(venue, data, p, ctx){
         }
       },
       onChoice: function(ch){
+        if (ch && typeof ch.cb === 'function') { ch.cb(ch); return; }
         // FASE 5d (#3): ramo do recruta ANTES dos ramos genéricos. D2: "Ver ficha"
         // é uma CHOICE com `node` ('<npc_id>:ficha'); voltar_ficha tem node '<npc_id>'.
         if (venue === 'recruta') {
@@ -73246,6 +73315,16 @@ function _openCityScreen(venue, cb, p, npc){
     if (!data || !data.ok) { if (typeof vToast === 'function') vToast('Não foi possível abrir.', 'warn'); return; }
     if (data.transition) { _handleCityDialogueResult(venue, data, p, npc); return; }
     _applyHudFromDialogue(data);
+    if (venue && venue !== 'recruta' && Array.isArray(data.choices) && !data.choices.some(function(c){ return c && c.id === 'return_venue_root'; })) {
+      var closeIdx = data.choices.findIndex(function(c){ return c && (c.id === 'close' || c.cb === 'close'); });
+      var backChoice = {
+        id: 'return_venue_root',
+        label: '↩ "Gostaria de tratar de outro assunto."',
+        cb: function() { _openCityDialogue(venue, 'greeting', p); }
+      };
+      if (closeIdx >= 0) data.choices.splice(closeIdx, 0, backChoice);
+      else data.choices.push(backChoice);
+    }
     _renderCityDialogue(venue, data, p);
   }).catch(function(e){
     console.error('[CITY-DIALOGUE] screen failed', e);
@@ -73422,14 +73501,50 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
           + ' <span style="opacity:.65">(' + d.total + ' vs CD ' + d.dc + ')</span>'
           + (d.degree_label ? (' &bull; <b style="color:' + (d.degree === 'critical_success' ? '#ffd700' : d.degree === 'exceptional_success' ? '#7bc67b' : d.degree === 'marginal_failure' ? '#e0a845' : (d.degree === 'catastrophic_failure' || d.degree === 'critical_failure') ? '#e05353' : d.degree === 'failure' ? '#d97d7d' : 'var(--v-gold,#c4953a)') + '">' + d.degree_label + '</b>') : '')),
       onContinue: function(){
+        if (data.stat_changes && data.stat_changes.length) {
+          if (typeof _renderCompanionApprovalBG3 === 'function') _renderCompanionApprovalBG3(data.stat_changes);
+          var nonAffD = data.stat_changes.filter(function(s){ return s.type !== 'affinity' && s.type !== 'approval'; });
+          if (nonAffD.length && typeof vToast === 'function') {
+            var tmsgD = nonAffD.map(function(s){ return s.text; }).join(' · ');
+            var ttypeD = nonAffD.some(function(s){ return s.type === 'no_effect'; }) ? 'warn' : 'ok';
+            vToast(tmsgD, ttypeD);
+          }
+        }
         // D4: SEMPRE re-fetch da raiz (custo novo + barganha consumida). NÃO renderiza node embutido.
         var nid = (ctx && ctx.npcId) || (data.npc && data.npc.id);
         if (venue === 'recruta' && nid) _openRecrutaDialogue(nid, p);
         else if (data.result_script && window.vEncounter && window.vEncounter.render) {
           var targetNpc = data.npc || npc || { name: 'Aventureiro' };
+          var diceResultChoices = (data.choices && data.choices.length) ? data.choices.slice() : [];
+          if (!diceResultChoices.length) {
+            if (venue && venue !== 'recruta' && typeof _openCityDialogue === 'function') {
+              var rootNodeD = (venue === 'square' || venue === 'wandering')
+                ? ((ctx && ctx.rootNode) || data.node || (data.npc && data.npc.id) || 'greeting')
+                : 'greeting';
+              diceResultChoices.push({
+                id: 'return_venue_root',
+                label: '↩ "Gostaria de ver outra coisa."',
+                cb: function() {
+                  _openCityDialogue(venue, rootNodeD, p);
+                }
+              });
+              diceResultChoices.push({
+                id: 'done',
+                label: '↩ "Até logo."',
+                cb: 'close'
+              });
+            } else {
+              diceResultChoices.push({ id: 'done', label: '↩ Continuar', cb: 'close' });
+            }
+          }
           window.vEncounter.render(
-            { npc: targetNpc, script: data.result_script, choices: (data.choices && data.choices.length) ? data.choices : [{ id: 'done', label: 'Continuar' }] },
-            { player: p, onChoice: function(){
+            { npc: targetNpc, script: data.result_script, choices: diceResultChoices },
+            { player: p, onChoice: function(ch){
+                if (ch && typeof ch.cb === 'function') { ch.cb(ch); return; }
+                if (ch && ch.node) {
+                  _resolveCityChoice(venue, ch.node, ch.id, p, targetNpc, ctx);
+                  return;
+                }
                 try { window.vEncounter.close(); } catch(_){}
                 if (typeof refreshHud === 'function') refreshHud();
             } }
@@ -73514,22 +73629,27 @@ function _renderCompanionApprovalBG3(scList) {
           }
         }
       }
-      var resultChoices = [];
-      if (venue && venue !== 'recruta' && typeof _openCityDialogue === 'function') {
-        resultChoices.push({
-          id: 'return_venue_root',
-          label: '↩ "Gostaria de ver outra coisa."',
-          cb: function() {
-            _openCityDialogue(venue, 'greeting', p);
-          }
-        });
-        resultChoices.push({
-          id: 'done',
-          label: '↩ "Até logo."',
-          cb: 'close'
-        });
-      } else {
-        resultChoices.push({ id: 'done', label: '↩ Voltar', cb: 'close' });
+      var resultChoices = (data.choices && data.choices.length) ? data.choices.slice() : [];
+      if (!resultChoices.length) {
+        if (venue && venue !== 'recruta' && typeof _openCityDialogue === 'function') {
+          var rootNode = (venue === 'square' || venue === 'wandering')
+            ? ((ctx && ctx.rootNode) || data.node || (data.npc && data.npc.id) || 'greeting')
+            : 'greeting';
+          resultChoices.push({
+            id: 'return_venue_root',
+            label: '↩ "Gostaria de ver outra coisa."',
+            cb: function() {
+              _openCityDialogue(venue, rootNode, p);
+            }
+          });
+          resultChoices.push({
+            id: 'done',
+            label: '↩ "Até logo."',
+            cb: 'close'
+          });
+        } else {
+          resultChoices.push({ id: 'done', label: '↩ Voltar', cb: 'close' });
+        }
       }
 
       window.vEncounter.render(
