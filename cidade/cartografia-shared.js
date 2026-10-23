@@ -3874,10 +3874,23 @@
       };
     }
 
+    function focusProvince(provId, w, h){
+      var prov = CART_PROVINCES.find(function(p){ return p.id === provId; }) || CART_PROVINCES[0];
+      var _mr = _cartWorldMapRect(w, h);
+      var _S = _mr.s;
+      var targetZoom = prov.zoom || 1.0;
+      var cx = _mr.x + (prov.cx || 0.5) * _S;
+      var cy = _mr.y + (prov.cy || 0.5) * _S;
+      var panX = (w / 2) - (cx * targetZoom);
+      var panY = (h / 2) - (cy * targetZoom);
+      return { panX: panX, panY: panY, zoom: targetZoom, province: prov };
+    }
+
     return {
       draw: draw,
       findNodeAt: findNodeAt,
       getNodePos: getNodePos,
+      focusProvince: focusProvince,
       invalidateBase: function(){ _baseCache = null; },
       ensureLocArt: _ensureLocArt
     };
@@ -3904,6 +3917,44 @@
       + '<span class="clp-loc-emoji" style="display:none">' + ico + '</span>';
   }
 
+  // === CART_PROVINCES (Hierarquia das 8 Províncias Canônicas de Valdória) ===
+  var CART_PROVINCES = [
+    { id: 'world',    name: 'Continente Geral',     icon: '🌍', zoom: 1.0,  cx: 0.50, cy: 0.50, mapKey: null,
+      desc: 'Visão de todo o continente conhecido de Valdória e suas fronteiras.' },
+    { id: 'plains',   name: 'Planícies Centrais',   icon: '🌾', zoom: 1.80, cx: 0.48, cy: 0.65, mapKey: 'Mapa das Planícies',
+      desc: 'Coração comercial do continente. Terras férteis, acampamentos e fortes sob o sopro do vento.' },
+    { id: 'forest',   name: 'Grandes Florestas',    icon: '🌲', zoom: 1.85, cx: 0.55, cy: 0.22, mapKey: 'Mapa da Floresta',
+      desc: 'Matas ancestrais onde a luz solar mal penetra e a magia druídica pulsa nas raízes.' },
+    { id: 'swamp',    name: 'Pântanos do Leste',    icon: '🐍', zoom: 1.80, cx: 0.72, cy: 0.52, mapKey: 'Mapa do Pântano',
+      desc: 'Águas estagnadas, sepulcros esquecidos e brumas traiçoeiras carregadas de miasma.' },
+    { id: 'mountain', name: 'Cordilheira Ocidental',icon: '🏔️', zoom: 1.80, cx: 0.16, cy: 0.32, mapKey: 'Mapa das Montanhas',
+      desc: 'Picos escarpados de rocha e minas profundas onde os ventos uivam entre desfiladeiros.' },
+    { id: 'desert',   name: 'Dunas do Sul',         icon: '🌵', zoom: 2.00, cx: 0.65, cy: 0.85, mapKey: 'Mapa do Deserto',
+      desc: 'Mares de areia dourada e ruínas soterradas sob o sol inclemente do sul.' },
+    { id: 'coast',    name: 'Litoral da Tormenta',  icon: '🌊', zoom: 2.00, cx: 0.88, cy: 0.86, mapKey: 'Mapa da Costa',
+      desc: 'Falésias fustigadas por ondas oceânicas, enseadas piratas e marés traiçoeiras.' },
+    { id: 'snow',     name: 'Ermo Boreal',          icon: '❄️', zoom: 2.00, cx: 0.65, cy: 0.08, mapKey: 'Mapa do Ermo Gelado',
+      desc: 'Geleiras eternas e despenhadeiros de gelo azul onde o frio corta mais que lâmina de aço.' },
+    { id: 'volcanic', name: 'Terras de Fogo',       icon: '🌋', zoom: 2.00, cx: 0.90, cy: 0.52, mapKey: 'Mapa Vulcânico',
+      desc: 'Gargantas fumegantes e rios de cinzas que desafiam a própria vida mortal.' }
+  ];
+
+  var _LOCATION_TO_PROVINCE = {
+    plains: 'plains', green_fields: 'plains', orc_tribe: 'plains', bandit_fortress: 'plains', ashen_badlands: 'plains',
+    forest: 'forest', goblin_nest: 'forest', elven_ruins: 'forest', elder_woods: 'forest',
+    cave: 'mountain', underground_caverns: 'mountain', crystal_depths: 'mountain', mountain: 'mountain', troll_cave: 'mountain', dragon_pass: 'mountain', korthag: 'mountain', black_peaks: 'mountain',
+    swamp: 'swamp', deep_swamp: 'swamp', graveyard: 'swamp', ancestral_graveyard: 'swamp', eldritch_mire: 'swamp',
+    desert: 'desert',
+    salty_coast: 'coast',
+    snow: 'snow', glacial_rift: 'snow',
+    volcanic: 'volcanic', valkrest: 'volcanic'
+  };
+
+  function getLocationProvince(locKey){
+    var pId = _LOCATION_TO_PROVINCE[locKey] || 'plains';
+    return CART_PROVINCES.find(function(p){ return p.id === pId; }) || CART_PROVINCES[1];
+  }
+
   // P-mapa sessão #73 (user: "Bioma: forest" deve estar em PT-BR): traduz a chave de
   // bioma (ASCII canonical) pro nome PT-BR exibido no popup do mapa.
   var _BIOME_PT = {
@@ -3918,7 +3969,7 @@
     INK_DARK: INK_DARK, INK_MED: INK_MED, INK_LIGHT: INK_LIGHT,
     INK_FAINT: INK_FAINT, PAPER_BG: PAPER_BG, PAPER_DARK: PAPER_DARK,
     SEA_INK: SEA_INK, SEA_FAINT: SEA_FAINT,
-    CART_BIOMES: CART_BIOMES, CART_PATHS: CART_PATHS,
+    CART_BIOMES: CART_BIOMES, CART_PATHS: CART_PATHS, CART_PROVINCES: CART_PROVINCES, getLocationProvince: getLocationProvince,
     _cartSeedRand: _cartSeedRand,
     _hatchArea: _hatchArea, _wavyLine: _wavyLine,
     _drawParchmentBase: _drawParchmentBase,
