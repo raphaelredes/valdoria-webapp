@@ -81,7 +81,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
       portrait: '../shared/img/npcs/irma-elara.webp'
     },
     script: [
-      { type: 'narration', text: 'Irmã Elara vem ao seu encontro com passos calmos. As vestes de linho azul-celeste — cor de céu antes do amanhecer — flutuam suaves contra o piso de mármore. Ela carrega uma bacia de água benta numa mão, e sob a outra, atadores de seda branca. Olhos castanhos quentes te observam com a paciência maternal de quem cura há décadas.' },
+      { type: 'narration', text: 'Irmã Elara vem ao seu encontro com passos calmos. As vestes de linho azul-celeste — cor de céu antes do amanhecer — flutuam suaves contra o piso de mármore. Ela carrega uma bacia de água benta numa mão, e sob a outra, atadores de seda branca. Olhos castanhos acolhedores observam você com a paciência maternal de quem cura há décadas.' },
       { type: 'speech', speaker: 'Irmã Elara', text: 'Mostre-me onde dói, irmão. <i>(coloca a bacia sobre uma pedra plana, pega sua mão com firmeza gentil)</i> Os Quatro ouvem mesmo o suspiro do mais humilde — e a magia divina não pergunta dívidas antes de fluir. Cura Maior, dois dados de oito mais Sabedoria.' }
     ],
     choices: [
@@ -98,6 +98,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
         resultText: '"Os Quatro ouviram." <i>(Elara inclina a cabeça, sem surpresa)</i> "Eles não respondem em palavras — respondem em caminhos. Mantenha os olhos abertos na próxima encruzilhada, irmão."',
         resultNarrationFail: 'As palavras da prece saem truncadas, fora de ordem. As velas queimam, indiferentes.',
         resultTextFail: '"Não se aflija." <i>(Elara reacende a vela que apagou)</i> "Prece torta de coração reto vale mais que salmo perfeito de boca vazia. Volte quando a alma estiver quieta."' },
+      { id: 'back_brevon', label: '↩ "Voltar a falar com o Padre Brevon."', cb: 'return_venue_root' },
       { id: 'back',    label: '"Outra hora."', cb: 'close' }
     ]
   },
@@ -117,6 +118,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
         resultText: '"Entre nós, irmão? <i>(meia voz)</i> Os nobres pagam o dobro da tabela para furar a fila das bênçãos. É desse ouro que sai o pão de quem não paga nada. Os Quatro perdoam a aritmética."',
         resultNarrationFail: 'A expressão do sacerdote volta a ser pedra de altar: polida, fria, sem fissuras.',
         resultTextFail: '"O Templo não discute suas contas. <i>(une as mãos)</i> Cada moeda tem destino santo. Se o valor pesa para você, os Quatro também aceitam seu trabalho como oferta."' },
+      { id: 'back_brevon', label: '↩ "Voltar aos outros serviços do Santuário."', cb: 'return_venue_root' },
       { id: 'back',    label: '"Outra hora."', cb: 'close' }
     ]
   },
@@ -143,6 +145,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
         resultText: '"S-só desta vez, tá? <i>(traça o sinal rápido na sua testa)</i> Se o Padre perguntar, foi treino. Os Quatro não cobram de quem chega de mãos vazias... mas eu levo bronca."',
         resultNarrationFail: 'Theron recua meio passo, as orelhas vermelhas. A coragem do acólito tem limites bem mapeados.',
         resultTextFail: '"N-não posso! <i>(sussurro aflito)</i> O óleo é contado, o Padre confere o frasco toda noite. Volte com cinco Valdoritas — a Orientação é baratinha, juro."' },
+      { id: 'back_brevon', label: '↩ "Voltar a falar com o Padre Brevon."', cb: 'return_venue_root' },
       { id: 'back',    label: '"Outra hora."', cb: 'close' }
     ]
   },
@@ -154,7 +157,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
       portrait: '../shared/img/npcs/sacerdotisa-miriel.webp'
     },
     script: [
-      { type: 'narration', text: 'Sacerdotisa Miriel não te recebe no salão principal — ela te conduz a uma câmara lateral selada por símbolos dourados. As paredes pulsam suavemente com runas em níveis quase imperceptíveis. Miriel tira o véu de prata da cabeça e olha direto nos seus olhos.' },
+      { type: 'narration', text: 'Sacerdotisa Miriel não recebe você no salão principal — ela conduz você a uma câmara lateral selada por símbolos dourados. As paredes pulsam suavemente com runas em níveis quase imperceptíveis. Miriel tira o véu de prata da cabeça e olha direto nos seus olhos.' },
       { type: 'speech', speaker: 'Sacerdotisa Miriel', text: 'Maldição é parasita de alma. <i>(traça runas no ar com o indicador)</i> Remover Maldição, terceiro círculo, noventa Valdoritas. Vai doer mais que o corte que a recebeu — mas em dez minutos você estará livre.' }
     ],
     choices: [
@@ -163,9 +166,10 @@ var SERVICE_DIALOGUES_TEMPLE = {
         resultText: '"Quem amaldiçoou você foi habilidoso, mas todo nó pode ser desfeito." <i>(traça o último símbolo)</i> <b>Maldição removida.</b> "Cuide para não cruzar com quem marcou você — segunda vez a magia custa o dobro."' },
       { id: 'rc_arcana', label: '"Que tipo de maldição?" · Arcana DC 15', check: { skill: 'arcana', dc: 15 },
         resultNarration: 'Os termos arcanos saem precisos da sua boca — e o olhar de Miriel muda de sacerdotisa para colega de ofício.',
-        resultText: '"Estudaste. <i>(baixa a voz)</i> As piores que cruzam estas portas são as de vínculo — agarram-se a um objeto querido e bebem do dono devagar. Se um dia teus pertences pesarem mais que o costume, não esperes para me procurar."',
-        resultNarrationFail: 'Os termos se embaralham na tua língua. Miriel ergue a mão antes de a frase terminar.',
-        resultTextFail: '"Quem confunde hex com mau agouro precisa de menos perguntas e mais leitura. <i>(sorri sem deboche)</i> Traz o objeto, se houver objeto. O resto é conversa de taverna."' },
+        resultText: '"Você estudou as artes. <i>(baixa a voz)</i> As piores que cruzam estas portas são as de vínculo — agarram-se a um objeto querido e bebem do dono devagar. Se um dia seus pertences pesarem mais que o costume, não espere para me procurar."',
+        resultNarrationFail: 'Os termos se embaralham na sua língua. Miriel ergue a mão antes de a frase terminar.',
+        resultTextFail: '"Quem confunde malefício com mau agouro precisa de menos perguntas e mais leitura. <i>(sorri sem deboche)</i> Traga o objeto, se houver objeto. O resto é conversa de taverna."' },
+      { id: 'back_brevon', label: '↩ "Voltar a falar com o Padre Brevon."', cb: 'return_venue_root' },
       { id: 'back',   label: '"Vou pensar."', cb: 'close' }
     ]
   },
@@ -182,8 +186,9 @@ var SERVICE_DIALOGUES_TEMPLE = {
     ],
     choices: [
       { id: 'gr_pay', label: 'Pagar 450V — Restauração Maior', cb: 'greater_restoration-confirm', backend_cb: 'temple_pay_greater_restoration', renownDelta: 3,
-        resultNarration: 'Varek ergue o cetro de prata e ônix ao alto. Os vitrais de cima da câmara reagem — luz colorida pousa em ti como manto de seda.',
-        resultText: '"Os Quatro restauram o que ainda pode ser." <i>(toca tua fronte com o cetro)</i> <b>Uma condição removida: exaustão, petrificação, maldição, encantamento, ou redução de atributo.</b> "Vai com cautela — magia desta ordem deixa marcas no espírito."' },
+        resultNarration: 'Varek ergue o cetro de prata e ônix ao alto. Os vitrais de cima da câmara reagem — luz colorida pousa sobre você como manto de seda.',
+        resultText: '"Os Quatro restauram o que ainda pode ser." <i>(toca sua fronte com o cetro)</i> <b>Uma condição removida: exaustão, petrificação, maldição, encantamento, ou redução de atributo.</b> "Vá com cautela — magia desta ordem deixa marcas no espírito."' },
+      { id: 'back_brevon', label: '↩ "Voltar a falar com o Padre Brevon."', cb: 'return_venue_root' },
       { id: 'back',   label: '"Vou ponderar."', cb: 'close' }
     ]
   },
@@ -195,18 +200,19 @@ var SERVICE_DIALOGUES_TEMPLE = {
       portrait: '../shared/img/npcs/oraculo-orenthia.webp'
     },
     script: [
-      { type: 'narration', text: 'Oráculo Orenthia espera-te na cripta sob o Templo. Velas de cera negra ardem em silêncio. Ela traz uma máscara de prata sem olhos — apenas duas fendas verticais por onde algo brilha. Seu vestido é de linho cinzento, sem ornamentos. Ela não fala alto — sua voz parece vir de longe.' },
-      { type: 'speech', speaker: 'Oráculo Orenthia', text: 'Reviver os caídos é privilégio dos Quatro, não direito dos vivos. <i>(toca tua testa com dedos gélidos)</i> Mil Valdoritas. O corpo deve estar diante de mim, e a alma ainda não dispersa. O caído retorna com penalidade de menos quatro em todas as rolagens por quatro descansos longos — o preço de cruzar a porta duas vezes.' }
+      { type: 'narration', text: 'Oráculo Orenthia espera por você na cripta sob o Templo. Velas de cera negra ardem em silêncio. Ela traz uma máscara de prata sem olhos — apenas duas fendas verticais por onde algo brilha. Seu vestido é de linho cinzento, sem ornamentos. Ela não fala alto — sua voz parece vir de longe.' },
+      { type: 'speech', speaker: 'Oráculo Orenthia', text: 'Reviver os caídos é privilégio dos Quatro, não direito dos vivos. <i>(toca sua testa com dedos gélidos)</i> Mil Valdoritas. O corpo deve estar diante de mim, e a alma ainda não dispersa. O caído retorna com penalidade de menos quatro em todas as rolagens por quatro descansos longos — o preço de cruzar a porta duas vezes.' }
     ],
     choices: [
       { id: 'rd_pay', label: 'Pagar 1000V — Reviver os Mortos', cb: 'raise_dead-confirm', backend_cb: 'temple_pay_raise_dead', renownDelta: 5,
-        resultNarration: 'Orenthia se posiciona sobre o corpo. As velas negras dobram a intensidade — então, súbito, todas se apagam ao mesmo tempo. Silêncio absoluto. Por meio segundo eternos.',
-        resultText: '"Volta, irmão. <i>(voz dupla — a dela e algo mais)</i> O caminho ainda não terminou pra ti." <b>Personagem revive com 1 HP. Penalidade: -4 em todas as rolagens por 4 descansos longos.</b> "Não fale do que viu lá. Os Quatro ouvem o que se diz."' },
+        resultNarration: 'Orenthia se posiciona sobre o corpo. As velas negras dobram a intensidade — então, súbito, todas se apagam ao mesmo tempo. Silêncio absoluto. Por meio segundo eterno.',
+        resultText: '"Volte, irmão. <i>(voz dupla — a dela e algo mais)</i> O caminho ainda não terminou para você." <b>Personagem revive com 1 HP. Penalidade: -4 em todas as rolagens por 4 descansos longos.</b> "Não fale do que viu lá. Os Quatro ouvem o que se diz."' },
       { id: 'rd_insight', label: '"Ela voltará... a mesma?" · Intuição DC 16', check: { skill: 'insight', dc: 16 },
-        resultNarration: 'Orenthia não responde de imediato. Os dedos dela apertam o medalhão — e é o gesto, não a voz, que te entrega a verdade.',
-        resultText: '"Voltam inteiros de corpo. <i>(longa pausa)</i> Mas todos trazem um silêncio novo. Alguns o perdem em semanas; outros o carregam até a segunda morte. Quem amas saberá te reencontrar — dá-lhe tempo."',
+        resultNarration: 'Orenthia não responde de imediato. Os dedos dela apertam o medalhão — e é o gesto, não a voz, que entrega a verdade a você.',
+        resultText: '"Voltam inteiros de corpo. <i>(longa pausa)</i> Mas todos trazem um silêncio novo. Alguns o perdem em semanas; outros o carregam até a segunda morte. Quem você ama saberá reencontrá-lo — dê tempo a essa alma."',
         resultNarrationFail: 'O rosto da oráculo é sereno como vitral. O que quer que saiba, guarda atrás da serenidade.',
-        resultTextFail: '"A alma pertence aos Quatro — e os Quatro não dão entrevistas. <i>(pousa a mão fria no teu braço)</i> Traz quem precisas trazer. O resto, deixa com o Templo."' },
+        resultTextFail: '"A alma pertence aos Quatro — e os Quatro não dão entrevistas. <i>(pousa a mão fria no seu braço)</i> Traga quem você precisa trazer. O resto, deixe com o Templo."' },
+      { id: 'back_brevon', label: '↩ "Voltar a falar com o Padre Brevon."', cb: 'return_venue_root' },
       { id: 'back',   label: '"Não estou pronto."', cb: 'close' }
     ]
   },
@@ -214,16 +220,17 @@ var SERVICE_DIALOGUES_TEMPLE = {
   confess: {
     npc: BREVON_DIALOGUE.npc,
     script: [
-      { type: 'narration', text: 'Padre Brevon te conduz à pequena sala de confissão atrás do altar. Apenas dois bancos de madeira escura, uma vela única, e um símbolo dos Quatro entalhado na parede. Ele se senta, fecha os olhos, espera. Quando finalmente falas, ele apenas escuta — paciente, sem julgar.' },
-      { type: 'speech', speaker: 'Padre Brevon', text: 'Os Quatro já sabem, irmão. <i>(suspira longo)</i> Sempre souberam. A confissão não é pra eles, é pra ti. Vais carregar trinta dias de bênção — a alma mais leve faz teu corpo mais ágil. Vantagem em salvaguardas de Sabedoria. Três Valdoritas como oferta — ou dez, e o Santuário se lembrará de ti. Vai em paz.' }
+      { type: 'narration', text: 'Padre Brevon conduz você à pequena sala de confissão atrás do altar. Apenas dois bancos de madeira escura, uma vela única, e um símbolo dos Quatro entalhado na parede. Ele se senta, fecha os olhos, espera. Quando você finalmente fala, ele apenas escuta — paciente, sem julgar.' },
+      { type: 'speech', speaker: 'Padre Brevon', text: 'Os Quatro já sabem, irmão. <i>(suspira longo)</i> Sempre souberam. A confissão não é para eles, é para você. Você vai carregar trinta dias de bênção — a alma mais leve deixa o seu corpo mais ágil. Vantagem em salvaguardas de Sabedoria. Três Valdoritas como oferta — ou dez, e o Santuário se lembrará de você. Vá em paz.' }
     ],
     choices: [
       { id: 'c_pay',    label: 'Pagar 3V — Confissão (bênção 30 dias)', cb: 'confess-confirm', backend_cb: 'temple_pay_confess_humble', renownDelta: 1,
-        resultNarration: 'Padre Brevon abençoa três velas — uma pra cada Quatro presente. Depois sopra a primeira pra liberar tua alma.',
-        resultText: '"Vai em paz, irmão." <i>(traça o sinal sobre tua testa)</i> <b>Vantagem em salvaguardas de Sabedoria por 30 dias.</b> "Volta sempre que precisar — a porta do confessionário não se fecha pra ninguém."' },
+        resultNarration: 'Padre Brevon abençoa três velas — uma para cada Quatro presente. Depois sopra a primeira para liberar sua alma.',
+        resultText: '"Vá em paz, irmão." <i>(traça o sinal sobre sua testa)</i> <b>Vantagem em salvaguardas de Sabedoria por 30 dias.</b> "Volte sempre que precisar — a porta do confessionário não se fecha para ninguém."' },
       { id: 'c_donate', label: 'Pagar 10V — Confissão + reputação', cb: 'confess-confirm', backend_cb: 'temple_pay_confess_devout', renownDelta: 3,
-        resultNarration: 'Padre Brevon abre o cofrinho do Santuário e deposita as moedas com gesto cuidadoso. Depois te abençoa com prece dobrada.',
-        resultText: '"Tua oferta é lembrada, e tua alma, igual." <i>(faz o sinal duas vezes)</i> <b>Vantagem em saves WIS 30 dias + reconhecimento entre os clérigos. +3 Renome do Templo.</b> "O Sumo-Sacerdote saberá teu nome."' },
+        resultNarration: 'Padre Brevon abre o cofrinho do Santuário e deposita as moedas com gesto cuidadoso. Depois abençoa você com prece dobrada.',
+        resultText: '"Sua oferta é lembrada, e sua alma, igual." <i>(faz o sinal duas vezes)</i> <b>Vantagem em saves WIS 30 dias + reconhecimento entre os clérigos. +3 Renome do Templo.</b> "O Sumo-Sacerdote saberá seu nome."' },
+      { id: 'back_brevon', label: '↩ "Voltar aos outros serviços do Santuário."', cb: 'return_venue_root' },
       { id: 'back',     label: '"Outra hora."', cb: 'close' }
     ]
   },
@@ -236,11 +243,11 @@ var SERVICE_DIALOGUES_TEMPLE = {
     },
     script: [
       { type: 'narration', text: 'Theron quase pula de empolgação quando você abre a bolsa. Ele segura um cesto de oferendas com as duas mãos, equilibrando-se pra que as moedas caiam direito. Os olhos brilham. Atrás dele, Irmã Elara sorri discretamente — é a primeira doação grande que Theron recebe sozinho.' },
-      { type: 'speech', speaker: 'Acólito Theron', text: 'D-doações vão pra alimentar os pobres do bairro e manter as velas acesas, irmão! <i>(tenta soar profissional, mas a voz trai a empolgação)</i> E sobe tua reputação com o Santuário! A Irmã Elara me ensinou — quanto mais doas, mais os Quatro lembram do teu nome.' }
+      { type: 'speech', speaker: 'Acólito Theron', text: 'D-doações vão pra alimentar os pobres do bairro e manter as velas acesas, irmão! <i>(tenta soar profissional, mas a voz trai a empolgação)</i> E sobe sua reputação com o Santuário! A Irmã Elara me ensinou — quanto mais você doa, mais os Quatro lembram do seu nome.' }
     ],
     choices: [
       { id: 'd_5',    label: 'Doar 5V — oferta humilde', cb: 'donate-confirm', backend_cb: 'temple_pay_donate_5', renownDelta: 1,
-        resultNarration: 'Theron coloca as cinco moedas no cesto e te dá um sorriso emocionado. Irmã Elara observa de longe, satisfeita.',
+        resultNarration: 'Theron coloca as cinco moedas no cesto e dá um sorriso emocionado para você. Irmã Elara observa de longe, satisfeita.',
         resultText: '"Os pobres do bairro vão ter pão essa semana, irmão!" <i>(curva-se desajeitado)</i> <b>+1 Renome do Templo.</b> "Os Quatro lembrarão."' },
       { id: 'd_25',   label: 'Doar 25V — oferta digna', cb: 'donate-confirm', backend_cb: 'temple_pay_donate_25', renownDelta: 2,
         resultNarration: 'Theron quase deixa o cesto cair quando as vinte e cinco moedas tilintam dentro. Irmã Elara aproxima-se, sorrindo discreta.',
@@ -248,6 +255,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
       { id: 'd_100',  label: 'Doar 100V — oferta generosa', cb: 'donate-confirm', backend_cb: 'temple_pay_donate_100', renownDelta: 5,
         resultNarration: 'Irmã Elara intervém pessoalmente — toca o braço de Theron com gentileza e assume o cesto. As cem Valdoritas brilham como rio de prata.',
         resultText: '"Cem Valdoritas. <i>(sorri com gratidão profunda)</i> Vossa Senhoria honra o Santuário. Os Quatro hão de lembrar — e o Sumo-Sacerdote, também." <b>+5 Renome do Templo. Acesso a serviços de tier superior desbloqueado.</b>' },
+      { id: 'back_brevon', label: '↩ "Voltar a falar com o Padre Brevon."', cb: 'return_venue_root' },
       { id: 'back',   label: '"Outra hora."', cb: 'close' }
     ]
   }

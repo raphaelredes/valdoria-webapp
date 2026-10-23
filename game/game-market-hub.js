@@ -47,10 +47,10 @@ if (!window._SVC_CONFIG_MARKET) {
     factionLabel: 'Mercado de Valdoria',
     reactions: {
       very_negative: 'Os mercadores se entreolham, e logo o boato corre pelas barracas. <i>(silêncio constrangedor)</i> "Vossa Senhoria perdeu crédito aqui hoje."',
-      negative: 'O mercador balança a cabeça desaprovando. <i>(continua o trabalho sem te olhar)</i> "Cada um com seus modos. Mas o preço fica o mesmo."',
+      negative: 'O mercador balança a cabeça desaprovando. <i>(continua o trabalho sem olhar para você)</i> "Cada um com seus modos. Mas o preço fica o mesmo."',
       neutral: 'O mercador continua atendendo. <i>(mantém o tom profissional)</i> "Anotado."',
       positive: 'O mercador sorri de canto. <i>(aceita a moeda com cuidado)</i> "Cliente respeitoso é cliente que volta. Apareça sempre."',
-      very_positive: 'O mercador estende a mão pra cumprimentar. <i>(gesto raro entre comerciantes orgulhosos)</i> "És do tipo que honra o Mercado. Próxima visita, abro a gaveta especial."'
+      very_positive: 'O mercador estende a mão pra cumprimentar. <i>(gesto raro entre comerciantes orgulhosos)</i> "Você é do tipo que honra o Mercado. Próxima visita, abro a gaveta especial."'
     },
     confirmMsgs: {
       narration: 'O mercador embala a compra com cuidado.',
@@ -230,6 +230,13 @@ function _mktBuildMerchantRow(npcKey, merchantData) {
           try { window.vEncounter.close(); } catch(_e){}
           if (ch && ch.id !== 'leave' && (ch.cb || '') !== 'close'
               && typeof window._showShopPopup === 'function') {
+            if (window._popupStack && Array.isArray(window._popupStack)) {
+              window._popupStack.push({
+                onClose: function() {
+                  setTimeout(function() { row.click(); }, 50);
+                }
+              });
+            }
             window._showShopPopup(npcKey);
           }
         }

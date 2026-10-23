@@ -67,9 +67,9 @@ function _gldSpeech(partyCount, partyMax, available, rotationHours) {
   var vagas = Math.max(0, (partyMax || 3) - (partyCount || 0));
   var parts = [];
   if (vagas > 0) {
-    parts.push('Bem-vindo de volta, aventureiro. Vejo que teu grupo ainda tem ' + vagas + ' vaga' + (vagas !== 1 ? 's' : '') + '.');
+    parts.push('Bem-vindo de volta, aventureiro. Vejo que seu grupo ainda tem ' + vagas + ' vaga' + (vagas !== 1 ? 's' : '') + '.');
   } else {
-    parts.push('Bem-vindo de volta, aventureiro. Teu grupo está completo — ' + partyCount + ' de ' + partyMax + '.');
+    parts.push('Bem-vindo de volta, aventureiro. Seu grupo está completo — ' + partyCount + ' de ' + partyMax + '.');
   }
   if (available && available > 0) {
     parts.push(' Temos ' + available + ' aventureiro' + (available !== 1 ? 's' : '') + ' dispostos hoje');
@@ -79,7 +79,7 @@ function _gldSpeech(partyCount, partyMax, available, rotationHours) {
       parts.push('.');
     }
   }
-  parts.push(' Em que posso te ajudar?');
+  parts.push(' Em que posso ajudar você?');
   return parts.join('');
 }
 
@@ -93,11 +93,11 @@ if (!window._SVC_CONFIG_GUILD) {
       negative: 'Tavira balança a cabeça. <i>(volta ao caderno)</i> "Cada um tem seu jeito. Mas a Guilda também."',
       neutral: 'Tavira anota algo no caderno. <i>(mantém o tom profissional)</i> "Registrado."',
       positive: 'Tavira ergue uma sobrancelha em aprovação. <i>(sorri de canto)</i> "Esse é o tipo de aventureiro que a Guilda precisa."',
-      very_positive: 'Tavira inclina a cabeça em respeito. <i>(estende a mão)</i> "És dos melhores. A Guilda sempre lembra dos seus."'
+      very_positive: 'Tavira inclina a cabeça em respeito. <i>(estende a mão)</i> "Você é dos melhores. A Guilda sempre lembra dos seus."'
     },
     confirmMsgs: {
       narration: 'Tavira anota o registro no livro da Guilda. <i>(passa a pena no tinteiro)</i>',
-      generic: '"Registrado e selado." <i>(fecha o livro)</i> Que tua jornada honre o nome da Guilda.'
+      generic: '"Registrado e selado." <i>(fecha o livro)</i> Que sua jornada honre o nome da Guilda.'
     }
   };
 }

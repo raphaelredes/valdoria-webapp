@@ -858,6 +858,30 @@
     // cb prefix 'cascade:' / 'memory:' / 'visit:' delegate to _npcDispatchCascadeChoice.
     // After dispatching, optionally chain to ch.continueDialogue (id em dialogues{})
     // pra continuação da conversa; senão fecha overlay.
+    if (cb === 'return_venue_root' || ch.id === 'return_venue_root') {
+      var faction = (window._SVC_CONFIG && window._SVC_CONFIG.faction) || '';
+      var isRem = !!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote())
+                  || (typeof window._isRemote === 'function' && window._isRemote());
+      if (isRem && typeof window._openCityDialogue === 'function') {
+        var rootMap = { temple: 'aldric', bank: 'aldwin', tavern: 'grom', inn: 'martha', market: 'thorne', guild: 'tavira', arena: 'vorhan', runes: 'eirik', workshop: 'garrick' };
+        var vName = faction === 'runes' ? 'rune' : faction;
+        var rNode = rootMap[faction] || 'aldric';
+        window._openCityDialogue(vName, rNode);
+        return true;
+      }
+      if (faction === 'temple' && typeof BREVON_DIALOGUE === 'object' && window.vEncounter) {
+        window.vEncounter.render(BREVON_DIALOGUE, { dialogues: dialogues || window.SERVICE_DIALOGUES_TEMPLE });
+        return true;
+      }
+      if (faction === 'bank' && typeof ALDWIN_DIALOGUE === 'object' && window.vEncounter) {
+        window.vEncounter.render(ALDWIN_DIALOGUE, { dialogues: dialogues || window.SERVICE_DIALOGUES_BANK });
+        return true;
+      }
+      if (dialogue && window.vEncounter && typeof window.vEncounter.render === 'function') {
+        window.vEncounter.render(dialogue, { dialogues: dialogues });
+        return true;
+      }
+    }
     if (cb.indexOf('cascade:') === 0 || cb.indexOf('memory:') === 0 || cb.indexOf('visit:') === 0) {
       if (typeof window._npcDispatchCascadeChoice === 'function') {
         window._npcDispatchCascadeChoice(cb, dialogue);
@@ -869,6 +893,23 @@
         } else if (typeof window._renderEncounterPopup === 'function') {
           window._renderEncounterPopup(dialogues[ch.continueDialogue]);
         }
+      } else if (window.vEncounter && typeof window.vEncounter.render === 'function' && dialogue) {
+        var npcObj = dialogue.npc || { name: 'NPC' };
+        var ackNarr = (window._SVC_CONFIG && window._SVC_CONFIG.confirmMsgs && window._SVC_CONFIG.confirmMsgs.narration)
+          || (npcObj.name + ' assente com discrição, registrando suas palavras.');
+        var ackSpeech = (window._SVC_CONFIG && window._SVC_CONFIG.confirmMsgs && window._SVC_CONFIG.confirmMsgs.generic)
+          || 'Entendido. Trataremos disso com a devida atenção.';
+        window.vEncounter.render({
+          npc: npcObj,
+          script: [
+            { type: 'narration', text: ackNarr },
+            { type: 'speech', speaker: npcObj.name || 'NPC', text: ackSpeech.replace(/^"|"$/g, '') }
+          ],
+          choices: [
+            { id: 'return_venue_root', label: '↩ "Mudar de assunto."', cb: 'return_venue_root' },
+            { id: 'leave', label: 'Encerrar conversa', cb: 'close' }
+          ]
+        }, { dialogues: dialogues });
       } else {
         if (window.vEncounter && typeof window.vEncounter.close === 'function') {
           window.vEncounter.close();
@@ -884,12 +925,13 @@
     // key em RECURRING_NPCS. Mas SERVICE_DIALOGUES_X têm enc.npc como OBJETO
     // ({name, desc, portrait}). Lookup falha → early return → nada acontece.
     // Fix: prefer vEncounter.render (canonical, aceita npc como objeto direto).
-    if (dialogues && dialogues[ch.id]) {
+    var nextDlgKey = (dialogues && dialogues[ch.id]) ? ch.id : (cb && dialogues && dialogues[cb]) ? cb : null;
+    if (nextDlgKey) {
       if (window.vEncounter && typeof window.vEncounter.render === 'function') {
         // Preserve opts.dialogues pra chain continuar funcionando
-        window.vEncounter.render(dialogues[ch.id], { dialogues: dialogues });
+        window.vEncounter.render(dialogues[nextDlgKey], { dialogues: dialogues });
       } else if (typeof window._renderEncounterPopup === 'function') {
-        window._renderEncounterPopup(dialogues[ch.id]); // legacy fallback
+        window._renderEncounterPopup(dialogues[nextDlgKey]); // legacy fallback
       }
       return true;
     }

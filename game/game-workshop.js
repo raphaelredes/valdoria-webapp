@@ -18,11 +18,11 @@ if (!window._SVC_CONFIG_WORKSHOP) {
     faction: 'workshop',
     factionLabel: 'Oficina de Artesanato',
     reactions: {
-      very_negative: 'Garrick larga o martelo no chão. <i>(sai sem te olhar)</i> "Sai da minha oficina."',
+      very_negative: 'Garrick larga o martelo no chão. <i>(sai sem olhar para você)</i> "Saia da minha oficina."',
       negative: 'Garrick coça a barba ruiva. <i>(volta ao trabalho)</i> "Cada um com seus modos. Mas aqui é trabalho."',
       neutral: 'Garrick acena com o queixo. <i>(continua martelando)</i> "Hmm."',
-      positive: 'Garrick interrompe o trabalho. <i>(dá uma palmada nos teus ombros)</i> "Cliente que respeita o ofício é cliente que volta."',
-      very_positive: 'Garrick estende a mão calejada. <i>(rara mostra de afeto)</i> "Honraste a Bigorna. Próxima encomenda, abro o estoque especial."'
+      positive: 'Garrick interrompe o trabalho. <i>(dá um tapa firme nos seus ombros)</i> "Cliente que respeita o ofício é cliente que volta."',
+      very_positive: 'Garrick estende a mão calejada. <i>(rara mostra de afeto)</i> "Você honrou a Bigorna. Na próxima encomenda, abro o estoque especial."'
     },
     confirmMsgs: {
       narration: 'Garrick anota no caderno encharcado de fuligem. <i>(martela uma vez na bigorna pra selar)</i>',
@@ -46,8 +46,8 @@ var GARRICK_DIALOGUE = {
   },
   script: [
     { type: 'narration', text: 'A oficina respira em fumaça e brasa. O forno central ruge — uma boca de ferro forjado com chamas alaranjadas dançando atrás de grade de aço. Ao lado, a bigorna principal: chumbo maciço, marcada por décadas de golpes, lustrosa onde o metal a beijou cem mil vezes.' },
-    { type: 'speech', speaker: 'Mestre Garrick', text: 'Cuidado com o chão. <i>(martela uma vez, pausa pra olhar)</i> Tem prego solto, ferro caído, e brasa que pula da forja sem aviso. O que vais fazer aqui? Eu não vendo curiosidade — só trabalho.' },
-    { type: 'speech', speaker: 'Mestre Garrick', text: 'Faço seis coisas. <i>(conta nos dedos calejados)</i> Forjo arma nova. Reparo dano. Aprimoro o que tu tem. Encanto se trouxeres a runa. Desconstruo se for desperdício. E faço comissão se pagares bem.' }
+    { type: 'speech', speaker: 'Mestre Garrick', text: 'Cuidado com o chão. <i>(martela uma vez, pausa pra olhar)</i> Tem prego solto, ferro caído, e brasa que pula da forja sem aviso. O que você veio fazer aqui? Eu não vendo curiosidade — só trabalho.' },
+    { type: 'speech', speaker: 'Mestre Garrick', text: 'Faço seis coisas. <i>(conta nos dedos calejados)</i> Forjo arma nova. Reparo dano. Aprimoro o que você tem. Encanto se você trouxer a runa. Desconstruo se for desperdício. E faço encomenda se pagar bem.' }
   ],
   choices: [
     // task #70 (2026-05-20): cb's alinhadas com backend canonical em crafting_ui.py.
@@ -94,6 +94,7 @@ function _wksOpenProfession(t){
   window.vEncounter.render({
     npc: { name: t.npc || 'Mestre Artesão', desc: t.desc || '', portraitHTML: t.emoji || '' },
     script: [
+      { type: 'narration', text: 'Você se aproxima da bancada de ' + String(t.name || 'ofício').toLowerCase() + ', onde ferramentas calibradas e materiais selecionados aguardam o trabalho artesanal.' },
       { type: 'speech', speaker: t.npc || 'Mestre', text: 'Bem-vindo à minha bancada de ' + String(t.name || '').toLowerCase() + '. ' + (t.recipe_count || 0) + ' receitas no meu repertório. O que deseja criar?' }
     ],
     choices: [

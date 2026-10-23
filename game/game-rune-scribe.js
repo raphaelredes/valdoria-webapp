@@ -21,10 +21,10 @@ if (!window._SVC_CONFIG_RUNES) {
     factionLabel: 'Câmara do Escriba',
     reactions: {
       very_negative: 'Eirik fecha o livro de glifos com um clack ressonante. <i>(volta-se para a parede de runas)</i> "Não."',
-      negative: 'Eirik suspira, decepcionado. <i>(continua escrevendo)</i> "Cada palavra tem peso. As tuas perderam o seu."',
+      negative: 'Eirik suspira, decepcionado. <i>(continua escrevendo)</i> "Cada palavra tem peso. As suas perderam o seu."',
       neutral: 'Eirik acena com leveza. <i>(volta ao manuscrito)</i> "Sigamos."',
-      positive: 'Eirik sorri discretamente. <i>(traça um pequeno glifo no ar)</i> "Há sabedoria em ti que poucos cultivam."',
-      very_positive: 'Eirik curva-se levemente. <i>(rara cortesia entre arcanistas)</i> "És dos poucos que entendem o peso de cada runa. A Câmara honra teu nome."'
+      positive: 'Eirik sorri discretamente. <i>(traça um pequeno glifo no ar)</i> "Há sabedoria em você que poucos cultivam."',
+      very_positive: 'Eirik curva-se levemente. <i>(rara cortesia entre arcanistas)</i> "Você é dos poucos que entendem o peso de cada runa. A Câmara honra seu nome."'
     },
     confirmMsgs: {
       narration: 'Eirik traça o glifo no pergaminho com pena de corvo. <i>(murmura uma sílaba em língua antiga)</i>',
@@ -40,8 +40,8 @@ var THESSIL_DIALOGUE = {
     portrait: '../shared/img/npcs/eirik-escriba.webp'
   },
   script: [
-    { type: 'narration', text: 'A câmara de Eirik é um santuário de pergaminhos e glifos. Estantes alcançam o teto, abarrotadas de manuscritos encadernados em couro escuro. Um cheiro de pena queimada, tinta de carvão e algo metálico — magia em estado bruto — paira no ar. Eirik ergue os olhos de um pergaminho aberto, traça um glifo no ar, e te reconhece.' },
-    { type: 'speech', speaker: 'Eirik', text: 'A Câmara está aberta. <i>(pousa a pena de corvo no tinteiro)</i> Trazes fragmentos? Três do mesmo tier forjam uma runa aleatória. É lei antiga, não tradição minha. O que precisas?' }
+    { type: 'narration', text: 'A câmara de Eirik é um santuário de pergaminhos e glifos. Estantes alcançam o teto, abarrotadas de manuscritos encadernados em couro escuro. Um cheiro de pena queimada, tinta de carvão e algo metálico — magia em estado bruto — paira no ar. Eirik ergue os olhos de um pergaminho aberto, traça um glifo no ar, e reconhece você.' },
+    { type: 'speech', speaker: 'Eirik', text: 'A Câmara está aberta. <i>(pousa a pena de corvo no tinteiro)</i> Trouxe fragmentos? Três do mesmo tier forjam uma runa aleatória. É lei antiga, não tradição minha. Do que você precisa?' }
   ],
   choices: [
     // task #70 (2026-05-20): cb's alinhadas com backend canonical em market_rune_scribe.py.

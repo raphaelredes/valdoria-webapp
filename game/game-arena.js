@@ -69,9 +69,9 @@ if (!window._SVC_CONFIG_ARENA) {
     reactions: {
       very_negative: 'Vorhan cospe no ch\u00E3o. <i>(volta-se para a multid\u00E3o)</i> "Pr\u00F3ximo!"',
       negative: 'Vorhan aperta os olhos, descrente. <i>(co\u00E7a a cicatriz no queixo)</i> "Trouxa."',
-      neutral: 'Vorhan anota o resultado no escudo de couro. <i>(n\u00E3o te olha)</i> "Hmm."',
-      positive: 'Vorhan assente, satisfeito. <i>(bate o punho sobre o peito)</i> "Lutaste bem. A multid\u00E3o lembrar\u00E1."',
-      very_positive: 'Vorhan estende a m\u00E3o calejada. <i>(rara mostra de respeito)</i> "Honraste o coliseu. A Arena reconhece os bravos."'
+      neutral: 'Vorhan anota o resultado no escudo de couro. <i>(nem olha para voc\u00EA)</i> "Hmm."',
+      positive: 'Vorhan assente, satisfeito. <i>(bate o punho sobre o peito)</i> "Lutou bem. A multid\u00E3o lembrar\u00E1."',
+      very_positive: 'Vorhan estende a m\u00E3o calejada. <i>(rara mostra de respeito)</i> "Honrou o coliseu. A Arena reconhece os bravos."'
     },
     confirmMsgs: {
       narration: 'Vorhan marca o resultado na tabela de combate. <i>(tom de bronze ressoa pelos corredores)</i>',
@@ -95,8 +95,8 @@ var VORHAN_DIALOGUE = {
     portrait: '../shared/img/npcs/mestre-vorhan.webp'
   },
   script: [
-    { type: 'narration', text: 'Vorhan \u00E9 colossal \u2014 dois metros, cicatrizes desenhando mapas em seu rosto, armadura de couro batido suja do sangue de mil combates. Atr\u00E1s dele, o coliseu zumbe com a multid\u00E3o. Ele te mede com o olhar de quem j\u00E1 viu mil aventureiros prometer e n\u00E3o cumprir.' },
-    { type: 'speech', speaker: 'Mestre Vorhan', text: 'Vens lutar ou tagarelar? <i>(cruza os bra\u00E7os calejados)</i> A Arena n\u00E3o tolera covardes. Ganha duas vezes seguidas e a multid\u00E3o lembrar\u00E1. Perde mais que ganha e ningu\u00E9m vai sequer ao funeral.' }
+    { type: 'narration', text: 'Vorhan \u00E9 colossal \u2014 dois metros, cicatrizes desenhando mapas em seu rosto, armadura de couro batido suja do sangue de mil combates. Atr\u00E1s dele, o coliseu zumbe com a multid\u00E3o. Ele mede voc\u00EA com o olhar de quem j\u00E1 viu mil aventureiros prometer e n\u00E3o cumprir.' },
+    { type: 'speech', speaker: 'Mestre Vorhan', text: 'Veio lutar ou tagarelar? <i>(cruza os bra\u00E7os calejados)</i> A Arena n\u00E3o tolera covardes. Ganhe duas vezes seguidas e a multid\u00E3o lembrar\u00E1. Perca mais que ganha e ningu\u00E9m vai sequer ao funeral.' }
   ],
   choices: [
     // task #70 (2026-05-20): cb's alinhadas com backend canonical em arena_manager.py.
