@@ -53,105 +53,105 @@
     //   ─── E ───────────  swamp, deep_swamp, desert, volcanic, valkrest
     // ═══════════════════════════════════════════════════════════════
     // ─── HUB CENTRAL (origem) ─────────────────────
-    { key: 'plains',    name: 'Portões de Valdoria',     x: 0.46, y: 0.5, biome: 'plains',    tier: 0, ico: '', isOrigin: true,
+    { key: 'plains',    name: 'Portões de Valdoria',     x: 0.50, y: 0.55, biome: 'plains',    tier: 0, ico: '', isOrigin: true,
       mapKey: null,
       desc: 'Os grandes portões da cidade. Aldric vigia a entrada. Ponto de partida de toda jornada.' },
     // ─── PLAINS interior (Sudoeste/Sudeste) ──────
-    { key: 'green_fields',   name: 'Campos Verdes',       x: 0.34, y: 0.68, biome: 'plains',  tier: 1, ico: '',
+    { key: 'green_fields',   name: 'Campos Verdes',       x: 0.36, y: 0.46, biome: 'plains',  tier: 1, ico: '',
       mapKey: 'Mapa das Planícies',
       desc: 'Vastas planícies onde o vento sopra livre. Lar de coelhos... e bandidos.' },
-    { key: 'orc_tribe',      name: 'Acampamento Orc',     x: 0.5, y: 0.74, biome: 'plains',  tier: 3, ico: '',
+    { key: 'orc_tribe',      name: 'Acampamento Orc',     x: 0.64, y: 0.58, biome: 'plains',  tier: 3, ico: '',
       mapKey: 'Mapa das Planícies',
       desc: 'Tendas de couro grosseiro e fogueiras. Tambores de guerra ecoam.' },
-    { key: 'bandit_fortress', name: 'Forte dos Bandidos', x: 0.66, y: 0.66, biome: 'plains',  tier: 5, ico: '',
+    { key: 'bandit_fortress', name: 'Forte dos Bandidos', x: 0.50, y: 0.68, biome: 'plains',  tier: 5, ico: '',
       mapKey: 'Mapa das Planícies',
       desc: 'Fortaleza improvisada de madeira e pedra. Base de saqueadores.' },
     // ─── FOREST (Norte) ───────────────────────────
-    { key: 'forest',    name: 'Floresta dos Sussurros',  x: 0.55, y: 0.24, biome: 'forest',   tier: 2, ico: '',
+    { key: 'forest',    name: 'Floresta dos Sussurros',  x: 0.48, y: 0.35, biome: 'forest',   tier: 2, ico: '',
       mapKey: 'Mapa da Floresta',
       desc: 'Árvores antigas que bloqueiam a luz do sol. Sombras com vida.' },
-    { key: 'goblin_nest',     name: 'Ninho de Goblins',  x: 0.4, y: 0.3, biome: 'forest',   tier: 2, ico: '',
+    { key: 'goblin_nest',     name: 'Ninho de Goblins',  x: 0.36, y: 0.22, biome: 'forest',   tier: 2, ico: '',
       mapKey: 'Mapa da Floresta',
       desc: 'Clareira cheia de armadilhas e lixo. O cheiro é terrível.' },
-    { key: 'elven_ruins',     name: 'Ruínas Élficas',    x: 0.72, y: 0.16, biome: 'forest',   tier: 4, ico: '',
+    { key: 'elven_ruins',     name: 'Ruínas Élficas',    x: 0.50, y: 0.20, biome: 'forest',   tier: 4, ico: '',
       mapKey: 'Mapa da Floresta',
       desc: 'Restos de uma antiga civilização élfica. A magia ainda pulsa.' },
     // ─── CAVE / UNDERGROUND (Oeste) ──────────────
-    { key: 'cave',      name: 'Passagem Subterrânea',    x: 0.22, y: 0.56, biome: 'cave',     tier: 3, ico: '',
+    { key: 'cave',      name: 'Passagem Subterrânea',    x: 0.22, y: 0.45, biome: 'cave',     tier: 3, ico: '',
       mapKey: 'Mapa das Montanhas',
       desc: 'Túnel escuro sob as colinas. Ecos estranhos das profundezas.' },
-    { key: 'troll_cave', name: 'Caverna do Troll',       x: 0.1, y: 0.34, biome: 'cave',     tier: 5, ico: '',
+    { key: 'troll_cave', name: 'Caverna do Troll',       x: 0.08, y: 0.47, biome: 'cave',     tier: 5, ico: '',
       mapKey: 'Mapa das Montanhas',
       desc: 'Abertura escura na rocha. Ossos enormes na entrada.' },
     // ─── SWAMP (Leste) ───────────────────────────
-    { key: 'swamp',     name: 'Pântano Nebuloso',         x: 0.66, y: 0.4, biome: 'swamp',   tier: 3, ico: '',
+    { key: 'swamp',     name: 'Pântano Nebuloso',         x: 0.74, y: 0.46, biome: 'swamp',   tier: 3, ico: '',
       mapKey: 'Mapa do Pântano',
       desc: 'Águas paradas e névoa eterna. Cuidado onde pisa.' },
-    { key: 'deep_swamp', name: 'Pântano Profundo',        x: 0.82, y: 0.5, biome: 'swamp',   tier: 5, ico: '',
+    { key: 'deep_swamp', name: 'Pântano Profundo',        x: 0.89, y: 0.40, biome: 'swamp',   tier: 5, ico: '',
       mapKey: 'Mapa do Pântano',
       desc: 'Águas negras e árvores mortas. Criaturas anciãs espreitam.' },
     // ─── MOUNTAIN (Noroeste) ──────────────────────
-    { key: 'mountain',  name: 'Picos de Pedra',           x: 0.2, y: 0.16, biome: 'mountain', tier: 4, ico: '',
+    { key: 'mountain',  name: 'Picos de Pedra',           x: 0.22, y: 0.32, biome: 'mountain', tier: 4, ico: '',
       mapKey: 'Mapa das Montanhas',
       desc: 'Montanhas íngremes e vento cortante. Harpias fazem ninhos.' },
-    { key: 'dragon_pass', name: 'Passo do Dragão',        x: 0.34, y: 0.1, biome: 'mountain', tier: 6, ico: '',
+    { key: 'dragon_pass', name: 'Passo do Dragão',        x: 0.24, y: 0.12, biome: 'mountain', tier: 6, ico: '',
       mapKey: 'Mapa das Montanhas',
       desc: 'Passagem estreita entre picos vulcânicos. Fumaça sobe do vale.' },
-    { key: 'korthag',   name: 'Korthag (Vila Mineira)',   x: 0.07, y: 0.07, biome: 'mountain', tier: 3, ico: '', settlement: true, discoverable: true,
+    { key: 'korthag',   name: 'Korthag (Vila Mineira)',   x: 0.12, y: 0.22, biome: 'mountain', tier: 3, ico: '', settlement: true, discoverable: true,
       mapKey: null,
       desc: 'Vila mineradora encravada nos picos. Fornalhas ardem dia e noite.' },
     // ─── DESERT (Sudeste) ─────────────────────────
-    { key: 'desert',    name: 'Deserto Dourado',          x: 0.62, y: 0.86, biome: 'desert',   tier: 4, ico: '',
+    { key: 'desert',    name: 'Deserto Dourado',          x: 0.38, y: 0.78, biome: 'desert',   tier: 4, ico: '',
       mapKey: 'Mapa do Deserto',
       desc: 'Dunas sem fim sob um sol impiedoso. Água vale mais que ouro.' },
     // ─── GRAVEYARD (Sul) ──────────────────────────
-    { key: 'graveyard', name: 'Cemitério Antigo',         x: 0.34, y: 0.9, biome: 'graveyard', tier: 3, ico: '',
+    { key: 'graveyard', name: 'Cemitério Antigo',         x: 0.56, y: 0.86, biome: 'graveyard', tier: 3, ico: '',
       mapKey: 'Mapa do Pântano',
       desc: 'Lápides cobertas de musgo. Mortos não descansam em paz.' },
-    { key: 'ancestral_graveyard', name: 'Cemitério Ancestral', x: 0.18, y: 0.86, biome: 'graveyard', tier: 5, ico: '',
+    { key: 'ancestral_graveyard', name: 'Cemitério Ancestral', x: 0.24, y: 0.86, biome: 'graveyard', tier: 5, ico: '',
       mapKey: 'Mapa do Pântano',
       desc: 'Mausoléus antigos da aristocracia esquecida. Magia necromântica residual.' },
     // ─── UNDERGROUND DEEP (Oeste profundo) ───────
-    { key: 'underground_caverns', name: 'Cavernas Subterrâneas', x: 0.07, y: 0.7, biome: 'cave', tier: 5, ico: '',
+    { key: 'underground_caverns', name: 'Cavernas Subterrâneas', x: 0.22, y: 0.58, biome: 'cave', tier: 5, ico: '',
       mapKey: 'Mapa das Montanhas',
       desc: 'Sistema de túneis profundos. Pedra esculpida pelo tempo.' },
-    { key: 'crystal_depths', name: 'Profundezas de Cristal', x: 0.06, y: 0.52, biome: 'cave', tier: 7, ico: '',
+    { key: 'crystal_depths', name: 'Profundezas de Cristal', x: 0.08, y: 0.61, biome: 'cave', tier: 7, ico: '',
       mapKey: 'Mapa das Montanhas',
       desc: 'Cavernas iluminadas por cristais luminescentes. Magia ancestral pulsa nas paredes.' },
     // ─── SNOW (Norte distante) ────────────────────
-    { key: 'snow',      name: 'Ermo Congelado',           x: 0.5, y: 0.05, biome: 'snow',     tier: 5, ico: '',
+    { key: 'snow',      name: 'Ermo Congelado',           x: 0.66, y: 0.10, biome: 'snow',     tier: 5, ico: '',
       mapKey: 'Mapa do Ermo Gelado',
       desc: 'Tudo é branco e mortal. O frio penetra até a alma.' },
     // ─── VOLCANIC (Leste extremo) ─────────────────
-    { key: 'volcanic',  name: 'Cratera Vulcânica',        x: 0.9, y: 0.66, biome: 'volcanic', tier: 8, ico: '',
+    { key: 'volcanic',  name: 'Cratera Vulcânica',        x: 0.80, y: 0.64, biome: 'volcanic', tier: 8, ico: '',
       mapKey: 'Mapa Vulcânico',
       desc: 'Rios de lava e cinzas. O calor derrete metal. Lar de dragões?' },
-    { key: 'valkrest',  name: 'Valkrest (Acampamento)',   x: 0.92, y: 0.4, biome: 'volcanic', tier: 5, ico: '', settlement: true, discoverable: true,
+    { key: 'valkrest',  name: 'Valkrest (Acampamento)',   x: 0.92, y: 0.70, biome: 'volcanic', tier: 5, ico: '', settlement: true, discoverable: true,
       mapKey: null,
       desc: 'Acampamento fortificado de aventureiros veteranos. Tendas resistem ao calor.' },
     // ─── 6 NOVOS BIOMAS (WORLD-1) ─────────────────
     // COAST (Leste/Sudeste)
-    { key: 'salty_coast', name: 'Costa Salgada', x: 0.88, y: 0.88, biome: 'coast', tier: 4, ico: '',
+    { key: 'salty_coast', name: 'Costa Salgada', x: 0.90, y: 0.54, biome: 'coast', tier: 4, ico: '',
       mapKey: 'Mapa da Costa',
       desc: 'Penhascos fustigados por ondas impiedosas, cavernas de maré e destroços de embarcações naufragadas. O sal impregna a brisa marinha.' },
     // DARK MOUNTAIN (Noroeste profundo)
-    { key: 'black_peaks', name: 'Montanhas Negras', x: 0.05, y: 0.21, biome: 'dark_mountain', tier: 6, ico: '',
+    { key: 'black_peaks', name: 'Montanhas Negras', x: 0.05, y: 0.33, biome: 'dark_mountain', tier: 6, ico: '',
       mapKey: 'Mapa das Montanhas',
       desc: 'Picos escarpados de rocha obsidiana e ardósia escura. O ar é pesado com enxofre antigo e as gargantas vertiginosas ecoam ventos uivantes.' },
     // ELDRITCH SWAMP (Leste profundo)
-    { key: 'eldritch_mire', name: 'Pântano Eldritch', x: 0.88, y: 0.26, biome: 'eldritch_swamp', tier: 7, ico: '',
+    { key: 'eldritch_mire', name: 'Pântano Eldritch', x: 0.76, y: 0.30, biome: 'eldritch_swamp', tier: 7, ico: '',
       mapKey: 'Mapa do Pântano',
       desc: 'Águas lodosas tingidas de fosforescência púrpura e árvores retorcidas cujas raízes sangram seiva espessa. Entidades ancestrais sussurram na névoa.' },
     // BADLANDS (Sudeste árido)
-    { key: 'ashen_badlands', name: 'Terras Devastadas', x: 0.78, y: 0.74, biome: 'badlands', tier: 5, ico: '',
+    { key: 'ashen_badlands', name: 'Terras Devastadas', x: 0.76, y: 0.78, biome: 'badlands', tier: 5, ico: '',
       mapKey: 'Mapa das Planícies',
       desc: 'Cânions profundos e platôs ressequidos de terra vermelha rachada. Nenhuma árvore sobrevive aqui, apenas carcaças de monstros e poeira sufocante.' },
     // ANCIENT FOREST (Norte ancestral)
-    { key: 'elder_woods', name: 'Bosque Ancestral', x: 0.64, y: 0.06, biome: 'ancient_forest', tier: 5, ico: '',
+    { key: 'elder_woods', name: 'Bosque Ancestral', x: 0.64, y: 0.25, biome: 'ancient_forest', tier: 5, ico: '',
       mapKey: 'Mapa da Floresta',
       desc: 'Árvores titânicas cujos troncos abraçam ruínas milenares anteriores à fundação de Valdória. A magia primordial vibra em cada folha prateada.' },
     // FROZEN ABYSS (Norte extremo)
-    { key: 'glacial_rift', name: 'Abismo Glacial', x: 0.80, y: 0.05, biome: 'frozen_abyss', tier: 8, ico: '',
+    { key: 'glacial_rift', name: 'Abismo Glacial', x: 0.44, y: 0.07, biome: 'frozen_abyss', tier: 8, ico: '',
       mapKey: 'Mapa do Ermo Gelado',
       desc: 'Uma imensa fenda de gelo azul eterno onde o frio congela o sangue em instantes. Ecos de feras colossais presas nas profundezas ressoam pelas geleiras.' }
   ];
@@ -420,25 +420,64 @@
   // world-map.webp como fundo do canvas + ícones de local (OpenAI) nas coords
   // salvas (/api/exploracao/map-coords). _onWorldMapLoad permite o consumer
   // invalidar a base-cache + redraw quando a imagem chega assíncrona.
-  var _cartWorldMap = null;
+    var _cartWorldMap = null;
   var _cartWorldMapCbs = [];
   (function(){
+    var url = '/shared/img/map/world-map.webp?v=20261023_v4';
+    function _onSuccess(im) {
+      _cartWorldMap = im;
+      var cbs = _cartWorldMapCbs; _cartWorldMapCbs = [];
+      cbs.forEach(function(cb){ try { cb(); } catch(_){} });
+    }
+    function _onError() {
+      if (url.indexOf('../shared/') === -1 && url.indexOf('/shared/') !== -1) {
+        var relUrl = url.replace('/shared/', '../shared/');
+        var fallbackIm = new Image();
+        fallbackIm.onload = function(){ _onSuccess(fallbackIm); };
+        fallbackIm.onerror = function(){ _cartWorldMap = null; };
+        fallbackIm.src = relUrl;
+      } else {
+        _cartWorldMap = null;
+      }
+    }
+    function _plainLoad(targetUrl) {
+      var im = new Image();
+      im.onload = function(){ _onSuccess(im); };
+      im.onerror = _onError;
+      im.src = targetUrl;
+    }
+
     try {
-      var _im = new Image();
-      _im.onload = function(){
-        _cartWorldMap = _im;
-        var cbs = _cartWorldMapCbs; _cartWorldMapCbs = [];
-        cbs.forEach(function(cb){ try { cb(); } catch(_){} });
-      };
-      _im.onerror = function(){
-        if (_im.src && _im.src.indexOf('../shared/') === -1 && _im.src.indexOf('/shared/') !== -1) {
-          _im.src = _im.src.replace('/shared/', '../shared/');
-        } else {
-          _cartWorldMap = null;
-        }
-      };
-      _im.src = '/shared/img/map/world-map.webp?v=20261023_v3';
-    } catch(_e){ _cartWorldMap = null; }
+      if (typeof window !== 'undefined' && 'caches' in window) {
+        caches.open('valdoria-cartography-v2').then(function(cache){
+          return cache.match(url).then(function(match){
+            if (match) {
+              return match.blob().then(function(blob){
+                var blobUrl = URL.createObjectURL(blob);
+                var im = new Image();
+                im.onload = function(){ _onSuccess(im); };
+                im.onerror = function(){ _plainLoad(url); };
+                im.src = blobUrl;
+              });
+            } else {
+              return fetch(url, { cache: 'force-cache' }).then(function(resp){
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                try { cache.put(url, resp.clone()); } catch(_){}
+                return resp.blob();
+              }).then(function(blob){
+                var blobUrl = URL.createObjectURL(blob);
+                var im = new Image();
+                im.onload = function(){ _onSuccess(im); };
+                im.onerror = function(){ _plainLoad(url); };
+                im.src = blobUrl;
+              });
+            }
+          });
+        }).catch(function(){ _plainLoad(url); });
+      } else {
+        _plainLoad(url);
+      }
+    } catch(_e){ _plainLoad(url); }
   })();
 
   // === worldMapReady / _onWorldMapLoad ===
@@ -3286,7 +3325,7 @@
   }
 
   // === _drawCartNode ===
-  function _drawCartNode(ctx, b, w, h, isHover, opts){
+    function _drawCartNode(ctx, b, w, h, isHover, opts){
     opts = opts || {};
     var bx = b.x * w, by = b.y * h;
     var isOrigin = b.isOrigin;
@@ -3295,35 +3334,47 @@
       hasRegionalMap = opts.ownedMaps.indexOf(b.mapKey) >= 0;
     }
 
-    // ── 1. Retículo de Foco Vazado (Lente Cartográfica Náutica) ────────
-    // Ilumina e destaca o relevo do terreno sob o círculo no world-map.webp,
-    // sem poluir com imagens duplicadas ou carimbos opacos.
-    var radius = isHover ? 18 : 13;
+    // ── 1. Retículo de Foco com Lente Náutica e Emblema da Destinação ────
+    var radius = isHover ? 20 : 14;
     ctx.save();
 
-    // 1.1 Iluminação interna suave do terreno (lupa cartográfica)
-    ctx.beginPath();
-    ctx.arc(bx, by, radius, 0, Math.PI * 2);
-    ctx.fillStyle = isHover ? 'rgba(255, 214, 133, 0.22)' : 'rgba(255, 214, 133, 0.10)';
-    ctx.fill();
+    // 1.1 Emblema / Miniatura da localidade dentro da lente náutica
+    var ic = (opts.locArt && opts.locArt[b.key]) || null;
+    if (ic && ic.complete && ic.naturalWidth) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(bx, by, radius - 1.5, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(ic, bx - radius, by - radius, radius * 2, radius * 2);
+      // Véu suave de integração sobre a miniatura
+      ctx.fillStyle = isHover ? 'rgba(42, 30, 18, 0.05)' : 'rgba(42, 30, 18, 0.15)';
+      ctx.fillRect(bx - radius, by - radius, radius * 2, radius * 2);
+      ctx.restore();
+    } else {
+      // Iluminação interna suave do terreno caso a miniatura ainda esteja carregando
+      ctx.beginPath();
+      ctx.arc(bx, by, radius, 0, Math.PI * 2);
+      ctx.fillStyle = isHover ? 'rgba(255, 214, 133, 0.22)' : 'rgba(255, 214, 133, 0.10)';
+      ctx.fill();
+    }
 
-    // 1.2 Anel Dourado Cartográfico (Vazado)
+    // 1.2 Anel Dourado Cartográfico (Aro Náutico)
     ctx.beginPath();
     ctx.arc(bx, by, radius, 0, Math.PI * 2);
-    ctx.lineWidth = isHover ? 2.0 : 1.2;
-    ctx.strokeStyle = isHover ? '#ffd685' : (isOrigin ? 'rgba(232, 196, 90, 0.85)' : 'rgba(196, 149, 58, 0.70)');
+    ctx.lineWidth = isHover ? 2.2 : 1.4;
+    ctx.strokeStyle = isHover ? '#ffd685' : (isOrigin ? 'rgba(232, 196, 90, 0.90)' : 'rgba(196, 149, 58, 0.75)');
     if (isHover) {
-      ctx.shadowColor = 'rgba(196, 149, 58, 0.85)';
-      ctx.shadowBlur = 10;
+      ctx.shadowColor = 'rgba(196, 149, 58, 0.90)';
+      ctx.shadowBlur = 12;
     }
     ctx.stroke();
 
-    // 1.3 Anel Esmeralda para Áreas Mapeadas (Posse da Carta Regional de Corvus)
+    // 1.3 Anel Esmeralda para Áreas Mapeadas (Carta Regional de Corvus)
     if (hasRegionalMap) {
       ctx.beginPath();
       ctx.arc(bx, by, radius + 3, 0, Math.PI * 2);
-      ctx.lineWidth = 1.0;
-      ctx.strokeStyle = 'rgba(129, 199, 132, 0.85)';
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = 'rgba(129, 199, 132, 0.90)';
       ctx.stroke();
     }
 
@@ -3331,8 +3382,8 @@
     if (isOrigin) {
       ctx.beginPath();
       ctx.arc(bx, by, Math.max(4, radius - 4), 0, Math.PI * 2);
-      ctx.lineWidth = 0.8;
-      ctx.strokeStyle = 'rgba(232, 196, 90, 0.75)';
+      ctx.lineWidth = 1.0;
+      ctx.strokeStyle = 'rgba(232, 196, 90, 0.85)';
       ctx.stroke();
     }
 
@@ -3343,7 +3394,7 @@
     ctx.moveTo(bx + radius - 1, by); ctx.lineTo(bx + radius + tickLen, by);
     ctx.moveTo(bx, by - radius - tickLen); ctx.lineTo(bx, by - radius + 1);
     ctx.moveTo(bx, by + radius - 1); ctx.lineTo(bx, by + radius + tickLen);
-    ctx.strokeStyle = isHover ? '#ffd685' : 'rgba(196, 149, 58, 0.50)';
+    ctx.strokeStyle = isHover ? '#ffd685' : 'rgba(196, 149, 58, 0.60)';
     ctx.lineWidth = 1;
     ctx.stroke();
 
@@ -3368,25 +3419,23 @@
     if (hasLvl) { ctx.font = 'italic 8px serif'; lvlW = ctx.measureText(lvlRange).width; ctx.font = (isHover ? 'bold 11px' : '10px') + ' serif'; }
     var pillW = Math.max(tw, lvlW) + 12;
     var pillH = hasLvl ? 27 : 16;
-    var pillX = bx - pillW / 2, pillY = by + radius + 8;
-    // Pill escuro semi-transparente (lê em QUALQUER parte do world-map)
-    ctx.fillStyle = 'rgba(26,21,16,0.85)';
+    var pillX = bx - pillW / 2;
+    var pillY = by + radius + 4;
+    ctx.fillStyle = 'rgba(28,20,13,0.92)';
+    ctx.strokeStyle = isHover ? 'rgba(255,214,133,0.85)' : 'rgba(196,149,58,0.55)';
+    ctx.lineWidth = 1;
     ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(pillX, pillY, pillW, pillH, 5);
+    if (ctx.roundRect) ctx.roundRect(pillX, pillY, pillW, pillH, 3);
     else ctx.rect(pillX, pillY, pillW, pillH);
     ctx.fill();
-    // Borda dourada sutil (origem mais forte; hover mais grosso)
-    ctx.strokeStyle = isOrigin ? 'rgba(196,149,58,0.85)' : 'rgba(196,149,58,0.45)';
-    ctx.lineWidth = isHover ? 1.0 : 0.7;
     ctx.stroke();
-    // Nome do local (claro; origem dourada)
-    ctx.fillStyle = isOrigin ? '#e8c45a' : '#e6dcc4';
-    ctx.fillText(labelText, bx, pillY + 3);
-    // Range de nível (dourado, DENTRO do pill — agora legível)
+
+    ctx.fillStyle = isHover ? '#ffd685' : '#e8c45a';
+    ctx.fillText(labelText, bx, pillY + 2);
     if (hasLvl) {
       ctx.font = 'italic 8px serif';
-      ctx.fillStyle = 'rgba(196,149,58,0.92)';
-      ctx.fillText(lvlRange, bx, pillY + 16);
+      ctx.fillStyle = 'rgba(218,194,148,0.78)';
+      ctx.fillText(lvlRange, bx, pillY + 14);
     }
     ctx.restore();
   }
@@ -3801,7 +3850,7 @@
         // Só aparece o que o personagem JÁ descobriu (known_locations) ou a origem.
         if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) {
           var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
-          _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps });
+          _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt });
         }
       });
       var pk = (typeof cfg.getPlayerBiomeKey === 'function') ? cfg.getPlayerBiomeKey() : null;
@@ -3913,25 +3962,25 @@
   }
 
   // === CART_PROVINCES (Hierarquia das 8 Províncias Canônicas de Valdória) ===
-  var CART_PROVINCES = [
+    var CART_PROVINCES = [
     { id: 'world',    name: 'Continente Geral',     icon: '🌍', zoom: 1.0,  cx: 0.50, cy: 0.50, mapKey: null,
       desc: 'Visão de todo o continente conhecido de Valdória e suas fronteiras.' },
-    { id: 'plains',   name: 'Planícies Centrais',   icon: '🌾', zoom: 1.80, cx: 0.48, cy: 0.65, mapKey: 'Mapa das Planícies',
-      desc: 'Coração comercial do continente. Terras férteis, acampamentos e fortes sob o sopro do vento.' },
-    { id: 'forest',   name: 'Grandes Florestas',    icon: '🌲', zoom: 1.85, cx: 0.55, cy: 0.22, mapKey: 'Mapa da Floresta',
-      desc: 'Matas ancestrais onde a luz solar mal penetra e a magia druídica pulsa nas raízes.' },
-    { id: 'swamp',    name: 'Pântanos do Leste',    icon: '🐍', zoom: 1.80, cx: 0.72, cy: 0.52, mapKey: 'Mapa do Pântano',
-      desc: 'Águas estagnadas, sepulcros esquecidos e brumas traiçoeiras carregadas de miasma.' },
-    { id: 'mountain', name: 'Cordilheira Ocidental',icon: '🏔️', zoom: 1.80, cx: 0.16, cy: 0.32, mapKey: 'Mapa das Montanhas',
-      desc: 'Picos escarpados de rocha e minas profundas onde os ventos uivam entre desfiladeiros.' },
-    { id: 'desert',   name: 'Dunas do Sul',         icon: '🌵', zoom: 2.00, cx: 0.65, cy: 0.85, mapKey: 'Mapa do Deserto',
-      desc: 'Mares de areia dourada e ruínas soterradas sob o sol inclemente do sul.' },
-    { id: 'coast',    name: 'Litoral da Tormenta',  icon: '🌊', zoom: 2.00, cx: 0.88, cy: 0.86, mapKey: 'Mapa da Costa',
-      desc: 'Falésias fustigadas por ondas oceânicas, enseadas piratas e marés traiçoeiras.' },
-    { id: 'snow',     name: 'Ermo Boreal',          icon: '❄️', zoom: 2.00, cx: 0.65, cy: 0.08, mapKey: 'Mapa do Ermo Gelado',
-      desc: 'Geleiras eternas e despenhadeiros de gelo azul onde o frio corta mais que lâmina de aço.' },
-    { id: 'volcanic', name: 'Terras de Fogo',       icon: '🌋', zoom: 2.00, cx: 0.90, cy: 0.52, mapKey: 'Mapa Vulcânico',
-      desc: 'Gargantas fumegantes e rios de cinzas que desafiam a própria vida mortal.' }
+    { id: 'plains',   name: 'Planícies Centrais',   icon: '🌾', zoom: 2.10, cx: 0.50, cy: 0.55, mapKey: 'Mapa das Planícies',
+      desc: 'Coração comercial e agrícola do reino. Campos dourados e grandes portões de pedra.' },
+    { id: 'forest',   name: 'Grandes Florestas',    icon: '🌲', zoom: 2.10, cx: 0.50, cy: 0.28, mapKey: 'Mapa da Floresta',
+      desc: 'Matas ancestrais densas, arcos élficos de pedra e bosques imemoriais.' },
+    { id: 'swamp',    name: 'Pântanos do Leste',    icon: '🐍', zoom: 2.10, cx: 0.78, cy: 0.42, mapKey: 'Mapa do Pântano',
+      desc: 'Águas estagnadas escuras, cabanas sobre palafitas e névoas com vapores esmeralda.' },
+    { id: 'mountain', name: 'Cordilheira Ocidental',icon: '🏔️', zoom: 2.10, cx: 0.20, cy: 0.38, mapKey: 'Mapa das Montanhas',
+      desc: 'Picos escarpados de granito, forjas mineiras de Korthag e galerias subterrâneas.' },
+    { id: 'desert',   name: 'Dunas do Sul',         icon: '🌵', zoom: 2.10, cx: 0.42, cy: 0.80, mapKey: 'Mapa do Deserto',
+      desc: 'Mares de areia dourada, cânions profundos de arenito e mausoléus antigos.' },
+    { id: 'coast',    name: 'Litoral da Tormenta',  icon: '🌊', zoom: 2.10, cx: 0.88, cy: 0.52, mapKey: 'Mapa da Costa',
+      desc: 'Costões rochosos fustigados por ondas oceânicas e enseadas de navegadores.' },
+    { id: 'snow',     name: 'Ermo Boreal',          icon: '❄️', zoom: 2.10, cx: 0.52, cy: 0.10, mapKey: 'Mapa do Ermo Gelado',
+      desc: 'Geleiras azuis eternas, fendas no gelo e montanhas congeladas ao norte.' },
+    { id: 'volcanic', name: 'Terras de Fogo',       icon: '🌋', zoom: 2.10, cx: 0.80, cy: 0.70, mapKey: 'Mapa Vulcânico',
+      desc: 'A grande caldeira ativa, fendas de lava incandescente e platôs de basalto.' }
   ];
 
   var _LOCATION_TO_PROVINCE = {

@@ -5304,7 +5304,64 @@ LOG SINK (Fase 7):
       font-size: var(--v-font-micro, 10px);
       margin: 0;
     }
-    .cart-canvas-frame {
+        .cart-loading-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 55;
+      background: radial-gradient(circle at center, rgba(32,24,16,0.96) 0%, rgba(14,10,6,0.98) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity 0.4s ease-out, visibility 0.4s ease-out;
+      pointer-events: auto;
+    }
+    .cart-loading-overlay.clo-hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .clo-astrolabe {
+      font-size: 32px;
+      color: #c4953a;
+      animation: cloSpin 8s linear infinite;
+      text-shadow: 0 0 12px rgba(196,149,58,0.6);
+    }
+    @keyframes cloSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .clo-title {
+      font-family: var(--v-font-family-display, serif);
+      font-size: 13px;
+      letter-spacing: 2px;
+      font-weight: bold;
+      color: #e8c45a;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+    }
+    .clo-desc {
+      font-size: 10px;
+      color: #a09484;
+      font-style: italic;
+    }
+    .clo-bar-track {
+      width: 140px;
+      height: 4px;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(196,149,58,0.3);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .clo-bar-fill {
+      width: 10%;
+      height: 100%;
+      background: linear-gradient(90deg, #c4953a, #ffd685);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+.cart-canvas-frame {
       /* P-mapa sessão #73 (user): canvas FULL-SCREEN responsivo (ocupa todo o espaço
          do dispositivo) — revertido o frame quadrado. O mapa (1024² quadrado) é
          renderizado CONTAIN no centro e TODA a área fora dele fica PRETA (#000), feita
@@ -69267,7 +69324,13 @@ function renderCartographyCanvas(el){
     + '      <button class="cart-prov-chip" data-prov="volcanic" type="button"><span>🌋</span> Vulcânico</button>'
     + '    </div>'
     + '  </div>'
-    + '  <div class="cart-canvas-frame">'
++ '  <div class="cart-canvas-frame">'
+    + '    <div class="cart-loading-overlay" id="cart-loading-overlay">'
+    + '      <div class="clo-astrolabe">✦</div>'
+    + '      <div class="clo-title">CARTOGRAFIA DE VALDÓRIA</div>'
+    + '      <div class="clo-desc">Desdobrando cartas imperiais e províncias...</div>'
+    + '      <div class="clo-bar-track"><div class="clo-bar-fill" id="clo-bar-fill"></div></div>'
+    + '    </div>'
     + '    <div class="cart-zoom-info" id="cart-zoom-info">100%</div>'
     + '    <canvas id="cart-canvas"></canvas>'
     + '    <div class="cart-tooltip" id="cart-tooltip"></div>'
@@ -69309,6 +69372,25 @@ function renderCartographyCanvas(el){
 
   _cartCtx = _cartCanvas.getContext('2d', { alpha: false });
   if (_cartEngine) _cartEngine.invalidateBase();
+  var _clo = document.getElementById('cart-loading-overlay');
+  var _cbar = document.getElementById('clo-bar-fill');
+  if (_clo && _cbar) {
+    if (CartShared.worldMapReady && CartShared.worldMapReady()) {
+      _clo.style.display = 'none';
+    } else {
+      _cbar.style.width = '35%';
+      setTimeout(function(){ if (_cbar) _cbar.style.width = '75%'; }, 250);
+      CartShared._onWorldMapLoad(function(){
+        if (_cbar) _cbar.style.width = '100%';
+        setTimeout(function(){
+          if (_clo) {
+            _clo.classList.add('clo-hidden');
+            setTimeout(function(){ if (_clo) _clo.style.display = 'none'; }, 400);
+          }
+        }, 150);
+      });
+    }
+  }
 
   function syncDims(){
     if (!_cartCanvas) return false;
