@@ -69307,7 +69307,7 @@ window.startCityJourney = startCityJourney;
 // Estado do canvas
 // #map-zoom (2026-06-23, user): o mapa abre com ~160% (dois passos) por padrão — mais perto,
 // locais maiores/legíveis logo de cara. Mesmo padrão na exploração (CART_ZOOM_DEFAULT lá).
-var CART_ZOOM_DEFAULT = 1.6;
+var CART_ZOOM_DEFAULT = 1.0;
 var _cartZoom = CART_ZOOM_DEFAULT;
 var _cartPanX = 0;
 var _cartPanY = 0;
@@ -69821,20 +69821,34 @@ function _cartFocusProvince(provId){
 
 function _cartCenterOnPlayer(){
   if (!_cartEngine || !_cartCanvas || !_cartW || !_cartH) return;
-  var _S = Math.min(_cartW, _cartH);
-  var minCover = Math.max(_cartW, _cartH) / _S;
-  if (_cartZoom < minCover) _cartZoom = Math.max(1.6, minCover);
+  var vm = (_cartEngine && typeof _cartEngine.getViewMode === 'function') ? _cartEngine.getViewMode() : { mode: 'world' };
+  
+  // No modo Continente Geral ('world'), o mapa deve abrir 100% visível, inteiro e perfeitamente enquadrado
+  if (vm.mode === 'world') {
+    _cartZoom = 1.0;
+    _cartPanX = 0;
+    _cartPanY = 0;
+    _cartClampPan();
+    _drawCart();
+    _cartUpdateZoomInfo();
+    return;
+  }
 
   var playerKey = (typeof _cartGetPlayerBiome === 'function') ? _cartGetPlayerBiome() : 'plains';
   var pos = (_cartEngine && typeof _cartEngine.getNodePos === 'function') ? _cartEngine.getNodePos(playerKey, _cartW, _cartH) : null;
   if (!pos) {
+    _cartZoom = 1.0;
+    _cartPanX = 0;
+    _cartPanY = 0;
     _cartClampPan();
     _drawCart();
+    _cartUpdateZoomInfo();
     return;
   }
 
-  _cartPanX = (_cartW / 2) - (pos.x * _cartZoom);
-  _cartPanY = (_cartH / 2) - (pos.y * _cartZoom);
+  _cartZoom = 1.0;
+  _cartPanX = 0;
+  _cartPanY = 0;
   _cartClampPan();
   _drawCart();
   _cartUpdateZoomInfo();
@@ -70059,7 +70073,8 @@ function _openCartLocationPopup(biome){
           + '<button class="clp-btn clp-btn-back" data-clp="back">Voltar pro Mapa</button>'
         : (isCurrent
           ? '<button class="clp-btn clp-btn-back" data-clp="back">Voltar pro Mapa</button>'
-          : '<button class="clp-btn clp-btn-travel" data-clp="travel">Viajar pra ' + biome.name.split(' ')[0] + '</button>'
+          : '<button class="clp-btn clp-btn-travel" data-clp="travel">Marchar até ' + biome.name.split(' ')[0] + '</button>'
+            + (biome.key !== 'plains' ? '<button class="clp-btn clp-btn-prov" data-clp="open-prov" style="background:rgba(196,149,58,0.2);border-color:#ffd685;color:#ffd685;">🗺️ Ver Carta Regional</button>' : '')
             + '<button class="clp-btn clp-btn-back" data-clp="back">Voltar pro Mapa</button>'
          ))
     + '</div>';
@@ -70085,6 +70100,14 @@ function _closeCartLocationPopup(){
       var action = btn.dataset.clp;
       var biome = window._cartCurrentLocBiome;
       if (action === 'back') { _closeCartLocationPopup(); return; }
+      if (action === 'open-prov' && biome) {
+        _closeCartLocationPopup();
+        if (typeof CartShared !== 'undefined' && CartShared.getLocationProvince) {
+          var p = CartShared.getLocationProvince(biome.key);
+          if (p && p.id) _cartFocusProvince(p.id);
+        }
+        return;
+      }
       if (action === 'travel' && biome) {
         _closeCartLocationPopup();
         if (ACTION_HANDLERS['cart_' + biome.key]) { ACTION_HANDLERS['cart_' + biome.key](window.CITY_MOCK_PLAYER); }
