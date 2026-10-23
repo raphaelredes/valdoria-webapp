@@ -93260,7 +93260,17 @@ function openCartography() {
 
     + '    <h2>Cartografia de Valdoria</h2>'
 
-    + '    <p class="xcart-flavor">Pergaminho do mundo conhecido. Toca um destino. Use roda do mouse ou pinça pra zoom.</p>'
+    + '    <div class="cart-prov-bar" id="xcart-prov-bar">'
+    + '      <button class="cart-prov-chip active" data-prov="world" type="button"><span>🌍</span> Continente</button>'
+    + '      <button class="cart-prov-chip" data-prov="plains" type="button"><span>🌾</span> Planícies</button>'
+    + '      <button class="cart-prov-chip" data-prov="forest" type="button"><span>🌲</span> Florestas</button>'
+    + '      <button class="cart-prov-chip" data-prov="mountain" type="button"><span>🏔️</span> Montanhas</button>'
+    + '      <button class="cart-prov-chip" data-prov="swamp" type="button"><span>🐍</span> Pântanos</button>'
+    + '      <button class="cart-prov-chip" data-prov="desert" type="button"><span>🌵</span> Deserto</button>'
+    + '      <button class="cart-prov-chip" data-prov="coast" type="button"><span>🌊</span> Costa</button>'
+    + '      <button class="cart-prov-chip" data-prov="snow" type="button"><span>❄️</span> Ermo Gelado</button>'
+    + '      <button class="cart-prov-chip" data-prov="volcanic" type="button"><span>🌋</span> Vulcânico</button>'
+    + '    </div>'
 
     + '  </div>'
 
@@ -93487,6 +93497,29 @@ function openCartography() {
 }
 
 
+
+function _xcartFocusProvince(provId){
+  if (!_xcartEngine || !_xcartCanvas || !_xcartW || !_xcartH) return;
+  if (provId === 'world') {
+    _cartZoom = CART_ZOOM_DEFAULT;
+    _xcartCenterOnPlayer();
+    _xcartUpdateZoomInfo();
+  } else {
+    var res = (typeof _xcartEngine.focusProvince === 'function') ? _xcartEngine.focusProvince(provId, _xcartW, _xcartH) : null;
+    if (res) {
+      _cartZoom = res.zoom;
+      _cartPanX = res.panX;
+      _cartPanY = res.panY;
+      _xcartClampPan();
+      _xcartDraw();
+      _xcartUpdateZoomInfo();
+    }
+  }
+  var chips = document.querySelectorAll('#xcart-prov-bar .cart-prov-chip');
+  chips.forEach(function(c){
+    c.classList.toggle('active', c.getAttribute('data-prov') === provId);
+  });
+}
 
 function _xcartCenterOnPlayer(){
 
@@ -93852,7 +93885,16 @@ function _xcartWireEvents() {
 
   document.getElementById('xcart-zoom-out').onclick = function(){ _xcartSetZoom(_cartZoom * 0.8, _xcartW/2, _xcartH/2); };
 
-  document.getElementById('xcart-zoom-reset').onclick = function(){ _cartZoom = CART_ZOOM_DEFAULT; _xcartCenterOnPlayer(); _xcartUpdateZoomInfo(); };
+  document.getElementById('xcart-zoom-reset').onclick = function(){ _xcartFocusProvince('world'); };
+
+  var _xProvChips = document.querySelectorAll('#xcart-prov-bar .cart-prov-chip');
+  _xProvChips.forEach(function(chip){
+    chip.onclick = function(e){
+      e.preventDefault();
+      var pId = chip.getAttribute('data-prov');
+      _xcartFocusProvince(pId);
+    };
+  });
 
   document.getElementById('xcart-close-btn').onclick = function(){ closeCartography(); };
 
@@ -103526,6 +103568,44 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
 
   text-shadow: 0 0 12px rgba(196,149,58,0.3);
 
+}
+
+.cart-prov-bar {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 3px 2px 1px;
+  margin-top: 2px;
+  -webkit-overflow-scrolling: touch;
+}
+.cart-prov-bar::-webkit-scrollbar { display: none; }
+.cart-prov-chip {
+  white-space: nowrap;
+  background: rgba(0, 0, 0, 0.48);
+  border: 1px solid rgba(196, 149, 58, 0.28);
+  border-radius: 10px;
+  padding: 2px 7px;
+  font-size: 10px;
+  font-family: inherit;
+  color: #c4b59d;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+.cart-prov-chip:hover {
+  background: rgba(196, 149, 58, 0.15);
+  color: #ffd685;
+  border-color: rgba(196, 149, 58, 0.60);
+}
+.cart-prov-chip.active {
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.35) 0%, rgba(196, 149, 58, 0.15) 100%);
+  border-color: #ffd685;
+  color: #ffd685;
+  box-shadow: 0 0 6px rgba(196, 149, 58, 0.40);
 }
 
 .xcart-header .xcart-flavor {
