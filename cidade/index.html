@@ -23781,13 +23781,13 @@ var TAVERN_GROM_INTERACT = {
     'Ele vira as costas e finge que você não existe.'
   ],
   cold: [
-    'Ele te encara com um olho só enquanto limpa uma caneca com um pano sujo. "Diga logo."',
+    'Ele encara você com um olho só enquanto limpa uma caneca com um pano sujo. "Diga logo."',
     'Grom suspira pesadamente ao te ver. "Rápido, estou ocupado."',
     'O taverneiro ergue uma sobrancelha. "De novo você?"',
     'Grom continua limpando o balcão sem te olhar. "Fale."'
   ],
   neutral: [
-    'Ele te encara com um olho só enquanto limpa uma caneca. "O que você quer aqui?"',
+    'Ele encara você com um olho só enquanto limpa uma caneca. "O que você quer aqui?"',
     'Grom apoia os cotovelos no balcão. "Vai beber ou só esquentar o banco?"',
     'O caolho te examina brevemente. "Pois não?"',
     'Grom coça a cicatriz sobre o olho fechado. "Mais um aventureiro... Diga."',
@@ -25198,7 +25198,7 @@ var MARKET_MERCHANTS = [
     desc: 'Homem maduro de braços fortes, avental de couro e bigode imponente. O ferreiro mentor do prelúdio que viajou até Valdoria.',
     greetings: [
       '<i>Thorne larga o martelo.</i> "Aço novo? Tem o que precisa aqui."',
-      '<i>O ferreiro te encara, suor pingando.</i> "Aventureiro. Vê algo bom?"',
+      '<i>O ferreiro encara você, suor pingando.</i> "Aventureiro. Vê algo bom?"',
       '<i>Thorne bate uma peça no balcão.</i> "Acabou de sair da forja. Quente ainda."'
     ],
     talkOptions: [
@@ -25251,7 +25251,7 @@ var MARKET_MERCHANTS = [
     desc: 'Homem alto e magro, manto preto, mãos manchadas de tinta.',
     greetings: [
       '<i>Corvus desenrola um pergaminho.</i> "Mapas. Sempre mapas. Para onde vai?"',
-      '<i>O cartógrafo te encara.</i> "Aventureiro precisa de mapa. Aventureiro sem mapa — morto."',
+      '<i>O cartógrafo encara você.</i> "Aventureiro precisa de mapa. Aventureiro sem mapa — morto."',
       '<i>Corvus aponta com tinta no dedo.</i> "Vê esse traço? Lá tem dragão. Lá tem ouro. Escolha bem."'
     ],
     talkOptions: [
@@ -28507,7 +28507,7 @@ var SHADOW_NPCS = [{
   talkOptions: [
     { id: 'browse',  q: 'Quero ver o que você tem hoje.', a: '<i>O Vulto puxa um pano sujo de cima de uma caixa.</i> "Olhe rápido. Não fico aqui a noite toda." <b>Inventário rotativo aberto.</b>' },
     { id: 'rotate',  q: 'Quando aparecem novidades?',     a: '<i>Encolhe os ombros.</i> "Quando os carregamentos chegam. Sem aviso. Volte amanhã. Ou depois. Ou não volte."' },
-    { id: 'origin',  q: 'De onde vem essa mercadoria?',   a: '<i>O Vulto te encara em silêncio por longos segundos.</i> "Próxima pergunta dessa, e a sombra te leva. Entendido?"' },
+    { id: 'origin',  q: 'De onde vem essa mercadoria?',   a: '<i>O Vulto encara você em silêncio por longos segundos.</i> "Próxima pergunta dessa, e a sombra leva você. Entendido?"' },
     { id: 'leave',   q: 'Volto outra hora.',              a: '<i>Apenas um aceno mínimo de cabeça. O Vulto já desviou o olhar para o próximo cliente nas sombras.</i>' }
   ]
 }];
@@ -38484,7 +38484,7 @@ var CANON_PLAZA_ENTRY_INTERACTIVE = [
     "choices": [
       { "id": "persuade", "label": "[CAR 13] Olha nos meus olhos — tá dizendo a verdade?", "stat": "charisma", "dc": 13, "success": { "text": "Ele desmorona, chora calado. Você cede duas Valdoritas pra fome e o solta com aviso.", "xp": 14, "gold": 0 }, "fail": { "text": "Olhar frio, história ensaiada. Ele foge antes de você decidir o que fazer.", "xp": 3 } },
       { "id": "detect_lie", "label": "[SAB 12] Observar postura, mãos, suor", "stat": "wisdom", "dc": 12, "success": { "text": "Calos profissionais, botas novas. Você o aperta, cobra reparação, ele paga e foge.", "xp": 10, "gold": 1 }, "fail": { "text": "Não dá pra ler. Você solta — ele desaparece.", "xp": 2 } },
-      { "id": "turn_in", "label": "Chamar a Guarda", "stat": null, "dc": null, "success": { "text": "A Guarda chega rápido. O batedor te encara sem ódio antes de ser levado.", "xp": 5, "gold": 0 } },
+      { "id": "turn_in", "label": "Chamar a Guarda", "stat": null, "dc": null, "success": { "text": "A Guarda chega rápido. O batedor encara você sem ódio antes de ser levado.", "xp": 5, "gold": 0 } },
       { "id": "let_go", "label": "Deixar ir sem palavras", "stat": null, "dc": null, "success": { "text": "Ele suma na multidão sem agradecer. Você não sabe se ensinou ou ajudou.", "xp": 2 } }
     ]
   },
@@ -38808,7 +38808,7 @@ var CANON_INTERACTION_RESULTS = {
     ],
     "chat": [
       "Você pergunta sobre seus ingredientes.\n\n<i>\"Curiosidade é boa, mas em alquimia pode ser... explosiva. Digamos que uso o que funciona. E funciona.\"</i>\n\nNila mexe o caldeirão e um vapor roxo sobe em espirais impossíveis.",
-      "Você pergunta por que ela não pisca.\n\n<i>\"...\"</i> Nila te encara por três segundos intermináveis. <i>\"Piscar é perder informação. Cada instante conta quando se trabalha com substâncias voláteis.\"</i>\n\nVocê não sabe se ela está brincando. Provavelmente não.",
+      "Você pergunta por que ela não pisca.\n\n<i>\"...\"</i> Nila encara você por três segundos intermináveis. <i>\"Piscar é perder informação. Cada instante conta quando se trabalha com substâncias voláteis.\"</i>\n\nVocê não sabe se ela está brincando. Provavelmente não.",
       "Você comenta sobre o vapor estranho do caldeirão.\n\n<i>\"Estranho? É apenas a reação natural do absinto-sombrio com pó de cristal-lunar. Perfeitamente seguro. Provavelmente.\"</i>\n\nNila sopra o vapor para longe de você com um gesto elegante da mão."
     ]
   },
@@ -39662,7 +39662,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
         result_text_fail: 'Você o examina mas o garoto desvia o olhar com timing perfeito. <i>Não dá pra ler nada nele.</i> Solta o pulso. <b>"Vai. Se voltar, te entrego."</b> Ele foge.' },
       { id: 'turn_in', label: 'Chamar a Guarda', result: 'apply_now',
         effect: { xp: 5, gold: 0, renown_lawful: 1 },
-        result_text: 'Você grita pela Guarda. <i>Dois soldados surgem em segundos e arrastam o batedor pra fora da praça. Ele te encara antes de virar a esquina — sem ódio, só resignação.</i> O comandante Aldric vai saber: <b>"Mais um menor pegado. Bom trabalho, aventureiro. Vou anotar."</b>' },
+        result_text: 'Você grita pela Guarda. <i>Dois soldados surgem em segundos e arrastam o batedor pra fora da praça. Ele encara você antes de virar a esquina — sem ódio, só resignação.</i> O comandante Aldric vai saber: <b>"Mais um menor pegado. Bom trabalho, aventureiro. Vou anotar."</b>' },
       { id: 'let_go', label: 'Deixar ir sem palavras', result: 'apply_now',
         effect: { xp: 2 },
         result_text: 'Você solta a mão dele. <i>O garoto te olha um segundo — sem agradecimento, só alívio — e some na multidão.</i> Você não sabe se ajudou alguém ou ensinou que rouba dá certo.' }
@@ -56513,7 +56513,7 @@ function _guildShowParty(p){
       stackKey: 'guild_party', icon: '<img src="../shared/img/npcs/mestra-tavira.webp" alt="Mestra Tavira" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(196,149,58,0.5);">', title: 'Meu Grupo',
       subtitle: 'Salão de Mestra Tavira',
       bannerImg: '../shared/img/guilda/guilda-banner.webp',
-      flavor: 'Tavira folheia o registro e te encara. <i>(bate a pena no balcão)</i> "Marchas sozinho, aventureiro. Recruta aliados aqui ou na Taverna antes que a estrada te engula."',
+      flavor: 'Tavira folheia o registro e encara você. <i>(bate a pena no balcão)</i> "Você marcha sozinho, aventureiro. Recrute aliados aqui ou na Taverna antes que a estrada engula você."',
       items: [], onPick: function(){}
     });
     return;
@@ -56534,7 +56534,7 @@ function _guildShowParty(p){
     title: 'Meu Grupo (' + aliveAllies.length + '/3)',
     subtitle: 'Salão de Mestra Tavira',
     bannerImg: '../shared/img/guilda/guilda-banner.webp',
-    flavor: 'Tavira aponta os nomes no registro. <i>(meio-sorriso)</i> "Eis os que marcham com você. Honram o nome da Guilda — mantém-nos vivos."',
+    flavor: 'Tavira aponta os nomes no registro. <i>(meio-sorriso)</i> "Eis os que marcham com você. Eles honram o nome da Guilda — mantenha-os vivos."',
     sectionLabel: 'Aventureiros no grupo',
     items: items,
     onPick: function(item){
@@ -58083,7 +58083,8 @@ function _questsShowTab(p, tab){
 // (caça/coleta rotativo Sessão #56) — _dailyShowBoard removido (sem
 // tabela do dia agora; pode voltar como sistema social future).
 
-function _showDailyChallengeEpicPopup(p){
+function _showDailyChallengeEpicPopup(p, opts){
+  opts = opts || {};
   if (typeof _dailyChallengeForToday !== 'function') {
     vToast(_uiIcoImg('alerta','ui-ico-img') + ' Desafio Diário indisponível.');
     return;
@@ -58234,7 +58235,9 @@ function _showDailyChallengeEpicPopup(p){
         + '</div>',
     singleButton: true,
     cancelLabel: 'Voltar',
-    onCancel: function(){ /* fecha popup */ }
+    onCancel: function(){
+      if (typeof opts.onCancel === 'function') opts.onCancel();
+    }
   });
 
   // Wire CTA + Mapa buttons após popup renderizar
@@ -58245,13 +58248,14 @@ function _showDailyChallengeEpicPopup(p){
         // Fecha popup atual + dispara combat handler
         var ov = document.getElementById('confirm-purchase-overlay');
         if (ov) ov.classList.remove('active');
-        setTimeout(function(){ _dailyStartCombat(p); }, 200);
+        setTimeout(function(){ _dailyStartCombat(p, opts); }, 200);
       });
     }
   }, 100);
 }
 
-function _dailyStartCombat(p){
+function _dailyStartCombat(p, opts){
+  opts = opts || {};
   // CY6 (P1, 2026-06-07): ANTES isto fazia um "combate" MOCK no cliente —
   // Math.random()<0.65 decidia sucesso/falha e, na falha, TIRAVA 4-11 HP do
   // jogador direto no cliente, mostrando tela de FRACASSO. Bug reportado pelo
@@ -58286,6 +58290,9 @@ function _dailyStartCombat(p){
         + 'tocar neste aviso.)</i></div>',
     confirmLabel: 'Partir para Aventura',
     cancelLabel: 'Voltar',
+    onCancel: function(){
+      if (typeof opts.onCancel === 'function') opts.onCancel();
+    },
     onConfirm: function(){
       // Direciona pra aventura real (auto-track server). NUNCA muta HP/gold/XP aqui.
       vToast(isHunt ? 'Boa caçada! O progresso conta sozinho.' : 'Boa coleta! O progresso conta sozinho.');
@@ -72830,7 +72837,14 @@ var _VENUE_ROOT_NODES = {
 function _getVenueRootNode(venue, data, ctx){
   if (ctx && ctx.rootNode) return ctx.rootNode;
   if (venue === 'square' || venue === 'wandering') {
-    return (data && data.node) || (data && data.npc && data.npc.id) || 'bounty_officer';
+    var rawNode = (data && data.node) || (data && data.npc && data.npc.id) || 'bounty_officer';
+    if (venue === 'square' && typeof rawNode === 'string' && rawNode.indexOf('square_') === 0 && rawNode !== 'square_bounty_officer') {
+      rawNode = rawNode.slice(7);
+    }
+    if (venue === 'wandering' && typeof rawNode === 'string' && (rawNode.indexOf('wnpc_wnpc_') === 0 || rawNode.indexOf('wnpc_rc_') === 0)) {
+      rawNode = rawNode.slice(5);
+    }
+    return rawNode;
   }
   if (venue === 'market' && data && (data.node === 'thorne' || data.node === 'mirena' || data.node === 'corvus')) {
     return data.node;
@@ -73521,7 +73535,9 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
   if (data.action === 'open_daily_challenge') {
     try { window.vEncounter.close(); } catch(_){}
     if (typeof _showDailyChallengeEpicPopup === 'function') {
-      _showDailyChallengeEpicPopup(p);
+      _showDailyChallengeEpicPopup(p, {
+        onCancel: function(){ _openCityDialogue('square', 'bounty_officer', p); }
+      });
     }
     return;
   }
@@ -73959,7 +73975,7 @@ function _merchantGreeting(merchantId){
         { type: 'speech', speaker: 'Thorne', text: '"Aço novo? Tem o que precisa aqui."' }
       ],
       [
-        { type: 'narration', text: 'O ferreiro te encara enquanto enxuga a fronte com a manga manchada de fuligem.' },
+        { type: 'narration', text: 'O ferreiro encara você enquanto enxuga a fronte com a manga manchada de fuligem.' },
         { type: 'speech', speaker: 'Thorne', text: '"Aventureiro. <i>(uma pausa)</i> Vê algo bom?"' }
       ],
       [
@@ -74001,7 +74017,7 @@ function _merchantGreeting(merchantId){
         { type: 'speech', speaker: 'Corvus Veltharion', text: '"Mapas. <i>Sempre mapas.</i> Pra onde vai?"' }
       ],
       [
-        { type: 'narration', text: 'O cartógrafo te encara por cima dos pergaminhos. Os olhos são cinzentos, atentos.' },
+        { type: 'narration', text: 'O cartógrafo encara você por cima dos pergaminhos. Os olhos são cinzentos, atentos.' },
         { type: 'speech', speaker: 'Corvus Veltharion', text: '"Aventureiro precisa de mapa. Aventureiro sem mapa — <i>morto</i>."' }
       ],
       [
@@ -74499,7 +74515,7 @@ function _thorneShowCustomForge(p, merchant, subTopic){
         { type: 'narration', text: 'Prazo restante estimado: <b>' + order.daysRemaining + ' dia(s)</b> de trabalho na forja. Você pode aguardar na cidade ou explorar as redondezas.' }
       ];
       var waitChoices = [
-        { id: 'wait_day', label: '⏳ Descansar na cidade (Avançar 1 dia de forja)', result: 'thorne_forge_advance_day' },
+        { id: 'wait_day', label: '◆ Descansar na cidade (Avançar 1 dia de forja)', result: 'thorne_forge_advance_day' },
         { id: 'back', label: '← Voltar ao balcão', result: 'goto_dialog', _encounterRef: 'mer_thorne_greeting' }
       ];
       var waitEnc = {
@@ -74784,9 +74800,10 @@ function _renderNpcNode(player, dialogueData, nodeId, npcKey){
     player: player,
     onChoice: function(choice, _dialogue){
       var original = choice._original || {};
+      var nextTarget = original.target || original.next || '';
       // Mark once flag
       if (original.once && window.npcAffinity && window.npcAffinity.setFlag) {
-        var flagName = '_once_' + (original.next || original.text);
+        var flagName = '_once_' + (nextTarget || original.text);
         window.npcAffinity.setFlag(player, npcKey, flagName, true);
       }
       // Aplica impact
@@ -74797,6 +74814,10 @@ function _renderNpcNode(player, dialogueData, nodeId, npcKey){
       if (original.check && window.dialogueEngine.rollSkillCheck) {
         var rollResult = window.dialogueEngine.rollSkillCheck(original, player);
         if (rollResult) {
+          var checkImpact = rollResult.success ? original.check.success_impact : original.check.failure_impact;
+          if (checkImpact && window.dialogueEngine.applyImpact) {
+            window.dialogueEngine.applyImpact(checkImpact, player, npcKey);
+          }
           if (typeof _showServiceResultPopup === 'function') {
             var STAT_ABBR = {strength:'FOR', dexterity:'DES', constitution:'CON', intelligence:'INT', wisdom:'SAB', charisma:'CAR'};
             var abbr = STAT_ABBR[rollResult.skill] || rollResult.skill.toUpperCase();
@@ -74811,7 +74832,13 @@ function _renderNpcNode(player, dialogueData, nodeId, npcKey){
               narrative: narrativeText,
               dice: { formula: '1d20+' + rollResult.mod, sides: 20, value: rollResult.roll, total: rollResult.total },
               onContinue: function(){
-                if (rollResult.nextNode) _renderNpcNode(player, dialogueData, rollResult.nextNode, npcKey);
+                var targetAfterRoll = rollResult.nextNode || nextTarget;
+                if (targetAfterRoll && targetAfterRoll !== 'exit') {
+                  _renderNpcNode(player, dialogueData, targetAfterRoll, npcKey);
+                } else {
+                  var rootNode = window.dialogueEngine.resolveStartNode(dialogueData.timeline, player, npcKey, 'start');
+                  _renderNpcNode(player, dialogueData, rootNode, npcKey);
+                }
               }
             });
             return;
@@ -74825,12 +74852,12 @@ function _renderNpcNode(player, dialogueData, nodeId, npcKey){
         return;
       }
       // next node?
-      if (original.next === 'exit') {
+      if (nextTarget === 'exit') {
         if (typeof window.vEncounter.close === 'function') window.vEncounter.close();
         return;
       }
-      if (original.next) {
-        _renderNpcNode(player, dialogueData, original.next, npcKey);
+      if (nextTarget) {
+        _renderNpcNode(player, dialogueData, nextTarget, npcKey);
       } else {
         if (typeof window.vEncounter.close === 'function') window.vEncounter.close();
       }
@@ -74915,7 +74942,7 @@ var CHANCE_ENCOUNTERS = [
       { type: 'narration', text: 'Ele baixa a voz, olhando ao redor. Em sua mão, um pergaminho amarelado com bordas chamuscadas — provavelmente o único mapa que ele carrega há anos.' },
       { type: 'speech', speaker: 'Guarda Aldric', text: '— Vejo aventureiros entrando e saindo todo dia. A maioria nem sabe pra onde vai. Você não pode atravessar Valdoria sem mapa. É praticamente suicídio.' },
       { type: 'speech', speaker: 'Guarda Aldric', text: '— O Mestre Corvus, na Praça Central, vende mapas regionais. Cada um cobre uma região do reino. Mas ele leva tempo pra preparar — depende de aventureiros como você que voltam contando o que viram.' },
-      { type: 'narration', text: 'Aldric te entrega seu pergaminho gasto.' },
+      { type: 'narration', text: 'Aldric entrega a você seu pergaminho gasto.' },
       { type: 'speech', speaker: 'Guarda Aldric', text: '— Tome. É um mapa antigo dos arredores próximos. Não cobre muito, mas é um começo. Volte aqui quando quiser saber mais — sempre tô de plantão.' }
     ],
     choices: [

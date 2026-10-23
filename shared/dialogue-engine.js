@@ -136,11 +136,15 @@
       if (typeof conditions.min_affinity === 'number' && aff < conditions.min_affinity) return false;
       if (typeof conditions.max_affinity === 'number' && aff > conditions.max_affinity) return false;
     }
-    // Reputation
+    // Reputation (single object OR array of { faction, value })
     if (conditions.min_rep && window.npcAffinity) {
-      var f = conditions.min_rep.faction;
-      var v = conditions.min_rep.value;
-      if (f && window.npcAffinity.getReputation(player, f) < v) return false;
+      var repList = Array.isArray(conditions.min_rep) ? conditions.min_rep : [conditions.min_rep];
+      for (var r = 0; r < repList.length; r++) {
+        var repItem = repList[r] || {};
+        if (repItem.faction && window.npcAffinity.getReputation(player, repItem.faction) < (repItem.value || 0)) {
+          return false;
+        }
+      }
     }
     // Class
     if (conditions.class && player.cls && conditions.class !== player.cls) return false;
@@ -211,15 +215,22 @@
     } else if (typeof node.text === 'string') {
       script = [{ type: 'speech', speaker: displayName, text: node.text }];
     }
+    // Regra Soberana #14: narrativa sensorial do Mestre obrigatória antes de qualquer fala
+    if (script.length > 0 && script[0].type !== 'narration' && script[0].type !== 'dm') {
+      script.unshift({
+        type: 'narration',
+        text: displayName + ' direciona o olhar para você e toma a palavra.'
+      });
+    }
 
     // Choices: filter por once/conditions, traduz pra cb pattern.
     // A3.6 (#90): formato único choices+target — o codemod migrou os JSONs
     // base ("options"/"next") pro padrão único.
     var choices = [];
-    var rawOpts = node.choices || [];
+    var rawOpts = node.choices || node.options || [];
     if (Array.isArray(rawOpts)) {
       rawOpts.forEach(function(opt){
-        var next = opt.target || '';
+        var next = opt.target || opt.next || '';
         // Skip options já usadas (once: true + visited)
         if (opt.once && window.npcAffinity && window.npcAffinity.getFlag(player, npcKey, '_once_' + (next || opt.text))) {
           return;
@@ -235,8 +246,38 @@
           _original: opt,
           // Skill check badges (renderizado por vEncounter)
           skill: opt.check ? opt.check.skill : undefined,
-          dc: opt.check ? opt.check.difficulty : undefined
+          dc: opt.check ? (opt.check.difficulty || opt.check.dc) : undefined
         });
+      });
+    }
+
+    // Padrão BG3: em sub-nós de diálogo, oferece retorno ao hub raiz do NPC
+    var rootTarget = resolveStartNode(dialogueData && dialogueData.timeline, player, npcKey, 'start');
+    var isSubNode = (nodeId !== rootTarget && nodeId !== 'start' && String(nodeId).indexOf('start_') !== 0);
+    if (isSubNode && dialogueData && dialogueData.nodes && dialogueData.nodes[rootTarget]) {
+      var hasReturn = choices.some(function(c){
+        var t = (c._original && (c._original.target || c._original.next)) || c.id || '';
+        return t === rootTarget || t === 'start' || String(t).indexOf('start_') === 0 || t === 'return_root';
+      });
+      if (!hasReturn) {
+        var exitIdx = choices.findIndex(function(c){
+          var t = (c._original && (c._original.target || c._original.next)) || c.id || '';
+          return t === 'exit' || !!(c._original && c._original.exit_callback);
+        });
+        var backEntry = {
+          id: rootTarget,
+          label: '↩ "Gostaria de tratar de outro assunto."',
+          _original: { text: '↩ "Gostaria de tratar de outro assunto."', target: rootTarget }
+        };
+        if (exitIdx >= 0) choices.splice(exitIdx, 0, backEntry);
+        else choices.push(backEntry);
+      }
+    }
+    if (choices.length === 0) {
+      choices.push({
+        id: 'exit',
+        label: 'Despedir-se',
+        _original: { text: 'Despedir-se', target: 'exit' }
       });
     }
 
@@ -319,6 +360,13 @@
       player.metadata = player.metadata || {};
       player.metadata.flags = player.metadata.flags || {};
       player.metadata.flags[impact.flag] = true;
+    }
+    if (impact.flags && typeof impact.flags === 'object') {
+      player.metadata = player.metadata || {};
+      player.metadata.flags = player.metadata.flags || {};
+      Object.keys(impact.flags).forEach(function(fk){
+        player.metadata.flags[fk] = impact.flags[fk];
+      });
     }
     if (typeof impact.xp === 'number' && typeof _gainXp === 'function') {
       try { _gainXp(player, impact.xp); } catch(_e){}
