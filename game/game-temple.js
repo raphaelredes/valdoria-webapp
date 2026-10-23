@@ -254,7 +254,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
         resultText: '"V-Vinte e cinco! <i>(emocionado)</i> Vai pagar o ferreiro de manter o sino da Capela em ordem por um ano!" <b>+2 Renome do Templo.</b>' },
       { id: 'd_100',  label: 'Doar 100V — oferta generosa', cb: 'donate-confirm', backend_cb: 'temple_pay_donate_100', renownDelta: 5,
         resultNarration: 'Irmã Elara intervém pessoalmente — toca o braço de Theron com gentileza e assume o cesto. As cem Valdoritas brilham como rio de prata.',
-        resultText: '"Cem Valdoritas. <i>(sorri com gratidão profunda)</i> Vossa Senhoria honra o Santuário. Os Quatro hão de lembrar — e o Sumo-Sacerdote, também." <b>+5 Renome do Templo. Acesso a serviços de tier superior desbloqueado.</b>' },
+        resultText: '"Cem Valdoritas. <i>(sorri com gratidão profunda)</i> Você honra o Santuário. Os Quatro hão de lembrar — e o Sumo-Sacerdote, também." <b>+5 Renome do Templo. Acesso a serviços de tier superior desbloqueado.</b>' },
       { id: 'back_brevon', label: '↩ "Voltar a falar com o Padre Brevon."', cb: 'return_venue_root' },
       { id: 'back',   label: '"Outra hora."', cb: 'close' }
     ]

@@ -606,8 +606,14 @@
           }
         }
       });
+    } else {
+      reactionChoices.push({
+        id: 'return_venue_root',
+        label: '↩ "Gostaria de tratar de outro assunto."',
+        cb: 'return_venue_root'
+      });
     }
-    reactionChoices.push({ id: 'continue', label: '↩ Voltar', cb: 'close' });
+    reactionChoices.push({ id: 'continue', label: '↩ "Até logo."', cb: 'close' });
 
     _renderViaCanonical({
       npc: npc,
@@ -680,8 +686,14 @@
           }
         }
       });
+    } else {
+      purchaseChoices.push({
+        id: 'return_venue_root',
+        label: '↩ "Gostaria de tratar de outro assunto."',
+        cb: 'return_venue_root'
+      });
     }
-    purchaseChoices.push({ id: 'continue', label: '↩ Voltar', cb: 'close' });
+    purchaseChoices.push({ id: 'continue', label: '↩ "Até logo."', cb: 'close' });
 
     _renderViaCanonical({
       npc: npc,

@@ -72884,6 +72884,15 @@ var _VENUE_ROOT_NODES = {
 };
 
 function _getVenueRootNode(venue, data, ctx){
+  if (_VENUE_ROOT_NODES[venue]) {
+    if (venue === 'market' && data && (data.node === 'mirena' || data.node === 'corvus')) {
+      return data.node;
+    }
+    if (venue === 'guild' && data && data.node === 'braun') {
+      return 'braun';
+    }
+    return _VENUE_ROOT_NODES[venue];
+  }
   if (ctx && ctx.rootNode) return ctx.rootNode;
   if (venue === 'square' || venue === 'wandering') {
     var rawNode = (data && data.node) || (data && data.npc && data.npc.id) || 'bounty_officer';
@@ -73691,13 +73700,31 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
               });
             } else if (venue && venue !== 'recruta' && typeof _openCityDialogue === 'function') {
               var rootNodeD = _getVenueRootNode(venue, data, ctx);
-              diceResultChoices.push({
-                id: 'return_venue_root',
-                label: '↩ "Gostaria de ver outra coisa."',
-                cb: function() {
-                  _openCityDialogue(venue, rootNodeD, p);
-                }
-              });
+              var currentNodeD = (data && data.node) || node || '';
+              if (currentNodeD && currentNodeD !== rootNodeD && currentNodeD !== 'greeting' && currentNodeD !== 'welcome') {
+                diceResultChoices.push({
+                  id: 'return_sub_node',
+                  label: '↩ Continuar neste assunto',
+                  cb: function() {
+                    _openCityDialogue(venue, currentNodeD, p);
+                  }
+                });
+                diceResultChoices.push({
+                  id: 'return_venue_root',
+                  label: '↩ "Gostaria de falar de outro assunto."',
+                  cb: function() {
+                    _openCityDialogue(venue, rootNodeD, p);
+                  }
+                });
+              } else {
+                diceResultChoices.push({
+                  id: 'return_venue_root',
+                  label: '↩ "Gostaria de ver outra coisa."',
+                  cb: function() {
+                    _openCityDialogue(venue, rootNodeD, p);
+                  }
+                });
+              }
               diceResultChoices.push({
                 id: 'done',
                 label: '↩ "Até logo."',
@@ -73804,13 +73831,31 @@ function _renderCompanionApprovalBG3(scList) {
       if (!resultChoices.length) {
         if (venue && venue !== 'recruta' && typeof _openCityDialogue === 'function') {
           var rootNode = _getVenueRootNode(venue, data, ctx);
-          resultChoices.push({
-            id: 'return_venue_root',
-            label: '↩ "Gostaria de ver outra coisa."',
-            cb: function() {
-              _openCityDialogue(venue, rootNode, p);
-            }
-          });
+          var currentNode = (data && data.node) || node || '';
+          if (currentNode && currentNode !== rootNode && currentNode !== 'greeting' && currentNode !== 'welcome') {
+            resultChoices.push({
+              id: 'return_sub_node',
+              label: '↩ Continuar neste assunto',
+              cb: function() {
+                _openCityDialogue(venue, currentNode, p);
+              }
+            });
+            resultChoices.push({
+              id: 'return_venue_root',
+              label: '↩ "Gostaria de falar de outro assunto."',
+              cb: function() {
+                _openCityDialogue(venue, rootNode, p);
+              }
+            });
+          } else {
+            resultChoices.push({
+              id: 'return_venue_root',
+              label: '↩ "Gostaria de ver outra coisa."',
+              cb: function() {
+                _openCityDialogue(venue, rootNode, p);
+              }
+            });
+          }
           resultChoices.push({
             id: 'done',
             label: '↩ "Até logo."',

@@ -46,7 +46,7 @@ if (!window._SVC_CONFIG_MARKET) {
     faction: 'market',
     factionLabel: 'Mercado de Valdoria',
     reactions: {
-      very_negative: 'Os mercadores se entreolham, e logo o boato corre pelas barracas. <i>(silêncio constrangedor)</i> "Vossa Senhoria perdeu crédito aqui hoje."',
+      very_negative: 'Os mercadores se entreolham, e logo o boato corre pelas barracas. <i>(silêncio constrangedor)</i> "Você perdeu crédito aqui hoje."',
       negative: 'O mercador balança a cabeça desaprovando. <i>(continua o trabalho sem olhar para você)</i> "Cada um com seus modos. Mas o preço fica o mesmo."',
       neutral: 'O mercador continua atendendo. <i>(mantém o tom profissional)</i> "Anotado."',
       positive: 'O mercador sorri de canto. <i>(aceita a moeda com cuidado)</i> "Cliente respeitoso é cliente que volta. Apareça sempre."',
@@ -110,11 +110,11 @@ var MERCHANT_NPCS_MARKET = {
   },
   corvus: {
     npc: { name: 'Corvus', desc: 'Livreiro · colecionador de tomos por trinta anos', portrait: '../shared/img/npcs/corvus-livreiro.webp' },
-    quote: '"Tenho dois grimórios menores, se Vossa Senhoria for mago."',
+    quote: '"Tenho dois grimórios menores, se você for mago."',
     cb: 'market_interact_menu_cartographer',
     script: [
       { type: 'narration', text: 'Corvus mantém uma barraca improvavelmente alta, empilhada com livros encadernados em couro de várias cores. Pergaminhos enrolados em cilindros de osso. Pena de corvo no tinteiro.' },
-      { type: 'speech', speaker: 'Corvus', text: 'Livro comum, dez Valdoritas. Tomo raro, cinquenta. Pergaminho mágico, varia muito. <i>(toca uma lombada gasta)</i> Tenho dois grimórios menores, se Vossa Senhoria for mago e tiver aval do Escriba Thessil.' }
+      { type: 'speech', speaker: 'Corvus', text: 'Livro comum, dez Valdoritas. Tomo raro, cinquenta. Pergaminho mágico, varia muito. <i>(toca uma lombada gasta)</i> Tenho dois grimórios menores, se você for mago e tiver aval do Escriba Thessil.' }
     ],
     choices: [
       { id: 'books', label: 'Ver livros e tomos', cb: 'market_interact_menu_cartographer' },

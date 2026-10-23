@@ -36,15 +36,15 @@
       faction: 'bank',
       factionLabel: 'Casa de Tholram',
       reactions: {
-        very_negative: 'Aldwin fecha o livro-razão com som seco. Os óculos meia-lua descem pelo nariz. <i>(voz cortante)</i> "Vossa Senhoria escolheu como tratar a Casa de Tholram. Eu não esquecerei."',
+        very_negative: 'Aldwin fecha o livro-razão com som seco. Os óculos meia-lua descem pelo nariz. <i>(voz cortante)</i> "Você escolheu como tratar a Casa de Tholram. Eu não esquecerei."',
         negative: 'Aldwin pausa, tamborila os dedos sobre o balcão. <i>(sorri sem calor)</i> "Cada um tem sua opinião. Mas o preço é o preço."',
         neutral: 'Aldwin mantém o olhar neutro, indecifrável. <i>(volta ao livro-razão)</i> "Anotado."',
         positive: 'Aldwin acena com aprovação contida. <i>(ajusta óculos)</i> "Cliente prudente. Aventureiros que poupam vivem mais — e clientes que respeitam, recebem reciprocidade."',
-        very_positive: 'Aldwin curva-se levemente, primeira vez em meses. <i>(sorri com cortesia rara)</i> "Palavras como essas honram a Casa. Vossa Senhoria sempre será bem-vindo."'
+        very_positive: 'Aldwin curva-se levemente, primeira vez em meses. <i>(sorri com cortesia rara)</i> "Palavras como essas honram a Casa. Você sempre será bem-vindo."'
       },
       confirmMsgs: {
         narration: 'Aldwin anota o valor no livro-razão com caligrafia impecável. <i>(passa o monóculo pelos números)</i>',
-        generic: '"Registrado e selado." <i>(guarda a pena no tinteiro)</i> A Casa de Tholram honra todo selo que entra por aquela porta. Que Vossa Senhoria tenha jornada próspera.'
+        generic: '"Registrado e selado." <i>(guarda a pena no tinteiro)</i> A Casa de Tholram honra todo selo que entra por aquela porta. Que você tenha uma jornada próspera.'
       }
     };
   }
@@ -61,7 +61,7 @@ var ALDWIN_DIALOGUE = {
     { type: 'narration', text: 'O salão principal do Banco de Valdoria respira em silêncio. Lustres de ferro forjado sustentam velas de cera virgem que pingam lentas sobre bandejas de bronze. Atrás de um balcão de mogno escuro, Aldwin — vestes de veludo azul-marinho debruadas a fio de ouro, monóculo pendurado no peito, dedos finos manchados de tinta sépia — ergue os olhos do livro de tarja com a precisão de quem soma fortunas há vinte e dois anos.' },
     { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Bem-vindo. <i>(fecha o livro com um clique de fivela de prata)</i> Sente-se, por favor. O cofre está aberto até a oitava hora, e a Casa de Tholram honra todo selo que entra por aquela porta.' },
     { type: 'speech', speaker: 'Aldwin de Tholram', text: 'O Cofre Real opera pelo padrão Tholram. <i>(passa o monóculo pelos números do livro)</i> Cem peças de cobre fazem dez de prata; dez de prata, uma de ouro; cem de ouro, uma de platina. <i>(sorri com cortesia medida)</i> Os números são velhos. As pessoas, não.' },
-    { type: 'speech', speaker: 'Aldwin de Tholram', text: 'O que traz Vossa Senhoria à Casa de Tholram? <i>(entrelaça os dedos sobre o balcão)</i> Depósito, retirada, ou negócio de maior peso? Tudo passa por aqui — só uma coisa nunca sai: a discrição.' }
+    { type: 'speech', speaker: 'Aldwin de Tholram', text: 'O que traz você à Casa de Tholram? <i>(entrelaça os dedos sobre o balcão)</i> Depósito, retirada, ou negócio de maior peso? Tudo passa por aqui — só uma coisa nunca sai: a discrição.' }
   ],
   choices: [
     { id: 'deposit', label: '"Quero depositar Valdoritas."', cb: 'deposit' },
@@ -77,7 +77,7 @@ var SERVICE_DIALOGUES_BANK = {
     npc: ALDWIN_DIALOGUE.npc,
     script: [
       { type: 'narration', text: 'Aldwin abre uma gaveta interna do balcão e retira uma caixa de bronze polido, forrada de veludo púrpura. Pousa-a entre vocês com cuidado litúrgico — é nela que as moedas serão pesadas antes de ir ao cofre.' },
-      { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Depósito é direito de cidadão, não favor. <i>(prepara a balança de prato)</i> Guardar é gratuito — a Casa cobra apenas na retirada, dois por cento que mantêm o cofre selado, os guardas pagos e o ferro das portas afiado. Quanto Vossa Senhoria deseja confiar a nós hoje?' }
+      { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Depósito é direito de cidadão, não favor. <i>(prepara a balança de prato)</i> Guardar é gratuito — a Casa cobra apenas na retirada, dois por cento que mantêm o cofre selado, os guardas pagos e o ferro das portas afiado. Quanto você deseja confiar a nós hoje?' }
     ],
     choices: [
       // task #64 (2026-05-20): backend canonical bank.py:298-307 "bank_deposit_gold_<amount>"
@@ -92,13 +92,13 @@ var SERVICE_DIALOGUES_BANK = {
         resultNarration: 'Aldwin chama um segundo banqueiro pra pesar quinhentas moedas. <i>(rituais maiores exigem testemunha)</i>',
         resultText: '"Quinhentas — taxa de três Valdoritas, abaixo do meio por cento padrão. <i>(carimba duplo)</i> Cliente significativo merece tarifa privilegiada." <b>+2 Renome.</b>' },
       { id: 'd_1000', label: 'Depositar 1000 V · taxa 5V', cb: 'deposit-confirm', backend_cb: 'bank_deposit_gold_1000', renownDelta: +3,
-        resultNarration: 'Aldwin sai detrás do balcão pessoalmente. Cobre Vossa Senhoria com olhar de respeito profundo. Dois guardas escoltam o cofre interno.',
-        resultText: '"Mil Valdoritas. Cinco de taxa. <i>(ajeita os óculos)</i> Vossa Senhoria entra agora pro registro dos clientes principais da Casa de Tholram." <b>+3 Renome. Acesso a investimentos premium liberado.</b>' },
+        resultNarration: 'Aldwin sai detrás do balcão pessoalmente. Olha para você com profundo respeito. Dois guardas escoltam o cofre interno.',
+        resultText: '"Mil Valdoritas. Cinco de taxa. <i>(ajeita os óculos)</i> Você entra agora pro registro dos clientes principais da Casa de Tholram." <b>+3 Renome. Acesso a investimentos premium liberado.</b>' },
       { id: 'd_persuade', label: '"Sem taxas, Aldwin?" · Persuasão DC 16', check: { skill: 'persuasion', dc: 16 },
         resultNarration: 'Aldwin ergue uma sobrancelha, surpreso com o argumento. <i>(pousa a pena e cruza os dedos sobre o livro-razão)</i>',
         resultText: '"Pois bem... a Casa abre exceção desta vez. Sem taxa neste depósito — cortesia a um cliente de boa lábia." <i>(carimba o lacre com meio sorriso)</i> "Mas não comente com os outros. A balança de Tholram não costuma pesar a favor de ninguém."',
         resultNarrationFail: 'Aldwin nem ergue os olhos do livro-razão. <i>(continua anotando com caligrafia precisa)</i>',
-        resultTextFail: '"A taxa mantém o cofre selado, os guardas pagos e o ferro das portas afiado, Vossa Senhoria. Nem o Conde pede isenção." <i>(ajeita o monóculo)</i> "Meio por cento. Como sempre foi."' },
+        resultTextFail: '"A taxa mantém o cofre selado, os guardas pagos e o ferro das portas afiado, amigo. Nem o Conde pede isenção." <i>(ajeita o monóculo)</i> "Meio por cento. Como sempre foi."' },
       { id: 'back_aldwin', label: '↩ "Voltar aos outros serviços do banco."', cb: 'return_venue_root' },
       { id: 'back',   label: 'Encerrar conversa', cb: 'close' }
     ]
@@ -107,29 +107,29 @@ var SERVICE_DIALOGUES_BANK = {
     npc: ALDWIN_DIALOGUE.npc,
     script: [
       { type: 'narration', text: 'Aldwin puxa o grande livro de retiradas para o centro do balcão de mármore, destrava a gaveta de mogno com uma chave presa ao colete e posiciona o sinete oficial da Casa ao lado do tinteiro.' },
-      { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Retirada exige selo e contra-selo. <i>(estende a mão, palma pra cima)</i> O selo Vossa Senhoria possui — o anel da Casa, marcado quando da abertura da conta. O contra-selo está aqui, na minha gaveta.' },
-      { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Dois por cento de taxa em retiradas — política da Casa, não decisão minha. <i>(coloca o carimbo sobre o lacre)</i> Quanto Vossa Senhoria precisa hoje? O cofre não fecha até a oitava hora.' }
+      { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Retirada exige selo e contra-selo. <i>(estende a mão, palma pra cima)</i> O selo que você possui — o anel da Casa, marcado quando da abertura da conta. O contra-selo está aqui, na minha gaveta.' },
+      { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Dois por cento de taxa em retiradas — política da Casa, não decisão minha. <i>(coloca o carimbo sobre o lacre)</i> Quanto você precisa hoje? O cofre não fecha até a oitava hora.' }
     ],
     choices: [
       // task #64: backend canonical bank.py:361-372 "bank_withdraw_gold_<amount>"
       // task #84: resultText específico por valor (cohesão).
       { id: 'w_50',   label: 'Retirar 50 V · taxa 1V',   cb: 'withdraw-confirm', backend_cb: 'bank_withdraw_gold_50', renownDelta: 0,
         resultNarration: 'Aldwin retira do cofre uma bolsa de couro selada com o brasão da Casa. <i>(conta 50 Valdoritas em silêncio)</i>',
-        resultText: '"Cinquenta menos uma de taxa. <i>(empurra a bolsa pelo balcão)</i> Vossa Senhoria conferiu? A Casa não devolve depois do selo aberto."' },
+        resultText: '"Cinquenta menos uma de taxa. <i>(empurra a bolsa pelo balcão)</i> Você conferiu? A Casa não devolve depois do selo aberto."' },
       { id: 'w_100',  label: 'Retirar 100 V · taxa 2V',  cb: 'withdraw-confirm', backend_cb: 'bank_withdraw_gold_100', renownDelta: 0,
         resultNarration: 'Aldwin conta as moedas em pilhas de dez. Anota no livro-razão com tinta sépia.',
-        resultText: '"Cem menos dois — noventa e oito Valdoritas em mão. <i>(carimba o lacre da bolsa)</i> Selo da Casa garante peso correto até a porta. Depois, é Vossa Senhoria que conta."' },
+        resultText: '"Cem menos dois — noventa e oito Valdoritas em mão. <i>(carimba o lacre da bolsa)</i> Selo da Casa garante peso correto até a porta. Depois, é você quem confere."' },
       { id: 'w_500',  label: 'Retirar 500 V · taxa 10V', cb: 'withdraw-confirm', backend_cb: 'bank_withdraw_gold_500', renownDelta: 0,
         resultNarration: 'Aldwin chama o guarda da entrada e pede testemunha pra retirada. Quinhentas moedas ocupam meia gaveta interna.',
         resultText: '"Quatrocentas e noventa nas mãos. <i>(testemunha assinada)</i> Aviso: andar com tanto no bolso atrai bandidos. Posso emprestar guarda até o portão por mais cinco?"' },
       { id: 'w_max',  label: 'Retirar saldo total · taxa 2%', cb: 'withdraw-confirm', backend_cb: 'bank_withdraw_gold_all', renownDelta: 0,
         resultNarration: 'Aldwin pausa um momento. <i>(olha por cima dos óculos meia-lua)</i> Fechar conta é decisão séria.',
-        resultText: '"Saldo total, descontados dois por cento. <i>(empurra a bolsa cheia)</i> A conta fica suspensa por seis meses — se voltar antes, retomamos sem taxa de reabertura. Boa jornada, Vossa Senhoria."' },
+        resultText: '"Saldo total, descontados dois por cento. <i>(empurra a bolsa cheia)</i> A conta fica suspensa por seis meses — se voltar antes, retomamos sem taxa de reabertura. Boa jornada, viajante."' },
       { id: 'w_persuade', label: '"Taxa menor pra cliente fiel?" · Persuasão DC 15', check: { skill: 'persuasion', dc: 15 },
-        resultNarration: 'Aldwin considera por um momento, medindo Vossa Senhoria como mediria ouro na balança. <i>(assente devagar)</i>',
+        resultNarration: 'Aldwin considera por um momento, olhando para você com atenção na balança. <i>(assente devagar)</i>',
         resultText: '"Fidelidade tem seu valor, admito. Reduzo a taxa à metade desta retirada — um por cento, não dois." <i>(corrige o lance no livro)</i> "A Casa de Tholram lembra de quem volta. Que volte mais vezes."',
         resultNarrationFail: 'Aldwin pousa o carimbo e olha por cima dos óculos meia-lua. <i>(paciente, mas firme)</i>',
-        resultTextFail: '"Fidelidade se mede em anos, Vossa Senhoria, não em visitas. <i>(sela a bolsa)</i> A taxa é dois por cento — para o mendigo e para o Conde, igual. É o que mantém a Casa de pé."' },
+        resultTextFail: '"Fidelidade se mede em anos, amigo, não em visitas. <i>(sela a bolsa)</i> A taxa é dois por cento — para o mendigo e para o Conde, igual. É o que mantém a Casa de pé."' },
       { id: 'back_aldwin', label: '↩ "Voltar aos outros serviços do banco."', cb: 'return_venue_root' },
       { id: 'back',   label: 'Encerrar conversa', cb: 'close' }
     ]
@@ -138,7 +138,7 @@ var SERVICE_DIALOGUES_BANK = {
     npc: ALDWIN_DIALOGUE.npc,
     script: [
       { type: 'narration', text: 'Aldwin para, monóculo já na mão. Pousa-o lentamente sobre o livro de tarja, abre uma gaveta inferior do balcão, retira três contratos lacrados em pergaminho amarelado. Aldwin tem o olhar de quem já viu cada tipo de aventureiro entrar pela porta jurando que pagaria.' },
-      { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Empréstimo é coisa séria, Vossa Senhoria. <i>(separa os três contratos sobre o mármore)</i> A Casa cobra dez por cento ao mês sobre o principal — juros simples, não compostos. Atraso paga vinte por cento de multa, e a terceira falta significa que o brasão da Casa vai à sua porta com dois guardas e um oficial do Conde.' }
+      { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Empréstimo é coisa séria, viajante. <i>(separa os três contratos sobre o mármore)</i> A Casa cobra dez por cento ao mês sobre o principal — juros simples, não compostos. Atraso paga vinte por cento de multa, e a terceira falta significa que o brasão da Casa vai à sua porta com dois guardas e um oficial do Conde.' }
     ],
     choices: [
       // task #64: backend canonical bank_loans.py:247 "bank_loan_take_<tier_id>"
@@ -148,18 +148,18 @@ var SERVICE_DIALOGUES_BANK = {
         resultText: '"Cem Valdoritas emprestadas, juros simples de dez por cento ao mês. <i>(empurra o contrato)</i> Trinta dias pra pagar tudo, ou principal mais juros. Atraso traz multa de vinte por cento, e a terceira falta vai à Justiça." <b>Empréstimo registrado.</b>' },
       { id: 'l_500',  label: 'Pedir 500 V · 30 dias · juros 50V',   cb: 'loan-confirm', backend_cb: 'bank_loan_take_medium', renownDelta: 0,
         resultNarration: 'Aldwin escolhe o segundo contrato. <i>(pede testemunha — um banqueiro júnior aparece e assina)</i>',
-        resultText: '"Quinhentas Valdoritas, cinquenta de juros. <i>(passa a pena pro contrato)</i> Vossa Senhoria assina aqui, e aqui — duas vias. Trinta dias. <b>Empréstimo registrado.</b> Espero não ver Vossa Senhoria de volta sem o pagamento."' },
+        resultText: '"Quinhentas Valdoritas, cinquenta de juros. <i>(passa a pena pro contrato)</i> Você assina aqui, e aqui — duas vias. Trinta dias. <b>Empréstimo registrado.</b> Espero não ver você de volta sem o pagamento."' },
       { id: 'l_1000', label: 'Pedir 1000 V · 60 dias · juros 200V', cb: 'loan-confirm', backend_cb: 'bank_loan_take_large', renownDelta: 0,
-        resultNarration: 'Aldwin pausa antes de pegar o terceiro contrato. <i>(estuda Vossa Senhoria por um momento longo)</i>',
+        resultNarration: 'Aldwin pausa antes de pegar o terceiro contrato. <i>(estuda você por um momento longo)</i>',
         resultText: '"Mil Valdoritas. <i>(traz o contrato selado de cera vermelha)</i> Sessenta dias, duzentos de juros. <b>Empréstimo registrado.</b> Se falhar duas vezes, o brasão da Casa vai à porta do Castelo. Eu, pessoalmente, espero não ter que enviar."' },
       // sessão #76 FIX: choices de dado precisam de resultNarration/resultText —
       // senão svc-interactions.js fecha o encounter ao clicar "Continuar" (bug
       // reportado: rolagem → Continuar → sai do diálogo sem mostrar nada).
       { id: 'l_insight', label: '"Quais os termos exatos?" · Intuição DC 13', check: { skill: 'insight', dc: 13 },
-        resultNarration: 'Vossa Senhoria observa os olhos de Aldwin enquanto ele fala — e percebe que ele não esconde nada. Cada cláusula está exatamente como dita.',
+        resultNarration: 'Você observa os olhos de Aldwin enquanto ele fala — e percebe que ele não esconde nada. Cada cláusula está exatamente como dita.',
         resultText: '"Dez por cento ao mês, juros simples — nunca compostos. Atraso cobra vinte por cento de multa sobre o saldo. Na terceira falta, o brasão da Casa vai à sua porta com dois guardas e um oficial do Conde." <i>(bate o indicador no contrato)</i> "Está tudo aqui. Leia antes de assinar — eu insisto."',
         resultNarrationFail: 'Aldwin recosta-se e fecha o monóculo. <i>(o olhar fica ilegível)</i>',
-        resultTextFail: '"Os termos estão no contrato, Vossa Senhoria — cada palavra escrita pela pena da Casa. Não cabe a mim resumir o que o pergaminho já diz com clareza." <i>(empurra o contrato pela mesa)</i> "Leia com calma."' },
+        resultTextFail: '"Os termos estão no contrato, viajante — cada palavra escrita pela pena da Casa. Não cabe a mim resumir o que o pergaminho já diz com clareza." <i>(empurra o contrato pela mesa)</i> "Leia com calma."' },
       { id: 'back_aldwin', label: '↩ "Voltar aos outros serviços do banco."', cb: 'return_venue_root' },
       { id: 'back',   label: 'Encerrar conversa', cb: 'close' }
     ]
@@ -168,24 +168,24 @@ var SERVICE_DIALOGUES_BANK = {
     npc: ALDWIN_DIALOGUE.npc,
     script: [
       { type: 'narration', text: 'Aldwin levanta-se com gesto lento e caminha até uma das três portas de aço polido atrás do balcão. Cada porta tem fechadura de seis cilindros e fenda pra carta selada. Ele gira uma chave de bronze pesado e a porta abre com ranger lento — dentro, um cofre vazio aguardando.' },
-      { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Guardar item é diferente de guardar ouro. <i>(ajusta o monóculo)</i> Item ocupa espaço — cinco Valdoritas por semana, independente do valor. <i>(tamborila dedos)</i> O cofre é selado com o anel da Casa. Apenas Vossa Senhoria, portando o selo correspondente, pode abri-lo.' }
+      { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Guardar item é diferente de guardar ouro. <i>(ajusta o monóculo)</i> Item ocupa espaço — cinco Valdoritas por semana, independente do valor. <i>(tamborila dedos)</i> O cofre é selado com o anel da Casa. Apenas você, portando o selo correspondente, pode abri-lo.' }
     ],
     choices: [
       // task #84: resultText específico por prazo (cohesão).
       { id: 's_short', label: 'Guardar 1 semana · 5V', cb: 'store-confirm', renownDelta: 0,
         resultNarration: 'Aldwin gira a chave de bronze na porta do cofre menor. <i>(deposita o item na bandeja de veludo)</i>',
-        resultText: '"Uma semana, cinco Valdoritas. <i>(sela a porta)</i> O item fica guardado até o sétimo dia. Após isso, Vossa Senhoria pode renovar ou retirar." <b>Item armazenado no Cofre Comum.</b>' },
+        resultText: '"Uma semana, cinco Valdoritas. <i>(sela a porta)</i> O item fica guardado até o sétimo dia. Após isso, você pode renovar ou retirar." <b>Item armazenado no Cofre Comum.</b>' },
       { id: 's_month', label: 'Guardar 1 mês · 18V (10% desconto)', cb: 'store-confirm', renownDelta: +1,
         resultNarration: 'Aldwin escolhe um cofre médio, no segundo nível. <i>(testa as três fechaduras antes de selar)</i>',
         resultText: '"Trinta dias, dezoito Valdoritas — desconto da fidelidade. <i>(carimba o recibo)</i> O item fica em cofre mais seguro, com duas chaves auxiliares." <b>Item armazenado. +1 Renome.</b>' },
       { id: 's_year',  label: 'Guardar 1 ano · 200V (Honored+)', cb: 'store-confirm', renownDelta: +3,
-        resultNarration: 'Aldwin curva-se levemente. Conduz Vossa Senhoria à câmara dos cofres principais, no andar de cima. Quatro guardas postados.',
+        resultNarration: 'Aldwin curva-se levemente. Conduz você à câmara dos cofres principais, no andar de cima. Quatro guardas postados.',
         resultText: '"Trezentos e sessenta dias, duzentas Valdoritas. <i>(seleciona o cofre nobre)</i> A Casa de Tholram garante a salvaguarda. Quem deposita por um ano, recebe o anel auxiliar para acesso de emergência." <b>Item armazenado no Cofre Real. +3 Renome.</b>' },
       { id: 's_persuade', label: '"Sou cliente antigo, dispense a primeira semana" · Persuasão DC 16', check: { skill: 'persuasion', dc: 16 },
         resultNarration: 'Aldwin ergue o monóculo e percorre o livro-razão até encontrar seu nome. O dedo para sobre uma coluna de depósitos antigos.',
-        resultText: '"De fato, Vossa Senhoria consta destas páginas há tempo. <i>(anota uma marca discreta ao lado do seu nome)</i> A Casa lembrará desta lealdade quando os prazos apertarem. Cortesia que vira regra deixa de ser cortesia — mas fidelidade tem peso no meu livro."',
+        resultText: '"De fato, seu nome consta destas páginas há tempo. <i>(anota uma marca discreta ao lado do seu nome)</i> A Casa lembrará desta lealdade quando os prazos apertarem. Cortesia que vira regra deixa de ser cortesia — mas fidelidade tem peso no meu livro."',
         resultNarrationFail: 'O monóculo desce devagar. Aldwin tamborila uma única vez no balcão — o som seco de quem já ouviu esse pedido mil vezes.',
-        resultTextFail: '"Antiguidade conta histórias, não abate taxas. <i>(reabre o livro-razão)</i> O preço é o preço, Vossa Senhoria. A Casa não faria diferente nem pelo Conde."' },
+        resultTextFail: '"Antiguidade conta histórias, não abate taxas. <i>(reabre o livro-razão)</i> O preço é o preço, amigo. A Casa não faria diferente nem pelo Conde."' },
       { id: 'back_aldwin', label: '↩ "Voltar aos outros serviços do banco."', cb: 'return_venue_root' },
       { id: 'back', label: 'Encerrar conversa', cb: 'close' }
     ]
@@ -194,23 +194,23 @@ var SERVICE_DIALOGUES_BANK = {
     npc: ALDWIN_DIALOGUE.npc,
     script: [
       { type: 'narration', text: 'Aldwin consulta o catálogo de custódia encadernado em couro escuro, confere o número do cofre com a ponta da pena de prata e posiciona a bandeja de veludo sobre o balcão.' },
-      { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Retirada de item requer selo, contra-selo e identidade verificada. <i>(estende a mão calejada)</i> Vossa Senhoria possui o selo — o anel; eu tenho o contra-selo. A identidade, o tempo me ensinou a reconhecer.' },
+      { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Retirada de item requer selo, contra-selo e identidade verificada. <i>(estende a mão calejada)</i> Você possui o selo — o anel; eu tenho o contra-selo. A identidade, o tempo me ensinou a reconhecer.' },
       { type: 'speech', speaker: 'Aldwin de Tholram', text: 'A taxa de retirada é uma Valdorita por item — política da Casa, não decisão minha. <i>(sorri com cortesia medida)</i> Se há mais de um item, posso fazer combo de cinco itens por três Valdoritas.' }
     ],
     choices: [
       // task #84: resultText específico (cohesão).
       { id: 'r_single', label: 'Retirar 1 item · 1V', cb: 'retrieve-confirm', renownDelta: 0,
         resultNarration: 'Aldwin destrava o cofre correspondente. <i>(devolve o item em bandeja de veludo)</i>',
-        resultText: '"Item retirado, uma Valdorita de taxa. <i>(confere o lacre)</i> Vossa Senhoria deseja inspecionar antes de selar a operação?" <b>Item devolvido.</b>' },
+        resultText: '"Item retirado, uma Valdorita de taxa. <i>(confere o lacre)</i> Você deseja inspecionar antes de selar a operação?" <b>Item devolvido.</b>' },
       { id: 'r_bundle', label: 'Retirar até 5 itens · 3V', cb: 'retrieve-confirm', renownDelta: +1,
         resultNarration: 'Aldwin abre dois cofres pequenos lado a lado. <i>(organiza os itens em bandeja maior)</i>',
         resultText: '"Cinco itens, três Valdoritas — combo da Casa. <i>(carimba a folha de retirada)</i> Pode conferir cada um antes de sair. +1 Renome pela operação." <b>Itens devolvidos.</b>' },
       { id: 'r_all',    label: 'Esvaziar cofre · 2% do valor total', cb: 'retrieve-confirm', renownDelta: 0,
-        resultNarration: 'Aldwin escolta Vossa Senhoria pessoalmente à câmara dos cofres. Dois guardas testemunham.',
-        resultText: '"Cofre esvaziado, dois por cento do valor total como taxa final. <i>(sela o cofre vazio)</i> A Casa de Tholram lembrará desta data. Vossa Senhoria fica livre para reabrir conta nova quando quiser." <b>Cofre desocupado.</b>' },
+        resultNarration: 'Aldwin escolta você pessoalmente à câmara dos cofres. Dois guardas testemunham.',
+        resultText: '"Cofre esvaziado, dois por cento do valor total como taxa final. <i>(sela o cofre vazio)</i> A Casa de Tholram lembrará desta data. Você fica livre para reabrir conta nova quando quiser." <b>Cofre desocupado.</b>' },
       { id: 'r_insight', label: '"Você confere por dentro também?" · Intuição DC 12', check: { skill: 'insight', dc: 12 },
         resultNarration: 'Você observa as mãos de Aldwin enquanto ele destrava o cofre — três giros, uma pausa, um quarto giro que ele não anuncia. Nada escapa ao seu olhar.',
-        resultText: '"Olho clínico, Vossa Senhoria. <i>(inclina o cofre para a luz)</i> Selo interno, forro intacto, nenhum dedo além dos meus. A Casa confere duas vezes para que o cliente não precise conferir nenhuma."',
+        resultText: '"Olho clínico, amigo. <i>(inclina o cofre para a luz)</i> Selo interno, forro intacto, nenhum dedo além dos meus. A Casa confere duas vezes para que o cliente não precise conferir nenhuma."',
         resultNarrationFail: 'Aldwin move as mãos rápido demais — entre um giro e outro, você perde o fio do que ele fez.',
         resultTextFail: '"Confiança é como juro composto: cresce devagar e desaba de uma vez. <i>(entrega o item sem pressa)</i> Confira por fora, se desejar. Por dentro, a palavra da Casa terá de bastar."' },
       { id: 'back_aldwin', label: '↩ "Voltar aos outros serviços do banco."', cb: 'return_venue_root' },
@@ -232,13 +232,13 @@ var SERVICE_DIALOGUES_BANK = {
         resultNarration: 'Aldwin chama um banqueiro júnior pra preparar o contrato Médio — caravana de comércio Sul-Vale. <i>(seleciona pergaminho específico)</i>',
         resultText: '"Quinhentas Valdoritas, dez por cento ao mês — atrelado à caravana de Marin Albert. <i>(assina junto)</i> Há risco de atraso ou perda parcial. Cinquenta Valdoritas mensais quando tudo corre bem." <b>+50V/mês expected. +2 Renome.</b>' },
       { id: 'i_high', label: 'Alto · 1000V × 20% (risco real)', cb: 'invest-confirm', renownDelta: +2,
-        resultNarration: 'Aldwin pausa antes de pegar o contrato Alto. <i>(estuda Vossa Senhoria)</i> Volta com pergaminho selado em cera vermelha-sangue.',
+        resultNarration: 'Aldwin pausa antes de pegar o contrato Alto. <i>(estuda você com calma)</i> Volta com pergaminho selado em cera vermelha-sangue.',
         resultText: '"Mil Valdoritas, vinte por cento ao mês — explora rota das Marcas, primeiro mês com expedição experimental. <i>(coloca a pena)</i> Pode duplicar capital em três meses, ou perder tudo se a expedição falhar." <b>+200V/mês potencial · risco substancial. +2 Renome.</b>' },
       { id: 'i_persuade', label: '"Posso ter taxa preferencial?" · Persuasão DC 16', check: { skill: 'persuasion', dc: 16 },
         resultNarration: 'Aldwin recosta-se. Pela primeira vez na conversa, os óculos meia-lua sobem em vez de descer.',
-        resultText: '"Taxa preferencial é privilégio de quem movimenta a Casa. <i>(faz uma anotação à margem)</i> Vossa Senhoria acaba de entrar nessa lista. No próximo contrato, os números serão... mais simpáticos."',
+        resultText: '"Taxa preferencial é privilégio de quem movimenta a Casa. <i>(faz uma anotação à margem)</i> Você acaba de entrar nessa lista. No próximo contrato, os números serão... mais simpáticos."',
         resultNarrationFail: 'A pena de Aldwin nem chega a tocar o pergaminho. O silêncio dura o bastante para a resposta ficar óbvia.',
-        resultTextFail: '"Todos pedem. <i>(sorri sem calor)</i> Os que recebem são os que não precisaram pedir. Cinco por cento, Vossa Senhoria — pegar ou largar."' },
+        resultTextFail: '"Todos pedem. <i>(sorri sem calor)</i> Os que recebem são os que não precisaram pedir. Cinco por cento, amigo — pegar ou largar."' },
       { id: 'about_tavira', label: '"E os bons clientes antigos? Como a Mestra Tavira?"', cb: 'about_tavira' },
       { id: 'i_rude', label: '"Cinco por cento é miséria. Você está roubando."', cb: 'opinion-rude', renownDelta: -2 },
       { id: 'back_aldwin', label: '↩ "Voltar aos outros serviços do banco."', cb: 'return_venue_root' },
@@ -260,7 +260,7 @@ var SERVICE_DIALOGUES_BANK = {
         resultNarration: 'Aldwin estuda seu rosto por um longo instante. O que quer que procurasse ali, não encontrou.',
         resultText: '"Palavras tocantes. <i>(guarda o pergaminho na gaveta)</i> Raros são os que dispensam o papel — e mais raros os que o dizem com os olhos limpos. A Casa aprecia... a intenção."',
         resultNarrationFail: 'O monóculo de Aldwin brilha. Banqueiros envelhecem ouvindo mentiras — e a sua não foi das melhores.',
-        resultTextFail: '"Confiança sem papel é poesia, Vossa Senhoria. E a Casa de Tholram não financia poetas. <i>(empurra o contrato de volta)</i> Assine, ou a porta é aquela."' },
+        resultTextFail: '"Confiança sem papel é poesia, amigo. E a Casa de Tholram não financia poetas. <i>(empurra o contrato de volta)</i> Assine, ou a porta é aquela."' },
       { id: 'in_insight', label: '"Já houve fraude com este Seguro?" · Intuição DC 14', check: { skill: 'insight', dc: 14 },
         resultNarration: 'A pausa de Aldwin antes de responder dura meio segundo a mais que o habitual. É resposta suficiente.',
         resultText: '"Uma vez. <i>(baixa a voz)</i> Um suposto morto que voltou a respirar quando o herdeiro veio cobrar. A Casa pagou o Revivify... e depois cobrou dele em juízo cada moeda, com juros. Não houve segunda vez."',
@@ -281,7 +281,7 @@ var SERVICE_DIALOGUES_BANK = {
       // task #84: resultText específico por tipo de propriedade (cohesão).
       { id: 'e_house',  label: 'Casa (Hovel) · 1000V', cb: 'estate-confirm', renownDelta: +2,
         resultNarration: 'Aldwin marca no mapa a Casa modesta na cidade baixa — duas portas, lareira pequena, jardim de ervas. <i>(passa a escritura assinada pelo Conde)</i>',
-        resultText: '"Mil Valdoritas, Casa registrada em nome de Vossa Senhoria. <i>(carimba o pergaminho)</i> Cidade baixa, perto do mercado. <b> — Hovel: lareira modesta, dois cômodos. Geração: 1 sp/dia. +2 Renome da Casa.</b>"' },
+        resultText: '"Mil Valdoritas, Casa registrada em seu nome. <i>(carimba o pergaminho)</i> Cidade baixa, perto do mercado. <b> — Hovel: lareira modesta, dois cômodos. Geração: 1 sp/dia. +2 Renome da Casa.</b>"' },
       { id: 'e_farm',   label: 'Quinta (Cottage) · 5000V', cb: 'estate-confirm', renownDelta: +3,
         resultNarration: 'Aldwin marca a Quinta nas margens do rio — três hectares, casa principal, celeiro, dois empregados inclusos.',
         resultText: '"Cinco mil Valdoritas. Quinta nas margens do Vale do Cervo. <i>(entrega escritura selada)</i> Empregados pagos, colheita garantida. <b>Cottage: 5 cômodos. Geração: 2 sp/dia. +3 Renome da Casa.</b>"' },
@@ -290,7 +290,7 @@ var SERVICE_DIALOGUES_BANK = {
         resultText: '"Quinze mil Valdoritas, mais cem dias de construção. <i>(carimba o contrato)</i> A Casa supervisiona obras. Quando concluída, gera 1 Valdorita/dia + base de operações fortificada. <b>Tower +3 Renome da Casa.</b>"' },
       { id: 'e_stronghold', label: 'Stronghold · 50000V · 400 dias · DC 20 Persuasão', check: { skill: 'persuasion', dc: 20 },
         resultNarration: 'Aldwin desce do banco e abre um armário trancado a chave dupla. Lá dentro, plantas que poucos clientes da Casa já viram.',
-        resultText: '"Cinquenta mil, quatrocentos dias, e um pedaço do mapa com seu nome. <i>(desenrola a planta da fortaleza)</i> A Casa raramente apresenta este portfólio. Reúna o capital, Vossa Senhoria — a papelada estará pronta quando o ouro estiver."',
+        resultText: '"Cinquenta mil, quatrocentos dias, e um pedaço do mapa com seu nome. <i>(desenrola a planta da fortaleza)</i> A Casa raramente apresenta este portfólio. Reúna o capital, amigo — a papelada estará pronta quando o ouro estiver."',
         resultNarrationFail: 'Aldwin sequer se move na direção do armário. O monóculo permanece fixo no livro-razão.',
         resultTextFail: '"Fortaleza não se ergue com entusiasmo, ergue-se com lastro. <i>(vira a página)</i> Volte quando o seu cofre impressionar mais que o seu discurso."' },
       { id: 'back_aldwin', label: '↩ "Voltar aos outros serviços do banco."', cb: 'return_venue_root' },
@@ -319,7 +319,7 @@ var SERVICE_DIALOGUES_BANK = {
     script: [
       { type: 'narration', text: 'Aldwin guarda o livro-razão devagar. O ranger das fivelas de prata soa mais firme que de costume. Há uma sombra fina cruzando seu rosto — algo entre desgosto e contenção profissional.' },
       { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Corvus é educado. Livros raros levam tempo para vender — eu entendo. <i>(ajusta colete)</i> Mas a Casa de Tholram não opera por simpatia. Ele deve, e os números não esquecem o que a paciência tenta apagar.' },
-      { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Se o vir no Mercado, não mencione nosso assunto. <i>(meia pausa)</i> A discrição, Vossa Senhoria, é metade do crédito.' }
+      { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Se o vir no Mercado, não mencione nosso assunto. <i>(meia pausa)</i> A discrição, viajante, é metade do crédito.' }
     ],
     choices: [
       { id: 'discrete', label: '"Serei discreto."',          cb: 'cascade:corvus:gossip_aldwin_loan', renownDelta: +1 },
