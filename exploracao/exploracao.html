@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-23T13:01:16Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-23T15:03:09Z - do not edit directly, edit source -->
 
 
 
@@ -88934,11 +88934,16 @@ function _handleWildBanterResolved(result, targetNpc, proceedAfterFn) {
 
   var script = (result && result.result_script && result.result_script.length)
 
-    ? result.result_script
+    ? result.result_script.slice()
 
     : [{ type: 'narration', text: 'A conversa se encerra enquanto a comitiva ajusta as mochilas e retoma a marcha.' }];
 
-
+  if (script.length > 0 && script[0].type !== 'narration' && script[0].type !== 'dm') {
+    script.unshift({
+      type: 'narration',
+      text: ((targetNpc && targetNpc.name) || 'Seu companheiro') + ' caminha ao seu lado pela trilha e responde.'
+    });
+  }
 
   if (result && result.toast_message && typeof vToast === 'function') {
 
@@ -88948,7 +88953,29 @@ function _handleWildBanterResolved(result, targetNpc, proceedAfterFn) {
 
   }
 
+  var matchedAlly = null;
+  if (typeof _getLivingWildernessCompanions === 'function' && targetNpc && targetNpc.name) {
+    var living = _getLivingWildernessCompanions();
+    for (var i = 0; i < living.length; i++) {
+      if (living[i] && living[i].name && (living[i].name === targetNpc.name || living[i].name.indexOf(targetNpc.name) === 0 || targetNpc.name.indexOf(living[i].name) === 0)) {
+        matchedAlly = living[i];
+        break;
+      }
+    }
+  }
 
+  var endChoices = [];
+  if (matchedAlly && typeof _showCampfireCompanionTopics === 'function') {
+    endChoices.push({
+      id: 'talk_more_ally',
+      label: '↩ Conversar mais com ' + (targetNpc.name || 'o companheiro'),
+      cb: function() {
+        window._encounterActive = false;
+        _showCampfireCompanionTopics(matchedAlly);
+      }
+    });
+  }
+  endChoices.push({ id: 'done', label: 'Continuar marcha' });
 
   window.vEncounter.render({
 
@@ -88956,13 +88983,18 @@ function _handleWildBanterResolved(result, targetNpc, proceedAfterFn) {
 
     script: script,
 
-    choices: [{ id: 'done', label: 'Continuar marcha' }]
+    choices: endChoices
 
   }, {
 
     player: (window.S && window.S.player) ? window.S.player : {},
 
-    onChoice: function() {
+    onChoice: function(ch) {
+
+      if (ch && typeof ch.cb === 'function') {
+        ch.cb();
+        return;
+      }
 
       window._encounterActive = false;
 
@@ -105478,16 +105510,6 @@ function _openCartographyWithPrompt(){
 
 })();
 
-</script>
-
-</body>
-
-</html>
-
-
-
-
-
 // ── CONVERSAS NA FOGUEIRA COM COMPANHEIROS (D&D 5e / EXPLORAÇÃO) ───────────────
 
 function _openCampfireChat() {
@@ -105546,7 +105568,7 @@ function _showCampfireAllyPicker(alliesList) {
 
       id: 'pick_ally_' + idx,
 
-      label: '💬 ' + aName + ' (' + aCls + ') ▸',
+      label: '◆ ' + aName + ' (' + aCls + ') ▸',
 
       cb: function() {
 
@@ -105630,8 +105652,6 @@ function _showCampfireAllyPicker(alliesList) {
 
 }
 
-
-
 function _getCampfireAlliesList() {
   if (window.S && Array.isArray(window.S.allies) && window.S.allies.length > 0) {
     return window.S.allies;
@@ -105658,35 +105678,37 @@ function _showCampfireCompanionTopics(ally) {
 
   var topics = [
 
-    { key: 'camp_campfire',      label: '🔥 Ao redor da fogueira ▸' },
+    { key: 'camp_campfire',      label: '◆ Ao redor da fogueira ▸',          doneLabel: '✓ Ao redor da fogueira (Relembrar) ▸' },
 
-    { key: 'backstory_secret',   label: '🗝️ Segredos e o passado ▸' },
+    { key: 'backstory_secret',   label: '◆ Segredos e o passado ▸',          doneLabel: '✓ Segredos e o passado (Relembrar) ▸' },
 
-    { key: 'morals_faith',       label: '⚖️ Princípios e crenças ▸' },
+    { key: 'morals_faith',       label: '◆ Princípios e crenças ▸',          doneLabel: '✓ Princípios e crenças (Relembrar) ▸' },
 
-    { key: 'combat_bonds',       label: '🛡️ Táticas e laços de batalha ▸' },
+    { key: 'combat_bonds',       label: '◆ Táticas e laços de batalha ▸',    doneLabel: '✓ Táticas e laços de batalha (Relembrar) ▸' },
 
-    { key: 'personal_favor',     label: '📜 Assunto pessoal e favor ▸' },
+    { key: 'personal_favor',     label: '◆ Assunto pessoal e favor ▸',       doneLabel: '✓ Assunto pessoal e favor (Relembrar) ▸' },
 
-    { key: 'romance_courtship',  label: '💖 Confidências a dois [Afeto] ▸' },
+    { key: 'romance_courtship',  label: '◆ Confidências a dois [Afeto] ▸',   doneLabel: '✓ Confidências a dois [Afeto] (Relembrar) ▸' },
 
-    { key: 'sparring_challenge', label: '⚔️ Desafio de treino rápido ▸' }
+    { key: 'sparring_challenge', label: '◆ Desafio de treino rápido ▸',      doneLabel: '✓ Desafio de treino rápido (Relembrar) ▸' }
 
   ];
 
-  var availTopics = topics.filter(function(t) {
+  var freshTopics = topics.filter(function(t) {
     return !ally._campfireTopicsDone[t.key];
   });
+  var revisitedTopics = topics.filter(function(t) {
+    return !!ally._campfireTopicsDone[t.key];
+  });
+  var orderedTopics = freshTopics.concat(revisitedTopics);
 
-
-
-  var choices = availTopics.map(function(t) {
-
+  var choices = orderedTopics.map(function(t) {
+    var isDone = !!ally._campfireTopicsDone[t.key];
     return {
 
       id: 'camp_top_' + t.key,
 
-      label: t.label,
+      label: isDone ? t.doneLabel : t.label,
 
       cb: function() {
 
@@ -105702,7 +105724,7 @@ function _showCampfireCompanionTopics(ally) {
   if (allAllies.length > 1) {
     choices.push({
       id: 'camp_switch_ally',
-      label: '👥 Conversar com outro companheiro',
+      label: '↩ Conversar com outro companheiro',
       cb: function() {
         _showCampfireAllyPicker(allAllies);
       }
@@ -106234,10 +106256,15 @@ function _showCampfireTopicDialogue(ally, topicKey) {
 
 
   var cur = topicData[topicKey] || topicData.camp_campfire;
+  ally._campfireChoicesUsed = ally._campfireChoicesUsed || {};
+  var availableTopicChoices = cur.choices.filter(function(ch) {
+    return !ally._campfireChoicesUsed[topicKey + ':' + ch.id];
+  });
+  if (availableTopicChoices.length === 0) {
+    availableTopicChoices = cur.choices.slice();
+  }
 
-
-
-  var choices = cur.choices.map(function(ch) {
+  var choices = availableTopicChoices.map(function(ch) {
 
     return {
 
@@ -106247,13 +106274,16 @@ function _showCampfireTopicDialogue(ally, topicKey) {
 
       cb: function() {
 
+        ally._campfireChoicesUsed = ally._campfireChoicesUsed || {};
+        ally._campfireChoicesUsed[topicKey + ':' + ch.id] = true;
+
         // Atualiza aprovação local
 
         ally.approval = (ally.approval || 0) + ch.delta;
 
         if (typeof vToast === 'function') {
 
-          vToast(displayName + ': Aprovação ' + (ch.delta >= 0 ? '+' : '') + ch.delta + ' (' + ally.approval + ')');
+          vToast('✦ ' + displayName + ': Aprovação ' + (ch.delta >= 0 ? '+' : '') + ch.delta + ' (' + ally.approval + ')');
 
         }
 
@@ -106305,22 +106335,30 @@ function _showCampfireTopicDialogue(ally, topicKey) {
 
         if (window.vEncounter && typeof window.vEncounter.render === 'function') {
           var postCampChoices = [];
-          var allTopicKeys = ['camp_campfire', 'backstory_secret', 'morals_faith', 'combat_bonds', 'personal_favor', 'romance_courtship', 'sparring_challenge'];
-          var hasMoreTopics = allTopicKeys.some(function(k) { return !ally._campfireTopicsDone[k]; });
-          if (hasMoreTopics) {
+          var remChoicesInTopic = cur.choices.filter(function(remCh) {
+            return !ally._campfireChoicesUsed[topicKey + ':' + remCh.id];
+          });
+          if (remChoicesInTopic.length > 0) {
             postCampChoices.push({
-              id: 'back_to_topics',
-              label: '↩ Escolher Outro Assunto',
+              id: 'more_in_topic',
+              label: '↩ Continuar sobre este assunto',
               cb: function() {
-                _showCampfireCompanionTopics(ally);
+                _showCampfireTopicDialogue(ally, topicKey);
               }
             });
           }
+          postCampChoices.push({
+            id: 'back_to_topics',
+            label: '↩ Escolher outro assunto',
+            cb: function() {
+              _showCampfireCompanionTopics(ally);
+            }
+          });
           var campAllies = _getCampfireAlliesList();
           if (campAllies.length > 1) {
             postCampChoices.push({
               id: 'camp_switch_ally',
-              label: '👥 Conversar com outro companheiro',
+              label: '↩ Conversar com outro companheiro',
               cb: function() {
                 _showCampfireAllyPicker(campAllies);
               }
@@ -106328,7 +106366,7 @@ function _showCampfireTopicDialogue(ally, topicKey) {
           }
           postCampChoices.push({
             id: 'finish_chat',
-            label: '🏕️ Voltar ao Acampamento',
+            label: '↩ Voltar ao Acampamento',
             cb: function() {
               window._isAtCampfire = false;
               try { window.vEncounter.close(); } catch(_) {}
@@ -106459,3 +106497,8 @@ function _showCampfireTopicDialogue(ally, topicKey) {
 
 }
 
+</script>
+
+</body>
+
+</html>

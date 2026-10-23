@@ -39859,7 +39859,9 @@ function _resolveInteractiveChoiceLOCAL(player, choice) {
     deltas: deltas,
     rewards: rewards.length > 0 ? rewards : null,
     dice: diceData,
-    onContinue: function(){}
+    onContinue: function(){
+      if (typeof choice._onContinue === 'function') choice._onContinue();
+    }
   });
 }
 
@@ -39963,7 +39965,9 @@ function _resolveInteractiveChoiceREMOTE(player, choice) {
       deltas: deltas,
       rewards: rewards.length > 0 ? rewards : null,
       dice: diceData,
-      onContinue: function(){}
+      onContinue: function(){
+        if (typeof choice._onContinue === 'function') choice._onContinue();
+      }
     });
   }).catch(function(e){
     if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
@@ -67583,6 +67587,11 @@ function _showAllyTopicDialogue(idx, topicKey) {
           id: 'back_to_topics_menu',
           label: '↩ Escolher outro assunto',
           cb: function() { _showAllyTopicsMenu(idx); }
+        },
+        {
+          id: 'back_to_ally_main',
+          label: '↩ "Gostaria de falar de outro assunto."',
+          cb: function() { _showAllyDialogue(idx); }
         }
       ]
     };
@@ -70613,7 +70622,7 @@ function _marthaGreeting(p){
   var rep = (p && p.metadata && p.metadata.inn_rep) || 0;
   if (rep >= 50) {
     return [
-      { type: 'narration', text: 'Martha sai de trás do balcão e te abraça como se fosse parente.' },
+      { type: 'narration', text: 'Martha sai de trás do balcão e abraça você como se fosse parente.' },
       { type: 'speech', speaker: 'Martha', text: '"Senta, senta! Tem caldo no fogão. Não quero saber, é por conta da casa."' }
     ];
   }
@@ -70624,7 +70633,7 @@ function _marthaGreeting(p){
     ];
   }
   return [
-    { type: 'narration', text: 'Martha te olha de cima a baixo com desconfiança mal disfarçada.' },
+    { type: 'narration', text: 'Martha olha você de cima a baixo com desconfiança mal disfarçada.' },
     { type: 'speech', speaker: 'Martha', text: '"Quarto? Cinco Valdoritas. À vista. E nada de barulho até o galo cantar."' }
   ];
 }
@@ -70670,7 +70679,7 @@ var MARTHA_ENCOUNTERS = {
       { type: 'narration', text: 'Martha hesita por um instante. Os olhos vão para a escada que desce pro porão.' },
       { type: 'speech', speaker: 'Martha', text: '"Velharias. Barris vazios. Coisas que o meu falecido marido guardou e nunca mais alguém olhou."' },
       { type: 'narration', text: 'Ela limpa as mãos no avental.' },
-      { type: 'speech', speaker: 'Martha', text: '"Mas ultimamente... <i>ouço ruídos.</i> Tem algo lá embaixo que não devia estar. Se quiser investigar, pega a chave atrás do balcão. Te pago bem se limpar."' },
+      { type: 'speech', speaker: 'Martha', text: '"Mas ultimamente... <i>ouço ruídos.</i> Tem algo lá embaixo que não devia estar. Se quiser investigar, pegue a chave atrás do balcão. Pago bem a você se limpar."' },
       {
         type: 'quest_contract',
         quest: {
@@ -70685,7 +70694,7 @@ var MARTHA_ENCOUNTERS = {
     ],
     choices: [
       { id: 'accept_cellar',  label: 'Aceitar a Missão', result: 'accept_quest', _questId: 'cellar' },
-      { id: 'decline_cellar', label: 'Recusar',           result: 'goto_dialog', _encounterRef: 'martha_decline' }
+      { id: 'decline_cellar', label: 'Recusar por enquanto', result: 'goto_dialog', _encounterRef: 'decline' }
     ]
   },
   local: {
@@ -70721,6 +70730,15 @@ var MARTHA_ENCOUNTERS = {
     script: [
       { type: 'narration', text: 'Martha encolhe os ombros e volta a polir o copo.' },
       { type: 'speech', speaker: 'Martha', text: '"Tudo bem. <i>A chave fica onde está.</i> Quando mudar de ideia, é só pedir."' }
+    ],
+    choices: _marthaChoicesAfter(['cellar'])
+  },
+  cellar_accepted: {
+    id: 'martha_cellar_accepted',
+    npc: 'martha',
+    script: [
+      { type: 'narration', text: 'Martha abre um sorriso aliviado e desliza uma pesada chave de ferro sobre o balcão de madeira.' },
+      { type: 'speech', speaker: 'Martha', text: '"Sabia que podia contar com você! Tome cuidado lá embaixo — o alçapão fica ao lado dos barris de hidromel."' }
     ],
     choices: _marthaChoicesAfter(['cellar'])
   }
@@ -72473,12 +72491,10 @@ function _fallbackBanterChoiceResolve(selected, banter, targetNpc, proceedAfterF
   if (typeof vToast === 'function') vToast(toastText, delta >= 0 ? 'ok' : 'warn');
 
   var resultScript = [];
-  if (selected.reply_narration) {
-    resultScript.push({
-      type: 'narration',
-      text: selected.reply_narration
-    });
-  }
+  resultScript.push({
+    type: 'narration',
+    text: selected.reply_narration || (banter.companion_name + ' caminha ao seu lado pelas ruas de Valdoria e reflete sobre as suas palavras.')
+  });
   if (selected.reply_speech) {
     resultScript.push({
       type: 'speech',
@@ -72493,16 +72509,49 @@ function _fallbackBanterChoiceResolve(selected, banter, targetNpc, proceedAfterF
 
 function _handleBanterResolved(result, targetNpc, proceedAfterFn) {
   var script = (result && result.result_script && result.result_script.length)
-    ? result.result_script
+    ? result.result_script.slice()
     : [{ type: 'narration', text: 'A conversa se encerra em tom tranquilo enquanto a comitiva retoma a marcha.' }];
+  if (script.length > 0 && script[0].type !== 'narration' && script[0].type !== 'dm') {
+    script.unshift({
+      type: 'narration',
+      text: ((targetNpc && targetNpc.name) || 'Seu companheiro') + ' caminha ao seu lado e responde.'
+    });
+  }
+
+  var matchedIdx = -1;
+  if (window.GROUP_MEMBERS && Array.isArray(window.GROUP_MEMBERS) && targetNpc && targetNpc.name) {
+    for (var i = 1; i < window.GROUP_MEMBERS.length; i++) {
+      var gm = window.GROUP_MEMBERS[i];
+      if (gm && !gm.dead && gm.name && (gm.name === targetNpc.name || gm.name.indexOf(targetNpc.name) === 0 || targetNpc.name.indexOf(gm.name) === 0)) {
+        matchedIdx = i;
+        break;
+      }
+    }
+  }
+  var banterEndChoices = [];
+  if (matchedIdx > 0 && typeof _showAllyDialogue === 'function') {
+    banterEndChoices.push({
+      id: 'talk_more_ally',
+      label: '↩ Conversar mais com ' + (targetNpc.name || 'o companheiro'),
+      cb: function() {
+        window._encounterActive = false;
+        _showAllyDialogue(matchedIdx);
+      }
+    });
+  }
+  banterEndChoices.push({ id: 'done', label: 'Continuar caminhada' });
 
   window.vEncounter.render({
     npc: targetNpc,
     script: script,
-    choices: [{ id: 'done', label: 'Continuar caminhada' }]
+    choices: banterEndChoices
   }, {
     player: (typeof CITY_MOCK_PLAYER !== 'undefined') ? CITY_MOCK_PLAYER : (window.CITY_MOCK_PLAYER || {}),
-    onChoice: function() {
+    onChoice: function(ch) {
+      if (ch && typeof ch.cb === 'function') {
+        ch.cb();
+        return;
+      }
       window._encounterActive = false;
       try { window.vEncounter.close(); } catch(_){}
       if (typeof refreshHud === 'function') refreshHud();
@@ -73668,6 +73717,7 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
                 }
                 try { window.vEncounter.close(); } catch(_){}
                 if (typeof refreshHud === 'function') refreshHud();
+                if (venue === 'recruta' && typeof _guildShowRecruits === 'function') _guildShowRecruits(p);
             } }
           );
         }
@@ -75106,7 +75156,7 @@ var CHANCE_ENCOUNTERS = [
       { type: 'speech', speaker: 'Mestra Miriana', text: '— Mas ele só vende mapas regionais comuns. Para o Mapa Mestre completo de Valdoria, ele exige um teste de erudição. Caso você queira... eu posso treinar você nas runas cartográficas. É uma arte difícil, mas... recompensadora.' }
     ],
     choices: [
-      { id: 'interested', label: 'Estou interessado em estudar.', result: 'continue' },
+      { id: 'interested', label: 'Estou interessado em estudar.', result: 'miriana_interested' },
       { id: 'goto_cart', label: 'Ir falar com Corvus primeiro', result: 'goto_cartographer' },
       { id: 'later', label: 'Talvez quando estiver mais experiente.', result: 'continue' },
       // 2026-05-12 PADRAO_ALDRIC dice rolls — Miriana square research
@@ -75215,7 +75265,7 @@ var CHANCE_ENCOUNTERS = [
     ],
     choices: [
       { id: 'thank', label: 'Vou ficar de olho. Obrigado, Hadric.', result: 'continue' },
-      { id: 'ask_more', label: 'Algum lugar específico que devo investigar?', result: 'continue' },
+      { id: 'ask_more', label: 'Algum lugar específico que devo investigar?', result: 'hadric_ask_more' },
       // 2026-05-12 PADRAO_ALDRIC dice rolls — Garrick gates routes
       // SAB 13 — Sobrevivência: ler o tempo / rastros
       { id: 'survival_weather', label: '[SAB 13] (Olhar pro céu e ler o tempo...)',
@@ -76944,7 +76994,7 @@ function _openCorvusGreetingDialog(player, opts) {
   var hasRelic = !!(player && (player.found_marco_relic || (Array.isArray(player.inventory) && player.inventory.indexOf('Placa do Marco Primordial') >= 0)));
   var completedQuest = !!(player && player.marco_quest_completed);
   if (hasRelic && !completedQuest) {
-    corvusChoices.push({ id: 'deliver_relic', label: '📜 Entregar a Placa do Marco Primordial a Corvus', result: 'corvus_marco_quest_complete' });
+    corvusChoices.push({ id: 'deliver_relic', label: '◆ Entregar a Placa do Marco Primordial a Corvus', result: 'corvus_marco_quest_complete' });
   }
   corvusChoices.push({ id: 'show_maps',   label: 'Mostrar os mapas', result: 'open_cartographer' });
   corvusChoices.push({ id: 'lore_advice', label: 'Consultar rotas e segredos de Valdoria', result: 'corvus_lore_advice' });
@@ -78605,11 +78655,63 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
       }
     }
   } else if (choice.result === 'open_cartographer') {
-    // Vem do diálogo greeting do Corvus → abre cartographer popup direto
+    // Vem do diálogo greeting do Corvus → abre cartographer popup direto e guarda retorno BG3 ao diálogo
+    if (enc && enc.npc === 'corvus_greeting') {
+      window._corvusReturnToDialoguePlayer = player;
+    }
     if (typeof ACTION_HANDLERS !== 'undefined' && ACTION_HANDLERS['square_cartographer_open']) {
       ACTION_HANDLERS['square_cartographer_open'](player);
     } else if (typeof _openCartographerPopup === 'function') {
       _openCartographerPopup(player);
+    }
+  } else if (choice.result === 'miriana_interested') {
+    var mirianaEnc = {
+      id: 'miriana_interested_reply',
+      npc: 'miriana',
+      triggers: [],
+      script: [
+        { type: 'narration', text: 'Mestra Miriana abre um sorriso luminoso e destaca do seu livro um pergaminho dobrado com diagramas de runas direcionais.' },
+        { type: 'speech', speaker: 'Mestra Miriana', text: '— Que alegria ouvir isso! Poucos aventureiros têm paciência para a erudição hoje em dia. Guarde este guia introdutório dos Cinco Vértices de Karthal. Quando visitar o Mestre Corvus na Praça, mostre a ele que você já iniciou os estudos das runas.' }
+      ],
+      choices: [
+        { id: 'goto_cart_from_miriana', label: 'Ir falar com Corvus na Praça', result: 'goto_cartographer' },
+        { id: 'back_miriana', label: '↩ "Gostaria de perguntar outra coisa."', result: 'return_chance_enc', _parentEncId: 'miriana_square_research', _usedChoiceId: 'interested' },
+        { id: 'thank_miriana', label: 'Agradecer pelos apontamentos', result: 'continue' }
+      ]
+    };
+    _renderEncounterPopup(mirianaEnc, originalAction, player);
+  } else if (choice.result === 'hadric_ask_more') {
+    var hadricEnc = {
+      id: 'hadric_ask_more_reply',
+      npc: 'hadric',
+      triggers: [],
+      script: [
+        { type: 'narration', text: 'Hadric apoia a bota sobre um bloco de pedra da muralha e aponta em direção à linha escura das árvores ao norte.' },
+        { type: 'speech', speaker: 'Hadric, o Caçador', text: '— Se quer um ponto de partida certeiro: fique atento às bordas da Floresta dos Sussurros e às trilhas secundárias perto do Forte dos Bandidos. Os batedores deles deixam marcas de carvão nas pedras para guiar contrabandistas à noite. Quem sabe ler esses sinais encontra esconderijos que nem os mapas de Corvus registram.' }
+      ],
+      choices: [
+        { id: 'goto_cart_from_hadric', label: 'Visitar Corvus na Praça', result: 'goto_cartographer' },
+        { id: 'back_hadric', label: '↩ "Gostaria de perguntar outra coisa."', result: 'return_chance_enc', _parentEncId: 'hadric_gates_routes', _usedChoiceId: 'ask_more' },
+        { id: 'thank_hadric', label: 'Vou ficar atento. Obrigado, Hadric.', result: 'continue' }
+      ]
+    };
+    _renderEncounterPopup(hadricEnc, originalAction, player);
+  } else if (choice.result === 'return_chance_enc') {
+    var parentEnc = (typeof CHANCE_ENCOUNTERS !== 'undefined')
+      ? CHANCE_ENCOUNTERS.filter(function(e){ return e && e.id === choice._parentEncId; })[0]
+      : null;
+    if (parentEnc) {
+      parentEnc._usedChoices = parentEnc._usedChoices || {};
+      if (choice._usedChoiceId) parentEnc._usedChoices[choice._usedChoiceId] = true;
+      var remCh = (parentEnc.choices || []).filter(function(c){ return !parentEnc._usedChoices[c.id]; });
+      var contEnc = {
+        id: parentEnc.id,
+        npc: parentEnc.npc,
+        triggers: parentEnc.triggers,
+        script: parentEnc.script.slice(-2),
+        choices: remCh.length ? remCh : parentEnc.choices
+      };
+      _renderEncounterPopup(contEnc, originalAction, player);
     }
   } else if (choice.result === 'corvus_lore_advice') {
     // Terceira opção: Corvus compartilha conselhos cartográficos, geografia de Valdoria e ritmo de viagem
@@ -78709,6 +78811,30 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
     if (interactiveData && typeof _resolveInteractiveChoice === 'function') {
       interactiveData._encounter_id = (enc && enc.id) || '';  // #10: anti-replay server-side
       interactiveData._choice_id = (choice && choice.id) || '';
+      // Padrão BG3: se o encontro pertence a CHANCE_ENCOUNTERS (conversa com NPC com múltiplas escolhas),
+      // ao concluir o popup do teste de perícia, retorna ao diálogo do NPC com as opções restantes.
+      var chanceParent = (enc && typeof CHANCE_ENCOUNTERS !== 'undefined')
+        ? CHANCE_ENCOUNTERS.filter(function(e){ return e && e.id === enc.id; })[0]
+        : null;
+      if (chanceParent) {
+        chanceParent._usedChoices = chanceParent._usedChoices || {};
+        if (choice && choice.id) chanceParent._usedChoices[choice.id] = true;
+        var remInteractiveChoices = (chanceParent.choices || []).filter(function(c){
+          return !chanceParent._usedChoices[c.id];
+        });
+        if (remInteractiveChoices.length > 0) {
+          interactiveData._onContinue = function() {
+            var resumeEnc = {
+              id: chanceParent.id,
+              npc: chanceParent.npc,
+              triggers: chanceParent.triggers,
+              script: chanceParent.script.slice(-2),
+              choices: remInteractiveChoices
+            };
+            _renderEncounterPopup(resumeEnc, originalAction, player);
+          };
+        }
+      }
       _resolveInteractiveChoice(player, interactiveData);
     }
   } else if (choice.result === 'shadow_aldric') {
@@ -78867,6 +78993,9 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
     // choice._questId = id em GUILD_QUEST_DETAILS. Usa _acceptQuest canonical.
     if (typeof _acceptQuest === 'function' && choice._questId) {
       _acceptQuest(choice._questId);
+      if (enc && enc.npc === 'martha' && typeof _openMarthaDialogue === 'function' && MARTHA_ENCOUNTERS && MARTHA_ENCOUNTERS.cellar_accepted) {
+        setTimeout(function(){ _openMarthaDialogue(player, 'cellar_accepted'); }, 80);
+      }
     } else if (typeof vToast === 'function') {
       vToast(_uiIcoImg('alerta','ui-ico-img') + ' Missão indisponível: ' + (choice._questId || '?'), 'warn');
     }
@@ -79759,6 +79888,11 @@ function _closeCartographerPopup() {
   if (cf) cf.remove();
   // Phase 6.6.x: reset paginação pra próxima visita começar na pg 1
   window._corvusCurrentPage = 0;
+  if (window._corvusReturnToDialoguePlayer && typeof _openCorvusGreetingDialog === 'function') {
+    var retP = window._corvusReturnToDialoguePlayer;
+    window._corvusReturnToDialoguePlayer = null;
+    setTimeout(function(){ _openCorvusGreetingDialog(retP); }, 60);
+  }
 }
 
 function _confirmOrderMap(mapName, player) {
