@@ -3286,34 +3286,78 @@
   }
 
   // === _drawCartNode ===
-  function _drawCartNode(ctx, b, w, h, isHover){
-    // === Node hand-drawn (Fase 6.5) ============================================
-    // Pencil-style: pin dot pequeno + nome inline. SEM filled circle, SEM emoji.
-    // O biome ART já tem o pictograma temático (montanha, vulcão, etc).
-    // Hover: anel adicional + label maior.
+  function _drawCartNode(ctx, b, w, h, isHover, opts){
+    opts = opts || {};
     var bx = b.x * w, by = b.y * h;
     var isOrigin = b.isOrigin;
+    var hasRegionalMap = !!opts.hasRegionalMap;
+    if (!hasRegionalMap && b.mapKey && opts.ownedMaps) {
+      hasRegionalMap = opts.ownedMaps.indexOf(b.mapKey) >= 0;
+    }
+
+    // ── 1. Retículo de Foco Vazado (Lente Cartográfica Náutica) ────────
+    // Ilumina e destaca o relevo do terreno sob o círculo no world-map.webp,
+    // sem poluir com imagens duplicadas ou carimbos opacos.
+    var radius = isHover ? 18 : 13;
     ctx.save();
-    // P-mapa sessão #73 (user: "o nome e nível dos locais deve sumir e aparecer SÓ com
-    // o mouse em cima do local"): o label (pill nome + nível) só é desenhado no HOVER.
-    // Por padrão o mapa mostra APENAS as imagens dos locais (loc-art) — nada de labels
-    // poluindo a visão. A descrição aparece no tooltip (também só no hover).
-    if (!isHover) { ctx.restore(); return; }
-    // P-mapa sessão #73 (user): SEM círculo marrom / anel. O local é só a IMAGEM
-    // (loc-art, desenhada por _drawLocArt com hover-zoom) + o label do nome abaixo.
-    // A DESCRIÇÃO aparece no tooltip ao passar o mouse. Removidos: pin dot + anel
-    // externo + anel duplo de origem + anel tracejado de hover.
-    // Label do bioma — P3 sessão #73: pill ESCURO + texto claro/dourado, legível
-    // sobre o world-map medieval. Antes era backplate cream (PAPER_BG) do mapa-
-    // pergaminho ANTIGO — destoava do fundo escuro e deixava o range de nível
-    // (texto INK_MED escuro, SEM backplate) quase ilegível sobre o mapa.
+
+    // 1.1 Iluminação interna suave do terreno (lupa cartográfica)
+    ctx.beginPath();
+    ctx.arc(bx, by, radius, 0, Math.PI * 2);
+    ctx.fillStyle = isHover ? 'rgba(255, 214, 133, 0.22)' : 'rgba(255, 214, 133, 0.10)';
+    ctx.fill();
+
+    // 1.2 Anel Dourado Cartográfico (Vazado)
+    ctx.beginPath();
+    ctx.arc(bx, by, radius, 0, Math.PI * 2);
+    ctx.lineWidth = isHover ? 2.0 : 1.2;
+    ctx.strokeStyle = isHover ? '#ffd685' : (isOrigin ? 'rgba(232, 196, 90, 0.85)' : 'rgba(196, 149, 58, 0.70)');
+    if (isHover) {
+      ctx.shadowColor = 'rgba(196, 149, 58, 0.85)';
+      ctx.shadowBlur = 10;
+    }
+    ctx.stroke();
+
+    // 1.3 Anel Esmeralda para Áreas Mapeadas (Posse da Carta Regional de Corvus)
+    if (hasRegionalMap) {
+      ctx.beginPath();
+      ctx.arc(bx, by, radius + 3, 0, Math.PI * 2);
+      ctx.lineWidth = 1.0;
+      ctx.strokeStyle = 'rgba(129, 199, 132, 0.85)';
+      ctx.stroke();
+    }
+
+    // 1.4 Anel Duplo Nobre de Origem (Portões de Valdória)
+    if (isOrigin) {
+      ctx.beginPath();
+      ctx.arc(bx, by, Math.max(4, radius - 4), 0, Math.PI * 2);
+      ctx.lineWidth = 0.8;
+      ctx.strokeStyle = 'rgba(232, 196, 90, 0.75)';
+      ctx.stroke();
+    }
+
+    // 1.5 Marcas de Mira Náutica (Astrolábio / Luneta Cartográfica)
+    var tickLen = isHover ? 4 : 3;
+    ctx.beginPath();
+    ctx.moveTo(bx - radius - tickLen, by); ctx.lineTo(bx - radius + 1, by);
+    ctx.moveTo(bx + radius - 1, by); ctx.lineTo(bx + radius + tickLen, by);
+    ctx.moveTo(bx, by - radius - tickLen); ctx.lineTo(bx, by - radius + 1);
+    ctx.moveTo(bx, by + radius - 1); ctx.lineTo(bx, by + radius + tickLen);
+    ctx.strokeStyle = isHover ? '#ffd685' : 'rgba(196, 149, 58, 0.50)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.restore();
+
+    // Se não estiver em hover, o retículo náutico já foi desenhado; o pill com nome só abre sob hover
+    if (!isHover) return;
+
+    ctx.save();
     var labelText = b.name;
     ctx.font = (isHover ? 'bold 11px' : '10px') + ' serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     var tw = ctx.measureText(labelText).width;
-    // 2026-05-05 v10: sem "Tier N" — só range de nível recomendado. Origem (tier 0)
-    // sem badge (cidade segura).
     var hasLvl = (typeof b.tier === 'number' && b.tier > 0);
     var lvlRange = !hasLvl ? '' :
                    (b.tier <= 1) ? 'Nível 1 a 2' :
@@ -3324,16 +3368,16 @@
     if (hasLvl) { ctx.font = 'italic 8px serif'; lvlW = ctx.measureText(lvlRange).width; ctx.font = (isHover ? 'bold 11px' : '10px') + ' serif'; }
     var pillW = Math.max(tw, lvlW) + 12;
     var pillH = hasLvl ? 27 : 16;
-    var pillX = bx - pillW / 2, pillY = by + 21;
+    var pillX = bx - pillW / 2, pillY = by + radius + 8;
     // Pill escuro semi-transparente (lê em QUALQUER parte do world-map)
-    ctx.fillStyle = 'rgba(26,21,16,0.82)';
+    ctx.fillStyle = 'rgba(26,21,16,0.85)';
     ctx.beginPath();
     if (ctx.roundRect) ctx.roundRect(pillX, pillY, pillW, pillH, 5);
     else ctx.rect(pillX, pillY, pillW, pillH);
     ctx.fill();
     // Borda dourada sutil (origem mais forte; hover mais grosso)
-    ctx.strokeStyle = isOrigin ? 'rgba(196,149,58,0.85)' : 'rgba(196,149,58,0.42)';
-    ctx.lineWidth = isHover ? 0.9 : 0.6;
+    ctx.strokeStyle = isOrigin ? 'rgba(196,149,58,0.85)' : 'rgba(196,149,58,0.45)';
+    ctx.lineWidth = isHover ? 1.0 : 0.7;
     ctx.stroke();
     // Nome do local (claro; origem dourada)
     ctx.fillStyle = isOrigin ? '#e8c45a' : '#e6dcc4';
@@ -3755,11 +3799,15 @@
       // dos labels/pin (ficam por cima). known===null (exploração) → _ensureCartFog null.
       var _fog = _ensureCartFog(_S, known, RB);
       if (_fog) ctx.drawImage(_fog, 0, 0, _S, _S);
+      var ownedMaps = (typeof cfg.getOwnedMaps === 'function') ? cfg.getOwnedMaps() :
+                      ((typeof window !== 'undefined' && window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.maps_owned) || []);
       RB.forEach(function(b){
         // P-mapa sessão #73 (user): NÃO mostra locais não-descobertos (nem o "?").
-        // Só aparece o que o personagem JÁ descobriu (known_locations) ou a origem —
-        // antes desenhava _drawUnknownLocation (silhueta tracejada + "?") pra todos.
-        if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) _drawCartNode(ctx, b, _S, _S, hoverKey === b.key);
+        // Só aparece o que o personagem JÁ descobriu (known_locations) ou a origem.
+        if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) {
+          var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
+          _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps });
+        }
       });
       var pk = (typeof cfg.getPlayerBiomeKey === 'function') ? cfg.getPlayerBiomeKey() : null;
       var pn = pk && RB.find(function(b){ return b.key === pk; });
