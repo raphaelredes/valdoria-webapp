@@ -67529,6 +67529,7 @@ function _showAllyTopicDialogue(idx, topicKey) {
         cls: cls,
         choice_id: c.id,
         name: displayName,
+        memberIdx: idx,
         topic: topicKey,
         renown_hint: c.renownDelta || 0
       }
@@ -67539,6 +67540,11 @@ function _showAllyTopicDialogue(idx, topicKey) {
     id: 'back_to_topics_menu',
     label: '↩ Escolher outro assunto',
     cb: function() { _showAllyTopicsMenu(idx); }
+  });
+  fullChoices.push({
+    id: 'back_to_ally_main',
+    label: '↩ Voltar às ações gerais',
+    cb: function() { _showAllyDialogue(idx); }
   });
 
   var dlg = {
@@ -67613,7 +67619,11 @@ function _showAllyTopicDialogue(idx, topicKey) {
           window.vEncounter.render({
             npc: dlg.npc,
             script: ch._replyScript,
-            choices: [{ id: 'back_to_topics', label: '↩ Escolher outro assunto', cb: function() { _showAllyTopicsMenu(idx); } }]
+            choices: [
+              { id: 'back_to_topics', label: '↩ Escolher outro assunto', cb: function() { _showAllyTopicsMenu(idx); } },
+              { id: 'back_to_ally_main', label: '↩ "Gostaria de falar de outro assunto."', cb: function() { _showAllyDialogue(idx); } },
+              { id: 'leave', label: '↩ "Até mais tarde."', cb: 'close' }
+            ]
           }, {
             closeable: true,
             onChoice: function(rc) {
@@ -67734,6 +67744,34 @@ function _showCompanionRelationshipTutorial(optAllyName, onDone) {
 }
 window._showCompanionRelationshipTutorial = _showCompanionRelationshipTutorial;
 
+function _getAvailableGiftItems() {
+  var items = [];
+  // 1. Verifica MOCK_PLAYER_INVENTORY
+  if (typeof MOCK_PLAYER_INVENTORY !== 'undefined' && Array.isArray(MOCK_PLAYER_INVENTORY)) {
+    MOCK_PLAYER_INVENTORY.forEach(function(it) {
+      if (it && it.n && (it.q == null || it.q > 0)) {
+        items.push({ name: it.n, qty: it.q || 1 });
+      }
+    });
+  }
+  // 2. Se vazio, verifica p.inventory
+  if (items.length === 0) {
+    var p = window.CITY_MOCK_PLAYER || window.player;
+    if (p && Array.isArray(p.inventory)) {
+      p.inventory.forEach(function(it) {
+        var name = (typeof it === 'string') ? it : (it && it.name ? it.name : (it && it.n ? it.n : ''));
+        if (name) {
+          var found = items.find(function(x) { return x.name === name; });
+          if (found) found.qty += 1;
+          else items.push({ name: name, qty: 1 });
+        }
+      });
+    }
+  }
+  return items;
+}
+window._getAvailableGiftItems = _getAvailableGiftItems;
+
 function _showAllyGiftDialogue(idx) {
   var m = (window.GROUP_MEMBERS || [])[idx];
   if (!m || m.dead || m.isPlayer) return;
@@ -67747,38 +67785,74 @@ function _showAllyGiftDialogue(idx) {
     : '<svg viewBox="0 0 120 120" style="width:100%;height:100%"><use href="#' + heraldicId + '"/></svg>';
 
   var p = window.CITY_MOCK_PLAYER;
-  var inv = (p && p.inventory) ? p.inventory : [];
-  var uniqueItems = Array.from(new Set(inv)).slice(0, 6);
+  var availableItems = (typeof _getAvailableGiftItems === 'function') ? _getAvailableGiftItems() : [];
+
+  if (availableItems.length === 0) {
+    var emptyDlg = {
+      npc: {
+        id: 'ally_gift_' + idx,
+        name: displayName,
+        desc: _classLabelPT(m.cls) + ' · Oferecer Presente · ' + _allyRelSummary(m),
+        portrait: allyPort,
+        portraitHTML: portraitHTML,
+        gender: allyGender
+      },
+      script: [
+        {
+          type: 'narration',
+          text: 'Você examina sua mochila de viagem diante de ' + displayName + ', mas não encontra nenhum item que possa oferecer de presente neste momento.'
+        },
+        {
+          type: 'speech',
+          speaker: displayName,
+          text: 'Não se preocupe com presentes. Ter você marchando ao meu lado na estrada já é mais do que suficiente.'
+        }
+      ],
+      choices: [
+        {
+          id: 'back_from_gifts',
+          label: '↩ "Pensando bem, vamos falar de outra coisa."',
+          cb: function() { _showAllyDialogue(idx); }
+        }
+      ]
+    };
+    if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+      window.vEncounter.render(emptyDlg, { closeable: true });
+    }
+    return;
+  }
 
   // Mapeamento de itens favoritos por classe D&D 5e
   function _isFavoriteGift(item, aCls) {
     var it = (item || '').toLowerCase();
-    if (aCls === 'ladino') return it.indexOf('adaga') >= 0 || it.indexOf('anel') >= 0 || it.indexOf('invisib') >= 0 || it.indexOf('joia') >= 0 || it.indexOf('moeda') >= 0;
-    if (aCls === 'guerreiro' || aCls === 'barbaro' || aCls === 'paladino') return it.indexOf('espada') >= 0 || it.indexOf('machado') >= 0 || it.indexOf('armadura') >= 0 || it.indexOf('força') >= 0 || it.indexOf('carne') >= 0;
-    if (aCls === 'clerigo' || aCls === 'druida') return it.indexOf('cura') >= 0 || it.indexOf('erva') >= 0 || it.indexOf('incenso') >= 0 || it.indexOf('sagrad') >= 0 || it.indexOf('fruta') >= 0;
-    if (aCls === 'mago' || aCls === 'feiticeiro' || aCls === 'bruxo') return it.indexOf('pergaminho') >= 0 || it.indexOf('grimório') >= 0 || it.indexOf('mana') >= 0 || it.indexOf('cristal') >= 0;
+    if (aCls === 'ladino') return it.indexOf('adaga') >= 0 || it.indexOf('anel') >= 0 || it.indexOf('invisib') >= 0 || it.indexOf('joia') >= 0 || it.indexOf('moeda') >= 0 || it.indexOf('chave') >= 0 || it.indexOf('ouro') >= 0;
+    if (aCls === 'guerreiro' || aCls === 'barbaro' || aCls === 'paladino') return it.indexOf('espada') >= 0 || it.indexOf('machado') >= 0 || it.indexOf('armadura') >= 0 || it.indexOf('força') >= 0 || it.indexOf('carne') >= 0 || it.indexOf('couro') >= 0;
+    if (aCls === 'clerigo' || aCls === 'druida') return it.indexOf('cura') >= 0 || it.indexOf('erva') >= 0 || it.indexOf('incenso') >= 0 || it.indexOf('sagrad') >= 0 || it.indexOf('fruta') >= 0 || it.indexOf('semente') >= 0;
+    if (aCls === 'mago' || aCls === 'feiticeiro' || aCls === 'bruxo') return it.indexOf('pergaminho') >= 0 || it.indexOf('grimório') >= 0 || it.indexOf('mana') >= 0 || it.indexOf('cristal') >= 0 || it.indexOf('gema') >= 0 || it.indexOf('runa') >= 0;
     return false;
   }
 
-  var giftChoices = uniqueItems.map(function(itemName) {
+  var giftChoices = availableItems.slice(0, 6).map(function(itemObj) {
+    var itemName = itemObj.name;
+    var itemQty = itemObj.qty;
     var isFav = _isFavoriteGift(itemName, cls);
     var delta = isFav ? 10 : 5;
     return {
       id: 'gift_' + itemName,
-      label: '🎁 Entregar ' + itemName + ' (' + inv.filter(function(x){ return x === itemName; }).length + ' na mochila)',
+      label: '🎁 Entregar ' + itemName + ' (' + itemQty + ' na mochila)',
       cb: function() {
-        // Remove 1 item da mochila
+        if (typeof _removeItemFromInventory === 'function') {
+          _removeItemFromInventory(itemName, 1);
+        }
         if (p && Array.isArray(p.inventory)) {
           var itemIdx = p.inventory.indexOf(itemName);
           if (itemIdx >= 0) p.inventory.splice(itemIdx, 1);
         }
-        // Aplica aprovação
         var oldApr = (m.approval != null) ? m.approval : 0;
         m.approval = Math.max(-100, Math.min(100, oldApr + delta));
         if (typeof vToast === 'function') {
           vToast('Presente entregue a ' + displayName + '! Aprovação +' + delta + ' (' + m.approval + ')');
         }
-        // Sincroniza com API
         if (typeof fetch === 'function') {
           var token = (typeof _getStoredToken === 'function') ? _getStoredToken() : (localStorage.getItem('token') || '');
           fetch('/api/ally/give-gift', {
@@ -67811,17 +67885,9 @@ function _showAllyGiftDialogue(idx) {
     };
   });
 
-  if (giftChoices.length === 0) {
-    giftChoices.push({
-      id: 'no_gifts',
-      label: 'Nenhum item disponível na mochila no momento para presentear',
-      cb: 'close'
-    });
-  }
-
   giftChoices.push({
     id: 'back_from_gifts',
-    label: '↩ Voltar às ações gerais',
+    label: '↩ "Pensando bem, vamos falar de outra coisa."',
     cb: function() { _showAllyDialogue(idx); }
   });
 
@@ -67858,7 +67924,10 @@ function _showAllyGiftDialogue(idx) {
             window.vEncounter.render({
               npc: dlg.npc,
               script: ch._replyScript,
-              choices: [{ id: 'back_to_ally_main', label: '↩ Continuar', cb: function() { _showAllyDialogue(idx); } }]
+              choices: [
+                { id: 'back_to_ally_main', label: '↩ "Gostaria de falar de outro assunto."', cb: function() { _showAllyDialogue(idx); } },
+                { id: 'leave', label: '↩ "Até mais tarde."', cb: 'close' }
+              ]
             }, {
               closeable: true,
               onChoice: function(rc) {
@@ -67943,6 +68012,7 @@ function _showAllyDialogue(idx){
         cls: cls,
         choice_id: c.id,
         name: displayName,
+        memberIdx: idx,
         renown_hint: c.renown || 0,
         label_hint: (_cleanLbl || '').replace(/^[^A-Za-zÀ-ú"]+\s*/, '').substring(0, 50),
       },
@@ -67965,13 +68035,17 @@ function _showAllyDialogue(idx){
         try { window.vEncounter.close(); } catch(_) {}
         if (typeof _showStatusPopup === 'function') _showStatusPopup(idx);
       }
-    },
-    {
+    }
+  ];
+
+  var availableGifts = (typeof _getAvailableGiftItems === 'function') ? _getAvailableGiftItems() : [];
+  if (availableGifts.length > 0) {
+    primaryChoices.push({
       id: 'nav_gift',
       label: '🎁 Oferecer um presente da mochila ▸',
       cb: function() { _showAllyGiftDialogue(idx); }
-    }
-  ];
+    });
+  }
 
   var combinedChoices = primaryChoices.concat(otherClassChoices);
   combinedChoices.push({ id: 'leave', label: '↩ "Até mais tarde."', cb: 'close', renownDelta: 0 });
@@ -68000,7 +68074,10 @@ function _showAllyDialogue(idx){
           window.vEncounter.render({
             npc: dlg.npc,
             script: ch._replyScript,
-            choices: [{ id: 'back_to_ally_main', label: '↩ Continuar', cb: function() { _showAllyDialogue(idx); } }]
+            choices: [
+              { id: 'back_to_ally_main', label: '↩ "Gostaria de falar de outro assunto."', cb: function() { _showAllyDialogue(idx); } },
+              { id: 'leave', label: '↩ "Até mais tarde."', cb: 'close' }
+            ]
           }, {
             closeable: true,
             onChoice: function(rc) {
@@ -73437,9 +73514,28 @@ function _renderCompanionApprovalBG3(scList) {
           }
         }
       }
+      var resultChoices = [];
+      if (venue && venue !== 'recruta' && typeof _openCityDialogue === 'function') {
+        resultChoices.push({
+          id: 'return_venue_root',
+          label: '↩ "Gostaria de ver outra coisa."',
+          cb: function() {
+            _openCityDialogue(venue, 'greeting', p);
+          }
+        });
+        resultChoices.push({
+          id: 'done',
+          label: '↩ "Até logo."',
+          cb: 'close'
+        });
+      } else {
+        resultChoices.push({ id: 'done', label: '↩ Voltar', cb: 'close' });
+      }
+
       window.vEncounter.render(
-        { npc: targetNpc, script: data.result_script, choices: [{ id: 'done', label: '↩ Voltar' }] },
-        { player: p, onChoice: function(){
+        { npc: targetNpc, script: data.result_script, choices: resultChoices },
+        { player: p, onChoice: function(ch){
+            if (typeof ch.cb === 'function') { ch.cb(); return; }
             try { window.vEncounter.close(); } catch(_){}
             if (typeof refreshHud === 'function') refreshHud();
             if (venue === 'inn' && typeof _renderCityPopup === 'function') {

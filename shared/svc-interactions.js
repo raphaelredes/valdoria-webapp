@@ -355,7 +355,7 @@
               _closeEncounterCanon();
             }
           } else {
-            // Regra Soberana #16 e #24: encerramento honesto direto no vEncounter com [↩ Continuar]
+            // Regra Soberana #16 e #24: encerramento honesto direto no vEncounter com opções inteligentes (BG3 flow)
             if (window.vEncounter && typeof window.vEncounter.render === 'function') {
               var outcomeScript = [];
               if (rNarration) outcomeScript.push({ type: 'narration', text: rNarration });
@@ -363,11 +363,58 @@
               if (!outcomeScript.length) {
                 outcomeScript.push({ type: 'narration', text: success ? 'Sucesso no teste.' : 'Falha no teste.' });
               }
+              var outcomeChoices = [];
+              var aSrc = opts.ch && opts.ch.ally_source;
+              var mIdx = (aSrc && aSrc.memberIdx != null) ? aSrc.memberIdx : null;
+              if (mIdx == null && Array.isArray(window.GROUP_MEMBERS)) {
+                var aNameTarget = (aSrc && aSrc.name) || (_npcObj && _npcObj.name) || '';
+                var aClsTarget = (aSrc && aSrc.cls ? aSrc.cls : '').toLowerCase();
+                for (var mi = 0; mi < window.GROUP_MEMBERS.length; mi++) {
+                  var gm = window.GROUP_MEMBERS[mi];
+                  if (!gm) continue;
+                  var gmName = (gm.name || '').split(/\s+/)[0];
+                  var gmCls = (gm.cls || '').toLowerCase();
+                  if ((aNameTarget && gmName === aNameTarget) || (aClsTarget && gmCls === aClsTarget)) {
+                    mIdx = mi;
+                    break;
+                  }
+                }
+              }
+
+              if (mIdx != null && typeof window._showAllyDialogue === 'function') {
+                if (aSrc && aSrc.topic && typeof window._showAllyTopicsMenu === 'function') {
+                  outcomeChoices.push({
+                    id: 'back_to_topics',
+                    label: '↩ Escolher outro assunto',
+                    cb: function() { window._showAllyTopicsMenu(mIdx); }
+                  });
+                }
+                outcomeChoices.push({
+                  id: 'back_to_ally_main',
+                  label: '↩ "Gostaria de falar de outro assunto."',
+                  cb: function() { window._showAllyDialogue(mIdx); }
+                });
+                outcomeChoices.push({
+                  id: 'close',
+                  label: '↩ "Até mais tarde."',
+                  cb: 'close'
+                });
+              } else {
+                outcomeChoices.push({ id: 'close', label: '↩ Continuar', cb: 'close' });
+              }
+
               window.vEncounter.render({
                 npc: _npcObj || { name: _npcName },
                 script: outcomeScript,
-                choices: [{ id: 'close', label: '↩ Continuar', cb: 'close' }]
-              }, { player: opts.player });
+                choices: outcomeChoices
+              }, {
+                player: opts.player,
+                closeable: true,
+                onChoice: function(rc) {
+                  if (typeof rc.cb === 'function') { rc.cb(); return; }
+                  try { window.vEncounter.close(); } catch(_) {}
+                }
+              });
             } else if (typeof window._showInfoPopup === 'function') {
               _closeEncounterCanon();
               window._showInfoPopup({
@@ -648,11 +695,44 @@
        aplicado por _postAllyEffect (em _handleChoiceInternal) antes daqui. */
     if (ch && ch._replyScript && ch._replyScript.length
         && window.vEncounter && typeof window.vEncounter.render === 'function') {
+      var replyChoices = [];
+      var aSrc = ch.ally_source;
+      var mIdx = (aSrc && aSrc.memberIdx != null) ? aSrc.memberIdx : null;
+      if (mIdx == null && Array.isArray(window.GROUP_MEMBERS)) {
+        var aNameTarget = (aSrc && aSrc.name) || (dialogue && dialogue.npc && dialogue.npc.name) || '';
+        var aClsTarget = (aSrc && aSrc.cls ? aSrc.cls : '').toLowerCase();
+        for (var mi = 0; mi < window.GROUP_MEMBERS.length; mi++) {
+          var gm = window.GROUP_MEMBERS[mi];
+          if (!gm) continue;
+          var gmName = (gm.name || '').split(/\s+/)[0];
+          var gmCls = (gm.cls || '').toLowerCase();
+          if ((aNameTarget && gmName === aNameTarget) || (aClsTarget && gmCls === aClsTarget)) {
+            mIdx = mi;
+            break;
+          }
+        }
+      }
+      if (mIdx != null && typeof window._showAllyDialogue === 'function') {
+        replyChoices.push({
+          id: 'back_to_ally_main',
+          label: '↩ "Gostaria de falar de outro assunto."',
+          cb: function() { window._showAllyDialogue(mIdx); }
+        });
+        replyChoices.push({ id: '_ally_reply_done', label: '↩ "Até mais tarde."', cb: 'close' });
+      } else {
+        replyChoices.push({ id: '_ally_reply_done', label: '↩ Continuar', cb: 'close' });
+      }
       window.vEncounter.render({
         npc: dialogue.npc,
         script: ch._replyScript,
-        choices: [{ id: '_ally_reply_done', label: '↩ Continuar', cb: 'close' }]
-      }, { closeable: true });
+        choices: replyChoices
+      }, {
+        closeable: true,
+        onChoice: function(rc) {
+          if (typeof rc.cb === 'function') { rc.cb(); return; }
+          try { window.vEncounter.close(); } catch(_) {}
+        }
+      });
       return true;
     }
     if (cb === 'close') {
