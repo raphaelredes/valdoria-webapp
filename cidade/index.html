@@ -28993,14 +28993,22 @@ function _openBlackMarketEncounter(p){
               icon: 'ic-bruxo'
             },
             script: [
+              { type: 'narration', text: 'A figura encapuzada estreita os olhos sob o capuz e mantém a mão firme no cabo da adaga.' },
               { type: 'speech', text: 'Turista... Achou o caminho errado. Dê o fora daqui antes que se meta em apuros que suas moedas não pagam.' }
             ],
             choices: [
+              { id: 'retry', label: '↩ "Espere — deixe-me pensar melhor."' },
               { id: 'leave', label: '↩ Afastar-se' }
             ]
           }, {
             player: p,
-            onChoice: function(){ try { window.vEncounter.close(); } catch(_){} }
+            onChoice: function(subCh){
+              if (subCh && subCh.id === 'retry') {
+                _openBlackMarketEncounter(p);
+                return;
+              }
+              try { window.vEncounter.close(); } catch(_){}
+            }
           });
           return;
         }
@@ -44212,18 +44220,18 @@ function _squareShowBountyOfficerDialogue(p){
         } else if (ch && ch.id === 'how_it_works') {
           window.vEncounter.render({
             npc: {
-              name: 'Capitão Vane',
+              name: 'Capitão Kaelen',
               desc: 'Oficial de Recompensas de Valdoria · Intendente de Editais e Caçadas Cívicas',
               portrait: '/shared/img/npcs/capitao-vane.webp'
             },
             script: [
               {
                 type: 'narration',
-                text: 'O Capitão Vane gesticula na direção do mapa de patrulha aberto sobre a mesa de carvalho.'
+                text: 'O Capitão Kaelen gesticula na direção do mapa de patrulha aberto sobre a mesa de carvalho.'
               },
               {
                 type: 'speech',
-                speaker: 'Capitão Vane',
+                speaker: 'Capitão Kaelen',
                 text: 'Todos os dias, à meia-noite, o Conselho publica uma requisição urgente — caçar feras e salteadores ou recolher materiais raros nos ermos. Ao aceitar, o progresso é acompanhado em suas viagens e combates. Assim que cumprir a meta, a recompensa é enviada imediatamente pelo tesouro municipal.'
               }
             ],
@@ -46208,6 +46216,7 @@ function _squareRenderVendor(p, vendor, bought){
       // PADRAO_COMPRA (2026-06-24): espelha no MOCK_PLAYER_INVENTORY o item que o
       // servidor JA adicionou+persistiu (a mochila le esse array, nao p.inventory).
       if (res.item_name) _applyBoughtItem(res.item_name);
+      if (itemIdx >= 0 && _bought.indexOf(itemIdx) < 0) _bought.push(itemIdx);
       if (typeof refreshHud === 'function') refreshHud();
       _applyTownRep(res);  // Forasteiro: comprar do vendedor sobe a reputação
       _showServiceResultPopup({
@@ -46218,7 +46227,13 @@ function _squareRenderVendor(p, vendor, bought){
         deltas: [
           { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }
         ],
-        onContinue: _squareTxnReturnToHub
+        onContinue: function() {
+          if (_bought.length < (v.items || []).length) {
+            _squareRenderVendor(p, v, _bought);
+          } else {
+            _squareTxnReturnToHub();
+          }
+        }
       });
     }).catch(function(_e){ if (typeof vToast === 'function') vToast('Erro ao comprar.'); });
   };
@@ -46289,7 +46304,7 @@ function _squareRenderVendor(p, vendor, bought){
       };
     });
     // Itens unicos/dia (A): tudo comprado hoje -> narra esgotado (so resta sair).
-    if (!_avail.length) script.push({ type: 'narration', text: 'O pano de feira esta quase vazio — voce ja levou hoje tudo o que ' + (vendor.name.split(',')[0]) + ' tinha de interessante.' });
+    if (!_avail.length) script.push({ type: 'narration', text: 'O pano de feira está quase vazio — você já levou hoje tudo o que ' + (vendor.name.split(',')[0]) + ' tinha de interessante.' });
     choices.push({ id: 'leave', label: '↩ "Quem sabe outra hora."' });
     window.vEncounter.render({ npc: npc, script: script, choices: choices }, {
       player: p, closeable: true,
@@ -67412,6 +67427,33 @@ window._allyStorageKey = _allyStorageKey;
 window._isAllyChoiceUsed = _isAllyChoiceUsed;
 window._markAllyChoiceUsed = _markAllyChoiceUsed;
 
+function _getAvailableAllyTopics(idx) {
+  var m = (window.GROUP_MEMBERS || [])[idx];
+  if (!m || m.dead || m.isPlayer) return [];
+  var cls = _allyTplKey(m.cls);
+  var displayName = (m.name || '').split(/\s+/)[0];
+  var isAtCampfire = Boolean(window._isAtCampfire || (m && m.isAtCampfire) || (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.isAtCampfire));
+  var topicList = [
+    { key: 'camp_campfire',      label: '🔥 Ao redor da fogueira ▸', requiresCampfire: true },
+    { key: 'backstory_secret',   label: '🗝️ Segredos e o passado ▸' },
+    { key: 'morals_faith',       label: '⚖️ Princípios e crenças ▸' },
+    { key: 'combat_bonds',       label: '🛡️ Táticas e laços de batalha ▸' },
+    { key: 'personal_favor',     label: '📜 Assunto pessoal e favor ▸' },
+    { key: 'romance_courtship',  label: '💖 Confidências a dois ▸' },
+    { key: 'sparring_challenge', label: '⚔️ Desafio de treino rápido ▸' },
+  ];
+  var allyStorageKey = _allyStorageKey(m, idx);
+  return topicList.filter(function(t) {
+    if (t.requiresCampfire && !isAtCampfire) return false;
+    var tNode = _buildClientAllyTopicNode(cls, t.key, displayName, m);
+    var remaining = (tNode.choices || []).filter(function(c) {
+      return !_isAllyChoiceUsed(allyStorageKey, t.key, c.id, m);
+    });
+    return remaining.length > 0;
+  });
+}
+window._getAvailableAllyTopics = _getAvailableAllyTopics;
+
 function _showAllyTopicsMenu(idx) {
   var m = (window.GROUP_MEMBERS || [])[idx];
   if (!m || m.dead || m.isPlayer) return;
@@ -67427,32 +67469,11 @@ function _showAllyTopicsMenu(idx) {
   // "Ao redor da fogueira" aparece EXCLUSIVAMENTE quando de fato estiver ao redor de uma fogueira/acampamento
   var isAtCampfire = Boolean(window._isAtCampfire || (m && m.isAtCampfire) || (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.isAtCampfire));
 
-  var topicList = [
-    { key: 'camp_campfire',      label: '🔥 Ao redor da fogueira ▸', requiresCampfire: true },
-    { key: 'backstory_secret',   label: '🗝️ Segredos e o passado ▸' },
-    { key: 'morals_faith',       label: '⚖️ Princípios e crenças ▸' },
-    { key: 'combat_bonds',       label: '🛡️ Táticas e laços de batalha ▸' },
-    { key: 'personal_favor',     label: '📜 Assunto pessoal e favor ▸' },
-    { key: 'romance_courtship',  label: '💖 Confidências a dois ▸' },
-    { key: 'sparring_challenge', label: '⚔️ Desafio de treino rápido ▸' },
-  ];
-
-  var activeTopics = topicList.filter(function(t) {
-    if (t.requiresCampfire && !isAtCampfire) return false;
-    return true;
-  });
-
-  var allyStorageKey = _allyStorageKey(m, idx);
+  var activeTopics = _getAvailableAllyTopics(idx);
   var choices = activeTopics.map(function(t) {
-    var tNode = _buildClientAllyTopicNode(cls, t.key, displayName, m);
-    var remaining = (tNode.choices || []).filter(function(c) {
-      return !_isAllyChoiceUsed(allyStorageKey, t.key, c.id, m);
-    });
-    var isDone = (tNode.choices || []).length > 0 && remaining.length === 0;
     return {
       id: 'topic_' + t.key,
-      label: t.label + (isDone ? ' ✓' : ''),
-      desc: isDone ? 'Assunto concluído' : '',
+      label: t.label,
       cb: function() { _showAllyTopicDialogue(idx, t.key); }
     };
   });
@@ -67669,14 +67690,23 @@ function _showAllyTopicDialogue(idx, topicKey) {
           if (typeof _markAllyChoiceUsed === 'function' && ch.id) {
             _markAllyChoiceUsed(displayName, 'lore', ch.id, null, m);
           }
+          var remInTopic = (topicNode.choices || []).filter(function(c) {
+            return !_isAllyChoiceUsed(allyStorageKey, topicKey, c.id, m);
+          });
+          var remTopics = (typeof _getAvailableAllyTopics === 'function') ? _getAvailableAllyTopics(idx) : [];
+          var replyChoices = [];
+          if (remInTopic.length > 0) {
+            replyChoices.push({ id: 'more_in_topic', label: '↩ Continuar sobre este assunto', cb: function() { _showAllyTopicDialogue(idx, topicKey); } });
+          }
+          if (remTopics.length > 0) {
+            replyChoices.push({ id: 'back_to_topics', label: '↩ Escolher outro assunto', cb: function() { _showAllyTopicsMenu(idx); } });
+          }
+          replyChoices.push({ id: 'back_to_ally_main', label: '↩ "Gostaria de falar de outro assunto."', cb: function() { _showAllyDialogue(idx); } });
+          replyChoices.push({ id: 'leave', label: '↩ "Até mais tarde."', cb: 'close' });
           window.vEncounter.render({
             npc: dlg.npc,
             script: ch._replyScript,
-            choices: [
-              { id: 'back_to_topics', label: '↩ Escolher outro assunto', cb: function() { _showAllyTopicsMenu(idx); } },
-              { id: 'back_to_ally_main', label: '↩ "Gostaria de falar de outro assunto."', cb: function() { _showAllyDialogue(idx); } },
-              { id: 'leave', label: '↩ "Até mais tarde."', cb: 'close' }
-            ]
+            choices: replyChoices
           }, {
             closeable: true,
             onChoice: function(rc) {
@@ -67974,13 +68004,17 @@ function _showAllyGiftDialogue(idx) {
         if (typeof ch.cb === 'function') {
           try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY-GIFT] cb failed', e); }
           if (ch._replyScript && window.vEncounter && typeof window.vEncounter.render === 'function') {
+            var moreGiftsAfter = (typeof _getAvailableGiftItems === 'function') ? _getAvailableGiftItems() : [];
+            var postGiftChoices = [];
+            if (moreGiftsAfter.length > 0) {
+              postGiftChoices.push({ id: 'more_gifts', label: '🎁 Oferecer outro presente', cb: function() { _showAllyGiftDialogue(idx); } });
+            }
+            postGiftChoices.push({ id: 'back_to_ally_main', label: '↩ "Gostaria de falar de outro assunto."', cb: function() { _showAllyDialogue(idx); } });
+            postGiftChoices.push({ id: 'leave', label: '↩ "Até mais tarde."', cb: 'close' });
             window.vEncounter.render({
               npc: dlg.npc,
               script: ch._replyScript,
-              choices: [
-                { id: 'back_to_ally_main', label: '↩ "Gostaria de falar de outro assunto."', cb: function() { _showAllyDialogue(idx); } },
-                { id: 'leave', label: '↩ "Até mais tarde."', cb: 'close' }
-              ]
+              choices: postGiftChoices
             }, {
               closeable: true,
               onChoice: function(rc) {
@@ -68075,13 +68109,16 @@ function _showAllyDialogue(idx){
   var otherClassChoices = classChoices.filter(function(c){ return c.id !== 'leave'; });
 
   // Menu organizado de alto nível com navegação por submenus funcionais (Interagir e Ficha no topo)
-  var primaryChoices = [
-    {
+  var primaryChoices = [];
+  var availableTopics = (typeof _getAvailableAllyTopics === 'function') ? _getAvailableAllyTopics(idx) : [];
+  if (availableTopics.length > 0) {
+    primaryChoices.push({
       id: 'nav_topics_menu',
       label: '💬 Interagir ▸',
       cb: function() { _showAllyTopicsMenu(idx); }
-    },
-    {
+    });
+  }
+  primaryChoices.push({
       id: 'nav_inspect_sheet',
       label: '📜 Ver ficha completa de ' + displayName,
       cb: function() {
@@ -68102,8 +68139,7 @@ function _showAllyDialogue(idx){
         }
         if (typeof _showStatusPopup === 'function') _showStatusPopup(idx);
       }
-    }
-  ];
+  });
 
   var availableGifts = (typeof _getAvailableGiftItems === 'function') ? _getAvailableGiftItems() : [];
   if (availableGifts.length > 0) {
@@ -73510,14 +73546,27 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
             vToast(tmsgD, ttypeD);
           }
         }
-        // D4: SEMPRE re-fetch da raiz (custo novo + barganha consumida). NÃO renderiza node embutido.
-        var nid = (ctx && ctx.npcId) || (data.npc && data.npc.id);
-        if (venue === 'recruta' && nid) _openRecrutaDialogue(nid, p);
+        // D4: Exibe result_script da barganha (fala do arquétipo + novo preço) com botão para retornar à raiz do recruta.
+        var nid = (ctx && ctx.npcId) || (data.npc && (data.npc.id || data.npc.npc_id));
+        if (venue === 'recruta' && nid && (!data.result_script || !window.vEncounter || !window.vEncounter.render)) {
+          _openRecrutaDialogue(nid, p);
+        }
         else if (data.result_script && window.vEncounter && window.vEncounter.render) {
           var targetNpc = data.npc || npc || { name: 'Aventureiro' };
           var diceResultChoices = (data.choices && data.choices.length) ? data.choices.slice() : [];
           if (!diceResultChoices.length) {
-            if (venue && venue !== 'recruta' && typeof _openCityDialogue === 'function') {
+            if (venue === 'recruta' && nid && typeof _openRecrutaDialogue === 'function') {
+              diceResultChoices.push({
+                id: 'return_recruit_root',
+                label: '↩ Continuar negociação',
+                cb: function() { _openRecrutaDialogue(nid, p); }
+              });
+              diceResultChoices.push({
+                id: 'done',
+                label: '↩ Voltar ao Salão da Guilda',
+                cb: 'close'
+              });
+            } else if (venue && venue !== 'recruta' && typeof _openCityDialogue === 'function') {
               var rootNodeD = (venue === 'square' || venue === 'wandering')
                 ? ((ctx && ctx.rootNode) || data.node || (data.npc && data.npc.id) || 'greeting')
                 : 'greeting';
@@ -74107,6 +74156,7 @@ function _marketShowColleagueGossip(p, merchant){
   var npcKey = 'mer_' + bjornFix;
   var script = [];
   if (!absent.length){
+    script.push({ type: 'narration', text: '<i>Você pergunta pelo movimento das bancas vizinhas. O mercador corre o olhar pelo pátio antes de responder.</i>' });
     script.push({ type: 'speech', speaker: npcKey, text: '"Hoje? Todos no posto, pelo que vi. Banca cheia — é raro."' });
   } else {
     script.push({ type: 'narration', text: '<i>Você pergunta se viu os outros mercadores hoje.</i>' });
@@ -74359,7 +74409,7 @@ function _thorneShowCustomForge(p, merchant, subTopic){
         // Falha na forja
         var isBreastplate = (order.item === 'Peitoral de Mithral');
         var failText = isBreastplate
-          ? '"O mithral é implacável, rapaz. Na conformação final das placas no fogo místico, uma fratura correu pela couraça e ela partiu. Consegui salvar apenas um dos lingotes das cinzas antes que a têmpera derretesse tudo. Toma de volta o que sobrou."'
+          ? '"O mithral é implacável, rapaz. Na conformação final das placas no fogo místico, uma fratura correu pela couraça e ela partiu. Consegui salvar apenas um dos lingotes das cinzas antes que a têmpera derretesse tudo. Pegue de volta o que sobrou."'
           : '"O mithral é implacável, rapaz. Na terceira têmpera no óleo estelar, uma microfratura invisível correu pela espinha da lâmina e ela partiu. Trabalhei três dias sem descanso, mas o metal recusou a dobra. Sinto muito... essa liga não perdoa falhas."';
         var failScript = [
           { type: 'narration', text: 'Thorne apoia as mãos calejadas sobre a bigorna, com a cabeça baixa e o semblante pesaroso. Diante dele repousam fragmentos partidos de metal azulado e cinzas escuras.' },
@@ -74402,8 +74452,8 @@ function _thorneShowCustomForge(p, merchant, subTopic){
   // Sem encomenda ativa: Menu de Encomendas
   var mithralIngots = _countInventoryItem('Lingote de Mithral');
   var script = [
-    { type: 'narration', text: 'Thorne apoia os braços musculosos sobre a bigorna e te encara com respeito profissional.' },
-    { type: 'speech', speaker: npcKey, text: '"Mithral não é ferro qualquer pra eu deixar pronto na vitrine acumulando pó. Peças dessa estirpe só ganham vida sob encomenda direta. Traga a matéria-prima e pague a mão de obra da forja, e eu bato a obra-prima pra ti."' },
+    { type: 'narration', text: 'Thorne apoia os braços musculosos sobre a bigorna e encara você com respeito profissional.' },
+    { type: 'speech', speaker: npcKey, text: '"Mithral não é ferro qualquer para eu deixar pronto na vitrine acumulando pó. Peças dessa estirpe só ganham vida sob encomenda direta. Traga a matéria-prima e pague a mão de obra da forja, e eu bato a obra-prima para você."' },
     { type: 'narration', text: 'Você possui atualmente: <b>' + mithralIngots + 'x Lingote de Mithral</b> na mochila.' }
   ];
   var choices = [
@@ -74478,12 +74528,26 @@ function _openMerchantDialogue(p, merchantId, topicKey){
     return;
   }
 
-  // _isBrowse: shortcut — fecha encounter e abre shop popup direto
+  // _isBrowse: shortcut — fecha encounter e abre shop popup direto, empilhando retorno ao diálogo do mercador
   if (enc._isBrowse){
     var ov = document.getElementById('encounter-overlay');
     if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
     window._encounterActive = false;
     if (typeof _showShopPopup === 'function') {
+      var _merRestoreKey = 'mer_dlg_return_' + merchant.id;
+      if (typeof _popupStack !== 'undefined' && _popupStack[_popupStack.length - 1] !== _merRestoreKey) {
+        _popupStack.push(_merRestoreKey);
+        if (!window._popupRestoreFns) window._popupRestoreFns = {};
+        window._popupRestoreFns[_merRestoreKey] = function() {
+          if (_popupStack.length > 0 && typeof _renderCityPopup === 'function') {
+            _renderCityPopup(_popupStack[_popupStack.length - 1]);
+          } else {
+            var subOv = document.getElementById('city-subscreen-popup');
+            if (subOv) subOv.classList.remove('active');
+          }
+          _openMerchantDialogue(p, merchant.id, 'greeting');
+        };
+      }
       // Mantém compat com NPCs que tem shop via CANON_MARKET_SHOPS por id original
       _showShopPopup(merchant.id);
     }
@@ -76769,11 +76833,11 @@ function _openCorvusGreetingDialog(player, opts) {
     { type: 'speech', speaker: 'Mestre Corvus', text: '— Não pise nos mapas. A tinta de carvalho leva três dias pra fixar no pergaminho, e eu acabei de aplicar a quarta camada na rota das Colinas Etéreas.' },
     { type: 'narration', text: 'Ele não levanta os olhos. A pena se move com cuidado milimétrico sobre uma curva de relevo.' },
     { type: 'speech', speaker: 'Mestre Corvus', text: '— Diga o que precisa. Se for direção, veio ao lugar certo. Se for conversa barata, a taverna é na outra rua.' },
-    { type: 'narration', text: 'Você menciona Aldric — o capitão dos Portões — e o pergaminho gasto que ele te entregou.' },
+    { type: 'narration', text: 'Você menciona Aldric — o capitão dos Portões — e o pergaminho gasto que ele entregou a você.' },
     { type: 'speech', speaker: 'Mestre Corvus', text: '— Aldric. <i>(uma pausa)</i> Aquele guarda velho. Um olho a menos, mas o que sobrou enxerga melhor que muito olho são. Ele não manda gente à toa.' },
     { type: 'narration', text: 'Corvus finalmente levanta os olhos. Estuda você por um instante — não como ameaça, como cartógrafo: medindo distâncias invisíveis.' },
     { type: 'speech', speaker: 'Mestre Corvus', text: '— Aldric e eu temos um acordo silencioso. Ele filtra os aventureiros que cruzam os portões; os que sobrevivem voltam aqui pra me contar o que viram. É assim que mapas ficam precisos. Sangue, suor e anotações.' },
-    { type: 'speech', speaker: 'Mestre Corvus', text: '— Vejo que ele te enxergou como alguém que pode chegar inteiro de volta. Não vou contradizê-lo.' },
+    { type: 'speech', speaker: 'Mestre Corvus', text: '— Vejo que ele enxergou você como alguém que pode chegar inteiro de volta. Não vou contradizê-lo.' },
     { type: 'narration', text: 'Ele empurra um caderno aberto na sua direção. As páginas mostram sete regiões cuidadosamente catalogadas — cada uma com preço, dificuldade e prazo de preparo.' },
     { type: 'speech', speaker: 'Mestre Corvus', text: '— Tenho sete mapas regionais. Os de regiões mais brandas vendo direto a qualquer um com prata na mão. Os de terras hostis... <i>(uma pausa)</i> esses só caem nas mãos de quem já provou que volta inteiro. Aldric e eu cuidamos disso. Cada mapa leva alguns dias pra eu preparar — depende de quem volta da estrada me trazendo informação fresca.' },
     { type: 'speech', speaker: 'Mestre Corvus', text: '— Pequena dica: Bjorn — sócio meu, perdeu a mão direita, desenha com a esquerda como se nascesse assim — costuma trazer informações de trilhas perigosas. Quando ele volta, eu acelero meus pedidos. Se você acabar cruzando com ele, mande lembranças. Ou um soco pelas costas.' }
@@ -78468,11 +78532,12 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
         { type: 'narration', text: 'Mestre Corvus limpa as lentes de seus óculos com uma flanela de feltro gasta, aponta a ponta do compasso sobre uma grande carta náutica desdobrada e apoia os cotovelos sobre o balcão.' },
         { type: 'speech', speaker: 'Mestre Corvus', text: '— Quer saber o que há além das muralhas de Valdoria? Escute com atenção, porque a maioria dos que partem sem conhecer o terreno nunca volta pra me trazer relatos.' },
         { type: 'speech', speaker: 'Mestre Corvus', text: '— Ao sul, as planícies e clareiras parecem mansas à luz do meio-dia, mas ao entardecer as névoas ocultam antigas sepulturas e covis. Ao norte e leste, as escarpas rochosas de Brakenhall e as terras vulcânicas não perdoam aventureiros desatentos.' },
-        { type: 'narration', text: 'Ele traça anotações detalhadas de marcos de pedras e ravinas no verso de uma folha e te entrega com cuidado. Você obteve <b>Conhecimento Cartográfico de Corvus</b> (+Vantagem em viagens e chance de cortar caminho nas terras ermas).' },
+        { type: 'narration', text: 'Ele traça anotações detalhadas de marcos de pedras e ravinas no verso de uma folha e entrega a você com cuidado. Você obteve <b>Conhecimento Cartográfico de Corvus</b> (+Vantagem em viagens e chance de cortar caminho nas terras ermas).' },
         { type: 'speech', speaker: 'Mestre Corvus', text: '— E aqui vai uma lição de quem sobreviveu a três expedições na Frota de Solhaven: o maior inimigo de quem viaja não são apenas as feras, é a teimosia de lutar contra o próprio corpo. Quem caminha ou luta durante o seu horário habitual de sono tem reflexos pesados como chumbo. Respeite sua rotina de descanso na estalagem ou no acampamento, ou as terras selvagens cobrarão o preço em sangue.' }
       ],
       choices: [
         { id: 'show_maps_from_lore', label: 'Mostrar os mapas agora', result: 'open_cartographer' },
+        { id: 'corvus_back', label: '↩ "Gostaria de perguntar outra coisa."', result: 'corvus_return_greeting' },
         { id: 'thanks_corvus', label: 'Agradecer os conselhos', result: 'continue' }
       ]
     };
@@ -78507,6 +78572,7 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
       ],
       choices: [
         { id: 'show_maps_from_quest', label: 'Consultar os mapas de Corvus', result: 'open_cartographer' },
+        { id: 'corvus_back_quest', label: '↩ "Gostaria de perguntar outra coisa."', result: 'corvus_return_greeting' },
         { id: 'thanks_corvus_quest', label: 'Agradecer e guardar os ensinamentos', result: 'continue' }
       ]
     };
@@ -78528,10 +78594,13 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
       ],
       choices: [
         { id: 'show_maps_from_inquiry', label: 'Mostrar os mapas agora', result: 'open_cartographer' },
+        { id: 'corvus_back_inquiry', label: '↩ "Gostaria de perguntar outra coisa."', result: 'corvus_return_greeting' },
         { id: 'thanks_inquiry', label: 'Agradecer a explicação', result: 'continue' }
       ]
     };
     _renderEncounterPopup(inquiryEnc, 'open_cartografia', player);
+  } else if (choice.result === 'corvus_return_greeting') {
+    setTimeout(function(){ _openCorvusGreetingDialog(player); }, 80);
   } else if (choice.result === 'continue_to_cart') {
     // Continua pra abrir cartografia
     if (typeof navigateTo === 'function') navigateTo('cartografia');
@@ -78869,7 +78938,7 @@ var CORVUS_MAPS = [
     reveals: ['orc_tribe', 'bandit_fortress'],
     reveal_intro: [
       { type: 'narration', text: 'Corvus abre um pergaminho amarelo, cuidadosamente catalogado, e o desliza pra você.' },
-      { type: 'speech', speaker: 'Mestre Corvus', text: '— Planícies de Valdoria. Terra de coelhos, fazendeiros... e bandidos. Bom pra começar a aventura — risco baixo, recompensa modesta. Aldric te credenciou — você tem o tipo de cabeça que volta inteira pra contar a história.' }
+      { type: 'speech', speaker: 'Mestre Corvus', text: '— Planícies de Valdoria. Terra de coelhos, fazendeiros... e bandidos. Bom pra começar a aventura — risco baixo, recompensa modesta. Aldric credenciou você — você tem o tipo de cabeça que volta inteira pra contar a história.' }
     ]
   },
   { name: 'Mapa da Floresta',    price: 35, days: 3, emoji: '', min_level: 2,
@@ -78893,7 +78962,7 @@ var CORVUS_MAPS = [
     reveals: ['deep_swamp', 'graveyard', 'ancestral_graveyard'],
     reveal_intro: [
       { type: 'narration', text: 'Corvus abre um pergaminho que cheira levemente a mofo. Manchas escuras decoram as bordas.' },
-      { type: 'speech', speaker: 'Mestre Corvus', text: '— Pântano Profundo. <i>(o tom dele endurece)</i> Mortos não ficam quietos lá. Theron sobreviveu três expedições e voltou da quarta sem o caçador parceiro. Você já provou que tem aço pra encarar trilhas duras — esse é o próximo nível de prova, mas dia frio e botas secas continuam sendo conselho de quem te quer vivo.' }
+      { type: 'speech', speaker: 'Mestre Corvus', text: '— Pântano Profundo. <i>(o tom dele endurece)</i> Mortos não ficam quietos lá. Theron sobreviveu três expedições e voltou da quarta sem o caçador parceiro. Você já provou que tem aço pra encarar trilhas duras — esse é o próximo nível de prova, mas dia frio e botas secas continuam sendo conselho de quem quer ver você vivo.' }
     ]
   },
   { name: 'Mapa do Ermo Gelado', price: 30, days: 4, emoji: '', min_level: 3,
@@ -78917,7 +78986,7 @@ var CORVUS_MAPS = [
     reveals: ['volcanic'],
     reveal_intro: [
       { type: 'narration', text: 'Corvus desenrola um pergaminho com bordas chamuscadas. <i>De fato chamuscadas.</i>' },
-      { type: 'speech', speaker: 'Mestre Corvus', text: '— Cratera Ardente. <i>(silêncio prolongado)</i> Aqui eu deveria desaconselhar. <i>(ele te encara fixamente)</i> Mas você sobreviveu a tudo até aqui — pântanos, montanhas, ermos. Lava, dragões, e algo mais antigo dormindo no centro. Se for mesmo, leve testamento assinado.' }
+      { type: 'speech', speaker: 'Mestre Corvus', text: '— Cratera Ardente. <i>(silêncio prolongado)</i> Aqui eu deveria desaconselhar. <i>(ele encara você fixamente)</i> Mas você sobreviveu a tudo até aqui — pântanos, montanhas, ermos. Lava, dragões, e algo mais antigo dormindo no centro. Se for mesmo, leve testamento assinado.' }
     ]
   }
 ];
@@ -79129,7 +79198,7 @@ function _showCorvusMapRevealDialog(player, newMaps) {
     script.push({ type: 'narration',
       text: 'Corvus para de medir o pergaminho que estava trabalhando e ergue o olhar.' });
     script.push({ type: 'speech', speaker: 'Mestre Corvus',
-      text: '— Espera. Antes de fechar a venda — tenho algo novo pra te mostrar.' });
+      text: '— Espere. Antes de fechar a venda — tenho algo novo para mostrar a você.' });
   } else {
     script.push({ type: 'narration',
       text: 'Corvus larga a pena e abre vários cadernos sobre a mesa, todos catalogados em vermelho.' });
@@ -79152,7 +79221,7 @@ function _showCorvusMapRevealDialog(player, newMaps) {
   script.push({ type: 'narration',
     text: 'Ele empurra os pergaminhos pra borda da mesa, próximos a você.' });
   script.push({ type: 'speech', speaker: 'Mestre Corvus',
-    text: '— Estão à venda. Quando estiver pronto, escolhe — eu preparo na hora.' });
+    text: '— Estão à venda. Quando estiver pronto, escolha — eu preparo na hora.' });
 
   var enc = {
     id: 'corvus_map_reveal',

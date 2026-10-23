@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-22T16:32:10Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-23T13:01:16Z - do not edit directly, edit source -->
 
 
 
@@ -88802,7 +88802,7 @@ function _renderWildernessCompanionBanterScene(banter, proceedAfterFn) {
 
     title: (banter.npc && banter.npc.title) || banter.companion_name,
 
-    portrait: banter.companion_avatar || '../shared/img/npcs/companion_default.webp'
+    portrait: banter.companion_avatar || ''
 
   };
 
@@ -88898,6 +88898,14 @@ function _fallbackWildBanterChoiceResolve(selected, banter, targetNpc, proceedAf
 
   var resultScript = [];
 
+  resultScript.push({
+
+    type: 'narration',
+
+    text: selected.reply_narration || (banter.companion_name + ' caminha ao seu lado pela trilha e reflete sobre as suas palavras.')
+
+  });
+
   if (selected.reply_speech) {
 
     resultScript.push({
@@ -88909,18 +88917,6 @@ function _fallbackWildBanterChoiceResolve(selected, banter, targetNpc, proceedAf
       avatar: banter.companion_avatar,
 
       text: selected.reply_speech
-
-    });
-
-  }
-
-  if (selected.reply_narration) {
-
-    resultScript.push({
-
-      type: 'narration',
-
-      text: selected.reply_narration
 
     });
 
@@ -105636,6 +105632,16 @@ function _showCampfireAllyPicker(alliesList) {
 
 
 
+function _getCampfireAlliesList() {
+  if (window.S && Array.isArray(window.S.allies) && window.S.allies.length > 0) {
+    return window.S.allies;
+  }
+  if (window.GROUP_MEMBERS && Array.isArray(window.GROUP_MEMBERS)) {
+    return window.GROUP_MEMBERS.filter(function(m, i){ return i > 0 && m && !m.dead; });
+  }
+  return [];
+}
+
 function _showCampfireCompanionTopics(ally) {
 
   window._isAtCampfire = true;
@@ -105645,6 +105651,8 @@ function _showCampfireCompanionTopics(ally) {
   var allyPort = ally.portrait || ally.port || null;
 
   var allyGender = ally.gender || 'female';
+
+  ally._campfireTopicsDone = ally._campfireTopicsDone || {};
 
 
 
@@ -105666,9 +105674,13 @@ function _showCampfireCompanionTopics(ally) {
 
   ];
 
+  var availTopics = topics.filter(function(t) {
+    return !ally._campfireTopicsDone[t.key];
+  });
 
 
-  var choices = topics.map(function(t) {
+
+  var choices = availTopics.map(function(t) {
 
     return {
 
@@ -105685,6 +105697,17 @@ function _showCampfireCompanionTopics(ally) {
     };
 
   });
+
+  var allAllies = _getCampfireAlliesList();
+  if (allAllies.length > 1) {
+    choices.push({
+      id: 'camp_switch_ally',
+      label: '👥 Conversar com outro companheiro',
+      cb: function() {
+        _showCampfireAllyPicker(allAllies);
+      }
+    });
+  }
 
 
 
@@ -105852,7 +105875,7 @@ function _showCampfireTopicDialogue(ally, topicKey) {
 
           delta: 6,
 
-          reply: 'Pode deixar comigo. Se alguém tentar te cercar pelas sombras, vai encontrar a ponta do meu aço.'
+          reply: 'Pode deixar comigo. Se alguém tentar cercar você pelas sombras, vai encontrar a ponta do meu aço.'
 
         },
 
@@ -105902,7 +105925,7 @@ function _showCampfireTopicDialogue(ally, topicKey) {
 
       narration: displayName + ' olha para o horizonte distante, com uma sombra de saudade e cautela cruzando o rosto.',
 
-      speech: 'Todo mundo que pega em armas em Valdoria tem uma história que preferia esquecer. O que te trouxe a essa vida de andarilho?',
+      speech: 'Todo mundo que pega em armas em Valdoria tem uma história que preferia esquecer. O que trouxe você a essa vida de andarilho?',
 
       choices: [
 
@@ -105938,7 +105961,7 @@ function _showCampfireTopicDialogue(ally, topicKey) {
 
           delta: 7,
 
-          reply: 'Obrigado por entender. Talvez um dia eu te conte tudo desde o começo.'
+          reply: 'Obrigado por entender. Talvez um dia eu conte tudo a você desde o começo.'
 
         },
 
@@ -106274,9 +106297,43 @@ function _showCampfireTopicDialogue(ally, topicKey) {
 
 
 
-        // Exibe desfecho
+        // Marca o assunto como concluído nesta sessão de fogueira
+        ally._campfireTopicsDone = ally._campfireTopicsDone || {};
+        ally._campfireTopicsDone[topicKey] = true;
+
+        // Exibe desfecho (Regra #14: narração do Mestre ANTES da fala do companheiro)
 
         if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+          var postCampChoices = [];
+          var allTopicKeys = ['camp_campfire', 'backstory_secret', 'morals_faith', 'combat_bonds', 'personal_favor', 'romance_courtship', 'sparring_challenge'];
+          var hasMoreTopics = allTopicKeys.some(function(k) { return !ally._campfireTopicsDone[k]; });
+          if (hasMoreTopics) {
+            postCampChoices.push({
+              id: 'back_to_topics',
+              label: '↩ Escolher Outro Assunto',
+              cb: function() {
+                _showCampfireCompanionTopics(ally);
+              }
+            });
+          }
+          var campAllies = _getCampfireAlliesList();
+          if (campAllies.length > 1) {
+            postCampChoices.push({
+              id: 'camp_switch_ally',
+              label: '👥 Conversar com outro companheiro',
+              cb: function() {
+                _showCampfireAllyPicker(campAllies);
+              }
+            });
+          }
+          postCampChoices.push({
+            id: 'finish_chat',
+            label: '🏕️ Voltar ao Acampamento',
+            cb: function() {
+              window._isAtCampfire = false;
+              try { window.vEncounter.close(); } catch(_) {}
+            }
+          });
 
           window.vEncounter.render({
 
@@ -106298,57 +106355,25 @@ function _showCampfireTopicDialogue(ally, topicKey) {
 
               {
 
+                type: 'narration',
+
+                text: 'A fogueira crepita suavemente. O laço de companheirismo entre vocês se fortaleceu com esta conversa.'
+
+              },
+
+              {
+
                 type: 'speech',
 
                 speaker: displayName,
 
                 text: ch.reply
 
-              },
-
-              {
-
-                type: 'narration',
-
-                text: 'A fogueira crepita suavemente. O laço de companheirismo entre vocês se fortaleceu com esta conversa.'
-
               }
 
             ],
 
-            choices: [
-
-              {
-
-                id: 'back_to_topics',
-
-                label: '↩ Escolher Outro Assunto',
-
-                cb: function() {
-
-                  _showCampfireCompanionTopics(ally);
-
-                }
-
-              },
-
-              {
-
-                id: 'finish_chat',
-
-                label: '🏕️ Voltar ao Acampamento',
-
-                cb: function() {
-
-                  window._isAtCampfire = false;
-
-                  try { window.vEncounter.close(); } catch(_) {}
-
-                }
-
-              }
-
-            ]
+            choices: postCampChoices
 
           }, {
 

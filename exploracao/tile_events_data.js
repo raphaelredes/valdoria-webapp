@@ -68,11 +68,11 @@ window.TILE_EVENTS_DB['orc_camp.dormant'] = {
 };
 
 window.TILE_EVENTS_DB['orc_camp.active'] = {
-  body: 'Você espia da mata. Vultos se movem entre as tendas, fogueira crepita, banner tremula no vento. Eles ainda não te viram.',
+  body: 'Você espia da mata. Vultos se movem entre as tendas, fogueira crepita, banner tremula no vento. Eles ainda não viram você.',
   script: [
     { type: 'narration', text: 'Você se agacha atrás de uma fileira de samambaias densas. À frente, o acampamento orc <b>vivo</b>: lança-chamas crepitando, fumaça subindo em duas colunas, e o estandarte de osso e couro batendo contra o vento como um tambor surdo.' },
     { type: 'narration', text: 'Cinco vultos. <i>Talvez seis.</i> Um patrulha o perímetro com passos pesados, machado de duas mãos pendurado no quadril. Os outros se aglomeram ao redor da fogueira, devorando carne crua.' },
-    { type: 'narration', text: 'Eles ainda não te viram. <i>Ainda.</i>' },
+    { type: 'narration', text: 'Eles ainda não viram você. <i>Ainda.</i>' },
     { type: 'narration', text: 'A vegetação rasteira oferece cobertura ao leste — até a curva do penhasco. Por outro lado, o ângulo frontal é claro: três passos e você está dentro do círculo de luz da fogueira, lâmina contra lâmina.' },
     { type: 'narration', text: 'O coração martela. Cada decisão aqui pode terminar em sangue derramado — o seu, ou o deles. Como você quer que isso termine?' }
   ],
@@ -90,7 +90,7 @@ window.TILE_EVENTS_DB['orc_camp.active'] = {
       label: 'Esgueirar pela esquerda',
       skill: 'dex', dc: 14,
       outcome_ok: {
-        flavor: 'Você desliza pela vegetação rasteira. Ninguém te viu — e você agora vê o ângulo cego do acampamento.',
+        flavor: 'Você desliza pela vegetação rasteira. Ninguém viu você — e você agora vê o ângulo cego do acampamento.',
         ops: [
           { op: 'flag', id: 'flanked_orc_camp', scope: 'session' },
           { op: 'xp', delta: 10 }
@@ -146,9 +146,9 @@ window.TILE_EVENTS_DB['orc_camp.active'] = {
 };
 
 window.TILE_EVENTS_DB['orc_camp.alerted'] = {
-  body: 'Eles te viram. Lanças apontam. Gritos guturais ecoam pela mata. Sem volta.',
+  body: 'Eles viram você. Lanças apontam. Gritos guturais ecoam pela mata. Sem volta.',
   script: [
-    { type: 'narration', text: 'Tarde demais. Um berro gutural rasga a clareira e ricocheteia entre os troncos — o alarme orc, agudo e animal. Cabeças se viram na sua direção; olhos amarelos te encontram entre as samambaias.' },
+    { type: 'narration', text: 'Tarde demais. Um berro gutural rasga a clareira e ricocheteia entre os troncos — o alarme orc, agudo e animal. Cabeças se viram na sua direção; olhos amarelos encontram você entre as samambaias.' },
     { type: 'narration', text: 'Lanças de ponta enegrecida se erguem em fileira. O cheiro de couro rançoso e carne crua chega no vento. Botas pesadas batem o chão úmido, fechando o semicírculo — <i>devagar, sem pressa</i>, como quem já sabe que a presa não tem saída fácil.' },
     { type: 'narration', text: 'O coração martela contra as costelas. A mata densa ainda murmura uma promessa de fuga ao leste, mas os orcs também a conhecem. <b>Não há mais volta</b> — só o que vem a seguir.' }
   ],
@@ -202,7 +202,7 @@ window.TILE_EVENTS_DB['orc_camp.alerted'] = {
         fsm: 'retreat_choice'
       },
       outcome_fail: {
-        flavor: 'O líder cospe no chão. "Palavras não te salvam aqui."',
+        flavor: 'O líder cospe no chão. "Palavras não salvam você aqui."',
         ops: [],
         fsm: null
       }
@@ -290,7 +290,7 @@ window.TILE_EVENTS_DB['orc_camp.ruins'] = {
       label: 'Refletir sobre o passado',
       flavor: 'Você fica em silêncio um momento, contemplando a passagem do tempo.',
       outcome_ok: {
-        flavor: 'Algo no ar te traz clareza — sabedoria silenciosa que ficará com você.',
+        flavor: 'Algo no ar traz clareza a você — sabedoria silenciosa que ficará com você.',
         ops: [{ op: 'xp', delta: 5 }],
         fsm: null
       }
@@ -655,7 +655,7 @@ window.TILE_EVENTS_DB['runestone.active'] = {
         fsm: 'loot_picked'
       },
       outcome_fail: {
-        flavor: 'A energia te repele. Você cai para trás, atordoado.',
+        flavor: 'A energia repele você. Você cai para trás, atordoado.',
         ops: [
           { op: 'hp', delta: -5 },
           { op: 'mp', delta: -3 }
@@ -668,7 +668,7 @@ window.TILE_EVENTS_DB['runestone.active'] = {
       label: 'Observar em silêncio',
       flavor: 'Você se afasta e contempla. A pedra eventualmente acalma.',
       outcome_ok: {
-        flavor: 'Algo no ato de observar te ensina. Você não saberia explicar o quê — mas ficou.',
+        flavor: 'Algo no ato de observar ensina você. Você não saberia explicar o quê — mas ficou.',
         ops: [{ op: 'xp', delta: 10 }],
         fsm: 'player_proximity'
       }
@@ -773,7 +773,7 @@ window.TILE_EVENTS_DB['fresh_tracks.dormant'] = {
         // imersão) + adicionado chain real pra escolher caçar/poupar/curar.
         // Padrão AAA tipo BG3/Pathfinder/Witcher 3 — encontro com criatura
         // ferida exige decisão moral, não apenas FINALIZAR.
-        flavor: 'Você segue o rastro até uma clareira sob a luz filtrada das árvores. O urso pardo está deitado de lado, ofegante. Tem uma flecha quebrada cravada no flanco esquerdo, e o sangue escuro mancha o pelo. Os olhos te encaram — não com fúria, mas com cansaço. Ainda é perigoso. Ainda é um urso.',
+        flavor: 'Você segue o rastro até uma clareira sob a luz filtrada das árvores. O urso pardo está deitado de lado, ofegante. Tem uma flecha quebrada cravada no flanco esquerdo, e o sangue escuro mancha o pelo. Os olhos encaram você — não com fúria, mas com cansaço. Ainda é perigoso. Ainda é um urso.',
         ops: [
           { op: 'flag', id: 'fresh_tracks_followed', scope: 'session' }
         ],
@@ -796,7 +796,7 @@ window.TILE_EVENTS_DB['fresh_tracks.dormant'] = {
                 ]
               },
               outcome_fail: {
-                flavor: 'O golpe sai mal calculado e o urso reage. Mesmo ferido, te derruba com a pata antes de sucumbir. Você sente as costelas reclamarem — e o gosto amargo de uma caça malfeita.',
+                flavor: 'O golpe sai mal calculado e o urso reage. Mesmo ferido, derruba você com a pata antes de sucumbir. Você sente as costelas reclamarem — e o gosto amargo de uma caça malfeita.',
                 ops: [
                   { op: 'hp', delta: -8 },
                   { op: 'xp', delta: 10 },
@@ -809,7 +809,7 @@ window.TILE_EVENTS_DB['fresh_tracks.dormant'] = {
               label: 'Tentar curar a fera (Medicina)',
               skill: 'medicine', dc: 14,
               outcome_ok: {
-                flavor: 'Você se aproxima com cautela. O urso permite. Arranca a flecha quebrada num movimento firme, aplica o que tem de erva e tecido limpo, e recua devagar. O animal te encara por um longo segundo — um juramento mudo — e desaparece nas árvores.',
+                flavor: 'Você se aproxima com cautela. O urso permite. Arranca a flecha quebrada num movimento firme, aplica o que tem de erva e tecido limpo, e recua devagar. O animal encara você por um longo segundo — um juramento mudo — e desaparece nas árvores.',
                 ops: [
                   { op: 'xp', delta: 30 },
                   { op: 'flag', id: 'fresh_tracks_healed', scope: 'pc' }
@@ -827,9 +827,9 @@ window.TILE_EVENTS_DB['fresh_tracks.dormant'] = {
             {
               id: 'fresh_tracks_spare',
               label: 'Recuar — deixar a fera viver',
-              flavor: 'Você não tira o olho do urso enquanto recua. Ele te observa de volta, imóvel. Quando você cruza o limite da clareira, o animal baixa a cabeça e fecha os olhos — exausto, mas vivo. Algo se firma dentro de você.',
+              flavor: 'Você não tira o olho do urso enquanto recua. Ele observa você de volta, imóvel. Quando você cruza o limite da clareira, o animal baixa a cabeça e fecha os olhos — exausto, mas vivo. Algo se firma dentro de você.',
               outcome_ok: {
-                flavor: 'Você não tira o olho do urso enquanto recua. Ele te observa de volta, imóvel. Quando você cruza o limite da clareira, o animal baixa a cabeça e fecha os olhos — exausto, mas vivo. Algo se firma dentro de você.',
+                flavor: 'Você não tira o olho do urso enquanto recua. Ele observa você de volta, imóvel. Quando você cruza o limite da clareira, o animal baixa a cabeça e fecha os olhos — exausto, mas vivo. Algo se firma dentro de você.',
                 ops: [
                   { op: 'xp', delta: 18 },
                   { op: 'flag', id: 'fresh_tracks_spared', scope: 'pc' }
@@ -840,7 +840,7 @@ window.TILE_EVENTS_DB['fresh_tracks.dormant'] = {
         }
       },
       outcome_fail: {
-        flavor: 'Você perde o rastro entre raízes e samambaias. A floresta engole as pegadas. Cansaço e frustração — pelo menos a floresta não te traiu de propósito.',
+        flavor: 'Você perde o rastro entre raízes e samambaias. A floresta engole as pegadas. Cansaço e frustração — pelo menos a floresta não traiu você de propósito.',
         ops: [{ op: 'exh', delta: 1 }],
         fsm: null
       }
@@ -1066,7 +1066,7 @@ window.TILE_EVENTS_DB['sentinel_post.dormant'] = {
       label: 'Descansar à sombra do posto',
       flavor: 'Você se senta apoiado contra a pedra. Por alguns minutos, o silêncio é seu único companheiro.',
       outcome_ok: {
-        flavor: 'O descanso é breve mas reparador. Você recupera o fôlego, e o silêncio do posto te dá tempo para pensar — talvez houvesse algo importante aqui.',
+        flavor: 'O descanso é breve mas reparador. Você recupera o fôlego, e o silêncio do posto dá tempo a você para pensar — talvez houvesse algo importante aqui.',
         ops: [{ op: 'hp', delta: 4 }],
         fsm: null
       }
@@ -1107,7 +1107,7 @@ window.TILE_EVENTS_DB['sentinel_post.active'] = {
       // detectou e ordenou identificação. Player precisa decidir: render-se,
       // tentar persuadir, fugir, ou atacar primeiro. Padrão BG3/Pathfinder.
       outcome_fail: {
-        flavor: 'O sentinela te avista. "Pare! Identifique-se!" A besta dele já está apontada na sua direção — o gatilho a centímetros do dedo dele.',
+        flavor: 'O sentinela avista você. "Pare! Identifique-se!" A besta dele já está apontada na sua direção — o gatilho a centímetros do dedo dele.',
         ops: [],
         fsm: 'player_attack_choice',
         chain: {
@@ -1140,7 +1140,7 @@ window.TILE_EVENTS_DB['sentinel_post.active'] = {
                 ops: [{ op: 'xp', delta: 8 }]
               },
               outcome_fail: {
-                flavor: 'Sua bota escorrega numa raiz. A flecha te alcança no ombro com um silvo seco. Você ainda chega na mata, mas marcado.',
+                flavor: 'Sua bota escorrega numa raiz. A flecha alcança você no ombro com um silvo seco. Você ainda chega na mata, mas marcado.',
                 ops: [{ op: 'hp', delta: -8 }]
               }
             },
@@ -1182,7 +1182,7 @@ window.TILE_EVENTS_DB['sentinel_post.active'] = {
               id: 'sentinel_back_off',
               label: 'Recuar lentamente — sem virar as costas',
               outcome_ok: {
-                flavor: 'Você ergue as mãos vazias e dá passos pra trás, devagar, mantendo o olhar nele. Ele te observa até a mata engolir sua silhueta. A besta nunca abaixou — mas também nunca disparou.',
+                flavor: 'Você ergue as mãos vazias e dá passos pra trás, devagar, mantendo o olhar nele. Ele observa você até a mata engolir sua silhueta. A besta nunca abaixou — mas também nunca disparou.',
                 ops: []
               }
             },
@@ -1430,7 +1430,7 @@ window.TILE_EVENTS_DB['bandit_camp.dormant'] = {
 };
 
 window.TILE_EVENTS_DB['bandit_camp.active'] = {
-  body: 'Bandidos riem em torno da fogueira, contando moedas roubadas. Quatro deles, dois com bestas. Não te viram ainda.',
+  body: 'Bandidos riem em torno da fogueira, contando moedas roubadas. Quatro deles, dois com bestas. Não viram você ainda.',
   script: [
     { type: 'narration', text: 'Da orla da mata, você os vê antes de ser visto. Quatro bandidos rodeiam uma fogueira crepitante, gargalhadas roucas misturadas ao tinir de moedas sendo contadas sobre um pano sujo.' },
     { type: 'narration', text: 'Dois deles têm bestas apoiadas ao alcance da mão; os outros, facas cravadas no chão entre os pés. O cheiro de fumaça e bebida barata viaja no ar. Eles riem alto demais — <i>confiantes, descuidados</i> — e ainda não notaram sua presença.' },
@@ -1477,7 +1477,7 @@ window.TILE_EVENTS_DB['bandit_camp.active'] = {
       label: 'Tentar negociar (Intimidação)',
       skill: 'intimidation', dc: 15,
       outcome_ok: {
-        flavor: 'Sua presença os intimida. Eles te dão metade do espólio para sumir.',
+        flavor: 'Sua presença os intimida. Eles entregam metade do espólio a você para sumir.',
         ops: [
           { op: 'gold', delta: 22 },
           { op: 'flag', id: 'bandit_intimidated', scope: 'session' }
@@ -1500,7 +1500,7 @@ window.TILE_EVENTS_DB['bandit_camp.active'] = {
 };
 
 window.TILE_EVENTS_DB['bandit_camp.alerted'] = {
-  body: 'Eles te viram. Saques sacam armas — facas, bestas, ódio.',
+  body: 'Eles viram você. Saques sacam armas — facas, bestas, ódio.',
   script: [
     { type: 'narration', text: 'O riso morre de uma vez. Quatro pares de olhos se cravam em você, e a moeda contada rola esquecida na poeira. <i>Eles viram.</i>' },
     { type: 'narration', text: 'Facas saltam do chão para as mãos; uma besta range ao ser engatilhada, depois outra. O ar enche-se de ódio fácil de quem vive de tomar o que é dos outros — e agora enxerga em você presa ou ameaça.' },
@@ -1535,7 +1535,7 @@ window.TILE_EVENTS_DB['bandit_camp.alerted'] = {
         fsm: 'sneak_success'
       },
       outcome_fail: {
-        flavor: 'Um deles te alcança. Você leva uma facada nas costas.',
+        flavor: 'Um deles alcança você. Você leva uma facada nas costas.',
         ops: [{ op: 'hp', delta: -8 }],
         fsm: null
       }
@@ -1653,7 +1653,7 @@ window.TILE_EVENTS_DB['hunter_camp.dormant'] = {
 };
 
 window.TILE_EVENTS_DB['hunter_camp.active'] = {
-  body: 'Três caçadores afiam facas em volta da fogueira. Um cervo recém abatido pendurado próximo. Eles te avistam — neutros até agora.',
+  body: 'Três caçadores afiam facas em volta da fogueira. Um cervo recém abatido pendurado próximo. Eles avistam você — neutros até agora.',
   script: [
     { type: 'narration', text: 'Três caçadores ocupam a clareira, sentados em volta de uma fogueira honesta de lenha seca. Facas longas raspam pedras de amolar num ritmo constante — o som metálico e paciente de quem vive da lâmina afiada.' },
     { type: 'narration', text: 'Um cervo recém-abatido pende de um galho próximo, ainda gotejando, e o cheiro de couro e sangue fresco mistura-se à fumaça. Os três param o que fazem ao notá-lo: olhares firmes, sem hostilidade — mas sem convite. <i>Neutros, calculando.</i>' },
@@ -1671,7 +1671,7 @@ window.TILE_EVENTS_DB['hunter_camp.active'] = {
       label: 'Cumprimentar respeitosamente (Persuasão)',
       skill: 'persuasion', dc: 11,
       outcome_ok: {
-        flavor: 'Eles te recebem. "Sentem-se. Há carne pra todos." Você ouve histórias e ganha conhecimento da floresta.',
+        flavor: 'Eles recebem você. "Sentem-se. Há carne pra todos." Você ouve histórias e ganha conhecimento da floresta.',
         ops: [
           { op: 'xp', delta: 20 },
           { op: 'hp', delta: 6 },
@@ -1830,7 +1830,7 @@ window.TILE_EVENTS_DB['hunter_camp.ruins'] = {
 // =============================================================================
 
 window.TILE_EVENTS_DB['caravan_camp.active'] = {
-  body: 'Uma caravana mercante descansa. Carroças cobertas, mulas pastando, comerciantes contando moedas. Eles te observam.',
+  body: 'Uma caravana mercante descansa. Carroças cobertas, mulas pastando, comerciantes contando moedas. Eles observam você.',
   script: [
     { type: 'narration', text: 'Uma fileira de carroças cobertas de lona descansa à beira da estrada, mulas pastando soltas na grama rala. Caixotes e fardos amontoam-se sob redes amarradas — a riqueza viajante de uma caravana mercante.' },
     { type: 'narration', text: 'Os comerciantes contam moedas e conferem cargas, mas os olhos os traem: acompanham cada passo seu com a cautela de quem já perdeu mercadoria para a estrada. Um guarda apoia a mão no cabo da arma — <i>sem sacá-la, por ora</i>.' },
@@ -1877,7 +1877,7 @@ window.TILE_EVENTS_DB['caravan_camp.active'] = {
         fsm: 'sneak_success'
       },
       outcome_fail: {
-        flavor: 'Um guarda te flagra. "Ladrão!" Combate iminente.',
+        flavor: 'Um guarda flagra você. "Ladrão!" Combate iminente.',
         ops: [],
         fsm: 'player_attack_choice'
       }
@@ -1970,7 +1970,7 @@ window.TILE_EVENTS_DB['caravan_camp.alerted'] = {
       label: 'Fugir',
       skill: 'dex', dc: 13,
       outcome_ok: {
-        flavor: 'Você corre pela noite. Eles não te alcançam.',
+        flavor: 'Você corre pela noite. Eles não alcançam você.',
         ops: [],
         fsm: 'sneak_success'
       },
@@ -2349,7 +2349,7 @@ window.TILE_EVENTS_DB['broken_tower.alerted'] = {
         fsm: 'cleared'
       },
       outcome_fail: {
-        flavor: 'Era um saqueador escondido. Ele te viu.',
+        flavor: 'Era um saqueador escondido. Ele viu você.',
         tech: { label: 'COMBATE', text: 'Bandido em emboscada. Sem vantagem inicial. Iniciando…' },
         ops: [{ op: 'flag', id: 'tower_combat', scope: 'session' }],
         dungeon_combat: { enemy: 'orc_raider', surprise: false },
@@ -2366,7 +2366,7 @@ window.TILE_EVENTS_DB['broken_tower.alerted'] = {
 };
 
 window.TILE_EVENTS_DB['fresh_tracks.alerted'] = {
-  body: 'As pegadas levam a um animal grande, agora a poucos metros. Ele ergueu a cabeça — te viu.',
+  body: 'As pegadas levam a um animal grande, agora a poucos metros. Ele ergueu a cabeça — viu você.',
   tech: { label: 'AMEAÇA', text: 'Animal selvagem alerta. Movimento errado dispara investida.' },
   script: [
     { type: 'narration', text: 'A trilha de patas funda termina ali, a poucos metros: uma criatura grande, de pelo eriçado, parada entre os fetos. O cheiro almiscarado de fera chega forte no vento.' },
@@ -2426,7 +2426,7 @@ window.TILE_EVENTS_DB['abandoned_camp.alerted'] = {
       label: 'Conversar (Persuasão)',
       skill: 'persuasion', dc: 12,
       outcome_ok: {
-        flavor: 'Era um sobrevivente assustado. Ele compartilha rações e te dá direções.',
+        flavor: 'Era um sobrevivente assustado. Ele compartilha rações e dá direções a você.',
         ops: [
           { op: 'xp', delta: 10 },
           { op: 'gold', delta: 4 }
@@ -2451,7 +2451,7 @@ window.TILE_EVENTS_DB['abandoned_camp.alerted'] = {
 };
 
 window.TILE_EVENTS_DB['sentinel_post.alerted'] = {
-  body: 'A sentinela te viu. O grito de alarme já saiu — outras vozes respondem ao longe. Combate ou fuga, em segundos.',
+  body: 'A sentinela viu você. O grito de alarme já saiu — outras vozes respondem ao longe. Combate ou fuga, em segundos.',
   tech: { label: 'AMEAÇA', text: 'Alarme disparado. Reforços chegando em 1-2 turnos. Janela tática curta.' },
   script: [
     { type: 'narration', text: 'O grito rasga o ar antes que você possa reagir — a sentinela apontou na sua direção e berrou o alarme, a voz quebrando de urgência sobre o telhado do posto.' },
@@ -2490,7 +2490,7 @@ window.TILE_EVENTS_DB['sentinel_post.alerted'] = {
         fsm: 'cleared'
       },
       outcome_fail: {
-        flavor: 'Galho estala — eles te vêem.',
+        flavor: 'Galho estala — eles veem você.',
         tech: { label: 'COMBATE', text: 'Fuga falha — combate em desvantagem. Iniciando…' },
         ops: [{ op: 'flag', id: 'sentinel_combat', scope: 'session' }],
         dungeon_combat: { enemy: 'orc_raider', surprise: false },
