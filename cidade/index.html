@@ -5261,6 +5261,43 @@ LOG SINK (Fase 7):
       margin: 0 0 var(--v-space-xs, 2px);
       text-shadow: 0 0 12px rgba(196, 149, 58, 0.45);
     }
+    .cart-prov-bar {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 3px 2px 1px;
+      margin-top: 2px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .cart-prov-bar::-webkit-scrollbar { display: none; }
+    .cart-prov-chip {
+      white-space: nowrap;
+      background: rgba(0, 0, 0, 0.48);
+      border: 1px solid rgba(196, 149, 58, 0.28);
+      border-radius: 10px;
+      padding: 2px 7px;
+      font-size: 10px;
+      font-family: inherit;
+      color: #c4b59d;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+    .cart-prov-chip:hover {
+      background: rgba(196, 149, 58, 0.15);
+      color: #ffd685;
+      border-color: rgba(196, 149, 58, 0.60);
+    }
+    .cart-prov-chip.active {
+      background: linear-gradient(180deg, rgba(196, 149, 58, 0.35) 0%, rgba(196, 149, 58, 0.15) 100%);
+      border-color: #ffd685;
+      color: #ffd685;
+      box-shadow: 0 0 6px rgba(196, 149, 58, 0.40);
+    }
     .cart-header .flavor {
       color: #a09484;
       font-style: italic;
@@ -69218,7 +69255,17 @@ function renderCartographyCanvas(el){
     + '  </div>'
     + '  <div class="cart-header">'
     + '    <h2>Mapa de Valdoria</h2>'
-    + '    <p class="flavor">Toca um destino pra viajar. Roda do mouse ou pinça pra zoom.</p>'
+    + '    <div class="cart-prov-bar" id="cart-prov-bar">'
+    + '      <button class="cart-prov-chip active" data-prov="world" type="button"><span>🌍</span> Continente</button>'
+    + '      <button class="cart-prov-chip" data-prov="plains" type="button"><span>🌾</span> Planícies</button>'
+    + '      <button class="cart-prov-chip" data-prov="forest" type="button"><span>🌲</span> Florestas</button>'
+    + '      <button class="cart-prov-chip" data-prov="mountain" type="button"><span>🏔️</span> Montanhas</button>'
+    + '      <button class="cart-prov-chip" data-prov="swamp" type="button"><span>🐍</span> Pântanos</button>'
+    + '      <button class="cart-prov-chip" data-prov="desert" type="button"><span>🌵</span> Deserto</button>'
+    + '      <button class="cart-prov-chip" data-prov="coast" type="button"><span>🌊</span> Costa</button>'
+    + '      <button class="cart-prov-chip" data-prov="snow" type="button"><span>❄️</span> Ermo Gelado</button>'
+    + '      <button class="cart-prov-chip" data-prov="volcanic" type="button"><span>🌋</span> Vulcânico</button>'
+    + '    </div>'
     + '  </div>'
     + '  <div class="cart-canvas-frame">'
     + '    <div class="cart-zoom-info" id="cart-zoom-info">100%</div>'
@@ -69601,7 +69648,39 @@ function _wireCartEvents(){
   // Botões
   document.getElementById('cart-zoom-in').onclick = function(){ _cartSetZoom(_cartZoom * 1.2, _cartW/2, _cartH/2); };
   document.getElementById('cart-zoom-out').onclick = function(){ _cartSetZoom(_cartZoom * 0.8, _cartW/2, _cartH/2); };
-  document.getElementById('cart-zoom-reset').onclick = function(){ _cartZoom = CART_ZOOM_DEFAULT; _cartCenterOnPlayer(); _cartUpdateZoomInfo(); };
+  document.getElementById('cart-zoom-reset').onclick = function(){ _cartFocusProvince('world'); };
+
+  var _provChips = document.querySelectorAll('.cart-prov-chip');
+  _provChips.forEach(function(chip){
+    chip.onclick = function(e){
+      e.preventDefault();
+      var pId = chip.getAttribute('data-prov');
+      _cartFocusProvince(pId);
+    };
+  });
+}
+
+function _cartFocusProvince(provId){
+  if (!_cartEngine || !_cartCanvas || !_cartW || !_cartH) return;
+  if (provId === 'world') {
+    _cartZoom = CART_ZOOM_DEFAULT;
+    _cartCenterOnPlayer();
+    _cartUpdateZoomInfo();
+  } else {
+    var res = (typeof _cartEngine.focusProvince === 'function') ? _cartEngine.focusProvince(provId, _cartW, _cartH) : null;
+    if (res) {
+      _cartZoom = res.zoom;
+      _cartPanX = res.panX;
+      _cartPanY = res.panY;
+      _cartClampPan();
+      _drawCart();
+      _cartUpdateZoomInfo();
+    }
+  }
+  var chips = document.querySelectorAll('.cart-prov-chip');
+  chips.forEach(function(c){
+    c.classList.toggle('active', c.getAttribute('data-prov') === provId);
+  });
 }
 
 function _cartCenterOnPlayer(){
