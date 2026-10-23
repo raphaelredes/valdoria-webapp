@@ -66963,13 +66963,13 @@ window._allyTplKey = _allyTplKey;
 
 // === Tópicos Temáticos de Conversa com Companheiros D&D 5e / BG3 ===
 var ALLY_TOPIC_CONFIG = {
-  camp_campfire:      { id: 'camp_campfire',      label: '🔥 Ao redor da fogueira ▸',         title: 'Ao Redor da Fogueira',  dc: 13, skill: 'persuasion',    skillLabel: 'Persuasão', requiresCampfire: true },
-  backstory_secret:   { id: 'backstory_secret',   label: '🗝️ Segredos e o passado ▸',        title: 'Segredos do Passado',   dc: 14, skill: 'insight',       skillLabel: 'Intuição' },
-  morals_faith:       { id: 'morals_faith',       label: '⚖️ Princípios e crenças ▸',         title: 'Filosofia e Crenças',   dc: 13, skill: 'religion',      skillLabel: 'Religião' },
-  combat_bonds:       { id: 'combat_bonds',       label: '🛡️ Táticas e laços de batalha ▸',   title: 'Laços de Batalha',      dc: 13, skill: 'athletics',     skillLabel: 'Atletismo' },
-  personal_favor:     { id: 'personal_favor',     label: '📜 Assunto pessoal e favor ▸',      title: 'Favor Pessoal',         dc: 14, skill: 'investigation', skillLabel: 'Investigação' },
-  romance_courtship:  { id: 'romance_courtship',  label: '💖 Confidências a dois ▸',  title: 'Confidências e Afeto',  dc: 12, skill: 'persuasion',    skillLabel: 'Persuasão' },
-  sparring_challenge: { id: 'sparring_challenge', label: '⚔️ Desafio de treino rápido ▸',     title: 'Desafio de Treino',     dc: 13, skill: 'acrobatics',    skillLabel: 'Acrobacia' },
+  camp_campfire:      { id: 'camp_campfire',      label: '◆ Ao redor da fogueira ▸',         title: 'Ao Redor da Fogueira',  dc: 13, skill: 'persuasion',    skillLabel: 'Persuasão', requiresCampfire: true },
+  backstory_secret:   { id: 'backstory_secret',   label: '◆ Segredos e o passado ▸',        title: 'Segredos do Passado',   dc: 14, skill: 'insight',       skillLabel: 'Intuição' },
+  morals_faith:       { id: 'morals_faith',       label: '◆ Princípios e crenças ▸',         title: 'Filosofia e Crenças',   dc: 13, skill: 'religion',      skillLabel: 'Religião' },
+  combat_bonds:       { id: 'combat_bonds',       label: '◆ Táticas e laços de batalha ▸',   title: 'Laços de Batalha',      dc: 13, skill: 'athletics',     skillLabel: 'Atletismo' },
+  personal_favor:     { id: 'personal_favor',     label: '◆ Assunto pessoal e favor ▸',      title: 'Favor Pessoal',         dc: 14, skill: 'investigation', skillLabel: 'Investigação' },
+  romance_courtship:  { id: 'romance_courtship',  label: '◆ Confidências a dois ▸',  title: 'Confidências e Afeto',  dc: 12, skill: 'persuasion',    skillLabel: 'Persuasão' },
+  sparring_challenge: { id: 'sparring_challenge', label: '◆ Desafio de treino rápido ▸',     title: 'Desafio de Treino',     dc: 13, skill: 'acrobatics',    skillLabel: 'Acrobacia' },
 };
 
 function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
@@ -67445,13 +67445,13 @@ function _getAvailableAllyTopics(idx) {
   var displayName = (m.name || '').split(/\s+/)[0];
   var isAtCampfire = Boolean(window._isAtCampfire || (m && m.isAtCampfire) || (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.isAtCampfire));
   var topicList = [
-    { key: 'camp_campfire',      label: '🔥 Ao redor da fogueira ▸', requiresCampfire: true },
-    { key: 'backstory_secret',   label: '🗝️ Segredos e o passado ▸' },
-    { key: 'morals_faith',       label: '⚖️ Princípios e crenças ▸' },
-    { key: 'combat_bonds',       label: '🛡️ Táticas e laços de batalha ▸' },
-    { key: 'personal_favor',     label: '📜 Assunto pessoal e favor ▸' },
-    { key: 'romance_courtship',  label: '💖 Confidências a dois ▸' },
-    { key: 'sparring_challenge', label: '⚔️ Desafio de treino rápido ▸' },
+    { key: 'camp_campfire',      label: '◆ Ao redor da fogueira ▸', requiresCampfire: true },
+    { key: 'backstory_secret',   label: '◆ Segredos e o passado ▸' },
+    { key: 'morals_faith',       label: '◆ Princípios e crenças ▸' },
+    { key: 'combat_bonds',       label: '◆ Táticas e laços de batalha ▸' },
+    { key: 'personal_favor',     label: '◆ Assunto pessoal e favor ▸' },
+    { key: 'romance_courtship',  label: '◆ Confidências a dois ▸' },
+    { key: 'sparring_challenge', label: '◆ Desafio de treino rápido ▸' },
   ];
   var allyStorageKey = _allyStorageKey(m, idx);
   return topicList.filter(function(t) {
@@ -67480,7 +67480,31 @@ function _showAllyTopicsMenu(idx) {
   // "Ao redor da fogueira" aparece EXCLUSIVAMENTE quando de fato estiver ao redor de uma fogueira/acampamento
   var isAtCampfire = Boolean(window._isAtCampfire || (m && m.isAtCampfire) || (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.isAtCampfire));
 
-  var activeTopics = _getAvailableAllyTopics(idx);
+  var allyStorageKey = _allyStorageKey(m, idx);
+  var freshTopics = [];
+  var doneTopics = [];
+  var allCityTopics = [
+    { key: 'camp_campfire',      label: '◆ Ao redor da fogueira ▸', requiresCampfire: true },
+    { key: 'backstory_secret',   label: '◆ Segredos e o passado ▸' },
+    { key: 'morals_faith',       label: '◆ Princípios e crenças ▸' },
+    { key: 'combat_bonds',       label: '◆ Táticas e laços de batalha ▸' },
+    { key: 'personal_favor',     label: '◆ Assunto pessoal e favor ▸' },
+    { key: 'romance_courtship',  label: '◆ Confidências a dois ▸' },
+    { key: 'sparring_challenge', label: '◆ Desafio de treino rápido ▸' },
+  ];
+  allCityTopics.forEach(function(t) {
+    if (t.requiresCampfire && !isAtCampfire) return;
+    var tNode = _buildClientAllyTopicNode(cls, t.key, displayName, m);
+    var remaining = (tNode.choices || []).filter(function(c) {
+      return !_isAllyChoiceUsed(allyStorageKey, t.key, c.id, m);
+    });
+    if (remaining.length > 0) {
+      freshTopics.push({ key: t.key, label: t.label });
+    } else {
+      doneTopics.push({ key: t.key, label: '✓ ' + t.label.replace(/^◆\s*/, '').replace(/\s*▸$/, ' (Relembrar) ▸') });
+    }
+  });
+  var activeTopics = freshTopics.concat(doneTopics);
   var choices = activeTopics.map(function(t) {
     return {
       id: 'topic_' + t.key,
@@ -68130,13 +68154,13 @@ function _showAllyDialogue(idx){
   if (availableTopics.length > 0) {
     primaryChoices.push({
       id: 'nav_topics_menu',
-      label: '💬 Interagir ▸',
+      label: '◆ Interagir ▸',
       cb: function() { _showAllyTopicsMenu(idx); }
     });
   }
   primaryChoices.push({
       id: 'nav_inspect_sheet',
-      label: '📜 Ver ficha completa de ' + displayName,
+      label: '◆ Ver ficha completa de ' + displayName,
       cb: function() {
         try { window.vEncounter.close(); } catch(_) {}
         var _restoreKey = 'ally_dlg_return_' + idx;
