@@ -437,7 +437,7 @@
           _cartWorldMap = null;
         }
       };
-      _im.src = '/shared/img/map/world-map.webp';
+      _im.src = '/shared/img/map/world-map.webp?v=20261023_v3';
     } catch(_e){ _cartWorldMap = null; }
   })();
 
@@ -3787,18 +3787,13 @@
       // pin/hit-test TODOS no MESMO lugar (antes só o ícone usava editor; o resto usava
       // CART_BIOMES, por isso ícone e rota apareciam separados).
       var RB = CART_BIOMES.map(_resolved);
-      RB.forEach(function(b){
-        if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) _drawLocArt(ctx, b, _S, _S, hoverKey === b.key);
-      });
+      // P-mapa (Ordem do Usuário 2026-10): sem carimbos/ícones opacos (_drawLocArt);
+      // nós são círculos de foco vazados (lentes náuticas) destacando a geografia do world-map.webp.
       CART_PATHS.forEach(function(p){
         if (_pathEndKnown(p[0]) && _pathEndKnown(p[1])) _drawCartPath(ctx, p[0], p[1], _S, _S, RB);
       });
-      // P-mapa sessão #74 (user: "fog of war igual a exploração — tampando os locais
-      // que o personagem ainda não foi ou nem soube que existe"): NÉVOA por cima do não-
-      // conhecido. Depois das estradas + ícones (clareiras revelam o conhecido), antes
-      // dos labels/pin (ficam por cima). known===null (exploração) → _ensureCartFog null.
-      var _fog = _ensureCartFog(_S, known, RB);
-      if (_fog) ctx.drawImage(_fog, 0, 0, _S, _S);
+      // O mapa mestre do continente permanece 100% visível em sua glória geográfica,
+      // sem névoa opaca preta obstruindo o relevo e os biomas de Valdória.
       var ownedMaps = (typeof cfg.getOwnedMaps === 'function') ? cfg.getOwnedMaps() :
                       ((typeof window !== 'undefined' && window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.maps_owned) || []);
       RB.forEach(function(b){
