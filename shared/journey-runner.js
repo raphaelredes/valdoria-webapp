@@ -148,7 +148,9 @@
         distRemaining: (_j.distRemaining != null) ? _j.distRemaining : Math.max(0, (_j.total - _j.step) * 3),
         distEstimated: (_j.distRemaining != null) ? _j.distRemaining : Math.max(0, (_j.total - _j.step) * 3),
         isDistance: true,
-        hideStages: true
+        hideStages: true,
+        biome: _j.biome,
+        destination: _j.displayName
       };
     }
     global.vEncounter.render(

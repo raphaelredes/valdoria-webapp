@@ -5298,6 +5298,29 @@ LOG SINK (Fase 7):
       color: #ffd685;
       box-shadow: 0 0 6px rgba(196, 149, 58, 0.40);
     }
+    .cart-btn-atlas-back {
+      background: linear-gradient(180deg, rgba(60, 42, 22, 0.95) 0%, rgba(28, 18, 10, 0.98) 100%);
+      border: 1px solid rgba(196, 149, 58, 0.75);
+      border-radius: 8px;
+      color: #ffd685;
+      font-size: 11px;
+      font-family: inherit;
+      font-weight: 600;
+      padding: 3px 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+      transition: all 0.2s ease;
+      letter-spacing: 0.5px;
+    }
+    .cart-btn-atlas-back:hover {
+      background: linear-gradient(180deg, rgba(85, 58, 28, 0.98) 0%, rgba(42, 26, 14, 1) 100%);
+      border-color: #ffd685;
+      box-shadow: 0 0 10px rgba(196, 149, 58, 0.5);
+    }
+
     .cart-header .flavor {
       color: #a09484;
       font-style: italic;
@@ -69307,11 +69330,12 @@ var _cartHoverNode = null;
 function renderCartographyCanvas(el){
   el.innerHTML = ''
     + '<div class="cart-wrapper">'
-    + '  <div class="subscreen-back-row">'
+    + '  <div class="subscreen-back-row" style="display:flex;justify-content:space-between;align-items:center;">'
     + '    <button class="subscreen-back" id="cart-back-btn" type="button" aria-label="Voltar para a cidade">← Voltar</button>'
+    + '    <button class="cart-btn-atlas-back" id="cart-atlas-back-btn" type="button" style="display:none;" aria-label="Voltar ao Continente">⮌ Atlas do Continente</button>'
     + '  </div>'
     + '  <div class="cart-header">'
-    + '    <h2>Mapa de Valdoria</h2>'
+    + '    <h2 id="cart-title">Mapa de Valdoria</h2>'
     + '    <div class="cart-prov-bar" id="cart-prov-bar">'
     + '      <button class="cart-prov-chip active" data-prov="world" type="button"><span>🌍</span> Continente</button>'
     + '      <button class="cart-prov-chip" data-prov="plains" type="button"><span>🌾</span> Planícies</button>'
@@ -69349,6 +69373,14 @@ function renderCartographyCanvas(el){
       e.stopPropagation();
       try { closeCityPopup(true); } catch(_e){}
       navigateTo('hub');
+    });
+  }
+  var _atlasBackBtn = document.getElementById('cart-atlas-back-btn');
+  if (_atlasBackBtn) {
+    _atlasBackBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      _cartFocusProvince('world');
     });
   }
 
@@ -69744,19 +69776,41 @@ function _wireCartEvents(){
 
 function _cartFocusProvince(provId){
   if (!_cartEngine || !_cartCanvas || !_cartW || !_cartH) return;
+  var titleEl = document.getElementById('cart-title');
+  var atlasBackBtn = document.getElementById('cart-atlas-back-btn');
+
   if (provId === 'world') {
+    if (typeof _cartEngine.closeProvince === 'function') {
+      _cartEngine.closeProvince();
+    }
     _cartZoom = CART_ZOOM_DEFAULT;
     _cartCenterOnPlayer();
     _cartUpdateZoomInfo();
+    if (titleEl) titleEl.textContent = 'Mapa de Valdoria';
+    if (atlasBackBtn) atlasBackBtn.style.display = 'none';
   } else {
-    var res = (typeof _cartEngine.focusProvince === 'function') ? _cartEngine.focusProvince(provId, _cartW, _cartH) : null;
-    if (res) {
-      _cartZoom = res.zoom;
-      _cartPanX = res.panX;
-      _cartPanY = res.panY;
+    if (typeof _cartEngine.openProvince === 'function') {
+      var res = _cartEngine.openProvince(provId);
+      _cartZoom = 1.0;
+      _cartPanX = 0;
+      _cartPanY = 0;
       _cartClampPan();
       _drawCart();
       _cartUpdateZoomInfo();
+      if (res && res.province) {
+        if (titleEl) titleEl.textContent = res.province.icon + ' ' + res.province.name;
+      }
+      if (atlasBackBtn) atlasBackBtn.style.display = 'inline-flex';
+    } else {
+      var res = (typeof _cartEngine.focusProvince === 'function') ? _cartEngine.focusProvince(provId, _cartW, _cartH) : null;
+      if (res) {
+        _cartZoom = res.zoom;
+        _cartPanX = res.panX;
+        _cartPanY = res.panY;
+        _cartClampPan();
+        _drawCart();
+        _cartUpdateZoomInfo();
+      }
     }
   }
   var chips = document.querySelectorAll('.cart-prov-chip');

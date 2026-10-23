@@ -3959,6 +3959,98 @@
           : ('Aproximadamente ~' + _distRem + (_distRem === 1 ? ' marco restante' : ' marcos restantes') + ' (estimativa)');
       }
 
+      // Carta Náutica e Traçador de Rota (Modelo 8)
+      if (!_pg.isCityWalk && _pg.isDistance) {
+        var nautBox = document.createElement('div');
+        nautBox.className = 'enc-nautical-track';
+        nautBox.style.cssText = 'position:relative;height:52px;margin-bottom:8px;background:rgba(20,14,9,0.92);border:1px solid rgba(196,149,58,0.45);border-radius:6px;overflow:hidden;box-shadow:inset 0 0 16px rgba(0,0,0,0.8);';
+        
+        var cv = document.createElement('canvas');
+        cv.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;';
+        nautBox.appendChild(cv);
+        
+        var rTag = document.createElement('div');
+        rTag.style.cssText = 'position:absolute;left:8px;top:4px;font-size:9px;font-family:Cinzel,serif;color:#f4d896;text-shadow:0 1px 3px #000;letter-spacing:1px;font-weight:700;z-index:2;';
+        rTag.textContent = 'CARTA NÁUTICA · EXPEDIÇÃO DE MARCHA';
+        nautBox.appendChild(rTag);
+        
+        pBan.appendChild(nautBox);
+        
+        setTimeout(function(){
+          try {
+            var rect = cv.getBoundingClientRect();
+            var cw = cv.width = Math.round(rect.width || 320);
+            var ch = cv.height = Math.round(rect.height || 52);
+            var nctx = cv.getContext('2d');
+            if (!nctx) return;
+            
+            nctx.fillStyle = '#1c140e';
+            nctx.fillRect(0, 0, cw, ch);
+            nctx.fillStyle = 'rgba(230, 200, 144, 0.08)';
+            nctx.fillRect(0, 0, cw, ch);
+            
+            // Rosa dos ventos estilizada
+            var rcx = cw - 26, rcy = ch / 2 + 3, rrad = 15;
+            nctx.strokeStyle = 'rgba(196, 149, 58, 0.35)';
+            nctx.lineWidth = 1;
+            nctx.beginPath();
+            nctx.arc(rcx, rcy, rrad, 0, Math.PI * 2);
+            nctx.stroke();
+            
+            // Rota traçada a nanquim e ouro
+            var startX = 26, endX = cw - 54, midY = ch / 2 + 6;
+            var tot = Math.max(1, _pg.total || 1);
+            var curStep = Math.max(1, Math.min(_cur, tot));
+            var stepX = startX + ((endX - startX) * ((curStep - 1) / Math.max(1, tot - 1)));
+            
+            // Linha pontilhada (estrada planejada)
+            nctx.setLineDash([4, 4]);
+            nctx.strokeStyle = 'rgba(196, 149, 58, 0.4)';
+            nctx.lineWidth = 2;
+            nctx.beginPath();
+            nctx.moveTo(startX, midY);
+            nctx.lineTo(endX, midY);
+            nctx.stroke();
+            
+            // Linha sólida dourada (caminho percorrido)
+            nctx.setLineDash([]);
+            nctx.strokeStyle = '#f4d896';
+            nctx.lineWidth = 2.5;
+            nctx.shadowColor = 'rgba(196, 149, 58, 0.8)';
+            nctx.shadowBlur = 6;
+            nctx.beginPath();
+            nctx.moveTo(startX, midY);
+            nctx.lineTo(stepX, midY);
+            nctx.stroke();
+            nctx.shadowBlur = 0;
+            
+            // Nós de Marco de estrada
+            for (var s = 0; s < tot; s++) {
+              var nx = startX + ((endX - startX) * (s / Math.max(1, tot - 1)));
+              var reached = (s + 1) <= curStep;
+              nctx.beginPath();
+              nctx.arc(nx, midY, reached ? 4 : 3, 0, Math.PI * 2);
+              nctx.fillStyle = reached ? '#ffd685' : 'rgba(50, 36, 22, 0.9)';
+              nctx.fill();
+              nctx.strokeStyle = reached ? '#c4953a' : 'rgba(196, 149, 58, 0.4)';
+              nctx.lineWidth = 1.5;
+              nctx.stroke();
+            }
+            
+            // Marcador da Comitiva (Bússola / Pin)
+            nctx.beginPath();
+            nctx.arc(stepX, midY - 8, 5, 0, Math.PI * 2);
+            nctx.fillStyle = '#ffecb3';
+            nctx.shadowColor = '#ffd685';
+            nctx.shadowBlur = 8;
+            nctx.fill();
+            nctx.strokeStyle = '#8a5a18';
+            nctx.lineWidth = 1.5;
+            nctx.stroke();
+          } catch(_){}
+        }, 12);
+      }
+
       pLine.appendChild(pLabel);
       pLine.appendChild(pRemain);
       var pBar = document.createElement('div');

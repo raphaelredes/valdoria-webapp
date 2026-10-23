@@ -3400,8 +3400,8 @@
 
     ctx.restore();
 
-    // Se não estiver em hover, o retículo náutico já foi desenhado; o pill com nome só abre sob hover
-    if (!isHover) return;
+    // No modo Regional (onde há poucos nós), o rótulo é permanente; no Continente Geral, só abre sob hover
+    if (!isHover && !opts.isRegional) return;
 
     ctx.save();
     var labelText = b.name;
@@ -3687,7 +3687,25 @@
     var _baseCache = null;
     var _locArt = null;       // {key: Image|false}
     var _locCoords = {};      // override {key:{x,y,scale}} do editor (server)
-    var _coordsLoaded = false, _coordsFetching = false;  // P-mapa #73: carrega coords c/ retry (race apiBase)
+    var _coordsLoaded = false, _coordsFetching = false;
+    var _viewMode = 'world'; // 'world' | 'province'
+    var _activeProvId = 'world';
+    var _provImgs = {};
+    var _provLoaded = {};
+    // Preload das 8 cartas regionais do Atlas de Províncias (persistem em cache)
+    (function(){
+      CART_PROVINCES.forEach(function(prov){
+        if (prov.id === 'world') return;
+        var im = new Image();
+        im.onload = function(){
+          _provLoaded[prov.id] = true;
+          if (_viewMode === 'province' && _activeProvId === prov.id) { _baseCache = null; _onLoad(); }
+        };
+        im.onerror = function(){ _provLoaded[prov.id] = false; };
+        im.src = '/shared/img/map/provinces/' + prov.id + '.webp';
+        _provImgs[prov.id] = im;
+      });
+    })();  // P-mapa #73: carrega coords c/ retry (race apiBase)
     var _apiBase = (cfg.apiBase || '');
     var _onLoad = (typeof cfg.onAsyncRedraw === 'function') ? cfg.onAsyncRedraw : function(){};
 
@@ -3712,8 +3730,20 @@
       cv.height = Math.max(1, Math.round(h * dpr));
       var bc = cv.getContext('2d', { alpha: false });
       bc.scale(dpr, dpr);
-      var _mapReady = _drawWorldMapBg(bc, w, h);
-      cv._w = w; cv._h = h; cv._dpr = dpr; cv._mapReady = _mapReady;
+      var _mapReady = false;
+      if (_viewMode === 'province' && _activeProvId !== 'world') {
+        var pim = _provImgs[_activeProvId];
+        if (pim && pim.complete && pim.naturalWidth) {
+          var r = _cartWorldMapRect(w, h);
+          bc.drawImage(pim, r.x, r.y, r.s, r.s);
+          _mapReady = true;
+        } else {
+          _drawParchmentBase(bc, w, h);
+        }
+      } else {
+        _mapReady = _drawWorldMapBg(bc, w, h);
+      }
+      cv._w = w; cv._h = h; cv._dpr = dpr; cv._mapReady = _mapReady; cv._prov = _activeProvId;
       _baseCache = cv;
       return cv;
     }
@@ -3826,40 +3856,77 @@
       var _base = _ensureBase(view);
       ctx.drawImage(_base, 0, 0, w, h);
       ctx.translate(_offX, _offY);
-      // Visibility: known=null → mostra TODOS (exploração); array → filtra + "?" (cidade).
+
       var known = (typeof cfg.getKnownLocations === 'function') ? cfg.getKnownLocations() : null;
       var hover = view.hoverNode || null;
       var hoverKey = hover ? hover.key : null;
-      function _pathEndKnown(key){ return known === null || known.indexOf(key) >= 0 || key === 'plains'; }
-      _ensureLocArt();
-      // P5 sessão #73: RB = biomes com as coords do EDITOR → ícones/nodes/labels/rotas/
-      // pin/hit-test TODOS no MESMO lugar (antes só o ícone usava editor; o resto usava
-      // CART_BIOMES, por isso ícone e rota apareciam separados).
-      var RB = CART_BIOMES.map(_resolved);
-      // P-mapa (Ordem do Usuário 2026-10): sem carimbos/ícones opacos (_drawLocArt);
-      // nós são círculos de foco vazados (lentes náuticas) destacando a geografia do world-map.webp.
-      CART_PATHS.forEach(function(p){
-        if (_pathEndKnown(p[0]) && _pathEndKnown(p[1])) _drawCartPath(ctx, p[0], p[1], _S, _S, RB);
-      });
-      // O mapa mestre do continente permanece 100% visível em sua glória geográfica,
-      // sem névoa opaca preta obstruindo o relevo e os biomas de Valdória.
       var ownedMaps = (typeof cfg.getOwnedMaps === 'function') ? cfg.getOwnedMaps() :
                       ((typeof window !== 'undefined' && window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.maps_owned) || []);
-      RB.forEach(function(b){
-        // P-mapa sessão #73 (user): NÃO mostra locais não-descobertos (nem o "?").
-        // Só aparece o que o personagem JÁ descobriu (known_locations) ou a origem.
-        if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) {
-          var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
-          _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt });
+      _ensureLocArt();
+
+      if (_viewMode === 'province' && _activeProvId !== 'world') {
+        // === MODO REGIONAL DE PROVÍNCIA (1:1 Nativo, Alta Nitidez, Sem Zoom Blur) ===
+        var curProv = CART_PROVINCES.find(function(p){ return p.id === _activeProvId; }) || CART_PROVINCES[1];
+        var regNodes = [];
+        CART_BIOMES.forEach(function(b){
+          if (_LOCATION_TO_PROVINCE[b.key] === _activeProvId) {
+            var rc = (curProv.regionalCoords && curProv.regionalCoords[b.key]) || { rx: b.x, ry: b.y };
+            var resolvedNode = Object.assign({}, b, { x: rc.rx, y: rc.ry, regionalName: rc.name, marcos: rc.marcos });
+            regNodes.push(resolvedNode);
+          }
+        });
+
+        // Desenhar rotas regionais internas da província
+        (curProv.regionalPaths || []).forEach(function(p){
+          _drawCartPath(ctx, p[0], p[1], _S, _S, regNodes);
+        });
+
+        // Desenhar nós da província com lentes de alta visibilidade
+        regNodes.forEach(function(b){
+          if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) {
+            var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
+            _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, isRegional: true });
+          }
+        });
+
+        // Pin do jogador se estiver na província
+        var pk = (typeof cfg.getPlayerBiomeKey === 'function') ? cfg.getPlayerBiomeKey() : null;
+        var pn = pk && regNodes.find(function(b){ return b.key === pk; });
+        if (pn) _drawPlayerPin(ctx, pn, _S, _S);
+
+        // Cartouche superior elegante com o nome da província
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.font = '700 13px Cinzel, serif';
+        ctx.fillStyle = '#f4d896';
+        ctx.shadowColor = 'rgba(0,0,0,0.85)';
+        ctx.shadowBlur = 6;
+        ctx.fillText(curProv.icon + ' ' + curProv.name.toUpperCase(), _S / 2, 28);
+        ctx.font = 'italic 10px Georgia, serif';
+        ctx.fillStyle = '#d2be90';
+        ctx.fillText('Atlas Regional de Valdória', _S / 2, 42);
+        ctx.restore();
+      } else {
+        // === MODO CONTINENTE GERAL ===
+        function _pathEndKnown(key){ return known === null || known.indexOf(key) >= 0 || key === 'plains'; }
+        var RB = CART_BIOMES.map(_resolved);
+        CART_PATHS.forEach(function(p){
+          if (_pathEndKnown(p[0]) && _pathEndKnown(p[1])) _drawCartPath(ctx, p[0], p[1], _S, _S, RB);
+        });
+        RB.forEach(function(b){
+          if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) {
+            var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
+            _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt });
+          }
+        });
+        var pk = (typeof cfg.getPlayerBiomeKey === 'function') ? cfg.getPlayerBiomeKey() : null;
+        var pn = pk && RB.find(function(b){ return b.key === pk; });
+        if (pn) _drawPlayerPin(ctx, pn, _S, _S);
+        var qf = (typeof cfg.getQuestFocus === 'function') ? cfg.getQuestFocus() : null;
+        if (qf && qf.key && typeof cfg.drawQuestHalo === 'function') {
+          var qn = RB.find(function(b){ return b.key === qf.key; });
+          if (qn) cfg.drawQuestHalo(ctx, qn, _S, _S, qf.title || 'Missão');
         }
-      });
-      var pk = (typeof cfg.getPlayerBiomeKey === 'function') ? cfg.getPlayerBiomeKey() : null;
-      var pn = pk && RB.find(function(b){ return b.key === pk; });
-      if (pn) _drawPlayerPin(ctx, pn, _S, _S);
-      var qf = (typeof cfg.getQuestFocus === 'function') ? cfg.getQuestFocus() : null;
-      if (qf && qf.key && typeof cfg.drawQuestHalo === 'function') {
-        var qn = RB.find(function(b){ return b.key === qf.key; });
-        if (qn) cfg.drawQuestHalo(ctx, qn, _S, _S, qf.title || 'Missão');
       }
       ctx.restore();
       // Bússola — screen-space (top-right, NÃO pan/zooma).
@@ -3879,10 +3946,20 @@
       // (assim o popup "Local Desconhecido" não acontece mais).
       var known = (typeof cfg.getKnownLocations === 'function') ? cfg.getKnownLocations() : null;
       var best = null, bestD = Infinity;
-      for (var i = 0; i < CART_BIOMES.length; i++) {
-        var b = CART_BIOMES[i];
+      var activeNodes = CART_BIOMES;
+      if (_viewMode === 'province' && _activeProvId !== 'world') {
+        var curProv = CART_PROVINCES.find(function(p){ return p.id === _activeProvId; });
+        activeNodes = CART_BIOMES.filter(function(b){ return _LOCATION_TO_PROVINCE[b.key] === _activeProvId; });
+      }
+      for (var i = 0; i < activeNodes.length; i++) {
+        var b = activeNodes[i];
         if (!(known === null || known.indexOf(b.key) >= 0 || b.isOrigin)) continue;
-        var rb = _resolved(b);  // P5 sessão #73: coords do editor (igual ao render)
+        var rb = _resolved(b);
+        if (_viewMode === 'province' && _activeProvId !== 'world') {
+          var curProv = CART_PROVINCES.find(function(p){ return p.id === _activeProvId; });
+          var rc = (curProv && curProv.regionalCoords && curProv.regionalCoords[b.key]) || { rx: rb.x, ry: rb.y };
+          rb = Object.assign({}, b, { x: rc.rx, y: rc.ry });
+        }
         var bx = _offX + rb.x * _S;
         var by = _offY + rb.y * _S;
         // P-mapa sessão #73 (user: "efeitos do mouse SÓ na imagem"): raio de hit =
@@ -3930,11 +4007,41 @@
       return { panX: panX, panY: panY, zoom: targetZoom, province: prov };
     }
 
+    function openProvince(provId){
+      if (!provId || provId === 'world') return closeProvince();
+      var prov = CART_PROVINCES.find(function(p){ return p.id === provId; });
+      if (!prov) return closeProvince();
+      _viewMode = 'province';
+      _activeProvId = provId;
+      _baseCache = null;
+      _onLoad();
+      return { panX: 0, panY: 0, zoom: 1.0, province: prov, mode: 'province' };
+    }
+
+    function closeProvince(){
+      _viewMode = 'world';
+      _activeProvId = 'world';
+      _baseCache = null;
+      _onLoad();
+      return { panX: 0, panY: 0, zoom: 1.0, province: CART_PROVINCES[0], mode: 'world' };
+    }
+
+    function getViewMode(){
+      return {
+        mode: _viewMode,
+        provinceId: _activeProvId,
+        province: CART_PROVINCES.find(function(p){ return p.id === _activeProvId; }) || CART_PROVINCES[0]
+      };
+    }
+
     return {
       draw: draw,
       findNodeAt: findNodeAt,
       getNodePos: getNodePos,
       focusProvince: focusProvince,
+      openProvince: openProvince,
+      closeProvince: closeProvince,
+      getViewMode: getViewMode,
       invalidateBase: function(){ _baseCache = null; },
       ensureLocArt: _ensureLocArt
     };
@@ -3962,25 +4069,188 @@
   }
 
   // === CART_PROVINCES (Hierarquia das 8 Províncias Canônicas de Valdória) ===
-    var CART_PROVINCES = [
-    { id: 'world',    name: 'Continente Geral',     icon: '🌍', zoom: 1.0,  cx: 0.50, cy: 0.50, mapKey: null,
-      desc: 'Visão de todo o continente conhecido de Valdória e suas fronteiras.' },
-    { id: 'plains',   name: 'Planícies Centrais',   icon: '🌾', zoom: 2.10, cx: 0.50, cy: 0.55, mapKey: 'Mapa das Planícies',
-      desc: 'Coração comercial e agrícola do reino. Campos dourados e grandes portões de pedra.' },
-    { id: 'forest',   name: 'Grandes Florestas',    icon: '🌲', zoom: 2.10, cx: 0.50, cy: 0.28, mapKey: 'Mapa da Floresta',
-      desc: 'Matas ancestrais densas, arcos élficos de pedra e bosques imemoriais.' },
-    { id: 'swamp',    name: 'Pântanos do Leste',    icon: '🐍', zoom: 2.10, cx: 0.78, cy: 0.42, mapKey: 'Mapa do Pântano',
-      desc: 'Águas estagnadas escuras, cabanas sobre palafitas e névoas com vapores esmeralda.' },
-    { id: 'mountain', name: 'Cordilheira Ocidental',icon: '🏔️', zoom: 2.10, cx: 0.20, cy: 0.38, mapKey: 'Mapa das Montanhas',
-      desc: 'Picos escarpados de granito, forjas mineiras de Korthag e galerias subterrâneas.' },
-    { id: 'desert',   name: 'Dunas do Sul',         icon: '🌵', zoom: 2.10, cx: 0.42, cy: 0.80, mapKey: 'Mapa do Deserto',
-      desc: 'Mares de areia dourada, cânions profundos de arenito e mausoléus antigos.' },
-    { id: 'coast',    name: 'Litoral da Tormenta',  icon: '🌊', zoom: 2.10, cx: 0.88, cy: 0.52, mapKey: 'Mapa da Costa',
-      desc: 'Costões rochosos fustigados por ondas oceânicas e enseadas de navegadores.' },
-    { id: 'snow',     name: 'Ermo Boreal',          icon: '❄️', zoom: 2.10, cx: 0.52, cy: 0.10, mapKey: 'Mapa do Ermo Gelado',
-      desc: 'Geleiras azuis eternas, fendas no gelo e montanhas congeladas ao norte.' },
-    { id: 'volcanic', name: 'Terras de Fogo',       icon: '🌋', zoom: 2.10, cx: 0.80, cy: 0.70, mapKey: 'Mapa Vulcânico',
-      desc: 'A grande caldeira ativa, fendas de lava incandescente e platôs de basalto.' }
+  var CART_PROVINCES = [
+    {
+      id: 'world',
+      name: 'Continente Geral',
+      icon: '🌍',
+      zoom: 1.0,
+      cx: 0.50,
+      cy: 0.50,
+      mapKey: null,
+      desc: 'Visão de todo o continente conhecido de Valdória e suas fronteiras.',
+      locKeys: ['plains', 'green_fields', 'orc_tribe', 'bandit_fortress', 'forest', 'goblin_nest', 'elven_ruins', 'mountain', 'dragon_pass', 'korthag', 'cave', 'troll_cave', 'underground_caverns', 'crystal_depths', 'swamp', 'deep_swamp', 'desert', 'graveyard', 'ancestral_graveyard', 'snow', 'volcanic', 'valkrest', 'salty_coast', 'black_peaks', 'eldritch_mire', 'ashen_badlands', 'elder_woods', 'glacial_rift'],
+      regionalCoords: {},
+      regionalPaths: []
+    },
+    {
+      id: 'plains',
+      name: 'Planícies Centrais',
+      icon: '🌾',
+      zoom: 1.0,
+      cx: 0.50,
+      cy: 0.55,
+      mapKey: 'Mapa das Planícies',
+      desc: 'Coração comercial e agrícola do reino. Campos dourados e grandes portões de pedra.',
+      locKeys: ['plains', 'green_fields', 'orc_tribe', 'bandit_fortress', 'ashen_badlands'],
+      regionalCoords: {
+        plains: { rx: 0.50, ry: 0.50, name: 'Portões de Valdória', marcos: 0 },
+        green_fields: { rx: 0.28, ry: 0.36, name: 'Campos Verdes', marcos: 1 },
+        orc_tribe: { rx: 0.74, ry: 0.38, name: 'Acampamento Orc', marcos: 3 },
+        bandit_fortress: { rx: 0.46, ry: 0.76, name: 'Forte dos Bandidos', marcos: 2 },
+        ashen_badlands: { rx: 0.76, ry: 0.74, name: 'Terras Devastadas', marcos: 4 }
+      },
+      regionalPaths: [
+        ['plains', 'green_fields'],
+        ['green_fields', 'orc_tribe'],
+        ['green_fields', 'bandit_fortress'],
+        ['bandit_fortress', 'ashen_badlands']
+      ]
+    },
+    {
+      id: 'forest',
+      name: 'Grandes Florestas',
+      icon: '🌲',
+      zoom: 1.0,
+      cx: 0.50,
+      cy: 0.28,
+      mapKey: 'Mapa da Floresta',
+      desc: 'Matas ancestrais densas, arcos élficos de pedra e bosques imemoriais.',
+      locKeys: ['forest', 'goblin_nest', 'elven_ruins', 'elder_woods'],
+      regionalCoords: {
+        forest: { rx: 0.38, ry: 0.48, name: 'Floresta dos Sussurros', marcos: 2 },
+        goblin_nest: { rx: 0.26, ry: 0.26, name: 'Ninho de Goblins', marcos: 2 },
+        elven_ruins: { rx: 0.64, ry: 0.28, name: 'Ruínas Élficas', marcos: 3 },
+        elder_woods: { rx: 0.74, ry: 0.66, name: 'Bosque Ancestral', marcos: 4 }
+      },
+      regionalPaths: [
+        ['forest', 'goblin_nest'],
+        ['forest', 'elven_ruins'],
+        ['elven_ruins', 'elder_woods'],
+        ['forest', 'elder_woods']
+      ]
+    },
+    {
+      id: 'swamp',
+      name: 'Pântanos do Leste',
+      icon: '🐍',
+      zoom: 1.0,
+      cx: 0.78,
+      cy: 0.42,
+      mapKey: 'Mapa do Pântano',
+      desc: 'Águas estagnadas escuras, cabanas sobre palafitas e névoas com vapores esmeralda.',
+      locKeys: ['swamp', 'deep_swamp', 'graveyard', 'ancestral_graveyard', 'eldritch_mire'],
+      regionalCoords: {
+        swamp: { rx: 0.30, ry: 0.36, name: 'Pântano Nebuloso', marcos: 3 },
+        deep_swamp: { rx: 0.72, ry: 0.40, name: 'Pântano Profundo', marcos: 4 },
+        graveyard: { rx: 0.40, ry: 0.74, name: 'Cemitério Antigo', marcos: 3 },
+        ancestral_graveyard: { rx: 0.20, ry: 0.82, name: 'Cemitério Ancestral', marcos: 5 },
+        eldritch_mire: { rx: 0.76, ry: 0.74, name: 'Pântano Eldritch', marcos: 5 }
+      },
+      regionalPaths: [
+        ['swamp', 'deep_swamp'],
+        ['swamp', 'graveyard'],
+        ['graveyard', 'ancestral_graveyard'],
+        ['deep_swamp', 'eldritch_mire']
+      ]
+    },
+    {
+      id: 'mountain',
+      name: 'Cordilheira Ocidental',
+      icon: '🏔️',
+      zoom: 1.0,
+      cx: 0.20,
+      cy: 0.38,
+      mapKey: 'Mapa das Montanhas',
+      desc: 'Picos escarpados de granito, forjas mineiras de Korthag e galerias subterrâneas.',
+      locKeys: ['mountain', 'korthag', 'dragon_pass', 'black_peaks', 'cave', 'troll_cave', 'underground_caverns', 'crystal_depths'],
+      regionalCoords: {
+        mountain: { rx: 0.48, ry: 0.36, name: 'Picos de Pedra', marcos: 3 },
+        korthag: { rx: 0.26, ry: 0.26, name: 'Korthag (Vila Mineira)', marcos: 3 },
+        dragon_pass: { rx: 0.74, ry: 0.22, name: 'Passo do Dragão', marcos: 5 },
+        black_peaks: { rx: 0.16, ry: 0.44, name: 'Montanhas Negras', marcos: 4 },
+        cave: { rx: 0.38, ry: 0.60, name: 'Passagem Subterrânea', marcos: 3 },
+        troll_cave: { rx: 0.18, ry: 0.68, name: 'Caverna do Troll', marcos: 4 },
+        underground_caverns: { rx: 0.58, ry: 0.72, name: 'Cavernas Subterrâneas', marcos: 4 },
+        crystal_depths: { rx: 0.32, ry: 0.84, name: 'Profundezas de Cristal', marcos: 6 }
+      },
+      regionalPaths: [
+        ['mountain', 'korthag'],
+        ['mountain', 'dragon_pass'],
+        ['mountain', 'black_peaks'],
+        ['mountain', 'cave'],
+        ['cave', 'troll_cave'],
+        ['cave', 'underground_caverns'],
+        ['underground_caverns', 'crystal_depths'],
+        ['crystal_depths', 'mountain']
+      ]
+    },
+    {
+      id: 'desert',
+      name: 'Dunas do Sul',
+      icon: '🌵',
+      zoom: 1.0,
+      cx: 0.42,
+      cy: 0.80,
+      mapKey: 'Mapa do Deserto',
+      desc: 'Mares de areia dourada, cânions profundos de arenito e mausoléus antigos.',
+      locKeys: ['desert'],
+      regionalCoords: {
+        desert: { rx: 0.50, ry: 0.50, name: 'Deserto Dourado', marcos: 3 }
+      },
+      regionalPaths: []
+    },
+    {
+      id: 'coast',
+      name: 'Litoral da Tormenta',
+      icon: '🌊',
+      zoom: 1.0,
+      cx: 0.88,
+      cy: 0.52,
+      mapKey: 'Mapa da Costa',
+      desc: 'Costões rochosos fustigados por ondas oceânicas e enseadas de navegadores.',
+      locKeys: ['salty_coast'],
+      regionalCoords: {
+        salty_coast: { rx: 0.50, ry: 0.50, name: 'Costa Salgada', marcos: 3 }
+      },
+      regionalPaths: []
+    },
+    {
+      id: 'snow',
+      name: 'Ermo Boreal',
+      icon: '❄️',
+      zoom: 1.0,
+      cx: 0.52,
+      cy: 0.10,
+      mapKey: 'Mapa do Ermo Gelado',
+      desc: 'Geleiras azuis eternas, fendas no gelo e montanhas congeladas ao norte.',
+      locKeys: ['snow', 'glacial_rift'],
+      regionalCoords: {
+        snow: { rx: 0.38, ry: 0.46, name: 'Ermo Congelado', marcos: 4 },
+        glacial_rift: { rx: 0.68, ry: 0.56, name: 'Abismo Glacial', marcos: 6 }
+      },
+      regionalPaths: [
+        ['snow', 'glacial_rift']
+      ]
+    },
+    {
+      id: 'volcanic',
+      name: 'Terras de Fogo',
+      icon: '🌋',
+      zoom: 1.0,
+      cx: 0.80,
+      cy: 0.70,
+      mapKey: 'Mapa Vulcânico',
+      desc: 'A grande caldeira ativa, fendas de lava incandescente e platôs de basalto.',
+      locKeys: ['volcanic', 'valkrest'],
+      regionalCoords: {
+        volcanic: { rx: 0.42, ry: 0.48, name: 'Cratera Vulcânica', marcos: 5 },
+        valkrest: { rx: 0.74, ry: 0.56, name: 'Valkrest (Acampamento)', marcos: 5 }
+      },
+      regionalPaths: [
+        ['volcanic', 'valkrest']
+      ]
+    }
   ];
 
   var _LOCATION_TO_PROVINCE = {
