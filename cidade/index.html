@@ -70012,7 +70012,8 @@ function renderCartographyCanvas(el){
     + '        <button class="cam-filter-pill" data-filter="hazards" type="button">⚠️ Perigos</button>'
     + '        <button class="cam-filter-pill" data-filter="landmarks" type="button">🏛️ Marcos</button>'
     + '        <button class="cam-filter-pill" data-filter="sanctuaries" type="button">✨ Santuários</button>'
-    + '        <button class="cam-filter-pill" data-filter="altitude" type="button">⛰️ Altitudes</button>'
+    + '        <button class="cam-filter-pill" data-filter="altitude" type="button">⛰️ Altitudes</button>
+        <button class="cam-filter-pill" data-filter="roads" type="button">🛣️ Estradas</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -71051,6 +71052,14 @@ function _cartFocusWaypoint(key) {
             if (prov.id === 'mountain' || prov.id === 'snow') return true;
             return false;
           }
+          } else if (_camActiveCategory === 'roads') {
+            if (prov.id === 'world') return false;
+            var hasPaved = false;
+            var pavedNodes = ['plains', 'floresta', 'posto_avancado', 'posto_sul', 'vale_aurora', 'vila_pescadores', 'cidade_capital'];
+            if (prov.locKeys) {
+              hasPaved = prov.locKeys.some(function(k){ return pavedNodes.indexOf(k) >= 0; });
+            }
+            if (!hasPaved && prov.id !== 'plains' && prov.id !== 'forest') return false;
           if (!ft) return true;
           if ((prov.name || '').toLowerCase().indexOf(ft) >= 0) return true;
           if ((prov.desc || '').toLowerCase().indexOf(ft) >= 0) return true;
@@ -72433,11 +72442,15 @@ function _openCartLocationPopup(biome){
               var altInfo = (biome.biome === 'mountain' || (biome.key && (biome.key.indexOf('pico') >= 0 || biome.key.indexOf('cordilheira') >= 0)))
                 ? CartShared.calcAltitudeExposure(11500, horasViagem)
                 : null;
+              var roadSec = (window.CartShared && CartShared.calcRoadSecurityAndToll)
+                ? CartShared.calcRoadSecurityAndToll('plains', biome.key || biome.biome || 'plains')
+                : null;
               return '<div class="clp-survival-gear-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,24,20,0.75);padding:4px 8px;border-radius:4px;border:1px solid rgba(74,222,128,0.25);font-size:8px;color:#bbf7d0;">'
                 + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:#86efac;margin-bottom:2px;">🎒 EQUIPAMENTO DE EXPEDIÇÃO (XGE p. 78):</div>'
                 + '  <div>• <b>Prontidão:</b> ' + gear.expeditionReadinessLabel + '</div>'
                 + (gear.activeSynergies.length ? ('  <div style="color:#d2be90;margin-top:1px;">• ' + gear.activeSynergies.map(function(s){ return s.icon + ' ' + s.name; }).join(' · ') + '</div>') : '')
                 + (altInfo ? ('  <div style="margin-top:2px;color:' + altInfo.color + ';">⛰️ <b>Alta Altitude:</b> ' + altInfo.riskLevel + ' (' + altInfo.altitudeFeet + ' pés · ~' + altInfo.altitudeMeters + 'm)</div>') : '')
+                + (roadSec ? ('  <div style="margin-top:2px;color:' + roadSec.color + ';">' + roadSec.icon + ' <b>Via:</b> ' + roadSec.roadName + ' (' + (roadSec.totalTollSp > 0 ? (roadSec.totalTollSp + ' moedas de prata') : 'Isento') + ' · ' + (roadSec.riskReductionPct > 0 ? ('-' + roadSec.riskReductionPct + '% risco') : ('+' + Math.abs(roadSec.riskReductionPct) + '% perigo')) + ')</div>') : '')
                 + '</div>';
             })();
       })()
@@ -72610,11 +72623,13 @@ function _openCartLocationPopup(biome){
         var syn = CartShared.calcPartyTravelRoles([curRole], { pace: curP, partySize: 4 });
         var forInfo = CartShared.calcForageYieldCheck(3, biome.key || biome.biome || 'plains', { pace: curP });
         var hazInfo = CartShared.getWildernessHazardDetails ? CartShared.getWildernessHazardDetails(biome.key || biome.biome || 'plains') : null;
+        var compInfo = (CartShared.calcForageComplication && forInfo.allowedByPace) ? CartShared.calcForageComplication(biome.key || biome.biome || 'plains', 8, { hasHerbalismKit: true }) : null;
         return '<div class="clp-synergy-card" id="clp-synergy-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,16,28,0.75);padding:4px 8px;border-radius:4px;border:1px solid rgba(192,132,252,0.3);font-size:8px;color:#d8b4fe;">'
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:#e9d5ff;margin-bottom:2px;">✨ SINERGIA DE MARCHA & FORRAGEAMENTO (D&D 5e):</div>'
           + '  <div>• <b>Função Ativa:</b> ' + (syn.synergies.length ? syn.synergies[0].title + ' (' + syn.synergies[0].benefit + ')' : 'Sentinela') + '</div>'
           + '  <div>• <b>Coleta nos Ermos:</b> <span style="color:' + forInfo.color + ';">' + forInfo.label + '</span> · ' + (forInfo.allowedByPace ? forInfo.expectedFoodLbs + ' lbs caça/dia' : 'Bloqueado') + '</div>'
           + (hazInfo ? ('  <div>• <b>Perigo Natural:</b> <span style="color:' + hazInfo.color + ';">' + hazInfo.name + '</span> (' + hazInfo.dcCheck + ')</div>') : '')
+          + (compInfo && compInfo.hasComplication ? ('  <div>• <b>Complicação:</b> <span style="color:' + compInfo.color + ';">' + compInfo.title + '</span> (' + (compInfo.mitigatedByKit ? 'Prevenido por Kit' : 'Requer Teste') + ')</div>') : '')
           + '</div>';
       })()
     + (function(){
@@ -73019,10 +73034,12 @@ function _openCartLocationPopup(biome){
         var synR = CartShared.calcPartyTravelRoles([rType], { pace: window._cartSelectedPace || 'normal', partySize: 4 });
         var forInfoR = CartShared.calcForageYieldCheck(3, biome.key || biome.biome || 'plains', { pace: window._cartSelectedPace || 'normal' });
         var hazInfoR = CartShared.getWildernessHazardDetails ? CartShared.getWildernessHazardDetails(biome.key || biome.biome || 'plains') : null;
+        var compInfoR = (CartShared.calcForageComplication && forInfoR.allowedByPace) ? CartShared.calcForageComplication(biome.key || biome.biome || 'plains', 8, { hasHerbalismKit: true }) : null;
         synCardR.innerHTML = '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:#e9d5ff;margin-bottom:2px;">✨ SINERGIA DE MARCHA & FORRAGEAMENTO (D&D 5e):</div>'
           + '  <div>• <b>Função Ativa:</b> ' + (synR.synergies.length ? synR.synergies[0].title + ' (' + synR.synergies[0].benefit + ')' : 'Sentinela') + '</div>'
           + '  <div>• <b>Coleta nos Ermos:</b> <span style="color:' + forInfoR.color + ';">' + forInfoR.label + '</span> · ' + (forInfoR.allowedByPace ? forInfoR.expectedFoodLbs + ' lbs caça/dia' : 'Bloqueado') + '</div>'
-          + (hazInfoR ? ('  <div>• <b>Perigo Natural:</b> <span style="color:' + hazInfoR.color + ';">' + hazInfoR.name + '</span> (' + hazInfoR.dcCheck + ')</div>') : '');
+          + (hazInfoR ? ('  <div>• <b>Perigo Natural:</b> <span style="color:' + hazInfoR.color + ';">' + hazInfoR.name + '</span> (' + hazInfoR.dcCheck + ')</div>') : '')
+          + (compInfoR && compInfoR.hasComplication ? ('  <div>• <b>Complicação:</b> <span style="color:' + compInfoR.color + ';">' + compInfoR.title + '</span> (' + (compInfoR.mitigatedByKit ? 'Prevenido por Kit' : 'Requer Teste') + ')</div>') : '');
       }
     };
   });
@@ -73074,10 +73091,12 @@ function _openCartLocationPopup(biome){
         var synP = CartShared.calcPartyTravelRoles([window._cartSelectedTravelRole || 'scout'], { pace: pType, partySize: 4 });
         var forInfoP = CartShared.calcForageYieldCheck(3, biome.key || biome.biome || 'plains', { pace: pType });
         var hazInfoP = CartShared.getWildernessHazardDetails ? CartShared.getWildernessHazardDetails(biome.key || biome.biome || 'plains') : null;
+        var compInfoP = (CartShared.calcForageComplication && forInfoP.allowedByPace) ? CartShared.calcForageComplication(biome.key || biome.biome || 'plains', 8, { hasHerbalismKit: true }) : null;
         synCardP.innerHTML = '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:#e9d5ff;margin-bottom:2px;">✨ SINERGIA DE MARCHA & FORRAGEAMENTO (D&D 5e):</div>'
           + '  <div>• <b>Função Ativa:</b> ' + (synP.synergies.length ? synP.synergies[0].title + ' (' + synP.synergies[0].benefit + ')' : 'Sentinela') + '</div>'
           + '  <div>• <b>Coleta nos Ermos:</b> <span style="color:' + forInfoP.color + ';">' + forInfoP.label + '</span> · ' + (forInfoP.allowedByPace ? forInfoP.expectedFoodLbs + ' lbs caça/dia' : 'Bloqueado') + '</div>'
-          + (hazInfoP ? ('  <div>• <b>Perigo Natural:</b> <span style="color:' + hazInfoP.color + ';">' + hazInfoP.name + '</span> (' + hazInfoP.dcCheck + ')</div>') : '');
+          + (hazInfoP ? ('  <div>• <b>Perigo Natural:</b> <span style="color:' + hazInfoP.color + ';">' + hazInfoP.name + '</span> (' + hazInfoP.dcCheck + ')</div>') : '')
+          + (compInfoP && compInfoP.hasComplication ? ('  <div>• <b>Complicação:</b> <span style="color:' + compInfoP.color + ';">' + compInfoP.title + '</span> (' + (compInfoP.mitigatedByKit ? 'Prevenido por Kit' : 'Requer Teste') + ')</div>') : '');
       }
     };
   });

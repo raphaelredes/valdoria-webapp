@@ -7116,6 +7116,128 @@
     };
   }
 
+
+  // === calcRoadSecurityAndToll (Segurança Viária, Patrulhas e Pedágios - DMG p. 112-114) ===
+  function calcRoadSecurityAndToll(originKey, targetKey, options) {
+    options = options || {};
+    var oKey = (originKey || 'plains').toLowerCase();
+    var tKey = (targetKey || 'floresta').toLowerCase();
+    var pSize = Math.max(1, (typeof options.partySize === 'number') ? options.partySize : 4);
+    var hasWarrant = !!(options.hasWarrant || options.isNoble);
+
+    var pavedNodes = ['plains', 'floresta', 'posto_avancado', 'posto_sul', 'vale_aurora', 'vila_pescadores', 'cidade_capital'];
+    var oPaved = pavedNodes.indexOf(oKey) >= 0;
+    var tPaved = pavedNodes.indexOf(tKey) >= 0;
+
+    var category = 'wilderness_offroad';
+    var name = 'Ermos Desbravados (Sem Estrada)';
+    var patrolRating = 'Nenhuma (Ermos Desprotegidos)';
+    var patrolDesc = 'Ausência total de guarnições e vigilância civil; a comitiva depende inteiramente de suas próprias armas e sentinelas.';
+    var tollPerPerson = 0;
+    var riskRed = -15;
+    var icon = '⚔️';
+    var color = '#f87171';
+
+    if (oPaved && tPaved) {
+      category = 'paved_highway';
+      name = 'Estrada Real Pavimentada';
+      patrolRating = 'Alta (Guarnição Imperial Ativa)';
+      patrolDesc = 'Patrulhas de lanceiros montados e guaritas regulares; salteadores evitam ataques abertos ao longo da via de pedra.';
+      tollPerPerson = 2;
+      riskRed = 15;
+      icon = '🛡️';
+      color = '#4ade80';
+    } else if (oPaved || tPaved) {
+      category = 'regional_trail';
+      name = 'Trilha Regional Batida';
+      patrolRating = 'Moderada (Patrulhas Ocasionais)';
+      patrolDesc = 'Caminho de terra batida usado por comboios comerciais; rondas esporádicas de batedores provinciais.';
+      tollPerPerson = 1;
+      riskRed = 5;
+      icon = '🚶';
+      color = '#facc15';
+    }
+
+    var effectiveToll = hasWarrant ? 0 : (tollPerPerson * pSize);
+
+    return {
+      roadCategory: category,
+      roadName: name,
+      patrolRating: patrolRating,
+      patrolDesc: patrolDesc,
+      tollPerPersonSp: hasWarrant ? 0 : tollPerPerson,
+      totalTollSp: effectiveToll,
+      hasWarrant: hasWarrant,
+      warrantNote: hasWarrant ? 'Salvo-conduto provincial ativo: isenção total de taxas e escolta cordial.' : 'Pedágio padrão de manutenção viária provincial.',
+      riskReductionPct: riskRed,
+      icon: icon,
+      color: color,
+      dndRef: 'DMG p. 112-114 (Vias Provinciais e Postos de Guarda)'
+    };
+  }
+
+  // === calcForageComplication (Complicações de Forrageamento e Água Contaminada - DMG p. 110-111) ===
+  function calcForageComplication(biomeKey, rollVal, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var roll = (typeof rollVal === 'number') ? rollVal : 12;
+    var hasKit = !!options.hasHerbalismKit;
+    var hasCook = !!options.hasCook;
+
+    if (roll >= 10) {
+      return {
+        hasComplication: false,
+        title: 'Água e Provisões Puras',
+        consequence: 'Nenhuma contaminação; água cristalina e caça saudável.',
+        mitigation: 'Consumo seguro sem exigência de testes adicionais.',
+        mitigatedByKit: false,
+        color: '#4ade80',
+        dndRef: 'DMG p. 110-111 (Forrageamento Seguro)'
+      };
+    }
+
+    var complications = {
+      swamp: {
+        title: 'Bolsão de Água Estagnada com Miasma',
+        consequence: 'Salvaguarda de CON CD 11 contra febre do pântano (1 nível de Exaustão persistente).',
+        mitigation: 'Ferver a água ou usar Utensílios de Cozinheiro (XGE p. 133).'
+      },
+      forest: {
+        title: 'Bagas Venenosas Mimetizadas',
+        consequence: 'Condição Envenenado por 4 horas ao ingerir frutos de aparência comestível.',
+        mitigation: 'Kit de Herbalismo (XGE p. 82) identifica e descarta os frutos tóxicos.'
+      },
+      desert: {
+        title: 'Água Salobra Alcalina das Dunas',
+        consequence: 'Desidratação acelerada; comitiva precisa de consumo duplo de água no dia seguinte.',
+        mitigation: 'Destilação rústica por condensação sob lona.'
+      },
+      mountain: {
+        title: 'Enxame de Parasitas das Rochas',
+        consequence: 'Picadas dolorosas impedem a recuperação plena de dados de vida no descanso curto.',
+        mitigation: 'Fumaça de resina de pinho afasta os insetos do acampamento.'
+      },
+      plains: {
+        title: 'Água Turva com Sedimentos Argilosos',
+        consequence: 'Desconforto gástrico; desvantagem na próxima salvaguarda de Constituição.',
+        mitigation: 'Filtragem por tecido de linho impermeabilizado.'
+      }
+    };
+
+    var comp = complications[bk] || complications.plains;
+    var isMitigated = hasKit || hasCook;
+
+    return {
+      hasComplication: true,
+      title: comp.title,
+      consequence: isMitigated ? 'Neutralizado: Equipamento da comitiva purificou a colheita.' : comp.consequence,
+      mitigation: comp.mitigation,
+      mitigatedByKit: isMitigated,
+      color: isMitigated ? '#a3e635' : '#f87171',
+      dndRef: 'DMG p. 110-111 (Complicações de Forrageamento)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -8817,6 +8939,8 @@
     calcAltitudeExposure: calcAltitudeExposure,
     calcMoonPhaseNavigation: calcMoonPhaseNavigation,
     calcForcedMarchRiskTable: calcForcedMarchRiskTable,
+    calcRoadSecurityAndToll: calcRoadSecurityAndToll,
+    calcForageComplication: calcForageComplication,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
