@@ -9653,6 +9653,146 @@
     };
   }
 
+
+  // === calcRockfallAndLandslideHazard (Desmoronamento, Queda de Rochas e Soterramento em Montanhas - DMG p. 110-111 / PHB p. 183) ===
+  function calcRockfallAndLandslideHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'montanha').toLowerCase();
+    var ht = (hazardType || 'loose_scree_slip').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Cascalho Solto em Encosta Íngreme (Scree Slip)',
+      saveDC: 12,
+      saveType: 'Destreza (Acrobacia)',
+      damageOrBurial: 'Deslize de 30 pés; 1d6 de dano contundente e atraso de 1 hora para os batedores subirem novamente.',
+      excavationEffort: 'Sem soterramento de corpos; apenas recuperação de alforjes soltos.',
+      mitigation: 'Corda com pítons ou cajado de caminhada concede vantagem na salvaguarda.',
+      icon: '🪨⚠️',
+      color: '#facc15'
+    };
+
+    if (ht === 'flash_rockfall') {
+      hazard = {
+        hazardTitle: 'Queda Repentina de Pedregulhos & Fragmentação',
+        saveDC: 14,
+        saveType: 'Destreza',
+        damageOrBurial: '3d6 de dano de concussão e condição Caído (Prone); metade do dano com sucesso na salvaguarda.',
+        excavationEffort: '1d4 minutos para desvencilhar membros do grupo sob pedras soltas.',
+        mitigation: 'Sentinela com Percepção Passiva 14+ ouve estalos prévios na crista, permitindo abrigo sob saliências.',
+        icon: '🪨💥',
+        color: '#f87171'
+      };
+    } else if (ht === 'massive_landslide' || bk === 'montanha') {
+      hazard = {
+        hazardTitle: 'Desmoronamento Maciço de Encosta (DMG p. 110)',
+        saveDC: 15,
+        saveType: 'Força (Atletismo) ou Destreza (Acrobacia)',
+        damageOrBurial: '4d6 de dano contundente e soterramento sob 1d4 pés de entulho (regras de Sufocamento - PHB p. 183).',
+        excavationEffort: 'Exige 1d4 horas de escavação manual contínua; pás e picaretas reduzem o tempo pela metade.',
+        mitigation: 'Evitar encostas de terra saturada por chuvas recentes ou contornar por cristas rochosas maciças.',
+        icon: '⛰️🚨',
+        color: '#ef4444'
+      };
+    } else if (ht === 'subterranean_cave_in') {
+      hazard = {
+        hazardTitle: 'Colapso de Teto Subterrâneo ou Fenda de Túnel',
+        saveDC: 15,
+        saveType: 'Destreza',
+        damageOrBurial: '4d6 de dano de impacto e trilha bloqueada por toneladas de rocha desabada.',
+        excavationEffort: '2d4 horas de escavação com picareta de minerador para reabrir passagem transitável.',
+        mitigation: 'Conhecimento da Pedra (Stonecunning) anão ou kit de pedreiro identifica fraturas de abóbada antecipadamente.',
+        icon: '⛏️🕳️',
+        color: '#a855f7'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      damageOrBurial: hazard.damageOrBurial,
+      excavationEffort: hazard.excavationEffort,
+      mitigation: hazard.mitigation,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Desmoronamentos e Queda de Pedras) / PHB p. 183 (Sufocamento)'
+    };
+  }
+
+  // === calcCampfireFuelAndHeatConservation (Combustível de Acampamento, Lenha Seca e Conservação Térmica contra Frio Extremo - DMG p. 110 / PHB p. 150, 185) ===
+  function calcCampfireFuelAndHeatConservation(biomeKey, fuelType, weatherCondition, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var ft = (fuelType || 'dry_hardwood').toLowerCase();
+    var wc = (weatherCondition || 'clear').toLowerCase();
+
+    var fuel = {
+      fuelName: 'Lenha de Madeira Nobre Seca (Carvalho / Faia)',
+      burnDurationHours: 6,
+      thermalProtection: 'Calor radiante elevado e brasas duradouras; mantém a temperatura do acampamento estável.',
+      smokeVisibility: 'Fumaça fina e cinzenta; visibilidade de até 2 milhas durante a queima noturna.',
+      coldSaveBonus: '+2 nas Salvaguardas de Constituição contra frio extremo (DMG p. 110).',
+      icon: '🪵🔥',
+      color: '#f97316'
+    };
+
+    if (ft === 'damp_peat_moss' || bk === 'swamp') {
+      fuel = {
+        fuelName: 'Tijolos de Turfa e Musgo de Pântano Seco',
+        burnDurationHours: 4,
+        thermalProtection: 'Calor brando e constante; suficiente para secar vestimentas e ferver caldeirões.',
+        smokeVisibility: 'Fumaça negra densa e acre; perceptível a até 5 milhas a favor do vento pelos batedores.',
+        coldSaveBonus: '+1 nas Salvaguardas de Constituição contra hipotermia.',
+        icon: '🧱💨',
+        color: '#84cc16'
+      };
+    } else if (ft === 'scrub_brush_thorns' || bk === 'desert' || bk === 'dunas') {
+      fuel = {
+        fuelName: 'Gravetos de Arbustos Secos & Raízes Espinhosas',
+        burnDurationHours: 2,
+        thermalProtection: 'Chama viva e rápida mas de baixa durabilidade; requer alimentação constante a cada vigília da comitiva.',
+        smokeVisibility: 'Fagulhas esparsas com fumaça esbranquiçada que se dissipa rapidamente no ar árido.',
+        coldSaveBonus: '+0 (calor insuficiente sem cobertores de lã pesada).',
+        icon: '🌿✨',
+        color: '#eab308'
+      };
+    } else if (ft === 'alchemical_fire_coal') {
+      fuel = {
+        fuelName: 'Carvão Alquímico Tratado (Pedra Sulfúrica Incandescente)',
+        burnDurationHours: 8,
+        thermalProtection: 'Calor concentrado supremo; queima com fulgor estável mesmo sob vendavais e chuva torrencial.',
+        smokeVisibility: 'Sem fumaça visível (zero colunas); perfeito para acampamentos furtivos em território hostil.',
+        coldSaveBonus: '+4 nas Salvaguardas de Constituição; imunidade ao frio não-mágico moderado.',
+        icon: '☄️🛡️',
+        color: '#38bdf8'
+      };
+    }
+
+    var shelterNotes = 'Trajes normais de viagem.';
+    if (options.hasColdWeatherGear) {
+      shelterNotes = 'Roupas de Inverno Acolchoadas (PHB p. 150) concedem sucesso automático contra frio moderado.';
+    }
+    if (options.hasWindbreakWall) {
+      shelterNotes += ' Anteparo de pedras/troncos dobra o raio de calor refletido nos sacos de dormir.';
+    }
+
+    return {
+      biomeKey: bk,
+      fuelType: ft,
+      fuelName: fuel.fuelName,
+      burnDurationHours: fuel.burnDurationHours,
+      thermalProtection: fuel.thermalProtection,
+      smokeVisibility: fuel.smokeVisibility,
+      coldSaveBonus: fuel.coldSaveBonus,
+      shelterNotes: shelterNotes,
+      icon: fuel.icon,
+      color: fuel.color,
+      dndRef: 'DMG p. 110 (Frio Extremo e Hipotermia) / PHB p. 150 (Equipamento de Inverno e Fogo)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -11390,6 +11530,8 @@
     calcArborealBivouacShelter: calcArborealBivouacShelter,
     calcWildernessSignalSmokeAndFlares: calcWildernessSignalSmokeAndFlares,
     calcPackAnimalConditioningAndLoad: calcPackAnimalConditioningAndLoad,
+    calcRockfallAndLandslideHazard: calcRockfallAndLandslideHazard,
+    calcCampfireFuelAndHeatConservation: calcCampfireFuelAndHeatConservation,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
