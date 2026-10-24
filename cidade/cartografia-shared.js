@@ -8458,6 +8458,122 @@
     };
   }
 
+  // === calcCartographicTriangulation (Triangulação de Marcos Topográficos e Ferramentas de Cartógrafo - XGE p. 79 / DMG p. 108) ===
+  function calcCartographicTriangulation(sightRangeMiles, landmarkCount, terrainType, options) {
+    options = options || {};
+    var sight = (typeof sightRangeMiles === 'number') ? sightRangeMiles : 5;
+    var count = (typeof landmarkCount === 'number') ? landmarkCount : 3;
+    var tt = (terrainType || 'plains').toLowerCase();
+
+    var accuracyGrade = 'Aproximada (1 Marco de Referência)';
+    var orientationBonus = 1;
+    var travelTimeReductionPct = 0;
+    var color = '#94a3b8';
+    var icon = '📐';
+
+    if (count >= 3) {
+      accuracyGrade = 'Precisa (3+ Marcos Geodésicos Triangulados)';
+      orientationBonus = 5;
+      travelTimeReductionPct = 15;
+      color = '#38bdf8';
+      icon = '📐🗺️';
+    } else if (count === 2) {
+      accuracyGrade = 'Satisfatória (2 Marcos em Linha de Visada)';
+      orientationBonus = 3;
+      travelTimeReductionPct = 10;
+      color = '#4ade80';
+      icon = '📐🧭';
+    }
+
+    var mapChartBenefit = (count >= 3)
+      ? 'Redige carta topográfica com escala precisa; comitiva avança com vantagem em salvaguardas de navegação e corta 15% do tempo de marcha.'
+      : ((count === 2)
+        ? 'Traçado com vetor de rota confiável; bônus de +3 na orientação geográfica e -10% de desgaste na jornada.'
+        : 'Esboço rústico; fornece referência elementar de direção com bônus modesto de +1.');
+
+    return {
+      sightRangeMiles: sight,
+      landmarkCount: count,
+      terrainType: tt,
+      accuracyGrade: accuracyGrade,
+      orientationBonus: orientationBonus,
+      travelTimeReductionPct: travelTimeReductionPct,
+      mapChartBenefit: mapChartBenefit,
+      icon: icon,
+      color: color,
+      dndRef: 'XGE p. 79 (Ferramentas de Cartógrafo & Triangulação) / DMG p. 108'
+    };
+  }
+
+  // === calcCampAlarmAndSentryAnimal (Cães de Guarda, Magia de Alarme e Sentinelas Aladas - PHB p. 157, 211, 240 / DMG p. 112) ===
+  function calcCampAlarmAndSentryAnimal(wardType, options) {
+    options = options || {};
+    var wt = (wardType || 'alarm_spell').toLowerCase();
+
+    var wards = {
+      alarm_spell: {
+        name: 'Magia Alarme Ritualística (PHB p. 211)',
+        alertRadiusFeet: 20,
+        detectionMechanism: 'Aviso mental silencioso ao conjurador ou badalar audível a 18 metros.',
+        passivePerceptionBonus: 0,
+        surpriseImmunity: true,
+        cost: 'Componente ritualístico (sineta e fio de prata); dura 8 horas ininterruptas.',
+        desc: 'Perímetro invisível que dispara ao menor toque de criatura minúscula a colossal.',
+        icon: '🔔✨',
+        color: '#c084fc'
+      },
+      guard_mastiff: {
+        name: 'Mastim de Guarda Treinado (PHB p. 157)',
+        alertRadiusFeet: 60,
+        detectionMechanism: 'Olfato e audição aguçados com latidos vigorosos de aviso.',
+        passivePerceptionBonus: 5,
+        surpriseImmunity: true,
+        cost: '25 po de adestramento militar; consome 1 libra de carne/ração por dia.',
+        desc: 'Sentinela leal com vantagem em Percepção para farejar invasores ou vultos furtivos.',
+        icon: '🐕',
+        color: '#f59e0b'
+      },
+      familiar_scout: {
+        name: 'Familiar Alado Coruja em Poleiro (PHB p. 240)',
+        alertRadiusFeet: 120,
+        detectionMechanism: 'Visão no escuro a 36 metros e conexão telepática instantânea.',
+        passivePerceptionBonus: 5,
+        surpriseImmunity: true,
+        cost: '10 po em incenso e carvão (Magia Encontrar Familiar).',
+        desc: 'Voo silencioso e visão noturna perfeita que detecta predadores nos galhos altos.',
+        icon: '🦉👁️',
+        color: '#38bdf8'
+      },
+      tripwire_bell: {
+        name: 'Fios de Tropeço com Guizos de Cobre',
+        alertRadiusFeet: 30,
+        detectionMechanism: 'Tilintar estridente de guizos metálicos ao puxar o arame esticado.',
+        passivePerceptionBonus: 2,
+        surpriseImmunity: false,
+        cost: '2 pp em carretel de arame e guizos mecânicos.',
+        desc: 'Dispositivo mecânico engenhoso montado em torno da fogueira ou trilha de acesso.',
+        icon: '🪤🛎️',
+        color: '#94a3b8'
+      }
+    };
+
+    var w = wards[wt] || wards.alarm_spell;
+
+    return {
+      wardType: wt,
+      wardName: w.name,
+      alertRadiusFeet: w.alertRadiusFeet,
+      detectionMechanism: w.detectionMechanism,
+      passivePerceptionBonus: w.passivePerceptionBonus,
+      surpriseImmunity: w.surpriseImmunity,
+      maintenanceCost: w.cost,
+      description: w.desc,
+      icon: w.icon,
+      color: w.color,
+      dndRef: 'PHB p. 157, 211, 240 (Vigília, Alarme e Animais de Guarda) / DMG p. 112'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -10177,6 +10293,8 @@
     calcCampNightWatchSchedule: calcCampNightWatchSchedule,
     calcTavernExplorationRumor: calcTavernExplorationRumor,
     calcWildernessSustenanceRequirements: calcWildernessSustenanceRequirements,
+    calcCartographicTriangulation: calcCartographicTriangulation,
+    calcCampAlarmAndSentryAnimal: calcCampAlarmAndSentryAnimal,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T21:33:42Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T21:36:48Z - do not edit directly, edit source -->
 
 
 
@@ -93657,6 +93657,27 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcCartographicTriangulation) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var tri = CartShared.calcCartographicTriangulation(5, 3, bKey);
+        return '<div class="clp-triangulation-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,28,34,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.3);font-size:8px;color:#bae6fd;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + tri.color + ';margin-bottom:2px;">' + tri.icon + ' TRIANGULAÇÃO & CARTOGRAFIA TOPOGRÁFICA (XGE p. 79):</div>'
+          + '  <div>• <b>Precisão:</b> ' + tri.accuracyGrade + ' (Visada ' + tri.sightRangeMiles + ' milhas)</div>'
+          + '  <div>• <b>Vantagem:</b> +' + tri.orientationBonus + ' em testes de orientação · -' + tri.travelTimeReductionPct + '% no tempo de marcha</div>'
+          + '  <div style="font-size:7.5px;color:#cbd5e1;margin-top:1px;">• ' + tri.mapChartBenefit + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampAlarmAndSentryAnimal) return '';
+        var alm = CartShared.calcCampAlarmAndSentryAnimal('guard_mastiff');
+        return '<div class="clp-camp-alarm-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,22,16,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);font-size:8px;color:#fde68a;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + alm.color + ';margin-bottom:2px;">' + alm.icon + ' VIGÍLIA DE ALARME & ANIMAIS DE GUARDA (PHB p. 157, 211):</div>'
+          + '  <div>• <b>Dispositivo:</b> ' + alm.wardName + ' (Raio ' + alm.alertRadiusFeet + ' pés)</div>'
+          + '  <div>• <b>Mecanismo:</b> ' + alm.detectionMechanism + ' · ' + (alm.surpriseImmunity ? 'Imune a surpresa noturna' : 'Alerta sonoro convencional') + '</div>'
+          + '  <div style="font-size:7.5px;color:#fef3c7;margin-top:1px;">• ' + alm.description + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcTavernExplorationRumor) return '';
         var bKey = (biome && biome.key) || 'plains';
         var rum = CartShared.calcTavernExplorationRumor(bKey, 'comfortable');
@@ -94738,7 +94759,8 @@ function openCartography() {
         <button class="cam-filter-pill" data-filter="rivers" type="button">🌊 Travessias</button>
         <button class="cam-filter-pill" data-filter="bounties" type="button">📜 Recompensas</button>
         <button class="cam-filter-pill" data-filter="harvest" type="button">🌿 Coleta</button>
-        <button class="cam-filter-pill" data-filter="rumors" type="button">🍺 Boatos</button>'
+        <button class="cam-filter-pill" data-filter="rumors" type="button">🍺 Boatos</button>
+        <button class="cam-filter-pill" data-filter="triangulation" type="button">📐 Triangulação</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -96086,6 +96108,9 @@ function _xcartFocusWaypoint(key) {
               });
             }
             return false;
+          } else if (_xcamActiveCategory === 'triangulation') {
+            if (prov.id === 'world') return false;
+            return true;
           } else if (_xcamActiveCategory === 'rumors') {
             if (prov.id === 'world') return false;
             return true;
