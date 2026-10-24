@@ -7899,6 +7899,145 @@
     };
   }
 
+  // === calcWaterCrossingOptions (Vaus Fluviais, Travessias Aquáticas e Navegação Fluvial - DMG p. 116-118 / PHB p. 155-157) ===
+  function calcWaterCrossingOptions(riverKey, options) {
+    options = options || {};
+    var rk = (riverKey || 'shallow_ford').toLowerCase();
+    var pSize = Math.max(1, (typeof options.partySize === 'number') ? options.partySize : 4);
+    var hasRope = !!options.hasRope;
+    var hasCarp = !!options.hasCarpenterTools;
+
+    var modes = {
+      shallow_ford: {
+        name: 'Vau Raso Pedregoso',
+        depthDesc: 'Água na altura dos joelhos; correnteza calma e leito de cascalho firme.',
+        athleticsDC: 0,
+        tollSilverCoins: 0,
+        delayHours: 1,
+        cargoDamageRiskPct: 5,
+        recommendation: 'Ideal para travessia regular a pé e carroças com animais de tração.',
+        icon: '🌊',
+        color: '#4ade80'
+      },
+      deep_current: {
+        name: 'Correnteza Profunda com Corredeiras',
+        depthDesc: 'Água na altura do peito com fluxo violento; turbilhões e pedras submersas.',
+        athleticsDC: 13,
+        tollSilverCoins: 0,
+        delayHours: 2,
+        cargoDamageRiskPct: 40,
+        recommendation: 'Arriscado; falha no teste de Atletismo arrasta o aventureiro rio abaixo.',
+        icon: '🏊',
+        color: '#f87171'
+      },
+      ferry_crossing: {
+        name: 'Balsa de Corda Guiada da Província',
+        depthDesc: 'Plataforma flutuante de madeira puxada por cabo de aço e operada por balseiro.',
+        athleticsDC: 0,
+        tollSilverCoins: 2 * pSize,
+        delayHours: 0.5,
+        cargoDamageRiskPct: 0,
+        recommendation: 'Travessia 100% segura sem risco de perda de mantimentos mediante pagamento de pedágio.',
+        icon: '⛴️',
+        color: '#38bdf8'
+      },
+      raft_construction: {
+        name: 'Construção de Jangada Rústica de Troncos',
+        depthDesc: 'Troncos abatidos e amarrados com cipós ou cordas grossas pela própria comitiva.',
+        athleticsDC: hasCarp ? 10 : 12,
+        tollSilverCoins: 0,
+        delayHours: 3,
+        cargoDamageRiskPct: hasRope ? 10 : 25,
+        recommendation: 'Exige machadinhas e cordas; permite transpor toda a carga em rios largos sem balsa.',
+        icon: '🪵',
+        color: '#facc15'
+      },
+      river_boat: {
+        name: 'Navegação Fluvial em Barco de Quilha',
+        depthDesc: 'Embarcação robusta a favor da correnteza fluvial; deslocamento rápido e estável.',
+        athleticsDC: 10,
+        tollSilverCoins: 10,
+        delayHours: -2,
+        cargoDamageRiskPct: 5,
+        recommendation: 'Dobra a velocidade de viagem para destinos situados ao longo do mesmo rio.',
+        icon: '⛵',
+        color: '#c084fc'
+      }
+    };
+
+    var m = modes[rk] || modes.shallow_ford;
+
+    return {
+      riverKey: rk,
+      modeName: m.name,
+      depthDescription: m.depthDesc,
+      athleticsDC: m.athleticsDC,
+      tollSilverCoins: m.tollSilverCoins,
+      delayHours: m.delayHours,
+      cargoDamageRiskPct: m.cargoDamageRiskPct,
+      recommendation: m.recommendation,
+      icon: m.icon,
+      color: m.color,
+      dndRef: 'DMG p. 116-118 (Travessias de Rios e Navegação Fluvial) / PHB p. 155-157'
+    };
+  }
+
+  // === calcExplorationMilestoneBoon (Marcos Cartográficos de Exploração e Descobertas Regionais - DMG p. 108 / XGE p. 132) ===
+  function calcExplorationMilestoneBoon(milestoneType, options) {
+    options = options || {};
+    var mt = (milestoneType || 'standing_stones').toLowerCase();
+
+    var milestones = {
+      standing_stones: {
+        name: 'Círculo de Menires dos Primeiros Povos',
+        historicalDesc: 'Monólitos ancestrais alinhados com as constelações; o ar vibra com energia elemental pura.',
+        passiveBoon: 'Inspiração Primal: concede 1 dado de Inspiração a cada aventureiro da comitiva e vantagem em testes de Natureza/Arcanismo.',
+        icon: '🪨✨',
+        color: '#c084fc'
+      },
+      forgotten_tower: {
+        name: 'Torre de Vigia da Antiga Aliança Imperial',
+        historicalDesc: 'Baluarte de pedra erguido sobre a colina mais alta do setor; escadarias intactas conduzem ao terraço de observação.',
+        passiveBoon: 'Visão Panorâmica: dissipa a névoa de guerra em 2 nós provinciais adjacentes no mapa do Diário.',
+        icon: '🏰',
+        color: '#38bdf8'
+      },
+      hermit_shrine: {
+        name: 'Altar Rústico de Eremita Consagrado',
+        historicalDesc: 'Santuário de madeira esculpida em torno de uma nascente de água cristalina pura.',
+        passiveBoon: 'Bênção Restauradora: beber da água da nascente purifica venenos e remove 1 nível de Exaustão de um aventureiro.',
+        icon: '⛲',
+        color: '#4ade80'
+      },
+      ancient_battlefield: {
+        name: 'Campo de Batalha Histórico dos Três Tronos',
+        historicalDesc: 'Tumulares cobertos de vegetação, lanças enferrujadas e elmos memoriais cravados na encosta da colina.',
+        passiveBoon: 'Resiliência Tática: a comitiva ganha +2 nas rolagens de Iniciativa no primeiro encontro de combate nas próximas 24 horas.',
+        icon: '⚔️',
+        color: '#facc15'
+      },
+      natural_geowonder: {
+        name: 'Maravilha Geológica Natural de Valdória',
+        historicalDesc: 'Monumento natural magnífico com cascatas esmeralda e cristais de calcita luminosos incrustados.',
+        passiveBoon: 'Prestígio Cartográfico: o registro cartográfico minucioso do local rende moedas de ouro adicionais nas guildas acadêmicas.',
+        icon: '💎',
+        color: '#f472b6'
+      }
+    };
+
+    var mile = milestones[mt] || milestones.standing_stones;
+
+    return {
+      milestoneType: mt,
+      milestoneName: mile.name,
+      historicalDesc: mile.historicalDesc,
+      passiveBoon: mile.passiveBoon,
+      icon: mile.icon,
+      color: mile.color,
+      dndRef: 'DMG p. 108 (Marcos de Exploração e Maravilhas Naturais) / XGE p. 132'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -9610,6 +9749,8 @@
     calcCaravanEscortSynergy: calcCaravanEscortSynergy,
     calcNaturalShelterSearch: calcNaturalShelterSearch,
     calcWildernessHazardEncounter: calcWildernessHazardEncounter,
+    calcWaterCrossingOptions: calcWaterCrossingOptions,
+    calcExplorationMilestoneBoon: calcExplorationMilestoneBoon,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T21:17:11Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T21:21:53Z - do not edit directly, edit source -->
 
 
 
@@ -93638,6 +93638,25 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWaterCrossingOptions) return '';
+        var wat = CartShared.calcWaterCrossingOptions('shallow_ford', { partySize: 4 });
+        return '<div class="clp-water-crossing-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,26,32,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.3);font-size:8px;color:#bae6fd;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + wat.color + ';margin-bottom:2px;">' + wat.icon + ' TRAVESSIA FLUVIAL & NAVEGAÇÃO (DMG p. 116-118):</div>'
+          + '  <div>• <b>Opção:</b> ' + wat.modeName + ' (' + wat.depthDescription + ')</div>'
+          + '  <div>• <b>Condição:</b> ' + (wat.tollSilverCoins > 0 ? (wat.tollSilverCoins + ' pp de taxa de balsa') : 'Livre trânsito') + ' · ' + (wat.athleticsDC > 0 ? ('Atletismo CD ' + wat.athleticsDC) : 'Seguro') + '</div>'
+          + '  <div style="font-size:7.5px;color:#cbd5e1;margin-top:1px;">• ' + wat.recommendation + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcExplorationMilestoneBoon) return '';
+        var ms = CartShared.calcExplorationMilestoneBoon('standing_stones');
+        return '<div class="clp-milestone-boon-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,20,32,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(192,132,252,0.3);font-size:8px;color:#e9d5ff;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
+          + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
+          + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.rollWildernessEncounterTable) return '';
         return '<div class="clp-encounter-sim-wrap" style="margin:4px 0 6px;text-align:left;">'
           + '  <button class="clp-btn-roll-encounter" id="clp-btn-roll-encounter" type="button" style="width:100%;background:rgba(30,20,12,0.85);border:1px solid rgba(251,146,60,0.5);color:#fdba74;font-size:8.5px;padding:3px 6px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">'
@@ -94653,7 +94672,8 @@ function openCartography() {
         <button class="cam-filter-pill" data-filter="mounts" type="button">🫏 Montaria</button>
         <button class="cam-filter-pill" data-filter="weather" type="button">⚡ Clima</button>
         <button class="cam-filter-pill" data-filter="caravans" type="button">📦 Comboios</button>
-        <button class="cam-filter-pill" data-filter="shelters" type="button">⛺ Abrigos</button>'
+        <button class="cam-filter-pill" data-filter="shelters" type="button">⛺ Abrigos</button>
+        <button class="cam-filter-pill" data-filter="rivers" type="button">🌊 Travessias</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -95998,6 +96018,17 @@ function _xcartFocusWaypoint(key) {
               return prov.locKeys.some(function(k){
                 var b = (CART_BIOMES || []).find(function(x){ return x.key === k; });
                 return b && (b.biome === 'mountain' || b.biome === 'forest' || b.isSanctuary || b.settlement);
+              });
+            }
+            return false;
+          } else if (_xcamActiveCategory === 'rivers') {
+            if (prov.id === 'world') return false;
+            var riverBiomes = ['floresta', 'swamp', 'vale_aurora', 'vila_pescadores', 'costa', 'lago'];
+            if (riverBiomes.indexOf(prov.id) >= 0) return true;
+            if (prov.locKeys) {
+              return prov.locKeys.some(function(k){
+                var b = (CART_BIOMES || []).find(function(x){ return x.key === k; });
+                return b && (b.key.indexOf('rio') >= 0 || b.key.indexOf('lago') >= 0 || b.key.indexOf('vila_pescadores') >= 0 || b.key.indexOf('vale') >= 0);
               });
             }
             return false;
