@@ -5262,6 +5262,8 @@ LOG SINK (Fase 7):
       text-shadow: 0 0 12px rgba(196, 149, 58, 0.45);
     }
     .cart-prov-bar {
+      flex: 1;
+      min-width: 0;
       display: flex;
       gap: 4px;
       overflow-x: auto;
@@ -69966,11 +69968,15 @@ function _wireCartEvents(){
     _cartLastMidX = null; _cartLastMidY = null;
   });
 
-  // Botões
-  document.getElementById('cart-zoom-in').onclick = function(){ _cartSetZoom(_cartZoom * 1.2, _cartW/2, _cartH/2); };
-  document.getElementById('cart-zoom-out').onclick = function(){ _cartSetZoom(_cartZoom * 0.8, _cartW/2, _cartH/2); };
-  document.getElementById('cart-zoom-reset').onclick = function(){ _cartFocusProvince('world'); };
+  // Botões de zoom e reset
+  var btnZoomIn = document.getElementById('cart-zoom-in');
+  if (btnZoomIn) btnZoomIn.onclick = function(){ _cartSetZoom(_cartZoom * 1.2, _cartW/2, _cartH/2); };
+  var btnZoomOut = document.getElementById('cart-zoom-out');
+  if (btnZoomOut) btnZoomOut.onclick = function(){ _cartSetZoom(_cartZoom * 0.8, _cartW/2, _cartH/2); };
+  var btnZoomReset = document.getElementById('cart-zoom-reset');
+  if (btnZoomReset) btnZoomReset.onclick = function(){ _cartFocusProvince('world'); };
 
+  // Chips de províncias no topo
   var _provChips = document.querySelectorAll('.cart-prov-chip');
   _provChips.forEach(function(chip){
     chip.onclick = function(e){
@@ -69979,18 +69985,118 @@ function _wireCartEvents(){
       _cartFocusProvince(pId);
     };
   });
+
+  // Navegação horizontal com setas (‹ e ›) e scroll do mouse na barra de províncias
+  var pBar = document.getElementById('cart-prov-bar');
+  var pPrev = document.getElementById('cart-prov-prev');
+  var pNext = document.getElementById('cart-prov-next');
+  if (pBar) {
+    pBar.addEventListener('wheel', function(e){
+      if (e.deltaY) {
+        pBar.scrollLeft += e.deltaY;
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    function _scrollProvBar(delta) {
+      try {
+        pBar.scrollBy({ left: delta, behavior: 'smooth' });
+      } catch(_) {
+        pBar.scrollLeft += delta;
+      }
+    }
+    if (pPrev) {
+      pPrev.onclick = function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        _scrollProvBar(-140);
+      };
+    }
+    if (pNext) {
+      pNext.onclick = function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        _scrollProvBar(140);
+      };
+    }
+  }
+
+  // Modal Atlas das Províncias (Seletor direto das 8 províncias + Continente)
+  var atlasPickerBtn = document.getElementById('cart-atlas-picker-btn');
+  var atlasModal = document.getElementById('cart-atlas-modal');
+  var camClose = document.getElementById('cam-close-btn');
+  var camGrid = document.getElementById('cam-grid');
+  if (atlasPickerBtn && atlasModal && camGrid) {
+    atlasPickerBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      var curMode = (_cartEngine && typeof _cartEngine.getViewMode === 'function') ? _cartEngine.getViewMode() : { provinceId: 'world' };
+      var provs = (window.CartShared && CartShared.CART_PROVINCES) ? CartShared.CART_PROVINCES : ((typeof CART_PROVINCES !== 'undefined') ? CART_PROVINCES : []);
+      camGrid.innerHTML = '';
+      provs.forEach(function(p){
+        var item = document.createElement('div');
+        var isActive = (curMode.provinceId === p.id) || (curMode.mode === 'world' && p.id === 'world');
+        item.className = 'cam-item' + (isActive ? ' active' : '');
+        item.innerHTML = '<div class="cam-item-title">' + (p.icon || '🗺️') + ' ' + (p.name || p.id) + '</div>'
+                       + '<div class="cam-item-sub">' + (p.desc || 'Província de Valdória') + '</div>';
+        item.onclick = function(ev){
+          ev.preventDefault();
+          ev.stopPropagation();
+          _cartFocusProvince(p.id);
+          atlasModal.style.display = 'none';
+        };
+        camGrid.appendChild(item);
+      });
+      atlasModal.style.display = 'flex';
+    };
+    if (camClose) {
+      camClose.onclick = function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        atlasModal.style.display = 'none';
+      };
+    }
+    atlasModal.onclick = function(e){
+      if (e.target === atlasModal) atlasModal.style.display = 'none';
+    };
+  }
+
+  // Simular Descoberta de Local (Dev / Teste Instantâneo de Animação e Revelação)
+  var simDiscBtn = document.getElementById('cart-sim-discovery');
+  if (simDiscBtn) {
+    simDiscBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      var p = window.CITY_MOCK_PLAYER || {};
+      p.known_locations = p.known_locations || ['plains'];
+      var realCandidates = ['green_fields', 'forest', 'swamp', 'mountain', 'orc_tribe', 'bandit_fortress', 'desert', 'cave', 'graveyard', 'snow', 'volcanic'];
+      var nextLoc = realCandidates.find(function(c){ return p.known_locations.indexOf(c) < 0; });
+      if (!nextLoc) {
+        nextLoc = realCandidates[0];
+      } else {
+        p.known_locations.push(nextLoc);
+      }
+      _triggerCartDiscoveryCelebration(nextLoc);
+    };
+  }
+
+  // Checagem automática de novas rotas descobertas após expedições
+  setTimeout(function(){
+    _checkCartAutoDiscoveryOnOpen();
+  }, 350);
 }
 
 // === Celebração de Nova Descoberta Cartográfica (Ordem do Usuário 2026-10) ===
 function _triggerCartDiscoveryCelebration(nodeKey) {
   if (!_cartEngine) return;
-  var b = (typeof CART_BIOMES !== 'undefined') ? CART_BIOMES.find(function(x){ return x.key === nodeKey; }) : null;
+  var biomesList = (window.CartShared && CartShared.CART_BIOMES) ? CartShared.CART_BIOMES : ((typeof CART_BIOMES !== 'undefined') ? CART_BIOMES : []);
+  var b = biomesList.find(function(x){ return x.key === nodeKey; }) || null;
   var locName = b ? b.name : nodeKey;
   
   // 1. Dispara pulso no canvas
   if (typeof _cartEngine.triggerDiscoveryAnimation === 'function') {
     _cartEngine.triggerDiscoveryAnimation(nodeKey, function(){
-      _drawCart();
+      if (typeof _drawCart === 'function') _drawCart();
     });
   }
 
@@ -69999,12 +70105,14 @@ function _triggerCartDiscoveryCelebration(nodeKey) {
   var tTitle = document.getElementById('cdt-title');
   var tBtn = document.getElementById('cdt-btn');
   if (toast && tTitle) {
-    tTitle.textContent = (b ? (b.icon || '📍') + ' ' : '') + locName;
+    tTitle.textContent = (b ? ((b.ico || b.icon || '📍') + ' ') : '') + locName;
     toast.style.display = 'flex';
     if (tBtn) {
-      tBtn.onclick = function(){
+      tBtn.onclick = function(e){
+        e.preventDefault();
+        e.stopPropagation();
         toast.style.display = 'none';
-        if (b) _openCartLocationPopup(b);
+        if (b && typeof _openCartLocationPopup === 'function') _openCartLocationPopup(b);
       };
     }
   }
@@ -70080,6 +70188,12 @@ function _cartFocusProvince(provId){
   chips.forEach(function(c){
     c.classList.toggle('active', c.getAttribute('data-prov') === provId);
   });
+  var activeChip = document.querySelector('.cart-prov-chip[data-prov="' + provId + '"]');
+  if (activeChip && typeof activeChip.scrollIntoView === 'function') {
+    try {
+      activeChip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    } catch(_) {}
+  }
 }
 
 function _cartCenterOnPlayer(){
