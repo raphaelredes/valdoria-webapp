@@ -6003,6 +6003,196 @@
     };
   }
 
+
+  // === calcPartyTravelRoles (Atribuição e Sinergia de Funções de Viagem - PHB p. 182-183) ===
+  function calcPartyTravelRoles(rolesAssignment, options) {
+    options = options || {};
+    var pSize = Math.max(1, (typeof options.partySize === 'number') ? options.partySize : 4);
+    var pace = options.pace || 'normal';
+
+    var rolesList = [];
+    if (Array.isArray(rolesAssignment)) {
+      rolesList = rolesAssignment.slice();
+    } else if (typeof rolesAssignment === 'string') {
+      rolesList = [rolesAssignment];
+    } else if (rolesAssignment && typeof rolesAssignment === 'object') {
+      Object.keys(rolesAssignment).forEach(function(k){
+        if (rolesAssignment[k]) rolesList.push(rolesAssignment[k]);
+      });
+    }
+    if (rolesList.length === 0) rolesList = ['scout'];
+
+    var hasScout = rolesList.indexOf('scout') >= 0;
+    var hasNavigator = rolesList.indexOf('navigator') >= 0;
+    var hasForager = rolesList.indexOf('forager') >= 0;
+    var hasCartographer = rolesList.indexOf('cartographer') >= 0;
+
+    var synergies = [];
+    var warnings = [];
+
+    if (hasScout) {
+      synergies.push({
+        role: 'scout',
+        title: 'Sentinela Atenta',
+        icon: '👁️',
+        benefit: '+5 Percepção Passiva; evita condição de Surpreso contra emboscadas (PHB p. 182).'
+      });
+    } else {
+      warnings.push({
+        role: 'scout',
+        title: 'Sem Batedor Dedicado',
+        warning: 'Percepção Passiva basal: vulnerabilidade aumentada a emboscadas furtivas.'
+      });
+    }
+
+    if (hasNavigator) {
+      synergies.push({
+        role: 'navigator',
+        title: 'Guia de Rota',
+        icon: '🧭',
+        benefit: '+5 em testes de Sobrevivência para orientação; anula desorientação em tempestades.'
+      });
+    } else {
+      warnings.push({
+        role: 'navigator',
+        title: 'Sem Guia de Rota',
+        warning: 'Risco de desvio de rota sob névoa espessa ou temporais sem bússola.'
+      });
+    }
+
+    if (hasForager) {
+      if (pace === 'fast') {
+        warnings.push({
+          role: 'forager',
+          title: 'Ritmo Rápido Incompatível',
+          warning: 'Em ritmo rápido, forragear e caçar é inviável devido à velocidade acelerada (PHB p. 182).'
+        });
+      } else {
+        synergies.push({
+          role: 'forager',
+          title: 'Caçador Forrageador',
+          icon: '🌿',
+          benefit: 'Reduz em 50% o consumo diário de rações empacotadas através de caça e coleta (DMG p. 111).'
+        });
+      }
+    } else {
+      warnings.push({
+        role: 'forager',
+        title: 'Sem Forrageador',
+        warning: 'Consumo pleno de rações da mochila (1 ração/dia por aventureiro).'
+      });
+    }
+
+    if (hasCartographer) {
+      synergies.push({
+        role: 'cartographer',
+        title: 'Mestre Cartógrafo',
+        icon: '📜',
+        benefit: 'Registra cartas regionais; concede +2 em testes de navegação ao revisitar a rota.'
+      });
+    }
+
+    var assignedCount = (hasScout ? 1 : 0) + (hasNavigator ? 1 : 0) + (hasForager ? 1 : 0) + (hasCartographer ? 1 : 0);
+    var coverageRating = 'Básica';
+    var coverageColor = '#facc15';
+    if (assignedCount >= 3) {
+      coverageRating = 'Exemplar';
+      coverageColor = '#4ade80';
+    } else if (assignedCount === 2) {
+      coverageRating = 'Balanceada';
+      coverageColor = '#86efac';
+    } else if (assignedCount === 1) {
+      coverageRating = 'Focalizada';
+      coverageColor = '#fb923c';
+    }
+
+    return {
+      partySize: pSize,
+      rolesAssigned: rolesList,
+      coverageRating: coverageRating,
+      coverageColor: coverageColor,
+      hasScout: hasScout,
+      hasNavigator: hasNavigator,
+      hasForager: hasForager,
+      hasCartographer: hasCartographer,
+      passivePerceptionBonus: hasScout ? 5 : 0,
+      navigationBonus: hasNavigator ? 5 : 0,
+      cartographyBonus: hasCartographer ? 2 : 0,
+      rationCostMult: (hasForager && pace !== 'fast') ? 0.5 : 1.0,
+      synergies: synergies,
+      warnings: warnings,
+      dndRef: 'PHB p. 182-183 (Atividades de Viagem da Comitiva)'
+    };
+  }
+
+  // === calcForageYieldCheck (Capacidade de Coleta e Caça nos Ermos - DMG p. 111 / XGE p. 130) ===
+  function calcForageYieldCheck(survivalBonus, biomeKey, options) {
+    options = options || {};
+    var sBonus = (typeof survivalBonus === 'number') ? survivalBonus : 3;
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var pace = options.pace || 'normal';
+
+    if (pace === 'fast') {
+      return {
+        biomeKey: bk,
+        allowedByPace: false,
+        dc: 0,
+        fertilityLevel: 'Bloqueado por Ritmo',
+        label: 'Ritmo Rápido Impede Coleta',
+        desc: 'Aventureiros em marcha acelerada não conseguem forragear ou caçar no caminho (PHB p. 182).',
+        expectedFoodLbs: 0,
+        expectedWaterGal: 0,
+        successChancePercent: 0,
+        color: '#f87171',
+        dndRef: 'PHB p. 182 / DMG p. 111'
+      };
+    }
+
+    var dc = 15;
+    var fertility = 'Moderada';
+    var color = '#facc15';
+
+    if (bk.indexOf('forest') >= 0 || bk.indexOf('swamp') >= 0 || bk.indexOf('rio') >= 0 || bk.indexOf('vale') >= 0) {
+      dc = 10;
+      fertility = 'Abundante';
+      color = '#4ade80';
+    } else if (bk.indexOf('plains') >= 0 || bk.indexOf('hills') >= 0 || bk.indexOf('colina') >= 0) {
+      dc = 15;
+      fertility = 'Moderada';
+      color = '#a3e635';
+    } else if (bk.indexOf('mountain') >= 0 || bk.indexOf('snow') >= 0 || bk.indexOf('cave') >= 0 || bk.indexOf('cordilheira') >= 0 || bk.indexOf('boreal') >= 0) {
+      dc = 20;
+      fertility = 'Escassa';
+      color = '#fb923c';
+    } else if (bk.indexOf('desert') >= 0 || bk.indexOf('dunas') >= 0 || bk.indexOf('volcanic') >= 0 || bk.indexOf('badlands') >= 0) {
+      dc = 25;
+      fertility = 'Quase Nula';
+      color = '#ef4444';
+    }
+
+    var effectiveBonus = sBonus + (pace === 'stealth' ? 2 : 0);
+    var target = dc - effectiveBonus;
+    var successChance = Math.max(5, Math.min(95, Math.round(((21 - Math.max(1, target)) / 20) * 100)));
+
+    var avgWisMod = Math.max(0, Math.floor(sBonus / 2));
+    var expectedFood = +(3.5 + avgWisMod).toFixed(1);
+    var expectedWater = +(3.5 + avgWisMod).toFixed(1);
+
+    return {
+      biomeKey: bk,
+      allowedByPace: true,
+      dc: dc,
+      fertilityLevel: fertility,
+      label: 'Fertilidade ' + fertility + ' (CD ' + dc + ')',
+      desc: 'Teste de Sabedoria (Sobrevivência) CD ' + dc + ' para colher 1d6+' + avgWisMod + ' lbs de caça e ' + expectedWater + ' gal de água potável (DMG p. 111).',
+      expectedFoodLbs: expectedFood,
+      expectedWaterGal: expectedWater,
+      successChancePercent: successChance,
+      color: color,
+      dndRef: 'DMG p. 111 (Forrageamento nos Ermos)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -7692,6 +7882,8 @@
     getConnectedLocations: getConnectedLocations,
     calcCampWatchShifts: calcCampWatchShifts,
     getBiomeHarvestableResources: getBiomeHarvestableResources,
+    calcPartyTravelRoles: calcPartyTravelRoles,
+    calcForageYieldCheck: calcForageYieldCheck,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

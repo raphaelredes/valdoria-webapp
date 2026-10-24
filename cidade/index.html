@@ -70009,6 +70009,7 @@ function renderCartographyCanvas(el){
     + '        <button class="cam-filter-pill" data-filter="mapped" type="button">🗺️ Cartas</button>'
     + '        <button class="cam-filter-pill" data-filter="pinned" type="button">📌 Fixados</button>'
     + '        <button class="cam-filter-pill" data-filter="unexplored" type="button">🧭 Inexplorados</button>'
+    + '        <button class="cam-filter-pill" data-filter="hazards" type="button">⚠️ Perigos</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -71014,6 +71015,17 @@ function _cartFocusWaypoint(key) {
             var lks = prov.locKeys || [];
             var allKn = lks.length > 0 && lks.every(function(k){ return known.indexOf(k) >= 0; });
             if (allKn) return false;
+          } else if (_camActiveCategory === 'hazards') {
+            if (prov.id === 'world') return false;
+            var isHaz = false;
+            if (prov.locKeys && window.CartShared && CartShared.getWildernessHazardDetails) {
+              isHaz = prov.locKeys.some(function(k){
+                var hz = CartShared.getWildernessHazardDetails(k);
+                return hz && hz.name;
+              });
+            }
+            if (!isHaz && (prov.id === 'desert' || prov.id === 'swamp' || prov.id === 'mountain' || prov.id === 'snow' || prov.id === 'volcanic')) isHaz = true;
+            if (!isHaz) return false;
           }
           if (!ft) return true;
           if ((prov.name || '').toLowerCase().indexOf(ft) >= 0) return true;
@@ -72518,6 +72530,20 @@ function _openCartLocationPopup(biome){
     + '  </div>'
     + '  <div class="clp-role-note" id="clp-role-note" style="font-size:8.5px;color:#d2be90;margin-top:2px;font-style:italic;">👁️ Sentinela Atenta: +5 na Percepção Passiva · Evita surpresa em emboscadas inimigas (PHB p. 182).</div>'
     + '</div>'
+    + (function(){
+        if (!window.CartShared || !CartShared.calcPartyTravelRoles || !CartShared.calcForageYieldCheck) return '';
+        var curRole = window._cartSelectedTravelRole || 'scout';
+        var curP = window._cartSelectedPace || 'normal';
+        var syn = CartShared.calcPartyTravelRoles([curRole], { pace: curP, partySize: 4 });
+        var forInfo = CartShared.calcForageYieldCheck(3, biome.key || biome.biome || 'plains', { pace: curP });
+        var hazInfo = CartShared.getWildernessHazardDetails ? CartShared.getWildernessHazardDetails(biome.key || biome.biome || 'plains') : null;
+        return '<div class="clp-synergy-card" id="clp-synergy-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,16,28,0.75);padding:4px 8px;border-radius:4px;border:1px solid rgba(192,132,252,0.3);font-size:8px;color:#d8b4fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:#e9d5ff;margin-bottom:2px;">✨ SINERGIA DE MARCHA & FORRAGEAMENTO (D&D 5e):</div>'
+          + '  <div>• <b>Função Ativa:</b> ' + (syn.synergies.length ? syn.synergies[0].title + ' (' + syn.synergies[0].benefit + ')' : 'Sentinela') + '</div>'
+          + '  <div>• <b>Coleta nos Ermos:</b> <span style="color:' + forInfo.color + ';">' + forInfo.label + '</span> · ' + (forInfo.allowedByPace ? forInfo.expectedFoodLbs + ' lbs caça/dia' : 'Bloqueado') + '</div>'
+          + (hazInfo ? ('  <div>• <b>Perigo Natural:</b> <span style="color:' + hazInfo.color + ';">' + hazInfo.name + '</span> (' + hazInfo.dcCheck + ')</div>') : '')
+          + '</div>';
+      })()
     + (horasViagem > 8 ? (
         '<div class="clp-forced-march-warn" id="clp-forced-march-warn" style="margin:4px 0 6px;text-align:left;background:rgba(30,15,10,0.8);padding:5px 8px;border-radius:4px;border-left:3px solid #f87171;">'
         + '  <div style="font-size:9px;color:#f87171;font-family:Cinzel,serif;font-weight:700;">⚠️ MARCHA FORÇADA & EXAUSTÃO (D&D 5e — PHB p. 181):</div>'
@@ -72818,6 +72844,16 @@ function _openCartLocationPopup(biome){
         riskElR.textContent = newRiskR.label;
         riskElR.style.color = newRiskR.color;
       }
+      var synCardR = el.querySelector('#clp-synergy-card');
+      if (synCardR && window.CartShared && CartShared.calcPartyTravelRoles && CartShared.calcForageYieldCheck) {
+        var synR = CartShared.calcPartyTravelRoles([rType], { pace: window._cartSelectedPace || 'normal', partySize: 4 });
+        var forInfoR = CartShared.calcForageYieldCheck(3, biome.key || biome.biome || 'plains', { pace: window._cartSelectedPace || 'normal' });
+        var hazInfoR = CartShared.getWildernessHazardDetails ? CartShared.getWildernessHazardDetails(biome.key || biome.biome || 'plains') : null;
+        synCardR.innerHTML = '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:#e9d5ff;margin-bottom:2px;">✨ SINERGIA DE MARCHA & FORRAGEAMENTO (D&D 5e):</div>'
+          + '  <div>• <b>Função Ativa:</b> ' + (synR.synergies.length ? synR.synergies[0].title + ' (' + synR.synergies[0].benefit + ')' : 'Sentinela') + '</div>'
+          + '  <div>• <b>Coleta nos Ermos:</b> <span style="color:' + forInfoR.color + ';">' + forInfoR.label + '</span> · ' + (forInfoR.allowedByPace ? forInfoR.expectedFoodLbs + ' lbs caça/dia' : 'Bloqueado') + '</div>'
+          + (hazInfoR ? ('  <div>• <b>Perigo Natural:</b> <span style="color:' + hazInfoR.color + ';">' + hazInfoR.name + '</span> (' + hazInfoR.dcCheck + ')</div>') : '');
+      }
     };
   });
 
@@ -72862,6 +72898,16 @@ function _openCartLocationPopup(biome){
         } else {
           paceNote.textContent = '🚶 Ritmo Normal (24 milhas/dia · ~' + curHours + 'h): Equilíbrio canônico D&D 5e entre velocidade de deslocamento e prontidão tática passiva.';
         }
+      }
+      var synCardP = el.querySelector('#clp-synergy-card');
+      if (synCardP && window.CartShared && CartShared.calcPartyTravelRoles && CartShared.calcForageYieldCheck) {
+        var synP = CartShared.calcPartyTravelRoles([window._cartSelectedTravelRole || 'scout'], { pace: pType, partySize: 4 });
+        var forInfoP = CartShared.calcForageYieldCheck(3, biome.key || biome.biome || 'plains', { pace: pType });
+        var hazInfoP = CartShared.getWildernessHazardDetails ? CartShared.getWildernessHazardDetails(biome.key || biome.biome || 'plains') : null;
+        synCardP.innerHTML = '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:#e9d5ff;margin-bottom:2px;">✨ SINERGIA DE MARCHA & FORRAGEAMENTO (D&D 5e):</div>'
+          + '  <div>• <b>Função Ativa:</b> ' + (synP.synergies.length ? synP.synergies[0].title + ' (' + synP.synergies[0].benefit + ')' : 'Sentinela') + '</div>'
+          + '  <div>• <b>Coleta nos Ermos:</b> <span style="color:' + forInfoP.color + ';">' + forInfoP.label + '</span> · ' + (forInfoP.allowedByPace ? forInfoP.expectedFoodLbs + ' lbs caça/dia' : 'Bloqueado') + '</div>'
+          + (hazInfoP ? ('  <div>• <b>Perigo Natural:</b> <span style="color:' + hazInfoP.color + ';">' + hazInfoP.name + '</span> (' + hazInfoP.dcCheck + ')</div>') : '');
       }
     };
   });
