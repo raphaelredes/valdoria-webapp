@@ -3537,6 +3537,58 @@
     return DND_FORAGE_DATA.plains;
   }
 
+  var TRAVEL_ROLES = {
+    scout: {
+      id: 'scout',
+      name: 'Sentinela Atenta',
+      icon: '👁️',
+      summary: 'Prontidão Máxima: +5 na Percepção Passiva; evita surpresa em emboscadas inimigas (PHB p. 182).',
+      riskMod: -10
+    },
+    navigator: {
+      id: 'navigator',
+      name: 'Guia da Rota',
+      icon: '🧭',
+      summary: 'Orientação Perfeita: Imunidade a desvios de rota sob névoa densa ou tempestades (PHB p. 182).',
+      riskMod: -5
+    },
+    forager: {
+      id: 'forager',
+      name: 'Caçador Forrageador',
+      icon: '🌿',
+      summary: 'Sustento dos Ermos: Caça e água garantidas em marcha normal ou lenta sem gastar rações.',
+      riskMod: 0
+    },
+    cartographer: {
+      id: 'cartographer',
+      name: 'Mestre Cartógrafo',
+      icon: '📜',
+      summary: 'Registro Preciso: Mapeia acidentes geográficos e anotações táticas ao longo da marcha.',
+      riskMod: 0
+    }
+  };
+
+  var DND_TERRAIN_DIFFICULTY = {
+    plains: { costMult: 1, isDifficult: false, label: 'Estrada Firme (1×)', color: '#86efac' },
+    forest: { costMult: 1, isDifficult: false, label: 'Trilha Florestal (1×)', color: '#86efac' },
+    swamp: { costMult: 2, isDifficult: true, label: 'Terreno Difícil (2× · Lodo)', color: '#f87171' },
+    desert: { costMult: 2, isDifficult: true, label: 'Terreno Difícil (2× · Dunas)', color: '#fb923c' },
+    mountain: { costMult: 2, isDifficult: true, label: 'Terreno Difícil (2× · Encostas)', color: '#fb923c' },
+    snow: { costMult: 2, isDifficult: true, label: 'Terreno Difícil (2× · Neve)', color: '#93c5fd' },
+    graveyard: { costMult: 1, isDifficult: false, label: 'Solo Fúnebre (1×)', color: '#d2be90' },
+    volcanic: { costMult: 2, isDifficult: true, label: 'Terreno Difícil (2× · Brasas)', color: '#f87171' },
+    cave: { costMult: 2, isDifficult: true, label: 'Terreno Difícil (2× · Cavernas)', color: '#fb923c' }
+  };
+
+  function getBiomeTerrainDifficulty(biomeKey) {
+    var raw = (biomeKey || '').toLowerCase();
+    if (raw.indexOf('pantano') >= 0 || raw.indexOf('swamp') >= 0 || raw.indexOf('leste') >= 0) return DND_TERRAIN_DIFFICULTY.swamp;
+    if (raw.indexOf('duna') >= 0 || raw.indexOf('desert') >= 0 || raw.indexOf('sul') >= 0) return DND_TERRAIN_DIFFICULTY.desert;
+    if (raw.indexOf('cordilheira') >= 0 || raw.indexOf('mountain') >= 0 || raw.indexOf('ocidental') >= 0) return DND_TERRAIN_DIFFICULTY.mountain;
+    if (raw.indexOf('floresta') >= 0 || raw.indexOf('forest') >= 0) return DND_TERRAIN_DIFFICULTY.forest;
+    return DND_TERRAIN_DIFFICULTY.plains;
+  }
+
   var TRANSPORT_MODES = {
     foot: {
       id: 'foot',
@@ -3629,8 +3681,10 @@
     var formMod = (formation === 'defensive') ? -10 : (formation === 'spread') ? -5 : 0;
     var transport = opts.transport || 'foot';
     var transMod = (transport === 'wagon') ? -10 : 0;
+    var travelRole = opts.travelRole || 'scout';
+    var roleMod = (travelRole === 'scout') ? -10 : (travelRole === 'navigator') ? -5 : 0;
 
-    var totalRisk = Math.max(0, Math.min(95, baseTierRisk + durationMod + nightMod + paceMod + weatherMod + formMod + transMod));
+    var totalRisk = Math.max(0, Math.min(95, baseTierRisk + durationMod + nightMod + paceMod + weatherMod + formMod + transMod + roleMod));
 
     var label = '', color = '#a3e635';
     if (totalRisk <= 20) {
@@ -5491,6 +5545,8 @@
     getBiomeDndInfo: getBiomeDndInfo,              // Informações de Terreno e Riscos Naturais D&D 5e
     getBiomeForageSustainability: getBiomeForageSustainability, // Forrageamento e Sustentabilidade de Água D&D 5e
     MARCHING_FORMATIONS: MARCHING_FORMATIONS,      // Ordens de Marcha Táticas D&D 5e
+    TRAVEL_ROLES: TRAVEL_ROLES,                    // Funções de Viagem da Comitiva (PHB p. 182)
+    getBiomeTerrainDifficulty: getBiomeTerrainDifficulty, // Custo de Movimento e Terreno Difícil (PHB p. 182)
     TRANSPORT_MODES: TRANSPORT_MODES,              // Modos de Transporte D&D 5e (A Pé, Montaria, Caravana)
     calcForcedMarchRisk: calcForcedMarchRisk,      // Cálculo de Marcha Forçada e Salvaguarda contra Exaustão
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

@@ -70033,6 +70033,10 @@ function renderCartographyCanvas(el){
           <div style="font-family:Cinzel,serif;font-weight:700;color:#fde047;font-size:11.5px;margin-bottom:4px;">🐎 MODOS DE TRANSPORTE & CARAVANAS (PHB p. 157)</div>
           <p style="margin:2px 0;"><b>🚶 A Pé:</b> 3 milhas/hora padrão. Mochilas e armas prontas.<br><b>🐎 Montaria:</b> +33% de velocidade em estradas (4 milhas/h). Reduz o tempo total de viagem.<br><b>🛒 Caravana:</b> 3 milhas/h com carruagens fortificadas. Reduz em -10% o risco de emboscadas noturnas no acampamento.</p>
         </div>
+        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">
+          <div style="font-family:Cinzel,serif;font-weight:700;color:#c084fc;font-size:11.5px;margin-bottom:4px;">🧭 ATIVIDADES & FUNÇÕES DE VIAGEM (PHB p. 182)</div>
+          <p style="margin:2px 0;"><b>👁️ Sentinela:</b> Alerta máximo (+5 Percepção Passiva); impede surpresas em emboscadas.<br><b>🧭 Guia:</b> Evita desvios sob névoas densas e tempestades.<br><b>🌿 Caçador:</b> Colhe comida e água silvestre sem gastar rações em marcha normal/lenta.<br><b>📜 Cartógrafo:</b> Mapeia estradas e detalha anotações táticas de viagem.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -71220,6 +71224,28 @@ function _wireCartKeyboardNavigation() {
       return;
     }
 
+    // G / g: alterna função de viagem da comitiva (D&D 5e)
+    if (e.key === 'g' || e.key === 'G') {
+      e.preventDefault();
+      var roleArr = ['scout', 'navigator', 'forager', 'cartographer'];
+      var curRIdx = roleArr.indexOf(window._cartSelectedTravelRole || 'scout');
+      var nextRole = roleArr[(curRIdx + 1) % roleArr.length];
+      window._cartSelectedTravelRole = nextRole;
+      var rBtn = document.querySelector('.clp-role-btn[data-role="' + nextRole + '"]');
+      if (rBtn) rBtn.click();
+      return;
+    }
+
+    // N / n: re-orienta Rosa dos Ventos ao Norte e centraliza
+    if (e.key === 'n' || e.key === 'N') {
+      e.preventDefault();
+      try { if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_scroll'); } catch(_) {}
+      _cartZoom = CART_ZOOM_DEFAULT;
+      _cartCenterOnPlayer();
+      _cartUpdateZoomInfo();
+      return;
+    }
+
     // Pan: WASD e Setas Direcionais
     var panStep = 60;
     if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
@@ -71962,6 +71988,16 @@ function _openCartLocationPopup(biome){
     + '  </div>'
     + '  <div class="clp-transport-note" id="clp-transport-note" style="font-size:8.5px;color:#d2be90;margin-top:2px;font-style:italic;">🚶 A Pé (Infantaria): 3 milhas/hora · Carga padrão em mochilas e armas prontas.</div>'
     + '</div>'
+    + '<div class="clp-role-wrap" style="margin-top: 8px; text-align: left;">'
+    + '  <div style="font-size: 9.5px; font-family: Cinzel, serif; color: #c084fc; margin-bottom: 3px; font-weight: 600;">FUNÇÃO DE VIAGEM DA COMITIVA (D&D 5e):</div>'
+    + '  <div class="clp-role-selector" style="display:flex;gap:4px;">'
+    + '    <button class="clp-role-btn active" data-role="scout" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid #ffd700;color:#ffd700;border-radius:3px;cursor:pointer;">👁️ Sentinela</button>'
+    + '    <button class="clp-role-btn" data-role="navigator" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🧭 Guia</button>'
+    + '    <button class="clp-role-btn" data-role="forager" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🌿 Caçador</button>'
+    + '    <button class="clp-role-btn" data-role="cartographer" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">📜 Escriba</button>'
+    + '  </div>'
+    + '  <div class="clp-role-note" id="clp-role-note" style="font-size:8.5px;color:#d2be90;margin-top:2px;font-style:italic;">👁️ Sentinela Atenta: +5 na Percepção Passiva · Evita surpresa em emboscadas inimigas (PHB p. 182).</div>'
+    + '</div>'
     + (horasViagem > 8 ? (
         '<div class="clp-forced-march-warn" id="clp-forced-march-warn" style="margin:4px 0 6px;text-align:left;background:rgba(30,15,10,0.8);padding:5px 8px;border-radius:4px;border-left:3px solid #f87171;">'
         + '  <div style="font-size:9px;color:#f87171;font-family:Cinzel,serif;font-weight:700;">⚠️ MARCHA FORÇADA & EXAUSTÃO (D&D 5e — PHB p. 181):</div>'
@@ -72151,6 +72187,45 @@ function _openCartLocationPopup(biome){
         } else {
           fmWarn.style.display = 'none';
         }
+      }
+    };
+  });
+
+  var roleBtns = el.querySelectorAll('.clp-role-btn');
+  var roleNote = el.querySelector('#clp-role-note');
+  roleBtns.forEach(function(btn){
+    btn.onclick = function(e){
+      e.preventDefault();
+      roleBtns.forEach(function(b){
+        b.classList.remove('active');
+        b.style.color = '#d2be90';
+        b.style.borderColor = 'rgba(196,149,58,0.4)';
+      });
+      btn.classList.add('active');
+      btn.style.color = '#ffd700';
+      btn.style.borderColor = '#ffd700';
+      var rType = btn.getAttribute('data-role');
+      window._cartSelectedTravelRole = rType;
+      try { sessionStorage.setItem('valdoria_travel_role', rType); } catch(_) {}
+      if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_click');
+      if (roleNote) {
+        if (rType === 'scout') {
+          roleNote.textContent = '👁️ Sentinela Atenta: +5 na Percepção Passiva · Evita surpresa em emboscadas inimigas (PHB p. 182).';
+        } else if (rType === 'navigator') {
+          roleNote.textContent = '🧭 Guia da Rota: Imunidade a desvios e desorientação de marcha sob névoa ou tempestade.';
+        } else if (rType === 'forager') {
+          roleNote.textContent = '🌿 Caçador Forrageador: Caça e água garantidas ao viajar em ritmo normal ou lento sem consumir rações.';
+        } else {
+          roleNote.textContent = '📜 Mestre Cartógrafo: Registra marcos e acidentes geográficos para o diário da comitiva.';
+        }
+      }
+      var newRiskR = (window.CartShared && CartShared.calcEncounterRisk)
+        ? CartShared.calcEncounterRisk(biome, { pace: window._cartSelectedPace || 'normal', isNight: isNight, weather: curWeather, hours: horasViagem, campStance: window._cartSelectedCampStance || 'vigilant', formation: window._cartSelectedFormation || 'standard', transport: window._cartSelectedTransport || 'foot', travelRole: rType })
+        : null;
+      var riskElR = el.querySelector('#clp-risk-badge');
+      if (riskElR && newRiskR) {
+        riskElR.textContent = newRiskR.label;
+        riskElR.style.color = newRiskR.color;
       }
     };
   });
