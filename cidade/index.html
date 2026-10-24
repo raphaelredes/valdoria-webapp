@@ -69527,17 +69527,7 @@ function renderCartographyCanvas(el){
     + '    <h2 id="cart-title">Mapa de Valdoria</h2>'
     + '    <div class="cart-prov-bar-wrap">'
     + '      <button class="cart-prov-nav-btn cart-prov-prev" id="cart-prov-prev" type="button" aria-label="Anterior">‹</button>'
-    + '      <div class="cart-prov-bar" id="cart-prov-bar">'
-    + '        <button class="cart-prov-chip active" data-prov="world" type="button"><span>🌍</span> Continente</button>'
-    + '        <button class="cart-prov-chip" data-prov="plains" type="button"><span>🌾</span> Planícies</button>'
-    + '        <button class="cart-prov-chip" data-prov="forest" type="button"><span>🌲</span> Florestas</button>'
-    + '        <button class="cart-prov-chip" data-prov="mountain" type="button"><span>🏔️</span> Montanhas</button>'
-    + '        <button class="cart-prov-chip" data-prov="swamp" type="button"><span>🐍</span> Pântanos</button>'
-    + '        <button class="cart-prov-chip" data-prov="desert" type="button"><span>🌵</span> Deserto</button>'
-    + '        <button class="cart-prov-chip" data-prov="coast" type="button"><span>🌊</span> Costa</button>'
-    + '        <button class="cart-prov-chip" data-prov="snow" type="button"><span>❄️</span> Ermo Gelado</button>'
-    + '        <button class="cart-prov-chip" data-prov="volcanic" type="button"><span>🌋</span> Vulcânico</button>'
-    + '      </div>'
+    + '      <div class="cart-prov-bar" id="cart-prov-bar"></div>'
     + '      <button class="cart-prov-nav-btn cart-prov-next" id="cart-prov-next" type="button" aria-label="Próximo">›</button>'
     + '    </div>'
     + '  </div>'
@@ -69824,6 +69814,71 @@ function _startQuestFocusTick(){
 }
 
 // === EVENTS ===
+var _PROV_SHORT_NAMES = {
+  world: 'Continente',
+  plains: 'Planícies',
+  forest: 'Florestas',
+  mountain: 'Montanhas',
+  swamp: 'Pântanos',
+  desert: 'Deserto',
+  coast: 'Costa',
+  snow: 'Ermo Gelado',
+  volcanic: 'Vulcânico'
+};
+
+function _renderCartProvinceBar() {
+  var pBar = document.getElementById('cart-prov-bar');
+  if (!pBar) return;
+  var p = window.CITY_MOCK_PLAYER || {};
+  var known = p.known_locations || ['plains'];
+  var ownedMaps = p.owned_maps || [];
+  var discProvs = (window.CartShared && CartShared.getDiscoveredProvinces) 
+    ? CartShared.getDiscoveredProvinces(known, ownedMaps) 
+    : ((window.CartShared && CartShared.CART_PROVINCES) ? [CartShared.CART_PROVINCES[0], CartShared.CART_PROVINCES[1]] : []);
+
+  var curMode = (_cartEngine && typeof _cartEngine.getViewMode === 'function') ? _cartEngine.getViewMode() : { provinceId: 'world' };
+  
+  // Se a província atual não for conhecida, volta para o Continente
+  var isCurKnown = discProvs.some(function(dp){ return dp.id === curMode.provinceId; });
+  if (!isCurKnown && curMode.provinceId !== 'world') {
+    _cartFocusProvince('world');
+    return;
+  }
+
+  pBar.innerHTML = '';
+  discProvs.forEach(function(prov){
+    var chip = document.createElement('button');
+    var isActive = (curMode.provinceId === prov.id) || (curMode.mode === 'world' && prov.id === 'world');
+    chip.className = 'cart-prov-chip' + (isActive ? ' active' : '');
+    chip.setAttribute('data-prov', prov.id);
+    chip.setAttribute('type', 'button');
+    chip.innerHTML = '<span>' + (prov.icon || '📍') + '</span> ' + (_PROV_SHORT_NAMES[prov.id] || prov.name);
+    chip.onclick = function(e){
+      e.preventDefault();
+      _cartFocusProvince(prov.id);
+    };
+    pBar.appendChild(chip);
+  });
+
+  // Atualiza contador no botão do Atlas
+  var atlasPickerBtn = document.getElementById('cart-atlas-picker-btn');
+  var regCount = discProvs.filter(function(dp){ return dp.id !== 'world'; }).length;
+  if (atlasPickerBtn) {
+    atlasPickerBtn.innerHTML = '🗺️ Atlas (' + regCount + ') ▾';
+  }
+
+  // Atualiza visibilidade das setas ‹ e › com base em overflow
+  var pPrev = document.getElementById('cart-prov-prev');
+  var pNext = document.getElementById('cart-prov-next');
+  if (pPrev && pNext) {
+    setTimeout(function(){
+      var hasOverflow = pBar.scrollWidth > (pBar.clientWidth + 4);
+      pPrev.style.display = hasOverflow ? 'flex' : 'none';
+      pNext.style.display = hasOverflow ? 'flex' : 'none';
+    }, 40);
+  }
+}
+
 function _wireCartEvents(){
   if (!_cartCanvas) return;
 
@@ -69976,15 +70031,8 @@ function _wireCartEvents(){
   var btnZoomReset = document.getElementById('cart-zoom-reset');
   if (btnZoomReset) btnZoomReset.onclick = function(){ _cartFocusProvince('world'); };
 
-  // Chips de províncias no topo
-  var _provChips = document.querySelectorAll('.cart-prov-chip');
-  _provChips.forEach(function(chip){
-    chip.onclick = function(e){
-      e.preventDefault();
-      var pId = chip.getAttribute('data-prov');
-      _cartFocusProvince(pId);
-    };
-  });
+  // Renderiza chips dinamicamente (somente províncias com locais descobertos)
+  _renderCartProvinceBar();
 
   // Navegação horizontal com setas (‹ e ›) e scroll do mouse na barra de províncias
   var pBar = document.getElementById('cart-prov-bar');
@@ -70030,19 +70078,25 @@ function _wireCartEvents(){
     atlasPickerBtn.onclick = function(e){
       e.preventDefault();
       e.stopPropagation();
+      var p = window.CITY_MOCK_PLAYER || {};
+      var known = p.known_locations || ['plains'];
+      var ownedMaps = p.owned_maps || [];
       var curMode = (_cartEngine && typeof _cartEngine.getViewMode === 'function') ? _cartEngine.getViewMode() : { provinceId: 'world' };
-      var provs = (window.CartShared && CartShared.CART_PROVINCES) ? CartShared.CART_PROVINCES : ((typeof CART_PROVINCES !== 'undefined') ? CART_PROVINCES : []);
+      var discProvs = (window.CartShared && CartShared.getDiscoveredProvinces) 
+        ? CartShared.getDiscoveredProvinces(known, ownedMaps) 
+        : ((window.CartShared && CartShared.CART_PROVINCES) ? [CartShared.CART_PROVINCES[0], CartShared.CART_PROVINCES[1]] : []);
+      
       camGrid.innerHTML = '';
-      provs.forEach(function(p){
+      discProvs.forEach(function(prov){
         var item = document.createElement('div');
-        var isActive = (curMode.provinceId === p.id) || (curMode.mode === 'world' && p.id === 'world');
+        var isActive = (curMode.provinceId === prov.id) || (curMode.mode === 'world' && prov.id === 'world');
         item.className = 'cam-item' + (isActive ? ' active' : '');
-        item.innerHTML = '<div class="cam-item-title">' + (p.icon || '🗺️') + ' ' + (p.name || p.id) + '</div>'
-                       + '<div class="cam-item-sub">' + (p.desc || 'Província de Valdória') + '</div>';
+        item.innerHTML = '<div class="cam-item-title">' + (prov.icon || '🗺️') + ' ' + (prov.name || prov.id) + '</div>'
+                       + '<div class="cam-item-sub">' + (prov.desc || 'Província de Valdória') + '</div>';
         item.onclick = function(ev){
           ev.preventDefault();
           ev.stopPropagation();
-          _cartFocusProvince(p.id);
+          _cartFocusProvince(prov.id);
           atlasModal.style.display = 'none';
         };
         camGrid.appendChild(item);
@@ -70097,8 +70151,10 @@ function _triggerCartDiscoveryCelebration(nodeKey) {
   if (typeof _cartEngine.triggerDiscoveryAnimation === 'function') {
     _cartEngine.triggerDiscoveryAnimation(nodeKey, function(){
       if (typeof _drawCart === 'function') _drawCart();
+      if (typeof _renderCartProvinceBar === 'function') _renderCartProvinceBar();
     });
   }
+  if (typeof _renderCartProvinceBar === 'function') _renderCartProvinceBar();
 
   // 2. Exibe o toast comemorativo de rota descoberta
   var toast = document.getElementById('cart-discovery-toast');
@@ -70149,6 +70205,16 @@ function _cartFocusProvince(provId){
   if (!_cartEngine || !_cartCanvas || !_cartW || !_cartH) return;
   var titleEl = document.getElementById('cart-title');
   var atlasBackBtn = document.getElementById('cart-atlas-back-btn');
+
+  var p = window.CITY_MOCK_PLAYER || {};
+  var known = p.known_locations || ['plains'];
+  var ownedMaps = p.owned_maps || [];
+
+  if (provId !== 'world' && window.CartShared && CartShared.isProvinceDiscovered) {
+    if (!CartShared.isProvinceDiscovered(provId, known, ownedMaps)) {
+      provId = 'world';
+    }
+  }
 
   if (provId === 'world') {
     if (typeof _cartEngine.closeProvince === 'function') {

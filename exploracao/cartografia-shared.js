@@ -4181,6 +4181,11 @@
       if (!provId || provId === 'world') return closeProvince();
       var prov = CART_PROVINCES.find(function(p){ return p.id === provId; });
       if (!prov) return closeProvince();
+      var known = (typeof getKnownLocations === 'function') ? getKnownLocations() : null;
+      var ownedMaps = (typeof getOwnedMaps === 'function') ? getOwnedMaps() : null;
+      if (!isProvinceDiscovered(provId, known, ownedMaps)) {
+        return closeProvince();
+      }
       _viewMode = 'province';
       _activeProvId = provId;
       _baseCache = null;
@@ -4466,6 +4471,29 @@
     volcanic: 'volcanic', valkrest: 'volcanic'
   };
 
+  // Regra de Visibilidade de Províncias (Ordem do Usuário 2026-10):
+  // Uma província regional só é revelada se o aventureiro tiver descoberto
+  // pelo menos 1 local pertencente a ela, ou possuir a carta geográfica regional.
+  function isProvinceDiscovered(provId, known, ownedMaps) {
+    if (!provId || provId === 'world') return true;
+    var p = CART_PROVINCES.find(function(pr){ return pr.id === provId; });
+    if (!p) return false;
+    if (p.mapKey && ownedMaps && ownedMaps.indexOf(p.mapKey) >= 0) return true;
+    var knownArr = known || [];
+    if (provId === 'plains') return true; // Hub de partida (Portões de Valdória)
+    if (!p.locKeys || !p.locKeys.length) return false;
+    for (var i = 0; i < p.locKeys.length; i++) {
+      if (knownArr.indexOf(p.locKeys[i]) >= 0) return true;
+    }
+    return false;
+  }
+
+  function getDiscoveredProvinces(known, ownedMaps) {
+    return CART_PROVINCES.filter(function(p){
+      return isProvinceDiscovered(p.id, known, ownedMaps);
+    });
+  }
+
   function getLocationProvince(locKey){
     var pId = _LOCATION_TO_PROVINCE[locKey] || 'plains';
     return CART_PROVINCES.find(function(p){ return p.id === pId; }) || CART_PROVINCES[1];
@@ -4485,7 +4513,7 @@
     INK_DARK: INK_DARK, INK_MED: INK_MED, INK_LIGHT: INK_LIGHT,
     INK_FAINT: INK_FAINT, PAPER_BG: PAPER_BG, PAPER_DARK: PAPER_DARK,
     SEA_INK: SEA_INK, SEA_FAINT: SEA_FAINT,
-    CART_BIOMES: CART_BIOMES, CART_PATHS: CART_PATHS, CART_PROVINCES: CART_PROVINCES, getLocationProvince: getLocationProvince,
+    CART_BIOMES: CART_BIOMES, CART_PATHS: CART_PATHS, CART_PROVINCES: CART_PROVINCES, getLocationProvince: getLocationProvince, isProvinceDiscovered: isProvinceDiscovered, getDiscoveredProvinces: getDiscoveredProvinces,
     _cartSeedRand: _cartSeedRand,
     _hatchArea: _hatchArea, _wavyLine: _wavyLine,
     _drawParchmentBase: _drawParchmentBase,
