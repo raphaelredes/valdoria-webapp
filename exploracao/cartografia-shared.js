@@ -8038,6 +8038,140 @@
     };
   }
 
+  // === calcCampFireConcealment (Fogueira de Acampamento, Visibilidade de Fumaça e Furtividade - DMG p. 112 / PHB p. 152) ===
+  function calcCampFireConcealment(firePosture, options) {
+    options = options || {};
+    var fp = (firePosture || 'blazing_hearth').toLowerCase();
+
+    var postures = {
+      blazing_hearth: {
+        name: 'Fogueira Aberta Ardente (Toras Grossas)',
+        lightVisibilityMiles: 5,
+        smokeVisibilityMiles: 8,
+        encounterRiskModPct: 25,
+        warmthBenefit: 'Calor pleno; +2 nas salvaguardas de Constituição matinais contra o frio.',
+        cookingAllowed: true,
+        desc: 'Fogo alto e calor confortável; atrai a atenção de salteadores e predadores famintos nos ermos.',
+        icon: '🔥',
+        color: '#f97316'
+      },
+      dakota_trench_fire: {
+        name: 'Fogo Dakota Oculto em Trincheira',
+        lightVisibilityMiles: 0.2,
+        smokeVisibilityMiles: 0.5,
+        encounterRiskModPct: 0,
+        warmthBenefit: 'Calor concentrado em cava subterrânea; permite cozimento sem emissão de clarão ou fumaça.',
+        cookingAllowed: true,
+        desc: 'Técnica de sobrevivência de batedores; queima eficiente alimentada por túnel de ar no solo.',
+        icon: '🕳️',
+        color: '#4ade80'
+      },
+      cold_camp: {
+        name: 'Acampamento Frio (Fogo Proibido)',
+        lightVisibilityMiles: 0,
+        smokeVisibilityMiles: 0,
+        encounterRiskModPct: -15,
+        warmthBenefit: 'Nenhum; a comitiva depende de cobertores e agasalhos pesados de inverno.',
+        cookingAllowed: false,
+        desc: 'Camuflagem noturna máxima; consumo estrito de rações secas de ferro sem emissão de luz ou cheiro.',
+        icon: '❄️',
+        color: '#38bdf8'
+      },
+      magic_flame: {
+        name: 'Chama Mágica Alquímica sem Fumaça',
+        lightVisibilityMiles: 1,
+        smokeVisibilityMiles: 0,
+        encounterRiskModPct: 5,
+        warmthBenefit: 'Calor constante e limpo alimentado por pedra térmica ou magia de Chama Contínua.',
+        cookingAllowed: true,
+        desc: 'Brilho cálido que não gera fumaça nem consome madeira dos ermos.',
+        icon: '✨',
+        color: '#c084fc'
+      }
+    };
+
+    var p = postures[fp] || postures.blazing_hearth;
+
+    return {
+      firePosture: fp,
+      postureName: p.name,
+      lightVisibilityMiles: p.lightVisibilityMiles,
+      smokeVisibilityMiles: p.smokeVisibilityMiles,
+      encounterRiskModPct: p.encounterRiskModPct,
+      warmthBenefit: p.warmthBenefit,
+      cookingAllowed: p.cookingAllowed,
+      description: p.desc,
+      icon: p.icon,
+      color: p.color,
+      dndRef: 'DMG p. 112 (Fogueiras de Acampamento e Visibilidade nos Ermos) / PHB p. 152'
+    };
+  }
+
+  // === calcRegionalBountyNotice (Contratos de Caça a Recompensas Regionais - DMG p. 92, 131 / XGE p. 130) ===
+  function calcRegionalBountyNotice(biomeKey, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+
+    var notice = {
+      contractTitle: 'Mandado de Caça: Bando de Salteadores da Trilha',
+      targetName: 'Capitão Valik e Corsários da Estrada',
+      threatCR: 'Desafio 3 (Grupo Médio)',
+      rewardGoldCoins: 25,
+      trackingClue: 'Vistos cobrando pedágio ilegal e atacando carroças perto do moinho velho.',
+      dangerWarning: 'Inimigos utilizam bestas pesadas e armadilhas de abrolhos na estrada.',
+      icon: '⚔️📜',
+      color: '#facc15'
+    };
+
+    if (bk === 'forest' || bk === 'selva') {
+      notice = {
+        contractTitle: 'Recompensa de Abate: Urso-Coruja Alfa das Sombras',
+        targetName: 'Urso-Coruja Alfa de Garras Negras',
+        threatCR: 'Desafio 4 (Predador Feroz)',
+        rewardGoldCoins: 35,
+        trackingClue: 'Carcaças de cervos suspensas em galhos altos delimitam seu território.',
+        dangerWarning: 'Ataques vorazes com bico e garras mutiladoras em área de emboscada.',
+        icon: '🦉🐻',
+        color: '#4ade80'
+      };
+    } else if (bk === 'swamp') {
+      notice = {
+        contractTitle: 'Contrato Sagrado: Coven de Bruxa do Charco',
+        targetName: 'Mãe Grenda e Lacaios Afogados',
+        threatCR: 'Desafio 5 (Conjuradora Sombria)',
+        rewardGoldCoins: 50,
+        trackingClue: 'Cânticos estranhos ecoam dos salgueiros retorcidos nas noites de lua minguante.',
+        dangerWarning: 'Bruxaria de ilusão, névoas venenosas e mortos-vivos rastejantes.',
+        icon: '🧙‍♀️',
+        color: '#c084fc'
+      };
+    } else if (bk === 'mountain' || bk === 'cordilheira' || bk === 'snow' || bk === 'tundra') {
+      notice = {
+        contractTitle: 'Ordem de Extermínio: Troles das Gargantas de Rocha',
+        targetName: 'Bando de Troles da Montanha (3 Criaturas)',
+        threatCR: 'Desafio 6 (Ameaça Mortal)',
+        rewardGoldCoins: 60,
+        trackingClue: 'Ossadas de mulas e fardos mercantes destruídos bloqueiam a passagem alta.',
+        dangerWarning: 'Regeneração acelerada; exige dano de fogo ou ácido para anular a cura.',
+        icon: '🪨👹',
+        color: '#f87171'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      contractTitle: notice.contractTitle,
+      targetName: notice.targetName,
+      threatCR: notice.threatCR,
+      rewardGoldCoins: notice.rewardGoldCoins,
+      trackingClue: notice.trackingClue,
+      dangerWarning: notice.dangerWarning,
+      icon: notice.icon,
+      color: notice.color,
+      dndRef: 'DMG p. 92, 131 (Contratos de Caça e Recompensas Provinciais) / XGE p. 130'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -9751,6 +9885,8 @@
     calcWildernessHazardEncounter: calcWildernessHazardEncounter,
     calcWaterCrossingOptions: calcWaterCrossingOptions,
     calcExplorationMilestoneBoon: calcExplorationMilestoneBoon,
+    calcCampFireConcealment: calcCampFireConcealment,
+    calcRegionalBountyNotice: calcRegionalBountyNotice,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
