@@ -69995,6 +69995,7 @@ function renderCartographyCanvas(el){
     + '        <button class="cam-filter-pill" data-filter="wilderness" type="button">⚔️ Terras Ermas</button>'
     + '        <button class="cam-filter-pill" data-filter="quests" type="button">📜 Contratos</button>'
     + '        <button class="cam-filter-pill" data-filter="mapped" type="button">🗺️ Cartas</button>'
+    + '        <button class="cam-filter-pill" data-filter="pinned" type="button">📌 Fixados</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -70588,6 +70589,12 @@ function _wireCartEvents(){
             var isCharted = (prov.id === 'world');
             if (ownedMaps && prov.locKeys && prov.locKeys.some(function(k){ return ownedMaps.indexOf(k) >= 0; })) isCharted = true;
             if (!isCharted) return false;
+          } else if (_camActiveCategory === 'pinned') {
+            var isPin = false;
+            if (prov.locKeys && window.CartShared && CartShared.isLocPinned) {
+              isPin = prov.locKeys.some(function(k){ return CartShared.isLocPinned(k); });
+            }
+            if (!isPin) return false;
           }
           if (!ft) return true;
           if ((prov.name || '').toLowerCase().indexOf(ft) >= 0) return true;
@@ -70607,9 +70614,15 @@ function _wireCartEvents(){
           var qBadge = qTitle ? '<span class="cam-q-badge">📜 ' + qTitle + '</span>' : '';
           var locKeys = prov.locKeys || [];
           var knownCount = locKeys.filter(function(k){ return known.indexOf(k) >= 0; }).length;
+          var pct = locKeys.length > 0 ? Math.round((knownCount / locKeys.length) * 100) : 100;
+          var compBadge = (pct === 100) ? ' <span style="color:#4ade80;font-weight:bold;">★ Completo</span>' : '';
+          var progBarHtml = (prov.id === 'world') ? '' :
+            '<div style="width:100%;height:3px;background:rgba(0,0,0,0.5);border-radius:2px;overflow:hidden;margin-top:4px;">' +
+            '  <div style="width:' + pct + '%;height:100%;background:' + (pct === 100 ? '#4ade80' : '#c4953a') + ';transition:width 0.3s ease;"></div>' +
+            '</div>';
           var metaHtml = (prov.id === 'world') 
             ? '<div class="cam-item-meta">🗺️ Mapa Geral de Valdória</div>'
-            : '<div class="cam-item-meta">📍 ' + knownCount + ' / ' + locKeys.length + ' locais mapeados ' + qBadge + '</div>';
+            : '<div class="cam-item-meta">📍 ' + knownCount + ' / ' + locKeys.length + ' locais mapeados (' + pct + '%)' + compBadge + qBadge + progBarHtml + '</div>';
           item.innerHTML = '<div class="cam-item-title">' + (prov.icon || '🗺️') + ' ' + (prov.name || prov.id) + '</div>'
                          + '<div class="cam-item-sub">' + (prov.desc || 'Província de Valdória') + '</div>'
                          + metaHtml;
@@ -70656,7 +70669,7 @@ function _wireCartEvents(){
   // Alternador de filtro rápido no dock
   var filterBtn = document.getElementById('cart-filter-toggle-btn');
   if (filterBtn) {
-    var _filterOrder = ['all', 'settlements', 'wilderness', 'quests'];
+    var _filterOrder = ['all', 'settlements', 'wilderness', 'quests', 'pinned'];
     filterBtn.onclick = function(e){
       e.preventDefault();
       var curF = window._cartActiveFilter || 'all';
@@ -70779,7 +70792,8 @@ function _setCartFilter(f) {
       all: '🎯 Filtro: Todos',
       settlements: '🏛️ Cidades',
       wilderness: '⚔️ Ermos',
-      quests: '📜 Contratos'
+      quests: '📜 Contratos',
+      pinned: '📌 Fixados'
     };
     btn.innerHTML = labels[f] || '🎯 Filtro: Todos';
   }
@@ -70880,6 +70894,7 @@ function _wireCartKeyboardNavigation() {
     if (e.key === '2') { e.preventDefault(); _setCartFilter('settlements'); return; }
     if (e.key === '3') { e.preventDefault(); _setCartFilter('wilderness'); return; }
     if (e.key === '4') { e.preventDefault(); _setCartFilter('quests'); return; }
+    if (e.key === '5') { e.preventDefault(); _setCartFilter('pinned'); return; }
 
     // Pan: WASD e Setas Direcionais
     var panStep = 60;
@@ -71445,6 +71460,14 @@ function _openCartLocationPopup(biome){
     + (rec ? '<div class="clp-meta">' + rec + '<br>Bioma: ' + biomePT + ' · Distância: ~' + distMilhas + ' milhas (~' + horasViagem + 'h de marcha)</div>' : '')
     + nightWarnHtml
     + dndHtml
+    + (biome.isOrigin || biome.settlement
+        ? '<div style="font-size:9.5px;color:#a3e635;margin-bottom:6px;font-family:Cinzel,serif;">🌀 Santuário & Marco de Viagem Rápida</div>'
+        : '')
+    + '<div style="text-align:right;margin:4px 0 6px;">'
+    + '  <button class="clp-btn-pin-toggle" id="clp-pin-toggle-btn" type="button" style="background:rgba(35,25,15,0.85);border:1px solid ' + ((window.CartShared && CartShared.isLocPinned && CartShared.isLocPinned(biome.key)) ? '#ffd700' : 'rgba(196,149,58,0.55)') + ';color:' + ((window.CartShared && CartShared.isLocPinned && CartShared.isLocPinned(biome.key)) ? '#ffd700' : '#d2be90') + ';font-size:9.5px;padding:3px 8px;border-radius:3px;cursor:pointer;">'
+    + ((window.CartShared && CartShared.isLocPinned && CartShared.isLocPinned(biome.key)) ? '📍 Alfinete Ativo (Remover)' : '📌 Fixar no Diário de Rotas')
+    + '  </button>'
+    + '</div>'
     + '<div class="clp-pace-wrap" style="margin-top: 8px; text-align: left;">'
     + '  <div style="font-size: 9.5px; font-family: Cinzel, serif; color: #ffd685; margin-bottom: 3px; font-weight: 600;">RITMO DE MARCHA D&D 5e:</div>'
     + '  <div class="clp-pace-selector">'
@@ -71470,6 +71493,24 @@ function _openCartLocationPopup(biome){
   window._cartSelectedPace = 'normal';
 
   // Configuração interativa do seletor de ritmo D&D 5e
+  var pinBtn = el.querySelector('#clp-pin-toggle-btn');
+  if (pinBtn) {
+    pinBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      if (window.CartShared && CartShared.toggleLocPinned) {
+        var nowPinned = CartShared.toggleLocPinned(biome.key);
+        pinBtn.innerHTML = nowPinned ? '📍 Alfinete Ativo (Remover)' : '📌 Fixar no Diário de Rotas';
+        pinBtn.style.color = nowPinned ? '#ffd700' : '#d2be90';
+        pinBtn.style.borderColor = nowPinned ? '#ffd700' : 'rgba(196,149,58,0.55)';
+        if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+          ValdoriaAudio.playSFX('sfx_click');
+        }
+        if (_cartCtx && _cartEngine) _drawCart();
+      }
+    };
+  }
+
   var paceBtns = el.querySelectorAll('.clp-pace-btn');
   var paceNote = el.querySelector('#clp-pace-note');
   paceBtns.forEach(function(btn){

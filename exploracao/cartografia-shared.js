@@ -3350,7 +3350,73 @@
   }
 
   // === _drawCartNode ===
-    function _drawCartNode(ctx, b, w, h, isHover, opts){
+    // === Alfinetes de Aventureiro / Marcadores Pessoais de Mapa (D&D 5e / Baldur's Gate 3) ===
+  function _getPinnedLocations() {
+    try {
+      var raw = localStorage.getItem('valdoria_pinned_locs');
+      return raw ? JSON.parse(raw) : [];
+    } catch (_) { return []; }
+  }
+  function _isLocPinned(key) {
+    if (!key) return false;
+    var list = _getPinnedLocations();
+    return list.indexOf(key) >= 0;
+  }
+  function _toggleLocPinned(key) {
+    if (!key) return false;
+    var list = _getPinnedLocations();
+    var idx = list.indexOf(key);
+    if (idx >= 0) {
+      list.splice(idx, 1);
+    } else {
+      list.push(key);
+    }
+    try { localStorage.setItem('valdoria_pinned_locs', JSON.stringify(list)); } catch (_) {}
+    return (list.indexOf(key) >= 0);
+  }
+
+  // === Iluminação Atmosférica e Clima Dinâmico no Mapa ===
+  function _drawCartAtmosphere(ctx, w, h) {
+    var phase = (typeof window !== 'undefined' && window.S && window.S.dayPhase) ||
+                (typeof window !== 'undefined' && window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.dayPhase) || 'day';
+    var weather = (typeof window !== 'undefined' && window.S && window.S.weather) || 's';
+
+    if (phase === 'night') {
+      ctx.save();
+      ctx.fillStyle = 'rgba(8, 16, 32, 0.25)';
+      ctx.fillRect(0, 0, w, h);
+      var vg = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.max(w, h) * 0.75);
+      vg.addColorStop(0, 'rgba(0,0,0,0)');
+      vg.addColorStop(1, 'rgba(4, 8, 20, 0.40)');
+      ctx.fillStyle = vg;
+      ctx.fillRect(0, 0, w, h);
+      ctx.restore();
+    } else if (phase === 'dusk') {
+      ctx.save();
+      ctx.fillStyle = 'rgba(70, 30, 15, 0.15)';
+      ctx.fillRect(0, 0, w, h);
+      var vgDusk = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.4, w / 2, h / 2, Math.max(w, h) * 0.8);
+      vgDusk.addColorStop(0, 'rgba(0,0,0,0)');
+      vgDusk.addColorStop(1, 'rgba(50, 15, 8, 0.30)');
+      ctx.fillStyle = vgDusk;
+      ctx.fillRect(0, 0, w, h);
+      ctx.restore();
+    } else if (phase === 'dawn') {
+      ctx.save();
+      ctx.fillStyle = 'rgba(80, 50, 20, 0.10)';
+      ctx.fillRect(0, 0, w, h);
+      ctx.restore();
+    }
+
+    if (weather === 'r' || weather === 'f') {
+      ctx.save();
+      ctx.fillStyle = 'rgba(25, 40, 55, 0.16)';
+      ctx.fillRect(0, 0, w, h);
+      ctx.restore();
+    }
+  }
+
+  function _drawCartNode(ctx, b, w, h, isHover, opts){
     opts = opts || {};
     var bx = b.x * w, by = b.y * h;
     var isOrigin = b.isOrigin;
@@ -3370,6 +3436,7 @@
       else if (af === 'wilderness' && (!b.settlement && !b.isOrigin)) isMatch = true;
       else if (af === 'quests' && opts.hasActiveQuest) isMatch = true;
       else if (af === 'mapped' && hasRegionalMap) isMatch = true;
+      else if (af === 'pinned' && (opts.isPinned || _isLocPinned(b.key))) isMatch = true;
 
       if (!isMatch) {
         ctx.globalAlpha = 0.22;
@@ -3471,13 +3538,33 @@
       ctx.restore();
     }
 
+    // 1.7 Alfinete de Aventureiro / Marcador Personalizado
+    var locIsPinned = opts.isPinned || _isLocPinned(b.key);
+    if (locIsPinned) {
+      ctx.save();
+      var px = bx - radius + 2;
+      var py = by - radius + 2;
+      ctx.beginPath();
+      ctx.arc(px, py, 6.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#2b1a0e';
+      ctx.fill();
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      ctx.font = '9px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('📍', px, py);
+      ctx.restore();
+    }
+
     ctx.restore();
 
     // No modo Regional (onde há poucos nós), o rótulo é permanente; no Continente Geral, só abre sob hover
     if (!isHover && !opts.isRegional) return;
 
     ctx.save();
-    var labelText = (opts.hasActiveQuest ? '📜 ' : '') + b.name;
+    var labelText = (locIsPinned ? '📍 ' : '') + (opts.hasActiveQuest ? '📜 ' : '') + b.name;
     ctx.font = (isHover ? 'bold 11px' : '10px') + ' serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
@@ -4151,6 +4238,7 @@
       ctx.scale(view.zoom || 1, view.zoom || 1);
       var _base = _ensureBase(view);
       ctx.drawImage(_base, 0, 0, w, h);
+      _drawCartAtmosphere(ctx, w, h);
       ctx.translate(_offX, _offY);
 
       var known = (typeof cfg.getKnownLocations === 'function') ? cfg.getKnownLocations() :
@@ -4199,7 +4287,8 @@
           var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
           if (isDiscovered || hasMap) {
             var hasQ = !!(qf && qf.key === b.key);
-            _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, isRegional: true, hasActiveQuest: hasQ, activeFilter: view.activeFilter });
+            var isPin = _isLocPinned(b.key);
+            _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, isRegional: true, hasActiveQuest: hasQ, isPinned: isPin, activeFilter: view.activeFilter });
           }
           // Locais inexplorados ficam 100% ocultos sob o Fog of War preto solido, sem qualquer icone ou texto.
         });
@@ -4273,7 +4362,8 @@
           if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) {
             var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
             var hasQ = !!(qf && qf.key === b.key);
-            _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, hasActiveQuest: hasQ, activeFilter: view.activeFilter });
+            var isPin = _isLocPinned(b.key);
+            _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, hasActiveQuest: hasQ, isPinned: isPin, activeFilter: view.activeFilter });
           }
         });
         var pn = pk && RB.find(function(b){ return b.key === pk; });
@@ -4839,6 +4929,10 @@
     locArtHtml: locArtHtml, clpImgFallback: clpImgFallback,  // P2 sessão #73: imagem do local no popup de viagem
     biomePT: biomePT,                              // P-mapa sessão #73: bioma key -> PT-BR no popup
     getBiomeDndInfo: getBiomeDndInfo,              // Informações de Terreno e Riscos Naturais D&D 5e
+    getPinnedLocations: _getPinnedLocations,
+    isLocPinned: _isLocPinned,
+    toggleLocPinned: _toggleLocPinned,
+    _drawCartAtmosphere: _drawCartAtmosphere,
     _drawAgedParchment: _drawAgedParchment,        // 2026-05-04: estilo #4 AAA (legado — só fallback explore)
     _drawOrganicBlob: _drawOrganicBlob,            // helper exposto
     _drawAgedStain: _drawAgedStain,                // helper exposto
