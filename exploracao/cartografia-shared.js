@@ -3790,6 +3790,58 @@
         ctx.restore();
       }
     }
+
+    // 5. Acampamentos de Descanso Longo (D&D 5e Wilderness March)
+    if (pathKeys.length >= 3) {
+      for (var ci = 1; ci < pathKeys.length - 1; ci++) {
+        var campNode = biomes.find(function(b){ return b.key === pathKeys[ci]; });
+        if (campNode) {
+          var cnx = campNode.x * w, cny = campNode.y * h;
+          _drawCampsiteWaypoint(ctx, cnx, cny, 'Descanso Longo · 8h');
+        }
+      }
+    } else if (pathKeys.length === 2) {
+      var nA = biomes.find(function(b){ return b.key === pathKeys[0]; });
+      var nB = biomes.find(function(b){ return b.key === pathKeys[1]; });
+      if (nA && nB) {
+        var distPx = Math.hypot((nB.x - nA.x) * w, (nB.y - nA.y) * h);
+        if (distPx > 160) {
+          var ax0 = nA.x * w, ay0 = nA.y * h;
+          var bx0 = nB.x * w, by0 = nB.y * h;
+          var dx0 = bx0 - ax0, dy0 = by0 - ay0;
+          var cx0 = (ax0 + bx0) / 2 + (-dy0 * 0.15);
+          var cy0 = (ay0 + by0) / 2 + (dx0 * 0.15);
+          _drawCampsiteWaypoint(ctx, cx0, cy0, 'Acampamento · 8h');
+        }
+      }
+    }
+    ctx.restore();
+  }
+
+  function _drawCampsiteWaypoint(ctx, x, y, label) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x, y - 14, 11, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(28, 18, 10, 0.88)';
+    ctx.strokeStyle = 'rgba(245, 175, 45, 0.9)';
+    ctx.lineWidth = 1.3;
+    ctx.shadowColor = 'rgba(255, 170, 0, 0.55)';
+    ctx.shadowBlur = 6;
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('⛺', x, y - 14);
+
+    if (label) {
+      ctx.font = '700 8px Cinzel, serif';
+      ctx.fillStyle = '#ffd685';
+      ctx.shadowColor = 'rgba(0,0,0,0.95)';
+      ctx.shadowBlur = 4;
+      ctx.fillText(label, x, y - 28);
+    }
     ctx.restore();
   }
 
@@ -3800,7 +3852,7 @@
     var barW = isProv ? 68 : 84;
     var x0 = 16;
     var y0 = h - 68;
-    var label = isProv ? '5 Léguas (~15 Milhas)' : '25 Léguas (~75 Milhas)';
+    var label = isProv ? '5 Marcos (~15 Milhas)' : '25 Marcos (~75 Milhas)';
 
     // Caixa de fundo translúcida estilo manuscrito
     ctx.fillStyle = 'rgba(24, 16, 9, 0.78)';
@@ -3834,12 +3886,28 @@
   }
 
   // === _drawCartCompass ===
-  function _drawCartCompass(ctx, w, h){
+  function _isCompassAt(mx, my, w, h) {
+    if (typeof mx !== 'number' || typeof my !== 'number') return false;
+    var cx = w - 40, cy = 40;
+    var dx = mx - cx, dy = my - cy;
+    return (dx * dx + dy * dy) <= (26 * 26);
+  }
+
+  function _drawCartCompass(ctx, w, h, isHovered){
     // Top-right (era bottom-right, mas conflitava com zoom controls)
     var cx = w - 40, cy = 40;
     var R = 22;
     ctx.save();
     ctx.translate(cx, cy);
+    if (isHovered) {
+      ctx.beginPath();
+      ctx.arc(0, 0, R + 5, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255, 215, 0, 0.75)';
+      ctx.lineWidth = 1.6;
+      ctx.shadowColor = 'rgba(255, 200, 60, 0.85)';
+      ctx.shadowBlur = 8;
+      ctx.stroke();
+    }
     ctx.strokeStyle = INK_DARK;
     // Anel externo
     ctx.lineWidth = 1.0;
@@ -4415,7 +4483,8 @@
       }
       ctx.restore();
       // Bússola — screen-space (top-right, NÃO pan/zooma).
-      _drawCartCompass(ctx, w, h);
+      var _isCompHov = (typeof view.hoverMx === 'number') && _isCompassAt(view.hoverMx, view.hoverMy, w, h);
+      _drawCartCompass(ctx, w, h, _isCompHov);
       // Escala Cartográfica D&D 5e — screen-space (bottom-left).
       _drawCartScaleBar(ctx, w, h, _viewMode);
       ctx.restore();
@@ -4494,13 +4563,25 @@
     }
 
     function getNodePos(key, w, h){
+      var _mr = _cartWorldMapRect(w, h);
+      if (_viewMode === 'province' && _activeProvId) {
+        var curProv = CART_PROVINCES.find(function(p){ return p.id === _activeProvId; });
+        if (curProv && curProv.regionalCoords && curProv.regionalCoords[key]) {
+          var rc = curProv.regionalCoords[key];
+          return {
+            x: _mr.x + rc.rx * _mr.s,
+            y: _mr.y + rc.ry * _mr.s,
+            rawX: rc.rx,
+            rawY: rc.ry
+          };
+        }
+      }
       var RB = CART_BIOMES.map(_resolved);
       var b = RB.find(function(item){ return item.key === key; });
       if (!b) {
         b = RB.find(function(item){ return item.isOrigin || item.key === 'plains'; }) || RB[0];
       }
       if (!b) return null;
-      var _mr = _cartWorldMapRect(w, h);
       var bx = (typeof b.x === 'number' ? b.x : 0.5);
       var by = (typeof b.y === 'number' ? b.y : 0.5);
       return {
@@ -4565,6 +4646,7 @@
       openProvince: openProvince,
       closeProvince: closeProvince,
       getViewMode: getViewMode,
+      isCompassAt: function(mx, my, w, h){ return _isCompassAt(mx, my, w, h); },
       triggerDiscoveryAnimation: function(nodeKey, onComplete){
         var node = CART_BIOMES.find(function(b){ return b.key === nodeKey; });
         if (!node) { if (onComplete) onComplete(); return; }
@@ -4945,6 +5027,8 @@
     _drawPlayerPin: _drawPlayerPin,
     _drawCartCompass: _drawCartCompass,
     _drawCartScaleBar: _drawCartScaleBar,
+    _drawCampsiteWaypoint: _drawCampsiteWaypoint,
+    isCompassAt: _isCompassAt,
     _findRoutePath: _findRoutePath,
     _drawActiveRouteBreadcrumbs: _drawActiveRouteBreadcrumbs,
     _drawUnknownLocation: _drawUnknownLocation  // 2026-05-04: locais não-descobertos

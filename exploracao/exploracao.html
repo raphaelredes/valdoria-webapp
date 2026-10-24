@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T16:25:53Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T16:44:17Z - do not edit directly, edit source -->
 
 
 
@@ -18143,6 +18143,7 @@ window.__onIntroTap = function() {
         <div id="minimap-wrap" role="button" tabindex="0" title="Diário de Missões (clique pra abrir)">
 
           <canvas id="minimap" width="96" height="130"></canvas>
+          <button id="btn-radar-expand" title="Expandir Radar Tático [Z]" aria-label="Expandir Radar Tático" type="button" style="position:absolute;top:2px;right:2px;background:rgba(20,14,8,0.88);border:1px solid rgba(196,149,58,0.6);color:#ffd685;font-size:10px;padding:1px 4px;border-radius:3px;cursor:pointer;z-index:10;line-height:1.2;">⛶</button>
 
           <div id="mw-quest-badge" aria-live="polite">
 
@@ -93453,7 +93454,8 @@ function openCartography() {
     + '  <div class="xcart-dock" id="xcart-dock">'
     + '    <button class="xcart-dock-btn" id="xcart-top-back-btn" type="button" title="Voltar para a exploração [Esc]" aria-label="Voltar para a exploração">🧭 Exploração</button>'
     + '    <button class="xcart-dock-btn primary" id="xcart-atlas-picker-btn" type="button" title="Atlas das Províncias [M]" aria-label="Seletor de Províncias">🗺️ Atlas ▾</button>'
-    + '    <button class="xcart-dock-btn" id="xcart-filter-toggle-btn" type="button" title="Alternar Filtro de Nós no Mapa [Teclas 1 a 4]">🎯 Filtro: Todos</button>'
+    + '    <button class="xcart-dock-btn" id="xcart-waypoints-btn" type="button" title="Rede de Marcos e Santuários [P]" aria-label="Marcos de Viagem e Santuários">🌀 Marcos</button>'
+    + '    <button class="xcart-dock-btn" id="xcart-filter-toggle-btn" type="button" title="Alternar Filtro de Nós no Mapa [Teclas 1 a 5]">🎯 Filtro: Todos</button>'
     + '    <button class="xcart-dock-btn accent" id="xcart-atlas-back-btn" type="button" title="Voltar ao Continente [Backspace]" style="display:none;" aria-label="Voltar ao Continente">🌍 Continente</button>'
     + '  </div>'
 
@@ -93499,7 +93501,33 @@ function openCartography() {
 
     + '  </div>'
 
-    + '  <div class="cart-atlas-modal" id="xcart-atlas-modal" style="display:none;">'
+    + '  <div class="cart-atlas-modal" id="tactical-radar-modal" style="display:none;z-index:115;" aria-label="Radar Tático da Região">
+    <div class="cam-box" style="max-width:380px;">
+      <div class="cam-header">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:16px;">🧭</span>
+          <div>
+            <h3 style="margin:0;font-size:13px;color:#f4d49a;font-family:Cinzel,serif;">Radar Tático da Região</h3>
+            <span id="trm-coverage-stat" style="font-size:9.5px;color:#a09484;">Calculando exploração...</span>
+          </div>
+        </div>
+        <button class="cam-close" id="tactical-radar-close-btn" type="button" aria-label="Fechar Radar [Esc]">✕</button>
+      </div>
+      <div style="position:relative;background:#140e08;padding:8px;display:flex;flex-direction:column;align-items:center;border-bottom:1px solid rgba(196,149,58,0.25);">
+        <div style="font-size:8.5px;color:#ffd700;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">▲ NORTE</div>
+        <canvas id="tactical-radar-canvas" width="280" height="280" style="background:#1b140d;border:1px solid rgba(196,149,58,0.45);border-radius:6px;cursor:pointer;"></canvas>
+        <div style="font-size:8.5px;color:#ffd700;font-family:Cinzel,serif;font-weight:700;margin-top:2px;">▼ SUL</div>
+      </div>
+      <div id="trm-legend" style="padding:6px 12px;font-size:9px;color:#d2be90;display:flex;justify-content:space-around;background:rgba(0,0,0,0.35);">
+        <span>📍 Comitiva</span>
+        <span>🟢 Saída</span>
+        <span>🟡 Retorno</span>
+        <span>👁️ Visível</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="cart-atlas-modal" id="xcart-atlas-modal" style="display:none;">'
     + '    <div class="cam-box">'
     + '      <div class="cam-header">'
     + '        <h3>Atlas das Províncias de Valdoria</h3>'
@@ -93517,6 +93545,23 @@ function openCartography() {
     + '        <button class="cam-filter-pill" data-filter="mapped" type="button">🗺️ Cartas</button>'
     + '        <button class="cam-filter-pill" data-filter="pinned" type="button">📌 Fixados</button>'
     + '      </div>'
+    + '    </div>'
+    + '  </div>'
+    + '  <div class="cart-atlas-modal" id="xcart-waypoints-modal" style="display:none;">'
+    + '    <div class="cam-box">'
+    + '      <div class="cam-header">'
+    + '        <div style="display:flex;align-items:center;gap:6px;">'
+    + '          <span style="font-size:16px;">🌀</span>'
+    + '          <h3 style="margin:0;font-size:13px;color:#f4d49a;font-family:Cinzel,serif;">Rede de Marcos & Santuários</h3>'
+    + '        </div>'
+    + '        <button class="cam-close" id="xcart-waypoints-close-btn" type="button">✕</button>'
+    + '      </div>'
+    + '      <div class="cam-legend" id="xcwm-filter-bar" style="padding:6px 12px;border-bottom:1px solid rgba(196,149,58,0.25);">'
+    + '        <button class="cam-filter-pill active" data-wfilter="all" type="button">Todos</button>'
+    + '        <button class="cam-filter-pill" data-wfilter="settlements" type="button">🏛️ Vilas & Santuários</button>'
+    + '        <button class="cam-filter-pill" data-wfilter="pinned" type="button">📌 Alfinetes Fixados</button>'
+    + '      </div>'
+    + '      <div class="cam-grid" id="xcart-waypoints-list" style="max-height:55vh;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:10px;"></div>'
     + '    </div>'
     + '  </div>'
 
@@ -93868,7 +93913,10 @@ function _xcartCenterOnPlayer(){
     return;
   }
 
-  _xcartSmoothPanTo(0, 0, 1.0, 240);
+  var targetZoom = 1.35;
+  var targetPanX = (_xcartW / 2) - (pos.x * targetZoom);
+  var targetPanY = (_xcartH / 2) - (pos.y * targetZoom);
+  _xcartSmoothPanTo(targetPanX, targetPanY, targetZoom, 280);
 }
 
 
@@ -94334,6 +94382,143 @@ function _xcartWireEvents() {
   var atlasBack = document.getElementById('xcart-atlas-back-btn');
   if (atlasBack) atlasBack.onclick = function(){ _xcartFocusProvince('world'); };
 
+
+function _xcartOpenWaypointsModal() {
+  var modal = document.getElementById('xcart-waypoints-modal');
+  if (!modal) return;
+  _xcartPopulateWaypointsList('all');
+  modal.style.display = 'flex';
+}
+
+function _xcartCloseWaypointsModal() {
+  var modal = document.getElementById('xcart-waypoints-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function _xcartPopulateWaypointsList(filter) {
+  var listEl = document.getElementById('xcart-waypoints-list');
+  if (!listEl) return;
+  var p = (typeof getPlayerObj === 'function') ? getPlayerObj() : (window.CITY_MOCK_PLAYER || {});
+  var known = p.known_locations || ['plains'];
+  var curLoc = (typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : 'plains';
+  var pinned = (window.CartShared && CartShared.getPinnedLocations) ? CartShared.getPinnedLocations() : [];
+
+  var allBiomes = (window.CartShared && CartShared.CART_BIOMES) || [];
+  var items = [];
+
+  allBiomes.forEach(function(b) {
+    var isKnown = (known.indexOf(b.key) >= 0) || b.isOrigin;
+    if (!isKnown) return;
+    var isSettlement = !!(b.settlement || b.isOrigin);
+    var isPin = pinned.indexOf(b.key) >= 0;
+
+    if (filter === 'settlements' && !isSettlement) return;
+    if (filter === 'pinned' && !isPin) return;
+    if (filter === 'all' && (!isSettlement && !isPin)) return;
+
+    items.push({
+      biome: b,
+      isSettlement: isSettlement,
+      isPin: isPin,
+      isCurrent: (b.key === curLoc)
+    });
+  });
+
+  if (items.length === 0) {
+    listEl.innerHTML = '<div style="padding:16px;text-align:center;color:#a09484;font-style:italic;font-size:11px;">Nenhum marco ou santuário disponível neste filtro. Fixe locais no mapa com o botão 📌 para acessá-los rapidamente aqui!</div>';
+    return;
+  }
+
+  var html = '';
+  items.forEach(function(item) {
+    var b = item.biome;
+    var prov = (window.CartShared && CartShared.getLocationProvince) ? CartShared.getLocationProvince(b.key) : null;
+    var provName = prov ? prov.name : 'Valdória';
+    var marcos = (typeof b.marcos === 'number') ? b.marcos : (b.tier || 1);
+    var distMilhas = Math.max(6, marcos * 8);
+
+    var badge = item.isCurrent ? '<span style="font-size:9px;background:#2e7d32;color:#fff;padding:1px 6px;border-radius:10px;">Você está aqui</span>'
+      : item.isPin ? '<span style="font-size:9px;background:rgba(218,165,32,0.25);border:1px solid #ffd700;color:#ffd700;padding:1px 6px;border-radius:10px;">📍 Alfinete</span>'
+      : '<span style="font-size:9px;background:rgba(196,149,58,0.2);color:#d2be90;padding:1px 6px;border-radius:10px;">🌀 Marco</span>';
+
+    html += '<div class="cam-item" style="cursor:pointer;flex-direction:row;align-items:center;justify-content:space-between;padding:8px 12px;" onclick="_xcartFocusWaypoint(\'' + b.key + '\')">'
+      + '  <div style="display:flex;align-items:center;gap:10px;">'
+      + '    <span style="font-size:22px;">' + (b.ico || '📍') + '</span>'
+      + '    <div>'
+      + '      <div style="font-family:Cinzel,serif;font-weight:700;color:#f4d49a;font-size:12px;">' + (b.regionalName || b.name) + ' ' + badge + '</div>'
+      + '      <div style="font-size:10px;color:#a09484;">' + provName + ' · ~' + distMilhas + ' milhas (~' + marcos + ' marcos)</div>'
+      + '    </div>'
+      + '  </div>'
+      + '  <button class="xcart-dock-btn" type="button" style="height:26px;font-size:9.5px;padding:0 8px;">🔍 Focar</button>'
+      + '</div>';
+  });
+  listEl.innerHTML = html;
+}
+
+function _xcartFocusWaypoint(key) {
+  _xcartCloseWaypointsModal();
+  var prov = (window.CartShared && CartShared.getLocationProvince) ? CartShared.getLocationProvince(key) : null;
+  if (prov && _xcartEngine && typeof _xcartEngine.openProvince === 'function') {
+    _xcartEngine.openProvince(prov.id);
+    _xcartActiveProvId = prov.id;
+    var titleEl = document.getElementById('xcart-title');
+    if (titleEl) {
+      titleEl.innerHTML = '<span class="cart-title-crumb" onclick="_xcartFocusProvince(\'world\')">🌍 Continente</span>'
+        + '<span class="cart-title-sep">›</span>'
+        + '<span>' + prov.icon + ' ' + prov.name + '</span>';
+    }
+  }
+  setTimeout(function() {
+    var pos = (_xcartEngine && typeof _xcartEngine.getNodePos === 'function') ? _xcartEngine.getNodePos(key, _xcartW, _xcartH) : null;
+    if (pos) {
+      var targetZoom = 1.4;
+      var targetPanX = (_xcartW / 2) - (pos.x * targetZoom);
+      var targetPanY = (_xcartH / 2) - (pos.y * targetZoom);
+      _xcartSmoothPanTo(targetPanX, targetPanY, targetZoom, 280);
+    }
+    var allBiomes = (window.CartShared && CartShared.CART_BIOMES) || [];
+    var targetNode = allBiomes.find(function(b){ return b.key === key; });
+    if (targetNode) {
+      _xcartOpenLocationPopup(targetNode);
+    }
+  }, 100);
+}
+
+  // Modal Marcos & Santuários (Exploração)
+  var waypointsBtn = document.getElementById('xcart-waypoints-btn');
+  var waypointsModal = document.getElementById('xcart-waypoints-modal');
+  var waypointsClose = document.getElementById('xcart-waypoints-close-btn');
+  if (waypointsBtn) {
+    waypointsBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      _xcartOpenWaypointsModal();
+    };
+  }
+  if (waypointsClose) {
+    waypointsClose.onclick = function(e){
+      e.preventDefault();
+      _xcartCloseWaypointsModal();
+    };
+  }
+  if (waypointsModal) {
+    waypointsModal.onclick = function(e){
+      if (e.target === waypointsModal) _xcartCloseWaypointsModal();
+    };
+  }
+  var xcwmFilterBar = document.getElementById('xcwm-filter-bar');
+  if (xcwmFilterBar) {
+    xcwmFilterBar.onclick = function(e){
+      var pill = e.target.closest('.cam-filter-pill');
+      if (!pill) return;
+      var pills = xcwmFilterBar.querySelectorAll('.cam-filter-pill');
+      pills.forEach(function(p){ p.classList.remove('active'); });
+      pill.classList.add('active');
+      var wFilter = pill.getAttribute('data-wfilter') || 'all';
+      _xcartPopulateWaypointsList(wFilter);
+    };
+  }
+
   // Atlas Modal Seletor de Províncias
   var atlasPickerBtn = document.getElementById('xcart-atlas-picker-btn');
   var atlasModal = document.getElementById('xcart-atlas-modal');
@@ -94538,6 +94723,12 @@ function _wireXCartKeyboardNavigation() {
       if (locPopup && locPopup.classList.contains('active')) {
         e.preventDefault();
         _closeCartLocationPopup();
+        return;
+      }
+      var wpModal = document.getElementById('xcart-waypoints-modal');
+      if (wpModal && wpModal.style.display !== 'none') {
+        e.preventDefault();
+        _xcartCloseWaypointsModal();
         return;
       }
       var atlasModal = document.getElementById('xcart-atlas-modal');
@@ -99519,6 +99710,157 @@ function bindQuickActions() {
   // wrap por user request). Toggle button DENTRO do wrap stop-propagation
 
   // pra evitar dispatch duplo. Keyboard: Enter/Space tambem abre.
+
+
+function _openTacticalRadar() {
+  var modal = document.getElementById('tactical-radar-modal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  _drawTacticalRadar();
+}
+
+function _closeTacticalRadar() {
+  var modal = document.getElementById('tactical-radar-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function _drawTacticalRadar() {
+  var canvas = document.getElementById('tactical-radar-canvas');
+  if (!canvas || !S || !S.grid) return;
+  var ctx = canvas.getContext('2d');
+  var w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#16110a';
+  ctx.fillRect(0, 0, w, h);
+
+  var pal = BIOME_COLORS[S.biome] || BIOME_COLORS.forest;
+  var cw = w / (COLS + 0.5);
+  var ch = h / ROWS;
+
+  var exploredCount = 0;
+  var totalTiles = ROWS * COLS;
+
+  for (var r = 0; r < ROWS; r++) {
+    for (var c = 0; c < COLS; c++) {
+      var key = fogKey(c, r);
+      var fs = S.fogState[key];
+      if (!fs) continue;
+      exploredCount++;
+      var tile = S.grid[r][c];
+      var color = pal[tile] || pal['.'];
+      var offsetX = (r % 2 === 1) ? cw * 0.5 : 0;
+      var alpha = (fs === 'visible') ? 1.0 : (fs === 'dim' ? 0.42 : 0);
+      if (alpha === 0) continue;
+
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = color;
+      ctx.fillRect(c * cw + offsetX, r * ch, cw + 0.6, ch + 0.6);
+    }
+  }
+  ctx.globalAlpha = 1.0;
+
+  // Render edges / exits
+  try {
+    var mEds = (S.mapDef && S.mapDef.edges) || [];
+    for (var mei = 0; mei < mEds.length; mei++) {
+      var med = mEds[mei];
+      var mfs = S.fogState[fogKey(med.col, med.row)];
+      if (mfs !== 'visible' && mfs !== 'dim') continue;
+      var meOff = (med.row % 2 === 1) ? cw * 0.5 : 0;
+      var mex = med.col * cw + cw / 2 + meOff;
+      var mey = med.row * ch + ch / 2;
+      var isRet = (med.targetMap === '__return_city__');
+      ctx.fillStyle = isRet ? '#ffd875' : '#4ade80';
+      ctx.beginPath();
+      var mds = Math.max(3, cw * 0.7);
+      ctx.arc(mex, mey, mds, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+    }
+  } catch(_) {}
+
+  // Render Player comitiva marker
+  var pOff = (S.player.row % 2 === 1) ? cw * 0.5 : 0;
+  var px = S.player.col * cw + cw / 2 + pOff;
+  var py = S.player.row * ch + ch / 2;
+
+  ctx.beginPath();
+  ctx.arc(px, py, Math.max(6, cw * 1.3), 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255, 215, 0, 0.35)';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(px, py, Math.max(3, cw * 0.65), 0, Math.PI * 2);
+  ctx.fillStyle = '#ffd700';
+  ctx.shadowColor = '#ffaa00';
+  ctx.shadowBlur = 6;
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // Update stat
+  var pct = Math.round((exploredCount / totalTiles) * 100);
+  var statEl = document.getElementById('trm-coverage-stat');
+  if (statEl) {
+    var edgesCount = (S.mapDef && S.mapDef.edges) ? S.mapDef.edges.length : 0;
+    statEl.textContent = 'Explorado: ' + pct + '% (' + exploredCount + '/' + totalTiles + ' hexágonos) · ' + edgesCount + ' Saídas';
+  }
+}
+
+  var btnRadar = document.getElementById('btn-radar-expand');
+  if (btnRadar) {
+    btnRadar.onclick = function(e){
+      e.stopPropagation();
+      _openTacticalRadar();
+    };
+  }
+  var radarClose = document.getElementById('tactical-radar-close-btn');
+  if (radarClose) {
+    radarClose.onclick = function(e){
+      e.preventDefault();
+      _closeTacticalRadar();
+    };
+  }
+  var radarModal = document.getElementById('tactical-radar-modal');
+  if (radarModal) {
+    radarModal.onclick = function(e){
+      if (e.target === radarModal) _closeTacticalRadar();
+    };
+  }
+  var radarCanvas = document.getElementById('tactical-radar-canvas');
+  if (radarCanvas) {
+    radarCanvas.onclick = function(e){
+      var rect = radarCanvas.getBoundingClientRect();
+      var mx = e.clientX - rect.left;
+      var my = e.clientY - rect.top;
+      var cw = radarCanvas.width / (COLS + 0.5);
+      var ch = radarCanvas.height / ROWS;
+      var targetR = Math.max(0, Math.min(ROWS - 1, Math.floor(my / ch)));
+      var offX = (targetR % 2 === 1) ? cw * 0.5 : 0;
+      var targetC = Math.max(0, Math.min(COLS - 1, Math.floor((mx - offX) / cw)));
+      _closeTacticalRadar();
+      centerOnPlayer(true);
+    };
+  }
+
+  window.addEventListener('keydown', function(e) {
+    var tag = (document.activeElement && document.activeElement.tagName) ? document.activeElement.tagName.toLowerCase() : '';
+    if (tag === 'input' || tag === 'textarea') return;
+    if (e.key === 'z' || e.key === 'Z') {
+      var rModal = document.getElementById('tactical-radar-modal');
+      if (rModal && rModal.style.display !== 'none') {
+        _closeTacticalRadar();
+      } else {
+        _openTacticalRadar();
+      }
+    } else if (e.key === 'Escape') {
+      var rModal = document.getElementById('tactical-radar-modal');
+      if (rModal && rModal.style.display !== 'none') {
+        _closeTacticalRadar();
+      }
+    }
+  });
 
   var mwWrap = document.getElementById('minimap-wrap');
 

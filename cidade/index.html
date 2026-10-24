@@ -69946,7 +69946,8 @@ function renderCartographyCanvas(el){
     + '  <div class="cart-dock" id="cart-dock">'
     + '    <button class="cart-dock-btn" id="cart-back-btn" type="button" title="Voltar à Cidade [Esc]" aria-label="Voltar para a cidade">🏛️ Cidade</button>'
     + '    <button class="cart-dock-btn primary" id="cart-atlas-picker-btn" type="button" title="Atlas das Províncias [M]" aria-label="Seletor de Províncias">🗺️ Atlas ▾</button>'
-    + '    <button class="cart-dock-btn" id="cart-filter-toggle-btn" type="button" title="Alternar Filtro de Nós no Mapa [Teclas 1 a 4]">🎯 Filtro: Todos</button>'
+    + '    <button class="cart-dock-btn" id="cart-waypoints-btn" type="button" title="Rede de Marcos e Santuários [W]" aria-label="Marcos de Viagem e Santuários">🌀 Marcos</button>'
+    + '    <button class="cart-dock-btn" id="cart-filter-toggle-btn" type="button" title="Alternar Filtro de Nós no Mapa [Teclas 1 a 5]">🎯 Filtro: Todos</button>'
     + '    <button class="cart-dock-btn accent" id="cart-atlas-back-btn" type="button" title="Voltar ao Continente [Backspace]" style="display:none;" aria-label="Voltar ao Continente">🌍 Continente</button>'
     + '  </div>'
     + '  <div class="cart-header">'
@@ -69997,6 +69998,23 @@ function renderCartographyCanvas(el){
     + '        <button class="cam-filter-pill" data-filter="mapped" type="button">🗺️ Cartas</button>'
     + '        <button class="cam-filter-pill" data-filter="pinned" type="button">📌 Fixados</button>'
     + '      </div>'
+    + '    </div>'
+    + '  </div>'
+    + '  <div class="cart-atlas-modal" id="cart-waypoints-modal" style="display:none;">'
+    + '    <div class="cam-box">'
+    + '      <div class="cam-header">'
+    + '        <div style="display:flex;align-items:center;gap:6px;">'
+    + '          <span style="font-size:16px;">🌀</span>'
+    + '          <h3 style="margin:0;font-size:13px;color:#f4d49a;font-family:Cinzel,serif;">Rede de Marcos & Santuários</h3>'
+    + '        </div>'
+    + '        <button class="cam-close" id="cart-waypoints-close-btn" type="button">✕</button>'
+    + '      </div>'
+    + '      <div class="cam-legend" id="cwm-filter-bar" style="padding:6px 12px;border-bottom:1px solid rgba(196,149,58,0.25);">'
+    + '        <button class="cam-filter-pill active" data-wfilter="all" type="button">Todos</button>'
+    + '        <button class="cam-filter-pill" data-wfilter="settlements" type="button">🏛️ Vilas & Santuários</button>'
+    + '        <button class="cam-filter-pill" data-wfilter="pinned" type="button">📌 Alfinetes Fixados</button>'
+    + '      </div>'
+    + '      <div class="cam-grid" id="cart-waypoints-list" style="max-height:55vh;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:10px;"></div>'
     + '    </div>'
     + '  </div>'
     + '</div>';
@@ -70551,6 +70569,143 @@ function _wireCartEvents(){
     }
   }
 
+
+function _cartOpenWaypointsModal() {
+  var modal = document.getElementById('cart-waypoints-modal');
+  if (!modal) return;
+  _cartPopulateWaypointsList('all');
+  modal.style.display = 'flex';
+}
+
+function _cartCloseWaypointsModal() {
+  var modal = document.getElementById('cart-waypoints-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function _cartPopulateWaypointsList(filter) {
+  var listEl = document.getElementById('cart-waypoints-list');
+  if (!listEl) return;
+  var p = window.CITY_MOCK_PLAYER || {};
+  var known = p.known_locations || ['plains'];
+  var curLoc = _cartGetPlayerBiome();
+  var pinned = (window.CartShared && CartShared.getPinnedLocations) ? CartShared.getPinnedLocations() : [];
+
+  var allBiomes = (window.CartShared && CartShared.CART_BIOMES) || [];
+  var items = [];
+
+  allBiomes.forEach(function(b) {
+    var isKnown = (known.indexOf(b.key) >= 0) || b.isOrigin;
+    if (!isKnown) return;
+    var isSettlement = !!(b.settlement || b.isOrigin);
+    var isPin = pinned.indexOf(b.key) >= 0;
+
+    if (filter === 'settlements' && !isSettlement) return;
+    if (filter === 'pinned' && !isPin) return;
+    if (filter === 'all' && (!isSettlement && !isPin)) return;
+
+    items.push({
+      biome: b,
+      isSettlement: isSettlement,
+      isPin: isPin,
+      isCurrent: (b.key === curLoc)
+    });
+  });
+
+  if (items.length === 0) {
+    listEl.innerHTML = '<div style="padding:16px;text-align:center;color:#a09484;font-style:italic;font-size:11px;">Nenhum marco ou santuário disponível neste filtro. Fixe locais no mapa com o botão 📌 para acessá-los rapidamente aqui!</div>';
+    return;
+  }
+
+  var html = '';
+  items.forEach(function(item) {
+    var b = item.biome;
+    var prov = (window.CartShared && CartShared.getLocationProvince) ? CartShared.getLocationProvince(b.key) : null;
+    var provName = prov ? prov.name : 'Valdória';
+    var marcos = (typeof b.marcos === 'number') ? b.marcos : (b.tier || 1);
+    var distMilhas = Math.max(6, marcos * 8);
+
+    var badge = item.isCurrent ? '<span style="font-size:9px;background:#2e7d32;color:#fff;padding:1px 6px;border-radius:10px;">Você está aqui</span>'
+      : item.isPin ? '<span style="font-size:9px;background:rgba(218,165,32,0.25);border:1px solid #ffd700;color:#ffd700;padding:1px 6px;border-radius:10px;">📍 Alfinete</span>'
+      : '<span style="font-size:9px;background:rgba(196,149,58,0.2);color:#d2be90;padding:1px 6px;border-radius:10px;">🌀 Marco</span>';
+
+    html += '<div class="cam-item" style="cursor:pointer;flex-direction:row;align-items:center;justify-content:space-between;padding:8px 12px;" onclick="_cartFocusWaypoint(\'' + b.key + '\')">'
+      + '  <div style="display:flex;align-items:center;gap:10px;">'
+      + '    <span style="font-size:22px;">' + (b.ico || '📍') + '</span>'
+      + '    <div>'
+      + '      <div style="font-family:Cinzel,serif;font-weight:700;color:#f4d49a;font-size:12px;">' + (b.regionalName || b.name) + ' ' + badge + '</div>'
+      + '      <div style="font-size:10px;color:#a09484;">' + provName + ' · ~' + distMilhas + ' milhas (~' + marcos + ' marcos)</div>'
+      + '    </div>'
+      + '  </div>'
+      + '  <button class="cart-dock-btn" type="button" style="height:26px;font-size:9.5px;padding:0 8px;">🔍 Focar</button>'
+      + '</div>';
+  });
+  listEl.innerHTML = html;
+}
+
+function _cartFocusWaypoint(key) {
+  _cartCloseWaypointsModal();
+  var prov = (window.CartShared && CartShared.getLocationProvince) ? CartShared.getLocationProvince(key) : null;
+  if (prov && _cartEngine && typeof _cartEngine.openProvince === 'function') {
+    _cartEngine.openProvince(prov.id);
+    _cartActiveProvId = prov.id;
+    var titleEl = document.getElementById('cart-title');
+    if (titleEl) {
+      titleEl.innerHTML = '<span class="cart-title-crumb" onclick="_cartFocusProvince(\'world\')">🌍 Continente</span>'
+        + '<span class="cart-title-sep">›</span>'
+        + '<span>' + prov.icon + ' ' + prov.name + '</span>';
+    }
+  }
+  setTimeout(function() {
+    var pos = (_cartEngine && typeof _cartEngine.getNodePos === 'function') ? _cartEngine.getNodePos(key, _cartW, _cartH) : null;
+    if (pos) {
+      var targetZoom = 1.4;
+      var targetPanX = (_cartW / 2) - (pos.x * targetZoom);
+      var targetPanY = (_cartH / 2) - (pos.y * targetZoom);
+      _cartSmoothPanTo(targetPanX, targetPanY, targetZoom, 280);
+    }
+    var allBiomes = (window.CartShared && CartShared.CART_BIOMES) || [];
+    var targetNode = allBiomes.find(function(b){ return b.key === key; });
+    if (targetNode) {
+      _openCartLocationPopup(targetNode);
+    }
+  }, 100);
+}
+
+  // Modal Marcos & Santuários
+  var waypointsBtn = document.getElementById('cart-waypoints-btn');
+  var waypointsModal = document.getElementById('cart-waypoints-modal');
+  var waypointsClose = document.getElementById('cart-waypoints-close-btn');
+  if (waypointsBtn) {
+    waypointsBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      _cartOpenWaypointsModal();
+    };
+  }
+  if (waypointsClose) {
+    waypointsClose.onclick = function(e){
+      e.preventDefault();
+      _cartCloseWaypointsModal();
+    };
+  }
+  if (waypointsModal) {
+    waypointsModal.onclick = function(e){
+      if (e.target === waypointsModal) _cartCloseWaypointsModal();
+    };
+  }
+  var cwmFilterBar = document.getElementById('cwm-filter-bar');
+  if (cwmFilterBar) {
+    cwmFilterBar.onclick = function(e){
+      var pill = e.target.closest('.cam-filter-pill');
+      if (!pill) return;
+      var pills = cwmFilterBar.querySelectorAll('.cam-filter-pill');
+      pills.forEach(function(p){ p.classList.remove('active'); });
+      pill.classList.add('active');
+      var wFilter = pill.getAttribute('data-wfilter') || 'all';
+      _cartPopulateWaypointsList(wFilter);
+    };
+  }
+
   // Modal Atlas das Províncias (Seletor direto das 8 províncias + Continente)
   var atlasPickerBtn = document.getElementById('cart-atlas-picker-btn');
   var atlasModal = document.getElementById('cart-atlas-modal');
@@ -70818,6 +70973,12 @@ function _wireCartKeyboardNavigation() {
         _closeCartLocationPopup();
         return;
       }
+      var wpModal = document.getElementById('cart-waypoints-modal');
+      if (wpModal && wpModal.style.display !== 'none') {
+        e.preventDefault();
+        _cartCloseWaypointsModal();
+        return;
+      }
       var atlasModal = document.getElementById('cart-atlas-modal');
       if (atlasModal && atlasModal.style.display !== 'none') {
         e.preventDefault();
@@ -70837,6 +70998,18 @@ function _wireCartKeyboardNavigation() {
     }
 
     if (isInput) return; // Não intercepta digitação na barra de busca do Atlas
+
+    // W / w: abre/alterna Rede de Marcos e Santuários
+    if (e.key === 'w' || e.key === 'W') {
+      e.preventDefault();
+      var wpModal = document.getElementById('cart-waypoints-modal');
+      if (wpModal && wpModal.style.display !== 'none') {
+        _cartCloseWaypointsModal();
+      } else {
+        _cartOpenWaypointsModal();
+      }
+      return;
+    }
 
     // M / Tab: abre/alterna Atlas
     if (e.key === 'm' || e.key === 'M' || e.key === 'Tab') {
@@ -71001,7 +71174,10 @@ function _cartCenterOnPlayer(){
     return;
   }
 
-  _cartSmoothPanTo(0, 0, 1.0, 240);
+  var targetZoom = 1.35;
+  var targetPanX = (_cartW / 2) - (pos.x * targetZoom);
+  var targetPanY = (_cartH / 2) - (pos.y * targetZoom);
+  _cartSmoothPanTo(targetPanX, targetPanY, targetZoom, 280);
 }
 
 function _cartTouchDist(touches){
