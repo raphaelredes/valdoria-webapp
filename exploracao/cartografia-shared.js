@@ -9511,6 +9511,148 @@
     };
   }
 
+
+  // === calcWildernessSignalSmokeAndFlares (Sinais de Fumaça, Sinalizadores Alquímicos e Visibilidade Regional - DMG p. 112 / PHB p. 150) ===
+  function calcWildernessSignalSmokeAndFlares(biomeKey, signalType, weatherCondition, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var st = (signalType || 'white_pine_smoke').toLowerCase();
+    var wc = (weatherCondition || 'clear').toLowerCase();
+
+    var baseMiles = 5;
+    var signalTitle = 'Sinal de Fumaça Branca Densa (Agulhas de Pinho Úmidas)';
+    var meaning = 'Acampamento amigo seguro / Ponto de encontro da comitiva desimpedido.';
+    var hostileAttractionRisk = '+10% chance de patrulhas hostis investigarem a coluna de fumaça.';
+    var icon = '💨🌲';
+    var color = '#e2e8f0';
+
+    if (st === 'black_pitch_smoke') {
+      baseMiles = 8;
+      signalTitle = 'Sinal de Fumaça Negra Oleosa (Piche e Resina Fóssil)';
+      meaning = 'Alerta de perigo extremo / Bando de aventureiros cercado ou emboscada em andamento.';
+      hostileAttractionRisk = '+25% de atração de saqueadores, orcs e feras atraídos por tumulto.';
+      icon = '🔥⚠️';
+      color = '#f87171';
+    } else if (st === 'colored_alchemical_smoke') {
+      baseMiles = 4;
+      signalTitle = 'Fumaça Alquímica Esmeralda / Púrpura (Cobre & Enxofre Cifrado)';
+      meaning = 'Código de batedores da guilda / Ponto de extração tática confirmado.';
+      hostileAttractionRisk = '+15% de atração de sentinelas ou conjuradores curiosos.';
+      icon = '🧪✨';
+      color = '#c084fc';
+    } else if (st === 'night_alchemist_flare') {
+      baseMiles = 10;
+      signalTitle = 'Sinalizador Pirotécnico Noturno (Fogo Alquímico / Faerie Fire)';
+      meaning = 'Sinalizador celeste de socorro noturno visível em vales e montanhas.';
+      hostileAttractionRisk = '+30% de atração de predadores alados em um raio de 10 milhas.';
+      icon = '🎆🌙';
+      color = '#facc15';
+    }
+
+    var visibilityMiles = baseMiles;
+    var weatherModifier = 'Céu limpo: visibilidade de horizonte total.';
+    if (wc === 'fog' || wc === 'rain' || wc === 'storm') {
+      visibilityMiles = Math.max(1, Math.round(baseMiles * 0.4));
+      weatherModifier = 'Precipitação ou nevoeiro espesso abafa a dispersão do sinal (alcance reduzido em 60%).';
+    } else if (wc === 'wind' || wc === 'strong_wind') {
+      visibilityMiles = Math.max(2, Math.round(baseMiles * 0.7));
+      weatherModifier = 'Ventos cortantes dispersam a coluna de fumaça lateralmente (alcance reduzido em 30%).';
+    }
+
+    return {
+      biomeKey: bk,
+      signalType: st,
+      signalTitle: signalTitle,
+      meaning: meaning,
+      visibilityMiles: visibilityMiles,
+      weatherModifier: weatherModifier,
+      hostileAttractionRisk: hostileAttractionRisk,
+      icon: icon,
+      color: color,
+      dndRef: 'DMG p. 112 (Sinais e Fumaça de Acampamento) / PHB p. 150 (Equipamento de Sinalização)'
+    };
+  }
+
+  // === calcPackAnimalConditioningAndLoad (Condicionamento de Animais de Carga, Carga Máxima e Terreno - PHB p. 155, 157, 161 / DMG p. 111) ===
+  function calcPackAnimalConditioningAndLoad(biomeKey, mountType, loadPounds, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var mt = (mountType || 'pack_mule').toLowerCase();
+    var load = (typeof loadPounds === 'number') ? loadPounds : 200;
+
+    var animal = {
+      animalName: 'Mula de Carga Fiel',
+      carryingCapacityLbs: 420,
+      baseSpeedFt: 40,
+      terrainAdaptation: 'Passo Firme (+5 em testes contra terreno acidentado e cascalho solto de encostas).',
+      dailyFeedWater: '1 lb de ração ou 2 horas de pastagem / 3 galões de água por dia.',
+      icon: '🫏📦',
+      color: '#ca8a04'
+    };
+
+    if (mt === 'draft_horse' || bk === 'plains') {
+      animal = {
+        animalName: 'Cavalo de Tração Robusto',
+        carryingCapacityLbs: 540,
+        baseSpeedFt: 40,
+        terrainAdaptation: 'Força motriz excelente em estradas e planícies; sofre desvantagem em pântanos profundos e fendas rochosas.',
+        dailyFeedWater: '2 lbs de aveia ou ração concentrada / 4 galões de água.',
+        icon: '🐎🌾',
+        color: '#a16207'
+      };
+    } else if (mt === 'desert_camel' || bk === 'desert' || bk === 'dunas') {
+      animal = {
+        animalName: 'Dromedário do Deserto',
+        carryingCapacityLbs: 480,
+        baseSpeedFt: 50,
+        terrainAdaptation: 'Reserva biológica de água: suporta até 10 dias sem beber água antes de sofrer exaustão (PHB p. 157); ignora terreno difícil em areia fofa.',
+        dailyFeedWater: 'Arbustos secos espinhosos / consumo abundante cíclico a cada 5 a 10 dias.',
+        icon: '🐫🏜️',
+        color: '#eab308'
+      };
+    } else if (mt === 'mountain_goat_giant' || bk === 'montanha') {
+      animal = {
+        animalName: 'Bode Gigante das Montanhas',
+        carryingCapacityLbs: 510,
+        baseSpeedFt: 40,
+        terrainAdaptation: 'Escalador nato: ignora terreno difícil não-mágico de rochedos íngremes, paredões e gelo liso.',
+        dailyFeedWater: 'Líquens de penhasco e arbustos alpinos / 2 galões de água de degelo.',
+        icon: '🐐⛰️',
+        color: '#38bdf8'
+      };
+    }
+
+    var cap = animal.carryingCapacityLbs;
+    var loadStatus = 'Carga Leve (Ágil)';
+    var speedModifier = 'Velocidade total preservada (sem atraso na marcha do grupo).';
+
+    if (load > cap * 1.5) {
+      loadStatus = 'Sobrecarga Crítica (Heavily Encumbered)';
+      speedModifier = 'Velocidade reduzida para 5 pés; desvantagem em testes e salvaguardas físicas.';
+    } else if (load > cap) {
+      loadStatus = 'Sobrecarga Pesada (Encumbered)';
+      speedModifier = 'Velocidade reduzida em 10 pés (-20% no deslocamento diário da comitiva).';
+    } else if (load > cap * 0.5) {
+      loadStatus = 'Carga Moderada (Capacidade Padrão)';
+      speedModifier = 'Ritmo padrão sustentado de 24 milhas/dia sem penalidades.';
+    }
+
+    return {
+      biomeKey: bk,
+      mountType: mt,
+      animalName: animal.animalName,
+      carryingCapacityLbs: cap,
+      currentLoadLbs: load,
+      loadStatus: loadStatus,
+      speedModifier: speedModifier,
+      terrainAdaptation: animal.terrainAdaptation,
+      dailyFeedWater: animal.dailyFeedWater,
+      icon: animal.icon,
+      color: animal.color,
+      dndRef: 'PHB p. 157, 161 (Animais de Carga e Tração) / DMG p. 111 (Marcha com Animais)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -11246,6 +11388,8 @@
     calcWildernessQuicksandHazard: calcWildernessQuicksandHazard,
     calcWaterSourcePurityAndPurification: calcWaterSourcePurityAndPurification,
     calcArborealBivouacShelter: calcArborealBivouacShelter,
+    calcWildernessSignalSmokeAndFlares: calcWildernessSignalSmokeAndFlares,
+    calcPackAnimalConditioningAndLoad: calcPackAnimalConditioningAndLoad,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

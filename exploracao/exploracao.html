@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T22:09:44Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T22:12:43Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,27 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessSignalSmokeAndFlares) return '';
+        var bKey = (biome && biome.key) || 'forest';
+        var sg = CartShared.calcWildernessSignalSmokeAndFlares(bKey, 'white_pine_smoke', 'clear');
+        return '<div class="clp-signals-card" style="margin:4px 0 6px;text-align:left;background:rgba(24,24,28,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(226,232,240,0.3);font-size:8px;color:#f1f5f9;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sg.color + ';margin-bottom:2px;">' + sg.icon + ' ' + sg.signalTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Significado:</b> ' + sg.meaning + ' · Alcance ' + sg.visibilityMiles + ' milhas (' + sg.weatherModifier + ')</div>'
+          + '  <div style="font-size:7.5px;color:#cbd5e1;margin-top:1px;">• <i>Risco Hostil: ' + sg.hostileAttractionRisk + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcPackAnimalConditioningAndLoad) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var pa = CartShared.calcPackAnimalConditioningAndLoad(bKey, 'pack_mule', 180);
+        return '<div class="clp-pack-animal-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,24,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(202,138,4,0.3);font-size:8px;color:#fef08a;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + pa.color + ';margin-bottom:2px;">' + pa.icon + ' ' + pa.animalName.toUpperCase() + ' (PHB p. 157, 161):</div>'
+          + '  <div>• <b>Carga:</b> ' + pa.currentLoadLbs + ' / ' + pa.carryingCapacityLbs + ' lbs · <b>Status:</b> ' + pa.loadStatus + '</div>'
+          + '  <div>• <b>Marcha:</b> ' + pa.speedModifier + ' · <i>Adaptação: ' + pa.terrainAdaptation + '</i></div>'
+          + '  <div style="font-size:7.5px;color:#fde047;margin-top:1px;">• <b>Sustento:</b> ' + pa.dailyFeedWater + '</div>'
           + '</div>';
       })()
     + (function(){
