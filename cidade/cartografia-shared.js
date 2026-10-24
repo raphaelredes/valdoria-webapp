@@ -9793,6 +9793,121 @@
     };
   }
 
+
+  // === calcRiverFordingAndRopeBridgeHazard (Travessia de Rios, Vadeamento e Cabos de Segurança - DMG p. 111 / PHB p. 182-183) ===
+  function calcRiverFordingAndRopeBridgeHazard(biomeKey, crossingType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var ct = (crossingType || 'shallow_gravel_ford').toLowerCase();
+
+    var crossing = {
+      crossingTitle: 'Vau de Cascalho Raso (Água até os Tornozelos)',
+      athleticsDC: 10,
+      currentHazard: 'Correnteza suave; opera como terreno difícil que consome metade do deslocamento ao atravessar.',
+      ropeSafetyMitigation: 'Passagem desimpedida a pé; montarias e carroças cruzam sem risco de afogamento.',
+      icon: '🌊🚶',
+      color: '#38bdf8'
+    };
+
+    if (ct === 'rushing_mountain_rapids') {
+      crossing = {
+        crossingTitle: 'Corredeiras Glaciais Rápidas & Pedras Escorregadias',
+        athleticsDC: 14,
+        currentHazard: 'Correnteza violenta de degelo; falha no teste arrasta o aventureiro por 30 pés a jusante e inflige 1d6 dano de impacto.',
+        ropeSafetyMitigation: 'Cabo guia de segurança ancorado por batedor de Força elevada concede vantagem no teste e impede arrasto pela correnteza.',
+        icon: '🌊💥',
+        color: '#0284c7'
+      };
+    } else if (ct === 'swollen_flood_river' || bk === 'swamp') {
+      crossing = {
+        crossingTitle: 'Rio Enchente Turbulentíssimo (DMG p. 111 / PHB p. 182)',
+        athleticsDC: 16,
+        currentHazard: 'Águas profundas e redemoinhos; nadar contra a correnteza exige teste a cada turno sob risco de afogamento (PHB p. 182).',
+        ropeSafetyMitigation: 'Montagem de balsa improvisada ou travessia ancorada com cabos duplos de 15 metros entre árvores firmes.',
+        icon: '🌊🚨',
+        color: '#ef4444'
+      };
+    } else if (ct === 'chasm_rope_bridge_crossing' || bk === 'montanha') {
+      crossing = {
+        crossingTitle: 'Ponte Pênsil de Corda sobre Desfiladeiro',
+        athleticsDC: 13,
+        currentHazard: 'Oscilação severa ao vento sobre abismo de 100 pés; tábuas podres e risco de queda com sobrecarga.',
+        ropeSafetyMitigation: 'Arnês com mosquetão preso ao cabo superior; impede queda fatal dos membros da comitiva em caso de tropeço.',
+        icon: '🌉⛰️',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      crossingType: ct,
+      crossingTitle: crossing.crossingTitle,
+      athleticsDC: crossing.athleticsDC,
+      currentHazard: crossing.currentHazard,
+      ropeSafetyMitigation: crossing.ropeSafetyMitigation,
+      icon: crossing.icon,
+      color: crossing.color,
+      dndRef: 'DMG p. 111 (Travessia de Águas e Corredeiras) / PHB p. 182 (Natação e Terreno Difícil)'
+    };
+  }
+
+  // === calcCampFortificationAndPerimeterDefense (Fortificações de Acampamento, Abrolhos e Armadilhas de Perímetro - PHB p. 150-151 / DMG p. 112) ===
+  function calcCampFortificationAndPerimeterDefense(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var dt = (defenseType || 'caltrop_and_ball_bearing_field').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Campo de Abrolhos e Esferas de Metal (PHB p. 150-151)',
+      tacticalEffect: 'Invasores devem superar Salvaguarda de Destreza CD 15 ou sofrer 1 ponto de dano perfurante e ter sua velocidade reduzida em 10 pés.',
+      detectionDC: 15,
+      ambushSuppression: 'Inutiliza investidas rápidas frontais de saqueadores noturnos e feras na trilha principal de acesso.',
+      icon: '⚙️🛑',
+      color: '#94a3b8'
+    };
+
+    if (dt === 'sharpened_stake_barricade') {
+      defense = {
+        defenseTitle: 'Paliçada de Estacas Pontiagudas & Troncos Entrançados',
+        tacticalEffect: 'Concede meio-abrigo (+2 na CA e testes de Destreza) contra ataques à distância e inflige 2d6 de dano perfurante em monstros que investirem contra as pontas.',
+        detectionDC: 10,
+        ambushSuppression: 'Bloqueia investidas de montarias e criaturas de porte Grande ao redor dos sacos de dormir da comitiva.',
+        icon: '🪵🛡️',
+        color: '#d97706'
+      };
+    } else if (dt === 'bell_and_string_tripwire') {
+      defense = {
+        defenseTitle: 'Fio de Desarme com Guizos de Latão e Conchas (PHB p. 152)',
+        tacticalEffect: 'Disparo acústico ecoa a até 60 pés ao redor; acorda instantaneamente todos os membros adormecidos do grupo.',
+        detectionDC: 14,
+        ambushSuppression: 'Impossibilita ataques de surpresa noturnos pelo perímetro protegido.',
+        icon: '🔔✨',
+        color: '#eab308'
+      };
+    } else if (dt === 'trench_and_earthen_berm') {
+      defense = {
+        defenseTitle: 'Vala de Drenagem e Talude de Terra Escavada',
+        tacticalEffect: 'Protege o centro do acampamento contra enxurradas repentinas e força invasores a subirem em terreno difícil.',
+        detectionDC: 12,
+        ambushSuppression: 'Invasores perdem metade do deslocamento para ultrapassar o fosso perimetral.',
+        icon: '⛏️🧱',
+        color: '#78716c'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: defense.defenseTitle,
+      tacticalEffect: defense.tacticalEffect,
+      detectionDC: defense.detectionDC,
+      ambushSuppression: defense.ambushSuppression,
+      icon: defense.icon,
+      color: defense.color,
+      dndRef: 'PHB p. 150-151 (Equipamento de Aventura: Abrolhos e Armadilhas) / DMG p. 112 (Acampamento em Território Hostil)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -11532,6 +11647,8 @@
     calcPackAnimalConditioningAndLoad: calcPackAnimalConditioningAndLoad,
     calcRockfallAndLandslideHazard: calcRockfallAndLandslideHazard,
     calcCampfireFuelAndHeatConservation: calcCampfireFuelAndHeatConservation,
+    calcRiverFordingAndRopeBridgeHazard: calcRiverFordingAndRopeBridgeHazard,
+    calcCampFortificationAndPerimeterDefense: calcCampFortificationAndPerimeterDefense,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
