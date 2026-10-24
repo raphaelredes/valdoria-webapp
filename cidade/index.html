@@ -5246,80 +5246,133 @@ LOG SINK (Fase 7):
       gap: 0;
       background: #000;  /* P-mapa sessão #73 (user): fundo PRETO fora do mapa */
     }
+    /* === DESIGN PROFISSIONAL CARTOGRAFIA AAA (Ordem do Usuário 2026-10) === */
     .cart-header {
       flex-shrink: 0;
       text-align: center;
-      padding: 6px var(--v-space-md, 8px) var(--v-space-sm, 4px);
-      background: linear-gradient(180deg, rgba(28,22,16,0.95), rgba(28,22,16,0.78));
-      border-bottom: 1px solid rgba(196, 149, 58, 0.25);
+      padding: 8px 12px 6px;
+      background: linear-gradient(180deg, rgba(18, 13, 8, 0.98) 0%, rgba(24, 18, 12, 0.92) 100%);
+      border-bottom: 1px solid rgba(196, 149, 58, 0.35);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
     }
     .cart-header h2 {
       font-family: 'Cinzel', serif;
-      color: #c4953a;
-      font-size: var(--v-font-body, 14px);
-      letter-spacing: 0.12em;
-      margin: 0 0 var(--v-space-xs, 2px);
-      text-shadow: 0 0 12px rgba(196, 149, 58, 0.45);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #f4d49a;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.9), 0 0 10px rgba(196, 149, 58, 0.4);
+      margin: 0 0 5px;
+      text-transform: uppercase;
+    }
+    .cart-prov-bar-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(196, 149, 58, 0.28);
+      border-radius: 20px;
+      padding: 3px 6px;
+      box-shadow: inset 0 1px 4px rgba(0,0,0,0.6);
+      width: 100%;
     }
     .cart-prov-bar {
       flex: 1;
       min-width: 0;
       display: flex;
-      gap: 4px;
+      gap: 5px;
       overflow-x: auto;
       scrollbar-width: none;
-      padding: 3px 2px 1px;
-      margin-top: 2px;
+      padding: 2px 0;
       -webkit-overflow-scrolling: touch;
     }
     .cart-prov-bar::-webkit-scrollbar { display: none; }
-    .cart-prov-bar-wrap {
-      position: relative;
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      margin-top: 2px;
-      width: 100%;
-    }
     .cart-prov-nav-btn {
-      background: rgba(30, 20, 10, 0.88);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(40, 28, 16, 0.9);
       border: 1px solid rgba(196, 149, 58, 0.45);
       color: #ffd685;
-      font-size: 15px;
+      font-size: 14px;
       line-height: 1;
-      width: 22px;
-      height: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 6px;
       cursor: pointer;
       flex-shrink: 0;
-      transition: all 0.15s ease;
+      transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
       user-select: none;
       padding: 0;
     }
     .cart-prov-nav-btn:hover {
-      background: rgba(196, 149, 58, 0.25);
+      background: rgba(196, 149, 58, 0.35);
       border-color: #ffd685;
+      transform: scale(1.1);
+      box-shadow: 0 0 8px rgba(196, 149, 58, 0.4);
     }
-    .cart-atlas-picker-btn {
-      background: rgba(42, 28, 14, 0.90);
-      border: 1px solid rgba(196, 149, 58, 0.55);
-      border-radius: 8px;
-      color: #ffd685;
-      font-size: 11px;
-      font-family: inherit;
-      padding: 3px 9px;
-      cursor: pointer;
+    .cart-prov-nav-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Dock Inferior de Ações Unificado */
+    .cart-dock {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 60;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      transition: all 0.15s ease;
+      gap: 6px;
+      background: linear-gradient(180deg, rgba(30, 22, 14, 0.94) 0%, rgba(14, 10, 6, 0.98) 100%);
+      border: 1px solid rgba(212, 168, 83, 0.5);
+      border-radius: 24px;
+      padding: 4px 6px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.85), 0 0 15px rgba(196, 149, 58, 0.2), inset 0 1px 0 rgba(255, 235, 175, 0.25);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      white-space: nowrap;
     }
-    .cart-atlas-picker-btn:hover {
-      background: rgba(70, 48, 22, 0.95);
+    .cart-dock-btn {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(196, 149, 58, 0.35);
+      border-radius: 18px;
+      color: #ffd685;
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      height: 34px;
+      padding: 0 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+      user-select: none;
+    }
+    .cart-dock-btn:hover {
+      background: rgba(196, 149, 58, 0.25);
       border-color: #ffd685;
+      color: #fff2cc;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 8px rgba(196, 149, 58, 0.3);
+    }
+    .cart-dock-btn:active {
+      transform: translateY(1px);
+    }
+    .cart-dock-btn.primary {
+      background: linear-gradient(180deg, rgba(196, 149, 58, 0.35) 0%, rgba(110, 78, 25, 0.5) 100%);
+      border-color: #ffd685;
+      box-shadow: 0 0 10px rgba(196, 149, 58, 0.3);
+    }
+    .cart-dock-btn.accent {
+      background: linear-gradient(180deg, rgba(140, 40, 20, 0.8) 0%, rgba(80, 20, 10, 0.9) 100%);
+      border-color: rgba(255, 120, 80, 0.6);
+      color: #ffddd0;
     }
     .cart-atlas-modal {
       position: absolute;
@@ -5459,30 +5512,32 @@ LOG SINK (Fase 7):
     }
     .cart-prov-chip {
       white-space: nowrap;
-      background: rgba(0, 0, 0, 0.48);
-      border: 1px solid rgba(196, 149, 58, 0.28);
-      border-radius: 10px;
-      padding: 2px 7px;
-      font-size: 10px;
-      font-family: inherit;
+      background: rgba(20, 14, 9, 0.7);
+      border: 1px solid rgba(196, 149, 58, 0.25);
+      border-radius: 14px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-family: 'Cinzel', serif;
       color: #c4b59d;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 3px;
+      gap: 4px;
       flex-shrink: 0;
-      transition: all 0.15s ease;
+      transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
     .cart-prov-chip:hover {
-      background: rgba(196, 149, 58, 0.15);
+      background: rgba(196, 149, 58, 0.22);
       color: #ffd685;
-      border-color: rgba(196, 149, 58, 0.60);
+      border-color: rgba(196, 149, 58, 0.6);
+      transform: translateY(-1px);
     }
     .cart-prov-chip.active {
-      background: linear-gradient(180deg, rgba(196, 149, 58, 0.35) 0%, rgba(196, 149, 58, 0.15) 100%);
+      background: linear-gradient(180deg, rgba(196, 149, 58, 0.4) 0%, rgba(95, 65, 20, 0.6) 100%);
       border-color: #ffd685;
-      color: #ffd685;
-      box-shadow: 0 0 6px rgba(196, 149, 58, 0.40);
+      color: #fff3d0;
+      box-shadow: 0 0 10px rgba(196, 149, 58, 0.45);
+      font-weight: 700;
     }
     .cart-btn-atlas-back {
       background: linear-gradient(180deg, rgba(60, 42, 22, 0.95) 0%, rgba(28, 18, 10, 0.98) 100%);
@@ -8634,7 +8689,98 @@ body.perf-lite .vc-action-btn { transition: none; }
       transform: scale(0.96);
     }
 
-  </style>
+  
+    /* Card de Província e Ação Hexagonal */
+    .clp-prov-banner {
+      width: calc(100% + 40px);
+      margin: -20px -20px 14px -20px;
+      height: 130px;
+      background-color: #24180d;
+      background: linear-gradient(180deg, #3d2817 0%, #1a1008 100%);
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      border-bottom: 2px solid rgba(196, 149, 58, 0.45);
+      border-radius: 8px 8px 0 0;
+    }
+    .clp-prov-banner-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(20, 14, 9, 0.95) 100%);
+    }
+    .clp-prov-badge {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      background: rgba(14, 10, 6, 0.88);
+      border: 1px solid #ffd685;
+      border-radius: 12px;
+      padding: 3px 10px;
+      font-family: Cinzel, serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: #ffd685;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    }
+    .clp-prov-title {
+      font-family: Cinzel, serif;
+      color: #f4d49a;
+      font-size: 17px;
+      margin: 10px 0 2px;
+      text-align: center;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+    }
+    .clp-prov-sub {
+      font-size: 11px;
+      color: #a09484;
+      text-align: center;
+      font-style: italic;
+      margin-bottom: 8px;
+    }
+    .clp-prov-desc {
+      font-size: 12px;
+      line-height: 1.45;
+      color: #d8cebf;
+      text-align: center;
+      padding: 0 12px;
+      margin-bottom: 12px;
+    }
+    .clp-prov-stats {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .clp-prov-stat-pill {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(196,149,58,0.3);
+      border-radius: 12px;
+      padding: 3px 10px;
+      font-size: 11px;
+      color: #ffd685;
+    }
+    .clp-btn-hex-explore {
+      background: linear-gradient(180deg, #d4a74a 0%, #8a6420 100%) !important;
+      border: 1px solid #ffe8aa !important;
+      color: #1a0f05 !important;
+      font-family: Cinzel, serif !important;
+      font-weight: 700 !important;
+      font-size: 12px !important;
+      letter-spacing: 0.5px !important;
+      padding: 10px 16px !important;
+      border-radius: 10px !important;
+      box-shadow: 0 4px 15px rgba(212, 167, 74, 0.4) !important;
+      cursor: pointer;
+      transition: all 0.2s ease !important;
+    }
+    .clp-btn-hex-explore:hover {
+      background: linear-gradient(180deg, #f0c56a 0%, #a87d2b 100%) !important;
+      box-shadow: 0 6px 20px rgba(212, 167, 74, 0.6) !important;
+      transform: translateY(-1px);
+    }
+    
+</style>
 </head>
 <body>
   <!-- VERSION STAMP LOG — primeiro script do body. USER REQUEST 2026-05-10:
@@ -69516,15 +69662,13 @@ var _cartHoverNode = null;
 function renderCartographyCanvas(el){
   el.innerHTML = ''
     + '<div class="cart-wrapper">'
-    + '  <div class="subscreen-back-row" style="display:flex;justify-content:space-between;align-items:center;">'
-    + '    <button class="subscreen-back" id="cart-back-btn" type="button" aria-label="Voltar para a cidade">← Voltar</button>'
-    + '    <div style="display:flex;gap:6px;align-items:center;">'
-    + '      <button class="cart-atlas-picker-btn" id="cart-atlas-picker-btn" type="button" aria-label="Seletor de Províncias">🗺️ Atlas (8) ▾</button>'
-    + '      <button class="cart-btn-atlas-back" id="cart-atlas-back-btn" type="button" style="display:none;" aria-label="Voltar ao Continente">⮌ Continente</button>'
-    + '    </div>'
+    + '  <div class="cart-dock" id="cart-dock">'
+    + '    <button class="cart-dock-btn" id="cart-back-btn" type="button" aria-label="Voltar para a cidade">🏛️ Cidade</button>'
+    + '    <button class="cart-dock-btn primary" id="cart-atlas-picker-btn" type="button" aria-label="Seletor de Províncias">🗺️ Atlas ▾</button>'
+    + '    <button class="cart-dock-btn accent" id="cart-atlas-back-btn" type="button" style="display:none;" aria-label="Voltar ao Continente">🌍 Continente</button>'
     + '  </div>'
     + '  <div class="cart-header">'
-    + '    <h2 id="cart-title">Mapa de Valdoria</h2>'
+    + '    <h2 id="cart-title">Mapa de Valdória</h2>'
     + '    <div class="cart-prov-bar-wrap">'
     + '      <button class="cart-prov-nav-btn cart-prov-prev" id="cart-prov-prev" type="button" aria-label="Anterior">‹</button>'
     + '      <div class="cart-prov-bar" id="cart-prov-bar"></div>'
@@ -70365,7 +70509,7 @@ function _cartHandleClick(mx, my){
 
   var vm = (_cartEngine && typeof _cartEngine.getViewMode === 'function') ? _cartEngine.getViewMode() : { mode: 'world' };
   
-  // 1. No modo Continente (Macro): clicar em um nó ou região abre a Carta Regional da Província!
+  // 1. No modo Continente (Macro): abre o popup de apresentação da Região para o jogador ver a carta!
   if (vm.mode === 'world') {
     var prov = (window.CartShared && CartShared.getLocationProvince) ? CartShared.getLocationProvince(node.key) : null;
     var provId = prov ? prov.id : 'plains';
@@ -70373,14 +70517,13 @@ function _cartHandleClick(mx, my){
     var known = p.known_locations || ['plains'];
     var ownedMaps = p.owned_maps || [];
     if (window.CartShared && CartShared.isProvinceDiscovered && !CartShared.isProvinceDiscovered(provId, known, ownedMaps)) {
-      return; // Região ainda inexplorada sob a névoa
+      return; // Região inexplorada sob a névoa
     }
-    _logCity('continent click -> navegando para provincia: ' + provId);
-    _cartFocusProvince(provId);
+    _openCartProvincePreviewPopup(prov);
     return;
   }
 
-  // 2. No modo Regional da Província (Micro): escolhe o destino específico e abre a ficha de marcha!
+  // 2. No modo Regional da Província (Micro): abre a janela com a opção de ir até o mapa hexagonal de exploração!
   _openCartLocationPopup(node);
 }
 function _cartFindNodeAt(mx, my){
@@ -70416,6 +70559,44 @@ function _cartGetPlayerBiome(){
 
 // === Popup de Localidade na Cartografia (Fase 5.5) ===
 // Build HTML do card baseado no bioma clicado
+// === Popup de Apresentação da Província no Continente (Ordem do Usuário 2026-10) ===
+function _openCartProvincePreviewPopup(prov) {
+  var el = document.getElementById('cart-loc-popup');
+  var card = document.getElementById('clp-card-content');
+  if (!el || !card || !prov) return;
+
+  var p = window.CITY_MOCK_PLAYER || {};
+  var known = p.known_locations || ['plains'];
+  var locKeys = prov.locKeys || [];
+  var knownCount = locKeys.filter(function(k){ return known.indexOf(k) >= 0; }).length;
+
+  var imgBase = (typeof window !== 'undefined' && window.location.protocol === 'file:')
+    ? '/shared/img/map/provinces/'
+    : '/shared/img/map/provinces/';
+  var imgUrl = imgBase + prov.id + '.webp';
+
+  card.innerHTML = ''
+    + '<div class="clp-body clp-prov-preview">'
+    + '  <div class="clp-prov-banner" style="background-image:url(\'' + imgUrl + '\');">'
+    + '    <div class="clp-prov-banner-overlay"></div>'
+    + '    <div class="clp-prov-badge">' + (prov.icon || '🗺️') + ' PROVÍNCIA IMPERIAL</div>'
+    + '  </div>'
+    + '  <h2 class="clp-prov-title">' + (prov.icon || '') + ' ' + prov.name + '</h2>'
+    + '  <div class="clp-prov-sub">Carta Regional do Reino de Valdória</div>'
+    + '  <p class="clp-prov-desc">' + (prov.desc || 'Uma vasta região com seus próprios mistérios e perigos.') + '</p>'
+    + '  <div class="clp-prov-stats">'
+    + '    <div class="clp-prov-stat-pill">📍 ' + knownCount + ' / ' + locKeys.length + ' locais mapeados</div>'
+    + '  </div>'
+    + '</div>'
+    + '<div class="clp-buttons">'
+    + '  <button class="clp-btn clp-btn-hex-explore" id="clp-open-prov-btn" data-clp="open-prov-detail">🗺️ Abrir Mapa da Região</button>'
+    + '  <button class="clp-btn clp-btn-back" data-clp="back">Fechar</button>'
+    + '</div>';
+
+  el.classList.add('active');
+  window._cartCurrentPreviewProv = prov;
+}
+
 function _openCartLocationPopup(biome){
   var el = document.getElementById('cart-loc-popup');
   if (!el) return;
@@ -70512,13 +70693,12 @@ function _openCartLocationPopup(biome){
     + '</div>'
     + '<div class="clp-buttons">'
     + (canExploreOrigin
-        ? '<button class="clp-btn clp-btn-travel" data-clp="travel">Explorar Planícies dos Portões</button>'
-          + '<button class="clp-btn clp-btn-back" data-clp="back">Voltar pro Mapa</button>'
+        ? '<button class="clp-btn clp-btn-hex-explore" data-clp="travel">🧭 Ir para o Mapa Hexagonal de Exploração</button>'
+          + '<button class="clp-btn clp-btn-back" data-clp="back">Voltar ao Mapa</button>'
         : (isCurrent
-          ? '<button class="clp-btn clp-btn-back" data-clp="back">Voltar pro Mapa</button>'
-          : '<button class="clp-btn clp-btn-travel" data-clp="travel">Marchar até ' + biome.name.split(' ')[0] + '</button>'
-            + (biome.key !== 'plains' ? '<button class="clp-btn clp-btn-prov" data-clp="open-prov" style="background:rgba(196,149,58,0.2);border-color:#ffd685;color:#ffd685;">🗺️ Ver Carta Regional</button>' : '')
-            + '<button class="clp-btn clp-btn-back" data-clp="back">Voltar pro Mapa</button>'
+          ? '<button class="clp-btn clp-btn-back" data-clp="back">Voltar ao Mapa</button>'
+          : '<button class="clp-btn clp-btn-hex-explore" data-clp="travel">🧭 Ir para o Mapa Hexagonal de Exploração</button>'
+            + '<button class="clp-btn clp-btn-back" data-clp="back">Voltar ao Mapa</button>'
          ))
     + '</div>';
   el.classList.add('active');
@@ -70543,6 +70723,14 @@ function _closeCartLocationPopup(){
       var action = btn.dataset.clp;
       var biome = window._cartCurrentLocBiome;
       if (action === 'back') { _closeCartLocationPopup(); return; }
+      if (action === 'open-prov-detail') {
+        var prevProv = window._cartCurrentPreviewProv;
+        _closeCartLocationPopup();
+        if (prevProv && prevProv.id) {
+          _cartFocusProvince(prevProv.id);
+        }
+        return;
+      }
       if (action === 'open-prov' && biome) {
         _closeCartLocationPopup();
         if (typeof CartShared !== 'undefined' && CartShared.getLocationProvince) {
