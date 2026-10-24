@@ -70014,7 +70014,8 @@ function renderCartographyCanvas(el){
     + '        <button class="cam-filter-pill" data-filter="sanctuaries" type="button">✨ Santuários</button>'
     + '        <button class="cam-filter-pill" data-filter="altitude" type="button">⛰️ Altitudes</button>
         <button class="cam-filter-pill" data-filter="roads" type="button">🛣️ Estradas</button>
-        <button class="cam-filter-pill" data-filter="mounts" type="button">🫏 Montaria</button>'
+        <button class="cam-filter-pill" data-filter="mounts" type="button">🫏 Montaria</button>
+        <button class="cam-filter-pill" data-filter="weather" type="button">⚡ Clima</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -71068,6 +71069,17 @@ function _cartFocusWaypoint(key) {
               hasStables = prov.locKeys.some(function(k){ return stableBiomes.indexOf(k) >= 0; });
             }
             if (!hasStables && prov.id !== 'plains') return false;
+          } else if (_camActiveCategory === 'weather') {
+            if (prov.id === 'world') return false;
+            var extremeBiomes = ['desert', 'mountain', 'snow', 'tundra', 'swamp', 'volcanic'];
+            if (extremeBiomes.indexOf(prov.id) >= 0) return true;
+            if (prov.locKeys) {
+              return prov.locKeys.some(function(k){
+                var b = (CART_BIOMES || []).find(function(x){ return x.key === k; });
+                return b && extremeBiomes.indexOf(b.biome) >= 0;
+              });
+            }
+            return false;
           }
           if (!ft) return true;
           if ((prov.name || '').toLowerCase().indexOf(ft) >= 0) return true;
@@ -72659,6 +72671,27 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:#bef264;margin-bottom:2px;">' + mInfo.icon + ' ANIMAL DE CARGA & EXPEDIÇÃO (PHB p. 157):</div>'
           + '  <div>• <b>Capacidade Extra:</b> +' + mInfo.extraCapacityLbs + ' lbs (' + mInfo.mountName + ')</div>'
           + '  <div>• <b>Alimentação:</b> ' + (mInfo.grazingFeasible ? 'Pastagem natural viável pelo trajeto' : (mInfo.fodderRequiredLbsPerDay + ' lbs feno/dia')) + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcSevereWeatherImpact) return '';
+        var curW = (typeof curWeather !== 'undefined' && curWeather) ? curWeather : 'clear';
+        var wImpact = CartShared.calcSevereWeatherImpact(curW, biome.key || biome.biome || 'plains');
+        return '<div class="clp-weather-hazard-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,24,32,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.3);font-size:8px;color:#bae6fd;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + wImpact.color + ';margin-bottom:2px;">' + wImpact.icon + ' CLIMA & IMPACTO AMBIENTAL (DMG p. 109-110):</div>'
+          + '  <div>• <b>Condição:</b> ' + wImpact.weatherName + ' (' + (wImpact.speedPenaltyPct !== 0 ? (wImpact.speedPenaltyPct + '% marcha') : 'Ritmo normal') + ')</div>'
+          + (wImpact.savingThrowDC > 0 ? ('  <div style="color:#f87171;">• <b>Risco Físico:</b> ' + wImpact.savingThrowType + ' CD ' + wImpact.savingThrowDC + ' contra Exaustão</div>') : '')
+          + '  <div style="font-size:7.5px;color:#94a3b8;margin-top:1px;">• ' + wImpact.gearMitigation + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampDowntimeActivity) return '';
+        var curAct = window._cartSelectedCampActivity || 'herbalism_brew';
+        var dAct = CartShared.calcCampDowntimeActivity(curAct, { hasTool: true, hasProficiency: true });
+        return '<div class="clp-camp-downtime-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,20,24,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(244,114,182,0.3);font-size:8px;color:#fbcfe8;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + dAct.color + ';margin-bottom:2px;">' + dAct.icon + ' ATIVIDADE DE DESCANSO NO ACAMPAMENTO (XGE p. 134):</div>'
+          + '  <div>• <b>Tarefa:</b> ' + dAct.activityTitle + ' (CD ' + dAct.checkDC + ')</div>'
+          + '  <div style="font-size:7.5px;color:#f472b6;margin-top:1px;">• <b>Benefício:</b> ' + dAct.boonEffect + '</div>'
           + '</div>';
       })()
     + (function(){

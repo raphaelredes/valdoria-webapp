@@ -7405,6 +7405,204 @@
     };
   }
 
+  // === calcSevereWeatherImpact (Deterioração Climática e Efeitos Ambientais Severos - DMG p. 109-110) ===
+  function calcSevereWeatherImpact(weatherKey, biomeKey, options) {
+    options = options || {};
+    var wk = (weatherKey || 'clear').toLowerCase();
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var hasColdGear = !!options.hasColdWeatherGear;
+    var hasWater = !!options.hasAbundantWater;
+    var hasGoggles = !!options.hasGogglesOrVeil;
+
+    if (wk === 'clear' || wk === 'ensolarado' || wk === 'nublado') {
+      return {
+        severity: 'normal',
+        weatherName: 'Tempo Estável e Ameno',
+        savingThrowType: 'Nenhum',
+        savingThrowDC: 0,
+        percepPenalty: 0,
+        speedPenaltyPct: 0,
+        gearMitigation: 'Nenhum equipamento especial exigido.',
+        isMitigated: true,
+        ambientHazard: 'Condições climáticas ideais para marcha e acampamento.',
+        icon: '☀️',
+        color: '#4ade80',
+        dndRef: 'DMG p. 109 (Condições Normais de Viagem)'
+      };
+    }
+
+    var isExtremeCold = (wk === 'extreme_cold' || wk === 'nevasca' || wk === 'frio_extremo' || bk === 'snow' || bk === 'tundra');
+    var isExtremeHeat = (wk === 'extreme_heat' || wk === 'calor_extremo' || wk === 'onda_calor' || (bk === 'desert' && (options.isMidday || wk === 'ensolarado')));
+    var isHeavyStorm = (wk === 'heavy_storm' || wk === 'tempestade' || wk === 'chuva_forte' || wk === 'tormenta');
+    var isSandstorm = (wk === 'sandstorm' || wk === 'tempestade_areia');
+
+    if (isExtremeCold) {
+      return {
+        severity: 'extreme_cold',
+        weatherName: 'Nevasca e Frio Extremo Congelante',
+        savingThrowType: 'Salvaguarda de CON',
+        savingThrowDC: 10,
+        percepPenalty: -5,
+        speedPenaltyPct: -50,
+        gearMitigation: hasColdGear ? 'Agasalhos pesados de pele neutralizam a salvaguarda de frio.' : 'Exige Agasalho de Inverno (Cold Weather Gear, PHB p. 150) sob pena de 1 nível de Exaustão por hora.',
+        isMitigated: hasColdGear,
+        ambientHazard: 'Visibilidade contida a 15 pés (escuridão leve); fogueiras pequenas são extintas em minutos.',
+        icon: '❄️',
+        color: hasColdGear ? '#38bdf8' : '#f87171',
+        dndRef: 'DMG p. 110 (Frio Extremo e Nevascas)'
+      };
+    }
+
+    if (isExtremeHeat) {
+      return {
+        severity: 'extreme_heat',
+        weatherName: 'Onda Escaldante e Calor Desértico Extremo',
+        savingThrowType: 'Salvaguarda de CON (armadura média/pesada)',
+        savingThrowDC: 10,
+        percepPenalty: 0,
+        speedPenaltyPct: -25,
+        gearMitigation: hasWater ? 'Cantil duplo de água fresca supre o consumo obrigatório de 2 galões/dia.' : 'Consumo obrigatório de água dobrado; armaduras de metal impõem desvantagem no teste de Constituição contra Exaustão.',
+        isMitigated: hasWater,
+        ambientHazard: 'Miragens desérticas aumentam a CD de navegação em +5 para não se perder.',
+        icon: '🔥',
+        color: hasWater ? '#facc15' : '#f87171',
+        dndRef: 'DMG p. 110 (Calor Extremo e Desidratação)'
+      };
+    }
+
+    if (isHeavyStorm) {
+      return {
+        severity: 'heavy_storm',
+        weatherName: 'Tempestade de Raios e Chuva Torrencial',
+        savingThrowType: 'Salvaguarda de FOR/DES (terreno lamacento)',
+        savingThrowDC: 12,
+        percepPenalty: -5,
+        speedPenaltyPct: -50,
+        gearMitigation: 'Lonas impermeabilizadas e manto encerado protegem mantimentos e fardos de carga.',
+        isMitigated: !!options.hasWaterproofTarp,
+        ambientHazard: 'Desvantagem em testes de Percepção auditiva/visual; tochas abertas são apagadas de imediato; ataques à distância impossíveis.',
+        icon: '⛈️',
+        color: '#a855f7',
+        dndRef: 'DMG p. 109-110 (Chuva Pesada e Ventos Fortes)'
+      };
+    }
+
+    if (isSandstorm) {
+      return {
+        severity: 'sandstorm',
+        weatherName: 'Tempestade de Areia Cortante',
+        savingThrowType: 'Teste de Sobrevivência',
+        savingThrowDC: 15,
+        percepPenalty: -5,
+        speedPenaltyPct: -50,
+        gearMitigation: hasGoggles ? 'Véu protetor e óculos de montaria preservam a visão da comitiva.' : 'Partículas de areia causam cegueira temporária sem proteção ocular.',
+        isMitigated: hasGoggles,
+        ambientHazard: 'Cobre rastros instantaneamente; terreno difícil severo; abrigo sob rochas é obrigatório.',
+        icon: '🌪️',
+        color: '#fb923c',
+        dndRef: 'DMG p. 109-110 (Tempestades de Areia nos Ermos)'
+      };
+    }
+
+    return {
+      severity: 'moderate',
+      weatherName: 'Chuva Intermitente e Vento Úmido',
+      savingThrowType: 'Nenhum',
+      savingThrowDC: 0,
+      percepPenalty: -2,
+      speedPenaltyPct: -15,
+      gearMitigation: 'Capas com capuz mantêm o grupo aquecido.',
+      isMitigated: true,
+      ambientHazard: 'Estradas barrentas com ligeira redução no ritmo de marcha.',
+      icon: '🌧️',
+      color: '#93c5fd',
+      dndRef: 'DMG p. 109 (Precipitação Moderada)'
+    };
+  }
+
+  // === calcCampDowntimeActivity (Atividades de Acampamento e Descanso nos Ermos - XGE p. 134 / DMG p. 128 / PHB p. 186) ===
+  function calcCampDowntimeActivity(activityKey, options) {
+    options = options || {};
+    var ak = (activityKey || 'rest_only').toLowerCase();
+    var hasTool = !!options.hasTool;
+    var proficiency = !!options.hasProficiency;
+
+    var activities = {
+      rest_only: {
+        title: 'Repouso Contemplativo Simples',
+        category: 'descanso',
+        requiredTool: 'Nenhum',
+        dcCheck: 0,
+        boonEffect: 'Recuperação canônica de Pontos de Vida e metade dos Dados de Vida gastos no descanso longo.',
+        icon: '⛺',
+        color: '#94a3b8'
+      },
+      herbalism_brew: {
+        title: 'Preparo de Emplastros e Bálsamos',
+        category: 'alquimia_cura',
+        requiredTool: 'Kit de Herbalismo (XGE p. 82)',
+        dcCheck: 12,
+        boonEffect: 'Produz 1 Bálsamo Cicatrizante dos Ermos (+1d4 PV curados adicionais no despertar matinal para 2 aventureiros).',
+        icon: '🌿',
+        color: '#4ade80'
+      },
+      gear_maintenance: {
+        title: 'Manutenção de Armaduras e Afiação de Lâminas',
+        category: 'forja_oficina',
+        requiredTool: 'Ferramentas de Ferreiro ou Coureiro (XGE p. 84)',
+        dcCheck: 11,
+        boonEffect: 'Armaduras reforçadas e armas brunidas concedem +1 no dano do primeiro golpe desferido no dia seguinte.',
+        icon: '🔨',
+        color: '#60a5fa'
+      },
+      trap_perimeter: {
+        title: 'Camuflagem e Armadilhas de Alarme Perimetral',
+        category: 'seguranca_tática',
+        requiredTool: 'Ferramentas de Ladrão ou Armadilha de Caça (PHB p. 150)',
+        dcCheck: 13,
+        boonEffect: 'Perímetro protegido com fios de alerta; predadores e emboscadores ativam sinos e perdem qualquer chance de surpresa.',
+        icon: '🪤',
+        color: '#facc15'
+      },
+      cartography_study: {
+        title: 'Mapeamento Topográfico e Anotações no Diário',
+        category: 'navegacao_erudicao',
+        requiredTool: 'Suprimentos de Calígrafo ou Ferramentas de Cartógrafo (XGE p. 80)',
+        dcCheck: 12,
+        boonEffect: 'Registros detalhados do relevo local; concede vantagem no próximo teste de Sobrevivência para orientação na rota.',
+        icon: '📜',
+        color: '#c084fc'
+      },
+      divine_communion: {
+        title: 'Meditação e Comunhão com os Espíritos da Natureza',
+        category: 'espiritual_adivinhacao',
+        requiredTool: 'Símbolo Sagrado ou Foco Druídico (PHB p. 151)',
+        dcCheck: 11,
+        boonEffect: 'Presságio sensorial do tempo: revela a aproximação de frentes de tempestade ou nascentes de água nas próximas 12 horas.',
+        icon: '✨',
+        color: '#f472b6'
+      }
+    };
+
+    var act = activities[ak] || activities.rest_only;
+    var finalDC = act.dcCheck;
+    if (proficiency) finalDC = Math.max(8, finalDC - 2);
+
+    return {
+      activityKey: ak,
+      activityTitle: act.title,
+      category: act.category,
+      requiredTool: act.requiredTool,
+      hasRequiredTool: hasTool,
+      hasProficiency: proficiency,
+      checkDC: finalDC,
+      boonEffect: act.boonEffect,
+      icon: act.icon,
+      color: act.color,
+      dndRef: 'XGE p. 134 (Atividades de Descanso) / DMG p. 128 / PHB p. 186'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -9110,6 +9308,8 @@
     calcForageComplication: calcForageComplication,
     calcBeastsOfBurden: calcBeastsOfBurden,
     calcWildernessTracking: calcWildernessTracking,
+    calcSevereWeatherImpact: calcSevereWeatherImpact,
+    calcCampDowntimeActivity: calcCampDowntimeActivity,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
