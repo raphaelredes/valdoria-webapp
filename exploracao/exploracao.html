@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T21:36:48Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T21:40:21Z - do not edit directly, edit source -->
 
 
 
@@ -93657,6 +93657,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcCampfireCookedMeal) return '';
+        var meal = CartShared.calcCampfireCookedMeal('seasoned_forage_stew');
+        return '<div class="clp-campfire-meal-card" style="margin:4px 0 6px;text-align:left;background:rgba(22,26,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(74,222,128,0.3);font-size:8px;color:#bbf7d0;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + meal.color + ';margin-bottom:2px;">' + meal.icon + ' CULINÁRIA DE ACAMPAMENTO (XGE p. 79 / TCoE p. 79):</div>'
+          + '  <div>• <b>Prato:</b> ' + meal.mealName + ' (CD ' + meal.prepDC + ' [' + meal.toolProficiency + '])</div>'
+          + '  <div>• <b>Vitalidade:</b> ' + meal.culinaryBenefit + '</div>'
+          + '  <div style="font-size:7.5px;color:#86efac;margin-top:1px;">• <i>Ingredientes: ' + meal.ingredientCostDesc + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCelestialStarNavigation) return '';
+        var star = CartShared.calcCelestialStarNavigation('clear_stars', 'estrela_guia_do_norte');
+        return '<div class="clp-celestial-nav-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,24,34,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.3);font-size:8px;color:#bae6fd;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + star.color + ';margin-bottom:2px;">' + star.icon + ' NAVEGAÇÃO CELESTE & ASTROLÁBIO (PHB p. 154 / DMG p. 111):</div>'
+          + '  <div>• <b>Constelação:</b> ' + star.constellationName + ' (' + (star.orientationModifier >= 0 ? '+' : '') + star.orientationModifier + ' em Orientação Noturna)</div>'
+          + '  <div>• <b>Presságio:</b> ' + star.celestialOmen + '</div>'
+          + '  <div style="font-size:7.5px;color:#93c5fd;margin-top:1px;">• ' + star.skyDescription + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcCartographicTriangulation) return '';
         var bKey = (biome && biome.key) || 'plains';
         var tri = CartShared.calcCartographicTriangulation(5, 3, bKey);
@@ -94760,7 +94780,8 @@ function openCartography() {
         <button class="cam-filter-pill" data-filter="bounties" type="button">📜 Recompensas</button>
         <button class="cam-filter-pill" data-filter="harvest" type="button">🌿 Coleta</button>
         <button class="cam-filter-pill" data-filter="rumors" type="button">🍺 Boatos</button>
-        <button class="cam-filter-pill" data-filter="triangulation" type="button">📐 Triangulação</button>'
+        <button class="cam-filter-pill" data-filter="triangulation" type="button">📐 Triangulação</button>
+        <button class="cam-filter-pill" data-filter="cooking" type="button">🍲 Culinária</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -96108,6 +96129,9 @@ function _xcartFocusWaypoint(key) {
               });
             }
             return false;
+          } else if (_xcamActiveCategory === 'cooking') {
+            if (prov.id === 'world') return false;
+            return true;
           } else if (_xcamActiveCategory === 'triangulation') {
             if (prov.id === 'world') return false;
             return true;

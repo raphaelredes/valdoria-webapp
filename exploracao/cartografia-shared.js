@@ -8574,6 +8574,125 @@
     };
   }
 
+  // === calcCampfireCookedMeal (Culinária de Acampamento, Utensílios de Cozinheiro e Banquetes - XGE p. 79 / TCoE p. 79) ===
+  function calcCampfireCookedMeal(mealType, options) {
+    options = options || {};
+    var mt = (mealType || 'seasoned_forage_stew').toLowerCase();
+
+    var meals = {
+      iron_ration_gruel: {
+        name: 'Papa Rústica de Rações de Ferro',
+        prepDC: 8,
+        costDesc: '1 ração de viagem e água fervente da fogueira.',
+        culinaryBenefit: 'Refeição frugal; sacia a fome diária sem conceder benefícios extras de vitalidade.',
+        desc: 'Alimento básico de marcha para manter a subsistência nos ermos.',
+        icon: '🥣',
+        color: '#94a3b8'
+      },
+      seasoned_forage_stew: {
+        name: 'Ensopado de Caça e Ervas dos Ermos (XGE p. 79)',
+        prepDC: 11,
+        costDesc: '1 ração de viagem combinada com caça ou ervas forrageadas.',
+        culinaryBenefit: 'Concede +1d4 de cura adicional por dado de vida gasto durante descansos curtos.',
+        desc: 'Cozimento lento em caldeirão; temperos aromáticos revigoram os músculos fatigados.',
+        icon: '🍲🌿',
+        color: '#4ade80'
+      },
+      hearty_travelers_feast: {
+        name: 'Banquete do Chef de Estrada (TCoE p. 79)',
+        prepDC: 13,
+        costDesc: 'Rações fartas, especiarias secas e sal gema de caravana.',
+        culinaryBenefit: 'Cada membro da comitiva recebe 5 pontos de vida temporários ao término do descanso longo.',
+        desc: 'Mesa aquecida e cheiro reconfortante que eleva o ânimo de todos os aventureiros.',
+        icon: '🍖✨',
+        color: '#f59e0b'
+      },
+      trail_hardened_pemmican: {
+        name: 'Pemmican Alquímico de Marcha Forçada',
+        prepDC: 12,
+        costDesc: 'Carne desidratada compactada com gordura e frutos silvestres.',
+        culinaryBenefit: 'Previne o ganho do 1º nível de exaustão decorrente de marcha forçada nas próximas 24 horas.',
+        desc: 'Provimento compacto de alta caloria ideal para marchas velozes sob intempéries.',
+        icon: '🥩🥾',
+        color: '#38bdf8'
+      }
+    };
+
+    var m = meals[mt] || meals.seasoned_forage_stew;
+
+    return {
+      mealType: mt,
+      mealName: m.name,
+      prepDC: m.prepDC,
+      toolProficiency: 'Utensílios de Cozinheiro ou Sobrevivência',
+      ingredientCostDesc: m.costDesc,
+      culinaryBenefit: m.culinaryBenefit,
+      description: m.desc,
+      icon: m.icon,
+      color: m.color,
+      dndRef: 'XGE p. 79 (Utensílios de Cozinheiro) / TCoE p. 79 (Talento de Chef de Estrada)'
+    };
+  }
+
+  // === calcCelestialStarNavigation (Navegação Noturna por Constelações e Astrolábio - PHB p. 154 / DMG p. 111) ===
+  function calcCelestialStarNavigation(skyCondition, constellationKey, options) {
+    options = options || {};
+    var sc = (skyCondition || 'clear_stars').toLowerCase();
+    var ck = (constellationKey || 'estrela_guia_do_norte').toLowerCase();
+
+    var constellations = {
+      estrela_guia_do_norte: {
+        name: 'A Agulha Astral do Norte',
+        omen: 'Rumo cardinal exato; revela o norte magnético sem oscilações em céu aberto.',
+        icon: '⭐🧭',
+        color: '#38bdf8'
+      },
+      constelacao_do_draco: {
+        name: 'O Guardião Dracônico dos Picos',
+        omen: 'Alinhamento com desfiladeiros montanhosos; previne desvios em gargantas rochosas.',
+        icon: '🐉✨',
+        color: '#f87171'
+      },
+      coroa_das_quatro_luas: {
+        name: 'A Coroa Mística das Quatro Luas',
+        omen: 'Ressonância arcana noturna; concede +1 na CD de salvaguardas de orientação de conjuradores.',
+        icon: '👑🌙',
+        color: '#c084fc'
+      },
+      cinturao_do_cacador: {
+        name: 'O Cinturão do Caçador dos Ermos',
+        omen: 'Trilha estelar de batedores; confere +2 em testes de Rastreamento diurno ao amanhecer.',
+        icon: '🏹⭐',
+        color: '#facc15'
+      }
+    };
+
+    var c = constellations[ck] || constellations.estrela_guia_do_norte;
+
+    var orientationModifier = 5;
+    var skyDesc = 'Céu estrelado límpido: visibilidade celeste plena com astrolábio de latão.';
+    if (sc === 'light_clouds') {
+      orientationModifier = 2;
+      skyDesc = 'Nebulosidade parcial: constelações visíveis intermitentemente entre aberturas de nuvens.';
+    } else if (sc === 'overcast_storm') {
+      orientationModifier = -5;
+      skyDesc = 'Céu encoberto por tempestade: estrelas totalmente ocultas; orientação requer bússola ou marcos físicos.';
+    }
+
+    return {
+      skyCondition: sc,
+      constellationKey: ck,
+      constellationName: c.name,
+      orientationModifier: orientationModifier,
+      celestialOmen: c.omen,
+      skyDescription: skyDesc,
+      toolUsed: 'Astrolábio e Cartas Celestes (Ferramentas de Navegador)',
+      icon: c.icon,
+      color: c.color,
+      dndRef: 'PHB p. 154 (Ferramentas de Navegador e Astrolábio) / DMG p. 111 (Navegação Noturna)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -10295,6 +10414,8 @@
     calcWildernessSustenanceRequirements: calcWildernessSustenanceRequirements,
     calcCartographicTriangulation: calcCartographicTriangulation,
     calcCampAlarmAndSentryAnimal: calcCampAlarmAndSentryAnimal,
+    calcCampfireCookedMeal: calcCampfireCookedMeal,
+    calcCelestialStarNavigation: calcCelestialStarNavigation,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
