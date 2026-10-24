@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-23T15:03:09Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T02:58:53Z - do not edit directly, edit source -->
 
 
 
@@ -92838,6 +92838,44 @@ function _cartGetPlayerBiomeV2(){
 
 // Build HTML do card baseado no bioma clicado
 
+// === Popup de Apresentação da Província no Continente (Fase 5.6) ===
+function _openCartProvincePreviewPopup(prov) {
+  var el = document.getElementById('cart-loc-popup');
+  var card = document.getElementById('clp-card-content');
+  if (!el || !card || !prov) return;
+
+  var p = (typeof window !== 'undefined' && window.CITY_MOCK_PLAYER) || {};
+  var known = window.__EXPLORE_KNOWN || p.known_locations || ['plains'];
+  var locKeys = prov.locKeys || [];
+  var knownCount = locKeys.filter(function(k){ return known.indexOf(k) >= 0; }).length;
+
+  var imgBase = (typeof window !== 'undefined' && window.location.protocol === 'file:')
+    ? '../shared/img/map/provinces/'
+    : '/shared/img/map/provinces/';
+  var imgUrl = imgBase + prov.id + '.webp';
+
+  card.innerHTML = ''
+    + '<div class="clp-body clp-prov-preview">'
+    + '  <div class="clp-prov-banner" style="background-image:url(\'' + imgUrl + '\');">'
+    + '    <div class="clp-prov-banner-overlay"></div>'
+    + '    <div class="clp-prov-badge">' + (prov.icon || '🗺️') + ' PROVÍNCIA IMPERIAL</div>'
+    + '  </div>'
+    + '  <h2 class="clp-prov-title">' + (prov.icon || '') + ' ' + prov.name + '</h2>'
+    + '  <div class="clp-prov-sub">Carta Regional do Reino de Valdória</div>'
+    + '  <p class="clp-prov-desc">' + (prov.desc || 'Uma vasta região com seus próprios mistérios e perigos.') + '</p>'
+    + '  <div class="clp-prov-stats">'
+    + '    <div class="clp-prov-stat-pill">📍 ' + knownCount + ' / ' + locKeys.length + ' locais mapeados</div>'
+    + '  </div>'
+    + '</div>'
+    + '<div class="clp-buttons">'
+    + '  <button class="clp-btn clp-btn-hex-explore" id="clp-open-prov-btn" data-clp="open-prov-detail">🗺️ Abrir Mapa da Região</button>'
+    + '  <button class="clp-btn clp-btn-back" data-clp="back">Fechar</button>'
+    + '</div>';
+
+  el.classList.add('active');
+  window._cartCurrentPreviewProv = prov;
+}
+
 function _openCartLocationPopup(biome){
 
   var el = document.getElementById('cart-loc-popup');
@@ -92939,7 +92977,14 @@ function _closeCartLocationPopup(){
       var biome = window._cartCurrentLocBiome;
 
       if (action === 'back') { _closeCartLocationPopup(); return; }
-
+      if (action === 'open-prov-detail') {
+        var prevProv = window._cartCurrentPreviewProv;
+        _closeCartLocationPopup();
+        if (prevProv && prevProv.id) {
+          _xcartFocusProvince(prevProv.id);
+        }
+        return;
+      }
       if (action === 'travel' && biome) {
 
         _closeCartLocationPopup();
@@ -93260,16 +93305,10 @@ function openCartography() {
 
     + '    <h2>Cartografia de Valdoria</h2>'
 
-    + '    <div class="cart-prov-bar" id="xcart-prov-bar">'
-    + '      <button class="cart-prov-chip active" data-prov="world" type="button"><span>🌍</span> Continente</button>'
-    + '      <button class="cart-prov-chip" data-prov="plains" type="button"><span>🌾</span> Planícies</button>'
-    + '      <button class="cart-prov-chip" data-prov="forest" type="button"><span>🌲</span> Florestas</button>'
-    + '      <button class="cart-prov-chip" data-prov="mountain" type="button"><span>🏔️</span> Montanhas</button>'
-    + '      <button class="cart-prov-chip" data-prov="swamp" type="button"><span>🐍</span> Pântanos</button>'
-    + '      <button class="cart-prov-chip" data-prov="desert" type="button"><span>🌵</span> Deserto</button>'
-    + '      <button class="cart-prov-chip" data-prov="coast" type="button"><span>🌊</span> Costa</button>'
-    + '      <button class="cart-prov-chip" data-prov="snow" type="button"><span>❄️</span> Ermo Gelado</button>'
-    + '      <button class="cart-prov-chip" data-prov="volcanic" type="button"><span>🌋</span> Vulcânico</button>'
+    + '    <div class="cart-prov-bar-wrap">'
+    + '      <button class="cart-prov-nav-btn cart-prov-prev" id="xcart-prov-prev" type="button" aria-label="Anterior">‹</button>'
+    + '      <div class="cart-prov-bar" id="xcart-prov-bar"></div>'
+    + '      <button class="cart-prov-nav-btn cart-prov-next" id="xcart-prov-next" type="button" aria-label="Próximo">›</button>'
     + '    </div>'
 
     + '  </div>'
@@ -93498,6 +93537,65 @@ function openCartography() {
 
 
 
+
+function _renderXCartProvinceBar() {
+  var pBar = document.getElementById('xcart-prov-bar');
+  if (!pBar) return;
+  var known = window.__EXPLORE_KNOWN || ['plains'];
+  var ownedMaps = [];
+  var discProvs = (window.CartShared && CartShared.getDiscoveredProvinces) 
+    ? CartShared.getDiscoveredProvinces(known, ownedMaps) 
+    : ((window.CartShared && CartShared.CART_PROVINCES) ? [CartShared.CART_PROVINCES[0], CartShared.CART_PROVINCES[1]] : []);
+
+  var curMode = (_xcartEngine && typeof _xcartEngine.getViewMode === 'function') ? _xcartEngine.getViewMode() : { provinceId: 'world' };
+  var curId = curMode.provinceId || 'world';
+
+  pBar.innerHTML = '';
+  discProvs.forEach(function(prov){
+    var chip = document.createElement('button');
+    var isActive = (curId === prov.id) || (curMode.mode === 'world' && prov.id === 'world');
+    chip.className = 'cart-prov-chip' + (isActive ? ' active' : '');
+    chip.setAttribute('data-prov', prov.id);
+    chip.setAttribute('type', 'button');
+    var shortName = (prov.id === 'world') ? 'Continente' :
+                    (prov.id === 'plains') ? 'Planícies' :
+                    (prov.id === 'forest') ? 'Florestas' :
+                    (prov.id === 'mountain') ? 'Montanhas' :
+                    (prov.id === 'swamp') ? 'Pântanos' :
+                    (prov.id === 'desert') ? 'Deserto' :
+                    (prov.id === 'coast') ? 'Costa' :
+                    (prov.id === 'snow') ? 'Ermo Gelado' :
+                    (prov.id === 'volcanic') ? 'Vulcânico' : prov.name;
+    chip.innerHTML = '<span>' + (prov.icon || '📍') + '</span> ' + shortName;
+    chip.onclick = function(e){
+      e.preventDefault();
+      _xcartFocusProvince(prov.id);
+    };
+    pBar.appendChild(chip);
+  });
+
+  var pPrev = document.getElementById('xcart-prov-prev');
+  var pNext = document.getElementById('xcart-prov-next');
+  if (pPrev) {
+    pPrev.onclick = function(e){
+      e.preventDefault();
+      var idx = discProvs.findIndex(function(dp){ return dp.id === curId; });
+      var prevProv = (idx > 0) ? discProvs[idx - 1] : discProvs[discProvs.length - 1];
+      if (prevProv) _xcartFocusProvince(prevProv.id);
+    };
+    pPrev.style.display = discProvs.length > 1 ? 'flex' : 'none';
+  }
+  if (pNext) {
+    pNext.onclick = function(e){
+      e.preventDefault();
+      var idx = discProvs.findIndex(function(dp){ return dp.id === curId; });
+      var nextProv = (idx >= 0 && idx < discProvs.length - 1) ? discProvs[idx + 1] : discProvs[0];
+      if (nextProv) _xcartFocusProvince(nextProv.id);
+    };
+    pNext.style.display = discProvs.length > 1 ? 'flex' : 'none';
+  }
+}
+
 function _xcartFocusProvince(provId){
   if (!_xcartEngine || !_xcartCanvas || !_xcartW || !_xcartH) return;
   if (provId === 'world') {
@@ -93519,6 +93617,10 @@ function _xcartFocusProvince(provId){
   chips.forEach(function(c){
     c.classList.toggle('active', c.getAttribute('data-prov') === provId);
   });
+  var activeChip = document.querySelector('#xcart-prov-bar .cart-prov-chip[data-prov="' + provId + '"]');
+  if (activeChip && typeof activeChip.scrollIntoView === 'function') {
+    try { activeChip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch(_) {}
+  }
 }
 
 function _xcartCenterOnPlayer(){
@@ -93887,14 +93989,7 @@ function _xcartWireEvents() {
 
   document.getElementById('xcart-zoom-reset').onclick = function(){ _xcartFocusProvince('world'); };
 
-  var _xProvChips = document.querySelectorAll('#xcart-prov-bar .cart-prov-chip');
-  _xProvChips.forEach(function(chip){
-    chip.onclick = function(e){
-      e.preventDefault();
-      var pId = chip.getAttribute('data-prov');
-      _xcartFocusProvince(pId);
-    };
-  });
+  _renderXCartProvinceBar();
 
   document.getElementById('xcart-close-btn').onclick = function(){ closeCartography(); };
 
@@ -94081,15 +94176,23 @@ function _xcartHandleHover(mx, my){
 
 
 function _xcartHandleClick(mx, my){
-
   var node = _xcartFindNodeAt(mx, my);
-
   if (!node) return;
 
-  // FASE 5.5 — abre popup de localidade unificado
+  var vm = (_xcartEngine && typeof _xcartEngine.getViewMode === 'function') ? _xcartEngine.getViewMode() : { mode: 'world' };
+  if (vm.mode === 'world') {
+    var prov = (window.CartShared && CartShared.getLocationProvince) ? CartShared.getLocationProvince(node.key) : null;
+    var provId = prov ? prov.id : 'plains';
+    var known = window.__EXPLORE_KNOWN || [];
+    var ownedMaps = [];
+    if (window.CartShared && CartShared.isProvinceDiscovered && !CartShared.isProvinceDiscovered(provId, known, ownedMaps)) {
+      return;
+    }
+    _openCartProvincePreviewPopup(prov);
+    return;
+  }
 
   _openCartLocationPopup(node);
-
 }
 
 

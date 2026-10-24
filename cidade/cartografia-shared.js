@@ -3639,6 +3639,22 @@
         ctx.fill();
       }
     }
+
+    // 4. Marcador de destino selecionado (concentric pulsing target ring no alvo final)
+    if (pathKeys.length > 0) {
+      var destNode = biomes.find(function(b){ return b.key === pathKeys[pathKeys.length - 1]; });
+      if (destNode) {
+        var dnx = destNode.x * w, dny = destNode.y * h;
+        var pulse = 0.5 + 0.5 * Math.sin(t / 220);
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(dnx, dny, 8 + pulse * 5, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255, 215, 0, ' + (0.65 + pulse * 0.35) + ')';
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
     ctx.restore();
   }
 

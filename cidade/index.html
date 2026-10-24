@@ -5711,21 +5711,87 @@ LOG SINK (Fase 7):
     }
     .cart-tooltip {
       position: absolute;
-      background: rgba(28, 22, 16, 0.95);
-      border: 1px solid #c4953a;
-      border-radius: var(--v-radius-xs, 4px);
-      padding: 6px var(--v-space-md-lg, 10px);
+      background: linear-gradient(180deg, rgba(28, 20, 12, 0.96) 0%, rgba(14, 10, 6, 0.98) 100%);
+      border: 1px solid rgba(212, 168, 83, 0.65);
+      border-radius: 6px;
+      padding: 6px 10px;
       color: #d4c8b0;
-      font-size: var(--v-font-xs, 11px);
+      font-size: 11px;
       pointer-events: none;
-      z-index: 6;
-      max-width: 180px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
-      display: none !important;
-      visibility: hidden !important;
-      opacity: 0 !important;
+      z-index: 70;
+      max-width: 220px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.85), 0 0 8px rgba(196, 149, 58, 0.25);
+      display: none;
+      transition: opacity 0.15s ease-out;
     }
-    .cart-tooltip.active { display: none !important; }
+    .cart-tooltip.active {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    .ctip-title {
+      font-family: Cinzel, serif;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #ffd685;
+      margin-bottom: 2px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    }
+    .ctip-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: #a09484;
+      margin-bottom: 3px;
+    }
+    .ctip-threat {
+      font-weight: 600;
+    }
+    .ctip-biome {
+      font-style: italic;
+    }
+    .ctip-footer {
+      font-size: 9.5px;
+      color: #8c7e6c;
+      border-top: 1px solid rgba(196, 149, 58, 0.2);
+      padding-top: 3px;
+    }
+    .ctip-hint {
+      color: #c4953a;
+      font-style: italic;
+    }
+    .cart-title-crumb {
+      color: #a09484;
+      cursor: pointer;
+      font-size: 0.82em;
+      transition: color 0.15s ease;
+    }
+    .cart-title-crumb:hover {
+      color: #ffd685;
+      text-decoration: underline;
+    }
+    .cart-title-sep {
+      color: rgba(196, 149, 58, 0.5);
+      font-size: 0.8em;
+      margin: 0 4px;
+    }
+    .cam-item-meta {
+      font-size: 9.5px;
+      color: #ffd685;
+      font-family: Cinzel, serif;
+      margin-top: 2px;
+    }
+    .cam-q-badge {
+      display: inline-block;
+      background: rgba(196, 149, 58, 0.3);
+      border: 1px solid #ffd685;
+      border-radius: 4px;
+      padding: 1px 4px;
+      font-size: 9px;
+      color: #fff4d0;
+      margin-left: 4px;
+    }
     .cart-tooltip strong { color: #c4953a; }
     .cart-tooltip .tier {
       display: inline-block;
@@ -70591,10 +70657,19 @@ function _cartHandleHover(mx, my){
   _cartHoverRaf = requestAnimationFrame(function(){
     _cartHoverRaf = 0;
     var node = _cartFindNodeAt(mx, my);
-    _cartHideTooltip();
     if (node !== _cartHoverNode) {
       _cartHoverNode = node;
-      _drawCart();
+      if (node) {
+        _cartShowTooltip(node, mx, my);
+        _cartRequestAnimLoop();
+      } else {
+        _cartHideTooltip();
+        _drawCart();
+      }
+    } else if (node) {
+      _cartShowTooltip(node, mx, my);
+    } else {
+      _cartHideTooltip();
     }
   });
 }
