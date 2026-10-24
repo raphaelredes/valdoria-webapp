@@ -4728,6 +4728,62 @@
   };
   function biomePT(key){ return _BIOME_PT[key] || key; }
 
+  // Informações de Terreno e Riscos Naturais D&D 5e (PHB p. 181-182 / DMG p. 108-112)
+  var _BIOME_DND_INFO = {
+    plains: {
+      terrain: 'Terreno Firme · Estradas Imperiais',
+      hazard: 'Perigos: Vento cortante, tempestades repentinas ou valas ocultas no capim alto.',
+      saves: 'Salvaguardas D&D 5e: DES CD 12 (Obstáculos), CON CD 11 (Tempestades).'
+    },
+    forest: {
+      terrain: 'Terreno Denso · Trilhas da Floresta Antiga',
+      hazard: 'Perigos: Galhos baixos espinhosos, raízes escorregadias e névoas alucinógenas.',
+      saves: 'Salvaguardas D&D 5e: DES CD 13 (Galhos), SAB CD 12 (Névoa), FOR CD 13 (Teias).'
+    },
+    swamp: {
+      terrain: 'Terreno Difícil (Custo ×2) · Pântano Traiçoeiro',
+      hazard: 'Perigos: Lamaçal movediço, miasmas pútridos e enxames de sanguessugas.',
+      saves: 'Salvaguardas D&D 5e: CON CD 13 (Miasma Tóxico), FOR CD 14 (Lodo Movediço).'
+    },
+    mountain: {
+      terrain: 'Terreno Acidentado · Cordilheira Escarpada',
+      hazard: 'Perigos: Queda de rochas, desfiladeiros vertiginosos e ar rarefeito gélido.',
+      saves: 'Salvaguardas D&D 5e: DES CD 14 (Desmoronamento), CON CD 13 (Exaustão/Frio).'
+    },
+    desert: {
+      terrain: 'Terreno Árido · Dunas Escaldantes',
+      hazard: 'Perigos: Calor extremo de dia, miragens traiçoeiras e tempestades de areia cortante.',
+      saves: 'Salvaguardas D&D 5e: CON CD 14 (Desidratação), SAB CD 13 (Miragens).'
+    },
+    snow: {
+      terrain: 'Terreno Gélido · Tundra e Neves Eternas',
+      hazard: 'Perigos: Frio penetrante, gelo fino quebradiço e nevascas ofuscantes.',
+      saves: 'Salvaguardas D&D 5e: CON CD 14 (Frio Extremo), SOB CD 13 (Orientação).'
+    },
+    graveyard: {
+      terrain: 'Terreno Funesto · Terras Amaldiçoadas',
+      hazard: 'Perigos: Eflúvios necromânticos, sepulcros profanados e calafrios espectrais.',
+      saves: 'Salvaguardas D&D 5e: SAB CD 13 (Pavor/Aura), CON CD 14 (Corrupção Profana).'
+    },
+    volcanic: {
+      terrain: 'Terreno Vulcânico · Caldeira de Brasas',
+      hazard: 'Perigos: Vapores de enxofre, solo incandescente e fumaça asfixiante.',
+      saves: 'Salvaguardas D&D 5e: CON CD 14 (Gases Tóxicos), DES CD 13 (Brasas Soltas).'
+    },
+    cave: {
+      terrain: 'Terreno Subterrâneo · Cavernas Profundas',
+      hazard: 'Perigos: Escuridão absoluta, estalagmites pontiagudas e abismos sem fundo.',
+      saves: 'Salvaguardas D&D 5e: DES CD 13 (Terreno Irregular), SAB CD 12 (Orientação no Escuro).'
+    }
+  };
+  function getBiomeDndInfo(key){
+    return _BIOME_DND_INFO[key] || {
+      terrain: 'Terreno Silvestre',
+      hazard: 'Perigos naturais e criaturas hostis nas estradas ermas.',
+      saves: 'Salvaguarda D&D 5e: CON CD 12.'
+    };
+  }
+
   // === Export to global namespace ===
   window.CartShared = {
     INK_DARK: INK_DARK, INK_MED: INK_MED, INK_LIGHT: INK_LIGHT,
@@ -4744,6 +4800,7 @@
     createWorldCart: createWorldCart,              // 2026-06-04 (sessão #73): motor ÚNICO do mapa (cidade+exploração)
     locArtHtml: locArtHtml, clpImgFallback: clpImgFallback,  // P2 sessão #73: imagem do local no popup de viagem
     biomePT: biomePT,                              // P-mapa sessão #73: bioma key -> PT-BR no popup
+    getBiomeDndInfo: getBiomeDndInfo,              // Informações de Terreno e Riscos Naturais D&D 5e
     _drawAgedParchment: _drawAgedParchment,        // 2026-05-04: estilo #4 AAA (legado — só fallback explore)
     _drawOrganicBlob: _drawOrganicBlob,            // helper exposto
     _drawAgedStain: _drawAgedStain,                // helper exposto

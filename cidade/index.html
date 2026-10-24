@@ -8911,6 +8911,26 @@ body.perf-lite .vc-action-btn { transition: none; }
       margin-top: 3px;
       line-height: 1.3;
     }
+    .clp-dnd-terrain {
+      background: rgba(14, 10, 6, 0.7);
+      border: 1px solid rgba(196, 149, 58, 0.35);
+      border-radius: 6px;
+      padding: 6px 8px;
+      margin: 6px 0 4px;
+      text-align: left;
+    }
+    .clp-terrain-tag {
+      font-family: Cinzel, serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: #ffd685;
+      margin-bottom: 2px;
+    }
+    .clp-hazard-note {
+      font-size: 8.5px;
+      color: #d2be90;
+      line-height: 1.35;
+    }
     .clp-lore-box {
       background: rgba(14, 10, 6, 0.6);
       border-left: 2px solid rgba(196, 149, 58, 0.6);
@@ -69902,9 +69922,9 @@ function renderCartographyCanvas(el){
   el.innerHTML = ''
     + '<div class="cart-wrapper">'
     + '  <div class="cart-dock" id="cart-dock">'
-    + '    <button class="cart-dock-btn" id="cart-back-btn" type="button" aria-label="Voltar para a cidade">🏛️ Cidade</button>'
-    + '    <button class="cart-dock-btn primary" id="cart-atlas-picker-btn" type="button" aria-label="Seletor de Províncias">🗺️ Atlas ▾</button>'
-    + '    <button class="cart-dock-btn accent" id="cart-atlas-back-btn" type="button" style="display:none;" aria-label="Voltar ao Continente">🌍 Continente</button>'
+    + '    <button class="cart-dock-btn" id="cart-back-btn" type="button" title="Voltar à Cidade [Esc]" aria-label="Voltar para a cidade">🏛️ Cidade</button>'
+    + '    <button class="cart-dock-btn primary" id="cart-atlas-picker-btn" type="button" title="Atlas das Províncias [M]" aria-label="Seletor de Províncias">🗺️ Atlas ▾</button>'
+    + '    <button class="cart-dock-btn accent" id="cart-atlas-back-btn" type="button" title="Voltar ao Continente [Backspace]" style="display:none;" aria-label="Voltar ao Continente">🌍 Continente</button>'
     + '  </div>'
     + '  <div class="cart-header">'
     + '    <h2 id="cart-title">Mapa de Valdória</h2>'
@@ -69925,9 +69945,9 @@ function renderCartographyCanvas(el){
     + '    <canvas id="cart-canvas"></canvas>'
     + '    <div class="cart-tooltip" id="cart-tooltip"></div>'
     + '    <div class="cart-controls">'
-    + '      <button class="cart-ctrl-btn" id="cart-zoom-in" title="Zoom in">+</button>'
-    + '      <button class="cart-ctrl-btn" id="cart-zoom-out" title="Zoom out">-</button>'
-    + '      <button class="cart-ctrl-btn" id="cart-zoom-reset" title="Reset" style="font-size:calc(18px * var(--v-font-scale, 1));">⌂</button>'
+    + '      <button class="cart-ctrl-btn" id="cart-zoom-in" title="Aproximar (+) [Tecla +]">+</button>'
+    + '      <button class="cart-ctrl-btn" id="cart-zoom-out" title="Afastar (-) [Tecla -]">-</button>'
+    + '      <button class="cart-ctrl-btn" id="cart-zoom-reset" title="Centralizar Comitiva / Norte [Espaço / Home]" style="font-size:calc(18px * var(--v-font-scale, 1));">⌂</button>'
     + '    </div>'
     + '    <div class="cart-discovery-toast" id="cart-discovery-toast" style="display:none;">'
     + '      <div class="cdt-badge">✦ NOVA ROTA REVELADA ✦</div>'
@@ -70304,6 +70324,7 @@ function _wireCartEvents(){
 
   // Mouse drag pan
   _cartCanvas.addEventListener('mousedown', function(e){
+    if (_cartPanAnimRaf) { cancelAnimationFrame(_cartPanAnimRaf); _cartPanAnimRaf = null; }
     _cartIsDragging = true;
     _cartDragStartX = e.offsetX - _cartPanX;
     _cartDragStartY = e.offsetY - _cartPanY;
@@ -70339,6 +70360,7 @@ function _wireCartEvents(){
   var _cartLastMidX = null, _cartLastMidY = null;  // sessão #74: midpoint anterior dos 2 dedos → pan fluido durante a pinça
   _cartCanvas.addEventListener('touchstart', function(e){
     e.preventDefault();
+    if (_cartPanAnimRaf) { cancelAnimationFrame(_cartPanAnimRaf); _cartPanAnimRaf = null; }
     if (e.touches.length === 2) {
       _cartLastPinchDist = _cartTouchDist(e.touches);
       var _r2 = _cartCanvas.getBoundingClientRect();
@@ -70580,6 +70602,9 @@ function _wireCartEvents(){
 
 
 
+  // Navegação profissional por teclado (Telegram Desktop / Hotkeys AAA)
+  _wireCartKeyboardNavigation();
+
   // Checagem automática de novas rotas descobertas após expedições
   setTimeout(function(){
     _checkCartAutoDiscoveryOnOpen();
@@ -70647,6 +70672,159 @@ function _checkCartAutoDiscoveryOnOpen() {
   } catch(_) {}
 }
 
+// === Câmera Cinematográfica Suave (_cartSmoothPanTo) ===
+var _cartPanAnimRaf = null;
+function _cartSmoothPanTo(targetPanX, targetPanY, targetZoom, duration) {
+  if (_cartPanAnimRaf) {
+    cancelAnimationFrame(_cartPanAnimRaf);
+    _cartPanAnimRaf = null;
+  }
+  var startX = _cartPanX;
+  var startY = _cartPanY;
+  var startZ = _cartZoom;
+  var targetClampedZ = Math.max(0.5, Math.min(3.0, targetZoom));
+  var dur = duration || 240;
+  var startT = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+
+  function step(now) {
+    var elapsed = now - startT;
+    var progress = Math.min(1.0, elapsed / dur);
+    var ease = 1.0 - Math.pow(1.0 - progress, 3); // Cubic ease-out
+    _cartPanX = startX + (targetPanX - startX) * ease;
+    _cartPanY = startY + (targetPanY - startY) * ease;
+    _cartZoom = startZ + (targetClampedZ - startZ) * ease;
+    _cartClampPan();
+    _cartUpdateZoomInfo();
+    _drawCart();
+    if (progress < 1.0) {
+      _cartPanAnimRaf = requestAnimationFrame(step);
+    } else {
+      _cartPanAnimRaf = null;
+    }
+  }
+  _cartPanAnimRaf = requestAnimationFrame(step);
+}
+
+// === Navegação Profissional por Teclado no Telegram Desktop (Ordem do Usuário 2026-10) ===
+function _wireCartKeyboardNavigation() {
+  if (window._cartKeyboardWired) return;
+  window._cartKeyboardWired = true;
+
+  window.addEventListener('keydown', function(e) {
+    if (!document.body.classList.contains('state-cart')) return;
+    
+    var tag = (document.activeElement && document.activeElement.tagName) ? document.activeElement.tagName.toLowerCase() : '';
+    var isInput = (tag === 'input' || tag === 'textarea' || tag === 'select');
+    
+    // ESC sempre fecha modais ou volta à cidade
+    if (e.key === 'Escape') {
+      var locPopup = document.getElementById('cart-loc-popup');
+      if (locPopup && locPopup.classList.contains('active')) {
+        e.preventDefault();
+        _closeCartLocationPopup();
+        return;
+      }
+      var atlasModal = document.getElementById('cart-atlas-modal');
+      if (atlasModal && atlasModal.style.display !== 'none') {
+        e.preventDefault();
+        atlasModal.style.display = 'none';
+        return;
+      }
+      var toast = document.getElementById('cart-discovery-toast');
+      if (toast && toast.style.display !== 'none') {
+        e.preventDefault();
+        toast.style.display = 'none';
+        return;
+      }
+      e.preventDefault();
+      var backBtn = document.getElementById('cart-back-btn');
+      if (backBtn) backBtn.click();
+      return;
+    }
+
+    if (isInput) return; // Não intercepta digitação na barra de busca do Atlas
+
+    // M / Tab: abre/alterna Atlas
+    if (e.key === 'm' || e.key === 'M' || e.key === 'Tab') {
+      e.preventDefault();
+      var atlasBtn = document.getElementById('cart-atlas-picker-btn');
+      var atlasModal = document.getElementById('cart-atlas-modal');
+      if (atlasModal && atlasModal.style.display !== 'none') {
+        atlasModal.style.display = 'none';
+      } else if (atlasBtn) {
+        atlasBtn.click();
+      }
+      return;
+    }
+
+    // Backspace: volta ao Continente quando dentro de uma Província
+    if (e.key === 'Backspace') {
+      var vm = (_cartEngine && typeof _cartEngine.getViewMode === 'function') ? _cartEngine.getViewMode() : { mode: 'world' };
+      if (vm.mode === 'province') {
+        e.preventDefault();
+        _cartFocusProvince('world');
+        return;
+      }
+    }
+
+    // Space / Home / R: centraliza na comitiva e orienta ao Norte
+    if (e.key === ' ' || e.key === 'Home' || e.key === 'r' || e.key === 'R') {
+      e.preventDefault();
+      try {
+        if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+          ValdoriaAudio.playSFX('sfx_scroll');
+        }
+      } catch(_) {}
+      _cartZoom = CART_ZOOM_DEFAULT;
+      _cartCenterOnPlayer();
+      _cartUpdateZoomInfo();
+      return;
+    }
+
+    // Zoom: + / = / PageUp / Z
+    if (e.key === '+' || e.key === '=' || e.key === 'PageUp' || e.key === 'z' || e.key === 'Z') {
+      e.preventDefault();
+      _cartSetZoom(_cartZoom * 1.25, _cartW / 2, _cartH / 2);
+      return;
+    }
+
+    // Zoom: - / _ / PageDown
+    if (e.key === '-' || e.key === '_' || e.key === 'PageDown') {
+      e.preventDefault();
+      _cartSetZoom(_cartZoom * 0.8, _cartW / 2, _cartH / 2);
+      return;
+    }
+
+    // Pan: WASD e Setas Direcionais
+    var panStep = 60;
+    if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+      e.preventDefault();
+      if (_cartPanAnimRaf) { cancelAnimationFrame(_cartPanAnimRaf); _cartPanAnimRaf = null; }
+      _cartPanY += panStep;
+      _cartClampPan();
+      _cartDragDraw();
+    } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+      e.preventDefault();
+      if (_cartPanAnimRaf) { cancelAnimationFrame(_cartPanAnimRaf); _cartPanAnimRaf = null; }
+      _cartPanY -= panStep;
+      _cartClampPan();
+      _cartDragDraw();
+    } else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+      e.preventDefault();
+      if (_cartPanAnimRaf) { cancelAnimationFrame(_cartPanAnimRaf); _cartPanAnimRaf = null; }
+      _cartPanX += panStep;
+      _cartClampPan();
+      _cartDragDraw();
+    } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+      e.preventDefault();
+      if (_cartPanAnimRaf) { cancelAnimationFrame(_cartPanAnimRaf); _cartPanAnimRaf = null; }
+      _cartPanX -= panStep;
+      _cartClampPan();
+      _cartDragDraw();
+    }
+  });
+}
+
 function _cartFocusProvince(provId){
   if (!_cartEngine || !_cartCanvas || !_cartW || !_cartH) return;
   try {
@@ -70671,20 +70849,13 @@ function _cartFocusProvince(provId){
     if (typeof _cartEngine.closeProvince === 'function') {
       _cartEngine.closeProvince();
     }
-    _cartZoom = CART_ZOOM_DEFAULT;
-    _cartCenterOnPlayer();
-    _cartUpdateZoomInfo();
+    _cartSmoothPanTo(0, 0, CART_ZOOM_DEFAULT, 260);
     if (titleEl) titleEl.innerHTML = '<span>🌍</span> Continente Geral';
     if (atlasBackBtn) atlasBackBtn.style.display = 'none';
   } else {
     if (typeof _cartEngine.openProvince === 'function') {
       var res = _cartEngine.openProvince(provId);
-      _cartZoom = 1.0;
-      _cartPanX = 0;
-      _cartPanY = 0;
-      _cartClampPan();
-      _drawCart();
-      _cartUpdateZoomInfo();
+      _cartSmoothPanTo(0, 0, 1.0, 260);
       if (res && res.province) {
         if (titleEl) {
           titleEl.innerHTML = '<span class="cart-title-crumb" onclick="_cartFocusProvince(\'world\')">🌍 Continente</span>'
@@ -70696,12 +70867,7 @@ function _cartFocusProvince(provId){
     } else {
       var res = (typeof _cartEngine.focusProvince === 'function') ? _cartEngine.focusProvince(provId, _cartW, _cartH) : null;
       if (res) {
-        _cartZoom = res.zoom;
-        _cartPanX = res.panX;
-        _cartPanY = res.panY;
-        _cartClampPan();
-        _drawCart();
-        _cartUpdateZoomInfo();
+        _cartSmoothPanTo(res.panX, res.panY, res.zoom, 260);
       }
     }
   }
@@ -70721,35 +70887,20 @@ function _cartCenterOnPlayer(){
   if (!_cartEngine || !_cartCanvas || !_cartW || !_cartH) return;
   var vm = (_cartEngine && typeof _cartEngine.getViewMode === 'function') ? _cartEngine.getViewMode() : { mode: 'world' };
   
-  // No modo Continente Geral ('world'), o mapa deve abrir 100% visível, inteiro e perfeitamente enquadrado
+  // No modo Continente Geral ('world'), o mapa enquadra suavemente em 100%
   if (vm.mode === 'world') {
-    _cartZoom = 1.0;
-    _cartPanX = 0;
-    _cartPanY = 0;
-    _cartClampPan();
-    _drawCart();
-    _cartUpdateZoomInfo();
+    _cartSmoothPanTo(0, 0, 1.0, 240);
     return;
   }
 
   var playerKey = (typeof _cartGetPlayerBiome === 'function') ? _cartGetPlayerBiome() : 'plains';
   var pos = (_cartEngine && typeof _cartEngine.getNodePos === 'function') ? _cartEngine.getNodePos(playerKey, _cartW, _cartH) : null;
   if (!pos) {
-    _cartZoom = 1.0;
-    _cartPanX = 0;
-    _cartPanY = 0;
-    _cartClampPan();
-    _drawCart();
-    _cartUpdateZoomInfo();
+    _cartSmoothPanTo(0, 0, 1.0, 240);
     return;
   }
 
-  _cartZoom = 1.0;
-  _cartPanX = 0;
-  _cartPanY = 0;
-  _cartClampPan();
-  _drawCart();
-  _cartUpdateZoomInfo();
+  _cartSmoothPanTo(0, 0, 1.0, 240);
 }
 
 function _cartTouchDist(touches){
@@ -71152,6 +71303,14 @@ function _openCartLocationPopup(biome){
     ? '<div class="clp-exp-night-warn">🌙 Marcha Noturna: O sol já se pôs além das colinas. Tochas, lanternas ou visão no escuro são indispensáveis contra emboscadas na estrada.</div>'
     : '';
 
+  var dndInfo = (window.CartShared && CartShared.getBiomeDndInfo) ? CartShared.getBiomeDndInfo(biome.biome || biome.key) : null;
+  var dndHtml = dndInfo
+    ? '<div class="clp-dnd-terrain">'
+    + '  <div class="clp-terrain-tag">🏔️ ' + dndInfo.terrain + '</div>'
+    + '  <div class="clp-hazard-note">⚠️ ' + dndInfo.hazard + '<br>🛡️ ' + dndInfo.saves + '</div>'
+    + '</div>'
+    : '';
+
   var canExploreOrigin = isCurrent && biome.isOrigin;
   var biomePT = ((CartShared && CartShared.biomePT) ? CartShared.biomePT(biome.biome || biome.key) : (biome.biome || biome.key));
 
@@ -71164,6 +71323,7 @@ function _openCartLocationPopup(biome){
     + '<p>' + (biome.desc || 'Um destino misterioso te aguarda além das fronteiras.') + '</p>'
     + (rec ? '<div class="clp-meta">' + rec + '<br>Bioma: ' + biomePT + ' · Distância: ~' + distMilhas + ' milhas (~' + horasViagem + 'h de marcha)</div>' : '')
     + nightWarnHtml
+    + dndHtml
     + '<div class="clp-pace-wrap" style="margin-top: 8px; text-align: left;">'
     + '  <div style="font-size: 9.5px; font-family: Cinzel, serif; color: #ffd685; margin-bottom: 3px; font-weight: 600;">RITMO DE MARCHA D&D 5e:</div>'
     + '  <div class="clp-pace-selector">'

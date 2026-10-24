@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T15:03:45Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T15:22:32Z - do not edit directly, edit source -->
 
 
 
@@ -92908,6 +92908,14 @@ function _openCartLocationPopup(biome){
 
   var biomePT = ((CartShared && CartShared.biomePT) ? CartShared.biomePT(biome.biome || biome.key) : (biome.biome || biome.key));
 
+  var dndInfo = (window.CartShared && CartShared.getBiomeDndInfo) ? CartShared.getBiomeDndInfo(biome.biome || biome.key) : null;
+  var dndHtml = dndInfo
+    ? '<div class="clp-dnd-terrain">'
+    + '  <div class="clp-terrain-tag">🏔️ ' + dndInfo.terrain + '</div>'
+    + '  <div class="clp-hazard-note">⚠️ ' + dndInfo.hazard + '<br>🛡️ ' + dndInfo.saves + '</div>'
+    + '</div>'
+    : '';
+
   card.innerHTML = ''
     + '<div class="clp-body">'
     + '<div class="clp-icon">' + (CartShared.locArtHtml ? CartShared.locArtHtml(biome) : biome.ico) + '</div>'
@@ -92916,6 +92924,7 @@ function _openCartLocationPopup(biome){
     + '<h2>' + (biome.regionalName || biome.name) + '</h2>'
     + '<p>' + (biome.desc || 'Um destino misterioso te aguarda além das fronteiras.') + '</p>'
     + (rec ? '<div class="clp-meta">' + rec + '<br>Bioma: ' + biomePT + ' · Distância: ~' + distMilhas + ' milhas (~' + horasViagem + 'h de marcha)</div>' : '')
+    + dndHtml
     + '<div class="clp-pace-wrap" style="margin-top: 8px; text-align: left;">'
     + '  <div style="font-size: 9.5px; font-family: Cinzel, serif; color: #ffd685; margin-bottom: 3px; font-weight: 600;">RITMO DE MARCHA D&D 5e:</div>'
     + '  <div class="clp-pace-selector">'
@@ -93009,19 +93018,15 @@ function _closeCartLocationPopup(){
         return;
       }
       if (action === 'travel' && biome) {
-
+        var selPace = window._cartSelectedPace || 'normal';
         _closeCartLocationPopup();
-
-        // 2026-06-21: viaja DIRETO (1 clique = 1 confirmação). Antes chamava
-
-        // handleCartographyNodeClick → openLocationPopup (2º popup INIMIGOS/MATERIAIS
-
-        // redundante que ficava pendurado/reaparecia). _cartTravelTo faz a viagem
-
-        // REAL (server-authoritative em REMOTE via /api/webapp/transition).
-
+        try {
+          if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+            ValdoriaAudio.playSFX('sfx_confirm');
+          }
+        } catch(_) {}
+        sessionStorage.setItem('valdoria_travel_pace', selPace);
         if (typeof _cartTravelTo === 'function') { _cartTravelTo(biome.key); }
-
       }
 
     });
@@ -93324,6 +93329,12 @@ function openCartography() {
 
     + '<div class="xcart-wrapper">'
 
+    + '  <div class="xcart-dock" id="xcart-dock">'
+    + '    <button class="xcart-dock-btn" id="xcart-top-back-btn" type="button" title="Voltar para a exploração [Esc]" aria-label="Voltar para a exploração">🧭 Exploração</button>'
+    + '    <button class="xcart-dock-btn primary" id="xcart-atlas-picker-btn" type="button" title="Atlas das Províncias [M]" aria-label="Seletor de Províncias">🗺️ Atlas ▾</button>'
+    + '    <button class="xcart-dock-btn accent" id="xcart-atlas-back-btn" type="button" title="Voltar ao Continente [Backspace]" style="display:none;" aria-label="Voltar ao Continente">🌍 Continente</button>'
+    + '  </div>'
+
     + '  <div class="xcart-header">'
 
     + '    <h2 id="xcart-title">Cartografia de Valdoria</h2>'
@@ -93346,11 +93357,11 @@ function openCartography() {
 
     + '    <div class="xcart-controls">'
 
-    + '      <button class="xcart-ctrl-btn" id="xcart-zoom-in" title="Zoom in">+</button>'
+    + '      <button class="xcart-ctrl-btn" id="xcart-zoom-in" title="Aproximar (+) [Tecla +]">+</button>'
 
-    + '      <button class="xcart-ctrl-btn" id="xcart-zoom-out" title="Zoom out">-</button>'
+    + '      <button class="xcart-ctrl-btn" id="xcart-zoom-out" title="Afastar (-) [Tecla -]">-</button>'
 
-    + '      <button class="xcart-ctrl-btn" id="xcart-zoom-reset" title="Reset" style="font-size:calc(18px * var(--v-font-scale, 1));">⌂</button>'
+    + '      <button class="xcart-ctrl-btn" id="xcart-zoom-reset" title="Centralizar Comitiva / Norte [Espaço / Home]" style="font-size:calc(18px * var(--v-font-scale, 1));">⌂</button>'
 
     + '    </div>'
 
@@ -93364,6 +93375,25 @@ function openCartography() {
 
     + '    <button class="xcart-back-btn xcart-city-btn" id="xcart-city-btn" title="Voltar para os Portões de Valdoria">Voltar pra Cidade</button>'
 
+    + '  </div>'
+
+    + '  <div class="cart-atlas-modal" id="xcart-atlas-modal" style="display:none;">'
+    + '    <div class="cam-box">'
+    + '      <div class="cam-header">'
+    + '        <h3>Atlas das Províncias de Valdoria</h3>'
+    + '        <button class="cam-close" id="xcam-close-btn" type="button">✕</button>'
+    + '      </div>'
+    + '      <div class="cam-search-wrap">'
+    + '        <input type="text" class="cam-search-input" id="xcam-search-input" placeholder="🔍 Buscar província ou localidade..." autocomplete="off">'
+    + '      </div>'
+    + '      <div class="cam-grid" id="xcam-grid"></div>'
+    + '      <div class="cam-legend">'
+    + '        <span class="cam-legend-item">🏛️ Assentamentos</span>'
+    + '        <span class="cam-legend-item">⚔️ Terras Ermas</span>'
+    + '        <span class="cam-legend-item">📜 Contratos</span>'
+    + '        <span class="cam-legend-item">🗺️ Cartas Mapeadas</span>'
+    + '      </div>'
+    + '    </div>'
     + '  </div>'
 
     + '</div>';
@@ -93393,6 +93423,18 @@ function openCartography() {
       },
 
       getPlayerBiomeKey: _cartGetPlayerBiomeV2,
+
+      getOwnedMaps: function(){ return window.__EXPLORE_OWNED_MAPS || []; },
+
+      getQuestFocus: function(){
+        if (typeof S !== 'undefined' && S && Array.isArray(S.activeQuests) && S.activeQuests.length) {
+          var q = S.activeQuests[0];
+          return { key: q.target_map || q.location || '', title: q.title || 'Missão' };
+        }
+        return (window._questFocusLoc && window._questFocusLoc.key) ? { key: window._questFocusLoc.key, title: window._questFocusLoc.questTitle || 'Missão' } : null;
+      },
+
+      drawQuestHalo: _drawQuestFocusHalo,
 
       // FIX mapa preto: _xcartDraw() direto (não _xcartCenterOnPlayer) — o callback
 
@@ -93647,24 +93689,19 @@ function _xcartFocusProvince(provId){
   } catch(_) {}
   var titleEl = document.getElementById('xcart-title');
   var continentBtn = document.getElementById('xcart-continent-btn');
+  var atlasBackBtn = document.getElementById('xcart-atlas-back-btn');
   if (provId === 'world') {
     if (typeof _xcartEngine.closeProvince === 'function') {
       _xcartEngine.closeProvince();
     }
-    _cartZoom = CART_ZOOM_DEFAULT;
-    _xcartCenterOnPlayer();
-    _xcartUpdateZoomInfo();
+    _xcartSmoothPanTo(0, 0, CART_ZOOM_DEFAULT, 260);
     if (titleEl) titleEl.innerHTML = '<span>🌍</span> Continente Geral';
     if (continentBtn) continentBtn.style.display = 'none';
+    if (atlasBackBtn) atlasBackBtn.style.display = 'none';
   } else {
     if (typeof _xcartEngine.openProvince === 'function') {
       var res = _xcartEngine.openProvince(provId);
-      _cartZoom = 1.0;
-      _cartPanX = 0;
-      _cartPanY = 0;
-      _xcartClampPan();
-      _xcartDraw();
-      _xcartUpdateZoomInfo();
+      _xcartSmoothPanTo(0, 0, 1.0, 260);
       if (res && res.province) {
         if (titleEl) {
           titleEl.innerHTML = '<span class="cart-title-crumb" onclick="_xcartFocusProvince(\'world\')">🌍 Continente</span>'
@@ -93673,15 +93710,11 @@ function _xcartFocusProvince(provId){
         }
       }
       if (continentBtn) continentBtn.style.display = 'inline-flex';
+      if (atlasBackBtn) atlasBackBtn.style.display = 'inline-flex';
     } else {
       var res = (typeof _xcartEngine.focusProvince === 'function') ? _xcartEngine.focusProvince(provId, _xcartW, _xcartH) : null;
       if (res) {
-        _cartZoom = res.zoom;
-        _cartPanX = res.panX;
-        _cartPanY = res.panY;
-        _xcartClampPan();
-        _xcartDraw();
-        _xcartUpdateZoomInfo();
+        _xcartSmoothPanTo(res.panX, res.panY, res.zoom, 260);
       }
     }
   }
@@ -93696,43 +93729,22 @@ function _xcartFocusProvince(provId){
 }
 
 function _xcartCenterOnPlayer(){
-
   if (!_xcartEngine || !_xcartCanvas || !_xcartW || !_xcartH) return;
+  var vm = (_xcartEngine && typeof _xcartEngine.getViewMode === 'function') ? _xcartEngine.getViewMode() : { mode: 'world' };
 
-  var _S = Math.min(_xcartW, _xcartH);
-
-  var minCover = Math.max(_xcartW, _xcartH) / _S;
-
-  if (_cartZoom < minCover) _cartZoom = Math.max(1.6, minCover);
-
-
-
-  var playerKey = (typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : 'plains';
-
-  var pos = (_xcartEngine && typeof _xcartEngine.getNodePos === 'function') ? _xcartEngine.getNodePos(playerKey, _xcartW, _xcartH) : null;
-
-  if (!pos) {
-
-    _xcartClampPan();
-
-    _xcartDraw();
-
+  if (vm.mode === 'world') {
+    _xcartSmoothPanTo(0, 0, 1.0, 240);
     return;
-
   }
 
+  var playerKey = (typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : 'plains';
+  var pos = (_xcartEngine && typeof _xcartEngine.getNodePos === 'function') ? _xcartEngine.getNodePos(playerKey, _xcartW, _xcartH) : null;
+  if (!pos) {
+    _xcartSmoothPanTo(0, 0, 1.0, 240);
+    return;
+  }
 
-
-  _cartPanX = (_xcartW / 2) - (pos.x * _cartZoom);
-
-  _cartPanY = (_xcartH / 2) - (pos.y * _cartZoom);
-
-  _xcartClampPan();
-
-  _xcartDraw();
-
-  _xcartUpdateZoomInfo();
-
+  _xcartSmoothPanTo(0, 0, 1.0, 240);
 }
 
 
@@ -93895,11 +93907,71 @@ var _xcartEngine = (window.CartShared && CartShared.createWorldCart) ? CartShare
 
   getPlayerBiomeKey: _cartGetPlayerBiomeV2,
 
+  getOwnedMaps: function(){ return window.__EXPLORE_OWNED_MAPS || []; },
+
+  getQuestFocus: function(){
+    if (typeof S !== 'undefined' && S && Array.isArray(S.activeQuests) && S.activeQuests.length) {
+      var q = S.activeQuests[0];
+      return { key: q.target_map || q.location || '', title: q.title || 'Missão' };
+    }
+    return (window._questFocusLoc && window._questFocusLoc.key) ? { key: window._questFocusLoc.key, title: window._questFocusLoc.questTitle || 'Missão' } : null;
+  },
+
+  drawQuestHalo: _drawQuestFocusHalo,
+
   // FIX mapa preto: _xcartDraw() direto (não _xcartCenterOnPlayer) — ver comentário acima.
 
   onAsyncRedraw: function(){ if (_xcartCtx && _xcartEngine) _xcartDraw(); }
 
 }) : null;
+
+function _drawQuestFocusHalo(ctx, biome, w, h, questTitle){
+  if (!biome) return;
+  var cx = biome.x * w;
+  var cy = biome.y * h;
+  if (window._valdoriaPerformanceTier === 'lite') {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, 44, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255, 215, 0, 0.85)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.restore();
+    return;
+  }
+  var t = (typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now()) / 600;
+  var pulse = 0.5 + 0.5 * Math.sin(t);
+  var rBase = 40;
+  var rOuter = rBase + 6 + pulse * 8;
+  if (!window._cityQuestRingSprite) {
+    var qC = document.createElement('canvas');
+    qC.width = 128; qC.height = 128;
+    var qCtx = qC.getContext('2d');
+    var qG = qCtx.createRadialGradient(64, 64, 24, 64, 64, 64);
+    qG.addColorStop(0, 'rgba(255,215,0,0)');
+    qG.addColorStop(0.55, 'rgba(255,200,80,0.38)');
+    qG.addColorStop(0.85, 'rgba(255,170,40,0.60)');
+    qG.addColorStop(1, 'rgba(255,140,30,0)');
+    qCtx.fillStyle = qG;
+    qCtx.beginPath();
+    qCtx.arc(64, 64, 64, 0, Math.PI * 2);
+    qCtx.fill();
+    window._cityQuestRingSprite = qC;
+  }
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = 0.55 + pulse * 0.45;
+  ctx.drawImage(window._cityQuestRingSprite, cx - rOuter, cy - rOuter, rOuter * 2, rOuter * 2);
+  ctx.restore();
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,215,0,' + (0.65 + pulse * 0.25) + ')';
+  ctx.lineWidth = 2 + pulse * 1.2;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.arc(cx, cy, rBase + 2, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+}
 
 function _xcartDraw() {
 
@@ -93936,6 +94008,8 @@ function _xcartWireEvents() {
   // Mouse drag pan
 
   _xcartCanvas.addEventListener('mousedown', function(e){
+
+    if (_cartPanAnimRaf) { cancelAnimationFrame(_cartPanAnimRaf); _cartPanAnimRaf = null; }
 
     _xcartIsDragging = true;
 
@@ -93986,6 +94060,8 @@ function _xcartWireEvents() {
   _xcartCanvas.addEventListener('touchstart', function(e){
 
     e.preventDefault();
+
+    if (_cartPanAnimRaf) { cancelAnimationFrame(_cartPanAnimRaf); _cartPanAnimRaf = null; }
 
     if (e.touches.length === 2) {
 
@@ -94115,6 +94191,89 @@ function _xcartWireEvents() {
 
   }
 
+  // Top Dock handlers
+  var topBack = document.getElementById('xcart-top-back-btn');
+  if (topBack) topBack.onclick = function(){ closeCartography(); };
+
+  var atlasBack = document.getElementById('xcart-atlas-back-btn');
+  if (atlasBack) atlasBack.onclick = function(){ _xcartFocusProvince('world'); };
+
+  // Atlas Modal Seletor de Províncias
+  var atlasPickerBtn = document.getElementById('xcart-atlas-picker-btn');
+  var atlasModal = document.getElementById('xcart-atlas-modal');
+  var camClose = document.getElementById('xcam-close-btn');
+  var camGrid = document.getElementById('xcam-grid');
+  var camSearch = document.getElementById('xcam-search-input');
+  if (atlasPickerBtn && atlasModal && camGrid) {
+    atlasPickerBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      var known = window.__EXPLORE_KNOWN || [];
+      var ownedMaps = window.__EXPLORE_OWNED_MAPS || [];
+      var curMode = (_xcartEngine && typeof _xcartEngine.getViewMode === 'function') ? _xcartEngine.getViewMode() : { provinceId: 'world' };
+      var discProvs = (window.CartShared && CartShared.getDiscoveredProvinces)
+        ? CartShared.getDiscoveredProvinces(known, ownedMaps)
+        : ((window.CartShared && CartShared.CART_PROVINCES) ? [CartShared.CART_PROVINCES[0], CartShared.CART_PROVINCES[1]] : []);
+
+      function renderCamItems(filterText) {
+        camGrid.innerHTML = '';
+        var ft = (filterText || '').toLowerCase().trim();
+        var filtered = discProvs.filter(function(prov){
+          if (!ft) return true;
+          if ((prov.name || '').toLowerCase().indexOf(ft) >= 0) return true;
+          if ((prov.desc || '').toLowerCase().indexOf(ft) >= 0) return true;
+          if (prov.locKeys && prov.locKeys.some(function(k){ return k.toLowerCase().indexOf(ft) >= 0; })) return true;
+          return false;
+        });
+        if (filtered.length === 0) {
+          camGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #a09484; font-size: 11px; padding: 20px;">Nenhuma província ou localidade encontrada para "' + filterText + '".</div>';
+          return;
+        }
+        filtered.forEach(function(prov){
+          var item = document.createElement('div');
+          var isActive = (curMode.provinceId === prov.id) || (curMode.mode === 'world' && prov.id === 'world');
+          item.className = 'cam-item' + (isActive ? ' active' : '');
+          var qTitle = _getXCartProvinceActiveQuest(prov.id);
+          var qBadge = qTitle ? '<span class="cam-q-badge">📜 ' + qTitle + '</span>' : '';
+          var locKeys = prov.locKeys || [];
+          var knownCount = locKeys.filter(function(k){ return known.indexOf(k) >= 0; }).length;
+          var metaHtml = (prov.id === 'world')
+            ? '<div class="cam-item-meta">🗺️ Mapa Geral de Valdória</div>'
+            : '<div class="cam-item-meta">📍 ' + knownCount + ' / ' + locKeys.length + ' locais mapeados ' + qBadge + '</div>';
+          item.innerHTML = '<div class="cam-item-title">' + (prov.icon || '🗺️') + ' ' + (prov.name || prov.id) + '</div>'
+                         + '<div class="cam-item-sub">' + (prov.desc || 'Província de Valdória') + '</div>'
+                         + metaHtml;
+          item.onclick = function(ev){
+            ev.preventDefault();
+            ev.stopPropagation();
+            _xcartFocusProvince(prov.id);
+            atlasModal.style.display = 'none';
+          };
+          camGrid.appendChild(item);
+        });
+      }
+      if (camSearch) {
+        camSearch.value = '';
+        camSearch.oninput = function(){ renderCamItems(camSearch.value); };
+      }
+      renderCamItems('');
+      atlasModal.style.display = 'flex';
+    };
+    if (camClose) {
+      camClose.onclick = function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        atlasModal.style.display = 'none';
+      };
+    }
+    atlasModal.onclick = function(e){
+      if (e.target === atlasModal) atlasModal.style.display = 'none';
+    };
+  }
+
+  // Ativa atalhos de teclado no Telegram Desktop
+  _wireXCartKeyboardNavigation();
+
 }
 
 
@@ -94136,6 +94295,146 @@ function _xcartTouchDist(touches){
 }
 
 
+
+// === Câmera Cinematográfica Suave (_xcartSmoothPanTo) ===
+var _cartPanAnimRaf = null;
+function _xcartSmoothPanTo(targetPanX, targetPanY, targetZoom, duration) {
+  if (_cartPanAnimRaf) {
+    cancelAnimationFrame(_cartPanAnimRaf);
+    _cartPanAnimRaf = null;
+  }
+  var startX = _cartPanX;
+  var startY = _cartPanY;
+  var startZ = _cartZoom;
+  var targetClampedZ = Math.max(0.5, Math.min(3.0, targetZoom));
+  var dur = duration || 240;
+  var startT = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+
+  function step(now) {
+    var elapsed = now - startT;
+    var progress = Math.min(1.0, elapsed / dur);
+    var ease = 1.0 - Math.pow(1.0 - progress, 3); // Cubic ease-out
+    _cartPanX = startX + (targetPanX - startX) * ease;
+    _cartPanY = startY + (targetPanY - startY) * ease;
+    _cartZoom = startZ + (targetClampedZ - startZ) * ease;
+    _xcartClampPan();
+    _xcartUpdateZoomInfo();
+    _xcartDraw();
+    if (progress < 1.0) {
+      _cartPanAnimRaf = requestAnimationFrame(step);
+    } else {
+      _cartPanAnimRaf = null;
+    }
+  }
+  _cartPanAnimRaf = requestAnimationFrame(step);
+}
+
+// === Navegação Profissional por Teclado no Telegram Desktop (Exploração) ===
+function _wireXCartKeyboardNavigation() {
+  if (window._xcartKeyboardWired) return;
+  window._xcartKeyboardWired = true;
+
+  window.addEventListener('keydown', function(e) {
+    var overlay = document.getElementById('cartography-overlay');
+    if (!overlay || !overlay.classList.contains('visible')) return;
+
+    var tag = (document.activeElement && document.activeElement.tagName) ? document.activeElement.tagName.toLowerCase() : '';
+    var isInput = (tag === 'input' || tag === 'textarea' || tag === 'select');
+
+    if (e.key === 'Escape') {
+      var locPopup = document.getElementById('cart-loc-popup');
+      if (locPopup && locPopup.classList.contains('active')) {
+        e.preventDefault();
+        _closeCartLocationPopup();
+        return;
+      }
+      var atlasModal = document.getElementById('xcart-atlas-modal');
+      if (atlasModal && atlasModal.style.display !== 'none') {
+        e.preventDefault();
+        atlasModal.style.display = 'none';
+        return;
+      }
+      e.preventDefault();
+      closeCartography();
+      return;
+    }
+
+    if (isInput) return; // Não intercepta digitação de busca
+
+    if (e.key === 'm' || e.key === 'M' || e.key === 'Tab') {
+      e.preventDefault();
+      var atlasBtn = document.getElementById('xcart-atlas-picker-btn');
+      var atlasModal = document.getElementById('xcart-atlas-modal');
+      if (atlasModal && atlasModal.style.display !== 'none') {
+        atlasModal.style.display = 'none';
+      } else if (atlasBtn) {
+        atlasBtn.click();
+      }
+      return;
+    }
+
+    if (e.key === 'Backspace') {
+      var vm = (_xcartEngine && typeof _xcartEngine.getViewMode === 'function') ? _xcartEngine.getViewMode() : { mode: 'world' };
+      if (vm.mode === 'province') {
+        e.preventDefault();
+        _xcartFocusProvince('world');
+        return;
+      }
+    }
+
+    if (e.key === ' ' || e.key === 'Home' || e.key === 'r' || e.key === 'R') {
+      e.preventDefault();
+      try {
+        if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+          ValdoriaAudio.playSFX('sfx_scroll');
+        }
+      } catch(_) {}
+      _cartZoom = CART_ZOOM_DEFAULT;
+      _xcartCenterOnPlayer();
+      _xcartUpdateZoomInfo();
+      return;
+    }
+
+    if (e.key === '+' || e.key === '=' || e.key === 'PageUp' || e.key === 'z' || e.key === 'Z') {
+      e.preventDefault();
+      _xcartSetZoom(_cartZoom * 1.25, _xcartW / 2, _xcartH / 2);
+      return;
+    }
+
+    if (e.key === '-' || e.key === '_' || e.key === 'PageDown') {
+      e.preventDefault();
+      _xcartSetZoom(_cartZoom * 0.8, _xcartW / 2, _xcartH / 2);
+      return;
+    }
+
+    var panStep = 60;
+    if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+      e.preventDefault();
+      if (_cartPanAnimRaf) { cancelAnimationFrame(_cartPanAnimRaf); _cartPanAnimRaf = null; }
+      _cartPanY += panStep;
+      _xcartClampPan();
+      _xcartDraw();
+    } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+      e.preventDefault();
+      if (_cartPanAnimRaf) { cancelAnimationFrame(_cartPanAnimRaf); _cartPanAnimRaf = null; }
+      _cartPanY -= panStep;
+      _xcartClampPan();
+      _xcartDraw();
+    } else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+      e.preventDefault();
+      if (_cartPanAnimRaf) { cancelAnimationFrame(_cartPanAnimRaf); _cartPanAnimRaf = null; }
+      _cartPanX += panStep;
+      _xcartClampPan();
+      _xcartDraw();
+    } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+      e.preventDefault();
+      if (_cartPanAnimRaf) { cancelAnimationFrame(_cartPanAnimRaf); _cartPanAnimRaf = null; }
+      _cartPanX -= panStep;
+      _xcartClampPan();
+      _xcartDraw();
+    }
+  });
+}
 
 function _xcartSetZoom(newZoom, anchorX, anchorY){
 
@@ -104100,6 +104399,197 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
 
   border-color: #fbd770;
 
+}
+
+/* === TOP DOCK & ATLAS MODAL (AAA D&D 5e Parity com Cidade) === */
+.xcart-dock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: rgba(18, 12, 7, 0.95);
+  border-bottom: 1px solid rgba(196, 149, 58, 0.35);
+  z-index: 10;
+}
+.xcart-dock-btn {
+  background: rgba(43, 31, 20, 0.85);
+  border: 1px solid rgba(196, 149, 58, 0.5);
+  color: #ffd685;
+  font-family: Cinzel, serif;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.xcart-dock-btn:hover {
+  background: rgba(196, 149, 58, 0.25);
+  border-color: #ffd685;
+  transform: translateY(-1px);
+}
+.xcart-dock-btn.primary {
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.35), rgba(80, 55, 20, 0.55));
+  border-color: #ffd685;
+}
+.xcart-dock-btn.accent {
+  background: linear-gradient(180deg, rgba(76, 175, 80, 0.3), rgba(27, 94, 32, 0.5));
+  border-color: #81c784;
+  color: #e8f5e9;
+}
+.cart-atlas-modal {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  background: rgba(10, 7, 4, 0.85);
+  backdrop-filter: blur(4px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.2s ease-out;
+}
+.cam-box {
+  background: linear-gradient(180deg, #2b1f14, #1a120b);
+  border: 2px solid #c4953a;
+  border-radius: 12px;
+  max-width: 440px;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.85), 0 0 25px rgba(196,149,58,0.25);
+  overflow: hidden;
+}
+.cam-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(196, 149, 58, 0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.cam-header h3 {
+  font-family: Cinzel, serif;
+  color: #f4d49a;
+  font-size: 14px;
+  margin: 0;
+}
+.cam-close {
+  background: none;
+  border: none;
+  color: #a09484;
+  font-size: 16px;
+  cursor: pointer;
+}
+.cam-search-wrap {
+  padding: 8px 12px 4px;
+}
+.cam-search-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(196,149,58,0.4);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: #ffd685;
+  font-size: 11px;
+  font-family: inherit;
+  outline: none;
+}
+.cam-search-input:focus {
+  border-color: #ffd685;
+  box-shadow: 0 0 6px rgba(196,149,58,0.4);
+}
+.cam-grid {
+  padding: 8px 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  overflow-y: auto;
+  max-height: 52vh;
+}
+.cam-item {
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(196, 149, 58, 0.3);
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+.cam-item:hover, .cam-item.active {
+  background: rgba(196, 149, 58, 0.2);
+  border-color: #ffd685;
+  transform: translateY(-1px);
+}
+.cam-item-title {
+  font-family: Cinzel, serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffd685;
+}
+.cam-item-sub {
+  font-size: 9px;
+  color: #a09484;
+  font-style: italic;
+}
+.cam-item-meta {
+  font-size: 8.5px;
+  color: #c4b59d;
+  margin-top: 2px;
+}
+.cam-q-badge {
+  display: inline-block;
+  background: rgba(196,149,58,0.35);
+  border: 1px solid #ffd685;
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-size: 8px;
+  color: #fff4d0;
+  margin-left: 3px;
+}
+.cam-legend {
+  padding: 6px 12px 10px;
+  border-top: 1px solid rgba(196,149,58,0.2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  font-size: 9px;
+  color: #a09484;
+}
+.cam-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.clp-dnd-terrain {
+  background: rgba(14, 10, 6, 0.7);
+  border: 1px solid rgba(196, 149, 58, 0.35);
+  border-radius: 6px;
+  padding: 6px 8px;
+  margin: 6px 0 4px;
+  text-align: left;
+}
+.clp-terrain-tag {
+  font-family: Cinzel, serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #ffd685;
+  margin-bottom: 2px;
+}
+.clp-hazard-note {
+  font-size: 8.5px;
+  color: #d2be90;
+  line-height: 1.35;
 }
 
 </style>
