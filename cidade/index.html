@@ -69949,6 +69949,7 @@ function renderCartographyCanvas(el){
     + '    <button class="cart-dock-btn" id="cart-waypoints-btn" type="button" title="Rede de Marcos e Santuários [W]" aria-label="Marcos de Viagem e Santuários">🌀 Marcos</button>'
     + '    <button class="cart-dock-btn" id="cart-filter-toggle-btn" type="button" title="Alternar Filtro de Nós no Mapa [Teclas 1 a 6]">🎯 Filtro: Todos</button>
     <button class="cart-dock-btn" id="cart-ruler-btn" type="button" title="Régua Cartográfica / Astrolábio de Medição [X]" aria-label="Régua Cartográfica e Distâncias">📏 Régua</button>
+    <button class="cart-dock-btn" id="cart-layers-btn" type="button" title="Alternar Camadas Táticas do Mapa [L]" aria-label="Camadas do Mapa">🗺️ Camadas</button>
     <button class="cart-dock-btn" id="cart-guide-btn" type="button" title="Guia do Andarilho e Regras de Viagem D&D 5e [H]" aria-label="Guia de Viagem D&D 5e">📖 Guia</button>'
     + '    <button class="cart-dock-btn accent" id="cart-atlas-back-btn" type="button" title="Voltar ao Continente [Backspace]" style="display:none;" aria-label="Voltar ao Continente">🌍 Continente</button>'
     + '  </div>'
@@ -70042,6 +70043,23 @@ function renderCartographyCanvas(el){
           <div style="font-family:Cinzel,serif;font-weight:700;color:#ffd700;font-size:11.5px;margin-bottom:4px;">📏 RÉGUA CARTOGRÁFICA & ASTROLÁBIO DE NAVEGAÇÃO (D&D 5e)</div>
           <p style="margin:2px 0;"><b>📏 Régua & Azimute (Tecla X):</b> Ativa a régua de medição tática. Ao mover o cursor ou clicar em nós, calcula a distância em <i>Milhas, Léguas e Quilômetros</i>, o rumo nos 16 ventos náuticos e a duração da marcha a pé, a cavalo ou de caravana.<br><b>🧭 Rosa dos Ventos Dinâmica:</b> O astrolábio no canto superior projeta um ponteiro dourado vivo em direção ao destino selecionado.<br><b>📋 Copiar Itinerário:</b> No popup de viagem, o botão <i>📋 Copiar Rota</i> gera um manifesto de expedição formatado em texto para a prancheta.</p>
         </div>
+      </div>
+    </div>
+  </div>
+  <div class="cart-atlas-modal" id="cart-layers-modal" style="display:none;">
+    <div class="cam-box" style="max-width:320px;">
+      <div class="cam-header">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:16px;">🗺️</span>
+          <h3 style="margin:0;font-size:13px;color:#f4d49a;font-family:Cinzel,serif;">Camadas Táticas</h3>
+        </div>
+        <button class="cam-close" id="cart-layers-close-btn" type="button">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;padding:12px;font-size:11px;color:#d2be90;text-align:left;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="cl-chk-roads" checked> 🛣️ Estradas & Trilhas</label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="cl-chk-settlements" checked> 🏛️ Povoações & Santuários</label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="cl-chk-threats" checked> ⚔️ Zonas de Perigo (Tier 4+)</label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="cl-chk-notes" checked> 📝 Alfinetes & Anotações</label>
       </div>
     </div>
   </div>
@@ -70783,6 +70801,9 @@ function _cartUpdateWpFocus(items, idx) {
 
 function _cartFocusWaypoint(key) {
   _cartCloseWaypointsModal();
+  if (_cartEngine && typeof _cartEngine.setFocusPulse === 'function') {
+    _cartEngine.setFocusPulse(key);
+  }
   var prov = (window.CartShared && CartShared.getLocationProvince) ? CartShared.getLocationProvince(key) : null;
   if (prov && _cartEngine && typeof _cartEngine.openProvince === 'function') {
     _cartEngine.openProvince(prov.id);
@@ -70817,6 +70838,39 @@ function _cartFocusWaypoint(key) {
       e.stopPropagation();
       _cartToggleRuler();
     };
+  }
+
+  // Modal Camadas Táticas (Fase 22)
+  var layersBtn = document.getElementById('cart-layers-btn');
+  var layersModal = document.getElementById('cart-layers-modal');
+  var layersClose = document.getElementById('cart-layers-close-btn');
+  if (layersBtn && layersModal) {
+    layersBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      layersModal.style.display = (layersModal.style.display !== 'none') ? 'none' : 'flex';
+    };
+  }
+  if (layersClose && layersModal) {
+    layersClose.onclick = function(e){
+      e.preventDefault();
+      layersModal.style.display = 'none';
+    };
+  }
+  if (layersModal) {
+    layersModal.onclick = function(e){
+      if (e.target === layersModal) layersModal.style.display = 'none';
+    };
+    ['roads', 'settlements', 'threats', 'notes'].forEach(function(layerKey){
+      var chk = document.getElementById('cl-chk-' + layerKey);
+      if (chk) {
+        chk.onchange = function(){
+          if (_cartEngine && typeof _cartEngine.setLayer === 'function') {
+            _cartEngine.setLayer(layerKey, this.checked);
+          }
+        };
+      }
+    });
   }
 
   // Modal Guia do Andarilho D&D 5e
@@ -71238,6 +71292,14 @@ function _wireCartKeyboardNavigation() {
     }
 
     if (isInput) return; // Não intercepta digitação na barra de busca do Atlas
+
+    // L / l: abre/alterna Camadas Táticas do Mapa (D&D 5e)
+    if (e.key === 'l' || e.key === 'L') {
+      e.preventDefault();
+      var lm = document.getElementById('cart-layers-modal');
+      if (lm) lm.style.display = (lm.style.display !== 'none') ? 'none' : 'flex';
+      return;
+    }
 
     // H / h: abre/alterna Guia do Andarilho D&D 5e
     if (e.key === 'h' || e.key === 'H') {
@@ -72157,7 +72219,31 @@ function _openCartLocationPopup(biome){
           + '    Efeito no Terreno: <span style="color:#fca5a5;">' + haz.effect + '</span> (' + haz.dcCheck + ')<br>'
           + '    Mitigação Tática: <span style="color:#86efac;font-style:italic;">' + haz.mitigation + '</span>'
           + '  </div>'
-          + '</div>';
+          + '</div>'
+          + (function(){
+              if (!window.CartShared || !CartShared.calcEncounterTableBreakdown) return '';
+              var enc = CartShared.calcEncounterTableBreakdown(biome.biome || biome.key, {
+                pace: curPace,
+                isNight: isNight,
+                hasDarkvision: hasDarkvision,
+                hasTorch: hasTorch,
+                role: 'scout'
+              });
+              var rows = enc.encounterTypes.map(function(t){
+                return '<div style="display:flex;justify-content:space-between;align-items:center;padding:1px 0;font-size:8.5px;">'
+                  + '<span>' + t.icon + ' ' + t.label + '</span>'
+                  + '<b style="color:#ffd700;">' + t.pct + '</b>'
+                  + '</div>';
+              }).join('');
+              return '<div class="clp-encounter-table-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,16,28,0.85);padding:5px 8px;border-radius:4px;border:1px solid rgba(168,85,247,0.4);">'
+                + '  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">'
+                + '    <span style="font-size:9px;color:#c084fc;font-family:Cinzel,serif;font-weight:700;">🎲 TABELA DE ACASOS DA ESTRADA (D&D 5e):</span>'
+                + '    <span style="font-size:8.5px;color:#ffd700;font-weight:700;">Risco: ' + enc.finalChance + '% (d20 ≥ ' + enc.d20Threshold + ')</span>'
+                + '  </div>'
+                + '  <div style="background:rgba(10,8,15,0.6);border-radius:3px;padding:3px 6px;margin-bottom:3px;">' + rows + '</div>'
+                + '  <div style="font-size:8px;color:#cbd5e1;font-style:italic;">' + enc.advice + ' CD ' + enc.surpriseDC + ' Percepção Passiva contra surpresa.</div>'
+                + '</div>';
+            })();
       })()
     + (biome.isSanctuary
         ? '<div style="font-size:9.5px;color:#ffd700;margin:4px 0;background:rgba(40,30,15,0.7);border:1px solid rgba(255,215,0,0.4);padding:4px 8px;border-radius:3px;font-family:Cinzel,serif;">🏛️ SANTUÁRIO CONSAGRADO: Descanso longo seguro sem risco de emboscada</div>'

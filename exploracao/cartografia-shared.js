@@ -3983,6 +3983,24 @@
       ctx.restore();
     }
 
+    // 1.65 Marcador de Ameaça Tática D&D 5e (Tier >= 4)
+    if (opts.layers && opts.layers.threats && b.tier >= 4) {
+      ctx.save();
+      var tx = bx + radius - 2, ty = by - radius + 2;
+      ctx.beginPath();
+      ctx.moveTo(tx, ty - 4);
+      ctx.lineTo(tx + 4, ty);
+      ctx.lineTo(tx, ty + 4);
+      ctx.lineTo(tx - 4, ty);
+      ctx.closePath();
+      ctx.fillStyle = (b.tier >= 6) ? '#ef4444' : '#f97316';
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+      ctx.restore();
+    }
+
     // 1.7 Alfinete de Aventureiro / Marcador Personalizado
     var locIsPinned = opts.isPinned || _isLocPinned(b.key);
     if (locIsPinned) {
@@ -4800,6 +4818,156 @@
     };
   }
 
+  // === calcEncounterTableBreakdown (Tabela de Acasos e Emboscadas D&D 5e DMG p. 86 / 110) ===
+  function calcEncounterTableBreakdown(biomeKey, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var pace = options.pace || 'normal';
+    var isNight = !!options.isNight;
+    var hasVision = !!(options.hasDarkvision || options.hasTorch);
+    var partyRole = options.role || 'scout';
+
+    var allB = CART_BIOMES || [];
+    var node = allB.find(function(b){ return b.key === bk; }) || { tier: 1 };
+    var tier = (typeof node.tier === 'number') ? node.tier : 1;
+
+    // Risco base segundo DMG p. 86 (d20 roll threshold)
+    var baseChance = (tier <= 0) ? 0 :
+                     (tier <= 1) ? 10 :
+                     (tier <= 3) ? 18 :
+                     (tier <= 5) ? 28 : 42;
+
+    var paceMod = (pace === 'stealth') ? 0.55 : (pace === 'fast' ? 1.30 : 1.0);
+    var lightMod = (!isNight) ? 1.0 : (hasVision ? 1.20 : 1.60);
+    var roleMod = (partyRole === 'scout') ? 0.85 : 1.0;
+
+    var finalChance = Math.min(85, Math.max(0, Math.round(baseChance * paceMod * lightMod * roleMod)));
+    var d20Threshold = Math.max(2, 21 - Math.round(finalChance / 5));
+
+    var baseSurpriseDC = 10 + Math.min(10, tier * 2);
+    if (pace === 'stealth') baseSurpriseDC -= 3;
+    if (pace === 'fast') baseSurpriseDC += 4;
+    if (isNight && !hasVision) baseSurpriseDC += 5;
+
+    // Categorias de Encontro por Bioma
+    var encTypes = [];
+    if (bk.indexOf('desert') >= 0 || bk.indexOf('dunas') >= 0) {
+      encTypes = [
+        { label: 'Bandos de Nômades Salteadores', pct: '35%', desc: 'Guerreiros do deserto emboscando em desfiladeiros rochosos.', icon: '⚔️' },
+        { label: 'Verme da Areia / Escorpião Gigante', pct: '30%', desc: 'Predador alfa subterrâneo atraído por vibrações na areia.', icon: '🦂' },
+        { label: 'Caravana de Especiarias Sitiada', pct: '20%', desc: 'Mercadores perdidos precisando de água e escolta armada.', icon: '🐪' },
+        { label: 'Monólito Arcano Submerso', pct: '15%', desc: 'Ruína de civilização esquecida com runas de teletransporte.', icon: '🏛️' }
+      ];
+    } else if (bk.indexOf('swamp') >= 0 || bk.indexOf('pantan') >= 0) {
+      encTypes = [
+        { label: 'Emboscada de Trogloditas & Homens-Lagarto', pct: '40%', desc: 'Ataque surpresa emergindo das águas escuras com dardos venenosos.', icon: '🦎' },
+        { label: 'Fogo-Fátuo & Assombrações', pct: '25%', desc: 'Entidades ilusórias que atraem incautos para charcos profundos.', icon: '👻' },
+        { label: 'Herborista Selvagem ou Eremita', pct: '20%', desc: 'Habitante do pântano oferecendo poções em troca de itens raros.', icon: '🧪' },
+        { label: 'Ninho Submerso de Hidra Jovem', pct: '15%', desc: 'Monstro lendário guardando relicário encharcado.', icon: '🐉' }
+      ];
+    } else if (bk.indexOf('mountain') >= 0 || bk.indexOf('cordilheira') >= 0) {
+      encTypes = [
+        { label: 'Patrulha de Gigantes das Colinas / Ogros', pct: '35%', desc: 'Forças brutas arremessando rochedos das alturas.', icon: '🧌' },
+        { label: 'Wyverns ou Harpias Aladas', pct: '30%', desc: 'Ataque aéreo vindo das correntes térmicas dos picos.', icon: '🦅' },
+        { label: 'Batedores da Guarda de Korthag', pct: '20%', desc: 'Sentinelas anões patrulhando os passos montanhosos.', icon: '🛡️' },
+        { label: 'Entrada de Mina Antiga Desmoronada', pct: '15%', desc: 'Filão de minério nobre com riscos de desabamento.', icon: '⛏️' }
+      ];
+    } else if (bk.indexOf('snow') >= 0 || bk.indexOf('boreal') >= 0) {
+      encTypes = [
+        { label: 'Matilha de Lobos Invernais', pct: '40%', desc: 'Predadores com sopro gélido flanqueando em meio à nevasca.', icon: '🐺' },
+        { label: 'Gigante do Gelo Solitário', pct: '25%', desc: 'Guerreiro titânico vasculhando os ermos glaciais.', icon: '❄️' },
+        { label: 'Caçadores Nômades da Tundra', pct: '20%', desc: 'Companhia de caça disposta a trocar peles e carne seca.', icon: '🏹' },
+        { label: 'Caverna Glacial com Santuário Congelado', pct: '15%', desc: 'Refúgio natural com cristais de gelo perene.', icon: '🧊' }
+      ];
+    } else if (bk.indexOf('forest') >= 0 || bk.indexOf('floresta') >= 0) {
+      encTypes = [
+        { label: 'Bando de Goblins ou Aranhas Gigantes', pct: '35%', desc: 'Armadilhas de teia suspensas nas copas ancestrais.', icon: '🕷️' },
+        { label: 'Entidade Feérica / Dríade Protetora', pct: '30%', desc: 'Guardiã do bosque exigindo respeito ou oferenda.', icon: '🧚' },
+        { label: 'Caçadores Élficos em Rastreio', pct: '20%', desc: 'Arqueiros das ruínas trocando informações sobre a mata.', icon: '🏹' },
+        { label: 'Círculo de Pedras Mágicas Ancestrais', pct: '15%', desc: 'Altar druídico que restaura pontos de magia ou vida.', icon: '🌿' }
+      ];
+    } else {
+      encTypes = [
+        { label: 'Salteadores de Estrada ou Bandidos', pct: '35%', desc: 'Bandidos de estrada buscando tributo de mercadorias.', icon: '⚔️' },
+        { label: 'Caravana de Mercadores Ambulantes', pct: '30%', desc: 'Venda de provisões, tochas e consumíveis de estrada.', icon: '🛒' },
+        { label: 'Patrulha da Guarnição de Valdória', pct: '20%', desc: 'Soldados assegurando as fronteiras da capital.', icon: '🛡️' },
+        { label: 'Acampamento Abandonado com Rastros', pct: '15%', desc: 'Fogueira recente com pistas de eventos locais.', icon: '⛺' }
+      ];
+    }
+
+    var advice = '';
+    if (finalChance === 0) {
+      advice = 'Percurso em território seguro sob vigilância régia (sem risco de emboscadas).';
+    } else if (finalChance <= 15) {
+      advice = 'Estrada pacífica. Vigilância padrão de sentinela é suficiente para uma marcha tranquila.';
+    } else if (finalChance <= 30) {
+      advice = 'Região moderadamente hostil. Mantenha armas a postos e batedor atento na vanguarda.';
+    } else {
+      advice = 'Perigo Crítico! Ritmo Furtivo e guarda de prontidão fortemente recomendados.';
+    }
+
+    return {
+      tier: tier,
+      baseChance: baseChance,
+      finalChance: finalChance,
+      d20Threshold: d20Threshold,
+      surpriseDC: baseSurpriseDC,
+      encounterTypes: encTypes,
+      advice: advice
+    };
+  }
+
+  // === _drawFocusPulseBeacon (Alvo Tático com Ondas Concêntricas D&D 5e / CRPG AAA) ===
+  function _drawFocusPulseBeacon(ctx, node, w, h, elapsedSec) {
+    if (!node || typeof node.x !== 'number') return;
+    var bx = node.x * w, by = node.y * h;
+    var t = Math.max(0, Math.min(2.5, elapsedSec || 0));
+    var progress = t / 2.5; // 0.0 -> 1.0
+    var alpha = Math.max(0, 1.0 - progress);
+
+    ctx.save();
+    ctx.translate(bx, by);
+
+    // 1. Onda concêntrica expansiva 1
+    var r1 = 14 + progress * 46;
+    ctx.beginPath();
+    ctx.arc(0, 0, r1, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255, 215, 0, ' + (alpha * 0.9) + ')';
+    ctx.lineWidth = 2.0;
+    ctx.shadowColor = '#ffd700';
+    ctx.shadowBlur = 8;
+    ctx.stroke();
+
+    // 2. Onda concêntrica expansiva 2 (ligeiramente defasada)
+    if (progress > 0.15) {
+      var r2 = 14 + (progress - 0.15) * 42;
+      var a2 = Math.max(0, 1.0 - (progress - 0.15) / 0.85);
+      ctx.beginPath();
+      ctx.arc(0, 0, r2, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(245, 158, 11, ' + (a2 * 0.7) + ')';
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+    }
+
+    // 3. Mira tática em cruz (+)
+    ctx.strokeStyle = 'rgba(255, 235, 150, ' + alpha + ')';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(0, -26); ctx.lineTo(0, -12);
+    ctx.moveTo(0, 12);  ctx.lineTo(0, 26);
+    ctx.moveTo(-26, 0); ctx.lineTo(-12, 0);
+    ctx.moveTo(12, 0);  ctx.lineTo(26, 0);
+    ctx.stroke();
+
+    // 4. Etiqueta de mira superior
+    ctx.font = 'bold 8.5px Cinzel, serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(255, 215, 0, ' + alpha + ')';
+    ctx.fillText('🎯 ALVO FOCADO', 0, -30);
+
+    ctx.restore();
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -4891,6 +5059,10 @@
     out.push('• Dinâmica do Vento:  ' + baroInfo.windDescription + (windImp ? (' · ' + windImp.label) : ''));
     out.push('• Provisões Mínimas:  ' + ratBudget.netRations + ' Ração(ões) / ' + ratBudget.netWater + ' Galões d\'Água (' + ratBudget.partySize + ' integrantes, ' + ratBudget.travelDays + ' dia' + (ratBudget.travelDays > 1 ? 's' : '') + ')');
     out.push('• Sobrevivência 5e:   ' + ratBudget.verdict);
+    var encBreakdown = calcEncounterTableBreakdown(targ.biome || targ.key, { pace: paceKey });
+    out.push('• Tabela de Acasos:    Risco de Encontro ' + encBreakdown.finalChance + '% (d20 ≥ ' + encBreakdown.d20Threshold + ')');
+    out.push('• Encontro Provável:   ' + encBreakdown.encounterTypes[0].icon + ' ' + encBreakdown.encounterTypes[0].label + ' (' + encBreakdown.encounterTypes[0].pct + ')');
+    out.push('• Salvaguarda Alerta:  Percepção Passiva CD ' + encBreakdown.surpriseDC + ' contra emboscada');
     out.push('• Perigo Selvagem:    ' + hazardInfo.icon + ' ' + hazardInfo.name + ' (' + hazardInfo.dndRef + ')');
     out.push('• Efeito do Terreno:  ' + hazardInfo.effect + ' · ' + hazardInfo.dcCheck);
     out.push('• Mitigação Tática:   ' + hazardInfo.mitigation);
@@ -5320,6 +5492,9 @@
     var _rulerCurrent = null;
     var _rulerLocked = false;
     var _searchQuery = ''; // { nodeKey, startTime, duration, onComplete }
+    var _cartLayers = { roads: true, settlements: true, threats: true, notes: true };
+    var _focusPulseKey = null;
+    var _focusPulseTime = 0;
 
     function _ensureProvFog(S, known, regNodes, provId){
       if (known === null || !Array.isArray(known)) return null;
@@ -5465,13 +5640,15 @@
         }
 
         // 2. Desenhar rotas regionais (só reveladas se ambas as pontas forem conhecidas ou possuir o mapa)
-        (curProv.regionalPaths || []).forEach(function(p){
-          var p0Known = (known === null || known.indexOf(p[0]) >= 0 || provMapOwned);
-          var p1Known = (known === null || known.indexOf(p[1]) >= 0 || provMapOwned);
-          if (p0Known && p1Known) {
-            _drawCartPath(ctx, p[0], p[1], _S, _S, regNodes);
-          }
-        });
+        if (_cartLayers.roads) {
+          (curProv.regionalPaths || []).forEach(function(p){
+            var p0Known = (known === null || known.indexOf(p[0]) >= 0 || provMapOwned);
+            var p1Known = (known === null || known.indexOf(p[1]) >= 0 || provMapOwned);
+            if (p0Known && p1Known) {
+              _drawCartPath(ctx, p[0], p[1], _S, _S, regNodes);
+            }
+          });
+        }
 
         // 3. Desenhar nós da província (SOMENTE locais descobertos; Ordem do Usuario: NUNCA desenhar Terra Incognita)
         var qf = (typeof cfg.getQuestFocus === 'function') ? cfg.getQuestFocus() : null;
@@ -5483,13 +5660,19 @@
             }
           });
         }
+        if (_focusPulseKey && (Date.now() - _focusPulseTime < 2500)) {
+          var pulseRegNode = regNodes.find(function(b){ return b.key === _focusPulseKey; });
+          if (pulseRegNode) {
+            _drawFocusPulseBeacon(ctx, pulseRegNode, _S, _S, (Date.now() - _focusPulseTime) / 1000);
+          }
+        }
         regNodes.forEach(function(b){
           var isDiscovered = (known === null || known.indexOf(b.key) >= 0 || b.isOrigin || provMapOwned);
           var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
           if (isDiscovered || hasMap) {
             var hasQ = !!(qf && qf.key === b.key);
             var isPin = _isLocPinned(b.key);
-            _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, isRegional: true, hasActiveQuest: hasQ, isPinned: isPin, activeFilter: view.activeFilter });
+            _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, isRegional: true, hasActiveQuest: hasQ, isPinned: isPin, activeFilter: view.activeFilter, layers: _cartLayers });
           }
           // Locais inexplorados ficam 100% ocultos sob o Fog of War preto solido, sem qualquer icone ou texto.
         });
@@ -5558,9 +5741,11 @@
         }
 
         // 2. Estradas conhecidas
-        CART_PATHS.forEach(function(p){
-          if (_pathEndKnown(p[0]) && _pathEndKnown(p[1])) _drawCartPath(ctx, p[0], p[1], _S, _S, RB);
-        });
+        if (_cartLayers.roads) {
+          CART_PATHS.forEach(function(p){
+            if (_pathEndKnown(p[0]) && _pathEndKnown(p[1])) _drawCartPath(ctx, p[0], p[1], _S, _S, RB);
+          });
+        }
 
         // Rota Continental Ativa e Breadcrumbs (D&D 5e Style)
         var activeTargetWorld = hoverKey || (typeof window !== 'undefined' && window._cartCurrentLocBiome && window._cartCurrentLocBiome.key);
@@ -5587,12 +5772,18 @@
             }
           });
         }
+        if (_focusPulseKey && (Date.now() - _focusPulseTime < 2500)) {
+          var pulseNode = RB.find(function(b){ return b.key === _focusPulseKey; });
+          if (pulseNode) {
+            _drawFocusPulseBeacon(ctx, pulseNode, _S, _S, (Date.now() - _focusPulseTime) / 1000);
+          }
+        }
         RB.forEach(function(b){
           if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) {
             var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
             var hasQ = !!(qf && qf.key === b.key);
             var isPin = _isLocPinned(b.key);
-            _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, hasActiveQuest: hasQ, isPinned: isPin, activeFilter: view.activeFilter });
+            _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, hasActiveQuest: hasQ, isPinned: isPin, activeFilter: view.activeFilter, layers: _cartLayers });
           }
         });
         var pn = pk && RB.find(function(b){ return b.key === pk; });
@@ -5897,6 +6088,28 @@
       },
       getSearchQuery: function(){
         return _searchQuery;
+      },
+      getLayers: function(){
+        return Object.assign({}, _cartLayers);
+      },
+      setLayer: function(k, v){
+        if (typeof _cartLayers[k] !== 'undefined') {
+          _cartLayers[k] = !!v;
+          _onLoad();
+        }
+      },
+      setFocusPulse: function(key){
+        _focusPulseKey = key;
+        _focusPulseTime = Date.now();
+        _onLoad();
+      },
+      getFocusPulse: function(){
+        if (!_focusPulseKey) return null;
+        if (Date.now() - _focusPulseTime > 2500) {
+          _focusPulseKey = null;
+          return null;
+        }
+        return { key: _focusPulseKey, elapsed: (Date.now() - _focusPulseTime) / 1000 };
       },
       handleRulerClick: function(mx, my, view, hoverNode){
         if (!_rulerActive) return false;
@@ -6371,6 +6584,8 @@
     calcWindImpact: calcWindImpact,
     calcExpeditionRationsBudget: calcExpeditionRationsBudget,
     getWildernessHazardDetails: getWildernessHazardDetails,
+    calcEncounterTableBreakdown: calcEncounterTableBreakdown,
+    _drawFocusPulseBeacon: _drawFocusPulseBeacon,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
