@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T16:19:34Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T16:25:53Z - do not edit directly, edit source -->
 
 
 
@@ -71355,6 +71355,34 @@ function drawMarkedDestination(ctx, mi) {
 
   }
 
+  // Se o destino marcado for uma Saída / Transição (tile === 'E'):
+  try {
+    var _destTile = S.grid[mi.row] && S.grid[mi.row][mi.col];
+    if (_destTile === 'E') {
+      var _eds = (S.mapDef && S.mapDef.edges) || [];
+      var _ed = _eds.find(function(e){ return e.col === mi.col && e.row === mi.row; });
+      if (_ed) {
+        var _isRet = (_ed.targetMap === '__return_city__');
+        var _destText = 'Transição: ' + (_isRet ? 'Valdoria' : (_ed.label || 'Novo Mapa'));
+        ctx.font = 'bold 10px Cinzel, serif';
+        var _dtw = ctx.measureText(_destText).width;
+        var _dbx = s.x - _dtw / 2 - 6, _dby = s.y - HEX_H * 0.66 - 28, _dbw = _dtw + 12, _dbh = 16;
+        ctx.fillStyle = 'rgba(12, 14, 18, 0.92)';
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') ctx.roundRect(_dbx, _dby, _dbw, _dbh, 3);
+        else ctx.rect(_dbx, _dby, _dbw, _dbh);
+        ctx.fill();
+        ctx.strokeStyle = _isRet ? '#ffd700' : '#4ade80';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.fillStyle = _isRet ? '#ffd875' : '#c3f5d5';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(_destText, s.x, _dby + _dbh / 2 + 0.5);
+      }
+    }
+  } catch (_) {}
+
   const bx = s.x, by = s.y - HEX_H * 0.66, br = 12.5;           // badge ✓
 
   if (tier !== 'lite') {
@@ -94824,15 +94852,43 @@ function _xcartShowTooltip(b, mx, my){
                    (tier <= 7) ? 'ND 7 - 10' : 'ND 10+';
   var threatColor = (tier === 0 || isSettlement) ? '#4cd137' : (tier <= 2 ? '#ffd685' : (tier <= 4 ? '#f39c12' : '#e74c3c'));
   var biomeName = (typeof CartShared !== 'undefined' && CartShared.biomePT) ? CartShared.biomePT(b.biome || b.key) : (b.biome || b.key);
-  var distL = (tier === 0) ? 0 : Math.max(4, tier * 3 + 2);
-  var marchDays = (tier === 0) ? 'Aqui' : (tier <= 2 ? '1 dia' : (tier <= 5 ? '2 dias' : '3+ dias'));
 
-  tip.innerHTML = '<div class="ctip-title">' + (b.ico || '📍') + ' ' + b.name + '</div>'
+  var marcos = (typeof b.marcos === 'number') ? b.marcos : (tier || 1);
+  var distMilhas = Math.max(6, marcos * 8);
+  var horas = Math.max(2, Math.round(distMilhas / 3));
+
+  var isPinned = (window.CartShared && CartShared.isLocPinned) ? CartShared.isLocPinned(b.key) : false;
+  var pinHtml = isPinned ? '<div style="font-size:9.5px;color:#ffd700;margin-top:2px;font-weight:600;">📍 Fixado no Diário de Rotas</div>' : '';
+
+  var activeQuestTitle = '';
+  if (typeof _getXCartProvinceActiveQuest === 'function') {
+    var pId = (window.CartShared && CartShared.getLocationProvince) ? CartShared.getLocationProvince(b.key) : '';
+    if (pId) activeQuestTitle = _getXCartProvinceActiveQuest(pId);
+  }
+  var questHtml = activeQuestTitle ? '<div style="font-size:9.5px;color:#ffd685;margin-top:2px;">📜 Missão: ' + activeQuestTitle + '</div>' : '';
+
+  var dndInfo = (window.CartShared && CartShared.getBiomeDndInfo) ? CartShared.getBiomeDndInfo(b.biome || b.key) : null;
+  var dndHtml = dndInfo ? '<div style="font-size:9px;color:#81c784;margin-top:2px;">🛡️ ' + dndInfo.saves + '</div>' : '';
+
+  var distHtml = (b.isOrigin || b.key === 'plains') ? '' :
+    '<div style="font-size:9.5px;color:#e6d3a3;margin-top:2px;">📏 ~' + distMilhas + ' milhas (~' + marcos + ' marcos · ~' + horas + 'h a pé)</div>';
+
+  var vm = (_xcartEngine && typeof _xcartEngine.getViewMode === 'function') ? _xcartEngine.getViewMode() : { mode: 'world' };
+  var hintText = (vm.mode === 'world') ? 'Duplo clique para Carta Regional' : 'Duplo clique para Iniciar Viagem';
+
+  tip.innerHTML = '<div class="ctip-title">' + (b.ico || '📍') + ' ' + (b.regionalName || b.name) + '</div>'
                 + '<div class="ctip-meta">'
                 + '  <span class="ctip-threat" style="color:' + threatColor + ';">● ' + threatText + '</span>'
+                + '  <span>•</span>'
                 + '  <span class="ctip-biome">' + biomeName + '</span>'
                 + '</div>'
-                + '<div class="ctip-footer">⏱️ ' + marchDays + ' (' + distL + ' leg.) · <span class="ctip-hint">Clique para inspecionar</span></div>';
+                + distHtml
+                + dndHtml
+                + questHtml
+                + pinHtml
+                + '<div class="ctip-footer" style="margin-top:4px;border-top:1px solid rgba(196,149,58,0.25);padding-top:3px;">'
+                + '  <span class="ctip-hint">' + hintText + '</span>'
+                + '</div>';
 
   tip.style.display = 'block';
   tip.classList.add('active');

@@ -71219,7 +71219,35 @@ function _cartShowTooltip(b, mx, my){
     ? (b.tier === 0 ? 'Origem (Segura)' : 'Perigo ND ' + b.tier)
     : 'Explorável';
 
-  var hintText = (vm.mode === 'world') ? 'Toque para ver a Carta Regional' : 'Toque para planejar expedição';
+  var marcos = (typeof b.marcos === 'number') ? b.marcos : (b.tier || 1);
+  var distMilhas = Math.max(6, marcos * 8);
+  var horas = Math.max(2, Math.round(distMilhas / 3));
+
+  var isPinned = (window.CartShared && CartShared.isLocPinned) ? CartShared.isLocPinned(b.key) : false;
+  var pinHtml = isPinned ? '<div style="font-size:9.5px;color:#ffd700;margin-top:2px;font-weight:600;">📍 Fixado no Diário de Rotas</div>' : '';
+
+  var activeQuestTitle = '';
+  if (window._questFocusLoc && window._questFocusLoc.key === b.key) {
+    activeQuestTitle = window._questFocusLoc.title || 'Missão Ativa';
+  } else if (typeof QUESTS_ACTIVE !== 'undefined' && Array.isArray(QUESTS_ACTIVE) && typeof QUEST_MAP !== 'undefined') {
+    for (var qi = 0; qi < QUESTS_ACTIVE.length; qi++) {
+      var qItem = QUESTS_ACTIVE[qi];
+      var qRaw = qItem ? (qItem.id || '').replace(/^qa_/, '') : '';
+      if (QUEST_MAP[qRaw] && QUEST_MAP[qRaw].biomeKey === b.key) {
+        activeQuestTitle = (qItem && qItem.title) || QUEST_MAP[qRaw].name;
+        break;
+      }
+    }
+  }
+  var questHtml = activeQuestTitle ? '<div style="font-size:9.5px;color:#ffd685;margin-top:2px;">📜 Missão: ' + activeQuestTitle + '</div>' : '';
+
+  var dndInfo = (window.CartShared && CartShared.getBiomeDndInfo) ? CartShared.getBiomeDndInfo(b.biome || b.key) : null;
+  var dndHtml = dndInfo ? '<div style="font-size:9px;color:#81c784;margin-top:2px;">🛡️ ' + dndInfo.saves + '</div>' : '';
+
+  var distHtml = (b.isOrigin || b.key === 'plains') ? '' :
+    '<div style="font-size:9.5px;color:#e6d3a3;margin-top:2px;">📏 ~' + distMilhas + ' milhas (~' + marcos + ' marcos · ~' + horas + 'h a pé)</div>';
+
+  var hintText = (vm.mode === 'world') ? 'Duplo clique para Carta Regional' : 'Duplo clique para Iniciar Viagem';
 
   tip.innerHTML = ''
     + '<div class="ctip-title">' + (b.ico || '📍') + ' ' + title + '</div>'
@@ -71228,7 +71256,11 @@ function _cartShowTooltip(b, mx, my){
     + '  <span>•</span>'
     + '  <span class="ctip-biome">' + biomeName + '</span>'
     + '</div>'
-    + '<div class="ctip-footer">'
+    + distHtml
+    + dndHtml
+    + questHtml
+    + pinHtml
+    + '<div class="ctip-footer" style="margin-top:4px;border-top:1px solid rgba(196,149,58,0.25);padding-top:3px;">'
     + '  <span class="ctip-hint">' + hintText + '</span>'
     + '</div>';
 
