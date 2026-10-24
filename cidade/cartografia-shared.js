@@ -5707,6 +5707,191 @@
     };
   }
 
+  // === calcHorizonVisibility (Alcance Visual e Linha de Visada no Horizonte - DMG p. 243) ===
+  function calcHorizonVisibility(biomeKey, weatherCode, isNight, isElevated) {
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var w = (weatherCode || 's').toLowerCase();
+
+    // 1. Limitações Climáticas Severas (Névoa, Nevasca, Tempestade de Areia)
+    if (w === 'f' || w === 'fog' || w === 'nevoa') {
+      return {
+        horizonMiles: 0.1,
+        horizonKm: 0.2,
+        viewDescription: 'Névoa Espessa: Visibilidade obstruída além de 300 pés (DMG p. 243).',
+        visibilityRating: 'Ofuscada',
+        color: '#94a3b8',
+        dndRef: 'DMG p. 243'
+      };
+    }
+    if (w === 'blizzard' || w === 'sandstorm') {
+      return {
+        horizonMiles: 0.2,
+        horizonKm: 0.3,
+        viewDescription: 'Vendaval Cegante: Partículas em suspensão limitam a visada a passos curtos.',
+        visibilityRating: 'Severamente Reduzida',
+        color: '#f87171',
+        dndRef: 'DMG p. 243'
+      };
+    }
+    if (w === 't' || w === 'storm' || w === 'tempestade' || w === 'r' || w === 'rain') {
+      return {
+        horizonMiles: 1.0,
+        horizonKm: 1.6,
+        viewDescription: 'Chuva Torrencial: Linha do horizonte encoberta por cortinas de água.',
+        visibilityRating: 'Reduzida',
+        color: '#60a5fa',
+        dndRef: 'DMG p. 243'
+      };
+    }
+
+    // 2. Noite sem iluminação mágica
+    if (isNight) {
+      return {
+        horizonMiles: 1.0,
+        horizonKm: 1.6,
+        viewDescription: 'Noite Fechada: Silhuetas no horizonte apenas sob luar ou fogueiras distantes.',
+        visibilityRating: 'Noturna',
+        color: '#c084fc',
+        dndRef: 'DMG p. 243'
+      };
+    }
+
+    // 3. Dia Claro / Terreno (DMG p. 243: Nível do chão 2 mi, Colinas 10 mi, Montanhas 20-40 mi)
+    if (bk === 'mountain' || bk === 'montanha' || isElevated) {
+      return {
+        horizonMiles: 30.0,
+        horizonKm: 48.0,
+        viewDescription: 'Pico Elevado: Visada espetacular alcançando marcos em províncias distantes (DMG p. 243).',
+        visibilityRating: 'Máxima',
+        color: '#38bdf8',
+        dndRef: 'DMG p. 243'
+      };
+    }
+    if (bk === 'hills' || bk === 'colinas') {
+      return {
+        horizonMiles: 10.0,
+        horizonKm: 16.0,
+        viewDescription: 'Cume de Colina: Desnível suave revela vales e estradas circunvizinhas.',
+        visibilityRating: 'Excelente',
+        color: '#4ade80',
+        dndRef: 'DMG p. 243'
+      };
+    }
+    if (bk === 'forest' || bk === 'floresta' || bk === 'cave') {
+      return {
+        horizonMiles: 0.5,
+        horizonKm: 0.8,
+        viewDescription: 'Dossel Fechado / Galhos: Visão de longa distância bloqueada pela vegetação densa.',
+        visibilityRating: 'Contida',
+        color: '#facc15',
+        dndRef: 'DMG p. 243'
+      };
+    }
+    if (bk === 'swamp' || bk === 'pantano') {
+      return {
+        horizonMiles: 1.0,
+        horizonKm: 1.6,
+        viewDescription: 'Pântano: Vapores estagnados e manguezais limitam o horizonte.',
+        visibilityRating: 'Moderada',
+        color: '#a3e635',
+        dndRef: 'DMG p. 243'
+      };
+    }
+
+    // Planície / Costa aberta padrão
+    return {
+      horizonMiles: 2.0,
+      horizonKm: 3.2,
+      viewDescription: 'Terreno Aberto / Planície: Visada clara até a curvatura do horizonte (DMG p. 243).',
+      visibilityRating: 'Normal',
+      color: '#ffd700',
+      dndRef: 'DMG p. 243'
+    };
+  }
+
+  // === calcRiverCrossingDifficulty (Perigos de Travessia e Vaus Fluviais - DMG p. 110) ===
+  function calcRiverCrossingDifficulty(biomeKey, weatherCode) {
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var w = (weatherCode || 's').toLowerCase();
+
+    if (bk === 'swamp' || bk === 'pantano') {
+      return {
+        hasCrossing: true,
+        crossingType: 'Lamaçal Movediço & Igarapé Fétido',
+        athleticsDC: 13,
+        vehicleRisk: 'Alto (risco de atolamento de carroças e montarias)',
+        vehicleRiskColor: '#f87171',
+        advice: 'Utilize varas de sondagem antes de avançar a comitiva na água turva.',
+        dndRef: 'DMG p. 110'
+      };
+    }
+    if (bk === 'coast' || bk === 'costa') {
+      return {
+        hasCrossing: true,
+        crossingType: 'Canal de Maré & Arrebentação Litorânea',
+        athleticsDC: 12,
+        vehicleRisk: 'Moderado (maré alta inunda eixos de madeira)',
+        vehicleRiskColor: '#facc15',
+        advice: 'Aguarde o refluxo da maré baixa para travessia segura.',
+        dndRef: 'DMG p. 110'
+      };
+    }
+    if ((w === 'storm' || w === 'tempestade' || w === 't' || w === 'r' || w === 'rain') && (bk === 'forest' || bk === 'plains')) {
+      return {
+        hasCrossing: true,
+        crossingType: 'Vau de Rio Transbordante & Correnteza Ágil',
+        athleticsDC: 14,
+        vehicleRisk: 'Severo (correnteza veloz arrasta carga solta e montarias)',
+        vehicleRiskColor: '#ef4444',
+        advice: 'Passe cordas guias atadas entre árvores firmes de ambas as margens.',
+        dndRef: 'DMG p. 110'
+      };
+    }
+
+    return {
+      hasCrossing: false,
+      crossingType: 'Vau Raso & Pontes Imperiais Firmes',
+      athleticsDC: 0,
+      vehicleRisk: 'Nenhum',
+      vehicleRiskColor: '#4ade80',
+      advice: 'Travessia plana sem impedimentos ou correntezas ameaçadoras.',
+      dndRef: 'DMG p. 110'
+    };
+  }
+
+  // === getConnectedLocations (Nós Vizinhos Conectados por Estradas) ===
+  function getConnectedLocations(locKey) {
+    var allP = CART_PATHS || [];
+    var allB = CART_BIOMES || [];
+    if (!locKey || !allP.length || !allB.length) return [];
+
+    var connectedKeys = [];
+    allP.forEach(function(edge){
+      if (edge.from === locKey && connectedKeys.indexOf(edge.to) === -1) connectedKeys.push(edge.to);
+      if (edge.to === locKey && connectedKeys.indexOf(edge.from) === -1) connectedKeys.push(edge.from);
+    });
+
+    var curLoc = allB.find(function(b){ return b.key === locKey; });
+
+    return connectedKeys.map(function(k){
+      var bObj = allB.find(function(b){ return b.key === k; }) || { key: k, name: k, biome: 'plains' };
+      var mb = (curLoc && calcDistanceBearing) ? calcDistanceBearing(curLoc, bObj, false) : { miles: 12 };
+      var miles = mb ? mb.miles : 12;
+      var hours = Math.max(1, Math.round(miles / 3));
+      var icon = bObj.settlement || bObj.isOrigin ? '🏛️' : (bObj.isSanctuary ? '🌀' : '📍');
+      return {
+        key: bObj.key,
+        name: bObj.regionalName || bObj.name,
+        biome: bObj.biome || bObj.key,
+        miles: miles,
+        hours: hours,
+        isSanctuary: !!bObj.isSanctuary,
+        isSettlement: !!bObj.settlement,
+        icon: icon
+      };
+    });
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -5850,6 +6035,8 @@
       campStance: campKey
     });
     out.push('• Repouso & Acampamento: ' + restRec.name + ' · Risco de Interrupção: ' + restRec.interruptionRisk);
+    var horizon = calcHorizonVisibility(targ.biome || targ.key, options.weather, options.isNight, altInfo && altInfo.elevationMeters > 300);
+    out.push('• Alcance no Horizonte: ' + horizon.horizonMiles + ' mi (' + horizon.viewDescription + ')');
     out.push('═══════════════════════════════════════════════════════════');
 
     return out.join('\n');
@@ -7387,6 +7574,9 @@
     calcMountLogistics: calcMountLogistics,
     calcCampRestRecovery: calcCampRestRecovery,
     getExpeditionWeatherTrend: getExpeditionWeatherTrend,
+    calcHorizonVisibility: calcHorizonVisibility,
+    calcRiverCrossingDifficulty: calcRiverCrossingDifficulty,
+    getConnectedLocations: getConnectedLocations,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

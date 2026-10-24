@@ -72347,6 +72347,30 @@ function _openCartLocationPopup(biome){
                 + '    <span style="font-size:8.5px;color:#cbd5e1;font-style:italic;">' + expo.mitigationText + '</span>'
                 + '  </div>'
                 + '</div>';
+            })()
+          + (function(){
+              if (!window.CartShared || !CartShared.calcHorizonVisibility) return '';
+              var isNight = (curTime && (curTime.hour < 6 || curTime.hour >= 20));
+              var hor = CartShared.calcHorizonVisibility(biome.biome || biome.key, curWeather, isNight, biome.tier >= 3);
+              return '<div class="clp-horizon-card" style="margin:4px 0 6px;text-align:left;background:rgba(16,22,28,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.25);">'
+                + '  <div style="font-size:8.5px;color:#38bdf8;font-family:Cinzel,serif;font-weight:700;">🔭 ALCANCE VISUAL NO HORIZONTE (DMG p. 243):</div>'
+                + '  <div style="font-size:8.5px;color:#f4d49a;line-height:1.35;">'
+                + '    Visada: <b style="color:' + hor.color + ';">~' + hor.horizonMiles + ' milhas (' + hor.horizonKm + ' km)</b> · <span style="color:#cbd5e1;font-style:italic;">' + hor.viewDescription + '</span>'
+                + '  </div>'
+                + '</div>';
+            })()
+          + (function(){
+              if (!window.CartShared || !CartShared.calcRiverCrossingDifficulty) return '';
+              var riv = CartShared.calcRiverCrossingDifficulty(biome.biome || biome.key, curWeather);
+              if (!riv.hasCrossing) return '';
+              return '<div class="clp-crossing-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,28,26,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(45,212,191,0.3);">'
+                + '  <div style="font-size:8.5px;color:#2dd4bf;font-family:Cinzel,serif;font-weight:700;">🌊 TRAVESSIA DE VAU & ÁGUAS (DMG p. 110):</div>'
+                + '  <div style="font-size:8.5px;color:#f4d49a;line-height:1.35;">'
+                + '    Tipo: <b>' + riv.crossingType + '</b> (Atletismo CD ' + riv.athleticsDC + ')<br>'
+                + '    Risco em Veículos: <span style="color:' + riv.vehicleRiskColor + ';">' + riv.vehicleRisk + '</span><br>'
+                + '    <span style="font-size:8px;color:#cbd5e1;font-style:italic;">' + riv.advice + '</span>'
+                + '  </div>'
+                + '</div>';
             })();
       })()
     + (biome.isSanctuary
@@ -72354,6 +72378,20 @@ function _openCartLocationPopup(biome){
         : (biome.isOrigin || biome.settlement
             ? '<div style="font-size:9.5px;color:#a3e635;margin-bottom:6px;font-family:Cinzel,serif;">🌀 Santuário & Marco de Viagem Rápida</div>'
             : ''))
+    + (function(){
+        if (!window.CartShared || !CartShared.getConnectedLocations) return '';
+        var conns = CartShared.getConnectedLocations(biome.key);
+        if (!conns.length) return '';
+        var pills = conns.map(function(c){
+          return '<button class="clp-btn-conn-jump" data-target="' + c.key + '" type="button" style="background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#ffd685;font-size:8px;padding:2px 5px;border-radius:3px;cursor:pointer;display:inline-flex;align-items:center;gap:3px;" title="Ver detalhes de ' + c.name + '">'
+            + '<span>' + c.icon + '</span> <b>' + c.name + '</b> <span style="color:#a09484;">(' + c.miles + ' mi)</span>'
+            + '</button>';
+        }).join('');
+        return '<div class="clp-connections-wrap" style="margin:4px 0 6px;text-align:left;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;color:#c4953a;font-weight:700;margin-bottom:3px;">🔗 CAMINHOS DIRETOS CONECTADOS:</div>'
+          + '  <div style="display:flex;flex-wrap:wrap;gap:3px;">' + pills + '</div>'
+          + '</div>';
+      })()
     + '<div style="text-align:right;margin:4px 0 6px;">'
     + '  <button class="clp-btn-pin-toggle" id="clp-pin-toggle-btn" type="button" style="background:rgba(35,25,15,0.85);border:1px solid ' + ((window.CartShared && CartShared.isLocPinned && CartShared.isLocPinned(biome.key)) ? '#ffd700' : 'rgba(196,149,58,0.55)') + ';color:' + ((window.CartShared && CartShared.isLocPinned && CartShared.isLocPinned(biome.key)) ? '#ffd700' : '#d2be90') + ';font-size:9.5px;padding:3px 8px;border-radius:3px;cursor:pointer;">'
     + ((window.CartShared && CartShared.isLocPinned && CartShared.isLocPinned(biome.key)) ? '📍 Alfinete Ativo (Remover)' : '📌 Fixar no Diário de Rotas')
@@ -72514,6 +72552,21 @@ function _openCartLocationPopup(biome){
       }
     };
   }
+
+  var connBtns = el.querySelectorAll('.clp-btn-conn-jump');
+  connBtns.forEach(function(btn){
+    btn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      var tKey = btn.getAttribute('data-target');
+      if (tKey && window.CartShared && CartShared.CART_BIOMES) {
+        var tBiome = CartShared.CART_BIOMES.find(function(b){ return b.key === tKey; });
+        if (tBiome && typeof _openCartLocPopup === 'function') {
+          _openCartLocPopup(tBiome);
+        }
+      }
+    };
+  });
 
   var retreatJumpBtn = el.querySelector('.clp-btn-retreat-jump');
   if (retreatJumpBtn) {
