@@ -9908,6 +9908,131 @@
     };
   }
 
+
+  // === calcAvalancheAndGlacialCrevasseHazard (Avalanches de Neve, Fendas Glaciais e Soterramento - DMG p. 110 / RotF p. 10-11) ===
+  function calcAvalancheAndGlacialCrevasseHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'montanha').toLowerCase();
+    var ht = (hazardType || 'powder_snow_avalanche').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Avalanche de Neve em Pó & Soterramento (DMG p. 110)',
+      saveDC: 15,
+      saveType: 'Força (Atletismo) ou Destreza (Acrobacia)',
+      burialDepthFeet: '1d4 x 5 pés de neve compactada',
+      warningRounds: 'Estrondo ouvido 1d10 rodadas antes do impacto (Percepção Passiva 10+).',
+      rescueMitigation: 'Membros da comitiva soterrados têm minutos de ar = 1 + Mod. Constituição (mínimo 30 seg); cordão de avalanche colorido permite localização com Sobrevivência CD 10.',
+      icon: '❄️🏔️',
+      color: '#38bdf8'
+    };
+
+    if (ht === 'whiteout_blizzard') {
+      hazard = {
+        hazardTitle: 'Nevasca Branca Total (Visibilidade Nula & Frio Severo)',
+        saveDC: 14,
+        saveType: 'Constituição',
+        burialDepthFeet: 'Sem soterramento direto; neve acumulada de 2 pés por hora.',
+        warningRounds: 'Nuvens de chumbo vistas no horizonte 1 hora antes.',
+        rescueMitigation: 'Deslocamento reduzido à metade; óculos de neve de osso ou proteção facial previnem cegueira temporária.',
+        icon: '🌨️🌬️',
+        color: '#7dd3fc'
+      };
+    } else if (ht === 'crevasse_snow_bridge' || bk === 'montanha') {
+      hazard = {
+        hazardTitle: 'Ponte de Neve Frágil sobre Fenda Glacial Profunda',
+        saveDC: 15,
+        saveType: 'Destreza',
+        burialDepthFeet: 'Queda em fenda de 1d6 x 10 pés de profundidade',
+        warningRounds: 'Vara de sondagem de 3 metros detecta oco na neve com Investigação CD 13.',
+        rescueMitigation: 'Corda de segurança ancorada entre os aventureiros em cordada impede a queda no fundo do abismo de gelo.',
+        icon: '🧊🕳️',
+        color: '#0284c7'
+      };
+    } else if (ht === 'ice_shelf_calving') {
+      hazard = {
+        hazardTitle: 'Ruptura Repentina de Placa de Gelo Glacial',
+        saveDC: 14,
+        saveType: 'Destreza (Acrobacia)',
+        burialDepthFeet: 'Blocos de gelo caídos de 20 pés de altura',
+        warningRounds: 'Estalos secos e ecoantes ouvidos 2 rodadas antes.',
+        rescueMitigation: 'Uso de grampos de escalada (crampons) e machado de gelo para fixação rápida em rocha sólida.',
+        icon: '⛏️🧊',
+        color: '#60a5fa'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      burialDepthFeet: hazard.burialDepthFeet,
+      warningRounds: hazard.warningRounds,
+      rescueMitigation: hazard.rescueMitigation,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110 (Perigos de Clima Severo e Avalanches) / PHB p. 183 (Sufocamento)'
+    };
+  }
+
+  // === calcCampSanitizationAndPestRepellent (Higienização de Acampamento, Cinzas de Madeira e Repelente de Pragas - PHB p. 154 / XGE p. 78-79) ===
+  function calcCampSanitizationAndPestRepellent(biomeKey, sanitizationType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var st = (sanitizationType || 'herbal_smoke_fumigation').toLowerCase();
+
+    var sanit = {
+      sanitizationTitle: 'Fumigação com Ervas Secas (Sálvia, Zimbro e Artemísia)',
+      diseaseResistanceBonus: '+2 nas Salvaguardas de Constituição contra febres do pântano e miasmas durante o descanso.',
+      pestRepellentEffect: 'Fumaça aromática afasta mosquitos transmissores, mutucas e moscas de cadáver num raio de 40 pés.',
+      restOptimization: 'Evita interrupções de sono por coceiras e picadas; recupera +1 PV adicional por Dado de Vida gasto em descansos curtos.',
+      icon: '🌿💨',
+      color: '#4ade80'
+    };
+
+    if (st === 'wood_ash_and_lime_spread') {
+      sanit = {
+        sanitizationTitle: 'Barreira de Cinzas de Fogueira e Cal Apagada',
+        diseaseResistanceBonus: '+1 nas Salvaguardas contra infecções de feridas abertas.',
+        pestRepellentEffect: 'Desidrata e repele sanguessugas, vermes da podridão, lesmas gigantes e centopeias rastejantes.',
+        restOptimization: 'Garante que os sacos de dormir permaneçam livres de parasitas necrófagos durante a vigília.',
+        icon: '🪵⚪',
+        color: '#e2e8f0'
+      };
+    } else if (st === 'salt_and_brine_leech_rinse') {
+      sanit = {
+        sanitizationTitle: 'Banho de Salmoura Antisséptica para Botas e Pernas',
+        diseaseResistanceBonus: 'Remove imediatamente qualquer sanguessuga aderida sem causar dano ou perda de sangue.',
+        pestRepellentEffect: 'Neutraliza ovos de parasitas microscópicos de águas estagnadas antes que penetrem na pele.',
+        restOptimization: 'Elimina a condição de irritação cutânea e restaura o ânimo dos membros da comitiva para o dia seguinte.',
+        icon: '🧂💧',
+        color: '#38bdf8'
+      };
+    } else if (st === 'sacred_water_consecration') {
+      sanit = {
+        sanitizationTitle: 'Aspersão de Água Benta Consagrada (PHB p. 151)',
+        diseaseResistanceBonus: 'Imunidade a contaminações necróticas sobrenaturais e maldições menores de solo corrompido.',
+        pestRepellentEffect: 'Mortos-vivos menores (esqueletos, zumbis rastejantes) evitam entrar na área consagrada de 30 pés.',
+        restOptimization: 'Sono calmo e restaurador protegido por bênção divina; alivia pesadelos e estresse de viagem.',
+        icon: '✨🕊️',
+        color: '#facc15'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      sanitizationType: st,
+      sanitizationTitle: sanit.sanitizationTitle,
+      diseaseResistanceBonus: sanit.diseaseResistanceBonus,
+      pestRepellentEffect: sanit.pestRepellentEffect,
+      restOptimization: sanit.restOptimization,
+      icon: sanit.icon,
+      color: sanit.color,
+      dndRef: 'PHB p. 154 (Kits de Herbalismo e Medicina) / XGE p. 78-79 (Descanso e Cuidados nos Ermos) / DMG p. 111'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -11649,6 +11774,8 @@
     calcCampfireFuelAndHeatConservation: calcCampfireFuelAndHeatConservation,
     calcRiverFordingAndRopeBridgeHazard: calcRiverFordingAndRopeBridgeHazard,
     calcCampFortificationAndPerimeterDefense: calcCampFortificationAndPerimeterDefense,
+    calcAvalancheAndGlacialCrevasseHazard: calcAvalancheAndGlacialCrevasseHazard,
+    calcCampSanitizationAndPestRepellent: calcCampSanitizationAndPestRepellent,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
