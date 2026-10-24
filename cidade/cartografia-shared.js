@@ -3242,19 +3242,21 @@
   // estradas"). A névoa cobre o resto (terra incognita), escondendo a EXISTÊNCIA do
   // local — não só o nome. Mesmo FOG_COLOR do explore-fog (consistência).
   // #85 (user): não-descoberto = PRETO SÓLIDO (não escurecido). Antes era
-  // rgba(26,21,16,0.92) (marrom 92%) → dava pra ver o mapa por baixo e saber o
-  // TAMANHO total já no nível 1. Agora preto opaco esconde a extensão do mapa até
-  // o jogador descobrir os limites (igual o fundo preto do zoom-out).
-  var CART_FOG_COLOR = 'rgba(22, 16, 10, 0.84)';
-  // falloff smoothstep: 0 (revelado) até r0; 255 (névoa cheia) após r1; gradiente no meio.
+  // Fog of war forte, denso e impenetravel (Ordem do Usuario 2026-10):
+  // Lugares inexplorados e distantes ficam TOTALMENTE pretos (#000000 100% solido).
+  // Tudo literalmente preto onde nao se consegue ver nada ate ser descoberto.
+  var CART_FOG_COLOR = '#000000';
+
+  // falloff smoothstep: 0 (100% revelado) ate r0; 255 (100% breu solido) apos r1; gradiente no meio.
   function _cartFogFalloff(dist, r0, r1){
     if (dist <= r0) return 0;
     if (dist >= r1) return 255;
     var t = (dist - r0) / (r1 - r0);
-    t = t * t * (3 - 2 * t);   // smoothstep (borda macia, igual ao upscale bilinear)
+    t = t * t * (3 - 2 * t);   // smoothstep (borda macia, transicao organica)
     return Math.round(t * 255);
   }
-  // distância ponto→segmento em coords normalizadas (clareira ao longo das estradas)
+
+  // distancia ponto->segmento em coords normalizadas (clareira ao longo das estradas)
   function _cartDistToSeg(px, py, ax, ay, bx, by){
     var dx = bx - ax, dy = by - ay;
     var len2 = dx*dx + dy*dy;
@@ -3264,30 +3266,52 @@
     var ex = px - cx, ey = py - cy;
     return Math.sqrt(ex*ex + ey*ey);
   }
-  // Constrói o canvas de névoa S×S (cacheado pelo consumer; só muda quando known/coords/S mudam).
-  // knownArr = array de keys conhecidas; biomes = RB (coords resolvidas do editor).
-  function _buildCartFog(S, knownArr, biomes){
+
+  // Constroi o canvas de nevoa S x S.
+  // knownArr = array de keys conhecidas; biomes = nos da carta; isProvince = booleano.
+  function _buildCartFog(S, knownArr, biomes, isProvince){
     if (typeof document === 'undefined' || !knownArr) return null;
     var lite = (typeof window !== 'undefined' && window._valdoriaPerformanceTier === 'lite');
-    var RES = lite ? 48 : 72;                       // resolução da máscara (bilinear suaviza)
-    var isK = function(key){ return knownArr.indexOf(key) >= 0 || key === 'plains'; };
+    var RES = lite ? 56 : 84;                       // resolucao da mascara
+
     var locs = [];
-    biomes.forEach(function(b){ if (isK(b.key) || b.isOrigin) locs.push([b.x, b.y]); });
-    if (!locs.length) locs.push([0.42, 0.55]);      // origem (Portões de Valdoria) fallback
+    biomes.forEach(function(b){
+      var isK = knownArr.indexOf(b.key) >= 0 || (!isProvince && (b.key === 'plains' || b.isOrigin));
+      if (isK) locs.push([b.x, b.y]);
+    });
+
+    // Se eh provincia e o aventureiro nao conhece NENHUM local dela: TUDO 100% PRETO SOLIDO!
+    if (isProvince && locs.length === 0) {
+      var blackCanvas = document.createElement('canvas');
+      blackCanvas.width = Math.max(1, Math.round(S));
+      blackCanvas.height = Math.max(1, Math.round(S));
+      var bctx = blackCanvas.getContext('2d');
+      bctx.fillStyle = CART_FOG_COLOR;
+      bctx.fillRect(0, 0, blackCanvas.width, blackCanvas.height);
+      return blackCanvas;
+    }
+
+    if (!locs.length) locs.push([0.42, 0.55]);      // origem (Portoes de Valdoria) fallback apenas continente
+
     var roads = [];
     CART_PATHS.forEach(function(p){
-      if (!isK(p[0]) || !isK(p[1])) return;         // estrada só revela se AMBAS as pontas conhecidas
+      var aKnown = knownArr.indexOf(p[0]) >= 0 || (!isProvince && p[0] === 'plains');
+      var bKnown = knownArr.indexOf(p[1]) >= 0 || (!isProvince && p[1] === 'plains');
+      if (!aKnown || !bKnown) return;             // estrada so revela se AMBAS as pontas conhecidas
       var a = biomes.find(function(bb){ return bb.key === p[0]; });
       var b = biomes.find(function(bb){ return bb.key === p[1]; });
       if (a && b) roads.push([a.x, a.y, b.x, b.y]);
     });
-    var LOC_R0 = 0.055, LOC_R1 = 0.16;              // clareira ao redor de cada local
-    var ROAD_R0 = 0.018, ROAD_R1 = 0.052;           // faixa ao longo das estradas
+
+    var LOC_R0 = isProvince ? 0.08 : 0.055, LOC_R1 = isProvince ? 0.18 : 0.15;  // clareira ao redor de cada local
+    var ROAD_R0 = 0.016, ROAD_R1 = 0.048;                                       // faixa ao longo das estradas
+
     var mask = document.createElement('canvas');
     mask.width = RES; mask.height = RES;
     var mctx = mask.getContext('2d');
     var img = mctx.createImageData(RES, RES);
     var d = img.data;
+
     for (var j = 0; j < RES; j++) {
       var ny = (j + 0.5) / RES;
       for (var i = 0; i < RES; i++) {
@@ -3299,26 +3323,27 @@
           if (dd < dl) dl = dd;
         }
         var a = _cartFogFalloff(dl, LOC_R0, LOC_R1);
-        if (a > 0 && roads.length) {                // estradas só importam onde ainda há névoa
+        if (a > 0 && roads.length) {
           var dr = Infinity;
           for (var m = 0; m < roads.length; m++) {
             var ds = _cartDistToSeg(nx, ny, roads[m][0], roads[m][1], roads[m][2], roads[m][3]);
             if (ds < dr) dr = ds;
           }
           var ar = _cartFogFalloff(dr, ROAD_R0, ROAD_R1);
-          if (ar < a) a = ar;                       // revelado se perto de local OU estrada
+          if (ar < a) a = ar;
         }
         var idx = (j * RES + i) * 4;
         d[idx] = 0; d[idx+1] = 0; d[idx+2] = 0; d[idx+3] = a;
       }
     }
     mctx.putImageData(img, 0, 0);
+
     var fog = document.createElement('canvas');
     fog.width = Math.max(1, Math.round(S)); fog.height = Math.max(1, Math.round(S));
     var fctx = fog.getContext('2d');
     fctx.imageSmoothingEnabled = true; fctx.imageSmoothingQuality = 'high';  // upscale bilinear
     fctx.drawImage(mask, 0, 0, RES, RES, 0, 0, fog.width, fog.height);
-    fctx.globalCompositeOperation = 'source-in';    // mantém o alpha da máscara, troca RGB
+    fctx.globalCompositeOperation = 'source-in';    // mantem o alpha da mascara, aplica cor solida preta
     fctx.fillStyle = CART_FOG_COLOR;
     fctx.fillRect(0, 0, fog.width, fog.height);
     return fog;
@@ -3970,15 +3995,14 @@
           }
         });
 
-        // 3. Desenhar nós da província com lentes de alta visibilidade
+        // 3. Desenhar nós da província (SOMENTE locais descobertos; Ordem do Usuario: NUNCA desenhar Terra Incognita)
         regNodes.forEach(function(b){
           var isDiscovered = (known === null || known.indexOf(b.key) >= 0 || b.isOrigin || provMapOwned);
           var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
           if (isDiscovered || hasMap) {
             _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, isRegional: true });
-          } else {
-            _drawUnknownRegionalNode(ctx, b, _S, _S, hoverKey === b.key);
           }
+          // Locais inexplorados ficam 100% ocultos sob o Fog of War preto solido, sem qualquer icone ou texto.
         });
 
         // Pin do jogador se estiver na província
@@ -4095,8 +4119,11 @@
       }
       for (var i = 0; i < activeNodes.length; i++) {
         var b = activeNodes[i];
-        // No modo regional, todos os nós da província (mesmo inexplorados) respondem ao clique para mostrar o popup explicativo
-        if (_viewMode !== 'province' && !(known === null || known.indexOf(b.key) >= 0 || b.isOrigin)) continue;
+        var curProv = CART_PROVINCES.find(function(p){ return p.id === _activeProvId; });
+        var provMapOwned = curProv && curProv.mapKey && ownedMaps && (ownedMaps.indexOf(curProv.mapKey) >= 0);
+        var isDiscovered = (known === null || known.indexOf(b.key) >= 0 || b.isOrigin || provMapOwned);
+        // Lugares sob o Fog of War preto solido nao respondem a toque/clique
+        if (!isDiscovered) continue;
         var rb = _resolved(b);
         if (_viewMode === 'province' && _activeProvId !== 'world') {
           var curProv = CART_PROVINCES.find(function(p){ return p.id === _activeProvId; });
