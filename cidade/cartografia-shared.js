@@ -10168,6 +10168,131 @@
     };
   }
 
+
+  // === calcKarstSinkholeAndCavernHazard (Sumidouros Cársicos, Fissuras e Estalactites - DMG p. 110-111 / OotA p. 24) ===
+  function calcKarstSinkholeAndCavernHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'colina').toLowerCase();
+    var ht = (hazardType || 'concealed_karst_sinkhole').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Sumidouro Cársico Camuflado por Raízes e Gramíneas',
+      saveDC: 14,
+      saveType: 'Destreza',
+      depthAndImpact: 'Queda de 30 pés em cavidade cilíndrica; 3d6 de dano de impacto e aterrissagem em lodo úmido.',
+      pioneerMitigation: 'Batedor utilizando vara de sondagem de 3 metros detecta a crosta oca antecipadamente sem risco de queda.',
+      rescueDetails: 'Exige corda de 15 metros ancorada em rocha firme para içar o companheiro acidentado.',
+      icon: '🕳️🌿',
+      color: '#ca8a04'
+    };
+
+    if (ht === 'limestone_stalactite_fall') {
+      hazard = {
+        hazardTitle: 'Queda de Lanças de Estalactites Calcificadas',
+        saveDC: 15,
+        saveType: 'Destreza',
+        depthAndImpact: '3d10 de dano perfurante por estalactites pontiagudas desprendidas do teto em fendas.',
+        pioneerMitigation: 'Evitar ruídos sonoros estrondosos, trompas de guerra ou magias trovejantes sob tetos calcários instáveis.',
+        rescueDetails: 'Primeiros socorros rápidos com Kit de Curativo (PHB p. 151) estancam perfurações de calcário.',
+        icon: '🗡️🪨',
+        color: '#f87171'
+      };
+    } else if (ht === 'chasm_sulfur_fissure' || bk === 'volcanic' || bk === 'vulcao') {
+      hazard = {
+        hazardTitle: 'Fissura Vulcânica Cársica com Gás Sulfídrico',
+        saveDC: 13,
+        saveType: 'Constituição',
+        depthAndImpact: 'Condição Envenenado e 1d6 de dano de veneno por minuto de exposição continuada em depressões.',
+        pioneerMitigation: 'Lenço umedecido sobre o nariz e boca concede vantagem na salvaguarda contra os vapores.',
+        rescueDetails: 'Transportar a vítima imediatamente para áreas abertas ventiladas por correntes de ar puro.',
+        icon: '🌋☠️',
+        color: '#ef4444'
+      };
+    } else if (ht === 'subterranean_siphon_flushing') {
+      hazard = {
+        hazardTitle: 'Sifão Hidráulico Cársico em Enxurrada Repentina',
+        saveDC: 15,
+        saveType: 'Força (Atletismo)',
+        depthAndImpact: 'Arrasto violento para galeria subterrânea alagada; risco de afogamento contínuo (PHB p. 182).',
+        pioneerMitigation: 'Evitar acampar ou cruzar o fundo de dolinas secas durante tempestades repentinas nas cabeceiras.',
+        rescueDetails: 'Cabo de segurança preso entre os aventureiros em cordada impede a sucção para o sifão.',
+        icon: '🌊🕳️',
+        color: '#0284c7'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      depthAndImpact: hazard.depthAndImpact,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueDetails: hazard.rescueDetails,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Abismos, Cavernas e Sumidouros) / PHB p. 182-183 (Queda e Sufocamento)'
+    };
+  }
+
+  // === calcCampScentConcealmentAndWasteDisposal (Camuflagem de Odores de Acampamento, Valas Sanitárias e Descarte - DMG p. 111-112 / XGE p. 78) ===
+  function calcCampScentConcealmentAndWasteDisposal(biomeKey, disposalMethod, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var dm = (disposalMethod || 'deep_earthen_latrine_burial').toLowerCase();
+
+    var method = {
+      methodTitle: 'Vala Sanitária Profunda Selada com Cal e Terra Fofa',
+      scentSuppressionRange: 'Odor suprimido em 80%; reduz o rastro olfativo a um raio contido de apenas 30 pés.',
+      predatorDeterrence: 'Predadores carnívoros e carniceiros não conseguem farejar os dejetos a favor do vento.',
+      rationProtection: 'Protege os arredores dos sacos de dormir contra infestações de moscas de carne e besouros.',
+      icon: '⛏️🌱',
+      color: '#65a30d'
+    };
+
+    if (dm === 'charcoal_and_herb_pit') {
+      method = {
+        methodTitle: 'Cremação de Ossos e Restos de Refeição em Carvão com Ervas',
+        scentSuppressionRange: 'Odor de gordura e sangue incinerado; substitui cheiro de carne por aroma de folhas queimadas.',
+        predatorDeterrence: 'Evita que alcateias de lobos, ursos-coruja e carniçais rastreiem o grupo a milhas de distância.',
+        rationProtection: 'Elimina sobras orgânicas expostas que atrairiam enxames rastejantes durante o sono da comitiva.',
+        icon: '🔥🌿',
+        color: '#f59e0b'
+      };
+    } else if (dm === 'predator_musk_perimeter_marking') {
+      method = {
+        methodTitle: 'Marcação Territorial Periférica com Almíscar de Predador Alfa',
+        scentSuppressionRange: 'Cria barreira olfativa de feromônios animais pungentes ao longo da borda da mata.',
+        predatorDeterrence: 'Feras comuns e predadores menores hesitam em invadir; impõe desvantagem em testes de moral animal.',
+        rationProtection: 'Cavalos e mulas de carga permanecem calmos sabendo que o perímetro está resguardado.',
+        icon: '🐾🛡️',
+        color: '#eab308'
+      };
+    } else if (dm === 'clean_campsite_cache') {
+      method = {
+        methodTitle: 'Bolsa de Provisões Suspensa em Copa Alta (Bear Bag Technique)',
+        scentSuppressionRange: 'Rações seladas em lona encerada e içadas a 5 metros do solo por galho resistente.',
+        predatorDeterrence: 'Totalmente inacessível para predadores terrestres sem escalada e roedores rastejantes.',
+        rationProtection: 'Segurança absoluta contra perda de comida por animais noturnos ou insetos carniceiros.',
+        icon: '🪢🍖',
+        color: '#38bdf8'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      disposalMethod: dm,
+      methodTitle: method.methodTitle,
+      scentSuppressionRange: method.scentSuppressionRange,
+      predatorDeterrence: method.predatorDeterrence,
+      rationProtection: method.rationProtection,
+      icon: method.icon,
+      color: method.color,
+      dndRef: 'DMG p. 111-112 (Acampamento Seguro e Odores) / PHB p. 150 (Mochilas e Alforjes) / XGE p. 78'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -11913,6 +12038,8 @@
     calcCampSanitizationAndPestRepellent: calcCampSanitizationAndPestRepellent,
     calcSandstormAndAridHeatHazard: calcSandstormAndAridHeatHazard,
     calcWildernessAcousticSignalHorn: calcWildernessAcousticSignalHorn,
+    calcKarstSinkholeAndCavernHazard: calcKarstSinkholeAndCavernHazard,
+    calcCampScentConcealmentAndWasteDisposal: calcCampScentConcealmentAndWasteDisposal,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

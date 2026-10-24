@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T22:25:03Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T22:28:38Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcKarstSinkholeAndCavernHazard) return '';
+        var bKey = (biome && biome.key) || 'hills';
+        var sk = CartShared.calcKarstSinkholeAndCavernHazard(bKey, 'concealed_karst_sinkhole');
+        return '<div class="clp-sinkhole-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,24,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(202,138,4,0.3);font-size:8px;color:#fef08a;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sk.color + ';margin-bottom:2px;">' + sk.icon + ' ' + sk.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Perigo:</b> ' + sk.depthAndImpact + ' (CD ' + sk.saveDC + ' [' + sk.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde047;margin-top:1px;">• <b>Prevenção:</b> ' + sk.pioneerMitigation + ' · <i>Resgate: ' + sk.rescueDetails + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampScentConcealmentAndWasteDisposal) return '';
+        var bKey = (biome && biome.key) || 'forest';
+        var sc = CartShared.calcCampScentConcealmentAndWasteDisposal(bKey, 'deep_earthen_latrine_burial');
+        return '<div class="clp-scent-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,28,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(101,163,13,0.3);font-size:8px;color:#d9f99d;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sc.color + ';margin-bottom:2px;">' + sc.icon + ' ' + sc.methodTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Supressão de Odores:</b> ' + sc.scentSuppressionRange + ' · <b>Proteção:</b> ' + sc.predatorDeterrence + '</div>'
+          + '  <div style="font-size:7.5px;color:#bef264;margin-top:1px;">• <b>Segurança de Provisões:</b> ' + sc.rationProtection + '</div>'
           + '</div>';
       })()
     + (function(){
