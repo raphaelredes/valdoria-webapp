@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T20:26:36Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T20:32:29Z - do not edit directly, edit source -->
 
 
 
@@ -93428,6 +93428,22 @@ function _openCartLocationPopup(biome){
               + '<i style="color:#cbd5e1;">' + shifts.tranceNote + '</i>'
               + '</div>';
           })()
+        + (function(){
+            if (!window.CartShared || !CartShared.calcCampDefensePerimeter) return '';
+            var curDef = window._cartSelectedCampDefense || 'bells';
+            var def = CartShared.calcCampDefensePerimeter(curDef);
+            return '<div class="clp-defense-wrap" style="margin-top:3px;text-align:left;">'
+              + '  <div style="font-size:8px;font-family:Cinzel,serif;color:#fdba74;font-weight:700;margin-bottom:2px;">🔔 PERÍMETRO DEFENSIVO (DMG p. 120):</div>'
+              + '  <div class="clp-defense-selector" style="display:flex;gap:3px;">'
+              + '    <button class="clp-defense-btn' + (curDef === 'none' ? ' active' : '') + '" data-def="none" type="button" style="flex:1;font-size:7.5px;padding:2px 1px;background:rgba(30,22,12,0.85);border:1px solid ' + (curDef === 'none' ? '#ffd700' : 'rgba(196,149,58,0.4)') + ';color:' + (curDef === 'none' ? '#ffd700' : '#d2be90') + ';border-radius:2px;cursor:pointer;">⛺ Básico</button>'
+              + '    <button class="clp-defense-btn' + (curDef === 'bells' ? ' active' : '') + '" data-def="bells" type="button" style="flex:1;font-size:7.5px;padding:2px 1px;background:rgba(30,22,12,0.85);border:1px solid ' + (curDef === 'bells' ? '#ffd700' : 'rgba(196,149,58,0.4)') + ';color:' + (curDef === 'bells' ? '#ffd700' : '#d2be90') + ';border-radius:2px;cursor:pointer;">🔔 Sininhos</button>'
+              + '    <button class="clp-defense-btn' + (curDef === 'traps' ? ' active' : '') + '" data-def="traps" type="button" style="flex:1;font-size:7.5px;padding:2px 1px;background:rgba(30,22,12,0.85);border:1px solid ' + (curDef === 'traps' ? '#ffd700' : 'rgba(196,149,58,0.4)') + ';color:' + (curDef === 'traps' ? '#ffd700' : '#d2be90') + ';border-radius:2px;cursor:pointer;">🪤 Armadilha</button>'
+              + '    <button class="clp-defense-btn' + (curDef === 'alarm_spell' ? ' active' : '') + '" data-def="alarm_spell" type="button" style="flex:1;font-size:7.5px;padding:2px 1px;background:rgba(30,22,12,0.85);border:1px solid ' + (curDef === 'alarm_spell' ? '#ffd700' : 'rgba(196,149,58,0.4)') + ';color:' + (curDef === 'alarm_spell' ? '#ffd700' : '#d2be90') + ';border-radius:2px;cursor:pointer;">✨ Alarme</button>'
+              + '    <button class="clp-defense-btn' + (curDef === 'abatis' ? ' active' : '') + '" data-def="abatis" type="button" style="flex:1;font-size:7.5px;padding:2px 1px;background:rgba(30,22,12,0.85);border:1px solid ' + (curDef === 'abatis' ? '#ffd700' : 'rgba(196,149,58,0.4)') + ';color:' + (curDef === 'abatis' ? '#ffd700' : '#d2be90') + ';border-radius:2px;cursor:pointer;">🛡️ Abatis</button>'
+              + '  </div>'
+              + '  <div id="clp-defense-note" style="font-size:7.5px;color:#d2be90;margin-top:2px;font-style:italic;">' + def.description + '</div>'
+              + '</div>';
+          })()
         + '</div>'
       ) : '')
     + '<div class="clp-formation-wrap" style="margin-top: 8px; text-align: left;">'
@@ -93735,6 +93751,29 @@ function _openCartLocationPopup(biome){
       }
     };
   }
+
+  var defBtns = el.querySelectorAll('.clp-defense-btn');
+  var defNote = el.querySelector('#clp-defense-note');
+  defBtns.forEach(function(btn){
+    btn.onclick = function(e){
+      e.preventDefault();
+      defBtns.forEach(function(b){
+        b.classList.remove('active');
+        b.style.color = '#d2be90';
+        b.style.borderColor = 'rgba(196,149,58,0.4)';
+      });
+      btn.classList.add('active');
+      btn.style.color = '#ffd700';
+      btn.style.borderColor = '#ffd700';
+      var dType = btn.getAttribute('data-def');
+      window._cartSelectedCampDefense = dType;
+      if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_click');
+      if (defNote && window.CartShared && CartShared.calcCampDefensePerimeter) {
+        var dObj = CartShared.calcCampDefensePerimeter(dType);
+        defNote.textContent = dObj.description;
+      }
+    };
+  });
 
   var campBtns = el.querySelectorAll('.clp-camp-btn');
   var campNote = el.querySelector('#clp-camp-note');
@@ -94437,6 +94476,7 @@ function openCartography() {
     + '        <button class="cam-filter-pill" data-filter="unexplored" type="button">🧭 Inexplorados</button>'
     + '        <button class="cam-filter-pill" data-filter="hazards" type="button">⚠️ Perigos</button>'
     + '        <button class="cam-filter-pill" data-filter="landmarks" type="button">🏛️ Marcos</button>'
+    + '        <button class="cam-filter-pill" data-filter="sanctuaries" type="button">✨ Santuários</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -95726,6 +95766,16 @@ function _xcartFocusWaypoint(key) {
               if (lms && lms.length > 0) hasLms = true;
             }
             if (!hasLms) return false;
+          } else if (_xcamActiveCategory === 'sanctuaries') {
+            if (prov.id === 'world') return false;
+            var isSanc = false;
+            if (prov.locKeys) {
+              isSanc = prov.locKeys.some(function(k){
+                var b = (CART_BIOMES || []).find(function(x){ return x.key === k; });
+                return b && (b.isSanctuary || b.settlement || b.isOrigin);
+              });
+            }
+            if (!isSanc) return false;
           }
           if (!ft) return true;
           if ((prov.name || '').toLowerCase().indexOf(ft) >= 0) return true;

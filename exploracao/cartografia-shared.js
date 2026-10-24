@@ -6553,6 +6553,186 @@
     return landmarksData.forest;
   }
 
+
+  // === calcCampDefensePerimeter (Perímetros Defensivos e Alarmes de Acampamento - DMG p. 120-123 / PHB p. 150-152, 211) ===
+  function calcCampDefensePerimeter(defenseType, options) {
+    options = options || {};
+    var dt = (defenseType || 'none').toLowerCase();
+
+    var defDefs = {
+      none: {
+        name: 'Sem Defesas Adicionais',
+        icon: '⛺',
+        stealthNegation: false,
+        surpriseImmunity: false,
+        ambushInterceptionPct: 0,
+        coverBonus: 'Nenhuma cobertura instalada',
+        desc: 'Acampamento básico montado no solo sem barreiras artificiais; a segurança noturna depende exclusivamente da Percepção Passiva basal das sentinelas.',
+        color: '#94a3b8'
+      },
+      bells: {
+        name: 'Cordas de Tropeço com Sininhos',
+        icon: '🔔',
+        stealthNegation: true,
+        surpriseImmunity: true,
+        ambushInterceptionPct: 35,
+        coverBonus: 'Alarme auditivo (alcance 18m)',
+        desc: 'Linhas de cânhamo esticadas a 15cm do solo ao redor do perímetro com pequenos guizos de latão (PHB p. 150); anula condição de Surpreso contra invasores terrestres.',
+        color: '#facc15'
+      },
+      traps: {
+        name: 'Perímetro de Armadilhas de Mandíbula',
+        icon: '🪤',
+        stealthNegation: true,
+        surpriseImmunity: true,
+        ambushInterceptionPct: 55,
+        coverBonus: 'Terreno acidentado no perímetro',
+        desc: 'Armadilhas de aço e estrepes ocultos nas trilhas de acesso (PHB p. 152 / DMG p. 122); causam 1d4+1 de dano perfurante e imobilizam invasores (CD 13 de Força).',
+        color: '#fb923c'
+      },
+      alarm_spell: {
+        name: 'Runa Mágica de Alarme',
+        icon: '✨',
+        stealthNegation: true,
+        surpriseImmunity: true,
+        ambushInterceptionPct: 80,
+        coverBonus: 'Detecção invisível e mental',
+        desc: 'Esfera ritual de proteção mágica em cubo de 6m (PHB p. 211); acorda imediatamente o conjurador por aviso mental sem produzir barulho exterior.',
+        color: '#c084fc'
+      },
+      abatis: {
+        name: 'Barricada de Troncos e Galhos (Abatis)',
+        icon: '🛡️',
+        stealthNegation: true,
+        surpriseImmunity: false,
+        ambushInterceptionPct: 45,
+        coverBonus: '+2 na CA e Salvaguardas de Destreza (Meia Cobertura)',
+        desc: 'Galhos pontiagudos entrelaçados formando trincheira improvisada (DMG p. 120); concede Meia Cobertura para sentinelas em vigília e dificulta a aproximação inimiga.',
+        color: '#4ade80'
+      }
+    };
+
+    var item = defDefs[dt] || defDefs.none;
+
+    return {
+      defenseType: dt,
+      name: item.name,
+      icon: item.icon,
+      stealthNegation: item.stealthNegation,
+      surpriseImmunity: item.surpriseImmunity,
+      ambushInterceptionPct: item.ambushInterceptionPct,
+      coverBonus: item.coverBonus,
+      description: item.desc,
+      color: item.color,
+      dndRef: 'DMG p. 120-123 / PHB p. 150-152, 211'
+    };
+  }
+
+  // === calcRouteObstacleOptions (Obstáculos Ambientais, Desvios e Reconhecimento - DMG p. 111-112) ===
+  function calcRouteObstacleOptions(obstacleType, biomeKey, distMiles, options) {
+    options = options || {};
+    var ot = (obstacleType || 'rockslide').toLowerCase();
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var miles = (typeof distMiles === 'number') ? distMiles : 15;
+
+    var obstacles = {
+      rockslide: {
+        title: 'Desmoronamento de Pedras no Desfiladeiro',
+        desc: 'Escarpa de cascalho e blocos de granito desabaram sobre a passagem principal, bloqueando a passagem de montarias e carroças.',
+        detourHours: 3.0,
+        forcedCross: {
+          skill: 'Força (Atletismo)',
+          dc: 13,
+          failureRisk: '1d10 de dano de concussão por deslizamento secundário e perda de 1 hora.'
+        },
+        scoutRecon: {
+          skill: 'Sabedoria (Sobrevivência)',
+          dc: 12,
+          timeSpentMinutes: 45,
+          benefit: 'Localiza trilha de cabras paralela acima do desmoronamento, poupando 2 horas de marcha.'
+        }
+      },
+      bridge_collapse: {
+        title: 'Ponte de Madeira Desabada sobre Despenhadeiro',
+        desc: 'A ponte secular sobre a garganta cedeu após tempestades torrenciais, restando apenas pilares de sustentação distantes.',
+        detourHours: 4.0,
+        forcedCross: {
+          skill: 'Destreza (Acrobacia)',
+          dc: 13,
+          failureRisk: 'Queda parcial amparada por corda; aventureiro sofre 1d6 de dano e perde equipamento menor.'
+        },
+        scoutRecon: {
+          skill: 'Sabedoria (Percepção)',
+          dc: 12,
+          timeSpentMinutes: 30,
+          benefit: 'Descobre vau raso a montante onde o leito rochoso permite travessia a pé sem risco.'
+        }
+      },
+      swamp_flood: {
+        title: 'Transbordamento de Miasma e Lamaçal Movediço',
+        desc: 'A chuva ácida recente inundou a trilha principal com lodo fétido de fundura incerta e emanações sulfurosas.',
+        detourHours: 3.5,
+        forcedCross: {
+          skill: 'Constituição',
+          dc: 12,
+          failureRisk: 'Condição Envenenado por 1 hora devido à inalação de vapores do mangue.'
+        },
+        scoutRecon: {
+          skill: 'Sabedoria (Sobrevivência)',
+          dc: 13,
+          timeSpentMinutes: 40,
+          benefit: 'Encontra caminho firme sobre raízes de salgueiro submersas, contornando os poços mais fundos.'
+        }
+      },
+      sandstorm_chasm: {
+        title: 'Cânion Entulhado por Tempestade de Areia',
+        desc: 'Dunas de areia fina emparedaram o cânion, soterrando marcos de orientação e reduzindo a visibilidade a 3 metros.',
+        detourHours: 4.0,
+        forcedCross: {
+          skill: 'Constituição',
+          dc: 13,
+          failureRisk: '1 nível de Exaustão por sufocamento e desgaste térmico sob areia em movimento.'
+        },
+        scoutRecon: {
+          skill: 'Sabedoria (Sobrevivência)',
+          dc: 12,
+          timeSpentMinutes: 35,
+          benefit: 'Lê as ondulações do vento nas cristas para guiar a comitiva pelo lado de barlavento.'
+        }
+      },
+      ice_fissure: {
+        title: 'Fenda Glacial Recém-Aberta',
+        desc: 'Uma rachadura azulada de 12 metros de profundidade cortou o platô de gelo eterno sem aviso prévio.',
+        detourHours: 3.0,
+        forcedCross: {
+          skill: 'Destreza (Acrobacia)',
+          dc: 13,
+          failureRisk: 'Escorregão na borda gélida causando 2d6 de dano de frio e atraso de 1 hora.'
+        },
+        scoutRecon: {
+          skill: 'Sabedoria (Sobrevivência)',
+          dc: 13,
+          timeSpentMinutes: 30,
+          benefit: 'Identifica uma ponte de gelo fóssil resistente o suficiente para suportar toda a comitiva.'
+        }
+      }
+    };
+
+    var obs = obstacles[ot] || obstacles.rockslide;
+
+    return {
+      obstacleType: ot,
+      biomeKey: bk,
+      distMiles: miles,
+      title: obs.title,
+      description: obs.desc,
+      safeDetourHours: obs.detourHours,
+      forcedCross: obs.forcedCross,
+      scoutRecon: obs.scoutRecon,
+      dndRef: 'DMG p. 111-112 (Obstáculos e Desvios de Rota)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -8246,6 +8426,8 @@
     calcForageYieldCheck: calcForageYieldCheck,
     rollWildernessEncounterTable: rollWildernessEncounterTable,
     getProvinceLandmarks: getProvinceLandmarks,
+    calcCampDefensePerimeter: calcCampDefensePerimeter,
+    calcRouteObstacleOptions: calcRouteObstacleOptions,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
