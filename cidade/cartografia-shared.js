@@ -7751,6 +7751,154 @@
     };
   }
 
+  // === calcNaturalShelterSearch (Descoberta de Abrigos Naturais e Fortificação nos Ermos - DMG p. 111-112 / XGE p. 135) ===
+  function calcNaturalShelterSearch(survivalBonus, biomeKey, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var bonus = (typeof survivalBonus === 'number') ? survivalBonus : 3;
+    var searchHours = Math.max(1, parseInt(options.searchHours, 10) || 1);
+    var isScout = !!options.isScout;
+
+    var baseDC = 14;
+    if (bk === 'mountain' || bk === 'cordilheira' || bk === 'highlands') {
+      baseDC = 12;
+    } else if (bk === 'forest' || bk === 'selva') {
+      baseDC = 13;
+    } else if (bk === 'plains') {
+      baseDC = 15;
+    } else if (bk === 'desert' || bk === 'snow' || bk === 'tundra') {
+      baseDC = 16;
+    }
+
+    var effectiveBonus = bonus + (searchHours >= 2 ? 2 : 0) + (isScout ? 3 : 0);
+    var rollEstimate = 10 + effectiveBonus;
+    var isSuccess = rollEstimate >= baseDC;
+
+    var shelterType = 'exposed_clearing';
+    var shelterName = 'Clareira Aberta Desabrigada';
+    var ambushReduction = 0;
+    var weatherProtection = 10;
+    var icon = '⛺';
+    var color = '#f87171';
+    var desc = 'A comitiva acampa sob o céu aberto; fogueiras são visíveis a grande distância nos ermos.';
+
+    if (isSuccess) {
+      if (bk === 'mountain' || bk === 'cordilheira') {
+        shelterType = 'natural_cave';
+        shelterName = 'Gruta de Rocha Calcária Protegida';
+        ambushReduction = -25;
+        weatherProtection = 100;
+        icon = '🪨';
+        color = '#38bdf8';
+        desc = 'Fissura profunda com piso seco e teto de pedra; bloqueia chuva pesada, ventos e olhares de salteadores.';
+      } else if (bk === 'forest' || bk === 'selva') {
+        shelterType = 'dense_canopy';
+        shelterName = 'Copa de Coníferas Trançada';
+        ambushReduction = -15;
+        weatherProtection = 75;
+        icon = '🌲';
+        color = '#4ade80';
+        desc = 'Galhos espessos entrelaçados formam um teto verde natural; camufla a luz do fogo de acampamento.';
+      } else if (bk === 'swamp') {
+        shelterType = 'rocky_overhang';
+        shelterName = 'Montículo Seco com Saliência Rochosa';
+        ambushReduction = -15;
+        weatherProtection = 65;
+        icon = '⛰️';
+        color = '#a3e635';
+        desc = 'Elevação drenada acima do nível da água estagnada; afasta umidade excessiva e miasmas rasteiros.';
+      } else {
+        shelterType = 'abandoned_cabin';
+        shelterName = 'Cabana de Caçador Abandonada ou Abrigo de Pedra';
+        ambushReduction = -20;
+        weatherProtection = 90;
+        icon = '🏚️';
+        color = '#facc15';
+        desc = 'Estrutura rústica abandonada; vigas reforçadas oferecem excelente refúgio durante o descanso longo.';
+      }
+    }
+
+    return {
+      biomeKey: bk,
+      shelterType: shelterType,
+      shelterName: shelterName,
+      checkDC: baseDC,
+      ambushReductionPct: ambushReduction,
+      weatherProtectionPct: weatherProtection,
+      isSuccess: isSuccess,
+      searchHours: searchHours,
+      description: desc,
+      icon: icon,
+      color: color,
+      dndRef: 'DMG p. 111-112 (Abrigos Naturais nos Ermos) / XGE p. 135'
+    };
+  }
+
+  // === calcWildernessHazardEncounter (Armadilhas Naturais dos Ermos: Areia Movediça, Sumidouros e Fendas - DMG p. 110-111) ===
+  function calcWildernessHazardEncounter(biomeKey, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var hasRope = !!options.hasRope;
+    var hasPole = !!options.has10FtPole;
+    var hasPitons = !!options.hasPitons;
+
+    var hazardType = 'sinkhole';
+    var hazardName = 'Sumidouro Oculto por Raízes e Musgo';
+    var percepDC = 14;
+    var escapeDC = 12;
+    var dangerDesc = 'O solo cede repentinamente em uma dolina oculta de 20 pés (queda de 2d6 de dano de concussão).';
+    var mitigation = 'Cajado de sondagem ou batedor em vanguarda alerta a comitiva antes do primeiro passo em falso.';
+    var isMitigated = hasPole;
+    var icon = '⚠️';
+    var color = '#facc15';
+
+    if (bk === 'swamp' || bk === 'desert') {
+      hazardType = 'quicksand';
+      hazardName = 'Sorvedouro de Areia Movediça ou Lama Fluida';
+      percepDC = 15;
+      escapeDC = 13;
+      dangerDesc = 'Acomodação traiçoeira do solo: aventureiros que pisarem afundam 1d4+1 pés por turno até a submersão.';
+      mitigation = 'Corda de cânhamo de 50 pés permite que os companheiros puxem o aventureiro preso com Atletismo CD 10.';
+      isMitigated = hasRope;
+      icon = '🕳️';
+      color = '#fb923c';
+    } else if (bk === 'mountain' || bk === 'cordilheira' || bk === 'snow' || bk === 'tundra') {
+      hazardType = 'glacial_crevasse';
+      hazardName = 'Fenda Glacial Traiçoeira ou Garganta Oculta';
+      percepDC = 15;
+      escapeDC = 13;
+      dangerDesc = 'Fissura oculta por ponte de gelo frágil; ruptura arremessa a criatura em fenda estreita de rocha congelante.';
+      mitigation = 'Pítons de ferro cravados e amarração de corda em linha de vida evitam quedas desastrosas na marcha.';
+      isMitigated = hasPitons && hasRope;
+      icon = '🏔️';
+      color = '#38bdf8';
+    } else if (bk === 'selva' || bk === 'forest') {
+      hazardType = 'razorvine_thickets';
+      hazardName = 'Espinheiros Lacerantes Selvagens';
+      percepDC = 12;
+      escapeDC = 11;
+      dangerDesc = 'Trepadeiras com espinhos duros como aço; passagem desatenta corta roupas, lonas e causa ferimentos perfurantes.';
+      mitigation = 'Machadinhas de caça e mantos de couro grosso desbravam passagem segura sem ferimentos.';
+      isMitigated = !!options.hasMacheteOrAxe;
+      icon = '🌿';
+      color = '#4ade80';
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: hazardType,
+      hazardName: hazardName,
+      perceptionDC: percepDC,
+      escapeCheckDC: escapeDC,
+      dangerDescription: dangerDesc,
+      mitigationGear: mitigation,
+      isMitigated: isMitigated,
+      icon: icon,
+      color: isMitigated ? '#4ade80' : color,
+      dndRef: 'DMG p. 110-111 (Armadilhas e Perigos Ambientais nos Ermos)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -9460,6 +9608,8 @@
     calcCampDowntimeActivity: calcCampDowntimeActivity,
     calcNavigationalOrientationCheck: calcNavigationalOrientationCheck,
     calcCaravanEscortSynergy: calcCaravanEscortSynergy,
+    calcNaturalShelterSearch: calcNaturalShelterSearch,
+    calcWildernessHazardEncounter: calcWildernessHazardEncounter,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

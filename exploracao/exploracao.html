@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T21:12:45Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T21:17:11Z - do not edit directly, edit source -->
 
 
 
@@ -93618,6 +93618,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcNaturalShelterSearch) return '';
+        var sh = CartShared.calcNaturalShelterSearch(3, biome.key || biome.biome || 'plains', { searchHours: 1 });
+        return '<div class="clp-natural-shelter-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,26,28,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.3);font-size:8px;color:#bae6fd;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sh.color + ';margin-bottom:2px;">' + sh.icon + ' ABRIGO NATURAL & ACAMPAMENTO (DMG p. 111-112):</div>'
+          + '  <div>• <b>Refúgio:</b> ' + sh.shelterName + ' (' + sh.weatherProtectionPct + '% proteção climática)</div>'
+          + '  <div>• <b>Segurança Noturna:</b> ' + (sh.ambushReductionPct < 0 ? (sh.ambushReductionPct + '% risco de emboscada') : 'Exposto aos ermos') + '</div>'
+          + '  <div style="font-size:7.5px;color:#cbd5e1;margin-top:1px;">• ' + sh.description + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessHazardEncounter) return '';
+        var hz = CartShared.calcWildernessHazardEncounter(biome.key || biome.biome || 'plains', { hasRope: true, has10FtPole: true });
+        return '<div class="clp-terrain-hazard-card" style="margin:4px 0 6px;text-align:left;background:rgba(32,22,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(251,146,60,0.3);font-size:8px;color:#fed7aa;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + hz.color + ';margin-bottom:2px;">' + hz.icon + ' ARMADILHA NATURAL DOS ERMOS (DMG p. 110-111):</div>'
+          + '  <div>• <b>Perigo:</b> ' + hz.hazardName + ' (Percepção CD ' + hz.perceptionDC + ')</div>'
+          + '  <div>• <b>Efeito:</b> ' + hz.dangerDescription + '</div>'
+          + '  <div style="font-size:7.5px;color:#fdba74;margin-top:1px;">• <i>Salvaguarda/Fuga: ' + hz.mitigationGear + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.rollWildernessEncounterTable) return '';
         return '<div class="clp-encounter-sim-wrap" style="margin:4px 0 6px;text-align:left;">'
           + '  <button class="clp-btn-roll-encounter" id="clp-btn-roll-encounter" type="button" style="width:100%;background:rgba(30,20,12,0.85);border:1px solid rgba(251,146,60,0.5);color:#fdba74;font-size:8.5px;padding:3px 6px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">'
@@ -94632,7 +94652,8 @@ function openCartography() {
         <button class="cam-filter-pill" data-filter="roads" type="button">🛣️ Estradas</button>
         <button class="cam-filter-pill" data-filter="mounts" type="button">🫏 Montaria</button>
         <button class="cam-filter-pill" data-filter="weather" type="button">⚡ Clima</button>
-        <button class="cam-filter-pill" data-filter="caravans" type="button">📦 Comboios</button>'
+        <button class="cam-filter-pill" data-filter="caravans" type="button">📦 Comboios</button>
+        <button class="cam-filter-pill" data-filter="shelters" type="button">⛺ Abrigos</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -95969,6 +95990,17 @@ function _xcartFocusWaypoint(key) {
               return prov.locKeys.some(function(k){ return caravanBiomes.indexOf(k) >= 0; });
             }
             return prov.id === 'plains' || prov.id === 'forest';
+          } else if (_xcamActiveCategory === 'shelters') {
+            if (prov.id === 'world') return false;
+            var shelterProvs = ['mountain', 'forest', 'snow', 'highlands', 'floresta'];
+            if (shelterProvs.indexOf(prov.id) >= 0) return true;
+            if (prov.locKeys) {
+              return prov.locKeys.some(function(k){
+                var b = (CART_BIOMES || []).find(function(x){ return x.key === k; });
+                return b && (b.biome === 'mountain' || b.biome === 'forest' || b.isSanctuary || b.settlement);
+              });
+            }
+            return false;
           }
           if (!ft) return true;
           if ((prov.name || '').toLowerCase().indexOf(ft) >= 0) return true;
