@@ -70380,7 +70380,25 @@ function _cartHandleClick(mx, my){
   var node = _cartFindNodeAt(mx, my);
   if (!node) return;
   _logCity('cart click: ' + node.key);
-  // FASE 5.5: abre popup com info do local + opções viajar/voltar
+
+  var vm = (_cartEngine && typeof _cartEngine.getViewMode === 'function') ? _cartEngine.getViewMode() : { mode: 'world' };
+  
+  // 1. No modo Continente (Macro): clicar em um nó ou região abre a Carta Regional da Província!
+  if (vm.mode === 'world') {
+    var prov = (window.CartShared && CartShared.getLocationProvince) ? CartShared.getLocationProvince(node.key) : null;
+    var provId = prov ? prov.id : 'plains';
+    var p = window.CITY_MOCK_PLAYER || {};
+    var known = p.known_locations || ['plains'];
+    var ownedMaps = p.owned_maps || [];
+    if (window.CartShared && CartShared.isProvinceDiscovered && !CartShared.isProvinceDiscovered(provId, known, ownedMaps)) {
+      return; // Região ainda inexplorada sob a névoa
+    }
+    _logCity('continent click -> navegando para provincia: ' + provId);
+    _cartFocusProvince(provId);
+    return;
+  }
+
+  // 2. No modo Regional da Província (Micro): escolhe o destino específico e abre a ficha de marcha!
   _openCartLocationPopup(node);
 }
 function _cartFindNodeAt(mx, my){

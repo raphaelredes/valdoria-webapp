@@ -4117,6 +4117,26 @@
         var curProv = CART_PROVINCES.find(function(p){ return p.id === _activeProvId; });
         activeNodes = CART_BIOMES.filter(function(b){ return _LOCATION_TO_PROVINCE[b.key] === _activeProvId; });
       }
+      // No modo Continente, permite também hit na área central das províncias descobertas
+      if (_viewMode === 'world') {
+        for (var pi = 0; pi < CART_PROVINCES.length; pi++) {
+          var pr = CART_PROVINCES[pi];
+          if (pr.id === 'world') continue;
+          if (!isProvinceDiscovered(pr.id, known, ownedMaps)) continue;
+          var pcx = _offX + (pr.cx || 0.5) * _S;
+          var pcy = _offY + (pr.cy || 0.5) * _S;
+          var pdx = wx - pcx, pdy = wy - pcy;
+          var provR = Math.max(36, _S * 0.08);
+          if (pdx*pdx + pdy*pdy <= provR * provR) {
+            var firstNode = CART_BIOMES.find(function(b){ return _LOCATION_TO_PROVINCE[b.key] === pr.id; });
+            if (firstNode) {
+              best = firstNode;
+              bestD = pdx*pdx + pdy*pdy;
+            }
+          }
+        }
+      }
+
       for (var i = 0; i < activeNodes.length; i++) {
         var b = activeNodes[i];
         var curProv = CART_PROVINCES.find(function(p){ return p.id === _activeProvId; });
