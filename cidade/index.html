@@ -8690,6 +8690,58 @@ body.perf-lite .vc-action-btn { transition: none; }
     }
 
   
+
+    /* HUD de Expedição e Prontidão de Viagem D&D 5e (Ordem do Usuário 2026-10) */
+    .clp-expedition-hud {
+      background: rgba(20, 14, 9, 0.88);
+      border: 1px solid rgba(196, 149, 58, 0.35);
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin: 10px 0;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.6);
+    }
+    .clp-exp-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+    }
+    .clp-exp-label {
+      color: #a09484;
+      font-family: Cinzel, serif;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+    }
+    .clp-exp-val {
+      font-weight: 600;
+      color: #f4d49a;
+    }
+    .clp-threat-badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      font-family: Cinzel, serif;
+    }
+    .clp-quest-alert {
+      background: linear-gradient(180deg, rgba(90, 65, 20, 0.9), rgba(50, 35, 10, 0.95));
+      border: 1px solid #ffd685;
+      border-radius: 6px;
+      padding: 6px 10px;
+      color: #fff4d0;
+      font-size: 11px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 8px;
+      box-shadow: 0 0 10px rgba(255, 214, 133, 0.25);
+    }
+
     /* Card de Província e Ação Hexagonal */
     .clp-prov-banner {
       width: calc(100% + 40px);
@@ -70200,14 +70252,36 @@ function _wireCartEvents(){
       pPrev.onclick = function(e){
         e.preventDefault();
         e.stopPropagation();
-        _scrollProvBar(-140);
+        var p = window.CITY_MOCK_PLAYER || {};
+        var known = p.known_locations || ['plains'];
+        var ownedMaps = p.owned_maps || [];
+        var discProvs = (window.CartShared && CartShared.getDiscoveredProvinces) 
+          ? CartShared.getDiscoveredProvinces(known, ownedMaps) 
+          : [];
+        if (!discProvs.length) return;
+        var curMode = (_cartEngine && typeof _cartEngine.getViewMode === 'function') ? _cartEngine.getViewMode() : { provinceId: 'world' };
+        var curId = curMode.provinceId || 'world';
+        var idx = discProvs.findIndex(function(dp){ return dp.id === curId; });
+        var prevProv = (idx > 0) ? discProvs[idx - 1] : discProvs[discProvs.length - 1];
+        if (prevProv) _cartFocusProvince(prevProv.id);
       };
     }
     if (pNext) {
       pNext.onclick = function(e){
         e.preventDefault();
         e.stopPropagation();
-        _scrollProvBar(140);
+        var p = window.CITY_MOCK_PLAYER || {};
+        var known = p.known_locations || ['plains'];
+        var ownedMaps = p.owned_maps || [];
+        var discProvs = (window.CartShared && CartShared.getDiscoveredProvinces) 
+          ? CartShared.getDiscoveredProvinces(known, ownedMaps) 
+          : [];
+        if (!discProvs.length) return;
+        var curMode = (_cartEngine && typeof _cartEngine.getViewMode === 'function') ? _cartEngine.getViewMode() : { provinceId: 'world' };
+        var curId = curMode.provinceId || 'world';
+        var idx = discProvs.findIndex(function(dp){ return dp.id === curId; });
+        var nextProv = (idx >= 0 && idx < discProvs.length - 1) ? discProvs[idx + 1] : discProvs[0];
+        if (nextProv) _cartFocusProvince(nextProv.id);
       };
     }
   }
@@ -70490,6 +70564,28 @@ function _cartDragDraw(){
 // === HOVER + CLICK ===
 // rAF throttle — evita redraws excessivos em devices low-end
 var _cartHoverRaf = 0;
+
+// === Loop de Animação Reativo (Breadcrumbs & Halos a 60fps sob demanda) ===
+var _cartAnimLoopId = null;
+function _cartRequestAnimLoop(){
+  if (_cartAnimLoopId) return;
+  function _loop(){
+    if (!document.body.classList.contains('state-cart')) {
+      _cartAnimLoopId = null;
+      return;
+    }
+    var shouldAnimate = !!(_cartHoverNode || window._cartCurrentLocBiome || window._questFocusLoc);
+    if (shouldAnimate) {
+      _drawCart();
+      _cartAnimLoopId = requestAnimationFrame(_loop);
+    } else {
+      _cartAnimLoopId = null;
+      _drawCart();
+    }
+  }
+  _cartAnimLoopId = requestAnimationFrame(_loop);
+}
+
 function _cartHandleHover(mx, my){
   if (_cartHoverRaf) return;
   _cartHoverRaf = requestAnimationFrame(function(){
@@ -70575,6 +70671,19 @@ function _openCartProvincePreviewPopup(prov) {
     : '/shared/img/map/provinces/';
   var imgUrl = imgBase + prov.id + '.webp';
 
+  // Checagem de contratos ativos nesta província
+  var provQuestName = '';
+  if (typeof QUESTS_ACTIVE !== 'undefined' && typeof QUEST_MAP !== 'undefined') {
+    for (var pqi = 0; pqi < QUESTS_ACTIVE.length; pqi++) {
+      var qItem2 = QUESTS_ACTIVE[pqi];
+      var qRawId2 = qItem2 ? qItem2.id.replace(/^qa_/, '') : '';
+      if (QUEST_MAP[qRawId2] && locKeys.indexOf(QUEST_MAP[qRawId2].biomeKey) >= 0) {
+        provQuestName = (qItem2 && qItem2.title) || QUEST_MAP[qRawId2].name;
+        break;
+      }
+    }
+  }
+
   card.innerHTML = ''
     + '<div class="clp-body clp-prov-preview">'
     + '  <div class="clp-prov-banner" style="background-image:url(\'' + imgUrl + '\');">'
@@ -70583,6 +70692,7 @@ function _openCartProvincePreviewPopup(prov) {
     + '  </div>'
     + '  <h2 class="clp-prov-title">' + (prov.icon || '') + ' ' + prov.name + '</h2>'
     + '  <div class="clp-prov-sub">Carta Regional do Reino de Valdória</div>'
+    + (provQuestName ? '<div class="clp-quest-alert" style="margin: 0 16px 8px;">📜 CONTRATO ATIVO NA REGIÃO: ' + provQuestName.toUpperCase() + '</div>' : '')
     + '  <p class="clp-prov-desc">' + (prov.desc || 'Uma vasta região com seus próprios mistérios e perigos.') + '</p>'
     + '  <div class="clp-prov-stats">'
     + '    <div class="clp-prov-stat-pill">📍 ' + knownCount + ' / ' + locKeys.length + ' locais mapeados</div>'

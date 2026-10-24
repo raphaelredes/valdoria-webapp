@@ -3555,6 +3555,133 @@
     ctx.restore();
   }
 
+
+  // === Rota de Viagem Ativa e Breadcrumbs (D&D 5e / Baldur's Gate 3 Style) ===
+  function _findRoutePath(startKey, endKey, edges) {
+    if (!startKey || !endKey || startKey === endKey || !edges) return null;
+    var queue = [[startKey]];
+    var visited = {};
+    visited[startKey] = true;
+    while (queue.length > 0) {
+      var path = queue.shift();
+      var node = path[path.length - 1];
+      if (node === endKey) return path;
+      for (var i = 0; i < edges.length; i++) {
+        var e = edges[i];
+        var next = (e[0] === node) ? e[1] : (e[1] === node) ? e[0] : null;
+        if (next && !visited[next]) {
+          visited[next] = true;
+          queue.push(path.concat([next]));
+        }
+      }
+    }
+    return null;
+  }
+
+  function _drawActiveRouteBreadcrumbs(ctx, pathKeys, w, h, biomes) {
+    if (!pathKeys || pathKeys.length < 2 || !biomes) return;
+    var t = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    var dashOffset = - (t / 40) % 20;
+
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // 1. Halo dourado sob a rota traçada
+    ctx.strokeStyle = 'rgba(255, 200, 60, 0.45)';
+    ctx.lineWidth = 5.0;
+    for (var i = 0; i < pathKeys.length - 1; i++) {
+      var a = biomes.find(function(b){ return b.key === pathKeys[i]; });
+      var b = biomes.find(function(b){ return b.key === pathKeys[i+1]; });
+      if (!a || !b) continue;
+      var ax = a.x * w, ay = a.y * h;
+      var bx = b.x * w, by = b.y * h;
+      var dx = bx - ax, dy = by - ay;
+      var cx = (ax + bx) / 2 + (-dy * 0.15);
+      var cy = (ay + by) / 2 + (dx * 0.15);
+      ctx.beginPath();
+      ctx.moveTo(ax, ay);
+      ctx.quadraticCurveTo(cx, cy, bx, by);
+      ctx.stroke();
+    }
+
+    // 2. Trilha animada de breadcrumbs luminosos (estilo marcha D&D)
+    ctx.strokeStyle = '#ffe484';
+    ctx.lineWidth = 2.2;
+    ctx.setLineDash([7, 5]);
+    ctx.lineDashOffset = dashOffset;
+    for (var j = 0; j < pathKeys.length - 1; j++) {
+      var a2 = biomes.find(function(b){ return b.key === pathKeys[j]; });
+      var b2 = biomes.find(function(b){ return b.key === pathKeys[j+1]; });
+      if (!a2 || !b2) continue;
+      var ax2 = a2.x * w, ay2 = a2.y * h;
+      var bx2 = b2.x * w, by2 = b2.y * h;
+      var dx2 = bx2 - ax2, dy2 = by2 - ay2;
+      var cx2 = (ax2 + bx2) / 2 + (-dy2 * 0.15);
+      var cy2 = (ay2 + by2) / 2 + (dx2 * 0.15);
+      ctx.beginPath();
+      ctx.moveTo(ax2, ay2);
+      ctx.quadraticCurveTo(cx2, cy2, bx2, by2);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+
+    // 3. Marcadores de marcha pulsantes em cada nó da rota
+    for (var k = 0; k < pathKeys.length; k++) {
+      var node = biomes.find(function(b){ return b.key === pathKeys[k]; });
+      if (node) {
+        var nx = node.x * w, ny = node.y * h;
+        ctx.beginPath();
+        ctx.arc(nx, ny, 3.8, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffd700';
+        ctx.shadowColor = '#ffaa00';
+        ctx.shadowBlur = 8;
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  // === _drawCartScaleBar (Escala Cartográfica Oficial D&D 5e) ===
+  function _drawCartScaleBar(ctx, w, h, viewMode) {
+    ctx.save();
+    var isProv = (viewMode === 'province');
+    var barW = isProv ? 68 : 84;
+    var x0 = 16;
+    var y0 = h - 22;
+    var label = isProv ? '5 Léguas (~15 Milhas)' : '25 Léguas (~75 Milhas)';
+
+    // Caixa de fundo translúcida estilo manuscrito
+    ctx.fillStyle = 'rgba(24, 16, 9, 0.78)';
+    ctx.strokeStyle = 'rgba(196, 149, 58, 0.45)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x0 - 6, y0 - 18, barW + 12, 26, 4);
+    else ctx.rect(x0 - 6, y0 - 18, barW + 12, 26);
+    ctx.fill();
+    ctx.stroke();
+
+    // Régua milimétrica com terminais
+    ctx.strokeStyle = '#ffd685';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(x0, y0);
+    ctx.lineTo(x0 + barW, y0);
+    ctx.moveTo(x0, y0 - 4); ctx.lineTo(x0, y0 + 4);
+    ctx.moveTo(x0 + barW / 2, y0 - 3); ctx.lineTo(x0 + barW / 2, y0 + 3);
+    ctx.moveTo(x0 + barW, y0 - 4); ctx.lineTo(x0 + barW, y0 + 4);
+    ctx.stroke();
+
+    // Texto Cinzel ouro
+    ctx.font = '700 8.5px Cinzel, serif';
+    ctx.fillStyle = '#ffd685';
+    ctx.textAlign = 'left';
+    ctx.shadowColor = 'rgba(0,0,0,0.9)';
+    ctx.shadowBlur = 4;
+    ctx.fillText(label, x0, y0 - 6);
+    ctx.restore();
+  }
+
   // === _drawCartCompass ===
   function _drawCartCompass(ctx, w, h){
     // Top-right (era bottom-right, mas conflitava com zoom controls)
@@ -4005,10 +4132,29 @@
           // Locais inexplorados ficam 100% ocultos sob o Fog of War preto solido, sem qualquer icone ou texto.
         });
 
-        // Pin do jogador se estiver na província
+        // Rota de Viagem Ativa e Breadcrumbs (D&D 5e / Baldur's Gate 3 Style)
         var pk = (typeof cfg.getPlayerBiomeKey === 'function') ? cfg.getPlayerBiomeKey() : null;
+        var activeTarget = hoverKey || (typeof window !== 'undefined' && window._cartCurrentLocBiome && window._cartCurrentLocBiome.key);
+        if (activeTarget && curProv.regionalPaths && curProv.regionalPaths.length) {
+          var startK = pk || (regNodes.length ? regNodes[0].key : null);
+          if (startK && startK !== activeTarget) {
+            var route = _findRoutePath(startK, activeTarget, curProv.regionalPaths);
+            if (route) {
+              _drawActiveRouteBreadcrumbs(ctx, route, _S, _S, regNodes);
+            }
+          }
+        }
+
+        // Pin do aventureiro se estiver na província
         var pn = pk && regNodes.find(function(b){ return b.key === pk; });
         if (pn) _drawPlayerPin(ctx, pn, _S, _S);
+
+        // Indicador de Missão / Quest Halo dentro da província
+        var qf = (typeof cfg.getQuestFocus === 'function') ? cfg.getQuestFocus() : null;
+        if (qf && qf.key && typeof cfg.drawQuestHalo === 'function') {
+          var qn = regNodes.find(function(b){ return b.key === qf.key; });
+          if (qn) cfg.drawQuestHalo(ctx, qn, _S, _S, qf.title || 'Missão');
+        }
 
         // Cartouche superior elegante com o nome da província
         ctx.save();
@@ -4039,6 +4185,18 @@
         CART_PATHS.forEach(function(p){
           if (_pathEndKnown(p[0]) && _pathEndKnown(p[1])) _drawCartPath(ctx, p[0], p[1], _S, _S, RB);
         });
+
+        // Rota Continental Ativa e Breadcrumbs (D&D 5e Style)
+        var activeTargetWorld = hoverKey || (typeof window !== 'undefined' && window._cartCurrentLocBiome && window._cartCurrentLocBiome.key);
+        if (activeTargetWorld && CART_PATHS && CART_PATHS.length) {
+          var startKW = pk || 'plains';
+          if (startKW && startKW !== activeTargetWorld) {
+            var routeW = _findRoutePath(startKW, activeTargetWorld, CART_PATHS);
+            if (routeW) {
+              _drawActiveRouteBreadcrumbs(ctx, routeW, _S, _S, RB);
+            }
+          }
+        }
         RB.forEach(function(b){
           if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) {
             var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
@@ -4097,6 +4255,8 @@
       ctx.restore();
       // Bússola — screen-space (top-right, NÃO pan/zooma).
       _drawCartCompass(ctx, w, h);
+      // Escala Cartográfica D&D 5e — screen-space (bottom-left).
+      _drawCartScaleBar(ctx, w, h, _viewMode);
       ctx.restore();
     }
 
@@ -4555,6 +4715,9 @@
     _drawCartNode: _drawCartNode,
     _drawPlayerPin: _drawPlayerPin,
     _drawCartCompass: _drawCartCompass,
+    _drawCartScaleBar: _drawCartScaleBar,
+    _findRoutePath: _findRoutePath,
+    _drawActiveRouteBreadcrumbs: _drawActiveRouteBreadcrumbs,
     _drawUnknownLocation: _drawUnknownLocation  // 2026-05-04: locais não-descobertos
   };
 })();
