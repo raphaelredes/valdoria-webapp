@@ -8956,6 +8956,134 @@
     };
   }
 
+  // === calcWildernessChaseEscape (Fuga Tática, Perseguições nos Ermos e Desengajamento - DMG p. 252-254 / PHB p. 192) ===
+  function calcWildernessChaseEscape(escapeTerrainType, partySpeedFt, options) {
+    options = options || {};
+    var ett = (escapeTerrainType || 'dense_thicket_escape').toLowerCase();
+    var speed = (typeof partySpeedFt === 'number') ? partySpeedFt : 30;
+    var conMod = (typeof options.conMod === 'number') ? options.conMod : 2;
+    var dashLimitRounds = Math.max(1, 3 + conMod);
+
+    var escapes = {
+      dense_thicket_escape: {
+        name: 'Fuga através de Espinheiros e Mata Fechada',
+        checkDC: 12,
+        checkSkill: 'Destreza (Acrobacia) ou Sobrevivência (Sabedoria)',
+        complicationHazard: 'Galhos espinhosos retalham capas e montarias; falha causa 1d6 de dano perfurante e lentidão.',
+        escapeAdvantage: 'Cobertura total contra projéteis e desvantagem para rastreadores visuais.',
+        desc: 'Mergulho em matagais espessos onde predadores grandes não conseguem manter a velocidade.',
+        icon: '🌿🏃',
+        color: '#4ade80'
+      },
+      river_current_drift: {
+        name: 'Salto e Deriva em Corredeira Fluvial Rápida',
+        checkDC: 13,
+        checkSkill: 'Força (Atletismo) para flutuar e controlar a descida',
+        complicationHazard: 'Pedras submersas pontiagudas; falha causa 1d8 de dano de concussão e perda de fardos leves.',
+        escapeAdvantage: 'A correnteza apaga instantaneamente todo rastro de odor e duplica o ritmo de fuga.',
+        desc: 'Abandono da margem para deslizar pela força das águas correnteza abaixo.',
+        icon: '🌊🏊',
+        color: '#38bdf8'
+      },
+      rocky_scree_slide: {
+        name: 'Deslizamento Controlado em Encosta de Cascalho',
+        checkDC: 11,
+        checkSkill: 'Destreza (Acrobacia) para manter o equilíbrio no declive',
+        complicationHazard: 'Perda de equilíbrio; falha causa queda prostrada e deslizamento descontrolado.',
+        escapeAdvantage: 'Poeira densa e pedras rolantes bloqueiam a perseguição imediata pela encosta.',
+        desc: 'Descida rápida esquiando sobre seixos soltos para romper a linha de visão do inimigo.',
+        icon: '🪨⛷️',
+        color: '#facc15'
+      },
+      smokescreen_caltrop_drop: {
+        name: 'Dispersão de Abrolhos e Cortina de Fumaça',
+        checkDC: 10,
+        checkSkill: 'Destreza (Prestidigitação) ou Uso de Equipamento Tático',
+        complicationHazard: 'Vento contrário pode dissipar a cortina antes do tempo desejado.',
+        escapeAdvantage: 'Terreno difícil automático com risco de dano nos pés das feras perseguidoras.',
+        desc: 'Arremesso de bombas de fumaça alquímica e sacas de abrolhos na trilha estreita.',
+        icon: '💨🪤',
+        color: '#fb923c'
+      }
+    };
+
+    var e = escapes[ett] || escapes.dense_thicket_escape;
+
+    return {
+      escapeTerrainType: ett,
+      terrainName: e.name,
+      checkDC: e.checkDC,
+      checkSkill: e.checkSkill,
+      dashLimitRounds: dashLimitRounds,
+      partySpeedFt: speed,
+      complicationHazard: e.complicationHazard,
+      escapeAdvantage: e.escapeAdvantage,
+      description: e.desc,
+      icon: e.icon,
+      color: e.color,
+      dndRef: 'DMG p. 252-254 (Perseguições e Fugas nos Ermos) / PHB p. 192'
+    };
+  }
+
+  // === calcRegionalLeylineNode (Linhas de Força Mística, Nós Arcanos e Solo Sobrenatural - TCoE p. 150-153 / DMG p. 109) ===
+  function calcRegionalLeylineNode(leylineType, options) {
+    options = options || {};
+    var lt = (leylineType || 'leyline_restoration_node').toLowerCase();
+
+    var nodes = {
+      leyline_restoration_node: {
+        title: 'Nó de Ressonância da Trama Astral',
+        resonanceDesc: 'Convergência de correntes arcanas subterrâneas que vibram no ar como uma harpa de cristal.',
+        spellcasterBoon: 'Durante descanso curto, conjuradores podem recuperar 1 espaço de magia de 1º círculo ou 2 pontos de feitiçaria.',
+        campBenefit: 'Fogueiras e tochas queimam com chama azulada purificadora sem consumir combustível.',
+        complication: 'Frequência mágica ressonante pode ser sentida por caçadores arcanos num raio de 2 milhas.',
+        icon: '🔮⚡',
+        color: '#c084fc'
+      },
+      wild_magic_surge_field: {
+        title: 'Fenda de Magia Selvagem Caótica',
+        resonanceDesc: 'A urdidura mágica está rompida; faíscas prismáticas brotam das rochas e do solo.',
+        spellcasterBoon: 'Toda magia de 1º círculo ou superior conjurada aqui exige rolagem de d20 na Tabela de Surto Selvagem (PHB p. 103).',
+        campBenefit: 'Descansos produzem sonhos proféticos desconexos; vantagem em 1 teste de iniciativa matinal.',
+        complication: 'Resultados caóticos imprevistos podem atrair elementais errantes da tempestade.',
+        icon: '🌀✨',
+        color: '#f43f5e'
+      },
+      divine_sanctified_ground: {
+        title: 'Solo Sagrado Consagrado (Hallowed Earth)',
+        resonanceDesc: 'Solo abençoado por deidades solares antigas; emanando calor brando e paz celestial.',
+        spellcasterBoon: 'Criaturas do tipo morto-vivo ou íncubo sofrem desvantagem em testes de resistência num raio de 18 metros.',
+        campBenefit: 'Todos os aventureiros recebem vantagem em salvaguardas de Sabedoria contra medo e encantamento.',
+        complication: 'Qualquer ato profano ou desecração encerra instantaneamente a bênção do local.',
+        icon: '☀️🛡️',
+        color: '#facc15'
+      },
+      shadowfell_dampening_veil: {
+        title: 'Véu Umbral de Amortecimento Sombrio',
+        resonanceDesc: 'Névoa gélida cinzenta onde cores parecem desbotadas e a luz natural projeta sombras alongadas.',
+        spellcasterBoon: 'Magias de ilusão e necromancia recebem +1 na CD de salvaguarda; fontes de luz têm alcance reduzido pela metade.',
+        campBenefit: 'Vantagem automática em testes de Furtividade para o acampamento permanecer camuflado na penumbra.',
+        complication: 'Sensação gélida opressiva exige teste de Constituição CD 11 para evitar desânimo ao despertar.',
+        icon: '🌑🌫️',
+        color: '#64748b'
+      }
+    };
+
+    var n = nodes[lt] || nodes.leyline_restoration_node;
+
+    return {
+      leylineType: lt,
+      nodeTitle: n.title,
+      magicalResonance: n.resonanceDesc,
+      spellcasterBoon: n.spellcasterBoon,
+      campAttunementBenefit: n.campBenefit,
+      complicationWarning: n.complication,
+      icon: n.icon,
+      color: n.color,
+      dndRef: 'TCoE p. 150-153 (Regiões Sobrenaturais e Nós Místicos) / DMG p. 109'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -10683,6 +10811,8 @@
     calcMountainAltitudeAcclimatization: calcMountainAltitudeAcclimatization,
     calcWildernessAcousticFootprint: calcWildernessAcousticFootprint,
     calcEnvironmentalMirageEncounter: calcEnvironmentalMirageEncounter,
+    calcWildernessChaseEscape: calcWildernessChaseEscape,
+    calcRegionalLeylineNode: calcRegionalLeylineNode,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

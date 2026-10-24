@@ -70025,7 +70025,8 @@ function renderCartographyCanvas(el){
         <button class="cam-filter-pill" data-filter="triangulation" type="button">📐 Triangulação</button>
         <button class="cam-filter-pill" data-filter="cooking" type="button">🍲 Culinária</button>
         <button class="cam-filter-pill" data-filter="trailblaze" type="button">🪨 Trilhas</button>
-        <button class="cam-filter-pill" data-filter="acoustics" type="button">👂 Acústica</button>'
+        <button class="cam-filter-pill" data-filter="acoustics" type="button">👂 Acústica</button>
+        <button class="cam-filter-pill" data-filter="leylines" type="button">🔮 Linhas Ley</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -71108,6 +71109,9 @@ function _cartFocusWaypoint(key) {
               });
             }
             return false;
+          } else if (_camActiveCategory === 'leylines') {
+            if (prov.id === 'world') return false;
+            return true;
           } else if (_camActiveCategory === 'acoustics') {
             if (prov.id === 'world') return false;
             return true;
@@ -72813,6 +72817,28 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessChaseEscape) return '';
+        var ch = CartShared.calcWildernessChaseEscape('dense_thicket_escape', 30);
+        return '<div class="clp-chase-escape-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,26,20,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(74,222,128,0.3);font-size:8px;color:#bbf7d0;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ch.color + ';margin-bottom:2px;">' + ch.icon + ' FUGA TÁTICA & PERSEGUIÇÃO NOS ERMOS (DMG p. 252):</div>'
+          + '  <div>• <b>Manobra:</b> ' + ch.terrainName + ' (CD ' + ch.checkDC + ' [' + ch.checkSkill + '])</div>'
+          + '  <div>• <b>Vantagem:</b> ' + ch.escapeAdvantage + ' · ' + ch.dashLimitRounds + ' rodadas de disparada livre</div>'
+          + '  <div style="font-size:7.5px;color:#86efac;margin-top:1px;">• <i>Risco: ' + ch.complicationHazard + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcRegionalLeylineNode) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var leyType = (bKey === 'swamp' ? 'shadowfell_dampening_veil' : (bKey === 'cordilheira' || bKey === 'mountain' ? 'wild_magic_surge_field' : 'leyline_restoration_node'));
+        var ley = CartShared.calcRegionalLeylineNode(leyType);
+        return '<div class="clp-leyline-card" style="margin:4px 0 6px;text-align:left;background:rgba(26,20,32,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(192,132,252,0.3);font-size:8px;color:#e9d5ff;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ley.color + ';margin-bottom:2px;">' + ley.icon + ' ' + ley.nodeTitle.toUpperCase() + ' (TCoE p. 150):</div>'
+          + '  <div>• <b>Ressonância:</b> ' + ley.magicalResonance + '</div>'
+          + '  <div>• <b>Dádiva Arcana:</b> ' + ley.spellcasterBoon + '</div>'
+          + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <i>Acampamento: ' + ley.campAttunementBenefit + '</i></div>'
           + '</div>';
       })()
     + (function(){
