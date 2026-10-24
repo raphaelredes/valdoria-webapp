@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T17:42:11Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T17:50:54Z - do not edit directly, edit source -->
 
 
 
@@ -93142,6 +93142,18 @@ function _openCartLocationPopup(biome){
     + weatherHtml
     + nightVisionHtml
     + dndHtml
+    + (function(){
+        var forInfo = (window.CartShared && CartShared.getBiomeForageSustainability) ? CartShared.getBiomeForageSustainability(biome.biome || biome.key) : null;
+        if (!forInfo) return '';
+        return '<div class="clp-forage-card" style="margin:4px 0 6px;text-align:left;background:rgba(15,22,15,0.7);padding:5px 8px;border-radius:4px;border:1px solid rgba(134,239,172,0.35);">'
+          + '  <div style="font-size:9px;color:#86efac;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🌿 FORRAGEAMENTO & ÁGUA SELVAGEM (D&D 5e):</div>'
+          + '  <div style="font-size:9px;color:#f4d49a;">'
+          + '    Abundância: <b style="color:' + forInfo.color + ';">' + forInfo.rating + '</b> (Sobrevivência CD ' + forInfo.dc + ')<br>'
+          + '    Fontes de Água: <span>' + forInfo.water + '</span><br>'
+          + '    <span style="font-size:8.5px;color:#cbd5e1;font-style:italic;">' + forInfo.notes + '</span>'
+          + '  </div>'
+          + '</div>';
+      })()
     + (biome.isOrigin || biome.settlement
         ? '<div style="font-size:9.5px;color:#a3e635;margin-bottom:6px;font-family:Cinzel,serif;">🌀 Santuário & Marco de Viagem Rápida</div>'
         : '')
@@ -93177,6 +93189,15 @@ function _openCartLocationPopup(biome){
         + '  <div class="clp-camp-note" id="clp-camp-note" style="font-size:8.5px;color:#d2be90;margin-top:2px;font-style:italic;">🛡️ Vigília Atenta: Revezamento rigoroso de sentinelas (+5 na Percepção Passiva contra surpresas à noite).</div>'
         + '</div>'
       ) : '')
+    + '<div class="clp-formation-wrap" style="margin-top: 8px; text-align: left;">'
+    + '  <div style="font-size: 9.5px; font-family: Cinzel, serif; color: #67e8f9; margin-bottom: 3px; font-weight: 600;">ORDEM DE MARCHA DA COMITIVA (D&D 5e):</div>'
+    + '  <div class="clp-formation-selector" style="display:flex;gap:4px;">'
+    + '    <button class="clp-formation-btn active" data-form="standard" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid #ffd700;color:#ffd700;border-radius:3px;cursor:pointer;">🚶 Fila</button>'
+    + '    <button class="clp-formation-btn" data-form="defensive" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🛡️ Fechada</button>'
+    + '    <button class="clp-formation-btn" data-form="spread" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🐾 Dispersa</button>'
+    + '  </div>'
+    + '  <div class="clp-formation-note" id="clp-formation-note" style="font-size:8.5px;color:#d2be90;margin-top:2px;font-style:italic;">🚶 Fila Indiana: Batedor na frente, comitiva equilibrada para reações rápidas (PHB p. 182).</div>'
+    + '</div>'
     + '</div>'
     + '<div class="clp-buttons">'
     + (isCurrent
@@ -93288,11 +93309,46 @@ function _openCartLocationPopup(biome){
           campNote.textContent = '⛺ Repouso Pleno: Foco na recuperação de PV e recursos dos membros do grupo.';
         }
       }
-      var newRisk2 = (window.CartShared && CartShared.calcEncounterRisk) ? CartShared.calcEncounterRisk(biome, { pace: window._cartSelectedPace || 'normal', isNight: isNight, weather: curWeather, hours: horasViagem, campStance: cType }) : null;
+      var newRisk2 = (window.CartShared && CartShared.calcEncounterRisk) ? CartShared.calcEncounterRisk(biome, { pace: window._cartSelectedPace || 'normal', isNight: isNight, weather: curWeather, hours: horasViagem, campStance: cType, formation: window._cartSelectedFormation || 'standard' }) : null;
       var riskEl2 = el.querySelector('#clp-risk-badge');
       if (riskEl2 && newRisk2) {
         riskEl2.textContent = newRisk2.label;
         riskEl2.style.color = newRisk2.color;
+      }
+    };
+  });
+
+  var formBtns = el.querySelectorAll('.clp-formation-btn');
+  var formNote = el.querySelector('#clp-formation-note');
+  formBtns.forEach(function(btn){
+    btn.onclick = function(e){
+      e.preventDefault();
+      formBtns.forEach(function(b){
+        b.classList.remove('active');
+        b.style.color = '#d2be90';
+        b.style.borderColor = 'rgba(196,149,58,0.4)';
+      });
+      btn.classList.add('active');
+      btn.style.color = '#ffd700';
+      btn.style.borderColor = '#ffd700';
+      var fType = btn.getAttribute('data-form');
+      window._cartSelectedFormation = fType;
+      try { sessionStorage.setItem('valdoria_marching_formation', fType); } catch(_) {}
+      if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_click');
+      if (formNote) {
+        if (fType === 'standard') {
+          formNote.textContent = '🚶 Fila Indiana: Batedor na frente, comitiva equilibrada para reações rápidas (PHB p. 182).';
+        } else if (fType === 'defensive') {
+          formNote.textContent = '🛡️ Formação Fechada: Escudos erguidos e retaguarda reforçada (-10% no risco de emboscada).';
+        } else {
+          formNote.textContent = '🐾 Vanguarda Dispersa: Batedor 30 pés adiante (+5 na Percepção Passiva para detectar armadilhas e pistas antecipadamente).';
+        }
+      }
+      var newRisk3 = (window.CartShared && CartShared.calcEncounterRisk) ? CartShared.calcEncounterRisk(biome, { pace: window._cartSelectedPace || 'normal', isNight: isNight, weather: curWeather, hours: horasViagem, campStance: window._cartSelectedCampStance || 'vigilant', formation: fType }) : null;
+      var riskEl3 = el.querySelector('#clp-risk-badge');
+      if (riskEl3 && newRisk3) {
+        riskEl3.textContent = newRisk3.label;
+        riskEl3.style.color = newRisk3.color;
       }
     };
   });
@@ -95153,6 +95209,30 @@ function _wireXCartKeyboardNavigation() {
     if (e.key === '4') { e.preventDefault(); _setXCartFilter('quests'); return; }
     if (e.key === '5') { e.preventDefault(); _setXCartFilter('pinned'); return; }
     if (e.key === '6') { e.preventDefault(); _setXCartFilter('notes'); return; }
+
+    // P / p: alterna ritmo de marcha (D&D 5e)
+    if (e.key === 'p' || e.key === 'P') {
+      e.preventDefault();
+      var paceArr = ['stealth', 'normal', 'fast'];
+      var curIdx = paceArr.indexOf(window._cartSelectedPace || 'normal');
+      var nextPace = paceArr[(curIdx + 1) % paceArr.length];
+      window._cartSelectedPace = nextPace;
+      var pBtn = document.querySelector('.clp-pace-btn[data-pace="' + nextPace + '"]');
+      if (pBtn) pBtn.click();
+      return;
+    }
+
+    // F / f: alterna ordem de marcha da comitiva (D&D 5e)
+    if (e.key === 'f' || e.key === 'F') {
+      e.preventDefault();
+      var formArr = ['standard', 'defensive', 'spread'];
+      var curFIdx = formArr.indexOf(window._cartSelectedFormation || 'standard');
+      var nextForm = formArr[(curFIdx + 1) % formArr.length];
+      window._cartSelectedFormation = nextForm;
+      var fBtn = document.querySelector('.clp-formation-btn[data-form="' + nextForm + '"]');
+      if (fBtn) fBtn.click();
+      return;
+    }
 
     var panStep = 60;
     if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {

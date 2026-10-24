@@ -3490,6 +3490,77 @@
   }
 
   // === D&D 5e Wilderness Encounter / Ambush Risk Assessment ===
+  var DND_FORAGE_DATA = {
+    forest: {
+      rating: 'Abundante',
+      dc: 10,
+      color: '#86efac',
+      water: 'Rios Cristalinos e Nascentes',
+      notes: 'Água pura e caça farta. Batedores ou comitivas com antecedente Forasteiro sustentam o bando sem gastar rações.'
+    },
+    plains: {
+      rating: 'Moderado',
+      dc: 15,
+      color: '#fde047',
+      water: 'Riachos e Poços Rurais',
+      notes: 'Fontes perenes perto de granjas e encostas. Caça veloz requer testes regulares de Sobrevivência.'
+    },
+    swamp: {
+      rating: 'Abundante (Tóxico)',
+      dc: 15,
+      color: '#a3e635',
+      water: 'Água Salobra / Miasmática',
+      notes: 'Água turva exige fervura ou magia de Purificar Alimentos contra contaminação.'
+    },
+    desert: {
+      rating: 'Crítico',
+      dc: 20,
+      color: '#f87171',
+      water: 'Oásis Raros e Cactos',
+      notes: 'Consumo duplo de água sob sol escaldante. Marchar sem odres cheios exige salvaguarda de CON contra exaustão.'
+    },
+    mountain: {
+      rating: 'Escasso',
+      dc: 20,
+      color: '#fb923c',
+      water: 'Neve e Gelo Perene',
+      notes: 'Exige fogueira para derreter neve. Ventos cortantes reduzem caça a animais de penhasco.'
+    }
+  };
+
+  function getBiomeForageSustainability(biomeKey) {
+    var raw = (biomeKey || '').toLowerCase();
+    if (raw.indexOf('floresta') >= 0 || raw.indexOf('forest') >= 0) return DND_FORAGE_DATA.forest;
+    if (raw.indexOf('pantano') >= 0 || raw.indexOf('swamp') >= 0 || raw.indexOf('leste') >= 0) return DND_FORAGE_DATA.swamp;
+    if (raw.indexOf('duna') >= 0 || raw.indexOf('desert') >= 0 || raw.indexOf('sul') >= 0) return DND_FORAGE_DATA.desert;
+    if (raw.indexOf('cordilheira') >= 0 || raw.indexOf('mountain') >= 0 || raw.indexOf('ocidental') >= 0) return DND_FORAGE_DATA.mountain;
+    return DND_FORAGE_DATA.plains;
+  }
+
+  var MARCHING_FORMATIONS = {
+    standard: {
+      id: 'standard',
+      name: 'Fila Indiana',
+      icon: '🚶',
+      summary: 'Equilibrada (PHB p. 182): batedor à frente, comitiva em linha com espaço para reagir.',
+      riskMod: 0
+    },
+    defensive: {
+      id: 'defensive',
+      name: 'Formação Fechada',
+      icon: '🛡️',
+      summary: 'Defensiva: batedores recuados, escudos erguidos e retaguarda reforçada (-10% no risco de emboscada).',
+      riskMod: -10
+    },
+    spread: {
+      id: 'spread',
+      name: 'Vanguarda Dispersa',
+      icon: '🐾',
+      summary: 'Dispersa: batedor 30 pés adiante (+5 na Percepção Passiva para detectar armadilhas e pistas antecipadamente).',
+      riskMod: -5
+    }
+  };
+
   function calcEncounterRisk(biome, options) {
     if (!biome) return { riskPct: 0, label: '🟢 Zona Segura (0%)', color: '#a3e635' };
     if (biome.tier === 0 || biome.isOrigin) return { riskPct: 0, label: '🟢 Zona Segura (0% Risco de Emboscada)', color: '#a3e635' };
@@ -3510,8 +3581,10 @@
     var nightMod = isNight ? (campStance === 'stealth' ? 10 : 18) : 0;
     var paceMod = (pace === 'stealth') ? -25 : (pace === 'fast') ? 15 : 0;
     var weatherMod = (weather === 't' || weather === 'f') ? 8 : 0;
+    var formation = opts.formation || 'standard';
+    var formMod = (formation === 'defensive') ? -10 : (formation === 'spread') ? -5 : 0;
 
-    var totalRisk = Math.max(0, Math.min(95, baseTierRisk + durationMod + nightMod + paceMod + weatherMod));
+    var totalRisk = Math.max(0, Math.min(95, baseTierRisk + durationMod + nightMod + paceMod + weatherMod + formMod));
 
     var label = '', color = '#a3e635';
     if (totalRisk <= 20) {
@@ -3971,6 +4044,72 @@
         }
       }
     }
+    ctx.restore();
+  }
+
+  // === Retículo de Destino Pulsante AAA (Fase 15 - 2026-05-19) ===
+  function _drawSelectedTargetHalo(ctx, node, w, h) {
+    if (!node || typeof node.x !== 'number') return;
+    var bx = node.x * w, by = node.y * h;
+    var t = Date.now() * 0.003;
+    var pulse = 1.0 + Math.sin(t) * 0.12;
+    var r1 = 26 * pulse;
+    var r2 = 33 * pulse;
+
+    ctx.save();
+    ctx.translate(bx, by);
+
+    // Halo circular dourado suave
+    ctx.beginPath();
+    ctx.arc(0, 0, r1, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255, 215, 0, 0.75)';
+    ctx.lineWidth = 1.8;
+    ctx.shadowColor = 'rgba(255, 215, 0, 0.85)';
+    ctx.shadowBlur = 10;
+    ctx.stroke();
+
+    // Anel externo pontilhado
+    ctx.beginPath();
+    ctx.arc(0, 0, r2, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255, 215, 0, 0.35)';
+    ctx.lineWidth = 1.0;
+    ctx.setLineDash([4, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 4 Corner brackets (retículo tático D&D)
+    var bDist = r2 + 4;
+    var arm = 5;
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    // Top-left
+    ctx.moveTo(-bDist, -bDist + arm);
+    ctx.lineTo(-bDist, -bDist);
+    ctx.lineTo(-bDist + arm, -bDist);
+    // Top-right
+    ctx.moveTo(bDist - arm, -bDist);
+    ctx.lineTo(bDist, -bDist);
+    ctx.lineTo(bDist, -bDist + arm);
+    // Bottom-left
+    ctx.moveTo(-bDist, bDist - arm);
+    ctx.lineTo(-bDist, bDist);
+    ctx.lineTo(-bDist + arm, bDist);
+    // Bottom-right
+    ctx.moveTo(bDist - arm, bDist);
+    ctx.lineTo(bDist, bDist);
+    ctx.lineTo(bDist, bDist - arm);
+    ctx.stroke();
+
+    // Destino Badge abaixo do nó
+    ctx.font = '700 8.5px Cinzel, serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = '#ffd700';
+    ctx.shadowColor = 'rgba(0,0,0,0.9)';
+    ctx.shadowBlur = 4;
+    ctx.fillText('DESTINO', 0, r2 + 6);
+
     ctx.restore();
   }
 
@@ -4587,6 +4726,12 @@
             }
           }
         }
+        if (activeTarget) {
+          var targetNode = regNodes.find(function(b){ return b.key === activeTarget; });
+          if (targetNode && targetNode.key !== pk) {
+            _drawSelectedTargetHalo(ctx, targetNode, _S, _S);
+          }
+        }
 
         // Pin do aventureiro se estiver na província
         var pn = pk && regNodes.find(function(b){ return b.key === pk; });
@@ -4647,6 +4792,12 @@
             if (routeW) {
               _drawActiveRouteBreadcrumbs(ctx, routeW, _S, _S, RB);
             }
+          }
+        }
+        if (activeTargetWorld) {
+          var targetNodeW = RB.find(function(b){ return b.key === activeTargetWorld; });
+          if (targetNodeW && targetNodeW.key !== pk) {
+            _drawSelectedTargetHalo(ctx, targetNodeW, _S, _S);
           }
         }
         var qf = (typeof cfg.getQuestFocus === 'function') ? cfg.getQuestFocus() : null;
@@ -5282,6 +5433,8 @@
     locArtHtml: locArtHtml, clpImgFallback: clpImgFallback,  // P2 sessão #73: imagem do local no popup de viagem
     biomePT: biomePT,                              // P-mapa sessão #73: bioma key -> PT-BR no popup
     getBiomeDndInfo: getBiomeDndInfo,              // Informações de Terreno e Riscos Naturais D&D 5e
+    getBiomeForageSustainability: getBiomeForageSustainability, // Forrageamento e Sustentabilidade de Água D&D 5e
+    MARCHING_FORMATIONS: MARCHING_FORMATIONS,      // Ordens de Marcha Táticas D&D 5e
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
     calcEncounterRisk: calcEncounterRisk,          // Avaliação de Risco de Emboscada na Estrada D&D 5e
     getPinnedLocations: _getPinnedLocations,
