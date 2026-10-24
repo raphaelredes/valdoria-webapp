@@ -10033,6 +10033,141 @@
     };
   }
 
+
+  // === calcSandstormAndAridHeatHazard (Tempestades de Areia, Haboob e Calor Extremo do Deserto - DMG p. 110, 112 / PHB p. 185) ===
+  function calcSandstormAndAridHeatHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'whistling_haboob_sandstorm').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Tempestade de Areia Haboob & Redemoinhos Cegantes (DMG p. 110)',
+      saveDC: 15,
+      saveType: 'Constituição',
+      visibilityPenalty: 'Visibilidade reduzida a 5 pés (escuridão pesada); fogo de tochas extinto imediatamente.',
+      abrasiveDamageOrBlindness: '1d4 de dano cortante abrasivo a cada 10 minutos sem proteção facial; desvantagem em testes visuais de Percepção.',
+      hydrationDemand: 'Exige 2 galões de água por dia por aventureiro; marcha noturna reduz a demanda para 1 galão.',
+      survivalAdvice: 'Ajoelhar-se junto aos camelos com mantas grossas estendidas e esperar a passagem da coluna de areia.',
+      icon: '🌪️🏜️',
+      color: '#f59e0b'
+    };
+
+    if (ht === 'superheated_dune_glare') {
+      hazard = {
+        hazardTitle: 'Ofuscamento Solar Extremo nas Dunas de Quartzo Branco',
+        saveDC: 12,
+        saveType: 'Constituição',
+        visibilityPenalty: 'Reflexo solar cegante; desvantagem em ataques à distância e testes de Percepção.',
+        abrasiveDamageOrBlindness: 'Falha causa cegueira temporária por 1d4 horas; mitigado por lenços kaffiyeh ou carvão sob as pálpebras.',
+        hydrationDemand: 'Consumo contínuo de água; perda rápida de eletrólitos corporais.',
+        survivalAdvice: 'Evitar caminhar entre 11h e 15h; adotar marcha no crepúsculo e sob luar.',
+        icon: '☀️🔥',
+        color: '#facc15'
+      };
+    } else if (ht === 'salt_crust_collapse') {
+      hazard = {
+        hazardTitle: 'Ruptura de Crosta de Sal sobre Lamaçal Cáustico',
+        saveDC: 13,
+        saveType: 'Destreza',
+        visibilityPenalty: 'Solo aparentemente firme; impossível distinguir armadilha natural sem vara de sondagem.',
+        abrasiveDamageOrBlindness: '2d6 de dano ácido por salmoura cáustica e botas de couro danificadas.',
+        hydrationDemand: 'Água imprópria ao redor; risco de sede se os cantis forem danificados.',
+        survivalAdvice: 'Batedores leves à frente amarrados em corda de segurança para testar o solo.',
+        icon: '🧂⚠️',
+        color: '#e2e8f0'
+      };
+    } else if (ht === 'extreme_solar_exhaustion' || bk === 'desert' || bk === 'dunas') {
+      hazard = {
+        hazardTitle: 'Onda de Calor Tórrido Acima de 40°C (DMG p. 110)',
+        saveDC: 10,
+        saveType: 'Constituição (+1 por hora adicional de marcha sem sombra)',
+        visibilityPenalty: 'Miragens térmicas e distorções visuais no horizonte a mais de 60 pés.',
+        abrasiveDamageOrBlindness: 'Falha acarreta 1 nível de exaustão acumulativa (armaduras médias e pesadas impõem desvantagem no teste).',
+        hydrationDemand: 'Consumo obrigatório de 2 galões/dia; sem água a exaustão é automática sem teste de salvaguarda (PHB p. 185).',
+        survivalAdvice: 'Montar tenda de lona suspensa durante o zênite solar e avançar exclusivamente em marcha noturna.',
+        icon: '🌡️💀',
+        color: '#ef4444'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      visibilityPenalty: hazard.visibilityPenalty,
+      abrasiveDamageOrBlindness: hazard.abrasiveDamageOrBlindness,
+      hydrationDemand: hazard.hydrationDemand,
+      survivalAdvice: hazard.survivalAdvice,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110 (Calor Extremo e Tempestades de Areia) / PHB p. 185 (Consumo de Água nos Ermos)'
+    };
+  }
+
+  // === calcWildernessAcousticSignalHorn (Trompas de Sinalização, Apitos de Caça e Comunicação Acústica - PHB p. 154 / DMG p. 105) ===
+  function calcWildernessAcousticSignalHorn(biomeKey, hornType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var ht = (hornType || 'brass_rally_horn').toLowerCase();
+
+    var horn = {
+      hornTitle: 'Trompa de Latão de Reagrupamento (PHB p. 154)',
+      audibleRangeMiles: 2.0,
+      tacticalMeaning: 'Reunião imediata da comitiva / Retorno urgente dos batedores ao acampamento.',
+      stealthDisguise: 'Som metálico estrondoso artificial; +20% chance de alertar patrulhas inimigas na região.',
+      tacticalBenefit: 'Batedores dispersos recebem o chamado e podem convergir em linha reta sem se perderem.',
+      icon: '📯🛡️',
+      color: '#f59e0b'
+    };
+
+    if (ht === 'bone_predator_whistle') {
+      horn = {
+        hornTitle: 'Apito Agudo de Osso de Caçador (Ultra-agudo)',
+        audibleRangeMiles: 1.0,
+        tacticalMeaning: 'Sinal de emboscada silenciosa / Comando para montarias e cães de guarda atacarem.',
+        stealthDisguise: 'Inaudível para humanoides a mais de 300 pés; passa despercebido em matas fechadas.',
+        tacticalBenefit: 'Permite coordenar pinças e flanqueamentos táticos sem revelar a posição dos batedores.',
+        icon: '🦴🎯',
+        color: '#94a3b8'
+      };
+    } else if (ht === 'iron_gong_or_war_drum' || bk === 'montanha') {
+      horn = {
+        hornTitle: 'Gongo de Ferro / Tambor de Guerra de Sentinela (DMG p. 105)',
+        audibleRangeMiles: 3.0,
+        tacticalMeaning: 'Alarme geral de invasão de acampamento / Chamado de reforço de vigílias.',
+        stealthDisguise: 'Ressonância profunda que ecoa em desfiladeiros e vales por várias milhas.',
+        tacticalBenefit: 'Acorda todos os companheiros em repouso no acampamento e desorienta invasores na rodada inicial.',
+        icon: '🥁⚔️',
+        color: '#dc2626'
+      };
+    } else if (ht === 'coded_birdcall_whistle') {
+      horn = {
+        hornTitle: 'Apito de Palheta de Pássaro Cifrado (Coruja / Falcão)',
+        audibleRangeMiles: 0.2,
+        tacticalMeaning: 'Mensagem cifrada pré-combinada entre patrulheiros ("Área limpa", "Inimigos à vista").',
+        stealthDisguise: 'Sons idênticos à fauna local; exige teste de Sabedoria (Intuição) CD 15 para detectar artifício.',
+        tacticalBenefit: 'Comunicação tática invisível sem elevar o risco de encontros hostis errantes.',
+        icon: '🦉🎶',
+        color: '#4ade80'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hornType: ht,
+      hornTitle: horn.hornTitle,
+      audibleRangeMiles: horn.audibleRangeMiles,
+      tacticalMeaning: horn.tacticalMeaning,
+      stealthDisguise: horn.stealthDisguise,
+      tacticalBenefit: horn.tacticalBenefit,
+      icon: horn.icon,
+      color: horn.color,
+      dndRef: 'PHB p. 154 (Instrumentos e Ferramentas) / DMG p. 105 (Alcance de Som e Ecos nos Ermos) / XGE p. 78'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -11776,6 +11911,8 @@
     calcCampFortificationAndPerimeterDefense: calcCampFortificationAndPerimeterDefense,
     calcAvalancheAndGlacialCrevasseHazard: calcAvalancheAndGlacialCrevasseHazard,
     calcCampSanitizationAndPestRepellent: calcCampSanitizationAndPestRepellent,
+    calcSandstormAndAridHeatHazard: calcSandstormAndAridHeatHazard,
+    calcWildernessAcousticSignalHorn: calcWildernessAcousticSignalHorn,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

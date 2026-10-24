@@ -72828,6 +72828,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcSandstormAndAridHeatHazard) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var ss = CartShared.calcSandstormAndAridHeatHazard(bKey, 'whistling_haboob_sandstorm');
+        return '<div class="clp-sandstorm-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,24,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ss.color + ';margin-bottom:2px;">' + ss.icon + ' ' + ss.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Perigo:</b> ' + ss.visibilityPenalty + ' · ' + ss.abrasiveDamageOrBlindness + ' (CD ' + ss.saveDC + ' [' + ss.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde047;margin-top:1px;">• <b>Demanda Hídrica:</b> ' + ss.hydrationDemand + ' · <i>' + ss.survivalAdvice + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessAcousticSignalHorn) return '';
+        var bKey = (biome && biome.key) || 'forest';
+        var sh = CartShared.calcWildernessAcousticSignalHorn(bKey, 'brass_rally_horn');
+        return '<div class="clp-signal-horn-card" style="margin:4px 0 6px;text-align:left;background:rgba(26,24,20,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);font-size:8px;color:#fde68a;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sh.color + ';margin-bottom:2px;">' + sh.icon + ' ' + sh.hornTitle.toUpperCase() + ' (PHB p. 154):</div>'
+          + '  <div>• <b>Significado:</b> ' + sh.tacticalMeaning + ' · Alcance: ' + sh.audibleRangeMiles + ' milhas</div>'
+          + '  <div style="font-size:7.5px;color:#fcd34d;margin-top:1px;">• <b>Vantagem:</b> ' + sh.tacticalBenefit + ' · <i>' + sh.stealthDisguise + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcAvalancheAndGlacialCrevasseHazard) return '';
         var bKey = (biome && biome.key) || 'mountain';
         var av = CartShared.calcAvalancheAndGlacialCrevasseHazard(bKey, 'powder_snow_avalanche');
