@@ -3719,6 +3719,22 @@
     // (player-pin.webp) marcando a posição do personagem. A BASE do estandarte crava no
     // node (posição) e a flâmula se ergue acima. Desenhado APÓS o fog → sempre visível.
     var bx = b.x * w, by = b.y * h;
+    var phase = (typeof window !== 'undefined' && window.S && window.S.dayPhase) ||
+                (typeof window !== 'undefined' && window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.dayPhase) || 'day';
+
+    // Iluminação Noturna D&D 5e: tocha/visão da comitiva projeta halo aquecido na escuridão
+    if (phase === 'night') {
+      ctx.save();
+      var torchGrad = ctx.createRadialGradient(bx, by - 12, 4, bx, by - 12, 54);
+      torchGrad.addColorStop(0, 'rgba(255, 215, 110, 0.40)');
+      torchGrad.addColorStop(0.4, 'rgba(235, 160, 50, 0.18)');
+      torchGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = torchGrad;
+      ctx.beginPath();
+      ctx.arc(bx, by - 12, 54, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
     if (_playerPinReady()) {
       var PIN_H = 46;
       var PIN_W = PIN_H * (_playerPin.naturalWidth / _playerPin.naturalHeight);

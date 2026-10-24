@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T16:58:20Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T17:06:18Z - do not edit directly, edit source -->
 
 
 
@@ -71438,10 +71438,42 @@ function drawRecentFootsteps(ctx) {
   ctx.restore();
 }
 
+function drawTacticalBeacon(ctx) {
+  if (!S || !S._tacticalBeacon) return;
+  if (S.player.col === S._tacticalBeacon.col && S.player.row === S._tacticalBeacon.row) {
+    S._tacticalBeacon = null;
+    return;
+  }
+  var s = hexToScreen(S._tacticalBeacon.col, S._tacticalBeacon.row);
+  var h = effectiveTileHeightPx(S._tacticalBeacon.col, S._tacticalBeacon.row);
+  var t = ((_animTime || 0) % 1400) / 1400;
+  var pulse = 0.5 + 0.5 * Math.sin(t * Math.PI * 2);
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(s.x, s.y - h, 14 + pulse * 6, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(56, 189, 248, ' + (0.4 + pulse * 0.4) + ')';
+  ctx.lineWidth = 2.0;
+  ctx.stroke();
+
+  ctx.font = '13px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('🎯', s.x, s.y - h);
+
+  ctx.font = '700 8.5px Cinzel, serif';
+  ctx.fillStyle = '#38bdf8';
+  ctx.shadowColor = 'rgba(0,0,0,0.9)';
+  ctx.shadowBlur = 4;
+  ctx.fillText('ALVO ' + S._tacticalBeacon.label, s.x, s.y - h - 18);
+  ctx.restore();
+}
+
 function drawMoveOverlay(ctx) {
 
   if (!S) return;
   drawRecentFootsteps(ctx);
+  drawTacticalBeacon(ctx);
   if (S.ph !== 'idle') return;
 
   // M11: alvo pode estar a 2-3 hexes → valida por ALCANCE (path), não por adjacência.
@@ -93040,6 +93072,34 @@ function _openCartLocationPopup(biome){
     + '</div>'
     : '';
 
+  var p = (typeof getPlayerObj === 'function') ? getPlayerObj() : (window.CITY_MOCK_PLAYER || (typeof S !== 'undefined' && S && S.player)) || {};
+  var pLvl = p.level || 1;
+  var threatDiff = (typeof biome.tier === 'number') ? (biome.tier - pLvl) : 0;
+  var threatBadge = '';
+  var stanceTip = '';
+  if (biome.tier === 0 || biome.isOrigin) {
+    threatBadge = '<span style="color:#a3e635;font-weight:700;">🟢 Cidade Segura</span>';
+    stanceTip = 'Zona neutra protegida pelas muralhas imperiais.';
+  } else if (threatDiff <= -1) {
+    threatBadge = '<span style="color:#86efac;font-weight:700;">🟢 Sob Controle (ND ' + biome.tier + ')</span>';
+    stanceTip = 'Comitiva experiente para este terreno. Marcha normal ou rápida.';
+  } else if (threatDiff === 0 || threatDiff === 1) {
+    threatBadge = '<span style="color:#fde047;font-weight:700;">🟡 Desafio Equilibrado (ND ' + biome.tier + ')</span>';
+    stanceTip = 'Forças emparelhadas. Mantenha os sentidos atentos contra patrulhas.';
+  } else {
+    threatBadge = '<span style="color:#f87171;font-weight:700;">🔴 Zona Mortalmente Hostil (ND ' + biome.tier + ')</span>';
+    stanceTip = '⚠️ Perigo Extremo! Ritmo Furtivo (🐾) fortemente recomendado.';
+  }
+
+  var isNight = (typeof S !== 'undefined' && S && S.dayPhase === 'night') || (typeof window._getCurrentGameTime === 'function' && window._getCurrentGameTime().hour >= 20);
+  var hasDarkvision = !!(p.darkvision || (p.race && ['elf', 'dwarf', 'drow', 'half-orc', 'tiefling'].indexOf(p.race.toLowerCase()) >= 0));
+  var hasTorch = !!(p.torch_active || p.has_light || (p.inventory && p.inventory.some(function(it){ return it.id === 'torch' || it.id === 'lantern'; })));
+  var nightVisionHtml = isNight ? (hasDarkvision
+    ? '<div class="clp-exp-night-warn" style="color:#93c5fd;border-left-color:#60a5fa;">🌙 Marcha Noturna · 👁️ Visão no Escuro Ativa: Seus olhos ancestrais penetram as sombras sem penalidades de percepção.</div>'
+    : hasTorch
+      ? '<div class="clp-exp-night-warn" style="color:#fde047;border-left-color:#eab308;">🌙 Marcha Noturna · 🕯️ Tocha da Comitiva: Facho de luz ativo dissipa a escuridão imediata contra emboscadas.</div>'
+      : '<div class="clp-exp-night-warn">🌙 Marcha Noturna: O sol já se pôs além das colinas. Sem tochas ou visão no escuro, desvantagem em testes de Percepção contra emboscadas.</div>') : '';
+
   card.innerHTML = ''
     + '<div class="clp-body">'
     + '<div class="clp-icon">' + (CartShared.locArtHtml ? CartShared.locArtHtml(biome) : biome.ico) + '</div>'
@@ -93047,7 +93107,8 @@ function _openCartLocationPopup(biome){
     + questBannerHtml
     + '<h2>' + (biome.regionalName || biome.name) + '</h2>'
     + '<p>' + (biome.desc || 'Um destino misterioso te aguarda além das fronteiras.') + '</p>'
-    + (rec ? '<div class="clp-meta">' + rec + '<br>Bioma: ' + biomePT + ' · Distância: ~' + distMilhas + ' milhas (~' + horasViagem + 'h de marcha)</div>' : '')
+    + (rec ? '<div class="clp-meta"><b>Nível Sugerido:</b> ' + rec + '<br><b>Avaliação de Ameaça:</b> ' + threatBadge + '<br><span style="font-size:9.5px;color:#d2be90;font-style:italic;">' + stanceTip + '</span><br><b>Bioma:</b> ' + biomePT + ' · <b>Distância:</b> ~' + distMilhas + ' milhas (~' + horasViagem + 'h de marcha)</div>' : '')
+    + nightVisionHtml
     + dndHtml
     + (biome.isOrigin || biome.settlement
         ? '<div style="font-size:9.5px;color:#a3e635;margin-bottom:6px;font-family:Cinzel,serif;">🌀 Santuário & Marco de Viagem Rápida</div>'
@@ -96553,6 +96614,22 @@ function drawMinimap() {
     }
   } catch (_) {}
 
+  // Tactical Beacon on Minimap
+  if (S._tacticalBeacon) {
+    var _tbOff = (S._tacticalBeacon.row % 2 === 1) ? cw * 0.5 : 0;
+    var _tbx = S._tacticalBeacon.col * cw + cw / 2 + _tbOff;
+    var _tby = S._tacticalBeacon.row * ch + ch / 2;
+    ctx.save();
+    ctx.fillStyle = '#38bdf8';
+    ctx.shadowColor = '#0284c7';
+    ctx.shadowBlur = 4;
+    ctx.beginPath();
+    var _tbRad = Math.max(2.5, cw * 0.65);
+    ctx.arc(_tbx, _tby, _tbRad, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
   // Border
 
   ctx.strokeStyle = 'rgba(196, 149, 58, 0.3)';
@@ -99933,8 +100010,18 @@ function _drawTacticalRadar() {
       var targetR = Math.max(0, Math.min(ROWS - 1, Math.floor(my / ch)));
       var offX = (targetR % 2 === 1) ? cw * 0.5 : 0;
       var targetC = Math.max(0, Math.min(COLS - 1, Math.floor((mx - offX) / cw)));
+      var lbl = (typeof hexCoordLabel === 'function') ? hexCoordLabel(targetC, targetR) : ('C' + targetC + 'R' + targetR);
+      S._tacticalBeacon = { col: targetC, row: targetR, label: lbl };
       _closeTacticalRadar();
-      centerOnPlayer(true);
+      var vp = document.getElementById('map-viewport');
+      if (vp) {
+        var c = hexToScreen(targetC, targetR);
+        var heightPx = effectiveTileHeightPx(targetC, targetR);
+        var targetX = Math.round(c.x - vp.clientWidth / 2);
+        var targetY = Math.round((c.y - heightPx) - vp.clientHeight / 2);
+        vp.scrollTo({ left: Math.max(0, Math.min(canvasW - vp.clientWidth, targetX)), top: Math.max(0, Math.min(canvasH - vp.clientHeight, targetY)), behavior: 'smooth' });
+      }
+      scheduleRender();
     };
   }
 
