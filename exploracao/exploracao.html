@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T14:49:24Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T14:57:28Z - do not edit directly, edit source -->
 
 
 
@@ -92877,67 +92877,90 @@ function _openCartProvincePreviewPopup(prov) {
 }
 
 function _openCartLocationPopup(biome){
-
   var el = document.getElementById('cart-loc-popup');
-
   if (!el) return;
-
   var isCurrent = (_cartGetPlayerBiomeV2()) === biome.key;
-
   var rec = '';
-
   if (biome.tier) {
-
-    rec = biome.tier <= 1 ? 'Iniciante (nv 1-2)' :
-
-          biome.tier <= 3 ? 'Aventureiro (nv 2-4)' :
-
-          biome.tier <= 5 ? 'Veterano (nv 4-7)' :
-
-          biome.tier <= 7 ? 'Experiente (nv 7-10)' :
-
-                            'Lendário (nv 10+)';
-
+    rec = biome.tier <= 1 ? 'Iniciante (Nível 1 a 2)' :
+          biome.tier <= 3 ? 'Aventureiro (Nível 2 a 4)' :
+          biome.tier <= 5 ? 'Veterano (Nível 4 a 7)' :
+          biome.tier <= 7 ? 'Experiente (Nível 7 a 10)' :
+                            'Lendário (Nível 10+)';
   }
+  var marcos = (typeof biome.marcos === 'number') ? biome.marcos : (biome.tier || 1);
+  var distMilhas = Math.max(6, marcos * 8);
+  var horasViagem = Math.max(2, Math.round(distMilhas / 3));
+
+  var activeQuestTitle = '';
+  if (typeof S !== 'undefined' && S && Array.isArray(S.activeQuests)) {
+    var foundQ = S.activeQuests.find(function(q){
+      return q && (q.target_map === biome.key || q.location === biome.key);
+    });
+    if (foundQ) activeQuestTitle = foundQ.title || 'Missão Ativa';
+  }
+  var questBannerHtml = activeQuestTitle
+    ? '<div class="clp-quest-alert" style="margin: 0 0 8px;">📜 CONTRATO ATIVO: ' + activeQuestTitle.toUpperCase() + '</div>'
+    : '';
 
   var card = document.getElementById('clp-card-content');
-
   if (!card) return;
 
+  var biomePT = ((CartShared && CartShared.biomePT) ? CartShared.biomePT(biome.biome || biome.key) : (biome.biome || biome.key));
+
   card.innerHTML = ''
-
+    + '<div class="clp-body">'
     + '<div class="clp-icon">' + (CartShared.locArtHtml ? CartShared.locArtHtml(biome) : biome.ico) + '</div>'
-
     + (isCurrent ? '<div class="clp-current-here">VOCÊ ESTÁ AQUI</div>' : '')
-
-    + '<h2>' + biome.name + '</h2>'
-
-    // P-mapa sessão #73: sem badge "Tier N" (redundante) — a faixa de nível
-
-    // recomendado no clp-meta abaixo é mais clara. Alinhado com o popup da cidade.
-
+    + questBannerHtml
+    + '<h2>' + (biome.regionalName || biome.name) + '</h2>'
     + '<p>' + (biome.desc || 'Um destino misterioso te aguarda além das fronteiras.') + '</p>'
-
-    + (rec ? '<div class="clp-meta">' + rec + '<br>Bioma: ' + ((CartShared && CartShared.biomePT) ? CartShared.biomePT(biome.biome || biome.key) : (biome.biome || biome.key)) + '</div>' : '')
-
+    + (rec ? '<div class="clp-meta">' + rec + '<br>Bioma: ' + biomePT + ' · Distância: ~' + distMilhas + ' milhas (~' + horasViagem + 'h de marcha)</div>' : '')
+    + '<div class="clp-pace-wrap" style="margin-top: 8px; text-align: left;">'
+    + '  <div style="font-size: 9.5px; font-family: Cinzel, serif; color: #ffd685; margin-bottom: 3px; font-weight: 600;">RITMO DE MARCHA D&D 5e:</div>'
+    + '  <div class="clp-pace-selector">'
+    + '    <button class="clp-pace-btn" data-pace="stealth" type="button">🐾 Furtivo</button>'
+    + '    <button class="clp-pace-btn active" data-pace="normal" type="button">🚶 Normal</button>'
+    + '    <button class="clp-pace-btn" data-pace="fast" type="button">⚡ Rápido</button>'
+    + '  </div>'
+    + '  <div class="clp-pace-note" id="clp-pace-note">🚶 Ritmo Normal (24 milhas/dia): Velocidade e percepção passiva equilibradas sem penalidades.</div>'
+    + '</div>'
+    + '</div>'
     + '<div class="clp-buttons">'
-
     + (isCurrent
-
-        ? '<button class="clp-btn clp-btn-back" data-clp="back">Voltar pro Mapa</button>'
-
-        : '<button class="clp-btn clp-btn-travel" data-clp="travel">Viajar pra ' + biome.name.split(' ')[0] + '</button>'
-
-          + '<button class="clp-btn clp-btn-back" data-clp="back">Voltar pro Mapa</button>'
-
+        ? '<button class="clp-btn clp-btn-back" data-clp="back">Voltar ao Mapa</button>'
+        : '<button class="clp-btn clp-btn-hex-explore" data-clp="travel">🧭 Ir para o Mapa Hexagonal de Exploração</button>'
+          + '<button class="clp-btn clp-btn-back" data-clp="back">Voltar ao Mapa</button>'
        )
-
     + '</div>';
 
   el.classList.add('active');
-
   window._cartCurrentLocBiome = biome;
+  window._cartSelectedPace = 'normal';
 
+  var paceBtns = el.querySelectorAll('.clp-pace-btn');
+  var paceNote = el.querySelector('#clp-pace-note');
+  paceBtns.forEach(function(btn){
+    btn.onclick = function(e){
+      e.preventDefault();
+      paceBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var pType = btn.getAttribute('data-pace');
+      window._cartSelectedPace = pType;
+      if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+        ValdoriaAudio.playSFX('sfx_click');
+      }
+      if (paceNote) {
+        if (pType === 'stealth') {
+          paceNote.textContent = '🐾 Marcha Furtiva (18 milhas/dia): Pode usar Furtividade para surpreender ou evitar encontros.';
+        } else if (pType === 'fast') {
+          paceNote.textContent = '⚡ Marcha Rápida (30 milhas/dia): Chega mais rápido (-25% tempo), porém -5 de penalidade na Percepção Passiva D&D 5e.';
+        } else {
+          paceNote.textContent = '🚶 Ritmo Normal (24 milhas/dia): Velocidade e percepção passiva equilibradas sem penalidades.';
+        }
+      }
+    };
+  });
 }
 
 function _closeCartLocationPopup(){
@@ -93303,7 +93326,7 @@ function openCartography() {
 
     + '  <div class="xcart-header">'
 
-    + '    <h2>Cartografia de Valdoria</h2>'
+    + '    <h2 id="xcart-title">Cartografia de Valdoria</h2>'
 
     + '    <div class="cart-prov-bar-wrap">'
     + '      <button class="cart-prov-nav-btn cart-prov-prev" id="xcart-prov-prev" type="button" aria-label="Anterior">‹</button>'
@@ -93336,6 +93359,8 @@ function openCartography() {
     + '  <div class="xcart-back-row">'
 
     + '    <button class="xcart-back-btn" id="xcart-close-btn">← Voltar pra Exploração</button>'
+
+    + '    <button class="xcart-back-btn" id="xcart-continent-btn" style="display:none;" onclick="_xcartFocusProvince(\'world\')">🌍 Continente</button>'
 
     + '    <button class="xcart-back-btn xcart-city-btn" id="xcart-city-btn" title="Voltar para os Portões de Valdoria">Voltar pra Cidade</button>'
 
@@ -93538,6 +93563,21 @@ function openCartography() {
 
 
 
+function _getXCartProvinceActiveQuest(provId) {
+  if (!provId || provId === 'world') return null;
+  var prov = (window.CartShared && CartShared.CART_PROVINCES) ? CartShared.CART_PROVINCES.find(function(p){ return p.id === provId; }) : null;
+  if (!prov || !prov.locKeys) return null;
+  if (typeof S !== 'undefined' && S && Array.isArray(S.activeQuests)) {
+    for (var i = 0; i < S.activeQuests.length; i++) {
+      var q = S.activeQuests[i];
+      if (q && (prov.locKeys.indexOf(q.target_map) >= 0 || prov.locKeys.indexOf(q.location) >= 0)) {
+        return q.title || 'Missão Ativa';
+      }
+    }
+  }
+  return null;
+}
+
 function _renderXCartProvinceBar() {
   var pBar = document.getElementById('xcart-prov-bar');
   if (!pBar) return;
@@ -93566,7 +93606,9 @@ function _renderXCartProvinceBar() {
                     (prov.id === 'coast') ? 'Costa' :
                     (prov.id === 'snow') ? 'Ermo Gelado' :
                     (prov.id === 'volcanic') ? 'Vulcânico' : prov.name;
-    chip.innerHTML = '<span>' + (prov.icon || '📍') + '</span> ' + shortName;
+    var qTitle = _getXCartProvinceActiveQuest(prov.id);
+    var qBadge = qTitle ? ' <span title="Contrato ativo: ' + qTitle + '" style="color:#ffd685;font-size:10px;">📜</span>' : '';
+    chip.innerHTML = '<span>' + (prov.icon || '📍') + '</span> ' + shortName + qBadge;
     chip.onclick = function(e){
       e.preventDefault();
       _xcartFocusProvince(prov.id);
@@ -93603,19 +93645,44 @@ function _xcartFocusProvince(provId){
       ValdoriaAudio.playSFX('sfx_scroll');
     }
   } catch(_) {}
+  var titleEl = document.getElementById('xcart-title');
+  var continentBtn = document.getElementById('xcart-continent-btn');
   if (provId === 'world') {
+    if (typeof _xcartEngine.closeProvince === 'function') {
+      _xcartEngine.closeProvince();
+    }
     _cartZoom = CART_ZOOM_DEFAULT;
     _xcartCenterOnPlayer();
     _xcartUpdateZoomInfo();
+    if (titleEl) titleEl.innerHTML = '<span>🌍</span> Continente Geral';
+    if (continentBtn) continentBtn.style.display = 'none';
   } else {
-    var res = (typeof _xcartEngine.focusProvince === 'function') ? _xcartEngine.focusProvince(provId, _xcartW, _xcartH) : null;
-    if (res) {
-      _cartZoom = res.zoom;
-      _cartPanX = res.panX;
-      _cartPanY = res.panY;
+    if (typeof _xcartEngine.openProvince === 'function') {
+      var res = _xcartEngine.openProvince(provId);
+      _cartZoom = 1.0;
+      _cartPanX = 0;
+      _cartPanY = 0;
       _xcartClampPan();
       _xcartDraw();
       _xcartUpdateZoomInfo();
+      if (res && res.province) {
+        if (titleEl) {
+          titleEl.innerHTML = '<span class="cart-title-crumb" onclick="_xcartFocusProvince(\'world\')">🌍 Continente</span>'
+            + '<span class="cart-title-sep">›</span>'
+            + '<span>' + res.province.icon + ' ' + res.province.name + '</span>';
+        }
+      }
+      if (continentBtn) continentBtn.style.display = 'inline-flex';
+    } else {
+      var res = (typeof _xcartEngine.focusProvince === 'function') ? _xcartEngine.focusProvince(provId, _xcartW, _xcartH) : null;
+      if (res) {
+        _cartZoom = res.zoom;
+        _cartPanX = res.panX;
+        _cartPanY = res.panY;
+        _xcartClampPan();
+        _xcartDraw();
+        _xcartUpdateZoomInfo();
+      }
     }
   }
   var chips = document.querySelectorAll('#xcart-prov-bar .cart-prov-chip');
