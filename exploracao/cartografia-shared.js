@@ -3433,13 +3433,14 @@
       ctx.restore();
     }
 
-    if (weather === 'r') {
+    if (weather === 'r' || weather === 't') {
       ctx.save();
-      ctx.fillStyle = 'rgba(25, 40, 55, 0.16)';
+      var isStorm = (weather === 't');
+      ctx.fillStyle = isStorm ? 'rgba(15, 25, 40, 0.28)' : 'rgba(25, 40, 55, 0.16)';
       ctx.fillRect(0, 0, w, h);
-      ctx.strokeStyle = 'rgba(100, 130, 160, 0.18)';
-      ctx.lineWidth = 0.8;
-      var spacing = 28;
+      ctx.strokeStyle = isStorm ? 'rgba(140, 180, 220, 0.32)' : 'rgba(100, 130, 160, 0.18)';
+      ctx.lineWidth = isStorm ? 1.2 : 0.8;
+      var spacing = isStorm ? 18 : 28;
       ctx.beginPath();
       for (var rx = -h; rx < w; rx += spacing) {
         ctx.moveTo(rx, 0);
@@ -3457,7 +3458,76 @@
         ctx.fillRect(0, my, w, 24);
       }
       ctx.restore();
+    } else if (weather === 'snow') {
+      ctx.save();
+      ctx.fillStyle = 'rgba(40, 60, 80, 0.14)';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = 'rgba(235, 245, 255, 0.35)';
+      var rngSnow = _cartSeedRand(99);
+      for (var sIdx = 0; sIdx < 40; sIdx++) {
+        var sx = rngSnow() * w;
+        var sy = rngSnow() * h;
+        var sr = 1 + rngSnow() * 2;
+        ctx.beginPath();
+        ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
     }
+  }
+
+  // === D&D 5e Weather Forecast & Atmospheric Hazards ===
+  function getWeatherDndInfo(code) {
+    var w = code || 's';
+    var data = {
+      s: { name: 'Céu Limpo', icon: '☀️', hazardMod: 0, effect: 'Visibilidade aberta; marcha sem penalidades climáticas.' },
+      r: { name: 'Chuva Contínua', icon: '🌧️', hazardMod: 2, effect: 'Terreno escorregadio (+2 CD em testes físicos de marcha). Dificuldade para acender fogueiras sem abrigo.' },
+      t: { name: 'Tempestade com Raios', icon: '⛈️', hazardMod: 3, effect: 'Visibilidade obscurecida e ventania. Desvantagem em testes de Percepção auditiva/visual à distância (D&D 5e PHB p. 110).' },
+      f: { name: 'Névoa Densa', icon: '🌫️', hazardMod: 2, effect: 'Visibilidade limitada. Desvantagem em testes de Percepção visual além de curta distância (D&D 5e PHB p. 183).' },
+      snow: { name: 'Nevasca Boreal', icon: '❄️', hazardMod: 3, effect: 'Frio extremo e ventos congelantes. Risco de exaustão sem mantos pesados ou tochas.' }
+    };
+    return data[w] || data.s;
+  }
+
+  // === D&D 5e Wilderness Encounter / Ambush Risk Assessment ===
+  function calcEncounterRisk(biome, options) {
+    if (!biome) return { riskPct: 0, label: '🟢 Zona Segura (0%)', color: '#a3e635' };
+    if (biome.tier === 0 || biome.isOrigin) return { riskPct: 0, label: '🟢 Zona Segura (0% Risco de Emboscada)', color: '#a3e635' };
+
+    var opts = options || {};
+    var pace = opts.pace || 'normal';
+    var isNight = !!opts.isNight;
+    var weather = opts.weather || 's';
+    var hours = opts.hours || 4;
+
+    var baseTierRisk = (biome.tier === 1) ? 15 :
+                       (biome.tier === 2) ? 25 :
+                       (biome.tier === 3) ? 40 :
+                       (biome.tier === 4) ? 55 : 70;
+
+    var durationMod = (hours <= 4) ? -5 : (hours <= 8) ? 0 : (hours <= 16) ? 10 : 20;
+    var nightMod = isNight ? 18 : 0;
+    var paceMod = (pace === 'stealth') ? -25 : (pace === 'fast') ? 15 : 0;
+    var weatherMod = (weather === 't' || weather === 'f') ? 8 : 0;
+
+    var totalRisk = Math.max(0, Math.min(95, baseTierRisk + durationMod + nightMod + paceMod + weatherMod));
+
+    var label = '', color = '#a3e635';
+    if (totalRisk <= 20) {
+      label = '🟢 Baixo Risco (~' + totalRisk + '% Chance de Emboscada)';
+      color = '#a3e635';
+    } else if (totalRisk <= 45) {
+      label = '🟡 Risco Moderado (~' + totalRisk + '% Chance de Emboscada)';
+      color = '#fde047';
+    } else if (totalRisk <= 70) {
+      label = '🟠 Alto Risco (~' + totalRisk + '% Chance de Emboscada · Patrulhas Ativas)';
+      color = '#fb923c';
+    } else {
+      label = '🔴 Risco Extremo (~' + totalRisk + '% Chance de Emboscada · Zona Mortal)';
+      color = '#f87171';
+    }
+
+    return { riskPct: totalRisk, label: label, color: color };
   }
 
   function _drawCartNode(ctx, b, w, h, isHover, opts){
@@ -5132,6 +5202,8 @@
     locArtHtml: locArtHtml, clpImgFallback: clpImgFallback,  // P2 sessão #73: imagem do local no popup de viagem
     biomePT: biomePT,                              // P-mapa sessão #73: bioma key -> PT-BR no popup
     getBiomeDndInfo: getBiomeDndInfo,              // Informações de Terreno e Riscos Naturais D&D 5e
+    getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
+    calcEncounterRisk: calcEncounterRisk,          // Avaliação de Risco de Emboscada na Estrada D&D 5e
     getPinnedLocations: _getPinnedLocations,
     isLocPinned: _isLocPinned,
     toggleLocPinned: _toggleLocPinned,

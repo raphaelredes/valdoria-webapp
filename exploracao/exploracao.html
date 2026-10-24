@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T17:18:25Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T17:25:29Z - do not edit directly, edit source -->
 
 
 
@@ -93100,6 +93100,14 @@ function _openCartLocationPopup(biome){
       ? '<div class="clp-exp-night-warn" style="color:#fde047;border-left-color:#eab308;">🌙 Marcha Noturna · 🕯️ Tocha da Comitiva: Facho de luz ativo dissipa a escuridão imediata contra emboscadas.</div>'
       : '<div class="clp-exp-night-warn">🌙 Marcha Noturna: O sol já se pôs além das colinas. Sem tochas ou visão no escuro, desvantagem em testes de Percepção contra emboscadas.</div>') : '';
 
+  var curWeather = (typeof window.S !== 'undefined' && window.S && window.S.weather) ||
+                   (typeof window.CITY_MOCK_PLAYER !== 'undefined' && window.CITY_MOCK_PLAYER.weather) || 's';
+  var weatherInfo = (window.CartShared && CartShared.getWeatherDndInfo) ? CartShared.getWeatherDndInfo(curWeather) : null;
+  var weatherHtml = weatherInfo ? '<div class="clp-weather-note" style="margin:4px 0 6px;font-size:9.5px;color:#93c5fd;background:rgba(20,30,45,0.7);padding:4px 8px;border-radius:3px;border-left:3px solid #60a5fa;text-align:left;">' + weatherInfo.icon + ' <b>Condição Climática:</b> ' + weatherInfo.name + '<br><span style="font-style:italic;color:#cbd5e1;">' + weatherInfo.effect + '</span></div>' : '';
+
+  var curPace = window._cartSelectedPace || 'normal';
+  var encounterRisk = (window.CartShared && CartShared.calcEncounterRisk) ? CartShared.calcEncounterRisk(biome, { pace: curPace, isNight: isNight, weather: curWeather, hours: horasViagem }) : { label: '🟢 Zona Segura (0%)', color: '#a3e635' };
+
   card.innerHTML = ''
     + '<div class="clp-body">'
     + '<div class="clp-icon">' + (CartShared.locArtHtml ? CartShared.locArtHtml(biome) : biome.ico) + '</div>'
@@ -93107,7 +93115,8 @@ function _openCartLocationPopup(biome){
     + questBannerHtml
     + '<h2>' + (biome.regionalName || biome.name) + '</h2>'
     + '<p>' + (biome.desc || 'Um destino misterioso te aguarda além das fronteiras.') + '</p>'
-    + (rec ? '<div class="clp-meta"><b>Nível Sugerido:</b> ' + rec + '<br><b>Avaliação de Ameaça:</b> ' + threatBadge + '<br><span style="font-size:9.5px;color:#d2be90;font-style:italic;">' + stanceTip + '</span><br><b>Bioma:</b> ' + biomePT + ' · <b>Distância:</b> ~' + distMilhas + ' milhas (~' + horasViagem + 'h de marcha)</div>' : '')
+    + (rec ? '<div class="clp-meta"><b>Nível Sugerido:</b> ' + rec + '<br><b>Avaliação de Ameaça:</b> ' + threatBadge + '<br><span style="font-size:9.5px;color:#d2be90;font-style:italic;">' + stanceTip + '</span><br><b>Risco de Emboscada:</b> <span id="clp-risk-badge" style="font-weight:700;color:' + encounterRisk.color + ';">' + encounterRisk.label + '</span><br><b>Bioma:</b> ' + biomePT + ' · <b>Distância:</b> ~' + distMilhas + ' milhas (<span id="clp-meta-hours">~' + horasViagem + 'h de marcha</span>)</div>' : '')
+    + weatherHtml
     + nightVisionHtml
     + dndHtml
     + (biome.isOrigin || biome.settlement
@@ -93236,9 +93245,10 @@ function _openCartLocationPopup(biome){
                      (pType === 'fast') ? Math.max(1, Math.round(distMilhas / 4)) :
                      Math.max(2, Math.round(distMilhas / 3));
 
+      var newRisk = (window.CartShared && CartShared.calcEncounterRisk) ? CartShared.calcEncounterRisk(biome, { pace: pType, isNight: isNight, weather: curWeather, hours: curHours }) : null;
       var metaEl = el.querySelector('.clp-meta');
       if (metaEl) {
-        metaEl.innerHTML = '<b>Nível Sugerido:</b> ' + rec + '<br><b>Avaliação de Ameaça:</b> ' + threatBadge + '<br><span style="font-size:9.5px;color:#d2be90;font-style:italic;">' + stanceTip + '</span><br><b>Bioma:</b> ' + biomePT + ' · <b>Distância:</b> ~' + distMilhas + ' milhas (~' + curHours + 'h de marcha)';
+        metaEl.innerHTML = '<b>Nível Sugerido:</b> ' + rec + '<br><b>Avaliação de Ameaça:</b> ' + threatBadge + '<br><span style="font-size:9.5px;color:#d2be90;font-style:italic;">' + stanceTip + '</span><br><b>Risco de Emboscada:</b> <span id="clp-risk-badge" style="font-weight:700;color:' + (newRisk ? newRisk.color : '#a3e635') + ';">' + (newRisk ? newRisk.label : '') + '</span><br><b>Bioma:</b> ' + biomePT + ' · <b>Distância:</b> ~' + distMilhas + ' milhas (<span id="clp-meta-hours">~' + curHours + 'h de marcha</span>)';
       }
 
       var paceRationsNote = (curHours <= 8)
@@ -93626,7 +93636,8 @@ function openCartography() {
     + '    <button class="xcart-dock-btn" id="xcart-top-back-btn" type="button" title="Voltar para a exploração [Esc]" aria-label="Voltar para a exploração">🧭 Exploração</button>'
     + '    <button class="xcart-dock-btn primary" id="xcart-atlas-picker-btn" type="button" title="Atlas das Províncias [M]" aria-label="Seletor de Províncias">🗺️ Atlas ▾</button>'
     + '    <button class="xcart-dock-btn" id="xcart-waypoints-btn" type="button" title="Rede de Marcos e Santuários [P]" aria-label="Marcos de Viagem e Santuários">🌀 Marcos</button>'
-    + '    <button class="xcart-dock-btn" id="xcart-filter-toggle-btn" type="button" title="Alternar Filtro de Nós no Mapa [Teclas 1 a 5]">🎯 Filtro: Todos</button>'
+    + '    <button class="xcart-dock-btn" id="xcart-filter-toggle-btn" type="button" title="Alternar Filtro de Nós no Mapa [Teclas 1 a 6]">🎯 Filtro: Todos</button>
+    <button class="xcart-dock-btn" id="xcart-guide-btn" type="button" title="Guia do Andarilho e Regras de Viagem D&D 5e [H]" aria-label="Guia de Viagem D&D 5e">📖 Guia</button>'
     + '    <button class="xcart-dock-btn accent" id="xcart-atlas-back-btn" type="button" title="Voltar ao Continente [Backspace]" style="display:none;" aria-label="Voltar ao Continente">🌍 Continente</button>'
     + '  </div>'
 
@@ -93718,7 +93729,34 @@ function openCartography() {
     + '      </div>'
     + '    </div>'
     + '  </div>'
-    + '  <div class="cart-atlas-modal" id="xcart-waypoints-modal" style="display:none;">'
+    + '  <div class="cart-atlas-modal" id="xcart-guide-modal" style="display:none;">
+    <div class="cam-box" style="max-width:440px;">
+      <div class="cam-header">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:16px;">📖</span>
+          <h3 style="margin:0;font-size:13px;color:#f4d49a;font-family:Cinzel,serif;">Guia do Andarilho (Regras D&D 5e)</h3>
+        </div>
+        <button class="cam-close" id="xcart-guide-close-btn" type="button">✕</button>
+      </div>
+      <div class="cam-grid" style="max-height:58vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:12px;text-align:left;font-size:11px;color:#d2be90;line-height:1.5;">
+        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">
+          <div style="font-family:Cinzel,serif;font-weight:700;color:#fde047;font-size:11.5px;margin-bottom:4px;">🚶 RITMOS DE MARCHA (PHB p. 181-182)</div>
+          <p style="margin:2px 0;"><b>🐾 Furtivo (18 milhas/dia):</b> -33% velocidade, +50% tempo. Permite usar Furtividade para surpreender inimigos ou evitar emboscadas; vantagem em Sobrevivência para forragear alimentos nos ermos.</p>
+          <p style="margin:2px 0;"><b>🚶 Normal (24 milhas/dia):</b> Ritmo canônico de comitiva. Velocidade equilibrada sem penalidades na Percepção Passiva.</p>
+          <p style="margin:2px 0;"><b>⚡ Rápido (30 milhas/dia):</b> +33% velocidade, -25% tempo. A comitiva corre em marcha forçada; penalidade de -5 na Percepção Passiva (maior chance de emboscadas).</p>
+        </div>
+        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">
+          <div style="font-family:Cinzel,serif;font-weight:700;color:#93c5fd;font-size:11.5px;margin-bottom:4px;">🌙 VIAGEM NOTURNA & VISÃO NO ESCURO (PHB p. 183)</div>
+          <p style="margin:2px 0;">O sol se põe e a escuridão cobre as estradas. Sem tochas ativas ou Visão no Escuro ancestral (elfos, anões, meio-orcs), a comitiva sofre <b>Desvantagem</b> em testes de Percepção contra emboscadas na escuridão.</p>
+        </div>
+        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">
+          <div style="font-family:Cinzel,serif;font-weight:700;color:#86efac;font-size:11.5px;margin-bottom:4px;">🍖 SUPRIMENTOS & ACAMPAMENTOS (PHB p. 185)</div>
+          <p style="margin:2px 0;">Jornadas acima de 8 horas exigem paradas de Descanso Longo (8h) em acampamentos na estrada e 1 Ração de Viagem por aventureiro. Em biomas férteis, testes de Sobrevivência permitem caçar e colher água potável.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cart-atlas-modal" id="xcart-waypoints-modal" style="display:none;">'
     + '    <div class="cam-box">'
     + '      <div class="cam-header">'
     + '        <div style="display:flex;align-items:center;gap:6px;">'
@@ -94562,6 +94600,16 @@ function _xcartOpenWaypointsModal() {
   modal.style.display = 'flex';
 }
 
+function _xcartOpenGuideModal() {
+  var modal = document.getElementById('xcart-guide-modal');
+  if (modal) modal.style.display = 'flex';
+}
+
+function _xcartCloseGuideModal() {
+  var modal = document.getElementById('xcart-guide-modal');
+  if (modal) modal.style.display = 'none';
+}
+
 function _xcartCloseWaypointsModal() {
   var modal = document.getElementById('xcart-waypoints-modal');
   if (modal) modal.style.display = 'none';
@@ -94658,6 +94706,29 @@ function _xcartFocusWaypoint(key) {
     }
   }, 100);
 }
+
+  // Modal Guia do Andarilho D&D 5e (Exploração)
+  var guideBtn = document.getElementById('xcart-guide-btn');
+  var guideModal = document.getElementById('xcart-guide-modal');
+  var guideClose = document.getElementById('xcart-guide-close-btn');
+  if (guideBtn) {
+    guideBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      _xcartOpenGuideModal();
+    };
+  }
+  if (guideClose) {
+    guideClose.onclick = function(e){
+      e.preventDefault();
+      _xcartCloseGuideModal();
+    };
+  }
+  if (guideModal) {
+    guideModal.onclick = function(e){
+      if (e.target === guideModal) _xcartCloseGuideModal();
+    };
+  }
 
   // Modal Marcos & Santuários (Exploração)
   var waypointsBtn = document.getElementById('xcart-waypoints-btn');
@@ -94901,6 +94972,12 @@ function _wireXCartKeyboardNavigation() {
         _closeCartLocationPopup();
         return;
       }
+      var gModal = document.getElementById('xcart-guide-modal');
+      if (gModal && gModal.style.display !== 'none') {
+        e.preventDefault();
+        _xcartCloseGuideModal();
+        return;
+      }
       var wpModal = document.getElementById('xcart-waypoints-modal');
       if (wpModal && wpModal.style.display !== 'none') {
         e.preventDefault();
@@ -94919,6 +94996,18 @@ function _wireXCartKeyboardNavigation() {
     }
 
     if (isInput) return; // Não intercepta digitação de busca
+
+    // H / h: abre/alterna Guia do Andarilho D&D 5e
+    if (e.key === 'h' || e.key === 'H') {
+      e.preventDefault();
+      var gm = document.getElementById('xcart-guide-modal');
+      if (gm && gm.style.display !== 'none') {
+        _xcartCloseGuideModal();
+      } else {
+        _xcartOpenGuideModal();
+      }
+      return;
+    }
 
     if (e.key === 'm' || e.key === 'M' || e.key === 'Tab') {
       e.preventDefault();
