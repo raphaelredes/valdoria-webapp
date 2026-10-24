@@ -3873,8 +3873,12 @@
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    // 1. Halo dourado sob a rota traçada
-    ctx.strokeStyle = 'rgba(255, 200, 60, 0.45)';
+    // 1. Halo dourado ou âmbar sob a rota traçada (aviso de ameaça ND alta)
+    var hasMortalThreat = pathKeys.some(function(k){
+      var node = biomes.find(function(b){ return b.key === k; });
+      return node && typeof node.tier === 'number' && node.tier >= 4;
+    });
+    ctx.strokeStyle = hasMortalThreat ? 'rgba(248, 113, 113, 0.45)' : 'rgba(255, 200, 60, 0.45)';
     ctx.lineWidth = 5.0;
     for (var i = 0; i < pathKeys.length - 1; i++) {
       var a = biomes.find(function(b){ return b.key === pathKeys[i]; });
@@ -3892,7 +3896,7 @@
     }
 
     // 2. Trilha animada de breadcrumbs luminosos (estilo marcha D&D)
-    ctx.strokeStyle = '#ffe484';
+    ctx.strokeStyle = hasMortalThreat ? '#fca5a5' : '#ffe484';
     ctx.lineWidth = 2.2;
     ctx.setLineDash([7, 5]);
     ctx.lineDashOffset = dashOffset;
@@ -4044,12 +4048,21 @@
     return (dx * dx + dy * dy) <= (26 * 26);
   }
 
-  function _drawCartCompass(ctx, w, h, isHovered){
+  function _drawCartCompass(ctx, w, h, isHovered, isPulsing){
     // Top-right (era bottom-right, mas conflitava com zoom controls)
     var cx = w - 40, cy = 40;
     var R = 22;
     ctx.save();
     ctx.translate(cx, cy);
+    if (isPulsing) {
+      ctx.beginPath();
+      ctx.arc(0, 0, R + 10, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255, 215, 0, 0.95)';
+      ctx.lineWidth = 2.4;
+      ctx.shadowColor = '#ffd700';
+      ctx.shadowBlur = 12;
+      ctx.stroke();
+    }
     if (isHovered) {
       ctx.beginPath();
       ctx.arc(0, 0, R + 5, 0, Math.PI * 2);
@@ -4666,7 +4679,7 @@
       ctx.restore();
       // Bússola — screen-space (top-right, NÃO pan/zooma).
       var _isCompHov = (typeof view.hoverMx === 'number') && _isCompassAt(view.hoverMx, view.hoverMy, w, h);
-      _drawCartCompass(ctx, w, h, _isCompHov);
+      _drawCartCompass(ctx, w, h, _isCompHov, !!view.isCompassPulsing);
       // Escala Cartográfica D&D 5e — screen-space (bottom-left).
       _drawCartScaleBar(ctx, w, h, _viewMode);
       ctx.restore();
