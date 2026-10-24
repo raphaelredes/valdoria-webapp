@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T20:02:58Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T20:12:51Z - do not edit directly, edit source -->
 
 
 
@@ -93191,6 +93191,17 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.getBiomeHarvestableResources) return '';
+        var res = CartShared.getBiomeHarvestableResources(biome.biome || biome.key, biome.tier);
+        return '<div class="clp-harvest-card" style="margin:4px 0 6px;text-align:left;background:rgba(22,26,18,0.75);padding:4px 8px;border-radius:4px;border:1px solid rgba(134,239,172,0.3);">'
+          + '  <div style="font-size:8.5px;color:#86efac;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🌿 HERBALISMO & COLETA SELVAGEM (XGE p. 130):</div>'
+          + '  <div style="font-size:8.5px;color:#f4d49a;line-height:1.35;">'
+          + '    • <b>Erva Típica:</b> <span style="color:#bbf7d0;">' + res.primaryHerb.name + '</span> (CD ' + res.primaryHerb.checkDC + ') · <i style="color:#cbd5e1;">' + res.primaryHerb.dndUse + '</i><br>'
+          + '    • <b>Mineral:</b> <span style="color:#fed7aa;">' + res.secondaryMineral.name + '</span> (CD ' + res.secondaryMineral.checkDC + ') · <i style="color:#cbd5e1;">' + res.secondaryMineral.dndUse + '</i>'
+          + '  </div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcExpeditionRationsBudget || !CartShared.getWildernessHazardDetails) return '';
         var rat = CartShared.calcExpeditionRationsBudget(horasViagem, 4, biome.biome || biome.key);
         var haz = CartShared.getWildernessHazardDetails(biome.biome || biome.key);
@@ -93405,6 +93416,16 @@ function _openCartLocationPopup(biome){
             return '<div class="clp-rest-recovery-card" style="margin-top:3px;background:rgba(20,25,18,0.7);padding:3px 6px;border-radius:3px;border:1px solid rgba(134,239,172,0.25);font-size:8.5px;color:#d2be90;">'
               + '⛺ <b>Recuperação:</b> ' + rec.hpRecoveryDesc + ' · <i>' + rec.hitDiceRecovery + '</i><br>'
               + '🛡️ <b>Risco Noturno:</b> <span style="color:#86efac;">' + rec.interruptionRisk + '</span> · ' + rec.exhaustionRecovery
+              + '</div>';
+          })()
+        + (function(){
+            if (!window.CartShared || !CartShared.calcCampWatchShifts) return '';
+            var p = (typeof getPlayerObj === 'function') ? getPlayerObj() : (window.CITY_MOCK_PLAYER || (typeof S !== 'undefined' && S && S.player)) || {};
+            var hasElf = !!(p.race && ['elf', 'drow', 'half-elf'].indexOf(p.race.toLowerCase()) >= 0);
+            var shifts = CartShared.calcCampWatchShifts(4, { hasTrance: hasElf, campStance: window._cartSelectedCamp || 'vigilant' });
+            return '<div class="clp-shifts-card" style="margin-top:3px;background:rgba(18,22,28,0.7);padding:3px 6px;border-radius:3px;border:1px solid rgba(147,197,253,0.25);font-size:8px;color:#93c5fd;">'
+              + '🛡️ <b>Escala de Vigília (4 Turnos):</b> 20h-22h (5%) · 22h-00h (10%) · <b style="color:#f87171;">00h-02h (18% - Madrugada Crítica)</b> · 02h-04h (8%)<br>'
+              + '<i style="color:#cbd5e1;">' + shifts.tranceNote + '</i>'
               + '</div>';
           })()
         + '</div>'
@@ -94348,6 +94369,7 @@ function openCartography() {
     + '        <button class="cam-filter-pill" data-filter="quests" type="button">📜 Contratos</button>'
     + '        <button class="cam-filter-pill" data-filter="mapped" type="button">🗺️ Cartas</button>'
     + '        <button class="cam-filter-pill" data-filter="pinned" type="button">📌 Fixados</button>'
+    + '        <button class="cam-filter-pill" data-filter="unexplored" type="button">🧭 Inexplorados</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -95613,6 +95635,11 @@ function _xcartFocusWaypoint(key) {
               isPin = prov.locKeys.some(function(k){ return CartShared.isLocPinned(k); });
             }
             if (!isPin) return false;
+          } else if (_xcamActiveCategory === 'unexplored') {
+            if (prov.id === 'world') return false;
+            var lks = prov.locKeys || [];
+            var allKn = lks.length > 0 && lks.every(function(k){ return known.indexOf(k) >= 0; });
+            if (allKn) return false;
           }
           if (!ft) return true;
           if ((prov.name || '').toLowerCase().indexOf(ft) >= 0) return true;

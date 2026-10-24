@@ -5892,6 +5892,117 @@
     });
   }
 
+  // === calcCampWatchShifts (Escala de Vigília Noturna da Comitiva - PHB p. 186 / DMG p. 111) ===
+  function calcCampWatchShifts(partySize, options) {
+    options = options || {};
+    var pSize = Math.max(1, partySize || 4);
+    var startH = (typeof options.startHour === 'number') ? options.startHour : 20;
+
+    var shifts = [
+      {
+        shiftIndex: 1,
+        timeRange: '20:00 - 22:00',
+        periodLabel: 'Primeira Vigília (Crepúsculo)',
+        riskFactor: '5% (Baixo)',
+        riskColor: '#4ade80',
+        desc: 'Inspeção inicial do perímetro do acampamento e alimentação da fogueira.'
+      },
+      {
+        shiftIndex: 2,
+        timeRange: '22:00 - 00:00',
+        periodLabel: 'Vigília da Meia-Noite (Silêncio)',
+        riskFactor: '10% (Moderado)',
+        riskColor: '#facc15',
+        desc: 'Ronda silenciosa ao redor das barracas e checagem de montarias e arreios.'
+      },
+      {
+        shiftIndex: 3,
+        timeRange: '00:00 - 02:00',
+        periodLabel: 'Vigília da Madrugada (Hora Sombria)',
+        riskFactor: '18% (Crítico)',
+        riskColor: '#ef4444',
+        desc: 'Momento de maior atividade de predadores alfa e criaturas noturnas; vigilância atenta mandatória.'
+      },
+      {
+        shiftIndex: 4,
+        timeRange: '02:00 - 04:00',
+        periodLabel: 'Vigília do Alvorecer (Neblina Matinal)',
+        riskFactor: '8% (Moderado)',
+        riskColor: '#fb923c',
+        desc: 'Névoa baixa da manhã; preparo de brasas para o desjejum da comitiva.'
+      }
+    ];
+
+    var tranceNote = options.hasTrance
+      ? 'Aventureiros élficos necessitam de apenas 4h de transe meditativo e podem cobrir 2 turnos inteiros de vigília sem sofrer exaustão (PHB p. 23).'
+      : 'Cada aventureiro cobre 1 turno de 2 horas de vigília leve durante o descanso longo de 8 horas (PHB p. 186).';
+
+    return {
+      totalShifts: 4,
+      shiftDurationHours: 2,
+      totalCampHours: 8,
+      shifts: shifts,
+      tranceNote: tranceNote,
+      criticalShift: 'Turno 3 (Madrugada: 00h - 02h)',
+      dndRef: 'PHB p. 186 / DMG p. 111'
+    };
+  }
+
+  // === getBiomeHarvestableResources (Recursos Alquímicos e Coleta Selvagem - XGE p. 130) ===
+  function getBiomeHarvestableResources(biomeKey, tier) {
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var t = (typeof tier === 'number') ? tier : 1;
+
+    var harvestTable = {
+      plains: {
+        primaryHerb: { name: 'Flor do Alvorecer', rarity: 'Comum', dndUse: 'Ingrediente base para Poções de Cura (PHB p. 153)', checkDC: 10 },
+        secondaryMineral: { name: 'Argila Vermelha dos Vales', rarity: 'Comum', dndUse: 'Selagem hermética de frascos alquímicos e pomadas', checkDC: 11 }
+      },
+      forest: {
+        primaryHerb: { name: 'Musgo Fantasma & Casca de Carvalho-de-Ferro', rarity: 'Incomum', dndUse: 'Emplastros curativos e Poções de Furtividade Menor', checkDC: 12 },
+        secondaryMineral: { name: 'Resina Silvestre Cristalizada', rarity: 'Comum', dndUse: 'Acendedor de tochas impermeáveis e impermeabilizante', checkDC: 11 }
+      },
+      swamp: {
+        primaryHerb: { name: 'Lótus Venenoso & Fungo de Miasma', rarity: 'Incomum', dndUse: 'Antídotos, Venenos Táticos e Resistência a Ácido', checkDC: 13 },
+        secondaryMineral: { name: 'Turfa Sulfúrica Fétida', rarity: 'Comum', dndUse: 'Combustível de queima lenta e fumaça repelente de insetos', checkDC: 12 }
+      },
+      mountain: {
+        primaryHerb: { name: 'Líquen dos Penhascos Gélidos', rarity: 'Incomum', dndUse: 'Cataplasmas contra fadiga de altitude e vigor muscular', checkDC: 13 },
+        secondaryMineral: { name: 'Cristais de Quartzo Bruto & Hematita', rarity: 'Raro', dndUse: 'Aprimoramento de armas, runas e focos arcanos', checkDC: 14 }
+      },
+      desert: {
+        primaryHerb: { name: 'Raiz de Cacto Escaldante', rarity: 'Incomum', dndUse: 'Extração de linfa hidratante e poção contra insolação', checkDC: 13 },
+        secondaryMineral: { name: 'Salitre Cristalino das Dunas', rarity: 'Comum', dndUse: 'Conservação de rações de carne e misturas incendiárias', checkDC: 12 }
+      },
+      snow: {
+        primaryHerb: { name: 'Cardo da Geada & Penugem Boreal', rarity: 'Incomum', dndUse: 'Poção de Resistência ao Frio e isolamento térmico', checkDC: 13 },
+        secondaryMineral: { name: 'Gelo Fóssil das Profundezas', rarity: 'Incomum', dndUse: 'Reagente para refrigeração de unguentos e infusões arcanas', checkDC: 12 }
+      },
+      graveyard: {
+        primaryHerb: { name: 'Beladona dos Sepulcros', rarity: 'Raro', dndUse: 'Unguentos necromânticos e proteção ritual contra espíritos', checkDC: 14 },
+        secondaryMineral: { name: 'Pó de Lápide Antiga Consagrada', rarity: 'Incomum', dndUse: 'Componente ritual para afastar mortos-vivos errantes', checkDC: 13 }
+      },
+      cave: {
+        primaryHerb: { name: 'Cogumelo Fosforescente', rarity: 'Comum', dndUse: 'Bioluminescência portátil e unguento para visão no escuro', checkDC: 11 },
+        secondaryMineral: { name: 'Enxofre Profundo & Estalactite de Calcário', rarity: 'Incomum', dndUse: 'Pólvora, ácidos corrosivos e reagentes de alquimia', checkDC: 13 }
+      },
+      volcanic: {
+        primaryHerb: { name: 'Flor de Enxofre Magmática', rarity: 'Raro', dndUse: 'Poção de Resistência a Fogo e Fogo Alquímico', checkDC: 15 },
+        secondaryMineral: { name: 'Obsidiana Negra & Pedra-Pomes Ígnea', rarity: 'Raro', dndUse: 'Lâminas rituais afiadas e forja de alta temperatura', checkDC: 14 }
+      }
+    };
+
+    var item = harvestTable[bk] || harvestTable.plains;
+
+    return {
+      biomeKey: bk,
+      primaryHerb: item.primaryHerb,
+      secondaryMineral: item.secondaryMineral,
+      harvestNote: 'Coleta realizada com Kit de Herbalismo (Sabedoria) ou teste de Sobrevivência.',
+      dndRef: 'XGE p. 130 (Herbalismo e Coleta)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -6037,6 +6148,8 @@
     out.push('• Repouso & Acampamento: ' + restRec.name + ' · Risco de Interrupção: ' + restRec.interruptionRisk);
     var horizon = calcHorizonVisibility(targ.biome || targ.key, options.weather, options.isNight, altInfo && altInfo.elevationMeters > 300);
     out.push('• Alcance no Horizonte: ' + horizon.horizonMiles + ' mi (' + horizon.viewDescription + ')');
+    var harvestRes = getBiomeHarvestableResources(targ.biome || targ.key, targ.tier);
+    out.push('• Coleta de Recursos: ' + harvestRes.primaryHerb.name + ' (' + harvestRes.primaryHerb.dndUse + ')');
     out.push('═══════════════════════════════════════════════════════════');
 
     return out.join('\n');
@@ -7577,6 +7690,8 @@
     calcHorizonVisibility: calcHorizonVisibility,
     calcRiverCrossingDifficulty: calcRiverCrossingDifficulty,
     getConnectedLocations: getConnectedLocations,
+    calcCampWatchShifts: calcCampWatchShifts,
+    getBiomeHarvestableResources: getBiomeHarvestableResources,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
