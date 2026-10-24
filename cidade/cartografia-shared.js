@@ -3412,6 +3412,19 @@
       ctx.stroke();
     }
 
+    // 1.4b Bastão e Ameias de Assentamento Seguro / Santuário (Korthag, Valkrest)
+    if (b.settlement && !isOrigin) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(bx, by, radius + 2.5, 0, Math.PI * 2);
+      ctx.lineWidth = 1.3;
+      ctx.setLineDash([4, 3]);
+      ctx.strokeStyle = 'rgba(246, 173, 85, 0.95)';
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
+
     // 1.5 Marcas de Mira Náutica (Astrolábio / Luneta Cartográfica)
     var tickLen = isHover ? 4 : 3;
     ctx.beginPath();
