@@ -9084,6 +9084,140 @@
     };
   }
 
+  // === calcWildernessWeatherForecast (Previsão Meteorológica, Artifício Druídico e Barometria - PHB p. 178, 236 / DMG p. 109) ===
+  function calcWildernessWeatherForecast(biomeKey, curSeason, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var season = (curSeason || 'autumn').toLowerCase();
+
+    var forecast = {
+      forecastOutlook: 'Céu Límpido com Brisas Amenas',
+      barometricTrend: 'Pressão alta estável; vento fraco de sudeste.',
+      hoursUntilShift: 18,
+      proactivePreparation: 'Nenhuma precaução severa necessária; marcha sem desgaste climático.',
+      foresightBonus: 'Vantagem em testes de Percepção visual ao ar livre nas próximas 24h.',
+      icon: '☀️🌤️',
+      color: '#facc15'
+    };
+
+    if (bk === 'desert' || bk === 'dunas') {
+      forecast = {
+        forecastOutlook: 'Tempestade de Areia e Vendaval Abrasador (Siroco)',
+        barometricTrend: 'Queda súbita de pressão com aumento de temperatura.',
+        hoursUntilShift: 4,
+        proactivePreparation: 'Cobrir montarias, selar odres de água e acampar a sotavento de dunas altas.',
+        foresightBonus: '+2 nas salvaguardas de Constituição contra exaustão por calor e desidratação.',
+        icon: '🏜️🌪️',
+        color: '#f59e0b'
+      };
+    } else if (bk === 'snow' || bk === 'tundra' || bk === 'montanha') {
+      forecast = {
+        forecastOutlook: 'Frente Polar e Nevasca com Rajadas de Granizo',
+        barometricTrend: 'Pressão barométrica em queda livre com ventos cortantes do norte.',
+        hoursUntilShift: 6,
+        proactivePreparation: 'Coletar lenha seca extra, vestir agasalhos árticos e fixar estacas de abrigo.',
+        foresightBonus: '+2 nas salvaguardas de Constituição contra hipotermia ao entardecer.',
+        icon: '❄️🌨️',
+        color: '#38bdf8'
+      };
+    } else if (bk === 'swamp') {
+      forecast = {
+        forecastOutlook: 'Névoa Miagmática Densa com Chuva Ácida Teimosa',
+        barometricTrend: 'Ar saturado e estagnado; condensação de vapores pantanosos.',
+        hoursUntilShift: 8,
+        proactivePreparation: 'Impregnar mantas com graxa vegetal e preparar infusões antitóxicas.',
+        foresightBonus: 'Imunidade a ser surpreendido por predadores rastejantes camuflados no nevoeiro.',
+        icon: '🌫️🌧️',
+        color: '#c084fc'
+      };
+    } else if (bk === 'forest' || bk === 'selva') {
+      forecast = {
+        forecastOutlook: 'Tempestade Elétrica com Chuvas Torrenciais de Copa',
+        barometricTrend: 'Acúmulo de nuvens cúmulo-nimbo escuras sobre o dossel florestal.',
+        hoursUntilShift: 5,
+        proactivePreparation: 'Evitar árvores isoladas e estabelecer refúgio sob copas baixas protegidas.',
+        foresightBonus: '+2 na orientação para encontrar cavernas secas antes da tempestade desabar.',
+        icon: '⛈️⚡',
+        color: '#4ade80'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      curSeason: season,
+      forecastOutlook: forecast.forecastOutlook,
+      barometricTrend: forecast.barometricTrend,
+      hoursUntilShift: forecast.hoursUntilShift,
+      proactivePreparation: forecast.proactivePreparation,
+      foresightBonus: forecast.foresightBonus,
+      icon: forecast.icon,
+      color: forecast.color,
+      dndRef: 'PHB p. 236 (Artifício Druídico) / PHB p. 178 (Sobrevivência e Previsão Meteorológica) / DMG p. 109'
+    };
+  }
+
+  // === calcAncientWaystoneAttunement (Círculos Rúnicos Antigos, Portais de Menires e Sintonização - DMG p. 135 / TCoE p. 150) ===
+  function calcAncientWaystoneAttunement(waystoneId, options) {
+    options = options || {};
+    var wid = (waystoneId || 'portal_vale_aurora').toLowerCase();
+
+    var portals = {
+      portal_vale_aurora: {
+        name: 'Portal dos Menires do Vale da Aurora',
+        sigilSequence: 'Sol Nascente · Trigo Dourado · Cisne Astral',
+        attunementDC: 12,
+        transitCost: '1 dose de giz argênteo ou 5 moedas de prata em incenso aromático.',
+        desc: 'Monólito de calcário esculpido por elfos antigos; emana calor suave e segurança.',
+        icon: '🏛️✨',
+        color: '#38bdf8'
+      },
+      portal_floresta_ancestral: {
+        name: 'Círculo Megalítico das Raízes Primordiais',
+        sigilSequence: 'Folha de Carvalho · Serpente Esmeralda · Lua Minguante',
+        attunementDC: 13,
+        transitCost: '1 gema polida de quartzo ou oferenda de seiva de mandrágora.',
+        desc: 'Pilares de pedra cobertos por hera eterna; sintonizado com os espíritos druídicos.',
+        icon: '🌳🔮',
+        color: '#4ade80'
+      },
+      portal_pico_gelado: {
+        name: 'Monólito Rúnico da Garganta do Vento Branco',
+        sigilSequence: 'Floco de Gelo · Garra de Falcão · Estrela Polar',
+        attunementDC: 14,
+        transitCost: '1 essência ígnea menor ou 10 moedas de ouro em carvão vegetal purificado.',
+        desc: 'Obelisco de granito azul cravado na rocha nua; ponto de salto entre cordilheiras.',
+        icon: '🏔️⭐',
+        color: '#c084fc'
+      },
+      portal_dunas_sol: {
+        name: 'Arco do Sol Poente das Areias Vermelhas',
+        sigilSequence: 'Escorpião de Ouro · Disco Solar · Miragem Alada',
+        attunementDC: 13,
+        transitCost: '1 frasco de óleo de lótus do deserto ou 10 po em especiarias raras.',
+        desc: 'Pórtico de arenito preservado que conecta oásis distantes através dos desertos.',
+        icon: '🏜️☀️',
+        color: '#facc15'
+      }
+    };
+
+    var p = portals[wid] || portals.portal_vale_aurora;
+
+    return {
+      waystoneId: wid,
+      portalName: p.name,
+      sigilSequence: p.sigilSequence,
+      attunementDC: p.attunementDC,
+      attunementSkill: 'Arcanismo (Inteligência) ou História (Inteligência)',
+      transitCostDesc: p.transitCost,
+      safeZoneRadiusFeet: 300,
+      networkStatus: 'Sintonizado e Ativo no Atlas da Comitiva',
+      description: p.desc,
+      icon: p.icon,
+      color: p.color,
+      dndRef: 'DMG p. 135 (Círculos Rúnicos de Teletransporte) / TCoE p. 150'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -10813,6 +10947,8 @@
     calcEnvironmentalMirageEncounter: calcEnvironmentalMirageEncounter,
     calcWildernessChaseEscape: calcWildernessChaseEscape,
     calcRegionalLeylineNode: calcRegionalLeylineNode,
+    calcWildernessWeatherForecast: calcWildernessWeatherForecast,
+    calcAncientWaystoneAttunement: calcAncientWaystoneAttunement,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

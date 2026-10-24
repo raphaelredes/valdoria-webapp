@@ -70026,7 +70026,8 @@ function renderCartographyCanvas(el){
         <button class="cam-filter-pill" data-filter="cooking" type="button">🍲 Culinária</button>
         <button class="cam-filter-pill" data-filter="trailblaze" type="button">🪨 Trilhas</button>
         <button class="cam-filter-pill" data-filter="acoustics" type="button">👂 Acústica</button>
-        <button class="cam-filter-pill" data-filter="leylines" type="button">🔮 Linhas Ley</button>'
+        <button class="cam-filter-pill" data-filter="leylines" type="button">🔮 Linhas Ley</button>
+        <button class="cam-filter-pill" data-filter="portals" type="button">🏛️ Portais</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -71109,6 +71110,9 @@ function _cartFocusWaypoint(key) {
               });
             }
             return false;
+          } else if (_camActiveCategory === 'portals') {
+            if (prov.id === 'world') return false;
+            return true;
           } else if (_camActiveCategory === 'leylines') {
             if (prov.id === 'world') return false;
             return true;
@@ -72817,6 +72821,29 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessWeatherForecast) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var fc = CartShared.calcWildernessWeatherForecast(bKey, 'autumn');
+        return '<div class="clp-forecast-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,24,30,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.3);font-size:8px;color:#bae6fd;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + fc.color + ';margin-bottom:2px;">' + fc.icon + ' PREVISÃO DO TEMPO & BAROMETRIA (PHB p. 178, 236):</div>'
+          + '  <div>• <b>Previsão (Próximas 24h):</b> ' + fc.forecastOutlook + ' (' + fc.hoursUntilShift + 'h até mudança)</div>'
+          + '  <div>• <b>Tendência:</b> ' + fc.barometricTrend + '</div>'
+          + '  <div style="font-size:7.5px;color:#93c5fd;margin-top:1px;">• <i>Prevenção: ' + fc.proactivePreparation + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcAncientWaystoneAttunement) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var pId = (bKey === 'desert' || bKey === 'dunas') ? 'portal_dunas_sol' : ((bKey === 'mountain' || bKey === 'cordilheira' || bKey === 'snow') ? 'portal_pico_gelado' : ((bKey === 'forest' || bKey === 'selva') ? 'portal_floresta_ancestral' : 'portal_vale_aurora'));
+        var ws = CartShared.calcAncientWaystoneAttunement(pId);
+        return '<div class="clp-waystone-card" style="margin:4px 0 6px;text-align:left;background:rgba(22,20,34,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(192,132,252,0.3);font-size:8px;color:#e9d5ff;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ws.color + ';margin-bottom:2px;">' + ws.icon + ' ' + ws.portalName.toUpperCase() + ' (DMG p. 135):</div>'
+          + '  <div>• <b>Sequência de Glifos:</b> ' + ws.sigilSequence + ' (CD ' + ws.attunementDC + ' [' + ws.attunementSkill + '])</div>'
+          + '  <div>• <b>Status no Atlas:</b> ' + ws.networkStatus + ' · Santuário ' + ws.safeZoneRadiusFeet + ' pés</div>'
+          + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <i>Ativação: ' + ws.transitCostDesc + '</i></div>'
           + '</div>';
       })()
     + (function(){
