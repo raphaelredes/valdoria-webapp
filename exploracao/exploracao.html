@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T15:22:32Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T15:32:03Z - do not edit directly, edit source -->
 
 
 
@@ -49632,7 +49632,7 @@ function drawDebugHud(ctx) {
 
 }
 
-// Toggle HUD: tecla backtick (`)
+// Toggle HUD: tecla backtick (`), Tecla M universal para abrir Cartografia
 
 document.addEventListener('keydown', function(e) {
 
@@ -49643,7 +49643,22 @@ document.addEventListener('keydown', function(e) {
     LOG('DRAW', 'debug HUD toggled -> ' + _debugHudOn);
 
     if (typeof scheduleRender === 'function') scheduleRender();
+    return;
 
+  }
+
+  if (e.key === 'm' || e.key === 'M') {
+    var tag = (document.activeElement && document.activeElement.tagName) ? document.activeElement.tagName.toLowerCase() : '';
+    if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+    var overlay = document.getElementById('cartography-overlay');
+    if (!overlay || !overlay.classList.contains('visible')) {
+      e.preventDefault();
+      if (typeof _openCartographyWithPrompt === 'function') {
+        _openCartographyWithPrompt();
+      } else if (typeof openCartography === 'function') {
+        openCartography();
+      }
+    }
   }
 
 });
@@ -94252,11 +94267,21 @@ function _xcartWireEvents() {
           camGrid.appendChild(item);
         });
       }
+      var filterPills = atlasModal.querySelectorAll('.cam-filter-pill');
+      filterPills.forEach(function(pill){
+        pill.onclick = function(ev){
+          ev.preventDefault();
+          filterPills.forEach(function(p){ p.classList.remove('active'); });
+          pill.classList.add('active');
+          var filterVal = pill.getAttribute('data-filter') || 'all';
+          renderCamItems(camSearch ? camSearch.value : '', filterVal);
+        };
+      });
       if (camSearch) {
         camSearch.value = '';
         camSearch.oninput = function(){ renderCamItems(camSearch.value); };
       }
-      renderCamItems('');
+      renderCamItems('', 'all');
       atlasModal.style.display = 'flex';
     };
     if (camClose) {

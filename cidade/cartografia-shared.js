@@ -3436,13 +3436,32 @@
     ctx.lineWidth = 1;
     ctx.stroke();
 
+    // 1.6 Selo de Contrato / Missão Ativa D&D 5e
+    if (opts.hasActiveQuest) {
+      ctx.save();
+      var qx = bx + radius - 2;
+      var qy = by - radius + 2;
+      ctx.beginPath();
+      ctx.arc(qx, qy, 6.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#2b1f14';
+      ctx.fill();
+      ctx.strokeStyle = '#ffd685';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      ctx.font = '9px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('📜', qx, qy);
+      ctx.restore();
+    }
+
     ctx.restore();
 
     // No modo Regional (onde há poucos nós), o rótulo é permanente; no Continente Geral, só abre sob hover
     if (!isHover && !opts.isRegional) return;
 
     ctx.save();
-    var labelText = b.name;
+    var labelText = (opts.hasActiveQuest ? '📜 ' : '') + b.name;
     ctx.font = (isHover ? 'bold 11px' : '10px') + ' serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
@@ -4158,11 +4177,13 @@
         });
 
         // 3. Desenhar nós da província (SOMENTE locais descobertos; Ordem do Usuario: NUNCA desenhar Terra Incognita)
+        var qf = (typeof cfg.getQuestFocus === 'function') ? cfg.getQuestFocus() : null;
         regNodes.forEach(function(b){
           var isDiscovered = (known === null || known.indexOf(b.key) >= 0 || b.isOrigin || provMapOwned);
           var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
           if (isDiscovered || hasMap) {
-            _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, isRegional: true });
+            var hasQ = !!(qf && qf.key === b.key);
+            _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, isRegional: true, hasActiveQuest: hasQ });
           }
           // Locais inexplorados ficam 100% ocultos sob o Fog of War preto solido, sem qualquer icone ou texto.
         });
@@ -4231,15 +4252,16 @@
             }
           }
         }
+        var qf = (typeof cfg.getQuestFocus === 'function') ? cfg.getQuestFocus() : null;
         RB.forEach(function(b){
           if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) {
             var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
-            _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt });
+            var hasQ = !!(qf && qf.key === b.key);
+            _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, hasActiveQuest: hasQ });
           }
         });
         var pn = pk && RB.find(function(b){ return b.key === pk; });
         if (pn) _drawPlayerPin(ctx, pn, _S, _S);
-        var qf = (typeof cfg.getQuestFocus === 'function') ? cfg.getQuestFocus() : null;
         if (qf && qf.key && typeof cfg.drawQuestHalo === 'function') {
           var qn = RB.find(function(b){ return b.key === qf.key; });
           if (qn) cfg.drawQuestHalo(ctx, qn, _S, _S, qf.title || 'Missão');

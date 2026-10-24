@@ -8840,9 +8840,31 @@ body.perf-lite .vc-action-btn { transition: none; }
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 10px;
+      gap: 6px;
       font-size: 9.5px;
       color: #a09484;
+    }
+    .cam-filter-pill {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(196, 149, 58, 0.35);
+      border-radius: 12px;
+      padding: 3px 8px;
+      font-size: 9.5px;
+      font-family: inherit;
+      color: #c4b59d;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .cam-filter-pill:hover {
+      background: rgba(196, 149, 58, 0.2);
+      border-color: #ffd685;
+      color: #ffd685;
+    }
+    .cam-filter-pill.active {
+      background: linear-gradient(180deg, rgba(196, 149, 58, 0.45), rgba(95, 65, 20, 0.65));
+      border-color: #ffd685;
+      color: #fff4d0;
+      font-weight: 700;
     }
     .cam-legend-item {
       display: inline-flex;
@@ -69966,11 +69988,12 @@ function renderCartographyCanvas(el){
     + '        <input type="text" class="cam-search-input" id="cam-search-input" placeholder="🔍 Buscar província ou localidade..." autocomplete="off">'
     + '      </div>'
     + '      <div class="cam-grid" id="cam-grid"></div>'
-    + '      <div class="cam-legend">'
-    + '        <span class="cam-legend-item">🏛️ Assentamentos</span>'
-    + '        <span class="cam-legend-item">⚔️ Terras Ermas</span>'
-    + '        <span class="cam-legend-item">📜 Contratos</span>'
-    + '        <span class="cam-legend-item">🗺️ Cartas Mapeadas</span>'
+    + '      <div class="cam-legend" id="cam-filter-bar">'
+    + '        <button class="cam-filter-pill active" data-filter="all" type="button">Todos</button>'
+    + '        <button class="cam-filter-pill" data-filter="settlements" type="button">🏛️ Cidades</button>'
+    + '        <button class="cam-filter-pill" data-filter="wilderness" type="button">⚔️ Terras Ermas</button>'
+    + '        <button class="cam-filter-pill" data-filter="quests" type="button">📜 Contratos</button>'
+    + '        <button class="cam-filter-pill" data-filter="mapped" type="button">🗺️ Cartas</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -70544,10 +70567,27 @@ function _wireCartEvents(){
         ? CartShared.getDiscoveredProvinces(known, ownedMaps) 
         : ((window.CartShared && CartShared.CART_PROVINCES) ? [CartShared.CART_PROVINCES[0], CartShared.CART_PROVINCES[1]] : []);
       
-      function renderCamItems(filterText) {
+      var _camActiveCategory = 'all';
+      function renderCamItems(filterText, catFilter) {
+        if (catFilter) _camActiveCategory = catFilter;
         camGrid.innerHTML = '';
         var ft = (filterText || '').toLowerCase().trim();
         var filtered = discProvs.filter(function(prov){
+          if (_camActiveCategory === 'settlements') {
+            var hasCity = (prov.id === 'world' || prov.id === 'plains');
+            if (prov.locKeys) {
+              if (prov.locKeys.indexOf('plains') >= 0 || prov.locKeys.indexOf('mountain') >= 0 || prov.locKeys.indexOf('coast') >= 0) hasCity = true;
+            }
+            if (!hasCity) return false;
+          } else if (_camActiveCategory === 'wilderness') {
+            if (prov.id === 'plains') return false;
+          } else if (_camActiveCategory === 'quests') {
+            if (!_getProvinceActiveQuest(prov.id)) return false;
+          } else if (_camActiveCategory === 'mapped') {
+            var isCharted = (prov.id === 'world');
+            if (ownedMaps && prov.locKeys && prov.locKeys.some(function(k){ return ownedMaps.indexOf(k) >= 0; })) isCharted = true;
+            if (!isCharted) return false;
+          }
           if (!ft) return true;
           if ((prov.name || '').toLowerCase().indexOf(ft) >= 0) return true;
           if ((prov.desc || '').toLowerCase().indexOf(ft) >= 0) return true;
@@ -70581,11 +70621,21 @@ function _wireCartEvents(){
           camGrid.appendChild(item);
         });
       }
+      var filterPills = atlasModal.querySelectorAll('.cam-filter-pill');
+      filterPills.forEach(function(pill){
+        pill.onclick = function(ev){
+          ev.preventDefault();
+          filterPills.forEach(function(p){ p.classList.remove('active'); });
+          pill.classList.add('active');
+          var filterVal = pill.getAttribute('data-filter') || 'all';
+          renderCamItems(camSearch ? camSearch.value : '', filterVal);
+        };
+      });
       if (camSearch) {
         camSearch.value = '';
         camSearch.oninput = function(){ renderCamItems(camSearch.value); };
       }
-      renderCamItems('');
+      renderCamItems('', 'all');
       atlasModal.style.display = 'flex';
     };
     if (camClose) {
@@ -72000,11 +72050,23 @@ document.addEventListener('DOMContentLoaded', function(){
   var cspBack = document.getElementById('csp-back-btn');
   if (cspBack) cspBack.addEventListener('click', navigateBack);
   // Inn animation usa #inn-overlay canonical (inn-animation.js gerencia próprios listeners)
-  // Keyboard: Ctrl+L toggle log panel (DEV only — _toggleLogPanel já tem gate)
+  // Keyboard: Ctrl+L toggle log panel, M tecla universal para abrir Cartografia
   document.addEventListener('keydown', function(e){
     if (e.ctrlKey && e.key === 'l') {
       e.preventDefault();
       _toggleLogPanel();
+      return;
+    }
+    if (e.key === 'm' || e.key === 'M') {
+      var tag = (document.activeElement && document.activeElement.tagName) ? document.activeElement.tagName.toLowerCase() : '';
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+      if (!document.body.classList.contains('state-cart')) {
+        var anyModal = document.querySelector('.city-modal.active, #enc-overlay.active, #corvus-overlay.active');
+        if (!anyModal && typeof navigateTo === 'function') {
+          e.preventDefault();
+          navigateTo('cartografia');
+        }
+      }
     }
   });
   _logCity('cidade.html ready');
