@@ -70685,6 +70685,9 @@ function _cartCloseGuideModal() {
 function _cartCloseWaypointsModal() {
   var modal = document.getElementById('cart-waypoints-modal');
   if (modal) modal.style.display = 'none';
+  if (_cartEngine && typeof _cartEngine.setSearchQuery === 'function') {
+    _cartEngine.setSearchQuery('');
+  }
 }
 
 function _cartPopulateWaypointsList(filter, query) {
@@ -70759,6 +70762,19 @@ function _cartPopulateWaypointsList(filter, query) {
       + '</div>';
   });
   listEl.innerHTML = html;
+}
+
+function _cartUpdateWpFocus(items, idx) {
+  items.forEach(function(el, i){
+    if (i === idx) {
+      el.style.outline = '2px solid #ffd700';
+      el.style.background = 'rgba(70, 48, 20, 0.95)';
+      if (typeof el.scrollIntoView === 'function') el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    } else {
+      el.style.outline = '';
+      el.style.background = '';
+    }
+  });
 }
 
 function _cartFocusWaypoint(key) {
@@ -70862,6 +70878,9 @@ function _cartFocusWaypoint(key) {
   if (cwmSearch) {
     cwmSearch.addEventListener('input', function(){
       _cartPopulateWaypointsList(window._cartCurrentWpFilter || 'all', this.value);
+      if (_cartEngine && typeof _cartEngine.setSearchQuery === 'function') {
+        _cartEngine.setSearchQuery(this.value);
+      }
     });
   }
 
@@ -70951,8 +70970,14 @@ function _cartFocusWaypoint(key) {
           var metaHtml = (prov.id === 'world') 
             ? '<div class="cam-item-meta">🗺️ Mapa Geral de Valdória</div>'
             : '<div class="cam-item-meta">📍 ' + knownCount + ' / ' + locKeys.length + ' locais mapeados (' + pct + '%)' + compBadge + qBadge + progBarHtml + '</div>';
+          var dossierHtml = (prov.id === 'world') ? '' :
+            '<div class="cam-item-dossier" style="display:flex;flex-wrap:wrap;gap:3px;margin:3px 0;font-size:8.5px;">' +
+            '  <span style="background:rgba(196,149,58,0.22);border:1px solid rgba(196,149,58,0.4);color:#ffd700;padding:1px 5px;border-radius:2px;">⚔️ ' + (prov.tier || 'Tier 1') + '</span>' +
+            '  <span style="background:rgba(20,30,45,0.6);border:1px solid rgba(147,197,253,0.3);color:#93c5fd;padding:1px 5px;border-radius:2px;">🌬️ ' + (prov.winds || 'Ventos') + '</span>' +
+            '</div>';
           item.innerHTML = '<div class="cam-item-title">' + (prov.icon || '🗺️') + ' ' + (prov.name || prov.id) + '</div>'
                          + '<div class="cam-item-sub">' + (prov.desc || 'Província de Valdória') + '</div>'
+                         + dossierHtml
                          + metaHtml;
           item.onclick = function(ev){
             ev.preventDefault();
@@ -71180,6 +71205,32 @@ function _wireCartKeyboardNavigation() {
       var backBtn = document.getElementById('cart-back-btn');
       if (backBtn) backBtn.click();
       return;
+    }
+
+    // Navegação por setas na Rede de Marcos (D&D 5e)
+    var wpModalNav = document.getElementById('cart-waypoints-modal');
+    if (wpModalNav && wpModalNav.style.display !== 'none') {
+      var wpItems = wpModalNav.querySelectorAll('.cam-item');
+      if (wpItems.length > 0) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          window._cartWpFocusIdx = (typeof window._cartWpFocusIdx === 'number') ? (window._cartWpFocusIdx + 1) % wpItems.length : 0;
+          _cartUpdateWpFocus(wpItems, window._cartWpFocusIdx);
+          return;
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          window._cartWpFocusIdx = (typeof window._cartWpFocusIdx === 'number') ? (window._cartWpFocusIdx - 1 + wpItems.length) % wpItems.length : wpItems.length - 1;
+          _cartUpdateWpFocus(wpItems, window._cartWpFocusIdx);
+          return;
+        } else if (e.key === 'Enter') {
+          if (typeof window._cartWpFocusIdx === 'number' && wpItems[window._cartWpFocusIdx]) {
+            e.preventDefault();
+            wpItems[window._cartWpFocusIdx].click();
+            window._cartWpFocusIdx = null;
+            return;
+          }
+        }
+      }
     }
 
     if (isInput) return; // Não intercepta digitação na barra de busca do Atlas
@@ -72053,6 +72104,23 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + weatherHtml
+    + (function(){
+        if (!window.CartShared || !CartShared.getBarometerForecast || !CartShared.calcWindImpact) return '';
+        var baro = CartShared.getBarometerForecast(curWeather, biome.biome || biome.key);
+        var curPlKey = (typeof _cartGetPlayerBiome === 'function') ? _cartGetPlayerBiome() : null;
+        var plObj = (curPlKey && window.CartShared && CartShared.CART_BIOMES) ? CartShared.CART_BIOMES.find(function(b){ return b.key === curPlKey; }) : null;
+        var mb = (plObj && CartShared.calcDistanceBearing) ? CartShared.calcDistanceBearing(plObj, biome, false) : null;
+        var windImp = CartShared.calcWindImpact(mb ? mb.degrees : 0, baro.windDirectionDeg, baro.windSpeedKmh);
+        return '<div class="clp-barometer-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,24,34,0.75);padding:5px 8px;border-radius:4px;border:1px solid rgba(147,197,253,0.35);">'
+          + '  <div style="font-size:9px;color:#93c5fd;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🧭 BARÔMETRO & DINÂMICA DOS VENTOS (D&D 5e):</div>'
+          + '  <div style="font-size:9px;color:#f4d49a;line-height:1.4;">'
+          + '    Pressão: <b>' + baro.pressureHpa + ' hPa</b> (' + baro.pressureStatus + ')<br>'
+          + '    Vento Local: <span>' + baro.windDescription + '</span><br>'
+          + '    Impacto na Marcha: <b style="color:' + windImp.color + ';">' + windImp.label + '</b><br>'
+          + '    <span style="font-size:8.5px;color:#cbd5e1;font-style:italic;">' + windImp.desc + '</span>'
+          + '  </div>'
+          + '</div>';
+      })()
     + nightVisionHtml
     + dndHtml
     + bestiaryHtml

@@ -3489,6 +3489,101 @@
     return data[w] || data.s;
   }
 
+  // === D&D 5e Barômetro & Ventos de Marcha (Fase 20) ===
+  var _BIOME_PREVAILING_WINDS = {
+    snow:     { deg: 0,   code: 'N',   speed: 35, name: 'Vento Boreal Uivante' },
+    mountain: { deg: 315, code: 'NO',  speed: 28, name: 'Ventos de Altitude da Cordilheira' },
+    coast:    { deg: 90,  code: 'L',   speed: 30, name: 'Brisa Oceânica de Leste' },
+    desert:   { deg: 180, code: 'S',   speed: 22, name: 'Vento Quente de Siroco' },
+    forest:   { deg: 45,  code: 'NE',  speed: 14, name: 'Brisa Silvestre Filtrada' },
+    swamp:    { deg: 135, code: 'SE',  speed: 8,  name: 'Ar Estagnado com Miasmas' },
+    plains:   { deg: 270, code: 'O',   speed: 18, name: 'Vento Aberto de Pradaria' },
+    volcanic: { deg: 225, code: 'SO',  speed: 25, name: 'Lufadas Térmicas Vulcânicas' },
+    cave:     { deg: 0,   code: 'N',   speed: 4,  name: 'Correntes de Ar Subterrâneas' },
+    graveyard:{ deg: 135, code: 'SE',  speed: 10, name: 'Vento Fúnebre Sombrio' }
+  };
+
+  function getBarometerForecast(weatherCode, biomeKey) {
+    var w = weatherCode || 's';
+    var bKey = biomeKey || 'plains';
+    var windDef = _BIOME_PREVAILING_WINDS[bKey] || _BIOME_PREVAILING_WINDS.plains;
+
+    var pressureHpa = 1018;
+    var status = 'Alta Pressão (Tempo Firme)';
+    var forecast = 'Tempo aberto e estável nas próximas 12 horas.';
+
+    if (w === 't') {
+      pressureHpa = 992;
+      status = 'Baixa Pressão Crítica (Tempestade Severa)';
+      forecast = 'Queda rápida de pressão; tempestades elétricas e vendavais.';
+    } else if (w === 'r') {
+      pressureHpa = 1004;
+      status = 'Baixa Pressão (Frente Chuvosa)';
+      forecast = 'Precipitação contínua e ventos úmidos persistentes.';
+    } else if (w === 'snow') {
+      pressureHpa = 998;
+      status = 'Baixa Pressão Boreal (Frente Ártica)';
+      forecast = 'Nevasca intensa, gelo e queda acentuada de temperatura.';
+    } else if (w === 'f') {
+      pressureHpa = 1012;
+      status = 'Pressão Neutra (Inversão Térmica)';
+      forecast = 'Névoa espessa acumulada no solo; visibilidade reduzida.';
+    }
+
+    return {
+      pressureHpa: pressureHpa,
+      pressureStatus: status,
+      windSpeedKmh: windDef.speed,
+      windDirectionDeg: windDef.deg,
+      windBearing: windDef.code,
+      windDescription: windDef.name + ' (' + windDef.speed + ' km/h · ' + windDef.code + ')',
+      forecast: forecast
+    };
+  }
+
+  function calcWindImpact(travelBearingDeg, windBearingDeg, windSpeedKmh) {
+    if (typeof travelBearingDeg !== 'number' || typeof windBearingDeg !== 'number') {
+      return {
+        relation: 'crosswind',
+        label: '🌬️ Vento Lateral Neutro',
+        speedMod: 1.0,
+        color: '#d2be90',
+        desc: 'Rajadas moderadas sem impacto na velocidade da comitiva.'
+      };
+    }
+
+    // O vento sopra DE windBearingDeg, logo viaja PARA (windBearingDeg + 180) % 360
+    var windFlowTowards = (windBearingDeg + 180) % 360;
+    var diff = Math.abs(travelBearingDeg - windFlowTowards);
+    if (diff > 180) diff = 360 - diff;
+
+    if (diff <= 45) {
+      return {
+        relation: 'tailwind',
+        label: '🍃 Vento a Favor (+10% Velocidade)',
+        speedMod: 1.10,
+        color: '#86efac',
+        desc: 'O vento sopra pelas costas da comitiva, acelerando montarias e reduzindo o cansaço.'
+      };
+    } else if (diff >= 135) {
+      return {
+        relation: 'headwind',
+        label: '💨 Vento Contrário (-10% Velocidade)',
+        speedMod: 0.90,
+        color: '#f87171',
+        desc: 'Ventos frontais fustigam os aventureiros, desacelerando o passo e exigindo mais esforço.'
+      };
+    } else {
+      return {
+        relation: 'crosswind',
+        label: '🌬️ Vento Lateral (Neutro)',
+        speedMod: 1.0,
+        color: '#93c5fd',
+        desc: 'Vento cruzado lateral soprando pelos flancos da formação.'
+      };
+    }
+  }
+
   // === D&D 5e Wilderness Encounter / Ambush Risk Assessment ===
   var DND_FORAGE_DATA = {
     forest: {
@@ -4284,6 +4379,59 @@
     ctx.restore();
   }
 
+  // === Retículo de Busca no Canvas (Fase 20 D&D 5e) ===
+  function _nodeMatchesSearch(b, q) {
+    if (!q || !b) return false;
+    var name = (b.regionalName || b.name || '').toLowerCase();
+    var key = (b.key || '').toLowerCase();
+    var biomeName = (b.biome || '').toLowerCase();
+    var prov = (window.CartShared && CartShared.getLocationProvince) ? (CartShared.getLocationProvince(b.key).name || '').toLowerCase() : '';
+    return name.indexOf(q) >= 0 || key.indexOf(q) >= 0 || biomeName.indexOf(q) >= 0 || prov.indexOf(q) >= 0;
+  }
+
+  function _drawSearchMatchBeacon(ctx, node, w, h) {
+    if (!node || typeof node.x !== 'number') return;
+    var bx = node.x * w, by = node.y * h;
+    var t = Date.now() * 0.004;
+    var pulse = 1.0 + Math.sin(t) * 0.16;
+    var r = 24 * pulse;
+
+    ctx.save();
+    ctx.translate(bx, by);
+
+    // Halo ciano-dourado pulsante
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(103, 232, 249, 0.85)';
+    ctx.lineWidth = 2.0;
+    ctx.shadowColor = '#67e8f9';
+    ctx.shadowBlur = 10;
+    ctx.stroke();
+
+    // Anel externo pontilhado
+    ctx.beginPath();
+    ctx.arc(0, 0, r + 5, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255, 215, 0, 0.55)';
+    ctx.lineWidth = 1.0;
+    ctx.setLineDash([3, 3]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 4 Corner brackets de retículo
+    var bD = r + 4;
+    var arm = 4.5;
+    ctx.strokeStyle = '#67e8f9';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(-bD, -bD + arm); ctx.lineTo(-bD, -bD); ctx.lineTo(-bD + arm, -bD);
+    ctx.moveTo(bD - arm, -bD); ctx.lineTo(bD, -bD); ctx.lineTo(bD, -bD + arm);
+    ctx.moveTo(-bD, bD - arm); ctx.lineTo(-bD, bD); ctx.lineTo(-bD + arm, bD);
+    ctx.moveTo(bD - arm, bD); ctx.lineTo(bD, bD); ctx.lineTo(bD, bD - arm);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
   function _drawCampsiteWaypoint(ctx, x, y, label) {
     ctx.save();
     ctx.beginPath();
@@ -4542,6 +4690,8 @@
     var forageInfo = getBiomeForageSustainability(targ.biome || targ.key);
     var bestiaryInfo = getBiomeBestiaryThreats(targ.biome || targ.key);
     var altInfo = getBiomeAltitude(targ.biome || targ.key, targ.tier);
+    var baroInfo = getBarometerForecast(options.weather || 's', targ.biome || targ.key);
+    var windImp = mb ? calcWindImpact(mb.degrees, baroInfo.windDirectionDeg, baroInfo.windSpeedKmh) : null;
 
     // Ajuste de horas de marcha com velocidade de transporte e ritmo
     var speedMod = (paceKey === 'fast') ? 1.33 : ((paceKey === 'stealth') ? 0.67 : 1.0);
@@ -4590,6 +4740,8 @@
     out.push('• Duração Estimada:   ' + travelHours + ' Horas de Viagem');
     out.push('• Custo do Terreno:   ' + (targ.difficulty || dndInfo.terrain));
     out.push('• Topografia/Relevo:  ' + (altInfo ? (altInfo.badge + ' ' + altInfo.label + ' (' + altInfo.meters + 'm)') : 'Relevo Normal'));
+    out.push('• Barômetro Local:    ' + baroInfo.pressureHpa + ' hPa (' + baroInfo.pressureStatus + ')');
+    out.push('• Dinâmica do Vento:  ' + baroInfo.windDescription + (windImp ? (' · ' + windImp.label) : ''));
     out.push('• Provisões Mínimas:  ' + rationsNeeded + ' Ração(ões) / ' + watersNeeded + ' Odres de Água por aventureiro');
     out.push('• Estado de Marcha:   ' + forcedMarchWarning);
     out.push('');
@@ -5015,7 +5167,8 @@
     var _rulerActive = false;
     var _rulerStart = null;
     var _rulerCurrent = null;
-    var _rulerLocked = false; // { nodeKey, startTime, duration, onComplete }
+    var _rulerLocked = false;
+    var _searchQuery = ''; // { nodeKey, startTime, duration, onComplete }
 
     function _ensureProvFog(S, known, regNodes, provId){
       if (known === null || !Array.isArray(known)) return null;
@@ -5171,6 +5324,14 @@
 
         // 3. Desenhar nós da província (SOMENTE locais descobertos; Ordem do Usuario: NUNCA desenhar Terra Incognita)
         var qf = (typeof cfg.getQuestFocus === 'function') ? cfg.getQuestFocus() : null;
+        if (_searchQuery) {
+          regNodes.forEach(function(b){
+            var isDiscovered = (known === null || known.indexOf(b.key) >= 0 || b.isOrigin || provMapOwned);
+            if (isDiscovered && _nodeMatchesSearch(b, _searchQuery)) {
+              _drawSearchMatchBeacon(ctx, b, _S, _S);
+            }
+          });
+        }
         regNodes.forEach(function(b){
           var isDiscovered = (known === null || known.indexOf(b.key) >= 0 || b.isOrigin || provMapOwned);
           var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
@@ -5268,6 +5429,13 @@
           }
         }
         var qf = (typeof cfg.getQuestFocus === 'function') ? cfg.getQuestFocus() : null;
+        if (_searchQuery) {
+          RB.forEach(function(b){
+            if ((known === null || known.indexOf(b.key) >= 0 || b.isOrigin) && _nodeMatchesSearch(b, _searchQuery)) {
+              _drawSearchMatchBeacon(ctx, b, _S, _S);
+            }
+          });
+        }
         RB.forEach(function(b){
           if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) {
             var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
@@ -5572,6 +5740,13 @@
         _rulerLocked = false;
         _onLoad();
       },
+      setSearchQuery: function(q){
+        _searchQuery = (q || '').toLowerCase().trim();
+        _onLoad();
+      },
+      getSearchQuery: function(){
+        return _searchQuery;
+      },
       handleRulerClick: function(mx, my, view, hoverNode){
         if (!_rulerActive) return false;
         var w = view.w, h = view.h;
@@ -5693,6 +5868,10 @@
       cy: 0.50,
       mapKey: null,
       desc: 'Visão de todo o continente conhecido de Valdória e suas fronteiras.',
+      tier: 'Tier 1 a 4 (Níveis 1-20)',
+      terrain: 'Continente de Valdória',
+      winds: 'Ventos Continentais',
+      hazard: 'Terras Ermas & Fronteiras Selvagens',
       locKeys: ['plains', 'green_fields', 'orc_tribe', 'bandit_fortress', 'forest', 'goblin_nest', 'elven_ruins', 'mountain', 'dragon_pass', 'korthag', 'cave', 'troll_cave', 'underground_caverns', 'crystal_depths', 'swamp', 'deep_swamp', 'desert', 'graveyard', 'ancestral_graveyard', 'snow', 'volcanic', 'valkrest', 'salty_coast', 'black_peaks', 'eldritch_mire', 'ashen_badlands', 'elder_woods', 'glacial_rift'],
       regionalCoords: {},
       regionalPaths: []
@@ -5706,6 +5885,10 @@
       cy: 0.55,
       mapKey: 'Mapa das Planícies',
       desc: 'Coração comercial e agrícola do reino. Campos dourados e grandes portões de pedra.',
+      tier: 'Tier 1 (Níveis 1-4)',
+      terrain: 'Pradarias & Estradas Imperiais',
+      winds: 'Vento de Pradaria (O · 18 km/h)',
+      hazard: 'Bandidos de Estrada & Tempestades',
       locKeys: ['plains', 'green_fields', 'orc_tribe', 'bandit_fortress', 'ashen_badlands'],
       regionalCoords: {
         plains: { rx: 0.50, ry: 0.50, name: 'Portões de Valdória', marcos: 0 },
@@ -5730,6 +5913,10 @@
       cy: 0.28,
       mapKey: 'Mapa da Floresta',
       desc: 'Matas ancestrais densas, arcos élficos de pedra e bosques imemoriais.',
+      tier: 'Tier 1-2 (Níveis 3-6)',
+      terrain: 'Floresta Antiga & Vales Silvestres',
+      winds: 'Brisa Silvestre (NE · 14 km/h)',
+      hazard: 'Névoas Ilusórias & Teias de Aranha',
       locKeys: ['forest', 'goblin_nest', 'elven_ruins', 'elder_woods'],
       regionalCoords: {
         forest: { rx: 0.38, ry: 0.48, name: 'Floresta dos Sussurros', marcos: 2 },
@@ -5753,6 +5940,10 @@
       cy: 0.42,
       mapKey: 'Mapa do Pântano',
       desc: 'Águas estagnadas escuras, cabanas sobre palafitas e névoas com vapores esmeralda.',
+      tier: 'Tier 2 (Níveis 5-8)',
+      terrain: 'Pântanos Traiçoeiros & Cemitérios',
+      winds: 'Ar Estagnado com Miasmas (SE · 8 km/h)',
+      hazard: 'Lama Movediça & Vapores Venenosos',
       locKeys: ['swamp', 'deep_swamp', 'graveyard', 'ancestral_graveyard', 'eldritch_mire'],
       regionalCoords: {
         swamp: { rx: 0.30, ry: 0.36, name: 'Pântano Nebuloso', marcos: 3 },
@@ -5777,6 +5968,10 @@
       cy: 0.38,
       mapKey: 'Mapa das Montanhas',
       desc: 'Picos escarpados de granito, forjas mineiras de Korthag e galerias subterrâneas.',
+      tier: 'Tier 2-3 (Níveis 6-10)',
+      terrain: 'Cordilheira Escarpada & Minas Profundas',
+      winds: 'Ventos de Altitude (NO · 28 km/h)',
+      hazard: 'Desmoronamentos, Frio & Ar Rarefeito',
       locKeys: ['mountain', 'korthag', 'dragon_pass', 'black_peaks', 'cave', 'troll_cave', 'underground_caverns', 'crystal_depths'],
       regionalCoords: {
         mountain: { rx: 0.48, ry: 0.36, name: 'Picos de Pedra', marcos: 3 },
@@ -5808,6 +6003,10 @@
       cy: 0.80,
       mapKey: 'Mapa do Deserto',
       desc: 'Mares de areia dourada, cânions profundos de arenito e mausoléus antigos.',
+      tier: 'Tier 2-3 (Níveis 6-10)',
+      terrain: 'Dunas Escaldantes & Cânions de Arenito',
+      winds: 'Vento Quente de Siroco (S · 22 km/h)',
+      hazard: 'Calor Extremo, Sede & Tempestades de Areia',
       locKeys: ['desert'],
       regionalCoords: {
         desert: { rx: 0.50, ry: 0.50, name: 'Deserto Dourado', marcos: 3 }
@@ -5823,6 +6022,10 @@
       cy: 0.52,
       mapKey: 'Mapa da Costa',
       desc: 'Costões rochosos fustigados por ondas oceânicas e enseadas de navegadores.',
+      tier: 'Tier 1-2 (Níveis 3-7)',
+      terrain: 'Costões Rochosos & Enseadas Marítimas',
+      winds: 'Brisa Oceânica (L · 30 km/h)',
+      hazard: 'Ressacas Violentas & Piratas',
       locKeys: ['salty_coast'],
       regionalCoords: {
         salty_coast: { rx: 0.50, ry: 0.50, name: 'Costa Salgada', marcos: 3 }
@@ -5838,6 +6041,10 @@
       cy: 0.10,
       mapKey: 'Mapa do Ermo Gelado',
       desc: 'Geleiras azuis eternas, fendas no gelo e montanhas congeladas ao norte.',
+      tier: 'Tier 3 (Níveis 8-12)',
+      terrain: 'Tundra Boreal & Geleiras Eternas',
+      winds: 'Vento Boreal Uivante (N · 35 km/h)',
+      hazard: 'Frio Extremo, Fendas de Gelo & Nevascas',
       locKeys: ['snow', 'glacial_rift'],
       regionalCoords: {
         snow: { rx: 0.38, ry: 0.46, name: 'Ermo Congelado', marcos: 4 },
@@ -5856,6 +6063,10 @@
       cy: 0.70,
       mapKey: 'Mapa Vulcânico',
       desc: 'A grande caldeira ativa, fendas de lava incandescente e platôs de basalto.',
+      tier: 'Tier 3-4 (Níveis 10-16)',
+      terrain: 'Caldeira Vulcânica & Platôs de Basalto',
+      winds: 'Lufadas Térmicas Vulcânicas (SO · 25 km/h)',
+      hazard: 'Rios de Lava, Vapores de Enxofre & Brasas',
       locKeys: ['volcanic', 'valkrest'],
       regionalCoords: {
         volcanic: { rx: 0.42, ry: 0.48, name: 'Cratera Vulcânica', marcos: 5 },
@@ -6005,6 +6216,10 @@
     getBiomeTerrainDifficulty: getBiomeTerrainDifficulty, // Custo de Movimento e Terreno Difícil (PHB p. 182)
     TRANSPORT_MODES: TRANSPORT_MODES,              // Modos de Transporte D&D 5e (A Pé, Montaria, Caravana)
     calcForcedMarchRisk: calcForcedMarchRisk,      // Cálculo de Marcha Forçada e Salvaguarda contra Exaustão
+    getBarometerForecast: getBarometerForecast,
+    calcWindImpact: calcWindImpact,
+    _drawSearchMatchBeacon: _drawSearchMatchBeacon,
+    _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
     calcEncounterRisk: calcEncounterRisk,          // Avaliação de Risco de Emboscada na Estrada D&D 5e
     getPinnedLocations: _getPinnedLocations,

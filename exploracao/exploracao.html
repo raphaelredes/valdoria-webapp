@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T18:40:05Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T18:59:03Z - do not edit directly, edit source -->
 
 
 
@@ -93158,6 +93158,23 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + weatherHtml
+    + (function(){
+        if (!window.CartShared || !CartShared.getBarometerForecast || !CartShared.calcWindImpact) return '';
+        var baro = CartShared.getBarometerForecast(curWeather, biome.biome || biome.key);
+        var curPlKey = (typeof _xcartGetPlayerBiome === 'function') ? _xcartGetPlayerBiome() : null;
+        var plObj = (curPlKey && window.CartShared && CartShared.CART_BIOMES) ? CartShared.CART_BIOMES.find(function(b){ return b.key === curPlKey; }) : null;
+        var mb = (plObj && CartShared.calcDistanceBearing) ? CartShared.calcDistanceBearing(plObj, biome, false) : null;
+        var windImp = CartShared.calcWindImpact(mb ? mb.degrees : 0, baro.windDirectionDeg, baro.windSpeedKmh);
+        return '<div class="clp-barometer-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,24,34,0.75);padding:5px 8px;border-radius:4px;border:1px solid rgba(147,197,253,0.35);">'
+          + '  <div style="font-size:9px;color:#93c5fd;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🧭 BARÔMETRO & DINÂMICA DOS VENTOS (D&D 5e):</div>'
+          + '  <div style="font-size:9px;color:#f4d49a;line-height:1.4;">'
+          + '    Pressão: <b>' + baro.pressureHpa + ' hPa</b> (' + baro.pressureStatus + ')<br>'
+          + '    Vento Local: <span>' + baro.windDescription + '</span><br>'
+          + '    Impacto na Marcha: <b style="color:' + windImp.color + ';">' + windImp.label + '</b><br>'
+          + '    <span style="font-size:8.5px;color:#cbd5e1;font-style:italic;">' + windImp.desc + '</span>'
+          + '  </div>'
+          + '</div>';
+      })()
     + nightVisionHtml
     + dndHtml
     + bestiaryHtml
@@ -95034,6 +95051,9 @@ function _xcartCloseGuideModal() {
 function _xcartCloseWaypointsModal() {
   var modal = document.getElementById('xcart-waypoints-modal');
   if (modal) modal.style.display = 'none';
+  if (_xcartEngine && typeof _xcartEngine.setSearchQuery === 'function') {
+    _xcartEngine.setSearchQuery('');
+  }
 }
 
 function _xcartPopulateWaypointsList(filter, query) {
@@ -95108,6 +95128,19 @@ function _xcartPopulateWaypointsList(filter, query) {
       + '</div>';
   });
   listEl.innerHTML = html;
+}
+
+function _xcartUpdateWpFocus(items, idx) {
+  items.forEach(function(el, i){
+    if (i === idx) {
+      el.style.outline = '2px solid #ffd700';
+      el.style.background = 'rgba(70, 48, 20, 0.95)';
+      if (typeof el.scrollIntoView === 'function') el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    } else {
+      el.style.outline = '';
+      el.style.background = '';
+    }
+  });
 }
 
 function _xcartFocusWaypoint(key) {
@@ -95211,6 +95244,9 @@ function _xcartFocusWaypoint(key) {
   if (xcwmSearch) {
     xcwmSearch.addEventListener('input', function(){
       _xcartPopulateWaypointsList(window._xcartCurrentWpFilter || 'all', this.value);
+      if (_xcartEngine && typeof _xcartEngine.setSearchQuery === 'function') {
+        _xcartEngine.setSearchQuery(this.value);
+      }
     });
   }
 
@@ -95299,8 +95335,14 @@ function _xcartFocusWaypoint(key) {
           var metaHtml = (prov.id === 'world')
             ? '<div class="cam-item-meta">🗺️ Mapa Geral de Valdória</div>'
             : '<div class="cam-item-meta">📍 ' + knownCount + ' / ' + locKeys.length + ' locais mapeados (' + pct + '%)' + compBadge + qBadge + progBarHtml + '</div>';
+          var dossierHtml = (prov.id === 'world') ? '' :
+            '<div class="cam-item-dossier" style="display:flex;flex-wrap:wrap;gap:3px;margin:3px 0;font-size:8.5px;">' +
+            '  <span style="background:rgba(196,149,58,0.22);border:1px solid rgba(196,149,58,0.4);color:#ffd700;padding:1px 5px;border-radius:2px;">⚔️ ' + (prov.tier || 'Tier 1') + '</span>' +
+            '  <span style="background:rgba(20,30,45,0.6);border:1px solid rgba(147,197,253,0.3);color:#93c5fd;padding:1px 5px;border-radius:2px;">🌬️ ' + (prov.winds || 'Ventos') + '</span>' +
+            '</div>';
           item.innerHTML = '<div class="cam-item-title">' + (prov.icon || '🗺️') + ' ' + (prov.name || prov.id) + '</div>'
                          + '<div class="cam-item-sub">' + (prov.desc || 'Província de Valdória') + '</div>'
+                         + dossierHtml
                          + metaHtml;
           item.onclick = function(ev){
             ev.preventDefault();
@@ -95461,6 +95503,32 @@ function _wireXCartKeyboardNavigation() {
       e.preventDefault();
       closeCartography();
       return;
+    }
+
+    // Navegação por setas na Rede de Marcos (D&D 5e)
+    var xwpModalNav = document.getElementById('xcart-waypoints-modal');
+    if (xwpModalNav && xwpModalNav.style.display !== 'none') {
+      var xwpItems = xwpModalNav.querySelectorAll('.cam-item');
+      if (xwpItems.length > 0) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          window._xcartWpFocusIdx = (typeof window._xcartWpFocusIdx === 'number') ? (window._xcartWpFocusIdx + 1) % xwpItems.length : 0;
+          _xcartUpdateWpFocus(xwpItems, window._xcartWpFocusIdx);
+          return;
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          window._xcartWpFocusIdx = (typeof window._xcartWpFocusIdx === 'number') ? (window._xcartWpFocusIdx - 1 + xwpItems.length) % xwpItems.length : xwpItems.length - 1;
+          _xcartUpdateWpFocus(xwpItems, window._xcartWpFocusIdx);
+          return;
+        } else if (e.key === 'Enter') {
+          if (typeof window._xcartWpFocusIdx === 'number' && xwpItems[window._xcartWpFocusIdx]) {
+            e.preventDefault();
+            xwpItems[window._xcartWpFocusIdx].click();
+            window._xcartWpFocusIdx = null;
+            return;
+          }
+        }
+      }
     }
 
     if (isInput) return; // Não intercepta digitação de busca
