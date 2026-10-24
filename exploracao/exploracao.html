@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T19:24:34Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T19:36:02Z - do not edit directly, edit source -->
 
 
 
@@ -93256,6 +93256,20 @@ function _openCartLocationPopup(biome){
                 + '    <span style="font-size:8.5px;color:#cbd5e1;font-style:italic;">Esforço de Aclive: +' + elev.ascentExertionHours + 'h de esforço físico na subida.</span>'
                 + '  </div>'
                 + '</div>';
+            })()
+          + (function(){
+              if (!window.CartShared || !CartShared.calcExpeditionSchedule) return '';
+              var curTime = (typeof window._getCurrentGameTime === 'function') ? window._getCurrentGameTime() : null;
+              var startH = (curTime && typeof curTime.hour === 'number') ? curTime.hour : 8;
+              var sched = CartShared.calcExpeditionSchedule(horasViagem, startH);
+              return '<div class="clp-schedule-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,20,28,0.85);padding:5px 8px;border-radius:4px;border:1px solid rgba(168,85,247,0.35);">'
+                + '  <div style="font-size:9px;color:#c084fc;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">⏳ CRONOGRAMA & CICLO DIA/NOITE (D&D 5e):</div>'
+                + '  <div style="font-size:9px;color:#f4d49a;line-height:1.4;">'
+                + '    Partida: <b>' + sched.departureStr + '</b> (' + (sched.startIsDay ? '☀️ Dia' : '🌙 Noite') + ') &rarr; Chegada: <b>' + sched.arrivalStr + '</b> (' + (sched.endIsDay ? '☀️ Dia' : '🌙 Noite') + ')<br>'
+                + '    Marcha: <b>' + sched.dayMarchHours + 'h dia</b> / <b>' + sched.nightMarchHours + 'h noite</b> ' + (sched.nightMarchHours > 0 ? '<span style="color:#ef4444;">[Visão no Escuro/Tocha req.]</span>' : '') + '<br>'
+                + (sched.campsitesCount > 0 ? '    <span style="font-size:8.5px;color:#a3e635;">⛺ Paradas para Descanso Longo: ' + sched.campsitesCount + ' acampamento(s) (' + (sched.campsitesCount * 8) + 'h de repouso)</span>' : '<span style="font-size:8.5px;color:#38bdf8;">⚡ Jornada Direta (Sem pernoite em acampamento selvagem)</span>')
+                + '  </div>'
+                + '</div>';
             })();
       })()
     + (biome.isSanctuary
@@ -94175,6 +94189,7 @@ function openCartography() {
     + '      <div class="cam-search-wrap">'
     + '        <input type="text" class="cam-search-input" id="xcam-search-input" placeholder="🔍 Buscar província ou localidade..." autocomplete="off">'
     + '      </div>'
+    + '      <div id="xcam-stats-dossier" style="margin:4px 12px 6px;padding:6px 10px;background:rgba(25,18,10,0.65);border:1px solid rgba(196,149,58,0.3);border-radius:4px;font-size:10px;color:#d2be90;display:flex;justify-content:space-between;align-items:center;"></div>'
     + '      <div class="cam-grid" id="xcam-grid"></div>'
     + '      <div class="cam-legend" id="xcam-filter-bar">'
     + '        <button class="cam-filter-pill active" data-filter="all" type="button">Todos</button>'
@@ -95507,6 +95522,15 @@ function _xcartFocusWaypoint(key) {
       if (camSearch) {
         camSearch.value = '';
         camSearch.oninput = function(){ renderCamItems(camSearch.value); };
+      }
+      var camStatsEl = document.getElementById('xcam-stats-dossier');
+      if (camStatsEl && window.CartShared && CartShared.getExplorationStats) {
+        var expSt = CartShared.getExplorationStats(known, ownedMaps);
+        camStatsEl.innerHTML = '<span style="color:#ffd700;font-weight:600;">' + expSt.title + '</span>'
+          + '<span>Províncias: <b style="color:#fff;">' + expSt.discoveredCount + '/' + expSt.totalProvinces + '</b> (' + expSt.explorationPercent + '%)</span>'
+          + '<span>Cartas: <b style="color:#67e8f9;">' + expSt.ownedMapsCount + '</b></span>'
+          + '<span>Santuários: <b style="color:#a3e635;">' + expSt.sanctuariesCount + '</b></span>'
+          + '<span>Milhas: <b style="color:#fde047;">' + expSt.totalMilesMapped + ' mi</b></span>';
       }
       renderCamItems('', 'all');
       atlasModal.style.display = 'flex';

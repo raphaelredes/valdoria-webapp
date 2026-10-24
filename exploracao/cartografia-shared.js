@@ -5114,6 +5114,120 @@
     });
   }
 
+  // === calcExpeditionSchedule (Cronograma de Viagem e Ciclo Dia/Noite D&D 5e) ===
+  function calcExpeditionSchedule(travelHours, startHour, options) {
+    options = options || {};
+    var h = (typeof travelHours === 'number' && travelHours > 0) ? travelHours : 4;
+    var curH = (typeof startHour === 'number' && startHour >= 0 && startHour < 24) ? Math.floor(startHour) : 8;
+
+    function _formatHour(val) {
+      var hh = Math.floor(val) % 24;
+      var mm = Math.round((val - Math.floor(val)) * 60);
+      return (hh < 10 ? '0' : '') + hh + ':' + (mm < 10 ? '0' : '') + mm;
+    }
+
+    function _periodName(val) {
+      var hh = Math.floor(val) % 24;
+      if (hh >= 5 && hh < 8) return 'Alvorecer';
+      if (hh >= 8 && hh < 12) return 'Manhã';
+      if (hh >= 12 && hh < 14) return 'Meio-Dia';
+      if (hh >= 14 && hh < 18) return 'Tarde';
+      if (hh >= 18 && hh < 21) return 'Crepúsculo';
+      return 'Noite Fechada';
+    }
+
+    var depStr = 'Dia 1, ' + _formatHour(curH) + ' (' + _periodName(curH) + ')';
+    var camps = [];
+    var currentDay = 1;
+    var clock = curH;
+    var remainingMarch = h;
+    var nightMarchHours = 0;
+
+    while (remainingMarch > 0) {
+      var marchThisDay = Math.min(8, remainingMarch);
+      for (var step = 0; step < marchThisDay; step++) {
+        var ch = (clock + step) % 24;
+        if (ch < 6 || ch >= 20) nightMarchHours++;
+      }
+      clock += marchThisDay;
+      remainingMarch -= marchThisDay;
+
+      if (remainingMarch > 0) {
+        camps.push({
+          day: currentDay,
+          startHour: _formatHour(clock),
+          period: _periodName(clock),
+          duration: '8h de Descanso Longo'
+        });
+        currentDay++;
+        clock = (clock + 8) % 24;
+        if (clock < 6) clock = 7;
+      }
+    }
+
+    var arrStr = 'Dia ' + currentDay + ', ' + _formatHour(clock) + ' (' + _periodName(clock) + ')';
+
+    return {
+      departureStr: depStr,
+      arrivalStr: arrStr,
+      totalDays: currentDay,
+      travelHours: h,
+      nightMarchHours: nightMarchHours,
+      camps: camps,
+      summary: depStr + ' ➔ ' + arrStr
+    };
+  }
+
+  // === getExplorationStats (Dossiê de Exploração e Cartografia do Reino D&D 5e) ===
+  function getExplorationStats(knownLocations, ownedMaps) {
+    var known = Array.isArray(knownLocations) ? knownLocations : ['plains'];
+    var maps = Array.isArray(ownedMaps) ? ownedMaps : [];
+
+    var allB = CART_BIOMES || [];
+    var totalBiomes = allB.length;
+    var discoveredBiomes = allB.filter(function(b){
+      return b.isOrigin || known.indexOf(b.key) >= 0 || (b.mapKey && maps.indexOf(b.mapKey) >= 0);
+    }).length;
+    var pctBiomes = Math.round((discoveredBiomes / totalBiomes) * 100);
+
+    var totalProvs = (CART_PROVINCES || []).filter(function(p){ return p.id !== 'world'; }).length;
+    var discProvs = (CART_PROVINCES || []).filter(function(p){
+      if (p.id === 'world') return false;
+      return isProvinceDiscovered(p.id, known, maps);
+    }).length;
+    var pctProvs = Math.round((discProvs / totalProvs) * 100);
+
+    var allSanctuaries = allB.filter(function(b){ return b.isSanctuary; });
+    var discSanctuaries = allSanctuaries.filter(function(b){
+      return b.isOrigin || known.indexOf(b.key) >= 0;
+    }).length;
+
+    var totalMilesMapped = allB.filter(function(b){
+      return b.isOrigin || known.indexOf(b.key) >= 0;
+    }).reduce(function(acc, b){
+      var marcos = (typeof b.marcos === 'number') ? b.marcos : (b.tier || 1);
+      return acc + Math.max(6, marcos * 8);
+    }, 0);
+
+    var cartographerTitle = (pctBiomes >= 90) ? 'Mestre Supremo dos Ermos' :
+                            (pctBiomes >= 70) ? 'Cartógrafo Real Veterano' :
+                            (pctBiomes >= 45) ? 'Batedor Experiente de Estradas' :
+                            (pctBiomes >= 20) ? 'Andarilho dos Caminhos' : 'Explorador Novato';
+
+    return {
+      totalBiomes: totalBiomes,
+      discoveredBiomes: discoveredBiomes,
+      biomePct: pctBiomes,
+      totalProvinces: totalProvs,
+      discoveredProvinces: discProvs,
+      provincePct: pctProvs,
+      totalSanctuaries: allSanctuaries.length,
+      discoveredSanctuaries: discSanctuaries,
+      totalMilesMapped: totalMilesMapped,
+      cartographerTitle: cartographerTitle
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -5202,8 +5316,10 @@
     var elevProfile = calcRouteElevationProfile(routeKeys || [orig.key, targ.key]);
     var encImpact = calcPartyEncumbranceImpact(options.weightLbs || 180, options.partyStrengthSum || 52, transKey);
     out.push('• Custo do Terreno:   ' + (targ.difficulty || dndInfo.terrain));
+    var expSched = calcExpeditionSchedule(travelHours, options.startHour || 8);
     out.push('• Topografia/Relevo:  ' + (altInfo ? (altInfo.badge + ' ' + altInfo.label + ' (' + altInfo.meters + 'm)') : 'Relevo Normal'));
     out.push('• Perfil Altimétrico: ' + elevProfile.summary + ' [' + elevProfile.sparkline + ']');
+    out.push('• Cronograma 5e:      ' + expSched.summary + ' (' + expSched.totalDays + ' dia' + (expSched.totalDays > 1 ? 's' : '') + ')');
     out.push('• Carga da Comitiva:  ' + encImpact.label);
     out.push('• Barômetro Local:    ' + baroInfo.pressureHpa + ' hPa (' + baroInfo.pressureStatus + ')');
     out.push('• Dinâmica do Vento:  ' + baroInfo.windDescription + (windImp ? (' · ' + windImp.label) : ''));
@@ -5259,6 +5375,18 @@
       ctx.shadowColor = 'rgba(255, 200, 60, 0.85)';
       ctx.shadowBlur = 8;
       ctx.stroke();
+
+      ctx.save();
+      ctx.font = 'bold 8.5px Cinzel, serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ffd700';
+      ctx.shadowColor = '#000000';
+      ctx.shadowBlur = 4;
+      var compassText = (typeof targetBearing === 'number')
+        ? '🧭 Rumo ao Destino (' + Math.round(targetBearing) + '°)'
+        : '🧭 Rosa dos Ventos [N]';
+      ctx.fillText(compassText, 0, R + 14);
+      ctx.restore();
     }
     ctx.strokeStyle = INK_DARK;
     // Anel externo
@@ -6739,6 +6867,8 @@
     calcPartyEncumbranceImpact: calcPartyEncumbranceImpact,
     calcRouteElevationProfile: calcRouteElevationProfile,
     calcTransportComparison: calcTransportComparison,
+    calcExpeditionSchedule: calcExpeditionSchedule,
+    getExplorationStats: getExplorationStats,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
