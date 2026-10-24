@@ -5228,6 +5228,232 @@
     };
   }
 
+  // === calcNavigationOrientationCheck (Testes de Orientação & Risco de se Perder - DMG p. 111) ===
+  function calcNavigationOrientationCheck(biomeKey, options) {
+    options = options || {};
+    var bKey = (biomeKey || 'plains').toLowerCase();
+
+    // CD Base por Terreno (DMG p. 111)
+    var baseDC = 10;
+    if (bKey === 'forest' || bKey === 'floresta' || bKey === 'swamp' || bKey === 'pantano' || bKey === 'hills' || bKey === 'colinas') {
+      baseDC = 15;
+    } else if (bKey === 'desert' || bKey === 'deserto' || bKey === 'mountain' || bKey === 'montanha' || bKey === 'snow' || bKey === 'tundra' || bKey === 'volcanic' || bKey === 'cave') {
+      baseDC = 20;
+    }
+
+    var mod = 0;
+    var factors = [];
+
+    // Estradas ou trilhas batidas
+    if (options.hasRoadOrTrail) {
+      mod -= 5;
+      factors.push('Trilha batida / estrada (-5 CD)');
+    }
+
+    // Carta topográfica regional possuída
+    if (options.hasChartedMap) {
+      mod -= 5;
+      factors.push('Carta regional cartografada (-5 CD)');
+    }
+
+    // Ritmo de marcha (PHB p. 182)
+    var pace = options.pace || 'normal';
+    if (pace === 'fast') {
+      mod += 5;
+      factors.push('Marcha rápida com menor atenção a marcos (+5 CD)');
+    }
+
+    // Clima adverso
+    var w = (options.weather || '').toLowerCase();
+    if (w === 'storm' || w === 'tempestade' || w === 't' || w === 'fog' || w === 'nevoa' || w === 'n' || w === 'blizzard' || w === 'sandstorm') {
+      mod += 5;
+      factors.push('Clima ofuscante / névoa / tempestade (+5 CD)');
+    }
+
+    // Marcha noturna sem iluminação adequada
+    if (options.isNight && !options.hasLight && !options.hasDarkvision) {
+      mod += 5;
+      factors.push('Escuridão total sem tocha ou visão no escuro (+5 CD)');
+    }
+
+    var finalDC = Math.max(5, Math.min(25, baseDC + mod));
+
+    var rating = 'Moderado';
+    var color = '#facc15';
+    if (finalDC <= 10) {
+      rating = 'Fácil';
+      color = '#4ade80';
+    } else if (finalDC <= 14) {
+      rating = 'Moderado';
+      color = '#facc15';
+    } else if (finalDC <= 18) {
+      rating = 'Desafiador';
+      color = '#fb923c';
+    } else if (finalDC <= 22) {
+      rating = 'Severo';
+      color = '#f87171';
+    } else {
+      rating = 'Extremo';
+      color = '#c084fc';
+    }
+
+    var lostPenalty = 'Desvio de 1d6 milhas fora do rumo pretendido e perda de 1d4 horas para se reorientar (DMG p. 111).';
+
+    return {
+      baseDC: baseDC,
+      finalDC: finalDC,
+      difficultyRating: rating,
+      color: color,
+      factors: factors,
+      lostPenalty: lostPenalty,
+      summary: 'Sobrevivência CD ' + finalDC + ' (' + rating + ')'
+    };
+  }
+
+  // === findNearestSanctuary (Localização do Refúgio / Santuário mais Próximo) ===
+  function findNearestSanctuary(locKey) {
+    var allB = CART_BIOMES || [];
+    if (!allB.length) return null;
+
+    var curLoc = allB.find(function(b){ return b.key === locKey; });
+    var sanctuaries = allB.filter(function(b){
+      return b.isSanctuary === true || b.settlement === true || b.isOrigin === true;
+    });
+
+    if (!sanctuaries.length) return null;
+
+    var isCurrentSanctuary = curLoc && (curLoc.isSanctuary || curLoc.settlement || curLoc.isOrigin);
+
+    var nearest = null;
+    var minMiles = Infinity;
+    var nearestMb = null;
+
+    sanctuaries.forEach(function(sanc){
+      if (curLoc && sanc.key === curLoc.key) return; // ignora o próprio local
+      var mb = (curLoc && calcDistanceBearing) ? calcDistanceBearing(curLoc, sanc, false) : { miles: 12, bearingCode: 'N', bearingName: 'Norte' };
+      if (mb && mb.miles < minMiles) {
+        minMiles = mb.miles;
+        nearest = sanc;
+        nearestMb = mb;
+      }
+    });
+
+    if (!nearest) {
+      if (isCurrentSanctuary) {
+        return {
+          key: curLoc.key,
+          name: curLoc.regionalName || curLoc.name,
+          distanceMiles: 0,
+          travelHours: 0,
+          bearingCode: 'Local',
+          bearingName: 'Aqui',
+          isReachableInOneDay: true,
+          isCurrentLocationSanctuary: true,
+          retreatAdvice: 'A comitiva já se encontra abrigada dentro de um Santuário ou Assentamento seguro.'
+        };
+      }
+      return null;
+    }
+
+    var distMiles = nearestMb ? nearestMb.miles : 15;
+    var travelHours = Math.max(1, Math.round(distMiles / 3));
+    var isOneDay = (travelHours <= 8);
+
+    return {
+      key: nearest.key,
+      name: nearest.regionalName || nearest.name,
+      distanceMiles: distMiles,
+      travelHours: travelHours,
+      bearingCode: nearestMb ? nearestMb.bearingCode : 'N',
+      bearingName: nearestMb ? nearestMb.bearingName : 'Norte',
+      isReachableInOneDay: isOneDay,
+      isCurrentLocationSanctuary: !!isCurrentSanctuary,
+      retreatAdvice: isOneDay
+        ? 'Refúgio Seguro: Alcance de 1 dia de marcha sem pernoite em acampamento selvagem.'
+        : 'Aviso de Retirada: Marcha demorada (>8h) exigirá acampamento na estrada; providencie vigília redobrada.'
+    };
+  }
+
+  // === getTrailSpoorClues (Pistas de Trilha e Rastreamento D&D 5e - DMG p. 244) ===
+  function getTrailSpoorClues(biomeKey, tier) {
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var t = (typeof tier === 'number') ? tier : 1;
+
+    var spoorTable = {
+      plains: {
+        spoorType: 'Pegadas & Capim Batido',
+        clueText: 'Marcas de cascos fendidos e capim amassado indicam trânsito recente de patrulhas montadas ou bandos de salteadores.',
+        baseDC: 10,
+        creatureHint: 'Patrulhas Humanoides ou Bandidos'
+      },
+      forest: {
+        spoorType: 'Galhos Rompidos & Arranhões',
+        clueText: 'Galhos estalados na altura dos ombros e musgo raspado nos troncos denunciam passagem de feras predatórias de grande porte.',
+        baseDC: 11,
+        creatureHint: 'Ursos-Coruja, Lobos Terríveis ou Aranhas Gigantes'
+      },
+      swamp: {
+        spoorType: 'Sulcos no Lodo & Miasma',
+        clueText: 'Rastros sinuosos arrastados na lama fétida com bolhas de metano ascendendo continuamente à tona da água estagnada.',
+        baseDC: 12,
+        creatureHint: 'Lagartos Gigantes, Bruxas do Pântano ou Trogloditas'
+      },
+      mountain: {
+        spoorType: 'Cascalho Solto & Ossadas',
+        clueText: 'Lascas de pedra pontiagudas recém-quebradas na beirada do desfiladeiro e ossadas atiradas de grandes altitudes.',
+        baseDC: 13,
+        creatureHint: 'Harpies, Wyverns ou Gigantes das Colinas'
+      },
+      desert: {
+        spoorType: 'Ondulações na Areia & Carcaças Secas',
+        clueText: 'Sulcos largos serpenteando entre as dunas móveis e exoesqueletos quitinosos ressequidos pelo sol escaldante.',
+        baseDC: 14,
+        creatureHint: 'Vermes das Dunas, Escorpiões Gigantes ou Salteadores Nômades'
+      },
+      snow: {
+        spoorType: 'Pegadas Congeladas & Penugem',
+        clueText: 'Pegadas fundas na crosta de gelo com tufos de pelos esbranquiçados retidos nos espinhos congelados.',
+        baseDC: 13,
+        creatureHint: 'Lobos do Inverno, Yetis ou Ogros do Gelo'
+      },
+      graveyard: {
+        spoorType: 'Terra Revolvida & Sudários',
+        clueText: 'Montículos de terra úmida recém-remexida junto aos mausoléus e tiras rasgadas de mortalhas enroscadas nas cruzes.',
+        baseDC: 12,
+        creatureHint: 'Carniçais, Zumbis ou Cultistas Profanos'
+      },
+      cave: {
+        spoorType: 'Saliva Ácida & Marcas de Garras',
+        clueText: 'Gotejamento pegajoso corroendo a pedra calcária e marcas de unhas afiadas escavadas nas paredes rochosas.',
+        baseDC: 13,
+        creatureHint: 'Trogloditas, Troglobitas ou Aberrações das Profundezas'
+      },
+      volcanic: {
+        spoorType: 'Cinzas Fumegantes & Escamas Calcinadas',
+        clueText: 'Pegadas carbonizadas emanando vapores sulfúricos leves e fragmentos de casca vítrea calcinada na borda das fissuras.',
+        baseDC: 14,
+        creatureHint: 'Salamandras de Fogo, Elementais ou Cães do Inferno'
+      }
+    };
+
+    var item = spoorTable[bk] || {
+      spoorType: 'Vestígios dos Ermos',
+      clueText: 'Sinais de circulação recente de andarilhos e bestas silvestres ao longo dos caminhos esquecidos.',
+      baseDC: 11,
+      creatureHint: 'Criaturas Selvagens Locais'
+    };
+
+    var finalDC = item.baseDC + Math.min(5, Math.max(0, t - 1));
+
+    return {
+      spoorType: item.spoorType,
+      clueText: item.clueText,
+      survivalDC: finalDC,
+      creatureHint: item.creatureHint,
+      dndRef: 'DMG p. 244 (Rastreamento)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -5339,6 +5565,22 @@
     out.push('• Salvaguardas 5e:    ' + dndInfo.saves);
     out.push('• Fauna/Predadores:   ' + (bestiaryInfo ? (bestiaryInfo.threats.join(', ') + ' · Predador Alfa: ' + bestiaryInfo.apex) : 'Fauna Comum'));
     out.push('• Forrageamento D&D:  ' + (forageInfo ? (forageInfo.rating + ' (Sobrevivência CD ' + forageInfo.dc + ') · Água: ' + forageInfo.water) : 'Padrão'));
+    var navCheck = calcNavigationOrientationCheck(targ.biome || targ.key, {
+      hasRoadOrTrail: isProv || targ.settlement,
+      hasChartedMap: options.hasChartedMap,
+      pace: paceKey,
+      weather: options.weather,
+      isNight: options.isNight
+    });
+    var nearSanc = findNearestSanctuary(targ.key);
+    var spoorClue = getTrailSpoorClues(targ.biome || targ.key, targ.tier);
+    out.push('• Orientação & Rumo:  ' + navCheck.summary + ' (' + navCheck.lostPenalty + ')');
+    if (nearSanc) {
+      out.push('• Refúgio Próximo:    ' + nearSanc.name + ' (' + nearSanc.distanceMiles + ' mi a ' + nearSanc.bearingCode + ', ~' + nearSanc.travelHours + 'h)');
+    }
+    if (spoorClue) {
+      out.push('• Pistas de Rastreio: ' + spoorClue.spoorType + ' · Sobrevivência CD ' + spoorClue.survivalDC + ' (' + spoorClue.creatureHint + ')');
+    }
     out.push('═══════════════════════════════════════════════════════════');
 
     return out.join('\n');
@@ -6869,6 +7111,9 @@
     calcTransportComparison: calcTransportComparison,
     calcExpeditionSchedule: calcExpeditionSchedule,
     getExplorationStats: getExplorationStats,
+    calcNavigationOrientationCheck: calcNavigationOrientationCheck,
+    findNearestSanctuary: findNearestSanctuary,
+    getTrailSpoorClues: getTrailSpoorClues,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

@@ -72291,6 +72291,38 @@ function _openCartLocationPopup(biome){
                 + (sched.campsitesCount > 0 ? '    <span style="font-size:8.5px;color:#a3e635;">⛺ Paradas para Descanso Longo: ' + sched.campsitesCount + ' acampamento(s) (' + (sched.campsitesCount * 8) + 'h de repouso)</span>' : '<span style="font-size:8.5px;color:#38bdf8;">⚡ Jornada Direta (Sem pernoite em acampamento selvagem)</span>')
                 + '  </div>'
                 + '</div>';
+            })()
+          + (function(){
+              if (!window.CartShared || !CartShared.calcNavigationOrientationCheck || !CartShared.getTrailSpoorClues) return '';
+              var p = window.CITY_MOCK_PLAYER || {};
+              var ownedMaps = p.owned_maps || [];
+              var hasMap = ownedMaps.indexOf(biome.key) >= 0;
+              var curPace = window._cartSelectedPace || 'normal';
+              var isNight = (curTime && (curTime.hour < 6 || curTime.hour >= 20));
+              var hasDarkvision = !!(p.darkvision || (p.race && ['elf', 'dwarf', 'drow', 'half-orc', 'tiefling'].indexOf(p.race.toLowerCase()) >= 0));
+              var hasLight = !!(p.torch_active || p.has_light || (p.inventory && p.inventory.some(function(it){ return it.id === 'torch' || it.id === 'lantern'; })));
+              var nav = CartShared.calcNavigationOrientationCheck(biome.biome || biome.key, {
+                hasRoadOrTrail: !!biome.settlement || !!biome.isOrigin,
+                hasChartedMap: hasMap,
+                pace: curPace,
+                weather: curWeather,
+                isNight: isNight,
+                hasLight: hasLight,
+                hasDarkvision: hasDarkvision
+              });
+              var spoor = CartShared.getTrailSpoorClues(biome.biome || biome.key, biome.tier);
+              var nearSanc = CartShared.findNearestSanctuary(biome.key);
+              var sancHtml = nearSanc ? ('<div style="font-size:8.5px;color:#86efac;margin-top:3px;border-top:1px dashed rgba(134,239,172,0.25);padding-top:2px;">🏛️ <b>Refúgio Mais Próximo:</b> ' + nearSanc.name + ' (' + nearSanc.distanceMiles + ' mi a ' + nearSanc.bearingCode + ', ~' + nearSanc.travelHours + 'h) · <i>' + nearSanc.retreatAdvice + '</i></div>') : '';
+              return '<div class="clp-orientation-card" style="margin:4px 0 6px;text-align:left;background:rgba(22,20,16,0.85);padding:5px 8px;border-radius:4px;border:1px solid rgba(250,204,21,0.35);">'
+                + '  <div style="font-size:9px;color:#facc15;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🧭 ORIENTAÇÃO & RASTREAMENTO DA TRILHA (D&D 5e):</div>'
+                + '  <div style="font-size:9px;color:#f4d49a;line-height:1.4;">'
+                + '    Orientação: <b style="color:' + nav.color + ';">' + nav.summary + '</b>' + (nav.factors.length ? ' (' + nav.factors.join(', ') + ')' : '') + '<br>'
+                + '    <span style="font-size:8.5px;color:#cbd5e1;font-style:italic;">Penalidade em Falha: ' + nav.lostPenalty + '</span><br>'
+                + '    Pistas na Trilha: <b>' + spoor.spoorType + '</b> (Sobrevivência CD ' + spoor.survivalDC + ' · <span style="color:#fdba74;">' + spoor.creatureHint + '</span>)<br>'
+                + '    <span style="font-size:8.5px;color:#d2be90;font-style:italic;">' + spoor.clueText + '</span>'
+                + sancHtml
+                + '  </div>'
+                + '</div>';
             })();
       })()
     + (biome.isSanctuary
