@@ -3440,6 +3440,55 @@
     ctx.restore();
   }
 
+  // === _drawUnknownRegionalNode ===
+  // No Atlas Regional, locais ainda não descobertos são desenhados como pontos misteriosos ("?"),
+  // permitindo ver a rede completa de estradas e aguçando a exploração estilo Witcher 3 / D&D 5e.
+  function _drawUnknownRegionalNode(ctx, b, w, h, isHover){
+    var bx = b.x * w, by = b.y * h;
+    var radius = isHover ? 16 : 12;
+
+    ctx.save();
+    // 1. Lente circular tracejada
+    ctx.beginPath();
+    ctx.arc(bx, by, radius, 0, Math.PI * 2);
+    ctx.setLineDash([3, 3]);
+    ctx.lineWidth = isHover ? 1.8 : 1.2;
+    ctx.strokeStyle = isHover ? '#ffd685' : 'rgba(196, 149, 58, 0.70)';
+    ctx.fillStyle = isHover ? 'rgba(38, 26, 15, 0.90)' : 'rgba(20, 14, 8, 0.80)';
+    ctx.fill();
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 2. Glifo "?" em nanquim e ouro
+    ctx.font = (isHover ? 'bold 14px' : 'bold 12px') + ' Cinzel, serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = isHover ? '#ffd685' : '#c4953a';
+    ctx.fillText('?', bx, by + 1);
+
+    // 3. Rótulo discreto inferior
+    var labelText = isHover ? 'Ponto Inexplorado' : 'Terra Incognita';
+    ctx.font = 'italic 9px Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    var tw = ctx.measureText(labelText).width;
+    var pillW = tw + 10, pillH = 15;
+    var pillX = bx - pillW / 2, pillY = by + radius + 3;
+
+    ctx.fillStyle = 'rgba(20, 14, 8, 0.88)';
+    ctx.strokeStyle = isHover ? 'rgba(255, 214, 133, 0.6)' : 'rgba(196, 149, 58, 0.35)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(pillX, pillY, pillW, pillH, 3);
+    else ctx.rect(pillX, pillY, pillW, pillH);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = isHover ? '#ffd685' : '#a09484';
+    ctx.fillText(labelText, bx, pillY + 2);
+    ctx.restore();
+  }
+
   // === _drawPlayerPin ===
   function _drawPlayerPin(ctx, b, w, h){
     // Sessão #74 (user): SEM o label "Você está aqui" + IMAGEM de estandarte fincado
@@ -3881,11 +3930,14 @@
           _drawCartPath(ctx, p[0], p[1], _S, _S, regNodes);
         });
 
-        // Desenhar nós da província com lentes de alta visibilidade
+        // Desenhar nós da província com lentes de alta visibilidade (descobertos e inexplorados)
         regNodes.forEach(function(b){
-          if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) {
-            var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
+          var isDiscovered = (known === null || known.indexOf(b.key) >= 0 || b.isOrigin);
+          var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
+          if (isDiscovered || hasMap) {
             _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, isRegional: true });
+          } else {
+            _drawUnknownRegionalNode(ctx, b, _S, _S, hoverKey === b.key);
           }
         });
 
@@ -3953,7 +4005,8 @@
       }
       for (var i = 0; i < activeNodes.length; i++) {
         var b = activeNodes[i];
-        if (!(known === null || known.indexOf(b.key) >= 0 || b.isOrigin)) continue;
+        // No modo regional, todos os nós da província (mesmo inexplorados) respondem ao clique para mostrar o popup explicativo
+        if (_viewMode !== 'province' && !(known === null || known.indexOf(b.key) >= 0 || b.isOrigin)) continue;
         var rb = _resolved(b);
         if (_viewMode === 'province' && _activeProvId !== 'world') {
           var curProv = CART_PROVINCES.find(function(p){ return p.id === _activeProvId; });

@@ -79484,6 +79484,14 @@ var CORVUS_MAPS = [
       { type: 'speech', speaker: 'Mestre Corvus', text: '— Areias Douradas. Sol implacável, água escassa, areias movediças que engolem cavalos inteiros. Mas os bandidos do leste têm carga pesada — vale ouro pra quem aguentar.' }
     ]
   },
+  { name: 'Mapa da Costa',       price: 45, days: 3, emoji: '🌊', min_level: 3,
+    desc: 'Litoral tempestuoso, falésias afiadas e recifes traiçoeiros. Costa Salgada.',
+    reveals: ['salty_coast'],
+    reveal_intro: [
+      { type: 'narration', text: 'Corvus abre uma carta náutica impregnada com o aroma salgado da maresia e grãos finos de areia nas dobras.' },
+      { type: 'speech', speaker: 'Mestre Corvus', text: '— Costa Salgada. <i>(ele aponta para as falésias desenhadas com tinta escura)</i> Ondas brutais e recifes que despedaçam cascos de embarcações como casca de noz. Mas as cavernas de maré guardam relíquias trazidas pelas correntes dos confins do oceano. Mantenha os olhos bem abertos com as criaturas marinhas.' }
+    ]
+  },
   { name: 'Mapa do Pântano',     price: 40, days: 4, emoji: '', min_level: 3,
     desc: 'Águas turvas e mortos antigos. Pântano Profundo + Cemitério Antigo + Cemitério Ancestral.',
     reveals: ['deep_swamp', 'graveyard', 'ancestral_graveyard'],
@@ -79533,6 +79541,8 @@ var CORVUS_NPC_RETURNS = [
     quote: 'Ainda com chapéu de palha. Conta histórias de oásis a Corvus.' },
   { name: 'Krael, o Bárbaro', cls: 'barbaro', region: 'da Cratera Vulcânica',
     quote: 'Cabelo chamuscado. Marca cracks de lava em uma carta de Corvus.' },
+  { name: 'Garrick, o Batedor', cls: 'guerreiro', region: 'da Costa Salgada',
+    quote: 'Botas manchadas de salmoura. Entrega croquis de recifes ao Mestre Corvus.' },
   { name: 'Vexa, a Bruxa', cls: 'bruxo', region: 'do Cemitério Antigo',
     quote: 'Pálida e silenciosa. Aponta tumbas perigosas no mapa de Corvus.' }
 ];
@@ -80024,6 +80034,33 @@ function _renderCartographerOverlay(player, delivered, npcReturn) {
     ordersHtml += '</div>';
   }
 
+  // Seção de Batedor: Venda de Anotações de Campo
+  var surveyNotes = 0;
+  if (Array.isArray(player.discovered_locations)) {
+    var sold = (player.cartographer && Array.isArray(player.cartographer.sold_surveys))
+      ? player.cartographer.sold_surveys
+      : (player._corvus_sold_surveys || []);
+    surveyNotes = player.discovered_locations.filter(function(loc){
+      return loc !== 'city_gates' && sold.indexOf(loc) < 0;
+    }).length;
+  }
+  var surveysHtml = '';
+  if (surveyNotes > 0) {
+    var totalReward = surveyNotes * 35;
+    surveysHtml = '<div class="corv-section" style="border:1px solid #c4953a;background:rgba(196,149,58,0.1);padding:10px;border-radius:8px;margin-bottom:8px">'
+      + '<h4 class="corv-section-title" style="color:#ffd685;display:flex;justify-content:space-between;align-items:center">'
+      + '  <span>📜 Caderno de Batedor</span>'
+      + '  <span style="font-size:11px;color:#81c784">+' + totalReward + ' Valdoritas</span>'
+      + '</h4>'
+      + '<div style="font-size:11.5px;color:var(--v-text);margin-bottom:8px;line-height:1.4">'
+      + '  Corvus observa os detalhes de suas anotações. <i>"Você explorou ' + surveyNotes + ' locais que ainda não documentei completamente. Pago 35 Valdoritas por cada croqui confiável."</i>'
+      + '</div>'
+      + '<button class="btn btn-sm btn-primary" id="corv-sell-surveys" style="width:100%;font-weight:bold">'
+      + '  Entregar ' + surveyNotes + ' Anotações de Campo (+ ' + totalReward + ' 💰)'
+      + '</button>'
+      + '</div>';
+  }
+
   // Phase 6.6.x level gating: Corvus filtra mapas pelo nível do jogador.
   // Tier system D&D 5e: tier 1 nv 1+, tier 2 nv 2-3, tier 3 nv 5+, tier 4 nv 7+
   // Mapas bloqueados por nível NÃO aparecem (Corvus simplesmente "não tem
@@ -80118,6 +80155,7 @@ function _renderCartographerOverlay(player, delivered, npcReturn) {
     + '  <div class="corv-body">'
     +    deliveredHtml
     +    newsHtml
+    +    surveysHtml
     +    ordersHtml
     +    mapsHtml
     + '  </div>'
@@ -80161,6 +80199,26 @@ function _renderCartographerOverlay(player, delivered, npcReturn) {
       _renderCartographerOverlay(player, delivered, npcReturn);
     }
   };
+  // Vender anotações de campo (Caderno de Batedor)
+  var sellBtn = document.getElementById('corv-sell-surveys');
+  if (sellBtn) {
+    sellBtn.onclick = function(){
+      if (typeof window.ValdoriaRemote !== 'undefined' && window.ValdoriaRemote.cartographerSellSurveys) {
+        window.ValdoriaRemote.cartographerSellSurveys().then(function(res){
+          if (res && res.gold_earned) {
+            if (typeof showToast === 'function') showToast('📜 ' + res.message, 'success');
+            player.gold = res.player_gold;
+            _openCartographerPopup(player, { silent: true });
+          }
+        }).catch(function(){
+          _localSellSurveys(player, surveyNotes);
+        });
+      } else {
+        _localSellSurveys(player, surveyNotes);
+      }
+    };
+  }
+
   // Map cards click → confirm order
   ov.querySelectorAll('.corv-map').forEach(function(card){
     if (card.classList.contains('disabled') || card.classList.contains('owned')) return;
@@ -80200,6 +80258,29 @@ function _closeCartographerPopup() {
     window._corvusReturnToDialoguePlayer = null;
     setTimeout(function(){ _openCorvusGreetingDialog(retP); }, 60);
   }
+}
+
+function _localSellSurveys(player, notes) {
+  var earned = notes * 35;
+  player.gold = (player.gold || 0) + earned;
+  player._corvus_sold_surveys = player._corvus_sold_surveys || [];
+  if (player.cartographer) {
+    player.cartographer.sold_surveys = player.cartographer.sold_surveys || [];
+  }
+  if (Array.isArray(player.discovered_locations)) {
+    player.discovered_locations.forEach(function(loc){
+      if (loc !== 'city_gates') {
+        if (player._corvus_sold_surveys.indexOf(loc) < 0) player._corvus_sold_surveys.push(loc);
+        if (player.cartographer && player.cartographer.sold_surveys.indexOf(loc) < 0) {
+          player.cartographer.sold_surveys.push(loc);
+        }
+      }
+    });
+  }
+  if (typeof showToast === 'function') {
+    showToast('📜 Você entregou ' + notes + ' anotações de campo para Corvus e recebeu ' + earned + ' Valdoritas!', 'success');
+  }
+  _openCartographerPopup(player, { silent: true });
 }
 
 function _confirmOrderMap(mapName, player) {
@@ -80757,6 +80838,10 @@ window.ValdoriaRemote = {
       days: days || 1,
       source: source || 'manual'
     });
+  },
+
+  cartographerSellSurveys: function() {
+    return this._post('/api/cartographer/sell_surveys', {});
   },
 
   // ─── Phase 6.3: Discovery ────────────────────────────────────────
