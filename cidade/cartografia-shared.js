@@ -6733,6 +6733,135 @@
     };
   }
 
+
+  // === calcTravelIllumination (Visão, Luz e Fontes de Iluminação Noturna - PHB p. 183) ===
+  function calcTravelIllumination(timeOfDay, lightSource, hasDarkvision, options) {
+    options = options || {};
+    var tod = (timeOfDay || 'day').toLowerCase();
+    var ls = (lightSource || 'none').toLowerCase();
+    var darkvision = !!hasDarkvision;
+
+    var lights = {
+      none: {
+        name: 'Sem Iluminação Artificial',
+        icon: '🌑',
+        brightRadiusFt: 0,
+        dimRadiusFt: 0,
+        stealthRisk: 'Nulo (Silhueta invisível na escuridão)',
+        fuelDurationHours: 0
+      },
+      torch: {
+        name: 'Tocha Resinosa',
+        icon: '🪵',
+        brightRadiusFt: 20,
+        dimRadiusFt: 20,
+        stealthRisk: 'Altíssimo (Chama aberta visível a milhas; +20% risco de emboscada)',
+        fuelDurationHours: 1.0
+      },
+      hooded_lantern: {
+        name: 'Lanterna Furta-Fogo (Coberta)',
+        icon: '🏮',
+        brightRadiusFt: 30,
+        dimRadiusFt: 30,
+        stealthRisk: 'Moderado (Tampa móvel permite abafar para foco de 1,5m em marcha furtiva)',
+        fuelDurationHours: 6.0
+      },
+      bullseye_lantern: {
+        name: 'Lanterna Direcional (Foco 18m)',
+        icon: '🔦',
+        brightRadiusFt: 60,
+        dimRadiusFt: 60,
+        stealthRisk: 'Direcional (Feixe longo direcionado para a frente da vanguarda)',
+        fuelDurationHours: 6.0
+      },
+      magic_light: {
+        name: 'Truque Luz Mágica (Arcana)',
+        icon: '✨',
+        brightRadiusFt: 20,
+        dimRadiusFt: 20,
+        stealthRisk: 'Alto (Brilho espectral sem fumaça, visível à distância)',
+        fuelDurationHours: 999.0
+      }
+    };
+
+    var light = lights[ls] || lights.none;
+
+    var effectiveVision = 'Luz Plena (Visão Normal sem Penalidades)';
+    var passiveMod = 0;
+    var color = '#86efac';
+
+    if (tod === 'day') {
+      effectiveVision = 'Luz Plena (Luz Solar Natural · Visão Normal)';
+      passiveMod = 0;
+      color = '#86efac';
+    } else if (ls !== 'none') {
+      effectiveVision = 'Iluminação Artificial (' + light.brightRadiusFt + ' pés de Luz Plena + ' + light.dimRadiusFt + ' pés de Meia-Luz)';
+      passiveMod = 0;
+      color = '#facc15';
+    } else if (darkvision) {
+      effectiveVision = 'Visão no Escuro (Enxerga em Meia-Luz na escuridão plena; -5 Percepção Passiva visual)';
+      passiveMod = -5;
+      color = '#a78bfa';
+    } else {
+      effectiveVision = 'Escuridão Total (Condição Cego na escuridão; desvantagem e falha em testes de visão)';
+      passiveMod = -10;
+      color = '#f87171';
+    }
+
+    return {
+      timeOfDay: tod,
+      lightSource: ls,
+      hasDarkvision: darkvision,
+      lightName: light.name,
+      lightIcon: light.icon,
+      brightRadiusFt: light.brightRadiusFt,
+      dimRadiusFt: light.dimRadiusFt,
+      effectiveVision: effectiveVision,
+      passivePerceptionMod: passiveMod,
+      stealthRisk: light.stealthRisk,
+      fuelDurationHours: light.fuelDurationHours,
+      color: color,
+      dndRef: 'PHB p. 183 (Visão e Iluminação em Marcha)'
+    };
+  }
+
+  // === calcCampCookingBenefits (Culinária e Utensílios de Cozinheiro - XGE p. 133 / TCoE) ===
+  function calcCampCookingBenefits(hasCookUtensils, cookCheckBonus, options) {
+    options = options || {};
+    var hasCook = !!hasCookUtensils;
+    var cBonus = (typeof cookCheckBonus === 'number') ? cookCheckBonus : 3;
+    var pSize = Math.max(1, (typeof options.partySize === 'number') ? options.partySize : 4);
+    var foragedLbs = (typeof options.foragedLbs === 'number') ? options.foragedLbs : 0;
+
+    if (!hasCook) {
+      return {
+        active: false,
+        title: 'Sem Mestre Cuca na Comitiva',
+        bonusHpPerDie: 0,
+        rationsPreserved: 0,
+        diseaseImmunity: false,
+        summary: 'A comitiva alimenta-se de rações secas duras ou caça assada diretamente no espeto sem temperos ou conservantes especiais.',
+        color: '#94a3b8',
+        dndRef: 'XGE p. 133 (Utensílios de Cozinheiro)'
+      };
+    }
+
+    var rationsPreserved = Math.min(4, Math.floor(foragedLbs / 2));
+    if (rationsPreserved === 0) rationsPreserved = 1;
+
+    return {
+      active: true,
+      title: 'Mestre Cuca da Comitiva (Utensílios de Cozinheiro)',
+      bonusHpPerDie: 1,
+      rationsPreserved: rationsPreserved,
+      diseaseImmunity: true,
+      cookCheckBonus: cBonus,
+      summary: 'Refeição Quente e Nutritiva: Concede +1 PV adicional por Dado de Vida gasto no descanso curto; ferve e salga a carne de caça, eliminando o risco de parasitas da água e alimentos selvagens.',
+      color: '#4ade80',
+      dndRef: 'XGE p. 133 (Utensílios de Cozinheiro)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -8428,6 +8557,8 @@
     getProvinceLandmarks: getProvinceLandmarks,
     calcCampDefensePerimeter: calcCampDefensePerimeter,
     calcRouteObstacleOptions: calcRouteObstacleOptions,
+    calcTravelIllumination: calcTravelIllumination,
+    calcCampCookingBenefits: calcCampCookingBenefits,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

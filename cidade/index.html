@@ -72510,6 +72510,24 @@ function _openCartLocationPopup(biome){
               + '  <div id="clp-defense-note" style="font-size:7.5px;color:#d2be90;margin-top:2px;font-style:italic;">' + def.description + '</div>'
               + '</div>';
           })()
+        + (function(){
+            if (!window.CartShared || !CartShared.calcTravelIllumination) return '';
+            var curLight = window._cartSelectedLightSource || 'none';
+            var p = window.CITY_MOCK_PLAYER || {};
+            var hasDv = !!(p.race && ['elf', 'drow', 'dwarf', 'half-elf', 'tiefling'].indexOf(p.race.toLowerCase()) >= 0);
+            var il = CartShared.calcTravelIllumination(isNight ? 'night' : 'day', curLight, hasDv);
+            return '<div class="clp-light-wrap" style="margin-top:3px;text-align:left;">'
+              + '  <div style="font-size:8px;font-family:Cinzel,serif;color:#fde047;font-weight:700;margin-bottom:2px;">🏮 FONTE DE LUZ EM MARCHA (PHB p. 183):</div>'
+              + '  <div class="clp-light-selector" style="display:flex;gap:2px;">'
+              + '    <button class="clp-light-btn' + (curLight === 'none' ? ' active' : '') + '" data-light="none" type="button" style="flex:1;font-size:7px;padding:2px 1px;background:rgba(30,22,12,0.85);border:1px solid ' + (curLight === 'none' ? '#ffd700' : 'rgba(196,149,58,0.4)') + ';color:' + (curLight === 'none' ? '#ffd700' : '#d2be90') + ';border-radius:2px;cursor:pointer;">🌑 Escuro</button>'
+              + '    <button class="clp-light-btn' + (curLight === 'torch' ? ' active' : '') + '" data-light="torch" type="button" style="flex:1;font-size:7px;padding:2px 1px;background:rgba(30,22,12,0.85);border:1px solid ' + (curLight === 'torch' ? '#ffd700' : 'rgba(196,149,58,0.4)') + ';color:' + (curLight === 'torch' ? '#ffd700' : '#d2be90') + ';border-radius:2px;cursor:pointer;">🪵 Tocha</button>'
+              + '    <button class="clp-light-btn' + (curLight === 'hooded_lantern' ? ' active' : '') + '" data-light="hooded_lantern" type="button" style="flex:1;font-size:7px;padding:2px 1px;background:rgba(30,22,12,0.85);border:1px solid ' + (curLight === 'hooded_lantern' ? '#ffd700' : 'rgba(196,149,58,0.4)') + ';color:' + (curLight === 'hooded_lantern' ? '#ffd700' : '#d2be90') + ';border-radius:2px;cursor:pointer;">🏮 Lanterna</button>'
+              + '    <button class="clp-light-btn' + (curLight === 'bullseye_lantern' ? ' active' : '') + '" data-light="bullseye_lantern" type="button" style="flex:1;font-size:7px;padding:2px 1px;background:rgba(30,22,12,0.85);border:1px solid ' + (curLight === 'bullseye_lantern' ? '#ffd700' : 'rgba(196,149,58,0.4)') + ';color:' + (curLight === 'bullseye_lantern' ? '#ffd700' : '#d2be90') + ';border-radius:2px;cursor:pointer;">🔦 Foco</button>'
+              + '    <button class="clp-light-btn' + (curLight === 'magic_light' ? ' active' : '') + '" data-light="magic_light" type="button" style="flex:1;font-size:7px;padding:2px 1px;background:rgba(30,22,12,0.85);border:1px solid ' + (curLight === 'magic_light' ? '#ffd700' : 'rgba(196,149,58,0.4)') + ';color:' + (curLight === 'magic_light' ? '#ffd700' : '#d2be90') + ';border-radius:2px;cursor:pointer;">✨ Magia</button>'
+              + '  </div>'
+              + '  <div id="clp-light-note" style="font-size:7.5px;color:' + il.color + ';margin-top:2px;font-style:italic;">' + il.effectiveVision + ' · ' + il.stealthRisk + '</div>'
+              + '</div>';
+          })()
         + '</div>'
       ) : '')
     + '<div class="clp-formation-wrap" style="margin-top: 8px; text-align: left;">'
@@ -72743,6 +72761,32 @@ function _openCartLocationPopup(biome){
       }
     };
   }
+
+  var lightBtns = el.querySelectorAll('.clp-light-btn');
+  var lightNote = el.querySelector('#clp-light-note');
+  lightBtns.forEach(function(btn){
+    btn.onclick = function(e){
+      e.preventDefault();
+      lightBtns.forEach(function(b){
+        b.classList.remove('active');
+        b.style.color = '#d2be90';
+        b.style.borderColor = 'rgba(196,149,58,0.4)';
+      });
+      btn.classList.add('active');
+      btn.style.color = '#ffd700';
+      btn.style.borderColor = '#ffd700';
+      var lType = btn.getAttribute('data-light');
+      window._cartSelectedLightSource = lType;
+      if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_click');
+      if (lightNote && window.CartShared && CartShared.calcTravelIllumination) {
+        var p = window.CITY_MOCK_PLAYER || {};
+        var hasDv = !!(p.race && ['elf', 'drow', 'dwarf', 'half-elf', 'tiefling'].indexOf(p.race.toLowerCase()) >= 0);
+        var ilObj = CartShared.calcTravelIllumination(isNight ? 'night' : 'day', lType, hasDv);
+        lightNote.textContent = ilObj.effectiveVision + ' · ' + ilObj.stealthRisk;
+        lightNote.style.color = ilObj.color;
+      }
+    };
+  });
 
   var defBtns = el.querySelectorAll('.clp-defense-btn');
   var defNote = el.querySelector('#clp-defense-note');
