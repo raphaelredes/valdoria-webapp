@@ -3978,10 +3978,14 @@
       bc.scale(dpr, dpr);
       var _mapReady = false;
       if (_viewMode === 'province' && _activeProvId !== 'world') {
+        bc.fillStyle = '#000';
+        bc.fillRect(0, 0, w, h);
         var pim = _provImgs[_activeProvId];
         if (pim && pim.complete && pim.naturalWidth) {
           var r = _cartWorldMapRect(w, h);
           bc.drawImage(pim, r.x, r.y, r.s, r.s);
+          bc.fillStyle = 'rgba(42,30,18,0.12)';   // véu sépia leve (medieval)
+          bc.fillRect(r.x, r.y, r.s, r.s);
           _mapReady = true;
         } else {
           _drawParchmentBase(bc, w, h);
@@ -4114,11 +4118,12 @@
       ctx.drawImage(_base, 0, 0, w, h);
       ctx.translate(_offX, _offY);
 
-      var known = (typeof cfg.getKnownLocations === 'function') ? cfg.getKnownLocations() : null;
+      var known = (typeof cfg.getKnownLocations === 'function') ? cfg.getKnownLocations() :
+                  ((typeof window !== 'undefined' && window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.known_locations) || null);
       var hover = view.hoverNode || null;
       var hoverKey = hover ? hover.key : null;
       var ownedMaps = (typeof cfg.getOwnedMaps === 'function') ? cfg.getOwnedMaps() :
-                      ((typeof window !== 'undefined' && window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.maps_owned) || []);
+                      ((typeof window !== 'undefined' && window.CITY_MOCK_PLAYER && (window.CITY_MOCK_PLAYER.owned_maps || window.CITY_MOCK_PLAYER.maps_owned)) || []);
       _ensureLocArt();
 
       if (_viewMode === 'province' && _activeProvId !== 'world') {
@@ -4299,7 +4304,10 @@
       // P-mapa sessão #73: só locais descobertos (ou origem) são clicáveis — os
       // não-descobertos não aparecem no mapa, então também não respondem ao tap/hover
       // (assim o popup "Local Desconhecido" não acontece mais).
-      var known = (typeof cfg.getKnownLocations === 'function') ? cfg.getKnownLocations() : null;
+      var known = (typeof cfg.getKnownLocations === 'function') ? cfg.getKnownLocations() :
+                  ((typeof window !== 'undefined' && window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.known_locations) || null);
+      var ownedMaps = (typeof cfg.getOwnedMaps === 'function') ? cfg.getOwnedMaps() :
+                      ((typeof window !== 'undefined' && window.CITY_MOCK_PLAYER && (window.CITY_MOCK_PLAYER.owned_maps || window.CITY_MOCK_PLAYER.maps_owned)) || []);
       var best = null, bestD = Infinity;
       var activeNodes = CART_BIOMES;
       if (_viewMode === 'province' && _activeProvId !== 'world') {
@@ -4347,11 +4355,13 @@
         // smartphone (~56px) e desktop (~24px) — usabilidade sem estourar a imagem.
         var _ov = _locCoords[b.key] || {};
         var imgHalf = (((typeof _ov.scale === 'number' ? _ov.scale : 5) / 100) * _S) / 2;  // default 5 (igual ao _drawLocArt)
-        var radius = isTouch ? Math.max(imgHalf, 28) : Math.max(imgHalf, 12);
+        var radius = isTouch ? Math.max(imgHalf, 28) : Math.max(imgHalf, 22);
         var rsq = radius * radius;
         var dx = wx - bx, dy = wy - by;
         var d = dx*dx + dy*dy;
-        if (d <= rsq && d < bestD) { best = b; bestD = d; }
+        // Hit no retículo ou na caixa de rótulo logo abaixo do nó
+        var inLabel = (Math.abs(dx) <= Math.max(radius, 40) && dy >= 0 && dy <= (radius + 24));
+        if ((d <= rsq || inLabel) && d < bestD) { best = b; bestD = d; }
       }
       return best;
     }
@@ -4390,8 +4400,10 @@
       if (!provId || provId === 'world') return closeProvince();
       var prov = CART_PROVINCES.find(function(p){ return p.id === provId; });
       if (!prov) return closeProvince();
-      var known = (typeof getKnownLocations === 'function') ? getKnownLocations() : null;
-      var ownedMaps = (typeof getOwnedMaps === 'function') ? getOwnedMaps() : null;
+      var known = (typeof cfg.getKnownLocations === 'function') ? cfg.getKnownLocations() :
+                  ((typeof window !== 'undefined' && window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.known_locations) || null);
+      var ownedMaps = (typeof cfg.getOwnedMaps === 'function') ? cfg.getOwnedMaps() :
+                      ((typeof window !== 'undefined' && window.CITY_MOCK_PLAYER && (window.CITY_MOCK_PLAYER.owned_maps || window.CITY_MOCK_PLAYER.maps_owned)) || []);
       if (!isProvinceDiscovered(provId, known, ownedMaps)) {
         return closeProvince();
       }

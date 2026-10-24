@@ -69972,6 +69972,7 @@ function renderCartographyCanvas(el){
     _cartEngine = CartShared.createWorldCart({
       apiBase: (window._VALDORIA_API_BASE || window._API_BASE || (new URLSearchParams(location.search).get('api') || '')).replace(/\/$/, ''),
       getKnownLocations: function(){ return (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.known_locations) || []; },
+      getOwnedMaps: function(){ var p = window.CITY_MOCK_PLAYER; return (p && (p.owned_maps || p.maps_owned)) || []; },
       getPlayerBiomeKey: _cartGetPlayerBiome,
       getQuestFocus: function(){ return (window._questFocusLoc && window._questFocusLoc.key) ? { key: window._questFocusLoc.key, title: window._questFocusLoc.questTitle || 'Missão' } : null; },
       drawQuestHalo: _drawQuestFocusHalo,
@@ -70615,7 +70616,7 @@ function _cartFocusProvince(provId){
     _cartZoom = CART_ZOOM_DEFAULT;
     _cartCenterOnPlayer();
     _cartUpdateZoomInfo();
-    if (titleEl) titleEl.textContent = 'Mapa de Valdoria';
+    if (titleEl) titleEl.innerHTML = '<span>🌍</span> Continente Geral';
     if (atlasBackBtn) atlasBackBtn.style.display = 'none';
   } else {
     if (typeof _cartEngine.openProvince === 'function') {
@@ -70627,7 +70628,11 @@ function _cartFocusProvince(provId){
       _drawCart();
       _cartUpdateZoomInfo();
       if (res && res.province) {
-        if (titleEl) titleEl.textContent = res.province.icon + ' ' + res.province.name;
+        if (titleEl) {
+          titleEl.innerHTML = '<span class="cart-title-crumb" onclick="_cartFocusProvince(\'world\')">🌍 Continente</span>'
+            + '<span class="cart-title-sep">›</span>'
+            + '<span>' + res.province.icon + ' ' + res.province.name + '</span>';
+        }
       }
       if (atlasBackBtn) atlasBackBtn.style.display = 'inline-flex';
     } else {
@@ -70830,7 +70835,49 @@ function _cartFindNodeAt(mx, my){
   return _cartEngine.findNodeAt({ w: _cartW, h: _cartH, panX: _cartPanX, panY: _cartPanY, zoom: _cartZoom }, mx, my);
 }
 function _cartShowTooltip(b, mx, my){
-  _cartHideTooltip();
+  var tip = document.getElementById('cart-tooltip');
+  if (!tip || !b) return;
+  var isTouch = (typeof window !== 'undefined' && (('ontouchstart' in window) || (navigator && navigator.maxTouchPoints > 0)));
+  if (isTouch) { tip.style.display = 'none'; return; }
+
+  var vm = (_cartEngine && typeof _cartEngine.getViewMode === 'function') ? _cartEngine.getViewMode() : { mode: 'world' };
+  var title = b.regionalName || b.name;
+  var biomeName = ((window.CartShared && CartShared.biomePT) ? CartShared.biomePT(b.biome || b.key) : (b.biome || b.key));
+  var tierText = (typeof b.tier === 'number') 
+    ? (b.tier === 0 ? 'Origem (Segura)' : 'Perigo ND ' + b.tier)
+    : 'Explorável';
+
+  var hintText = (vm.mode === 'world') ? 'Toque para ver a Carta Regional' : 'Toque para planejar expedição';
+
+  tip.innerHTML = ''
+    + '<div class="ctip-title">' + (b.ico || '📍') + ' ' + title + '</div>'
+    + '<div class="ctip-meta">'
+    + '  <span class="ctip-threat">' + tierText + '</span>'
+    + '  <span>•</span>'
+    + '  <span class="ctip-biome">' + biomeName + '</span>'
+    + '</div>'
+    + '<div class="ctip-footer">'
+    + '  <span class="ctip-hint">' + hintText + '</span>'
+    + '</div>';
+
+  tip.classList.add('active');
+  tip.style.display = 'block';
+
+  var frame = document.querySelector('.cart-canvas-frame');
+  var frameRect = frame ? frame.getBoundingClientRect() : { width: _cartW, height: _cartH };
+  var tipW = tip.offsetWidth || 180;
+  var tipH = tip.offsetHeight || 60;
+  
+  var left = mx + 14;
+  if (left + tipW > frameRect.width - 10) {
+    left = mx - tipW - 14;
+  }
+  var top = my - tipH - 10;
+  if (top < 10) {
+    top = my + 20;
+  }
+  tip.style.left = Math.max(8, left) + 'px';
+  tip.style.top = Math.max(8, top) + 'px';
 }
 function _cartHideTooltip(){
   var tip = document.getElementById('cart-tooltip');
@@ -71144,6 +71191,7 @@ var _cartEngine = (window.CartShared && CartShared.createWorldCart) ? CartShared
   // NÃO carregavam → cada localidade caía na posição default (≠ map-editor).
   apiBase: (window._VALDORIA_API_BASE || window._API_BASE || (new URLSearchParams(location.search).get('api') || '')).replace(/\/$/, ''),
   getKnownLocations: function(){ return (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.known_locations) || []; },
+  getOwnedMaps: function(){ var p = window.CITY_MOCK_PLAYER; return (p && (p.owned_maps || p.maps_owned)) || []; },
   getPlayerBiomeKey: _cartGetPlayerBiome,
   getQuestFocus: function(){ return (window._questFocusLoc && window._questFocusLoc.key) ? { key: window._questFocusLoc.key, title: window._questFocusLoc.questTitle || 'Missão' } : null; },
   drawQuestHalo: _drawQuestFocusHalo,
