@@ -9327,6 +9327,190 @@
     };
   }
 
+
+  // === calcWaterSourcePurityAndPurification (Pureza de Fontes de Água Selvagem, Contaminação e Métodos de Purificação - DMG p. 111 / PHB p. 185, 270) ===
+  function calcWaterSourcePurityAndPurification(biomeKey, waterCategory, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var wc = (waterCategory || 'flowing_river').toLowerCase();
+
+    var hasPurifySpell = !!options.hasPurifySpell;
+    var hasHerbalismKit = !!options.hasHerbalismKit;
+    var canBoil = (options.canBoil !== undefined) ? !!options.canBoil : true;
+
+    var purity = {
+      purityStatus: 'Água Doce Corrente de Riacho',
+      diseaseOrPoison: 'Baixa presença de sedimentos; risco leve de contaminação em água não tratada.',
+      saveDC: 10,
+      saveType: 'Constituição',
+      purificationOutcome: 'Fervura de 5 minutos torna a água totalmente pura para cantis de viagem (DMG p. 111).',
+      dailyGallonsYield: 'Abundante (riacho com fluxo ativo contínuo)',
+      icon: '🌊🐟',
+      color: '#38bdf8'
+    };
+
+    if (wc === 'pure_mountain_spring' || bk === 'montanha') {
+      purity = {
+        purityStatus: 'Potável & Cristalina (Nascente de Altitude)',
+        diseaseOrPoison: 'Nenhum contaminante biológico ou químico detectado; água de degelo ou aquífero puro.',
+        saveDC: 0,
+        saveType: 'Constituição',
+        purificationOutcome: 'Consumo seguro imediato sem necessidade de tratamento; hidratação perfeita para a comitiva.',
+        dailyGallonsYield: '10d6 galões/hora (nascente ativa contínua)',
+        icon: '💧✨',
+        color: '#38bdf8'
+      };
+    } else if (wc === 'stagnant_swamp_mire' || bk === 'swamp' || bk === 'pantano') {
+      var purifOutcomeSwamp = 'Ingestão crua exige Salvaguarda de Constituição CD 12; falha causa 1 nível de exaustão e Praga do Esgoto.';
+      if (hasPurifySpell) {
+        purifOutcomeSwamp = 'Purificação milagrosa instantânea via magia canônica *Purificar Alimentos e Bebidas* (PHB p. 270). Água 100% esterilizada.';
+      } else if (canBoil) {
+        purifOutcomeSwamp = 'Fervura prolongada por 10 minutos elimina 100% dos micróbios e parasitas biológicos (DMG p. 111).';
+      } else if (hasHerbalismKit) {
+        purifOutcomeSwamp = 'Filtro de carvão ativado e musgo esfagno reduz a CD da Salvaguarda para 8.';
+      }
+
+      purity = {
+        purityStatus: 'Contaminada por Lodo e Parasitas (Miasma Pantanoso)',
+        diseaseOrPoison: 'Praga do Esgoto (Sewer Plague - DMG p. 257) e disenteria pútrida.',
+        saveDC: 12,
+        saveType: 'Constituição',
+        purificationOutcome: purifOutcomeSwamp,
+        dailyGallonsYield: '3d6 galões de água tratada',
+        icon: '🧪🦠',
+        color: '#4ade80'
+      };
+    } else if (wc === 'volcanic_sulfur_pool' || bk === 'volcanic' || bk === 'vulcao') {
+      var purifOutcomeVolc = 'Consumo tóxico sem tratamento; falha na Salvaguarda CD 14 inflige condição Envenenado e 2d6 dano de veneno.';
+      if (hasPurifySpell) {
+        purifOutcomeVolc = 'Magia divina *Purificar Alimentos e Bebidas* (PHB p. 270) neutraliza as toxinas minerais e enxofre por completo!';
+      } else if (canBoil) {
+        purifOutcomeVolc = 'AVISO: Fervura convencional NÃO remove enxofre ou metais pesados; a evaporação apenas concentra os venenos!';
+      } else if (hasHerbalismKit) {
+        purifOutcomeVolc = 'Kit de herbalismo com carvão ativo neutraliza parte dos metais pesados; CD de Salvaguarda reduzida para 10.';
+      }
+
+      purity = {
+        purityStatus: 'Tóxica por Enxofre e Metais Pesados',
+        diseaseOrPoison: 'Veneno Mineral Corrosivo (intoxicação gástrica e queimação química).',
+        saveDC: 14,
+        saveType: 'Constituição',
+        purificationOutcome: purifOutcomeVolc,
+        dailyGallonsYield: '1d6 galões após neutralização química',
+        icon: '🌋☠️',
+        color: '#f87171'
+      };
+    } else if (wc === 'blighted_shadow_bog') {
+      var purifOutcomeBog = 'Fervura física é inútil contra mácula sobrenatural; beber sem purificação mágica drena 1d6 PV máximos da comitiva.';
+      if (hasPurifySpell) {
+        purifOutcomeBog = 'Magia divina *Purificar Alimentos e Bebidas* (PHB p. 270) dissipa a mácula profana da água.';
+      }
+
+      purity = {
+        purityStatus: 'Necroticamente Maculada (Névoa Sombria e Cadavérica)',
+        diseaseOrPoison: 'Miasma de Podridão Cadavérica e drenagem necrótica de tecidos.',
+        saveDC: 15,
+        saveType: 'Constituição',
+        purificationOutcome: purifOutcomeBog,
+        dailyGallonsYield: '2d4 galões purificados',
+        icon: '💀🥀',
+        color: '#c084fc'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      waterCategory: wc,
+      purityStatus: purity.purityStatus,
+      diseaseOrPoison: purity.diseaseOrPoison,
+      saveDC: purity.saveDC,
+      saveType: purity.saveType,
+      purificationOutcome: purity.purificationOutcome,
+      dailyGallonsYield: purity.dailyGallonsYield,
+      survivalTip: 'Em clima temperado, cada aventureiro consome 1 galão/dia; em calor extremo ou marcha acelerada no deserto, consome 2 galões/dia (PHB p. 185).',
+      icon: purity.icon,
+      color: purity.color,
+      dndRef: 'DMG p. 111 (Contaminação de Água) / PHB p. 185 (Sustento de Viagem) / PHB p. 270 (Purificar Alimentos)'
+    };
+  }
+
+  // === calcArborealBivouacShelter (Bivaque e Abrigo Arbóreo Suspenso contra Insetos e Predadores Terrestres - DMG p. 111 / PHB p. 153 / XGE p. 78) ===
+  function calcArborealBivouacShelter(biomeKey, shelterType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'floresta').toLowerCase();
+    var st = (shelterType || 'suspended_hammock').toLowerCase();
+
+    var bivouac = {
+      shelterTitle: 'Rede Suspensa em Troncos Altos (DMG p. 111)',
+      viability: 'Alta em florestas e biomas arborizados.',
+      groundVerminImmunity: true,
+      ambushDefenseModifier: '+2 na Percepção Passiva da vigília noturna; predadores terrestres sem escalada não conseguem surpreender os aventureiros.',
+      riggingDC: 11,
+      riggingSkill: 'Sabedoria (Sobrevivência) ou Destreza (Acrobacia)',
+      weatherResistance: 'Excelente drenagem contra solo encharcado e lamaçal; requer lona contra chuvas fortes.',
+      campRestAdvantage: 'Os aventureiros descansam suspensos com segurança, isolados da lama tóxica e de enxames de centopeias.',
+      icon: '🪢🌲',
+      color: '#4ade80'
+    };
+
+    if (st === 'ground_bedroll') {
+      bivouac = {
+        shelterTitle: 'Saco de Dormir no Solo (Acampamento Rasteiro Padrão)',
+        viability: 'Universal em qualquer solo plano.',
+        groundVerminImmunity: false,
+        ambushDefenseModifier: 'Nenhum bônus tático; vulnerável a insetos rastejantes, sanguessugas e predadores terrestres furtivos.',
+        riggingDC: 0,
+        riggingSkill: 'Nenhum teste necessário',
+        weatherResistance: 'Vulnerável a alagamentos rápidos, poças de lama e frio ascendente da terra.',
+        campRestAdvantage: 'Descanso básico normal; em pântanos exige teste de Constituição contra febres transmitidas por vermes.',
+        icon: '🏕️🛏️',
+        color: '#94a3b8'
+      };
+    } else if (st === 'canopy_platform_blind') {
+      bivouac = {
+        shelterTitle: 'Plataforma Arbórea Camuflada nas Copas (PHB p. 153 / XGE p. 78)',
+        viability: 'Alta em matas fechadas e selvas virgens; requer cordas de escalada e 1 hora de montagem.',
+        groundVerminImmunity: true,
+        ambushDefenseModifier: 'Camuflagem concede +5 no teste de Furtividade do acampamento e cobertura de três quartos (+5 CA) contra disparos do solo.',
+        riggingDC: 14,
+        riggingSkill: 'Sobrevivência (Sabedoria) ou Atletismo (Força)',
+        weatherResistance: 'Abrigo coberto com folhagem espessa que amortece ventos e chuvas torrenciais.',
+        campRestAdvantage: 'Refúgio tático com visão panorâmica de 360 graus para sentinelas vigiarem a mata ao redor.',
+        icon: '🦅🌳',
+        color: '#a855f7'
+      };
+    } else if (st === 'cliff_ledge_piton_hammock' || bk === 'montanha') {
+      bivouac = {
+        shelterTitle: 'Bivaque Suspenso em Paredão de Rocha com Pítons (PHB p. 153)',
+        viability: 'Excelente em montanhas, cânions e escarpamentos rochosos verticais.',
+        groundVerminImmunity: true,
+        ambushDefenseModifier: 'Inacessível para predadores terrestres; apenas criaturas voadoras conseguem alcançar o bivaque.',
+        riggingDC: 13,
+        riggingSkill: 'Força (Atletismo) ou Uso de Kit de Escalador',
+        weatherResistance: 'Protegido sob saliências rochosas contra neve e granizo; vulnerável a desmoronamento de pedregulhos.',
+        campRestAdvantage: 'A comitiva repousa ancorada nos penhascos acima das névoas venenosas e pântanos dos vales.',
+        icon: '🧗⛰️',
+        color: '#38bdf8'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      shelterType: st,
+      shelterTitle: bivouac.shelterTitle,
+      viability: bivouac.viability,
+      groundVerminImmunity: bivouac.groundVerminImmunity,
+      ambushDefenseModifier: bivouac.ambushDefenseModifier,
+      riggingDC: bivouac.riggingDC,
+      riggingSkill: bivouac.riggingSkill,
+      weatherResistance: bivouac.weatherResistance,
+      campRestAdvantage: bivouac.campRestAdvantage,
+      icon: bivouac.icon,
+      color: bivouac.color,
+      dndRef: 'DMG p. 111 (Abrigos Naturais e Acampamento) / PHB p. 153 (Equipamento de Aventura) / XGE p. 78'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -11060,6 +11244,8 @@
     calcAncientWaystoneAttunement: calcAncientWaystoneAttunement,
     calcMonsterSpoorAndLairProximity: calcMonsterSpoorAndLairProximity,
     calcWildernessQuicksandHazard: calcWildernessQuicksandHazard,
+    calcWaterSourcePurityAndPurification: calcWaterSourcePurityAndPurification,
+    calcArborealBivouacShelter: calcArborealBivouacShelter,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
