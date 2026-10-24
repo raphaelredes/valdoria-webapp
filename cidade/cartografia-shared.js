@@ -9218,6 +9218,115 @@
     };
   }
 
+  // === calcMonsterSpoorAndLairProximity (Rastros de Monstros, Proximidade de Covil e Efeitos Regionais - MM p. 8 / DMG p. 244) ===
+  function calcMonsterSpoorAndLairProximity(biomeKey, creatureCategory, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var cat = (creatureCategory || 'apex_predator_draconic').toLowerCase();
+
+    var spoor = {
+      spoorTitle: 'Covil Dracônico Próximo & Efeitos Regionais (MM p. 8)',
+      trackingSigns: 'Árvores chamuscadas e cheiro acre de enxofre em um raio de 3 milhas.',
+      regionalLairEffect: 'Nevoeiro denso e cinzas flutuantes obscurecem a visão; pequenos animais fugiram da região.',
+      detectionDC: 13,
+      detectionSkill: 'Sobrevivência (Sabedoria) ou Natureza (Inteligência)',
+      tacticalForeknowledge: 'Comitiva não pode ser surpreendida pelo predador e recebe +2 na iniciativa ao avistar o monstro.',
+      dangerWarning: 'Aproximação direta da caverna principal aciona ações de covil na contagem de iniciativa 20.',
+      icon: '🐉🔥',
+      color: '#f87171'
+    };
+
+    if (cat === 'monstrosity_owlbear' || bk === 'forest' || bk === 'selva') {
+      spoor = {
+        spoorTitle: 'Território de Urso-Coruja Alfa & Marcas de Garra',
+        trackingSigns: 'Troncos esfolados a 3 metros de altura e pelotas de ossos regurgitados em fendas de raízes.',
+        regionalLairEffect: 'Carcaças de presas penduradas em galhos marcam a fronteira do território de caça.',
+        detectionDC: 12,
+        detectionSkill: 'Sobrevivência (Sabedoria) ou Percepção (Sabedoria)',
+        tacticalForeknowledge: 'Identifica ângulo de emboscada aérea nos ramos altos; vantagem no primeiro teste de Percepção.',
+        dangerWarning: 'A fera tem faro aguçado; acampar a favor do vento atrai ataque noturno imediato.',
+        icon: '🦉🐻',
+        color: '#4ade80'
+      };
+    } else if (cat === 'undead_coven' || bk === 'swamp') {
+      spoor = {
+        spoorTitle: 'Miasma Necrótico de Coven & Mãos Afogadas',
+        trackingSigns: 'Água fétida estagnada e árvores mortas chorando seiva negra e viscosa.',
+        regionalLairEffect: 'Plantas apodrecem num raio de 1 milha; névoas sussurrantes transmitem calafrios sobrenaturais.',
+        detectionDC: 14,
+        detectionSkill: 'Arcanismo (Inteligência) ou Religião (Inteligência)',
+        tacticalForeknowledge: 'Revela imunidades a veneno dos lacaios mortos-vivos e orienta uso de dano radiante ou fogo.',
+        dangerWarning: 'Mortos-vivos rastejantes emergem do lodo caso a comitiva faça paradas prolongadas.',
+        icon: '🧙‍♀️💀',
+        color: '#c084fc'
+      };
+    } else if (bk === 'desert' || bk === 'dunas') {
+      spoor = {
+        spoorTitle: 'Trilha de Verme das Areias & Tremores Sísmicos',
+        trackingSigns: 'Sulcos profundos na areia e vibrações ritmadas perceptíveis no solo a cada poucos minutos.',
+        regionalLairEffect: 'Redemoinhos de poeira e pequenos desmoronamentos de dunas cercam o covil subterrâneo.',
+        detectionDC: 13,
+        detectionSkill: 'Sobrevivência (Sabedoria) ou Investigação (Inteligência)',
+        tacticalForeknowledge: 'Permite transitar pisando suavemente em rochas firmes, reduzindo chance de emboscada subterrânea.',
+        dangerWarning: 'Caminhar com passos pesados nas areias moles atrai o monstro em 1d4 rodadas.',
+        icon: '🐛🏜️',
+        color: '#facc15'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      creatureCategory: cat,
+      spoorTitle: spoor.spoorTitle,
+      trackingSigns: spoor.trackingSigns,
+      regionalLairEffect: spoor.regionalLairEffect,
+      detectionDC: spoor.detectionDC,
+      detectionSkill: spoor.detectionSkill,
+      tacticalForeknowledge: spoor.tacticalForeknowledge,
+      dangerWarning: spoor.dangerWarning,
+      icon: spoor.icon,
+      color: spoor.color,
+      dndRef: 'Monster Manual p. 8 (Covis e Efeitos Regionais) / DMG p. 244 / PHB p. 178'
+    };
+  }
+
+  // === calcWildernessQuicksandHazard (Areia Movediça, Tremedais e Regras Canônicas de Resgate - DMG p. 110-111 / PHB p. 183) ===
+  function calcWildernessQuicksandHazard(biomeKey, partyWeightClass, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var wc = (partyWeightClass || 'standard_scout').toLowerCase();
+
+    var pitDepthFeet = (bk === 'swamp') ? 12 : 10;
+    var spottingDC = 15;
+
+    var sinkingFormula = 'Afunda 1d4 + 1 pés imediatamente e 1d4 pés no início de cada um dos seus turnos (DMG p. 110).';
+    var escapeFormula = 'Teste de Força (Atletismo) CD 10 + quantidade de pés afundados; ou CD 10 se auxiliado por companheiros com corda.';
+
+    var hazardName = (bk === 'swamp')
+      ? 'Tremedal Traiçoeiro sob Folhagem Flutuante'
+      : ((bk === 'desert' || bk === 'dunas')
+        ? 'Poço de Areia Movediça Seca e Fina'
+        : 'Lamaçal Movediço de Margem Fluvial');
+
+    var rescueMitigation = (wc === 'heavy_armored_pack')
+      ? 'Armaduras pesadas aceleram o pânico; soltar mochilas e utilizar corda de 15 metros ancorada em árvore firme.'
+      : 'Vara de sondagem de 3 metros tocando o solo à frente detecta o tremedal automaticamente sem riscos.';
+
+    return {
+      biomeKey: bk,
+      hazardName: hazardName,
+      spottingDC: spottingDC,
+      spottingSkill: 'Sabedoria (Percepção) ou Sobrevivência (Sabedoria)',
+      pitDepthFeet: pitDepthFeet,
+      sinkingFormula: sinkingFormula,
+      escapeFormula: escapeFormula,
+      rescueMitigation: rescueMitigation,
+      icon: '🕳️⚠️',
+      color: '#eab308',
+      dndRef: 'DMG p. 110-111 (Areia Movediça e Tremedais) / PHB p. 183 (Sufocamento)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -10949,6 +11058,8 @@
     calcRegionalLeylineNode: calcRegionalLeylineNode,
     calcWildernessWeatherForecast: calcWildernessWeatherForecast,
     calcAncientWaystoneAttunement: calcAncientWaystoneAttunement,
+    calcMonsterSpoorAndLairProximity: calcMonsterSpoorAndLairProximity,
+    calcWildernessQuicksandHazard: calcWildernessQuicksandHazard,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
