@@ -8172,6 +8172,159 @@
     };
   }
 
+  // === calcWildernessHarvestYield (Coleta de Recursos Naturais e Botânica Alquímica - XGE p. 130 / DMG p. 110-111) ===
+  function calcWildernessHarvestYield(biomeKey, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+
+    var harvest = {
+      resourceName: 'Erva-doce dos Prados Dourados',
+      resourceType: 'Flora Medicinal',
+      gatheringDC: 11,
+      checkType: 'Sobrevivência (Sabedoria) ou Natureza (Inteligência)',
+      yieldDice: '1d4 + 1 doses',
+      alchemicalEffect: 'Unguento curativo suave; concede +1 PV por dado de vida gasto durante descansos curtos.',
+      marketValueGold: 4,
+      icon: '🌿',
+      color: '#a3e635'
+    };
+
+    if (bk === 'forest' || bk === 'selva') {
+      harvest = {
+        resourceName: 'Raiz de Mandrágora Prateada',
+        resourceType: 'Flora Rara',
+        gatheringDC: 13,
+        checkType: 'Sobrevivência (Sabedoria) ou Natureza (Inteligência)',
+        yieldDice: '1d3 doses',
+        alchemicalEffect: 'Infusão revigorante que estabiliza exaustão e reduz 1 nível de fadiga ao amanhecer.',
+        marketValueGold: 12,
+        icon: '🌱',
+        color: '#4ade80'
+      };
+    } else if (bk === 'swamp') {
+      harvest = {
+        resourceName: 'Cogumelo Fosforescente do Charco',
+        resourceType: 'Fungo Alquímico',
+        gatheringDC: 14,
+        checkType: 'Sobrevivência (Sabedoria) ou Kit de Herbalismo',
+        yieldDice: '1d4 doses',
+        alchemicalEffect: 'Extrato antitóxico; confere vantagem em salvaguardas contra veneno por 8 horas.',
+        marketValueGold: 15,
+        icon: '🍄',
+        color: '#c084fc'
+      };
+    } else if (bk === 'mountain' || bk === 'cordilheira') {
+      harvest = {
+        resourceName: 'Líquen Ígneo das Fendas Rochosas',
+        resourceType: 'Mineral Botânico',
+        gatheringDC: 14,
+        checkType: 'Sobrevivência (Sabedoria) ou Atletismo (Força)',
+        yieldDice: '1d4 doses',
+        alchemicalEffect: 'Pasta térmica corporal; protege contra hipotermia extrema e ventanias glaciais.',
+        marketValueGold: 16,
+        icon: '🔥🪨',
+        color: '#fb923c'
+      };
+    } else if (bk === 'desert' || bk === 'dunas') {
+      harvest = {
+        resourceName: 'Flor Suculenta da Miragem',
+        resourceType: 'Flora Desértica',
+        gatheringDC: 13,
+        checkType: 'Sobrevivência (Sabedoria) ou Kit de Herbalismo',
+        yieldDice: '1d4 doses',
+        alchemicalEffect: 'Néctar hiper-hidratante; supre a necessidade diária de água de 1 aventureiro.',
+        marketValueGold: 10,
+        icon: '🌵',
+        color: '#facc15'
+      };
+    } else if (bk === 'snow' || bk === 'tundra') {
+      harvest = {
+        resourceName: 'Flor de Gelo Perpétuo',
+        resourceType: 'Flora Glacial',
+        gatheringDC: 15,
+        checkType: 'Sobrevivência (Sabedoria) ou Natureza (Inteligência)',
+        yieldDice: '1d3 doses',
+        alchemicalEffect: 'Bálsamo analgésico e redutor de queimaduras; neutraliza febres e calafrios intensos.',
+        marketValueGold: 18,
+        icon: '❄️🌸',
+        color: '#38bdf8'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      resourceName: harvest.resourceName,
+      resourceType: harvest.resourceType,
+      gatheringDC: harvest.gatheringDC,
+      checkType: harvest.checkType,
+      yieldDice: harvest.yieldDice,
+      alchemicalEffect: harvest.alchemicalEffect,
+      marketValueGold: harvest.marketValueGold,
+      icon: harvest.icon,
+      color: harvest.color,
+      dndRef: 'XGE p. 130 (Kit de Herbalismo e Coleta) / DMG p. 110-111'
+    };
+  }
+
+  // === calcCampNightWatchSchedule (Turnos de Vigília de Acampamento e Percepção Noturna - PHB p. 186 / DMG p. 112) ===
+  function calcCampNightWatchSchedule(partyCount, lightCondition, options) {
+    options = options || {};
+    var members = partyCount || 4;
+    if (members < 1) members = 1;
+    var lc = (lightCondition || 'dim_firelight').toLowerCase();
+
+    var shiftHours = 8 / members;
+    var shiftDurationDesc = (Math.round(shiftHours * 10) / 10) + 'h por turno';
+
+    var shifts = [];
+    var names = ['1º Turno (Crepúsculo & Brasas)', '2º Turno (Noite Profunda)', '3º Turno (Hora das Bruxas)', '4º Turno (Alvorecer & Neblina)'];
+    if (members === 2) {
+      names = ['1ª Metade da Noite (Crepúsculo a Meia-Noite)', '2ª Metade da Noite (Meia-Noite ao Alvorecer)'];
+    } else if (members === 3) {
+      names = ['1º Turno (Anoitecer)', '2º Turno (Vigília da Meia-Noite)', '3º Turno (Madrugada ao Alvorecer)'];
+    }
+
+    for (var i = 0; i < members; i++) {
+      shifts.push({
+        shiftIndex: i + 1,
+        shiftName: names[i] || ('Turno ' + (i + 1)),
+        durationHours: shiftHours,
+        riskDescriptor: (i === 1 || i === 2) ? 'Risco Elevado de Emboscada (Criaturas Noturnas)' : 'Vigília de Transição'
+      });
+    }
+
+    var passivePerceptionMod = 0;
+    var ambientNote = 'Iluminação suave de brasas: sentinela observa vultos a até 9 metros sem penalidade.';
+    var icon = '🛡️🌙';
+    var color = '#60a5fa';
+
+    if (lc === 'pitch_dark') {
+      passivePerceptionMod = -5;
+      ambientNote = 'Escuridão total: sem tocha ou visão no escuro, aplica-se penalidade de -5 na Percepção Passiva (PHB p. 183).';
+      icon = '🌑';
+      color = '#94a3b8';
+    } else if (lc === 'full_moon') {
+      passivePerceptionMod = 0;
+      ambientNote = 'Luar prateado pleno: penumbra aberta que revela silhuetas com nitidez nas clareiras.';
+      icon = '🌕';
+      color = '#e2e8f0';
+    }
+
+    return {
+      partyMembersCount: members,
+      shiftCount: members,
+      shiftDurationHours: shiftHours,
+      shiftDurationDesc: shiftDurationDesc,
+      shifts: shifts,
+      lightCondition: lc,
+      passivePerceptionMod: passivePerceptionMod,
+      ambientNote: ambientNote,
+      icon: icon,
+      color: color,
+      dndRef: 'PHB p. 186 (Descanso Longo e Vigília) / DMG p. 112'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -9887,6 +10040,8 @@
     calcExplorationMilestoneBoon: calcExplorationMilestoneBoon,
     calcCampFireConcealment: calcCampFireConcealment,
     calcRegionalBountyNotice: calcRegionalBountyNotice,
+    calcWildernessHarvestYield: calcWildernessHarvestYield,
+    calcCampNightWatchSchedule: calcCampNightWatchSchedule,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

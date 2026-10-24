@@ -70019,7 +70019,8 @@ function renderCartographyCanvas(el){
         <button class="cam-filter-pill" data-filter="caravans" type="button">📦 Comboios</button>
         <button class="cam-filter-pill" data-filter="shelters" type="button">⛺ Abrigos</button>
         <button class="cam-filter-pill" data-filter="rivers" type="button">🌊 Travessias</button>
-        <button class="cam-filter-pill" data-filter="bounties" type="button">📜 Recompensas</button>'
+        <button class="cam-filter-pill" data-filter="bounties" type="button">📜 Recompensas</button>
+        <button class="cam-filter-pill" data-filter="harvest" type="button">🌿 Coleta</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -71102,6 +71103,9 @@ function _cartFocusWaypoint(key) {
               });
             }
             return false;
+          } else if (_camActiveCategory === 'harvest') {
+            if (prov.id === 'world') return false;
+            return true;
           } else if (_camActiveCategory === 'bounties') {
             if (prov.id === 'world') return false;
             return true;
@@ -72789,6 +72793,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessHarvestYield) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var harv = CartShared.calcWildernessHarvestYield(bKey);
+        return '<div class="clp-harvest-yield-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,26,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(163,230,53,0.3);font-size:8px;color:#d9f99d;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + harv.color + ';margin-bottom:2px;">' + harv.icon + ' BOTÂNICA & RECURSOS ALQUÍMICOS (XGE p. 130):</div>'
+          + '  <div>• <b>Espécime:</b> ' + harv.resourceName + ' (' + harv.resourceType + ')</div>'
+          + '  <div>• <b>Coleta:</b> CD ' + harv.gatheringDC + ' [' + harv.checkType + '] · Produção: ' + harv.yieldDice + ' (' + harv.marketValueGold + ' po/dose)</div>'
+          + '  <div style="font-size:7.5px;color:#bef264;margin-top:1px;">• <i>Aplicação: ' + harv.alchemicalEffect + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampNightWatchSchedule) return '';
+        var watch = CartShared.calcCampNightWatchSchedule(4, 'dim_firelight');
+        return '<div class="clp-nightwatch-card" style="margin:4px 0 6px;text-align:left;background:rgba(16,22,34,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(96,165,250,0.3);font-size:8px;color:#bfdbfe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + watch.color + ';margin-bottom:2px;">' + watch.icon + ' ESCALA DE VIGÍLIA NOTURNA (PHB p. 186):</div>'
+          + '  <div>• <b>Turnos:</b> ' + watch.shiftCount + ' sentinelas (' + watch.shiftDurationDesc + ') · Descanso Longo de 8h</div>'
+          + '  <div style="font-size:7.5px;color:#93c5fd;margin-top:1px;">• ' + watch.ambientNote + '</div>'
           + '</div>';
       })()
     + (function(){
