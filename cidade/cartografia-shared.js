@@ -7603,6 +7603,154 @@
     };
   }
 
+  // === calcNavigationalOrientationCheck (Perder-se nos Ermos e Desorientação Espacial - DMG p. 111-112) ===
+  function calcNavigationalOrientationCheck(navigatorSurvivalBonus, biomeKey, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var bonus = (typeof navigatorSurvivalBonus === 'number') ? navigatorSurvivalBonus : 3;
+    var pace = (options.pace || 'normal').toLowerCase();
+    var weather = (options.weather || 'clear').toLowerCase();
+    var hasMap = !!options.hasMap;
+    var hasTools = !!options.hasNavTools;
+
+    var baseDC = 10;
+    var terrainName = 'Planície ou colinas abertas';
+    var icon = '🧭';
+
+    if (bk === 'forest' || bk === 'selva') {
+      baseDC = 15;
+      terrainName = 'Floresta densa de copa fechada (marcos celestes ocultos)';
+      icon = '🌲';
+    } else if (bk === 'swamp') {
+      baseDC = 15;
+      terrainName = 'Pântano brumoso e águas estagnadas sem trilhas fixas';
+      icon = '🐊';
+    } else if (bk === 'desert') {
+      baseDC = 15;
+      terrainName = 'Dunas mutáveis sob vento forte e miragens solares';
+      icon = '🏜️';
+    } else if (bk === 'mountain' || bk === 'cordilheira' || bk === 'highlands') {
+      baseDC = 15;
+      terrainName = 'Desfiladeiros labirínticos e gargantas rochosas estreitas';
+      icon = '⛰️';
+    } else if (bk === 'snow' || bk === 'tundra') {
+      baseDC = 15;
+      terrainName = 'Vastidão branca e neves eternas sem pontos de referência';
+      icon = '❄️';
+    }
+
+    var weatherMod = 0;
+    if (weather === 'fog' || weather === 'heavy_storm' || weather === 'sandstorm' || weather === 'nevasca') {
+      weatherMod = 5;
+    }
+
+    var pacePenalty = 0;
+    if (pace === 'fast') {
+      pacePenalty = 5;
+    }
+
+    var toolsBonus = (hasMap ? 3 : 0) + (hasTools ? 2 : 0);
+    var effectiveDC = Math.max(5, baseDC + weatherMod + pacePenalty - toolsBonus);
+
+    var directions = ['Norte', 'Nordeste', 'Leste', 'Sudeste', 'Sul', 'Sudoeste', 'Oeste', 'Noroeste'];
+    var driftIdx = Math.floor(Math.random() * directions.length);
+    var driftDir = directions[driftIdx];
+    var wanderHours = Math.floor(Math.random() * 5) + 2;
+
+    var notes = '';
+    if (effectiveDC <= 10) {
+      notes = 'Navegação tranquila; marcos visíveis e orientação firme ao longo da rota.';
+    } else if (effectiveDC <= 14) {
+      notes = 'Orientação moderada; requer atenção regular do guia aos acidentes geográficos.';
+    } else {
+      notes = 'Alto risco de desorientação; falha no teste de Sobrevivência faz a comitiva vagar perdida.';
+    }
+
+    return {
+      biomeKey: bk,
+      terrainName: terrainName,
+      baseDC: baseDC,
+      weatherModifier: weatherMod,
+      pacePenalty: pacePenalty,
+      toolsBonus: toolsBonus,
+      effectiveDC: effectiveDC,
+      navigatorBonus: bonus,
+      hasMap: hasMap,
+      hasNavTools: hasTools,
+      hasAdvantage: hasMap && hasTools,
+      wanderHoursOnFailure: wanderHours,
+      randomDriftDirection: driftDir,
+      icon: icon,
+      color: effectiveDC <= 11 ? '#4ade80' : (effectiveDC <= 15 ? '#facc15' : '#f87171'),
+      notes: notes,
+      dndRef: 'DMG p. 111-112 (Perder-se nos Ermos e Testes de Navegação)'
+    };
+  }
+
+  // === calcCaravanEscortSynergy (Contratos de Escolta de Comboio e Guildas de Viagem - DMG p. 93, 114 / XGE p. 132) ===
+  function calcCaravanEscortSynergy(caravanType, options) {
+    options = options || {};
+    var ct = (caravanType || 'merchant_convoy').toLowerCase();
+
+    var caravans = {
+      merchant_convoy: {
+        name: 'Comboio Comercial da Guilda dos Mercadores',
+        securityRating: 'Alta (12 Lanceiros Mercenários e Arqueiros)',
+        stipendSilverPerDay: 8,
+        speedModifierPct: -20,
+        specialPerk: 'Rações de viagem e água limpa supridas pelo mestre de carga; acesso a compras de mantimentos nas paradas.',
+        obligation: 'Defender as carroças de mercadorias contra salteadores e feras famintas em emboscadas de estrada.',
+        icon: '📦',
+        color: '#facc15'
+      },
+      pilgrim_procession: {
+        name: 'Procissão Sagrada de Peregrinos de Aurora',
+        securityRating: 'Moderada (Devotos Armados e Clérigos)',
+        stipendSilverPerDay: 4,
+        speedModifierPct: -15,
+        specialPerk: 'Clérigos peregrinos realizam curas de ferimentos e purificação de enfermidades sem custo durante o repouso.',
+        obligation: 'Liderar a vanguarda e manter a segurança de anciãos e noviços em travessias arriscadas.',
+        icon: '🕊️',
+        color: '#38bdf8'
+      },
+      royal_garrison_supply: {
+        name: 'Caravana Militar de Suprimentos Régios',
+        securityRating: 'Muito Alta (Guarnição de Infantaria Pesada da Coroa)',
+        stipendSilverPerDay: 12,
+        speedModifierPct: 0,
+        specialPerk: 'Armeiros militares consertam armaduras amassadas e repõem virotes e flechas sem despesas adicionais.',
+        obligation: 'Compor a guarda de flanco e obedecer à hierarquia tática dos sargentos de infantaria.',
+        icon: '🛡️',
+        color: '#4ade80'
+      },
+      dwarven_mining_cart: {
+        name: 'Comitiva de Mineradores e Carretas de Forja Anã',
+        securityRating: 'Alta (Guerreiros Anões com Cotas de Malha e Machados)',
+        stipendSilverPerDay: 10,
+        speedModifierPct: -25,
+        specialPerk: 'Perícia anã em rochas: vantagem para superar desfiladeiros montanhosos e forja de campanha ativa.',
+        obligation: 'Auxiliar na tração de carretas emperradas em passagens estreitas e combater horrores subterrâneos.',
+        icon: '⛏️',
+        color: '#fb923c'
+      }
+    };
+
+    var c = caravans[ct] || caravans.merchant_convoy;
+
+    return {
+      caravanType: ct,
+      caravanName: c.name,
+      securityRating: c.securityRating,
+      stipendSilverPerDay: c.stipendSilverPerDay,
+      speedModifierPct: c.speedModifierPct,
+      specialPerk: c.specialPerk,
+      obligation: c.obligation,
+      icon: c.icon,
+      color: c.color,
+      dndRef: 'DMG p. 93, 114 (Escoltas de Comboio e Caravanas Comerciais)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -9310,6 +9458,8 @@
     calcWildernessTracking: calcWildernessTracking,
     calcSevereWeatherImpact: calcSevereWeatherImpact,
     calcCampDowntimeActivity: calcCampDowntimeActivity,
+    calcNavigationalOrientationCheck: calcNavigationalOrientationCheck,
+    calcCaravanEscortSynergy: calcCaravanEscortSynergy,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

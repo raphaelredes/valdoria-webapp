@@ -70015,7 +70015,8 @@ function renderCartographyCanvas(el){
     + '        <button class="cam-filter-pill" data-filter="altitude" type="button">⛰️ Altitudes</button>
         <button class="cam-filter-pill" data-filter="roads" type="button">🛣️ Estradas</button>
         <button class="cam-filter-pill" data-filter="mounts" type="button">🫏 Montaria</button>
-        <button class="cam-filter-pill" data-filter="weather" type="button">⚡ Clima</button>'
+        <button class="cam-filter-pill" data-filter="weather" type="button">⚡ Clima</button>
+        <button class="cam-filter-pill" data-filter="caravans" type="button">📦 Comboios</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -71080,6 +71081,13 @@ function _cartFocusWaypoint(key) {
               });
             }
             return false;
+          } else if (_camActiveCategory === 'caravans') {
+            if (prov.id === 'world') return false;
+            var caravanBiomes = ['plains', 'floresta', 'posto_avancado', 'posto_sul', 'cidade_capital', 'vale_aurora', 'vila_pescadores'];
+            if (prov.locKeys) {
+              return prov.locKeys.some(function(k){ return caravanBiomes.indexOf(k) >= 0; });
+            }
+            return prov.id === 'plains' || prov.id === 'forest';
           }
           if (!ft) return true;
           if ((prov.name || '').toLowerCase().indexOf(ft) >= 0) return true;
@@ -72692,6 +72700,28 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + dAct.color + ';margin-bottom:2px;">' + dAct.icon + ' ATIVIDADE DE DESCANSO NO ACAMPAMENTO (XGE p. 134):</div>'
           + '  <div>• <b>Tarefa:</b> ' + dAct.activityTitle + ' (CD ' + dAct.checkDC + ')</div>'
           + '  <div style="font-size:7.5px;color:#f472b6;margin-top:1px;">• <b>Benefício:</b> ' + dAct.boonEffect + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcNavigationalOrientationCheck) return '';
+        var curP = window._cartSelectedPace || 'normal';
+        var nav = CartShared.calcNavigationalOrientationCheck(3, biome.key || biome.biome || 'plains', { pace: curP, hasMap: true, hasNavTools: true });
+        return '<div class="clp-nav-hazard-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,28,24,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(74,222,128,0.3);font-size:8px;color:#bbf7d0;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + nav.color + ';margin-bottom:2px;">' + nav.icon + ' ORIENTAÇÃO ESPACIAL & RISCO DE PERDER-SE (DMG p. 111-112):</div>'
+          + '  <div>• <b>Terreno:</b> ' + nav.terrainName + ' (CD ' + nav.effectiveDC + ')</div>'
+          + '  <div>• <b>Auxílios de Rota:</b> ' + (nav.toolsBonus > 0 ? ('+' + nav.toolsBonus + ' bônus de mapa/instrumentos') : 'Nenhum') + (nav.pacePenalty > 0 ? (' · -' + nav.pacePenalty + ' penalidade de marcha rápida') : '') + '</div>'
+          + '  <div style="font-size:7.5px;color:#cbd5e1;margin-top:1px;">• <i>Falha: comitiva vaga ' + nav.wanderHoursOnFailure + 'h para ' + nav.randomDriftDirection + ' antes de notar o desvio.</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCaravanEscortSynergy) return '';
+        var curCar = window._cartSelectedCaravan || 'merchant_convoy';
+        var car = CartShared.calcCaravanEscortSynergy(curCar);
+        return '<div class="clp-caravan-escort-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,24,16,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(250,204,21,0.3);font-size:8px;color:#fef08a;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + car.color + ';margin-bottom:2px;">' + car.icon + ' ESCOLTA DE COMBOIO & GUILDA (DMG p. 93, 114):</div>'
+          + '  <div>• <b>Contrato:</b> ' + car.caravanName + ' (' + car.securityRating + ')</div>'
+          + '  <div>• <b>Estipêndio:</b> ' + car.stipendSilverPerDay + ' pp/dia por aventureiro · ' + (car.speedModifierPct !== 0 ? (car.speedModifierPct + '% marcha') : 'Ritmo militar regular') + '</div>'
+          + '  <div style="font-size:7.5px;color:#fde047;margin-top:1px;">• <b>Benefício:</b> ' + car.specialPerk + '</div>'
           + '</div>';
       })()
     + (function(){
