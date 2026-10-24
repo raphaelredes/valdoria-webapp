@@ -70845,10 +70845,27 @@ function _cartHandleHover(mx, my){
   if (_cartHoverRaf) return;
   _cartHoverRaf = requestAnimationFrame(function(){
     _cartHoverRaf = 0;
+    var compassX = _cartW - 40, compassY = 40;
+    var cdx = mx - compassX, cdy = my - compassY;
+    var isOverCompass = (cdx * cdx + cdy * cdy <= 26 * 26);
+    if (isOverCompass) {
+      if (_cartCanvas) _cartCanvas.style.cursor = 'pointer';
+      var tip = document.getElementById('cart-tooltip');
+      if (tip) {
+        tip.innerHTML = '<div class="ctip-title">🧭 Rosa dos Ventos</div><div class="ctip-footer"><span class="ctip-hint">Clique para orientar ao Norte / Centralizar</span></div>';
+        tip.classList.add('active');
+        tip.style.display = 'block';
+        tip.style.left = Math.max(10, mx - 180) + 'px';
+        tip.style.top = (my + 16) + 'px';
+      }
+      return;
+    }
+    if (_cartCanvas) _cartCanvas.style.cursor = 'default';
     var node = _cartFindNodeAt(mx, my);
     if (node !== _cartHoverNode) {
       _cartHoverNode = node;
       if (node) {
+        if (_cartCanvas) _cartCanvas.style.cursor = 'pointer';
         _cartShowTooltip(node, mx, my);
         _cartRequestAnimLoop();
       } else {
@@ -70856,6 +70873,7 @@ function _cartHandleHover(mx, my){
         _drawCart();
       }
     } else if (node) {
+      if (_cartCanvas) _cartCanvas.style.cursor = 'pointer';
       _cartShowTooltip(node, mx, my);
     } else {
       _cartHideTooltip();
@@ -70863,6 +70881,21 @@ function _cartHandleHover(mx, my){
   });
 }
 function _cartHandleClick(mx, my){
+  // 0. Interação na Rosa dos Ventos (Top-right Compass Rose: re-centraliza e orienta ao Norte)
+  var compassX = _cartW - 40, compassY = 40;
+  var cdx = mx - compassX, cdy = my - compassY;
+  if (cdx * cdx + cdy * cdy <= 26 * 26) {
+    try {
+      if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+        ValdoriaAudio.playSFX('sfx_scroll');
+      }
+    } catch(_) {}
+    _cartZoom = CART_ZOOM_DEFAULT;
+    _cartCenterOnPlayer();
+    _cartUpdateZoomInfo();
+    return;
+  }
+
   var node = _cartFindNodeAt(mx, my);
   if (!node) return;
   _logCity('cart click: ' + node.key);

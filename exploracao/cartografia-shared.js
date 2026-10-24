@@ -3677,7 +3677,7 @@
     var isProv = (viewMode === 'province');
     var barW = isProv ? 68 : 84;
     var x0 = 16;
-    var y0 = h - 22;
+    var y0 = h - 68;
     var label = isProv ? '5 Léguas (~15 Milhas)' : '25 Léguas (~75 Milhas)';
 
     // Caixa de fundo translúcida estilo manuscrito

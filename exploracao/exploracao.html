@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T14:57:28Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T15:03:45Z - do not edit directly, edit source -->
 
 
 
@@ -94222,32 +94222,61 @@ function _xcartUpdateZoomInfo(){
 
 
 function _xcartHandleHover(mx, my){
-
   if (_xcartHoverRaf) return;
-
   _xcartHoverRaf = requestAnimationFrame(function(){
-
     _xcartHoverRaf = 0;
-
-    var node = _xcartFindNodeAt(mx, my);
-
-    _xcartHideTooltip();
-
-    if (node !== _xcartHoverNode) {
-
-      _xcartHoverNode = node;
-
-      _xcartDraw();
-
+    var compassX = _xcartW - 40, compassY = 40;
+    var cdx = mx - compassX, cdy = my - compassY;
+    var isOverCompass = (cdx * cdx + cdy * cdy <= 26 * 26);
+    if (isOverCompass) {
+      if (_xcartCanvas) _xcartCanvas.style.cursor = 'pointer';
+      var tip = document.getElementById('xcart-tooltip');
+      if (tip) {
+        tip.innerHTML = '<div class="ctip-title">🧭 Rosa dos Ventos</div><div class="ctip-footer"><span class="ctip-hint">Clique para orientar ao Norte / Centralizar</span></div>';
+        tip.classList.add('active');
+        tip.style.display = 'block';
+        tip.style.left = Math.max(10, mx - 180) + 'px';
+        tip.style.top = (my + 16) + 'px';
+      }
+      return;
     }
-
+    if (_xcartCanvas) _xcartCanvas.style.cursor = 'default';
+    var node = _xcartFindNodeAt(mx, my);
+    if (node !== _xcartHoverNode) {
+      _xcartHoverNode = node;
+      if (node) {
+        if (_xcartCanvas) _xcartCanvas.style.cursor = 'pointer';
+        _xcartShowTooltip(node, mx, my);
+        _xcartDraw();
+      } else {
+        _xcartHideTooltip();
+        _xcartDraw();
+      }
+    } else if (node) {
+      if (_xcartCanvas) _xcartCanvas.style.cursor = 'pointer';
+      _xcartShowTooltip(node, mx, my);
+    } else {
+      _xcartHideTooltip();
+    }
   });
-
 }
 
-
-
 function _xcartHandleClick(mx, my){
+  // 0. Interação na Rosa dos Ventos (Top-right Compass Rose: re-centraliza e orienta ao Norte)
+  var compassX = _xcartW - 40, compassY = 40;
+  var cdx = mx - compassX, cdy = my - compassY;
+  if (cdx * cdx + cdy * cdy <= 26 * 26) {
+    try {
+      if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+        ValdoriaAudio.playSFX('sfx_scroll');
+      }
+    } catch(_) {}
+    _cartZoom = CART_ZOOM_DEFAULT;
+    _xcartCenterOnPlayer();
+    _xcartUpdateZoomInfo();
+    return;
+  }
+
   var node = _xcartFindNodeAt(mx, my);
   if (!node) return;
 
