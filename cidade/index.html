@@ -69545,7 +69545,6 @@ function renderCartographyCanvas(el){
     + '      <button class="cart-ctrl-btn" id="cart-zoom-in" title="Zoom in">+</button>'
     + '      <button class="cart-ctrl-btn" id="cart-zoom-out" title="Zoom out">-</button>'
     + '      <button class="cart-ctrl-btn" id="cart-zoom-reset" title="Reset" style="font-size:calc(18px * var(--v-font-scale, 1));">⌂</button>'
-    + '      <button class="cart-ctrl-btn" id="cart-sim-discovery" title="Simular Descoberta de Local (Dev)" style="font-size:calc(14px * var(--v-font-scale, 1));color:#ffd685;">⚡</button>'
     + '    </div>'
     + '    <div class="cart-discovery-toast" id="cart-discovery-toast" style="display:none;">'
     + '      <div class="cdt-badge">✦ NOVA ROTA REVELADA ✦</div>'
@@ -70115,24 +70114,7 @@ function _wireCartEvents(){
     };
   }
 
-  // Simular Descoberta de Local (Dev / Teste Instantâneo de Animação e Revelação)
-  var simDiscBtn = document.getElementById('cart-sim-discovery');
-  if (simDiscBtn) {
-    simDiscBtn.onclick = function(e){
-      e.preventDefault();
-      e.stopPropagation();
-      var p = window.CITY_MOCK_PLAYER || {};
-      p.known_locations = p.known_locations || ['plains'];
-      var realCandidates = ['green_fields', 'forest', 'swamp', 'mountain', 'orc_tribe', 'bandit_fortress', 'desert', 'cave', 'graveyard', 'snow', 'volcanic'];
-      var nextLoc = realCandidates.find(function(c){ return p.known_locations.indexOf(c) < 0; });
-      if (!nextLoc) {
-        nextLoc = realCandidates[0];
-      } else {
-        p.known_locations.push(nextLoc);
-      }
-      _triggerCartDiscoveryCelebration(nextLoc);
-    };
-  }
+
 
   // Checagem automática de novas rotas descobertas após expedições
   setTimeout(function(){
