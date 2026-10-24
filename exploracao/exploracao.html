@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T20:37:07Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T20:42:25Z - do not edit directly, edit source -->
 
 
 
@@ -93354,6 +93354,21 @@ function _openCartLocationPopup(biome){
                 + '    <span style="font-size:8px;color:#cbd5e1;font-style:italic;">' + riv.advice + '</span>'
                 + '  </div>'
                 + '</div>';
+            })()
+          + (function(){
+              if (!window.CartShared || !CartShared.calcSurvivalGearSynergy) return '';
+              var p = (typeof window.PLAYER !== 'undefined') ? window.PLAYER : (window.S ? window.S.player : {});
+              var inv = (p && p.inventory) ? p.inventory : ['navigators_tools', 'herbalism_kit'];
+              var gear = CartShared.calcSurvivalGearSynergy(inv);
+              var altInfo = (biome.biome === 'mountain' || (biome.key && (biome.key.indexOf('pico') >= 0 || biome.key.indexOf('cordilheira') >= 0)))
+                ? CartShared.calcAltitudeExposure(11500, horasViagem)
+                : null;
+              return '<div class="clp-survival-gear-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,24,20,0.75);padding:4px 8px;border-radius:4px;border:1px solid rgba(74,222,128,0.25);font-size:8px;color:#bbf7d0;">'
+                + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:#86efac;margin-bottom:2px;">🎒 EQUIPAMENTO DE EXPEDIÇÃO (XGE p. 78):</div>'
+                + '  <div>• <b>Prontidão:</b> ' + gear.expeditionReadinessLabel + '</div>'
+                + (gear.activeSynergies.length ? ('  <div style="color:#d2be90;margin-top:1px;">• ' + gear.activeSynergies.map(function(s){ return s.icon + ' ' + s.name; }).join(' · ') + '</div>') : '')
+                + (altInfo ? ('  <div style="margin-top:2px;color:' + altInfo.color + ';">⛰️ <b>Alta Altitude:</b> ' + altInfo.riskLevel + ' (' + altInfo.altitudeFeet + ' pés · ~' + altInfo.altitudeMeters + 'm)</div>') : '')
+                + '</div>';
             })();
       })()
     + (biome.isSanctuary
@@ -94523,6 +94538,7 @@ function openCartography() {
     + '        <button class="cam-filter-pill" data-filter="hazards" type="button">⚠️ Perigos</button>'
     + '        <button class="cam-filter-pill" data-filter="landmarks" type="button">🏛️ Marcos</button>'
     + '        <button class="cam-filter-pill" data-filter="sanctuaries" type="button">✨ Santuários</button>'
+    + '        <button class="cam-filter-pill" data-filter="altitude" type="button">⛰️ Altitudes</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -95822,6 +95838,9 @@ function _xcartFocusWaypoint(key) {
               });
             }
             if (!isSanc) return false;
+          } else if (_xcamActiveCategory === 'altitude') {
+            if (prov.id === 'mountain' || prov.id === 'snow') return true;
+            return false;
           }
           if (!ft) return true;
           if ((prov.name || '').toLowerCase().indexOf(ft) >= 0) return true;

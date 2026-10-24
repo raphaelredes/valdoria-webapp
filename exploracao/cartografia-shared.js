@@ -6862,6 +6862,136 @@
     };
   }
 
+
+  // === calcSurvivalGearSynergy (Ferramentas de Sobrevivência e Equipamento - XGE p. 78-85 / PHB p. 150-154) ===
+  function calcSurvivalGearSynergy(inventoryItems, options) {
+    options = options || {};
+    var rawList = Array.isArray(inventoryItems) ? inventoryItems : [];
+    var idList = rawList.map(function(item) {
+      if (!item) return '';
+      if (typeof item === 'string') return item.toLowerCase();
+      return (item.id || item.key || '').toLowerCase();
+    });
+
+    var hasNavTools = idList.some(function(id) {
+      return id.indexOf('navigator') >= 0 || id.indexOf('astrolabe') >= 0 || id.indexOf('sextant') >= 0 || id === 'navigators_tools';
+    });
+    var hasHerbalismKit = idList.some(function(id) {
+      return id.indexOf('herbalism') >= 0 || id.indexOf('herbal') >= 0 || id === 'herbalism_kit';
+    });
+    var hasCartTools = idList.some(function(id) {
+      return id.indexOf('cartographer') >= 0 || id.indexOf('map_tools') >= 0 || id === 'cartographers_tools';
+    });
+    var hasClimberKit = idList.some(function(id) {
+      return id.indexOf('climber') >= 0 || id.indexOf('climbing') >= 0 || id.indexOf('rope') >= 0 || id === 'climbers_kit';
+    });
+
+    var synergies = [];
+    if (hasNavTools) {
+      synergies.push({
+        id: 'nav_tools',
+        name: 'Instrumentos de Navegador',
+        icon: '🧭',
+        benefit: '+3 em testes de navegação; imunidade a perder-se sob céu estrelado (XGE p. 83).'
+      });
+    }
+    if (hasHerbalismKit) {
+      synergies.push({
+        id: 'herbalism_kit',
+        name: 'Kit de Herbalismo',
+        icon: '🌿',
+        benefit: 'Identificação botânica precisa; dobra o rendimento na coleta de ervas medicinais (XGE p. 82).'
+      });
+    }
+    if (hasCartTools) {
+      synergies.push({
+        id: 'cart_tools',
+        name: 'Ferramentas de Cartógrafo',
+        icon: '📜',
+        benefit: 'Mapeamento topográfico; concede +1 em testes de iniciativa ao revisitar a região (XGE p. 80).'
+      });
+    }
+    if (hasClimberKit) {
+      synergies.push({
+        id: 'climber_kit',
+        name: 'Kit de Escalador & Cordas',
+        icon: '🧗',
+        benefit: 'Arreios e pitões; neutraliza o risco de queda mortal em encostas e gargantas rochosas (PHB p. 151).'
+      });
+    }
+
+    var count = synergies.length;
+    var readinessLabel = 'Improvisada (0/4 Ferramentas)';
+    var color = '#94a3b8';
+    if (count === 4) {
+      readinessLabel = 'Expedição Completa (4/4 Ferramentas)';
+      color = '#4ade80';
+    } else if (count >= 2) {
+      readinessLabel = 'Expedição Avançada (' + count + '/4 Ferramentas)';
+      color = '#facc15';
+    } else if (count === 1) {
+      readinessLabel = 'Expedição Básica (1/4 Ferramenta)';
+      color = '#fb923c';
+    }
+
+    return {
+      toolsCount: count,
+      gearScorePercent: Math.round((count / 4) * 100),
+      expeditionReadinessLabel: readinessLabel,
+      activeSynergies: synergies,
+      hasNavTools: hasNavTools,
+      hasHerbalismKit: hasHerbalismKit,
+      hasCartTools: hasCartTools,
+      hasClimberKit: hasClimberKit,
+      color: color,
+      dndRef: 'XGE p. 78-85 / PHB p. 150-154 (Ferramentas de Sobrevivência)'
+    };
+  }
+
+  // === calcAltitudeExposure (Alta Altitude, Ar Rarefeito e Exaustão - DMG p. 110) ===
+  function calcAltitudeExposure(altitudeFeet, hoursOfTravel, isAcclimated, options) {
+    options = options || {};
+    var alt = (typeof altitudeFeet === 'number') ? altitudeFeet : 2500;
+    var hours = (typeof hoursOfTravel === 'number') ? hoursOfTravel : 4;
+    var acclimated = !!isAcclimated;
+    var meters = Math.round(alt * 0.3048);
+
+    var isHigh = alt >= 10000;
+    var conSaveDC = isHigh ? (10 + Math.max(0, Math.floor(hours - 1))) : 0;
+
+    var riskLevel = 'Altitude Segura';
+    var color = '#4ade80';
+    var desc = 'Pressão atmosférica estável; respiração e vigor físico normais da comitiva.';
+
+    if (isHigh) {
+      if (acclimated) {
+        riskLevel = 'Aclimatado ao Ar Rarefeito';
+        color = '#60a5fa';
+        desc = 'Aventureiros adaptados aos picos nevados (mais de 30 dias na cordilheira); imunidade à fadiga respiratória.';
+      } else {
+        riskLevel = 'Ar Rarefeito Severo (CD ' + conSaveDC + ' CON)';
+        color = '#f87171';
+        desc = 'Altitude de ' + alt + ' pés (~' + meters + 'm). Cada hora de marcha exige Salvaguarda de CON CD ' + conSaveDC + ' contra 1 nível de Exaustão (DMG p. 110).';
+      }
+    } else if (alt >= 5000) {
+      riskLevel = 'Planalto Elevado (5.000 - 10.000 pés)';
+      color = '#facc15';
+      desc = 'Encostas montanhosas; ventos frios moderados sem necessidade de testes de exaustão por ar rarefeito.';
+    }
+
+    return {
+      altitudeFeet: alt,
+      altitudeMeters: meters,
+      isHighAltitude: isHigh,
+      isAcclimated: acclimated,
+      conSaveDC: conSaveDC,
+      riskLevel: riskLevel,
+      description: desc,
+      color: color,
+      dndRef: 'DMG p. 110 (Alta Altitude e Ar Rarefeito)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -8559,6 +8689,8 @@
     calcRouteObstacleOptions: calcRouteObstacleOptions,
     calcTravelIllumination: calcTravelIllumination,
     calcCampCookingBenefits: calcCampCookingBenefits,
+    calcSurvivalGearSynergy: calcSurvivalGearSynergy,
+    calcAltitudeExposure: calcAltitudeExposure,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
