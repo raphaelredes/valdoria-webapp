@@ -70024,7 +70024,8 @@ function renderCartographyCanvas(el){
         <button class="cam-filter-pill" data-filter="rumors" type="button">🍺 Boatos</button>
         <button class="cam-filter-pill" data-filter="triangulation" type="button">📐 Triangulação</button>
         <button class="cam-filter-pill" data-filter="cooking" type="button">🍲 Culinária</button>
-        <button class="cam-filter-pill" data-filter="trailblaze" type="button">🪨 Trilhas</button>'
+        <button class="cam-filter-pill" data-filter="trailblaze" type="button">🪨 Trilhas</button>
+        <button class="cam-filter-pill" data-filter="acoustics" type="button">👂 Acústica</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -71107,6 +71108,9 @@ function _cartFocusWaypoint(key) {
               });
             }
             return false;
+          } else if (_camActiveCategory === 'acoustics') {
+            if (prov.id === 'world') return false;
+            return true;
           } else if (_camActiveCategory === 'trailblaze') {
             if (prov.id === 'world') return false;
             return true;
@@ -72809,6 +72813,29 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessAcousticFootprint) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var isCanyon = (bKey === 'mountain' || bKey === 'cordilheira' || bKey === 'fenda' || bKey === 'caverna');
+        var ac = CartShared.calcWildernessAcousticFootprint('clanking_heavy_armor', isCanyon ? 'rocky_canyon_cave' : 'open_plains_road');
+        return '<div class="clp-acoustics-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,20,24,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(248,113,113,0.3);font-size:8px;color:#fca5a5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ac.color + ';margin-bottom:2px;">' + ac.icon + ' PEGADA SONORA & ECO NOS ERMOS (PHB p. 177):</div>'
+          + '  <div>• <b>Ruído:</b> ' + ac.noiseName + ' (Audível a ' + ac.adjustedAudibleFeet + ' pés / ' + Math.round(ac.adjustedAudibleFeet * 0.3) + 'm)</div>'
+          + '  <div>• <b>Acústica:</b> ' + ac.ambientEchoDesc + '</div>'
+          + '  <div style="font-size:7.5px;color:#fecaca;margin-top:1px;">• <i>Furtividade: ' + ac.stealthModifier + ' · Alerta emboscada ' + (ac.ambushAlertRiskPct >= 0 ? '+' : '') + ac.ambushAlertRiskPct + '%</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcEnvironmentalMirageEncounter) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var mir = CartShared.calcEnvironmentalMirageEncounter(bKey, 'extreme_heat');
+        return '<div class="clp-mirage-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,24,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(250,204,21,0.3);font-size:8px;color:#fef08a;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + mir.color + ';margin-bottom:2px;">' + mir.icon + ' ' + mir.mirageTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Ilusão:</b> ' + mir.deceptionStory + '</div>'
+          + '  <div>• <b>Identificação:</b> CD ' + mir.discernDC + ' [' + mir.discernSkill + ']</div>'
+          + '  <div style="font-size:7.5px;color:#fde047;margin-top:1px;">• <i>Dica Tática: ' + mir.tacticalAdvice + '</i></div>'
           + '</div>';
       })()
     + (function(){

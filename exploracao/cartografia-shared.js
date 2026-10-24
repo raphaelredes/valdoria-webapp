@@ -8810,6 +8810,152 @@
     };
   }
 
+  // === calcWildernessAcousticFootprint (Pegada Sonora, Eco em Desfiladeiros e Furtividade Auditiva - PHB p. 177 / DMG p. 105) ===
+  function calcWildernessAcousticFootprint(travelNoiseType, biomeAcoustics, options) {
+    options = options || {};
+    var nt = (travelNoiseType || 'clanking_heavy_armor').toLowerCase();
+    var ba = (biomeAcoustics || 'open_plains_road').toLowerCase();
+
+    var noiseProfiles = {
+      clanking_heavy_armor: {
+        name: 'Placas Metálicas e Cota de Malha Tilintante',
+        baselineFeet: 300,
+        stealthModDesc: 'Desvantagem automática em testes de Furtividade (PHB p. 144).',
+        ambushRiskPct: 35,
+        desc: 'O choque ritmado do ferro ressoa a grandes distâncias alertando patrulhas e predadores.',
+        icon: '🛡️🔔',
+        color: '#f87171'
+      },
+      marching_horses_wagon: {
+        name: 'Carroça Mercante e Ferraduras em Cascalho',
+        baselineFeet: 600,
+        stealthModDesc: 'Furtividade impossível; ruído contínuo de rodas rangentes e passos de tração.',
+        ambushRiskPct: 45,
+        desc: 'Comboio audível a centenas de metros; atrai salteadores de estrada.',
+        icon: '🐎📦',
+        color: '#fb923c'
+      },
+      muffled_boots_scouts: {
+        name: 'Botas Acolchoadas e Manto de Batedor',
+        baselineFeet: 25,
+        stealthModDesc: 'Passos silenciosos; permite marcha com vantagem em testes de Furtividade.',
+        ambushRiskPct: 0,
+        desc: 'Passada leve que evita galhos secos e seixos soltos.',
+        icon: '🥾🍃',
+        color: '#4ade80'
+      },
+      spellcasting_verbal_components: {
+        name: 'Entoação Mística de Componentes Verbais',
+        baselineFeet: 60,
+        stealthModDesc: 'Ressonância sonora mágica audível claramente a até 18 metros.',
+        ambushRiskPct: 15,
+        desc: 'Palavras de poder e cânticos de conjuração que reverberam no ar.',
+        icon: '✨🗣️',
+        color: '#c084fc'
+      }
+    };
+
+    var p = noiseProfiles[nt] || noiseProfiles.clanking_heavy_armor;
+    var baseFeet = p.baselineFeet;
+    var multiplier = 1.0;
+    var ambientEchoDesc = 'Acústica de terreno aberto regular.';
+
+    if (ba === 'dense_forest_snow') {
+      multiplier = 0.5;
+      ambientEchoDesc = 'Foliagem densa e neve fofa amortecem as vibrações sonoras (-50% alcance auditivo).';
+    } else if (ba === 'rocky_canyon_cave') {
+      multiplier = 2.0;
+      ambientEchoDesc = 'Paredões de rocha e fendas reverberam o som em eco estrondoso (+100% alcance auditivo).';
+    } else if (ba === 'raging_gale_waterfall') {
+      multiplier = 0.25;
+      ambientEchoDesc = 'Vendaval uivante e rugido de corredeiras criam ruído branco mascarador.';
+    }
+
+    var adjustedAudibleFeet = Math.round(baseFeet * multiplier);
+
+    return {
+      travelNoiseType: nt,
+      noiseName: p.name,
+      biomeAcoustics: ba,
+      baselineAudibleFeet: baseFeet,
+      adjustedAudibleFeet: adjustedAudibleFeet,
+      stealthModifier: p.stealthModDesc,
+      ambientEchoDesc: ambientEchoDesc,
+      ambushAlertRiskPct: Math.round(p.ambushRiskPct * multiplier),
+      description: p.desc,
+      icon: p.icon,
+      color: p.color,
+      dndRef: 'PHB p. 177 (Barulho e Percepção Auditiva) / DMG p. 105'
+    };
+  }
+
+  // === calcEnvironmentalMirageEncounter (Miragens Térmicas, Luzes-Fátuas e Desorientação Sensorial - DMG p. 111-112 / PHB p. 178) ===
+  function calcEnvironmentalMirageEncounter(biomeKey, weatherTemp, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var wt = (weatherTemp || 'extreme_heat').toLowerCase();
+
+    var mirage = {
+      mirageTitle: 'Miragem de Oásis Térmico e Palmeiras Ilusórias',
+      deceptionStory: 'O calor abrasador do sol do meio-dia faz o ar tremular nas dunas, projetando o reflexo vítreo de um lago fresco.',
+      discernDC: 13,
+      discernSkill: 'Investigação (Inteligência) ou Sobrevivência (Sabedoria)',
+      misdirectionConsequence: 'Desvia a comitiva por 1d4 milhas em direção a bancos de areia escaldantes, consumindo 1 hora de marcha inútil.',
+      tacticalAdvice: 'Use um cantil ou observe pássaros reais; a ausência de animais em voo revela a ilusão térmica.',
+      icon: '🏜️💧',
+      color: '#facc15'
+    };
+
+    if (bk === 'swamp') {
+      mirage = {
+        mirageTitle: 'Luzes-Fátuas e Falsos Lampiões do Charco',
+        deceptionStory: 'Globos fosforescentes de fogo fátuo dançam na névoa espessa mimetizando tochas de uma estalagem ou batedores de socorro.',
+        discernDC: 14,
+        discernSkill: 'Sobrevivência (Sabedoria) ou Arcanismo (Inteligência)',
+        misdirectionConsequence: 'Conduz viajantes direto a poços de lodo movediço (Salvaguarda de Destreza CD 12 ou afundamento).',
+        tacticalAdvice: 'Luzes frias sem fumaça denunciam gases venenosos e espíritos errantes do pântano.',
+        icon: '🏮🌫️',
+        color: '#c084fc'
+      };
+    } else if (bk === 'snow' || bk === 'tundra') {
+      mirage = {
+        mirageTitle: 'Estruturas Fantasmas da Nevasca Branca',
+        deceptionStory: 'A luz cegante refletida na neve associada ao vento polar distorce montículos de gelo em formato de cabanas de refúgio.',
+        discernDC: 12,
+        discernSkill: 'Sobrevivência (Sabedoria) ou Percepção (Sabedoria)',
+        misdirectionConsequence: 'Gasta 2 horas contornando gretas de gelo quebradiço na tentativa de alcançar o abrigo inexistente.',
+        tacticalAdvice: 'Óculos de fenda de madeira ou pele escura protegem a visão contra a cegueira branca da tundra.',
+        icon: '❄️🛖',
+        color: '#38bdf8'
+      };
+    } else if (bk === 'mountain' || bk === 'cordilheira') {
+      mirage = {
+        mirageTitle: 'Ecos Ilusórios e Sussurros das Fendas',
+        deceptionStory: 'Rajadas de ar canalizadas pelas gargantas rochosas emitem uivos acústicos que soam idênticos a pedidos de socorro.',
+        discernDC: 13,
+        discernSkill: 'Percepção (Sabedoria) ou Sobrevivência (Sabedoria)',
+        misdirectionConsequence: 'Atrai a comitiva para bordas escorregadias expostas a ventanias laterais de desfiladeiro.',
+        tacticalAdvice: 'Verifique a direção do vento dominante antes de se deslocar em direção aos ruídos.',
+        icon: '⛰️🗣️',
+        color: '#f87171'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      weatherTemp: wt,
+      mirageTitle: mirage.mirageTitle,
+      deceptionStory: mirage.deceptionStory,
+      discernDC: mirage.discernDC,
+      discernSkill: mirage.discernSkill,
+      misdirectionConsequence: mirage.misdirectionConsequence,
+      tacticalAdvice: mirage.tacticalAdvice,
+      icon: mirage.icon,
+      color: mirage.color,
+      dndRef: 'DMG p. 111-112 (Miragens e Desorientação Sensorial nos Ermos) / PHB p. 178'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -10535,6 +10681,8 @@
     calcCelestialStarNavigation: calcCelestialStarNavigation,
     calcWildernessTrailBlaze: calcWildernessTrailBlaze,
     calcMountainAltitudeAcclimatization: calcMountainAltitudeAcclimatization,
+    calcWildernessAcousticFootprint: calcWildernessAcousticFootprint,
+    calcEnvironmentalMirageEncounter: calcEnvironmentalMirageEncounter,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
