@@ -69942,7 +69942,16 @@ function renderCartographyCanvas(el){
     + '        <h3>Atlas das Províncias de Valdoria</h3>'
     + '        <button class="cam-close" id="cam-close-btn" type="button">✕</button>'
     + '      </div>'
+    + '      <div class="cam-search-wrap">'
+    + '        <input type="text" class="cam-search-input" id="cam-search-input" placeholder="🔍 Buscar província ou localidade..." autocomplete="off">'
+    + '      </div>'
     + '      <div class="cam-grid" id="cam-grid"></div>'
+    + '      <div class="cam-legend">'
+    + '        <span class="cam-legend-item">🏛️ Assentamentos</span>'
+    + '        <span class="cam-legend-item">⚔️ Terras Ermas</span>'
+    + '        <span class="cam-legend-item">📜 Contratos</span>'
+    + '        <span class="cam-legend-item">🗺️ Cartas Mapeadas</span>'
+    + '      </div>'
     + '    </div>'
     + '  </div>'
     + '</div>';
@@ -70209,6 +70218,25 @@ var _PROV_SHORT_NAMES = {
   volcanic: 'Vulcânico'
 };
 
+function _getProvinceActiveQuest(provId) {
+  if (!provId || provId === 'world') return null;
+  var prov = (window.CartShared && CartShared.CART_PROVINCES) ? CartShared.CART_PROVINCES.find(function(p){ return p.id === provId; }) : null;
+  if (!prov || !prov.locKeys) return null;
+  if (window._questFocusLoc && window._questFocusLoc.key && prov.locKeys.indexOf(window._questFocusLoc.key) >= 0) {
+    return window._questFocusLoc.title || 'Contrato em Andamento';
+  }
+  if (typeof QUESTS_ACTIVE !== 'undefined' && Array.isArray(QUESTS_ACTIVE) && typeof QUEST_MAP !== 'undefined') {
+    for (var i = 0; i < QUESTS_ACTIVE.length; i++) {
+      var qItem = QUESTS_ACTIVE[i];
+      var qRawId = qItem ? (qItem.id || '').replace(/^qa_/, '') : '';
+      if (QUEST_MAP[qRawId] && prov.locKeys.indexOf(QUEST_MAP[qRawId].biomeKey) >= 0) {
+        return (qItem && qItem.title) || QUEST_MAP[qRawId].name;
+      }
+    }
+  }
+  return null;
+}
+
 function _renderCartProvinceBar() {
   var pBar = document.getElementById('cart-prov-bar');
   if (!pBar) return;
@@ -70235,7 +70263,9 @@ function _renderCartProvinceBar() {
     chip.className = 'cart-prov-chip' + (isActive ? ' active' : '');
     chip.setAttribute('data-prov', prov.id);
     chip.setAttribute('type', 'button');
-    chip.innerHTML = '<span>' + (prov.icon || '📍') + '</span> ' + (_PROV_SHORT_NAMES[prov.id] || prov.name);
+    var qTitle = _getProvinceActiveQuest(prov.id);
+    var qIcon = qTitle ? '<span class="cam-q-dot" title="Contrato Ativo: ' + qTitle + '">📜</span>' : '';
+    chip.innerHTML = '<span>' + (prov.icon || '📍') + '</span> ' + (_PROV_SHORT_NAMES[prov.id] || prov.name) + (qIcon ? ' ' + qIcon : '');
     chip.onclick = function(e){
       e.preventDefault();
       _cartFocusProvince(prov.id);
@@ -70479,6 +70509,7 @@ function _wireCartEvents(){
   var atlasModal = document.getElementById('cart-atlas-modal');
   var camClose = document.getElementById('cam-close-btn');
   var camGrid = document.getElementById('cam-grid');
+  var camSearch = document.getElementById('cam-search-input');
   if (atlasPickerBtn && atlasModal && camGrid) {
     atlasPickerBtn.onclick = function(e){
       e.preventDefault();
@@ -70491,21 +70522,48 @@ function _wireCartEvents(){
         ? CartShared.getDiscoveredProvinces(known, ownedMaps) 
         : ((window.CartShared && CartShared.CART_PROVINCES) ? [CartShared.CART_PROVINCES[0], CartShared.CART_PROVINCES[1]] : []);
       
-      camGrid.innerHTML = '';
-      discProvs.forEach(function(prov){
-        var item = document.createElement('div');
-        var isActive = (curMode.provinceId === prov.id) || (curMode.mode === 'world' && prov.id === 'world');
-        item.className = 'cam-item' + (isActive ? ' active' : '');
-        item.innerHTML = '<div class="cam-item-title">' + (prov.icon || '🗺️') + ' ' + (prov.name || prov.id) + '</div>'
-                       + '<div class="cam-item-sub">' + (prov.desc || 'Província de Valdória') + '</div>';
-        item.onclick = function(ev){
-          ev.preventDefault();
-          ev.stopPropagation();
-          _cartFocusProvince(prov.id);
-          atlasModal.style.display = 'none';
-        };
-        camGrid.appendChild(item);
-      });
+      function renderCamItems(filterText) {
+        camGrid.innerHTML = '';
+        var ft = (filterText || '').toLowerCase().trim();
+        var filtered = discProvs.filter(function(prov){
+          if (!ft) return true;
+          if ((prov.name || '').toLowerCase().indexOf(ft) >= 0) return true;
+          if ((prov.desc || '').toLowerCase().indexOf(ft) >= 0) return true;
+          if (prov.locKeys && prov.locKeys.some(function(k){ return k.toLowerCase().indexOf(ft) >= 0; })) return true;
+          return false;
+        });
+        if (filtered.length === 0) {
+          camGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #a09484; font-size: 11px; padding: 20px;">Nenhuma província ou localidade encontrada para "' + filterText + '".</div>';
+          return;
+        }
+        filtered.forEach(function(prov){
+          var item = document.createElement('div');
+          var isActive = (curMode.provinceId === prov.id) || (curMode.mode === 'world' && prov.id === 'world');
+          item.className = 'cam-item' + (isActive ? ' active' : '');
+          var qTitle = _getProvinceActiveQuest(prov.id);
+          var qBadge = qTitle ? '<span class="cam-q-badge">📜 ' + qTitle + '</span>' : '';
+          var locKeys = prov.locKeys || [];
+          var knownCount = locKeys.filter(function(k){ return known.indexOf(k) >= 0; }).length;
+          var metaHtml = (prov.id === 'world') 
+            ? '<div class="cam-item-meta">🗺️ Mapa Geral de Valdória</div>'
+            : '<div class="cam-item-meta">📍 ' + knownCount + ' / ' + locKeys.length + ' locais mapeados ' + qBadge + '</div>';
+          item.innerHTML = '<div class="cam-item-title">' + (prov.icon || '🗺️') + ' ' + (prov.name || prov.id) + '</div>'
+                         + '<div class="cam-item-sub">' + (prov.desc || 'Província de Valdória') + '</div>'
+                         + metaHtml;
+          item.onclick = function(ev){
+            ev.preventDefault();
+            ev.stopPropagation();
+            _cartFocusProvince(prov.id);
+            atlasModal.style.display = 'none';
+          };
+          camGrid.appendChild(item);
+        });
+      }
+      if (camSearch) {
+        camSearch.value = '';
+        camSearch.oninput = function(){ renderCamItems(camSearch.value); };
+      }
+      renderCamItems('');
       atlasModal.style.display = 'flex';
     };
     if (camClose) {
@@ -71020,8 +71078,6 @@ function _openCartLocationPopup(biome){
 
   // Local conhecido — popup normal
   var rec = '';
-  // FIX 2026-05-04 (revisão): tier 0 (origem) não cai no mapeamento abaixo
-  // por ser falsy. Tratamos tier 0 como "Origem (sem perigo)".
   if (typeof biome.tier === 'number') {
     if (biome.tier === 0) {
       rec = 'Origem (Cidade Segura)';
@@ -71033,21 +71089,57 @@ function _openCartLocationPopup(biome){
                               'Lendário (Nível 10+)';
     }
   }
-  // 2026-05-05 v10: Portões de Valdoria (origem) é EXPLORÁVEL como bioma
-  // de planície. User pediu "permita explorar os portões de valdoria, sendo
-  // um mapa de planície chamado portões de valdoria". Antes só "Voltar pro
-  // Mapa" aparecia quando isCurrent. Agora origem mostra "Explorar Planícies"
-  // → chama mesmo handler que viajar (cart_plains) → playTravelAnimation +
-  // exploracao.html?biome=plains.
+
+  var marcos = (typeof biome.marcos === 'number') ? biome.marcos : (biome.tier || 1);
+  var distMilhas = Math.max(6, marcos * 8);
+  var horasViagem = Math.max(2, Math.round(distMilhas / 3));
+
+  var curTime = (typeof _getCurrentGameTime === 'function') ? _getCurrentGameTime() : null;
+  var isNight = curTime && (curTime.hour < 6 || curTime.hour >= 20);
+
+  var activeQuestTitle = '';
+  if (window._questFocusLoc && window._questFocusLoc.key === biome.key) {
+    activeQuestTitle = window._questFocusLoc.title || 'Missão Ativa';
+  } else if (typeof QUESTS_ACTIVE !== 'undefined' && Array.isArray(QUESTS_ACTIVE) && typeof QUEST_MAP !== 'undefined') {
+    for (var qi = 0; qi < QUESTS_ACTIVE.length; qi++) {
+      var qItem = QUESTS_ACTIVE[qi];
+      var qRaw = qItem ? (qItem.id || '').replace(/^qa_/, '') : '';
+      if (QUEST_MAP[qRaw] && QUEST_MAP[qRaw].biomeKey === biome.key) {
+        activeQuestTitle = (qItem && qItem.title) || QUEST_MAP[qRaw].name;
+        break;
+      }
+    }
+  }
+
+  var questBannerHtml = activeQuestTitle
+    ? '<div class="clp-quest-alert" style="margin: 0 0 8px;">📜 CONTRATO ATIVO: ' + activeQuestTitle.toUpperCase() + '</div>'
+    : '';
+
+  var nightWarnHtml = isNight
+    ? '<div class="clp-exp-night-warn">🌙 Marcha Noturna: O sol já se pôs além das colinas. Tochas, lanternas ou visão no escuro são indispensáveis contra emboscadas na estrada.</div>'
+    : '';
+
   var canExploreOrigin = isCurrent && biome.isOrigin;
-  // 2026-05-05 v10: removido badge "Tier N" — só level range no rec.
+  var biomePT = ((CartShared && CartShared.biomePT) ? CartShared.biomePT(biome.biome || biome.key) : (biome.biome || biome.key));
+
   card.innerHTML = ''
     + '<div class="clp-body">'
     + '<div class="clp-icon">' + (CartShared.locArtHtml ? CartShared.locArtHtml(biome) : biome.ico) + '</div>'
     + (isCurrent ? '<div class="clp-current-here">VOCÊ ESTÁ AQUI</div>' : '')
-    + '<h2>' + biome.name + '</h2>'
+    + questBannerHtml
+    + '<h2>' + (biome.regionalName || biome.name) + '</h2>'
     + '<p>' + (biome.desc || 'Um destino misterioso te aguarda além das fronteiras.') + '</p>'
-    + (rec ? '<div class="clp-meta">' + rec + '<br>Bioma: ' + ((CartShared && CartShared.biomePT) ? CartShared.biomePT(biome.biome || biome.key) : (biome.biome || biome.key)) + '</div>' : '')
+    + (rec ? '<div class="clp-meta">' + rec + '<br>Bioma: ' + biomePT + ' · Distância: ~' + distMilhas + ' milhas (~' + horasViagem + 'h de marcha)</div>' : '')
+    + nightWarnHtml
+    + '<div class="clp-pace-wrap" style="margin-top: 8px; text-align: left;">'
+    + '  <div style="font-size: 9.5px; font-family: Cinzel, serif; color: #ffd685; margin-bottom: 3px; font-weight: 600;">RITMO DE MARCHA D&D 5e:</div>'
+    + '  <div class="clp-pace-selector">'
+    + '    <button class="clp-pace-btn" data-pace="stealth" type="button">🐾 Furtivo</button>'
+    + '    <button class="clp-pace-btn active" data-pace="normal" type="button">🚶 Normal</button>'
+    + '    <button class="clp-pace-btn" data-pace="fast" type="button">⚡ Rápido</button>'
+    + '  </div>'
+    + '  <div class="clp-pace-note" id="clp-pace-note">🚶 Ritmo Normal (24 milhas/dia): Velocidade e percepção passiva equilibradas sem penalidades.</div>'
+    + '</div>'
     + '</div>'
     + '<div class="clp-buttons">'
     + (canExploreOrigin

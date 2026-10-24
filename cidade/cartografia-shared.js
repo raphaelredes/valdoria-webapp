@@ -4124,6 +4124,7 @@
       var hoverKey = hover ? hover.key : null;
       var ownedMaps = (typeof cfg.getOwnedMaps === 'function') ? cfg.getOwnedMaps() :
                       ((typeof window !== 'undefined' && window.CITY_MOCK_PLAYER && (window.CITY_MOCK_PLAYER.owned_maps || window.CITY_MOCK_PLAYER.maps_owned)) || []);
+      var pk = (typeof cfg.getPlayerBiomeKey === 'function') ? cfg.getPlayerBiomeKey() : null;
       _ensureLocArt();
 
       if (_viewMode === 'province' && _activeProvId !== 'world') {
@@ -4167,10 +4168,9 @@
         });
 
         // Rota de Viagem Ativa e Breadcrumbs (D&D 5e / Baldur's Gate 3 Style)
-        var pk = (typeof cfg.getPlayerBiomeKey === 'function') ? cfg.getPlayerBiomeKey() : null;
         var activeTarget = hoverKey || (typeof window !== 'undefined' && window._cartCurrentLocBiome && window._cartCurrentLocBiome.key);
         if (activeTarget && curProv.regionalPaths && curProv.regionalPaths.length) {
-          var startK = pk || (regNodes.length ? regNodes[0].key : null);
+          var startK = (pk && regNodes.some(function(b){ return b.key === pk; })) ? pk : (regNodes.length ? regNodes[0].key : null);
           if (startK && startK !== activeTarget) {
             var route = _findRoutePath(startK, activeTarget, curProv.regionalPaths);
             if (route) {
@@ -4223,7 +4223,7 @@
         // Rota Continental Ativa e Breadcrumbs (D&D 5e Style)
         var activeTargetWorld = hoverKey || (typeof window !== 'undefined' && window._cartCurrentLocBiome && window._cartCurrentLocBiome.key);
         if (activeTargetWorld && CART_PATHS && CART_PATHS.length) {
-          var startKW = pk || 'plains';
+          var startKW = (pk && RB.some(function(b){ return b.key === pk; })) ? pk : 'plains';
           if (startKW && startKW !== activeTargetWorld) {
             var routeW = _findRoutePath(startKW, activeTargetWorld, CART_PATHS);
             if (routeW) {
@@ -4237,7 +4237,6 @@
             _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt });
           }
         });
-        var pk = (typeof cfg.getPlayerBiomeKey === 'function') ? cfg.getPlayerBiomeKey() : null;
         var pn = pk && RB.find(function(b){ return b.key === pk; });
         if (pn) _drawPlayerPin(ctx, pn, _S, _S);
         var qf = (typeof cfg.getQuestFocus === 'function') ? cfg.getQuestFocus() : null;
