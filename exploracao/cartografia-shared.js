@@ -8325,6 +8325,139 @@
     };
   }
 
+  // === calcTavernExplorationRumor (Boatos de Taverna, Intel de Exploração e Segredos dos Ermos - DMG p. 129-130 / XGE p. 130) ===
+  function calcTavernExplorationRumor(biomeKey, spendingLevel, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var sl = (spendingLevel || 'comfortable').toLowerCase();
+
+    var bribeCostSilver = 10;
+    if (sl === 'modest') bribeCostSilver = 3;
+    else if (sl === 'lavish') bribeCostSilver = 30;
+
+    var rumor = {
+      rumorTitle: 'O Esconderijo do Bando da Masmorra Aberta',
+      rumorStory: 'Tropeiros juram que contrabandistas usavam uma adega de pedra escondida sob um moinho em ruínas para fugir das patrulhas.',
+      credibility: 'Confiável (Relato de Batedores Locais)',
+      tacticalBenefit: 'Permite encontrar abrigo subterrâneo seguro para descanso longo sem risco de chuvas torrenciais.',
+      dangerWarning: 'Possível presença de armadilhas de alçapão e abrolhos enferrujados nos degraus de acesso.',
+      icon: '🍺📜',
+      color: '#facc15'
+    };
+
+    if (bk === 'forest' || bk === 'selva') {
+      rumor = {
+        rumorTitle: 'O Carvalho Sussurrante das Ruínas Antigas',
+        rumorStory: 'Caçadores dizem que um carvalho colossal milenar guarda uma clareira sagrada intocada por feras vorazes.',
+        credibility: 'Confiável (Confirmado por Druidas)',
+        tacticalBenefit: 'Clareira sagrada: descansos curtos recuperam 2 PV adicionais por dado de vida gasto.',
+        dangerWarning: 'Perturbar raízes ancestrais atrai dríades protetoras em postura de combate.',
+        icon: '🌳✨',
+        color: '#4ade80'
+      };
+    } else if (bk === 'swamp') {
+      rumor = {
+        rumorTitle: 'O Navio Naufragado no Charco de Sangue',
+        rumorStory: 'Um bardo jura que uma barcaça mercante naufragou no lodo carregando um baú com gemas e poções alquímicas.',
+        credibility: 'Exagerado (Conto de Bardo de Taverna)',
+        tacticalBenefit: 'Sucesso em Investigação CD 13 revela 2 doses de antídoto e 15 moedas de prata.',
+        dangerWarning: 'Área infestada por sanguessugas gigantes e gás do pântano inflamável.',
+        icon: '🛶☠️',
+        color: '#c084fc'
+      };
+    } else if (bk === 'mountain' || bk === 'cordilheira') {
+      rumor = {
+        rumorTitle: 'O Covil do Draco de Chumbo no Pico Esbranquiçado',
+        rumorStory: 'Mineiros relatam rugidos estrondosos e escamas cinzentas brilhando nas fendas altas acima da linha de neve.',
+        credibility: 'Perigo Iminente (Alerta de Guarda Regional)',
+        tacticalBenefit: 'Concede +2 na Iniciativa e impede surpresa no primeiro combate contra répteis gigantes da região.',
+        dangerWarning: 'Terreno instável com risco crítico de desmoronamentos de pedras durante o confronto.',
+        icon: '🏔️🐉',
+        color: '#f87171'
+      };
+    } else if (bk === 'desert' || bk === 'dunas') {
+      rumor = {
+        rumorTitle: 'O Oásis Esmeralda das Miragens Errantes',
+        rumorStory: 'Nômades juram que uma nascente de água cristalina surge entre dunas gêmeas sob a constelação da Serpente.',
+        credibility: 'Lenda Antiga (Tradição Oral Nômade)',
+        tacticalBenefit: 'Fornece suprimento ilimitado de água pura e remove 1 nível de exaustão de toda a comitiva.',
+        dangerWarning: 'A ilusão requer teste de Sobrevivência CD 14 para não se desviar da rota planejada.',
+        icon: '🏜️💧',
+        color: '#38bdf8'
+      };
+    } else if (bk === 'snow' || bk === 'tundra') {
+      rumor = {
+        rumorTitle: 'O Monólito Rúnico do Andarilho Congelado',
+        rumorStory: 'Batedores do norte afirmam que um menir talhado por anões antigos orienta viajantes em meio a nevascas.',
+        credibility: 'Confiável (Marco Histórico Cartografado)',
+        tacticalBenefit: 'Vantagem automática em salvaguardas de orientação geográfica contra se perder na tundra (DMG p. 111).',
+        dangerWarning: 'Gelo quebradiço nas bordas da rocha exige cuidado ao transitar a pé.',
+        icon: '🗿❄️',
+        color: '#e2e8f0'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      spendingLevel: sl,
+      bribeCostSilver: bribeCostSilver,
+      rumorTitle: rumor.rumorTitle,
+      rumorStory: rumor.rumorStory,
+      credibility: rumor.credibility,
+      tacticalBenefit: rumor.tacticalBenefit,
+      dangerWarning: rumor.dangerWarning,
+      icon: rumor.icon,
+      color: rumor.color,
+      dndRef: 'DMG p. 129-130 (Reunir Informações e Boatos dos Ermos) / XGE p. 130'
+    };
+  }
+
+  // === calcWildernessSustenanceRequirements (Consumo de Rações, Suprimento Hídrico, Desidratação e Inanição - PHB p. 185 / DMG p. 111) ===
+  function calcWildernessSustenanceRequirements(partyCount, travelDays, biomeKey, climateTemp, options) {
+    options = options || {};
+    var members = partyCount || 4;
+    if (members < 1) members = 1;
+    var days = travelDays || 3;
+    if (days < 1) days = 1;
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var temp = (climateTemp || 'moderate').toLowerCase();
+
+    var isHot = (bk === 'desert' || bk === 'dunas' || temp === 'scorching_heat' || temp === 'extreme_heat');
+    var waterGallonsPerDay = isHot ? 2 : 1;
+    var rationsPerDay = 1;
+
+    var totalRationsNeeded = members * days * rationsPerDay;
+    var totalWaterGallonsNeeded = members * days * waterGallonsPerDay;
+
+    var conMod = (typeof options.conMod === 'number') ? options.conMod : 2;
+    var starvationDays = Math.max(1, 3 + conMod);
+
+    var dehydrationPenalty = 'CD 15 de Constituição após 1 dia com meia ração de água, ou ganho de 1 nível automático de exaustão sem água (DMG p. 111).';
+    var starvationPenalty = 'Após ' + starvationDays + ' dias sem comida, ganho de 1 nível automático de exaustão a cada dia subsequente (PHB p. 185).';
+
+    var gearDesc = isHot
+      ? 'Barril de água em carroça ou múltiplos odres pesados de couro reforçado; prioridade vital no deserto.'
+      : 'Cantis de viagem individuais e fardos de ração seca de viagem de ferro.';
+
+    return {
+      partyMembersCount: members,
+      travelDays: days,
+      biomeKey: bk,
+      isExtremeHeat: isHot,
+      rationsPerDayPerPerson: rationsPerDay,
+      totalRationsNeeded: totalRationsNeeded,
+      waterGallonsPerDayPerPerson: waterGallonsPerDay,
+      totalWaterGallonsNeeded: totalWaterGallonsNeeded,
+      starvationThresholdDays: starvationDays,
+      dehydrationPenalty: dehydrationPenalty,
+      starvationPenalty: starvationPenalty,
+      gearRecommendation: gearDesc,
+      icon: isHot ? '☀️💧' : '🍞🍶',
+      color: isHot ? '#f59e0b' : '#38bdf8',
+      dndRef: 'PHB p. 185 (Comida e Água) / DMG p. 111 (Desidratação e Inanição)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -10042,6 +10175,8 @@
     calcRegionalBountyNotice: calcRegionalBountyNotice,
     calcWildernessHarvestYield: calcWildernessHarvestYield,
     calcCampNightWatchSchedule: calcCampNightWatchSchedule,
+    calcTavernExplorationRumor: calcTavernExplorationRumor,
+    calcWildernessSustenanceRequirements: calcWildernessSustenanceRequirements,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

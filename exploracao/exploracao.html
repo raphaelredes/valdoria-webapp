@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T21:30:03Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T21:33:42Z - do not edit directly, edit source -->
 
 
 
@@ -93657,6 +93657,27 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcTavernExplorationRumor) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var rum = CartShared.calcTavernExplorationRumor(bKey, 'comfortable');
+        return '<div class="clp-tavern-rumor-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,24,14,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(250,204,21,0.3);font-size:8px;color:#fef08a;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + rum.color + ';margin-bottom:2px;">' + rum.icon + ' ' + rum.rumorTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Relato:</b> ' + rum.rumorStory + '</div>'
+          + '  <div>• <b>Credibilidade:</b> ' + rum.credibility + ' · ' + rum.bribeCostSilver + ' pp em rodadas de cerveja</div>'
+          + '  <div style="font-size:7.5px;color:#fde047;margin-top:1px;">• <i>Vantagem: ' + rum.tacticalBenefit + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessSustenanceRequirements) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var sust = CartShared.calcWildernessSustenanceRequirements(4, 3, bKey, 'moderate');
+        return '<div class="clp-sustenance-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,24,32,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.3);font-size:8px;color:#bae6fd;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sust.color + ';margin-bottom:2px;">' + sust.icon + ' DEMANDA DE RAÇÕES & ÁGUA (PHB p. 185 / DMG p. 111):</div>'
+          + '  <div>• <b>Expedição (3 Dias / 4 Aventureiros):</b> ' + sust.totalRationsNeeded + ' rações secas · ' + sust.totalWaterGallonsNeeded + ' galões de água</div>'
+          + '  <div style="font-size:7.5px;color:#cbd5e1;margin-top:1px;">• ' + sust.gearRecommendation + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessHarvestYield) return '';
         var bKey = (biome && biome.key) || 'plains';
         var harv = CartShared.calcWildernessHarvestYield(bKey);
@@ -94716,7 +94737,8 @@ function openCartography() {
         <button class="cam-filter-pill" data-filter="shelters" type="button">⛺ Abrigos</button>
         <button class="cam-filter-pill" data-filter="rivers" type="button">🌊 Travessias</button>
         <button class="cam-filter-pill" data-filter="bounties" type="button">📜 Recompensas</button>
-        <button class="cam-filter-pill" data-filter="harvest" type="button">🌿 Coleta</button>'
+        <button class="cam-filter-pill" data-filter="harvest" type="button">🌿 Coleta</button>
+        <button class="cam-filter-pill" data-filter="rumors" type="button">🍺 Boatos</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -96064,6 +96086,9 @@ function _xcartFocusWaypoint(key) {
               });
             }
             return false;
+          } else if (_xcamActiveCategory === 'rumors') {
+            if (prov.id === 'world') return false;
+            return true;
           } else if (_xcamActiveCategory === 'harvest') {
             if (prov.id === 'world') return false;
             return true;
