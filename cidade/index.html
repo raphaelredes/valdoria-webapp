@@ -70010,6 +70010,7 @@ function renderCartographyCanvas(el){
     + '        <button class="cam-filter-pill" data-filter="pinned" type="button">📌 Fixados</button>'
     + '        <button class="cam-filter-pill" data-filter="unexplored" type="button">🧭 Inexplorados</button>'
     + '        <button class="cam-filter-pill" data-filter="hazards" type="button">⚠️ Perigos</button>'
+    + '        <button class="cam-filter-pill" data-filter="landmarks" type="button">🏛️ Marcos</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -71026,6 +71027,14 @@ function _cartFocusWaypoint(key) {
             }
             if (!isHaz && (prov.id === 'desert' || prov.id === 'swamp' || prov.id === 'mountain' || prov.id === 'snow' || prov.id === 'volcanic')) isHaz = true;
             if (!isHaz) return false;
+          } else if (_camActiveCategory === 'landmarks') {
+            if (prov.id === 'world') return false;
+            var hasLms = false;
+            if (window.CartShared && CartShared.getProvinceLandmarks) {
+              var lms = CartShared.getProvinceLandmarks(prov.id);
+              if (lms && lms.length > 0) hasLms = true;
+            }
+            if (!hasLms) return false;
           }
           if (!ft) return true;
           if ((prov.name || '').toLowerCase().indexOf(ft) >= 0) return true;
@@ -72544,6 +72553,15 @@ function _openCartLocationPopup(biome){
           + (hazInfo ? ('  <div>• <b>Perigo Natural:</b> <span style="color:' + hazInfo.color + ';">' + hazInfo.name + '</span> (' + hazInfo.dcCheck + ')</div>') : '')
           + '</div>';
       })()
+    + (function(){
+        if (!window.CartShared || !CartShared.rollWildernessEncounterTable) return '';
+        return '<div class="clp-encounter-sim-wrap" style="margin:4px 0 6px;text-align:left;">'
+          + '  <button class="clp-btn-roll-encounter" id="clp-btn-roll-encounter" type="button" style="width:100%;background:rgba(30,20,12,0.85);border:1px solid rgba(251,146,60,0.5);color:#fdba74;font-size:8.5px;padding:3px 6px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">'
+          + '    <span>🎲</span> <b>Consultar Encontro dos Ermos (XGE p. 92)</b>'
+          + '  </button>'
+          + '  <div id="clp-encounter-result-box" style="display:none;margin-top:3px;background:rgba(18,14,10,0.85);border:1px solid rgba(251,146,60,0.4);border-radius:4px;padding:5px 8px;font-size:8px;line-height:1.35;"></div>'
+          + '</div>';
+      })()
     + (horasViagem > 8 ? (
         '<div class="clp-forced-march-warn" id="clp-forced-march-warn" style="margin:4px 0 6px;text-align:left;background:rgba(30,15,10,0.8);padding:5px 8px;border-radius:4px;border-left:3px solid #f87171;">'
         + '  <div style="font-size:9px;color:#f87171;font-family:Cinzel,serif;font-weight:700;">⚠️ MARCHA FORÇADA & EXAUSTÃO (D&D 5e — PHB p. 181):</div>'
@@ -72570,6 +72588,28 @@ function _openCartLocationPopup(biome){
   window._cartSelectedPace = 'normal';
 
   // Configuração interativa do seletor de ritmo D&D 5e
+  var rollBtn = el.querySelector('#clp-btn-roll-encounter');
+  var rollBox = el.querySelector('#clp-encounter-result-box');
+  if (rollBtn && rollBox) {
+    rollBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_click');
+      if (window.CartShared && CartShared.rollWildernessEncounterTable) {
+        var enc = CartShared.rollWildernessEncounterTable(biome.key || biome.biome, biome.tier || 1);
+        rollBox.style.display = 'block';
+        rollBox.innerHTML = '<div style="font-size:8.5px;font-weight:700;color:' + enc.categoryColor + ';display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">'
+          + '<span>' + enc.categoryIcon + ' ' + enc.categoryName + ': ' + enc.title + '</span>'
+          + '<span style="font-size:7px;color:#a09484;">' + enc.dndRef + '</span>'
+          + '</div>'
+          + '<div style="color:#d2be90;margin-bottom:3px;">' + enc.description + '</div>'
+          + '<div style="color:#fde047;font-size:7.5px;"><b>🎲 Teste:</b> ' + enc.checkRequired + '</div>'
+          + '<div style="color:#86efac;font-size:7.5px;margin-top:1px;"><b>✅ Sucesso:</b> ' + enc.successOutcome + '</div>'
+          + '<div style="color:#f87171;font-size:7.5px;margin-top:1px;"><b>❌ Falha:</b> ' + enc.failureOutcome + '</div>';
+      }
+    };
+  }
+
   var pinBtn = el.querySelector('#clp-pin-toggle-btn');
   if (pinBtn) {
     pinBtn.onclick = function(e){

@@ -6193,6 +6193,366 @@
     };
   }
 
+
+  // === rollWildernessEncounterTable (Tabelas de Encontros dos Ermos - XGE p. 92-110 / DMG p. 85-87) ===
+  function rollWildernessEncounterTable(biomeKey, tier, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var t = Math.max(1, (typeof tier === 'number') ? tier : 1);
+
+    var rollVal = (typeof options.roll === 'number') ? options.roll : (Math.floor(Math.random() * 100) + 1);
+    var category = options.category;
+    if (!category) {
+      if (rollVal <= 40) category = 'combat';
+      else if (rollVal <= 65) category = 'social';
+      else if (rollVal <= 85) category = 'discovery';
+      else category = 'hazard';
+    }
+
+    var tables = {
+      plains: {
+        combat: {
+          title: 'Bando de Salteadores das Colinas',
+          desc: 'Seis salteadores armados com bestas leves e lanças improvisadas surgem de uma depressão no terreno, exigindo pedágio ilegal da comitiva.',
+          check: 'Sabedoria (Percepção) CD 12 para evitar surpresa ou Carisma (Intimidação) CD 13 para dispersá-los.',
+          success: 'A comitiva percebe a emboscada com antecedência, assumindo posições táticas ou intimidando o bando a recuar sem combate.',
+          failure: 'Inimigos ganham a rodada de surpresa ou forçam a comitiva a ceder 5 moedas de ouro para evitar confronto direto.'
+        },
+        social: {
+          title: 'Caravana de Comerciantes de Grãos',
+          desc: 'Duas carroças pesadas com escolta de mercenários descansam à beira da estrada. O mestre da caravana acena cordialmente aos viajantes.',
+          check: 'Carisma (Persuasão) CD 11 para negociar notícias e mantimentos.',
+          success: 'Comerciantes vendem rações frescas com 25% de desconto e compartilham rumores sobre as patrulhas da província (+2 na próxima orientação).',
+          failure: 'Mercadores são receosos e apenas trocam saudações breves sem conceder descontos ou informações.'
+        },
+        discovery: {
+          title: 'Marco Milenar da Primeira Dinastia',
+          desc: 'Um monólito talhado em granito antigo ergue-se à margem da trilha, com inscrições imperiais indicando distâncias e fontes de água pura.',
+          check: 'Inteligência (História) ou Sabedoria (Sobrevivência) CD 11.',
+          success: 'O escriba da comitiva registra os marcos no diário cartográfico, concedendo vantagem no próximo teste de navegação na província.',
+          failure: 'As inscrições estão desgastadas pelo tempo, servindo apenas como ponto de referência visual da rota.'
+        },
+        hazard: {
+          title: 'Ravina Oculta sob Capim Alto',
+          desc: 'Uma vala profunda escavada por enxurradas antigas corta a rota, disfarçada por vegetação densa rasteira.',
+          check: 'Destreza (Acrobacia ou Cavalgar) CD 12.',
+          success: 'Aventureiros e montarias transpõem a fenda com destreza, mantendo o ritmo de marcha inalterado.',
+          failure: 'Uma montaria ou integrante da comitiva tropeça, sofrendo 1d6 de dano de concussão e atrasando a marcha em 30 minutos.'
+        }
+      },
+      forest: {
+        combat: {
+          title: 'Matilha de Lobos Espreitadores',
+          desc: 'Um bando de quatro lobos cinzentos com olhos famintos cerca a comitiva pelas sombras das árvores antigas.',
+          check: 'Sabedoria (Percepção) CD 13 ou Sabedoria (Lidar com Animais) CD 14.',
+          success: 'A sentinela detecta os animais antes do cerco; fogo de tochas e postura defensiva afugentam a matilha sem derramamento de sangue.',
+          failure: 'Os lobos atacam os flancos da formação de marcha, forçando um combate surpresa.'
+        },
+        social: {
+          title: 'Eremita Coletor de Raízes',
+          desc: 'Um druida solitário com manto de musgo e cajado de freixo colhe ervas raras em uma clareira úmida.',
+          check: 'Sabedoria (Sobrevivência ou Intuição) CD 12.',
+          success: 'O eremita presenteia a comitiva com um unguento de ervas curativas (recupera 1 Dado de Vida adicional no próximo descanso curto).',
+          failure: 'O eremita recolhe suas coisas desconfiado e some entre as folhagens sem trocar palavras.'
+        },
+        discovery: {
+          title: 'Círculo Druídico dos Antigos',
+          desc: 'Sete menires verticais dispostos em círculo em torno de um carvalho centenário irrompem com suave aura espiritual.',
+          check: 'Inteligência (Arcanismo ou Religião) CD 12.',
+          success: 'Aventureiros sentem uma paz revigorante; todos recebem +1 em todas as salvaguardas nas próximas 8 horas de jornada.',
+          failure: 'O local é reconhecido como sagrado, proporcionando um repouso calmo sem distúrbios.'
+        },
+        hazard: {
+          title: 'Barreira de Troncos e Espinheiro Cortante',
+          desc: 'Árvores tombadas por vendaval recente formam um emaranhado denso recoberto por espinhos cortantes como lâminas.',
+          check: 'Destreza CD 12 para transpor ou Força (Atletismo) CD 13 para abrir clareira com machado.',
+          success: 'A comitiva abre caminho sem ferimentos e segue viagem sem demora.',
+          failure: 'Espinhos rasgam vestimentas e mochilas; 1d10 de dano cortante dividido entre a comitiva e atraso de 1 hora.'
+        }
+      },
+      swamp: {
+        combat: {
+          title: 'Trolls Anfíbios do Brejo',
+          desc: 'Duas criaturas corpulentas cobertas de lodo e sanguessugas emergem silenciosamente das águas turvas empunhando clavas de madeira petrificada.',
+          check: 'Sabedoria (Percepção) CD 13 para notar bolhas de ar na água.',
+          success: 'A comitiva avista o rastro de bolhas a tempo de empunhar tochas e flechas incendiárias, mantendo distância.',
+          failure: 'As criaturas saltam de emboscada puxando um membro da retaguarda em direção à água funda.'
+        },
+        social: {
+          title: 'Pescadores de Enguias do Pântano',
+          desc: 'Uma família de canoeiros ribeirinhos atraca em uma ilhota de raízes trançadas, defumando enguias em fogueira baixa.',
+          check: 'Carisma (Persuasão) CD 11.',
+          success: 'Pescadores indicam canais com águas navegáveis e fundura segura, reduzindo a dificuldade de terreno por 4 horas.',
+          failure: 'Pescadores exigem moedas ou trocas pesadas para compartilhar quaisquer direções.'
+        },
+        discovery: {
+          title: 'Capela Submersa das Águas Negras',
+          desc: 'A torre sineira de uma antiga capela de pedra projeta-se acima do nível do lodo, com o sino ainda entoando notas fúnebres ao sabor do vento.',
+          check: 'Sabedoria (Percepção) CD 13 ou Inteligência (História) CD 12.',
+          success: 'Aventureiros recuperam um medalhão sagrado esquecido na cornija, que brilha com tênue luz mágica em presença de mortos-vivos.',
+          failure: 'O interior da torre está tomado por lodo espesso e não permite exploração segura.'
+        },
+        hazard: {
+          title: 'Bolsão de Gás Miasmático Inflamável',
+          desc: 'A comitiva adentra um trecho onde a água borbulha com gás sulfúrico denso e sufocante.',
+          check: 'Constituição CD 12 contra envenenamento.',
+          success: 'Aventureiros cobrem o nariz com panos úmidos e apagam tochas a tempo, atravessando sem inalar o miasma.',
+          failure: 'Membros da comitiva sofrem enjoo e tosse severa, ficando com a condição Envenenado por 1 hora.'
+        }
+      },
+      mountain: {
+        combat: {
+          title: 'Patrulha de Caçadores Orcs dos Picos',
+          desc: 'Cinco guerreiros orcs com armaduras de escamas de ferro e arcos compostos vigiam a garganta rochosa em posição elevada.',
+          check: 'Sabedoria (Percepção) CD 14.',
+          success: 'O batedor avista o brilho do metal nos penhascos superiores, permitindo à comitiva buscar cobertura ou traçar rota alternativa.',
+          failure: 'Uma saraivada de flechas pesadas desce das escarpas rochosas contra a vanguarda.'
+        },
+        social: {
+          title: 'Batedores da Guarda de Pedra',
+          desc: 'Três guardas anões bem equipados com machados de batalha e cabras de montanha patrulham o desfiladeiro.',
+          check: 'Carisma (Persuasão) CD 12.',
+          success: 'Guardas fornecem salvo-conduto provincial e mapas parciais dos atalhos montanhosos (+3 em navegação na cordilheira).',
+          failure: 'Guardas exigem inspeção detalhada de bagagens antes de liberar passagem pela estrada.'
+        },
+        discovery: {
+          title: 'Santuário da Virgem dos Cumes',
+          desc: 'Uma gruta esculpida na rocha com estátua consagrada à deusa dos ventos e bacia de água límpida de degelo.',
+          check: 'Sabedoria (Religião) CD 11.',
+          success: 'A comitiva enche cantis com água pura abençoada; beber dela concede vantagem contra efeitos de altitude por 24h.',
+          failure: 'A água é extremamente gelada e serve apenas para consumo comum.'
+        },
+        hazard: {
+          title: 'Desmoronamento de Pedras e Seixos',
+          desc: 'Tremores de encosta soltam uma chuva de pedregulhos afiados sobre a trilha estreita de beira de abismo.',
+          check: 'Destreza CD 13 para esquivar ou Força (Atletismo) CD 13 para erguer escudos.',
+          success: 'Aventureiros protegem a si e às montarias sob fendas de rocha firme sem sofrer ferimentos.',
+          failure: 'Pedregulhos atingem a comitiva, causando 2d8 de dano de concussão e bloqueando o caminho principal temporariamente.'
+        }
+      },
+      desert: {
+        combat: {
+          title: 'Escorpião Gigante das Areias',
+          desc: 'Uma monstruosidade com carapaça de quitina amarelada e ferrão venenoso irrompe de sob a duna de areia fofa.',
+          check: 'Sabedoria (Percepção) CD 13.',
+          success: 'O batedor nota a ondulação na areia antes do bote, permitindo ataques à distância imediatos.',
+          failure: 'O ferrão golpeia a retaguarda com surpresa, forçando salvaguarda de CON CD 12 contra veneno.'
+        },
+        social: {
+          title: 'Caravana de Mercadores Beduínos',
+          desc: 'Quatro camelos conduzidos por andarilhos de mantos alvos cruzam as cristas das dunas em marcha lenta.',
+          check: 'Carisma (Persuasão) CD 11.',
+          success: 'Nômades trocam água fresca por mantimentos e indicam a localização do oásis mais próximo.',
+          failure: 'A caravana mantém distância prudente com cimitarras desembainhadas, seguindo sem interagir.'
+        },
+        discovery: {
+          title: 'Cúpula Soterrada de Arenito',
+          desc: 'O vento forte descobre parcialmente o teto abobadado de um templo de arenito construído séculos antes da Grande Seca.',
+          check: 'Inteligência (Investigação ou História) CD 12.',
+          success: 'A comitiva encontra 2d10 moedas de prata imperiais e abrigo seguro com sombra fresca para descanso curto.',
+          failure: 'A entrada está entulhada de areia e ameaça desabamento se for forçada.'
+        },
+        hazard: {
+          title: 'Tempestade Súbita de Areia Vermelha',
+          desc: 'Uma parede de poeira sufocante e ventos cortantes avança velozmente pela planície arenosa.',
+          check: 'Sabedoria (Sobrevivência) CD 13 ou Constituição CD 12.',
+          success: 'A comitiva arma toldos e agrupa montarias a tempo, aguardando o vendaval passar sem danos.',
+          failure: 'Areia fina cega e sufoca os aventureiros; todos sofrem desvantagem em testes de Percepção pelas próximas 4 horas.'
+        }
+      },
+      snow: {
+        combat: {
+          title: 'Matilha de Lobos da Neve',
+          desc: 'Feras alvas de pelo espesso camufladas na nevasca correm em arco para isolar o integrante mais lento da marcha.',
+          check: 'Sabedoria (Percepção) CD 13 sob neve.',
+          success: 'A comitiva avista os rastros e fecha a formação de marcha com lanças erguidas, intimidando a matilha.',
+          failure: 'A matilha ataca de surpresa buscando derrubar um aventureiro no chão congelado.'
+        },
+        social: {
+          title: 'Caçadores de Focas em Trenó',
+          desc: 'Dois caçadores em trenó puxado por cães nórdicos descansam ao abrigo de uma morena glacial.',
+          check: 'Carisma (Persuasão) CD 11.',
+          success: 'Caçadores ensinam técnicas de isolamento térmico e cedem gordura de foca para impermeabilizar botas (+2 contra frio).',
+          failure: 'Caçadores limitam-se a acenar e seguir em frente velozmente na esteira da nevasca.'
+        },
+        discovery: {
+          title: 'Monólito da Estrela Polar',
+          desc: 'Uma torre de gelo translúcido contendo um cristal que brilha com luminescência azulada apontando para o polo norte magnético.',
+          check: 'Inteligência (Arcanismo ou Natureza) CD 11.',
+          success: 'A luz do cristal calibra os instrumentos da comitiva, garantindo rumo infalível durante o restante da viagem.',
+          failure: 'O cristal é belo, mas seu brilho esfria rapidamente com a tempestade iminente.'
+        },
+        hazard: {
+          title: 'Placa de Gelo Quebradiço sobre Fenda Glacial',
+          desc: 'Uma ponte natural de neve oculta um abismo de gelo de 15 metros de profundidade.',
+          check: 'Sabedoria (Percepção) CD 13 ou Destreza CD 13.',
+          success: 'O guia identifica a fenda a tempo com a vara de sondagem, conduzindo o grupo em volta com segurança.',
+          failure: 'O gelo cede sob o peso de um aventureiro; teste urgente de DES CD 13 para agarrar a borda da cordilheira.'
+        }
+      }
+    };
+
+    var biomeTable = tables[bk] || tables.plains;
+    var enc = biomeTable[category] || biomeTable.combat;
+
+    var catLabels = {
+      combat: { name: 'Ameaça Hostil', icon: '⚔️', color: '#ef4444' },
+      social: { name: 'Encontro Social', icon: '🗣️', color: '#60a5fa' },
+      discovery: { name: 'Descoberta / Marco', icon: '🏛️', color: '#ffd700' },
+      hazard: { name: 'Perigo Ambiental', icon: '⚠️', color: '#fb923c' }
+    };
+
+    var catMeta = catLabels[category] || catLabels.combat;
+
+    return {
+      biomeKey: bk,
+      tier: t,
+      category: category,
+      categoryName: catMeta.name,
+      categoryIcon: catMeta.icon,
+      categoryColor: catMeta.color,
+      title: enc.title,
+      description: enc.desc,
+      checkRequired: enc.check,
+      successOutcome: enc.success,
+      failureOutcome: enc.failure,
+      dndRef: 'XGE p. 92-110 / DMG p. 85-87 (Tabelas de Encontros dos Ermos)'
+    };
+  }
+
+  // === getProvinceLandmarks (Marcos Históricos e Cartográficos das Províncias - DMG p. 108) ===
+  function getProvinceLandmarks(provinceId) {
+    var pid = (provinceId || 'forest').toLowerCase();
+    var landmarksData = {
+      forest: [
+        {
+          id: 'forest_heart_tree',
+          name: 'Árvore-Coração de Carvalho-de-Ferro',
+          icon: '🌳',
+          provinceId: 'forest',
+          provinceName: 'Província das Grandes Florestas',
+          locationDesc: 'Coração da mata densa, a 15 milhas ao norte de Aldeia do Carvalho.',
+          lore: 'Carvalho colossal de mil anos cujas raízes abrigam entalhes rúnicos da Primeira Dinastia.',
+          benefit: 'Ponto sagrado: vantagem em testes de Sobrevivência e repouso revigorante.',
+          dndRef: 'DMG p. 108 (Wilderness Landmarks)'
+        },
+        {
+          id: 'forest_leaf_fort',
+          name: 'Ruínas do Forte das Folhas',
+          icon: '🏰',
+          provinceId: 'forest',
+          provinceName: 'Província das Grandes Florestas',
+          locationDesc: 'Planalto rochoso encoberto por trepadeiras na borda oriental.',
+          lore: 'Antigo posto de patrulha dos guardas florestais com cisternas de água pura e mirante defensivo.',
+          benefit: 'Refúgio fortificado: acampamento imune a ataques furtivos de flanco.',
+          dndRef: 'DMG p. 108 (Wilderness Landmarks)'
+        }
+      ],
+      desert: [
+        {
+          id: 'desert_three_palms',
+          name: 'Oásis das Três Palmeiras',
+          icon: '🌴',
+          provinceId: 'desert',
+          provinceName: 'Província das Dunas do Sul',
+          locationDesc: 'Depressão rochosa cercada por dunas móveis a 18 milhas a sudoeste do entreposto.',
+          lore: 'Nascente de água doce perene que sobreviveu à Grande Seca e serve de refúgio aos clãs nômades.',
+          benefit: 'Sustento dos Ermos: reabastece 100% dos cantis e cantinas sem teste de forrageamento.',
+          dndRef: 'DMG p. 108 (Wilderness Landmarks)'
+        },
+        {
+          id: 'desert_wind_obelisk',
+          name: 'Obelisco dos Ventos Sussurrantes',
+          icon: '🗿',
+          provinceId: 'desert',
+          provinceName: 'Província das Dunas do Sul',
+          locationDesc: 'Pilar solitário de arenito erguido sobre a crista da Grande Duna.',
+          lore: 'Esculpido com canais ocos que assobiam em tons distintos antecipando tempestades de areia.',
+          benefit: 'Previsão Barométrica: antecipa o clima dos próximos 2 dias com 100% de precisão.',
+          dndRef: 'DMG p. 108 (Wilderness Landmarks)'
+        }
+      ],
+      mountain: [
+        {
+          id: 'mountain_thunder_pass',
+          name: 'Passo do Trovoada',
+          icon: '⛰️',
+          provinceId: 'mountain',
+          provinceName: 'Província da Cordilheira Ocidental',
+          locationDesc: 'Garganta natural estreita ladeada por muralhas de granito de 200m de altura.',
+          lore: 'O único corredor transitável para carroças cruzando as escarpas rochosas em direção ao oeste.',
+          benefit: 'Marco de Trânsito: reduz o tempo de travessia da cordilheira em 4 horas de marcha.',
+          dndRef: 'DMG p. 108 (Wilderness Landmarks)'
+        },
+        {
+          id: 'mountain_stone_sentinel',
+          name: 'Torre do Sentinela de Pedra',
+          icon: '🗼',
+          provinceId: 'mountain',
+          provinceName: 'Província da Cordilheira Ocidental',
+          locationDesc: 'Pico agulhado encimado por farol de pedra talhado na rocha viva.',
+          lore: 'Mirante dos antigos batedores da guarda que avista até 20 léguas de planície em dias claros.',
+          benefit: 'Horizonte Estendido: revela todos os pontos de interesse no raio de 2 hexágonos.',
+          dndRef: 'DMG p. 108 (Wilderness Landmarks)'
+        }
+      ],
+      swamp: [
+        {
+          id: 'swamp_drowned_willow',
+          name: 'Salgueiro dos Afogados',
+          icon: '🌿',
+          provinceId: 'swamp',
+          provinceName: 'Província dos Pântanos do Leste',
+          locationDesc: 'Ilhota de raízes gigantescas no centro do brejo profundo.',
+          lore: 'Árvore colossal coberta de líquen fosforescente que oferece a única plataforma seca em 10 milhas.',
+          benefit: 'Acampamento Seco: permite descanso longo sem risco de submergir no lodo fétido.',
+          dndRef: 'DMG p. 108 (Wilderness Landmarks)'
+        },
+        {
+          id: 'swamp_black_pillar',
+          name: 'Pilar de Pedra-Negra Submerso',
+          icon: '🪨',
+          provinceId: 'swamp',
+          provinceName: 'Província dos Pântanos do Leste',
+          locationDesc: 'Obelisco de basalto parcialmente engolido pelo mangue perto das águas salobras.',
+          lore: 'Inscrições druídicas alertam sobre os ninhos de répteis vorazes e canais de correnteza.',
+          benefit: 'Aviso Hidrológico: anula risco de afundamento em atoleiros nos próximos 3 hexágonos.',
+          dndRef: 'DMG p. 108 (Wilderness Landmarks)'
+        }
+      ],
+      snow: [
+        {
+          id: 'snow_white_wolf_tomb',
+          name: 'Túmulo do Lobo Branco',
+          icon: '🐺',
+          provinceId: 'snow',
+          provinceName: 'Província das Terras Boreais',
+          locationDesc: 'Colina de gelo eterno coroada por efígie de lobo esculpida em quartzo ártico.',
+          lore: 'Tributo aos guias polares primitivos; oferendas deixadas aqui acalmam matilhas selvagens.',
+          benefit: 'Graça Polar: matilhas de lobos não atacam a comitiva durante as próximas 24 horas.',
+          dndRef: 'DMG p. 108 (Wilderness Landmarks)'
+        },
+        {
+          id: 'snow_aurora_cliff',
+          name: 'Penedo da Aurora Gélida',
+          icon: '🌌',
+          provinceId: 'snow',
+          provinceName: 'Província das Terras Boreais',
+          locationDesc: 'Paredão de granito negro voltado para o norte que espelha as cores do céu boreal.',
+          lore: 'Ponto focal de energias arcanas onde viajantes contemplam o esplendor do firmamento.',
+          benefit: 'Inspiração Celestial: cada aventureiro recupera 1 espaço de magia de 1º círculo ou 1 Dado de Vida.',
+          dndRef: 'DMG p. 108 (Wilderness Landmarks)'
+        }
+      ]
+    };
+
+    if (pid.indexOf('desert') >= 0 || pid.indexOf('dunas') >= 0) return landmarksData.desert;
+    if (pid.indexOf('mountain') >= 0 || pid.indexOf('cordilheira') >= 0) return landmarksData.mountain;
+    if (pid.indexOf('swamp') >= 0 || pid.indexOf('pantan') >= 0) return landmarksData.swamp;
+    if (pid.indexOf('snow') >= 0 || pid.indexOf('boreal') >= 0 || pid.indexOf('norte') >= 0) return landmarksData.snow;
+    return landmarksData.forest;
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -7884,6 +8244,8 @@
     getBiomeHarvestableResources: getBiomeHarvestableResources,
     calcPartyTravelRoles: calcPartyTravelRoles,
     calcForageYieldCheck: calcForageYieldCheck,
+    rollWildernessEncounterTable: rollWildernessEncounterTable,
+    getProvinceLandmarks: getProvinceLandmarks,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
