@@ -3375,6 +3375,31 @@
     return (list.indexOf(key) >= 0);
   }
 
+  // === Anotações Pessoais de Viagem da Comitiva (D&D 5e Expedition Notes) ===
+  function _getLocNotes() {
+    try {
+      var raw = localStorage.getItem('valdoria_loc_notes');
+      return raw ? JSON.parse(raw) : {};
+    } catch (_) {
+      return {};
+    }
+  }
+  function _getLocNote(key) {
+    if (!key) return '';
+    var map = _getLocNotes();
+    return map[key] || '';
+  }
+  function _setLocNote(key, text) {
+    if (!key) return;
+    var map = _getLocNotes();
+    if (text && text.trim()) {
+      map[key] = text.trim();
+    } else {
+      delete map[key];
+    }
+    try { localStorage.setItem('valdoria_loc_notes', JSON.stringify(map)); } catch (_) {}
+  }
+
   // === Iluminação Atmosférica e Clima Dinâmico no Mapa ===
   function _drawCartAtmosphere(ctx, w, h) {
     var phase = (typeof window !== 'undefined' && window.S && window.S.dayPhase) ||
@@ -3408,10 +3433,29 @@
       ctx.restore();
     }
 
-    if (weather === 'r' || weather === 'f') {
+    if (weather === 'r') {
       ctx.save();
       ctx.fillStyle = 'rgba(25, 40, 55, 0.16)';
       ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = 'rgba(100, 130, 160, 0.18)';
+      ctx.lineWidth = 0.8;
+      var spacing = 28;
+      ctx.beginPath();
+      for (var rx = -h; rx < w; rx += spacing) {
+        ctx.moveTo(rx, 0);
+        ctx.lineTo(rx + h * 0.5, h);
+      }
+      ctx.stroke();
+      ctx.restore();
+    } else if (weather === 'f') {
+      ctx.save();
+      ctx.fillStyle = 'rgba(35, 45, 55, 0.20)';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = 'rgba(190, 205, 215, 0.08)';
+      for (var fRow = 0; fRow < 5; fRow++) {
+        var my = (fRow * (h / 5)) + 20;
+        ctx.fillRect(0, my, w, 24);
+      }
       ctx.restore();
     }
   }
@@ -3558,13 +3602,33 @@
       ctx.restore();
     }
 
+    // 1.8 Marcador de Anotação Pessoal de Viagem (D&D 5e Expedition Note)
+    var locHasNote = !!_getLocNote(b.key);
+    if (locHasNote) {
+      ctx.save();
+      var nx = bx + radius - 2;
+      var ny = by - radius + 2;
+      ctx.beginPath();
+      ctx.arc(nx, ny, 6.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#2b1a0e';
+      ctx.fill();
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 1.0;
+      ctx.stroke();
+      ctx.font = '8px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('📝', nx, ny);
+      ctx.restore();
+    }
+
     ctx.restore();
 
     // No modo Regional (onde há poucos nós), o rótulo é permanente; no Continente Geral, só abre sob hover
     if (!isHover && !opts.isRegional) return;
 
     ctx.save();
-    var labelText = (locIsPinned ? '📍 ' : '') + (opts.hasActiveQuest ? '📜 ' : '') + b.name;
+    var labelText = (locIsPinned ? '📍 ' : '') + (locHasNote ? '📝 ' : '') + (opts.hasActiveQuest ? '📜 ' : '') + b.name;
     ctx.font = (isHover ? 'bold 11px' : '10px') + ' serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
@@ -4943,47 +5007,56 @@
     plains: {
       terrain: 'Terreno Firme · Estradas Imperiais',
       hazard: 'Perigos: Vento cortante, tempestades repentinas ou valas ocultas no capim alto.',
-      saves: 'Salvaguardas D&D 5e: DES CD 12 (Obstáculos), CON CD 11 (Tempestades).'
+      saves: 'Salvaguardas D&D 5e: DES CD 12 (Obstáculos), CON CD 11 (Tempestades).',
+      foraging: 'Forrageamento D&D 5e: Abundante · Sobrevivência CD 10 (Ervas e água doce).'
     },
     forest: {
       terrain: 'Terreno Denso · Trilhas da Floresta Antiga',
       hazard: 'Perigos: Galhos baixos espinhosos, raízes escorregadias e névoas alucinógenas.',
-      saves: 'Salvaguardas D&D 5e: DES CD 13 (Galhos), SAB CD 12 (Névoa), FOR CD 13 (Teias).'
+      saves: 'Salvaguardas D&D 5e: DES CD 13 (Galhos), SAB CD 12 (Névoa), FOR CD 13 (Teias).',
+      foraging: 'Forrageamento D&D 5e: Fértil · Sobrevivência CD 10 (Frutos silvestres e caça menor).'
     },
     swamp: {
       terrain: 'Terreno Difícil (Custo ×2) · Pântano Traiçoeiro',
       hazard: 'Perigos: Lamaçal movediço, miasmas pútridos e enxames de sanguessugas.',
-      saves: 'Salvaguardas D&D 5e: CON CD 13 (Miasma Tóxico), FOR CD 14 (Lodo Movediço).'
+      saves: 'Salvaguardas D&D 5e: CON CD 13 (Miasma Tóxico), FOR CD 14 (Lodo Movediço).',
+      foraging: 'Forrageamento D&D 5e: Traiçoeiro · Sobrevivência CD 14 (Água requer fervura e filtragem).'
     },
     mountain: {
       terrain: 'Terreno Acidentado · Cordilheira Escarpada',
       hazard: 'Perigos: Queda de rochas, desfiladeiros vertiginosos e ar rarefeito gélido.',
-      saves: 'Salvaguardas D&D 5e: DES CD 14 (Desmoronamento), CON CD 13 (Exaustão/Frio).'
+      saves: 'Salvaguardas D&D 5e: DES CD 14 (Desmoronamento), CON CD 13 (Exaustão/Frio).',
+      foraging: 'Forrageamento D&D 5e: Escasso · Sobrevivência CD 15 (Raízes amargas e líquens).'
     },
     desert: {
       terrain: 'Terreno Árido · Dunas Escaldantes',
       hazard: 'Perigos: Calor extremo de dia, miragens traiçoeiras e tempestades de areia cortante.',
-      saves: 'Salvaguardas D&D 5e: CON CD 14 (Desidratação), SAB CD 13 (Miragens).'
+      saves: 'Salvaguardas D&D 5e: CON CD 14 (Desidratação), SAB CD 13 (Miragens).',
+      foraging: 'Forrageamento D&D 5e: Crítico · Sobrevivência CD 17 (Cactos raros e água subterrânea).'
     },
     snow: {
       terrain: 'Terreno Gélido · Tundra e Neves Eternas',
       hazard: 'Perigos: Frio penetrante, gelo fino quebradiço e nevascas ofuscantes.',
-      saves: 'Salvaguardas D&D 5e: CON CD 14 (Frio Extremo), SOB CD 13 (Orientação).'
+      saves: 'Salvaguardas D&D 5e: CON CD 14 (Frio Extremo), SOB CD 13 (Orientação).',
+      foraging: 'Forrageamento D&D 5e: Severo · Sobrevivência CD 16 (Gelo para derreter, escassez de caça).'
     },
     graveyard: {
       terrain: 'Terreno Funesto · Terras Amaldiçoadas',
       hazard: 'Perigos: Eflúvios necromânticos, sepulcros profanados e calafrios espectrais.',
       saves: 'Salvaguardas D&D 5e: SAB CD 13 (Pavor/Aura), CON CD 14 (Corrupção Profana).'
+      , foraging: 'Forrageamento D&D 5e: Impossível · Água estagnada e vegetação necrosada.'
     },
     volcanic: {
       terrain: 'Terreno Vulcânico · Caldeira de Brasas',
       hazard: 'Perigos: Vapores de enxofre, solo incandescente e fumaça asfixiante.',
       saves: 'Salvaguardas D&D 5e: CON CD 14 (Gases Tóxicos), DES CD 13 (Brasas Soltas).'
+      , foraging: 'Forrageamento D&D 5e: Impossível · Solo calcinado e fontes de água ácidas/ferventes.'
     },
     cave: {
       terrain: 'Terreno Subterrâneo · Cavernas Profundas',
       hazard: 'Perigos: Escuridão absoluta, estalagmites pontiagudas e abismos sem fundo.',
       saves: 'Salvaguardas D&D 5e: DES CD 13 (Terreno Irregular), SAB CD 12 (Orientação no Escuro).'
+      , foraging: 'Forrageamento D&D 5e: Especial · Sobrevivência CD 15 (Fungos luminescentes e goteiras puras).'
     }
   };
   function getBiomeDndInfo(key){
@@ -5029,6 +5102,8 @@
     _drawCartScaleBar: _drawCartScaleBar,
     _drawCampsiteWaypoint: _drawCampsiteWaypoint,
     isCompassAt: _isCompassAt,
+    getLocNote: _getLocNote,
+    setLocNote: _setLocNote,
     _findRoutePath: _findRoutePath,
     _drawActiveRouteBreadcrumbs: _drawActiveRouteBreadcrumbs,
     _drawUnknownLocation: _drawUnknownLocation  // 2026-05-04: locais não-descobertos

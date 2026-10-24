@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T16:44:17Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T16:58:20Z - do not edit directly, edit source -->
 
 
 
@@ -69960,6 +69960,11 @@ function beginMove(col, row) {
 
   const dur = getMoveDurationFor(col, row, p.col, p.row);
 
+  // Rastreio de pegadas recentes da comitiva no tabuleiro
+  if (!S._recentFootsteps) S._recentFootsteps = [];
+  S._recentFootsteps.unshift({ col: p.col, row: p.row, t: Date.now() });
+  if (S._recentFootsteps.length > 6) S._recentFootsteps.pop();
+
   playerAnim = {
 
     fromX: from.x, fromY: from.y, fromH: effectiveTileHeightPx(p.col, p.row),
@@ -71412,9 +71417,32 @@ function drawMarkedDestination(ctx, mi) {
 
 // indicadores sutis nos vizinhos alcançáveis.
 
+
+function drawRecentFootsteps(ctx) {
+  if (!S || !S._recentFootsteps || !S._recentFootsteps.length) return;
+  ctx.save();
+  for (var i = 0; i < S._recentFootsteps.length; i++) {
+    var step = S._recentFootsteps[i];
+    var fs = S.fogState && S.fogState[fogKey(step.col, step.row)];
+    if (fs !== 'visible' && fs !== 'dim') continue;
+    var s = hexToScreen(step.col, step.row);
+    var h = effectiveTileHeightPx(step.col, step.row);
+    var alpha = (0.45 - i * 0.07);
+    if (alpha <= 0.04) continue;
+    ctx.fillStyle = 'rgba(212, 175, 95, ' + alpha + ')';
+    ctx.beginPath();
+    ctx.arc(s.x - 3.5, s.y - h - 1, 1.8, 0, Math.PI * 2);
+    ctx.arc(s.x + 3.5, s.y - h + 2, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
 function drawMoveOverlay(ctx) {
 
-  if (!S || S.ph !== 'idle') return;
+  if (!S) return;
+  drawRecentFootsteps(ctx);
+  if (S.ph !== 'idle') return;
 
   // M11: alvo pode estar a 2-3 hexes → valida por ALCANCE (path), não por adjacência.
 
@@ -93008,7 +93036,7 @@ function _openCartLocationPopup(biome){
   var dndHtml = dndInfo
     ? '<div class="clp-dnd-terrain">'
     + '  <div class="clp-terrain-tag">🏔️ ' + dndInfo.terrain + '</div>'
-    + '  <div class="clp-hazard-note">⚠️ ' + dndInfo.hazard + '<br>🛡️ ' + dndInfo.saves + '<br>' + rationsNote + '</div>'
+    + '  <div class="clp-hazard-note">⚠️ ' + dndInfo.hazard + '<br>🛡️ ' + dndInfo.saves + '<br>' + (dndInfo.foraging ? '🌿 ' + dndInfo.foraging + '<br>' : '') + rationsNote + '</div>'
     + '</div>'
     : '';
 
@@ -93028,6 +93056,13 @@ function _openCartLocationPopup(biome){
     + '  <button class="clp-btn-pin-toggle" id="xclp-pin-toggle-btn" type="button" style="background:rgba(35,25,15,0.85);border:1px solid ' + ((window.CartShared && CartShared.isLocPinned && CartShared.isLocPinned(biome.key)) ? '#ffd700' : 'rgba(196,149,58,0.55)') + ';color:' + ((window.CartShared && CartShared.isLocPinned && CartShared.isLocPinned(biome.key)) ? '#ffd700' : '#d2be90') + ';font-size:9.5px;padding:3px 8px;border-radius:3px;cursor:pointer;">'
     + ((window.CartShared && CartShared.isLocPinned && CartShared.isLocPinned(biome.key)) ? '📍 Alfinete Ativo (Remover)' : '📌 Fixar no Diário de Rotas')
     + '  </button>'
+    + '</div>'
+    + '<div class="clp-note-box" style="margin:4px 0 6px;text-align:left;background:rgba(20,14,8,0.7);padding:4px 8px;border-radius:4px;border:1px solid rgba(196,149,58,0.3);">'
+    + '  <div style="font-size:9px;color:#d2be90;margin-bottom:2px;">📝 Anotação de Viagem:</div>'
+    + '  <div style="display:flex;gap:4px;">'
+    + '    <input type="text" id="xclp-note-input" maxlength="45" placeholder="Adicionar nota pessoal..." style="flex:1;background:rgba(0,0,0,0.5);border:1px solid rgba(196,149,58,0.4);color:#ffd685;font-size:9.5px;padding:2px 5px;border-radius:3px;" value="' + ((window.CartShared && CartShared.getLocNote) ? CartShared.getLocNote(biome.key).replace(/"/g, '&quot;') : '') + '">'
+    + '    <button id="xclp-note-save-btn" type="button" style="background:#8b6420;border:1px solid #ffd700;color:#fff;font-size:9px;padding:2px 7px;border-radius:3px;cursor:pointer;">Salvar</button>'
+    + '  </div>'
     + '</div>'
     + '<div class="clp-pace-wrap" style="margin-top: 8px; text-align: left;">'
     + '  <div style="font-size: 9.5px; font-family: Cinzel, serif; color: #ffd685; margin-bottom: 3px; font-weight: 600;">RITMO DE MARCHA D&D 5e:</div>'
@@ -93064,6 +93099,60 @@ function _openCartLocationPopup(biome){
         if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
           ValdoriaAudio.playSFX('sfx_click');
         }
+        if (_xcartCtx && _xcartEngine) _xcartDraw();
+      }
+    };
+  }
+
+  var noteSaveBtn = el.querySelector('#xclp-note-save-btn');
+  var noteInput = el.querySelector('#xclp-note-input');
+  if (noteSaveBtn && noteInput) {
+    noteSaveBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      if (window.CartShared && CartShared.setLocNote) {
+        CartShared.setLocNote(biome.key, noteInput.value);
+        if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+          ValdoriaAudio.playSFX('sfx_scroll');
+        }
+        noteSaveBtn.textContent = 'Salvo!';
+        setTimeout(function(){ noteSaveBtn.textContent = 'Salvar'; }, 1200);
+        if (_xcartCtx && _xcartEngine) _xcartDraw();
+      }
+    };
+  }
+
+  var noteSaveBtn = el.querySelector('#clp-note-save-btn');
+  var noteInput = el.querySelector('#clp-note-input');
+  if (noteSaveBtn && noteInput) {
+    noteSaveBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      if (window.CartShared && CartShared.setLocNote) {
+        CartShared.setLocNote(biome.key, noteInput.value);
+        if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+          ValdoriaAudio.playSFX('sfx_scroll');
+        }
+        noteSaveBtn.textContent = 'Salvo!';
+        setTimeout(function(){ noteSaveBtn.textContent = 'Salvar'; }, 1200);
+        if (_xcartCtx && _xcartEngine) _xcartDraw();
+      }
+    };
+  }
+
+  var noteSaveBtn = el.querySelector('#xclp-note-save-btn');
+  var noteInput = el.querySelector('#xclp-note-input');
+  if (noteSaveBtn && noteInput) {
+    noteSaveBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      if (window.CartShared && CartShared.setLocNote) {
+        CartShared.setLocNote(biome.key, noteInput.value);
+        if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+          ValdoriaAudio.playSFX('sfx_scroll');
+        }
+        noteSaveBtn.textContent = 'Salvo!';
+        setTimeout(function(){ noteSaveBtn.textContent = 'Salvar'; }, 1200);
         if (_xcartCtx && _xcartEngine) _xcartDraw();
       }
     };
@@ -95060,6 +95149,9 @@ function _xcartShowTooltip(b, mx, my){
 
   var dndInfo = (window.CartShared && CartShared.getBiomeDndInfo) ? CartShared.getBiomeDndInfo(b.biome || b.key) : null;
   var dndHtml = dndInfo ? '<div style="font-size:9px;color:#81c784;margin-top:2px;">🛡️ ' + dndInfo.saves + '</div>' : '';
+  var foragingHtml = (dndInfo && dndInfo.foraging) ? '<div style="font-size:8.5px;color:#a3e635;margin-top:2px;">' + dndInfo.foraging + '</div>' : '';
+  var customNote = (window.CartShared && CartShared.getLocNote) ? CartShared.getLocNote(b.key) : '';
+  var noteHtml = customNote ? '<div style="font-size:8.5px;color:#fcd34d;margin-top:2px;font-style:italic;background:rgba(255,215,0,0.12);padding:2px 5px;border-radius:3px;">📝 Nota: "' + customNote + '"</div>' : '';
 
   var distHtml = (b.isOrigin || b.key === 'plains') ? '' :
     '<div style="font-size:9.5px;color:#e6d3a3;margin-top:2px;">📏 ~' + distMilhas + ' milhas (~' + marcos + ' marcos · ~' + horas + 'h a pé)</div>';
@@ -95075,8 +95167,10 @@ function _xcartShowTooltip(b, mx, my){
                 + '</div>'
                 + distHtml
                 + dndHtml
+                + foragingHtml
                 + questHtml
                 + pinHtml
+                + noteHtml
                 + '<div class="ctip-footer" style="margin-top:4px;border-top:1px solid rgba(196,149,58,0.25);padding-top:3px;">'
                 + '  <span class="ctip-hint">' + hintText + '</span>'
                 + '</div>';
