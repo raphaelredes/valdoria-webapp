@@ -3245,7 +3245,7 @@
   // rgba(26,21,16,0.92) (marrom 92%) → dava pra ver o mapa por baixo e saber o
   // TAMANHO total já no nível 1. Agora preto opaco esconde a extensão do mapa até
   // o jogador descobrir os limites (igual o fundo preto do zoom-out).
-  var CART_FOG_COLOR = 'rgba(0,0,0,1)';
+  var CART_FOG_COLOR = 'rgba(22, 16, 10, 0.84)';
   // falloff smoothstep: 0 (revelado) até r0; 255 (névoa cheia) após r1; gradiente no meio.
   function _cartFogFalloff(dist, r0, r1){
     if (dist <= r0) return 0;
@@ -3818,6 +3818,17 @@
     // editor chegam (_fogCache=null no callback de coords). known===null (exploração) →
     // SEM névoa (o mapa sandbox mostra tudo; só a cidade tem descoberta progressiva).
     var _fogCache = null;
+    var _provFogCache = {};
+    var _discoveryAnim = null; // { nodeKey, startTime, duration, onComplete }
+
+    function _ensureProvFog(S, known, regNodes, provId){
+      if (known === null || !Array.isArray(known)) return null;
+      var sig = Math.round(S) + '|' + known.slice().sort().join(',') + '|' + provId;
+      if (_provFogCache[provId] && _provFogCache[provId].sig === sig) return _provFogCache[provId].canvas;
+      var canvas = _buildCartFog(S, known, regNodes, true);
+      _provFogCache[provId] = { sig: sig, canvas: canvas };
+      return canvas;
+    }
     function _ensureCartFog(S, known, biomes){
       if (known === null || !Array.isArray(known)) return null;
       var sig = Math.round(S) + '|' + known.slice().sort().join(',');
@@ -3941,14 +3952,27 @@
           }
         });
 
-        // Desenhar rotas regionais internas da província
+        // 1. Fog of War na Província (cobre áreas ainda não exploradas salvo se possuir o mapa de Corvus)
+        var provMapOwned = curProv.mapKey && ownedMaps && (ownedMaps.indexOf(curProv.mapKey) >= 0);
+        if (known !== null && !provMapOwned) {
+          var provFog = _ensureProvFog(_S, known, regNodes, _activeProvId);
+          if (provFog) {
+            ctx.drawImage(provFog, 0, 0, _S, _S);
+          }
+        }
+
+        // 2. Desenhar rotas regionais (só reveladas se ambas as pontas forem conhecidas ou possuir o mapa)
         (curProv.regionalPaths || []).forEach(function(p){
-          _drawCartPath(ctx, p[0], p[1], _S, _S, regNodes);
+          var p0Known = (known === null || known.indexOf(p[0]) >= 0 || provMapOwned);
+          var p1Known = (known === null || known.indexOf(p[1]) >= 0 || provMapOwned);
+          if (p0Known && p1Known) {
+            _drawCartPath(ctx, p[0], p[1], _S, _S, regNodes);
+          }
         });
 
-        // Desenhar nós da província com lentes de alta visibilidade (descobertos e inexplorados)
+        // 3. Desenhar nós da província com lentes de alta visibilidade
         regNodes.forEach(function(b){
-          var isDiscovered = (known === null || known.indexOf(b.key) >= 0 || b.isOrigin);
+          var isDiscovered = (known === null || known.indexOf(b.key) >= 0 || b.isOrigin || provMapOwned);
           var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
           if (isDiscovered || hasMap) {
             _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, isRegional: true });
@@ -3978,6 +4002,16 @@
         // === MODO CONTINENTE GERAL ===
         function _pathEndKnown(key){ return known === null || known.indexOf(key) >= 0 || key === 'plains'; }
         var RB = CART_BIOMES.map(_resolved);
+
+        // 1. Fog of War Continental sobre regiões inexploradas
+        if (known !== null) {
+          var worldFog = _ensureCartFog(_S, known, RB);
+          if (worldFog) {
+            ctx.drawImage(worldFog, 0, 0, _S, _S);
+          }
+        }
+
+        // 2. Estradas conhecidas
         CART_PATHS.forEach(function(p){
           if (_pathEndKnown(p[0]) && _pathEndKnown(p[1])) _drawCartPath(ctx, p[0], p[1], _S, _S, RB);
         });
@@ -3994,6 +4028,46 @@
         if (qf && qf.key && typeof cfg.drawQuestHalo === 'function') {
           var qn = RB.find(function(b){ return b.key === qf.key; });
           if (qn) cfg.drawQuestHalo(ctx, qn, _S, _S, qf.title || 'Missão');
+        }
+      }
+
+      // === Animação de Descoberta Ativa (Golden Pulse + Revelação da Névoa) ===
+      if (_discoveryAnim && _discoveryAnim.nodeKey) {
+        var activeNodes = (_viewMode === 'province' && typeof regNodes !== 'undefined') ? regNodes : CART_BIOMES.map(_resolved);
+        var targetNode = activeNodes.find(function(n){ return n.key === _discoveryAnim.nodeKey; });
+        if (targetNode) {
+          var elapsed = Date.now() - _discoveryAnim.startTime;
+          var dur = _discoveryAnim.duration || 2400;
+          if (elapsed < dur) {
+            var prog = elapsed / dur;
+            var tx = targetNode.x * _S, ty = targetNode.y * _S;
+            ctx.save();
+            // Pulso 1: onda de choque dourada expandindo
+            var r1 = 14 + prog * 70;
+            var a1 = Math.max(0, (1 - prog) * 0.95);
+            ctx.beginPath();
+            ctx.arc(tx, ty, r1, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255, 214, 133, ' + a1 + ')';
+            ctx.lineWidth = Math.max(1, 3.5 * (1 - prog * 0.6));
+            ctx.stroke();
+
+            // Pulso 2: anel interno atrasado
+            if (prog > 0.22) {
+              var p2 = (prog - 0.22) / 0.78;
+              var r2 = 12 + p2 * 45;
+              var a2 = Math.max(0, (1 - p2) * 0.75);
+              ctx.beginPath();
+              ctx.arc(tx, ty, r2, 0, Math.PI * 2);
+              ctx.strokeStyle = 'rgba(196, 149, 58, ' + a2 + ')';
+              ctx.lineWidth = 2;
+              ctx.stroke();
+            }
+            ctx.restore();
+          } else {
+            var cb = _discoveryAnim.onComplete;
+            _discoveryAnim = null;
+            if (typeof cb === 'function') { try { cb(); } catch(_){} }
+          }
         }
       }
       ctx.restore();
@@ -4111,6 +4185,38 @@
       openProvince: openProvince,
       closeProvince: closeProvince,
       getViewMode: getViewMode,
+      triggerDiscoveryAnimation: function(nodeKey, onComplete){
+        var node = CART_BIOMES.find(function(b){ return b.key === nodeKey; });
+        if (!node) { if (onComplete) onComplete(); return; }
+        var provId = _LOCATION_TO_PROVINCE[nodeKey];
+        if (provId && _viewMode === 'province' && _activeProvId !== provId) {
+          openProvince(provId);
+        }
+        _discoveryAnim = {
+          nodeKey: nodeKey,
+          startTime: Date.now(),
+          duration: 2400,
+          onComplete: onComplete
+        };
+        _fogCache = null;
+        _provFogCache = {};
+        _onLoad();
+        
+        var startT = Date.now();
+        function loopAnim(){
+          if (!_discoveryAnim) return;
+          _onLoad();
+          if (Date.now() - startT < 2400) {
+            if (typeof requestAnimationFrame === 'function') requestAnimationFrame(loopAnim);
+          } else {
+            var done = _discoveryAnim && _discoveryAnim.onComplete;
+            _discoveryAnim = null;
+            _onLoad();
+            if (typeof done === 'function') { try { done(); } catch(_){} }
+          }
+        }
+        if (typeof requestAnimationFrame === 'function') requestAnimationFrame(loopAnim);
+      },
       invalidateBase: function(){ _baseCache = null; },
       ensureLocArt: _ensureLocArt
     };

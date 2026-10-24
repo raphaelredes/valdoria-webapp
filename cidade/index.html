@@ -5271,6 +5271,190 @@ LOG SINK (Fase 7):
       -webkit-overflow-scrolling: touch;
     }
     .cart-prov-bar::-webkit-scrollbar { display: none; }
+    .cart-prov-bar-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      margin-top: 2px;
+      width: 100%;
+    }
+    .cart-prov-nav-btn {
+      background: rgba(30, 20, 10, 0.88);
+      border: 1px solid rgba(196, 149, 58, 0.45);
+      color: #ffd685;
+      font-size: 15px;
+      line-height: 1;
+      width: 22px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+      user-select: none;
+      padding: 0;
+    }
+    .cart-prov-nav-btn:hover {
+      background: rgba(196, 149, 58, 0.25);
+      border-color: #ffd685;
+    }
+    .cart-atlas-picker-btn {
+      background: rgba(42, 28, 14, 0.90);
+      border: 1px solid rgba(196, 149, 58, 0.55);
+      border-radius: 8px;
+      color: #ffd685;
+      font-size: 11px;
+      font-family: inherit;
+      padding: 3px 9px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .cart-atlas-picker-btn:hover {
+      background: rgba(70, 48, 22, 0.95);
+      border-color: #ffd685;
+    }
+    .cart-atlas-modal {
+      position: absolute;
+      inset: 0;
+      z-index: 100;
+      background: rgba(10, 7, 4, 0.85);
+      backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .cam-box {
+      background: linear-gradient(180deg, #2b1f14, #1a120b);
+      border: 2px solid #c4953a;
+      border-radius: 12px;
+      max-width: 440px;
+      width: 100%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.85), 0 0 25px rgba(196,149,58,0.25);
+      overflow: hidden;
+    }
+    .cam-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(196, 149, 58, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .cam-header h3 {
+      font-family: Cinzel, serif;
+      color: #f4d49a;
+      font-size: 14px;
+      margin: 0;
+    }
+    .cam-close {
+      background: none;
+      border: none;
+      color: #a09484;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .cam-grid {
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      overflow-y: auto;
+    }
+    .cam-item {
+      background: rgba(0,0,0,0.45);
+      border: 1px solid rgba(196, 149, 58, 0.3);
+      border-radius: 8px;
+      padding: 8px 10px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      transition: all 0.15s ease;
+      text-align: left;
+    }
+    .cam-item:hover, .cam-item.active {
+      background: rgba(196, 149, 58, 0.2);
+      border-color: #ffd685;
+      transform: translateY(-1px);
+    }
+    .cam-item-title {
+      font-family: Cinzel, serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: #ffd685;
+    }
+    .cam-item-sub {
+      font-size: 9px;
+      color: #a09484;
+      font-style: italic;
+    }
+    .cart-discovery-toast {
+      position: absolute;
+      top: 60px;
+      left: 14px;
+      right: 14px;
+      z-index: 95;
+      background: linear-gradient(180deg, rgba(38,26,14,0.96), rgba(20,13,7,0.98));
+      border: 2px solid #ffd685;
+      border-radius: 10px;
+      padding: 12px 14px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.9), 0 0 20px rgba(255,214,133,0.35);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      animation: dropDown 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    }
+    @keyframes dropDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .cdt-badge {
+      font-family: Cinzel, serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: #ffd685;
+      letter-spacing: 1.5px;
+      text-align: center;
+    }
+    .cdt-title {
+      font-family: Cinzel, serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+      text-shadow: 0 0 8px rgba(255,214,133,0.5);
+    }
+    .cdt-desc {
+      font-size: 11px;
+      color: #d4c8b0;
+      font-style: italic;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .cdt-btn {
+      margin-top: 4px;
+      background: linear-gradient(180deg, #c4953a, #9a7530);
+      border: 1px solid #ffd685;
+      border-radius: 6px;
+      color: #1a1510;
+      font-family: Cinzel, serif;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
     .cart-prov-chip {
       white-space: nowrap;
       background: rgba(0, 0, 0, 0.48);
@@ -69332,20 +69516,27 @@ function renderCartographyCanvas(el){
     + '<div class="cart-wrapper">'
     + '  <div class="subscreen-back-row" style="display:flex;justify-content:space-between;align-items:center;">'
     + '    <button class="subscreen-back" id="cart-back-btn" type="button" aria-label="Voltar para a cidade">← Voltar</button>'
-    + '    <button class="cart-btn-atlas-back" id="cart-atlas-back-btn" type="button" style="display:none;" aria-label="Voltar ao Continente">⮌ Atlas do Continente</button>'
+    + '    <div style="display:flex;gap:6px;align-items:center;">'
+    + '      <button class="cart-atlas-picker-btn" id="cart-atlas-picker-btn" type="button" aria-label="Seletor de Províncias">🗺️ Atlas (8) ▾</button>'
+    + '      <button class="cart-btn-atlas-back" id="cart-atlas-back-btn" type="button" style="display:none;" aria-label="Voltar ao Continente">⮌ Continente</button>'
+    + '    </div>'
     + '  </div>'
     + '  <div class="cart-header">'
     + '    <h2 id="cart-title">Mapa de Valdoria</h2>'
-    + '    <div class="cart-prov-bar" id="cart-prov-bar">'
-    + '      <button class="cart-prov-chip active" data-prov="world" type="button"><span>🌍</span> Continente</button>'
-    + '      <button class="cart-prov-chip" data-prov="plains" type="button"><span>🌾</span> Planícies</button>'
-    + '      <button class="cart-prov-chip" data-prov="forest" type="button"><span>🌲</span> Florestas</button>'
-    + '      <button class="cart-prov-chip" data-prov="mountain" type="button"><span>🏔️</span> Montanhas</button>'
-    + '      <button class="cart-prov-chip" data-prov="swamp" type="button"><span>🐍</span> Pântanos</button>'
-    + '      <button class="cart-prov-chip" data-prov="desert" type="button"><span>🌵</span> Deserto</button>'
-    + '      <button class="cart-prov-chip" data-prov="coast" type="button"><span>🌊</span> Costa</button>'
-    + '      <button class="cart-prov-chip" data-prov="snow" type="button"><span>❄️</span> Ermo Gelado</button>'
-    + '      <button class="cart-prov-chip" data-prov="volcanic" type="button"><span>🌋</span> Vulcânico</button>'
+    + '    <div class="cart-prov-bar-wrap">'
+    + '      <button class="cart-prov-nav-btn cart-prov-prev" id="cart-prov-prev" type="button" aria-label="Anterior">‹</button>'
+    + '      <div class="cart-prov-bar" id="cart-prov-bar">'
+    + '        <button class="cart-prov-chip active" data-prov="world" type="button"><span>🌍</span> Continente</button>'
+    + '        <button class="cart-prov-chip" data-prov="plains" type="button"><span>🌾</span> Planícies</button>'
+    + '        <button class="cart-prov-chip" data-prov="forest" type="button"><span>🌲</span> Florestas</button>'
+    + '        <button class="cart-prov-chip" data-prov="mountain" type="button"><span>🏔️</span> Montanhas</button>'
+    + '        <button class="cart-prov-chip" data-prov="swamp" type="button"><span>🐍</span> Pântanos</button>'
+    + '        <button class="cart-prov-chip" data-prov="desert" type="button"><span>🌵</span> Deserto</button>'
+    + '        <button class="cart-prov-chip" data-prov="coast" type="button"><span>🌊</span> Costa</button>'
+    + '        <button class="cart-prov-chip" data-prov="snow" type="button"><span>❄️</span> Ermo Gelado</button>'
+    + '        <button class="cart-prov-chip" data-prov="volcanic" type="button"><span>🌋</span> Vulcânico</button>'
+    + '      </div>'
+    + '      <button class="cart-prov-nav-btn cart-prov-next" id="cart-prov-next" type="button" aria-label="Próximo">›</button>'
     + '    </div>'
     + '  </div>'
 + '  <div class="cart-canvas-frame">'
@@ -69362,6 +69553,22 @@ function renderCartographyCanvas(el){
     + '      <button class="cart-ctrl-btn" id="cart-zoom-in" title="Zoom in">+</button>'
     + '      <button class="cart-ctrl-btn" id="cart-zoom-out" title="Zoom out">-</button>'
     + '      <button class="cart-ctrl-btn" id="cart-zoom-reset" title="Reset" style="font-size:calc(18px * var(--v-font-scale, 1));">⌂</button>'
+    + '      <button class="cart-ctrl-btn" id="cart-sim-discovery" title="Simular Descoberta de Local (Dev)" style="font-size:calc(14px * var(--v-font-scale, 1));color:#ffd685;">⚡</button>'
+    + '    </div>'
+    + '    <div class="cart-discovery-toast" id="cart-discovery-toast" style="display:none;">'
+    + '      <div class="cdt-badge">✦ NOVA ROTA REVELADA ✦</div>'
+    + '      <div class="cdt-title" id="cdt-title">Nome do Local</div>'
+    + '      <div class="cdt-desc" id="cdt-desc">Suas explorações nas terras ermas desbravaram este caminho. O local agora está mapeado e disponível para viagem!</div>'
+    + '      <button class="cdt-btn" id="cdt-btn">Examinar no Mapa</button>'
+    + '    </div>'
+    + '  </div>'
+    + '  <div class="cart-atlas-modal" id="cart-atlas-modal" style="display:none;">'
+    + '    <div class="cam-box">'
+    + '      <div class="cam-header">'
+    + '        <h3>Atlas das Províncias de Valdoria</h3>'
+    + '        <button class="cam-close" id="cam-close-btn" type="button">✕</button>'
+    + '      </div>'
+    + '      <div class="cam-grid" id="cam-grid"></div>'
     + '    </div>'
     + '  </div>'
     + '</div>';
@@ -69772,6 +69979,62 @@ function _wireCartEvents(){
       _cartFocusProvince(pId);
     };
   });
+}
+
+// === Celebração de Nova Descoberta Cartográfica (Ordem do Usuário 2026-10) ===
+function _triggerCartDiscoveryCelebration(nodeKey) {
+  if (!_cartEngine) return;
+  var b = (typeof CART_BIOMES !== 'undefined') ? CART_BIOMES.find(function(x){ return x.key === nodeKey; }) : null;
+  var locName = b ? b.name : nodeKey;
+  
+  // 1. Dispara pulso no canvas
+  if (typeof _cartEngine.triggerDiscoveryAnimation === 'function') {
+    _cartEngine.triggerDiscoveryAnimation(nodeKey, function(){
+      _drawCart();
+    });
+  }
+
+  // 2. Exibe o toast comemorativo de rota descoberta
+  var toast = document.getElementById('cart-discovery-toast');
+  var tTitle = document.getElementById('cdt-title');
+  var tBtn = document.getElementById('cdt-btn');
+  if (toast && tTitle) {
+    tTitle.textContent = (b ? (b.icon || '📍') + ' ' : '') + locName;
+    toast.style.display = 'flex';
+    if (tBtn) {
+      tBtn.onclick = function(){
+        toast.style.display = 'none';
+        if (b) _openCartLocationPopup(b);
+      };
+    }
+  }
+
+  // 3. Efeito sonoro de conquista/missão
+  try {
+    if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSfx) {
+      ValdoriaAudio.playSfx('quest');
+    }
+  } catch(_) {}
+}
+
+function _checkCartAutoDiscoveryOnOpen() {
+  try {
+    var p = window.CITY_MOCK_PLAYER || {};
+    var currentKnown = p.known_locations || ['plains'];
+    var raw = localStorage.getItem('valdoria_cart_last_known');
+    if (!raw) {
+      localStorage.setItem('valdoria_cart_last_known', JSON.stringify(currentKnown));
+      return;
+    }
+    var lastKnown = JSON.parse(raw);
+    if (!Array.isArray(lastKnown)) return;
+    var newLocs = currentKnown.filter(function(k){ return lastKnown.indexOf(k) < 0; });
+    if (newLocs.length > 0) {
+      var revealKey = newLocs[0];
+      _triggerCartDiscoveryCelebration(revealKey);
+      localStorage.setItem('valdoria_cart_last_known', JSON.stringify(currentKnown));
+    }
+  } catch(_) {}
 }
 
 function _cartFocusProvince(provId){
