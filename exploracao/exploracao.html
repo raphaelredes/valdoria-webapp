@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T18:14:51Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T18:40:05Z - do not edit directly, edit source -->
 
 
 
@@ -93149,7 +93149,10 @@ function _openCartLocationPopup(biome){
           ? '⛺ Paradas Programadas: ' + campCount + ' Acampamento' + (campCount > 1 ? 's' : '') + ' com Descanso Longo (8h cada)'
           : '⛺ Marcha Direta (sem acampamento na estrada)';
         return '<div class="clp-itinerary-box" style="margin:4px 0 6px;text-align:left;background:rgba(20,14,8,0.7);padding:5px 8px;border-radius:4px;border:1px solid rgba(196,149,58,0.35);">'
-          + '  <div style="font-size:9px;color:#fde047;font-family:Cinzel,serif;font-weight:700;margin-bottom:3px;">🗺️ ITINERÁRIO DA MARCHA (' + (routeKeys.length - 1) + ' ETAPAS):</div>'
+          + '  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">'
+          + '    <span style="font-size:9px;color:#fde047;font-family:Cinzel,serif;font-weight:700;">🗺️ ITINERÁRIO DA MARCHA (' + (routeKeys.length - 1) + ' ETAPAS):</span>'
+          + '    <button class="clp-btn-copy-itinerary" id="xclp-copy-itinerary-btn" type="button" style="background:rgba(35,25,14,0.9);border:1px solid rgba(255,215,0,0.6);color:#ffd700;font-size:8.5px;padding:2px 6px;border-radius:3px;cursor:pointer;font-family:Cinzel,serif;" title="Copiar Itinerário Formatado D&D 5e para a Prancheta">📋 Copiar Rota</button>'
+          + '  </div>'
           + '  <div style="font-size:9.5px;color:#f4d49a;line-height:1.4;">' + rNames.join(' <span style="color:#d2be90;">➔</span> ') + '</div>'
           + '  <div style="font-size:8.5px;color:#86efac;margin-top:3px;">' + campTip + '</div>'
           + '</div>';
@@ -93292,6 +93295,47 @@ function _openCartLocationPopup(biome){
     };
   }
 
+  var copyItineraryBtn = el.querySelector('#xclp-copy-itinerary-btn') || el.querySelector('#clp-copy-itinerary-btn');
+  if (copyItineraryBtn) {
+    copyItineraryBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      if (window.CartShared && CartShared.formatExpeditionItinerary) {
+        var startK = (typeof _xcartGetPlayerBiome === 'function' ? _xcartGetPlayerBiome() : null) || 'plains';
+        var text = CartShared.formatExpeditionItinerary(startK, biome, routeKeys, {
+          pace: window._cartSelectedPace || 'normal',
+          formation: window._cartSelectedFormation || 'standard',
+          transport: window._cartSelectedTransport || 'foot',
+          role: window._cartSelectedTravelRole || 'scout',
+          campStance: window._cartSelectedCampStance || 'vigilant',
+          isProvince: (_xcartEngine && typeof _xcartEngine.getViewMode === 'function' && _xcartEngine.getViewMode().mode === 'province')
+        });
+
+        function notifyCopied() {
+          if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_scroll');
+          copyItineraryBtn.textContent = '✅ Copiado!';
+          copyItineraryBtn.style.color = '#86efac';
+          copyItineraryBtn.style.borderColor = '#86efac';
+          setTimeout(function(){
+            copyItineraryBtn.textContent = '📋 Copiar Rota';
+            copyItineraryBtn.style.color = '#ffd700';
+            copyItineraryBtn.style.borderColor = 'rgba(255,215,0,0.6)';
+          }, 2000);
+        }
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(notifyCopied).catch(function(){
+            _xcartFallbackCopy(text);
+            notifyCopied();
+          });
+        } else {
+          _xcartFallbackCopy(text);
+          notifyCopied();
+        }
+      }
+    };
+  }
+
   var noteSaveBtn = el.querySelector('#clp-note-save-btn');
   var noteInput = el.querySelector('#clp-note-input');
   if (noteSaveBtn && noteInput) {
@@ -93324,6 +93368,47 @@ function _openCartLocationPopup(biome){
         noteSaveBtn.textContent = 'Salvo!';
         setTimeout(function(){ noteSaveBtn.textContent = 'Salvar'; }, 1200);
         if (_xcartCtx && _xcartEngine) _xcartDraw();
+      }
+    };
+  }
+
+  var copyItineraryBtn = el.querySelector('#xclp-copy-itinerary-btn') || el.querySelector('#clp-copy-itinerary-btn');
+  if (copyItineraryBtn) {
+    copyItineraryBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      if (window.CartShared && CartShared.formatExpeditionItinerary) {
+        var startK = (typeof _xcartGetPlayerBiome === 'function' ? _xcartGetPlayerBiome() : null) || 'plains';
+        var text = CartShared.formatExpeditionItinerary(startK, biome, routeKeys, {
+          pace: window._cartSelectedPace || 'normal',
+          formation: window._cartSelectedFormation || 'standard',
+          transport: window._cartSelectedTransport || 'foot',
+          role: window._cartSelectedTravelRole || 'scout',
+          campStance: window._cartSelectedCampStance || 'vigilant',
+          isProvince: (_xcartEngine && typeof _xcartEngine.getViewMode === 'function' && _xcartEngine.getViewMode().mode === 'province')
+        });
+
+        function notifyCopied() {
+          if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_scroll');
+          copyItineraryBtn.textContent = '✅ Copiado!';
+          copyItineraryBtn.style.color = '#86efac';
+          copyItineraryBtn.style.borderColor = '#86efac';
+          setTimeout(function(){
+            copyItineraryBtn.textContent = '📋 Copiar Rota';
+            copyItineraryBtn.style.color = '#ffd700';
+            copyItineraryBtn.style.borderColor = 'rgba(255,215,0,0.6)';
+          }, 2000);
+        }
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(notifyCopied).catch(function(){
+            _xcartFallbackCopy(text);
+            notifyCopied();
+          });
+        } else {
+          _xcartFallbackCopy(text);
+          notifyCopied();
+        }
       }
     };
   }
@@ -93907,6 +93992,7 @@ function openCartography() {
     + '    <button class="xcart-dock-btn primary" id="xcart-atlas-picker-btn" type="button" title="Atlas das Províncias [M]" aria-label="Seletor de Províncias">🗺️ Atlas ▾</button>'
     + '    <button class="xcart-dock-btn" id="xcart-waypoints-btn" type="button" title="Rede de Marcos e Santuários [P]" aria-label="Marcos de Viagem e Santuários">🌀 Marcos</button>'
     + '    <button class="xcart-dock-btn" id="xcart-filter-toggle-btn" type="button" title="Alternar Filtro de Nós no Mapa [Teclas 1 a 6]">🎯 Filtro: Todos</button>
+    <button class="xcart-dock-btn" id="xcart-ruler-btn" type="button" title="Régua Cartográfica / Astrolábio de Medição [X]" aria-label="Régua Cartográfica e Distâncias">📏 Régua</button>
     <button class="xcart-dock-btn" id="xcart-guide-btn" type="button" title="Guia do Andarilho e Regras de Viagem D&D 5e [H]" aria-label="Guia de Viagem D&D 5e">📖 Guia</button>'
     + '    <button class="xcart-dock-btn accent" id="xcart-atlas-back-btn" type="button" title="Voltar ao Continente [Backspace]" style="display:none;" aria-label="Voltar ao Continente">🌍 Continente</button>'
     + '  </div>'
@@ -94034,6 +94120,10 @@ function openCartography() {
         <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">
           <div style="font-family:Cinzel,serif;font-weight:700;color:#c084fc;font-size:11.5px;margin-bottom:4px;">🧭 ATIVIDADES & FUNÇÕES DE VIAGEM (PHB p. 182)</div>
           <p style="margin:2px 0;"><b>👁️ Sentinela:</b> Alerta máximo (+5 Percepção Passiva); impede surpresas em emboscadas.<br><b>🧭 Guia:</b> Evita desvios sob névoas densas e tempestades.<br><b>🌿 Caçador:</b> Colhe comida e água silvestre sem gastar rações em marcha normal/lenta.<br><b>📜 Cartógrafo:</b> Mapeia estradas e detalha anotações táticas de viagem.</p>
+        </div>
+        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">
+          <div style="font-family:Cinzel,serif;font-weight:700;color:#ffd700;font-size:11.5px;margin-bottom:4px;">📏 RÉGUA CARTOGRÁFICA & ASTROLÁBIO DE NAVEGAÇÃO (D&D 5e)</div>
+          <p style="margin:2px 0;"><b>📏 Régua & Azimute (Tecla X):</b> Ativa a régua de medição tática. Ao mover o cursor ou clicar em nós, calcula a distância em <i>Milhas, Léguas e Quilômetros</i>, o rumo nos 16 ventos náuticos e a duração da marcha a pé, a cavalo ou de caravana.<br><b>🧭 Rosa dos Ventos Dinâmica:</b> O astrolábio no canto superior projeta um ponteiro dourado vivo em direção ao destino selecionado.<br><b>📋 Copiar Itinerário:</b> No popup de viagem, o botão <i>📋 Copiar Rota</i> gera um manifesto de expedição formatado em texto para a prancheta.</p>
         </div>
       </div>
     </div>
@@ -94892,6 +94982,45 @@ function _xcartOpenWaypointsModal() {
   modal.style.display = 'flex';
 }
 
+function _xcartFallbackCopy(text){
+  try {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  } catch(_) {}
+}
+
+function _xcartToggleRuler(){
+  if (!_xcartEngine || typeof _xcartEngine.toggleRuler !== 'function') return;
+  var plBiomeKey = (typeof _xcartGetPlayerBiome === 'function') ? _xcartGetPlayerBiome() : null;
+  var origNode = null;
+  if (plBiomeKey && window.CartShared && CartShared.CART_BIOMES) {
+    origNode = CartShared.CART_BIOMES.find(function(b){ return b.key === plBiomeKey; });
+  }
+  var active = _xcartEngine.toggleRuler(undefined, origNode);
+  var btn = document.getElementById('xcart-ruler-btn');
+  if (btn) {
+    if (active) {
+      btn.style.borderColor = '#ffd700';
+      btn.style.color = '#ffd700';
+      btn.style.background = 'rgba(60, 42, 18, 0.95)';
+    } else {
+      btn.style.borderColor = '';
+      btn.style.color = '';
+      btn.style.background = '';
+    }
+  }
+  if (_xcartCanvas) {
+    _xcartCanvas.style.cursor = active ? 'crosshair' : 'default';
+  }
+  _xcartRedraw();
+}
+
 function _xcartOpenGuideModal() {
   var modal = document.getElementById('xcart-guide-modal');
   if (modal) modal.style.display = 'flex';
@@ -95009,6 +95138,15 @@ function _xcartFocusWaypoint(key) {
     }
   }, 100);
 }
+
+  var xcartRulerBtn = document.getElementById('xcart-ruler-btn');
+  if (xcartRulerBtn) {
+    xcartRulerBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      _xcartToggleRuler();
+    };
+  }
 
   // Modal Guia do Andarilho D&D 5e (Exploração)
   var guideBtn = document.getElementById('xcart-guide-btn');
@@ -95291,6 +95429,11 @@ function _wireXCartKeyboardNavigation() {
     var isInput = (tag === 'input' || tag === 'textarea' || tag === 'select');
 
     if (e.key === 'Escape') {
+      if (_xcartEngine && typeof _xcartEngine.isRulerActive === 'function' && _xcartEngine.isRulerActive()) {
+        e.preventDefault();
+        _xcartToggleRuler();
+        return;
+      }
       var locPopup = document.getElementById('cart-loc-popup');
       if (locPopup && locPopup.classList.contains('active')) {
         e.preventDefault();
@@ -95446,6 +95589,13 @@ function _wireXCartKeyboardNavigation() {
       return;
     }
 
+    // X / x: Ativa / Desativa Régua Cartográfica & Astrolábio de Medição (D&D 5e)
+    if (e.key === 'x' || e.key === 'X') {
+      e.preventDefault();
+      _xcartToggleRuler();
+      return;
+    }
+
     // B / b: fixa ou alterna Alvo Tático (Beacon) no nó sob o cursor ou selecionado
     if (e.key === 'b' || e.key === 'B') {
       e.preventDefault();
@@ -95575,6 +95725,12 @@ function _xcartHandleHover(mx, my){
   if (_xcartHoverRaf) return;
   _xcartHoverRaf = requestAnimationFrame(function(){
     _xcartHoverRaf = 0;
+    if (_xcartEngine && typeof _xcartEngine.handleRulerMove === 'function' && _xcartEngine.isRulerActive()) {
+      var view = { w: _xcartW, h: _xcartH, panX: _xcartPanX, panY: _xcartPanY, zoom: _cartZoom };
+      if (_xcartEngine.handleRulerMove(mx, my, view, _xcartHoverNode)) {
+        _xcartRedraw();
+      }
+    }
     var compassX = _xcartW - 40, compassY = 40;
     var cdx = mx - compassX, cdy = my - compassY;
     var isOverCompass = (cdx * cdx + cdy * cdy <= 26 * 26);
@@ -95612,6 +95768,16 @@ function _xcartHandleHover(mx, my){
 }
 
 function _xcartHandleClick(mx, my){
+  // 0. Régua Cartográfica / Astrolábio de Medição (quando ativa intercepta cliques)
+  if (_xcartEngine && typeof _xcartEngine.handleRulerClick === 'function' && _xcartEngine.isRulerActive()) {
+    var view = { w: _xcartW, h: _xcartH, panX: _xcartPanX, panY: _xcartPanY, zoom: _cartZoom };
+    if (_xcartEngine.handleRulerClick(mx, my, view, _xcartHoverNode)) {
+      try { if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_click'); } catch(_) {}
+      _xcartRedraw();
+      return;
+    }
+  }
+
   // 0. Interação no Indicador de Borda da Comitiva (Tracker fora da tela)
   if (_xcartEngine && typeof _xcartEngine.getOffscreenComitivaBadge === 'function') {
     var bPos = _xcartEngine.getOffscreenComitivaBadge();

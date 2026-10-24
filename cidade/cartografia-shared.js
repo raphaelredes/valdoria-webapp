@@ -4351,6 +4351,258 @@
     ctx.restore();
   }
 
+  // === 16-Wind Nautical Bearing Table & Astrolabe Functions (D&D 5e) ===
+  var _BEARING_16 = [
+    { code: 'N',   name: 'Norte' },
+    { code: 'NNE', name: 'Norte-Nordeste' },
+    { code: 'NE',  name: 'Nordeste' },
+    { code: 'ENE', name: 'Leste-Nordeste' },
+    { code: 'L',   name: 'Leste' },
+    { code: 'ESE', name: 'Leste-Sudeste' },
+    { code: 'SE',  name: 'Sudeste' },
+    { code: 'SSE', name: 'Sul-Sudeste' },
+    { code: 'S',   name: 'Sul' },
+    { code: 'SSO', name: 'Sul-Sudoeste' },
+    { code: 'SO',  name: 'Sudoeste' },
+    { code: 'OSO', name: 'Oeste-Sudoeste' },
+    { code: 'O',   name: 'Oeste' },
+    { code: 'ONO', name: 'Oeste-Noroeste' },
+    { code: 'NO',  name: 'Noroeste' },
+    { code: 'NNO', name: 'Norte-Noroeste' }
+  ];
+
+  function calcDistanceBearing(p1, p2, isProvince) {
+    if (!p1 || !p2) return null;
+    var x1 = (typeof p1.x === 'number') ? p1.x : 0.5;
+    var y1 = (typeof p1.y === 'number') ? p1.y : 0.5;
+    var x2 = (typeof p2.x === 'number') ? p2.x : 0.5;
+    var y2 = (typeof p2.y === 'number') ? p2.y : 0.5;
+    var dx = x2 - x1;
+    var dy = y2 - y1;
+    var distNorm = Math.sqrt(dx * dx + dy * dy);
+    var baseMiles = isProvince ? 45 : 150;
+    var miles = Math.max(1, Math.round(distNorm * baseMiles));
+    var km = Math.round(miles * 1.6);
+    var leagues = +(miles / 3).toFixed(1);
+
+    // dy cresce para baixo, logo -dy aponta para o Norte
+    var rad = Math.atan2(dx, -dy);
+    var deg = Math.round((rad * 180 / Math.PI + 360) % 360);
+    var sector = Math.floor(((deg + 11.25) % 360) / 22.5);
+    var bEntry = _BEARING_16[sector] || _BEARING_16[0];
+
+    return {
+      miles: miles,
+      km: km,
+      leagues: leagues,
+      degrees: deg,
+      bearingCode: bEntry.code,
+      bearingName: bEntry.name,
+      hoursFoot: +(miles / 3).toFixed(1),
+      hoursHorse: +(miles / 4).toFixed(1),
+      hoursWagon: +(miles / 2).toFixed(1)
+    };
+  }
+
+  // === _drawCartRuler (Astrolábio de Medição & Régua Cartográfica D&D 5e) ===
+  function _drawCartRuler(ctx, startPt, currPt, S, offX, offY, viewMode) {
+    if (!startPt || !currPt) return;
+    var sx = offX + startPt.x * S;
+    var sy = offY + startPt.y * S;
+    var ex = offX + currPt.x * S;
+    var ey = offY + currPt.y * S;
+
+    var isProv = (viewMode === 'province');
+    var m = calcDistanceBearing(startPt, currPt, isProv);
+    if (!m) return;
+
+    ctx.save();
+
+    // 1. Linha de medição principal dourada com glow e tracejado
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(ex, ey);
+    ctx.strokeStyle = 'rgba(255, 215, 0, 0.85)';
+    ctx.lineWidth = 2.0;
+    ctx.shadowColor = 'rgba(255, 215, 0, 0.9)';
+    ctx.shadowBlur = 8;
+    ctx.setLineDash([6, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 2. Terminais: anel na origem e retículo no destino
+    ctx.beginPath();
+    ctx.arc(sx, sy, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffd700';
+    ctx.fill();
+    ctx.strokeStyle = '#221508';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(ex, ey, 7, 0, Math.PI * 2);
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(ex - 10, ey); ctx.lineTo(ex + 10, ey);
+    ctx.moveTo(ex, ey - 10); ctx.lineTo(ex, ey + 10);
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // 3. Marcas de léguas ao longo da linha (ticks)
+    var distPx = Math.sqrt((ex - sx) * (ex - sx) + (ey - sy) * (ey - sy));
+    var steps = Math.min(10, Math.max(2, Math.floor(m.leagues)));
+    if (distPx > 40 && steps > 1) {
+      for (var i = 1; i < steps; i++) {
+        var t = i / steps;
+        var tx = sx + (ex - sx) * t;
+        var ty = sy + (ey - sy) * t;
+        var perpX = -(ey - sy) / distPx;
+        var perpY = (ex - sx) / distPx;
+        ctx.beginPath();
+        ctx.moveTo(tx - perpX * 4, ty - perpY * 4);
+        ctx.lineTo(tx + perpX * 4, ty + perpY * 4);
+        ctx.strokeStyle = 'rgba(255, 215, 0, 0.7)';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+      }
+    }
+
+    // 4. Cartouche flutuante de medição próximo ao ponto médio
+    var mx = (sx + ex) / 2;
+    var my = (sy + ey) / 2;
+    my -= 24;
+
+    var boxW = 148;
+    var boxH = 48;
+    ctx.fillStyle = 'rgba(22, 14, 8, 0.90)';
+    ctx.strokeStyle = 'rgba(255, 215, 0, 0.75)';
+    ctx.lineWidth = 1.2;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+    ctx.shadowBlur = 6;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(mx - boxW / 2, my - boxH / 2, boxW, boxH, 4);
+    else ctx.rect(mx - boxW / 2, my - boxH / 2, boxW, boxH);
+    ctx.fill();
+    ctx.stroke();
+
+    // Textos do cartouche
+    ctx.textAlign = 'center';
+    ctx.font = '700 9.5px Cinzel, serif';
+    ctx.fillStyle = '#ffd700';
+    ctx.fillText('📏 ' + m.miles + ' Milhas (~' + m.leagues + ' Léguas · ' + m.km + ' km)', mx, my - 10);
+
+    ctx.font = '8.5px Georgia, serif';
+    ctx.fillStyle = '#f4d49a';
+    ctx.fillText('🧭 Rumo: ' + m.bearingCode + ' (' + m.degrees + '°) · 🚶 ~' + m.hoursFoot + 'h', mx, my + 3);
+
+    ctx.font = 'italic 7.5px Georgia, serif';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('🐎 ~' + m.hoursHorse + 'h montaria · 🛒 ~' + m.hoursWagon + 'h caravana', mx, my + 15);
+
+    ctx.restore();
+  }
+
+  // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
+  function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
+    options = options || {};
+    var RB = CART_BIOMES;
+
+    function _resolveNode(inp) {
+      if (!inp) return null;
+      if (typeof inp === 'object' && inp.name) return inp;
+      var k = (typeof inp === 'string') ? inp : inp.key;
+      return RB.find(function(b){ return b.key === k; }) || { key: k, name: k, biome: 'plains' };
+    }
+
+    var orig = _resolveNode(originInput) || { key: 'plains', name: 'Portões de Valdória', biome: 'plains' };
+    var targ = _resolveNode(targetInput) || { key: 'floresta', name: 'Destino da Marcha', biome: 'forest' };
+    var origProv = getLocationProvince(orig.key);
+    var targProv = getLocationProvince(targ.key);
+    var isProv = !!options.isProvince;
+
+    var mb = calcDistanceBearing(orig, targ, isProv);
+    var miles = mb ? mb.miles : 15;
+    var km = mb ? mb.km : 24;
+    var leagues = mb ? mb.leagues : 5.0;
+    var bearingStr = mb ? (mb.bearingCode + ' (' + mb.degrees + '° - ' + mb.bearingName + ')') : 'Norte';
+
+    var paceKey = options.pace || 'normal';
+    var formKey = options.formation || 'standard';
+    var transKey = options.transport || 'foot';
+    var roleKey = options.role || 'scout';
+    var campKey = options.campStance || 'vigilant';
+
+    var formObj = MARCHING_FORMATIONS[formKey] || MARCHING_FORMATIONS.standard;
+    var transObj = TRANSPORT_MODES[transKey] || TRANSPORT_MODES.foot;
+    var roleObj = TRAVEL_ROLES[roleKey] || TRAVEL_ROLES.scout;
+    var dndInfo = getBiomeDndInfo(targ.biome || targ.key);
+    var forageInfo = getBiomeForageSustainability(targ.biome || targ.key);
+    var bestiaryInfo = getBiomeBestiaryThreats(targ.biome || targ.key);
+    var altInfo = getBiomeAltitude(targ.biome || targ.key, targ.tier);
+
+    // Ajuste de horas de marcha com velocidade de transporte e ritmo
+    var speedMod = (paceKey === 'fast') ? 1.33 : ((paceKey === 'stealth') ? 0.67 : 1.0);
+    var travelHours = +(miles / (transObj.speedMph * speedMod)).toFixed(1);
+    var campCount = Math.max(0, Math.floor((travelHours - 1) / 8));
+
+    // Nomes da rota
+    var routeStepsNames = [];
+    if (Array.isArray(routeKeys) && routeKeys.length) {
+      routeStepsNames = routeKeys.map(function(k){
+        var n = RB.find(function(b){ return b.key === k; });
+        return n ? n.name : k;
+      });
+    } else {
+      routeStepsNames = [orig.name, targ.name];
+    }
+
+    var campText = (campCount > 0)
+      ? (campCount + ' Acampamento(s) com Descanso Longo (8h cada) · Postura: ' + (campKey === 'vigilant' ? '🛡️ Vigília Atenta' : (campKey === 'stealth' ? '🕯️ Acampamento Oculto' : '⛺ Repouso Pleno')))
+      : 'Marcha Direta sem necessidade de pernoite na estrada';
+
+    var forcedMarchWarning = (travelHours > 8 && campCount === 0)
+      ? ('⚠️ ALERTA DE MARCHA FORÇADA (PHB p. 181): Salvaguarda de CON CD ' + (10 + Math.floor(travelHours - 8)) + ' contra Exaustão Nível 1.')
+      : 'Marcha dentro do limite diário padrão (sem risco de exaustão).';
+
+    var rationsNeeded = Math.max(1, Math.ceil(travelHours / 8));
+    var watersNeeded = rationsNeeded * 2;
+
+    var out = [];
+    out.push('📜 ITINERÁRIO DE EXPEDIÇÃO · LENDAS DE VALDORIA');
+    out.push('═══════════════════════════════════════════════════════════');
+    out.push('📍 Origem:     ' + orig.name + ' (' + biomePT(orig.biome || orig.key) + ' · ' + origProv.name + ')');
+    out.push('🎯 Destino:    ' + targ.name + ' (' + biomePT(targ.biome || targ.key) + ' · ' + targProv.name + ')');
+    out.push('🧭 Rumo:       ' + bearingStr);
+    out.push('📏 Distância:  ~' + miles + ' Milhas (~' + leagues + ' Léguas · ~' + km + ' km)');
+    out.push('🗺️ Rota:       ' + routeStepsNames.join(' ➔ '));
+    out.push('');
+    out.push('⚙️ PARÂMETROS DA MARCHA (D&D 5e):');
+    out.push('• Modo de Transporte: ' + transObj.name + ' (' + transObj.speedMph + ' milhas/h)');
+    out.push('• Ritmo da Comitiva:  ' + (paceKey === 'fast' ? '⚡ Rápido (30 mi/dia)' : (paceKey === 'stealth' ? '🐾 Furtivo (18 mi/dia)' : '🚶 Normal (24 mi/dia)')));
+    out.push('• Ordem de Marcha:    ' + formObj.name + ' (' + formObj.desc + ')');
+    out.push('• Função de Viagem:   ' + roleObj.name + ' (' + roleObj.desc + ')');
+    out.push('• Vigília Selvagem:   ' + campText);
+    out.push('');
+    out.push('⏳ LOGÍSTICA & SOBREVIVÊNCIA:');
+    out.push('• Duração Estimada:   ' + travelHours + ' Horas de Viagem');
+    out.push('• Custo do Terreno:   ' + (targ.difficulty || dndInfo.terrain));
+    out.push('• Topografia/Relevo:  ' + (altInfo ? (altInfo.badge + ' ' + altInfo.label + ' (' + altInfo.meters + 'm)') : 'Relevo Normal'));
+    out.push('• Provisões Mínimas:  ' + rationsNeeded + ' Ração(ões) / ' + watersNeeded + ' Odres de Água por aventureiro');
+    out.push('• Estado de Marcha:   ' + forcedMarchWarning);
+    out.push('');
+    out.push('⚔️ AMEAÇAS & RECURSOS DO BIOMA:');
+    out.push('• Terreno & Riscos:   ' + dndInfo.hazard);
+    out.push('• Salvaguardas 5e:    ' + dndInfo.saves);
+    out.push('• Fauna/Predadores:   ' + (bestiaryInfo ? (bestiaryInfo.threats.join(', ') + ' · Predador Alfa: ' + bestiaryInfo.apex) : 'Fauna Comum'));
+    out.push('• Forrageamento D&D:  ' + (forageInfo ? (forageInfo.rating + ' (Sobrevivência CD ' + forageInfo.dc + ') · Água: ' + forageInfo.water) : 'Padrão'));
+    out.push('═══════════════════════════════════════════════════════════');
+
+    return out.join('\n');
+  }
+
   // === _drawCartCompass ===
   function _isCompassAt(mx, my, w, h) {
     if (typeof mx !== 'number' || typeof my !== 'number') return false;
@@ -4359,7 +4611,7 @@
     return (dx * dx + dy * dy) <= (26 * 26);
   }
 
-  function _drawCartCompass(ctx, w, h, isHovered, isPulsing){
+  function _drawCartCompass(ctx, w, h, isHovered, isPulsing, targetBearing){
     // Top-right (era bottom-right, mas conflitava com zoom controls)
     var cx = w - 40, cy = 40;
     var R = 22;
@@ -4445,6 +4697,32 @@
       ctx.closePath();
       ctx.stroke();
     }
+
+    // Ponteiro de Destino do Astrolábio Dourado (D&D 5e)
+    if (targetBearing && typeof targetBearing.degrees === 'number') {
+      var tAng = (targetBearing.degrees * Math.PI / 180) - Math.PI / 2;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      var arrowLen = R - 2;
+      var arrowTipX = Math.cos(tAng) * arrowLen;
+      var arrowTipY = Math.sin(tAng) * arrowLen;
+      var perpX = -Math.sin(tAng) * 2.8;
+      var perpY = Math.cos(tAng) * 2.8;
+      ctx.lineTo(arrowTipX * 0.55 + perpX, arrowTipY * 0.55 + perpY);
+      ctx.lineTo(arrowTipX, arrowTipY);
+      ctx.lineTo(arrowTipX * 0.55 - perpX, arrowTipY * 0.55 - perpY);
+      ctx.closePath();
+      ctx.fillStyle = '#fde047';
+      ctx.shadowColor = '#ffd700';
+      ctx.shadowBlur = 8;
+      ctx.fill();
+      ctx.strokeStyle = '#854d0e';
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+      ctx.restore();
+    }
+
     // Centro: círculo pequeno
     ctx.lineWidth = 0.8;
     ctx.beginPath();
@@ -4457,6 +4735,20 @@
     ctx.textBaseline = 'middle';
     ctx.fillStyle = INK_DARK;
     ctx.fillText('N', 0, -R - 5);
+
+    // Badge com rumo sob a bússola se houver destino ou hover
+    if (targetBearing || isHovered) {
+      ctx.save();
+      var badgeText = targetBearing ? (targetBearing.degrees + '° ' + targetBearing.bearingCode) : 'Norte 0°';
+      ctx.font = '700 8px Cinzel, serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = targetBearing ? '#fde047' : '#ffd685';
+      ctx.shadowColor = 'rgba(0,0,0,0.95)';
+      ctx.shadowBlur = 4;
+      ctx.fillText(badgeText, 0, R + 13);
+      ctx.restore();
+    }
+
     ctx.restore();
   }
 
@@ -4719,7 +5011,11 @@
     // SEM névoa (o mapa sandbox mostra tudo; só a cidade tem descoberta progressiva).
     var _fogCache = null;
     var _provFogCache = {};
-    var _discoveryAnim = null; // { nodeKey, startTime, duration, onComplete }
+    var _discoveryAnim = null;
+    var _rulerActive = false;
+    var _rulerStart = null;
+    var _rulerCurrent = null;
+    var _rulerLocked = false; // { nodeKey, startTime, duration, onComplete }
 
     function _ensureProvFog(S, known, regNodes, provId){
       if (known === null || !Array.isArray(known)) return null;
@@ -5050,9 +5346,29 @@
         }
       }
       ctx.restore();
+      // Azimute para o destino ativo (Astrolábio D&D 5e)
+      var _activeBearing = null;
+      var _bearingTarget = hoverKey || (typeof window !== 'undefined' && window._cartCurrentLocBiome && window._cartCurrentLocBiome.key);
+      if (_bearingTarget) {
+        var _plNodeForBearing = (_viewMode === 'province' && typeof regNodes !== 'undefined')
+          ? (pk && regNodes.find(function(b){ return b.key === pk; }))
+          : (pk && (typeof RB !== 'undefined' ? RB.find(function(b){ return b.key === pk; }) : null));
+        var _tgtNodeForBearing = (_viewMode === 'province' && typeof regNodes !== 'undefined')
+          ? regNodes.find(function(b){ return b.key === _bearingTarget; })
+          : (typeof RB !== 'undefined' ? RB.find(function(b){ return b.key === _bearingTarget; }) : null);
+        if (_plNodeForBearing && _tgtNodeForBearing && _plNodeForBearing.key !== _tgtNodeForBearing.key) {
+          _activeBearing = calcDistanceBearing(_plNodeForBearing, _tgtNodeForBearing, _viewMode === 'province');
+        }
+      }
+
+      // Régua Cartográfica / Astrolábio de Medição (quando ativa)
+      if (_rulerActive && _rulerStart && _rulerCurrent) {
+        _drawCartRuler(ctx, _rulerStart, _rulerCurrent, _S, _offX, _offY, _viewMode);
+      }
+
       // Bússola — screen-space (top-right, NÃO pan/zooma).
       var _isCompHov = (typeof view.hoverMx === 'number') && _isCompassAt(view.hoverMx, view.hoverMy, w, h);
-      _drawCartCompass(ctx, w, h, _isCompHov, !!view.isCompassPulsing);
+      _drawCartCompass(ctx, w, h, _isCompHov, !!view.isCompassPulsing, _activeBearing);
       // Escala Cartográfica D&D 5e — screen-space (bottom-left).
       _drawCartScaleBar(ctx, w, h, _viewMode);
 
@@ -5229,6 +5545,83 @@
       openProvince: openProvince,
       closeProvince: closeProvince,
       getViewMode: getViewMode,
+      toggleRuler: function(enable, originPt){
+        if (typeof enable === 'boolean') _rulerActive = enable;
+        else _rulerActive = !_rulerActive;
+        if (!_rulerActive) {
+          _rulerStart = null;
+          _rulerCurrent = null;
+          _rulerLocked = false;
+        } else if (originPt && typeof originPt.x === 'number') {
+          _rulerStart = { x: originPt.x, y: originPt.y, name: originPt.name || originPt.key };
+          _rulerCurrent = _rulerStart;
+          _rulerLocked = false;
+        }
+        _onLoad();
+        return _rulerActive;
+      },
+      isRulerActive: function(){ return _rulerActive; },
+      setRulerPoints: function(startPt, currPt){
+        _rulerStart = startPt;
+        _rulerCurrent = currPt;
+        _onLoad();
+      },
+      clearRuler: function(){
+        _rulerStart = null;
+        _rulerCurrent = null;
+        _rulerLocked = false;
+        _onLoad();
+      },
+      handleRulerClick: function(mx, my, view, hoverNode){
+        if (!_rulerActive) return false;
+        var w = view.w, h = view.h;
+        var wx = (mx - (view.panX || 0)) / (view.zoom || 1);
+        var wy = (my - (view.panY || 0)) / (view.zoom || 1);
+        var _mr = _cartWorldMapRect(w, h);
+        var _S = _mr.s, _offX = _mr.x, _offY = _mr.y;
+
+        var pt = null;
+        if (hoverNode && typeof hoverNode.x === 'number') {
+          pt = { x: hoverNode.x, y: hoverNode.y, name: hoverNode.name || hoverNode.key };
+        } else {
+          var nx = Math.max(0, Math.min(1, (wx - _offX) / _S));
+          var ny = Math.max(0, Math.min(1, (wy - _offY) / _S));
+          pt = { x: nx, y: ny };
+        }
+
+        if (!_rulerStart) {
+          _rulerStart = pt;
+          _rulerCurrent = pt;
+          _rulerLocked = false;
+        } else if (!_rulerLocked) {
+          _rulerCurrent = pt;
+          _rulerLocked = true;
+        } else {
+          _rulerStart = pt;
+          _rulerCurrent = pt;
+          _rulerLocked = false;
+        }
+        _onLoad();
+        return true;
+      },
+      handleRulerMove: function(mx, my, view, hoverNode){
+        if (!_rulerActive || !_rulerStart || _rulerLocked) return false;
+        var w = view.w, h = view.h;
+        var wx = (mx - (view.panX || 0)) / (view.zoom || 1);
+        var wy = (my - (view.panY || 0)) / (view.zoom || 1);
+        var _mr = _cartWorldMapRect(w, h);
+        var _S = _mr.s, _offX = _mr.x, _offY = _mr.y;
+
+        if (hoverNode && typeof hoverNode.x === 'number') {
+          _rulerCurrent = { x: hoverNode.x, y: hoverNode.y, name: hoverNode.name || hoverNode.key };
+        } else {
+          var nx = Math.max(0, Math.min(1, (wx - _offX) / _S));
+          var ny = Math.max(0, Math.min(1, (wy - _offY) / _S));
+          _rulerCurrent = { x: nx, y: ny };
+        }
+        _onLoad();
+        return true;
+      },
       isCompassAt: function(mx, my, w, h){ return _isCompassAt(mx, my, w, h); },
       getOffscreenComitivaBadge: function(){ return _lastOffscreenComitivaBadge; },
       triggerDiscoveryAnimation: function(nodeKey, onComplete){
@@ -5628,6 +6021,10 @@
     _buildCartFog: _buildCartFog,                  // 2026-06-04 (sessão #74): fog of war Low-Res Upscale
     _drawCartNode: _drawCartNode,
     _drawPlayerPin: _drawPlayerPin,
+    calcDistanceBearing: calcDistanceBearing,
+    formatExpeditionItinerary: formatExpeditionItinerary,
+    _BEARING_16: _BEARING_16,
+    _drawCartRuler: _drawCartRuler,
     _drawCartCompass: _drawCartCompass,
     _drawCartScaleBar: _drawCartScaleBar,
     _drawCampsiteWaypoint: _drawCampsiteWaypoint,
