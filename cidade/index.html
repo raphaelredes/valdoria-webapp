@@ -72319,7 +72319,7 @@ function _openCartLocationPopup(biome){
               });
               var spoor = CartShared.getTrailSpoorClues(biome.biome || biome.key, biome.tier);
               var nearSanc = CartShared.findNearestSanctuary(biome.key);
-              var sancHtml = nearSanc ? ('<div style="font-size:8.5px;color:#86efac;margin-top:3px;border-top:1px dashed rgba(134,239,172,0.25);padding-top:2px;">🏛️ <b>Refúgio Mais Próximo:</b> ' + nearSanc.name + ' (' + nearSanc.distanceMiles + ' mi a ' + nearSanc.bearingCode + ', ~' + nearSanc.travelHours + 'h) · <i>' + nearSanc.retreatAdvice + '</i></div>') : '';
+              var sancHtml = nearSanc ? ('<div style="font-size:8.5px;color:#86efac;margin-top:3px;border-top:1px dashed rgba(134,239,172,0.25);padding-top:2px;display:flex;justify-content:space-between;align-items:center;"><span>🏛️ <b>Refúgio Mais Próximo:</b> ' + nearSanc.name + ' (' + nearSanc.distanceMiles + ' mi a ' + nearSanc.bearingCode + ', ~' + nearSanc.travelHours + 'h)</span>' + (nearSanc.key !== biome.key ? '<button class="clp-btn-retreat-jump" data-target="' + nearSanc.key + '" type="button" style="background:#1e293b;border:1px solid #38bdf8;color:#38bdf8;font-size:8px;padding:1px 5px;border-radius:2px;cursor:pointer;" title="Focar este refúgio no mapa">📍 Ver Refúgio</button>' : '') + '</div>') : '';
               return '<div class="clp-orientation-card" style="margin:4px 0 6px;text-align:left;background:rgba(22,20,16,0.85);padding:5px 8px;border-radius:4px;border:1px solid rgba(250,204,21,0.35);">'
                 + '  <div style="font-size:9px;color:#facc15;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🧭 ORIENTAÇÃO & RASTREAMENTO DA TRILHA (D&D 5e):</div>'
                 + '  <div style="font-size:9px;color:#f4d49a;line-height:1.4;">'
@@ -72384,6 +72384,19 @@ function _openCartLocationPopup(biome){
         + '    <button class="clp-camp-btn" data-camp="rest" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">⛺ Pleno</button>'
         + '  </div>'
         + '  <div class="clp-camp-note" id="clp-camp-note" style="font-size:8.5px;color:#d2be90;margin-top:2px;font-style:italic;">🛡️ Vigília Atenta: Revezamento rigoroso de sentinelas (+5 na Percepção Passiva contra surpresas à noite).</div>'
+        + (function(){
+            if (!window.CartShared || !CartShared.calcCampRestRecovery) return '';
+            var p = window.CITY_MOCK_PLAYER || {};
+            var rec = CartShared.calcCampRestRecovery('long', {
+              isSanctuary: !!biome.isSanctuary,
+              campStance: window._cartSelectedCamp || 'vigilant',
+              hasCook: !!(p.inventory && p.inventory.some(function(it){ return it.id === 'cook_utensils' || it.id === 'chef_supplies'; }))
+            });
+            return '<div class="clp-rest-recovery-card" style="margin-top:3px;background:rgba(20,25,18,0.7);padding:3px 6px;border-radius:3px;border:1px solid rgba(134,239,172,0.25);font-size:8.5px;color:#d2be90;">'
+              + '⛺ <b>Recuperação:</b> ' + rec.hpRecoveryDesc + ' · <i>' + rec.hitDiceRecovery + '</i><br>'
+              + '🛡️ <b>Risco Noturno:</b> <span style="color:#86efac;">' + rec.interruptionRisk + '</span> · ' + rec.exhaustionRecovery
+              + '</div>';
+          })()
         + '</div>'
       ) : '')
     + '<div class="clp-formation-wrap" style="margin-top: 8px; text-align: left;">'
@@ -72498,6 +72511,21 @@ function _openCartLocationPopup(biome){
         noteSaveBtn.textContent = 'Salvo!';
         setTimeout(function(){ noteSaveBtn.textContent = 'Salvar'; }, 1200);
         if (_cartCtx && _cartEngine) _drawCart();
+      }
+    };
+  }
+
+  var retreatJumpBtn = el.querySelector('.clp-btn-retreat-jump');
+  if (retreatJumpBtn) {
+    retreatJumpBtn.onclick = function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      var tKey = retreatJumpBtn.getAttribute('data-target');
+      if (tKey && window.CartShared && CartShared.CART_BIOMES) {
+        var tBiome = CartShared.CART_BIOMES.find(function(b){ return b.key === tKey; });
+        if (tBiome && typeof _openCartLocPopup === 'function') {
+          _openCartLocPopup(tBiome);
+        }
       }
     };
   }

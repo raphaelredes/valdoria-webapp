@@ -5600,6 +5600,113 @@
     };
   }
 
+  // === calcCampRestRecovery (Recuperação em Descanso Curto e Longo - PHB p. 186) ===
+  function calcCampRestRecovery(restType, options) {
+    options = options || {};
+    var type = (restType === 'short') ? 'short' : 'long';
+    var isSanctuary = !!options.isSanctuary;
+    var stance = options.campStance || 'vigilant';
+
+    if (type === 'short') {
+      var cookBonus = options.hasCook
+        ? 'Refeição Quente (Talento Chef / Utensílios de Cozinheiro): +1d8 PV adicionais recuperados por descanso curto.'
+        : 'Alimentação de viagem padrão sem bônus culinário adicional.';
+      var shortRisk = isSanctuary ? '0% (Santuário Consagrado)' : (stance === 'vigilant' ? '5% (Sentinela Alerta)' : '12% (Risco Selvagem)');
+      return {
+        restType: 'short',
+        name: 'Descanso Curto (1 Hora - PHB p. 186)',
+        hoursConsumed: 1,
+        hpRecoveryDesc: 'Permite gastar Dados de Vida (d8/d10/d12 + modificador de CON) para recuperar Pontos de Vida.',
+        hitDiceRecovery: 'Não recupera Dados de Vida (apenas gasta dados disponíveis).',
+        resourcesRecovered: 'Recupera recursos de classe de recarga rápida (Ação Súbita, Retomar o Fôlego, Ki, Espaços de Bruxo).',
+        exhaustionRecovery: 'Descanso curto não reduz níveis de exaustão.',
+        interruptionRisk: shortRisk,
+        cookBonus: cookBonus,
+        isSanctuarySafe: isSanctuary,
+        dndRef: 'PHB p. 186'
+      };
+    }
+
+    // Descanso Longo (8h)
+    var longRisk = isSanctuary
+      ? '0% (Santuário Consagrado - Imunidade Total a Emboscadas)'
+      : (stance === 'vigilant' ? '10% (Vigília Noturna Atenta)' : (stance === 'stealth' ? '15% (Acampamento Oculto)' : '25% (Sono Pleno Sem Vigília)'));
+    return {
+      restType: 'long',
+      name: 'Descanso Longo (8 Horas - PHB p. 186)',
+      hoursConsumed: 8,
+      hpRecoveryDesc: 'Recupera 100% dos Pontos de Vida perdidos pela comitiva.',
+      hitDiceRecovery: 'Recupera metade do total máximo de Dados de Vida dos aventureiros.',
+      resourcesRecovered: 'Restaura todos os espaços de magia (círculos 1 a 9) e habilidades diárias.',
+      exhaustionRecovery: 'Reduz 1 nível de exaustão (requer ração de comida e água diária consumidas - PHB p. 185).',
+      interruptionRisk: longRisk,
+      cookBonus: 'Descanso pleno em leito ou barraca de campanha aquecida.',
+      isSanctuarySafe: isSanctuary,
+      dndRef: 'PHB p. 186'
+    };
+  }
+
+  // === getExpeditionWeatherTrend (Projeção Meteorológica da Marcha - DMG p. 109) ===
+  function getExpeditionWeatherTrend(currentWeather, travelHours, biomeKey) {
+    var h = (typeof travelHours === 'number' && travelHours > 0) ? travelHours : 8;
+    var w = (currentWeather || 's').toLowerCase();
+    var bk = (biomeKey || 'plains').toLowerCase();
+
+    var weatherMap = {
+      s: { name: 'Ensolarado / Céu Limpo', icon: '☀️' },
+      c: { name: 'Céu Parcialmente Encoberto', icon: '⛅' },
+      r: { name: 'Chuva Moderada', icon: '🌧️' },
+      t: { name: 'Tempestade de Raios', icon: '⛈️' },
+      f: { name: 'Nevoeiro Denso', icon: '🌫️' },
+      w: { name: 'Ventos Cortantes', icon: '🌬️' }
+    };
+
+    var curObj = weatherMap[w] || weatherMap.s;
+    var days = Math.max(1, Math.ceil(h / 8));
+    var stages = [];
+
+    stages.push({
+      day: 1,
+      hours: '1h - ' + Math.min(8, h) + 'h',
+      name: curObj.name,
+      icon: curObj.icon,
+      condition: 'Condição atual observada na partida'
+    });
+
+    if (days >= 2) {
+      var d2Obj = (bk === 'desert') ? weatherMap.s : ((bk === 'mountain' || bk === 'swamp') ? weatherMap.f : weatherMap.c);
+      stages.push({
+        day: 2,
+        hours: '9h - ' + Math.min(16, h) + 'h',
+        name: d2Obj.name,
+        icon: d2Obj.icon,
+        condition: 'Tendência barométrica regional'
+      });
+    }
+
+    if (days >= 3) {
+      var d3Obj = (bk === 'desert') ? weatherMap.w : ((bk === 'snow') ? weatherMap.w : weatherMap.r);
+      stages.push({
+        day: 3,
+        hours: '17h - ' + Math.min(24, h) + 'h',
+        name: d3Obj.name,
+        icon: d3Obj.icon,
+        condition: 'Clima dos confins do bioma'
+      });
+    }
+
+    var outlook = (days === 1)
+      ? 'Jornada curta: estabilidade térmica e climática mantida durante todo o percurso.'
+      : ('Expedição de ' + days + ' dias: atente para variações barométricas entre os trechos de marcha.');
+
+    return {
+      totalDays: days,
+      stages: stages,
+      outlook: outlook,
+      dndRef: 'DMG p. 109'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -5738,6 +5845,11 @@
     if (mountLog.mode !== 'foot') {
       out.push('• Logística Montaria:  ' + mountLog.name + ' · Forragem: ' + mountLog.fodderSummary);
     }
+    var restRec = calcCampRestRecovery(horasViagem > 8 ? 'long' : 'short', {
+      isSanctuary: !!targ.isSanctuary,
+      campStance: campKey
+    });
+    out.push('• Repouso & Acampamento: ' + restRec.name + ' · Risco de Interrupção: ' + restRec.interruptionRisk);
     out.push('═══════════════════════════════════════════════════════════');
 
     return out.join('\n');
@@ -7273,6 +7385,8 @@
     getTrailSpoorClues: getTrailSpoorClues,
     calcExtremeWeatherExposure: calcExtremeWeatherExposure,
     calcMountLogistics: calcMountLogistics,
+    calcCampRestRecovery: calcCampRestRecovery,
+    getExpeditionWeatherTrend: getExpeditionWeatherTrend,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
