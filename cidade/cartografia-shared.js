@@ -7238,6 +7238,173 @@
     };
   }
 
+  // === calcBeastsOfBurden (Animais de Carga, Montaria e Capacidade de Expedição - PHB p. 157, 181-182) ===
+  function calcBeastsOfBurden(mountType, count, attachment, options) {
+    options = options || {};
+    var type = (mountType || 'none').toLowerCase();
+    var num = Math.max(0, parseInt(count, 10) || (type === 'none' ? 0 : 1));
+    var att = (attachment || 'pack_saddle').toLowerCase();
+    var terrain = (options.biome || 'plains').toLowerCase();
+
+    if (type === 'none' || num === 0) {
+      return {
+        mountType: 'none',
+        mountName: 'Sem Montaria (Marcha a Pé)',
+        count: 0,
+        extraCapacityLbs: 0,
+        fodderRequiredLbsPerDay: 0,
+        grazingFeasible: true,
+        speedBonusPct: 0,
+        speedPenaltyPct: 0,
+        speedNetPct: 0,
+        forageBonusLbs: 0,
+        icon: '🚶',
+        color: '#94a3b8',
+        notes: 'A comitiva se desloca inteiramente a pé, carregando apenas suas mochilas e mantimentos pessoais.',
+        dndRef: 'PHB p. 181-182 (Marcha Terrestre a Pé)'
+      };
+    }
+
+    var baseSpecs = {
+      mule: { name: 'Mula de Carga', baseCapacity: 420, baseSpeedMod: 0, fodder: 10, costCp: 800, icon: '🫏' },
+      draft_horse: { name: 'Cavalo de Tração', baseCapacity: 540, baseSpeedMod: 0, fodder: 15, costCp: 5000, icon: '🐎' },
+      riding_horse: { name: 'Cavalo de Montaria', baseCapacity: 480, baseSpeedMod: 25, fodder: 15, costCp: 7500, icon: '🏇' },
+      warhorse: { name: 'Cavalo de Guerra', baseCapacity: 540, baseSpeedMod: 20, fodder: 20, costCp: 40000, icon: '🛡️' },
+      camel: { name: 'Camelo do Deserto', baseCapacity: 480, baseSpeedMod: 0, fodder: 10, costCp: 5000, icon: '🐫' },
+      ox: { name: 'Boi de Puxa', baseCapacity: 540, baseSpeedMod: -15, fodder: 20, costCp: 1500, icon: '🐂' }
+    };
+
+    var spec = baseSpecs[type] || baseSpecs.mule;
+
+    var attMult = 1.0;
+    var attName = 'Alforje Simples';
+    var speedModAtt = 0;
+    if (att === 'cart') {
+      attMult = 3.0;
+      attName = 'Carroça de Carga (2 Rodas)';
+      speedModAtt = -10;
+    } else if (att === 'wagon') {
+      attMult = 5.0;
+      attName = 'Carroção de Carga Coberto (4 Rodas)';
+      speedModAtt = -20;
+    } else if (att === 'riding_saddle') {
+      attMult = 0.8;
+      attName = 'Sela de Montaria';
+      speedModAtt = 10;
+    } else {
+      attMult = 1.0;
+      attName = 'Sela de Carga Reforçada';
+    }
+
+    var terrainSpeedMod = 0;
+    var grazing = true;
+    if (terrain === 'swamp' || terrain === 'mountain') {
+      if (att === 'cart' || att === 'wagon') {
+        terrainSpeedMod = -30;
+      } else {
+        terrainSpeedMod = -10;
+      }
+    } else if (terrain === 'desert') {
+      if (type !== 'camel') {
+        grazing = false;
+        terrainSpeedMod = -15;
+      }
+    } else if (terrain === 'snow' || terrain === 'tundra') {
+      grazing = false;
+      terrainSpeedMod = -15;
+    }
+
+    var totalExtraCap = Math.round(spec.baseCapacity * attMult * num);
+    var totalFodder = spec.fodder * num;
+    var netSpeed = spec.baseSpeedMod + speedModAtt + terrainSpeedMod;
+
+    return {
+      mountType: type,
+      mountName: spec.name + (num > 1 ? ' (' + num + ' animais)' : ''),
+      count: num,
+      attachment: att,
+      attachmentName: attName,
+      extraCapacityLbs: totalExtraCap,
+      fodderRequiredLbsPerDay: totalFodder,
+      grazingFeasible: grazing,
+      speedNetPct: netSpeed,
+      forageBonusLbs: Math.round(totalExtraCap * 0.1),
+      icon: spec.icon,
+      color: netSpeed >= 0 ? '#4ade80' : '#facc15',
+      notes: grazing ? 'Pastagem natural disponível ao longo do trajeto; animais podem pastar livremente.' : 'Vegetação escassa no bioma; a comitiva deve transportar ' + totalFodder + ' lbs de forragem por dia.',
+      dndRef: 'PHB p. 157, 181-182 (Capacidade de Carga de Montarias)'
+    };
+  }
+
+  // === calcWildernessTracking (Rastreamento nos Ermos e Identificação de Pegadas - DMG p. 244 / PHB p. 178) ===
+  function calcWildernessTracking(biomeKey, hoursElapsed, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var hours = Math.max(0, parseInt(hoursElapsed, 10) || 4);
+    var weather = (options.weather || 'clear').toLowerCase();
+    var isRanger = !!options.isRanger;
+
+    var groundType = 'Terra ou relva comum';
+    var baseDC = 15;
+    var tracksType = 'Pegadas nítidas de comitiva de salteadores e lobos cinzentos';
+    var icon = '🐾';
+
+    if (bk === 'snow' || bk === 'tundra' || bk === 'swamp') {
+      groundType = 'Neve fofa ou lamaçal úmido';
+      baseDC = 10;
+      tracksType = 'Valas profundas de pegadas lamacentas deixadas por troles ou ogros';
+      icon = '👣';
+    } else if (bk === 'mountain' || bk === 'caverna' || bk === 'highlands') {
+      groundType = 'Rocha nua e cascalho solto';
+      baseDC = 20;
+      tracksType = 'Arranhões de garras em pedra e pedregulhos recém-deslocados';
+      icon = '🪨';
+    } else if (bk === 'desert') {
+      groundType = 'Areia e dunas ventosas';
+      baseDC = 15;
+      tracksType = 'Ondulações serpenteantes e pegadas afundadas de nômades e basiliscos';
+      icon = '🏜️';
+    } else if (bk === 'forest' || bk === 'selva') {
+      groundType = 'Húmus denso e folhagem quebrada';
+      baseDC = 12;
+      tracksType = 'Ramos partidos na altura dos ombros e pegadas de orcs batedores';
+      icon = '🌿';
+    }
+
+    var daysElapsed = Math.floor(hours / 24);
+    var timeMod = daysElapsed * 5;
+
+    var weatherMod = 0;
+    if (weather === 'rain' || weather === 'chuva_forte' || weather === 'nevasca') {
+      weatherMod = 5;
+    }
+
+    var totalDC = baseDC + timeMod + weatherMod;
+    if (isRanger) {
+      totalDC = Math.max(5, totalDC - 5);
+    }
+
+    var freshDesc = hours <= 4 ? 'Vestígios extremamente frescos (< 4h atrás); o alvo está a pouca distância à frente.'
+      : (hours <= 24 ? 'Vestígios de hoje (4-24h atrás); passadas ainda discerníveis no terreno.'
+      : 'Rastro antigo (> ' + daysElapsed + ' dias atrás); marcas parcialmente desgastadas pelo vento e tempo.');
+
+    return {
+      biomeKey: bk,
+      groundType: groundType,
+      hoursElapsed: hours,
+      baseDC: baseDC,
+      timeModifier: timeMod,
+      weatherModifier: weatherMod,
+      trackingDC: totalDC,
+      tracksDiscovered: tracksType,
+      freshnessDesc: freshDesc,
+      tacticalAdvantage: 'Sucesso no teste de Sobrevivência (CD ' + totalDC + ') concede surpresa tática ou impede emboscada no próximo encontro.',
+      icon: icon,
+      color: totalDC <= 12 ? '#4ade80' : (totalDC <= 16 ? '#facc15' : '#f87171'),
+      dndRef: 'DMG p. 244 (Regras de Rastreamento) / PHB p. 178'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -8941,6 +9108,8 @@
     calcForcedMarchRiskTable: calcForcedMarchRiskTable,
     calcRoadSecurityAndToll: calcRoadSecurityAndToll,
     calcForageComplication: calcForageComplication,
+    calcBeastsOfBurden: calcBeastsOfBurden,
+    calcWildernessTracking: calcWildernessTracking,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

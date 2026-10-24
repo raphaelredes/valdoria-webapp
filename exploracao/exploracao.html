@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T20:56:36Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T21:01:13Z - do not edit directly, edit source -->
 
 
 
@@ -93555,6 +93555,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessTracking) return '';
+        var track = CartShared.calcWildernessTracking(biome.key || biome.biome || 'plains', 6);
+        return '<div class="clp-tracking-card" style="margin:4px 0 6px;text-align:left;background:rgba(24,18,14,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(251,146,60,0.3);font-size:8px;color:#fed7aa;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + track.color + ';margin-bottom:2px;">' + track.icon + ' RASTREAMENTO & VESTÍGIOS (DMG p. 244):</div>'
+          + '  <div>• <b>Solo:</b> ' + track.groundType + ' (Sobrevivência CD ' + track.trackingDC + ')</div>'
+          + '  <div>• <b>Vestígios:</b> ' + track.tracksDiscovered + '</div>'
+          + '  <div style="font-size:7.5px;color:#fdba74;margin-top:1px;">• ' + track.freshnessDesc + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcBeastsOfBurden) return '';
+        var curMount = window._cartSelectedMount || 'mule';
+        var mInfo = CartShared.calcBeastsOfBurden(curMount, 1, 'pack_saddle', { biome: biome.key || biome.biome || 'plains' });
+        return '<div class="clp-mount-card" style="margin:4px 0 6px;text-align:left;background:rgba(22,26,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(163,230,53,0.3);font-size:8px;color:#d9f99d;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:#bef264;margin-bottom:2px;">' + mInfo.icon + ' ANIMAL DE CARGA & EXPEDIÇÃO (PHB p. 157):</div>'
+          + '  <div>• <b>Capacidade Extra:</b> +' + mInfo.extraCapacityLbs + ' lbs (' + mInfo.mountName + ')</div>'
+          + '  <div>• <b>Alimentação:</b> ' + (mInfo.grazingFeasible ? 'Pastagem natural viável pelo trajeto' : (mInfo.fodderRequiredLbsPerDay + ' lbs feno/dia')) + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.rollWildernessEncounterTable) return '';
         return '<div class="clp-encounter-sim-wrap" style="margin:4px 0 6px;text-align:left;">'
           + '  <button class="clp-btn-roll-encounter" id="clp-btn-roll-encounter" type="button" style="width:100%;background:rgba(30,20,12,0.85);border:1px solid rgba(251,146,60,0.5);color:#fdba74;font-size:8.5px;padding:3px 6px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;">'
@@ -94566,7 +94586,8 @@ function openCartography() {
     + '        <button class="cam-filter-pill" data-filter="landmarks" type="button">🏛️ Marcos</button>'
     + '        <button class="cam-filter-pill" data-filter="sanctuaries" type="button">✨ Santuários</button>'
     + '        <button class="cam-filter-pill" data-filter="altitude" type="button">⛰️ Altitudes</button>
-        <button class="cam-filter-pill" data-filter="roads" type="button">🛣️ Estradas</button>'
+        <button class="cam-filter-pill" data-filter="roads" type="button">🛣️ Estradas</button>
+        <button class="cam-filter-pill" data-filter="mounts" type="button">🫏 Montaria</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -95869,7 +95890,6 @@ function _xcartFocusWaypoint(key) {
           } else if (_xcamActiveCategory === 'altitude') {
             if (prov.id === 'mountain' || prov.id === 'snow') return true;
             return false;
-          }
           } else if (_xcamActiveCategory === 'roads') {
             if (prov.id === 'world') return false;
             var hasPaved = false;
@@ -95878,6 +95898,15 @@ function _xcartFocusWaypoint(key) {
               hasPaved = prov.locKeys.some(function(k){ return pavedNodes.indexOf(k) >= 0; });
             }
             if (!hasPaved && prov.id !== 'plains' && prov.id !== 'forest') return false;
+          } else if (_xcamActiveCategory === 'mounts') {
+            if (prov.id === 'world') return false;
+            var hasStables = false;
+            var stableBiomes = ['plains', 'posto_avancado', 'posto_sul', 'cidade_capital', 'vale_aurora'];
+            if (prov.locKeys) {
+              hasStables = prov.locKeys.some(function(k){ return stableBiomes.indexOf(k) >= 0; });
+            }
+            if (!hasStables && prov.id !== 'plains') return false;
+          }
           if (!ft) return true;
           if ((prov.name || '').toLowerCase().indexOf(ft) >= 0) return true;
           if ((prov.desc || '').toLowerCase().indexOf(ft) >= 0) return true;
