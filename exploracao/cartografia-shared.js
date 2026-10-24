@@ -4968,6 +4968,152 @@
     ctx.restore();
   }
 
+  // === calcPartyEncumbranceImpact (Sobrecarga e Capacidade de Carga D&D 5e PHB p. 176) ===
+  function calcPartyEncumbranceImpact(totalWeightLbs, partyStrengthSum, transportMode) {
+    var str = (typeof partyStrengthSum === 'number' && partyStrengthSum > 0) ? partyStrengthSum : 52;
+    var weight = (typeof totalWeightLbs === 'number' && totalWeightLbs >= 0) ? totalWeightLbs : 180;
+    var mode = (transportMode || 'foot').toLowerCase();
+
+    // Capacidades base segundo a regra variante D&D 5e (PHB p. 176)
+    var mult = (mode === 'wagon') ? 8.0 : ((mode === 'horse') ? 2.5 : 1.0);
+    var capLight = Math.round(str * 5 * mult);
+    var capHeavy = Math.round(str * 10 * mult);
+    var capMax = Math.round(str * 15 * mult);
+
+    var tier = 'desimpedido';
+    var speedPenalty = 0;
+    var timeMultiplier = 1.0;
+    var label = '🟢 Marcha Livre (Carga Leve)';
+    var desc = 'Comitiva ágil com mochilas equilibradas. Deslocamento sem penalidades (PHB p. 176).';
+    var color = '#86efac';
+
+    if (weight > capMax) {
+      tier = 'imobilizado';
+      speedPenalty = -30;
+      timeMultiplier = 999.0;
+      label = '⛔ Carga Excessiva (Imobilizado)';
+      desc = 'O peso ultrapassa a capacidade máxima da comitiva. Deslocamento reduzido a zero.';
+      color = '#ef4444';
+    } else if (weight > capHeavy) {
+      tier = 'sobrecarga_pesada';
+      speedPenalty = -20;
+      timeMultiplier = 1.65;
+      label = '🔴 Sobrecarga Severa (-20 pés)';
+      desc = 'Desvantagem em testes de perícias físicas e salvaguardas. A marcha requer +65% de tempo.';
+      color = '#f87171';
+    } else if (weight > capLight) {
+      tier = 'sobrecarga_leve';
+      speedPenalty = -10;
+      timeMultiplier = 1.25;
+      label = '🟡 Sobrecarga Leve (-10 pés)';
+      desc = 'Peso acima do ideal reduz o deslocamento em 10 pés. A marcha requer +25% de tempo.';
+      color = '#fde047';
+    }
+
+    return {
+      weightLbs: weight,
+      partyStrength: str,
+      transportMode: mode,
+      capLight: capLight,
+      capHeavy: capHeavy,
+      capMax: capMax,
+      tier: tier,
+      speedPenaltyFt: speedPenalty,
+      timeMultiplier: timeMultiplier,
+      label: label,
+      desc: desc,
+      color: color
+    };
+  }
+
+  // === calcRouteElevationProfile (Perfil Topográfico e Altimetria D&D 5e DMG p. 109) ===
+  function calcRouteElevationProfile(routeKeys, options) {
+    options = options || {};
+    var RB = CART_BIOMES || [];
+    var keys = (Array.isArray(routeKeys) && routeKeys.length) ? routeKeys : ['plains'];
+
+    var steps = [];
+    var minM = 99999, maxM = -99999;
+    var totalAscent = 0, totalDescent = 0;
+    var prevM = null;
+
+    keys.forEach(function(k){
+      var node = RB.find(function(b){ return b.key === k; }) || { key: k, name: k, biome: 'plains', tier: 1 };
+      var alt = getBiomeAltitude(node.biome || node.key, node.tier);
+      var m = alt ? alt.meters : 120;
+      if (m < minM) minM = m;
+      if (m > maxM) maxM = m;
+
+      if (prevM !== null) {
+        var delta = m - prevM;
+        if (delta > 0) totalAscent += delta;
+        else totalDescent += Math.abs(delta);
+      }
+      prevM = m;
+
+      steps.push({
+        key: k,
+        name: node.regionalName || node.name,
+        meters: m,
+        isHighAltitude: !!(alt && alt.isHighAltitude)
+      });
+    });
+
+    if (minM === 99999) minM = 120;
+    if (maxM === -99999) maxM = 120;
+
+    // Gerar sparkline ASCII do perfil topográfico
+    var chars = [' ', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
+    var range = Math.max(1, maxM - minM);
+    var sparkline = steps.map(function(s){
+      var idx = Math.min(chars.length - 1, Math.floor(((s.meters - minM) / range) * chars.length));
+      return chars[idx];
+    }).join('');
+
+    var exertionHours = +(totalAscent / 600).toFixed(1);
+    var hasExtreme = steps.some(function(s){ return s.isHighAltitude || s.meters >= 2000; });
+
+    return {
+      steps: steps,
+      minMeters: minM,
+      maxMeters: maxM,
+      totalAscent: totalAscent,
+      totalDescent: totalDescent,
+      ascentExertionHours: exertionHours,
+      hasExtremeAltitude: hasExtreme,
+      sparkline: sparkline,
+      summary: minM + 'm ➔ ' + maxM + 'm (+Δh ' + totalAscent + 'm subida acumulada)'
+    };
+  }
+
+  // === calcTransportComparison (Comparativo Instantâneo de Modos de Transporte D&D 5e) ===
+  function calcTransportComparison(miles, pace) {
+    var dist = (typeof miles === 'number' && miles > 0) ? miles : 15;
+    var p = pace || 'normal';
+    var speedMod = (p === 'fast') ? 1.33 : ((p === 'stealth') ? 0.67 : 1.0);
+
+    var list = [
+      { key: 'foot',  name: 'A Pé',        icon: '🚶', speedMph: 3.0, feature: 'Mochilas prontas e sentidos aguçados (PHB p. 181)' },
+      { key: 'horse', name: 'Montaria',    icon: '🐎', speedMph: 4.0, feature: '+33% Velocidade em estradas; consome ração de forragem' },
+      { key: 'wagon', name: 'Caravana',    icon: '🛒', speedMph: 3.0, feature: 'Carga pesada segura; -10% risco de emboscada noturna' },
+      { key: 'boat',  name: 'Barco Fluvial', icon: '⛵', speedMph: 5.0, feature: 'Velocidade fluvial acelerada; sem fadiga de marcha' }
+    ];
+
+    return list.map(function(item){
+      var h = +(dist / (item.speedMph * speedMod)).toFixed(1);
+      var days = Math.max(1, Math.ceil(h / 8));
+      return {
+        key: item.key,
+        name: item.name,
+        icon: item.icon,
+        speedMph: item.speedMph,
+        hours: h,
+        days: days,
+        feature: item.feature
+      };
+    });
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -5053,8 +5199,12 @@
     out.push('');
     out.push('⏳ LOGÍSTICA & SOBREVIVÊNCIA:');
     out.push('• Duração Estimada:   ' + travelHours + ' Horas de Viagem');
+    var elevProfile = calcRouteElevationProfile(routeKeys || [orig.key, targ.key]);
+    var encImpact = calcPartyEncumbranceImpact(options.weightLbs || 180, options.partyStrengthSum || 52, transKey);
     out.push('• Custo do Terreno:   ' + (targ.difficulty || dndInfo.terrain));
     out.push('• Topografia/Relevo:  ' + (altInfo ? (altInfo.badge + ' ' + altInfo.label + ' (' + altInfo.meters + 'm)') : 'Relevo Normal'));
+    out.push('• Perfil Altimétrico: ' + elevProfile.summary + ' [' + elevProfile.sparkline + ']');
+    out.push('• Carga da Comitiva:  ' + encImpact.label);
     out.push('• Barômetro Local:    ' + baroInfo.pressureHpa + ' hPa (' + baroInfo.pressureStatus + ')');
     out.push('• Dinâmica do Vento:  ' + baroInfo.windDescription + (windImp ? (' · ' + windImp.label) : ''));
     out.push('• Provisões Mínimas:  ' + ratBudget.netRations + ' Ração(ões) / ' + ratBudget.netWater + ' Galões d\'Água (' + ratBudget.partySize + ' integrantes, ' + ratBudget.travelDays + ' dia' + (ratBudget.travelDays > 1 ? 's' : '') + ')');
@@ -6586,6 +6736,9 @@
     getWildernessHazardDetails: getWildernessHazardDetails,
     calcEncounterTableBreakdown: calcEncounterTableBreakdown,
     _drawFocusPulseBeacon: _drawFocusPulseBeacon,
+    calcPartyEncumbranceImpact: calcPartyEncumbranceImpact,
+    calcRouteElevationProfile: calcRouteElevationProfile,
+    calcTransportComparison: calcTransportComparison,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

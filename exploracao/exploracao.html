@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T19:18:21Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T19:24:34Z - do not edit directly, edit source -->
 
 
 
@@ -93231,6 +93231,31 @@ function _openCartLocationPopup(biome){
                 + '  <div style="background:rgba(10,8,15,0.6);border-radius:3px;padding:3px 6px;margin-bottom:3px;">' + rows + '</div>'
                 + '  <div style="font-size:8px;color:#cbd5e1;font-style:italic;">' + enc.advice + ' CD ' + enc.surpriseDC + ' Percepção Passiva contra surpresa.</div>'
                 + '</div>';
+            })()
+          + (function(){
+              if (!window.CartShared || !CartShared.calcPartyEncumbranceImpact) return '';
+              var curTrans = window._xcartSelectedTransport || 'foot';
+              var enc = CartShared.calcPartyEncumbranceImpact(180, 52, curTrans);
+              return '<div class="clp-encumbrance-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,22,18,0.85);padding:5px 8px;border-radius:4px;border:1px solid rgba(74,222,128,0.35);">'
+                + '  <div style="font-size:9px;color:' + enc.color + ';font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🎒 CARGA & CAPACIDADE DA COMITIVA (D&D 5e):</div>'
+                + '  <div style="font-size:9px;color:#f4d49a;line-height:1.4;">'
+                + '    Status: <b style="color:' + enc.color + ';">' + enc.label + '</b> (' + enc.weightLbs + ' / ' + enc.capMax + ' lbs)<br>'
+                + '    <span style="font-size:8.5px;color:#cbd5e1;font-style:italic;">' + enc.desc + '</span>'
+                + '  </div>'
+                + '</div>';
+            })()
+          + (function(){
+              if (!window.CartShared || !CartShared.calcRouteElevationProfile) return '';
+              var startK = (typeof _xcartGetPlayerBiome === 'function') ? _xcartGetPlayerBiome() : 'plains';
+              var elev = CartShared.calcRouteElevationProfile([startK, biome.key]);
+              return '<div class="clp-elevation-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,24,30,0.85);padding:5px 8px;border-radius:4px;border:1px solid rgba(147,197,253,0.35);">'
+                + '  <div style="font-size:9px;color:#93c5fd;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🏔️ PERFIL ALTIMÉTRICO & RELEVO (D&D 5e):</div>'
+                + '  <div style="font-size:9px;color:#f4d49a;line-height:1.4;">'
+                + '    Trajeto: <b>' + elev.summary + '</b> ' + (elev.hasExtremeAltitude ? '<span style="color:#ef4444;font-weight:700;">[Ar Rarefeito]</span>' : '') + '<br>'
+                + '    <span style="font-family:monospace;letter-spacing:1px;color:#ffd700;font-size:10px;">Perfil: ' + elev.sparkline + '</span><br>'
+                + '    <span style="font-size:8.5px;color:#cbd5e1;font-style:italic;">Esforço de Aclive: +' + elev.ascentExertionHours + 'h de esforço físico na subida.</span>'
+                + '  </div>'
+                + '</div>';
             })();
       })()
     + (biome.isSanctuary
@@ -93287,6 +93312,19 @@ function _openCartLocationPopup(biome){
     + '    <button class="clp-transport-btn" data-transport="wagon" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🛒 Caravana</button>'
     + '  </div>'
     + '  <div class="clp-transport-note" id="clp-transport-note" style="font-size:8.5px;color:#d2be90;margin-top:2px;font-style:italic;">🚶 A Pé (Infantaria): 3 milhas/hora · Carga padrão em mochilas e armas prontas.</div>'
+    + (function(){
+        if (!window.CartShared || !CartShared.calcTransportComparison) return '';
+        var comps = CartShared.calcTransportComparison(distMilhas, curPace);
+        var cols = comps.map(function(c){
+          return '<div style="flex:1;background:rgba(15,20,30,0.7);border:1px solid rgba(196,149,58,0.25);border-radius:3px;padding:3px 2px;text-align:center;">'
+            + '<div style="font-size:10px;">' + c.icon + '</div>'
+            + '<div style="font-size:8px;font-weight:700;color:#f4d49a;">' + c.name + '</div>'
+            + '<div style="font-size:8.5px;color:#ffd700;">' + c.hours + 'h</div>'
+            + '<div style="font-size:7.5px;color:#a09484;">' + c.days + 'd</div>'
+            + '</div>';
+        }).join('');
+        return '<div class="clp-transport-comparison-grid" style="display:flex;gap:4px;margin:4px 0 6px;">' + cols + '</div>';
+      })()
     + '</div>'
     + '<div class="clp-role-wrap" style="margin-top: 8px; text-align: left;">'
     + '  <div style="font-size: 9.5px; font-family: Cinzel, serif; color: #c084fc; margin-bottom: 3px; font-weight: 600;">FUNÇÃO DE VIAGEM DA COMITIVA (D&D 5e):</div>'
