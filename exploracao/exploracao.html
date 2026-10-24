@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T17:50:54Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T17:58:21Z - do not edit directly, edit source -->
 
 
 
@@ -93198,6 +93198,25 @@ function _openCartLocationPopup(biome){
     + '  </div>'
     + '  <div class="clp-formation-note" id="clp-formation-note" style="font-size:8.5px;color:#d2be90;margin-top:2px;font-style:italic;">🚶 Fila Indiana: Batedor na frente, comitiva equilibrada para reações rápidas (PHB p. 182).</div>'
     + '</div>'
+    + '<div class="clp-transport-wrap" style="margin-top: 8px; text-align: left;">'
+    + '  <div style="font-size: 9.5px; font-family: Cinzel, serif; color: #fde047; margin-bottom: 3px; font-weight: 600;">MODO DE TRANSPORTE (D&D 5e):</div>'
+    + '  <div class="clp-transport-selector" style="display:flex;gap:4px;">'
+    + '    <button class="clp-transport-btn active" data-transport="foot" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid #ffd700;color:#ffd700;border-radius:3px;cursor:pointer;">🚶 A Pé</button>'
+    + '    <button class="clp-transport-btn" data-transport="horse" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🐎 Montaria</button>'
+    + '    <button class="clp-transport-btn" data-transport="wagon" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🛒 Caravana</button>'
+    + '  </div>'
+    + '  <div class="clp-transport-note" id="clp-transport-note" style="font-size:8.5px;color:#d2be90;margin-top:2px;font-style:italic;">🚶 A Pé (Infantaria): 3 milhas/hora · Carga padrão em mochilas e armas prontas.</div>'
+    + '</div>'
+    + (horasViagem > 8 ? (
+        '<div class="clp-forced-march-warn" id="clp-forced-march-warn" style="margin:4px 0 6px;text-align:left;background:rgba(30,15,10,0.8);padding:5px 8px;border-radius:4px;border-left:3px solid #f87171;">'
+        + '  <div style="font-size:9px;color:#f87171;font-family:Cinzel,serif;font-weight:700;">⚠️ MARCHA FORÇADA & EXAUSTÃO (D&D 5e — PHB p. 181):</div>'
+        + '  <div style="font-size:8.5px;color:#fca5a5;line-height:1.35;margin-top:2px;" id="clp-forced-march-desc">'
+        + '    Jornada de <b>~' + horasViagem + 'h</b> excede o limite diário de 8 horas.<br>'
+        + '    • <b>Sem acampamento:</b> Salvaguarda de <b>CON CD ' + (10 + (horasViagem - 8)) + '</b> contra 1 Nível de Exaustão.<br>'
+        + '    • <b>Com acampamento (' + Math.max(1, Math.floor((horasViagem - 1) / 8)) + ' parada):</b> A marcha é fracionada em dias de 8h, anulando o risco de exaustão!'
+        + '  </div>'
+        + '</div>'
+      ) : '')
     + '</div>'
     + '<div class="clp-buttons">'
     + (isCurrent
@@ -93344,11 +93363,72 @@ function _openCartLocationPopup(biome){
           formNote.textContent = '🐾 Vanguarda Dispersa: Batedor 30 pés adiante (+5 na Percepção Passiva para detectar armadilhas e pistas antecipadamente).';
         }
       }
-      var newRisk3 = (window.CartShared && CartShared.calcEncounterRisk) ? CartShared.calcEncounterRisk(biome, { pace: window._cartSelectedPace || 'normal', isNight: isNight, weather: curWeather, hours: horasViagem, campStance: window._cartSelectedCampStance || 'vigilant', formation: fType }) : null;
+      var newRisk3 = (window.CartShared && CartShared.calcEncounterRisk) ? CartShared.calcEncounterRisk(biome, { pace: window._cartSelectedPace || 'normal', isNight: isNight, weather: curWeather, hours: horasViagem, campStance: window._cartSelectedCampStance || 'vigilant', formation: fType, transport: window._cartSelectedTransport || 'foot' }) : null;
       var riskEl3 = el.querySelector('#clp-risk-badge');
       if (riskEl3 && newRisk3) {
         riskEl3.textContent = newRisk3.label;
         riskEl3.style.color = newRisk3.color;
+      }
+    };
+  });
+
+  var transBtns = el.querySelectorAll('.clp-transport-btn');
+  var transNote = el.querySelector('#clp-transport-note');
+  transBtns.forEach(function(btn){
+    btn.onclick = function(e){
+      e.preventDefault();
+      transBtns.forEach(function(b){
+        b.classList.remove('active');
+        b.style.color = '#d2be90';
+        b.style.borderColor = 'rgba(196,149,58,0.4)';
+      });
+      btn.classList.add('active');
+      btn.style.color = '#ffd700';
+      btn.style.borderColor = '#ffd700';
+      var tType = btn.getAttribute('data-transport');
+      window._cartSelectedTransport = tType;
+      try { sessionStorage.setItem('valdoria_travel_transport', tType); } catch(_) {}
+      if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_click');
+      if (transNote) {
+        if (tType === 'foot') {
+          transNote.textContent = '🚶 A Pé (Infantaria): 3 milhas/hora · Carga padrão em mochilas e armas prontas.';
+        } else if (tType === 'horse') {
+          transNote.textContent = '🐎 Montaria (Cavalos de Viagem): +33% de velocidade em estrada · Reduz horas de viagem.';
+        } else {
+          transNote.textContent = '🛒 Caravana / Carroça: Tendas e provisões protegidas (-10% no risco de emboscada).';
+        }
+      }
+      var pType = window._cartSelectedPace || 'normal';
+      var baseMph = (pType === 'stealth') ? 2 : (pType === 'fast') ? 4 : 3;
+      var speedMult = (tType === 'horse') ? 1.33 : 1.0;
+      var curHours = Math.max(1, Math.round(distMilhas / (baseMph * speedMult)));
+      var hoursEl = el.querySelector('#clp-meta-hours');
+      if (hoursEl) hoursEl.textContent = '~' + curHours + 'h de marcha';
+
+      var newRiskT = (window.CartShared && CartShared.calcEncounterRisk)
+        ? CartShared.calcEncounterRisk(biome, { pace: pType, isNight: isNight, weather: curWeather, hours: curHours, campStance: window._cartSelectedCampStance || 'vigilant', formation: window._cartSelectedFormation || 'standard', transport: tType })
+        : null;
+      var riskElT = el.querySelector('#clp-risk-badge');
+      if (riskElT && newRiskT) {
+        riskElT.textContent = newRiskT.label;
+        riskElT.style.color = newRiskT.color;
+      }
+
+      var fmDesc = el.querySelector('#clp-forced-march-desc');
+      var fmWarn = el.querySelector('#clp-forced-march-warn');
+      if (fmWarn) {
+        if (curHours > 8) {
+          fmWarn.style.display = 'block';
+          if (fmDesc) {
+            var dc = 10 + (curHours - 8);
+            var stops = Math.max(1, Math.floor((curHours - 1) / 8));
+            fmDesc.innerHTML = 'Jornada de <b>~' + curHours + 'h</b> excede o limite diário de 8 horas.<br>'
+              + '• <b>Sem acampamento:</b> Salvaguarda de <b>CON CD ' + dc + '</b> contra 1 Nível de Exaustão.<br>'
+              + '• <b>Com acampamento (' + stops + ' parada' + (stops > 1 ? 's' : '') + '):</b> A marcha é fracionada em dias de 8h, anulando o risco de exaustão!';
+          }
+        } else {
+          fmWarn.style.display = 'none';
+        }
       }
     };
   });
@@ -93877,6 +93957,14 @@ function openCartography() {
         <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">
           <div style="font-family:Cinzel,serif;font-weight:700;color:#86efac;font-size:11.5px;margin-bottom:4px;">🍖 SUPRIMENTOS & ACAMPAMENTOS (PHB p. 185)</div>
           <p style="margin:2px 0;">Jornadas acima de 8 horas exigem paradas de Descanso Longo (8h) em acampamentos na estrada e 1 Ração de Viagem por aventureiro. Em biomas férteis, testes de Sobrevivência permitem caçar e colher água potável.</p>
+        </div>
+        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">
+          <div style="font-family:Cinzel,serif;font-weight:700;color:#f87171;font-size:11.5px;margin-bottom:4px;">⚠️ MARCHA FORÇADA & EXAUSTÃO (PHB p. 181)</div>
+          <p style="margin:2px 0;">O limite de marcha contínua segura é de 8 horas por dia. Cada hora adicional exige Salvaguarda de Constituição (CD 10 + 1 por hora além de 8). Em caso de falha, o aventureiro sofre 1 Nível de Exaustão. Fracionar a rota com acampamentos de Descanso Longo (8h) anula a penalidade.</p>
+        </div>
+        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">
+          <div style="font-family:Cinzel,serif;font-weight:700;color:#fde047;font-size:11.5px;margin-bottom:4px;">🐎 MODOS DE TRANSPORTE & CARAVANAS (PHB p. 157)</div>
+          <p style="margin:2px 0;"><b>🚶 A Pé:</b> 3 milhas/hora padrão. Mochilas e armas prontas.<br><b>🐎 Montaria:</b> +33% de velocidade em estradas (4 milhas/h). Reduz o tempo total de viagem.<br><b>🛒 Caravana:</b> 3 milhas/h com carruagens fortificadas. Reduz em -10% o risco de emboscadas noturnas no acampamento.</p>
         </div>
       </div>
     </div>
@@ -95231,6 +95319,18 @@ function _wireXCartKeyboardNavigation() {
       window._cartSelectedFormation = nextForm;
       var fBtn = document.querySelector('.clp-formation-btn[data-form="' + nextForm + '"]');
       if (fBtn) fBtn.click();
+      return;
+    }
+
+    // T / t: alterna modo de transporte da comitiva (D&D 5e)
+    if (e.key === 't' || e.key === 'T') {
+      e.preventDefault();
+      var transArr = ['foot', 'horse', 'wagon'];
+      var curTIdx = transArr.indexOf(window._cartSelectedTransport || 'foot');
+      var nextTrans = transArr[(curTIdx + 1) % transArr.length];
+      window._cartSelectedTransport = nextTrans;
+      var tBtn = document.querySelector('.clp-transport-btn[data-transport="' + nextTrans + '"]');
+      if (tBtn) tBtn.click();
       return;
     }
 

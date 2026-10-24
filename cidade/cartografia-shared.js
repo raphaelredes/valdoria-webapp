@@ -3537,6 +3537,50 @@
     return DND_FORAGE_DATA.plains;
   }
 
+  var TRANSPORT_MODES = {
+    foot: {
+      id: 'foot',
+      name: 'A Pé (Infantaria)',
+      icon: '🚶',
+      speedMph: 3,
+      speedMult: 1.0,
+      riskMod: 0,
+      summary: 'Infantaria: 3 milhas/hora · Carga padrão em mochilas e armas prontas.'
+    },
+    horse: {
+      id: 'horse',
+      name: 'Montaria (Cavalos)',
+      icon: '🐎',
+      speedMph: 4,
+      speedMult: 1.33,
+      riskMod: 0,
+      summary: 'Montaria: +33% de velocidade em estradas · Reduz horas de viagem.'
+    },
+    wagon: {
+      id: 'wagon',
+      name: 'Caravana / Carroça',
+      icon: '🛒',
+      speedMph: 3,
+      speedMult: 1.0,
+      riskMod: -10,
+      summary: 'Caravana: Tendas reforçadas e provisões protegidas (-10% no risco de emboscadas noturnas).'
+    }
+  };
+
+  function calcForcedMarchRisk(hours, campCount) {
+    var h = hours || 4;
+    var cc = campCount || 0;
+    if (h <= 8) {
+      return { isForced: false, extraHours: 0, saveDC: 0, safeDays: 1, note: 'Marcha diária segura dentro do limite padrão de 8 horas.' };
+    }
+    if (cc > 0) {
+      return { isForced: false, extraHours: 0, saveDC: 0, safeDays: Math.ceil(h / 8), note: 'Marcha fracionada em ' + Math.ceil(h / 8) + ' dias com ' + cc + ' acampamento(s). Risco de exaustão anulado!' };
+    }
+    var extra = h - 8;
+    var dc = 10 + extra;
+    return { isForced: true, extraHours: extra, saveDC: dc, exhaustionLevel: 1, note: 'Marcha de ' + h + 'h excede as 8h diárias. Salvaguarda de Constituição CD ' + dc + ' contra 1 Nível de Exaustão.' };
+  }
+
   var MARCHING_FORMATIONS = {
     standard: {
       id: 'standard',
@@ -3583,8 +3627,10 @@
     var weatherMod = (weather === 't' || weather === 'f') ? 8 : 0;
     var formation = opts.formation || 'standard';
     var formMod = (formation === 'defensive') ? -10 : (formation === 'spread') ? -5 : 0;
+    var transport = opts.transport || 'foot';
+    var transMod = (transport === 'wagon') ? -10 : 0;
 
-    var totalRisk = Math.max(0, Math.min(95, baseTierRisk + durationMod + nightMod + paceMod + weatherMod + formMod));
+    var totalRisk = Math.max(0, Math.min(95, baseTierRisk + durationMod + nightMod + paceMod + weatherMod + formMod + transMod));
 
     var label = '', color = '#a3e635';
     if (totalRisk <= 20) {
@@ -3784,10 +3830,20 @@
                    (b.tier <= 3) ? 'Nível 2 a 4' :
                    (b.tier <= 5) ? 'Nível 4 a 7' :
                    (b.tier <= 7) ? 'Nível 7 a 10' : 'Nível 10+';
-    var lvlW = 0;
-    if (hasLvl) { ctx.font = 'italic 8px serif'; lvlW = ctx.measureText(lvlRange).width; ctx.font = (isHover ? 'bold 11px' : '10px') + ' serif'; }
-    var pillW = Math.max(tw, lvlW) + 12;
-    var pillH = hasLvl ? 27 : 16;
+    var marcos = (typeof b.marcos === 'number') ? b.marcos : (b.tier || 1);
+    var distMilhas = Math.max(6, marcos * 8);
+    var horas = Math.max(2, Math.round(distMilhas / 3));
+    var subText = hasLvl
+      ? (isHover ? (lvlRange + ' · ~' + distMilhas + ' mi') : lvlRange)
+      : (isHover ? ('~' + distMilhas + ' mi · ~' + horas + 'h') : '');
+    var subW = 0;
+    if (subText) {
+      ctx.font = 'italic 8px serif';
+      subW = ctx.measureText(subText).width;
+      ctx.font = (isHover ? 'bold 11px' : '10px') + ' serif';
+    }
+    var pillW = Math.max(tw, subW) + 14;
+    var pillH = subText ? 27 : 16;
     var pillX = bx - pillW / 2;
     var pillY = by + radius + 4;
     ctx.fillStyle = 'rgba(28,20,13,0.92)';
@@ -3801,10 +3857,10 @@
 
     ctx.fillStyle = isHover ? '#ffd685' : '#e8c45a';
     ctx.fillText(labelText, bx, pillY + 2);
-    if (hasLvl) {
+    if (subText) {
       ctx.font = 'italic 8px serif';
       ctx.fillStyle = 'rgba(218,194,148,0.78)';
-      ctx.fillText(lvlRange, bx, pillY + 14);
+      ctx.fillText(subText, bx, pillY + 14);
     }
     ctx.restore();
   }
@@ -5435,6 +5491,8 @@
     getBiomeDndInfo: getBiomeDndInfo,              // Informações de Terreno e Riscos Naturais D&D 5e
     getBiomeForageSustainability: getBiomeForageSustainability, // Forrageamento e Sustentabilidade de Água D&D 5e
     MARCHING_FORMATIONS: MARCHING_FORMATIONS,      // Ordens de Marcha Táticas D&D 5e
+    TRANSPORT_MODES: TRANSPORT_MODES,              // Modos de Transporte D&D 5e (A Pé, Montaria, Caravana)
+    calcForcedMarchRisk: calcForcedMarchRisk,      // Cálculo de Marcha Forçada e Salvaguarda contra Exaustão
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
     calcEncounterRisk: calcEncounterRisk,          // Avaliação de Risco de Emboscada na Estrada D&D 5e
     getPinnedLocations: _getPinnedLocations,
