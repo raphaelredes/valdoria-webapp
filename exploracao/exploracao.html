@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T15:32:03Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T15:39:22Z - do not edit directly, edit source -->
 
 
 
@@ -92924,10 +92924,16 @@ function _openCartLocationPopup(biome){
   var biomePT = ((CartShared && CartShared.biomePT) ? CartShared.biomePT(biome.biome || biome.key) : (biome.biome || biome.key));
 
   var dndInfo = (window.CartShared && CartShared.getBiomeDndInfo) ? CartShared.getBiomeDndInfo(biome.biome || biome.key) : null;
+  var rationsNote = (horasViagem <= 8)
+    ? '🍖 Suprimentos: Viagem de 1 dia de marcha leve (sem necessidade de descanso longo na estrada).'
+    : (horasViagem <= 16)
+      ? '🍖 Suprimentos: 1 Ração de viagem por aventureiro · 1 Descanso Longo em acampamento selvagem.'
+      : '🍖 Suprimentos: ~' + Math.ceil(horasViagem / 12) + ' Rações de viagem por aventureiro · Marcha árdua com paradas em terrenos hostis.';
+
   var dndHtml = dndInfo
     ? '<div class="clp-dnd-terrain">'
     + '  <div class="clp-terrain-tag">🏔️ ' + dndInfo.terrain + '</div>'
-    + '  <div class="clp-hazard-note">⚠️ ' + dndInfo.hazard + '<br>🛡️ ' + dndInfo.saves + '</div>'
+    + '  <div class="clp-hazard-note">⚠️ ' + dndInfo.hazard + '<br>🛡️ ' + dndInfo.saves + '<br>' + rationsNote + '</div>'
     + '</div>'
     : '';
 
@@ -93347,6 +93353,7 @@ function openCartography() {
     + '  <div class="xcart-dock" id="xcart-dock">'
     + '    <button class="xcart-dock-btn" id="xcart-top-back-btn" type="button" title="Voltar para a exploração [Esc]" aria-label="Voltar para a exploração">🧭 Exploração</button>'
     + '    <button class="xcart-dock-btn primary" id="xcart-atlas-picker-btn" type="button" title="Atlas das Províncias [M]" aria-label="Seletor de Províncias">🗺️ Atlas ▾</button>'
+    + '    <button class="xcart-dock-btn" id="xcart-filter-toggle-btn" type="button" title="Alternar Filtro de Nós no Mapa [Teclas 1 a 4]">🎯 Filtro: Todos</button>'
     + '    <button class="xcart-dock-btn accent" id="xcart-atlas-back-btn" type="button" title="Voltar ao Continente [Backspace]" style="display:none;" aria-label="Voltar ao Continente">🌍 Continente</button>'
     + '  </div>'
 
@@ -93992,7 +93999,7 @@ function _xcartDraw() {
 
   if (!_xcartCtx || !_xcartEngine) return;
 
-  _xcartEngine.draw({ ctx: _xcartCtx, w: _xcartW, h: _xcartH, dpr: _xcartDpr, panX: _cartPanX, panY: _cartPanY, zoom: _cartZoom, hoverNode: _xcartHoverNode });
+  _xcartEngine.draw({ ctx: _xcartCtx, w: _xcartW, h: _xcartH, dpr: _xcartDpr, panX: _cartPanX, panY: _cartPanY, zoom: _cartZoom, hoverNode: _xcartHoverNode, activeFilter: window._xcartActiveFilter || 'all' });
 
 }
 
@@ -94207,6 +94214,18 @@ function _xcartWireEvents() {
   }
 
   // Top Dock handlers
+  var filterBtn = document.getElementById('xcart-filter-toggle-btn');
+  if (filterBtn) {
+    var _xFilterOrder = ['all', 'settlements', 'wilderness', 'quests'];
+    filterBtn.onclick = function(e){
+      e.preventDefault();
+      var curF = window._xcartActiveFilter || 'all';
+      var idx = _xFilterOrder.indexOf(curF);
+      var nextF = _xFilterOrder[(idx + 1) % _xFilterOrder.length];
+      _setXCartFilter(nextF);
+    };
+  }
+
   var topBack = document.getElementById('xcart-top-back-btn');
   if (topBack) topBack.onclick = function(){ closeCartography(); };
 
@@ -94355,6 +94374,22 @@ function _xcartSmoothPanTo(targetPanX, targetPanY, targetZoom, duration) {
 }
 
 // === Navegação Profissional por Teclado no Telegram Desktop (Exploração) ===
+window._xcartActiveFilter = 'all';
+function _setXCartFilter(f) {
+  window._xcartActiveFilter = f;
+  var btn = document.getElementById('xcart-filter-toggle-btn');
+  if (btn) {
+    var labels = {
+      all: '🎯 Filtro: Todos',
+      settlements: '🏛️ Cidades',
+      wilderness: '⚔️ Ermos',
+      quests: '📜 Contratos'
+    };
+    btn.innerHTML = labels[f] || '🎯 Filtro: Todos';
+  }
+  _xcartDraw();
+}
+
 function _wireXCartKeyboardNavigation() {
   if (window._xcartKeyboardWired) return;
   window._xcartKeyboardWired = true;
@@ -94431,6 +94466,12 @@ function _wireXCartKeyboardNavigation() {
       _xcartSetZoom(_cartZoom * 0.8, _xcartW / 2, _xcartH / 2);
       return;
     }
+
+    // Filtros rápidos no canvas: 1=Todos, 2=Cidades, 3=Ermos, 4=Contratos
+    if (e.key === '1') { e.preventDefault(); _setXCartFilter('all'); return; }
+    if (e.key === '2') { e.preventDefault(); _setXCartFilter('settlements'); return; }
+    if (e.key === '3') { e.preventDefault(); _setXCartFilter('wilderness'); return; }
+    if (e.key === '4') { e.preventDefault(); _setXCartFilter('quests'); return; }
 
     var panStep = 60;
     if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
@@ -94605,6 +94646,35 @@ function _xcartHandleClick(mx, my){
   if (!node) return;
 
   var vm = (_xcartEngine && typeof _xcartEngine.getViewMode === 'function') ? _xcartEngine.getViewMode() : { mode: 'world' };
+
+  // Duplo clique: ação direta rápida (padrão CRPG AAA)
+  var now = Date.now();
+  var isDoubleClick = (window._lastXCartNodeClickTime && (now - window._lastXCartNodeClickTime < 380) && (window._lastXCartNodeClickKey === node.key));
+  window._lastXCartNodeClickTime = now;
+  window._lastXCartNodeClickKey = node.key;
+
+  if (isDoubleClick) {
+    if (vm.mode === 'world') {
+      var dProv = (window.CartShared && CartShared.getLocationProvince) ? CartShared.getLocationProvince(node.key) : null;
+      var dProvId = dProv ? dProv.id : 'plains';
+      if (dProvId) {
+        _xcartFocusProvince(dProvId);
+        return;
+      }
+    } else {
+      var isCurLoc = (_cartGetPlayerBiomeV2()) === node.key;
+      if (!isCurLoc) {
+        _closeCartLocationPopup();
+        try { if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_confirm'); } catch(_) {}
+        var selPace = window._cartSelectedPace || 'normal';
+        sessionStorage.setItem('valdoria_travel_pace', selPace);
+        if (typeof _cartTravelTo === 'function') {
+          _cartTravelTo(node.key);
+          return;
+        }
+      }
+    }
+  }
   if (vm.mode === 'world') {
     var prov = (window.CartShared && CartShared.getLocationProvince) ? CartShared.getLocationProvince(node.key) : null;
     var provId = prov ? prov.id : 'plains';

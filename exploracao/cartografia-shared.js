@@ -3363,6 +3363,22 @@
     var radius = isHover ? 20 : 14;
     ctx.save();
 
+    var af = opts.activeFilter || 'all';
+    if (af !== 'all') {
+      var isMatch = false;
+      if (af === 'settlements' && (b.settlement || b.isOrigin)) isMatch = true;
+      else if (af === 'wilderness' && (!b.settlement && !b.isOrigin)) isMatch = true;
+      else if (af === 'quests' && opts.hasActiveQuest) isMatch = true;
+      else if (af === 'mapped' && hasRegionalMap) isMatch = true;
+
+      if (!isMatch) {
+        ctx.globalAlpha = 0.22;
+      } else {
+        ctx.shadowColor = '#ffd685';
+        ctx.shadowBlur = 10;
+      }
+    }
+
     // 1.1 Emblema / Miniatura da localidade dentro da lente náutica
     var ic = (opts.locArt && opts.locArt[b.key]) || null;
     if (ic && ic.complete && ic.naturalWidth) {
@@ -4183,7 +4199,7 @@
           var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
           if (isDiscovered || hasMap) {
             var hasQ = !!(qf && qf.key === b.key);
-            _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, isRegional: true, hasActiveQuest: hasQ });
+            _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, isRegional: true, hasActiveQuest: hasQ, activeFilter: view.activeFilter });
           }
           // Locais inexplorados ficam 100% ocultos sob o Fog of War preto solido, sem qualquer icone ou texto.
         });
@@ -4257,7 +4273,7 @@
           if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) {
             var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
             var hasQ = !!(qf && qf.key === b.key);
-            _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, hasActiveQuest: hasQ });
+            _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, hasActiveQuest: hasQ, activeFilter: view.activeFilter });
           }
         });
         var pn = pk && RB.find(function(b){ return b.key === pk; });

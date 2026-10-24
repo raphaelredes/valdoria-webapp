@@ -69946,6 +69946,7 @@ function renderCartographyCanvas(el){
     + '  <div class="cart-dock" id="cart-dock">'
     + '    <button class="cart-dock-btn" id="cart-back-btn" type="button" title="Voltar à Cidade [Esc]" aria-label="Voltar para a cidade">🏛️ Cidade</button>'
     + '    <button class="cart-dock-btn primary" id="cart-atlas-picker-btn" type="button" title="Atlas das Províncias [M]" aria-label="Seletor de Províncias">🗺️ Atlas ▾</button>'
+    + '    <button class="cart-dock-btn" id="cart-filter-toggle-btn" type="button" title="Alternar Filtro de Nós no Mapa [Teclas 1 a 4]">🎯 Filtro: Todos</button>'
     + '    <button class="cart-dock-btn accent" id="cart-atlas-back-btn" type="button" title="Voltar ao Continente [Backspace]" style="display:none;" aria-label="Voltar ao Continente">🌍 Continente</button>'
     + '  </div>'
     + '  <div class="cart-header">'
@@ -70652,6 +70653,19 @@ function _wireCartEvents(){
 
 
 
+  // Alternador de filtro rápido no dock
+  var filterBtn = document.getElementById('cart-filter-toggle-btn');
+  if (filterBtn) {
+    var _filterOrder = ['all', 'settlements', 'wilderness', 'quests'];
+    filterBtn.onclick = function(e){
+      e.preventDefault();
+      var curF = window._cartActiveFilter || 'all';
+      var idx = _filterOrder.indexOf(curF);
+      var nextF = _filterOrder[(idx + 1) % _filterOrder.length];
+      _setCartFilter(nextF);
+    };
+  }
+
   // Navegação profissional por teclado (Telegram Desktop / Hotkeys AAA)
   _wireCartKeyboardNavigation();
 
@@ -70756,6 +70770,22 @@ function _cartSmoothPanTo(targetPanX, targetPanY, targetZoom, duration) {
 }
 
 // === Navegação Profissional por Teclado no Telegram Desktop (Ordem do Usuário 2026-10) ===
+window._cartActiveFilter = 'all';
+function _setCartFilter(f) {
+  window._cartActiveFilter = f;
+  var btn = document.getElementById('cart-filter-toggle-btn');
+  if (btn) {
+    var labels = {
+      all: '🎯 Filtro: Todos',
+      settlements: '🏛️ Cidades',
+      wilderness: '⚔️ Ermos',
+      quests: '📜 Contratos'
+    };
+    btn.innerHTML = labels[f] || '🎯 Filtro: Todos';
+  }
+  _drawCart();
+}
+
 function _wireCartKeyboardNavigation() {
   if (window._cartKeyboardWired) return;
   window._cartKeyboardWired = true;
@@ -70844,6 +70874,12 @@ function _wireCartKeyboardNavigation() {
       _cartSetZoom(_cartZoom * 0.8, _cartW / 2, _cartH / 2);
       return;
     }
+
+    // Filtros rápidos no canvas: 1=Todos, 2=Cidades, 3=Ermos, 4=Contratos
+    if (e.key === '1') { e.preventDefault(); _setCartFilter('all'); return; }
+    if (e.key === '2') { e.preventDefault(); _setCartFilter('settlements'); return; }
+    if (e.key === '3') { e.preventDefault(); _setCartFilter('wilderness'); return; }
+    if (e.key === '4') { e.preventDefault(); _setCartFilter('quests'); return; }
 
     // Pan: WASD e Setas Direcionais
     var panStep = 60;
@@ -71102,6 +71138,35 @@ function _cartHandleClick(mx, my){
   _logCity('cart click: ' + node.key);
 
   var vm = (_cartEngine && typeof _cartEngine.getViewMode === 'function') ? _cartEngine.getViewMode() : { mode: 'world' };
+
+  // Duplo clique: ação direta rápida (padrão CRPG AAA)
+  var now = Date.now();
+  var isDoubleClick = (window._lastCartNodeClickTime && (now - window._lastCartNodeClickTime < 380) && (window._lastCartNodeClickKey === node.key));
+  window._lastCartNodeClickTime = now;
+  window._lastCartNodeClickKey = node.key;
+
+  if (isDoubleClick) {
+    if (vm.mode === 'world') {
+      var dProv = (window.CartShared && CartShared.getLocationProvince) ? CartShared.getLocationProvince(node.key) : null;
+      var dProvId = dProv ? dProv.id : 'plains';
+      if (dProvId) {
+        _cartFocusProvince(dProvId);
+        return;
+      }
+    } else {
+      var isCurLoc = (_cartGetPlayerBiome()) === node.key;
+      if (!isCurLoc) {
+        _closeCartLocationPopup();
+        try { if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_confirm'); } catch(_) {}
+        var selPace = window._cartSelectedPace || 'normal';
+        sessionStorage.setItem('valdoria_travel_pace', selPace);
+        if (typeof ACTION_HANDLERS !== 'undefined' && ACTION_HANDLERS['cart_' + node.key]) {
+          ACTION_HANDLERS['cart_' + node.key](window.CITY_MOCK_PLAYER);
+          return;
+        }
+      }
+    }
+  }
   
   // 1. No modo Continente (Macro): abre o popup de apresentação da Região para o jogador ver a carta!
   if (vm.mode === 'world') {
@@ -71354,10 +71419,16 @@ function _openCartLocationPopup(biome){
     : '';
 
   var dndInfo = (window.CartShared && CartShared.getBiomeDndInfo) ? CartShared.getBiomeDndInfo(biome.biome || biome.key) : null;
+  var rationsNote = (horasViagem <= 8)
+    ? '🍖 Suprimentos: Viagem de 1 dia de marcha leve (sem necessidade de descanso longo na estrada).'
+    : (horasViagem <= 16)
+      ? '🍖 Suprimentos: 1 Ração de viagem por aventureiro · 1 Descanso Longo em acampamento selvagem.'
+      : '🍖 Suprimentos: ~' + Math.ceil(horasViagem / 12) + ' Rações de viagem por aventureiro · Marcha árdua com paradas em terrenos hostis.';
+
   var dndHtml = dndInfo
     ? '<div class="clp-dnd-terrain">'
     + '  <div class="clp-terrain-tag">🏔️ ' + dndInfo.terrain + '</div>'
-    + '  <div class="clp-hazard-note">⚠️ ' + dndInfo.hazard + '<br>🛡️ ' + dndInfo.saves + '</div>'
+    + '  <div class="clp-hazard-note">⚠️ ' + dndInfo.hazard + '<br>🛡️ ' + dndInfo.saves + '<br>' + rationsNote + '</div>'
     + '</div>'
     : '';
 
@@ -71536,7 +71607,7 @@ var _cartEngine = (window.CartShared && CartShared.createWorldCart) ? CartShared
 }) : null;
 function _drawCart(){
   if (!_cartCtx || !_cartEngine) return;
-  _cartEngine.draw({ ctx: _cartCtx, w: _cartW, h: _cartH, dpr: _cartDpr, panX: _cartPanX, panY: _cartPanY, zoom: _cartZoom, hoverNode: _cartHoverNode });
+  _cartEngine.draw({ ctx: _cartCtx, w: _cartW, h: _cartH, dpr: _cartDpr, panX: _cartPanX, panY: _cartPanY, zoom: _cartZoom, hoverNode: _cartHoverNode, activeFilter: window._cartActiveFilter || 'all' });
 }
 
 // === Mar hand-drawn (Fase 6.5 — 2026-04-30) ================================
