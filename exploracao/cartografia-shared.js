@@ -3741,17 +3741,32 @@
     var _activeProvId = 'world';
     var _provImgs = {};
     var _provLoaded = {};
-    // Preload das 8 cartas regionais do Atlas de Províncias (persistem em cache)
+    // Preload das 8 cartas regionais do Atlas de Províncias (persistem em cache e com multi-path fallback)
     (function(){
+      var vHash = (typeof window !== 'undefined' && window.VBUNDLE_HASH) ? ('?v=' + window.VBUNDLE_HASH) : ('?v=' + Date.now());
       CART_PROVINCES.forEach(function(prov){
         if (prov.id === 'world') return;
+        var paths = [
+          '/shared/img/map/provinces/' + prov.id + '.webp' + vHash,
+          './shared/img/map/provinces/' + prov.id + '.webp' + vHash,
+          '../shared/img/map/provinces/' + prov.id + '.webp' + vHash,
+          '../valdoria-webapp/shared/img/map/provinces/' + prov.id + '.webp' + vHash
+        ];
+        var pathIdx = 0;
         var im = new Image();
         im.onload = function(){
           _provLoaded[prov.id] = true;
           if (_viewMode === 'province' && _activeProvId === prov.id) { _baseCache = null; _onLoad(); }
         };
-        im.onerror = function(){ _provLoaded[prov.id] = false; };
-        im.src = '/shared/img/map/provinces/' + prov.id + '.webp';
+        im.onerror = function(){
+          pathIdx++;
+          if (pathIdx < paths.length) {
+            im.src = paths[pathIdx];
+          } else {
+            _provLoaded[prov.id] = false;
+          }
+        };
+        im.src = paths[0];
         _provImgs[prov.id] = im;
       });
     })();  // P-mapa #73: carrega coords c/ retry (race apiBase)
@@ -3771,7 +3786,8 @@
       var w = view.w, h = view.h, dpr = view.dpr || 1;
       var mapReady = worldMapReady();
       if (_baseCache && _baseCache._w === w && _baseCache._h === h
-          && _baseCache._dpr === dpr && _baseCache._mapReady === mapReady) {
+          && _baseCache._dpr === dpr && _baseCache._mapReady === mapReady
+          && _baseCache._viewMode === _viewMode && _baseCache._prov === _activeProvId) {
         return _baseCache;
       }
       var cv = document.createElement('canvas');
@@ -3792,7 +3808,7 @@
       } else {
         _mapReady = _drawWorldMapBg(bc, w, h);
       }
-      cv._w = w; cv._h = h; cv._dpr = dpr; cv._mapReady = _mapReady; cv._prov = _activeProvId;
+      cv._w = w; cv._h = h; cv._dpr = dpr; cv._mapReady = _mapReady; cv._viewMode = _viewMode; cv._prov = _activeProvId;
       _baseCache = cv;
       return cv;
     }
