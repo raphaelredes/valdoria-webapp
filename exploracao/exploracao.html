@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T20:42:25Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T20:47:36Z - do not edit directly, edit source -->
 
 
 
@@ -93557,15 +93557,32 @@ function _openCartLocationPopup(biome){
           + '  <div id="clp-encounter-result-box" style="display:none;margin-top:3px;background:rgba(18,14,10,0.85);border:1px solid rgba(251,146,60,0.4);border-radius:4px;padding:5px 8px;font-size:8px;line-height:1.35;"></div>'
           + '</div>';
       })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcMoonPhaseNavigation) return '';
+        var curDay = (typeof curTime !== 'undefined' && curTime && curTime.day) ? curTime.day : 14;
+        var moon = CartShared.calcMoonPhaseNavigation(curDay);
+        return '<div class="clp-moon-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,18,30,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(192,132,252,0.3);font-size:8px;color:#e9d5ff;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + moon.color + ';margin-bottom:2px;">' + moon.icon + ' FASE LUNAR: ' + moon.phaseName + ' (Dia ' + moon.cycleDay + '/28)</div>'
+          + '  <div style="color:#d2be90;line-height:1.35;">' + moon.nightAmbientDesc + '</div>'
+          + '  <div style="margin-top:2px;font-size:7.5px;color:#ffd700;">'
+          + (moon.navigationBonus ? '• Bônus de Navegação: +' + moon.navigationBonus + ' Sobrevivência · ' : '')
+          + (moon.stealthBonus ? '• Furtividade Noturna: +' + moon.stealthBonus + ' Destreza · ' : '')
+          + 'Risco Noturno: ' + (moon.encounterRiskMod > 0 ? '+' : '') + moon.encounterRiskMod + '%'
+          + '  </div>'
+          + '</div>';
+      })()
     + (horasViagem > 8 ? (
-        '<div class="clp-forced-march-warn" id="clp-forced-march-warn" style="margin:4px 0 6px;text-align:left;background:rgba(30,15,10,0.8);padding:5px 8px;border-radius:4px;border-left:3px solid #f87171;">'
-        + '  <div style="font-size:9px;color:#f87171;font-family:Cinzel,serif;font-weight:700;">⚠️ MARCHA FORÇADA & EXAUSTÃO (D&D 5e — PHB p. 181):</div>'
-        + '  <div style="font-size:8.5px;color:#fca5a5;line-height:1.35;margin-top:2px;" id="clp-forced-march-desc">'
-        + '    Jornada de <b>~' + horasViagem + 'h</b> excede o limite diário de 8 horas.<br>'
-        + '    • <b>Sem acampamento:</b> Salvaguarda de <b>CON CD ' + (10 + (horasViagem - 8)) + '</b> contra 1 Nível de Exaustão.<br>'
-        + '    • <b>Com acampamento (' + Math.max(1, Math.floor((horasViagem - 1) / 8)) + ' parada):</b> A marcha é fracionada em dias de 8h, anulando o risco de exaustão!'
-        + '  </div>'
-        + '</div>'
+        (function(){
+          var fm = (window.CartShared && CartShared.calcForcedMarchRiskTable) ? CartShared.calcForcedMarchRiskTable(horasViagem) : null;
+          return '<div class="clp-forced-march-warn" id="clp-forced-march-warn" style="margin:4px 0 6px;text-align:left;background:rgba(30,15,10,0.8);padding:5px 8px;border-radius:4px;border-left:3px solid #f87171;">'
+            + '  <div style="font-size:9px;color:#f87171;font-family:Cinzel,serif;font-weight:700;">⚠️ MARCHA FORÇADA & EXAUSTÃO (D&D 5e — PHB p. 181):</div>'
+            + '  <div style="font-size:8.5px;color:#fca5a5;line-height:1.35;margin-top:2px;" id="clp-forced-march-desc">'
+            + '    Jornada de <b>~' + horasViagem + 'h</b> excede o limite diário de 8 horas em <b>' + (fm ? fm.extraHours : (horasViagem - 8)) + 'h</b>.<br>'
+            + '    • <b>Sem acampamento:</b> Salvaguardas progressivas de <b>CON CD 11 a CD ' + (fm ? fm.maxDC : (10 + (horasViagem - 8))) + '</b> contra níveis de Exaustão.<br>'
+            + '    • <b>Com acampamento (' + Math.max(1, Math.floor((horasViagem - 1) / 8)) + ' parada):</b> A marcha é fracionada em dias de 8h, anulando o risco de exaustão!'
+            + '  </div>'
+            + '</div>';
+        })()
       ) : '')
     + '</div>'
     + '<div class="clp-buttons">'

@@ -6992,6 +6992,130 @@
     };
   }
 
+
+  // === calcMoonPhaseNavigation (Orientação Celeste e Fases Lunares - PHB p. 183 / DMG p. 111) ===
+  function calcMoonPhaseNavigation(dayNumber, options) {
+    options = options || {};
+    var day = (typeof dayNumber === 'number') ? dayNumber : 14;
+    var cycleDay = ((day - 1) % 28) + 1;
+
+    var phaseId = 'full_moon';
+    var phaseName = 'Lua Cheia';
+    var icon = '🌕';
+    var nightDesc = 'Meia-Luz natural contínua sobre os ermos; visibilidade estendida à noite sem necessidade de tochas abertas.';
+    var navBonus = 2;
+    var stealthBonus = 0;
+    var encMod = -10;
+    var color = '#facc15';
+
+    if (cycleDay === 28) {
+      phaseId = 'blood_moon';
+      phaseName = 'Lua de Sangue (Eclipse Ancestral)';
+      icon = '🩸';
+      nightDesc = 'Luar avermelhado sinistro; aberrações e predadores noturnos entram em frenesi violento (+30% risco de emboscada).';
+      navBonus = 0;
+      stealthBonus = -2;
+      encMod = 30;
+      color = '#ef4444';
+    } else if (cycleDay <= 3 || cycleDay >= 26) {
+      phaseId = 'new_moon';
+      phaseName = 'Lua Nova';
+      icon = '🌑';
+      nightDesc = 'Escuridão plena; céu velado sem reflexo lunar. Marcha furtiva facilitada (+2 Furtividade), porém fontes de luz são vitais.';
+      navBonus = -2;
+      stealthBonus = 2;
+      encMod = 10;
+      color = '#94a3b8';
+    } else if (cycleDay <= 10) {
+      phaseId = 'waxing_moon';
+      phaseName = 'Quarto Crescente';
+      icon = '🌓';
+      nightDesc = 'Iluminação moderada no primeiro terço da noite; silhuetas visíveis a média distância.';
+      navBonus = 0;
+      stealthBonus = 0;
+      encMod = 0;
+      color = '#fde047';
+    } else if (cycleDay <= 17) {
+      phaseId = 'full_moon';
+      phaseName = 'Lua Cheia';
+      icon = '🌕';
+      nightDesc = 'Meia-Luz natural prateada em toda a província; +2 em testes de orientação e navegação celestial.';
+      navBonus = 2;
+      stealthBonus = -1;
+      encMod = -10;
+      color = '#ffd700';
+    } else {
+      phaseId = 'waning_moon';
+      phaseName = 'Quarto Minguante';
+      icon = '🌗';
+      nightDesc = 'Luar tardio na segunda metade da madrugada; sombras profundas no alvorecer.';
+      navBonus = 0;
+      stealthBonus = 1;
+      encMod = 0;
+      color = '#e2e8f0';
+    }
+
+    return {
+      dayNumber: day,
+      cycleDay: cycleDay,
+      phaseId: phaseId,
+      phaseName: phaseName,
+      icon: icon,
+      nightAmbientDesc: nightDesc,
+      navigationBonus: navBonus,
+      stealthBonus: stealthBonus,
+      encounterRiskMod: encMod,
+      color: color,
+      dndRef: 'PHB p. 183 / DMG p. 111 (Orientação Celeste e Fases Lunares)'
+    };
+  }
+
+  // === calcForcedMarchRiskTable (Tabela Progressiva de Marcha Forçada - PHB p. 181) ===
+  function calcForcedMarchRiskTable(travelHours, conBonus, options) {
+    options = options || {};
+    var hours = (typeof travelHours === 'number') ? travelHours : 8;
+    var conB = (typeof conBonus === 'number') ? conBonus : 2;
+
+    var extraHours = Math.max(0, Math.ceil(hours - 8));
+    if (extraHours === 0) {
+      return {
+        isForcedMarch: false,
+        extraHours: 0,
+        maxDC: 0,
+        schedule: [],
+        summary: 'Marcha dentro do limite padrão de 8 horas de viagem diária; comitiva avança sem fadiga excessiva.',
+        color: '#4ade80',
+        dndRef: 'PHB p. 181 (Marcha Forçada)'
+      };
+    }
+
+    var schedule = [];
+    for (var h = 1; h <= extraHours; h++) {
+      var dc = 10 + h;
+      var target = dc - conB;
+      var failChance = Math.max(5, Math.min(95, Math.round((Math.max(1, target - 1) / 20) * 100)));
+      schedule.push({
+        extraHour: h,
+        totalHour: 8 + h,
+        conDC: dc,
+        failureChancePercent: failChance,
+        consequence: 'Salvaguarda de CON CD ' + dc + ' contra Exaustão Nível ' + h
+      });
+    }
+
+    var maxDC = 10 + extraHours;
+
+    return {
+      isForcedMarch: true,
+      extraHours: extraHours,
+      maxDC: maxDC,
+      schedule: schedule,
+      summary: 'Marcha Forçada: ' + hours + 'h diárias excedem o limite em ' + extraHours + 'h. Salvaguardas progressivas de CON de CD 11 até CD ' + maxDC + '.',
+      color: '#f87171',
+      dndRef: 'PHB p. 181 (Marcha Forçada)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -8691,6 +8815,8 @@
     calcCampCookingBenefits: calcCampCookingBenefits,
     calcSurvivalGearSynergy: calcSurvivalGearSynergy,
     calcAltitudeExposure: calcAltitudeExposure,
+    calcMoonPhaseNavigation: calcMoonPhaseNavigation,
+    calcForcedMarchRiskTable: calcForcedMarchRiskTable,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
