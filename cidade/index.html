@@ -69953,6 +69953,13 @@ function renderCartographyCanvas(el){
     <button class="cart-dock-btn" id="cart-guide-btn" type="button" title="Guia do Andarilho e Regras de Viagem D&D 5e [H]" aria-label="Guia de Viagem D&D 5e">📖 Guia</button>'
     + '    <button class="cart-dock-btn accent" id="cart-atlas-back-btn" type="button" title="Voltar ao Continente [Backspace]" style="display:none;" aria-label="Voltar ao Continente">🌍 Continente</button>'
     + '  </div>'
+    + '  <div class="cart-hotkey-strip" style="display:flex;justify-content:center;gap:6px;padding:2px 8px;font-size:8.5px;color:#a09484;font-family:Cinzel,serif;background:rgba(18,14,10,0.65);border-bottom:1px solid rgba(196,149,58,0.2);">'
+    + '    <span><kbd style="color:#ffd700;font-family:monospace;background:rgba(0,0,0,0.4);padding:0 3px;border-radius:2px;">M</kbd> Atlas</span>'
+    + '    <span><kbd style="color:#ffd700;font-family:monospace;background:rgba(0,0,0,0.4);padding:0 3px;border-radius:2px;">L</kbd> Camadas</span>'
+    + '    <span><kbd style="color:#ffd700;font-family:monospace;background:rgba(0,0,0,0.4);padding:0 3px;border-radius:2px;">W</kbd> Marcos</span>'
+    + '    <span><kbd style="color:#ffd700;font-family:monospace;background:rgba(0,0,0,0.4);padding:0 3px;border-radius:2px;">H</kbd> Guia 5e</span>'
+    + '    <span><kbd style="color:#ffd700;font-family:monospace;background:rgba(0,0,0,0.4);padding:0 3px;border-radius:2px;">Esc</kbd> Fechar</span>'
+    + '  </div>'
     + '  <div class="cart-header">'
     + '    <h2 id="cart-title">Mapa de Valdória</h2>'
     + '    <div class="cart-prov-bar-wrap">'
@@ -72323,6 +72330,23 @@ function _openCartLocationPopup(biome){
                 + sancHtml
                 + '  </div>'
                 + '</div>';
+            })()
+          + (function(){
+              if (!window.CartShared || !CartShared.calcExtremeWeatherExposure) return '';
+              var p = window.CITY_MOCK_PLAYER || {};
+              var expo = CartShared.calcExtremeWeatherExposure(biome.biome || biome.key, curWeather, {
+                hasWinterGear: !!(p.inventory && p.inventory.some(function(it){ return it.id === 'winter_clothes' || it.id === 'fur_cloak'; })),
+                hasHeavyArmor: !!(p.armor_type === 'heavy' || p.armor_type === 'medium')
+              });
+              if (!expo.hasHazard) return '';
+              return '<div class="clp-exposure-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,16,16,0.85);padding:5px 8px;border-radius:4px;border:1px solid ' + expo.exhaustionColor + ';">'
+                + '  <div style="font-size:9px;color:' + expo.exhaustionColor + ';font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">' + expo.title + '</div>'
+                + '  <div style="font-size:9px;color:#f4d49a;line-height:1.4;">'
+                + '    Salvaguarda: <b style="color:#fca5a5;">' + expo.dcCheck + '</b><br>'
+                + '    Risco de Exaustão: <b style="color:' + expo.exhaustionColor + ';">' + expo.exhaustionRisk + '</b>' + (expo.waterMultiplier > 1 ? ' · <span style="color:#67e8f9;">Demanda 2× Água</span>' : '') + '<br>'
+                + '    <span style="font-size:8.5px;color:#cbd5e1;font-style:italic;">' + expo.mitigationText + '</span>'
+                + '  </div>'
+                + '</div>';
             })();
       })()
     + (biome.isSanctuary
@@ -72391,6 +72415,19 @@ function _openCartLocationPopup(biome){
             + '</div>';
         }).join('');
         return '<div class="clp-transport-comparison-grid" style="display:flex;gap:4px;margin:4px 0 6px;">' + cols + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcMountLogistics) return '';
+        var curTrans = window._cartSelectedTransport || 'foot';
+        var mountLog = CartShared.calcMountLogistics(curTrans, 180, horasViagem / 8);
+        if (mountLog.mode === 'foot') return '';
+        return '<div class="clp-mount-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,24,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(134,239,172,0.3);">'
+          + '  <div style="font-size:8.5px;color:#86efac;font-family:Cinzel,serif;font-weight:700;">🐎 ' + mountLog.name + ':</div>'
+          + '  <div style="font-size:8.5px;color:#d2be90;line-height:1.35;">'
+          + '    Carga Útil: <b>' + mountLog.carryCapLbs + ' lbs</b> · Forragem: <b>' + mountLog.fodderSummary + '</b><br>'
+          + '    <span style="color:#a3e635;font-style:italic;">' + mountLog.terrainBonus + '</span>'
+          + '  </div>'
+          + '</div>';
       })()
     + '</div>'
     + '<div class="clp-role-wrap" style="margin-top: 8px; text-align: left;">'

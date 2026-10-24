@@ -5454,6 +5454,152 @@
     };
   }
 
+  // === calcExtremeWeatherExposure (Exposição Climática Extrema e Salvaguardas - DMG p. 110) ===
+  function calcExtremeWeatherExposure(biomeKey, weatherCode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var w = (weatherCode || 's').toLowerCase();
+
+    // 1. Frio Extremo (DMG p. 110: Tundra, Neve, Montanha em nevasca ou inverno)
+    if (bk === 'snow' || bk === 'tundra' || bk === 'neve' || (bk === 'mountain' && (w === 'snow' || w === 'blizzard' || w === 'cold'))) {
+      var hasWinterGear = !!options.hasWinterGear;
+      var coldMitigation = hasWinterGear
+        ? 'Agasalhos de inverno e peles espessas garantem imunidade contra o teste de frio extremo.'
+        : 'Sem trajes térmicos: cada falha impõe 1 nível de Exaustão ao aventureiro.';
+      return {
+        hasHazard: true,
+        hazardType: 'extreme_cold',
+        title: '❄️ Frio Extremo (DMG p. 110)',
+        dcCheck: 'Salvaguarda de Constituição CD 10 ao fim de cada hora',
+        saveType: 'CON',
+        dcValue: 10,
+        isMitigated: hasWinterGear,
+        exhaustionRisk: hasWinterGear ? 'Nenhum' : 'Alto',
+        exhaustionColor: hasWinterGear ? '#4ade80' : '#f87171',
+        waterMultiplier: 1,
+        mitigationText: coldMitigation,
+        tacticalAdvice: 'Acenda fogueiras nos descansos e utilize mantos forrados contra a hipotermia.',
+        dndRef: 'DMG p. 110'
+      };
+    }
+
+    // 2. Calor Extremo (DMG p. 110: Deserto, Vulcânico sob sol escaldante)
+    if (bk === 'desert' || bk === 'deserto' || bk === 'volcanic' || bk === 'vulcanico' || w === 'hot' || w === 'heatwave') {
+      var hasHeavyArmor = !!(options.hasHeavyArmor || options.hasMediumArmor);
+      var heatDisadvNote = hasHeavyArmor ? ' (Desvantagem por armadura pesada/média)' : '';
+      return {
+        hasHazard: true,
+        hazardType: 'extreme_heat',
+        title: '☀️ Calor Escaldante (DMG p. 110)',
+        dcCheck: 'Salvaguarda de Constituição CD 5 (+1 por hora adicional)' + heatDisadvNote,
+        saveType: 'CON',
+        dcValue: 5,
+        isMitigated: false,
+        exhaustionRisk: hasHeavyArmor ? 'Severo' : 'Moderado',
+        exhaustionColor: hasHeavyArmor ? '#ef4444' : '#fb923c',
+        waterMultiplier: 2,
+        mitigationText: 'Consumo dobrado de água (2 galões/dia) e descanso em sombras nas horas mais quentes (11h-15h).',
+        tacticalAdvice: 'Prefira marcha crepuscular ou noturna e evite armaduras de placas metálicas ao meio-dia.',
+        dndRef: 'DMG p. 110'
+      };
+    }
+
+    // 3. Ventos Fortes e Precipitação Torrencial (DMG p. 110)
+    if (w === 'storm' || w === 'tempestade' || w === 't' || w === 'blizzard' || w === 'sandstorm') {
+      return {
+        hasHazard: true,
+        hazardType: 'heavy_storm',
+        title: '🌪️ Intempérie Severa (DMG p. 110)',
+        dcCheck: 'Desvantagem em ataques à distância e Percepção visual/auditiva',
+        saveType: 'None',
+        dcValue: 0,
+        isMitigated: false,
+        exhaustionRisk: 'Baixo',
+        exhaustionColor: '#facc15',
+        waterMultiplier: 1,
+        mitigationText: 'Tochas são apagadas; lanternas cobertas ou luz mágica são mandatórias.',
+        tacticalAdvice: 'Mantenha a comitiva em formação fechada para evitar dispersão no vendaval.',
+        dndRef: 'DMG p. 110'
+      };
+    }
+
+    // Clima Temperado normal
+    return {
+      hasHazard: false,
+      hazardType: 'temperate',
+      title: 'Clima Temperado Estável',
+      dcCheck: 'Nenhuma salvaguarda climática exigida',
+      saveType: 'None',
+      dcValue: 0,
+      isMitigated: true,
+      exhaustionRisk: 'Nenhum',
+      exhaustionColor: '#4ade80',
+      waterMultiplier: 1,
+      mitigationText: 'Condições térmicas confortáveis para a marcha.',
+      tacticalAdvice: 'Manter ritmo habitual de caminhada e hidratação padrão.',
+      dndRef: 'DMG p. 110'
+    };
+  }
+
+  // === calcMountLogistics (Capacidade de Carga, Forragem e Desgaste de Montarias - PHB p. 157) ===
+  function calcMountLogistics(transportMode, partyWeightLbs, travelDays) {
+    var mode = transportMode || 'foot';
+    var days = Math.max(1, Math.round(travelDays || 1));
+    var weight = Math.max(0, partyWeightLbs || 0);
+
+    var specs = {
+      foot: {
+        name: 'Marcha a Pé (Sem Montaria)',
+        carryCap: 0,
+        pullCap: 0,
+        fodderDailyCopper: 0,
+        terrainBonus: 'Adaptabilidade total em encostas, matas densas e pântanos sem risco de lesão animal.',
+        enduranceNote: 'A comitiva depende exclusivamente do próprio vigor físico dos aventureiros.'
+      },
+      horse: {
+        name: 'Cavalos de Montaria (PHB p. 157)',
+        carryCap: 480,
+        pullCap: 2400,
+        fodderDailyCopper: 5,
+        terrainBonus: '+33% velocidade em estradas e planícies; terreno difícil reduz a velocidade à metade.',
+        enduranceNote: 'Pode percorrer até 32 milhas em marcha rápida antes de exigir descanso e água para as montarias.'
+      },
+      wagon: {
+        name: 'Carroça com Animais de Tração (PHB p. 157)',
+        carryCap: 1200,
+        pullCap: 2400,
+        fodderDailyCopper: 10,
+        terrainBonus: 'Capacidade máxima de transporte de mantimentos, armas e tesouros pesados da comitiva.',
+        enduranceNote: 'Restrito a estradas, colinas suaves e planícies; intransponível em ravinas e lamaçal denso.'
+      },
+      boat: {
+        name: 'Embarcação Fluvial / Bote a Remos (PHB p. 157)',
+        carryCap: 1500,
+        pullCap: 0,
+        fodderDailyCopper: 0,
+        terrainBonus: 'Ignora terreno difícil terrestre; velocidade contínua a favor do curso dos rios.',
+        enduranceNote: 'Limitado a hidrovias e margens navegáveis; imune a custos de forragem animal.'
+      }
+    };
+
+    var item = specs[mode] || specs.foot;
+    var totalFodderCopper = item.fodderDailyCopper * days;
+    var utilizationPct = (item.carryCap > 0 && weight > 0) ? Math.min(100, Math.round((weight / item.carryCap) * 100)) : 0;
+
+    return {
+      mode: mode,
+      name: item.name,
+      carryCapLbs: item.carryCap,
+      pullCapLbs: item.pullCap,
+      fodderDailyCopper: item.fodderDailyCopper,
+      fodderTotalCopper: totalFodderCopper,
+      fodderSummary: item.fodderDailyCopper > 0 ? (item.fodderDailyCopper + ' pc/dia (Total: ' + totalFodderCopper + ' peças de cobre)') : 'Isento de custo com forragem animal',
+      terrainBonus: item.terrainBonus,
+      enduranceNote: item.enduranceNote,
+      utilizationPct: utilizationPct
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -5580,6 +5726,17 @@
     }
     if (spoorClue) {
       out.push('• Pistas de Rastreio: ' + spoorClue.spoorType + ' · Sobrevivência CD ' + spoorClue.survivalDC + ' (' + spoorClue.creatureHint + ')');
+    }
+    var weatherExpo = calcExtremeWeatherExposure(targ.biome || targ.key, options.weather, {
+      hasWinterGear: options.hasWinterGear,
+      hasHeavyArmor: options.hasHeavyArmor
+    });
+    var mountLog = calcMountLogistics(transKey, 180, miles / 24);
+    if (weatherExpo.hasHazard) {
+      out.push('• Exposição Climática: ' + weatherExpo.title + ' · ' + weatherExpo.dcCheck);
+    }
+    if (mountLog.mode !== 'foot') {
+      out.push('• Logística Montaria:  ' + mountLog.name + ' · Forragem: ' + mountLog.fodderSummary);
     }
     out.push('═══════════════════════════════════════════════════════════');
 
@@ -7114,6 +7271,8 @@
     calcNavigationOrientationCheck: calcNavigationOrientationCheck,
     findNearestSanctuary: findNearestSanctuary,
     getTrailSpoorClues: getTrailSpoorClues,
+    calcExtremeWeatherExposure: calcExtremeWeatherExposure,
+    calcMountLogistics: calcMountLogistics,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
