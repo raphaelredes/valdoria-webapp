@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T15:39:22Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T16:04:56Z - do not edit directly, edit source -->
 
 
 
@@ -62865,6 +62865,7 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
 
     // mapas). Poucos edges/mapa → o loop é barato.
 
+    var _ed = null;
     var _isReturn = false;
 
     try {
@@ -62873,7 +62874,11 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
 
       for (var _ei = 0; _ei < _eds.length; _ei++) {
 
-        if (_eds[_ei].col === col && _eds[_ei].row === row && _eds[_ei].targetMap === '__return_city__') { _isReturn = true; break; }
+        if (_eds[_ei].col === col && _eds[_ei].row === row) {
+          _ed = _eds[_ei];
+          if (_ed.targetMap === '__return_city__') _isReturn = true;
+          break;
+        }
 
       }
 
@@ -62937,6 +62942,47 @@ function drawTileDecoration(ctx, cx, cy, tile, col, row) {
 
       ctx.stroke();
 
+    }
+
+    // D&D 5e: Indicador Direcional de Borda / Saída (Norte, Sul, Leste, Oeste + Destino)
+    if (_ed) {
+      ctx.save();
+      var _label = _isReturn ? 'Valdoria' : (_ed.label || 'Terras Vizinhas');
+      var _dir = '';
+      var _maxR = (S && S.rows) ? S.rows : 28;
+      var _maxC = (S && S.cols) ? S.cols : 24;
+      if (row <= 2) _dir = 'Norte';
+      else if (row >= _maxR - 3) _dir = 'Sul';
+      else if (col <= 2) _dir = 'Oeste';
+      else if (col >= _maxC - 3) _dir = 'Leste';
+      else if (row < _maxR / 2) _dir = 'Norte';
+      else _dir = 'Sul';
+
+      var _badgeText = (_dir ? (_dir + ': ') : '') + _label;
+      ctx.font = 'bold 9px "Cinzel", "Times New Roman", serif';
+      var _tw = ctx.measureText(_badgeText).width;
+      var _bx = cx - _tw / 2 - 5;
+      var _by = (row >= _maxR - 3) ? (cy - HEX_H * 0.36) : (cy + HEX_H * 0.22);
+      var _bw = _tw + 10;
+      var _bh = 15;
+
+      ctx.fillStyle = 'rgba(12, 14, 18, 0.84)';
+      ctx.beginPath();
+      if (typeof ctx.roundRect === 'function') {
+        ctx.roundRect(_bx, _by, _bw, _bh, 3);
+      } else {
+        ctx.rect(_bx, _by, _bw, _bh);
+      }
+      ctx.fill();
+      ctx.strokeStyle = _isReturn ? 'rgba(212, 175, 55, 0.7)' : 'rgba(74, 214, 128, 0.7)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.fillStyle = _isReturn ? '#ffd875' : '#c3f5d5';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(_badgeText, cx, _by + _bh / 2 + 0.5);
+      ctx.restore();
     }
 
   } else if (tile === 'D') {
@@ -96083,6 +96129,29 @@ function drawMinimap() {
   ctx.stroke();
 
 
+
+  // Edges / saídas no minimapa (se descobertas)
+  try {
+    var _mEds = (S.mapDef && S.mapDef.edges) || [];
+    for (var _mei = 0; _mei < _mEds.length; _mei++) {
+      var _med = _mEds[_mei];
+      var _mfs = S.fogState[fogKey(_med.col, _med.row)];
+      if (_mfs !== 'visible' && _mfs !== 'dim') continue;
+      var _meOff = (_med.row % 2 === 1) ? cw * 0.5 : 0;
+      var _mex = _med.col * cw + cw / 2 + _meOff;
+      var _mey = _med.row * ch + ch / 2;
+      var _mRet = (_med.targetMap === '__return_city__');
+      ctx.fillStyle = _mRet ? '#ffd875' : '#4ade80';
+      ctx.beginPath();
+      var _mds = Math.max(2, cw * 0.55);
+      ctx.moveTo(_mex, _mey - _mds);
+      ctx.lineTo(_mex + _mds, _mey);
+      ctx.lineTo(_mex, _mey + _mds);
+      ctx.lineTo(_mex - _mds, _mey);
+      ctx.closePath();
+      ctx.fill();
+    }
+  } catch (_) {}
 
   // Border
 

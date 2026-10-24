@@ -56,8 +56,17 @@
     var distTotal = total * 3;
     var prevTrack = (global.ValdoriaAudio && typeof ValdoriaAudio.getCurrentTrack === 'function')
       ? ValdoriaAudio.getCurrentTrack() : null;
+    var pace = 'normal';
+    try {
+      pace = (opts && opts.pace) || (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('valdoria_travel_pace')) || 'normal';
+    } catch (_) {}
+    if (pace === 'fast' && total > 2) {
+      total = Math.max(2, total - 1);
+      distTotal = total * 3;
+    }
     _j = { opts: opts, biome: biome, displayName: opts.displayName || 'destino',
            total: total, step: 0, distTotal: distTotal, distRemaining: distTotal,
+           pace: pace, stealthAdvantageOnFirst: (pace === 'stealth'),
            usedHaz: [], usedSafe: [], prevTrack: prevTrack, weather: null };
     if (opts.confirm === false) {
       _showMarcoTutorial(function () { _departure(); });
@@ -264,6 +273,23 @@
     if (j.prep && j.prep.label) {
       script.push({ type: 'narration', text: 'Sob a postura de <b>' + j.prep.label + '</b>, a marcha se inicia com foco redobrado.' });
     }
+    // Ritmo de marcha D&D 5e (Furtivo, Rápido, Normal)
+    var pace = j.pace || 'normal';
+    var paceNarr = '';
+    if (pace === 'stealth') {
+      paceNarr = isGrp
+        ? 'Marchando em ritmo furtivo, a comitiva avança com passos comedidos e sentidos aguçados pelas sombras...'
+        : 'Marchando em ritmo furtivo, você avança com passos comedidos e sentidos aguçados pelas sombras...';
+    } else if (pace === 'fast') {
+      paceNarr = isGrp
+        ? 'Em marcha acelerada, os aventureiros forçam o passo nas estradas para cobrir a distância com rapidez máxima...'
+        : 'Em marcha acelerada, você força o passo nas estradas para cobrir a distância com rapidez máxima...';
+    } else {
+      paceNarr = isGrp
+        ? 'Em ritmo constante e equilibrado, a comitiva inicia a travessia das estradas imperiais...'
+        : 'Em ritmo constante e equilibrado, você inicia a travessia das estradas imperiais...';
+    }
+    script.push({ type: 'narration', text: paceNarr });
     if (JD().detectWeather) {
       var wDep = JD().detectWeather(script);
       if (wDep) { j.weather = wDep; _log('journey weather updated on departure -> ' + wDep); }
@@ -407,6 +433,21 @@
     if (_j && _j.prep && _j.prep.advantageOnFirst) {
       checkOpts.advantage = true;
       _j.prep.advantageOnFirst = false; // consumido no primeiro teste
+    }
+    if (_j && _j.pace === 'stealth' && _j.stealthAdvantageOnFirst) {
+      var sKey = String((ch && (ch.skill || ch.stat)) || '').toLowerCase();
+      var isStealthOrPerc = (sKey === 'dex' || sKey === 'wis' || sKey === 'stealth' || sKey === 'perception' || sKey === 'furtividade' || sKey === 'percepcao' || !sKey);
+      if (isStealthOrPerc) {
+        checkOpts.advantage = true;
+        _j.stealthAdvantageOnFirst = false;
+      }
+    }
+    if (_j && _j.pace === 'fast') {
+      var sKeyP = String((ch && (ch.skill || ch.stat)) || '').toLowerCase();
+      var isPerceptionCheck = (sKeyP === 'wis' || sKeyP === 'perception' || sKeyP === 'percepcao');
+      if (isPerceptionCheck || (hz && (hz.isAmbush || hz.ambush))) {
+        checkOpts.disadvantage = true;
+      }
     }
     var roll = JD().resolveJourneyCheck ? JD().resolveJourneyCheck(p, ch, checkOpts) : null;
     if (!roll) { _outcome(hz, ch, true, null); return; }
