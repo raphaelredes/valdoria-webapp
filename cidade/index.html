@@ -71416,7 +71416,22 @@ function _cartHandleHover(mx, my){
   });
 }
 function _cartHandleClick(mx, my){
-  // 0. Interação na Rosa dos Ventos (Top-right Compass Rose: re-centraliza e orienta ao Norte)
+  // 0. Interação no Indicador de Borda da Comitiva (Tracker fora da tela)
+  if (_cartEngine && typeof _cartEngine.getOffscreenComitivaBadge === 'function') {
+    var bPos = _cartEngine.getOffscreenComitivaBadge();
+    if (bPos && bPos.active) {
+      var bdx = mx - bPos.x, bdy = my - bPos.y;
+      if (bdx * bdx + bdy * bdy <= 24 * 24) {
+        try { if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_scroll'); } catch(_) {}
+        _cartZoom = CART_ZOOM_DEFAULT;
+        _cartCenterOnPlayer();
+        _cartUpdateZoomInfo();
+        return;
+      }
+    }
+  }
+
+  // 0.1 Interação na Rosa dos Ventos (Top-right Compass Rose: re-centraliza e orienta ao Norte)
   var compassX = _cartW - 40, compassY = 40;
   var cdx = mx - compassX, cdy = my - compassY;
   if (cdx * cdx + cdy * cdy <= 26 * 26) {
@@ -71862,6 +71877,17 @@ function _openCartLocationPopup(biome){
     + '  </div>'
     + '  <div class="clp-pace-note" id="clp-pace-note">🚶 Ritmo Normal (24 milhas/dia): Velocidade e percepção passiva equilibradas sem penalidades.</div>'
     + '</div>'
+    + (horasViagem > 8 ? (
+        '<div class="clp-camp-wrap" style="margin-top: 8px; text-align: left;">'
+        + '  <div style="font-size: 9.5px; font-family: Cinzel, serif; color: #86efac; margin-bottom: 3px; font-weight: 600;">VIGÍLIA NO ACAMPAMENTO SELVAGEM (D&D 5e):</div>'
+        + '  <div class="clp-camp-selector" style="display:flex;gap:4px;">'
+        + '    <button class="clp-camp-btn active" data-camp="vigilant" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid #ffd700;color:#ffd700;border-radius:3px;cursor:pointer;">🛡️ Vigília</button>'
+        + '    <button class="clp-camp-btn" data-camp="stealth" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🕯️ Oculto</button>'
+        + '    <button class="clp-camp-btn" data-camp="rest" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">⛺ Pleno</button>'
+        + '  </div>'
+        + '  <div class="clp-camp-note" id="clp-camp-note" style="font-size:8.5px;color:#d2be90;margin-top:2px;font-style:italic;">🛡️ Vigília Atenta: Revezamento rigoroso de sentinelas (+5 na Percepção Passiva contra surpresas à noite).</div>'
+        + '</div>'
+      ) : '')
     + '</div>'
     + '<div class="clp-buttons">'
     + (canExploreOrigin
@@ -71913,6 +71939,41 @@ function _openCartLocationPopup(biome){
       }
     };
   }
+
+  var campBtns = el.querySelectorAll('.clp-camp-btn');
+  var campNote = el.querySelector('#clp-camp-note');
+  campBtns.forEach(function(btn){
+    btn.onclick = function(e){
+      e.preventDefault();
+      campBtns.forEach(function(b){
+        b.classList.remove('active');
+        b.style.color = '#d2be90';
+        b.style.borderColor = 'rgba(196,149,58,0.4)';
+      });
+      btn.classList.add('active');
+      btn.style.color = '#ffd700';
+      btn.style.borderColor = '#ffd700';
+      var cType = btn.getAttribute('data-camp');
+      window._cartSelectedCampStance = cType;
+      try { sessionStorage.setItem('valdoria_camp_stance', cType); } catch(_) {}
+      if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_click');
+      if (campNote) {
+        if (cType === 'vigilant') {
+          campNote.textContent = '🛡️ Vigília Atenta: Revezamento rigoroso de sentinelas (+5 na Percepção Passiva contra surpresas à noite).';
+        } else if (cType === 'stealth') {
+          campNote.textContent = '🕯️ Acampamento Oculto: Fogueira baixa oculta nas sombras (-15% no risco de atrair patrulhas noturnas).';
+        } else {
+          campNote.textContent = '⛺ Repouso Pleno: Foco na recuperação de PV e recursos dos membros do grupo.';
+        }
+      }
+      var newRisk2 = (window.CartShared && CartShared.calcEncounterRisk) ? CartShared.calcEncounterRisk(biome, { pace: window._cartSelectedPace || 'normal', isNight: isNight, weather: curWeather, hours: horasViagem, campStance: cType }) : null;
+      var riskEl2 = el.querySelector('#clp-risk-badge');
+      if (riskEl2 && newRisk2) {
+        riskEl2.textContent = newRisk2.label;
+        riskEl2.style.color = newRisk2.color;
+      }
+    };
+  });
 
   var paceBtns = el.querySelectorAll('.clp-pace-btn');
   var paceNote = el.querySelector('#clp-pace-note');

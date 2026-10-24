@@ -3506,7 +3506,8 @@
                        (biome.tier === 4) ? 55 : 70;
 
     var durationMod = (hours <= 4) ? -5 : (hours <= 8) ? 0 : (hours <= 16) ? 10 : 20;
-    var nightMod = isNight ? 18 : 0;
+    var campStance = opts.campStance || 'vigilant';
+    var nightMod = isNight ? (campStance === 'stealth' ? 10 : 18) : 0;
     var paceMod = (pace === 'stealth') ? -25 : (pace === 'fast') ? 15 : 0;
     var weatherMod = (weather === 't' || weather === 'f') ? 8 : 0;
 
@@ -4266,6 +4267,56 @@
   //     onAsyncRedraw(),                      // chamado quando imagem/coords chegam (redraw)
   //   }
   //   view = { ctx, w, h, dpr, panX, panY, zoom, hoverNode }
+  var _lastOffscreenComitivaBadge = null;
+
+  function _drawOffScreenComitivaChevron(ctx, w, h, targetX, targetY, locName) {
+    var margin = 32;
+    var topMargin = 58;
+    var bottomMargin = 45;
+    var cx = Math.max(margin, Math.min(w - margin, targetX));
+    var cy = Math.max(topMargin, Math.min(h - bottomMargin, targetY));
+    var angle = Math.atan2(targetY - cy, targetX - cx);
+
+    ctx.save();
+    ctx.translate(cx, cy);
+
+    ctx.beginPath();
+    ctx.arc(0, 0, 16, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(25, 18, 10, 0.88)';
+    ctx.fill();
+    ctx.lineWidth = 1.6;
+    ctx.strokeStyle = '#ffd700';
+    ctx.shadowColor = 'rgba(255, 215, 0, 0.65)';
+    ctx.shadowBlur = 8;
+    ctx.stroke();
+
+    ctx.save();
+    ctx.rotate(angle);
+    ctx.beginPath();
+    ctx.moveTo(18, 0);
+    ctx.lineTo(11, -5);
+    ctx.lineTo(11, 5);
+    ctx.closePath();
+    ctx.fillStyle = '#ffd700';
+    ctx.fill();
+    ctx.restore();
+
+    ctx.font = '12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('📍', 0, 0);
+
+    ctx.font = '700 8.5px Cinzel, serif';
+    ctx.fillStyle = '#fde047';
+    ctx.shadowColor = 'rgba(0,0,0,0.9)';
+    ctx.shadowBlur = 4;
+    var labelY = (cy < h / 2) ? 22 : -20;
+    ctx.fillText('COMITIVA', 0, labelY);
+
+    ctx.restore();
+    return { x: cx, y: cy, active: true };
+  }
+
   function createWorldCart(cfg){
     cfg = cfg || {};
     var _baseCache = null;
@@ -4682,6 +4733,21 @@
       _drawCartCompass(ctx, w, h, _isCompHov, !!view.isCompassPulsing);
       // Escala Cartográfica D&D 5e — screen-space (bottom-left).
       _drawCartScaleBar(ctx, w, h, _viewMode);
+
+      // Indicador de Borda da Comitiva quando fora da tela (Baldur's Gate 3 / CRPG AAA Tracker)
+      _lastOffscreenComitivaBadge = null;
+      var _activePlNode = (_viewMode === 'province' && _activeProvId !== 'world')
+        ? (pk && regNodes.find(function(b){ return b.key === pk; }))
+        : (pk && (typeof RB !== 'undefined' ? RB.find(function(b){ return b.key === pk; }) : null));
+      if (_activePlNode) {
+        var _apBx = _activePlNode.x * _S, _apBy = _activePlNode.y * _S;
+        var _apScrX = (_apBx + _offX) * (view.zoom || 1) + (view.panX || 0);
+        var _apScrY = (_apBy + _offY) * (view.zoom || 1) + (view.panY || 0);
+        if (_apScrX < 15 || _apScrX > w - 15 || _apScrY < 15 || _apScrY > h - 15) {
+          _lastOffscreenComitivaBadge = _drawOffScreenComitivaChevron(ctx, w, h, _apScrX, _apScrY, _activePlNode.regionalName || _activePlNode.name);
+        }
+      }
+
       ctx.restore();
     }
 
@@ -4842,6 +4908,7 @@
       closeProvince: closeProvince,
       getViewMode: getViewMode,
       isCompassAt: function(mx, my, w, h){ return _isCompassAt(mx, my, w, h); },
+      getOffscreenComitivaBadge: function(){ return _lastOffscreenComitivaBadge; },
       triggerDiscoveryAnimation: function(nodeKey, onComplete){
         var node = CART_BIOMES.find(function(b){ return b.key === nodeKey; });
         if (!node) { if (onComplete) onComplete(); return; }
