@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T03:04:07Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T03:09:12Z - do not edit directly, edit source -->
 
 
 
@@ -93598,6 +93598,11 @@ function _renderXCartProvinceBar() {
 
 function _xcartFocusProvince(provId){
   if (!_xcartEngine || !_xcartCanvas || !_xcartW || !_xcartH) return;
+  try {
+    if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+      ValdoriaAudio.playSFX('sfx_scroll');
+    }
+  } catch(_) {}
   if (provId === 'world') {
     _cartZoom = CART_ZOOM_DEFAULT;
     _xcartCenterOnPlayer();

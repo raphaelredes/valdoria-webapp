@@ -8872,6 +8872,63 @@ body.perf-lite .vc-action-btn { transition: none; }
       font-family: Cinzel, serif;
     }
 
+
+    /* === FASE 4: Seletor de Ritmo de Viagem D&D 5e e Caderno do Explorador === */
+    .clp-pace-selector {
+      display: flex;
+      gap: 5px;
+      margin-top: 4px;
+    }
+    .clp-pace-btn {
+      flex: 1;
+      background: rgba(28, 20, 12, 0.85);
+      border: 1px solid rgba(196, 149, 58, 0.35);
+      border-radius: 4px;
+      padding: 4px 2px;
+      font-size: 9.5px;
+      font-family: Cinzel, serif;
+      color: #c4b59d;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+    .clp-pace-btn:hover {
+      background: rgba(196, 149, 58, 0.2);
+      border-color: #ffd685;
+      color: #ffd685;
+    }
+    .clp-pace-btn.active {
+      background: linear-gradient(180deg, rgba(196, 149, 58, 0.45), rgba(95, 65, 20, 0.65));
+      border-color: #ffd685;
+      color: #fff4d0;
+      font-weight: 700;
+      box-shadow: 0 0 6px rgba(196, 149, 58, 0.35);
+    }
+    .clp-pace-note {
+      font-size: 9px;
+      color: #ffd685;
+      font-style: italic;
+      margin-top: 3px;
+      line-height: 1.3;
+    }
+    .clp-lore-box {
+      background: rgba(14, 10, 6, 0.6);
+      border-left: 2px solid rgba(196, 149, 58, 0.6);
+      padding: 5px 8px;
+      margin: 6px 0;
+      font-size: 10px;
+      line-height: 1.35;
+      color: #c4b59d;
+      text-align: left;
+    }
+    .clp-lore-title {
+      font-family: Cinzel, serif;
+      font-weight: 700;
+      font-size: 9.5px;
+      color: #ffd685;
+      margin-bottom: 2px;
+    }
+
     /* Card de Província e Ação Hexagonal */
     .clp-prov-banner {
       width: calc(100% + 40px);
@@ -70533,6 +70590,11 @@ function _checkCartAutoDiscoveryOnOpen() {
 
 function _cartFocusProvince(provId){
   if (!_cartEngine || !_cartCanvas || !_cartW || !_cartH) return;
+  try {
+    if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+      ValdoriaAudio.playSFX('sfx_scroll');
+    }
+  } catch(_) {}
   var titleEl = document.getElementById('cart-title');
   var atlasBackBtn = document.getElementById('cart-atlas-back-btn');
 
@@ -70952,6 +71014,32 @@ function _openCartLocationPopup(biome){
     + '</div>';
   el.classList.add('active');
   window._cartCurrentLocBiome = biome;
+  window._cartSelectedPace = 'normal';
+
+  // Configuração interativa do seletor de ritmo D&D 5e
+  var paceBtns = el.querySelectorAll('.clp-pace-btn');
+  var paceNote = el.querySelector('#clp-pace-note');
+  paceBtns.forEach(function(btn){
+    btn.onclick = function(e){
+      e.preventDefault();
+      paceBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var pType = btn.getAttribute('data-pace');
+      window._cartSelectedPace = pType;
+      if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+        ValdoriaAudio.playSFX('sfx_click');
+      }
+      if (paceNote) {
+        if (pType === 'stealth') {
+          paceNote.textContent = '🐾 Marcha Furtiva (18 milhas/dia): Pode usar Furtividade para surpreender ou evitar encontros.';
+        } else if (pType === 'fast') {
+          paceNote.textContent = '⚡ Marcha Rápida (30 milhas/dia): Chega mais rápido (-25% tempo), porém -5 de penalidade na Percepção Passiva D&D 5e.';
+        } else {
+          paceNote.textContent = '🚶 Ritmo Normal (24 milhas/dia): Velocidade e percepção passiva equilibradas sem penalidades.';
+        }
+      }
+    };
+  });
 }
 function _closeCartLocationPopup(){
   var el = document.getElementById('cart-loc-popup');
@@ -70989,8 +71077,18 @@ function _closeCartLocationPopup(){
         return;
       }
       if (action === 'travel' && biome) {
+        var selPace = window._cartSelectedPace || 'normal';
         _closeCartLocationPopup();
-        if (ACTION_HANDLERS['cart_' + biome.key]) { ACTION_HANDLERS['cart_' + biome.key](window.CITY_MOCK_PLAYER); }
+        try {
+          if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
+            ValdoriaAudio.playSFX('sfx_confirm');
+          }
+        } catch(_) {}
+        if (ACTION_HANDLERS['cart_' + biome.key]) {
+          // Armazena ritmo escolhido para a sessão de exploração
+          sessionStorage.setItem('valdoria_travel_pace', selPace);
+          ACTION_HANDLERS['cart_' + biome.key](window.CITY_MOCK_PLAYER);
+        }
       }
       // 2026-05-04: navegar pro Cartógrafo Corvus na Praça Central
       if (action === 'goto-cartographer') {
