@@ -8693,6 +8693,123 @@
     };
   }
 
+  // === calcWildernessTrailBlaze (Marcação de Trilhas, Moledros e Runas de Batedores - DMG p. 111-112 / PHB p. 178) ===
+  function calcWildernessTrailBlaze(markerType, options) {
+    options = options || {};
+    var mt = (markerType || 'stone_cairn').toLowerCase();
+
+    var markers = {
+      stone_cairn: {
+        name: 'Moledro de Pedras Empilhadas (Cairn)',
+        durabilityDesc: 'Resiste a anos de intempéries, nevascas e ventos fortes.',
+        navigationBonus: 5,
+        stealthPenaltyDesc: 'Visível a 1 milha de distância; pode ser seguido por rastreadores inimigos.',
+        returnBenefit: 'Comitiva viaja pela trilha sem risco de se perder no retorno (CD de navegação reduzida a 5).',
+        desc: 'Pilha cônica de pedras empilhadas em encruzilhadas ou elevações de terreno.',
+        icon: '🪨📍',
+        color: '#facc15'
+      },
+      blazed_tree_notch: {
+        name: 'Talho Profundo em Casca de Árvore',
+        durabilityDesc: 'Permanece legível por vários meses até a regeneração da casca.',
+        navigationBonus: 3,
+        stealthPenaltyDesc: 'Requer inspeção visual próxima de caçadores ou batedores na mata.',
+        returnBenefit: 'Batedores aliados avançam em ritmo rápido sem penalidade na percepção passiva.',
+        desc: 'Cortes angulares feitos com machadinha na altura dos olhos em troncos espaçados.',
+        icon: '🪓🌲',
+        color: '#4ade80'
+      },
+      druidic_secret_sigil: {
+        name: 'Runa Secreta Druídica / Marca de Ladinagem',
+        durabilityDesc: 'Entalhe camuflado sob musgo ou líquen; dura indefinidamente.',
+        navigationBonus: 4,
+        stealthPenaltyDesc: 'Oculto a leigos; exige CD 15 de Investigação ou conhecimento da língua secreta.',
+        returnBenefit: 'Sinalização segura contra emboscadas; indica atalhos camuflados entre raízes e rochas.',
+        desc: 'Símbolos pictográficos discretos que revelam perigos e mananciais a iniciados.',
+        icon: '🌿🔮',
+        color: '#c084fc'
+      },
+      chalk_trail_glyph: {
+        name: 'Glifo de Giz Alquímico em Cavernas',
+        durabilityDesc: 'Fosforescência suave que brilha no escuro por 7 dias em galerias secas.',
+        navigationBonus: 4,
+        stealthPenaltyDesc: 'Brilho tênue detectável por monstros subterrâneos a curta distância.',
+        returnBenefit: 'Impede desorientação em labirintos de fendas rochosas e passagens subterrâneas.',
+        desc: 'Inscrições rápidas feitas com bastão de giz enriquecido com fósforo.',
+        icon: '✨🕳️',
+        color: '#38bdf8'
+      }
+    };
+
+    var m = markers[mt] || markers.stone_cairn;
+
+    return {
+      markerType: mt,
+      markerName: m.name,
+      durabilityDesc: m.durabilityDesc,
+      navigationBonus: m.navigationBonus,
+      stealthPenaltyDesc: m.stealthPenaltyDesc,
+      returnBenefit: m.returnBenefit,
+      description: m.desc,
+      icon: m.icon,
+      color: m.color,
+      dndRef: 'DMG p. 111-112 (Orientação e Marcação de Trilhas nos Ermos) / PHB p. 178'
+    };
+  }
+
+  // === calcMountainAltitudeAcclimatization (Grandes Altitudes, Ar Rarefeito e Aclimação - DMG p. 110 / PHB p. 181) ===
+  function calcMountainAltitudeAcclimatization(elevationFeet, isAcclimatized, options) {
+    options = options || {};
+    var elev = (typeof elevationFeet === 'number') ? elevationFeet : 11000;
+    var acclim = !!isAcclimatized;
+
+    var altitudeTier = 'Colinas e Vales (< 10.000 pés)';
+    var forcedMarchHourMultiplier = 1;
+    var constitutionDC = 0;
+    var penaltyDesc = 'Respiração regular; sem penalidades metabólicas de ar rarefeito.';
+    var icon = '⛰️';
+    var color = '#4ade80';
+
+    if (elev >= 20000) {
+      altitudeTier = 'Pico Glacial Extremo (≥ 20.000 pés)';
+      forcedMarchHourMultiplier = acclim ? 1 : 2;
+      constitutionDC = 10;
+      penaltyDesc = acclim
+        ? 'Aclimatado ao ar rarefeito; ainda assim exige salvaguarda de Constituição CD 10 a cada hora de esforço ou ganho de 1 nível de exaustão (DMG p. 110).'
+        : 'Ar hipóxico severo: 1 hora de viagem conta como 2 horas de marcha forçada e salvaguarda de Con CD 10 a cada hora contra exaustão.';
+      icon = '🏔️❄️';
+      color = '#f87171';
+    } else if (elev >= 10000) {
+      altitudeTier = 'Garganta de Alta Montanha (10.000 a 20.000 pés)';
+      forcedMarchHourMultiplier = acclim ? 1 : 2;
+      constitutionDC = 0;
+      penaltyDesc = acclim
+        ? 'Aclimatado (30+ dias na elevação): marcha normal sem duplicar desgaste de fadiga.'
+        : 'Não aclimatado: cada hora de viagem conta como 2 horas para propósitos de marcha forçada e exaustão (DMG p. 110).';
+      icon = '⛰️🌬️';
+      color = '#facc15';
+    }
+
+    var gearRecommendation = (elev >= 20000)
+      ? 'Agasalhos árticos pesados, cordas de seda de montanhismo, grampos de bota (crampons) e poção de resistência ao frio.'
+      : ((elev >= 10000)
+        ? 'Peles de inverno, corda reforçada de 15 metros, estacas de escalada e rações calóricas.'
+        : 'Botas de caminhada robustas e agasalho comum de viagem.');
+
+    return {
+      elevationFeet: elev,
+      altitudeTier: altitudeTier,
+      isAcclimatized: acclim,
+      forcedMarchHourMultiplier: forcedMarchHourMultiplier,
+      constitutionDC: constitutionDC,
+      altitudePenaltyDesc: penaltyDesc,
+      gearRecommendation: gearRecommendation,
+      icon: icon,
+      color: color,
+      dndRef: 'DMG p. 110 (Grandes Altitudes e Ar Rarefeito) / PHB p. 181'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -10416,6 +10533,8 @@
     calcCampAlarmAndSentryAnimal: calcCampAlarmAndSentryAnimal,
     calcCampfireCookedMeal: calcCampfireCookedMeal,
     calcCelestialStarNavigation: calcCelestialStarNavigation,
+    calcWildernessTrailBlaze: calcWildernessTrailBlaze,
+    calcMountainAltitudeAcclimatization: calcMountainAltitudeAcclimatization,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

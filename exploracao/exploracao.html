@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T21:40:21Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T21:45:01Z - do not edit directly, edit source -->
 
 
 
@@ -93657,6 +93657,28 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessTrailBlaze) return '';
+        var tb = CartShared.calcWildernessTrailBlaze('stone_cairn');
+        return '<div class="clp-trailblaze-card" style="margin:4px 0 6px;text-align:left;background:rgba(26,24,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(250,204,21,0.3);font-size:8px;color:#fef08a;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + tb.color + ';margin-bottom:2px;">' + tb.icon + ' MARCAÇÃO DE TRILHAS & MOLEDROS (DMG p. 111-112):</div>'
+          + '  <div>• <b>Marco:</b> ' + tb.markerName + ' (+' + tb.navigationBonus + ' em Navegação de Retorno)</div>'
+          + '  <div>• <b>Durabilidade:</b> ' + tb.durabilityDesc + '</div>'
+          + '  <div style="font-size:7.5px;color:#fde047;margin-top:1px;">• <i>Vantagem: ' + tb.returnBenefit + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcMountainAltitudeAcclimatization) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var isHigh = (bKey === 'mountain' || bKey === 'cordilheira' || bKey === 'pico' || bKey === 'colina');
+        var alt = CartShared.calcMountainAltitudeAcclimatization(isHigh ? 12000 : 3500, false);
+        return '<div class="clp-altitude-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,24,32,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(148,163,184,0.3);font-size:8px;color:#cbd5e1;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + alt.color + ';margin-bottom:2px;">' + alt.icon + ' GRANDES ALTITUDES & AR RAREFEITO (DMG p. 110):</div>'
+          + '  <div>• <b>Cota:</b> ' + alt.altitudeTier + ' (' + alt.elevationFeet + ' pés)</div>'
+          + '  <div>• <b>Efeito Fisiológico:</b> ' + alt.altitudePenaltyDesc + '</div>'
+          + '  <div style="font-size:7.5px;color:#94a3b8;margin-top:1px;">• <i>Equipamento: ' + alt.gearRecommendation + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcCampfireCookedMeal) return '';
         var meal = CartShared.calcCampfireCookedMeal('seasoned_forage_stew');
         return '<div class="clp-campfire-meal-card" style="margin:4px 0 6px;text-align:left;background:rgba(22,26,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(74,222,128,0.3);font-size:8px;color:#bbf7d0;">'
@@ -94781,7 +94803,8 @@ function openCartography() {
         <button class="cam-filter-pill" data-filter="harvest" type="button">🌿 Coleta</button>
         <button class="cam-filter-pill" data-filter="rumors" type="button">🍺 Boatos</button>
         <button class="cam-filter-pill" data-filter="triangulation" type="button">📐 Triangulação</button>
-        <button class="cam-filter-pill" data-filter="cooking" type="button">🍲 Culinária</button>'
+        <button class="cam-filter-pill" data-filter="cooking" type="button">🍲 Culinária</button>
+        <button class="cam-filter-pill" data-filter="trailblaze" type="button">🪨 Trilhas</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -96129,6 +96152,9 @@ function _xcartFocusWaypoint(key) {
               });
             }
             return false;
+          } else if (_xcamActiveCategory === 'trailblaze') {
+            if (prov.id === 'world') return false;
+            return true;
           } else if (_xcamActiveCategory === 'cooking') {
             if (prov.id === 'world') return false;
             return true;
