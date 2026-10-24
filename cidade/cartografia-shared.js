@@ -3481,6 +3481,7 @@
       else if (af === 'quests' && opts.hasActiveQuest) isMatch = true;
       else if (af === 'mapped' && hasRegionalMap) isMatch = true;
       else if (af === 'pinned' && (opts.isPinned || _isLocPinned(b.key))) isMatch = true;
+      else if (af === 'notes' && !!_getLocNote(b.key)) isMatch = true;
 
       if (!isMatch) {
         ctx.globalAlpha = 0.22;
@@ -4464,17 +4465,26 @@
           if (qn) cfg.drawQuestHalo(ctx, qn, _S, _S, qf.title || 'Missão');
         }
 
-        // Cartouche superior elegante com o nome da província
+        // Cartouche superior elegante com o nome da província e progresso de mapeamento
+        var totalProvLocs = curProv.locKeys ? curProv.locKeys.length : regNodes.length;
+        var discProvLocs = curProv.locKeys ? curProv.locKeys.filter(function(k){
+          return (known === null || known.indexOf(k) >= 0 || (k === 'plains') || provMapOwned);
+        }).length : regNodes.length;
+        var provPct = Math.round((discProvLocs / Math.max(1, totalProvLocs)) * 100);
+        var provProgressText = (provPct >= 100)
+          ? '⭐ Território 100% Cartografado'
+          : '🗺️ Mapeado: ' + discProvLocs + '/' + totalProvLocs + ' Locais (' + provPct + '%)';
+
         ctx.save();
         ctx.textAlign = 'center';
         ctx.font = '700 13px Cinzel, serif';
-        ctx.fillStyle = '#f4d896';
+        ctx.fillStyle = (provPct >= 100) ? '#fde047' : '#f4d896';
         ctx.shadowColor = 'rgba(0,0,0,0.85)';
         ctx.shadowBlur = 6;
-        ctx.fillText(curProv.icon + ' ' + curProv.name.toUpperCase(), _S / 2, 28);
+        ctx.fillText((curProv.icon || '📍') + ' ' + curProv.name.toUpperCase(), _S / 2, 28);
         ctx.font = 'italic 10px Georgia, serif';
-        ctx.fillStyle = '#d2be90';
-        ctx.fillText('Atlas Regional de Valdória', _S / 2, 42);
+        ctx.fillStyle = (provPct >= 100) ? '#fde047' : '#d2be90';
+        ctx.fillText(provProgressText, _S / 2, 42);
         ctx.restore();
       } else {
         // === MODO CONTINENTE GERAL ===
@@ -4520,6 +4530,28 @@
           var qn = RB.find(function(b){ return b.key === qf.key; });
           if (qn) cfg.drawQuestHalo(ctx, qn, _S, _S, qf.title || 'Missão');
         }
+
+        // Cartouche superior elegante no Modo Continente
+        var totalWorld = CART_BIOMES.length;
+        var discWorld = (known !== null) ? CART_BIOMES.filter(function(b){
+          return known.indexOf(b.key) >= 0 || b.isOrigin || b.key === 'plains';
+        }).length : totalWorld;
+        var worldPct = Math.round((discWorld / totalWorld) * 100);
+        var worldProgressText = (worldPct >= 100)
+          ? '⭐ Continente Totalmente Mapeado (100%)'
+          : '🗺️ Atlas Geral: ' + discWorld + '/' + totalWorld + ' Locais Conhecidos (' + worldPct + '%)';
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.font = '700 13px Cinzel, serif';
+        ctx.fillStyle = (worldPct >= 100) ? '#fde047' : '#f4d896';
+        ctx.shadowColor = 'rgba(0,0,0,0.85)';
+        ctx.shadowBlur = 6;
+        ctx.fillText('🌍 CONTINENTE DE VALDÓRIA', _S / 2, 28);
+        ctx.font = 'italic 10px Georgia, serif';
+        ctx.fillStyle = (worldPct >= 100) ? '#fde047' : '#d2be90';
+        ctx.fillText(worldProgressText, _S / 2, 42);
+        ctx.restore();
       }
 
       // === Animação de Descoberta Ativa (Golden Pulse + Revelação da Névoa) ===

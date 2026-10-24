@@ -70013,6 +70013,7 @@ function renderCartographyCanvas(el){
     + '        <button class="cam-filter-pill active" data-wfilter="all" type="button">Todos</button>'
     + '        <button class="cam-filter-pill" data-wfilter="settlements" type="button">🏛️ Vilas & Santuários</button>'
     + '        <button class="cam-filter-pill" data-wfilter="pinned" type="button">📌 Alfinetes Fixados</button>'
+    + '        <button class="cam-filter-pill" data-wfilter="notes" type="button">📝 Anotações</button>'
     + '      </div>'
     + '      <div class="cam-grid" id="cart-waypoints-list" style="max-height:55vh;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:10px;"></div>'
     + '    </div>'
@@ -70599,9 +70600,11 @@ function _cartPopulateWaypointsList(filter) {
     var isSettlement = !!(b.settlement || b.isOrigin);
     var isPin = pinned.indexOf(b.key) >= 0;
 
+    var hasNote = !!(window.CartShared && CartShared.getLocNote && CartShared.getLocNote(b.key));
     if (filter === 'settlements' && !isSettlement) return;
     if (filter === 'pinned' && !isPin) return;
-    if (filter === 'all' && (!isSettlement && !isPin)) return;
+    if (filter === 'notes' && !hasNote) return;
+    if (filter === 'all' && (!isSettlement && !isPin && !hasNote)) return;
 
     items.push({
       biome: b,
@@ -70634,6 +70637,7 @@ function _cartPopulateWaypointsList(filter) {
       + '    <div>'
       + '      <div style="font-family:Cinzel,serif;font-weight:700;color:#f4d49a;font-size:12px;">' + (b.regionalName || b.name) + ' ' + badge + '</div>'
       + '      <div style="font-size:10px;color:#a09484;">' + provName + ' · ~' + distMilhas + ' milhas (~' + marcos + ' marcos)</div>'
+      + ((window.CartShared && CartShared.getLocNote && CartShared.getLocNote(b.key)) ? '<div style="font-size:9.5px;color:#fcd34d;font-style:italic;margin-top:2px;">📝 "' + CartShared.getLocNote(b.key) + '"</div>' : '')
       + '    </div>'
       + '  </div>'
       + '  <button class="cart-dock-btn" type="button" style="height:26px;font-size:9.5px;padding:0 8px;">🔍 Focar</button>'
@@ -70824,7 +70828,7 @@ function _cartFocusWaypoint(key) {
   // Alternador de filtro rápido no dock
   var filterBtn = document.getElementById('cart-filter-toggle-btn');
   if (filterBtn) {
-    var _filterOrder = ['all', 'settlements', 'wilderness', 'quests', 'pinned'];
+    var _filterOrder = ['all', 'settlements', 'wilderness', 'quests', 'pinned', 'notes'];
     filterBtn.onclick = function(e){
       e.preventDefault();
       var curF = window._cartActiveFilter || 'all';
@@ -70948,7 +70952,8 @@ function _setCartFilter(f) {
       settlements: '🏛️ Cidades',
       wilderness: '⚔️ Ermos',
       quests: '📜 Contratos',
-      pinned: '📌 Fixados'
+      pinned: '📌 Fixados',
+      notes: '📝 Anotações'
     };
     btn.innerHTML = labels[f] || '🎯 Filtro: Todos';
   }
@@ -71068,6 +71073,7 @@ function _wireCartKeyboardNavigation() {
     if (e.key === '3') { e.preventDefault(); _setCartFilter('wilderness'); return; }
     if (e.key === '4') { e.preventDefault(); _setCartFilter('quests'); return; }
     if (e.key === '5') { e.preventDefault(); _setCartFilter('pinned'); return; }
+    if (e.key === '6') { e.preventDefault(); _setCartFilter('notes'); return; }
 
     // Pan: WASD e Setas Direcionais
     var panStep = 60;
@@ -71787,13 +71793,33 @@ function _openCartLocationPopup(biome){
       if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
         ValdoriaAudio.playSFX('sfx_click');
       }
+      var curHours = (pType === 'stealth') ? Math.max(2, Math.round(distMilhas / 2)) :
+                     (pType === 'fast') ? Math.max(1, Math.round(distMilhas / 4)) :
+                     Math.max(2, Math.round(distMilhas / 3));
+
+      var metaEl = el.querySelector('.clp-meta');
+      if (metaEl) {
+        metaEl.innerHTML = '<b>Nível Sugerido:</b> ' + rec + '<br><b>Avaliação de Ameaça:</b> ' + threatBadge + '<br><span style="font-size:9.5px;color:#d2be90;font-style:italic;">' + stanceTip + '</span><br><b>Bioma:</b> ' + biomePT + ' · <b>Distância:</b> ~' + distMilhas + ' milhas (~' + curHours + 'h de marcha)';
+      }
+
+      var paceRationsNote = (curHours <= 8)
+        ? '🍖 Suprimentos: Viagem de 1 dia de marcha leve (sem necessidade de descanso longo na estrada).'
+        : (curHours <= 16)
+          ? '🍖 Suprimentos: 1 Ração de viagem por aventureiro · 1 Descanso Longo em acampamento selvagem.'
+          : '🍖 Suprimentos: ~' + Math.ceil(curHours / 12) + ' Rações de viagem por aventureiro · Marcha árdua com paradas em terrenos hostis.';
+
+      var hazardEl = el.querySelector('.clp-hazard-note');
+      if (hazardEl && dndInfo) {
+        hazardEl.innerHTML = '⚠️ ' + dndInfo.hazard + '<br>🛡️ ' + dndInfo.saves + '<br>' + (dndInfo.foraging ? '🌿 ' + dndInfo.foraging + '<br>' : '') + paceRationsNote;
+      }
+
       if (paceNote) {
         if (pType === 'stealth') {
-          paceNote.textContent = '🐾 Marcha Furtiva (18 milhas/dia): Pode usar Furtividade para surpreender ou evitar encontros.';
+          paceNote.textContent = '🐾 Marcha Furtiva (18 milhas/dia · ~' + curHours + 'h): Comitiva avança em sigilo (+50% tempo). Permite surpreender inimigos ou evitar emboscadas; vantagem em testes de Sobrevivência para forragear suprimentos.';
         } else if (pType === 'fast') {
-          paceNote.textContent = '⚡ Marcha Rápida (30 milhas/dia): Chega mais rápido (-25% tempo), porém -5 de penalidade na Percepção Passiva D&D 5e.';
+          paceNote.textContent = '⚡ Marcha Rápida (30 milhas/dia · ~' + curHours + 'h): Marcha acelerada (-25% tempo), porém comitiva sofre penalidade de -5 na Percepção Passiva D&D 5e (maior risco de emboscadas).';
         } else {
-          paceNote.textContent = '🚶 Ritmo Normal (24 milhas/dia): Velocidade e percepção passiva equilibradas sem penalidades.';
+          paceNote.textContent = '🚶 Ritmo Normal (24 milhas/dia · ~' + curHours + 'h): Equilíbrio canônico D&D 5e entre velocidade de deslocamento e prontidão tática passiva.';
         }
       }
     };
