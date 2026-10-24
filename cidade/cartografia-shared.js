@@ -53,9 +53,9 @@
     //   ─── E ───────────  swamp, deep_swamp, desert, volcanic, valkrest
     // ═══════════════════════════════════════════════════════════════
     // ─── HUB CENTRAL (origem) ─────────────────────
-    { key: 'plains',    name: 'Portões de Valdoria',     x: 0.50, y: 0.55, biome: 'plains',    tier: 0, ico: '', isOrigin: true,
+    { key: 'plains',    name: 'Portões de Valdoria',     x: 0.50, y: 0.55, biome: 'plains',    tier: 0, ico: '', isOrigin: true, isSanctuary: true,
       mapKey: null,
-      desc: 'Os grandes portões da cidade. Aldric vigia a entrada. Ponto de partida de toda jornada.' },
+      desc: 'Os grandes portões da cidade. Aldric vigia a entrada. Ponto de partida de toda jornada. Refúgio seguro com muralhas consagradas.' },
     // ─── PLAINS interior (Sudoeste/Sudeste) ──────
     { key: 'green_fields',   name: 'Campos Verdes',       x: 0.36, y: 0.46, biome: 'plains',  tier: 1, ico: '',
       mapKey: 'Mapa das Planícies',
@@ -73,9 +73,9 @@
     { key: 'goblin_nest',     name: 'Ninho de Goblins',  x: 0.36, y: 0.22, biome: 'forest',   tier: 2, ico: '',
       mapKey: 'Mapa da Floresta',
       desc: 'Clareira cheia de armadilhas e lixo. O cheiro é terrível.' },
-    { key: 'elven_ruins',     name: 'Ruínas Élficas',    x: 0.50, y: 0.20, biome: 'forest',   tier: 4, ico: '',
+    { key: 'elven_ruins',     name: 'Ruínas Élficas',    x: 0.50, y: 0.20, biome: 'forest',   tier: 4, ico: '', isSanctuary: true,
       mapKey: 'Mapa da Floresta',
-      desc: 'Restos de uma antiga civilização élfica. A magia ainda pulsa.' },
+      desc: 'Restos de uma antiga civilização élfica. A magia ainda pulsa em santuário protegido por círculos rúnicos.' },
     // ─── CAVE / UNDERGROUND (Oeste) ──────────────
     { key: 'cave',      name: 'Passagem Subterrânea',    x: 0.22, y: 0.45, biome: 'cave',     tier: 3, ico: '',
       mapKey: 'Mapa das Montanhas',
@@ -97,9 +97,9 @@
     { key: 'dragon_pass', name: 'Passo do Dragão',        x: 0.24, y: 0.12, biome: 'mountain', tier: 6, ico: '',
       mapKey: 'Mapa das Montanhas',
       desc: 'Passagem estreita entre picos vulcânicos. Fumaça sobe do vale.' },
-    { key: 'korthag',   name: 'Korthag (Vila Mineira)',   x: 0.12, y: 0.22, biome: 'mountain', tier: 3, ico: '', settlement: true, discoverable: true,
+    { key: 'korthag',   name: 'Korthag (Vila Mineira)',   x: 0.12, y: 0.22, biome: 'mountain', tier: 3, ico: '', settlement: true, discoverable: true, isSanctuary: true,
       mapKey: null,
-      desc: 'Vila mineradora encravada nos picos. Fornalhas ardem dia e noite.' },
+      desc: 'Vila mineradora encravada nos picos. Fornalhas ardem dia e noite em cidadela segura.' },
     // ─── DESERT (Sudeste) ─────────────────────────
     { key: 'desert',    name: 'Deserto Dourado',          x: 0.38, y: 0.78, biome: 'desert',   tier: 4, ico: '',
       mapKey: 'Mapa do Deserto',
@@ -115,9 +115,9 @@
     { key: 'underground_caverns', name: 'Cavernas Subterrâneas', x: 0.22, y: 0.58, biome: 'cave', tier: 5, ico: '',
       mapKey: 'Mapa das Montanhas',
       desc: 'Sistema de túneis profundos. Pedra esculpida pelo tempo.' },
-    { key: 'crystal_depths', name: 'Profundezas de Cristal', x: 0.08, y: 0.61, biome: 'cave', tier: 7, ico: '',
+    { key: 'crystal_depths', name: 'Profundezas de Cristal', x: 0.08, y: 0.61, biome: 'cave', tier: 7, ico: '', isSanctuary: true,
       mapKey: 'Mapa das Montanhas',
-      desc: 'Cavernas iluminadas por cristais luminescentes. Magia ancestral pulsa nas paredes.' },
+      desc: 'Cavernas iluminadas por cristais luminescentes. Magia ancestral pulsa em refúgio protegido.' },
     // ─── SNOW (Norte distante) ────────────────────
     { key: 'snow',      name: 'Ermo Congelado',           x: 0.66, y: 0.10, biome: 'snow',     tier: 5, ico: '',
       mapKey: 'Mapa do Ermo Gelado',
@@ -126,9 +126,9 @@
     { key: 'volcanic',  name: 'Cratera Vulcânica',        x: 0.80, y: 0.64, biome: 'volcanic', tier: 8, ico: '',
       mapKey: 'Mapa Vulcânico',
       desc: 'Rios de lava e cinzas. O calor derrete metal. Lar de dragões?' },
-    { key: 'valkrest',  name: 'Valkrest (Acampamento)',   x: 0.92, y: 0.70, biome: 'volcanic', tier: 5, ico: '', settlement: true, discoverable: true,
+    { key: 'valkrest',  name: 'Valkrest (Acampamento)',   x: 0.92, y: 0.70, biome: 'volcanic', tier: 5, ico: '', settlement: true, discoverable: true, isSanctuary: true,
       mapKey: null,
-      desc: 'Acampamento fortificado de aventureiros veteranos. Tendas resistem ao calor.' },
+      desc: 'Acampamento fortificado de aventureiros veteranos com defesas sólidas e refúgio seguro.' },
     // ─── 6 NOVOS BIOMAS (WORLD-1) ─────────────────
     // COAST (Leste/Sudeste)
     { key: 'salty_coast', name: 'Costa Salgada', x: 0.90, y: 0.54, biome: 'coast', tier: 4, ico: '',
@@ -4043,9 +4043,13 @@
     var marcos = (typeof b.marcos === 'number') ? b.marcos : (b.tier || 1);
     var distMilhas = Math.max(6, marcos * 8);
     var horas = Math.max(2, Math.round(distMilhas / 3));
+    var threatBadge = (b.tier >= 6) ? '💀 Letal' :
+                      (b.tier >= 4) ? '⚔️ Difícil' :
+                      (b.tier >= 2) ? '⚠️ Moderado' : '🛡️ Seguro';
+    var sanctBadge = b.isSanctuary ? '🏛️ Refúgio' : '';
     var subText = hasLvl
-      ? (isHover ? (lvlRange + ' · ~' + distMilhas + ' mi') : lvlRange)
-      : (isHover ? ('~' + distMilhas + ' mi · ~' + horas + 'h') : '');
+      ? (isHover ? (lvlRange + ' · ~' + distMilhas + ' mi · ' + threatBadge + (sanctBadge ? ' · ' + sanctBadge : '')) : (sanctBadge ? lvlRange + ' · ' + sanctBadge : lvlRange))
+      : (isHover ? ('~' + distMilhas + ' mi · ~' + horas + 'h · ' + threatBadge + (sanctBadge ? ' · ' + sanctBadge : '')) : (sanctBadge || ''));
     var subW = 0;
     if (subText) {
       ctx.font = 'italic 8px serif';
@@ -4653,6 +4657,149 @@
     ctx.restore();
   }
 
+  // === calcExpeditionRationsBudget (Orçamento de Provisões D&D 5e PHB p. 185) ===
+  function calcExpeditionRationsBudget(travelHours, partySize, biomeKey, foragerSuccess) {
+    var h = (typeof travelHours === 'number' && travelHours > 0) ? travelHours : 8;
+    var size = (typeof partySize === 'number' && partySize > 0) ? partySize : 4;
+    var days = Math.max(1, Math.ceil(h / 8));
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var isArid = (bk === 'desert' || bk === 'dunas_do_sul' || bk === 'volcanic' || bk.indexOf('desert') >= 0 || bk.indexOf('dunas') >= 0);
+    var isBoreal = (bk === 'boreal' || bk === 'snow' || bk === 'terras_altas_do_norte' || bk.indexOf('snow') >= 0);
+
+    var rationsGross = days * size;
+    var waterGallonsGross = days * size * (isArid ? 2 : 1);
+
+    var forInfo = (typeof getBiomeForageSustainability === 'function') ? getBiomeForageSustainability(bk) : null;
+    var dc = forInfo ? forInfo.dc : 15;
+
+    var foragedRations = 0;
+    var foragedWater = 0;
+    var forageStatus = 'não_forrageado';
+
+    if (foragerSuccess === true || (typeof foragerSuccess === 'number' && foragerSuccess >= dc)) {
+      if (forInfo && forInfo.rating === 'Abundante') {
+        foragedRations = rationsGross;
+        foragedWater = waterGallonsGross;
+        forageStatus = 'fartura_total';
+      } else if (forInfo && (forInfo.rating === 'Boa' || forInfo.rating === 'Moderada')) {
+        foragedRations = Math.ceil(rationsGross * 0.75);
+        foragedWater = Math.ceil(waterGallonsGross * 0.75);
+        forageStatus = 'sucesso_parcial';
+      } else {
+        foragedRations = Math.ceil(rationsGross * 0.25);
+        foragedWater = isArid ? 0 : Math.ceil(waterGallonsGross * 0.25);
+        forageStatus = 'escassez';
+      }
+    }
+
+    var netRations = Math.max(0, rationsGross - foragedRations);
+    var netWater = Math.max(0, waterGallonsGross - foragedWater);
+
+    var verdict = '';
+    if (forageStatus === 'fartura_total') {
+      verdict = 'Forrageamento abundante supriu toda a comida e água fresca!';
+    } else if (forageStatus === 'sucesso_parcial') {
+      verdict = 'Forrageador garantiu caça e água fresca; exige apenas ' + netRations + ' rações da mochila.';
+    } else if (isArid) {
+      verdict = 'Calor escaldante do deserto dobra o consumo d\'água (2 gal/dia por integrante). Sem forrageamento viável!';
+    } else if (isBoreal) {
+      verdict = 'Clima gélido exige derreter neve em fogueiras; consumo de rações de inverno padrão mantido.';
+    } else {
+      verdict = 'Consumo padrão de 1 ração e 1 galão d\'água diários por integrante da comitiva (PHB p. 185).';
+    }
+
+    return {
+      travelDays: days,
+      partySize: size,
+      isArid: isArid,
+      isBoreal: isBoreal,
+      rationsGross: rationsGross,
+      waterGallonsGross: waterGallonsGross,
+      foragedRations: foragedRations,
+      foragedWater: foragedWater,
+      netRations: netRations,
+      netWater: netWater,
+      forageStatus: forageStatus,
+      forageDC: dc,
+      verdict: verdict
+    };
+  }
+
+  // === getWildernessHazardDetails (Matriz de Perigos Naturais D&D 5e DMG p. 110-112) ===
+  function getWildernessHazardDetails(biomeKey) {
+    var bk = (biomeKey || 'plains').toLowerCase();
+    if (bk.indexOf('desert') >= 0 || bk.indexOf('dunas') >= 0) {
+      return {
+        name: 'Calor Extremo & Tempestade de Areia',
+        dndRef: 'DMG p. 110 (Extreme Heat)',
+        dcCheck: 'Salvaguarda de CON CD 10 (+1/h)',
+        effect: 'Exaustão por desidratação sob sol acima de 40°C',
+        mitigation: 'Consumo duplo d\'água (2 gal/dia) ou marcha noturna',
+        icon: '☀️',
+        color: '#f97316'
+      };
+    } else if (bk.indexOf('swamp') >= 0 || bk.indexOf('pantan') >= 0) {
+      return {
+        name: 'Lodo Movediço & Bruma Decomposta',
+        dndRef: 'DMG p. 110 (Quicksand)',
+        dcCheck: 'Salvaguarda de DES ou CON CD 12',
+        effect: 'Velocidade reduzida pela metade e risco de febre das brumas',
+        mitigation: 'Batedor com vara de sondagem (Sobrevivência 12+)',
+        icon: '☣️',
+        color: '#84cc16'
+      };
+    } else if (bk.indexOf('mountain') >= 0 || bk.indexOf('cordilheira') >= 0 || bk.indexOf('pass') >= 0) {
+      return {
+        name: 'Penhascos Farpados & Cascalho Solto',
+        dndRef: 'DMG p. 110 (Rockslide)',
+        dcCheck: 'Salvaguarda de DES CD 13',
+        effect: '2d10 dano de contusão ou atraso de 2h na rota',
+        mitigation: 'Cordas de escalada e Guia de Montanha',
+        icon: '🧗',
+        color: '#94a3b8'
+      };
+    } else if (bk.indexOf('boreal') >= 0 || bk.indexOf('snow') >= 0 || bk.indexOf('norte') >= 0) {
+      return {
+        name: 'Frio Extremo & Nevasca Cegante',
+        dndRef: 'DMG p. 110 (Extreme Cold)',
+        dcCheck: 'Salvaguarda de CON CD 12',
+        effect: 'Nível de Exaustão sem agasalhos térmicos',
+        mitigation: 'Trajes de pele de lobo e fogueira de acampamento',
+        icon: '❄️',
+        color: '#38bdf8'
+      };
+    } else if (bk.indexOf('forest') >= 0 || bk.indexOf('floresta') >= 0) {
+      return {
+        name: 'Cipós Farpados & Bruma Ilusória',
+        dndRef: 'DMG p. 110 (Razorvine & Foraging)',
+        dcCheck: 'Salvaguarda de SAB ou DES CD 11',
+        effect: 'Perda temporária de orientação ou cortes de espinhos',
+        mitigation: 'Navegador com Percepção Passiva 12+ ou Bússola',
+        icon: '🌿',
+        color: '#22c55e'
+      };
+    } else if (bk.indexOf('volcanic') >= 0 || bk.indexOf('cave') >= 0) {
+      return {
+        name: 'Fumaça Enxofrada & Crosta Frágil',
+        dndRef: 'DMG p. 111 (Toxic Fumes)',
+        dcCheck: 'Salvaguarda de CON CD 13',
+        effect: 'Envenenado por 1h ou dano ígneo de 1d6',
+        mitigation: 'Máscaras de pano embebidas e passo firme',
+        icon: '🌋',
+        color: '#ef4444'
+      };
+    }
+    return {
+      name: 'Exposição Aberta & Chuvas Repentinas',
+      dndRef: 'DMG p. 106 (Wilderness Travel)',
+      dcCheck: 'Salvaguarda de CON CD 10 sob temporal',
+      effect: 'Encharcamento e terreno lamacento reduzindo velocidade',
+      mitigation: 'Capas de viagem impermeáveis e marcha constante',
+      icon: '🌾',
+      color: '#eab308'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -4717,8 +4864,8 @@
       ? ('⚠️ ALERTA DE MARCHA FORÇADA (PHB p. 181): Salvaguarda de CON CD ' + (10 + Math.floor(travelHours - 8)) + ' contra Exaustão Nível 1.')
       : 'Marcha dentro do limite diário padrão (sem risco de exaustão).';
 
-    var rationsNeeded = Math.max(1, Math.ceil(travelHours / 8));
-    var watersNeeded = rationsNeeded * 2;
+    var ratBudget = calcExpeditionRationsBudget(travelHours, options.partySize || 4, targ.biome || targ.key, options.foragerSuccess);
+    var hazardInfo = getWildernessHazardDetails(targ.biome || targ.key);
 
     var out = [];
     out.push('📜 ITINERÁRIO DE EXPEDIÇÃO · LENDAS DE VALDORIA');
@@ -4742,7 +4889,11 @@
     out.push('• Topografia/Relevo:  ' + (altInfo ? (altInfo.badge + ' ' + altInfo.label + ' (' + altInfo.meters + 'm)') : 'Relevo Normal'));
     out.push('• Barômetro Local:    ' + baroInfo.pressureHpa + ' hPa (' + baroInfo.pressureStatus + ')');
     out.push('• Dinâmica do Vento:  ' + baroInfo.windDescription + (windImp ? (' · ' + windImp.label) : ''));
-    out.push('• Provisões Mínimas:  ' + rationsNeeded + ' Ração(ões) / ' + watersNeeded + ' Odres de Água por aventureiro');
+    out.push('• Provisões Mínimas:  ' + ratBudget.netRations + ' Ração(ões) / ' + ratBudget.netWater + ' Galões d\'Água (' + ratBudget.partySize + ' integrantes, ' + ratBudget.travelDays + ' dia' + (ratBudget.travelDays > 1 ? 's' : '') + ')');
+    out.push('• Sobrevivência 5e:   ' + ratBudget.verdict);
+    out.push('• Perigo Selvagem:    ' + hazardInfo.icon + ' ' + hazardInfo.name + ' (' + hazardInfo.dndRef + ')');
+    out.push('• Efeito do Terreno:  ' + hazardInfo.effect + ' · ' + hazardInfo.dcCheck);
+    out.push('• Mitigação Tática:   ' + hazardInfo.mitigation);
     out.push('• Estado de Marcha:   ' + forcedMarchWarning);
     out.push('');
     out.push('⚔️ AMEAÇAS & RECURSOS DO BIOMA:');
@@ -6218,6 +6369,8 @@
     calcForcedMarchRisk: calcForcedMarchRisk,      // Cálculo de Marcha Forçada e Salvaguarda contra Exaustão
     getBarometerForecast: getBarometerForecast,
     calcWindImpact: calcWindImpact,
+    calcExpeditionRationsBudget: calcExpeditionRationsBudget,
+    getWildernessHazardDetails: getWildernessHazardDetails,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

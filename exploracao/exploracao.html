@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T18:59:03Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T19:10:11Z - do not edit directly, edit source -->
 
 
 
@@ -93190,9 +93190,30 @@ function _openCartLocationPopup(biome){
           + '  </div>'
           + '</div>';
       })()
-    + (biome.isOrigin || biome.settlement
-        ? '<div style="font-size:9.5px;color:#a3e635;margin-bottom:6px;font-family:Cinzel,serif;">🌀 Santuário & Marco de Viagem Rápida</div>'
-        : '')
+    + (function(){
+        if (!window.CartShared || !CartShared.calcExpeditionRationsBudget || !CartShared.getWildernessHazardDetails) return '';
+        var rat = CartShared.calcExpeditionRationsBudget(horasViagem, 4, biome.biome || biome.key);
+        var haz = CartShared.getWildernessHazardDetails(biome.biome || biome.key);
+        return '<div class="clp-rations-card" style="margin:4px 0 6px;text-align:left;background:rgba(22,18,12,0.8);padding:5px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.4);">'
+          + '  <div style="font-size:9px;color:#f59e0b;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🍞 PROVISÕES & LOGÍSTICA DE SOBREVIVÊNCIA (D&D 5e):</div>'
+          + '  <div style="font-size:9px;color:#f4d49a;line-height:1.4;">'
+          + '    Demanda da Comitiva: <b>' + rat.rationsGross + ' Rações</b> · <b>' + rat.waterGallonsGross + ' Galões d\'Água</b> (' + rat.partySize + ' integrantes, ' + rat.travelDays + ' dia' + (rat.travelDays > 1 ? 's' : '') + ')<br>'
+          + '    <span style="font-size:8.5px;color:#cbd5e1;font-style:italic;">' + rat.verdict + '</span>'
+          + '  </div>'
+          + '</div>'
+          + '<div class="clp-hazard-card" style="margin:4px 0 6px;text-align:left;background:rgba(25,15,15,0.8);padding:5px 8px;border-radius:4px;border:1px solid rgba(239,68,68,0.4);">'
+          + '  <div style="font-size:9px;color:' + haz.color + ';font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">' + haz.icon + ' PERIGO SELVAGEM: ' + haz.name.toUpperCase() + ' (' + haz.dndRef + ')</div>'
+          + '  <div style="font-size:9px;color:#f4d49a;line-height:1.4;">'
+          + '    Efeito no Terreno: <span style="color:#fca5a5;">' + haz.effect + '</span> (' + haz.dcCheck + ')<br>'
+          + '    Mitigação Tática: <span style="color:#86efac;font-style:italic;">' + haz.mitigation + '</span>'
+          + '  </div>'
+          + '</div>';
+      })()
+    + (biome.isSanctuary
+        ? '<div style="font-size:9.5px;color:#ffd700;margin:4px 0;background:rgba(40,30,15,0.7);border:1px solid rgba(255,215,0,0.4);padding:4px 8px;border-radius:3px;font-family:Cinzel,serif;">🏛️ SANTUÁRIO CONSAGRADO: Descanso longo seguro sem risco de emboscada</div>'
+        : (biome.isOrigin || biome.settlement
+            ? '<div style="font-size:9.5px;color:#a3e635;margin-bottom:6px;font-family:Cinzel,serif;">🌀 Santuário & Marco de Viagem Rápida</div>'
+            : ''))
     + '<div style="text-align:right;margin:4px 0 6px;">'
     + '  <button class="clp-btn-pin-toggle" id="xclp-pin-toggle-btn" type="button" style="background:rgba(35,25,15,0.85);border:1px solid ' + ((window.CartShared && CartShared.isLocPinned && CartShared.isLocPinned(biome.key)) ? '#ffd700' : 'rgba(196,149,58,0.55)') + ';color:' + ((window.CartShared && CartShared.isLocPinned && CartShared.isLocPinned(biome.key)) ? '#ffd700' : '#d2be90') + ';font-size:9.5px;padding:3px 8px;border-radius:3px;cursor:pointer;">'
     + ((window.CartShared && CartShared.isLocPinned && CartShared.isLocPinned(biome.key)) ? '📍 Alfinete Ativo (Remover)' : '📌 Fixar no Diário de Rotas')
@@ -94157,6 +94178,7 @@ function openCartography() {
     + '      <div class="cam-legend" id="xcwm-filter-bar" style="padding:6px 12px;border-bottom:1px solid rgba(196,149,58,0.25);">'
     + '        <button class="cam-filter-pill active" data-wfilter="all" type="button">Todos</button>'
     + '        <button class="cam-filter-pill" data-wfilter="settlements" type="button">🏛️ Vilas & Santuários</button>'
+    + '        <button class="cam-filter-pill" data-wfilter="sanctuaries" type="button">✨ Santuários Sagrados</button>'
     + '        <button class="cam-filter-pill" data-wfilter="pinned" type="button">📌 Alfinetes Fixados</button>'
     + '        <button class="cam-filter-pill" data-wfilter="notes" type="button">📝 Anotações</button>'
     + '      </div>'
@@ -95078,9 +95100,10 @@ function _xcartPopulateWaypointsList(filter, query) {
     var hasNote = !!noteText;
 
     if (filter === 'settlements' && !isSettlement) return;
+    if (filter === 'sanctuaries' && !b.isSanctuary) return;
     if (filter === 'pinned' && !isPin) return;
     if (filter === 'notes' && !hasNote) return;
-    if (filter === 'all' && (!isSettlement && !isPin && !hasNote)) return;
+    if (filter === 'all' && (!isSettlement && !isPin && !hasNote && !b.isSanctuary)) return;
 
     if (q) {
       var matchName = (b.name || '').toLowerCase().indexOf(q) >= 0;
@@ -95093,6 +95116,7 @@ function _xcartPopulateWaypointsList(filter, query) {
     items.push({
       biome: b,
       isSettlement: isSettlement,
+      isSanctuary: !!b.isSanctuary,
       isPin: isPin,
       isCurrent: (b.key === curLoc)
     });
@@ -95112,6 +95136,7 @@ function _xcartPopulateWaypointsList(filter, query) {
     var distMilhas = Math.max(6, marcos * 8);
 
     var badge = item.isCurrent ? '<span style="font-size:9px;background:#2e7d32;color:#fff;padding:1px 6px;border-radius:10px;">Você está aqui</span>'
+      : item.isSanctuary ? '<span style="font-size:9px;background:rgba(196,149,58,0.25);border:1px solid #ffd700;color:#ffd700;padding:1px 6px;border-radius:10px;">🏛️ Santuário</span>'
       : item.isPin ? '<span style="font-size:9px;background:rgba(218,165,32,0.25);border:1px solid #ffd700;color:#ffd700;padding:1px 6px;border-radius:10px;">📍 Alfinete</span>'
       : '<span style="font-size:9px;background:rgba(196,149,58,0.2);color:#d2be90;padding:1px 6px;border-radius:10px;">🌀 Marco</span>';
 
