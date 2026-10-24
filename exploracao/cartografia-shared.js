@@ -3537,6 +3537,67 @@
     return DND_FORAGE_DATA.plains;
   }
 
+  var DND_REGIONAL_BESTIARY = {
+    forest: {
+      threats: ['🐺 Lobos da Floresta (ND 1/4)', '🕷️ Aranhas Gigantes (ND 1)', '🌿 Dríades Espinhosas (ND 2)'],
+      apex: '🐻 Urso-Coruja Feroz (ND 3)',
+      advice: 'Evite viajar fora das trilhas à noite. Tochas e armas de fogo mantêm feras afastadas.'
+    },
+    plains: {
+      threats: ['🐗 Javalis Selvagens (ND 1/4)', '🏹 Salteadores da Estrada (ND 1/2)', '👹 Goblins Saqueadores (ND 1)'],
+      apex: '🦁 Manticora Alada (ND 3)',
+      advice: 'Mantenha batedores em pontos elevados para avistar poeira de saqueadores ao longe.'
+    },
+    swamp: {
+      threats: ['🐊 Crocodilos do Lodo (ND 1/2)', '🧟 Carniçais Pantanosos (ND 1)', '🦎 Trogloditas Fétidos (ND 1)'],
+      apex: '🐍 Hidra das Águas Negras (ND 5)',
+      advice: 'Mantenha os olhos nas águas turvas e prepare salvaguardas contra veneno.'
+    },
+    mountain: {
+      threats: ['🦅 Harpias das Encostas (ND 1)', '🪨 Gigantes da Colina (ND 5)', '👹 Ogros Montanheses (ND 2)'],
+      apex: '🐉 Jovem Dragão Vermelho (ND 10)',
+      advice: 'Cuidado com desfiladeiros estreitos favoráveis a emboscadas e quedas de rochas.'
+    },
+    desert: {
+      threats: ['🦂 Escorpiões Gigantes (ND 3)', '💀 Múmias do Vale Seco (ND 3)', '🌪️ Serpentes de Areia (ND 1)'],
+      apex: '🐛 Verme da Areia Colossal (ND 7)',
+      advice: 'Viaje em ritmo furtivo durante a noite para escapar do calor e dos escorpiões solares.'
+    },
+    cave: {
+      threats: ['🦇 Morcegos Gigantes (ND 1/4)', '🍄 Fungos Violetas (ND 1)', '🕷️ Aranhas Espectrais (ND 3)'],
+      apex: '👁️ Observador das Profundezas (ND 8)',
+      advice: 'Visão no Escuro ou lanternas de foco concentrado são indispensáveis.'
+    }
+  };
+
+  function getBiomeBestiaryThreats(biomeKey) {
+    var raw = (biomeKey || '').toLowerCase();
+    if (raw.indexOf('floresta') >= 0 || raw.indexOf('forest') >= 0) return DND_REGIONAL_BESTIARY.forest;
+    if (raw.indexOf('pantano') >= 0 || raw.indexOf('swamp') >= 0 || raw.indexOf('leste') >= 0) return DND_REGIONAL_BESTIARY.swamp;
+    if (raw.indexOf('duna') >= 0 || raw.indexOf('desert') >= 0 || raw.indexOf('sul') >= 0) return DND_REGIONAL_BESTIARY.desert;
+    if (raw.indexOf('cordilheira') >= 0 || raw.indexOf('mountain') >= 0 || raw.indexOf('ocidental') >= 0) return DND_REGIONAL_BESTIARY.mountain;
+    if (raw.indexOf('caverna') >= 0 || raw.indexOf('cave') >= 0) return DND_REGIONAL_BESTIARY.cave;
+    return DND_REGIONAL_BESTIARY.plains;
+  }
+
+  function getBiomeAltitude(biomeKey, tier) {
+    var raw = (biomeKey || '').toLowerCase();
+    var t = tier || 1;
+    if (raw.indexOf('cordilheira') >= 0 || raw.indexOf('mountain') >= 0 || raw.indexOf('peaks') >= 0) {
+      return { meters: 1800 + t * 250, isHighAltitude: true, label: '🏔️ Altitude Extrema (Ar Rarefeito · ' + (1800 + t * 250) + 'm)' };
+    }
+    if (raw.indexOf('colina') >= 0 || raw.indexOf('hills') >= 0) {
+      return { meters: 600 + t * 80, isHighAltitude: false, label: '⛰️ Colinas Elevadas (' + (600 + t * 80) + 'm)' };
+    }
+    if (raw.indexOf('pantano') >= 0 || raw.indexOf('swamp') >= 0) {
+      return { meters: 15, isHighAltitude: false, label: '🌊 Baixada Alagada (15m)' };
+    }
+    if (raw.indexOf('duna') >= 0 || raw.indexOf('desert') >= 0) {
+      return { meters: 220, isHighAltitude: false, label: '🏜️ Planalto de Dunas (220m)' };
+    }
+    return { meters: 120 + t * 30, isHighAltitude: false, label: '🌾 Planície (' + (120 + t * 30) + 'm)' };
+  }
+
   var TRAVEL_ROLES = {
     scout: {
       id: 'scout',
@@ -5545,6 +5606,8 @@
     getBiomeDndInfo: getBiomeDndInfo,              // Informações de Terreno e Riscos Naturais D&D 5e
     getBiomeForageSustainability: getBiomeForageSustainability, // Forrageamento e Sustentabilidade de Água D&D 5e
     MARCHING_FORMATIONS: MARCHING_FORMATIONS,      // Ordens de Marcha Táticas D&D 5e
+    getBiomeBestiaryThreats: getBiomeBestiaryThreats, // Bestiário Regional e Fauna D&D 5e
+    getBiomeAltitude: getBiomeAltitude,            // Perfil Topográfico e Altitude D&D 5e
     TRAVEL_ROLES: TRAVEL_ROLES,                    // Funções de Viagem da Comitiva (PHB p. 182)
     getBiomeTerrainDifficulty: getBiomeTerrainDifficulty, // Custo de Movimento e Terreno Difícil (PHB p. 182)
     TRANSPORT_MODES: TRANSPORT_MODES,              // Modos de Transporte D&D 5e (A Pé, Montaria, Caravana)

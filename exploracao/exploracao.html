@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T18:04:26Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-24T18:14:51Z - do not edit directly, edit source -->
 
 
 
@@ -93072,6 +93072,21 @@ function _openCartLocationPopup(biome){
     + '</div>'
     : '';
 
+  var bestiaryInfo = (window.CartShared && CartShared.getBiomeBestiaryThreats) ? CartShared.getBiomeBestiaryThreats(biome.biome || biome.key) : null;
+  var bestiaryHtml = (bestiaryInfo && !biome.isOrigin && biome.tier > 0)
+    ? '<div class="clp-bestiary-card" style="margin:4px 0 6px;text-align:left;background:rgba(25,15,15,0.7);padding:5px 8px;border-radius:4px;border:1px solid rgba(248,113,113,0.3);">'
+    + '  <div style="font-size:9px;color:#f87171;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">⚔️ FAUNA & BESTIÁRIO REGIONAL (D&D 5e):</div>'
+    + '  <div style="font-size:8.5px;color:#fca5a5;line-height:1.35;">'
+    + '    • <b>Ameaças Típicas:</b> ' + bestiaryInfo.threats.join(', ') + '<br>'
+    + '    • <b>Predador Alfa:</b> <span style="color:#ffd700;font-weight:700;">' + bestiaryInfo.apex + '</span><br>'
+    + '    <span style="color:#d2be90;font-style:italic;">' + bestiaryInfo.advice + '</span>'
+    + '  </div>'
+    + '</div>'
+    : '';
+
+  var altInfo = (window.CartShared && CartShared.getBiomeAltitude) ? CartShared.getBiomeAltitude(biome.biome || biome.key, biome.tier) : null;
+  var altBadge = altInfo ? (' · <b>Altitude:</b> ' + altInfo.label) : '';
+
   var p = (typeof getPlayerObj === 'function') ? getPlayerObj() : (window.CITY_MOCK_PLAYER || (typeof S !== 'undefined' && S && S.player)) || {};
   var pLvl = p.level || 1;
   var threatDiff = (typeof biome.tier === 'number') ? (biome.tier - pLvl) : 0;
@@ -93142,6 +93157,7 @@ function _openCartLocationPopup(biome){
     + weatherHtml
     + nightVisionHtml
     + dndHtml
+    + bestiaryHtml
     + (function(){
         var forInfo = (window.CartShared && CartShared.getBiomeForageSustainability) ? CartShared.getBiomeForageSustainability(biome.biome || biome.key) : null;
         if (!forInfo) return '';
@@ -94037,7 +94053,14 @@ function openCartography() {
     + '        <button class="cam-filter-pill" data-wfilter="pinned" type="button">📌 Alfinetes Fixados</button>'
     + '        <button class="cam-filter-pill" data-wfilter="notes" type="button">📝 Anotações</button>'
     + '      </div>'
-    + '      <div style="padding:4px 12px 6px;"><input type="text" class="cam-search-input" id="xcwm-search-input" placeholder="🔍 Filtrar por nome, província ou nota..." style="width:100%;box-sizing:border-box;margin:0;font-size:11px;" autocomplete="off"></div>'
+    + '      <div style="padding:4px 12px 6px;"><input type="text" class="cam-search-input" id="xcwm-search-input" placeholder="🔍 Filtrar por nome, província ou nota..." style="width:100%;box-sizing:border-box;margin:0;font-size:11px;" autocomplete="off"></div>
+      <div class="cam-legend" id="xcwm-prov-filter-bar" style="padding:2px 12px 6px;display:flex;gap:4px;overflow-x:auto;">
+        <button class="cam-filter-pill active" data-wprov="all" type="button" style="font-size:8.5px;padding:2px 6px;">🌍 Todas</button>
+        <button class="cam-filter-pill" data-wprov="forest" type="button" style="font-size:8.5px;padding:2px 6px;">🌲 Florestas</button>
+        <button class="cam-filter-pill" data-wprov="desert" type="button" style="font-size:8.5px;padding:2px 6px;">🏜️ Dunas</button>
+        <button class="cam-filter-pill" data-wprov="mountain" type="button" style="font-size:8.5px;padding:2px 6px;">⛰️ Cordilheira</button>
+        <button class="cam-filter-pill" data-wprov="swamp" type="button" style="font-size:8.5px;padding:2px 6px;">🐸 Pântanos</button>
+      </div>'
     + '      <div class="cam-grid" id="xcart-waypoints-list" style="max-height:50vh;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:10px;"></div>'
     + '    </div>'
     + '  </div>'
@@ -95053,6 +95076,20 @@ function _xcartFocusWaypoint(key) {
     });
   }
 
+  var xcwmProvBar = document.getElementById('xcwm-prov-filter-bar');
+  if (xcwmProvBar) {
+    xcwmProvBar.addEventListener('click', function(e){
+      var btn = e.target.closest('.cam-filter-pill');
+      if (!btn) return;
+      var pills = xcwmProvBar.querySelectorAll('.cam-filter-pill');
+      pills.forEach(function(p){ p.classList.remove('active'); });
+      btn.classList.add('active');
+      var pId = btn.getAttribute('data-wprov');
+      window._cartCurrentWpProvFilter = pId;
+      _xcartPopulateWaypointsList(window._xcartCurrentWpFilter || 'all', xcwmSearch ? xcwmSearch.value : '');
+    });
+  }
+
   // Atlas Modal Seletor de Províncias
   var atlasPickerBtn = document.getElementById('xcart-atlas-picker-btn');
   var atlasModal = document.getElementById('xcart-atlas-modal');
@@ -95406,6 +95443,18 @@ function _wireXCartKeyboardNavigation() {
       _cartZoom = CART_ZOOM_DEFAULT;
       _xcartCenterOnPlayer();
       _xcartUpdateZoomInfo();
+      return;
+    }
+
+    // B / b: fixa ou alterna Alvo Tático (Beacon) no nó sob o cursor ou selecionado
+    if (e.key === 'b' || e.key === 'B') {
+      e.preventDefault();
+      var targetK = _xcartHoverNode ? _xcartHoverNode.key : (window._cartCurrentLocBiome ? window._cartCurrentLocBiome.key : null);
+      if (targetK && window.CartShared && CartShared.toggleLocPinned) {
+        CartShared.toggleLocPinned(targetK);
+        try { if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_click'); } catch(_) {}
+        _xcartDraw();
+      }
       return;
     }
 
