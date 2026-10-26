@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 216: CASCATAS DE BARRAGEM DE TRAVERTINO E DIQUES DE TUFA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessTravertineTufaBarrageHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var ht = (hazardType || 'phytoclastic_tufa_barrage_crest_spongy_dam_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ruptura de Crista de Barragem de Tufa Fitoclástica Esponjosa',
+      saveDC: 15,
+      saveType: 'Destreza',
+      travertineRisk: 'Diques naturais de carbonato de cálcio precipitado sobre galhos e musgos que represam lagos escalonados de águas azul-turquesa; a borda da barragem é uma estrutura porosa e oca de baixa densidade que cede sob o peso da comitiva, lançando os aventureiros cachoeira abaixo junto com blocos de calcita e a onda da represa rompida com 3d6 de concussão (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Evitar caminhar sobre o lábio fino da barragem onde a água transborda, vadeando pela rampa interna de cascalho calcário.',
+      rescueAndStabilization: 'Arremesso de corda flutuante para o patamar inferior e imobilização de contusões.',
+      icon: '🌊🪨',
+      color: '#06b6d4'
+    };
+
+    if (ht === 'diatomaceous_mucilage_biofilm_cascade_apron_vertical_slip') {
+      hazard = {
+        hazardTitle: 'Deslizamento em Rampa de Travertino Coberta por Biofilme de Diatomáceas',
+        saveDC: 14,
+        saveType: 'Destreza',
+        travertineRisk: 'As rampas arredondadas entre as piscinas de travertino são revestidas por uma película invisível de diatomáceas e cianobactérias calcificantes mais escorregadia que sabão; perder o apoio dispara uma queda descontrolada em tobogã por três degraus de cascatas sucessivas causando 2d8 de concussão (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Uso de sandálias de feltro ou corda trançada sobre as botas e progressão encordada pelas raízes marginais.',
+        rescueAndStabilization: 'Ancoragem em troncos calcificados nas bordas rasas e secagem de equipamentos.',
+        icon: '🫧⛷️',
+        color: '#0891b2'
+      };
+    } else if (ht === 'sub_cascade_tufa_curtain_cavern_hydraulic_vortex_trap') {
+      hazard = {
+        hazardTitle: 'Aprisionamento Hidráulico em Caverna Oculta atrás de Cortina de Tufa',
+        saveDC: 15,
+        saveType: 'Força',
+        travertineRisk: 'O crescimento contínuo de cortinas pendentes de tufa fecha o espaço atrás das cachoeiras formando câmaras semissubmersas alimentadas pelo refluxo da queda d’água; ser puxado para trás da cortina calcária prende o explorador em um redemoinho escuro e ruidoso com ar rarefeito e 2d6 de concussão mais risco de afogamento (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Manter distância de segurança de três metros do pé das quedas d’água em cortina fechada.',
+        rescueAndStabilization: 'Mergulho profundo pelo fluxo de saída junto ao leito da bacia para escapar do refluxo superficial.',
+        icon: '🌀🌊',
+        color: '#0e7490'
+      };
+    } else if (ht === 'submerged_calcified_logjam_karst_snag_foot_entrapment') {
+      hazard = {
+        hazardTitle: 'Entalamento de Pé em Gaiola Submersa de Troncos Petrificados por Calcita',
+        saveDC: 15,
+        saveType: 'Força',
+        travertineRisk: 'No fundo das lagoas translúcidas de travertino, antigas árvores caídas foram inteiramente revestidas por crostas espessas de calcita formando grades rígidas como pedra sob a água; prender a bota em uma forquilha petrificada a 1,5 metro de profundidade sob correnteza contínua ameaça quebrar o tornozelo e afogar o aventureiro com 2d6 de concussão (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Sondagem do fundo turquesa com vara antes de dar cada passo e desatar as fivelas rápidas das botas ao vadear.',
+        rescueAndStabilization: 'Alavancagem da crosta de tufa com pé-de-cabra ou descalçamento submerso assistido por companheiro.',
+        icon: '🪵⚓',
+        color: '#14b8a6'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampTravertineTufaBarrageStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var dt = (defenseType || 'relict_dry_palaeo_travertine_terrace_bench_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Terraço Fóssil de Paleo-Travertino Seco e Nivelado',
+      travertineAndCampSafety: 'Acampamento instalado sobre uma antiga barragem de travertino abandonada pelo curso atual do rio a 8 metros acima da calha ativa.',
+      travertineTrenchAndWatch: 'Piso horizontal naturalmente plano, poroso e seco, imune a trombas d’água noturnas no cânion.',
+      campRestAndSafetyGuards: 'Garante descanso longo confortável e seguro para toda a comitiva.',
+      icon: '⛺🏞️',
+      color: '#06b6d4'
+    };
+
+    if (dt === 'dry_tufa_drapery_overhang_shelter_grottos') {
+      tech = {
+        defenseTitle: 'Gruta Seca sob Cortina Fóssil de Tufa em Balanço',
+        travertineAndCampSafety: 'Abrigo sob uma abóbada espessa de tufa petrificada na encosta lateral onde a cachoeira já secou há séculos.',
+        travertineTrenchAndWatch: 'Protege integralmente as tendas e o fogo contra chuvas torrenciais de montanha.',
+        campRestAndSafetyGuards: 'Oculta a luz da fogueira de observadores no topo do desfiladeiro.',
+        icon: '🪨🔥',
+        color: '#0891b2'
+      };
+    } else if (dt === 'calcium_bicarbonate_degassing_spring_pure_water_pool') {
+      tech = {
+        defenseTitle: 'Coleta de Água Mineral Cristalina na Bacia Superior de Decantação',
+        travertineAndCampSafety: 'Captação de água na represa mais alta onde o carbonato já precipitou e a água repousa absolutamente límpida e filtrada.',
+        travertineTrenchAndWatch: 'Fornece água potável livre de argila ou patógenos orgânicos.',
+        campRestAndSafetyGuards: 'Abastece os cantis do grupo sem necessidade de filtração demorada.',
+        icon: '💧🏺',
+        color: '#22d3ee'
+      };
+    } else if (dt === 'cascade_white_noise_acoustic_masking_camp_concealment') {
+      tech = {
+        defenseTitle: 'Cortina Acústica de Ruído Branco das Cascatas Escalonadas',
+        travertineAndCampSafety: 'Posicionamento tático do acampamento a barlavento de uma sequência de pequenas quedas d’água de travertino.',
+        travertineTrenchAndWatch: 'O murmúrio constante das cascatas abafa inteiramente as vozes, o tilintar de armaduras e o relincho das montarias da comitiva.',
+        campRestAndSafetyGuards: 'Dificulta a localização acústica do bivaque por patrulhas hostis noturnas.',
+        icon: '🌊🔇',
+        color: '#14b8a6'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 215: LABIRINTOS DE MANGUEZAIS DE RAÍZES-ESCORA E IGARAPÉS (D&D 5e)
   // =========================================================================
 
@@ -30244,6 +30348,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessTravertineTufaBarrageHazard: calcWildernessTravertineTufaBarrageHazard,
+    calcCampTravertineTufaBarrageStation: calcCampTravertineTufaBarrageStation,
     calcWildernessMangrovePropRootHazard: calcWildernessMangrovePropRootHazard,
     calcCampMangrovePropRootStation: calcCampMangrovePropRootStation,
     calcWildernessTafoniGnammaDomeHazard: calcWildernessTafoniGnammaDomeHazard,
