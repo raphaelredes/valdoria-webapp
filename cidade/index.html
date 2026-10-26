@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessTropicalPeatSwampDomeHazard) return '';
+        var bKey = (biome && biome.key) || 'swamp';
+        var ps = CartShared.calcWildernessTropicalPeatSwampDomeHazard(bKey, 'hollow_buttress_root_mat_peat_slurry_void_plunge');
+        return '<div class="clp-tropical-peat-swamp-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,26,16,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(22,163,74,0.35);font-size:8px;color:#dcfce7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ps.color + ';margin-bottom:2px;">' + ps.icon + ' ' + ps.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Turfeiras Tropicais e Rios de Água Negra:</b> ' + ps.peatSwampRisk + ' (CD ' + ps.saveDC + ' [' + ps.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bbf7d0;margin-top:1px;">• <b>Mitigação:</b> ' + ps.pioneerMitigation + ' · <i>Estabilização: ' + ps.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampTropicalPeatSwampDomeStation) return '';
+        var bKey = (biome && biome.key) || 'swamp';
+        var pc = CartShared.calcCampTropicalPeatSwampDomeStation(bKey, 'buttress_root_flange_elevated_alcove_plank_bivouac');
+        return '<div class="clp-tropical-peat-swamp-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(10,20,14,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(21,128,61,0.3);font-size:8px;color:#dcfce7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + pc.color + ';margin-bottom:2px;">' + pc.icon + ' ' + pc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Alcova em Raízes Tabulares:</b> ' + pc.peatSwampAndCampSafety + ' · <b>Defesa:</b> ' + pc.peatSwampTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#86efac;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + pc.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessMeteoriticImpactCraterHazard) return '';
         var bKey = (biome && biome.key) || 'desert';
         var mc = CartShared.calcWildernessMeteoriticImpactCraterHazard(bKey, 'suevite_impact_melt_glass_shard_talus_avalanche');

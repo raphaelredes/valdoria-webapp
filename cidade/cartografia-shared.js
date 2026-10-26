@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 225: DOMOS DE TURFEIRAS TROPICAIS E RIOS DE ÁGUA NEGRA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessTropicalPeatSwampDomeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'hollow_buttress_root_mat_peat_slurry_void_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda em Câmara Oca sob Tapete de Raízes Tabulares para Polpa de Turfa',
+      saveDC: 15,
+      saveType: 'Destreza',
+      peatSwampRisk: 'Nas florestas de turfeira ombrotrófica, as árvores gigantes apoiam-se em um falso chão suspenso de raízes entrelaçadas e serrapilheira a 2 metros acima de um bolsão de turfa semilíquida e troncos submersos; pisar entre dois contrafortes radiculares podres rompe o teto fibroso, mergulhando o aventureiro na polpa escura sem oxigênio com 2d6 de concussão e risco de sufocamento (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Caminhar estritamente sobre as cristas grossas das raízes em tábua (buttress roots) sondando os vãos com vara longa.',
+      rescueAndStabilization: 'Passagem de alça de corda sob as axilas apoiada nos troncos vivos e limpeza das vias respiratórias.',
+      icon: '🌳🕳️',
+      color: '#15803d'
+    };
+
+    if (ht === 'ombrotrophic_blackwater_humic_tannin_acid_corrosion_and_leeches') {
+      hazard = {
+        hazardTitle: 'Travessia de Canal de Água Negra Húmica Ácida (pH 3.2) e Sanguessugas-Tigre',
+        saveDC: 14,
+        saveType: 'Constituição',
+        peatSwampRisk: 'Rios lentos cor de chá preto concentrado saturados de ácidos húmicos e fúlvicos que impedem o apodrecimento da madeira mas maceram a pele humana e atraem nuvens de sanguessugas arborícolas e aquáticas; vadear com escoriações abertas provoca infecção fúngica e perda sanguínea contínua impondo 2d6 necrótico e 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Vedação das bocas das calças nas botas com cera de abelha e óleo de cânfora ou tabaco.',
+        rescueAndStabilization: 'Cauterização suave com sal ou brasa para soltar os anelídeos sem rasgar a pele e curativo seco.',
+        icon: '🩸🌊',
+        color: '#b45309'
+      };
+    } else if (ht === 'shallow_rooted_emergent_dipterocarp_domino_windthrow') {
+      hazard = {
+        hazardTitle: 'Queda em Dominó de Árvore Emergente de Raiz Rasa na Turfa Mole',
+        saveDC: 15,
+        saveType: 'Destreza',
+        peatSwampRisk: 'Como o lençol freático ácido impede raízes profundas, gigantes florestais de 45 metros ancoram-se apenas na camada superficial fofa de turfa; uma rajada de vento de tempestade ou o corte de cipós tensores faz um colosso tombar arrancando todo o tapete radicular em um raio de 10 metros e puxando três árvores vizinhas sobre a comitiva com 4d8 de concussão (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Observar a inclinação da copa das árvores emergentes e jamais cortar lianas grossas que funcionam como estais.',
+        rescueAndStabilization: 'Rolamento lateral perpendicular ao eixo do tronco em queda e serragem de galhos.',
+        icon: '🌲💥',
+        color: '#16a34a'
+      };
+    } else if (ht === 'subsurface_smoldering_dry_peat_ash_pit_concealed_burn') {
+      hazard = {
+        hazardTitle: 'Alçapão de Cinza Quente em Turfa Subterrânea em Combustão Lenta',
+        saveDC: 15,
+        saveType: 'Constituição',
+        peatSwampRisk: 'Na coroa ressecada do domo de turfa durante a estação seca, raios antigos iniciam fogos subterrâneos sem chama nem fumaça visível que queimam por meses sob a crosta intacta; pisar sobre a cavidade consumida faz o explorador afundar até a cintura em brasas de turfa a 400 graus sofrendo 3d8 de fogo (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Detectar o cheiro adocicado de alcatrão de turfa tostada e observar folhas amareladas murchas sem razão aparente.',
+        rescueAndStabilization: 'Içamento imediato por corda sem pisar na borda do buraco de cinza e resfriamento com água.',
+        icon: '🔥🕳️',
+        color: '#dc2626'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampTropicalPeatSwampDomeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'buttress_root_flange_elevated_alcove_plank_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Alcova de Raízes Tabulares Gigantes com Estrado de Varas',
+      peatSwampAndCampSafety: 'Acampamento encaixado entre duas aletas de madeira viva de 3 metros de altura na base de uma árvore sã, com piso de troncos apoiado acima da turfa.',
+      peatSwampTrenchAndWatch: 'Paredes naturais de madeira dura protegem os flancos e impedem o afundamento noturno no solo esponjoso.',
+      campRestAndSafetyGuards: 'Garante descanso longo seco e seguro para toda a comitiva.',
+      icon: '⛺🌳',
+      color: '#16a34a'
+    };
+
+    if (dt === 'green_bark_clay_hearth_cradle_against_peat_ignition') {
+      tech = {
+        defenseTitle: 'Berço de Argila e Casca Verde Suspenso para Fogueira sem Ignição da Turfa',
+        peatSwampAndCampSafety: 'Acender fogo diretamente no chão da turfeira incendiaria o subsolo sob as próprias botas do grupo; a brasa é mantida sobre um leito espesso de barro úmido e troncos verdes.',
+        peatSwampTrenchAndWatch: 'Permite cozinhar e secar roupas sem jamais incendiar o domo de turfa seca abaixo.',
+        campRestAndSafetyGuards: 'Elimina o risco de acordar sobre uma cratera incandescente subterrânea.',
+        icon: '🔥🪵',
+        color: '#ea580c'
+      };
+    } else if (dt === 'tannin_blackwater_antiseptic_boiled_tea_supply') {
+      tech = {
+        defenseTitle: 'Água Negra Húmica Fervida Naturalmente Estéril por Acidez e Taninos',
+        peatSwampAndCampSafety: 'A extrema acidez (pH 3) e a riqueza em fenóis vegetais da água negra impedem a proliferação de bactérias de cólera e larvas.',
+        peatSwampTrenchAndWatch: 'Após simples filtração em pano e fervura rápida, fornece bebida segura como chá escuro.',
+        campRestAndSafetyGuards: 'Abastece os cantis do grupo sem risco de disenteria pantanosa.',
+        icon: '🍵💧',
+        color: '#d97706'
+      };
+    } else if (dt === 'hydraulic_root_mat_pressure_wave_intruder_detector') {
+      tech = {
+        defenseTitle: 'Sensor Hidrostático de Ondulação no Tapete Radicular Flutuante',
+        peatSwampAndCampSafety: 'Uma tigela rasa com água apoiada na raiz mestra acusa por círculos concêntricos o peso de qualquer criatura pisando no tapete de turfa a 30 metros.',
+        peatSwampTrenchAndWatch: 'Transforma a elasticidade do solo esponjoso em um sistema de alarme sísmico silencioso para o vigia.',
+        campRestAndSafetyGuards: 'Impede emboscadas noturnas sob a copa fechada da selva.',
+        icon: '🥣🔔',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 224: CRATERAS DE IMPACTO METEORÍTICO (ASTROBREMAS) E SUEVITA (D&D 5e)
   // =========================================================================
 
@@ -31180,6 +31284,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessTropicalPeatSwampDomeHazard: calcWildernessTropicalPeatSwampDomeHazard,
+    calcCampTropicalPeatSwampDomeStation: calcCampTropicalPeatSwampDomeStation,
     calcWildernessMeteoriticImpactCraterHazard: calcWildernessMeteoriticImpactCraterHazard,
     calcCampMeteoriticImpactCraterStation: calcCampMeteoriticImpactCraterStation,
     calcWildernessCryogenicFrostPolygonHazard: calcWildernessCryogenicFrostPolygonHazard,
