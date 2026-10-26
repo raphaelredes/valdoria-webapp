@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 260: POLJES KÁRSTICOS E UVALAS COMPOSTAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessKarstPoljePonorHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var ht = (hazardType || 'estavelle_flash_reversal_geyser_deluge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Inversão de Fluxo em Estavelle e Erupção Hidráulica Repentina no Polje',
+      saveDC: 15,
+      saveType: 'Destreza',
+      karstPoljeRisk: 'Um sumidouro (ponor) que normalmente drena as águas do polje sofre reversão hidrostática instantânea quando chuvas torrenciais pressurizam os aquíferos dos maciços calcários circundantes; a boca da fenda explode em um gêiser colossal de água barrenta e cascalho que submerge a várzea sob 2 metros de torrente veloz em poucos minutos, arrastando aventureiros com 3d8 de dano contundente (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Marchar pelas margens elevadas do polje junto aos contrafortes de rocha nua e observar borbulhamentos e mudanças repentinas de cor nas águas dos sumidouros.',
+      rescueAndStabilization: 'Içamento imediato com cordas de retenção para colinas cônicas residuais e tratamento de escoriações.',
+      icon: '🌊🌀',
+      color: '#0284c7'
+    };
+
+    if (ht === 'ponor_funnel_debris_whirlpool_suction') {
+      hazard = {
+        hazardTitle: 'Redemoinho de Sucção em Funil de Ponor e Aprisionamento em Sifão',
+        saveDC: 14,
+        saveType: 'Força',
+        karstPoljeRisk: 'O ponto de fuga onde o rio da planície mergulha para o subterrâneo forma um funil afunilado de sucção violenta bloqueado por troncos e detritos; nadar ou vauzejar próximo ao vórtice puxa corpos para condutos submersos escuros e sem bolsas de ar, exigindo vigor muscular extremo para não ser tragado para o abismo (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Fixar estacas de advertência a 50 metros a montante do ponor e lançar linhas de retenção transversais ancoradas na rocha.',
+        rescueAndStabilization: 'Tração coordenada da linha de segurança por múltiplos membros da comitiva para arrancar a vítima do refluxo.',
+        icon: '🕳️🌀',
+        color: '#2563eb'
+      };
+    } else if (ht === 'uvala_coalescence_subsidence_sinkhole_collapse') {
+      hazard = {
+        hazardTitle: 'Subsidência Diferencial e Abertura de Nova Fenda de Colapso na Uvala',
+        saveDC: 14,
+        saveType: 'Destreza',
+        karstPoljeRisk: 'O fundo plano da uvala é recoberto por espessas camadas férteis de terra rossa que ocultam fendas de coalescência cárstica; a dissolução da rocha calcária basal provoca o desabamento repentino de uma nova dolina sob a marcha, tragando exploradores e mulas de carga em uma cratera de 8 metros de profundidade (DMG p. 111; PHB p. 182).',
+        pioneerMitigation: 'Batedores avançam encordoados sondando a espessura do solo argiloso com bastões de ferro antes da passagem de cargas pesadas.',
+        rescueAndStabilization: 'Lançamento de escadas de corda e tração mecânica com estribos e roldanas para içamento.',
+        icon: '🕳️📉',
+        color: '#b45309'
+      };
+    } else if (ht === 'stagnant_polje_floodwater_marsh_miasma') {
+      hazard = {
+        hazardTitle: 'Nevoeiro Miasmático e Gás Paludoso em Várzea Inundada Estagnada',
+        saveDC: 14,
+        saveType: 'Constituição',
+        karstPoljeRisk: 'Após a cheia estacional, bolsões de água estagnada retidos sobre a argila impermeável de terra rossa apodrecem a vegetação rasteira, desprendendo nuvens baixas de gás metano e vapores sulfídricos fétidos; respirar o miasma causa náuseas, tontura e 2d6 de dano de veneno com desvantagem em testes de Percepção (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Cruzar as baixadas exclusivamente em horas de vento forte e umedecer máscaras de linho em vinagre aromático.',
+        rescueAndStabilization: 'Retirada rápida para terrenos elevados e arejados e inalação de essência de eucalipto.',
+        icon: '🌫️☠️',
+        color: '#ca8a04'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampKarstPoljePonorStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'perimeter_hums_isolated_conical_hill_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Estratégico no Cume de Hum Cárstico Residual',
+      karstPoljeAndCampSafety: 'Instalação do acampamento no topo de uma colina cônica residual de calcário (hum) que se eleva 25 metros acima do leito plano do polje.',
+      karstPoljeTrenchAndWatch: 'A elevação rochosa isolada permanece completamente a salvo de qualquer inundação repentina da bacia e oferece excelente linha de visão da várzea.',
+      campRestAndSafetyGuards: 'Garante descanso longo seco, calmo e seguro mesmo que a planície inteira seja submersa por enchentes noturnas.',
+      icon: '⛺⛰️',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'estavelle_flow_acoustic_listening_sentry') {
+      tech = {
+        defenseTitle: 'Posto Sentinela de Escuta Acústica e Monitoramento de Pressão Freática',
+        karstPoljeAndCampSafety: 'Posicionamento de vigias na base do hum monitorando o som do borbulhar da água e o nível dos sumidouros da planície.',
+        karstPoljeTrenchAndWatch: 'O som sibilante do escape de ar e o estrondo da inversão hidrostática nos condutos subterrâneos são detectados com minutos de antecedência.',
+        campRestAndSafetyGuards: 'Emite alarme antecipado de emergência para que o grupo se recolha e proteja suprimentos.',
+        icon: '👂🌊',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'terra_rossa_trench_drainage_berm') {
+      tech = {
+        defenseTitle: 'Bermas de Contenção de Terra Rossa e Trincheiras de Drenagem Perimetrais',
+        karstPoljeAndCampSafety: 'Escavação de valas de desvio de enxurradas e muretas de argila compactada ao redor das tendas no contraforte do morro.',
+        karstPoljeTrenchAndWatch: 'A terra rossa compactada impede a infiltração de água nas barracas e direciona as enxurradas de chuva para os canais naturais de drenagem.',
+        campRestAndSafetyGuards: 'Mantém o piso interno das barracas aquecido, seco e confortável durante temporais intensos.',
+        icon: '🛡️🧱',
+        color: '#10b981'
+      };
+    } else if (dt === 'karst_spring_filtered_pure_drinking_water') {
+      tech = {
+        defenseTitle: 'Captação de Água Cristalina em Nascente Cárstica no Sopé da Encosta',
+        karstPoljeAndCampSafety: 'Coleta de água potável límpida que brota diretamente das fraturas calcárias da encosta antes de atingir a várzea argilosa.',
+        karstPoljeTrenchAndWatch: 'Fornece suprimento abundante de água doce puríssima e rica em minerais saudáveis, completamente livre de turbidez ou lodo.',
+        campRestAndSafetyGuards: 'Abastece todos os cantis do grupo com hidratação de alta qualidade para as travessias seguintes.',
+        icon: '💧🏺',
+        color: '#38bdf8'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 259: RELEVO RUINIFORME E CIDADES DE PEDRA (D&D 5e)
   // =========================================================================
 
@@ -34820,6 +34924,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessKarstPoljePonorHazard: calcWildernessKarstPoljePonorHazard,
+    calcCampKarstPoljePonorStation: calcCampKarstPoljePonorStation,
     calcWildernessSandstoneRuiniformLabyrinthHazard: calcWildernessSandstoneRuiniformLabyrinthHazard,
     calcCampSandstoneRuiniformLabyrinthStation: calcCampSandstoneRuiniformLabyrinthStation,
     calcWildernessFossilCoralReefCaveHazard: calcWildernessFossilCoralReefCaveHazard,

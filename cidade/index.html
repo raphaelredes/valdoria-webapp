@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessKarstPoljePonorHazard) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var kp = CartShared.calcWildernessKarstPoljePonorHazard(bKey, 'estavelle_flash_reversal_geyser_deluge');
+        return '<div class="clp-karst-polje-ponor-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,24,36,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(2,132,199,0.35);font-size:8px;color:#f0f9ff;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + kp.color + ';margin-bottom:2px;">' + kp.icon + ' ' + kp.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Polje Kárstico e Sumidouro Ponor:</b> ' + kp.karstPoljeRisk + ' (CD ' + kp.saveDC + ' [' + kp.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Mitigação:</b> ' + kp.pioneerMitigation + ' · <i>Estabilização: ' + kp.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampKarstPoljePonorStation) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var kp = CartShared.calcCampKarstPoljePonorStation(bKey, 'perimeter_hums_isolated_conical_hill_bivouac');
+        return '<div class="clp-karst-polje-ponor-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,24,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#d1fae5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + kp.color + ';margin-bottom:2px;">' + kp.icon + ' ' + kp.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Bivaque em Hum Cárstico:</b> ' + kp.karstPoljeAndCampSafety + ' · <b>Proteção:</b> ' + kp.karstPoljeTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#a7f3d0;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + kp.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessSandstoneRuiniformLabyrinthHazard) return '';
         var bKey = (biome && biome.key) || 'desert';
         var sr = CartShared.calcWildernessSandstoneRuiniformLabyrinthHazard(bKey, 'balancing_pedestal_rock_topple_crush');
