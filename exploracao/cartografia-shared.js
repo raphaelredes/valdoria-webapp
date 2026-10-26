@@ -14881,6 +14881,130 @@
     };
   }
 
+  // === calcWildernessSavannaTermiteMoundAndDustHazard (Savanas Áridas, Galerias Ocas de Cupinzeiro e Poços de Pó - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessSavannaTermiteMoundAndDustHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'grassland').toLowerCase();
+    var ht = (hazardType || 'hollow_termite_mound_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso em Galeria Oca de Cupinzeiro Gigante',
+      saveDC: 14,
+      saveType: 'Destreza',
+      savannaRiskAndDust: 'Solo argiloso ressecado mascarando rede de galerias subterrâneas de 3 metros; queda de 2d8 de concussão com mordidas corrosivas de insetos guardiões ácaros (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores inspecionam chaminés cônicas de ventilação no capim alto e avançam apenas por trilhas consolidadas de manadas.',
+      rescueAndStabilization: 'Extração por cordas com nó em oito, raspagem de ferroadas com faca cega e unguento de argila com óleo de nim.',
+      icon: '🌾🕳️',
+      color: '#ca8a04'
+    };
+
+    if (ht === 'micron_dust_bowl_pocket_suffocation') {
+      hazard = {
+        hazardTitle: 'Poço de Pó Fino de Silte e Sufocamento Rápido',
+        saveDC: 13,
+        saveType: 'Constituição',
+        savannaRiskAndDust: 'Depressão rasa cheia de pó calcário impalpável de 1 metro de profundidade; agitação levanta nuvem sufocante que cega e causa tosse espasmódica.',
+        pioneerMitigation: 'Sondagem frontal com bastão com guizo e colocação de panos umedecidos sobre o focinho das montarias e rostos dos aventureiros.',
+        rescueAndStabilization: 'Lavagem das fossas nasais com soro morno e repouso em bivaque abrigado do vento.',
+        icon: '🌫️🏜️',
+        color: '#eab308'
+      };
+    } else if (ht === 'savanna_grass_flash_fire_front') {
+      hazard = {
+        hazardTitle: 'Frente de Queimada Rápida em Capim Seco',
+        saveDC: 14,
+        saveType: 'Destreza',
+        savannaRiskAndDust: 'Parede de chamas impulsionada por vendaval a 30km/h consumindo capim elefante ressecado; 3d6 de fogo e asfixia por fumaça negra.',
+        pioneerMitigation: 'Abertura imediata de aceiro de contra-fogo queimando faixa controlada e fuga para áreas já chamuscadas.',
+        rescueAndStabilization: 'Curativos para queimaduras com clara de ovo de avestruz e compressas de infusão de malva.',
+        icon: '🔥🌾',
+        color: '#f97316'
+      };
+    } else if (ht === 'thornbush_acacia_punji_puncture') {
+      hazard = {
+        hazardTitle: 'Moita Espinhosa de Acácia Agulha',
+        saveDC: 13,
+        saveType: 'Destreza',
+        savannaRiskAndDust: 'Espinhos lignificados de 10 cm impregnados de taninos amargos furando solas de botas; causa 2d6 de perfuração e inflamação aguda.',
+        pioneerMitigation: 'Uso de botas de solado duplo de couro de búfalo e desarme de ramos baixos com podão longo.',
+        rescueAndStabilization: 'Remoção de farpas com pinça aquecida e desinfecção com vinagre de palmeira.',
+        icon: '🌵🩸',
+        color: '#ef4444'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      savannaRiskAndDust: hazard.savannaRiskAndDust,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Savanas, Incêndios e Terreno Frágil) / PHB p. 182-183 (Visibilidade, Rastros e Salvaguardas)'
+    };
+  }
+
+  // === calcCampSavannaAcaciaPlatformAndDustScreenStation (Plataformas em Acácia, Cortinas de Musselina e Trincheiras Corta-Fogo - DMG p. 111 / XGE p. 78-83 / PHB p. 150) ===
+  function calcCampSavannaAcaciaPlatformAndDustScreenStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'grassland').toLowerCase();
+    var dt = (defenseType || 'forked_acacia_limb_tree_platform').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Plataforma Elevada em Forquilha de Acácia Centenária',
+      savannaAnchorageAndStability: 'Estrado de ripas de jacarandá ancorado com cordas de sisal em forquilhas grossas a 3 metros do solo, fora do alcance de felinos predadores.',
+      dustShieldingAndCampSecurity: 'Isola os leitos dos aventureiros de cobras, escorpiões da savana e formigas carnívoras migratórias.',
+      campRestAndSafetyGuards: 'Garante sono longo tranquilo e seguro para a comitiva com brisa refrescante nas alturas.',
+      icon: '🌳⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'fine_muslin_dust_filter_sleeping_screen') {
+      tech = {
+        defenseTitle: 'Mosquiteiro e Cortina Antipoeira de Musselina Fina',
+        savannaAnchorageAndStability: 'Cúpula de tecido respirável de trama fechada armada sobre cada leito com zíperes de osso e bainha de chumbo.',
+        dustShieldingAndCampSecurity: 'Bloqueia 99% do pó fino em suspensão soprado pelas rajadas noturnas e impede picadas de insetos transmissores de febre.',
+        campRestAndSafetyGuards: 'Proporciona descanso silencioso sem tosse ou irritação ocular para sentinelas e descansantes.',
+        icon: '🛏️🛡️',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'mineral_salt_firebreak_perimeter_trench') {
+      tech = {
+        defenseTitle: 'Trincheira Perimetral Corta-Fogo com Sal-Gema',
+        savannaAnchorageAndStability: 'Vala de 1 metro de largura limpa até o solo mineral, aspergida com sal-gema e cascalho que anula a propagação de fagulhas.',
+        dustShieldingAndCampSecurity: 'Cria cordão de isolamento estático contra incêndios florestais repentinos na vegetação seca circundante.',
+        campRestAndSafetyGuards: 'Assegura integridade física absoluta das tendas e suprimentos de água da comitiva.',
+        icon: '🧂🔥',
+        color: '#f59e0b'
+      };
+    } else if (dt === 'night_vision_elevated_crow_nest_lookout') {
+      tech = {
+        defenseTitle: 'Posto de Sentinela em Ninho de Corvo Elevado na Copa',
+        savannaAnchorageAndStability: 'Cesto protegido com parapeito trançado e luneta de campanha no ponto mais alto da árvore abrigo.',
+        dustShieldingAndCampSecurity: 'Permite às sentinelas vigiarem a savana aberta em 360 graus por até 5km de raio sob o luar.',
+        campRestAndSafetyGuards: 'Elimina a desvantagem por terreno cego e concede tempo tático de resposta a aproximações furtivas.',
+        icon: '🔭🌕',
+        color: '#ca8a04'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      savannaAnchorageAndStability: tech.savannaAnchorageAndStability,
+      dustShieldingAndCampSecurity: tech.dustShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque em Árvores e Savanas) / XGE p. 78-83 (Ferramentas de Carpinteiro e Sobrevivência)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -16704,6 +16828,8 @@
     calcCampCloudForestFogHarvesterAndHeatedBedStation: calcCampCloudForestFogHarvesterAndHeatedBedStation,
     calcWildernessPillowLavaAndThermalVentHazard: calcWildernessPillowLavaAndThermalVentHazard,
     calcCampPillowLavaBasaltPlatformAndCondenserStation: calcCampPillowLavaBasaltPlatformAndCondenserStation,
+    calcWildernessSavannaTermiteMoundAndDustHazard: calcWildernessSavannaTermiteMoundAndDustHazard,
+    calcCampSavannaAcaciaPlatformAndDustScreenStation: calcCampSavannaAcaciaPlatformAndDustScreenStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
