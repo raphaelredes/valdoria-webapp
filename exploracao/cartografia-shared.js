@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 235: FLORESTAS SUBMERSAS DE TRONCOS E JANGADAS DE MADEIRA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessDrownedSnagForestHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'submerged_crown_snag_hull_impalement_capsize').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Empalamento de Casco e Naufrágio em Galhada Submersa ("Deadhead Snags")',
+      saveDC: 15,
+      saveType: 'Destreza',
+      drownedSnagRisk: 'Vales florestados inundados por barragens naturais de deslizamento onde milhares de troncos branqueados erguem-se da água escura como mastros fantasmagóricos; um metro abaixo da superfície espelhada, pontas de galhos de cerne endurecido pela água fria rasgam o fundo de canoas e prendem mochilas de nadadores a 6 metros de profundidade com 3d6 de dano perfurante e risco de afogamento (DMG p. 110; XGE p. 109).',
+      pioneerMitigation: 'Navegar em velocidade reduzida com proeiro sondando a água turva com vara longa.',
+      rescueAndStabilization: 'Corte imediato das alças da mochila presa nos galhos submersos e tamponamento do casco com breu.',
+      icon: '🪵🛶',
+      color: '#0284c7'
+    };
+
+    if (ht === 'rotting_standing_widowmaker_snag_vibration_topple') {
+      hazard = {
+        hazardTitle: 'Queda de Topo Podre de Tronco Morto ("Widowmaker") ao Encostar o Remo',
+        saveDC: 15,
+        saveType: 'Destreza',
+        drownedSnagRisk: 'As partes aéreas das árvores afogadas apodrecem exatamente na linha d’água pelo ataque de fungos, enquanto o fuste superior de duas toneladas permanece em pé por equilíbrio precário; o simples toque de uma vara de impulsão ou a marola da embarcação parte o tronco na linha d’água e desaba a copa seca sobre o barco com 3d8 de concussão (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Nunca empurrar nem amarrar embarcações em troncos ocos de casca solta ou inclinados.',
+        rescueAndStabilization: 'Resgate rápido dos tripulantes lançados na água e imobilização de traumas.',
+        icon: '🌲💥',
+        color: '#b45309'
+      };
+    } else if (ht === 'shifting_floating_driftwood_logjam_foot_crush_trap') {
+      hazard = {
+        hazardTitle: 'Esmagamento entre Toras Rolantes em Jangada de Troncos (Floating Logjam)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        drownedSnagRisk: 'Tapetes compactos de milhares de troncos flutuantes represados nas curvas do lago que parecem formar uma ponte sólida de madeira; ao caminhar sobre eles, um tronco cilíndrico gira sob a bota e abre uma fenda que engole a perna do aventureiro antes que as toras vizinhas batam novamente como uma prensa hidráulica, causando 2d8 de concussão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Atravessar jangadas de troncos apenas pisando nas junções cruzadas ou estendendo pranchas de apoio.',
+        rescueAndStabilization: 'Uso de alavanca de madeira para afastar as toras flutuantes e retirar a perna presa.',
+        icon: '🪵⚙️',
+        color: '#d97706'
+      };
+    } else if (ht === 'anoxic_tannin_hypolimnion_blackwater_methane_belch') {
+      hazard = {
+        hazardTitle: 'Erupção de Gás Sulfídrico e Água Anóxica Gelada do Fundo Florestal',
+        saveDC: 14,
+        saveType: 'Constituição',
+        drownedSnagRisk: 'No fundo da floresta submersa, toneladas de folhedo e cascas em decomposição consomem todo o oxigênio e geram bolsões de sulfeto de hidrogênio e metano presos sob tapetes de raízes; perturbar o fundo com âncora ou vara libera uma fervura fétida que envenena o ar rente à água e impõe a condição envenenado e 1 nível de exaustão (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Amarrar os barcos nos troncos firmes acima da superfície em vez de lançar âncoras no lodo.',
+        rescueAndStabilization: 'Remada rápida para canal aberto ventilado e inalação de ar puro.',
+        icon: '🫧☠️',
+        color: '#65a30d'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampDrownedSnagForestStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'lashed_giant_cedar_stump_pile_dwelling_platform').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Palafita Suspensa Amarrada entre Três Troncos de Cedro Morto Maciços',
+      drownedSnagAndCampSafety: 'Seleção de três fustes grossos de cedro ou cipreste (cuja madeira resinosa não apodrece na água) dispostos em triângulo para amarrar um estrado a 2 metros acima do lago.',
+      drownedSnagTrenchAndWatch: 'Mantém a comitiva enxuta e isolada de sanguessugas, répteis aquáticos e umidade noturna.',
+      campRestAndSafetyGuards: 'Garante descanso longo seguro em meio a quilômetros de floresta inundada sem terra firme.',
+      icon: '⛺🪵',
+      color: '#0284c7'
+    };
+
+    if (dt === 'cured_standing_resin_heartwood_pitch_torch_harvest') {
+      tech = {
+        defenseTitle: 'Colheita de Cerne Resinoso Seco em Pé ("Fatwood") Acima da Linha d’Água',
+        drownedSnagAndCampSafety: 'Os galhos baixos de coníferas mortas em pé curados pelo sol e vento acima da água concentram resina pura na base.',
+        drownedSnagTrenchAndWatch: 'Fornece lenha seca de alto poder calorífico e tochas impermeáveis sem precisar buscar em terra.',
+        campRestAndSafetyGuards: 'Sustenta fogueira em braseiro suspenso de barro ou metal sobre a plataforma.',
+        icon: '🔥🌲',
+        color: '#f59e0b'
+      };
+    } else if (dt === 'logjam_perimeter_boom_floating_canoe_harbor') {
+      tech = {
+        defenseTitle: 'Dique Flutuante de Toras Amarradas (Log Boom) para Porto Seguro',
+        drownedSnagAndCampSafety: 'Encadeamento de quatro toras longas flutuantes com cordas ao redor das canoas sob a plataforma de bivaque.',
+        drownedSnagTrenchAndWatch: 'Amortece marolas, desvia troncos à deriva e bloqueia a aproximação silenciosa de criaturas nadadoras.',
+        campRestAndSafetyGuards: 'Protege as embarcações contra danos noturnos no casco.',
+        icon: '🛶🛡️',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'canopy_snag_crows_nest_overwater_lookout') {
+      tech = {
+        defenseTitle: 'Gávea de Vigia em Forquilha Alta de Árvore Submersa',
+        drownedSnagAndCampSafety: 'Posto de observação instalado a 8 metros acima do espelho d’água em um tronco mestre de cerne íntegro.',
+        drownedSnagTrenchAndWatch: 'Permite mapear os canais abertos entre as jangadas de madeira antes da partida matinal.',
+        campRestAndSafetyGuards: 'Concede vantagem na percepção de luzes, fumaça ou movimento de barcos no lago.',
+        icon: '👁️🌊',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 234: CRISTAS EÓLICAS YARDANGS E CORREDORES DE KALUTS (D&D 5e)
   // =========================================================================
 
@@ -32220,6 +32324,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessDrownedSnagForestHazard: calcWildernessDrownedSnagForestHazard,
+    calcCampDrownedSnagForestStation: calcCampDrownedSnagForestStation,
     calcWildernessAeolianYardangKalutHazard: calcWildernessAeolianYardangKalutHazard,
     calcCampAeolianYardangKalutStation: calcCampAeolianYardangKalutStation,
     calcWildernessSubarcticPalsaThermokarstHazard: calcWildernessSubarcticPalsaThermokarstHazard,
