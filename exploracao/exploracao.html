@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T05:45:41Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T05:49:08Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessSandstoneCanyonAndRockfallHazard) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var sc = CartShared.calcWildernessSandstoneCanyonAndRockfallHazard(bKey, 'unstable_sandstone_arch_collapse');
+        return '<div class="clp-sandstone-canyon-card" style="margin:4px 0 6px;text-align:left;background:rgba(36,20,12,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(249,115,22,0.3);font-size:8px;color:#ffedd5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sc.color + ';margin-bottom:2px;">' + sc.icon + ' ' + sc.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Desmoronamento:</b> ' + sc.sandstoneRiskAndCollapse + ' (CD ' + sc.saveDC + ' [' + sc.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Mitigação:</b> ' + sc.pioneerMitigation + ' · <i>Estabilização: ' + sc.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampSandstoneCanyonCammingStationAndShelter) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var cs = CartShared.calcCampSandstoneCanyonCammingStationAndShelter(bKey, 'spring_camming_device_fissure_anchor_array');
+        return '<div class="clp-camming-station-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,28,34,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(6,182,212,0.3);font-size:8px;color:#ecfeff;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Entaladores Mecânicos:</b> ' + cs.canyonAnchorageAndStability + ' · <b>Proteção:</b> ' + cs.rockfallShieldingAndCampSecurity + '</div>'
+          + '  <div style="font-size:7.5px;color:#67e8f9;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

@@ -14385,6 +14385,130 @@
     };
   }
 
+  // === calcWildernessSandstoneCanyonAndRockfallHazard (Canyons de Arenito Vermelho, Desmoronamento de Arcos e Tálus - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessSandstoneCanyonAndRockfallHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'unstable_sandstone_arch_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso de Arco Natural de Arenito',
+      saveDC: 14,
+      saveType: 'Destreza',
+      sandstoneRiskAndCollapse: 'Desabamento repentino de bloco de arco erodido pelo vento; chuva de lajes pesadas causando 4d8 de concussão e soterramento parcial (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores conferem linhas de fratura por percussão com martelo de geólogo e desviam a rota por fora do raio de queda de arcos ocos.',
+      rescueAndStabilization: 'Remoção de escombros com alavancas de ferro, talas para fraturas compostas e unguento de confrei.',
+      icon: '🏜️🪨',
+      color: '#f97316'
+    };
+
+    if (ht === 'talus_scree_slope_avalanche') {
+      hazard = {
+        hazardTitle: 'Deslizamento em Cascalheira de Tálus',
+        saveDC: 13,
+        saveType: 'Destreza',
+        sandstoneRiskAndCollapse: 'Torrente de brita e blocos angulares deslizando encosta abaixo; 2d10 de concussão e rolamento de 15 metros no despenhadeiro.',
+        pioneerMitigation: 'Progressão diagonal cuidadosa apoiando calcanhares e mantendo corda guia esticada entre os aventureiros.',
+        rescueAndStabilization: 'Tratamento de lacerações profundas com pomada antisséptica de própolis e sutura de emergência.',
+        icon: '⛰️📉',
+        color: '#fb923c'
+      };
+    } else if (ht === 'toppling_spire_hoodoo_topple') {
+      hazard = {
+        hazardTitle: 'Tombamento de Pináculo Frágil (Hoodoo)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        sandstoneRiskAndCollapse: 'Pilar esguio de rocha sedimentar com base afinada que cede sob rajadas fortes de vento térmico.',
+        pioneerMitigation: 'Sentinelas medem a inclinação vertical com fio de prumo e proíbem ancoragem em colunas isoladas.',
+        rescueAndStabilization: 'Uso de pás e cordas para resgatar membros da comitiva soterrados e talas de imobilização espinhal.',
+        icon: '🏛️⚠️',
+        color: '#ea580c'
+      };
+    } else if (ht === 'flash_sandstorm_blindness_in_slot') {
+      hazard = {
+        hazardTitle: 'Tempestade de Areia Afunilada em Desfiladeiro Estreito',
+        saveDC: 13,
+        saveType: 'Constituição',
+        sandstoneRiskAndCollapse: 'Rajadas cortantes de quartzo e poeira vermelha canalizadas pelo efeito garganta do cânion; falha causa cegueira temporária por 1 hora e sufocamento por poeira.',
+        pioneerMitigation: 'Uso de lenços umedecidos cobrindo narinas e olhos e parada tática colada às paredes côncavas.',
+        rescueAndStabilization: 'Lavagem ocular abundante com água morna e infusão pulmonar de eucalipto seco.',
+        icon: '🌪️🔴',
+        color: '#ef4444'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      sandstoneRiskAndCollapse: hazard.sandstoneRiskAndCollapse,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Desfiladeiros e Queda de Rochas) / PHB p. 182-183 (Terreno Acidentado e Salvaguardas)'
+    };
+  }
+
+  // === calcCampSandstoneCanyonCammingStationAndShelter (Entaladores Mecânicos, Alcovas em Paredão e Defletores - DMG p. 111 / XGE p. 78-83 / PHB p. 150) ===
+  function calcCampSandstoneCanyonCammingStationAndShelter(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'spring_camming_device_fissure_anchor_array').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Conjunto de Entaladores Mecânicos em Fissuras de Arenito',
+      canyonAnchorageAndStability: 'Entaladores de lóbulos expansíveis (cams) e porcas hexagonais de latão inseridos em fendas paralelas que não danificam a rocha porosa.',
+      rockfallShieldingAndCampSecurity: 'Garante ancoragem estática firme para as tendas sem risco de lascamento do arenito macio sob tração de estais.',
+      campRestAndSafetyGuards: 'Permite sono longo sereno para a comitiva sob os paredões verticais do cânion.',
+      icon: '⚙️🪨',
+      color: '#06b6d4'
+    };
+
+    if (dt === 'sandstone_alcove_dry_overhang_bivouac') {
+      tech = {
+        defenseTitle: 'Bivaque em Alcova Natural sob Marquise Côncava',
+        canyonAnchorageAndStability: 'Aproveitamento de reentrâncias secas protegidas do vento que defletem pedregulhos que caem do platô superior.',
+        rockfallShieldingAndCampSecurity: 'Gera cobertura sólida natural contra intempéries e impede que chuva de topo escorra sobre os leitos.',
+        campRestAndSafetyGuards: 'Preserva mantimentos e assegura descanso restaurador para os aventureiros em temperatura amena.',
+        icon: '⛺🏜️',
+        color: '#10b981'
+      };
+    } else if (dt === 'rockfall_deflector_bamboo_and_stone_screen') {
+      tech = {
+        defenseTitle: 'Barricada Defletora com Muro de Pedras e Malha de Cordas',
+        canyonAnchorageAndStability: 'Paliçada inclinada de 45 graus com esteiras pesadas de couro e cascalho que amortece e desvia rochas rolantes.',
+        rockfallShieldingAndCampSecurity: 'Cria perímetro protegido contra ricochetes acidentais nas encostas íngremes do acampamento.',
+        campRestAndSafetyGuards: 'Protege sentinelas durante a vigília noturna sem surpresas de detritos caindo no escuro.',
+        icon: '🛡️🪨',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'sand_filtration_water_catchment_sump') {
+      tech = {
+        defenseTitle: 'Sumidouro de Filtragem de Água em Sedimento Areoso',
+        canyonAnchorageAndStability: 'Poço de decantação forrado com seixos de rio e carvão vegetal que drena água pura de infiltrações de arenito.',
+        rockfallShieldingAndCampSecurity: 'Fornece água potável cristalina sem sabor de barro ou sedimentos alcalinos para a comitiva.',
+        campRestAndSafetyGuards: 'Reabastece os odres dos aventureiros sem necessidade de arriscar incursões noturnas em leitos distantes.',
+        icon: '💧🏺',
+        color: '#38bdf8'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      canyonAnchorageAndStability: tech.canyonAnchorageAndStability,
+      rockfallShieldingAndCampSecurity: tech.rockfallShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque sob Paredões e Canyons) / XGE p. 78-83 (Kit de Escalada e Entaladores)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -16200,6 +16324,8 @@
     calcCampGlacialCrevasseIceScrewAndSnowAnchorStation: calcCampGlacialCrevasseIceScrewAndSnowAnchorStation,
     calcWildernessBambooThicketAndElasticSpringHazard: calcWildernessBambooThicketAndElasticSpringHazard,
     calcCampBambooThicketSuspendedPlatformAndLashingStation: calcCampBambooThicketSuspendedPlatformAndLashingStation,
+    calcWildernessSandstoneCanyonAndRockfallHazard: calcWildernessSandstoneCanyonAndRockfallHazard,
+    calcCampSandstoneCanyonCammingStationAndShelter: calcCampSandstoneCanyonCammingStationAndShelter,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
