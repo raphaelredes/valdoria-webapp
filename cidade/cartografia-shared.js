@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 256: CANAIS ENTRELAÇADOS E AREIAS MOVEDIÇAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessBraidedRiverQuickmudHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var ht = (hazardType || 'thixotropic_subterranean_spring_quickmud_engulfment').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Imersão e Engolimento por Areia Movediça Tixotrópica em Surgência Subterrânea',
+      saveDC: 15,
+      saveType: 'Força',
+      braidedRiverRisk: 'Um bolsão de silte saturado alimentado por fluxo freático ascendente mantém os grãos de areia em suspensão fluida sob uma crosta superficial seca e enganosa; pisar no poço liquefaz a lama instantaneamente, sugando o explorador 1d4+1 pés para baixo por rodada e impondo risco iminente de sufocamento se debater-se sem apoio (DMG p. 110-111; PHB p. 182-183).',
+      pioneerMitigation: 'Marchar espalhado com bastões de sondagem graduados de 2 metros, projetar o corpo na horizontal para boiar e usar raquetes de lama nos pés.',
+      rescueAndStabilization: 'Lançamento de laço de corda ancorado em estacas traseiras e tração lenta e contínua com auxílio de bastões de apoio.',
+      icon: '🕳️🌊',
+      color: '#b45309'
+    };
+
+    if (ht === 'braided_channel_channeling_flash_pulse') {
+      hazard = {
+        hazardTitle: 'Pulso Repentino de Cheia em Canais Entrelaçados Múltiplos',
+        saveDC: 14,
+        saveType: 'Destreza',
+        braidedRiverRisk: 'Degelo acelerado ou chuvas distantes no topo da bacia canalizam uma onda de cheia multifacetada por dezenas de esteiras sinuosas de cascalho; os canais mudam de rota em minutos, erodindo bancos de areia e isolando aventureiros em ilhotas efêmeras prestes a desabar na correnteza veloz (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Fixar vigias nas margens altas para alertar mudanças no fluxo e avançar sempre em direção às barras de cascalho com salgueiros ancorados.',
+        rescueAndStabilization: 'Lançamento de cabos de tirolesa para travessia de emergência e recolhimento de fardos arrastados.',
+        icon: '🌊⚡',
+        color: '#0284c7'
+      };
+    } else if (ht === 'riverbed_boulder_entrapment_hydraulic_jam') {
+      hazard = {
+        hazardTitle: 'Encalhe e Esmagamento de Membros em Fenda de Matacões Aluviais Submersos',
+        saveDC: 14,
+        saveType: 'Força',
+        braidedRiverRisk: 'Trechos de vau com água turva na altura dos joelhos escondem leitos instáveis de matacões arredondados que rolam sob a força da correnteza; um pé desatento preso na fenda entre duas pedras móveis sofre esmagamento de 2d8 de dano contundente, aprisionando o explorador contra o fluxo turbulento (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Cruzar o vau em fila indiana segurando em corda guia esticada de margem a margem, apoiando os pés com sapatos reforçados.',
+        rescueAndStabilization: 'Uso de alavancas de ferro para calçar as pedras e afrouxar o membro aprisionado antes de içamento.',
+        icon: '🪨🦶',
+        color: '#d97706'
+      };
+    } else if (ht === 'alluvial_quicksand_crust_sun_bake_deception') {
+      hazard = {
+        hazardTitle: 'Engano Visual por Crosta Seca Assada ao Sol sobre Lama Fluida',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        braidedRiverRisk: 'O sol a pino do meio-dia seca uma fina crosta de 2 centímetros na superfície dos leitos aluviais secos, criando um padrão de rachaduras poligonais indistinguível de solo firme; marchar com bestas de carga sobre a armadilha parte a lâmina rígida e mergulha pernas e bagagens em lodo pegajoso profundo (DMG p. 111; XGE p. 111).',
+        pioneerMitigation: 'Batedores experientes identificam a umidade subterrânea pela vegetação marginal e arremessam pedras pesadas à frente para testar a resistência.',
+        rescueAndStabilization: 'Descarregamento imediato dos animais de carga e içamento por tirantes de tração apoiados em pranchas largas.',
+        icon: '☀️🌾',
+        color: '#ca8a04'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampBraidedRiverQuickmudStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'consolidated_cobble_eyot_raised_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Elevado em Ilhota de Seixos Consolidados e Salgueiros Estabilizadores',
+      braidedRiverAndCampSafety: 'Instalação do acampamento no ponto mais alto de uma ilhota fluvial (eyot) ancorada por raízes profundas de árvores e cascalho grosseiro consolidado.',
+      braidedRiverTrenchAndWatch: 'O solo firme de cascalho drena instantaneamente a água e permanece 1,5 metro acima do nível de cheia dos canais secundários, imune a areias movediças.',
+      campRestAndSafetyGuards: 'Permite descanso longo protegido e confortável sem risco de afundamento ou colapso da margem.',
+      icon: '⛺🏝️',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'quicksand_probe_sounding_rod_perimeter_sweep') {
+      tech = {
+        defenseTitle: 'Sondagem Perimetral Contínua com Hastes Graduadas de Ferro',
+        braidedRiverAndCampSafety: 'Varredura metódica do solo ao redor das barracas cravando hastes metálicas a cada meio metro para localizar poços de surgência.',
+        braidedRiverTrenchAndWatch: 'Delimita corredores seguros de circulação com estacas sinalizadas e fitas coloridas visíveis na escuridão.',
+        campRestAndSafetyGuards: 'Evita acidentes noturnos durante as trocas de guarda e rondas de vigilância das sentinelas.',
+        icon: '🦯🚩',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'spanning_timber_ladder_safety_bridge') {
+      tech = {
+        defenseTitle: 'Passarelas Articuladas de Escadas de Madeira e Corda para Vadeação Segura',
+        braidedRiverAndCampSafety: 'Assentamento de pranchas leves de madeira e escadas de mão estendidas sobre os canais instáveis que cercam a ilha.',
+        braidedRiverTrenchAndWatch: 'Distribui as passadas sobre uma ampla área de contato, permitindo o trânsito dos exploradores sem pisar na lama fluida.',
+        campRestAndSafetyGuards: 'Garante acesso seguro e seco às margens principais para patrulhas e batedores.',
+        icon: '🪵🪜',
+        color: '#10b981'
+      };
+    } else if (dt === 'alluvial_driftwood_drying_rack_camp_comfort') {
+      tech = {
+        defenseTitle: 'Estruturas de Secagem Elevadas e Fogueiras Abastecidas por Madeira Aluvial',
+        braidedRiverAndCampSafety: 'Coleta de troncos secos e galhos lavados acumulados nas curvas de remanso dos canais.',
+        braidedRiverTrenchAndWatch: 'Construção de varais suspensos ao redor da fogueira para secar botas, meias e perneiras encharcadas de lama aluvial.',
+        campRestAndSafetyGuards: 'Previne pé de trincheira e restaura o ânimo e vigor de todos os aventureiros do grupo.',
+        icon: '🔥🪵',
+        color: '#ea580c'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 255: DOLINAS DE COLAPSO E CENOTES KÁRSTICOS (D&D 5e)
   // =========================================================================
 
@@ -34404,6 +34508,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessBraidedRiverQuickmudHazard: calcWildernessBraidedRiverQuickmudHazard,
+    calcCampBraidedRiverQuickmudStation: calcCampBraidedRiverQuickmudStation,
     calcWildernessCenoteSinkholeCollapseHazard: calcWildernessCenoteSinkholeCollapseHazard,
     calcCampCenoteSinkholeCollapseStation: calcCampCenoteSinkholeCollapseStation,
     calcWildernessGlaciolacustrineProglacialLakeHazard: calcWildernessGlaciolacustrineProglacialLakeHazard,
