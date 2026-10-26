@@ -19221,6 +19221,130 @@
     };
   }
 
+  // === calcWildernessTufaPinnacleAndEndorheicHazard (Pináculos de Tufo Calcário e Lagos de Fundo Falso em Bacias Endorreicas - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessTufaPinnacleAndEndorheicHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'fragile_salt_crust_caustic_mud_breakthrough').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ruptura de Casca de Sal sobre Lodo Cáustico Alcalino',
+      saveDC: 15,
+      saveType: 'Destreza',
+      tufaPinnacleAndEndorheicRisk: 'Crosta fina de carbonato de sódio e salitre que simula solo seco sobre camada de lodo alcalino viscoso (pH 10); rompimento súbito sob peso engolindo pernas dos aventureiros causando 2d6 de dano cáustico e imobilização em areia movediça (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores marcham com sapatos de esteira de vime entrelaçado e sondam o piso a cada passo com bastões de ponta chata.',
+      rescueAndStabilization: 'Tração imediata com pranchas de travessia para distribuir o peso e neutralização química das queimaduras com compressas de vinagre de cidra.',
+      icon: '🧂🕳️',
+      color: '#ca8a04'
+    };
+
+    if (ht === 'submerged_endorheic_sinkhole_siphon') {
+      hazard = {
+        hazardTitle: 'Sumidouro Submerso com Vórtice Sifônico em Lago Alcalino',
+        saveDC: 15,
+        saveType: 'Força',
+        tufaPinnacleAndEndorheicRisk: 'Fundo falso do lago endorreico composto por crostas finas de tufo que cedem sob correntezas subterrâneas cársticas; sucção para condutos subaquáticos de água densa saturada de sais causando asfixia e 3d6 de concussão.',
+        pioneerMitigation: 'Navegação por canoas de fundo plano atadas por cabos de segurança ancorados nos pináculos de tufo calcário emersos.',
+        rescueAndStabilization: 'Recuperação com arpéus de resgate, drenagem mecânica dos pulmões e aquecimento corporal gradual com pedras quentes.',
+        icon: '🌀🌊',
+        color: '#0284c7'
+      };
+    } else if (ht === 'heavy_hydrogen_sulfide_mist_pocket') {
+      hazard = {
+        hazardTitle: 'Bolsão de Gás Sulfídrico Pesado e Asfixia Rente à Lâmina d\'Água',
+        saveDC: 14,
+        saveType: 'Constituição',
+        tufaPinnacleAndEndorheicRisk: 'Gases de decomposição bacteriana e fontes hidrotermais sublacustres que se acumulam em bolsões sem vento até 1 metro acima da superfície do lago; inalação que causa náusea extrema, cegueira química e envenenamento (condição Envenenado por 1 hora).',
+        pioneerMitigation: 'Uso de máscaras de gaze embebidas em óleo de eucalipto canforado e avanço rápido por trilhas elevadas nas cristas rochosas.',
+        rescueAndStabilization: 'Evacuação para cotas superiores acima de 3 metros, respiração assistida e inalação de vapores de vinagre quente.',
+        icon: '🌫️☣️',
+        color: '#84cc16'
+      };
+    } else if (ht === 'tufa_spire_brittle_calcite_shear') {
+      hazard = {
+        hazardTitle: 'Fratura de Espigão de Tufo Frágil sob Carga de Escalada',
+        saveDC: 14,
+        saveType: 'Destreza',
+        tufaPinnacleAndEndorheicRisk: 'Torres de tufo porosas de carbonato de cálcio precipitadas ao redor de fontes extintas; microfissuras internas que esfarelam sob pítons de ferro causando descolamento da ancoragem e queda vertical de 8 metros.',
+        pioneerMitigation: 'Amarração em laços amplos de fitas tubulares contornando a coluna completa em vez de cravação de pítons pontuais na rocha friável.',
+        rescueAndStabilization: 'Descida em rapel duplo ancorado na base e imobilização de entorses com talas de bambu amarradas com tiras de couro.',
+        icon: '🧗‍♂️🪨',
+        color: '#64748b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      tufaPinnacleAndEndorheicRisk: hazard.tufaPinnacleAndEndorheicRisk,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Bacias Endorreicas e Lagos Salinas) / PHB p. 182-183 (Marcha em Terreno Cáustico) / XGE p. 78-83 (Geomorfologia Química e Pináculos de Tufo)'
+    };
+  }
+
+  // === calcCampTufaPinnacleAndEndorheicStation (Bivaques em Pináculos de Tufo e Alambiques Solares - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampTufaPinnacleAndEndorheicStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'tufa_pinnacle_high_platform_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Plataforma Elevada de Pináculo de Tufo Calcário',
+      tufaPinnacleAnchorageAndGasSafety: 'Plataforma natural talhada no topo de pináculo de tufo a 6 metros acima do nível do lago alcalino; posição imune a gases sulfídricos pesados rasteiros e inundações por seiche lacustre.',
+      solarStillAndPerimeterIsolation: 'Isolamento vertical absoluto contra rastejantes, caranguejos de salmoura e predadores carniceiros que rondam as margens do lago.',
+      campRestAndSafetyGuards: 'Garante descanso longo seguro e reconfortante para os membros da comitiva com posto de sentinela de vigília de 360 graus sobre toda a bacia.',
+      icon: '⛺🗿',
+      color: '#b45309'
+    };
+
+    if (dt === 'condensing_solar_still_pyramid_array') {
+      tech = {
+        defenseTitle: 'Matriz de Alambiques Solares Piramidais de Dessalinização',
+        tufaPinnacleAnchorageAndGasSafety: 'Pirâmides de lona plástica e feltro negro montadas sobre covas de salmoura saturada que aproveitam a radiação do sol para evaporar e condensar água destilada potável.',
+        solarStillAndPerimeterIsolation: 'Produz 15 litros diários de água doce ultra-pura a partir da água imprópria e salobra do lago alcalino sem queimar lenha.',
+        campRestAndSafetyGuards: 'Supre integralmente a cota hídrica diária da comitiva, prevenindo desidratação e falhas nos testes de marcha.',
+        icon: '💧☀️',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'brine_barrier_trench_acid_lime_seal') {
+      tech = {
+        defenseTitle: 'Trincheira de Salmoura Saturada com Selo de Cal Virgem',
+        tufaPinnacleAnchorageAndGasSafety: 'Vala perimetral preenchida com salmoura hipersalina concentrada e óxido de cálcio que queima patas e garras de qualquer criatura que tente rastejar para o acampamento.',
+        solarStillAndPerimeterIsolation: 'Barra insetos venenosos, larvas de mosca de salmoura e sanguessugas de água alcalina.',
+        campRestAndSafetyGuards: 'Permite que a guarda noturna monitore apenas os acessos estreitos de passadiço sem risco de invasão oculta pela lama.',
+        icon: '🛡️🧪',
+        color: '#10b981'
+      };
+    } else if (dt === 'calcite_reflector_smokeless_stove') {
+      tech = {
+        defenseTitle: 'Fogareiro Cônico de Blocos de Calcita com Tiragem Sem Fumaça',
+        tufaPinnacleAnchorageAndGasSafety: 'Fornilho construído com blocos de calcita branca que reflete o calor das brasas para cima sem emitir fumaça densa para a atmosfera aberta.',
+        solarStillAndPerimeterIsolation: 'Aquece rações de viagem e ferve infusões medicinais sem revelar a posição do bivaque para invasores ou patrulhas hostis.',
+        campRestAndSafetyGuards: 'Mantém a comitiva aquecida durante as madrugadas gélidas da bacia salina sem produzir cinzas dispersas.',
+        icon: '🔥🧱',
+        color: '#ea580c'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      tufaPinnacleAnchorageAndGasSafety: tech.tufaPinnacleAnchorageAndGasSafety,
+      solarStillAndPerimeterIsolation: tech.solarStillAndPerimeterIsolation,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Bacias Salinas e Tufo) / PHB p. 150 (Kits de Dessalinização) / XGE p. 78-83 (Engenharia de Plataformas Elevadas e Alambiques Solares)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -21114,6 +21238,8 @@
     calcCampQuartziteCanyonAndPlungeStation: calcCampQuartziteCanyonAndPlungeStation,
     calcWildernessLateriteCrustAndMoundHazard: calcWildernessLateriteCrustAndMoundHazard,
     calcCampLateriteCrustAndMoundStation: calcCampLateriteCrustAndMoundStation,
+    calcWildernessTufaPinnacleAndEndorheicHazard: calcWildernessTufaPinnacleAndEndorheicHazard,
+    calcCampTufaPinnacleAndEndorheicStation: calcCampTufaPinnacleAndEndorheicStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
