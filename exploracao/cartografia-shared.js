@@ -10913,6 +10913,130 @@
     };
   }
 
+  // === calcWildernessBeastLairAndTerritorialAmbushHazard (Ninhos de Feras, Teias Gigantes e Emboscadas Territoriais - DMG p. 105, 110 / MM p. 6) ===
+  function calcWildernessBeastLairAndTerritorialAmbushHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var ht = (hazardType || 'predator_gorge_chokepoint_ambush').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Garganta Estreita com Emboscada de Predador Alfa',
+      saveDC: 15,
+      saveType: 'Sabedoria (Percepção)',
+      ambushDangerAndDamage: 'Ataque surpresa de emboscada; o predador salta das saliências superiores com vantagem e dano crítico potencial.',
+      pioneerMitigation: 'Batedores avançam no topo das cristas para obter linha de visão desobstruída do desfiladeiro abaixo.',
+      counterStrategy: 'Fechar formação em tartaruga com escudos erguidos para cima neutralizando o salto inicial.',
+      icon: '🐾🗡️',
+      color: '#f97316'
+    };
+
+    if (ht === 'spider_silk_web_choke_tunnel' || bk === 'swamp' || bk === 'pantano') {
+      hazard = {
+        hazardTitle: 'Túnel de Galhos Trançados com Teias de Aranha Gigante',
+        saveDC: 13,
+        saveType: 'Destreza',
+        ambushDangerAndDamage: 'Teias viscosas (DMG p. 105); impõe a condição Contido e atrai aranhas monstruosas em 1 rodada.',
+        pioneerMitigation: 'Tochas acesas na vanguarda queimam as teias rapidamente (causa 2d4 de dano de fogo à vegetação de teias).',
+        counterStrategy: 'Lâminas cortantes com teste de Força CD 12 rasgam os fios grossos liberando os companheiros presos.',
+        icon: '🕸️🕷️',
+        color: '#a855f7'
+      };
+    } else if (ht === 'wyvern_roost_cliff_fall_zone' || bk === 'mountain' || bk === 'montanha') {
+      hazard = {
+        hazardTitle: 'Penhasco Sob Ninho de Serpes com Desabamento de Ossadas',
+        saveDC: 14,
+        saveType: 'Destreza',
+        ambushDangerAndDamage: 'Carcaças e pedregulhos arremessados do alto do ninho causando 3d10 de concussão e risco de queda.',
+        pioneerMitigation: 'Avançar colado às fendas da parede rochosa onde o ângulo de arremesso do ninho fica bloqueado.',
+        counterStrategy: 'Manter arqueiros com virotes prontos para suprimir a serpe sentinela no momento da decolagem.',
+        icon: '🦅🪨',
+        color: '#ef4444'
+      };
+    } else if (ht === 'territorial_alpha_musk_scent_boundary') {
+      hazard = {
+        hazardTitle: 'Marcação Territorial de Urso-Coruja com Garras em Troncos',
+        saveDC: 14,
+        saveType: 'Sabedoria (Sobrevivência)',
+        ambushDangerAndDamage: 'Invasão acidental de território de reprodução desencadeando fúria implacável e perseguição veloz.',
+        pioneerMitigation: 'Identificar as marcas de arranhão a 3 metros de altura e o odor almiscarado antes de adentrar a ravina.',
+        counterStrategy: 'Contornar o perímetro do covil contra o vento sem fazer ruídos ou disparar o alarme animal.',
+        icon: '🐻🌲',
+        color: '#eab308'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      ambushDangerAndDamage: hazard.ambushDangerAndDamage,
+      pioneerMitigation: hazard.pioneerMitigation,
+      counterStrategy: hazard.counterStrategy,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 105, 110 (Covis, Emboscadas e Armadilhas Naturais) / MM p. 6 / PHB p. 183'
+    };
+  }
+
+  // === calcCampTripwireAlarmAndDefensiveSnare (Alarmes de Tropeço, Abátis de Estacas e Cercado Defensivo - DMG p. 111-112 / PHB p. 151-152) ===
+  function calcCampTripwireAlarmAndDefensiveSnare(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var dt = (defenseType || 'concealed_tripwire_tin_rattle').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Fio de Tropeço com Latas e Guizos Sonoros de Alerta',
+      alarmPerimeterRange: 'Perímetro circular esticado a 15 metros ao redor do acampamento a 20 cm do solo.',
+      surprisePreventionRating: 'Garante que invasores noturnos não consigam surpreender a comitiva; acorda sentinelas instantaneamente.',
+      intruderDeterrence: 'O retinir metálico assusta predadores menores e revela a posição exata da incursão na escuridão.',
+      icon: '🔔🏕️',
+      color: '#38bdf8'
+    };
+
+    if (dt === 'sharpened_stake_abatis_perimeter') {
+      defense = {
+        defenseTitle: 'Cercado de Estacas Pontiagudas Endurecidas ao Fogo (Abátis)',
+        alarmPerimeterRange: 'Barreira física densa de galhos grossos apontados a 45 graus contornando as tendas.',
+        surprisePreventionRating: 'Terreno difícil intransponível para investidas rápidas; invasores que saltam sofrem 2d6 de dano perfurante.',
+        intruderDeterrence: 'Força feras e bandidos a buscar passagens estreitas canalizando-os diretamente para o campo de tiro.',
+        icon: '🪵⚔️',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'perimeter_deadfall_snare_loop') {
+      defense = {
+        defenseTitle: 'Laços de Gatilho com Tronco Suspenso em Trilhas de Acesso',
+        alarmPerimeterRange: 'Armadilhas de laço dispostas nas 3 principais rotas de aproximação furtiva do acampamento.',
+        surprisePreventionRating: 'Invasores que tropeçam no laço fazem salvaguarda de Destreza CD 13 ou ficam Contidos suspensos pela perna.',
+        intruderDeterrence: 'Imobiliza batedores hostis silenciosamente antes que consigam lançar flechas contra as barracas.',
+        icon: '🪢🌲',
+        color: '#84cc16'
+      };
+    } else if (dt === 'crushed_dry_twig_scatter_carpet') {
+      defense = {
+        defenseTitle: 'Tapete de Gravetos Secos Estaladiços e Conchas Trituradas',
+        alarmPerimeterRange: 'Faixa perimetral de 5 metros de largura ao redor do círculo de sacos de dormir.',
+        surprisePreventionRating: 'Impõe desvantagem em testes de Destreza (Furtividade) de qualquer criatura que tente caminhar no escuro.',
+        intruderDeterrence: 'O estalar de gravetos secos sob as patas quebra qualquer aproximação silenciosa a até 20 metros.',
+        icon: '🍂👂',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: defense.defenseTitle,
+      alarmPerimeterRange: defense.alarmPerimeterRange,
+      surprisePreventionRating: defense.surprisePreventionRating,
+      intruderDeterrence: defense.intruderDeterrence,
+      icon: defense.icon,
+      color: defense.color,
+      dndRef: 'DMG p. 111-112 (Acampamento Seguro e Perímetros) / PHB p. 151-152 (Armadilhas e Alarmes) / XGE p. 78'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -12674,6 +12798,8 @@
     calcCampWindbreakPalisadeAndGuylineBracing: calcCampWindbreakPalisadeAndGuylineBracing,
     calcWildernessCausticBogAndMiasmaHazard: calcWildernessCausticBogAndMiasmaHazard,
     calcCampBootDryingAndFootwearCare: calcCampBootDryingAndFootwearCare,
+    calcWildernessBeastLairAndTerritorialAmbushHazard: calcWildernessBeastLairAndTerritorialAmbushHazard,
+    calcCampTripwireAlarmAndDefensiveSnare: calcCampTripwireAlarmAndDefensiveSnare,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
