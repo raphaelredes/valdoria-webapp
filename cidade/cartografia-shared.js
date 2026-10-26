@@ -15625,6 +15625,130 @@
     };
   }
 
+  // === calcWildernessColumnarBasaltAndJointSpallingHazard (Basalto Colunar, Prismas Disjuntivos e Cascalheiras Hexagonais - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78) ===
+  function calcWildernessColumnarBasaltAndJointSpallingHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'columnar_joint_spalling_toppling').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Descolamento e Tombamento de Prisma Basáltico',
+      saveDC: 15,
+      saveType: 'Destreza',
+      columnarBasaltRiskAndScree: 'Pilar basáltico hexagonal de 12 metros sofre descompressão térmica e tomba transversalmente sobre a trilha; chuva de blocos pesados causando 3d8 de dano contundente e soterramento parcial (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avaliam fraturas de tensão com martelo geológico e identificam juntas disjuntivas soltas antes de permitir a passagem do grupo.',
+      rescueAndStabilization: 'Alavancas com cunhas de ferro temperado e tração com cordas para desobstruir membros comprimidos sob os prismas.',
+      icon: '🏛️💥',
+      color: '#475569'
+    };
+
+    if (ht === 'hexagonal_scree_talus_sliding') {
+      hazard = {
+        hazardTitle: 'Deslizamento em Cascalheira Hexagonal Solta',
+        saveDC: 14,
+        saveType: 'Destreza',
+        columnarBasaltRiskAndScree: 'Ladeira íngreme formada por fragmentos poligonais facetados e cortantes que rolam em avalanche sob o peso dos passos; 2d6 de dano de corte/contundente e queda de 6 metros.',
+        pioneerMitigation: 'Instalação de linhas-guia fixadas em fendas consolidadas e uso de bastões de marcha com ponteira temperada.',
+        rescueAndStabilization: 'Imobilização de membros torcidos com talas rígidas de freixo e curativos compressivos contra lacerações.',
+        icon: '⛰️⚠️',
+        color: '#d97706'
+      };
+    } else if (ht === 'wind_whistle_blind_chasm_vortex') {
+      hazard = {
+        hazardTitle: 'Vórtice Eólico e Assobios Ressonantes nas Fendas',
+        saveDC: 13,
+        saveType: 'Constituição',
+        columnarBasaltRiskAndScree: 'Rajadas em funil que ecoam entre as colunas com volume ensurdecedor; perturbação no equilíbrio corporal e risco de surdez temporária na travessia de arestas estreitas.',
+        pioneerMitigation: 'Uso de protetores auriculares de cera vegetal e travessia agachada em cordada tripla.',
+        rescueAndStabilization: 'Aplicação de gotas mornas de óleo de amêndoas nos ouvidos e repouso em abrigo com abafamento sonoro.',
+        icon: '💨👂',
+        color: '#0284c7'
+      };
+    } else if (ht === 'sharp_hexagonal_edge_trip_and_fall') {
+      hazard = {
+        hazardTitle: 'Queda em Arestas Prismáticas Cortantes de Basalto',
+        saveDC: 14,
+        saveType: 'Destreza',
+        columnarBasaltRiskAndScree: 'Tropeço sobre degraus poligonais com bordas vítreas afiadas como lâminas; 2d6 de dano perfurante/cortante e rompimento de tiras de mochilas e arreios.',
+        pioneerMitigation: 'Avanço com passos curtos e compassados usando botas reforçadas com caneleiras de sola dupla.',
+        rescueAndStabilization: 'Sutura de cortes com linha encerada esterilizada e reposição de correias de carga sobressalentes.',
+        icon: '🔪🩸',
+        color: '#dc2626'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      columnarBasaltRiskAndScree: hazard.columnarBasaltRiskAndScree,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Desfiladeiros, Desmoronamentos e Terreno Íngreme) / PHB p. 182-183 (Marcha Forçada e Quedas) / XGE p. 78 (Ferramentas de Pedreiro)'
+    };
+  }
+
+  // === calcCampColumnarBasaltPrismAnchorageAndShelfStation (Grampos Mecânicos em Prismas, Bivaques em Balcões e Para-Raios - DMG p. 111 / PHB p. 150 / XGE p. 78) ===
+  function calcCampColumnarBasaltPrismAnchorageAndShelfStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'stepped_hexagonal_shelf_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Balcão Hexagonal Escalonado',
+      basaltAnchorageAndStructuralSafety: 'Terraço suspenso natural de 3 prismas nivelados a 8 metros do chão do canyon; isola o acampamento de inundações relâmpago e animais terrestres.',
+      jointSpallingShieldAndCampSecurity: 'Bordas contidas por parapeitos de sacos de cascalho compactado que impedem rolagens acidentais durante a noite.',
+      campRestAndSafetyGuards: 'Permite sono longo tranquilo e seguro para a comitiva com campo de visão dominante sobre o canyon.',
+      icon: '🏛️⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'expansion_prism_cam_and_anchor_array') {
+      tech = {
+        defenseTitle: 'Sistema de Grampos Mecânicos de Expansão para Juntas Prismáticas',
+        basaltAnchorageAndStructuralSafety: 'Entaladores de mola e cunhas metálicas que se fixam firmemente nas juntas disjuntivas hexagonais sem faturar a rocha.',
+        jointSpallingShieldAndCampSecurity: 'Cria pontos de ancoragem infalíveis para redes suspensas, amarras de barracas e içamento seguro de mochilas.',
+        campRestAndSafetyGuards: 'Impede que vendavais do desfiladeiro arranquem lonas ou derrubem equipamentos bivaqueados.',
+        icon: '🪝🔩',
+        color: '#6366f1'
+      };
+    } else if (dt === 'magnetic_ironstone_lightning_ground_rod') {
+      tech = {
+        defenseTitle: 'Haste de Aterramento Mineral e Para-Raios de Fenda',
+        basaltAnchorageAndStructuralSafety: 'Pino condutor de cobre cravado em veio de magnetita basáltica com cabo direcionador para o leito do desfiladeiro.',
+        jointSpallingShieldAndCampSecurity: 'Dissipa descargas elétricas de tempestades montanhosas sem expor o platô dos aventureiros a raios diretos.',
+        campRestAndSafetyGuards: 'Elimina o risco de choque atmosférico e assegura vigília serena das sentinelas mesmo sob temporais.',
+        icon: '⚡🛡️',
+        color: '#eab308'
+      };
+    } else if (dt === 'windbreak_stone_baffle_wall') {
+      tech = {
+        defenseTitle: 'Muralha Defletora de Vento com Blocos Hexagonais Secos',
+        basaltAnchorageAndStructuralSafety: 'Anteparo erguido com prismas basálticos fraturados dispostos em ziguezague contra o canal de ventilação do canyon.',
+        jointSpallingShieldAndCampSecurity: 'Reduz a força do vento cortante em 90% e conserva o calor das fogueiras de bivaque na concavidade da rocha.',
+        campRestAndSafetyGuards: 'Concede repouso térmico aquecido e protegido para o grupo, prevenindo exaustão por frio noturno.',
+        icon: '🧱🔥',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      basaltAnchorageAndStructuralSafety: tech.basaltAnchorageAndStructuralSafety,
+      jointSpallingShieldAndCampSecurity: tech.jointSpallingShieldAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Terraços Naturais) / PHB p. 150 (Kit de Escalador, Grampos e Pitons) / XGE p. 78 (Ferramentas de Pedreiro)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -17460,6 +17584,8 @@
     calcCampObsidianSpirePaddedBivouacAndResonatorStation: calcCampObsidianSpirePaddedBivouacAndResonatorStation,
     calcWildernessBrackishMarshAndMacrophyteHazard: calcWildernessBrackishMarshAndMacrophyteHazard,
     calcCampBrackishMarshFloatingPlatformAndFilterStation: calcCampBrackishMarshFloatingPlatformAndFilterStation,
+    calcWildernessColumnarBasaltAndJointSpallingHazard: calcWildernessColumnarBasaltAndJointSpallingHazard,
+    calcCampColumnarBasaltPrismAnchorageAndShelfStation: calcCampColumnarBasaltPrismAnchorageAndShelfStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
