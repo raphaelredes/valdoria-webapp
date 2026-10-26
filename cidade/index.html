@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessCryogenicPingoAndThermokarstHazard) return '';
+        var bKey = (biome && biome.key) || 'tundra';
+        var pg = CartShared.calcWildernessCryogenicPingoAndThermokarstHazard(bKey, 'pingo_ice_core_collapse_sink');
+        return '<div class="clp-cryogenic-pingo-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,28,36,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(2,132,199,0.3);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + pg.color + ';margin-bottom:2px;">' + pg.icon + ' ' + pg.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Pingo e Termocarste:</b> ' + pg.cryogenicPingoRiskAndThermokarst + ' (CD ' + pg.saveDC + ' [' + pg.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Mitigação:</b> ' + pg.pioneerMitigation + ' · <i>Estabilização: ' + pg.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampCryogenicPingoMoundAndDeckStation) return '';
+        var bKey = (biome && biome.key) || 'tundra';
+        var cp = CartShared.calcCampCryogenicPingoMoundAndDeckStation(bKey, 'pingo_summit_dry_mound_bivouac');
+        return '<div class="clp-pingo-mound-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,34,28,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#ecfdf5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Pingo:</b> ' + cp.pingoAnchorageAndPermafrostSafety + ' · <b>Proteção:</b> ' + cp.thermokarstShieldingAndCampSecurity + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessTravertineTerraceAndCascadeHazard) return '';
         var bKey = (biome && biome.key) || 'river';
         var tr = CartShared.calcWildernessTravertineTerraceAndCascadeHazard(bKey, 'rimstone_fragile_lip_collapse');

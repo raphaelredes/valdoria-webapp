@@ -17361,6 +17361,130 @@
     };
   }
 
+  // === calcWildernessCryogenicPingoAndThermokarstHazard (Domos Pingo, Degelo Termocárstico e Permafrost - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessCryogenicPingoAndThermokarstHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'tundra').toLowerCase();
+    var ht = (hazardType || 'pingo_ice_core_collapse_sink').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso de Domo Pingo por Ruptura de Núcleo de Gelo',
+      saveDC: 15,
+      saveType: 'Destreza',
+      cryogenicPingoRiskAndThermokarst: 'Montículo criógeno com núcleo de gelo maciço de 20 metros que implode subitamente pelo degelo da base; cratera de lama congelada e blocos pontiagudos de gelo causando 3d6 contundente e hipotermia (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores usam sondas graduadas de perfuração térmica para checar a solidez da cobertura de turfa e contornam cumes com fendas radiais ativas.',
+      rescueAndStabilization: 'Extração rápida com escadas de corda duplas, remoção de vestimentas encharcadas e aquecimento corporal progressivo com pedras aquecidas na brasa.',
+      icon: '🏔️⚠️',
+      color: '#0284c7'
+    };
+
+    if (ht === 'thermokarst_bog_morass_quicksand') {
+      hazard = {
+        hazardTitle: 'Atolamento em Lamaçal Termocárstico Frio de Turfa Instável',
+        saveDC: 14,
+        saveType: 'Força',
+        cryogenicPingoRiskAndThermokarst: 'Solo de tundra aparentemente firme que se liquefaz sob o peso da coluna de marcha em uma pasta viscosa de solo descongelado a 2°C, sugando membros e bagagens.',
+        pioneerMitigation: 'Marcha em fila com raquetes de neve e galhos entrelaçados para distribuição de pressão, mantendo cordas de segurança tensionadas entre exploradores.',
+        rescueAndStabilization: 'Tracionamento horizontal através de tábuas de apoio para evitar o efeito ventosa e massagem vigorosa com óleo de pinho para reativar circulação periférica.',
+        icon: '🧊🕳️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'subsurface_methane_crater_blowout') {
+      hazard = {
+        hazardTitle: 'Erupção Explosiva de Bolha de Metano Subglacial em Pingo',
+        saveDC: 14,
+        saveType: 'Destreza',
+        cryogenicPingoRiskAndThermokarst: 'Bolsão de gás acumulado sob alta pressão sob a carapaça de permafrost que se rompe com estrondo ensurdecedor, projetando blocos de gelo fóssil e poeira asfixiante.',
+        pioneerMitigation: 'Sentinelas farejam odores fétidos de turfeira fermentada e utilizam tochas indicadoras para demarcar zonas de exsudação gasosa a distância segura.',
+        rescueAndStabilization: 'Retirada imediata para barlavento, lavagem das vias aéreas com infusão de hortelã e imobilização de contusões por detritos projetados.',
+        icon: '💥💨',
+        color: '#dc2626'
+      };
+    } else if (ht === 'catastrophic_thaw_lake_drainage_surge') {
+      hazard = {
+        hazardTitle: 'Drenagem Catastrófica de Lago de Degelo com Onda de Lama',
+        saveDC: 13,
+        saveType: 'Força',
+        cryogenicPingoRiskAndThermokarst: 'Lago termocárstico cuja margem congelada se rompe bruscamente, esvaziando milhares de metros cúbicos de água gelada e lama fluida ravina abaixo.',
+        pioneerMitigation: 'Mapeamento de terraços lacustres suspensos e evasão rápida para cristas rochosas de afloramento maciço ao primeiro sinal de escoamento turbulento.',
+        rescueAndStabilization: 'Içamento com arpões de fixação rápida e fornecimento imediato de caldo quente concentrado e trocas secas de roupas de lã forrada.',
+        icon: '🌊❄️',
+        color: '#0891b2'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      cryogenicPingoRiskAndThermokarst: hazard.cryogenicPingoRiskAndThermokarst,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Terrenos de Permafrost e Tundra Gelada) / PHB p. 182-183 (Marcha no Gelo) / XGE p. 78-83 (Geomorfologia Glacial e Criogênica)'
+    };
+  }
+
+  // === calcCampCryogenicPingoMoundAndDeckStation (Bivaques em Cume de Pingo, Estrados Articulados e Sifões - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampCryogenicPingoMoundAndDeckStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'tundra').toLowerCase();
+    var dt = (defenseType || 'pingo_summit_dry_mound_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque no Cume Drenado de Pingo Estável com Barreira Térmica',
+      pingoAnchorageAndPermafrostSafety: 'Colina criógena madura com cume convexo naturalmente drenado a 15 metros acima do pântano de degelo circundante; base de turfa espessa que atua como colchão isolante.',
+      thermokarstShieldingAndCampSecurity: 'Totalmente imune a enxurradas e inundações repentinas de lagos termocársticos, oferecendo visão panorâmica de 360 graus contra aproximação furtiva.',
+      campRestAndSafetyGuards: 'Permite sono longo aquecido e seco para os membros da comitiva, protegendo contra a umidade penetrante do solo polar.',
+      icon: '🏔️⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'permafrost_timber_grillage_platform') {
+      tech = {
+        defenseTitle: 'Estrado Articulado de Troncos sobre Solo de Permafrost',
+        pingoAnchorageAndPermafrostSafety: 'Grelha flutuante de toras de bétula amarradas que dispersa a carga do acampamento e impede que o calor das tendas derreta a camada de gelo subjacente.',
+        thermokarstShieldingAndCampSecurity: 'Evita a formação de poças de lama sob as camas e impede a deformação de mastros e estacas durante a noite.',
+        campRestAndSafetyGuards: 'Garante piso firme e nivelado para movimentação segura das sentinelas durante seus turnos de vigília.',
+        icon: '🪵🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'thaw_lake_meltwater_siphon_purifier') {
+      tech = {
+        defenseTitle: 'Sifão de Captação Subglacial com Decantador Cerâmico',
+        pingoAnchorageAndPermafrostSafety: 'Mangueira semirrígida que capta água pura do degelo profundo de lente de gelo fóssil, antes do contato com a matéria orgânica da turfeira ácida.',
+        thermokarstShieldingAndCampSecurity: 'Garante 12 litros diários de água cristalina de altitude livre de esporos bacterianos e acidez húmica de pântano.',
+        campRestAndSafetyGuards: 'Abastece integralmente as reservas de hidratação e poções da comitiva sem necessidade de ferver lodo.',
+        icon: '💧🏺',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'cryo_trench_thermal_windbreak') {
+      tech = {
+        defenseTitle: 'Trincheira Térmica de Barlavento com Para-Vento de Ramos',
+        pingoAnchorageAndPermafrostSafety: 'Vala semicircular escavada na encosta do pingo guarnecida com painéis entrelaçados de ramos de salgueiro-anão para desviar o vento polar.',
+        thermokarstShieldingAndCampSecurity: 'Corta em até 70% o vento cortante e conserva as brasas do fogo de acampamento acesas até a aurora.',
+        campRestAndSafetyGuards: 'Evita casos de congelamento superficial em extremidades dos sentinelas expostos.',
+        icon: '🛡️❄️',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      pingoAnchorageAndPermafrostSafety: tech.pingoAnchorageAndPermafrostSafety,
+      thermokarstShieldingAndCampSecurity: tech.thermokarstShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques na Tundra e Regiões Polares) / PHB p. 150 (Kits de Exploração Ártica) / XGE p. 78-83 (Engenharia em Solos Congelados)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -19224,6 +19348,8 @@
     calcCampGraniteInselbergFlakeRoofAndSiphonStation: calcCampGraniteInselbergFlakeRoofAndSiphonStation,
     calcWildernessTravertineTerraceAndCascadeHazard: calcWildernessTravertineTerraceAndCascadeHazard,
     calcCampTravertineTerraceAndCascadeFilterStation: calcCampTravertineTerraceAndCascadeFilterStation,
+    calcWildernessCryogenicPingoAndThermokarstHazard: calcWildernessCryogenicPingoAndThermokarstHazard,
+    calcCampCryogenicPingoMoundAndDeckStation: calcCampCryogenicPingoMoundAndDeckStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
