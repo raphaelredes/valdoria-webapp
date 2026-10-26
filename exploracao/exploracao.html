@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T19:11:34Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T19:14:08Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessAlpineRockGlacierHazard) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var rg = CartShared.calcWildernessAlpineRockGlacierHazard(bKey, 'oversteepened_rock_glacier_snout_boulder_cascade_avalanche');
+        return '<div class="clp-alpine-rock-glacier-card" style="margin:4px 0 6px;text-align:left;background:rgba(16,22,30,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(100,116,139,0.35);font-size:8px;color:#f1f5f9;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + rg.color + ';margin-bottom:2px;">' + rg.icon + ' ' + rg.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Geleiras de Rocha Alpinas:</b> ' + rg.rockGlacierRisk + ' (CD ' + rg.saveDC + ' [' + rg.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#cbd5e1;margin-top:1px;">• <b>Mitigação:</b> ' + rg.pioneerMitigation + ' · <i>Estabilização: ' + rg.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampAlpineRockGlacierStation) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var rc = CartShared.calcCampAlpineRockGlacierStation(bKey, 'relict_inactive_fossil_rock_glacier_lobe_bivouac');
+        return '<div class="clp-alpine-rock-glacier-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,18,26,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(148,163,184,0.3);font-size:8px;color:#f1f5f9;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + rc.color + ';margin-bottom:2px;">' + rc.icon + ' ' + rc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Lóbulo Fóssil Estabilizado:</b> ' + rc.rockGlacierAndCampSafety + ' · <b>Defesa:</b> ' + rc.rockGlacierTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#94a3b8;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + rc.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

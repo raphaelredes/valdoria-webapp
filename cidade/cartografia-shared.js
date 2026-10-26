@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 219: GELEIRAS DE ROCHA ALPINAS E TALUDES DE PERMAFROST (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessAlpineRockGlacierHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'oversteepened_rock_glacier_snout_boulder_cascade_avalanche').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desmoronamento da Frente Íngreme (Snout) de Geleira de Rocha em Rastejo',
+      saveDC: 15,
+      saveType: 'Destreza',
+      rockGlacierRisk: 'Línguas colossais de detritos rochosos cimentados internamente por um núcleo de gelo plástico que escorrem pelo vale alpino a centímetros por dia, mantendo uma parede frontal de 40 metros inclinada a 42 graus além do equilíbrio natural; o empuxo do gelo interno cospe matacões angulares continuamente do topo da frente, bombardeando a comitiva com 4d8 de concussão (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Jamais subir diretamente pela rampa frontal cinza-clara; contornar pelo sulco lateral entre a geleira de rocha e a parede do vale.',
+      rescueAndStabilization: 'Abrigo imediato atrás de megablocos estacionários na morena lateral e uso de talas.',
+      icon: '🏔️🪨',
+      color: '#64748b'
+    };
+
+    if (ht === 'transverse_compression_furrow_crevasse_interstitial_ice_slip') {
+      hazard = {
+        hazardTitle: 'Queda em Sulco Transversal de Compressão com Fundo de Gelo Negro',
+        saveDC: 15,
+        saveType: 'Destreza',
+        rockGlacierRisk: 'A superfície da geleira de rocha é enrugada como lava pahoehoe gigante em cristas e sulcos arqueados de 8 metros de profundidade; no fundo sombrio dos sulcos aflora o núcleo de gelo intersticial liso como espelho onde o aventureiro escorrega para fendas estreitas entre blocos congelados sofrendo 2d6 de concussão mais 2d6 de frio (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Marcha ao longo da crista longitudinal de uma ruga de compressão sem descer aos vales transversais.',
+        rescueAndStabilization: 'Talha de degraus no gelo intersticial com piqueta e içamento por corda dupla.',
+        icon: '🧊🕳️',
+        color: '#38bdf8'
+      };
+    } else if (ht === 'thermokarst_meltout_funnel_collapse_into_englacial_conduit') {
+      hazard = {
+        hazardTitle: 'Colapso de Funil de Degelo para Conduto Englacial Subterrâneo',
+        saveDC: 15,
+        saveType: 'Força',
+        rockGlacierRisk: 'O derretimento localizado do núcleo de gelo abre crateras cônicas instáveis no manto de pedras (funis de termocarste) cujo fundo comunica diretamente com rios pressurizados dentro da geleira de rocha; pisar na borda faz o anel de cascalho ceder em espiral sugando o explorador para a água a zero grau com 2d8 de concussão e hipotermia (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Desviar por pelo menos dez metros de qualquer depressão circular onde as pedras pareçam lavadas ou úmidas.',
+        rescueAndStabilization: 'Tracionamento imediato por linha de segurança e reaquecimento de emergência.',
+        icon: '🌀❄️',
+        color: '#0284c7'
+      };
+    } else if (ht === 'shifting_active_layer_boulder_carapace_ankle_pinch_maze') {
+      hazard = {
+        hazardTitle: 'Carapaça Móvel da Camada Ativa de Blocos Soltos Sobre Gelo Escorregadio',
+        saveDC: 14,
+        saveType: 'Destreza',
+        rockGlacierRisk: 'A camada superior de 2 metros de matacões descongelados desliza livremente sobre o topo lubrificado do núcleo de gelo subjacente; cada passo provoca um rearranjo surdo de dezenas de pedras interligadas que abrem e fecham como mandíbulas, esmagando botas e tornozelos com 2d8 de concussão (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Selecionar apenas os maiores blocos tabulares (>3 metros) que já assentaram diretamente no núcleo congelado.',
+        rescueAndStabilization: 'Destravamento do bloco com alavanca metálica e bandagem firme de suporte.',
+        icon: '🥾🪨',
+        color: '#94a3b8'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampAlpineRockGlacierStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'relict_inactive_fossil_rock_glacier_lobe_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Lóbulo Fóssil de Geleira de Rocha Inativa (Coberta por Líquens)',
+      rockGlacierAndCampSafety: 'Acampamento instalado sobre um terraço inferior antigo cujo núcleo de gelo já derreteu há milênios, reconhecível pela cobertura densa de líquens pretos e verdes nos blocos imóveis.',
+      rockGlacierTrenchAndWatch: 'Piso rochoso perfeitamente consolidado, sem movimento de rastejo ou queda de blocos.',
+      campRestAndSafetyGuards: 'Garante descanso longo seguro e elevado acima do fundo úmido do vale.',
+      icon: '⛺🏔️',
+      color: '#64748b'
+    };
+
+    if (dt === 'rock_glacier_toe_ultracold_perennial_spring_tap') {
+      tech = {
+        defenseTitle: 'Captação na Nascente Perene a 1 Grau na Base da Frente de Talude',
+        rockGlacierAndCampSafety: 'Coleta de água na fonte cristalina que emerge na base lateral segura da geleira de rocha, filtrada por quilômetros de gelo interno e cascalho.',
+        rockGlacierTrenchAndWatch: 'Mantém vazão constante e pureza mineral absoluta mesmo quando todos os córregos superficiais secam no fim do verão.',
+        campRestAndSafetyGuards: 'Supre toda a comitiva com água potável de altíssima qualidade.',
+        icon: '💧🧊',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'compression_ridge_crest_dry_stone_wind_redoubt') {
+      tech = {
+        defenseTitle: 'Reduto Corta-Vento de Pedra Seca na Crista de Ruga Estabilizada',
+        rockGlacierAndCampSafety: 'Mureta semicircular erguida com lajes de gnaisse no topo de uma crista arqueada consolidada.',
+        rockGlacierTrenchAndWatch: 'Protege as barracas do vento catabático gelado que desce da cabeceira do circo glacial.',
+        campRestAndSafetyGuards: 'Oferece posição defensiva elevada com visão desimpedida das encostas.',
+        icon: '🪨🛡️',
+        color: '#94a3b8'
+      };
+    } else if (dt === 'painted_cairn_line_and_tension_wire_creep_monitor') {
+      tech = {
+        defenseTitle: 'Alinhamento de Marcas de Giz e Fio Tensor de Monitoramento de Blocos',
+        rockGlacierAndCampSafety: 'Fio fino esticado entre três matacões periféricos com sineta metálica para acusar qualquer acomodação noturna da camada ativa.',
+        rockGlacierTrenchAndWatch: 'Alerta os sentinelas segundos antes que um reajuste do talude ameace as tendas.',
+        campRestAndSafetyGuards: 'Assegura vigilância mecânica contínua durante o pernoite alpino.',
+        icon: '🔔📐',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 218: ESTROMATOLITOS HIPERSALINOS E TAPETES MICROBIANOS (D&D 5e)
   // =========================================================================
 
@@ -30556,6 +30660,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessAlpineRockGlacierHazard: calcWildernessAlpineRockGlacierHazard,
+    calcCampAlpineRockGlacierStation: calcCampAlpineRockGlacierStation,
     calcWildernessStromatoliteBiohermHazard: calcWildernessStromatoliteBiohermHazard,
     calcCampStromatoliteBiohermStation: calcCampStromatoliteBiohermStation,
     calcWildernessGlaciolacustrineHoodooHazard: calcWildernessGlaciolacustrineHoodooHazard,
