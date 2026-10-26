@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 268: DIQUES DE PEGMATITO E CAVIDADES MIROLÍTICAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessPegmatiteDikeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var ht = (hazardType || 'miarolitic_pocket_roof_crystal_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso em Teto Cristalizado de Cavidade Mirolítica',
+      saveDC: 15,
+      saveType: 'Destreza',
+      pegmatiteRisk: 'O núcleo do dique de pegmatito encerra bolsões ocos (geodos gigantes) forrados por prismas colossais de quartzo e berilo afiados como lanças; ao pisar sobre essa crosta oca fraturada, o teto cede sob o peso da comitiva em queda vertical de 6 metros sobre pontas cristalinas pontiagudas causando 3d8 de dano perfurante e laceração de botas e correias (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores sondando as lajes de feldspato com martelos pesados para escutar o eco oco de cavidades subterrâneas e fincando cordas de segurança (Sobrevivência ou Natureza CD 14).',
+      rescueAndStabilization: 'Içamento vertical com talha de escalada e aplicação de unguento hemostático em lacerações causadas por lascas de quartzo (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🔮',
+      color: '#c084fc'
+    };
+
+    if (ht === 'cleavage_mica_book_slip_chasm') {
+      hazard.hazardTitle = 'Deslizamento em Laje de Clivagem de Muscovita Gigante';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Destreza';
+      hazard.pegmatiteRisk = 'Encostas íngremes do pegmatito expõem pacotes de folhas gigantescas de mica (muscovita) que se soltam em lâminas flexíveis e escorregadias como graxa; pisar no plano de clivagem desestabiliza a marcha e arremessa o aventureiro desgovernado encosta abaixo com 3d6 de concussão e perda de tração de carga (DMG p. 110; PHB p. 182).';
+      hazard.pioneerMitigation = 'Uso de calçados com travas pontiagudas de aço e contorno cauteloso de veios micáceos reluzentes (Atletismo ou Sobrevivência CD 14).';
+      rescueAndStabilization = 'Contenção de queda com laço de corda reforçada e aplicação de compressas para contusões articulares (Atletismo CD 13 ou Medicina CD 12).';
+    } else if (ht === 'pneumatolytic_radon_gas_pocket_rupture') {
+      hazard.hazardTitle = 'Ruptura Pneumatolítica de Bolsão de Gases Tóxicos';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Constituição';
+      hazard.pegmatiteRisk = 'A bertura acidental de uma câmara selada de cristalização magmática libera vapores residuais altamente ionizados de radônio e ácido fluorídrico concentrados; a inalação involuntária causa queimação broncopulmonar aguda, 3d6 de dano de veneno e cegueira transitória por irritação ocular química (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Identificação de eflorescências coloridas de flúor e detecção de odores acres antes de romper qualquer cavidade cristalina (Percepção CD 14).';
+      hazard.rescueAndStabilization = 'Evacuação imediata a barlavento e lavagem de olhos e garganta com leite e soro fisiológico (Medicina CD 13).';
+    } else if (ht === 'giant_spodumene_crystal_avalanche') {
+      hazard.hazardTitle = 'Avalanche de Cristais Gigantes de Espodumênio e Feldspato';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.pegmatiteRisk = 'Taludes escarpados do pegmatito acumulam monólitos soltos de cristais de espodumênio de até três metros de comprimento em equilíbrio precário; a tentativa de minerar gemas brutas desaba uma enxurrada de pedregulhos cristalinos densos que causam 2d10 de dano contundente por impacto e esmagamento (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Proibição de mineração desordenada na base de taludes e estabelecimento de barreiras de contenção com cabos de aço (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Escavação manual ágil com alavancas de ferro para desvencilhar membros prensados sob megacristais (Força [Atletismo] CD 14).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampPegmatiteDikeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var dt = (defenseType || 'feldspar_mega_crystal_alcove_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Alcova de Megacristal de Feldspato',
+      pegmatiteAndCampSafety: 'O acampamento é montado no recesso natural esculpido em um cristal colossal de feldspato de cinco metros; as paredes de rocha ígnea ultra-densa oferecem isolamento térmico perfeito e teto impenetrável imune a desabamentos ou umidade (DMG p. 111).',
+      pegmatiteTrenchAndWatch: 'Entrada estreita de fácil defesa guarnecida por blocos minerais que canalizam aproximações hostis, concedendo +2 de bônus na Percepção Passiva das sentinelas.',
+      campRestAndSafetyGuards: 'Descanso longo tranquilo em abrigo estável protegido contra tempestades de montanha e predadores errantes.',
+      icon: '🛡️',
+      color: '#c084fc'
+    };
+
+    if (dt === 'quartz_cleavage_water_catchment_sluice') {
+      defense.defenseTitle = 'Canaleta de Captação em Veio de Quartzo Puro';
+      defense.pegmatiteAndCampSafety = 'Canalização artesanal aproveitando uma fenda lisa de quartzo translúcido que escorre água pura de orvalho e degelo, totalmente livre de contaminação por argilas ou toxinas minerais (PHB p. 150).';
+      defense.pegmatiteTrenchAndWatch = 'Fornece suprimento abundante de água potável límpida e fresca para cantis e animais durante o repouso da comitiva.';
+      defense.campRestAndSafetyGuards = 'Restauração física ideal com hidratação mineral pura sem risco de febres intestinais.';
+    } else if (dt === 'mica_sheet_spark_and_wind_baffle') {
+      defense.defenseTitle = 'Pára-Vento e Escudo de Faíscas em Placas de Mica';
+      defense.pegmatiteAndCampSafety = 'Mureta protetora erguida com placas laminares translúcidas de muscovita gigante sobrepostas como escamas minerais, absolutamente incombustíveis e impermeáveis ao vento cortante (PHB p. 185).';
+      defense.pegmatiteTrenchAndWatch = 'Concede cobertura total (+5 na CA) contra arqueiros na escuridão e bloqueia faíscas da fogueira de atingirem as tendas de lona.';
+      defense.campRestAndSafetyGuards = 'Elimina correntes de ar gélidas mantendo o interior do bivaque aquecido e protegido.';
+    } else if (dt === 'miarolitic_gem_pocket_watchpost') {
+      defense.defenseTitle = 'Posto de Vigia em Cavidade Mirolítica de Crista';
+      defense.pegmatiteAndCampSafety = 'Nicho elevado escavado na crista superior do dique com visibilidade de 360 graus sobre todo o relevo circundante, permitindo detectar aproximações a mais de um quilômetro (DMG p. 111).';
+      defense.pegmatiteTrenchAndWatch = 'As paredes de quartzo e turmalina escura camuflam a silhueta da sentinela contra o luar, concedendo vantagem em testes de Furtividade para vigilância noturna.';
+      defense.campRestAndSafetyGuards = 'Segurança máxima de vigília noturna prevenindo qualquer possibilidade de emboscada ao acampamento.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 267: DIQUES CLÁSTICOS E FISSURAS PALEOSSÍSMICAS (D&D 5e)
   // =========================================================================
 
@@ -35556,6 +35636,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessPegmatiteDikeHazard: calcWildernessPegmatiteDikeHazard,
+    calcCampPegmatiteDikeStation: calcCampPegmatiteDikeStation,
     calcWildernessClasticDikeHazard: calcWildernessClasticDikeHazard,
     calcCampClasticDikeSeismicStation: calcCampClasticDikeSeismicStation,
     calcWildernessCoastalFlyschPlatformHazard: calcWildernessCoastalFlyschPlatformHazard,
