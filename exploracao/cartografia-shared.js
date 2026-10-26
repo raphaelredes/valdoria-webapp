@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 205: FLORESTAS SUBMERSAS DE CIPRESTES (BAYOUS) E MEANDROS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessCypressBayouOxbowHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'cypress_knee_pneumatophore_submerged_snag_impale').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Empalamento em Estacas Submersas de Pneumatóforos (Joelhos de Cipreste)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      cypressBayouRisk: 'O tapete contínuo de lentilha-d’água verde esconde centenas de projeções cônicas de madeira dura que brotam das raízes submersas dos ciprestes-calvos; tropeçar ou virar o bote sobre essas lanças naturais causa 3d8 de dano perfurante e concussão (DMG p. 109-110; PHB p. 182-183).',
+      pioneerMitigation: 'Sondagem contínua à frente da proa ou das botas com vara de freixo e avanço lento pelo canal profundo.',
+      rescueAndStabilization: 'Retirada imediata da água estagnada, limpeza profunda das feridas perfurantes e bandagem seca.',
+      icon: '🌲🗡️',
+      color: '#15803d'
+    };
+
+    if (ht === 'floating_flotant_peat_island_wind_drift_seal') {
+      hazard = {
+        hazardTitle: 'Deriva de Ilhas Flutuantes de Turfa (Flotant) e Fechamento do Canal',
+        saveDC: 15,
+        saveType: 'Sabedoria',
+        cypressBayouRisk: 'Bancos espessos de turfa e capim aquático sem raízes no fundo movem-se silenciosamente com o vento no lago de meandro abandonado (oxbow), fechando o canal por onde a comitiva entrou e induzindo 4 horas de desorientação e 1 nível de exaustão (DMG p. 110-111; PHB p. 185).',
+        pioneerMitigation: 'Entalhe de marcas visíveis na casca alta dos ciprestes centenários (que têm raiz fixa no fundo) e nunca nas margens de capim.',
+        rescueAndStabilization: 'Subida na copa de um cipreste alto para relocalizar o canal principal e abertura de brecha com arpões.',
+        icon: '🏝️🧭',
+        color: '#0d9488'
+      };
+    } else if (ht === 'hollow_buttress_trunk_cottonmouth_and_leech_nest') {
+      hazard = {
+        hazardTitle: 'Ninho de Víboras-de-Água em Sapopemas Ocas de Cipreste Gigante',
+        saveDC: 14,
+        saveType: 'Constituição',
+        cypressBayouRisk: 'As bases alargadas e caneladas dos grandes troncos formam cavernas secas logo acima da linha d’água onde serpentes aquáticas peçonhentas se aglomeram; apoiar as mãos nas fendas do tronco provoca botes múltiplos com 2d8 de dano de veneno e condição Envenenado por 1 hora (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Inspeção das cavidades dos troncos com fumaça de tocha resinosa antes de atracar ou apoiar o equipamento.',
+        rescueAndStabilization: 'Extração de presas, lavagem com solução tânica de casca de carvalho e repouso absoluto do membro.',
+        icon: '🐍🌳',
+        color: '#84cc16'
+      };
+    } else if (ht === 'anoxic_blackwater_methane_ebullition_and_mire') {
+      hazard = {
+        hazardTitle: 'Ebulição de Gás dos Pântanos em Vasa Negra de Meandro Morto',
+        saveDC: 14,
+        saveType: 'Força',
+        cypressBayouRisk: 'O fundo do braço morto do rio acumula metros de folhas decompostas em lama preta sem oxigênio; pisar no depósito libera bolhas sufocantes de metano e gás sulfídrico enquanto a vasa suga as pernas causando 2d6 de dano de veneno (DMG p. 109; PHB p. 182).',
+        pioneerMitigation: 'Marcha sobre troncos caídos submersos de madeira de cipreste (que não apodrecem sob a água).',
+        rescueAndStabilization: 'Içamento com corda passada em galho baixo e ventilação longe das bolhas fétidas.',
+        icon: '🫧🕳️',
+        color: '#4d7c0f'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampCypressBayouOxbowStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'natural_levee_oak_chenier_high_bank_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Dique Marginal Natural (Natural Levee) de Carvalhos',
+      bayouAndCampSafety: 'Acampamento erguido sobre o cordão elevado de silte arenoso depositado pelas antigas cheias do rio na curva externa do meandro, 3 metros acima do pântano de ciprestes.',
+      bayouPlatformAndSmudge: 'Oferece a única faixa de terra firme, seca e bem drenada por quilômetros no interior do bayou.',
+      campRestAndSafetyGuards: 'Garante descanso longo enxuto, seguro e com solo firme para fogueira e tendas da comitiva.',
+      icon: '⛺🌳',
+      color: '#15803d'
+    };
+
+    if (dt === 'cypress_buttress_suspended_rope_platform_hammock_rig') {
+      tech = {
+        defenseTitle: 'Palanque Suspenso de Cordas Entre Sapopemas de Ciprestes',
+        bayouAndCampSafety: 'Estrado de varas e lonas tensionadas amarrado a 4 metros de altura entre três troncos monumentais de cipreste-calvo no meio da floresta inundada.',
+        bayouPlatformAndSmudge: 'Mantém todo o grupo e as mochilas suspensos acima da água negra, fora do alcance de jacarés, serpentes e sanguessugas.',
+        campRestAndSafetyGuards: 'Permite pernoitar com segurança absoluta mesmo em setores sem nenhum palmo de terra seca.',
+        icon: '🕸️🌲',
+        color: '#0d9488'
+      };
+    } else if (dt === 'spanish_moss_smudge_pot_and_cypress_resin_torch_ring') {
+      tech = {
+        defenseTitle: 'Braseiro Fumegante de Barba-de-Velho e Resina de Cipreste',
+        bayouAndCampSafety: 'Queima controlada de novelos de epífitas (Tillandsia) levemente úmidos misturados a lascas resinosas de cerne de cipreste em recipientes suspensos.',
+        bayouPlatformAndSmudge: 'Produz uma névoa aromática que afasta enxames transmissores de febre do pântano e ilumina o espelho d’água sob a copa fechada.',
+        campRestAndSafetyGuards: 'Preserva a saúde e a concentração das sentinelas durante a vigília noturna.',
+        icon: '🔥🌿',
+        color: '#84cc16'
+      };
+    } else if (dt === 'submerged_duckweed_channel_cord_and_gourd_float_alarm') {
+      tech = {
+        defenseTitle: 'Linha Submersa de Cabaças Flutuantes Sob o Tapete de Lentilha',
+        bayouAndCampSafety: 'Cordel escuro estendido a 20 centímetros abaixo da superfície coberta de vegetação aquática, ligado a cabaças secas contendo seixos.',
+        bayouPlatformAndSmudge: 'Qualquer predador anfíbio ou embarcação furtiva que rasgue o tapete verde faz chacoalhar as cabaças junto ao posto de guarda.',
+        campRestAndSafetyGuards: 'Anula a camuflagem da água turva e alerta imediatamente a comitiva.',
+        icon: '🎃🔔',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 204: SALARES DE ALTITUDE E OLHOS DE SALMOURA (OJOS DEL SALAR) (D&D 5e)
   // =========================================================================
 
@@ -29100,6 +29204,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessCypressBayouOxbowHazard: calcWildernessCypressBayouOxbowHazard,
+    calcCampCypressBayouOxbowStation: calcCampCypressBayouOxbowStation,
     calcWildernessHighlandSalarHazard: calcWildernessHighlandSalarHazard,
     calcCampHighlandSalarStation: calcCampHighlandSalarStation,
     calcWildernessPoljeEstavelleHazard: calcWildernessPoljeEstavelleHazard,
