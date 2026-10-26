@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 197: TURFEIRAS DE CORDÕES BOREAIS (AAPA) E COLINAS DE PALSA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessPalsaAapaMireHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'aapa_mire_flark_rimppi_bottomless_peat_slurry').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Afundamento em Vala Alagada (Flark) entre Cordões de Turfeira Aapa',
+      saveDC: 15,
+      saveType: 'Força',
+      palsaMireRisk: 'Pântano boreal estriado formado por diques estreitos de musgo (strängar) separados por lagoas lineares de lodo orgânico líquido (flarks); escorregar da crista estreita submerge o aventureiro em turfa gelada até os ombros impondo 1 nível de exaustão e 2d6 de frio (DMG p. 109-110; PHB p. 182-183).',
+      pioneerMitigation: 'Marcha em fila indiana rigorosa sobre a crista dos cordões de carriço sondando a firmeza com vara longa.',
+      rescueAndStabilization: 'Puxada horizontal com corda lançada a partir do cordão firme e troca imediata das roupas encharcadas.',
+      icon: '🌾🕳️',
+      color: '#10b981'
+    };
+
+    if (ht === 'palsa_peat_dome_thermokarst_ring_moat_collapse') {
+      hazard = {
+        hazardTitle: 'Desabamento de Borda Rachada de Palsa no Fosso Anelar de Degelo',
+        saveDC: 15,
+        saveType: 'Destreza',
+        palsaMireRisk: 'Colina oval de 6 metros de altura com núcleo perene de turfa congelada cercada por um fosso circular de água negra onde o gelo interno está derretendo; blocos inteiros da encosta escura desabam no fosso causando 2d8 de concussão e 2d6 de frio (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Subida na palsa apenas pela rampa de barlavento intacta evitando as paredes verticais escavadas pela água.',
+        rescueAndStabilization: 'Ancoragem de estaca no núcleo congelado do topo e içamento rápido para fora da água negra.',
+        icon: '🏔️🌊',
+        color: '#0d9488'
+      };
+    } else if (ht === 'floating_quaking_sphagnum_schwingmoor_mat_rupture') {
+      hazard = {
+        hazardTitle: 'Ruptura de Tapete Flutuante Trêmulo de Esfagno (Schwingmoor)',
+        saveDC: 15,
+        saveType: 'Destreza',
+        palsaMireRisk: 'Prado verdejante elástico que ondula a cada passo por flutuar sobre uma lagoa subterrânea de 5 metros de profundidade; o peso concentrado rasga a malha de raízes fechando a abertura sobre a cabeça do explorador com risco severo de afogamento (DMG p. 109; PHB p. 183).',
+        pioneerMitigation: 'Travessia rastejante ou com raquetes largas de vime mantendo distância de 6 metros entre os integrantes.',
+        rescueAndStabilization: 'Corte imediato da malha de musgo com facão de mato e extração pelo cabo de segurança.',
+        icon: '🌿🌊',
+        color: '#059669'
+      };
+    } else if (ht === 'marsh_labrador_tea_terpene_fume_and_blackfly_swarm') {
+      hazard = {
+        hazardTitle: 'Emanação Narcótica de Chá-do-Pântano e Nuvem de Borrachudos',
+        saveDC: 14,
+        saveType: 'Constituição',
+        palsaMireRisk: 'Sob o sol abafado, os arbustos densos de Rhododendron boreal liberam vapores pesados de terpenos voláteis que provocam cefaleia e vertigem, agravados por enxames sufocantes de moscas negras que impõem a condição Envenenado por 1 hora (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Uso de véus de crina trançada sobre o rosto e aplicação de alcatrão de casca de bétula na pele exposta.',
+        rescueAndStabilization: 'Retirada para o topo ventilado de uma palsa alta e lavagem do rosto com água fria.',
+        icon: '🦟🌿',
+        color: '#84cc16'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampPalsaAapaMireStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'intact_frozen_palsa_peat_plateau_dry_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque no Topo Seco da Colina de Palsa de Núcleo Congelado',
+      palsaMireAndCampSafety: 'Acampamento erguido sobre a coroa plana e ressecada de turfa a 5 metros acima do pântano estriado, sustentado pelo núcleo rígido de gelo perene.',
+      palsaCausewayAndSmudge: 'A elevação expõe o bivaque à brisa constante que afasta os enxames de insetos e oferece solo completamente enxuto no meio do charco.',
+      campRestAndSafetyGuards: 'Assegura descanso longo seco, elevado e com visibilidade ampla sobre os cordões da turfeira.',
+      icon: '⛺🌾',
+      color: '#10b981'
+    };
+
+    if (dt === 'birch_pole_corduroy_causeway_across_strangar_strings') {
+      tech = {
+        defenseTitle: 'Estiva de Varas de Bétula Entre Cordões de Turfa (Strängar)',
+        palsaMireAndCampSafety: 'Passadeira portátil de troncos finos de bétula-anã amarrados lado a lado lançada sobre a vala alagada (flark) que separa a palsa do cordão firme vizinho.',
+        palsaCausewayAndSmudge: 'Garante rota de saída rápida e seca para toda a comitiva sem afundar na lama ácida.',
+        campRestAndSafetyGuards: 'Pode ser recolhida à noite como ponte levadiça improvisada, isolando o acampamento.',
+        icon: '🪵🌉',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'sphagnum_moss_antiseptic_filter_and_amber_bog_water_boil') {
+      tech = {
+        defenseTitle: 'Filtro Antisséptico de Musgo Esfagno e Caldeira de Água Âmbar',
+        palsaMireAndCampSafety: 'Funil de casca de bétula preenchido com musgo esfagno vivo prensado que retém partículas e bactérias graças à sua acidez fenólica natural, seguido de fervura.',
+        palsaCausewayAndSmudge: 'Fornece água potável limpa e compressas naturais estéreis de esfagno seco para curativos de campanha.',
+        campRestAndSafetyGuards: 'Mantém a saúde hídrica e o tratamento de escoriações de todos os aventureiros.',
+        icon: '💧🌿',
+        color: '#0ea5e9'
+      };
+    } else if (dt === 'smudge_fire_of_damp_peat_and_birch_fungus_insect_screen') {
+      tech = {
+        defenseTitle: 'Braseiro Repelente em Panela de Pedra com Turfa e Fungo Chaga',
+        palsaMireAndCampSafety: 'Fogo lento confinado sobre lajes de pedra trazidas nos alforjes (para não incendiar a turfa seca do chão) queimando fungo-de-bétula e musgo úmido.',
+        palsaCausewayAndSmudge: 'Cria um domo aromático de fumaça branca que elimina 100% dos mosquitos e borrachudos sem produzir labaredas altas.',
+        campRestAndSafetyGuards: 'Permite que as sentinelas vigiem em paz e que o grupo durma sem picadas incessantes.',
+        icon: '🔥🍄',
+        color: '#84cc16'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 196: PLATÔS DE LOESS EÓLICO E GARGANTAS DE SILTE (D&D 5e)
   // =========================================================================
 
@@ -28268,6 +28372,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessPalsaAapaMireHazard: calcWildernessPalsaAapaMireHazard,
+    calcCampPalsaAapaMireStation: calcCampPalsaAapaMireStation,
     calcWildernessAeolianLoessRavineHazard: calcWildernessAeolianLoessRavineHazard,
     calcCampAeolianLoessRavineStation: calcCampAeolianLoessRavineStation,
     calcWildernessTectonicGrabenFissureHazard: calcWildernessTectonicGrabenFissureHazard,

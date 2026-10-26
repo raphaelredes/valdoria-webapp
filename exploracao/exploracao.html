@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T17:28:14Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T17:29:39Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessPalsaAapaMireHazard) return '';
+        var bKey = (biome && biome.key) || 'swamp';
+        var pm = CartShared.calcWildernessPalsaAapaMireHazard(bKey, 'aapa_mire_flark_rimppi_bottomless_peat_slurry');
+        return '<div class="clp-palsa-aapa-mire-card" style="margin:4px 0 6px;text-align:left;background:rgba(14,32,24,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.35);font-size:8px;color:#d1fae5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + pm.color + ';margin-bottom:2px;">' + pm.icon + ' ' + pm.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Turfeira de Cordões (Aapa) e Palsas:</b> ' + pm.palsaMireRisk + ' (CD ' + pm.saveDC + ' [' + pm.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#a7f3d0;margin-top:1px;">• <b>Mitigação:</b> ' + pm.pioneerMitigation + ' · <i>Estabilização: ' + pm.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampPalsaAapaMireStation) return '';
+        var bKey = (biome && biome.key) || 'swamp';
+        var pc = CartShared.calcCampPalsaAapaMireStation(bKey, 'intact_frozen_palsa_peat_plateau_dry_bivouac');
+        return '<div class="clp-palsa-aapa-mire-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(10,24,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(5,150,105,0.3);font-size:8px;color:#d1fae5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + pc.color + ';margin-bottom:2px;">' + pc.icon + ' ' + pc.defenseTitle.toUpperCase() + ' (DMG p. 109):</div>'
+          + '  <div>• <b>Bivaque no Domo da Palsa:</b> ' + pc.palsaMireAndCampSafety + ' · <b>Defesa:</b> ' + pc.palsaCausewayAndSmudge + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + pc.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){
