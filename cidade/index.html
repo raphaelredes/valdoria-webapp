@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessCinderConeScoriaSlopeHazard) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var cc = CartShared.calcWildernessCinderConeScoriaSlopeHazard(bKey, 'scoria_scree_angle_of_repose_avalanche');
+        return '<div class="clp-cinder-cone-scoria-slope-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,14,14,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(220,38,38,0.35);font-size:8px;color:#fef2f2;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cc.color + ';margin-bottom:2px;">' + cc.icon + ' ' + cc.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Cone de Cinza e Escória Vulcânica:</b> ' + cc.cinderConeRisk + ' (CD ' + cc.saveDC + ' [' + cc.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fecaca;margin-top:1px;">• <b>Mitigação:</b> ' + cc.pioneerMitigation + ' · <i>Estabilização: ' + cc.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampCinderConeScoriaSlopeStation) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var cc = CartShared.calcCampCinderConeScoriaSlopeStation(bKey, 'lava_tube_buttressed_scoria_terrace_bivouac');
+        return '<div class="clp-cinder-cone-scoria-slope-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(24,18,14,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cc.color + ';margin-bottom:2px;">' + cc.icon + ' ' + cc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Bivaque em Terraço de Lava:</b> ' + cc.cinderConeAndCampSafety + ' · <b>Proteção:</b> ' + cc.cinderConeTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cc.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessBraidedRiverQuickmudHazard) return '';
         var bKey = (biome && biome.key) || 'plains';
         var br = CartShared.calcWildernessBraidedRiverQuickmudHazard(bKey, 'thixotropic_subterranean_spring_quickmud_engulfment');

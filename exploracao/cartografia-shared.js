@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 257: CONES DE CINZA E ESCÓRIAS VULCÂNICAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessCinderConeScoriaSlopeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var ht = (hazardType || 'scoria_scree_angle_of_repose_avalanche').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Avalanche de Escórias Piroclásticas Soltas em Ângulo de Repouso Crítico',
+      saveDC: 15,
+      saveType: 'Destreza',
+      cinderConeRisk: 'As encostas íngremes do cone vulcânico acumulam cascalho de lapilli e fragmentos de escória vesicular empilhados no limite do repouso gravitacional a 33 graus; passos da marcha rompem o equilíbrio estático, desencadeando um escorregamento violento de pedras pontiagudas e abrasivas que arrasta a comitiva encosta abaixo com 3d8 de dano cortante (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Marchar em zigue-zague com bastões de ponta chata, calçando perneiras de couro grosso e fixando ancoragens em diques de lava consolidados.',
+      rescueAndStabilization: 'Içamento imediato com nós de retenção dinâmicos e limpeza de cortes profundos contaminados com pó vítreo de cinza.',
+      icon: '🌋🪨',
+      color: '#dc2626'
+    };
+
+    if (ht === 'sulfur_dioxide_fumarole_degassing_plume') {
+      hazard = {
+        hazardTitle: 'Coluna Tóxica de Dióxido de Enxofre e Fumarolas Subterrâneas Ácidas',
+        saveDC: 14,
+        saveType: 'Constituição',
+        cinderConeRisk: 'Fraturas radiais no flanco da montanha expelem jatos contínuos de vapor a 180°C carregados de dióxido de enxofre e aerossóis sulfúricos; o gás corrosivo ataca os pulmões, corrói correias de couro e irrita os olhos, impondo tosse espasmódica, 2d6 de dano de veneno e condição envenenado por 1 hora (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Equipar máscaras de feltro embebidas em água calcária e marchar estritamente pelo lado de barlavento das plumas.',
+        rescueAndStabilization: 'Lavagem das vias aéreas com soro fisiológico e uso de compressas balsâmicas nos olhos.',
+        icon: '☠️💨',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'hot_pyroclastic_bomb_crust_burn') {
+      hazard = {
+        hazardTitle: 'Queimadura Térmica por Crosta Fina Ocultando Bombas Vulcânicas Incandescentes',
+        saveDC: 14,
+        saveType: 'Destreza',
+        cinderConeRisk: 'Bombas vulcânicas esferoidais arremessadas na última erupção resfriaram apenas na casca externa de cinza, mantendo o núcleo basáltico a mais de 400°C; apoiar o pé ou as mãos na pedra quebra a casca fina vítrea, liberando calor incandescente que queima solas de botas e carne com 2d8 de dano de fogo (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Sondar rochas escuras com varas de ferro antes de qualquer apoio e observar a cintilação do ar quente sobre as lajes.',
+        rescueAndStabilization: 'Tratamento de queimaduras com unguento de babosa alpina e ataduras umedecidas.',
+        icon: '🔥💣',
+        color: '#ea580c'
+      };
+    } else if (ht === 'crater_rim_gale_lip_fracture') {
+      hazard = {
+        hazardTitle: 'Fratura Estrutural do Rebordo da Cratera e Queda em Chaminé Vulcânica',
+        saveDC: 14,
+        saveType: 'Destreza',
+        cinderConeRisk: 'O lábio superior da cratera é uma aresta delgada e friável açoitada por rajadas de vento turbulento de altitude; a borda de cinza compactada cede sob o peso das sentinelas, arremessando-as em direção ao fosso interno pontilhado de respiradouros fumegantes (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Manter a linha de observação a pelo menos 4 metros recuada da borda e fixar estacas de aço temperado para ancoragem dorsal.',
+        rescueAndStabilization: 'Içamento rápido com corda de escalada e talabarte de tração antes da aproximação de gases asfixiantes.',
+        icon: '🧗‍♂️⚠️',
+        color: '#f59e0b'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampCinderConeScoriaSlopeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var dt = (defenseType || 'lava_tube_buttressed_scoria_terrace_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Abrigado em Terraço de Lava Consolidada na Face de Barlavento',
+      cinderConeAndCampSafety: 'Instalação do acampamento sobre uma plataforma contrafiliada de basalto maciço situada a barlavento das fissuras de gás.',
+      cinderConeTrenchAndWatch: 'O vento dominante dispersa qualquer emanação tóxica para longe das barracas e a rocha sólida basáltica é imune a avalanches de cinza.',
+      campRestAndSafetyGuards: 'Assegura descanso longo aquecido e protegido contra gases sulfurosos e deslizamentos piroclásticos.',
+      icon: '⛺🌋',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'geothermal_vent_steam_distiller_rig') {
+      tech = {
+        defenseTitle: 'Destilador Geotérmico de Vapor para Obtenção de Água Pura e Esterilizada',
+        cinderConeAndCampSafety: 'Canalização de uma fumarola limpa de vapor de água através de serpentinas metálicas condensadoras resfriadas pelo ar da montanha.',
+        cinderConeTrenchAndWatch: 'Produz dezenas de litros de água destilada potável e livre de enxofre em terreno desprovido de qualquer riacho superficial.',
+        campRestAndSafetyGuards: 'Abastece todos os recipientes e cantis do grupo com hidratação pura e estéril para os dias seguintes.',
+        icon: '💧♨️',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'basalt_gabion_scree_deflection_trench') {
+      tech = {
+        defenseTitle: 'Trincheira Defletora de Gabiões de Basalto contra Avalanches de Cinza',
+        cinderConeAndCampSafety: 'Empilhamento de muros de escória pesada e lajes basálticas em formato de V invertido a montante do bivaque.',
+        cinderConeTrenchAndWatch: 'Desvia qualquer fluxo de seixos e pedras soltas que rolem pela encosta superior, canalizando-os pelas laterais do acampamento.',
+        campRestAndSafetyGuards: 'Garante tranquilidade total durante a madrugada para sentinelas e aventureiros em repouso.',
+        icon: '🛡️🧱',
+        color: '#10b981'
+      };
+    } else if (dt === 'radiant_ground_heated_thermal_bivouac') {
+      tech = {
+        defenseTitle: 'Aquecimento Térmico Natural do Solo por Fluxo Magmático Subterrâneo',
+        cinderConeAndCampSafety: 'Escolha de bancada de rocha vulcânica aquecida a confortáveis 20°C constantes pela proximidade de condutos térmicos profundos.',
+        cinderConeTrenchAndWatch: 'O calor ascendente mantém as tendas confortavelmente aquecidas a noite inteira mesmo sob frio cortante de altitude, secando roupas e dispensando lenha.',
+        campRestAndSafetyGuards: 'Promove recuperação acelerada de pontos de vida e eliminação de exaustão térmica.',
+        icon: '♨️🛏️',
+        color: '#6366f1'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 256: CANAIS ENTRELAÇADOS E AREIAS MOVEDIÇAS (D&D 5e)
   // =========================================================================
 
@@ -34508,6 +34612,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessCinderConeScoriaSlopeHazard: calcWildernessCinderConeScoriaSlopeHazard,
+    calcCampCinderConeScoriaSlopeStation: calcCampCinderConeScoriaSlopeStation,
     calcWildernessBraidedRiverQuickmudHazard: calcWildernessBraidedRiverQuickmudHazard,
     calcCampBraidedRiverQuickmudStation: calcCampBraidedRiverQuickmudStation,
     calcWildernessCenoteSinkholeCollapseHazard: calcWildernessCenoteSinkholeCollapseHazard,
