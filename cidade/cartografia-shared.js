@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 200 (MARCO BICENTENÁRIO): MESETAS DE QUARTZITO (TEPUIS) E SIMAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessQuartziteTepuiSimaHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'tepui_quartzite_sima_vertical_shaft_cloud_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda em Abismo Cilíndrico de Quartzito (Sima) Oculto por Nuvens',
+      saveDC: 16,
+      saveType: 'Destreza',
+      tepuiSimaRisk: 'Poço gigante de abatimento vertical com 300 metros de profundidade escavado no platô pré-cambriano da meseta (tepui) e encoberto por cerração perpétua; um passo em falso na borda negativa precipita o batedor contra ressaltos de quartzito com 4d10 de concussão (DMG p. 110, 201; PHB p. 182-183).',
+      pioneerMitigation: 'Avanço encordado com sondagem acústica (lançamento de seixos no nevoeiro) e leitura da drenagem radial das lajes.',
+      rescueAndStabilization: 'Montagem de ancoragem tripla em monólitos de quartzo e içamento com sistema de polias multiplicadoras.',
+      icon: '🕳️☁️',
+      color: '#f59e0b'
+    };
+
+    if (ht === 'orographic_cloud_waterfall_flash_spate_sweep') {
+      hazard = {
+        hazardTitle: 'Enxurrada Súbita rumo à Borda de Catarata Suspensa de 800 Metros',
+        saveDC: 15,
+        saveType: 'Força',
+        tepuiSimaRisk: 'O choque de nuvens oceânicas contra a muralha do tepui despeja dilúvios instantâneos sobre a rocha nua sem solo; os riachos cor de âmbar incham em segundos arrastando a comitiva em direção ao salto vertical do abismo com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Travessia dos rios do cume a pelo menos 200 metros de distância da linha de queda da escarpa com cabo estendido.',
+        rescueAndStabilization: 'Tracionamento imediato para ilhotas elevadas de rocha negra antes que a correnteza atinja o lábio da cascata.',
+        icon: '🌊🏞️',
+        color: '#0284c7'
+      };
+    } else if (ht === 'black_algal_silica_karren_bog_labyrinth_slip') {
+      hazard = {
+        hazardTitle: 'Escorregamento em Lajedo Negro de Cianobactérias e Fendas de Sílica',
+        saveDC: 15,
+        saveType: 'Destreza',
+        tepuiSimaRisk: 'O topo da montanha-mesa é coberto por crosta negra escorregadia de colônias de algas primitivas, charcos de plantas carnívoras (Heliamphora) e fendas afiadas de dissolução siliciosa; a queda corta membros e desorienta na cerração com 2d8 de dano cortante (DMG p. 110-111; PHB p. 182).',
+        pioneerMitigation: 'Uso de solados cravejados e balizamento da trilha com fitas vermelhas visíveis sob nevoeiro denso.',
+        rescueAndStabilization: 'Assepsia das feridas contaminadas por lodo ácido e imobilização de articulações.',
+        icon: '🌿🪨',
+        color: '#10b981'
+      };
+    } else if (ht === 'katabatic_overhang_wall_updraft_mist_hypothermia') {
+      hazard = {
+        hazardTitle: 'Chuva Horizontal Ascendente e Hipotermia na Muralha do Tepui',
+        saveDC: 15,
+        saveType: 'Constituição',
+        tepuiSimaRisk: 'Correntes ascendentes violentas que sobem dos vales de selva batem no paredão vertical de 1.000 metros e invertem o curso das cachoeiras em tempestade ascendente de névoa gelada; as vestes encharcam de baixo para cima causando 2d6 de dano de frio e 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Capas impermeáveis amarradas na cintura e nas coxas e recuo para galerias abrigadas no interior das diáclases.',
+        rescueAndStabilization: 'Aquecimento com infusões ferventes sob abrigo de rocha seca e fricção corporal vigorosa.',
+        icon: '🌬️🌧️',
+        color: '#38bdf8'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampQuartziteTepuiSimaStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'dry_pink_quartzite_balcony_cave_under_cap_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Varanda Cavernosa de Quartzito Rosado Acima das Nuvens',
+      tepuiAndCampSafety: 'Acampamento instalado em amplo salão horizontal seco escavado na camada de quartzito rosado sob o teto monolítico da meseta, 20 metros abaixo do topo chuvoso.',
+      tepuiBridgeAndBeacon: 'Totalmente imune às enxurradas do platô superior e às nuvens de insetos da selva lá embaixo, com vista panorâmica sobre o mar de nuvens.',
+      campRestAndSafetyGuards: 'Consagra o Marco Bicentenário (Fase 200) garantindo descanso longo lendário, enxuto e inexpugnável para toda a comitiva.',
+      icon: '⛺🏞️',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'fixed_ascender_rope_highway_across_diaclase_bridge') {
+      tech = {
+        defenseTitle: 'Ponte Dupla de Cabos Tensionados sobre Fenda de Diáclase',
+        tepuiAndCampSafety: 'Passarela suspensa de duas cordas paralelas ancoradas em chaminés opostas de quartzito, isolando a ilha rochosa do acampamento do restante do platô.',
+        tepuiBridgeAndBeacon: 'Permite transpor abismos de 15 metros com segurança total e pode ser desacoplada de um lado durante a noite.',
+        campRestAndSafetyGuards: 'Torna o perímetro fisicamente inalcançável para predadores terrestres do tepui.',
+        icon: '🌉🧗‍♂️',
+        color: '#d97706'
+      };
+    } else if (dt === 'amber_humic_stream_quartz_pebble_and_charcoal_filter') {
+      tech = {
+        defenseTitle: 'Clarificador de Quartzo e Carvão para Água Âmbar de Tepui',
+        tepuiAndCampSafety: 'Coluna filtrante montada com areia grossa de cristal de rocha e brasas trituradas para tratar a água escura rica em ácidos húmicos e taninos das lagoas do topo.',
+        tepuiBridgeAndBeacon: 'Remove o amargor vegetal e neutraliza a acidez excessiva, entregando água cristalina e leve para os cantis.',
+        campRestAndSafetyGuards: 'Mantém a hidratação perfeita dos aventureiros nas grandes altitudes.',
+        icon: '💧💎',
+        color: '#0ea5e9'
+      };
+    } else if (dt === 'sima_rim_acoustic_wind_harp_and_fog_beacon_line') {
+      tech = {
+        defenseTitle: 'Baliza Acústica de Vento e Lanterna de Cerração na Borda da Sima',
+        tepuiAndCampSafety: 'Conjunto de tubos ocos ressonantes e lanterna protegida por refletor de mica instalados no promontório de entrada do abrigo.',
+        tepuiBridgeAndBeacon: 'Emite um acorde grave contínuo quando o vento sopra na borda do abismo, guiando pelo ouvido qualquer batedor surpreendido pelo nevoeiro.',
+        campRestAndSafetyGuards: 'Impede que integrantes se percam na cerração noturna e auxilia a vigília das sentinelas.',
+        icon: '🏮🎶',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 199: GEODOS GIGANTES DE SELENITA E CAVERNAS DE CRISTAIS (D&D 5e)
   // =========================================================================
 
@@ -28580,6 +28684,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessQuartziteTepuiSimaHazard: calcWildernessQuartziteTepuiSimaHazard,
+    calcCampQuartziteTepuiSimaStation: calcCampQuartziteTepuiSimaStation,
     calcWildernessSeleniteCrystalCaveHazard: calcWildernessSeleniteCrystalCaveHazard,
     calcCampSeleniteCrystalCaveStation: calcCampSeleniteCrystalCaveStation,
     calcWildernessCoastalBlowholeHazard: calcWildernessCoastalBlowholeHazard,
