@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 202: CRATERAS DE MAAR FREATOMAGMÁTICO E LAGOS MEROMÍTICOS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessPhreatomagmaticMaarHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var ht = (hazardType || 'limnic_eruption_co2_lake_overturn_suffocation').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Erupção Límnica e Nuvem Asfixiante de Gás em Lago de Maar',
+      saveDC: 16,
+      saveType: 'Constituição',
+      maarLakeRisk: 'O fundo profundo do lago de cratera acumula milhões de metros cúbicos de gás carbônico magmático dissolvido sob pressão; a queda de uma rocha na encosta desencadeia a efervescência súbita de uma coluna leitosa que libera um manto invisível e sufocante de CO2 causando 3d8 de dano necrótico por hipóxia (DMG p. 110; PHB p. 183).',
+      pioneerMitigation: 'Proibição absoluta de descer até a praia interna quando a água apresentar manchas avermelhadas de ferro oxidado ou ausência de aves.',
+      rescueAndStabilization: 'Subida imediata em corrida para a crista alta do anel de tufo (acima de 40 metros) e ventilação pulmonar forçada.',
+      icon: '🫧💀',
+      color: '#ef4444'
+    };
+
+    if (ht === 'base_surge_cross_bedded_wet_tuff_ring_mudslide') {
+      hazard = {
+        hazardTitle: 'Deslizamento de Camadas de Cinza Hidroclástica no Anel de Tufo',
+        saveDC: 15,
+        saveType: 'Destreza',
+        maarLakeRisk: 'As paredes internas da cratera são formadas por lâminas finas de cinza úmida pouco consolidada depositadas por nuvens rasantes (base surge); o peso da comitiva destaca placas inteiras que escorregam rumo às águas profundas do maar com 3d8 de concussão (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Caminhada sobre os afloramentos radiais de diques basálticos firmes que cortam o anel de tufo.',
+        rescueAndStabilization: 'Frenagem com piqueta cravada nas camadas secas superiores e laçamento com cabo de segurança.',
+        icon: '🌋🪨',
+        color: '#f97316'
+      };
+    } else if (ht === 'phreatic_steam_explosion_vent_ballistic_blocks') {
+      hazard = {
+        hazardTitle: 'Explosão Freática Subterrânea e Chuva de Blocos Balísticos',
+        saveDC: 15,
+        saveType: 'Destreza',
+        maarLakeRisk: 'A infiltração súbita de água do lago através de uma falha atinge rocha incandescente rasa, gerando uma detonação de vapor que arremessa blocos angulares de granito e peridotito sem aviso prévio com 3d10 de dano de concussão e fogo (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Monitoramento de borbulhamentos quentes nas margens e travessia rápida pelo setor externo do anel.',
+        rescueAndStabilization: 'Abrigo atrás de megablocos ejetados antigos e tratamento imediato de queimaduras de vapor.',
+        icon: '💥🪨',
+        color: '#eab308'
+      };
+    } else if (ht === 'meromictic_ferruginous_anoxic_shore_bog_trap') {
+      hazard = {
+        hazardTitle: 'Atolamento em Lodo Ferruginoso Anóxico na Margem da Cratera',
+        saveDC: 14,
+        saveType: 'Força',
+        maarLakeRisk: 'As margens rasas do lago estratificado acumulam um precipitado gelatinoso cor de ferrugem sobre areia vulcânica sem oxigênio; quem pisa na borda afunda em talude subaquático abrupto de 45 graus sofrendo 1 nível de exaustão para escapar (DMG p. 109-110; PHB p. 185).',
+        pioneerMitigation: 'Coleta de amostras à distância com balde amarrado em corda sem jamais pisar na linha d’água alaranjada.',
+        rescueAndStabilization: 'Tracionamento com vara longa desde o degrau seco de tufo e limpeza do lodo ácido.',
+        icon: '🧡🕳️',
+        color: '#d97706'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampPhreatomagmaticMaarStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var dt = (defenseType || 'outer_tuff_ring_crest_windward_rim_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque na Crista Alta do Anel de Tufo a Barlavento da Cratera',
+      maarAndCampSafety: 'Acampamento posicionado no ponto mais alto do anel vulcânico (60 metros acima do lago), com declive externo suave que drena qualquer gás denso para longe das tendas.',
+      maarSentinelAndWater: 'Completamente seguro contra erupções límnicas de CO2 (que escoam apenas pelas selas baixas do anel) e com visão de 360 graus.',
+      campRestAndSafetyGuards: 'Assegura descanso longo ventilado, elevado e estrategicamente dominante para toda a comitiva.',
+      icon: '⛺🌋',
+      color: '#f97316'
+    };
+
+    if (dt === 'flame_and_canary_cage_low_saddle_gas_sentinel') {
+      tech = {
+        defenseTitle: 'Sentinela de Chama Baixa em Nicho na Encosta Interna',
+        maarAndCampSafety: 'Lanterna de azeite calibrada instalada em uma cavidade 8 metros abaixo da cota do acampamento, visível diretamente pelo vigia da guarda.',
+        maarSentinelAndWater: 'Se o nível invisível de gás carbônico subir pela bacia da cratera à noite, a chama azulada apaga-se muito antes de atingir as barracas.',
+        campRestAndSafetyGuards: 'Garante alerta visual silencioso e imediato contra emanações gasosas noturnas.',
+        icon: '🕯️👁️',
+        color: '#eab308'
+      };
+    } else if (dt === 'perched_rainwater_tuff_basin_spring_tap') {
+      tech = {
+        defenseTitle: 'Cisterna de Água Pluvial em Bacia de Tufo Palagonítico',
+        maarAndCampSafety: 'Reservatório natural escavado na rocha de cinza cimentada da vertente externa que retém exclusivamente água da chuva.',
+        maarSentinelAndWater: 'Evita que os exploradores consumam a água salobra, rica em ferro, bicarbonato e flúor do lago meromítico.',
+        campRestAndSafetyGuards: 'Mantém o suprimento de água potável pura e fresca para todos os membros do grupo.',
+        icon: '💧🪨',
+        color: '#0ea5e9'
+      };
+    } else if (dt === 'crater_rim_basalt_ejecta_boulder_parapet') {
+      tech = {
+        defenseTitle: 'Reduto de Blocos Ejetados de Basalto e Xenólitos de Olivina',
+        maarAndCampSafety: 'Muralha circular erguida na crista da cratera aproveitando os blocos pesados e densos arrancados do manto profundo durante a formação do maar.',
+        maarSentinelAndWater: 'Oferece cobertura superior (+5 na CA) contra ventos cortantes e ataques vindos tanto da planície quanto da caldeira.',
+        campRestAndSafetyGuards: 'Fortalece o perímetro defensivo para os turnos de sentinela.',
+        icon: '🪨🛡️',
+        color: '#10b981'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 201: PLANÍCIES DE LAVAGEM GLACIAL (SANDUR) E JÖKULHLAUPS (D&D 5e)
   // =========================================================================
 
@@ -28788,6 +28892,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessPhreatomagmaticMaarHazard: calcWildernessPhreatomagmaticMaarHazard,
+    calcCampPhreatomagmaticMaarStation: calcCampPhreatomagmaticMaarStation,
     calcWildernessJokulhlaupSandurHazard: calcWildernessJokulhlaupSandurHazard,
     calcCampJokulhlaupSandurStation: calcCampJokulhlaupSandurStation,
     calcWildernessQuartziteTepuiSimaHazard: calcWildernessQuartziteTepuiSimaHazard,
