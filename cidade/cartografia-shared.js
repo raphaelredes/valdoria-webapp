@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 269: COMPLEXOS ALCALINOS DE CARBONATITO E NATROCARBONATITO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessCarbonatiteAlkalineHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'caustic_natrocarbonatite_ash_crust_slump').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso em Crosta Cáustica de Cinza Natrocarbonatítica',
+      saveDC: 15,
+      saveType: 'Destreza',
+      carbonatiteRisk: 'O solo do vale vulcânico é coberto por uma carapaça branca esfarelável de carbonatos de sódio e potássio suspensa sobre lamas de soda altamente cáusticas (pH 11); pisar na crosta oca faz o aventureiro afundar até os joelhos sofrendo 3d8 de dano químico cáustico com destruição acelerada de solados e perneiras de couro (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores avançados calçando botas com solas duplas impermeabilizadas com gordura espessa e testando a densidade da crosta com varas de sondagem (Sobrevivência ou Natureza CD 14).',
+      rescueAndStabilization: 'Extração urgente do atoleiro com cordas e lavagem imediata da pele com água acidificada com vinagre para estancar a corrosão alcalina (Medicina CD 13).',
+      icon: '🌋',
+      color: '#f1f5f9'
+    };
+
+    if (ht === 'sublimated_soda_whiteout_glare') {
+      hazard.hazardTitle = 'Ofuscamento Solar por Albedo Extremo em Planície de Soda';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Constituição';
+      hazard.carbonatiteRisk = 'A brancura ofuscante dos precipitados de natrocarbonatito sob luz intensa reflete 95% da radiação solar, gerando queimaduras de córnea dolorosas e cegueira temporária que impõe desvantagem em testes de Percepção visual e ataques à distância por 2 horas (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Uso obrigatório de óculos de fenda fina esculpidos em osso ou madeira com lentes enfumaçadas com fuligem (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Aplicação de compressas umedecidas em chás herbais calmantes e repouso em tendas com cortinas opacas (Medicina CD 12).';
+    } else if (ht === 'alkaline_mudpot_soda_spray_geyser') {
+      hazard.hazardTitle = 'Gêiser de Borrifo de Lama Alcalina Incandescente';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.carbonatiteRisk = 'Poços termais borbulhantes de soda cáustica a 500 graus ejetam jatos corrosivos sem fumaça prévia; a torrente atinge os aventureiros com 2d8 de dano de fogo mais 2d6 de dano cáustico alcalino contínuo (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Observação atenta da pulsação acústica subterrânea e manutenção de rota em cristas rochosas altas (Percepção CD 14).';
+      hazard.rescueAndStabilization = 'Neutralização rápida com emplastros salinos e óleo protetor contra escaras químicas (Medicina CD 13).';
+    } else if (ht === 'friable_carbonatite_hornito_spire_collapse') {
+      hazard.hazardTitle = 'Desabamento de Chaminé Espicular de Natrocarbonatito';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.carbonatiteRisk = 'Agulhas e torres ocas de carbonatito hidratado ressecam ao vento transformando-se em giz quebradiço; o choque acidental de um fardo ou montaria derruba a torre inteira em pedregulhos pesados sobre a comitiva com 2d8 de concussão e poeira sufocante de soda (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Contorno amplo de formações espiculares frágeis mantendo marcha em corda espaçada (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Remoção rápida de blocos calcários e desobstrução das vias aéreas com panos limpos (Atletismo CD 13 ou Medicina CD 12).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampCarbonatiteAlkalineStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'insoluble_fenite_halo_ledge_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Cornija de Fenito Insolúvel',
+      carbonatiteAndCampSafety: 'O acampamento é estabelecido sobre uma cornija de fenito maciço no halo de contato da intrusão magmática; a rocha silicificada insolúvel é imune a reações alcalinas e oferece solo firme e seco livre da soda cáustica circundante (DMG p. 111).',
+      carbonatiteTrenchAndWatch: 'Posição elevada que domina o vale esbranquiçado, permitindo avistar aproximações hostis a centenas de metros e concedendo +2 de bônus na Percepção Passiva das sentinelas.',
+      campRestAndSafetyGuards: 'Descanso seguro com estabilidade de terreno e isolamento absoluto contra poeiras cáusticas.',
+      icon: '🛡️',
+      color: '#f1f5f9'
+    };
+
+    if (dt === 'condensed_rain_catchment_tarp_still') {
+      defense.defenseTitle = 'Coletor de Lona Suspensa para Água Neutra';
+      defense.carbonatiteAndCampSafety = 'Montagem de lonas enceradas limpas estendidas entre mastros para coletar chuva ou condensação noturna antes que toquem o solo de carbonatito, garantindo água doce com pH neutro (PHB p. 150).';
+      defense.carbonatiteTrenchAndWatch = 'Evita que os membros do grupo consumam água contaminada por carbonatos cáusticos de sódio.',
+      defense.campRestAndSafetyGuards = 'Hidratação saudável e revigorante sem risco de cólicas cáusticas ou desidratação osmótica.';
+    } else if (dt === 'alkaline_dust_trench_perimeter_trap') {
+      defense.defenseTitle = 'Trincheira de Poeira Cáustica Anti-Invasão';
+      defense.carbonatiteAndCampSafety = 'Cava circular em torno das barracas preenchida com pó fino e corrosivo de natrocarbonatito; predadores e feras descalças sofrem dor intensa nas patas ao pisar e recuam imediatamente (DMG p. 111).';
+      defense.carbonatiteTrenchAndWatch = 'Alarme tátil infalível que bloqueia investidas furtivas noturnas por criaturas terrestres.',
+      defense.campRestAndSafetyGuards = 'Proteção periférica excelente que garante repouso longo ininterrupto para a comitiva.';
+    } else if (dt === 'neutralizing_vinegar_wash_station') {
+      defense.defenseTitle = 'Posto de Neutralização com Vinagre e Sabão Gordo';
+      defense.carbonatiteAndCampSafety = 'Cuba de lavagem com água pura e vinagre diluído na entrada do acampamento para desintoxicar botas, calças e arreios de montarias de toda poeira de soda antes do repouso (PHB p. 185).';
+      defense.carbonatiteTrenchAndWatch = 'Preserva a integridade do couro e dos tecidos de proteção contra apodrecimento alcalino rápido.',
+      defense.campRestAndSafetyGuards = 'Conforto higiênico superior prevenindo dermatites e queimaduras químicas durante o sono.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 268: DIQUES DE PEGMATITO E CAVIDADES MIROLÍTICAS (D&D 5e)
   // =========================================================================
 
@@ -35636,6 +35716,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessCarbonatiteAlkalineHazard: calcWildernessCarbonatiteAlkalineHazard,
+    calcCampCarbonatiteAlkalineStation: calcCampCarbonatiteAlkalineStation,
     calcWildernessPegmatiteDikeHazard: calcWildernessPegmatiteDikeHazard,
     calcCampPegmatiteDikeStation: calcCampPegmatiteDikeStation,
     calcWildernessClasticDikeHazard: calcWildernessClasticDikeHazard,
