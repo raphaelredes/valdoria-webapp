@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessAcidCalderaCraterHazard) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var ac = CartShared.calcWildernessAcidCalderaCraterHazard(bKey, 'acid_crater_lake_surge_corrosive_burn');
+        return '<div class="clp-acid-caldera-card" style="margin:4px 0 6px;text-align:left;background:rgba(36,20,16,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(234,88,12,0.35);font-size:8px;color:#fef2f2;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ac.color + ';margin-bottom:2px;">' + ac.icon + ' ' + ac.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Caldeiras Vulcânicas e Lagos Ácidos:</b> ' + ac.calderaAndAcidRisk + ' (CD ' + ac.saveDC + ' [' + ac.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fecaca;margin-top:1px;">• <b>Mitigação:</b> ' + ac.pioneerMitigation + ' · <i>Estabilização: ' + ac.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampAcidCalderaCraterStation) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var cc = CartShared.calcCampAcidCalderaCraterStation(bKey, 'basalt_caldera_bench_wind_deflected_bivouac');
+        return '<div class="clp-acid-caldera-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,16,12,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(180,83,9,0.3);font-size:8px;color:#fef2f2;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cc.color + ';margin-bottom:2px;">' + cc.icon + ' ' + cc.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Platô de Caldeira:</b> ' + cc.calderaAndCampSafety + ' · <b>Defesa:</b> ' + cc.calderaBasaltBarrierAndSteamStill + '</div>'
+          + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cc.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessFiordHangingFallsHazard) return '';
         var bKey = (biome && biome.key) || 'coastal';
         var ff = CartShared.calcWildernessFiordHangingFallsHazard(bKey, 'hanging_fall_wind_whipped_spray_gale_plunge');

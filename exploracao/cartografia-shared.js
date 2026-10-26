@@ -20606,6 +20606,110 @@
   // FASE 179: PENHASCOS EM FIORDE MARINHO COM QUEDAS SUSPENSAS E TÁLUS LITORÂNEO (D&D 5e)
   // =========================================================================
 
+  // =========================================================================
+  // FASE 180 (MARCO +80): CAMPOS DE CALDEIRAS VULCÂNICAS E LAGOS CRATERA ÁCIDOS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessAcidCalderaCraterHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var ht = (hazardType || 'acid_crater_lake_surge_corrosive_burn').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Borbulhamento Hidrotermal com Onda Cáustica de Lago Ácido a pH 1,5',
+      saveDC: 15,
+      saveType: 'Destreza',
+      calderaAndAcidRisk: 'Lago de cratera com água hipersulfúrica a pH 1,5 a 65°C; erupção freática subaquática gera onda ácida de 3 metros que inunda a margem rochosa; a água cáustica corrói roupas e atinge os exploradores com risco grave de 3d10 de dano de ácido corrosivo (DMG p. 110, 246-247).',
+      pioneerMitigation: 'Observação de manchas de enxofre em ebulição na superfície do lago e uso de botas e perneiras tratadas com cera mineral grossa.',
+      rescueAndStabilization: 'Neutralização imediata da pele com pasta de bicarbonato e leite de cal diluído, seguida de enxágue com água doce mineral.',
+      icon: '🌋🧪',
+      color: '#16a34a'
+    };
+
+    if (ht === 'caldera_rim_scoria_talus_sliding_plunge') {
+      hazard = {
+        hazardTitle: 'Deslizamento em Borda de Caldeira em Escória e Cinza com Queda de 30m',
+        saveDC: 15,
+        saveType: 'Destreza',
+        calderaAndAcidRisk: 'Borda íngreme da caldeira formada por tálus de escória solta e lapilli vulcânico; os passos da comitiva desencadeiam rolamento em massa de cascalho basáltico arremessando os aventureiros encosta abaixo com 3d8 de concussão e queimaduras abrasivas (PHB p. 182-183).',
+        pioneerMitigation: 'Fixação de cabos de aço em ancoragens perfuradas na rocha basáltica sólida e avanço em cordada espaçada de 6 metros.',
+        rescueAndStabilization: 'Tracionamento com talha de resgate montada em tripé de ferro e aplicação de ataduras esterilizadas com pomada de arnica.',
+        icon: '🧗‍♂️🌋',
+        color: '#ea580c'
+      };
+    } else if (ht === 'subaqueous_fumarole_sulfur_dioxide_burp') {
+      hazard = {
+        hazardTitle: 'Golpe de Fumarola com Jato de Dióxido de Enxofre a 120°C e Asfixia',
+        saveDC: 14,
+        saveType: 'Constituição',
+        calderaAndAcidRisk: 'Conduto subaquático na margem rasa que expele repentinamente coluna de vapor superaquecido saturado de SO₂ e H₂S; a nuvem cáustica envolve a trilha eliminando o oxigênio com 2d8 de fogo, 2d8 de veneno e tosse hemorrágica por 1 hora (DMG p. 110, 257).',
+        pioneerMitigation: 'Uso de respiradores de couro vedados com filtros de carvão vegetal ativo embebidos em solução básica neutralizante.',
+        rescueAndStabilization: 'Remoção célere para a crista de barlavento da caldeira, inalação de vapores calmantes e repouso estendido.',
+        icon: '💨☠️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'thermal_solfatara_sulfur_crust_collapse') {
+      hazard = {
+        hazardTitle: 'Rompimento de Crosta de Enxofre Nativo com Afundamento em Lama Fervente',
+        saveDC: 14,
+        saveType: 'Destreza',
+        calderaAndAcidRisk: 'Campo de solfataras com crosta frágil de enxofre cristalizado sobre bolsões de lama termal a 95°C; o peso da bota quebra a laje mergulhando a perna do explorador no lodo incandescente com 3d8 de dano ígneo e queimaduras severas (DMG p. 246; PHB p. 182-183).',
+        pioneerMitigation: 'Sondagem rigorosa de piso com haste de ferro temperado a cada passo e caminhada restrita a lajes de basalto escuro.',
+        rescueAndStabilization: 'Resfriamento imediato com água potável tépida, remoção cuidadosa de crostas de lama e aplicação de emplastro calmante de babosa.',
+        icon: '🕳️🔥',
+        color: '#dc2626'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampAcidCalderaCraterStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var dt = (defenseType || 'basalt_caldera_bench_wind_deflected_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Platô de Basalto Colunar no Degrau Médio da Caldeira',
+      calderaAndCampSafety: 'Acampamento assentado em terraço plano de basalto colunar consolidado a 150 metros acima do lago ácido, posicionado a barlavento das plumas sulfurosas e fora do alcance de ondas e vapores térmicos.',
+      calderaBasaltBarrierAndSteamStill: 'A barreira de colunas prismáticas de basalto funciona como muralha natural sólida contra vendavais e desmoronamentos da encosta superior, enquanto a cratera impede qualquer acesso furtivo por terra.',
+      campRestAndSafetyGuards: 'Concede repouso longo aquecido pelo calor geotérmico suave do solo, seco e seguro para todos os membros do grupo, garantindo visão panorâmica soberba para as sentinelas de guarda.',
+      icon: '⛺🌋',
+      color: '#ea580c'
+    };
+
+    if (dt === 'interlocking_andesite_block_and_scoria_parapet') {
+      tech = {
+        defenseTitle: 'Parapeito Baluarte de Blocos de Andesito e Escória Vulcânica',
+        calderaAndCampSafety: 'Muro semicircular defensivo erguido com blocos pesados de andesito encaixados em cantaria seca e fendas calafetadas com pó pozolânico vulcânico impermeável.',
+        calderaBasaltBarrierAndSteamStill: 'Concede cobertura superior (+5 na CA) contra arqueiros e projéteis e barra totalmente o avanço de salamandras ígneas ou bestas termais.',
+        campRestAndSafetyGuards: 'Assegura descanso contínuo sem risco de asfixia por rajadas térmicas e defesa inexpugnável para o bivaque.',
+        icon: '🧱🛡️',
+        color: '#b45309'
+      };
+    } else if (dt === 'geothermal_condensate_steam_still_pot') {
+      tech = {
+        defenseTitle: 'Destilador Geotérmico de Vapor Vulcânico com Condensador de Cobre',
+        calderaAndCampSafety: 'Sistema de serpentina de cobre estendida sobre fumarola de vapor limpo que condensa água pura desmineralizada separando gases sulfurosos por gravidade.',
+        calderaBasaltBarrierAndSteamStill: 'Fornece 65 litros diários de água destilada, límpida, tépida e potável, eliminando a dependência de carregar tonéis pesados de água doce nos ermos vulcânicos.',
+        campRestAndSafetyGuards: 'Garante hidratação abundante e previne desidratação crônica e choque térmico na comitiva.',
+        icon: '💧⚗️',
+        color: '#0284c7'
+      };
+    } else if (dt === 'caldera_chasm_tripwire_bronze_bell_alarm') {
+      tech = {
+        defenseTitle: 'Perímetro de Alarme em Fenda de Caldeira com Cabos de Tungstênio e Campainhas',
+        calderaAndCampSafety: 'Cabos de liga de tungstênio resistentes a ácidos estendidos ao longo das fendas de acesso conectados a sinos de bronze instalados em pontos estratégicos.',
+        calderaBasaltBarrierAndSteamStill: 'Alerta audível instantâneo a 80 metros de distância com a aproximação de invasores ou feras noturnas nas fendas da caldeira.',
+        campRestAndSafetyGuards: 'Proporciona tranquilidade mental absoluta e vigilância automatizada precisa para as sentinelas de vigília.',
+        icon: '🔔🌋',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessFiordHangingFallsHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'coastal').toLowerCase();
@@ -26498,6 +26602,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessAcidCalderaCraterHazard: calcWildernessAcidCalderaCraterHazard,
+    calcCampAcidCalderaCraterStation: calcCampAcidCalderaCraterStation,
     calcWildernessFiordHangingFallsHazard: calcWildernessFiordHangingFallsHazard,
     calcCampFiordHangingFallsStation: calcCampFiordHangingFallsStation,
     calcWildernessArtesianFervedouroHazard: calcWildernessArtesianFervedouroHazard,
