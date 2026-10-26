@@ -20735,6 +20735,82 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 295: PLATAFORMAS DE STRANDFLAT E ARQUIPÉLAGOS DE SKERRIES (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessStrandflatSkerryHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'tidal_race_skerry_sound_maelstrom').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Correnteza de Maré em Estreitos de Skerries e Vórtice Costeiro',
+      saveDC: 15,
+      saveType: 'Força',
+      strandflatRisk: 'Quando a maré oscila 4 metros no labirinto de ilhotas, estreitos canais entre skerries de rocha nua canalizam torrentes furiosas de água salgada a 16 nós (turbilhões de maré / straum); botes e nadadores são sugados para fendas submarinas e arremessados contra cristas de granito afiadas com 3d8 de concussão e risco de afogamento por turbulência (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores navegadores calculando a tábua de marés e cruzando os canais estritamente na calmaria do estofo da maré (Sobrevivência ou Navegação CD 14).',
+      rescueAndStabilization: 'Cabos de retinida arremessados de ilhotas secas com ganchos de resgate e tração combinada para retirar náufragos dos vórtices (Atletismo CD 14 ou Sobrevivência CD 13).',
+      icon: '🌊',
+      color: '#0284c7'
+    };
+
+    if (ht === 'blind_skerry_submerged_reef_hull_breach') {
+      hazard.hazardTitle = 'Arrecife Oculto de Skerry Cego e Naufrágio na Preamar';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.strandflatRisk = 'Rochedos glaciais arredondados e bancos de rocha submersa (båe / skerries cegos) ficam ocultos a poucos centímetros da superfície na maré alta; o fundo do casco ou as pernas dos aventureiros em marcha vadeando o raso chocam-se contra as cristas afiadas de cracas e rocha fraturada, rompendo o fundo da embarcação e causando 2d8 cortante e contundente com risco de perder mantimentos no mar gelado (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Vigia constante na proa com vara de sondagem graduada (prumo de mão) mapeando desníveis de rocha e padrões de arrebentação (Percepção ou Navegação CD 14).';
+      hazard.rescueAndStabilization = 'Calafetagem emergencial com tábuas e breu resinoso, ou encalhe controlado no topo plano do skerry mais próximo (Ofício [Carpintaria] CD 13 ou Atletismo CD 13).';
+    } else if (ht === 'supercooled_spray_verglas_skerry_slip') {
+      hazard.hazardTitle = 'Spray Marinho Super-resfriado e Verglas em Lajes de Skerry';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.strandflatRisk = 'O vento antártico sopra névoa salina gélida sobre as superfícies lisas e polidas pelo gelo das ilhotas rasas de strandflat, formando em minutos uma película invisível de gelo vitrificado (verglas salino); o menor passo desatento resulta em queda violenta sobre blocos de tálus costeiro ou escorregão direto para a ressaca gélida com 2d6 de concussão e 2d6 de frio (PHB p. 183; DMG p. 110).';
+      hazard.pioneerMitigation = 'Uso de cravos de ferro (grampões) nas botas e corda-guia amarrada entre a comitiva ancorada em pitões nas fendas da rocha (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Içamento com talhas e isolamento imediato da umidade marinha com mantas secas e fogueira de turfa em bivaque (Sobrevivência ou Medicina CD 13).';
+    } else if (ht === 'sea_smoke_frost_fog_skerry_labyrinth_trap') {
+      hazard.hazardTitle = 'Fumaça do Mar e Desorientação no Labirinto de Skerries';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Sabedoria';
+      hazard.strandflatRisk = 'O choque térmico entre o ar polar a -15°C e a água do mar gera densas colunas de vapor congelante (sea smoke / fumaça do mar) que cobrem o arquipélago com visibilidade zero; as centenas de ilhotas idênticas e a acústica reverberante das ondas desorientam os batedores, isolando a comitiva em um ilhéu rochoso submersível na maré seguinte com 1 nível de exaustão e hipotermia (DMG p. 110-111).';
+      hazard.pioneerMitigation = 'Orientação contínua por bússola giroscópica e escuta das ondas que quebram nos paredões externos do continente (Sobrevivência ou Navegação CD 14).';
+      hazard.rescueAndStabilization = 'Disparo de fogos de sinalização arcana e ancoragem temporária segura em elevação granítica (Sobrevivência CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampStrandflatSkerryStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'elevated_glaciated_whaleback_skerry_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Corcova de Rocha Polida (Whaleback Skerry)',
+      strandflatAndCampSafety: 'O acampamento é montado no topo convexo de uma ilhota de rocha granítica lisa e maciça polida pelo gelo, elevada 5 metros acima da preamar máxima; a superfície sólida e sem solo retém zero lama, drenando a água da chuva e respingos de maré diretamente para o mar sem risco de inundação (DMG p. 111).',
+      strandflatAndWatch: 'A posição insular oferece 360 graus de visão marítima sobre todo o canal e cordão de ilhotas circundantes com vantagem em testes de Percepção contra predadores aquáticos ou botes invasores.',
+      campRestAndSafetyGuards: 'Repouso seco e estável sobre leitos de lona esticados com cabos ancorados em cunhas de fenda, restaurando plenamente as energias dos aventureiros.',
+      icon: '⛺',
+      color: '#0284c7'
+    };
+
+    if (dt === 'intertidal_kelp_brine_smoke_hearth') {
+      defense.defenseTitle = 'Fogueira de Algaporca Seca e Defumador de Peixes de Fundo';
+      defense.strandflatAndCampSafety = 'Feixes de algas pardas laminares e algaporca colhidas na maré baixa são desidratadas nas pedras e queimadas com lascas de madeira flutuante, gerando brasa densa e fumaça iodada que repele mosquitos litorâneos e insetos de praia (PHB p. 150).';
+      defense.strandflatAndWatch = 'Fornece calor contínuo para secagem rápida de botas e roupas de lã salgadas, permitindo que os membros do grupo recuperem +1 dado de vida adicional ao completar um descanso longo.';
+      defense.campRestAndSafetyGuards = 'Ambiente aquecido e aromático no interior das tendas, protegendo a comitiva contra a umidade penetrante da maresia.';
+    } else if (dt === 'driftwood_boulder_bastion_breakwater') {
+      defense.defenseTitle = 'Baluarte de Troncos de Deriva e Matacões de Morena';
+      defense.strandflatAndCampSafety = 'Troncos maciços de pinheiro trazidos pelas ressacas são calçados entre matacões de granito trazidos por geleiras antigas, erguendo um parapeito de 1,5 metro de altura contra os vendavais marítimos de proa (PHB p. 185).';
+      defense.strandflatAndWatch = 'Garante cobertura três-quartos (+5 na CA e +5 em salvaguardas de Destreza) contra ventanias glaciais de 70 km/h e virote ou arpões inimigos vindos da água.';
+      defense.campRestAndSafetyGuards = 'Proteção hermética contra a fúria do oceano aberto e vigília noturna segura e abrigada para as sentinelas.';
+    }
+
+    return defense;
+  }
+
+
+  // =========================================================================
   // FASE 294: PLANÍCIES LITORÂNEAS DE MACHAIR E LOCHANS (D&D 5e)
   // =========================================================================
 
@@ -37672,6 +37748,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessStrandflatSkerryHazard: calcWildernessStrandflatSkerryHazard,
+    calcCampStrandflatSkerryStation: calcCampStrandflatSkerryStation,
     calcWildernessMachairCoastHazard: calcWildernessMachairCoastHazard,
     calcCampMachairCoastStation: calcCampMachairCoastStation,
     calcWildernessFaultFacetCanyonHazard: calcWildernessFaultFacetCanyonHazard,
