@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T16:47:48Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T16:50:52Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessSugarloafInselbergHazard) return '';
+        var bKey = (biome && biome.key) || 'savanna';
+        var si = CartShared.calcWildernessSugarloafInselbergHazard(bKey, 'granite_dome_friction_slab_sliding_fall');
+        return '<div class="clp-sugarloaf-inselberg-card" style="margin:4px 0 6px;text-align:left;background:rgba(36,24,14,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(202,138,4,0.35);font-size:8px;color:#fefce8;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + si.color + ';margin-bottom:2px;">' + si.icon + ' ' + si.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Inselbergs e Pães de Açúcar:</b> ' + si.inselbergRisk + ' (CD ' + si.saveDC + ' [' + si.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fef08a;margin-top:1px;">• <b>Mitigação:</b> ' + si.pioneerMitigation + ' · <i>Estabilização: ' + si.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampSugarloafInselbergStation) return '';
+        var bKey = (biome && biome.key) || 'savanna';
+        var ss = CartShared.calcCampSugarloafInselbergStation(bKey, 'inselberg_mid_slope_vegetated_terrace_bivouac');
+        return '<div class="clp-sugarloaf-inselberg-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,18,10,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(180,83,9,0.3);font-size:8px;color:#fefce8;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ss.color + ';margin-bottom:2px;">' + ss.icon + ' ' + ss.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Platô de Inselberg:</b> ' + ss.inselbergAndCampSafety + ' · <b>Defesa:</b> ' + ss.inselbergCliffBarrierAndWaterWell + '</div>'
+          + '  <div style="font-size:7.5px;color:#fde047;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + ss.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

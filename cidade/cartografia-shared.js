@@ -20618,6 +20618,110 @@
   // FASE 182: CAMPOS DE DOLINAS ALUVIAIS DE COLAPSO E VORAGENS (D&D 5e)
   // =========================================================================
 
+  // =========================================================================
+  // FASE 183: CRISTAS DE INSELBERGS GRANÍTICOS EM PÃO DE AÇÚCAR (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessSugarloafInselbergHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'savanna').toLowerCase();
+    var ht = (hazardType || 'granite_dome_friction_slab_sliding_fall').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Descorregamento em Laje de Aderência de Pão de Açúcar com Queda de 25m',
+      saveDC: 15,
+      saveType: 'Destreza',
+      inselbergRisk: 'Domo monolítico de granito com inclinação convexa de 45° a 60° sem fendas para apoio; a sola da bota perde aderência no quartzo polido; o explorador derrapa pela laje lisa arremessando-se contra tálus rochoso na base com risco de 3d8 de concussão por abrasão generalizada (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Uso de calçados de borracha resinada de alta fricção, aplicação de magnésio em pó nas palmas e avanço em cordada triangular com pítons de expansão.',
+      rescueAndStabilization: 'Ancoragem de chapeleta na rocha nua com cabo dinâmico e içamento por polia com aplicação de gaze vaselinada sobre queimaduras de atrito.',
+      icon: '🧗‍♂️🪨',
+      color: '#ca8a04'
+    };
+
+    if (ht === 'exfoliation_sheet_spalling_sheet_collapse') {
+      hazard = {
+        hazardTitle: 'Desplacamento Espontâneo de Casca de Granito em Queda de 5 Toneladas',
+        saveDC: 15,
+        saveType: 'Destreza',
+        inselbergRisk: 'Aquecimento solar extremo seguido de resfriamento brusco gera dilatação térmica diferencial que rompe laje de granito esfoliado de 10 cm; a casca rochosa rompe com estrondo explosivo e desliza sobre a encosta, causando 3d10 de concussão por esmagamento (DMG p. 246-247).',
+        pioneerMitigation: 'Observação de fendas de descamação ressonantes e avanço cauteloso pelas caneluras consolidadas de drenagem hídrica.',
+        rescueAndStabilization: 'Alavancagem da laje com pés-de-cabra de aço e contenção de hemorragias com ataduras hemostáticas de cânhamo.',
+        icon: '🪨💥',
+        color: '#b45309'
+      };
+    } else if (ht === 'inselberg_summit_lightning_strike_concussion') {
+      hazard = {
+        hazardTitle: 'Descarga Atmosférica Fulminante em Cume Isolado com Concussão Sônica',
+        saveDC: 14,
+        saveType: 'Constituição',
+        inselbergRisk: 'O domo granítico eleva-se isolado sobre a planície funcionando como para-raios durante tempestades; raio de 100.000 amperes atinge a crista rochosa; a onda de choque e a corrente de retorno causam surdez e 3d8 de dano elétrico com atordoamento por 1 hora (DMG p. 110, 246).',
+        pioneerMitigation: 'Descida imediata do cume ao menor sinal de eletricidade estática e refúgio em depressões côncavas sem tocar em superfícies metálicas.',
+        rescueAndStabilization: 'Reanimação cardiorrespiratória célere, isolamento térmico e administração de água com sal mineralizado.',
+        icon: '⚡🌩️',
+        color: '#eab308'
+      };
+    } else if (ht === 'fluting_runnel_algae_slick_sprain') {
+      hazard = {
+        hazardTitle: 'Limo Viscoso em Canelura de Dissolução Ácida com Fratura e Torção',
+        saveDC: 14,
+        saveType: 'Destreza',
+        inselbergRisk: 'Sulcos verticais profundos esculpidos por água ácida de bromélias (karren granítico) revestidos de algas úmidas; o aventureiro pisa na canaleta escorregadia torcendo o tornozelo nas paredes estreitas de quartzo com 3d6 de concussão e luxação severa (PHB p. 182-183).',
+        pioneerMitigation: 'Marcha pelas lombadas convexas secas evitando as canaletas escuras de escoamento de água.',
+        rescueAndStabilization: 'Redução articular imediata com tração manual suave, fixação com tala de bambu rígida e repouso.',
+        icon: '🌿⚠️',
+        color: '#16a34a'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampSugarloafInselbergStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'savanna').toLowerCase();
+    var dt = (defenseType || 'inselberg_mid_slope_vegetated_terrace_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Platô Suspenso de Bromelial em Meia Encosta do Monólito',
+      inselbergAndCampSafety: 'Acampamento instalado em terraço plano em degrau natural a 120 metros de altura na parede do inselberg, abrigado por tapetes densos de bromélias e arbustos saxícolas ancorados em tálus arenoso consolidado.',
+      inselbergCliffBarrierAndWaterWell: 'A encosta íngreme e lisa de granito impede qualquer acesso de predadores terrestres sem asas e a elevação isola totalmente o abrigo de enchentes, calor abafado e névoas da planície.',
+      campRestAndSafetyGuards: 'Concede sono longo revigorante, seco e calmo com circulação contínua de brisa pura, garantindo vigília panorâmica soberba em 360 graus para as sentinelas de guarda.',
+      icon: '⛺🧗‍♂️',
+      color: '#ca8a04'
+    };
+
+    if (dt === 'granite_talus_cyclopean_drywall_bastion') {
+      tech = {
+        defenseTitle: 'Baluarte Ciclópico de Blocos de Granito e Esteiras de Cipó Trançado',
+        inselbergAndCampSafety: 'Barreira perimetral semicircular construída com megablocos de descamação granítica arranjados em alvenaria ciclópica sem argamassa fechando o perímetro do platô.',
+        inselbergCliffBarrierAndWaterWell: 'Concede cobertura superior (+5 na CA) contra arqueiros inimigos e projeta parapeito rígido contra rajadas de vendaval de alta altitude.',
+        campRestAndSafetyGuards: 'Assegura descanso térmico estável e sentinelas resguardadas em nichos de observação blindados.',
+        icon: '🧱🛡️',
+        color: '#b45309'
+      };
+    } else if (dt === 'bromeliad_tank_water_filtration_still_pot') {
+      tech = {
+        defenseTitle: 'Filtro Decantador de Tanques de Bromélia e Coletor de Orvalho',
+        inselbergAndCampSafety: 'Sistema de filtragem e decantação com carvão ativado e areia quartzosa que purifica água límpida acumulada nos cálices das grandes bromélias imperiais do platô.',
+        inselbergCliffBarrierAndWaterWell: 'Fornece 50 litros diários de água doce cristalina, fresca e purificada de resíduos orgânicos, eliminando o esforço de transportar tonéis pela escalada.',
+        campRestAndSafetyGuards: 'Restabelece o vigor físico e a hidratação dos aventureiros, preservando a saúde e a autonomia da comitiva.',
+        icon: '💧🪴',
+        color: '#16a34a'
+      };
+    } else if (dt === 'inselberg_slab_tripwire_bronze_bell_alarm') {
+      tech = {
+        defenseTitle: 'Perímetro de Alarme em Laje com Fios de Tensão e Guizos de Bronze',
+        inselbergAndCampSafety: 'Cabos finos de latão estendidos ao longo das vias de escalada e canaletas de acesso conectados a sinos de bronze instalados em cantoneiras de ferro cravadas na rocha.',
+        inselbergCliffBarrierAndWaterWell: 'Dispara alerta sonoro agudo a mais de 80 metros com qualquer toque de invasores escalando o monólito nas trevas.',
+        campRestAndSafetyGuards: 'Proporciona repouso noturno ininterrupto e prontidão tática instantânea para as sentinelas de vigília.',
+        icon: '🔔🪨',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessAlluvialCollapseDolineHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'grassland').toLowerCase();
@@ -26810,6 +26914,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessSugarloafInselbergHazard: calcWildernessSugarloafInselbergHazard,
+    calcCampSugarloafInselbergStation: calcCampSugarloafInselbergStation,
     calcWildernessAlluvialCollapseDolineHazard: calcWildernessAlluvialCollapseDolineHazard,
     calcCampAlluvialCollapseDolineStation: calcCampAlluvialCollapseDolineStation,
     calcWildernessBadlandClayPipingHazard: calcWildernessBadlandClayPipingHazard,
