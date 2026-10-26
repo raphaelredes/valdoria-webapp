@@ -20582,6 +20582,110 @@
   // FASE 173: PÂNTANOS SALGADOS E MARISMAS DE MARÉ TEMPERADA COM ESTEIRAS DE ESPARTINA (D&D 5e)
   // =========================================================================
 
+  // =========================================================================
+  // FASE 174: CÂNYONS FÓSSIL-GLACIAIS EM TÚNEL SUBGLACIAR (ESKERS E KAMES) (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessSubglacialEskerKameHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'tundra').toLowerCase();
+    var ht = (hazardType || 'esker_crest_scree_sliding_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Deslizamento em Crista Sinuosa de Esker com Queda em Tálus Instável de 15m',
+      saveDC: 15,
+      saveType: 'Destreza',
+      eskerAndGlacialRisk: 'Crista estreita de cascalho e pedregulhos fluvioglaciares de 15 metros que cede sob os passos da comitiva em marcha; desencadeia avalanche localizada de seixos soltos arremessando os exploradores encosta abaixo com risco de fraturas e 3d8 de concussão (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Marcha em fila única pela linha de cume com bastões alpinos de ponta reforçada e botas com cãibras de fixação lateral.',
+      rescueAndStabilization: 'Ancoragem de machado de gelo na crista sólida com descida de corda em nó prussik para içamento seguro dos feridos.',
+      icon: '🏔️🪨',
+      color: '#38bdf8'
+    };
+
+    if (ht === 'subglacial_tunnel_ceiling_ice_slab_collapse') {
+      hazard = {
+        hazardTitle: 'Desabamento de Placa de Gelo Fóssil em Teto de Túnel Subglaciar',
+        saveDC: 15,
+        saveType: 'Destreza',
+        eskerAndGlacialRisk: 'Túnel tubular escavado por drenagem subglaciar com teto instável de gelo azul fóssil; o calor corporal e vibrações provocam colapso de placas de 2 toneladas, causando 3d10 de concussão por esmagamento e soterramento parcial (DMG p. 246-247).',
+        pioneerMitigation: 'Sondagem de ressonância acústica do teto com martelo geológico antes da entrada e escoramento com pranchas de abeto silvestre.',
+        rescueAndStabilization: 'Escavação ágil com picaretas de ponta dupla, imobilização com talas rígidas e administração de bebida quente para hipotermia.',
+        icon: '🧊⚠️',
+        color: '#0284c7'
+      };
+    } else if (ht === 'kame_kettle_quicksilt_slurry_trap') {
+      hazard = {
+        hazardTitle: 'Sumidouro de Lama Movediça Glaciolacustre em Depressão de Kettle',
+        saveDC: 14,
+        saveType: 'Força',
+        eskerAndGlacialRisk: 'Depressão circular de kettle hole com areia fina e farinha de rocha saturada de água gélida de desgelo; a crosta superficial aparente liquifaz sob peso corporal, sugando o aventureiro na pasta viscosa com risco de asfixia e 2d6 de concussão (DMG p. 110-111).',
+        pioneerMitigation: 'Disposição prévia de troncos transversais formando esteira de apoio e teste de compactação do solo com vara longa de pinho.',
+        rescueAndStabilization: 'Tracionamento com cabo de reboque atrelado a cavalo ou alavanca de tronco ancorada em rocha firme da margem da bacia.',
+        icon: '🕳️❄️',
+        color: '#0ea5e9'
+      };
+    } else if (ht === 'subglacial_flash_jokulhlaup_torrent') {
+      hazard = {
+        hazardTitle: 'Torrente Repentina de Esvaziamento Glaciar (Jökulhlaup) em Cânion',
+        saveDC: 15,
+        saveType: 'Força',
+        eskerAndGlacialRisk: 'Ruptura catastrófica de barreira de morena em lago subglaciar com torrente violenta de água gélida e blocos de gelo a 40 km/h pelo fundo do cânion; teste contra arrastamento pela cheia e 3d8 de concussão por blocos de gelo flutuantes (DMG p. 110, 246).',
+        pioneerMitigation: 'Vigilância contínua de variações súbitas no leito do córrego e estalos nas morenas com fuga rápida para o dorso elevado do esker.',
+        rescueAndStabilization: 'Içamento emergencial com laços de corda nas margens altas, aquecimento imediato com mantas de pele e fogueiras de turfa.',
+        icon: '🌊🧊',
+        color: '#0369a1'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampSubglacialEskerKameStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'tundra').toLowerCase();
+    var dt = (defenseType || 'kame_knoll_promontory_wind_deflected_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Promontório Cônico de Kame com Trincheira de Vento',
+      eskerAndCampSafety: 'Acampamento assentado no topo cônico de colina de kame a 25 metros de altitude, escavado em trincheira perimétrica que desvia correntes catabáticas e névoas gélidas do fundo do vale.',
+      eskerWallBarrierAndGlacialWell: 'O promontório elevado oferece drenagem natural imediata, solo seco livre de enchentes de desgelo e horizonte limpo em 360 graus contra aproximações sorrateiras.',
+      campRestAndSafetyGuards: 'Assegura repouso longo aquecido e seco sem risco de avalanches de rocha, proporcionando sono tranquilo e vigilância plena para as sentinelas.',
+      icon: '⛺🏔️',
+      color: '#38bdf8'
+    };
+
+    if (dt === 'interlocking_glacier_erratic_boulder_bastion') {
+      tech = {
+        defenseTitle: 'Baluarte de Blocos Erráticos Glaciários com Muros de Tálus Calafetado',
+        eskerAndCampSafety: 'Perímetro defensivo erguido com megablocos de granito errático deixados pelo recuo glaciar, com fendas preenchidas por pedras e musgo polar seco.',
+        eskerWallBarrierAndGlacialWell: 'Concede cobertura superior (+5 na CA) contra arqueiros e bloqueia totalmente investidas de predadores das neves ou ventanias polares cortantes.',
+        campRestAndSafetyGuards: 'Garante temperatura interna protegida e segurança impenetrável contra ataques noturnos nas terras glaciais.',
+        icon: '🪨🛡️',
+        color: '#0284c7'
+      };
+    } else if (dt === 'glacial_flour_sediment_filtration_well') {
+      tech = {
+        defenseTitle: 'Poço de Decantação de Farinha Glacial com Leito de Cascalho e Carvão',
+        eskerAndCampSafety: 'Bacias em cascata escavadas no cascalho limpo do esker que decantam e purificam a água de desgelo turva saturada de finos abrasivos de rocha.',
+        eskerWallBarrierAndGlacialWell: 'Fornece 50 litros diários de água cristalina, límpida e potável sem resíduos minerais prejudiciais à digestão e à resistência da comitiva.',
+        campRestAndSafetyGuards: 'Restaura o vigor hídrico pleno dos aventureiros, eliminando cólicas e preservando a saúde física de todo o grupo.',
+        icon: '💧🏔️',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'esker_spine_tripwire_pebble_rattle_perimeter') {
+      tech = {
+        defenseTitle: 'Perímetro de Alarme na Crista do Esker com Guizos e Cascalho Vibrante',
+        eskerAndCampSafety: 'Cordões de linho encerado estendidos ao longo das encostas íngremes do esker conectados a latas de seixos que ecoam estrondosamente ao menor movimento.',
+        eskerWallBarrierAndGlacialWell: 'Alerta antecipado a 60 metros contra tentativas de escalada da crista durante as tempestades noturnas e noites escuras.',
+        campRestAndSafetyGuards: 'Garante tranquilidade mental absoluta e vigilância automatizada precisa para as sentinelas de vigília.',
+        icon: '🔔🪨',
+        color: '#38bdf8'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessTidalSaltMarshHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'swamp').toLowerCase();
@@ -25874,6 +25978,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessSubglacialEskerKameHazard: calcWildernessSubglacialEskerKameHazard,
+    calcCampSubglacialEskerKameStation: calcCampSubglacialEskerKameStation,
     calcWildernessTidalSaltMarshHazard: calcWildernessTidalSaltMarshHazard,
     calcCampTidalSaltMarshStation: calcCampTidalSaltMarshStation,
     calcWildernessYardangCorridorHazard: calcWildernessYardangCorridorHazard,
