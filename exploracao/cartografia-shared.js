@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 198: BUFADEROS COSTEIROS DE COMPRESSÃO E GALERIAS DE RESSACA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessCoastalBlowholeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'blowhole_pneumatic_geyser_column_ejection').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ejeção Pneumática de Coluna Marinha em Chaminé de Bufadero',
+      saveDC: 15,
+      saveType: 'Força',
+      blowholeSurgeRisk: 'Poço vertical no topo do promontório rochoso conectado a uma caverna submarina; a entrada de uma onda de tempestade comprime o ar na galeria e dispara um gêiser violento de espuma, seixos e água salgada que arremessa quem passa sobre a fenda com 3d8 de concussão (DMG p. 110, 117; PHB p. 182-183).',
+      pioneerMitigation: 'Observação das manchas circulares úmidas e sem líquen na laje costeira e travessia a 15 metros dos respiradouros.',
+      rescueAndStabilization: 'Resgate com cabo de segurança antes da aspiração de retorno no poço e imobilização de contusões.',
+      icon: '🐳🌊',
+      color: '#0284c7'
+    };
+
+    if (ht === 'sea_cave_surge_piston_vacuum_backwash_suction') {
+      hazard = {
+        hazardTitle: 'Sucção de Refluxo em Tubo de Ressaca Subterrâneo (Efeito Pistão)',
+        saveDC: 15,
+        saveType: 'Força',
+        blowholeSurgeRisk: 'Quando o vagalhão recua do interior da caverna costeira, cria-se um vácuo poderoso que suga tudo no piso da galeria através do sifão estreito em direção ao mar aberto, raspando os aventureiros contra paredes de cracas com 3d6 de dano cortante e risco de afogamento (DMG p. 117; PHB p. 182-183).',
+        pioneerMitigation: 'Ancoragem em grampos altos na parede da caverna antes da chegada da série de ondas maiores.',
+        rescueAndStabilization: 'Tracionamento imediato pelo cabo-guia no intervalo calmo entre as séries de ondas.',
+        icon: '🌀🐚',
+        color: '#0369a1'
+      };
+    } else if (ht === 'compressed_air_pocket_overpressure_barotrauma_blast') {
+      hazard = {
+        hazardTitle: 'Onda de Choque por Sobrepressão de Ar Comprimido em Gruta Cega',
+        saveDC: 15,
+        saveType: 'Constituição',
+        blowholeSurgeRisk: 'Em galerias marinhas sem chaminé superior de escape, a parede de água sela a entrada e comprime o bolsão de ar interno como um cilindro de bomba; o estrondo sônico e o salto barométrico causam 3d8 de dano trovejante e a condição Surdo por 1 hora (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Proibição de adentrar câmaras costeiras sem chaminé de ventilação durante a maré enchente.',
+        rescueAndStabilization: 'Evacuação rápida para o terraço externo na maré vazante e proteção auricular com cera.',
+        icon: '💥👂',
+        color: '#38bdf8'
+      };
+    } else if (ht === 'barnacle_and_mussel_razor_shelf_wave_slam') {
+      hazard = {
+        hazardTitle: 'Arremesso Contra Bancada Cortante de Cracas Gigantes e Mexilhões',
+        saveDC: 14,
+        saveType: 'Destreza',
+        blowholeSurgeRisk: 'Os degraus inferiores do promontório são inteiramente revestidos por carapaças calcárias cônicas e conchas bivalves afiadas como bisturis; o impacto de uma onda lateral arrasta o explorador sobre a crosta biológica causando 3d6 de dano cortante (PHB p. 182-183).',
+        pioneerMitigation: 'Uso de botas de sola grossa cravada e perneiras de couro curtido ao cruzar a zona entremarés.',
+        rescueAndStabilization: 'Desinfecção rigorosa dos cortes marinhos com aguardente ou vinagre e sutura firme.',
+        icon: '🦪🗡️',
+        color: '#0d9488'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampCoastalBlowholeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'elevated_marine_terrace_above_spray_zone_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Terraço Marinho Fóssil Acima da Zona de Borrifo',
+      blowholeAndCampSafety: 'Acampamento instalado em antigo degrau de abrasão marinha elevado a 25 metros acima do nível do mar, sobre rocha maciça sem fissuras pneumáticas.',
+      blowholeGaugeAndSpring: 'Domina visualmente toda a linha de arrebentação e mantém as barracas secas e livres da névoa salina corrosiva dos bufaderos.',
+      campRestAndSafetyGuards: 'Garante descanso longo tranquilo e seguro para todos os aventureiros e sentinelas.',
+      icon: '⛺🌊',
+      color: '#0284c7'
+    };
+
+    if (dt === 'surge_chamber_vent_whistle_tide_and_swell_gauge') {
+      tech = {
+        defenseTitle: 'Flauta Barométrica na Fenda de Ar para Leitura de Maré e Ressaca',
+        blowholeAndCampSafety: 'Tubo oco de madeira encaixado em uma fresta secundária de escape de ar a 30 metros do bivaque que emite notas graves ou agudas conforme a pressão das ondas na caverna inferior.',
+        blowholeGaugeAndSpring: 'Permite prever com precisão o horário da preamar e a aproximação de tempestades marinhas horas antes de atingirem a costa.',
+        campRestAndSafetyGuards: 'Orienta o planejamento seguro de travessias costeiras pela manhã.',
+        icon: '🎶🌬️',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'coastal_cliff_seepage_fern_grotto_freshwater_drip') {
+      tech = {
+        defenseTitle: 'Bica de Água Doce em Gruta Suspensa de Avencas na Falésia',
+        blowholeAndCampSafety: 'Nicho sombreado na meia-encosta superior onde a água pluvial infiltrada no platô brota sobre uma camada de xisto impermeável, longe dos respingos do mar.',
+        blowholeGaugeAndSpring: 'Canaliza o gotejamento contínuo por calhas de casca de árvore para encher todos os cantis com água doce e fria.',
+        campRestAndSafetyGuards: 'Assegura autonomia hídrica completa mesmo em promontórios rochosos áridos.',
+        icon: '💧🌿',
+        color: '#10b981'
+      };
+    } else if (dt === 'kelp_and_driftwood_baffle_over_fissure_vent') {
+      tech = {
+        defenseTitle: 'Abafador Acústico de Toras e Algas Laminárias sobre Respiradouro',
+        blowholeAndCampSafety: 'Grade pesada de troncos de deriva forrada com feixes espessos de algas kelp secas posicionada sobre fendas ruidosas próximas ao acampamento.',
+        blowholeGaugeAndSpring: 'Amortece o sibilo estrondoso do ar comprimido noturno, permitindo que as sentinelas ouçam passos reais na trilha.',
+        campRestAndSafetyGuards: 'Elimina a fadiga auditiva e melhora a qualidade do sono da comitiva.',
+        icon: '🪵🔇',
+        color: '#0d9488'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 197: TURFEIRAS DE CORDÕES BOREAIS (AAPA) E COLINAS DE PALSA (D&D 5e)
   // =========================================================================
 
@@ -28372,6 +28476,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessCoastalBlowholeHazard: calcWildernessCoastalBlowholeHazard,
+    calcCampCoastalBlowholeStation: calcCampCoastalBlowholeStation,
     calcWildernessPalsaAapaMireHazard: calcWildernessPalsaAapaMireHazard,
     calcCampPalsaAapaMireStation: calcCampPalsaAapaMireStation,
     calcWildernessAeolianLoessRavineHazard: calcWildernessAeolianLoessRavineHazard,
