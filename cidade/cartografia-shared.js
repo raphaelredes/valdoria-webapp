@@ -18229,6 +18229,130 @@
     };
   }
 
+  // === calcWildernessBadlandsMudstoneAndHoodooHazard (Badlands em Argilito, Voçorocas e Chaminés de Fada - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessBadlandsMudstoneAndHoodooHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'headcut_gully_retrogressive_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desabamento Regressivo de Cabeceira de Voçoroca em Badlands',
+      saveDC: 15,
+      saveType: 'Destreza',
+      badlandsMudstoneRiskAndHoodoos: 'Erosão regressiva violenta em talude de argilito fissurado de 15 metros; colapso súbito da borda do desfiladeiro sob a coluna de marcha com rolamento de blocos de barro ressequido causando 3d6 contundente e soterramento (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam recuados 8 metros das fendas de tração e utilizam bastões de madeira leve para sondar vazios ocos de cabeceira.',
+      rescueAndStabilization: 'Içamento por corda dupla com roldanas de encosta e aplicação de compressas de água salina e argila medicinal nas escoriações.',
+      icon: '🏜️⚠️',
+      color: '#d97706'
+    };
+
+    if (ht === 'hoodoo_capstone_topple_shear') {
+      hazard = {
+        hazardTitle: 'Queda de Bloco Protetor de Hoodoo por Cisalhamento',
+        saveDC: 14,
+        saveType: 'Destreza',
+        badlandsMudstoneRiskAndHoodoos: 'Laje pesada de arenito que coroa pilar esguio de argila desmorona pelo desgaste eólico da haste basal; queda de 5 toneladas de rocha estilhaçada no fundo estreito da ravina.',
+        pioneerMitigation: 'Evitar transitar na base imediata de agulhas e chaminés de fada assimétricas com fendas visíveis no colo rochoso.',
+        rescueAndStabilization: 'Retirada rápida de escombros com alavancas de jacarandá e imobilização de contusões torácicas com coletes de couro amarrados.',
+        icon: '🗿💥',
+        color: '#b45309'
+      };
+    } else if (ht === 'pipe_flow_subsurface_pseudokarst_void') {
+      hazard = {
+        hazardTitle: 'Afundamento em Tubulação Erosiva Subterrânea em Argilito',
+        saveDC: 14,
+        saveType: 'Força',
+        badlandsMudstoneRiskAndHoodoos: 'Túnel oculto de drenagem interna de 8 metros de profundidade sob fina crosta de argila seca; afundamento repentino de exploradores e mulas de carga em fosso cego.',
+        pioneerMitigation: 'Marcha em linha com cordas de segurança retesadas entre batedores e desvio de linhas de drenagem marcadas por pequenas depressões circulares.',
+        rescueAndStabilization: 'Tracionamento vertical por guincho de tripé e resgate de alforjes com cordas de nós com ganchos de aço.',
+        icon: '🕳️⚠️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'slick_bentonite_mud_slip_fall') {
+      hazard = {
+        hazardTitle: 'Escorregão Violento em Lama Bentonítica Expansiva',
+        saveDC: 13,
+        saveType: 'Destreza',
+        badlandsMudstoneRiskAndHoodoos: 'Chuva passageira que transforma o pó de bentonita em pasta ultraescorregadia sem atrito; derrapagem desgovernada por 20 metros em direção à beira do abismo.',
+        pioneerMitigation: 'Uso de bastões com cravos de ferro pontiagudos e amarração de solados de corda de sisal para criar tração mecânica na lama viscosa.',
+        rescueAndStabilization: 'Lançamento de laços de arremesso ancorados em arbustos de raiz profunda e lavagem dos olhos para remoção de poeira cáustica.',
+        icon: '🧗‍♂️💥',
+        color: '#0284c7'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      badlandsMudstoneRiskAndHoodoos: hazard.badlandsMudstoneRiskAndHoodoos,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Badlands e Labirintos de Erosão) / PHB p. 182-183 (Marcha em Terreno Árido) / XGE p. 78-83 (Geomorfologia Semiárida e Pseudocárste)'
+    };
+  }
+
+  // === calcCampBadlandsMudstoneAndHoodooStation (Bivaques em Platôs de Arenito, Diques e Toldos Catenários - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampBadlandsMudstoneAndHoodooStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'sandstone_capped_mesa_tableland_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Platô de Arenito Resistente acima de Badlands',
+      mudstoneAnchorageAndHoodooSafety: 'Mesa plana coroada por espessa laje de arenito duro a 30 metros acima dos labirintos de ravinas; piso maciço totalmente imune a desabamentos de argila.',
+      hoodooShieldingAndCampSecurity: 'Totalmente isolado de enxurradas de lama das torrentes repentinas e com linha de visão panorâmica ampla para detectar aproximações a quilômetros.',
+      campRestAndSafetyGuards: 'Assegura descanso calmo, limpo e seguro para os membros da comitiva, livre da poeira asfixiante dos desfiladeiros inferiores.',
+      icon: '🏜️⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'gully_check_dam_gabion_reinforcement') {
+      tech = {
+        defenseTitle: 'Pequenas Barragens de Retenção em Pedra nas Ravinas',
+        mudstoneAnchorageAndHoodooSafety: 'Muretas de gabião de pedras encaixadas com estacas de zimbro cravadas no canal de acesso à rampa do bivaque.',
+        hoodooShieldingAndCampSecurity: 'Dissipam a energia das enxurradas de lama barrenta e evitam o recuo erosivo da base da rampa de subida ao platô.',
+        campRestAndSafetyGuards: 'Garante que a rota de descida permaneça transitável e estável durante toda a permanência da comitiva.',
+        icon: '🪵🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'bentonite_free_sandstone_filtered_cistern') {
+      tech = {
+        defenseTitle: 'Cisterna Decantadora com Tubo em Arenito Poroso',
+        mudstoneAnchorageAndHoodooSafety: 'Reservatório escavado na rocha sã revestido com areia grossa de quartzo que retém partículas finas de bentonita em suspensão.',
+        hoodooShieldingAndCampSecurity: 'Fornece 12 litros diários de água translúcida límpida a partir de torrentes turvas sem entupir os filtros de linho da comitiva.',
+        campRestAndSafetyGuards: 'Garante hidratação segura e evita doenças gástricas causadas pela ingestão de argilas suspensas alcalinas.',
+        icon: '🏺💧',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'hoodoo_shade_canvas_catenary_awning') {
+      tech = {
+        defenseTitle: 'Toldo Catenário Ancorado entre Pilares de Hoodoo',
+        mudstoneAnchorageAndHoodooSafety: 'Lonas de brim amarradas por cabos estaiados diretamente em blocos sólidos de hoodoos que projetam sombras permanentes.',
+        hoodooShieldingAndCampSecurity: 'Cria área de sombra contínua sem necessidade de cravar mastros no solo frágil e esfarelento de argilito.',
+        campRestAndSafetyGuards: 'Reduz a temperatura do bivaque em 10°C e permite recuperação física completa dos sentinelas sob o sol inclemente.',
+        icon: '🎪🛡️',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      mudstoneAnchorageAndHoodooSafety: tech.mudstoneAnchorageAndHoodooSafety,
+      hoodooShieldingAndCampSecurity: tech.hoodooShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Desfiladeiros e Platôs) / PHB p. 150 (Kits de Exploração Semiárida) / XGE p. 78-83 (Engenharia em Terrenos de Badlands)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -20106,6 +20230,8 @@
     calcCampGlacialMoraineAndDrumlinStation: calcCampGlacialMoraineAndDrumlinStation,
     calcWildernessBlackwaterIgapoAndMatHazard: calcWildernessBlackwaterIgapoAndMatHazard,
     calcCampBlackwaterIgapoAndMatStation: calcCampBlackwaterIgapoAndMatStation,
+    calcWildernessBadlandsMudstoneAndHoodooHazard: calcWildernessBadlandsMudstoneAndHoodooHazard,
+    calcCampBadlandsMudstoneAndHoodooStation: calcCampBadlandsMudstoneAndHoodooStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
