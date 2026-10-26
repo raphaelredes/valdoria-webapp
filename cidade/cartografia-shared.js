@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 238: PESCOÇOS VULCÂNICOS E MURALHAS DE DIQUES ANELARES (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessVolcanicPlugRingDikeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'radial_dike_wall_horizontal_column_pullout_fall').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desprendimento de Prisma Horizontal em Muralha de Dique Radial (Dike Wall Pullout)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      plugRingDikeRisk: 'Muralhas retilíneas de basalto negro de 25 metros de altura que cortam a paisagem como fortificações ciclópicas naturais onde o magma solidificou em fendas verticais; diferente das colunas verticais de derrames comuns, nos diques os prismas hexagonais de resfriamento jazem deitados na horizontal como gavetas soltas de meia tonelada que escorregam para fora da parede quando o escalador se pendura nelas, despencando com 3d8 de concussão (DMG p. 110; PHB p. 182; XGE p. 109).',
+      pioneerMitigation: 'Nunca escalar a face de prismas horizontais de um dique; procurar selas erodidas ou contornar até uma brecha transversal.',
+      rescueAndStabilization: 'Remoção do bloco prismático com alavancas e imobilização de membros.',
+      icon: '🧱🏔️',
+      color: '#64748b'
+    };
+
+    if (ht === 'volcanic_neck_vent_agglomerate_tuff_breccia_rockfall') {
+      hazard = {
+        hazardTitle: 'Chuva de Bombas Líticas Soltas em Pescoço de Brecha Vulcânica (Volcanic Neck)',
+        saveDC: 15,
+        saveType: 'Destreza',
+        plugRingDikeRisk: 'Monólitos cilíndricos de 150 metros que formavam a garganta central de antigos vulcões extintos, compostos por um aglomerado caótico de blocos angulosos soldados por cinza alterada (brecha de conduto); o intemperismo dissolve o cimento de tufo e faz blocos do tamanho de baús se soltarem da torre vertical a cada rajada de vento, atingindo a base com 3d6 de concussão (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Manter distância de segurança do cone de dejeção na base do pescoço vulcânico durante ventanias.',
+        rescueAndStabilization: 'Abrigo imediato atrás das muralhas maciças dos diques radiais e primeiros socorros.',
+        icon: '🗼🪨',
+        color: '#dc2626'
+      };
+    } else if (ht === 'baked_hornfels_contact_aureole_glassy_scree_slide') {
+      hazard = {
+        hazardTitle: 'Deslizamento em Talude Vítreo de Hornfels Cozido (Contact Aureole)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        plugRingDikeRisk: 'Ao redor do pescoço vulcânico e dos diques anelares, o folhelho antigo foi cozido pelo calor do magma em uma rocha metamórfica negra e vítrea (hornfels) que se parte em lascas sonoras e escorregadias como telhas quebradas; atravessar o colar de estilhaços a meia-encosta dispara avalanches de placas cortantes que causam 2d8 de dano cortante (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Cruzar o talude de hornfels em diagonal ascendente apoiando os pés nos afloramentos firmes de rocha.',
+        rescueAndStabilization: 'Bandagem compressiva de cortes e reparo das solas das botas.',
+        icon: '🔪⛰️',
+        color: '#f97316'
+      };
+    } else if (ht === 'concentric_ring_dike_moat_flash_runoff_choke') {
+      hazard = {
+        hazardTitle: 'Enxurrada Repentina no Fosso Anelar entre Diques Concêntricos (Ring-Dike Moat)',
+        saveDC: 14,
+        saveType: 'Força',
+        plugRingDikeRisk: 'Vales circulares fechados entre duas muralhas concêntricas de diques anelares onde a rocha sedimentar macia foi erodida em uma trincheira curva sem saída lateral; uma tromba d’água na montanha canaliza toda a drenagem para o anel rochoso em minutos, varrendo o fundo do fosso e impondo 1 nível de exaustão e arrasto (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Marchar pelo terraço elevado junto à base da muralha de basalto, nunca pelo talvegue do fosso anelar.',
+        rescueAndStabilization: 'Ancoragem nas prateleiras horizontais do dique até a baixa das águas.',
+        icon: '🌊⭕',
+        color: '#0284c7'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampVolcanicPlugRingDikeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'breached_ring_dike_gate_natural_fortress_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque na Cidadela Natural da Garganta do Dique Anelar',
+      plugRingDikeAndCampSafety: 'As muralhas verticais de basalto do dique anelar formam um recinto circular intransponível de 15 metros de altura com apenas uma fenda estreita de entrada.',
+      plugRingDikeTrenchAndWatch: 'Permite fechar o único portão de pedra com uma barricada rápida e defender o acampamento com dois sentinelas.',
+      campRestAndSafetyGuards: 'Garante descanso longo dentro de uma fortaleza geológica natural.',
+      icon: '🏰🪨',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'plucked_horizontal_prism_socket_alcove_shelter') {
+      tech = {
+        defenseTitle: 'Abrigo nas Gavetas de Prismas Horizontais na Base do Dique',
+        plugRingDikeAndCampSafety: 'Onde três ou quatro colunas horizontais de basalto já caíram da base da muralha, restam alcovas retangulares perfeitas de 2 metros de fundo.',
+        plugRingDikeTrenchAndWatch: 'Paredes e teto planos de basalto maciço que protegem contra vento, chuva e queda de pedras superiores.',
+        campRestAndSafetyGuards: 'Mantém as barracas e o fogo enxutos sem necessidade de armar lonas externas.',
+        icon: '⛺🧱',
+        color: '#94a3b8'
+      };
+    } else if (dt === 'hornfels_clinkstone_acoustic_perimeter_alarm') {
+      tech = {
+        defenseTitle: 'Tapete Acústico de Lajes Sonoras de Hornfels ("Clinkstone")',
+        plugRingDikeAndCampSafety: 'O hornfels cozido pelo magma emite um som metálico agudo de sino ao ser pisado ou deslocado.',
+        plugRingDikeTrenchAndWatch: 'Espalhar essas placas na brecha de acesso do dique denuncia instantaneamente qualquer aproximação furtiva.',
+        campRestAndSafetyGuards: 'Anula tentativas de emboscada noturna contra o bivaque.',
+        icon: '🔔🛡️',
+        color: '#eab308'
+      };
+    } else if (dt === 'dike_dammed_perched_spring_cistern_tap') {
+      tech = {
+        defenseTitle: 'Nascente Suspensa Represada pela Muralha Impermeável do Dique',
+        plugRingDikeAndCampSafety: 'A folha vertical de basalto corta as camadas porosas como uma barragem subterrânea impermeável que represa o lençol freático.',
+        plugRingDikeTrenchAndWatch: 'A água brota limpa e constante na linha de contato a montante da muralha, mesmo em regiões secas.',
+        campRestAndSafetyGuards: 'Garante abastecimento hídrico seguro dentro do perímetro defensivo.',
+        icon: '💧🧱',
+        color: '#38bdf8'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 237: CALDEIRÕES DE GELO MORTO (KETTLES) E CRISTAS DE ESKERS (D&D 5e)
   // =========================================================================
 
@@ -32532,6 +32636,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessVolcanicPlugRingDikeHazard: calcWildernessVolcanicPlugRingDikeHazard,
+    calcCampVolcanicPlugRingDikeStation: calcCampVolcanicPlugRingDikeStation,
     calcWildernessKettleKameEskerHazard: calcWildernessKettleKameEskerHazard,
     calcCampKettleKameEskerStation: calcCampKettleKameEskerStation,
     calcWildernessSupraglacialDebrisGlacierHazard: calcWildernessSupraglacialDebrisGlacierHazard,

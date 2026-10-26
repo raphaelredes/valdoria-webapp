@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessVolcanicPlugRingDikeHazard) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var pr = CartShared.calcWildernessVolcanicPlugRingDikeHazard(bKey, 'radial_dike_wall_horizontal_column_pullout_fall');
+        return '<div class="clp-volcanic-plug-ring-dike-card" style="margin:4px 0 6px;text-align:left;background:rgba(24,18,16,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(220,38,38,0.35);font-size:8px;color:#f1f5f9;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + pr.color + ';margin-bottom:2px;">' + pr.icon + ' ' + pr.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Pescoços Vulcânicos e Diques Anelares:</b> ' + pr.plugRingDikeRisk + ' (CD ' + pr.saveDC + ' [' + pr.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#cbd5e1;margin-top:1px;">• <b>Mitigação:</b> ' + pr.pioneerMitigation + ' · <i>Estabilização: ' + pr.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampVolcanicPlugRingDikeStation) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var pc = CartShared.calcCampVolcanicPlugRingDikeStation(bKey, 'breached_ring_dike_gate_natural_fortress_bivouac');
+        return '<div class="clp-volcanic-plug-ring-dike-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,14,12,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + pc.color + ';margin-bottom:2px;">' + pc.icon + ' ' + pc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Cidadela de Dique Anelar:</b> ' + pc.plugRingDikeAndCampSafety + ' · <b>Defesa:</b> ' + pc.plugRingDikeTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + pc.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessKettleKameEskerHazard) return '';
         var bKey = (biome && biome.key) || 'arctic';
         var ke = CartShared.calcWildernessKettleKameEskerHazard(bKey, 'buried_dead_ice_block_kettle_pit_subsidence');
