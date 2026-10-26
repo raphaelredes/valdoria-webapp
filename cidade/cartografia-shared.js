@@ -15005,6 +15005,130 @@
     };
   }
 
+  // === calcWildernessTreeFernForestAndTarPitHazard (Florestas de Samambaias Gigantes, Poços de Asfalto e Metano - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessTreeFernForestAndTarPitHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'natural_bitumen_tar_pit_entrapment').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Aprisionamento em Poço de Asfalto Natural Betuminoso',
+      saveDC: 14,
+      saveType: 'Força',
+      tarPitRiskAndSuffocation: 'Brejo viscoso de piche negro camuflado por folhas caídas de samambaias gigantes; afundamento com teste de Força CD 14 para não ficar preso e sofrer sufocamento por asfalto fervente (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores usam varas longas de bambu com feltro na ponta para sondar manchas escuras e avançam apenas por raízes aéreas de fetos.',
+      rescueAndStabilization: 'Dissolução imediata do betume aderido com banha animal morna e óleo de terpintina antes de endurecer nos pulmões e pele.',
+      icon: '🕳️🛢️',
+      color: '#1c1917'
+    };
+
+    if (ht === 'methane_bubble_burst_and_flare') {
+      hazard = {
+        hazardTitle: 'Estouro de Bolha de Metano Subaquática',
+        saveDC: 14,
+        saveType: 'Destreza',
+        tarPitRiskAndSuffocation: 'Emulsão de gás metano comprimido que sobe à tona e entra em combustão espontânea com fagulhas de tochas; 3d6 de fogo e cegueira por fuligem.',
+        pioneerMitigation: 'Proibição de fogo aberto nas zonas de charco betuminoso e uso de lanternas químicas de óleo de peixe seladas.',
+        rescueAndStabilization: 'Uso de panos molhados para abafar labaredas e lavagem de queimaduras com infusão fria de líquen gelatinoso.',
+        icon: '💥🫧',
+        color: '#f97316'
+      };
+    } else if (ht === 'giant_fern_silica_spore_cloud') {
+      hazard = {
+        hazardTitle: 'Nuvem de Esporos Silicosos de Feto Arbóreo',
+        saveDC: 13,
+        saveType: 'Constituição',
+        tarPitRiskAndSuffocation: 'Esporângios gigantes estourando em pó microscópico afiado; inflamação pulmonar aguda, tosse com sangue e desvantagem em testes de Percepção.',
+        pioneerMitigation: 'Uso de máscaras de tecido duplo umedecidas em vinagre de maçã e avanço rasteiro contra o vento.',
+        rescueAndStabilization: 'Inalação de vapores expectorantes de tomilho silvestre e repouso em câmara de lona filtrada.',
+        icon: '🌿💨',
+        color: '#84cc16'
+      };
+    } else if (ht === 'decaying_trunk_sponge_quagmire') {
+      hazard = {
+        hazardTitle: 'Lodaçal de Troncos Fósseis em Decomposição Esponjosa',
+        saveDC: 13,
+        saveType: 'Destreza',
+        tarPitRiskAndSuffocation: 'Tronco podre de samambaia fóssil de 1 metro de diâmetro que desmorona em polpa ácida escorregadia; queda de 2d6 de ácido e perda de calçados.',
+        pioneerMitigation: 'Teste de percussão com machadinha na madeira e fixação de passadeiras de corda com estacas de ancoragem.',
+        rescueAndStabilization: 'Neutralização da acidez da lama com cinzas de madeira queimada e curativo com sebo.',
+        icon: '🪵🕳️',
+        color: '#a16207'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      tarPitRiskAndSuffocation: hazard.tarPitRiskAndSuffocation,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Pântanos, Asfalto e Gases Inflamáveis) / PHB p. 182-183 (Selvas Antigas e Salvaguardas)'
+    };
+  }
+
+  // === calcCampTreeFernCanopyBivouacAndSolventStation (Bivaques em Dossel de Feto, Solventes Cítricos e Calçadas Enceradas - DMG p. 111 / XGE p. 78-83 / PHB p. 150) ===
+  function calcCampTreeFernCanopyBivouacAndSolventStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'tree_fern_canopy_basket_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Suspenso em Cesto no Dossel de Samambaia Gigante',
+      primevalAnchorageAndSecurity: 'Ninho trançado de folhas coriáceas de feto arbóreo suspenso a 5 metros do solo por cordas de cipó-titica em três troncos colossais.',
+      bitumenShieldingAndCampSafety: 'Mantém os leitos dos aventureiros totalmente isolados dos poços de piche borbulhantes e dos gases pesados do solo pantanoso.',
+      campRestAndSafetyGuards: 'Garante sono longo reparador para a comitiva com ar puro acima da névoa de decomposição orgânica.',
+      icon: '🌿⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'citrus_oil_bitumen_solvent_bath') {
+      tech = {
+        defenseTitle: 'Estação de Solvente Cítrico e Banha Vegetal para Piche',
+        primevalAnchorageAndSecurity: 'Tacho de cobre com óleo de casca de frutas cítricas e banha vegetal aquecida a 40°C para limpeza de botas, cordas e peles.',
+        bitumenShieldingAndCampSafety: 'Dissolve 100% de resíduos de alcatrão e resina sem danificar os couros e metais da expedição.',
+        campRestAndSafetyGuards: 'Preserva a mobilidade e o equipamento tático dos batedores após cruzarem zonas de asfalto pegajoso.',
+        icon: '🍋🛢️',
+        color: '#eab308'
+      };
+    } else if (dt === 'waxed_plank_corduroy_causeway_roll') {
+      tech = {
+        defenseTitle: 'Rolo Desdobrável de Calçada Flutuante de Pranchas Enceradas',
+        primevalAnchorageAndSecurity: 'Esteira de ripas de madeira tratadas com cera de carnaúba interligadas por cabos de cânhamo estendidas sobre o atoleiro.',
+        bitumenShieldingAndCampSafety: 'Evita contato direto das solas com o betume viscoso e permite travessia rápida de montarias leves.',
+        campRestAndSafetyGuards: 'Garante passagem segura de provisões e armaduras pesadas entre o acampamento e terreno firme.',
+        icon: '🪵🛣️',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'methane_vent_chimney_flare_trap') {
+      tech = {
+        defenseTitle: 'Chaminé Queimadora de Metano com Valvula de Retenção',
+        primevalAnchorageAndSecurity: 'Cone invertido de folha de ferro sobre fissura de gás que canaliza e queima o metano a 4 metros de altura de forma controlada.',
+        bitumenShieldingAndCampSafety: 'Elimina o risco de explosões noturnas acidentais ao redor do acampamento e dissipa odores asfixiantes.',
+        campRestAndSafetyGuards: 'Fornece iluminação perimetral constante e afasta predadores de sangue frio da área de descanso.',
+        icon: '🔥💨',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      primevalAnchorageAndSecurity: tech.primevalAnchorageAndSecurity,
+      bitumenShieldingAndCampSafety: tech.bitumenShieldingAndCampSafety,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque em Dosséis e Solos Betuminosos) / XGE p. 78-83 (Ferramentas de Alquimista e Herborismo)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -16830,6 +16954,8 @@
     calcCampPillowLavaBasaltPlatformAndCondenserStation: calcCampPillowLavaBasaltPlatformAndCondenserStation,
     calcWildernessSavannaTermiteMoundAndDustHazard: calcWildernessSavannaTermiteMoundAndDustHazard,
     calcCampSavannaAcaciaPlatformAndDustScreenStation: calcCampSavannaAcaciaPlatformAndDustScreenStation,
+    calcWildernessTreeFernForestAndTarPitHazard: calcWildernessTreeFernForestAndTarPitHazard,
+    calcCampTreeFernCanopyBivouacAndSolventStation: calcCampTreeFernCanopyBivouacAndSolventStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,

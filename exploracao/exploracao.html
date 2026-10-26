@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T06:04:27Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T09:56:24Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessTreeFernForestAndTarPitHazard) return '';
+        var bKey = (biome && biome.key) || 'swamp';
+        var tf = CartShared.calcWildernessTreeFernForestAndTarPitHazard(bKey, 'natural_bitumen_tar_pit_entrapment');
+        return '<div class="clp-tar-pit-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,20,20,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(161,98,7,0.3);font-size:8px;color:#fef08a;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + tf.color + ';margin-bottom:2px;">' + tf.icon + ' ' + tf.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Piche e Asfalto:</b> ' + tf.tarPitRiskAndSuffocation + ' (CD ' + tf.saveDC + ' [' + tf.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde047;margin-top:1px;">• <b>Mitigação:</b> ' + tf.pioneerMitigation + ' · <i>Estabilização: ' + tf.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampTreeFernCanopyBivouacAndSolventStation) return '';
+        var bKey = (biome && biome.key) || 'swamp';
+        var cs = CartShared.calcCampTreeFernCanopyBivouacAndSolventStation(bKey, 'tree_fern_canopy_basket_bivouac');
+        return '<div class="clp-tree-fern-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,34,20,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#ecfdf5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Dossel de Samambaia:</b> ' + cs.primevalAnchorageAndSecurity + ' · <b>Proteção:</b> ' + cs.bitumenShieldingAndCampSafety + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){
