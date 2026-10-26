@@ -20497,6 +20497,113 @@
   // PHB p. 182-183 (Travel Pace, Navigation in Mountain Passes), PHB p. 190 (Falling & Suffocation), XGE p. 77-83
   // =========================================================================
 
+
+  // =========================================================================
+  // FASE 147: FLORESTAS PETRIFICADAS DE ÁGATA, BOSQUES DE SÍLICA E CÂNYONS DE VIDRO
+  // D&D 5e: DMG p. 110-111 (Hazards, Sharp Surfaces, Silica Inhalation), DMG p. 246-247 (Objects & Hardness),
+  // PHB p. 182-183 (Travel Pace, Navigation in Badlands), PHB p. 190 (Cutting Hazards), XGE p. 77-83
+  // =========================================================================
+
+  function calcWildernessPetrifiedAgateForestHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'badlands').toLowerCase();
+    var ht = (hazardType || 'petrified_agate_log_rolling_shear_crush').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Rolamento de Troncos Petrificados de Ágata de 15 Toneladas',
+      saveDC: 15,
+      saveType: 'Destreza',
+      agateForestAndSilicaRisk: 'Colossais toras fósseis de quartzo e calcedônia equilibradas precariamente sobre encostas de argila erodida; passos pesados desestabilizam os blocos pétreos gerando rolamento violento que esmaga o solo com 3d8 de concussão (DMG p. 110, 246).',
+      pioneerMitigation: 'Batedores observam os pontos de apoio na base dos troncos fósseis e guiam a expedição exclusivamente pelo topo das cristas consolidadas de arenito.',
+      rescueAndStabilization: 'Remoção urgente com alavancas de ferro e cunhas de carvalho, estabilização de fraturas por esmagamento e aplicação de unguento hemostático.',
+      icon: '🪵💎',
+      color: '#d97706'
+    };
+
+    if (ht === 'sharp_obsidian_silica_sand_shredding_gale') {
+      hazard = {
+        hazardTitle: 'Vendaval de Areia de Vidro Vulcânico e Lascas de Sílica',
+        saveDC: 15,
+        saveType: 'Destreza',
+        agateForestAndSilicaRisk: 'Rajadas de vento de 70 km/h que erguem nuvens cortantes de poeira de vidro vulcânico e microcristais de quartzo; trituram tecidos finos, causam lacerações dérmicas severas, cegueira momentânea e infligem 2d6 de dano cortante.',
+        pioneerMitigation: 'Uso de máscaras de couro macio com filtros de algodão umedecido em água pura e óculos protetores com lentes grossas de vidro temperado.',
+        rescueAndStabilization: 'Lavagem imediata dos olhos com água limpa tépida e aplicação de pomada calmante de cera de abelha em arranhões e cortes na pele.',
+        icon: '🌪️🔪',
+        color: '#dc2626'
+      };
+    } else if (ht === 'blinding_prismatic_quartz_refraction_mirage') {
+      hazard = {
+        hazardTitle: 'Refração Prismática Cegante e Miragens em Manto de Quartzo',
+        saveDC: 14,
+        saveType: 'Constituição',
+        agateForestAndSilicaRisk: 'Troncos e seixos translúcidos de ágata colorida que concentram e refratam a luz solar sob o zênite em feixes ofuscantes; induzem fotoceratite, vertigem óptica e desvantagem em testes de Percepção e navegação.',
+        pioneerMitigation: 'Avanço nas primeiras horas da manhã e ao entardecer, cobrindo a visão periférica com viseiras de feltro escuro.',
+        rescueAndStabilization: 'Descanso em abrigo sob sombra completa com vendas escuras nos olhos e compressas frias para recuperação da acuidade visual.',
+        icon: '☀️🌈',
+        color: '#f59e0b'
+      };
+    } else if (ht === 'splintering_chert_and_jasper_knife_trench_hazard') {
+      hazard = {
+        hazardTitle: 'Ravina de Lascas Conchoidais de Jaspe e Sílex Cortante',
+        saveDC: 14,
+        saveType: 'Destreza',
+        agateForestAndSilicaRisk: 'Fundos de desfiladeiro repletos de lâminas naturais de jaspe vermelho e sílex que retalham arreios, correias de armaduras e solas de calçados, causando 2d6 de dano cortante e marcha lenta.',
+        pioneerMitigation: 'Perneiras reforçadas com placas sobrepostas de couro cru endurecido e calçados com sola dupla de chapa de latão.',
+        rescueAndStabilization: 'Extração de fragmentos conchoidais incrustados com pinças de prata, assepsia com álcool de cereais e bandagens de proteção.',
+        icon: '🗡️🩸',
+        color: '#991b1b'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampPetrifiedAgateForestStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'badlands').toLowerCase();
+    var dt = (defenseType || 'petrified_log_buttress_colonnade_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque sob Colunata Natural de Troncos Petrificados',
+      agateForestAnchorageAndSilicaSafety: 'Acampamento montado sob a abóbada protetora de troncos gigantes de ágata fossilizada que não sofrem corrosão climática, imunes a tempestades de areia e faíscas.',
+      leatherDustAirlockAndCalciteMat: 'Muralhas de quartzo maciço protegem as tendas contra rajadas de vento e oferecem ancoragem segura e inabalável para cabos de fixação.',
+      campRestAndSafetyGuards: 'Permite sono longo tranquilo e revigorante para os membros da expedição com proteção estrutural absoluta.',
+      icon: '⛺💎',
+      color: '#d97706'
+    };
+
+    if (dt === 'leather_curtain_silica_dust_settling_airlock') {
+      tech = {
+        defenseTitle: 'Tenda de Eclusa com Cortinas Triplas contra Poeira de Vidro',
+        agateForestAnchorageAndSilicaSafety: 'Ante-sala de isolamento montada com panos espessos de couro embebidos em óleo vegetal que decantam as partículas abrasivas de vidro vulcânico antes do acesso aos dormitórios.',
+        leatherDustAirlockAndCalciteMat: 'Mantém o ar interno completamente limpo e respirável, prevenindo crises de tosse e lesões respiratórias nos aventureiros.',
+        campRestAndSafetyGuards: 'Garante que os sentinelas descansem em ambiente protegido de poeiras minerais cortantes.',
+        icon: '🛡️🚪',
+        color: '#78350f'
+      };
+    } else if (dt === 'crushed_calcite_gravel_mat_abrasion_barrier') {
+      tech = {
+        defenseTitle: 'Leito Compactado de Areia Calcária contra Lâminas de Sílex',
+        agateForestAnchorageAndSilicaSafety: 'Camada de 10 cm de areia calcária macia e cascalho arredondado espalhada sobre o piso do acampamento que sepulta lascas afiadas de jaspe.',
+        leatherDustAirlockAndCalciteMat: 'Cria superfície confortável para circulação interna, anulando cortes nos pés e protegendo o fundo dos sacos de dormir.',
+        campRestAndSafetyGuards: 'Permite caminhadas descalças ou leves no interior do bivaque sem perigo de lacerações acidentais.',
+        icon: '🪨🛡️',
+        color: '#a16207'
+      };
+    } else if (dt === 'prismatic_chert_cleared_corridor_torch_trail') {
+      tech = {
+        defenseTitle: 'Trilha Balizada com Marcos Refletores de Calcedônia',
+        agateForestAnchorageAndSilicaSafety: 'Corredor perimetral desobstruído com topos de ágata polida que refletem o brilho das tochas e lampiões ao longo de todo o perímetro.',
+        leatherDustAirlockAndCalciteMat: 'Facilita a visualização do terreno pelas sentinelas em noites sem lua e demarca claramente os limites seguros do acampamento.',
+        campRestAndSafetyGuards: 'Garante rondas perimetrais rápidas, estáveis e livres de tropeços em fendas pontiagudas.',
+        icon: '🪜✨',
+        color: '#10b981'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessHangingRockGlacierHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'mountain').toLowerCase();
@@ -23033,6 +23140,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessPetrifiedAgateForestHazard: calcWildernessPetrifiedAgateForestHazard,
+    calcCampPetrifiedAgateForestStation: calcCampPetrifiedAgateForestStation,
     calcWildernessHangingRockGlacierHazard: calcWildernessHangingRockGlacierHazard,
     calcCampHangingRockGlacierStation: calcCampHangingRockGlacierStation,
     calcWildernessQuebrachoForestAndVertisolHazard: calcWildernessQuebrachoForestAndVertisolHazard,
