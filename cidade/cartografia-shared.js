@@ -18353,6 +18353,130 @@
     };
   }
 
+  // === calcWildernessBlackMangroveAndPneumatophoreHazard (Mangue Negro, Pneumatóforos em Espeto e Marés de Lama - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessBlackMangroveAndPneumatophoreHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'pencil_pneumatophore_punji_impale').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Perfuração por Pneumatóforos Rígidos em Lança no Lodo',
+      saveDC: 15,
+      saveType: 'Destreza',
+      blackMangroveRiskAndPneumatophores: 'Campos densos de milhares de raízes respiratórias pontiagudas de 30 centímetros que despontam da vasa cinzenta; queda violenta com perfuração múltipla causando 3d6 perfurante e risco severo de septicemia por bactérias marinhas (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores calçam caneleiras de couro crú forradas com lâminas de madeira e progridem apoiando pranchas de travessia sobre os espetos.',
+      rescueAndStabilization: 'Extração cuidadosa dos empalados com tesouras de poda, lavagem imediata com água esterilizada e queima superficial com cautério de iodo vegetal.',
+      icon: '🌿⚠️',
+      color: '#15803d'
+    };
+
+    if (ht === 'hypersaline_mud_crust_slump_entrapment') {
+      hazard = {
+        hazardTitle: 'Afundamento em Lamaçal Hipersalino de Sedimento Fino',
+        saveDC: 14,
+        saveType: 'Força',
+        blackMangroveRiskAndPneumatophores: 'Bacia de manguezal superior ressequida por evaporação extrema que oculta vasa argilosa hiperconcentrada em sal; afundamento até a cintura com dissolução de amarras de calçados.',
+        pioneerMitigation: 'Uso de raquetes de mangue trançadas em junco e marcha mantendo cabos de sustentação amarrados a galhos aéreos.',
+        rescueAndStabilization: 'Tracionamento horizontal através de tábuas de distribuição de peso e lavagem vigorosa dos membros com água doce para estancar queimaduras salinas.',
+        icon: '🕳️🧂',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'high_salinity_dehydration_heat_glare') {
+      hazard = {
+        hazardTitle: 'Estafa Térmica e Desidratação por Salinidade Extrema',
+        saveDC: 14,
+        saveType: 'Constituição',
+        blackMangroveRiskAndPneumatophores: 'Planície de salitre sem sombra sob sol inclemente de 42°C; queimação corrosiva nas vias respiratórias pelo sal em suspensão, vertigem e choque térmico.',
+        pioneerMitigation: 'Proteção facial com máscaras de linho umedecido e consumo metódico de caldos levemente acidificados com limão silvestre.',
+        rescueAndStabilization: 'Retirada rápida para a sombra das árvores de mangue, resfriamento com panos molhados e hidratação lenta em pequenos goles.',
+        icon: '☀️🔥',
+        color: '#dc2626'
+      };
+    } else if (ht === 'creek_tidal_bore_mud_wave') {
+      hazard = {
+        hazardTitle: 'Onda de Maré Estuarina Repentina em Canal de Lama Cego',
+        saveDC: 13,
+        saveType: 'Força',
+        blackMangroveRiskAndPneumatophores: 'Frente abrupta de maré enchente que sobe 2 metros em minutos por estreito canal estuarino, arrastando exploradores atolados no lodo sem margem de fuga.',
+        pioneerMitigation: 'Monitoramento contínuo das tábuas de maré e fixação de cordas de ancoragem em troncos de mangue robustos a cada 10 metros.',
+        rescueAndStabilization: 'Içamento vertical com laços de resgate direto para os ramos altos das árvores antes do ápice da onda de ressaca.',
+        icon: '🌊🛶',
+        color: '#0284c7'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      blackMangroveRiskAndPneumatophores: hazard.blackMangroveRiskAndPneumatophores,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Manguezais e Terrenos Costeiros de Maré) / PHB p. 182-183 (Marcha em Lamaçal) / XGE p. 78-83 (Geomorfologia Estuarina e Zonas Intermareais)'
+    };
+  }
+
+  // === calcCampBlackMangroveAndPneumatophoreStation (Bivaques Suspensos, Passarelas de Faxinas e Calhas Coletoras - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampBlackMangroveAndPneumatophoreStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'black_mangrove_branch_platform_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Plataforma Suspensa nos Ramos de Mangue Negro',
+      mangroveAnchorageAndPneumatophoreSafety: 'Estrado articulado de varas de angelim atado com nós marinheiros na forquilha resistente de grandes árvores de Avicennia a 4 metros acima do lodo.',
+      pneumatophoreShieldingAndCampSecurity: 'Totalmente isolado do perigo de perfuração pelos pneumatóforos do solo e acima da cota máxima de qualquer maré de sizígia noturna.',
+      campRestAndSafetyGuards: 'Assegura descanso seguro, fresco e livre da umidade pegajosa da vasa salobra para todos os membros da comitiva.',
+      icon: '🪵⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'corduroy_brushwood_trackway_walkway') {
+      tech = {
+        defenseTitle: 'Passarela Rústica de Feixes de Galhos sobre Pneumatóforos',
+        mangroveAnchorageAndPneumatophoreSafety: 'Esteiras de ramos de mangue entrelaçados dispostas em dupla camada sobre o piso de pontas agudas entre as árvores do acampamento.',
+        pneumatophoreShieldingAndCampSecurity: 'Cria trilha plana e amortecida que protege as botas dos exploradores de perfurações e impede atolamentos no lodo úmido.',
+        campRestAndSafetyGuards: 'Permite movimentação rápida e segura das sentinelas durante a troca de turnos no escuro.',
+        icon: '🪵🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'mangrove_salt_excretion_leaf_dew_collector') {
+      tech = {
+        defenseTitle: 'Calhas Coletoras de Lona para Chuva e Condensação',
+        mangroveAnchorageAndPneumatophoreSafety: 'Telas suspensas com funis cerâmicos que aproveitam a umidade marítima e o orvalho da copa das árvores sem absorver sal residual das folhas.',
+        pneumatophoreShieldingAndCampSecurity: 'Coleta 14 litros diários de água doce potável límpida em ambiente onde todo o lençol freático é hipersalino.',
+        campRestAndSafetyGuards: 'Garante o abastecimento constante dos cantis e caldeirões da comitiva sem risco de intoxicação salina.',
+        icon: '💧🏺',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'estuarine_tide_staff_alarm_gauge') {
+      tech = {
+        defenseTitle: 'Régua Graduada Flutuante com Alarme de Guizo Noturno',
+        mangroveAnchorageAndPneumatophoreSafety: 'Haste de madeira calibrada ancorada no canal com flutuador de cortiça conectado a sinetas sonoras no bivaque.',
+        pneumatophoreShieldingAndCampSecurity: 'Dispara alerta acústico imediato se a maré começar a subir acima do nível normal de preamar.',
+        campRestAndSafetyGuards: 'Permite que a comitiva durma em paz sabendo que qualquer elevação anômala das águas soará o alarme com antecedência.',
+        icon: '🔔🌊',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      mangroveAnchorageAndPneumatophoreSafety: tech.mangroveAnchorageAndPneumatophoreSafety,
+      pneumatophoreShieldingAndCampSecurity: tech.pneumatophoreShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques Costeiros e Estuarinos) / PHB p. 150 (Kits de Exploração Marítima) / XGE p. 78-83 (Engenharia em Manguezais e Alertas de Maré)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -20232,6 +20356,8 @@
     calcCampBlackwaterIgapoAndMatStation: calcCampBlackwaterIgapoAndMatStation,
     calcWildernessBadlandsMudstoneAndHoodooHazard: calcWildernessBadlandsMudstoneAndHoodooHazard,
     calcCampBadlandsMudstoneAndHoodooStation: calcCampBadlandsMudstoneAndHoodooStation,
+    calcWildernessBlackMangroveAndPneumatophoreHazard: calcWildernessBlackMangroveAndPneumatophoreHazard,
+    calcCampBlackMangroveAndPneumatophoreStation: calcCampBlackMangroveAndPneumatophoreStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
