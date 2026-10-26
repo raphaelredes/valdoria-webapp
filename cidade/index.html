@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessKarstStoneForestHazard) return '';
+        var bKey = (biome && biome.key) || 'forest';
+        var sf = CartShared.calcWildernessKarstStoneForestHazard(bKey, 'tsingy_razor_blade_laceration');
+        return '<div class="clp-karst-stone-forest-card" style="margin:4px 0 6px;text-align:left;background:rgba(16,36,24,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.35);font-size:8px;color:#ecfdf5;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sf.color + ';margin-bottom:2px;">' + sf.icon + ' ' + sf.hazardTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Floresta de Pedra e Agulhas de Tsingy:</b> ' + sf.stoneForestRisk + ' (CD ' + sf.saveDC + ' [' + sf.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#a7f3d0;margin-top:1px;">• <b>Mitigação:</b> ' + sf.pioneerMitigation + ' · <i>Estabilização: ' + sf.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampKarstStoneForestStation) return '';
+        var bKey = (biome && biome.key) || 'forest';
+        var sf = CartShared.calcCampKarstStoneForestStation(bKey, 'suspended_grike_hammock_niche');
+        return '<div class="clp-karst-stone-forest-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,30,20,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(5,150,105,0.3);font-size:8px;color:#ecfdf5;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sf.color + ';margin-bottom:2px;">' + sf.icon + ' ' + sf.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>' 
+          + '  <div>• <b>Bivaque em Floresta de Pedra:</b> ' + sf.forestAndCampSafety + ' · <b>Defesa:</b> ' + sf.forestAndWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#a7f3d0;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + sf.campRestAndSafetyGuards + '</div>' 
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessYardangRidgeHazard) return '';
         var bKey = (biome && biome.key) || 'desert';
         var yr = CartShared.calcWildernessYardangRidgeHazard(bKey, 'yardang_corridor_venturi_sandstorm');

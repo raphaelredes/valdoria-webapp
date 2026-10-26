@@ -20735,6 +20735,82 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 290: FLORESTA DE PEDRA CÁRSTICA E AGULHAS DE TSINGY (D&D 5e)
+  // MARCO CANÔNICO: 290 MARCOS DOS ERMOS EM VALDORIA!
+  // =========================================================================
+
+  function calcWildernessKarstStoneForestHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var ht = (hazardType || 'tsingy_razor_blade_laceration').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Laceração em Lâminas Afiadas de Agulha de Tsingy',
+      saveDC: 15,
+      saveType: 'Destreza',
+      stoneForestRisk: 'As bordas superiores e laterais dos pináculos de calcário puro são esculpidas pela chuva ácida em arestas cortantes como navalhas de aço; qualquer desequilíbrio na travessia das cristas retalha roupas, polainas e peles de aventureiros com 3d6 de dano cortante e hemorragia ativa (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores utilizando luvas grossas de couro ferrado e fitas de ancoragem com mosquetões de aço em passadas cadenciadas (Sobrevivência ou Atletismo CD 14).',
+      rescueAndStabilization: 'Estancamento imediato de sangramentos por torniquete de emergência, sutura de cortes e aplicação de bálsamo adstringente (Medicina CD 13).',
+      icon: '🏛️',
+      color: '#10b981'
+    };
+
+    if (ht === 'grike_chasm_blind_crevasse_fall') {
+      hazard.hazardTitle = 'Queda Abrupta em Fenda Cárstica Cega de Grike';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Destreza';
+      hazard.stoneForestRisk = 'Entre as lâminas de pedra abrem-se fendas verticais de 30 metros de profundidade encobertas por esteiras delgadas de trepadeiras e musgos secos; o piso ilusório desmorona sob o peso da marcha, projetando o explorador em queda livre contra paredes pontiagudas de lapiás com 4d6 de concussão e fraturas ósseas (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Sondagem de solo com bordões pesados e avanço encordoado em duplas interligadas por cabo de tração (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Içamento mecânico com talha e imobilização de membros inferiores com talas rígidas de madeira (Atletismo CD 14 ou Medicina CD 13).';
+    } else if (ht === 'stone_forest_acoustic_maze_disorientation') {
+      hazard.hazardTitle = 'Labirinto Acústico de Pináculos e Desorientação';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Sabedoria';
+      hazard.stoneForestRisk = 'Centenas de agulhas verticais idênticas de 50 metros bloqueiam o horizonte e geram ecos sonoros múltiplos que anulam chamados e distorcem a orientação; a comitiva corre o risco de rodar em círculos pelas fendas escuras sob calor sufocante e ar estagnado, sofrendo 1 nível de exaustão por fadiga mental e desidratação (PHB p. 183; DMG p. 111).';
+      hazard.pioneerMitigation = 'Pintura sistemática de setas de cal nas esquinas de pedra e observação da posição solar através de fendas de prumo (Sobrevivência CD 14).';
+      hazard.rescueAndStabilization = 'Descanso sob fendas ventiladas, hidratação com água limpa e reorientação por bússola geológica (Medicina CD 13 ou Navegação CD 13).';
+    } else if (ht === 'pinnacle_toppling_rockfall_cascade') {
+      hazard.hazardTitle = 'Tombamento de Pináculo Calcário em Cascata';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.stoneForestRisk = 'A base corroída de um monólito de 30 metros cede subitamente sob a vibração de ganchos de escalada; o pilar de calcário tomba como uma árvore de pedra sobre o corredor estreito, despedaçando-se em blocos angulosos com 3d10 de concussão que soterram a passagem (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Inspeção de fendas de alívio na raiz dos monólitos e marcha contornando a projeção de pilares inclinados (Percepção ou Natureza CD 13).';
+      hazard.rescueAndStabilization = 'Alavancamento de lajes com barras de aço e curativos compressivos em contusões graves (Atletismo CD 14 ou Medicina CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampKarstStoneForestStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var dt = (defenseType || 'suspended_grike_hammock_niche').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque Suspenso em Nicho de Fenda de Grike',
+      forestAndCampSafety: 'O acampamento é estruturado em redes e plataformas de lona ancoradas 5 metros acima do solo nas paredes verticais de uma fenda de grike; a posição suspensa mantém a comitiva totalmente a salvo de umidade rasteira, inundações repentinas e predadores terrestres (DMG p. 111).',
+      forestAndWatch: 'As paredes estreitas de calcário afunilam o acesso a um único corredor vigiado pela sentinela com vantagem em testes de Percepção contra aproximações hostis.',
+      campRestAndSafetyGuards: 'Repouso estável e protegido no coração das muralhas de pedra, garantindo recuperação integral de pontos de vida.',
+      icon: '⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'karst_fluting_condensate_funnel') {
+      defense.defenseTitle = 'Funil de Captação em Caneluras Cársticas Puras';
+      defense.forestAndCampSafety = 'Caneluras verticais (karren) talhadas pela água pluvial nas faces dos pináculos são interligadas por calhas de lona encerada para coleta de água de condensação noturna e chuva pura (PHB p. 150).';
+      defense.forestAndWatch = 'Coleta até 40 litros diários de água mineral cristalina e perfeitamente potável, acelerando a eliminação de fadiga e restaurando +1 dado de vida adicional aos membros do grupo durante o descanso longo.';
+      defense.campRestAndSafetyGuards = 'Autonomia hídrica absoluta assegurada mesmo em platôs elevados desprovidos de córregos superficiais.';
+    } else if (dt === 'needle_crevice_slotted_breastwork') {
+      defense.defenseTitle = 'Parapeito Entrincheirado em Frestas de Agulhas';
+      defense.forestAndCampSafety = 'O estrangulamento natural entre duas lâminas de tsingy é travado com lajes de calcário e troncos de madeira de lei, criando uma barreira de 1,6 metro com seteira de tiro protegida (PHB p. 185).';
+      defense.forestAndWatch = 'Concede cobertura total (+5 na CA e +5 em salvaguardas de Destreza) contra arqueiros e impede o avanço de predadores gigantes incapazes de penetrar no afunilamento.';
+      defense.campRestAndSafetyGuards = 'Fortificação natural inexpugnável que proporciona segurança noturna total para o grupo.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 289: CRISTAS DE YARDANGS E CORREDORES DE DEFLAÇÃO EÓLICA (D&D 5e)
   // =========================================================================
 
@@ -37296,6 +37372,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessKarstStoneForestHazard: calcWildernessKarstStoneForestHazard,
+    calcCampKarstStoneForestStation: calcCampKarstStoneForestStation,
     calcWildernessYardangRidgeHazard: calcWildernessYardangRidgeHazard,
     calcCampYardangRidgeStation: calcCampYardangRidgeStation,
     calcWildernessDesertPavementHazard: calcWildernessDesertPavementHazard,
