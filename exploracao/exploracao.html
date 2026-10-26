@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T10:10:16Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T10:14:57Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessBrackishMarshAndMacrophyteHazard) return '';
+        var bKey = (biome && biome.key) || 'swamp';
+        var bm = CartShared.calcWildernessBrackishMarshAndMacrophyteHazard(bKey, 'floating_macrophyte_mat_tear');
+        return '<div class="clp-brackish-marsh-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,32,20,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(22,163,74,0.3);font-size:8px;color:#dcfce7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + bm.color + ';margin-bottom:2px;">' + bm.icon + ' ' + bm.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Esteira de Macrófitas:</b> ' + bm.brackishMarshRiskAndMud + ' (CD ' + bm.saveDC + ' [' + bm.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#86efac;margin-top:1px;">• <b>Mitigação:</b> ' + bm.pioneerMitigation + ' · <i>Estabilização: ' + bm.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampBrackishMarshFloatingPlatformAndFilterStation) return '';
+        var bKey = (biome && biome.key) || 'swamp';
+        var bp = CartShared.calcCampBrackishMarshFloatingPlatformAndFilterStation(bKey, 'woven_reed_floating_pontoon_platform');
+        return '<div class="clp-marsh-pontoon-card" style="margin:4px 0 6px;text-align:left;background:rgba(16,36,28,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#ecfdf5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + bp.color + ';margin-bottom:2px;">' + bp.icon + ' ' + bp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Pontão Flutuante:</b> ' + bp.marshAnchorageAndTidalSafety + ' · <b>Proteção:</b> ' + bp.mudShieldingAndCampSecurity + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + bp.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

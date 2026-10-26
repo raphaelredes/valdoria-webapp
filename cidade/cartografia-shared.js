@@ -15501,6 +15501,130 @@
     };
   }
 
+  // === calcWildernessBrackishMarshAndMacrophyteHazard (Brejos Salobros, Esteiras de Macrófitas e Gás Sulfídrico - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessBrackishMarshAndMacrophyteHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'floating_macrophyte_mat_tear').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ruptura de Esteira Flutuante de Macrófitas',
+      saveDC: 14,
+      saveType: 'Destreza',
+      brackishMarshRiskAndMud: 'Trama delgada de aguapés e juncos flutuantes sobre canal de 4 metros de lama negra e água salobra; colapso sob peso com teste de Destreza CD 14 para não afundar no lodo (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam com pranchas leves de cedro distribuindo peso e sondam o leito com percha graduada de 3 metros.',
+      rescueAndStabilization: 'Lançamento de cordas com alça de resgate, extração rápida antes da subida da maré e raspagem de sanguessugas com sal mineral.',
+      icon: '🌿🌊',
+      color: '#16a34a'
+    };
+
+    if (ht === 'hydrogen_sulfide_pocket_effervescence') {
+      hazard = {
+        hazardTitle: 'Efervescência de Bolsão de Gás Sulfídrico',
+        saveDC: 14,
+        saveType: 'Constituição',
+        brackishMarshRiskAndMud: 'Liberação de gás letal com odor fétido de matéria orgânica submarina; 2d8 de veneno e estado envenenado com náusea incapacitante.',
+        pioneerMitigation: 'Uso de máscaras de gaze impregnadas com vinagre de maçã e avanço a favor da brisa estuarina.',
+        rescueAndStabilization: 'Inalação de vapores puros de essência de alecrim e hidratação com água morna açucarada.',
+        icon: '🫧☣️',
+        color: '#eab308'
+      };
+    } else if (ht === 'tidal_bore_estuary_wave_ram') {
+      hazard = {
+        hazardTitle: 'Pororoca e Vaga Súbita de Maré Salobra',
+        saveDC: 13,
+        saveType: 'Força',
+        brackishMarshRiskAndMud: 'Onda estuarina de 2 metros subindo contra a corrente fluvial; arrasto violento de embarcações e perda de fardos de suprimentos.',
+        pioneerMitigation: 'Ancoragem firme de botes na margem lodosa com estacas de mangue antes do horário de inversão de maré.',
+        rescueAndStabilization: 'Resgate de tripulantes atirados na correnteza com arpéus de madeira e contenção de hipotermia salina.',
+        icon: '🌊🚤',
+        color: '#0284c7'
+      };
+    } else if (ht === 'snapping_mud_turtle_and_gar_strike') {
+      hazard = {
+        hazardTitle: 'Mordida Oculta de Tartaruga-Mordedora e Peixe-Agulha',
+        saveDC: 13,
+        saveType: 'Destreza',
+        brackishMarshRiskAndMud: 'Predadores aquáticos camuflados no lodo túrbido; mordida afiada causando 2d6 de perfuração e risco de infecção estuarina bacteriana.',
+        pioneerMitigation: 'Uso de perneiras de couro espesso e agitação prévia da água com vara de bambu antes de desembarcar.',
+        rescueAndStabilization: 'Cauterização de feridas com tintura de mirra e aplicação de cataplasma de bardana.',
+        icon: '🐢🩸',
+        color: '#dc2626'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      brackishMarshRiskAndMud: hazard.brackishMarshRiskAndMud,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Brejos Salobros, Lama Movediça e Gases Tóxicos) / PHB p. 182-183 (Navegação Estuarina e Salvaguardas)'
+    };
+  }
+
+  // === calcCampBrackishMarshFloatingPlatformAndFilterStation (Plataformas Flutuantes de Junco, Filtros Decantadores e Perchas - DMG p. 111 / XGE p. 78-83 / PHB p. 150) ===
+  function calcCampBrackishMarshFloatingPlatformAndFilterStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'woven_reed_floating_pontoon_platform').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Plataforma Flutuante de Feixes de Junco Trançado',
+      marshAnchorageAndTidalSafety: 'Estrado de três camadas de esteiras de papiro e juncos amarrados com tiras de casca de salgueiro que sobe e desce com a maré.',
+      mudShieldingAndCampSecurity: 'Isola os leitos dos aventureiros da lama lodosa salobra e impede infiltrações de água durante a preamar.',
+      campRestAndSafetyGuards: 'Garante sono longo estável e seco para a comitiva mesmo sobre canais de maré lodosos.',
+      icon: '🌾⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'three_chamber_sand_and_charcoal_filter') {
+      tech = {
+        defenseTitle: 'Filtro Decantador de Três Câmaras para Água Salobra',
+        marshAnchorageAndTidalSafety: 'Tanques de argila sobrepostos com seixos, areia fina de restinga e carvão de bambu que eliminam 95% do salitre e sedimentos.',
+        mudShieldingAndCampSecurity: 'Fornece água doce potável límpida no coração de um estuário salobro pantanoso.',
+        campRestAndSafetyGuards: 'Supre os odres da expedição e evita intoxicação mineral por consumo de água salobra.',
+        icon: '🏺💧',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'collapsible_sectional_sounding_pole_rack') {
+      tech = {
+        defenseTitle: 'Armação de Perchas de Sondagem Desmontáveis com Gancho',
+        marshAnchorageAndTidalSafety: 'Varas de freixo encastoadas em latão com pontas de concha e gancho de ancoragem para medição de profundidade de lodo.',
+        mudShieldingAndCampSecurity: 'Equipamento essencial mantido à mão para batedores delinearem acessos firmes ao redor do bivaque.',
+        campRestAndSafetyGuards: 'Evita que sentinelas desavisadas afundem em poços de lama traiçoeiros na escuridão noturna.',
+        icon: '🛶🦯',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'smoke_deflector_mangrove_charcoal_smudge') {
+      tech = {
+        defenseTitle: 'Defumador Anti-Mosquitos com Carvão de Mangue e Eucalipto',
+        marshAnchorageAndTidalSafety: 'Braseiro suspenso queimando nós de madeira resinosa que emite fumaça aromática densa não sufocante.',
+        mudShieldingAndCampSecurity: 'Afasta 100% das nuvens de pernilongos, borrachudos e maruins transmissores de febres estuarinas.',
+        campRestAndSafetyGuards: 'Assegura repouso tranquilo e ininterrupto para a comitiva sem necessidade de vigília contra enxames.',
+        icon: '💨🦟',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      marshAnchorageAndTidalSafety: tech.marshAnchorageAndTidalSafety,
+      mudShieldingAndCampSecurity: tech.mudShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque Flutuante em Brejos) / XGE p. 78-83 (Ferramentas de Tecelão e Herborismo)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -17334,6 +17458,8 @@
     calcCampBlackMoraineDebrisPlatformAndFilterStation: calcCampBlackMoraineDebrisPlatformAndFilterStation,
     calcWildernessObsidianSpireAndRazorGlassHazard: calcWildernessObsidianSpireAndRazorGlassHazard,
     calcCampObsidianSpirePaddedBivouacAndResonatorStation: calcCampObsidianSpirePaddedBivouacAndResonatorStation,
+    calcWildernessBrackishMarshAndMacrophyteHazard: calcWildernessBrackishMarshAndMacrophyteHazard,
+    calcCampBrackishMarshFloatingPlatformAndFilterStation: calcCampBrackishMarshFloatingPlatformAndFilterStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
