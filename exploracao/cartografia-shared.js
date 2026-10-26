@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 222: PAVIMENTOS DE CLASTOS (REG / GIBBER) E VENTIFACTOS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessGibberRegVentifactHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'desert_varnish_chert_gibber_ball_bearing_ankle_roll').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Derrapagem em Mosaico de Seixos de Sílex Envernizados (Gibber Plains)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      gibberRisk: 'Planícies infinitas recobertas por um pavimento compacto de seixos de calcedônia e quartzo polidos pelo vento e revestidos por verniz do deserto negro-azulado rico em ferro e manganês, lisos como bilhas de aço; marchar sobre o tapete de pedras rolantes provoca torções articulares violentas e quedas sobre clastos pontiagudos com 2d8 de concussão (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Passos curtos de sola inteira sem impulsionar na ponta da bota e uso de bastão com ponteira de borracha ou couro cru.',
+      rescueAndStabilization: 'Enfaixamento compressivo imediato de tornozelos torcidos e redistribuição de carga.',
+      icon: '🪨🏜️',
+      color: '#d97706'
+    };
+
+    if (ht === 'dreikanter_fluted_ventifact_razor_keel_gale_shrapnel') {
+      hazard = {
+        hazardTitle: 'Quilhas Cortantes de Ventifactos (Dreikanter) e Metralha de Areia Quartzosa',
+        saveDC: 15,
+        saveType: 'Destreza',
+        gibberRisk: 'Blocos de basalto e sílex esculpidos por milênios de jateamento de areia em pirâmides de três faces côncavas cujas arestas superiores (dreikanter) são afiadas como machados de pedra lascada; durante rajadas de vento rasante que varrem o reg, ser derrubado contra os ventifactos rasga armaduras de couro e tendões com 3d6 cortante (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Deitar-se de bruços atrás de um bloco grande com a mochila voltada para o vento ao perceber a frente de poeira.',
+        rescueAndStabilization: 'Sutura ou bandagem limpa das lacerações antes que a poeira fina penetre no corte.',
+        icon: '🔪💨',
+        color: '#b45309'
+      };
+    } else if (ht === 'vesicular_av_silt_horizon_crust_collapse_and_talc_choke') {
+      hazard = {
+        hazardTitle: 'Ruptura do Pavimento para o Horizonte Vesicular de Silte Fofo (Camada Av)',
+        saveDC: 14,
+        saveType: 'Constituição',
+        gibberRisk: 'A camada de seixos do pavimento desértico tem apenas uma pedra de espessura e repousa sobre um colchão de 40 centímetros de silte eólico finíssimo e poroso como espuma seca (horizonte vesicular Av); quando as patas das montarias ou botas pesadas rompem o mosaico protetor, os pés afundam no talco sufocante que sobe em nuvens densas impondo 1 nível de exaustão e tosse seca (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Manter a comitiva em fila única pisando apenas onde o mosaico de pedras grandes estiver intacto.',
+        rescueAndStabilization: 'Proteção das narinas com lenço úmido e limpeza das articulações de armaduras.',
+        icon: '🥾☁️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'black_desert_varnish_albedo_radiant_heat_stroke_mirage') {
+      hazard = {
+        hazardTitle: 'Fornalha Radiante de Verniz Negro do Deserto e Miragem Inferior',
+        saveDC: 15,
+        saveType: 'Constituição',
+        gibberRisk: 'O revestimento negro espelhado de óxidos de manganês e ferro sobre milhões de pedras absorve toda a radiação solar e aquece a superfície da planície a 75 graus ao meio-dia, derretendo a cola de calçados e criando uma camada de ar superaquecido que distorce toda a linha do horizonte; a travessia diurna impõe 2d6 de fogo nas solas e exaustão térmica (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Marcha crepuscular e noturna guiada pelas estrelas ou uso de palmilhas isolantes de cortiça e feltro duplo.',
+        rescueAndStabilization: 'Suspensão imediata da marcha sob toldo elevado para permitir a circulação de ar sob o corpo.',
+        icon: '☀️🔥',
+        color: '#dc2626'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampGibberRegVentifactStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'cleared_desert_pavement_intaglio_sunken_ring_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Círculo de Pedras Afastadas (Geoglifo de Abrigo no Reg)',
+      gibberAndCampSafety: 'Remoção cuidadosa dos clastos pontiagudos para a borda externa formando um anel protetor de 50 centímetros de altura ao redor de um leito plano compactado.',
+      gibberTrenchAndWatch: 'Evita que os ventifactos rasguem o piso das tendas e desvia o jateamento de areia que corre rente ao chão.',
+      campRestAndSafetyGuards: 'Garante descanso longo sem perfurações e abrigado do vento rasteiro.',
+      icon: '⛺⭕',
+      color: '#d97706'
+    };
+
+    if (dt === 'giant_faceted_megaventifact_lee_shadow_canopy') {
+      tech = {
+        defenseTitle: 'Sombra e Sotavento de Megaventifacto Errático Esculpido',
+        gibberAndCampSafety: 'Acampamento posicionado na face côncava de sotavento de um matacão residual de 3 metros polido pelo vento.',
+        gibberTrenchAndWatch: 'Cria uma zona de calmaria aerodinâmica perfeita e sombra fresca durante as horas de sol alto.',
+        campRestAndSafetyGuards: 'Reduz o consumo diário de água da comitiva pela metade.',
+        icon: '🪨⛺',
+        color: '#b45309'
+      };
+    } else if (dt === 'radiative_night_sky_black_basalt_cobble_dew_tray') {
+      tech = {
+        defenseTitle: 'Tabuleiro Condensador de Orvalho Noturno em Seixos de Basalto Negro',
+        gibberAndCampSafety: 'As mesmas pedras escuras que fervem ao sol perdem calor rapidamente por irradiação para o céu limpo da madrugada, ficando geladas antes do amanhecer.',
+        gibberTrenchAndWatch: 'Permite enxugar com panos limpos o orvalho condensado nas faces superiores polidas dos clastos.',
+        campRestAndSafetyGuards: 'Coleta preciosas rações extras de água ao alvorecer no deserto pedregoso.',
+        icon: '💧🌑',
+        color: '#0284c7'
+      };
+    } else if (dt === 'horizon_360_gibber_clatter_acoustic_perimeter') {
+      tech = {
+        defenseTitle: 'Perímetro de Clastos de Sílex Sonoros e Visão Desimpedida de 360 Graus',
+        gibberAndCampSafety: 'Na planície absolutamente chata do pavimento de reg, qualquer silhueta é visível a quilômetros e os seixos de sílex tilintam como porcelana quando pisados.',
+        gibberTrenchAndWatch: 'Torna impossível a aproximação silenciosa de incursores ou feras noturnas.',
+        campRestAndSafetyGuards: 'Concede vantagem tática absoluta aos sentinelas da guarda.',
+        icon: '👁️🔔',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 221: DRENAGEM ÁCIDA NATURAL (GOSSAN) E RIOS FÉRRICOS RUBros (D&D 5e)
   // =========================================================================
 
@@ -30868,6 +30972,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessGibberRegVentifactHazard: calcWildernessGibberRegVentifactHazard,
+    calcCampGibberRegVentifactStation: calcCampGibberRegVentifactStation,
     calcWildernessAcidGossanDrainageHazard: calcWildernessAcidGossanDrainageHazard,
     calcCampAcidGossanDrainageStation: calcCampAcidGossanDrainageStation,
     calcWildernessIcePenitenteBladeHazard: calcWildernessIcePenitenteBladeHazard,
