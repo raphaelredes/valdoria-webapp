@@ -17485,6 +17485,130 @@
     };
   }
 
+  // === calcWildernessRestingaBarrierAndLagoonHazard (Restingas, Cordões Arenosos e Lagunas Hipersalinas - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessRestingaBarrierAndLagoonHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'barchan_avalanche_slip_face').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Avalanche de Areia Fina na Face de Deslizamento Barcana',
+      saveDC: 15,
+      saveType: 'Destreza',
+      restingaBarrierRiskAndLagoons: 'Crista móvel de duna barcana com 12 metros de desnível no ângulo crítico de repouso (34 graus); colapso em massa com deslocamento repentino de toneladas de areia fina causando 3d6 contundente e soterramento parcial (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores contornam o barlavento consolidado e evitam transpor o topo das barcanas durante rajadas de vento marítimo intenso.',
+      rescueAndStabilization: 'Desenterramento ágil com pás dobráveis de bico largo, colocação de cânula respiratória de bambu e limpeza dos olhos com água boricada.',
+      icon: '🏜️⚠️',
+      color: '#d97706'
+    };
+
+    if (ht === 'hypersaline_lagoon_quagmire_crust_break') {
+      hazard = {
+        hazardTitle: 'Ruptura de Crosta Salina em Lamaçal Hipersalino de Laguna',
+        saveDC: 14,
+        saveType: 'Destreza',
+        restingaBarrierRiskAndLagoons: 'Crosta de halita ressequida de 3 centímetros que mascara lamaçal orgânico putrefato subjacente; afundamento repentino até a cintura em lodo cáustico altamente salino.',
+        pioneerMitigation: 'Vigias realizam sondagem sistemática com varas de medição e marcha com sapatilhas de couro largas trançadas em junco.',
+        rescueAndStabilization: 'Tracionamento horizontal por corda dupla com estribos e lavagem vigorosa da pele com água doce de cantil para prevenir queimaduras químicas.',
+        icon: '🧂🕳️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'corrasive_salt_spray_sandstorm') {
+      hazard = {
+        hazardTitle: 'Tempestade de Vento Costeiro com Spray Salino e Areia Corrosiva',
+        saveDC: 14,
+        saveType: 'Constituição',
+        restingaBarrierRiskAndLagoons: 'Vendaval marítimo de 75 km/h carregado de aerossol hipersalino e microgrãos angulares de quartzo; abrasão ocular intensa, tosse salina sufocante e degradação de correias.',
+        pioneerMitigation: 'Uso de óculos de proteção de couro com frestas de osso polido e envolvimento de equipamentos metálicos em panos ensebados.',
+        rescueAndStabilization: 'Abrigo imediato em trincheira de barlavento, lavagem ocular com soro fisiológico morno e aplicação de pomada labial de cera de abelha.',
+        icon: '🌪️🧂',
+        color: '#b45309'
+      };
+    } else if (ht === 'rip_current_spit_breach_washout') {
+      hazard = {
+        hazardTitle: 'Arrombamento de Esporão Arenoso por Maré de Sizígia',
+        saveDC: 13,
+        saveType: 'Força',
+        restingaBarrierRiskAndLagoons: 'Surto de ondas de maré alta que transborda o cordão litorâneo, abrindo canal de correnteza violenta de retorno que arrasta exploradores e animais de carga rumo à rebentação.',
+        pioneerMitigation: 'Monitoramento atento das tábuas de maré e travessia dos esporões estritamente nos períodos de baixa-mar prolongada.',
+        rescueAndStabilization: 'Lançamento de boias de cortiça com retinida tensionada a partir de estacas firmes fincadas na restinga interna.',
+        icon: '🌊🌊',
+        color: '#0284c7'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      restingaBarrierRiskAndLagoons: hazard.restingaBarrierRiskAndLagoons,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Dunas e Terrenos Litorâneos) / PHB p. 182-183 (Marcha em Terreno Difícil) / XGE p. 78-83 (Geomorfologia Costeira e Lagunar)'
+    };
+  }
+
+  // === calcCampRestingaBarrierAndLagoonStation (Bivaques Interdunares, Cercas Defletoras e Destiladores Solares - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampRestingaBarrierAndLagoonStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'dune_slack_vegetated_hollow_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Depressão Interdunar com Cobertura de Restinga',
+      barrierAnchorageAndRestingaSafety: 'Bolsão rebaixado entre dunas consolidado por gramíneas fixadoras de areia e arbustos resinosos; barreira topográfica natural que quebra a ventania marítima contínua.',
+      lagoonShieldingAndCampSecurity: 'Totalmente oculto da linha de horizonte marítimo e protegido de ressacas marinhas por dunas frontais de 8 metros de altura.',
+      campRestAndSafetyGuards: 'Assegura sono longo fresco, silencioso e protegido para os membros da comitiva, sem acúmulo incômodo de areia soprada nas cobertas.',
+      icon: '🏝️⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'brushwood_sand_fence_windbreak') {
+      tech = {
+        defenseTitle: 'Cerca Defletora de Faxinas Trançadas contra Migração Arenosa',
+        barrierAnchorageAndRestingaSafety: 'Paliçada permeável de galhos de aroeira-da-praia entrelaçados fincada a montante das tendas da comitiva para dissipar a energia do vento.',
+        lagoonShieldingAndCampSecurity: 'Provoca a deposição controlada de areia na periferia do acampamento impedindo o soterramento das estruturas de lona.',
+        campRestAndSafetyGuards: 'Mantém o espaço central limpo e permite que a fogueira permaneça estável sem faíscas dispersas.',
+        icon: '🪵🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'condenser_solar_still_spit_desalinator') {
+      tech = {
+        defenseTitle: 'Destilador Solar de Areia e Lona para Dessalinização',
+        barrierAnchorageAndRestingaSafety: 'Fosso cônico forrado com vegetação suculenta e água salobra coberto por lona encerada transparente com peso central coletor.',
+        lagoonShieldingAndCampSecurity: 'Gera 10 litros diários de água pura potável condensada sem consumo de lenha preciosa nem resíduos de sais cáusticos.',
+        campRestAndSafetyGuards: 'Abastece plenamente os cantis de todos os exploradores do bando em ambiente onde fontes de água doce são inexistentes.',
+        icon: '💧🏺',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'elevated_driftwood_watchtower_deck') {
+      tech = {
+        defenseTitle: 'Plataforma Sentinela de Troncos com Tirantes de Cabo Náutico',
+        barrierAnchorageAndRestingaSafety: 'Torre de vigia leve montada com madeiras arrojadas pela maré travadas por nós marinheiros e ancoradas com sacos de areia enterrados.',
+        lagoonShieldingAndCampSecurity: 'Eleva as sentinelas 4 metros acima do solo arenoso conferindo linha de visão desobstruída sobre canais lagunares e mar aberto.',
+        campRestAndSafetyGuards: 'Evita ataques de surpresa por predadores anfíbios ou saqueadores costeiros durante a noite.',
+        icon: '🗼🛡️',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      barrierAnchorageAndRestingaSafety: tech.barrierAnchorageAndRestingaSafety,
+      lagoonShieldingAndCampSecurity: tech.lagoonShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques Litorâneos e Dunas) / PHB p. 150 (Kits de Sobrevivência Costeira) / XGE p. 78-83 (Engenharia em Restingas e Dessalinização)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -19350,6 +19474,8 @@
     calcCampTravertineTerraceAndCascadeFilterStation: calcCampTravertineTerraceAndCascadeFilterStation,
     calcWildernessCryogenicPingoAndThermokarstHazard: calcWildernessCryogenicPingoAndThermokarstHazard,
     calcCampCryogenicPingoMoundAndDeckStation: calcCampCryogenicPingoMoundAndDeckStation,
+    calcWildernessRestingaBarrierAndLagoonHazard: calcWildernessRestingaBarrierAndLagoonHazard,
+    calcCampRestingaBarrierAndLagoonStation: calcCampRestingaBarrierAndLagoonStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
