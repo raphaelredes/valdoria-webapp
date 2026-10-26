@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 252: DEPRESSÕES DE SABKHAS SALGADAS E CROSTAS DE ANIDRITA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessSabkhaSalineCrustHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'brittle_halite_crust_sulfidic_brine_breakthrough').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ruptura de Crosta Frágil de Halita e Queda em Salmoura Sulfídrica Corrosiva',
+      saveDC: 15,
+      saveType: 'Destreza',
+      sabkhaSalineRisk: 'Uma crosta branca de sal puro de 5 centímetros de espessura parece rocha sólida uniforme, mas oculta lamas anóxicas e bolsões subterrâneos de salmoura saturada em ácido sulfídrico; a quebra da placa sob a marcha mergulha pernas e botas em líquido cáustico e fétido que corrói couros e queima tecidos vivos, causando 2d8 de dano ácido (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Marchar em fila com bastão graduado sondando cavidades ocas antes de cada passo e usar pranchas de travessia para distribuir o peso.',
+      rescueAndStabilization: 'Lavagem imediata com água doce em abundância para retirar a crosta cáustica e unção com bálsamo neutro.',
+      icon: '🧂☠️',
+      color: '#e11d48'
+    };
+
+    if (ht === 'salt_flat_albedo_glare_photokeratitis') {
+      hazard = {
+        hazardTitle: 'Cegueira Temporária e Ofuscamento por Albedo em Planície de Sal Branca',
+        saveDC: 14,
+        saveType: 'Constituição',
+        sabkhaSalineRisk: 'O albedo extremo da crosta branca sob o sol a pino do deserto reflete mais de 90% da radiação ultravioleta diretamente nos olhos dos exploradores; marchar sem lentes escuras de chifre entalhado ou véus de linho causa ceratite solar severa, impondo desvantagem em testes de Percepção baseados em visão e cegueira transitória de 1d4 horas (DMG p. 110; XGE p. 112).',
+        pioneerMitigation: 'Pintar fuligem negra sob os olhos e equipar viseiras de madeira ou osso com fendas estreitas.',
+        rescueAndStabilization: 'Aplicação de compressas úmidas frias sobre as pálpebras e descanso em tenda sombreada.',
+        icon: '☀️🕶️',
+        color: '#f59e0b'
+      };
+    } else if (ht === 'anhydrite_dust_devil_alkaline_choking') {
+      hazard = {
+        hazardTitle: 'Redemoinho de Poeira de Anidrita Alcalina e Asfixia Respiratória',
+        saveDC: 14,
+        saveType: 'Constituição',
+        sabkhaSalineRisk: 'Rajadas térmicas repentinas erguem redemoinhos violentos de cristais microscópicos e cortantes de anidrita e gesso em pó fino; a inalação da poeira alcalina queima as vias aéreas superiores, provocando espasmos pulmonares, tosse com sangue e 2d6 de dano de veneno com condição envenenado por 1 hora (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Umedecer lenços faciais em vinagre diluído e agachar-se de costas para a tempestade de poeira.',
+        rescueAndStabilization: 'Inalação de vapores de ervas balsâmicas e descanso prolongado para regenerar as mucosas.',
+        icon: '🌪️🧂',
+        color: '#d97706'
+      };
+    } else if (ht === 'hypersaline_quagmire_mule_bogging_entrapment') {
+      hazard = {
+        hazardTitle: 'Atolamento de Bestas de Carga em Atoladeiro Hipersalino Subterrâneo',
+        saveDC: 14,
+        saveType: 'Força',
+        sabkhaSalineRisk: 'Faixas periféricas onde a crosta evaporítica se dissolve em lodo denso e movediço de lama salgada; animais de montaria e bestas de carga afundam rapidamente até a barriga sem apoio, correndo risco de exaustão e soterramento se não forem içados em poucos minutos (DMG p. 111; PHB p. 182).',
+        pioneerMitigation: 'Descarregar os animais imediatamente e ancorar esteiras de vime sob as patas para criar sustentação.',
+        rescueAndStabilization: 'Uso de sistema de polias e cordas ancoradas em estacas de madeira seca para tração mecânica.',
+        icon: '🕳️🐎',
+        color: '#b45309'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampSabkhaSalineCrustStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'elevated_evaporite_ridge_dry_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Elevado em Crista de Evaporito Seco Acima da Zona de Maré',
+      sabkhaSalineAndCampSafety: 'Instalação do acampamento sobre uma crista fóssil de gesso consolidado e rocha evaporítica situada a 2 metros acima da lâmina freática da sabkha.',
+      sabkhaSalineTrenchAndWatch: 'O solo rochoso elevado permanece completamente seco e rígido, eliminando o risco de subsidência ou umidade corrosiva no chão das tendas.',
+      campRestAndSafetyGuards: 'Assegura descanso longo firme, aquecido e sem contato com lamas sulfídricas corrosivas.',
+      icon: '⛺🧂',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'solar_dew_condenser_tarp_still') {
+      tech = {
+        defenseTitle: 'Destilador Solar de Lona para Extração de Água Doce da Salmoura',
+        sabkhaSalineAndCampSafety: 'Escavação de covas rasas na sabkha cobertas por pirâmides de lona plástica/encerada com peso central de pedra.',
+        sabkhaSalineTrenchAndWatch: 'A radiação solar evapora a umidade subterrânea e o vapor condensa na face interna da lona, gotejando dezenas de litros de água destilada potável em baldes centrais.',
+        campRestAndSafetyGuards: 'Garante hidratação pura e renovação de cantis em ambiente desprovido de qualquer fonte superficial doce.',
+        icon: '💧☀️',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'raised_canvas_cot_corrosion_barrier') {
+      tech = {
+        defenseTitle: 'Barreiras Anti-Corrosão e Camas Suspensas contra Umidade Salina Noturna',
+        sabkhaSalineAndCampSafety: 'Armação de macas dobráveis de lona elevadas a 40 centímetros do chão e lubrificação preventiva de metais com sebo.',
+        sabkhaSalineTrenchAndWatch: 'Impede que o orvalho salino noturno e o pó cáustico entrem em contato direto com armaduras, espadas e mochilas.',
+        campRestAndSafetyGuards: 'Preserva a durabilidade dos equipamentos da comitiva contra oxidação e corrosão salina prematura.',
+        icon: '🛡️🛏️',
+        color: '#10b981'
+      };
+    } else if (dt === 'sterile_hypersaline_moat_predator_guard') {
+      tech = {
+        defenseTitle: 'Perímetro Hipersalino Estéril Livre de Predadores e Parasitas',
+        sabkhaSalineAndCampSafety: 'Escolha estratégica de ponto de vigília cercado por depressões de salmoura hipersalina impenetráveis.',
+        sabkhaSalineTrenchAndWatch: 'A ausência total de água doce, sombra e caça afasta feras predadoras, serpentes venenosas e insetos hematófagos.',
+        campRestAndSafetyGuards: 'Proporciona sentinela tranquila e descanso longo seguro sem ameaças biológicas noturnas.',
+        icon: '🛑🦂',
+        color: '#6366f1'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 251: GARGANTAS DE FENDA EM CALCÁRIO KARSTIFICADO E TROMBAS D'ÁGUA (D&D 5e)
   // =========================================================================
 
@@ -33988,6 +34092,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessSabkhaSalineCrustHazard: calcWildernessSabkhaSalineCrustHazard,
+    calcCampSabkhaSalineCrustStation: calcCampSabkhaSalineCrustStation,
     calcWildernessKarstLimestoneSlotGorgeHazard: calcWildernessKarstLimestoneSlotGorgeHazard,
     calcCampKarstLimestoneSlotGorgeStation: calcCampKarstLimestoneSlotGorgeStation,
     calcWildernessGeyseriteSinterThermalHazard: calcWildernessGeyseriteSinterThermalHazard,
