@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T20:27:16Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T20:29:50Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessHogbackFlatironRidgeHazard) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var hf = CartShared.calcWildernessHogbackFlatironRidgeHazard(bKey, 'dip_slope_bedding_plane_wet_shale_parting_slide');
+        return '<div class="clp-hogback-flatiron-ridge-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,20,14,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(217,119,6,0.35);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + hf.color + ';margin-bottom:2px;">' + hf.icon + ' ' + hf.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Cristas de Hogbacks e Flatirons:</b> ' + hf.hogbackFlatironRisk + ' (CD ' + hf.saveDC + ' [' + hf.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Mitigação:</b> ' + hf.pioneerMitigation + ' · <i>Estabilização: ' + hf.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampHogbackFlatironRidgeStation) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var hc = CartShared.calcCampHogbackFlatironRidgeStation(bKey, 'wind_gap_elevated_dry_notch_pass_bivouac');
+        return '<div class="clp-hogback-flatiron-ridge-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(22,16,10,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + hc.color + ';margin-bottom:2px;">' + hc.icon + ' ' + hc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Boqueirão Seco (Wind Gap):</b> ' + hc.hogbackFlatironAndCampSafety + ' · <b>Controle:</b> ' + hc.hogbackFlatironTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#fcd34d;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + hc.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

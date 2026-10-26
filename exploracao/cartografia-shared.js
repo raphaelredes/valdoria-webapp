@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 245: CRISTAS DE HOGBACKS, FLATIRONS E BOQUEIRÕES (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessHogbackFlatironRidgeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'dip_slope_bedding_plane_wet_shale_parting_slide').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Deslizamento de Placa no Plano de Acamamento do Flatiron (Dip-Slope Bedding Slide)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      hogbackFlatironRisk: 'Placas triangulares gigantes de arenito e calcário inclinadas a 45 graus (flatirons) encostadas no flanco da cordilheira como escudos de titãs; como cada laje repousa sobre uma película milimétrica de folhelho argiloso impermeável, a infiltração de chuva lubrifica o plano de acamamento e faz placas inteiras de rocha ou aventureiros escorregarem sem freio por 60 metros até a ravina basal com 3d8 de concussão (DMG p. 110; PHB p. 182; XGE p. 109).',
+      pioneerMitigation: 'Evitar subir pela face lisa inclinada (dip-slope) do flatiron; usar os degraus das ravinas laterais em V.',
+      rescueAndStabilization: 'Frenagem com corda ancorada em pinheiros rupestres e imobilização de fraturas.',
+      icon: '📐⛰️',
+      color: '#d97706'
+    };
+
+    if (ht === 'razorback_hogback_vertical_strata_knife_edge_fall') {
+      hazard = {
+        hazardTitle: 'Queda na Crista em Lâmina de Faca do Hogback Vertical (Razorback Crest)',
+        saveDC: 15,
+        saveType: 'Destreza',
+        hogbackFlatironRisk: 'Quando o dobramento tectônico empina as camadas de quartzito a quase 90 graus, a erosão das rochas macias laterais deixa uma muralha em barbatana dorsal (hogback) cujo topo tem menos de meio metro de largura com abismos verticais de ambos os lados; rajadas de vento lateral na crista estreita desequilibram a comitiva e provocam quedas de 25 metros com 3d6 de concussão (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Progredir encordado pelo fio da crista ou marchar pelo vale longitudinal na base da muralha.',
+        rescueAndStabilization: 'Contrapeso de corda pelo lado oposto da crista e resgate em prateleira.',
+        icon: '🔪🏔️',
+        color: '#dc2626'
+      };
+    } else if (ht === 'anti_dip_scarp_undercut_shale_sapping_rockfall') {
+      hazard = {
+        hazardTitle: 'Desabamento da Cornija Frontal por Erosão do Folhelho Basal (Scarp Sapping)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        hogbackFlatironRisk: 'Na face oposta à rampa inclinada (escarpa de frente), o folhelho mole da base erode rapidamente e deixa a camada superior de arenito duro em balanço sem apoio; caminhar na trilha de meia-encosta sob a cornija desprende blocos prismáticos com 2d8 de concussão (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Manter a marcha afastada da linha de gotejamento das cornijas em balanço.',
+        rescueAndStabilization: 'Retirada imediata do cone de detritos e aplicação de talas.',
+        icon: '🪨⚠️',
+        color: '#b45309'
+      };
+    } else if (ht === 'transverse_water_gap_narrows_flash_backwater_surge') {
+      hazard = {
+        hazardTitle: 'Afogamento de Passagem no Boqueirão Transversal (Water Gap Narrows)',
+        saveDC: 14,
+        saveType: 'Força',
+        hogbackFlatironRisk: 'O único ponto de travessia ao nível do chão através de uma muralha de hogback de vinte quilômetros é o boqueirão estreito (water gap) onde um rio serrou a crista; qualquer chuva a montante represa no gargalo rochoso e eleva o nível da água em três metros em minutos, bloqueando a passagem e impondo 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Preferir atravessar a crista por um boqueirão seco superior (wind gap) quando o tempo estiver fechado.',
+        rescueAndStabilization: 'Subida rápida para os degraus de quartzito acima da marca de cheia.',
+        icon: '🌊⛩️',
+        color: '#0284c7'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampHogbackFlatironRidgeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'wind_gap_elevated_dry_notch_pass_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Boqueirão Seco Abandonado (Wind Gap) Acima das Cheias',
+      hogbackFlatironAndCampSafety: 'Uma sela entalhada no alto da crista de hogback por um rio antigo capturado há milênios oferece passagem plana e enxuta.',
+      hogbackFlatironTrenchAndWatch: 'Paredes verticais de quartzito flanqueiam os dois lados da sela, permitindo trancar toda a passagem da serra com dois sentinelas.',
+      campRestAndSafetyGuards: 'Garante descanso longo livre de enchentes e com controle tático da rota.',
+      icon: '⛺⛩️',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'contact_spring_seep_at_sandstone_shale_junction') {
+      tech = {
+        defenseTitle: 'Captação de Nascente de Contato entre Arenito e Folhelho',
+        hogbackFlatironAndCampSafety: 'A água da chuva infiltrada na placa porosa do flatiron barra na camada inferior de folhelho impermeável e brota na linha de contato.',
+        hogbackFlatironTrenchAndWatch: 'Fornece água filtrada pela rocha e constante ao longo do sopé protegido.',
+        campRestAndSafetyGuards: 'Abastece os cantis sem precisar descer ao rio barrento do boqueirão.',
+        icon: '💧🪨',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'flatiron_apex_triangular_bastion_lookout') {
+      tech = {
+        defenseTitle: 'Bastião de Vigia no Vértice Superior do Flatiron Triangular',
+        hogbackFlatironAndCampSafety: 'O bico agudo no topo de um flatiron funciona como a proa elevada de um castelo rochoso.',
+        hogbackFlatironTrenchAndWatch: 'Domina visualmente todo o vale subsequente e as duas ravinas laterais que isolam a placa.',
+        campRestAndSafetyGuards: 'Impossível de ser escalado frontalmente sem ser detectado pelo vigia.',
+        icon: '👁️📐',
+        color: '#eab308'
+      };
+    } else if (dt === 'subsequent_strike_valley_lee_shelter_corridor') {
+      tech = {
+        defenseTitle: 'Corredor Abrigado no Vale Subsequente Atrás da Muralha do Hogback',
+        hogbackFlatironAndCampSafety: 'A barreira contínua de camadas empinadas de 40 metros de altura corta 100% dos ventos de tempestade.',
+        hogbackFlatironTrenchAndWatch: 'Oculta a fumaça e a luz do acampamento de qualquer observador na planície externa.',
+        campRestAndSafetyGuards: 'Oferece pasto abrigado para montarias e noite tranquila para a comitiva.',
+        icon: '🛡️🌲',
+        color: '#84cc16'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 244: BLOWHOLES COSTEIROS, GLOUPS E ARCOS MARINHOS (D&D 5e)
   // =========================================================================
 
@@ -33260,6 +33364,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessHogbackFlatironRidgeHazard: calcWildernessHogbackFlatironRidgeHazard,
+    calcCampHogbackFlatironRidgeStation: calcCampHogbackFlatironRidgeStation,
     calcWildernessCoastalBlowholeGloupHazard: calcWildernessCoastalBlowholeGloupHazard,
     calcCampCoastalBlowholeGloupStation: calcCampCoastalBlowholeGloupStation,
     calcWildernessVolcanicHummockTorevaHazard: calcWildernessVolcanicHummockTorevaHazard,
