@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 228: FALÉSIAS DE GIZ COSTEIRAS E PLATAFORMAS DE SÍLEX (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessChalkCliffFlintPlatformHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'frost_weathered_chalk_headland_tension_crack_slab_fall').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda de Muralha Branca de Giz Fraturada por Fendas de Tração',
+      saveDC: 15,
+      saveType: 'Destreza',
+      chalkCliffRisk: 'Falésias verticais de 90 metros de calcário coccolítico branco puro (giz) altamente poroso que absorve água da chuva e se expande com a geada, abrindo fendas de tração invisíveis sob a grama da borda; pisar no gramado costeiro faz uma fatia inteira do penhasco branco desprender-se rumo ao mar revolto, ou sepultar quem caminha na praia estreita abaixo com 4d8 de concussão (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Manter distância mínima de cinco metros da borda da falésia e jamais marchar sob manchas úmidas amareladas na parede branca.',
+      rescueAndStabilization: 'Ancoragem em estacas profundas longe da linha de fissura e resgate rápido antes da maré cheia.',
+      icon: '🏔️🌊',
+      color: '#e2e8f0'
+    };
+
+    if (ht === 'knapped_flint_nodule_shingle_wave_platform_laceration') {
+      hazard = {
+        hazardTitle: 'Campo de Nódulos de Sílex Negro Lascado na Plataforma de Abrasão',
+        saveDC: 14,
+        saveType: 'Destreza',
+        chalkCliffRisk: 'A erosão do giz macio libera milhões de nódulos duros de sílex negro (pederneira) que o mar quebra ao meio na plataforma de maré baixa, expondo bordas conchoidais mais afiadas que vidro combinadas a uma pasta branca de giz molhado escorregadia como graxa; escorregar corta botas e joelhos profundamente causando 2d6 cortante mais 1d8 de concussão (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Caminhar sobre os cordões de seixos já rolados e arredondados na parte alta da praia evitando o giz liso recém-molhado.',
+        rescueAndStabilization: 'Estancamento de sangramento com compressa limpa e remoção de lascas de sílex vítreo.',
+        icon: '🖤🔪',
+        color: '#94a3b8'
+      };
+    } else if (ht === 'clay_with_flints_solution_pipe_karst_shaft_sinkhole') {
+      hazard = {
+        hazardTitle: 'Afundamento em Tubo de Dissolução Vertical (Solution Pipe) no Topo da Falésia',
+        saveDC: 15,
+        saveType: 'Destreza',
+        chalkCliffRisk: 'No planalto gramado acima das falésias, a água ácida escava poços cilíndricos verticais de 1 metro de largura e 15 metros de profundidade no giz branco, preenchidos frouxamente por argila vermelha pegajosa e pedras de sílex (clay-with-flints); após chuvas fortes o tampão de argila cede como um pistão engolindo o aventureiro no poço estreito com 3d6 de concussão e soterramento (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Desviar de depressões circulares onde a grama é mais verde-escura ou onde afloram seixos avermelhados no solo branco.',
+        rescueAndStabilization: 'Içamento por tripé de bastões apoiado no giz firme externo ao cilindro.',
+        icon: '🕳️🌿',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'white_chalk_albedo_glare_and_sea_fret_cliff_edge_vertigo') {
+      hazard = {
+        hazardTitle: 'Cegueira Branca de Albedo do Giz e Nevoeiro Costeiro (Sea Fret)',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        chalkCliffRisk: 'Quando o nevoeiro marinho branco-leitoso envolve a falésia de giz igualmente branca, o horizonte, o céu e o abismo de 90 metros fundem-se em um vazio óptico sem contraste nem sombra (whiteout costeiro); um passo desorientado leva diretamente ao precipício vertical (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Arremessar pedras escuras de sílex à frente para marcar o chão real e progredir encordado longe da costa.',
+        rescueAndStabilization: 'Parada imediata sentada no gramado até a dissipação da cerração marinha.',
+        icon: '🌫️👁️',
+        color: '#cbd5e1'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampChalkCliffFlintPlatformStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'dry_chalk_coombe_valley_sheltered_turf_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Vale Seco Periglacial no Giz (Dry Chalk Coombe)',
+      chalkCliffAndCampSafety: 'Acampamento instalado no fundo gramado de um vale em anfiteatro esculpido no giz que não possui rio superficial porque toda a chuva infiltra instantaneamente na rocha porosa.',
+      chalkCliffTrenchAndWatch: 'Fundo de vale 100% imune a enxurradas, seco e abrigado dos vendavais marítimos pelas colinas arredondadas.',
+      campRestAndSafetyGuards: 'Garante descanso longo tranquilo e seco para toda a comitiva.',
+      icon: '⛺🏞️',
+      color: '#e2e8f0'
+    };
+
+    if (dt === 'flint_nodule_spark_and_pyrite_marcasite_firestarter_station') {
+      tech = {
+        defenseTitle: 'Oficina de Pederneira de Sílex e Nódulos de Marcassita para Fogo Instantâneo',
+        chalkCliffAndCampSafety: 'As falésias de giz fornecem em abundância tanto o melhor sílex negro quanto nódulos radiados de sulfeto de ferro (marcassita) para produzir faíscas quentes mesmo sob umidade marinha.',
+        chalkCliffTrenchAndWatch: 'Permite acender fogueiras e tochas rapidamente sem gastar recursos mágicos ou pederneiras da mochila.',
+        campRestAndSafetyGuards: 'Permite também lascar pontas de flecha e lâminas improvisadas de emergência.',
+        icon: '🔥🪨',
+        color: '#f59e0b'
+      };
+    } else if (dt === 'basal_marl_band_chalk_aquifer_filtered_spring') {
+      tech = {
+        defenseTitle: 'Fonte Cristalina no Contato do Aquífero de Giz com a Camada de Marga',
+        chalkCliffAndCampSafety: 'Coleta de água doce que brota na base da encosta onde o giz permeável encontra uma camada impermeável de marga argilosa.',
+        chalkCliffTrenchAndWatch: 'O giz funciona como um filtro microporoso natural de centenas de metros, entregando água pura e rica em cálcio.',
+        campRestAndSafetyGuards: 'Abastece os cantis do grupo antes da subida para os platôs secos.',
+        icon: '💧🪨',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'chalk_cut_white_trench_contrast_night_watch') {
+      tech = {
+        defenseTitle: 'Parapeito Escavado no Giz Branco para Contraste de Silhuetas Noturnas',
+        chalkCliffAndCampSafety: 'Remoção de uma tira de 20 centímetros de grama ao redor do bivaque expondo uma faixa branca brilhante de giz puro.',
+        chalkCliffTrenchAndWatch: 'Mesmo em noites sem lua, qualquer criatura escura que cruze a faixa branca de giz destaca-se nitidamente para o vigia.',
+        campRestAndSafetyGuards: 'Concede alerta visual imediato durante todos os turnos de sentinela.',
+        icon: '👁️⚪',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 227: DUNAS PARABÓLICAS, BACIAS DE DEFLAÇÃO E FLORESTAS FANTASMAS (D&D 5e)
   // =========================================================================
 
@@ -31492,6 +31596,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessChalkCliffFlintPlatformHazard: calcWildernessChalkCliffFlintPlatformHazard,
+    calcCampChalkCliffFlintPlatformStation: calcCampChalkCliffFlintPlatformStation,
     calcWildernessParabolicBlowoutDuneHazard: calcWildernessParabolicBlowoutDuneHazard,
     calcCampParabolicBlowoutDuneStation: calcCampParabolicBlowoutDuneStation,
     calcWildernessPillowLavaHyaloclastiteHazard: calcWildernessPillowLavaHyaloclastiteHazard,

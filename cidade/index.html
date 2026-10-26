@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessChalkCliffFlintPlatformHazard) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var cc = CartShared.calcWildernessChalkCliffFlintPlatformHazard(bKey, 'frost_weathered_chalk_headland_tension_crack_slab_fall');
+        return '<div class="clp-chalk-cliff-flint-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,24,32,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(226,232,240,0.35);font-size:8px;color:#f8fafc;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cc.color + ';margin-bottom:2px;">' + cc.icon + ' ' + cc.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Falésias de Giz e Nódulos de Sílex:</b> ' + cc.chalkCliffRisk + ' (CD ' + cc.saveDC + ' [' + cc.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#cbd5e1;margin-top:1px;">• <b>Mitigação:</b> ' + cc.pioneerMitigation + ' · <i>Estabilização: ' + cc.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampChalkCliffFlintPlatformStation) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var cs = CartShared.calcCampChalkCliffFlintPlatformStation(bKey, 'dry_chalk_coombe_valley_sheltered_turf_bivouac');
+        return '<div class="clp-chalk-cliff-flint-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(14,20,28,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(148,163,184,0.3);font-size:8px;color:#f8fafc;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Vale Seco no Giz (Coombe):</b> ' + cs.chalkCliffAndCampSafety + ' · <b>Defesa:</b> ' + cs.chalkCliffTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#94a3b8;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessParabolicBlowoutDuneHazard) return '';
         var bKey = (biome && biome.key) || 'coastal';
         var pb = CartShared.calcWildernessParabolicBlowoutDuneHazard(bKey, 'wind_scoured_blowout_trough_slipface_rotational_slump');
