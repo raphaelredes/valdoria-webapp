@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 285: PLATÔS DE TUYA VULCÂNICA E MESAS SUBGLACIAIS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessSubglacialTuyaHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var ht = (hazardType || 'palagonite_talus_shear_rotational_slump').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desabamento Rotacional em Talude de Palagonita Friável',
+      saveDC: 15,
+      saveType: 'Destreza',
+      tuyaRisk: 'Os flancos verticais de 300 metros da tuya são constituídos por tufos vítreos de palagonita intemperizada e brechas de hialoclastito que repousam em ângulo crítico; a passagem de montarias e aventureiros na trilha estreita de meia-encosta rompe uma camada friável, disparando um desmoronamento maciço de blocos angulosos com 4d8 de concussão e queda no abismo glacial (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores sondando a coesão das cinzas consolidadas com martelos de geólogo e contornando a montanha por esporões de lavas em almofada estáveis (Sobrevivência ou Investigação CD 14).',
+      rescueAndStabilization: 'Ancoragem imediata de cabos estáticos em fraturas duras e imobilização de fraturas por trauma compressivo com talas ortopédicas (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🏔️',
+      color: '#f59e0b'
+    };
+
+    if (ht === 'subglacial_moat_crevasse_marginal_plunge') {
+      hazard.hazardTitle = 'Queda em Fosso Periférico Glacial de Derretimento';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Destreza';
+      hazard.tuyaRisk = 'O calor geotérmico residual das paredes da tuya derrete a borda do manto de gelo circundante, criando um fosso abissal oculto de 40 metros coberto por pontes finas de neve fofa; a ruptura súbita da ponte precipita o explorador entre a parede de rocha quente e o paredão de gelo azul com 3d8 de concussão e risco de esmagamento criogênico (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Sondagem sistemática com varas de avalanche de 3 metros e travessia amarrada em cordada tripla (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Montagem rápida de tripé de resgate com talha mecânica e aquecimento imediato com mantas térmicas (Atletismo CD 14 ou Medicina CD 13).';
+    } else if (ht === 'caprock_columnar_overhang_keystone_topple') {
+      hazard.hazardTitle = 'Tombamento de Colunas Basálticas da Borda da Capa';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.tuyaRisk = 'A capa de basalto prismático horizontal que coroa a tuya projeta-se em beirais suspensos sobre o talude inferior; o gelo intersticial nas juntas colunares expande-se por congelamento e desaloja prismas hexagonais de 5 toneladas que despencam em cascata sobre as rampas de acesso com 3d10 de concussão (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Observação ótica de fendas de tração na borda superior e marcha acelerada fora da linha de prumo dos beirais (Percepção CD 13).';
+      hazard.rescueAndStabilization = 'Alavancamento com barras de ferro para libertar membros soterrados e sutura de lacerações (Atletismo CD 14 ou Medicina CD 13).';
+    } else if (ht === 'hyaloclastite_glass_shard_windstorm_flurry') {
+      hazard.hazardTitle = 'Tempestade de Lascas Vítreas de Hialoclastito';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Constituição';
+      hazard.tuyaRisk = 'Ventos fortes canalizados pelas escarpas verticais da montanha arrancam esquírolas microscópicas de vidro basáltico e sideromelano das brechas friáveis; a nuvem abrasiva rasga roupas, inflige 2d6 de dano cortante e penetra nos olhos e garganta, exigindo salvaguarda de Constituição CD 14 para não sofrer cegueira temporária por 1 hora e tosse sufocante (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Uso de máscaras de couro fechadas com visores de cristal e proteção integral de peles seladas (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Lavagem oftálmica copiosa com água destilada e repouso em tendas herméticas (Medicina CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampSubglacialTuyaStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var dt = (defenseType || 'tuya_summit_table_fortress_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque Fortaleza no Platô Superior da Tuya',
+      tuyaAndCampSafety: 'O acampamento é instalado na mesa plana de basalto subaéreo no cume da tuya, 300 metros acima da geleira circundante; o platô possui piso sólido horizontal indeformável e drenagem perfeita imune a enxurradas e avalanches (DMG p. 111).',
+      tuyaAndWatch: 'As falésias verticais em 360 graus tornam o cume inacessível a qualquer criatura sem asas, transformando a única garganta de escalada em um afunilamento guardado por uma sentinela com vantagem em Percepção.',
+      campRestAndSafetyGuards: 'Descanso inexpugnável em ninho de águia isolado do terreno hostil dos ermos glaciais.',
+      icon: '🛡️',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'perched_snowmelt_basalt_hollow_cistern') {
+      defense.defenseTitle = 'Bacia Cisterna de Degelo em Cavidade Basáltica';
+      defense.tuyaAndCampSafety = 'Depressões naturais na rocha basáltica negra aquecida pela insolação acumulam água de degelo pura, filtrada pelo leito rochoso e aquecida a 15°C durante o dia (PHB p. 150).';
+      defense.tuyaAndWatch = 'Garante suprimento de até 35 litros diários de água potável límpida para toda a comitiva sem esforço de derretimento artificial de gelo.';
+      defense.campRestAndSafetyGuards = 'Hidratação contínua e conservação do estoque de lenha e óleo para o grupo.';
+    } else if (dt === 'hexagonal_column_dry_stacked_rampart') {
+      defense.defenseTitle = 'Baluarte de Colunas Hexagonais de Basalto';
+      defense.tuyaAndCampSafety = 'Prismas caídos de diabásio e basalto são empilhados em meia-lua na entrada da rampa de acesso, formando um parapeito de 1,6 metro de espessura (PHB p. 185).';
+      defense.tuyaAndWatch = 'Concede cobertura total (+5 na CA) contra arqueiros inimigos e impede qualquer investida física contra o perímetro do acampamento.';
+      defense.campRestAndSafetyGuards = 'Barreira maciça e inabalável garantindo segurança noturna para sentinelas e repouso de toda a comitiva.';
+    } else if (dt === 'palagonite_bench_warm_shelter_niche') {
+      defense.defenseTitle = 'Nicho Abrigado em Bancada de Palagonita com Calor Geotérmico';
+      defense.tuyaAndCampSafety = 'Cavidades naturais na meia-encosta da tuya aquecidas por condução magmática fóssil a 22°C que cortam o vento polar externo (DMG p. 111).';
+      defense.tuyaAndWatch = 'Fornece dormitório quente e protegido que elimina qualquer risco de hipotermia sem produzir chamas visíveis no horizonte.';
+      defense.campRestAndSafetyGuards = 'Sono reparador com restauração integral de pontos de vida e eliminação de fadiga nos ermos gelados.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 284: FISSURAS ERUPTIVAS BASÁLTICAS E CORTINAS DE FOGO (D&D 5e)
   // =========================================================================
 
@@ -36916,6 +36996,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessSubglacialTuyaHazard: calcWildernessSubglacialTuyaHazard,
+    calcCampSubglacialTuyaStation: calcCampSubglacialTuyaStation,
     calcWildernessBasalticEruptiveFissureHazard: calcWildernessBasalticEruptiveFissureHazard,
     calcCampBasalticEruptiveFissureStation: calcCampBasalticEruptiveFissureStation,
     calcWildernessGlacialMoulinHazard: calcWildernessGlacialMoulinHazard,
