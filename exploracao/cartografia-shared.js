@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 276: CAMPOS DE LAVA PĀHOEHOE, TÚMULOS E TUBOS DE LAVA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessPahoehoeLavaTubeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var ht = (hazardType || 'skylight_roof_collapse_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda em Claraboia Oculta de Tubo de Lava',
+      saveDC: 15,
+      saveType: 'Destreza',
+      pahoehoeRisk: 'A crosta basáltica cordada de aparência sólida oculta o teto fino e oco de um tubo de lava subterrâneo com 12 metros de profundidade; a passagem de aventureiros e animais de carga provoca o colapso súbito da claraboia, exigindo salvaguarda de Destreza CD 15 para agarrar as bordas de rocha ou despencar no abismo escuro sofrendo 4d6 de concussão pela queda sobre tálus de basalto afiado mais 1d6 de dano de fogo por cascalho ainda incandescente (DMG p. 110, 246; PHB p. 183).',
+      pioneerMitigation: 'Batedores sondando o terreno à frente com pontões de ferro e ouvindo a ressonância oca dos passos na crosta vulcânica (Sobrevivência ou Percepção CD 14).',
+      rescueAndStabilization: 'Descida e ancoragem de cordas de cânhamo reforçadas e imobilização de fraturas com talas leves de campanha (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🌋',
+      color: '#ea580c'
+    };
+
+    if (ht === 'ropy_crust_crevasse_razor_spall') {
+      hazard.hazardTitle = 'Fraturas Cortantes em Crosta de Lava Cordada';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.pahoehoeRisk = 'As cristas entrelaçadas de rocha pāhoehoe se assemelham a cordas petrificadas cobertas por uma película delgada de vidro vulcânico negro extremamente afiado; escorregar ou tropeçar nas dobras basálticas estilhaça a casca vítrea em lascas navalhadas que rasgam botas e perneiras, causando 2d8 de dano cortante e desvantagem em testes de Destreza por sangramento até que seja realizado curativo de primeiros socorros (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Marcha cautelosa com botas reforçadas com solado de couro duplo e cabos estáticos de apoio mútuo (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Extração manual de agulhas de vidro vulcânico e aplicação de ataduras compressivas com óleo balsâmico (Medicina CD 13).';
+    } else if (ht === 'lava_tumulus_magmatic_gas_burp') {
+      hazard.hazardTitle = 'Explosão de Gás e Vapor em Túmulo de Lava Intumescido';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Constituição';
+      hazard.pahoehoeRisk = 'Dormitórios elípticos de lava intumescida (tumuli) acumulam bolsas seladas de dióxido de enxofre e vapor superaquecido sob pressão magmática; a quebra da cúpula estala a rocha expelindo uma nuvem asfixiante tóxica a 90°C sobre a trilha, exigindo salvaguarda de Constituição CD 15 ou sofrer 3d6 de dano de veneno e condição Envenenado por 1 hora por inalação ácida (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Detecção prévia de eflorescências amareladas de enxofre nas fraturas e desvio a barlavento das cúpulas de tumuli (Natureza ou Percepção CD 14).';
+      hazard.rescueAndStabilization = 'Lavagem das vias aéreas com vinagre diluído e descanso em ar fresco desimpedido (Medicina CD 13).';
+    } else if (ht === 'sulfur_stalactite_cave_ceiling_snap') {
+      hazard.hazardTitle = 'Ruptura de Tubos e Espeleotemas Basálticos de Teto';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.pahoehoeRisk = 'Ao transitar por galerias de lava semi-abertas, estalactites gotejadas de lava e agulhas de sulfato suspensas no teto se soltam com as vibrações sonoras e passos da comitiva, despencando como flechas de basalto pesado com 2d10 de perfuração sobre os exploradores (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Avanço silencioso em formação dispersa protegida sob escudos erguidos em cobertura superior (Sobrevivência ou Furtividade CD 13).';
+      hazard.rescueAndStabilization = 'Remoção cirúrgica de pontas de rocha encravadas e sutura de perfurações profundas (Medicina CD 14).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampPahoehoeLavaTubeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var dt = (defenseType || 'lava_tube_thermal_cavern_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque Subterrâneo em Galeria de Tubo de Lava',
+      pahoehoeAndCampSafety: 'O acampamento é instalado no interior seco e plano de um tubo de lava desobstruído com paredes circulares de basalto espesso, imune a tempestades de cinza, ventos árticos e intempéries da superfície (DMG p. 111).',
+      pahoehoeLavaAndWatch: 'A entrada estreita sob a claraboia colapsada restringe qualquer avanço hostil a um afunilamento vertical facilmente guardado por uma única sentinela com vantagem em testes de Percepção (Sabedoria).',
+      campRestAndSafetyGuards: 'Descanso pleno protegido de predadores terrestres, com temperatura interna estável e sem fumaça visível na superfície.',
+      icon: '🛡️',
+      color: '#ea580c'
+    };
+
+    if (dt === 'inflated_tumulus_observation_redoubt') {
+      defense.defenseTitle = 'Reduto de Vigília no Topo de Túmulo de Lava Solidificado';
+      defense.pahoehoeAndCampSafety = 'A cúpula intumescida e sólida de um tumulus basáltico ergue o bivaque 6 metros acima do campo de lavas circundante, com piso rígido que barra animais peçonhentos e escorpiões da cinza (DMG p. 111).';
+      defense.pahoehoeLavaAndWatch = 'Posto de vigília elevado que descortina toda a planície basáltica a 2 milhas de alcance, com parapeitos naturais de cristas pāhoehoe que garantem meia cobertura (+2 na CA) aos arqueiros.';
+      defense.campRestAndSafetyGuards = 'Vigilância panorâmica impecável e terreno hostil ao redor que desacelera invasores noturnos.';
+    } else if (dt === 'basalt_tube_condensation_seep_cistern') {
+      defense.defenseTitle = 'Coletor de Condensação em Paredes Basálticas do Tubo';
+      defense.pahoehoeAndCampSafety = 'A umidade do ar subterrâneo condensa nas paredes frias e vitrificadas do tubo de lava, escorrendo em canaletas naturais até uma cisterna de pedra lavada (PHB p. 150).';
+      defense.pahoehoeLavaAndWatch = 'Gera até 15 litros diários de água mineral fresca e límpida, abastecendo cantis e caldeirões da comitiva sem necessidade de arriscar batedores no deserto exterior.';
+      defense.campRestAndSafetyGuards = 'Hidratação contínua e segura durante o descanso longo nos ermos.';
+    } else if (dt === 'residual_geothermal_cooking_hearth') {
+      defense.defenseTitle = 'Fosso Geotérmico com Leito Térmico para Refeições e Aquecimento';
+      defense.pahoehoeAndCampSafety = 'Fraturas basais profundas que irradiam calor residual da câmara magmática a 60°C são aproveitadas para forrar o bivaque e cozer rações sem necessidade de acender fogueiras que emitam fumaça (PHB p. 185).';
+      defense.pahoehoeLavaAndWatch = 'Elimina chamas e odores delatores no horizonte noturno, impedindo que patrulhas hostis localizem o acampamento pela fumaça.';
+      defense.campRestAndSafetyGuards = 'Sono revigorante com calor térmico radiante e segurança contra hipotermia noturna.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 275: SOLEIRAS DE DIABÁSIO E ESCARPAS EM PALISADE (D&D 5e)
   // =========================================================================
 
@@ -36196,6 +36276,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessPahoehoeLavaTubeHazard: calcWildernessPahoehoeLavaTubeHazard,
+    calcCampPahoehoeLavaTubeStation: calcCampPahoehoeLavaTubeStation,
     calcWildernessDiabasePalisadeHazard: calcWildernessDiabasePalisadeHazard,
     calcCampDiabasePalisadeStation: calcCampDiabasePalisadeStation,
     calcWildernessLamprophyreDikeHazard: calcWildernessLamprophyreDikeHazard,
