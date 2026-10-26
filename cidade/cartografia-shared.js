@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 288: PAVIMENTO DESÉRTICO EM MOSAICO DE REG E VERNIZ DO DESERTO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessDesertPavementHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'ventifact_sandblast_abrasion').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Abrasão Eólica em Ventifactos e Tempestade Rasteira',
+      saveDC: 15,
+      saveType: 'Destreza',
+      pavementRisk: 'Ventos rasantes de 90 km/h canalizam grãos de sílica dura contra o pavimento de ventifactos facetados no nível do solo; a esteira de areia atua como jato abrasivo pontiagudo que rasga polainas de couro, fura odres e inflige 3d6 de dano perfurante e cortante na comitiva (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores posicionando escudos pesados rente ao solo na vanguarda e envolvendo calçados e patas de montarias em bandagens duplas de lona encerada (Sobrevivência ou Atletismo CD 14).',
+      rescueAndStabilization: 'Sutura rápida de lacerações dérmicas, extração de esquírolas minerais e vedação de cantis com resina de cacto (Medicina CD 13).',
+      icon: '🏜️',
+      color: '#eab308'
+    };
+
+    if (ht === 'slick_desert_varnish_glide') {
+      hazard.hazardTitle = 'Deslizamento Traiçoeiro em Verniz do Deserto Orvalhado';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.pavementRisk = 'O orvalho da madrugada umedece a película vítrea de óxidos de manganês e ferro que recobre os seixos intertravados do reg; o piso rochoso torna-se tão escorregadio quanto gelo negro, exigindo salvaguarda de Destreza CD 14 para não sofrer quedas violentas com 2d8 de concussão e torção de ligamentos (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Uso de bastões de marcha com pontas de ferro e marcha compassada evitando acelerações bruscas sobre o mosaico polido (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Aplicação de talas ortopédicas em tornozelos luxados e massagem de aquecimento para restaurar mobilidade (Medicina CD 13).';
+    } else if (ht === 'thermal_fracture_rock_shatter') {
+      hazard.hazardTitle = 'Estilhaçamento Explosivo por Choque Térmico';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Constituição';
+      hazard.pavementRisk = 'A queda térmica brusca de 45°C para o congelamento sob o céu limpo dispara contração violenta nos blocos de basalto e sílex do pavimento; os seixos explodem espontaneamente em lascas cortantes que voam em estilhaços com 2d6 de dano cortante e perfuração de membros inferiores (PHB p. 183; DMG p. 110).';
+      hazard.pioneerMitigation = 'Uso de caneleiras reforçadas com placas de metal e dispersão tática da linha de marcha evitando aglomeração (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Desinfecção imediata com bálsamo adstringente e cauterização de sangramentos periféricos (Medicina CD 13).';
+    } else if (ht === 'mirage_heat_haze_disorientation') {
+      hazard.hazardTitle = 'Miragem Reverberante e Ofuscamento em Verniz Negro';
+      hazard.saveDC = 13;
+      hazard.saveType = 'Constituição';
+      hazard.pavementRisk = 'A carapaça negra de manganês do reg absorve calor solar maciço e projeta colunas de ar trêmulas que encobrem depressões e geram miragens ilusórias; aventureiros sofrem cegueira luminosa temporária e perdem pontos de orientação sob risco de 1 nível de exaustão (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Uso de viseiras de fenda de madeira ou osso polido e navegação rigorosa por sombras solares e ventifactos orientados (Natureza ou Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Compressas umedecidas nos olhos com infusões de ervas e descanso absoluto sob toldos de proteção solar (Medicina CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampDesertPavementStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'varnished_reg_stone_anchor_camp').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque Ancorado em Mosaico de Reg Intertravado',
+      pavementAndCampSafety: 'O piso do acampamento é estruturado diretamente sobre a couraça de seixos do reg intertravados, que forma uma plataforma horizontal compacta indeformável; estacas de ferro são calçadas nas juntas da carapaça, garantindo fixação rígida imune a tempestades de areia e solo 100% livre de peçonhas escavadoras (DMG p. 111).',
+      pavementAndWatch: 'A ausência total de vegetação alta e a rigidez do pavimento plano oferecem visão de 360 graus até o horizonte, concedendo vantagem em testes de Percepção à sentinela contra aproximações furtivas.',
+      campRestAndSafetyGuards: 'Repouso estável e seguro sobre piso impermeável, eliminando a infiltração de areia em sacos de dormir e equipamentos da comitiva.',
+      icon: '🏕️',
+      color: '#eab308'
+    };
+
+    if (dt === 'sub_pavement_silt_thermal_hearth') {
+      defense.defenseTitle = 'Leito Aquecido em Silte Sub-Pavimento Aerado';
+      defense.pavementAndCampSafety = 'Remoção parcial de placas do mosaico superficial para acessar o horizonte de silte e argila aerada subjacente; brasas e pedras aquecidas são enterradas para gerar irradiação térmica contínua durante a noite glacial do deserto (PHB p. 150).';
+      defense.pavementAndWatch = 'Mantém o abrigo a 18°C constante mesmo com temperaturas externas de 0°C, restaurando +1 dado de vida adicional aos aventureiros durante o descanso longo.';
+      defense.campRestAndSafetyGuards = 'Eliminação do risco de hipotermia noturna e descanso revigorante para o grupo.';
+    } else if (dt === 'ventifact_cairn_survey_marker') {
+      defense.defenseTitle = 'Marco de Vigília em Moledro de Ventifactos Facetados';
+      defense.pavementAndCampSafety = 'Moledro cônico de 2 metros erguido com ventifactos angulares e seixos de verniz negro pesados, servindo de parapeito de vigia e ponto de triangulação inabalável (PHB p. 185).';
+      defense.pavementAndWatch = 'Concede cobertura três-quartos (+5 na CA e +5 em salvaguardas de Destreza) contra ventanias de areia e arqueiros inimigos na planície aberta.';
+      defense.campRestAndSafetyGuards = 'Torre de vigia e baluarte sólido que protege o perímetro de repouso dos viajantes.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 287: VENTOS CATABÁTICOS DE FÖHN E DESSECAMENTO DE SOTAVENTO (D&D 5e)
   // =========================================================================
 
@@ -37146,6 +37221,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessDesertPavementHazard: calcWildernessDesertPavementHazard,
+    calcCampDesertPavementStation: calcCampDesertPavementStation,
     calcWildernessFoehnWindHazard: calcWildernessFoehnWindHazard,
     calcCampFoehnWindStation: calcCampFoehnWindStation,
     calcWildernessKarstDryValleyHazard: calcWildernessKarstDryValleyHazard,

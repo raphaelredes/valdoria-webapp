@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T22:52:08Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T22:56:39Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessDesertPavementHazard) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var dp = CartShared.calcWildernessDesertPavementHazard(bKey, 'ventifact_sandblast_abrasion');
+        return '<div class="clp-desert-pavement-card" style="margin:4px 0 6px;text-align:left;background:rgba(36,32,10,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(234,179,8,0.35);font-size:8px;color:#fefce8;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + dp.color + ';margin-bottom:2px;">' + dp.icon + ' ' + dp.hazardTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Pavimento Desértico e Mosaico de Reg:</b> ' + dp.pavementRisk + ' (CD ' + dp.saveDC + ' [' + dp.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#fef08a;margin-top:1px;">• <b>Mitigação:</b> ' + dp.pioneerMitigation + ' · <i>Estabilização: ' + dp.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampDesertPavementStation) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var dp = CartShared.calcCampDesertPavementStation(bKey, 'varnished_reg_stone_anchor_camp');
+        return '<div class="clp-desert-pavement-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,26,8,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(202,138,4,0.3);font-size:8px;color:#fefce8;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + dp.color + ';margin-bottom:2px;">' + dp.icon + ' ' + dp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>' 
+          + '  <div>• <b>Bivaque em Pavimento Desértico:</b> ' + dp.pavementAndCampSafety + ' · <b>Defesa:</b> ' + dp.pavementAndWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#fef08a;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + dp.campRestAndSafetyGuards + '</div>' 
           + '</div>';
       })()
     + (function(){
