@@ -16121,6 +16121,130 @@
     };
   }
 
+  // === calcWildernessAbyssalCenoteAndTravertineHazard (Dolinas Abismais, Pontes de Travertino e Sifões - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessAbyssalCenoteAndTravertineHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'cenote_lip_moss_slip_fall').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda e Escorregão em Borda Úmida de Cenote',
+      saveDC: 15,
+      saveType: 'Destreza',
+      abyssalCenoteRiskAndTravertine: 'Borda calcária recoberta por limo escorregadio pendendo sobre abismo vertical de 25 metros; queda iminente causando 4d6 de dano contundente a menos que ancorado (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam encordoados com pítons de ferro forjado e instalam cabos de corrimão antes da aproximação do grupo.',
+      rescueAndStabilization: 'Içamento por roldana tripla com alça torácica acolchoada e contenção de fraturas com talas de cedro.',
+      icon: '🕳️⚠️',
+      color: '#0284c7'
+    };
+
+    if (ht === 'travertine_natural_bridge_crumble') {
+      hazard = {
+        hazardTitle: 'Desabamento de Ponte Natural de Travertino',
+        saveDC: 14,
+        saveType: 'Destreza',
+        abyssalCenoteRiskAndTravertine: 'Arco calcário suspenso oco com espessura delgada que estala sob carga pesada; desmoronamento súbito e soterramento parcial por lajes.',
+        pioneerMitigation: 'Sondagem acústica da ponte com maça de ferro para testar oco e passagem espaçada em fila indiana.',
+        rescueAndStabilization: 'Extração rápida de membros sob blocos usando alavancas de freixo e sutura de cortes cortantes.',
+        icon: '🌉💥',
+        color: '#d97706'
+      };
+    } else if (ht === 'epikarst_siphon_vortex_whirlpool') {
+      hazard = {
+        hazardTitle: 'Vórtice de Sucção em Sifão de Drenagem Cárstica',
+        saveDC: 14,
+        saveType: 'Força',
+        abyssalCenoteRiskAndTravertine: 'Forte corrente subterrânea que engole as águas da dolina gerando redemoinho violento capaz de arrastar embarcações e exploradores.',
+        pioneerMitigation: 'Navegação por linhas fixas na margem e boias sinalizadoras delimitando a zona de arraste do sifão.',
+        rescueAndStabilization: 'Arremesso de cabos com boias de cortiça e tração mecânica a partir de ancoragens secas.',
+        icon: '🌀🌊',
+        color: '#0ea5e9'
+      };
+    } else if (ht === 'chasm_bat_colony_guano_effluvium') {
+      hazard = {
+        hazardTitle: 'Enxame de Morcegos e Eflúvio Tóxico de Guano',
+        saveDC: 13,
+        saveType: 'Constituição',
+        abyssalCenoteRiskAndTravertine: 'Revoada ensurdecedora ao pôr do sol associada a acúmulo de vapores amoniacais nas profundezas do cenote; asfixia temporária e pânico.',
+        pioneerMitigation: 'Uso de tochas sulfurosas que dispersam os animais e lenços embebidos em óleo de hortelã.',
+        rescueAndStabilization: 'Retirada rápida para ar fresco na borda e inalações de vapor de água doce purificada.',
+        icon: '🦇☣️',
+        color: '#9333ea'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      abyssalCenoteRiskAndTravertine: hazard.abyssalCenoteRiskAndTravertine,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Abismos e Terreno Cárstico) / PHB p. 182-183 (Marcha e Quedas) / XGE p. 78-83 (Geologia)'
+    };
+  }
+
+  // === calcCampAbyssalCenoteShelfBivouacAndCableBridge (Balcões em Cenote, Pontes de Cabos e Condensadores - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampAbyssalCenoteShelfBivouacAndCableBridge(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'cenote_mid_wall_shelf_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Balcão Suspenso a Meia-Parede de Cenote',
+      cenoteAnchorageAndChasmSafety: 'Plataforma natural de calcário a 12 metros de profundidade no abismo, alcançada exclusivamente por escada de corda recolhível.',
+      chasmShieldingAndCampSecurity: 'Totalmente imune a predadores terrestres, emboscadas de solo e tempestades de superfície.',
+      campRestAndSafetyGuards: 'Assegura repouso longo ininterrupto para a comitiva com vigilância em ângulo de 360 graus para o poço.',
+      icon: '🕳️⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'karst_rock_anchor_cabled_span') {
+      tech = {
+        defenseTitle: 'Passadiço Suspenso de Três Cabos com Pítons de Expansão',
+        cenoteAnchorageAndChasmSafety: 'Vigas de freixo amarradas em cabos trançados de aço cravados com ancoragens de expansão nas duas bordas da dolina.',
+        chasmShieldingAndCampSecurity: 'Permite circulação rápida de patrulhas sem necessidade de contornar quilômetros de abismos perigosos.',
+        campRestAndSafetyGuards: 'Interliga postos de sentinela avançados e oferece rota de evacuação imediata em caso de alarme.',
+        icon: '🌉🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'chasm_mist_condenser_mesh') {
+      tech = {
+        defenseTitle: 'Rede Coletora de Névoa de Abismo em Tela de Cânhamo',
+        cenoteAnchorageAndChasmSafety: 'Malha permeável estendida sobre a corrente ascendente de vapor da caverna subterrânea.',
+        chasmShieldingAndCampSecurity: 'Condensa 8 litros diários de água mineral cristalina diretamente da umidade do abismo.',
+        campRestAndSafetyGuards: 'Abastece todos os cantis e tachos da comitiva sem necessidade de descida arriscada até o fundo do cenote.',
+        icon: '💧🕸️',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'retractable_pulley_lift_cradle') {
+      tech = {
+        defenseTitle: 'Guincho Articulado com Cesto de Içamento e Trava de Segurança',
+        cenoteAnchorageAndChasmSafety: 'Braço mecânico com roldana tripla ancorado na rocha sã que transporta fardos pesados e feridos com leveza.',
+        chasmShieldingAndCampSecurity: 'Evita esforços desnecessários na subida de suprimentos e impede quedas durante a estiva noturna.',
+        campRestAndSafetyGuards: 'Garante operação logística suave e rápida de montagem e desmontagem do bivaque.',
+        icon: '🏗️🧺',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      cenoteAnchorageAndChasmSafety: tech.cenoteAnchorageAndChasmSafety,
+      chasmShieldingAndCampSecurity: tech.chasmShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Paredões e Água) / PHB p. 150 (Kits de Escalada) / XGE p. 78-83 (Engenharia Cárstica)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -17964,6 +18088,8 @@
     calcCampCoastalDuneFascineBarrierAndDewStation: calcCampCoastalDuneFascineBarrierAndDewStation,
     calcWildernessStiltRootMangroveHazard: calcWildernessStiltRootMangroveHazard,
     calcCampStiltRootMangrovePlatformAndDistillerStation: calcCampStiltRootMangrovePlatformAndDistillerStation,
+    calcWildernessAbyssalCenoteAndTravertineHazard: calcWildernessAbyssalCenoteAndTravertineHazard,
+    calcCampAbyssalCenoteShelfBivouacAndCableBridge: calcCampAbyssalCenoteShelfBivouacAndCableBridge,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
