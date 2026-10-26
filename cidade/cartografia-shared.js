@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 189: VALES CÁRSTICOS CEGOS DE RESSURGÊNCIA E CAVERNAS DE SIFÃO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessVauclusianSiphonHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'vauclusian_artesian_flash_outburst_surge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Jorro Súbito de Ressurgência Vauclusiana por Pressão Hidrostática',
+      saveDC: 15,
+      saveType: 'Força',
+      vauclusianRisk: 'Tempestade distante nos platôs superiores sobrecarrega a rede de condutos subterrâneos e dispara uma coluna de água gelada pelo poço ascendente da nascente vauclusiana; o nível do rio sobe 3 metros em minutos varrendo o vale cego com 3d8 de concussão (DMG p. 110, 201; PHB p. 182-183).',
+      pioneerMitigation: 'Observação constante da turbidez da nascente e marcha pela cornija calcária a 6 metros acima da calha de vazão.',
+      rescueAndStabilization: 'Ancoragem de cabo transversal entre estalagmites de margem e aquecimento imediato dos sobreviventes.',
+      icon: '⛲🌊',
+      color: '#0284c7'
+    };
+
+    if (ht === 'flooded_siphon_phreatic_loop_entrapment') {
+      hazard = {
+        hazardTitle: 'Aprisionamento em Sifão Freático Inundado com Turvação de Silte',
+        saveDC: 15,
+        saveType: 'Constituição',
+        vauclusianRisk: 'Trecho de galeria cárstica totalmente submerso onde o teto de calcário mergulha abaixo do lençol freático; o movimento das nadadeiras ou botas levanta nuvem opaca de argila de descalcificação zerando a visibilidade e induzindo asfixia e 2d6 de dano de frio (DMG p. 201; PHB p. 183).',
+        pioneerMitigation: 'Uso obrigatório de carretilha com cabo-guia tensionado (linha de Ariadne) marcado com setas táteis de couro na direção da saída.',
+        rescueAndStabilization: 'Rebobinamento calmo pelo cabo-guia até a campânula de ar anterior e manobras de drenagem pulmonar.',
+        icon: '🤿🕳️',
+        color: '#0369a1'
+      };
+    } else if (ht === 'blind_valley_ponor_whirlpool_suction') {
+      hazard = {
+        hazardTitle: 'Vórtex de Sucção em Sumidouro de Vale Cego (Ponor Subaquático)',
+        saveDC: 15,
+        saveType: 'Força',
+        vauclusianRisk: 'Paredão terminal do vale cego onde o rio superficial desaparece integralmente por fendas estreitas entulhadas de troncos na base do penhasco; o redemoinho puxa os exploradores contra grades de rocha e galhos submersos causando 3d6 de concussão (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Contorno amplo da bacia de engolimento (ponor) utilizando passadeira suspensa cravada na parede calcária.',
+        rescueAndStabilization: 'Içamento vertical pela parede seca com polia dupla evitando a zona de sucção da base.',
+        icon: '🌀🪨',
+        color: '#1d4ed8'
+      };
+    } else if (ht === 'travertine_gour_rimstone_razor_slip') {
+      hazard = {
+        hazardTitle: 'Queda em Barragens Escalonadas de Travertino (Gours) Afiadas',
+        saveDC: 14,
+        saveType: 'Destreza',
+        vauclusianRisk: 'Diques sinuosos naturais de calcita precipitada que represam piscinas sucessivas na saída da caverna; a borda cristalina dentada é coberta por película escorregadia de cianobactérias provocando quedas severas com 2d8 de dano cortante e concussão (PHB p. 182-183).',
+        pioneerMitigation: 'Apoio de bastão ferrado no fundo plano das bacias e proibição de caminhar sobre a crista fina dos diques de calcita.',
+        rescueAndStabilization: 'Assepsia das lacerações calcárias com tintura alcoólica e imobilização de torções nos tornozelos.',
+        icon: '🪜💧',
+        color: '#0d9488'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampVauclusianSiphonStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'fossil_dry_gallery_upper_phreatic_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Galeria Fóssil Seca no Andar Freático Superior',
+      vauclusianAndCampSafety: 'Acampamento estabelecido em antigo conduto cárstico desativado situado 15 metros acima do nível atual da ressurgência, com piso plano de areia siliciosa seca e temperatura constante de 14°C.',
+      vauclusianAlarmAndWater: 'Completamente imune às cheias repentinas do sifão inferior, oferecendo teto abobadado sólido e abrigo absoluto contra intempéries externas.',
+      campRestAndSafetyGuards: 'Assegura descanso longo silencioso, térmico e protegido para todos os aventureiros e sentinelas.',
+      icon: '⛺🦇',
+      color: '#0284c7'
+    };
+
+    if (dt === 'siphon_water_level_float_bell_gauge_alarm') {
+      tech = {
+        defenseTitle: 'Alarme Hidrostático de Boia e Sinetas no Poço de Ressurgência',
+        vauclusianAndCampSafety: 'Flutuador de madeira selada posicionado na garganta do sifão ligado por cordel de linho a um carrilhão de sinetas de bronze instalado na entrada da galeria superior.',
+        vauclusianAlarmAndWater: 'Qualquer elevação de 15 centímetros no nível da água subterrânea aciona o carrilhão 20 minutos antes que a onda de cheia atinja o vale.',
+        campRestAndSafetyGuards: 'Garante tempo de sobra para recolher equipamentos nas margens baixas e mantém a guarda informada.',
+        icon: '🔔🌊',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'karst_resurgence_calcium_spring_water_cache') {
+      tech = {
+        defenseTitle: 'Bacia de Decantação de Água Cristalina da Nascente Cárstica',
+        vauclusianAndCampSafety: 'Reservatório lateral em bacia natural de travertino que capta a água filtrada pelo maciço calcário fora da turbulência central da ressurgência.',
+        vauclusianAlarmAndWater: 'Fornece suprimento ilimitado de água mineral pura e rica em bicarbonato de cálcio, excelente para hidratação e preparo de rações quentes.',
+        campRestAndSafetyGuards: 'Recupera o vigor físico dos exploradores após longas marchas subterrâneas.',
+        icon: '💧🪨',
+        color: '#0ea5e9'
+      };
+    } else if (dt === 'blind_valley_headwall_echo_sentry_post') {
+      tech = {
+        defenseTitle: 'Posto de Vigília Acústica no Anfiteatro do Paredão Cego',
+        vauclusianAndCampSafety: 'Nicho de observação escavado na meia-encosta da parede côncava de calcário que fecha o vale cego, aproveitando a acústica parabólica natural do anfiteatro rochoso.',
+        vauclusianAlarmAndWater: 'Concentra os sons do fundo do vale e da entrada da caverna, permitindo que uma única sentinela monitore todo o perímetro com visão desimpedida.',
+        campRestAndSafetyGuards: 'Concede vantagem nos testes de Percepção noturna e protege o sono da comitiva.',
+        icon: '👁️🏔️',
+        color: '#0d9488'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 188: CAMPOS DE LAGOAS COSTEIRAS DE RESTINGA E CANAIS DE MARÉ (D&D 5e)
   // =========================================================================
 
@@ -27436,6 +27540,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessVauclusianSiphonHazard: calcWildernessVauclusianSiphonHazard,
+    calcCampVauclusianSiphonStation: calcCampVauclusianSiphonStation,
     calcWildernessCoastalBarrierSpitHazard: calcWildernessCoastalBarrierSpitHazard,
     calcCampCoastalBarrierSpitStation: calcCampCoastalBarrierSpitStation,
     calcWildernessRuiniformSandstoneHazard: calcWildernessRuiniformSandstoneHazard,
