@@ -20575,6 +20575,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 167: CAMPOS DE GELEIRA DE PEDRA SUBANTÁRTICOS E SOLIFLUXÃO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessPeriglacialRockGlacierHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'solifluction_rock_lobe_shear_avalanche').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desmoronamento em Lóbulo de Solifluxão de Geleira de Pedra',
+      saveDC: 15,
+      saveType: 'Destreza',
+      rockGlacierAndPermafrostRisk: 'Frente ativa de geleira de rocha com tálus instável sobre núcleo de gelo deslizante; a camada de detritos de 2 metros se rompe sob a marcha gerando avalanche de blocos de meia tonelada com 3d8 de concussão e soterramento parcial (DMG p. 110, 190).',
+      pioneerMitigation: 'Batedores avançam com bastões de ponta de tungstênio sondando a solidez da capa rochosa e guiam a marcha exclusivamente por costilhas laterais estáticas.',
+      rescueAndStabilization: 'Remoção urgente com alavancas de ferro e cunhas de carvalho, imobilização com talas rígidas e aplicação de bálsamo anti-trauma de arnica alpina.',
+      icon: '🏔️🪨',
+      color: '#475569'
+    };
+
+    if (ht === 'interstitial_ice_crevasse_frostbite_plunge') {
+      hazard = {
+        hazardTitle: 'Queda em Fenda entre Blocos com Choque Térmico a -20°C',
+        saveDC: 15,
+        saveType: 'Constituição',
+        rockGlacierAndPermafrostRisk: 'Espaço oco de 6 metros entre blocos colossais diretamente sobre o núcleo de gelo fóssil onde o ar atinge -20°C; o explorador despenca na fenda sofrendo 2d6 de concussão e risco iminente de hipotermia grave e necrose por congelamento nas extremidades (PHB p. 183, 185).',
+        pioneerMitigation: 'Uso de calçados alpinos com cano alto forrados com pele de foca e progressão encordoada em grupos de três com espaçamento de 4 metros.',
+        rescueAndStabilization: 'Içamento rápido com laço de resgate em roldana dupla, troca imediata de luvas e botas molhadas e aquecimento com pedras tépidas envoltas em lã.',
+        icon: '❄️🕳️',
+        color: '#0284c7'
+      };
+    } else if (ht === 'permafrost_thaw_slump_mud_quagmire') {
+      hazard = {
+        hazardTitle: 'Lamaçal de Descongelamento Periglacial em Depressão Termocárstica',
+        saveDC: 14,
+        saveType: 'Força',
+        rockGlacierAndPermafrostRisk: 'Camada ativa de solo que degela sob o sol do meio-dia transformando o cascalho fino em lodo pegajoso coloidal; aprisiona botas e pernas da comitiva, drenando energia e impondo desvantagem em testes de deslocamento e fadiga acelerada.',
+        pioneerMitigation: 'Travessia durante o início da manhã antes que a radiação solar aqueça o solo e uso de raquetes de neve com aros de madeira trançada.',
+        rescueAndStabilization: 'Extração de calçados do lodo com talabartes de couro, raspagem de argila e ingestão de caldo salgado quente.',
+        icon: '⚠️🦶',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'katabatic_gale_scree_blast_abrasion') {
+      hazard = {
+        hazardTitle: 'Vendaval Catabático Polar de Fragmentos de Quartzito a 75 km/h',
+        saveDC: 14,
+        saveType: 'Destreza',
+        rockGlacierAndPermafrostRisk: 'Correntes descendentes gélidas canalizadas pelo vale em U que projetam partículas afiadas de quartzito desprendidas da geleira; laceram tecidos, fustigam o rosto e provocam 2d6 de dano cortante com cegueira temporária.',
+        pioneerMitigation: 'Uso de capuzes de couro forrados com feltro e máscaras faciais com óculos de chifre escurecido com fendas finas.',
+        rescueAndStabilization: 'Lavagem dos olhos com soro tépido estéril e aplicação de pomada cicatrizante de própolis montanhosa sobre escoriações.',
+        icon: '💨🏔️',
+        color: '#38bdf8'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampPeriglacialRockGlacierStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'static_bedrock_spur_parapet_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Esporão Rochoso Fixo Fora da Zona de Deformação Ativa',
+      rockGlacierAndCampSafety: 'Acampamento assentado em contraforte de rocha matriz imóvel a 30 metros de altura sobre a frente da geleira de pedra, totalmente imune a rastejos de solifluxão e avalanches de tálus.',
+      spurMoatAndMeltSpringBasin: 'A escarpa vertical do contraforte atua como parapeito inexpugnável contra predadores da tundra e canaliza ventos polares por cima das barracas.',
+      campRestAndSafetyGuards: 'Garante sono profundo calmo, seguro e aquecido para todos os membros do grupo, com ponto elevado de vigilância para as sentinelas.',
+      icon: '⛺🏔️',
+      color: '#475569'
+    };
+
+    if (dt === 'dry_stacked_quartzite_boulder_windbreak_bastion') {
+      tech = {
+        defenseTitle: 'Paliçada de Blocos de Quartzito Empilhados a Seco com Travas de Cunha',
+        rockGlacierAndCampSafety: 'Muralha semicircular de 1,6 metro de altura construída com lajes de quartzito encaixadas que anula completamente rajadas catabáticas e detritos eólicos.',
+        spurMoatAndMeltSpringBasin: 'Oferece cobertura defensiva superior (+5 na CA) contra ataques e impede que animais de carga fiquem expostos ao vento polar.',
+        campRestAndSafetyGuards: 'Assegura vigília protegida para as sentinelas e repouso tranquilo para a expedição sem risco de tombamento de tendas.',
+        icon: '🛡️🧱',
+        color: '#334155'
+      };
+    } else if (dt === 'subglacial_melt_spring_catchment_and_charcoal_vessel') {
+      tech = {
+        defenseTitle: 'Bacia Coletora de Surgência Subglacial com Serpentina de Degelo',
+        rockGlacierAndCampSafety: 'Captação de água pura e cristalina de degelo subglacial que brota na base do contraforte protegida de sedimentos de lama, fervida sobre braseiro de turfa fóssil.',
+        spurMoatAndMeltSpringBasin: 'Fornece 45 litros diários de água doce mineral gelada e purificada, prevenindo carência hídrica e intoxicação mineral na comitiva.',
+        campRestAndSafetyGuards: 'Mantém a hidratação e a temperatura corporal no nível ótimo de eficiência, renovando as energias dos exploradores.',
+        icon: '💧🔥',
+        color: '#0284c7'
+      };
+    } else if (dt === 'talus_rim_tripwire_bronze_bell_alarm_chain') {
+      tech = {
+        defenseTitle: 'Corrente de Alarme com Fios de Aço e Sinos Retumbantes de Bronze Polar',
+        rockGlacierAndCampSafety: 'Cabos finos fixados em pítons ao longo da crista de tálus conectados a sinos de bronze pendurados na entrada do bivaque que ressoam ao menor deslocamento na encosta.',
+        spurMoatAndMeltSpringBasin: 'Alerta precoce a 50 metros de distância eliminando qualquer possibilidade de ataque surpresa nas noites brancas polares.',
+        campRestAndSafetyGuards: 'Proporciona tranquilidade mental e sono reparador para toda a comitiva durante o pernoite.',
+        icon: '🔔🏔️',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 166: VALES EM GARGANTA COM SUMIDOUROS DE DRENAGEM CÁRSTICA E TÚNEIS FÓSSIL-SUBTERRÂNEOS (D&D 5e)
   // =========================================================================
 
@@ -25146,6 +25250,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessPeriglacialRockGlacierHazard: calcWildernessPeriglacialRockGlacierHazard,
+    calcCampPeriglacialRockGlacierStation: calcCampPeriglacialRockGlacierStation,
     calcWildernessBlindGorgePonorHazard: calcWildernessBlindGorgePonorHazard,
     calcCampBlindGorgePonorStation: calcCampBlindGorgePonorStation,
     calcWildernessCoastalRestingaSwaleHazard: calcWildernessCoastalRestingaSwaleHazard,
