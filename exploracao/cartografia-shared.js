@@ -20575,6 +20575,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 160: FIORDES FLUVIAIS EM CÂNON ESTREITO COM DESFILADEIROS SUBMERSOS E CORREDEIRAS ABISSAIS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessFluvialFiordMeanderHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'river').toLowerCase();
+    var ht = (hazardType || 'entrenched_meander_abyssal_whirlpool_undertow').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Turbilhão Abissal de Sucção em Meandro Fluvial Entalhado',
+      saveDC: 15,
+      saveType: 'Força',
+      fiordAndMeanderRisk: 'Garganta estreita de 12 metros onde o choque de correntes em curva sinuosa gera redemoinho de sucção que traga embarcações e nadadores para covões submersos de 30 metros de profundidade; provoca 3d8 de concussão e teste imediato para evitar submersão prolongada (DMG p. 110, 118).',
+      pioneerMitigation: 'Batedores sondam o fluxo da água com flutuadores de cortiça e guiam a navegação exclusivamente pelo canal de corte externo com apoio de remos de governo pesados.',
+      rescueAndStabilization: 'Arremesso de cabos flutuantes de fibra de juta com boias de bexiga curtida, içamento contra o refluxo e manobras de ressuscitação cardiorrespiratória com drenagem torácica.',
+      icon: '🌊🌀',
+      color: '#0284c7'
+    };
+
+    if (ht === 'canyon_flash_flood_debris_surge') {
+      hazard = {
+        hazardTitle: 'Cabeça d\'água Relâmpago com Detritos de Troncos a 50 km/h',
+        saveDC: 15,
+        saveType: 'Destreza',
+        fiordAndMeanderRisk: 'Onda de cheia repentina de 4 metros de altura comprimida pelo cânion que avança sem aviso prévio carregando árvores e blocos rolantes; destrói botes e arrasta aventureiros contra os desfiladeiros causando 3d10 de concussão (DMG p. 110, 246).',
+        pioneerMitigation: 'Sentinelas instaladas em postos elevados com trompas de alarme sonoro identificam o bramido da onda a montante e ordenam escalada urgente para terraços superiores.',
+        rescueAndStabilization: 'Içamento por cordas pré-instaladas para fissuras altas, contenção de hipotermia com mantas secas aquecidas em brasas e infusões quentes de alecrim.',
+        icon: '🌊🪵',
+        color: '#dc2626'
+      };
+    } else if (ht === 'hypothermic_glacial_melt_rapids_shock') {
+      hazard = {
+        hazardTitle: 'Choque Térmico em Corredeiras Glaciais de Água Descongelada',
+        saveDC: 14,
+        saveType: 'Constituição',
+        fiordAndMeanderRisk: 'Água glacial a 4°C em corredeiras violentas de classe IV que causa paralisia muscular súbita, perda de fôlego imediata e 2d6 de dano de frio com 1 nível de exaustão em caso de queda na água (PHB p. 183, 185).',
+        pioneerMitigation: 'Uso de trajes estanques de couro encerado forrados com lã espessa e coletes salva-vidas acolchoados com crina de cavalo tratada.',
+        rescueAndStabilization: 'Remoção urgente para abrigo aquecido, troca imediata de roupas molhadas, fricção vigorosa com panos secos e elixires quentes de canela.',
+        icon: '❄️🌊',
+        color: '#38bdf8'
+      };
+    } else if (ht === 'calcified_canyon_scarp_rockfall_cascade') {
+      hazard = {
+        hazardTitle: 'Desabamento de Placas Calcárias em Balanço de Encosta Fluvial',
+        saveDC: 14,
+        saveType: 'Destreza',
+        fiordAndMeanderRisk: 'Erosão contínua da base do meandro que desestabiliza cornijas calcárias superiores; blocos de 200 kg despencam verticalmente de 60 metros sobre o leito fluvial causando 2d8 de concussão.',
+        pioneerMitigation: 'Navegação rente à margem convexa de menor inclinação e uso de capacetes de ferro de abas largas com forro amortecedor de feltro.',
+        rescueAndStabilization: 'Desobstrução do leito com ganchos de tração, imobilização de fraturas ósseas e sutura asséptica de cortes na cabeça.',
+        icon: '🪨⚠️',
+        color: '#ca8a04'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampFluvialFiordMeanderStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'river').toLowerCase();
+    var dt = (defenseType || 'elevated_fossil_terrace_canyon_alcove_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Terraço Aluvial Fóssil Suspenso Acima da Cota de Cheia',
+      fiordAndMeanderSafety: 'Acampamento montado em platô natural de rocha a 12 metros de altura sobre o rio, totalmente protegido de trombas d\'água, inundações noturnas e quedas de blocos superiores.',
+      canyonMoatAndBoatMooring: 'As águas profundas do fiorde atuam como fosso impenetrável contra predadores terrestres, com ancoradouros em fendas de pedra para os botes sob vigília direta.',
+      campRestAndSafetyGuards: 'Garante descanso longo profundo, calmo e seguro para todos os membros do grupo, com acústica controlada e sentinelas bem posicionadas.',
+      icon: '⛺🏞️',
+      color: '#0284c7'
+    };
+
+    if (dt === 'cavern_meander_recess_boom_and_winch_harbor') {
+      tech = {
+        defenseTitle: 'Porto Abrigado em Caverna de Meandro com Barreira Flutuante e Guincho',
+        fiordAndMeanderSafety: 'Enseada escavada pela água no meandro abrigando os barcos atrás de troncos flutuantes amarrados com correntes que bloqueiam detritos e invasores fluviais.',
+        canyonMoatAndBoatMooring: 'Permite manutenção a seco de canoas, reparos em remos e segurança total contra correntezas de deriva durante o pernoite.',
+        campRestAndSafetyGuards: 'Protege a frota da expedição contra perdas ou danos materiais, garantindo prontidão imediata de partida.',
+        icon: '⚓🪵',
+        color: '#0369a1'
+      };
+    } else if (dt === 'canyon_wall_spring_sweetwater_spout_catchment') {
+      tech = {
+        defenseTitle: 'Captação de Bica de Surgência Doce em Paredão de Calcário',
+        fiordAndMeanderSafety: 'Nascente límpida que brota da rocha a 3 metros do chão do cânion, fornecendo água doce fresca filtrada por estratos de calcário sem resíduos de turbidez do rio lamacento.',
+        canyonMoatAndBoatMooring: 'Gera 60 litros diários de água mineral gelada e cristalina, prevenindo infecções hídricas e cólicas na comitiva.',
+        campRestAndSafetyGuards: 'Mantém a saúde estomacal e a hidratação de todos os exploradores no nível máximo de eficiência.',
+        icon: '💧🏞️',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'meander_gorge_tripwire_flare_alarm_chain') {
+      tech = {
+        defenseTitle: 'Corrente de Fios de Alarme e Sinalizadores de Pirotecnia no Desfiladeiro',
+        fiordAndMeanderSafety: 'Cabos esticados de margem a margem na entrada e saída do meandro conectados a sinos de bronze e cartuchos de fulminato que explodem em clarão ao toque de qualquer casco invasor.',
+        canyonMoatAndBoatMooring: 'Alerta precoce a 200 metros de distância eliminando 100% dos riscos de emboscadas fluviais noturnas por piratas ou monstros anfíbios.',
+        campRestAndSafetyGuards: 'Garante sono tranquilo e ininterrupto para a comitiva com vigilância automatizada de alta precisão.',
+        icon: '🔔🎇',
+        color: '#f59e0b'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 159: PLATÔS VULCÂNICOS BASÁLTICOS INVERTIDOS E ESCARPAS EM MESETA (D&D 5e)
   // =========================================================================
 
@@ -24418,6 +24522,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessFluvialFiordMeanderHazard: calcWildernessFluvialFiordMeanderHazard,
+    calcCampFluvialFiordMeanderStation: calcCampFluvialFiordMeanderStation,
     calcWildernessInvertedBasaltMesetaHazard: calcWildernessInvertedBasaltMesetaHazard,
     calcCampInvertedBasaltMesetaStation: calcCampInvertedBasaltMesetaStation,
     calcWildernessCockpitKarstBambooHazard: calcWildernessCockpitKarstBambooHazard,
