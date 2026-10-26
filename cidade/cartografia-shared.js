@@ -16989,6 +16989,130 @@
     };
   }
 
+  // === calcWildernessPalafitteRiverAndMonsoonHazard (Rios de Várzea, Enxurradas de Monção e Palafitas - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessPalafitteRiverAndMonsoonHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'river').toLowerCase();
+    var ht = (hazardType || 'monsoon_flash_flood_ram_wave').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Onda de Enxurrada Relâmpago com Detritos Flutuantes',
+      saveDC: 15,
+      saveType: 'Força',
+      palafitteRiverRiskAndMonsoon: 'Vaga repentina de 2,5 metros de água túrbida descendo a curva de meandro com troncos pesados; impacto contundente causando 3d6 e arrasto violento (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores monitoram a cor da água e o som de estalos na cabeceira, posicionando a expedição em elevações de margem convexa.',
+      rescueAndStabilization: 'Lançamento de arpéu com boia de cortiça, tração com corda de cânhamo de alta carga e alívio de hipotermia com cobertores secos.',
+      icon: '🌊🪵',
+      color: '#0284c7'
+    };
+
+    if (ht === 'oxbow_bank_undermining_collapse') {
+      hazard = {
+        hazardTitle: 'Desmoronamento de Barranco de Meandro Fluvial',
+        saveDC: 14,
+        saveType: 'Destreza',
+        palafitteRiverRiskAndMonsoon: 'Erosão submersa que solapa a margem côncava da várzea; colapso de toneladas de terra barrenta com queda no leito profundo e 2d6 contundente.',
+        pioneerMitigation: 'Manter distância de 5 metros da crista do barranco e sondagem contínua com bastões compridos de freixo.',
+        rescueAndStabilization: 'Içamento por corda com alça dupla ancorada em árvore de raiz profunda e lavagem de olhos e ouvidos com água limpa.',
+        icon: '🕳️🌊',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'submerged_snag_hull_puncture') {
+      hazard = {
+        hazardTitle: 'Tronco Submerso de Fundo Falso (Snag)',
+        saveDC: 13,
+        saveType: 'Destreza',
+        palafitteRiverRiskAndMonsoon: 'Galhos rígidos pontiagudos submersos na água turva que abrem rombos em canoas e ferem pernas de exploradores em vaus rápidos.',
+        pioneerMitigation: 'Navegação lenta a ré com sentinela de proa sinalizando obstáculos com vara graduada.',
+        rescueAndStabilization: 'Remendo rápido de botes com resina de pinho e tela de linho, contenção de hemorragias com gaze limpa.',
+        icon: '🪵⛵',
+        color: '#d97706'
+      };
+    } else if (ht === 'leech_swarm_varzea_infestation') {
+      hazard = {
+        hazardTitle: 'Enxame de Sanguessugas de Várzea em Água Parada',
+        saveDC: 13,
+        saveType: 'Constituição',
+        palafitteRiverRiskAndMonsoon: 'Centenas de sanguessugas microscópicas que penetram fendas de calçados durante travessias; sangramento oculto e fadiga com perda de dados de vida.',
+        pioneerMitigation: 'Aplicação preventiva de pasta espessa de fumo de rolo e banha sobre tornozelos e pernas antes de entrar na água.',
+        rescueAndStabilization: 'Remoção com sal mineral grosso ou lâmina aquecida em brasa, seguida de cauterização com tintura de iodo vegetal.',
+        icon: '🩸🪱',
+        color: '#dc2626'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      palafitteRiverRiskAndMonsoon: hazard.palafitteRiverRiskAndMonsoon,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Corredeiras, Inundações e Terreno Alagado) / PHB p. 182-183 (Navegação Fluvial) / XGE p. 78-83 (Carpintaria)'
+    };
+  }
+
+  // === calcCampPalafitteStiltDeckAndBoomStation (Decks Palafíticos, Amarrações e Barreiras de Tronco - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampPalafitteStiltDeckAndBoomStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'river').toLowerCase();
+    var dt = (defenseType || 'articulated_stilt_river_deck_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Deck Palafítico Suspenso sobre Estacas',
+      riverAnchorageAndStiltSafety: 'Plataforma de tábuas de cedro a 3 metros do solo fluvial erguida sobre estacas de angelim cravadas firmemente no leito.',
+      floodShieldingAndCampSecurity: 'Totalmente isolado das variações de cheia da monção, lama podre de várzea e animais carnívoros semi-aquáticos.',
+      campRestAndSafetyGuards: 'Garante sono longo seco, ventilado e confortável para os membros da comitiva com amplo campo de visão sobre o curso fluvial.',
+      icon: '🏠🌊',
+      color: '#10b981'
+    };
+
+    if (dt === 'oxbow_mooring_cleat_anchor_array') {
+      tech = {
+        defenseTitle: 'Cunhas de Amarração Fluvial Rápida com Nós de Corrediça',
+        riverAnchorageAndStiltSafety: 'Travas de madeira de lei fixadas nas vigas mestras com cabos náuticos de liberação instantânea sob puxão simples.',
+        floodShieldingAndCampSecurity: 'Permite desatracar botes de emergência em fração de segundo caso uma cheia excepcional ameace o perímetro.',
+        campRestAndSafetyGuards: 'Assegura prontidão de evacuação rápida sem risco de tripulantes ficarem presos às amarras.',
+        icon: '🪢⛵',
+        color: '#6366f1'
+      };
+    } else if (dt === 'varzea_triple_settling_silt_filter') {
+      tech = {
+        defenseTitle: 'Filtro Decantador de Três Estágios para Lama Fluvial',
+        riverAnchorageAndStiltSafety: 'Vasos cerâmicos graduados com brita de rio, areia lavada e carvão ativado que decantam e purificam a água barrenta da cheia.',
+        floodShieldingAndCampSecurity: 'Produz 12 litros diários de água doce cristalina, sem sedimentos de argila e sem bactérias de pântano.',
+        campRestAndSafetyGuards: 'Abastece integralmente todos os cantis e tachos de refeição da comitiva.',
+        icon: '🏺💧',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'river_drift_deflector_boom') {
+      tech = {
+        defenseTitle: 'Barreira Flutuante Defletora de Troncos e Galhadas',
+        riverAnchorageAndStiltSafety: 'Tronco flutuante amarrado em diagonal contra o fluxo do rio a montante das estacas do acampamento.',
+        floodShieldingAndCampSecurity: 'Desvia toras pesadas, galhos pontiagudos e ilhas flutuantes de aguapés para fora da rota do bivaque.',
+        campRestAndSafetyGuards: 'Protege a integridade estrutural das estacas de suporte durante toda a noite sem necessidade de vigília com remos.',
+        icon: '🪵🛡️',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      riverAnchorageAndStiltSafety: tech.riverAnchorageAndStiltSafety,
+      floodShieldingAndCampSecurity: tech.floodShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques Palafíticos e Enchentes) / PHB p. 150 (Kits de Aventureiro) / XGE p. 78-83 (Carpintaria Naval)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -18846,6 +18970,8 @@
     calcCampBlackSandDuneTrenchAndCondenserStation: calcCampBlackSandDuneTrenchAndCondenserStation,
     calcWildernessIgnimbritePlateauAndTafoniHazard: calcWildernessIgnimbritePlateauAndTafoniHazard,
     calcCampIgnimbriteTafoniAlcoveAndFilterStation: calcCampIgnimbriteTafoniAlcoveAndFilterStation,
+    calcWildernessPalafitteRiverAndMonsoonHazard: calcWildernessPalafitteRiverAndMonsoonHazard,
+    calcCampPalafitteStiltDeckAndBoomStation: calcCampPalafitteStiltDeckAndBoomStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
