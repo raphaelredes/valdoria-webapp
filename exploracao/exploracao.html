@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T03:50:21Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T03:54:24Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessVolcanicFumaroleAndNoxiousGasHazard) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var vf = CartShared.calcWildernessVolcanicFumaroleAndNoxiousGasHazard(bKey, 'sulfur_fumarole_vent_erup');
+        return '<div class="clp-fumarole-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,20,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(239,68,68,0.3);font-size:8px;color:#fca5a5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + vf.color + ';margin-bottom:2px;">' + vf.icon + ' ' + vf.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Perigo:</b> ' + vf.fumaroleDamageAndAsphyxiation + ' (CD ' + vf.saveDC + ' [' + vf.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#f87171;margin-top:1px;">• <b>Prevenção:</b> ' + vf.pioneerMitigation + ' · <i>Descontaminação: ' + vf.respiratoryCleansing + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampAshFiltrationAndVentilationSeal) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var af = CartShared.calcCampAshFiltrationAndVentilationSeal(bKey, 'activated_charcoal_breathing_veil');
+        return '<div class="clp-ash-filter-card" style="margin:4px 0 6px;text-align:left;background:rgba(22,26,20,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(132,204,22,0.3);font-size:8px;color:#d9f99d;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + af.color + ';margin-bottom:2px;">' + af.icon + ' ' + af.filtrationTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Filtro de Gases:</b> ' + af.gasFiltrationEfficiency + ' · <b>Vedação:</b> ' + af.tentSealingAndAshProtection + '</div>'
+          + '  <div style="font-size:7.5px;color:#bef264;margin-top:1px;">• <b>Proteção Pulmonar:</b> ' + af.sentryEyeAndLungCare + '</div>'
           + '</div>';
       })()
     + (function(){

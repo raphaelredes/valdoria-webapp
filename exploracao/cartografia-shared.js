@@ -11161,6 +11161,130 @@
     };
   }
 
+  // === calcWildernessVolcanicFumaroleAndNoxiousGasHazard (Fumarolas Vulcânicas, Cinza Ácida e Gases Asfixiantes - DMG p. 110 / PHB p. 183) ===
+  function calcWildernessVolcanicFumaroleAndNoxiousGasHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var ht = (hazardType || 'sulfur_fumarole_vent_erup').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Gêiser de Fumarola Sulfurosa Superaquecida',
+      saveDC: 14,
+      saveType: 'Destreza',
+      fumaroleDamageAndAsphyxiation: 'Erupção repentina de vapor cáustico; 2d8 de fogo + 2d6 de veneno e condição Envenenado por 1 minuto.',
+      pioneerMitigation: 'Batedores atentos detectam silvo de pressão e crostas amarelas de enxofre desviando a marcha em 10 metros.',
+      respiratoryCleansing: 'Afastar o companheiro atingido para o cume ventilado e irrigar queimaduras com água fresca sem cinzas.',
+      icon: '🌋💨',
+      color: '#ef4444'
+    };
+
+    if (ht === 'dense_acidic_ash_fall') {
+      hazard = {
+        hazardTitle: 'Chuva Densa de Cinzas Vulcânicas Abrasivas e Ácidas',
+        saveDC: 13,
+        saveType: 'Constituição',
+        fumaroleDamageAndAsphyxiation: 'Irritação grave de olhos e pulmões; desvantagem em Percepção visual e tosse seca com microfissuras pulmonares.',
+        pioneerMitigation: 'Óculos de proteção vedados com graxa e máscaras faciais de linho úmido evitam a inalação de partículas de vidro vulcânico.',
+        respiratoryCleansing: 'Lavagem ocular com água salina morna e descanso em tenda vedada sem pó de cinza.',
+        icon: '🌫️🔥',
+        color: '#f97316'
+      };
+    } else if (ht === 'subterranean_magma_crust_radiance') {
+      hazard = {
+        hazardTitle: 'Crosta Fina de Basalto Sobre Lago Magmático Oculto',
+        saveDC: 14,
+        saveType: 'Constituição',
+        fumaroleDamageAndAsphyxiation: 'Calor extremo irradiado pelo chão derretendo solas de bota; 1d10 de fogo por minuto e risco de Exaustão (DMG p. 110).',
+        pioneerMitigation: 'Avançar pisando estritamente em cristas de rocha escura resfriada com reforço de placas de ferro nos calçados.',
+        respiratoryCleansing: 'Descanso tático imediato com consumo dobrado de água para compensar a desidratação fulminante.',
+        icon: '🪨🔥',
+        color: '#ea580c'
+      };
+    } else if (ht === 'carbon_monoxide_depression_pocket') {
+      hazard = {
+        hazardTitle: 'Bolsão Invisível de Monóxido em Depressão de Cratera',
+        saveDC: 15,
+        saveType: 'Constituição',
+        fumaroleDamageAndAsphyxiation: 'Gás pesado inodoro acumulado no fundo de fendas; queda Inconsciente por asfixia súbita (PHB p. 183).',
+        pioneerMitigation: 'Observar a ausência de insetos e tochas que se apagam subitamente ao aproximar da borda da cavidade.',
+        respiratoryCleansing: 'Içamento rápido com corda para terreno elevado ventilado e massagem torácica vigorosa.',
+        icon: '☠️🕳️',
+        color: '#71717a'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      fumaroleDamageAndAsphyxiation: hazard.fumaroleDamageAndAsphyxiation,
+      pioneerMitigation: hazard.pioneerMitigation,
+      respiratoryCleansing: hazard.respiratoryCleansing,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110 (Terrenos Vulcânicos e Gases) / PHB p. 183 (Dano de Fogo, Veneno e Asfixia)'
+    };
+  }
+
+  // === calcCampAshFiltrationAndVentilationSeal (Filtros de Carvão, Vedação de Cinzas e Chaminé com Tiragem - DMG p. 111-112 / XGE p. 78) ===
+  function calcCampAshFiltrationAndVentilationSeal(biomeKey, filtrationType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var ft = (filtrationType || 'activated_charcoal_breathing_veil').toLowerCase();
+
+    var filtration = {
+      filtrationTitle: 'Máscaras Faciais com Pó de Carvão Ativado e Vinagre',
+      gasFiltrationEfficiency: 'Filtra 90% dos vapores de enxofre e partículas de cinza; concede vantagem em salvaguardas respiratórias.',
+      tentSealingAndAshProtection: 'Permite que a comitiva descanse sem inalar poeira ácida mesmo durante erupções moderadas a sotavento.',
+      sentryEyeAndLungCare: 'Sentinelas de vigília mantêm clareza pulmonar e foco visual nas trocas noturnas de turno.',
+      icon: '😷🌿',
+      color: '#84cc16'
+    };
+
+    if (ft === 'wet_clay_tent_flap_sealing') {
+      filtration = {
+        filtrationTitle: 'Vedação Hermética de Barracas com Argila Úmida e Cinza',
+        gasFiltrationEfficiency: 'Barreira física contínua aplicada nas saias das lonas impedindo que o pó fino de basalto invada os sacos de dormir.',
+        tentSealingAndAshProtection: 'Preserva provisões, cantis de água e mantas térmicas 100% livres de poeira tóxica abrasiva.',
+        sentryEyeAndLungCare: 'Evita abrasão de córnea e irritações alérgicas nos olhos dos aventureiros enquanto dormem.',
+        icon: '🏕️🧱',
+        color: '#ca8a04'
+      };
+    } else if (ft === 'elevated_baffle_smoke_chimney') {
+      filtration = {
+        filtrationTitle: 'Chaminé Defletora de Pedras com Tiragem Superior Positiva',
+        gasFiltrationEfficiency: 'Captura ar puro das correntes elevadas a 2 metros do solo enquanto gases pesados sulfídricos passam rente ao chão.',
+        tentSealingAndAshProtection: 'Ventilação contínua e fresca no interior dos abrigos de pedra sem entrada de fumaça sufocante.',
+        sentryEyeAndLungCare: 'Garante oxigenação ideal durante o sono da comitiva, prevenindo náuseas e dores de cabeça matinais.',
+        icon: '🪵💨',
+        color: '#38bdf8'
+      };
+    } else if (ft === 'eye_rinse_saline_flask') {
+      filtration = {
+        filtrationTitle: 'Estação de Limpeza Ocular com Cantil Salino Estéril',
+        gasFiltrationEfficiency: 'Lavagem imediata de poeira vulcânica acumulada nos cantos dos olhos dos sentinelas após ventanias de cinza.',
+        tentSealingAndAshProtection: 'Prevenção ativa de conjuntivite abrasiva e microarranhões na esclera ocular.',
+        sentryEyeAndLungCare: 'Mantém a Percepção visual dos vigias em 100% de acuidade sem penalidades no turno da madrugada.',
+        icon: '💧👁️',
+        color: '#06b6d4'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      filtrationType: ft,
+      filtrationTitle: filtration.filtrationTitle,
+      gasFiltrationEfficiency: filtration.gasFiltrationEfficiency,
+      tentSealingAndAshProtection: filtration.tentSealingAndAshProtection,
+      sentryEyeAndLungCare: filtration.sentryEyeAndLungCare,
+      icon: filtration.icon,
+      color: filtration.color,
+      dndRef: 'DMG p. 111-112 (Acampamento em Terreno Vulcânico) / XGE p. 78 (Engenharia e Higiene de Acampamento)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -12926,6 +13050,8 @@
     calcCampTripwireAlarmAndDefensiveSnare: calcCampTripwireAlarmAndDefensiveSnare,
     calcWildernessThinIceAndFrigidWaterHazard: calcWildernessThinIceAndFrigidWaterHazard,
     calcCampThermalReflectorAndHypothermiaCare: calcCampThermalReflectorAndHypothermiaCare,
+    calcWildernessVolcanicFumaroleAndNoxiousGasHazard: calcWildernessVolcanicFumaroleAndNoxiousGasHazard,
+    calcCampAshFiltrationAndVentilationSeal: calcCampAshFiltrationAndVentilationSeal,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
