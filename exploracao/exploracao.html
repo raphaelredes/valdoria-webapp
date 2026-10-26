@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T17:38:09Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T17:40:29Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessPoljeEstavelleHazard) return '';
+        var bKey = (biome && biome.key) || 'hills';
+        var pe = CartShared.calcWildernessPoljeEstavelleHazard(bKey, 'estavelle_hydraulic_reversal_gushing_inundation');
+        return '<div class="clp-polje-estavelle-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,26,38,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(2,132,199,0.35);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + pe.color + ';margin-bottom:2px;">' + pe.icon + ' ' + pe.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Polje Cárstico e Estavelas:</b> ' + pe.poljeEstavelleRisk + ' (CD ' + pe.saveDC + ' [' + pe.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Mitigação:</b> ' + pe.pioneerMitigation + ' · <i>Estabilização: ' + pe.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampPoljeEstavelleStation) return '';
+        var bKey = (biome && biome.key) || 'hills';
+        var pc = CartShared.calcCampPoljeEstavelleStation(bKey, 'elevated_karst_hum_citadel_knoll_bivouac');
+        return '<div class="clp-polje-estavelle-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(10,20,30,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(14,165,233,0.3);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + pc.color + ';margin-bottom:2px;">' + pc.icon + ' ' + pc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Bivaque em Colina Residual (Hum):</b> ' + pc.poljeAndCampSafety + ' · <b>Defesa:</b> ' + pc.poljeGaugeAndWall + '</div>'
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + pc.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 203: POLJES CÁRSTICOS, LAGOS TURLOUGH E ESTAVELAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessPoljeEstavelleHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'hills').toLowerCase();
+    var ht = (hazardType || 'estavelle_hydraulic_reversal_gushing_inundation').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Inversão Hidráulica de Estavela e Inundação Súbita do Polje',
+      saveDC: 15,
+      saveType: 'Força',
+      poljeEstavelleRisk: 'Orifício cárstico de dupla função no fundo plano do vale fechado que, após chuvas nas montanhas distantes, inverte seu fluxo de sumidouro para gêiser artesiano; a água fria brota do chão inundando os prados do polje com 3d8 de concussão e isolando as rotas terrestres (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Escuta do rugido de ar expelido pelas bocas de rocha no chão do vale e marcha pelo sopé alto das escarpas.',
+      rescueAndStabilization: 'Retirada imediata para os montes calcários isolados (hums) e aquecimento da comitiva.',
+      icon: '⛲🌊',
+      color: '#0284c7'
+    };
+
+    if (ht === 'turlough_algal_marl_paper_crust_sink_mire') {
+      hazard = {
+        hazardTitle: 'Afundamento sob Tapete Seco de Papel Algal e Marga Calcária',
+        saveDC: 14,
+        saveType: 'Força',
+        poljeEstavelleRisk: 'Quando o lago intermitente (turlough) drena para o subsolo, deixa uma película branca contínua de algas secas entrelaçadas sobre marga calcária fluida; a crosta rasga sob as botas prendendo os exploradores em barro branco pegajoso e impondo 1 nível de exaustão (DMG p. 109-110; PHB p. 185).',
+        pioneerMitigation: 'Sondagem da espessura da marga com cajado antes de cruzar o leito vazante do lago estacional.',
+        rescueAndStabilization: 'Extração com pranchas de distribuição de peso e lavagem do lodo calcário alcalino.',
+        icon: '🕳️📜',
+        color: '#38bdf8'
+      };
+    } else if (ht === 'hum_residual_limestone_knoll_viper_and_sinkhole_ambush') {
+      hazard = {
+        hazardTitle: 'Refúgio Superlotado de Répteis e Fendas em Monte Residual (Hum)',
+        saveDC: 15,
+        saveType: 'Destreza',
+        poljeEstavelleRisk: 'Durante a subida rápida das águas do polje, toda a fauna terrestre e víboras-de-chifre buscam abrigo nas mesmas colinas cônicas de calcário residual (hums) crivadas de poços; a escalada apressada causa quedas e picadas com 2d8 de dano perfurante/veneno (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Batida prévia das lajes calcárias com bastão longo e uso de perneiras altas de couro grosso.',
+        rescueAndStabilization: 'Imobilização do membro afetado e aplicação de antitoxina ou cataplasma absorvente.',
+        icon: '🐍⛰️',
+        color: '#10b981'
+      };
+    } else if (ht === 'draining_ponor_subterranean_suction_whirlpool') {
+      hazard = {
+        hazardTitle: 'Redemoinho de Esvaziamento Rápido em Garganta de Sumidouro',
+        saveDC: 15,
+        saveType: 'Força',
+        poljeEstavelleRisk: 'Na fase de vazante do lago turlough, o volume inteiro da bacia é sugado por fendas submersas no calcário; o vórtex oculto entre os juncos puxa os aventureiros contra grades naturais de rocha afiada com 3d6 de concussão (PHB p. 182-183).',
+        pioneerMitigation: 'Observação de movimentos circulares na superfície da água e contorno a 25 metros das depressões marginais.',
+        rescueAndStabilization: 'Lançamento de corda amarrada em mourões de pedra seca na margem firme.',
+        icon: '🌀🕳️',
+        color: '#0369a1'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampPoljeEstavelleStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'hills').toLowerCase();
+    var dt = (defenseType || 'elevated_karst_hum_citadel_knoll_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque no Topo de Colina Residual Calcária (Hum) no Polje',
+      poljeAndCampSafety: 'Acampamento estabelecido a 20 metros de altura no cume plano de um monte residual de calcário maciço que emerge como ilha rochosa perene no meio da bacia.',
+      poljeGaugeAndWall: 'Permanece inteiramente seco e seguro mesmo que as estavelas inundem toda a planície ao redor durante a noite.',
+      campRestAndSafetyGuards: 'Garante descanso longo inexpugnável e visão panorâmica sobre todo o vale cárstico para a comitiva.',
+      icon: '⛺⛰️',
+      color: '#0284c7'
+    };
+
+    if (dt === 'black_moss_flood_line_and_estavelle_air_roar_gauge') {
+      tech = {
+        defenseTitle: 'Balizamento pela Linha de Musgo Negro e Sopro das Estavelas',
+        poljeAndCampSafety: 'Identificação precisa da faixa horizontal de musgo aquático escuro (Cinclidotus) gravada nos paredões, que indica até onde a água sobe nas maiores cheias.',
+        poljeGaugeAndWall: 'Combinada ao som de vento que escapa das cavidades quando o lençol freático sobe, oferece previsão exata de inundação.',
+        campRestAndSafetyGuards: 'Impede que o grupo arme barracas abaixo da cota histórica de alagamento.',
+        icon: '🌿📏',
+        color: '#10b981'
+      };
+    } else if (dt === 'karst_border_perennial_fissure_spring_cistern') {
+      tech = {
+        defenseTitle: 'Captação em Fonte Perene de Fissura Acima do Nível da Marga',
+        poljeAndCampSafety: 'Coleta de água em nascente de encosta situada acima do fundo barrento do polje, livre de sedimentos de inversão hidráulica.',
+        poljeGaugeAndWall: 'Fornece água cristalina e fresca sem o gosto terroso das águas estagnadas do turlough.',
+        campRestAndSafetyGuards: 'Mantém a hidratação segura de todos os exploradores e montarias.',
+        icon: '💧🪨',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'dry_stone_karst_wall_enclosure_on_hum_terrace') {
+      tech = {
+        defenseTitle: 'Cerca Ciclópica de Pedra Seca Calcária (Suhozid) no Terraço',
+        poljeAndCampSafety: 'Muro espesso de blocos calcários encaixados a seco contornando o patamar superior da colina residual.',
+        poljeGaugeAndWall: 'Corta a fúria do vento frio descendente (Bora) e barra a subida de animais ou saqueadores deslocados pela enchente.',
+        campRestAndSafetyGuards: 'Concede cobertura sólida (+4 na CA) e abrigo térmico para os turnos de guarda.',
+        icon: '🧱🛡️',
+        color: '#0d9488'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 202: CRATERAS DE MAAR FREATOMAGMÁTICO E LAGOS MEROMÍTICOS (D&D 5e)
   // =========================================================================
 
@@ -28892,6 +28996,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessPoljeEstavelleHazard: calcWildernessPoljeEstavelleHazard,
+    calcCampPoljeEstavelleStation: calcCampPoljeEstavelleStation,
     calcWildernessPhreatomagmaticMaarHazard: calcWildernessPhreatomagmaticMaarHazard,
     calcCampPhreatomagmaticMaarStation: calcCampPhreatomagmaticMaarStation,
     calcWildernessJokulhlaupSandurHazard: calcWildernessJokulhlaupSandurHazard,
