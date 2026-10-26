@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T14:58:37Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T15:02:29Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessSlotCanyonFlashFloodHazard) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var sc = CartShared.calcWildernessSlotCanyonFlashFloodHazard(bKey, 'slot_canyon_flash_torrent_chute_plunge');
+        return '<div class="clp-slot-torrent-card" style="margin:4px 0 6px;text-align:left;background:rgba(38,20,12,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(234,88,12,0.35);font-size:8px;color:#ffedd5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sc.color + ';margin-bottom:2px;">' + sc.icon + ' ' + sc.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Cânions em Fenda e Torrentes:</b> ' + sc.slotCanyonAndTorrentRisk + ' (CD ' + sc.saveDC + ' [' + sc.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Mitigação:</b> ' + sc.pioneerMitigation + ' · <i>Estabilização: ' + sc.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampSlotCanyonFlashFloodStation) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var cp = CartShared.calcCampSlotCanyonFlashFloodStation(bKey, 'elevated_sandstone_alcove_hanging_bivouac');
+        return '<div class="clp-slot-torrent-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,16,10,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(194,65,12,0.3);font-size:8px;color:#ffedd5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Alcova Suspensa:</b> ' + cp.slotCanyonAndCampSafety + ' · <b>Defesa:</b> ' + cp.slotWallBarrierAndMarmitaReservoir + '</div>'
+          + '  <div style="font-size:7.5px;color:#fdba74;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

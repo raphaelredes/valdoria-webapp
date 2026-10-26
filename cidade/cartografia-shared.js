@@ -20575,6 +20575,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 163: CÂNYONS DE ARENITO ENTALHADO EM FENDA ESTREITA E TORRENTES RELÂMPAGO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessSlotCanyonFlashFloodHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'slot_canyon_flash_torrent_chute_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Torrente Relâmpago em Fenda de Arenito com Subida de Água a 6 Metros',
+      saveDC: 15,
+      saveType: 'Destreza',
+      slotCanyonAndTorrentRisk: 'Garganta estreita de arenito de 1,2 metro de largura invadida por onda de cheia relâmpago violenta carregando troncos e detritos; a água sobe repentinamente arrastando exploradores contra paredões polidos com 3d10 de concussão e aprisionamento em marmita submersa (DMG p. 110, 246).',
+      pioneerMitigation: 'Batedores monitoram ecos acústicos e marcas de lodo nas paredes, mantendo estribos de corda pré-fixados e avançando com arreios de escalada rápida.',
+      rescueAndStabilization: 'Içamento urgente com ganchos de resgate ancorados em fendas altas, drenagem pulmonar rápida e aquecimento contra choque térmico com cobertores secos.',
+      icon: '🏜️🌊',
+      color: '#ea580c'
+    };
+
+    if (ht === 'sandstone_stemming_slip_fall_fracture') {
+      hazard = {
+        hazardTitle: 'Queda em Manobra de Chaminé em Parede Polida de Arenito',
+        saveDC: 15,
+        saveType: 'Força',
+        slotCanyonAndTorrentRisk: 'Progressão em atrito corporal entre paredes opostas de arenito fino recobertas por poeira escorregadia; a perda de aderência provoca queda de 12 metros no fundo rochoso da fenda com 3d6 de concussão e fraturas em membros inferiores (PHB p. 182-183).',
+        pioneerMitigation: 'Uso de calçados com sola de borracha antiderrapante resinada e instalação de pítons de proteção com fitas tubulares a cada 3 metros.',
+        rescueAndStabilization: 'Imobilização imediata com talas infláveis de couro, amarração em prancha de resgate vertical e içamento por roldanas.',
+        icon: '🧗‍♂️🪨',
+        color: '#d97706'
+      };
+    } else if (ht === 'abyssal_slot_twilight_disorientation_blindness') {
+      hazard = {
+        hazardTitle: 'Penumbra Abissal em Fenda Fechada e Queda em Poço Seco Cego',
+        saveDC: 14,
+        saveType: 'Destreza',
+        slotCanyonAndTorrentRisk: 'Fendas profundas de 50 metros onde as paredes quase se tocam no topo, bloqueando a luz solar e criando escuridão profunda; precipita passos em buracos de erosão ocultos causando 2d6 de concussão e torções articulares graves.',
+        pioneerMitigation: 'Uso de lanternas direcionais com espelhos refletores de latão e sondagem contínua do piso com bastões de ponta arredondada.',
+        rescueAndStabilization: 'Remoção do explorador do fosso com alças de fita, enfaixamento compressivo de tornozelos e descanso em nicho iluminado.',
+        icon: '🕯️🕳️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'canyon_convective_heat_exhaustion_trap') {
+      hazard = {
+        hazardTitle: 'Calor Convectivo Aprisionado no Fundo de Arenito a 45°C',
+        saveDC: 14,
+        saveType: 'Constituição',
+        slotCanyonAndTorrentRisk: 'Ausência de circulação de ar no fundo da fenda somada ao calor irradiado pelas rochas aquecidas; induz desidratação acelerada, cãibras severas e 1 nível de exaustão por insolação convectiva (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Travessia durante as primeiras horas da aurora e transporte de cantis térmicos de couro duplo forrados com feltro úmido.',
+        rescueAndStabilization: 'Borrifação de água fresca nas têmporas, ingestão lenta de eletrólitos salinos e ventilação manual com abanos de palha.',
+        icon: '☀️🔥',
+        color: '#dc2626'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampSlotCanyonFlashFloodStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'elevated_sandstone_alcove_hanging_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Alcova de Arenito Escavada 8 Metros Acima da Linha de Cheia',
+      slotCanyonAndCampSafety: 'Acampamento assentado em nicho natural seco na parede do desfiladeiro, localizado com segurança muito acima dos limites de detritos de enchentes antigas, acessível apenas por cordas retráteis.',
+      slotWallBarrierAndMarmitaReservoir: 'A elevação vertical anula qualquer perigo de inundações relâmpago e impede investidas de predadores terrestres que circulam pelo fundo da fenda.',
+      campRestAndSafetyGuards: 'Garante descanso longo imperturbável, seguro e revigorante para todos os membros do grupo, com sentinelas vigiando do topo do nicho.',
+      icon: '⛺🏜️',
+      color: '#ea580c'
+    };
+
+    if (dt === 'recessed_chute_boulder_chockstone_breastwork') {
+      tech = {
+        defenseTitle: 'Parapeito de Blocos de Arenito Entalados e Travas de Madeira Rígida',
+        slotCanyonAndCampSafety: 'Mureta defensiva assentada em estrangulamento da fenda com blocos naturais de arenito e vigas transversais que fecham a passagem estreita contra aproximações hostis.',
+        slotWallBarrierAndMarmitaReservoir: 'Oferece cobertura defensiva intransponível (+5 na CA) contra ataques e permite disparos protegidos por fendas estreitas.',
+        campRestAndSafetyGuards: 'Assegura sono livre de temores e tranquilidade absoluta para as sentinelas de guarda.',
+        icon: '🛡️🧱',
+        color: '#b45309'
+      };
+    } else if (dt === 'shaded_pothole_tinaja_sand_water_filtration') {
+      tech = {
+        defenseTitle: 'Captação de Marmita de Arenito Sombreada com Tubo Filtrante de Carvão',
+        slotCanyonAndCampSafety: 'Cisterna natural esculpida pela água na rocha que retém dezenas de litros de água fria e límpida abrigada do calor solar, purificada com elemento de carvão e areia de quartzo.',
+        slotWallBarrierAndMarmitaReservoir: 'Fornece 45 litros diários de água doce cristalina de altíssima qualidade, garantindo a autonomia hídrica da comitiva.',
+        campRestAndSafetyGuards: 'Elimina a desidratação e o desgaste físico nos cânions áridos, preservando a saúde e a energia de todos.',
+        icon: '💧🏺',
+        color: '#0284c7'
+      };
+    } else if (dt === 'chute_acoustic_echo_tripwire_resonator_alarm') {
+      tech = {
+        defenseTitle: 'Ressonador Acústico de Parede com Fios de Tensão e Guizos de Cobre',
+        slotCanyonAndCampSafety: 'Cabos finos de latão estendidos ao longo do corredor sinuoso conectados a pequenos tambores de cerâmica fixados nas paredes que amplificam qualquer vibração ou toque sonoro.',
+        slotWallBarrierAndMarmitaReservoir: 'Detecta aproximações no desfiladeiro a 60 metros de distância com alarme sonoro retumbante reverberando na fenda.',
+        campRestAndSafetyGuards: 'Blindagem acústica total contra investidas furtivas noturnas, garantindo repouso tranquilo para a expedição.',
+        icon: '🔔🏜️',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 162: BREJOS DE TABOA E SOLOS MOVEDIÇOS ALUVIAS COM ILHAS FLUTUANTES (D&D 5e)
   // =========================================================================
 
@@ -24730,6 +24834,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessSlotCanyonFlashFloodHazard: calcWildernessSlotCanyonFlashFloodHazard,
+    calcCampSlotCanyonFlashFloodStation: calcCampSlotCanyonFlashFloodStation,
     calcWildernessQuakingBogReedHazard: calcWildernessQuakingBogReedHazard,
     calcCampQuakingBogReedStation: calcCampQuakingBogReedStation,
     calcWildernessSingingSandBarchanHazard: calcWildernessSingingSandBarchanHazard,
