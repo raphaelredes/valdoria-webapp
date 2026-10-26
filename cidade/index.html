@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessCoastalSpitAndBreakerHazard) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var cs = CartShared.calcWildernessCoastalSpitAndBreakerHazard(bKey, 'storm_surge_breaker_wave_sweep');
+        return '<div class="clp-coastal-spit-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,24,36,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(2,132,199,0.3);font-size:8px;color:#f0f9ff;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Arrebentação:</b> ' + cs.coastalRiskAndImpact + ' (CD ' + cs.saveDC + ' [' + cs.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Mitigação:</b> ' + cs.pioneerMitigation + ' · <i>Estabilização: ' + cs.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampCoastalSpitPalingAndTidalStation) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var cp = CartShared.calcCampCoastalSpitPalingAndTidalStation(bKey, 'woven_dune_paling_and_brushwood_groin');
+        return '<div class="clp-spit-paling-card" style="margin:4px 0 6px;text-align:left;background:rgba(16,36,28,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#ecfdf5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Estacaria de Fascina:</b> ' + cp.spitAnchorageAndStability + ' · <b>Proteção:</b> ' + cp.tidalSurgeShieldingAndSafety + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessSandstoneCanyonAndRockfallHazard) return '';
         var bKey = (biome && biome.key) || 'desert';
         var sc = CartShared.calcWildernessSandstoneCanyonAndRockfallHazard(bKey, 'unstable_sandstone_arch_collapse');

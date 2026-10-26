@@ -14509,6 +14509,130 @@
     };
   }
 
+  // === calcWildernessCoastalSpitAndBreakerHazard (Restingas Litorâneas, Ressacas e Arrebentação de Maré - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessCoastalSpitAndBreakerHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'storm_surge_breaker_wave_sweep').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ressaca Violenta e Arrebentação de Maré Alta',
+      saveDC: 14,
+      saveType: 'Força',
+      coastalRiskAndImpact: 'Vaga oceânica de 4 metros varrendo a restinga arenosa; impacto de 3d8 de concussão com arrasto de 12 metros em direção a rochedos submersos (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores conferem tábuas de maré, evitam barras estreitas na preamar e avançam fixando cabos guias em estacas profundas.',
+      rescueAndStabilization: 'Arremesso de cabos com flutuadores de cortiça, respiração compassada para afogados e aquecimento com mantas secas.',
+      icon: '🌊🏖️',
+      color: '#0284c7'
+    };
+
+    if (ht === 'rip_current_channel_undertow') {
+      hazard = {
+        hazardTitle: 'Corrente de Retorno em Canal de Fuga (Rip Current)',
+        saveDC: 14,
+        saveType: 'Constituição',
+        coastalRiskAndImpact: 'Fluxo acelerado de água oceânica puxando aventureiros para o largo a 8km/h; exaustão rápida e afogamento por luta contra a corrente.',
+        pioneerMitigation: 'Natação transversal paralela à praia sem resistir diretamente ao canal central de retorno.',
+        rescueAndStabilization: 'Resgate por botes de apoio com remos compridos e infusão revigorante de gengibre e melaço.',
+        icon: '🌀🌊',
+        color: '#06b6d4'
+      };
+    } else if (ht === 'quicksand_saturated_sandspit_trap') {
+      hazard = {
+        hazardTitle: 'Restinga Hipersaturada e Areia Movediça Litorânea',
+        saveDC: 13,
+        saveType: 'Força',
+        coastalRiskAndImpact: 'Camada de areia fina fluidificada por lençol freático salino sob a arrebentação; afundamento rápido até a cintura em 2 rodadas.',
+        pioneerMitigation: 'Sondagem de solo com remo de caiaque e redistribuição imediata de peso deitando-se de costas.',
+        rescueAndStabilization: 'Uso de pranchas de madeira transversais como alavancas e tração por arreios de montarias.',
+        icon: '🏖️🕳️',
+        color: '#eab308'
+      };
+    } else if (ht === 'salt_spray_corrosive_blinding_gale') {
+      hazard = {
+        hazardTitle: 'Vendaval Salino com Névoa Corrosiva de Espuma',
+        saveDC: 13,
+        saveType: 'Constituição',
+        coastalRiskAndImpact: 'Ventos de 60km/h carregados de cristais de salitre e microgotas salinas; ardor ocular debilitante e ferrugem acelerada em cotas metálicas.',
+        pioneerMitigation: 'Uso de óculos de proteção com tela de latão fino e lubrificação preventiva de couros e armaduras com sebo de baleia.',
+        rescueAndStabilization: 'Lavagem ocular com água doce filtrada e aplicação de unguento calmante de camomila litorânea.',
+        icon: '💨🧂',
+        color: '#38bdf8'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      coastalRiskAndImpact: hazard.coastalRiskAndImpact,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Litoral, Ressacas e Afogamento) / PHB p. 182-183 (Navegação Costeira e Salvaguardas)'
+    };
+  }
+
+  // === calcCampCoastalSpitPalingAndTidalStation (Estacarias de Fascina, Bivaques em Palafita e Filtros de Lente Doce - DMG p. 111 / XGE p. 78-83 / PHB p. 150) ===
+  function calcCampCoastalSpitPalingAndTidalStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'woven_dune_paling_and_brushwood_groin').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Barreira de Estacaria Entrelaçada com Feixes de Galhos',
+      spitAnchorageAndStability: 'Cercado de estacas de eucalipto cravadas a 2 metros com fascina de galhos que quebra a força das ondas e retém dunas de areia.',
+      tidalSurgeShieldingAndSafety: 'Impede que o mar de ressaca avance sobre o piso do acampamento e desvia resíduos flutuantes pesados.',
+      campRestAndSafetyGuards: 'Garante sono longo tranquilo para a comitiva mesmo durante a maré alta viva da lua cheia.',
+      icon: '🪵🌊',
+      color: '#10b981'
+    };
+
+    if (dt === 'elevated_stilt_bivouac_on_stabilized_dune') {
+      tech = {
+        defenseTitle: 'Bivaque Elevado em Palafitas sobre Duna Vegetada',
+        spitAnchorageAndStability: 'Plataforma de pinho apoiada em quatro pilares fincados na crista de duna fixada por capim-marinho.',
+        tidalSurgeShieldingAndSafety: 'Mantém os leitos dos aventureiros a 3 metros acima da cota máxima de ressaca oceânica.',
+        campRestAndSafetyGuards: 'Oferece piso seco e ventilado com visão de 360 graus do horizonte marinho para as sentinelas.',
+        icon: '🛖🌅',
+        color: '#0ea5e9'
+      };
+    } else if (dt === 'cork_and_bamboo_emergency_flotation_raft') {
+      tech = {
+        defenseTitle: 'Jangada Emergencial de Bambu e Cortiça Aterrada',
+        spitAnchorageAndStability: 'Estrado leve com tambores vedados e amarras elásticas conectado à estaca-mestra por cabo de 15 metros.',
+        tidalSurgeShieldingAndSafety: 'Flutua automaticamente caso a restinga seja submersa por maré de tempestade excepcional.',
+        campRestAndSafetyGuards: 'Salva a bagagem, rações e aventureiros feridos sem risco de soterramento aquático súbito.',
+        icon: '🎋🛟',
+        color: '#f59e0b'
+      };
+    } else if (dt === 'freshwater_lens_casse_filter_sump') {
+      tech = {
+        defenseTitle: 'Poço de Captação da Lente de Água Doce Submarina',
+        spitAnchorageAndStability: 'Cova rasa cônica revestida com cascalho que intercepta a água pluvial menos densa flutuando sobre o lençol salgado.',
+        tidalSurgeShieldingAndSafety: 'Fornece água doce potável límpida no coração de uma restinga árida cercada por oceano.',
+        campRestAndSafetyGuards: 'Garante hidratação abundante para a comitiva e preserva a autonomia dos batedores litorâneos.',
+        icon: '💧🏖️',
+        color: '#06b6d4'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      spitAnchorageAndStability: tech.spitAnchorageAndStability,
+      tidalSurgeShieldingAndSafety: tech.tidalSurgeShieldingAndSafety,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque Litorâneo e Restingas) / XGE p. 78-83 (Ferramentas de Navegador e Carpintaria)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -16326,6 +16450,8 @@
     calcCampBambooThicketSuspendedPlatformAndLashingStation: calcCampBambooThicketSuspendedPlatformAndLashingStation,
     calcWildernessSandstoneCanyonAndRockfallHazard: calcWildernessSandstoneCanyonAndRockfallHazard,
     calcCampSandstoneCanyonCammingStationAndShelter: calcCampSandstoneCanyonCammingStationAndShelter,
+    calcWildernessCoastalSpitAndBreakerHazard: calcWildernessCoastalSpitAndBreakerHazard,
+    calcCampCoastalSpitPalingAndTidalStation: calcCampCoastalSpitPalingAndTidalStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
