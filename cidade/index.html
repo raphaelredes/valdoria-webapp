@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessPrismaticGeyserBasinHazard) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var gb = CartShared.calcWildernessPrismaticGeyserBasinHazard(bKey, 'geyserite_sinter_crust_breakthrough_scald');
+        return '<div class="clp-prismatic-geyser-card" style="margin:4px 0 6px;text-align:left;background:rgba(38,20,14,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(249,115,22,0.35);font-size:8px;color:#ffedd5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + gb.color + ';margin-bottom:2px;">' + gb.icon + ' ' + gb.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Bacia de Gêiseres e Fontes Prismáticas:</b> ' + gb.geyserBasinRisk + ' (CD ' + gb.saveDC + ' [' + gb.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Mitigação:</b> ' + gb.pioneerMitigation + ' · <i>Estabilização: ' + gb.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampPrismaticGeyserBasinStation) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var gc = CartShared.calcCampPrismaticGeyserBasinStation(bKey, 'upwind_solid_rhyolite_knoll_thermal_bivouac');
+        return '<div class="clp-prismatic-geyser-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,16,12,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(234,88,12,0.3);font-size:8px;color:#ffedd5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + gc.color + ';margin-bottom:2px;">' + gc.icon + ' ' + gc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Bivaque Geotérmico em Riolito:</b> ' + gc.geyserBasinAndCampSafety + ' · <b>Defesa:</b> ' + gc.geyserWalkwayAndCooker + '</div>'
+          + '  <div style="font-size:7.5px;color:#fdba74;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + gc.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessDolomiteSawtoothRidgeHazard) return '';
         var bKey = (biome && biome.key) || 'mountain';
         var ds = CartShared.calcWildernessDolomiteSawtoothRidgeHazard(bKey, 'dolomite_couloir_freeze_thaw_rock_barrage');

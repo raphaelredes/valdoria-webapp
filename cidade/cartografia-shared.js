@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 191: CAMPOS DE GÊISERES E PISCINAS TERMAIS PRISMÁTICAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessPrismaticGeyserBasinHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var ht = (hazardType || 'geyserite_sinter_crust_breakthrough_scald').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ruptura de Crosta Oca de Sinter Silicoso sobre Piscina Fervente',
+      saveDC: 15,
+      saveType: 'Destreza',
+      geyserBasinRisk: 'Laje branca aparentemente sólida de sílica precipitada (geyserita) com apenas 3 centímetros de espessura cobrindo um bolsão de água a 95°C; a crosta quebra sob o peso das botas mergulhando as pernas do batedor no líquido fervente com 4d6 de dano de fogo por escaldadura (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Sondagem rítmica do timbre da crosta com bastão ferrado (evitando som oco de tambor) e marcha estrita sobre rocha matriz.',
+      rescueAndStabilization: 'Retirada imediata pelo cinto com vara longa, remoção cuidadosa das botas para evitar descolamento cutâneo e resfriamento com água fria.',
+      icon: '♨️🕳️',
+      color: '#f97316'
+    };
+
+    if (ht === 'periodic_geyser_superheated_steam_column_blast') {
+      hazard = {
+        hazardTitle: 'Erupção Súbita de Coluna de Vapor Superaquecido em Cone de Gêiser',
+        saveDC: 15,
+        saveType: 'Constituição',
+        geyserBasinRisk: 'Tremor subterrâneo seguido pelo disparo violento de um jato de água alcalina e vapor a 40 metros de altura; a chuva fervente e a nuvem de vapor envolvem a comitiva causando 3d8 de dano de fogo e cegueira temporária pela névoa densa de sílica (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Deslocamento estrito a barlavento (contra o vento) dos cones de geyserita e cronometragem do intervalo entre erupções.',
+        rescueAndStabilization: 'Retirada guiada por corda para fora da pluma de vapor e aplicação de compressas úmidas frias nas vias aéreas.',
+        icon: '⛲🔥',
+        color: '#ef4444'
+      };
+    } else if (ht === 'boiling_mud_pot_acid_clay_spatter_eruption') {
+      hazard = {
+        hazardTitle: 'Explosão de Bolhas em Caldeirão de Lama Ácida Fervente (Mud Pot)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        geyserBasinRisk: 'Poço de argila vulcânica dissolvida por ácido sulfúrico onde grandes bolhas viscosas estouram arremessando coágulos pesados de lama aderente a 8 metros de distância; a lama gruda nas vestes causando 2d6 de dano de fogo e 2d6 de dano de ácido (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Uso de capas de couro oleado com capuz e manutenção de distância mínima de 10 metros das bordas de argila borbulhante.',
+        rescueAndStabilization: 'Raspagem imediata da lama quente com espátula de madeira antes de lavar com água bicarbonatada.',
+        icon: '🌋🧪',
+        color: '#eab308'
+      };
+    } else if (ht === 'thermophilic_bacterial_mat_slip_into_runoff_channel') {
+      hazard = {
+        hazardTitle: 'Escorregamento em Tapete Viscoso de Bactérias Termofílicas Prismáticas',
+        saveDC: 14,
+        saveType: 'Destreza',
+        geyserBasinRisk: 'Canais rasos de escoamento das fontes prismáticas revestidos por biofilmes vibrantes amarelos, laranjas e esmeraldas; a superfície é mais escorregadia que sabão líquido, derrubando o aventureiro na correnteza escaldante com 2d8 de dano de fogo (PHB p. 182-183).',
+        pioneerMitigation: 'Salto sobre os canais nos pontos estreitos de rocha seca ou uso de pranchão portátil de cedro.',
+        rescueAndStabilization: 'Tratamento das queimaduras superficiais nas palmas das mãos com unguento de babosa e enfaixamento.',
+        icon: '🌈♨️',
+        color: '#10b981'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampPrismaticGeyserBasinStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var dt = (defenseType || 'upwind_solid_rhyolite_knoll_thermal_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Colina de Riolito Maciço a Barlavento das Fontes',
+      geyserBasinAndCampSafety: 'Acampamento instalado sobre afloramento estável de rocha riolítica 8 metros acima da bacia de sinter, posicionado contra o vento dominante para receber a irradiação térmica sem inalar gases sulfurosos.',
+      geyserWalkwayAndCooker: 'O calor geotérmico do solo eleva a temperatura do bivaque em 12°C durante a noite, anulando geadas severas sem necessidade de grandes fogueiras.',
+      campRestAndSafetyGuards: 'Proporciona descanso longo aquecido, seco e seguro contra rupturas de crosta para toda a comitiva.',
+      icon: '⛺♨️',
+      color: '#f97316'
+    };
+
+    if (dt === 'wooden_duckboard_plank_walkway_over_sinter') {
+      tech = {
+        defenseTitle: 'Passarela de Pranchas Interligadas sobre Crosta Frágil de Sinter',
+        geyserBasinAndCampSafety: 'Trilha de tábuas largas amarradas com tiras de couro cru estendida entre o acampamento e o ponto de coleta de água, distribuindo o peso humano por uma área dez vezes maior.',
+        geyserWalkwayAndCooker: 'Elimina o risco de perfurar a crosta fina de geyserita durante deslocamentos noturnos ou sob neblina.',
+        campRestAndSafetyGuards: 'Permite patrulha segura das sentinelas ao redor do perímetro termal.',
+        icon: '🪜🛡️',
+        color: '#d97706'
+      };
+    } else if (dt === 'geothermal_steam_box_ration_cooker_and_sterilizer') {
+      tech = {
+        defenseTitle: 'Forno Geotérmico de Vapor e Condensador de Água Potável',
+        geyserBasinAndCampSafety: 'Caixa de pedra vedada sobre uma fumarola secundária mansa que cozinha rações em marmitas fechadas e condensa o vapor limpo em tubo metálico resfriado.',
+        geyserWalkwayAndCooker: 'Garante refeições quentes contínuas e água destilada livre de sílica ou enxofre sem emitir fumaça de lenha.',
+        campRestAndSafetyGuards: 'Eleva o moral e recupera o vigor dos membros do grupo em ermos vulcânicos.',
+        icon: '🍲💨',
+        color: '#10b981'
+      };
+    } else if (dt === 'harmonic_tremor_water_vial_geyser_eruption_predictor') {
+      tech = {
+        defenseTitle: 'Sismógrafo Hidrostático de Ampola para Previsão de Erupções',
+        geyserBasinAndCampSafety: 'Frasco de vidro com água colorida apoiado diretamente na rocha matriz junto ao posto de sentinela, calibrado para exibir anéis concêntricos ao menor tremor harmônico subterrâneo.',
+        geyserWalkwayAndCooker: 'Antecipa em 10 minutos a subida da coluna de água fervente nos gêiseres vizinhos.',
+        campRestAndSafetyGuards: 'Evita surpresas durante o sono e permite fechar as abas das tendas antes da precipitação de vapor.',
+        icon: '🧪🔔',
+        color: '#0ea5e9'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 190: CORDILHEIRAS DE DENTES DE DRAGÃO E PINÁCULOS DE DOLOMITO (D&D 5e)
   // =========================================================================
 
@@ -27644,6 +27748,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessPrismaticGeyserBasinHazard: calcWildernessPrismaticGeyserBasinHazard,
+    calcCampPrismaticGeyserBasinStation: calcCampPrismaticGeyserBasinStation,
     calcWildernessDolomiteSawtoothRidgeHazard: calcWildernessDolomiteSawtoothRidgeHazard,
     calcCampDolomiteSawtoothRidgeStation: calcCampDolomiteSawtoothRidgeStation,
     calcWildernessVauclusianSiphonHazard: calcWildernessVauclusianSiphonHazard,
