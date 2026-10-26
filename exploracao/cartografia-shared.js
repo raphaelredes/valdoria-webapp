@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 220: PINÁCULOS DE GELO DE SUBLIMAÇÃO (PENITENTES) E LABIRINTOS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessIcePenitenteBladeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'nieves_penitentes_serrated_ice_blade_impalement_fall').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Empalamento e Laceração em Floresta de Lâminas de Gelo (Penitentes)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      penitenteRisk: 'Nos campos de neve áridos de alta altitude acima de 4.500 metros, a sublimação direta pelo vento seco e o sol zenital esculpem milhões de torres e adagas de gelo endurecido (nieves penitentes) de até 5 metros de altura inclinadas para o equador; tropeçar nos sulcos estreitos lança o aventureiro sobre fileiras de lâminas vítreas afiadas causando 2d8 perfurante mais 2d6 de frio (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Marcha estritamente alinhada aos sulcos leste-oeste (na direção da inclinação solar das lâminas) ou quebra controlada das pontas com piqueta.',
+      rescueAndStabilization: 'Serragem cuidadosa das aletas de gelo ao redor do membro ferido e bandagem térmica compressiva.',
+      icon: '🧊🗡️',
+      color: '#38bdf8'
+    };
+
+    if (ht === 'inter_blade_solar_radiation_oven_and_meltwater_pit_collapse') {
+      hazard = {
+        hazardTitle: 'Armadilha Óptica de Focagem Solar e Fosso de Água de Sublimação',
+        saveDC: 15,
+        saveType: 'Constituição',
+        penitenteRisk: 'As paredes côncavas espelhadas entre duas fileiras de penitentes funcionam como refletores parabólicos que concentram a radiação ultravioleta extrema no fundo do corredor enquanto derretem poços ocultos sob uma casca fina de gelo; o explorador sofre queimadura actínica severa no rosto e afunda até o peito na água a zero grau no fundo da trincheira com 2d6 radiante mais 2d6 de frio (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Cobertura total da pele exposta, óculos de fenda estreita e sondagem do fundo entre os penitentes antes de pisar.',
+        rescueAndStabilization: 'Apoio horizontal dos braços nas duas lâminas laterais para sair do fosso e troca imediata das botas.',
+        icon: '☀️🧊',
+        color: '#0ea5e9'
+      };
+    } else if (ht === 'resonant_brittle_penitente_domino_cascade_shatter') {
+      hazard = {
+        hazardTitle: 'Colapso em Efeito Dominó de Fileira de Penitentes Esbeltos',
+        saveDC: 15,
+        saveType: 'Destreza',
+        penitenteRisk: 'Quando o vento catabático vespertino sopra perpendicularmente às fileiras de penitentes subescavados na base por sublimação, o choque de uma única mochila contra uma torre de 4 metros desencadeia a quebra em cadeia de dezenas de colunas de gelo maciço sobre a comitiva com 3d8 de concussão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Evitar corredores onde as colunas de gelo apresentem cintura basal translúcida menor que um palmo.',
+        rescueAndStabilization: 'Escavação imediata dos blocos de gelo quebrado e proteção das cabeças com escudos.',
+        icon: '❄️💥',
+        color: '#0284c7'
+      };
+    } else if (ht === 'high_altitude_hypobaric_whiteout_labyrinth_exhaustion') {
+      hazard = {
+        hazardTitle: 'Desorientação Labiríntica Hipobárica entre Muralhas de Penitentes',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        penitenteRisk: 'Cercados por paredes de gelo branco de 4 metros que bloqueiam qualquer referência de relevo sob o ar rarefeito da zona da morte, os membros do grupo perdem a noção de direção e gastam o triplo de esforço saltando de corredor em corredor, acumulando 1 nível de exaustão e hipóxia (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Uso da própria inclinação geométrica constante das lâminas de gelo (sempre apontadas para o sol do meio-dia) como bússola natural.',
+        rescueAndStabilization: 'Pausa controlada para aclimatação respiratória e marcação dos portais abertos nos penitentes.',
+        icon: '🧭❄️',
+        color: '#7dd3fc'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampIcePenitenteBladeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'truncated_penitente_pillared_igloo_vault_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Câmara Esculpida entre Pilares Truncados de Penitentes',
+      penitenteAndCampSafety: 'Acampamento instalado após decepar o topo agudo de um círculo de penitentes grossos e usar os blocos cortados para fechar o teto como uma abóbada esquimó.',
+      penitenteTrenchAndWatch: 'Cria um abrigo hermético contra furacões de alta montanha a -30 graus mantendo o interior próximo de zero grau.',
+      campRestAndSafetyGuards: 'Garante descanso longo protegido da hipotermia letal dos altos passos alpinos.',
+      icon: '⛺🧊',
+      color: '#38bdf8'
+    };
+
+    if (dt === 'solar_parabolic_penitente_trough_snow_melter') {
+      tech = {
+        defenseTitle: 'Calha Parabólica de Reflexão Solar entre Lâminas para Derretimento',
+        penitenteAndCampSafety: 'Posicionamento de um pano escuro ou escudo metálico no foco óptico natural entre duas paredes côncavas de penitentes ao meio-dia.',
+        penitenteTrenchAndWatch: 'Derrete gelo em água potável usando apenas a intensa radiação solar de altitude, poupando todo o combustível da comitiva.',
+        campRestAndSafetyGuards: 'Garante a hidratação essencial para prevenir o mal da montanha.',
+        icon: '☀️💧',
+        color: '#0ea5e9'
+      };
+    } else if (dt === 'wind_scoured_bare_andesite_saddle_penitente_free_camp') {
+      tech = {
+        defenseTitle: 'Sela de Andesito Varrida pelo Vento Livre de Campos de Lâminas',
+        penitenteAndCampSafety: 'Montagem das tendas sobre a crista rochosa nua onde a deflação eólica impede o acúmulo de neve e a formação de penitentes.',
+        penitenteTrenchAndWatch: 'Oferece piso seco de cascalho vulcânico e visão desimpedida sobre todo o mar de lâminas brancas abaixo.',
+        campRestAndSafetyGuards: 'Facilita a guarda noturna e evita fossos de degelo sob as barracas.',
+        icon: '🏔️🛡️',
+        color: '#64748b'
+      };
+    } else if (dt === 'ice_blade_chime_wind_corridor_sentry_post') {
+      tech = {
+        defenseTitle: 'Posto de Vigília com Perímetro de Cristas de Gelo Translucente',
+        penitenteAndCampSafety: 'Aproveitamento da transparência óptica das lâminas superiores de gelo que projetam silhuetas e sombras de qualquer criatura à luz da lua ou de lanternas.',
+        penitenteTrenchAndWatch: 'Qualquer tentativa de abrir caminho quebrando as aletas de gelo ecoa a centenas de metros no ar frio e seco.',
+        campRestAndSafetyGuards: 'Impede aproximações furtivas contra o bivaque de alta altitude.',
+        icon: '🔔🧊',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 219: GELEIRAS DE ROCHA ALPINAS E TALUDES DE PERMAFROST (D&D 5e)
   // =========================================================================
 
@@ -30660,6 +30764,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessIcePenitenteBladeHazard: calcWildernessIcePenitenteBladeHazard,
+    calcCampIcePenitenteBladeStation: calcCampIcePenitenteBladeStation,
     calcWildernessAlpineRockGlacierHazard: calcWildernessAlpineRockGlacierHazard,
     calcCampAlpineRockGlacierStation: calcCampAlpineRockGlacierStation,
     calcWildernessStromatoliteBiohermHazard: calcWildernessStromatoliteBiohermHazard,
