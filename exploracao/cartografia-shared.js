@@ -14013,6 +14013,130 @@
     };
   }
 
+  // === calcWildernessDesertMirageAndOpticalRefractionHazard (Miragens do Deserto, Fata Morgana e Reverberação Solar - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessDesertMirageAndOpticalRefractionHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'fata_morgana_inverted_oasis_illusion').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Fata Morgana de Oásis e Lago Invertido',
+      saveDC: 14,
+      saveType: 'Sabedoria',
+      opticalDistortionAndRisk: 'Refração térmica inferior projetando ilusão de palmeirais e lagoas translúcidas; teste de Sabedoria (Percepção) CD 14 para não desviar a rota da comitiva em 1d4 milhas em direção a dunas áridas (DMG p. 111).',
+      pioneerMitigation: 'Batedores usam bússolas solares, conferem o horizonte real com prumo de cartógrafo e identificam a ausência de aves aquáticas.',
+      rescueAndStabilization: 'Sinalização com espelhos de heliógrafo, racionamento estrito de odres de água e marcha noturna orientada por azimute estelar.',
+      icon: '🏜️🏝️',
+      color: '#f59e0b'
+    };
+
+    if (ht === 'shifting_heat_haze_range_distortion') {
+      hazard = {
+        hazardTitle: 'Reverberação Ondulante e Distorção de Distância',
+        saveDC: 13,
+        saveType: 'Inteligência',
+        opticalDistortionAndRisk: 'Gradiente de ar superaquecido que faz despenhadeiros parecerem a 200m quando estão a 2km; impõe desvantagem em testes de Investigação e ataques à distância além de 18 metros.',
+        pioneerMitigation: 'Medição de paralaxe com bastão graduado de topógrafo e observação rasteira rente ao solo antes do aquecimento zenital.',
+        rescueAndStabilization: 'Ajuste de marcha para o ritmo lento e repouso ocular dos aventureiros com compressas de tecido umedecido.',
+        icon: '🌫️🔥',
+        color: '#fb923c'
+      };
+    } else if (ht === 'solar_glare_blinding_salt_flat_reflection') {
+      hazard = {
+        hazardTitle: 'Reverberação Cegante em Deserto de Sal e Alúmen',
+        saveDC: 13,
+        saveType: 'Constituição',
+        opticalDistortionAndRisk: 'Clarão solar duplo refletido pela crosta branca de salitre; falha causa cegueira temporária por 1 hora e dor ocular aguda nos viajantes.',
+        pioneerMitigation: 'Uso de viseiras de osso polido com fendas horizontais estreitas e pintura de carvão vegetal sob as órbitas dos olhos.',
+        rescueAndStabilization: 'Lavagem ocular com água filtrada fresca e repouso em penumbra total dentro de tendas seladas.',
+        icon: '☀️🧂',
+        color: '#fef08a'
+      };
+    } else if (ht === 'ghost_caravan_refracted_echo_mirage') {
+      hazard = {
+        hazardTitle: 'Miragem de Caravana Fantasma e Ecos Térmicos',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        opticalDistortionAndRisk: 'Refração acústica e visual projetando silhuetas em movimento e sinos de camelos a 30km de distância; atrai a comitiva para desfiladeiros de emboscada.',
+        pioneerMitigation: 'Identificação da ausência de poeira real levantada no horizonte e inspeção de marcas no solo com binóculos de campanha.',
+        rescueAndStabilization: 'Reagrupamento defensivo da comitiva em formação circular com sentinelas cobrindo os flancos.',
+        icon: '🐪👻',
+        color: '#c084fc'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      opticalDistortionAndRisk: hazard.opticalDistortionAndRisk,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Miragens e Calor Extremo) / PHB p. 182-183 (Navegação no Deserto e Salvaguardas)'
+    };
+  }
+
+  // === calcCampDesertMiragePolarizedFilterAndRefractoryAwning (Filtros Polarizados, Toldos Refratários e Bivaques Térmicos - DMG p. 111 / XGE p. 78-83 / PHB p. 150) ===
+  function calcCampDesertMiragePolarizedFilterAndRefractoryAwning(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'amber_tinted_crystal_lens_filter_array').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Filtro de Lentes de Quartzo Fumê e Cristal Âmbar',
+      opticalShieldingAndClarity: 'Lentes lapidadas em quartzo fumê e âmbar montadas em viseiras de couro; filtram o comprimento de onda azul e anulam 100% da distorção de miragem.',
+      thermalRefractionAndPerceptionBonus: 'Garante percepção passiva desobstruída para as sentinelas mesmo sob meio-dia escaldante, revelando aproximações furtivas.',
+      campRestAndSafetyGuards: 'Permite vigília prolongada sem cefaleia ou fadiga ocular decorrente do reflexo nas areias.',
+      icon: '👓✨',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'double_layered_refractory_silk_awning') {
+      tech = {
+        defenseTitle: 'Toldo Duplo Refratário de Seda e Linho Despolarizado',
+        opticalShieldingAndClarity: 'Cobertura superior em tecido claro defletor de radiação com espaçamento de arrefecimento de 30 cm sobre a tenda principal.',
+        thermalRefractionAndPerceptionBonus: 'Abaixa a temperatura interna do bivaque em até 8°C e quebra o gradiente de refração óptica sobre o acampamento.',
+        campRestAndSafetyGuards: 'Garante descanso longo reparador para os aventureiros mesmo nas horas mais quentes do ciclo desértico.',
+        icon: '⛺☀️',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'bone_slit_glare_goggles_and_charcoal_stripe') {
+      tech = {
+        defenseTitle: 'Óculos de Fenda de Osso com Faixa de Carvão Anti-Reflexo',
+        opticalShieldingAndClarity: 'Viseiras anatômicas de osso de camelo com ranhuras de 1 milímetro e pigmento mineral escuro absorvedor sob as pálpebras.',
+        thermalRefractionAndPerceptionBonus: 'Elimina 95% do brilho difuso de salinas e dunas sem necessidade de componentes ópticos frágeis.',
+        campRestAndSafetyGuards: 'Protege sentinelas e animais de tração contra ofuscamento súbito e vertigem térmica.',
+        icon: '🥽🦴',
+        color: '#e2e8f0'
+      };
+    } else if (dt === 'thermal_sink_dune_shadow_bivouac') {
+      tech = {
+        defenseTitle: 'Bivaque em Trincheira de Sombra com Cortina de Ventilação',
+        opticalShieldingAndClarity: 'Acampamento escavado na encosta leste de dunas com esteiras de junco criando corrente laminar de ar fresco.',
+        thermalRefractionAndPerceptionBonus: 'Dissipa o bolsão de ar quente estagnado, estabilizando a linha de visão das sentinelas do posto elevado.',
+        campRestAndSafetyGuards: 'Protege os suprimentos de água e rações contra ressecamento e evita estresse térmico da comitiva.',
+        icon: '🏜️⛺',
+        color: '#10b981'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      opticalShieldingAndClarity: tech.opticalShieldingAndClarity,
+      thermalRefractionAndPerceptionBonus: tech.thermalRefractionAndPerceptionBonus,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque e Descanso sob Insolação) / XGE p. 78-83 (Equipamentos de Óptica e Sobrevivência)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -15822,6 +15946,8 @@
     calcCampAcidMarshCorduroyCausewayAndLimestoneBed: calcCampAcidMarshCorduroyCausewayAndLimestoneBed,
     calcWildernessLightningPlateauAndArcDischargeHazard: calcWildernessLightningPlateauAndArcDischargeHazard,
     calcCampLightningPlateauFaradayCageAndGroundingStation: calcCampLightningPlateauFaradayCageAndGroundingStation,
+    calcWildernessDesertMirageAndOpticalRefractionHazard: calcWildernessDesertMirageAndOpticalRefractionHazard,
+    calcCampDesertMiragePolarizedFilterAndRefractoryAwning: calcCampDesertMiragePolarizedFilterAndRefractoryAwning,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
