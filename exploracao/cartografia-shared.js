@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 195: VALES DE RIFTE TECTÔNICO (GRABEN) E FENDAS DE ESCUDO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessTectonicGrabenFissureHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var ht = (hazardType || 'dilational_gja_fissure_moss_bridge_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda em Fenda Tectônica de Dilatação (Gjá) Oculta por Musgo',
+      saveDC: 15,
+      saveType: 'Destreza',
+      grabenFissureRisk: 'Enxame de fendas paralelas de afastamento crustal com 2 metros de largura e 30 metros de profundidade, cujas bocas são encobertas por tapetes espessos de musgo lanoso; o tapete vegetal rasga sob as botas precipitando o batedor entre paredes verticais de basalto com 3d10 de concussão (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Marcha perpendicular ao eixo do rifte sondando cada tapete de musgo com ponteira de ferro antes de transferir o peso.',
+      rescueAndStabilization: 'Ancoragem em cunhas de basalto na borda da fenda e descida de cadeirinha de resgate com cabo duplo.',
+      icon: '🕳️🌿',
+      color: '#10b981'
+    };
+
+    if (ht === 'normal_fault_scarp_seismic_swarm_rock_shearing') {
+      hazard = {
+        hazardTitle: 'Cisalhamento de Blocos em Escarpa de Falha por Enxame Sísmico',
+        saveDC: 15,
+        saveType: 'Destreza',
+        grabenFissureRisk: 'Paredão vertical de falha normal que delimita o vale abatido (graben); tremores harmônicos recorrentes sacodem a escarpa soltando colunas inteiras de basalto que tombam como árvores de pedra sobre a trilha de base com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Deslocamento pelo centro aberto do piso do graben mantendo distância mínima de 30 metros do sopé da falha.',
+        rescueAndStabilization: 'Retirada rápida da zona de queda de prismas e imobilização de fraturas com talas rígidas.',
+        icon: '⛰️📳',
+        color: '#f59e0b'
+      };
+    } else if (ht === 'fissure_mofette_carbon_dioxide_invisible_pocket') {
+      hazard = {
+        hazardTitle: 'Bolsão Asfixiante de Gás Carbônico Frio (Mofeta) no Fundo da Fenda',
+        saveDC: 15,
+        saveType: 'Constituição',
+        grabenFissureRisk: 'Emanação silenciosa e inodora de dióxido de carbono vulcânico frio que, por ser mais denso que o ar, acumula-se como um rio invisível no fundo das fendas sem vento; aventurar-se na depressão apaga tochas instantaneamente e causa asfixia com 2d8 de dano necrótico (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Avanço com lanterna de chama baixa pendurada na ponta de uma vara abaixo da cintura para testar o nível de oxigênio.',
+        rescueAndStabilization: 'Içamento imediato por corda sem descer sem ar preso nos pulmões e ventilação no patamar ventilado superior.',
+        icon: '💨🕯️',
+        color: '#64748b'
+      };
+    } else if (ht === 'hornito_rootless_spatter_cone_hollow_chimney_collapse') {
+      hazard = {
+        hazardTitle: 'Colapso de Chaminé Oca em Cone de Respingo Basáltico (Hornito)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        grabenFissureRisk: 'Torreões ocos de lava aglutinada de 6 metros de altura alinhados sobre a fissura eruptiva extinta; ao escalar o cone para observação, a casca vítrea quebradiça cede lançando o aventureiro no conduto interno eriçado de escória cortante com 2d8 de dano perfurante (PHB p. 182-183).',
+        pioneerMitigation: 'Proibição de subir na boca de cones de escória soldada e contorno pela laje basáltica basal.',
+        rescueAndStabilization: 'Abertura de brecha lateral na base fina do hornito com marreta para extrair o companheiro sem içá-lo pelas pontas.',
+        icon: '🌋🕳️',
+        color: '#ef4444'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampTectonicGrabenFissureStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var dt = (defenseType || 'horst_uplifted_basalt_bench_seismic_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque no Patamar Elevado do Bloco Tectônico Firme (Horst)',
+      grabenAndCampSafety: 'Acampamento instalado sobre o terraço estrutural elevado (horst) entre duas fendas paralelas, sobre laje contínua de basalto maciço livre de acúmulo de gases pesados.',
+      grabenPoolAndBastion: 'As duas fendas laterais profundas funcionam como fossos naturais intransponíveis, isolando a comitiva de ataques terrestres.',
+      campRestAndSafetyGuards: 'Assegura descanso longo seguro, ventilado e com defesa perimetral formidável para todo o grupo.',
+      icon: '⛺⛰️',
+      color: '#10b981'
+    };
+
+    if (dt === 'flooded_gja_geothermal_clear_water_fissure_pool') {
+      tech = {
+        defenseTitle: 'Fonte Cristalina Aquecida em Fenda Tectônica Inundada (Grjótagjá)',
+        grabenAndCampSafety: 'Galeria de fenda onde o lençol freático cristalino é suavemente aquecido a 28°C pelo gradiente geotérmico profundo do rifte.',
+        grabenPoolAndBastion: 'Fornece água potável puríssima filtrada pelo basalto poroso e permite banho morno restaurador abrigado do vento glacial.',
+        campRestAndSafetyGuards: 'Alivia dores musculares da marcha forçada e revigora os aventureiros para o dia seguinte.',
+        icon: '💧♨️',
+        color: '#0ea5e9'
+      };
+    } else if (dt === 'columnar_basalt_hexagonal_prism_windbreak_bastion') {
+      tech = {
+        defenseTitle: 'Bastião Ciclópico de Prismas Hexagonais de Basalto Colunar',
+        grabenAndCampSafety: 'Parapeito erguido com segmentos de colunas hexagonais naturais caídas que se encaixam geometricamente sem deixar frestas para o vento.',
+        grabenPoolAndBastion: 'Cria uma fortificação de pedra quase indestrutível (+5 na CA) que resiste a abalos sísmicos sem desmoronar.',
+        campRestAndSafetyGuards: 'Protege as barracas contra vendavais subárticos e projéteis de emboscadas.',
+        icon: '🧱🛡️',
+        color: '#f59e0b'
+      };
+    } else if (dt === 'taut_wire_across_dilation_joint_seismic_and_intruder_bell') {
+      tech = {
+        defenseTitle: 'Linha Tensora de Alarme Sísmico e Perimetral Sobre a Fenda',
+        grabenAndCampSafety: 'Cabo metálico esticado sob alta tensão entre as duas margens da fenda de acesso e conectado a uma placa percussora de ferro.',
+        grabenPoolAndBastion: 'Dispara um toque sonoro claro tanto se uma criatura tocar a ponte de travessia quanto se a fenda sofrer dilatação sísmica.',
+        campRestAndSafetyGuards: 'Mantém as sentinelas em alerta máximo contra perigos tectônicos ou incursões noturnas.',
+        icon: '🔔🔗',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 194: CHAPADAS DE COURAÇA LATERÍTICA (BOWAL) E CANGA (D&D 5e)
   // =========================================================================
 
@@ -28060,6 +28164,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessTectonicGrabenFissureHazard: calcWildernessTectonicGrabenFissureHazard,
+    calcCampTectonicGrabenFissureStation: calcCampTectonicGrabenFissureStation,
     calcWildernessLateriteBowalCuirassHazard: calcWildernessLateriteBowalCuirassHazard,
     calcCampLateriteBowalCuirassStation: calcCampLateriteBowalCuirassStation,
     calcWildernessSaltDiapirGlacierHazard: calcWildernessSaltDiapirGlacierHazard,
