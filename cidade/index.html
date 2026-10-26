@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessLoessGullyHeadcutHazard) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var lg = CartShared.calcWildernessLoessGullyHeadcutHazard(bKey, 'gully_headcut_retrogressive_bank_collapse');
+        return '<div class="clp-loess-gully-headcut-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,20,12,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(180,83,9,0.35);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + lg.color + ';margin-bottom:2px;">' + lg.icon + ' ' + lg.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Planalto de Loess e Cárcavas:</b> ' + lg.loessGullyRisk + ' (CD ' + lg.saveDC + ' [' + lg.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Mitigação:</b> ' + lg.pioneerMitigation + ' · <i>Estabilização: ' + lg.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampLoessGullyHeadcutStation) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var lg = CartShared.calcCampLoessGullyHeadcutStation(bKey, 'interfluve_flat_plateau_drainage_bivouac');
+        return '<div class="clp-loess-gully-headcut-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,24,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#d1fae5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + lg.color + ';margin-bottom:2px;">' + lg.icon + ' ' + lg.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Bivaque em Interflúvio de Loess:</b> ' + lg.loessGullyAndCampSafety + ' · <b>Proteção:</b> ' + lg.loessGullyTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#a7f3d0;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + lg.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessBandedIronItabiriteHazard) return '';
         var bKey = (biome && biome.key) || 'mountains';
         var bi = CartShared.calcWildernessBandedIronItabiriteHazard(bKey, 'magnetic_compass_erratic_deviation_labyrinth');

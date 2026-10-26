@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 262: PLANÍCIES DE LOESS E CÁRCAVAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessLoessGullyHeadcutHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var ht = (hazardType || 'gully_headcut_retrogressive_bank_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desabamento Regressivo de Cabeceira de Cárcava em Enxurrada',
+      saveDC: 15,
+      saveType: 'Destreza',
+      loessGullyRisk: 'A cabeceira vertical de 15 metros da ravina de loess sofre subsidência rápida durante chuvas fortes por perda de coesão na base; um bloco de dezenas de toneladas de solo desaba repentinamente para trás sob os pés dos exploradores, arrastando aventureiros para o fundo do desfiladeiro com 3d8 de dano contundente e soterramento parcial (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Marchar afastado a pelo menos 30 metros das bordas de recuo de cabeceiras ativas e evitar depressões com fissuras concêntricas de tração.',
+      rescueAndStabilization: 'Desenterramento urgente com pás de campanha e administração de poção revigorante para desobstruir vias aéreas.',
+      icon: '📉🕳️',
+      color: '#b45309'
+    };
+
+    if (ht === 'loess_piping_blind_subterranean_tunnel_fall') {
+      hazard = {
+        hazardTitle: 'Queda em Túnel Cárstico Oculto de Piping Subterrâneo',
+        saveDC: 14,
+        saveType: 'Destreza',
+        loessGullyRisk: 'A percolação da água da chuva em subsuperfície escava canais e galerias tubulares invisíveis sob a crosta seca do terreno; o piso oco cede sob a marcha de mulas e fardos de carga, precipitando a vítima 6 metros abaixo em um canal estreito de lama líquida (DMG p. 111; PHB p. 182).',
+        pioneerMitigation: 'Batedores avançam com bastões longos golpeando o solo à procura de eco oco e contornam dolinas de colapso recentes.',
+        rescueAndStabilization: 'Lançamento de cordas com laço e içamento mecânico por estribos para retirar a vítima da galeria inundada.',
+        icon: '🕳️⚠️',
+        color: '#d97706'
+      };
+    } else if (ht === 'pulverized_loess_dust_storm_blindness_choking') {
+      hazard = {
+        hazardTitle: 'Tempestade de Pó de Loess Pulverizado e Asfixia Respiratória',
+        saveDC: 14,
+        saveType: 'Constituição',
+        loessGullyRisk: 'Rajadas térmicas repentinas erguem o silte eólico extremamente fino em tempestades amarelas opacas que bloqueiam a luz solar; a poeira penetra roupas, cega a visão e queima os alvéolos pulmonares com tosse seca espasmódica, infligindo 2d6 de dano de asfixia e desvantagem em testes de Percepção (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Marchar com véus de seda fina umedecidos cobrindo nariz e boca e óculos de osso com fendas estreitas.',
+        rescueAndStabilization: 'Abrigo em ravina sombreada, lavagem ocular com água limpa e inalação de vapor balsâmico.',
+        icon: '🌪️😷',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'vertical_loess_joint_fracture_topple') {
+      hazard = {
+        hazardTitle: 'Fratura de Colunas Verticais de Loess e Tombamento de Paredão',
+        saveDC: 14,
+        saveType: 'Destreza',
+        loessGullyRisk: 'O loess possui juntas de alívio verticais que formam pilares colunares paralelos aos desfiladeiros; ancorar grampos ou puxar cordas de escalada desestabiliza a base da coluna de 10 metros, que tomba como um monólito de terra compactada em direção à trilha inferior (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Não fixar pitons em paredes verticais de loess e transpor os desfiladeiros exclusivamente por rampas suaves de tálus estabilizado.',
+        rescueAndStabilization: 'Remoção urgente de blocos de solo sobre membros atingidos e contenção de fraturas com talas.',
+        icon: '🧱💥',
+        color: '#dc2626'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampLoessGullyHeadcutStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'interfluve_flat_plateau_drainage_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Estratégico em Interflúvio Plano Longe das Cabeceiras',
+      loessGullyAndCampSafety: 'Instalação do acampamento no centro do divisor de águas plano (interflúvio), a mais de 80 metros de qualquer ravina ou cárcava ativa.',
+      loessGullyTrenchAndWatch: 'O solo plano é perfeitamente drenado e permanece fora do alcance de qualquer desabamento regressivo ou erosão remontante das cabeceiras.',
+      campRestAndSafetyGuards: 'Assegura descanso longo estável, seco e livre de subsidências ou colapsos noturnos.',
+      icon: '⛺🌾',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'piping_cavity_acoustic_sounding_sweep') {
+      tech = {
+        defenseTitle: 'Sondagem Acústica por Percussão para Detecção de Vazios Subterrâneos',
+        loessGullyAndCampSafety: 'Varredura metódica do solo golpeando o terreno com maças de madeira e hastes de ferro para identificar condutos de piping ocultos.',
+        loessGullyTrenchAndWatch: 'Mapeia e isola qualquer galeria subterrânea com estacas sinalizadoras, impedindo que barracas sejam armadas sobre tetos ocos.',
+        campRestAndSafetyGuards: 'Elimina o risco de colapso de piso sob o peso da comitiva durante o repouso.',
+        icon: '🔨👂',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'vegetated_turf_reinforcement_trench') {
+      tech = {
+        defenseTitle: 'Muretas de Torrões Enraizados e Valas de Desvio de Enxurrada',
+        loessGullyAndCampSafety: 'Construção de bermas perimetrais com placas de grama estepária enraizada e valas de escoamento ao redor das tendas.',
+        loessGullyTrenchAndWatch: 'A vegetação amarra o pó de loess e impede que enxurradas de chuva descalcem a fundação do acampamento, direcionando a água para fora.',
+        campRestAndSafetyGuards: 'Mantém o chão do acampamento firme e sem formação de lama pastosa durante temporais.',
+        icon: '🛡️🌿',
+        color: '#10b981'
+      };
+    } else if (dt === 'subterranean_loess_dugout_thermal_shelter') {
+      tech = {
+        defenseTitle: 'Abrigo Escavado em Caverna de Loess com Isolamento Térmico Perfeito',
+        loessGullyAndCampSafety: 'Aproveitamento da coesão do solo para escavar câmaras e nichos abobadados em paredes estáveis de loess.',
+        loessGullyTrenchAndWatch: 'A espessa camada de terra protege contra ventos uivantes e poeira estepária, mantendo uma temperatura agradável de 18°C a noite inteira.',
+        campRestAndSafetyGuards: 'Permite descanso longo aquecido e revigorante sem consumo de lenha escassa.',
+        icon: '🕳️🛌',
+        color: '#6366f1'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 261: FORMAÇÕES FERRÍFERAS BANDADAS E ITABIRITO (D&D 5e)
   // =========================================================================
 
@@ -35028,6 +35132,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessLoessGullyHeadcutHazard: calcWildernessLoessGullyHeadcutHazard,
+    calcCampLoessGullyHeadcutStation: calcCampLoessGullyHeadcutStation,
     calcWildernessBandedIronItabiriteHazard: calcWildernessBandedIronItabiriteHazard,
     calcCampBandedIronItabiriteStation: calcCampBandedIronItabiriteStation,
     calcWildernessKarstPoljePonorHazard: calcWildernessKarstPoljePonorHazard,
