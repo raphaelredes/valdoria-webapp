@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T16:50:52Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T16:53:58Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessStratovolcanoGlacierHazard) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var sg = CartShared.calcWildernessStratovolcanoGlacierHazard(bKey, 'lahar_slurry_surge_ice_melt_flash_flood');
+        return '<div class="clp-stratovolcano-glacier-card" style="margin:4px 0 6px;text-align:left;background:rgba(36,22,18,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(234,88,12,0.35);font-size:8px;color:#fef2f2;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sg.color + ';margin-bottom:2px;">' + sg.icon + ' ' + sg.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Geleiras Subvulcânicas e Lahares:</b> ' + sg.glacierVolcanoRisk + ' (CD ' + sg.saveDC + ' [' + sg.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fecaca;margin-top:1px;">• <b>Mitigação:</b> ' + sg.pioneerMitigation + ' · <i>Estabilização: ' + sg.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampStratovolcanoGlacierStation) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var cs = CartShared.calcCampStratovolcanoGlacierStation(bKey, 'andesite_rib_wind_and_lahar_deflected_bivouac');
+        return '<div class="clp-stratovolcano-glacier-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,16,14,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(180,83,9,0.3);font-size:8px;color:#fef2f2;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
+          + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

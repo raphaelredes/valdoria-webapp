@@ -20622,6 +20622,110 @@
   // FASE 183: CRISTAS DE INSELBERGS GRANÍTICOS EM PÃO DE AÇÚCAR (D&D 5e)
   // =========================================================================
 
+  // =========================================================================
+  // FASE 184: SOLFATARAS E GELEIRAS SUBVULCÂNICAS EM ESTRATOVULCÃO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessStratovolcanoGlacierHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var ht = (hazardType || 'lahar_slurry_surge_ice_melt_flash_flood').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Torrente de Lahar Vulcânico com Lama Fervente e Blocos de Gelo a 45 km/h',
+      saveDC: 15,
+      saveType: 'Força',
+      glacierVolcanoRisk: 'Bolsa subglacial aquecida por fumarola que rompe em torrente de lahar com lama de cinza e blocos de gelo a 45 km/h descendo a garganta; arrasta equipamentos pesados e causa risco de 3d10 de concussão por choque mecânico e queimaduras de lama a 60°C (DMG p. 110, 246-247).',
+      pioneerMitigation: 'Observação contínua de degelo anormal da morena frontal e fuga urgente para contrafortes de rocha andesítica saliente.',
+      rescueAndStabilization: 'Içamento com cabos de aço e roldanas ancoradas na rocha alta com lavagem imediata da lama abrasiva da pele e olhos.',
+      icon: '🌋🧊',
+      color: '#ea580c'
+    };
+
+    if (ht === 'subglacial_sulfur_steam_chimney_collapse') {
+      hazard = {
+        hazardTitle: 'Desabamento de Chaminé de Gelo Subvulcânica com Vapor Sulfuroso a 90°C',
+        saveDC: 15,
+        saveType: 'Destreza',
+        glacierVolcanoRisk: 'Caverna subglacial esculpida por vapor geotérmico com teto translúcido fraturado; o choque térmico rompe blocos de gelo de 1 tonelada liberando vapor escaldante saturado de enxofre com 3d8 de concussão e 2d6 de fogo/vapor (PHB p. 182-183).',
+        pioneerMitigation: 'Sondagem de solidez do gelo com piolet e uso de respiradores de feltro umedecido com vinagre diluído.',
+        rescueAndStabilization: 'Escavação ágil com picaretas de ponta dupla, imobilização com talas rígidas e aplicação de curativo para queimaduras térmicas.',
+        icon: '💨❄️',
+        color: '#0284c7'
+      };
+    } else if (ht === 'bergschrund_crevasse_fumarole_trap') {
+      hazard = {
+        hazardTitle: 'Queda em Fenda Bergschrund com Asfixia em Fumarola Tóxica Submersa',
+        saveDC: 15,
+        saveType: 'Destreza',
+        glacierVolcanoRisk: 'Fenda glaciovulcânica profunda (bergschrund) com ponte de neve frágil; o aventureiro despenca 15 metros em nicho aquecido com acúmulo letal de CO₂ e H₂S, sofrendo 3d8 de concussão e risco iminente de asfixia (DMG p. 110, 246; PHB p. 182-183).',
+        pioneerMitigation: 'Travessia em cordada tensa de 3 membros com teste prévio de pontes de neve com sonda de avalanche de 3 metros.',
+        rescueAndStabilization: 'Tração imediata com cabo dinâmico e polia prussik, ventilação assistida em superfície e isolamento térmico.',
+        icon: '🕳️⚠️',
+        color: '#38bdf8'
+      };
+    } else if (ht === 'subglacial_hydrothermal_moraine_burst') {
+      hazard = {
+        hazardTitle: 'Estouro Hidrotermal de Represa de Morena com Ejeção de Fragmentos',
+        saveDC: 14,
+        saveType: 'Destreza',
+        glacierVolcanoRisk: 'Pressão de vapor acumulada sob morena congelada que explode arremessando fragmentos pontiagudos de basalto e gelo pressurizado como estilhaços balísticos a mais de 100 metros de raio com 3d6 de dano perfurante (DMG p. 246-247).',
+        pioneerMitigation: 'Reconhecimento de ruídos de estalo subterrâneo e marcha mantendo distância de segurança de 80 metros da crista da morena.',
+        rescueAndStabilization: 'Extração de lascas de rocha e gelo cravadas com pinças estéreis, desinfecção com bálsamo antisséptico e sutura.',
+        icon: '💥🪨',
+        color: '#dc2626'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampStratovolcanoGlacierStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var dt = (defenseType || 'andesite_rib_wind_and_lahar_deflected_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Crista de Andesito Elevada Acima dos Canais de Lahar',
+      glacierAndCampSafety: 'Acampamento instalado em espinhaço rochoso saliente de andesito maciço a 40 metros acima dos desfiladeiros de degelo, posicionado em contraforte que divide e desvia qualquer fluxo de lahar ou avalanche.',
+      glacierAndVolcanoBarrier: 'A quilha de rocha sólida funciona como proa inquebrável contra avalanches de gelo e lama fervente, oferecendo piso seco e drenado imune a subsidências térmicas.',
+      campRestAndSafetyGuards: 'Concede sono longo seguro e protegido das intempéries para todos os membros do grupo, garantindo vigilância de 360 graus contra ameaças das neves e erupções para as sentinelas de guarda.',
+      icon: '⛺🌋',
+      color: '#ea580c'
+    };
+
+    if (dt === 'interlocking_ice_block_and_andesite_parapet') {
+      tech = {
+        defenseTitle: 'Muralha de Blocos de Gelo Compactado e Lajes de Andesito Vulcânico',
+        glacierAndCampSafety: 'Barreira perimetral semicircular construída com blocos densos de gelo glaciar calafetados com areia basáltica e apoiados em lajes pesadas de andesito.',
+        glacierAndVolcanoBarrier: 'Concede cobertura superior (+5 na CA) contra arqueiros e projéteis e isola termicamente as tendas contra ventos polares catabáticos de -20°C.',
+        campRestAndSafetyGuards: 'Assegura estabilidade térmica interna e proteção impenetrável contra predadores das geleiras ou feras ígneas.',
+        icon: '🧊🛡️',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'geothermal_meltwater_distillation_well') {
+      tech = {
+        defenseTitle: 'Poço de Captação Geotérmica com Serpentina de Degelo e Filtro',
+        glacierAndCampSafety: 'Sistema de serpentina metálica estendida sobre leito de vapor vulcânico ameno que derrete gelo puro continuamente, purificando a água de desgelo por filtragem em cascalho e carvão.',
+        glacierAndVolcanoBarrier: 'Fornece 60 litros diários de água mineral tépida, cristalina e potável sem cinzas abrasivas, garantindo a autonomia hídrica da comitiva no cume gelado.',
+        campRestAndSafetyGuards: 'Elimina a necessidade de gastar combustível precioso para derreter neve, restaurando o vigor dos exploradores.',
+        icon: '💧♨️',
+        color: '#0284c7'
+      };
+    } else if (dt === 'glacier_rim_tripwire_bronze_bell_alarm') {
+      tech = {
+        defenseTitle: 'Perímetro de Alarme em Morena com Cabos de Aço e Guizos de Bronze',
+        glacierAndCampSafety: 'Fios de aço de alta resistência estendidos ao longo das cristas de acesso e bordas de greta conectados a sinos de bronze ancorados em estacas de gelo.',
+        glacierAndVolcanoBarrier: 'Emite alarme sonoro agudo a mais de 70 metros de distância com qualquer movimento de invasores ou rastejamento de feras na neve noturna.',
+        campRestAndSafetyGuards: 'Garante tranquilidade mental e alerta imediato sem sobressaltos para as sentinelas de vigília.',
+        icon: '🔔❄️',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessSugarloafInselbergHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'savanna').toLowerCase();
@@ -26914,6 +27018,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
+    calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
     calcWildernessSugarloafInselbergHazard: calcWildernessSugarloafInselbergHazard,
     calcCampSugarloafInselbergStation: calcCampSugarloafInselbergStation,
     calcWildernessAlluvialCollapseDolineHazard: calcWildernessAlluvialCollapseDolineHazard,
