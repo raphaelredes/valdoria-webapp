@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessPingoThermokarstHazard) return '';
+        var bKey = (biome && biome.key) || 'tundra';
+        var pt = CartShared.calcWildernessPingoThermokarstHazard(bKey, 'pingo_summit_dilation_crater_ice_lens_collapse');
+        return '<div class="clp-pingo-thermokarst-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,26,38,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.35);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + pt.color + ';margin-bottom:2px;">' + pt.icon + ' ' + pt.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Colina de Pingo e Termocarste:</b> ' + pt.pingoThermokarstRisk + ' (CD ' + pt.saveDC + ' [' + pt.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Mitigação:</b> ' + pt.pioneerMitigation + ' · <i>Estabilização: ' + pt.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampPingoThermokarstStation) return '';
+        var bKey = (biome && biome.key) || 'tundra';
+        var pc = CartShared.calcCampPingoThermokarstStation(bKey, 'pingo_windward_drained_gravel_shoulder_bivouac');
+        return '<div class="clp-pingo-thermokarst-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(10,20,30,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(14,165,233,0.3);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + pc.color + ';margin-bottom:2px;">' + pc.icon + ' ' + pc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Bivaque no Ombro do Pingo:</b> ' + pc.pingoAndCampSafety + ' · <b>Defesa:</b> ' + pc.pingoInsulationAndIce + '</div>'
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + pc.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessPrismaticGeyserBasinHazard) return '';
         var bKey = (biome && biome.key) || 'volcanic';
         var gb = CartShared.calcWildernessPrismaticGeyserBasinHazard(bKey, 'geyserite_sinter_crust_breakthrough_scald');

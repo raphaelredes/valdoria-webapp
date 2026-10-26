@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 192: COLINAS DE PINGO DE NÚCLEO DE GELO E DEPRESSÕES DE ALAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessPingoThermokarstHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'tundra').toLowerCase();
+    var ht = (hazardType || 'pingo_summit_dilation_crater_ice_lens_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso de Cratera de Dilatação sobre Lente de Gelo no Topo do Pingo',
+      saveDC: 15,
+      saveType: 'Destreza',
+      pingoThermokarstRisk: 'O domo cônico de 30 metros erguido por pressão hidrostática apresenta fendas radiais de tensão no cume cobertas por turfa fina; a ponte de solo cede lançando os exploradores no interior da caverna da lente de gelo maciço com 3d8 de concussão e 2d6 de frio (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Contorno da borda da cratera pelo anel estrutural externo e proibição de marchar pelo centro deprimido do domo.',
+      rescueAndStabilization: 'Cravação de parafusos tubulares de gelo na parede da lente e içamento rápido antes da instalação de hipotermia.',
+      icon: '🏔️🧊',
+      color: '#38bdf8'
+    };
+
+    if (ht === 'thermokarst_alas_thaw_slump_mudflow_slide') {
+      hazard = {
+        hazardTitle: 'Deslizamento Retrogressivo de Degelo (Thaw Slump) em Bacia de Alas',
+        saveDC: 15,
+        saveType: 'Força',
+        pingoThermokarstRisk: 'Anfiteatro lamacento na margem de uma depressão de termocarste onde a parede de permafrost derrete ao sol e desmorona em avalanches de lama gelada; a massa viscosa arrasta a comitiva para o lago turvo com 3d6 de concussão e risco de soterramento (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Marcha recuada a pelo menos 15 metros das cicatrizes semicirculares de abatimento na borda do alas.',
+        rescueAndStabilization: 'Laçamento do aventureiro com corda flutuante e troca imediata das vestes encharcadas de lama glacial.',
+        icon: '🌊🪨',
+        color: '#0284c7'
+      };
+    } else if (ht === 'drunken_forest_tilted_larch_root_snare_and_bog') {
+      hazard = {
+        hazardTitle: 'Atolamento em Floresta Bêbada de Larícios sobre Camada Ativa Liquefeita',
+        saveDC: 14,
+        saveType: 'Destreza',
+        pingoThermokarstRisk: 'Bosque subártico onde o abatimento irregular do permafrost inclina as árvores em ângulos caóticos sobre poços de lama tixotrópica e raízes emaranhadas; o solo liquefaz sob a vibração dos passos prendendo as pernas e impondo 1 nível de exaustão (DMG p. 110-111; PHB p. 185).',
+        pioneerMitigation: 'Progressão apoiada sobre os troncos tombados e tapetes contínuos de musgo esfagno seco.',
+        rescueAndStabilization: 'Alavancagem das botas presas no vácuo da argila com galhos de larício e massagem térmica nos membros inferiores.',
+        icon: '🌲🌀',
+        color: '#0d9488'
+      };
+    } else if (ht === 'sub_permafrost_methane_clathrate_blowout_vent') {
+      hazard = {
+        hazardTitle: 'Erupção Gasosa de Bolsão de Metano Sob Permafrost em Degelo',
+        saveDC: 15,
+        saveType: 'Constituição',
+        pingoThermokarstRisk: 'Montículo inchado na tundra que explode subitamente liberando gás metano pressurizado e blocos de solo congelado; o jato desloca o ar respirável e inflama ao menor contato com tochas causando 3d8 de dano de concussão/fogo (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Extinção imediata de chamas abertas ao detectar borbulhamento a seco nas poças da tundra.',
+        rescueAndStabilization: 'Remoção urgente da zona de depressão gasosa e ventilação forçada dos pulmões em terreno alto.',
+        icon: '💥💨',
+        color: '#eab308'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampPingoThermokarstStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'tundra').toLowerCase();
+    var dt = (defenseType || 'pingo_windward_drained_gravel_shoulder_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque no Ombro Drenado de Cascalho a Meia-Encosta do Pingo',
+      pingoAndCampSafety: 'Acampamento posicionado no terraço lateral de cascalho seco a 12 metros de altura no flanco do pingo, fora do alcance da lama da planície e abaixo da cratera instável do cume.',
+      pingoInsulationAndIce: 'Oferece visão desimpedida de 360 graus sobre a bacia de termocarste e piso perfeitamente drenado contra o degelo diurno.',
+      campRestAndSafetyGuards: 'Garante descanso longo enxuto e vigilância estratégica superior para as sentinelas da comitiva.',
+      icon: '⛺🏔️',
+      color: '#38bdf8'
+    };
+
+    if (dt === 'larch_bough_and_peat_insulation_mat_over_permafrost') {
+      tech = {
+        defenseTitle: 'Plataforma Isolante de Ramagens de Larício e Turfa Seca',
+        pingoAndCampSafety: 'Camada dupla de 30 centímetros de galhos resinosos e blocos de turfa seca sob o piso das tendas e sob o braseiro do acampamento.',
+        pingoInsulationAndIce: 'Impede que o calor corporal dos aventureiros derreta o permafrost subjacente e transforme o chão da barraca em um charco gelado durante a noite.',
+        campRestAndSafetyGuards: 'Preserva o isolamento térmico positivo e evita exaustão por frio noturno.',
+        icon: '🌲🛡️',
+        color: '#0d9488'
+      };
+    } else if (dt === 'pingo_core_pure_injection_ice_chisel_quarry') {
+      tech = {
+        defenseTitle: 'Lavra de Gelo de Injeção Ultracristalino no Núcleo Exposto',
+        pingoAndCampSafety: 'Coleta controlada de lascas do gelo azul compacto exposto na parede externa da fenda do pingo, evitando beber a água estagnada e rica em húmus dos lagos de alas.',
+        pingoInsulationAndIce: 'Produz água potável puríssima após fusão rápida na marmita, livre de parasitas de tundra e sedimentos em suspensão.',
+        campRestAndSafetyGuards: 'Assegura hidratação saudável e preparo seguro de caldos quentes para todo o grupo.',
+        icon: '🧊💧',
+        color: '#0ea5e9'
+      };
+    } else if (dt === 'polygon_ice_wedge_trough_perimeter_stake_line') {
+      tech = {
+        defenseTitle: 'Trincheira Defensiva nas Valas Poligonais de Cunhas de Gelo',
+        pingoAndCampSafety: 'Aproveitamento da rede geométrica natural de valas de contração térmica (polígonos de tundra) ao redor da base do pingo como fosso perimetral guarnecido com estacas.',
+        pingoInsulationAndIce: 'Canaliza e retarda a investida de predadores árticos, forçando-os a saltar valas monitoradas pelos arqueiros.',
+        campRestAndSafetyGuards: 'Reforça a segurança tática do bivaque durante as longas noites subárticas.',
+        icon: '🔶🛡️',
+        color: '#0284c7'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 191: CAMPOS DE GÊISERES E PISCINAS TERMAIS PRISMÁTICAS (D&D 5e)
   // =========================================================================
 
@@ -27748,6 +27852,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessPingoThermokarstHazard: calcWildernessPingoThermokarstHazard,
+    calcCampPingoThermokarstStation: calcCampPingoThermokarstStation,
     calcWildernessPrismaticGeyserBasinHazard: calcWildernessPrismaticGeyserBasinHazard,
     calcCampPrismaticGeyserBasinStation: calcCampPrismaticGeyserBasinStation,
     calcWildernessDolomiteSawtoothRidgeHazard: calcWildernessDolomiteSawtoothRidgeHazard,
