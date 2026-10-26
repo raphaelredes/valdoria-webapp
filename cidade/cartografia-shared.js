@@ -20575,6 +20575,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 169: PLATÔS VULCÂNICOS DE TUFO RIOLÍTICO E CHAMINÉS DE FADAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessRhyoliteTuffHoodoosHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'badlands').toLowerCase();
+    var ht = (hazardType || 'friable_tuff_hoodoo_shear_crumb_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desprendimento de Tufo Riolítico Friável com Queda de Pináculo',
+      saveDC: 15,
+      saveType: 'Destreza',
+      hoodooAndTuffRisk: 'Borda de cornija de tufo vulcânico poroso que se esfarela sob a passada em fenda de 14 metros entre chaminés de fadas; o explorador despenca prensado entre paredes de cinza compacta sofrendo 3d8 de concussão e risco de esmagamento por bloco basáltico do topo (DMG p. 110, 190).',
+      pioneerMitigation: 'Batedores avançam testando apoios com ponteiros de ferro doce e fixam grampos de expansão alargados para rochas moles.',
+      rescueAndStabilization: 'Içamento em tirolesa de resgate com roldanas de latão, imobilização de fraturas e aplicação de emplastro de resina vegetal e argila montmorilonita.',
+      icon: '🏜️🪨',
+      color: '#d97706'
+    };
+
+    if (ht === 'volcanic_ash_wind_tunnel_abrasion_choke') {
+      hazard = {
+        hazardTitle: 'Turbilhonamento de Cinza Vítrea Abrasiva em Desfiladeiro a 65 km/h',
+        saveDC: 14,
+        saveType: 'Constituição',
+        hoodooAndTuffRisk: 'Rajadas de vento comprimidas entre torres cônicas de tufo que erguem nuvens densas de microcristais de quartzo e cinza vulcânica; provoca espasmos respiratórios, queimação pulmonar e 1 nível de exaustão por silicose aguda (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Uso de máscaras de tecido duplo de lã embebidas em água e óculos de viseira de fenda fina de cobre.',
+        rescueAndStabilization: 'Inalação de vapores de chá de alteia morno, lavagem de olhos com concha de água filtrada e repouso em câmara vedada.',
+        icon: '💨🌋',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'troglodyte_vertical_vent_pit_fall') {
+      hazard = {
+        hazardTitle: 'Queda em Duto Cego de Ventilação de Cidade Subterrânea Oculta',
+        saveDC: 15,
+        saveType: 'Destreza',
+        hoodooAndTuffRisk: 'Poço cilíndrico de aeração de 20 metros escavado no tufo disfarçado por vegetação de estepes e cascalho solto; o solo cede sob a marcha tragando o aventureiro para as trevas de galerias subterrâneas com 3d6 de concussão.',
+        pioneerMitigation: 'Batedores marcham com varas longas sondando depressões circulares suspeitas no platô e balizam o contorno de aberturas.',
+        rescueAndStabilization: 'Descida com cadeira de resgate encordoada, extração cuidadosa e enfaixamento de luxações com tiras de linho rígido.',
+        icon: '🕳️⚠️',
+        color: '#b45309'
+      };
+    } else if (ht === 'hoodoo_balance_capstone_topple_collapse') {
+      hazard = {
+        hazardTitle: 'Tombamento de Chapéu de Basalto Equilibrado no Topo da Chaminé',
+        saveDC: 14,
+        saveType: 'Destreza',
+        hoodooAndTuffRisk: 'Bloco protetor de basalto negro de duas toneladas em equilíbrio precário no vértice da pirâmide de tufo que perde sustentação com a vibração da passagem da comitiva; despenca em ricochete causando 2d8 de concussão em raio de 4 metros.',
+        pioneerMitigation: 'Desvio prudente da base de pirâmides com fissuras basais visíveis e silêncio absoluto na passagem por corredores estreitos.',
+        rescueAndStabilization: 'Desobstrução rápida com alavancas de ferro forjado e aplicação de torniquete compressivo em ferimentos contusos.',
+        icon: '⚠️⛰️',
+        color: '#dc2626'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampRhyoliteTuffHoodoosStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'badlands').toLowerCase();
+    var dt = (defenseType || 'carved_troglodyte_chamber_millstone_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Câmara Troglodita Elevada com Porta de Mo Basáltica',
+      hoodooAndCampSafety: 'Refúgio escavado no tufo riolítico situado a 8 metros do solo com acesso por escadaria entalhada defensável e portal vedado por disco giratório de pedra maciça de 1 tonelada.',
+      tuffInsulationAndCisternCatchment: 'A rocha vulcânica fornece isolamento térmico perfeito mantendo 18°C estáveis, com chaminés de ar disfarçadas e cisterna pluvial límpida integrada.',
+      campRestAndSafetyGuards: 'Garante descanso longo imperturbável, seguro e revigorante para toda a comitiva com imunidade total a invasões e intempéries.',
+      icon: '⛺🏛️',
+      color: '#d97706'
+    };
+
+    if (dt === 'hoodoo_neck_dry_stacked_parapet_bastion') {
+      tech = {
+        defenseTitle: 'Parapeito de Lajes de Tufo Encaixadas em Colo de Chaminé de Fadas',
+        hoodooAndCampSafety: 'Muralha defensiva de 1,7 metro construída no estreitamento rochoso entre dois pináculos que bloqueia qualquer avanço hostil pela crista do platô.',
+        tuffInsulationAndCisternCatchment: 'Concede cobertura total (+5 na CA) contra arqueiros e visão panorâmica privilegiada de 360 graus para as sentinelas.',
+        campRestAndSafetyGuards: 'Assegura sono livre de sobressaltos e vigilância tática imbatível nas noites desérticas.',
+        icon: '🛡️🧱',
+        color: '#78350f'
+      };
+    } else if (dt === 'carved_dripstone_cistern_and_charcoal_filter') {
+      tech = {
+        defenseTitle: 'Cisterna Fóssil de Condensação com Leito Filtrante de Areia Quartzo',
+        hoodooAndCampSafety: 'Reservatório subterrâneo escavado na rocha que recolhe água de infiltração límpida e fria protegida da evaporação e purificada com carvão ativado de pinho.',
+        tuffInsulationAndCisternCatchment: 'Fornece 50 litros diários de água potável fresca enriquecida com minerais benéficos, garantindo a autonomia hídrica da expedição.',
+        campRestAndSafetyGuards: 'Elimina o risco de desidratação e estresse térmico, restabelecendo plenamente o vigor dos exploradores.',
+        icon: '💧🏺',
+        color: '#0284c7'
+      };
+    } else if (dt === 'vertical_chute_tripwire_resonating_pot_alarm') {
+      tech = {
+        defenseTitle: 'Alarme Acústico de Duto Vertical com Guizos de Bronze e Ânforas Ressonantes',
+        hoodooAndCampSafety: 'Cabos de tensão finos estendidos nas escadarias e dutos de acesso conectados a bilhas de pedra no interior de ânforas ocas que amplificam qualquer vibração externa.',
+        tuffInsulationAndCisternCatchment: 'Alerta precoce a 50 metros de distância eliminando qualquer possibilidade de ataque surpresa nas trevas das galerias.',
+        campRestAndSafetyGuards: 'Permite repouso sereno e seguro para todos os membros do grupo com alerta automatizado confiável.',
+        icon: '🔔🏺',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 168: MANGUEZAIS VERMELHOS DE MARÉ ESTUARINA E RAÍZES EM ESCORA (D&D 5e)
   // =========================================================================
 
@@ -25354,6 +25458,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessRhyoliteTuffHoodoosHazard: calcWildernessRhyoliteTuffHoodoosHazard,
+    calcCampRhyoliteTuffHoodoosStation: calcCampRhyoliteTuffHoodoosStation,
     calcWildernessTidalRedMangroveHazard: calcWildernessTidalRedMangroveHazard,
     calcCampTidalRedMangroveStation: calcCampTidalRedMangroveStation,
     calcWildernessPeriglacialRockGlacierHazard: calcWildernessPeriglacialRockGlacierHazard,
