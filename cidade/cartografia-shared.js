@@ -20726,6 +20726,110 @@
     return tech;
   }
 
+  // =========================================================================
+  // FASE 185: CAMPOS DE DUNAS COSTEIRAS TREPADORAS EM FALÉSIAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessClimbingCliffDuneHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'climbing_sand_ramp_avalanche_cliff_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desabamento de Rampa de Duna Trepadora em Falésia com Queda de 30m',
+      saveDC: 15,
+      saveType: 'Destreza',
+      cliffDuneRisk: 'Rampa íngreme de areia móvel subindo falésia marinha em ângulo de 38°; o avanço da comitiva rompe a cumeeira eólica fofa provocando avalanche de areia que arrasta os exploradores penhasco abaixo contra as rochas da arrebentação com 3d8 de concussão por queda (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Escalada ancorada por cabos com pítons cravados na rocha sólida da falésia e uso de bastões de sondagem de base rochosa.',
+      rescueAndStabilization: 'Ancoragem de talha no topo da falésia e descida de maca de resgate em cabo de aço para içamento rápido.',
+      icon: '🧗‍♂️🏖️',
+      color: '#d97706'
+    };
+
+    if (ht === 'cliff_edge_undercut_paleodune_cornice_collapse') {
+      hazard = {
+        hazardTitle: 'Rompimento de Cornija de Paleoduna Arenosa Suspensa sobre o Mar',
+        saveDC: 15,
+        saveType: 'Destreza',
+        cliffDuneRisk: 'Crista consolidada de arenito eólico projetada em balanço sobre o abismo marinho; a ação das intempéries solapa a base da cornija que cede sob o peso das botas com risco de 3d10 de concussão por queda livre no oceano (PHB p. 182-183).',
+        pioneerMitigation: 'Delimitação estrita de linha de marcha a 10 metros da borda do abismo e teste de sustentação com vara articulada.',
+        rescueAndStabilization: 'Lançamento de bóias circulares com cabos de resgate e içamento com torniquete ancorado em solo firme.',
+        icon: '🪨🌊',
+        color: '#b45309'
+      };
+    } else if (ht === 'cliffside_onshore_sandblast_spray_blindness') {
+      hazard = {
+        hazardTitle: 'Vendaval Marítimo com Areia Quartzosa e Borrifos Salinos a 80 km/h',
+        saveDC: 14,
+        saveType: 'Constituição',
+        cliffDuneRisk: 'Ventos alísios impetuosos comprimidos contra o paredão acelerando a 80 km/h carregando areia e borrifos cáusticos; corta a pele, arranha córneas e induz cegueira temporária nos batedores com 2d6 de dano cortante e desorientação por 1 hora (DMG p. 110, 246).',
+        pioneerMitigation: 'Uso de viseiras vedadas de chifre polido com fenda fina e capuzes de lona encerada amarrados firmemente sob o queixo.',
+        rescueAndStabilization: 'Lavagem dos olhos com soro fisiológico tépido e compressas emolientes de camomila em repouso abrigado.',
+        icon: '💨👁️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'submerged_beachrock_reef_keel_fracture') {
+      hazard = {
+        hazardTitle: 'Bancada de Arenito de Praia Submerso (Beachrock) com Abalroamento',
+        saveDC: 14,
+        saveType: 'Força',
+        cliffDuneRisk: 'Lajes duras de arenito praial cimentado que afloram sob a arrebentação; cascos de embarcações são destroçados ao aportar na maré vazante arremessando tripulantes contra as lajes com 3d6 de concussão (PHB p. 182-183).',
+        pioneerMitigation: 'Reconhecimento prévio de canais de maré desimpedidos por batedor em ponto elevado e desembarque exclusivo na estofa de preamar.',
+        rescueAndStabilization: 'Puxada imediata da comitiva para o topo de pedras secas e calafetagem de fendas do casco com resina e estopa.',
+        icon: '🛶⚠️',
+        color: '#0284c7'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampClimbingCliffDuneStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'cliff_top_paleodune_vegetated_bench_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Terraço Vegetado de Paleoduna no Topo da Falésia',
+      cliffDuneAndCampSafety: 'Acampamento instalado no platô de topo de falésia a 80 metros acima do mar, abrigado em depressão natural consolidada por raízes de restinga densa fora da linha de vento direto e imune a marés altas.',
+      cliffDuneBarrierAndWell: 'A falésia vertical impede qualquer invasão vinda do mar e a densa restinga circundante camufla as tendas contra observadores distantes, oferecendo visão panorâmica límpida do oceano.',
+      campRestAndSafetyGuards: 'Concede sono longo revigorante, seco e calmo com circulação contínua de brisa marinha fresca, garantindo vigília serena para as sentinelas de guarda.',
+      icon: '⛺🌾',
+      color: '#d97706'
+    };
+
+    if (dt === 'interlocking_driftwood_and_calcarenite_parapet') {
+      tech = {
+        defenseTitle: 'Parapeito Baluarte de Blocos de Calcarenito e Vigas de Naufrágio',
+        cliffDuneAndCampSafety: 'Muro perimetral defensivo construído com blocos pesados de arenito eólico e troncos de deriva cravados em trincheira profunda de areia compactada.',
+        cliffDuneBarrierAndWell: 'Concede cobertura superior (+5 na CA) contra arqueiros inimigos e protege totalmente o acampamento contra vendavais de areia e borrifos salinos.',
+        campRestAndSafetyGuards: 'Assegura descanso contínuo e defesa impenetrável contra predadores noturnos ou incursões costeiras.',
+        icon: '🪵🛡️',
+        color: '#b45309'
+      };
+    } else if (dt === 'paleodune_sand_filtration_lens_well') {
+      tech = {
+        defenseTitle: 'Poço de Ponteira Filtrante em Lente de Água Doce sob Paleoduna',
+        cliffDuneAndCampSafety: 'Perfuração artesanal na depressão da paleoduna que capta água de chuva retida sobre camada impermeável de argila fóssil, filtrada naturalmente pela areia quartzosa.',
+        cliffDuneBarrierAndWell: 'Fornece 55 litros diários de água doce cristalina, fresca e pura sem salinidade, garantindo autonomia hídrica completa no topo da falésia.',
+        campRestAndSafetyGuards: 'Elimina a fadiga de transportar odres pelas escarpas e recupera a hidratação plena dos exploradores.',
+        icon: '💧🏺',
+        color: '#0284c7'
+      };
+    } else if (dt === 'cliff_ridge_tripwire_shell_chime_alarm') {
+      tech = {
+        defenseTitle: 'Perímetro de Alarme em Crista de Falésia com Fios de Tensão e Guizos',
+        cliffDuneAndCampSafety: 'Linhas finas de latão estendidas ao longo dos acessos e rampas de areia conectadas a campainhas feitas de conchas marinhas perfuradas.',
+        cliffDuneBarrierAndWell: 'Tilintar sonoro nítido audível a 70 metros com qualquer toque de escaladores ou feras galgando as encostas da falésia nas trevas.',
+        campRestAndSafetyGuards: 'Proporciona repouso noturno ininterrupto e prontidão tática instantânea para as sentinelas de vigília.',
+        icon: '🔔🐚',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessSugarloafInselbergHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'savanna').toLowerCase();
@@ -27020,6 +27124,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessClimbingCliffDuneHazard: calcWildernessClimbingCliffDuneHazard,
+    calcCampClimbingCliffDuneStation: calcCampClimbingCliffDuneStation,
     calcWildernessSugarloafInselbergHazard: calcWildernessSugarloafInselbergHazard,
     calcCampSugarloafInselbergStation: calcCampSugarloafInselbergStation,
     calcWildernessAlluvialCollapseDolineHazard: calcWildernessAlluvialCollapseDolineHazard,

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T16:53:58Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T16:57:22Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessClimbingCliffDuneHazard) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var cd = CartShared.calcWildernessClimbingCliffDuneHazard(bKey, 'climbing_sand_ramp_avalanche_cliff_plunge');
+        return '<div class="clp-climbing-cliff-dune-card" style="margin:4px 0 6px;text-align:left;background:rgba(36,24,14,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(217,119,6,0.35);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cd.color + ';margin-bottom:2px;">' + cd.icon + ' ' + cd.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Dunas Trepadoras e Falésias:</b> ' + cd.cliffDuneRisk + ' (CD ' + cd.saveDC + ' [' + cd.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Mitigação:</b> ' + cd.pioneerMitigation + ' · <i>Estabilização: ' + cd.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampClimbingCliffDuneStation) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var cs = CartShared.calcCampClimbingCliffDuneStation(bKey, 'cliff_top_paleodune_vegetated_bench_bivouac');
+        return '<div class="clp-climbing-cliff-dune-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,20,10,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(180,83,9,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Topo de Falésia:</b> ' + cs.cliffDuneAndCampSafety + ' · <b>Defesa:</b> ' + cs.cliffDuneBarrierAndWell + '</div>'
+          + '  <div style="font-size:7.5px;color:#fcd34d;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){
