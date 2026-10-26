@@ -20490,6 +20490,113 @@
   // PHB p. 182-183 (Travel Pace, Navigation, Marching Order), XGE p. 77-83 (Forest and Swamp Hazards)
   // =========================================================================
 
+
+  // =========================================================================
+  // FASE 146: GELEIRAS DE ROCHAS SUSPENSAS, CONES DE DEJEÇÃO E AVALANCHES EM VALES EM U
+  // D&D 5e: DMG p. 110-111 (Hazards, Avalanches, Extreme Cold), DMG p. 246-247 (Structural Integrity),
+  // PHB p. 182-183 (Travel Pace, Navigation in Mountain Passes), PHB p. 190 (Falling & Suffocation), XGE p. 77-83
+  // =========================================================================
+
+  function calcWildernessHangingRockGlacierHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'scree_talus_creep_shear_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Deslizamento em Cone de Tálus Periglacial Instável',
+      saveDC: 15,
+      saveType: 'Destreza',
+      rockGlacierAndTalusRisk: 'Encosta de cascalho afiado e blocos soltos de permafrost em declive de 40 graus; o solo cede sob a marcha da expedição desencadeando corrida de detritos rochosos de 12 metros que inflige 3d6 de concussão e risco de soterramento parcial (DMG p. 110, 190).',
+      pioneerMitigation: 'Batedores avançam com bastões alpinos de ponta de aço e utilizam passadas em diagonal amarrados por cabos de retenção dinâmicos.',
+      rescueAndStabilization: 'Içamento com ancoragens de rocha e talhas mecânicas, aplicação de compressas frias em luxações e talas rígidas para imobilização de fraturas.',
+      icon: '🏔️🪨',
+      color: '#64748b'
+    };
+
+    if (ht === 'hanging_glacier_serac_ice_avalanche_blast') {
+      hazard = {
+        hazardTitle: 'Desprendimento de Séracs em Geleira Suspensa e Onda de Choque',
+        saveDC: 15,
+        saveType: 'Força',
+        rockGlacierAndTalusRisk: 'Blocos monumentais de gelo fóssil pesando centenas de toneladas que despencam de falésia suspensa a 300 metros, gerando avalanche catastrófica acompanhada de deslocamento de ar supersônico com 3d8 de concussão e soterramento por neve e gelo pulverizado.',
+        pioneerMitigation: 'Travessia rápida antes do amanhecer, quando as temperaturas gélidas congelam as fraturas de gelo e minimizam o risco de desprendimento.',
+        rescueAndStabilization: 'Busca rápida com sondas de avalanche de freixo e pás de metal leve, desobstrução das vias aéreas e aquecimento progressivo em tenda térmica.',
+        icon: '❄️💥',
+        color: '#0284c7'
+      };
+    } else if (ht === 'hypothermic_scree_gale_frostbite_chill') {
+      hazard = {
+        hazardTitle: 'Ventania Catabática Gélida Descendente a -15°C',
+        saveDC: 14,
+        saveType: 'Constituição',
+        rockGlacierAndTalusRisk: 'Correntes de ar glacial que despencam dos cumes a 60 km/h pelo vale em U; congelam o suor nas roupas em minutos e causam dormência extrema nas extremidades, impondo 1 nível de exaustão e desvantagem em testes de Destreza.',
+        pioneerMitigation: 'Uso de anoraks de couro engraxado forrados com pele de raposa polar e manoplas duplas com isolamento de lã prensada.',
+        rescueAndStabilization: 'Troca de luvas e meias úmidas por lã seca no bivaque, massagem suave sem fricção abrasiva e ingestão de caldo gordo fervente com raízes.',
+        icon: '💨🥶',
+        color: '#38bdf8'
+      };
+    } else if (ht === 'unstable_permafrost_thaw_slump_mudflow') {
+      hazard = {
+        hazardTitle: 'Desabamento Rotacional de Permafrost Degelado e Torrente de Lama',
+        saveDC: 14,
+        saveType: 'Destreza',
+        rockGlacierAndTalusRisk: 'O derretimento do gelo subterrâneo provoca o colapso repentino da camada superficial de turfa e cascalho, formando fluxo de lama gelada que engole mantimentos e arrasta montarias pela encosta.',
+        pioneerMitigation: 'Batedores atentos a degraus de abatimento e fendas de tração contornam áreas recém-expostas de solo negro saturado.',
+        rescueAndStabilization: 'Tracionamento com cordas amarradas a rochas matrizes firmes e limpeza rápida das bagagens com água limpa de degelo.',
+        icon: '⚠️🌊',
+        color: '#d97706'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampHangingRockGlacierStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'u_shaped_trough_bench_rock_glacier_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Abrigado em Patamar Rochoso de Vale em U',
+      rockGlacierAnchorageAndAvalancheSafety: 'Acampamento montado em terraço granítico suspenso 40 metros acima do fundo do vale, totalmente fora da trajetória de avalanches e de quedas de cascalho.',
+      talusGabionRetainingWallAndSnowTrench: 'Esporão rochoso saliente atua como quebra-vento natural contra rajadas catabáticas, oferecendo solo firme de laje nivelada.',
+      campRestAndSafetyGuards: 'Assegura repouso longo calmo e protegido para os aventureiros, neutralizando o desgaste físico da escalada alpina.',
+      icon: '⛺🏔️',
+      color: '#64748b'
+    };
+
+    if (dt === 'periglacial_talus_gabion_retaining_wall') {
+      tech = {
+        defenseTitle: 'Muro Defletor de Gabiões de Cascalho e Toras Alpinas',
+        rockGlacierAnchorageAndAvalancheSafety: 'Paredão protetor erguido com redes de corda de cânhamo preenchidas com pedras de tálus que desvia fragmentos rolantes para fora da área habitada.',
+        talusGabionRetainingWallAndSnowTrench: 'Impede que deslizamentos menores de cascalho atinjam as tendas durante a noite, criando perímetro seguro de descanso.',
+        campRestAndSafetyGuards: 'Permite que as sentinelas mantenham a vigilância em posto coberto e protegido de projéteis naturais de rocha.',
+        icon: '🛡️🧱',
+        color: '#475569'
+      };
+    } else if (dt === 'insulated_moss_turf_snow_trench_hearth') {
+      tech = {
+        defenseTitle: 'Lareira em Trincheira de Neve com Lousas e Turfa Alpina',
+        rockGlacierAnchorageAndAvalancheSafety: 'Fornilho escavado em poço de neve compactada forrado com lousas de xisto e placas de turfa seca que refletem o calor para o interior do bivaque.',
+        talusGabionRetainingWallAndSnowTrench: 'Mantém fogo vivo com queima de combustível prensado sem derreter a base do acampamento e sem gerar fumaça sufocante.',
+        campRestAndSafetyGuards: 'Eleva a temperatura interna das barracas em até 15°C, garantindo conforto térmico e secagem completa de vestimentas.',
+        icon: '🔥❄️',
+        color: '#ea580c'
+      };
+    } else if (dt === 'anchored_static_guide_line_scree_trail') {
+      tech = {
+        defenseTitle: 'Trilha de Tálus com Cabos de Aço e Pontos Fixos de Amarração',
+        rockGlacierAnchorageAndAvalancheSafety: 'Corda estática ancorada em pítons cravados na rocha viva que estabelece corredor de passagem firme entre as tendas e os pontos de vigia.',
+        talusGabionRetainingWallAndSnowTrench: 'Elimina escorregões acidentais no cascalho instável e viabiliza deslocamentos seguros mesmo sob escuridão ou nevasca.',
+        campRestAndSafetyGuards: 'Garante que as sentinelas façam suas rondas perimetrais com estabilidade e confiança.',
+        icon: '🪜⚓',
+        color: '#10b981'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessQuebrachoForestAndVertisolHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'swamp').toLowerCase();
@@ -22926,6 +23033,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessHangingRockGlacierHazard: calcWildernessHangingRockGlacierHazard,
+    calcCampHangingRockGlacierStation: calcCampHangingRockGlacierStation,
     calcWildernessQuebrachoForestAndVertisolHazard: calcWildernessQuebrachoForestAndVertisolHazard,
     calcCampQuebrachoForestAndVertisolStation: calcCampQuebrachoForestAndVertisolStation,
     calcWildernessHaliteSaltFlatHazard: calcWildernessHaliteSaltFlatHazard,
