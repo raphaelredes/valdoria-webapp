@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessBandedIronItabiriteHazard) return '';
+        var bKey = (biome && biome.key) || 'mountains';
+        var bi = CartShared.calcWildernessBandedIronItabiriteHazard(bKey, 'magnetic_compass_erratic_deviation_labyrinth');
+        return '<div class="clp-banded-iron-itabirite-card" style="margin:4px 0 6px;text-align:left;background:rgba(24,18,32,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(124,58,237,0.35);font-size:8px;color:#f5f3ff;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + bi.color + ';margin-bottom:2px;">' + bi.icon + ' ' + bi.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Formação Ferrífera e Itabirito:</b> ' + bi.bandedIronRisk + ' (CD ' + bi.saveDC + ' [' + bi.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#ddd6fe;margin-top:1px;">• <b>Mitigação:</b> ' + bi.pioneerMitigation + ' · <i>Estabilização: ' + bi.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampBandedIronItabiriteStation) return '';
+        var bKey = (biome && biome.key) || 'mountains';
+        var bi = CartShared.calcCampBandedIronItabiriteStation(bKey, 'quartzite_capped_insulated_knoll_bivouac');
+        return '<div class="clp-banded-iron-itabirite-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,24,20,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#d1fae5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + bi.color + ';margin-bottom:2px;">' + bi.icon + ' ' + bi.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Bivaque em Quartzito Isolante:</b> ' + bi.bandedIronAndCampSafety + ' · <b>Proteção:</b> ' + bi.bandedIronTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#a7f3d0;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + bi.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessKarstPoljePonorHazard) return '';
         var bKey = (biome && biome.key) || 'plains';
         var kp = CartShared.calcWildernessKarstPoljePonorHazard(bKey, 'estavelle_flash_reversal_geyser_deluge');

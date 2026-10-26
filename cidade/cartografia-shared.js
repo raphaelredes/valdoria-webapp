@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 261: FORMAÇÕES FERRÍFERAS BANDADAS E ITABIRITO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessBandedIronItabiriteHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var ht = (hazardType || 'magnetic_compass_erratic_deviation_labyrinth').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desvio Magnético Extremo de Bússolas e Desorientação em Cristas de Magnetita',
+      saveDC: 15,
+      saveType: 'Sabedoria',
+      bandedIronRisk: 'A presença de espessas camadas alternadas de magnetita e hematita de alta densidade distorce o campo magnético local em centenas de metros; bússolas de navegação giram desordenadamente ou apontam para depósitos locais de minério, induzindo o grupo em labirintos de gargantas cegas com perda de 1d4 dias de marcha (DMG p. 111; XGE p. 111).',
+      pioneerMitigation: 'Navegar por marcos visuais orográficos e posições do sol e das estrelas, guardando as bússolas metálicas em caixas de chumbo isolantes.',
+      rescueAndStabilization: 'Pausa para orientação astronômica ao entardecer e subida ao pico mais alto para avistar referências da planície.',
+      icon: '🧭🧲',
+      color: '#7c3aed'
+    };
+
+    if (ht === 'lightning_strike_conductive_iron_ridge') {
+      hazard = {
+        hazardTitle: 'Atração de Relâmpagos em Crista Condutora de Minério de Ferro',
+        saveDC: 15,
+        saveType: 'Destreza',
+        bandedIronRisk: 'Durante tempestades e trovoadas secas de altitude, a crista de itabirito atua como um condutor elétrico colossal que atrai descargas atmosféricas contínuas; arcos de plasma percorrem a superfície da rocha nua e descarregam em cotas de malha e armas de aço, infligindo 3d10 de dano elétrico (DMG p. 110; PHB p. 182-183).',
+        pioneerMitigation: 'Descer imediatamente das arestas expostas para vales de xisto e descartar temporariamente armaduras e armas de metal em depressões protegidas.',
+        rescueAndStabilization: 'Estabilização de parada cardiorrespiratória com magia de cura e compressas para queimaduras elétricas.',
+        icon: '⚡🪨',
+        color: '#eab308'
+      };
+    } else if (ht === 'razor_sharp_hematite_shale_scree_fracture') {
+      hazard = {
+        hazardTitle: 'Estilhaços Cortantes de Hematita e Lâminas de Jaspe Fraturadas',
+        saveDC: 14,
+        saveType: 'Destreza',
+        bandedIronRisk: 'As encostas de tálus do itabirito esfarelam em lascas metálicas de óxido de ferro e lâminas de jaspe vermelho afiadas como facas de açougueiro; escorregar no cascalho rasga solas e calças, talhando artérias e causando 2d8 de dano cortante e hemorragia ativa (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Marchar com perneiras reforçadas com placas de couro cru e testar cada laje com ponteiras de ferro antes de transferir o peso do corpo.',
+        rescueAndStabilization: 'Aplicação imediata de torniquetes de pressão e sutura rápida de lacerações musculares.',
+        icon: '🔪🩸',
+        color: '#dc2626'
+      };
+    } else if (ht === 'magnetic_equipment_drag_weight_impedance') {
+      hazard = {
+        hazardTitle: 'Sobrecarga e Arrasto Magnético em Armaduras e Armas de Ferro',
+        saveDC: 14,
+        saveType: 'Força',
+        bandedIronRisk: 'A intensa indução magnética de blocos maciços de magnetita subterrâneos exerce atração física direta sobre peças de armadura pesada, escudos e maças de ferro; a força invisível puxa o equipamento em direção ao solo rochoso, aumentando o peso percebido em 50%, reduzindo o deslocamento pela metade e impondo desvantagem em testes de perícia física (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Distribuir mochilas e armas metálicas em trenós de madeira ou substituir equipamentos ferrosos por peças de bronze, osso ou prata.',
+        rescueAndStabilization: 'Desafivelamento rápido de couraças e peitorais com auxílio de companheiros para aliviar a tração magnética.',
+        icon: '🛡️🧲',
+        color: '#b45309'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampBandedIronItabiriteStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var dt = (defenseType || 'quartzite_capped_insulated_knoll_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Isolado em Colina com Capa de Quartzito Dielétrico',
+      bandedIronAndCampSafety: 'Instalação do acampamento sobre uma elevação capeada por espessas camadas de quartzito puro que não conduz magnetismo nem eletricidade.',
+      bandedIronTrenchAndWatch: 'O piso isolante neutraliza a atração magnética sobre armas e armaduras e protege o bivaque contra arcos voltaicos de descargas de tempestade.',
+      campRestAndSafetyGuards: 'Permite descanso longo protegido e confortável sem que equipamentos de ferro fiquem colados ao chão.',
+      icon: '⛺💎',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'celestial_sextant_shadow_stick_navigation_post') {
+      tech = {
+        defenseTitle: 'Posto de Navegação por Gnômon Solar e Observação Astrológica',
+        bandedIronAndCampSafety: 'Armação de um gnômon vertical calibrado em círculo de pedras e observatório de estrelas no ponto mais alto do acampamento.',
+        bandedIronTrenchAndWatch: 'Calcula o norte verdadeiro e as coordenadas de marcha com precisão angular absoluta, corrigindo todos os mapas da comitiva.',
+        campRestAndSafetyGuards: 'Garante que os batedores conheçam com exatidão a rota segura de descida antes da alvorada.',
+        icon: '🔭☀️',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'copper_grounding_spike_lightning_cage') {
+      tech = {
+        defenseTitle: 'Gaiola de Aterramento e Estacas de Cobre contra Descargas Atmosféricas',
+        bandedIronAndCampSafety: 'Fixação de hastes de cobre espessas conectadas por cabos condutores circundando o perímetro das tendas.',
+        bandedIronTrenchAndWatch: 'Canaliza qualquer raio de tempestade diretamente para os veios profundos de minério de ferro fora da área de descanso.',
+        campRestAndSafetyGuards: 'Elimina o risco de choque elétrico durante tempestades noturnas de alta intensidade.',
+        icon: '🛡️⚡',
+        color: '#10b981'
+      };
+    } else if (dt === 'hematite_anvil_field_forge_weapon_temper') {
+      tech = {
+        defenseTitle: 'Forja de Campanha em Lajes de Hematita de Alta Inércia Térmica',
+        bandedIronAndCampSafety: 'Aproveitamento de blocos de minério de ferro de altíssima densidade para reter o calor das brasas da fogueira.',
+        bandedIronTrenchAndWatch: 'As lajes funcionam como fornos de recozimento e bigornas naturais perfeitas para desempenar armaduras amassadas e retificar fios de espadas.',
+        campRestAndSafetyGuards: 'Restaura a eficácia de combate e a moral da comitiva com equipamentos revisados e polidos.',
+        icon: '🔨🔥',
+        color: '#ea580c'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 260: POLJES KÁRSTICOS E UVALAS COMPOSTAS (D&D 5e)
   // =========================================================================
 
@@ -34924,6 +35028,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessBandedIronItabiriteHazard: calcWildernessBandedIronItabiriteHazard,
+    calcCampBandedIronItabiriteStation: calcCampBandedIronItabiriteStation,
     calcWildernessKarstPoljePonorHazard: calcWildernessKarstPoljePonorHazard,
     calcCampKarstPoljePonorStation: calcCampKarstPoljePonorStation,
     calcWildernessSandstoneRuiniformLabyrinthHazard: calcWildernessSandstoneRuiniformLabyrinthHazard,
