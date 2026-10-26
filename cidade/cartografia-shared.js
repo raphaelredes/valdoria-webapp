@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 214: CALDEIRÕES GNAMMA, TAFONI EM FAVO E DOMOS DE ESFOLIAÇÃO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessTafoniGnammaDomeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'hills').toLowerCase();
+    var ht = (hazardType || 'exfoliation_onion_skin_granite_sheet_spalling_slide').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desplacamento Súbito de Laje em Casca de Cebola em Domo de Esfoliação',
+      saveDC: 15,
+      saveType: 'Destreza',
+      tafoniRisk: 'Domos monolíticos de granito e gnaisse submetidos a alívio de pressão e insolação diurna cujas placas curvas externas (folhas de esfoliação de 15 centímetros de espessura) estão descoladas da rocha-mãe; o peso da comitiva sob o calor do meio-dia faz a placa arquear com um estrondo de canhão e escorregar pelo domo liso com 3d8 de concussão (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Percussão prévia da laje com o bastão para detectar som oco de descolamento e subida por veios de quartzo rugoso.',
+      rescueAndStabilization: 'Frenagem com cunhas de ferro nas fendas transversais e imobilização de membros.',
+      icon: '🪨💥',
+      color: '#d97706'
+    };
+
+    if (ht === 'honeycomb_tafoni_fretted_sandstone_handhold_crumble') {
+      hazard = {
+        hazardTitle: 'Ruptura de Septo Salino em Parede de Tafoni em Favo de Mel',
+        saveDC: 15,
+        saveType: 'Destreza',
+        tafoniRisk: 'Paredões de arenito e granito costeiro ou desértico inteiramente esculpidos por haloclastia (cristalização de sal) em milhares de alvéolos ocos separados por paredes de rocha finas como casca de ovo; agarrar ou apoiar o pé em um septo de tafoni provoca sua pulverização instantânea, precipitando o explorador com 2d8 de concussão mais 1d6 cortante (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Testar cada apoio três vezes e ancorar cordas somente em pilares maciços sem alvéolos salinos.',
+        rescueAndStabilization: 'Sustentação por corda dinâmica presa ao companheiro da base e limpeza de areia salina nos cortes.',
+        icon: '🧽🧗',
+        color: '#b45309'
+      };
+    } else if (ht === 'gnamma_panhole_rotting_organic_sludge_concealed_rim_slip') {
+      hazard = {
+        hazardTitle: 'Escorregamento em Caldeirão de Dissolução (Gnamma) de Borda em Balanço',
+        saveDC: 14,
+        saveType: 'Destreza',
+        tafoniRisk: 'No topo achatado dos inselbergs abrem-se bacias circulares profundas de fundo plano e paredes negativas (panholes ou gnammas) cheias de lodo escuro de folhas decompostas, algas mucilaginosas e água ácida estagnada; escorregar na borda úmida lança o aventureiro na cuba de paredes lisas impossíveis de escalar sem auxílio, causando 2d6 de veneno por ingestão séptica (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Contornar as bacias escuras pelo anel externo seco a pelo menos um metro da borda negativa.',
+        rescueAndStabilization: 'Lançamento de cabo de reboque desde a rocha seca e lavagem imediata com água limpa.',
+        icon: '🕳️🧪',
+        color: '#65a30d'
+      };
+    } else if (ht === 'cavernous_basal_tafoni_hornet_and_viper_roost_disturbance') {
+      hazard = {
+        hazardTitle: 'Enxame e Bote em Cavidade Basal de Tafoni Gigante Sobreaquecido',
+        saveDC: 14,
+        saveType: 'Constituição',
+        tafoniRisk: 'Grandes cavernas alveolares na base dos domos funcionam como estufas térmicas naturais que abrigam colônias agressivas de vespas-caçadoras e víboras de pedra camufladas nos alvéolos; buscar sombra sem inspeção prévia desencadeia múltiplos ataques em espaço confinado com 3d6 de veneno (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Inspeção das cavidades alveolares com fumaça de tocha resinosa na ponta de uma vara antes de entrar.',
+        rescueAndStabilization: 'Retirada imediata do abrigo alveolar, extração de ferrões e aplicação de antitoxina.',
+        icon: '🐝🐍',
+        color: '#ca8a04'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampTafoniGnammaDomeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'hills').toLowerCase();
+    var dt = (defenseType || 'basal_flared_tafoni_alcove_windproof_stone_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Alcova Basal de Tafoni Gigante (Câmara em Concha)',
+      tafoniAndCampSafety: 'Acampamento abrigado dentro de uma caverna de tafoni de 4 metros esculpida na base maciça de um bloco granítico estável, após limpeza prévia da câmara.',
+      tafoniTrenchAndWatch: 'A abóbada côncava em concha reflete o calor de uma pequena brasa para todo o grupo e bloqueia 100% do vento e da chuva.',
+      campRestAndSafetyGuards: 'Garante descanso longo invisível do exterior e termicamente protegido.',
+      icon: '⛺🪨',
+      color: '#d97706'
+    };
+
+    if (dt === 'capped_gnamma_rock_cistern_rainwater_reservoir') {
+      tech = {
+        defenseTitle: 'Cisterna Natural de Água de Chuva em Gnamma Coberta por Laje',
+        tafoniAndCampSafety: 'Poços cilíndricos profundos no topo do domo granítico cobertos por lajes de pedra colocadas por antigos batedores para impedir evaporação e queda de animais.',
+        tafoniTrenchAndWatch: 'Conserva centenas de litros de água pluvial cristalina e fria em meio a regiões áridas sem rios.',
+        campRestAndSafetyGuards: 'Recolocação rigorosa da laje de cobertura após abastecer os cantis da comitiva.',
+        icon: '💧🏺',
+        color: '#0284c7'
+      };
+    } else if (dt === 'exfoliation_buttress_shadow_cleft_cool_day_refuge') {
+      tech = {
+        defenseTitle: 'Fenda de Sombra Perene entre Contrafortes de Rocha Matriz',
+        tafoniAndCampSafety: 'Corredor estreito de rocha viva sem placas soltas de esfoliação onde a luz solar direta nunca penetra.',
+        tafoniTrenchAndWatch: 'Mantém temperatura 15 graus abaixo do deserto circundante para descanso diurno ou guarda.',
+        campRestAndSafetyGuards: 'Prevenção eficaz contra insolação e exaustão térmica do grupo.',
+        icon: '⛰️❄️',
+        color: '#64748b'
+      };
+    } else if (dt === 'honeycomb_acoustic_resonator_window_sentry_niche') {
+      tech = {
+        defenseTitle: 'Nicho de Vigília com Janelas Alveolares Acústicas no Tafoni',
+        tafoniAndCampSafety: 'Posto de sentinela posicionado atrás de uma parede fina de tafoni perfurada por dezenas de aberturas naturais em favo de mel.',
+        tafoniTrenchAndWatch: 'Permite observar a planície por múltiplas seteiras naturais enquanto as conchas côncavas amplificam sons distantes.',
+        campRestAndSafetyGuards: 'Oferece cobertura total de três quartos ao vigia durante os turnos da noite.',
+        icon: '👁️🔔',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 213: CONES DE CINZA VULCÂNICA, ESCÓRIA VÍTREA E BOMBAS OCAS (D&D 5e)
   // =========================================================================
 
@@ -30036,6 +30140,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessTafoniGnammaDomeHazard: calcWildernessTafoniGnammaDomeHazard,
+    calcCampTafoniGnammaDomeStation: calcCampTafoniGnammaDomeStation,
     calcWildernessPyroclasticCinderConeHazard: calcWildernessPyroclasticCinderConeHazard,
     calcCampPyroclasticCinderConeStation: calcCampPyroclasticCinderConeStation,
     calcWildernessFelsenmeerBlockfieldHazard: calcWildernessFelsenmeerBlockfieldHazard,
