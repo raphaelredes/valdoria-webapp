@@ -13641,6 +13641,130 @@
     };
   }
 
+  // === calcWildernessVolcanicHighlandTephraAndLavaBombHazard (Bombas de Lava, Plumas de Dióxido de Enxofre e Gêiseres Ácidos - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessVolcanicHighlandTephraAndLavaBombHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var ht = (hazardType || 'incandescent_lava_bomb_barrage').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Chuva de Bombas de Lava Incandescente e Ejetos Balísticos',
+      saveDC: 14,
+      saveType: 'Destreza',
+      volcanicDamageAndEjection: 'Projéteis de magma semifundido em trajetória parabólica a 120 km/h; 4d6 de fogo e 2d6 de concussão com estilhaços em raio de 4,5 metros (DMG p. 110).',
+      pioneerMitigation: 'Batedores observam rastros de fumaça ascendente na caldeira e orientam corrida imediata para a base de esporões de basalto maciço.',
+      rescueAndStabilization: 'Resfriamento com água limpa, desbridamento cauteloso de tecidos queimados e curativo com unguento estéril de banha animal.',
+      icon: '🌋☄️',
+      color: '#dc2626'
+    };
+
+    if (ht === 'toxic_sulfur_dioxide_plume_drift') {
+      hazard = {
+        hazardTitle: 'Pluma Rasteira de Dióxido de Enxofre e Cinza Escaldante',
+        saveDC: 13,
+        saveType: 'Constituição',
+        volcanicDamageAndEjection: 'Névoa pesada e corrosiva descendo a encosta; 2d6 de dano de ácido/veneno e 1 nível de exaustão por tosse asfixiante.',
+        pioneerMitigation: 'Uso de máscaras faciais de linho embebidas em vinagre fraco e marcha rápida pelas cristas elevadas contra o vento.',
+        rescueAndStabilization: 'Lavagem das vias aéreas com soro morno de cantil e inalação de vapores de infusão emoliente.',
+        icon: '☣️🌋',
+        color: '#eab308'
+      };
+    } else if (ht === 'brittle_lava_crust_breakthrough') {
+      hazard = {
+        hazardTitle: 'Rompimento de Crosta Fina de Basalto e Tubo Magmático Oco',
+        saveDC: 14,
+        saveType: 'Destreza',
+        volcanicDamageAndEjection: 'Piso de lava vítrea cedendo sob o peso da marcha; 3d8 de dano de fogo imediato e perda de calçados pela temperatura de 400°C.',
+        pioneerMitigation: 'Sondagem sistemática do solo com bastões longos de ponta de ferro e avanço exclusivo por cordões de lava encordoada espessa.',
+        rescueAndStabilization: 'Aplicação de compressas frias de lama mineral e imobilização do membro com talas de madeira rígida.',
+        icon: '🕳️🔥',
+        color: '#ea580c'
+      };
+    } else if (ht === 'hot_acid_geyser_blowout') {
+      hazard = {
+        hazardTitle: 'Sopro Súbito de Gêiser Hidrotermal e Água Ácida Fervente',
+        saveDC: 13,
+        saveType: 'Destreza',
+        volcanicDamageAndEjection: 'Erupção hidrotermal repentina de vapor e ácido a 15 metros de altura; 2d10 de fogo/ácido em raio de 3 metros.',
+        pioneerMitigation: 'Identificação de eflorescências de enxofre cristalizado no chão e audição de silvos de pressão subterrânea.',
+        rescueAndStabilization: 'Neutralização tópica com pasta de cinza vegetal pura e irrigação abundante com água potável.',
+        icon: '💨🧪',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      volcanicDamageAndEjection: hazard.volcanicDamageAndEjection,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Ambientes Vulcânicos e Calor Extremo) / PHB p. 182-183 (Asfixia e Fogo)'
+    };
+  }
+
+  // === calcCampVolcanicBasaltOverhangAndTephraTrenchStation (Bivaques sob Marquise de Basalto, Defletores de Cinza e Lastro de Pedra-Pomes - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampVolcanicBasaltOverhangAndTephraTrenchStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var dt = (defenseType || 'reinforced_basalt_shelf_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Sob Marquise de Basalto Maciço Colunar',
+      overheadMagmaProtection: 'Abóbada de rocha vulcânica densa suportando impacto balístico de bombas e desviando chuva de cinzas incandescentes.',
+      respiratoryAndThermalInsulation: 'Permite posicionamento de sentinelas em frestas laterais com ângulo total de visão da encosta.',
+      campRestAndSafetyGuards: 'Garante repouso longo imune a desabamentos causados por tremores vulcânicos ou fragmentos de magma.',
+      icon: '🛖🌋',
+      color: '#10b981'
+    };
+
+    if (dt === 'angled_tephra_deflector_screen_trench') {
+      tech = {
+        defenseTitle: 'Trincheira com Defletores Inclinados de Cinza e Escória',
+        overheadMagmaProtection: 'Valeta escavada com telas de couro cru inclinadas a 45° que fazem escorregar cinzas e pedregulhos quentes.',
+        respiratoryAndThermalInsulation: 'Mantém a área das barracas livre de acúmulo de peso de cinza que poderia colapsar as coberturas.',
+        campRestAndSafetyGuards: 'Permite vigília desobstruída e evacuação veloz mesmo sob precipitação contínua de tephra vulcânica.',
+        icon: '🛡️🪨',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'airtight_vinegar_sponge_breathing_kit') {
+      tech = {
+        defenseTitle: 'Estação de Filtros de Esponja com Vinagre e Carvão Ativo',
+        overheadMagmaProtection: 'Aparatos respiratórios individuais com dupla camada de esponja que retêm cinzas microscópicas e enxofre.',
+        respiratoryAndThermalInsulation: 'Protege as vias aéreas da comitiva contra edema pulmonar e queimaduras químicas durante o sono.',
+        campRestAndSafetyGuards: 'Garante que os aventureiros acordem recuperados sem tosses debilitantes ou dores torácicas.',
+        icon: '🤿🌿',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'thermal_isolation_pumice_stone_layer') {
+      tech = {
+        defenseTitle: 'Lastro Isolante de Pedra-Pomes Térmica sob os Leitos',
+        overheadMagmaProtection: 'Camada de 15 cm de rocha porosa sob os colchonetes bloqueando 95% do calor irradiado pelo solo magmático.',
+        respiratoryAndThermalInsulation: 'Impede a combustão espontânea de mantas e alforjes em contato com lajes basálticas superaquecidas.',
+        campRestAndSafetyGuards: 'Proporciona sono confortável em temperatura estável sem risco de queimaduras por condução térmica.',
+        icon: '🧱🌡️',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      overheadMagmaProtection: tech.overheadMagmaProtection,
+      respiratoryAndThermalInsulation: tech.respiratoryAndThermalInsulation,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque Vulcânico) / XGE p. 78 (Equipamento de Proteção e Sobrevivência)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -15444,6 +15568,8 @@
     calcCampSteppeYurtShelterAndFirebreakStation: calcCampSteppeYurtShelterAndFirebreakStation,
     calcWildernessMangroveSwampAndTidalMudflatHazard: calcWildernessMangroveSwampAndTidalMudflatHazard,
     calcCampMangroveStiltPlatformAndOutriggerStation: calcCampMangroveStiltPlatformAndOutriggerStation,
+    calcWildernessVolcanicHighlandTephraAndLavaBombHazard: calcWildernessVolcanicHighlandTephraAndLavaBombHazard,
+    calcCampVolcanicBasaltOverhangAndTephraTrenchStation: calcCampVolcanicBasaltOverhangAndTephraTrenchStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,

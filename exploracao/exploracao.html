@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T05:19:28Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T05:24:58Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessVolcanicHighlandTephraAndLavaBombHazard) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var vh = CartShared.calcWildernessVolcanicHighlandTephraAndLavaBombHazard(bKey, 'incandescent_lava_bomb_barrage');
+        return '<div class="clp-volcanic-tephra-card" style="margin:4px 0 6px;text-align:left;background:rgba(32,18,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(220,38,38,0.3);font-size:8px;color:#fee2e2;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + vh.color + ';margin-bottom:2px;">' + vh.icon + ' ' + vh.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Perigo:</b> ' + vh.volcanicDamageAndEjection + ' (CD ' + vh.saveDC + ' [' + vh.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fca5a5;margin-top:1px;">• <b>Prevenção:</b> ' + vh.pioneerMitigation + ' · <i>Estabilização: ' + vh.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampVolcanicBasaltOverhangAndTephraTrenchStation) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var vb = CartShared.calcCampVolcanicBasaltOverhangAndTephraTrenchStation(bKey, 'reinforced_basalt_shelf_bivouac');
+        return '<div class="clp-volcanic-basalt-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,32,24,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#d1fae5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + vb.color + ';margin-bottom:2px;">' + vb.icon + ' ' + vb.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Proteção Superior:</b> ' + vb.overheadMagmaProtection + ' · <b>Isolamento:</b> ' + vb.respiratoryAndThermalInsulation + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Sono:</b> ' + vb.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){
