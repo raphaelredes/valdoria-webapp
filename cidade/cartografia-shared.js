@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 267: DIQUES CLÁSTICOS E FISSURAS PALEOSSÍSMICAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessClasticDikeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'badlands').toLowerCase();
+    var ht = (hazardType || 'clastic_dike_wall_topple_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Tombamento de Laje Vertical de Dique Clástico Silicificado',
+      saveDC: 15,
+      saveType: 'Destreza',
+      dikeRisk: 'Muralhas estreitas de arenito quartzoso de 10 metros de altura emergem onde a rocha encaixante mais mole foi erodida; a perda de sustentação lateral faz placas de arenito cimentado tombarem como monólitos sobre a trilha ao menor abalo, esmagando a comitiva com 3d8 de dano contundente (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores sondando a estabilidade da base das muralhas com pontas de ferro e traçando rotas afastadas da zona de queda das lajes (Sobrevivência ou Natureza CD 14).',
+      rescueAndStabilization: 'Remoção urgente de lajes de arenito com alavancas de carga e imobilização de fraturas com talas e faixas rígidas (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🧱',
+      color: '#f97316'
+    };
+
+    if (ht === 'seismic_sand_blow_fissure_void') {
+      hazard.hazardTitle = 'Fosso Oco de Chaminé Paleossísmica Oculta';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Destreza';
+      hazard.dikeRisk = 'Fissuras verticais de injeção de areia onde a drenagem subterrânea carreada lavou o sedimento interno, deixando um vazio cego de 8 metros coberto apenas por uma casca fina de solo ressecado; o piso cede sob os pés do aventureiro em queda livre com 3d6 de concussão e aprisionamento (DMG p. 110).';
+      hazard.pioneerMitigation = 'Inspeção de depressões lineares e avanço com varas de sondagem para testar o chão antes de descarregar o peso do corpo (Percepção CD 14).';
+      hazard.rescueAndStabilization = 'Lançamento ágil de cordas de escalada com mosquetões para resgatar quem caiu na cavidade cega (Atletismo CD 13).';
+    } else if (ht === 'liquefaction_slurry_quakemire') {
+      hazard.hazardTitle = 'Areia Liquefeita em Bolsão Paleossísmico Ativo';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.dikeRisk = 'Depósito residual de areia fina saturada sob pressão intersticial que perde toda a coesão mecânica ao ser pisada com frequência; o explorador afunda subitamente até o peito em lama pastosa com deslocamento reduzido a zero e risco de perda de carga pesada (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Distribuição de peso amarrando pranchas de madeira sob os calçados e evitando passos pesados em fila única (Sobrevivência CD 14).';
+      hazard.rescueAndStabilization = 'Trabalho de tração com cordas e varas horizontais para retirar os aventureiros do atoleiro antes da acomodação da pasta (Atletismo CD 13).';
+    } else if (ht === 'brecciated_wall_flint_shard_gale') {
+      hazard.hazardTitle = 'Ventania com Estilhaços Cortantes em Corredor de Diques';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Constituição';
+      hazard.dikeRisk = 'Ventos canalizados entre as muralhas paralelas de diques arrastam fragmentos afiados de cherte e quartzo intemperizado das paredes; a rajada retalha roupas, fere a pele e causa 2d6 de dano cortante com risco de cegueira momentânea por poeira de sílica (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Uso de mantos pesados de couro com capuzes ajustados e óculos de proteção com frestas de osso (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Lavagem imediata dos olhos com água limpa e aplicação de compressas calmantes nas escoriações (Medicina CD 12).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampClasticDikeSeismicStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'badlands').toLowerCase();
+    var dt = (defenseType || 'parallel_dike_alcove_fortified_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Trincheira Natural de Diques Paralelos',
+      dikeAndCampSafety: 'O acampamento é estabelecido no corredor plano entre duas muralhas paralelas de diques clásticos maciços; as lajes verticais de arenito silicificado funcionam como muralhas ciclópicas que barram ventanias e ataques laterais (DMG p. 111).',
+      dikeTrenchAndWatch: 'Sentinela instalada no topo da muralha de arenito com visão limpa das terras ermas ao redor, garantindo +2 de bônus na Percepção Passiva.',
+      campRestAndSafetyGuards: 'Descanso seguro com excelente barreira contra ventos cortantes e invasões terrestres.',
+      icon: '🛡️',
+      color: '#f97316'
+    };
+
+    if (dt === 'sand_vent_filtered_subsurface_seep') {
+      defense.defenseTitle = 'Filtro Subterrâneo em Surgência de Chaminé Arenosa';
+      defense.dikeAndCampSafety = 'Captação de água doce de um filete subterrâneo que ascende filtrado naturalmente pelo quartzo purificado da chaminé clástica, brotando limpo e sem argilas em suspensão (PHB p. 150).';
+      defense.dikeTrenchAndWatch = 'Fornece suprimento constante de água fresca e pura para toda a comitiva durante o descanso longo nos ermos.';
+      defense.campRestAndSafetyGuards = 'Restauração física ideal sem risco de cólicas intestinais provocadas por água barrenta.';
+    } else if (dt === 'dike_chokepoint_rubble_breastwork') {
+      defense.defenseTitle = 'Barricada de Cascalho no Estreitamento do Corredor';
+      defense.dikeAndCampSafety = 'Fechamento da entrada do desfiladeiro com blocos empilhados de arenito clástico, criando uma fortaleza inexpugnável com frestas de disparo para armas de longo alcance (DMG p. 111).';
+      defense.dikeTrenchAndWatch = 'Concede cobertura total (+5 na CA) contra disparos de flechas e canaliza eventuais atacantes para um ponto de estrangulamento mortal.';
+      defense.campRestAndSafetyGuards = 'Elimina surpresas noturnas permitindo sono tranquilo e vigília facilitada com poucos sentinelas.';
+    } else if (dt === 'silicified_sandstone_hearth_reflector') {
+      defense.defenseTitle = 'Lareira com Refletor Térmico em Parede Silicificada';
+      defense.dikeAndCampSafety = 'Fogueira construída junto à face lisa do dique de arenito quartzoso que absorve e reflete o calor para o centro do bivaque como um forno cerâmico (PHB p. 185).';
+      defense.dikeTrenchAndWatch = 'Permite manter o acampamento aquecido por horas usando um quarto da lenha comum e sem gerar labaredas altas visíveis à distância.';
+      defense.campRestAndSafetyGuards = 'Proteção contra hipotermia noturna e descanso revigorante mesmo sob baixas temperaturas.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 266: PLATAFORMAS DE ABRASÃO COSTEIRA EM FLYSCH (D&D 5e)
   // =========================================================================
 
@@ -35476,6 +35556,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessClasticDikeHazard: calcWildernessClasticDikeHazard,
+    calcCampClasticDikeSeismicStation: calcCampClasticDikeSeismicStation,
     calcWildernessCoastalFlyschPlatformHazard: calcWildernessCoastalFlyschPlatformHazard,
     calcCampCoastalFlyschPlatformStation: calcCampCoastalFlyschPlatformStation,
     calcWildernessFloodBasaltTrappHazard: calcWildernessFloodBasaltTrappHazard,
