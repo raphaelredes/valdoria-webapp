@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 258: RECIFES DE CORAL FÓSSIL E CAVERNAS MARINHAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessFossilCoralReefCaveHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coast').toLowerCase();
+    var ht = (hazardType || 'razor_coral_calcite_spire_laceration').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Laceração por Espículas de Calcita e Lâminas Cortantes de Coral Fóssil',
+      saveDC: 15,
+      saveType: 'Destreza',
+      fossilCoralRisk: 'A barreira de recife soerguida é composta por esqueletos fossilizados de corais pétreos eriçados de septos pontiagudos e lâminas de calcita cortantes como navalhas; qualquer desequilíbrio na marcha rasga perneiras de couro grosso e talha carnes até o osso com 3d6 de dano cortante e risco de infecção óssea por microrganismos incrustantes (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Equipar solados de couro dobrado com cravos de bronze, apoiar os passos exclusivamente em trilhas de cascalho moído e não apoiar mãos desprotegidas.',
+      rescueAndStabilization: 'Cauterização imediata de cortes com tintura de iodo marinho e curativo compressivo com faixas limpas.',
+      icon: '🪸🔪',
+      color: '#e11d48'
+    };
+
+    if (ht === 'tidal_surge_sea_cave_hydraulic_compression') {
+      hazard = {
+        hazardTitle: 'Compressão Hidráulica e Armadilha de Maré Alta em Caverna Marinha',
+        saveDC: 14,
+        saveType: 'Força',
+        fossilCoralRisk: 'A preamar de sizígia avança rapidamente sobre as grutas de abrasão na base do recife, comprimindo grandes bolsões de ar contra o teto e canalizando ondas de choque hidropneumáticas que arremessam aventureiros contra estalactites com 2d8 de impacto, fechando a rota de saída sob 4 metros de água revolta (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Consultar tabelas lunares de maré antes de entrar em cavernas e fixar cordas guias de evacuação rápida na linha de preamar.',
+        rescueAndStabilization: 'Puxar o explorador pela corda guia para poços de descompressão elevados e desobstruir as vias respiratórias.',
+        icon: '🌊🚪',
+        color: '#0284c7'
+      };
+    } else if (ht === 'blind_drop_sponge_solution_chimney_fall') {
+      hazard = {
+        hazardTitle: 'Queda em Chaminé Oculta de Dissolução Esponjosa',
+        saveDC: 14,
+        saveType: 'Destreza',
+        fossilCoralRisk: 'O platô superior do recife é perfurado por poços verticais cilíndricos escavados pela água da chuva em zonas ricas em esponjas fósseis friáveis; disfarçados por esteiras de gramíneas halófitas secas, o piso oco cede sob o peso da marcha, precipitando a vítima em queda de 10 metros sobre seixos pontiagudos (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Sondar o terreno com hastes de madeira à frente dos pés e evitar avançar sobre manchas densas de vegetação costeira suspensa.',
+        rescueAndStabilization: 'Lançamento de escada de corda com estribos e estabilização de torsões articulares com talas rígidas.',
+        icon: '🕳️🌿',
+        color: '#b45309'
+      };
+    } else if (ht === 'hypersaline_tidepool_crust_toxic_anemone_sting') {
+      hazard = {
+        hazardTitle: 'Queimadura Tóxica por Toxinas de Cnidários e Salmouras Estagnadas',
+        saveDC: 14,
+        saveType: 'Constituição',
+        fossilCoralRisk: 'Depressões rochosas rasas isoladas pelo recuo da maré concentram salmouras cáusticas e colônias de anêmonas venenosas camufladas em algas pardas; o contato direto da pele com os cnidócitos libera neurotoxinas urticantes que causam choque doloroso, infligindo 2d6 de veneno e condição envenenado por 1 hora (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Marchar calçado com botas impermeáveis de cano alto e não mergulhar as mãos em poças estagnadas para capturar mariscos.',
+        rescueAndStabilization: 'Banho de vinagre ou água do mar morna para inativar as toxinas e unção com óleo de peixe calmante.',
+        icon: '🪼☠️',
+        color: '#9333ea'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampFossilCoralReefCaveStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coast').toLowerCase();
+    var dt = (defenseType || 'upper_crest_fossil_lagoon_dry_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Seguro na Crista Superior de Antiga Laguna Fóssil',
+      fossilCoralAndCampSafety: 'Instalação do acampamento na bacia côncava da antiga laguna coralínea situada a 12 metros acima da cota máxima de sizígia.',
+      fossilCoralTrenchAndWatch: 'O solo de areia bioclástica fina drena perfeitamente qualquer chuva, proporcionando piso macio, seco e completamente imune ao avanço das marés oceânicas.',
+      campRestAndSafetyGuards: 'Garante descanso longo seco, calmo e seguro sem risco de inundação costeira.',
+      icon: '⛺🪸',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'sea_cave_dripwater_stalactite_condenser') {
+      tech = {
+        defenseTitle: 'Coleta de Água Doce em Estalactites Filtrantes no Teto da Caverna',
+        fossilCoralAndCampSafety: 'Posicionamento de funis e jarros sob gotejamentos contínuos de água de chuva filtrada através de 30 metros de rocha bioclástica.',
+        fossilCoralTrenchAndWatch: 'A água é naturalmente mineralizada, límpida, fresca e totalmente isenta de salinidade marinha ou bactérias estuarinas.',
+        campRestAndSafetyGuards: 'Abastece todos os cantis da comitiva com água doce potável de altíssima pureza.',
+        icon: '💧🏺',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'calcified_ridge_sentry_lookout_vantage') {
+      tech = {
+        defenseTitle: 'Posto Avançado na Crista Calcificada com Varredura Visual de Costeiras e Marés',
+        fossilCoralAndCampSafety: 'Posicionamento de sentinelas na crista externa do recife fóssil, dominando todo o horizonte marítimo e faixas intermarés.',
+        fossilCoralTrenchAndWatch: 'Oferece linha de visão de dezenas de quilômetros para detecção antecipada de caravelas piratas, marés vivas ou tempestades oceânicas.',
+        campRestAndSafetyGuards: 'Alerta o acampamento com horas de antecedência sobre qualquer aproximação perigosa.',
+        icon: '🔭🌊',
+        color: '#10b981'
+      };
+    } else if (dt === 'wave_baffle_limestone_breakwater_shelter') {
+      tech = {
+        defenseTitle: 'Barreira Quebra-Mar Natural contra Ventos Salinos e Respingos de Arrebentação',
+        fossilCoralAndCampSafety: 'Aproveitamento da muralha fóssil de 15 metros como anteparo contra as rajadas marinhas predominantes.',
+        fossilCoralTrenchAndWatch: 'Bloqueia o vento úmido carregado de salmoura que acelera a ferrugem de armaduras e armas de ferro, mantendo o interior do bivaque acolhedor.',
+        campRestAndSafetyGuards: 'Preserva a integridade de equipamentos metálicos e tecidos, promovendo repouso térmico tranquilo.',
+        icon: '🛡️🧱',
+        color: '#6366f1'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 257: CONES DE CINZA E ESCÓRIAS VULCÂNICAS (D&D 5e)
   // =========================================================================
 
@@ -34612,6 +34716,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessFossilCoralReefCaveHazard: calcWildernessFossilCoralReefCaveHazard,
+    calcCampFossilCoralReefCaveStation: calcCampFossilCoralReefCaveStation,
     calcWildernessCinderConeScoriaSlopeHazard: calcWildernessCinderConeScoriaSlopeHazard,
     calcCampCinderConeScoriaSlopeStation: calcCampCinderConeScoriaSlopeStation,
     calcWildernessBraidedRiverQuickmudHazard: calcWildernessBraidedRiverQuickmudHazard,

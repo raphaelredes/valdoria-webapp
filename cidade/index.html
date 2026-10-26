@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessFossilCoralReefCaveHazard) return '';
+        var bKey = (biome && biome.key) || 'coast';
+        var fc = CartShared.calcWildernessFossilCoralReefCaveHazard(bKey, 'razor_coral_calcite_spire_laceration');
+        return '<div class="clp-fossil-coral-reef-cave-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,14,20,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(225,29,72,0.35);font-size:8px;color:#fff1f2;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + fc.color + ';margin-bottom:2px;">' + fc.icon + ' ' + fc.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Recife de Coral Fóssil e Caverna Marinha:</b> ' + fc.fossilCoralRisk + ' (CD ' + fc.saveDC + ' [' + fc.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fecdd3;margin-top:1px;">• <b>Mitigação:</b> ' + fc.pioneerMitigation + ' · <i>Estabilização: ' + fc.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampFossilCoralReefCaveStation) return '';
+        var bKey = (biome && biome.key) || 'coast';
+        var fc = CartShared.calcCampFossilCoralReefCaveStation(bKey, 'upper_crest_fossil_lagoon_dry_bivouac');
+        return '<div class="clp-fossil-coral-reef-cave-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,24,24,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(20,184,166,0.3);font-size:8px;color:#ccfbf1;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + fc.color + ';margin-bottom:2px;">' + fc.icon + ' ' + fc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Bivaque em Laguna Fóssil Elevada:</b> ' + fc.fossilCoralAndCampSafety + ' · <b>Proteção:</b> ' + fc.fossilCoralTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#99f6e4;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + fc.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessCinderConeScoriaSlopeHazard) return '';
         var bKey = (biome && biome.key) || 'volcanic';
         var cc = CartShared.calcWildernessCinderConeScoriaSlopeHazard(bKey, 'scoria_scree_angle_of_repose_avalanche');
