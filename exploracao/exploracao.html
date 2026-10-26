@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T16:57:22Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T17:02:38Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessTunnelValleyKettleHazard) return '';
+        var bKey = (biome && biome.key) || 'tundra';
+        var tv = CartShared.calcWildernessTunnelValleyKettleHazard(bKey, 'tunnel_valley_ice_scoured_scarp_rockslide');
+        return '<div class="clp-tunnel-valley-kettle-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,28,42,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.35);font-size:8px;color:#f0f9ff;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + tv.color + ';margin-bottom:2px;">' + tv.icon + ' ' + tv.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Vales de Túnel e Lagos Kettle:</b> ' + tv.tunnelValleyRisk + ' (CD ' + tv.saveDC + ' [' + tv.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Mitigação:</b> ' + tv.pioneerMitigation + ' · <i>Estabilização: ' + tv.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampTunnelValleyKettleStation) return '';
+        var bKey = (biome && biome.key) || 'tundra';
+        var tk = CartShared.calcCampTunnelValleyKettleStation(bKey, 'tunnel_valley_fluvial_terrace_kame_bivouac');
+        return '<div class="clp-tunnel-valley-kettle-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(10,24,36,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(14,165,233,0.3);font-size:8px;color:#f0f9ff;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + tk.color + ';margin-bottom:2px;">' + tk.icon + ' ' + tk.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Terraço de Kame:</b> ' + tk.valleyAndCampSafety + ' · <b>Defesa:</b> ' + tk.valleyBarrierAndSumpWell + '</div>'
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + tk.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

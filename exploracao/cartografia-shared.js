@@ -20730,6 +20730,110 @@
   // FASE 185: CAMPOS DE DUNAS COSTEIRAS TREPADORAS EM FALÉSIAS (D&D 5e)
   // =========================================================================
 
+  // =========================================================================
+  // FASE 186: VALES SUBGLACIAIS EM RAVINAS DE TÚNEL E LAGOS DE KETTLE (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessTunnelValleyKettleHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'tundra').toLowerCase();
+    var ht = (hazardType || 'tunnel_valley_ice_scoured_scarp_rockslide').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desabamento de Paredão Escavado em Vale de Túnel com Avalanche',
+      saveDC: 15,
+      saveType: 'Destreza',
+      tunnelValleyRisk: 'Flancos de vale em túnel de 40 metros formados por tálus de morena instável; o degelo solta matriz de cascalho e argila desencadeando deslizamento de 30 toneladas de rocha sobre o leito com risco de 3d8 de concussão por esmagamento (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Marcha em fila única pelo centro drenado do vale mantendo vigilância contínua das escarpas superiores com sentinela avançada.',
+      rescueAndStabilization: 'Ancoragem de cabos de aço em blocos erráticos estáveis e remoção de pedregulhos com alavancas para desencarcerar feridos.',
+      icon: '🏔️🪨',
+      color: '#38bdf8'
+    };
+
+    if (ht === 'kettle_lake_subsurface_ice_core_calving') {
+      hazard = {
+        hazardTitle: 'Rompimento de Bloco de Gelo Fóssil em Lago de Kettle com Vórtice',
+        saveDC: 15,
+        saveType: 'Força',
+        tunnelValleyRisk: 'Depressão circular de kettle lake onde núcleo remanescente de gelo glacial no fundo colapsa repentinamente; a cavidade drena milhares de litros gerando turbilhão de sucção em água a 2°C com 3d8 de concussão por choque térmico (DMG p. 110, 246-247).',
+        pioneerMitigation: 'Navegação cautelosa amarrada a linhas de segurança na borda da morena e sondagem de profundidade com cabo graduado.',
+        rescueAndStabilization: 'Puxada imediata pela linha de vida para margem seca, troca de vestes encharcadas e aquecimento em saco de dormir de pele.',
+        icon: '🌀🧊',
+        color: '#0284c7'
+      };
+    } else if (ht === 'moraine_till_liquefaction_quickmud_slough') {
+      hazard = {
+        hazardTitle: 'Liquefação de Tilita Glacial em Encosta de Morena com Atolamento',
+        saveDC: 14,
+        saveType: 'Destreza',
+        tunnelValleyRisk: 'Encosta de morena frontal com mistura de argila moída e seixos saturados por degelo subterrâneo; o piso cede sob os pés transformando-se em pasta fluida que atola o aventureiro até as coxas com 2d8 de concussão por deslizamento (PHB p. 182-183).',
+        pioneerMitigation: 'Travessia sobre sapatilhas largas de lona reforçada e apoio contínuo em bastões alpinos de ponta dupla.',
+        rescueAndStabilization: 'Lançamento de escada flexível de corda sobre a lama e tração firme com cabo ancorado em árvore na crista.',
+        icon: '🕳️❄️',
+        color: '#0ea5e9'
+      };
+    } else if (ht === 'subglacial_fluvial_chute_flash_surge') {
+      hazard = {
+        hazardTitle: 'Onda de Cheia em Calha Fluvial Subglaciar no Fundo do Vale',
+        saveDC: 14,
+        saveType: 'Força',
+        tunnelValleyRisk: 'Riacho encaixado no fundo do vale em túnel alimentado por lagos subglaciares; rompimento de dique de gelo lança torrente de água gélida e seixos a 35 km/h sem escape lateral imediato com 3d6 de concussão e risco de afogamento (DMG p. 110, 246).',
+        pioneerMitigation: 'Reconhecimento antecipado de degraus de escalada nas margens e monitoramento de turbidez súbita da água.',
+        rescueAndStabilization: 'Resgate com ganchos de içamento lançados das margens altas e abrigo imediato em tenda térmica aquecida.',
+        icon: '🌊🏔️',
+        color: '#0369a1'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampTunnelValleyKettleStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'tundra').toLowerCase();
+    var dt = (defenseType || 'tunnel_valley_fluvial_terrace_kame_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Terraço Fluvial Elevado de Kame sob a Morena',
+      valleyAndCampSafety: 'Acampamento instalado em terraço plano de cascalho bem drenado a 15 metros acima do leito do vale em túnel, em promontório de kame fora do alcance de torrentes de degelo e deslizamentos.',
+      valleyBarrierAndSumpWell: 'A elevação isola o abrigo das correntes de ar catabático gélido da ravina, enquanto o paredão rochoso pelas costas bloqueia tempestades de neve e emboscadas inimigas.',
+      campRestAndSafetyGuards: 'Concede descanso longo aquecido, seco e seguro para todos os membros do grupo, garantindo vigilância panorâmica sobre o corredor do vale para as sentinelas de guarda.',
+      icon: '⛺🏔️',
+      color: '#38bdf8'
+    };
+
+    if (dt === 'interlocking_glacier_boulder_and_pine_log_breastwork') {
+      tech = {
+        defenseTitle: 'Parapeito Baluarte de Blocos Glaciares e Toras de Pinho',
+        valleyAndCampSafety: 'Muro defensivo perimetral erguido com pedregulhos arredondados de morena e toras pesadas de pinho encaixadas em cantaria rústica travada com musgo seco.',
+        valleyBarrierAndSumpWell: 'Concede cobertura superior (+5 na CA) contra arqueiros e projéteis e barra investidas de lobos das neves, ursos pardos ou predadores da tundra.',
+        campRestAndSafetyGuards: 'Assegura estabilidade térmica contra vendavais glaciais e sentinelas abrigadas em postos de observação cobertos.',
+        icon: '🪵🛡️',
+        color: '#0284c7'
+      };
+    } else if (dt === 'kame_gravel_filtration_freshwater_sump_well') {
+      tech = {
+        defenseTitle: 'Poço de Captação em Leito de Cascalho com Filtro de Carvão',
+        valleyAndCampSafety: 'Bacia escavada no cascalho limpo de kame que capta água de degelo filtrada naturalmente através de camadas espessas de areia quartzosa, isenta de farinha de rocha.',
+        valleyBarrierAndSumpWell: 'Fornece 60 litros diários de água mineral gelada, cristalina, pura e potável, garantindo a autonomia hídrica da comitiva no vale subglacial.',
+        campRestAndSafetyGuards: 'Previne cólicas causadas por água turva de morena e restabelece plenamente o vigor dos exploradores.',
+        icon: '💧🏺',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'tunnel_valley_rim_tripwire_bronze_bell_alarm') {
+      tech = {
+        defenseTitle: 'Perímetro de Alarme em Garganta com Fios de Aço e Campainhas',
+        valleyAndCampSafety: 'Cabos de aço flexível estendidos ao longo das vias de acesso e bordas da morena conectados a sinos de bronze instalados em estacas no permafrost.',
+        valleyBarrierAndSumpWell: 'Ecoa estrondo sonoro nítido pelo vale ao menor toque, alertando sobre aproximações hostis a mais de 70 metros de distância.',
+        campRestAndSafetyGuards: 'Garante tranquilidade contínua no sono e prontidão imediata para as sentinelas de vigília.',
+        icon: '🔔❄️',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessClimbingCliffDuneHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'coastal').toLowerCase();
@@ -27124,6 +27228,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessTunnelValleyKettleHazard: calcWildernessTunnelValleyKettleHazard,
+    calcCampTunnelValleyKettleStation: calcCampTunnelValleyKettleStation,
     calcWildernessClimbingCliffDuneHazard: calcWildernessClimbingCliffDuneHazard,
     calcCampClimbingCliffDuneStation: calcCampClimbingCliffDuneStation,
     calcWildernessSugarloafInselbergHazard: calcWildernessSugarloafInselbergHazard,
