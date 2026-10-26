@@ -20476,6 +20476,113 @@
   // PHB p. 182-185 (Travel Pace, Dehydration & Water Requirements), XGE p. 77-83 (Arid Encounters)
   // =========================================================================
 
+
+  // =========================================================================
+  // FASE 144: CAMPOS DE HALITA, SALINAS FÓSSEIS E OÁSIS HIPOTÉRMICOS SUBTERRÂNEOS
+  // D&D 5e: DMG p. 110-111 (Hazards, Quicksand/Sinkholes, Extreme Heat), DMG p. 246-247 (Structural Integrity),
+  // PHB p. 182-185 (Travel Pace, Navigation in Salt Flats, Dehydration), XGE p. 77-83 (Salt Flat Encounters)
+  // =========================================================================
+
+  function calcWildernessHaliteSaltFlatHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'brine_crust_collapse_hypersaline_sinkhole').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso de Crosta de Halita em Sumidouro de Salmoura Cáustica',
+      saveDC: 15,
+      saveType: 'Destreza',
+      haliteSaltFlatRisk: 'Crosta quebradiça de sal de apenas 5 cm de espessura suspensa sobre bolsão profundo de salmoura líquida hipersalina a 38° Bé; o piso cede repentinamente tragando o aventureiro em lodo salgado com densidade asfixiante que inflige 2d8 de dano cáustico/ácido e risco de sufocamento (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores sondam o solo à frente com bastões de ponta de ferro e utilizam raquetes largas de madeira leve nos pés para distribuição homogênea de peso.',
+      rescueAndStabilization: 'Içamento imediato com cabos de laço duplo e alavancas de prancha, lavagem copiosa da pele e olhos com água doce pura para estancar queimaduras salinas.',
+      icon: '🧂🕳️',
+      color: '#e2e8f0'
+    };
+
+    if (ht === 'blinding_albedo_salt_glare_and_corneal_scorch') {
+      hazard = {
+        hazardTitle: 'Albedo Ofuscante do Manto Branco de Sal e Queimadura Retiniana',
+        saveDC: 14,
+        saveType: 'Constituição',
+        haliteSaltFlatRisk: 'Reflexão de 95% da luz solar pela planície branca de sal puro que queima as retinas e induz cegueira solar por fotoceratite após 3 horas de marcha exposta, impondo desvantagem contínua em testes de Percepção e jogadas de ataque.',
+        pioneerMitigation: 'Uso de óculos de fenda feitos de casca de árvore enegrecida ou aplicação de fuligem espessa sob os olhos para bloquear o brilho refletido.',
+        rescueAndStabilization: 'Repouso absoluto em tenda escura com compressas de infusão fria de camomila nos olhos por 2 horas para recuperação da acuidade visual.',
+        icon: '☀️🕶️',
+        color: '#f8fafc'
+      };
+    } else if (ht === 'hyperosmotic_salt_wind_desiccation_dehydration') {
+      hazard = {
+        hazardTitle: 'Vendaval Salino Hiperosmótico e Desidratação Pulmonar Crítica',
+        saveDC: 15,
+        saveType: 'Constituição',
+        haliteSaltFlatRisk: 'Ventos abrasivos a 50 km/h saturados de microcristais secos de cloreto de sódio que dessecam mucosas nasais e garganta, triplicando a perda de umidade corporal e impondo 1 nível de exaustão e tosse sanguinolenta.',
+        pioneerMitigation: 'Uso de máscaras faciais de linho embebidas em óleo de linhaça ou vinagre diluído e aumento preventivo das rações diárias de água potável.',
+        rescueAndStabilization: 'Inalação de vapor d\'água doce quente em tenda fechada, reposição hídrica fracionada e ingestão de mel puro para regeneração faríngea.',
+        icon: '💨🧂',
+        color: '#cbd5e1'
+      };
+    } else if (ht === 'needle_halite_crystallization_trench_hazard') {
+      hazard = {
+        hazardTitle: 'Polígonos de Halita com Lâminas de Cristal Afiadas como Navalhas',
+        saveDC: 14,
+        saveType: 'Destreza',
+        haliteSaltFlatRisk: 'Bordas de dilatação térmica do sal que erguem cristas geométricas de cristais de halita transparentes e afiados; cortam solas de calçados, patas de montarias e ferem canelas desprotegidas, causando 2d6 de dano cortante e marcha claudicante.',
+        pioneerMitigation: 'Proteção das pernas com botinas reforçadas com placas de couro cru tratado e marcha estritamente concentrada no centro liso dos polígonos.',
+        rescueAndStabilization: 'Extração meticulosa de fragmentos vítreos de sal das feridas com pinças finas, cauterização suave e curativo compressivo impermeabilizado.',
+        icon: '💎🩸',
+        color: '#94a3b8'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampHaliteSaltFlatStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'subterranean_halite_alcove_hypothermic_oasis_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Alcova Subterrânea de Sal com Oásis Hipotérmico',
+      saltFlatAnchorageAndDesiccationSafety: 'Acampamento estabelecido em gruta natural de domo salino escavada 8 metros abaixo da crosta abrasiva, onde a temperatura se estabiliza em confortáveis 19°C com ar limpo.',
+      solarBrineStillAndAlbedoShade: 'Lagoa subterrânea límpida de água doce alimentada por aquífero profundo fornece água fresca mineralizada e proteção contra vendavais salinos externos.',
+      campRestAndSafetyGuards: 'Garante descanso longo perfeito e revigorante para toda a comitiva com eliminação imediata de estafa térmica e secura labial.',
+      icon: '⛺🧂',
+      color: '#e2e8f0'
+    };
+
+    if (dt === 'sun_deflecting_black_cloth_awning_and_albedo_shield') {
+      tech = {
+        defenseTitle: 'Toldo Duplo de Tecido Escuro com Anteparo Anti-Albedo',
+        saltFlatAnchorageAndDesiccationSafety: 'Tenda de expedição projetada com tecido exterior que repele a luz direta e forro negro interior que absorve totalmente o reflexo do chão de sal.',
+        solarBrineStillAndAlbedoShade: 'Cria ambiente de penumbra relaxante no interior do bivaque, prevenindo cefaleias e fadiga visual nos aventureiros após longas marchas sob o sol.',
+        campRestAndSafetyGuards: 'Permite sono calmo e reparador para as sentinelas fora de turno mesmo durante as horas mais tórridas do meio-dia.',
+        icon: '⛺🖤',
+        color: '#475569'
+      };
+    } else if (dt === 'solar_brine_condenser_and_potable_dew_still') {
+      tech = {
+        defenseTitle: 'Destilador Solar de Salmoura por Evaporação e Condensação',
+        saltFlatAnchorageAndDesiccationSafety: 'Aparelho de pirâmides de lona que aproveita o calor extremo do deserto de sal para evaporar água de poças rasas de salmoura e recolher condensado puro.',
+        solarBrineStillAndAlbedoShade: 'Produz 30 litros diários de água destilada potável de altíssima pureza, assegurando a autonomia hídrica da expedição em terreno estéril.',
+        campRestAndSafetyGuards: 'Garante hidratação abundante para a comitiva e seus animais de tração, prevenindo crises de desidratação.',
+        icon: '⚗️💧',
+        color: '#0284c7'
+      };
+    } else if (dt === 'woven_reed_mat_raised_pavement_pathway') {
+      tech = {
+        defenseTitle: 'Passadiço Elevado de Esteiras Trançadas de Junco e Tábuas',
+        saltFlatAnchorageAndDesiccationSafety: 'Trilha perimetral montada sobre esteiras de fibra vegetal que distribui o peso dos passos e isola calçados da ação corrosiva do solo salino.',
+        solarBrineStillAndAlbedoShade: 'Neutraliza qualquer risco de colapso acidental de sumidouros ao redor do acampamento e preserva o estado das botas das sentinelas.',
+        campRestAndSafetyGuards: 'Permite trocas de guarda e rondas perimetrais rápidas e silenciosas com total segurança estrutural.',
+        icon: '🪵🛡️',
+        color: '#10b981'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessCaatingaAndInselbergHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'desert').toLowerCase();
@@ -22712,6 +22819,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessHaliteSaltFlatHazard: calcWildernessHaliteSaltFlatHazard,
+    calcCampHaliteSaltFlatStation: calcCampHaliteSaltFlatStation,
     calcWildernessCaatingaAndInselbergHazard: calcWildernessCaatingaAndInselbergHazard,
     calcCampCaatingaAndInselbergStation: calcCampCaatingaAndInselbergStation,
     calcWildernessBasaltColumnsAndGiantCausewayHazard: calcWildernessBasaltColumnsAndGiantCausewayHazard,
