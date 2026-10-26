@@ -20518,6 +20518,113 @@
   // PHB p. 182-183 (Travel Pace, Navigation in Subterranean Caves), PHB p. 190 (Cave-In Damage), XGE p. 77-83
   // =========================================================================
 
+
+  // =========================================================================
+  // FASE 150: MONTANHAS TECTÔNICAS, HORSTS, GRABENS E ESPELHOS DE FALHA POLIDOS
+  // D&D 5e: DMG p. 110-111 (Hazards, Earthquakes, Chasm Fissures, Steep Cliffs), DMG p. 246-247 (Structural Integrity),
+  // PHB p. 182-183 (Travel Pace, Navigation in Fault Country), PHB p. 190 (Chasm Falling Damage), XGE p. 77-83
+  // =========================================================================
+
+  function calcWildernessTransformFaultAndHorstHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'transform_fault_seismic_displacement_chasm_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Deslocamento Sísmico em Falha Transformante e Abertura de Abismo',
+      saveDC: 15,
+      saveType: 'Destreza',
+      transformFaultAndHorstRisk: 'Ruptura tectônica repentina ao longo de plano de falha de compressão que abre fenda abissal de 30 metros de profundidade no piso do graben; o solo se separa tragando aventureiros e montarias sob estrondo ensurdecedor, causando 4d6 de concussão e risco de esmagamento por lajes (DMG p. 110, 190).',
+      pioneerMitigation: 'Batedores atentos a microtremores no solo utilizam cabos de retenção dinâmicos entre os membros da expedição e avançam pelas cristas monolíticas do horst.',
+      rescueAndStabilization: 'Içamento imediato com sistema de polias e talhas fixadas em ancoragens profundas de expansão, imobilização com talas de tração e elixires restauradores.',
+      icon: '⚡🪨',
+      color: '#d97706'
+    };
+
+    if (ht === 'slickenside_mirror_vertical_shear_slip') {
+      hazard = {
+        hazardTitle: 'Escorregão em Espelho de Falha Polido por Fricção Tectônica',
+        saveDC: 15,
+        saveType: 'Destreza',
+        transformFaultAndHorstRisk: 'Paredão de quartzito e serpentinito polido a espelho por milênios de atrito entre placas tectônicas e untado por argila de falha escorregadia; pisada em falso resulta em queda livre descontrolada de 15 metros causando 3d6 de concussão.',
+        pioneerMitigation: 'Uso obrigatório de grampões forjados com pontas de aço temperado, pítons de fenda e cordas de segurança tensionadas a cada 3 metros.',
+        rescueAndStabilization: 'Resgate com maca articulada suspensa, tratamento de queimaduras de atrito com pomada de arnica e bandagens hemostáticas.',
+        icon: '🪞🩸',
+        color: '#dc2626'
+      };
+    } else if (ht === 'horst_crest_hypobaric_tectonic_gale_chill') {
+      hazard = {
+        hazardTitle: 'Vendaval Tectônico Canalizado em Garganta de Horst a 80 km/h',
+        saveDC: 14,
+        saveType: 'Constituição',
+        transformFaultAndHorstRisk: 'Rajadas violentas de vento comprimidas pelas escarpas paralelas do horst que atingem 80 km/h; derrubam aventureiros desatentos, congelam a pele com sensação térmica de -10°C e impõem 1 nível de exaustão e desvantagem em testes de Percepção auditiva.',
+        pioneerMitigation: 'Marcha agachada rente às paredes rochosas, uso de capotes de lã impermeabilizada com óleo e proteção auricular com protetores forrados.',
+        rescueAndStabilization: 'Abrigo imediato em reentrâncias de rocha sólida, infusão quente de raízes picantes com mel e fricção térmica de extremidades.',
+        icon: '💨🥶',
+        color: '#0284c7'
+      };
+    } else if (ht === 'rockfall_breccia_block_detachment_hazard') {
+      hazard = {
+        hazardTitle: 'Desprendimento de Blocos Angulares de Brecha Tectônica',
+        saveDC: 14,
+        saveType: 'Destreza',
+        transformFaultAndHorstRisk: 'Lajes de brecha tectônica com fragmentos afiados cimentados que sofrem descompressão elástica súbita, desprendendo blocos de 5 toneladas que estilhaçam no fundo da garganta causando 3d8 de concussão.',
+        pioneerMitigation: 'Varredura visual das escarpas superiores identificando linhas de fratura fresca e contorno célere das áreas de depósito de detritos.',
+        rescueAndStabilization: 'Remoção coordenada de pedras com alavancas de ferro temperado, estabilização de tórax e curativos compressivos em cortes.',
+        icon: '⚠️🏔️',
+        color: '#b45309'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampTransformFaultAndHorstStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'horst_bedrock_keystone_buttress_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Travado no Bloco Central de Horst Sísmico Estável',
+      transformFaultAnchorageAndTremorSafety: 'Acampamento assentado sobre o maciço central de horst tectônico ancorado na rocha matriz inabalável, isolado das fendas de graben ativas por fossos naturais de descompressão.',
+      pendulumGuyWireAndTremorGauge: 'Muralhas de quartzito maciço protegem as tendas contra rajadas de vento canalizadas e oferecem ancoragem segura e inabalável contra abalos sísmicos.',
+      campRestAndSafetyGuards: 'Assegura sono longo calmo, protegido e revigorante para toda a comitiva com imunidade a desabamentos do solo.',
+      icon: '⛺🏔️',
+      color: '#d97706'
+    };
+
+    if (dt === 'pendulum_dampened_guy_wire_stabilization_anchor') {
+      tech = {
+        defenseTitle: 'Ancoragem de Estais com Amortecedores Pendulares de Chumbo',
+        transformFaultAnchorageAndTremorSafety: 'Sistema de cabos de aço tensionados com contrapesos pendulares de chumbo que absorvem oscilações sísmicas e impedem o tombamento das tendas.',
+        pendulumGuyWireAndTremorGauge: 'Dissipa ondas harmônicas de tremores menores, mantendo os mastros principais estáveis mesmo durante abalos de intensidade moderada.',
+        campRestAndSafetyGuards: 'Permite que descansantes e feridos durmam sem interrupções provocadas por tremores de terra secundários.',
+        icon: '🛡️⚖️',
+        color: '#64748b'
+      };
+    } else if (dt === 'fault_scarp_acoustic_listening_post_and_tremor_gauge') {
+      tech = {
+        defenseTitle: 'Posto de Escuta Acústica de Falha com Pêndulo de Mercúrio',
+        transformFaultAnchorageAndTremorSafety: 'Estação de vigia subterrânea com haste ressonante cravada na falha tectônica que capta micro-fraturas e alerta sobre tremores prévios com 15 minutos de antecedência.',
+        pendulumGuyWireAndTremorGauge: 'Permite evacuação ordenada e preventiva de equipamentos e animais de carga muito antes de deslocamentos de maior magnitude.',
+        campRestAndSafetyGuards: 'Garante alerta antecipado para as sentinelas com total prontidão de segurança perimetral.',
+        icon: '⚗️🔔',
+        color: '#ea580c'
+      };
+    } else if (dt === 'flexible_chain_link_suspension_chasm_bridge') {
+      tech = {
+        defenseTitle: 'Passarela Suspensa Articulada com Malha de Aço Flexível',
+        transformFaultAnchorageAndTremorSafety: 'Ponte móvel de cabos e tábuas articuladas que cruza a fenda do graben adaptando-se às variações de largura sem sofrer ruptura estrutural.',
+        pendulumGuyWireAndTremorGauge: 'Assegura rota contínua de fuga e comunicação rápida entre o bivaque no horst e os postos avançados de patrulha.',
+        campRestAndSafetyGuards: 'Permite rondas noturnas com passadas seguras, sem perigo de quedas no abismo mesmo sob fortes rajadas de vento.',
+        icon: '🪜🌉',
+        color: '#10b981'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessSaltDomeAndDiapirHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'underdark').toLowerCase();
@@ -23354,6 +23461,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessTransformFaultAndHorstHazard: calcWildernessTransformFaultAndHorstHazard,
+    calcCampTransformFaultAndHorstStation: calcCampTransformFaultAndHorstStation,
     calcWildernessSaltDomeAndDiapirHazard: calcWildernessSaltDomeAndDiapirHazard,
     calcCampSaltDomeAndDiapirStation: calcCampSaltDomeAndDiapirStation,
     calcWildernessPillowLavaAndBlackSmokerHazard: calcWildernessPillowLavaAndBlackSmokerHazard,

@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessTransformFaultAndHorstHazard) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var tf = CartShared.calcWildernessTransformFaultAndHorstHazard(bKey, 'transform_fault_seismic_displacement_chasm_collapse');
+        return '<div class="clp-transform-fault-card" style="margin:4px 0 6px;text-align:left;background:rgba(36,26,16,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(217,119,6,0.35);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + tf.color + ';margin-bottom:2px;">' + tf.icon + ' ' + tf.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Falhas Tectônicas e Horsts:</b> ' + tf.transformFaultAndHorstRisk + ' (CD ' + tf.saveDC + ' [' + tf.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Mitigação:</b> ' + tf.pioneerMitigation + ' · <i>Estabilização: ' + tf.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampTransformFaultAndHorstStation) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var cp = CartShared.calcCampTransformFaultAndHorstStation(bKey, 'horst_bedrock_keystone_buttress_bivouac');
+        return '<div class="clp-horst-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,20,12,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(180,83,9,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Bloco de Horst:</b> ' + cp.transformFaultAnchorageAndTremorSafety + ' · <b>Defesa:</b> ' + cp.pendulumGuyWireAndTremorGauge + '</div>'
+          + '  <div style="font-size:7.5px;color:#fcd34d;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessSaltDomeAndDiapirHazard) return '';
         var bKey = (biome && biome.key) || 'underdark';
         var sd = CartShared.calcWildernessSaltDomeAndDiapirHazard(bKey, 'diapir_salt_plug_extrusion_shear_crush');
