@@ -19593,6 +19593,130 @@
     };
   }
 
+  // === calcWildernessHypersalineApicumHazard (Restingas de Manguezal Hipersalino e Apicuns de Maré - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessHypersalineApicumHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'hypersaline_apicum_mud_suction_quagmire').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Atoleiro de Lama Cinzenta e Sucção de Apicum Hipersalino',
+      saveDC: 15,
+      saveType: 'Força',
+      hypersalineApicumRisk: 'Planície de apicum desprovida de árvores com fina casca salina sobre lodo sulfídrico viscoso e hipersalino; rompimento súbito que engole pernas até as coxas com sucção mecânica implacável de lama salgada causando 2d6 de dano de contusão e imobilização total (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam com raquetes de praia feitas de talas de palmeira entrelaçadas e utilizam remos como pontes de apoio horizontal.',
+      rescueAndStabilization: 'Tração com cabos de içamento fixados em esteios de mangue firme e lavagem imediata da derme com água fresca para evitar queimaduras cáusticas por salitre.',
+      icon: '🌊🧂',
+      color: '#ca8a04'
+    };
+
+    if (ht === 'spring_tide_bore_surge_inundation') {
+      hazard = {
+        hazardTitle: 'Onda de Maré de Sizígia e Inundação Repentina do Apicum',
+        saveDC: 15,
+        saveType: 'Sabedoria',
+        hypersalineApicumRisk: 'Subida ultrarrápida da maré de sizígia impulsionada pelo vento litorâneo que cobre o apicum com 1 metro de água salobra em menos de 10 minutos, transformando a planície seca em um canal navegável com fortes correntes transversais.',
+        pioneerMitigation: 'Monitoramento estrito das fases lunares e colocação de balizas graduadas de maré nas bordas do manguezal.',
+        rescueAndStabilization: 'Evacuação em canoas de resgate atracadas previamente em raízes aéreas de mangue vermelho e recolhimento de fardos flutuantes.',
+        icon: '🌊🌪️',
+        color: '#0284c7'
+      };
+    } else if (ht === 'toxic_hydrogen_sulfide_crust_vent') {
+      hazard = {
+        hazardTitle: 'Emissão de Gás Sulfídrico Tóxico sob Crosta Salina Fissurada',
+        saveDC: 14,
+        saveType: 'Constituição',
+        hypersalineApicumRisk: 'Bolsões de gás de decomposição anaeróbica aprisionados sob a carapaça de sal evaporado que explodem em jatos fétidos quando pisados; inalação que provoca tontura severa, náusea e perda temporária de olfato e paladar.',
+        pioneerMitigation: 'Uso de máscaras de tecido de cânhamo embebidas em vinagre de maçã e avanço a favor do vento predominante do mar.',
+        rescueAndStabilization: 'Remoção para áreas ventiladas na praia aberta, respiração profunda de ar marítimo puro e ingestão de carvão ativado triturado.',
+        icon: '💨☣️',
+        color: '#84cc16'
+      };
+    } else if (ht === 'sharp_calcified_barnacle_mat_laceration') {
+      hazard = {
+        hazardTitle: 'Laceração em Tapete de Cracas e Ostras Calcificadas',
+        saveDC: 14,
+        saveType: 'Destreza',
+        hypersalineApicumRisk: 'Bordas de canais de maré recobertas por colônias densas de cracas pontiagudas e conchas de ostras fossilizadas; quedas que rasgam calçados e tecidos infligindo cortes profundos propensos a severas infecções por bactérias marinhas halófilas.',
+        pioneerMitigation: 'Uso obrigatório de grevas de couro cru curtido e perneiras blindadas com tiras de lona encerada reforçada.',
+        rescueAndStabilization: 'Cauterização com água fervente e salmoura diluída, desinfecção com tintura de iodo de algas marinhas e sutura estéril.',
+        icon: '🦪🩸',
+        color: '#dc2626'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      hypersalineApicumRisk: hazard.hypersalineApicumRisk,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Litorais Pantanosos e Apicuns) / PHB p. 182-183 (Marcha em Lamaçais Costeiros) / XGE p. 78-83 (Geomorfologia Costeira e Marés de Sizígia)'
+    };
+  }
+
+  // === calcCampHypersalineApicumStation (Bivaques em Sambaquis e Plataformas em Esteios - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampHypersalineApicumStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'shell_midden_consolidated_mound_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Montículo Consolidado de Sambaqui de Conchas',
+      apicumMoundAnchorageAndTidalSafety: 'Acampamento assentado sobre elevação natural de 3 metros formada por conchas de moluscos e cascalho litorâneo consolidado; cota imune à maré máxima de sizígia com drenagem imediata de água pluvial.',
+      stiltSupportAndPerimeterSecurity: 'Solo seco e firme que impede atolamento de estacas e oferece ancoragem perfeita com esteios de madeira de mangue de alta densidade.',
+      campRestAndSafetyGuards: 'Garante descanso longo perfeito e revigorante para os membros da comitiva com sentinelas monitorando o horizonte litorâneo e as canaletas de maré.',
+      icon: '⛺🦪',
+      color: '#ca8a04'
+    };
+
+    if (dt === 'mangrove_stilt_raised_platform_shelter') {
+      tech = {
+        defenseTitle: 'Plataforma Suspensa em Esteios Trançados de Manguezal',
+        apicumMoundAnchorageAndTidalSafety: 'Estrado suspenso a 2 metros do solo construído com varas de mangue vermelho atadas com cipós flexíveis entre troncos bifurcados de árvores maduras.',
+        stiltSupportAndPerimeterSecurity: 'Isolamento vertical completo contra inundações de maré e invasões noturnas de jacarés-do-papo-amarelo e caranguejos carnívoros.',
+        campRestAndSafetyGuards: 'Permite que a comitiva durma em redes secas e ventiladas pelo vento marítimo contínuo.',
+        icon: '🪵🌊',
+        color: '#15803d'
+      };
+    } else if (dt === 'evaporative_condenser_coastal_freshwater_still') {
+      tech = {
+        defenseTitle: 'Alambique Evaporativo Litorâneo para Extração de Água Doce',
+        apicumMoundAnchorageAndTidalSafety: 'Condensador cônico montado sobre bacia de lodo salgado que utiliza o calor solar diurno para destilar 18 litros diários de água mineral potável sem resíduo de salitre.',
+        stiltSupportAndPerimeterSecurity: 'Garante autonomia hídrica total para a comitiva em ambiente litorâneo hiperárido e saturado de salmoura não-potável.',
+        campRestAndSafetyGuards: 'Evita a fadiga e mantém os batedores hidratados para as longas jornadas de exploração costeira.',
+        icon: '💧☀️',
+        color: '#0284c7'
+      };
+    } else if (dt === 'mangrove_tannin_smoke_smudge_pot') {
+      tech = {
+        defenseTitle: 'Braseiro Defumador com Casca Rica em Tanino de Mangue',
+        apicumMoundAnchorageAndTidalSafety: 'Fogareiro em nicho cerâmico que queima cavacos de casca de manguezal, liberando fumaça densa e aromática rica em taninos e compostos repelentes.',
+        stiltSupportAndPerimeterSecurity: 'Espanta completamente nuvens de mosquitos-pólvora, mutucas litorâneas e carrapatos de manguezal sem incomodar a respiração dos exploradores.',
+        campRestAndSafetyGuards: 'Proporciona sono tranquilo e ininterrupto para as sentinelas em seus períodos de descanso no acampamento.',
+        icon: '🔥🛡️',
+        color: '#ea580c'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      apicumMoundAnchorageAndTidalSafety: tech.apicumMoundAnchorageAndTidalSafety,
+      stiltSupportAndPerimeterSecurity: tech.stiltSupportAndPerimeterSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques Costeiros e Manguezais) / PHB p. 150 (Kits de Acampamento Fluvial e Marítimo) / XGE p. 78-83 (Engenharia de Plataformas em Esteio)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -21492,6 +21616,8 @@
     calcCampRockGlacierAndSolifluctionStation: calcCampRockGlacierAndSolifluctionStation,
     calcWildernessKarstPavementAndGrykeHazard: calcWildernessKarstPavementAndGrykeHazard,
     calcCampKarstPavementAndGrykeStation: calcCampKarstPavementAndGrykeStation,
+    calcWildernessHypersalineApicumHazard: calcWildernessHypersalineApicumHazard,
+    calcCampHypersalineApicumStation: calcCampHypersalineApicumStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
