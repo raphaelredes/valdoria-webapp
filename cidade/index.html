@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessPermafrostAndPenitenteHazard) return '';
+        var bKey = (biome && biome.key) || 'tundra';
+        var pf = CartShared.calcWildernessPermafrostAndPenitenteHazard(bKey, 'ice_wedge_polygon_crevasse_plunge');
+        return '<div class="clp-permafrost-hazard-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,28,40,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(2,132,199,0.3);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + pf.color + ';margin-bottom:2px;">' + pf.icon + ' ' + pf.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Permafrost e Penitente:</b> ' + pf.permafrostRiskAndPenitentes + ' (CD ' + pf.saveDC + ' [' + pf.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Mitigação:</b> ' + pf.pioneerMitigation + ' · <i>Estabilização: ' + pf.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampPermafrostIsothermalBivouacAndMelterStation) return '';
+        var bKey = (biome && biome.key) || 'tundra';
+        var cp = CartShared.calcCampPermafrostIsothermalBivouacAndMelterStation(bKey, 'isothermal_double_wall_igloo_tent');
+        return '<div class="clp-permafrost-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(16,32,32,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#ecfdf5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Iglu-Tenda Isotérmica:</b> ' + cp.permafrostAnchorageAndThermalSafety + ' · <b>Proteção:</b> ' + cp.coldShieldingAndCampSecurity + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessAbyssalCenoteAndTravertineHazard) return '';
         var bKey = (biome && biome.key) || 'mountain';
         var cn = CartShared.calcWildernessAbyssalCenoteAndTravertineHazard(bKey, 'cenote_lip_moss_slip_fall');

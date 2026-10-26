@@ -16245,6 +16245,130 @@
     };
   }
 
+  // === calcWildernessPermafrostAndPenitenteHazard (Platôs de Permafrost, Cunhas de Gelo e Penitentes - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessPermafrostAndPenitenteHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'tundra').toLowerCase();
+    var ht = (hazardType || 'ice_wedge_polygon_crevasse_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda em Fenda Oculta de Cunha de Gelo Fóssil',
+      saveDC: 15,
+      saveType: 'Destreza',
+      permafrostRiskAndPenitentes: 'Fenda vertical de 18 metros encoberta por fina ponte de neve dura; ruptura súbita com queda em fresta congelante causando 3d6 de impacto contundente e 1d6 de frio (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam com bastões de sondagem medindo a densidade da neve e caminham encordoados em trios.',
+      rescueAndStabilization: 'Ancoragem de piquete de gelo em T na neve dura, içamento por polia e aquecimento corporal imediato com pedras quentes.',
+      icon: '🧊⚠️',
+      color: '#0284c7'
+    };
+
+    if (ht === 'penitente_blade_forest_laceration') {
+      hazard = {
+        hazardTitle: 'Labirinto de Agulhas Glaciais Penitentes',
+        saveDC: 14,
+        saveType: 'Destreza',
+        permafrostRiskAndPenitentes: 'Floresta densa de lâminas e espigões de gelo de 2 metros pontiagudos que rasgam mochilas, roupas térmicas e cortam a pele com 2d6 perfurante.',
+        pioneerMitigation: 'Uso de óculos escuros de osso com fenda estenopeica contra ofuscamento solar e corte de trilha com machadinhas de gelo.',
+        rescueAndStabilization: 'Sutura de cortes limpos com linha encerada estéril e aplicação de graxa protetora contra queimaduras de gelo.',
+        icon: '🗡️❄️',
+        color: '#38bdf8'
+      };
+    } else if (ht === 'cryoturbation_mud_boil_subsidence') {
+      hazard = {
+        hazardTitle: 'Colapso de Bolha de Lama de Desgelo (Cryoturbation)',
+        saveDC: 14,
+        saveType: 'Força',
+        permafrostRiskAndPenitentes: 'Camada de solo superficial descongelada que se liquefaz em bolsão de lama gélida movediça engolindo botas e fardos de carga.',
+        pioneerMitigation: 'Passos calculados sobre os centros elevados dos polígonos de pedra e uso de raquetes de neve para distribuição de peso.',
+        rescueAndStabilization: 'Tração imediata com varas de freixo estendidas e lavagem de lama congelada com água morna antes que endureça.',
+        icon: '🕳️🪵',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'permafrost_blizzard_whiteout_gale') {
+      hazard = {
+        hazardTitle: 'Nevasca Branca e Vento Cortante em Platô Ártico',
+        saveDC: 14,
+        saveType: 'Constituição',
+        permafrostRiskAndPenitentes: 'Ventania polar de 80 km/h que suspende cristais de gelo fino gerando cegueira total de terreno (whiteout) e frio paralisante.',
+        pioneerMitigation: 'Amarração da comitiva por cabo-guia contínuo e uso de capuzes de pele forrados com gordura animal.',
+        rescueAndStabilization: 'Montagem de abrigo de emergência em trincheira de neve e consumo de caldo concentrado calórico.',
+        icon: '🌨️💨',
+        color: '#94a3b8'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      permafrostRiskAndPenitentes: hazard.permafrostRiskAndPenitentes,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Tundra, Frio Extremo e Fendas) / PHB p. 182-183 (Marcha Glacial) / XGE p. 78-83 (Sobrevivência Polar)'
+    };
+  }
+
+  // === calcCampPermafrostIsothermalBivouacAndMelterStation (Iglu-Tendas, Ancoragens Helicoidais e Fusores - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampPermafrostIsothermalBivouacAndMelterStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'tundra').toLowerCase();
+    var dt = (defenseType || 'isothermal_double_wall_igloo_tent').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Iglu-Tenda Isotérmica de Lona Dupla com Fole de Neve',
+      permafrostAnchorageAndThermalSafety: 'Tenda abobadada com duas camadas de lona oleada separadas por almofada de ar e mureta protetora de blocos de neve compacta.',
+      coldShieldingAndCampSecurity: 'Conserva temperatura interna até 15 graus acima do ambiente exterior, impedindo hipotermia noturna e congelamento de membros.',
+      campRestAndSafetyGuards: 'Assegura sono longo reparador e confortável para a comitiva mesmo sob tempestades polares violentas.',
+      icon: '⛺❄️',
+      color: '#10b981'
+    };
+
+    if (dt === 'helical_permafrost_screw_anchors') {
+      tech = {
+        defenseTitle: 'Ancoragens Helicoidais de Aço para Permafrost Rígido',
+        permafrostAnchorageAndThermalSafety: 'Parafusos helicoidais de aço temperado cravados no solo congelado que oferecem sustentação inabalável para amarras.',
+        coldShieldingAndCampSecurity: 'Impede categoricamente que ventos de rajada polar arranquem estacas ou derrubem as tendas durante a noite.',
+        campRestAndSafetyGuards: 'Mantém a estrutura do bivaque firme e permite que as sentinelas façam vigília com confiança na estabilidade do campo.',
+        icon: '🔩🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'solar_parabolic_ice_melter_vat') {
+      tech = {
+        defenseTitle: 'Caldeira Fusora Solar de Gelo com Refletor Parabólico',
+        permafrostAnchorageAndThermalSafety: 'Espelho côncavo polido que concentra raios solares sobre tacho de cobre, fundindo blocos de gelo limpo em água doce pura.',
+        coldShieldingAndCampSecurity: 'Produz 10 litros diários de água morna potável sem queimar a lenha preciosa racionada da expedição.',
+        campRestAndSafetyGuards: 'Supre as necessidades de hidratação, cozimento e preparo de tônicos aquecidos para os aventureiros.',
+        icon: '☀️💧',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'windbreak_snow_brick_parapet') {
+      tech = {
+        defenseTitle: 'Parapeito Corta-Vento em Blocos Serrados de Neve Compacta',
+        permafrostAnchorageAndThermalSafety: 'Barreira perimétrica de 1,8 metro de altura construída com blocos cortados com serrote de gelo.',
+        coldShieldingAndCampSecurity: 'Desvia o vento gelado rente ao solo sobre o acampamento e retém a camada de ar menos fria no interior.',
+        campRestAndSafetyGuards: 'Concede tranquilidade e proteção absoluta contra ventanias cortantes durante o período de descanso do grupo.',
+        icon: '🧱🌨️',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      permafrostAnchorageAndThermalSafety: tech.permafrostAnchorageAndThermalSafety,
+      coldShieldingAndCampSecurity: tech.coldShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques no Frio Extremo) / PHB p. 150 (Kits de Sobrevivência) / XGE p. 78-83 (Engenharia de Neve)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -18090,6 +18214,8 @@
     calcCampStiltRootMangrovePlatformAndDistillerStation: calcCampStiltRootMangrovePlatformAndDistillerStation,
     calcWildernessAbyssalCenoteAndTravertineHazard: calcWildernessAbyssalCenoteAndTravertineHazard,
     calcCampAbyssalCenoteShelfBivouacAndCableBridge: calcCampAbyssalCenoteShelfBivouacAndCableBridge,
+    calcWildernessPermafrostAndPenitenteHazard: calcWildernessPermafrostAndPenitenteHazard,
+    calcCampPermafrostIsothermalBivouacAndMelterStation: calcCampPermafrostIsothermalBivouacAndMelterStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
