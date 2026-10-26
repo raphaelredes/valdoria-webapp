@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 253: COLINAS RESIDUAIS E INSELBERGS EM RELEVO RESIDUAL (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessInselbergBornhardtHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'convex_bornhardt_sheet_fracture_slippage').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Escorregamento e Queda em Cúpula Convexa com Esfoliação em Folhas Laminares',
+      saveDC: 15,
+      saveType: 'Destreza',
+      inselbergRisk: 'O inselberg se ergue como um domo maciço e liso de rocha cristalina cujas encostas convexas sofrem esfoliação em casca de cebola; placas soltas de pedra de dezenas de metros desprendem-se sob passos desatentos, arremessando o explorador em um escorregamento descontrolado por encostas de 60 graus que causa 3d8 de dano contundente (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Marchar com calçados de borracha resinada, cravando pitons em fendas primárias e evitando placas convexas delaminadas.',
+      rescueAndStabilization: 'Ancoragem imediata com corda de resgate com nó prusik e estabilização de fraturas com talas.',
+      icon: '⛰️🪨',
+      color: '#d97706'
+    };
+
+    if (ht === 'microclimatic_thermal_updraft_gale') {
+      hazard = {
+        hazardTitle: 'Rajadas de Vento Térmico Ascendente em Cristas Cônicas',
+        saveDC: 14,
+        saveType: 'Força',
+        inselbergRisk: 'O monólito de pedra nua aquece intensamente sob o sol e funciona como uma chaminé térmica gigante que atrai ar frio da planície e gera correntes ascendentes turbulentas de 80 km/h; rajadas súbitas atingem a comitiva ao contornar arestas afiadas, ameaçando arremessar mochilas e corpos para o abismo (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Avançar agachado em marcha de quatro apoios perto da linha de cume e amarrar equipamentos com cordeletes reforçados.',
+        rescueAndStabilization: 'Içamento rápido do membro suspenso por cabo de retenção e abrigo imediato em reentrâncias.',
+        icon: '💨🧗',
+        color: '#0284c7'
+      };
+    } else if (ht === 'raptor_roost_talon_dive_harassment') {
+      hazard = {
+        hazardTitle: 'Ninhos de Grandes Aves de Rapina e Ataques Aéreos em Mergulho',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        inselbergRisk: 'Fissuras e cornijas inatingíveis da face vertical do inselberg abrigam colônias de águias gigantes e gaviões carniceiros territoriais; a invasão da rota de subida provoca mergulhos aéreos fulminantes com garras afiadas que visam cegar ou derrubar aventureiros dos paredões, infligindo 2d6 de dano cortante e desestabilização (DMG p. 111; PHB p. 183).',
+        pioneerMitigation: 'Empunhar escudos voltados para o alto e utilizar tochas de fumaça aromática para desorientar as aves sem ferir seus filhotes.',
+        rescueAndStabilization: 'Tratamento de lacerações profundas com tintura anti-infecciosa e contenção de hemorragias.',
+        icon: '🦅⚡',
+        color: '#dc2626'
+      };
+    } else if (ht === 'sheetwash_talus_scree_avalanche') {
+      hazard = {
+        hazardTitle: 'Avalanche de Cascalho e Depósitos de Tálus na Base do Inselberg',
+        saveDC: 14,
+        saveType: 'Destreza',
+        inselbergRisk: 'A base do maciço residual acumula encostas íngremes de pedras angulares e detritos de erosão laminar em ângulo de repouso crítico; a vibração de passos pesados desencadeia avalanches de seixos cortantes que soterram pernas e esmagam tornozelos com 2d6 de dano perfurante e lentidão (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Transpor a encosta em zigue-zague sobre cristas consolidadas e testar cada laje com bastão de ferro antes de apoiar o peso.',
+        rescueAndStabilization: 'Remoção urgente de blocos que prendem os membros e aplicação de gelo mineral para reduzir o inchaço.',
+        icon: '🪨⚠️',
+        color: '#b45309'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampInselbergBornhardtStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'summit_flat_eagle_nest_command_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Estratégico no Platô de Cúpula com Visão Panorâmica de 360 Graus',
+      inselbergAndCampSafety: 'Instalação do acampamento no platô superior plano do inselberg, a 150 metros acima da planície circunvizinha.',
+      inselbergTrenchAndWatch: 'Oferece linha de visão desobstruída por dezenas de quilômetros em todas as direções, garantindo detecção precoce de qualquer coluna de poeira ou marcha inimiga.',
+      campRestAndSafetyGuards: 'Concede +5 na Percepção passiva das sentinelas e elimina qualquer risco de emboscada noturna.',
+      icon: '⛺🦅',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'weathering_gnammas_rainwater_cistern') {
+      tech = {
+        defenseTitle: 'Cisternas Naturais e Bacias de Dissolução com Água de Chuva Potável',
+        inselbergAndCampSafety: 'Aproveitamento de gnammas circulares esculpidas na rocha pelo intemperismo químico do cume.',
+        inselbergTrenchAndWatch: 'As bacias armazenam dezenas de litros de água límpida e fresca filtrada por musgos e isolada da contaminação do solo da planície.',
+        campRestAndSafetyGuards: 'Abastece todos os cantis da comitiva com água doce de excelente qualidade sem necessidade de escavação.',
+        icon: '🏺💧',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'single_chimney_access_defensive_chokepoint') {
+      tech = {
+        defenseTitle: 'Gargalo Defensivo em Chaminé Única de Acesso com Escada de Corda Retrátil',
+        inselbergAndCampSafety: 'O acesso ao topo é restrito a uma fenda vertical estreita onde apenas uma pessoa sobe por vez.',
+        inselbergTrenchAndWatch: 'Ao recolher a escada de corda no bivaque, o topo se torna absolutamente inexpugnável para invasores desprovidos de asas ou magia de voo.',
+        campRestAndSafetyGuards: 'Permite vigília com sentinela única descansada, assegurando sono profundo e tranquilo para todos os membros do grupo.',
+        icon: '🛡️🧗',
+        color: '#10b981'
+      };
+    } else if (dt === 'deep_cavern_tafoni_thermal_shelter') {
+      tech = {
+        defenseTitle: 'Abrigo Térmico em Cavidades Côncavas de Tafoni Arenítico',
+        inselbergAndCampSafety: 'Acomodação das tendas dentro de tafonis naturais esculpidos pelo vento na face sombreada do monólito.',
+        inselbergTrenchAndWatch: 'A abóbada de pedra oferece sombra constante durante o meio-dia abrasador e bloqueia tempestades de areia e ventos frios da madrugada.',
+        campRestAndSafetyGuards: 'Reduz o consumo de rações de água e garante descanso longo térmico revigorante.',
+        icon: '🕳️⛺',
+        color: '#6366f1'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 252: DEPRESSÕES DE SABKHAS SALGADAS E CROSTAS DE ANIDRITA (D&D 5e)
   // =========================================================================
 
@@ -34092,6 +34196,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessInselbergBornhardtHazard: calcWildernessInselbergBornhardtHazard,
+    calcCampInselbergBornhardtStation: calcCampInselbergBornhardtStation,
     calcWildernessSabkhaSalineCrustHazard: calcWildernessSabkhaSalineCrustHazard,
     calcCampSabkhaSalineCrustStation: calcCampSabkhaSalineCrustStation,
     calcWildernessKarstLimestoneSlotGorgeHazard: calcWildernessKarstLimestoneSlotGorgeHazard,
