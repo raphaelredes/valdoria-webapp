@@ -12277,6 +12277,130 @@
     };
   }
 
+  // === calcWildernessSeismicTremorAndEarthFissureHazard (Tremores Sísmicos, Fissuras Tectônicas e Liquefação de Solo - DMG p. 110, 284 / PHB p. 183) ===
+  function calcWildernessSeismicTremorAndEarthFissureHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'sudden_tectonic_ground_fissure').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Fratura Tectônica Repentina e Fissura de Solo',
+      saveDC: 13,
+      saveType: 'Destreza',
+      seismicDamageAndDisruption: 'Rompimento abrupto do terreno abrindo fenda de até 6 metros de profundidade; 2d6 de concussão e risco de soterramento pelas bordas instáveis (DMG p. 284).',
+      pioneerMitigation: 'Batedores atentos notam rachaduras em zigue-zague e pássaros fugindo em revoada, saltando para rocha firme lateral.',
+      rescueAndStabilization: 'Lançamento de escada de corda reforçada com ganchos de fixação e tração por aventureiros na borda segura.',
+      icon: '⚡🪨',
+      color: '#ea580c'
+    };
+
+    if (ht === 'shockwave_soil_liquefaction') {
+      hazard = {
+        hazardTitle: 'Onda de Choque Sísmica e Liquefação Arenosa',
+        saveDC: 13,
+        saveType: 'Destreza',
+        seismicDamageAndDisruption: 'Vibração harmônica que transforma areia e cascalho em lama movediça temporária; condição Caído e afundamento até os joelhos.',
+        pioneerMitigation: 'Avanço estrito sobre leitos de lajes rochosas contínuas ou raízes largas de árvores ancestrais.',
+        rescueAndStabilization: 'Distribuição do peso com tábuas transversais de apoio para puxar pernas presas sem esforço excessivo.',
+        icon: '🌊🪨',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'chasm_edge_rock_churn_collapse') {
+      hazard = {
+        hazardTitle: 'Desabamento de Paredões por Vibração de Falha Geológica',
+        saveDC: 14,
+        saveType: 'Destreza',
+        seismicDamageAndDisruption: 'Queda massiva de blocos desprendidos pelo tremor em desfiladeiros estreitos; 3d8 de concussão e obstrução de trilha.',
+        pioneerMitigation: 'Reconhecimento de estrondos subterrâneos e busca imediata de saliências em abóbada côncava segura.',
+        rescueAndStabilization: 'Uso de pés-de-cabra e alavancas de ferro para remover pedras sobre companheiros atingidos.',
+        icon: '🪨💥',
+        color: '#ef4444'
+      };
+    } else if (ht === 'subterranean_fault_noxious_vent') {
+      hazard = {
+        hazardTitle: 'Fuga de Gases Pesados Inflamáveis de Fissura Profunda',
+        saveDC: 12,
+        saveType: 'Constituição',
+        seismicDamageAndDisruption: 'Emissão rápida de bolsões de gás aprisionados no manto rochoso; 2d6 de veneno, tosse sufocante e perigo de ignição com tochas acesas.',
+        pioneerMitigation: 'Extinção instantânea de chamas abertas e avanço com toalhas molhadas sobre o nariz contra o vento.',
+        rescueAndStabilization: 'Retirada do intoxicado para terreno elevado e aplicação de sais estimulantes para reanimação.',
+        icon: '💨☠️',
+        color: '#84cc16'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      seismicDamageAndDisruption: hazard.seismicDamageAndDisruption,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110, 284 (Fissuras de Solo e Terremotos) / PHB p. 183 (Dano de Queda e Soterramento)'
+    };
+  }
+
+  // === calcCampFlexibleGuylineAndSeismicBufferPlatform (Amortecedores Sísmicos de Toras, Pêndulos de Alarme e Estaiamento Elástico - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampFlexibleGuylineAndSeismicBufferPlatform(biomeKey, bufferType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var bt = (bufferType || 'log_roller_buffer_cribbing').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Plataforma de Toras Cruzadas com Roletes e Coxins Amortecedores',
+      seismicDampingEfficiency: 'Estrado elevado sobre camadas de toras redondas e cascalho que dissipa 90% da aceleração sísmica horizontal.',
+      guylineElasticityAndSecurity: 'Impede o colapso estrutural das barracas e protege instrumentos frágeis e poções contra quebras.',
+      campRestAndSafetyGuards: 'Garante que tremores de terra noturnos não derrubem as tendas nem interrompam o sono da comitiva.',
+      icon: '🪵🛡️',
+      color: '#10b981'
+    };
+
+    if (bt === 'elastic_tendon_guyline_bracing') {
+      tech = {
+        defenseTitle: 'Estaiamento com Laços de Couro Cru e Molas de Tendão',
+        seismicDampingEfficiency: 'Cabos de ancoragem flexíveis que se expandem e contraem com as oscilações do solo sem arrancar as estacas.',
+        guylineElasticityAndSecurity: 'Mantém a tensão perfeita das lonas mesmo durante deformações dinâmicas da superfície rochosa.',
+        campRestAndSafetyGuards: 'Evita que estacas sejam ejetadas como projéteis perigosos em direção aos leitos dos aventureiros.',
+        icon: '🪢⛺',
+        color: '#38bdf8'
+      };
+    } else if (bt === 'bronze_rattle_pendulum_detector') {
+      tech = {
+        defenseTitle: 'Pêndulo Sismográfico com Haste Telúrica e Chocalho de Bronze',
+        seismicDampingEfficiency: 'Dispositivo mecânico enterrado que amplifica microvibrações primárias de ondas P precedendo o tremor principal.',
+        guylineElasticityAndSecurity: 'Alerta sonoro estridente que acorda os sentinelas com 30 segundos de antecedência para evacuação segura.',
+        campRestAndSafetyGuards: 'Elimina o pânico noturno e permite que todos alcancem terreno aberto antes do choque destrutivo.',
+        icon: '🔔🪨',
+        color: '#ca8a04'
+      };
+    } else if (bt === 'seismic_relief_buffer_trenches') {
+      tech = {
+        defenseTitle: 'Valetas Perimetrais de Alívio e Absorção de Fraturas de Solo',
+        seismicDampingEfficiency: 'Trincheiras rasas escavadas em anel concêntrico que interceptam e redirecionam rachaduras de superfície.',
+        guylineElasticityAndSecurity: 'Impede que fendas tectônicas se propaguem por baixo da fogueira ou dos sacos de dormir.',
+        campRestAndSafetyGuards: 'Preserva a integridade do piso central do acampamento e garante estabilidade para fardos pesados.',
+        icon: '⛏️🏕️',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      bufferType: bt,
+      defenseTitle: tech.defenseTitle,
+      seismicDampingEfficiency: tech.seismicDampingEfficiency,
+      guylineElasticityAndSecurity: tech.guylineElasticityAndSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Estabilidade de Acampamento) / XGE p. 78 (Engenharia de Terreno e Proteção Sísmica)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -14058,6 +14182,8 @@
     calcCampGlyphicWardsAndChalkCirclePerimeter: calcCampGlyphicWardsAndChalkCirclePerimeter,
     calcWildernessBlizzardAndWhiteoutHazard: calcWildernessBlizzardAndWhiteoutHazard,
     calcCampSnowTrenchQuinzheeAndFurBedding: calcCampSnowTrenchQuinzheeAndFurBedding,
+    calcWildernessSeismicTremorAndEarthFissureHazard: calcWildernessSeismicTremorAndEarthFissureHazard,
+    calcCampFlexibleGuylineAndSeismicBufferPlatform: calcCampFlexibleGuylineAndSeismicBufferPlatform,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
