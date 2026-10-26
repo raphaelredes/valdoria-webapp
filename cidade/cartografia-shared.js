@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 221: DRENAGEM ÁCIDA NATURAL (GOSSAN) E RIOS FÉRRICOS RUBros (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessAcidGossanDrainageHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'hills').toLowerCase();
+    var ht = (hazardType || 'jarositic_ferric_acid_stream_ph1_corrosive_ford').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Travessia Corrosiva em Riacho Férrico de Drenagem Ácida Natural (pH 1.5)',
+      saveDC: 15,
+      saveType: 'Constituição',
+      gossanRisk: 'Rios de cor vermelho-vinho translúcida que drenam maciços de sulfetos metálicos oxidados (pirita e calcopirita) onde bactérias extremófilas acidófilas geram ácido sulfúrico puro rico em ferro férrico e arsênio dissolvido; vadear sem proteção corrói fivelas de ferro, destrói o couro das botas e causa queimaduras químicas com 3d6 de ácido (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Transposição aérea por corda ou ponte de troncos envernizados com piche vegetal sem tocar no líquido rubi.',
+      rescueAndStabilization: 'Lavagem imediata com água alcalina ou pasta de cinza de fogueira para neutralizar o ácido.',
+      icon: '🩸🧪',
+      color: '#dc2626'
+    };
+
+    if (ht === 'efflorescent_melanterite_copiapite_crust_toxic_dust_cloud') {
+      hazard = {
+        hazardTitle: 'Nuvem Cáustica de Sais Eflorescentes de Sulfato de Ferro e Cobre',
+        saveDC: 14,
+        saveType: 'Constituição',
+        gossanRisk: 'Nas margens secas do vale precipitam crostas coloridas amarelo-enxofre e azul-esverdeadas de copiapita, melanterita e calcantita solúveis; pisar nessas flores de sal levanta um pó metálico altamente ácido e venenoso que queima as mucosas nasais e olhos com 2d6 de ácido mais 1d8 de veneno (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Marcha a barlavento das incrustações amarelas e azuis com máscara úmida embebida em cal ou cinza.',
+        rescueAndStabilization: 'Enxágue copioso dos olhos e garganta com água pura do cantil.',
+        icon: '💛☠️',
+        color: '#eab308'
+      };
+    } else if (ht === 'leached_honeycomb_gossan_iron_hat_vuggy_ledge_collapse') {
+      hazard = {
+        hazardTitle: 'Ruptura de Cornija Lixiviada de Chapéu-de-Ferro (Gossan Esponjoso)',
+        saveDC: 15,
+        saveType: 'Destreza',
+        gossanRisk: 'O topo oxidado do veio mineral (chapéu-de-ferro ou gossan) teve todos os seus sulfetos dissolvidos pela chuva ácida ao longo de eras, restando apenas um esqueleto oco e quebradiço de limonita e hematita ocre; apoiar o peso na escarpa enferrujada faz a rocha esfarelar como biscoito seco lançando o explorador no abismo com 3d6 de concussão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Ancorar-se exclusivamente nos veios brancos de quartzo maciço que resistem à lixiviação ácida.',
+        rescueAndStabilization: 'Retenção por corda de cânhamo encerado (imune ao ácido) e tala para contusões.',
+        icon: '🪨⚠️',
+        color: '#b45309'
+      };
+    } else if (ht === 'exothermic_pyrite_oxidation_pocket_so2_thermal_fume') {
+      hazard = {
+        hazardTitle: 'Emanação Exotérmica de Oxidação de Pirita em Fenda Subterrânea',
+        saveDC: 15,
+        saveType: 'Constituição',
+        gossanRisk: 'Fissuras profundas no maciço pirítico úmido onde a oxidação bacteriana acelerada libera calor intenso de até 60 graus e baforadas sufocantes de gás sulfuroso sem origem vulcânica; explorar abrigos na encosta sem ventilação provoca broncoespasmo e tontura com 2d8 de veneno e 1 nível de exaustão (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Sondar a temperatura das frestas na rocha ferruginosa e evitar qualquer cavidade com cheiro de fósforo queimado.',
+        rescueAndStabilization: 'Retirada imediata para o alto da colina ventilada e repouso sentado.',
+        icon: '♨️☁️',
+        color: '#ea580c'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampAcidGossanDrainageStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'hills').toLowerCase();
+    var dt = (defenseType || 'unmineralized_country_rock_quartzite_ridge_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Crista de Quartzito Encaixante Acima da Zona de Sulfetos',
+      gossanAndCampSafety: 'Acampamento instalado no espigão de rocha silicática estéril a montante do contato geológico com o veio de pirita.',
+      gossanTrenchAndWatch: 'Solo quimicamente neutro, firme e livre de poeira de sais de sulfato ou vapores ácidos.',
+      campRestAndSafetyGuards: 'Garante descanso longo saudável e preserva as armaduras e armas de aço da corrosão.',
+      icon: '⛺⛰️',
+      color: '#dc2626'
+    };
+
+    if (dt === 'upstream_headwater_spring_above_gossan_contact') {
+      tech = {
+        defenseTitle: 'Captação de Água na Cabeceira a Montante do Chapéu-de-Ferro',
+        gossanAndCampSafety: 'Coleta de água exclusivamente nas nascentes altas antes que o córrego toque as primeiras rochas manchadas de ocre e ferrugem.',
+        gossanTrenchAndWatch: 'Evita o envenenamento por metais pesados (arsênio, cádmio e cobre) que contamina todo o vale inferior.',
+        campRestAndSafetyGuards: 'Assegura reservas de água pura para toda a travessia do distrito mineral.',
+        icon: '💧🏞️',
+        color: '#0284c7'
+      };
+    } else if (dt === 'limestone_gravel_neutralization_trench_tent_apron') {
+      tech = {
+        defenseTitle: 'Trincheira de Cascalho Calcário Alcalino para Neutralização de Escoamento',
+        gossanAndCampSafety: 'Valeta perimetral preenchida com pedras calcárias britadas ou cinza branca ao redor das tendas.',
+        gossanTrenchAndWatch: 'Neutraliza a acidez da água de chuva que escorre pela encosta antes que atinja as lonas e mochilas.',
+        campRestAndSafetyGuards: 'Protege o equipamento da comitiva durante tempestades noturnas.',
+        icon: '⛏️🛡️',
+        color: '#94a3b8'
+      };
+    } else if (dt === 'tallow_and_beeswax_armor_coating_maintenance_station') {
+      tech = {
+        defenseTitle: 'Posto de Engraxamento Protetor de Sebo e Cera de Abelha em Metais',
+        gossanAndCampSafety: 'Aplicação preventiva de camada impermeável de gordura animal e cera sobre lâminas, cotas de malha e ferragens no acampamento.',
+        gossanTrenchAndWatch: 'Impede que a névoa ácida noturna do rio férrico oxide e fragilize o aço dos aventureiros.',
+        campRestAndSafetyGuards: 'Mantém a integridade total do equipamento de combate do grupo.',
+        icon: '⚔️🕯️',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 220: PINÁCULOS DE GELO DE SUBLIMAÇÃO (PENITENTES) E LABIRINTOS (D&D 5e)
   // =========================================================================
 
@@ -30764,6 +30868,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessAcidGossanDrainageHazard: calcWildernessAcidGossanDrainageHazard,
+    calcCampAcidGossanDrainageStation: calcCampAcidGossanDrainageStation,
     calcWildernessIcePenitenteBladeHazard: calcWildernessIcePenitenteBladeHazard,
     calcCampIcePenitenteBladeStation: calcCampIcePenitenteBladeStation,
     calcWildernessAlpineRockGlacierHazard: calcWildernessAlpineRockGlacierHazard,
