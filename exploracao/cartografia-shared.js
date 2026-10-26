@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 232: FLORESTAS PETRIFICADAS DE ÁGATA E RAVINAS BENTÔNICAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessPetrifiedWoodBadlandHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'suspended_agate_log_bridge_transverse_fracture_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ruptura de Ponte Natural de Tronco Petrificado (Agate Log Bridge)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      petrifiedWoodRisk: 'Troncos colossais de coníferas pré-históricas inteiramente substituídos por quartzo, calcedônia e jaspe que atravessam ravinas erodidas como pontes suspensas; apesar da aparência de madeira maciça, a sílica cristalina não possui elasticidade nem fibras e já está segmentada por fraturas transversais invisíveis, partindo-se sob o peso da comitiva e despencando toneladas de blocos vítreos por 12 metros com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+      pioneerMitigation: 'Jamais cruzar sobre troncos fósseis suspensos sem apoio central de rocha; descer e contornar pelo fundo seco da ravina.',
+      rescueAndStabilization: 'Remoção cuidadosa de cilindros de quartzo com alavancas e imobilização de membros.',
+      icon: '🪵💎',
+      color: '#dc2626'
+    };
+
+    if (ht === 'chalcedony_jasper_wood_splinter_razor_shatter_fall') {
+      hazard = {
+        hazardTitle: 'Estilhaçamento Cortante em Lascas de Xilópala e Calcedônia',
+        saveDC: 14,
+        saveType: 'Destreza',
+        petrifiedWoodRisk: 'Encostas juncadas de discos e cascas de madeira fóssil silicificada (xilópala) cuja fratura conchoidal produz bordas tão afiadas quanto obsidiana; escorregar nos taludes soltos projeta o explorador contra navalhas minerais multicoloridas que rasgam botas e perneiras com 2d8 de dano cortante (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Usar perneiras de couro grosso e escolher passagens de arenito firme fora dos cones de estilhaços.',
+        rescueAndStabilization: 'Extração de farpas de sílica com pinça, lavagem e bandagem compressiva.',
+        icon: '🔪🌈',
+        color: '#f97316'
+      };
+    } else if (ht === 'pedestal_undercut_petrified_trunk_roll_avalanche') {
+      hazard = {
+        hazardTitle: 'Rolamento de Tora de Quartzo Descalçada em Pedestal de Argila',
+        saveDC: 15,
+        saveType: 'Força',
+        petrifiedWoodRisk: 'Seções cilíndricas de troncos petrificados pesando três toneladas equilibradas precariamente no topo de pilares estreitos de argilito mole esculpidos pela chuva; apoiar a mão ou vibrar o terreno faz o pedestal ceder e dispara um rolo compressor de pedra morro abaixo sobre a fileira de marcha com 3d6 de concussão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Marchar pela crista das lombadas, nunca diretamente abaixo de toras fósseis equilibradas em encostas.',
+        rescueAndStabilization: 'Calçamento imediato da tora rolada com cunhas de pedra antes de resgatar o companheiro.',
+        icon: '🪨🪵',
+        color: '#b45309'
+      };
+    } else if (ht === 'rain_slick_bentonite_popcorn_clay_gulch_mire') {
+      hazard = {
+        hazardTitle: 'Atolamento em Argila Bentônica Inchada ("Popcorn Clay") pós-Aguaceiro',
+        saveDC: 14,
+        saveType: 'Força',
+        petrifiedWoodRisk: 'A matriz de cinza vulcânica onde a floresta foi soterrada decompôs-se em montmorilonita pura (bentonita) de textura crocante a seco, mas que ao primeiro chuvisco absorve cinco vezes seu volume em água e vira um sabão coloidal escorregadio e pegajoso nas ravinas, reduzindo o deslocamento a um quarto e impondo 1 nível de exaustão (DMG p. 110; PHB p. 182-183).',
+        pioneerMitigation: 'Subir imediatamente para os terraços de cascalho de quartzo ou lajes de arenito ao avistar nuvens de chuva.',
+        rescueAndStabilization: 'Raspagem das crostas pesadas de argila das botas e descanso para recuperar o fôlego.',
+        icon: '🌧️🥾',
+        color: '#78716c'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampPetrifiedWoodBadlandStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'giant_hollowed_agate_root_burl_windproof_alcove').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Raiz Oca de Árvore Petrificada Gigante',
+      petrifiedWoodAndCampSafety: 'Abrigo instalado na cavidade basal de um toco fóssil de 4 metros de diâmetro cujas paredes de sílica maciça têm 40 centímetros de espessura.',
+      petrifiedWoodTrenchAndWatch: 'Estrutura mineral incombustível e impenetrável contra ventos de areia, flechas e garras de predadores.',
+      campRestAndSafetyGuards: 'Garante descanso longo protegido com visada limpa sobre toda a bacia de badlands.',
+      icon: '⛺💎',
+      color: '#f97316'
+    };
+
+    if (dt === 'jasper_chalcedony_flint_striker_and_blade_knapping_bench') {
+      tech = {
+        defenseTitle: 'Bancada de Lascamento de Calcedônia para Pederneiras e Pontas',
+        petrifiedWoodAndCampSafety: 'A madeira petrificada de alta pureza (ágata e jaspe) possui dureza 7 na escala de Mohs e gera faíscas intensas contra o aço.',
+        petrifiedWoodTrenchAndWatch: 'Permite reabastecer pederneiras de acendimento rápido e lascar pontas de seta cortantes durante a vigília.',
+        campRestAndSafetyGuards: 'Assegura ignição de fogueiras mesmo sob vento forte nos ermos áridos.',
+        icon: '🔥🪨',
+        color: '#eab308'
+      };
+    } else if (dt === 'monolithic_log_ring_barricade_badland_redoubt') {
+      tech = {
+        defenseTitle: 'Reduto Circular entre Toras Monolíticas de Quartzo',
+        petrifiedWoodAndCampSafety: 'Aproveitamento de um agrupamento natural de troncos petrificados tombados no topo de uma mesa seca acima da argila bentônica.',
+        petrifiedWoodTrenchAndWatch: 'Os cilindros de pedra de 1,5 metro de altura funcionam como muralha pronta à prova de investidas.',
+        campRestAndSafetyGuards: 'Cobertura total (três quartos a total) para os sentinelas durante toda a noite.',
+        icon: '🛡️🪵',
+        color: '#d97706'
+      };
+    } else if (dt === 'sandstone_caprock_cistern_above_bentonite_seal') {
+      tech = {
+        defenseTitle: 'Cisterna Natural sobre Selo Impermeável de Argilito Bentônico',
+        petrifiedWoodAndCampSafety: 'Como a camada inferior de bentonita inchada é 100% impermeável, as bacias de arenito logo acima retêm água da chuva sem infiltrar.',
+        petrifiedWoodTrenchAndWatch: 'Fornece água limpa decantada sem a turbidez leitosa dos córregos do fundo do vale.',
+        campRestAndSafetyGuards: 'Sustenta a hidratação da comitiva e das montarias em pleno deserto de badlands.',
+        icon: '💧🪨',
+        color: '#38bdf8'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 231: CRISTAS DE PRESSÃO TOROSS E POLÍNIAS DE GELO MARINHO (D&D 5e)
   // =========================================================================
 
@@ -31908,6 +32012,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessPetrifiedWoodBadlandHazard: calcWildernessPetrifiedWoodBadlandHazard,
+    calcCampPetrifiedWoodBadlandStation: calcCampPetrifiedWoodBadlandStation,
     calcWildernessSeaIceTorossPolynyaHazard: calcWildernessSeaIceTorossPolynyaHazard,
     calcCampSeaIceTorossPolynyaStation: calcCampSeaIceTorossPolynyaStation,
     calcWildernessBedrockStridPotholeHazard: calcWildernessBedrockStridPotholeHazard,
