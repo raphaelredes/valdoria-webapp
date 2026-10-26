@@ -16493,6 +16493,130 @@
     };
   }
 
+  // === calcWildernessContinentalSaltFlatHazard (Salinas Endorreicas, Crostas de Halita e Salmoura - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessContinentalSaltFlatHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'halite_crust_collapse_brine_scalding').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso de Crosta de Halita em Salmoura Escaldante',
+      saveDC: 15,
+      saveType: 'Destreza',
+      saltFlatRiskAndBrine: 'Crosta superficial de sal de 4 cm que desaba sob o avanço da comitiva; afundamento em salmoura cáustica e quente a 50°C causando 2d6 ácido e 1d6 de fogo (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores usam calçados estribo de madeira de balsa que dispersam a pressão sobre a crosta salina e testam o solo com lanças leves.',
+      rescueAndStabilization: 'Extração rápida com alça torácica, lavagem abundante de sal com água doce limpa e curativo com pasta de argila cicatrizante.',
+      icon: '🧂🔥',
+      color: '#eab308'
+    };
+
+    if (ht === 'salt_flat_solar_albedo_blindness') {
+      hazard = {
+        hazardTitle: 'Ofuscamento Solar por Albedo de Cristal de Sal',
+        saveDC: 14,
+        saveType: 'Constituição',
+        saltFlatRiskAndBrine: 'Reflexão ofuscante de 90% dos raios solares no salar branco; queima de retina, cegueira temporária por 1 hora e enxaqueca severa.',
+        pioneerMitigation: 'Uso obrigatório de óculos de osso polar com fendas estreitas e viseiras de feltro escuro sob as sobrancelhas.',
+        rescueAndStabilization: 'Repouso em tenda totalmente vedada à luz e compressas frescas de chá de camomila sobre as pálpebras.',
+        icon: '☀️🕶️',
+        color: '#f59e0b'
+      };
+    } else if (ht === 'brine_mirage_route_inversion') {
+      hazard = {
+        hazardTitle: 'Miragem Térmica de Salmoura e Desvio de Rumo',
+        saveDC: 13,
+        saveType: 'Sabedoria',
+        saltFlatRiskAndBrine: 'Ilusão óptica cintilante criada pelo calor sobre a camada de sal que oculta poços de lama cáustica e simula oásis imaginários.',
+        pioneerMitigation: 'Navegação por bússola solar calibrada e marcos fixos de estacas de cedro cravadas ao longo do caminho.',
+        rescueAndStabilization: 'Reorientação cartográfica por mapas astronômicos e consumo de água fresca açucarada para estabilização mental.',
+        icon: '🌫️🧭',
+        color: '#06b6d4'
+      };
+    } else if (ht === 'crust_blade_edge_pack_damage') {
+      hazard = {
+        hazardTitle: 'Lâminas Afiadas de Cristal de Sal em Carga Baixa',
+        saveDC: 13,
+        saveType: 'Destreza',
+        saltFlatRiskAndBrine: 'Bordas poligonais de halita cristalizada cortantes como navalhas que rasgam botas, sacarias de suprimentos e cascos de montarias.',
+        pioneerMitigation: 'Passos calculados sobre os centros planos das placas e perneiras protetoras de couro reforçado com lona encerada.',
+        rescueAndStabilization: 'Sutura cuidadosa de cortes superficiais com linha esterilizada e reposição de sacos danificados com lonas reservas.',
+        icon: '🔪🩸',
+        color: '#dc2626'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      saltFlatRiskAndBrine: hazard.saltFlatRiskAndBrine,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Salinas Endorreicas e Miragens) / PHB p. 182-183 (Marcha no Deserto de Sal) / XGE p. 78-83 (Sobrevivência)'
+    };
+  }
+
+  // === calcCampContinentalSaltFlatPlatformAndDistillerStation (Plataformas de Sal, Calçados Estribo e Destiladores - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampContinentalSaltFlatPlatformAndDistillerStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'compacted_salt_block_raised_deck').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Plataforma Elevada de Blocos Serrados de Sal Puro',
+      saltFlatAnchorageAndCrustSafety: 'Estrado elevado de 40 cm composto por blocos sólidos de sal mineral seco serrados da borda sã do salar; isola as tendas da salmoura líquida.',
+      brineShieldingAndCampSecurity: 'Impede a corrosão salina de tecidos, mochilas e arreios da comitiva, mantendo as esteiras limpas e secas.',
+      campRestAndSafetyGuards: 'Permite sono longo tranquilo e seguro para os membros do grupo sem risco de infiltração química noturna.',
+      icon: '🧂⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'salt_skate_broad_footwear_rack') {
+      tech = {
+        defenseTitle: 'Armação de Calçados Estribo de Difusão de Pressão',
+        saltFlatAnchorageAndCrustSafety: 'Pranchas leves de madeira de balsa com tiras de couro que dobram a área de contato dos pés sobre a crosta quebradiça de sal.',
+        brineShieldingAndCampSecurity: 'Garante trânsito seguro de sentinelas ao redor do bivaque sem perigo de ruptura acidental da crosta salina.',
+        campRestAndSafetyGuards: 'Mantém as patrulhas perimétricas ágeis e prontas para defender o acampamento de predadores do deserto.',
+        icon: '🪵🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'solar_evaporative_brine_distiller_array') {
+      tech = {
+        defenseTitle: 'Bateria de Destiladores Solares de Salmoura com Coletor Cônico',
+        saltFlatAnchorageAndCrustSafety: 'Conjunto de quatro cones translúcidos que utilizam a forte irradiação solar do salar para ferver salmoura e recolher condensação potável.',
+        brineShieldingAndCampSecurity: 'Produz 8 litros diários de água mineral fresca límpida a partir de poças saturadas de salitre.',
+        campRestAndSafetyGuards: 'Garante autonomia de abastecimento hídrico vitalícia para a expedição no coração do deserto de sal.',
+        icon: '💧🏺',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'reflective_salt_dust_windscreen') {
+      tech = {
+        defenseTitle: 'Anteparo de Tela com Pó de Sal Neutro Corta-Vento',
+        saltFlatAnchorageAndCrustSafety: 'Paredão de lona de algodão tensionado entre estacas que desvia tempestades de pó salino cáustico sobre o bivaque.',
+        brineShieldingAndCampSecurity: 'Evita a irritação ocular e respiratória das sentinelas durante vendavais noturnos no salar.',
+        campRestAndSafetyGuards: 'Assegura repouso profundo, sem poeira ácida e aquecido para todos os aventureiros.',
+        icon: '🧱💨',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      saltFlatAnchorageAndCrustSafety: tech.saltFlatAnchorageAndCrustSafety,
+      brineShieldingAndCampSecurity: tech.brineShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Desertos de Sal) / PHB p. 150 (Kits de Aventureiro) / XGE p. 78-83 (Engenharia de Sobrevivência)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -18342,6 +18466,8 @@
     calcCampPermafrostIsothermalBivouacAndMelterStation: calcCampPermafrostIsothermalBivouacAndMelterStation,
     calcWildernessBorealTaigaAndPeatHazard: calcWildernessBorealTaigaAndPeatHazard,
     calcCampBorealTaigaLarchPlatformAndFirebreak: calcCampBorealTaigaLarchPlatformAndFirebreak,
+    calcWildernessContinentalSaltFlatHazard: calcWildernessContinentalSaltFlatHazard,
+    calcCampContinentalSaltFlatPlatformAndDistillerStation: calcCampContinentalSaltFlatPlatformAndDistillerStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
