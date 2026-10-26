@@ -18601,6 +18601,130 @@
     };
   }
 
+  // === calcWildernessPapyrusSwampAndSiphonHazard (Pântanos de Papiro, Vaus Profundos e Sifões de Turfa - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessPapyrusSwampAndSiphonHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'papyrus_culm_dense_thicket_entrapment').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Aprisionamento em Matagal Denso de Caules de Papiro',
+      saveDC: 15,
+      saveType: 'Força',
+      papyrusSwampRiskAndSiphons: 'Muralha impenetrável de hastes triangulares de papiro de 5 metros de altura entrelaçadas em rizomas flutuantes; desorientação sensorial e aprisionamento elástico causando exaustão severa e risco de asfixia em lamaçal (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam empunhando foices longas de ceifa e abrem trilha alinhada por bússola solar com estacas marcadoras a cada 15 metros.',
+      rescueAndStabilization: 'Abertura rápida de clareira com facões pesados, hidratação imediata com infusão de gengibre silvestre e repouso de 30 minutos em solo firme.',
+      icon: '🌾⚠️',
+      color: '#15803d'
+    };
+
+    if (ht === 'peat_siphon_suction_vortex') {
+      hazard = {
+        hazardTitle: 'Vórtice de Sucção em Sifão Oculto de Turfeira',
+        saveDC: 14,
+        saveType: 'Destreza',
+        papyrusSwampRiskAndSiphons: 'Fenda de drenagem cárstica submersa sob camada fina de turfa decomposta; correnteza descendente violenta que traciona nadadores e mochilas para conduto abissal de lodo anóxico.',
+        pioneerMitigation: 'Sondagem sistemática da velocidade de escoamento superficial com flutuadores de cortiça e travessia exclusivamente amarrados em cordada quádrupla.',
+        rescueAndStabilization: 'Tracionamento mecânico por talha manual fixada em touceira espessa de papiro e drenagem postural dos pulmões na margem seca.',
+        icon: '🌀🕳️',
+        color: '#0284c7'
+      };
+    } else if (ht === 'hippo_deep_run_trench_stumble') {
+      hazard = {
+        hazardTitle: 'Queda em Canal Submerso de Trânsito de Feras Anfíbias',
+        saveDC: 14,
+        saveType: 'Destreza',
+        papyrusSwampRiskAndSiphons: 'Trincheira cega de 4 metros de profundidade escavada no lodo pela passagem rotineira de animais anfíbios pesados; afundamento repentino de exploradores sob águas turvas.',
+        pioneerMitigation: 'Varredura com varas de bambu verticais para demarcar desníveis de relevo antes de apoiar os pés e acompanhamento cuidadoso de rastros nas bordas.',
+        rescueAndStabilization: 'Içamento por corda dupla com estribo de lona e massagem estimulante com óleo de eucalipto para aquecimento muscular.',
+        icon: '🕳️🌊',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'swamp_gas_ignition_flame_flash') {
+      hazard = {
+        hazardTitle: 'Ignição Súbita de Bolha de Metano por Tocha de Marcha',
+        saveDC: 13,
+        saveType: 'Destreza',
+        papyrusSwampRiskAndSiphons: 'Liberação em massa de biogás aprisionado sob tapete de raízes que entra em combustão instantânea ao contato com centelhas; labareda fulgurante com 2d6 de fogo e queimaduras em faces.',
+        pioneerMitigation: 'Uso de lanternas vedadas com vidro de mica fosca e proibição estrita de tochas abertas durante travessias em águas estagnadas com bolhas ativas.',
+        rescueAndStabilization: 'Abafamento das chamas com capas de lã pesada e aplicação de pasta de clara de ovo e babosa nas queimaduras superficiais.',
+        icon: '🔥🫧',
+        color: '#dc2626'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      papyrusSwampRiskAndSiphons: hazard.papyrusSwampRiskAndSiphons,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Brejos Fluviais e Zonas Pantanosas) / PHB p. 182-183 (Marcha na Água) / XGE p. 78-83 (Geomorfologia Fluvial e Pântanos de Papiro)'
+    };
+  }
+
+  // === calcCampPapyrusSwampAndSiphonStation (Ilhas Flutuantes de Papiro, Paliçadas e Tinas de Percolação - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampPapyrusSwampAndSiphonStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'papyrus_bundle_floating_island_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Ilha Flutuante de Feixes de Papiro Trançado',
+      swampAnchorageAndPapyrusSafety: 'Plataforma circular insubmersível de 15 metros de diâmetro tecida com feixes secos de papiro em camadas cruzadas ancorada por estacas no leito raso.',
+      siphonShieldingAndCampSecurity: 'Totalmente isolado do alcance de predadores terrestres rasteiros e imune a oscilações do nível d água ou enxurradas da bacia.',
+      campRestAndSafetyGuards: 'Assegura sono longo confortável, amortecido e seco para os membros da comitiva sobre colchão vegetal flutuante espesso.',
+      icon: '🌾⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'perimeter_stake_palisade_snag_barrier') {
+      tech = {
+        defenseTitle: 'Paliçada de Pontas de Estacas contra Feras Anfíbias',
+        swampAnchorageAndPapyrusSafety: 'Cercadura de estacas afiadas de ipê cravadas no fundo lodoso a 45 graus voltadas para fora ao redor da ilha flutuante.',
+        siphonShieldingAndCampSecurity: 'Impede que feras aquáticas e animais de grande porte invadam a área do bivaque durante a noite.',
+        campRestAndSafetyGuards: 'Permite que as sentinelas mantenham a vigilância em posto seguro sem perigo de ataques de surpresa vindos da água.',
+        icon: '🪵🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'sand_charcoal_slow_percolation_vat') {
+      tech = {
+        defenseTitle: 'Tina de Percolação com Areia e Carvão de Papiro',
+        swampAnchorageAndPapyrusSafety: 'Barril de madeira com leito filtrante de carvão vegetal moído, areia quartzosa de rio e tela de linho fino.',
+        siphonShieldingAndCampSecurity: 'Remove odor fétido de matéria orgânica e neutraliza microrganismos de pântano, fornecendo 18 litros diários de água doce translúcida.',
+        campRestAndSafetyGuards: 'Garante o reabastecimento de cantis e o preparo seguro de ensopados nutritivos sem risco de febre palustre.',
+        icon: '🏺💧',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'marsh_watchtower_bundle_tripod_deck') {
+      tech = {
+        defenseTitle: 'Torre Tripé de Caules de Papiro com Visada Panorâmica',
+        swampAnchorageAndPapyrusSafety: 'Estrutura leve em tripé de toras de papiro atadas com nós de linho encerado coroada por cesto de vigia a 5 metros de altitude.',
+        siphonShieldingAndCampSecurity: 'Eleva a sentinela acima do teto do canavial conferindo visão desobstruída de 360 graus sobre toda a extensão do brejo.',
+        campRestAndSafetyGuards: 'Alerta a comitiva com antecedência sobre deslocamentos de manadas ou aproximação de perigos nos canais.',
+        icon: '🗼🛡️',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      swampAnchorageAndPapyrusSafety: tech.swampAnchorageAndPapyrusSafety,
+      siphonShieldingAndCampSecurity: tech.siphonShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques Fluviais e Pantanosos) / PHB p. 150 (Kits de Sobrevivência em Brejo) / XGE p. 78-83 (Engenharia em Áreas Úmidas e Filtração)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -20484,6 +20608,8 @@
     calcCampBlackMangroveAndPneumatophoreStation: calcCampBlackMangroveAndPneumatophoreStation,
     calcWildernessAaLavaFieldAndChasmHazard: calcWildernessAaLavaFieldAndChasmHazard,
     calcCampAaLavaFieldAndChasmStation: calcCampAaLavaFieldAndChasmStation,
+    calcWildernessPapyrusSwampAndSiphonHazard: calcWildernessPapyrusSwampAndSiphonHazard,
+    calcCampPapyrusSwampAndSiphonStation: calcCampPapyrusSwampAndSiphonStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
