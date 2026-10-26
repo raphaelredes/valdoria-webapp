@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 250: CHAMINÉS HIDROTERMAIS DE SÍLICA, GÊISERES E PISCINAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessGeyseriteSinterThermalHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'hydrothermal_steam_flash_explosion_crater_burst').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Erupção Hidrotermal Explosiva de Vapor Confinado (Hydrothermal Flash Explosion)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      geyseriteThermalRisk: 'Quando a sílica precipitada veda canais subterrâneos profundos, a água superaquecida a 200 graus sob pressão extrema entra em ebulição instantânea ao sofrer descompressão por terremoto ou fratura da crosta; o solo inteiro explode para cima arremessando fragmentos de geiserita afiada e uma nuvem de vapor escaldante por 30 metros de raio, causando 3d8 de dano ígneo e concussão (DMG p. 110; XGE p. 109).',
+      pioneerMitigation: 'Manter a marcha sobre solo frio de cascalho basáltico e afastar-se de fumarolas cujo fluxo de vapor assobie em tom agudo.',
+      rescueAndStabilization: 'Tratamento imediato de queimaduras com unguento refrescante e bandagem estéril.',
+      icon: '💥♨️',
+      color: '#dc2626'
+    };
+
+    if (ht === 'brittle_geyserite_shelf_boiling_pool_breakthrough') {
+      hazard = {
+        hazardTitle: 'Ruptura de Casca Fina de Geiserita sobre Piscina Fervente a 95°C',
+        saveDC: 15,
+        saveType: 'Destreza',
+        geyseriteThermalRisk: 'Ao redor das lagoas prismáticas de água turquesa abrem-se terraços brancos decorados em couve-flor de sílica amorfa que se projetam sobre o lago fervente como prateleiras sem apoio; pisar além da borda firme rompe a casca de 3 centímetros e mergulha as pernas em água a 95 graus rica em ácido sulfúrico e sílica coloidal, causando 3d6 de dano de fogo e destruição das botas (DMG p. 110; PHB p. 182-183).',
+        pioneerMitigation: 'Sondar a borda da piscina com o bastão de ferro antes de cada passo e jamais aproximar-se da margem sem ancoragem traseira.',
+        rescueAndStabilization: 'Remoção urgente do calçado encharcado de água fervente e imersão em água fria.',
+        icon: '🕳️♨️',
+        color: '#ea580c'
+      };
+    } else if (ht === 'superheated_geyser_throat_periodic_eruption_scald') {
+      hazard = {
+        hazardTitle: 'Ejeção Periódica de Água Escaldante em Garganta de Gêiser Cônico',
+        saveDC: 14,
+        saveType: 'Destreza',
+        geyseriteThermalRisk: 'Cones maciços de geiserita de 3 metros de altura que parecem adormecidos entre ciclos de atividade; quando o duto subterrâneo atinge a temperatura crítica, o gêiser ejeta uma coluna de água fervente e vapor a 60 metros de altura a cada 40 minutos sem outro aviso prévio além de um borbulhar na boca do cone, atingindo a comitiva com 2d8 de dano de fogo (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Observar o ciclo de erupção a uma distância segura com ampulheta antes de cruzar o campo termal.',
+        rescueAndStabilization: 'Cura com magia de regeneração ou aplicação de pomadas anti-queimadura.',
+        icon: '🌋💨',
+        color: '#f97316'
+      };
+    } else if (ht === 'toxic_hydrogen_sulfide_thermal_fog_asphyxiation') {
+      hazard = {
+        hazardTitle: 'Asfixia por Gás Sulfídrico e Nevoeiro Termal Ácido em Baixadas',
+        saveDC: 14,
+        saveType: 'Constituição',
+        geyseriteThermalRisk: 'Nas noites frias e madrugadas sem vento, o vapor denso dos gêiseres condensa e aprisiona gás sulfídrico, dióxido de carbono e aerossóis de ácido nas depressões entre os terraços de sílica; inalar o nevoeiro concentrado queima as mucosas pulmonares, impondo condição envenenado e 1 nível de exaustão (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Marchar pelas cristas ventiladas acima da camada de vapor e usar máscaras de linho umedecidas.',
+        rescueAndStabilization: 'Retirada rápida para ar puro em terreno elevado e respiração assistida.',
+        icon: '☠️🌫️',
+        color: '#ca8a04'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampGeyseriteSinterThermalStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'warm_dry_geyserite_terrace_radiant_heated_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Aquecido por Radiação em Terraço de Geiserita Inativo',
+      geyseriteThermalAndCampSafety: 'Aproveitamento de uma plataforma alta de sílica inativa aquecida pelo fluxo geotérmico profundo a confortáveis 22 graus constantes.',
+      geyseriteThermalTrenchAndWatch: 'A pedra seca e morna irradia calor constante de baixo para cima, eliminando o congelamento do chão mesmo sob nevascas intensas.',
+      campRestAndSafetyGuards: 'Garante descanso longo aquecido e revigorante sem consumo de lenha.',
+      icon: '⛺♨️',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'pure_steam_condenser_sheet_freshwater_rig') {
+      tech = {
+        defenseTitle: 'Condensador de Lona para Água Doce a partir de Vents de Vapor Puro',
+        geyseriteThermalAndCampSafety: 'Posicionamento de uma lona inclinada sobre um respiradouro de vapor limpo na borda do campo termal.',
+        geyseriteThermalTrenchAndWatch: 'O vapor condensa na face fria da lona e escorre para baldes, produzindo dezenas de litros de água destilada pura e esterilizada.',
+        campRestAndSafetyGuards: 'Fornece hidratação limpa para cantis e esterilização de bandagens.',
+        icon: '💧💨',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'scalding_runnel_moat_perimeter_defense') {
+      tech = {
+        defenseTitle: 'Fosso Defensivo Natural de Regatos de Drenagem Escaldantes',
+        geyseriteThermalAndCampSafety: 'Instalação do bivaque em uma ilha cercada pelos canais de escoamento de água fervente dos gêiseres superiores.',
+        geyseriteThermalTrenchAndWatch: 'A água a 80 graus e o lodo silicoso instável dos regatos formam um fosso impenetrável contra predadores ou invasores descalços.',
+        campRestAndSafetyGuards: 'Protege o perímetro do acampamento com sentinelas posicionadas apenas nas passagens secas.',
+        icon: '🛡️♨️',
+        color: '#0284c7'
+      };
+    } else if (dt === 'hydrothermal_sinter_cooking_hearth_hot_pot') {
+      tech = {
+        defenseTitle: 'Panela Geotérmica em Borda de Nascente de Baixa Atividade',
+        geyseriteThermalAndCampSafety: 'Uso de uma pequena bacia de água limpa a 85 graus para cozinhar caldeirões de rações e carnes em banho-maria.',
+        geyseriteThermalTrenchAndWatch: 'Cozinha alimentos sem emitir fumaça nem fagulhas que pudessem revelar a posição do bivaque na escuridão.',
+        campRestAndSafetyGuards: 'Mantém a comitiva bem nutrida com refeições quentes em total discrição noturna.',
+        icon: '🍲♨️',
+        color: '#16a34a'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 249: DUNAS TREPADORAS E AREIAS CANTANTES RESSONANTES (D&D 5e)
   // =========================================================================
 
@@ -33780,6 +33884,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessGeyseriteSinterThermalHazard: calcWildernessGeyseriteSinterThermalHazard,
+    calcCampGeyseriteSinterThermalStation: calcCampGeyseriteSinterThermalStation,
     calcWildernessClimbingDuneBoomingSandHazard: calcWildernessClimbingDuneBoomingSandHazard,
     calcCampClimbingDuneBoomingSandStation: calcCampClimbingDuneBoomingSandStation,
     calcWildernessOysterReefPluffMudHazard: calcWildernessOysterReefPluffMudHazard,
