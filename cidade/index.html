@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessLightningPlateauAndArcDischargeHazard) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var lt = CartShared.calcWildernessLightningPlateauAndArcDischargeHazard(bKey, 'ground_current_lightning_step_potential');
+        return '<div class="clp-lightning-plateau-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,28,16,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(234,179,8,0.3);font-size:8px;color:#fef9c3;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + lt.color + ';margin-bottom:2px;">' + lt.icon + ' ' + lt.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Perigo:</b> ' + lt.electricalDamageAndShock + ' (CD ' + lt.saveDC + ' [' + lt.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde047;margin-top:1px;">• <b>Prevenção:</b> ' + lt.pioneerMitigation + ' · <i>Estabilização: ' + lt.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampLightningPlateauFaradayCageAndGroundingStation) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var fc = CartShared.calcCampLightningPlateauFaradayCageAndGroundingStation(bKey, 'portable_copper_wire_faraday_canopy');
+        return '<div class="clp-faraday-canopy-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,32,24,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#d1fae5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + fc.color + ';margin-bottom:2px;">' + fc.icon + ' ' + fc.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Blindagem Faraday:</b> ' + fc.faradayShieldingAndGrounding + ' · <b>Aterramento:</b> ' + fc.staticDepolarizationAndEquipmentSafety + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Sono:</b> ' + fc.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessAcidMarshAndCorrosiveSlimeHazard) return '';
         var bKey = (biome && biome.key) || 'swamp';
         var am = CartShared.calcWildernessAcidMarshAndCorrosiveSlimeHazard(bKey, 'corrosive_alum_mud_immersion');

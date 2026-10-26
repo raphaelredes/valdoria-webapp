@@ -13889,6 +13889,130 @@
     };
   }
 
+  // === calcWildernessLightningPlateauAndArcDischargeHazard (Tempestades Elétricas, Tensão de Passo e Relâmpagos Globulares - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessLightningPlateauAndArcDischargeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'ground_current_lightning_step_potential').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Descarga de Solo e Tensão de Passo por Raio Indireto',
+      saveDC: 14,
+      saveType: 'Constituição',
+      electricalDamageAndShock: 'Corrente de terra por impacto de raio a 30 metros; 3d10 de dano de eletricidade e paralisia temporária nas pernas por diferença de potencial (DMG p. 110).',
+      pioneerMitigation: 'Batedores adotam postura de agachamento compacto com pés juntos sem encostar mãos na rocha e proíbem passadas largas.',
+      rescueAndStabilization: 'Massagem cardíaca emergencial, despolarização com barra de ferro aterrada e respiração compassada.',
+      icon: '⚡🪨',
+      color: '#eab308'
+    };
+
+    if (ht === 'fulgurite_crag_static_discharge_arc') {
+      hazard = {
+        hazardTitle: 'Arco Voltaico Eletrostático em Pináculo de Fulgurita',
+        saveDC: 13,
+        saveType: 'Destreza',
+        electricalDamageAndShock: 'Salto de faísca elétrica estalando de rochas vitrificadas contra armaduras metálicas; 2d8 de relâmpago e desarme involuntário de armas de ferro.',
+        pioneerMitigation: 'Isolamento de peças de metal em capas de couro untado e desvio de agulhas rochosas pontiagudas.',
+        rescueAndStabilization: 'Alívio de espasmos musculares com compressas térmicas e infusão de arnica e casca de salgueiro.',
+        icon: '⚡🗡️',
+        color: '#facc15'
+      };
+    } else if (ht === 'ozone_scented_supercharged_hail') {
+      hazard = {
+        hazardTitle: 'Granizo Energizado Eletrostaticamente com Ozônio',
+        saveDC: 13,
+        saveType: 'Destreza',
+        electricalDamageAndShock: 'Pedras de gelo pontiagudas carregadas de estática; 1d8 de concussão + 1d8 de relâmpago com quebra de concentração de conjuradores.',
+        pioneerMitigation: 'Abrigo imediato sob escudos de madeira com rebites isolados ou mantas pesadas de lã encerada.',
+        rescueAndStabilization: 'Tratamento de ferimentos no couro cabeludo com pomada esterilizante e proteção contra choque térmico.',
+        icon: '🧊⚡',
+        color: '#38bdf8'
+      };
+    } else if (ht === 'ball_lightning_floating_orb_stalker') {
+      hazard = {
+        hazardTitle: 'Orbe Flutuante de Relâmpago Globular (Ball Lightning)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        electricalDamageAndShock: 'Esfera luminosa de plasma flutuando em busca de massa condutora; explosão de 3d8 de eletricidade e cegueira temporária por flash.',
+        pioneerMitigation: 'Permanecer imóvel sem agitar o ar e lançar projéteis de ferro na direção oposta para atrair a esfera.',
+        rescueAndStabilization: 'Tratamento de queimaduras por descarga elétrica com óleo balsâmico de babosa da montanha.',
+        icon: '🔮⚡',
+        color: '#a855f7'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      electricalDamageAndShock: hazard.electricalDamageAndShock,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Tempestades e Relâmpagos) / PHB p. 182-183 (Dano Elétrico e Salvaguardas)'
+    };
+  }
+
+  // === calcCampLightningPlateauFaradayCageAndGroundingStation (Gaiolas de Faraday, Varões de Aterramento e Estrados Isolantes - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampLightningPlateauFaradayCageAndGroundingStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'portable_copper_wire_faraday_canopy').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Toldo com Gaiola de Faraday de Fios de Cobre Entrelaçados',
+      faradayShieldingAndGrounding: 'Malha flexível de cobre sobre as barracas conduzindo descargas elétricas diretas e indiretas pelo exterior.',
+      staticDepolarizationAndEquipmentSafety: 'Cria zona despolarizada segura no interior da tenda imune a campos de alta voltagem.',
+      campRestAndSafetyGuards: 'Permite sono longo tranquilo para a comitiva sem medo de raios caindo sobre o acampamento no platô.',
+      icon: '⛺⚡',
+      color: '#10b981'
+    };
+
+    if (dt === 'spike_driven_grounding_rod_array') {
+      tech = {
+        defenseTitle: 'Conjunto de Varões de Aterramento em Cobre e Salmoura',
+        faradayShieldingAndGrounding: 'Estacas de cobre cravadas a 1 metro na rocha com salmoura conduzindo correntes elétricas para o subsolo profundo.',
+        staticDepolarizationAndEquipmentSafety: 'Dissipa tensões de passo acumuladas na superfície da rocha antes de atingirem os abrigos.',
+        campRestAndSafetyGuards: 'Garante vigília segura para as sentinelas sem choque ao tocar em estais ou ferragens do acampamento.',
+        icon: '🔩⚡',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'rubberized_pitch_tarpaulin_isolation_deck') {
+      tech = {
+        defenseTitle: 'Estrado Isolante de Madeira Seca com Piche e Cortiça',
+        faradayShieldingAndGrounding: 'Piso elevado de 10 cm com pranchas impermeabilizadas bloqueando 100% da condução de corrente de solo.',
+        staticDepolarizationAndEquipmentSafety: 'Impede que choques de retorno por ricochete de raios atinjam os leitos dos aventureiros.',
+        campRestAndSafetyGuards: 'Garante recuperação completa de dados de vida sem interrupção por espasmos estáticos noturnos.',
+        icon: '🪵🛡️',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'static_discharge_chain_and_depolarizer') {
+      tech = {
+        defenseTitle: 'Corrente de Despolarização e Alívio Eletrostático',
+        faradayShieldingAndGrounding: 'Cabo de cobre de aterramento arrastado que descarrega a estática acumulada em cotas de malha e placas de ferro.',
+        staticDepolarizationAndEquipmentSafety: 'Neutraliza o faiscamento entre armaduras e objetos de metal ao entrar na área de repouso.',
+        campRestAndSafetyGuards: 'Preserva componentes metálicos e protege os aventureiros contra descargas ao desarmar o equipamento.',
+        icon: '⛓️🔋',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      faradayShieldingAndGrounding: tech.faradayShieldingAndGrounding,
+      staticDepolarizationAndEquipmentSafety: tech.staticDepolarizationAndEquipmentSafety,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque em Cumes Elétricos) / XGE p. 78 (Equipamento de Proteção e Aterramento)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -15696,6 +15820,8 @@
     calcCampVolcanicBasaltOverhangAndTephraTrenchStation: calcCampVolcanicBasaltOverhangAndTephraTrenchStation,
     calcWildernessAcidMarshAndCorrosiveSlimeHazard: calcWildernessAcidMarshAndCorrosiveSlimeHazard,
     calcCampAcidMarshCorduroyCausewayAndLimestoneBed: calcCampAcidMarshCorduroyCausewayAndLimestoneBed,
+    calcWildernessLightningPlateauAndArcDischargeHazard: calcWildernessLightningPlateauAndArcDischargeHazard,
+    calcCampLightningPlateauFaradayCageAndGroundingStation: calcCampLightningPlateauFaradayCageAndGroundingStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
