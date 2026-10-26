@@ -20614,6 +20614,110 @@
   // FASE 181: RAVINAS E GARGANTAS EM BADLANDS COM PONTES NATURAIS DE ARGILA (D&D 5e)
   // =========================================================================
 
+  // =========================================================================
+  // FASE 182: CAMPOS DE DOLINAS ALUVIAIS DE COLAPSO E VORAGENS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessAlluvialCollapseDolineHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'grassland').toLowerCase();
+    var ht = (hazardType || 'cover_collapse_sinkhole_sudden_void_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso Súbito de Dolina Aluvial de Voragem com Queda de 25m',
+      saveDC: 15,
+      saveType: 'Destreza',
+      dolineAndVoidRisk: 'Planície de cascalho aparentemente sólida sobre cavidade cárstica; a passagem da comitiva sobrecarrega o teto de solo saturado que desaba repentinamente em funil vertical de 25 metros; terra e os aventureiros despencam no vazio com risco de soterramento completo e 3d10 de concussão por esmagamento (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Avanço em cordada com linhas de 10 metros, sondagem com haste de percussão e identificação prévia de trincas anelares no solo.',
+      rescueAndStabilization: 'Ancoragem de tripé de madeira na borda externa estável e descida de arreio com sistema de roldanas para içamento seguro.',
+      icon: '🕳️⚠️',
+      color: '#b45309'
+    };
+
+    if (ht === 'alluvial_quicksilt_false_lakebed_trap') {
+      hazard = {
+        hazardTitle: 'Leito Falso de Silte Movediço em Lago de Dolina Recém-Formado',
+        saveDC: 15,
+        saveType: 'Força',
+        dolineAndVoidRisk: 'Lago circular de água turva formado por desabamento recente com sedimento fino de cascalho e argila fluida em suspensão coloidal; a superfície da água esconde leito sem sustentação firme; o explorador afunda até o peito na pasta viscosa sob risco de sucção e asfixia (DMG p. 110-111, 246).',
+        pioneerMitigation: 'Uso de pranchas transversais de madeira leve para distribuição do peso corporal e sondagem de profundidade com varas longas.',
+        rescueAndStabilization: 'Lançamento de laço largo de corda flutuante e tracionamento por montaria posicionada em solo firme.',
+        icon: '🌊🕳️',
+        color: '#0284c7'
+      };
+    } else if (ht === 'doline_lip_soil_creep_slumping_fall') {
+      hazard = {
+        hazardTitle: 'Ruptura de Borda Circular de Dolina em Deslizamento Rotacional de 15m',
+        saveDC: 15,
+        saveType: 'Destreza',
+        dolineAndVoidRisk: 'Margens instáveis de solo aluvial ao redor da voragem que sofrem deslizamento rotacional com a aproximação de batedores; fatias de terra de 20 toneladas escorregam encosta abaixo levando mochilas e equipamentos com 3d8 de concussão (PHB p. 182-183).',
+        pioneerMitigation: 'Manutenção de perímetro de segurança de 15 metros da crista do colapso e abordagem estritamente por terreno plano exterior.',
+        rescueAndStabilization: 'Imobilização de feridos com macas rígidas de lona e içamento com cabos reforçados ancorados em estacas profundas.',
+        icon: '🧗‍♂️🪨',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'chasm_anoxic_carbon_dioxide_lake_seep') {
+      hazard = {
+        hazardTitle: 'Bolsão de Gás Carbônico Estagnado em Fundo de Funil de Voragem',
+        saveDC: 14,
+        saveType: 'Constituição',
+        dolineAndVoidRisk: 'Fundo côncavo da dolina de colapso onde gás carbônico expelido por falha cárstica profunda se acumula sem circulação de ar; o aventureiro que desce na depressão sofre hipóxia fulminante com desmaio, confusão mental e 2d8 de veneno/asfixia (DMG p. 110, 257).',
+        pioneerMitigation: 'Teste de chama guia com tocha suspensa por corda antes de qualquer descida humana e uso de panos impregnados com essência canforada.',
+        rescueAndStabilization: 'Içamento rápido da vítima desacordada por cabo de segurança para a superfície arejada e respiração assistida imediata.',
+        icon: '🫧☠️',
+        color: '#78350f'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampAlluvialCollapseDolineStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'grassland').toLowerCase();
+    var dt = (defenseType || 'consolidated_alluvial_terrace_scarp_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Terraço Fluvial Consolidado Fora do Raio de Colapso',
+      dolineAndCampSafety: 'Acampamento instalado em terraço aluvial antigo com matriz de cascalho e argila cimentada por ferro a 200 metros de distância de qualquer depressão de dolina e a 5 metros acima do lençol freático.',
+      dolineTerraceBarrierAndWell: 'O solo consolidado elimina riscos de abatimento subterrâneo repentino, enquanto a elevação suave assegura drenagem rápida de enxurradas e boa visibilidade periférica.',
+      campRestAndSafetyGuards: 'Concede descanso longo seguro, seco e tranquilo para todos os membros do grupo, garantindo vigilância panorâmica limpa para as sentinelas de guarda.',
+      icon: '⛺🏞️',
+      color: '#b45309'
+    };
+
+    if (dt === 'interlocking_hardwood_timber_and_boulder_breastwork') {
+      tech = {
+        defenseTitle: 'Parapeito Baluarte de Toras de Carvalho e Blocos de Seixo Aluvial',
+        dolineAndCampSafety: 'Barreira perimetral defensiva erguida com toras pesadas de madeira de lei cravadas em trincheira e preenchidas com gabiões de cascalho fluvial graúdo.',
+        dolineTerraceBarrierAndWell: 'Concede cobertura superior (+5 na CA) contra projéteis e disparos e barra investidas de predadores carnívoros atraídos pela água das dolinas.',
+        campRestAndSafetyGuards: 'Assegura sono protegido contra intempéries e isolamento acústico contra ventanias da planície.',
+        icon: '🪵🛡️',
+        color: '#78350f'
+      };
+    } else if (dt === 'deep_alluvial_gravel_filtration_sump_well') {
+      tech = {
+        defenseTitle: 'Poço de Drenagem com Filtro Natural de Cascalho e Areia Quartzosa',
+        dolineAndCampSafety: 'Poço artesanal revestido de alvenaria de pedra seca que capta água límpida filtrada naturalmente pelas camadas aluviais antes do refluxo para os sumidouros.',
+        dolineTerraceBarrierAndWell: 'Produz 55 litros diários de água cristalina, fresca e purificada sem coloides de argila, garantindo autonomia hídrica segura para a comitiva.',
+        campRestAndSafetyGuards: 'Elimina a desidratação e o contágio por parasitas de águas estagnadas, preservando o vigor físico dos exploradores.',
+        icon: '💧🏺',
+        color: '#0284c7'
+      };
+    } else if (dt === 'doline_perimeter_tripwire_bronze_bell_alarm') {
+      tech = {
+        defenseTitle: 'Perímetro de Alarme em Anel com Fios de Tensão e Campainhas de Bronze',
+        dolineAndCampSafety: 'Cabos de latão estendidos em semicírculo ao redor do acampamento e ao longo das cristas de ravina conectados a sinos de bronze ancorados em estacas de ferro.',
+        dolineTerraceBarrierAndWell: 'Emite alerta audível instantâneo a 70 metros de distância caso qualquer invasor ou fera tente contornar as bordas de colapso sob a névoa noturna.',
+        campRestAndSafetyGuards: 'Garante paz de espírito e reação tática antecipada imediata para as sentinelas de guarda.',
+        icon: '🔔🪨',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessBadlandClayPipingHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'desert').toLowerCase();
@@ -26706,6 +26810,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessAlluvialCollapseDolineHazard: calcWildernessAlluvialCollapseDolineHazard,
+    calcCampAlluvialCollapseDolineStation: calcCampAlluvialCollapseDolineStation,
     calcWildernessBadlandClayPipingHazard: calcWildernessBadlandClayPipingHazard,
     calcCampBadlandClayPipingStation: calcCampBadlandClayPipingStation,
     calcWildernessAcidCalderaCraterHazard: calcWildernessAcidCalderaCraterHazard,
