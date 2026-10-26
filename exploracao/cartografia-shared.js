@@ -19469,6 +19469,130 @@
     };
   }
 
+  // === calcWildernessKarstPavementAndGrykeHazard (Campos de Lapiás Cársticos e Fendas de Gryke - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessKarstPavementAndGrykeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'razor_sharp_clint_limestone_shear').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Corte em Lâminas de Calcário e Queda em Fenda de Gryke',
+      saveDC: 15,
+      saveType: 'Destreza',
+      karstPavementAndGrykeRisk: 'Pavimento de lapiás com blocos tabulares de calcário polido separados por fendas verticais de até 3 metros de profundidade com arestas cortantes como serras; escorregamento ao saltar entre blocos prendendo a perna na fresta e infligindo 2d8 de dano cortante e perfurante com risco de fratura exposta (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam com cordas guias esticadas entre os integrantes e marcham sobre pranchas de travessia portáteis de cedro leve.',
+      rescueAndStabilization: 'Tração com macaco mecânico de madeira para alargar a fenda, imobilização com tala rígida e sutura com fio de prata antisséptico.',
+      icon: '🪨🔪',
+      color: '#64748b'
+    };
+
+    if (ht === 'concealed_gryke_fern_mantle_pitfall') {
+      hazard = {
+        hazardTitle: 'Armadilha Natural de Fenda de Gryke Oculta por Samambaias',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        karstPavementAndGrykeRisk: 'Fendas profundas camufladas por tapetes espessos de samambaias e heras cársticas que crescem no microclima úmido interior; ilusão de solo firme que cede ao pisar, derrubando exploradores em poço escuro de 4 metros sobre pedregulhos pontiagudos.',
+        pioneerMitigation: 'Sondagem sistemática da vegetação à frente com varas longas de freixo calçadas com ponteira metálica.',
+        rescueAndStabilization: 'Içamento com arnês de peito e corda de cânhamo encerada, seguido de inspeção torácica contra costelas trincadas.',
+        icon: '🌿🕳️',
+        color: '#16a34a'
+      };
+    } else if (ht === 'karst_glare_calcite_photokeratitis') {
+      hazard = {
+        hazardTitle: 'Ofuscamento Solar em Lapiás Branco e Fotoceratite',
+        saveDC: 14,
+        saveType: 'Constituição',
+        karstPavementAndGrykeRisk: 'Reflexão ultravioleta implacável do sol do meio-dia sobre a rocha calcária branca pura do platô desprovido de árvores; queima das córneas que provoca cegueira temporária por 1d4 horas e desorientação sensorial.',
+        pioneerMitigation: 'Uso de máscaras faciais de linho tingido de fuligem com fendas oculares estreitas e descanso nas horas de pico solar.',
+        rescueAndStabilization: 'Repouso em ambiente escuro com compressas umedecidas em infusão de folhas de camomila e mel silvestre nos olhos.',
+        icon: '☀️🕶️',
+        color: '#eab308'
+      };
+    } else if (ht === 'subterranean_karst_void_subsidence') {
+      hazard = {
+        hazardTitle: 'Subsidência Repentina de Teto Cárstico Finado',
+        saveDC: 15,
+        saveType: 'Força',
+        karstPavementAndGrykeRisk: 'Bloco de clint com base completamente oca dissolvida pela água subterrânea que desaba sob a carga de peso da comitiva, abrindo cratera de colapso de 6 metros conectada a galerias inundadas inferiores.',
+        pioneerMitigation: 'Identificação de áreas com eco oco por batimento rítmico de maça de madeira e contorno imediato de zonas com fissuração radial.',
+        rescueAndStabilization: 'Lançamento emergencial de escada de corda reforçada com degraus de carvalho e evacuação rápida do perímetro de colapso.',
+        icon: '💥🪨',
+        color: '#dc2626'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      karstPavementAndGrykeRisk: hazard.karstPavementAndGrykeRisk,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Platôs Cársticos e Lapiás) / PHB p. 182-183 (Marcha em Terreno Fissurado) / XGE p. 78-83 (Geomorfologia Cárstica e Fendas de Gryke)'
+    };
+  }
+
+  // === calcCampKarstPavementAndGrykeStation (Bivaques em Fendas de Gryke e Passadiços Modulares - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampKarstPavementAndGrykeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'gryke_chasm_trench_sheltered_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Abrigado em Fenda Natural de Gryke com Lona Tensionada',
+      karstPavementAnchorageAndWindSafety: 'Acampamento montado no fundo de fenda de calcário de 2 metros de profundidade com toldo impermeável esticado entre as cristas de clint superiores; proteção total contra ventos uivantes da montanha e camuflagem visual absoluta.',
+      creviceIsolationAndAcousticDamping: 'As paredes verticais de calcário absorvem o som de conversas e preparam alimentos sem irradiar odores ou chamas para o platô aberto.',
+      campRestAndSafetyGuards: 'Garante descanso longo profundo e reconfortante para os membros da comitiva com sentinelas posicionados no bloco mais alto de clint para vigília de 360 graus.',
+      icon: '⛺🪨',
+      color: '#64748b'
+    };
+
+    if (dt === 'clint_bridging_timber_deck_system') {
+      tech = {
+        defenseTitle: 'Passadiço Modular de Pranchas Travadas entre Blocos de Clint',
+        karstPavementAnchorageAndWindSafety: 'Estrados de madeira articulados assentados transversalmente sobre as fendas com calços de borracha que criam vias de circulação planas e seguras entre as seções do acampamento.',
+        creviceIsolationAndAcousticDamping: 'Elimina tropeços noturnos e quedas nas fendas de calcário durante as trocas de guarda e movimentação no bivaque.',
+        campRestAndSafetyGuards: 'Mantém os suprimentos e mantas elevados longe da umidade condensada nas paredes frias da fenda cárstica.',
+        icon: '🪵🛡️',
+        color: '#b45309'
+      };
+    } else if (dt === 'calc_dissolution_micro_cistern_trap') {
+      tech = {
+        defenseTitle: 'Microcisterna Decantadora em Pia Cárstica Natural',
+        karstPavementAnchorageAndWindSafety: 'Depressão circular em rocha calcária polida conectada a duto coletor de orvalho noturno com filtro de cascalho silicoso e carvão vegetal.',
+        creviceIsolationAndAcousticDamping: 'Coleta 20 litros por noite de água de condensação pura e rica em minerais, livre de microalgas ou sedimentos amargos.',
+        campRestAndSafetyGuards: 'Abastece plenamente os recipientes e cantis da comitiva sem necessidade de expedições arriscadas a sumidouros profundos.',
+        icon: '💧🏺',
+        color: '#0284c7'
+      };
+    } else if (dt === 'calcite_baffle_smoke_dissipator_hearth') {
+      tech = {
+        defenseTitle: 'Lareira com Defletores de Calcário para Dissipação de Fumaça',
+        karstPavementAnchorageAndWindSafety: 'Fogueira construída no recesso da fenda com placas verticais de calcita que resfriam e dispersam a fumaça ao longo das fissuras antes de atingir o topo do lapiás.',
+        creviceIsolationAndAcousticDamping: 'Permite cozinhar e manter o bivaque aquecido a 18°C sem gerar colunas visíveis de fumaça na planície iluminada pelo luar.',
+        campRestAndSafetyGuards: 'Proporciona calor revigorante e proteção contra hipotermia para os guardas de sentinela em vigília noturna.',
+        icon: '🔥🛡️',
+        color: '#ea580c'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      karstPavementAnchorageAndWindSafety: tech.karstPavementAnchorageAndWindSafety,
+      creviceIsolationAndAcousticDamping: tech.creviceIsolationAndAcousticDamping,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Platôs de Calcário) / PHB p. 150 (Kits de Acampamento em Fendas) / XGE p. 78-83 (Engenharia de Passadiços e Cisternas Cársticas)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -21366,6 +21490,8 @@
     calcCampTufaPinnacleAndEndorheicStation: calcCampTufaPinnacleAndEndorheicStation,
     calcWildernessRockGlacierAndSolifluctionHazard: calcWildernessRockGlacierAndSolifluctionHazard,
     calcCampRockGlacierAndSolifluctionStation: calcCampRockGlacierAndSolifluctionStation,
+    calcWildernessKarstPavementAndGrykeHazard: calcWildernessKarstPavementAndGrykeHazard,
+    calcCampKarstPavementAndGrykeStation: calcCampKarstPavementAndGrykeStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,

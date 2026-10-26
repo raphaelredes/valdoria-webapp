@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessKarstPavementAndGrykeHazard) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var kp = CartShared.calcWildernessKarstPavementAndGrykeHazard(bKey, 'razor_sharp_clint_limestone_shear');
+        return '<div class="clp-karst-pavement-card" style="margin:4px 0 6px;text-align:left;background:rgba(26,28,34,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(100,116,139,0.3);font-size:8px;color:#f1f5f9;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + kp.color + ';margin-bottom:2px;">' + kp.icon + ' ' + kp.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Lapiás e Fendas de Gryke:</b> ' + kp.karstPavementAndGrykeRisk + ' (CD ' + kp.saveDC + ' [' + kp.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#cbd5e1;margin-top:1px;">• <b>Mitigação:</b> ' + kp.pioneerMitigation + ' · <i>Estabilização: ' + kp.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampKarstPavementAndGrykeStation) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var cp = CartShared.calcCampKarstPavementAndGrykeStation(bKey, 'gryke_chasm_trench_sheltered_bivouac');
+        return '<div class="clp-gryke-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(22,24,30,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(71,85,105,0.3);font-size:8px;color:#e2e8f0;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Fenda de Gryke:</b> ' + cp.karstPavementAnchorageAndWindSafety + ' · <b>Isolamento:</b> ' + cp.creviceIsolationAndAcousticDamping + '</div>'
+          + '  <div style="font-size:7.5px;color:#94a3b8;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessRockGlacierAndSolifluctionHazard) return '';
         var bKey = (biome && biome.key) || 'mountain';
         var rg = CartShared.calcWildernessRockGlacierAndSolifluctionHazard(bKey, 'solifluction_rock_scree_sliding_avalanche');
