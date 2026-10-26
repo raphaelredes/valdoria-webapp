@@ -12897,6 +12897,130 @@
     };
   }
 
+  // === calcWildernessSwampQuicksandAndSporeBloomHazard (Lamaçal Sugador, Esporos Tóxicos e Sanguessugas - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessSwampQuicksandAndSporeBloomHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'quicksand_muck_sinkhole_submersion').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Lamaçal Sugador e Areia Movediça Pantanosa',
+      saveDC: 14,
+      saveType: 'Força',
+      swampDamageAndEntrapment: 'Bolsão de lodo profundo coberto por folhiço podre; afunda 1d4+1 pés na entrada e mais 1d4 pés por tentativa sem apoio até risco de asfixia (DMG p. 110).',
+      pioneerMitigation: 'Batedores avançam sondando o leito com varas de 3 metros e pisam exclusivamente em touceiras de juncos firmes.',
+      rescueAndStabilization: 'Projeção de pranchas de madeira para distribuir peso, laço com cabo de escalada e tração horizontal lenta.',
+      icon: '🪵🕳️',
+      color: '#713f12'
+    };
+
+    if (ht === 'toxic_spore_puffball_burst') {
+      hazard = {
+        hazardTitle: 'Nuvem de Esporos Fúngicos Tóxicos e Mofo Amarelo',
+        saveDC: 13,
+        saveType: 'Constituição',
+        swampDamageAndEntrapment: 'Fungos esféricos que estouram com o impacto de passos; nuvem fétida de 3 metros infligindo 2d6 de dano de veneno e condição Envenenado por 1 hora.',
+        pioneerMitigation: 'Marcha com lenços embebidos em vinagre cobrindo o nariz e desvio visual de colônias de cogumelos intumescidos.',
+        rescueAndStabilization: 'Aplicação de compressa de musgo adstringente nas vias respiratórias e chá desintoxicante de menta selvagem.',
+        icon: '🍄☣️',
+        color: '#84cc16'
+      };
+    } else if (ht === 'swamp_gas_ignition_pocket') {
+      hazard = {
+        hazardTitle: 'Bolsão de Metano Pantanoso com Ignição Fulminante',
+        saveDC: 13,
+        saveType: 'Destreza',
+        swampDamageAndEntrapment: 'Acúmulo de gás inflamável rente à lâmina d\'água; qualquer chama exposta gera labareda em cone de 4,5 metros causando 2d8 de fogo e cegueira temporária.',
+        pioneerMitigation: 'Uso de lanternas cegas mantidas a 2 metros de altura e atenção ao borbulhamento gasoso contínuo na superfície.',
+        rescueAndStabilization: 'Mergulho rápido no lodo úmido para conter chamas e pomada de gordura de peixe em queimaduras.',
+        icon: '🔥🫧',
+        color: '#f97316'
+      };
+    } else if (ht === 'parasitic_swamp_leech_infestation') {
+      hazard = {
+        hazardTitle: 'Infestação de Sanguessugas Parasitárias Gigantes',
+        saveDC: 12,
+        saveType: 'Constituição',
+        swampDamageAndEntrapment: 'Anelídeos hematófagos em águas turvas que drenam sangue pelas frestas de botas; perda contínua de 1d4 de dano de sangramento se não removidas.',
+        pioneerMitigation: 'Vedação de calçados com piche vegetal e polainas embebidas em infusão de folhas amargas de tabaco.',
+        rescueAndStabilization: 'Descolamento térmico com ponta de adaga incandescente e esterilização das mordidas com sal grosso.',
+        icon: '🪱🩸',
+        color: '#991b1b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      swampDamageAndEntrapment: hazard.swampDamageAndEntrapment,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Areia Movediça e Perigos de Charco) / PHB p. 182-183 (Asfixia e Terreno Difícil)'
+    };
+  }
+
+  // === calcCampSwampStiltPlatformAndMudshoeStation (Palafitas Elevadas, Raquetes de Lama e Bacias de Filtragem - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampSwampStiltPlatformAndMudshoeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'log_stilt_raised_platform_shelter').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Plataforma Elevada de Palafitas com Troncos Trançados',
+      groundIsolationAndBuoyancy: 'Bivaque montado a 1,5 metro de altura sobre esteios cravados em solo firme, longe da lama pútrida e inundações.',
+      verminAndMiasmaRepulsion: 'Impede o rastejo de víboras d\'água, sanguessugas e quelônios carnívoros no piso de descanso.',
+      campRestAndSafetyGuards: 'Permite sono longo confortável e seco em meio a alagados sem risco de acordar submerso em lodo.',
+      icon: '🛖🪵',
+      color: '#10b981'
+    };
+
+    if (dt === 'willow_mudshoe_and_swamp_skis_station') {
+      tech = {
+        defenseTitle: 'Estação de Raquetes de Salgueiro e Pranchas para Lamaçal',
+        groundIsolationAndBuoyancy: 'Aparatos de madeira flexível atados às solas aumentando a área de contato e impedindo afundamento no charco.',
+        verminAndMiasmaRepulsion: 'Garante mobilidade ágil de sentinelas ao redor do acampamento para vigília sem tropeços ou sucção.',
+        campRestAndSafetyGuards: 'Permite deslocamento tático e resgate rápido de aventureiros sem perda de velocidade em terreno lamacento.',
+        icon: '🎿🌱',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'smudge_pot_citronella_smoke_barrier') {
+      tech = {
+        defenseTitle: 'Defumadores Periféricos com Sebo e Ervas Repelentes',
+        groundIsolationAndBuoyancy: 'Névoa contínua de zimbro e folhas resinosas cobrindo um raio de 12 metros ao redor da plataforma.',
+        verminAndMiasmaRepulsion: 'Repugna 99% dos mosquitos transmissores de maleita e enxames parasitários do pântano.',
+        campRestAndSafetyGuards: 'Garante que os companheiros de comitiva recuperem pontos de vida sem febres infecciosas durante o descanso.',
+        icon: '💨🏺',
+        color: '#eab308'
+      };
+    } else if (dt === 'peat_moss_charcoal_water_filtration_basin') {
+      tech = {
+        defenseTitle: 'Bacia Filtrante Portátil com Turfa e Carvão Ativo',
+        groundIsolationAndBuoyancy: 'Sistema mecânico de três estágios que decanta lama e remove cheiro de enxofre da água do pântano.',
+        verminAndMiasmaRepulsion: 'Elimina larvas e parasitas de água estagnada tornando o suprimento potável e cristalino.',
+        campRestAndSafetyGuards: 'Abastece todos os cantis da comitiva com água pura prevenindo disenteria e desidratação.',
+        icon: '🪨🚰',
+        color: '#ca8a04'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      groundIsolationAndBuoyancy: tech.groundIsolationAndBuoyancy,
+      verminAndMiasmaRepulsion: tech.verminAndMiasmaRepulsion,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque em Pântano) / XGE p. 78 (Equipamento de Proteção e Sobrevivência)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -14688,6 +14812,8 @@
     calcCampSpelunkingLineAndBuoyantPouchStation: calcCampSpelunkingLineAndBuoyantPouchStation,
     calcWildernessDesertNocturnalFreezingAndShiftingDunesHazard: calcWildernessDesertNocturnalFreezingAndShiftingDunesHazard,
     calcCampDesertThermalTrenchAndReflectiveWall: calcCampDesertThermalTrenchAndReflectiveWall,
+    calcWildernessSwampQuicksandAndSporeBloomHazard: calcWildernessSwampQuicksandAndSporeBloomHazard,
+    calcCampSwampStiltPlatformAndMudshoeStation: calcCampSwampStiltPlatformAndMudshoeStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
