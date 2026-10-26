@@ -20575,6 +20575,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 159: PLATÔS VULCÂNICOS BASÁLTICOS INVERTIDOS E ESCARPAS EM MESETA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessInvertedBasaltMesetaHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'badlands').toLowerCase();
+    var ht = (hazardType || 'meseta_scarp_talus_scree_runout_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desmoronamento em Tálus de Escarpa de Meseta Basáltica',
+      saveDC: 15,
+      saveType: 'Destreza',
+      basaltAndMesetaRisk: 'Encosta de tálus instável com inclinação de 45 graus formada por blocos basálticos angulosos de meia tonelada que se deslocam sob o impacto dos passos da comitiva; provoca avalanche de rocha negra com 3d8 de concussão e risco de esmagamento de membros inferiores (DMG p. 110, 190).',
+      pioneerMitigation: 'Batedores instalam amarras de corda em garras de aço cravadas no topo da cornija basáltica e avançam em ziguezague por costilhas rochosas fixas.',
+      rescueAndStabilization: 'Remoção com alavancas de ferro temperado, imobilização com talas de madeira e contenção de hemorragias com compressas de arnica silvestre.',
+      icon: '⛰️🪨',
+      color: '#475569'
+    };
+
+    if (ht === 'inverted_plateau_gale_edge_shear_push') {
+      hazard = {
+        hazardTitle: 'Vendaval Linear de Bordo em Platô Invertido a 80 km/h',
+        saveDC: 15,
+        saveType: 'Força',
+        basaltAndMesetaRisk: 'Correntes de ar ascendentes comprimidas pela parede vertical da meseta que estouram no topo em rajadas horizontais de 80 km/h; desequilibram aventureiros junto à borda do abismo causando risco de arremesso no vazio e 2d6 de dano de impacto com o solo rochoso (PHB p. 182, DMG p. 110).',
+        pioneerMitigation: 'Marcha agachada rente às depressões do topo e uso de cinturões com tirantes de ancoragem rápida em fendas de basalto.',
+        rescueAndStabilization: 'Resgate com laço e cabrestante de montanha, reposicionamento no centro do platô e aplicação de ungüento anti-trauma nos ombros e joelhos.',
+        icon: '💨⛰️',
+        color: '#dc2626'
+      };
+    } else if (ht === 'basalt_tinaja_stagnant_alkaline_brine') {
+      hazard = {
+        hazardTitle: 'Poço de Tinaja Basáltica com Água Hipersalina Alcalina',
+        saveDC: 14,
+        saveType: 'Constituição',
+        basaltAndMesetaRisk: 'Água estagnada retida em cavidade de basalto fóssil altamente concentrada em sais minerais e carbonatos cáusticos sob a evaporação solar; provoca queimação gástrica severa, vômitos e 1 nível de exaustão se ingerida sem destilação (DMG p. 111, PHB p. 185).',
+        pioneerMitigation: 'Uso de tiras reagentes de teste mineral e alambique portátil de cobre para destilação solar por condensação limpa.',
+        rescueAndStabilization: 'Administração rápida de água pura com carvão ativado triturado e repouso sob toldo protetor à sombra da cornija.',
+        icon: '⚠️🧪',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'basalt_columnar_scarp_solar_heat_scorch') {
+      hazard = {
+        hazardTitle: 'Irradiação Térmica Escaldante em Paredão de Basalto Negro',
+        saveDC: 14,
+        saveType: 'Constituição',
+        basaltAndMesetaRisk: 'A rocha basáltica negra absorve calor solar intenso atingindo 55°C durante a escalada do paredão; provoca queimaduras de contato nas mãos desprotegidas, insolação acelerada e desvantagem em testes de Atletismo por tontura térmica.',
+        pioneerMitigation: 'Escalada nas primeiras horas da aurora antes do aquecimento da rocha e uso de luvas reforçadas de camurça grossa com forro de lã térmica.',
+        rescueAndStabilization: 'Hidratação com salmoura diluída fria, aplicação de pasta de babosa fresca nas palmas das mãos e descanso forçado.',
+        icon: '☀️🔥',
+        color: '#ea580c'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampInvertedBasaltMesetaStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'badlands').toLowerCase();
+    var dt = (defenseType || 'cornice_overhang_recessed_alcove_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Alcova Protegida sob Cornija Basáltica Suspensa',
+      mesetaAndBasaltSafety: 'Acampamento assentado em nicho natural sob o beiral saliente da meseta basáltica, totalmente imune a quedas de pedras do topo e com abrigo total contra chuvas torrenciais.',
+      basaltWallAndTinajaReservoir: 'O paredão vertical de basalto atua como fortaleza inexpugnável pelas costas, bloqueando 180 graus de abordagem hostil e anulando ventos catabáticos.',
+      campRestAndSafetyGuards: 'Garante descanso longo profundo, calmo e seguro para todos os membros do grupo, com ponto elevado estratégico para as sentinelas.',
+      icon: '⛺⛰️',
+      color: '#475569'
+    };
+
+    if (dt === 'dry_stacked_basalt_block_parapet_bastion') {
+      tech = {
+        defenseTitle: 'Parapeito de Blocos Basálticos Justapostos com Fendas de Flecha',
+        mesetaAndBasaltSafety: 'Trincheira defensiva erguida com lajes pesadas de basalto hexagonal encaixadas a seco, formando mureta de 1,5 metro de altura contra investidas frontais.',
+        basaltWallAndTinajaReservoir: 'Concede cobertura total (+5 na CA e bônus de cobertura superior) para os defensores do acampamento contra projéteis e feras.',
+        campRestAndSafetyGuards: 'Assegura sono livre de ameaças e permite que as sentinelas vigiem a aproximação pelo platô com segurança máxima.',
+        icon: '🛡️🧱',
+        color: '#334155'
+      };
+    } else if (dt === 'deep_shaded_tinaja_freshwater_cistern') {
+      tech = {
+        defenseTitle: 'Cisterna Natural de Tinaja Sombreada com Coletor Pluvial',
+        mesetaAndBasaltSafety: 'Poço profundo na rocha protegido do sol direto por fendas estreitas de basalto, preservando água doce límpida, gelada e potável.',
+        basaltWallAndTinajaReservoir: 'Abastece a expedição com 50 litros diários de água cristalina sem risco de evaporação ou contaminação mineral.',
+        campRestAndSafetyGuards: 'Elimina a desidratação e o desgaste físico no topo da meseta, renovando as energias da comitiva.',
+        icon: '💧⛰️',
+        color: '#0284c7'
+      };
+    } else if (dt === 'canyon_rim_heliograph_and_mirror_signal_post') {
+      tech = {
+        defenseTitle: 'Posto de Sinalização com Espelho Heliográfico na Borda da Meseta',
+        mesetaAndBasaltSafety: 'Estação de observação no vértice mais avançado do platô equipada com espelhos de bronze polido capazes de transmitir mensagens a 30 km de distância pelos ermos.',
+        basaltWallAndTinajaReservoir: 'Detecta colunas de fumaça, tempestades de poeira e movimentos de tropas ou monstros com horas de antecedência.',
+        campRestAndSafetyGuards: 'Proporciona alerta tático antecipado insuperável, blindando o acampamento contra quaisquer surpresas estratégicas.',
+        icon: '🪞🔭',
+        color: '#f59e0b'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 158: VALES DE DOLINAS EM FUNIL DE CARSTE DE COCKPIT E FLORESTAS DE BAMBU GIGANTE (D&D 5e)
   // =========================================================================
 
@@ -24314,6 +24418,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessInvertedBasaltMesetaHazard: calcWildernessInvertedBasaltMesetaHazard,
+    calcCampInvertedBasaltMesetaStation: calcCampInvertedBasaltMesetaStation,
     calcWildernessCockpitKarstBambooHazard: calcWildernessCockpitKarstBambooHazard,
     calcCampCockpitKarstBambooStation: calcCampCockpitKarstBambooStation,
     calcWildernessFoldMountainHogbackHazard: calcWildernessFoldMountainHogbackHazard,
