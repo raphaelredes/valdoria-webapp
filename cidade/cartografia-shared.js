@@ -11657,6 +11657,130 @@
     };
   }
 
+  // === calcWildernessRazorvineAndChokingBrierHazard (Vinha Cortante, Cipós Constritores e Espinheiros Venenosos - DMG p. 110 / PHB p. 183) ===
+  function calcWildernessRazorvineAndChokingBrierHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var ht = (hazardType || 'tangled_razorvine_hedge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Emaranhado Denso de Vinhas Cortantes (Razorvine)',
+      saveDC: 11,
+      saveType: 'Destreza',
+      vineDamageAndEntanglement: 'Cipós com garras afiadas como lâminas; 1d10 de dano cortante (2d10 em ritmo rápido) e rasgo em vestes de viagem (DMG p. 110).',
+      pioneerMitigation: 'Batedores identificam bordas triangulares luzidias nas folhas e abrem trilha segura com golpes cadenciados de facão.',
+      woundCareAndClearing: 'Aplicação imediata de pomada de calêndula e compressas limpas para estancar sangramentos superficiais.',
+      icon: '🌿🗡️',
+      color: '#84cc16'
+    };
+
+    if (ht === 'constricting_choking_creeper') {
+      hazard = {
+        hazardTitle: 'Cipó Constritor Asfixiante Oculto em Copa Baixa',
+        saveDC: 13,
+        saveType: 'Força',
+        vineDamageAndEntanglement: 'Vinha predatória que laça o pescoço da retaguarda; 2d6 de concussão, condição Agarrado e asfixia progressiva se não cortada (PHB p. 183).',
+        pioneerMitigation: 'Vigilância de sentinelas voltada para galhos suspensos e teste de Percepção para notar movimentos sem vento.',
+        woundCareAndClearing: 'Golpe cortante certeiro de companheiro adjacente e massagem na traqueia do aventureiro resgatado.',
+        icon: '🪴🐍',
+        color: '#15803d'
+      };
+    } else if (ht === 'toxic_sleepthorn_thicket') {
+      hazard = {
+        hazardTitle: 'Bosque de Espinheiros Tóxicos Torporíficos',
+        saveDC: 12,
+        saveType: 'Constituição',
+        vineDamageAndEntanglement: 'Agulhas vegetais impregnadas com seiva narcótica; 1d6 de perfuração e condição Envenenado por 1 hora com letargia motora.',
+        pioneerMitigation: 'Uso de luvas grossas de lona encerada e botas de cano alto ao cruzar capoeiras fechadas.',
+        woundCareAndClearing: 'Extração dos espinhos com pinça de ferro e infusão amarga de ervas estimulantes no acampamento.',
+        icon: '🥀💤',
+        color: '#a855f7'
+      };
+    } else if (ht === 'barbed_root_carpet_creepers') {
+      hazard = {
+        hazardTitle: 'Tapete de Raízes Farpadas e Abrolhos Vegetais',
+        saveDC: 12,
+        saveType: 'Destreza',
+        vineDamageAndEntanglement: 'Raízes pontiagudas ocultas sob serapilheira; deslocamento reduzido à metade e 1d4 de perfuração a cada 1,5 m de avanço sem cuidado.',
+        pioneerMitigation: 'Avanço cuidadoso pisando sobre troncos caídos e pedras firmes em cadência lenta de marcha.',
+        woundCareAndClearing: 'Desinfecção de ferimentos plantares com álcool alquímico para evitar tétano e infecções nos ermos.',
+        icon: '🌱⚠️',
+        color: '#ca8a04'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      vineDamageAndEntanglement: hazard.vineDamageAndEntanglement,
+      pioneerMitigation: hazard.pioneerMitigation,
+      woundCareAndClearing: hazard.woundCareAndClearing,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110 (Razorvine e Perigos Vegetais) / PHB p. 183 (Dano Cortante e Asfixia)'
+    };
+  }
+
+  // === calcCampClearingMacheteAndProtectiveGaiters (Roçagem de Perímetro, Perneiras de Couro e Anel de Cal - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampClearingMacheteAndProtectiveGaiters(biomeKey, clearanceType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var ct = (clearanceType || 'heavy_machete_perimeter_clearing').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Roçagem Perimetral Ampla com Facão Pesado e Queima de Raízes',
+      clearanceEfficiencyAndProtection: 'Abertura de faixa desimpedida de 6 metros ao redor das barracas, removendo trepadeiras agressivas e arbustos densos.',
+      gaitersAndPersonalSafety: 'Elimina pontos cegos de emboscada vegetal e impede que vinhas invasoras alcancem os sacos de dormir.',
+      campRestAndSafetyGuards: 'Garante linha de visão desobstruída para os sentinelas noturnos vigiarem a mata circundante.',
+      icon: '🪓🏕️',
+      color: '#16a34a'
+    };
+
+    if (ct === 'reinforced_leather_gaiters_greaves') {
+      tech = {
+        defenseTitle: 'Perneiras de Couro Cru Reforçado e Grevas com Sebo',
+        clearanceEfficiencyAndProtection: 'Proteção física estendida do tornozelo ao joelho imune a cortes de vinhas e espinhos pontiagudos.',
+        gaitersAndPersonalSafety: 'Concede vantagem em salvaguardas de Destreza e Constituição contra plantas carnívoras e cipós cortantes.',
+        campRestAndSafetyGuards: 'Permite que os guardas patrulhem o entorno do acampamento sem receio de ferimentos nos pés e pernas.',
+        icon: '🥾🛡️',
+        color: '#ca8a04'
+      };
+    } else if (ct === 'quicklime_ash_root_barrier_ring') {
+      tech = {
+        defenseTitle: 'Anel Defensivo de Cal Virgem e Cinza Cauterizante',
+        clearanceEfficiencyAndProtection: 'Cordão contínuo de cinzas alcalinas polvilhado ao redor da área de repouso desidratando brotos rastejantes.',
+        gaitersAndPersonalSafety: 'Barreira química que impede a aproximação de gavinhas constritoras subterrâneas durante a madrugada.',
+        campRestAndSafetyGuards: 'Proporciona sono seguro para todos os membros do grupo sem risco de intrusões botânicas silenciosas.',
+        icon: '⚪🌿',
+        color: '#e2e8f0'
+      };
+    } else if (ct === 'pruning_hook_canopy_inspection') {
+      tech = {
+        defenseTitle: 'Vara de Podar com Gancho Curvo para Varredura Aérea',
+        clearanceEfficiencyAndProtection: 'Inspeção meticulosa dos galhos suspensos acima das barracas, derrubando cipós parasitas e favos venenosos.',
+        gaitersAndPersonalSafety: 'Neutraliza o risco de desabamento de galhos podres ou botes verticais de cipós asfixiantes.',
+        campRestAndSafetyGuards: 'Assegura um dossel limpo e seguro para ancoragem de redes e lonas impermeáveis de chuva.',
+        icon: '🪝🌳',
+        color: '#38bdf8'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      clearanceType: ct,
+      defenseTitle: tech.defenseTitle,
+      clearanceEfficiencyAndProtection: tech.clearanceEfficiencyAndProtection,
+      gaitersAndPersonalSafety: tech.gaitersAndPersonalSafety,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Segurança de Acampamento) / XGE p. 78 (Engenharia de Terreno e Ferramentas)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -13430,6 +13554,8 @@
     calcCampRetainingWallAndPitonAnchoring: calcCampRetainingWallAndPitonAnchoring,
     calcWildernessFlashFloodAndRiverRapidHazard: calcWildernessFlashFloodAndRiverRapidHazard,
     calcCampFloodClearanceAndRopeTraverse: calcCampFloodClearanceAndRopeTraverse,
+    calcWildernessRazorvineAndChokingBrierHazard: calcWildernessRazorvineAndChokingBrierHazard,
+    calcCampClearingMacheteAndProtectiveGaiters: calcCampClearingMacheteAndProtectiveGaiters,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
