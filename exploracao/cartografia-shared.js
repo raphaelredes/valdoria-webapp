@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 255: DOLINAS DE COLAPSO E CENOTES KÁRSTICOS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessCenoteSinkholeCollapseHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var ht = (hazardType || 'abrupt_cenote_roof_structural_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso Estrutural Súbito de Teto de Caverna e Queda em Cenote Vertical',
+      saveDC: 15,
+      saveType: 'Destreza',
+      cenoteRisk: 'A dissolução subterrânea pelo ácido carbônico escavou uma câmara colossal cujo teto de calcário foi reduzido a uma casca de 30 centímetros; a passagem da marcha quebra a abóbada em estrondo repentino, arremessando aventureiros em queda livre de 40 metros em direção a uma lagoa subterrânea de águas escuras cercada de paredes verticais lisas, causando 3d10 de impacto e risco de afogamento (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Marchar encordoados a cada 10 metros, tateando o solo com varas de percussão e contornando depressões com vegetação rasteira amarelada.',
+      rescueAndStabilization: 'Lançamento imediato de cabos de resgate com flutuadores de cortiça e içamento mecânico com roldana.',
+      icon: '🕳️🌊',
+      color: '#0284c7'
+    };
+
+    if (ht === 'subterranean_siphon_suction_vortex') {
+      hazard = {
+        hazardTitle: 'Vórtice de Sucção Hidráulica em Sifão de Drenagem Subterrânea',
+        saveDC: 14,
+        saveType: 'Força',
+        cenoteRisk: 'As profundezas do cenote conectam-se a uma rede de túneis e sifões submersos que drenam água para o oceano ou cavernas inferiores; quando marés ou cheias mudam a pressão hidráulica, redemoinhos repentinos de sucção violenta tragam nadadores e barcos em direção aos condutos escuros, exigindo braçadas vigorosas contra o vórtice (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Amarrar cabos guias transversais na superfície da lagoa e jamais nadar desprovido de linha de retenção dorsal ancorada na margem.',
+        rescueAndStabilization: 'Puxar o nadador pela linha de retenção e aplicar manobras de ressuscitação cardiorrespiratória se houver asfixia.',
+        icon: '🌀🏊‍♂️',
+        color: '#2563eb'
+      };
+    } else if (ht === 'toxic_hydrogen_sulfide_halocline_poisoning') {
+      hazard = {
+        hazardTitle: 'Asfixia e Queimadura Química por Haloclina e Gás Sulfídrico Estagnado',
+        saveDC: 14,
+        saveType: 'Constituição',
+        cenoteRisk: 'Abaixo da lente superficial de água doce límpida, repousa uma haloclina leitosa e densa de água salgada aprisionada com matéria orgânica em decomposição; perturbar essa camada com mergulho ou remos libera bolhas de gás sulfídrico concentrado que queimam os olhos, corroem as mucosas respiratórias e causam 2d6 de dano de veneno (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Navegar com cuidado sem agitar as pás de remo nas camadas profundas e coletar água exclusivamente da superfície límpida.',
+        rescueAndStabilization: 'Retirada rápida da zona de gás com lavagem dos olhos em água limpa corrente e inalação de ar fresco.',
+        icon: '☠️🌫️',
+        color: '#dc2626'
+      };
+    } else if (ht === 'blind_chasm_perimeter_lip_undercut_calving') {
+      hazard = {
+        hazardTitle: 'Desprendimento da Borda em Balanço da Dolina de Colapso',
+        saveDC: 14,
+        saveType: 'Destreza',
+        cenoteRisk: 'A borda superior da dolina foi escavada por baixo pelas chuvas ácidas, formando lábios de rocha em balanço sem sustentação inferior; pisar na borda para espiar o abismo ou armar vigília faz o beiral de rocha partir-se sob os pés, desequilibrando o explorador em direção ao precipício (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Aproximar-se da borda exclusivamente deitado de bruços sobre pranchas de madeira e ancorado com mosquetão em estacas traseiras.',
+        rescueAndStabilization: 'Retenção imediata pelo arnês de segurança e contenção de escoriações com ataduras limpas.',
+        icon: '🧗‍♀️⚠️',
+        color: '#d97706'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampCenoteSinkholeCollapseStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var dt = (defenseType || 'buttressed_rim_limestone_bench_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Seguro em Terraço Contrafiliado Fora da Zona de Subsidência',
+      cenoteAndCampSafety: 'Instalação do acampamento recuado a 30 metros da borda do cenote sobre espessas camadas horizontais de calcário maciço.',
+      cenoteTrenchAndWatch: 'A fundação de rocha sã foi previamente testada por percussão de marreta e sondagem sônica, garantindo imunidade absoluta contra novos colapsos de teto.',
+      campRestAndSafetyGuards: 'Permite descanso longo protegido, longe de margens instáveis e perto de fontes limpas de água.',
+      icon: '⛺🏛️',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'cenote_freshwater_pulley_hoist_rig') {
+      tech = {
+        defenseTitle: 'Guincho de Corda e Balde com Polia para Coleta Segura de Água Doce',
+        cenoteAndCampSafety: 'Montagem de uma armação tripé com roldana de bronze fixada em vigamento seguro sobre a água do cenote.',
+        cenoteTrenchAndWatch: 'Permite içar baldes de água doce límpida da lente superficial sem que nenhum membro da comitiva precise arriscar-se na beirada escorregadia.',
+        campRestAndSafetyGuards: 'Fornece suprimento ilimitado de água pura e potável para cozinhar e encher todos os cantis.',
+        icon: '🪣💧',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'stalactite_tether_sentry_safety_harness') {
+      tech = {
+        defenseTitle: 'Ancoragem Perimetral em Pilares e Espeleotemas com Talabarte de Retenção',
+        cenoteAndCampSafety: 'Fixação de cabos de aço e fitas de escalada ao redor de colunas calcárias consolidadas e estalactites maciças.',
+        cenoteTrenchAndWatch: 'As sentinelas de vigília patrulham presas a talabartes com freio antiqueda, eliminando o perigo de despencar no abismo durante rondas na escuridão.',
+        campRestAndSafetyGuards: 'Garante vigília segura e sentinelas alertas sem receio de passos em falso.',
+        icon: '🛡️🪢',
+        color: '#10b981'
+      };
+    } else if (dt === 'cavern_entrance_cool_draft_thermal_comfort') {
+      tech = {
+        defenseTitle: 'Circulação de Ar Fresco e Ventilação Natural Soprada por Fissuras Kársticas',
+        cenoteAndCampSafety: 'Aproveitamento das correntes de convecção térmica geradas pelo diferencial de temperatura entre a água subterrânea e o ar externo.',
+        cenoteTrenchAndWatch: 'Uma brisa fresca e revigorante sopra continuamente através das tendas, dissipando o mormaço da selva e repelindo nuvens de mosquitos.',
+        campRestAndSafetyGuards: 'Garante descanso longo fresco e confortável sem esgotamento por calor tropical.',
+        icon: '🍃🌬️',
+        color: '#6366f1'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 254: PLANÍCIES GLACIOLACUSTRES E LAGOS PROGLACIAIS (D&D 5e)
   // =========================================================================
 
@@ -34300,6 +34404,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessCenoteSinkholeCollapseHazard: calcWildernessCenoteSinkholeCollapseHazard,
+    calcCampCenoteSinkholeCollapseStation: calcCampCenoteSinkholeCollapseStation,
     calcWildernessGlaciolacustrineProglacialLakeHazard: calcWildernessGlaciolacustrineProglacialLakeHazard,
     calcCampGlaciolacustrineProglacialLakeStation: calcCampGlaciolacustrineProglacialLakeStation,
     calcWildernessInselbergBornhardtHazard: calcWildernessInselbergBornhardtHazard,
