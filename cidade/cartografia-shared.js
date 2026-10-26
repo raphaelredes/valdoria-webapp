@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 254: PLANÍCIES GLACIOLACUSTRES E LAGOS PROGLACIAIS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessGlaciolacustrineProglacialLakeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'snow').toLowerCase();
+    var ht = (hazardType || 'moraine_dam_breach_glof_cataclysmic_deluge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ruptura Catastrófica de Dique de Morena e Inundação Glacial Repentina (GLOF)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      glaciolacustrineRisk: 'Um lago proglacial represado por morenas instáveis de gelo e cascalho colapsa sob a pressão do degelo; uma torrente catastrófica de água a 1°C misturada com blocos de gelo do tamanho de carruagens desce o vale a 50 km/h, arrastando tudo em seu caminho e causando 3d10 de dano contundente mais hipotermia severa (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Manter a marcha sobre terraços elevados de praia fóssil e observar atentamente a turvação repentina das águas da drenagem.',
+      rescueAndStabilization: 'Içamento imediato com cabos de escalada para as cristas e aquecimento de choque contra hipotermia com pedras quentes.',
+      icon: '🌊🧊',
+      color: '#0284c7'
+    };
+
+    if (ht === 'varved_clay_thixotropic_quickclay_collapse') {
+      hazard = {
+        hazardTitle: 'Colapso Tixotrópico de Argila Rítmica Rápida (Quickclay)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        glaciolacustrineRisk: 'As argilas rítmicas e varvitos da bacia lacustre drenada parecem solo firme e seco à superfície, mas possuem estrutura floculada altamente saturada; a vibração repetida de botas pesadas rompe as ligações minerais, liquefazendo o solo instantaneamente em uma pasta fluida onde aventureiros afundam até o peito (DMG p. 111; PHB p. 182).',
+        pioneerMitigation: 'Distribuir raquetes de lama nos pés, marchar espaçados e carregar varas longas de madeira na horizontal.',
+        rescueAndStabilization: 'Lançamento de cordas com laço de resgate e tração de corpos imersos usando esteiras de vime.',
+        icon: '🕳️📉',
+        color: '#b45309'
+      };
+    } else if (ht === 'lacustrine_strandline_quick_boulder_roll') {
+      hazard = {
+        hazardTitle: 'Rolamento de Blocos Erráticos em Linhas de Praia Fóssil Desestabilizadas',
+        saveDC: 14,
+        saveType: 'Destreza',
+        glaciolacustrineRisk: 'As margens elevadas do antigo lago glacial acumulam cordões instáveis de seixos e matacões erráticos descarregados por icebergs ancestrais; a erosão pelas águas de degelo descalça as bases dessas rochas, fazendo matacões de granito de toneladas rolarem descontroladamente pelas encostas (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Batedores sondam os contrafortes com alavancas e sinalizam rotas de travessia fora dos cones de dejetos.',
+        rescueAndStabilization: 'Remoção urgente de entulhos sobre membros atingidos e alinhamento de ossos fraturados com talas.',
+        icon: '🪨⚠️',
+        color: '#d97706'
+      };
+    } else if (ht === 'cryogenic_groundwater_upwelling_ice_slurry') {
+      hazard = {
+        hazardTitle: 'Erupção Criogênica de Água Subterrânea sob Pressão e Lama Gélida',
+        saveDC: 14,
+        saveType: 'Constituição',
+        glaciolacustrineRisk: 'Aquíferos artesianos subglaciais confinados sob o estrato argiloso impermeável rompem a superfície em gêiseres de lama pastosa a 0°C saturada de cascalho afiado; o jato encharca roupas protetoras e impõe choque térmico com 2d6 de dano de frio e 1 nível de exaustão (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Evitar depressões circulares fumegantes e contornar fissuras com eflorescência argilosa fresca.',
+        rescueAndStabilization: 'Troca imediata de vestimentas molhadas por mantos secos e administração de infusão de canela e gengibre.',
+        icon: '🥶🌋',
+        color: '#0891b2'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampGlaciolacustrineProglacialLakeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'snow').toLowerCase();
+    var dt = (defenseType || 'paleo_beach_ridge_gravel_bench_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Elevado em Cordão de Cascalho de Praia Fóssil',
+      glaciolacustrineAndCampSafety: 'Instalação do acampamento sobre um cordão de praia fóssil e terraço arenoso situado a 15 metros acima do fundo da bacia argilosa.',
+      glaciolacustrineTrenchAndWatch: 'O solo de cascalho grosso drena instantaneamente a água de chuva e degelo, mantendo o chão do acampamento seco, firme e imune a liquefação ou enxurradas.',
+      campRestAndSafetyGuards: 'Permite descanso longo protegido e aquecido, seguro contra qualquer surto de cheia do lago superior.',
+      icon: '⛺🏖️',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'meltwater_acoustic_listening_sentry_post') {
+      tech = {
+        defenseTitle: 'Posto Sentinela de Escuta Sísmica e Hidráulica de Ruptura de Represa',
+        glaciolacustrineAndCampSafety: 'Posicionamento de vigias na crista da morena com hastes acústicas de bronze cravadas no leito rochoso.',
+        glaciolacustrineTrenchAndWatch: 'Detecta fraturas no gelo, cavitação interna e aumento repentino no caudal de escoamento da represa com horas de antecedência.',
+        campRestAndSafetyGuards: 'Garante evacuação prévia e tranquila de todo o grupo muito antes da torrente atingir a bacia.',
+        icon: '👂🌊',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'thixotropic_plank_corduroy_trench_pathway') {
+      tech = {
+        defenseTitle: 'Passadiço Trançado de Troncos e Corduroy contra Afundamento em Argila',
+        glaciolacustrineAndCampSafety: 'Assentamento de pranchas transversais de madeira e esteiras de cascalho intertravado nos acessos às tendas.',
+        glaciolacustrineTrenchAndWatch: 'Distribui as cargas pontuais e impede que o pisoteio constante desestabilize a argila sob o acampamento.',
+        campRestAndSafetyGuards: 'Evita a formação de atoleiros de lama nas áreas de circulação e alimentação da comitiva.',
+        icon: '🪵🚶',
+        color: '#10b981'
+      };
+    } else if (dt === 'proglacial_driftwood_seasoned_hearth_fuel') {
+      tech = {
+        defenseTitle: 'Pilhas de Madeira de Deriva Fóssil e Fogueiras Aquecidas e Duradouras',
+        glaciolacustrineAndCampSafety: 'Coleta de troncos subfósseis de coníferas perfeitamente preservados e secos ao longo dos antigos terraços lacustres.',
+        glaciolacustrineTrenchAndWatch: 'A madeira impregnada em resinas naturais queima com chama viva e duradoura, gerando calor intenso mesmo sob ventos glaciais cortantes.',
+        campRestAndSafetyGuards: 'Mantém as fogueiras acesas a noite inteira para secagem de botas e recuperação plena de exaustão.',
+        icon: '🔥🪵',
+        color: '#ea580c'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 253: COLINAS RESIDUAIS E INSELBERGS EM RELEVO RESIDUAL (D&D 5e)
   // =========================================================================
 
@@ -34196,6 +34300,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessGlaciolacustrineProglacialLakeHazard: calcWildernessGlaciolacustrineProglacialLakeHazard,
+    calcCampGlaciolacustrineProglacialLakeStation: calcCampGlaciolacustrineProglacialLakeStation,
     calcWildernessInselbergBornhardtHazard: calcWildernessInselbergBornhardtHazard,
     calcCampInselbergBornhardtStation: calcCampInselbergBornhardtStation,
     calcWildernessSabkhaSalineCrustHazard: calcWildernessSabkhaSalineCrustHazard,
