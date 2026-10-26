@@ -20089,6 +20089,130 @@
     };
   }
 
+  // === calcWildernessBoomingDuneHazard (Desertos de Dunas Cantantes e Vales de Areia Sibilante - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessBoomingDuneHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'booming_dune_acoustic_vertigo_resonance').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ressonância Acústica Ensurdecedora de Duna Cantante',
+      saveDC: 15,
+      saveType: 'Sabedoria',
+      boomingDuneAndSlipRisk: 'Vibração subsônica e estrondo harmônico contínuo de até 105 dB gerado pelo atrito de grãos de quartzo na descida da duna; ondas de pressão que provocam vertigem labiríntica, desorientação de marcha e pânico incontrolável em montarias de carga (DMG p. 110-111).',
+      pioneerMitigation: 'Uso obrigatório de tampões auriculares de lã encerada e cabrestos de contenção com antolhos para os animais de carga.',
+      rescueAndStabilization: 'Descanso imediato no piso plano entre dunas, massagem nas têmporas com óleo de lavanda e estabilização postural.',
+      icon: '🔊🏜️',
+      color: '#ca8a04'
+    };
+
+    if (ht === 'slip_face_sand_avalanche_engulfment') {
+      hazard = {
+        hazardTitle: 'Avalanche de Areia Fina Fluida em Face de Declive',
+        saveDC: 15,
+        saveType: 'Destreza',
+        boomingDuneAndSlipRisk: 'Rompimento súbito da crista da duna inclinada a 34 graus; cascata de areia fluida que soterra exploradores sob 2 metros de sedimento móvel causando sufocamento mecânico e 2d8 de concussão por compressão.',
+        pioneerMitigation: 'Avanço diagonal por cristas consolidadas de barlavento e uso de bastões de esteira para redistribuição do peso.',
+        rescueAndStabilization: 'Desenterramento ágil com pás de lona dobráveis, limpeza imediata das vias respiratórias e respiração boca-a-boca com fole de couro.',
+        icon: '🌊⏳',
+        color: '#d97706'
+      };
+    } else if (ht === 'acoustic_decoy_mirage_ambush') {
+      hazard = {
+        hazardTitle: 'Engodo Acústico de Areia Sonora e Falsa Emboscada',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        boomingDuneAndSlipRisk: 'Sons graves modulados pela duna que imitam passos pesados de gigantes ou trombetas de patrulhas hostis, atraindo os membros do grupo para despenhadeiros de areia movediça na bacia interna.',
+        pioneerMitigation: 'Confirmação visual rigorosa por vigias avançados utilizando monóculos de bronze antes de qualquer alteração de curso.',
+        rescueAndStabilization: 'Reagrupamento por apitos de alta frequência que cortam o zumbido grave da duna e verificação de perímetro.',
+        icon: '📯🌀',
+        color: '#b45309'
+      };
+    } else if (ht === 'windblown_silica_blindness_vortex') {
+      hazard = {
+        hazardTitle: 'Vórtice de Poeira de Quartzo Micronizada nos Olhos',
+        saveDC: 14,
+        saveType: 'Constituição',
+        boomingDuneAndSlipRisk: 'Redemoinho repentino na crista da duna que levanta partículas microscópicas de sílica afiada, arranhando a derme facial e causando cegueira temporária dolorosa por abrasão ocular.',
+        pioneerMitigation: 'Uso de turbantes duplos de linho com véu facial de fenda estreita e vedação ocular com unguento gorduroso.',
+        rescueAndStabilization: 'Lavagem abundante com soro fisiológico morno e aplicação de gotas de colírio de camomila silvestre.',
+        icon: '🌪️👁️',
+        color: '#ea580c'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      boomingDuneAndSlipRisk: hazard.boomingDuneAndSlipRisk,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Dunas e Desertos de Areia) / PHB p. 182-183 (Marcha sob Ressonância Acústica) / XGE p. 78-83 (Geomorfologia Eólica e Areias Sonoras)'
+    };
+  }
+
+  // === calcCampBoomingDuneStation (Bivaques em Sotavento e Estacas Helicoidais - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampBoomingDuneStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'leeward_acoustic_baffle_trench_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Trincheira de Sotavento com Barreiras Antirressonância',
+      boomingDuneAnchorageAndAcousticSafety: 'Trincheira escavada na base da duna revestida com caixilhos de vime e esteiras de feltro grosso que dissipam ondas acústicas e cancelam a ressonância do solo.',
+      sandSlipDeflectionAndRestSanctuary: 'Parapeito inclinado de sacos de areia que desvia eventuais avalanches de crista para as laterais, mantendo o nicho de repouso completamente protegido.',
+      campRestAndSafetyGuards: 'Garante descanso longo profundo e silencioso para os membros da comitiva sem interferência dos estrondos da areia.',
+      icon: '⛺🏜️',
+      color: '#ca8a04'
+    };
+
+    if (dt === 'spiral_ground_anchor_tent_matrix') {
+      tech = {
+        defenseTitle: 'Matriz de Estacas Helicoidais com Esticadores de Cabo',
+        boomingDuneAnchorageAndAcousticSafety: 'Estacas espirais de ferro fundido de 80 cm enroscadas profundamente no estrato consolidado de areia sob a camada móvel superficial.',
+        sandSlipDeflectionAndRestSanctuary: 'Mantém barracas e toldos de sombra imóveis mesmo sob vendavais noturnos de até 80 km/h sem risco de colapso estrutural.',
+        campRestAndSafetyGuards: 'Elimina a necessidade de manutenções noturnas nas amarrações durante os turnos de vigília das sentinelas.',
+        icon: '⚓🧱',
+        color: '#64748b'
+      };
+    } else if (dt === 'condenser_stone_cone_sand_trap') {
+      tech = {
+        defenseTitle: 'Condensador Noturno Cônico em Bacia de Cascalho Silicoso',
+        boomingDuneAnchorageAndAcousticSafety: 'Pirâmide de seixos escuros colocada sobre lona impermeável na depressão interdunar que coleta umidade do ar noturno por irradiação térmica.',
+        sandSlipDeflectionAndRestSanctuary: 'Produz 16 litros diários de água fresca e límpida, abastecendo cantis e caldeirões da comitiva em pleno mar de dunas secas.',
+        campRestAndSafetyGuards: 'Garante autonomia de hidratação contínua sem necessidade de cavar poços instáveis na areia fluida.',
+        icon: '💧🏺',
+        color: '#0284c7'
+      };
+    } else if (dt === 'buried_acoustic_tripwire_rattle_perimeter') {
+      tech = {
+        defenseTitle: 'Linha Perimetral Enterrada com Chocalhos de Concha',
+        boomingDuneAnchorageAndAcousticSafety: 'Cordéis tensos camuflados sob fina lâmina de areia conectados a chocalhos de metal e conchas pendurados em estacas de bambu.',
+        sandSlipDeflectionAndRestSanctuary: 'Dispara tinidos agudos imediatos quando pisados por predadores ou invasores que tentam se infiltrar sob o ruído da areia cantante.',
+        campRestAndSafetyGuards: 'Permite prontidão defensiva instantânea para a sentinela noturna sem falsos alarmes provocados pelo vento comum.',
+        icon: '🔔🛡️',
+        color: '#ea580c'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      boomingDuneAnchorageAndAcousticSafety: tech.boomingDuneAnchorageAndAcousticSafety,
+      sandSlipDeflectionAndRestSanctuary: tech.sandSlipDeflectionAndRestSanctuary,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Dunas e Ergs) / PHB p. 150 (Kits de Acampamento no Deserto) / XGE p. 78-83 (Engenharia de Barreiras Antirressonância e Estacas Espirais)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -21996,6 +22120,8 @@
     calcCampRuiniformSandstoneAndLabyrinthStation: calcCampRuiniformSandstoneAndLabyrinthStation,
     calcWildernessTepuiMesaAndChasmHazard: calcWildernessTepuiMesaAndChasmHazard,
     calcCampTepuiMesaAndChasmStation: calcCampTepuiMesaAndChasmStation,
+    calcWildernessBoomingDuneHazard: calcWildernessBoomingDuneHazard,
+    calcCampBoomingDuneStation: calcCampBoomingDuneStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
