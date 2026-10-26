@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 234: CRISTAS EÓLICAS YARDANGS E CORREDORES DE KALUTS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessAeolianYardangKalutHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'kalut_wind_tunnel_venturi_sandblast_corridor').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Jateamento Abrasivo em Corredor Venturi entre Kaluts (Mega-Yardangs)',
+      saveDC: 15,
+      saveType: 'Constituição',
+      yardangKalutRisk: 'Cristas paralelas de argilito e siltito lacustre esculpidas pelo vento unidirecional em forma de cascos de navio invertidos de 30 metros de altura, separadas por corredores retilíneos estreitos; quando o vento sopra, esses becos funcionam como bocais Venturi que duplicam a velocidade das rajadas carregadas de grãos de quartzo na altura dos joelhos e do rosto, causando 3d6 de dano cortante e cegueira por abrasão (DMG p. 110; XGE p. 109).',
+      pioneerMitigation: 'Envolver rosto, olhos e perneiras em panos duplos e marchar apenas nas horas calmas da alvorada.',
+      rescueAndStabilization: 'Abrigo imediato na cauda de sotavento de uma crista e lavagem ocular com água limpa.',
+      icon: '🌬️🏜️',
+      color: '#f59e0b'
+    };
+
+    if (ht === 'undercut_yardang_prow_mudstone_overhang_collapse') {
+      hazard = {
+        hazardTitle: 'Desabamento de Proa Subescavada de Yardang ("Esfinge de Argila")',
+        saveDC: 15,
+        saveType: 'Destreza',
+        yardangKalutRisk: 'Como a abrasão de areia é máxima no primeiro metro acima do chão, a proa frontal de cada yardang é corroída na base até restar um pescoço fino sustentando uma cabeça pesada de argilito ressecado; abrigar-se diretamente sob esse beiral ou vibrar a parede faz a proa partir e despencar com 3d8 de concussão (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Jamais descansar sob as proas em balanço voltadas para o vento; usar sempre a extremidade traseira afilada.',
+        rescueAndStabilization: 'Fragmentação dos blocos de argilito seco com picareta e retirada rápida do soterrado.',
+        icon: '🗿💥',
+        color: '#d97706'
+      };
+    } else if (ht === 'parallel_kalut_labyrinth_dead_end_hyperarid_trap') {
+      hazard = {
+        hazardTitle: 'Desorientação em Labirinto de Corredores Cegos de Kaluts',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        yardangKalutRisk: 'Centenas de cristas idênticas alinhadas por dezenas de quilômetros sem pontos de referência transversais nem água; entrar no corredor errado aprisiona a comitiva entre paredões verticais intransponíveis de 20 metros sob temperaturas de solo de 65 graus, impondo perda de rumo e 1 nível de exaustão por desidratação (DMG p. 110-111; PHB p. 183).',
+        pioneerMitigation: 'Marcar cada bifurcação de corredor com setas de pedras escuras e manter rumo por bússola e estrelas.',
+        rescueAndStabilization: 'Reidratação fracionada na sombra e envio de batedor leve ao topo de uma sela para localizar a saída.',
+        icon: '🧭☀️',
+        color: '#ea580c'
+      };
+    } else if (ht === 'salt_gypsum_cemented_yardang_flank_vertical_slide') {
+      hazard = {
+        hazardTitle: 'Deslizamento em Flanco Aerodinâmico de Siltito Salino',
+        saveDC: 14,
+        saveType: 'Força',
+        yardangKalutRisk: 'As encostas laterais dos yardangs são polidas pelo vento como porcelana e incrustadas de halita quebradiça; tentar escalar de um corredor para a crista superior resulta na quebra dos apoios de crosta salina e queda de retorno ao fundo pedregoso com 2d8 de concussão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Subir exclusivamente pela rampa suave da cauda de sotavento do yardang, nunca pelos flancos verticais.',
+        rescueAndStabilization: 'Imobilização de entorses e limpeza de escoriações impregnadas de sal.',
+        icon: '🧗‍♂️🪨',
+        color: '#ca8a04'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampAeolianYardangKalutStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'aerodynamic_yardang_tail_eddy_calm_lee_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque na Zona de Calma Aerodinâmica da Cauda do Yardang',
+      yardangKalutAndCampSafety: 'A extremidade traseira afilada (cauda de sotavento) do yardang divide o fluxo de ar laminarmente e cria um bolsão triangular de calmaria.',
+      yardangKalutTrenchAndWatch: 'Protege as tendas do jateamento de areia sem acumular dunas sobre o acampamento durante a noite.',
+      campRestAndSafetyGuards: 'Garante descanso longo tranquilo mesmo durante vendavais severos nos corredores vizinhos.',
+      icon: '⛺🌬️',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'carved_indurated_siltstone_cool_cave_dugout') {
+      tech = {
+        defenseTitle: 'Câmara Escavada na Base Maciça de Siltito Compacto',
+        yardangKalutAndCampSafety: 'Escavação de uma alcova fresca no corpo espesso da cauda de argilito consolidado, longe das proas instáveis.',
+        yardangKalutTrenchAndWatch: 'A inércia térmica da rocha reduz a temperatura em 20 graus ao meio-dia e retém calor à noite.',
+        campRestAndSafetyGuards: 'Preserva a água dos cantis contra evaporação e protege contra insolação.',
+        icon: '⛏️🌡️',
+        color: '#fbbf24'
+      };
+    } else if (dt === 'notched_spine_cross_corridor_watchtower_post') {
+      tech = {
+        defenseTitle: 'Posto de Vigia em Sela de Crista entre Dois Corredores',
+        yardangKalutAndCampSafety: 'Instalação de um sentinela deitado em uma sela baixa na espinha dorsal do yardang.',
+        yardangKalutTrenchAndWatch: 'Permite vigiar simultaneamente dois corredores paralelos de aproximação sem silhueta contra o horizonte.',
+        campRestAndSafetyGuards: 'Impede que patrulhas ou predadores flanqueiem o grupo pelos corredores vizinhos.',
+        icon: '👁️🏜️',
+        color: '#d97706'
+      };
+    } else if (dt === 'wind_harp_fluted_ridge_acoustic_early_warning') {
+      tech = {
+        defenseTitle: 'Alerta Acústico Natural das Caneluras de Vento nos Kaluts',
+        yardangKalutAndCampSafety: 'As ranhuras eólicas no topo das cristas ressoam em tom grave quando a pressão barométrica muda antes de uma tempestade.',
+        yardangKalutTrenchAndWatch: 'Funciona como sirene natural que avisa a comitiva com 20 minutos de antecedência sobre frentes de areia.',
+        campRestAndSafetyGuards: 'Dá tempo suficiente para vedar cargas, proteger montarias e recolher sentinelas.',
+        icon: '🎶⚠️',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 233: TURFEIRAS DE PALSA SUBÁRTICAS E TERMOCARSTE (D&D 5e)
   // =========================================================================
 
@@ -32116,6 +32220,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessAeolianYardangKalutHazard: calcWildernessAeolianYardangKalutHazard,
+    calcCampAeolianYardangKalutStation: calcCampAeolianYardangKalutStation,
     calcWildernessSubarcticPalsaThermokarstHazard: calcWildernessSubarcticPalsaThermokarstHazard,
     calcCampSubarcticPalsaThermokarstStation: calcCampSubarcticPalsaThermokarstStation,
     calcWildernessPetrifiedWoodBadlandHazard: calcWildernessPetrifiedWoodBadlandHazard,
