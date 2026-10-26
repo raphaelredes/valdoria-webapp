@@ -11905,6 +11905,130 @@
     };
   }
 
+  // === calcWildernessWildMagicAndArcaneFalloutHazard (Magia Selvagem, Zonas de Magia Morta e Resíduos Mágicos - DMG p. 109, 136 / TCoE p. 150) ===
+  function calcWildernessWildMagicAndArcaneFalloutHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'arcane').toLowerCase();
+    var ht = (hazardType || 'wild_magic_eldritch_distortion').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Fenda de Magia Selvagem e Distorção Étnica Flutuante',
+      saveDC: 13,
+      saveType: 'Sabedoria',
+      arcaneFalloutAndSurge: 'Oscilação repentina no tecido mágico; 2d8 de dano de força e risco de efeito caótico imprevisível da tabela de magia selvagem (TCoE p. 150).',
+      pioneerMitigation: 'Batedores atentos notam arrepios na nuca e cabelos eriçados, contornando bolsas de ar cintilante a 20 metros.',
+      arcaneCleansingAndGrounding: 'Canalizar o excesso de carga telúrica cravando lâminas de aço no solo úmido e beber água destilada.',
+      icon: '✨🔮',
+      color: '#c084fc'
+    };
+
+    if (ht === 'dead_magic_sinkhole_void') {
+      hazard = {
+        hazardTitle: 'Zona de Magia Morta e Vazio Antimagia Natural',
+        saveDC: 13,
+        saveType: 'Inteligência',
+        arcaneFalloutAndSurge: 'Apagamento completo de auras mágicas e itens encantados; teste de Arcanismo para não desorientar bússolas e runas (DMG p. 136).',
+        pioneerMitigation: 'Navegação baseada estritamente em marcos estelares e bússolas mecânicas magnéticas de bronze.',
+        arcaneCleansingAndGrounding: 'Avançar em linha reta até ultrapassar a bolha neutra e reenergizar talismãs em fogueiras convencionais.',
+        icon: '🕳️🚫',
+        color: '#94a3b8'
+      };
+    } else if (ht === 'fey_glimmer_hallucination_mist') {
+      hazard = {
+        hazardTitle: 'Bruma de Poeira Feérica e Alucinações Ópticas',
+        saveDC: 12,
+        saveType: 'Sabedoria',
+        arcaneFalloutAndSurge: 'Vapores bioluminescentes coloridos; condição Enfeitiçado por 10 minutos e desorientação de rota por miragens celestes.',
+        pioneerMitigation: 'Amarrar lenços umedecidos em vinagre sobre o nariz e manter a comitiva atada por corda guia de caminhada.',
+        arcaneCleansingAndGrounding: 'Estapear as bochechas dos companheiros enfeitiçados e focar a atenção na chama firme de uma tocha acesa.',
+        icon: '🧚‍♀️🌌',
+        color: '#e879f9'
+      };
+    } else if (ht === 'desecrated_battlefield_radiation') {
+      hazard = {
+        hazardTitle: 'Solo Profanado de Antigo Campo de Guerra Arcano',
+        saveDC: 13,
+        saveType: 'Constituição',
+        arcaneFalloutAndSurge: 'Radiação necrótica residual; impede recuperação natural de PV em descanso curto e impõe 1d6 de dano necrótico por hora (DMG p. 110).',
+        pioneerMitigation: 'Especialistas religiosos reconhecem ossadas petrificadas e guiam o grupo por encostas ventiladas de pedra viva.',
+        arcaneCleansingAndGrounding: 'Aspersão de água benta sobre a sola das botas e orações de proteção antes de cruzar valas de combate.',
+        icon: '☠️⚡',
+        color: '#f43f5e'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      arcaneFalloutAndSurge: hazard.arcaneFalloutAndSurge,
+      pioneerMitigation: hazard.pioneerMitigation,
+      arcaneCleansingAndGrounding: hazard.arcaneCleansingAndGrounding,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 109, 136 (Zonas Mágicas e Terreno Profanado) / TCoE p. 150 (Perigos Sobrenaturais)'
+    };
+  }
+
+  // === calcCampGlyphicWardsAndChalkCirclePerimeter (Círculo de Sal e Prata, Aterramento Arcano e Incenso Consagrado - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampGlyphicWardsAndChalkCirclePerimeter(biomeKey, wardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'arcane').toLowerCase();
+    var wt = (wardType || 'consecrated_silver_salt_chalk_ring').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Círculo de Giz Consagrado, Sal Grosso e Prata Triturada',
+      wardEfficiencyAndContainment: 'Traçado contínuo ao redor das barracas que bloqueia oscilações de magia selvagem e alerta sobre intrusões incorpóreas.',
+      groundingAndArcaneStability: 'Mantém a integridade mental dos conjuradores durante o sono, permitindo descanso pleno sem pesadelos mágicos.',
+      campRestAndSafetyGuards: 'Proporciona sono tranquilo e seguro para toda a comitiva com sentinelas protegidos contra encantos e possessões.',
+      icon: '⭕🧂',
+      color: '#e2e8f0'
+    };
+
+    if (wt === 'cold_iron_ley_grounding_spikes') {
+      tech = {
+        defenseTitle: 'Estacas de Ferro Frio e Cobre para Aterramento de Linhas de Ley',
+        wardEfficiencyAndContainment: 'Quatro estacas cravadas nos pontos cardeais canalizando surtos arcanos e eletrostática mágica para a terra profunda.',
+        groundingAndArcaneStability: 'Neutraliza 100% de centelhas espontâneas e faíscas cósmicas que poderiam incendiar as lonas das barracas.',
+        campRestAndSafetyGuards: 'Assegura estabilidade para foco arcano, preparação de magias matinais e alívio de fadiga mágica.',
+        icon: '🔩⚡',
+        color: '#38bdf8'
+      };
+    } else if (wt === 'amethyst_pendulum_resonance_chime') {
+      tech = {
+        defenseTitle: 'Carrilhão de Ametistas e Pêndulo de Ressonância Planar',
+        wardEfficiencyAndContainment: 'Pêndulo suspenso na entrada do acampamento vibrando e tilintando sinos de prata diante de distorções no éter.',
+        groundingAndArcaneStability: 'Alarme místico antecipado que acorda instantaneamente os guardas 3 rodadas antes de uma fenda planar se abrir.',
+        campRestAndSafetyGuards: 'Elimina o fator surpresa em ataques de criaturas etéreas ou flutuações anômalas de mana.',
+        icon: '🔔🔮',
+        color: '#c084fc'
+      };
+    } else if (wt === 'blessed_frankincense_censer_brazier') {
+      tech = {
+        defenseTitle: 'Braseiro Purificador com Resina de Olíbano e Sálvia Branca',
+        wardEfficiencyAndContainment: 'Fumaça sagrada que dissolve miasmas de profanação e concede +1 em salvaguardas mentais a todos no acampamento.',
+        groundingAndArcaneStability: 'Restaura o equilíbrio espiritual dos aventureiros, purificando a aura do local para descanso longo eficiente.',
+        campRestAndSafetyGuards: 'Garante recuperação regular de pontos de vida mesmo quando acampando nas cercanias de ruínas amaldiçoadas.',
+        icon: '💨🔥',
+        color: '#ca8a04'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      wardType: wt,
+      defenseTitle: tech.defenseTitle,
+      wardEfficiencyAndContainment: tech.wardEfficiencyAndContainment,
+      groundingAndArcaneStability: tech.groundingAndArcaneStability,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Proteções Sobrenaturais) / XGE p. 78 (Engenharia de Terreno e Rituais de Vigília)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -13682,6 +13806,8 @@
     calcCampClearingMacheteAndProtectiveGaiters: calcCampClearingMacheteAndProtectiveGaiters,
     calcWildernessParasiteSwarmAndVectorHazard: calcWildernessParasiteSwarmAndVectorHazard,
     calcCampSmokeSmudgePotAndCitronellaRepellent: calcCampSmokeSmudgePotAndCitronellaRepellent,
+    calcWildernessWildMagicAndArcaneFalloutHazard: calcWildernessWildMagicAndArcaneFalloutHazard,
+    calcCampGlyphicWardsAndChalkCirclePerimeter: calcCampGlyphicWardsAndChalkCirclePerimeter,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
