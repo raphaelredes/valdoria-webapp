@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 278: DOMOS DE LAVA RIOLÍTICA, AGULHAS PELÉANAS E COULEES (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessRhyoliteDomeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var ht = (hazardType || 'pelean_spine_collapse_block_ash_avalanche').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso de Agulha Peléana e Avalanche de Blocos e Cinzas',
+      saveDC: 15,
+      saveType: 'Destreza',
+      rhyoliteDomeRisk: 'Uma agulha colossal de dacito incandescente de 80 metros de altura projetada da cúpula do domo racha por alívio térmico interno; o desabamento catastrófico dispara uma avalanche piroclástica de blocos de rocha e cinza incandescente a 100 km/h pela ravina, exigindo salvaguarda de Destreza CD 15 para escapar da calha de descida ou sofrer 3d8 de dano de concussão mais 2d6 de dano de fogo e ser engolfado pela onda de choque piroclástica (DMG p. 110, 246; PHB p. 183).',
+      pioneerMitigation: 'Batedores monitorando o prumo e a fumaça de fratura da agulha com teodolitos rústicos e mantendo a rota em cristas laterais elevadas protegidas de fluxos gravitacionais (Sobrevivência ou Percepção CD 14).',
+      rescueAndStabilization: 'Extração de sobreviventes sob o manto de cinzas aquecidas com pás de campanha e tratamento urgente de queimaduras com bálsamos refrescantes (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🌋',
+      color: '#dc2626'
+    };
+
+    if (ht === 'obsidian_coulee_autoclastic_talus_shear') {
+      hazard.hazardTitle = 'Desabamento de Tálus em Coulee de Obsidiana e Brecha Autoclástica';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.rhyoliteDomeRisk = 'O avanço lento do coulee riolítico quebra sua própria crosta externa resfriada em um tálus colossal de blocos angulosos de obsidiana pura e rocha vítrea; pisar nessa rampa instável mobiliza dezenas de toneladas de lâminas de vidro vulcânico, infligindo 2d8 de dano cortante e desvantagem permanente em deslocamento até um descanso curto devido a cortes nos pés e patas de montarias (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Fixação de passadeiras de toros e pranchas sobre as zonas de blocos móveis e uso de calçados com sola de ferro (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Sutura cirúrgica de lacerações profundas causadas por obsidiana e hemostasia imediata (Medicina CD 13).';
+    } else if (ht === 'dome_crevasse_pressurized_vapor_blast') {
+      hazard.hazardTitle = 'Jato Pressurizado de Vapor e Gases em Crevasse do Domo';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Constituição';
+      hazard.rhyoliteDomeRisk = 'Fissuras radiais na crosta resfriada do domo de lava concentram vapor e gases voláteis selados a alta pressão; a detonação súbita de uma rolha mineral arremessa estilhaços vítreos acompanhados de uma baforada sulfurosa a 120°C, exigindo salvaguarda de Constituição CD 15 ou sofrer 3d6 de fogo e cegueira por fumaça ácida por 1 rodada (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Avanço com máscaras de linho embebidas em vinagre e desvio de fumarolas com coloração amarela ou ocre (Natureza ou Sobrevivência CD 14).';
+      hazard.rescueAndStabilization = 'Lavagem ocular rápida e inalação de vapores calmantes de hortelã-da-montanha (Medicina CD 13).';
+    } else if (ht === 'rhyolite_block_lava_pinch_void') {
+      hazard.hazardTitle = 'Fosso Oculto entre Blocos de Lava em Cúpula';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.rhyoliteDomeRisk = 'A superfície rugosa do domo é formada por blocos gigantes de riolito que ocultam fendas verticais de 8 metros entre as pedras sem apoio basal; o afundamento acidental prende aventureiros no fosso com risco de esmagamento se os blocos vizinhos se moverem, exigindo salvaguarda de Força CD 14 para não sofrer 2d10 de concussão e condição Preso (DMG p. 110; PHB p. 182-183).';
+      hazard.pioneerMitigation = 'Marcha amarrada em cordada de três membros com batedor testando fendas com vara longa (Atletismo CD 13).';
+      hazard.rescueAndStabilization = 'Içamento de carga e resgate com cordas e roldanas ancoradas em monólitos sãos (Atletismo CD 14).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampRhyoliteDomeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var dt = (defenseType || 'cold_flank_rhyolite_buttress_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Contraforte Estável de Flanco Frio',
+      rhyoliteDomeAndCampSafety: 'O acampamento é montado em um contraforte de riolito antigo e resfriado fora do alcance de avalanches da cúpula ativa, protegido por muralhas maciças de pedra dura e piso nivelado (DMG p. 111).',
+      rhyoliteDomeAndWatch: 'A elevação de 30 metros acima da encosta proporciona visão desimpedida de vales e acessos por 3 milhas e abrigo contra ventanias cortantes de altitude.',
+      campRestAndSafetyGuards: 'Descanso pleno em solo estável imune a desabamentos do domo e protegido de emboscadas terrestres.',
+      icon: '🛡️',
+      color: '#dc2626'
+    };
+
+    if (dt === 'fumarole_steam_condensation_still') {
+      defense.defenseTitle = 'Alambique Coletor de Vapor de Fumarola Limpa';
+      defense.rhyoliteDomeAndCampSafety = 'Vapor de condensação limpo emitido por diaclases termais é canalizado por tubos de cobre e panos de linho estendidos sobre calhas de pedra, condensando água pura e quente (PHB p. 150).';
+      defense.rhyoliteDomeAndWatch = 'Produz até 20 litros diários de água destilada quente para a comitiva, reabastecendo caldeirões sem risco de intoxicação mineral.';
+      defense.campRestAndSafetyGuards = 'Suprimento de água garantido no ambiente vulcânico sem necessidade de expedições arriscadas.';
+    } else if (dt === 'obsidian_blade_perimeter_alarm_scatter') {
+      defense.defenseTitle = 'Perímetro Tático com Lâminas e Lascas de Obsidiana';
+      defense.rhyoliteDomeAndCampSafety = 'Faixa de 4 metros ao redor do acampamento recoberta com lascas afiadas de obsidiana descartadas do coulee que estalam ruidosamente e cortam patas de predadores furtivos (PHB p. 185).';
+      defense.rhyoliteDomeAndWatch = 'Qualquer invasor que tente cruzar a faixa sem asas sofre penalidade em Furtividade e alerta imediatamente as sentinelas em guarda com vantagem em Percepção Passiva.';
+      defense.campRestAndSafetyGuards = 'Alarme mecânico infalível que previne surpresas durante as vigílias noturnas.';
+    } else if (dt === 'geothermal_heated_stone_cradle') {
+      defense.defenseTitle = 'Leito de Pedra com Aquecimento Geotérmico Suave';
+      defense.rhyoliteDomeAndCampSafety = 'Lajes de riolito sobre fraturas termais com circulação de ar aquecido a 25°C são forradas com palha e cobertores de lã para o descanso (DMG p. 111).';
+      defense.rhyoliteDomeAndWatch = 'Mantém o grupo aquecido durante as madrugadas congelantes da alta montanha vulcânica sem necessidade de queima de lenha combustível.';
+      defense.campRestAndSafetyGuards = 'Elimina risco de hipotermia e concede recuperação integral de vigor físico aos aventureiros.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 277: DELTAS LACUSTRES EM GILBERT E ENCOSTAS DE PROGRADAÇÃO (D&D 5e)
   // =========================================================================
 
@@ -36356,6 +36436,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessRhyoliteDomeHazard: calcWildernessRhyoliteDomeHazard,
+    calcCampRhyoliteDomeStation: calcCampRhyoliteDomeStation,
     calcWildernessGilbertDeltaHazard: calcWildernessGilbertDeltaHazard,
     calcCampGilbertDeltaStation: calcCampGilbertDeltaStation,
     calcWildernessPahoehoeLavaTubeHazard: calcWildernessPahoehoeLavaTubeHazard,
