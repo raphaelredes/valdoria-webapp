@@ -13145,6 +13145,130 @@
     };
   }
 
+  // === calcWildernessGlacialCrevasseAndPermafrostHazard (Fendas Glaciais Ocultas, Ventos Catabáticos e Seracs - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessGlacialCrevasseAndPermafrostHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'arctic').toLowerCase();
+    var ht = (hazardType || 'hidden_snow_bridge_crevasse_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso de Ponte de Neve e Queda em Fenda Glacial (Crevasse)',
+      saveDC: 14,
+      saveType: 'Destreza',
+      glacialDamageAndExposure: 'Ponte de neve frágil desmoronando sob o peso da marcha; queda de 4d6 de concussão e risco de hipotermia grave no gelo azul profundo (DMG p. 110).',
+      pioneerMitigation: 'Batedores avançam encordoados a cada 5 metros e sondam o leito com bastões de ponta de aço endurecido.',
+      rescueAndStabilization: 'Sistema de polias 3:1 ancorado em parafusos tubulares de gelo e resgate com arnês de escalada.',
+      icon: '❄️🕳️',
+      color: '#38bdf8'
+    };
+
+    if (ht === 'permafrost_frost_heave_shear') {
+      hazard = {
+        hazardTitle: 'Fissura de Cisalhamento por Permafrost e Expansão de Gelo',
+        saveDC: 13,
+        saveType: 'Destreza',
+        glacialDamageAndExposure: 'Placas de rocha e gelo rachando subitamente sob tensão térmica; 2d6 de perfuração e piso com terreno muito difícil.',
+        pioneerMitigation: 'Avanço disperso observando elevações de solo e uso de grampos de ferro nas solas das botas de neve.',
+        rescueAndStabilization: 'Fixação de talas acolchoadas em fraturas e aplicação de unguento aquecedor de banha animal.',
+        icon: '🧊⚡',
+        color: '#0284c7'
+      };
+    } else if (ht === 'katabatic_gale_chill_factor') {
+      hazard = {
+        hazardTitle: 'Vento Catabático Descendente e Sensação Térmica Extrema',
+        saveDC: 13,
+        saveType: 'Constituição',
+        glacialDamageAndExposure: 'Rajada polar a 80 km/h baixando a sensação térmica para -30°C; 2d6 de frio e 1 nível de exaustão em 10 minutos.',
+        pioneerMitigation: 'Abrigo imediato a sotavento de morenas de pedra e uso de anoraks de pele dupla com capuz ajustado.',
+        rescueAndStabilization: 'Aquecimento gradual do tronco com pedras polidas quentes e ingestão de caldo gorduroso fervente.',
+        icon: '💨🥶',
+        color: '#7dd3fc'
+      };
+    } else if (ht === 'glacial_serac_tower_topple') {
+      hazard = {
+        hazardTitle: 'Tombamento de Torre de Gelo Instável (Serac)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        glacialDamageAndExposure: 'Pináculo de gelo azul de 15 metros colapsando sob calor solar; 3d10 de concussão e risco de soterramento.',
+        pioneerMitigation: 'Travessia em silêncio absoluto nas primeiras horas da alvorada e contorno largo da base de blocos suspensos.',
+        rescueAndStabilization: 'Desenterro urgente com pás de campanha e administração de essências revigorantes.',
+        icon: '🏔️⚠️',
+        color: '#bae6fd'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      glacialDamageAndExposure: hazard.glacialDamageAndExposure,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Frio Extremo e Gelo Frágil) / PHB p. 182-183 (Asfixia e Hipotermia)'
+    };
+  }
+
+  // === calcCampGlacialSnowBlockShelterAndIceScrewStation (Domo de Blocos de Neve, Parafusos de Gelo e Esteiras de Pele - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampGlacialSnowBlockShelterAndIceScrewStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'arctic').toLowerCase();
+    var dt = (defenseType || 'compacted_snow_block_igloo_shelter').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Domo de Blocos de Neve Compacta com Entrada em Túnel',
+      thermalRetentionAndInsulation: 'Abrigo com túnel rebaixado retendo ar aquecido a 5°C mesmo com nevasca polar externa a -25°C.',
+      anchoringStabilityAndGaleDefense: 'Domo espiral autoportante que dissipa a força do vento e impede qualquer colapso mecânico.',
+      campRestAndSafetyGuards: 'Permite sono longo restaurador completo e confortável sem penalidades de frio extremo.',
+      icon: '🛖❄️',
+      color: '#10b981'
+    };
+
+    if (dt === 'tubular_ice_screw_and_belay_anchors') {
+      tech = {
+        defenseTitle: 'Ancoragem de Estais com Parafusos Tubulares de Aço no Gelo',
+        thermalRetentionAndInsulation: 'Parafusos rosqueados a 20 cm no gelo vivo suportando 1.500 kg de tração contra rajadas furiosas.',
+        anchoringStabilityAndGaleDefense: 'Garante que barracas e equipamentos pesados permaneçam imóveis durante ventanias catabáticas.',
+        campRestAndSafetyGuards: 'Elimina o risco de a comitiva acordar com abrigos arrancados ou equipamentos espalhados na nevasca.',
+        icon: '🔩⚓',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'reindeer_fur_underlay_raised_snow_bench') {
+      tech = {
+        defenseTitle: 'Bancada Elevada de Sono com Esteira de Pele de Rena',
+        thermalRetentionAndInsulation: 'Plataforma esculpida acima da entrada de ar frio forrada com camadas duplas de pelos ocos isolantes.',
+        anchoringStabilityAndGaleDefense: 'Bloqueia 100% da perda de calor corporal por condução para o assoalho de gelo da geleira.',
+        campRestAndSafetyGuards: 'Garante que os aventureiros recuperem todos os dados de vida sem calafrios ou dormência muscular.',
+        icon: '🦌🧶',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'blubber_lamp_and_snow_melt_trough') {
+      tech = {
+        defenseTitle: 'Lâmpada de Gordura de Foca com Calha para Degelo',
+        thermalRetentionAndInsulation: 'Chama suave sem fumaça que eleva a temperatura interna e derrete neve pura para consumo.',
+        anchoringStabilityAndGaleDefense: 'Abastecimento ininterrupto de água potável líquida sem dependência de lenha escassa no ártico.',
+        campRestAndSafetyGuards: 'Mantém a comitiva hidratada e aquecida durante todo o período de vigília noturna.',
+        icon: '🪔💧',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      thermalRetentionAndInsulation: tech.thermalRetentionAndInsulation,
+      anchoringStabilityAndGaleDefense: tech.anchoringStabilityAndGaleDefense,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque Ártico) / XGE p. 78 (Equipamento de Exploração e Sobrevivência)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -14940,6 +15064,8 @@
     calcCampSwampStiltPlatformAndMudshoeStation: calcCampSwampStiltPlatformAndMudshoeStation,
     calcWildernessDenseForestDeadfallAndAllergenicPollenHazard: calcWildernessDenseForestDeadfallAndAllergenicPollenHazard,
     calcCampForestCanopyHammockAndDeadfallClearingStation: calcCampForestCanopyHammockAndDeadfallClearingStation,
+    calcWildernessGlacialCrevasseAndPermafrostHazard: calcWildernessGlacialCrevasseAndPermafrostHazard,
+    calcCampGlacialSnowBlockShelterAndIceScrewStation: calcCampGlacialSnowBlockShelterAndIceScrewStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
