@@ -20734,6 +20734,110 @@
   // FASE 186: VALES SUBGLACIAIS EM RAVINAS DE TÚNEL E LAGOS DE KETTLE (D&D 5e)
   // =========================================================================
 
+  // =========================================================================
+  // FASE 187: PLATÔS DE ARENITO RUINIFORME EM FLORESTA DE PEDRA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessRuiniformSandstoneHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'goblet_rock_pedestal_topple_crush').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Tombamento de Taça de Arenito Ruiniforme em Pedestal Estreito',
+      saveDC: 15,
+      saveType: 'Destreza',
+      ruiniformRisk: 'Bloco de arenito de 40 toneladas esculpido em taça equilibrada sobre pedestal fino erodido; rajada de vento ou apoio de corda rompe o ponto de fulcro provocando o tombamento do monólito sobre o corredor com 3d10 de concussão por esmagamento (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Proibição estrita de ancorar cabos em colunas de base estreita e travessia rápida pelo eixo desimpedido das galerias.',
+      rescueAndStabilization: 'Alavancagem de blocos fragmentados com barras de ferro temperado e remoção urgente dos feridos em maca rígida.',
+      icon: '🏆🪨',
+      color: '#d97706'
+    };
+
+    if (ht === 'sandstone_furna_sinkhole_vertical_plunge') {
+      hazard = {
+        hazardTitle: 'Queda em Furna Vertical de Abatimento Arenítico de 40 Metros',
+        saveDC: 15,
+        saveType: 'Destreza',
+        ruiniformRisk: 'Poço cilíndrico vertical (furna) de 40 metros com paredes negativas e lago subterrâneo no fundo; a borda é camuflada por samambaias; o batedor pisa na vegetação suspensa despencando no abismo com 3d8 de concussão e risco de afogamento (DMG p. 246-247; PHB p. 182-183).',
+        pioneerMitigation: 'Marcha encordada com distância de 8 metros e sondagem da borda vegetada com vara longa de bambu antes de avançar.',
+        rescueAndStabilization: 'Montagem de tripé de resgate na laje de quartzo firme e descida de cabo de 50 metros com polia redutora de carga.',
+        icon: '🕳️🌿',
+        color: '#15803d'
+      };
+    } else if (ht === 'diaclase_labyrinth_magnetic_iron_disorientation') {
+      hazard = {
+        hazardTitle: 'Labirinto de Diáclases Ortogonais com Anomalia Ferruginosa',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        ruiniformRisk: 'Rede claustrofóbica de fendas retilíneas de 15 metros com crostas ricas em hematita e magnetita que desviam bússolas; corredores idênticos desorientam a comitiva induzindo marcha em círculos por 4 horas e 1 nível de exaustão (DMG p. 110-111; PHB p. 185).',
+        pioneerMitigation: 'Marcação física das esquinas com giz branco mineral e orientação solar pelo zênite das fendas.',
+        rescueAndStabilization: 'Reagrupamento por sinais acústicos de apito de osso em frequência grave e hidratação com soro salino.',
+        icon: '🧭🧱',
+        color: '#b45309'
+      };
+    } else if (ht === 'friable_quartz_sand_avalanche_chute') {
+      hazard = {
+        hazardTitle: 'Escorregamento de Areia de Desagregação em Calha de Escarpa',
+        saveDC: 14,
+        saveType: 'Destreza',
+        ruiniformRisk: 'Canaleta inclinada de arenito friável coberta por grãos de quartzo rolados; o piso granulado escorre sob as botas arremessando o aventureiro contra paredões ásperos como lixa grossa com 3d6 de dano cortante/abrasivo (PHB p. 182-183).',
+        pioneerMitigation: 'Uso de joelheiras e luvas de couro grosso cravando pítons de cantoneira nas fendas laterais de quartzo sólido.',
+        rescueAndStabilization: 'Lavagem das escoriações profundas com água fervida e aplicação de bálsamo cicatrizante de barbatimão.',
+        icon: '🏜️🧗‍♂️',
+        color: '#ca8a04'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampRuiniformSandstoneStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'quartzite_arch_alcove_sheltered_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Alcova Sob Arco Maciço de Quartzito Consolidado',
+      ruiniformAndCampSafety: 'Acampamento instalado em cavidade seca e plana protegida sob arco natural de quartzito metamorfizado a 10 metros de altura, imune a desmoronamentos de arenito friável e enxurradas nos corredores.',
+      ruiniformBarrierAndCistern: 'A abóbada de quartzito duro protege contra tempestades e queda de pedras, enquanto os pilares do arco estreitam o acesso a duas passagens facilmente defensáveis.',
+      campRestAndSafetyGuards: 'Concede sono longo revigorante, seco e aquecido pela reverberação térmica da rocha para todos os membros do grupo, garantindo vigília elevada para as sentinelas de guarda.',
+      icon: '⛺🌉',
+      color: '#d97706'
+    };
+
+    if (dt === 'diaclase_corridor_sandstone_block_barricade') {
+      tech = {
+        defenseTitle: 'Barricada Baluarte de Lajes de Arenito Silicificado em Fenda',
+        ruiniformAndCampSafety: 'Muro defensivo erguido de parede a parede na entrada do corredor de diáclase utilizando lajes retangulares de arenito cimentado por sílica.',
+        ruiniformBarrierAndCistern: 'Concede cobertura superior (+5 na CA) contra projéteis e fecha hermeticamente o corredor contra ataques de feras rupestres ou emboscadas noturnas.',
+        campRestAndSafetyGuards: 'Assegura isolamento perfeito do perímetro e descanso ininterrupto para a comitiva.',
+        icon: '🧱🛡️',
+        color: '#92400e'
+      };
+    } else if (dt === 'sandstone_alveolar_basin_rainwater_cistern') {
+      tech = {
+        defenseTitle: 'Cisterna Natural em Bacia de Dissolução Alveolar com Filtro',
+        ruiniformAndCampSafety: 'Caldeirão escavado na rocha viva de arenito puro (tafoni de piso) que armazena água da chuva filtrada através de areia quartzosa limpa no fundo da cavidade.',
+        ruiniformBarrierAndCistern: 'Fornece 50 litros diários de água doce cristalina, fresca e livre de contaminação biológica, assegurando autonomia hídrica no alto da chapada.',
+        campRestAndSafetyGuards: 'Elimina a necessidade de descer em furnas perigosas para buscar água e revigora os exploradores.',
+        icon: '💧🪨',
+        color: '#0284c7'
+      };
+    } else if (dt === 'ruiniform_corridor_tripwire_chime_alarm') {
+      tech = {
+        defenseTitle: 'Perímetro de Alarme nas Diáclases com Fios e Placas de Quartzo',
+        ruiniformAndCampSafety: 'Fios finos estendidos na meia-sombra dos corredores de pedra conectados a placas suspensas de quartzo leitoso que produzem som cristalino estridente.',
+        ruiniformBarrierAndCistern: 'O eco natural dos corredores amplifica o som por 80 metros, alertando instantaneamente sobre qualquer intruso no labirinto de pedra.',
+        campRestAndSafetyGuards: 'Proporciona tranquilidade mental e prontidão imediata para as sentinelas de vigília.',
+        icon: '🔔💎',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessTunnelValleyKettleHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'tundra').toLowerCase();
@@ -27228,6 +27332,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessRuiniformSandstoneHazard: calcWildernessRuiniformSandstoneHazard,
+    calcCampRuiniformSandstoneStation: calcCampRuiniformSandstoneStation,
     calcWildernessTunnelValleyKettleHazard: calcWildernessTunnelValleyKettleHazard,
     calcCampTunnelValleyKettleStation: calcCampTunnelValleyKettleStation,
     calcWildernessClimbingCliffDuneHazard: calcWildernessClimbingCliffDuneHazard,
