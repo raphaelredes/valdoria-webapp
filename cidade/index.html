@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessIgnimbriteCanyonHazard) return '';
+        var bKey = (biome && biome.key) || 'badlands';
+        var ig = CartShared.calcWildernessIgnimbriteCanyonHazard(bKey, 'fossil_fumarole_pipe_roof_collapse_plunge');
+        return '<div class="clp-ignimbrite-card" style="margin:4px 0 6px;text-align:left;background:rgba(36,24,14,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(217,119,6,0.35);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ig.color + ';margin-bottom:2px;">' + ig.icon + ' ' + ig.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Cânions de Ignimbrito e Fumarolas:</b> ' + ig.ignimbriteAndFumaroleRisk + ' (CD ' + ig.saveDC + ' [' + ig.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Mitigação:</b> ' + ig.pioneerMitigation + ' · <i>Estabilização: ' + ig.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampIgnimbriteCanyonStation) return '';
+        var bKey = (biome && biome.key) || 'badlands';
+        var cp = CartShared.calcCampIgnimbriteCanyonStation(bKey, 'massive_welded_tuff_terrace_solid_bivouac');
+        return '<div class="clp-ignimbrite-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,18,10,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(180,83,9,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Terraço de Tufo:</b> ' + cp.ignimbriteAnchorageAndAshSafety + ' · <b>Proteção:</b> ' + cp.leatherDustAirlockAndSteamStill + '</div>'
+          + '  <div style="font-size:7.5px;color:#fcd34d;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessWhiteSandCampinaranaHazard) return '';
         var bKey = (biome && biome.key) || 'jungle';
         var ws = CartShared.calcWildernessWhiteSandCampinaranaHazard(bKey, 'white_sand_liquefaction_quicksand_sinkhole');

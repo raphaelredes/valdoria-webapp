@@ -20560,6 +20560,113 @@
   // PHB p. 182-183 (Travel Pace, Navigation in Tropical Forests), PHB p. 185 (Food & Water), XGE p. 77-83
   // =========================================================================
 
+
+  // =========================================================================
+  // FASE 156: CÂNYONS DE IGNIMBRITO E CHAMINÉS DE FUMAROLAS FÓSSEIS
+  // D&D 5e: DMG p. 110-111 (Hazards, Extreme Heat, Toxic Ash), DMG p. 246-247 (Structural Integrity),
+  // PHB p. 182-183 (Travel Pace, Navigation in Badlands), PHB p. 190 (Falling & Suffocation), XGE p. 77-83
+  // =========================================================================
+
+  function calcWildernessIgnimbriteCanyonHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'badlands').toLowerCase();
+    var ht = (hazardType || 'fossil_fumarole_pipe_roof_collapse_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso de Teto em Chaminé de Fumarola Fóssil Oca',
+      saveDC: 15,
+      saveType: 'Destreza',
+      ignimbriteAndFumaroleRisk: 'Crosta delgada de tufo vulcânico soldado suspensa sobre duto vertical de fumarola fóssil de 15 metros de profundidade; o solo se rompe sob os passos da comitiva tragando o explorador em queda livre com 3d8 de concussão e aprisionamento em funil de cinza compacta (DMG p. 110, 246).',
+      pioneerMitigation: 'Batedores sondam o solo à frente com pontas de aço forjado identificando ressonâncias ocas e guiam a marcha exclusivamente por cristas densas de tufo.',
+      rescueAndStabilization: 'Içamento imediato com polias e cintas de amarração em triângulo, imobilização de fraturas e bandagens com emplastro de resina cicatrizante.',
+      icon: '🌋🕳️',
+      color: '#d97706'
+    };
+
+    if (ht === 'welded_ignimbrite_vitric_shard_cutting_gale') {
+      hazard = {
+        hazardTitle: 'Vendaval de Lascas Vítreas de Ignimbrito Soldado a 65 km/h',
+        saveDC: 15,
+        saveType: 'Destreza',
+        ignimbriteAndFumaroleRisk: 'Rajadas de vento quente comprimidas pelo cânion que erguem nuvens de fragmentos conchoidais afiados de vidro vulcânico; retalham vestes e armaduras de couro, causando 2d6 de dano cortante e cegueira momentânea por abrasão ocular.',
+        pioneerMitigation: 'Uso de máscaras de couro macio com telas de cobre trançado e óculos protetores com lentes grossas de quartzo.',
+        rescueAndStabilization: 'Lavagem cuidadosa dos olhos com água destilada tépida em concha esterilizada e selagem de cortes na pele com pomada de própolis.',
+        icon: '🌪️🔪',
+        color: '#dc2626'
+      };
+    } else if (ht === 'subsurface_smoldering_ash_pocket_scald') {
+      hazard = {
+        hazardTitle: 'Bolsão de Cinza Incandescente em Combustão Residual a 200°C',
+        saveDC: 14,
+        saveType: 'Destreza',
+        ignimbriteAndFumaroleRisk: 'Fissuras subterrâneas seladas onde cinzas piroclásticas retêm temperaturas de 200°C; o rompimento da crosta queima solas de botas de couro e causa 2d8 de dano de fogo e desequilíbrio.',
+        pioneerMitigation: 'Uso de calçados reforçados com sola dupla de chapa de ferro e monitoramento de gradientes térmicos no solo com varetas de chumbo.',
+        rescueAndStabilization: 'Arrasto para solo frio, imersão dos pés em água tépida com sais refrescantes e curativo com unguento de óleo de linhaça.',
+        icon: '🔥🦶',
+        color: '#ea580c'
+      };
+    } else if (ht === 'vitric_ash_pneumoconiosis_choke_spasm') {
+      hazard = {
+        hazardTitle: 'Inalação de Cinza Vítrea Micronizada com Espasmo Respiratório',
+        saveDC: 14,
+        saveType: 'Constituição',
+        ignimbriteAndFumaroleRisk: 'Poeira de sílica vulcânica ultrafina suspensa no ar de desfiladeiros sem vento; a inalação forma pasta coloidal nos brônquios provocando tosse com sangue, desvantagem em testes físicos e 1 nível de exaustão.',
+        pioneerMitigation: 'Uso de lenços embebidos em água com vinagre de maçã diluído e caminhada em fila indiana mantendo distância para assentamento do pó.',
+        rescueAndStabilization: 'Inalação de vapor d\'água doce com folhas aromáticas de eucalipto em tenda fechada e hidratação lenta com mel.',
+        icon: '💨😷',
+        color: '#78350f'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampIgnimbriteCanyonStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'badlands').toLowerCase();
+    var dt = (defenseType || 'massive_welded_tuff_terrace_solid_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Assentado em Terraço Maciço de Tufo Soldado',
+      ignimbriteAnchorageAndAshSafety: 'Acampamento montado em laje densa de ignimbrito maciço sem cavidades de fumarolas, imune a colapsos de teto e calor residual subterrâneo.',
+      leatherDustAirlockAndSteamStill: 'Paredões de tufo vulcânico oferecem barreira natural sólida contra vendavais de areia vítrea e ancoragem firme para estacas de ferro.',
+      campRestAndSafetyGuards: 'Garante repouso longo calmo, seguro e protegido para toda a comitiva com regeneração total de pontos de vida.',
+      icon: '⛺🌋',
+      color: '#d97706'
+    };
+
+    if (dt === 'leather_baffle_air_lock_and_vitric_ash_cyclone_filter') {
+      tech = {
+        defenseTitle: 'Tenda de Eclusa com Cortinas Triplas e Filtro Ciclônico',
+        ignimbriteAnchorageAndAshSafety: 'Ante-sala de isolamento com tecidos pesados de couro engraxado que decanta 98% das partículas abrasivas de cinza vulcânica antes do dormitório.',
+        leatherDustAirlockAndSteamStill: 'Mantém o ar interno limpo e respirável, prevenindo crises de asfixia e permitindo que os aventureiros durmam sem máscaras faciais.',
+        campRestAndSafetyGuards: 'Permite que descansantes e sentinelas durmam e vigiem em ambiente protegido contra poeiras cáusticas.',
+        icon: '🛡️🚪',
+        color: '#78350f'
+      };
+    } else if (dt === 'condensing_ignimbrite_steam_catchment_still') {
+      tech = {
+        defenseTitle: 'Serpentina de Cobre para Condensação de Vapores de Fenda',
+        ignimbriteAnchorageAndAshSafety: 'Aparelho condensador montado sobre respiradouros quentes que capta vapor d\'água geotérmico e condensa água pura destilada em recipientes de cerâmica.',
+        leatherDustAirlockAndSteamStill: 'Produz 30 litros diários de água doce límpida e fresca sem queima de lenha, garantindo autonomia hídrica no cânion estéril.',
+        campRestAndSafetyGuards: 'Elimina carência hídrica e intoxicação mineral, preservando a saúde digestiva e o moral de todos os membros do grupo.',
+        icon: '⚗️💧',
+        color: '#0284c7'
+      };
+    } else if (dt === 'puncheon_treadway_over_fumarole_pipes') {
+      tech = {
+        defenseTitle: 'Passadiço Perimetral de Pranchas sobre Chaminés de Fumarolas',
+        ignimbriteAnchorageAndAshSafety: 'Passarela de tábuas grossas de carvalho que distribui o peso dos passos e cobre dutos ocos ao redor do posto de vigia.',
+        leatherDustAirlockAndSteamStill: 'Elimina totalmente perigos de quedas em fossos verticais ou queimaduras em bolsas de cinza quente durante a noite.',
+        campRestAndSafetyGuards: 'Garante passagens noturnas rápidas, seguras e com apoio firme para todas as sentinelas.',
+        icon: '🪵🚶',
+        color: '#10b981'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessWhiteSandCampinaranaHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'jungle').toLowerCase();
@@ -23996,6 +24103,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessIgnimbriteCanyonHazard: calcWildernessIgnimbriteCanyonHazard,
+    calcCampIgnimbriteCanyonStation: calcCampIgnimbriteCanyonStation,
     calcWildernessWhiteSandCampinaranaHazard: calcWildernessWhiteSandCampinaranaHazard,
     calcCampWhiteSandCampinaranaStation: calcCampWhiteSandCampinaranaStation,
     calcWildernessSubmergedPetrifiedForestHazard: calcWildernessSubmergedPetrifiedForestHazard,
