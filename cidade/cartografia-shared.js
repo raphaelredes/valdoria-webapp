@@ -12525,6 +12525,130 @@
     };
   }
 
+  // === calcWildernessSubterraneanGasAndChokeDampHazard (Gases Asfixiantes de Subsolo, Grisou e Galerias Hipóxicas - DMG p. 105, 110 / PHB p. 183) ===
+  function calcWildernessSubterraneanGasAndChokeDampHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'underdark').toLowerCase();
+    var ht = (hazardType || 'choke_damp_carbon_dioxide_pocket').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Bolsão de Gás Asfixiante e Depressão Hipóxica (Choke Damp)',
+      saveDC: 14,
+      saveType: 'Constituição',
+      subterraneanDamageAndSuffocation: 'Gás carbônico pesado e inodoro acumulado em poços baixos; extingue tochas instantaneamente e causa sufocamento (PHB p. 183).',
+      pioneerMitigation: 'Batedores avançam com tocha erguida na ponta de vara de 3 metros e testam depressões de solo antes de permitir descida da comitiva.',
+      rescueAndStabilization: 'Içamento imediato da vítima com cabos de escalada para galeria arejada e aplicação de respiração assistida.',
+      icon: '☠️💨',
+      color: '#64748b'
+    };
+
+    if (ht === 'fire_damp_methane_flammable_surge') {
+      hazard = {
+        hazardTitle: 'Grisou Inflamável e Bolsão de Metano Explosivo (Fire Damp)',
+        saveDC: 13,
+        saveType: 'Destreza',
+        subterraneanDamageAndSuffocation: 'Acúmulo de gás inflamável em veios de carvão; qualquer fagulha detona explosão de 3d6 de fogo e concussão em raio de 6 metros.',
+        pioneerMitigation: 'Avanço estrito com lanternas de segurança de malha de latão, apagando qualquer tocha de resina ou fogo exposto.',
+        rescueAndStabilization: 'Abafamento rápido com mantas umedecidas, dispersão de areia e tratamento de queimaduras com unguentos medicinais.',
+        icon: '💥🔥',
+        color: '#f97316'
+      };
+    } else if (ht === 'stink_damp_sulfur_rotten_egg_miasma') {
+      hazard = {
+        hazardTitle: 'Miasma Sulfuroso Tóxico e Névoa Corrosiva (Stink Damp)',
+        saveDC: 13,
+        saveType: 'Constituição',
+        subterraneanDamageAndSuffocation: 'Névoa fétida de sulfeto com odor de ovos podres; 2d6 de dano de veneno e condição Envenenado com náuseas severas.',
+        pioneerMitigation: 'Uso de máscaras de tecido com carvão ativado e vinagre, acelerando a passagem sem inalar o miasma estagnado.',
+        rescueAndStabilization: 'Desintoxicação com infusão de carvão medicinal e lavagem das vias aéreas com água potável morna.',
+        icon: '🤢🧪',
+        color: '#84cc16'
+      };
+    } else if (ht === 'afterdamp_toxic_carbon_monoxide_drift') {
+      hazard = {
+        hazardTitle: 'Névoa Traiçoeira de Monóxido e Ar Estagnado (After Damp)',
+        saveDC: 14,
+        saveType: 'Constituição',
+        subterraneanDamageAndSuffocation: 'Monóxido imperceptível que induz sonolência, fraqueza muscular e colapso respiratório sem qualquer aviso.',
+        pioneerMitigation: 'Monitoramento constante da lucidez do sentinela da vanguarda e observação de pequenos animais de alerta.',
+        rescueAndStabilization: 'Remoção forçada e urgente para corrente de ar fresco na boca da galeria e administração de tônicos revigorantes.',
+        icon: '💤🌫️',
+        color: '#a855f7'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      subterraneanDamageAndSuffocation: hazard.subterraneanDamageAndSuffocation,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 105, 110 (Perigos Subterrâneos e Gases) / PHB p. 183 (Sufocamento e Asfixia)'
+    };
+  }
+
+  // === calcCampUndergroundVentilationAndDavySafetyLamp (Lâmpadas de Segurança Davy, Ventilação Forçada e Gaiolas Sentinela - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampUndergroundVentilationAndDavySafetyLamp(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'underdark').toLowerCase();
+    var dt = (defenseType || 'davy_flame_safety_wire_gauze_lantern').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Lanterna de Segurança Tipo Davy com Malha Antichama de Latão',
+      ventilationAndGasNeutralization: 'Malha de latão dissipa o calor da chama interna impedindo a ignição de gases inflamáveis externos.',
+      warningSensorsAndToxinAlert: 'A chama ganha auréola azulada característica ao detectar grisou, concedendo aviso prévio de 5 minutos.',
+      campRestAndSafetyGuards: 'Permite iluminação segura no bivaque subterrâneo sem risco de detonação de bolsões gasosos vizinhos.',
+      icon: '🏮🛡️',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'bellows_and_canvas_air_duct_flue') {
+      tech = {
+        defenseTitle: 'Sistema de Ventilação com Folerola de Foles e Conduto de Lona',
+        ventilationAndGasNeutralization: 'Linha tubular de lona encerada bombeando ar fresco de chaminé natural para a câmara do acampamento.',
+        warningSensorsAndToxinAlert: 'Expulsa ativamente bolsas de ar estagnado e gases densos para longe da área de repouso.',
+        campRestAndSafetyGuards: 'Garante suprimento contínuo de oxigênio permitindo descanso longo completo sem penalidades de sufocamento.',
+        icon: '💨⛺',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'canary_cage_sentinel_early_warning') {
+      tech = {
+        defenseTitle: 'Gaiola Sentinela de Alerta com Pequena Ave / Roedor',
+        ventilationAndGasNeutralization: 'Sentinela biológico de resposta rápida para detecção de concentrações letais de monóxido inodoro.',
+        warningSensorsAndToxinAlert: 'Inquietação ou silêncio da criatura acorda as sentinelas de vigília antes do ar atingir níveis tóxicos para a comitiva.',
+        campRestAndSafetyGuards: 'Concede vantagem em testes para evitar surpresas por bolsões gasosos invasivos durante as vigílias noturnas.',
+        icon: '🐦🔔',
+        color: '#eab308'
+      };
+    } else if (dt === 'limestone_slaked_acid_gas_scrubber') {
+      tech = {
+        defenseTitle: 'Filtro Neutralizador de Leito de Cal e Carvão Ativo',
+        ventilationAndGasNeutralization: 'Barreira passiva de recipientes rasos com cal viva e carvão triturado que absorve vapores ácidos e sulfeto.',
+        warningSensorsAndToxinAlert: 'Reação com vapores ácidos efervesce suavemente alertando sobre o aumento de acidez no ar circundante.',
+        campRestAndSafetyGuards: 'Mantém o ar ao redor das mantas de dormir neutro, prevenindo corrosão de tecidos e queimação pulmonar.',
+        icon: '🪨🧪',
+        color: '#10b981'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      ventilationAndGasNeutralization: tech.ventilationAndGasNeutralization,
+      warningSensorsAndToxinAlert: tech.warningSensorsAndToxinAlert,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Acampamento Subterrâneo) / XGE p. 78 (Ferramentas de Mineração e Segurança)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -14310,6 +14434,8 @@
     calcCampFlexibleGuylineAndSeismicBufferPlatform: calcCampFlexibleGuylineAndSeismicBufferPlatform,
     calcWildernessCoastalReefAndTidalSurgeHazard: calcWildernessCoastalReefAndTidalSurgeHazard,
     calcCampTideLineClearanceAndAnchorGrapnel: calcCampTideLineClearanceAndAnchorGrapnel,
+    calcWildernessSubterraneanGasAndChokeDampHazard: calcWildernessSubterraneanGasAndChokeDampHazard,
+    calcCampUndergroundVentilationAndDavySafetyLamp: calcCampUndergroundVentilationAndDavySafetyLamp,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,

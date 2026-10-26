@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T04:44:04Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T04:47:27Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessSubterraneanGasAndChokeDampHazard) return '';
+        var bKey = (biome && biome.key) || 'underdark';
+        var gd = CartShared.calcWildernessSubterraneanGasAndChokeDampHazard(bKey, 'choke_damp_carbon_dioxide_pocket');
+        return '<div class="clp-subterranean-gas-card" style="margin:4px 0 6px;text-align:left;background:rgba(24,24,28,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(148,163,184,0.3);font-size:8px;color:#f1f5f9;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + gd.color + ';margin-bottom:2px;">' + gd.icon + ' ' + gd.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Perigo:</b> ' + gd.subterraneanDamageAndSuffocation + ' (CD ' + gd.saveDC + ' [' + gd.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#cbd5e1;margin-top:1px;">• <b>Prevenção:</b> ' + gd.pioneerMitigation + ' · <i>Estabilização: ' + gd.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampUndergroundVentilationAndDavySafetyLamp) return '';
+        var bKey = (biome && biome.key) || 'underdark';
+        var dl = CartShared.calcCampUndergroundVentilationAndDavySafetyLamp(bKey, 'davy_flame_safety_wire_gauze_lantern');
+        return '<div class="clp-davy-lamp-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,26,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + dl.color + ';margin-bottom:2px;">' + dl.icon + ' ' + dl.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Ventilação:</b> ' + dl.ventilationAndGasNeutralization + ' · <b>Detecção:</b> ' + dl.warningSensorsAndToxinAlert + '</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Segurança no Sono:</b> ' + dl.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){
