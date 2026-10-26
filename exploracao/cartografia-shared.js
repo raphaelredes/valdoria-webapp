@@ -10789,6 +10789,130 @@
     };
   }
 
+  // === calcWildernessCausticBogAndMiasmaHazard (Pântanos Ácidos, Turfeiras Cáusticas e Miasma - DMG p. 110 / PHB p. 182-183) ===
+  function calcWildernessCausticBogAndMiasmaHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'corrosive_acidic_peat_sink').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Turfeira Ácida Cáustica com Lodo Sulfuroso Corrosivo',
+      saveDC: 14,
+      saveType: 'Destreza',
+      acidicImpactAndTrapping: 'Afundamento até os joelhos; 2d6 de dano de ácido por turno e velocidade 0 (escape CD 14 Força [Atletismo]).',
+      pioneerMitigation: 'Batedores usando varas longas de sondagem para testar a consistência da turfa antes de apoiar o peso do corpo.',
+      escapeAndCleansing: 'Lavar a pele com água corrente limpa e neutralizar tiras de couro com cinza fina de fogueira.',
+      icon: '🧪🕳️',
+      color: '#84cc16'
+    };
+
+    if (ht === 'stagnant_rotmire_gas_pocket') {
+      hazard = {
+        hazardTitle: 'Bolsão de Gás Mefítico Volátil de Pântano Podre',
+        saveDC: 13,
+        saveType: 'Destreza',
+        acidicImpactAndTrapping: 'Fagulhas ou chamas abertas (tochas) detonam explosão de 3d6 de fogo em raio de 10 pés (metade no sucesso).',
+        pioneerMitigation: 'Utilizar lanternas fechadas encapadas com vidro ou pedras luminescentes mágicas sem chama viva.',
+        escapeAndCleansing: 'Avançar rapidamente por áreas bem ventiladas a favor do vento para evitar acúmulos gasosos.',
+        icon: '💥🌫️',
+        color: '#f97316'
+      };
+    } else if (ht === 'blood_leech_infested_shallows') {
+      hazard = {
+        hazardTitle: 'Vaus Pantanosos Infestados por Sanguessugas Carniceiras',
+        saveDC: 13,
+        saveType: 'Constituição',
+        acidicImpactAndTrapping: 'Fixação parasitária nas pernas; perda de 1 Dado de Vida ou 1d6 de dano perfurante por hemorragia continuada.',
+        pioneerMitigation: 'Pernilheiras de couro apertadas e untadas com sebo animal espesso repelem a fixação dos parasitas.',
+        escapeAndCleansing: 'Aplicar sal grosso, vinagre ou brasa incandescente nas sanguessugas para desprendimento seguro.',
+        icon: '🪱🩸',
+        color: '#ef4444'
+      };
+    } else if (ht === 'quagmire_deep_crust_false_ground') {
+      hazard = {
+        hazardTitle: 'Falsa Crosta Musgosa Flutuante sobre Poço Lodoso',
+        saveDC: 13,
+        saveType: 'Destreza',
+        acidicImpactAndTrapping: 'Rompimento da esteira vegetal; queda em água lodosa profunda de 4 metros com risco de sufocamento (PHB p. 183).',
+        pioneerMitigation: 'Marcha em cordada de 3 metros ancorada em raízes grossas de mangue impede a submersão total do viajante.',
+        escapeAndCleansing: 'Companheiros usam alavanca de galho resistente para resgatar o membro acidentado da lama densa.',
+        icon: '🌿🕳️',
+        color: '#10b981'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      acidicImpactAndTrapping: hazard.acidicImpactAndTrapping,
+      pioneerMitigation: hazard.pioneerMitigation,
+      escapeAndCleansing: hazard.escapeAndCleansing,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110 (Pântanos, Lodaçais e Terreno Difícil) / PHB p. 182-183 (Dano de Ácido e Condições)'
+    };
+  }
+
+  // === calcCampBootDryingAndFootwearCare (Secagem de Calçados, Cuidados com Couro e Pé-de-Trincheira - DMG p. 111-112 / XGE p. 78) ===
+  function calcCampBootDryingAndFootwearCare(biomeKey, careType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ct = (careType || 'heated_pebble_boot_drying').toLowerCase();
+
+    var care = {
+      careTitle: 'Secagem Interna de Botas com Seixos Aquecidos em Cinzas',
+      dryingEfficiency: 'Calor residual constante absorve 100% da umidade interna do couro em 2 horas sem ressecar as costuras.',
+      leatherPreservation: 'Evita rachaduras, encolhimento e endurecimento do couro causados pela exposição direta a chamas abertas.',
+      trenchFootPrevention: 'Garante que os aventureiros comecem a marcha matinal com calçados secos, prevenindo podridão de trincheira.',
+      icon: '🪨🥾',
+      color: '#ca8a04'
+    };
+
+    if (ct === 'tallow_and_beeswax_waterproofing') {
+      care = {
+        careTitle: 'Impermeabilização com Sebo de Carneiro e Cera de Abelha',
+        dryingEfficiency: 'Aplicação a quente nas costuras e linguetas de couro criando camada repelente a lama e águas ácidas.',
+        leatherPreservation: 'Dobra a durabilidade das solas de montaria em terrenos pedregosos ou pantanosos abrasivos.',
+        trenchFootPrevention: 'Impede a infiltração de umidade durante travessias rasas de vaus e atoleiros na jornada.',
+        icon: '🕯️🛡️',
+        color: '#eab308'
+      };
+    } else if (ct === 'suspended_drying_tripod_rack') {
+      care = {
+        careTitle: 'Tripé de Varal Elevado a Sotavento da Fogueira',
+        dryingEfficiency: 'Circulação de ar morno contínuo secando meias de lã, panos de pé e mantos pesados sem queimar.',
+        leatherPreservation: 'Mantém as peças afastadas do chão úmido e fora do alcance de fagulhas vivas da lenha.',
+        trenchFootPrevention: 'Meias secas e higienizadas reduzem o atrito nos calcanhares, impedindo bolhas incapacitantes.',
+        icon: '🪵🧺',
+        color: '#f59e0b'
+      };
+    } else if (ct === 'sulfur_and_tallow_foot_powder') {
+      care = {
+        careTitle: 'Higienização de Pés com Pó de Enxofre e Amido Secante',
+        dryingEfficiency: 'Ação antifúngica e antisséptica imediata eliminando micoses e escoriações provocadas por lodo salobro.',
+        leatherPreservation: 'Evita proliferação de fungos e mofo nas palmilhas de feltro durante longas expedições de semanas.',
+        trenchFootPrevention: 'Concede alívio tático e restauração de conforto; aventureiros acordam sem penalidades de marcha.',
+        icon: '✨🦶',
+        color: '#38bdf8'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      careType: ct,
+      careTitle: care.careTitle,
+      dryingEfficiency: care.dryingEfficiency,
+      leatherPreservation: care.leatherPreservation,
+      trenchFootPrevention: care.trenchFootPrevention,
+      icon: care.icon,
+      color: care.color,
+      dndRef: 'DMG p. 111-112 (Acampamento Seguro e Higiene de Marcha) / XGE p. 78 (Manutenção de Equipamento)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -12548,6 +12672,8 @@
     calcCampDrainageTrenchAndRunoffDiversion: calcCampDrainageTrenchAndRunoffDiversion,
     calcWildernessGaleForceWindsAndFlightHazard: calcWildernessGaleForceWindsAndFlightHazard,
     calcCampWindbreakPalisadeAndGuylineBracing: calcCampWindbreakPalisadeAndGuylineBracing,
+    calcWildernessCausticBogAndMiasmaHazard: calcWildernessCausticBogAndMiasmaHazard,
+    calcCampBootDryingAndFootwearCare: calcCampBootDryingAndFootwearCare,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
