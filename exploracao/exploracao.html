@@ -95437,9 +95437,18 @@ function _xcartFocusProvince(provId){
     c.classList.toggle('active', c.getAttribute('data-prov') === provId);
   });
   var activeChip = document.querySelector('#xcart-prov-bar .cart-prov-chip[data-prov="' + provId + '"]');
-  if (activeChip && typeof activeChip.scrollIntoView === 'function') {
-    try { activeChip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch(_) {}
+  var pBar = document.getElementById('xcart-prov-bar');
+  if (activeChip && pBar) {
+    try {
+      var chipLeft = activeChip.offsetLeft;
+      var chipWidth = activeChip.offsetWidth;
+      var barWidth = pBar.clientWidth;
+      pBar.scrollTo({ left: chipLeft - (barWidth / 2) + (chipWidth / 2), behavior: 'smooth' });
+    } catch(_) {}
   }
+  if (window.scrollX !== 0 || window.scrollY !== 0) window.scrollTo(0, 0);
+  var _appEl = document.getElementById('app');
+  if (_appEl && _appEl.scrollLeft !== 0) _appEl.scrollLeft = 0;
 }
 
 function _xcartCenterOnPlayer(){
@@ -106736,6 +106745,14 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
 
 #cartography-overlay.xcart-v2.visible { display: flex; }
 
+#cartography-overlay.xcart-v2 {
+  position: absolute;
+  inset: 0;
+  z-index: 90;
+  overflow: hidden !important;
+  overflow-x: hidden !important;
+}
+
 .xcart-wrapper {
   display: flex;
   flex-direction: column;
@@ -106746,6 +106763,9 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
   gap: 4px;
   padding: 4px;
   box-sizing: border-box;
+  overflow: hidden !important;
+  overflow-x: hidden !important;
+  position: relative;
 }
 
 .xcart-header {
@@ -106759,10 +106779,18 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
 .xcart-header h2 {
   font-family: 'Cinzel', serif;
   color: #c4953a;
-  font-size: 12px;
-  letter-spacing: 0.1em;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   margin: 0 0 3px;
   text-shadow: 0 0 12px rgba(196,149,58,0.3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  max-width: 100%;
 }
 
 .cart-prov-bar-wrap {

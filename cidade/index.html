@@ -5233,18 +5233,36 @@ LOG SINK (Fase 7):
     body.state-cart #footer-restore { display: none !important; }
     /* cart-controls (zoom +/-/⌂) sobem pra não colidir com Voltar (bottom:6px+pad) */
     body.state-cart .cart-controls { bottom: 48px !important; }
+    body.state-cart {
+      overflow: hidden !important;
+      overflow-x: hidden !important;
+      position: relative;
+    }
+    body.state-cart #app {
+      overflow: hidden !important;
+      overflow-x: hidden !important;
+      max-width: 100% !important;
+    }
     body.state-cart #content {
       position: absolute; inset: 0;
       z-index: 50;
       padding: 0;
+      overflow: hidden !important;
+      overflow-x: hidden !important;
+      width: 100% !important;
+      max-width: 100% !important;
     }
     .cart-wrapper {
       display: flex;
       flex-direction: column;
       height: 100%;
       width: 100%;
+      max-width: 100% !important;
       gap: 0;
       background: #000;  /* P-mapa sessão #73 (user): fundo PRETO fora do mapa */
+      overflow: hidden !important;
+      overflow-x: hidden !important;
+      position: relative;
     }
     /* === DESIGN PROFISSIONAL CARTOGRAFIA AAA (Ordem do Usuário 2026-10) === */
     .cart-header {
@@ -5259,13 +5277,21 @@ LOG SINK (Fase 7):
     }
     .cart-header h2 {
       font-family: 'Cinzel', serif;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
-      letter-spacing: 1.5px;
+      letter-spacing: 1px;
       color: #f4d49a;
       text-shadow: 0 2px 8px rgba(0,0,0,0.9), 0 0 10px rgba(196, 149, 58, 0.4);
       margin: 0 0 3px;
       text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      max-width: 100%;
     }
     .cart-prov-bar-wrap {
       position: relative;
@@ -71717,11 +71743,20 @@ function _cartFocusProvince(provId){
     c.classList.toggle('active', c.getAttribute('data-prov') === provId);
   });
   var activeChip = document.querySelector('.cart-prov-chip[data-prov="' + provId + '"]');
-  if (activeChip && typeof activeChip.scrollIntoView === 'function') {
+  var pBar = document.getElementById('cart-prov-bar');
+  if (activeChip && pBar) {
     try {
-      activeChip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      var chipLeft = activeChip.offsetLeft;
+      var chipWidth = activeChip.offsetWidth;
+      var barWidth = pBar.clientWidth;
+      pBar.scrollTo({ left: chipLeft - (barWidth / 2) + (chipWidth / 2), behavior: 'smooth' });
     } catch(_) {}
   }
+  if (window.scrollX !== 0 || window.scrollY !== 0) window.scrollTo(0, 0);
+  var _appEl = document.getElementById('app');
+  if (_appEl && _appEl.scrollLeft !== 0) _appEl.scrollLeft = 0;
+  var _cntEl = document.getElementById('content');
+  if (_cntEl && _cntEl.scrollLeft !== 0) _cntEl.scrollLeft = 0;
 }
 
 function _cartCenterOnPlayer(){
@@ -72052,15 +72087,22 @@ function _cartShowTooltip(b, mx, my){
   var tipH = tip.offsetHeight || 60;
   
   var left = mx + 14;
-  if (left + tipW > frameRect.width - 10) {
+  if (left + tipW > frameRect.width - 8) {
     left = mx - tipW - 14;
   }
+  if (left < 8) left = 8;
+  if (left + tipW > frameRect.width - 8) {
+    left = Math.max(8, frameRect.width - tipW - 8);
+  }
   var top = my - tipH - 10;
-  if (top < 10) {
+  if (top < 8) {
     top = my + 20;
   }
-  tip.style.left = Math.max(8, left) + 'px';
-  tip.style.top = Math.max(8, top) + 'px';
+  if (top + tipH > frameRect.height - 8) {
+    top = Math.max(8, frameRect.height - tipH - 8);
+  }
+  tip.style.left = left + 'px';
+  tip.style.top = top + 'px';
 }
 function _cartHideTooltip(){
   var tip = document.getElementById('cart-tooltip');

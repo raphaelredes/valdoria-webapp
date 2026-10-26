@@ -4389,14 +4389,14 @@
     ctx.lineTo(bDist, bDist - arm);
     ctx.stroke();
 
-    // Destino Badge abaixo do nó
+    // Destino Badge acima do nó (evita colisão com o pill de nome/nível abaixo)
     ctx.font = '700 8.5px Cinzel, serif';
     ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
+    ctx.textBaseline = 'bottom';
     ctx.fillStyle = '#ffd700';
     ctx.shadowColor = 'rgba(0,0,0,0.9)';
     ctx.shadowBlur = 4;
-    ctx.fillText('DESTINO', 0, r2 + 6);
+    ctx.fillText('✦ DESTINO ✦', 0, -bDist - 4);
 
     ctx.restore();
   }
@@ -11095,14 +11095,16 @@
           ? '⭐ Território 100% Cartografado'
           : '🗺️ Mapeado: ' + discProvLocs + '/' + totalProvLocs + ' Locais (' + provPct + '%)';
 
+        var provTitleFont = (_S < 380) ? '700 11px Cinzel, serif' : '700 12.5px Cinzel, serif';
+        var provSubFont = (_S < 380) ? 'italic 9px Georgia, serif' : 'italic 10px Georgia, serif';
         ctx.save();
         ctx.textAlign = 'center';
-        ctx.font = '700 13px Cinzel, serif';
+        ctx.font = provTitleFont;
         ctx.fillStyle = (provPct >= 100) ? '#fde047' : '#f4d896';
         ctx.shadowColor = 'rgba(0,0,0,0.85)';
         ctx.shadowBlur = 6;
         ctx.fillText((curProv.icon || '📍') + ' ' + curProv.name.toUpperCase(), _S / 2, 28);
-        ctx.font = 'italic 10px Georgia, serif';
+        ctx.font = provSubFont;
         ctx.fillStyle = (provPct >= 100) ? '#fde047' : '#d2be90';
         ctx.fillText(provProgressText, _S / 2, 42);
         ctx.restore();
@@ -11182,14 +11184,16 @@
           ? '⭐ Continente Totalmente Mapeado (100%)'
           : '🗺️ Atlas Geral: ' + discWorld + '/' + totalWorld + ' Locais Conhecidos (' + worldPct + '%)';
 
+        var worldTitleFont = (_S < 380) ? '700 11px Cinzel, serif' : '700 12.5px Cinzel, serif';
+        var worldSubFont = (_S < 380) ? 'italic 9px Georgia, serif' : 'italic 10px Georgia, serif';
         ctx.save();
         ctx.textAlign = 'center';
-        ctx.font = '700 13px Cinzel, serif';
+        ctx.font = worldTitleFont;
         ctx.fillStyle = (worldPct >= 100) ? '#fde047' : '#f4d896';
         ctx.shadowColor = 'rgba(0,0,0,0.85)';
         ctx.shadowBlur = 6;
         ctx.fillText('🌍 CONTINENTE DE VALDÓRIA', _S / 2, 28);
-        ctx.font = 'italic 10px Georgia, serif';
+        ctx.font = worldSubFont;
         ctx.fillStyle = (worldPct >= 100) ? '#fde047' : '#d2be90';
         ctx.fillText(worldProgressText, _S / 2, 42);
         ctx.restore();
