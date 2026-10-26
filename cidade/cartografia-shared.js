@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 287: VENTOS CATABÁTICOS DE FÖHN E DESSECAMENTO DE SOTAVENTO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessFoehnWindHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var ht = (hazardType || 'adiabatic_superflash_desiccation').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Dessecamento Relâmpago por Compressão Adiabática',
+      saveDC: 15,
+      saveType: 'Constituição',
+      windRisk: 'O vento orográfico descende abruptamente pelo flanco de sotavento a 120 km/h, elevando a temperatura em 22°C em minutos e derrubando a umidade relativa para menos de 7%; a evaporação celular violenta drena cantis e inflige 3d6 de dano de fogo/desidratação, impondo 1 nível de exaustão caso falhe na salvaguarda de Constituição CD 15 (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores monitorando a formação do muro de nuvens de barlavento (Föhn-Wall) e racionando sais eletrolíticos com imersão prévia de odres de água em sacas de lã umedecida (Sobrevivência ou Natureza CD 14).',
+      rescueAndStabilization: 'Hidratação lenta fracionada com caldos salinos frios, repouso sob lonas sombreadas e proteção ocular contra evaporação de fluidos (Medicina CD 13).',
+      icon: '💨',
+      color: '#f97316'
+    };
+
+    if (ht === 'foehn_firestorm_conflagration') {
+      hazard.hazardTitle = 'Conflagração Catabática e Tempestade de Fogo Espontânea';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Destreza';
+      hazard.windRisk = 'O ar superaquecido e ressecado sopra como fole de fornalha sobre os capins e bosques secos do sopé da montanha; fagulhas minerais de atrito inflamam uma frente de chamas de 5 quilômetros que corre a 80 km/h, exigindo salvaguarda de Destreza CD 15 para transpor a linha de fogo ou sofrer 4d6 de dano de fogo mais 2d6 de concussão por queda de árvores incandescentes (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Abertura imediata de aceiros com foices e lançamento de contra-fogo controlado para consumir o combustível a barlavento da posição da comitiva (Sobrevivência CD 14).';
+      hazard.rescueAndStabilization = 'Extinção de brasas com mantas pesadas de lã crua e aplicação de pastas cicatrizantes de babosa e óleo de rícino (Medicina CD 13).';
+    } else if (ht === 'lee_slope_shear_blast') {
+      hazard.hazardTitle = 'Rajadas Descendentes de Cisalhamento e Vórtice de Sotavento';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.windRisk = 'Turbilhões em rotor descem as escarpas em vórtices oscilantes com pressão dinâmica de 140 km/h, arremessando aventureiros contra esporões rochosos e arrancando arreios de montarias; salvaguarda de Força CD 14 para não ser derrubado e arrastado 40 pés com 3d6 de concussão (PHB p. 183; DMG p. 110).';
+      hazard.pioneerMitigation = 'Ancoragem imediata com estacas de aço fincadas em juntas de rocha e progressão de gatinhas rastejando junto à encosta (Atletismo ou Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Uso de talas rígidas para conter fraturas articulares e imobilização preventiva de pescoço e coluna contra traumas cinéticos (Medicina CD 13).';
+    } else if (ht === 'sublimation_snow_wall_collapse') {
+      hazard.hazardTitle = 'Sublimação Catabática e Colapso de Cornijas de Neve';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.windRisk = 'Na transição dos campos de neve altos, o calor adiabático derrete e sublima as raízes de sustentação de cornijas e placas de gelo em minutos; blocos de centenas de toneladas desmoronam em avalanche de fusão mista com 3d10 de concussão sobre a trilha (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Inspeção ótica de fraturas basais nas cornijas com luneta e recuo acelerado para espigões rochosos convexos (Percepção ou Natureza CD 13).';
+      hazard.rescueAndStabilization = 'Desenterro rápido com pás leves de acampamento e desobstrução de orifícios respiratórios (Atletismo CD 14 ou Medicina CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampFoehnWindStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var dt = (defenseType || 'lee_shadow_alcove_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Reentrância Sob Parede de Sotavento',
+      windAndCampSafety: 'O bivaque é montado em uma caverna rasa ou reentrância côncava sob o paredão da escarpa de sotavento; a rocha suspensa deflete o jato de vento descendente por cima do vão, mantendo as tendas e o fogo de acampamento em calmaria estável (DMG p. 111).',
+      windAndWatch: 'A posição protegida impede que faíscas sejam sopradas para a estepe e garante campo visual desobstruído sobre o vale sem ofuscamento por turbilhões de poeira e cinzas, concedendo vantagem em testes de Percepção para a sentinela.',
+      campRestAndSafetyGuards: 'Descanso tranquilo e resguardado do estresse térmico, permitindo recuperação plena de vigor para toda a comitiva.',
+      icon: '⛺',
+      color: '#f97316'
+    };
+
+    if (dt === 'adiabatic_dew_trap_cistern') {
+      defense.defenseTitle = 'Armadilha Térmica de Condensação e Cisterna Evaporativa';
+      defense.windAndCampSafety = 'Telas e mantas de condensação com pedras decantadas montadas contra as primeiras correntes orográficas frescas capturam a umidade residual antes do dessecamento total (PHB p. 150).';
+      defense.windAndWatch = 'Assegura reserva de até 35 litros de água fresca resfriada para hidratação preventiva do grupo e alívio do calor extremo, restaurando +1 dado de vida adicional aos aventureiros.';
+      defense.campRestAndSafetyGuards = 'Manutenção constante dos níveis hídricos e proteção contra insolação ou choque térmico orográfico.';
+    } else if (dt === 'windbreak_baffle_stone_parapet') {
+      defense.defenseTitle = 'Parapeito Defletor Aerodinâmico de Pedra em Cunha';
+      defense.windAndCampSafety = 'Blocos pesados de granito ou gnaisse são empilhados em formato de cunha apontando para a crista do monte, criando uma rampa defletora que conduz os ventos catabáticos de 120 km/h por cima do abrigo (PHB p. 185).';
+      defense.windAndWatch = 'Garante cobertura três-quartos (+5 na CA e +5 em salvaguardas de Destreza) contra estilhaços de galhos e pedregulhos e impede desabamento das tendas.';
+      defense.campRestAndSafetyGuards = 'Bastião inabalável contra tempestades de vento catabático extremo e impactos mecânicos da encosta.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 286: VALES SECOS CÁRSTICOS E SUMIDOUROS CÉLERE DE RIOS CEGOS (D&D 5e)
   // =========================================================================
 
@@ -37071,6 +37146,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessFoehnWindHazard: calcWildernessFoehnWindHazard,
+    calcCampFoehnWindStation: calcCampFoehnWindStation,
     calcWildernessKarstDryValleyHazard: calcWildernessKarstDryValleyHazard,
     calcCampKarstDryValleyStation: calcCampKarstDryValleyStation,
     calcWildernessSubglacialTuyaHazard: calcWildernessSubglacialTuyaHazard,

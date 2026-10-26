@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T22:48:40Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T22:52:08Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessFoehnWindHazard) return '';
+        var bKey = (biome && biome.key) || 'mountains';
+        var fw = CartShared.calcWildernessFoehnWindHazard(bKey, 'adiabatic_superflash_desiccation');
+        return '<div class="clp-foehn-wind-card" style="margin:4px 0 6px;text-align:left;background:rgba(36,20,10,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(249,115,22,0.35);font-size:8px;color:#fff7ed;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + fw.color + ';margin-bottom:2px;">' + fw.icon + ' ' + fw.hazardTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Vento Catabático de Föhn e Dessecamento:</b> ' + fw.windRisk + ' (CD ' + fw.saveDC + ' [' + fw.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#ffedd5;margin-top:1px;">• <b>Mitigação:</b> ' + fw.pioneerMitigation + ' · <i>Estabilização: ' + fw.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampFoehnWindStation) return '';
+        var bKey = (biome && biome.key) || 'mountains';
+        var fw = CartShared.calcCampFoehnWindStation(bKey, 'lee_shadow_alcove_bivouac');
+        return '<div class="clp-foehn-wind-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,16,8,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(234,88,12,0.3);font-size:8px;color:#fff7ed;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + fw.color + ';margin-bottom:2px;">' + fw.icon + ' ' + fw.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>' 
+          + '  <div>• <b>Bivaque em Vento Catabático:</b> ' + fw.windAndCampSafety + ' · <b>Defesa:</b> ' + fw.windAndWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#ffedd5;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + fw.campRestAndSafetyGuards + '</div>' 
           + '</div>';
       })()
     + (function(){
