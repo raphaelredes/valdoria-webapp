@@ -15997,6 +15997,130 @@
     };
   }
 
+  // === calcWildernessStiltRootMangroveHazard (Manguezais de Raízes Zancudas, Canais de Vasa e Cracas - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessStiltRootMangroveHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'stilt_root_tangle_oyster_laceration').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Emalhado de Raízes Zancudas e Lâminas de Cracas',
+      saveDC: 14,
+      saveType: 'Destreza',
+      stiltRootMangroveRiskAndTidalMud: 'Emaranhado de raízes aéreas arqueadas recobertas por bancos de ostras e cracas pontiagudas; quedas repentinas causando 2d6 de corte e risco de infecção séptica marinha (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores usam perneiras de couro curtido com tanino e facões de mato pesados abrindo clareiras de avanço.',
+      rescueAndStabilization: 'Desvencilhamento com alavancas de bambu, cauterização suave de cortes com tintura de algas marinhas e sutura.',
+      icon: '🪵🔪',
+      color: '#15803d'
+    };
+
+    if (ht === 'tidal_mud_channel_quagmire_sink') {
+      hazard = {
+        hazardTitle: 'Atoleiro de Vasa em Canal de Refluxo de Maré',
+        saveDC: 14,
+        saveType: 'Força',
+        stiltRootMangroveRiskAndTidalMud: 'Depressão lodosa oculta por água barrenta com lodo anaeróbico que suga membros até o tronco; risco iminente de afogamento na virada da preamar.',
+        pioneerMitigation: 'Avanço com varas de sondagem de bambu testando o fundo lodoso e passos sobre as curvas das raízes mestras.',
+        rescueAndStabilization: 'Lançamento de pranchas leves de cedro para distribuição de peso e içamento com corda ancorada em tronco.',
+        icon: '🌊🕳️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'blind_estuary_crocodilian_ambush') {
+      hazard = {
+        hazardTitle: 'Bote de Predador Estuarino Camuflado no Lodo',
+        saveDC: 14,
+        saveType: 'Percepção',
+        stiltRootMangroveRiskAndTidalMud: 'Répteis e predadores anfíbios imóveis sob película de lama marinha; ataque surpresa causando 2d8 de perfuração e manobra de arrasto.',
+        pioneerMitigation: 'Golpes ritmados na água com varas de bambu para afugentar predadores antes da passagem da comitiva.',
+        rescueAndStabilization: 'Disparo de tochas acesas na mandíbula do agressor e estancamento de hemorragias com compressas de feltro.',
+        icon: '🐊🩸',
+        color: '#dc2626'
+      };
+    } else if (ht === 'stagnant_mangrove_miasma_fever') {
+      hazard = {
+        hazardTitle: 'Miasma de Decomposição Orgânica e Nuvens de Maruins',
+        saveDC: 13,
+        saveType: 'Constituição',
+        stiltRootMangroveRiskAndTidalMud: 'Gás sulfuroso pesado preso sob o dossel de mangue associado a enxames de mosquitos flebótomos; náusea debilitante e febre estuarina.',
+        pioneerMitigation: 'Uso de máscaras de gaze embebidas em vinagre aromático e unção da pele com óleo de copaíba.',
+        rescueAndStabilization: 'Consumo de infusão amarga de casca de quina e repouso elevado em rede ventilada.',
+        icon: '🦟☣️',
+        color: '#9333ea'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      stiltRootMangroveRiskAndTidalMud: hazard.stiltRootMangroveRiskAndTidalMud,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Manguezais e Terreno Difícil) / PHB p. 182-183 (Marcha Estuarina) / XGE p. 78-83 (Herborismo)'
+    };
+  }
+
+  // === calcCampStiltRootMangrovePlatformAndDistillerStation (Decks em Raízes, Passadiços e Destiladores - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampStiltRootMangrovePlatformAndDistillerStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'stilt_root_suspended_deck_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Deck Suspenso em Arco de Raízes de Mangue-Vermelho',
+      mangroveAnchorageAndTidalSafety: 'Estrado desmontável de bambu amarrado a 2,5 metros de altura sobre as curvas das raízes aéreas de mangue; isolado de inundações marinhas.',
+      rootShieldingAndCampSecurity: 'Mantém as esteiras, mochilas e fogueiras portáteis completamente a salvo da lama fétida e da maré cheia.',
+      campRestAndSafetyGuards: 'Permite sono longo tranquilo e seguro para a comitiva com sentinelas vigiando canais aquáticos navegáveis.',
+      icon: '🪵⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'bamboo_catwalk_with_guide_ropes') {
+      tech = {
+        defenseTitle: 'Passadiço Aéreo de Bambu com Cordas-Guia',
+        mangroveAnchorageAndTidalSafety: 'Pontes flexíveis suspensas entre troncos de mangue que permitem circulação contínua sem pisar no lodo.',
+        rootShieldingAndCampSecurity: 'Garante rotas de fuga rápidas e deslocamento seguro de sentinelas mesmo durante o pico da preamar.',
+        campRestAndSafetyGuards: 'Conecta todos os pontos do acampamento e preserva a integridade de equipamentos de vigília noturna.',
+        icon: '🪜🛡️',
+        color: '#0284c7'
+      };
+    } else if (dt === 'solar_conical_distillation_still') {
+      tech = {
+        defenseTitle: 'Destilador Solar Cônico para Água Salobra de Estuário',
+        mangroveAnchorageAndTidalSafety: 'Armação cônica de lona translúcida montada sobre tacho de água salobra que recolhe condensação pura e sem sal.',
+        rootShieldingAndCampSecurity: 'Produz 6 litros de água potável fresca por dia diretamente a partir da lama marinha.',
+        campRestAndSafetyGuards: 'Garante autossuficiência hídrica completa para os aventureiros em ambientes estuarinos salgados.',
+        icon: '💧🏺',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'mangrove_tannin_smoke_torch') {
+      tech = {
+        defenseTitle: 'Tocha Defumadora com Tanino e Resina de Mangue-Preto',
+        mangroveAnchorageAndTidalSafety: 'Braseiro cerâmico suspenso queimando nós de madeira tânica que dispersa fumaça densa aromática e insetífuga.',
+        rootShieldingAndCampSecurity: 'Expele integralmente mosquitos transmissores de febres e protege os animais de montaria de ferroadas.',
+        campRestAndSafetyGuards: 'Assegura descanso reparador e sem coceiras ou alergias para todos os membros do grupo.',
+        icon: '💨🪵',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      mangroveAnchorageAndTidalSafety: tech.mangroveAnchorageAndTidalSafety,
+      rootShieldingAndCampSecurity: tech.rootShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques Suspensos e Coleta de Água) / PHB p. 150 (Kits de Aventureiro) / XGE p. 78-83 (Carpintaria e Herborismo)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -17838,6 +17962,8 @@
     calcCampKarstPavementHoneycombShelterAndFilterStation: calcCampKarstPavementHoneycombShelterAndFilterStation,
     calcWildernessCoastalDuneAndSingingSandHazard: calcWildernessCoastalDuneAndSingingSandHazard,
     calcCampCoastalDuneFascineBarrierAndDewStation: calcCampCoastalDuneFascineBarrierAndDewStation,
+    calcWildernessStiltRootMangroveHazard: calcWildernessStiltRootMangroveHazard,
+    calcCampStiltRootMangrovePlatformAndDistillerStation: calcCampStiltRootMangrovePlatformAndDistillerStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,

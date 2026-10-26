@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessStiltRootMangroveHazard) return '';
+        var bKey = (biome && biome.key) || 'swamp';
+        var mg = CartShared.calcWildernessStiltRootMangroveHazard(bKey, 'stilt_root_tangle_oyster_laceration');
+        return '<div class="clp-mangrove-stilt-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,32,24,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(21,128,61,0.3);font-size:8px;color:#dcfce7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + mg.color + ';margin-bottom:2px;">' + mg.icon + ' ' + mg.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Raízes Zancudas e Vasa:</b> ' + mg.stiltRootMangroveRiskAndTidalMud + ' (CD ' + mg.saveDC + ' [' + mg.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#86efac;margin-top:1px;">• <b>Mitigação:</b> ' + mg.pioneerMitigation + ' · <i>Estabilização: ' + mg.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampStiltRootMangrovePlatformAndDistillerStation) return '';
+        var bKey = (biome && biome.key) || 'swamp';
+        var mp = CartShared.calcCampStiltRootMangrovePlatformAndDistillerStation(bKey, 'stilt_root_suspended_deck_bivouac');
+        return '<div class="clp-mangrove-deck-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,36,28,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#ecfdf5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + mp.color + ';margin-bottom:2px;">' + mp.icon + ' ' + mp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Deck Suspenso:</b> ' + mp.mangroveAnchorageAndTidalSafety + ' · <b>Proteção:</b> ' + mp.rootShieldingAndCampSecurity + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + mp.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessCoastalDuneAndSingingSandHazard) return '';
         var bKey = (biome && biome.key) || 'coastal';
         var cd = CartShared.calcWildernessCoastalDuneAndSingingSandHazard(bKey, 'barchan_slipface_slump_avalanche');
