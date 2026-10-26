@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 279: TÔMBOLOS ARENOSOS, ILHAS DE MARÉ E CALÇADAS INTERMAREAIS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessCoastalTomboloHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'bimodal_wave_clash_causeway_sweep').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Choque de Ondas Bimodais e Varredura da Calçada do Tômbolo',
+      saveDC: 15,
+      saveType: 'Força',
+      tomboloRisk: 'O tômbolo de areia e cascalho é atingido simultaneamente por trens de ondas que contornam a ilha por direções opostas; na virada da preamar, a convergência gera vagalhões cruzados de 3 metros que varrem a calçada, exigindo salvaguarda de Força CD 15 para fincar pontões de apoio ou ser arrancado da ponte arenosa e arrastado para correntes oceânicas sofrendo 3d8 de concussão contra blocos de recife com risco iminente de afogamento (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores consultando tábuas de maré lunares e fixando estacas de marégrafo na calçada para iniciar a travessia no estofo exato da baixamar (Sobrevivência ou Veículos Aquáticos CD 14).',
+      rescueAndStabilization: 'Arremesso de laços de resgate flutuantes com nós de boia e ancoragem em cabos estáticos de terra firme (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🌊',
+      color: '#0284c7'
+    };
+
+    if (ht === 'saturated_sand_liquefaction_quicksand') {
+      hazard.hazardTitle = 'Liquefação Saturada e Areia Movediça Intermareal';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.tomboloRisk = 'A elevação do lençol freático costeiro com a maré enchente pressuriza os estratos de areia fina do tômbolo, convertendo o piso aparentemente firme em uma armadilha movediça semi-líquida; aventureiros e mulas de carga afundam rapidamente até os quadris, exigindo salvaguarda de Destreza CD 14 ou ficarem Impossibilitados de se Mover enquanto a água do mar sobe sobre suas cabeças (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Progressão sobre pranchas de madeira distribuídas em fila indiana e sondagem com bordões graduados (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Colocação de alavancas horizontais sob as axilas para distribuir o peso e tração com talha de cordas (Atletismo CD 14).';
+    } else if (ht === 'tidal_bore_estuarine_pinch_surge') {
+      hazard.hazardTitle = 'Vagarão de Maré em Garganta Estreita do Tômbolo';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Destreza';
+      hazard.tomboloRisk = 'Quando a ilha de maré é ladeada por enseadas estreitas, a maré enchente avança em uma parede líquida abrupta de espuma e detritos que sobrepuja a calçada em segundos; o impacto violento arremessa os membros da comitiva sobre o cascalho rolante com 3d6 de concussão e perda imediata de fardos leves (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Escuta atenta do rugido distante da vaga de maré e recuo imediato para a falésia rochosa mais próxima (Percepção CD 14).';
+      hazard.rescueAndStabilization = 'Recolhimento urgente de pertences com ganchos de abordagem e curativos hemostáticos em escoriações (Medicina CD 13).';
+    } else if (ht === 'submerged_shingle_ridge_ankle_trap') {
+      hazard.hazardTitle = 'Armadilha de Seixos Soltos em Crista Submersa';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.tomboloRisk = 'Bancos móveis de seixos rolados de sílex cobrem o istmo submerso em água rasa de 40 cm; pisar nos cascalhos arredondados sob correnteza faz as pedras rolarem sob os pés prendendo tornozelos em fendas ocultas, causando 2d8 de concussão e reduzindo a velocidade pela metade até o término do descanso (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Uso de calçados altos com amarração no tornozelo e apoio em bordões duplos de equilíbrio (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Deslocamento manual de seixos com alavanca de ferro e imobilização articular com talas de campanha (Medicina CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampCoastalTomboloStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'tidal_island_granite_crown_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque no Cume Granítico da Ilha de Maré',
+      tomboloAndCampSafety: 'O acampamento é estabelecido no topo escarpado da ilha de maré rochosa 20 metros acima do nível da preamar máxima, totalmente a salvo de ondas de ressaca e inundações oceânicas (DMG p. 111).',
+      tomboloAndWatch: 'A subida da maré isola a ilha transformando o mar bravio em um fosso aquático impenetrável que barra invasores terrestres por 8 horas, enquanto as sentinelas dominam o istmo submerso com vantagem em Percepção.',
+      campRestAndSafetyGuards: 'Descanso inexpugnável protegido por fosso marítimo natural e parapeitos de rocha nua.',
+      icon: '🛡️',
+      color: '#0284c7'
+    };
+
+    if (dt === 'intertidal_causeway_anchor_bollard_post') {
+      defense.defenseTitle = 'Baluarte de Amarração e Cabeços de Amarração no Istmo';
+      defense.tomboloAndCampSafety = 'Cabeços de granito talhado fincados na entrada da calçada permitem esticar cabos de segurança e guias com roldanas de bronze que facilitam evacuações emergenciais mesmo sob maré enchente (PHB p. 150).';
+      defense.tomboloAndWatch = 'Fornece rota segura de retirada balizada com cabos flutuantes de cortiça que impedem que aventureiros se percam em redemoinhos noturnos.';
+      defense.campRestAndSafetyGuards = 'Mobilidade tática garantida e controle absoluto dos horários de travessia do grupo.';
+    } else if (dt === 'perched_freshwater_lens_cliff_spring') {
+      defense.defenseTitle = 'Surgência de Água Doce em Falésia da Ilha';
+      defense.tomboloAndCampSafety = 'Fratura de cisalhamento na falésia da ilha verte água doce pluvial filtrada através da cúpula de granito antes de misturar-se com a salmoura marítima (PHB p. 150).';
+      defense.tomboloAndWatch = 'Abastecimento contínuo de até 25 litros diários de água potável fresca para a comitiva sem necessidade de carregar tonéis pela calçada arenosa.';
+      defense.campRestAndSafetyGuards = 'Autossuficiência hídrica completa no posto insular durante o descanso longo.';
+    } else if (dt === 'driftwood_stockade_watch_rampart') {
+      defense.defenseTitle = 'Empaliçada de Troncos de Naufrágio e Seixos de Praia';
+      defense.tomboloAndCampSafety = 'Troncos pesados trazidos pelas marés são calçados com grandes seixos rolados de sílex, formando uma mureta defensiva de 2 metros na cabeceira da ilha (PHB p. 185).';
+      defense.tomboloAndWatch = 'Oferece cobertura total (+5 na CA) para as sentinelas contra disparos vindos de botes ou invasores que tentem desembarcar pela baixamar.';
+      defense.campRestAndSafetyGuards = 'Barreira física resistente que impede desembarques surpresa de saqueadores costeiros.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 278: DOMOS DE LAVA RIOLÍTICA, AGULHAS PELÉANAS E COULEES (D&D 5e)
   // =========================================================================
 
@@ -36436,6 +36516,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessCoastalTomboloHazard: calcWildernessCoastalTomboloHazard,
+    calcCampCoastalTomboloStation: calcCampCoastalTomboloStation,
     calcWildernessRhyoliteDomeHazard: calcWildernessRhyoliteDomeHazard,
     calcCampRhyoliteDomeStation: calcCampRhyoliteDomeStation,
     calcWildernessGilbertDeltaHazard: calcWildernessGilbertDeltaHazard,
