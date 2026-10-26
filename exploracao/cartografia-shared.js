@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 206: CÂNIONS DE FENDA ESTREITA (SLOT CANYONS) E MARMITAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessSandstoneSlotCanyonHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'distant_storm_slot_canyon_flash_flood_bore').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Muralha de Enxurrada Relâmpago em Cânion de Fenda (Slot Canyon)',
+      saveDC: 16,
+      saveType: 'Destreza',
+      slotCanyonRisk: 'Mesmo sob céu azul diretamente acima da fenda, uma tempestade nas cabeceiras a 20 quilômetros canaliza uma parede rugidora de água barrenta e troncos por uma garganta de 1 metro de largura e 50 metros de altura, esmagando a comitiva contra as curvas sinuosas com 4d8 de concussão (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Mapeamento prévio das rotas de escalada para o topo a cada 300 metros e monitoramento das nuvens na bacia hidrográfica superior.',
+      rescueAndStabilization: 'Escalada em oposição imediata acima da marca de troncos entalados e lançamento de cabo para os retardatários.',
+      icon: '🌊🏜️',
+      color: '#ea580c'
+    };
+
+    if (ht === 'keeper_pothole_smooth_undercut_marmita_trap') {
+      hazard = {
+        hazardTitle: 'Aprisionamento em Marmita Côncava Polida (Keeper Pothole)',
+        saveDC: 15,
+        saveType: 'Força',
+        slotCanyonRisk: 'Caldeirão circular de 4 metros de profundidade escavado no piso do cânion por seixos giratórios, com paredes negativas lisas como vidro e poça de água gelada na sombra eterna do fundo; quem desce não consegue subir sem ajuda externa sofrendo 2d6 de frio e 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Lançamento de saco de areia amarrado a uma corda (pot shot) além da borda oposta da marmita antes do primeiro aventureiro descer.',
+        rescueAndStabilization: 'Içamento por estribo de fita e aquecimento imediato com roupas secas guardadas em saco estanque.',
+        icon: '🕳️🏺',
+        color: '#0284c7'
+      };
+    } else if (ht === 'chockstone_boulder_jam_narrow_squeeze_crush') {
+      hazard = {
+        hazardTitle: 'Deslocamento de Matacão Entalado (Chockstone) na Fenda',
+        saveDC: 15,
+        saveType: 'Destreza',
+        slotCanyonRisk: 'Bloco redondo de 5 toneladas preso a 6 metros de altura apenas pelo atrito entre as duas paredes convergentes da fenda; apoiar o peso ou ancorar corda na pedra instável rompe o equilíbrio fazendo o matacão desabar sobre o corredor estreito com 3d10 de concussão (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Passagem silenciosa por baixo do bloco sem tocá-lo ou contorno por chaminé superior ancorada na rocha matriz.',
+        rescueAndStabilization: 'Uso de alavancas de ferro nas frestas laterais e extração pelo vão inferior da garganta.',
+        icon: '🪨⚠️',
+        color: '#d97706'
+      };
+    } else if (ht === 'narrows_stemming_chimney_sandstone_friction_fall') {
+      hazard = {
+        hazardTitle: 'Perda de Atrito em Travessia em Oposição (Stemming) sobre Abismo',
+        saveDC: 14,
+        saveType: 'Destreza',
+        slotCanyonRisk: 'Para evitar poços inundados no fundo, o grupo avança a 8 metros de altura pressionando pés e costas contra as paredes opostas do cânito; grãos de areia solta sob a sola fazem o pé escorregar em efeito zíper causando queda de 3d6 de concussão e abrasão severa (PHB p. 182-183).',
+        pioneerMitigation: 'Limpeza da areia das solas antes de cada passo e manutenção de três pontos de contato de pressão.',
+        rescueAndStabilization: 'Travamento com joelhos e ombros na parte mais estreita da fenda e curativo nas escoriações.',
+        icon: '🧗‍♂️🏜️',
+        color: '#b45309'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampSandstoneSlotCanyonStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'high_rim_slickrock_bench_above_driftwood_line_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Terraço Superior Acima da Linha de Troncos Entalados',
+      slotCanyonAndCampSafety: 'Acampamento montado em patamar amplo de arenito na borda superior da garganta, situado 10 metros acima dos mais altos galhos deixados pelas cheias seculares.',
+      slotCanyonAnchorAndSpring: 'Garante imunidade absoluta contra enxurradas noturnas e oferece brisa seca longe do ar frio e úmido confinado no fundo da fenda.',
+      campRestAndSafetyGuards: 'Proporciona descanso longo seguro, enxuto e com rota de saída desimpedida para toda a comitiva.',
+      icon: '⛺🏜️',
+      color: '#ea580c'
+    };
+
+    if (dt === 'weighted_throw_bag_pot_escape_pack_anchor') {
+      tech = {
+        defenseTitle: 'Sistema de Âncora de Contrapeso com Saco de Areia (Pot Shot)',
+        slotCanyonAndCampSafety: 'Bolsa de lona reforçada preenchida com 15 quilos de areia local conectada à corda principal de escalada e arremessada sobre o lábio superior das marmitas.',
+        slotCanyonAnchorAndSpring: 'Cria uma ancoragem de atrito imediata onde a rocha lisa não possui fendas para cravar pítons.',
+        campRestAndSafetyGuards: 'Permite transpor obstáculos verticais e manter linha de resgate pronta durante a estadia.',
+        icon: '🎒🪢',
+        color: '#d97706'
+      };
+    } else if (dt === 'navajo_sandstone_seep_hanging_garden_spring_drip') {
+      tech = {
+        defenseTitle: 'Fonte de Exsudação em Jardim Suspenso de Alcova de Arenito',
+        slotCanyonAndCampSafety: 'Captação da água cristalina que atravessa lentamente os poros do arenito eólico e goteja nas paredes atapetadas de avencas-de-vênus.',
+        slotCanyonAnchorAndSpring: 'Fornece água pura e fresca, evitando beber a água estagnada e podre acumulada nas marmitas do piso do cânion.',
+        campRestAndSafetyGuards: 'Abastece os cantis de todos os membros do grupo sem necessidade de fervura prolongada.',
+        icon: '💧🌿',
+        color: '#10b981'
+      };
+    } else if (dt === 'canyon_throat_acoustic_echo_funnel_sentry_post') {
+      tech = {
+        defenseTitle: 'Posto de Escuta no Funil Acústico da Garganta Sinuosa',
+        slotCanyonAndCampSafety: 'Posição de sentinela instalada na curva parabólica superior da fenda, onde as paredes lisas e curvas funcionam como uma concha acústica natural.',
+        slotCanyonAnchorAndSpring: 'Amplifica o som de passos ou o rugido distante de uma enxurrada a mais de 2 quilômetros cânion acima.',
+        campRestAndSafetyGuards: 'Concede vantagem nos testes de Percepção auditiva e alerta antecipado para a guarda.',
+        icon: '👂🔔',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 205: FLORESTAS SUBMERSAS DE CIPRESTES (BAYOUS) E MEANDROS (D&D 5e)
   // =========================================================================
 
@@ -29204,6 +29308,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessSandstoneSlotCanyonHazard: calcWildernessSandstoneSlotCanyonHazard,
+    calcCampSandstoneSlotCanyonStation: calcCampSandstoneSlotCanyonStation,
     calcWildernessCypressBayouOxbowHazard: calcWildernessCypressBayouOxbowHazard,
     calcCampCypressBayouOxbowStation: calcCampCypressBayouOxbowStation,
     calcWildernessHighlandSalarHazard: calcWildernessHighlandSalarHazard,
