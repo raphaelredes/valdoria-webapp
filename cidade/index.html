@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessQuartzitePillarForestHazard) return '';
+        var bKey = (biome && biome.key) || 'forest';
+        var qp = CartShared.calcWildernessQuartzitePillarForestHazard(bKey, 'suspended_sandstone_bridge_collapse');
+        return '<div class="clp-quartzite-pillar-forest-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,32,40,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(6,182,212,0.35);font-size:8px;color:#ecfeff;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + qp.color + ';margin-bottom:2px;">' + qp.icon + ' ' + qp.hazardTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Pilares de Arenito de Wulingyuan:</b> ' + qp.pillarRisk + ' (CD ' + qp.saveDC + ' [' + qp.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#a5f3fc;margin-top:1px;">• <b>Mitigação:</b> ' + qp.pioneerMitigation + ' · <i>Estabilização: ' + qp.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampQuartzitePillarForestStation) return '';
+        var bKey = (biome && biome.key) || 'forest';
+        var qp = CartShared.calcCampQuartzitePillarForestStation(bKey, 'isolated_pillar_summit_table_bivouac');
+        return '<div class="clp-quartzite-pillar-forest-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(10,26,34,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(8,145,178,0.3);font-size:8px;color:#ecfeff;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + qp.color + ';margin-bottom:2px;">' + qp.icon + ' ' + qp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>' 
+          + '  <div>• <b>Bivaque em Pilares de Arenito:</b> ' + qp.pillarAndCampSafety + ' · <b>Defesa:</b> ' + qp.pillarAndWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#a5f3fc;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + qp.campRestAndSafetyGuards + '</div>' 
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessSeifLinearDuneHazard) return '';
         var bKey = (biome && biome.key) || 'desert';
         var sd = CartShared.calcWildernessSeifLinearDuneHazard(bKey, 'seif_scimitar_knife_edge_shear_avalanche');

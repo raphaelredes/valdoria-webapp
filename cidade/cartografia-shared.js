@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 292: PILARES DE ARENITO QUARTZÍTICO DE WULINGYUAN (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessQuartzitePillarForestHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var ht = (hazardType || 'suspended_sandstone_bridge_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso de Arco Natural de Arenito Suspenso no Abismo',
+      saveDC: 15,
+      saveType: 'Destreza',
+      pillarRisk: 'Uma ponte natural estreita de 2 metros de largura suspensa entre dois pilares a 300 metros de altura sofreu fraturas por descompressão no extradorso do arco; o avanço da comitiva com cargas pesadas quebra o bloco-chave, exigindo salvaguarda de Destreza CD 15 para saltar para o platô firme ou despencar no abismo enevoado com 10d6 de concussão (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores amarrando cabos de aço estáticos entre os dois monólitos e inspecionando fissuras basais antes da travessia de cada membro (Sobrevivência ou Atletismo CD 14).',
+      rescueAndStabilization: 'Içamento emergencial por cordas com freios antiqueda e contenção de traumas de suspensão com repouso horizontal (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🏛️',
+      color: '#06b6d4'
+    };
+
+    if (ht === 'cloud_chasm_condensation_moss_slip') {
+      hazard.hazardTitle = 'Deslizamento em Limo de Nevoeiro nos Beirais Verticais';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Destreza';
+      hazard.pillarRisk = 'A névoa subtropical perene satura as cornijas talhadas nos paredões de 400 metros com uma camada viscosa de musgo e líquen gelatinoso; a perda de aderência precipita o explorador pela face de arenito liso sem agarras (Salvaguarda de Destreza CD 15 para cravar pítons de escalada ou sofrer 4d6 de concussão e ficar pendurado por cabos; PHB p. 185; DMG p. 110).';
+      hazard.pioneerMitigation = 'Uso de calçados com cravos de aço rígidos e progressão em linha com ancoragens múltiplas em fendas de quartzo (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Tracionamento com roldana de resgate e tratamento de contusões musculares e lacerações por rocha áspera (Atletismo CD 14 ou Medicina CD 13).';
+    } else if (ht === 'valley_wind_shear_pillar_rotor') {
+      hazard.hazardTitle = 'Rajadas Descendentes de Rotor Eólico em Desfiladeiro';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.pillarRisk = 'O vento soprando pelas gargantas estreitas entre os pilares verticais gera turbilhões oscilantes a 90 km/h que arrancam coberturas de tendas e empurram aventureiros que transpõem passadiços expostos (Salvaguarda de Força CD 14 para não ser desequilibrado e arremessado contra as agulhas com 3d6 de concussão; DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Rastejamento rente à rocha durante as rajadas e fixação de lonas com lastro de pedras pesadas (Atletismo ou Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Imobilização preventiva de coluna com pranchas rígidas e sutura de cortes faciais (Medicina CD 13).';
+    } else if (ht === 'perched_relict_forest_tree_fall') {
+      hazard.hazardTitle = 'Queda de Pinheiros Ancestrais com Raízes Fraturadas';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.pillarRisk = 'No cume estreito dos pilares, pinheiros centenários crescem em fendas que alargam a rocha sob peso e vento; sob tempestade, a rocha que ancora as raízes parte-se de repente, despencando troncos e blocos de quartzo sobre a trilha com 3d8 de concussão e soterramento parcial (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Inspeção visual de árvores com raízes expostas e montagem de passadiços fora do raio de tombamento dos pinheiros (Natureza ou Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Corte de troncos com machados leves para liberar membros presos e administração de tônicos analgésicos (Atletismo CD 14 ou Medicina CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampQuartzitePillarForestStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var dt = (defenseType || 'isolated_pillar_summit_table_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque Fortaleza no Cume Isolado do Pilar de Arenito',
+      pillarAndCampSafety: 'O acampamento é instalado no topo plano de um pilar monolítico de 250 metros de altitude, alcançado unicamente por escadas de corda recolhíveis; o cume rochoso isolado é 100% inacessível a predadores terrestres dos ermos e imune a enxurradas que assolam o fundo dos desfiladeiros (DMG p. 111).',
+      pillarAndWatch: 'A posição elevada acima do mar de nuvens oferece visão periférica em 360 graus de todo o arquipélago de torres de pedra com vantagem em testes de Percepção para a sentinela.',
+      campRestAndSafetyGuards: 'Repouso seguro e sereno em ninho de águia inexpugnável, assegurando recuperação plena de forças para a comitiva.',
+      icon: '⛺',
+      color: '#06b6d4'
+    };
+
+    if (dt === 'quartzite_fracture_filtered_spring_pool') {
+      defense.defenseTitle = 'Bacia de Captação Filtrada por Fendas de Quartzo Puro';
+      defense.pillarAndCampSafety = 'A espessa camada de arenito quartzítico atua como filtro de sílica de alta eficiência, purificando a água pluvial que escorre por fraturas verticais até bacias rochosas suspensas (PHB p. 150).';
+      defense.pillarAndWatch = 'Produz até 40 litros diários de água mineral pura e límpida, restaurando +1 dado de vida adicional aos membros do grupo durante o descanso longo.';
+      defense.campRestAndSafetyGuards = 'Hidratação cristalina e farta no alto dos pilares sem necessidade de descer aos desfiladeiros perigosos.';
+    } else if (dt === 'sandstone_slab_windward_breastwork') {
+      defense.defenseTitle = 'Parapeito de Lajes de Arenito Intertravadas a Barlavento';
+      defense.pillarAndCampSafety = 'Lajes planas de quartzo soltas no cume são empilhadas em semicírculo de 1,5 metro travadas com cunhas de ferro, criando um abrigo sólido contra os ventos do abismo (PHB p. 185).';
+      defense.pillarAndWatch = 'Concede cobertura três-quartos (+5 na CA e +5 em salvaguardas de Destreza) contra arqueiros, ventos cortantes e predadores aéreos.';
+      defense.campRestAndSafetyGuards = 'Muralha protetora que garante vigília calma e resguardo térmico nas noites frias de altitude.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 291: DUNAS LINEARES EM SEIF E CORREDORES DE PLINTO (D&D 5e)
   // =========================================================================
 
@@ -37447,6 +37522,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessQuartzitePillarForestHazard: calcWildernessQuartzitePillarForestHazard,
+    calcCampQuartzitePillarForestStation: calcCampQuartzitePillarForestStation,
     calcWildernessSeifLinearDuneHazard: calcWildernessSeifLinearDuneHazard,
     calcCampSeifLinearDuneStation: calcCampSeifLinearDuneStation,
     calcWildernessKarstStoneForestHazard: calcWildernessKarstStoneForestHazard,
