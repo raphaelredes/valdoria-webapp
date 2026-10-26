@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 233: TURFEIRAS DE PALSA SUBÁRTICAS E TERMOCARSTE (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessSubarcticPalsaThermokarstHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'arctic').toLowerCase();
+    var ht = (hazardType || 'palsa_peat_mound_ice_lens_core_collapse_sink').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso de Domo de Turfa com Núcleo de Gelo (Palsa Dome Sink)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      palsaThermokarstRisk: 'Colinas ovais de turfa seca de 4 a 7 metros de altura erguidas no meio do pântano subártico pela expansão de uma lente maciça de gelo eterno em seu interior; no verão, rachaduras pretas na casca de musgo expõem o núcleo derretendo em lama gelada, fazendo o topo da palsa abater sob a comitiva e engolir aventureiros em uma caldeira de lama congelante com 3d6 de frio e restrição (DMG p. 109-110; XGE p. 109).',
+      pioneerMitigation: 'Subir apenas em domos de palsa cobertos de líquen branco contínuo, evitando montículos com fendas escuras ou poças laterais.',
+      rescueAndStabilization: 'Extração com varas longas de lariço apoiadas na borda firme de turfa e aquecimento imediato.',
+      icon: '⛰️❄️',
+      color: '#38bdf8'
+    };
+
+    if (ht === 'thermokarst_drunken_forest_tilted_spruce_root_snare') {
+      hazard = {
+        hazardTitle: 'Queda de Árvores Inclinadas em Floresta Bêbada de Termocarste (Drunken Forest)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        palsaThermokarstRisk: 'Bosques de abetos e lariços cujos troncos pendem em ângulos bizarros de 45 graus porque o permafrost subjacente derreteu de forma desigual; o peso de uma mochila apoiada ou o vento derruba fileiras inteiras de árvores com raízes rasas em efeito dominó, prendendo exploradores na lama com 2d8 de concussão (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Jamais amarrar cordas ou apoiar carga em árvores inclinadas sobre solo de degelo.',
+        rescueAndStabilization: 'Corte rápido dos troncos caídos com machadinha e alavancagem do prato de raízes.',
+        icon: '🌲🌀',
+        color: '#22c55e'
+      };
+    } else if (ht === 'ebullition_methane_thermokarst_lake_asphyxia_flare') {
+      hazard = {
+        hazardTitle: 'Ebulição de Bolsão de Metano em Lagoa de Termocarste',
+        saveDC: 15,
+        saveType: 'Constituição',
+        palsaThermokarstRisk: 'Lagos circulares escuros formados pelo abatimento do solo congelado onde bactérias anaeróbicas decompõem turfa milenar liberando colunas contínuas de gás dos pântanos (metano e gás sulfídrico); aproximar uma tocha acesa da margem provoca um clarão explosivo de 3d6 de fogo, enquanto o gás acumulado nas depressões causa tontura e asfixia (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Apagar chamas abertas ao contornar lagoas borbulhantes ou crostas de gelo com bolhas brancas presas.',
+        rescueAndStabilization: 'Remoção imediata para o alto ventilado da palsa e aplicação de unguento para queimaduras.',
+        icon: '🫧🔥',
+        color: '#f97316'
+      };
+    } else if (ht === 'rim_moat_lagg_fen_floating_sphagnum_quagmire') {
+      hazard = {
+        hazardTitle: 'Afundamento no Fosso Anelar de Degelo (Palsa Rim Moat)',
+        saveDC: 14,
+        saveType: 'Força',
+        palsaThermokarstRisk: 'Ao redor de cada colina de palsa forma-se um anel de abatimento térmico profundo coberto por um tapete enganador de esfagno verde-claro flutuante; tentar subir ou descer do domo sem ponte de varas rompe a película vegetal e mergulha o batedor até o peito em água ácida a zero grau, impondo 1 nível de exaustão (DMG p. 109; PHB p. 185).',
+        pioneerMitigation: 'Estender troncos de lariço sobre o anel verde-claro antes de acessar o domo central da palsa.',
+        rescueAndStabilization: 'Tracionamento por corda desde o alto seco do montículo e troca de botas encharcadas.',
+        icon: '🕳️🌿',
+        color: '#84cc16'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampSubarcticPalsaThermokarstStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'arctic').toLowerCase();
+    var dt = (defenseType || 'intact_windswept_palsa_crest_dry_lichen_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque na Crista Seca de Palsa Íntegra Coberta de Líquen Branco',
+      palsaThermokarstAndCampSafety: 'Ao contrário do pântano encharcado ao redor, o topo convexo de uma palsa ativa sem fissuras é enxuto, ventilado e forrado por um colchão espesso de líquen-das-renas (Cladonia).',
+      palsaThermokarstTrenchAndWatch: 'Elevação de 5 metros que oferece visão de 360 graus sobre a turfeira e brisa constante que afasta enxames de insetos.',
+      campRestAndSafetyGuards: 'Garante descanso longo seco e isolado termicamente do permafrost inferior.',
+      icon: '⛺🦌',
+      color: '#38bdf8'
+    };
+
+    if (dt === 'exposed_ice_core_scarp_natural_cold_cellar_cache') {
+      tech = {
+        defenseTitle: 'Câmara Frigorífica Natural no Núcleo de Gelo Exposto da Palsa',
+        palsaThermokarstAndCampSafety: 'Escavação de um pequeno nicho na lente de gelo puro sob 50 centímetros de turfa isolante e rebatimento da tampa de musgo.',
+        palsaThermokarstTrenchAndWatch: 'Conserva rações frescas, caça e reagentes alquímicos congelados mesmo sob o sol da meia-noite.',
+        campRestAndSafetyGuards: 'Fornece gelo limpo para derreter sem precisar beber a água escura do pântano.',
+        icon: '🧊🥩',
+        color: '#7dd3fc'
+      };
+    } else if (dt === 'harvested_dry_peat_turf_smudge_fire_mosquito_screen') {
+      tech = {
+        defenseTitle: 'Fogueira de Turfa Seca e Cortina de Fumaça Contra Nuvens de Mosquitos',
+        palsaThermokarstAndCampSafety: 'Blocos de turfa fibrosa cortados da superfície seca queimam em brasa lenta por horas em bacia de pedra.',
+        palsaThermokarstTrenchAndWatch: 'Produz uma fumaça aromática que cria um domo protetor contra nuvens sufocantes de borrachudos e mutucas.',
+        campRestAndSafetyGuards: 'Permite que sentinelas e montarias descansem sem tormento de picadas.',
+        icon: '🔥🦟',
+        color: '#f59e0b'
+      };
+    } else if (dt === 'larch_pole_corduroy_causeway_across_rim_moat') {
+      tech = {
+        defenseTitle: 'Passarela de Varas de Lariço sobre o Fosso Anelar (Rim Moat)',
+        palsaThermokarstAndCampSafety: 'Uso de três lariços inclinados da floresta bêbada como ponte removível sobre o fosso de lama que circunda a palsa.',
+        palsaThermokarstTrenchAndWatch: 'Recolher as varas à noite isola a colina como uma ilha cercada por atoleiro profundo.',
+        campRestAndSafetyGuards: 'Impede emboscadas noturnas de predadores terrestres no bivaque.',
+        icon: '🪵🛡️',
+        color: '#84cc16'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 232: FLORESTAS PETRIFICADAS DE ÁGATA E RAVINAS BENTÔNICAS (D&D 5e)
   // =========================================================================
 
@@ -32012,6 +32116,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessSubarcticPalsaThermokarstHazard: calcWildernessSubarcticPalsaThermokarstHazard,
+    calcCampSubarcticPalsaThermokarstStation: calcCampSubarcticPalsaThermokarstStation,
     calcWildernessPetrifiedWoodBadlandHazard: calcWildernessPetrifiedWoodBadlandHazard,
     calcCampPetrifiedWoodBadlandStation: calcCampPetrifiedWoodBadlandStation,
     calcWildernessSeaIceTorossPolynyaHazard: calcWildernessSeaIceTorossPolynyaHazard,
