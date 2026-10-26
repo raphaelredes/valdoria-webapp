@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 244: BLOWHOLES COSTEIROS, GLOUPS E ARCOS MARINHOS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessCoastalBlowholeGloupHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'hydropneumatic_spouting_horn_blowhole_geyser_blast').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ejeção Hidropneumática em Chaminé de Sopro Costeira (Spouting Horn / Blowhole)',
+      saveDC: 15,
+      saveType: 'Força',
+      blowholeGloupRisk: 'Quando grandes ondas de ressaca entram em cavernas marinhas estreitas na base do promontório, a água comprime o bolsão de ar preso no fundo até dezenas de atmosferas e dispara um gêiser salgado rugidor por orifícios verticais no planalto rochoso 20 metros acima; passar sobre uma chaminé de sopro entre duas séries de ondas lança o aventureiro aos ares com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+      pioneerMitigation: 'Observar aneis de rocha molhada e espuma branca no planalto antes de avançar e contar o intervalo entre as séries de ondas.',
+      rescueAndStabilization: 'Retirada imediata da zona de respingos com cabo de segurança e imobilização de traumas.',
+      icon: '🐳🌊',
+      color: '#0284c7'
+    };
+
+    if (ht === 'vacuum_backwash_suction_throat_undertow_draw') {
+      hazard = {
+        hazardTitle: 'Sucção a Vácuo na Garganta do Blowhole durante o Recuo da Onda',
+        saveDC: 15,
+        saveType: 'Força',
+        blowholeGloupRisk: 'Imediatamente após o disparo do jato de espuma, a coluna de toneladas de água recua de volta pelo tubo vertical como um pistão descendente, gerando um vácuo poderoso na boca da cratera; quem escorregar no anel de algas ao redor do orifício é sugado para dentro da caverna escura submersa, sofrendo 3d6 de concussão e risco imediato de afogamento (DMG p. 110; PHB p. 182-183).',
+        pioneerMitigation: 'Manter distância mínima de cinco metros das crateras afuniladas cobertas de limo verde.',
+        rescueAndStabilization: 'Ancoragem da corda de cintura em pitão de rocha seca antes de qualquer aproximação à borda.',
+        icon: '🌀🕳️',
+        color: '#0369a1'
+      };
+    } else if (ht === 'collapsed_sea_cave_skylight_gloup_shaft_fall') {
+      hazard = {
+        hazardTitle: 'Queda em Clarabóia de Abatimento de Caverna Marinha (Gloup / Geo Shaft)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        blowholeGloupRisk: 'A dezenas de metros da borda da falésia, em meio ao pasto costeiro aparentemente firme, abrem-se poços verticais sem parapeito (gloups) onde o teto de uma galeria marinha subterrânea desabou; na neblina costeira ou à noite, dar um passo em falso na relva úmida precipita o batedor por 15 metros direto na caldeira de espuma fervente lá embaixo com 3d6 de concussão (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Guiar-se pelo estrondo surdo do mar sob os pés para detectar clarabóias ocultas sob o capim.',
+        rescueAndStabilization: 'Montagem de tripé de resgate vertical e içamento sincronizado nos intervalos da ressaca.',
+        icon: '🕳️🌫️',
+        color: '#64748b'
+      };
+    } else if (ht === 'narrow_natural_sea_arch_lintel_wave_slam') {
+      hazard = {
+        hazardTitle: 'Varredura por Onda Vagabunda sobre Ponte Natural de Rocha (Sea Arch Lintel)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        blowholeGloupRisk: 'Pontes estreitas de rocha residual que ligam o continente a ilhotas escarpadas; a interferência construtiva de duas ondas refletidas nos flancos faz uma parede de água subir verticalmente e varrer o topo da ponte a 10 metros de altura, exigindo agarrar-se à rocha com 2d6 de concussão para não ser arremessado ao mar revolto (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Cruzar o arco natural encordado e apenas durante a janela de baixa-mar.',
+        rescueAndStabilization: 'Içamento rápido pelo cabo guia fixado nas duas extremidades da ponte.',
+        icon: '🌉🌊',
+        color: '#0ea5e9'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampCoastalBlowholeGloupStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'inland_wind_shadow_behind_gloup_rim_dyke_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque na Sombra de Vento atrás de Crista de Dique Costeiro',
+      blowholeGloupAndCampSafety: 'Posicionamento das tendas na depressão seca e firme a barlavento das chaminés de sopro, fora do alcance do spray salgado.',
+      blowholeGloupTrenchAndWatch: 'O rugido contínuo dos blowholes mascara os sons de conversa e movimentação da comitiva.',
+      campRestAndSafetyGuards: 'Garante descanso longo enxuto sem corrosão salina nos equipamentos.',
+      icon: '⛺🌊',
+      color: '#38bdf8'
+    };
+
+    if (dt === 'rhythmic_blowhole_infrasound_tide_and_storm_gauge') {
+      tech = {
+        defenseTitle: 'Barômetro Acústico da Chaminé de Sopro para Previsão de Ressaca',
+        blowholeGloupAndCampSafety: 'A nota grave e o intervalo dos sopros hidropneumáticos mudam horas antes da chegada de uma tempestade oceânica ou preamar.',
+        blowholeGloupTrenchAndWatch: 'Funciona como relógio de maré e alerta meteorológico natural mesmo sob nevoeiro fechado.',
+        campRestAndSafetyGuards: 'Permite planejar travessias costeiras e recolher barcos com antecedência.',
+        icon: '🔊⏱️',
+        color: '#eab308'
+      };
+    } else if (dt === 'wave_tossed_kelp_and_driftwood_shelf_fuel_harvest') {
+      tech = {
+        defenseTitle: 'Colheita de Lenha de Deriva Arremessada às Prateleiras Altas',
+        blowholeGloupAndCampSafety: 'A pressão dos gêiseres marinhos lança toras de navios e madeira flutuante para terraços altos onde secam ao sol.',
+        blowholeGloupTrenchAndWatch: 'Fornece lenha seca abundante em promontórios rochosos desprovidos de árvores.',
+        campRestAndSafetyGuards: 'Sustenta fogueira quente durante toda a vigília noturna.',
+        icon: '🪵🔥',
+        color: '#f59e0b'
+      };
+    } else if (dt === 'single_span_sea_arch_stack_fortified_redoubt') {
+      tech = {
+        defenseTitle: 'Reduto Isolado em Faraglione (Sea Stack) após a Ponte Natural',
+        blowholeGloupAndCampSafety: 'Instalação do acampamento no topo plano gramado de um pilar marinho conectado à costa apenas por um arco estreito de pedra.',
+        blowholeGloupTrenchAndWatch: 'Abismos verticais de 30 metros cercam o bivaque por três lados, exigindo apenas um sentinela na ponte.',
+        campRestAndSafetyGuards: 'Oferece defesa inexpugnável contra emboscadas terrestres.',
+        icon: '🏝️🛡️',
+        color: '#0284c7'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 243: COLINAS DE AVALANCHE VULCÂNICA (HUMMOCKS) E BLOCOS TOREVA (D&D 5e)
   // =========================================================================
 
@@ -33156,6 +33260,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessCoastalBlowholeGloupHazard: calcWildernessCoastalBlowholeGloupHazard,
+    calcCampCoastalBlowholeGloupStation: calcCampCoastalBlowholeGloupStation,
     calcWildernessVolcanicHummockTorevaHazard: calcWildernessVolcanicHummockTorevaHazard,
     calcCampVolcanicHummockTorevaStation: calcCampVolcanicHummockTorevaStation,
     calcWildernessGilgaiVertisolCrackingHazard: calcWildernessGilgaiVertisolCrackingHazard,

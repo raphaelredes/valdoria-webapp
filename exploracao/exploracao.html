@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T20:24:38Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T20:27:16Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessCoastalBlowholeGloupHazard) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var bg = CartShared.calcWildernessCoastalBlowholeGloupHazard(bKey, 'hydropneumatic_spouting_horn_blowhole_geyser_blast');
+        return '<div class="clp-coastal-blowhole-gloup-card" style="margin:4px 0 6px;text-align:left;background:rgba(10,24,36,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(2,132,199,0.35);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + bg.color + ';margin-bottom:2px;">' + bg.icon + ' ' + bg.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Blowholes, Gloups e Arcos Marinhos:</b> ' + bg.blowholeGloupRisk + ' (CD ' + bg.saveDC + ' [' + bg.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Mitigação:</b> ' + bg.pioneerMitigation + ' · <i>Estabilização: ' + bg.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampCoastalBlowholeGloupStation) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var bc = CartShared.calcCampCoastalBlowholeGloupStation(bKey, 'inland_wind_shadow_behind_gloup_rim_dyke_bivouac');
+        return '<div class="clp-coastal-blowhole-gloup-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(8,18,28,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.3);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + bc.color + ';margin-bottom:2px;">' + bc.icon + ' ' + bc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Sombra de Dique Costeiro:</b> ' + bc.blowholeGloupAndCampSafety + ' · <b>Acústica:</b> ' + bc.blowholeGloupTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + bc.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){
