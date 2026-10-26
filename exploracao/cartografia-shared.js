@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 204: SALARES DE ALTITUDE E OLHOS DE SALMOURA (OJOS DEL SALAR) (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessHighlandSalarHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'ojo_del_salar_thin_salt_rim_brine_chasm_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda em Olho do Salar (Ojo del Salar) de Salmoura Super-Resfriada',
+      saveDC: 15,
+      saveType: 'Destreza',
+      highlandSalarRisk: 'Poço vertical cilíndrico aberto na placa de sal que comunica com o lago subterrâneo de salmoura rica em lítio e magnésio a -5°C (líquida abaixo de zero pela salinidade extrema); a borda em balanço quebra mergulhando o explorador no abismo cáustico e gelado com 3d8 de dano de frio (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Desvio de manchas circulares azul-turquesa ou alaranjadas na planície branca e marcha encordada.',
+      rescueAndStabilization: 'Içamento imediato, lavagem do sal corrosivo com água doce morna e troca completa de vestes.',
+      icon: '👁️🧂',
+      color: '#38bdf8'
+    };
+
+    if (ht === 'polygonal_tepee_pressure_ridge_ankle_fracture') {
+      hazard = {
+        hazardTitle: 'Cristas Poligonais de Pressão (Tepees de Sal) Cortantes',
+        saveDC: 14,
+        saveType: 'Destreza',
+        highlandSalarRisk: 'A expansão térmica da crosta de halita levanta bordas poligonais hexagonais de 40 centímetros duras como concreto e eriçadas de cristais agudos; tropeçar nas placas empenadas causa torções severas e cortes profundos com 2d8 de dano cortante/concussão (PHB p. 182-183).',
+        pioneerMitigation: 'Uso de botas de cano alto reforçado e apoio rítmico de bastões duplos no centro plano de cada hexágono.',
+        rescueAndStabilization: 'Imobilização do tornozelo com bandagem firme e remoção de cristais de sal das escoriações.',
+        icon: '🔶🧂',
+        color: '#f43f5e'
+      };
+    } else if (ht === 'wet_mirror_salar_horizon_loss_and_uv_corneal_burn') {
+      hazard = {
+        hazardTitle: 'Vertigem de Espelho Infinito e Cegueira UV em Salar Alagado',
+        saveDC: 15,
+        saveType: 'Constituição',
+        highlandSalarRisk: 'Uma lâmina de 2 centímetros de água sobre o sal plano transforma a bacia inteira em um espelho perfeito que funde céu e chão a 4.000 metros de altitude; a ausência total de horizonte e a radiação solar duplicada impõem a condição Cego e perda de direção (DMG p. 110-111; PHB p. 183).',
+        pioneerMitigation: 'Navegação estrita por azimute de bússola e uso de viseiras de fenda estreita escurecidas com carvão.',
+        rescueAndStabilization: 'Tenda escura montada sobre estrados secos e compressas oculares frias.',
+        icon: '🪞☀️',
+        color: '#0ea5e9'
+      };
+    } else if (ht === 'hypoxic_white_wind_viento_blanco_hypothermia') {
+      hazard = {
+        hazardTitle: 'Vendaval Hipóxico de Altitude (Viento Blanco) no Deserto de Sal',
+        saveDC: 15,
+        saveType: 'Constituição',
+        highlandSalarRisk: 'Sem nenhuma árvore ou rocha por dezenas de quilômetros, o vento gelado desce dos vulcões vizinhos carregando poeira fina de sal e bórax no ar rarefeito; a queda brusca para -20°C causa 2d8 de dano de frio e 1 nível de exaustão (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Construção rápida de mureta corta-vento com blocos de sal serrados na própria crosta.',
+        rescueAndStabilization: 'Abrigo coletivo em saco de bivaque térmico e infusão quente de folhas alpinas.',
+        icon: '🌬️❄️',
+        color: '#64748b'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampHighlandSalarStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'fossil_coral_stromatolite_island_incahuasi_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Ilha Rochosa de Calcário Recifal Fóssil no Centro do Salar',
+      salarAndCampSafety: 'Acampamento instalado nos terraços secos de um antigo monte vulcânico revestido de corais e estromatólitos fósseis que emerge 40 metros acima do mar de sal.',
+      salarIglooAndBofedal: 'Oferece rocha firme imune ao alagamento superficial do salar, abrigo entre cactos gigantes centenários e visão de 50 quilômetros ao redor.',
+      campRestAndSafetyGuards: 'Garante descanso longo seguro, seco e estrategicamente elevado para toda a comitiva e sentinelas.',
+      icon: '⛺🌵',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'carved_salt_brick_igloo_mortared_with_brine_slush') {
+      tech = {
+        defenseTitle: 'Reduto de Tijolos de Sal Maciço Cimentados com Pasta Salina',
+        salarAndCampSafety: 'Domo ou muralha erguida com blocos retangulares de 40 centímetros extraídos a machado da crosta de halita e soldados com polpa de sal úmido.',
+        salarIglooAndBofedal: 'A estrutura solidifica em minutos formando uma casamata monolítica à prova do vento glacial da madrugada.',
+        campRestAndSafetyGuards: 'Proporciona isolamento térmico surpreendente e cobertura total (+5 na CA) na planície aberta.',
+        icon: '🧱🧂',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'marginal_bofedal_cushion_bog_freshwater_spring_cache') {
+      tech = {
+        defenseTitle: 'Aguada Doce em Turfeira de Almofada (Bofedal) na Borda do Salar',
+        salarAndCampSafety: 'Ponto de captação nos tapetes verdes de plantas em almofada na margem do salar, onde a água doce de degelo das montanhas brota antes de tocar o sal.',
+        salarIglooAndBofedal: 'Fornece a única água potável pura da região e pasto nutritivo para as montarias de carga.',
+        campRestAndSafetyGuards: 'Sustenta a travessia do deserto branco sem risco de intoxicação salina.',
+        icon: '💧🌿',
+        color: '#10b981'
+      };
+    } else if (dt === 'black_basalt_cairn_line_and_compass_azimuth_stakes') {
+      tech = {
+        defenseTitle: 'Alinhamento de Marcos de Basalto Negro e Balizas de Azimute',
+        salarAndCampSafety: 'Fileira de pilhas de pedras vulcânicas negras trazidas da margem demarcando o perímetro e o rumo exato de saída do acampamento.',
+        salarIglooAndBofedal: 'Contrasta fortemente contra a brancura ofuscante do sal e quebra a ilusão óptica do efeito espelho.',
+        campRestAndSafetyGuards: 'Impede que patrulhas ou sentinelas percam o rumo ao redor do bivaque.',
+        icon: '🪨🧭',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 203: POLJES CÁRSTICOS, LAGOS TURLOUGH E ESTAVELAS (D&D 5e)
   // =========================================================================
 
@@ -28996,6 +29100,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessHighlandSalarHazard: calcWildernessHighlandSalarHazard,
+    calcCampHighlandSalarStation: calcCampHighlandSalarStation,
     calcWildernessPoljeEstavelleHazard: calcWildernessPoljeEstavelleHazard,
     calcCampPoljeEstavelleStation: calcCampPoljeEstavelleStation,
     calcWildernessPhreatomagmaticMaarHazard: calcWildernessPhreatomagmaticMaarHazard,
