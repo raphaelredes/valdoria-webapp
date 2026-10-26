@@ -14137,6 +14137,130 @@
     };
   }
 
+  // === calcWildernessGlacialCorniceAndSnowBridgeHazard (Cornijas de Neve, Fendas Glaciais e Pontes Frágeis - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessGlacialCorniceAndSnowBridgeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'glacier').toLowerCase();
+    var ht = (hazardType || 'fragile_crevasse_snow_bridge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ponte de Neve Instável sobre Fenda Glacial',
+      saveDC: 14,
+      saveType: 'Destreza',
+      glacialRiskAndFall: 'Camada delgada de neve congelada mascarando fenda abissal de 20 metros; colapso sob peso da comitiva causando 6d6 de queda e soterramento no gelo (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam encordoados a 10 metros com sondagem contínua de piolet e grampões serrilhados cravados.',
+      rescueAndStabilization: 'Sistema de polias e roldanas 3:1 de kit de escalador, mosquetões de ferro e cobertores térmicos com conhaque anizado.',
+      icon: '❄️🕳️',
+      color: '#38bdf8'
+    };
+
+    if (ht === 'overhanging_ice_cornice_collapse') {
+      hazard = {
+        hazardTitle: 'Ruptura de Cornija de Gelo em Crista',
+        saveDC: 15,
+        saveType: 'Destreza',
+        glacialRiskAndFall: 'Lábio saliente de neve compactada pendendo no vazio de despenhadeiro; vibração de passos causa desabamento de 10 toneladas de gelo.',
+        pioneerMitigation: 'Traçado de rota a pelo menos 5 metros recuado da borda visível da crista com balizamento de estacas coloridas.',
+        rescueAndStabilization: 'Resgate imediato com machado de gelo, imobilização com talas de madeira e contenção de hipotermia grau II.',
+        icon: '🏔️⚠️',
+        color: '#0ea5e9'
+      };
+    } else if (ht === 'collapsing_serac_ice_tower') {
+      hazard = {
+        hazardTitle: 'Tombamento de Sérac e Torre de Gelo Azul',
+        saveDC: 13,
+        saveType: 'Constituição',
+        glacialRiskAndFall: 'Bloco vertical de geleira que se desprende por movimento térmico; onda de choque de gelo quebrado causando 3d8 de concussão e atordoamento.',
+        pioneerMitigation: 'Travessia rápida nas primeiras horas da madrugada quando o frio extremo solidifica a base das torres de gelo.',
+        rescueAndStabilization: 'Uso de pás de neve para desobstrução de vias respiratórias e elixir de arnica com cânfora.',
+        icon: '🧊💥',
+        color: '#67e8f9'
+      };
+    } else if (ht === 'blue_ice_sheet_slick_slide') {
+      hazard = {
+        hazardTitle: 'Espelho de Gelo Azul e Escorregamento Incontrolável',
+        saveDC: 13,
+        saveType: 'Destreza',
+        glacialRiskAndFall: 'Superfície vítrea de inclinação acentuada sem atrito; queda descontrolada em direção a leito de rochas afiadas a 40km/h.',
+        pioneerMitigation: 'Técnica de autofrenagem imediata (self-arrest) com bico do piolet enterrado e pontas frontais de grampões.',
+        rescueAndStabilization: 'Sutura de lacerações de gelo e repouso de luxações com bandagens elásticas de linho.',
+        icon: '⛸️🪨',
+        color: '#a5f3fc'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      glacialRiskAndFall: hazard.glacialRiskAndFall,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Geleiras e Fendas Glaciais) / PHB p. 182-183 (Terreno Difícil e Salvaguardas)'
+    };
+  }
+
+  // === calcCampGlacialCrevasseIceScrewAndSnowAnchorStation (Parafusos de Gelo, Âncoras Deadman e Estrados Térmicos - DMG p. 111 / XGE p. 78-83 / PHB p. 150) ===
+  function calcCampGlacialCrevasseIceScrewAndSnowAnchorStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'glacier').toLowerCase();
+    var dt = (defenseType || 'tubular_steel_ice_screw_anchor_array').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Conjunto de Parafusos Tubulares de Gelo e Estacas Mortas',
+      glacialAnchorageAndStability: 'Parafusos ocos de aço temperado rosqueados a 45 graus no gelo azul profundo, suportando até 15 kN de tração por ponto.',
+      crevasseShieldingAndCampSecurity: 'Garante ancoragem estática total das barracas e linhas de vida dos aventureiros contra deslizamentos glaciais.',
+      campRestAndSafetyGuards: 'Permite descanso longo sereno mesmo em plataformas estreitas à beira de fendas glaciais.',
+      icon: '🔩❄️',
+      color: '#06b6d4'
+    };
+
+    if (dt === 'deadman_snow_fluke_and_buried_picket') {
+      tech = {
+        defenseTitle: 'Âncoras de Neve Entaladas e Estacas Mortas (Deadman Anchors)',
+        glacialAnchorageAndStability: 'Placas côncavas de alumínio ou pranchas de pinho enterradas transversalmente na neve compacta a 1 metro de profundidade.',
+        crevasseShieldingAndCampSecurity: 'Distribui a carga de retenção em neve fofa onde parafusos de gelo não encontram substrato duro.',
+        campRestAndSafetyGuards: 'Impede que rajadas de vento catabático arranquem os estais e exponham a comitiva ao congelamento.',
+        icon: '⛏️🛡️',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'crevasse_spanning_timber_deck_and_netting') {
+      tech = {
+        defenseTitle: 'Plataforma Articulada sobre Fenda com Rede de Retenção',
+        glacialAnchorageAndStability: 'Vigas de cedro com travas transversais e malha de cordas de cânhamo esticada sob o piso do acampamento.',
+        crevasseShieldingAndCampSecurity: 'Evita que quedas acidentais durante a noite engulam sentinelas ou mochilas de provisões.',
+        campRestAndSafetyGuards: 'Oferece circulação plana e segura entre as tendas no labirinto de gretas glaciais.',
+        icon: '🪵🕸️',
+        color: '#10b981'
+      };
+    } else if (dt === 'insulated_aerogel_mat_and_neoprene_groundsheet') {
+      tech = {
+        defenseTitle: 'Estrado Térmico Duplo de Espuma Isolante e Cortiça',
+        glacialAnchorageAndStability: 'Barreira celular impermeável de 5 cm que bloqueia a perda condutiva de calor para o assoalho de gelo da geleira.',
+        crevasseShieldingAndCampSecurity: 'Impede o derretimento do gelo sob os corpos dos aventureiros que formaria poças d\'água gélida.',
+        campRestAndSafetyGuards: 'Garante recuperação completa de dados de vida e imunidade ao frio extremo durante o sono (DMG p. 110).',
+        icon: '🛏️❄️',
+        color: '#ca8a04'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      glacialAnchorageAndStability: tech.glacialAnchorageAndStability,
+      crevasseShieldingAndCampSecurity: tech.crevasseShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque em Alta Montanha Glacial) / XGE p. 78-83 (Kit de Escalada e Ancoragens)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -15948,6 +16072,8 @@
     calcCampLightningPlateauFaradayCageAndGroundingStation: calcCampLightningPlateauFaradayCageAndGroundingStation,
     calcWildernessDesertMirageAndOpticalRefractionHazard: calcWildernessDesertMirageAndOpticalRefractionHazard,
     calcCampDesertMiragePolarizedFilterAndRefractoryAwning: calcCampDesertMiragePolarizedFilterAndRefractoryAwning,
+    calcWildernessGlacialCorniceAndSnowBridgeHazard: calcWildernessGlacialCorniceAndSnowBridgeHazard,
+    calcCampGlacialCrevasseIceScrewAndSnowAnchorStation: calcCampGlacialCrevasseIceScrewAndSnowAnchorStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
