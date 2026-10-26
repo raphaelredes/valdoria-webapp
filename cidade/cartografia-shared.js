@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 282: GARGANTAS EPIGENÉTICAS E MEANDROS SUPERIMPOSTOS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessEpigeneticGorgeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var ht = (hazardType || 'superimposed_slot_flash_choke').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Enxurrada Relâmpago e Estrangulamento em Garganta Epigenética',
+      saveDC: 15,
+      saveType: 'Força',
+      epigeneticRisk: 'O rio superimposto corta uma crista transversal de gnaisse duro em um desfiladeiro afunilado de apenas 3 metros de largura com paredões verticais de 60 metros; chuvas a montante disparam uma onda de torrente com 4 metros de lâmina de água barrenta e troncos arremessados em alta velocidade, exigindo salvaguarda de Força CD 15 para se fixar em grampos de escalada ou ser arrastado pelas corredeiras sofrendo 4d8 de concussão com risco de afogamento e esmagamento (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores atentos à mudança de coloração da água e eco prévio de estrondo a montante, instalando linhas estáticas de cabo de aço em banquetas altas de rocha (Sobrevivência ou Atletismo CD 14).',
+      rescueAndStabilization: 'Içamento urgente com roldanas de resgate e tratamento de hipotermia com caldos quentes e ataduras compressivas (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🌊',
+      color: '#0284c7'
+    };
+
+    if (ht === 'fluvial_vortex_pothole_submerged_trap') {
+      hazard.hazardTitle = 'Vórtice e Marmita de Gigante Submersa';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.epigeneticRisk = 'No leito rochoso polido do cânion ocultam-se marmitas de gigante cilíndricas de 3 metros de profundidade escavadas por matacões giratórios; a água translúcida esconde a borda lisa como vidro onde o aventureiro escorrega caindo no poço com turbilhão de sucção que gira o corpo contra pedregulhos esféricos causando 2d8 de concussão e perda de fôlego (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Sondagem sistemática do fundo de vau com varas ferradas e avanço amarrado em cordada dupla (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Lançamento de vara de resgate e extração rápida antes da perda de consciência por afogamento (Atletismo CD 13).';
+    } else if (ht === 'venturi_acoustic_screaming_gale') {
+      hazard.hazardTitle = 'Vendaval em Efeito Venturi e Ressonância Acústica Ensordecedora';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Constituição';
+      hazard.epigeneticRisk = 'A constrição da garganta rochosa acelera os ventos de altitude gerando rajadas supersônicas canalizadas com assovios estridentes de até 110 dB reverberados pelas paredes de gnaisse; o estrondo contínuo causa vertigem espacial, 2d6 de dano trovejante e surdez temporária por 1 hora com desvantagem em testes de Percepção auditiva (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Uso de protetores auriculares de cera de abelha e avanço em fila baixa junto aos recortes de soco da parede (Sobrevivência CD 14).';
+      hazard.rescueAndStabilization = 'Aplicação de gotas de óleo de amêndoas mornas no canal auditivo e repouso em fendas abrigadas (Medicina CD 13).';
+    } else if (ht === 'perched_boulder_chokepoint_dislodge') {
+      hazard.hazardTitle = 'Desprendimento de Matacão Entalado em Garganta Estreita';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.epigeneticRisk = 'Matacões gigantescos de erosão fluvial ficam entalados entre as paredes da fenda 15 metros acima da trilha; a vibração de passos e a água de gotejamento soltam as cunhas de apoio, fazendo o bloco de 6 toneladas despencar como martelo gigante sobre a comitiva com 3d10 de concussão e bloqueio do desfiladeiro (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Inspeção ótica de fissuras nos blocos suspensos e passagem individual rápida sem produzir ruídos (Investigação ou Furtividade CD 13).';
+      hazard.rescueAndStabilization = 'Alavancamento com pontões de ferro e imobilização de fraturas ósseas por compressão (Atletismo CD 14 ou Medicina CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampEpigeneticGorgeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var dt = (defenseType || 'high_fluvial_terrace_granite_ledge_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Terraço Fluvial Suspenso de Rocha Sã',
+      epigeneticAndCampSafety: 'O acampamento é montado em uma cornija plana de gnaisse 20 metros acima do leito do rio, totalmente fora do alcance da maior enxurrada de cheia histórica e protegido de enxurradas de tálus (DMG p. 111).',
+      epigeneticAndWatch: 'A elevação na garganta afunila qualquer aproximação a uma rampa estreita de escalada facilmente vigiada por uma única sentinela com vantagem em testes de Percepção.',
+      campRestAndSafetyGuards: 'Descanso tranquilo em rocha sólida e seca imune a inundações relâmpago repentinas do cânion.',
+      icon: '🛡️',
+      color: '#0284c7'
+    };
+
+    if (dt === 'sculpted_rock_basin_potable_cistern') {
+      defense.defenseTitle = 'Cisterna Natural em Marmita Fóssil Elevada';
+      defense.epigeneticAndCampSafety = 'Marmita de gigante fóssil situada na banqueta alta acima do rio que capta e decanta exclusivamente água da chuva e orvalho pluvial (PHB p. 150).';
+      defense.epigeneticAndWatch = 'Fornece reservatório de até 40 litros de água mineral cristalina e fria, poupando os aventureiros de descer ao rio barrento e caudaloso da garganta.';
+      defense.campRestAndSafetyGuards = 'Abastecimento seguro sem risco de contaminação por sedimentos em suspensão.';
+    } else if (dt === 'dry_stone_chokepoint_breastwork_parapet') {
+      defense.defenseTitle = 'Parapeito de Pedras Encaixadas em Estrangulamento';
+      defense.epigeneticAndCampSafety = 'Mureta de pedras roladas empilhadas a seco fechando a única passagem de acesso à cornija do bivaque (PHB p. 185).';
+      defense.epigeneticAndWatch = 'Concede cobertura total (+5 na CA) contra arqueiros inimigos e força qualquer invasor a avançar por uma borda vertiginosa de abismo.';
+      defense.campRestAndSafetyGuards = 'Barreira física intransponível que assegura sono sem sobressaltos para toda a comitiva.';
+    } else if (dt === 'canyon_echo_perimeter_warning_wire') {
+      defense.defenseTitle = 'Linha de Alarme com Ressonância Acústica de Cânion';
+      defense.epigeneticAndCampSafety = 'Cabos de cobre tensionados de parede a parede na entrada da fenda conectados a cones de bronze que amplificam vibrações sonoras através do eco natural da garganta (DMG p. 111).';
+      defense.epigeneticAndWatch = 'O mínimo tropeço ou corte de linha ecoa como um trovão pela garganta rochosa, acordando as sentinelas com minutos de antecedência.';
+      defense.campRestAndSafetyGuards = 'Alarme perimetral de longo alcance com confiabilidade máxima contra invasões noturnas.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 281: TABULEIROS COSTEIROS, FALÉSIAS VIVAS E ARCOS DE ABRASÃO (D&D 5e)
   // =========================================================================
 
@@ -36676,6 +36756,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessEpigeneticGorgeHazard: calcWildernessEpigeneticGorgeHazard,
+    calcCampEpigeneticGorgeStation: calcCampEpigeneticGorgeStation,
     calcWildernessCoastalTablelandHazard: calcWildernessCoastalTablelandHazard,
     calcCampCoastalTablelandStation: calcCampCoastalTablelandStation,
     calcWildernessBarchanoidDuneLagoonHazard: calcWildernessBarchanoidDuneLagoonHazard,
