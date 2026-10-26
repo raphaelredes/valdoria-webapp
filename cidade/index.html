@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessMountainNamakierHazard) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var nm = CartShared.calcWildernessMountainNamakierHazard(bKey, 'namakier_plastic_salt_flow_shear_rupture');
+        return '<div class="clp-namakier-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,34,44,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(203,213,225,0.35);font-size:8px;color:#f8fafc;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + nm.color + ';margin-bottom:2px;">' + nm.icon + ' ' + nm.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Geleiras de Sal (Namakiers):</b> ' + nm.namakierAndSaltRisk + ' (CD ' + nm.saveDC + ' [' + nm.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#cbd5e1;margin-top:1px;">• <b>Mitigação:</b> ' + nm.pioneerMitigation + ' · <i>Estabilização: ' + nm.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampMountainNamakierStation) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var cp = CartShared.calcCampMountainNamakierStation(bKey, 'namakier_limestone_shoulder_bench_bivouac');
+        return '<div class="clp-namakier-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(22,28,38,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(148,163,184,0.3);font-size:8px;color:#f8fafc;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Ombro de Calcário:</b> ' + cp.namakierAnchorageAndDissolutionSafety + ' · <b>Defesa:</b> ' + cp.anhydriteDikeAndSolarDewTrap + '</div>'
+          + '  <div style="font-size:7.5px;color:#94a3b8;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessThermokarstAndDrunkenForestHazard) return '';
         var bKey = (biome && biome.key) || 'arctic';
         var df = CartShared.calcWildernessThermokarstAndDrunkenForestHazard(bKey, 'drunken_forest_tree_tilt_root_tear_collapse');

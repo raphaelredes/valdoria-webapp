@@ -20539,6 +20539,113 @@
   // PHB p. 182-183 (Travel Pace, Navigation in Boreal Forests), PHB p. 190 (Falling Trees), XGE p. 77-83
   // =========================================================================
 
+
+  // =========================================================================
+  // FASE 153: GELEIRAS DE SAL DE MONTANHA (NAMAKIERS) E CASCATAS DE HALITA
+  // D&D 5e: DMG p. 110-111 (Hazards, Salt Creep, Extreme Heat), DMG p. 246-247 (Structural Integrity),
+  // PHB p. 182-183 (Travel Pace, Navigation in Mountain Passes), PHB p. 190 (Falling on Sharp Crystals), XGE p. 77-83
+  // =========================================================================
+
+  function calcWildernessMountainNamakierHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'namakier_plastic_salt_flow_shear_rupture').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ruptura Súbita e Cisalhamento em Geleira de Sal (Namakier)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      namakierAndSaltRisk: 'Maciço de halita fóssil de 400 metros de extensão fluindo plasticamente pela encosta montanhosa; a dilatação térmica sob o sol do meio-dia provoca fratura repentina de blocos de sal de 10 toneladas que despencam em cascata causando 3d8 de concussão e soterramento cáustico (DMG p. 110, 246).',
+      pioneerMitigation: 'Batedores escutam os estalos de alívio de tensão com pontas de ferro no solo e conduzem a marcha pelas bordas rochosas de calcário.',
+      rescueAndStabilization: 'Içamento imediato com cabos de sustentação, remoção de crostas salinas aderidas e aplicação de bálsamo regenerador em contusões.',
+      icon: '🏔️🧂',
+      color: '#cbd5e1'
+    };
+
+    if (ht === 'salt_serac_dissolution_needle_collapse') {
+      hazard = {
+        hazardTitle: 'Desabamento de Séracs e Agulhas Afiadas de Halita',
+        saveDC: 15,
+        saveType: 'Destreza',
+        namakierAndSaltRisk: 'Pináculos e estiletes de sal puro esculpidos pela condensação noturna que perdem a sustentação ao esquentar; despencam como saraivada de navalhas cristalinas sobre desfiladeiros estreitos, infligindo 3d6 de concussão e perfuração.',
+        pioneerMitigation: 'Marcha em diagonal usando escudos erguidos em formação tartaruga ao cruzar gargantas com séracs salinos salientes.',
+        rescueAndStabilization: 'Extração rápida de fragmentos vítreos de halita, sutura de cortes e compressas impermeabilizadas contra queimação química.',
+        icon: '🗡️💎',
+        color: '#e2e8f0'
+      };
+    } else if (ht === 'hyperosmotic_namakier_brine_spray_corneal_burn') {
+      hazard = {
+        hazardTitle: 'Vendaval Salino em Garganta de Namakier e Queimadura Ocular',
+        saveDC: 14,
+        saveType: 'Constituição',
+        namakierAndSaltRisk: 'Rajadas secas a 50 km/h que carregam gotículas microscópicas de salmoura cáustica e pó abrasivo de halita; agridem olhos e vias respiratórias, impondo fotoceratite, desvantagem em testes de Percepção e 1 nível de exaustão.',
+        pioneerMitigation: 'Uso de viseiras de feltro com lentes de quartzo fumê e máscaras faciais de linho untadas com graxa animal protetora.',
+        rescueAndStabilization: 'Lavagem ocular copiosa com água pura destilada, repouso sob vendas escuras e hidratação lenta com água mineralizada.',
+        icon: '💨👁️',
+        color: '#94a3b8'
+      };
+    } else if (ht === 'subsidence_salt_crevasse_brine_quagmire') {
+      hazard = {
+        hazardTitle: 'Queda em Crevassa de Sal com Fundo de Salmoura Asfixiante',
+        saveDC: 14,
+        saveType: 'Destreza',
+        namakierAndSaltRisk: 'Fendas de tração profundas ocultas sob fina camada de cascalho de gesso quebradiço; o solo cede sob os pés arremessando o explorador em poço de salmoura a 35° Bé com 6 metros de queda, causando 2d6 de concussão e asfixia química.',
+        pioneerMitigation: 'Batedores avançam encordoados em cordada dupla de três membros testando o piso com bastões de ponta de ferro temperado.',
+        rescueAndStabilization: 'Içamento célere com sistema de polias, banho de água doce para retirar a salmoura aderida e manobras de desobstrução pulmonar.',
+        icon: '🕳️☠️',
+        color: '#475569'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampMountainNamakierStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'namakier_limestone_shoulder_bench_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Assentado no Ombro de Calcário Estável do Desfiladeiro',
+      namakierAnchorageAndDissolutionSafety: 'Acampamento montado em patamar de rocha calcária sólida 30 metros acima da calha ativa do namakier, imune à deformação plástica e a cascatas de sal fóssil.',
+      anhydriteDikeAndSolarDewTrap: 'Maciço de rocha calcária protege o acampamento contra rajadas de vento salino e oferece ancoragem firme para as estacas das barracas.',
+      campRestAndSafetyGuards: 'Garante repouso longo calmo, seguro e protegido para toda a comitiva com regeneração integral de pontos de vida.',
+      icon: '⛺🏔️',
+      color: '#cbd5e1'
+    };
+
+    if (dt === 'crushed_anhydrite_embankment_and_brine_diversion_dike') {
+      tech = {
+        defenseTitle: 'Dique Defletor de Anidrita Britada contra Fluxos de Salmoura',
+        namakierAnchorageAndDissolutionSafety: 'Mureta perimetral de anidrita compactada que desvia fluxos de água salgada e lama salina para longe das tendas durante enxurradas.',
+        anhydriteDikeAndSolarDewTrap: 'Mantém o piso interno das barracas perfeitamente seco, prevenindo a corrosão de couros e tecidos de expedição.',
+        campRestAndSafetyGuards: 'Permite que descansantes e sentinelas circulem em terreno firme e protegido de infiltrações cáusticas.',
+        icon: '🛡️🧱',
+        color: '#94a3b8'
+      };
+    } else if (dt === 'condensing_solar_dew_collector_and_brine_trap') {
+      tech = {
+        defenseTitle: 'Coletor Cônico de Orvalho e Dessalinizador Passivo',
+        namakierAnchorageAndDissolutionSafety: 'Lonas impermeáveis esticadas em funil que recolhem a condensação abundante das madrugadas desérticas e drenam água doce límpida para ânforas.',
+        anhydriteDikeAndSolarDewTrap: 'Produz 25 litros diários de água pura potável sem consumo de lenha, assegurando autossuficiência hídrica no ermo salgado.',
+        campRestAndSafetyGuards: 'Garante hidratação abundante para a comitiva, prevenindo crises de desidratação e sede extrema.',
+        icon: '⚗️💧',
+        color: '#0284c7'
+      };
+    } else if (dt === 'cleared_puncheon_treadway_over_halite_crevasses') {
+      tech = {
+        defenseTitle: 'Passadiço de Pranchas de Madeira sobre Crevassas de Sal',
+        namakierAnchorageAndDissolutionSafety: 'Passarela contínua de tábuas de cedro reforçadas que cobre fendas de retração salina ao redor do posto de vigia.',
+        anhydriteDikeAndSolarDewTrap: 'Elimina totalmente o perigo de quedas em abismos de salmoura durante movimentações noturnas pelas cristas.',
+        campRestAndSafetyGuards: 'Permite rondas de patrulha noturnas rápidas, seguras e com passadas firmes.',
+        icon: '🪵🚶',
+        color: '#10b981'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessThermokarstAndDrunkenForestHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'arctic').toLowerCase();
@@ -23675,6 +23782,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessMountainNamakierHazard: calcWildernessMountainNamakierHazard,
+    calcCampMountainNamakierStation: calcCampMountainNamakierStation,
     calcWildernessThermokarstAndDrunkenForestHazard: calcWildernessThermokarstAndDrunkenForestHazard,
     calcCampThermokarstAndDrunkenForestStation: calcCampThermokarstAndDrunkenForestStation,
     calcWildernessTowerKarstAndBlindValleyHazard: calcWildernessTowerKarstAndBlindValleyHazard,
