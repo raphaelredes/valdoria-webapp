@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 247: PÂNTANOS DE CORDÕES (STRING BOGS / AAPA MIRES) E FLARKS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessStringBogAapaMireHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'strang_peat_ridge_floating_root_bridge_breach').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ruptura de Cordão Estreito de Turfa Flutuante (Strang Ridge Breach)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      stringBogRisk: 'Pântanos boreais listrados (aapa mires) onde centenas de diques fibrosos de meio metro de largura (strangs) correm perpendicularmente ao declive como pontes sinuosas entre lagoas negras paralelas (flarks); muitas dessas cristas não têm base mineral e flutuam apenas pelo entrelaçamento de raízes de bétula-anã, cedendo sob o peso da comitiva e afundando os aventureiros na fenda de água gelada com 2d8 de frio e restrição (DMG p. 109-110; PHB p. 182).',
+      pioneerMitigation: 'Pisar apenas nos trechos do cordão onde crescem arbustos lenhosos densos e manter três metros de intervalo entre cada membro.',
+      rescueAndStabilization: 'Lançamento de vara longa desde o trecho firme da crista e troca de vestes molhadas.',
+      icon: '🌿🌊',
+      color: '#16a34a'
+    };
+
+    if (ht === 'flark_rim_pool_bottomless_sapropel_ooze_sink') {
+      hazard = {
+        hazardTitle: 'Afundamento em Lagoa Linear de Flark com Lodo de Sapropel sem Fundo',
+        saveDC: 15,
+        saveType: 'Força',
+        stringBogRisk: 'As trincheiras aquáticas alongadas entre os cordões de turfa parecem ter apenas um palmo de água escura sobre fundo firme, mas escondem até 4 metros de sapropel (lodo orgânico gelatinoso em suspensão) sob a lâmina d’água; tentar atalhar cruzando um flark a vau engole o explorador até o pescoço em lodo negro anóxico, impondo risco de sufocamento e 1 nível de exaustão (DMG p. 109; XGE p. 109).',
+        pioneerMitigation: 'Sondar toda lagoa de flark com bastão graduado antes de tentar vadear; usar pontes de varas.',
+        rescueAndStabilization: 'Tração horizontal de bruços sobre prancha ou feixe de galhos apoiado nos dois diques.',
+        icon: '🕳️⚫',
+        color: '#65a30d'
+      };
+    } else if (ht === 'spring_fen_window_quaking_sedge_mat_subduction') {
+      hazard = {
+        hazardTitle: 'Subducção sob Tapete de Junco em Olho d’Água de Aapa Mire',
+        saveDC: 14,
+        saveType: 'Força',
+        stringBogRisk: 'Nas cabeceiras alimentadas por água subterrânea, tapetes de junco verde-vivo cobrem chaminés verticais de ressurgência fria; ao romper a malha vegetal, o peso da mochila puxa o aventureiro para debaixo do tapete flutuante como sob uma placa de gelo com 2d6 de frio (DMG p. 109-110; PHB p. 183).',
+        pioneerMitigation: 'Evitar manchas circulares de junco verde brilhante que ondulem a cada passo.',
+        rescueAndStabilization: 'Rasgar a malha de raízes com facão ou machadinha e içar o companheiro pelo cinturão.',
+        icon: '🌱❄️',
+        color: '#0284c7'
+      };
+    } else if (ht === 'parallel_ribbing_detour_march_exhaustion_maze') {
+      hazard = {
+        hazardTitle: 'Exaustão de Marcha em Ziguezague pelos Cordões Paralelos',
+        saveDC: 14,
+        saveType: 'Constituição',
+        stringBogRisk: 'Como todos os cordões de turfa e lagoas de flark são orientados transversalmente à direção de descida do vale, avançar uma única légua exige dezenas de quilômetros de desvios laterais em busca de conexões entre as cristas, dobrando o tempo de viagem e impondo 1 nível de exaustão (DMG p. 111; PHB p. 181-182).',
+        pioneerMitigation: 'Carregar duas varas leves de ponte para saltar os canais estreitos em linha reta sem desviar.',
+        rescueAndStabilization: 'Pausa para ração quente e massagem muscular em ilha seca.',
+        icon: '🧭🥾',
+        color: '#ca8a04'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampStringBogAapaMireStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'mineral_cored_master_strang_hummock_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Ilha de Cordão Mestre com Núcleo de Cascalho Glacial',
+      stringBogAndCampSafety: 'Identificação das cristas mais largas onde crescem pinheiros adultos — sinal botânico infalível de que o cordão repousa sobre rocha firme e não flutua.',
+      stringBogTrenchAndWatch: 'Piso enxuto de musgo e agulhas de pinheiro elevado 1,5 metro acima do espelho d’água das lagoas vizinhas.',
+      campRestAndSafetyGuards: 'Garante descanso longo firme e seco no coração do pântano listrado.',
+      icon: '⛺🌲',
+      color: '#16a34a'
+    };
+
+    if (dt === 'birch_pole_flark_jumping_vault_and_bridge_rig') {
+      tech = {
+        defenseTitle: 'Ponte Portátil de Duas Varas de Bétula para Transpor Flarks',
+        stringBogAndCampSafety: 'Confecção de uma passarela leve de duas varas de bétula unidas por degraus de corda que o grupo recolhe ao acampar.',
+        stringBogTrenchAndWatch: 'Permite cruzar as lagoas de lodo em linha reta durante o dia e isolar a ilha de bivaque à noite.',
+        campRestAndSafetyGuards: 'Reduz pela metade o desgaste físico da travessia matinal.',
+        icon: '🪜🌿',
+        color: '#84cc16'
+      };
+    } else if (dt === 'bog_myrtle_sweet_gale_smudge_insect_repellent') {
+      tech = {
+        defenseTitle: 'Defumação de Murta-do-Pântano (Myrica gale) Contra Insetos',
+        stringBogAndCampSafety: 'Os arbustos aromáticos de murta-do-pântano que crescem sobre os cordões de strang são ricos em óleos essenciais.',
+        stringBogTrenchAndWatch: 'Esfregar as folhas na pele e lançar ramos verdes na brasa afasta nuvens de mosquitos e mutucas.',
+        campRestAndSafetyGuards: 'Assegura sono tranquilo para a comitiva e montarias.',
+        icon: '🌿🔥',
+        color: '#eab308'
+      };
+    } else if (dt === 'parallel_flark_moat_defense_single_file_approach') {
+      tech = {
+        defenseTitle: 'Defesa em Fila Indiana sobre o Istmo do Cordão de Turfa',
+        stringBogAndCampSafety: 'Posicionamento do acampamento entre duas lagoas de flark de 100 metros de comprimento e 4 metros de lodo.',
+        stringBogTrenchAndWatch: 'Qualquer predador ou inimigo terrestre só consegue se aproximar caminhando em fila única pela crista de meio metro.',
+        campRestAndSafetyGuards: 'Dois sentinelas nas pontas do cordão bloqueiam 100% do acesso ao bivaque.',
+        icon: '🛡️🌊',
+        color: '#0284c7'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 246: PSEUDOCARSTE DE LOESS, TÚNEIS DE PIPING E RAVINAS (D&D 5e)
   // =========================================================================
 
@@ -33468,6 +33572,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessStringBogAapaMireHazard: calcWildernessStringBogAapaMireHazard,
+    calcCampStringBogAapaMireStation: calcCampStringBogAapaMireStation,
     calcWildernessLoessPseudokarstPipingHazard: calcWildernessLoessPseudokarstPipingHazard,
     calcCampLoessPseudokarstPipingStation: calcCampLoessPseudokarstPipingStation,
     calcWildernessHogbackFlatironRidgeHazard: calcWildernessHogbackFlatironRidgeHazard,

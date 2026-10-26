@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessStringBogAapaMireHazard) return '';
+        var bKey = (biome && biome.key) || 'swamp';
+        var sb = CartShared.calcWildernessStringBogAapaMireHazard(bKey, 'strang_peat_ridge_floating_root_bridge_breach');
+        return '<div class="clp-string-bog-aapa-mire-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,26,18,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(22,163,74,0.35);font-size:8px;color:#dcfce7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sb.color + ';margin-bottom:2px;">' + sb.icon + ' ' + sb.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Pântanos de Cordões (Aapa Mires) e Flarks:</b> ' + sb.stringBogRisk + ' (CD ' + sb.saveDC + ' [' + sb.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bbf7d0;margin-top:1px;">• <b>Mitigação:</b> ' + sb.pioneerMitigation + ' · <i>Estabilização: ' + sb.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampStringBogAapaMireStation) return '';
+        var bKey = (biome && biome.key) || 'swamp';
+        var sc = CartShared.calcCampStringBogAapaMireStation(bKey, 'mineral_cored_master_strang_hummock_bivouac');
+        return '<div class="clp-string-bog-aapa-mire-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(10,20,14,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(132,204,22,0.3);font-size:8px;color:#ecfccb;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sc.color + ';margin-bottom:2px;">' + sc.icon + ' ' + sc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Cordão Mestre de Cascalho:</b> ' + sc.stringBogAndCampSafety + ' · <b>Piso:</b> ' + sc.stringBogTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#bef264;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + sc.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessLoessPseudokarstPipingHazard) return '';
         var bKey = (biome && biome.key) || 'hills';
         var lp = CartShared.calcWildernessLoessPseudokarstPipingHazard(bKey, 'subsurface_loess_piping_tunnel_roof_cave_in');
