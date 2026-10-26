@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T04:24:53Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T04:29:40Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessBlizzardAndWhiteoutHazard) return '';
+        var bKey = (biome && biome.key) || 'snow';
+        var bz = CartShared.calcWildernessBlizzardAndWhiteoutHazard(bKey, 'raging_arctic_blizzard_whiteout');
+        return '<div class="clp-blizzard-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,26,34,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.3);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + bz.color + ';margin-bottom:2px;">' + bz.icon + ' ' + bz.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Perigo:</b> ' + bz.blizzardDamageAndDisorientation + ' (CD ' + bz.saveDC + ' [' + bz.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Prevenção:</b> ' + bz.pioneerMitigation + ' · <i>Reaquecimento: ' + bz.frostbiteAndRewarming + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampSnowTrenchQuinzheeAndFurBedding) return '';
+        var bKey = (biome && biome.key) || 'snow';
+        var qz = CartShared.calcCampSnowTrenchQuinzheeAndFurBedding(bKey, 'compacted_quinzhee_dome_shelter');
+        return '<div class="clp-quinzhee-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,24,20,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(249,115,22,0.3);font-size:8px;color:#ffedd5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + qz.color + ';margin-bottom:2px;">' + qz.icon + ' ' + qz.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Isolamento Térmico:</b> ' + qz.thermalInsulationEfficiency + ' · <b>Furtividade:</b> ' + qz.fireAndVentilationSecurity + '</div>'
+          + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Sono:</b> ' + qz.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

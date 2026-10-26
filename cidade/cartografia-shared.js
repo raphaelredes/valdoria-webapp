@@ -12029,6 +12029,130 @@
     };
   }
 
+  // === calcWildernessBlizzardAndWhiteoutHazard (Nevasca Ártica, Vento Branco e Cegueira Glacial - DMG p. 110 / PHB p. 185) ===
+  function calcWildernessBlizzardAndWhiteoutHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'snow').toLowerCase();
+    var ht = (hazardType || 'raging_arctic_blizzard_whiteout').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Nevasca Ártica e Desorientação Total de Vento Branco (Whiteout)',
+      saveDC: 13,
+      saveType: 'Constituição',
+      blizzardDamageAndDisorientation: 'Vendaval a -20°C com neve horizontal; visibilidade nula, salvaguarda horária contra 1 nível de Exaustão e congelamento (DMG p. 110).',
+      pioneerMitigation: 'Batedores amarram a comitiva em corda mestra de segurança e mantêm ritmo lento com bastões de sondagem.',
+      frostbiteAndRewarming: 'Descongelar extremidades em contato pele a pele sem fricção e ingerir caldos quentes gordurosos no abrigo.',
+      icon: '❄️🌪️',
+      color: '#38bdf8'
+    };
+
+    if (ht === 'crevasse_snow_bridge_collapse') {
+      hazard = {
+        hazardTitle: 'Colapso de Ponte de Neve Sobre Fenda de Geleira',
+        saveDC: 14,
+        saveType: 'Destreza',
+        blizzardDamageAndDisorientation: 'Camada fina de neve cedendo sob os pés; queda de 6 a 15 metros em fenda gélida (2d6 a 5d6 de concussão) e aprisionamento em gelo azul.',
+        pioneerMitigation: 'Sondagem contínua com vara de freixo e avanço em zigue-zague guiado pelo batedor experiente em relevo glacial.',
+        frostbiteAndRewarming: 'Içamento do companheiro com polias de escalada e uso imediato de mantas térmicas de lã espessa.',
+        icon: '🕳️🧊',
+        color: '#0284c7'
+      };
+    } else if (ht === 'wind_driven_ice_shard_barrage') {
+      hazard = {
+        hazardTitle: 'Chuva de Agulhas e Cristais de Gelo Impulsionados por Vendaval',
+        saveDC: 12,
+        saveType: 'Destreza',
+        blizzardDamageAndDisorientation: 'Rajadas de gelo afiado a 70 km/h; 1d8 cortante + 1d6 de frio e risco de laceração de córneas desprotegidas.',
+        pioneerMitigation: 'Uso de óculos de osso com fendas estreitas de visão e capuzes de pele com borda de pelo de carcaju.',
+        frostbiteAndRewarming: 'Proteção do rosto a sotavento e aplicação de bálsamo seboso sobre queimaduras de frio superficiais.',
+        icon: '🌨️🗡️',
+        color: '#06b6d4'
+      };
+    } else if (ht === 'extreme_hypothermia_numbness') {
+      hazard = {
+        hazardTitle: 'Letargia Criogênica e Hipotermia Periférica Severa',
+        saveDC: 13,
+        saveType: 'Constituição',
+        blizzardDamageAndDisorientation: 'Perda de calor corporal por imersão ou umidade; desvantagem em testes de perícia e salvaguardas físicas por dormência motora.',
+        pioneerMitigation: 'Troca obrigatória de meias úmidas na pausa de marcha e consumo regular de gordura e chás secos.',
+        frostbiteAndRewarming: 'Repouso imediato em saco de dormir duplo com garrafas de pedra quente junto à virilha e axilas.',
+        icon: '🥶🩸',
+        color: '#818cf8'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      blizzardDamageAndDisorientation: hazard.blizzardDamageAndDisorientation,
+      pioneerMitigation: hazard.pioneerMitigation,
+      frostbiteAndRewarming: hazard.frostbiteAndRewarming,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110 (Frio Extremo e Nevascas) / PHB p. 185 (Exaustão e Hipotermia)'
+    };
+  }
+
+  // === calcCampSnowTrenchQuinzheeAndFurBedding (Trincheiras de Neve Quinzhee, Fogueira Dakota e Peles de Rena - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampSnowTrenchQuinzheeAndFurBedding(biomeKey, shelterType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'snow').toLowerCase();
+    var st = (shelterType || 'compacted_quinzhee_dome_shelter').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Cúpula Quinzhee de Neve Compactada e Escavação Térmica',
+      thermalInsulationEfficiency: 'Blocos de neve sinterizada com vão de ar que mantêm +2°C interno mesmo sob temperatura exterior de -30°C.',
+      fireAndVentilationSecurity: 'Chaminé estreita perfurada no topo permitindo exaustão de ar viciado e velas de sebo sem perda térmica.',
+      campRestAndSafetyGuards: 'Suspende 100% das salvaguardas de frio extremo e garante descanso longo revigorante para a comitiva.',
+      icon: '🏕️❄️',
+      color: '#38bdf8'
+    };
+
+    if (st === 'subterranean_dakota_fire_hole') {
+      tech = {
+        defenseTitle: 'Fogueira Subterrânea Dakota com Túnel de Tiragem Oculto',
+        thermalInsulationEfficiency: 'Dois poços interligados no solo congelado que maximizam a queima de lenha seca com quase zero fumaça visível.',
+        fireAndVentilationSecurity: 'Concentra o calor diretamente nos caldeirões de ensopado sem aquecer nem derreter as paredes de neve do abrigo.',
+        campRestAndSafetyGuards: 'Permite cocção de rações quentes e derretimento de neve potável em total furtividade térmica noturna.',
+        icon: '🔥🕳️',
+        color: '#f97316'
+      };
+    } else if (st === 'caribou_fur_pelt_spruce_bedding') {
+      tech = {
+        defenseTitle: 'Estrado Isolante de Ramos de Abeto e Peles de Rena Duplas',
+        thermalInsulationEfficiency: 'Camada de 30 cm de ramagens coníferas sob peles espessas com fibras ocas bloqueando a condução do gelo.',
+        fireAndVentilationSecurity: 'Mantém os sacos de dormir perfeitamente secos e isolados contra umidade por condensação no solo.',
+        campRestAndSafetyGuards: 'Proporciona conforto postural para os aventureiros recuperarem dados de vida e níveis de exaustão.',
+        icon: '🦌🌲',
+        color: '#10b981'
+      };
+    } else if (st === 'blizzard_tether_rope_lifeline') {
+      tech = {
+        defenseTitle: 'Linha de Vida Guia com Corda Tensionada entre Tendas e Vigília',
+        thermalInsulationEfficiency: 'Cabo mestre de seda esticado entre a porta do abrigo e o ponto de sentinela a sotavento da crista.',
+        fireAndVentilationSecurity: 'Permite trocas de turno cegas em meio a vendavais de neve sem risco de o vigia se desorientar no escuro.',
+        campRestAndSafetyGuards: 'Elimina acidentes de sentinelas desgarrados e garante segurança absoluta nas rondas noturnas.',
+        icon: '🪢🏔️',
+        color: '#ca8a04'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      shelterType: st,
+      defenseTitle: tech.defenseTitle,
+      thermalInsulationEfficiency: tech.thermalInsulationEfficiency,
+      fireAndVentilationSecurity: tech.fireAndVentilationSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Acampamento no Gelo) / XGE p. 78 (Engenharia de Terreno e Abrigos de Inverno)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -13808,6 +13932,8 @@
     calcCampSmokeSmudgePotAndCitronellaRepellent: calcCampSmokeSmudgePotAndCitronellaRepellent,
     calcWildernessWildMagicAndArcaneFalloutHazard: calcWildernessWildMagicAndArcaneFalloutHazard,
     calcCampGlyphicWardsAndChalkCirclePerimeter: calcCampGlyphicWardsAndChalkCirclePerimeter,
+    calcWildernessBlizzardAndWhiteoutHazard: calcWildernessBlizzardAndWhiteoutHazard,
+    calcCampSnowTrenchQuinzheeAndFurBedding: calcCampSnowTrenchQuinzheeAndFurBedding,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
