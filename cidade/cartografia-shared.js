@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 291: DUNAS LINEARES EM SEIF E CORREDORES DE PLINTO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessSeifLinearDuneHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'seif_scimitar_knife_edge_shear_avalanche').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Avalanche em Lâmina de Cimitarra e Cisalhamento Eólico',
+      saveDC: 15,
+      saveType: 'Destreza',
+      seifRisk: 'A crista estreita e sinuosa da duna em seif atua como faca de areia onde dois regimes oblíquos de vento colidem; o avanço da comitiva rompe a tensão da crista viva, deflagrando uma avalanche em leque de 30 metros que arrasta exploradores para o talude íngreme com 3d6 de concussão e soterramento parcial (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores sondando a coesão do topo com bordões de marcha e contornando a crista pelo plinto basal de cascalho consolidado (Sobrevivência ou Natureza CD 14).',
+      rescueAndStabilization: 'Desenterro rápido com pás de lona, desobstrução de vias aéreas e hidratação fracionada para desalojar areia inalada (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🏜️',
+      color: '#f59e0b'
+    };
+
+    if (ht === 'interdune_plinth_venturi_sand_blast') {
+      hazard.hazardTitle = 'Tempestade com Efeito Venturi em Corredor de Plinto';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.seifRisk = 'O corredor plano de cascalho entre duas dunas em seif paralelas de 80 metros canaliza ventos convergentes a 110 km/h; a tempestade rasteira de areia de quartzo arranca mantas, fura odres e inflige 3d6 de dano perfurante e cortante com cegueira temporária por 1 hora se falhar na salvaguarda (PHB p. 185; DMG p. 110).';
+      hazard.pioneerMitigation = 'Uso de óculos de fenda de madeira e alinhamento cerrado da coluna atrás de escudos pesados na vanguarda (Sobrevivência ou Atletismo CD 13).';
+      hazard.rescueAndStabilization = 'Lavagem ocular com soro fisiológico morno e aplicação de pomadas cicatrizantes de babosa em lacerações dérmicas (Medicina CD 13).';
+    } else if (ht === 'sinuous_slipface_disorientation_trap') {
+      hazard.hazardTitle = 'Desorientação Sinuosa e Ilusão de Alinhamento Infinito';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Sabedoria';
+      hazard.seifRisk = 'As cristas em curva de cimitarra estendem-se por centenas de quilômetros sem marcos visuais, com curvatura quase imperceptível que desvia sutilmente o rumo da marcha para o núcleo hiperárido do deserto; viajantes perdem as referências solares sob vento rodopiante, acumulando 1 nível de exaustão (DMG p. 111).';
+      hazard.pioneerMitigation = 'Conferência contínua da rota por bússola magnética ou sombras de gnomon fixas na areia (Sobrevivência ou Navegação CD 14).';
+      hazard.rescueAndStabilization = 'Pausa forçada sob toldo de proteção solar, reidratação eletrolítica e recalibração do azimute da marcha (Medicina CD 13).';
+    } else if (ht === 'perched_heavy_mineral_sand_crust_collapse') {
+      hazard.hazardTitle = 'Ruptura de Crosta Frágil de Areia Pesada Mineral';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.seifRisk = 'Na base da duna em seif, lençõis de areia rica em ilmenita e magnetita formam crostas rígidas milimétricas sobre bolsões de areia oca sem sustentação mecânica; o peso das montarias esmaga a crosta, afundando membros até a virilha em areia movediça seca com condição impedido e risco de torção articular (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Sondagem prévia com bordões de ferro e marcha espaçada sobre o centro pedregoso do plinto (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Uso de alavancas de madeira e pranchas de deslizamento para extrair animais e aventureiros atolados (Atletismo CD 14 ou Sobrevivência CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampSeifLinearDuneStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'leeward_plinth_gravel_terrace_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Terraço de Cascalho no Plinto de Sotavento',
+      seifAndCampSafety: 'O acampamento é estruturado sobre o piso consolidado de seixos e britas do plinto basal protegido pelo flanco de 60 metros da duna em seif; a fundação firme sustenta estacas indeformáveis, enquanto a duna bloqueia o vento dominante e corta a poeira eólica (DMG p. 111).',
+      seifAndWatch: 'A sentinela posicionada no ombro do plinto domina a visão retilínea de todo o corredor interdunar com vantagem em testes de Percepção contra aproximações furtivas.',
+      campRestAndSafetyGuards: 'Repouso estável livre de afundamento em areia fofa, garantindo recuperação plena de forças para a comitiva.',
+      icon: '⛺',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'seif_base_capillary_dew_collector') {
+      defense.defenseTitle = 'Coletor de Orvalho Capilar na Raiz da Duna em Seif';
+      defense.seifAndCampSafety = 'A massa monumental de areia de quartzo da duna retém a umidade da noite e a drena por gravidade até a linha de contato impermeável com o plinto rochoso subjacente (PHB p. 150).';
+      defense.seifAndWatch = 'Produz até 35 litros de água pura fresca filtrada pela areia sílica, restaurando +1 dado de vida adicional aos membros do grupo durante o descanso longo.';
+      defense.campRestAndSafetyGuards = 'Autonomia de hidratação indispensável em travessias desérticas de longa duração.';
+    } else if (dt === 'interdune_shingle_stacked_wedge_parapet') {
+      defense.defenseTitle = 'Parapeito em Cunha de Cascalho Interdunar Intertravado';
+      defense.seifAndCampSafety = 'Placas de caliche e seixos pesados recolhidos no plinto são empilhados em cunha aerodinâmica apontada contra o vento do corredor, criando um reduto de 1,5 metro de altura (PHB p. 185).';
+      defense.seifAndWatch = 'Concede cobertura três-quartos (+5 na CA e +5 em salvaguardas de Destreza) contra ventos rasantes de areia e disparos de salteadores das dunas.';
+      defense.campRestAndSafetyGuards = 'Bastião sólido que protege o perímetro de descanso dos viajantes.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 290: FLORESTA DE PEDRA CÁRSTICA E AGULHAS DE TSINGY (D&D 5e)
   // MARCO CANÔNICO: 290 MARCOS DOS ERMOS EM VALDORIA!
   // =========================================================================
@@ -37372,6 +37447,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessSeifLinearDuneHazard: calcWildernessSeifLinearDuneHazard,
+    calcCampSeifLinearDuneStation: calcCampSeifLinearDuneStation,
     calcWildernessKarstStoneForestHazard: calcWildernessKarstStoneForestHazard,
     calcCampKarstStoneForestStation: calcCampKarstStoneForestStation,
     calcWildernessYardangRidgeHazard: calcWildernessYardangRidgeHazard,
