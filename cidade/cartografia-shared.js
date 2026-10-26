@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 223: SOLOS POLIGONAIS CRIOGÊNICOS E CÍRCULOS DE LAMA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessCryogenicFrostPolygonHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'arctic').toLowerCase();
+    var ht = (hazardType || 'active_ice_wedge_trough_snow_bridge_crevasse_drop').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda em Trincheira de Cunha de Gelo Ativa Mascarada por Neve',
+      saveDC: 15,
+      saveType: 'Destreza',
+      frostPolygonRisk: 'A tundra ártica é dividida em redes geométricas de polígonos de 20 metros delimitados por valas sobre enormes cunhas de gelo subterrâneas que se abrem com estalos sísmicos no frio intenso; quando o topo da cunha derrete parcialmente ou racha sob uma ponte de neve soprada pelo vento, o aventureiro cai na fenda estreita de paredes de gelo azul com 2d8 de concussão mais 2d6 de frio (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Cruzar as valas poligonais apenas perpendicularmente e sondar a depressão marginal antes de transferir o peso.',
+      rescueAndStabilization: 'Tracionamento imediato com corda esticada entre os dois diques laterais da vala e aquecimento.',
+      icon: '❄️🕳️',
+      color: '#38bdf8'
+    };
+
+    if (ht === 'cryoturbated_frost_boil_mud_circle_thixotropic_suction') {
+      hazard = {
+        hazardTitle: 'Sucção Tixotrópica em Círculo de Lama Crioturbada (Frost Boil / Mudboil)',
+        saveDC: 15,
+        saveType: 'Força',
+        frostPolygonRisk: 'No centro dos círculos de pedras selecionadas pelo gelo afloram medalhões circulares de argila siltosa nua saturada sob pressão hidrostática pelo congelamento lateral; pisar no medalhão faz o barro se liquefazer instantaneamente como cimento fresco sob vibração, engolindo as pernas até os joelhos na pasta congelante e impondo 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Saltar exclusivamente de anel de pedra em anel de pedra na borda dos círculos sem jamais pisar no centro argiloso nu.',
+        rescueAndStabilization: 'Alavancagem das botas com bastões cruzados sobre a borda pedregosa do círculo.',
+        icon: '⭕🥾',
+        color: '#0284c7'
+      };
+    } else if (ht === 'low_center_polygon_perched_bog_ice_lens_breakthrough') {
+      hazard = {
+        hazardTitle: 'Ruptura de Gelo Fino em Bacia Alagada de Polígono de Centro Baixo',
+        saveDC: 14,
+        saveType: 'Constituição',
+        frostPolygonRisk: 'Polígonos com bordas soerguidas funcionam como tanques rasos impermeáveis cheios de água de degelo sobre o permafrost a zero grau recobertos por uma película enganosa de gelo matinal; romper a crosta mergulha as botas e perneiras na água gelada sob vento polar causando congelamento rápido das extremidades com 2d8 de frio (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Caminhar estritamente sobre as muretas elevadas de turfa (ramparts) que separam as bacias poligonais.',
+        rescueAndStabilization: 'Secagem imediata dos pés com musgo sphagnum seco e troca de meias de lã.',
+        icon: '🧊🌊',
+        color: '#0ea5e9'
+      };
+    } else if (ht === 'thermal_contraction_ground_quake_sonic_crack_panic') {
+      hazard = {
+        hazardTitle: 'Fraturamento Sísmico Noturno por Contração Térmica (Cryoseism)',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        frostPolygonRisk: 'Quando a temperatura despenca abaixo de -30 graus, o solo congelado contrai violentamente abrindo fendas milimétricas de centenas de metros com estrondos ensurdecedores de tiro de canhão e tremores sob as botas; o choque acústico assusta montarias em disparada pelo campo de blocos e interrompe manobras (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Amarrar firmemente as montarias em estacas duplas e manter a calma reconhecendo o fenômeno criossísmico.',
+        rescueAndStabilization: 'Contenção rápida dos animais de carga antes que quebrem as patas nos anéis de pedra.',
+        icon: '💥❄️',
+        color: '#7dd3fc'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampCryogenicFrostPolygonStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'arctic').toLowerCase();
+    var dt = (defenseType || 'high_center_polygon_drained_peat_dome_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque no Domo Seco de Polígono de Centro Alto (High-Center Polygon)',
+      frostPolygonAndCampSafety: 'Acampamento instalado sobre um polígono cujo centro foi soerguido 1,5 metro acima das valas periféricas, garantindo drenagem total e turfa seca isolante.',
+      frostPolygonTrenchAndWatch: 'Mantém o piso das barracas seco, elevado acima da água de degelo e livre de círculos de lama.',
+      campRestAndSafetyGuards: 'Garante descanso longo aquecido e estável na planície de solo poligonal.',
+      icon: '⛺🔷',
+      color: '#38bdf8'
+    };
+
+    if (dt === 'sorted_stone_circle_ring_wall_ready_made_windbreak') {
+      tech = {
+        defenseTitle: 'Abrigo Circular Aproveitando Anel Natural de Pedras Selecionadas pelo Gelo',
+        frostPolygonAndCampSafety: 'A crioturbação natural já empurrou todos os matacões para uma mureta circular perfeita de 4 metros de diâmetro ao redor de um piso nivelado.',
+        frostPolygonTrenchAndWatch: 'Oferece fundação pronta de pedra para ancorar as lonas das tendas onde estacas não penetram no permafrost.',
+        campRestAndSafetyGuards: 'Resiste às piores nevascas horizontais da tundra.',
+        icon: '🪨⭕',
+        color: '#94a3b8'
+      };
+    } else if (dt === 'exposed_foliated_ice_wedge_pure_meltwater_quarry') {
+      tech = {
+        defenseTitle: 'Extração de Gelo Puro em Topo Exposto de Cunha de Gelo Milenar',
+        frostPolygonAndCampSafety: 'Corte com machadinha de blocos de gelo branco leitoso na parede lateral de uma vala poligonal limpa.',
+        frostPolygonTrenchAndWatch: 'Evita beber a água estagnada ferruginosa e rica em taninos das poças superficiais da tundra.',
+        campRestAndSafetyGuards: 'Proporciona água potável limpa após fervura rápida no fogareiro.',
+        icon: '🧊⛏️',
+        color: '#0ea5e9'
+      };
+    } else if (dt === 'polygonal_rampart_elevated_grid_patrol_walkway') {
+      tech = {
+        defenseTitle: 'Passarela de Ronda sobre a Grade de Diques Poligonais Elevados',
+        frostPolygonAndCampSafety: 'As cristas elevadas que cercam os polígonos formam uma rede de caminhos secos elevados 80 centímetros acima do pântano.',
+        frostPolygonTrenchAndWatch: 'Permite que os sentinelas patrulhem todo o perímetro do acampamento a pé seco e com visão superior.',
+        campRestAndSafetyGuards: 'Facilita a defesa coordenada contra alcatéias de lobos árticos.',
+        icon: '🛡️🧭',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 222: PAVIMENTOS DE CLASTOS (REG / GIBBER) E VENTIFACTOS (D&D 5e)
   // =========================================================================
 
@@ -30972,6 +31076,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessCryogenicFrostPolygonHazard: calcWildernessCryogenicFrostPolygonHazard,
+    calcCampCryogenicFrostPolygonStation: calcCampCryogenicFrostPolygonStation,
     calcWildernessGibberRegVentifactHazard: calcWildernessGibberRegVentifactHazard,
     calcCampGibberRegVentifactStation: calcCampGibberRegVentifactStation,
     calcWildernessAcidGossanDrainageHazard: calcWildernessAcidGossanDrainageHazard,
