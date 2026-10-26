@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessFungalSporeAndYellowMoldHazard) return '';
+        var bKey = (biome && biome.key) || 'forest';
+        var fz = CartShared.calcWildernessFungalSporeAndYellowMoldHazard(bKey, 'yellow_mold_colony');
+        return '<div class="clp-fungal-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,24,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(234,179,8,0.3);font-size:8px;color:#fef08a;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + fz.color + ';margin-bottom:2px;">' + fz.icon + ' ' + fz.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Perigo:</b> ' + fz.sporeImpactAndDamage + ' (CD ' + fz.saveDC + ' [' + fz.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde047;margin-top:1px;">• <b>Prevenção:</b> ' + fz.pioneerMitigation + ' · <i>Tratamento: ' + fz.treatmentDetails + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampGroundInsulationAndSleepingPlatform) return '';
+        var bKey = (biome && biome.key) || 'forest';
+        var gp = CartShared.calcCampGroundInsulationAndSleepingPlatform(bKey, 'raised_bough_sleeping_platform');
+        return '<div class="clp-insulation-card" style="margin:4px 0 6px;text-align:left;background:rgba(26,24,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(202,138,4,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + gp.color + ';margin-bottom:2px;">' + gp.icon + ' ' + gp.platformTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Isolamento Térmico:</b> ' + gp.thermalInsulation + ' · <b>Umidade:</b> ' + gp.moistureProtection + '</div>'
+          + '  <div style="font-size:7.5px;color:#fde047;margin-top:1px;">• <b>Recuperação:</b> ' + gp.comfortAndExhaustionRecovery + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcKarstSinkholeAndCavernHazard) return '';
         var bKey = (biome && biome.key) || 'hills';
         var sk = CartShared.calcKarstSinkholeAndCavernHazard(bKey, 'concealed_karst_sinkhole');

@@ -10293,6 +10293,130 @@
     };
   }
 
+  // === calcWildernessFungalSporeAndYellowMoldHazard (Fungos Venenosos, Mofo Amarelo e Esporos nos Ermos - DMG p. 105 / OotA p. 23) ===
+  function calcWildernessFungalSporeAndYellowMoldHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var ht = (hazardType || 'yellow_mold_colony').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colônia Traiçoeira de Mofo Amarelo em Troncos Úmidos',
+      saveDC: 15,
+      saveType: 'Constituição',
+      sporeImpactAndDamage: 'Nuvem asfixiante de 10 pés; 2d10 de dano de veneno e condição Envenenado por 1 minuto (1d10 de veneno extra por turno).',
+      pioneerMitigation: 'Destruir a colônia a distância com tochas ou magias ígneas; luz solar direta ou fogo limpam os esporos instantaneamente.',
+      treatmentDetails: 'Magias como Purificar Alimentos ou Restauração Menor neutralizam os esporos e removem a condição Envenenado.',
+      icon: '🍄☠️',
+      color: '#eab308'
+    };
+
+    if (ht === 'hallucinogenic_timmask_puffballs') {
+      hazard = {
+        hazardTitle: 'Esporos Alucinógenos de Fungos Timmask do Brejo',
+        saveDC: 13,
+        saveType: 'Sabedoria',
+        sporeImpactAndDamage: 'Condição Envenenado e estado de Confusão sensorial por 1 hora; o membro da comitiva se move em direções aleatórias.',
+        pioneerMitigation: 'Batedor com máscara de pano embebida em vinagre ou óleo aromático possui vantagem na salvaguarda contra inalação.',
+        rescueDetails: 'Manter o companheiro amarrado a uma corda guia curta até que as alucinações se dissipem completamente.',
+        icon: '🍄🌀',
+        color: '#c084fc'
+      };
+    } else if (ht === 'quagmire_suffocating_puffball' || bk === 'swamp' || bk === 'pantano') {
+      hazard = {
+        hazardTitle: 'Bolsas de Esporos Asfixiantes de Turfeira Negra',
+        saveDC: 14,
+        saveType: 'Constituição',
+        sporeImpactAndDamage: 'Tosse sufocante incontrolável; condição Incapacitado por 1 rodada e deslocamento reduzido pela metade por 10 minutos.',
+        pioneerMitigation: 'Caminhar com cautela ao redor de depressões lamacentas com cobertura fúngica musgosa visível.',
+        treatmentDetails: 'Água fresca em abundância para gargarejo e ar puro removem a tosse persistente.',
+        icon: '🌫️🕳️',
+        color: '#a3e635'
+      };
+    } else if (ht === 'cavern_bioluminescent_acid_caps') {
+      hazard = {
+        hazardTitle: 'Cogumelos Ácidos Cáusticos de Subterrâneo',
+        saveDC: 14,
+        saveType: 'Destreza',
+        sporeImpactAndDamage: 'Jato de seiva fúngica corrosiva em cone de 15 pés; 3d6 de dano de ácido e corrosão de tiras de couro.',
+        pioneerMitigation: 'Disparar flechas em alvos brilhantes antes da aproximação do grupo detona as cápsulas de forma segura.',
+        treatmentDetails: 'Lavar a pele com água com cal ou terra alcalina neutraliza a queimação ácida.',
+        icon: '✨🧪',
+        color: '#38bdf8'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      sporeImpactAndDamage: hazard.sporeImpactAndDamage,
+      pioneerMitigation: hazard.pioneerMitigation,
+      treatmentDetails: hazard.treatmentDetails || hazard.rescueDetails,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 105 (Mofo Amarelo e Fungos Perigosos) / PHB p. 182-183 (Condições de Envenenamento e Asfixia)'
+    };
+  }
+
+  // === calcCampGroundInsulationAndSleepingPlatform (Estrados Suspensos, Esteiras de Casca e Isolamento Térmico do Solo - DMG p. 111 / XGE p. 78) ===
+  function calcCampGroundInsulationAndSleepingPlatform(biomeKey, platformType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var pt = (platformType || 'raised_bough_sleeping_platform').toLowerCase();
+
+    var platform = {
+      platformTitle: 'Estrado Elevado de Varas Trançadas sobre Forquilhas',
+      thermalInsulation: 'Elevação de 25 cm do solo; bloqueia 85% da perda térmica corporal por condução com a terra gelada.',
+      moistureProtection: 'Totalmente imune a poças d água superficiais formadas por orvalho noturno ou chuvas passageiras.',
+      comfortAndExhaustionRecovery: 'Garante descanso profundo ininterrupto; aventureiros recuperam Dados de Vida com +1 PV adicional.',
+      icon: '🪵🛏️',
+      color: '#ca8a04'
+    };
+
+    if (pt === 'waterproof_bark_slat_mat') {
+      platform = {
+        platformTitle: 'Esteira de Casca de Bétula Impermeabilizada com Resina',
+        thermalInsulation: 'Barreira impermeável flexível entre o manto de lã e o solo pedregoso ou arenoso.',
+        moistureProtection: 'Bloqueia infiltração de umidade capilar do subsolo úmido ou neve compactada.',
+        comfortAndExhaustionRecovery: 'Impede que os sacos de dormir amanheçam ensopados; previne exaustão por calafrios matinais.',
+        icon: '🛶🌿',
+        color: '#84cc16'
+      };
+    } else if (pt === 'pine_needle_thermal_mattress') {
+      platform = {
+        platformTitle: 'Colchão Espesso de Agulhas de Pinheiro e Folhagem Seca',
+        thermalInsulation: 'Camada de 15 cm de matéria vegetal seca com microcâmaras de ar retendo o calor do corpo.',
+        moistureProtection: 'Camada inferior absorve a umidade do chão preservando a face superior aquecida e seca.',
+        comfortAndExhaustionRecovery: 'Concede vantagem na primeira salvaguarda de Constituição contra o frio matinal no despertar.',
+        icon: '🌲🍂',
+        color: '#10b981'
+      };
+    } else if (pt === 'suspended_jungle_hammock') {
+      platform = {
+        platformTitle: 'Bivaque em Rede Suspensa com Cobertura de Lona Encerada',
+        thermalInsulation: 'Isolamento aéreo absoluto a 1,5 metro do chão em áreas alagadas de mangue ou mata densa.',
+        moistureProtection: 'Inatingível por lençóis freáticos aflorantes, carrapatos, formigas carnívoras e cobras rastejantes.',
+        comfortAndExhaustionRecovery: 'Permite sono relaxante e seguro mesmo sobre charcos lamacentos ou raízes salientes.',
+        icon: '🪢🌴',
+        color: '#06b6d4'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      platformType: pt,
+      platformTitle: platform.platformTitle,
+      thermalInsulation: platform.thermalInsulation,
+      moistureProtection: platform.moistureProtection,
+      comfortAndExhaustionRecovery: platform.comfortAndExhaustionRecovery,
+      icon: platform.icon,
+      color: platform.color,
+      dndRef: 'DMG p. 111-112 (Acampamento Seguro e Condições Adversas) / XGE p. 78 (Atividades de Acampamento e Descanso) / PHB p. 186'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -12044,6 +12168,8 @@
     calcWildernessAcousticSignalHorn: calcWildernessAcousticSignalHorn,
     calcKarstSinkholeAndCavernHazard: calcKarstSinkholeAndCavernHazard,
     calcCampScentConcealmentAndWasteDisposal: calcCampScentConcealmentAndWasteDisposal,
+    calcWildernessFungalSporeAndYellowMoldHazard: calcWildernessFungalSporeAndYellowMoldHazard,
+    calcCampGroundInsulationAndSleepingPlatform: calcCampGroundInsulationAndSleepingPlatform,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
