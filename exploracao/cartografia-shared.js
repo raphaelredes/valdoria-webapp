@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 193: DOMOS DE DIAPIROS DE SAL E GELEIRAS DE HALITA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessSaltDiapirGlacierHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'halite_namak_pinnacle_karren_laceration').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Campo de Lâminas de Halita Cristalina em Geleira de Sal (Namakier)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      saltDiapirRisk: 'Língua de sal-gema extrudida da montanha e esculpida pelas raras chuvas em milhares de agulhas e cristas translúcidas afiadas como vidro; uma queda rasga couro e carne com 3d8 de dano cortante agravado pela incrustação imediata de sal puro nas feridas (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Quebra metódica das pontas cristalinas com marreta de ferro para abrir vereda plana e uso de solados duplos de madeira.',
+      rescueAndStabilization: 'Lavagem abundante das lacerações com água doce antes de suturar e enfaixamento com linho limpo.',
+      icon: '🧂🗡️',
+      color: '#f43f5e'
+    };
+
+    if (ht === 'sub_salt_brine_tube_sinkhole_plunge') {
+      hazard = {
+        hazardTitle: 'Queda em Sumidouro de Conduto de Salmoura Sob Crosta Evaporítica',
+        saveDC: 15,
+        saveType: 'Destreza',
+        saltDiapirRisk: 'A altíssima solubilidade da halita cria chaminés verticais ocultas sob pontes finas de sal recristalizado; o teto cede precipitando o explorador em poço subterrâneo de salmoura hipersaturada com 3d8 de concussão e desidratação osmótica severa (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Marcha encordada sobre as nervuras escuras de argila residual insolúvel que demarcam as zonas maciças.',
+        rescueAndStabilization: 'Içamento imediato do poço salino e remoção da crosta de sal da pele e olhos com água fresca.',
+        icon: '🕳️🧂',
+        color: '#e11d48'
+      };
+    } else if (ht === 'hyper_albedo_halite_crystal_snow_blindness') {
+      hazard = {
+        hazardTitle: 'Ofuscamento e Cegueira Solar nas Facetas Brancas do Domo de Sal',
+        saveDC: 14,
+        saveType: 'Constituição',
+        saltDiapirRisk: 'As paredes espelhadas de halita branca e gipsita refletem 90% da radiação solar do deserto em todas as direções; a exposição sem proteção queima a córnea impondo a condição Cego por 2 horas e desorientação na marcha (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Uso de viseiras de osso ou madeira com fenda estreita (óculos de fenda) e fuligem de carvão aplicada sob os olhos.',
+        rescueAndStabilization: 'Descanso em tenda escura com compressas frias de chá de camomila sobre as pálpebras fechadas.',
+        icon: '☀️👁️',
+        color: '#fb7185'
+      };
+    } else if (ht === 'viscous_salt_flow_overhang_calving_crush') {
+      hazard = {
+        hazardTitle: 'Desmoronamento de Cornija de Sal Colorido na Frente do Fluxo',
+        saveDC: 15,
+        saveType: 'Força',
+        saltDiapirRisk: 'A frente da geleira de sal avança lentamente por gravidade criando blocos suspensos de halita avermelhada e silvita que se desprendem subitamente com o estalo térmico da tarde, esmagando o fundo do cânion com 3d10 de concussão (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Travessia afastada da parede frontal da língua de sal e proibição de descansar à sombra das cornijas salinas.',
+        rescueAndStabilization: 'Fragmentação rápida dos blocos de sal-gema com picaretas e retirada dos feridos para terreno firme.',
+        icon: '🏔️🧂',
+        color: '#f97316'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampSaltDiapirGlacierStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'caprock_gypsum_anhydrite_crown_dry_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque na Rocha Capeadora Insolúvel (Caprock) no Topo do Domo',
+      saltDiapirAndCampSafety: 'Acampamento estabelecido sobre a carapaça residual de calcário, dolomito e anidrita que coroa o diapiro, completamente livre de condutos de dissolução rápida da halita.',
+      saltShelterAndStill: 'Proporciona fundação pétrea inabalável, brisa fresca constante acima do calor do vale e visão dominante das rotas.',
+      campRestAndSafetyGuards: 'Garante descanso longo estável e seguro para todos os aventureiros e sentinelas da comitiva.',
+      icon: '⛺🪨',
+      color: '#f43f5e'
+    };
+
+    if (dt === 'translucent_halite_block_windbreak_igloo') {
+      tech = {
+        defenseTitle: 'Reduto de Blocos de Sal-Gema Soldados com Salmoura (Muro de Halita)',
+        saltDiapirAndCampSafety: 'Muralha circular construída com lajes cúbicas de sal cristalino unidas por pasta de sal úmido que seca ao vento formando uma estrutura monolítica translúcida.',
+        saltShelterAndStill: 'Bloqueia integralmente as tempestades de areia e o vento seco da noite, mantendo iluminação difusa suave no interior.',
+        campRestAndSafetyGuards: 'Oferece cobertura total (+5 na CA) e conforto térmico surpreendente no deserto salino.',
+        icon: '🧱🧂',
+        color: '#fb7185'
+      };
+    } else if (dt === 'solar_brine_distillation_cone_still_station') {
+      tech = {
+        defenseTitle: 'Alambique Solar de Evaporação sobre Bacia de Salmoura',
+        saltDiapirAndCampSafety: 'Toldo cônico impermeável estendido sobre uma poça rasa de salmoura exposta ao sol, onde o vapor de água pura condensa na face interna e pinga em cantis enterrados na sombra.',
+        saltShelterAndStill: 'Transforma a água intragável saturada de sal em água destilada potável ao longo do dia e da noite.',
+        campRestAndSafetyGuards: 'Impede a exaustão por sede quando as reservas de água doce da comitiva começam a baixar.',
+        icon: '💧☀️',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'acoustic_crystal_salt_crust_perimeter_apron') {
+      tech = {
+        defenseTitle: 'Tapete Acústico de Cristais Cúbicos de Halita Crepitante',
+        saltDiapirAndCampSafety: 'Faixa de 10 metros ao redor do bivaque semeada com crostas finas e ocas de sal recém-cristalizado que estalam alto sob qualquer pressão.',
+        saltShelterAndStill: 'Funciona como campo de alarme sonoro natural impossível de atravessar em silêncio por criaturas terrestres.',
+        campRestAndSafetyGuards: 'Concede alerta antecipado imediato para as sentinelas durante a vigília noturna.',
+        icon: '🔔🧂',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 192: COLINAS DE PINGO DE NÚCLEO DE GELO E DEPRESSÕES DE ALAS (D&D 5e)
   // =========================================================================
 
@@ -27852,6 +27956,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessSaltDiapirGlacierHazard: calcWildernessSaltDiapirGlacierHazard,
+    calcCampSaltDiapirGlacierStation: calcCampSaltDiapirGlacierStation,
     calcWildernessPingoThermokarstHazard: calcWildernessPingoThermokarstHazard,
     calcCampPingoThermokarstStation: calcCampPingoThermokarstStation,
     calcWildernessPrismaticGeyserBasinHazard: calcWildernessPrismaticGeyserBasinHazard,

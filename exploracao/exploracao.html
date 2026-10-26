@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T17:21:41Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T17:23:18Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessSaltDiapirGlacierHazard) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var sd = CartShared.calcWildernessSaltDiapirGlacierHazard(bKey, 'halite_namak_pinnacle_karren_laceration');
+        return '<div class="clp-salt-diapir-card" style="margin:4px 0 6px;text-align:left;background:rgba(38,16,24,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(244,63,94,0.35);font-size:8px;color:#ffe4e6;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sd.color + ';margin-bottom:2px;">' + sd.icon + ' ' + sd.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Domo de Sal e Geleira de Halita:</b> ' + sd.saltDiapirRisk + ' (CD ' + sd.saveDC + ' [' + sd.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fecdd3;margin-top:1px;">• <b>Mitigação:</b> ' + sd.pioneerMitigation + ' · <i>Estabilização: ' + sd.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampSaltDiapirGlacierStation) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var sc = CartShared.calcCampSaltDiapirGlacierStation(bKey, 'caprock_gypsum_anhydrite_crown_dry_bivouac');
+        return '<div class="clp-salt-diapir-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,12,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(225,29,72,0.3);font-size:8px;color:#ffe4e6;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sc.color + ';margin-bottom:2px;">' + sc.icon + ' ' + sc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Bivaque na Caprock do Domo:</b> ' + sc.saltDiapirAndCampSafety + ' · <b>Defesa:</b> ' + sc.saltShelterAndStill + '</div>'
+          + '  <div style="font-size:7.5px;color:#fda4af;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + sc.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){
