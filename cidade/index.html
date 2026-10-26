@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessBlackwaterIgapoAndMatHazard) return '';
+        var bKey = (biome && biome.key) || 'swamp';
+        var ig = CartShared.calcWildernessBlackwaterIgapoAndMatHazard(bKey, 'floating_mat_sudden_submersion');
+        return '<div class="clp-blackwater-igapo-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,28,24,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(21,128,61,0.3);font-size:8px;color:#dcfce7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ig.color + ';margin-bottom:2px;">' + ig.icon + ' ' + ig.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Igapós e Tapetes Flutuantes:</b> ' + ig.blackwaterIgapoRiskAndMats + ' (CD ' + ig.saveDC + ' [' + ig.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#86efac;margin-top:1px;">• <b>Mitigação:</b> ' + ig.pioneerMitigation + ' · <i>Estabilização: ' + ig.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampBlackwaterIgapoAndMatStation) return '';
+        var bKey = (biome && biome.key) || 'swamp';
+        var cp = CartShared.calcCampBlackwaterIgapoAndMatStation(bKey, 'buttress_root_elevated_platform_bivouac');
+        return '<div class="clp-buttress-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,34,28,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#ecfdf5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Sapopemas:</b> ' + cp.igapoAnchorageAndButtressSafety + ' · <b>Proteção:</b> ' + cp.matShieldingAndCampSecurity + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessGlacialMoraineAndDrumlinHazard) return '';
         var bKey = (biome && biome.key) || 'glacier';
         var gm = CartShared.calcWildernessGlacialMoraineAndDrumlinHazard(bKey, 'moraine_scree_till_avalanche');

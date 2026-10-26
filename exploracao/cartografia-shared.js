@@ -18105,6 +18105,130 @@
     };
   }
 
+  // === calcWildernessBlackwaterIgapoAndMatHazard (Igapós de Água Preta, Sapopemas e Tapetes Flutuantes - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessBlackwaterIgapoAndMatHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'floating_mat_sudden_submersion').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ruptura Súbita de Tapete Flutuante de Macrófitas',
+      saveDC: 15,
+      saveType: 'Destreza',
+      blackwaterIgapoRiskAndMats: 'Camada entrelaçada de gramíneas e juncos aquáticos de 30 centímetros que cede sob a marcha da comitiva; afundamento em 6 metros de água preta anóxica emaranhada em raízes causando 3d6 e sufocamento por afogamento (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam com varas longas de bambu de sondagem horizontal e amarram linhas de retenção aos troncos firmes de igapó.',
+      rescueAndStabilization: 'Içamento imediato com ganchos de resgate acolchoados, desobstrução das vias aéreas e compressão torácica na canoa de apoio.',
+      icon: '🌿⚠️',
+      color: '#15803d'
+    };
+
+    if (ht === 'buttress_root_labyrinth_snare') {
+      hazard = {
+        hazardTitle: 'Aprisionamento em Labirinto de Sapopemas Espinhosas',
+        saveDC: 14,
+        saveType: 'Destreza',
+        blackwaterIgapoRiskAndMats: 'Emaranhado de raízes tabulares submersas e caules armados com acúleos venenosos de palmeiras-marajá; aprisionamento de embarcações e perfurações profundas na pele.',
+        pioneerMitigation: 'Mapeamento visual de fendas de escoamento e uso de facões de desbaste de gume reforçado pelos remadores de vanguarda.',
+        rescueAndStabilization: 'Desvencilhamento com alicates de corte e curativo compressivo com unguento de copaíba e casca de barbatimão.',
+        icon: '🪵🩸',
+        color: '#b45309'
+      };
+    } else if (ht === 'anoxic_marsh_methane_bubble_burst') {
+      hazard = {
+        hazardTitle: 'Ruptura Tóxica de Bolha Gigante de Gás Sulfídrico e Metano',
+        saveDC: 14,
+        saveType: 'Constituição',
+        blackwaterIgapoRiskAndMats: 'Bolsão de decomposição anaeróbica no leito lodoso de água preta que irrompe na passagem das canoas liberando nuvem cáustica de gás sulfídrico e metano com náusea intensa e desmaio.',
+        pioneerMitigation: 'Vigias mantêm tochas aromáticas elevadas e navegam a favor do fluxo da correnteza com panos umedecidos sobre o rosto.',
+        rescueAndStabilization: 'Remoção urgente para canais abertos e ministração de infusão concentrada de carqueja com mel de abelha silvestre.',
+        icon: '🫧☣️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'submerged_snag_tannin_obscurity_ram') {
+      hazard = {
+        hazardTitle: 'Choque com Tronco Submerso Oculto por Águas Negras',
+        saveDC: 13,
+        saveType: 'Força',
+        blackwaterIgapoRiskAndMats: 'Tronco maciço de angelim-da-várzea repousando a 20 centímetros sob a superfície opaca de água rica em taninos escuros; impacto frontal violento com alagamento da canoa.',
+        pioneerMitigation: 'Sondador na proa com vara de toque contínuo e velocidade de remada reduzida a menos de meio nó em trechos sombreados.',
+        rescueAndStabilization: 'Escoramento do casco com cunhas de madeira macia e calafetagem rápida com breu aquecido e estopa de algodão.',
+        icon: '🛶💥',
+        color: '#0284c7'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      blackwaterIgapoRiskAndMats: hazard.blackwaterIgapoRiskAndMats,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Florestas Alagadas e Terrenos Pantanosos) / PHB p. 182-183 (Marcha Fluvial e Natação) / XGE p. 78-83 (Geomorfologia Fluvial e Zonas Húmidas)'
+    };
+  }
+
+  // === calcCampBlackwaterIgapoAndMatStation (Bivaques em Sapopemas, Passadiços e Filtros de Tanino - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampBlackwaterIgapoAndMatStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'buttress_root_elevated_platform_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Plataforma sobre Sapopemas de Samaúma',
+      igapoAnchorageAndButtressSafety: 'Decks de pranchas de cedro fixadas a 3 metros acima da linha de cheia apoiadas nas cavidades naturais entre as raízes tabulares gigantes de samaúma centenária.',
+      matShieldingAndCampSecurity: 'Totalmente isolado do contato com répteis aquáticos, peixes carnívoros e enxurradas noturnas do leito do igapó.',
+      campRestAndSafetyGuards: 'Permite sono longo seguro, seco e ventilado para os membros da comitiva, longe da umidade putrefata da lama do fundo.',
+      icon: '🪵⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'woven_wicker_floating_bridge_walkway') {
+      tech = {
+        defenseTitle: 'Passadiço Flutuante Articulado de Vime e Troncos de Balsa',
+        igapoAnchorageAndButtressSafety: 'Esteiras trançadas de cipó-titica amarradas a flutuadores leves de balsa ancoradas com estacas de ipê na margem de terra firme.',
+        matShieldingAndCampSecurity: 'Permite circulação rápida e segura entre as plataformas de acampamento e as canoas sem pisar em lama movediça ou tapetes falsos.',
+        campRestAndSafetyGuards: 'Garante evacuação tática em menos de 30 segundos em caso de aproximação de perigos aquáticos noturnos.',
+        icon: '🌉🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'tannin_charcoal_ash_water_purifier') {
+      tech = {
+        defenseTitle: 'Filtro Decantador com Carvão e Cinza para Taninos',
+        igapoAnchorageAndButtressSafety: 'Funil de cerâmica com camadas sucessivas de carvão ativado de lenha dura, cinzas alcalinas de fogueira e areia de rio lavada.',
+        matShieldingAndCampSecurity: 'Neutraliza a acidez intensa e retém a adstringência de taninos escuros, produzindo 15 litros diários de água translúcida potável.',
+        campRestAndSafetyGuards: 'Evita azia, cólicas intestinais e desidratação entre todos os integrantes da comitiva.',
+        icon: '💧🏺',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'smoke_pot_citronella_brazier_perimeter') {
+      tech = {
+        defenseTitle: 'Braseiros Defumadores com Resina de Breu e Citronela',
+        igapoAnchorageAndButtressSafety: 'Panelas de barro suspensas nos cantos da plataforma queimando resina balsâmica e folhas maceradas de capim-santo.',
+        matShieldingAndCampSecurity: 'Cria cortina contínua de fumaça aromática densa que repele pernilongos, mutucas e borrachudos das águas pretas.',
+        campRestAndSafetyGuards: 'Assegura que as sentinelas mantenham a vigilância sem o tormento de picadas e febres da floresta úmida.',
+        icon: '💨🌿',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      igapoAnchorageAndButtressSafety: tech.igapoAnchorageAndButtressSafety,
+      matShieldingAndCampSecurity: tech.matShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Pântanos e Florestas Fluviais) / PHB p. 150 (Kits de Exploração de Selva) / XGE p. 78-83 (Engenharia em Áreas Alagadas e Purificação)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -19980,6 +20104,8 @@
     calcCampGeyserBasinAndAcidPoolStation: calcCampGeyserBasinAndAcidPoolStation,
     calcWildernessGlacialMoraineAndDrumlinHazard: calcWildernessGlacialMoraineAndDrumlinHazard,
     calcCampGlacialMoraineAndDrumlinStation: calcCampGlacialMoraineAndDrumlinStation,
+    calcWildernessBlackwaterIgapoAndMatHazard: calcWildernessBlackwaterIgapoAndMatHazard,
+    calcCampBlackwaterIgapoAndMatStation: calcCampBlackwaterIgapoAndMatStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
