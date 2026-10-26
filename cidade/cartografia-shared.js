@@ -18725,6 +18725,130 @@
     };
   }
 
+  // === calcWildernessKarstMogoteAndBlindPitHazard (Mogotes Cársticos Tropicais, Sumidouros em Poço Cego e Sifões - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessKarstMogoteAndBlindPitHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'blind_shaft_speleothem_drop').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda em Sumidouro Vertical de Poço Cego em Mogote',
+      saveDC: 15,
+      saveType: 'Destreza',
+      karstMogoteRiskAndPits: 'Poço vertical de dissolução kárstica de 20 metros de profundidade camuflado por tapete denso de samambaias e orquídeas aéreas; ruptura súbita com queda sobre espigas pontiagudas de espeleotemas causando 4d6 de queda e perfuração (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam tateando o solo com varas de bambu compridas e amarram fitas refletivas demarcatórias nas fendas ocultas.',
+      rescueAndStabilization: 'Içamento por guincho de tripé com corda estática e colocação de colar cervical e imobilização espinhal completa.',
+      icon: '🕳️⚠️',
+      color: '#d97706'
+    };
+
+    if (ht === 'mogote_sheer_cliff_limestone_flake_shear') {
+      hazard = {
+        hazardTitle: 'Desprendimento de Laje de Calcário Tropical por Cisalhamento',
+        saveDC: 14,
+        saveType: 'Destreza',
+        karstMogoteRiskAndPits: 'Placa saliente de calcário carcomida pela água das chuvas que se parte da torre do mogote com estrondo trovejante; queda de bloco cortante de 3 toneladas na vereda.',
+        pioneerMitigation: 'Inspeção visual da crista superior por sentinelas com lunetas e avanço rápido mantendo distância segura da base dos paredões.',
+        rescueAndStabilization: 'Remoção urgente de entulhos com alavancas de ferro e curativo hemostático compressivo em ferimentos lacerantes.',
+        icon: '🧗💥',
+        color: '#b45309'
+      };
+    } else if (ht === 'subterranean_siphon_flash_surge_inundation') {
+      hazard = {
+        hazardTitle: 'Inundação Relâmpago por Ressurgência de Rio Cárstico',
+        saveDC: 14,
+        saveType: 'Força',
+        karstMogoteRiskAndPits: 'Boca de caverna inferior que cospe repentinamente torrente torrencial de água pressurizada por temporais ocorridos no platô a quilômetros de distância; arraste de aventureiros e cargas para sumidouro.',
+        pioneerMitigation: 'Leitura atenta de ruídos subterrâneos de eco hídrico e acampamento sempre posicionado pelo menos 10 metros acima do fundo do vale cárstico.',
+        rescueAndStabilization: 'Lançamento de retinidas com arneses e tracionamento horizontal rápido para saliências rochosas secas.',
+        icon: '🌊🌀',
+        color: '#0284c7'
+      };
+    } else if (ht === 'cavernous_spore_fungal_cloud_inhalation') {
+      hazard = {
+        hazardTitle: 'Nuvem de Esporos Fúngicos Cáusticos em Entrada de Caverna',
+        saveDC: 13,
+        saveType: 'Constituição',
+        karstMogoteRiskAndPits: 'Colônias de fungos endógenos de guano de morcego perturbadas pela passagem da coluna de marcha; spray denso de micélios alérgicos provocando tosse asfixiante e desorientação febril.',
+        pioneerMitigation: 'Uso de máscaras de gaze de linho embebidas em vinagre aromático e avanço rápido sem encostar nas paredes úmidas de calcário.',
+        rescueAndStabilization: 'Inalação de vapores de eucalipto balsâmico em área aberta e lavagem nasal vigorosa com soro morno esterilizado.',
+        icon: '🍄☣️',
+        color: '#ca8a04'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      karstMogoteRiskAndPits: hazard.karstMogoteRiskAndPits,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Terrenos Cársticos e Cavernas) / PHB p. 182-183 (Marcha e Terreno Hostil) / XGE p. 78-83 (Geomorfologia Cárstica Tropical)'
+    };
+  }
+
+  // === calcCampKarstMogoteAndBlindPitStation (Bivaques em Alcovas de Mogote, Grades de Poço e Calhas Minerais - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampKarstMogoteAndBlindPitStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'mogote_natural_alcove_terrace_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Terraço de Alcova Calcificada a Meia-Encosta',
+      mogoteAnchorageAndPitSafety: 'Patamar rochoso natural de calcário maciço a 15 metros acima do fundo do vale úmido abrigado por ampla pala côncava de rocha saliente contra intempéries.',
+      pitShieldingAndCampSecurity: 'Totalmente isolado do alcance de predadores terrestres sem garras e imune a inundações repentinas de cursos de água subterrâneos.',
+      campRestAndSafetyGuards: 'Garante sono longo protegido, seco e arejado para os membros da comitiva com ampla visão panorâmica sobre a mata cárstica.',
+      icon: '🧗⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'blind_pit_grate_cover_woven_timber') {
+      tech = {
+        defenseTitle: 'Grade Reforçada de Troncos de Jacarandá sobre Sumidouros',
+        mogoteAnchorageAndPitSafety: 'Grelha pesada de toras travadas e amarradas com tirantes de couro assentada sobre orifícios de poços cegos próximos às tendas.',
+        pitShieldingAndCampSecurity: 'Veda totalmente as bocas de abismos verticais e impede quedas acidentais de sentinelas durante a noite.',
+        campRestAndSafetyGuards: 'Permite circulação desimpedida e montagem segura do acampamento mesmo em áreas crivadas de sumidouros cársticos.',
+        icon: '🪵🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'cave_drip_stalactite_gutter_collector') {
+      tech = {
+        defenseTitle: 'Calhas de Bambu com Coleta de Gotejamento de Estalactites',
+        mogoteAnchorageAndPitSafety: 'Sistema de canaletas de bambu calibradas posicionadas sob pingadeiras ativas de teto de caverna conectadas a talhas de cerâmica.',
+        pitShieldingAndCampSecurity: 'Coleta 16 litros diários de água mineral límpida naturalmente filtrada por dezenas de metros de calcário puro sem contaminantes biológicos.',
+        campRestAndSafetyGuards: 'Abastece plenamente os cantis e caldeirões da comitiva sem necessidade de expedições perigosas aos fundos dos sumidouros.',
+        icon: '💧🏺',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'sulfur_lime_barrier_snake_ward_trench') {
+      tech = {
+        defenseTitle: 'Valeta Defensiva Perimétrica com Cal e Enxofre Repelente',
+        mogoteAnchorageAndPitSafety: 'Sulco contínuo escavado ao redor do bivaque preenchido com cinzas alcalinas, cal virgem e enxofre em pó.',
+        pitShieldingAndCampSecurity: 'Cria barreira química intransponível para víboras peçonhentas, escorpiões e lacraias gigantes que nidificam em fendas rochosas.',
+        campRestAndSafetyGuards: 'Assegura a tranquilidade dos sentinelas e permite repouso seguro sem surpresas venenosas.',
+        icon: '🧪🛡️',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      mogoteAnchorageAndPitSafety: tech.mogoteAnchorageAndPitSafety,
+      pitShieldingAndCampSecurity: tech.pitShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Cavernas e Formações Kársticas) / PHB p. 150 (Kits de Exploração de Caverna) / XGE p. 78-83 (Engenharia Cárstica e Captação)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -20610,6 +20734,8 @@
     calcCampAaLavaFieldAndChasmStation: calcCampAaLavaFieldAndChasmStation,
     calcWildernessPapyrusSwampAndSiphonHazard: calcWildernessPapyrusSwampAndSiphonHazard,
     calcCampPapyrusSwampAndSiphonStation: calcCampPapyrusSwampAndSiphonStation,
+    calcWildernessKarstMogoteAndBlindPitHazard: calcWildernessKarstMogoteAndBlindPitHazard,
+    calcCampKarstMogoteAndBlindPitStation: calcCampKarstMogoteAndBlindPitStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
