@@ -15873,6 +15873,130 @@
     };
   }
 
+  // === calcWildernessCoastalDuneAndSingingSandHazard (Dunas Móveis, Corredores de Deflação e Areias Cantantes - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessCoastalDuneAndSingingSandHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'barchan_slipface_slump_avalanche').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desmoronamento da Face de Deslizamento de Barcana',
+      saveDC: 14,
+      saveType: 'Destreza',
+      coastalDuneRiskAndSandSlump: 'Aresta instável de duna costeira de 15 metros que cede sob o avanço da comitiva; avalanche de areia fofa causando 2d8 de contusão e risco de soterramento parcial (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam com calçados largos de trama de palha e evitam a crista de barlavento íngreme durante rajadas de vento.',
+      rescueAndStabilization: 'Desenterramento rápido com pás de campo desobstruindo as vias respiratórias e hidratação imediata.',
+      icon: '🏖️⚠️',
+      color: '#d97706'
+    };
+
+    if (ht === 'wind_deflation_corridor_sandblast') {
+      hazard = {
+        hazardTitle: 'Jateamento Cortante em Corredor de Deflação',
+        saveDC: 14,
+        saveType: 'Constituição',
+        coastalDuneRiskAndSandSlump: 'Rajadas oceânicas de 60 km/h canalizadas entre dunas que arremessam grãos de quartzo e salitre afiado; 2d6 de dano perfurante e cegueira temporária por 10 minutos.',
+        pioneerMitigation: 'Uso de máscaras de linho espesso com lentes polarizadas de mica e deslocamento em fila indiana rente ao solo.',
+        rescueAndStabilization: 'Lavagem ocular com soro fisiológico limpo e aplicação de pomada calmante de camomila.',
+        icon: '💨🌪️',
+        color: '#f59e0b'
+      };
+    } else if (ht === 'acoustic_singing_sand_resonance') {
+      hazard = {
+        hazardTitle: 'Ressonância Acústica das Areias Cantantes',
+        saveDC: 13,
+        saveType: 'Sabedoria',
+        coastalDuneRiskAndSandSlump: 'Zumbido subsônico profundo emitido pela fricção de grãos dunares esféricos; perturbação no labirinto auricular, náusea e quebra involuntária de concentração mágica.',
+        pioneerMitigation: 'Vedação auricular preventiva com cera de abelha aromatizada com hortelã.',
+        rescueAndStabilization: 'Ingestão de infusão quente de gengibre e repouso de 15 minutos em área de solo rochoso firme.',
+        icon: '🔊🌀',
+        color: '#8b5cf6'
+      };
+    } else if (ht === 'coastal_quicksand_washout') {
+      hazard = {
+        hazardTitle: 'Bolsão de Areia Movediça Submersa por Ressaca',
+        saveDC: 14,
+        saveType: 'Força',
+        coastalDuneRiskAndSandSlump: 'Depressão interdunária saturada por infiltração de água marinha sob maré viva; afundamento rápido de aventureiros e cargas até a cintura.',
+        pioneerMitigation: 'Sondagem contínua do leito com bastões de bambu graduados antes de pisar em trechos de cor mais escura.',
+        rescueAndStabilization: 'Lançamento de pranchas leves de suporte e tração com corda de cânhamo de 15 metros com nó de laço.',
+        icon: '🌊🕳️',
+        color: '#0284c7'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      coastalDuneRiskAndSandSlump: hazard.coastalDuneRiskAndSandSlump,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Dunas Móveis e Sufocamento) / PHB p. 182-183 (Marcha Litorânea) / XGE p. 78-83 (Herborismo e Navegação)'
+    };
+  }
+
+  // === calcCampCoastalDuneFascineBarrierAndDewStation (Bivaques em Barcanas, Cercas de Fascina e Condensadores - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampCoastalDuneFascineBarrierAndDewStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'lee_side_barchan_hollow_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque no Barlavento Côncavo de Barcana Estável',
+      duneAnchorageAndWindSafety: 'Depressão protegida na curva em ferradura da duna que bloqueia ventos marinhos cortantes e dispersa tempestades de areia.',
+      sandShieldingAndCampSecurity: 'Muros de contenção com esteiras de junco e estacas de freixo que impedem o soterramento noturno do acampamento.',
+      campRestAndSafetyGuards: 'Garante repouso longo aquecido e sem areia nas esteiras dos aventureiros com sentinelas em posto elevado de crista.',
+      icon: '🏖️⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'marram_grass_fascine_barrier') {
+      tech = {
+        defenseTitle: 'Paliçada de Fascina e Feixes de Grama-das-Dunas',
+        duneAnchorageAndWindSafety: 'Cerca viva trançada com feixes de grama marinha e raízes fibrosas que estabiliza o topo da duna e retém a areia volátil.',
+        sandShieldingAndCampSecurity: 'Cria anteparo eficaz contra o jateamento salino e impede invasão de caranguejos e rastejadores de praia.',
+        campRestAndSafetyGuards: 'Mantém a área central do acampamento estável e transitável mesmo sob vendavais noturnos.',
+        icon: '🌾🛡️',
+        color: '#14b8a6'
+      };
+    } else if (dt === 'solar_condensation_dew_trap') {
+      tech = {
+        defenseTitle: 'Armadilha de Condensação Solar e Coletor de Orvalho Marinho',
+        duneAnchorageAndWindSafety: 'Cúpula cônica invertida de lona impermeável estendida sobre vala de areia com peso central e recipiente de barro.',
+        sandShieldingAndCampSecurity: 'Condensa a umidade do nevoeiro litorâneo e produz 5 litros de água doce purificada sem salinidade.',
+        campRestAndSafetyGuards: 'Abastece todos os cantis da comitiva de forma autossuficiente em pleno litoral sem fontes fluviais.',
+        icon: '💧🏺',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'woven_mat_ground_stabilization_carpet') {
+      tech = {
+        defenseTitle: 'Esteiras Trançadas de Junco para Estabilização de Solo',
+        duneAnchorageAndWindSafety: 'Passadiço flexível desenrolado sobre a areia fofa que distribui a pressão dos passos e equipamentos pesados.',
+        sandShieldingAndCampSecurity: 'Evita afundamentos ao redor das fogueiras e facilita movimentação rápida de combate caso ocorra alarme.',
+        campRestAndSafetyGuards: 'Assegura piso limpo e firme para manutenção de armas, armaduras e preparo de refeições no bivaque.',
+        icon: '🪵🧺',
+        color: '#eab308'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      duneAnchorageAndWindSafety: tech.duneAnchorageAndWindSafety,
+      sandShieldingAndCampSecurity: tech.sandShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Dunas e Coleta de Água) / PHB p. 150 (Kits de Aventureiro) / XGE p. 78-83 (Herborismo e Carpintaria)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -17712,6 +17836,8 @@
     calcCampColumnarBasaltPrismAnchorageAndShelfStation: calcCampColumnarBasaltPrismAnchorageAndShelfStation,
     calcWildernessKarstPavementAndSinkholeHazard: calcWildernessKarstPavementAndSinkholeHazard,
     calcCampKarstPavementHoneycombShelterAndFilterStation: calcCampKarstPavementHoneycombShelterAndFilterStation,
+    calcWildernessCoastalDuneAndSingingSandHazard: calcWildernessCoastalDuneAndSingingSandHazard,
+    calcCampCoastalDuneFascineBarrierAndDewStation: calcCampCoastalDuneFascineBarrierAndDewStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,

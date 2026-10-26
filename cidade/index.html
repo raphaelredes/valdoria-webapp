@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessCoastalDuneAndSingingSandHazard) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var cd = CartShared.calcWildernessCoastalDuneAndSingingSandHazard(bKey, 'barchan_slipface_slump_avalanche');
+        return '<div class="clp-coastal-dune-card" style="margin:4px 0 6px;text-align:left;background:rgba(36,28,20,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(217,119,6,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cd.color + ';margin-bottom:2px;">' + cd.icon + ' ' + cd.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Duna e Areia Cantante:</b> ' + cd.coastalDuneRiskAndSandSlump + ' (CD ' + cd.saveDC + ' [' + cd.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Mitigação:</b> ' + cd.pioneerMitigation + ' · <i>Estabilização: ' + cd.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampCoastalDuneFascineBarrierAndDewStation) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var cp = CartShared.calcCampCoastalDuneFascineBarrierAndDewStation(bKey, 'lee_side_barchan_hollow_bivouac');
+        return '<div class="clp-dune-fascine-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,34,30,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#ecfdf5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Barcana:</b> ' + cp.duneAnchorageAndWindSafety + ' · <b>Proteção:</b> ' + cp.sandShieldingAndCampSecurity + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessKarstPavementAndSinkholeHazard) return '';
         var bKey = (biome && biome.key) || 'mountain';
         var kh = CartShared.calcWildernessKarstPavementAndSinkholeHazard(bKey, 'limestone_grike_leg_trap_fracture');
