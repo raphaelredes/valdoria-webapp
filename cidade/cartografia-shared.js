@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 251: GARGANTAS DE FENDA EM CALCÁRIO KARSTIFICADO E TROMBAS D'ÁGUA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessKarstLimestoneSlotGorgeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'karst_chute_debris_wall_surge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: "Tromba d'Água Repentina e Muro de Detritos em Garganta de Calcário Karstificado",
+      saveDC: 15,
+      saveType: 'Destreza',
+      karstLimestoneRisk: 'Tempestades distantes a dezenas de quilômetros canalizam milhares de toneladas de água por gargantas de calcário com menos de um metro de largura; a onda de choque chega em minutos como um muro de lama, cascalho e troncos rugindo entre paredes verticais de 50 metros de altura sem saída lateral, causando 3d10 de dano contundente e risco de afogamento (DMG p. 110; PHB p. 182-183; XGE p. 111).',
+      pioneerMitigation: 'Marchar atento aos estrondos ecoantes na fenda e fixar cordas de segurança e tirantes de subida nas paredes antes do avanço.',
+      rescueAndStabilization: 'Içamento imediato com cabos de escalada e ressuscitação de aventureiros arrastados pela torrente.',
+      icon: '🌊峡',
+      color: '#0284c7'
+    };
+
+    if (ht === 'polished_karst_chimney_slippage_fall') {
+      hazard = {
+        hazardTitle: 'Deslizamento e Queda em Chaminé de Rocha Calcária Polida',
+        saveDC: 14,
+        saveType: 'Destreza',
+        karstLimestoneRisk: 'As paredes verticais da garganta foram esculpidas e polidas por milênios de enxurradas arenosas, formando calhas e chaminés lisas como vidro; tentar escalar para fugir da água ou transpor um estrangulamento exige apoios precários em nós de rocha, e qualquer escorregão precipita o explorador em fendas pontiagudas, causando 2d8 de dano de impacto (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Utilizar sapatilhas de atrito, magnésio nas mãos e cunhas de ferro cravadas nas fendas para pontos de apoio firmes.',
+        rescueAndStabilization: 'Tração de fraturas com talas de madeira e uso de poção de cura para estabilizar o ferido.',
+        icon: '🧗‍♂️🧱',
+        color: '#d97706'
+      };
+    } else if (ht === 'subterranean_blind_meander_entombment') {
+      hazard = {
+        hazardTitle: 'Desorientação em Labirinto de Cânions Sinuosos sem Visibilidade Solar',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        karstLimestoneRisk: 'Gargantas em zigue-zague com paredes que quase se tocam no topo bloqueiam qualquer visibilidade do céu, do sol ou das estrelas; os ecos reverberam em todas as direções desorientando a audição e bússolas oscilam sob depósitos minerais, prendendo o grupo num labirinto úmido e claustrofóbico que impõe 1 nível de exaustão e atraso de dias (DMG p. 111; XGE p. 111).',
+        pioneerMitigation: 'Marcar as paredes de calcário com giz resistente à água e usar fio de Ariadne em cruzamentos sinuosos.',
+        rescueAndStabilization: 'Pausa para orientação com bússola mágica ou ascensão aos bordos do cânion para conferir referências.',
+        icon: '🌀🧭',
+        color: '#7c3aed'
+      };
+    } else if (ht === 'hypothermic_karst_sump_swimming_exhaustion') {
+      hazard = {
+        hazardTitle: 'Exaustão por Natação em Poços de Lama Fria e Desfiladeiros Inundados',
+        saveDC: 14,
+        saveType: 'Constituição',
+        karstLimestoneRisk: 'Trechos profundos onde a fenda afunda em piscinas permanentes de água gélida que nunca recebem luz solar direta; cruzar nadando com mochilas pesadas e armaduras enquanto se empurra lama pegajosa consome as forças musculares e induz tremores incontroláveis de hipotermia com 2d6 de dano de frio (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Embalar suprimentos em sacos estanques flutuantes e amarrar linhas guia de apoio para travessia em fila.',
+        rescueAndStabilization: 'Fogueira imediata com óleo inflamável e troca de mantos encharcados por peles secas.',
+        icon: '🥶🏊‍♂️',
+        color: '#0891b2'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampKarstLimestoneSlotGorgeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'elevated_karst_undercut_hanging_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Suspenso em Alcova de Calcário Acima da Linha de Enxurrada',
+      karstLimestoneAndCampSafety: 'Instalação do acampamento em uma alcova côncava na parede da garganta situada a 6 metros acima da cota máxima de cheia das cheias históricas.',
+      karstLimestoneTrenchAndWatch: 'O teto de rocha protege contra desprendimento de seixos superiores e a elevação mantém a comitiva e os mantimentos fora do alcance de qualquer torrente repentina.',
+      campRestAndSafetyGuards: 'Permite descanso longo protegido e térmico em ambiente naturalmente isolado do vento noturno do deserto.',
+      icon: '⛺🧗',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'acoustic_karst_gorge_sentry_alarm') {
+      tech = {
+        defenseTitle: 'Alarme Sentinela Acústico de Reverberação Fluvial na Fenda',
+        karstLimestoneAndCampSafety: 'Posicionamento de sentinelas e gongos de bronze ancorados no estreito de entrada a montante da garganta.',
+        karstLimestoneTrenchAndWatch: 'O som do borbulhar da água ou choque de pedras sendo arrastadas é amplificado naturalmente pelas paredes da garganta com quilômetros de antecedência.',
+        campRestAndSafetyGuards: 'Alerta o acampamento com antecedência de minutos vitais para içar todo o equipamento.',
+        icon: '🔔👂',
+        color: '#eab308'
+      };
+    } else if (dt === 'karst_anchor_bolt_climbing_line_vertical_rig') {
+      tech = {
+        defenseTitle: 'Cabeamento de Emergência com Pitons e Cordas para Evacuação Vertical Rápida',
+        karstLimestoneAndCampSafety: 'Fixação preventiva de estacas de aço e escadas de nós ao longo da rota de subida para o terraço superior.',
+        karstLimestoneTrenchAndWatch: 'Garante rota de fuga desimpedida caso o nível da água ameace subir extraordinariamente durante a madrugada.',
+        campRestAndSafetyGuards: 'Elimina o pânico noturno e assegura evacuação rápida em fila única sem perda de cargas vitais.',
+        icon: '🧗‍♀️🪢',
+        color: '#10b981'
+      };
+    } else if (dt === 'karst_limestone_solution_pocket_freshwater') {
+      tech = {
+        defenseTitle: 'Captação de Água Doce em Bacias e Tinajas Suspensas na Rocha',
+        karstLimestoneAndCampSafety: 'Coleta de água limpa filtrada pelas camadas de calcário e acumulada em poças elevadas intocadas por sedimentos.',
+        karstLimestoneTrenchAndWatch: 'Fornece suprimento de água pura e límpida essencial para cozinhar e hidratar a comitiva sem risco de contaminação mineral.',
+        campRestAndSafetyGuards: 'Abastece todos os cantis do grupo com água potável para os dias subsequentes de travessia.',
+        icon: '🏺💧',
+        color: '#06b6d4'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 250: CHAMINÉS HIDROTERMAIS DE SÍLICA, GÊISERES E PISCINAS (D&D 5e)
   // =========================================================================
 
@@ -33884,6 +33988,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessKarstLimestoneSlotGorgeHazard: calcWildernessKarstLimestoneSlotGorgeHazard,
+    calcCampKarstLimestoneSlotGorgeStation: calcCampKarstLimestoneSlotGorgeStation,
     calcWildernessGeyseriteSinterThermalHazard: calcWildernessGeyseriteSinterThermalHazard,
     calcCampGeyseriteSinterThermalStation: calcCampGeyseriteSinterThermalStation,
     calcWildernessClimbingDuneBoomingSandHazard: calcWildernessClimbingDuneBoomingSandHazard,

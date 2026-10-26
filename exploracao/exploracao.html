@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T20:45:15Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T20:53:38Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessKarstLimestoneSlotGorgeHazard) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var sc = CartShared.calcWildernessKarstLimestoneSlotGorgeHazard(bKey, 'karst_chute_debris_wall_surge');
+        return '<div class="clp-karst-limestone-slot-gorge-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,24,36,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(2,132,199,0.35);font-size:8px;color:#f0f9ff;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sc.color + ';margin-bottom:2px;">' + sc.icon + ' ' + sc.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Garganta de Calcário Karstificado e Tromba d\'Água:</b> ' + sc.karstLimestoneRisk + ' (CD ' + sc.saveDC + ' [' + sc.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Mitigação:</b> ' + sc.pioneerMitigation + ' · <i>Estabilização: ' + sc.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampKarstLimestoneSlotGorgeStation) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var sc = CartShared.calcCampKarstLimestoneSlotGorgeStation(bKey, 'elevated_karst_undercut_hanging_bivouac');
+        return '<div class="clp-karst-limestone-slot-gorge-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(16,20,28,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sc.color + ';margin-bottom:2px;">' + sc.icon + ' ' + sc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Bivaque em Alcova Elevada:</b> ' + sc.karstLimestoneAndCampSafety + ' · <b>Proteção:</b> ' + sc.karstLimestoneTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + sc.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){
