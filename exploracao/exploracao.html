@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T17:23:18Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T17:24:58Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessLateriteBowalCuirassHazard) return '';
+        var bKey = (biome && biome.key) || 'hills';
+        var lb = CartShared.calcWildernessLateriteBowalCuirassHazard(bKey, 'ironstone_canga_crust_collapse_over_piping_void');
+        return '<div class="clp-laterite-bowal-card" style="margin:4px 0 6px;text-align:left;background:rgba(38,22,12,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(180,83,9,0.35);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + lb.color + ';margin-bottom:2px;">' + lb.icon + ' ' + lb.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Chapada de Canga e Couraça (Bowal):</b> ' + lb.lateriteBowalRisk + ' (CD ' + lb.saveDC + ' [' + lb.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Mitigação:</b> ' + lb.pioneerMitigation + ' · <i>Estabilização: ' + lb.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampLateriteBowalCuirassStation) return '';
+        var bKey = (biome && biome.key) || 'hills';
+        var lc = CartShared.calcCampLateriteBowalCuirassStation(bKey, 'marginal_ironstone_vereda_overhang_bivouac');
+        return '<div class="clp-laterite-bowal-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,18,10,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(217,119,6,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + lc.color + ';margin-bottom:2px;">' + lc.icon + ' ' + lc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Bivaque sob Cornija de Canga:</b> ' + lc.lateriteAndCampSafety + ' · <b>Defesa:</b> ' + lc.lateriteWallAndSpring + '</div>'
+          + '  <div style="font-size:7.5px;color:#fcd34d;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + lc.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

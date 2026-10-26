@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 194: CHAPADAS DE COURAÇA LATERÍTICA (BOWAL) E CANGA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessLateriteBowalCuirassHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'hills').toLowerCase();
+    var ht = (hazardType || 'ironstone_canga_crust_collapse_over_piping_void').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ruptura de Carapaça de Canga Ferruginosa sobre Vazio Subterrâneo',
+      saveDC: 15,
+      saveType: 'Destreza',
+      lateriteBowalRisk: 'A crosta superficial endurecida de óxidos de ferro e alumínio (canga) permanece suspensa como uma ponte oca após a erosão hídrica remover a argila macia inferior; o teto ferruginoso quebra sob o grupo lançando os exploradores sobre estalagmites ásperas de limonita com 3d8 de dano perfurante/concussão (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Marcha pelos bordos maciços de afloramento compacto evitando depressões circulares com vegetação arbustiva anã.',
+      rescueAndStabilization: 'Ancoragem em blocos de hematita sólida e içamento com corda protegida contra o atrito da borda serrilhada.',
+      icon: '🪨🕳️',
+      color: '#b45309'
+    };
+
+    if (ht === 'black_ferricrete_pan_thermal_radiation_heatstroke') {
+      hazard = {
+        hazardTitle: 'Fornalha Radiante em Lajedo Negro de Couraça Laterítica (Bowal)',
+        saveDC: 15,
+        saveType: 'Constituição',
+        lateriteBowalRisk: 'Clareira estéril quilométrica onde a couraça de ferro negro sem solo nem árvores absorve o sol tropical e atinge 65°C na superfície; a reverberação térmica queima através das botas e impõe 1 nível de exaustão por insolação severa (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Travessia exclusiva no crepúsculo ou alvorada com panos úmidos sobre a nuca e hidratação reforçada.',
+        rescueAndStabilization: 'Remoção imediata para a sombra das cavernas marginais de canga e resfriamento gradual das têmporas.',
+        icon: '☀️🔥',
+        color: '#dc2626'
+      };
+    } else if (ht === 'pisolitic_iron_nodule_ball_bearing_scree_slide') {
+      hazard = {
+        hazardTitle: 'Derrapagem em Rampa de Pisolitos de Ferro (Grãos de Chumbo)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        lateriteBowalRisk: 'Encosta da chapada coberta por milhões de concreções esféricas soltas de hematita do tamanho de ervilhas; pisar nessa camada equivale a caminhar sobre esferas de aço, arremessando o aventureiro contra degraus cortantes de canga com 2d8 de dano cortante (PHB p. 182-183).',
+        pioneerMitigation: 'Varredura da trilha com cajado antes de firmar o pé e descida em diagonal apoiando nas raízes de canela-de-ema.',
+        rescueAndStabilization: 'Limpeza do pó de minério de ferro incrustado nos cortes e aplicação de ataduras compressivas.',
+        icon: '⚪🧗‍♂️',
+        color: '#d97706'
+      };
+    } else if (ht === 'laterite_cave_guano_and_iron_dust_spores_inhalation') {
+      hazard = {
+        hazardTitle: 'Nuvem de Poeira Ocre e Esporos em Gruta Rasa Sob Couraça',
+        saveDC: 14,
+        saveType: 'Constituição',
+        lateriteBowalRisk: 'O deslocamento em tetos baixos de cavernas de canga levanta pó fino de hidróxido de ferro misturado a guano seco e esporos fúngicos; a inalação irrita os brônquios causando 2d6 de dano de veneno e a condição Envenenado por 1 hora (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Amarração de lenço embebido em água e vinagre sobre o nariz e a boca antes de rastejar sob a couraça.',
+        rescueAndStabilization: 'Retirada para a brisa aberta da escarpa e lavagem das narinas e garganta com água limpa.',
+        icon: '🦇💨',
+        color: '#92400e'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampLateriteBowalCuirassStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'hills').toLowerCase();
+    var dt = (defenseType || 'marginal_ironstone_vereda_overhang_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque sob Cornija Marginal de Canga Junto à Cabeceira de Vereda',
+      lateriteAndCampSafety: 'Acampamento abrigado sob a aba saliente de 5 metros da couraça ferruginosa na quebra da chapada, voltado para o vale úmido da vereda.',
+      lateriteWallAndSpring: 'O teto monolítico de minério de ferro suporta qualquer tempestade sem desmoronar e irradia à noite um calor suave acumulado durante o dia.',
+      campRestAndSafetyGuards: 'Garante descanso longo confortável, seco e oculto de observadores no topo do platô para toda a comitiva.',
+      icon: '⛺🪨',
+      color: '#b45309'
+    };
+
+    if (dt === 'cemented_laterite_slab_breastwork_and_fire_ring') {
+      tech = {
+        defenseTitle: 'Parapeito Refrátario de Blocos de Laterita Nodular (Canga)',
+        lateriteAndCampSafety: 'Trincheira defensiva e anel de fogo construídos com blocos pesados e porosos de laterita rica em ferro que se encaixam com firmeza extrema.',
+        lateriteWallAndSpring: 'A rocha ferruginosa nunca explode no fogo (ao contrário de seixos de rio) e funciona como um radiador térmico duradouro após apagar as brasas.',
+        campRestAndSafetyGuards: 'Concede cobertura sólida (+4 na CA) e mantém o bivaque aquecido sem chamas visíveis.',
+        icon: '🧱🔥',
+        color: '#d97706'
+      };
+    } else if (dt === 'sub_cuirass_contact_spring_natural_iron_filter') {
+      tech = {
+        defenseTitle: 'Fonte de Contato Sub-Couraça com Bacia de Decantação Limpa',
+        lateriteAndCampSafety: 'Nascente perene que brota exatamente na base da carapaça porosa de canga sobre o horizonte argiloso impermeável.',
+        lateriteWallAndSpring: 'A água da chuva atravessa lentamente os poros da couraça de ferro emergindo fresca, cristalina e livre de impurezas superficiais.',
+        campRestAndSafetyGuards: 'Abastece os cantis de todo o grupo sem necessidade de descer aos pântanos do fundo do vale.',
+        icon: '💧🪨',
+        color: '#0ea5e9'
+      };
+    } else if (dt === 'metallic_ringing_canga_slab_perimeter_pavement') {
+      tech = {
+        defenseTitle: 'Calçamento Acústico de Placas de Canga Densa (Pedra-Sino)',
+        lateriteAndCampSafety: 'Arranjo de placas finas de canga hematítica de alto teor metálico apoiadas em equilíbrio nas duas trilhas de acesso à cornija.',
+        lateriteWallAndSpring: 'Quando pisadas, as lajes ricas em ferro batem umas nas outras produzindo um som metálico agudo idêntico ao de uma bigorna.',
+        campRestAndSafetyGuards: 'Impede qualquer aproximação furtiva noturna e alerta imediatamente as sentinelas de guarda.',
+        icon: '🔔⚒️',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 193: DOMOS DE DIAPIROS DE SAL E GELEIRAS DE HALITA (D&D 5e)
   // =========================================================================
 
@@ -27956,6 +28060,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessLateriteBowalCuirassHazard: calcWildernessLateriteBowalCuirassHazard,
+    calcCampLateriteBowalCuirassStation: calcCampLateriteBowalCuirassStation,
     calcWildernessSaltDiapirGlacierHazard: calcWildernessSaltDiapirGlacierHazard,
     calcCampSaltDiapirGlacierStation: calcCampSaltDiapirGlacierStation,
     calcWildernessPingoThermokarstHazard: calcWildernessPingoThermokarstHazard,
