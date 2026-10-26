@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 281: TABULEIROS COSTEIROS, FALÉSIAS VIVAS E ARCOS DE ABRASÃO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessCoastalTablelandHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'wave_undermined_cliff_slab_topple').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desabamento de Placa em Falésia Viva de Tabuleiro',
+      saveDC: 15,
+      saveType: 'Destreza',
+      tablelandRisk: 'O tabuleiro costeiro termina em um penhasco avermelhado de 40 metros cuja base arenosa foi solapada pelo mar; a vibração de passos na borda rompe uma fenda de tração oculta, fazendo uma fatia de rocha de centenas de toneladas despencar verticalmente no oceano, exigindo salvaguarda de Destreza CD 15 para saltar para trás ou cair no abismo sofrendo 4d10 de dano de concussão por esmagamento contra lajes e seixos litorâneos (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores sondando fissuras de recuo na grama do tabuleiro com bastões graduados e mantendo o avanço a uma distância mínima de duas vezes a altura da escarpa (Sobrevivência ou Investigação CD 14).',
+      rescueAndStabilization: 'Descida urgente com talha de escalada e ancoragem tripla em solo firme para içar feridos da praia rochosa (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🌊',
+      color: '#e11d48'
+    };
+
+    if (ht === 'wave_cut_arch_keystone_spall') {
+      hazard.hazardTitle = 'Queda de Fecho de Abóbada em Arco de Abrasão Marinha';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.tablelandRisk = 'A trilha na praia costeira passa por baixo de um arco monumental de arenito esculpido pelas ondas; a salinidade e a pressão do ar comprimido nas frestas fraturam a pedra-fecho do arco, despencando blocos pontiagudos de rocha ferruginosa sobre a comitiva com 2d10 de dano contundente (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Inspeção visual prévia de fraturas frescas no intradorso do arco e travessia rápida em fila espaçada (Percepção CD 13).';
+      hazard.rescueAndStabilization = 'Remoção rápida de pedras caídas e estancamento de sangramentos na cabeça com ataduras compressivas (Medicina CD 13).';
+    } else if (ht === 'tidal_sea_cave_hydraulic_compression_surge') {
+      hazard.hazardTitle = 'Compressão Hidráulica e Vagalhão em Caverna de Solapamento';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Constituição';
+      hazard.tablelandRisk = 'Ao explorar cavernas marinhas na base da falésia, a entrada de uma grande onda de maré sela a boca da gruta comprimindo o bolsão de ar interno a pressões violentas; a onda explode para fora com rugido ensurdecedor arrastando exploradores com 3d6 de concussão, rompimento timpânico temporário por 1 hora e risco de afogamento (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Cálculo rigoroso do ciclo de marés e entrada apenas no estofo da maré baixa mantendo vigia externo com corneta (Veículos Aquáticos ou Sobrevivência CD 14).';
+      hazard.rescueAndStabilization = 'Reanimação cardiorrespiratória em praia seca e drenagem de água das vias aéreas (Medicina CD 14).';
+    } else if (ht === 'ferruginous_sandstone_mudflow_scarp') {
+      hazard.hazardTitle = 'Corrida de Lama Ferruginosa em Talude de Ravina Costeira';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.tablelandRisk = 'Águas pluviais que drenam do topo do tabuleiro saturam as camadas de argila variegada intercaladas com arenito, disparando uma torrente viscosa de lama vermelha espessa que soterra trilhas de descida com 2d8 de concussão e velocidade reduzida a zero até que o aventureiro se desvencilhe (DMG p. 110; PHB p. 182-183).';
+      hazard.pioneerMitigation = 'Desvio por lombadas drenadas cobertas por restinga nativa e fixação de cordas de sustentação (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Desenterramento com alavancas e limpeza de juntas mecânicas e armas travadas por argila (Atletismo CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampCoastalTablelandStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'tableland_plateau_inland_setback_redoubt').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Reduto em Tabuleiro Plano com Recuo Seguro da Falésia',
+      tablelandAndCampSafety: 'O acampamento é estabelecido no platô plano do tabuleiro costeiro a 60 metros da borda da falésia, sobre leito de arenito ferruginoso consolidado imune a desabamentos marinhos e inundações de maré (DMG p. 111).',
+      tablelandAndWatch: 'A altitude dominante de 40 metros acima da praia concede visão desimpedida de todo o litoral por 4 milhas de distância, impedindo qualquer aproximação clandestina de embarcações ou incursores.',
+      campRestAndSafetyGuards: 'Descanso pleno em terreno firme, plano e arejado com ventilação marítima fresca e sem umidade salobra.',
+      icon: '🛡️',
+      color: '#e11d48'
+    };
+
+    if (dt === 'perched_sandstone_aquifer_hanging_spring') {
+      defense.defenseTitle = 'Nascente Suspensa em Fratura Basal de Arenito';
+      defense.tablelandAndCampSafety = 'O contato estratigráfico entre os arenitos porosos do topo e os argilitos impermeáveis inferiores drena água doce puríssima que brota como uma cascata límpida na cabeceira de uma ravina protegida (PHB p. 150).';
+      defense.tablelandAndWatch = 'Fornece mais de 30 litros diários de água doce mineral filtrada para toda a comitiva, eliminando a dependência de fontes costeiras salobras.';
+      defense.campRestAndSafetyGuards = 'Suprimento ininterrupto de água potável límpida durante o descanso longo nos ermos costeiros.';
+    } else if (dt === 'ironstone_block_parapet_bulwark') {
+      defense.defenseTitle = 'Parapeito de Lajes Ferruginosas de Canga Costeira';
+      defense.tablelandAndCampSafety = 'Blocos pesados de arenito enriquecido com ferro são dispostos em muretas de abrigo de 1,4 metro contra os ventos costeiros dominantes (PHB p. 185).';
+      defense.tablelandAndWatch = 'Oferece cobertura superior (+5 na CA) contra arqueiros e bloqueia totalmente a luz e faíscas de fogueiras baixas contra o horizonte noturno.';
+      defense.campRestAndSafetyGuards = 'Proteção balística sólida e camuflagem visual total para as sentinelas de guarda.';
+    } else if (dt === 'hanging_rope_ladder_beach_counterweight') {
+      defense.defenseTitle = 'Acesso Tático Retrátil com Escada de Corda e Contrapeso';
+      defense.tablelandAndCampSafety = 'Guincho mecânico de madeira instalado na borda de um promontório rochoso sólido com escada de corda reforçada com degraus de madeira que pode ser içada para o platô em segundos (DMG p. 111).';
+      defense.tablelandAndWatch = 'Permite descida rápida à praia para pescar ou coletar moluscos durante o dia e corte absoluto do acesso de qualquer perseguidor à noite.';
+      defense.campRestAndSafetyGuards = 'Segurança vertical absoluta impedindo invasores de alcançarem o bivaque a partir da orla.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 280: CAMPOS DE DUNAS EM LENÇÓIS E LAGOAS INTERDUNARES (D&D 5e)
   // =========================================================================
 
@@ -36596,6 +36676,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessCoastalTablelandHazard: calcWildernessCoastalTablelandHazard,
+    calcCampCoastalTablelandStation: calcCampCoastalTablelandStation,
     calcWildernessBarchanoidDuneLagoonHazard: calcWildernessBarchanoidDuneLagoonHazard,
     calcCampBarchanoidDuneLagoonStation: calcCampBarchanoidDuneLagoonStation,
     calcWildernessCoastalTomboloHazard: calcWildernessCoastalTomboloHazard,
