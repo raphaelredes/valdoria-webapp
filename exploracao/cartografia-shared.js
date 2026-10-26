@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 241: TORS GRANÍTICOS ACASTELADOS E CAOS DE MATACÕES (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessGraniteTorCorestoneHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'hills').toLowerCase();
+    var ht = (hazardType || 'weathered_joint_corestone_stack_topple_crush').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Tombamento de Pilha de Matacões Residuais (Corestone Tor Stack)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      graniteTorRisk: 'Torres acasteladas de blocos de granito arredondados (tors ou kopjes) empilhados a 15 metros de altura sobre o topo de colinas e charnecas, onde o manto de rocha decomposta foi lavado pela chuva deixando os núcleos duros apoiados uns sobre os outros por cantos mínimos corroídos; escalar ou disparar ondas de choque perto da pilha desloca o bloco-chave e derruba uma cascata de matacões de cinco toneladas com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+      pioneerMitigation: 'Subir apenas pelas chaminés entalhadas no plúton maciço basal, evitando pilhas de matacões soltos no topo.',
+      rescueAndStabilization: 'Uso de alavancas de ferro e calços de pedra para liberar vítimas e imobilização de fraturas.',
+      icon: '🗿⛰️',
+      color: '#d97706'
+    };
+
+    if (ht === 'grus_granitic_sand_ball_bearing_apron_slide') {
+      hazard = {
+        hazardTitle: 'Derrapagem em Rampa de Areia Granítica Grossa ("Grus" Ball-Bearing Slide)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        graniteTorRisk: 'A desagregação granular do feldspato e quartzo cobre as lajes inclinadas na base do tor com um tapete solto de grãos esféricos de 4 milímetros (grus) que rolam sob a sola das botas exatamente como bolinhas de gude sobre mármore; o aventureiro perde os pés instantaneamente e desliza pela rampa rochosa até as fendas da base com 2d8 de concussão (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Varrer os grãos de quartzo com o pé ou bastão antes de firmar o passo em lajes inclinadas.',
+        rescueAndStabilization: 'Limpeza das escoriações impregnadas de areia de quartzo e enfaixamento.',
+        icon: '🥾🪨',
+        color: '#f59e0b'
+      };
+    } else if (ht === 'hidden_pseudo_bedding_sheet_joint_overhang_slab_shear') {
+      hazard = {
+        hazardTitle: 'Desplacamento de Laje de Alívio de Pressão (Sheet-Joint Slab Shear)',
+        saveDC: 15,
+        saveType: 'Destreza',
+        graniteTorRisk: 'Juntas curvas de descompressão dividem os flancos do tor em cascas concêntricas de granito separadas por filmes de argila caulinítica úmida; caminhar sobre uma aba lateral em declive vence o atrito residual da argila e dispara a prancha inteira de rocha morro abaixo, levando a comitiva junto com 3d6 de concussão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Evitar placas de granito separadas do núcleo por fendas horizontais barrentas após chuvas.',
+        rescueAndStabilization: 'Retirada rápida da zona de deslizamento e contenção de hemorragias.',
+        icon: '🪨💥',
+        color: '#b45309'
+      };
+    } else if (ht === 'peat_choked_sub_tor_clitter_cleft_leg_trap') {
+      hazard = {
+        hazardTitle: 'Queda em Fenda de Caos de Blocos (Clitter Cleft) Oculta por Urze',
+        saveDC: 14,
+        saveType: 'Força',
+        graniteTorRisk: 'Ao redor do tor estende-se um avental caótico de blocos tombados (clitter) cujos vãos cavernosos de 2 metros de profundidade são mascarados por moitas fechadas de urze roxa e turfa seca; afundar a perna entre dois blocos angulosos trava o joelho e impõe 2d6 de concussão e condição impedido (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Saltar de topo em topo visível dos matacões em vez de pisar nas moitas de urze entre eles.',
+        rescueAndStabilization: 'Abertura de espaço no musgo e extração vertical cuidadosa da perna presa.',
+        icon: '🌿🕳️',
+        color: '#9333ea'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampGraniteTorCorestoneStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'hills').toLowerCase();
+    var dt = (defenseType || 'cyclopean_corestone_lintel_dolmen_chamber_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque sob Dólmen Natural de Matacões Ciclópicos no Tor',
+      graniteTorAndCampSafety: 'Aproveitamento de uma câmara megalítica natural na base maciça do tor onde um bloco horizontal de vinte toneladas repousa firmemente sobre três pilares de rocha matriz.',
+      graniteTorTrenchAndWatch: 'Salão de pedra impenetrável contra tempestades da charneca, raios e ataques aéreos.',
+      campRestAndSafetyGuards: 'Garante descanso longo seguro e aquecido pelo granito que irradia o calor da fogueira.',
+      icon: '⛺🗿',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'summit_rock_basin_weathering_pit_rain_cistern') {
+      tech = {
+        defenseTitle: 'Cisterna Pluvial nas Bacias de Intemperismo do Topo (Rock Basins)',
+        graniteTorAndCampSafety: 'No topo plano dos blocos superiores do tor, bacias circulares escavadas na rocha retêm dezenas de litros de água da chuva.',
+        graniteTorTrenchAndWatch: 'Água pura e elevada, livre da turfa ácida e de dejetos de animais das baixadas.',
+        campRestAndSafetyGuards: 'Abastece a comitiva dentro do próprio perímetro fortificado do rochedo.',
+        icon: '💧🪨',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'castle_tor_watchtower_360_moorland_command') {
+      tech = {
+        defenseTitle: 'Torreão de Vigia no Topo do Tor Acastelado (Castle-Tor)',
+        graniteTorAndCampSafety: 'Como os tors coroam os pontos mais altos das colinas abertas, a plataforma superior funciona como atalaia natural.',
+        graniteTorTrenchAndWatch: 'Um único sentinela domina visualmente todas as trilhas e vales em um raio de duas léguas.',
+        campRestAndSafetyGuards: 'Concede vantagem na detecção antecipada de bandos ou patrulhas.',
+        icon: '🏰👁️',
+        color: '#eab308'
+      };
+    } else if (dt === 'quartz_feldspar_grus_dry_drainage_tent_floor') {
+      tech = {
+        defenseTitle: 'Colchão Drenante de Areia de Quartzo (Grus) para Piso do Abrigo',
+        graniteTorAndCampSafety: 'Espalhamento de uma camada nivelada de areia granítica grossa (grus) no chão plano das alcovas da base.',
+        graniteTorTrenchAndWatch: 'Drena instantaneamente qualquer infiltração de chuva e amortece o piso rochoso.',
+        campRestAndSafetyGuards: 'Mantém mantas e mochilas enxutas durante noites chuvosas.',
+        icon: '⏳⛺',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 240: CARSTE DE GESSO, ALABASTRO E AGULHAS DE SELENITA (D&D 5e)
   // =========================================================================
 
@@ -32844,6 +32948,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessGraniteTorCorestoneHazard: calcWildernessGraniteTorCorestoneHazard,
+    calcCampGraniteTorCorestoneStation: calcCampGraniteTorCorestoneStation,
     calcWildernessGypsumKarstSeleniteHazard: calcWildernessGypsumKarstSeleniteHazard,
     calcCampGypsumKarstSeleniteStation: calcCampGypsumKarstSeleniteStation,
     calcWildernessRocheMoutonneeBoulderPavementHazard: calcWildernessRocheMoutonneeBoulderPavementHazard,
