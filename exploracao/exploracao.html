@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T18:45:49Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T18:49:18Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessDesiccationPolygonHazard) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var dp = CartShared.calcWildernessDesiccationPolygonHazard(bKey, 'giant_desiccation_polygon_wedge_fissure_concealed_drop');
+        return '<div class="clp-desiccation-polygon-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,22,12,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(217,119,6,0.35);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + dp.color + ';margin-bottom:2px;">' + dp.icon + ' ' + dp.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Polígonos Gigantes e Pedras Navegantes:</b> ' + dp.desiccationRisk + ' (CD ' + dp.saveDC + ' [' + dp.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Mitigação:</b> ' + dp.pioneerMitigation + ' · <i>Estabilização: ' + dp.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampDesiccationPolygonStation) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var dc = CartShared.calcCampDesiccationPolygonStation(bKey, 'polygon_center_core_slab_fissure_free_bivouac');
+        return '<div class="clp-desiccation-polygon-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(25,18,10,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(180,83,9,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + dc.color + ';margin-bottom:2px;">' + dc.icon + ' ' + dc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Bivaque no Megapolígono:</b> ' + dc.desiccationAndCampSafety + ' · <b>Defesa:</b> ' + dc.desiccationTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#fcd34d;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + dc.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

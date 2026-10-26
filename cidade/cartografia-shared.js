@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 210: POLÍGONOS DE DESSECAÇÃO GIGANTES E PEDRAS NAVEGANTES (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessDesiccationPolygonHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'giant_desiccation_polygon_wedge_fissure_concealed_drop').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda em Fenda de Contração Gigante de Polígono de Argila Seca',
+      saveDC: 15,
+      saveType: 'Destreza',
+      desiccationRisk: 'A dessecação secular de antigas bacias lacustres rasga o solo argiloso em polígonos hexagonais de 100 metros bordejados por fendas em cunha de até 6 metros de profundidade cobertas por finas pontes de poeira eólica; pisar na borda colapsa o lábio seco precipitando o explorador na fenda estreita com 3d6 de concussão e entalamento dos membros (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Sondagem da linha escura do polígono com vara longa e salto de impulso pelo centro duro da placa.',
+      rescueAndStabilization: 'Içamento vertical com polia apoiada em pranchões largos e tala para entorses de tornozelo.',
+      icon: '🏜️🕳️',
+      color: '#d97706'
+    };
+
+    if (ht === 'racetrack_playa_ice_raft_sailing_boulder_gale_collision') {
+      hazard = {
+        hazardTitle: 'Abalroamento por Matacão Navegante Impulsionado por Jangada de Gelo e Vendaval',
+        saveDC: 15,
+        saveType: 'Destreza',
+        desiccationRisk: 'Após uma fina chuva invernal que congela à noite em lâminas vítreas sobre a argila escorregadia da playa, rajadas catabáticas matinais empurram jangadas de gelo que arrastam blocos de dolomita de 300 quilos deixando sulcos retilíneos na lama; a marcha silenciosa das pedras sob nevoeiro colide contra a comitiva com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Observação dos sulcos frescos paralelos na lama e travessia perpendicular à direção do vento dominante.',
+        rescueAndStabilization: 'Remoção rápida da trajetória da placa de gelo em movimento e imobilização de fraturas.',
+        icon: '🪨💨',
+        color: '#b45309'
+      };
+    } else if (ht === 'bentonite_popcorn_clay_swelling_rain_slick_mire') {
+      hazard = {
+        hazardTitle: 'Atolamento Viscoelástico em Argila Bentonítica Expansiva (Solo Pipoca)',
+        saveDC: 14,
+        saveType: 'Força',
+        desiccationRisk: 'Colinas e baixadas de argila esmectita vulcânica com superfície encaroçada seca que, ao menor aguaceiro repentino, absorve oito vezes seu volume em água transformando-se em uma cola pesada e escorregadia que arranca botas, derruba montarias e impõe 1 nível de exaustão por esforço extremo (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Subida imediata para cristas de cascalho aluvial antes que a garoa molhe o solo de bentonita.',
+        rescueAndStabilization: 'Raspagem periódica dos blocos de barro presos às solas com espátula de osso e hidratação.',
+        icon: '🥾🌧️',
+        color: '#92400e'
+      };
+    } else if (ht === 'subsurface_soil_piping_pseudokarst_tunnel_roof_collapse') {
+      hazard = {
+        hazardTitle: 'Afundamento de Teto em Galeria de Erosão Subterrânea (Soil Piping)',
+        saveDC: 15,
+        saveType: 'Destreza',
+        desiccationRisk: 'A água de tempestades raras escoa pelas fendas de dessecação escavando túneis ocultos no subsolo argiloso dispersivo (pseudocarste de argila) enquanto a superfície parece intacta; o peso da comitiva rompe a abóbada seca afundando os aventureiros em galerias poeirentas com 2d8 de concussão e asfixia por silte (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Evitar marchar alinhado sobre fileiras de pequenos sumidouros em funil ou arbustos secos alinhados.',
+        rescueAndStabilization: 'Resgate com corda desde a placa poligonal central intacta e limpeza das vias aéreas.',
+        icon: '⚠️🏜️',
+        color: '#ca8a04'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampDesiccationPolygonStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'polygon_center_core_slab_fissure_free_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque no Núcleo Central Intacto do Megapolígono de Argila',
+      desiccationAndCampSafety: 'Acampamento posicionado exatamente no centro geométrico de um polígono de 80 metros, distante das fendas de contração periféricas e de galerias de piping.',
+      desiccationTrenchAndWatch: 'Garante piso plano duro como ladrilho cerâmico, visibilidade de 360 graus e zero risco de colapso noturno.',
+      campRestAndSafetyGuards: 'Proporciona descanso longo tranquilo e seguro para toda a comitiva na bacia desértica.',
+      icon: '⛺🔶',
+      color: '#d97706'
+    };
+
+    if (dt === 'stationary_megaboulder_windbreak_anchored_shelter') {
+      tech = {
+        defenseTitle: 'Abrigo de Sotavento em Matacão Ancorado em Inselberg Rochoso',
+        desiccationAndCampSafety: 'Tendas montadas junto a um afloramento fixo de rocha matriz na borda da playa, fora da pista de deslizamento das pedras navegantes.',
+        desiccationTrenchAndWatch: 'Corta o vento gélido noturno da planície aberta e protege contra blocos móveis em noites de gelo fino.',
+        campRestAndSafetyGuards: 'Preserva o calor das fogueiras e evita que o vendaval rasgue as lonas.',
+        icon: '🪨⛺',
+        color: '#b45309'
+      };
+    } else if (dt === 'deep_desiccation_crack_shaded_condensation_collector') {
+      tech = {
+        defenseTitle: 'Coletor de Umidade Residual no Fundo Sombrio de Fenda Gigante',
+        desiccationAndCampSafety: 'Descida controlada de pano absorvente ou vaso por corda até o fundo frio de 4 metros de uma fenda de contração onde a umidade não evapora ao sol.',
+        desiccationTrenchAndWatch: 'Extrai água preciosa conservada na argila profunda mesmo no auge da estação seca.',
+        campRestAndSafetyGuards: 'Evita a desidratação do grupo durante a travessia da playa árida.',
+        icon: '💧🏺',
+        color: '#0284c7'
+      };
+    } else if (dt === 'gravel_alluvial_fan_apron_high_dry_rain_refuge') {
+      tech = {
+        defenseTitle: 'Plataforma Drenante na Aba de Cascalho do Leque Aluvial',
+        desiccationAndCampSafety: 'Instalação preventiva do bivaque nos primeiros degraus de seixos permeáveis onde a montanha encontra a playa de bentonita.',
+        desiccationTrenchAndWatch: 'Mantém o acampamento completamente livre da lama expansiva pegajosa caso caia uma tempestade noturna.',
+        campRestAndSafetyGuards: 'Permite partida matinal imediata sem atolamento de carroças ou montarias.',
+        icon: '⛰️🛡️',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 209: CAMPOS DE GELO DE AGULHA (PIPKRAKE) E SOLIFLUXÃO ALPINA (D&D 5e)
   // =========================================================================
 
@@ -29620,6 +29724,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessDesiccationPolygonHazard: calcWildernessDesiccationPolygonHazard,
+    calcCampDesiccationPolygonStation: calcCampDesiccationPolygonStation,
     calcWildernessPeriglacialSolifluctionHazard: calcWildernessPeriglacialSolifluctionHazard,
     calcCampPeriglacialSolifluctionStation: calcCampPeriglacialSolifluctionStation,
     calcWildernessStarDuneRhourdHazard: calcWildernessStarDuneRhourdHazard,
