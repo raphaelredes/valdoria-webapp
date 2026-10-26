@@ -19717,6 +19717,130 @@
     };
   }
 
+  // === calcWildernessSlotCanyonAndArchHazard (Cânions em Fenda de Arenito Vermelho e Arcos Naturais - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessSlotCanyonAndArchHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'slot_canyon_flash_flood_rampart').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Cabeça d\'Água Torrencial em Cânion em Fenda Estreita',
+      saveDC: 15,
+      saveType: 'Destreza',
+      slotCanyonAndArchRisk: 'Enxurrada relâmpago gerada por tempestade a quilômetros de distância a montante; parede de água barrenta de 3 metros de altura avançando a 40 km/h pelo gargalo estreito de arenito sem aviso acústico, arrastando aventureiros e infligindo 3d8 de dano de concussão contra as paredes polidas com afogamento iminente (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores monitoram vibrações no piso rochoso e mantêm cordas de fuga já instaladas com nós prussik nas fendas elevadas.',
+      rescueAndStabilization: 'Içamento vertical imediato para nichos superiores, drenagem postural dos pulmões e massagem torácica de emergência.',
+      icon: '🌊🧱',
+      color: '#dc2626'
+    };
+
+    if (ht === 'fluted_sandstone_chimney_slip') {
+      hazard = {
+        hazardTitle: 'Escorregamento em Parede Canelada de Arenito Eólico',
+        saveDC: 14,
+        saveType: 'Força',
+        slotCanyonAndArchRisk: 'Paredes verticais de arenito vermelho polidas pela água e areia eólica; perda súbita de atrito durante manobra de oposição corporal em fenda de 80 cm, resultando em queda de 5 metros sobre pedras soltas no leito seco.',
+        pioneerMitigation: 'Uso de calçados com solado de borracha aderente e apoio cruzado de bastões de freixo para sustentação dos membros.',
+        rescueAndStabilization: 'Tração articular, imobilização de entorses com talas de cedro e aplicação de óleo balsâmico anti-inflamatório.',
+        icon: '🧗‍♂️🪨',
+        color: '#ea580c'
+      };
+    } else if (ht === 'natural_arch_key_keystone_spall') {
+      hazard = {
+        hazardTitle: 'Desprendimento de Blocos da Abóbada de Arco Natural',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        slotCanyonAndArchRisk: 'Esfoliação térmica na curvatura inferior de arcos monumentais de arenito; queda imprevista de lajes pesadas de 200 kg devido à dilatação solar diurna sobre a trilha de passagem no fundo do cânion.',
+        pioneerMitigation: 'Avanço com intervalos de segurança de 10 metros entre cada integrante e observação cuidadosa de fraturas no intradorso do arco.',
+        rescueAndStabilization: 'Remoção coordenada de escombros sobre acidentados com alavancas de ferro e curativo estéril em traumatismos.',
+        icon: '⚠️🪨',
+        color: '#d97706'
+      };
+    } else if (ht === 'quicksand_silt_pool_entrapment') {
+      hazard = {
+        hazardTitle: 'Poço de Areia Movediça e Silte Frio no Leito Sombreado',
+        saveDC: 15,
+        saveType: 'Força',
+        slotCanyonAndArchRisk: 'Bolsões de areia ultrafina saturada de água gélida no fundo do cânion que nunca recebe luz solar direta; afundamento rápido até a cintura com perda de temperatura corporal e paralisia muscular por hipotermia.',
+        pioneerMitigation: 'Sondagem sistemática do fundo de poças com varas longas de madeira antes de pisar.',
+        rescueAndStabilization: 'Laço de resgate com corda dinâmica, tracionamento por múltiplos batedores e troca imediata de vestimentas úmidas.',
+        icon: '🕳️🥶',
+        color: '#0284c7'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      slotCanyonAndArchRisk: hazard.slotCanyonAndArchRisk,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Cânions em Fenda e Desfiladeiros) / PHB p. 182-183 (Escalada em Fendas e Cabeças d\'Água) / XGE p. 78-83 (Geomorfologia de Arenito e Arcos Naturais)'
+    };
+  }
+
+  // === calcCampSlotCanyonAndArchStation (Bivaques em Balcões Elevados de Arenito e Redes de Fenda - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampSlotCanyonAndArchStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'high_alcove_sandstone_shelf_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Balcão de Arenito Elevado sob Nicho de Arco',
+      slotCanyonAnchorageAndFloodSafety: 'Acampamento montado em prateleira natural de arenito a 5 metros acima do leito do cânion; abrigo seco sob a curvatura do arco imune a cabeças d\'água repentinas e detritos arrastados.',
+      chimneyEscapeRouteAndThermalShelter: 'O nicho retém o calor residual acumulado na rocha durante o dia, mantendo o bivaque a 20°C durante as noites frias do deserto.',
+      campRestAndSafetyGuards: 'Garante descanso longo perfeito e calmo para os membros da comitiva com sentinela avançado no topo do arco monitorando aproximações.',
+      icon: '⛺🧱',
+      color: '#ea580c'
+    };
+
+    if (dt === 'chimney_stemming_hammock_matrix') {
+      tech = {
+        defenseTitle: 'Matriz de Redes Suspensas em Pontaletes de Fenda',
+        slotCanyonAnchorageAndFloodSafety: 'Hastes telescópicas de carvalho com sapatas de borracha cravadas por pressão entre as duas paredes estreitas do cânion, sustentando redes de descanso a 4 metros de altura.',
+        chimneyEscapeRouteAndThermalShelter: 'Permite bivaque seguro em trechos do cânion onde não existem balcões naturais largos o suficiente para tendas.',
+        campRestAndSafetyGuards: 'Elimina qualquer contato com a umidade e os escorpiões do piso rochoso durante o sono dos exploradores.',
+        icon: '🪵🛡️',
+        color: '#b45309'
+      };
+    } else if (dt === 'sandstone_perched_tinaja_water_filter') {
+      tech = {
+        defenseTitle: 'Filtro de Decantação em Tinaja Suspensa de Arenito',
+        slotCanyonAnchorageAndFloodSafety: 'Bacia natural de pedra arenítica empoleirada fora do alcance de enxurradas com sistema de filtragem por areia de quartzo e carvão vegetal ativado.',
+        chimneyEscapeRouteAndThermalShelter: 'Fornece 25 litros diários de água límpida, decantando silte fino e impurezas argilosas carregadas pelo vento.',
+        campRestAndSafetyGuards: 'Garante reserva hídrica abundante para a comitiva preparar suas rações e repor cantis.',
+        icon: '💧🏺',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'acoustic_horn_and_beacon_early_warning') {
+      tech = {
+        defenseTitle: 'Corneta Acústica e Fogueira de Alarme em Topo de Arco',
+        slotCanyonAnchorageAndFloodSafety: 'Posto de vigília avançado na cumeada do arco natural equipado com buzina de chifre de boi e facho de sinalização visual voltado para a bacia hidrográfica a montante.',
+        chimneyEscapeRouteAndThermalShelter: 'Emite aviso sonoro retumbante com 15 minutos de antecedência caso nuvens de tempestade provoquem o início de cheias torrenciais.',
+        campRestAndSafetyGuards: 'Assegura tempo hábil para evacuação ordenada ou recolhimento de equipamentos para as fendas superiores.',
+        icon: '📯🔥',
+        color: '#eab308'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      slotCanyonAnchorageAndFloodSafety: tech.slotCanyonAnchorageAndFloodSafety,
+      chimneyEscapeRouteAndThermalShelter: tech.chimneyEscapeRouteAndThermalShelter,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Desfiladeiros e Arcos) / PHB p. 150 (Kits de Escalada de Parede Vertical) / XGE p. 78-83 (Engenharia de Redes de Fenda e Tinajas)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -21618,6 +21742,8 @@
     calcCampKarstPavementAndGrykeStation: calcCampKarstPavementAndGrykeStation,
     calcWildernessHypersalineApicumHazard: calcWildernessHypersalineApicumHazard,
     calcCampHypersalineApicumStation: calcCampHypersalineApicumStation,
+    calcWildernessSlotCanyonAndArchHazard: calcWildernessSlotCanyonAndArchHazard,
+    calcCampSlotCanyonAndArchStation: calcCampSlotCanyonAndArchStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
