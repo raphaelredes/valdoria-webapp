@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessSerpentiniteOphioliteHazard) return '';
+        var bKey = (biome && biome.key) || 'mountains';
+        var so = CartShared.calcWildernessSerpentiniteOphioliteHazard(bKey, 'waxy_slickenside_serpentine_shear_slip');
+        return '<div class="clp-serpentinite-ophiolite-card" style="margin:4px 0 6px;text-align:left;background:rgba(14,28,20,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(5,150,105,0.35);font-size:8px;color:#ecfdf5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + so.color + ';margin-bottom:2px;">' + so.icon + ' ' + so.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Recife de Serpentinito Ofiolítico:</b> ' + so.serpentiniteRisk + ' (CD ' + so.saveDC + ' [' + so.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#a7f3d0;margin-top:1px;">• <b>Mitigação:</b> ' + so.pioneerMitigation + ' · <i>Estabilização: ' + so.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampSerpentiniteOphioliteStation) return '';
+        var bKey = (biome && biome.key) || 'mountains';
+        var so = CartShared.calcCampSerpentiniteOphioliteStation(bKey, 'gabbro_dike_competent_knoll_bivouac');
+        return '<div class="clp-serpentinite-ophiolite-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,24,20,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#d1fae5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + so.color + ';margin-bottom:2px;">' + so.icon + ' ' + so.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Bivaque em Dique de Gabro:</b> ' + so.serpentiniteAndCampSafety + ' · <b>Proteção:</b> ' + so.serpentiniteTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#a7f3d0;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + so.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessLoessGullyHeadcutHazard) return '';
         var bKey = (biome && biome.key) || 'plains';
         var lg = CartShared.calcWildernessLoessGullyHeadcutHazard(bKey, 'gully_headcut_retrogressive_bank_collapse');

@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 263: RECIFES DE SERPENTINITO OFIOLÍTICO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessSerpentiniteOphioliteHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var ht = (hazardType || 'waxy_slickenside_serpentine_shear_slip').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Escorregamento Catastrófico em Espelhos de Falha Cerificados (Slickensides)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      serpentiniteRisk: 'Os planos de falha tectônica do maciço ofiolítico são compostos por serpentinito verde polido pelo atrito crustal, adquirindo consistência gordurosa e extremamente escorregadia quando umedecidos por neblina; pisar nessas rampas lisas como sabão sem ancoragem mecânica arremessa o aventureiro por declives de 50 metros com 3d8 de dano contundente contra blocos pontiagudos de harzburgito (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Equipar calçados com cravos afiados de aço endurecido, fixar cunhas de retenção em fendas transversais e contornar lajes polidas de cor verde-esmeralda.',
+      rescueAndStabilization: 'Içamento imediato com corda dinâmica ancorada em blocos estáveis de gabro e contenção de fraturas com talas.',
+      icon: '🧗‍♂️🧼',
+      color: '#059669'
+    };
+
+    if (ht === 'ultramafic_nickel_cadmium_soil_toxicity') {
+      hazard = {
+        hazardTitle: 'Intoxicação por Metais Pesados (Níquel/Cádmio) em Pó Ultramáfico Seco',
+        saveDC: 14,
+        saveType: 'Constituição',
+        serpentiniteRisk: 'O intemperismo das rochas peridotíticas gera um solo vermelho ocre estéril com concentrações letais de níquel, cromo hexavalente e cádmio; inalar a poeira fina levantada pela marcha ou consumir água de poças turvas induz dores estomacais lancinantes, gosto metálico na boca e 2d6 de dano de veneno com condição envenenado (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Marchar com máscaras de feltro umedecidas em água limpa e consumir estritamente água transportada em odres vedados.',
+        rescueAndStabilization: 'Administração de carvão medicinal e infusão de folhas de tília para quelação gástrica de metais pesados.',
+        icon: '☠️🧪',
+        color: '#dc2626'
+      };
+    } else if (ht === 'chrysotile_asbestos_fiber_inhalation') {
+      hazard = {
+        hazardTitle: 'Irritação Pulmonar por Fibras Aciculares de Amianto Crisotila',
+        saveDC: 14,
+        saveType: 'Constituição',
+        serpentiniteRisk: 'Veios fraturados de crisotila sedosa que cortam o serpentinito liberam microagulhas de asbesto no ar quando fragmentados pelo pisoteio da comitiva; as fibras microscópicas alojam-se nos brônquios, provocando queimação respiratória, acessos incontroláveis de tosse com expectoração sanguinolenta e 1 nível de exaustão (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Evitar áreas de rocha fibrosa esbranquiçada e contornar encostas expostas ao vento desfavorável.',
+        rescueAndStabilization: 'Inalação de vapores emolientes de camomila e repouso em ambiente com ar filtrado e protegido.',
+        icon: '😷🌬️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'hyperalkaline_calcium_depleted_forage_scarcity') {
+      hazard = {
+        hazardTitle: 'Inanição e Fraqueza Mineral por Escassez de Forragem em Solo Serpentínico Estéril',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        serpentiniteRisk: 'A desproporção extrema entre magnésio e cálcio no solo ultramáfico impede o crescimento de gramíneas comestíveis e forrageiras comuns; animais de montaria e bestas de carga sofrem cãibras musculares severas e apatia por desnutrição mineral, exigindo descarte de cargas ou divisão das rações secas da própria comitiva (DMG p. 111; PHB p. 185).',
+        pioneerMitigation: 'Transportar suplementos de sal marinho rico em cálcio para as montarias e racionar cuidadosamente o feno antes da entrada no complexo.',
+        rescueAndStabilization: 'Administração de caldo de ossos cozido e repouso prolongado para recuperação de eletrólitos vitais.',
+        icon: '🌾⚠️',
+        color: '#d97706'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampSerpentiniteOphioliteStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var dt = (defenseType || 'gabbro_dike_competent_knoll_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Seguro em Dique de Gabro Duro e Isento de Amianto',
+      serpentiniteAndCampSafety: 'Instalação do acampamento sobre uma intrusão de gabro maciço e seco que corta o complexo de serpentinito.',
+      serpentiniteTrenchAndWatch: 'O gabro oferece atrito mecânico excelente para as botas, rocha firme para ancoragem de estacas e total ausência de poeira tóxica ou fibras de amianto.',
+      campRestAndSafetyGuards: 'Permite descanso longo protegido, aquecido e sem contato com lamas cerificadas escorregadias.',
+      icon: '⛺🪨',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'hyperalkaline_spring_charcoal_filter_cistern') {
+      tech = {
+        defenseTitle: 'Filtragem com Carvão Ativado e Argila para Neutralização de Metais Pesados',
+        serpentiniteAndCampSafety: 'Passagem da água de nascentes hiperalcalinas por barris com camadas alternadas de areia de quartzo, cinzas e carvão vegetal ativado.',
+        serpentiniteTrenchAndWatch: 'Neutraliza o pH excessivo e precipita os íons de níquel e cromo, gerando água potável doce e perfeitamente segura para consumo.',
+        campRestAndSafetyGuards: 'Garante hidratação segura e restauração dos cantis da comitiva sem risco de envenenamento mineral.',
+        icon: '💧🏺',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'canvas_groundsheet_dust_barrier_perimeter') {
+      tech = {
+        defenseTitle: 'Lonas de Chão Enceradas e Barreiras Anti-Poeira contra Fibras Ultramáficas',
+        serpentiniteAndCampSafety: 'Revestimento completo do solo das tendas com lonas impermeáveis e estabelecimento de área de descalçar e lavar botas na entrada.',
+        serpentiniteTrenchAndWatch: 'Impede a suspensão de partículas de amianto e pó de níquel dentro dos dormitórios durante a movimentação noturna.',
+        campRestAndSafetyGuards: 'Protege a saúde pulmonar de todos os aventureiros do grupo durante as horas de sono.',
+        icon: '🛡️🛏️',
+        color: '#10b981'
+      };
+    } else if (dt === 'sterile_serpentine_barren_no_predator_buffer') {
+      tech = {
+        defenseTitle: 'Perímetro Estéril sem Predadores Terrestres ou Ninhos de Insetos',
+        serpentiniteAndCampSafety: 'Aproveitamento da ausência total de presas e vegetação herbácea no maciço ofiolítico.',
+        serpentiniteTrenchAndWatch: 'Predadores de grande porte e pragas rasteiras evitam ativamente o planalto devido à escassez de água e alimentos.',
+        campRestAndSafetyGuards: 'Permite vigília tranquila com sentinelas atentas apenas aos acessos principais da trilha.',
+        icon: '🛑🐺',
+        color: '#6366f1'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 262: PLANÍCIES DE LOESS E CÁRCAVAS (D&D 5e)
   // =========================================================================
 
@@ -35132,6 +35236,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessSerpentiniteOphioliteHazard: calcWildernessSerpentiniteOphioliteHazard,
+    calcCampSerpentiniteOphioliteStation: calcCampSerpentiniteOphioliteStation,
     calcWildernessLoessGullyHeadcutHazard: calcWildernessLoessGullyHeadcutHazard,
     calcCampLoessGullyHeadcutStation: calcCampLoessGullyHeadcutStation,
     calcWildernessBandedIronItabiriteHazard: calcWildernessBandedIronItabiriteHazard,
