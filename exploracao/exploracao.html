@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T14:43:55Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T14:47:44Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessCockpitKarstBambooHazard) return '';
+        var bKey = (biome && biome.key) || 'jungle';
+        var ck = CartShared.calcWildernessCockpitKarstBambooHazard(bKey, 'cockpit_funnel_blind_sinkhole_quagmire_plunge');
+        return '<div class="clp-cockpit-karst-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,36,20,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(22,163,74,0.35);font-size:8px;color:#dcfce7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ck.color + ';margin-bottom:2px;">' + ck.icon + ' ' + ck.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Carste de Cockpit e Bambuzal:</b> ' + ck.cockpitAndBambooRisk + ' (CD ' + ck.saveDC + ' [' + ck.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bbf7d0;margin-top:1px;">• <b>Mitigação:</b> ' + ck.pioneerMitigation + ' · <i>Estabilização: ' + ck.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampCockpitKarstBambooStation) return '';
+        var bKey = (biome && biome.key) || 'jungle';
+        var cp = CartShared.calcCampCockpitKarstBambooStation(bKey, 'elevated_bamboo_stilts_cone_shoulder_platform');
+        return '<div class="clp-cockpit-karst-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(16,30,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(21,128,61,0.3);font-size:8px;color:#dcfce7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Plataforma em Palafita de Bambu:</b> ' + cp.cockpitAndBambooSafety + ' · <b>Defesa:</b> ' + cp.culmPalisadeAndSpringDrainage + '</div>'
+          + '  <div style="font-size:7.5px;color:#86efac;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

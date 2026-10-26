@@ -20574,6 +20574,110 @@
   // PHB p. 182-183 (Travel Pace, Navigation in Fold Mountains), PHB p. 190 (Climbing & Falling), XGE p. 77-83
   // =========================================================================
 
+  // =========================================================================
+  // FASE 158: VALES DE DOLINAS EM FUNIL DE CARSTE DE COCKPIT E FLORESTAS DE BAMBU GIGANTE (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessCockpitKarstBambooHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'jungle').toLowerCase();
+    var ht = (hazardType || 'cockpit_funnel_blind_sinkhole_quagmire_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda em Sumidouro Cego de Dolina em Cockpit com Lodo Aspira-Passos',
+      saveDC: 15,
+      saveType: 'Destreza',
+      cockpitAndBambooRisk: 'Fundo de dolina conica de 25 metros de profundidade encoberto por lodo argiloso coloidal e detritos de bambu podre; o piso cede sob os passos tragando o explorador em succao rapida com 3d8 de concussao e risco iminente de asfixia (DMG p. 110, 190).',
+      pioneerMitigation: 'Batedores avancam sondando a firmeza do terreno com varas longas de bambu verde e estendem esteiras trancadas de colmos para distribuir a carga.',
+      rescueAndStabilization: 'Lancamento de laco com corda de canhamo amarrada em bambuzal robusto, tracao combinada e drenagem rapida das vias aereas com ervas descongestionantes.',
+      icon: '🎋🕳️',
+      color: '#15803d'
+    };
+
+    if (ht === 'bamboo_culm_explosive_sonic_crack_disorientation') {
+      hazard = {
+        hazardTitle: 'Estalo Explosivo de Colmos de Bambu Sob Tensao Eolica a 110 dB',
+        saveDC: 15,
+        saveType: 'Constituicao',
+        cockpitAndBambooRisk: 'Ventanias no topo dos cones carsticos vergam colmos gigantes de 30 metros acumulando energia elastica que se rompe com estrondo sonico de 110 dB reverberando no funil carstico; provoca desorientacao severa, vertigem e 2d6 de dano trovejante com surdez temporaria por 1 hora (PHB p. 182, DMG p. 246).',
+        pioneerMitigation: 'Uso de protetores auriculares de cera de abelha envolvida em algodao cru e avanco protegido rente as paredes calcarias do vale.',
+        rescueAndStabilization: 'Repouso em abrigo com compressas aromaticas mornas sobre as temporas e administracao de gotas de oleo de camomila nos ouvidos.',
+        icon: '💥🎋',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'razor_bamboo_culm_splinter_punji_trap') {
+      hazard = {
+        hazardTitle: 'Farpas e Pontas de Bambu Afiadas como Laminas em Vertente Umida',
+        saveDC: 14,
+        saveType: 'Destreza',
+        cockpitAndBambooRisk: 'Tocos de bambus partidos em angulo agudo e folhas silicificadas cortantes como navalhas escondidas na folhagem densa; laceram pernas e pes da comitiva causando 2d6 de dano perfurante e risco de infeccao micotica tropical.',
+        pioneerMitigation: 'Uso de perneiras rigidas de couro tratado com graxa impermeavel e corte previo de pontas com foices curtas de desbravamento.',
+        rescueAndStabilization: 'Extracao imediata de lascas com pinças finas de latao, cauterizacao suave com tintura de iodo vegetal e curativo com balsamo antisseptico.',
+        icon: '⚠️🔪',
+        color: '#b45309'
+      };
+    } else if (ht === 'stagnant_cockpit_miasma_respiratory_torpor') {
+      hazard = {
+        hazardTitle: 'Miasma Toxico Estagnado no Fundo da Dolina Carstica',
+        saveDC: 14,
+        saveType: 'Constituicao',
+        cockpitAndBambooRisk: 'Acumulo de gases pesados de fermentacao anaerobica de materia vegetal retidos no fundo sem vento da dolina; provoca nausea sufocante, visao turva e 1 nivel de exaustao por hipoxia se respirado sem protecao (DMG p. 111, PHB p. 185).',
+        pioneerMitigation: 'Uso de lencos embebidos em vinagre de maca e folhas de menta silvestre amarrados sobre a boca e nariz, com ascensao rapida para as encostas ventiladas.',
+        rescueAndStabilization: 'Transporte urgente para o ombro ensolarado do cone carstico, inalacao de sais de amonia herbal e hidratacao com cha estimulante de gengibre.',
+        icon: '🌫️☣️',
+        color: '#4d7c0f'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampCockpitKarstBambooStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'jungle').toLowerCase();
+    var dt = (defenseType || 'elevated_bamboo_stilts_cone_shoulder_platform').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Plataforma Aerea de Bambu em Palafita no Ombro do Cone Carstico',
+      cockpitAndBambooSafety: 'Acampamento suspenso montado a 4 metros do chao amarrado a colmos vivos de bambu gigante na encosta superior do cone, fora do alcance de inundacoes rapidas e predadores rastejantes.',
+      culmPalisadeAndSpringDrainage: 'O piso permeavel de taquara trancada permite drenagem pluvial instantanea e ventilacao continua contra a umidade sufocante da depressao.',
+      campRestAndSafetyGuards: 'Proporciona descanso pleno, calmo e seguro para todos os membros do grupo, com visao panoramica de 360 graus para as sentinelas.',
+      icon: '⛺🎋',
+      color: '#15803d'
+    };
+
+    if (dt === 'bamboo_culm_interlocking_perimeter_palisade') {
+      tech = {
+        defenseTitle: 'Palicada Defensiva Perimetrica de Colmos Entrelaçados com Nos Trancados',
+        cockpitAndBambooSafety: 'Muralha perimetrica de 3 metros de altura feita com feixes duplos de bambu gigante fincados na rocha e amarrados com cipos resistentes, provida de seteiras de disparo defensivo.',
+        culmPalisadeAndSpringDrainage: 'Bloqueia completamente investidas de feras selvagens e emboscadas furtivas vindas da mata densa com bonus de +2 na CA do acampamento.',
+        campRestAndSafetyGuards: 'Assegura sono continuo sem sobressaltos e vigilia tatica tranquila para as sentinelas de guarda noturna.',
+        icon: '🛡️🎋',
+        color: '#166534'
+      };
+    } else if (dt === 'internode_pure_water_tapping_and_charcoal_vessel') {
+      tech = {
+        defenseTitle: 'Captacao de Agua Doce em Entrenos Vivos de Bambu com Purificador Ceramico',
+        cockpitAndBambooSafety: 'Coleta de agua limpida, filtrada e doce acumulada naturalmente no interior oco dos colmos gigantes de bambu, sem risco de contaminacao pelas aguas paradas da dolina.',
+        culmPalisadeAndSpringDrainage: 'Fornece 40 litros diarios de agua cristalina enriquecida com silica natural, garantindo o suprimento de toda a expedicao.',
+        campRestAndSafetyGuards: 'Garante hidratacao perfeita e vigor renovado, prevenindo colicas intestinais e febres tropicais.',
+        icon: '💧🎋',
+        color: '#0284c7'
+      };
+    } else if (dt === 'bamboo_tension_tripwire_rattle_alarm_web') {
+      tech = {
+        defenseTitle: 'Teia de Alarmes Sonoros por Cabos de Tensao e Guizos de Bambu Oco',
+        cockpitAndBambooSafety: 'Rede de fios de fibra esticados em torno do bivaque conectados a gomos de bambu fendidos com bilhas de pedra no interior que estalam sonoramente ao menor contato.',
+        culmPalisadeAndSpringDrainage: 'Alerta imediato a 40 metros de distancia eliminando qualquer possibilidade de ataque surpresa nas trevas da noite carstica.',
+        campRestAndSafetyGuards: 'Permite que a comitiva repouse com total tranquilidade mental sabendo que o perimetro esta rigorosamente monitorado.',
+        icon: '🔔🎋',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessFoldMountainHogbackHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'mountain').toLowerCase();
@@ -24210,6 +24314,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessCockpitKarstBambooHazard: calcWildernessCockpitKarstBambooHazard,
+    calcCampCockpitKarstBambooStation: calcCampCockpitKarstBambooStation,
     calcWildernessFoldMountainHogbackHazard: calcWildernessFoldMountainHogbackHazard,
     calcCampFoldMountainHogbackStation: calcCampFoldMountainHogbackStation,
     calcWildernessIgnimbriteCanyonHazard: calcWildernessIgnimbriteCanyonHazard,
