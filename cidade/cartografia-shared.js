@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 271: MEANDROS INCISADOS E ENTRINCHEIRADOS EM CÂNIONS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessIncisedMeanderHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var ht = (hazardType || 'undercut_canyon_meander_flank_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso em Flanco Côncavo Subescavado de Meandro',
+      saveDC: 15,
+      saveType: 'Destreza',
+      meanderRisk: 'Nas curvas fechadas do cânion incisado, a força centrífuga do rio escava profundamente a base do paredão côncavo externo, deixando cornijas rochosas maciças suspensas em balanço; a passagem da comitiva desaba lajes de 30 metros sobre o leito com 3d8 de dano contundente de impacto e esmagamento por blocos fluviais (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores avançados conduzindo a rota pelo terraço convexo de acresção e fincando amarras de segurança longe da zona de queda da margem externa (Sobrevivência ou Natureza CD 14).',
+      rescueAndStabilization: 'Içamento rápido com cabos de resgate e tratamento de contusões e entorses com talas de madeira e ataduras compressivas (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🔄',
+      color: '#0ea5e9'
+    };
+
+    if (ht === 'gooseneck_neck_cutoff_flash_surge') {
+      hazard.hazardTitle = 'Tromba d’Água em Rompimento de Colo de Meandro',
+      hazard.saveDC = 15;
+      hazard.saveType = 'Força';
+      hazard.meanderRisk = 'Chuvas torrenciais a montante fazem a torrente romper o colo rochoso estreito do meandro entalhado (gooseneck), abrindo um atalho subterrâneo violento que jorra em catarata repentina varrendo o fundo do cânion com 3d8 de concussão e arrasto violento de 60 metros (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Observação atenta da tonalidade barrenta da água e do estrondo hidrodinâmico nas gargantas altas, buscando abrigo imediato em patamares rochosos elevados (Percepção CD 14).';
+      hazard.rescueAndStabilization = 'Lançamento de bóias de arganéu e cordas de resgate para contenção de exploradores levados pela correnteza (Atletismo CD 14).';
+    } else if (ht === 'hydrolastic_eddy_vortex_entrapment') {
+      hazard.hazardTitle = 'Vórtice e Redemoinho Hidrostático em Curva Fluvial',
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.meanderRisk = 'No vértice de retorno da curva sinuosa contra esporões rochosos, a correnteza desenvolve turbilhões descendentes de alta sucção; o redemoinho traga montarias e aventureiros para baixo d’água com 2d8 de concussão por choque contra pedras submersas e risco crítico de afogamento (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Remo compassado com lemes direcionais longos mantendo embarcações e nadadores no fluxo periférico laminar (Atletismo ou Veículos Aquáticos CD 14).';
+      hazard.rescueAndStabilization = 'Trabalho de tração de emergência com ganchos de resgate e manobras imediatas de reanimação cardiopulmonar (Atletismo CD 13 ou Medicina CD 13).';
+    } else if (ht === 'wind_funnel_amphitheater_gale_gust') {
+      hazard.hazardTitle = 'Vendaval Ressonante em Anfiteatro de Meandro',
+      hazard.saveDC = 14;
+      hazard.saveType = 'Constituição';
+      hazard.meanderRisk = 'Os paredões semicirculares do cânion comprimem os ventos de altitude em vórtices uivantes de ressonância acústica violenta; as rajadas arremessam cascalho pesado na face dos viajantes causando 2d6 de concussão e desorientação sensorial severa (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Uso de capuzes de couro ajustados e marcha agachada rente às depressões do terraço de seixos (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Lavagem de olhos atingidos por poeira e aplicação de bálsamos auriculares para zumbidos agudos (Medicina CD 12).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampIncisedMeanderStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var dt = (defenseType || 'point_bar_gravel_terrace_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Terraço Convexo de Seixos Drenantes',
+      meanderAndCampSafety: 'O acampamento é montado no terraço de acresção suave na margem interna da curva do meandro, fora da linha de impacto hidrodinâmico e 4 metros acima da cota normal de vazante; cascalheira porosa de drenagem rápida imune a alagamentos (DMG p. 111).',
+      meanderTrenchAndWatch: 'Vista desafogada de 180 graus de toda a ferradura do rio, permitindo que a sentinela monitore qualquer barco ou criatura descendo a correnteza.',
+      campRestAndSafetyGuards: 'Descanso seguro com barreira hídrica natural e fundação estável longe de paredões instáveis.',
+      icon: '🛡️',
+      color: '#0ea5e9'
+    };
+
+    if (dt === 'oxbow_cutoff_isolated_redoubt_bastion') {
+      defense.defenseTitle = 'Reduto Natural em Esporão Isolado de Meandro Cortado';
+      defense.meanderAndCampSafety = 'Assentamento de bivaque na península rochosa elevada circundada pelo antigo leito abandonado do rio, acessível apenas por uma crista de 2 metros de largura facilmente barricável (DMG p. 111).';
+      defense.meanderTrenchAndWatch = 'Concede cobertura total (+5 na CA) contra ataques terrestres e defesa inexpugnável com sentinelas em plano superior.',
+      defense.campRestAndSafetyGuards = 'Impossibilita ataques de surpresa por terra e garante vigília tranquila para todo o grupo.';
+    } else if (dt === 'potable_underflow_fluvial_filtration_well') {
+      defense.defenseTitle = 'Poço de Filtragem em Areias Aluviais do Terraço';
+      defense.meanderAndCampSafety = 'Cova de 1 metro escavada no banco de seixos a 10 metros da margem do rio que capta a água subsuperficial límpida filtrada naturalmente pelas camadas de quartzo (PHB p. 150).';
+      defense.meanderTrenchAndWatch = 'Abastece a comitiva com água cristalina, fresca e pura, livre do barro e das carcaças arrastadas pela correnteza principal.',
+      defense.campRestAndSafetyGuards = 'Hidratação saudável e prevenção de infecções intestinais durante a jornada.';
+    } else if (dt === 'canyon_bend_acoustic_echo_watch') {
+      defense.defenseTitle = 'Posto de Vigia com Amplificação Acústica de Cânion';
+      defense.meanderAndCampSafety = 'Instalação do posto de vigia na curvatura rochosa que funciona como uma concha acústica parabólica natural, captando ecos de remos ou passos na água a centenas de metros (PHB p. 185).';
+      defense.meanderTrenchAndWatch = 'Concede +2 de bônus na Percepção Passiva das sentinelas para detectar ameaças fluviais mesmo na escuridão fechada.',
+      defense.campRestAndSafetyGuards = 'Alerta prévio infalível que neutraliza aproximações furtivas antes que alcancem o bivaque.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 270: GRANITOS RAPAKIVI E MATACÕES OVOIDES EM VIBORGITO (D&D 5e)
   // =========================================================================
 
@@ -35796,6 +35876,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessIncisedMeanderHazard: calcWildernessIncisedMeanderHazard,
+    calcCampIncisedMeanderStation: calcCampIncisedMeanderStation,
     calcWildernessRapakiviGraniteHazard: calcWildernessRapakiviGraniteHazard,
     calcCampRapakiviGraniteStation: calcCampRapakiviGraniteStation,
     calcWildernessCarbonatiteAlkalineHazard: calcWildernessCarbonatiteAlkalineHazard,
