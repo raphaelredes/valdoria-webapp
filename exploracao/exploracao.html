@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T04:15:24Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T04:20:46Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessParasiteSwarmAndVectorHazard) return '';
+        var bKey = (biome && biome.key) || 'swamp';
+        var ps = CartShared.calcWildernessParasiteSwarmAndVectorHazard(bKey, 'blood_mosquito_cloud_vector');
+        return '<div class="clp-parasite-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,20,20,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(239,68,68,0.3);font-size:8px;color:#fca5a5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ps.color + ';margin-bottom:2px;">' + ps.icon + ' ' + ps.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Perigo:</b> ' + ps.parasiteDamageAndInfection + ' (CD ' + ps.saveDC + ' [' + ps.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#f87171;margin-top:1px;">• <b>Prevenção:</b> ' + ps.pioneerMitigation + ' · <i>Sanitização: ' + ps.leechRemovalAndSanitizing + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampSmokeSmudgePotAndCitronellaRepellent) return '';
+        var bKey = (biome && biome.key) || 'swamp';
+        var sp = CartShared.calcCampSmokeSmudgePotAndCitronellaRepellent(bKey, 'smoke_smudge_pot_brazier');
+        return '<div class="clp-smoke-pot-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,28,24,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#d1fae5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sp.color + ';margin-bottom:2px;">' + sp.icon + ' ' + sp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Névoa Repelente:</b> ' + sp.repellentEfficiencyAndArea + ' · <b>Isolamento:</b> ' + sp.nettingAndBeddingSafety + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Sono:</b> ' + sp.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

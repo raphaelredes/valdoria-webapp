@@ -11781,6 +11781,130 @@
     };
   }
 
+  // === calcWildernessParasiteSwarmAndVectorHazard (Enxames de Insetos, Parasitas Hematófagos e Vetores de Doença - DMG p. 110, 257 / PHB p. 183) ===
+  function calcWildernessParasiteSwarmAndVectorHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'blood_mosquito_cloud_vector').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Nuvem Densa de Mosquitos de Brejo e Vetores de Febre',
+      saveDC: 12,
+      saveType: 'Constituição',
+      parasiteDamageAndInfection: 'Milhares de insetos ferroando simultaneamente; 2d4 de perfuração e risco de contrair Febre do Pântano (DMG p. 257).',
+      pioneerMitigation: 'Batedores utilizam capuzes de malha fina e orientam a comitiva a evitar lagoas estagnadas sob o crepúsculo.',
+      leechRemovalAndSanitizing: 'Aplicação de pasta de vinagre com sal para aliviar coceiras e banho com água fervida para desinfecção cutânea.',
+      icon: '🦟🩸',
+      color: '#ef4444'
+    };
+
+    if (ht === 'submerged_mud_leech_cluster') {
+      hazard = {
+        hazardTitle: 'Infestação Oculta de Sanguessugas de Lama em Vau',
+        saveDC: 13,
+        saveType: 'Sabedoria',
+        parasiteDamageAndInfection: 'Anelídeos hematófagos fixados nos membros inferiores; 1d6 de dano de sangramento sem dor e fraqueza muscular gradual.',
+        pioneerMitigation: 'Vistoria obrigatória a cada travessia de mangue com meias amarradas firmes por fora das calças.',
+        leechRemovalAndSanitizing: 'Uso de ponta de faca aquecida na brasa ou punhado de sal mineral para descolar os parasitas sem rasgar a pele.',
+        icon: '🪱💧',
+        color: '#854d0e'
+      };
+    } else if (ht === 'burrowing_ground_hornet_nest') {
+      hazard = {
+        hazardTitle: 'Enxame de Maribondos da Terra em Solo Escavado',
+        saveDC: 13,
+        saveType: 'Destreza',
+        parasiteDamageAndInfection: 'Ataque furioso ao pisar em ninho subterrâneo; 2d8 de veneno e condição Envenenado por 10 minutos (PHB p. 183).',
+        pioneerMitigation: 'Sentinelas de vanguarda reconhecem montículos de terra batida com zumbido ativo e sinalizam desvio imediato.',
+        leechRemovalAndSanitizing: 'Compressas geladas de barro úmido com folhas maceradas de tanchagem para neutralizar o veneno.',
+        icon: '🐝⚡',
+        color: '#f59e0b'
+      };
+    } else if (ht === 'decaying_bark_rot_grub_larvae') {
+      hazard = {
+        hazardTitle: 'Larvas Putrefatas de Tronco Caído (Rot Grubs)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        parasiteDamageAndInfection: 'Larvas necrófagas que saltam ao tocar cascas podres; enterram na carne causando 1d6 de dano por turno até queimadas com fogo.',
+        pioneerMitigation: 'Batedores proíbem sentar em troncos umedecidos sem antes raspar a casca com o cutelo de sobrevivência.',
+        leechRemovalAndSanitizing: 'Cauterização instantânea com tocha acesa na ferida nos primeiros 6 segundos para exterminar as larvas.',
+        icon: '🐛🔥',
+        color: '#71717a'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      parasiteDamageAndInfection: hazard.parasiteDamageAndInfection,
+      pioneerMitigation: hazard.pioneerMitigation,
+      leechRemovalAndSanitizing: hazard.leechRemovalAndSanitizing,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110, 257 (Doenças e Enxames dos Ermos) / PHB p. 183 (Dano de Perfuração e Veneno)'
+    };
+  }
+
+  // === calcCampSmokeSmudgePotAndCitronellaRepellent (Defumadores Aromáticos, Telas Mosquiteiras e Unguentos Repelentes - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampSmokeSmudgePotAndCitronellaRepellent(biomeKey, repellentType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var rt = (repellentType || 'smoke_smudge_pot_brazier').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Defumadores de Folhas de Pinho, Artemísia e Citronela',
+      repellentEfficiencyAndArea: 'Brasas lentas em vasos de barro gerando névoa aromática que repele 100% dos insetos em raio de 9 metros.',
+      nettingAndBeddingSafety: 'Fumaça suave e agradável que purifica o ar do acampamento sem irritar as vias aéreas da comitiva.',
+      campRestAndSafetyGuards: 'Assegura noite inteira de descanso revigorante sem interrupções por zumbidos ou picadas hematófagas.',
+      icon: '🏺💨',
+      color: '#10b981'
+    };
+
+    if (rt === 'waxed_gauze_netting_hammock') {
+      tech = {
+        defenseTitle: 'Telas Mosquiteiras de Gaze Encerada e Camas Suspensas',
+        repellentEfficiencyAndArea: 'Envoltório completo de tecido poroso impermeabilizado com cera vegetal suspenso entre troncos firmes.',
+        nettingAndBeddingSafety: 'Barreira física intransponível contra parasitas voadores e rastejantes a 1 metro de distância do solo úmido.',
+        campRestAndSafetyGuards: 'Mantém os aventureiros e guardas protegidos enquanto dormem, preservando vigor pleno para a marcha.',
+        icon: '🕸️🛏️',
+        color: '#38bdf8'
+      };
+    } else if (rt === 'camphor_tallow_sulfur_salve') {
+      tech = {
+        defenseTitle: 'Unguento Repelente de Cânfora, Sebo e Flor de Enxofre',
+        repellentEfficiencyAndArea: 'Pomada oleosa aplicada nas juntas, canelas e nuca dos membros da comitiva antes das rondas de vigília.',
+        nettingAndBeddingSafety: 'Concede vantagem em todas as salvaguardas contra vetores infecciosos e mascara o odor de suor humano.',
+        campRestAndSafetyGuards: 'Sentinelas realizam patrulhas perimetrais confortáveis mesmo nas margens pantanosas mais densas.',
+        icon: '🧴🌿',
+        color: '#ca8a04'
+      };
+    } else if (rt === 'salt_flask_heated_blade_station') {
+      tech = {
+        defenseTitle: 'Estação de Desparasitação com Cantil Salino e Lâmina Quente',
+        repellentEfficiencyAndArea: 'Mesa de cuidados táticos montada perto do fogo para inspeção e remoção anatômica de sanguessugas e carrapatos.',
+        nettingAndBeddingSafety: 'Extração segura e estéril impedindo regurgitação de toxinas ou infecções bacterianas secundárias.',
+        campRestAndSafetyGuards: 'Garante que todos os aventureiros iniciem o descanso longo com o corpo 100% limpo e higienizado.',
+        icon: '🧂🗡️',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      repellentType: rt,
+      defenseTitle: tech.defenseTitle,
+      repellentEfficiencyAndArea: tech.repellentEfficiencyAndArea,
+      nettingAndBeddingSafety: tech.nettingAndBeddingSafety,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Higiene de Acampamento) / XGE p. 78 (Engenharia de Terreno e Repelentes)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -13556,6 +13680,8 @@
     calcCampFloodClearanceAndRopeTraverse: calcCampFloodClearanceAndRopeTraverse,
     calcWildernessRazorvineAndChokingBrierHazard: calcWildernessRazorvineAndChokingBrierHazard,
     calcCampClearingMacheteAndProtectiveGaiters: calcCampClearingMacheteAndProtectiveGaiters,
+    calcWildernessParasiteSwarmAndVectorHazard: calcWildernessParasiteSwarmAndVectorHazard,
+    calcCampSmokeSmudgePotAndCitronellaRepellent: calcCampSmokeSmudgePotAndCitronellaRepellent,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
