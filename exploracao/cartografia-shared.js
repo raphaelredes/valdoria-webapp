@@ -18477,6 +18477,130 @@
     };
   }
 
+  // === calcWildernessAaLavaFieldAndChasmHazard (Lava A'a em Blocos, Fendas e Tubos de Lava Colapsados - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessAaLavaFieldAndChasmHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var ht = (hazardType || 'aa_clinker_clank_tumble_abrasion').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Rolamento Lacerante em Blocos Espinhosos de Lava A\'a',
+      saveDC: 15,
+      saveType: 'Destreza',
+      aaLavaRiskAndChasms: 'Campo caótico de clínqueres afiados e blocos escoriáceos de basalto vítreo sem aderência firme; desequilíbrio e queda desgovernada com lacerações profundas causando 3d6 cortante e perfurante com destruição de perneiras de couro (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores calçam solados de placas de ferro fixadas com arames e avançam apoiados em bordões longos com ponta chata para testar a estabilidade dos blocos.',
+      rescueAndStabilization: 'Içamento por maca rígida suspensa, sutura rápida de lacerações e aplicação de bálsamo antisséptico de seiva de zimbro vulcânico.',
+      icon: '🌋💥',
+      color: '#dc2626'
+    };
+
+    if (ht === 'lava_tube_thin_roof_skylight_collapse') {
+      hazard = {
+        hazardTitle: 'Ruptura de Teto de Tubo de Lava com Queda em Claraboia',
+        saveDC: 14,
+        saveType: 'Destreza',
+        aaLavaRiskAndChasms: 'Fina crosta basáltica resfriada de 5 centímetros que mascara galeria oca de tubo de lava subjacente; desabamento repentino com queda de 8 metros sobre pontas de rocha.',
+        pioneerMitigation: 'Sondagem acústica constante por golpes de maça no solo para identificar ressonâncias ocas antes da marcha da comitiva.',
+        rescueAndStabilization: 'Extração vertical por corda guia com triângulo de resgate e tala acolchoada para imobilização de fraturas em membros inferiores.',
+        icon: '🕳️⚠️',
+        color: '#b45309'
+      };
+    } else if (ht === 'subsurface_thermal_radiant_scald_vent') {
+      hazard = {
+        hazardTitle: 'Fenda Térmica Subterrânea com Ar Escaldante a 120°C',
+        saveDC: 14,
+        saveType: 'Constituição',
+        aaLavaRiskAndChasms: 'Fratura de contração que exala ar superaquecido por fluxo de magma residual em profundidade; queimação instantânea de mucosas nasais, asfixia e estafa térmica extrema.',
+        pioneerMitigation: 'Monitoramento de miragens termais e avanço com máscaras de linho umedecidas mantendo barlavento em relação às fissuras ativas.',
+        rescueAndStabilization: 'Retirada rápida para zonas ventiladas de basalto frio, hidratação por pequenos goles de água fresca e compressas frias na fronte.',
+        icon: '♨️🔥',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'unstable_clinker_scree_sliding_chasm') {
+      hazard = {
+        hazardTitle: 'Deslizamento de Seixos Vulcânicos Rumo a Fenda Basáltica',
+        saveDC: 13,
+        saveType: 'Força',
+        aaLavaRiskAndChasms: 'Encosta íngreme de cascalho escoriáceo solto que se liquefaz em avalanche mecânica sob os passos, arrastando exploradores e cargas para fenda cega estreita.',
+        pioneerMitigation: 'Transposição de encostas com cabos de aço ancorados em rocha mãe e descida lenta em passos laterais cravando calcanhares.',
+        rescueAndStabilization: 'Tração imediata com guincho manual e aplicação de unguento calmante de arnica e própolis sobre hematomas extensos.',
+        icon: '🪨💨',
+        color: '#0284c7'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      aaLavaRiskAndChasms: hazard.aaLavaRiskAndChasms,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Terrenos Vulcânicos e Fluxos de Lava) / PHB p. 182-183 (Marcha em Terreno Hostil) / XGE p. 78-83 (Geomorfologia Vulcânica e Escórias)'
+    };
+  }
+
+  // === calcCampAaLavaFieldAndChasmStation (Bivaques em Tubos de Lava, Leitos de Escória e Destiladores - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampAaLavaFieldAndChasmStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var dt = (defenseType || 'intact_lava_tube_chamber_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Câmara Íntegra de Tubo de Lava Basáltico',
+      lavaFieldAnchorageAndChasmSafety: 'Galeria subterrânea curvilínea de abóbada monolítica de basalto sã de 4 metros de altura; isolamento térmico impecável mantendo 18°C agradáveis contra os rigores da superfície.',
+      chasmShieldingAndCampSecurity: 'Totalmente protegido de chuvas de cinzas, ventanias cáusticas e imperceptível na superfície para patrulhas hostis ou predadores errantes.',
+      campRestAndSafetyGuards: 'Permite sono longo revigorante, calmo e seguro para todos os membros da comitiva após travessias extenuantes de campos de lava.',
+      icon: '🌋⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'clinker_crushed_fill_leveling_pavement') {
+      tech = {
+        defenseTitle: 'Leito Aplanado de Escória Moída com Mantas de Lona',
+        lavaFieldAnchorageAndChasmSafety: 'Trituração de arestas afiadas de basalto preenchida com cascalho fino e coberta por três camadas de lona encerada de alta resistência.',
+        chasmShieldingAndCampSecurity: 'Transforma o piso caótico e cortante da escória vulcânica em superfície regular e macia para a montagem de barracas sem risco de furos.',
+        campRestAndSafetyGuards: 'Garante que os sentinelas circulem sem ruídos e sem risco de tropeços ou rasgos em calçados durante as rondas.',
+        icon: '🪵🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'fumarolic_condensate_clay_retort_still') {
+      tech = {
+        defenseTitle: 'Destilador em Retorta Cerâmica com Alambique para Vapores',
+        lavaFieldAnchorageAndChasmSafety: 'Cúpula de argila refratária vedada sobre fenda de vapor mineral com tubo condensador espiral de cobre imerso em bacia de rocha.',
+        chasmShieldingAndCampSecurity: 'Produz 15 litros diários de água pura condensada livre de enxofre, cinzas e gases venenosos em pleno deserto vulcânico.',
+        campRestAndSafetyGuards: 'Assegura a hidratação completa da comitiva e o preparo de ensopados nutritivos sem consumo de lenha preciosa.',
+        icon: '🏺💧',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'skylight_perimeter_rope_tripwire_guard') {
+      tech = {
+        defenseTitle: 'Cerca Perimetral com Guizos ao Redor de Claraboias',
+        lavaFieldAnchorageAndChasmSafety: 'Pítons de ancoragem cravados nos blocos basálticos sustentando cordas estaiadas com sinetas sonoras ao redor de crateras colapsadas.',
+        chasmShieldingAndCampSecurity: 'Sinaliza com precisão os limites de precipícios verticais invisíveis no escuro da noite vulcânica sem iluminação excessiva.',
+        campRestAndSafetyGuards: 'Elimina totalmente o perigo de quedas acidentais de sentinelas sonolentas em poços cegos durante as trocas de turno.',
+        icon: '🔔🛡️',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      lavaFieldAnchorageAndChasmSafety: tech.lavaFieldAnchorageAndChasmSafety,
+      chasmShieldingAndCampSecurity: tech.chasmShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Terrenos Vulcânicos e Tubos de Lava) / PHB p. 150 (Kits de Exploração Subterrânea) / XGE p. 78-83 (Engenharia em Áreas Geotérmicas)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -20358,6 +20482,8 @@
     calcCampBadlandsMudstoneAndHoodooStation: calcCampBadlandsMudstoneAndHoodooStation,
     calcWildernessBlackMangroveAndPneumatophoreHazard: calcWildernessBlackMangroveAndPneumatophoreHazard,
     calcCampBlackMangroveAndPneumatophoreStation: calcCampBlackMangroveAndPneumatophoreStation,
+    calcWildernessAaLavaFieldAndChasmHazard: calcWildernessAaLavaFieldAndChasmHazard,
+    calcCampAaLavaFieldAndChasmStation: calcCampAaLavaFieldAndChasmStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,

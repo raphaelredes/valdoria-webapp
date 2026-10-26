@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessAaLavaFieldAndChasmHazard) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var aa = CartShared.calcWildernessAaLavaFieldAndChasmHazard(bKey, 'aa_clinker_clank_tumble_abrasion');
+        return '<div class="clp-aa-lava-card" style="margin:4px 0 6px;text-align:left;background:rgba(32,20,20,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(220,38,38,0.3);font-size:8px;color:#fee2e2;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + aa.color + ';margin-bottom:2px;">' + aa.icon + ' ' + aa.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Lava A\'a e Fendas:</b> ' + aa.aaLavaRiskAndChasms + ' (CD ' + aa.saveDC + ' [' + aa.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fca5a5;margin-top:1px;">• <b>Mitigação:</b> ' + aa.pioneerMitigation + ' · <i>Estabilização: ' + aa.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampAaLavaFieldAndChasmStation) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var cp = CartShared.calcCampAaLavaFieldAndChasmStation(bKey, 'intact_lava_tube_chamber_bivouac');
+        return '<div class="clp-lava-tube-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,34,28,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#ecfdf5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Tubo de Lava:</b> ' + cp.lavaFieldAnchorageAndChasmSafety + ' · <b>Proteção:</b> ' + cp.chasmShieldingAndCampSecurity + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessBlackMangroveAndPneumatophoreHazard) return '';
         var bKey = (biome && biome.key) || 'coastal';
         var bm = CartShared.calcWildernessBlackMangroveAndPneumatophoreHazard(bKey, 'pencil_pneumatophore_punji_impale');
