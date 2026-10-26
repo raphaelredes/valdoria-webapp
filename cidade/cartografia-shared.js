@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 226: CÂNIONS DE LAVAS EM ALMOFADA E BRECHAS DE HIALOCLASTITO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessPillowLavaHyaloclastiteHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'hyaloclastite_palagonite_vitric_breccia_matrix_crumble').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desagregação de Matriz de Hialoclastito Vítreo entre Almofadas de Basalto',
+      saveDC: 15,
+      saveType: 'Destreza',
+      pillowLavaRisk: 'Paredões de antigas lavas submarinas soerguidas tectonicamente formados por lóbulos bulbosos de basalto (pillow lavas) cimentados por uma matriz amarelada friável de vidro vulcânico granulado por choque térmico (hialoclastito e palagonita); quando o explorador pisa ou crava apoio entre duas almofadas, a matriz vítrea esfarela instantaneamente soltando o lóbulo de basalto de meia tonelada com 3d8 de concussão mais 1d6 cortante (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Apoiar o peso apenas no pescoço peduncular das almofadas soldadas entre si e nunca na brecha amarela intersticial.',
+      rescueAndStabilization: 'Retenção por corda ancorada em dique maciço e lavagem de espículas de vidro palagonítico.',
+      icon: '🪨🌋',
+      color: '#f59e0b'
+    };
+
+    if (ht === 'radial_cooling_joint_pillow_rind_wedge_spalling') {
+      hazard = {
+        hazardTitle: 'Desprendimento de Cunha Radial de Casca Vítrea de Lava em Almofada',
+        saveDC: 14,
+        saveType: 'Destreza',
+        pillowLavaRisk: 'Cada travesseiro de basalto possui uma casca externa vítrea negra de 3 centímetros e juntas de contração radiais como fatias de torta que convergem para o centro; puxar para fora uma saliência na barriga da almofada arranca um bloco triangular inteiro em forma de cunha contra o peito do escalador causando 2d8 de concussão (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Aplicar força apenas verticalmente para baixo sobre o topo convexo das almofadas sem tracionar para fora.',
+        rescueAndStabilization: 'Uso de capacete ou escudo sobre os ombros da cordada inferior e imobilização.',
+        icon: '🧗🪨',
+        color: '#d97706'
+      };
+    } else if (ht === 'hollow_drained_pillow_lava_shelf_cavern_collapse') {
+      hazard = {
+        hazardTitle: 'Colapso de Prateleira de Almofada de Lava Oca (Drained Pillow Tube)',
+        saveDC: 15,
+        saveType: 'Destreza',
+        pillowLavaRisk: 'Muitos lóbulos de lava esvaziaram seu magma interno antes de solidificar completamente, deixando bolhas de basalto ocas com múltiplas prateleiras horizontais finas de vidro basáltico no interior; saltar sobre um domo bulboso faz a abóbada de 4 centímetros quebrar sob as botas cravando as pernas nas divisórias internas afiadas com 2d6 perfurante mais 2d6 de concussão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Bater na carapaça de cada travesseiro de basalto com o bastão ferrado para evitar aqueles que soam como tambor oco.',
+        rescueAndStabilization: 'Quebra controlada das bordas da abertura com marreta para retirar a perna sem rasgar a artéria.',
+        icon: '🕳️🔪',
+        color: '#b45309'
+      };
+    } else if (ht === 'sheeted_dike_serpentinite_fault_gouge_slickenside_slide') {
+      hazard = {
+        hazardTitle: 'Escorregamento em Espelho de Falha de Serpentinita Sabonosa nos Diques',
+        saveDC: 15,
+        saveType: 'Força',
+        pillowLavaRisk: 'O complexo de lavas em almofada é cortado por corredores de falha revestidos por serpentinita verde-escura e talco hidrotermal polidos pelo movimento tectônico (slickensides); ao menor chuvisco, a rampa mineral fica mais escorregadia que gelo engraxado, disparando a comitiva rumo ao fundo do desfiladeiro com 3d6 de concussão e 1 nível de exaustão (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Evitar as faixas de rocha verde cerosa e brilhante, mantendo-se nas paredes rugosas de gabro ou diques de diabásio.',
+        rescueAndStabilization: 'Travessia com cabo corrimão fixado de lado a lado da zona de falha.',
+        icon: '🐍⛷️',
+        color: '#10b981'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampPillowLavaHyaloclastiteStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'drained_megapillow_basalt_geode_shell_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Concha de Megapillow Oco Revestido por Zeólitas',
+      pillowLavaAndCampSafety: 'Acampamento abrigado dentro de um tubo de lava em almofada gigante de 4 metros de diâmetro já aberto lateralmente pela erosão e atapetado por cristais arredondados de zeólita e calcita.',
+      pillowLavaTrenchAndWatch: 'Casca de basalto maciço de meio metro de espessura que protege contra quedas de blocos do paredão superior.',
+      campRestAndSafetyGuards: 'Garante descanso longo seco, aquecido e seguro na garganta ofiolítica.',
+      icon: '⛺🪨',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'sheeted_diabase_dike_vertical_rib_fortified_corridor') {
+      tech = {
+        defenseTitle: 'Corredor Fortificado entre Costelas Verticais de Diques em Camadas',
+        pillowLavaAndCampSafety: 'Instalação das barracas no vão plano entre dois diques paralelos de diabásio vertical que funcionam como muralhas naturais de 6 metros.',
+        pillowLavaTrenchAndWatch: 'Ao contrário do hialoclastito friável, os diques intrusivos são de rocha cristalina tenaz e indeformável.',
+        campRestAndSafetyGuards: 'Corta totalmente os ventos cruzados do cânion e protege ambos os flancos.',
+        icon: '🛡️⛰️',
+        color: '#64748b'
+      };
+    } else if (dt === 'zeolite_amygdaloidal_fracture_filtered_spring_water') {
+      tech = {
+        defenseTitle: 'Nascente Purificada por Leito Natural de Zeólitas Moleculares',
+        pillowLavaAndCampSafety: 'Coleta de água que percola pelas vesículas e cavidades preenchidas por minerais de zeólita (peneiras moleculares naturais) no basalto.',
+        pillowLavaTrenchAndWatch: 'As zeólitas removem naturalmente íons metálicos e impurezas, entregando água cristalina e leve.',
+        campRestAndSafetyGuards: 'Abastece os cantis do grupo com água de pureza excepcional.',
+        icon: '💧💎',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'glassy_tachylite_rind_crunch_perimeter_trap') {
+      tech = {
+        defenseTitle: 'Tapete de Cascas Vítreas de Taquilita no Perímetro de Vigília',
+        pillowLavaAndCampSafety: 'Espalhamento das crostas vítreas descascadas das almofadas de basalto nos acessos do acampamento.',
+        pillowLavaTrenchAndWatch: 'Qualquer passo sobre as cascas de vidro basáltico produz um estalo agudo audível a dezenas de metros.',
+        campRestAndSafetyGuards: 'Alerta imediatamente os sentinelas sobre aproximações noturnas.',
+        icon: '🔔🖤',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 225: DOMOS DE TURFEIRAS TROPICAIS E RIOS DE ÁGUA NEGRA (D&D 5e)
   // =========================================================================
 
@@ -31284,6 +31388,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessPillowLavaHyaloclastiteHazard: calcWildernessPillowLavaHyaloclastiteHazard,
+    calcCampPillowLavaHyaloclastiteStation: calcCampPillowLavaHyaloclastiteStation,
     calcWildernessTropicalPeatSwampDomeHazard: calcWildernessTropicalPeatSwampDomeHazard,
     calcCampTropicalPeatSwampDomeStation: calcCampTropicalPeatSwampDomeStation,
     calcWildernessMeteoriticImpactCraterHazard: calcWildernessMeteoriticImpactCraterHazard,

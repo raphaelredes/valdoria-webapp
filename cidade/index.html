@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessPillowLavaHyaloclastiteHazard) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var pl = CartShared.calcWildernessPillowLavaHyaloclastiteHazard(bKey, 'hyaloclastite_palagonite_vitric_breccia_matrix_crumble');
+        return '<div class="clp-pillow-lava-hyaloclastite-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,22,12,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.35);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + pl.color + ';margin-bottom:2px;">' + pl.icon + ' ' + pl.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Lavas em Almofada e Hialoclastito:</b> ' + pl.pillowLavaRisk + ' (CD ' + pl.saveDC + ' [' + pl.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Mitigação:</b> ' + pl.pioneerMitigation + ' · <i>Estabilização: ' + pl.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampPillowLavaHyaloclastiteStation) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var pc = CartShared.calcCampPillowLavaHyaloclastiteStation(bKey, 'drained_megapillow_basalt_geode_shell_bivouac');
+        return '<div class="clp-pillow-lava-hyaloclastite-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(22,18,10,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(217,119,6,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + pc.color + ';margin-bottom:2px;">' + pc.icon + ' ' + pc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Concha de Megapillow:</b> ' + pc.pillowLavaAndCampSafety + ' · <b>Defesa:</b> ' + pc.pillowLavaTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#fcd34d;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + pc.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessTropicalPeatSwampDomeHazard) return '';
         var bKey = (biome && biome.key) || 'swamp';
         var ps = CartShared.calcWildernessTropicalPeatSwampDomeHazard(bKey, 'hollow_buttress_root_mat_peat_slurry_void_plunge');
