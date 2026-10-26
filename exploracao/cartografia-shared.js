@@ -15129,6 +15129,130 @@
     };
   }
 
+  // === calcWildernessSubterraneanRapidAndStalactiteHazard (Corredeiras Subterrâneas, Queda de Estalactites e Sifões - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessSubterraneanRapidAndStalactiteHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'underground').toLowerCase();
+    var ht = (hazardType || 'subterranean_whitewater_cataract_slam').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda em Catarata e Corredeira Subterrânea',
+      saveDC: 14,
+      saveType: 'Força',
+      karstRiverRiskAndDrowning: 'Torrente turbulenta no escuro arremessando botes contra rochas cársticas submersas; impacto de 3d8 de concussão e risco de afogamento em água a 5°C (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam com corda guia na margem rochosa e ancoram espias de retenção antes de corredeiras de classe IV.',
+      rescueAndStabilization: 'Lançamento de cabos flutuantes com nós de boia, reanimação pulmonar em bancada seca e infusão com raízes quentes de canela silvestre.',
+      icon: '🚣🕳️',
+      color: '#0284c7'
+    };
+
+    if (ht === 'ceiling_stalactite_vibration_drop') {
+      hazard = {
+        hazardTitle: 'Desabamento de Estalactites por Ressonância Acústica',
+        saveDC: 14,
+        saveType: 'Destreza',
+        karstRiverRiskAndDrowning: 'Espigões calcários de 2 metros no teto da galeria que se soltam pelo eco do rugido das corredeiras; empalação causando 3d10 de perfuração.',
+        pioneerMitigation: 'Inspeção de teto com lanternas direcionais com foco estreito e silenciamento de equipamentos metálicos.',
+        rescueAndStabilization: 'Remoção de fragmentos calcários com fórceps e estancamento de sangramento com pó hemostático de líquen de caverna.',
+        icon: '🧗‍♂️⚠️',
+        color: '#eab308'
+      };
+    } else if (ht === 'limestone_sump_siphon_vortex') {
+      hazard = {
+        hazardTitle: 'Vórtice em Sifão Cárstico Submerso',
+        saveDC: 13,
+        saveType: 'Força',
+        karstRiverRiskAndDrowning: 'Redemoinho voraz sugando embarcações e nadadores para conduto inundado sem bolsão de ar; perda de suprimentos e asfixia.',
+        pioneerMitigation: 'Sondagem de fluxo com boias de madeira sinalizadoras com fósforo antes de soltar amarras.',
+        rescueAndStabilization: 'Tratamento de água aspirada com tosse induzida e massagem diafragmática vigorosa.',
+        icon: '🌀🌊',
+        color: '#06b6d4'
+      };
+    } else if (ht === 'calcified_razor_rimstone_laceration') {
+      hazard = {
+        hazardTitle: 'Bordas Cortantes de Represas de Travertino',
+        saveDC: 13,
+        saveType: 'Destreza',
+        karstRiverRiskAndDrowning: 'Diques finos de calcita afiada sob a lâmina d\'água rasgando cascos de embarcações e pernas; 2d6 de corte e sangramento na água gélida.',
+        pioneerMitigation: 'Uso de remos com sapata de couro para frear a aproximação e calçados com biqueira reforçada.',
+        rescueAndStabilization: 'Desinfecção de cortes com tintura de iodo de caverna e sutura com fio encerado.',
+        icon: '🪨🔪',
+        color: '#38bdf8'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      karstRiverRiskAndDrowning: hazard.karstRiverRiskAndDrowning,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Rios Subterrâneos, Corredeiras e Afogamento) / PHB p. 182-183 (Navegação em Cavernas e Salvaguardas)'
+    };
+  }
+
+  // === calcCampSubterraneanRiverTravertineBenchAndRaftStation (Bancadas de Travertino, Botes de Couro e Tirolesas de Bronze - DMG p. 111 / XGE p. 78-83 / PHB p. 150) ===
+  function calcCampSubterraneanRiverTravertineBenchAndRaftStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'underground').toLowerCase();
+    var dt = (defenseType || 'elevated_travertine_terrace_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Bancada Seca de Terraço de Travertino',
+      karstRiverAnchorageAndSafety: 'Plataforma calcária plana natural elevada a 4 metros acima do nível máximo da cheia do rio subterrâneo.',
+      moistureShieldingAndCampSecurity: 'Isola os leitos dos aventureiros da umidade gélida do leito fluvial e de inundações repentinas.',
+      campRestAndSafetyGuards: 'Garante sono longo aquecido e silencioso para a comitiva fora da corrente de ar úmida da galeria.',
+      icon: '⛺🪨',
+      color: '#10b981'
+    };
+
+    if (dt === 'pneumatic_leather_and_bladder_raft') {
+      tech = {
+        defenseTitle: 'Bote Desmontável de Couro Engraxado com Câmaras de Ar',
+        karstRiverAnchorageAndSafety: 'Casco flexível reforçado com costelas de freixo e bexigas de ar infláveis imunes a perfurações em rochas pontiagudas.',
+        moistureShieldingAndCampSecurity: 'Permite travessia segura de corredeiras violentas transportando toda a bagagem e montarias leves.',
+        campRestAndSafetyGuards: 'Oferece veículo de fuga rápido e confiável caso as cavernas sofram inundação torrencial.',
+        icon: '🛶🛡️',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'bronze_carabiner_tyrolean_traverse_cable') {
+      tech = {
+        defenseTitle: 'Cabo de Tirolesa Subterrânea com Roldanas de Bronze',
+        karstRiverAnchorageAndSafety: 'Cabo de aço galvanizado tensionado entre duas paredes rochosas com pontos de ancoragem duplos em chapeletas de expansão.',
+        moistureShieldingAndCampSecurity: 'Permite transposição aérea de sumidouros e corredeiras sem molhar um único fardo de provisões.',
+        campRestAndSafetyGuards: 'Agiliza o transporte de sentinelas e feridos entre margens opostas do cânion subterrâneo.',
+        icon: '🚡🔩',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'lime_stalagmite_chimney_smoke_filter') {
+      tech = {
+        defenseTitle: 'Fogueira com Filtro de Fumaça em Fissura de Estalagmite',
+        karstRiverAnchorageAndSafety: 'Lareira construída com pedras furadas que canaliza os gases quentes para fendas naturais ascendentes do teto cárstico.',
+        moistureShieldingAndCampSecurity: 'Evita o acúmulo de monóxido de carbono e fuligem na câmara de acampamento fechada.',
+        campRestAndSafetyGuards: 'Permite cocção de refeições e fervura de água para os aventureiros em atmosfera pura e respirável.',
+        icon: '🔥💨',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      karstRiverAnchorageAndSafety: tech.karstRiverAnchorageAndSafety,
+      moistureShieldingAndCampSecurity: tech.moistureShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque Subterrâneo em Terraços de Travertino) / XGE p. 78-83 (Kit de Escalada e Ferramentas de Navegador)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -16956,6 +17080,8 @@
     calcCampSavannaAcaciaPlatformAndDustScreenStation: calcCampSavannaAcaciaPlatformAndDustScreenStation,
     calcWildernessTreeFernForestAndTarPitHazard: calcWildernessTreeFernForestAndTarPitHazard,
     calcCampTreeFernCanopyBivouacAndSolventStation: calcCampTreeFernCanopyBivouacAndSolventStation,
+    calcWildernessSubterraneanRapidAndStalactiteHazard: calcWildernessSubterraneanRapidAndStalactiteHazard,
+    calcCampSubterraneanRiverTravertineBenchAndRaftStation: calcCampSubterraneanRiverTravertineBenchAndRaftStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
