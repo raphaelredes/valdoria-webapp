@@ -18849,6 +18849,130 @@
     };
   }
 
+  // === calcWildernessHamadaRegAndGaleHazard (Pavimentos de Reg, Ventos Catabáticos de Poeira e Nebkas - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessHamadaRegAndGaleHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'desert_varnish_flint_conchoidal_shear').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Corte em Lascas de Pederneira com Verniz do Deserto',
+      saveDC: 15,
+      saveType: 'Destreza',
+      hamadaRegRiskAndGales: 'Pavimento contínuo de seixos silicosos e lascas de pederneira envernizadas com óxidos de manganês; fratura concoidal com bordas afiadas como bisturis que rasgam botas e cortam tendões em quedas causando 3d6 cortante e perfurante (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores fixam solas de ferro dobrado sob as botas e marcham em fila única apoiando os passos nos seixos maiores arredondados.',
+      rescueAndStabilization: 'Estancamento com torniquete de emergência, sutura com fio encerado e cauterização com pó de casca de romã adstringente.',
+      icon: '🪨🩸',
+      color: '#b45309'
+    };
+
+    if (ht === 'catabatic_dust_storm_zero_visibility_whiteout') {
+      hazard = {
+        hazardTitle: 'Vendaval Catabático com Poeira Fina e Cegueira Total',
+        saveDC: 14,
+        saveType: 'Constituição',
+        hamadaRegRiskAndGales: 'Frente de vento polar descendente que atinge o planalto desértico a 90 km/h levantando poeira micronizada impenetrável; perda total da visão a meio metro e asfixia mecânica.',
+        pioneerMitigation: 'Fixação de corda mestra interligando todos os integrantes da comitiva e uso de óculos de proteção de fenda dupla com vedação de graxa vegetal.',
+        rescueAndStabilization: 'Recolhimento para trincheiras de encosta, lavagem nasal com solução salina morna e respiração cadenciada sob capuzes de feltro.',
+        icon: '🌪️🌫️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'nebka_sand_hollow_quicksand_collapse') {
+      hazard = {
+        hazardTitle: 'Colapso de Moita de Nebka sobre Sedimento Arenoso Solto',
+        saveDC: 14,
+        saveType: 'Força',
+        hamadaRegRiskAndGales: 'Montículo de areia eólica de 2 metros acumulado ao redor de arbustos espinhosos com base oca carcomida pelo vento; colapso súbito engolindo exploradores em bolsão solto.',
+        pioneerMitigation: 'Evitar escalar montículos de nebka para vigília e contornar as moitas pelo piso consolidado de cascalho do reg.',
+        rescueAndStabilization: 'Tracionamento com estribos de corda e alavancas de suporte para evitar que a areia fina soterre o peito dos acidentados.',
+        icon: '🏜️🕳️',
+        color: '#d97706'
+      };
+    } else if (ht === 'mirage_heat_refraction_thermal_delirium') {
+      hazard = {
+        hazardTitle: 'Refração Térmica e Miragem Convectiva no Pavimento de Reg',
+        saveDC: 13,
+        saveType: 'Sabedoria',
+        hamadaRegRiskAndGales: 'Ar superaquecido rente aos seixos negros a 68°C criando espelhamento óptico perfeito que oculta fendas e projeta ilusões de corpos de água inexistentes, induzindo extravio fatal.',
+        pioneerMitigation: 'Navegação por azimute estrito via bússola solar com checagens de marcos orográficos altos em vez de referências no horizonte rebaixado.',
+        rescueAndStabilization: 'Repouso imediato sob toldo refletor, banho de cabeça com água fria de cantil e ministração de pastilhas de sal marinho.',
+        icon: '☀️🌀',
+        color: '#dc2626'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      hamadaRegRiskAndGales: hazard.hamadaRegRiskAndGales,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Desertos Rochosos e Hamadas) / PHB p. 182-183 (Marcha no Deserto) / XGE p. 78-83 (Geomorfologia Semiárida e Pavimentos de Reg)'
+    };
+  }
+
+  // === calcCampHamadaRegAndGaleStation (Bivaques Rebaixados em Reg, Lastros Aerodinâmicos e Condensadores de Seixo - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampHamadaRegAndGaleStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'reg_pavement_stone_revetment_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque com Trincheira Rebaixada e Mureta de Lastro de Reg',
+      regAnchorageAndGaleSafety: 'Fosso de 60 centímetros escavado no pavimento rochoso protegido por parapeito perimetral de seixos empilhados em caixilhos de arame.',
+      galeShieldingAndCampSecurity: 'Reduz o perfil do acampamento contra vendavais catabáticos rasantes e desvia rajadas de areia por cima das coberturas.',
+      campRestAndSafetyGuards: 'Assegura descanso reparador e calmo para os membros da comitiva sem perigo de arrancamento de tendas ou soterramento de cobertas.',
+      icon: '🪨⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'aerodynamic_low_profile_tent_anchor_matrix') {
+      tech = {
+        defenseTitle: 'Matriz de Fixação de Baixo Perfil com Sacos de Lastro',
+        regAnchorageAndGaleSafety: 'Pítons de aço cravados entre fendas do reg combinados com sacos de lona cheios de seixos de sílica amarrados nas alças das barracas.',
+        galeShieldingAndCampSecurity: 'Garante estabilidade absoluta das lonas contra ventos de até 90 km/h sem necessidade de esteios verticais vulneráveis.',
+        campRestAndSafetyGuards: 'Permite que a comitiva repouse com total segurança mesmo sob o rugido de tempestades de poeira noturnas.',
+        icon: '⛺🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'condenser_stone_pile_dew_trap') {
+      tech = {
+        defenseTitle: 'Monte Cônico de Seixos Negros para Condensação Noturna',
+        regAnchorageAndGaleSafety: 'Pirâmide de pedras de reg escuras montada sobre bacia impermeabilizada de argila cozida que aproveita a radiação térmica para resfriamento rápido.',
+        galeShieldingAndCampSecurity: 'Condensa o vapor noturno em canaletas coletoras gerando 10 litros diários de água mineral fresca límpida sem consumo de combustível.',
+        campRestAndSafetyGuards: 'Abastece plenamente os cantis da comitiva em região árida onde não existem nascentes ou poços.',
+        icon: '💧🏺',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'slate_louver_ventilation_sand_screen') {
+      tech = {
+        defenseTitle: 'Anteparo de Placas de Xisto com Frestas Anguladas',
+        regAnchorageAndGaleSafety: 'Painéis modulares de lajes finas de xisto dispostos com ângulo de 45 graus voltados contra a direção do vento dominante.',
+        galeShieldingAndCampSecurity: 'Permite circulação contínua de ar fresco no interior da trincheira enquanto barra completamente o ingresso de poeira e areia fina.',
+        campRestAndSafetyGuards: 'Protege a respiração e os olhos das sentinelas de vigília, mantendo sua prontidão para combate.',
+        icon: '🛡️💨',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      regAnchorageAndGaleSafety: tech.regAnchorageAndGaleSafety,
+      galeShieldingAndCampSecurity: tech.galeShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques no Deserto e Hamadas) / PHB p. 150 (Kits de Sobrevivência Árida) / XGE p. 78-83 (Engenharia de Abrigos de Baixo Perfil)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -20736,6 +20860,8 @@
     calcCampPapyrusSwampAndSiphonStation: calcCampPapyrusSwampAndSiphonStation,
     calcWildernessKarstMogoteAndBlindPitHazard: calcWildernessKarstMogoteAndBlindPitHazard,
     calcCampKarstMogoteAndBlindPitStation: calcCampKarstMogoteAndBlindPitStation,
+    calcWildernessHamadaRegAndGaleHazard: calcWildernessHamadaRegAndGaleHazard,
+    calcCampHamadaRegAndGaleStation: calcCampHamadaRegAndGaleStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
