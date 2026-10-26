@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessKimberliteDiatremeHazard) return '';
+        var bKey = (biome && biome.key) || 'mountains';
+        var kd = CartShared.calcWildernessKimberliteDiatremeHazard(bKey, 'breccia_chasm_collapse');
+        return '<div class="clp-kimberlite-diatreme-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,24,36,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.35);font-size:8px;color:#f0f9ff;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + kd.color + ';margin-bottom:2px;">' + kd.icon + ' ' + kd.hazardTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Diatrema de Kimberlito:</b> ' + kd.diatremeRisk + ' (CD ' + kd.saveDC + ' [' + kd.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Mitigação:</b> ' + kd.pioneerMitigation + ' · <i>Estabilização: ' + kd.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampKimberliteDiatremeStation) return '';
+        var bKey = (biome && biome.key) || 'mountains';
+        var kd = CartShared.calcCampKimberliteDiatremeStation(bKey, 'massive_eclogite_rim_bivouac');
+        return '<div class="clp-kimberlite-diatreme-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(16,28,40,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(14,165,233,0.3);font-size:8px;color:#e0f2fe;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + kd.color + ';margin-bottom:2px;">' + kd.icon + ' ' + kd.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>' 
+          + '  <div>• <b>Bivaque em Crista de Eclogito:</b> ' + kd.diatremeAndCampSafety + ' · <b>Proteção:</b> ' + kd.diatremeTrenchAndWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + kd.campRestAndSafetyGuards + '</div>' 
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessSerpentiniteOphioliteHazard) return '';
         var bKey = (biome && biome.key) || 'mountains';
         var so = CartShared.calcWildernessSerpentiniteOphioliteHazard(bKey, 'waxy_slickenside_serpentine_shear_slip');

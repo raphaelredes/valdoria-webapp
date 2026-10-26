@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 264: DIATREMAS DE KIMBERLITO E BRECHAS MANTÉLICAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessKimberliteDiatremeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var ht = (hazardType || 'breccia_chasm_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso em Funil de Brecha Kimberlítica Friável',
+      saveDC: 15,
+      saveType: 'Destreza',
+      diatremeRisk: 'O preenchimento tubular da chaminé vulcânica é composto por brecha de kimberlito friável alterada em argilas azuis; ao pisar nessa crosta instável sobre vazios verticais de descompressão gasosa, o solo cede em funil tragando o aventureiro por 20 metros com 3d8 de dano contundente de impacto e soterramento parcial (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores avançados utilizando varas longas de madeira reforçada e cordas de segurança para sondar a resistência mecânica das argilas antes da passagem da comitiva (Sobrevivência ou Natureza CD 14).',
+      rescueAndStabilization: 'Lançamento ágil de cabos de escalada e roldanas para içamento de quem cair antes do afunilamento total das cinzas (Atletismo CD 14 ou Ferramentas de Ladrão/Engenho CD 13).',
+      icon: '💎',
+      color: '#38bdf8'
+    };
+
+    if (ht === 'deep_mantle_gas_pocket_rupture') {
+      hazard.hazardTitle = 'Ruptura de Bolsão de Gases Vulcânicos Mantélicos';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Constituição';
+      hazard.diatremeRisk = 'Fissuras profundas conectadas à raiz mantélica da chaminé liberam repentinamente bolsas pressurizadas de gases inodoros densos (metano, gás carbônico e sulfeto); a inalação causa vertigem súbita, 3d6 de dano de veneno e desvantagem em testes de Percepção e Sobrevivência por 1 hora por hipóxia tóxica (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Observação atenta da ausência de pássaros e uso de tochas de vigia que vacilam e mudam de cor na borda de fendas suspeitas (Percepção CD 14).';
+      hazard.rescueAndStabilization = 'Aplicação imediata de máscaras umedecidas em vinagre e bálsamos de purificação herbal para desintoxicação das vias aéreas (Medicina CD 13 ou Kit de Herbalismo).';
+    } else if (ht === 'angular_peridotite_scree_avalanche') {
+      hazard.hazardTitle = 'Enxurrada de Blocos Angulares de Peridotito e Eclogito';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.diatremeRisk = 'Encostas escarpadas do diatrema acumulam cascalheiras soltas de xenólitos mantélicos ultradensos; passos pesados desencadeiam uma torrente de pedras pesadas de alta gravidade que derrubam aventureiros e causam 2d10 de dano contundente por impacto e esmagamento (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Travessia em linha escalonada e fixação de pitões de aço nas nervuras de rocha sã para ancorar a linha de marcha (Atletismo CD 14).';
+      hazard.rescueAndStabilization = 'Trabalho de alavanca com barras de ferro e socorro rápido para retirar membros presos sob blocos pesados de peridotito (Atletismo CD 14).';
+    } else if (ht === 'gem_fever_unstable_pit_slip') {
+      hazard.hazardTitle = 'Escorregamento em Vertente Instável por Cobiça de Gemas';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.diatremeRisk = 'Cristais brutos de diamante e granadas piropo reluzem na terra azul intemperizada da encosta; a tentativa afobada de coletar gemas sem segurança faz o talude ceder, arremessando o explorador contra rochas cortantes com 2d6 de dano perfurante e perda de itens da mochila (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Disciplina rígida de exploração militar, mantendo os aventureiros amarrados à linha guia antes de examinar depósitos minerais suspeitos (Intuição ou Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Içamento por corda e contenção de escoriações com ataduras compressivas (Medicina CD 12).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampKimberliteDiatremeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var dt = (defenseType || 'massive_eclogite_rim_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Crista de Eclogito Maciço',
+      diatremeAndCampSafety: 'O acampamento é estabelecido sobre uma crista sólida de eclogito mantélico ultradenso na borda do diatrema, imune a colapsos de teto e cujo leito de rocha impenetrável impede completamente que monstros escavadores perfurem o chão das barracas (DMG p. 111).',
+      diatremeTrenchAndWatch: 'Plataforma elevada com visão limpa de 360 graus sobre a cratera e a planície circundante, concedendo +2 de bônus na Percepção Passiva das sentinelas durante a vigília noturna.',
+      campRestAndSafetyGuards: 'Descanso seguro com barreira natural contra infiltrações subterrâneas e estabilidade sísmica perfeita.',
+      icon: '🛡️',
+      color: '#38bdf8'
+    };
+
+    if (dt === 'heavy_mineral_gravity_sluice_trough') {
+      defense.defenseTitle = 'Calha Gravimétrica de Decantação e Filtragem';
+      defense.diatremeAndCampSafety = 'Canalização artesanal de um filete de degelo ou nascente por calhas de madeira que decantam areias densas de kimberlito, fornecendo água límpida filtrada e concentrando cristais brutos de granada e quartzo (PHB p. 150; XGE p. 78).';
+      defense.diatremeTrenchAndWatch = 'Garante abastecimento contínuo de água potável livre de argilas coloidais tóxicas para todos os membros da comitiva durante o descanso longo.';
+      defense.campRestAndSafetyGuards = 'Restauração completa de hidratação sem risco de disenteria por suspensões minerais.';
+    } else if (dt === 'mantle_xenolith_windbreak_parapet') {
+      defense.defenseTitle = 'Mureta Corta-Vento em Nódulos Mantélicos';
+      defense.diatremeAndCampSafety = 'Parapeito defensivo construído com blocos pesados de peridotito e cromitita empilhados ao redor das tendas, suportando tempestades severas e concedendo cobertura superior (+5 na CA) contra ataques à distância (DMG p. 111).';
+      defense.diatremeTrenchAndWatch = 'Fendas de tiro protegidas permitem que arqueiros e conjuradores monitorem os acessos da garganta vulcânica em total segurança.';
+      defense.campRestAndSafetyGuards = 'Elimina a perda térmica por ventos gelados de altitude e impede projéteis inimigos de atingirem aventureiros adormecidos.';
+    } else if (dt === 'peridotite_thermal_heat_sink_hearth') {
+      defense.defenseTitle = 'Lareira de Acúmulo Térmico em Rochas de Olivina';
+      defense.diatremeAndCampSafety = 'Círculo de fogo montado com pedras densas de olivina e minerais de ferro-magnésio que retêm calor residual por 8 horas sem gerar labaredas altas ou fumaça delatora (PHB p. 185).';
+      defense.diatremeTrenchAndWatch = 'Mantém o bivaque aquecido na madrugada gelada dos ermos sem atrair predadores noturnos pela claridade excessiva.';
+      defense.campRestAndSafetyGuards = 'Proteção contra hipotermia com vantagem em testes de resistência contra frio extremo.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 263: RECIFES DE SERPENTINITO OFIOLÍTICO (D&D 5e)
   // =========================================================================
 
@@ -35236,6 +35316,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessKimberliteDiatremeHazard: calcWildernessKimberliteDiatremeHazard,
+    calcCampKimberliteDiatremeStation: calcCampKimberliteDiatremeStation,
     calcWildernessSerpentiniteOphioliteHazard: calcWildernessSerpentiniteOphioliteHazard,
     calcCampSerpentiniteOphioliteStation: calcCampSerpentiniteOphioliteStation,
     calcWildernessLoessGullyHeadcutHazard: calcWildernessLoessGullyHeadcutHazard,
