@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 218: ESTROMATOLITOS HIPERSALINOS E TAPETES MICROBIANOS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessStromatoliteBiohermHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'stromatolite_bioherm_hollow_aragonite_dome_crust_punch').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Afundamento em Domo Oco de Estromatolito de Aragonita e Salmoura',
+      saveDC: 15,
+      saveType: 'Destreza',
+      stromatoliteRisk: 'Colunas e domos calcários biogênicos construídos camada por camada por cianobactérias em lagunas hipersalinas rasas cujo interior foi dissolvido pela salmoura ácida; pisar no topo de um bioerma aparentemente sólido faz a casca de aragonita quebrar como porcelana, cravando as canelas nos anéis laminados cortantes com 2d6 cortante mais 1d8 de ácido salino (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Marcha pelos canais arenosos claros entre os domos escuros sem pisar nas cabeças de estromatolito.',
+      rescueAndStabilization: 'Lavagem imediata dos cortes com água doce do cantil antes que o sal cristalize na ferida.',
+      icon: '🪨🦠',
+      color: '#14b8a6'
+    };
+
+    if (ht === 'pustular_thrombolite_microbial_mat_false_bottom_quagmire') {
+      hazard = {
+        hazardTitle: 'Alçapão Viscoso de Tapete Microbiano Coeso sobre Lodo Sulfídrico',
+        saveDC: 15,
+        saveType: 'Força',
+        stromatoliteRisk: 'Nas margens da laguna estende-se um tapete elástico alaranjado e coriáceo de 5 centímetros de espessura tecido por filamentos bacterianos que flutua sobre um metro de lama negra anaeróbica fervilhante de gás sulfídrico; quando a membrana biológica rasga sob a bota, ela se fecha ao redor da coxa prendendo o aventureiro na lama tóxica com 2d8 de veneno e 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Sondar a margem elástica com lança; se o solo ondular como gelatina, contornar pela berma de conchas.',
+        rescueAndStabilization: 'Rasgar o tapete microbiano ao redor da perna com faca antes de puxar o companheiro com corda.',
+        icon: '🧡🕳️',
+        color: '#ea580c'
+      };
+    } else if (ht === 'heliothermal_halocline_superheated_bottom_brine_scald') {
+      hazard = {
+        hazardTitle: 'Escaldamento Solar em Piscina Heliotérmica de Haloclina Estratificada',
+        saveDC: 14,
+        saveType: 'Constituição',
+        stromatoliteRisk: 'Bacias costeiras onde uma camada fina de água menos salgada na superfície funciona como lente de estufa impedindo a convecção da salmoura densa do fundo, que atinge 65 graus sob o sol sem ferver nem soltar vapor; vadear pela piscina morna na superfície queima subitamente pés e pernas ao cruzar a haloclina com 3d6 de fogo (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Medir a temperatura do fundo da bacia com a ponta metálica do bastão antes de entrar na água.',
+        rescueAndStabilization: 'Retirada imediata para a brisa costeira e resfriamento com compressas de água fria.',
+        icon: '☀️🌡️',
+        color: '#dc2626'
+      };
+    } else if (ht === 'halophilic_dunaliella_crimson_glare_and_salt_needle_blindness') {
+      hazard = {
+        hazardTitle: 'Ofuscamento Carmesim de Algas Halófilas e Cristais de Halita em Suspensão',
+        saveDC: 14,
+        saveType: 'Constituição',
+        stromatoliteRisk: 'A proliferação de microalgas halófilas tinge a laguna de vermelho-sangue espelhado enquanto o vento levanta borrifos saturados que cristalizam instantaneamente nas pestanas e córneas; o reflexo ofuscante combinado à queimação salina impõe cegueira temporária e desorientação (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Uso de viseiras baixas de couro escurecido com fuligem e pano úmido sobre as maçãs do rosto.',
+        rescueAndStabilization: 'Enxágue ocular com algumas gotas preciosas de água doce e repouso à sombra.',
+        icon: '👁️🌺',
+        color: '#e11d48'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampStromatoliteBiohermStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'coquina_beach_ridge_bivalve_shell_chenier_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Crista de Coquina e Conchas Cimentadas (Chenier)',
+      stromatoliteAndCampSafety: 'Acampamento instalado sobre o cordão litorâneo elevado de conchas de bivalves cimentadas a 4 metros acima da laguna de estromatolitos.',
+      stromatoliteTrenchAndWatch: 'Solo firme, seco e livre dos gases sulfídricos do tapete microbiano e da salmoura heliotérmica.',
+      campRestAndSafetyGuards: 'Garante descanso longo seguro e ventilado para toda a comitiva.',
+      icon: '⛺🐚',
+      color: '#14b8a6'
+    };
+
+    if (dt === 'fossil_precambrian_stromatolite_reef_windbreak_wall') {
+      tech = {
+        defenseTitle: 'Muralha Corta-Vento de Recife Fóssil de Estromatolitos Litificados',
+        stromatoliteAndCampSafety: 'Tendas abrigadas atrás de um banco antigo de estromatolitos totalmente petrificados em sílex e dolomita dura na encosta seca.',
+        stromatoliteTrenchAndWatch: 'Bloqueia o vento carregado de cristais de sal e oculta o acampamento da linha da praia.',
+        campRestAndSafetyGuards: 'Preserva as lonas e evita a corrosão salina das armas.',
+        icon: '🪨🛡️',
+        color: '#0d9488'
+      };
+    } else if (dt === 'coastal_dune_toe_freshwater_ghyben_herzberg_lens_well') {
+      tech = {
+        defenseTitle: 'Cacimba Rasa na Lente de Água Doce da Base da Duna Costeira',
+        stromatoliteAndCampSafety: 'Escavação superficial de 60 centímetros na base da duna de areia quartzosa adjacente à laguna onde a água da chuva flutua sobre o lençol salgado.',
+        stromatoliteTrenchAndWatch: 'Retirada cuidadosa apenas da lâmina superior de água doce com concha rasa.',
+        campRestAndSafetyGuards: 'Garante água potável vital ao lado de uma bacia hipersalina venenosa.',
+        icon: '💧🏖️',
+        color: '#0284c7'
+      };
+    } else if (dt === 'crunchy_aragonite_crust_perimeter_footstep_detector') {
+      tech = {
+        defenseTitle: 'Faixa de Alerta de Crosta de Aragonita e Conchas Quebradiças',
+        stromatoliteAndCampSafety: 'Manutenção de um anel de 12 metros de crosta salina seca e conchas finas ao redor do bivaque.',
+        stromatoliteTrenchAndWatch: 'Estala alto sob o menor passo de incursores noturnos, alertando os sentinelas.',
+        campRestAndSafetyGuards: 'Reforça a segurança perimetral durante a vigília noturna.',
+        icon: '🔔🐚',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 217: CHAMINÉS DE FADA GLACIOLACUSTRES (DEMOISELLES) E RAVINAS (D&D 5e)
   // =========================================================================
 
@@ -30452,6 +30556,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessStromatoliteBiohermHazard: calcWildernessStromatoliteBiohermHazard,
+    calcCampStromatoliteBiohermStation: calcCampStromatoliteBiohermStation,
     calcWildernessGlaciolacustrineHoodooHazard: calcWildernessGlaciolacustrineHoodooHazard,
     calcCampGlaciolacustrineHoodooStation: calcCampGlaciolacustrineHoodooStation,
     calcWildernessTravertineTufaBarrageHazard: calcWildernessTravertineTufaBarrageHazard,
