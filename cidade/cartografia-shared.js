@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 243: COLINAS DE AVALANCHE VULCÂNICA (HUMMOCKS) E BLOCOS TOREVA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessVolcanicHummockTorevaHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'jigsaw_fractured_megablock_hummock_interior_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desmoronamento de Colina de Megabloco Fraturado em Quebra-Cabeça ("Jigsaw-Fit Hummock")',
+      saveDC: 15,
+      saveType: 'Destreza',
+      hummockTorevaRisk: 'Milhares de colinas cônicas e cristas caóticas espalhadas pela bacia ao pé de um estratovulcão colapsado; embora cada colina (hummock) pareça uma montanha de rocha sólida, seu interior é um único megabloco de lava inteiramente estilhaçado em milhões de peças encaixadas sem cimento (jigsaw cracks) durante o transporte da avalanche, desmoronando em cascata ao menor golpe de picão ou escalada com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+      pioneerMitigation: 'Evitar escalar faces íngremes de hummocks com textura de mosaico trincado; contornar pela sela basal.',
+      rescueAndStabilization: 'Remoção rápida dos fragmentos angulosos de andesito e imobilização de fraturas.',
+      icon: '⛰️🧩',
+      color: '#dc2626'
+    };
+
+    if (ht === 'backward_tilted_toreva_block_headwall_fissure_chasm') {
+      hazard = {
+        hazardTitle: 'Queda em Fenda de Rotação Traseira de Bloco Toreva (Toreva Block Graben)',
+        saveDC: 15,
+        saveType: 'Destreza',
+        hummockTorevaRisk: 'Enormes fatias da encosta da montanha (blocos Toreva) que escorregaram girando para trás em direção ao paredão principal, formando falsos terraços inclinados para dentro onde a fenda de separação traseira fica camuflada por samambaias e cinzas; caminhar para a borda interna do terraço precipita o aventureiro no abismo em cunha entre o bloco e o penhasco com 3d6 de concussão (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Manter a marcha pelo centro do patamar rotacionado, longe da linha de contato com o paredão.',
+        rescueAndStabilization: 'Descida vertical encordada na fenda em cunha e içamento com polia.',
+        icon: '🪨🕳️',
+        color: '#b45309'
+      };
+    } else if (ht === 'closed_inter_hummock_lahar_slurry_depression_mire') {
+      hazard = {
+        hazardTitle: 'Atolamento em Bacia Fechada de Matriz de Lama Vulcânica Inter-Montículos',
+        saveDC: 14,
+        saveType: 'Força',
+        hummockTorevaRisk: 'Entre uma colina cônica e outra não existe rede de drenagem conectada; as depressões fechadas acumulam a matriz fina de argila hidrotermal da avalanche e água pluvial em charcos tixotrópicos sem fundo; descer de um hummock diretamente para a várzea plana faz o explorador afundar até o peito em lama cinzenta ácida, impondo condição impedido e 1 nível de exaustão (DMG p. 109-110; PHB p. 185).',
+        pioneerMitigation: 'Transitar de colina em colina pelas cristas divisoras de cascalho sem descer ao centro das bacias fechadas.',
+        rescueAndStabilization: 'Lançamento de corda desde a saia firme do montículo e lavagem da lama ácida.',
+        icon: '🌋🥾',
+        color: '#64748b'
+      };
+    } else if (ht === 'chaotic_hummock_field_acoustic_shadow_maze_lost') {
+      hazard = {
+        hazardTitle: 'Desorientação em Labirinto de Colinas Cônicas Idênticas',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        hummockTorevaRisk: 'Campos de hummocks vulcanoclásticos com dezenas de quilômetros quadrados onde centenas de cones de 30 metros de altura bloqueiam a linha de visão em todas as direções e abafam sons de trompas ou gritos; perder o marco de referência da montanha sob nevoeiro faz a comitiva andar em círculos pelo labirinto de colinas (DMG p. 111; PHB p. 183).',
+        pioneerMitigation: 'Subir a um montículo mais alto a cada hora para confirmar o azimute com bússola e erguer marcos de pedra.',
+        rescueAndStabilization: 'Reagrupamento por sinal de fumaça vertical no topo de um cone central.',
+        icon: '🧭🌫️',
+        color: '#f59e0b'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampVolcanicHummockTorevaStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'back_tilted_toreva_bench_reverse_slope_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque na Contra-Encosta Oculta de Terraço de Bloco Toreva',
+      hummockTorevaAndCampSafety: 'Como a superfície superior de um bloco Toreva inclina-se para trás contra a montanha, a borda externa forma um parapeito elevado natural.',
+      hummockTorevaTrenchAndWatch: 'Oculta totalmente as barracas e o brilho da fogueira de qualquer observador na planície abaixo e corta o vento do vale.',
+      campRestAndSafetyGuards: 'Garante descanso longo invisível e abrigado em posição dominante.',
+      icon: '⛺🪨',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'indurated_lava_core_hummock_summit_watchpost') {
+      tech = {
+        defenseTitle: 'Atalaia no Cume do Montículo Mestre de Núcleo de Lava Maciça',
+        hummockTorevaAndCampSafety: 'Seleção do hummock mais alto formado por um bloco íntegro do antigo domo de dacito não estilhaçado.',
+        hummockTorevaTrenchAndWatch: 'Proporciona visão panorâmica sobre o mar de colinas menores e baliza o rumo da manhã seguinte.',
+        campRestAndSafetyGuards: 'Impede que patrulhas se aproximem ocultas pelos corredores sinuosos.',
+        icon: '👁️⛰️',
+        color: '#eab308'
+      };
+    } else if (dt === 'perched_toreva_crease_pond_freshwater_cistern') {
+      tech = {
+        defenseTitle: 'Lagoa de Sela no Reverso do Bloco Toreva para Água Limpa',
+        hummockTorevaAndCampSafety: 'A calha inclinada no topo do bloco rotacionado capta água da chuva sobre rocha limpa antes que toque a lama hidrotermal da baixada.',
+        hummockTorevaTrenchAndWatch: 'Fornece água doce livre de cinzas e enxofre ao lado do próprio bivaque.',
+        campRestAndSafetyGuards: 'Sustenta a hidratação da comitiva sem precisar descer aos charcos ácidos.',
+        icon: '💧🪨',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'interlocking_breccia_slab_chokepoint_barricade') {
+      tech = {
+        defenseTitle: 'Barricada de Blocos Encaixados no Gargalo entre Dois Hummocks',
+        hummockTorevaAndCampSafety: 'Uso dos fragmentos poliédricos de brecha vulcânica para fechar a sela estreita entre dois montículos gêmeos.',
+        hummockTorevaTrenchAndWatch: 'As faces rugosas das pedras travam-se umas nas outras como uma muralha ciclópica instantânea.',
+        campRestAndSafetyGuards: 'Permite defender o acampamento em corredor estreito com esforço mínimo.',
+        icon: '🧱🛡️',
+        color: '#d97706'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 242: RELEVO DE GILGAI, VERTISSOLOS E ARGILAS EXPANSIVAS (D&D 5e)
   // =========================================================================
 
@@ -33052,6 +33156,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessVolcanicHummockTorevaHazard: calcWildernessVolcanicHummockTorevaHazard,
+    calcCampVolcanicHummockTorevaStation: calcCampVolcanicHummockTorevaStation,
     calcWildernessGilgaiVertisolCrackingHazard: calcWildernessGilgaiVertisolCrackingHazard,
     calcCampGilgaiVertisolCrackingStation: calcCampGilgaiVertisolCrackingStation,
     calcWildernessGraniteTorCorestoneHazard: calcWildernessGraniteTorCorestoneHazard,

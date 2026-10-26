@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessVolcanicHummockTorevaHazard) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var ht = CartShared.calcWildernessVolcanicHummockTorevaHazard(bKey, 'jigsaw_fractured_megablock_hummock_interior_collapse');
+        return '<div class="clp-volcanic-hummock-toreva-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,18,16,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(220,38,38,0.35);font-size:8px;color:#fef2f2;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ht.color + ';margin-bottom:2px;">' + ht.icon + ' ' + ht.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Colinas Hummocks e Blocos Toreva:</b> ' + ht.hummockTorevaRisk + ' (CD ' + ht.saveDC + ' [' + ht.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fecaca;margin-top:1px;">• <b>Mitigação:</b> ' + ht.pioneerMitigation + ' · <i>Estabilização: ' + ht.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampVolcanicHummockTorevaStation) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var hc = CartShared.calcCampVolcanicHummockTorevaStation(bKey, 'back_tilted_toreva_bench_reverse_slope_bivouac');
+        return '<div class="clp-volcanic-hummock-toreva-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(22,14,12,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + hc.color + ';margin-bottom:2px;">' + hc.icon + ' ' + hc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Terraço de Bloco Toreva:</b> ' + hc.hummockTorevaAndCampSafety + ' · <b>Ocultação:</b> ' + hc.hummockTorevaTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + hc.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessGilgaiVertisolCrackingHazard) return '';
         var bKey = (biome && biome.key) || 'grassland';
         var gv = CartShared.calcWildernessGilgaiVertisolCrackingHazard(bKey, 'desiccated_vertisol_shrinkage_fissure_leg_swallow');
