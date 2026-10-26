@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 289: CRISTAS DE YARDANGS E CORREDORES DE DEFLAÇÃO EÓLICA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessYardangRidgeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'yardang_corridor_venturi_sandstorm').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Tempestade com Efeito Venturi em Corredor de Yardangs',
+      saveDC: 15,
+      saveType: 'Força',
+      yardangRisk: 'O vento constante é afunilado e comprimido entre cristas de yardangs paralelas de 15 metros, acelerando para além de 100 km/h; a esteira violenta de areia e silte fustiga a comitiva como lixa rápida, exigindo salvaguarda de Força ou Constituição CD 15 contra cegueira temporária, perda de fôlego e 3d6 de dano perfurante e cortante (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores amarrando cabos de guia entre as reentrâncias basais e avançando de joelhos com coberturas faciais duplas (Sobrevivência ou Atletismo CD 14).',
+      rescueAndStabilization: 'Lavagem ocular com colírios de soro limpo, estancamento de escoriações cutâneas e abrigo emergencial em fendas (Medicina CD 13).',
+      icon: '🏜️',
+      color: '#d97706'
+    };
+
+    if (ht === 'inverted_keel_overhang_shear_collapse') {
+      hazard.hazardTitle = 'Colapso por Subescavação de Quilha Invertida';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.yardangRisk = 'A base do yardang sofre erosão contínua por grãos de areia basais, formando beirais suspensos delgados em forma de quilha de navio invertida; a passagem de exploradores e montarias deflagra vibrações que desmoronam blocos de argilito compactado com 3d8 de concussão e soterramento parcial (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Inspeção ótica de fraturas de tração na base da quilha e avanço rápido pelo centro da calha fora da projeção dos beirais (Percepção CD 13).';
+      hazard.rescueAndStabilization = 'Remoção rápida de escombros com alavancas de ferro e contenção de lesões torácicas (Atletismo CD 14 ou Medicina CD 13).';
+    } else if (ht === 'yardang_labyrinth_blind_deadend') {
+      hazard.hazardTitle = 'Desorientação em Labirinto Cego de Deflação';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Sabedoria';
+      hazard.yardangRisk = 'Corredores paralelos repetitivos com paredões idênticos de silte e eco eólico abafador enganam os sentidos; a comitiva arrisca entrar em canais sem saída bloqueados por barcanas transversais sob calor escaldante, sofrendo 1 nível de exaustão por desidratação e perda de tempo (PHB p. 183; DMG p. 111).';
+      hazard.pioneerMitigation = 'Marcação sistemática das cristas com traços de giz ou carvão e orientação pelo eixo dominante de alinhamento eólico dos yardangs (Sobrevivência CD 14).';
+      rescueAndStabilization: 'Hidratação imediata com sais minerais, repouso sob toldo e retorno seguro à última marcação confirmada (Medicina CD 13).';
+    } else if (ht === 'fluted_spine_knife_edge_fall') {
+      hazard.hazardTitle = 'Queda de Crista Afilada em Faca de Navalha';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.yardangRisk = 'Batedores que sobem à crista afilada do yardang para triangulação visual enfrentam bordas friáveis de argilito sob rajadas laterais súbitas; a perda de equilíbrio projeta o aventureiro em queda de 12 metros encosta abaixo com 4d6 de concussão e lacerações (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Uso de arreios de escalada com grampos de ancoragem e progressão a cavalo sobre a crista (Atletismo ou Sobrevivência CD 13).';
+      rescueAndStabilization: 'Içamento por cordas com sistema de roldanas e imobilização de fraturas ósseas (Atletismo CD 14 ou Medicina CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampYardangRidgeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'leeward_yardang_flute_alcove').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Sulco Côncavo de Sotavento do Yardang',
+      yardangAndCampSafety: 'O acampamento é instalado no flanco protegido do yardang, aninhado em um sulco eólico côncavo esculpido pela aerodinâmica natural da montanha; a crista deflete completamente as tempestades frontais e gera sombra contínua 10°C mais fresca que o deserto aberto (DMG p. 111).',
+      yardangAndWatch: 'A sentinela posicionada no ombro intermediário da crista domina a visão de todo o corredor de deflação com vantagem em testes de Percepção contra aproximações hostis.',
+      campRestAndSafetyGuards: 'Repouso resguardado do calor extenuante e dos ventos uivantes, assegurando recuperação integral de pontos de vida.',
+      icon: '⛺',
+      color: '#d97706'
+    };
+
+    if (dt === 'deflation_trough_silt_well') {
+      defense.defenseTitle = 'Poço de Umidade Fóssil em Calha de Deflação';
+      defense.yardangAndCampSafety = 'Escavação rápida no ponto mais profundo da calha onde a ação eólica expôs sedimentos lacustres ancestrais com umidade capilar ascendente (PHB p. 150).';
+      defense.yardangAndWatch = 'Produz até 30 litros de água límpida filtrada pelo silte argiloso, restaurando +1 dado de vida adicional aos membros do grupo durante o descanso longo.';
+      defense.campRestAndSafetyGuards = 'Abastecimento hídrico confiável mesmo em terrenos áridos desprovidos de fontes superficiais.';
+    } else if (dt === 'compacted_claystone_wind_parapet') {
+      defense.defenseTitle = 'Parapeito de Lajes de Argilito Compactado';
+      defense.yardangAndCampSafety = 'Lajes tabulares recolhidas da base do yardang são assentadas em cunha defensiva cruzando a entrada do corredor, criando um reduto de 1,5 metro de altura (PHB p. 185).';
+      defense.yardangAndWatch = 'Concede cobertura três-quartos (+5 na CA e +5 em salvaguardas de Destreza) contra rajadas de areia e flechas de saqueadores do deserto.';
+      defense.campRestAndSafetyGuards = 'Barreira compacta e firme que barra a entrada de predadores terrestres no bivaque da comitiva.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 288: PAVIMENTO DESÉRTICO EM MOSAICO DE REG E VERNIZ DO DESERTO (D&D 5e)
   // =========================================================================
 
@@ -37221,6 +37296,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessYardangRidgeHazard: calcWildernessYardangRidgeHazard,
+    calcCampYardangRidgeStation: calcCampYardangRidgeStation,
     calcWildernessDesertPavementHazard: calcWildernessDesertPavementHazard,
     calcCampDesertPavementStation: calcCampDesertPavementStation,
     calcWildernessFoehnWindHazard: calcWildernessFoehnWindHazard,
