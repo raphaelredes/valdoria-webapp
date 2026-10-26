@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 274: ENXAMES DE DIQUES DE LAMPRÓFIRO E OCELOS MÁFICOS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessLamprophyreDikeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var ht = (hazardType || 'micaceous_saprolite_trench_slump').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desmoronamento em Trincheira de Saprolito Micáceo',
+      saveDC: 15,
+      saveType: 'Destreza',
+      lamprophyreRisk: 'Os diques densos de lamprófiro intemperizam rapidamente ao ar livre em solo ocre fofo e argilas micáceas untosas; ao descer na trincheira escavada entre paredões sãos, o talude cede sob a marcha da comitiva soterrando o aventureiro até o peito com 3d6 de concussão e velocidade reduzida a zero (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores avançados utilizando varas graduadas para testar a coesão do solo nas trincheiras e abrindo picadas pelo topo das rochas encaixantes firmes (Sobrevivência ou Natureza CD 14).',
+      rescueAndStabilization: 'Extração rápida com alavancas de carga e limpeza de vias aéreas obstruídas por poeira de mica (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🪨',
+      color: '#a855f7'
+    };
+
+    if (ht === 'ocelli_carbonate_gas_pocket_rupture') {
+      hazard.hazardTitle = 'Ruptura de Ocelos Magmáticos com Emissão de Gases';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Constituição';
+      hazard.lamprophyreRisk = 'Fissuras que cortam o núcleo do dique rompem cavidades ocelares esféricas de carbonato que aprisionam dióxido de carbono denso e radônio residual; a inalação involuntária causa vertigem súbita, 3d6 de dano de veneno e desvantagem em testes físicos por 1 hora por hipóxia tóxica (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Observação atenta da ausência de liquens e detecção de odores acres antes de avançar em corredores estreitos (Percepção CD 14).';
+      hazard.rescueAndStabilization = 'Retirada para áreas abertas ventiladas e aplicação de compressas frescas no peito (Medicina CD 13).';
+    } else if (ht === 'biotite_sheared_joint_razor_slip') {
+      hazard.hazardTitle = 'Escorregamento Cortante em Juntas de Clivagem de Biotita';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.lamprophyreRisk = 'Paredes verticais do dique expõem planos de clivagem formados por grandes fenocristais de biotita e piroxênio que se desfolham em lâminas vítreas afiadíssimas; apoiar as mãos ou pisar na rocha lubrificada rasga luvas e botas com 2d8 de dano cortante e queda de 10 metros (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Uso de luvas reforçadas com cota de malha e ancoragem com grampos de aço em rocha matriz dura (Atletismo CD 14).';
+      hazard.rescueAndStabilization = 'Estancamento de hemorragias compressivas com ataduras limpas e bálsamos hemostáticos (Medicina CD 13).';
+    } else if (ht === 'mantle_xenolith_scree_avalanche') {
+      hazard.hazardTitle = 'Avalanche de Cascalheira de Xenólitos Mantélicos';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.lamprophyreRisk = 'Encostas íngremes do lamprófiro acumulam detritos angulares densos de peridotito mantélico arrastados na ascensão magmática; a vibração de passos desaba uma torrente de pedregulhos pesados sobre a comitiva causando 2d10 de concussão e risco de soterramento de carga (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Marcha em diagonal espaçada e fixação de estacas com cabos-guia nas nervuras de rocha sã (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Escavação manual ágil para liberar membros prensados sob blocos de peridotito (Força [Atletismo] CD 14).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampLamprophyreDikeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var dt = (defenseType || 'competent_wall_rock_corridor_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Corredor Natural de Rocha Encaixante',
+      lamprophyreAndCampSafety: 'O acampamento é estabelecido no leito plano e firme entre duas muralhas de rocha matriz dura deixadas pela erosão do dique; as paredes laterais paralelas oferecem blindagem sólida imune a ventos de altitude e tempestades (DMG p. 111).',
+      lamprophyreTrenchAndWatch: 'Acesso estreito de fácil monitoramento guarnecido por blocos de pedra, concedendo +2 de bônus na Percepção Passiva das sentinelas durante a vigília.',
+      campRestAndSafetyGuards: 'Descanso seguro com barreira pétrea natural contra predadores errantes e estabilidade de terreno impecável.',
+      icon: '🛡️',
+      color: '#a855f7'
+    };
+
+    if (dt === 'underflow_mica_filtered_sand_well') {
+      defense.defenseTitle = 'Poço de Captação Filtrado em Areias de Quartzo';
+      defense.lamprophyreAndCampSafety = 'Cova rasa escavada no fundo arenoso do corredor que capta água de infiltração decantada naturalmente pelas areias puras do dique, límpida e livre de argilas coloidais (PHB p. 150).';
+      defense.lamprophyreTrenchAndWatch = 'Abastecimento ininterrupto de água potável fresca para toda a comitiva durante o descanso longo.';
+      defense.campRestAndSafetyGuards = 'Restauração orgânica ideal sem risco de disenteria por suspensões minerais.';
+    } else if (dt === 'lamprophyre_chokepoint_dry_stone_rampart') {
+      defense.defenseTitle = 'Barricada de Garganta com Blocos Encaixantes';
+      defense.lamprophyreAndCampSafety = 'Fechamento do estrangulamento da ravina com pedras empilhadas a seco, criando um baluarte inexpugnável com seteiras protegidas para arqueiros (DMG p. 111).';
+      defense.lamprophyreTrenchAndWatch = 'Concede cobertura total (+5 na CA) contra arqueiros hostis e força invasores a avançarem por um corredor afunilado e vulnerável.';
+      defense.campRestAndSafetyGuards = 'Elimina surpresas noturnas e assegura sono tranquilo para todo o grupo.';
+    } else if (dt === 'biotite_thermal_hearth_cradle') {
+      defense.defenseTitle = 'Lareira com Revestimento Térmico em Lâminas de Biotita';
+      defense.lamprophyreAndCampSafety = 'Forno circular forrado com placas espessas de mica e rocha máfica que acumulam calor e impedem labaredas altas ou faíscas de atingirem as tendas (PHB p. 185).';
+      defense.lamprophyreTrenchAndWatch = 'Permite aquecer as refeições e o acampamento na madrugada gelada dos ermos com queima limpa e sem fumaça delatora.';
+      defense.campRestAndSafetyGuards = 'Proteção eficiente contra hipotermia com descanso revigorante garantido.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 273: BURACOS AZUIS E DOLINAS SUBMARINAS CÁRSTICAS (D&D 5e)
   // =========================================================================
 
@@ -36036,6 +36116,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessLamprophyreDikeHazard: calcWildernessLamprophyreDikeHazard,
+    calcCampLamprophyreDikeStation: calcCampLamprophyreDikeStation,
     calcWildernessMarineBlueHoleHazard: calcWildernessMarineBlueHoleHazard,
     calcCampMarineBlueHoleStation: calcCampMarineBlueHoleStation,
     calcWildernessBauxiteKarstPlateauHazard: calcWildernessBauxiteKarstPlateauHazard,
