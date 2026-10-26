@@ -20553,6 +20553,113 @@
   // PHB p. 182-183 (Travel Pace, Navigation in Lakes), PHB p. 198 (Underwater Combat), XGE p. 77-83
   // =========================================================================
 
+
+  // =========================================================================
+  // FASE 155: FLORESTAS DE AREIA BRANCA PODZÓLICA E RIOS DE ÁGUA PRETA FÚLVICA
+  // D&D 5e: DMG p. 110-111 (Hazards, Quicksand, Acidic Water), DMG p. 246-247 (Structural Integrity),
+  // PHB p. 182-183 (Travel Pace, Navigation in Tropical Forests), PHB p. 185 (Food & Water), XGE p. 77-83
+  // =========================================================================
+
+  function calcWildernessWhiteSandCampinaranaHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'jungle').toLowerCase();
+    var ht = (hazardType || 'white_sand_liquefaction_quicksand_sinkhole').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Liquefação de Areia Branca Saturada e Sumidouro Fluido',
+      saveDC: 15,
+      saveType: 'Destreza',
+      whiteSandAndBlackwaterRisk: 'Areia silicosa pura lixiviada saturada por lençol freático raso; o solo perde a sustentação sob o peso da expedição colapsando em poço de areia movediça de 2 metros de profundidade que traga o explorador em sucção coloidal com 2d6 de concussão e asfixia (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam com varas longas de bambu testando a firmeza do solo e utilizam pranchas de madeira leve nos pés para travessia de manchas arenosas.',
+      rescueAndStabilization: 'Tração imediata com cabos de laço duplo e alavancas de prancha, limpeza da areia dos olhos e aquecimento com mantas secas.',
+      icon: '🏖️🕳️',
+      color: '#f8fafc'
+    };
+
+    if (ht === 'fulvic_acid_blackwater_corrosion_chill') {
+      hazard = {
+        hazardTitle: 'Choque Cáustico em Rio de Água Preta a pH 3,5 com Ácido Fúlvico',
+        saveDC: 15,
+        saveType: 'Constituição',
+        whiteSandAndBlackwaterRisk: 'Igarapés escuros saturados de ácidos húmicos e fúlvicos lixiviados da turfa arenosa; contato prolongado queima mucosas, amolece costuras de botas de couro e causa tremores hipotérmicos severos com 1 nível de exaustão e fraqueza muscular.',
+        pioneerMitigation: 'Uso de perneiras impermeabilizadas com graxa animal espessa e travessia rápida sem pausas em águas profundas.',
+        rescueAndStabilization: 'Enxágue imediato com água destilada potável, fricção com aguardente e aplicação de pasta de cinza alcalina para neutralização.',
+        icon: '🌊☕',
+        color: '#78350f'
+      };
+    } else if (ht === 'bleached_silica_albedo_heat_exhaustion') {
+      hazard = {
+        hazardTitle: 'Albedo Ofuscante de Areia Branca e Insolação Térmica',
+        saveDC: 14,
+        saveType: 'Constituição',
+        whiteSandAndBlackwaterRisk: 'Reflexão solar de 85% na areia branca e fina sob copa rala de campinarana; atinge temperaturas de 50°C no solo provocando desidratação aguda, queimação na retina e desvantagem em testes de Percepção visual.',
+        pioneerMitigation: 'Marcha nas primeiras horas da manhã, capuzes de linho com proteção de nuca e carvão untado abaixo dos olhos contra o brilho.',
+        rescueAndStabilization: 'Repouso em abrigo com toldo duplo sob sombra densa, hidratação fracionada com soro de rapadura e compressas frias na fronte.',
+        icon: '☀️🕶️',
+        color: '#e2e8f0'
+      };
+    } else if (ht === 'sclerophyllous_campina_razor_leaf_laceration') {
+      hazard = {
+        hazardTitle: 'Matagal Esclerófilo com Folhas Rígidas de Borda de Sílica',
+        saveDC: 14,
+        saveType: 'Destreza',
+        whiteSandAndBlackwaterRisk: 'Arbustos xeromórficos com folhas coriáceas armadas de microdentes de sílica cristalina que fatiam calças, mochilas e arreios de montarias, causando 2d6 de dano cortante e marcha dolorosa.',
+        pioneerMitigation: 'Perneiras reforçadas com couro cru de anta e avanço com foices de mato limpando a picada antes do avanço do grupo.',
+        rescueAndStabilization: 'Assepsia de cortes com resina de copaíba e ligaduras com tiras de algodão esterilizado.',
+        icon: '🌿🔪',
+        color: '#15803d'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampWhiteSandCampinaranaStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'jungle').toLowerCase();
+    var dt = (defenseType || 'podzol_sand_ridge_elevated_hardpan_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Assentado em Crista de Areia com Horizonte Endurecido',
+      whiteSandAnchorageAndBlackwaterSafety: 'Acampamento montado em espigão arenoso elevado onde uma camada subterrânea consolidada de ferro e húmus garante base estável e livre de liquefação.',
+      trenchDrainageAndAshNeutralizer: 'A altitude da crista assegura escoamento imediato das chuvas torrenciais, mantendo o chão do bivaque perfeitamente seco e fresco.',
+      campRestAndSafetyGuards: 'Garante descanso longo perfeito e revigorante para toda a comitiva com zero perigo de atolamento nas barracas.',
+      icon: '⛺🏖️',
+      color: '#f8fafc'
+    };
+
+    if (dt === 'white_sand_drainage_trench_and_silt_bund') {
+      tech = {
+        defenseTitle: 'Vala Perimetral de Drenagem e Dique de Areia Compactada',
+        whiteSandAnchorageAndBlackwaterSafety: 'Canal escavado ao redor das tendas com taludes de areia batida que intercepta enxurradas ácidas e as drena diretamente para o igarapé.',
+        trenchDrainageAndAshNeutralizer: 'Evita a formação de poças de lama ácida sob as esteiras de dormir, protegendo o piso interno do acampamento.',
+        campRestAndSafetyGuards: 'Permite que descansantes e sentinelas durmam e vigiem em ambiente protegido contra inundações repentinas.',
+        icon: '🛡️🧱',
+        color: '#cbd5e1'
+      };
+    } else if (dt === 'charcoal_and_wood_ash_fulvic_acid_neutralizer') {
+      tech = {
+        defenseTitle: 'Filtro Desacidificante de Carvão e Cinzas Alcalinas de Madeira',
+        whiteSandAnchorageAndBlackwaterSafety: 'Cisterna portátil com leitos de cinza de fogueira rica em potássio e carvão de pau-rainha que neutraliza o pH do rio de água preta.',
+        trenchDrainageAndAshNeutralizer: 'Precipita os ácidos fúlvicos e clarifica a água escura, produzindo 30 litros diários de água doce com pH neutro e sem sabor amargo.',
+        campRestAndSafetyGuards: 'Elimina completamente o risco de gastrite ácida ou desidratação por repulsa à água do charco.',
+        icon: '⚗️💧',
+        color: '#0284c7'
+      };
+    } else if (dt === 'woven_palm_frond_causeway_over_quicksand') {
+      tech = {
+        defenseTitle: 'Passarela de Folhas de Babaçu e Palha Trançada sobre Areia',
+        whiteSandAnchorageAndBlackwaterSafety: 'Esteira contínua de palha vegetal densamente entrelaçada que distribui o peso dos passos sobre áreas de areia fofa e sumidouros.',
+        trenchDrainageAndAshNeutralizer: 'Permite trânsito noturno estável e silencioso entre o bivaque e a margem de embarque sem risco de afundamento.',
+        campRestAndSafetyGuards: 'Garante rondas perimetrais seguras e ágeis para todas as sentinelas.',
+        icon: '🪜🌴',
+        color: '#10b981'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessSubmergedPetrifiedForestHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'swamp').toLowerCase();
@@ -23889,6 +23996,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessWhiteSandCampinaranaHazard: calcWildernessWhiteSandCampinaranaHazard,
+    calcCampWhiteSandCampinaranaStation: calcCampWhiteSandCampinaranaStation,
     calcWildernessSubmergedPetrifiedForestHazard: calcWildernessSubmergedPetrifiedForestHazard,
     calcCampSubmergedPetrifiedForestStation: calcCampSubmergedPetrifiedForestStation,
     calcWildernessMountainNamakierHazard: calcWildernessMountainNamakierHazard,

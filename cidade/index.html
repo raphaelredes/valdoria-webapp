@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessWhiteSandCampinaranaHazard) return '';
+        var bKey = (biome && biome.key) || 'jungle';
+        var ws = CartShared.calcWildernessWhiteSandCampinaranaHazard(bKey, 'white_sand_liquefaction_quicksand_sinkhole');
+        return '<div class="clp-campinarana-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,34,30,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(248,250,252,0.35);font-size:8px;color:#f8fafc;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ws.color + ';margin-bottom:2px;">' + ws.icon + ' ' + ws.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Campinaranas e Areias Brancas:</b> ' + ws.whiteSandAndBlackwaterRisk + ' (CD ' + ws.saveDC + ' [' + ws.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#cbd5e1;margin-top:1px;">• <b>Mitigação:</b> ' + ws.pioneerMitigation + ' · <i>Estabilização: ' + ws.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampWhiteSandCampinaranaStation) return '';
+        var bKey = (biome && biome.key) || 'jungle';
+        var cp = CartShared.calcCampWhiteSandCampinaranaStation(bKey, 'podzol_sand_ridge_elevated_hardpan_bivouac');
+        return '<div class="clp-campinarana-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(24,28,24,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(203,213,225,0.3);font-size:8px;color:#f8fafc;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Crista de Areia Branca:</b> ' + cp.whiteSandAnchorageAndBlackwaterSafety + ' · <b>Drenagem:</b> ' + cp.trenchDrainageAndAshNeutralizer + '</div>'
+          + '  <div style="font-size:7.5px;color:#94a3b8;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessSubmergedPetrifiedForestHazard) return '';
         var bKey = (biome && biome.key) || 'swamp';
         var sf = CartShared.calcWildernessSubmergedPetrifiedForestHazard(bKey, 'submerged_silicified_snag_hull_rupture_puncture');
