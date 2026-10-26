@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 240: CARSTE DE GESSO, ALABASTRO E AGULHAS DE SELENITA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessGypsumKarstSeleniteHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'rapid_dissolution_alabaster_roof_crust_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso Súbito de Abóbada de Alabastro por Dissolução Rápida (Gypsum Karst Collapse)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      gypsumKarstRisk: 'Como o gesso (sulfato de cálcio hidratado) dissolve na água da chuva cem vezes mais rápido que o calcário comum, as pontes naturais e tetos de cavernas rasas de alabastro afinam até a espessura de uma casca de ovo entre uma estação chuvosa e outra; pisar sobre um domo branco oco provoca a ruptura silenciosa do piso fibroso e queda de 8 metros sobre lâminas de selenita com 3d8 de dano perfurante e concussão (DMG p. 110; XGE p. 109).',
+      pioneerMitigation: 'Evitar caminhar sobre crostas brancas sacaróides que soem ocas ao toque do bastão; seguir pelas cristas de dolomito cinza.',
+      rescueAndStabilization: 'Içamento vertical com corda protegida contra bordas de cristal e curativos compressivos.',
+      icon: '💎🕳️',
+      color: '#e2e8f0'
+    };
+
+    if (ht === 'anhydrite_hydration_swelling_heave_buckle_trap') {
+      hazard = {
+        hazardTitle: 'Ruptura Explosiva de Domo de Anidrita em Hidratação ("Tepee Swell Buckle")',
+        saveDC: 15,
+        saveType: 'Destreza',
+        gypsumKarstRisk: 'Quando camadas de anidrita anidra absorvem água de orvalho ou chuva, os cristais incham mais de 60% em volume e arqueiam o terreno em tendas de pedra sob tensão extrema; o impacto de uma bota ou bastão no ápice tensionado faz a abóbada inteira estourar para cima como uma mola de pedra e depois abater, atingindo o explorador com 3d6 de concussão (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Contornar empolamentos poligonais rachados que emitam estalos secos ao aquecer sob o sol.',
+        rescueAndStabilization: 'Remoção das placas arqueadas de anidrita e imobilização de entorses.',
+        icon: '⛺💥',
+        color: '#f59e0b'
+      };
+    } else if (ht === 'giant_selenite_sword_crystal_geode_laceration_heat') {
+      hazard = {
+        hazardTitle: 'Laceração e Exaustão Térmica em Fenda de Espadas de Selenita',
+        saveDC: 14,
+        saveType: 'Constituição',
+        gypsumKarstRisk: 'Fendas e cavidades rasas atravessadas por prismas translúcidos de selenita de até 3 metros de comprimento com arestas cortantes como vidro e umidade interna de 100% aquecida por fontes sulfurosas; escorregar entre os feixes de cristal causa 2d8 de dano cortante e impõe 1 nível de exaustão pelo vapor abafado (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Limitar a travessia de galerias de cristal a poucos minutos e usar luvas de couro grosso.',
+        rescueAndStabilization: 'Retirada imediata para o ar seco externo, resfriamento e sutura de cortes.',
+        icon: '🗡️🌡️',
+        color: '#38bdf8'
+      };
+    } else if (ht === 'bitter_calcium_sulfate_saturated_sink_brine_poison') {
+      hazard = {
+        hazardTitle: 'Ingestão de Água Cristalina Saturada de Sulfato de Cálcio e Magnésio',
+        saveDC: 14,
+        saveType: 'Constituição',
+        gypsumKarstRisk: 'As nascentes e poças nos vales de carste de gesso são enganadoramente transparentes e inodoras, mas carregam concentrações saturadas de sulfato de cálcio e sais de Epsom (sulfato de magnésio); beber dessa água sem destilar provoca cólicas severas, desidratação osmótica e a condição envenenado (DMG p. 110-111; PHB p. 185).',
+        pioneerMitigation: 'Testar uma gota na ponta da língua (sabor amargo-metálico) ou ferver uma amostra em colher para ver se deixa crosta branca.',
+        rescueAndStabilization: 'Hidratação com água pluvial pura reservada e carvão ativado.',
+        icon: '💧☠️',
+        color: '#a855f7'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampGypsumKarstSeleniteStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'translucent_alabaster_grottos_diffused_daylight_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Gruta de Alabastro Translúcido com Iluminação Difusa',
+      gypsumKarstAndCampSafety: 'Abrigo instalado sob uma parede maciça de alabastro branco de 40 centímetros que bloqueia o vento e o calor, mas transmite um brilho suave da luz do dia e do luar.',
+      gypsumKarstTrenchAndWatch: 'Permite enxergar dentro do abrigo sem acender tochas ou revelar a posição da comitiva à noite.',
+      campRestAndSafetyGuards: 'Garante descanso longo fresco e oculto nos ermos de gesso.',
+      icon: '⛺💎',
+      color: '#38bdf8'
+    };
+
+    if (dt === 'calcined_gypsum_plaster_of_paris_cast_and_seal_kiln') {
+      tech = {
+        defenseTitle: 'Queima de Gesso para Talas Médicas Rígidas (Gesso Cirúrgico)',
+        gypsumKarstAndCampSafety: 'Assar fragmentos de selenita na brasa da fogueira a 150 graus converte a pedra em pó de gesso de secagem rápida.',
+        gypsumKarstTrenchAndWatch: 'Misturado com água e tiras de pano, cria talas ortopédicas rígidas para fraturas e veda frestas de barris.',
+        campRestAndSafetyGuards: 'Acelera a estabilização e recuperação física de companheiros feridos.',
+        icon: '🔥🩹',
+        color: '#f8fafc'
+      };
+    } else if (dt === 'selenite_cleavage_window_pane_windproof_lookout') {
+      tech = {
+        defenseTitle: 'Vigia com Visores de Placas de Selenita Transparente ("Lapis Specularis")',
+        gypsumKarstAndCampSafety: 'O gesso cristalino parte-se em folhas perfeitamente transparentes como vidro que podem ser encaixadas nas seteiras de pedra.',
+        gypsumKarstTrenchAndWatch: 'Os sentinelas observam todo o vale sem sofrer jateamento de poeira, vento frio ou fumaça nos olhos.',
+        campRestAndSafetyGuards: 'Mantém a vigília contínua mesmo durante tempestades severas.',
+        icon: '🪟👁️',
+        color: '#7dd3fc'
+      };
+    } else if (dt === 'solar_still_condensation_over_gypsum_brine_pool') {
+      tech = {
+        defenseTitle: 'Destilador Solar com Lâminas de Selenita sobre Poça Salobra',
+        gypsumKarstAndCampSafety: 'Montagem de placas inclinadas de cristal de selenita sobre uma bacia rasa de água amarga sulfatada.',
+        gypsumKarstTrenchAndWatch: 'O calor solar evapora a água pura que condensa na face fria do cristal e pinga limpa nos cantis.',
+        campRestAndSafetyGuards: 'Transforma fontes minerais impróprias em água potável segura.',
+        icon: '☀️💧',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 239: ROCHES MOUTONNÉES E PAVIMENTOS DE BLOCOS ESTRIADOS (D&D 5e)
   // =========================================================================
 
@@ -32740,6 +32844,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessGypsumKarstSeleniteHazard: calcWildernessGypsumKarstSeleniteHazard,
+    calcCampGypsumKarstSeleniteStation: calcCampGypsumKarstSeleniteStation,
     calcWildernessRocheMoutonneeBoulderPavementHazard: calcWildernessRocheMoutonneeBoulderPavementHazard,
     calcCampRocheMoutonneeBoulderPavementStation: calcCampRocheMoutonneeBoulderPavementStation,
     calcWildernessVolcanicPlugRingDikeHazard: calcWildernessVolcanicPlugRingDikeHazard,

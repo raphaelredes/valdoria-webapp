@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T20:13:01Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T20:15:37Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessGypsumKarstSeleniteHazard) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var gk = CartShared.calcWildernessGypsumKarstSeleniteHazard(bKey, 'rapid_dissolution_alabaster_roof_crust_collapse');
+        return '<div class="clp-gypsum-karst-selenite-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,22,30,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(226,232,240,0.35);font-size:8px;color:#f8fafc;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + gk.color + ';margin-bottom:2px;">' + gk.icon + ' ' + gk.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Carste de Gesso e Selenita:</b> ' + gk.gypsumKarstRisk + ' (CD ' + gk.saveDC + ' [' + gk.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#cbd5e1;margin-top:1px;">• <b>Mitigação:</b> ' + gk.pioneerMitigation + ' · <i>Estabilização: ' + gk.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampGypsumKarstSeleniteStation) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var gc = CartShared.calcCampGypsumKarstSeleniteStation(bKey, 'translucent_alabaster_grottos_diffused_daylight_bivouac');
+        return '<div class="clp-gypsum-karst-selenite-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(14,18,26,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.3);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + gc.color + ';margin-bottom:2px;">' + gc.icon + ' ' + gc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Gruta de Alabastro:</b> ' + gc.gypsumKarstAndCampSafety + ' · <b>Camuflagem:</b> ' + gc.gypsumKarstTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + gc.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){
