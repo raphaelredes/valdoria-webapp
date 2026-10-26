@@ -10665,6 +10665,130 @@
     };
   }
 
+  // === calcWildernessGaleForceWindsAndFlightHazard (Ventanias Uivantes, Rajadas de Furacão e Projéteis Desviados - DMG p. 110 / XGE p. 134) ===
+  function calcWildernessGaleForceWindsAndFlightHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'montanha').toLowerCase();
+    var ht = (hazardType || 'gale_force_gusts').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ventania Uivante de Espinhaço com Rajadas de Furacão',
+      saveDC: 14,
+      saveType: 'Força',
+      windForcePenalty: 'Desvantagem em ataques à distância e em Percepção auditiva; rajadas podem empurrar 15 pés e derrubar No Chão.',
+      pioneerMitigation: 'Avançar agachado utilizando bordões e cajados cravados em fendas da rocha como pontos de apoio.',
+      flightAndRangedImpact: 'Criaturas voadoras pequenas ou médias devem pousar ou caem; flechas e virotes desviam bruscamente.',
+      icon: '🌬️🏔️',
+      color: '#38bdf8'
+    };
+
+    if (ht === 'arid_dust_devil_vortex' || bk === 'desert' || bk === 'deserto') {
+      hazard = {
+        hazardTitle: 'Redemoinho de Areia Abrasiva e Poeira (Dust Devil)',
+        saveDC: 13,
+        saveType: 'Destreza',
+        windForcePenalty: 'Vórtice giratório de cascalho; 2d8 de dano cortante e cegueira por 1 rodada por terra nos olhos.',
+        pioneerMitigation: 'Óculos de proteção com fenda fina de couro e lenço facial umedecido bloqueiam a poeira rodopiante.',
+        flightAndRangedImpact: 'Dissipa instantaneamente névoas, gases e nuvens de esporos na área de passagem do cone.',
+        icon: '🌪️🏜️',
+        color: '#f59e0b'
+      };
+    } else if (ht === 'coastal_squall_gale' || bk === 'coast' || bk === 'litoral') {
+      hazard = {
+        hazardTitle: 'Borrasca Costeira com Salpicos Marítimos e Vento Lateral',
+        saveDC: 14,
+        saveType: 'Força (Atletismo)',
+        windForcePenalty: 'Rajadas marítimas violentas de 70 km/h que arrancam capas e dificultam a firmeza dos passos em falésias.',
+        pioneerMitigation: 'Manter marcha afastada da beirada das escarpas com cordada unindo os companheiros.',
+        flightAndRangedImpact: 'Navegação costeira e botes sofrem risco de emborcamento; exige manobra firme de leme.',
+        icon: '🌊🌬️',
+        color: '#0284c7'
+      };
+    } else if (ht === 'canyon_funnel_downdraft') {
+      hazard = {
+        hazardTitle: 'Corrente Descendente Afunilada em Garganta Rochosa',
+        saveDC: 15,
+        saveType: 'Constituição',
+        windForcePenalty: 'Pressão barométrica severa e vento ensurdecedor; impõe a condição Surdo enquanto permanecer na garganta.',
+        pioneerMitigation: 'Tampões de cera ou algodão nos ouvidos diminuem a dor de tímpano causada pelo assobio do vento.',
+        flightAndRangedImpact: 'Criaturas em sobrevoo são arremessadas contra as paredes rochosas com 3d6 de concussão.',
+        icon: '⛰️💨',
+        color: '#a855f7'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      windForcePenalty: hazard.windForcePenalty,
+      pioneerMitigation: hazard.pioneerMitigation,
+      flightAndRangedImpact: hazard.flightAndRangedImpact,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110 (Ventos Fortes e Clima Extremo) / XGE p. 134 (Turbulência e Projéteis) / PHB p. 183'
+    };
+  }
+
+  // === calcCampWindbreakPalisadeAndGuylineBracing (Paliçadas Corta-Vento, Estacas Cruzadas e Proteção de Fogo - DMG p. 111-112 / XGE p. 78) ===
+  function calcCampWindbreakPalisadeAndGuylineBracing(biomeKey, bracingType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'montanha').toLowerCase();
+    var bt = (bracingType || 'interwoven_wattle_windbreak').toLowerCase();
+
+    var bracing = {
+      bracingTitle: 'Paliçada Corta-Vento de Galhos Trançados e Esteiras',
+      windReductionEfficiency: 'Reduz a velocidade do vento na zona de dormir em 70%; impede que o calor da fogueira seja dispersado.',
+      guylineStabilityRating: 'Tirantes de lona ancorados com estacas duplas cruzadas em ângulo de 45 graus suportando até 80 km/h.',
+      firePreservationDetails: 'Anteparo de pedras e terra resguarda as brasas do caldeirão contra rajadas uivantes repentinas.',
+      icon: '🪵🛡️',
+      color: '#ca8a04'
+    };
+
+    if (bt === 'dakota_subterranean_fire_trench') {
+      bracing = {
+        bracingTitle: 'Fogueira em Trincheira Subterrânea Estilo Dakota',
+        windReductionEfficiency: 'Queima em câmara escavada abaixo do nível do solo; 100% imune a ser apagada por ventos fortes.',
+        guylineStabilityRating: 'Gera tiragem de ar subterrânea limpa com queima de alta eficiência e emissão mínima de fumaça visível.',
+        firePreservationDetails: 'Permite cozinhar e ferver água mesmo no epicentro de vendavais sem espalhar fagulhas na mata.',
+        icon: '🔥⛏️',
+        color: '#ea580c'
+      };
+    } else if (bt === 'boulder_guyline_rock_anchors') {
+      bracing = {
+        bracingTitle: 'Ancoragem de Tendas com Rochedos e Lastro de 25 kg',
+        windReductionEfficiency: 'Ideal para lajes de pedra nua onde estacas normais não penetram; lastro de pedras atadas com corda.',
+        guylineStabilityRating: 'Elimina o risco de lonas rasgadas ou estacas arrancadas pelas rajadas noturnas em cumes.',
+        firePreservationDetails: 'Mureta circular de pedras empilhadas em meia-lua foca a radiação térmica para o interior das barracas.',
+        icon: '🪨🏕️',
+        color: '#64748b'
+      };
+    } else if (bt === 'clay_ember_carrier_pot') {
+      bracing = {
+        bracingTitle: 'Vaso Cerâmico Térmico com Brasas Seladas em Cinza',
+        windReductionEfficiency: 'Transporte e preservação de fogo protegido de tempestades; brasas vivas por até 12 horas consecutivas.',
+        guylineStabilityRating: 'Permite reativar o acampamento matinal instantaneamente sem gastar pederneiras na ventania.',
+        firePreservationDetails: 'Elimina o risco de a comitiva amanhecer congelada por falta de fogo em meio ao temporal.',
+        icon: '🏺🔥',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      bracingType: bt,
+      bracingTitle: bracing.bracingTitle,
+      windReductionEfficiency: bracing.windReductionEfficiency,
+      guylineStabilityRating: bracing.guylineStabilityRating,
+      firePreservationDetails: bracing.firePreservationDetails,
+      icon: bracing.icon,
+      color: bracing.color,
+      dndRef: 'DMG p. 111-112 (Acampamento Seguro e Ventanias) / XGE p. 78 (Engenharia de Acampamento)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -12422,6 +12546,8 @@
     calcCampLightningRodAndGroundingSafety: calcCampLightningRodAndGroundingSafety,
     calcDenseFogAndVisualObscurementHazard: calcDenseFogAndVisualObscurementHazard,
     calcCampDrainageTrenchAndRunoffDiversion: calcCampDrainageTrenchAndRunoffDiversion,
+    calcWildernessGaleForceWindsAndFlightHazard: calcWildernessGaleForceWindsAndFlightHazard,
+    calcCampWindbreakPalisadeAndGuylineBracing: calcCampWindbreakPalisadeAndGuylineBracing,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
