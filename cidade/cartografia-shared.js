@@ -20483,6 +20483,113 @@
   // PHB p. 182-185 (Travel Pace, Navigation in Salt Flats, Dehydration), XGE p. 77-83 (Salt Flat Encounters)
   // =========================================================================
 
+
+  // =========================================================================
+  // FASE 145: FLORESTAS DE QUEBRACHO E SOLOS DE ARGILA EXPANSIVA VERTISSÓLICA
+  // D&D 5e: DMG p. 110-111 (Hazards, Difficult Terrain, Quagmire/Fluid Mud), DMG p. 246-247 (Soil Mechanics),
+  // PHB p. 182-183 (Travel Pace, Navigation, Marching Order), XGE p. 77-83 (Forest and Swamp Hazards)
+  // =========================================================================
+
+  function calcWildernessQuebrachoForestAndVertisolHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'vertisol_deep_shrinkage_crack_leg_entrapment').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Fendas de Retração em Solo de Argila Vertissólica e Entorce',
+      saveDC: 15,
+      saveType: 'Destreza',
+      quebrachoAndVertisolRisk: 'Fissuras verticais de dessecação de até 1,2 metro de profundidade que se abrem na argila preta expansiva durante a estiagem, ocultas sob tapete rasteiro de folhas secas; passos desatentos prendem o tornozelo provocando torção severa, 2d6 de concussão e deslocamento reduzido à metade (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam com varas longas de madeira testando o folhiço e utilizam perneiras de couro rijo com tala articulada para estabilização de articulações.',
+      rescueAndStabilization: 'Desentalamento com alavancas de bétula, aplicação de emplastro frio de argila cinzenta com folhas maceradas de arnica e fixação de bandagem tensora.',
+      icon: '🪵🕳️',
+      color: '#78350f'
+    };
+
+    if (ht === 'fluid_clay_slurry_flash_ford_quagmire') {
+      hazard = {
+        hazardTitle: 'Vau de Argila Fluida Súbita e Sucção Coloidal Pós-Chuva',
+        saveDC: 15,
+        saveType: 'Força',
+        quebrachoAndVertisolRisk: 'Após pancadas de chuva torrenciais, o solo vertissólico absorve água rapidamente convertendo-se em atoleiro coloidal viscoso de 1,5 metro de fundura com sucção implacável que imobiliza aventureiros e cavalos, causando exaustão e asfixia por lodo.',
+        pioneerMitigation: 'Batedores sondam as margens com piquetes de amarração e montam travessia com cabos de suporte presos a árvores maduras em solo firme.',
+        rescueAndStabilization: 'Tração imediata com cintas de arreio puxadas por montarias em terra seca e lavagem de condutos respiratórios com solução salina.',
+        icon: '🌊🪵',
+        color: '#92400e'
+      };
+    } else if (ht === 'ironwood_quebracho_axe_shattering_deadfall') {
+      hazard = {
+        hazardTitle: 'Queda de Galhos Maciços de Quebracho por Vendaval',
+        saveDC: 14,
+        saveType: 'Destreza',
+        quebrachoAndVertisolRisk: 'Troncos e galhos pétreos de quebracho-vermelho com densidade superior à da água que não apodrecem no solo e quebram de estalo sob ventos fortes, despencando blocos de madeira de 400 kg causando 3d8 de concussão e esmagamento.',
+        pioneerMitigation: 'Reconhecimento visual da copa das árvores para identificar galhos secos suspensos e desvio de rota para clareiras abertas de solo arenoso.',
+        rescueAndStabilization: 'Remoção rápida do peso com cunhas de ferro, administração de tônicos revigorantes e imobilização de fraturas ósseas.',
+        icon: '⚠️🌲',
+        color: '#b45309'
+      };
+    } else if (ht === 'tannin_saturated_red_water_stomach_cramps') {
+      hazard = {
+        hazardTitle: 'Intoxicação por Água Vermelha Saturada de Tanino Polifenólico',
+        saveDC: 14,
+        saveType: 'Constituição',
+        quebrachoAndVertisolRisk: 'Poças de drenagem tingidas de vermelho-escuro pela lixiviação de tanino do cerne de quebracho; consumo direto causa contrações gástricas violentas, vômitos e desvantagem em testes de resistência físicos por 24 horas.',
+        pioneerMitigation: 'Identificação visual da tonalidade avermelhada da água estagnada e teste prévio com tiras reagentes de papel alcalino.',
+        rescueAndStabilization: 'Lavagem estomacal com suspensão de carvão vegetal moído, ingestão de leite de cabra ou clara de ovo coagulante para neutralização dos taninos.',
+        icon: '🍷🤢',
+        color: '#991b1b'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampQuebrachoForestAndVertisolStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'elevated_quebracho_post_pile_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Elevado em Pilotis de Quebracho Imputrescível',
+      vertisolAnchorageAndTanninSafety: 'Plataforma de acampamento sustentada por esteios cravados de quebracho-preto que resistem à podridão de fungos e à torção do solo argiloso expansivo.',
+      clayStabilizationAndRedWaterStill: 'Mantém as barracas elevadas 1 metro acima do terreno pantanoso, imunes a inundações repentinas de lama e à umidade rasteira.',
+      campRestAndSafetyGuards: 'Permite sono calmo e reparador para os membros da expedição com zero perigo de afundamento de estacas ou umedecimento de bagagens.',
+      icon: '⛺🪵',
+      color: '#78350f'
+    };
+
+    if (dt === 'ash_and_sand_vertisol_stabilization_cordon') {
+      tech = {
+        defenseTitle: 'Cordão Mineral de Cinza e Areia para Estabilização de Argila',
+        vertisolAnchorageAndTanninSafety: 'Espalhamento perimetral de mistura de cal viva, cinzas de fogueira e areia de rio que neutraliza o inchamento higroscópico da argila vertissólica.',
+        clayStabilizationAndRedWaterStill: 'Cria piso firme e impermeável ao redor das tendas, prevenindo a formação de lamaçais ou fendas de retração sob os pés.',
+        campRestAndSafetyGuards: 'Garante que os sentinelas se desloquem com firmeza e rapidez durante as trocas de turno mesmo sob chuva contínua.',
+        icon: '🛡️🧱',
+        color: '#a16207'
+      };
+    } else if (dt === 'multi_stage_charcoal_and_limestone_tannin_filter') {
+      tech = {
+        defenseTitle: 'Filtro Multinível de Carvão e Calcário para Neutralização de Tanino',
+        vertisolAnchorageAndTanninSafety: 'Cisterna portátil de barril contendo leitos sucessivos de brita calcária, areia de quartzo e carvão de quebracho ativado por fogo.',
+        clayStabilizationAndRedWaterStill: 'Precipita completamente os ácidos tânicos e clarifica a água vermelha de charco, produzindo 30 litros diários de água doce cristalina e inodora.',
+        campRestAndSafetyGuards: 'Elimina integralmente riscos de cólicas ou intoxicação alimentar, preservando a saúde digestiva da comitiva.',
+        icon: '⚗️💧',
+        color: '#0284c7'
+      };
+    } else if (dt === 'split_quebracho_log_puncheon_trail') {
+      tech = {
+        defenseTitle: 'Passadiço Perimetral de Troncos Fendidos de Madeira-de-Ferro',
+        vertisolAnchorageAndTanninSafety: 'Passarela firme montada com metades de troncos de quebracho aplainados com machado e assentados transversalmente sobre o lodo.',
+        clayStabilizationAndRedWaterStill: 'Evita contato direto das solas com a lama escorregadia e garante tração antiderrapante nas áreas de serviço do bivaque.',
+        campRestAndSafetyGuards: 'Anula quedas e lesões articulares nas movimentações noturnas pelo acampamento.',
+        icon: '🪵🚶',
+        color: '#15803d'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessHaliteSaltFlatHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'desert').toLowerCase();
@@ -22819,6 +22926,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessQuebrachoForestAndVertisolHazard: calcWildernessQuebrachoForestAndVertisolHazard,
+    calcCampQuebrachoForestAndVertisolStation: calcCampQuebrachoForestAndVertisolStation,
     calcWildernessHaliteSaltFlatHazard: calcWildernessHaliteSaltFlatHazard,
     calcCampHaliteSaltFlatStation: calcCampHaliteSaltFlatStation,
     calcWildernessCaatingaAndInselbergHazard: calcWildernessCaatingaAndInselbergHazard,
