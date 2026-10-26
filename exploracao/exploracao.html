@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T22:38:13Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T22:41:49Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessBasalticEruptiveFissureHazard) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var ef = CartShared.calcWildernessBasalticEruptiveFissureHazard(bKey, 'curtain_fire_fountain_spatter_burst');
+        return '<div class="clp-basaltic-eruptive-fissure-card" style="margin:4px 0 6px;text-align:left;background:rgba(36,14,14,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(220,38,38,0.35);font-size:8px;color:#fef2f2;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ef.color + ';margin-bottom:2px;">' + ef.icon + ' ' + ef.hazardTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Fissura Basáltica e Cortina de Fogo:</b> ' + ef.fissureRisk + ' (CD ' + ef.saveDC + ' [' + ef.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#fee2e2;margin-top:1px;">• <b>Mitigação:</b> ' + ef.pioneerMitigation + ' · <i>Estabilização: ' + ef.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampBasalticEruptiveFissureStation) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var ef = CartShared.calcCampBasalticEruptiveFissureStation(bKey, 'windward_spatter_rampart_crest_bivouac');
+        return '<div class="clp-basaltic-eruptive-fissure-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,12,12,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(185,28,28,0.3);font-size:8px;color:#fef2f2;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ef.color + ';margin-bottom:2px;">' + ef.icon + ' ' + ef.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>' 
+          + '  <div>• <b>Bivaque em Rampa de Escória:</b> ' + ef.fissureAndCampSafety + ' · <b>Defesa:</b> ' + ef.fissureAndWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#fee2e2;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + ef.campRestAndSafetyGuards + '</div>' 
           + '</div>';
       })()
     + (function(){

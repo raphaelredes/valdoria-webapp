@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 284: FISSURAS ERUPTIVAS BASÁLTICAS E CORTINAS DE FOGO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessBasalticEruptiveFissureHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var ht = (hazardType || 'curtain_fire_fountain_spatter_burst').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Erupção em Cortina de Fogo e Chuva de Escória Soldada',
+      saveDC: 15,
+      saveType: 'Destreza',
+      fissureRisk: 'A fissura linear de 2 quilômetros rasga o solo com rugido subterrâneo disparando uma cortina contínua de fontes de lava a 150 metros de altitude; o vento espalha pelotas incandescentes de escória fluida que chovem em raio de 300 metros, exigindo salvaguarda de Destreza CD 15 para se abrigar sob escudos e muretas ou sofrer 3d8 de dano de fogo mais 2d6 de concussão com queima de vestes e arreios de montarias (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores monitorando o alinhamento da fissura e a direção dos ventos dominantes, contornando a rampa de spatter a barlavento por corredores de cinza resfriada (Sobrevivência ou Natureza CD 14).',
+      rescueAndStabilization: 'Abafamento de focos de fogo com cobertores grossos de lã e aplicação de pomadas de gordura de baleia e calêndula para queimaduras térmicas (Medicina CD 13).',
+      icon: '🌋',
+      color: '#dc2626'
+    };
+
+    if (ht === 'fluorine_sulfur_acid_haze_suffocation') {
+      hazard.hazardTitle = 'Névoa Ácida Fluorídrica e Asfixia em Fissura de Rifte';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Constituição';
+      hazard.fissureRisk = 'A fenda eruptiva libera plumas densas e rasteiras de dióxido de enxofre e gás fluorídrico que se acumulam nas depressões do terreno formando uma neblina azulada corrosiva; inalar o gás queima as mucosas pulmonares, causa 3d6 de veneno e impõe 1 nível de exaustão e tosse com sangue em aventureiros desprotegidos (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Uso de máscaras faciais de couro embebidas em solução de cal e água doce e marcha pelas cristas elevadas do terreno (Sobrevivência CD 14).';
+      hazard.rescueAndStabilization = 'Inalação de vapores de óleo de eucalipto balsâmico e lavagem nasal abundante com soro fisiológico (Medicina CD 13).';
+    } else if (ht === 'welded_spatter_bridge_crust_collapse') {
+      hazard.hazardTitle = 'Colapso de Ponte Oca de Escória Soldada';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.fissureRisk = 'Sobre a garganta da fissura forma-se uma abóbada frágil de bombas vulcânicas aglutinadas e escória espatiforme semi-oca que parece uma ponte de pedra natural; o peso da comitiva rompe a crosta térmica de 20 cm, exigindo salvaguarda de Destreza CD 14 para saltar para as margens sólidas ou cair na calha incandescente com 3d10 de fogo e soterramento parcial (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Teste de sustentação da ponte com pontões pesados de ferro e avanço com cabo guia ancorado em rocha sã distante (Atletismo CD 13).';
+      hazard.rescueAndStabilization = 'Lançamento de laços térmicos de resgate e tração mecânica ágil de membros da comitiva (Atletismo CD 14).';
+    } else if (ht === 'subsurface_magma_creep_ground_swell') {
+      hazard.hazardTitle = 'Abaulamento Tectônico e Fissuramento Sísmico do Solo';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.fissureRisk = 'A injeção veloz de magma basáltico a pouca profundidade ergue o solo em um domo de tensão que racha em fendas laterais de 2 metros de largura acompanhadas de tremores de terra; a terra se abre sob os pés dos exploradores, exigindo salvaguarda de Destreza CD 14 ou cair na greta sofrendo 2d8 de concussão e ficando Caído entre blocos instáveis (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Percepção de microsismos contínuos no solo e desvio de linhas com desprendimento de vapor e trincas frescas (Percepção ou Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Alavancamento de bordas de fenda com vigas de madeira e extração manual ágil (Atletismo CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampBasalticEruptiveFissureStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var dt = (defenseType || 'windward_spatter_rampart_crest_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque na Crista de Rampa de Escória a Barlavento',
+      fissureAndCampSafety: 'O acampamento é estabelecido no dorso de uma rampa fóssil de escória soldada a 20 metros de altura, rigorosamente posicionado a barlavento das fumarolas ativas para receber ar puro constante do platô (DMG p. 111).',
+      fissureAndWatch: 'A crista elevada de rocha aglutinada oferece linha de visão de 360 graus por 3 milhas sobre a planície basáltica e barreira natural intransponível contra fluxos de lava rasteiros.',
+      campRestAndSafetyGuards: 'Descanso seguro com ar ventilado imune a gases tóxicos e temperatura do solo amena e estável.',
+      icon: '🛡️',
+      color: '#dc2626'
+    };
+
+    if (dt === 'fissure_flank_rainwater_catchment_hopper') {
+      defense.defenseTitle = 'Coletor de Água Pluvial em Funil de Basalto Limpo';
+      defense.fissureAndCampSafety = 'Depressões circulares revestidas por placas de basalto vítreo impermeável limpas pela chuva que acumulam exclusivamente água doce pluvial longe da cinza ácida (PHB p. 150).';
+      defense.fissureAndWatch = 'Fornece suprimento de até 30 litros diários de água doce potável para a comitiva, eliminando o risco de consumir poças contaminadas por flúor ou enxofre.';
+      defense.campRestAndSafetyGuards = 'Garante hidratação segura e restauração do grupo no ambiente desolado dos ermos vulcânicos.';
+    } else if (dt === 'welded_spatter_parapet_firebreak_wall') {
+      defense.defenseTitle = 'Muralha Corta-Fogo e Parapeito de Escória Soldada';
+      defense.fissureAndCampSafety = 'Trincheira ladeada por muretas de blocos densos de escória vulcânica de 1,5 metro que desvia pequenos fluxos de lava e bloqueia projéteis piroclásticos errantes (PHB p. 185).';
+      defense.fissureAndWatch = 'Concede cobertura total (+5 na CA) para as sentinelas contra disparos e impede aproximações de bestas ígneas hostis.';
+      defense.campRestAndSafetyGuards = 'Proteção balística e térmica inexpugnável assegurando sono repousante.';
+    } else if (dt === 'subterranean_dike_cooling_chamber_hearth') {
+      defense.defenseTitle = 'Forno Natural em Câmara de Dique de Resfriamento';
+      defense.fissureAndCampSafety = 'Nichos basais em diques antigos que irradiam calor residual suave e constante a 30°C, perfeitos para cozinhar provisões e secar roupas sem chamas delatoras (DMG p. 111).';
+      defense.fissureAndWatch = 'Elimina necessidade de fogueiras que soltam fumaça preta no horizonte noturno, camuflando a presença do grupo.';
+      defense.campRestAndSafetyGuards = 'Conforto térmico ideal sem risco de hipotermia na madrugada dos ermos.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 283: MOINHOS DE GELEIRA (MOULINS) E TÚNEIS SUBGLACIAIS (D&D 5e)
   // =========================================================================
 
@@ -36836,6 +36916,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessBasalticEruptiveFissureHazard: calcWildernessBasalticEruptiveFissureHazard,
+    calcCampBasalticEruptiveFissureStation: calcCampBasalticEruptiveFissureStation,
     calcWildernessGlacialMoulinHazard: calcWildernessGlacialMoulinHazard,
     calcCampGlacialMoulinStation: calcCampGlacialMoulinStation,
     calcWildernessEpigeneticGorgeHazard: calcWildernessEpigeneticGorgeHazard,
