@@ -20511,6 +20511,113 @@
   // PHB p. 182-183 (Travel Pace & Navigation), PHB p. 198 (Underwater Rules), XGE p. 77-83
   // =========================================================================
 
+
+  // =========================================================================
+  // FASE 149: MONTANHAS EM DOMO DE SAL, DIAPIROS E CAVERNAS DE GESSO HIPERSALINO
+  // D&D 5e: DMG p. 110-111 (Hazards, Cave-Ins, Salt Dissolution), DMG p. 246-247 (Structural Integrity),
+  // PHB p. 182-183 (Travel Pace, Navigation in Subterranean Caves), PHB p. 190 (Cave-In Damage), XGE p. 77-83
+  // =========================================================================
+
+  function calcWildernessSaltDomeAndDiapirHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'underdark').toLowerCase();
+    var ht = (hazardType || 'diapir_salt_plug_extrusion_shear_crush').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Extrusão Tectônica de Diapiro Salino e Cisalhamento Estrutural',
+      saveDC: 15,
+      saveType: 'Destreza',
+      saltDomeAndDiapirRisk: 'Plugue vertical de sal e gesso fóssil de 600 metros de altura sob deformação plástica contínua; estalos sísmicos repentinos provocam o desprendimento de blocos maciços de halita de 20 toneladas que despencam em cascata causando 3d8 de concussão e esmagamento (DMG p. 110, 246).',
+      pioneerMitigation: 'Batedores monitoram vibrações acústicas nas paredes com estetoscópios de osso e evitam falhas ativas de extrusão durante períodos de dilatação térmica.',
+      rescueAndStabilization: 'Remoção coordenada de escombros de sal com alavancas de ferro, tração de membros prensados e administração de elixires hemostáticos.',
+      icon: '🏔️🧂',
+      color: '#cbd5e1'
+    };
+
+    if (ht === 'hygroscopic_salt_cavern_deliquescence_mudslide') {
+      hazard = {
+        hazardTitle: 'Deliquescência Higroscópica e Desabamento de Lama Salina',
+        saveDC: 15,
+        saveType: 'Força',
+        saltDomeAndDiapirRisk: 'A umidade do ar subterrâneo dissolve estalactites e teto de sal e gesso, gerando colapso repentino de pasta de salmoura lamacenta corrosiva de 2 metros de profundidade que engole exploradores e causa 2d8 de concussão e risco de afogamento.',
+        pioneerMitigation: 'Manutenção rigorosa de ventilação forçada com foles e fixação de toldos defletores inclinados ao longo das passagens úmidas.',
+        rescueAndStabilization: 'Arrasto rápido para galerias secas de calcário com cordas de náilon e lavagem profunda da pele e vias respiratórias com água pura.',
+        icon: '🌊🧂',
+        color: '#94a3b8'
+      };
+    } else if (ht === 'gypsum_needle_speleothem_puncture_trap') {
+      hazard = {
+        hazardTitle: 'Agulhas Aciculares de Selenita e Gesso Afiadas como Estiletes',
+        saveDC: 14,
+        saveType: 'Destreza',
+        saltDomeAndDiapirRisk: 'Salões de caverna forrados com cristais transparentes pontiagudos de selenita de 30 cm que perfuram solas de couro macio e patas de animais, provocando 2d6 de dano perfurante e sangramento lacerante.',
+        pioneerMitigation: 'Calçados com solado de chapa de ferro e avanço meticuloso esmagando previamente os cristais com marretas pesadas de pioneiro.',
+        rescueAndStabilization: 'Extração de fragmentos de gesso das feridas com pinças estéreis, cauterização com tintura de iodo e curativo compressivo.',
+        icon: '🗡️💎',
+        color: '#e2e8f0'
+      };
+    } else if (ht === 'hyperosmotic_salt_dust_edema_and_suffocation') {
+      hazard = {
+        hazardTitle: 'Nuvem de Halita Micronizada e Edema Pulmonar Osmótico',
+        saveDC: 14,
+        saveType: 'Constituição',
+        saltDomeAndDiapirRisk: 'Desabamentos pontuais pulverizam sal em micropartículas que flutuam no ar estagnado; a inalação suga a água dos tecidos pulmonares gerando tosse sufocante, desvantagem em testes físicos e 1 nível de exaustão.',
+        pioneerMitigation: 'Uso de máscaras de linho embebidas em água doce ou vinagre de maçã diluído para retenção osmótica do sal.',
+        rescueAndStabilization: 'Repouso em tenda selada com inalação de vapor d\'água tépido e infusões balsâmicas para desobstrução pulmonar.',
+        icon: '💨😷',
+        color: '#64748b'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampSaltDomeAndDiapirStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'underdark').toLowerCase();
+    var dt = (defenseType || 'dry_anhydrite_alcove_diapir_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Alcova Desidratada de Anidrita Pura',
+      saltDomeAnchorageAndDeliquescenceSafety: 'Acampamento estabelecido em câmara de anidrita desidratada que não absorve umidade e permanece estruturalmente firme contra colapsos plásticos.',
+      waxedCanopyAndAirDesiccator: 'Muralhas naturais de pedra evaporítica impermeável protegem a comitiva contra correntes de ar úmidas e dissolução do teto.',
+      campRestAndSafetyGuards: 'Permite sono longo calmo, seco e revigorante com proteção estrutural absoluta contra abatimentos de sal.',
+      icon: '⛺🧂',
+      color: '#cbd5e1'
+    };
+
+    if (dt === 'waxed_canvas_deliquescence_canopy_and_brine_gutter') {
+      tech = {
+        defenseTitle: 'Dossel de Lona Encerada com Calhas Coletoras de Salmoura',
+        saltDomeAnchorageAndDeliquescenceSafety: 'Toldo suspenso em formato de pirâmide invertida que recolhe goteiras salinas do teto e as drena para canaletas de argila fora das barracas.',
+        waxedCanopyAndAirDesiccator: 'Mantém o piso do acampamento e os sacos de dormir totalmente secos e livres de goteiras corrosivas de salmoura.',
+        campRestAndSafetyGuards: 'Garante conforto térmico perfeito para os exploradores sem risco de queimação química na pele.',
+        icon: '🛡️⛺',
+        color: '#94a3b8'
+      };
+    } else if (dt === 'charcoal_and_quicklime_air_desiccator_station') {
+      tech = {
+        defenseTitle: 'Desumidificador Ambiental de Cal Viva e Carvão Vegetal',
+        saltDomeAnchorageAndDeliquescenceSafety: 'Caixas perfuradas contendo cal virgem e carvão que absorvem o excesso de umidade do ar da caverna mantendo o ambiente seco.',
+        waxedCanopyAndAirDesiccator: 'Impede a deliquescência do sal nas paredes do bivaque e purifica o ar de odores sulfurosos ou poeiras minerais.',
+        campRestAndSafetyGuards: 'Permite que as sentinelas respirem com facilidade e repousem em atmosfera limpa e equilibrada.',
+        icon: '⚗️💨',
+        color: '#64748b'
+      };
+    } else if (dt === 'selenite_cleared_puncheon_cordon_trail') {
+      tech = {
+        defenseTitle: 'Passadiço Perimetral de Pranchas sobre Cristais de Gesso',
+        saltDomeAnchorageAndDeliquescenceSafety: 'Passarela de madeira reforçada assentada sobre os leitos de espículas de selenita que cria via de circulação lisa e segura.',
+        waxedCanopyAndAirDesiccator: 'Elimina totalmente perigos de perfuração nos pés durante as rondas de vigilância e tarefas noturnas.',
+        campRestAndSafetyGuards: 'Garante trocas de guarda rápidas, silenciosas e sem lacerações acidentais.',
+        icon: '🪵🚶',
+        color: '#10b981'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessPillowLavaAndBlackSmokerHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'coastal').toLowerCase();
@@ -23247,6 +23354,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessSaltDomeAndDiapirHazard: calcWildernessSaltDomeAndDiapirHazard,
+    calcCampSaltDomeAndDiapirStation: calcCampSaltDomeAndDiapirStation,
     calcWildernessPillowLavaAndBlackSmokerHazard: calcWildernessPillowLavaAndBlackSmokerHazard,
     calcCampPillowLavaAndBlackSmokerStation: calcCampPillowLavaAndBlackSmokerStation,
     calcWildernessPetrifiedAgateForestHazard: calcWildernessPetrifiedAgateForestHazard,
