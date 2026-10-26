@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T13:20:46Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T13:25:05Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessGlacialFjordAndCalvingHazard) return '';
+        var bKey = (biome && biome.key) || 'glacier';
+        var gf = CartShared.calcWildernessGlacialFjordAndCalvingHazard(bKey, 'blue_ice_calving_surge_wave');
+        return '<div class="clp-glacial-fjord-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,28,36,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(2,132,199,0.3);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + gf.color + ';margin-bottom:2px;">' + gf.icon + ' ' + gf.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Fiordes Glaciais e Desprendimento de Gelo:</b> ' + gf.glacialFjordAndCalvingRisk + ' (CD ' + gf.saveDC + ' [' + gf.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Mitigação:</b> ' + gf.pioneerMitigation + ' · <i>Estabilização: ' + gf.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampGlacialFjordAndCalvingStation) return '';
+        var bKey = (biome && biome.key) || 'glacier';
+        var cp = CartShared.calcCampGlacialFjordAndCalvingStation(bKey, 'raised_marine_terrace_fjord_bivouac');
+        return '<div class="clp-fjord-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,28,34,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.3);font-size:8px;color:#f0f9ff;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Terraço de Fiorde:</b> ' + cp.fjordAnchorageAndIceSafety + ' · <b>Proteção:</b> ' + cp.iceBoomDeflectionAndTidalProtection + '</div>'
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

@@ -20213,6 +20213,130 @@
     };
   }
 
+  // === calcWildernessGlacialFjordAndCalvingHazard (Fiordes Glaciais com Desprendimento de Gelo Azul - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessGlacialFjordAndCalvingHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'glacier').toLowerCase();
+    var ht = (hazardType || 'blue_ice_calving_surge_wave').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Onda de Choque por Desprendimento de Bloco de Gelo Azul',
+      saveDC: 15,
+      saveType: 'Destreza',
+      glacialFjordAndCalvingRisk: 'Colapso de torre de gelo de 40 metros de altura na frente marinha da geleira; impacto que gera onda repentina de 5 metros avançando pelo fiorde estreito que vira embarcações e lança aventureiros na água a 1°C infligindo 3d8 de concussão e risco imediato de hipotermia letal (DMG p. 110-111).',
+      pioneerMitigation: 'Navegação mantendo distância mínima de 500 metros da frente da geleira e proa voltada perpendicularmente à direção da onda.',
+      rescueAndStabilization: 'Içamento emergencial com varas e ganchos de foca, aquecimento corporal vigoroso sob mantas de pele e ingestão de caldo gélido salgado quente.',
+      icon: '🌊🧊',
+      color: '#0284c7'
+    };
+
+    if (ht === 'sharp_growler_ice_hull_puncture') {
+      hazard = {
+        hazardTitle: 'Abalroamento em Bloco de Gelo Fóssil Submerso',
+        saveDC: 14,
+        saveType: 'Destreza',
+        glacialFjordAndCalvingRisk: 'Fragmentos densos de gelo azul fóssil (growlers) quase invisíveis sob a linha d\'água com densidade de ferro; colisão que perfura o casco da canoa causando inundação rápida e perda de carga pesada.',
+        pioneerMitigation: 'Vigia de proa permanente com vara graduada tateando a lâmina d\'água à frente do barco em marcha lenta.',
+        rescueAndStabilization: 'Vedação do rasgo com placas de chumbo flexível e estopa impermeabilizada com sebo de baleia, seguido de esgotamento com baldes.',
+        icon: '🛶💥',
+        color: '#475569'
+      };
+    } else if (ht === 'fjord_cliff_scree_rockfall_cascade') {
+      hazard = {
+        hazardTitle: 'Queda de Blocos de Tálus em Falésia Íngreme de Fiorde',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        glacialFjordAndCalvingRisk: 'Vibrações contínuas de calving e expansão térmica que soltam lajes de gnaisse e granito das encostas verticais de 600 metros, despencando em cascata de estilhaços sobre canais estreitos de passagem.',
+        pioneerMitigation: 'Navegação rente ao centro do canal fora do cone de espalhamento de escombros de encosta.',
+        rescueAndStabilization: 'Proteção imediata com escudos reforçados de carvalho, primeiros socorros em traumatismos cranianos e hemostasia de emergência.',
+        icon: '🪨⚠️',
+        color: '#dc2626'
+      };
+    } else if (ht === 'glacial_meltwater_hypothermia_shock') {
+      hazard = {
+        hazardTitle: 'Choque Térmico por Infiltração de Água de Degelo a 1°C',
+        saveDC: 15,
+        saveType: 'Constituição',
+        glacialFjordAndCalvingRisk: 'Água doce superfria proveniente do fundo da geleira que boia sobre a água salgada do fiorde; contato prolongado que provoca espasmos respiratórios incontroláveis, perda de mobilidade nos dedos e 1 nível de exaustão em minutos.',
+        pioneerMitigation: 'Uso de trajes impermeáveis de couro de foca com costuras duplas seladas com resina vegetal e luvas grossas de lã polar.',
+        rescueAndStabilization: 'Troca por roupas secas em ambiente abrigado, fricção suave da pele com álcool destilado e repouso em saco de dormir duplo.',
+        icon: '🥶💧',
+        color: '#64748b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      glacialFjordAndCalvingRisk: hazard.glacialFjordAndCalvingRisk,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Fiordes Glaciais e Icebergs) / PHB p. 182-183 (Navegação e Águas Gélidas) / XGE p. 78-83 (Geomorfologia Costeira Glacial e Calving)'
+    };
+  }
+
+  // === calcCampGlacialFjordAndCalvingStation (Bivaques em Terraços Elevados e Quebra-Mares de Toras - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampGlacialFjordAndCalvingStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'glacier').toLowerCase();
+    var dt = (defenseType || 'raised_marine_terrace_fjord_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Terraço Marinho Elevado com Barreira Anti-Surge',
+      fjordAnchorageAndIceSafety: 'Acampamento montado em patamar rochoso de fiorde a 10 metros acima do nível da maré máxima, fora do alcance de ondas de calving e de respingos de spray gélido.',
+      iceBoomDeflectionAndTidalProtection: 'Protegido por esporões salientes de granito que dissipam o impacto de ventos catabáticos descendo da calota de gelo interior.',
+      campRestAndSafetyGuards: 'Garante descanso longo reparador e seguro para os membros da comitiva com as embarcações içadas em rampas de troncos secos.',
+      icon: '⛺🏔️',
+      color: '#0284c7'
+    };
+
+    if (dt === 'floating_log_ice_boom_breakwater') {
+      tech = {
+        defenseTitle: 'Quebra-Mar de Toras Flutuantes Encordoadas',
+        fjordAnchorageAndIceSafety: 'Cinturão de toras grossas de pinheiro amarradas com correntes de ferro ancoradas no fundo da enseada que barram a entrada de gelo à deriva.',
+        iceBoomDeflectionAndTidalProtection: 'Impede que icebergs menores abalroem os barcos ancorados na doca natural do bivaque durante a noite.',
+        campRestAndSafetyGuards: 'Elimina a necessidade de vigílias constantes com ganchos de repulsão durante o turno de sono dos navegadores.',
+        icon: '🪵🛡️',
+        color: '#15803d'
+      };
+    } else if (dt === 'slate_chimney_sealed_hearth_shelter') {
+      tech = {
+        defenseTitle: 'Lareira Enclausurada com Duto de Lajes de Ardósia',
+        fjordAnchorageAndIceSafety: 'Fornilho montado em nicho rochoso com lastro de pedras vulcânicas aquecidas que irradia calor contínuo sem produzir clarão para fora da enseada.',
+        iceBoomDeflectionAndTidalProtection: 'Seca trajes náuticos úmidos, botas e redes de pesca em menos de duas horas, mantendo a temperatura do abrigo a 18°C.',
+        campRestAndSafetyGuards: 'Neutraliza a hipotermia acumulada pelas sentinelas em seus turnos de vigília sob o vento marítimo gélido.',
+        icon: '🔥🛡️',
+        color: '#ea580c'
+      };
+    } else if (dt === 'acoustic_cleat_foghorn_sentinel_post') {
+      tech = {
+        defenseTitle: 'Posto de Sentinela com Trombeta Náutica de Alarme',
+        fjordAnchorageAndIceSafety: 'Guarita de vigília instalada em esporão elevado de fiorde equipada com trombeta de latão e linha de cabo de fuga até o bivaque principal.',
+        iceBoomDeflectionAndTidalProtection: 'Monitora estalos e fissurações na frente glacial, emitindo sinal sonoro de alerta com 5 minutos de antecedência antes do colapso de gelo.',
+        campRestAndSafetyGuards: 'Proporciona tempo hábil para que a comitiva reforce as amarras das embarcações e se afaste de zonas de risco.',
+        icon: '📯🛡️',
+        color: '#eab308'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      fjordAnchorageAndIceSafety: tech.fjordAnchorageAndIceSafety,
+      iceBoomDeflectionAndTidalProtection: tech.iceBoomDeflectionAndTidalProtection,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Fiordes e Enseadas Glaciais) / PHB p. 150 (Kits de Navegação Polar) / XGE p. 78-83 (Engenharia de Quebra-Mares e Terraços Anti-Surge)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -22122,6 +22246,8 @@
     calcCampTepuiMesaAndChasmStation: calcCampTepuiMesaAndChasmStation,
     calcWildernessBoomingDuneHazard: calcWildernessBoomingDuneHazard,
     calcCampBoomingDuneStation: calcCampBoomingDuneStation,
+    calcWildernessGlacialFjordAndCalvingHazard: calcWildernessGlacialFjordAndCalvingHazard,
+    calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
