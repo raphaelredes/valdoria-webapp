@@ -14261,6 +14261,130 @@
     };
   }
 
+  // === calcWildernessBambooThicketAndElasticSpringHazard (Matas de Bambu Gigante, Tensão Elástica e Espigões Naturais - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessBambooThicketAndElasticSpringHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var ht = (hazardType || 'elastic_tension_culm_snap').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Estalo por Tensão Elástica de Colmo de Bambu',
+      saveDC: 14,
+      saveType: 'Destreza',
+      bambooRiskAndImpact: 'Vara de bambu gigante arqueada sob tensão que se solta como catapulta; impacto de 3d8 de concussão e arremesso a 3 metros (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores usam podões de lâmina curva para alívio gradual de tensão em nós e caminham em fila única com 3 metros de espaçamento.',
+      rescueAndStabilization: 'Imobilização de costelas com faixas de linho, tala de bambu leve e emplastro de argila fria.',
+      icon: '🎋💥',
+      color: '#84cc16'
+    };
+
+    if (ht === 'sharpened_culm_punji_spike_pit') {
+      hazard = {
+        hazardTitle: 'Fosso Oculto de Pontas de Bambu Afiadas',
+        saveDC: 14,
+        saveType: 'Destreza',
+        bambooRiskAndImpact: 'Espigões pontiagudos de bambu seco temperado a fogo ocultos sob folhas; perfuração de 2d10 e risco de tétano séptico.',
+        pioneerMitigation: 'Sondagem de solo com vara de junco antes de cada pisada e uso de perneiras de couro reforçado.',
+        rescueAndStabilization: 'Cauterização de ferimentos com ferro incandescente e purificação de toxinas com infusão de casca amarga.',
+        icon: '🕳️🗡️',
+        color: '#eab308'
+      };
+    } else if (ht === 'explosive_sealed_internode_fire_burst') {
+      hazard = {
+        hazardTitle: 'Estouro Explosivo de Entre-nós Selados de Bambu',
+        saveDC: 13,
+        saveType: 'Constituição',
+        bambooRiskAndImpact: 'Aquecimento de cavidades de ar aprisionado em colmos grossos provocando estampido ensurdecedor e estilhaços de madeira.',
+        pioneerMitigation: 'Perfuração prévia com sovela de ferro em colmos secos antes de atear tochas ou aproximar fogueiras.',
+        rescueAndStabilization: 'Tratamento de trauma acústico com algodão umedecido em óleo doce e alívio de tinido nos ouvidos.',
+        icon: '💥🎋',
+        color: '#f97316'
+      };
+    } else if (ht === 'razor_sharp_sheath_leaf_laceration') {
+      hazard = {
+        hazardTitle: 'Folhas Bainha Cortantes como Navalha',
+        saveDC: 13,
+        saveType: 'Destreza',
+        bambooRiskAndImpact: 'Bordas silicosas de bainhas de folhas jovens cortando tendões e tecidos como vidro moído; causa 2d6 de corte e sangramento contínuo.',
+        pioneerMitigation: 'Uso de luvas grossas de lona encerada e avanço abrindo picada com facões pesados.',
+        rescueAndStabilization: 'Estancamento com pó de cogumelo calvatia e ataduras compressivas esterilizadas.',
+        icon: '🍃🔪',
+        color: '#22c55e'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      bambooRiskAndImpact: hazard.bambooRiskAndImpact,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Florestas Tropicais e Matas Densas) / PHB p. 182-183 (Terreno Difícil e Salvaguardas)'
+    };
+  }
+
+  // === calcCampBambooThicketSuspendedPlatformAndLashingStation (Plataformas Suspensas em Colmos, Esteiras Trançadas e Bivaques Elevados - DMG p. 111 / XGE p. 78-83 / PHB p. 150) ===
+  function calcCampBambooThicketSuspendedPlatformAndLashingStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var dt = (defenseType || 'flexible_rattan_lashed_culm_platform').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Plataforma Elevada Amarrada com Fibras de Rotim',
+      platformElevatedAnchorage: 'Estrado de varas de bambu verde amarrado a 2 metros do chão entre quatro touceiras grossas com cipós flexíveis de rotim.',
+      groundHazardShieldingAndSafety: 'Isola o acampamento de predadores terrestres, lamaçal úmido e animais rastejantes peçonhentos.',
+      campRestAndSafetyGuards: 'Permite sono longo tranquilo para a comitiva com ventilação natural por baixo do assoalho.',
+      icon: '🎋⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'split_bamboo_woven_screen_shelter') {
+      tech = {
+        defenseTitle: 'Abrigo com Esteiras Trançadas de Bambu Partido',
+        platformElevatedAnchorage: 'Teto de ripas sobrepostas de bambu bipartido canalizando 100% da chuva torrencial para fora do perímetro.',
+        groundHazardShieldingAndSafety: 'Barreira rígida contra vento transversal e queda de folhiço úmido sobre os leitos dos aventureiros.',
+        campRestAndSafetyGuards: 'Mantém os mantimentos e sacos de dormir perfeitamente secos durante tempestades monçônicas.',
+        icon: '🛖🌧️',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'perimeter_tripwire_culm_alarm_station') {
+      tech = {
+        defenseTitle: 'Estação de Sentinela com Alarme Sonoro de Bambu',
+        platformElevatedAnchorage: 'Varas ocas balanceadas com percutores de madeira que batem ao contato com fios de tropeço nos acessos.',
+        groundHazardShieldingAndSafety: 'Alerta imediato sem depender apenas da visão noturna das sentinelas na escuridão da mata densa.',
+        campRestAndSafetyGuards: 'Concede tempo de reação tático para a comitiva sacar armas antes de qualquer emboscada noturna.',
+        icon: '🔔🎋',
+        color: '#eab308'
+      };
+    } else if (dt === 'elevated_cookstove_ash_bed_hearth') {
+      tech = {
+        defenseTitle: 'Fogareiro Elevado com Leito de Cinzas e Argila',
+        platformElevatedAnchorage: 'Cesto suspenso de bambu revestido com 10 cm de barro endurecido e cinzas para cocção segura.',
+        groundHazardShieldingAndSafety: 'Elimina o risco de propagação de faíscas para o piso de bambu ou para a serapilheira seca.',
+        campRestAndSafetyGuards: 'Permite refeições quentes e fervura de água para os aventureiros sem comprometer a estrutura do bivaque.',
+        icon: '🍲🔥',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      platformElevatedAnchorage: tech.platformElevatedAnchorage,
+      groundHazardShieldingAndSafety: tech.groundHazardShieldingAndSafety,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque Suspenso na Selva) / XGE p. 78-83 (Ferramentas de Entalhador e Carpintaria)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -16074,6 +16198,8 @@
     calcCampDesertMiragePolarizedFilterAndRefractoryAwning: calcCampDesertMiragePolarizedFilterAndRefractoryAwning,
     calcWildernessGlacialCorniceAndSnowBridgeHazard: calcWildernessGlacialCorniceAndSnowBridgeHazard,
     calcCampGlacialCrevasseIceScrewAndSnowAnchorStation: calcCampGlacialCrevasseIceScrewAndSnowAnchorStation,
+    calcWildernessBambooThicketAndElasticSpringHazard: calcWildernessBambooThicketAndElasticSpringHazard,
+    calcCampBambooThicketSuspendedPlatformAndLashingStation: calcCampBambooThicketSuspendedPlatformAndLashingStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
