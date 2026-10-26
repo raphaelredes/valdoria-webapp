@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T22:45:01Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T22:48:40Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessKarstDryValleyHazard) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var kv = CartShared.calcWildernessKarstDryValleyHazard(bKey, 'sinkhole_swallow_hole_collapse');
+        return '<div class="clp-karst-dry-valley-card" style="margin:4px 0 6px;text-align:left;background:rgba(16,36,24,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.35);font-size:8px;color:#ecfdf5;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + kv.color + ';margin-bottom:2px;">' + kv.icon + ' ' + kv.hazardTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Vale Seco Cárstico e Rio Cego:</b> ' + kv.valleyRisk + ' (CD ' + kv.saveDC + ' [' + kv.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#a7f3d0;margin-top:1px;">• <b>Mitigação:</b> ' + kv.pioneerMitigation + ' · <i>Estabilização: ' + kv.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampKarstDryValleyStation) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var kv = CartShared.calcCampKarstDryValleyStation(bKey, 'fossil_alluvial_terrace');
+        return '<div class="clp-karst-dry-valley-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,30,20,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(5,150,105,0.3);font-size:8px;color:#ecfdf5;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + kv.color + ';margin-bottom:2px;">' + kv.icon + ' ' + kv.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>' 
+          + '  <div>• <b>Bivaque em Vale Seco Cárstico:</b> ' + kv.valleyAndCampSafety + ' · <b>Defesa:</b> ' + kv.valleyAndWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#a7f3d0;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + kv.campRestAndSafetyGuards + '</div>' 
           + '</div>';
       })()
     + (function(){

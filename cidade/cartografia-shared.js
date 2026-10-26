@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 286: VALES SECOS CÁRSTICOS E SUMIDOUROS CÉLERE DE RIOS CEGOS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessKarstDryValleyHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var ht = (hazardType || 'sinkhole_swallow_hole_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Abatimento Súdito de Sumidouro e Ponor em Leito Seco',
+      saveDC: 15,
+      saveType: 'Destreza',
+      valleyRisk: 'O leito seco de seixos calcários oculta um engolidouro cárstico instável coberto por crostas finas de carbonato; a passagem da comitiva rompe a abóbada fóssil, colapsando o piso em funil abissal de brita e blocos com 3d8 de concussão e soterramento parcial (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores sondando o leito de seixos com varas rígidas de ferro e amarrando cordadas antes da transposição de linhas de fratura cárstica (Sobrevivência ou Investigação CD 14).',
+      rescueAndStabilization: 'Tração com cabos de escalada ancorados em paredões firmes e desobstrução de vias respiratórias livres de pedriscos (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🕳️',
+      color: '#10b981'
+    };
+
+    if (ht === 'estavelle_flash_aquifer_surge') {
+      hazard.hazardTitle = 'Refluxo Turbulento em Estavela e Enxurrada Subterrânea';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Força';
+      hazard.valleyRisk = 'Chuvas torrenciais no planalto cárstico superior sobrecarregam o lençol freático confinado, provocando refluxo explosivo através das estavelas do vale cego; jatos repentinos de lama e cascalho inundam o cânion seco em segundos com 3d6 de concussão, empurrando aventureiros por 30 pés contra rochedos pontiagudos com perda de itens leves (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Observação de borbulhamento ruidoso nas fendas do talvegue e fuga imediata para os terraços aluviais fósseis elevados (Percepção CD 14).';
+      hazard.rescueAndStabilization = 'Arremesso de cabos de resgate com boias improvisadas e tratamento de hipotermia por submersão súbita (Atletismo CD 14 ou Sobrevivência CD 13).';
+    } else if (ht === 'carbonate_dust_blind_canyon_asphyxiation') {
+      hazard.hazardTitle = 'Poeira Asfixiante de Carbonato Micronizado em Cânion Cego';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Constituição';
+      hazard.valleyRisk = 'Ventos fortes canalizados pelas paredes verticais do vale cego levantam turbilhões abrasivos de pó de carbonato de cálcio e cal micronizada; a inalação cáustica inflige 2d6 de dano de veneno, tosse convulsiva e cegueira temporária por 1 hora se falhar na salvaguarda (PHB p. 183; DMG p. 110).';
+      hazard.pioneerMitigation = 'Uso de lenços umedecidos com vinagre ou água limpa amarrados sobre boca e narinas e óculos com lentes protegidas (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Lavagem oftálmica abundante com infusões de camomila e repouso em cavidades protegidas do vento (Medicina CD 13).';
+    } else if (ht === 'blind_cliff_arch_rubble_collapse') {
+      hazard.hazardTitle = 'Desabamento de Arco Cárstico e Paredão Cego';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.valleyRisk = 'No término cego do vale, onde o rio ancestral outrora desaparecia, blocos de travertino e calcário fraturado desabam do arco residual e do paredão terminal de 60 metros; o estrondo lança chuvas de escombros de 3d10 de concussão que bloqueiam o recuo da comitiva (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Identificação de fendas de tração ativas e estalagmites caídas no fundo do cânion, contornando a projeção vertical dos arcos (Percepção ou Natureza CD 13).';
+      hazard.rescueAndStabilization = 'Alavancamento de lajes de calcário para resgate de companheiros presos e imobilização de fraturas (Atletismo CD 14 ou Medicina CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampKarstDryValleyStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'fossil_alluvial_terrace').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Terraço Aluvial Fóssil Elevado',
+      valleyAndCampSafety: 'O acampamento é estabelecido em uma bancada fóssil de calcário 6 metros acima do talvegue do vale cego; o piso elevado mantém as tendas completamente a salvo de refluxos repentinos de estavelas e inundações torrenciais subterrâneas (DMG p. 111).',
+      valleyAndWatch: 'A posição elevada sobre o cânion proporciona visão desimpedida ao longo de todo o leito seco, concedendo vantagem em testes de Percepção para a sentinela contra aproximações furtivas.',
+      campRestAndSafetyGuards: 'Descanso seguro e protegido contra surpresas hidrológicas e predadores rastejantes nos vales cársticos.',
+      icon: '🏕️',
+      color: '#10b981'
+    };
+
+    if (dt === 'gravel_filtration_sump') {
+      defense.defenseTitle = 'Poço de Filtração em Cascalho Cárstico Profundo';
+      defense.valleyAndCampSafety = 'Escavação manual em leito de seixos e britas calcárias limpas próxima ao sumidouro inativo canaliza o fluxo freático perene com decantação de argilas e detritos (PHB p. 150).';
+      defense.valleyAndWatch = 'Produz água mineral límpida, pura e abundante (até 40 litros por descanso), acelerando a recuperação de exaustão e restaurando +1 dado de vida adicional aos membros do grupo.';
+      defense.campRestAndSafetyGuards = 'Suprimento vital de hidratação límpida mesmo em vales secos e áridos com rios superficiais extintos.';
+    } else if (dt === 'limestone_slab_breastwork') {
+      defense.defenseTitle = 'Parapeito de Lajes de Calcário Intertravadas';
+      defense.valleyAndCampSafety = 'Placas planas de calcário fraturado recolhidas nas escarpas do vale são empilhadas em junta seca, formando trincheiras de 1,5 metro de altura ao redor do perímetro das tendas (PHB p. 185).';
+      defense.valleyAndWatch = 'Concede cobertura três-quartos (+5 na CA e +5 em salvaguardas de Destreza) contra rajadas de vento com poeira e ataques de projéteis de emboscadores trogloditas.';
+      defense.campRestAndSafetyGuards = 'Fortificação rápida e robusta que garante vigília tranquila e barreira maciça contra investidas físicas.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 285: PLATÔS DE TUYA VULCÂNICA E MESAS SUBGLACIAIS (D&D 5e)
   // =========================================================================
 
@@ -36996,6 +37071,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessKarstDryValleyHazard: calcWildernessKarstDryValleyHazard,
+    calcCampKarstDryValleyStation: calcCampKarstDryValleyStation,
     calcWildernessSubglacialTuyaHazard: calcWildernessSubglacialTuyaHazard,
     calcCampSubglacialTuyaStation: calcCampSubglacialTuyaStation,
     calcWildernessBasalticEruptiveFissureHazard: calcWildernessBasalticEruptiveFissureHazard,
