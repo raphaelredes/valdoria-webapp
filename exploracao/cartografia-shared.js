@@ -16865,6 +16865,130 @@
     };
   }
 
+  // === calcWildernessIgnimbritePlateauAndTafoniHazard (Planaltos de Ignimbrito, Tafoni e Cinzas Soldadas - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessIgnimbritePlateauAndTafoniHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'tafoni_honeycomb_ledge_break').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ruptura de Balcão Alveolar em Tafoni',
+      saveDC: 15,
+      saveType: 'Destreza',
+      ignimbriteRiskAndTafoni: 'Saliência oca de tufo vulcânico esfarelável em favo de mel que quebra durante escalada; queda de 8 metros sobre cascalheira áspera com 3d6 contundente e entorse (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores usam pítons expansivos de haste longa para rocha porosa e testam a rigidez dos apoios com martelo geológico.',
+      rescueAndStabilization: 'Içamento por corda dupla com arnês acolchoado e imobilização de fraturas com talas rígidas de freixo.',
+      icon: '🧗💥',
+      color: '#b45309'
+    };
+
+    if (ht === 'ignimbrite_ash_dust_avalanche') {
+      hazard = {
+        hazardTitle: 'Avalanche Seca de Cinza Vulcânica Soldada e Púmice',
+        saveDC: 14,
+        saveType: 'Constituição',
+        ignimbriteRiskAndTafoni: 'Enxurrada de cinza vítrea fina e pedregulhos esponjosos que soterra os aventureiros até a cintura; 2d6 de concussão e asfixia por poeira por 10 minutos.',
+        pioneerMitigation: 'Uso de máscaras faciais de gaze com vinagre e avanço em ziguezague pelas cristas mais consolidadas.',
+        rescueAndStabilization: 'Escavação manual com pás dobráveis, desobstrução das vias respiratórias e lavagem dos olhos com soro límpido.',
+        icon: '🌋💨',
+        color: '#78716c'
+      };
+    } else if (ht === 'vesicular_glass_edge_laceration') {
+      hazard = {
+        hazardTitle: 'Laceração em Arestas Vesiculares de Púmice Vítreo',
+        saveDC: 13,
+        saveType: 'Destreza',
+        ignimbriteRiskAndTafoni: 'Paredões com bordas vítreas serrilhadas e abrasivas que cortam roupas, mochilas e provocam sangramento cutâneo com 2d6 de dano de corte.',
+        pioneerMitigation: 'Uso de luvas de raspa de couro reforçadas com tachas e perneiras grossas de camurça tratada.',
+        rescueAndStabilization: 'Limpeza de pó vulcânico com infusão estéril de tomilho e curativos compressivos com óleo de linhaça.',
+        icon: '🔪🩸',
+        color: '#dc2626'
+      };
+    } else if (ht === 'subterranean_fumarole_draft_suffocation') {
+      hazard = {
+        hazardTitle: 'Corrente Ascendente de Gás Asfixiante em Fenda de Tufo',
+        saveDC: 14,
+        saveType: 'Constituição',
+        ignimbriteRiskAndTafoni: 'Bolsão de dióxido de carbono denso e inodoro preso no fundo de ravina de ignimbrito; tontura súbita, perda de sentidos e risco de asfixia.',
+        pioneerMitigation: 'Detecção prévia de fendas com tochas rebaixadas para monitorar oxigênio e contorno de depressões estagnadas.',
+        rescueAndStabilization: 'Içamento rápido para terreno ventilado no platô superior e massagem torácica com respiração assistida.',
+        icon: '💨☣️',
+        color: '#eab308'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      ignimbriteRiskAndTafoni: hazard.ignimbriteRiskAndTafoni,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Planaltos Vulcânicos e Despenhadeiros de Cinza) / PHB p. 182-183 (Marcha em Altitude) / XGE p. 78-83 (Geologia)'
+    };
+  }
+
+  // === calcCampIgnimbriteTafoniAlcoveAndFilterStation (Alcovas em Tafoni, Ancoragens em Púmice e Filtros de Tufo - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampIgnimbriteTafoniAlcoveAndFilterStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'tafoni_natural_alcove_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Alcova Natural de Tafoni Vulcânico',
+      ignimbriteAnchorageAndTafoniSafety: 'Nicho arredondado de 4 metros escavado pelo vento no paredão de ignimbrito; abrigo térmico perfeito contra vendavais gelados de altitude e chuvas ácidas.',
+      ashShieldingAndCampSecurity: 'Totalmente isolado de deslizamentos de encosta e seguro contra predadores voadores graças ao teto côncavo de pedra maciça.',
+      campRestAndSafetyGuards: 'Permite sono longo aquecido, seco e protegido para os membros do grupo com sentinela postada na entrada.',
+      icon: '🪨⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'expansion_pumice_anchor_pegs') {
+      tech = {
+        defenseTitle: 'Estacas de Ancoragem Expansivas para Rocha Púmice',
+        ignimbriteAnchorageAndTafoniSafety: 'Pinos de madeira flexível com garras duplas de ferro que se travam nos poros do tufo vulcânico sem esfarelar a rocha.',
+        ashShieldingAndCampSecurity: 'Garante pontos de sustentação firmes para redes suspensas, amarras de barracas e içamento de fardos.',
+        campRestAndSafetyGuards: 'Mantém as estruturas do bivaque perfeitamente fixadas mesmo sob rajadas de ventania alpina.',
+        icon: '🔩🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'volcanic_tuff_percolation_filter') {
+      tech = {
+        defenseTitle: 'Vaso Filtrador Decantador em Rocha de Tufo Poroso',
+        ignimbriteAnchorageAndTafoniSafety: 'Cuba esculpida em tufo mineral que filtra água barrenta de degelo e chuva, removendo 99% das cinzas e partículas minerais.',
+        ashShieldingAndCampSecurity: 'Produz 8 litros diários de água potável límpida, neutra e sem gosto de cinza vulcânica para a expedição.',
+        campRestAndSafetyGuards: 'Abastece integralmente todos os cantis da comitiva com água purificada e segura.',
+        icon: '🏺💧',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'ignimbrite_block_wind_baffle') {
+      tech = {
+        defenseTitle: 'Parapeito de Blocos Secos de Ignimbrito Leve',
+        ignimbriteAnchorageAndTafoniSafety: 'Mureta frontal de pedras porosas empilhadas que fecha metade do vão da alcova de tafoni.',
+        ashShieldingAndCampSecurity: 'Desvia ventanias de tempestade para fora do abrigo e retém o calor gerado pela fogueira de bivaque.',
+        campRestAndSafetyGuards: 'Concede refúgio térmico blindado e sereno para todos os aventureiros da expedição.',
+        icon: '🧱🌋',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      ignimbriteAnchorageAndTafoniSafety: tech.ignimbriteAnchorageAndTafoniSafety,
+      ashShieldingAndCampSecurity: tech.ashShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Alcovas Vulcânicas) / PHB p. 150 (Kits de Aventureiro) / XGE p. 78-83 (Engenharia e Alvenaria)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -18720,6 +18844,8 @@
     calcCampPetrifiedForestAgateHollowAndWall: calcCampPetrifiedForestAgateHollowAndWall,
     calcWildernessBlackSandDuneAndVentHazard: calcWildernessBlackSandDuneAndVentHazard,
     calcCampBlackSandDuneTrenchAndCondenserStation: calcCampBlackSandDuneTrenchAndCondenserStation,
+    calcWildernessIgnimbritePlateauAndTafoniHazard: calcWildernessIgnimbritePlateauAndTafoniHazard,
+    calcCampIgnimbriteTafoniAlcoveAndFilterStation: calcCampIgnimbriteTafoniAlcoveAndFilterStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
