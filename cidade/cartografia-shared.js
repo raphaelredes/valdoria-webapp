@@ -17981,6 +17981,130 @@
     };
   }
 
+  // === calcWildernessGlacialMoraineAndDrumlinHazard (Morenas Glaciais, Cristas de Drumlins e Matacões Erráticos - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessGlacialMoraineAndDrumlinHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'glacier').toLowerCase();
+    var ht = (hazardType || 'moraine_scree_till_avalanche').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Avalanche de Cascalho e Matacões em Crista de Morena',
+      saveDC: 15,
+      saveType: 'Destreza',
+      glacialMoraineRiskAndDrumlins: 'Encosta de morena lateral de 45 graus formada por detritos glaciais soltos e blocos angulares sem consolidação; colapso em massa sob os passos da coluna causando rolamento com 3d6 contundente e soterramento parcial (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores sondam o leito com bastões de ferro temperado e contornam as cristas soltas pela base sólida de rocha polida.',
+      rescueAndStabilization: 'Extração rápida com alavancas de aço, desobstrução das vias respiratórias e imobilização de fraturas com talas rígidas forradas.',
+      icon: '🏔️⚠️',
+      color: '#d97706'
+    };
+
+    if (ht === 'drumlin_crevasse_dead_ice_sink') {
+      hazard = {
+        hazardTitle: 'Colapso de Lente de Gelo Fóssil Oculta em Drumlin',
+        saveDC: 14,
+        saveType: 'Destreza',
+        glacialMoraineRiskAndDrumlins: 'Solo de argila e seixos aparentemente sólido que oculta bloco de gelo fóssil em processo de fusão subsuperficial; abertura súbita de fenda abissal de 10 metros com água a 1°C.',
+        pioneerMitigation: 'Vigias mapeiam depressões em ferradura e avançam com cordas tensionadas entre membros da marcha espaçados a cada 5 metros.',
+        rescueAndStabilization: 'Içamento por corda dupla com roldanas de resgate e aplicação imediata de mantas térmicas e pedras aquecidas na brasa.',
+        icon: '🧊🕳️',
+        color: '#0284c7'
+      };
+    } else if (ht === 'erratic_boulder_topple_unstable_fulcrum') {
+      hazard = {
+        hazardTitle: 'Tombamento de Matacão Errático em Equilíbrio Instável',
+        saveDC: 14,
+        saveType: 'Força',
+        glacialMoraineRiskAndDrumlins: 'Bloco de granito de 15 toneladas depositado pelo recuo glacial sobre pedestal de cascalho fino que sofre solapamento pelo vento; giro violento com esmagamento letal.',
+        pioneerMitigation: 'Evitar usar matacões isolados como esteio ou abrigo sem antes inspecionar o ponto de apoio e ancorar tirantes de contraventamento.',
+        rescueAndStabilization: 'Salto evasivo lateral rápido para fora da calha de rolamento e tracionamento com talhas para desencarceramento de bagagens presas.',
+        icon: '🪨💥',
+        color: '#b45309'
+      };
+    } else if (ht === 'glacial_outwash_braided_stream_flash_surge') {
+      hazard = {
+        hazardTitle: 'Onda de Lavagem Glacial com Lama e Cascalho Abrasivo',
+        saveDC: 13,
+        saveType: 'Força',
+        glacialMoraineRiskAndDrumlins: 'Ruptura repentina de barragem de gelo a montante provocando torrente barrenta de água de degelo carregada de cascalho afiado que arrasta aventureiros e alforjes.',
+        pioneerMitigation: 'Travessia de canais entrelaçados realizada exclusivamente nas primeiras horas da manhã antes que o sol acelere o degelo do glaciar.',
+        rescueAndStabilization: 'Lançamento de retinida com boia flutuante e resgate imediato para margens elevadas seguido de fogueira para evitar hipotermia.',
+        icon: '🌊❄️',
+        color: '#0891b2'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      glacialMoraineRiskAndDrumlins: hazard.glacialMoraineRiskAndDrumlins,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Terrenos Glaciais e Morenas) / PHB p. 182-183 (Marcha no Gelo) / XGE p. 78-83 (Geomorfologia Glacial e Blocos Erráticos)'
+    };
+  }
+
+  // === calcCampGlacialMoraineAndDrumlinStation (Bivaques sob Matacões, Gabiões de Morena e Filtros de Degelo - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampGlacialMoraineAndDrumlinStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'glacier').toLowerCase();
+    var dt = (defenseType || 'erratic_boulder_lee_overhang_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque sob Balcão Concreto de Matacão Errático Gigante',
+      moraineAnchorageAndGlacialSafety: 'Parede monolítica de granito de 6 metros de altura assentada firmemente no leito de rocha maciça; balcão que atua como teto indestrutível contra quedas de pedras da morena.',
+      drumlinShieldingAndCampSecurity: 'Totalmente protegido de ventos catabáticos de cume e oculto na linha de horizonte da calota glacial circundante.',
+      campRestAndSafetyGuards: 'Garante sono longo seco, aquecido e sem riscos de soterramento para os membros da comitiva durante a tempestade de neve.',
+      icon: '🪨⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'moraine_till_crib_retaining_breastwork') {
+      tech = {
+        defenseTitle: 'Muralha em Gabião de Pedras de Morena com Escoramento',
+        moraineAnchorageAndGlacialSafety: 'Parapeito de blocos e seixos glaciais encaixados a seco contido por esteios de toras travadas fincadas no terraço de acampamento.',
+        drumlinShieldingAndCampSecurity: 'Impede o rolamento de cascalho solto da encosta superior sobre as tendas e oferece cobertura sólida para arqueiros sentinelas.',
+        campRestAndSafetyGuards: 'Cria perímetro defensivo intransponível para alcateias de lobos de inverno e predadores das geleiras.',
+        icon: '🪵🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'subglacial_till_filtration_cistern') {
+      tech = {
+        defenseTitle: 'Cisterna Decantadora com Cascalho Fino de Morena',
+        moraineAnchorageAndGlacialSafety: 'Fosso de captação escalonado revestido com areia quartzosa e cascalho graduado que retém a farinha de rocha glacial em suspensão.',
+        drumlinShieldingAndCampSecurity: 'Fornece 15 litros diários de água cristalina de degelo límpida sem resíduos minerais adstringentes que causam cólicas.',
+        campRestAndSafetyGuards: 'Assegura a hidratação plena e preparo seguro de ensopados nutritivos para toda a comitiva.',
+        icon: '🏺💧',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'drumlin_ridge_aerodynamic_windbreak_fence') {
+      tech = {
+        defenseTitle: 'Cerca Defletora com Ramos Trançados na Crista do Drumlin',
+        moraineAnchorageAndGlacialSafety: 'Paliçada permeável de galhos de salgueiro-ártico entrelaçados posicionada a montante na crista suave do drumlin.',
+        drumlinShieldingAndCampSecurity: 'Reduz a força do vendaval polar em 60% e evita o acúmulo de montes de neve sobre as lonas dos abrigos.',
+        campRestAndSafetyGuards: 'Mantém a temperatura do acampamento estável e permite descanso térmico efetivo dos sentinelas.',
+        icon: '🛡️❄️',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      moraineAnchorageAndGlacialSafety: tech.moraineAnchorageAndGlacialSafety,
+      drumlinShieldingAndCampSecurity: tech.drumlinShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Morenas e Terrenos Glaciais) / PHB p. 150 (Kits de Exploração Ártica) / XGE p. 78-83 (Engenharia de Abrigo e Filtração)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -19854,6 +19978,8 @@
     calcCampStarDuneAndGassiStation: calcCampStarDuneAndGassiStation,
     calcWildernessGeyserBasinAndAcidPoolHazard: calcWildernessGeyserBasinAndAcidPoolHazard,
     calcCampGeyserBasinAndAcidPoolStation: calcCampGeyserBasinAndAcidPoolStation,
+    calcWildernessGlacialMoraineAndDrumlinHazard: calcWildernessGlacialMoraineAndDrumlinHazard,
+    calcCampGlacialMoraineAndDrumlinStation: calcCampGlacialMoraineAndDrumlinStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
