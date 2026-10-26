@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 294: PLANÍCIES LITORÂNEAS DE MACHAIR E LOCHANS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessMachairCoastHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'equinoctial_storm_surge_lochan_inundation').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Inundação por Maré Equinocial e Transbordamento de Lochan',
+      saveDC: 15,
+      saveType: 'Força',
+      machairRisk: 'Ventos oceânicos tempestuosos empurram uma maré de sizígia furiosa que transpõe o cordão de dunas e afoga a planície de machair; os lochans de água doce transbordam em minutos, convertendo a campina em um lençol de água salobra gelada com correnteza rápida que arrasta a comitiva com 3d6 de concussão e frio (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores monitorando o refluxo das ondas e a linha de algas nas dunas, conduzindo o avanço pela crista dos cordões de capim-marram (Sobrevivência ou Natureza CD 14).',
+      rescueAndStabilization: 'Lançamento de cabos de resgate com boias de cortiça e aquecimento rápido com mantas de lã e chá quente contra choque térmico (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🌊',
+      color: '#0ea5e9'
+    };
+
+    if (ht === 'crushed_shell_calcareous_sand_abrasion') {
+      hazard.hazardTitle = 'Tempestade de Areia Conquífera e Abrasão Ocular';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Constituição';
+      hazard.machairRisk = 'Vendavais de 80 km/h levantam turbilhões de areia branca de conchas marinhas moídas ricas em microesquírolas de calcita; o pó cortante queima os olhos, fura tecidos leves e causa cegueira temporária por 1 hora e tosse áspera se falhar na salvaguarda (PHB p. 183; DMG p. 110).';
+      hazard.pioneerMitigation = 'Uso de máscaras de couro com viseiras de fenda e bandagens umedecidas com água doce sobre o rosto (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Lavagem oftálmica copiosa com colírio de camomila e repouso em tendas herméticas (Medicina CD 13).';
+    } else if (ht === 'quaking_turf_dune_slack_bog_swallow') {
+      hazard.hazardTitle = 'Afundamento em Turfa Móvel de Depressão Úmida';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.machairRisk = 'Aparentando ser uma campina firme de grama e flores raras, a depressão interdunar oculta uma camada flutuante de turfa de algas sobre lama movediça de cascalho conquífero; o tapete verde cede sob montarias e aventureiros, sugando membros até a cintura com condição impedido e risco de soterramento lento (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Sondagem de solo com bordões de marcha e travessia espaçada sobre pranchas de madeira distribuindo o peso (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Tracionamento com alavancas e estacas de ancoragem para extração rápida de aventureiros atolados (Atletismo CD 14 ou Sobrevivência CD 13).';
+    } else if (ht === 'coastal_haaf_fog_whiteout_disorientation') {
+      hazard.hazardTitle = 'Nevoeiro Marinho Denso e Desorientação em Machair';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Sabedoria';
+      hazard.machairRisk = 'Uma muralha gélida de nevoeiro marinho denso (haaf-fog) engole a planície plana e uniforme de machair, reduzindo o campo de visão a 3 metros; a falta de marcos físicos e a reverberação das ondas confundem os sentidos, fazendo a comitiva marchar direto para a arrebentação ou atoleiros salobros com 1 nível de exaustão (DMG p. 111).';
+      hazard.pioneerMitigation = 'Navegação rigorosa por bússola magnética e monitoramento acústico do ritmo sonoro das marés (Sobrevivência ou Navegação CD 14).';
+      hazard.rescueAndStabilization = 'Montagem de abrigo temporário estático e queima de tochas resinosas com apitos de sinalização (Sobrevivência CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampMachairCoastStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'consolidated_marram_dune_crest_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque na Crista de Duna com Capim-Marram',
+      machairAndCampSafety: 'O acampamento é estruturado na crista gramada de uma duna frontal firme fixada por densas redes de raízes de capim-marram; o solo é seco, bem drenado e elevado 6 metros acima da planície, completamente a salvo de transbordamentos de lochans e inundações de sizígia (DMG p. 111).',
+      machairAndWatch: 'A elevação sobre a campina proporciona vigília desobstruída em 360 graus vigiando tanto a linha de praia quanto as pastagens interiores com vantagem em testes de Percepção.',
+      campRestAndSafetyGuards: 'Descanso enxuto e estável com forragem macia que garante recuperação integral de forças para a comitiva.',
+      icon: '⛺',
+      color: '#0ea5e9'
+    };
+
+    if (dt === 'machair_shell_sand_aquifer_fresh_well') {
+      defense.defenseTitle = 'Poço de Água Doce Filtrada em Areia Conquífera';
+      defense.machairAndCampSafety = 'A espessa camada de areia de conchas moídas atua como filtro biológico alcalino que purifica a lente de água da chuva suspensa sobre o lençol salobro inferior (PHB p. 150).';
+      defense.machairAndWatch = 'Produz até 40 litros diários de água doce cristalina rica em cálcio puro, restaurando +1 dado de vida adicional aos membros do grupo durante o descanso longo.';
+      defense.campRestAndSafetyGuards = 'Hidratação cristalina e abundante garantida sem sabor salobro mesmo a poucos metros do mar.';
+    } else if (dt === 'driftwood_and_turf_stacked_dike') {
+      defense.defenseTitle = 'Parapeito de Leivas de Turfa e Madeira Flutuante';
+      defense.machairAndCampSafety = 'Leivas densas de grama do machair são cortadas e empilhadas com troncos pesados trazidos pela maré, erguendo um baluarte de 1,6 metro de altura (PHB p. 185).';
+      defense.machairAndWatch = 'Concede cobertura três-quartos (+5 na CA e +5 em salvaguardas de Destreza) contra ventanias marítimas e investidas de predadores anfíbios da praia.';
+      defense.campRestAndSafetyGuards = 'Barreira robusta contra a maresia e vigília noturna serena para as sentinelas do bivaque.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 293: ESCARPAS DE FALHA EM FACETAS TRIANGULARES (D&D 5e)
   // =========================================================================
 
@@ -37597,6 +37672,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessMachairCoastHazard: calcWildernessMachairCoastHazard,
+    calcCampMachairCoastStation: calcCampMachairCoastStation,
     calcWildernessFaultFacetCanyonHazard: calcWildernessFaultFacetCanyonHazard,
     calcCampFaultFacetCanyonStation: calcCampFaultFacetCanyonStation,
     calcWildernessQuartzitePillarForestHazard: calcWildernessQuartzitePillarForestHazard,
