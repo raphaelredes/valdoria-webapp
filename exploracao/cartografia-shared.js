@@ -20575,6 +20575,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 168: MANGUEZAIS VERMELHOS DE MARÉ ESTUARINA E RAÍZES EM ESCORA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessTidalRedMangroveHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'prop_root_slip_barnacle_laceration_quagmire').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Escorregamento em Raiz Escora com Laceração por Cracas e Tragamento em Vasa',
+      saveDC: 15,
+      saveType: 'Destreza',
+      mangroveAndTidalRisk: 'Arco de raiz aérea de mangue-vermelho coberto por algas limosas e colônias de cracas afiadas; o pé escorrega e o aventureiro cai sobre cascas cortantes despencando em lodo anaeróbico movediço com 3d8 de concussão, cortes sangrentos e afundamento rápido (DMG p. 110, 246).',
+      pioneerMitigation: 'Batedores avançam encordoados utilizando bastões com ganchos de fixação em forquilhas altas e botas reforçadas com caneleiras rígidas de couro cru.',
+      rescueAndStabilization: 'Lançamento de prancha de salvamento leve, içamento com cabos de sisal e cauterização imediata de cortes por cracas com infusão de tanino adstringente.',
+      icon: '🦀🌳',
+      color: '#15803d'
+    };
+
+    if (ht === 'tidal_bore_furo_channel_boat_swamp') {
+      hazard = {
+        hazardTitle: 'Onda de Maré Estuarina em Canal de Furo com Viramento de Canoas',
+        saveDC: 15,
+        saveType: 'Força',
+        mangroveAndTidalRisk: 'Subida repentina da preamar que canaliza onda de choque de 2 metros em canal meândrico estreito a 35 km/h; despedaça embarcações contra as raízes aéreas causando 2d8 de concussão e risco iminente de perda de suprimentos por afogamento (DMG p. 110, 118).',
+        pioneerMitigation: 'Vigia permanente na proa atento ao estrondo prévio da maré e amarração preventiva de emergência em raízes mestras consolidadas.',
+        rescueAndStabilization: 'Resgate de náufragos para a copa das árvores com estribos de corda, recuperação de fardos estanques flutuantes e troca de vestes ensopadas.',
+        icon: '🌊🛶',
+        color: '#0284c7'
+      };
+    } else if (ht === 'hydrogen_sulfide_anaerobic_miasma_torpor') {
+      hazard = {
+        hazardTitle: 'Vapor Sulfídrico Anaeróbico em Lodaçal Exposto por Maré Baixa',
+        saveDC: 14,
+        saveType: 'Constituição',
+        mangroveAndTidalRisk: 'Emissão maciça de gás sulfídrico desprendido da lama preta fétida sob o calor do sol da tarde; provoca ardência nas vias respiratórias, náusea incapacitante e 1 nível de exaustão por hipóxia química (DMG p. 111; PHB p. 185).',
+        pioneerMitigation: 'Uso de máscaras de linho embebidas em vinagre silvestre e folhas de mangue-preto e ascensão para os galhos superiores ventilados.',
+        rescueAndStabilization: 'Inalação de vapores de eucalipto aromático, repouso sob copa fresca e administração de água destilada fria com carvão vegetal.',
+        icon: '🌫️☣️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'stinging_estuarine_jellyfish_scourge') {
+      hazard = {
+        hazardTitle: 'Enxame de Medusas Estuarinas em Canal Turvo de Maré Alta',
+        saveDC: 14,
+        saveType: 'Constituição',
+        mangroveAndTidalRisk: 'Águas turvas da maré enchente infestadas por caravelas e medusas com filamentos urticantes de até 3 metros; o contato acidental durante o vau ou manobra de remos inflige 2d6 de dano de veneno com paralisia local e febre aguda.',
+        pioneerMitigation: 'Uso de macacões de tecido denso e sondagem da água com remos longos antes de qualquer imersão de membros.',
+        rescueAndStabilization: 'Lavagem vigorosa com água do mar tépida (nunca água doce), raspagem de filamentos com conchas e aplicação de vinagre concentrado.',
+        icon: '🪼⚠️',
+        color: '#dc2626'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampTidalRedMangroveStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'elevated_stilt_root_canopy_platform_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Plataforma de Raízes em Escora Elevada a 3 Metros Acima da Preamar',
+      mangroveAndCampSafety: 'Acampamento suspenso erguido na forquilha de raízes gigantes de mangue-vermelho com estrado de varas amarradas com cipós titica, situado muito acima da cota máxima de cheia da maré de sizígia.',
+      tidalMoatAndCanalMooring: 'A água da maré e o lodo profundo sob a plataforma funcionam como fosso intransponível contra predadores terrestres, com amarras seguras para canoas no canal protegido.',
+      campRestAndSafetyGuards: 'Garante repouso longo calmo, seguro e sem sobressaltos para toda a comitiva, com ventilação litorânea contínua que afasta mosquitos.',
+      icon: '⛺🌳',
+      color: '#15803d'
+    };
+
+    if (dt === 'woven_aerial_root_palisade_bastion') {
+      tech = {
+        defenseTitle: 'Paliçada de Raízes Aéreas Vivas Trançadas com Travas de Madeira Mangue',
+        mangroveAndCampSafety: 'Muralha perimétrica entrelaçada diretamente nas raízes vivas em torno do bivaque que bloqueia a passagem de botes hostis e predadores anfíbios.',
+        tidalMoatAndCanalMooring: 'Concede cobertura total (+5 na CA) aos defensores contra disparos de dardos e flechas vindos dos canais fluviais.',
+        campRestAndSafetyGuards: 'Assegura sono livre de ameaças e vigília serena para as sentinelas posicionadas nos nós mais altos da copa.',
+        icon: '🛡️🌿',
+        color: '#166534'
+      };
+    } else if (dt === 'condensed_mangrove_sap_and_rain_barrel_cistern') {
+      tech = {
+        defenseTitle: 'Cisterna Flutuante Coletora de Água Pluvial com Filtro de Areia Fluvial',
+        mangroveAndCampSafety: 'Barris estanques ancorados entre as raízes que recolhem água doce das copas frondosas das árvores através de lonas coletoras impermeabilizadas com resina de tanino.',
+        tidalMoatAndCanalMooring: 'Fornece 45 litros diários de água doce cristalina de altíssima pureza, eliminando qualquer dependência da água salobra estuarina.',
+        campRestAndSafetyGuards: 'Previne desidratação osmótica e cólicas intestinais, assegurando pleno vigor e disposição para a comitiva.',
+        icon: '💧🛢️',
+        color: '#0284c7'
+      };
+    } else if (dt === 'canal_tripwire_bell_oyster_shell_alarm_web') {
+      tech = {
+        defenseTitle: 'Rede de Alarme Subaquática e Aérea com Conchas de Ostra e Guizos',
+        mangroveAndCampSafety: 'Cabos de fibra vegetal estendidos através dos canais de acesso amarrados a pencas de conchas grossas de ostra que batem sonoramente com o movimento de qualquer casco ou nadador.',
+        tidalMoatAndCanalMooring: 'Detecta aproximações de embarcações a 40 metros de distância com alarme sonoro instantâneo ecoando nas raízes ocas.',
+        campRestAndSafetyGuards: 'Proporciona tranquilidade mental e proteção perimétrica impenetrável durante o pernoite no manguezal.',
+        icon: '🔔🦪',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 167: CAMPOS DE GELEIRA DE PEDRA SUBANTÁRTICOS E SOLIFLUXÃO (D&D 5e)
   // =========================================================================
 
@@ -25250,6 +25354,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessTidalRedMangroveHazard: calcWildernessTidalRedMangroveHazard,
+    calcCampTidalRedMangroveStation: calcCampTidalRedMangroveStation,
     calcWildernessPeriglacialRockGlacierHazard: calcWildernessPeriglacialRockGlacierHazard,
     calcCampPeriglacialRockGlacierStation: calcCampPeriglacialRockGlacierStation,
     calcWildernessBlindGorgePonorHazard: calcWildernessBlindGorgePonorHazard,

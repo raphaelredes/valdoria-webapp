@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T15:52:33Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T15:56:53Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessTidalRedMangroveHazard) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var rm = CartShared.calcWildernessTidalRedMangroveHazard(bKey, 'prop_root_slip_barnacle_laceration_quagmire');
+        return '<div class="clp-red-mangrove-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,34,22,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(22,163,74,0.35);font-size:8px;color:#dcfce7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + rm.color + ';margin-bottom:2px;">' + rm.icon + ' ' + rm.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Manguezais e Raízes em Escora:</b> ' + rm.mangroveAndTidalRisk + ' (CD ' + rm.saveDC + ' [' + rm.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bbf7d0;margin-top:1px;">• <b>Mitigação:</b> ' + rm.pioneerMitigation + ' · <i>Estabilização: ' + rm.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampTidalRedMangroveStation) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var cp = CartShared.calcCampTidalRedMangroveStation(bKey, 'elevated_stilt_root_canopy_platform_bivouac');
+        return '<div class="clp-red-mangrove-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,30,20,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(21,128,61,0.3);font-size:8px;color:#dcfce7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Raízes de Mangue:</b> ' + cp.mangroveAndCampSafety + ' · <b>Defesa:</b> ' + cp.tidalMoatAndCanalMooring + '</div>'
+          + '  <div style="font-size:7.5px;color:#86efac;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){
