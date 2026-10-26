@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 293: ESCARPAS DE FALHA EM FACETAS TRIANGULARES (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessFaultFacetCanyonHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var ht = (hazardType || 'wine_glass_pour_off_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda em Catarata Seca em Degrau de Taça de Vinho',
+      saveDC: 15,
+      saveType: 'Destreza',
+      faultRisk: 'O fundo estreito da haste do cânion em taça de vinho é cortado por degraus verticais lisos de 25 metros talhados em quartzito maciço; cordas gastas em rochas cortantes e poços de torvelinho secos ocultos sob cascalho instável ameaçam precipitar o explorador em queda de 20 metros com 4d6 de concussão e entorse articular (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores cravando grampos de expansão em rocha viva e descendo em rapel duplo com nós bloqueadores de segurança (Sobrevivência ou Atletismo CD 14).',
+      rescueAndStabilization: 'Içamento mecânico com polias e imobilização de luxações com talas rígidas de alpinismo (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🏔️',
+      color: '#ef4444'
+    };
+
+    if (ht === 'fault_gouge_breccia_avalanche') {
+      hazard.hazardTitle = 'Avalanche de Brecha e Argila de Falha Milonítica';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Destreza';
+      hazard.faultRisk = 'O espelho de falha normal expõe rochas intensamente cisalhadas por atrito tectônico; a passagem da comitiva rompe a cunha friável da base da faceta triangular, deflagrando uma avalanche maciça de cascalho anguloso com 3d8 de concussão e corte sobre a trilha (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Inspeção de espelhos de falha com estrias ativas e marcha rápida fora da linha de desprendimento dos taludes (Percepção ou Natureza CD 13).';
+      hazard.rescueAndStabilization = 'Alavancamento de blocos de rocha para liberar membros presos e sutura de cortes profundos (Atletismo CD 14 ou Medicina CD 13).';
+    } else if (ht === 'tectonic_microquake_rockfall_shower') {
+      hazard.hazardTitle = 'Tremor Tectônico Local e Saraivada de Blocos';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.faultRisk = 'Pequenas acomodações sísmicas no plano da falha produzem estalos secos que ejetam blocos de granito de cornijas suspensas a 300 metros de altura sobre a garganta estreita; a saraivada de pedras inflige 3d10 de concussão e obstrui o desfiladeiro (PHB p. 183; DMG p. 110).';
+      hazard.pioneerMitigation = 'Uso de capacetes de aço acolchoados e corrida imediata para nichos escavados sob a parede côncava da falha (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Desobstrução de passagens com alavancas e aplicação de compressas hemostáticas (Atletismo CD 14 ou Medicina CD 13).';
+    } else if (ht === 'alluvial_fan_flash_flood_debris_flow') {
+      hazard.hazardTitle = 'Corrida de Detritos Torrencial na Boca da Falha';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.faultRisk = 'Chuvas torrenciais no cálice da bacia superior convergem pela haste estreita da taça de vinho e jorram na boca da falha como torrente violenta de lama e pedregulhos a 50 km/h, arrastando aventureiros por 40 pés com 3d8 de concussão e perda de equipamentos leves (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Monitoramento do ruído surdo de trovão subterrâneo a montante e escalada rápida para os esporões rochosos laterais (Percepção CD 14).';
+      hazard.rescueAndStabilization = 'Arremesso de cabos de resgate e tratamento preventivo de hipotermia por submersão em lama fria (Atletismo CD 14 ou Sobrevivência CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampFaultFacetCanyonStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var dt = (defenseType || 'wine_glass_goblet_basin_high_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque Suspenso na Bacia do Cálice da Taça de Vinho',
+      faultAndCampSafety: 'O acampamento é estabelecido na bacia suspensa superior do cânion, 200 metros acima da planície tectônica; o único acesso é a garganta estreita da haste do cânion, transformando a posição em fortaleza natural inexpugnável a salvo de predadores de planície e de inundações basais (DMG p. 111).',
+      faultAndWatch: 'A sentinela de vigia na borda do cálice domina toda a escarpa de falha com visão panorâmica até o horizonte e vantagem em testes de Percepção contra aproximações furtivas.',
+      campRestAndSafetyGuards: 'Descanso protegido em platô elevado que bloqueia ventos do vale e assegura recuperação integral de forças para a comitiva.',
+      icon: '⛺',
+      color: '#ef4444'
+    };
+
+    if (dt === 'fault_plane_spring_scarp_cistern') {
+      defense.defenseTitle = 'Captação em Surgência Hidrogeológica no Plano de Falha';
+      defense.faultAndCampSafety = 'A barreira impermeável de argila de falha força lençõis freáticos profundos a emergirem em nascentes límpidas e perenes na base da escarpa rochosa (PHB p. 150).';
+      defense.faultAndWatch = 'Produz até 40 litros diários de água mineral pura e cristalina rica em cálcio, restaurando +1 dado de vida adicional aos membros do grupo durante o descanso longo.';
+      defense.campRestAndSafetyGuards = 'Abastecimento hídrico abundante mesmo em escarpas áridas com rios superficiais efêmeros.';
+    } else if (dt === 'triangular_spur_reentrant_rock_breastwork') {
+      defense.defenseTitle = 'Parapeito em Reentrância de Esporão Facetado';
+      defense.faultAndCampSafety = 'Blocos de granito caídos da faceta são empilhados em cunha em nicho côncavo na parede da escarpa, imune a quedas de pedras da linha de prumo (PHB p. 185).';
+      defense.faultAndWatch = 'Concede cobertura três-quartos (+5 na CA e +5 em salvaguardas de Destreza) contra ventos canalizados e flechas de emboscadores da encosta.';
+      defense.campRestAndSafetyGuards = 'Bastião rígido e estável que garante noites de vigília serenas para os sentinelas do grupo.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 292: PILARES DE ARENITO QUARTZÍTICO DE WULINGYUAN (D&D 5e)
   // =========================================================================
 
@@ -37522,6 +37597,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessFaultFacetCanyonHazard: calcWildernessFaultFacetCanyonHazard,
+    calcCampFaultFacetCanyonStation: calcCampFaultFacetCanyonStation,
     calcWildernessQuartzitePillarForestHazard: calcWildernessQuartzitePillarForestHazard,
     calcCampQuartzitePillarForestStation: calcCampQuartzitePillarForestStation,
     calcWildernessSeifLinearDuneHazard: calcWildernessSeifLinearDuneHazard,
