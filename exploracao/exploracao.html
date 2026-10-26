@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T17:34:32Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T17:35:24Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessJokulhlaupSandurHazard) return '';
+        var bKey = (biome && biome.key) || 'tundra';
+        var js = CartShared.calcWildernessJokulhlaupSandurHazard(bKey, 'jokulhlaup_ice_dam_rupture_hyperconcentrated_surge');
+        return '<div class="clp-jokulhlaup-sandur-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,24,36,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(2,132,199,0.35);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + js.color + ';margin-bottom:2px;">' + js.icon + ' ' + js.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Planície de Sandur e Jökulhlaup:</b> ' + js.sandurJokulhlaupRisk + ' (CD ' + js.saveDC + ' [' + js.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Mitigação:</b> ' + js.pioneerMitigation + ' · <i>Estabilização: ' + js.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampJokulhlaupSandurStation) return '';
+        var bKey = (biome && biome.key) || 'tundra';
+        var jc = CartShared.calcCampJokulhlaupSandurStation(bKey, 'palagonite_tuya_rock_island_above_sandur_bivouac');
+        return '<div class="clp-jokulhlaup-sandur-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(10,18,28,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(14,165,233,0.3);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + jc.color + ';margin-bottom:2px;">' + jc.icon + ' ' + jc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Bivaque em Monte-Ilha (Tuya):</b> ' + jc.sandurAndCampSafety + ' · <b>Defesa:</b> ' + jc.sandurWatchAndFilter + '</div>'
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + jc.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

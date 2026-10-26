@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 201: PLANÍCIES DE LAVAGEM GLACIAL (SANDUR) E JÖKULHLAUPS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessJokulhlaupSandurHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'tundra').toLowerCase();
+    var ht = (hazardType || 'jokulhlaup_ice_dam_rupture_hyperconcentrated_surge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Enxurrada Catastrófica Subglacial (Jökulhlaup) com Icebergs Rolantes',
+      saveDC: 16,
+      saveType: 'Força',
+      sandurJokulhlaupRisk: 'O derretimento geotérmico sob a calota de gelo rompe o túnel frontal liberando um dilúvio repentino de água barrenta e blocos de gelo do tamanho de casas que varre toda a planície negra de sandur com 4d8 de concussão e 2d6 de frio (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Atenção imediata ao cheiro de gás sulfídrico vindo dos rios glaciais e travessia rápida entre afloramentos rochosos.',
+      rescueAndStabilization: 'Içamento para terraços basálticos altos e reaquecimento intensivo contra choque hipotérmico.',
+      icon: '🌊🧊',
+      color: '#0284c7'
+    };
+
+    if (ht === 'braided_meltwater_channel_shifting_quicksand_gravel') {
+      hazard = {
+        hazardTitle: 'Migração de Canais Entrelaçados e Cascalho Movediço a 1°C',
+        saveDC: 15,
+        saveType: 'Força',
+        sandurJokulhlaupRisk: 'Centenas de braços rasos de água leitosa mudam de leito a cada hora sobre areia basáltica saturada; o fundo cede sob o peso das botas prendendo o explorador na correnteza congelante e impondo 1 nível de exaustão (DMG p. 109-110; PHB p. 185).',
+        pioneerMitigation: 'Travessia nas barras diagonais onde a água forma ondulações rasas (riffles) e formação em triângulo de apoio mútuo.',
+        rescueAndStabilization: 'Descalçamento assistido por alavanca de bastão e fricção vigorosa dos pés dormentes.',
+        icon: '🏞️❄️',
+        color: '#38bdf8'
+      };
+    } else if (ht === 'buried_stranded_iceberg_kettle_collapse_pit') {
+      hazard = {
+        hazardTitle: 'Colapso de Abóbada de Areia Negra sobre Iceberg Soterrado',
+        saveDC: 15,
+        saveType: 'Destreza',
+        sandurJokulhlaupRisk: 'Antigos blocos gigantes de gelo deixados pela última cheia derretem lentamente sob metros de cinza e cascalho, deixando cavernas ocas invisíveis na superfície; o piso desaba precipitando o batedor em cratera de paredes escorregadias com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Desvio de anéis circulares de subsidência na areia negra e marcha encordada.',
+        rescueAndStabilization: 'Lançamento de escada de corda ancorada fora do cone de desmoronamento.',
+        icon: '🕳️🧊',
+        color: '#0369a1'
+      };
+    } else if (ht === 'katabatic_glacier_fluorine_ash_sandstorm_blast') {
+      hazard = {
+        hazardTitle: 'Tempestade Catabática de Areia Basáltica e Cinza Fluorada',
+        saveDC: 14,
+        saveType: 'Constituição',
+        sandurJokulhlaupRisk: 'O vento gelado que despenca da geleira acelera sobre a planície nua levantando nuvens negras de vidro vulcânico moído e poeira ácida; a tempestade fere os olhos impondo a condição Cego e 2d6 de dano de veneno/cortante (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Uso de máscaras de couro com lentes de mica e abrigo atrás de matacões erráticos.',
+        rescueAndStabilization: 'Lavagem ocular abundante com água limpa e proteção das mucosas com sebo.',
+        icon: '🌪️🖤',
+        color: '#64748b'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampJokulhlaupSandurStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'tundra').toLowerCase();
+    var dt = (defenseType || 'palagonite_tuya_rock_island_above_sandur_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Monte-Ilha de Palagonita Consolidada Acima do Sandur',
+      sandurAndCampSafety: 'Acampamento posicionado no topo de um promontório vulcânico subglacial antigo (tuya) que se ergue como uma ilha rochosa 25 metros acima da planície de lavagem.',
+      sandurWatchAndFilter: 'Permanece inteiramente fora do alcance das inundações catastróficas de jökulhlaup e oferece abrigo seco contra os canais mutáveis.',
+      campRestAndSafetyGuards: 'Garante descanso longo inabalável e visão de longo alcance até a frente da geleira para toda a comitiva.',
+      icon: '⛺⛰️',
+      color: '#0284c7'
+    };
+
+    if (dt === 'glacier_portal_seismic_and_sulfurous_odor_watch') {
+      tech = {
+        defenseTitle: 'Vigília Olfativa de Enxofre e Escuta Sísmica da Frente Glacial',
+        sandurAndCampSafety: 'Posto avançado de sentinela atento ao odor característico de sulfeto de hidrogênio ("cheiro de caldeira") e aos estrondos graves na margem do gelo.',
+        sandurWatchAndFilter: 'Detecta o início do escoamento subglacial 3 horas antes que a onda principal de inundação atinja a planície.',
+        campRestAndSafetyGuards: 'Assegura alerta precoce infalível para recolher equipamentos e animais.',
+        icon: '👃🔔',
+        color: '#eab308'
+      };
+    } else if (dt === 'glacial_rock_flour_alum_flocculation_cistern') {
+      tech = {
+        defenseTitle: 'Bacia de Decantação de Farinha de Rocha Glacial (Leite de Geleira)',
+        sandurAndCampSafety: 'Repouso e coagulação da água cinzenta leitosa dos rios de degelo em tonéis de lona para precipitar o pó microscópico de quartzo e basalto triturado.',
+        sandurWatchAndFilter: 'Impede a irritação gástrica severa causada pela ingestão de sílica moída em suspensão.',
+        campRestAndSafetyGuards: 'Fornece água limpa e saudável para o preparo das refeições do grupo.',
+        icon: '🥛💧',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'erratic_boulder_prow_deflector_gabion_wall') {
+      tech = {
+        defenseTitle: 'Quebra-Mar Seco Ancorado em Matacão Errático Gigante',
+        sandurAndCampSafety: 'Muro em V construído na sombra de um bloco de 80 toneladas deixado pelo recuo glacial no terraço alto.',
+        sandurWatchAndFilter: 'Corta a fúria do vento catabático que desce da calota de gelo e cria um bolsão de ar calmo para as barracas.',
+        campRestAndSafetyGuards: 'Preserva o calor das tendas e concede cobertura pesada (+5 na CA) para a guarda.',
+        icon: '🪨🛡️',
+        color: '#0d9488'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 200 (MARCO BICENTENÁRIO): MESETAS DE QUARTZITO (TEPUIS) E SIMAS (D&D 5e)
   // =========================================================================
 
@@ -28684,6 +28788,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessJokulhlaupSandurHazard: calcWildernessJokulhlaupSandurHazard,
+    calcCampJokulhlaupSandurStation: calcCampJokulhlaupSandurStation,
     calcWildernessQuartziteTepuiSimaHazard: calcWildernessQuartziteTepuiSimaHazard,
     calcCampQuartziteTepuiSimaStation: calcCampQuartziteTepuiSimaStation,
     calcWildernessSeleniteCrystalCaveHazard: calcWildernessSeleniteCrystalCaveHazard,
