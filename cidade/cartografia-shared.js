@@ -20567,6 +20567,113 @@
   // PHB p. 182-183 (Travel Pace, Navigation in Badlands), PHB p. 190 (Falling & Suffocation), XGE p. 77-83
   // =========================================================================
 
+
+  // =========================================================================
+  // FASE 157: MONTANHAS DOBRADAS EM RELEVO JURÁSSICO, HOGBACKS E VALAS DE CLUSE
+  // D&D 5e: DMG p. 110-111 (Hazards, Steep Cliffs, Rockfalls), DMG p. 246-247 (Structural Integrity),
+  // PHB p. 182-183 (Travel Pace, Navigation in Fold Mountains), PHB p. 190 (Climbing & Falling), XGE p. 77-83
+  // =========================================================================
+
+  function calcWildernessFoldMountainHogbackHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'hogback_knife_edge_shear_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Deslizamento em Crista de Hogback Afiada a 60 Graus',
+      saveDC: 15,
+      saveType: 'Destreza',
+      hogbackAndCluseRisk: 'Crista estreita de quartzito puro de 40 cm de largura esculpida em ângulo de 60 graus; rajadas de vento laterais desequilibram aventureiros causando queda desgovernada de 18 metros pela escarpa rochosa com 3d8 de concussão e lacerações múltiplas (DMG p. 110, 190).',
+      pioneerMitigation: 'Batedores avançam encordoados a cavaleiro da crista e instalam piquetes de expansão com cordas-guia laterais para a travessia segura da comitiva.',
+      rescueAndStabilization: 'Içamento com polias de alta tração ancoradas em rocha sólida, imobilização com talas rígidas e curativos compressivos em escoriações.',
+      icon: '🏔️⚡',
+      color: '#d97706'
+    };
+
+    if (ht === 'anticlinal_cluse_funnel_wind_blast') {
+      hazard = {
+        hazardTitle: 'Vendaval Canalizado em Garganta de Cluse Anticlinal a 85 km/h',
+        saveDC: 15,
+        saveType: 'Força',
+        hogbackAndCluseRisk: 'Corredor estreito de 5 metros cortando a dobra geológica onde o vento atinge 85 km/h em efeito pistão; arremessa exploradores contra os paredões de quartzito causando 2d8 de concussão e risco de perda de animais de carga.',
+        pioneerMitigation: 'Marcha sincronizada rente ao chão em fila indiana, com cargas pesadas ancoradas por cabos de arrasto na rocha.',
+        rescueAndStabilization: 'Arrasto para nichos abrigados na rocha, administração de elixires tônicos e sutura de cortes provocados pelo atrito com a parede.',
+        icon: '💨🪨',
+        color: '#dc2626'
+      };
+    } else if (ht === 'shattered_chert_scree_sliding_avalanche') {
+      hazard = {
+        hazardTitle: 'Avalanche de Cascalho de Sílex Anguloso em Laje Inclinada',
+        saveDC: 14,
+        saveType: 'Destreza',
+        hogbackAndCluseRisk: 'Placa de quartzito liso recoberta por camada solta de fragmentos afiados de sílex que desliza em massa sob o peso dos passos, causando 2d6 de dano cortante e perda de equilíbrio.',
+        pioneerMitigation: 'Uso de bastões com ponta de metal reforçada e botas com solado serrilhado de alta aderência, evitando pisadas em pontos de declive acentuado.',
+        rescueAndStabilization: 'Extração de pedras afiadas dos calçados, assepsia de lacerações nos tornozelos e enfaixamento preventivo.',
+        icon: '⚠️🔪',
+        color: '#b45309'
+      };
+    } else if (ht === 'quartzite_fault_mirror_blinding_glare') {
+      hazard = {
+        hazardTitle: 'Reflexão Cegante em Espelho de Quartzito Polido',
+        saveDC: 14,
+        saveType: 'Constituição',
+        hogbackAndCluseRisk: 'Paredão de quartzito metamórfico polido a espelho pela fricção tectônica milenar que refrata a luz solar em feixe ofuscante; induz fotoceratite, vertigem e desvantagem em testes de Percepção visual por 1 hora.',
+        pioneerMitigation: 'Uso de viseiras de linho escuro com fendas de osso e progressão no início da manhã antes que o sol atinja o zênite.',
+        rescueAndStabilization: 'Repouso em abrigo com vendas de tecido negro nos olhos e aplicação de compressas frias com infusão de ervas calmantes.',
+        icon: '☀️🪞',
+        color: '#f59e0b'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampFoldMountainHogbackStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'synclinal_perched_valley_protected_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Assentado em Vale Sinclinal Suspenso Abrigado',
+      hogbackAnchorageAndCluseSafety: 'Acampamento montado em depressão natural da dobra geológica protegida dos ventos catabáticos pelas duas cristas de hogback laterais, com solo firme e drenagem livre.',
+      windbreakBarrierAndSpringBasin: 'As muralhas naturais de quartzito funcionam como parapeitos colossais contra vendavais da cluse e oferecem base plana para as tendas.',
+      campRestAndSafetyGuards: 'Garante sono longo calmo, seguro e revigorante para toda a comitiva com imunidade a desabamentos de encosta.',
+      icon: '⛺🏔️',
+      color: '#d97706'
+    };
+
+    if (dt === 'hogback_cable_anchored_guy_and_boulder_windbreak') {
+      tech = {
+        defenseTitle: 'Barreira Defletora de Blocos de Quartzito e Estais Chumbados',
+        hogbackAnchorageAndCluseSafety: 'Mureta de pedras pesadas assentada sem argamassa que quebra a velocidade do vento na garganta da cluse e desvia detritos rolantes para fora da área das barracas.',
+        windbreakBarrierAndSpringBasin: 'Anula turbulências e correntes descendentes, mantendo o interior do bivaque aquecido e com fogueiras estáveis.',
+        campRestAndSafetyGuards: 'Permite que descansantes e sentinelas durmam e vigiem sem perigo de tombamento de armações pelo vento.',
+        icon: '🛡️🧱',
+        color: '#78350f'
+      };
+    } else if (dt === 'limestone_spring_catchment_basin_and_carbon_filter') {
+      tech = {
+        defenseTitle: 'Bacia Coletora de Surgência Cárstica com Filtro de Carvão',
+        hogbackAnchorageAndCluseSafety: 'Cisterna natural esculpida na rocha que recolhe água doce límpida filtrada através dos estratos de quartzito e a purifica com leito de carvão vegetal.',
+        windbreakBarrierAndSpringBasin: 'Produz 35 litros diários de água mineral fresca de alta pureza, assegurando a autonomia hídrica da expedição na alta montanha.',
+        campRestAndSafetyGuards: 'Elimina carência hídrica e intoxicação mineral, preservando o vigor e o moral de todos os membros do grupo.',
+        icon: '⚗️💧',
+        color: '#0284c7'
+      };
+    } else if (dt === 'rock_bolted_steel_wire_ridge_guide_trail') {
+      tech = {
+        defenseTitle: 'Passarela de Crista Balizada com Cabos de Aço e Pítons',
+        hogbackAnchorageAndCluseSafety: 'Linha de vida aérea fixada com parafusos de expansão nas cristas de hogback que conecta o bivaque aos postos avançados de observação.',
+        windbreakBarrierAndSpringBasin: 'Elimina totalmente perigos de escorregões ou quedas no abismo durante rondas noturnas de vigilância.',
+        campRestAndSafetyGuards: 'Garante rondas de patrulha noturnas rápidas, seguras e com apoio firme para todas as sentinelas.',
+        icon: '🪜⚓',
+        color: '#10b981'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessIgnimbriteCanyonHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'badlands').toLowerCase();
@@ -24103,6 +24210,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessFoldMountainHogbackHazard: calcWildernessFoldMountainHogbackHazard,
+    calcCampFoldMountainHogbackStation: calcCampFoldMountainHogbackStation,
     calcWildernessIgnimbriteCanyonHazard: calcWildernessIgnimbriteCanyonHazard,
     calcCampIgnimbriteCanyonStation: calcCampIgnimbriteCanyonStation,
     calcWildernessWhiteSandCampinaranaHazard: calcWildernessWhiteSandCampinaranaHazard,
