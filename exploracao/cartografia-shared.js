@@ -17113,6 +17113,130 @@
     };
   }
 
+  // === calcWildernessGraniteInselbergAndExfoliationHazard (Inselbergs Graníticos, Lajes de Fricção e Esfoliação - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessGraniteInselbergAndExfoliationHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'granite_slab_friction_slip_fall').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda e Escorregão em Rampa Lisa de Granito de Fricção',
+      saveDC: 15,
+      saveType: 'Destreza',
+      graniteInselbergRiskAndSlabs: 'Declive liso de granito maciço com 50 graus de inclinação sem agarras manuais; derrapagem descontrolada por 30 metros causando 4d6 de abrasão e impacto (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores usam sapatilhas de couro com sola de borracha vegetal resinada para alta aderência e fixam linhas de corrimão encordoadas.',
+      rescueAndStabilization: 'Içamento por corda dupla com arnês torácico e aplicação de pasta calmante de babosa e arnica sobre abrasões de rocha.',
+      icon: '🧗💥',
+      color: '#b45309'
+    };
+
+    if (ht === 'onion_skin_sheet_spalling_detachment') {
+      hazard = {
+        hazardTitle: 'Descolamento Súbito de Placa de Esfoliação Curva',
+        saveDC: 14,
+        saveType: 'Destreza',
+        graniteInselbergRiskAndSlabs: 'Laje convexa de 3 toneladas que se desprende repentinamente sob a marcha com estrondo semelhante a tiro; deslizamento e impacto contundente com 3d6.',
+        pioneerMitigation: 'Teste acústico de oco com bastões de ferro e desvio de placas com bordas fissuradas que já apresentem folga.',
+        rescueAndStabilization: 'Extração rápida com alavancas de aço temperado e imobilização de fraturas com talas de cedro forradas.',
+        icon: '🪨⚠️',
+        color: '#d97706'
+      };
+    } else if (ht === 'catabatic_summit_gale_gust') {
+      hazard = {
+        hazardTitle: 'Rajada Catabática em Cume Desnudo de Inselberg',
+        saveDC: 14,
+        saveType: 'Força',
+        graniteInselbergRiskAndSlabs: 'Vendaval descendente súbito de 85 km/h que sopra sem obstáculos sobre o topo arredondado do inselberg, ameaçando arremessar exploradores para fora da borda.',
+        pioneerMitigation: 'Deslocamento agachado rente à rocha amarrados em cordada quádrupla ancorada em fendas periféricas.',
+        rescueAndStabilization: 'Tracionamento contra o vento para reentrâncias côncavas e amarração em pítons de segurança profunda.',
+        icon: '💨⛰️',
+        color: '#0284c7'
+      };
+    } else if (ht === 'gnamma_puddle_thermal_scalding') {
+      hazard = {
+        hazardTitle: 'Água Fervente e Lodo Cáustico em Marmita de Rocha',
+        saveDC: 13,
+        saveType: 'Constituição',
+        graniteInselbergRiskAndSlabs: 'Marmitas rasas de dissolução acumulando água de chuva aquecida a 55°C pelo sol com colônias de cianobactérias irritantes; queimaduras e dermatite.',
+        pioneerMitigation: 'Evitar pisar ou beber de poças rasas sem antes testar temperatura e decantação com concha de cabo longo.',
+        rescueAndStabilization: 'Lavagem imediata com água limpa de cantil e aplicação de óleo de copaíba desinflamatório.',
+        icon: '🧪🔥',
+        color: '#dc2626'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      graniteInselbergRiskAndSlabs: hazard.graniteInselbergRiskAndSlabs,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Monólitos e Terreno de Fricção) / PHB p. 182-183 (Marcha em Encostas) / XGE p. 78-83 (Geologia)'
+    };
+  }
+
+  // === calcCampGraniteInselbergFlakeRoofAndSiphonStation (Alcovas em Esfoliação, Entaladores e Sifões de Marmita - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampGraniteInselbergFlakeRoofAndSiphonStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'exfoliation_flake_cave_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque sob Placa de Esfoliação Granítica em Balcão',
+      inselbergAnchorageAndGraniteSafety: 'Fenda côncava de 3 metros sob laje maciça de esfoliação de granito; teto monolítico impenetrável que isola o acampamento de ventanias e raios.',
+      slabShieldingAndCampSecurity: 'Totalmente inacessível a animais carnívoros sem garras de escalada e abrigado de chuvas torrenciais com declive natural de escoamento.',
+      campRestAndSafetyGuards: 'Assegura sono longo fresco, silencioso e protegido para os membros da comitiva com amplo domínio visual da savana circundante.',
+      icon: '🪨⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'camming_spring_friction_anchors') {
+      tech = {
+        defenseTitle: 'Entaladores Mecânicos de Mola para Fendas Cegas',
+        inselbergAnchorageAndGraniteSafety: 'Leques metálicos de alta fricção que se expandem em frestas lisas de granito sem faturar a rocha.',
+        slabShieldingAndCampSecurity: 'Garante fixação inabalável de redes, amarras de barracas e içamento de fardos sobre superfícies polidas.',
+        campRestAndSafetyGuards: 'Mantém a estrutura do acampamento estável mesmo sob rajadas de ventania catabática noturna.',
+        icon: '🔩🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'gnamma_rock_basin_siphon_filter') {
+      tech = {
+        defenseTitle: 'Sifão Decantador com Filtro de Carvão para Marmitas',
+        inselbergAnchorageAndGraniteSafety: 'Mangueira de linho encerado que drena a água de meia-profundidade de marmitas graníticas através de filtro cerâmico com carvão ativado.',
+        slabShieldingAndCampSecurity: 'Produz 10 litros diários de água mineral fresca límpida a partir de poças naturais de cume sem recolher sedimentos do fundo.',
+        campRestAndSafetyGuards: 'Abastece todos os cantis da comitiva sem necessidade de descida exaustiva até a base do monólito.',
+        icon: '🏺💧',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'friction_ramp_belay_guide_rope') {
+      tech = {
+        defenseTitle: 'Linha-Guia Fixa de Fricção com Travas de Segurança',
+        inselbergAnchorageAndGraniteSafety: 'Cabo náutico tensionado entre pítons fixados ao longo da rampa lisa de acesso ao bivaque.',
+        slabShieldingAndCampSecurity: 'Permite circulação rápida e segura de sentinelas durante a noite sem perigo de escorregamento sobre o granito úmido de orvalho.',
+        campRestAndSafetyGuards: 'Interliga o abrigo aos postos de vigília periféricos garantindo resposta imediata em caso de alarme.',
+        icon: '🧗‍♂️🛡️',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      inselbergAnchorageAndGraniteSafety: tech.inselbergAnchorageAndGraniteSafety,
+      slabShieldingAndCampSecurity: tech.slabShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Monólitos Graníticos) / PHB p. 150 (Kits de Escalador) / XGE p. 78-83 (Engenharia de Fricção)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -18972,6 +19096,8 @@
     calcCampIgnimbriteTafoniAlcoveAndFilterStation: calcCampIgnimbriteTafoniAlcoveAndFilterStation,
     calcWildernessPalafitteRiverAndMonsoonHazard: calcWildernessPalafitteRiverAndMonsoonHazard,
     calcCampPalafitteStiltDeckAndBoomStation: calcCampPalafitteStiltDeckAndBoomStation,
+    calcWildernessGraniteInselbergAndExfoliationHazard: calcWildernessGraniteInselbergAndExfoliationHazard,
+    calcCampGraniteInselbergFlakeRoofAndSiphonStation: calcCampGraniteInselbergFlakeRoofAndSiphonStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
