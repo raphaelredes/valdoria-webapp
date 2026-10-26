@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessMangrovePropRootHazard) return '';
+        var bKey = (biome && biome.key) || 'swamp';
+        var mp = CartShared.calcWildernessMangrovePropRootHazard(bKey, 'rhizophora_prop_root_barnacle_entanglement_and_laceration');
+        return '<div class="clp-mangrove-proproot-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,28,18,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(22,163,74,0.35);font-size:8px;color:#dcfce7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + mp.color + ';margin-bottom:2px;">' + mp.icon + ' ' + mp.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Manguezal de Raízes-Escora e Igarapés:</b> ' + mp.mangroveRisk + ' (CD ' + mp.saveDC + ' [' + mp.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bbf7d0;margin-top:1px;">• <b>Mitigação:</b> ' + mp.pioneerMitigation + ' · <i>Estabilização: ' + mp.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampMangrovePropRootStation) return '';
+        var bKey = (biome && biome.key) || 'swamp';
+        var mc = CartShared.calcCampMangrovePropRootStation(bKey, 'woven_prop_root_aerial_hammock_canopy_bivouac');
+        return '<div class="clp-mangrove-proproot-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(10,22,14,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(21,128,61,0.3);font-size:8px;color:#dcfce7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + mc.color + ';margin-bottom:2px;">' + mc.icon + ' ' + mc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Bivaque Aéreo no Mangue:</b> ' + mc.mangroveAndCampSafety + ' · <b>Defesa:</b> ' + mc.mangroveTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#86efac;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + mc.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessTafoniGnammaDomeHazard) return '';
         var bKey = (biome && biome.key) || 'hills';
         var tg = CartShared.calcWildernessTafoniGnammaDomeHazard(bKey, 'exfoliation_onion_skin_granite_sheet_spalling_slide');

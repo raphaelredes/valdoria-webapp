@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 215: LABIRINTOS DE MANGUEZAIS DE RAÍZES-ESCORA E IGARAPÉS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessMangrovePropRootHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'rhizophora_prop_root_barnacle_entanglement_and_laceration').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Emaranhamento em Gaiola de Raízes-Escora Incrustadas de Cracas Cortantes',
+      saveDC: 15,
+      saveType: 'Destreza',
+      mangroveRisk: 'Emaranhado tridimensional impenetrável de raízes aéreas arqueadas (rizóforos) recobertas até a linha da preamar por colônias de cracas e ostras-de-mangue afiadas como bisturis; perder o equilíbrio sobre uma raiz limosa prende os membros na gaiola lenhosa causando 2d6 cortante e infecção séptica salobra (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Progressão apoiada nas forquilhas superiores secas acima da linha das cracas com perneiras de couro grosso.',
+      rescueAndStabilization: 'Corte cuidadoso dos brotos secundários sem sacudir o tronco e lavagem das feridas com álcool ou água fervida.',
+      icon: '🌿🦪',
+      color: '#16a34a'
+    };
+
+    if (ht === 'anoxic_sulfidic_black_mangrove_ooze_pneumatophore_impale') {
+      hazard = {
+        hazardTitle: 'Afundamento em Vasa Negra Anóxica sobre Tapete de Pneumatóforos',
+        saveDC: 15,
+        saveType: 'Força',
+        mangroveRisk: 'Sob o mangue-preto estende-se um lodo orgânico sem fundo rico em gás sulfídrico atravessado por milhares de raízes respiratórias verticais pontiagudas como estacas (pneumatóforos); saltar do arco das raízes para o barro faz o aventureiro afundar até a cintura enquanto as pontas rígidas perfuram as solas com 2d6 perfurante mais 1d8 de veneno gasoso (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Deitar pranchas de casca ou feixes de galhos sobre os pneumatóforos para distribuir o peso da comitiva.',
+        rescueAndStabilization: 'Reboque horizontal usando as raízes-escora vizinhas como polia e extração de farpas radiculares.',
+        icon: '🕳️🌱',
+        color: '#15803d'
+      };
+    } else if (ht === 'tidal_creek_igarape_reverse_flood_surge_and_crocodilian_lurk') {
+      hazard = {
+        hazardTitle: 'Inversão Violenta de Maré em Canal de Igarapé Cego e Emboscada Submersa',
+        saveDC: 15,
+        saveType: 'Força',
+        mangroveRisk: 'Canais sinuosos de fundo argiloso que secam na baixa-mar mas enchem em minutos quando a maré montante avança pelo estuário como uma parede d’água barrenta; a correnteza afoga as trilhas baixas e traz grandes predadores encouraçados que patrulham o canal turvo, impondo 2d8 de concussão e risco de submersão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Marcação da altura máxima das cracas nos troncos para calcular o teto da maré antes de descer ao canal.',
+        rescueAndStabilization: 'Escalada imediata para a copa das árvores de mangue-vermelho e içamento de mochilas.',
+        icon: '🐊🌊',
+        color: '#0f766e'
+      };
+    } else if (ht === 'blinding_excoecaria_milky_latex_sap_splash_burn') {
+      hazard = {
+        hazardTitle: 'Borrifo Cáustico de Seiva Leitosa de Árvore-da-Cegueira do Mangue',
+        saveDC: 14,
+        saveType: 'Constituição',
+        mangroveRisk: 'Abrir caminho a golpes de facão sem identificar os troncos pálidos do mangue-de-leite (Excoecaria) projeta jatos de látex branco alcalino que causam bolhas químicas severas na pele e cegueira excruciante ao atingir os olhos com 2d6 de ácido (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Identificação botânica das folhas serrilhadas com glândulas na base e desvio sem cortar os ramos.',
+        rescueAndStabilization: 'Lavagem abundante com água doce fria do cantil e bandagem ocular protetora.',
+        icon: '💧👁️',
+        color: '#65a30d'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampMangrovePropRootStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'woven_prop_root_aerial_hammock_canopy_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Aéreo de Redes e Estrado Suspenso nos Arcos de Mangue-Vermelho',
+      mangroveAndCampSafety: 'Plataforma de varas amarradas e redes suspensas a 3 metros acima do lodo, apoiada nos arcos elásticos de múltiplas raízes-escora entrelaçadas.',
+      mangroveTrenchAndWatch: 'Mantém a comitiva completamente seca acima da preamar máxima, da vasa sulfídrica e dos predadores anfíbios.',
+      campRestAndSafetyGuards: 'Garante descanso longo seguro e ventilado pela brisa do estuário.',
+      icon: '⛺🌿',
+      color: '#16a34a'
+    };
+
+    if (dt === 'shell_midden_sambaqui_ancient_oyster_mound_dry_island') {
+      tech = {
+        defenseTitle: 'Ilha Seca de Sambaqui Antigo (Monte Conchífero Elevado)',
+        mangroveAndCampSafety: 'Acampamento instalado sobre uma colina artificial pré-histórica de conchas de ostras e berbigões compactadas a 5 metros acima do manguezal.',
+        mangroveTrenchAndWatch: 'Único solo firme, calcário e perfeitamente drenado em léguas de pântano salobro, permitindo acender fogueira segura.',
+        campRestAndSafetyGuards: 'Oferece visão dominante sobre os canais de maré ao redor.',
+        icon: '🦪⛰️',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'salt_excreting_avicennia_leaf_dew_freshwater_wipe') {
+      tech = {
+        defenseTitle: 'Coleta de Orvalho Matinal nas Copas e Bromélias Epífitas Superiores',
+        mangroveAndCampSafety: 'Colheita de água condensada nas largas folhas da copa superior e em bromélias epífitas que crescem nos galhos altos.',
+        mangroveTrenchAndWatch: 'Fornece água doce potável em um ambiente cercado exclusivamente por água salobra imprópria para consumo.',
+        campRestAndSafetyGuards: 'Evita a desidratação hipernatrêmica durante a travessia costeira.',
+        icon: '💧🌱',
+        color: '#0284c7'
+      };
+    } else if (dt === 'smoldering_rotten_rhizophora_termite_nest_mosquito_smudge') {
+      tech = {
+        defenseTitle: 'Defumador de Cupinzeiro Arbóreo Seco contra Nuvens de Maruins',
+        mangroveAndCampSafety: 'Queima lenta de pedaços de ninhos cartonados de cupins arbóreos dentro de uma panela de barro suspensa sob o estrado.',
+        mangroveTrenchAndWatch: 'Produz fumaça aromática densa que repele enxames de mosquitos-pólvora (maruins) e mutucas hematófagas.',
+        campRestAndSafetyGuards: 'Permite sono reparador sem febres transmitidas por insetos do pântano.',
+        icon: '🔥🦟',
+        color: '#d97706'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 214: CALDEIRÕES GNAMMA, TAFONI EM FAVO E DOMOS DE ESFOLIAÇÃO (D&D 5e)
   // =========================================================================
 
@@ -30140,6 +30244,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessMangrovePropRootHazard: calcWildernessMangrovePropRootHazard,
+    calcCampMangrovePropRootStation: calcCampMangrovePropRootStation,
     calcWildernessTafoniGnammaDomeHazard: calcWildernessTafoniGnammaDomeHazard,
     calcCampTafoniGnammaDomeStation: calcCampTafoniGnammaDomeStation,
     calcWildernessPyroclasticCinderConeHazard: calcWildernessPyroclasticCinderConeHazard,
