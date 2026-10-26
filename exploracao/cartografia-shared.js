@@ -17609,6 +17609,130 @@
     };
   }
 
+  // === calcWildernessRiparianGalleryAndCutbankHazard (Florestas de Galeria, Barrancos Aluviais e Meandros - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessRiparianGalleryAndCutbankHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var ht = (hazardType || 'cutbank_alluvial_slump_avalanche').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desmoronamento Repentino de Barranco Aluvial Meândrico',
+      saveDC: 15,
+      saveType: 'Destreza',
+      riparianGalleryRiskAndCutbanks: 'Erosão basal oculta que solapa barranco vertical de 8 metros de altura na curva externa do meandro; colapso súbito de terra saturada e raízes expostas causando 3d6 contundente e soterramento parcial (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam recuados 10 metros da borda de erosão e examinam trincas longitudinais no solo antes de permitir a passagem da comitiva.',
+      rescueAndStabilization: 'Extração rápida com alavancas de jacarandá e enxadarecos, seguida de desobstrução das vias aéreas e imobilização de clavícula fraturada.',
+      icon: '🪵⚠️',
+      color: '#b45309'
+    };
+
+    if (ht === 'point_bar_quick_quicksand_draw') {
+      hazard = {
+        hazardTitle: 'Areia Movediça Fina em Barra de Deposição Meândrica',
+        saveDC: 14,
+        saveType: 'Força',
+        riparianGalleryRiskAndCutbanks: 'Sedimento arenoso saturado por lençol freático ascendente na curva interna do rio; consistência tixotrópica que engole pernas e patas sob marcha contínua.',
+        pioneerMitigation: 'Testagem do solo com varas de bambu compridas e travessia sobre esteiras trançadas de folhas de buriti.',
+        rescueAndStabilization: 'Projeção de corda ancorada em tronco robusto da mata e alívio de peso de mochilas com guincho simples.',
+        icon: '🏖️🕳️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'submerged_snag_strainer_ram') {
+      hazard = {
+        hazardTitle: 'Choque com Galhada Submersa e Filtro de Troncos',
+        saveDC: 14,
+        saveType: 'Destreza',
+        riparianGalleryRiskAndCutbanks: 'Árvores caídas represadas na correnteza forming um crivo letal de pontas afiadas sob a flor d água; risco de perfuração de canoas e aprisionamento de nadadores.',
+        pioneerMitigation: 'Sentinelas na proa com varas de repulsão metálica e desaceleração obrigatória da marcha aquática antes de gargantas cegas.',
+        rescueAndStabilization: 'Corte ágil de galhos com machadinha de escalada e resgate de náufragos com cabos de retinida e flutuadores de cortiça.',
+        icon: '🌊🪵',
+        color: '#0284c7'
+      };
+    } else if (ht === 'dense_liana_canopy_deadfall_drop') {
+      hazard = {
+        hazardTitle: 'Queda de Tronco Morto Prensado em Dossel de Cipós',
+        saveDC: 13,
+        saveType: 'Constituição',
+        riparianGalleryRiskAndCutbanks: 'Galho maciço de angelim podre mantido em falso equilíbrio por lianas que arrebentam sob o balanço de vento forte; impacto vertical violento no leito da trilha.',
+        pioneerMitigation: 'Inspeção visual da copa arbórea por arqueiros batedores e desvio de veredas com acúmulo de biomassa morta suspensa.',
+        rescueAndStabilization: 'Tracionamento com talha para retirada do peso e aplicação de compressas de casca de copaíba e mastruço para alívio de traumatismo.',
+        icon: '🌿💥',
+        color: '#15803d'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      riparianGalleryRiskAndCutbanks: hazard.riparianGalleryRiskAndCutbanks,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Florestas Ripárias e Terreno Aluvial) / PHB p. 182-183 (Marcha Fluvial) / XGE p. 78-83 (Geomorfologia Fluvial e Matas de Galeria)'
+    };
+  }
+
+  // === calcCampRiparianGalleryAndBankStation (Bivaques em Barra de Cascalho, Gabiões e Poços - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampRiparianGalleryAndBankStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var dt = (defenseType || 'point_bar_dry_gravel_terrace_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Terraço de Cascalho Seco de Meandro',
+      riparianAnchorageAndBankSafety: 'Patamar de cascalho arredondado e areia grossa a 3 metros acima do leito corrente; drenagem instantânea que impede acúmulo de poças sob as tendas.',
+      cutbankShieldingAndCampSecurity: 'Ampla visibilidade da floresta em ambas as margens e livre da sombra úmida e fungosa do dossel fechado da mata de galeria.',
+      campRestAndSafetyGuards: 'Assegura descanso reparador e arejado para os membros da comitiva, com brisa contínua do rio que dispersa mosquitos e carrapatos.',
+      icon: '🏕️🏞️',
+      color: '#10b981'
+    };
+
+    if (dt === 'cutbank_revetment_cribwall_reinforcement') {
+      tech = {
+        defenseTitle: 'Muralha Rústica de Gabiões de Tronco para Contenção',
+        riparianAnchorageAndBankSafety: 'Estrutura em caixilho de toras travadas preenchida com pedregulhos de rio fincada na base do barranco de montante do acampamento.',
+        cutbankShieldingAndCampSecurity: 'Estabiliza a margem e protege o acampamento de solapamentos noturnos causados pelo repiquete das águas.',
+        campRestAndSafetyGuards: 'Preserva a integridade dos esteios e permite movimentação segura das sentinelas na borda do rio.',
+        icon: '🪵🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'riparian_sand_core_infiltration_well') {
+      tech = {
+        defenseTitle: 'Poço Filtrante com Leito de Areia e Seixo Rolado',
+        riparianAnchorageAndBankSafety: 'Cavidade circular revestida com bambu perfurado escavada a 5 metros da margem para induzir filtração aluvial.',
+        cutbankShieldingAndCampSecurity: 'Fornece 20 litros diários de água cristalina límpida livre de argila em suspensão, parasitas aquáticos e folhas em decomposição.',
+        campRestAndSafetyGuards: 'Abastece todos os caldeirões de ensopado e cantis da comitiva com água purificada sem risco de diarreia da mata.',
+        icon: '💧🏺',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'canopy_tensioned_liana_hammock_grid') {
+      tech = {
+        defenseTitle: 'Manta Suspensa de Redes Tensionadas em Cipós Nativos',
+        riparianAnchorageAndBankSafety: 'Redes de dormir armadas a 2 metros de altura atadas com nós de marinheiro em troncos vigorosos de ingazeiro.',
+        cutbankShieldingAndCampSecurity: 'Isola os aventureiros do contato com serpentes peçonhentas, escorpiões e umidade fria do chão da mata de galeria.',
+        campRestAndSafetyGuards: 'Garante que os sentinelas alcancem postos de tiro na copa da árvore com poucos passos rápidos.',
+        icon: '🕸️🌿',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      riparianAnchorageAndBankSafety: tech.riparianAnchorageAndBankSafety,
+      cutbankShieldingAndCampSecurity: tech.cutbankShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Margens Ripárias) / PHB p. 150 (Kits de Exploração de Selva) / XGE p. 78-83 (Engenharia de Drenagem e Filtros Aluviais)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -19476,6 +19600,8 @@
     calcCampCryogenicPingoMoundAndDeckStation: calcCampCryogenicPingoMoundAndDeckStation,
     calcWildernessRestingaBarrierAndLagoonHazard: calcWildernessRestingaBarrierAndLagoonHazard,
     calcCampRestingaBarrierAndLagoonStation: calcCampRestingaBarrierAndLagoonStation,
+    calcWildernessRiparianGalleryAndCutbankHazard: calcWildernessRiparianGalleryAndCutbankHazard,
+    calcCampRiparianGalleryAndBankStation: calcCampRiparianGalleryAndBankStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
