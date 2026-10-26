@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 248: RECIFES DE OSTRAS INTERMARÉS E LAMA PLUFF ESTUARINA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessOysterReefPluffMudHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'razor_oyster_reef_bar_hull_and_boot_shred').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Laceração em Banco de Ostras Cortantes Intermarés (Oyster Reef Bar)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      oysterPluffRisk: 'Diques vivos de milhões de conchas de ostras cimentadas verticalmente umas às outras nos canais estuarinos, cujas bordas calcárias serrilhadas são tão afiadas quanto lâminas de aço e fervilham de bactérias marinhas (Vibrio); encalhar a canoa ou escorregar sobre o banco na meia-maré rasga botas de couro, cascos de madeira e panturrilhas com 2d8 de dano cortante e infecção séptica rápida (DMG p. 110; PHB p. 182; XGE p. 109).',
+      pioneerMitigation: 'Navegar exclusivamente pelo eixo profundo do canal na preamar e usar solados reforçados com madeira ou metal.',
+      rescueAndStabilization: 'Lavagem imediata dos cortes com água doce fervida e vinagre ou álcool antes de enfaixar.',
+      icon: '🦪🔪',
+      color: '#64748b'
+    };
+
+    if (ht === 'anoxic_pluff_mud_vacuum_suction_tide_trap') {
+      hazard = {
+        hazardTitle: 'Aprisionamento a Vácuo em Lama Estuarina ("Pluff Mud") sob Maré Enchente',
+        saveDC: 15,
+        saveType: 'Força',
+        oysterPluffRisk: 'Lodo argilo-orgânico cinza-escuro saturado de gás sulfídrico nas margens dos canais de maré (pluff mud) que parece firme sob o capim-marinho (Spartina), mas engole o aventureiro até a coxa ao primeiro passo fora das raízes; o vácuo da lama arranca as botas e trava as pernas enquanto a maré sobe um metro por hora, impondo condição impedido e risco letal de afogamento (DMG p. 109-110; PHB p. 183).',
+        pioneerMitigation: 'Deitar-se de bruços para distribuir o peso ou caminhar pisando exclusivamente sobre as touceiras vivas de capim Spartina.',
+        rescueAndStabilization: 'Injeção de água ou ar com vara ao lado da perna presa para quebrar o vácuo antes de puxar.',
+        icon: '🕳️🌊',
+        color: '#475569'
+      };
+    } else if (ht === 'ebb_tide_dendritic_creek_labyrinth_stranding') {
+      hazard = {
+        hazardTitle: 'Encalhe em Labirinto de Gamboas Cegas na Vazante (Tidal Creek Stranding)',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        oysterPluffRisk: 'Milhares de canais sinuosos idênticos cercados por muralhas de capim-marinho de dois metros de altura que bloqueiam a visão do horizonte; quando a maré vaza rapidamente, nove em cada dez canais secam por completo e deixam a embarcação encalhada em um fosso de lama sem água potável sob o sol e enxames de mutucas, impondo 1 nível de exaustão (DMG p. 110-111; PHB p. 185).',
+        pioneerMitigation: 'Observar a direção de inclinação das pontas do capim submerso e a espuma para distinguir o canal principal das gamboas cegas.',
+        rescueAndStabilization: 'Ancoragem da canoa na lama, montagem de toldo de sombra e espera pela próxima preamar.',
+        icon: '🛶🧭',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'periwinkle_cordgrass_blade_laceration_and_midge_swarm') {
+      hazard = {
+        hazardTitle: 'Cortes deFolhas Sílicosas de Capim-Marinho e Nuvem de Maruins',
+        saveDC: 14,
+        saveType: 'Constituição',
+        oysterPluffRisk: 'As bordas das folhas de Spartina são revestidas de dentes microscópicos de sílica que cortam a pele exposta a cada braçada pelo brejo salgado, enquanto milhões de maruins (biting midges) emergem da lama na calmaria do crepúsculo, impedindo o descanso e causando 1d6 de dano cortante e exaustão (DMG p. 109; PHB p. 182).',
+        pioneerMitigation: 'Manter mangas compridas abotoadas, luvas leves e untar o rosto com lama seca ou óleo aromático.',
+        rescueAndStabilization: 'Limpeza da pele com água doce e abrigo sob mosquiteiro fechado.',
+        icon: '🌾🦟',
+        color: '#84cc16'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampOysterReefPluffMudStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'ancient_shell_midden_ring_elevated_hammock_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Sambaqui Anelar de Conchas Antigas (Shell Ring Midden)',
+      oysterPluffAndCampSafety: 'Colinas circulares de 4 metros de altura formadas por milhões de conchas de ostras acumuladas há séculos acima da marca das maiores marés de tempestade.',
+      oysterPluffTrenchAndWatch: 'O piso branco de conchas calcárias drena a chuva instantaneamente, reflete o luar para os vigias e estala alto sob qualquer passo furtivo.',
+      campRestAndSafetyGuards: 'Garante a única ilha 100% seca, firme e livre de lama pluff em todo o estuário.',
+      icon: '⛺🦪',
+      color: '#f8fafc'
+    };
+
+    if (dt === 'roasted_oyster_bed_protein_and_tabby_lime_kiln') {
+      tech = {
+        defenseTitle: 'Assado de Ostras na Brasa e Queima de Cal de Conchas ("Tabby Lime")',
+        oysterPluffAndCampSafety: 'Assar cachos de ostras frescas sobre o fogo abre as valvas automaticamente, esteriliza o alimento e fornece nutrição rica em zinco e sal.',
+        oysterPluffTrenchAndWatch: 'As conchas calcinadas no fundo da fogueira viram cal viva que misturada com areia e água cria argamassa impermeável (tabby).',
+        campRestAndSafetyGuards: 'Reabastece as provisões do grupo e permite calafetar barcos avariados.',
+        icon: '🔥🦪',
+        color: '#f59e0b'
+      };
+    } else if (dt === 'wax_myrtle_and_cedar_hammock_wind_smoke_screen') {
+      tech = {
+        defenseTitle: 'Bosque de Murta-de-Cera (Wax Myrtle) no Topo do Sambaqui',
+        oysterPluffAndCampSafety: 'O solo rico em cálcio dos sambaquis sustenta bosquetes densos de cedro-vermelho e murta-de-cera (Morella cerifera).',
+        oysterPluffTrenchAndWatch: 'As folhas aromáticas de murta-de-cera queimadas na fogueira exalam um incenso natural que repele maruins e mosquitos.',
+        campRestAndSafetyGuards: 'Oferece lenha seca, sombra e proteção contra ventos costeiros.',
+        icon: '🌳💨',
+        color: '#16a34a'
+      };
+    } else if (dt === 'intertidal_oyster_bar_natural_chevaux_de_frise') {
+      tech = {
+        defenseTitle: 'Muralha Defensiva Natural de Bancos de Ostras na Baixa-Mar',
+        oysterPluffAndCampSafety: 'Durante a vazante noturna, os recifes de ostras expostos e o cinturão de lama pluff ao redor do sambaqui cercam a ilha.',
+        oysterPluffTrenchAndWatch: 'Qualquer atacante a pé fica retido na lama a vácuo ou lacerado pelas conchas antes de alcançar a margem firme.',
+        campRestAndSafetyGuards: 'Transforma o acampamento em um forte isolado durante toda a noite.',
+        icon: '🛡️🦪',
+        color: '#38bdf8'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 247: PÂNTANOS DE CORDÕES (STRING BOGS / AAPA MIRES) E FLARKS (D&D 5e)
   // =========================================================================
 
@@ -33572,6 +33676,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessOysterReefPluffMudHazard: calcWildernessOysterReefPluffMudHazard,
+    calcCampOysterReefPluffMudStation: calcCampOysterReefPluffMudStation,
     calcWildernessStringBogAapaMireHazard: calcWildernessStringBogAapaMireHazard,
     calcCampStringBogAapaMireStation: calcCampStringBogAapaMireStation,
     calcWildernessLoessPseudokarstPipingHazard: calcWildernessLoessPseudokarstPipingHazard,
