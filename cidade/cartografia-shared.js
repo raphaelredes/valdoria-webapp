@@ -20525,6 +20525,113 @@
   // PHB p. 182-183 (Travel Pace, Navigation in Fault Country), PHB p. 190 (Chasm Falling Damage), XGE p. 77-83
   // =========================================================================
 
+
+  // =========================================================================
+  // FASE 151: CÂNYONS CÁRSTICOS EM TORRE, VALES CEGOS E SUMIDOUROS SUBTERRÂNEOS
+  // D&D 5e: DMG p. 110-111 (Hazards, Flash Floods, Submerged Caves), DMG p. 246-247 (Structural Integrity),
+  // PHB p. 182-183 (Travel Pace, Navigation in Blind Valleys), PHB p. 190 (Falling & Drowning), XGE p. 77-83
+  // =========================================================================
+
+  function calcWildernessTowerKarstAndBlindValleyHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'blind_valley_flash_flood_funnel_surge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Enxurrada em Funil de Vale Cego com Obstrução de Sumidouro',
+      saveDC: 15,
+      saveType: 'Força',
+      towerKarstAndValleyRisk: 'Tempestades torrenciais canalizadas em desfiladeiro sem saída; o sumidouro cárstico se obstrui com troncos e lama acumulando lâmina d\'água de 3 metros em minutos que arrasta a comitiva com 3d6 de concussão e risco de afogamento (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores posicionados em plataformas elevadas monitoram o escoamento do sumidouro e mantêm rotas de escalada com cordas prontas nos paredões da torre.',
+      rescueAndStabilization: 'Tracionamento com laços rápidos para terraços de calcário, drenagem postural de líquido dos pulmões e aquecimento com mantas secas.',
+      icon: '🌊🧗',
+      color: '#0284c7'
+    };
+
+    if (ht === 'subterranean_river_whirlpool_ponor_vortex') {
+      hazard = {
+        hazardTitle: 'Vórtice de Sucção Hidráulica em Sumidouro de Rio Subterrâneo',
+        saveDC: 15,
+        saveType: 'Força',
+        towerKarstAndValleyRisk: 'O rio de superfície desaba repentinamente em abismo cárstico gerando redemoinho furioso de sucção contínua; traga exploradores e bagagens para galerias escuras inundadas a 20 metros de fundura, causando 3d8 de concussão.',
+        pioneerMitigation: 'Bandeamento de segurança com linhas de vida amarradas a árvores de margem e reconhecimento de sons de refluxo antes de aproximar-se de leitos de rio.',
+        rescueAndStabilization: 'Içamento por cabos de tração estáticos com roldanas de bronze, ressuscitação respiratória imediata e administração de tônicos quentes.',
+        icon: '🌀🕳️',
+        color: '#0369a1'
+      };
+    } else if (ht === 'tower_karst_stalactite_speleothem_shear_collapse') {
+      hazard = {
+        hazardTitle: 'Cisalhamento de Agulhas Calcárias e Estalactites em Torre',
+        saveDC: 14,
+        saveType: 'Destreza',
+        towerKarstAndValleyRisk: 'Escarpass verticais de calcário erodido com estalactites expostas de até 8 toneladas que se rompem sob ventos fortes e chuva ácida, desabando projéteis pontiagudos de pedra que causam 3d8 de concussão.',
+        pioneerMitigation: 'Avanço afastado da base de beirais suspensos, utilizando capacetes de couro reforçado com tiras de ferro temperado.',
+        rescueAndStabilization: 'Remoção coordenada de escombros calcários com cunhas de ferro, contenção de sangramentos e tala em fraturas de membros.',
+        icon: '⚠️🏔️',
+        color: '#b45309'
+      };
+    } else if (ht === 'karst_chasm_toxic_co2_gas_lake_asphyxiation') {
+      hazard = {
+        hazardTitle: 'Bolsão de Dióxido de Carbono Estagnado em Fundo de Dolina',
+        saveDC: 14,
+        saveType: 'Constituição',
+        towerKarstAndValleyRisk: 'Gás carbônico pesado que se deposita no fundo de depressões cársticas sem ventilação; apaga tochas instantaneamente e provoca asfixia química repentina com 2d6 de veneno, tontura severa e perda de sentidos.',
+        pioneerMitigation: 'Avanço com archotes baixos como sentinelas de oxigênio; elevação imediata para cristas rochosas ao primeiro sinal de labareda bruxuleante.',
+        rescueAndStabilization: 'Remoção urgente para topo ventilado da torre, ventilação forçada com abanadores de lona e massagem torácica revigorante.',
+        icon: '☠️💨',
+        color: '#475569'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampTowerKarstAndBlindValleyStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'tower_karst_upper_alcove_limestone_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Alcova Suspensa de Torre Cárstica com Drenagem',
+      towerKarstAnchorageAndFloodSafety: 'Acampamento montado em terraço natural de calcário consolidado a 25 metros acima do piso do vale cego, imune a enxurradas e animais predadores.',
+      blindValleySpillwayAndVentFlue: 'Paredões côncavos da torre oferecem teto protetor contra tempestades e garantem fluxo livre de vento fresco sem acúmulo de gases pesados.',
+      campRestAndSafetyGuards: 'Assegura descanso longo calmo, seguro e protegido para toda a comitiva com regeneração total de forças.',
+      icon: '⛺🧗',
+      color: '#0284c7'
+    };
+
+    if (dt === 'blind_valley_overflow_spillway_and_debris_boom') {
+      tech = {
+        defenseTitle: 'Barreira Flutuante de Troncos e Vertedouro de Emergência',
+        towerKarstAnchorageAndFloodSafety: 'Paliçada curva ancorada com cabos de aço que retém galhos e detritos flutuantes, impedindo o entupimento do sumidouro subterrâneo do vale.',
+        blindValleySpillwayAndVentFlue: 'Evita a formação de represas acidentais que inundem o acampamento ou as rotas de aproximação durante aguaceiros noturnos.',
+        campRestAndSafetyGuards: 'Garante tranquilidade para sentinelas e descansantes com risco nulo de alagamentos catastróficos repentinos.',
+        icon: '🛡️🪵',
+        color: '#78350f'
+      };
+    } else if (dt === 'bellows_ventilation_flue_and_limestone_co2_scrubber') {
+      tech = {
+        defenseTitle: 'Duto de Ventilação Forçada com Leito Neutralizante de Cal',
+        towerKarstAnchorageAndFloodSafety: 'Fole de lona acionado por contrapeso que capta ar fresco da crista da torre e sopra para o interior do abrigo de caverna.',
+        blindValleySpillwayAndVentFlue: 'Expulsa completamente gases estagnados e poeira úmida, mantendo o ar respirável puro e oxigenado.',
+        campRestAndSafetyGuards: 'Permite que exploradores feridos se recuperem sem tosse ou fadiga respiratória causada por miasmas cársticos.',
+        icon: '⚗️💨',
+        color: '#64748b'
+      };
+    } else if (dt === 'drilled_expansion_bolt_highline_traverse') {
+      tech = {
+        defenseTitle: 'Tirolesa Suspensa de Cabo de Aço entre Torres Cársticas',
+        towerKarstAnchorageAndFloodSafety: 'Linha de trânsito aéreo esticada com parafusos de expansão que conecta o bivaque aos postos avançados de vigia sobre o desfiladeiro.',
+        blindValleySpillwayAndVentFlue: 'Permite travessias rápidas sobre fendas e rios caudalosos sem necessidade de descer ao fundo lamacento do vale cego.',
+        campRestAndSafetyGuards: 'Garante rondas noturnas ágeis e vigilância perimétrica com vantagem tática de altitude absoluta.',
+        icon: '🪜✨',
+        color: '#10b981'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessTransformFaultAndHorstHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'mountain').toLowerCase();
@@ -23461,6 +23568,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessTowerKarstAndBlindValleyHazard: calcWildernessTowerKarstAndBlindValleyHazard,
+    calcCampTowerKarstAndBlindValleyStation: calcCampTowerKarstAndBlindValleyStation,
     calcWildernessTransformFaultAndHorstHazard: calcWildernessTransformFaultAndHorstHazard,
     calcCampTransformFaultAndHorstStation: calcCampTransformFaultAndHorstStation,
     calcWildernessSaltDomeAndDiapirHazard: calcWildernessSaltDomeAndDiapirHazard,
