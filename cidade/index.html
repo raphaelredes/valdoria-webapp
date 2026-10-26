@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessBlackSandDuneAndVentHazard) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var bs = CartShared.calcWildernessBlackSandDuneAndVentHazard(bKey, 'black_sand_thermal_scald_slump');
+        return '<div class="clp-black-sand-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,22,26,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(220,38,38,0.3);font-size:8px;color:#fee2e2;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + bs.color + ';margin-bottom:2px;">' + bs.icon + ' ' + bs.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Areia Negra e Fumarola:</b> ' + bs.blackSandRiskAndVents + ' (CD ' + bs.saveDC + ' [' + bs.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fca5a5;margin-top:1px;">• <b>Mitigação:</b> ' + bs.pioneerMitigation + ' · <i>Estabilização: ' + bs.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampBlackSandDuneTrenchAndCondenserStation) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var cp = CartShared.calcCampBlackSandDuneTrenchAndCondenserStation(bKey, 'geothermal_black_sand_warmth_trench');
+        return '<div class="clp-geothermal-trench-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,34,28,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#ecfdf5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Trincheira Geotérmica:</b> ' + cp.blackSandAnchorageAndVentSafety + ' · <b>Proteção:</b> ' + cp.thermalShieldingAndCampSecurity + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessPetrifiedForestAndSilicaHazard) return '';
         var bKey = (biome && biome.key) || 'desert';
         var pf = CartShared.calcWildernessPetrifiedForestAndSilicaHazard(bKey, 'petrified_log_rolling_crush');

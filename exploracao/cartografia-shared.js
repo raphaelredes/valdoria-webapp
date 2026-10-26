@@ -16741,6 +16741,130 @@
     };
   }
 
+  // === calcWildernessBlackSandDuneAndVentHazard (Dunas de Areia Negra Vulcânica, Bombas de Tefra e Fumarolas - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessBlackSandDuneAndVentHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'black_sand_thermal_scald_slump').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Deslizamento em Duna de Areia Negra Escaldante',
+      saveDC: 15,
+      saveType: 'Constituição',
+      blackSandRiskAndVents: 'Dunas móveis de magnetita e basalto moído que atingem 70°C sob sol forte; desmoronamento sobre a comitiva causando 2d8 de fogo e queimaduras térmicas nas pernas (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores usam sandálias com solado duplo de cortiça isolante e avançam em marcha noturna ou nas primeiras horas do amanhecer.',
+      rescueAndStabilization: 'Extração rápida da areia quente, lavagem com água marinha decantada e aplicação de compressas frias com óleo de algas.',
+      icon: '🏖️🔥',
+      color: '#dc2626'
+    };
+
+    if (ht === 'tephra_bomb_crater_collapse') {
+      hazard = {
+        hazardTitle: 'Queda em Cratera de Bomba Vulcânica Instável',
+        saveDC: 14,
+        saveType: 'Destreza',
+        blackSandRiskAndVents: 'Crosta de tefra oca que cede sob o peso dos aventureiros; queda de 5 metros em cascalheira basáltica causando 2d6 perfurante e torsões articulares.',
+        pioneerMitigation: 'Sondagem com lanças de bambu antes de pisar em depressões circulares suspeitas e avanço espaçado.',
+        rescueAndStabilization: 'Içamento com cordas ancoradas em blocos basálticos sólidos e imobilização de membros com talas rígidas.',
+        icon: '🕳️💥',
+        color: '#b45309'
+      };
+    } else if (ht === 'hypothermal_sulfur_vent_blowout') {
+      hazard = {
+        hazardTitle: 'Erupção de Respiradouro de Vapor Sulfuroso',
+        saveDC: 14,
+        saveType: 'Destreza',
+        blackSandRiskAndVents: 'Jato súbito de vapor superaquecido com enxofre em pó sob pressão; 2d6 de fogo e 1d6 de veneno com náusea debilitante.',
+        pioneerMitigation: 'Identificação prévia de manchas amarelas de enxofre e uso de máscaras com filtros de carvão ativo e gaze umedecida.',
+        rescueAndStabilization: 'Retirada rápida da zona de emanação de gás, hidratação com água morna e repouso a favor do vento marinho.',
+        icon: '💨☣️',
+        color: '#eab308'
+      };
+    } else if (ht === 'magnetic_black_sand_compass_jam') {
+      hazard = {
+        hazardTitle: 'Interferência Magnética das Areias Negras de Magnetita',
+        saveDC: 13,
+        saveType: 'Sabedoria',
+        blackSandRiskAndVents: 'Areia densa com alta concentração de magnetita que faz as agulhas das bússolas girarem em falso, desorientando a marcha na neblina costeira.',
+        pioneerMitigation: 'Navegação por alinhamento de astros celestes, ondulações de maré e balizas visuais de pedras empilhadas.',
+        rescueAndStabilization: 'Reconferência da posição em mapas astronômicos e reagrupamento da comitiva ao redor de uma fogueira abrigada.',
+        icon: '🧭🧲',
+        color: '#0284c7'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      blackSandRiskAndVents: hazard.blackSandRiskAndVents,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Litoral Vulcânico e Fumarolas) / PHB p. 182-183 (Marcha Litorânea) / XGE p. 78-83 (Geologia)'
+    };
+  }
+
+  // === calcCampBlackSandDuneTrenchAndCondenserStation (Trincheiras Geotérmicas, Condensadores e Balizadores - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampBlackSandDuneTrenchAndCondenserStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'geothermal_black_sand_warmth_trench').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Trincheira Geotérmica com Piso Isolante de Freixo',
+      blackSandAnchorageAndVentSafety: 'Vala escavada em trecho suave de calor geotérmico forrada com estrados de madeira que aproveita o calor suave do subsolo.',
+      thermalShieldingAndCampSecurity: 'Mantém o bivaque aquecido contra a friagem marítima sem expor a comitiva a gases ou areia escaldante.',
+      campRestAndSafetyGuards: 'Permite sono longo tranquilo e reparador para os membros do grupo com sentinela postada em crista de observação.',
+      icon: '🏖️⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'zeolite_filter_steam_condenser') {
+      tech = {
+        defenseTitle: 'Condensador de Fumarola com Leito de Zeólita Purificadora',
+        blackSandAnchorageAndVentSafety: 'Armação cônica de cobre com leito mineral de zeólita que neutraliza vapores ácidos e colhe vapor puro de fumarola.',
+        thermalShieldingAndCampSecurity: 'Gera 10 litros diários de água doce quente e límpida diretamente a partir de respiradouros vulcânicos.',
+        campRestAndSafetyGuards: 'Garante abastecimento constante de água potável para os aventureiros sem necessidade de busca em terra firme.',
+        icon: '💧🏺',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'basalt_boulder_windbreak_cairn') {
+      tech = {
+        defenseTitle: 'Muralha de Pedras Basálticas Secas contra Ressaca e Vento',
+        blackSandAnchorageAndVentSafety: 'Paredão semicircular de pedras vulcânicas empilhadas sem argamassa que quebra a força das rajadas litorâneas.',
+        thermalShieldingAndCampSecurity: 'Impede que o vento marinho disperse o calor do bivaque e evita soterramentos por areia negra volátil.',
+        campRestAndSafetyGuards: 'Assegura proteção física inabalável e barreira contra animais marinhos predatórios noturnos.',
+        icon: '🧱🌋',
+        color: '#f97316'
+      };
+    } else if (dt === 'luminescent_lichen_trail_beacons') {
+      tech = {
+        defenseTitle: 'Balizadores Noturnos de Líquens Fluorescentes em Hastes',
+        blackSandAnchorageAndVentSafety: 'Varas de bambu com cúpulas de vidro contendo colônias de fungos bioluminescentes que brilham em tom esmeralda suave.',
+        thermalShieldingAndCampSecurity: 'Delineiam trilhas seguras entre as barracas e os respiradouros perigosos na escuridão absoluta da praia negra.',
+        campRestAndSafetyGuards: 'Permite circulação noturna sem risco de sentinelas pisarem acidentalmente em areia escaldante.',
+        icon: '🏮✨',
+        color: '#a855f7'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      blackSandAnchorageAndVentSafety: tech.blackSandAnchorageAndVentSafety,
+      thermalShieldingAndCampSecurity: tech.thermalShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Áreas Geotérmicas) / PHB p. 150 (Kits de Aventureiro) / XGE p. 78-83 (Engenharia de Sobrevivência)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -18594,6 +18718,8 @@
     calcCampContinentalSaltFlatPlatformAndDistillerStation: calcCampContinentalSaltFlatPlatformAndDistillerStation,
     calcWildernessPetrifiedForestAndSilicaHazard: calcWildernessPetrifiedForestAndSilicaHazard,
     calcCampPetrifiedForestAgateHollowAndWall: calcCampPetrifiedForestAgateHollowAndWall,
+    calcWildernessBlackSandDuneAndVentHazard: calcWildernessBlackSandDuneAndVentHazard,
+    calcCampBlackSandDuneTrenchAndCondenserStation: calcCampBlackSandDuneTrenchAndCondenserStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
