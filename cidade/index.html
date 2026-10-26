@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessRocheMoutonneeBoulderPavementHazard) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var rm = CartShared.calcWildernessRocheMoutonneeBoulderPavementHazard(bKey, 'glacially_polished_stoss_slab_wet_lichen_slide');
+        return '<div class="clp-roche-moutonnee-boulder-pavement-card" style="margin:4px 0 6px;text-align:left;background:rgba(16,22,30,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(100,116,139,0.35);font-size:8px;color:#f1f5f9;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + rm.color + ';margin-bottom:2px;">' + rm.icon + ' ' + rm.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Roches Moutonnées e Pavimento Estriado:</b> ' + rm.rocheMoutonneeRisk + ' (CD ' + rm.saveDC + ' [' + rm.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#cbd5e1;margin-top:1px;">• <b>Mitigação:</b> ' + rm.pioneerMitigation + ' · <i>Estabilização: ' + rm.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampRocheMoutonneeBoulderPavementStation) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var rc = CartShared.calcCampRocheMoutonneeBoulderPavementStation(bKey, 'plucked_lee_scarp_overhang_windbreak_bivouac');
+        return '<div class="clp-roche-moutonnee-boulder-pavement-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,18,26,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.3);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + rc.color + ';margin-bottom:2px;">' + rc.icon + ' ' + rc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Escarpa de Arrancamento:</b> ' + rc.rocheMoutonneeAndCampSafety + ' · <b>Abrigo:</b> ' + rc.rocheMoutonneeTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + rc.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessVolcanicPlugRingDikeHazard) return '';
         var bKey = (biome && biome.key) || 'mountain';
         var pr = CartShared.calcWildernessVolcanicPlugRingDikeHazard(bKey, 'radial_dike_wall_horizontal_column_pullout_fall');

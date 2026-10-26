@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 239: ROCHES MOUTONNÉES E PAVIMENTOS DE BLOCOS ESTRIADOS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessRocheMoutonneeBoulderPavementHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'glacially_polished_stoss_slab_wet_lichen_slide').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Escorregamento Acelerado em Laje Polida de Barlavento Glacial (Glacial Polish Stoss Slide)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      rocheMoutonneeRisk: 'Lombadas rochosas de gnaisse e granito (roches moutonnées) cuja rampa suave de subida foi lixada pelo pó de quartzo sob uma geleira antiga até adquirir um verniz espelhado (glacial polish) coberto por líquen negro mucilaginoso; ao primeiro orvalho ou garoa, o atrito cai a zero e lança o aventureiro que pisa na rampa como num tobogã diretamente para o precipício na face oposta com 3d6 de concussão (DMG p. 110; PHB p. 182).',
+      pioneerMitigation: 'Caminhar pisando dentro das fendas de fratura ou nas estrias profundas da rocha, evitando as placas espelhadas úmidas.',
+      rescueAndStabilization: 'Frenagem por corda ancorada em arbusto rupestre e tratamento de contusões.',
+      icon: '🪨🛷',
+      color: '#64748b'
+    };
+
+    if (ht === 'quarried_lee_plucking_scarp_blind_cliff_drop') {
+      hazard = {
+        hazardTitle: 'Queda Cega na Escarpa Vertical de Arrancamento Glacial (Lee Plucking Cliff)',
+        saveDC: 15,
+        saveType: 'Sabedoria',
+        rocheMoutonneeRisk: 'Toda roche moutonnée possui perfil enganosamente assimétrico: uma subida mansa e arredondada seguida por um corte vertical abrupto de 15 metros no lado de sotavento onde o gelo arrancou blocos inteiros (glacial plucking); marchar na neblina ou contra o sol pelo dorso suave leva o batedor a dar um passo no vazio sobre a escarpa cega com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Reduzir o passo ao atingir o topo arredondado de qualquer lombada glacial e sondar a descida antes de avançar.',
+        rescueAndStabilization: 'Descida por rapel nos degraus da face de arrancamento e imobilização com talas.',
+        icon: '⛰️⚠️',
+        color: '#475569'
+      };
+    } else if (ht === 'striated_boulder_pavement_frost_heave_ankle_trap') {
+      hazard = {
+        hazardTitle: 'Torção em Fenda de Pavimento de Matacões Estriados (Boulder Pavement)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        rocheMoutonneeRisk: 'Terraços subglaciais onde milhares de matacões tiveram o topo aplanado e riscado na mesma direção pelo fluxo de gelo como uma calçada ciclópica, mas com frestas estreitas e profundas de 1 metro entre um bloco e outro; escorregar da face polida crava a perna na cunha entre dois matacões de granito, causando 2d8 de concussão e condição impedido (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Usar o bastão de caminhada para testar o vão oculto por musgo entre os blocos aplanados.',
+        rescueAndStabilization: 'Descalçamento da bota presa na fenda rochosa e enfaixamento firme do tornozelo.',
+        icon: '🥾🪨',
+        color: '#94a3b8'
+      };
+    } else if (ht === 'perched_glacial_erratic_rocking_stone_logan_crush') {
+      hazard = {
+        hazardTitle: 'Tombamento de Bloco Errático Oscilante ("Logan / Rocking Stone")',
+        saveDC: 15,
+        saveType: 'Força',
+        rocheMoutonneeRisk: 'Matacões de dez toneladas trazidos de montanhas distantes e depositados pela geleira sobre três pequenos seixos de apoio na crista polida; o bloco inteiro balança ao toque de um ombro ou rajada de vento e pode perder o calço basal, esmagando quem busca abrigo à sua sombra com 3d8 de concussão (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Verificar se grandes blocos isolados possuem base larga soldada à laje antes de encostar ou acampar sob eles.',
+        rescueAndStabilization: 'Uso de alavancas de ferro e cunhas de pedra para erguer o bloco e liberar o companheiro.',
+        icon: '🪨⚖️',
+        color: '#d97706'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampRocheMoutonneeBoulderPavementStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'plucked_lee_scarp_overhang_windbreak_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque na Escarpa de Arrancamento (Plucking Lee) Protegida do Vento',
+      rocheMoutonneeAndCampSafety: 'Enquanto o dorso polido é varrido pelo vento, a face vertical de sotavento da roche moutonnée forma degraus cúbicos secos e abrigados.',
+      rocheMoutonneeTrenchAndWatch: 'A parede vertical de 10 metros às costas bloqueia o vento predominante e reflete o calor da fogueira sobre as tendas.',
+      campRestAndSafetyGuards: 'Garante descanso longo seguro sem risco de ataque pelas costas.',
+      icon: '⛺🪨',
+      color: '#38bdf8'
+    };
+
+    if (dt === 'glacial_striation_groove_compass_bearing_station') {
+      tech = {
+        defenseTitle: 'Orientação por Estrias Glaciais sob Neblina Densa',
+        rocheMoutonneeAndCampSafety: 'Os sulcos paralelos gravados na rocha matriz pelos seixos da antiga geleira apontam invariavelmente o eixo do vale principal.',
+        rocheMoutonneeTrenchAndWatch: 'Permite calibrar mapas e manter o rumo exato da comitiva mesmo sob nevoeiro fechado ou tempestade.',
+        campRestAndSafetyGuards: 'Elimina o risco de desorientação ao retomar a marcha pela manhã.',
+        icon: '🧭📏',
+        color: '#eab308'
+      };
+    } else if (dt === 'flat_topped_boulder_pavement_hearth_and_table_camp') {
+      tech = {
+        defenseTitle: 'Plataforma Seca sobre Calçada de Matacões Aplanados',
+        rocheMoutonneeAndCampSafety: 'O topo perfeitamente nivelado e seco do pavimento de blocos estriados funciona como piso elevado acima do charco.',
+        rocheMoutonneeTrenchAndWatch: 'Base incombustível e limpa para montar o braseiro e organizar equipamentos da comitiva.',
+        campRestAndSafetyGuards: 'Mantém mochilas e mantimentos livres da umidade ácida da tundra.',
+        icon: '🔥🧱',
+        color: '#f59e0b'
+      };
+    } else if (dt === 'chattermark_crescent_gouge_rainwater_catchment') {
+      tech = {
+        defenseTitle: 'Coleta de Água em Marcas de Vibração Semilunares (Chattermarks)',
+        rocheMoutonneeAndCampSafety: 'As cicatrizes côncavas em forma de meia-lua escavadas na laje polida de granito funcionam como bacias impermeáveis.',
+        rocheMoutonneeTrenchAndWatch: 'Acumulam água da chuva e de degelo cristalina sem contaminação por lama ou turfa.',
+        campRestAndSafetyGuards: 'Reabastece cantis rapidamente no próprio rochedo do bivaque.',
+        icon: '💧🌙',
+        color: '#0ea5e9'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 238: PESCOÇOS VULCÂNICOS E MURALHAS DE DIQUES ANELARES (D&D 5e)
   // =========================================================================
 
@@ -32636,6 +32740,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessRocheMoutonneeBoulderPavementHazard: calcWildernessRocheMoutonneeBoulderPavementHazard,
+    calcCampRocheMoutonneeBoulderPavementStation: calcCampRocheMoutonneeBoulderPavementStation,
     calcWildernessVolcanicPlugRingDikeHazard: calcWildernessVolcanicPlugRingDikeHazard,
     calcCampVolcanicPlugRingDikeStation: calcCampVolcanicPlugRingDikeStation,
     calcWildernessKettleKameEskerHazard: calcWildernessKettleKameEskerHazard,
