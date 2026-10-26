@@ -19841,6 +19841,130 @@
     };
   }
 
+  // === calcWildernessRuiniformSandstoneAndLabyrinthHazard (Colinas Cônicas em Relevo Ruiniforme de Arenito e Labirintos de Desfiladeiros Cegos - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessRuiniformSandstoneAndLabyrinthHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'blind_box_canyon_maze_entrapment').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Extravio em Labirinto de Desfiladeiros Cegos e Paredões Sem Saída',
+      saveDC: 15,
+      saveType: 'Sabedoria',
+      ruiniformSandstoneAndLabyrinthRisk: 'Cânions sinuosos de arenito idênticos com 25 metros de altura que convergem para fendas cegas em fundo de saco; entrada em ramificação errônea que adiciona 1d4 horas de marcha estéril sob calor escaldante gerando 1 nível de exaustão e desorientação total de bússola (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores marcam cruzamentos rochosos com pirâmides de seixos de sílica e mantêm cartografia contínua em prancheta de navegação.',
+      rescueAndStabilization: 'Retraçamento pelo azimute de retorno gravado nas rochas e reidratação com infusão fria de raízes de cálamo silvestre.',
+      icon: '🧱🧭',
+      color: '#b45309'
+    };
+
+    if (ht === 'acoustic_echo_confusion_mirage') {
+      hazard = {
+        hazardTitle: 'Reverberação Acústica Ilusória em Cânions Ruiniformes',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        ruiniformSandstoneAndLabyrinthRisk: 'Paredes côncavas de arenito que focalizam e amplificam sons distantes como passos, rugidos de predadores ou sussurros, criando ilusões acústicas perfeitas que induzem a comitiva a marchar em direção a emboscadas naturais.',
+        pioneerMitigation: 'Uso de protetores auriculares de lã embebida em cera de abelha e checagem visual com espelhos refletores antes de avançar.',
+        rescueAndStabilization: 'Sinalização por tochas de fumaça colorida e reagrupamento da comitiva em formação circular compacta.',
+        icon: '🔊🌀',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'ruiniform_tower_shear_rockfall') {
+      hazard = {
+        hazardTitle: 'Desmoronamento de Pilar Ruiniforme por Ventilação Eólica',
+        saveDC: 15,
+        saveType: 'Destreza',
+        ruiniformSandstoneAndLabyrinthRisk: 'Colunas cônicas de arenito com base carcomida pela erosão eólica que desabam ao menor choque mecânico, projetando blocos de 3 toneladas pelo corredor estreito causando 3d8 de concussão.',
+        pioneerMitigation: 'Inspeção prévia da estabilidade das bases dos pilares com bordões de ferro e passagem silenciosa com passos amortecidos.',
+        rescueAndStabilization: 'Desobstrução do corredor com alavancas de suporte de madeira de lei e primeiros socorros em lesões por esmagamento.',
+        icon: '💥🗿',
+        color: '#dc2626'
+      };
+    } else if (ht === 'convective_thermal_vortex_whirlwind') {
+      hazard = {
+        hazardTitle: 'Vórtice Térmico Convectivo em Gargalo de Arenito',
+        saveDC: 14,
+        saveType: 'Constituição',
+        ruiniformSandstoneAndLabyrinthRisk: 'Gradiente térmico violento entre cânions sombreados a 15°C e o platô solar a 45°C que gera redemoinhos de areia fina a 60 km/h arrancando capas e cegando temporariamente os exploradores.',
+        pioneerMitigation: 'Colocação de óculos protetores de couro com telas de malha fina de latão e marcha abaixada rente às paredes de sotavento.',
+        rescueAndStabilization: 'Lavagem dos olhos com colírio de água destilada salina e aplicação de bálsamo cicatrizante na face.',
+        icon: '🌪️👁️',
+        color: '#ea580c'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      ruiniformSandstoneAndLabyrinthRisk: hazard.ruiniformSandstoneAndLabyrinthRisk,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Labirintos Rochosos e Desfiladeiros Ruiniformes) / PHB p. 182-183 (Navegação em Terreno Labiríntico) / XGE p. 78-83 (Geomorfologia Ruiniforme de Arenito)'
+    };
+  }
+
+  // === calcCampRuiniformSandstoneAndLabyrinthStation (Bivaques em Fundos de Saco e Glifos de Rumo - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampRuiniformSandstoneAndLabyrinthStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'box_canyon_cul_de_sac_fortified_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Fortificado em Anfiteatro de Fundo de Saco',
+      ruiniformCanyonAnchorageAndSecurity: 'Acampamento montado no término cego de um desfiladeiro de arenito cercado por paredões verticais de 30 metros em três lados, com uma única garganta de acesso de 2 metros de largura.',
+      labyrinthChokepointAndAcousticMasking: 'Permite controle defensivo absoluto com uma única sentinela e oculta fogueiras e conversas de qualquer observador fora do corredor.',
+      campRestAndSafetyGuards: 'Assegura descanso longo protegido e relaxado para os membros da comitiva com tranquilidade total contra emboscadas na retaguarda.',
+      icon: '⛺🛡️',
+      color: '#b45309'
+    };
+
+    if (dt === 'carved_sandstone_glyph_waypoint_markers') {
+      tech = {
+        defenseTitle: 'Matriz de Glifos Direcionais Entalhados em Arenito',
+        ruiniformCanyonAnchorageAndSecurity: 'Marcas criptográficas discretas esculpidas com formão de aço nas esquinas de cânions estratégicos que apontam a rota segura de retorno ao bivaque.',
+        labyrinthChokepointAndAcousticMasking: 'Impede desorientação dos batedores durante incursões de reconhecimento noturnas no labirinto rochoso.',
+        campRestAndSafetyGuards: 'Garante retorno rápido e seguro dos sentinelas avançados em caso de tempestade repentina ou perseguição.',
+        icon: '⛏️🧭',
+        color: '#64748b'
+      };
+    } else if (dt === 'natural_alcove_dew_catchment_hopper') {
+      tech = {
+        defenseTitle: 'Funil Coletor de Orvalho em Alcova Sombreada de Arenito',
+        ruiniformCanyonAnchorageAndSecurity: 'Lonas impermeabilizadas com cera de abelha estendidas sob as paredes côncavas do anfiteatro que canalizam condensação noturna para odres de couro.',
+        labyrinthChokepointAndAcousticMasking: 'Coleta 18 litros diários de água mineral fresca livre de poeira eólica sem necessidade de sair do acampamento.',
+        campRestAndSafetyGuards: 'Supre as necessidades de hidratação dos exploradores e preserva as provisões para a marcha seguinte.',
+        icon: '💧🏺',
+        color: '#0284c7'
+      };
+    } else if (dt === 'perimetral_tripwire_bone_bell_alarm') {
+      tech = {
+        defenseTitle: 'Alarme Perimetral com Fios Tropeçadores e Guizos de Osso',
+        ruiniformCanyonAnchorageAndSecurity: 'Fios finos de tripa esticados a 20 centímetros do chão no gargalo de acesso ao cânion conectados a feixes de ossos ocos e guizos de bronze.',
+        labyrinthChokepointAndAcousticMasking: 'Emite aviso sonoro agudo instantâneo caso qualquer criatura ou batedor hostil tente penetrar no corredor de acesso ao bivaque.',
+        campRestAndSafetyGuards: 'Permite que a guarda noturna repouse com prontidão sem risco de ser surpreendida no sono.',
+        icon: '🔔🛡️',
+        color: '#ea580c'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      ruiniformCanyonAnchorageAndSecurity: tech.ruiniformCanyonAnchorageAndSecurity,
+      labyrinthChokepointAndAcousticMasking: tech.labyrinthChokepointAndAcousticMasking,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Desfiladeiros Fechados) / PHB p. 150 (Kits de Sinalização e Cartografia Subterrânea) / XGE p. 78-83 (Engenharia de Alarmes de Gargalo)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -21744,6 +21868,8 @@
     calcCampHypersalineApicumStation: calcCampHypersalineApicumStation,
     calcWildernessSlotCanyonAndArchHazard: calcWildernessSlotCanyonAndArchHazard,
     calcCampSlotCanyonAndArchStation: calcCampSlotCanyonAndArchStation,
+    calcWildernessRuiniformSandstoneAndLabyrinthHazard: calcWildernessRuiniformSandstoneAndLabyrinthHazard,
+    calcCampRuiniformSandstoneAndLabyrinthStation: calcCampRuiniformSandstoneAndLabyrinthStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
