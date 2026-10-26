@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 236: GELEIRAS NEGRAS COBERTAS DE DETRITOS E LAGOAS SUPRAGLACIAIS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessSupraglacialDebrisGlacierHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'backwasting_supraglacial_ice_cliff_boulder_calving').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda de Matacões em Falésia de Gelo Supraglacial em Degelo (Ice Cliff Calving)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      supraglacialDebrisRisk: 'Geleiras alpinas inteiramente ocultas sob um manto escuro de 2 metros de seixos e blocos angulosos que parecem uma encosta pedregosa comum, mas rasgadas por paredões verticais de gelo negro de 25 metros aquecidos pelo sol; a fusão constante da face libera avalanches súbitas dos matacões empilhados na crista sem qualquer aviso sísmico, esmagando a comitiva com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+      pioneerMitigation: 'Jamais caminhar na base ou na borda superior de falésias de gelo exposto após o nascer do sol.',
+      rescueAndStabilization: 'Retirada rápida da zona de queda de blocos sob cobertura de escudos e imobilização de fraturas.',
+      icon: '🏔️🪨',
+      color: '#64748b'
+    };
+
+    if (ht === 'perched_supraglacial_pond_englacial_conduit_drain_vortex') {
+      hazard = {
+        hazardTitle: 'Drenagem Súbita de Lagoa Supraglacial por Conduto Englacial',
+        saveDC: 15,
+        saveType: 'Força',
+        supraglacialDebrisRisk: 'Lagoas verde-turquesa suspensas em bacias sobre o gelo morto coberto de detritos; quando a água morna perfura o tampão de gelo no fundo, a lagoa inteira esvazia em minutos por um sifão subglacial rugidor, arrastando quem estiver vadeando as margens lodosas para as entranhas escuras da geleira com 3d6 de frio e concussão (DMG p. 110; PHB p. 182-183).',
+        pioneerMitigation: 'Contornar lagoas supraglaciais pelas cristas altas de detritos, longe das margens de lodo saturado.',
+        rescueAndStabilization: 'Ancoragem imediata com piquetas de gelo e içamento por corda antes da boca do conduto.',
+        icon: '🌀🧊',
+        color: '#0284c7'
+      };
+    } else if (ht === 'wet_supraglacial_till_basal_ice_lubricated_mudslide') {
+      hazard = {
+        hazardTitle: 'Deslizamento de Manto de Detritos Encharcado sobre Laje de Gelo Liso',
+        saveDC: 14,
+        saveType: 'Destreza',
+        supraglacialDebrisRisk: 'Nas tardes de sol, o filme de contato entre o cascalho escuro aquecido e o gelo impermeável logo abaixo derrete e vira um plano de sabão inclinado; ao pisar no talude, todo o tapete de pedras e lama escorrega de uma vez sobre o espelho de gelo oculto, lançando o aventureiro para dentro de fendas abertas com 2d8 de concussão (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Marchar apenas sobre lombadas onde o manto de blocos grandes exceda 1 metro de espessura seca.',
+        rescueAndStabilization: 'Tracionamento com corda de segurança e limpeza de ferimentos abrasivos.',
+        icon: '🎿🪨',
+        color: '#94a3b8'
+      };
+    } else if (ht === 'debris_masked_hummock_dead_ice_sinkhole_collapse') {
+      hazard = {
+        hazardTitle: 'Abatimento em Funil de Fusão Oculto sob Cascalho (Supraglacial Sinkhole)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        supraglacialDebrisRisk: 'Vazios cavernosos derretidos por riachos internos sob uma ponte enganadora de lajes de gnaisse e cascalho cimentado apenas por geada matinal; o peso da marcha rompe o arco de detritos e derruba o batedor em um poço de paredes de gelo negro e água a zero grau, impondo 2d6 de frio e 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Progredir encordado escutando o som de água corrente oca sob os pés antes de cruzar depressões.',
+        rescueAndStabilization: 'Montagem de polia em tripé de bastões para extração vertical do poço de gelo.',
+        icon: '🕳️❄️',
+        color: '#38bdf8'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampSupraglacialDebrisGlacierStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'thick_debris_mantle_insulated_glacier_table_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque sobre Mesa Glacial Isolada por Manto Espesso de Gnaisse',
+      supraglacialDebrisAndCampSafety: 'Camadas de detritos rochosos com mais de 1,5 metro de espessura isolam termicamente o gelo abaixo e impedem seu derretimento.',
+      supraglacialDebrisTrenchAndWatch: 'A rocha escura absorve calor solar durante o dia e oferece um piso seco e dez graus mais quente que o gelo nu.',
+      campRestAndSafetyGuards: 'Garante descanso longo estável sem afundamento térmico das barracas.',
+      icon: '⛺🪨',
+      color: '#38bdf8'
+    };
+
+    if (dt === 'glacier_mushroom_pedestal_boulder_roof_shelter') {
+      tech = {
+        defenseTitle: 'Abrigo sob Laje de Cogumelo Glacial (Glacier Table) Escorada',
+        supraglacialDebrisAndCampSafety: 'Enormes lajes horizontais de granito de 5 metros ficam suspensas sobre um pedestal central de gelo protegido da radiação solar.',
+        supraglacialDebrisTrenchAndWatch: 'Escorar as bordas da laje com muretas de pedra seca cria um teto monolítico contra nevascas.',
+        campRestAndSafetyGuards: 'Protege a comitiva contra ventos catabáticos e queda noturna de granizo.',
+        icon: '🍄🛡️',
+        color: '#94a3b8'
+      };
+    } else if (dt === 'lateral_moraine_crest_ridge_trail_and_watchpost') {
+      tech = {
+        defenseTitle: 'Posto de Vigia e Trilha na Crista da Moreia Lateral Consolidada',
+        supraglacialDebrisAndCampSafety: 'Instalação dos sentinelas no fio alto da moreia lateral fora do corpo abatido da geleira negra.',
+        supraglacialDebrisTrenchAndWatch: 'Domínio visual completo sobre o labirinto de montículos, lagoas e falésias de gelo abaixo.',
+        campRestAndSafetyGuards: 'Permite traçar a rota segura da manhã seguinte antes que a neblina suba.',
+        icon: '👁️🏔️',
+        color: '#f59e0b'
+      };
+    } else if (dt === 'solar_warmed_dark_schist_slab_gear_drying_deck') {
+      tech = {
+        defenseTitle: 'Laje de Xisto Negro Aquecida pelo Sol para Secagem e Fusão de Água',
+        supraglacialDebrisAndCampSafety: 'Placas planas de xisto escuro no topo do manto atingem 30 graus sob o sol alpino mesmo com ar congelante.',
+        supraglacialDebrisTrenchAndWatch: 'Derrete neve limpa em calhas naturais para encher cantis sem consumir lenha ou óleo.',
+        campRestAndSafetyGuards: 'Seca botas, mantas e cordas rapidamente antes do congelamento noturno.',
+        icon: '☀️💧',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 235: FLORESTAS SUBMERSAS DE TRONCOS E JANGADAS DE MADEIRA (D&D 5e)
   // =========================================================================
 
@@ -32324,6 +32428,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessSupraglacialDebrisGlacierHazard: calcWildernessSupraglacialDebrisGlacierHazard,
+    calcCampSupraglacialDebrisGlacierStation: calcCampSupraglacialDebrisGlacierStation,
     calcWildernessDrownedSnagForestHazard: calcWildernessDrownedSnagForestHazard,
     calcCampDrownedSnagForestStation: calcCampDrownedSnagForestStation,
     calcWildernessAeolianYardangKalutHazard: calcWildernessAeolianYardangKalutHazard,
