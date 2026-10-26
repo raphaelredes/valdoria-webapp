@@ -12401,6 +12401,130 @@
     };
   }
 
+  // === calcWildernessCoastalReefAndTidalSurgeHazard (Recifes Ocultos, Correntes de Retorno e Ressacas Costeiras - DMG p. 110, 118 / PHB p. 182-183) ===
+  function calcWildernessCoastalReefAndTidalSurgeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'rip_current_undertow_surge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Corrente de Retorno Violenta e Ressaca de Arrebentação',
+      saveDC: 14,
+      saveType: 'Força',
+      coastalDamageAndSweeping: 'Fluxo oceânico veloz puxando para o largo a 15 km/h; arrasto de 30 metros mar adentro e risco de afogamento em mar agitado (PHB p. 183).',
+      pioneerMitigation: 'Batedores identificam faixa de água calma e sem ondas entre arrebentações e orientam nadar paralelo à praia.',
+      rescueAndStabilization: 'Lançamento de boia de cortiça com cabo de retinida e nado diagonal para escapar do canal de sucção.',
+      icon: '🌊🏊‍♂️',
+      color: '#0284c7'
+    };
+
+    if (ht === 'jagged_coral_shoal_puncture') {
+      hazard = {
+        hazardTitle: 'Recifes de Coral Farpado e Rochedos Submersos',
+        saveDC: 13,
+        saveType: 'Destreza',
+        coastalDamageAndSweeping: 'Lâminas calcárias afiadas sob lâmina d\'água de 1 metro; 2d8 de dano cortante/perfurante e infecção bacteriana marinha nas lacerações.',
+        pioneerMitigation: 'Navegação atenta usando vara de sondagem de proa e óculos de lentes âmbar para enxergar formações de coral.',
+        rescueAndStabilization: 'Cauterização com compressas de vinagre aquecido para neutralizar toxinas de anêmonas e curativo compressivo.',
+        icon: '🪸⛵',
+        color: '#06b6d4'
+      };
+    } else if (ht === 'tidal_blowhole_geyser_blast') {
+      hazard = {
+        hazardTitle: 'Geiser de Pressão Marítima em Soprador de Falésia',
+        saveDC: 13,
+        saveType: 'Destreza',
+        coastalDamageAndSweeping: 'Jato súbito de espuma e ar comprimido por caverna marinha; 2d10 de concussão e arremesso de 6 metros contra rochedos de granito.',
+        pioneerMitigation: 'Sentinelas ouvem o silvo cavernoso de pressão prévia e conduzem a marcha a 10 metros da borda de fendas litorâneas.',
+        rescueAndStabilization: 'Tracionamento de companheiros caídos com cordas de escalada e inspeção contra fraturas de costela.',
+        icon: '💨🌊',
+        color: '#38bdf8'
+      };
+    } else if (ht === 'corrosive_salt_spray_encrustation') {
+      hazard = {
+        hazardTitle: 'Maresia Salina Corrosiva e Salmoura Incrustante',
+        saveDC: 12,
+        saveType: 'Constituição',
+        coastalDamageAndSweeping: 'Névoa oceânica hipersalina constante; corrosão de lâminas de ferro, desvantagem em Percepção visual e queimação ocular.',
+        pioneerMitigation: 'Envolver armas e couros em capas engraxadas com sebo de baleia e uso de lenços protetores no rosto.',
+        rescueAndStabilization: 'Lavagem dos olhos e juntas de armaduras com água doce de cantil seguida de polimento imediato com graxa.',
+        icon: '🧂🛡️',
+        color: '#94a3b8'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      coastalDamageAndSweeping: hazard.coastalDamageAndSweeping,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110, 118 (Ressacas e Ambientes Costeiros) / PHB p. 182-183 (Afogamento e Dano de Impacto)'
+    };
+  }
+
+  // === calcCampTideLineClearanceAndAnchorGrapnel (Cota de Maré Alta, Ancoragem com Fateixas e Proteção Contra Maresia - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampTideLineClearanceAndAnchorGrapnel(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'high_tide_driftwood_clearance').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Cota de Segurança Acima da Marca de Maré Equinocial',
+      tideClearanceEfficiency: 'Acampamento montado a no mínimo 6 metros acima do limite de sargaços e conchas deixados pela maré cheia.',
+      grapnelAnchoringAndVesselSecurity: 'Garante que marés de sizígia noturnas ou ondas de ressaca passem a dezenas de metros das barracas e mantimentos.',
+      campRestAndSafetyGuards: 'Proporciona sono tranquilo para a comitiva sem risco de despertar em meio a inundações de água salgada.',
+      icon: '🏕️🌊',
+      color: '#10b981'
+    };
+
+    if (dt === 'iron_grapnel_shock_hawser_mooring') {
+      tech = {
+        defenseTitle: 'Ancoragem de Barcos com Fateixa de Ferro e Cabo de Retinida',
+        tideClearanceEfficiency: 'Fateixa de quatro garras cravada em rocha firme com mola elástica de cabo náutico amortecendo puxões da maré.',
+        grapnelAnchoringAndVesselSecurity: 'Impede que botes, canoas ou fardos flutuantes sejam arrastados para alto-mar durante o fluxo das marés.',
+        campRestAndSafetyGuards: 'Mantém a rota de fuga aquática sempre preservada e ancorada a poucos passos do acampamento.',
+        icon: '⚓🪢',
+        color: '#0284c7'
+      };
+    } else if (dt === 'driftwood_breakwater_palisade') {
+      tech = {
+        defenseTitle: 'Quebra-Mar Provisório de Troncos Flutuantes Encalhados',
+        tideClearanceEfficiency: 'Paliçada baixa de troncos pesados empilhados em meia-lua amortecendo a força das ondas de arrebentação.',
+        grapnelAnchoringAndVesselSecurity: 'Protege a praia de descanso contra respingos diretos de espuma marinha e ventos costeiros cortantes.',
+        campRestAndSafetyGuards: 'Permite acender fogueira protegida a sotavento dos troncos para aquecer as rações da comitiva.',
+        icon: '🪵🛡️',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'armor_desalination_fish_oil_station') {
+      tech = {
+        defenseTitle: 'Estação de Dessalinização com Água Doce e Óleo Protetor',
+        tideClearanceEfficiency: 'Ponto de manutenção de armaduras com enxágue de água doce de riacho e engraxe com óleo de peixe estéril.',
+        grapnelAnchoringAndVesselSecurity: 'Neutraliza 100% da ação oxidante do salitre sobre cotas de malha, placas e componentes metálicos delicados.',
+        campRestAndSafetyGuards: 'Preserva o valor de CA e integridade dos equipamentos de batalha dos aventureiros para o dia seguinte.',
+        icon: '🧴🗡️',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      tideClearanceEfficiency: tech.tideClearanceEfficiency,
+      grapnelAnchoringAndVesselSecurity: tech.grapnelAnchoringAndVesselSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Acampamento Costeiro) / XGE p. 78 (Engenharia Náutica e Manutenção de Equipamento)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -14184,6 +14308,8 @@
     calcCampSnowTrenchQuinzheeAndFurBedding: calcCampSnowTrenchQuinzheeAndFurBedding,
     calcWildernessSeismicTremorAndEarthFissureHazard: calcWildernessSeismicTremorAndEarthFissureHazard,
     calcCampFlexibleGuylineAndSeismicBufferPlatform: calcCampFlexibleGuylineAndSeismicBufferPlatform,
+    calcWildernessCoastalReefAndTidalSurgeHazard: calcWildernessCoastalReefAndTidalSurgeHazard,
+    calcCampTideLineClearanceAndAnchorGrapnel: calcCampTideLineClearanceAndAnchorGrapnel,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,

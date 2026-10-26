@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T04:39:26Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T04:44:04Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessCoastalReefAndTidalSurgeHazard) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var rf = CartShared.calcWildernessCoastalReefAndTidalSurgeHazard(bKey, 'rip_current_undertow_surge');
+        return '<div class="clp-coastal-reef-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,24,32,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(2,132,199,0.3);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + rf.color + ';margin-bottom:2px;">' + rf.icon + ' ' + rf.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Perigo:</b> ' + rf.coastalDamageAndSweeping + ' (CD ' + rf.saveDC + ' [' + rf.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Prevenção:</b> ' + rf.pioneerMitigation + ' · <i>Estabilização: ' + rf.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampTideLineClearanceAndAnchorGrapnel) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var td = CartShared.calcCampTideLineClearanceAndAnchorGrapnel(bKey, 'high_tide_driftwood_clearance');
+        return '<div class="clp-tide-clearance-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,32,24,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#d1fae5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + td.color + ';margin-bottom:2px;">' + td.icon + ' ' + td.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Cota de Maré:</b> ' + td.tideClearanceEfficiency + ' · <b>Ancoragem:</b> ' + td.grapnelAnchoringAndVesselSecurity + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Sono:</b> ' + td.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){
