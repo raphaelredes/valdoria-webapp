@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 273: BURACOS AZUIS E DOLINAS SUBMARINAS CÁRSTICAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessMarineBlueHoleHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'tidal_vortex_sinkhole_whirlpool').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Vórtice e Redemoinho de Reversão de Maré em Buraco Azul',
+      saveDC: 15,
+      saveType: 'Força',
+      blueHoleRisk: 'O buraco azul é um cilindro abissal de calcário de 150 metros de profundidade conectado ao mar aberto por galerias cársticas profundas; na virada da maré, a diferença de pressão gera um vórtice gigante de sucção que traga botes e nadadores para as entranhas escuras do poço com 3d8 de dano contundente de impacto contra estalactites marinhas e risco imediato de afogamento (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores monitorando o horário exato de preamar e baixamar e amarrando cabos flutuantes de cortiça ancorados nas margens sólidas do recife (Sobrevivência ou Veículos Aquáticos CD 14).',
+      rescueAndStabilization: 'Lançamento de arpões com cabos estáticos e içamento rápido por talha montada na borda do recife de coral (Atletismo CD 14).',
+      icon: '🕳️',
+      color: '#0284c7'
+    };
+
+    if (ht === 'hydrogen_sulfide_chemocline_poison_void') {
+      hazard.hazardTitle = 'Asfixia e Queimadura Química na Quimioclina de Sulfeto',
+      hazard.saveDC = 15;
+      hazard.saveType = 'Constituição';
+      hazard.blueHoleRisk = 'Abaixo de 25 metros de profundidade, uma névoa leitosa marca a transição para águas anóxicas saturadas de gás sulfídrico (H2S); a inalação ou contato desprotegido corrói tecidos moles, causa queimação ocular e impõe 3d6 de dano de veneno mais paralisia respiratória por hipóxia tóxica (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Inspeção visual da camada opaca de bactérias e uso de máscaras de respiração com carvão ativado e ungüento oleoso na pele (Natureza ou Sobrevivência CD 14).';
+      hazard.rescueAndStabilization = 'Evacuação imediata para a superfície e administração de sais alcalinos estimulantes para restaurar a respiração (Medicina CD 13).';
+    } else if (ht === 'overhanging_coral_rim_shear_collapse') {
+      hazard.hazardTitle = 'Desprendimento de Cornija de Coral em Balanço',
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.blueHoleRisk = 'A borda circular do abismo é formada por plataformas de coral fóssil delgadas suspensas sobre 100 metros de vazio aquático; o peso concentrado da comitiva ou a ancoragem de barcos quebra a laje em queda livre no poço causando 3d8 de concussão por choque contra saliências inferiores (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Ancoragem exclusiva em cabeços de rocha calcária sólida recuados da borda vertical do buraco (Percepção CD 14).';
+      hazard.rescueAndStabilization = 'Resgate ágil com redes marinhas de içamento e imobilização de fraturas (Atletismo CD 13 ou Medicina CD 13).';
+    } else if (ht === 'submerged_stalactite_labyrinth_entanglement') {
+      hazard.hazardTitle = 'Emaranhamento em Floresta de Estalactites Submersas',
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.blueHoleRisk = 'Nas paredes do buraco azul pendem estalactites colossais gotejadas antes da inundação marinha; cabos de mergulho, mochilas e membros enroscam-se nos pilares pontiagudos no escuro abissal, reduzindo o deslocamento a zero e impondo risco iminente de asfixia aquática (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Navegação subaquática com lanternas estanques em rota direta e facas de mergulho presas ao peito prontas para corte (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Corte rápido de cabos emaranhados e compartilhamento de bolsas de ar para subida de emergência (Atletismo CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampMarineBlueHoleStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'atoll_coral_rim_platform_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Plataforma de Recife de Coral Emerso',
+      blueHoleAndCampSafety: 'O acampamento é montado no anel emerso de calcário de coral que circunda a abertura do buraco azul, bem acima da preamar de sizígia; base estável e ventilada protegida contra ondas de mar aberto pelas bancadas externas do recife (DMG p. 111).',
+      blueHoleTrenchAndWatch: 'Vista desafogada de 360 graus sobre a lagoa azul e o oceano ao redor, permitindo avistar barcos piratas ou criaturas marinhas a quilômetros de distância (+2 de bônus na Percepção Passiva).',
+      campRestAndSafetyGuards: 'Descanso seguro com barreira natural contra monstros terrestres e isolamento perfeito contra marés.',
+      icon: '🛡️',
+      color: '#0284c7'
+    };
+
+    if (dt === 'rainwater_shallow_lens_catchment_cistern') {
+      defense.defenseTitle = 'Cisterna de Lente de Água Doce em Bacia de Coral';
+      defense.blueHoleAndCampSafety = 'Aproveitamento de uma cavidade de dissolução rasa no alto do anel calcário que capta exclusivamente água de chuva, formando uma lente doce que flutua pura sobre a umidade salina (PHB p. 150).';
+      defense.blueHoleTrenchAndWatch = 'Garante abastecimento constante de água doce límpida para toda a expedição sem risco de salinização ou contaminação.',
+      defense.campRestAndSafetyGuards = 'Hidratação perfeita e segurança sanitária durante o repouso longo no atol.';
+    } else if (dt === 'radial_cable_mooring_boom_bastion') {
+      defense.defenseTitle = 'Barricada Flutuante de Cabos e Toras de Mangue';
+      defense.blueHoleAndCampSafety = 'Rede de toras pesadas de mangue amarradas com correntes estendidas em arco sobre o buraco azul, bloqueando a subida de monstros abissais da caverna submersa (DMG p. 111).';
+      defense.blueHoleTrenchAndWatch = 'Concede cobertura total (+5 na CA) contra ataques vindos da água e impede que predadores anfíbios alcancem as barracas.',
+      defense.campRestAndSafetyGuards = 'Elimina riscos de emboscada noturna vinda das profundezas do poço marinho.';
+    } else if (dt === 'subsurface_luminescent_buoy_beacon') {
+      defense.defenseTitle = 'Balizas de Algas Bioluminescentes na Borda Submersa';
+      defense.blueHoleAndCampSafety = 'Lanternas de vidro com algas fosforescentes afundadas a 5 metros nas paredes do buraco azul que iluminam a entrada da dolina em brilho esmeralda suave (PHB p. 185).';
+      defense.blueHoleTrenchAndWatch = 'Denuncia instantaneamente a silhueta de qualquer criatura que nade para fora do poço em direção à superfície.',
+      defense.campRestAndSafetyGuards = 'Alerta precoce perfeito que assegura vigília noturna sem necessidade de tochas que queimem os olhos dos vigias.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 272: PLATÔS DE BAUXITA E CARSTE ALUMINOSO (D&D 5e)
   // =========================================================================
 
@@ -35956,6 +36036,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessMarineBlueHoleHazard: calcWildernessMarineBlueHoleHazard,
+    calcCampMarineBlueHoleStation: calcCampMarineBlueHoleStation,
     calcWildernessBauxiteKarstPlateauHazard: calcWildernessBauxiteKarstPlateauHazard,
     calcCampBauxiteKarstPlateauStation: calcCampBauxiteKarstPlateauStation,
     calcWildernessIncisedMeanderHazard: calcWildernessIncisedMeanderHazard,
