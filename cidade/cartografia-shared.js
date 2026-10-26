@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 230: MARMITAS DE GIGANTE FLUVIAIS E GARGANTAS STRID (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessBedrockStridPotholeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var ht = (hazardType || 'strid_bedrock_chute_vertical_river_flip_subduction').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Subducção Hidráulica em Fenda de Rio Virado de Lado (The Strid Chute)',
+      saveDC: 15,
+      saveType: 'Força',
+      stridPotholeRisk: 'Trecho enganador onde um rio largo de montanha é subitamente comprimido em uma fenda de rocha matriz de apenas 1,5 metro de largura que parece fácil de saltar, mas cuja calha tem 20 metros de profundidade com cavernas laterais subescavadas e correntes descendentes letais; um escorregão na borda polida suga o aventureiro imediatamente para as galerias submersas com 3d8 de concussão e risco severo de afogamento (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Jamais tentar saltar a garganta a seco sem corda de segurança ancorada em árvore ou pitão na margem oposta.',
+      rescueAndStabilization: 'Pêndulo de resgate a jusante onde a fenda se alarga em bacia calma e reanimação cardiopulmonar.',
+      icon: '🌊🕳️',
+      color: '#0284c7'
+    };
+
+    if (ht === 'evorsion_giants_kettle_whirlpool_grinder_boulder_trap') {
+      hazard = {
+        hazardTitle: 'Aprisionamento em Marmita de Gigante (Giant’s Kettle) com Moinho de Seixos',
+        saveDC: 15,
+        saveType: 'Força',
+        stridPotholeRisk: 'Cilindros verticais perfeitamente lisos de 4 metros de profundidade perfurados na laje do rio pelo giro perpétuo de balas de granito (grinders) movidas por vórtices de cheia; cair em uma marmita ativa submete o explorador a uma centrífuga de paredes polidas sem apoios enquanto os matacões do fundo rolam esmagando pernas com 3d6 de concussão (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Evitar caminhar pela laje rasa quando a água espumar em espirais circulares sobre poços escuros.',
+        rescueAndStabilization: 'Lançamento de rede ou escada de corda lastrada no centro do vórtice para extração vertical.',
+        icon: '🌀🪨',
+        color: '#0369a1'
+      };
+    } else if (ht === 'dry_relict_pothole_overhung_bell_pit_ankle_snare') {
+      hazard = {
+        hazardTitle: 'Queda em Marmita Seca em Forma de Sino de Borda Estreita',
+        saveDC: 14,
+        saveType: 'Destreza',
+        stridPotholeRisk: 'Nos terraços rochosos laterais do leito de vazante abrem-se dezenas de marmitas secas cujo diâmetro no fundo é o dobro da boca estreita na superfície (perfil em garrafa ou sino), ocultas por arbustos ribeirinhos; pisar na boca de 50 centímetros engole o aventureiro em um poço de paredes côncavas impossível de escalar a mãos nuas, causando 2d8 de concussão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Varrer a laje marginal com o bastão antes de pisar entre moitas de salgueiro ou pilhas de madeira flutuante.',
+        rescueAndStabilization: 'Içamento por corda direta pelo bocal superior da marmita e tala para entorses.',
+        icon: '🔔🕳️',
+        color: '#64748b'
+      };
+    } else if (ht === 'aerated_whitewater_froth_zero_buoyancy_boiling_pot') {
+      hazard = {
+        hazardTitle: 'Caldeirão de Espuma Aerada de Flutuabilidade Zero (Drowning Machine)',
+        saveDC: 15,
+        saveType: 'Constituição',
+        stridPotholeRisk: 'No pé dos degraus da garganta rochosa, a água batida contém até 60% de bolhas de ar em suspensão formando uma espuma branca fervente onde a densidade do líquido cai pela metade; nem mesmo nadadores experientes ou barris conseguem boiar nessa água aerada, afundando como chumbo até o leito turbulento e sofrendo 1 nível de exaustão e asfixia por espuma (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Portagem obrigatória das embarcações e carga pelas lajes altas contornando toda a seção de espuma branca.',
+        rescueAndStabilization: 'Tracionamento rápido por cabo flutuante lançado desde a rocha seca lateral.',
+        icon: '🫧⚓',
+        color: '#0ea5e9'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampBedrockStridPotholeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var dt = (defenseType || 'high_terrace_breached_giant_kettle_stone_rotunda_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Rotunda de Marmita de Gigante Fóssil Acima da Cota de Cheia',
+      stridPotholeAndCampSafety: 'Acampamento abrigado dentro de um caldeirão cilíndrico de 5 metros de largura esculpido há milênios no terraço superior a 12 metros acima do rio atual, com parede lateral aberta como porta.',
+      stridPotholeTrenchAndWatch: 'Paredes circulares de granito polido de 3 metros de altura que formam um fortim natural à prova de vento e flechas.',
+      campRestAndSafetyGuards: 'Garante descanso longo seguro e aquecido pelo eco térmico da fogueira na rotunda.',
+      icon: '⛺🪨',
+      color: '#0284c7'
+    };
+
+    if (dt === 'solar_heated_high_pothole_natural_bath_and_cistern') {
+      tech = {
+        defenseTitle: 'Bacia Termal Solar em Marmita Rasa Superior de Água Pluvial',
+        stridPotholeAndCampSafety: 'Poços circulares rasos na laje escura superior que acumulam água de chuva limpa e aquecem a 35 graus sob o sol da tarde.',
+        stridPotholeTrenchAndWatch: 'Permite lavar ferimentos, higienizar a comitiva e abastecer cantis sem descer à fenda letal do rio.',
+        campRestAndSafetyGuards: 'Recupera o moral e previne infecções cutâneas após longas marchas.',
+        icon: '💧☀️',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'spherical_granite_grinder_stone_boiler_cooking_hearth') {
+      tech = {
+        defenseTitle: 'Uso das Esferas de Granito Moedoras (Grinders) como Pedras Térmicas',
+        stridPotholeAndCampSafety: 'As bolas perfeitamente esféricas de granito e basalto retiradas das marmitas secas não racham no fogo por serem livres de fissuras.',
+        stridPotholeTrenchAndWatch: 'Aquecidas na brasa, fervem caldeirões de água em minutos ou mantêm as tendas quentes durante toda a noite.',
+        campRestAndSafetyGuards: 'Proporciona aquecimento seguro sem fumaça dentro das barracas.',
+        icon: '🔥⚫',
+        color: '#f59e0b'
+      };
+    } else if (dt === 'single_log_strid_span_removable_drawbridge_defense') {
+      tech = {
+        defenseTitle: 'Ponte Retrátil de Tronco Único sobre a Fenda do Strid',
+        stridPotholeAndCampSafety: 'Posicionamento do bivaque na margem oposta da garganta de 2 metros de largura, recolhendo a prancha de travessia para o lado do grupo ao anoitecer.',
+        stridPotholeTrenchAndWatch: 'Transforma o abismo fluvial intransponível em um fosso defensivo absoluto contra qualquer criatura terrestre.',
+        campRestAndSafetyGuards: 'Permite que um único sentinela vigie toda a aproximação noturna.',
+        icon: '🪵🛡️',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 229: CAMPOS DE SOLFATARA E LAGOS DE ENXOFRE LÍQUIDO RUBI (D&D 5e)
   // =========================================================================
 
@@ -31700,6 +31804,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessBedrockStridPotholeHazard: calcWildernessBedrockStridPotholeHazard,
+    calcCampBedrockStridPotholeStation: calcCampBedrockStridPotholeStation,
     calcWildernessVolcanicSolfataraFieldHazard: calcWildernessVolcanicSolfataraFieldHazard,
     calcCampVolcanicSolfataraFieldStation: calcCampVolcanicSolfataraFieldStation,
     calcWildernessChalkCliffFlintPlatformHazard: calcWildernessChalkCliffFlintPlatformHazard,
