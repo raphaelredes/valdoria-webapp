@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 237: CALDEIRÕES DE GELO MORTO (KETTLES) E CRISTAS DE ESKERS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessKettleKameEskerHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'arctic').toLowerCase();
+    var ht = (hazardType || 'buried_dead_ice_block_kettle_pit_subsidence').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Abatimento Súbito de Caldeirão de Gelo Morto Soterrado (Kettle Hole Subsidence)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      kettleEskerRisk: 'Planícies de lavagem glaciofluvial (pitted sandur) onde blocos colossais de gelo desprendidos da geleira em recuo ficaram soterrados sob metros de areia e cascalho; quando o coração do bloco derrete na primavera, a abóbada de areia perde sustentação e desaba de uma só vez sob o peso das montarias, abrindo uma cratera em funil de 8 metros cheia de água e lama glacial com 3d6 de concussão e frio (DMG p. 110; XGE p. 109).',
+      pioneerMitigation: 'Marchar pelo alto das cristas sinuosas de cascalho (eskers) evitando depressões circulares úmidas na planície.',
+      rescueAndStabilization: 'Lançamento de cabo desde a borda firme do funil e aquecimento rápido do aventureiro resgatado.',
+      icon: '🕳️🧊',
+      color: '#0284c7'
+    };
+
+    if (ht === 'steep_esker_angle_of_repose_gravel_avalanche') {
+      hazard = {
+        hazardTitle: 'Deslizamento de Talude de Cascalho Rolado na Crista do Esker',
+        saveDC: 14,
+        saveType: 'Destreza',
+        kettleEskerRisk: 'Diques sinuosos de cascalho e seixos rolados de 20 metros de altura depositados por antigos túneis subglaciais, cujas encostas laterais repousam exatamente no ângulo crítico de 35 graus; pisar em falso na borda da crista dispara uma enxurrada de pedras redondas que rolam como esferas de aço ladeira abaixo e projetam o aventureiro para o pântano na base com 2d8 de concussão (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Caminhar estritamente pelo eixo central da espinha do esker, mantendo um metro de distância das bordas de seixos.',
+        rescueAndStabilization: 'Subida assistida por corda e limpeza de escoriações nos joelhos e mãos.',
+        icon: '🪨⛰️',
+        color: '#d97706'
+      };
+    } else if (ht === 'quaking_kettle_bog_sphagnum_false_bottom_drowning') {
+      hazard = {
+        hazardTitle: 'Fundo Falso em Lagoa de Caldeirão (Kettle Bog) sem Saída',
+        saveDC: 15,
+        saveType: 'Força',
+        kettleEskerRisk: 'Crateras circulares antigas de gelo morto convertidas em lagos profundos sem riachos de entrada ou saída, cujas margens crescem para dentro como um anel flutuante de musgo sobre 10 metros de água negra gelada; pisar na borda elástica rompe o anel vegetal e mergulha o explorador sob a prateleira submersa sem degrau de apoio, impondo risco de afogamento e 1 nível de exaustão (DMG p. 109-110; PHB p. 183).',
+        pioneerMitigation: 'Nunca se aproximar da beira verde-clara de lagoas circulares em funil para coletar água.',
+        rescueAndStabilization: 'Uso de vara longa ou prancha estendida sobre o tapete de musgo para puxar o companheiro.',
+        icon: '🌿🌊',
+        color: '#16a34a'
+      };
+    } else if (ht === 'kame_delta_quicksand_upwelling_spring_boil') {
+      hazard = {
+        hazardTitle: 'Fervura de Areia Movediça na Base de Terraço de Kame',
+        saveDC: 14,
+        saveType: 'Força',
+        kettleEskerRisk: 'Na base das colinas cônicas de areia estratificada (kames), a água de degelo infiltrada no topo brota sob pressão artesiana e fluidifica os bancos de areia fina da encosta inferior; o aventureiro que marcha pelo sopé do kame afunda até a cintura em areia movediça fria, ficando impedido (DMG p. 109; PHB p. 185).',
+        pioneerMitigation: 'Contornar as colinas de kame pela meia-encosta de cascalho grosso, acima da linha de surgência de água.',
+        rescueAndStabilization: 'Descarte da mochila e tração diagonal com corda sem movimentos bruscos.',
+        icon: '⏳💧',
+        color: '#ca8a04'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampKettleKameEskerStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'arctic').toLowerCase();
+    var dt = (defenseType || 'elevated_esker_spine_dry_causeway_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque na Espinha Dorsal Seca do Esker Acima do Pântano',
+      kettleEskerAndCampSafety: 'As cristas sinuosas de cascalho grosso dos eskers drenam a água da chuva instantaneamente e erguem-se 15 metros acima dos pântanos e lagoas.',
+      kettleEskerTrenchAndWatch: 'Funciona como estrada natural seca com visão desimpedida para ambos os flancos da planície glacial.',
+      campRestAndSafetyGuards: 'Garante descanso longo enxuto e ventilado contra a umidade fria da baixada.',
+      icon: '⛺🛣️',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'kame_gravel_filtered_spring_water_tap') {
+      tech = {
+        defenseTitle: 'Captação de Água Filtrada por Cascalho na Meia-Encosta do Kame',
+        kettleEskerAndCampSafety: 'Enquanto a água parada dos kettle bogs é ácida, as camadas de areia e seixos do kame funcionam como filtro natural lento.',
+        kettleEskerTrenchAndWatch: 'Entrega água cristalina e livre de sedimentos glaciais diretamente na meia-encosta segura.',
+        campRestAndSafetyGuards: 'Abastece os cantis sem risco de afundamento nas margens falsas das lagoas.',
+        icon: '💧🪨',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'dry_kettle_bowl_windbreak_amphitheater_camp') {
+      tech = {
+        defenseTitle: 'Acampamento Oculto em Caldeirão Seco (Dry Kettle) Acima do Lençol Freático',
+        kettleEskerAndCampSafety: 'Crateras de gelo morto situadas em terraços altos cujo fundo fica acima do lençol freático formam anfiteatros circulares secos e gramados.',
+        kettleEskerTrenchAndWatch: 'As paredes de 8 metros de altura ocultam totalmente o brilho da fogueira e cortam as rajadas de vento.',
+        campRestAndSafetyGuards: 'Permite acampar com fogo aceso sem ser avistado na planície aberta.',
+        icon: '🔥🥣',
+        color: '#84cc16'
+      };
+    } else if (dt === 'rounded_glaciofluvial_cobble_gabion_breastwork') {
+      tech = {
+        defenseTitle: 'Parapeito de Seixos Glaciofluviais nos Acessos da Crista',
+        kettleEskerAndCampSafety: 'Abundância de pedras roladas calibradas no topo do esker para erguer duas muretas transversais fechando a crista estreita.',
+        kettleEskerTrenchAndWatch: 'Canaliza qualquer tentativa de ataque apenas pelas duas pontas do dique ou pelos taludes instáveis.',
+        campRestAndSafetyGuards: 'Concede posição elevada e cobertura sólida para os dois sentinelas.',
+        icon: '🛡️🪨',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 236: GELEIRAS NEGRAS COBERTAS DE DETRITOS E LAGOAS SUPRAGLACIAIS (D&D 5e)
   // =========================================================================
 
@@ -32428,6 +32532,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessKettleKameEskerHazard: calcWildernessKettleKameEskerHazard,
+    calcCampKettleKameEskerStation: calcCampKettleKameEskerStation,
     calcWildernessSupraglacialDebrisGlacierHazard: calcWildernessSupraglacialDebrisGlacierHazard,
     calcCampSupraglacialDebrisGlacierStation: calcCampSupraglacialDebrisGlacierStation,
     calcWildernessDrownedSnagForestHazard: calcWildernessDrownedSnagForestHazard,
