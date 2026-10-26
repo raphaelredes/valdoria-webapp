@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T21:33:32Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T21:36:09Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessCoastalFlyschPlatformHazard) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var cf = CartShared.calcWildernessCoastalFlyschPlatformHazard(bKey, 'sawtooth_flysch_rib_razor_slip');
+        return '<div class="clp-coastal-flysch-platform-card" style="margin:4px 0 6px;text-align:left;background:rgba(8,20,32,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(2,132,199,0.35);font-size:8px;color:#f0f9ff;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cf.color + ';margin-bottom:2px;">' + cf.icon + ' ' + cf.hazardTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Plataforma de Flysch Costeiro:</b> ' + cf.flyschRisk + ' (CD ' + cf.saveDC + ' [' + cf.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Mitigação:</b> ' + cf.pioneerMitigation + ' · <i>Estabilização: ' + cf.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampCoastalFlyschPlatformStation) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var cf = CartShared.calcCampCoastalFlyschPlatformStation(bKey, 'elevated_sandstone_hogback_ledge_bivouac');
+        return '<div class="clp-coastal-flysch-platform-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,24,36,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(14,165,233,0.3);font-size:8px;color:#e0f2fe;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cf.color + ';margin-bottom:2px;">' + cf.icon + ' ' + cf.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>' 
+          + '  <div>• <b>Bivaque em Crista de Flysch:</b> ' + cf.flyschAndCampSafety + ' · <b>Proteção:</b> ' + cf.flyschTrenchAndWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cf.campRestAndSafetyGuards + '</div>' 
           + '</div>';
       })()
     + (function(){

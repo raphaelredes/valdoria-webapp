@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 266: PLATAFORMAS DE ABRASÃO COSTEIRA EM FLYSCH (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessCoastalFlyschPlatformHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'sawtooth_flysch_rib_razor_slip').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Escorregamento em Cristas de Serra em Lâminas de Flysch',
+      saveDC: 15,
+      saveType: 'Destreza',
+      flyschRisk: 'A plataforma intermareal é formada por camadas alternadas verticais de arenito duro e folhelho erodido; as lâminas de arenito emergem como dentes de serra afiados cobertos por limo marinho viscoso onde um escorregão arremessa o aventureiro contra bordas cortantes com 3d6 de dano de corte e laceração de botas e correias (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores avançados utilizando bastões de apoio e solados reforçados com grampos de ferro para caminhar nas fendas secas de maré baixa (Sobrevivência ou Atletismo CD 14).',
+      rescueAndStabilization: 'Extração rápida de fendas lodosas com cordas de nó duplo e desinfecção imediata de cortes marinhos com bálsamos salinos (Medicina CD 13 ou Kit de Primeiros Socorros).',
+      icon: '🌊',
+      color: '#0284c7'
+    };
+
+    if (ht === 'turbidite_planar_rockfall_sheet') {
+      hazard.hazardTitle = 'Descolamento Planar de Placas de Calcário e Folhelho';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Destreza';
+      hazard.flyschRisk = 'Nas falésias verticais de flysch que marginam a plataforma costeira, a vibração do impacto das ondas descola placas delgadas de rocha laminada que despencam como guilhotinas de pedra sobre a praia causando 3d8 de dano cortante e contundente (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Observação atenta do som oco emitido pelas placas ao vento e manutenção de distância segura de 10 metros da base da falésia (Percepção CD 14).';
+      hazard.rescueAndStabilization = 'Remoção ágil de lajes desabadas com alavancas e contenção de hemorragias compressivas (Atletismo CD 14 ou Medicina CD 13).';
+    } else if (ht === 'intertidal_surge_channel_surge') {
+      hazard.hazardTitle = 'Vagalhão Súbito em Gargantas de Sucção Intermareal';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.flyschRisk = 'Canais profundos esculpidos na rocha onde camadas moles de argilito cederam funcionam como funis hidráulicos; a maré enchente empurra trombas de água salgada a grande velocidade que arrastam exploradores contra dentes rochosos com 2d8 de concussão e risco de afogamento (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Monitoramento do ciclo de maré e travessia rápida das calhas estreitas usando amarras de segurança coletivas (Sobrevivência CD 14).';
+      hazard.rescueAndStabilization = 'Lançamento de bóias de cortiça e cabos de resgate para contenção de arrasto antes da preamar (Atletismo CD 13).';
+    } else if (ht === 'algal_slime_trench_entrapment') {
+      hazard.hazardTitle = 'Aprisionamento em Valetas Lodosas com Algas Laminadas';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.flyschRisk = 'Entre duas cristas de arenito formam-se depressões cheias de lama negra putrefata e mantos densos de algas marinhas escorregadias; o aventureiro afunda até a coxa ficando com deslocamento reduzido a zero enquanto a maré começa a subir (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Sondagem sistemática do fundo das poças com bastão longo de madeira antes de pisar (Percepção CD 13).';
+      hazard.rescueAndStabilization = 'Uso de pranchas de madeira para distribuir o peso e puxar o companheiro retido no lodo (Força CD 13 ou Sobrevivência CD 12).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampCoastalFlyschPlatformStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'elevated_sandstone_hogback_ledge_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Crista Elevada de Arenito Rígido',
+      flyschAndCampSafety: 'O acampamento é montado sobre uma crista de arenito espessa e resistente de flysch erguida bem acima da cota da maré de sizígia; base de rocha sólida imune a desabamentos e livre da umidade salina do lodo costeiro (DMG p. 111).',
+      flyschTrenchAndWatch: 'Posição com visão desimpedida do canal marítimo e da falésia, concedendo +2 de bônus na Percepção Passiva das sentinelas para detectar embarcações e criaturas anfíbias.',
+      campRestAndSafetyGuards: 'Descanso seguro com barreira pétrea natural contra o avanço das ondas e invasões noturnas.',
+      icon: '🛡️',
+      color: '#0284c7'
+    };
+
+    if (dt === 'tidal_pool_gravity_settling_cistern') {
+      defense.defenseTitle = 'Bacia de Captação e Decantação de Degelo de Falésia';
+      defense.flyschAndCampSafety = 'Poça natural na bancada superior de arenito abastecida por filetes de água doce que brotam da falésia, decantando areia e permitindo coletar água potável cristalina antes de se misturar ao mar salgado (PHB p. 150).';
+      defense.flyschTrenchAndWatch = 'Abastecimento seguro de água doce para a comitiva sem necessidade de adentrar pântanos salobros perigosos.';
+      defense.campRestAndSafetyGuards = 'Hidratação perfeita sem risco de cólicas ou intoxicação marinha durante o descanso longo.';
+    } else if (dt === 'sawtooth_barrier_flank_stockade') {
+      defense.defenseTitle = 'Paliçada Aproveitando Cristas em Dentes de Serra';
+      defense.flyschAndCampSafety = 'Aproveitamento das cristas paralelas de rocha vertical como muralhas naturais afiadas, fechando os vãos intermediários com troncos de deriva e estacas pontiagudas (DMG p. 111).';
+      defense.flyschTrenchAndWatch = 'Concede cobertura total (+5 na CA) contra arqueiros nas falésias e força qualquer atacante a avançar por desfiladeiros cortantes e estreitos.';
+      defense.campRestAndSafetyGuards = 'Defesa impenetrável contra investidas de grupos hostis ou monstros costeiros durante o sono.';
+    } else if (dt === 'driftwood_drift_kelp_smoke_screen_hearth') {
+      defense.defenseTitle = 'Lareira de Lenha de Deriva em Recesso de Rocha';
+      defense.flyschAndCampSafety = 'Fogueira acesa com madeiras marinhas secas e mantos de algas desidratadas alojada em nicho profundo de arenito, liberando calor contínuo sem chamas altas (PHB p. 185).';
+      defense.flyschTrenchAndWatch = 'Evita que a luz do acampamento seja avistada por piratas no horizonte marinho durante a noite costeira.';
+      defense.campRestAndSafetyGuards = 'Secagem eficiente de roupas salgadas e botas úmidas sem fumaça delatora.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 265: ESCARPAS DE BASALTOS DE INUNDAÇÃO E TRAPPS (D&D 5e)
   // =========================================================================
 
@@ -35396,6 +35476,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessCoastalFlyschPlatformHazard: calcWildernessCoastalFlyschPlatformHazard,
+    calcCampCoastalFlyschPlatformStation: calcCampCoastalFlyschPlatformStation,
     calcWildernessFloodBasaltTrappHazard: calcWildernessFloodBasaltTrappHazard,
     calcCampFloodBasaltTrappStation: calcCampFloodBasaltTrappStation,
     calcWildernessKimberliteDiatremeHazard: calcWildernessKimberliteDiatremeHazard,
