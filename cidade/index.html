@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessLightningAndConductiveRidgeHazard) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var lt = CartShared.calcWildernessLightningAndConductiveRidgeHazard(bKey, 'direct_ridgeline_strike');
+        return '<div class="clp-lightning-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,26,34,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.3);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + lt.color + ';margin-bottom:2px;">' + lt.icon + ' ' + lt.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Perigo:</b> ' + lt.strikeDamageAndSurge + ' (CD ' + lt.saveDC + ' [' + lt.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Atração:</b> ' + lt.conductiveAttraction + ' · <i>Sinal: ' + lt.pioneerWarningSign + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampLightningRodAndGroundingSafety) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var lg = CartShared.calcCampLightningRodAndGroundingSafety(bKey, 'improvised_picket_lightning_rod');
+        return '<div class="clp-grounding-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,24,30,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(2,132,199,0.3);font-size:8px;color:#bae6fd;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + lg.color + ';margin-bottom:2px;">' + lg.icon + ' ' + lg.protectionTitle.toUpperCase() + ' (DMG p. 109):</div>'
+          + '  <div>• <b>Zona de Segurança:</b> ' + lg.safetyZoneRadius + ' · <b>Localização:</b> ' + lg.campsitePlacementSafety + '</div>'
+          + '  <div style="font-size:7.5px;color:#93c5fd;margin-top:1px;">• <b>Protocolo de Metais:</b> ' + lg.metalGearProtocol + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessFungalSporeAndYellowMoldHazard) return '';
         var bKey = (biome && biome.key) || 'forest';
         var fz = CartShared.calcWildernessFungalSporeAndYellowMoldHazard(bKey, 'yellow_mold_colony');

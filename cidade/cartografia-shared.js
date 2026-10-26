@@ -10417,6 +10417,130 @@
     };
   }
 
+  // === calcWildernessLightningAndConductiveRidgeHazard (Raios em Espinhaço, Tempestades Elétricas e Fogo de Santelmo - DMG p. 109-110 / PHB p. 183) ===
+  function calcWildernessLightningAndConductiveRidgeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'direct_ridgeline_strike').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Descarga Direta de Raio em Espinhaço Montanhoso Elevado',
+      saveDC: 15,
+      saveType: 'Destreza',
+      strikeDamageAndSurge: 'Raio de eletricidade atmosférica colossal; 8d10 de dano elétrico em falha (metade no sucesso); atinge o ponto mais alto.',
+      conductiveAttraction: 'Aventureiros com armaduras metálicas ou armas condutoras longas empunhadas sofrem desvantagem na salvaguarda.',
+      pioneerWarningSign: 'Fogo de Santelmo: faíscas azuladas estalam nas pontas das lanças e cabelos se arrepiam 1 rodada antes do raio.',
+      icon: '⚡🏔️',
+      color: '#38bdf8'
+    };
+
+    if (ht === 'ground_current_surface_arc') {
+      hazard = {
+        hazardTitle: 'Arco de Correnteza Superficial em Laje Rocha Úmida',
+        saveDC: 13,
+        saveType: 'Constituição',
+        strikeDamageAndSurge: 'Corrente residual de choque pelo chão encharcado; 3d10 de dano elétrico e condição Atordoado até o final do próximo turno.',
+        pioneerWarningSign: 'Formigamento agudo nas solas das botas de montaria e cheiro penetrante de ozônio no ar.',
+        conductiveAttraction: 'Manter ambos os pés juntos ou agachar sobre manta de lã seca isolante anula a condução do choque pelo solo.',
+        icon: '⚡🪨',
+        color: '#facc15'
+      };
+    } else if (ht === 'geomagnetic_compass_flux' || bk === 'desert' || bk === 'deserto') {
+      hazard = {
+        hazardTitle: 'Tempestade Magnética Ionizada com Desorientação de Bússola',
+        saveDC: 14,
+        saveType: 'Sabedoria (Sobrevivência)',
+        strikeDamageAndSurge: 'Agulha de bússolas e pedras-guia giram freneticamente; marcha desvia em 45 graus com risco de perder a rota.',
+        pioneerWarningSign: 'Céu noturno com auroras elétricas anômalas estalando em tons esmeralda e violeta sobre as dunas.',
+        conductiveAttraction: 'Batedores que navegam por estrelas ou marcos geográficos proeminentes ignoram a anomalia eletromagnética.',
+        icon: '🧭⚡',
+        color: '#c084fc'
+      };
+    } else if (ht === 'supercell_ball_lightning' || bk === 'swamp' || bk === 'pantano') {
+      hazard = {
+        hazardTitle: 'Centelha Esférica Flutuante (Raio Globular Errático)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        strikeDamageAndSurge: 'Orbe plasmático que persegue massas de ferro; 4d10 de dano elétrico e cegueira temporária por clarão cegante.',
+        pioneerWarningSign: 'Zumbido de baixa frequência vibrando no peito acompanhado por orbe luminoso descendo lentamente da nuvem.',
+        conductiveAttraction: 'Permanecer imóvel sem movimentos bruscos permite que o globo passe sem detonar contra o grupo.',
+        icon: '🔮⚡',
+        color: '#e879f9'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      strikeDamageAndSurge: hazard.strikeDamageAndSurge,
+      conductiveAttraction: hazard.conductiveAttraction,
+      pioneerWarningSign: hazard.pioneerWarningSign,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 109-110 (Tempestades Severas, Raios e Ventos Fortes) / PHB p. 183 (Dano Elétrico)'
+    };
+  }
+
+  // === calcCampLightningRodAndGroundingSafety (Para-raios de Acampamento, Aterramento e Segurança Elétrica - DMG p. 109-110 / XGE p. 78) ===
+  function calcCampLightningRodAndGroundingSafety(biomeKey, protectionType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'montanha').toLowerCase();
+    var pt = (protectionType || 'improvised_picket_lightning_rod').toLowerCase();
+
+    var protection = {
+      protectionTitle: 'Para-raios Improvisado com Lança de Ferro e Cabo de Aterramento',
+      safetyZoneRadius: 'Raio de segurança de 20 metros ao redor da haste; desvia descargas atmosféricas diretas para a rocha.',
+      metalGearProtocol: 'Armaduras pesadas e escudos metálicos depositados a 15 metros das tendas sob lona encerada.',
+      campsitePlacementSafety: 'Acampamento montado em depressão natural ou sela rochosa, nunca no cume ou topo do escarpado.',
+      icon: '🛡️⚡',
+      color: '#0284c7'
+    };
+
+    if (pt === 'grounding_cable_trench') {
+      protection = {
+        protectionTitle: 'Trincheira Periférica com Corrente de Ferro Aterrada em Fenda Úmida',
+        safetyZoneRadius: 'Dispersa correntes elétricas que correm pela superfície molhada antes de atingirem os sacos de dormir.',
+        metalGearProtocol: 'Equipamentos de metal condutor limpos e secos dentro de baús de madeira isolante.',
+        campsitePlacementSafety: 'Sentinelas permanecem abrigadas sob fendas rochosas profundas sem contato direto com paredes molhadas.',
+        icon: '⛏️⚡',
+        color: '#38bdf8'
+      };
+    } else if (pt === 'insulated_wool_bivouac_mat') {
+      protection = {
+        protectionTitle: 'Isolamento de Acampamento com Esteiras Secas de Lã e Casca Grossa',
+        safetyZoneRadius: 'Barreira dielétrica de 10 cm entre o corpo dos aventureiros e a terra carregada de estática.',
+        metalGearProtocol: 'Armas de lâmina guardadas em bainhas de couro untado sem ponteiras expostas ao ar livre.',
+        campsitePlacementSafety: 'Evita a proximidade de árvores isoladas altas que atuam como alvos primários de descargas elétricas.',
+        icon: '🏕️🐑',
+        color: '#a3e635'
+      };
+    } else if (pt === 'canyon_floor_shielding') {
+      protection = {
+        protectionTitle: 'Acampamento no Fundo de Desfiladeiro com Paredes Altas Naturais',
+        safetyZoneRadius: 'Paredes do cânion 50 metros acima atraem qualquer descarga, criando cone de sombra elétrico perfeito.',
+        metalGearProtocol: 'Vigilância redobrada contra enxurradas repentinas causadas pelas tempestades nas cabeceiras.',
+        campsitePlacementSafety: 'Posicionamento sobre terraço de cascalho elevado a 3 metros do leito do rio seco.',
+        icon: '⛰️🛡️',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      protectionType: pt,
+      protectionTitle: protection.protectionTitle,
+      safetyZoneRadius: protection.safetyZoneRadius,
+      metalGearProtocol: protection.metalGearProtocol,
+      campsitePlacementSafety: protection.campsitePlacementSafety,
+      icon: protection.icon,
+      color: protection.color,
+      dndRef: 'DMG p. 109-110 (Tempestades Severas e Aterramento) / XGE p. 78 (Segurança de Acampamento)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -12170,6 +12294,8 @@
     calcCampScentConcealmentAndWasteDisposal: calcCampScentConcealmentAndWasteDisposal,
     calcWildernessFungalSporeAndYellowMoldHazard: calcWildernessFungalSporeAndYellowMoldHazard,
     calcCampGroundInsulationAndSleepingPlatform: calcCampGroundInsulationAndSleepingPlatform,
+    calcWildernessLightningAndConductiveRidgeHazard: calcWildernessLightningAndConductiveRidgeHazard,
+    calcCampLightningRodAndGroundingSafety: calcCampLightningRodAndGroundingSafety,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
