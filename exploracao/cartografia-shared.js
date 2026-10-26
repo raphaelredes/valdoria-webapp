@@ -13517,6 +13517,130 @@
     };
   }
 
+  // === calcWildernessMangroveSwampAndTidalMudflatHazard (Manguezais de Maré, Peixes-Pedra e Gaiolas de Raízes - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessMangroveSwampAndTidalMudflatHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'anaerobic_black_mudflat_sink_trap').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Lodo Negro Anaeróbico de Maré Baixa e Sucção Pútrida',
+      saveDC: 14,
+      saveType: 'Força',
+      mangroveDamageAndTrapping: 'Lamaçal salino profundo de sucção a vácuo; perda total de deslocamento e risco crítico de submersão na maré enchente (DMG p. 110).',
+      pioneerMitigation: 'Batedores avançam exclusivamente pelas raízes escora de mangue vermelho e usam pranchas de bambu para cruzar canais.',
+      rescueAndStabilization: 'Tracionamento com laços e cabos estaiados em troncos firmes, seguido de lavagem das feridas com água doce morna.',
+      icon: '🦀🪵',
+      color: '#475569'
+    };
+
+    if (ht === 'submerged_stonefish_and_stingray_spine') {
+      hazard = {
+        hazardTitle: 'Ferrão Oculto de Peixe-Pedra e Arraia de Lama Salobra',
+        saveDC: 13,
+        saveType: 'Constituição',
+        mangroveDamageAndTrapping: 'Espinho peçonhento na vasa da maré baixa; 2d8 de veneno/perfuração, dor lancinante e condição Envenenado por 24 horas.',
+        pioneerMitigation: 'Marcha arrastando os pés na lama para afugentar peixes bentônicos e botas de sola chapeada com madeira dura.',
+        rescueAndStabilization: 'Imersão imediata do membro atingido em água a 45°C para neutralizar o veneno proteico e extração da farpa.',
+        icon: '🐟⚠️',
+        color: '#dc2626'
+      };
+    } else if (ht === 'tide_surge_mangrove_root_cage_trap') {
+      hazard = {
+        hazardTitle: 'Subida Súbita de Maré e Gaiola de Raízes Aéreas',
+        saveDC: 13,
+        saveType: 'Destreza',
+        mangroveDamageAndTrapping: 'Água subindo 2 metros em minutos enquanto raízes retorcidas prendem botas e fardos; 2d6 de concussão e risco de afogamento.',
+        pioneerMitigation: 'Monitoramento rigoroso das tábuas de maré lunares e navegação exclusiva por canais principais com canoas leves.',
+        rescueAndStabilization: 'Corte ágil de raízes com facões de mato pesados e flutuação de companheiros com bexigas de ar infladas.',
+        icon: '🌊🌿',
+        color: '#0284c7'
+      };
+    } else if (ht === 'stagnant_salt_marsh_gas_burst') {
+      hazard = {
+        hazardTitle: 'Erupção de Gás Sulfídrico em Esteira de Algas Podres',
+        saveDC: 13,
+        saveType: 'Constituição',
+        mangroveDamageAndTrapping: 'Névoa fétida de sulfeto sob lâmina d\'água agitada; 2d6 de dano de veneno e desvantagem em testes de resistência física.',
+        pioneerMitigation: 'Máscaras de pano embebidas em água salgada limpa e travessia rápida sem apoiar bastões no lodo podre.',
+        rescueAndStabilization: 'Remoção urgente para praia aberta com brisa marinha e inalação de vapores de resina balsâmica.',
+        icon: '☣️🫧',
+        color: '#84cc16'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      mangroveDamageAndTrapping: hazard.mangroveDamageAndTrapping,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Pântanos Salgados e Marés) / PHB p. 182-183 (Asfixia e Terreno Difícil)'
+    };
+  }
+
+  // === calcCampMangroveStiltPlatformAndOutriggerStation (Plataformas em Forquilha, Pirogas de Balancim e Coletor de Chuva - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampMangroveStiltPlatformAndOutriggerStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'stilted_mangrove_timber_platform_deck').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Plataforma Elevada em Forquilhas de Mangue Vermelho',
+      stiltElevationAndTidalSecurity: 'Piso de toras montado 2 metros acima da maré alta máxima apoiado na copa de raízes escora imputrescíveis.',
+      mooringAndWaterHarvestingDefenses: 'Isolamento completo contra a lama cáustica, marés de sizígia e rastejantes carnívoros do manguezal.',
+      campRestAndSafetyGuards: 'Permite repouso longo seco e confortável sem risco de inundação da área dos sacos de dormir.',
+      icon: '🛖🌊',
+      color: '#10b981'
+    };
+
+    if (dt === 'outrigger_pirogue_tied_mooring_boom') {
+      tech = {
+        defenseTitle: 'Amarração de Pirogas Fluviais com Balancim Estabilizador',
+        stiltElevationAndTidalSecurity: 'Canoas leves com hastes estabilizadoras amarradas com cabo de folga na lateral da plataforma.',
+        mooringAndWaterHarvestingDefenses: 'Rota de fuga e transporte de equipamentos sempre flutuando e pronta para uso imediato em emergências.',
+        campRestAndSafetyGuards: 'Garante evacuação ordenada da comitiva caso o nível da maré suba além das previsões astronômicas.',
+        icon: '🛶⚓',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'elevated_fire_hearth_sand_box') {
+      tech = {
+        defenseTitle: 'Caixa de Fogo Elevada com Cama de Areia e Argila Seca',
+        stiltElevationAndTidalSecurity: 'Bandeja suspensa de madeira revestida com 10 cm de areia e cascalho de conchas para fogueira contínua.',
+        mooringAndWaterHarvestingDefenses: 'Permite cozinhar e manter fumaça repelente sem queimar o assoalho de madeira da plataforma.',
+        campRestAndSafetyGuards: 'Mantém o bivaque aquecido e livre de mosquitos transmissores de febres estuarinas durante a noite.',
+        icon: '🔥📦',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'brackish_water_solar_still_and_rain_tarps') {
+      tech = {
+        defenseTitle: 'Toldos Coletores de Chuva e Destilador de Água Salobra',
+        stiltElevationAndTidalSecurity: 'Lonas côncavas limpas captando água pluvial direcionada para barris de carvalho estéreis.',
+        mooringAndWaterHarvestingDefenses: 'Abastecimento diário de até 30 litros de água doce cristalina em pleno ambiente de salmoura marinha.',
+        campRestAndSafetyGuards: 'Garante que os aventureiros mantenham hidratação impecável prevenindo intoxicações por água salgada.',
+        icon: '🌧️🚰',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      stiltElevationAndTidalSecurity: tech.stiltElevationAndTidalSecurity,
+      mooringAndWaterHarvestingDefenses: tech.mooringAndWaterHarvestingDefenses,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque Estuarino) / XGE p. 78 (Equipamento Náutico e Sobrevivência)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -15318,6 +15442,8 @@
     calcCampCanyonRockOverhangAndWindbreakStation: calcCampCanyonRockOverhangAndWindbreakStation,
     calcWildernessSteppeGrassFireAndWindstormHazard: calcWildernessSteppeGrassFireAndWindstormHazard,
     calcCampSteppeYurtShelterAndFirebreakStation: calcCampSteppeYurtShelterAndFirebreakStation,
+    calcWildernessMangroveSwampAndTidalMudflatHazard: calcWildernessMangroveSwampAndTidalMudflatHazard,
+    calcCampMangroveStiltPlatformAndOutriggerStation: calcCampMangroveStiltPlatformAndOutriggerStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
