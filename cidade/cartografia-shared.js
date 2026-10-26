@@ -20575,6 +20575,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 164: PLATÔS CÁRSTICOS ALPINOS FRATURADOS (LAPIAZ) E GALERIAS GLACIOCÁRSTICAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessAlpineLapiesIceShaftHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'lapies_razor_grike_crevasse_shear_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda em Fenda Estreita de Lapiaz com Lâminas Calcárias Afiadas',
+      saveDC: 15,
+      saveType: 'Destreza',
+      lapiesAndGlaciokarstRisk: 'Pavimento cárstico fraturado por fendas verticais de 12 metros de profundidade com bordas afiadas como facas; o salto entre cristas falha e o explorador despenca prensado entre lâminas calcárias sofrendo 3d8 de concussão e lacerações profundas (DMG p. 110, 190).',
+      pioneerMitigation: 'Batedores avançam encordoados em dupla e utilizam pranchas de travessia de alumínio forjado ou madeira densa sobre as fendas mais largas.',
+      rescueAndStabilization: 'Içamento vertical com tripé de resgate de montanha e cintas acolchoadas, imobilização com tala rígida e sutura de cortes com fio encerado asséptico.',
+      icon: '🏔️🔪',
+      color: '#475569'
+    };
+
+    if (ht === 'glaciokarst_ice_shaft_black_glaze_slide') {
+      hazard = {
+        hazardTitle: 'Escorregamento em Sumidouro Glaciocárstico com Gelo Vítreo Liso',
+        saveDC: 15,
+        saveType: 'Destreza',
+        lapiesAndGlaciokarstRisk: 'Piso cárstico em declive recoberto por camada de gelo transparente polido por degelo noturno; a ausência de atrito projeta aventureiros em rampa inclinada em direção a funil abissal de gelo causando 2d8 de concussão e risco de perda de carga.',
+        pioneerMitigation: 'Uso obrigatório de botas com grampões de 10 pontas de aço forjado e avanço com picaretas de gelo cravadas a cada passo.',
+        rescueAndStabilization: 'Lançamento de corda com nó prussik fixado em píton de gelo, aquecimento de extremidades dormentes e infusão de caldo quente temperado.',
+        icon: '❄️🕳️',
+        color: '#0284c7'
+      };
+    } else if (ht === 'catabatic_ice_cave_draft_hypothermia_shock') {
+      hazard = {
+        hazardTitle: 'Correnteza de Ar Glacial Catabática em Galeria Subterrânea a -15°C',
+        saveDC: 14,
+        saveType: 'Constituição',
+        lapiesAndGlaciokarstRisk: 'Ventos descendentes gelados canalizados através de chaminés cársticas com velocidade de 60 km/h; congelam o suor nas roupas em minutos, provocando choque hipotérmico e 1 nível de exaustão com perda de sensibilidade motora fina (PHB p. 182-183, 185).',
+        pioneerMitigation: 'Uso de trajes térmicos em camadas de lã pura cobertos por anoraques de couro estanque com gola de pele espessa.',
+        rescueAndStabilization: 'Isolamento imediato em saco de dormir de penas com bolsa de água quente no peito e administração de bebida açucarada tépida.',
+        icon: '💨❄️',
+        color: '#38bdf8'
+      };
+    } else if (ht === 'permafrost_frost_heave_boulder_shatter') {
+      hazard = {
+        hazardTitle: 'Estilhaçamento Criogênico de Bloco Calcário Sob Tensão de Gelo',
+        saveDC: 14,
+        saveType: 'Destreza',
+        lapiesAndGlaciokarstRisk: 'A expansão da água congelada no interior das microporosidades do calcário causa fragmentação súbita de laje rochosa com estampido semelhante a tiro de trabuco; arremessa estilhaços pontiagudos causando 2d6 de dano cortante.',
+        pioneerMitigation: 'Desvio de lajes com fissuras esbranquiçadas visíveis e uso de escudos ou mantos reforçados para amortecer projeções de brita.',
+        rescueAndStabilization: 'Extração de fragmentos de pedra calcária da pele com pinça cirúrgica e aplicação de pomada cicatrizante de própolis montanhosa.',
+        icon: '💥🪨',
+        color: '#ca8a04'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampAlpineLapiesIceShaftStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'insulated_glaciokarst_alcove_platform_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Alcova Cársica Alpinizada com Lastro Térmico de Cascalho',
+      lapiesAndCampSafety: 'Acampamento montado em cavidade protegida na base de escarpa de lapiaz, com solo nivelado artificialmente com cascalho miúdo e esteiras de couro acolchoado para isolar o frio da pedra.',
+      lapiesParapetAndFossilIceCistern: 'A mureta frontal de pedras soltas bloqueia ventanias catabáticas de montanha e concede visão desobstruída do platô cárstico para as sentinelas.',
+      campRestAndSafetyGuards: 'Garante sono profundo calmo, seguro e aconchegante para todos os membros do grupo, com imunidade a desabamentos e correntes polares.',
+      icon: '⛺🏔️',
+      color: '#475569'
+    };
+
+    if (dt === 'dry_stacked_lapies_slab_windbreak_bastion') {
+      tech = {
+        defenseTitle: 'Paliçada de Lajes Calcárias de Lapiaz com Fendas para Arqueiros',
+        lapiesAndCampSafety: 'Muralha perimétrica de 1,6 metro de altura construída com placas tabulares de calcário justapostas com amarração de cunhas que barra investidas de predadores alpinos.',
+        lapiesParapetAndFossilIceCistern: 'Concede cobertura superior (+5 na CA) para os defensores do acampamento e serve de anteparo corta-vento impenetrável.',
+        campRestAndSafetyGuards: 'Assegura vigilância tranquila para as sentinelas e repouso tranquilo para os aventureiros em recuperação.',
+        icon: '🛡️🧱',
+        color: '#334155'
+      };
+    } else if (dt === 'fossil_ice_melt_basin_and_copper_hearth_boiler') {
+      tech = {
+        defenseTitle: 'Derretedor de Gelo Fóssil Glaciocárstico com Serpentina de Cobre',
+        lapiesAndCampSafety: 'Caldeirão alimentado com blocos de gelo puro extraídos das galerias profundas conectado a serpentina sobre braseiro de turfa compactada.',
+        lapiesParapetAndFossilIceCistern: 'Produz 50 litros diários de água mineral esterilizada quente e reconfortante, mantendo a comitiva devidamente hidratada e aquecida na alta montanha.',
+        campRestAndSafetyGuards: 'Previne hipotermia, desidratação alpina e cansaço extremo, acelerando a recuperação de todos os exploradores.',
+        icon: '🔥💧',
+        color: '#0284c7'
+      };
+    } else if (dt === 'crevasse_wire_bell_seismic_chime_alarm') {
+      tech = {
+        defenseTitle: 'Alarme Sísmico de Fissura com Cabos de Aço e Sinos de Bronze Alpino',
+        lapiesAndCampSafety: 'Fios esticados sobre as canaletas de lapiaz ao redor do bivaque conectados a pêndulos de bronze no interior das fendas que vibram sonoramente a qualquer pisada externa.',
+        lapiesParapetAndFossilIceCistern: 'Detecta passos na rocha calcária a 50 metros de distância com alarme sonoro instantâneo reverberando na caverna.',
+        campRestAndSafetyGuards: 'Garante que a comitiva descanse com serenidade total sabendo que nenhuma criatura das alturas passará despercebida.',
+        icon: '🔔🏔️',
+        color: '#f59e0b'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 163: CÂNYONS DE ARENITO ENTALHADO EM FENDA ESTREITA E TORRENTES RELÂMPAGO (D&D 5e)
   // =========================================================================
 
@@ -24834,6 +24938,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessAlpineLapiesIceShaftHazard: calcWildernessAlpineLapiesIceShaftHazard,
+    calcCampAlpineLapiesIceShaftStation: calcCampAlpineLapiesIceShaftStation,
     calcWildernessSlotCanyonFlashFloodHazard: calcWildernessSlotCanyonFlashFloodHazard,
     calcCampSlotCanyonFlashFloodStation: calcCampSlotCanyonFlashFloodStation,
     calcWildernessQuakingBogReedHazard: calcWildernessQuakingBogReedHazard,
