@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 277: DELTAS LACUSTRES EM GILBERT E ENCOSTAS DE PROGRADAÇÃO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessGilbertDeltaHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var ht = (hazardType || 'foreset_slope_liquefaction_slump').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Liquefação e Escorregamento Subaquático em Encosta Foreset',
+      saveDC: 15,
+      saveType: 'Destreza',
+      gilbertDeltaRisk: 'A borda de avanço do delta lacustre repousa no limite crítico de inclinação de 32 graus sobre águas gélidas de 50 metros de profundidade; a passagem de carretas ou montarias na beirada desestabiliza os estratos arenosos saturados, provocando liquefação súbita que engole o terreno sob a comitiva com 3d8 de concussão e arrasto violento para o abismo lacustre com risco de afogamento (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores avançados testando a coesão das bordas de praia com estacas de profundidade e demarcando a linha de recuo seguro nos leitos de topo horizontais (Sobrevivência ou Investigação CD 14).',
+      rescueAndStabilization: 'Lançamento de cabos de náilon e laços de segurança ancorados em matacões estáveis de leito de topo e drenagem pulmonar de água fria (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🌊',
+      color: '#0284c7'
+    };
+
+    if (ht === 'topset_gravel_braided_surge_flash') {
+      hazard.hazardTitle = 'Enxurrada Truncada em Canais Entrelaçados de Leito de Topo';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.gilbertDeltaRisk = 'Canais anastomosados de cascalho no topo do delta sofrem transbordamento violento por degelo repentino a montante; uma lâmina de água de 1 metro com seixos rolantes pesados varre a planície aluvial, exigindo salvaguarda de Força CD 14 ou ser derrubado e arrastado por 15 metros sofrendo 2d8 de dano de concussão e perda de fardos de carga (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Observação da turbidez e de troncos flutuantes a montante e fixação de cordas-guia em blocos ancorados (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Resgate ágil com arpões de ancoragem e recolhimento de mantimentos encharcados (Atletismo CD 13).';
+    } else if (ht === 'underflow_turbidity_current_rip') {
+      hazard.hazardTitle = 'Corrente de Turbidez Subaquática em Boca de Deságue';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Constituição';
+      hazard.gilbertDeltaRisk = 'Águas fluviais densas e carregadas de silte mergulham diretamente sob a lâmina superficial pura do lago, criando uma contracorrente de fundo oculta de alta velocidade e temperatura próxima a 2°C; nadar ou vauzejar atrai o explorador para o mergulho túrgido causando choque térmico, 3d6 de frio e 1 nível de exaustão imediata por hipotermia aguda (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Uso de canoas leves em arco aberto afastado da pluma lamacenta de deságue (Veículos Aquáticos CD 14).';
+      hazard.rescueAndStabilization = 'Aquecimento corporal urgente com peles secas e consumo de caldos quentes medicinais (Medicina CD 13).';
+    } else if (ht === 'wave_cut_notched_cliff_undermine') {
+      hazard.hazardTitle = 'Colapso de Falésia Truncada por Ondas Lacustres';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.gilbertDeltaRisk = 'Tempestades no lago escavam entalhes basais profundos nos terraços antigos do delta; a borda suspensa de cascalho cede sob a marcha, despencando 10 metros em blocos desarticulados com 2d10 de concussão (DMG p. 110; PHB p. 182).';
+      hazard.pioneerMitigation = 'Inspeção prévia da crista e identificação de fendas de tração paralelas à margem (Percepção CD 13).';
+      hazard.rescueAndStabilization = 'Extração de aventureiros sob cascalheira com alavancas e pá de sapa (Atletismo CD 14).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampGilbertDeltaStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var dt = (defenseType || 'elevated_topset_terrace_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Terraço Elevado de Leito de Topo',
+      gilbertDeltaAndCampSafety: 'O acampamento é assentado em um terraço relictal de cascalho consolidado 15 metros acima do nível do lago, com drenagem natural instantânea de chuvas por porosidade e piso firme (DMG p. 111).',
+      gilbertDeltaAndWatch: 'A posição dominante descortina tanto o desfiladeiro fluvial a montante quanto todo o espelho de água do lago por milhas, impedindo aproximações furtivas de embarcações ou feras costeiras.',
+      campRestAndSafetyGuards: 'Descanso seco e seguro sem risco de umidade no solo ou inundações.',
+      icon: '🛡️',
+      color: '#0284c7'
+    };
+
+    if (dt === 'deltaic_gravel_seep_filtration_well') {
+      defense.defenseTitle = 'Poço de Captação Filtrado em Cascalheira Deltaica';
+      defense.gilbertDeltaAndCampSafety = 'Escavação rasa na faixa de seixos limpos que capta água freática decantada pelas camadas de areia de topo, límpida, gelada e livre do silte lacustre (PHB p. 150).';
+      defense.gilbertDeltaAndWatch = 'Fornece suprimento inesgotável de água potável pura para toda a comitiva durante o descanso longo.';
+      defense.campRestAndSafetyGuards = 'Hidratação perfeita sem risco de lodo bacteriano ou turbidez mineral.';
+    } else if (dt === 'abandoned_channel_defensive_bulwark') {
+      defense.defenseTitle = 'Entrincheiramento em Canal Anastomosado Abandonado';
+      defense.gilbertDeltaAndCampSafety = 'Leito seco de cascalho flanqueado por diques naturais de seixos de 2 metros de altura, criando uma trincheira protegida de ventos lacustres (DMG p. 111).';
+      defense.gilbertDeltaAndWatch = 'As bermas laterais concedem cobertura superior (+5 na CA) contra arqueiros e ocultam fogueiras e tendas de qualquer vigia no lago aberto.';
+      defense.campRestAndSafetyGuards = 'Camuflagem tática noturna com barreira física natural contra incursões inimigas.';
+    } else if (dt === 'lacustrine_driftwood_palisade_barrier') {
+      defense.defenseTitle = 'Paliçada de Madeiramento Flutuante Acumulado';
+      defense.gilbertDeltaAndCampSafety = 'Troncos de árvores arrastados por cheias e depositados na praia do delta são entrelaçados com cordas e estacas cravadas no cascalho, formando um baluarte perimetral contra predadores (PHB p. 185).';
+      defense.gilbertDeltaAndWatch = 'Bloqueia o acesso direto de bestas anfíbias e concede sentinelas postos de observação elevados e firmes.';
+      defense.campRestAndSafetyGuards = 'Segurança sólida no perímetro garantindo sono ininterrupto ao grupo.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 276: CAMPOS DE LAVA PĀHOEHOE, TÚMULOS E TUBOS DE LAVA (D&D 5e)
   // =========================================================================
 
@@ -36276,6 +36356,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessGilbertDeltaHazard: calcWildernessGilbertDeltaHazard,
+    calcCampGilbertDeltaStation: calcCampGilbertDeltaStation,
     calcWildernessPahoehoeLavaTubeHazard: calcWildernessPahoehoeLavaTubeHazard,
     calcCampPahoehoeLavaTubeStation: calcCampPahoehoeLavaTubeStation,
     calcWildernessDiabasePalisadeHazard: calcWildernessDiabasePalisadeHazard,

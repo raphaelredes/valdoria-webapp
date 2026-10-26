@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessGilbertDeltaHazard) return '';
+        var bKey = (biome && biome.key) || 'mountains';
+        var gd = CartShared.calcWildernessGilbertDeltaHazard(bKey, 'foreset_slope_liquefaction_slump');
+        return '<div class="clp-gilbert-delta-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,24,36,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(2,132,199,0.35);font-size:8px;color:#f0f9ff;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + gd.color + ';margin-bottom:2px;">' + gd.icon + ' ' + gd.hazardTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Delta em Gilbert e Encosta Foreset:</b> ' + gd.gilbertDeltaRisk + ' (CD ' + gd.saveDC + ' [' + gd.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Mitigação:</b> ' + gd.pioneerMitigation + ' · <i>Estabilização: ' + gd.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampGilbertDeltaStation) return '';
+        var bKey = (biome && biome.key) || 'mountains';
+        var gd = CartShared.calcCampGilbertDeltaStation(bKey, 'elevated_topset_terrace_bivouac');
+        return '<div class="clp-gilbert-delta-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(16,28,40,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(14,165,233,0.3);font-size:8px;color:#f0f9ff;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + gd.color + ';margin-bottom:2px;">' + gd.icon + ' ' + gd.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>' 
+          + '  <div>• <b>Bivaque em Terraço de Topo:</b> ' + gd.gilbertDeltaAndCampSafety + ' · <b>Defesa:</b> ' + gd.gilbertDeltaAndWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + gd.campRestAndSafetyGuards + '</div>' 
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessPahoehoeLavaTubeHazard) return '';
         var bKey = (biome && biome.key) || 'volcanic';
         var pt = CartShared.calcWildernessPahoehoeLavaTubeHazard(bKey, 'skylight_roof_collapse_plunge');
