@@ -12153,6 +12153,130 @@
     };
   }
 
+  // === calcWildernessHighAltitudeHypoxiaAndThinAirHazard (Rarefação de Oxigênio, Hipóxia e Mal da Altitude - DMG p. 110 / PHB p. 183) ===
+  function calcWildernessHighAltitudeHypoxiaAndThinAirHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'acute_mountain_sickness_hypoxia').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Mal da Montanha Agudo e Hipóxia em Ar Rarefeito',
+      saveDC: 12,
+      saveType: 'Constituição',
+      altitudeDamageAndHypoxia: 'Altitude acima de 3.000 metros (10.000 pés); salvaguarda horária de CON ou sofre 1 nível de Exaustão por falta de oxigênio (DMG p. 110).',
+      pioneerMitigation: 'Batedores conduzem ritmo cadenciado com paradas de 10 minutos a cada hora para equalização pulmonar da comitiva.',
+      oxygenRecoveryAndAcclimatization: 'Inalação de vapores de cânfora e repouso deitado com a cabeça elevada em relação ao tórax.',
+      icon: '🏔️🫁',
+      color: '#38bdf8'
+    };
+
+    if (ht === 'thermal_updraft_cliff_vertigo') {
+      hazard = {
+        hazardTitle: 'Correntes Térmicas Ascendentes e Vertigem de Precipício',
+        saveDC: 13,
+        saveType: 'Sabedoria',
+        altitudeDamageAndHypoxia: 'Rajadas súbitas de ar quente que sobem do vale criando vertigem visual; perda de equilíbrio e condição Caído à beira do abismo.',
+        pioneerMitigation: 'Caminhar encostado na parede de rocha interior mantendo corda de retinida presa aos arreios dos companheiros.',
+        oxygenRecoveryAndAcclimatization: 'Sentar imediatamente contra a rocha firme, fixar o olhar em ponto estático no chão e respirar fundo.',
+        icon: '🧗‍♀️🌪️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'gravitational_pocket_distortion') {
+      hazard = {
+        hazardTitle: 'Bolso Anômalo de Microgravidade em Crista Planar',
+        saveDC: 13,
+        saveType: 'Destreza',
+        altitudeDamageAndHypoxia: 'Flutuação gravitacional imprevisível; saltos descontrolados, deslocamento reduzido à metade e risco de queda vertical de 6 metros.',
+        pioneerMitigation: 'Uso de botas de solado pesado de chumbo e fixação contínua de mosquetões em cabos de segurança de aço.',
+        oxygenRecoveryAndAcclimatization: 'Tração de recolhimento por companheiros ancorados e redistribuição uniforme do peso dos alforjes.',
+        icon: '🌌⚖️',
+        color: '#c084fc'
+      };
+    } else if (ht === 'alpine_solar_uv_retina_burn') {
+      hazard = {
+        hazardTitle: 'Radiação Ultravioleta Alpina e Cegueira da Neve',
+        saveDC: 12,
+        saveType: 'Constituição',
+        altitudeDamageAndHypoxia: 'Reflexão solar intensa em altitude com ar fino; queimação de córnea, lacrimejamento e desvantagem em Percepção visual.',
+        pioneerMitigation: 'Aplicação de carvão vegetal moído sob as órbitas oculares e uso de máscaras de couro com frestas de visão.',
+        oxygenRecoveryAndAcclimatization: 'Lavagem dos olhos com compressas de chá de camomila frio e descanso em ambiente totalmente escurecido.',
+        icon: '☀️👁️',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      altitudeDamageAndHypoxia: hazard.altitudeDamageAndHypoxia,
+      pioneerMitigation: hazard.pioneerMitigation,
+      oxygenRecoveryAndAcclimatization: hazard.oxygenRecoveryAndAcclimatization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110 (Grande Altitude e Hipóxia) / PHB p. 183 (Asfixia e Exaustão)'
+    };
+  }
+
+  // === calcCampAcclimatizationBivouacAndOxygenTrap (Bivaques de Aclimatação, Inaladores de Musgo e Redes Suspensas - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampAcclimatizationBivouacAndOxygenTrap(biomeKey, acclimatizationType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var at = (acclimatizationType || 'staged_altitude_bivouac_terrace').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Escavado de Aclimatação em Terraço Protegido',
+      altitudeAdaptationEfficiency: 'Abrigo intermediário a sotavento que reduz pela metade o tempo biológico de adaptação à altitude da comitiva.',
+      oxygenAndWindShieldProtection: 'Nicho natural escavado que bloqueia 100% das rajadas de cume e preserva a pressão de ar interior.',
+      campRestAndSafetyGuards: 'Permite descanso curto ou longo restaurador sem penalidades respiratórias para conjuradores e guerreiros.',
+      icon: '🏕️⛰️',
+      color: '#10b981'
+    };
+
+    if (at === 'alpine_moss_oxygen_inhaler') {
+      tech = {
+        defenseTitle: 'Inalador de Tecido com Musgo Esponjoso e Essência de Menta',
+        altitudeAdaptationEfficiency: 'Dispositivo facial leve que umedece o ar rarefeito e dilata os brônquios pulmonares durante o sono.',
+        oxygenAndWindShieldProtection: 'Concede vantagem em todas as salvaguardas de Constituição contra hipóxia e fadiga de cume.',
+        campRestAndSafetyGuards: 'Sentinelas de vigília mantêm clareza mental e acuidade auditiva perfeita durante os turnos noturnos.',
+        icon: '🌿🫁',
+        color: '#38bdf8'
+      };
+    } else if (at === 'portaledge_cliff_suspension_hammock') {
+      tech = {
+        defenseTitle: 'Redes Tubulares Suspensas em Parede de Rocha (Portaledge)',
+        altitudeAdaptationEfficiency: 'Plataforma rígida de alumínio e lona ancorada em fissuras de rocha viva com três pitões de redundância.',
+        oxygenAndWindShieldProtection: 'Permite acampar em paredes verticais de desfiladeiros sem depender de terrenos planos inexistentes.',
+        campRestAndSafetyGuards: 'Aventureiros dormem atados por cintos de escalada com zero risco de rolamento ou quedas noturnas.',
+        icon: '🧗‍♂️🛏️',
+        color: '#ca8a04'
+      };
+    } else if (at === 'tundra_ginseng_mineral_broth') {
+      tech = {
+        defenseTitle: 'Caldo Energético de Raiz de Ginseng da Tundra e Sal Mineral',
+        altitudeAdaptationEfficiency: 'Infusão fervida rica em eletrólitos e adaptógenos naturais que estimula a oxigenação celular.',
+        oxygenAndWindShieldProtection: 'Previne dores de cabeça matinais, retenção anômala de fluidos e náuseas provocadas pelo ar fino.',
+        campRestAndSafetyGuards: 'Restaura o vigor dos membros do grupo para reiniciar a escalada ao amanhecer com energia plena.',
+        icon: '🍵🌱',
+        color: '#84cc16'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      acclimatizationType: at,
+      defenseTitle: tech.defenseTitle,
+      altitudeAdaptationEfficiency: tech.altitudeAdaptationEfficiency,
+      oxygenAndWindShieldProtection: tech.oxygenAndWindShieldProtection,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Acampamento em Altitude) / XGE p. 78 (Engenharia de Terreno e Aclimatação)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -13934,6 +14058,8 @@
     calcCampGlyphicWardsAndChalkCirclePerimeter: calcCampGlyphicWardsAndChalkCirclePerimeter,
     calcWildernessBlizzardAndWhiteoutHazard: calcWildernessBlizzardAndWhiteoutHazard,
     calcCampSnowTrenchQuinzheeAndFurBedding: calcCampSnowTrenchQuinzheeAndFurBedding,
+    calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
+    calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

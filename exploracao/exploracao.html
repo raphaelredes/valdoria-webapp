@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T04:29:40Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T04:34:28Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessHighAltitudeHypoxiaAndThinAirHazard) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var ha = CartShared.calcWildernessHighAltitudeHypoxiaAndThinAirHazard(bKey, 'acute_mountain_sickness_hypoxia');
+        return '<div class="clp-altitude-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,26,34,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.3);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ha.color + ';margin-bottom:2px;">' + ha.icon + ' ' + ha.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Perigo:</b> ' + ha.altitudeDamageAndHypoxia + ' (CD ' + ha.saveDC + ' [' + ha.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Prevenção:</b> ' + ha.pioneerMitigation + ' · <i>Equalização: ' + ha.oxygenRecoveryAndAcclimatization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampAcclimatizationBivouacAndOxygenTrap) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var ac = CartShared.calcCampAcclimatizationBivouacAndOxygenTrap(bKey, 'staged_altitude_bivouac_terrace');
+        return '<div class="clp-acclimatization-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,28,24,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#d1fae5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ac.color + ';margin-bottom:2px;">' + ac.icon + ' ' + ac.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Adaptação:</b> ' + ac.altitudeAdaptationEfficiency + ' · <b>Proteção:</b> ' + ac.oxygenAndWindShieldProtection + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Sono:</b> ' + ac.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){
