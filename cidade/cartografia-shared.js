@@ -20546,6 +20546,113 @@
   // PHB p. 182-183 (Travel Pace, Navigation in Mountain Passes), PHB p. 190 (Falling on Sharp Crystals), XGE p. 77-83
   // =========================================================================
 
+
+  // =========================================================================
+  // FASE 154: FLORESTAS PETRIFICADAS SUBMERSAS E FONTES DE ÁGUA GASOSA
+  // D&D 5e: DMG p. 110-111 (Hazards, Submerged Obstacles, Soda Springs), DMG p. 116-117 (Underwater Visibility & Corrosion),
+  // PHB p. 182-183 (Travel Pace, Navigation in Lakes), PHB p. 198 (Underwater Combat), XGE p. 77-83
+  // =========================================================================
+
+  function calcWildernessSubmergedPetrifiedForestHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'submerged_silicified_snag_hull_rupture_puncture').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Perfuração em Troncos Petrificados Submersos Afiados',
+      saveDC: 15,
+      saveType: 'Destreza',
+      submergedForestRisk: 'Galhadas e tocos fósseis de quartzo e calcedônia submersos na água lacustre turva; a aproximação de barcas ou nadadores colide contra pontas pétreas afiadas que rasgam cascos de madeira e causam 3d8 de perfuração e naufrágio em minutos (DMG p. 110, 116).',
+      pioneerMitigation: 'Batedores na proa sondam a lâmina d\'água com varas graduadas e utilizam placas de chumbo no fundo das embarcações para amortecimento.',
+      rescueAndStabilization: 'Resgate urgente de náufragos com boias de cortiça e cabos de arremesso, estancamento de sangramentos e contenção de hipotermia.',
+      icon: '🪵⛵',
+      color: '#0284c7'
+    };
+
+    if (ht === 'alkaline_soda_spring_gas_eruption_scald') {
+      hazard = {
+        hazardTitle: 'Erupção de Gás Carbônico e Água Alcalina a pH 10,5',
+        saveDC: 15,
+        saveType: 'Constituição',
+        submergedForestRisk: 'Fissura no fundo lacustre que expele borbulhas massivas de CO2 e jatos de água mineral a 75°C altamente cáustica; causa perda súbita de flutuabilidade na espuma, 2d8 de fogo/queimadura alcalina e asfixia por vapores.',
+        pioneerMitigation: 'Afastamento preventivo de áreas lacustres com efervescência constante e uso de vestes impermeabilizadas com cera vegetal.',
+        rescueAndStabilization: 'Remoção rápida da água cáustica com banho de água doce límpida, neutralização dérmica com vinagre suave e oxigenação assistida.',
+        icon: '🫧🔥',
+        color: '#dc2626'
+      };
+    } else if (ht === 'calcareous_algae_crust_shear_laceration') {
+      hazard = {
+        hazardTitle: 'Lacerações em Crostas Cortantes de Algas Calcárias',
+        saveDC: 14,
+        saveType: 'Destreza',
+        submergedForestRisk: 'Concreções minerais de calcita afiadas como navalhas incrustadas nos troncos fósseis da margem lacustre; escorregões desatentos retalham solas de calçados e canelas, infligindo 2d6 de dano cortante e infecção microbiana.',
+        pioneerMitigation: 'Uso de botinas com perneiras de couro endurecido e passadas cautelosas apoiadas em bastões de caminhada com ponteira dupla.',
+        rescueAndStabilization: 'Extração meticulosa de fragmentos calcários das feridas, assepsia com tintura de iodo e curativos compressivos estéreis.',
+        icon: '🔪🩸',
+        color: '#b45309'
+      };
+    } else if (ht === 'anoxic_lacustrine_tannin_mud_entrapment') {
+      hazard = {
+        hazardTitle: 'Atolamento em Lodo Lacustre Anóxico com Sulfetos de Ferro',
+        saveDC: 14,
+        saveType: 'Força',
+        submergedForestRisk: 'Camada de sedimento negro viscoso de 1,5 metro de espessura no fundo de enseadas calmas; a lama suga os aventureiros que desembarcam e libera bolhas de sulfeto fétido, causando 2d6 de veneno e exaustão física.',
+        pioneerMitigation: 'Uso de esteiras de junco trançado lançadas sobre o lodo para criar pontes móveis de desembarque com distribuição de peso.',
+        rescueAndStabilization: 'Tração imediata com cintas de arreio e pranchas de apoio, limpeza dos membros com esponjas e ingestão de tônicos aromáticos.',
+        icon: '🕳️☠️',
+        color: '#475569'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampSubmergedPetrifiedForestStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'lacustrine_petrified_buttress_pile_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Assentado sobre Troncos Petrificados Gigantes',
+      submergedForestAnchorageAndSodaSafety: 'Acampamento montado em estrado plano amarrado sobre topos emersos de árvores de quartzo imutáveis, 3 metros acima da água, imune a inundações e vermes aquáticos.',
+      sodaBaffleAndLimeFilter: 'Troncos fósseis de alta dureza atuam como píer inabalável contra ondulações lacustres e oferecem fundação perfeitamente seca.',
+      campRestAndSafetyGuards: 'Garante repouso longo calmo, seguro e protegido para toda a comitiva com regeneração total de energia.',
+      icon: '⛺🪵',
+      color: '#0284c7'
+    };
+
+    if (dt === 'soda_gas_deflector_baffle_and_aeration_boom') {
+      tech = {
+        defenseTitle: 'Barreira Defletora de Gases e Flutuadores de Aeração',
+        submergedForestAnchorageAndSodaSafety: 'Flutuadores de madeira leve com telas verticais que dispersam plumas gasosas e efervescências alcalinas para longe da área de ancoragem.',
+        sodaBaffleAndLimeFilter: 'Mantém o ar respirável limpo e a água ao redor do bivaque estável e segura para banhos e lavagem de equipamentos.',
+        campRestAndSafetyGuards: 'Permite que sentinelas e descansantes respirem ar fresco sem odores sulfurosos ou ardência nos olhos.',
+        icon: '🛡️🫧',
+        color: '#ea580c'
+      };
+    } else if (dt === 'multi_stage_lime_and_sand_alkaline_neutralizer_still') {
+      tech = {
+        defenseTitle: 'Destilador e Filtro Neutralizante de Água Alcalina de Soda',
+        submergedForestAnchorageAndSodaSafety: 'Aparelho portátil com leito de carvão ativado, areia de quartzo e infusão de frutas silvestres ácidas que neutraliza o pH da água lacustre.',
+        sodaBaffleAndLimeFilter: 'Produz 30 litros diários de água doce límpida, neutra e mineralizada para consumo direto e cozimento de rações.',
+        campRestAndSafetyGuards: 'Elimina integralmente riscos de cólicas gástricas ou queimação interna por ingestão de águas alcalinas.',
+        icon: '⚗️💧',
+        color: '#0369a1'
+      };
+    } else if (dt === 'corduroy_float_causeway_and_pier_runway') {
+      tech = {
+        defenseTitle: 'Passarela Flutuante de Troncos com Guarda-Corpo de Corda',
+        submergedForestAnchorageAndSodaSafety: 'Passadiço articulado sobre tambores flutuantes que conecta o bivaque à margem sólida sobre trechos de lodo profundo.',
+        sodaBaffleAndLimeFilter: 'Anula qualquer risco de escorregões ou quedas nos tocos afiados de quartzo durante as rondas de vigilância.',
+        campRestAndSafetyGuards: 'Garante passagens noturnas rápidas, seguras e com apoio firme para todas as patrulhas.',
+        icon: '🪜🌉',
+        color: '#10b981'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessMountainNamakierHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'desert').toLowerCase();
@@ -23782,6 +23889,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessSubmergedPetrifiedForestHazard: calcWildernessSubmergedPetrifiedForestHazard,
+    calcCampSubmergedPetrifiedForestStation: calcCampSubmergedPetrifiedForestStation,
     calcWildernessMountainNamakierHazard: calcWildernessMountainNamakierHazard,
     calcCampMountainNamakierStation: calcCampMountainNamakierStation,
     calcWildernessThermokarstAndDrunkenForestHazard: calcWildernessThermokarstAndDrunkenForestHazard,
