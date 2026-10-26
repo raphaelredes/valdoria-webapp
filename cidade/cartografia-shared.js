@@ -11285,6 +11285,130 @@
     };
   }
 
+  // === calcWildernessExtremeHeatAndSunstrokeHazard (Calor Extremo, Insolação e Miragens nos Ermos - DMG p. 110 / PHB p. 185) ===
+  function calcWildernessExtremeHeatAndSunstrokeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'blistering_sunstroke_exposure').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Insolação Tórrida sob Zênite Escaldante',
+      saveDC: 12,
+      saveType: 'Constituição',
+      heatstrokeDamageAndExhaustion: 'Calor acima de 38°C (100°F); salvaguarda horária de CON (CD 5 + 1 por hora adicional) ou sofre 1 nível de Exaustão (DMG p. 110).',
+      pioneerMitigation: 'Batedores recomendam descanso nas 4 horas de pico solar e marcha noturna fresca com mantas de linho leve.',
+      hydrationAndCoolingCare: 'Consumo mínimo obrigatório de 8 litros de água fresca por aventureiro ao dia para evitar desidratação crítica.',
+      icon: '☀️🔥',
+      color: '#f59e0b'
+    };
+
+    if (ht === 'shimmering_desert_mirage_delusion') {
+      hazard = {
+        hazardTitle: 'Miragem Refrativa e Desorientação Espacial',
+        saveDC: 13,
+        saveType: 'Sabedoria',
+        heatstrokeDamageAndExhaustion: 'Ondulações térmicas no horizonte simulam oásis inexistentes; teste de Percepção/Investigação para não desviar 1d4 horas da rota.',
+        pioneerMitigation: 'Batedores com bússola solar e marcos de azimute ignoram distorções visuais e mantêm a comitiva no rumo correto.',
+        hydrationAndCoolingCare: 'Umedecer panos sobre a fronte dos aventureiros afetados e recalibrar a rota com mapas celestes.',
+        icon: '🏜️✨',
+        color: '#eab308'
+      };
+    } else if (ht === 'superheated_abrasive_sandstorm') {
+      hazard = {
+        hazardTitle: 'Tempestade de Areia Cortante e Vento Férvido',
+        saveDC: 13,
+        saveType: 'Constituição',
+        heatstrokeDamageAndExhaustion: 'Ventos abrasivos a mais de 60 km/h; visão pesadamente obscurecida, terreno difícil e risco de cegueira temporária por fagulhas de sílica.',
+        pioneerMitigation: 'Envolver rosto e olhos com keffiyeh de tecido duplo e buscar abrigo imediato a sotavento de dunas altas ou cânions.',
+        hydrationAndCoolingCare: 'Limpeza dos condutos oculares e nasais com gotas de água purificada e repouso agachado em grupo.',
+        icon: '🌪️⏳',
+        color: '#d97706'
+      };
+    } else if (ht === 'water_source_parched_alkali_well') {
+      hazard = {
+        hazardTitle: 'Poço de Oásis Alcalino e Água Salobra Tóxica',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        heatstrokeDamageAndExhaustion: 'Água aparentemente potável saturada de sais minerais cáusticos; teste de Sobrevivência CD 14 ou sofre 2d8 de veneno e Envenenado.',
+        pioneerMitigation: 'Especialistas em sobrevivência examinam crostas brancas de sal na borda do poço antes de permitir que os companheiros bebam.',
+        hydrationAndCoolingCare: 'Filtração por carvão vegetal e areia fina seguida de fervura ou uso de Destiladores Solares de acampamento.',
+        icon: '☠️💧',
+        color: '#84cc16'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      heatstrokeDamageAndExhaustion: hazard.heatstrokeDamageAndExhaustion,
+      pioneerMitigation: hazard.pioneerMitigation,
+      hydrationAndCoolingCare: hazard.hydrationAndCoolingCare,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110 (Calor Extremo e Insolação) / PHB p. 185 (Exaustão e Necessidades Hídricas)'
+    };
+  }
+
+  // === calcCampSolarStillAndShadeCanopy (Toldos Térmicos, Destiladores Solares e Condensação de Umidade - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampSolarStillAndShadeCanopy(biomeKey, canopyType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ct = (canopyType || 'double_layered_thermal_shade_canopy').toLowerCase();
+
+    var canopy = {
+      canopyTitle: 'Toldo Duplo de Tecido Claro com Vão de Ventilação Térmica',
+      thermalReductionAndShadeEffect: 'Reduz a temperatura ambiente sob o abrigo em até 10°C (20°F), eliminando a necessidade de salvaguardas horárias de calor.',
+      moistureYieldAndSolarStill: 'Barreira refletiva branca suspensa a 30 cm do solo que canaliza brisas refrescantes sob a lona de repouso.',
+      campRestAndExhaustionRecovery: 'Permite descanso curto ou longo revigorante com remoção padrão de Exaustão sem desgaste sob o sol a pino.',
+      icon: '⛺☀️',
+      color: '#38bdf8'
+    };
+
+    if (ct === 'deep_sand_trench_shaded_shelter') {
+      canopy = {
+        canopyTitle: 'Trincheira Escavada em Areia com Cobertura Refletiva',
+        thermalReductionAndShadeEffect: 'Aproveita a temperatura até 15°C mais fria das camadas de solo a 60 cm de profundidade nas dunas.',
+        moistureYieldAndSolarStill: 'Protege a comitiva e os fardos contra radiação infravermelha direta e tempestades de poeira rasteiras.',
+        campRestAndExhaustionRecovery: 'Concede sono tranquilo para os sentinelas e montarias fora de serviço mesmo ao meio-dia.',
+        icon: '🕳️🏕️',
+        color: '#ca8a04'
+      };
+    } else if (ct === 'dew_condensation_solar_still_battery') {
+      canopy = {
+        canopyTitle: 'Bateria de Destiladores Solares e Coletores de Umidade',
+        thermalReductionAndShadeEffect: 'Fosso circular com lona esticada e pedra central condensando vapor vegetal e umidade subterrânea em tigela limpa.',
+        moistureYieldAndSolarStill: 'Produz de 4 a 8 litros de água destilada pura e fria por ciclo de descanso longo sem gastar magias.',
+        campRestAndExhaustionRecovery: 'Abastece os cantis dos aventureiros e previne penalidades por desidratação na marcha seguinte.',
+        icon: '💧☀️',
+        color: '#06b6d4'
+      };
+    } else if (ct === 'subterranean_root_water_cache') {
+      canopy = {
+        canopyTitle: 'Poço de Capilaridade Radicular com Filtro de Cascalho',
+        thermalReductionAndShadeEffect: 'Escavação rente a arbustos desérticos captando umidade retida por raízes profundas.',
+        moistureYieldAndSolarStill: 'Filtração lenta e natural fornecendo água mineral límpida sem teor alcalino perigoso.',
+        campRestAndExhaustionRecovery: 'Garante hidratação segura para montarias, animais de carga e todos os membros do grupo.',
+        icon: '🌱🪨',
+        color: '#84cc16'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      canopyType: ct,
+      canopyTitle: canopy.canopyTitle,
+      thermalReductionAndShadeEffect: canopy.thermalReductionAndShadeEffect,
+      moistureYieldAndSolarStill: canopy.moistureYieldAndSolarStill,
+      campRestAndExhaustionRecovery: canopy.campRestAndExhaustionRecovery,
+      icon: canopy.icon,
+      color: canopy.color,
+      dndRef: 'DMG p. 111 (Abastecimento Hídrico nos Ermos) / XGE p. 78 (Engenharia de Acampamento e Sobrevivência)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -13052,6 +13176,8 @@
     calcCampThermalReflectorAndHypothermiaCare: calcCampThermalReflectorAndHypothermiaCare,
     calcWildernessVolcanicFumaroleAndNoxiousGasHazard: calcWildernessVolcanicFumaroleAndNoxiousGasHazard,
     calcCampAshFiltrationAndVentilationSeal: calcCampAshFiltrationAndVentilationSeal,
+    calcWildernessExtremeHeatAndSunstrokeHazard: calcWildernessExtremeHeatAndSunstrokeHazard,
+    calcCampSolarStillAndShadeCanopy: calcCampSolarStillAndShadeCanopy,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

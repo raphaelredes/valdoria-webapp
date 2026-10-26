@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessExtremeHeatAndSunstrokeHazard) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var eh = CartShared.calcWildernessExtremeHeatAndSunstrokeHazard(bKey, 'blistering_sunstroke_exposure');
+        return '<div class="clp-extreme-heat-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,24,16,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + eh.color + ';margin-bottom:2px;">' + eh.icon + ' ' + eh.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Perigo:</b> ' + eh.heatstrokeDamageAndExhaustion + ' (CD ' + eh.saveDC + ' [' + eh.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Prevenção:</b> ' + eh.pioneerMitigation + ' · <i>Hidratação: ' + eh.hydrationAndCoolingCare + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampSolarStillAndShadeCanopy) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var ss = CartShared.calcCampSolarStillAndShadeCanopy(bKey, 'double_layered_thermal_shade_canopy');
+        return '<div class="clp-solar-still-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,26,30,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.3);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ss.color + ';margin-bottom:2px;">' + ss.icon + ' ' + ss.canopyTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Isolamento Térmico:</b> ' + ss.thermalReductionAndShadeEffect + ' · <b>Captação Hídrica:</b> ' + ss.moistureYieldAndSolarStill + '</div>'
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Recuperação no Descanso:</b> ' + ss.campRestAndExhaustionRecovery + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessVolcanicFumaroleAndNoxiousGasHazard) return '';
         var bKey = (biome && biome.key) || 'volcanic';
         var vf = CartShared.calcWildernessVolcanicFumaroleAndNoxiousGasHazard(bKey, 'sulfur_fumarole_vent_erup');
