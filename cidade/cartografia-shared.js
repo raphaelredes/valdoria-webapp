@@ -19097,6 +19097,130 @@
     };
   }
 
+  // === calcWildernessLateriteCrustAndMoundHazard (Savanas de Crostas de Laterita Ferruginosa e Cupinzeiros Fósseis Gigantes - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessLateriteCrustAndMoundHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'savanna').toLowerCase();
+    var ht = (hazardType || 'ferruginous_laterite_crust_radiant_heat').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Irradiação Térmica de Crosta Laterítica Ferruginosa',
+      saveDC: 15,
+      saveType: 'Constituição',
+      lateriteCrustAndMoundRisk: 'Carapaça de canga férrea negra e ocre aquecida pelo sol tropical a 58°C; calor radiante ascendente que desidrata a comitiva em dobro (4 galões/dia) e induz exaustão precoce (DMG p. 110-111).',
+      pioneerMitigation: 'Marcha estritamente crepuscular e noturna, com botas de sola dupla isoladas por cortiça e capas claras de linho reflexivo.',
+      rescueAndStabilization: 'Descanso imediato sob a sombra de cupinzeiros, reidratação com infusão salina e aplicação de compressas úmidas na nuca.',
+      icon: '☀️🧱',
+      color: '#b45309'
+    };
+
+    if (ht === 'giant_termite_chimney_breach_collapse') {
+      hazard = {
+        hazardTitle: 'Ruptura de Chaminé Oca de Cupinzeiro Gigante e Queda',
+        saveDC: 14,
+        saveType: 'Destreza',
+        lateriteCrustAndMoundRisk: 'Chaminés verticais de cupinzeiros fósseis com paredes externas endurecidas por ferro mas galerias internas corroídas; colapso súbito ao ser utilizado como posto de observação, gerando queda de 6 metros em poço de detritos perfurantes.',
+        pioneerMitigation: 'Sondagem prévia com bordão de ferro e fixação de corda guia ao redor da base consolidada antes de qualquer escalada.',
+        rescueAndStabilization: 'Içamento com arnês de içamento triplo e aplicação de unguento antisséptico contra poeira cáustica de cupim.',
+        icon: '🕳️🐜',
+        color: '#d97706'
+      };
+    } else if (ht === 'magnetic_hematite_compass_deviation') {
+      hazard = {
+        hazardTitle: 'Desvio Magnético de Bússola por Concentração de Hematita',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        lateriteCrustAndMoundRisk: 'Depósitos massivos de minério de ferro e hematita sob a crosta laterítica que desviam a agulha de bússolas em até 40 graus, induzindo guias a marcharem em círculos enganosos pela savana aberta.',
+        pioneerMitigation: 'Orientação exclusiva por marcos orográficos distantes, astrolábio solar ao meio-dia e posição das constelações meridionais.',
+        rescueAndStabilization: 'Recalibração imediata do rumo ao cair da noite utilizando a estrela polar de Valdória e medição de sombras com gnômon.',
+        icon: '🧭🧲',
+        color: '#475569'
+      };
+    } else if (ht === 'soldier_termite_swarm_mandible_frenzy') {
+      hazard = {
+        hazardTitle: 'Enxame de Cupins Soldados com Mandíbulas Cerimoniosas',
+        saveDC: 15,
+        saveType: 'Destreza',
+        lateriteCrustAndMoundRisk: 'Perturbação acidental de colônia ativa subterrânea; milhares de soldados blindados de 5 centímetros com mandíbulas que perfuram couro e cravam ácido fórmico corrosivo, infligindo 2d6 cortante e 2d4 de dano ácido contínuo.',
+        pioneerMitigation: 'Inspeção perimetral com fumaça de resina de mirra amarga e passagem rápida sem percussão de passos pesados no solo.',
+        rescueAndStabilization: 'Defumação com tochas de enxofre para desenganchar as mandíbulas e lavagem imediata com pasta alcalina de cinzas de madeira.',
+        icon: '🐜🔥',
+        color: '#dc2626'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      lateriteCrustAndMoundRisk: hazard.lateriteCrustAndMoundRisk,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Savanas Tropicais e Crostas Lateríticas) / PHB p. 182-183 (Marcha sob Calor Extremo) / XGE p. 78-83 (Geomorfologia Semiárida e Cupinzeiros Fósseis)'
+    };
+  }
+
+  // === calcCampLateriteCrustAndMoundStation (Bivaques ao Abrigo de Cupinzeiros Gigantes e Proteções de Laterita - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampLateriteCrustAndMoundStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'savanna').toLowerCase();
+    var dt = (defenseType || 'monolithic_termite_mound_shadow_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque ao Abrigo Térmico de Cupinzeiro Monolítico Fóssil',
+      lateriteMoundAnchorageAndSecurity: 'Estrutura maciça de 5 metros de solo cimentado por óxidos de ferro que projeta sombra permanente de 20 metros quadrados durante o ápice do sol e irradia calor moderado retido na noite fria da savana.',
+      chimneyVentilationAndSmokeTirage: 'Aproveita canais verticais inativos como chaminés que conduzem toda a fumaça das brasas a 5 metros de altitude, dissipando odores e impedindo a detecção do acampamento.',
+      campRestAndSafetyGuards: 'Assegura descanso longo perfeito e revigorante para os membros da comitiva com plataforma de sentinela no topo para vigilância panorâmica em 360 graus.',
+      icon: '⛺🐜',
+      color: '#b45309'
+    };
+
+    if (dt === 'ironstone_slab_windbreak_parapet') {
+      tech = {
+        defenseTitle: 'Parapeito Corta-Vento de Lajes de Canga Ferruginosa',
+        lateriteMoundAnchorageAndSecurity: 'Barreira de placas tabulares de laterita densa assentadas ao redor do perímetro do acampamento em forma de cunha voltada contra os ventos poeirentos da planície.',
+        chimneyVentilationAndSmokeTirage: 'Protege as mantas de dormir e as provisões contra rajadas de pó avermelhado de hematita e desvia predadores rastejantes.',
+        campRestAndSafetyGuards: 'Mantém o bivaque limpo e estanque, preservando a saúde respiratória dos sentinelas durante seus turnos de guarda.',
+        icon: '🧱🛡️',
+        color: '#64748b'
+      };
+    } else if (dt === 'termite_clay_water_purification_cooler') {
+      tech = {
+        defenseTitle: 'Talha de Cerâmica de Argila de Cupinzeiro para Resfriamento d\'Água',
+        lateriteMoundAnchorageAndSecurity: 'Vasilhames moldados com argila microporosa extraída das galerias de cupinzeiro que utilizam resfriamento evaporativo para baixar a temperatura da água em até 12°C sob o sol tórrido.',
+        chimneyVentilationAndSmokeTirage: 'Filtra areia fina e sedimentos da savana, mantendo reserva de 30 litros de água mineral fresca e alcalina.',
+        campRestAndSafetyGuards: 'Garante hidratação ideal para evitar a exaustão por calor durante as marchas do dia seguinte.',
+        icon: '🏺💧',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'perimeter_termite_resin_barrier_trench') {
+      tech = {
+        defenseTitle: 'Trincheira Perimetral com Resina Repelente de Insetos e Predadores',
+        lateriteMoundAnchorageAndSecurity: 'Canaleta circular escavada ao redor das tendas preenchida com cinzas vulcânicas e resina de acácia aromática que barra escorpiões, víboras e formigas carnívoras.',
+        chimneyVentilationAndSmokeTirage: 'Cria barreira olfativa que mascara o cheiro dos aventureiros contra felinos de grande porte e hienas farejadoras da savana.',
+        campRestAndSafetyGuards: 'Permite que a comitiva repouse tranquilamente sem necessidade de vigília dupla ininterrupta.',
+        icon: '🛡️🔥',
+        color: '#ea580c'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      lateriteMoundAnchorageAndSecurity: tech.lateriteMoundAnchorageAndSecurity,
+      chimneyVentilationAndSmokeTirage: tech.chimneyVentilationAndSmokeTirage,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Savanas e Cupinzeiros) / PHB p. 150 (Kits de Sobrevivência Tropical) / XGE p. 78-83 (Engenharia de Abrigos Térmicos e Filtros Evaporativos)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -20988,6 +21112,8 @@
     calcCampHamadaRegAndGaleStation: calcCampHamadaRegAndGaleStation,
     calcWildernessQuartziteCanyonAndPlungeHazard: calcWildernessQuartziteCanyonAndPlungeHazard,
     calcCampQuartziteCanyonAndPlungeStation: calcCampQuartziteCanyonAndPlungeStation,
+    calcWildernessLateriteCrustAndMoundHazard: calcWildernessLateriteCrustAndMoundHazard,
+    calcCampLateriteCrustAndMoundStation: calcCampLateriteCrustAndMoundStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
