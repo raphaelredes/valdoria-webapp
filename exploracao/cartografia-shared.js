@@ -20575,6 +20575,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 171: FLORESTAS DE GALERIA RIPÁRIA, DIQUES MARGINAIS E MEANDROS ABANDONADOS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessRiparianOxbowLeveeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var ht = (hazardType || 'levee_crevasse_splay_flash_breach_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ruptura Súbita de Dique Marginal com Torrente Aluvial de 35 km/h',
+      saveDC: 15,
+      saveType: 'Destreza',
+      riparianAndOxbowRisk: 'O dique de silte e areia cede sob a pressão da cheia do rio principal, abrindo brecha de 8 metros que arremessa torrente de água barrenta e troncos pesados contra a comitiva; provoca 3d8 de concussão por arrasto e aprisionamento em lamaçal de várzea (DMG p. 110, 246).',
+      pioneerMitigation: 'Batedores sondam fissuras de percolação na crista do dique e instalam sacos de lona com cascalho para contenção de pontos fracos.',
+      rescueAndStabilization: 'Içamento urgente para forquilhas de embaúbas com laços encordoados, drenagem de água ingerida e tratamento de luxações com unguento de copaíba.',
+      icon: '🌊🌳',
+      color: '#15803d'
+    };
+
+    if (ht === 'submerged_snag_logjam_hull_pierce') {
+      hazard = {
+        hazardTitle: 'Tronqueira Submersa Oculta com Rompimento de Casco de Canoa',
+        saveDC: 15,
+        saveType: 'Força',
+        riparianAndOxbowRisk: 'Troncos pontiagudos de árvores duras encravados no leito do meandro cobertos por água turva; perfuram o fundo de embarcações lançando aventureiros nas águas rápidas com 2d8 de concussão e perda iminente de mantimentos.',
+        pioneerMitigation: 'Navegador na proa utiliza vara de sondagem com ponta metálica mantendo velocidade reduzida e guia o bote pelo canal côncavo profundo.',
+        rescueAndStabilization: 'Estancamento imediato de vazamentos com cunhas de madeira e resina de breu vegetal, resgate de náufragos e secagem rápida de fardos.',
+        icon: '🪵🛶',
+        color: '#0284c7'
+      };
+    } else if (ht === 'anoxic_oxbow_marsh_leech_fever_torpor') {
+      hazard = {
+        hazardTitle: 'Infestação de Sanguessugas Gigantes e Febre em Braço Morto de Rio',
+        saveDC: 14,
+        saveType: 'Constituição',
+        riparianAndOxbowRisk: 'Água estagnada tépida de meandro abandonado repleta de sanguessugas e bactérias decompositoras; fixam-se nas pernas drenando sangue e inoculando toxinas que causam náusea, anemia aguda e 1 nível de exaustão (DMG p. 111; PHB p. 185).',
+        pioneerMitigation: 'Uso de meias impermeáveis amarradas com cordões de couro e unção das pernas com pasta de tabaco verde e cinza de madeira.',
+        rescueAndStabilization: 'Remoção cautelosa de parasitas com aplicação de sal grosso ou brasa, desinfecção de feridas com própolis e caldo revigorante de raízes.',
+        icon: '🩸☣️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'riparian_liana_canopy_entanglement_fall') {
+      hazard = {
+        hazardTitle: 'Emaranhado de Cipós com Queda de Galhos Podres de Dossel',
+        saveDC: 14,
+        saveType: 'Destreza',
+        riparianAndOxbowRisk: 'Cipós espessos suspensos que prendem mochilas e animais de carga, desestabilizando galhos mortos de 15 metros de altura; o impacto de troncos desprendidos causa 2d6 de concussão e perda momentânea de orientação.',
+        pioneerMitigation: 'Corte de desobstrução à frente com facões de mato longos e uso de capacetes de couro reforçado com armação de ferro.',
+        rescueAndStabilization: 'Remoção de galhos caídos, imobilização de pescoço e ombros com colar de feltro e repouso em clareira aberta.',
+        icon: '🌿⚠️',
+        color: '#b45309'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampRiparianOxbowLeveeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var dt = (defenseType || 'natural_levee_crest_sand_terrace_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Crista de Dique Marginal com Base Seca de Areia Fina',
+      riparianAndCampSafety: 'Acampamento assentado no cume de dique fluvial natural elevado a 3 metros sobre as várzeas pantanosas, com solo arenoso de drenagem livre que impede o acúmulo de poças de chuva.',
+      leveeMoatAndPalmHarvestCatchment: 'O meandro abandonado atua como fosso aquático natural de proteção contra predadores terrestres, com acesso desimpedido a bosques de palmeiras frutíferas no dique.',
+      campRestAndSafetyGuards: 'Garante sono profundo calmo, seguro e confortável para todos os membros do grupo, com brisa suave canalizada pelo rio que reduz mosquitos.',
+      icon: '⛺🌳',
+      color: '#15803d'
+    };
+
+    if (dt === 'woven_liana_and_hardwood_stake_palisade') {
+      tech = {
+        defenseTitle: 'Paliçada de Estacas de Madeira Roxa e Cipós Trançados de Galeria',
+        riparianAndCampSafety: 'Muralha perimétrica de 1,8 metro fincada no cume do dique entre duas árvores seculares que impede investidas de grandes felinos e répteis fluviais.',
+        leveeMoatAndPalmHarvestCatchment: 'Oferece cobertura defensiva superior (+5 na CA) contra ataques e serve de suporte sólido para as amarras das tendas de campanha.',
+        campRestAndSafetyGuards: 'Assegura sono livre de receios e vigília serena para as sentinelas em postos elevados nos galhos mestres.',
+        icon: '🛡️🪵',
+        color: '#166534'
+      };
+    } else if (dt === 'creek_sediment_filtration_basin_and_palm_pot') {
+      tech = {
+        defenseTitle: 'Bacia Filtrante de Areia Fluvial e Coletor de Seiva de Buriti',
+        riparianAndCampSafety: 'Sistema de purificação por camadas de areia de praia de rio e carvão que clareia águas turvas fluviais, associado a corte limpo em palmeiras que fornece néctar nutritivo.',
+        leveeMoatAndPalmHarvestCatchment: 'Fornece 50 litros diários de água potável límpida e refrescante, prevenindo cólicas intestinais e carências eletrolíticas na comitiva.',
+        campRestAndSafetyGuards: 'Mantém o vigor físico no patamar ideal e recupera rapidamente exploradores exaustos pela marcha fluvial.',
+        icon: '💧🌴',
+        color: '#0284c7'
+      };
+    } else if (dt === 'oxbow_bend_tripwire_rattle_perimeter_alarm') {
+      tech = {
+        defenseTitle: 'Cordão de Alarme com Fios de Tensão e Maracas de Cascas de Castanha',
+        riparianAndCampSafety: 'Linhas de fibra vegetal estendidas ao longo da trilha do dique e na margem do meandro amarradas a ouriços secos de castanha com pedregulhos que soam fortemente ao toque.',
+        leveeMoatAndPalmHarvestCatchment: 'Detecta aproximação de predadores anfíbios ou canoas hostis a 40 metros de distância com alarme sonoro instantâneo.',
+        campRestAndSafetyGuards: 'Garante tranquilidade perimétrica total e descanso ininterrupto durante toda a noite na floresta de galeria.',
+        icon: '🔔🌴',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 170: GARGANTAS ABISSAIS DE FALHA TECTÔNICA E RIFT ESCARPADO (D&D 5e)
   // =========================================================================
 
@@ -25562,6 +25666,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessRiparianOxbowLeveeHazard: calcWildernessRiparianOxbowLeveeHazard,
+    calcCampRiparianOxbowLeveeStation: calcCampRiparianOxbowLeveeStation,
     calcWildernessTectonicRiftGrabenHazard: calcWildernessTectonicRiftGrabenHazard,
     calcCampTectonicRiftGrabenStation: calcCampTectonicRiftGrabenStation,
     calcWildernessRhyoliteTuffHoodoosHazard: calcWildernessRhyoliteTuffHoodoosHazard,
