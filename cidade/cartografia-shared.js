@@ -13765,6 +13765,130 @@
     };
   }
 
+  // === calcWildernessAcidMarshAndCorrosiveSlimeHazard (Lamaçais Cáusticos de Alúmen, Névoa Ácida e Utriculárias Carnívoras - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessAcidMarshAndCorrosiveSlimeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'corrosive_alum_mud_immersion').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Imersão em Lodo Cáustico de Alúmen e Ácido Sulfúrico',
+      saveDC: 14,
+      saveType: 'Destreza',
+      acidDamageAndCorrosion: 'Lamaçal salino ácido de pH extremo sob crosta fétida; 2d8 de dano ácido imediato e risco de corrosão de armaduras não mágicas (-1 CA se não lavada com água potável) (DMG p. 110).',
+      pioneerMitigation: 'Batedores testam o solo com tiras de tornassol vegetal e sondam a consistência com bastões graduados de teca.',
+      rescueAndStabilization: 'Polvilhamento imediato com pó de giz neutralizador, lavagem abundante com água pura e ataduras de linho ungido.',
+      icon: '🧪🕳️',
+      color: '#84cc16'
+    };
+
+    if (ht === 'fuming_acid_mist_inversion') {
+      hazard = {
+        hazardTitle: 'Inversão Térmica de Névoa Ácida Sulfurosa e Vapores',
+        saveDC: 13,
+        saveType: 'Constituição',
+        acidDamageAndCorrosion: 'Nuvem ácida rasteira condensada na alvorada; queimação brônquica aguda, 2d6 de dano de ácido/veneno e 1 nível de exaustão.',
+        pioneerMitigation: 'Uso de máscaras de couro seladas com banha animal e esponjas umedecidas em solução alcalina fraca.',
+        rescueAndStabilization: 'Colírio de água doce com infusão de mel de acácia e inalação de vapores emolientes de camomila.',
+        icon: '🌫️☣️',
+        color: '#a3e635'
+      };
+    } else if (ht === 'dissolving_peat_sinkhole_collapse') {
+      hazard = {
+        hazardTitle: 'Colapso de Turfeira Oca Dissolvida por Ácido',
+        saveDC: 13,
+        saveType: 'Destreza',
+        acidDamageAndCorrosion: 'Solo turfoso carcomido pela acidez subterrânea que cede em funis; 2d6 de concussão e 2d6 de ácido por respingos na queda.',
+        pioneerMitigation: 'Marcha espaçada em 6 metros com distribuição de peso em esteios transversais de bambu.',
+        rescueAndStabilization: 'Içamento por corda encerada resistente a corrosão e imobilização de fraturas com talas limpas.',
+        icon: '🕳️⚠️',
+        color: '#65a30d'
+      };
+    } else if (ht === 'carnivorous_acidic_bladderwort_trap') {
+      hazard = {
+        hazardTitle: 'Colônia de Utriculárias Carnívoras Gigantes Aquáticas',
+        saveDC: 13,
+        saveType: 'Força',
+        acidDamageAndCorrosion: 'Vesículas vegetais que sugam membros de viajantes injetando enzimas digestivas cáusticas; 2d6 de dano de ácido/perfuração e aprisionamento.',
+        pioneerMitigation: 'Identificação visual de vesículas translúcidas flutuantes e corte preventivo com foices compridas.',
+        rescueAndStabilization: 'Desativação enzimática com álcool destilado puro e curativo compressivo com pasta adstringente.',
+        icon: '🌱🩸',
+        color: '#4d7c0f'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      acidDamageAndCorrosion: hazard.acidDamageAndCorrosion,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Pântanos Ácidos e Terreno Corrosivo) / PHB p. 182-183 (Asfixia e Dano Ácido)'
+    };
+  }
+
+  // === calcCampAcidMarshCorduroyCausewayAndLimestoneBed (Calçadas de Pranchões, Leito de Calcário e Bancadas de Graxa - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampAcidMarshCorduroyCausewayAndLimestoneBed(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'corduroy_waxed_pine_log_causeway').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Calçada de Pranchões de Pinho Encerado (Corduroy)',
+      acidIsolationAndGroundSupport: 'Piso contínuo de meias-toras de pinho amarradas e untadas com sebo, isolando 100% da lama ácida cáustica.',
+      chemicalNeutralizationAndEquipmentSafety: 'Elimina o contato das solas de couro e mantimentos com o lodo corrosivo do charco.',
+      campRestAndSafetyGuards: 'Permite circulação ágil e segura no acampamento sem risco de dissolução de botas ou equipamentos.',
+      icon: '🪵🛡️',
+      color: '#10b981'
+    };
+
+    if (dt === 'crushed_limestone_neutralizing_bed') {
+      tech = {
+        defenseTitle: 'Leito Neutralizador de Calcário Triturado e Cal',
+        acidIsolationAndGroundSupport: 'Camada de 10 cm de brita calcária espalhada sob as tendas neutralizando quimicamente vapores e respingos ácidos.',
+        chemicalNeutralizationAndEquipmentSafety: 'Cria microambiente de pH neutro que impede corrosão de metais e queimação na pele dos aventureiros.',
+        campRestAndSafetyGuards: 'Garante que os membros da comitiva durmam sem inalar eflúvios cáusticos durante a noite inteira.',
+        icon: '🪨🧪',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'elevated_limestone_mound_bivouac') {
+      tech = {
+        defenseTitle: 'Bivaque em Montículo Calcário Natural Elevado',
+        acidIsolationAndGroundSupport: 'Assentamento sobre crista natural de rocha carbonática que drena enxurradas ácidas para longe das coberturas.',
+        chemicalNeutralizationAndEquipmentSafety: 'Solo sólido e quimicamente básico imune a afundamentos em turfas carcomidas pelo ácido.',
+        campRestAndSafetyGuards: 'Proporciona descanso restaurador estável e seco com visão tática de aproximação de predadores anfíbios.',
+        icon: '⛰️⛺',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'greased_leather_gear_preservation_station') {
+      tech = {
+        defenseTitle: 'Bancada de Conservação com Sebo Animal e Cera de Abelha',
+        acidIsolationAndGroundSupport: 'Ponto de manutenção intensiva com graxa pesada que impermeabiliza armaduras, arreios e bainhas.',
+        chemicalNeutralizationAndEquipmentSafety: 'Cria película hidrofóbica que repele respingos ácidos e previne ferrugem e corrosão galvânica.',
+        campRestAndSafetyGuards: 'Preserva a integridade e bônus de CA dos equipamentos de combate para a jornada seguinte.',
+        icon: '🧴🗡️',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      acidIsolationAndGroundSupport: tech.acidIsolationAndGroundSupport,
+      chemicalNeutralizationAndEquipmentSafety: tech.chemicalNeutralizationAndEquipmentSafety,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque em Charco Ácido) / XGE p. 78 (Equipamento de Proteção e Sobrevivência)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -15570,6 +15694,8 @@
     calcCampMangroveStiltPlatformAndOutriggerStation: calcCampMangroveStiltPlatformAndOutriggerStation,
     calcWildernessVolcanicHighlandTephraAndLavaBombHazard: calcWildernessVolcanicHighlandTephraAndLavaBombHazard,
     calcCampVolcanicBasaltOverhangAndTephraTrenchStation: calcCampVolcanicBasaltOverhangAndTephraTrenchStation,
+    calcWildernessAcidMarshAndCorrosiveSlimeHazard: calcWildernessAcidMarshAndCorrosiveSlimeHazard,
+    calcCampAcidMarshCorduroyCausewayAndLimestoneBed: calcCampAcidMarshCorduroyCausewayAndLimestoneBed,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
