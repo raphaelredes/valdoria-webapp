@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessTowerKarstPoljeHazard) return '';
+        var bKey = (biome && biome.key) || 'jungle';
+        var kp = CartShared.calcWildernessTowerKarstPoljeHazard(bKey, 'karst_tower_vertical_scarp_rockfall_plunge');
+        return '<div class="clp-tower-karst-polje-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,34,22,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(22,163,74,0.35);font-size:8px;color:#f0fdf4;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + kp.color + ';margin-bottom:2px;">' + kp.icon + ' ' + kp.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Torres Cársticas e Poljes:</b> ' + kp.karstAndPoljeRisk + ' (CD ' + kp.saveDC + ' [' + kp.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bbf7d0;margin-top:1px;">• <b>Mitigação:</b> ' + kp.pioneerMitigation + ' · <i>Estabilização: ' + kp.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampTowerKarstPoljeStation) return '';
+        var bKey = (biome && biome.key) || 'jungle';
+        var ts = CartShared.calcCampTowerKarstPoljeStation(bKey, 'tower_karst_mid_cliff_cave_sanctuary_bivouac');
+        return '<div class="clp-tower-karst-polje-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(14,28,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(21,128,61,0.3);font-size:8px;color:#f0fdf4;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ts.color + ';margin-bottom:2px;">' + ts.icon + ' ' + ts.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Gruta de Torre:</b> ' + ts.karstAndCampSafety + ' · <b>Defesa:</b> ' + ts.karstTowerBarrierAndCaveCistern + '</div>'
+          + '  <div style="font-size:7.5px;color:#86efac;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + ts.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessSubglacialEskerKameHazard) return '';
         var bKey = (biome && biome.key) || 'tundra';
         var ek = CartShared.calcWildernessSubglacialEskerKameHazard(bKey, 'esker_crest_scree_sliding_plunge');

@@ -20586,6 +20586,110 @@
   // FASE 174: CÂNYONS FÓSSIL-GLACIAIS EM TÚNEL SUBGLACIAR (ESKERS E KAMES) (D&D 5e)
   // =========================================================================
 
+  // =========================================================================
+  // FASE 175: VALES DE DOLINAS EM CARSTE DE TORRE E LABIRINTOS DE POLJE (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessTowerKarstPoljeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'jungle').toLowerCase();
+    var ht = (hazardType || 'karst_tower_vertical_scarp_rockfall_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desabamento de Paredão Vertical de Torre Calcária em Queda de 25m',
+      saveDC: 15,
+      saveType: 'Destreza',
+      karstAndPoljeRisk: 'Paredão vertical de calcário de 200 metros com fendas de dissolução ácida; chuvas tropicais soltam blocos de 500 kg que despencam sobre o sopé da torre, impondo salvaguarda para esquivar de soterramento e 3d10 de concussão por impacto de pedregulhos (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Observação sistemática de fissuras ativas e ninhos de andorinhões com avanço rápido pela zona aberta fora da área de queda direta de detritos.',
+      rescueAndStabilization: 'Escora dos blocos com esteios de tora maciça e alavancagem com hastes de ferro para desencarcerar exploradores prensados.',
+      icon: '🧗‍♂️🪨',
+      color: '#16a34a'
+    };
+
+    if (ht === 'polje_flash_inundation_ponor_whirlpool') {
+      hazard = {
+        hazardTitle: 'Inundação Relâmpago de Polje com Redemoinho em Sumidouro Ativo de 12m',
+        saveDC: 15,
+        saveType: 'Força',
+        karstAndPoljeRisk: 'Planície plana de polje cercada por torres de calcário; chuvas torrenciais inundam a bacia em minutos enquanto o sumidouro subterrâneo (ponor) drena a água gerando vórtice violento de sucção de 12 metros; teste contra arrastamento e 3d8 de concussão por sucção submersa (DMG p. 110, 246-247).',
+        pioneerMitigation: 'Monitoramento de drenagem de córregos cársticos e fixação imediata de linhas de vida nas raízes de figueiras-bravas das encostas.',
+        rescueAndStabilization: 'Lançamento de arpão ancorado com corda de cânhamo de 20 mm e içamento com torniquete de tração mecânica.',
+        icon: '🌀🌊',
+        color: '#0284c7'
+      };
+    } else if (ht === 'tower_karst_guano_chasm_methane_flare') {
+      hazard = {
+        hazardTitle: 'Garganta de Guano em Fenda de Torre com Explosão Térmica de Metano',
+        saveDC: 14,
+        saveType: 'Constituição',
+        karstAndPoljeRisk: 'Fenda cárstica profunda habitada por colônias imensas de morcegos; acúmulo de guano em fermentação libera metano volátil e esporos fúngicos; fagulhas ou tochas provocam deflagração térmica com 2d8 de dano ígneo e condição cego/intoxicado por 1 hora (DMG p. 110, 257).',
+        pioneerMitigation: 'Uso de lanternas de óleo de baleia com filtro estanque de mica e toalhas umedecidas com água de eucalipto cobrindo narinas e boca.',
+        rescueAndStabilization: 'Aplicação de colírio emoliente de camomila, lavagem de pele com salmoura fresca e administração de antídoto de carvão ativado.',
+        icon: '🦇🔥',
+        color: '#d97706'
+      };
+    } else if (ht === 'needle_karst_shilf_foot_puncture') {
+      hazard = {
+        hazardTitle: 'Lâminas Afiadas de Carste em Agulha com Perfuração de Solas e Perneiras',
+        saveDC: 14,
+        saveType: 'Destreza',
+        karstAndPoljeRisk: 'Cristas e pináculos afiados de calcário erodido (lapiaz em agulha) encobertos por musgo tropical rasteiro; lâminas de rocha com bordas cortantes furam solas de botas causando 3d6 de dano perfurante e redução da velocidade pela metade por 24 horas (PHB p. 182-183).',
+        pioneerMitigation: 'Uso de palmilhas de ferro fundido articuladas e sondagem de piso com bastão reforçado antes de apoiar os pés.',
+        rescueAndStabilization: 'Desinfecção profunda com álcool etílico de cana, tamponamento hemostático com gaze de algodão e bandagem compressiva.',
+        icon: '🗡️🪨',
+        color: '#ca8a04'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampTowerKarstPoljeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'jungle').toLowerCase();
+    var dt = (defenseType || 'tower_karst_mid_cliff_cave_sanctuary_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Gruta Suspensa a Meia Encosta da Torre Calcária',
+      karstAndCampSafety: 'Acampamento assentado em caverna seca natural escavada a 40 metros de altura na parede da torre de carste, acessível apenas por cordas retráteis recolhidas após a subida.',
+      karstTowerBarrierAndCaveCistern: 'A posição suspensa torna o abrigo imune a enchentes de polje, enxames de predadores terrestres e invasões noturnas de saqueadores nos ermos.',
+      campRestAndSafetyGuards: 'Concede repouso longo aquecido, ventilado e inexpugnável para todos os membros do grupo, garantindo vigilância panorâmica soberba para as sentinelas.',
+      icon: '⛺🧗‍♂️',
+      color: '#16a34a'
+    };
+
+    if (dt === 'karst_chasm_ironwood_palisade_gate') {
+      tech = {
+        defenseTitle: 'Paliçada Baluarte de Pau-Ferro e Travas de Calcita em Fenda da Torre',
+        karstAndCampSafety: 'Muralha perimétrica erguida no portal estreito de entrada de desfiladeiro cárstico cego com toras de pau-ferro entalhadas e fixadas com argamassa de cal.',
+        karstTowerBarrierAndCaveCistern: 'Concede cobertura superior (+5 na CA) contra arqueiros e bloqueia totalmente investidas de monstros carnívoros dos vales úmidos.',
+        campRestAndSafetyGuards: 'Assegura sono tranquilo e isolamento impenetrável com sentinelas protegidas por seteiras elevadas de observação.',
+        icon: '🪵🛡️',
+        color: '#15803d'
+      };
+    } else if (dt === 'stalactite_condensate_drip_basin_and_bamboo_duct') {
+      tech = {
+        defenseTitle: 'Bacia de Condensação Estalactítica com Dutos de Bambu Silvestre',
+        karstAndCampSafety: 'Sistema de calhas e funis de bambu gigante suspensos sob estalactites ativas que captam gotejamento contínuo de água subterrânea purificada pelo calcário.',
+        karstTowerBarrierAndCaveCistern: 'Coleta 55 litros diários de água pura, alcalina, gelada e livre de parasitas pantanosos, assegurando a autonomia hídrica da comitiva no carste.',
+        campRestAndSafetyGuards: 'Elimina a desidratação e o contágio por águas paradas tropicais, mantendo a imunidade e o vigor dos exploradores.',
+        icon: '💧🎋',
+        color: '#0284c7'
+      };
+    } else if (dt === 'karst_grotto_acoustic_funnel_bell_alarm') {
+      tech = {
+        defenseTitle: 'Alarme Acústico em Funil Cárstico com Fios de Tensão e Guizos de Bronze',
+        karstAndCampSafety: 'Rede de cabos de latão estendidos ao longo das vias de acesso conectada a sinos de bronze instalados no foco de uma câmara de eco da caverna.',
+        karstTowerBarrierAndCaveCistern: 'Amplifica qualquer ressonância sonora emitindo alerta a mais de 80 metros de distância com a aproximação de qualquer ameaça nas trevas.',
+        campRestAndSafetyGuards: 'Proporciona repouso noturno ininterrupto e vigilância automatizada precisa com tempo hábil para a prontidão dos aventureiros.',
+        icon: '🔔🦇',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessSubglacialEskerKameHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'tundra').toLowerCase();
@@ -25978,6 +26082,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessTowerKarstPoljeHazard: calcWildernessTowerKarstPoljeHazard,
+    calcCampTowerKarstPoljeStation: calcCampTowerKarstPoljeStation,
     calcWildernessSubglacialEskerKameHazard: calcWildernessSubglacialEskerKameHazard,
     calcCampSubglacialEskerKameStation: calcCampSubglacialEskerKameStation,
     calcWildernessTidalSaltMarshHazard: calcWildernessTidalSaltMarshHazard,
