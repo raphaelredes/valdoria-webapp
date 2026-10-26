@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 246: PSEUDOCARSTE DE LOESS, TÚNEIS DE PIPING E RAVINAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessLoessPseudokarstPipingHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'hills').toLowerCase();
+    var ht = (hazardType || 'subsurface_loess_piping_tunnel_roof_cave_in').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Abatimento Súbito de Teto de Túnel de Erosão Tubular em Loess (Pseudokarst Piping Collapse)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      loessPipingRisk: 'Platôs espessos de silte eólico amarelo (loess) onde a água da chuva infiltra por fraturas verticais e escava galerias subterrâneas ocultas de 4 metros de diâmetro (soil piping) sem alterar a superfície gramada; o peso da comitiva rompe a casca seca de meio metro sobre o túnel oco e precipita aventureiros e montarias em um funil cego de poeira e lama com 3d6 de concussão (DMG p. 110; XGE p. 109).',
+      pioneerMitigation: 'Evitar caminhar sobre alinhamentos de pequenas depressões em funil rumo à borda da ravina.',
+      rescueAndStabilization: 'Ancoragem de corda longe da borda esfarelenta do funil e retirada com prancha.',
+      icon: '🕳️🌾',
+      color: '#eab308'
+    };
+
+    if (ht === 'vertical_columnar_joint_loess_bluff_slab_topple') {
+      hazard = {
+        hazardTitle: 'Tombamento de Coluna Vertical de Paredão de Loess (Loess Bluff Slab Topple)',
+        saveDC: 15,
+        saveType: 'Destreza',
+        loessPipingRisk: 'O loess seco mantém paredões perfeitamente verticais de 40 metros de altura sustentados apenas por juntas colunares de contração e cimento calcário frágil; a vibração da marcha ou um trovão destaca uma fatia vertical inteira da falésia que tomba sem aviso sobre o caminho do cânion com 3d8 de concussão e soterramento (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Nunca marchar colado à base de paredões de silte que apresentem fendas verticais abertas no topo.',
+        rescueAndStabilization: 'Escavação imediata do silte fofo com pás para desobstruir a respiração do companheiro.',
+        icon: '🧱💥',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'hydroconsolidation_wet_loess_slurry_liquefaction') {
+      hazard = {
+        hazardTitle: 'Colapso Estrutural e Liquefação de Silte por Hidroconsolidação',
+        saveDC: 14,
+        saveType: 'Força',
+        loessPipingRisk: 'Quando seco, o piso de loess é duro como tijolo, mas sua estrutura porosa aberta perde 100% da coesão ao saturar sob um aguaceiro repentino (hidroconsolidação); o solo inteiro cede meio metro de uma vez e vira um mingau amarelo denso que prende as pernas até os joelhos, impondo condição impedido e 1 nível de exaustão (DMG p. 109-110; PHB p. 185).',
+        pioneerMitigation: 'Subir para os divisores gramados ou abrigar-se em alcovas secas antes que a chuva encharque o fundo do vale.',
+        rescueAndStabilization: 'Tração horizontal com corda sobre lonas estendidas na lama amarela.',
+        icon: '🌧️🥾',
+        color: '#d97706'
+      };
+    } else if (ht === 'choking_yellow_silt_blinding_dust_plume_gully') {
+      hazard = {
+        hazardTitle: 'Nuvem Asfixiante de Pó de Silte Fino em Ravina Seca',
+        saveDC: 14,
+        saveType: 'Constituição',
+        loessPipingRisk: 'O desprendimento de um único bloco na ravina ou o vento canalizado levanta uma cortina impenetrável de partículas de quartzo e argila de 20 mícrons que permanece em suspensão por horas, reduzindo a visibilidade a zero e causando asfixia e irritação ocular severa (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Cobrir boca e nariz com lenço úmido e manter cabo guia entre os membros do grupo.',
+        rescueAndStabilization: 'Lavagem ocular com água limpa do cantil e repouso fora do canal de vento.',
+        icon: '🌫️💛',
+        color: '#f59e0b'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampLoessPseudokarstPipingStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'hills').toLowerCase();
+    var dt = (defenseType || 'hand_carved_yaodong_loess_arch_cave_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Caverna em Arco Escavada na Parede de Loess ("Yaodong")',
+      loessPipingAndCampSafety: 'O loess seco e maciço na meia-encosta de um paredão íntegro pode ser escavado em uma abóbada parabólica autoportante.',
+      loessPipingTrenchAndWatch: 'Isolamento térmico extraordinário que mantém 18 graus constantes tanto sob nevasca quanto sob sol escaldante.',
+      campRestAndSafetyGuards: 'Garante descanso longo silencioso, seco e invisível do alto do platô.',
+      icon: '⛺🏛️',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'calcareous_loess_puppet_nodule_hearth_lining') {
+      tech = {
+        defenseTitle: 'Forro de Fogueira com Concreções Calcárias ("Bonecas de Loess")',
+        loessPipingAndCampSafety: 'Coleta dos nódulos duros de carbonato de cálcio (Lösskindl) que afloram nas paredes das ravinas.',
+        loessPipingTrenchAndWatch: 'Permite calçar o braseiro e refletir calor sem ressecar nem esfarelar o piso de silte do abrigo.',
+        campRestAndSafetyGuards: 'Mantém o fogo seguro e estável durante toda a noite.',
+        icon: '🔥🪨',
+        color: '#eab308'
+      };
+    } else if (dt === 'natural_loess_bridge_span_elevated_watchpost') {
+      tech = {
+        defenseTitle: 'Posto de Vigia com Detecção de Plumas de Poeira a Longa Distância',
+        loessPipingAndCampSafety: 'Instalação do vigia em um esporão elevado sobre o labirinto dendrítico de ravinas amarelas.',
+        loessPipingTrenchAndWatch: 'Como qualquer tropa ou criatura marchando no loess levanta uma coluna fina de pó dourado, é impossível se aproximar sem ser visto.',
+        campRestAndSafetyGuards: 'Oferece aviso prévio de quilômetros durante o dia e o crepúsculo.',
+        icon: '👁️🌫️',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'tamped_lime_silt_rain_diversion_parapet') {
+      tech = {
+        defenseTitle: 'Valeta e Parapeito de Silte Apiloado para Desvio de Enxurrada',
+        loessPipingAndCampSafety: 'Escavação de uma calha em V acima da entrada do abrigo e apiloamento do silte úmido com cinza.',
+        loessPipingTrenchAndWatch: 'Desvia a água da chuva para longe da face vertical, impedindo a hidroconsolidação da parede.',
+        campRestAndSafetyGuards: 'Preserva a integridade estrutural do bivaque mesmo sob tempestades noturnas.',
+        icon: '⛏️🛡️',
+        color: '#d97706'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 245: CRISTAS DE HOGBACKS, FLATIRONS E BOQUEIRÕES (D&D 5e)
   // =========================================================================
 
@@ -33364,6 +33468,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessLoessPseudokarstPipingHazard: calcWildernessLoessPseudokarstPipingHazard,
+    calcCampLoessPseudokarstPipingStation: calcCampLoessPseudokarstPipingStation,
     calcWildernessHogbackFlatironRidgeHazard: calcWildernessHogbackFlatironRidgeHazard,
     calcCampHogbackFlatironRidgeStation: calcCampHogbackFlatironRidgeStation,
     calcWildernessCoastalBlowholeGloupHazard: calcWildernessCoastalBlowholeGloupHazard,

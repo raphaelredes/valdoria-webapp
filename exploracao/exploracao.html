@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T20:29:50Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T20:33:33Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessLoessPseudokarstPipingHazard) return '';
+        var bKey = (biome && biome.key) || 'hills';
+        var lp = CartShared.calcWildernessLoessPseudokarstPipingHazard(bKey, 'subsurface_loess_piping_tunnel_roof_cave_in');
+        return '<div class="clp-loess-pseudokarst-piping-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,22,10,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(234,179,8,0.35);font-size:8px;color:#fef9c3;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + lp.color + ';margin-bottom:2px;">' + lp.icon + ' ' + lp.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Pseudocarste de Loess e Piping:</b> ' + lp.loessPipingRisk + ' (CD ' + lp.saveDC + ' [' + lp.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde047;margin-top:1px;">• <b>Mitigação:</b> ' + lp.pioneerMitigation + ' · <i>Estabilização: ' + lp.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampLoessPseudokarstPipingStation) return '';
+        var bKey = (biome && biome.key) || 'hills';
+        var lc = CartShared.calcCampLoessPseudokarstPipingStation(bKey, 'hand_carved_yaodong_loess_arch_cave_bivouac');
+        return '<div class="clp-loess-pseudokarst-piping-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(22,18,8,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + lc.color + ';margin-bottom:2px;">' + lc.icon + ' ' + lc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Abóbada de Loess (Yaodong):</b> ' + lc.loessPipingAndCampSafety + ' · <b>Clima:</b> ' + lc.loessPipingTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#fcd34d;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + lc.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){
