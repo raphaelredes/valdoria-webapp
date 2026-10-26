@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 199: GEODOS GIGANTES DE SELENITA E CAVERNAS DE CRISTAIS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessSeleniteCrystalCaveHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'hyper_humid_geothermal_crystal_chamber_heat_syncope').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Síncope Térmica e Condensação Pulmonar na Câmara de Cristais (50°C)',
+      saveDC: 15,
+      saveType: 'Constituição',
+      seleniteCaveRisk: 'Geodo subterrâneo aquecido por intrusão magmática profunda a 50°C com 98% de umidade; como o ar é mais quente que o corpo humano, o vapor condensa diretamente dentro dos alvéolos pulmonares causando afogamento a seco com 2d8 de dano de fogo e 1 nível de exaustão (DMG p. 110, 201; PHB p. 185).',
+      pioneerMitigation: 'Incursões cronometradas de no máximo 15 minutos respirando através de esponjas embebidas em água fria trazida da superfície.',
+      rescueAndStabilization: 'Retirada imediata para a galeria calcária fresca externa e resfriamento axilar e cervical com compressas.',
+      icon: '💎🥵',
+      color: '#ec4899'
+    };
+
+    if (ht === 'giant_selenite_crystal_beam_condensation_slip_and_impale') {
+      hazard = {
+        hazardTitle: 'Queda sobre Vigas Translúcidas de Selenita e Pontas em Cauda de Andorinha',
+        saveDC: 15,
+        saveType: 'Destreza',
+        seleniteCaveRisk: 'Travessia sobre colunas gigantes de gipsita cristalina de 12 metros de comprimento que cruzam o vazio da caverna; a superfície lisa de dureza 2 recoberta de suor mineral arremessa o aventureiro sobre drusas pontiagudas no piso com 3d8 de dano perfurante/cortante (DMG p. 201; PHB p. 182-183).',
+        pioneerMitigation: 'Revestimento das botas com meias grossas de lã áspera (nunca cravos de ferro que racham o cristal) e corda passada em laço largo.',
+        rescueAndStabilization: 'Içamento cuidadoso entre as lâminas gêmeas de cristal e estancamento imediato das feridas profundas.',
+        icon: '💎🗡️',
+        color: '#f472b6'
+      };
+    } else if (ht === 'cleavage_plane_thermal_shock_crystal_pillar_shatter') {
+      hazard = {
+        hazardTitle: 'Clivagem Súbita de Pilar de Selenita por Choque Térmico ou Impacto',
+        saveDC: 15,
+        saveType: 'Destreza',
+        seleniteCaveRisk: 'Os megacristais de sulfato de cálcio hidratado possuem planos de clivagem perfeitos submetidos a imensa tensão interna; o impacto de uma marreta ou jato de água gelada fende uma viga de 20 toneladas que desaba em guilhotinas transparentes com 3d10 de dano cortante (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Proibição absoluta de cravar pítons nos cristais ou usar magias de frio/trovão dentro do geodo gigante.',
+        rescueAndStabilization: 'Remoção de pranchas cristalinas com alavancas revestidas de couro e imobilização do acidentado.',
+        icon: '💎💥',
+        color: '#db2777'
+      };
+    } else if (ht === 'anhydrite_hydration_swelling_floor_buckle_trap') {
+      hazard = {
+        hazardTitle: 'Ruptura de Empolamento de Anidrita sobre Fenda de Vapor Ácido',
+        saveDC: 14,
+        saveType: 'Destreza',
+        seleniteCaveRisk: 'O piso da caverna composto por anidrita absorve a umidade termal e expande de volume, formando domos ocos e quebradiços sobre fissuras de água sulfurosa a 70°C; a casca cede queimando os pés e pernas com 2d8 de dano de fogo (PHB p. 182-183).',
+        pioneerMitigation: 'Caminhada sobre a base maciça dos grandes cristais ancorados na rocha matriz calcária.',
+        rescueAndStabilization: 'Puxada rápida pelo arnês peitoral e aplicação de pasta refrescante sobre as queimaduras.',
+        icon: '♨️💎',
+        color: '#fb7185'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampSeleniteCrystalCaveStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'outer_limestone_vestibule_updraft_cooling_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque no Vestíbulo Calcário Ventilado Fora da Porta Térmica',
+      seleniteAndCampSafety: 'Acampamento base montado na galeria de calcário seco situada 40 metros antes da entrada do geodo de selenita, onde uma chaminé natural sopra brisa fresca constante a 19°C.',
+      seleniteOpticsAndCool: 'Isolado da umidade letal da câmara dos cristais por uma cortina dupla de lona pesada, oferecendo repouso fresco e ar puro.',
+      campRestAndSafetyGuards: 'Garante descanso longo seguro e recuperação completa da exaustão térmica para toda a comitiva.',
+      icon: '⛺💎',
+      color: '#ec4899'
+    };
+
+    if (dt === 'ice_vest_and_chilled_wet_linen_breathing_mask_rig') {
+      tech = {
+        defenseTitle: 'Aparato de Coletes Resfriados e Máscaras de Linho Frio',
+        seleniteAndCampSafety: 'Conjunto de túnicas acolchoadas embebidas na água fria do vestíbulo e máscaras faciais de múltiplas camadas de linho gelado.',
+        seleniteOpticsAndCool: 'Resfria o ar inspirado abaixo da temperatura corporal, dobrando o tempo seguro de exploração dentro da câmara de 50°C.',
+        campRestAndSafetyGuards: 'Permite rotações seguras de trabalho e resgate para os exploradores.',
+        icon: '🤿❄️',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'condensed_pure_hydrothermal_crystal_drip_collector') {
+      tech = {
+        defenseTitle: 'Coletor de Condensado Destilado nas Pontas dos Cristais',
+        seleniteAndCampSafety: 'Bacias posicionadas exatamente na zona de encontro entre o vapor quente do geodo e a rocha fria do túnel de entrada.',
+        seleniteOpticsAndCool: 'Recolhe litros de água destilada puríssima que escorre pelas pontas dos cristais de selenita já resfriada.',
+        campRestAndSafetyGuards: 'Repõe os sais minerais e a hidratação intensa exigida pelo ambiente subterrâneo.',
+        icon: '💧💎',
+        color: '#0ea5e9'
+      };
+    } else if (dt === 'optical_refraction_lantern_prism_beacon_network') {
+      tech = {
+        defenseTitle: 'Rede de Iluminação por Refração Óptica em Vigas de Selenita',
+        seleniteAndCampSafety: 'Posicionamento estratégico de uma única lanterna furta-fogo encostada na base de um longo cristal translúcido na entrada do corredor.',
+        seleniteOpticsAndCool: 'O cristal conduz e difunde a luz internamente como um farol leitoso de 30 metros, iluminando todo o acesso sem gastar óleo extra nem consumir oxigênio.',
+        campRestAndSafetyGuards: 'Impede que qualquer criatura subterrânea se aproxime na escuridão sem ser vista pelas sentinelas.',
+        icon: '🔦💎',
+        color: '#f472b6'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 198: BUFADEROS COSTEIROS DE COMPRESSÃO E GALERIAS DE RESSACA (D&D 5e)
   // =========================================================================
 
@@ -28476,6 +28580,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessSeleniteCrystalCaveHazard: calcWildernessSeleniteCrystalCaveHazard,
+    calcCampSeleniteCrystalCaveStation: calcCampSeleniteCrystalCaveStation,
     calcWildernessCoastalBlowholeHazard: calcWildernessCoastalBlowholeHazard,
     calcCampCoastalBlowholeStation: calcCampCoastalBlowholeStation,
     calcWildernessPalsaAapaMireHazard: calcWildernessPalsaAapaMireHazard,
