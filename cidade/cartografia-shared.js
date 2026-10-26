@@ -10541,6 +10541,130 @@
     };
   }
 
+  // === calcDenseFogAndVisualObscurementHazard (Nevoeiro Espesso, Cerração Cega e Brumas Feéricas - DMG p. 109 / PHB p. 183) ===
+  function calcDenseFogAndVisualObscurementHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var ht = (hazardType || 'heavy_morning_valley_fog').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Cerração Espessa de Baixada com Visibilidade Nula',
+      saveDC: 14,
+      saveType: 'Sabedoria (Percepção)',
+      obscurementPenalty: 'Visibilidade limitada a 3 metros (Heavy Obscurement PHB p. 183); ataques à distância com desvantagem.',
+      pioneerMitigation: 'Batedores amarrados por corda de guia de 6 metros avançam em fila indiana sem risco de separação.',
+      navigationalGuidance: 'Bússolas e correntes de ar frio nas encostas indicam a saída da depressão de nevoeiro.',
+      icon: '🌫️🌲',
+      color: '#94a3b8'
+    };
+
+    if (ht === 'disorienting_fey_mist' || bk === 'swamp' || bk === 'pantano') {
+      hazard = {
+        hazardTitle: 'Brumas Feéricas Ilusórias e Encantamento Esmeralda',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        obscurementPenalty: 'Condição Enfeitiçado e alucinações auditivas; aventureiros desviam a rota em 90 graus andando em círculos.',
+        pioneerMitigation: 'Sinos de latão afinados ou canções de bardo quebram o torpor hipnótico das emanações feéricas.',
+        navigationalGuidance: 'Seguir rastros de água corrente límpida que repelem as névoas encantadas da floresta.',
+        icon: '✨🌫️',
+        color: '#c084fc'
+      };
+    } else if (ht === 'toxic_peat_smolder_smoke') {
+      hazard = {
+        hazardTitle: 'Fumaça Sulfurosa de Turfeira em Combustão Lenta',
+        saveDC: 13,
+        saveType: 'Constituição',
+        obscurementPenalty: 'Ardor ocular lacrimejante e 2d6 de dano de veneno por inalação prolongada de turfa queimada.',
+        pioneerMitigation: 'Máscaras de tecido umedecidas em água e sal protegem os pulmões e mucosas dos viajantes.',
+        navigationalGuidance: 'Subir para cristas expostas a favor do vento onde a fumaça rasteira não consegue alcançar.',
+        icon: '🔥🌫️',
+        color: '#f97316'
+      };
+    } else if (ht === 'bone_chill_rime_fog' || bk === 'snow' || bk === 'tundra' || bk === 'neve') {
+      hazard = {
+        hazardTitle: 'Nevoeiro de Geada e Cristais Glaciais em Suspensão',
+        saveDC: 13,
+        saveType: 'Constituição',
+        obscurementPenalty: 'Cristais pontiagudos congelam cílios e barbas; 1 nível de exaustão por frio severo (PHB p. 185).',
+        pioneerMitigation: 'Gordura de foca ou ungüento oleoso na face previne queimaduras de geada durante a marcha.',
+        navigationalGuidance: 'Manter marcha cadenciada com paradas breves de aquecimento a cada 30 minutos.',
+        icon: '❄️🌫️',
+        color: '#38bdf8'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      obscurementPenalty: hazard.obscurementPenalty,
+      pioneerMitigation: hazard.pioneerMitigation,
+      navigationalGuidance: hazard.navigationalGuidance,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 109 (Cerração, Nevoeiro e Clima Severo) / PHB p. 183 (Visibilidade e Área Fortemente Obscurecida)'
+    };
+  }
+
+  // === calcCampDrainageTrenchAndRunoffDiversion (Valas de Drenagem, Trincheiras e Escoamento de Chuva - DMG p. 111-112 / XGE p. 78) ===
+  function calcCampDrainageTrenchAndRunoffDiversion(biomeKey, trenchType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var tt = (trenchType || 'horseshoe_swale_trench').toLowerCase();
+
+    var trench = {
+      trenchTitle: 'Vala em Ferradura Escavada a Montante com Saída Livre',
+      waterDiversionCapacity: 'Drena até 80 litros de enxurrada por minuto; contorna o perímetro externo das barracas.',
+      mudAndSoakProtection: 'Impede que o solo sob as lonas se transforme em lamaçal pegajoso durante tempestades noturnas.',
+      gearAndTentsSafety: 'Mochilas, arcas e sacos de dormir da comitiva permanecem 100% secos e isolados de enchentes.',
+      icon: '⛏️🌊',
+      color: '#0284c7'
+    };
+
+    if (tt === 'gravel_soakaway_sump') {
+      trench = {
+        trenchTitle: 'Poço de Absorção com Seixos Rolados e Gravetos Trançados',
+        waterDiversionCapacity: 'Infiltração rápida da água empoçada no ponto mais baixo do terreno do acampamento.',
+        mudAndSoakProtection: 'Elimina poças estagnadas que atrairiam mosquitos carniceiros e insetos do pântano.',
+        gearAndTentsSafety: 'Sentinelas de vigília conseguem caminhar sem patinar na lama nas trocas de turno.',
+        icon: '🪨💧',
+        color: '#38bdf8'
+      };
+    } else if (tt === 'earth_berm_deflector') {
+      trench = {
+        trenchTitle: 'Talude de Terra Compactada com Troncos de Contenção',
+        waterDiversionCapacity: 'Barreira física resistente contra enxurradas violentas descendo de encostas montanhosas.',
+        mudAndSoakProtection: 'Bloqueia lamaçal denso e detritos rochosos carreados pelas águas pluviais rápidas.',
+        gearAndTentsSafety: 'Garante estabilidade dos esteios das tendas e resguarda as fogueiras protegidas.',
+        icon: '🪵🛡️',
+        color: '#ca8a04'
+      };
+    } else if (tt === 'corduroy_timber_walkway') {
+      trench = {
+        trenchTitle: 'Trilho Elevado de Toras Roliças entre Tendas e Fogueira',
+        waterDiversionCapacity: 'Passadiço suspenso 10 cm acima do solo saturado de água pluvial e lama.',
+        mudAndSoakProtection: 'Calçados e capas de viagem permanecem limpos, evitando perda térmica nos pés dos aventureiros.',
+        gearAndTentsSafety: 'Transporte seguro de caldeirões de ensopado e suprimentos sem risco de escorregões.',
+        icon: '🪵🛤️',
+        color: '#84cc16'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      trenchType: tt,
+      trenchTitle: trench.trenchTitle,
+      waterDiversionCapacity: trench.waterDiversionCapacity,
+      mudAndSoakProtection: trench.mudAndSoakProtection,
+      gearAndTentsSafety: trench.gearAndTentsSafety,
+      icon: trench.icon,
+      color: trench.color,
+      dndRef: 'DMG p. 111-112 (Acampamento Seguro e Chuvas Torrenciais) / XGE p. 78 (Engenharia de Acampamento)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -12296,6 +12420,8 @@
     calcCampGroundInsulationAndSleepingPlatform: calcCampGroundInsulationAndSleepingPlatform,
     calcWildernessLightningAndConductiveRidgeHazard: calcWildernessLightningAndConductiveRidgeHazard,
     calcCampLightningRodAndGroundingSafety: calcCampLightningRodAndGroundingSafety,
+    calcDenseFogAndVisualObscurementHazard: calcDenseFogAndVisualObscurementHazard,
+    calcCampDrainageTrenchAndRunoffDiversion: calcCampDrainageTrenchAndRunoffDiversion,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
