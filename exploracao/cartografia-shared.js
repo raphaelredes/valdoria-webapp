@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 213: CONES DE CINZA VULCÂNICA, ESCÓRIA VÍTREA E BOMBAS OCAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessPyroclasticCinderConeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var ht = (hazardType || 'angle_of_repose_scoria_tephra_avalanche_and_vitric_shred').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Avalanche de Escória Piroclástica no Ângulo de Repouso e Abrasão Vítrea',
+      saveDC: 15,
+      saveType: 'Destreza',
+      cinderRisk: 'Encostas íngremes de 33 graus formadas por cascalho vulcânico alveolar solto (lapilli e escória basáltica) empilhado no limite exato do ângulo de repouso; um único passo em falso dispara um tapete rolante de fragmentos vítreos afiados como obsidiana que arrasta a comitiva ladeira abaixo rasgando couro e carne com 2d6 cortante mais 2d6 de concussão (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Subida exclusivamente pela crista de um dique de lava solidificada (spatter rampart) que corta o cone de cinzas.',
+      rescueAndStabilization: 'Pranchamento corporal de braços abertos para flutuar sobre a escória em movimento e lavagem de farpas vítreas.',
+      icon: '🌋🪨',
+      color: '#ea580c'
+    };
+
+    if (ht === 'breadcrust_volcanic_bomb_hollow_shell_thermal_shatter') {
+      hazard = {
+        hazardTitle: 'Estilhaçamento de Bomba Vulcânica Crosta-de-Pão Oca Sobreaquecida',
+        saveDC: 15,
+        saveType: 'Destreza',
+        cinderRisk: 'Blocos esféricos de magma de 2 metros ejetados na encosta cuja crosta externa resfriou e rachou enquanto o núcleo permaneceu incandescente ou oco e pressurizado por gases; apoiar o peso sobre a casca vitrificada rompe o domo frágil liberando um jato de vapor ácido e cacos cortantes com 2d6 de fogo mais 2d6 perfurante (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Evitar matacões arredondados com fissuras poligonais na casca que exibam miragem de calor ou cheiro de enxofre.',
+        rescueAndStabilization: 'Resfriamento imediato de queimaduras com água do cantil e retirada de fragmentos de vidro vulcânico.',
+        icon: '💣🔥',
+        color: '#dc2626'
+      };
+    } else if (ht === 'cinder_cone_crater_throat_fumarolic_co2_acid_mist_pocket') {
+      hazard = {
+        hazardTitle: 'Bolsão Asfixiante de Gás Carbônico e Névoa Sulfurosa na Garganta da Cratera',
+        saveDC: 15,
+        saveType: 'Constituição',
+        cinderRisk: 'No fundo em funil da cratera do cone de escória, fumarolas silenciosas exalam dióxido de carbono mais pesado que o ar misturado a dióxido de enxofre; descer à depressão sem vento causa sufocamento súbito e queimação pulmonar com 3d6 de veneno e 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Permanência estrita no anel superior ventilado da borda da cratera com pano úmido alcalino sobre o rosto.',
+        rescueAndStabilization: 'Içamento imediato para a crista exposta ao vento e ventilação em ar puro.',
+        icon: '☁️☠️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'silicosis_vitric_tephra_ash_plume_gale_blinding_cloud') {
+      hazard = {
+        hazardTitle: 'Tempestade Cegante de Cinza Vítrea (Tefra Fina) e Abrasão Ocular',
+        saveDC: 14,
+        saveType: 'Constituição',
+        cinderRisk: 'Rajadas de vento varrem o manto de cinza vulcânica microscópica composta por agulhas de sílica pura e vidro pulverizado; a nuvem cinzenta reduz a visibilidade a zero, arranha as córneas e inflama os brônquios causando cegueira temporária e 2d6 perfurante interno (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Uso de óculos de fenda de osso ou couro vedados com graxa e respiração através de duplo lenço molhado.',
+        rescueAndStabilization: 'Irrigação ocular cuidadosa sem esfregar as pálpebras para não cravar as espículas de vidro.',
+        icon: '🌪️👁️',
+        color: '#78716c'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampPyroclasticCinderConeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var dt = (defenseType || 'agglutinated_spatter_rampart_welded_lava_ridge_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Muralha de Escória Soldada (Spatter Rampart) Estável',
+      cinderAndCampSafety: 'Acampamento instalado sobre a crista sólida de respingos de lava aglutinados a meia-encosta, imune aos deslizamentos do talude de cinzas soltas.',
+      cinderTrenchAndWatch: 'Piso rochoso coeso, elevado acima das depressões de gás pesado e com visão panorâmica da planície vulcânica.',
+      campRestAndSafetyGuards: 'Garante descanso longo firme e seguro para todos os membros do grupo no campo piroclástico.',
+      icon: '⛺🌋',
+      color: '#ea580c'
+    };
+
+    if (dt === 'warm_scoria_subsurface_geothermal_radiant_bedding') {
+      tech = {
+        defenseTitle: 'Leito Térmico Escavado em Cascalho de Escória Aquecido por Condutividade',
+        cinderAndCampSafety: 'Remoção da camada superficial fria de lapilli em zona inativa de baixa emissão para expor a escória porosa morna a 30 graus.',
+        cinderTrenchAndWatch: 'Os poros do cascalho vulcânico retêm calor geotérmico suave e drenam qualquer chuva instantaneamente.',
+        campRestAndSafetyGuards: 'Elimina o frio noturno de altitude sem necessidade de fogueira visível.',
+        icon: '🔥🛌',
+        color: '#f97316'
+      };
+    } else if (dt === 'fumarolic_steam_cold_basalt_slab_condenser_still') {
+      tech = {
+        defenseTitle: 'Destilador de Vapor Fumarólico em Laje Fria de Basalto',
+        cinderAndCampSafety: 'Posicionamento de placas inclinadas de basalto frio sobre uma fresta de vapor d’água limpo (livre de enxofre) para condensar gotas puras em um cantil.',
+        cinderTrenchAndWatch: 'Produz água destilada estéril em um terreno onde toda a chuva infiltra instantaneamente na cinza porosa.',
+        campRestAndSafetyGuards: 'Garante a hidratação da comitiva na travessia árida de tefra.',
+        icon: '💧🪨',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'acoustic_cinder_talus_crunch_perimeter_skirt') {
+      tech = {
+        defenseTitle: 'Glacis Acústico de Escória Crocante no Perímetro de Vigília',
+        cinderAndCampSafety: 'Nivelamento de uma faixa de 15 metros de escória alveolar vítrea ao redor da muralha do acampamento.',
+        cinderTrenchAndWatch: 'A estrutura vítrea oca da escória estala ruidosamente como vidro quebrado sob o peso de qualquer predador ou batedor hostil.',
+        campRestAndSafetyGuards: 'Impede aproximações furtivas noturnas e auxilia a guarda dos sentinelas.',
+        icon: '🔔🌋',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 212: MARES DE BLOCOS PERIGLACIAIS (FELSENMEER) E RIOS OCULTOS (D&D 5e)
   // =========================================================================
 
@@ -29932,6 +30036,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessPyroclasticCinderConeHazard: calcWildernessPyroclasticCinderConeHazard,
+    calcCampPyroclasticCinderConeStation: calcCampPyroclasticCinderConeStation,
     calcWildernessFelsenmeerBlockfieldHazard: calcWildernessFelsenmeerBlockfieldHazard,
     calcCampFelsenmeerBlockfieldStation: calcCampFelsenmeerBlockfieldStation,
     calcWildernessVermetidReefHazard: calcWildernessVermetidReefHazard,
