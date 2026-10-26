@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessGlacialMoulinHazard) return '';
+        var bKey = (biome && biome.key) || 'mountains';
+        var gm = CartShared.calcWildernessGlacialMoulinHazard(bKey, 'moulin_lip_glaze_vortex_plunge');
+        return '<div class="clp-glacial-moulin-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,28,40,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.35);font-size:8px;color:#f0f9ff;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + gm.color + ';margin-bottom:2px;">' + gm.icon + ' ' + gm.hazardTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Moinho Glacial e Túnel Subglacial:</b> ' + gm.moulinRisk + ' (CD ' + gm.saveDC + ' [' + gm.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Mitigação:</b> ' + gm.pioneerMitigation + ' · <i>Estabilização: ' + gm.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampGlacialMoulinStation) return '';
+        var bKey = (biome && biome.key) || 'mountains';
+        var gm = CartShared.calcCampGlacialMoulinStation(bKey, 'dry_relict_ice_cavern_alcove_bivouac');
+        return '<div class="clp-glacial-moulin-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(10,24,36,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(14,165,233,0.3);font-size:8px;color:#f0f9ff;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + gm.color + ';margin-bottom:2px;">' + gm.icon + ' ' + gm.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>' 
+          + '  <div>• <b>Bivaque em Alcova de Gelo Azul:</b> ' + gm.moulinAndCampSafety + ' · <b>Defesa:</b> ' + gm.moulinAndWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + gm.campRestAndSafetyGuards + '</div>' 
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessEpigeneticGorgeHazard) return '';
         var bKey = (biome && biome.key) || 'mountains';
         var eg = CartShared.calcWildernessEpigeneticGorgeHazard(bKey, 'superimposed_slot_flash_choke');

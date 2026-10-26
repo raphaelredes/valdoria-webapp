@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 283: MOINHOS DE GELEIRA (MOULINS) E TÚNEIS SUBGLACIAIS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessGlacialMoulinHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var ht = (hazardType || 'moulin_lip_glaze_vortex_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda em Vórtice Espiral de Moinho Glacial',
+      saveDC: 15,
+      saveType: 'Destreza',
+      moulinRisk: 'A trilha na superfície da geleira margeia um moinho circular de 6 metros de diâmetro onde uma torrente de degelo mergulha verticalmente por 50 metros em espiral; o lábio do poço é coberto por gelo vítreo lubrificado que cede sem atrito, exigindo salvaguarda de Destreza CD 15 para cravar o piolet de gelo ou despencar no abismo gélido sofrendo 4d8 de concussão por impacto nas paredes cilíndricas mais 2d6 de dano de frio com risco iminente de afogamento e hipotermia terminal (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores amarrados em cordada com grampos de doze pontas instalando estacas de gelo com linhas de recuo a 10 metros da borda do moinho (Sobrevivência ou Atletismo CD 14).',
+      rescueAndStabilization: 'Içamento urgente com guincho de roldanas e polias de escalada técnica e reaquecimento térmico imediato com peles e bolsas de brasas (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '❄️',
+      color: '#38bdf8'
+    };
+
+    if (ht === 'subglacial_hydraulic_pressure_burst') {
+      hazard.hazardTitle = 'Erupção Hidráulica Pressurizada em Túnel Subglacial';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Força';
+      hazard.moulinRisk = 'Dentro das galerias basais da geleira, o entupimento temporário de um dreno por blocos de gelo represados acumula milhares de toneladas de água sob pressão colossal; a rolha de gelo se rompe disparando um jato pressurizado de água a 0°C com pedregulhos e blocos de gelo que varre o túnel com 3d8 de concussão e risco de esmagamento contra o teto de gelo (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Observação de ruídos de compressão e flutuações no nível das poças internas antes de adentrar galerias basais (Percepção ou Investigação CD 14).';
+      hazard.rescueAndStabilization = 'Extração de aventureiros prensados sob blocos de gelo com alavancas e drenagem de água pulmonar (Atletismo CD 14 ou Medicina CD 13).';
+    } else if (ht === 'glacial_thunder_acoustic_disorientation') {
+      hazard.hazardTitle = 'Trovão Glacial e Ressonância Ensurdecedora em Caverna de Gelo';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Constituição';
+      hazard.moulinRisk = 'O impacto da cascata de 50 metros contra o leito rochoso ecoa pelas galerias de gelo azul em frequências infrassônicas e estrondos contínuos de 105 dB; a reverberação causa náuseas severas, desequilíbrio labiríntico e surdez temporária por 1 hora, impondo desvantagem em testes de iniciativa e percepção auditiva (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Uso de protetores de lã cardada com cera de abelha e comunicação tática exclusivamente por sinais manuais padronizados (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Retirada rápida para nichos laterais com repouso em ambiente acusticamente amortecido (Medicina CD 13).';
+    } else if (ht === 'serac_calving_ceiling_collapse') {
+      hazard.hazardTitle = 'Desabamento de Serac em Teto de Túnel de Degelo';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.moulinRisk = 'O calor do ar externo que penetra pelo moinho derrete os apoios de seracs pontiagudos de 4 toneladas suspensos no teto da galeria; a quebra súbita precipita agulhas e estalagmites gigantescas de gelo cristalino sobre a passagem com 2d10 de perfuração e soterramento parcial (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Inspeção com lanternas direcionadas para fraturas de tração no teto e travessia rápida em fila indiana espaçada (Percepção CD 13).';
+      hazard.rescueAndStabilization = 'Corte rápido de gelo com machados de escalada para liberar membros presos e tala de membros fraturados (Atletismo CD 13 ou Medicina CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampGlacialMoulinStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var dt = (defenseType || 'dry_relict_ice_cavern_alcove_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Alcova Seca de Caverna de Gelo Azul',
+      moulinAndCampSafety: 'O acampamento é instalado em uma câmara lateral fóssil e desobstruída esculpida em gelo azul denso, situada 10 metros acima do conduto ativo de drenagem; o abrigo possui teto estável em abóbada imune a ventanias e tempestades de nevasca da superfície da geleira (DMG p. 111).',
+      moulinAndWatch: 'A temperatura interna se mantém constante em 0°C mesmo quando o exterior atinge -25°C, e a entrada estreita do conduto é monitorada pelas sentinelas com cobertura natural e vantagem em Percepção.',
+      campRestAndSafetyGuards: 'Descanso pleno em ambiente protegido de nevascas glaciais severas e predadores da tundra.',
+      icon: '🛡️',
+      color: '#38bdf8'
+    };
+
+    if (dt === 'subglacial_fluvial_filtered_meltwater_well') {
+      defense.defenseTitle = 'Poço de Captação em Leito de Seixos Subglacial';
+      defense.moulinAndCampSafety = 'Bolsão de água de degelo decantada naturalmente através de bancos de seixos rolados no piso rochoso da caverna, límpida e livre de farinha de rocha glacial em suspensão (PHB p. 150).';
+      defense.moulinAndWatch = 'Fornece suprimento abundante de água puríssima e cristalina para toda a comitiva sem necessidade de gastar combustível de fogueira derretendo neve.';
+      defense.campRestAndSafetyGuards = 'Hidratação ideal e conservação crítica de lenha e óleo de aquecimento.';
+    } else if (dt === 'carved_ice_block_windbreak_chokepoint') {
+      defense.defenseTitle = 'Barricada de Blocos de Gelo Azul em Meia-Lua';
+      defense.moulinAndCampSafety = 'Blocos pesados de gelo denso cortados com serras de geleira são empilhados na boca de acesso da alcova, formando uma mureta inexpugnável de 1,6 metro (PHB p. 185).';
+      defense.moulinAndWatch = 'Oferece cobertura total (+5 na CA) contra arqueiros e corta totalmente correntes de ar catabáticas geladas que descem pelos moinhos.';
+      defense.campRestAndSafetyGuards = 'Baluarte impenetrável contra predadores árticos com retenção térmica aperfeiçoada no bivaque.';
+    } else if (dt === 'subglacial_acoustic_rattle_wire_perimeter') {
+      defense.defenseTitle = 'Perímetro Tático com Guizos e Fios de Cobre em Fissuras';
+      defense.moulinAndCampSafety = 'Fios finos de cobre tensionados na galeria de acesso com sinetas de bronze afixadas em parafusos tubulares de gelo (DMG p. 111).';
+      defense.moulinAndWatch = 'Qualquer criatura que tente rastejar pelo túnel rompe os fios e faz as sinetas ressoarem na câmara de gelo, despertando as sentinelas com antecedência absoluta.';
+      defense.campRestAndSafetyGuards = 'Sistema de alerta noturno infalível garantindo sono tranquilo a todo o grupo de aventureiros.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 282: GARGANTAS EPIGENÉTICAS E MEANDROS SUPERIMPOSTOS (D&D 5e)
   // =========================================================================
 
@@ -36756,6 +36836,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessGlacialMoulinHazard: calcWildernessGlacialMoulinHazard,
+    calcCampGlacialMoulinStation: calcCampGlacialMoulinStation,
     calcWildernessEpigeneticGorgeHazard: calcWildernessEpigeneticGorgeHazard,
     calcCampEpigeneticGorgeStation: calcCampEpigeneticGorgeStation,
     calcWildernessCoastalTablelandHazard: calcWildernessCoastalTablelandHazard,
