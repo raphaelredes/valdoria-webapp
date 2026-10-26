@@ -20575,6 +20575,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 166: VALES EM GARGANTA COM SUMIDOUROS DE DRENAGEM CÁRSTICA E TÚNEIS FÓSSIL-SUBTERRÂNEOS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessBlindGorgePonorHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'ponor_hydraulic_suction_vortex_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Vórtice de Sucção Hidráulica em Sumidouro Engolidor de Ponor',
+      saveDC: 15,
+      saveType: 'Força',
+      blindGorgeAndPonorRisk: 'Garganta cárstica terminal onde o rio volumoso desaba em funil subterrâneo com vórtice de sucção que traga botes e nadadores para dentro de sifão subaquático fechado; provoca 3d8 de concussão contra rochas e risco crítico de asfixia prolongada (DMG p. 110, 118; PHB p. 183).',
+      pioneerMitigation: 'Batedores fixam cabos de retenção de aço com estacas de ancoragem nas margens e desviam a navegação para terraço seco de desembarque prévio.',
+      rescueAndStabilization: 'Arremesso de cabos de tração em trança dupla com anzóis de desengate rápido, içamento contra a correnteza e compressão torácica para expulsão de água dos pulmões.',
+      icon: '🕳️🌊',
+      color: '#0284c7'
+    };
+
+    if (ht === 'siphon_tunnel_co2_heavy_bad_air_torpor') {
+      hazard = {
+        hazardTitle: 'Acúmulo de Gás Dióxido Pesado Asfixiante em Depressão Cárstica',
+        saveDC: 14,
+        saveType: 'Constituição',
+        blindGorgeAndPonorRisk: 'Bolsão de ar estagnado rico em gás carbônico no fundo do túnel fóssil sem ventilação; apaga tochas instantaneamente e causa tontura repentina, fraqueza muscular e 1 nível de exaustão por hipóxia se inalado sem proteção (DMG p. 111; PHB p. 185).',
+        pioneerMitigation: 'Avanço com candeias de prova de chama erguidas na altura da cabeça e uso de máscaras com carvão ativado embebidas em vinagre aromático.',
+        rescueAndStabilization: 'Transporte urgente para a boca ensolarada da caverna, abanamento vigoroso com telas de linho e administração de elixir tônico picante.',
+        icon: '🌫️☣️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'blind_valley_flash_siphon_backflood') {
+      hazard = {
+        hazardTitle: 'Refluxo Súbito de Sifão Cárstico Sob Pressão por Cheia Relâmpago',
+        saveDC: 15,
+        saveType: 'Destreza',
+        blindGorgeAndPonorRisk: 'Pressão hidráulica excessiva gerada por tempestade montanhosa que faz o sumidouro cuspir jatos d\'água em refluxo violento de 40 km/h; alaga o vale cego em segundos causando 2d8 de concussão por arrasto contra blocos pontiagudos.',
+        pioneerMitigation: 'Escalada imediata por estribos e pítons pré-instalados em direção a patamares elevados acima da cota máxima de refluxo.',
+        rescueAndStabilization: 'Içamento com guincho de catraca, contenção de escoriações com pomada de arnica e aquecimento térmico com mantas de lã.',
+        icon: '🌊💥',
+        color: '#dc2626'
+      };
+    } else if (ht === 'fossil_tunnel_stalactite_shatter_cascade') {
+      hazard = {
+        hazardTitle: 'Desprendimento de Estalactites Calcárias Finas por Vibração Acústica',
+        saveDC: 14,
+        saveType: 'Destreza',
+        blindGorgeAndPonorRisk: 'Formações calcárias pontiagudas de 2 metros suspensas no teto do túnel fóssil enfraquecidas por infiltrações que despencam como lanças de pedra ao menor eco sonoro; causam 2d6 de dano perfurante.',
+        pioneerMitigation: 'Marcha silenciosa com calçados com sola de feltro amortecedor e uso de escudos ou capacetes de ferro de abas largas.',
+        rescueAndStabilization: 'Extração de pontas calcárias incrustadas com pinça asséptica e cauterização com tintura balsâmica de pinho silvestre.',
+        icon: '🗡️🪨',
+        color: '#475569'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampBlindGorgePonorStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'elevated_dry_ledge_ponor_alcove_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Cornija Fóssil Elevada 15 Metros Acima do Sumidouro',
+      blindGorgeAndCampSafety: 'Acampamento montado em patamar seco de calcário situado muito acima do refluxo de água e fora do alcance de correntes de ar viciado, com acesso exclusivo por trilha escalonada defensável.',
+      ponorMoatAndSpeleothemWater: 'O precipício do sumidouro atua como fosso abissal impenetrável pelas costas, com paredões verticais que bloqueiam ventanias e predadores rastejantes.',
+      campRestAndSafetyGuards: 'Garante descanso longo calmo, seguro e protegido para toda a comitiva, com acústica favorável para a vigilância das sentinelas.',
+      icon: '⛺🕳️',
+      color: '#0284c7'
+    };
+
+    if (dt === 'stalagmite_interlocking_breastwork_bastion') {
+      tech = {
+        defenseTitle: 'Parapeito de Estalagmites Entrelaçadas e Lajes de Calcário Justapostas',
+        blindGorgeAndCampSafety: 'Barreira defensiva natural reforçada com blocos pesados de calcário montada no único ponto de acesso à cornija, dotada de seteiras para disparos de arco ou besta.',
+        ponorMoatAndSpeleothemWater: 'Concede cobertura superior (+5 na CA) aos defensores contra qualquer investida frontal de criaturas das cavernas.',
+        campRestAndSafetyGuards: 'Permite que a comitiva repouse com total segurança e que as sentinelas mantenham vigília desimpedida.',
+        icon: '🛡️🧱',
+        color: '#334155'
+      };
+    } else if (dt === 'pure_speleothem_drip_catchment_basin') {
+      tech = {
+        defenseTitle: 'Cisterna Coletora de Gotejamento Cárstico Puro com Filtro de Sílica',
+        blindGorgeAndCampSafety: 'Captação direta da água de infiltração límpida que goteja das estalactites do teto da galeria fóssil, conduzida por calhas de bambu até vasos de cerâmica esterilizada.',
+        ponorMoatAndSpeleothemWater: 'Fornece 45 litros diários de água doce ultrafiltrada, livre de turbidez fluvial e rica em carbonatos benéficos à saúde.',
+        campRestAndSafetyGuards: 'Elimina carências hídricas e cólicas gastrointestinais, mantendo o vigor e o moral da expedição no ápice.',
+        icon: '💧🏺',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'blind_chasm_tripwire_resonating_bronze_bell') {
+      tech = {
+        defenseTitle: 'Sistema de Alarme Acústico com Fios de Aço e Sinos Retumbantes de Bronze',
+        blindGorgeAndCampSafety: 'Cabos de tensão finos estendidos pela trilha de acesso à cornija conectados a sinos pendurados no interior da caverna que ecoam profundamente ao menor toque.',
+        ponorMoatAndSpeleothemWater: 'Alerta imediato a 50 metros de distância eliminando qualquer possibilidade de ataque surpresa nas trevas da garganta cárstica.',
+        campRestAndSafetyGuards: 'Garante sono profundo e sossegado para todos os membros do grupo com alerta antecipado garantido.',
+        icon: '🔔🕳️',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 165: RESTINGAS ARBUSTIVAS LITORÂNEAS, CORDÕES ARENOSOS E BREJOS SALOBROS (D&D 5e)
   // =========================================================================
 
@@ -25042,6 +25146,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessBlindGorgePonorHazard: calcWildernessBlindGorgePonorHazard,
+    calcCampBlindGorgePonorStation: calcCampBlindGorgePonorStation,
     calcWildernessCoastalRestingaSwaleHazard: calcWildernessCoastalRestingaSwaleHazard,
     calcCampCoastalRestingaSwaleStation: calcCampCoastalRestingaSwaleStation,
     calcWildernessAlpineLapiesIceShaftHazard: calcWildernessAlpineLapiesIceShaftHazard,
