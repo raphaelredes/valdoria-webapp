@@ -20469,6 +20469,113 @@
   // PHB p. 182-183 (Travel Pace, Navigation), PHB p. 190 (Falling Damage), XGE p. 77-83 (Coastal Hazards)
   // =========================================================================
 
+
+  // =========================================================================
+  // FASE 143: CAATINGAS HIPERXERÓFILAS, LAJEDOS CRISTALINOS E TANQUES DE INSELBERGS
+  // D&D 5e: DMG p. 110-111 (Extreme Heat, Trackless Arid Badlands), DMG p. 112 (Water Shortage),
+  // PHB p. 182-185 (Travel Pace, Dehydration & Water Requirements), XGE p. 77-83 (Arid Encounters)
+  // =========================================================================
+
+  function calcWildernessCaatingaAndInselbergHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'scalding_granite_pavement_heatstroke_and_blisters').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Insolação e Convecção Térmica em Lajedo de Granito a 55°C',
+      saveDC: 15,
+      saveType: 'Constituição',
+      caatingaAndInselbergRisk: 'Superfície rochosa nua de granito escuro que atinge 55°C ao meio-dia, gerando bolsões de ar superaquecido que cozinham as solas de botas de couro e provocam desidratação fulminante, impondo 1 nível de exaustão e 2d6 de dano de fogo radiante (DMG p. 110, PHB p. 185).',
+      pioneerMitigation: 'Marcha noturna ou matinal entre 04h e 09h, calçados reforçados com solado duplo de cortiça isolante e capuzes de linho cru com proteção de nuca.',
+      rescueAndStabilization: 'Arrasto imediato para a sombra de fendas graníticas, aplicação de panos úmidos na fronte e hidratação lenta com soro de sal marinho e rapadura.',
+      icon: '☀️🪨',
+      color: '#ea580c'
+    };
+
+    if (ht === 'spiny_caatinga_cholla_shredding_thorns') {
+      hazard = {
+        hazardTitle: 'Matagal Espinhoso de Cactos, Mandacarus e Juremas Venenosas',
+        saveDC: 14,
+        saveType: 'Destreza',
+        caatingaAndInselbergRisk: 'Vegetação xerófila densa armada com agulhas farpadas de até 8 cm e resinas cáusticas; passos descuidados perfuram armaduras de couro, rasgam alforjes com perda de suprimentos e causam 2d6 de dano perfurante e lentidão de marcha.',
+        pioneerMitigation: 'Batedores avançam com perneiras de couro cru endurecido em banha e utilizam podões longos de desbaste para abrir picadas seguras.',
+        rescueAndStabilization: 'Extração cirúrgica de espinhos com pinças aquecidas, assepsia das feridas com infusão alcoólica de própolis e ligaduras limpas.',
+        icon: '🌵🩸',
+        color: '#dc2626'
+      };
+    } else if (ht === 'hyperthermal_whirlwind_dust_devil_blindness') {
+      hazard = {
+        hazardTitle: 'Redemoinho Hipertérmico de Poeira Silicosa e Microcristais',
+        saveDC: 14,
+        saveType: 'Destreza',
+        caatingaAndInselbergRisk: 'Ciclones térmicos repentinos que erguem nuvens de poeira de quartzo a 60 km/h; causam cegueira temporária por 1d4 rodadas por abrasão corneana e apagam completamente marcas de trilhas de navegação.',
+        pioneerMitigation: 'Uso de óculos de fenda de osso ou viseiras de gaze densa e amarração de corda-guia entre os membros da comitiva durante a aproximação da coluna de vento.',
+        rescueAndStabilization: 'Lavagem ocular com água doce pura em concha esterilizada e descanso visual sob vendas de tecido escuro por 30 minutos.',
+        icon: '🌪️👁️',
+        color: '#d97706'
+      };
+    } else if (ht === 'thorny_flash_flood_alluvial_creek_surge') {
+      hazard = {
+        hazardTitle: 'Enxurrada Torrencial de Argila em Leito Seco de Lajedo',
+        saveDC: 15,
+        saveType: 'Força',
+        caatingaAndInselbergRisk: 'Chuvas torrenciais caídas a quilômetros de distância canalizadas instantaneamente sobre os lajedos impermeáveis, formando onda de choque de lama e troncos espinhosos com 2 metros de altura e 3d6 de concussão.',
+        pioneerMitigation: 'Batedores atentos a sons de trovões distantes e pássaros em fuga montam sentinelas em cristas de inselbergs, evitando o fundo de grotas secas.',
+        rescueAndStabilization: 'Resgate de náufragos terrestres com cordas de cânhamo amarradas a árvores de jurema de tronco grosso e drenagem de lodo pulmonar.',
+        icon: '🌊🪵',
+        color: '#b45309'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampCaatingaAndInselbergStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'inselberg_granite_shade_crevice_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Fenda Umbrófila de Inselberg com Isolador Térmico',
+      caatingaShadeAnchorageAndWaterSafety: 'Acampamento montado sob a abóbada sombreada de fenda granítica em monólito de inselberg, onde a temperatura se mantém 14°C abaixo do lajedo exposto.',
+      bromeliadCisternAndEvaporativeCooler: 'Esteiras de folhas secas de palmeira carnaúba isolam os aventureiros do solo rochoso enquanto a correnteza de ar do cânion garante brisa suave.',
+      campRestAndSafetyGuards: 'Permite repouso longo revigorante com recuperação integral de pontos de vida e cancelamento de níveis de estafa térmica.',
+      icon: '⛺🪨',
+      color: '#ea580c'
+    };
+
+    if (dt === 'giant_bromeliad_tank_filtered_water_oasis') {
+      tech = {
+        defenseTitle: 'Cisterna Natural de Tanque de Bromélias Gigantes de Encosta',
+        caatingaShadeAnchorageAndWaterSafety: 'Captação criteriosa de água limpa acumulada nas axilas foliares de bromélias rupícolas gigantes de até 2 metros de diâmetro que habitam as encostas úmidas do inselberg.',
+        bromeliadCisternAndEvaporativeCooler: 'Filtragem por peneira fina de crina de cavalo e carvão de aroeira, garantindo 25 litros diários de água doce mineralizada e fresca.',
+        campRestAndSafetyGuards: 'Elimina integralmente a escassez de água no bivaque, abastecendo cantis e animais de carga sem risco de parasitas hídricos.',
+        icon: '🌺💧',
+        color: '#10b981'
+      };
+    } else if (dt === 'wax_palm_sunshade_and_convection_vent') {
+      tech = {
+        defenseTitle: 'Toldo Refletivo de Palha Cerosa com Exaustão Convectiva',
+        caatingaShadeAnchorageAndWaterSafety: 'Cobertura suspensa confeccionada com palhas entrelaçadas de carnaúba ricas em cera impermeabilizante que repelem 80% do calor radiante do sol.',
+        bromeliadCisternAndEvaporativeCooler: 'Aberturas superiores no toldo geram efeito chaminé natural, sugando o ar fresco da base das rochas e expelindo o ar quente acumulado.',
+        campRestAndSafetyGuards: 'Mantém as tendas em ambiente fresco e sombreado mesmo sob o zênite do meio-dia, viabilizando descansos curtos confortáveis.',
+        icon: '🌴💨',
+        color: '#16a34a'
+      };
+    } else if (dt === 'clay_water_olla_evaporative_cooling_cache') {
+      tech = {
+        defenseTitle: 'Talhas de Argila Porosa Enterradas para Refrigeração Evaporativa',
+        caatingaShadeAnchorageAndWaterSafety: 'Recipientes de cerâmica não vitrificada enterrados na areia úmida de fendas sombreadas que transpiram água continuamente.',
+        bromeliadCisternAndEvaporativeCooler: 'A evaporação passiva na superfície do barro resfria a água armazenada a 16°C e conserva rações de carne-seca e queijo por dias.',
+        campRestAndSafetyGuards: 'Garante suprimentos frescos e bebidas revigorantes que elevam o moral e a prontidão dos batedores e sentinelas.',
+        icon: '🏺❄️',
+        color: '#0284c7'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessBasaltColumnsAndGiantCausewayHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'coastal').toLowerCase();
@@ -22605,6 +22712,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessCaatingaAndInselbergHazard: calcWildernessCaatingaAndInselbergHazard,
+    calcCampCaatingaAndInselbergStation: calcCampCaatingaAndInselbergStation,
     calcWildernessBasaltColumnsAndGiantCausewayHazard: calcWildernessBasaltColumnsAndGiantCausewayHazard,
     calcCampBasaltColumnsAndGiantCausewayStation: calcCampBasaltColumnsAndGiantCausewayStation,
     calcWildernessRaisedBogAndSphagnumHazard: calcWildernessRaisedBogAndSphagnumHazard,
