@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 224: CRATERAS DE IMPACTO METEORÍTICO (ASTROBREMAS) E SUEVITA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessMeteoriticImpactCraterHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'suevite_impact_melt_glass_shard_talus_avalanche').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Deslizamento de Talude de Suevita e Estilhaços de Vidro de Impacto (Impactita)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      astroblemeRisk: 'As muralhas internas do anel da cratera são formadas por brechas polimíticas fundidas pelo impacto cósmico (suevita) repletas de bombas de vidro negro lechatelierita e quartzo chocado quebradiço; o peso da comitiva desencadeia um desmoronamento de lascas vítreas afiadas como bisturis cirúrgicos causando 2d6 cortante mais 2d6 de concussão (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Descer à bacia da cratera pelas ravinas radiais onde a suevita solta já foi lavada até a rocha cristalina.',
+      rescueAndStabilization: 'Extração de farpas de vidro de sílica fundida com pinça e enfaixamento firme.',
+      icon: '☄️🪨',
+      color: '#a855f7'
+    };
+
+    if (ht === 'shatter_cone_fractured_central_uplift_pinnacle_shearing') {
+      hazard = {
+        hazardTitle: 'Cisalhamento de Pináculo de Cones de Estilhaçamento no Pico Central',
+        saveDC: 15,
+        saveType: 'Destreza',
+        astroblemeRisk: 'No centro da cratera complexa ergue-se o anel de rebote elástico composto por rochas inteiramente atravessadas por fraturas cônicas estriadas (shatter cones) produzidas pela onda de choque de gigapascals; apoiar-se ou cravar pítons nos cones imbricados faz o bloco inteiro descolar ao longo das superfícies cônicas lisas com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Nunca cravar grampos na direção do ápice dos cones de estilhaçamento; contornar a base do maciço central.',
+        rescueAndStabilization: 'Ancoragem em lajes horizontais da bacia anelar e imobilização de membros.',
+        icon: '⛰️💥',
+        color: '#9333ea'
+      };
+    } else if (ht === 'shocked_remagnetized_nickel_iron_anomaly_compass_spin') {
+      hazard = {
+        hazardTitle: 'Anomalia Geomagnética de Fragmentos de Ferro-Níquel e Desorientação',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        astroblemeRisk: 'Massas soterradas do meteorito metálico de camacita e taenita junto à remagnetização de choque do embasamento fazem a agulha da bússola girar loucamente ou apontar para o chão da cratera; sob nevoeiro ou tempestade de poeira na bacia circular simétrica, o grupo caminha em círculos acumulando 1 nível de exaustão (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Guardar a bússola magnética e navegar estritamente por azimute solar ou alinhamento com o pico central.',
+        rescueAndStabilization: 'Subida até a crista do anel externo para restabelecer triangulação visual.',
+        icon: '🧭🧲',
+        color: '#c084fc'
+      };
+    } else if (ht === 'annular_moat_endorheic_nickel_cobalt_heavy_metal_seep') {
+      hazard = {
+        hazardTitle: 'Intoxicação Metálica nas Lagoas Anelares de Lixiviação de Níquel e Cobalto',
+        saveDC: 15,
+        saveType: 'Constituição',
+        astroblemeRisk: 'Na depressão circular entre a muralha externa e o pico central acumulam-se águas paradas esverdeadas saturadas por sais de níquel, cobalto e irídio lixiviados da brecha de impacto; beber ou cozinhar com essa água cristalina sem cheiro provoca cólicas severas e vertigem com 3d6 de veneno (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Proibição absoluta de consumir água estagnada do fosso anelar; usar apenas água pluvial das bordas altas.',
+        rescueAndStabilization: 'Administração de carvão ativado da fogueira e hidratação com reservas limpas.',
+        icon: '🧪🟢',
+        color: '#10b981'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampMeteoriticImpactCraterStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'overturned_ejecta_flap_hinge_rim_fortified_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque sob a Aba Invertida da Crista do Anel da Cratera (Overturned Flap)',
+      astroblemeAndCampSafety: 'Acampamento abrigado sob a camada de rocha sedimentar que foi dobrada para trás como uma dobradiça durante o impacto, formando um teto em balanço voltado para o exterior da cratera.',
+      astroblemeTrenchAndWatch: 'Domina simultaneamente toda a planície externa e a bacia interna da cratera a partir de um abrigo seco.',
+      campRestAndSafetyGuards: 'Garante descanso longo estrategicamente inexpugnável para a comitiva.',
+      icon: '⛺☄️',
+      color: '#a855f7'
+    };
+
+    if (dt === 'impact_melt_sheet_columnar_monolith_windbreak') {
+      tech = {
+        defenseTitle: 'Reduto em Laje Maciça de Rocha Fundida de Impacto (Impact Melt Sheet)',
+        astroblemeAndCampSafety: 'Tendas montadas sobre o lençol basal de rocha totalmente fundida e recristalizada como um basalto denso e sem fraturas de choque.',
+        astroblemeTrenchAndWatch: 'Oferece fundação sólida livre dos estilhaços soltos de suevita e retém calor solar moderado à noite.',
+        campRestAndSafetyGuards: 'Proporciona piso plano e seguro para as barracas e animais.',
+        icon: '🪨🛡️',
+        color: '#9333ea'
+      };
+    } else if (dt === 'rim_inward_fracture_perched_meteoric_water_spring') {
+      tech = {
+        defenseTitle: 'Fonte de Água Meteórica Filtrada na Falha de Borda Superior',
+        astroblemeAndCampSafety: 'Captação de água de chuva que infiltra no topo do anel externo e brota acima do nível das brechas ricas em níquel.',
+        astroblemeTrenchAndWatch: 'Fornece água potável livre da contaminação por metais pesados do fosso anelar inferior.',
+        campRestAndSafetyGuards: 'Mantém a saúde hídrica do grupo durante a exploração da cratera.',
+        icon: '💧⛰️',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'parabolic_crater_bowl_acoustic_focal_watchpost') {
+      tech = {
+        defenseTitle: 'Posto de Escuta no Ponto Focal Acústico da Bacia Parabólica',
+        astroblemeAndCampSafety: 'A geometria circular em tigela da cratera de impacto reflete ondas sonoras das encostas diretamente para o anel do pico central.',
+        astroblemeTrenchAndWatch: 'Permite aos sentinelas ouvir passos ou vozes na borda da cratera a mais de um quilômetro de distância.',
+        campRestAndSafetyGuards: 'Impede qualquer incursão surpresa na bacia durante a noite.',
+        icon: '🔔📡',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 223: SOLOS POLIGONAIS CRIOGÊNICOS E CÍRCULOS DE LAMA (D&D 5e)
   // =========================================================================
 
@@ -31076,6 +31180,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessMeteoriticImpactCraterHazard: calcWildernessMeteoriticImpactCraterHazard,
+    calcCampMeteoriticImpactCraterStation: calcCampMeteoriticImpactCraterStation,
     calcWildernessCryogenicFrostPolygonHazard: calcWildernessCryogenicFrostPolygonHazard,
     calcCampCryogenicFrostPolygonStation: calcCampCryogenicFrostPolygonStation,
     calcWildernessGibberRegVentifactHazard: calcWildernessGibberRegVentifactHazard,

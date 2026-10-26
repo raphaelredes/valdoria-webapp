@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T19:24:52Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T19:27:32Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessMeteoriticImpactCraterHazard) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var mc = CartShared.calcWildernessMeteoriticImpactCraterHazard(bKey, 'suevite_impact_melt_glass_shard_talus_avalanche');
+        return '<div class="clp-meteoritic-impact-crater-card" style="margin:4px 0 6px;text-align:left;background:rgba(24,14,34,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(168,85,247,0.35);font-size:8px;color:#f3e8ff;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + mc.color + ';margin-bottom:2px;">' + mc.icon + ' ' + mc.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Cratera de Impacto (Astroblema) e Suevita:</b> ' + mc.astroblemeRisk + ' (CD ' + mc.saveDC + ' [' + mc.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#e9d5ff;margin-top:1px;">• <b>Mitigação:</b> ' + mc.pioneerMitigation + ' · <i>Estabilização: ' + mc.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampMeteoriticImpactCraterStation) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var ms = CartShared.calcCampMeteoriticImpactCraterStation(bKey, 'overturned_ejecta_flap_hinge_rim_fortified_bivouac');
+        return '<div class="clp-meteoritic-impact-crater-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,10,28,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(147,51,234,0.3);font-size:8px;color:#f3e8ff;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' ' + ms.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Aba Invertida do Anel:</b> ' + ms.astroblemeAndCampSafety + ' · <b>Defesa:</b> ' + ms.astroblemeTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#d8b4fe;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + ms.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){
