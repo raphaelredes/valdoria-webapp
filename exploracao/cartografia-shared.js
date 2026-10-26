@@ -13393,6 +13393,130 @@
     };
   }
 
+  // === calcWildernessSteppeGrassFireAndWindstormHazard (Queimadas em Grama Seca, Redemoinhos de Poeira e Debandada - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessSteppeGrassFireAndWindstormHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'steppe').toLowerCase();
+    var ht = (hazardType || 'wildfire_grass_inferno_surge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Parede de Fogo Rápido em Grama Seca (Grass Fire)',
+      saveDC: 14,
+      saveType: 'Destreza',
+      steppeDamageAndDisruption: 'Labaredas rasteiras impulsionadas a 40 km/h; calor abrasador de 3d8 de fogo e risco de asfixia por fumaça densa (DMG p. 110).',
+      pioneerMitigation: 'Batedores iniciam contra-fogo preventivo a sotavento e conduzem a comitiva para solo já calcinado.',
+      rescueAndStabilization: 'Abafamento com mantas de couro úmidas, compressas de terra fria em queimaduras e hidratação imediata.',
+      icon: '🔥🌾',
+      color: '#ea580c'
+    };
+
+    if (ht === 'blinding_dust_devil_whirlwind') {
+      hazard = {
+        hazardTitle: 'Redemoinho de Poeira Cortante e Areia Fina (Dust Devil)',
+        saveDC: 13,
+        saveType: 'Destreza',
+        steppeDamageAndDisruption: 'Vórtice térmico rotativo arremessando cascalho; 2d6 de corte/concussão e condição Cego por 1 minuto.',
+        pioneerMitigation: 'Uso de óculos com fendas protetoras de osso ou couro e postura agachada de costas para a rajada.',
+        rescueAndStabilization: 'Lavagem ocular abundante com água filtrada e colírio de infusão calmante de camomila.',
+        icon: '🌪️🏜️',
+        color: '#d97706'
+      };
+    } else if (ht === 'hidden_badger_and_marmot_burrow_tangle') {
+      hazard = {
+        hazardTitle: 'Campo Minado de Tocas de Marmotas e Texugos',
+        saveDC: 13,
+        saveType: 'Destreza',
+        steppeDamageAndDisruption: 'Galerias subterrâneas frágeis sob pastagens; afundamento súbito causando 1d8 de concussão e risco de fratura em montarias.',
+        pioneerMitigation: 'Marcha em fila indiana com guia a pé sondando o terreno com vara flexível antes da passagem das montarias.',
+        rescueAndStabilization: 'Imobilização com talas de bambu e ataduras de linho, poupando a pata do animal acidentado.',
+        icon: '🕳️🦡',
+        color: '#78716c'
+      };
+    } else if (ht === 'stampeding_bison_herd_avalanche') {
+      hazard = {
+        hazardTitle: 'Debandada de Manada de Bisões em Pânico Cego',
+        saveDC: 14,
+        saveType: 'Destreza',
+        steppeDamageAndDisruption: 'Centenas de cascos pesados cruzando a planície; 4d10 de concussão/atropelamento em cone massivo de 30 metros.',
+        pioneerMitigation: 'Vigília com percepção acústica de tremores no chão e acendimento de archotes de fumaça negra para desviar o rebanho.',
+        rescueAndStabilization: 'Socorro emergencial com talas torácicas e elixires restauradores para aventureiros pisoteados.',
+        icon: '🦬💨',
+        color: '#b45309'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      steppeDamageAndDisruption: hazard.steppeDamageAndDisruption,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Fogo nos Ermos e Estepes) / PHB p. 182-183 (Sufocamento e Atropelamento)'
+    };
+  }
+
+  // === calcCampSteppeYurtShelterAndFirebreakStation (Tendas Yurt Nômades, Faixas Aceiro e Mantas de Couro - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampSteppeYurtShelterAndFirebreakStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'steppe').toLowerCase();
+    var dt = (defenseType || 'nomadic_circular_yurt_felt_shelter').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Tenda Yurt Nômade Circular com Armação Flexível de Vime',
+      aerodynamicWindResistance: 'Estrutura circular autoportante sem arestas que dissipa ventos de até 100 km/h sem tombar.',
+      firebreakSecurityAndComfort: 'Cobertura de feltro de lã impermeabilizada que barra o ar gélido noturno e respingos de chuva.',
+      campRestAndSafetyGuards: 'Permite sono longo aquecido e repousante para toda a comitiva mesmo no meio de vendavais de estepe.',
+      icon: '⛺🌀',
+      color: '#10b981'
+    };
+
+    if (dt === 'plowed_perimeter_firebreak_trench') {
+      tech = {
+        defenseTitle: 'Faixa Aceiro Perimétrica Roçada e Escavada',
+        aerodynamicWindResistance: 'Trincheira limpa de 4 metros sem qualquer palha ou grama seca ao redor do acampamento.',
+        firebreakSecurityAndComfort: 'Impede 100% que labaredas de fogo rasteiro cheguem às coberturas e mantimentos do grupo.',
+        campRestAndSafetyGuards: 'Garante vigília segura contra queimadas noturnas trazidas repentinamente por mudanças de vento.',
+        icon: '🛡️🌾',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'wet_leather_dousing_flaps_station') {
+      tech = {
+        defenseTitle: 'Estação de Mantas de Couro Úmidas e Bolsas Extintoras',
+        aerodynamicWindResistance: 'Posto de contenção rápida com couros pesados embebidos em água prontos para abafar fagulhas.',
+        firebreakSecurityAndComfort: 'Neutraliza fagulhas incandescentes sopradas pelo vento antes de formarem novos focos no acampamento.',
+        campRestAndSafetyGuards: 'Mantém a área das barracas e depósitos de ração protegida de centelhas durante a noite inteira.',
+        icon: '🧤💧',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'central_brazier_deflected_vent_chimney') {
+      tech = {
+        defenseTitle: 'Braseiro Central com Coifa e Defletor Aerodinâmico',
+        aerodynamicWindResistance: 'Fogareiro embutido com tiragem regulável que aquece uniformemente o interior da tenda.',
+        firebreakSecurityAndComfort: 'Elimina risco de intoxicação por monóxido de carbono e previne faíscas soltas no feltro.',
+        campRestAndSafetyGuards: 'Proporciona ambiente agradável para recuperação completa dos aventureiros após marchas extenuantes.',
+        icon: '🔥🛖',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      aerodynamicWindResistance: tech.aerodynamicWindResistance,
+      firebreakSecurityAndComfort: tech.firebreakSecurityAndComfort,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque em Estepe) / XGE p. 78 (Equipamento de Proteção e Sobrevivência)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -15192,6 +15316,8 @@
     calcCampGlacialSnowBlockShelterAndIceScrewStation: calcCampGlacialSnowBlockShelterAndIceScrewStation,
     calcWildernessRockyCanyonWindTunnelAndSpallingHazard: calcWildernessRockyCanyonWindTunnelAndSpallingHazard,
     calcCampCanyonRockOverhangAndWindbreakStation: calcCampCanyonRockOverhangAndWindbreakStation,
+    calcWildernessSteppeGrassFireAndWindstormHazard: calcWildernessSteppeGrassFireAndWindstormHazard,
+    calcCampSteppeYurtShelterAndFirebreakStation: calcCampSteppeYurtShelterAndFirebreakStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
