@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T17:08:01Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T17:14:09Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessCoastalBarrierSpitHazard) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var bs = CartShared.calcWildernessCoastalBarrierSpitHazard(bKey, 'tidal_inlet_ebb_jet_undertow_sweep');
+        return '<div class="clp-barrier-spit-card" style="margin:4px 0 6px;text-align:left;background:rgba(14,28,38,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(2,132,199,0.35);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + bs.color + ';margin-bottom:2px;">' + bs.icon + ' ' + bs.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Restinga e Barra de Maré:</b> ' + bs.barrierSpitRisk + ' (CD ' + bs.saveDC + ' [' + bs.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Mitigação:</b> ' + bs.pioneerMitigation + ' · <i>Estabilização: ' + bs.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampCoastalBarrierSpitStation) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var bc = CartShared.calcCampCoastalBarrierSpitStation(bKey, 'elevated_chenier_shell_ridge_bivouac');
+        return '<div class="clp-barrier-spit-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(10,22,32,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(14,165,233,0.3);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + bc.color + ';margin-bottom:2px;">' + bc.icon + ' ' + bc.defenseTitle.toUpperCase() + ' (DMG p. 117):</div>'
+          + '  <div>• <b>Bivaque em Cordão Litorâneo:</b> ' + bc.barrierSpitAndCampSafety + ' · <b>Defesa:</b> ' + bc.barrierSpitWindbreakAndLens + '</div>'
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + bc.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

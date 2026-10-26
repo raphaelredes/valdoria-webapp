@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 188: CAMPOS DE LAGOAS COSTEIRAS DE RESTINGA E CANAIS DE MARÉ (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessCoastalBarrierSpitHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'tidal_inlet_ebb_jet_undertow_sweep').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Corrente de Jato de Vazante em Canal de Barra de Restinga',
+      saveDC: 15,
+      saveType: 'Força',
+      barrierSpitRisk: 'Garganta estreita de barra arenosa onde toda a massa de água da lagoa escoa para o mar aberto na maré vazante; o fluxo violento arranca o equilíbrio dos exploradores arrastando-os contra bancos de conchas cortantes e arrebentação externa com 3d8 de dano cortante/concussão (DMG p. 109-110, 117; PHB p. 182-183).',
+      pioneerMitigation: 'Travessia estrita no estofo da maré (repouso entre enchente e vazante) com cabo de segurança ancorado em troncos de aroeira na margem.',
+      rescueAndStabilization: 'Lançamento oblíquo de boia de cortiça presa a carretilha de cânhamo e aquecimento imediato junto a fogueira protegida.',
+      icon: '🌊🏖️',
+      color: '#0284c7'
+    };
+
+    if (ht === 'storm_overwash_fan_breach_surge') {
+      hazard = {
+        hazardTitle: 'Ruptura de Cordão Litorâneo por Onda de Galgamento Oceânico',
+        saveDC: 15,
+        saveType: 'Destreza',
+        barrierSpitRisk: 'Série de vagalhões de ressaca que transpõem a crista baixa da barreira de areia abrindo um leque de galgamento (overwash fan); a enxurrada salgada soterra equipamentos e derruba a comitiva na lagoa interna com 3d6 de concussão (DMG p. 110, 117; XGE p. 109).',
+        pioneerMitigation: 'Marcha pelo reverso vegetado das dunas frontais altas evitando depressões interdunares sem vegetação fixadora.',
+        rescueAndStabilization: 'Desenterramento rápido das mochilas na areia encharcada e lavagem dos olhos e feridas com água doce de cantil.',
+        icon: '🌊⚠️',
+        color: '#0369a1'
+      };
+    } else if (ht === 'choked_lagoon_anaerobic_sapropel_mire') {
+      hazard = {
+        hazardTitle: 'Atolamento em Vasa Negra de Sapropel em Lagoa Estrangulada',
+        saveDC: 14,
+        saveType: 'Força',
+        barrierSpitRisk: 'Fundo raso de lagoa costeira hipersalina enganosamente coberto por crosta clara de sal e algas secas sobre 2 metros de lodo orgânico negro (sapropel) e gás sulfídrico; o piso cede prendendo as pernas até a cintura e causando 2d6 de dano de veneno por inalação fétida (DMG p. 109-110; PHB p. 182).',
+        pioneerMitigation: 'Uso de pranchas largas de madeira de deriva ou raquetes de junco trançado para distribuir o peso sobre a crosta salina.',
+        rescueAndStabilization: 'Extração horizontal com vara longa de bambu estendida a partir da restinga firme e limpeza da lama cáustica.',
+        icon: '🕳️🦠',
+        color: '#4d7c0f'
+      };
+    } else if (ht === 'halophyte_bromo_spine_thicket_laceration') {
+      hazard = {
+        hazardTitle: 'Labirinto Espinhoso de Gravatás-de-Restinga e Cactos Litorâneos',
+        saveDC: 14,
+        saveType: 'Constituição',
+        barrierSpitRisk: 'Moitas impenetráveis de bromélias terrestres de serrilha dura, cactos-de-praia e espinheiros retorcidos pelo vento salino; o avanço forçado rasga botas e perneiras causando 2d6 de dano perfurante e inflamação salina dolorosa (DMG p. 110; PHB p. 182-183).',
+        pioneerMitigation: 'Abertura paciente de picada com facão pesado seguindo trilhas de mamíferos costeiros sobre a crista seca.',
+        rescueAndStabilization: 'Remoção de espinhos quebrados sob a pele com pinça esterilizada no fogo e emplastro de erva-baleeira.',
+        icon: '🌵🗡️',
+        color: '#15803d'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampCoastalBarrierSpitStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'elevated_chenier_shell_ridge_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Crista de Cordão Conquífero Elevado (Chenier Ridge)',
+      barrierSpitAndCampSafety: 'Acampamento erguido sobre antigo terraço elevado de areia e conchas calcárias consolidadas a 4 metros acima do nível máximo da preamar de sizígia e dos canais de maré.',
+      barrierSpitWindbreakAndLens: 'O piso poroso de conchas drena instantaneamente a água da chuva e emite ruído crocante ao menor passo externo, impedindo aproximação furtiva.',
+      campRestAndSafetyGuards: 'Garante descanso longo enxuto, estável e livre de inundações de galgamento para toda a comitiva e sentinelas.',
+      icon: '⛺🐚',
+      color: '#0284c7'
+    };
+
+    if (dt === 'driftwood_and_beach_grass_palisade_windbreak') {
+      tech = {
+        defenseTitle: 'Paliçada Quebra-Vento de Troncos de Deriva e Feixes de Espartina',
+        barrierSpitAndCampSafety: 'Muralha curva de toras marinhas encalhadas travadas na areia e vedadas com esteiras espessas de capim-de-praia que desviam a ventania oceânica e a maresia.',
+        barrierSpitWindbreakAndLens: 'Reduz em 80% a deposição de areia soprada sobre as tendas e concede cobertura sólida (+4 na CA) contra ataques vindos da praia.',
+        campRestAndSafetyGuards: 'Mantém a fogueira acesa sem fumaça dispersiva e preserva o calor dos aventureiros durante a noite.',
+        icon: '🪵🛡️',
+        color: '#b45309'
+      };
+    } else if (dt === 'freshwater_ghyben_herzberg_lens_shallow_well') {
+      tech = {
+        defenseTitle: 'Cacimba Filtrante no Lençol Freático Doce sobre Cunha Salina',
+        barrierSpitAndCampSafety: 'Poço raso revestido com cesto de vime escavado no centro da duna de restinga para captar apenas a película superior de água doce da chuva que flutua sobre a água salobra subterrânea.',
+        barrierSpitWindbreakAndLens: 'Fornece 40 litros diários de água potável fresca sem atingir a interface salina inferior, evitando desidratação em ambiente marinho.',
+        campRestAndSafetyGuards: 'Sustenta a hidratação plena dos membros do grupo e animais de carga durante toda a estadia costeira.',
+        icon: '💧🏖️',
+        color: '#0ea5e9'
+      };
+    } else if (dt === 'tidal_inlet_drift_net_and_shell_chime_perimeter') {
+      tech = {
+        defenseTitle: 'Perímetro de Alarme nas Barras com Redes de Deriva e Conchas',
+        barrierSpitAndCampSafety: 'Redes de pesca descartadas estendidas a meia-altura entre estacas de mangue nas bordas do canal de maré, guarnecidas com dezenas de conchas de búzios secos.',
+        barrierSpitWindbreakAndLens: 'Qualquer criatura anfíbia ou saqueador que tente subir do canal enrosca-se na malha fazendo soar o chocalho calcário a 60 metros.',
+        campRestAndSafetyGuards: 'Elimina emboscadas noturnas vindas da lagoa ou da arrebentação e tranquiliza os turnos de guarda.',
+        icon: '🕸️🐚',
+        color: '#0d9488'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 187: PLATÔS DE ARENITO RUINIFORME EM FLORESTA DE PEDRA (D&D 5e)
   // =========================================================================
 
@@ -27332,6 +27436,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessCoastalBarrierSpitHazard: calcWildernessCoastalBarrierSpitHazard,
+    calcCampCoastalBarrierSpitStation: calcCampCoastalBarrierSpitStation,
     calcWildernessRuiniformSandstoneHazard: calcWildernessRuiniformSandstoneHazard,
     calcCampRuiniformSandstoneStation: calcCampRuiniformSandstoneStation,
     calcWildernessTunnelValleyKettleHazard: calcWildernessTunnelValleyKettleHazard,
