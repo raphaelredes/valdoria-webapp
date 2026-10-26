@@ -20575,6 +20575,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 170: GARGANTAS ABISSAIS DE FALHA TECTÔNICA E RIFT ESCARPADO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessTectonicRiftGrabenHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'rift_fault_scarp_abyssal_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda Abissal em Escarpa de Falha Tectônica de Rift com 500 Metros',
+      saveDC: 15,
+      saveType: 'Destreza',
+      riftAndGrabenRisk: 'Paredão vertical de falha tectônica com espelho de atrito polido que desaba parcialmente sob tremores; a perda de aderência precipita a comitiva em abismo de fenda cortical causando 4d10 de concussão catastrófica e perda de cargas (DMG p. 110, 183).',
+      pioneerMitigation: 'Batedores instalam cabos de sustentação em pítons de expansão de aço maciço e operam guinchos mecânicos de descenso com freio centrífugo duplo.',
+      rescueAndStabilization: 'Içamento de emergência com tripé de carga pesado ancorado em rocha matriz, contenção de politraumatismos com gessos de alume e elixires tônicos de sangue.',
+      icon: '🌋⚡',
+      color: '#dc2626'
+    };
+
+    if (ht === 'seismic_tremor_fault_rupture_collapse') {
+      hazard = {
+        hazardTitle: 'Abertura Súbita de Fissura Tectônica por Tremor Sísmico Intra-Placa',
+        saveDC: 15,
+        saveType: 'Destreza',
+        riftAndGrabenRisk: 'Abalo sísmico violento que racha o assoalho do vale em fenda de 3 metros de largura engolindo aventureiros; projeta lajes basálticas desestabilizadas causando 3d8 de concussão e aprisionamento nas profundezas (PHB p. 182-183; DMG p. 246).',
+        pioneerMitigation: 'Marcha dispersa mantendo 10 metros entre exploradores e identificação prévia de linhas de fratura ativa através de bússolas e pêndulos de chumbo.',
+        rescueAndStabilization: 'Extração com cintas de suspensão rápida de montanha, reposicionamento em terreno cristalino firme e alívio de contusões musculares.',
+        icon: '💥🪨',
+        color: '#d97706'
+      };
+    } else if (ht === 'hydrothermal_acid_fumarole_steam_blast') {
+      hazard = {
+        hazardTitle: 'Sopro de Vapor Ácido Hidrotérmico em Fissura de Caldeira a 70°C',
+        saveDC: 14,
+        saveType: 'Constituição',
+        riftAndGrabenRisk: 'Emissão explosiva de vapor superaquecido com ácido clorídrico e sulfeto que irrompe de fenda do graben; causa queimaduras severas na pele exposta, 2d6 de dano de fogo e 1 nível de exaustão por queimação brônquica (DMG p. 111; PHB p. 185).',
+        pioneerMitigation: 'Uso de capas de couro curtido com forro de lã impermeável tratada com óxido de zinco e respiradores de cerâmica com carvão mineral.',
+        rescueAndStabilization: 'Aplicação de pasta de bicarbonato e leite de cal sobre queimaduras ácidas e inalação de vapores calmantes de óleo de camomila.',
+        icon: '🌫️🔥',
+        color: '#ea580c'
+      };
+    } else if (ht === 'slickenside_mirror_shear_glaze_slip') {
+      hazard = {
+        hazardTitle: 'Escorregamento em Espelho de Falha Metamórfico de Fricção Tectônica',
+        saveDC: 14,
+        saveType: 'Destreza',
+        riftAndGrabenRisk: 'Lajes de rocha cristalina polidas até o brilho vítreo pelo atrito de placas tectônicas inclinadas em 50 graus; a ausência de rugosidade arremessa o explorador desgovernado encosta abaixo contra campos de blocos pontiagudos causando 2d8 de concussão.',
+        pioneerMitigation: 'Gramponamento de solados com dentes de aço temperado e fixação de cordas-guia com parafusos de perfuração contínua na rocha dura.',
+        rescueAndStabilization: 'Contenção com talas articuladas de ferro, assepsia de lacerações na pele e administração de bálsamos anestésicos de mandrágora.',
+        icon: '🪞⚠️',
+        color: '#ca8a04'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampTectonicRiftGrabenStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'elevated_tectonic_horst_terrace_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Terraço Estrutural de Horst Tectônico Suspenso a 40 Metros',
+      riftAndGrabenCampSafety: 'Acampamento assentado em bloco soerguido natural de rocha cristalina situado muito acima do fundo do vale fraturado, totalmente protegido de gases de fumarolas e de avalanches de escarpa.',
+      horstMoatAndThermalSpringTub: 'O desnível abrupto de 40 metros funciona como barreira intransponível contra predadores e invasores, com acesso exclusivo por ponte levadiça de cabos de aço.',
+      campRestAndSafetyGuards: 'Garante descanso longo calmo, seguro e revigorante para toda a comitiva, com visão panorâmica soberba de todo o desfiladeiro para as sentinelas.',
+      icon: '⛺🌋',
+      color: '#dc2626'
+    };
+
+    if (dt === 'cyclopean_basalt_block_rift_bastion') {
+      tech = {
+        defenseTitle: 'Paliçada de Blocos Basálticos Ciclópicos com Base de Amortecimento Sísmico',
+        riftAndGrabenCampSafety: 'Muralha colossal de 2 metros erguida com blocos poligonais de basalto sobre leito amortecedor de cascalho arredondado que dissipa vibrações de tremores terrestres.',
+        horstMoatAndThermalSpringTub: 'Oferece cobertura defensiva impenetrável (+5 na CA) aos defensores e protege contra projeções de rochas sísmicas.',
+        campRestAndSafetyGuards: 'Assegura repouso imperturbável sem perigo de colapso estrutural durante as horas de sono dos exploradores.',
+        icon: '🛡️🧱',
+        color: '#78350f'
+      };
+    } else if (dt === 'tempered_mineral_thermal_bath_and_distillery') {
+      tech = {
+        defenseTitle: 'Tanque Termal Mineral Regulado com Alambique de Condensação Pura',
+        riftAndGrabenCampSafety: 'Aproveitamento de nascente hidrotérmica canalizada por calhas de pedra que resfria a água sulfurosa até 38°C para banhos regeneradores e destila vapor em água potável límpida.',
+        horstMoatAndThermalSpringTub: 'Produz 60 litros diários de água mineral esterilizada e remove 1 nível de exaustão acumulado por fadiga física em descanso curto.',
+        campRestAndSafetyGuards: 'Revigora músculos, alivia inflamações e reestabelece a força plena e a vitalidade de todos os membros do grupo.',
+        icon: '♨️💧',
+        color: '#0284c7'
+      };
+    } else if (dt === 'seismic_pendulum_chime_resonance_alarm') {
+      tech = {
+        defenseTitle: 'Sistema de Alarme por Pêndulo Sísmico de Chumbo e Sinos de Bronze Telúrico',
+        riftAndGrabenCampSafety: 'Pêndulos pesados suspensos em tripés de bronze afinados para ressoar ao menor tremor cortical ou aproximação de criaturas colossais nas falhas do rift.',
+        horstMoatAndThermalSpringTub: 'Alerta antecipado a 100 metros de distância eliminando qualquer surpresa por emboscadas subterrâneas ou deslizamentos de borda.',
+        campRestAndSafetyGuards: 'Proporciona vigilância contínua e tranquilidade inabalável para toda a expedição.',
+        icon: '🔔🌋',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 169: PLATÔS VULCÂNICOS DE TUFO RIOLÍTICO E CHAMINÉS DE FADAS (D&D 5e)
   // =========================================================================
 
@@ -25458,6 +25562,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessTectonicRiftGrabenHazard: calcWildernessTectonicRiftGrabenHazard,
+    calcCampTectonicRiftGrabenStation: calcCampTectonicRiftGrabenStation,
     calcWildernessRhyoliteTuffHoodoosHazard: calcWildernessRhyoliteTuffHoodoosHazard,
     calcCampRhyoliteTuffHoodoosStation: calcCampRhyoliteTuffHoodoosStation,
     calcWildernessTidalRedMangroveHazard: calcWildernessTidalRedMangroveHazard,

@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessTectonicRiftGrabenHazard) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var tr = CartShared.calcWildernessTectonicRiftGrabenHazard(bKey, 'rift_fault_scarp_abyssal_plunge');
+        return '<div class="clp-tectonic-rift-card" style="margin:4px 0 6px;text-align:left;background:rgba(38,18,18,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(220,38,38,0.35);font-size:8px;color:#fee2e2;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + tr.color + ';margin-bottom:2px;">' + tr.icon + ' ' + tr.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Gargantas de Rift e Falhas:</b> ' + tr.riftAndGrabenRisk + ' (CD ' + tr.saveDC + ' [' + tr.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fca5a5;margin-top:1px;">• <b>Mitigação:</b> ' + tr.pioneerMitigation + ' · <i>Estabilização: ' + tr.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampTectonicRiftGrabenStation) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var cp = CartShared.calcCampTectonicRiftGrabenStation(bKey, 'elevated_tectonic_horst_terrace_bivouac');
+        return '<div class="clp-tectonic-rift-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,14,14,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(185,28,28,0.3);font-size:8px;color:#fee2e2;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Horst Tectônico:</b> ' + cp.riftAndGrabenCampSafety + ' · <b>Defesa:</b> ' + cp.horstMoatAndThermalSpringTub + '</div>'
+          + '  <div style="font-size:7.5px;color:#f87171;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessRhyoliteTuffHoodoosHazard) return '';
         var bKey = (biome && biome.key) || 'badlands';
         var rh = CartShared.calcWildernessRhyoliteTuffHoodoosHazard(bKey, 'friable_tuff_hoodoo_shear_crumb_plunge');
