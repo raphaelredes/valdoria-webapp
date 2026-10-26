@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 270: GRANITOS RAPAKIVI E MATACÕES OVOIDES EM VIBORGITO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessRapakiviGraniteHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var ht = (hazardType || 'grus_gravel_scree_runaway_slide').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Escorregamento Desgovernado em Cascalheira de Grus',
+      saveDC: 15,
+      saveType: 'Destreza',
+      rapakiviRisk: 'O granito rapakivi sofre desagregação granular severa (grus/moro), transformando as encostas em cascalheiras instáveis de feldspato esfarelado que rolam como esferas sob os passos da comitiva; o solo cede subitamente arremessando o aventureiro 25 metros encosta abaixo com 3d6 de concussão e perda de tração de montarias (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores avançados utilizando bastões com ponteiras de aço para sondar a firmeza do cascalho e abrindo caminho em ziguezague por costões sãos (Sobrevivência ou Natureza CD 14).',
+      rescueAndStabilization: 'Lançamento de cabos de escalada com laços de resgate e aplicação de compressas frias para entorses articulares (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🪨',
+      color: '#f43f5e'
+    };
+
+    if (ht === 'wiborgite_ovoid_corestone_topple') {
+      hazard.hazardTitle = 'Tombamento de Matacão Ovoide de Viborgito',
+      hazard.saveDC = 15;
+      hazard.saveType = 'Destreza';
+      hazard.rapakiviRisk = 'Blocos esféricos gigantescos de granito ovoide de 8 metros de diâmetro equilibram-se precariamente sobre pedestais estreitos de rocha intemperizada; vibrações de passos pesados ou ventanias colapsam o pedestal, fazendo o matacão rolar como uma mó gigante sobre a trilha com 3d8 de dano contundente de esmagamento (DMG p. 110, 246).';
+      hazard.pioneerMitigation = 'Inspeção visual da linha de sustentação dos matacões e desvio preventivo da linha de queda dos blocos arredondados (Percepção CD 14).';
+      hazard.rescueAndStabilization = 'Uso de alavancas de ferro e cunhas para erguer pedras e desvencilhar membros presos com talas rígidas (Atletismo CD 14 ou Medicina CD 13).';
+    } else if (ht === 'exfoliation_curved_sheet_shear_collapse') {
+      hazard.hazardTitle = 'Desprendimento de Laje Curva de Esfoliação Esferoidal';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.rapakiviRisk = 'Grandes placas arqueadas de granito esfoliam das cúpulas monolíticas por alívio de pressão térmica; o choque térmico noturno destaca lâminas de rocha de meia tonelada que escorregam sobre a trilha causando 3d8 de concussão e corte por bordas lascadas (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Evitar acampamentos ou paradas prolongadas diretamente abaixo de paredes com placas soltas em casca de cebola (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Contenção ágil com cordas estáticas e tratamento de ferimentos corto-contusos com ataduras hemostáticas (Atletismo CD 13 ou Medicina CD 12).';
+    } else if (ht === 'blind_crevice_grus_concealment_fall') {
+      hazard.hazardTitle = 'Queda em Fenda Cega Camuflada por Cascalho de Grus';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.rapakiviRisk = 'Fraturas verticais de tração profundas de 10 metros entre matacões de granito acumulam uma cobertura enganadora de areia grossa e musgo seco; o piso falso cede sob os pés do explorador, prendendo-o em fenda em cunha com 3d6 de dano de queda e asfixia mecânica parcial (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Sondagem sistemática com bordões longos antes de firmar passos pesados em fissuras duvidosas (Percepção CD 13).';
+      hazard.rescueAndStabilization = 'Içamento vertical com estribos de corda e aplicação de óleo mineral para extrair o companheiro prensado (Atletismo CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampRapakiviGraniteStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var dt = (defenseType || 'monolithic_ovoid_boulder_alcove_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Alcova de Matacão Ovoide Monolítico',
+      rapakiviAndCampSafety: 'O acampamento é instalado sob o abrigo natural da base protegida de um matacão gigante e estável de viborgito; o teto monolítico de granito maciço oferece abrigo inquebrável imune a tempestades torrenciais e desabamentos externos (DMG p. 111).',
+      rapakiviTrenchAndWatch: 'Entrada afunilada de fácil monitoramento guarnecida por blocos de granito, concedendo +2 de bônus na Percepção Passiva das sentinelas durante a vigília.',
+      campRestAndSafetyGuards: 'Descanso sereno em solo protegido com isolamento térmico e blindagem pétrea contra invasões noturnas.',
+      icon: '🛡️',
+      color: '#f43f5e'
+    };
+
+    if (dt === 'natural_grus_sand_filtration_sump') {
+      defense.defenseTitle = 'Poço de Filtragem em Leito de Areia de Grus';
+      defense.rapakiviAndCampSafety = 'Cova rasa escavada no leito espesso de areia de grus quartzofeldspática que filtra naturalmente águas pluviais, decantando qualquer resíduo e fornecendo água doce fresca e translúcida (PHB p. 150).';
+      defense.rapakiviTrenchAndWatch = 'Abastecimento ininterrupto de água potável límpida para todos os membros da comitiva durante o descanso longo.',
+      defense.campRestAndSafetyGuards = 'Restauração orgânica perfeita sem risco de cólicas por água turva ou contaminada.';
+    } else if (dt === 'interlocking_corestone_gap_stockade') {
+      defense.defenseTitle = 'Barricada em Garganta entre Matacões Ovoides';
+      defense.rapakiviAndCampSafety = 'Fechamento do vão estreito entre dois grandes matacões com pedregulhos empilhados e toras travadas, criando um portão defensivo inexpugnável (DMG p. 111).';
+      defense.rapakiviTrenchAndWatch = 'Concede cobertura total (+5 na CA) contra disparos de projéteis e canaliza eventuais predadores para um ponto cego desvantajoso.',
+      defense.campRestAndSafetyGuards = 'Elimina surpresas noturnas e assegura vigília facilitada com poucos sentinelas.';
+    } else if (dt === 'compacted_feldspar_grus_tent_pad') {
+      defense.defenseTitle = 'Plataforma Nivelada e Drenante de Feldspato';
+      defense.rapakiviAndCampSafety = 'Nivelamento e compactação da areia de grus sob as tendas com bordaduras de madeira, criando um colchão drenante e macio que impede acúmulo de poças e isola a friagem do solo rochoso (PHB p. 185).';
+      defense.rapakiviTrenchAndWatch = 'Mantém o piso das barracas seco mesmo sob aguaceiros intensos da montanha.',
+      defense.campRestAndSafetyGuards = 'Excelente conforto térmico e descanso longo de alta qualidade recuperando recursos vitais.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 269: COMPLEXOS ALCALINOS DE CARBONATITO E NATROCARBONATITO (D&D 5e)
   // =========================================================================
 
@@ -35716,6 +35796,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessRapakiviGraniteHazard: calcWildernessRapakiviGraniteHazard,
+    calcCampRapakiviGraniteStation: calcCampRapakiviGraniteStation,
     calcWildernessCarbonatiteAlkalineHazard: calcWildernessCarbonatiteAlkalineHazard,
     calcCampCarbonatiteAlkalineStation: calcCampCarbonatiteAlkalineStation,
     calcWildernessPegmatiteDikeHazard: calcWildernessPegmatiteDikeHazard,
