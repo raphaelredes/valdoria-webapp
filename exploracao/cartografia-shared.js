@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 275: SOLEIRAS DE DIABÁSIO E ESCARPAS EM PALISADE (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessDiabasePalisadeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var ht = (hazardType || 'palisade_columnar_topple').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Tombamento de Colunas Prismáticas de Diabásio',
+      saveDC: 15,
+      saveType: 'Destreza',
+      palisadeRisk: 'A escarpa vertical em paliçada ergue-se em colunas hexagonais de diabásio de 30 metros de altura fraturadas por alívio de pressão; o estalo súbito de juntas de resfriamento provoca o tombamento maciço de prismas monolíticos sobre a trilha, exigindo salvaguarda de Destreza CD 15 para saltar fora da linha de queda ou sofrer 4d10 de dano contundente de esmagamento e ser lançado ao chão sob blocos quebrados (DMG p. 110, 246; PHB p. 183).',
+      pioneerMitigation: 'Batedores avançados examinando fendas basais com percussão sonora e detectando estalos de rocha antes da passagem da caravana (Sobrevivência ou Investigação CD 14).',
+      rescueAndStabilization: 'Remoção urgente com alavancas de ferro e talas compressivas para fraturas por esmagamento (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🏛️',
+      color: '#0284c7'
+    };
+
+    if (ht === 'chilled_margin_glass_talus') {
+      hazard.hazardTitle = 'Tálus Cortante de Bordo Vítreo de Resfriamento';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.palisadeRisk = 'Na base da soleira de diabásio, o contato com o estrato sedimentar frio gerou uma crosta vítrea e microlítica que se quebrou em tálus de lascas afiadas como lâminas de vidro vulcânico; atravessar a encosta instável sem ancoragem rasga grevas e mochilas, infligindo 2d8 de dano cortante e reduzindo o deslocamento da comitiva em 3 metros até o próximo descanso curto (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Uso de calçados reforçados com placas de sola e progressão por banquetas sedimentares não vitrificadas (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Extração de fragmentos vítreos com pinças cirúrgicas e curativos hemostáticos de compressão (Medicina CD 13).';
+    } else if (ht === 'sill_contact_thermal_steam_vent') {
+      hazard.hazardTitle = 'Sopro Pressurizado de Vapor em Fissura de Contato Térmico';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Constituição';
+      hazard.palisadeRisk = 'A junta estratigráfica entre o diabásio impermeável e os arenitos cozidos em hornfels canaliza lençóis de água fervente e vapor sulfuroso retidos sob pressão termal; a abertura súbita de uma diaclase expulsa um jato escaldante na trilha, exigindo salvaguarda de Constituição CD 15 ou sofrer 3d6 de dano de fogo e cegueira temporária por 1 rodada pelo vapor mineralizado (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Identificação de depósitos esbranquiçados de sílica e sibilados de vapor nas juntas antes da marcha (Percepção ou Natureza CD 14).';
+      hazard.rescueAndStabilization = 'Aplicação de pomadas refrescantes de babosa e lavagem ocular com água límpida (Medicina CD 13).';
+    } else if (ht === 'columnar_crevasse_pinch') {
+      hazard.hazardTitle = 'Estrangulamento em Fenda Prismática de Diabásio';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.palisadeRisk = 'Para cruzar a escarpa, a rota penetra em fendas colunares estreitíssimas onde paredes verticais de dolerito tenaz aprisionam mochilas e arreios de montarias; um desmoronamento de topo entala os aventureiros na greta com risco de asfixia postural e 2d10 de concussão por compressão de rocha rígida (DMG p. 110; PHB p. 182-183).';
+      hazard.pioneerMitigation = 'Descarregamento prévio de fardos volumosos e passagem em fila espaçada com cabo guia tático (Atletismo CD 13).';
+      hazard.rescueAndStabilization = 'Uso de cunhas de madeira e alavancas mecânicas para alargar a fenda e içar o aventureiro entalado (Atletismo CD 14).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampDiabasePalisadeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var dt = (defenseType || 'palisade_columnar_alcove_redoubt').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Reduto em Alcova Colunar de Soleira de Diabásio',
+      diabaseAndCampSafety: 'O acampamento é montado em uma alcova natural escavada na base da soleira de diabásio, rodeada por colunas prismáticas hexagonais que formam ameias monolíticas inexpugnáveis imunes a vendavais e tempestades de montanha (DMG p. 111).',
+      diabasePalisadeAndWatch: 'As colunas verticais fornecem cobertura total (+5 na CA) contra disparos de projéteis e limitam o acesso a um único pórtico estreito facilmente vigiado pelas sentinelas com vantagem em Percepção.',
+      campRestAndSafetyGuards: 'Descanso tranquilo protegido de emboscadas noturnas sob muralhas de rocha ultra-resistente.',
+      icon: '🛡️',
+      color: '#0284c7'
+    };
+
+    if (dt === 'diabase_joint_artesian_spring') {
+      defense.defenseTitle = 'Fonte Artesiana em Diaclase Basal de Diabásio';
+      defense.diabaseAndCampSafety = 'Fraturas profundas de resfriamento na base da soleira vertem água límpida e fria, filtrada por dezenas de metros de quartzo e piroxênio sob alta pressão hidrostática (PHB p. 150).';
+      defense.diabasePalisadeAndWatch = 'Fonte inesgotável de água potável pura que reabastece cantis de toda a comitiva e concede +1 de bônus na recuperação de Dados de Vida no descanso longo.';
+      defense.campRestAndSafetyGuards = 'Garante hidratação perfeita sem risco de patógenos ou toxinas de pântano.';
+    } else if (dt === 'contact_hornfels_natural_rampart') {
+      defense.defenseTitle = 'Baluarte Panorâmico em Cornija de Hornfels';
+      defense.diabaseAndCampSafety = 'A cornija superior de hornfels endurecido pelo metamorfismo de contato forma uma sacada natural 40 metros acima da garganta do vale, fora do alcance de feras e predadores rastejantes (DMG p. 111).';
+      defense.diabasePalisadeAndWatch = 'Posto elevado de vigília com visão panorâmica de 360 graus que detecta aproximações hostis a até 3 milhas de distância, impedindo surpresas táticas.';
+      defense.campRestAndSafetyGuards = 'Posição inexpugnável com excelente ventilação e fogueira protegida por muretas pétreas.';
+    } else if (dt === 'dolerite_quarry_weapon_sharpening') {
+      defense.defenseTitle = 'Bancada de Cantaria e Afiação em Grão Fino de Dolerito';
+      defense.diabaseAndCampSafety = 'Bancadas de diabásio de granulação fina homogênea são utilizadas como pedras naturais de amolar de qualidade artesanal superior (PHB p. 154, 185).';
+      defense.diabasePalisadeAndWatch = 'Aventureiros e guerreiros afiam espadas, machados e virotes, concedendo +1 de dano no primeiro golpe armado bem-sucedido de cada combatente na manhã seguinte.';
+      defense.campRestAndSafetyGuards = 'Manutenção de armaduras e armas concluída com rigor durante a vigília de descanso.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 274: ENXAMES DE DIQUES DE LAMPRÓFIRO E OCELOS MÁFICOS (D&D 5e)
   // =========================================================================
 
@@ -36116,6 +36196,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessDiabasePalisadeHazard: calcWildernessDiabasePalisadeHazard,
+    calcCampDiabasePalisadeStation: calcCampDiabasePalisadeStation,
     calcWildernessLamprophyreDikeHazard: calcWildernessLamprophyreDikeHazard,
     calcCampLamprophyreDikeStation: calcCampLamprophyreDikeStation,
     calcWildernessMarineBlueHoleHazard: calcWildernessMarineBlueHoleHazard,
