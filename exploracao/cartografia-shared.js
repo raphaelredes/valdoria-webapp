@@ -11409,6 +11409,130 @@
     };
   }
 
+  // === calcWildernessRockfallAndAvalancheHazard (Deslizamentos de Rochas, Avalanches e Tálus Íngremes - DMG p. 110 / PHB p. 182) ===
+  function calcWildernessRockfallAndAvalancheHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'scree_slope_rockfall_barrage').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Deslizamento de Seixos e Chuva de Pedregulhos em Garganta',
+      saveDC: 13,
+      saveType: 'Destreza',
+      rockfallDamageAndBurial: 'Queda repentina de rochas soltas; 3d10 de concussão e condição Caído, sendo parcialmente soterrado (PHB p. 182).',
+      pioneerMitigation: 'Batedores examinam encostas instáveis e conduzem a comitiva em fila espaçada a 15 metros entre cada aventureiro.',
+      clearingAndRescue: 'Teste de Força (Atletismo) CD 13 para escavar companheiros presos e estancar contusões com talas e gelo.',
+      icon: '🪨💥',
+      color: '#f97316'
+    };
+
+    if (ht === 'high_altitude_snow_avalanche') {
+      hazard = {
+        hazardTitle: 'Avalanche Massiva de Neve e Detritos em Encosta Íngreme',
+        saveDC: 15,
+        saveType: 'Força',
+        rockfallDamageAndBurial: 'Muralha de neve compacta a 100 km/h; 8d10 de concussão (metade no sucesso), soterramento e risco de asfixia (DMG p. 110).',
+        pioneerMitigation: 'Evitar gritos, estalos de chicote ou sons altos na base de cornijas nevadas e cruzar antes do degelo do meio-dia.',
+        clearingAndRescue: 'Sondagem de emergência com varas compridas e escavação cooperativa rápida nos primeiros 5 minutos vitais.',
+        icon: '❄️🏔️',
+        color: '#38bdf8'
+      };
+    } else if (ht === 'unstable_ledge_cliffside_collapse') {
+      hazard = {
+        hazardTitle: 'Colapso de Cornija Rochosa em Trilha de Desfiladeiro',
+        saveDC: 14,
+        saveType: 'Destreza',
+        rockfallDamageAndBurial: 'Rompimento da beirada do penhasco; queda vertical de 9 a 18 metros (3d6 a 6d6 de concussão) se não reagir a tempo.',
+        pioneerMitigation: 'Batedores ancoram cordas guias com pitões cravados na rocha firme ao longo de todo o trecho fraturado.',
+        clearingAndRescue: 'Içamento do membro da comitiva com roldanas de escalada e uso de bandagens compressivas contra fraturas.',
+        icon: '🧗‍♂️⚡',
+        color: '#ef4444'
+      };
+    } else if (ht === 'karst_chasm_gravel_sink') {
+      hazard = {
+        hazardTitle: 'Sumidouro Cárstico Oculto sob Camada de Cascalho',
+        saveDC: 13,
+        saveType: 'Destreza',
+        rockfallDamageAndBurial: 'Abatimento repentino do chão de cascalho em funil subterrâneo; 2d8 de concussão e retenção até a cintura.',
+        pioneerMitigation: 'Sondagem do solo à frente com bastão de caminhada de ferro antes de apoiar o peso do corpo na marcha.',
+        clearingAndRescue: 'Lançamento de laço com corda de cânhamo e tração firme de dois aventureiros ancorados em terreno plano.',
+        icon: '🕳️🪨',
+        color: '#a8a29e'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      rockfallDamageAndBurial: hazard.rockfallDamageAndBurial,
+      pioneerMitigation: hazard.pioneerMitigation,
+      clearingAndRescue: hazard.clearingAndRescue,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110 (Avalanches e Quedas de Rochas) / PHB p. 182 (Dano de Queda e Soterramento)'
+    };
+  }
+
+  // === calcCampRetainingWallAndPitonAnchoring (Muretas de Pedra Seca, Barricadas Defletoras e Ancoragem com Pitões - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampRetainingWallAndPitonAnchoring(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'dry_stone_deflector_retaining_wall').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Mureta de Pedra Seca em Cunha Defletora a Montante',
+      retainingEfficiencyAndDeflection: 'Barreira angular de blocos de granito que desvia rochas rolantes e enxurradas de cascalho para as laterais do acampamento.',
+      anchoringAndStructuralStability: 'Estrutura sem argamassa que drena água de degelo sem acumular pressão hidrostática perigosa.',
+      campSafetyAndRestGuards: 'Garante repouso tranquilo para os aventureiros que dormem nas tendas sem risco de impactos noturnos.',
+      icon: '🧱🪨',
+      color: '#ca8a04'
+    };
+
+    if (dt === 'forged_steel_piton_crevice_anchoring') {
+      defense = {
+        defenseTitle: 'Ancoragem com Pitões de Aço Forjado em Fissuras de Rocha',
+        retainingEfficiencyAndDeflection: 'Estacas de ferro temperado marteladas em fendas vivas segurando cabos de sustentação das lonas.',
+        anchoringAndStructuralStability: 'Resiste a vendavais de montanha de até 80 km/h sem afrouxamento ou perda de tensão nas cordas.',
+        campSafetyAndRestGuards: 'Impede que barracas sejam arrancadas para abismos enquanto os sentinelas vigiam os cumes vizinhos.',
+        icon: '🔩🏕️',
+        color: '#94a3b8'
+      };
+    } else if (dt === 'scree_catch_net_wire_barrier') {
+      defense = {
+        defenseTitle: 'Rede de Retenção de Cascalho com Trança de Arame e Estacas',
+        retainingEfficiencyAndDeflection: 'Malha flexível fixada 5 metros acima das barracas retendo pequenos fragmentos e pedriscos soltos.',
+        anchoringAndStructuralStability: 'Amortece a energia cinética de detritos que se desprendem espontaneamente durante o resfriamento noturno.',
+        campSafetyAndRestGuards: 'Elimina barulhos intermitentes de pedras caindo nas lonas, facilitando a recuperação de magias no sono.',
+        icon: '🕸️⛰️',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'overhang_cave_natural_boulder_baffle') {
+      defense = {
+        defenseTitle: 'Aproveitamento de Enseada Rochosa com Monólito Defletor',
+        retainingEfficiencyAndDeflection: 'Seleção de abrigo sob teto natural de rocha sólida protegido por grande pedra estática à frente.',
+        anchoringAndStructuralStability: 'Cobertura natural 100% impenetrável contra pedras em queda livre e avalanches laterais.',
+        campSafetyAndRestGuards: 'Concede cobertura total para toda a comitiva e fogueira oculta sem assinatura de fumaça exposta.',
+        icon: '🏔️🛡️',
+        color: '#10b981'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: defense.defenseTitle,
+      retainingEfficiencyAndDeflection: defense.retainingEfficiencyAndDeflection,
+      anchoringAndStructuralStability: defense.anchoringAndStructuralStability,
+      campSafetyAndRestGuards: defense.campSafetyAndRestGuards,
+      icon: defense.icon,
+      color: defense.color,
+      dndRef: 'DMG p. 111 (Acampamento em Montanha) / XGE p. 78 (Engenharia de Abrigos e Defesas de Acampamento)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -13178,6 +13302,8 @@
     calcCampAshFiltrationAndVentilationSeal: calcCampAshFiltrationAndVentilationSeal,
     calcWildernessExtremeHeatAndSunstrokeHazard: calcWildernessExtremeHeatAndSunstrokeHazard,
     calcCampSolarStillAndShadeCanopy: calcCampSolarStillAndShadeCanopy,
+    calcWildernessRockfallAndAvalancheHazard: calcWildernessRockfallAndAvalancheHazard,
+    calcCampRetainingWallAndPitonAnchoring: calcCampRetainingWallAndPitonAnchoring,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
