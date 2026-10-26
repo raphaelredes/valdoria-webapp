@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 242: RELEVO DE GILGAI, VERTISSOLOS E ARGILAS EXPANSIVAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessGilgaiVertisolCrackingHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'grassland').toLowerCase();
+    var ht = (hazardType || 'desiccated_vertisol_shrinkage_fissure_leg_swallow').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda em Fenda de Contração de Vertissolo Ressecado (Gilgai Shrinkage Fissure)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      gilgaiVertisolRisk: 'Planícies de argila esmectítica negra ("Black Cotton Soil") que ao secar no estio contraem violentamente e abrem uma rede poligonal de fendas verticais de 20 centímetros de largura e até 2 metros de profundidade ocultas sob o capim amarelado; pisar em falso engole a perna inteira do aventureiro ou o casco de uma montaria como uma armadilha de mandíbula de pedra dura, causando 2d8 de concussão e fratura (DMG p. 110; PHB p. 182).',
+      pioneerMitigation: 'Avançar com batedor abrindo o capim seco com vara longa para revelar o traçado das fendas poligonais.',
+      rescueAndStabilization: 'Escavação lateral da borda ressecada com picareta e imobilização com tala.',
+      icon: '🕳️🌾',
+      color: '#ca8a04'
+    };
+
+    if (ht === 'melon_hole_crabhole_collapse_subsurface_piping_pit') {
+      hazard = {
+        hazardTitle: 'Abatimento em Buraco de Caranguejo e Caldeirão de Gilgai ("Melon-Hole Collapse")',
+        saveDC: 15,
+        saveType: 'Destreza',
+        gilgaiVertisolRisk: 'Micro-relevo ondulado de montículos e bacias circulares (melon-holes) onde a água das primeiras chuvas escoa pelas fendas profundas e escava túneis subterrâneos invisíveis por erosão tubular (soil piping); a crosta superficial seca cede de repente sob a marcha e derruba o explorador em uma caverna de lama escura com 3d6 de concussão (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Contornar o centro das depressões circulares e caminhar apenas pelas cristas dos montículos convexos.',
+        rescueAndStabilization: 'Içamento por corda apoiada nos montículos firmes e limpeza das vias aéreas.',
+        icon: '🕳️🌧️',
+        color: '#b45309'
+      };
+    } else if (ht === 'swollen_black_cotton_smectite_boot_balling_quagmire') {
+      hazard = {
+        hazardTitle: 'Imobilização em Lama Expansiva de Algodão Negro ("Black Cotton Gumbo")',
+        saveDC: 14,
+        saveType: 'Força',
+        gilgaiVertisolRisk: 'Basta meia hora de chuva para a argila montmorilonítica expandir e se transformar em um visco negro impermeável que adere quimicamente ao couro e ao ferro; cada passo acumula blocos de dez quilos de barro nas botas e trava rodas de carroça até a imobilidade completa, reduzindo o deslocamento a um terço e impondo 1 nível de exaustão (DMG p. 109-110; PHB p. 185).',
+        pioneerMitigation: 'Envolver as botas em tiras de pano oleado ou palha trançada e buscar terrenos arenosos altos ao primeiro sinal de chuva.',
+        rescueAndStabilization: 'Raspagem periódica do barro com espátulas de madeira e descanso.',
+        icon: '🥾⚫',
+        color: '#78716c'
+      };
+    } else if (ht === 'crevice_ambush_viper_and_scorpion_thermal_refuge') {
+      hazard = {
+        hazardTitle: 'Botes de Serpentes e Escorpiões Refugiados nas Fendas Térmicas do Gilgai',
+        saveDC: 14,
+        saveType: 'Constituição',
+        gilgaiVertisolRisk: 'Durante o calor escaldante do dia na savana ou estepe, milhares de fendas profundas de contração do vertissolo funcionam como abrigos frescos e úmidos onde víboras e escorpiões se aglomeram a poucos centímetros da superfície; tropeçar em uma fenda desperta o ninho e provoca picadas com 2d8 de dano de veneno e condição envenenado (DMG p. 109; PHB p. 183).',
+        pioneerMitigation: 'Usar perneiras altas de couro rígido e nunca introduzir as mãos em fendas do solo.',
+        rescueAndStabilization: 'Aplicação de antiveneno ou emplastro de ervas absorventes e repouso.',
+        icon: '🦂🐍',
+        color: '#dc2626'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampGilgaiVertisolCrackingStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'grassland').toLowerCase();
+    var dt = (defenseType || 'gravel_capped_gilgai_puff_mound_dry_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque nos Montículos Elevados de Cascalho ("Gilgai Puffs")',
+      gilgaiVertisolAndCampSafety: 'No relevo de gilgai, os montículos convexos (puffs) expulsam seixos de quartzo e carbonato para a superfície pelo movimento cíclico da argila.',
+      gilgaiVertisolTrenchAndWatch: 'Oferece plataformas circulares mais altas, drenadas e firmes acima das bacias lodosas vizinhas.',
+      campRestAndSafetyGuards: 'Garante descanso longo enxuto mesmo se chover durante a madrugada na planície.',
+      icon: '⛺⛰️',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'impermeable_melon_hole_clay_pan_rainwater_pond') {
+      tech = {
+        defenseTitle: 'Reservatório de Água Pluvial nas Bacias Impermeáveis de Melon-Hole',
+        gilgaiVertisolAndCampSafety: 'Uma vez úmida, a argila do fundo das depressões de gilgai veda suas próprias fendas por expansão e forma bacias estanques.',
+        gilgaiVertisolTrenchAndWatch: 'Retém água doce da chuva por semanas na estepe seca onde não há rios perenes.',
+        campRestAndSafetyGuards: 'Decantar a água com uma pitada de cinza ou alúmen fornece água potável abundante.',
+        icon: '💧🥣',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'sun_baked_black_clay_clod_breastwork_parapet') {
+      tech = {
+        defenseTitle: 'Mureta Defensiva de Torrões de Argila Negra Cozida pelo Sol',
+        gilgaiVertisolAndCampSafety: 'Os blocos prismáticos de vertissolo ressecado soltos entre as fendas têm a dureza de tijolos de adobe maciços.',
+        gilgaiVertisolTrenchAndWatch: 'Permite erguer um parapeito balístico circular ao redor do montículo em quinze minutos sem cavar.',
+        campRestAndSafetyGuards: 'Concede meia cobertura e bloqueia o vento rasteiro da savana.',
+        icon: '🧱🛡️',
+        color: '#eab308'
+      };
+    } else if (dt === 'dry_grass_bundle_fissure_bridging_mat_floor') {
+      tech = {
+        defenseTitle: 'Esteira de Feixes de Capim e Cinza para Vedação de Fendas no Piso',
+        gilgaiVertisolAndCampSafety: 'Calafetação das fendas sob a área das barracas com feixes compactados de capim seco polvilhados com cinza quente da fogueira.',
+        gilgaiVertisolTrenchAndWatch: 'Impede que escorpiões, centopeias e serpentes subam das fendas subterrâneas durante a noite.',
+        campRestAndSafetyGuards: 'Nivela o piso do acampamento e protege os equipamentos pequenos contra queda nas frestas.',
+        icon: '🌾🔥',
+        color: '#84cc16'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 241: TORS GRANÍTICOS ACASTELADOS E CAOS DE MATACÕES (D&D 5e)
   // =========================================================================
 
@@ -32948,6 +33052,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessGilgaiVertisolCrackingHazard: calcWildernessGilgaiVertisolCrackingHazard,
+    calcCampGilgaiVertisolCrackingStation: calcCampGilgaiVertisolCrackingStation,
     calcWildernessGraniteTorCorestoneHazard: calcWildernessGraniteTorCorestoneHazard,
     calcCampGraniteTorCorestoneStation: calcCampGraniteTorCorestoneStation,
     calcWildernessGypsumKarstSeleniteHazard: calcWildernessGypsumKarstSeleniteHazard,

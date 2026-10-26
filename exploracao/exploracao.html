@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T20:18:01Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T20:22:05Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessGilgaiVertisolCrackingHazard) return '';
+        var bKey = (biome && biome.key) || 'grassland';
+        var gv = CartShared.calcWildernessGilgaiVertisolCrackingHazard(bKey, 'desiccated_vertisol_shrinkage_fissure_leg_swallow');
+        return '<div class="clp-gilgai-vertisol-cracking-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,22,12,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(202,138,4,0.35);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + gv.color + ';margin-bottom:2px;">' + gv.icon + ' ' + gv.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Relevo de Gilgai e Vertissolo:</b> ' + gv.gilgaiVertisolRisk + ' (CD ' + gv.saveDC + ' [' + gv.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Mitigação:</b> ' + gv.pioneerMitigation + ' · <i>Estabilização: ' + gv.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampGilgaiVertisolCrackingStation) return '';
+        var bKey = (biome && biome.key) || 'grassland';
+        var gc = CartShared.calcCampGilgaiVertisolCrackingStation(bKey, 'gravel_capped_gilgai_puff_mound_dry_bivouac');
+        return '<div class="clp-gilgai-vertisol-cracking-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(22,18,10,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + gc.color + ';margin-bottom:2px;">' + gc.icon + ' ' + gc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Montículos Gilgai Puffs:</b> ' + gc.gilgaiVertisolAndCampSafety + ' · <b>Drenagem:</b> ' + gc.gilgaiVertisolTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#fcd34d;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + gc.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){
