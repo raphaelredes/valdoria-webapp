@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 212: MARES DE BLOCOS PERIGLACIAIS (FELSENMEER) E RIOS OCULTOS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessFelsenmeerBlockfieldHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'felsenmeer_cantilevered_chockstone_boulder_seesaw_crush').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Gangorra Esmagadora de Matacão em Balanço no Mar de Pedra (Felsenmeer)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      felsenmeerRisk: 'Campos periglaciais de blocos angulares de granito e basalto sem qualquer matriz terrosa, onde matacões de 5 toneladas repousam em equilíbrio instável sobre fulcros agudos; transferir o peso do aventureiro para a extremidade livre faz a laje bascular subitamente como um alçapão de pedra, prendendo pernas ou escudos com 3d8 de concussão (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Teste de firmeza com o pé dianteiro sem transferir o centro de gravidade e apoio em três pontos.',
+      rescueAndStabilization: 'Uso de alavancas de ferro e calços de pedra (chockstones) para aliviar o bloco e imobilizar fraturas.',
+      icon: '🪨⚖️',
+      color: '#94a3b8'
+    };
+
+    if (ht === 'sub_boulder_moss_bridged_interstitial_void_deep_pitfall') {
+      hazard = {
+        hazardTitle: 'Queda em Abismo Intersticial Mascarado por Tapete de Musgo sobre Felsenmeer',
+        saveDC: 15,
+        saveType: 'Destreza',
+        felsenmeerRisk: 'Entre os megablocos empilhados abrem-se cavernas intersticiais escuras de até 4 metros de altura recobertas no topo por falsas pontes de líquen, musgo espesso e raízes secas; pisar no tapete vegetal rompe a cobertura oca precipitando o explorador no labirinto inferior com 2d6 de concussão mais 1d6 de frio nas frestas geladas (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Pisar exclusivamente na rocha nua cinzenta visível e sondar qualquer mancha de musgo com o bastão.',
+        rescueAndStabilization: 'Descida de lanterna e escada de corda pela fenda entre os blocos para içamento vertical.',
+        icon: '🌿🕳️',
+        color: '#65a30d'
+      };
+    } else if (ht === 'ringing_phonolite_boulder_acoustic_disorientation_and_echo') {
+      hazard = {
+        hazardTitle: 'Ressonância Metálica de Blocos Fonolíticos (Ringing Rocks) e Desorientação',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        felsenmeerRisk: 'Mar de matacões de diabásio e fonolito sob tensão elástica interna que emitem notas metálicas de sino ao menor toque de botas ferradas ou queda de pedras; sob nevoeiro fechado, os múltiplos ecos acústicos cruzados mascaram o som de passos ou desmoronamentos reais e desorientam a bússola auditiva da comitiva (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Envolver as ponteiras metálicas dos bastões em tiras de couro e navegar por balizas visuais de pedra (cairns).',
+        rescueAndStabilization: 'Reagrupamento por sinal de apito de frequência única e ancoragem com corda guia.',
+        icon: '🔔🪨',
+        color: '#eab308'
+      };
+    } else if (ht === 'sub_blockfield_piping_torrent_flash_surge_entrapment') {
+      hazard = {
+        hazardTitle: 'Enxurrada Oculta em Rio Sub-Megablocos sob o Mar de Pedra',
+        saveDC: 15,
+        saveType: 'Força',
+        felsenmeerRisk: 'Toda a drenagem da montanha corre invisível a 3 metros abaixo da superfície do felsenmeer em cachoeiras subterrâneas furiosas; escorregar para o fundo de uma fenda expõe o aventureiro à correnteza gelada que o arrasta para sob os blocos seguintes sem abertura para emergir com 2d8 de concussão e risco de afogamento (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Evitar marchar sobre a calha central onde o rugido abafado de água corrente ressoa sob as botas.',
+        rescueAndStabilization: 'Tracionamento imediato por linha de vida presa ao cinto antes da sifonagem sob o próximo matacão.',
+        icon: '🌊🪨',
+        color: '#0284c7'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampFelsenmeerBlockfieldStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'wedged_megaboulder_a_frame_cyclopean_cavern_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Abrigo Ciclópico de Megablocos Travados em A',
+      felsenmeerAndCampSafety: 'Acampamento abrigado sob dois matacões graníticos de 20 toneladas encostados em ogiva milenar com piso nivelado por cascalho seco.',
+      felsenmeerTrenchAndWatch: 'Oferece teto indestrutível contra granizo, ventos de cumeada e queda de pedras menores.',
+      campRestAndSafetyGuards: 'Garante descanso longo aquecido e oculto no coração do mar de pedra.',
+      icon: '⛺🪨',
+      color: '#94a3b8'
+    };
+
+    if (dt === 'acoustic_ringing_rock_perimeter_chime_alarm') {
+      tech = {
+        defenseTitle: 'Perímetro de Alerta Acústico nas Lajes Sonoras (Ringing Stones)',
+        felsenmeerAndCampSafety: 'Aproveitamento natural das pedras fonolíticas ao redor do bivaque que ressoam como sinos de bronze quando pisadas por qualquer criatura que se aproxime.',
+        felsenmeerTrenchAndWatch: 'Impede emboscadas furtivas noturnas mesmo sob neblina espessa ou escuridão total.',
+        campRestAndSafetyGuards: 'Concede alerta antecipado imediato aos sentinelas da comitiva.',
+        icon: '🔔🛡️',
+        color: '#eab308'
+      };
+    } else if (dt === 'interstitial_cold_trap_perennial_ice_pocket_water') {
+      tech = {
+        defenseTitle: 'Coleta de Gelo Perene em Armadilha Fria Intersticial (Balch Cave)',
+        felsenmeerAndCampSafety: 'O ar pesado de inverno acumula-se nas fendas profundas entre os blocos, conservando colunas de gelo cristalino puro mesmo durante o verão seco.',
+        felsenmeerTrenchAndWatch: 'Fornece suprimento garantido de água potável limpa através do derretimento de blocos de gelo no caldeirão.',
+        campRestAndSafetyGuards: 'Elimina o risco de descer às torrentes profundas perigosas para encher os cantis.',
+        icon: '🧊🏺',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'flat_tabular_plinth_slab_elevated_tent_platform') {
+      tech = {
+        defenseTitle: 'Platô de Laje Tabular Nivelada Acima das Fendas Intersticiais',
+        felsenmeerAndCampSafety: 'Montagem das tendas sobre um único bloco monolítico de topo chato de 6 metros de largura sem frestas abertas.',
+        felsenmeerTrenchAndWatch: 'Isola o grupo das correntes de ar gelado que sopram dos vazios subterrâneos do felsenmeer.',
+        campRestAndSafetyGuards: 'Proporciona piso contínuo e seguro para a movimentação noturna sem lanterna.',
+        icon: '🪨⛺',
+        color: '#64748b'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 211: RECIFES DE VERMETÍDEOS COSTEIROS (TROTTOIRS) E RESSACA (D&D 5e)
   // =========================================================================
 
@@ -29828,6 +29932,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessFelsenmeerBlockfieldHazard: calcWildernessFelsenmeerBlockfieldHazard,
+    calcCampFelsenmeerBlockfieldStation: calcCampFelsenmeerBlockfieldStation,
     calcWildernessVermetidReefHazard: calcWildernessVermetidReefHazard,
     calcCampVermetidReefStation: calcCampVermetidReefStation,
     calcWildernessDesiccationPolygonHazard: calcWildernessDesiccationPolygonHazard,

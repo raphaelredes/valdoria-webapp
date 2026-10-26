@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessFelsenmeerBlockfieldHazard) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var fb = CartShared.calcWildernessFelsenmeerBlockfieldHazard(bKey, 'felsenmeer_cantilevered_chockstone_boulder_seesaw_crush');
+        return '<div class="clp-felsenmeer-blockfield-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,24,32,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(148,163,184,0.35);font-size:8px;color:#f1f5f9;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + fb.color + ';margin-bottom:2px;">' + fb.icon + ' ' + fb.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Mar de Blocos (Felsenmeer):</b> ' + fb.felsenmeerRisk + ' (CD ' + fb.saveDC + ' [' + fb.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#cbd5e1;margin-top:1px;">• <b>Mitigação:</b> ' + fb.pioneerMitigation + ' · <i>Estabilização: ' + fb.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampFelsenmeerBlockfieldStation) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var fc = CartShared.calcCampFelsenmeerBlockfieldStation(bKey, 'wedged_megaboulder_a_frame_cyclopean_cavern_bivouac');
+        return '<div class="clp-felsenmeer-blockfield-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(15,20,28,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(100,116,139,0.3);font-size:8px;color:#f1f5f9;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + fc.color + ';margin-bottom:2px;">' + fc.icon + ' ' + fc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Abrigo Ciclópico em A:</b> ' + fc.felsenmeerAndCampSafety + ' · <b>Defesa:</b> ' + fc.felsenmeerTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#94a3b8;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + fc.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessVermetidReefHazard) return '';
         var bKey = (biome && biome.key) || 'coastal';
         var vr = CartShared.calcWildernessVermetidReefHazard(bKey, 'vermetid_trottoir_overhang_cornice_wave_collapse');
