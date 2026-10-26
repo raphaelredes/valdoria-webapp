@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T18:39:00Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T18:41:11Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessAlkalineSodaLakeHazard) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var sl = CartShared.calcWildernessAlkalineSodaLakeHazard(bKey, 'caustic_natron_crust_breakthrough_chemical_scald');
+        return '<div class="clp-alkaline-soda-lake-card" style="margin:4px 0 6px;text-align:left;background:rgba(38,14,26,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(236,72,153,0.35);font-size:8px;color:#fce7f3;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sl.color + ';margin-bottom:2px;">' + sl.icon + ' ' + sl.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Lago Alcalino de Soda e Natrão:</b> ' + sl.sodaLakeRisk + ' (CD ' + sl.saveDC + ' [' + sl.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fbcfe8;margin-top:1px;">• <b>Mitigação:</b> ' + sl.pioneerMitigation + ' · <i>Estabilização: ' + sl.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampAlkalineSodaLakeStation) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var sc = CartShared.calcCampAlkalineSodaLakeStation(bKey, 'elevated_phonolite_lava_bluff_above_alkali_dust_bivouac');
+        return '<div class="clp-alkaline-soda-lake-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,10,20,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(219,39,119,0.3);font-size:8px;color:#fce7f3;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sc.color + ';margin-bottom:2px;">' + sc.icon + ' ' + sc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Bivaque no Promontório de Fonolito:</b> ' + sc.sodaLakeAndCampSafety + ' · <b>Defesa:</b> ' + sc.sodaSpringAndGrease + '</div>'
+          + '  <div style="font-size:7.5px;color:#f9a8d4;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + sc.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

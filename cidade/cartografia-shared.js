@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 207: LAGOS ALCALINOS DE SODA, CHAMINÉS DE TRONA E NATRÃO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessAlkalineSodaLakeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'caustic_natron_crust_breakthrough_chemical_scald').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ruptura de Crosta de Natrão sobre Salmoura Cáustica Fervente (pH 10.5)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      sodaLakeRisk: 'Placa rosada de carbonato de sódio cristalizado que flutua sobre lama alcalina cáustica a 60°C; o piso quebra sob as botas mergulhando as pernas do aventureiro em lixívia natural corrosiva com 2d8 de dano de ácido e 2d6 de dano de fogo (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Teste de resistência da crosta branca com estaca longa e marcha exclusiva sobre as cristas escuras de rocha vulcânica.',
+      rescueAndStabilization: 'Retirada imediata e lavagem abundante com água doce acidulada com vinagre para neutralizar a queimadura alcalina.',
+      icon: '🧪🦩',
+      color: '#ec4899'
+    };
+
+    if (ht === 'hydrothermal_trona_chimney_vent_boiling_alkali_spurt') {
+      hazard = {
+        hazardTitle: 'Jorro de Lixívia Fervente em Chaminé Hidrotermal de Trona',
+        saveDC: 15,
+        saveType: 'Constituição',
+        sodaLakeRisk: 'Pináculos brancos porosos de bicarbonato de sódio (trona) erguidos por nascentes subaquáticas quentes; a obstrução momentânea do conduto dispara um esguicho de água alcalina a 80°C que causa 3d8 de dano de ácido/fogo e cegueira química (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Contorno a barlavento das torres brancas fumegantes mantendo distância mínima de 12 metros.',
+        rescueAndStabilization: 'Irrigação ocular imediata com cantil de água limpa e aplicação de compressas frias.',
+        icon: '⛲🧪',
+        color: '#f43f5e'
+      };
+    } else if (ht === 'crimson_haloarchaea_mirage_and_ammonia_fume_vertigo') {
+      hazard = {
+        hazardTitle: 'Vapores de Amônia e Miragem Vermelha em Lagoa de Haloarqueias',
+        saveDC: 14,
+        saveType: 'Constituição',
+        sodaLakeRisk: 'Sob o sol implacável, a proliferação de microrganismos extremófilos tinge a água de vermelho-sangue e libera gases irritantes de amônia e aminas voláteis; a inalação contínua impõe a condição Envenenado por 1 hora e vertigem severa (DMG p. 110-111; PHB p. 183).',
+        pioneerMitigation: 'Uso de lenços umedecidos em suco cítrico ou vinagre diluído para filtrar os vapores alcalinos.',
+        rescueAndStabilization: 'Subida para a brisa limpa das escarpas marginais e hidratação fracionada.',
+        icon: '🩸🌫️',
+        color: '#e11d48'
+      };
+    } else if (ht === 'razor_gaylussite_and_nahcolite_evaporite_shoal_laceration') {
+      hazard = {
+        hazardTitle: 'Bancos de Agulhas Cristalinas de Nahcolita e Trona Cortante',
+        saveDC: 14,
+        saveType: 'Destreza',
+        sodaLakeRisk: 'As margens secas do lago são atapetadas por rosetas de cristais aciculares duros que corroem o couro ressecado das botas; escorregar sobre o banco mineral provoca cortes profundos impregnados de soda cáustica com 2d8 de dano cortante e 1d6 de ácido (PHB p. 182-183).',
+        pioneerMitigation: 'Reforço das solas com chapas de madeira ou couro cru engraxado com sebo espesso.',
+        rescueAndStabilization: 'Retirada das farpas cristalinas com pinça e lavagem neutralizante antes do curativo.',
+        icon: '💎🗡️',
+        color: '#db2777'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampAlkalineSodaLakeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'elevated_phonolite_lava_bluff_above_alkali_dust_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Promontório de Fonolito Acima da Poeira Alcalina',
+      sodaLakeAndCampSafety: 'Acampamento estabelecido sobre um terraço rochoso de lava fonolítica a 25 metros acima da planície de natrão, fora da camada rasteira de poeira cáustica soprada pelo vento.',
+      sodaSpringAndGrease: 'Oferece piso de rocha neutra que não corrói lonas nem cordas e visão privilegiada de toda a bacia endorreica.',
+      campRestAndSafetyGuards: 'Garante descanso longo seguro, respirável e livre de irritação química para toda a comitiva.',
+      icon: '⛺🦩',
+      color: '#ec4899'
+    };
+
+    if (dt === 'marginal_freshwater_fault_seep_reed_oasis_well') {
+      tech = {
+        defenseTitle: 'Cacimba Doce em Nascente de Falha Demarcada por Taboas Verdes',
+        sodaLakeAndCampSafety: 'Localização de exsudações de água doce na base da escarpa de falha, identificadas pela presença exclusiva de juncos e taboas verdes antes da água tocar o leito salino.',
+        sodaSpringAndGrease: 'Fornece água potável fresca em uma paisagem onde o lago principal é quimicamente intragável.',
+        campRestAndSafetyGuards: 'Salva o grupo da desidratação severa e permite lavar resíduos alcalinos da pele.',
+        icon: '💧🌾',
+        color: '#10b981'
+      };
+    } else if (dt === 'vinegar_and_tallow_leather_neutralizing_boot_grease') {
+      tech = {
+        defenseTitle: 'Estação de Impermeabilização com Sebo Ácido e Vinagre',
+        sodaLakeAndCampSafety: 'Aplicação preventiva de pasta de gordura animal misturada a vinagre forte nas costuras das botas, correias e cascos de animais.',
+        sodaSpringAndGrease: 'Impede que o carbonato de sódio saponifique a gordura natural do couro e desfaça o calçado dos exploradores.',
+        campRestAndSafetyGuards: 'Preserva a integridade do equipamento de marcha para as etapas seguintes da expedição.',
+        icon: '🥾🛡️',
+        color: '#f59e0b'
+      };
+    } else if (dt === 'calcified_driftwood_and_trona_slab_windbreak_wall') {
+      tech = {
+        defenseTitle: 'Parapeito de Troncos Petrificados por Calcita e Lajes Vulcânicas',
+        sodaLakeAndCampSafety: 'Mureta defensiva erguida com galhos antigos incrustados de pedra calcária pesada e blocos de basalto ao redor das tendas.',
+        sodaSpringAndGrease: 'Bloqueia as rajadas noturnas do vale de rifte e concede cobertura sólida (+4 na CA) para os vigias.',
+        campRestAndSafetyGuards: 'Mantém o perímetro protegido e estável durante toda a noite.',
+        icon: '🪵🧱',
+        color: '#f43f5e'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 206: CÂNIONS DE FENDA ESTREITA (SLOT CANYONS) E MARMITAS (D&D 5e)
   // =========================================================================
 
@@ -29308,6 +29412,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessAlkalineSodaLakeHazard: calcWildernessAlkalineSodaLakeHazard,
+    calcCampAlkalineSodaLakeStation: calcCampAlkalineSodaLakeStation,
     calcWildernessSandstoneSlotCanyonHazard: calcWildernessSandstoneSlotCanyonHazard,
     calcCampSandstoneSlotCanyonStation: calcCampSandstoneSlotCanyonStation,
     calcWildernessCypressBayouOxbowHazard: calcWildernessCypressBayouOxbowHazard,
