@@ -15377,6 +15377,130 @@
     };
   }
 
+  // === calcWildernessObsidianSpireAndRazorGlassHazard (Cumes de Obsidiana, Cascalheiras Cortantes e Ressonância Sônica - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessObsidianSpireAndRazorGlassHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var ht = (hazardType || 'vitreous_obsidian_scree_slip').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Escorregão em Cascalheira de Obsidiana Afiada',
+      saveDC: 14,
+      saveType: 'Destreza',
+      obsidianRiskAndShrapnel: 'Cacos vítreos de vidro vulcânico de corte molecular; queda causa 3d6 de dano cortante e laceração de botas e cordas de sustentação (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores calçam solados de placas de ferro rebitadas e usam bastões com ponteira de chumbo para testar a estabilidade dos cacos.',
+      rescueAndStabilization: 'Extração microscópica de lascas de vidro com ímãs e pinças finas, lavagem hemostática e sutura com fio metálico flexível.',
+      icon: '💎🔪',
+      color: '#6366f1'
+    };
+
+    if (ht === 'supersonic_wind_glass_shrapnel_gale') {
+      hazard = {
+        hazardTitle: 'Vendaval com Estilhaços Voadores de Vidro Vulcânico',
+        saveDC: 14,
+        saveType: 'Destreza',
+        obsidianRiskAndShrapnel: 'Rajada de vento térmico a 80km/h canalizada pela garganta que projeta nuvem de lascas de obsidiana; 3d8 de perfuração e risco de cegueira.',
+        pioneerMitigation: 'Comitiva adota formação de tartaruga com escudos de carvalho sobrepostos e capas de couro cru pesado.',
+        rescueAndStabilization: 'Remoção cautelosa de fragmentos oculares com lavagem de óleo mineral doce e curativo com compressa de seda preta.',
+        icon: '🌪️💎',
+        color: '#a855f7'
+      };
+    } else if (ht === 'sonic_vortex_whistle_resonance') {
+      hazard = {
+        hazardTitle: 'Ressonância Acústica Ensurdecedora em Fissuras Vítreas',
+        saveDC: 13,
+        saveType: 'Constituição',
+        obsidianRiskAndShrapnel: 'Ventos que vibram em orifícios tubulares de obsidiana emitindo uivo ultrassônico agudo; dano psíquico de 2d6 e quebra imediata de concentração mágica.',
+        pioneerMitigation: 'Uso de tampões auditivos de cera de abelha macia misturada com algodão e avanço cobrindo as orelhas.',
+        rescueAndStabilization: 'Repouso em silêncio absoluto dentro de caverna acústica isolada e infusão relaxante de camomila vulcânica.',
+        icon: '🔔🔊',
+        color: '#8b5cf6'
+      };
+    } else if (ht === 'mirror_glare_thermal_concentrator_beam') {
+      hazard = {
+        hazardTitle: 'Foco Térmico por Reflexo em Paredões de Obsidiana Espelhada',
+        saveDC: 13,
+        saveType: 'Constituição',
+        obsidianRiskAndShrapnel: 'Paredões côncavos polidos naturalmente que concentram a luz solar em feixe concentrado; queima de 2d8 de fogo e queima de tendas e mantas.',
+        pioneerMitigation: 'Pintura temporária de fuligem ou argila úmida sobre faces espelhadas ao longo do caminho.',
+        rescueAndStabilization: 'Resfriamento rápido de queimaduras solares de segundo grau com unguento de folhas de babosa do basalto.',
+        icon: '☀️🪞',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      obsidianRiskAndShrapnel: hazard.obsidianRiskAndShrapnel,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Terreno Cortante, Ventos Fortes e Calor Extremo) / PHB p. 182-183 (Vidro Vulcânico e Salvaguardas)'
+    };
+  }
+
+  // === calcCampObsidianSpirePaddedBivouacAndResonatorStation (Alcovas Acolchoadas, Diapasões de Cobre e Barricadas - DMG p. 111 / XGE p. 78-83 / PHB p. 150) ===
+  function calcCampObsidianSpirePaddedBivouacAndResonatorStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var dt = (defenseType || 'padded_ballistic_leather_alcove_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Alcova Forrada com Mantas de Couro Acolchoado',
+      obsidianAnchorageAndSafety: 'Refúgio natural em reentrância côncava de obsidiana revestido com dupla camada de feltro pesado e couro cru rebitado.',
+      shrapnelShieldingAndCampSecurity: 'Amortece e anula 100% dos impactos de lascas cortantes e fragmentos vítreos soprados por vendavais.',
+      campRestAndSafetyGuards: 'Garante sono longo revigorante para a comitiva sem risco de cortes acidentais durante o repouso.',
+      icon: '⛺🛡️',
+      color: '#10b981'
+    };
+
+    if (dt === 'copper_resonance_tuning_fork_array') {
+      tech = {
+        defenseTitle: 'Conjunto de Diapasões de Cobre para Neutralização Sônica',
+        obsidianAnchorageAndSafety: 'Varas metálicas afinadas cravadas nas aberturas das fissuras que dissipam e amortecem as frequências de ressonância harmônica.',
+        shrapnelShieldingAndCampSecurity: 'Extingue os uivos ultrassônicos ensurdecedores na área de acampamento, preservando o repouso mental dos aventureiros.',
+        campRestAndSafetyGuards: 'Permite descanso longo pleno com recuperação de magias e dados de vida sem distúrbios acústicos.',
+        icon: '🎵🔩',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'interlocking_slate_paling_barricade') {
+      tech = {
+        defenseTitle: 'Barricada Defletora com Lajes Sobrepostas de Pinho e Ardósia',
+        obsidianAnchorageAndSafety: 'Paliçada em ângulo de 60 graus que guia estilhaços de vidro e ventos violentos para cima e para fora do abrigo.',
+        shrapnelShieldingAndCampSecurity: 'Protege montarias e equipamentos de reserva contra rajadas de fragmentos cortantes durante a noite.',
+        campRestAndSafetyGuards: 'Garante posto de sentinela protegido com seteiras protegidas por grelhas de latão.',
+        icon: '🪵🛡️',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'obsidian_flint_striker_refining_hearth') {
+      tech = {
+        defenseTitle: 'Lareira Refratária com Raspadores de Obsidiana para Ferramentas',
+        obsidianAnchorageAndSafety: 'Fogareiro construído com blocos de basalto polido aproveitando o calor contido para moldar e afiar lâminas e pontas de flecha.',
+        shrapnelShieldingAndCampSecurity: 'Oferece oficina de campanha emergencial para afiação de armas e restauração de pontas de ferramentas.',
+        campRestAndSafetyGuards: 'Permite refeições quentes e manutenção do arsenal da expedição com eficiência máxima.',
+        icon: '🔥🗡️',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      obsidianAnchorageAndSafety: tech.obsidianAnchorageAndSafety,
+      shrapnelShieldingAndCampSecurity: tech.shrapnelShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque em Alcovas Siliciosas e Paredões) / XGE p. 78-83 (Ferramentas de Ferreiro e Alvenaria)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -17208,6 +17332,8 @@
     calcCampSubterraneanRiverTravertineBenchAndRaftStation: calcCampSubterraneanRiverTravertineBenchAndRaftStation,
     calcWildernessBlackMoraineAndCryoconiteHazard: calcWildernessBlackMoraineAndCryoconiteHazard,
     calcCampBlackMoraineDebrisPlatformAndFilterStation: calcCampBlackMoraineDebrisPlatformAndFilterStation,
+    calcWildernessObsidianSpireAndRazorGlassHazard: calcWildernessObsidianSpireAndRazorGlassHazard,
+    calcCampObsidianSpirePaddedBivouacAndResonatorStation: calcCampObsidianSpirePaddedBivouacAndResonatorStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
