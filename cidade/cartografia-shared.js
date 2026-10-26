@@ -20575,6 +20575,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 161: DUNAS MEGABARCANAS DE AREIA CANTANTE E CORREDORES DE DEFLAÇÃO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessSingingSandBarchanHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'barchan_slipface_sand_avalanche_suffocation').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Avalanche de Areia Fofa em Face de Escorregamento de Barcana',
+      saveDC: 15,
+      saveType: 'Destreza',
+      barchanAndAcousticRisk: 'Crista instável de duna barcana de 90 metros de altura no ângulo crítico de 34 graus que desaba sob a marcha da comitiva; provoca avalanche de areia abrasiva com 3d8 de concussão e risco iminente de soterramento e asfixia (DMG p. 110; PHB p. 183).',
+      pioneerMitigation: 'Batedores avançam encordoados utilizando esquis de madeira leve e varas de sondagem para distribuir a pressão sobre a crista da duna.',
+      rescueAndStabilization: 'Escavação rápida com pás de lona dobráveis, colocação de tubo respirador de junco oco na boca da vítima e hidratação imediata.',
+      icon: '🏜️⏳',
+      color: '#d97706'
+    };
+
+    if (ht === 'singing_sand_acoustic_resonance_disorientation') {
+      hazard = {
+        hazardTitle: 'Ressonância Acústica Ensurdecedora de Duna Cantante a 105 dB',
+        saveDC: 15,
+        saveType: 'Constituição',
+        barchanAndAcousticRisk: 'Atrito sincronizado de grãos de areia esféricos em declive gerando zumbido grave contínuo de 105 dB que ecoa pelos corredores interdunas; causa vertigem espacial, náusea e desvantagem em testes de Percepção auditiva e Sobrevivência por 2 horas (PHB p. 182; DMG p. 111).',
+        pioneerMitigation: 'Uso de protetores de ouvido confeccionados com cera pura e algodão cardado amarrados sob turbantes grossos.',
+        rescueAndStabilization: 'Repouso em tenda vedada com compressas frias umedecidas nas têmporas e gotas de óleo balsâmico nos canais auditivos.',
+        icon: '🔊🏜️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'interdune_sandblast_abrasion_gale') {
+      hazard = {
+        hazardTitle: 'Vendaval de Areia Cortante em Corredor de Deflação a 70 km/h',
+        saveDC: 14,
+        saveType: 'Destreza',
+        barchanAndAcousticRisk: 'Ventos canalizados entre dunas megabarcanas que aceleram grãos de quartzo angulosos em efeito jateador; rasgam vestes, fustigam os olhos e causam 2d6 de dano cortante com cegueira temporária.',
+        pioneerMitigation: 'Uso de óculos de armação de osso com fendas estreitas e capas completas de lã batida impermeabilizada com resina vegetal.',
+        rescueAndStabilization: 'Lavagem dos olhos com colírio salino esterilizado e aplicação de pomada emoliente nas áreas expostas da pele.',
+        icon: '💨⏳',
+        color: '#b45309'
+      };
+    } else if (ht === 'gypsum_crust_alkaline_mirage_torpor') {
+      hazard = {
+        hazardTitle: 'Espejismo Térmico e Crosta Quebradiça de Gesso Cáustico',
+        saveDC: 14,
+        saveType: 'Constituição',
+        barchanAndAcousticRisk: 'Falso lago gerado por miragem térmica sobre piso fino de gesso que cede sob o peso, expondo lodo salino quente que queima os pés e induz desidratação crítica com 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Observação de horizontes com lunetas com filtros de vidro fumê e marcha guiada exclusivamente por afloramentos de cascalho firme.',
+        rescueAndStabilization: 'Lavagem imediata dos calçados e pés com água doce neutralizante, aplicação de talco de argila e repouso sob toldo térmico.',
+        icon: '☀️🔥',
+        color: '#ea580c'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampSingingSandBarchanStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'windward_compacted_slope_trench_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Entrincheirado em Encosta de Barlavento Compactada',
+      barchanAndCampSafety: 'Acampamento assentado na vertente suave e firme da duna barcana protegida pelo dorso da crista, utilizando estacas de fuso helicoidal que ancoram as tendas mesmo sob ventos intensos.',
+      sandDeflectionAndSeepWell: 'A aerodinâmica natural da duna desvia correntes de areia por cima das barracas, reduzindo a turbulência e o calor radiante em 12°C.',
+      campRestAndSafetyGuards: 'Garante repouso longo calmo, seguro e sem sobressaltos para todos os membros do grupo, com campo de visão desobstruído para as sentinelas.',
+      icon: '⛺🏜️',
+      color: '#d97706'
+    };
+
+    if (dt === 'interdune_tamarisk_bramble_windbreak_bastion') {
+      tech = {
+        defenseTitle: 'Paliçada Corta-Vento de Galhos de Tamargueira e Esteiras de Esparto',
+        barchanAndCampSafety: 'Barreira semicircular trançada com arbustos desérticos fixados com pesos de pedra que quebra a velocidade do vento rasante e impede o acúmulo de areia móvel no bivaque.',
+        sandDeflectionAndSeepWell: 'Anula o efeito abrasivo do vendaval no perímetro interno com bônus de cobertura superior contra intempéries.',
+        campRestAndSafetyGuards: 'Permite sono contínuo e impede que os equipamentos e suprimentos da expedição sejam soterrados durante a noite.',
+        icon: '🛡️🌾',
+        color: '#92400e'
+      };
+    } else if (dt === 'subsurface_interdune_seep_well_filtration') {
+      tech = {
+        defenseTitle: 'Poço de Cacimba Interdunar com Filtro de Areia Fina e Pano de Linho',
+        barchanAndCampSafety: 'Escavação rasa na depressão entre dunas que alcança o lençol freático doce protegido sob a camada de areia, equipado com cilindro de vime e tecido filtrante.',
+        sandDeflectionAndSeepWell: 'Fornece 45 litros diários de água límpida, fresca e potável sem resíduos salinos, garantindo a autonomia hídrica da comitiva no deserto.',
+        campRestAndSafetyGuards: 'Elimina o risco de desidratação e estresse térmico, restabelecendo plenamente o vigor dos exploradores.',
+        icon: '💧⏳',
+        color: '#0284c7'
+      };
+    } else if (dt === 'dune_crest_tripwire_chime_sand_anchor_web') {
+      tech = {
+        defenseTitle: 'Rede de Alarmes por Cabos de Tensão com Guizos e Pranchas de Ancoragem',
+        barchanAndCampSafety: 'Linhas de alerta estendidas ao longo da crista e dos chifres da barcana conectadas a sinos de bronze instalados em pranchas enterradas na areia móvel.',
+        sandDeflectionAndSeepWell: 'Detecta deslocamentos de monstros subterrâneos e invasores nas dunas a 50 metros de distância com precisão sonora imediata.',
+        campRestAndSafetyGuards: 'Assegura vigília noturna sem falhas e descanso confiável para toda a comitiva.',
+        icon: '🔔🏜️',
+        color: '#f59e0b'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 160: FIORDES FLUVIAIS EM CÂNON ESTREITO COM DESFILADEIROS SUBMERSOS E CORREDEIRAS ABISSAIS (D&D 5e)
   // =========================================================================
 
@@ -24522,6 +24626,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessSingingSandBarchanHazard: calcWildernessSingingSandBarchanHazard,
+    calcCampSingingSandBarchanStation: calcCampSingingSandBarchanStation,
     calcWildernessFluvialFiordMeanderHazard: calcWildernessFluvialFiordMeanderHazard,
     calcCampFluvialFiordMeanderStation: calcCampFluvialFiordMeanderStation,
     calcWildernessInvertedBasaltMesetaHazard: calcWildernessInvertedBasaltMesetaHazard,

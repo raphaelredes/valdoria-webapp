@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T14:53:12Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T14:56:06Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessSingingSandBarchanHazard) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var sb = CartShared.calcWildernessSingingSandBarchanHazard(bKey, 'barchan_slipface_sand_avalanche_suffocation');
+        return '<div class="clp-barchan-card" style="margin:4px 0 6px;text-align:left;background:rgba(36,24,14,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(217,119,6,0.35);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sb.color + ';margin-bottom:2px;">' + sb.icon + ' ' + sb.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Dunas Megabarcanas e Areias:</b> ' + sb.barchanAndAcousticRisk + ' (CD ' + sb.saveDC + ' [' + sb.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Mitigação:</b> ' + sb.pioneerMitigation + ' · <i>Estabilização: ' + sb.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampSingingSandBarchanStation) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var cp = CartShared.calcCampSingingSandBarchanStation(bKey, 'windward_compacted_slope_trench_bivouac');
+        return '<div class="clp-barchan-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,20,10,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(180,83,9,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Encosta de Barcana:</b> ' + cp.barchanAndCampSafety + ' · <b>Defesa:</b> ' + cp.sandDeflectionAndSeepWell + '</div>'
+          + '  <div style="font-size:7.5px;color:#fcd34d;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){
