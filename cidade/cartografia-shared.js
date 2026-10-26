@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 196: PLATÔS DE LOESS EÓLICO E GARGANTAS DE SILTE (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessAeolianLoessRavineHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var ht = (hazardType || 'loess_vertical_cleavage_slab_topple_crush').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desabamento de Coluna Prismática Vertical em Paredão de Loess',
+      saveDC: 15,
+      saveType: 'Destreza',
+      loessRavineRisk: 'Os depósitos eólicos de silte amarelo apresentam juntas de clivagem perfeitamente verticais de 25 metros de altura; o ressecamento ou vibração destaca fatias inteiras do barranco que desabam silenciosamente soterrando o fundo da garganta com 3d10 de concussão (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Inspeção de fendas de tração no topo da barranca e marcha pelo leito central longe da base dos paredões.',
+      rescueAndStabilization: 'Escavação imediata com pás de campanha para liberar o rosto do soterrado antes da asfixia pelo pó fino.',
+      icon: '🏜️🧱',
+      color: '#eab308'
+    };
+
+    if (ht === 'loess_sinkhole_tunnel_gully_erosion_plunge') {
+      hazard = {
+        hazardTitle: 'Queda em Poço de Erosão Subterrânea (Carste de Loess)',
+        saveDC: 15,
+        saveType: 'Destreza',
+        loessRavineRisk: 'A infiltração das águas pluviais dissolve o cimento calcário do silte e escava galerias cegas de 15 metros de profundidade sob o capim aparentemente contínuo da estepe; o teto desmorona sob os pés lançando o explorador no fundo do poço seco com 3d8 de concussão (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Desvio de alinhamentos de depressões em funil e marcha encordada nas cabeceiras das ravinas (ovragi).',
+        rescueAndStabilization: 'Fixação de estacas recuadas a 5 metros da borda friável e içamento sobre manta de couro.',
+        icon: '🕳️🌾',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'yellow_silt_blinding_dust_squall_choke') {
+      hazard = {
+        hazardTitle: 'Turbulência Sufocante de Poeira Amarela nos Corredores de Silte',
+        saveDC: 14,
+        saveType: 'Constituição',
+        loessRavineRisk: 'O vento canalizado pelas gargantas levanta nuvens densas de partículas microscópicas de quartzo e feldspato que penetram nas vestes e pulmões; a visibilidade cai a zero impondo a condição Cego e 1 nível de exaustão por asfixia seca (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Proteção ocular com óculos de couro vedados e respiração através de pano úmido dobrado.',
+        rescueAndStabilization: 'Abrigo em nicho lateral a sotavento e lavagem ocular e nasal com água limpa.',
+        icon: '🌪️🌫️',
+        color: '#d97706'
+      };
+    } else if (ht === 'rain_liquefied_loess_slurry_flash_flow') {
+      hazard = {
+        hazardTitle: 'Liquefação Súbita de Talude em Torrente de Lama Amarela',
+        saveDC: 15,
+        saveType: 'Força',
+        loessRavineRisk: 'Assim que um aguaceiro atinge o platô, a estrutura porosa do loess colapsa instantaneamente transformando paredes sólidas em um rio denso de lama amarela que corre pelas ravinas com 3d6 de concussão e arrastamento (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Subida imediata para os terraços escalonados superiores ao primeiro sinal de trovoada no horizonte.',
+        rescueAndStabilization: 'Lançamento de corda com nós a partir de raízes de arbustos altos e raspagem da lama pesada.',
+        icon: '🌧️🌊',
+        color: '#b45309'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampAeolianLoessRavineStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'yaodong_arched_loess_cliff_vault_dugout_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Câmara Abobadada Escavada no Loess Seco (Yaodong)',
+      loessAndCampSafety: 'Abrigo escavado horizontalmente na meia-encosta de uma parede antiga e consolidada de loess, com teto talhado em arco parabólico autoportante.',
+      loessWallAndFilter: 'A espessa massa de silte seco funciona como isolante térmico perfeito, mantendo o interior a 16°C mesmo sob nevascas ou calor escaldante lá fora.',
+      campRestAndSafetyGuards: 'Proporciona descanso longo silencioso, invisível da superfície da estepe e protegido de tempestades de poeira.',
+      icon: '⛺🏛️',
+      color: '#eab308'
+    };
+
+    if (dt === 'calcium_carbonate_tamped_silt_parapet_wall') {
+      tech = {
+        defenseTitle: 'Parapeito de Taipa de Loess e Concreções Calcárias (Bonecas)',
+        loessAndCampSafety: 'Mureta frontal na entrada da câmara erguida com terra de loess umedecida e socada entre nódulos duros de carbonato de cálcio naturais do terreno.',
+        loessWallAndFilter: 'Endurece rapidamente como tijolo cru, oferecendo cobertura robusta (+4 na CA) e bloqueando correntes de ar frio.',
+        campRestAndSafetyGuards: 'Estreita a entrada a uma única passagem vigiada pelas sentinelas da comitiva.',
+        icon: '🧱🛡️',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'ceramic_and_sand_silt_decantation_water_jar') {
+      tech = {
+        defenseTitle: 'Estação de Clarificação de Água Barrenta com Alúmen e Areia',
+        loessAndCampSafety: 'Sistema de duas talhas de lona onde a água amarela carregada de silte em suspensão recebe uma pitada de pedra-ume mineral para coagular o barro no fundo.',
+        loessWallAndFilter: 'Decanta 99% do sedimento amarelo em meia hora, entregando água cristalina que não desgasta os dentes nem causa cólicas.',
+        campRestAndSafetyGuards: 'Garante hidratação limpa e preparo de chá quente restaurador para todos os membros do grupo.',
+        icon: '🏺💧',
+        color: '#0ea5e9'
+      };
+    } else if (dt === 'ravine_rim_acacia_thorn_and_trip_cord_screen') {
+      tech = {
+        defenseTitle: 'Cerca de Espinheiros e Cordel de Alerta na Crista da Garganta',
+        loessAndCampSafety: 'Barreira de galhos espinhosos de acácia-da-estepe e fio de alarme disposta 10 metros acima da boca do abrigo na borda superior do barranco.',
+        loessWallAndFilter: 'Impede que predadores ou batedores hostis se aproximem da borda superior para atacar ou rolar pedras de cima.',
+        campRestAndSafetyGuards: 'Assegura domínio tático da cota superior e vigília tranquila para os turnos de guarda.',
+        icon: '🌵🔔',
+        color: '#15803d'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 195: VALES DE RIFTE TECTÔNICO (GRABEN) E FENDAS DE ESCUDO (D&D 5e)
   // =========================================================================
 
@@ -28164,6 +28268,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessAeolianLoessRavineHazard: calcWildernessAeolianLoessRavineHazard,
+    calcCampAeolianLoessRavineStation: calcCampAeolianLoessRavineStation,
     calcWildernessTectonicGrabenFissureHazard: calcWildernessTectonicGrabenFissureHazard,
     calcCampTectonicGrabenFissureStation: calcCampTectonicGrabenFissureStation,
     calcWildernessLateriteBowalCuirassHazard: calcWildernessLateriteBowalCuirassHazard,

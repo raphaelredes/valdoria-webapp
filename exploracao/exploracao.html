@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T17:26:30Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T17:28:14Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessAeolianLoessRavineHazard) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var lr = CartShared.calcWildernessAeolianLoessRavineHazard(bKey, 'loess_vertical_cleavage_slab_topple_crush');
+        return '<div class="clp-loess-ravine-card" style="margin:4px 0 6px;text-align:left;background:rgba(38,30,12,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(234,179,8,0.35);font-size:8px;color:#fef9c3;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + lr.color + ';margin-bottom:2px;">' + lr.icon + ' ' + lr.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Platô de Loess e Gargantas (Ovragi):</b> ' + lr.loessRavineRisk + ' (CD ' + lr.saveDC + ' [' + lr.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fef08a;margin-top:1px;">• <b>Mitigação:</b> ' + lr.pioneerMitigation + ' · <i>Estabilização: ' + lr.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampAeolianLoessRavineStation) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var lc = CartShared.calcCampAeolianLoessRavineStation(bKey, 'yaodong_arched_loess_cliff_vault_dugout_bivouac');
+        return '<div class="clp-loess-ravine-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,24,10,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(202,138,4,0.3);font-size:8px;color:#fef9c3;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + lc.color + ';margin-bottom:2px;">' + lc.icon + ' ' + lc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Bivaque em Abóbada de Loess (Yaodong):</b> ' + lc.loessAndCampSafety + ' · <b>Defesa:</b> ' + lc.loessWallAndFilter + '</div>'
+          + '  <div style="font-size:7.5px;color:#fde047;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + lc.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){
