@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 272: PLATÔS DE BAUXITA E CARSTE ALUMINOSO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessBauxiteKarstPlateauHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var ht = (hazardType || 'pisolitic_bauxite_hardpan_gravel_slip').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Escorregamento em Nódulos Pisolíticos de Bauxita',
+      saveDC: 15,
+      saveType: 'Destreza',
+      bauxiteRisk: 'A couraça laterítica de bauxita sobre o maciço cárstico desagrega em milhares de nódulos esféricos pisolíticos duros de gibbsita de 2 cm; sobre lajes calcárias inclinadas, esse cascalho rola como rolamentos de ferro sob os passos da comitiva, arremessando o aventureiro por ravina íngreme com 3d6 de concussão e perda de tração de montarias (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores avançados conduzindo marcha em passo curto com sapatilhas de couro áspero e evitando bordas com cascalho solto de coloração avermelhada (Sobrevivência ou Atletismo CD 14).',
+      rescueAndStabilization: 'Contenção ágil com cordas reforçadas e aplicação de ataduras elásticas em articulações torcidas (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🧱',
+      color: '#ea580c'
+    };
+
+    if (ht === 'terra_rossa_aluminous_mud_trap') {
+      hazard.hazardTitle = 'Atolamento Tenaz em Argila Vermelha de Terra Rossa';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.bauxiteRisk = 'Depressões no topo do platô acumulam argila residual vermelha aluminosa saturada que age como cola ultra-adesiva; pisar na lamaçal tenaz suga botas e pernas com deslocamento zero e exige força colossal para não rasgar calçados nem tombar de costas no barro espesso (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Sondagem prévia com bordão de madeira e uso de esteiras de bambu trançado para distribuir o peso sobre áreas lamacentas (Percepção ou Natureza CD 13).';
+      hazard.rescueAndStabilization = 'Trabalho de tração com alavancas e água corrente para dissolver o barro seco nas botas dos exploradores (Atletismo CD 13).';
+    } else if (ht === 'subsurface_palaeokarst_void_collapse') {
+      hazard.hazardTitle = 'Colapso de Teto em Caverna de Paleocarste Oculta';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Destreza';
+      hazard.bauxiteRisk = 'A couraça endurecida de bauxita oculta cavidades cegas de dissolução cárstica profunda no calcário subjacente; o peso concentrado da marcha rompe a crosta de 15 cm em queda livre vertical de 8 metros sobre escombros pontiagudos com 3d8 de dano contundente de impacto (DMG p. 110, 246).';
+      hazard.pioneerMitigation = 'Escuta atenta do eco metálico oco das pisadas e caminhada em fila espaçada de 6 metros (Percepção CD 14).';
+      hazard.rescueAndStabilization = 'Içamento vertical rápido com roldana tripla e tratamento de fraturas com talas de casca de árvore (Atletismo CD 14 ou Medicina CD 13).';
+    } else if (ht === 'extreme_hydric_drought_plateau_scarcity') {
+      hazard.hazardTitle = 'Seca Hidráulica Crítica em Platô Cárstico Infiltrante';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Constituição';
+      hazard.bauxiteRisk = 'Toda água pluvial drena instantaneamente pelas fendas e sumidouros do carste para rios subterrâneos a 300 metros de profundidade; a marcha sobre o platô árido e reflexivo sob sol implacável sem fontes hídricas superficiais induz desidratação aguda e 1 nível de exaustão (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Racionamento militar de cantis e busca por orvalho em cavernas rasas sombreadas (Sobrevivência CD 14).';
+      hazard.rescueAndStabilization = 'Administração cuidadosa de sais de hidratação oral e repouso forçado sob toldos de isolamento térmico (Medicina CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampBauxiteKarstPlateauStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var dt = (defenseType || 'bauxite_pisolite_hardpan_pavement_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Laje Maciça de Couraça de Bauxita',
+      bauxiteAndCampSafety: 'O acampamento é estabelecido sobre uma laje tabular horizontal de bauxita pisolítica consolidada de alta dureza; o piso indeformável é imune a atolamentos e completamente livre da umidade da terra vermelha circundante (DMG p. 111).',
+      bauxiteTrenchAndWatch: 'Plataforma rochosa sem vegetação alta que impede aproximações furtivas, concedendo +2 de bônus na Percepção Passiva das sentinelas durante a vigília.',
+      campRestAndSafetyGuards: 'Descanso seguro com solo rígido e estável imune a desbarrancamentos ou alagamentos repentinos.',
+      icon: '🛡️',
+      color: '#ea580c'
+    };
+
+    if (dt === 'dew_condensation_aluminous_tarp_funnel') {
+      defense.defenseTitle = 'Funil Condensador de Orvalho Noturno com Lona Encerada';
+      defense.bauxiteAndCampSafety = 'Estrutura de lonas estendidas em ângulo sobre vasilhames limpos que capta a forte condensação de orvalho da madrugada no platô, colhendo 30 litros de água pura e potável (PHB p. 150).';
+      defense.bauxiteTrenchAndWatch = 'Resolve totalmente a escassez hídrica do relevo cárstico sem exigir expedições arriscadas a cavernas profundas.',
+      defense.campRestAndSafetyGuards = 'Abastecimento hídrico vital com restauração orgânica perfeita durante o repouso longo.';
+    } else if (dt === 'pisolitic_breastwork_perimeter_parapet') {
+      defense.defenseTitle = 'Mureta Perimétrica de Blocos Pisolíticos de Bauxita';
+      defense.bauxiteAndCampSafety = 'Parapeito defensivo construído com blocos pesados de couraça laterítica empilhados ao redor das barracas, conferindo cobertura total (+5 na CA) contra arqueiros na escuridão (DMG p. 111).';
+      defense.bauxiteTrenchAndWatch = 'Paredão maciço que barra ventanias de tempestade e impede o acesso de predadores carnívoros à área das tendas.',
+      defense.campRestAndSafetyGuards = 'Elimina riscos de ataques noturnos e assegura sono tranquilo para toda a comitiva.';
+    } else if (dt === 'terra_rossa_insulating_clay_hearth') {
+      defense.defenseTitle = 'Lareira Térmica com Argila Refratária de Terra Rossa';
+      defense.bauxiteAndCampSafety = 'Forno artesanal moldado com argila aluminosa que acumula e irradia calor por até 10 horas, consumindo um terço da lenha e sem fumaça visível acima da borda do acampamento (PHB p. 185).';
+      defense.bauxiteTrenchAndWatch = 'Permite cozinhar e manter o bivaque aquecido sem denunciar a posição para patrulhas hostis à distância.',
+      defense.campRestAndSafetyGuards = 'Excelente conforto térmico e proteção contra noites geladas de platô.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 271: MEANDROS INCISADOS E ENTRINCHEIRADOS EM CÂNIONS (D&D 5e)
   // =========================================================================
 
@@ -35876,6 +35956,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessBauxiteKarstPlateauHazard: calcWildernessBauxiteKarstPlateauHazard,
+    calcCampBauxiteKarstPlateauStation: calcCampBauxiteKarstPlateauStation,
     calcWildernessIncisedMeanderHazard: calcWildernessIncisedMeanderHazard,
     calcCampIncisedMeanderStation: calcCampIncisedMeanderStation,
     calcWildernessRapakiviGraniteHazard: calcWildernessRapakiviGraniteHazard,
