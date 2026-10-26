@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T10:19:04Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T10:22:15Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessKarstPavementAndSinkholeHazard) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var kh = CartShared.calcWildernessKarstPavementAndSinkholeHazard(bKey, 'limestone_grike_leg_trap_fracture');
+        return '<div class="clp-karst-pavement-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,30,36,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(148,163,184,0.3);font-size:8px;color:#f8fafc;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + kh.color + ';margin-bottom:2px;">' + kh.icon + ' ' + kh.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Lapiás e Gretas em Grike:</b> ' + kh.karstPavementRiskAndSinkholes + ' (CD ' + kh.saveDC + ' [' + kh.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#cbd5e1;margin-top:1px;">• <b>Mitigação:</b> ' + kh.pioneerMitigation + ' · <i>Estabilização: ' + kh.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampKarstPavementHoneycombShelterAndFilterStation) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var kc = CartShared.calcCampKarstPavementHoneycombShelterAndFilterStation(bKey, 'limestone_honeycomb_shelter_niche');
+        return '<div class="clp-karst-honeycomb-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,28,30,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#ecfdf5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + kc.color + ';margin-bottom:2px;">' + kc.icon + ' ' + kc.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Alvéolo Calcário:</b> ' + kc.karstAnchorageAndBedrockSafety + ' · <b>Proteção:</b> ' + kc.grikeShieldingAndCampSecurity + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + kc.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

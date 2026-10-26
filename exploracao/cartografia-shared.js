@@ -15749,6 +15749,130 @@
     };
   }
 
+  // === calcWildernessKarstPavementAndSinkholeHazard (Lapiás Cárstico, Gretas em Grike e Sumidouros em Agulha - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78) ===
+  function calcWildernessKarstPavementAndSinkholeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'limestone_grike_leg_trap_fracture').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Fratura em Fenda Estreita de Grike Cárstico',
+      saveDC: 14,
+      saveType: 'Destreza',
+      karstPavementRiskAndSinkholes: 'Gretas profundas ocultas sob tufos de musgo e samambaias entre blocos de clint liso; aprisionamento repentino do pé com fratura por torção e 2d8 de dano contundente (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam com bastões de sondagem medindo as gretas e marcam trilhas seguras com giz vermelho.',
+      rescueAndStabilization: 'Alargamento da fenda com talhadeiras de aço, aplicação de tala rígida de freixo e bálsamo analgésico de arnica.',
+      icon: '🪨⚠️',
+      color: '#64748b'
+    };
+
+    if (ht === 'needle_sinkhole_chemical_collapse') {
+      hazard = {
+        hazardTitle: 'Colapso de Teto em Sumidouro em Agulha',
+        saveDC: 15,
+        saveType: 'Destreza',
+        karstPavementRiskAndSinkholes: 'Crosta calcária oca afinada pela dissolução ácida que desaba sob a comitiva; queda vertiginosa de 9 metros em poço d’água subterrânea com 3d6 de impacto e 1d6 ácido.',
+        pioneerMitigation: 'Avanço com batedores amarrados em cordadas duplas testando a firmeza do solo com martelo geológico.',
+        rescueAndStabilization: 'Içamento por roldana com arnês de couro e lavagem imediata de queimaduras alcalinas com água destilada.',
+        icon: '🕳️💥',
+        color: '#dc2626'
+      };
+    } else if (ht === 'dissolution_knife_edge_laceration') {
+      hazard = {
+        hazardTitle: 'Laceração em Cristas Cortantes de Calcário Canelado',
+        saveDC: 13,
+        saveType: 'Destreza',
+        karstPavementRiskAndSinkholes: 'Ranhuras de dissolução pluvial com gumes cortantes como vidro que rasgam botas e calças; 2d6 de corte e risco de infecção mineral.',
+        pioneerMitigation: 'Uso de caneleiras reforçadas com lâminas de sola e passos calculados sobre os topos planos dos blocos.',
+        rescueAndStabilization: 'Limpeza de pó cárstico das feridas com solução salina e sutura com linha encerada esterilizada.',
+        icon: '🔪🩸',
+        color: '#e11d48'
+      };
+    } else if (ht === 'subterranean_echo_disorientation') {
+      hazard = {
+        hazardTitle: 'Desorientação por Ecos Subterrâneos em Sumidouros',
+        saveDC: 13,
+        saveType: 'Sabedoria',
+        karstPavementRiskAndSinkholes: 'Ventos que ressoam nas galerias ocultas produzindo ruídos ilusórios e perda completa de orientação na neblina do planalto.',
+        pioneerMitigation: 'Navegação por bússola magnética independente de marcos sonoros e estacas de balizamento visual.',
+        rescueAndStabilization: 'Acalmar membros do grupo com chás de valeriana e reagrupamento ao redor de uma fogueira abrigada.',
+        icon: '🌫️🧭',
+        color: '#0284c7'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      karstPavementRiskAndSinkholes: hazard.karstPavementRiskAndSinkholes,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Lapiás, Terreno Difícil e Sumidouros) / PHB p. 182-183 (Marcha e Perigos Ambientais) / XGE p. 78 (Ferramentas de Pedreiro)'
+    };
+  }
+
+  // === calcCampKarstPavementHoneycombShelterAndFilterStation (Alvéolos Calcários, Pranchas de Grike e Cubas Alcalinas - DMG p. 111 / PHB p. 150 / XGE p. 78) ===
+  function calcCampKarstPavementHoneycombShelterAndFilterStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'limestone_honeycomb_shelter_niche').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Alvéolo Calcário Protegido',
+      karstAnchorageAndBedrockSafety: 'Concavidade natural de 4 metros escavada pelo vento no calcário sólido; isola o acampamento de vendavais cortantes e tempestades.',
+      grikeShieldingAndCampSecurity: 'Piso forrado com esteiras de feltro espesso que neutralizam a dureza e a umidade mineral da rocha.',
+      campRestAndSafetyGuards: 'Assegura repouso longo aquecido e confortável para a comitiva com sentinelas abrigadas na boca do nicho.',
+      icon: '🪨⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'articulated_grike_bridging_planks') {
+      tech = {
+        defenseTitle: 'Passadiço Articulado de Pranchas Leves com Travas de Fenda',
+        karstAnchorageAndBedrockSafety: 'Estrado desmontável de freixo com ganchos de aço que se fixam nas bordas das gretas de grike.',
+        grikeShieldingAndCampSecurity: 'Permite circulação rápida e segura entre os blocos sem risco de sentinelas caírem nas fendas na escuridão noturna.',
+        campRestAndSafetyGuards: 'Mantém o perímetro de vigília interligado e pronto para deslocamento defensivo imediato.',
+        icon: '🪜🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'alkaline_run_off_filter_and_settling_vat') {
+      tech = {
+        defenseTitle: 'Cuba de Decantação e Neutralização com Carvão e Areia Siliciosa',
+        karstAnchorageAndBedrockSafety: 'Recipiente triplo de barro cozido com leitos de decantação que neutralizam o excesso de cal e gesso da água de chuva cárstica.',
+        grikeShieldingAndCampSecurity: 'Garante água límpida, neutra e sem sedimentos cársticos que poderiam causar cólicas renais nos aventureiros.',
+        campRestAndSafetyGuards: 'Supre todos os cantis da expedição com água potável doce e cristalina.',
+        icon: '🏺💧',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'quicklime_perimeter_pest_barrier') {
+      tech = {
+        defenseTitle: 'Faixa Periférica de Cal Viva e Resina de Zimbro Repelente',
+        karstAnchorageAndBedrockSafety: 'Cordão contínuo espalhado ao redor das fendas do bivaque que desidrata e repele rastejadores de caverna.',
+        grikeShieldingAndCampSecurity: 'Impede a invasão noturna de centopeias gigantes, lacraias cavernosas e sanguessugas de lapiás.',
+        campRestAndSafetyGuards: 'Permite que a comitiva durma em paz sem sobressaltos com animais peçonhentos rastejantes.',
+        icon: '🧪🦗',
+        color: '#eab308'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      karstAnchorageAndBedrockSafety: tech.karstAnchorageAndBedrockSafety,
+      grikeShieldingAndCampSecurity: tech.grikeShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Abrigos em Reentrâncias Calcárias) / PHB p. 150 (Kits de Aventureiro) / XGE p. 78 (Alvenaria e Geologia)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -17586,6 +17710,8 @@
     calcCampBrackishMarshFloatingPlatformAndFilterStation: calcCampBrackishMarshFloatingPlatformAndFilterStation,
     calcWildernessColumnarBasaltAndJointSpallingHazard: calcWildernessColumnarBasaltAndJointSpallingHazard,
     calcCampColumnarBasaltPrismAnchorageAndShelfStation: calcCampColumnarBasaltPrismAnchorageAndShelfStation,
+    calcWildernessKarstPavementAndSinkholeHazard: calcWildernessKarstPavementAndSinkholeHazard,
+    calcCampKarstPavementHoneycombShelterAndFilterStation: calcCampKarstPavementHoneycombShelterAndFilterStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
