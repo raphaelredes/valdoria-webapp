@@ -15253,6 +15253,130 @@
     };
   }
 
+  // === calcWildernessBlackMoraineAndCryoconiteHazard (Geleiras Negras, Cones de Degelo e Crioconita - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessBlackMoraineAndCryoconiteHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'glacier').toLowerCase();
+    var ht = (hazardType || 'ice_cored_debris_cone_slump').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desabamento de Cone de Detritos com Núcleo de Gelo',
+      saveDC: 14,
+      saveType: 'Destreza',
+      moraineRiskAndSlump: 'Manto de cascalho negro que desliza repentinamente sobre núcleo de gelo derretido pelo sol; deslizamento de brita afiada e queda de 10 metros causando 3d8 de concussão (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores conferem a espessura da camada de till com piolets de haste longa e proíbem travessia pelas cristas instáveis nos horários mais quentes.',
+      rescueAndStabilization: 'Uso de pás de trincheira para resgate de aventureiros soterrados e imobilização de fraturas com talas de pinho.',
+      icon: '🏔️🪨',
+      color: '#475569'
+    };
+
+    if (ht === 'cryoconite_melt_hole_quagmire') {
+      hazard = {
+        hazardTitle: 'Poço Cilindrico de Crioconita e Lama Glacial Fervente de Frio',
+        saveDC: 13,
+        saveType: 'Força',
+        moraineRiskAndSlump: 'Buraco vertical de fusão profunda preenchido com poeira mineral negra e água de degelo a 0,5°C; afundamento até o peito e choque térmico rápido.',
+        pioneerMitigation: 'Sondagem contínua com vara de freixo à frente de cada passada e marcha amarrada em cordada de três membros.',
+        rescueAndStabilization: 'Tração por corda com nó prussik, troca rápida de roupas molhadas e conhaque quente aquecido em fogareiro.',
+        icon: '🕳️❄️',
+        color: '#0ea5e9'
+      };
+    } else if (ht === 'unstable_perched_erratic_boulder_roll') {
+      hazard = {
+        hazardTitle: 'Rolamento de Bloco Errático Equilibrado no Gelo',
+        saveDC: 14,
+        saveType: 'Destreza',
+        moraineRiskAndSlump: 'Pedregulho granítico de 5 toneladas cujo pedestal de gelo se dissolveu; rolamento montanha abaixo com força devastadora de 4d10 de esmagamento.',
+        pioneerMitigation: 'Batedores mantêm vigilância contínua encosta acima e delimitam rotas longe de leitos de erráticos isolados.',
+        rescueAndStabilization: 'Tratamento de traumas de compressão com compressas hemostáticas de arnica e estiramento muscular assistido.',
+        icon: '🪨⚠️',
+        color: '#f97316'
+      };
+    } else if (ht === 'windblown_silt_blackout_in_gully') {
+      hazard = {
+        hazardTitle: 'Tempestade de Silte Glacial em Ravina Morênica',
+        saveDC: 13,
+        saveType: 'Constituição',
+        moraineRiskAndSlump: 'Ventos catabáticos uivantes que levantam farinha de rocha ultrafina; perda de visibilidade para 1 metro e tosse irritativa por abrasão pulmonar.',
+        pioneerMitigation: 'Uso de óculos de montanha selados com feltro e máscaras de couro respirável umedecidas.',
+        rescueAndStabilization: 'Lavagem dos olhos com solução salina estéril e descanso em tendas com abas enterradas em cascalho.',
+        icon: '🌪️🌫️',
+        color: '#64748b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      moraineRiskAndSlump: hazard.moraineRiskAndSlump,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Geleiras, Desmoronamentos e Frio Extremo) / PHB p. 182-183 (Terreno Difícil e Salvaguardas)'
+    };
+  }
+
+  // === calcCampBlackMoraineDebrisPlatformAndFilterStation (Muros de Cascalho Seco, Estrados Dentados e Braseiros - DMG p. 111 / XGE p. 78-83 / PHB p. 150) ===
+  function calcCampBlackMoraineDebrisPlatformAndFilterStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'glacier').toLowerCase();
+    var dt = (defenseType || 'dry_rubble_berm_and_windbreak_trench').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Trincheira com Muro de Arrimo de Cascalho Seco',
+      moraineAnchorageAndInsulation: 'Trincheira escavada até o substrato estável cercada por muro de pedra seca de 1,2 metro que deflete ventos catabáticos de 70km/h.',
+      glacialIsolationAndCampSecurity: 'Isola os leitos da comitiva da esteira de gelo subjacente e impede o soterramento por deslizamento de tálus.',
+      campRestAndSafetyGuards: 'Garante sono longo estável e protegido para os aventureiros em meio ao deserto de pedra e gelo.',
+      icon: '⛺🛡️',
+      color: '#10b981'
+    };
+
+    if (dt === 'toothed_crampon_snowshoe_deck') {
+      tech = {
+        defenseTitle: 'Estrado Nivelado de Pranchas com Grampos Dentados de Retenção',
+        moraineAnchorageAndInsulation: 'Plataforma de ripas de abeto tratadas com piche ancorada no gelo subjacente por quatro estacas de aço com dentes de tubarão.',
+        glacialIsolationAndCampSecurity: 'Impede o escorregamento do acampamento mesmo que o cascalho da superfície se mova lentamente.',
+        campRestAndSafetyGuards: 'Oferece piso firme e seguro para circulação das sentinelas sem risco de torções em pedras soltas.',
+        icon: '🪵⚙️',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'cryoconite_sediment_filtration_sump') {
+      tech = {
+        defenseTitle: 'Sumidouro Decantador de Água de Degelo de Crioconita',
+        moraineAnchorageAndInsulation: 'Sistema de três tanques de decantação forrados com cascalho miúdo, areia lavada e carvão vegetal que remove 100% da farinha de rocha.',
+        glacialIsolationAndCampSecurity: 'Produz água potável límpida e cristalina a partir da neve suja de pó negro sem entupir os rins.',
+        campRestAndSafetyGuards: 'Abastece os suprimentos de água da comitiva e garante hidratação segura durante a travessia morênica.',
+        icon: '💧🪨',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'portable_sheet_iron_charcoal_brazier') {
+      tech = {
+        defenseTitle: 'Braseiro Portátil de Folha de Ferro com Chaminé Direcional',
+        moraineAnchorageAndInsulation: 'Fogareiro suspenso sobre tripé que queima carvão denso sem derreter o gelo sob as pedras do acampamento.',
+        glacialIsolationAndCampSecurity: 'Mantém a temperatura interna da tenda em confortáveis 18°C sem risco de criar poças ou afundar o piso.',
+        campRestAndSafetyGuards: 'Permite recuperação completa de dados de vida e secagem de meias e luvas de lã dos batedores.',
+        icon: '🔥🛖',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      moraineAnchorageAndInsulation: tech.moraineAnchorageAndInsulation,
+      glacialIsolationAndCampSecurity: tech.glacialIsolationAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque em Morainas e Cascalheiras) / XGE p. 78-83 (Kit de Escalada e Ferramentas de Alvenaria)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -17082,6 +17206,8 @@
     calcCampTreeFernCanopyBivouacAndSolventStation: calcCampTreeFernCanopyBivouacAndSolventStation,
     calcWildernessSubterraneanRapidAndStalactiteHazard: calcWildernessSubterraneanRapidAndStalactiteHazard,
     calcCampSubterraneanRiverTravertineBenchAndRaftStation: calcCampSubterraneanRiverTravertineBenchAndRaftStation,
+    calcWildernessBlackMoraineAndCryoconiteHazard: calcWildernessBlackMoraineAndCryoconiteHazard,
+    calcCampBlackMoraineDebrisPlatformAndFilterStation: calcCampBlackMoraineDebrisPlatformAndFilterStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
