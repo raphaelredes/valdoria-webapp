@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T04:47:27Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T04:51:43Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessSubmergedCavesAndKarstSiphonHazard) return '';
+        var bKey = (biome && biome.key) || 'underdark';
+        var ks = CartShared.calcWildernessSubmergedCavesAndKarstSiphonHazard(bKey, 'submerged_karst_siphon_undertow');
+        return '<div class="clp-karst-siphon-card" style="margin:4px 0 6px;text-align:left;background:rgba(14,24,36,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(14,165,233,0.3);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ks.color + ';margin-bottom:2px;">' + ks.icon + ' ' + ks.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Perigo:</b> ' + ks.karstDamageAndDrowningRisk + ' (CD ' + ks.saveDC + ' [' + ks.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Prevenção:</b> ' + ks.pioneerMitigation + ' · <i>Estabilização: ' + ks.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampSpelunkingLineAndBuoyantPouchStation) return '';
+        var bKey = (biome && biome.key) || 'underdark';
+        var sp = CartShared.calcCampSpelunkingLineAndBuoyantPouchStation(bKey, 'braided_guide_line_reel_and_anchor_pitons');
+        return '<div class="clp-spelunking-station-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,32,28,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#d1fae5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sp.color + ';margin-bottom:2px;">' + sp.icon + ' ' + sp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Linha Guia:</b> ' + sp.lineNavigationEfficiency + ' · <b>Estanqueidade:</b> ' + sp.buoyancyAndWaterproofingSecurity + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Sono:</b> ' + sp.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

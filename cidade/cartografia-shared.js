@@ -12649,6 +12649,130 @@
     };
   }
 
+  // === calcWildernessSubmergedCavesAndKarstSiphonHazard (Sifões Cársticos, Sucção Subaquática e Cegueira por Sedimento - DMG p. 110, 116 / PHB p. 182-183) ===
+  function calcWildernessSubmergedCavesAndKarstSiphonHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'underdark').toLowerCase();
+    var ht = (hazardType || 'submerged_karst_siphon_undertow').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Sifão Cárstico Submerso com Sucção para Sumidouro',
+      saveDC: 14,
+      saveType: 'Força',
+      karstDamageAndDrowningRisk: 'Garganta estreita de rocha calcária puxando a água a 20 km/h; arrasto involuntário de 18 metros e risco de afogamento (PHB p. 183).',
+      pioneerMitigation: 'Batedores ancoram cabo guia de cânhamo em rocha seca e realizam teste de correnteza com flutuadores de cortiça.',
+      rescueAndStabilization: 'Tracionamento com roldanas de escalada, desobstrução das vias aéreas e drenagem pulmonar inclinada.',
+      icon: '🕳️🌊',
+      color: '#0ea5e9'
+    };
+
+    if (ht === 'stalactite_submerged_fang_constriction') {
+      hazard = {
+        hazardTitle: 'Galeria Subaquática Estreita com Estalactites Farpadas',
+        saveDC: 13,
+        saveType: 'Destreza',
+        karstDamageAndDrowningRisk: 'Fenda submersa de 60 cm entre agulhas calcárias pontiagudas; 2d8 de dano perfurante e risco de prender alforjes na rocha.',
+        pioneerMitigation: 'Desmonte preventivo das mochilas, conduzindo os fardos empurrados à frente em fila indiana lenta.',
+        rescueAndStabilization: 'Corte imediato de correias travadas com faca de mergulho e aplicação de tala subaquática para membros contundidos.',
+        icon: '🦷💧',
+        color: '#0284c7'
+      };
+    } else if (ht === 'turbid_silt_blackout_disorientation') {
+      hazard = {
+        hazardTitle: 'Cegueira Submersa Total por Nuvem de Silte (Silt Out)',
+        saveDC: 13,
+        saveType: 'Sabedoria',
+        karstDamageAndDrowningRisk: 'Fundo lamacento revolvido anulando a visão a zero; desvantagem severa em orientação e risco agudo de pânico claustrofóbico.',
+        pioneerMitigation: 'Natação suspensa sem bater pernas no leito e marcha tátil com mão ininterruptamente segura ao cabo guia.',
+        rescueAndStabilization: 'Sinalização por toques codificados na corda guia e pausa de 3 minutos para assentamento do sedimento.',
+        icon: '🌫️🤿',
+        color: '#64748b'
+      };
+    } else if (ht === 'hypothermic_groundwater_cramp') {
+      hazard = {
+        hazardTitle: 'Choque Térmico em Lençol Freático Glacial e Cãibra Muscular',
+        saveDC: 13,
+        saveType: 'Constituição',
+        karstDamageAndDrowningRisk: 'Água a 4°C provocando espasmos musculares severos, 1 nível de exaustão e incapacidade temporária de nadar.',
+        pioneerMitigation: 'Untar o corpo com banha animal isolante e uso de trajes de couro ajustados com costuras vedadas.',
+        rescueAndStabilization: 'Fricção enérgica com panos secos na primeira bolsa de ar respirável e consumo imediato de caldo quente.',
+        icon: '🥶🏊',
+        color: '#38bdf8'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      karstDamageAndDrowningRisk: hazard.karstDamageAndDrowningRisk,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110, 116 (Masmorras Alagadas e Cavernas) / PHB p. 182-183 (Natação e Asfixia)'
+    };
+  }
+
+  // === calcCampSpelunkingLineAndBuoyantPouchStation (Carretéis de Linha Guia, Bolsas Flutuantes e Redes Suspensas - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampSpelunkingLineAndBuoyantPouchStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'underdark').toLowerCase();
+    var dt = (defenseType || 'braided_guide_line_reel_and_anchor_pitons').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Carretel de Linha Guia Trançada com Pitões de Fixação',
+      lineNavigationEfficiency: 'Cabo fosforescente ininterrupto cravado com pitões a cada 5 metros conectando a margem ao acampamento seguro.',
+      buoyancyAndWaterproofingSecurity: 'Garante navegação e retorno infalíveis mesmo sob cegueira total por lama ou falha de iluminação.',
+      campRestAndSafetyGuards: 'Permite que sentinelas orientem saídas de emergência ordenadas caso a galeria comece a encher d\'água.',
+      icon: '🪢📍',
+      color: '#10b981'
+    };
+
+    if (dt === 'buoyant_oilskin_pack_and_float_bladders') {
+      tech = {
+        defenseTitle: 'Bolsas Flutuadoras Estanques com Bexigas Infladas e Piche',
+        lineNavigationEfficiency: 'Alforjes e caixas de suprimentos selados com lona encerada e flutuadores laterais que boiam sem esforço.',
+        buoyancyAndWaterproofingSecurity: 'Protege rações, pergaminhos e mapas de cartografia contra qualquer infiltração de água salobra.',
+        campRestAndSafetyGuards: 'Garante que os mantimentos e equipamentos permaneçam 100% secos e operacionais após travessias submersas.',
+        icon: '🎒🫧',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'suspended_hammock_above_flash_water') {
+      tech = {
+        defenseTitle: 'Rede Suspensa com Esticadores Acima da Linha de Inundação',
+        lineNavigationEfficiency: 'Bivaque elevado montado a 2 metros de altura atado em fendas do teto calcário por esticadores de aço.',
+        buoyancyAndWaterproofingSecurity: 'Mantém o leito de repouso dos membros da comitiva completamente livre de enchentes repentinas da maré cárstica.',
+        campRestAndSafetyGuards: 'Proporciona descanso longo confortável e protegido contra a umidade gelada do solo cavernoso.',
+        icon: '🛏️🧗',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'sealed_tallow_torch_and_tinder_canister') {
+      tech = {
+        defenseTitle: 'Estojo Estanque de Flandres com Tochas de Sebo Impermeáveis',
+        lineNavigationEfficiency: 'Tochas resinadas pré-untadas e pederneiras acondicionadas em cilindros metálicos lacrados com cera de abelha.',
+        buoyancyAndWaterproofingSecurity: 'Garante acendimento instantâneo de fogueira em menos de 1 minuto logo após emergir de trechos alagados.',
+        campRestAndSafetyGuards: 'Restaura a visibilidade e o calor corporal da comitiva rapidamente, prevenindo hipotermia.',
+        icon: '🔥🥫',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      lineNavigationEfficiency: tech.lineNavigationEfficiency,
+      buoyancyAndWaterproofingSecurity: tech.buoyancyAndWaterproofingSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque em Caverna) / XGE p. 78 (Equipamento de Mergulho e Espeleologia)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -14436,6 +14560,8 @@
     calcCampTideLineClearanceAndAnchorGrapnel: calcCampTideLineClearanceAndAnchorGrapnel,
     calcWildernessSubterraneanGasAndChokeDampHazard: calcWildernessSubterraneanGasAndChokeDampHazard,
     calcCampUndergroundVentilationAndDavySafetyLamp: calcCampUndergroundVentilationAndDavySafetyLamp,
+    calcWildernessSubmergedCavesAndKarstSiphonHazard: calcWildernessSubmergedCavesAndKarstSiphonHazard,
+    calcCampSpelunkingLineAndBuoyantPouchStation: calcCampSpelunkingLineAndBuoyantPouchStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
