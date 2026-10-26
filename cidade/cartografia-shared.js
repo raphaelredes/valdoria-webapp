@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 249: DUNAS TREPADORAS E AREIAS CANTANTES RESSONANTES (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessClimbingDuneBoomingSandHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'booming_sand_acoustic_resonance_avalanche_vertigo').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Avalanche de Cisalhamento em Areia Cantante (Booming Sand Resonance)',
+      saveDC: 15,
+      saveType: 'Constituição',
+      climbingDuneRisk: 'Encostas de dunas formadas por grãos de quartzo perfeitamente calibrados e secos que, ao sofrerem cisalhamento sob o peso da marcha, colidem emitindo um estrondo ressonante de baixa frequência tão potente quanto um trovão contínuo; a vibração acústica no solo e no labirinto auricular causa vertigem aguda, náusea e perda de equilíbrio, lançando os aventureiros encosta abaixo com 3d6 de concussão e desorientação sonora (DMG p. 110; PHB p. 182-183; XGE p. 109).',
+      pioneerMitigation: 'Descer contornando pelas cristas de menor inclinação ou apoiar o peso sobre esteiras de lona para amortecer o atrito entre os grãos.',
+      rescueAndStabilization: 'Descanso em solo rochoso firme fora do cone acústico e hidratação com água fresca.',
+      icon: '🔊🏜️',
+      color: '#eab308'
+    };
+
+    if (ht === 'climbing_dune_headland_sheer_cliff_sandfall') {
+      hazard = {
+        hazardTitle: 'Queda em Duna Trepadora sobre Falésia Marinha (Climbing Dune Sandfall)',
+        saveDC: 15,
+        saveType: 'Destreza',
+        climbingDuneRisk: 'Grandes massas de areia empurradas por ventos costeiros que sobem rampas rochosas íngremes até transbordar no topo de falésias de 50 metros; caminhar na borda da duna onde a areia não tem suporte rochoso inferior rompe a crista móvel em uma cascata que despenca diretamente para as arrebentações nas pedras com 3d8 de concussão (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Manter a marcha a pelo menos dez metros recuado da linha de quebra da falésia, guiando-se por afloramentos rochosos.',
+        rescueAndStabilization: 'Içamento vertical com corda e imobilização de membros atingidos.',
+        icon: '🌊🏖️',
+        color: '#d97706'
+      };
+    } else if (ht === 'cliff_top_deflation_pavement_sandblast_shred') {
+      hazard = {
+        hazardTitle: 'Jateamento de Areia em Platô de Deflação Costeira',
+        saveDC: 14,
+        saveType: 'Destreza',
+        climbingDuneRisk: 'No topo da escarpa, as rajadas marinhas aceleradas varrem a rocha nua a velocidades tempestuosas, arrastando grãos de areia cortantes rente ao chão que trituram tiras de mochilas, rasgam tendas e ferem tornozelos e olhos, causando 2d8 de dano cortante e cegueira temporária (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Rastejar sob a proteção de escudos e avançar apenas nos momentos de calmaria entre as frentes de brisa.',
+        rescueAndStabilization: 'Lavagem imediata dos olhos com água limpa estéril e curativo ocular.',
+        icon: '💨🪨',
+        color: '#f59e0b'
+      };
+    } else if (ht === 'lee_slipface_angle_of_repose_suffocating_slump') {
+      hazard = {
+        hazardTitle: 'Colapso de Face de Deslizamento em Ângulo Crítico (Slipface Slump)',
+        saveDC: 14,
+        saveType: 'Força',
+        climbingDuneRisk: 'A face de sotavento da duna costeira equilibra-se exatamente a 34 graus de inclinação; pisar no terço superior desencadeia um escorregamento em cunha que soterra o explorador até o peito em areia fofa e seca, impondo condição impedido e 1 nível de exaustão por compressão torácica (DMG p. 109-110; PHB p. 183).',
+        pioneerMitigation: 'Atravessar as faces de deslizamento em diagonal rápida com passos largos sem parar para descansar.',
+        rescueAndStabilization: 'Escavação manual rápida da caixa torácica e respiração assistida.',
+        icon: '⏳🕳️',
+        color: '#ca8a04'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampClimbingDuneBoomingSandStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'fossilized_sandstone_core_notch_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Reentrância de Paleoduna Cimentada (Eolianito)',
+      climbingDuneAndCampSafety: 'Aproveitamento de uma cornija de arenito fóssil resistente que sustenta a duna móvel por baixo, garantindo piso rochoso inabalável.',
+      climbingDuneTrenchAndWatch: 'A parede de eolianito corta os ventos marinhos diretos e impede o soterramento das barracas pela areia de deriva.',
+      campRestAndSafetyGuards: 'Garante descanso longo seguro mesmo durante tempestades de vento na costa.',
+      icon: '⛺🧱',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'acoustically_deadened_gravel_apron_camp') {
+      tech = {
+        defenseTitle: 'Acampamento sobre Cascalho Amortecedor de Ressonância',
+        climbingDuneAndCampSafety: 'Montagem do bivaque sobre um manto de seixos e conchas que dissipa qualquer atrito entre os grãos de areia fina.',
+        climbingDuneTrenchAndWatch: 'Elimina totalmente os estrondos ressonantes da areia, permitindo que a sentinela escute passos sutis ao redor.',
+        campRestAndSafetyGuards: 'Evita o estresse auditivo e devolve o sono tranquilo à comitiva.',
+        icon: '🔇🪨',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'marram_grass_stabilized_ridge_lookout') {
+      tech = {
+        defenseTitle: 'Posto de Vigia em Crista Fixada por Capim-das-Dunas (Ammophila)',
+        climbingDuneAndCampSafety: 'As raízes densas do capim-das-dunas amarram a areia em uma cúpula firme e transitável no topo da duna trepadora.',
+        climbingDuneTrenchAndWatch: 'Proporciona visada de 360 graus sobre a praia, o oceano e o interior do planalto costeiro.',
+        campRestAndSafetyGuards: 'Permite avistar aproximações com horas de antecedência.',
+        icon: '🌾👁️',
+        color: '#84cc16'
+      };
+    } else if (dt === 'condensed_fog_dune_sand_drainage_well') {
+      tech = {
+        defenseTitle: 'Poço de Drenagem de Nevoeiro Costeiro na Areia Basal',
+        climbingDuneAndCampSafety: 'A areia de quartzo da duna retém o nevoeiro marítimo que condensa nas encostas e escorre até o contato com a rocha.',
+        climbingDuneTrenchAndWatch: 'Cavar uma cova de um metro no sopé da duna fornece água doce límpida e fresca filtrada pela areia.',
+        campRestAndSafetyGuards: 'Abastece cantis sem precisar buscar fontes salobras na orla marítima.',
+        icon: '💧🌫️',
+        color: '#0284c7'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 248: RECIFES DE OSTRAS INTERMARÉS E LAMA PLUFF ESTUARINA (D&D 5e)
   // =========================================================================
 
@@ -33676,6 +33780,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessClimbingDuneBoomingSandHazard: calcWildernessClimbingDuneBoomingSandHazard,
+    calcCampClimbingDuneBoomingSandStation: calcCampClimbingDuneBoomingSandStation,
     calcWildernessOysterReefPluffMudHazard: calcWildernessOysterReefPluffMudHazard,
     calcCampOysterReefPluffMudStation: calcCampOysterReefPluffMudStation,
     calcWildernessStringBogAapaMireHazard: calcWildernessStringBogAapaMireHazard,
