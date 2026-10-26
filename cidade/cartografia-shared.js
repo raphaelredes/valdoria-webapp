@@ -20337,6 +20337,130 @@
     };
   }
 
+  // === calcWildernessTidewaterGlacierAndSeaCaveHazard (Geleiras Flutuantes de Maré e Cavernas de Gelo - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessTidewaterGlacierAndSeaCaveHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'glacier').toLowerCase();
+    var ht = (hazardType || 'subglacial_jokulhlaup_surge_burst').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Erupção Súbita de Jökulhlaup Subglacial sob Caverna de Gelo',
+      saveDC: 15,
+      saveType: 'Força',
+      tidewaterGlacierAndSeaCaveRisk: 'Bolsão de água doce represada sob alta pressão na base da geleira que arrebenta pelo fundo da caverna marinha, projetando uma torrente gélida violenta de 4 metros com blocos de gelo pontiagudos a 45 km/h causando 3d8 de concussão e risco imediato de afogamento (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores ancoram canoas em cabos de retenção tensionados nas paredes laterais de rocha sólida e mantêm rotas de evacuação desimpedidas.',
+      rescueAndStabilization: 'Içamento rápido com arneses de içamento, drenagem pulmonar de emergência e aquecimento térmico com pedras aquecidas em fogueira externa.',
+      icon: '🌊🧊',
+      color: '#0284c7'
+    };
+
+    if (ht === 'blue_ice_ceiling_collapse_crush') {
+      hazard = {
+        hazardTitle: 'Colapso de Teto de Caverna de Gelo Azul Cristalino',
+        saveDC: 15,
+        saveType: 'Destreza',
+        tidewaterGlacierAndSeaCaveRisk: 'Fratura transversal em abóbada de gelo azul de 10 metros de espessura enfraquecida por marés; queda de estalactites maciças de 2 toneladas esmagando equipamentos e esmagando aventureiros contra o piso rochoso.',
+        pioneerMitigation: 'Sondagem acústica por estalos com bastões de madeira e travessia rápida em fila indiana sem paradas sob arcos fraturados.',
+        rescueAndStabilization: 'Alavancamento com pontaletes de aço para libertar membros presos, estancamento hemostático e talas de imobilização.',
+        icon: '💥🧊',
+        color: '#dc2626'
+      };
+    } else if (ht === 'hydrothermal_vent_scalding_mist_pocket') {
+      hazard = {
+        hazardTitle: 'Bolsão de Vapor Escaldante de Pluma Hidrotermal',
+        saveDC: 14,
+        saveType: 'Constituição',
+        tidewaterGlacierAndSeaCaveRisk: 'Gêiser subaquático termal que borbulha dentro de bolsão fechado da caverna liberando vapor a 85°C saturado de enxofre em ambiente gélido; choque térmico que queima tecidos respiratórios e causa cegueira temporária.',
+        pioneerMitigation: 'Uso de máscaras de linho umedecidas em óleo de amêndoas e monitoramento de temperatura da água na proa com termômetro de mercúrio.',
+        rescueAndStabilization: 'Retirada rápida para a entrada ventilada da caverna, inalação de vapores calmantes de hortelã e aplicação de pomada para queimaduras.',
+        icon: '♨️☣️',
+        color: '#ea580c'
+      };
+    } else if (ht === 'marine_ice_maze_tide_lock_entrapment') {
+      hazard = {
+        hazardTitle: 'Aprisionamento por Fechamento de Canal por Maré de Gelo',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        tidewaterGlacierAndSeaCaveRisk: 'Mudança do fluxo de maré que empurra centenas de blocos de gelo flutuantes para a garganta de saída da caverna marinha, bloqueando a fuga dos exploradores com uma barreira compactada de gelo de 3 metros.',
+        pioneerMitigation: 'Acompanhamento rigoroso das tábuas de maré e fixação de boias de marcação na boca da caverna.',
+        rescueAndStabilization: 'Abertura de canal de fuga com picaretas de gelo e alavancas de ferro, rebocando canoas por sobre a banquisa.',
+        icon: '🧊🔒',
+        color: '#475569'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      tidewaterGlacierAndSeaCaveRisk: hazard.tidewaterGlacierAndSeaCaveRisk,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Cavernas de Gelo Marinho e Geleiras de Maré) / PHB p. 182-183 (Marcha em Gelo Subaquático) / XGE p. 78-83 (Geomorfologia Glacio-Marinha e Plumas Térmicas)'
+    };
+  }
+
+  // === calcCampTidewaterGlacierAndSeaCaveStation (Bivaques em Alcovas Térmicas e Contrafortes - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampTidewaterGlacierAndSeaCaveStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'glacier').toLowerCase();
+    var dt = (defenseType || 'subglacial_thermal_alcove_sanctuary_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Alcova Térmica Subglacial com Respiro Natural',
+      tidewaterGlacierAnchorageAndVentSafety: 'Nicho abrigado no leito rochoso sob a geleira aquecido por correntes termais ascendentes amenas a 12°C com chaminé natural de exaustão de gases que impede condensação e derretimento do teto.',
+      hydrothermalPlumeAndIceWallProtection: 'Isolamento completo contra ventos catabáticos de -25°C e tempestades de neve do oceano exterior.',
+      campRestAndSafetyGuards: 'Garante descanso longo perfeito, aquecido e revigorante para os membros da comitiva em redes suspensas longe da água fria.',
+      icon: '⛺♨️',
+      color: '#0284c7'
+    };
+
+    if (dt === 'timber_strut_ice_buttress_reinforcement') {
+      tech = {
+        defenseTitle: 'Contrafortes de Escoramento com Vigas de Madeira Fóssil',
+        tidewaterGlacierAnchorageAndVentSafety: 'Armações triangulares de toras densas travadas com cunhas de aço sob pontos de tensão da abóbada de gelo azul para impedir colapsos repentinos.',
+        hydrothermalPlumeAndIceWallProtection: 'Garante estabilidade estrutural absoluta do teto do bivaque durante o período de sono e repouso dos exploradores.',
+        campRestAndSafetyGuards: 'Elimina o risco de esmagamento noturno e confere segurança psicológica para a recuperação da fadiga.',
+        icon: '🪵🛡️',
+        color: '#b45309'
+      };
+    } else if (dt === 'geothermal_meltwater_distillation_basin') {
+      tech = {
+        defenseTitle: 'Bacia de Destilação com Água Térmica Subterrânea',
+        tidewaterGlacierAnchorageAndVentSafety: 'Canaleta esculpida em pedra vulcânica que resfria a água termal mineralizada, decantando sedimentos e produzindo 30 litros diários de água mineral pura potável.',
+        hydrothermalPlumeAndIceWallProtection: 'Fornece banho morno e água quente imediata para reaquecer corpos resfriados e cozinhar provisões sem queima de lenha.',
+        campRestAndSafetyGuards: 'Acelera a recuperação de membros congelados e devolve o vigor físico dos batedores e sentinelas.',
+        icon: '💧♨️',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'ice_block_baffle_parapet_with_lookout_embrasure') {
+      tech = {
+        defenseTitle: 'Parapeito de Blocos de Gelo Lapidados com Frestas de Vigia',
+        tidewaterGlacierAnchorageAndVentSafety: 'Muralha espessa de tijolos de gelo maciço assentada na entrada da caverna com seteiras anguladas para observação contínua da baía polar.',
+        hydrothermalPlumeAndIceWallProtection: 'Barra a entrada de ondas de choque de maré e desvia o vento polar direto da área interna de descanso.',
+        campRestAndSafetyGuards: 'Permite sentinela noturna protegida e abrigada com visão ampla de quaisquer predadores marinhos ou blocos à deriva.',
+        icon: '🧱🛡️',
+        color: '#64748b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      tidewaterGlacierAnchorageAndVentSafety: tech.tidewaterGlacierAnchorageAndVentSafety,
+      hydrothermalPlumeAndIceWallProtection: tech.hydrothermalPlumeAndIceWallProtection,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Cavernas Glaciais) / PHB p. 150 (Kits de Espeleologia Polar) / XGE p. 78-83 (Engenharia de Contrafortes de Gelo e Bacias Térmicas)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -22248,6 +22372,8 @@
     calcCampBoomingDuneStation: calcCampBoomingDuneStation,
     calcWildernessGlacialFjordAndCalvingHazard: calcWildernessGlacialFjordAndCalvingHazard,
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
+    calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
+    calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
