@@ -20575,6 +20575,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 172: CAMPOS FÓSSEIS DE YARDANGS EM ARGILITO EÓLICO E CORREDORES DE VENTO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessYardangCorridorHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'venturi_wind_tunnel_sandblast_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Vendaval Venturi em Corredor de Yardangs com Areia Cortante a 80 km/h',
+      saveDC: 15,
+      saveType: 'Força',
+      yardangAndWindRisk: 'Corredor estreito de argilito que comprime tempestade eólica gerando jato de vento de 80 km/h carregado de partículas abrasivas; desequilibra aventureiros, tomba montarias e arremessa a comitiva contra arestas afiadas de argilito causando 3d8 de concussão e cegueira momentânea (DMG p. 110, 246).',
+      pioneerMitigation: 'Batedores avançam rente à base dos yardangs utilizando ganchos de arrasto no solo e operam em fila cerrada com mantos de lã pesada protegendo o rosto.',
+      rescueAndStabilization: 'Resgate com cordas-guia ancoradas na popa do yardang, assepsia de olhos com solução salina esterilizada e reposicionamento em zona de calmaria.',
+      icon: '💨🏜️',
+      color: '#d97706'
+    };
+
+    if (ht === 'friable_clay_scarp_flaking_fall') {
+      hazard = {
+        hazardTitle: 'Esfarelamento de Crista de Argilito Laminado em Queda de 12 Metros',
+        saveDC: 15,
+        saveType: 'Destreza',
+        yardangAndWindRisk: 'Paredão vertical esculpido pelo vento com lâminas de argilito quebradiço que se desprendem sob a pressão da bota na escalada; o explorador despenca sobre o chão endurecido sofrendo 3d6 de concussão e risco de fraturas de tornozelo (PHB p. 182-183).',
+        pioneerMitigation: 'Uso de pítons de estaca longa para terrenos brandos e verificação de firmeza com haste de ferro antes de qualquer apoio de peso corporal.',
+        rescueAndStabilization: 'Imobilização imediata com talas de bambu e ataduras de cânhamo, seguida de aplicação de ungüento anti-edema de arnica.',
+        icon: '🧗‍♂️🪨',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'whistling_yardang_acoustic_vertigo') {
+      hazard = {
+        hazardTitle: 'Uivo Ressonante Eólico de Alta Frequência a 95 dB com Desorientação',
+        saveDC: 14,
+        saveType: 'Constituição',
+        yardangAndWindRisk: 'Vento veloz soprando através de canaletas e furos de erosão do yardang que gera assovio estridente contínuo de 95 dB; induz náusea por vibração acústica, cefaleia severa e desvantagem em testes de Percepção auditiva por 3 horas.',
+        pioneerMitigation: 'Uso de protetores auriculares de cera pura de abelha envolvida em gaze de linho fino amarrados sob capuzes de couro.',
+        rescueAndStabilization: 'Repouso em tenda selada à prova de som com compressas mornas nas têmporas e gotas de óleo emoliente de sálvia nos ouvidos.',
+        icon: '🔊🏜️',
+        color: '#b45309'
+      };
+    } else if (ht === 'clay_corridor_convective_heat_oven') {
+      hazard = {
+        hazardTitle: 'Calor Convectivo Focado em Vala Côncava de Argilito a 48°C',
+        saveDC: 14,
+        saveType: 'Constituição',
+        yardangAndWindRisk: 'Paredes curvas de argila compacta que concentram a radiação solar transformando a vala eólica em forno térmico sem brisa; desidratação acelerada que induz cãibras críticas e 1 nível de exaustão por insolação extrema (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Deslocamento restrito às horas de sombra matutina e consumo rigoroso de água com eletrólitos minerais a cada 30 minutos.',
+        rescueAndStabilization: 'Transporte para abrigo à sombra da popa do yardang, hidratação lenta em pequenos goles de salmoura tépida e repouso estendido.',
+        icon: '☀️🔥',
+        color: '#dc2626'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampYardangCorridorStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'lee_side_yardang_wake_trench_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Vala de Sota-Vento Protegida sob a Popa do Yardang',
+      yardangAndCampSafety: 'Acampamento assentado na zona de calmaria aerodinâmica atrás da crista afilada do yardang, onde a silhueta natural da rocha desvia correntes de vento e tempestades de areia por cima das barracas.',
+      yardangWakeBarrierAndClayCistern: 'A muralha maciça de argilito de 20 metros funciona como barreira inexpugnável pelas costas contra vendavais e oculta fogueiras contra observadores distantes.',
+      campRestAndSafetyGuards: 'Garante repouso longo calmo, seguro e sem sobressaltos para todos os membros do grupo, com temperatura noturna estável e vigilância serena.',
+      icon: '⛺🏜️',
+      color: '#d97706'
+    };
+
+    if (dt === 'inter_yardang_boulder_and_esparto_windbreak') {
+      tech = {
+        defenseTitle: 'Paliçada de Blocos de Argilito e Esteiras de Esparto Trançado',
+        yardangAndCampSafety: 'Barreira semicircular erguida na entrada da vala com blocos pesados e painéis duplos de fibras desérticas que bloqueia totalmente a invasão de areia rasteira e rajadas laterais.',
+        yardangWakeBarrierAndClayCistern: 'Concede cobertura superior (+5 na CA) contra arqueiros e fecha o perímetro contra ataques de predadores noturnos.',
+        campRestAndSafetyGuards: 'Assegura sono contínuo sem risco de soterramento de equipamentos e vigília protegida para as sentinelas de guarda.',
+        icon: '🛡️🌾',
+        color: '#92400e'
+      };
+    } else if (dt === 'bentonite_clay_subsurface_seep_well_filter') {
+      tech = {
+        defenseTitle: 'Poço de Cacimba em Argila Bentonítica com Tubo Filtrante de Linho',
+        yardangAndCampSafety: 'Escavação na base de barlavento do yardang que alcança condensação subterrânea retida em camada impermeável de argila, purificada por filtro de linho e carvão.',
+        yardangWakeBarrierAndClayCistern: 'Fornece 45 litros diários de água límpida, fresca e potável livre de salitre, assegurando a autonomia hídrica da comitiva no deserto.',
+        campRestAndSafetyGuards: 'Elimina a desidratação e o estresse térmico, restabelecendo plenamente as forças e o vigor dos exploradores.',
+        icon: '💧🏺',
+        color: '#0284c7'
+      };
+    } else if (dt === 'trough_perimeter_tripwire_resonating_pot_alarm') {
+      tech = {
+        defenseTitle: 'Rede de Alarme Acústico com Fios de Tensão e Ânforas de Argilito',
+        yardangAndCampSafety: 'Cabos finos de latão estendidos ao longo dos corredores de vento conectados a bilhas de pedra no interior de potes de cerâmica que amplificam qualquer vibração externa.',
+        yardangWakeBarrierAndClayCistern: 'Alerta antecipado a 60 metros de distância eliminando qualquer surpresa por emboscadas nas trevas dos desfiladeiros eólicos.',
+        campRestAndSafetyGuards: 'Proporciona tranquilidade mental absoluta e vigilância automatizada precisa durante toda a noite.',
+        icon: '🔔🏺',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 171: FLORESTAS DE GALERIA RIPÁRIA, DIQUES MARGINAIS E MEANDROS ABANDONADOS (D&D 5e)
   // =========================================================================
 
@@ -25666,6 +25770,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessYardangCorridorHazard: calcWildernessYardangCorridorHazard,
+    calcCampYardangCorridorStation: calcCampYardangCorridorStation,
     calcWildernessRiparianOxbowLeveeHazard: calcWildernessRiparianOxbowLeveeHazard,
     calcCampRiparianOxbowLeveeStation: calcCampRiparianOxbowLeveeStation,
     calcWildernessTectonicRiftGrabenHazard: calcWildernessTectonicRiftGrabenHazard,
