@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessStarDuneRhourdHazard) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var sd = CartShared.calcWildernessStarDuneRhourdHazard(bKey, 'star_dune_slipface_cornice_avalanche_burial');
+        return '<div class="clp-star-dune-rhourd-card" style="margin:4px 0 6px;text-align:left;background:rgba(38,26,12,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.35);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sd.color + ';margin-bottom:2px;">' + sd.icon + ' ' + sd.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Duna Estrelada (Rhourd) e Areias Cantantes:</b> ' + sd.starDuneRisk + ' (CD ' + sd.saveDC + ' [' + sd.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Mitigação:</b> ' + sd.pioneerMitigation + ' · <i>Estabilização: ' + sd.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampStarDuneRhourdStation) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var sc = CartShared.calcCampStarDuneRhourdStation(bKey, 'exposed_interdune_rock_gassi_corridor_bivouac');
+        return '<div class="clp-star-dune-rhourd-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,20,10,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(217,119,6,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sc.color + ';margin-bottom:2px;">' + sc.icon + ' ' + sc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Bivaque no Corredor Gassi:</b> ' + sc.starDuneAndCampSafety + ' · <b>Defesa:</b> ' + sc.starDuneAnchorAndWell + '</div>'
+          + '  <div style="font-size:7.5px;color:#fcd34d;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + sc.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessAlkalineSodaLakeHazard) return '';
         var bKey = (biome && biome.key) || 'desert';
         var sl = CartShared.calcWildernessAlkalineSodaLakeHazard(bKey, 'caustic_natron_crust_breakthrough_chemical_scald');

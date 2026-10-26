@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 208: DUNAS ESTRELADAS GIGANTES (RHOURDS) E AREIAS CANTANTES (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessStarDuneRhourdHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'star_dune_slipface_cornice_avalanche_burial').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Avalanche de Face de Deslizamento em Pirâmide de Duna Estrelada (Rhourd)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      starDuneRisk: 'Montanha piramidal de areia de 250 metros de altura com múltiplos braços sinuosos; pisar na cornija de sotavento em ângulo crítico de repouso (34 graus) dispara uma placa inteira de areia seca que soterra a comitiva no caldeirão basal com 3d8 de concussão e asfixia (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Marcha estrita pelo lado firme de barlavento (ondulado pelo vento) a 3 metros da linha da aresta.',
+      rescueAndStabilization: 'Localização pela corda-guia colorida e escavação imediata das vias aéreas com escudos ou pratos.',
+      icon: '🏜️⭐',
+      color: '#f59e0b'
+    };
+
+    if (ht === 'booming_sand_acoustic_resonance_disorientation') {
+      hazard = {
+        hazardTitle: 'Ressonância Sísmico-Acústica de Areias Cantantes (Booming Sands)',
+        saveDC: 14,
+        saveType: 'Constituição',
+        starDuneRisk: 'O deslizamento sincronizado de milhões de grãos de quartzo polidos e extremamente secos gera um bramido grave ensurdecedor que faz vibrar o tórax e o solo por minutos; o estrondo mascara chamadas de alerta e impõe a condição Surdo por 1 hora e vertigem (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Comunicação visual por bandeiras de mão entre o batedor da crista e o grupo da base.',
+        rescueAndStabilization: 'Parada imediata até cessar a vibração da encosta e proteção dos ouvidos com turbantes.',
+        icon: '🔊🏜️',
+        color: '#eab308'
+      };
+    } else if (ht === 'interdune_gassi_fech_fech_powder_crust_trap') {
+      hazard = {
+        hazardTitle: 'Afundamento em Bolsão de Pó Impalpável (Fech-Fech) no Caldeirão',
+        saveDC: 15,
+        saveType: 'Força',
+        starDuneRisk: 'Nas bacias fechadas entre os braços radiais da duna estrelada, uma casca milimétrica de argila ressecada esconde um metro de talco mineral sem coesão (fech-fech); animais e aventureiros afundam instantaneamente levantando nuvem sufocante e sofrendo 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Contorno das manchas cinza-claras fofas no fundo da bacia mantendo-se sobre o cascalho escuro.',
+        rescueAndStabilization: 'Estendimento de mantas largas de lã para rolar o companheiro para fora do pó sem afundar.',
+        icon: '🕳️🌫️',
+        color: '#d97706'
+      };
+    } else if (ht === 'multi_directional_rotor_eddy_sand_blinding_vortex') {
+      hazard = {
+        hazardTitle: 'Vórtice de Vento Multidirecional no Ápice dos Braços da Duna',
+        saveDC: 15,
+        saveType: 'Constituição',
+        starDuneRisk: 'O encontro de correntes de ar que sobem pelas três faces côncavas da duna estrelada gera redemoinhos verticais de areia cortante no cume, impondo a condição Cego e causando 2d6 de dano cortante por abrasão (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Travessia pelos colos mais baixos dos braços laterais evitando o pico piramidal central.',
+        rescueAndStabilization: 'Envolvimento facial completo com véu beduíno e lavagem ocular com água limpa.',
+        icon: '🌪️🏜️',
+        color: '#ea580c'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampStarDuneRhourdStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'exposed_interdune_rock_gassi_corridor_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Lajedo Interdunar Varrido pelo Vento (Corredor Gassi)',
+      starDuneAndCampSafety: 'Acampamento instalado sobre a plataforma de rocha matriz exposta entre duas grandes dunas estreladas, longe da base das faces de avalanche.',
+      starDuneAnchorAndWell: 'O piso pétreo impede o soterramento noturno das barracas por migração de areia e garante marcha firme sem fech-fech.',
+      campRestAndSafetyGuards: 'Garante descanso longo estável, ventilado e seguro para toda a comitiva e montarias.',
+      icon: '⛺⭐',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'buried_sand_bag_deadman_anchor_tent_mooring') {
+      tech = {
+        defenseTitle: 'Ancoragem de Homem-Morto com Sacos de Areia Enterrados a 80 cm',
+        starDuneAndCampSafety: 'Substituição de estacas comuns (que soltam facilmente na areia seca) por bolsas de lona cheias de areia enterradas horizontalmente na camada inferior compacta.',
+        starDuneAnchorAndWell: 'Resiste aos mais violentos vendavais noturnos do erg sem deixar o abrigo colapsar sobre o grupo.',
+        campRestAndSafetyGuards: 'Mantém as tendas firmes e silenciosas durante toda a noite.',
+        icon: '⚓🏜️',
+        color: '#d97706'
+      };
+    } else if (dt === 'dune_base_fossil_aquifer_nebka_tamarisk_well') {
+      tech = {
+        defenseTitle: 'Cacimba na Esponja Basal da Duna Junto a Cômoros de Tamargueira',
+        starDuneAndCampSafety: 'Escavação de 1,5 metro no pé da gigantesca massa de areia onde tufos verdes de tamargueira (nebkas) denunciam água retida sobre o embasamento impermeável.',
+        starDuneAnchorAndWell: 'A duna estrelada funciona como um reservatório natural protegido da evaporação, fornecendo água doce e fresca.',
+        campRestAndSafetyGuards: 'Repõe os cantis da expedição no coração do grande mar de areia.',
+        icon: '💧🌿',
+        color: '#10b981'
+      };
+    } else if (dt === 'crest_silk_streamer_wind_reversal_indicator') {
+      tech = {
+        defenseTitle: 'Balizas de Seda nos Braços da Duna para Leitura de Inversão Eólica',
+        starDuneAndCampSafety: 'Hastes altas com fitas coloridas finas cravadas nos dois braços de duna que flanqueiam o acampamento.',
+        starDuneAnchorAndWell: 'Indica imediatamente às sentinelas quando o vento muda de quadrante e ameaça transformar a encosta calma em face de deslizamento ativa.',
+        campRestAndSafetyGuards: 'Antecipa mudanças bruscas de tempo e orienta os turnos de vigília.',
+        icon: '🎏🧭',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 207: LAGOS ALCALINOS DE SODA, CHAMINÉS DE TRONA E NATRÃO (D&D 5e)
   // =========================================================================
 
@@ -29412,6 +29516,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessStarDuneRhourdHazard: calcWildernessStarDuneRhourdHazard,
+    calcCampStarDuneRhourdStation: calcCampStarDuneRhourdStation,
     calcWildernessAlkalineSodaLakeHazard: calcWildernessAlkalineSodaLakeHazard,
     calcCampAlkalineSodaLakeStation: calcCampAlkalineSodaLakeStation,
     calcWildernessSandstoneSlotCanyonHazard: calcWildernessSandstoneSlotCanyonHazard,
