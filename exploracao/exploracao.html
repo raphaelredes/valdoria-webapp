@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T05:56:29Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T06:00:13Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessPillowLavaAndThermalVentHazard) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var pl = CartShared.calcWildernessPillowLavaAndThermalVentHazard(bKey, 'superheated_steam_blowhole_erupt');
+        return '<div class="clp-pillow-lava-card" style="margin:4px 0 6px;text-align:left;background:rgba(36,20,16,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(249,115,22,0.3);font-size:8px;color:#ffedd5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + pl.color + ';margin-bottom:2px;">' + pl.icon + ' ' + pl.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Vapor Hidrotermal:</b> ' + pl.pillowLavaRiskAndSteam + ' (CD ' + pl.saveDC + ' [' + pl.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Mitigação:</b> ' + pl.pioneerMitigation + ' · <i>Estabilização: ' + pl.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampPillowLavaBasaltPlatformAndCondenserStation) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var bp = CartShared.calcCampPillowLavaBasaltPlatformAndCondenserStation(bKey, 'raised_basalt_slab_causeway_deck');
+        return '<div class="clp-basalt-condenser-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,34,24,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#ecfdf5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + bp.color + ';margin-bottom:2px;">' + bp.icon + ' ' + bp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Estrado Basáltico:</b> ' + bp.basaltAnchorageAndStability + ' · <b>Proteção:</b> ' + bp.thermalShieldingAndCampSecurity + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + bp.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

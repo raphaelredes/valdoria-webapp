@@ -14757,6 +14757,130 @@
     };
   }
 
+  // === calcWildernessPillowLavaAndThermalVentHazard (Campos de Lava Almofadada, Respiradouros Térmicos e Vapor Escaldante - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessPillowLavaAndThermalVentHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var ht = (hazardType || 'superheated_steam_blowhole_erupt').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Erupção de Respiradouro de Vapor Superaquecido',
+      saveDC: 14,
+      saveType: 'Destreza',
+      pillowLavaRiskAndSteam: 'Jato repentino de vapor a 180°C irrompendo de fissura basáltica submarina; 3d8 de dano ígneo e arremesso em piscina de água fervente (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores observam silvos acústicos na rocha e avançam apenas por cristas de basalto escuro resfriado.',
+      rescueAndStabilization: 'Aplicação imediata de gel de babosa marinha, compressas salinas frias e infusão de folhas de confrei.',
+      icon: '🌋💨',
+      color: '#f97316'
+    };
+
+    if (ht === 'hollow_pillow_crust_collapse') {
+      hazard = {
+        hazardTitle: 'Ruptura de Crosta Oca de Lava Almofadada',
+        saveDC: 13,
+        saveType: 'Destreza',
+        pillowLavaRiskAndSteam: 'Camada vítrea frágil de basalto que se rompe sob o peso da comitiva, revelando câmara de água escaldante e cacos afiados; 2d6 de perfuração e 2d6 de fogo.',
+        pioneerMitigation: 'Sondagem contínua com bastão de ferro temperado e distribuição de peso sobre tábuas basálticas.',
+        rescueAndStabilization: 'Extração de farpas vítreas de obsidiana e sutura de lacerações térmicas com fio de seda.',
+        icon: '🪨🔥',
+        color: '#ea580c'
+      };
+    } else if (ht === 'sulfuric_thermal_plume_asphyxiation') {
+      hazard = {
+        hazardTitle: 'Pluma Sulfurosa de Fissura Litorânea',
+        saveDC: 14,
+        saveType: 'Constituição',
+        pillowLavaRiskAndSteam: 'Gases densos de enxofre e dióxido de carbono pesados acumulados em depressões de basalto; envenenamento e sufocamento em 3 rodadas.',
+        pioneerMitigation: 'Uso de máscaras de couro com carvão ativado marinho e marcha em postos elevados batidos pela brisa marítima.',
+        rescueAndStabilization: 'Respiração assistida com ar puro no alto de promontório e infusão de alho silvestre desintoxicante.',
+        icon: '💨☣️',
+        color: '#eab308'
+      };
+    } else if (ht === 'scalding_tide_surge_boiling_pool') {
+      hazard = {
+        hazardTitle: 'Maré Térmica em Piscinas Escaldantes',
+        saveDC: 13,
+        saveType: 'Constituição',
+        pillowLavaRiskAndSteam: 'Onda costeira que invade poços hidrotermais e projeta spray fervente de salmoura a 90°C; queima de tecidos e quebra de botas de couro.',
+        pioneerMitigation: 'Uso de polainas de lona encerada e desvio das calhas de maré nas horas de preamar térmica.',
+        rescueAndStabilization: 'Remoção cautelosa de calçados colados e curativo com banha de foca e própolis vulcânica.',
+        icon: '🌊🔥',
+        color: '#ef4444'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      pillowLavaRiskAndSteam: hazard.pillowLavaRiskAndSteam,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Lava, Gases Vulcânicos e Vapor Superaquecido) / PHB p. 182-183 (Terreno Vulcânico e Salvaguardas)'
+    };
+  }
+
+  // === calcCampPillowLavaBasaltPlatformAndCondenserStation (Calçadas Basálticas, Alambiques de Dessalinização e Cal Extinta - DMG p. 111 / XGE p. 78-83 / PHB p. 150) ===
+  function calcCampPillowLavaBasaltPlatformAndCondenserStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var dt = (defenseType || 'raised_basalt_slab_causeway_deck').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Estrado de Lajes Basálticas Niveladas e Ventiladas',
+      basaltAnchorageAndStability: 'Blocos hexagonais de basalto resfriado assentados sobre leito de cascalho vulcânico, criando piso elevado de 20 cm imune ao calor do solo.',
+      thermalShieldingAndCampSecurity: 'Isola as barracas da comitiva do calor residual e das emanações gasosas da rocha vulcânica.',
+      campRestAndSafetyGuards: 'Garante sono longo tranquilo e seguro sem perigo de queimar fundos de tendas ou leitos.',
+      icon: '🪨⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'coiled_copper_steam_desalination_still') {
+      tech = {
+        defenseTitle: 'Dessalinizador de Serpentina de Cobre com Vapor Hidrotermal',
+        basaltAnchorageAndStability: 'Alambique condensador acoplado a bocal de respiradouro que canaliza o vapor natural por serpentina resfriada a água do mar.',
+        thermalShieldingAndCampSecurity: 'Gera até 40 litros de água destilada potável pura sem gastar lenha ou óleo da comitiva.',
+        campRestAndSafetyGuards: 'Abastece os cantis dos aventureiros e permite caldos revigorantes com água puríssima mineral.',
+        icon: '⚗️💧',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'volcanic_thermal_convection_drying_flue') {
+      tech = {
+        defenseTitle: 'Chaminé de Convecção Térmica para Desumidificação',
+        basaltAnchorageAndStability: 'Tubo cônico de barro e pedras vulcânicas que canaliza ar quente seco e filtrado para o interior do abrigo.',
+        thermalShieldingAndCampSecurity: 'Mantém a umidade costeira longe de armas de aço, mantimentos e componentes de conjuração.',
+        campRestAndSafetyGuards: 'Elimina a condensação marinha e preserva cordas e couros da comitiva em perfeito estado.',
+        icon: '🛖💨',
+        color: '#f59e0b'
+      };
+    } else if (dt === 'sulfur_neutralizing_slaked_lime_perimeter') {
+      tech = {
+        defenseTitle: 'Perímetro de Cal Extinta Neutralizadora de Enxofre',
+        basaltAnchorageAndStability: 'Trincheira rasa preenchida com pó de calcário e carvão vegetal moído ao redor do acampamento.',
+        thermalShieldingAndCampSecurity: 'Reage quimicamente com os gases sulfurosos que sobem pelas fendas, neutralizando o ar respirável.',
+        campRestAndSafetyGuards: 'Permite vigília lúcida das sentinelas sem náusea, irritação pulmonar ou cefaleia.',
+        icon: '🧪🛡️',
+        color: '#ca8a04'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      basaltAnchorageAndStability: tech.basaltAnchorageAndStability,
+      thermalShieldingAndCampSecurity: tech.thermalShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque em Campos Vulcânicos) / XGE p. 78-83 (Ferramentas de Ferreiro e Alvenaria)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -16578,6 +16702,8 @@
     calcCampCoastalSpitPalingAndTidalStation: calcCampCoastalSpitPalingAndTidalStation,
     calcWildernessCloudForestAndDrizzleHazard: calcWildernessCloudForestAndDrizzleHazard,
     calcCampCloudForestFogHarvesterAndHeatedBedStation: calcCampCloudForestFogHarvesterAndHeatedBedStation,
+    calcWildernessPillowLavaAndThermalVentHazard: calcWildernessPillowLavaAndThermalVentHazard,
+    calcCampPillowLavaBasaltPlatformAndCondenserStation: calcCampPillowLavaBasaltPlatformAndCondenserStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
