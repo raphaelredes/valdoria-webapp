@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 231: CRISTAS DE PRESSÃO TOROSS E POLÍNIAS DE GELO MARINHO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessSeaIceTorossPolynyaHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'arctic').toLowerCase();
+    var ht = (hazardType || 'toross_pressure_ridge_active_ice_keel_grind_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Esmagamento em Crista de Pressão Ativa (Toross / Hummock Ridge)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      torossPolynyaRisk: 'Muralhas caóticas de blocos de gelo marinho de 6 metros de altura empurrados uns sobre os outros pela colisão de placas de banquisa sob o vento polar; quando a maré muda, a crista inteira range com estrondos de canhão e desmorona ou fecha fendas como mandíbulas, esmagando exploradores entre lajes de duas toneladas com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+      pioneerMitigation: 'Cruzar apenas cristas antigas de contornos arredondados e azulados que não emitam estalos acústicos.',
+      rescueAndStabilization: 'Uso de alavancas de ferro e talhas de corda para afastar blocos de gelo e imobilização de fraturas.',
+      icon: '🧊🏔️',
+      color: '#38bdf8'
+    };
+
+    if (ht === 'steaming_coastal_polynya_frost_smoke_whiteout_lead') {
+      hazard = {
+        hazardTitle: 'Queda em Polínia Costeira Oculta por Nevoeiro de Geada (Frost Smoke)',
+        saveDC: 15,
+        saveType: 'Sabedoria',
+        torossPolynyaRisk: 'Clarabóias de água aberta permanente no meio do mar congelado mantidas por correntes ascendentes e ventos catabáticos; o contraste entre o oceano a zero grau e o ar a trinta negativos gera densas colunas de fumaça de geada que cegam a comitiva e ocultam a borda da água negra a poucos passos, provocando imersão hipotérmica imediata com 3d6 de frio (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Avançar encordado contornando bancos de vapor escuro pelo lado de barlavento e sondando a borda.',
+        rescueAndStabilization: 'Retirada imediata com ganchos de gelo, remoção de vestes molhadas e rolamento em neve seca.',
+        icon: '🌫️🌊',
+        color: '#0284c7'
+      };
+    } else if (ht === 'dark_nilas_elastic_finger_rafting_thin_ice_breakthrough') {
+      hazard = {
+        hazardTitle: 'Ruptura de Gelo Negro Elástico Recém-Formado (Dark Nilas)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        torossPolynyaRisk: 'Canais recém-congelados cobertos por uma crosta fosca e escura de apenas 5 centímetros de espessura que ondula elasticamente sob o peso das botas sem estalar antes de ceder de súbito; o aventureiro afunda silenciosamente na água salgada super-resfriada sob placas entrelaçadas (finger rafting), sofrendo 2d8 de frio e restrição de nado (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Testar toda faixa de gelo cinza-escuro com golpe firme de bastão ferrado (tuk) antes de transferir o peso.',
+        rescueAndStabilization: 'Auto-resgate com punções de gelo de punho e tração horizontal de bruços sobre prancha larga.',
+        icon: '🕳️❄️',
+        color: '#64748b'
+      };
+    } else if (ht === 'pack_ice_floe_shear_zone_open_lead_stranding_drift') {
+      hazard = {
+        hazardTitle: 'Deriva Isolada por Abertura Súbita de Canal de Cisalhamento (Ice Lead)',
+        saveDC: 14,
+        saveType: 'Força',
+        torossPolynyaRisk: 'Uma mudança de vento ou corrente marinha rasga a placa de gelo sob o acampamento ou coluna de marcha em minutos, abrindo um canal de água negra de 30 metros de largura que separa batedores, trenós e suprimentos em bandos à deriva no mar polar com 1 nível de exaustão por exposição (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Manter a comitiva e os trenós na mesma placa mãe e lançar arpão com cabo ao primeiro sinal de fissura.',
+        rescueAndStabilization: 'Travessia de emergência usando trenó estanque ou bloco de gelo espesso tracionado por corda.',
+        icon: '🌊🛷',
+        color: '#0369a1'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampSeaIceTorossPolynyaStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'arctic').toLowerCase();
+    var dt = (defenseType || 'multiyear_weathered_toross_freshwater_melt_ice_quarry').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Extração de Água Potável em Blocos Azuis de Toross Multi-Anual',
+      torossPolynyaAndCampSafety: 'Gelo marinho novo é salobro, mas o topo azul-celeste de cristas de pressão antigas (multi-year ice) já drenou toda a salmoura por gravidade em verões passados.',
+      torossPolynyaTrenchAndWatch: 'Derreter lascas desse gelo vítreo fornece água doce pura sem consumir combustível extra com destilação.',
+      campRestAndSafetyGuards: 'Garante hidratação plena sobre o oceano congelado durante o descanso longo.',
+      icon: '🧊💧',
+      color: '#38bdf8'
+    };
+
+    if (dt === 'consolidated_hummock_lee_igloo_snow_drift_bivouac') {
+      tech = {
+        defenseTitle: 'Bivaque em Duna de Neve Sinterizada a Sotavento de Crista Consolidada',
+        torossPolynyaAndCampSafety: 'Escavação de abrigo na língua de neve compactada pelo vento atrás de um toross antigo e consolidado, longe de zonas de fratura ativa.',
+        torossPolynyaTrenchAndWatch: 'A muralha de gelo de 5 metros quebra o vento catabático e oculta a silhueta das barracas na banquisa.',
+        campRestAndSafetyGuards: 'Eleva a temperatura interna do abrigo em 25 graus acima da nevasca externa.',
+        icon: '⛺❄️',
+        color: '#7dd3fc'
+      };
+    } else if (dt === 'polynya_edge_breathing_hole_seal_blubber_lamp_station') {
+      tech = {
+        defenseTitle: 'Posto de Observação e Combustível Animal na Borda Segura da Polínia',
+        torossPolynyaAndCampSafety: 'As polínias são oásis biológicos polares onde mamíferos e aves marinhas emergem para respirar e se alimentar.',
+        torossPolynyaTrenchAndWatch: 'Vigiar a plataforma espessa a barlavento da fumaça de geada provê carne fresca e gordura para lâmpadas de pedra (qulliq).',
+        campRestAndSafetyGuards: 'Sustenta luz e calor constantes sem depender de lenha inexistente no mar polar.',
+        icon: '🦭🔥',
+        color: '#f59e0b'
+      };
+    } else if (dt === 'tethered_kayak_sledge_amphibious_raft_anchor_system') {
+      tech = {
+        defenseTitle: 'Ancoragem de Trenós-Caiaque Anfíbios com Cabo de Reboque Flutuante',
+        torossPolynyaAndCampSafety: 'Acoplamento das cargas do bivaque sobre trenós leves com cascos estanques de couro amarrados entre si por cabos de fibra.',
+        torossPolynyaTrenchAndWatch: 'Caso uma fenda de cisalhamento se abra sob o acampamento à noite, o equipamento flutua como balsa imediata.',
+        campRestAndSafetyGuards: 'Elimina o risco de perda total de suprimentos por ruptura noturna da banquisa.',
+        icon: '🛷⚓',
+        color: '#0ea5e9'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 230: MARMITAS DE GIGANTE FLUVIAIS E GARGANTAS STRID (D&D 5e)
   // =========================================================================
 
@@ -31804,6 +31908,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessSeaIceTorossPolynyaHazard: calcWildernessSeaIceTorossPolynyaHazard,
+    calcCampSeaIceTorossPolynyaStation: calcCampSeaIceTorossPolynyaStation,
     calcWildernessBedrockStridPotholeHazard: calcWildernessBedrockStridPotholeHazard,
     calcCampBedrockStridPotholeStation: calcCampBedrockStridPotholeStation,
     calcWildernessVolcanicSolfataraFieldHazard: calcWildernessVolcanicSolfataraFieldHazard,
