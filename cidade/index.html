@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessBorealTaigaAndPeatHazard) return '';
+        var bKey = (biome && biome.key) || 'taiga';
+        var bt = CartShared.calcWildernessBorealTaigaAndPeatHazard(bKey, 'smoldering_peat_sinkhole_burn');
+        return '<div class="clp-boreal-taiga-card" style="margin:4px 0 6px;text-align:left;background:rgba(36,24,18,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(234,88,12,0.3);font-size:8px;color:#ffedd5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + bt.color + ';margin-bottom:2px;">' + bt.icon + ' ' + bt.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Taiga e Fogo Subterrâneo:</b> ' + bt.borealTaigaRiskAndPeat + ' (CD ' + bt.saveDC + ' [' + bt.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fdba74;margin-top:1px;">• <b>Mitigação:</b> ' + bt.pioneerMitigation + ' · <i>Estabilização: ' + bt.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampBorealTaigaLarchPlatformAndFirebreak) return '';
+        var bKey = (biome && biome.key) || 'taiga';
+        var cp = CartShared.calcCampBorealTaigaLarchPlatformAndFirebreak(bKey, 'high_branch_larch_deck_bivouac');
+        return '<div class="clp-larch-platform-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,34,26,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#ecfdf5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Deck em Lariço:</b> ' + cp.taigaAnchorageAndPeatSafety + ' · <b>Proteção:</b> ' + cp.fireShieldingAndCampSecurity + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessPermafrostAndPenitenteHazard) return '';
         var bKey = (biome && biome.key) || 'tundra';
         var pf = CartShared.calcWildernessPermafrostAndPenitenteHazard(bKey, 'ice_wedge_polygon_crevasse_plunge');

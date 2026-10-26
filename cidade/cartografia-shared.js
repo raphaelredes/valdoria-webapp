@@ -16369,6 +16369,130 @@
     };
   }
 
+  // === calcWildernessBorealTaigaAndPeatHazard (Taiga Boreal, Fogos Subterrâneos de Turfa e Floresta Bêbada - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessBorealTaigaAndPeatHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'taiga').toLowerCase();
+    var ht = (hazardType || 'smoldering_peat_sinkhole_burn').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso em Poço de Fogo Subterrâneo de Turfa',
+      saveDC: 15,
+      saveType: 'Destreza',
+      borealTaigaRiskAndPeat: 'Camada de musgo superficial verdejante que oculta covas de combustão lenta de turfa a 400°C; colapso sob passos causando 3d6 de fogo e destruição de solas de botas (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam com varas de freixo pontiagudas medindo calor do solo e detectam vapores cinzentos entre as raízes.',
+      rescueAndStabilization: 'Extração rápida com alça torácica, resfriamento com neve limpa e aplicação de compressa fria de musgo esfagno estéril.',
+      icon: '🔥🪵',
+      color: '#ea580c'
+    };
+
+    if (ht === 'drunken_forest_tree_fall_toppling') {
+      hazard = {
+        hazardTitle: 'Tombamento em Efeito Dominó de Floresta Bêbada',
+        saveDC: 14,
+        saveType: 'Destreza',
+        borealTaigaRiskAndPeat: 'Lariços e abetos gigantes desestabilizados pelo desgelo do permafrost que desabam em cadeia durante ventanias; 2d8 de concussão e soterramento por ramagens.',
+        pioneerMitigation: 'Avaliação visual de inclinação de troncos e desvio preventivo de clareiras com árvores vergadas em ângulos agudos.',
+        rescueAndStabilization: 'Desobstrução com machados de lenhador de duas mãos e imobilização de torsões com talas rígidas de pinho.',
+        icon: '🌲⚠️',
+        color: '#16a34a'
+      };
+    } else if (ht === 'resin_crust_toxic_smoke_pocket') {
+      hazard = {
+        hazardTitle: 'Bolsão de Fumaça Asfixiante de Resina de Abeto',
+        saveDC: 13,
+        saveType: 'Constituição',
+        borealTaigaRiskAndPeat: 'Gás acre e denso liberado por queima subterrânea sem chama de depósitos de terebintina e resina fóssil; tosse paralisante e cegueira lacrimejante.',
+        pioneerMitigation: 'Uso de lenços embebidos em gordura de foca e avanço rápido a favor do vento predominante.',
+        rescueAndStabilization: 'Inalação de vapores de eucalipto silvestre e lavagem de olhos com soro límpido de degelo.',
+        icon: '💨🌲',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'hidden_bog_deadfall_punji_trap') {
+      hazard = {
+        hazardTitle: 'Armadilha de Galhos Aguçados em Brejo de Turfa',
+        saveDC: 14,
+        saveType: 'Destreza',
+        borealTaigaRiskAndPeat: 'Troncos partidos pontiagudos submersos na lama de turfa gélida que empalam calçados e canelas; 2d6 perfurante e risco de infecção fúngica profunda.',
+        pioneerMitigation: 'Passos calculados com bastões de marcha largos e perneiras de couro espesso com forro de placa de chumbo leve.',
+        rescueAndStabilization: 'Lavagem imediata com tintura alcoólica de zimbro e sutura cirúrgica estéril.',
+        icon: '🪵🩸',
+        color: '#dc2626'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      borealTaigaRiskAndPeat: hazard.borealTaigaRiskAndPeat,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Taiga Boreal e Fogos Subterrâneos) / PHB p. 182-183 (Marcha Florestal) / XGE p. 78-83 (Sobrevivência)'
+    };
+  }
+
+  // === calcCampBorealTaigaLarchPlatformAndFirebreak (Decks em Coníferas, Trincheiras e Lareiras - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampBorealTaigaLarchPlatformAndFirebreak(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'taiga').toLowerCase();
+    var dt = (defenseType || 'high_branch_larch_deck_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Deck Suspenso em Troncos Sólidos de Lariço',
+      taigaAnchorageAndPeatSafety: 'Estrado suspenso a 3 metros do solo amarrado com cabos de cânhamo em três coníferas sadias; isola a comitiva do solo úmido e de predadores terrestres.',
+      fireShieldingAndCampSecurity: 'Totalmente protegido contra incêndios subterrâneos rasteiros e invasões noturnas de ursos pardos e matilhas de lobos boreais.',
+      campRestAndSafetyGuards: 'Permite sono longo aquecido e seco para os membros do grupo com campo de vigilância sobre a copa.',
+      icon: '🌲⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'mineral_firebreak_gravel_trench') {
+      tech = {
+        defenseTitle: 'Trincheira de Isolamento Mineral com Cascalho de Rio',
+        taigaAnchorageAndPeatSafety: 'Vala circular escavada até o leito de argila incombustível preenchida com pedregulhos lavados que cerca a área da fogueira.',
+        fireShieldingAndCampSecurity: 'Impede terminantemente que brasas penetrem na turfa e deflagrem incêndios subterrâneos imperceptíveis sob as barracas.',
+        campRestAndSafetyGuards: 'Garante que o fogo do acampamento permaneça aceso com segurança inabalável durante toda a noite.',
+        icon: '⛏️🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'stone_reflector_radiant_hearth') {
+      tech = {
+        defenseTitle: 'Lareira de Pedras Secas com Anteparo Refletor de Calor',
+        taigaAnchorageAndPeatSafety: 'Paredão semicircular de lajes de granito que espelha o calor radiante para o interior do abrigo suspenso.',
+        fireShieldingAndCampSecurity: 'Reduz o consumo de lenha em 50% e evita rajadas de faíscas sopradas pelo vento polar.',
+        campRestAndSafetyGuards: 'Mantém o bivaque a uma temperatura amena constante mesmo sob frio congelante externo.',
+        icon: '🧱🔥',
+        color: '#f97316'
+      };
+    } else if (dt === 'conifer_pitch_impregnated_tarpaulin') {
+      tech = {
+        defenseTitle: 'Lona Coberta com Cera de Resina de Abeto Hidrorrepelente',
+        taigaAnchorageAndPeatSafety: 'Tenda impermeabilizada com resina vegetal refinada e cera de abelha que escorrega neve pesada sem acumular peso.',
+        fireShieldingAndCampSecurity: 'Bloqueia 100% da chuva congelante e rajadas de vento úmido que poderiam encharcar os sacos de dormir.',
+        campRestAndSafetyGuards: 'Assegura ambiente interno seco, isolado e acolhedor para a comitiva.',
+        icon: '🏕️💧',
+        color: '#06b6d4'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      taigaAnchorageAndPeatSafety: tech.taigaAnchorageAndPeatSafety,
+      fireShieldingAndCampSecurity: tech.fireShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Florestas Boreais) / PHB p. 150 (Kits de Aventureiro) / XGE p. 78-83 (Carpintaria e Alvenaria)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -18216,6 +18340,8 @@
     calcCampAbyssalCenoteShelfBivouacAndCableBridge: calcCampAbyssalCenoteShelfBivouacAndCableBridge,
     calcWildernessPermafrostAndPenitenteHazard: calcWildernessPermafrostAndPenitenteHazard,
     calcCampPermafrostIsothermalBivouacAndMelterStation: calcCampPermafrostIsothermalBivouacAndMelterStation,
+    calcWildernessBorealTaigaAndPeatHazard: calcWildernessBorealTaigaAndPeatHazard,
+    calcCampBorealTaigaLarchPlatformAndFirebreak: calcCampBorealTaigaLarchPlatformAndFirebreak,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
