@@ -17857,6 +17857,130 @@
     };
   }
 
+  // === calcWildernessGeyserBasinAndAcidPoolHazard (Bacias Hidrotermais, Piscinas de Ácido e Terraços de Sílica - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessGeyserBasinAndAcidPoolHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var ht = (hazardType || 'geyser_superheated_steam_eruption').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Erupção Hidrotermal Superaquecida com Coluna de Água e Vapor',
+      saveDC: 15,
+      saveType: 'Destreza',
+      geyserBasinRiskAndAcid: 'Coluna explosiva de água fervente a 100°C e vapor pressurizado que irrompe repentinamente de conduto oculto a 60 metros de altura; escaldamento violento com 4d6 de dano de fogo e choque térmico (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores identificam orifícios borbulhantes por ressonância acústica e respeitam perímetro de segurança de 30 metros ao redor de cones de sílica.',
+      rescueAndStabilization: 'Resgate com varas telescópicas de agarre rápido, remoção imediata de couros escaldados e aplicação de bálsamo de confrei e própolis.',
+      icon: '♨️🔥',
+      color: '#dc2626'
+    };
+
+    if (ht === 'sulfuric_acid_pool_crust_collapse') {
+      hazard = {
+        hazardTitle: 'Ruptura de Crosta Frágil sobre Piscina de Ácido Sulfúrico',
+        saveDC: 14,
+        saveType: 'Destreza',
+        geyserBasinRiskAndAcid: 'Delgada camada de enxofre cristalizado de 2 centímetros ocultando caldeira de água ácida fervente com pH 2; colapso sob a marcha com 3d6 de dano de ácido e destruição de calçados.',
+        pioneerMitigation: 'Sondagem sistemática com ponteiras de ferro temperado e travessia exclusivamente por cristas espessas de rocha ígnea consolidada.',
+        rescueAndStabilization: 'Içamento por corda dupla e neutralização química imediata da área atingida com banho concentrado de pasta de cal e cinzas vegetais.',
+        icon: '🧪⚠️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'lethal_hydrogen_sulfide_gas_pocket') {
+      hazard = {
+        hazardTitle: 'Bolsão de Gás Sulfídrico Asfixiante em Depressão Cárstica',
+        saveDC: 14,
+        saveType: 'Constituição',
+        geyserBasinRiskAndAcid: 'Gás sulfídrico mais pesado que o ar acumulado em baixios sem vento; paralisia olfativa imediata, tosse sufocante, náusea aguda e risco de asfixia química.',
+        pioneerMitigation: 'Sentinelas observam a ausência total de insetos e utilizam tochas indicadoras que mudam de cor ou se apagam na presença do bolsão.',
+        rescueAndStabilization: 'Arrasto dos desacordados para cumes arejados a montante do vento e reanimação com inalação de vapores de vinagre e folhas de hortelã.',
+        icon: '🌫️☣️',
+        color: '#b45309'
+      };
+    } else if (ht === 'sinter_terrace_slick_silica_fall') {
+      hazard = {
+        hazardTitle: 'Escorregão em Terraço Silicoso com Bordas de Calcedônia',
+        saveDC: 13,
+        saveType: 'Destreza',
+        geyserBasinRiskAndAcid: 'Terraços escalonados de sílica vítrea molhada com bordas afiadas como lâminas de vidro; escorregão descontrolado com lacerações profundas em pernas e mãos.',
+        pioneerMitigation: 'Marcha com solados de sola de pneu ou couro rugoso cravado com cravos de bronze e apoio contínuo em bordões de ponta chata.',
+        rescueAndStabilization: 'Sutura provisória com fios de seda cirúrgica esterilizada e compressas estancadoras de pó de casca de carvalho.',
+        icon: '💎🩸',
+        color: '#0891b2'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      geyserBasinRiskAndAcid: hazard.geyserBasinRiskAndAcid,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Terrenos Vulcânicos e Hidrotermais) / PHB p. 182-183 (Marcha em Terreno Hostil) / XGE p. 78-83 (Geomorfologia Hidrotermal e Vulcânica)'
+    };
+  }
+
+  // === calcCampGeyserBasinAndAcidPoolStation (Bivaques Térmicos de Sílica, Destiladores e Trincheiras Alcalinas - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampGeyserBasinAndAcidPoolStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var dt = (defenseType || 'sinter_plateau_thermal_radiant_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Platô de Sílica com Calor Radiante Natural',
+      geyserBasinAnchorageAndSilicaSafety: 'Plataforma maciça de travertino silicoso a 25°C constante aquecida por condutividade geotérmica profunda; solo seco que dispensa o acendimento de fogueiras em noites gélidas.',
+      acidShieldingAndCampSecurity: 'Posicionada 8 metros acima do nível das lagoas cáusticas e protegida de jatos de vapor por barreiras de blocos de rocha sinterizada.',
+      campRestAndSafetyGuards: 'Assegura sono longo revigorante, aquecido e sem umidade para os membros da comitiva mesmo sob geada exterior severa.',
+      icon: '♨️⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'steam_vent_condenser_distiller_station') {
+      tech = {
+        defenseTitle: 'Destilador de Chaminé Vulcânica com Serpentina Cerâmica',
+        geyserBasinAnchorageAndSilicaSafety: 'Campânula de ferro fundido montada sobre fenda de vapor limpo conectada a tubo espiral de barro resfriado em água corrente.',
+        acidShieldingAndCampSecurity: 'Coleta 15 litros diários de água destilada mineral pura livre de sulfatos e metais pesados.',
+        campRestAndSafetyGuards: 'Garante o reabastecimento total dos cantis da comitiva em região onde toda água superficial é ácida e letal.',
+        icon: '🏺💧',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'alkaline_lime_neutralizing_perimeter') {
+      tech = {
+        defenseTitle: 'Trincheira Periférica com Leito de Cal Neutralizador',
+        geyserBasinAnchorageAndSilicaSafety: 'Valeta circular ao redor das tendas preenchida com cal virgem e cinzas de fogueira para reagir quimicamente com emanações ácidas rasteiras.',
+        acidShieldingAndCampSecurity: 'Impede que névoas ácidas e vapores corrosivos penetrem no interior dos abrigos durante a noite.',
+        campRestAndSafetyGuards: 'Protege a respiração e os olhos dos exploradores de irritações e tosse crônica durante o repouso.',
+        icon: '🛡️🧪',
+        color: '#6366f1'
+      };
+    } else if (dt === 'elevated_silica_ridge_breeze_watchtower') {
+      tech = {
+        defenseTitle: 'Posto Sentinela em Crista Silicosa a Barlavento',
+        geyserBasinAnchorageAndSilicaSafety: 'Plataforma de vigília montada sobre agulha sólida de sílica onde a brisa dominante afasta continuamente as plumas de fumaça sulfurosa.',
+        acidShieldingAndCampSecurity: 'Proporciona visibilidade irrestrita de toda a bacia de gêiseres sem risco de asfixia por gás sulfídrico.',
+        campRestAndSafetyGuards: 'Permite que as sentinelas mantenham vigilância atenta sem fadiga respiratória.',
+        icon: '🗼🛡️',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      geyserBasinAnchorageAndSilicaSafety: tech.geyserBasinAnchorageAndSilicaSafety,
+      acidShieldingAndCampSecurity: tech.acidShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Zonas Geotérmicas) / PHB p. 150 (Kits de Exploração Vulcânica) / XGE p. 78-83 (Engenharia Hidrotermal e Destilação)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -19728,6 +19852,8 @@
     calcCampRiparianGalleryAndBankStation: calcCampRiparianGalleryAndBankStation,
     calcWildernessStarDuneAndGassiHazard: calcWildernessStarDuneAndGassiHazard,
     calcCampStarDuneAndGassiStation: calcCampStarDuneAndGassiStation,
+    calcWildernessGeyserBasinAndAcidPoolHazard: calcWildernessGeyserBasinAndAcidPoolHazard,
+    calcCampGeyserBasinAndAcidPoolStation: calcCampGeyserBasinAndAcidPoolStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,

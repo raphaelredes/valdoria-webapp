@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T11:28:39Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T11:32:03Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessGeyserBasinAndAcidPoolHazard) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var gy = CartShared.calcWildernessGeyserBasinAndAcidPoolHazard(bKey, 'geyser_superheated_steam_eruption');
+        return '<div class="clp-geyser-basin-card" style="margin:4px 0 6px;text-align:left;background:rgba(32,20,20,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(220,38,38,0.3);font-size:8px;color:#fee2e2;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + gy.color + ';margin-bottom:2px;">' + gy.icon + ' ' + gy.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Gêiseres e Piscinas Ácidas:</b> ' + gy.geyserBasinRiskAndAcid + ' (CD ' + gy.saveDC + ' [' + gy.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fca5a5;margin-top:1px;">• <b>Mitigação:</b> ' + gy.pioneerMitigation + ' · <i>Estabilização: ' + gy.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampGeyserBasinAndAcidPoolStation) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var cp = CartShared.calcCampGeyserBasinAndAcidPoolStation(bKey, 'sinter_plateau_thermal_radiant_bivouac');
+        return '<div class="clp-geyser-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,34,28,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#ecfdf5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Platô Térmico:</b> ' + cp.geyserBasinAnchorageAndSilicaSafety + ' · <b>Proteção:</b> ' + cp.acidShieldingAndCampSecurity + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){
