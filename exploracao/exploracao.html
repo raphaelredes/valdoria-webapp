@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T15:05:38Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T15:08:46Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessCoastalRestingaSwaleHazard) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var cr = CartShared.calcWildernessCoastalRestingaSwaleHazard(bKey, 'restinga_thorny_thicket_tangle_laceration');
+        return '<div class="clp-restinga-swale-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,32,24,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(22,163,74,0.35);font-size:8px;color:#dcfce7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cr.color + ';margin-bottom:2px;">' + cr.icon + ' ' + cr.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Restingas e Brejos Salobros:</b> ' + cr.restingaAndSwaleRisk + ' (CD ' + cr.saveDC + ' [' + cr.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bbf7d0;margin-top:1px;">• <b>Mitigação:</b> ' + cr.pioneerMitigation + ' · <i>Estabilização: ' + cr.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampCoastalRestingaSwaleStation) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var cp = CartShared.calcCampCoastalRestingaSwaleStation(bKey, 'stabilized_sand_ridge_crest_trench_bivouac');
+        return '<div class="clp-restinga-swale-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,28,20,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(21,128,61,0.3);font-size:8px;color:#dcfce7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Crista Arenosa:</b> ' + cp.restingaAndCampSafety + ' · <b>Defesa:</b> ' + cp.swaleMoatAndBromeliadCatchment + '</div>'
+          + '  <div style="font-size:7.5px;color:#86efac;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

@@ -20575,6 +20575,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 165: RESTINGAS ARBUSTIVAS LITORÂNEAS, CORDÕES ARENOSOS E BREJOS SALOBROS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessCoastalRestingaSwaleHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'restinga_thorny_thicket_tangle_laceration').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Emaranhado Espinhoso de Restinga Arbustiva com Lacerações por Cactos',
+      saveDC: 15,
+      saveType: 'Destreza',
+      restingaAndSwaleRisk: 'Mata fechada de restinga sobre areia solta com cactos colunares e bromélias com espilhos recurvados; tropeços no terreno fofo precipitam aventureiros contra touceiras pontiagudas causando 2d8 de dano perfurante e sangramento lacerante (DMG p. 110, 246).',
+      pioneerMitigation: 'Batedores abrem caminho com podões curtos e usam perneiras de couro espesso com reforço frontal de lona encerada impermeável.',
+      rescueAndStabilization: 'Extração de espinhos com pinças afiadas de cobre, assepsia com óleo de copaíba e curativo compressivo com folhas de algodãozeiro silvestre.',
+      icon: '🌵🏖️',
+      color: '#15803d'
+    };
+
+    if (ht === 'brackish_swale_alkaline_toxic_brine') {
+      hazard = {
+        hazardTitle: 'Ingestão Acidental de Salmoura Alcalina Tóxica em Brejo Intercordão',
+        saveDC: 15,
+        saveType: 'Constituição',
+        restingaAndSwaleRisk: 'Lagoa salobra estagnada entre cordões arenosos saturada de cloretos, sulfatos e cianobactérias; o contato com mucosas e ingestão inadvertida induz vômitos imediatos, queimação estomacal e 1 nível de exaustão por desidratação osmótica (DMG p. 111; PHB p. 185).',
+        pioneerMitigation: 'Uso de canudos de bambu com carvão ativado e testes de salinidade com reagentes químicos antes de qualquer coleta.',
+        rescueAndStabilization: 'Ingestão imediata de água doce potável com argila neutralizante e repouso forçado sob sombra fresca ventilada.',
+        icon: '⚠️🧪',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'sand_ridge_solar_glare_photokeratitis') {
+      hazard = {
+        hazardTitle: 'Reflexão Solar Ofuscante em Areia Quartzosa de Cordão Litorâneo',
+        saveDC: 14,
+        saveType: 'Constituição',
+        restingaAndSwaleRisk: 'Radiação solar incidente refratada em 360 graus por areias brancas de quartzo puro; provoca dor ocular lancinante, conjuntivite actínica e desvantagem em testes de Percepção visual por 2 horas (PHB p. 182-183).',
+        pioneerMitigation: 'Uso de faixas oculares de linho escurecido com carvão vegetal e aplicação de pigmento negro de fuligem sob os olhos.',
+        rescueAndStabilization: 'Descanso com vendas umedecidas em infusão de folhas de camomila litorânea e abrigo total contra a luminosidade.',
+        icon: '☀️🏖️',
+        color: '#eab308'
+      };
+    } else if (ht === 'coastal_salt_spray_gear_corrosion_jam') {
+      hazard = {
+        hazardTitle: 'Aerossol Marinho Corrosivo e Travamento de Engrenagens de Armadura',
+        saveDC: 14,
+        saveType: 'Destreza',
+        restingaAndSwaleRisk: 'Névoa salina densa carregada pelo vento marinho que deposita crostas salinas ácidas sobre metais e mecanismos delicados; emperra articulações de placas metálicas e impõe penalidade de -1 em testes de ataque até a próxima manutenção.',
+        pioneerMitigation: 'Aplicação periódica de cera de abelha misturada com graxa animal em todas as lâminas, cotas de malha e fivelas.',
+        rescueAndStabilization: 'Lavagem rápida com água doce destilada, secagem ao fogo brando e polimento com estopa embebida em banha mineral.',
+        icon: '🌊🛡️',
+        color: '#0284c7'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampCoastalRestingaSwaleStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'stabilized_sand_ridge_crest_trench_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Crista de Cordão Arenoso Estabilizado com Esteiras de Palha',
+      restingaAndCampSafety: 'Acampamento montado no cume do cordão arenoso mais elevado e antigo, com piso forrado por esteiras de palha entrelaçada que eliminam o contato com a areia solta e facilitam a drenagem pluvial.',
+      swaleMoatAndBromeliadCatchment: 'A elevação do cume afasta a comitiva da umidade e insetos dos brejos baixos, canalizando brisas marinhas frescas que mantêm as tendas arejadas.',
+      campRestAndSafetyGuards: 'Garante repouso longo calmo, seguro e revigorante para todos os membros do grupo, com campo de visão desobstruído sobre a planície litorânea.',
+      icon: '⛺🏖️',
+      color: '#15803d'
+    };
+
+    if (dt === 'woven_myrtaceae_thicket_palisade_windbreak') {
+      tech = {
+        defenseTitle: 'Paliçada de Feixes Vivos de Myrtaceae e Galhos Entrelaçados de Restinga',
+        restingaAndCampSafety: 'Muralha perimétrica espessa de 1,7 metro de altura feita com arbustos lenhosos da restinga fincados na areia e atados com fibras vegetais, formando anteparo intransponível contra ventanias e feras.',
+        swaleMoatAndBromeliadCatchment: 'Concede cobertura total (+5 na CA) contra projéteis e amortece o impacto de rajadas carregadas de areia marinha.',
+        campRestAndSafetyGuards: 'Assegura sono ininterrupto e vigília protegida para as sentinelas durante as rondas noturnas.',
+        icon: '🛡️🌿',
+        color: '#166534'
+      };
+    } else if (dt === 'giant_tank_bromeliad_rainwater_reservoir') {
+      tech = {
+        defenseTitle: 'Coletor de Água Pura em Tanques de Bromélias Gigantes com Filtro de Tecido',
+        restingaAndCampSafety: 'Captação sustentável de água límpida e potável acumulada nas rosetas de bromélias gigantes da restinga (Vriesea), esterilizada por filtragem com pano de linho e fervura suave.',
+        swaleMoatAndBromeliadCatchment: 'Fornece 40 litros diários de água doce cristalina de excelente sabor, garantindo a autonomia hídrica da comitiva na orla árida.',
+        campRestAndSafetyGuards: 'Elimina o risco de desidratação e intoxicação salina, restabelecendo as forças e o vigor de todos os aventureiros.',
+        icon: '💧🍍',
+        color: '#0284c7'
+      };
+    } else if (dt === 'swale_perimeter_tripwire_shell_rattle_alarm') {
+      tech = {
+        defenseTitle: 'Cordão de Alarme com Fios de Tensão e Chocalhos de Conchas Marinhas',
+        restingaAndCampSafety: 'Linhas de fibra vegetal camufladas entre a vegetação rasteira conectadas a conchas perfuradas de moluscos que produzem estalidos sonoros claros ao menor toque.',
+        swaleMoatAndBromeliadCatchment: 'Alerta precoce a 40 metros de distância eliminando qualquer possibilidade de ataque surpresa nas trevas da restinga.',
+        campRestAndSafetyGuards: 'Proporciona tranquilidade mental e descanso completo para a comitiva com vigilância automatizada de alta precisão.',
+        icon: '🔔🐚',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 164: PLATÔS CÁRSTICOS ALPINOS FRATURADOS (LAPIAZ) E GALERIAS GLACIOCÁRSTICAS (D&D 5e)
   // =========================================================================
 
@@ -24938,6 +25042,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessCoastalRestingaSwaleHazard: calcWildernessCoastalRestingaSwaleHazard,
+    calcCampCoastalRestingaSwaleStation: calcCampCoastalRestingaSwaleStation,
     calcWildernessAlpineLapiesIceShaftHazard: calcWildernessAlpineLapiesIceShaftHazard,
     calcCampAlpineLapiesIceShaftStation: calcCampAlpineLapiesIceShaftStation,
     calcWildernessSlotCanyonFlashFloodHazard: calcWildernessSlotCanyonFlashFloodHazard,
