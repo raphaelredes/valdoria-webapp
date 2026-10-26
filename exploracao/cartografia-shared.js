@@ -20578,6 +20578,110 @@
   // FASE 172: CAMPOS FÓSSEIS DE YARDANGS EM ARGILITO EÓLICO E CORREDORES DE VENTO (D&D 5e)
   // =========================================================================
 
+  // =========================================================================
+  // FASE 173: PÂNTANOS SALGADOS E MARISMAS DE MARÉ TEMPERADA COM ESTEIRAS DE ESPARTINA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessTidalSaltMarshHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'incoming_spring_tide_mudflat_stranding').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Repiquete Repentino de Maré Viva com Aprisionamento em Vaza Móvel de 1,8m',
+      saveDC: 15,
+      saveType: 'Força',
+      marshAndTidalRisk: 'Maré de sizígia avança rapidamente pelos canais sinuosos da marisma inundando os flats de vaza a 25 km/h; a lama viscosa retém as pernas e botas dos exploradores enquanto a lâmina d\'água sobe 1,8 metro em minutos, impondo risco de afogamento e 3d8 de concussão por impacto de detritos flutuantes e hipotermia estuarina (DMG p. 110, 246-247).',
+      pioneerMitigation: 'Uso de raquetes de lama de ripas leves de vime que distribuem o peso corporal e marcha rigorosa sincronizada com a tábua de marés local.',
+      rescueAndStabilization: 'Lançamento de cabo flutuante amarrado a barris estanque e alavanca com varas de taquara para desatarolar os membros da lama.',
+      icon: '🌊🌾',
+      color: '#0284c7'
+    };
+
+    if (ht === 'spartina_root_tussock_concealed_creek_fall') {
+      hazard = {
+        hazardTitle: 'Queda em Canal de Maré Oculto sob Esteira Flutuante de Espartina',
+        saveDC: 15,
+        saveType: 'Destreza',
+        marshAndTidalRisk: 'Esteira densa de capim espartina que cresce sobre a borda erodida de canal de maré de 3 metros formando ponte oca falsa; a vegetação suspensa rompe sob o peso, arremessando o aventureiro na lama lodosa do fundo com correnteza de vazante, causando 3d6 de concussão e risco de torção severa (PHB p. 182-183).',
+        pioneerMitigation: 'Sondagem sistemática de solo a cada passo com vara flexível de freixo e avanço em cordada espaçada de 5 metros.',
+        rescueAndStabilization: 'Puxada imediata pela corda de segurança e fixação de tala de contenção na articulação lesionada com ataduras de linho resinado.',
+        icon: '🌾🕳️',
+        color: '#15803d'
+      };
+    } else if (ht === 'hydrogen_sulfide_anoxic_ooze_burst') {
+      hazard = {
+        hazardTitle: 'Bolsão Anóxico de Gás Sulfídrico sob Lama Negra em Decomposição',
+        saveDC: 14,
+        saveType: 'Constituição',
+        marshAndTidalRisk: 'Rompimento acidental da crosta de lodo anaeróbico que libera nuvem cáustica de gás sulfídrico a alta pressão; induz asfixia imediata, ardor ocular severo e 2d8 de dano de veneno com condição envenenado e tosse convulsiva por 1 hora (DMG p. 110, 257).',
+        pioneerMitigation: 'Uso de máscaras faciais de tecido triplo umedecidas com vinagre aromático e desvio cauteloso de depressões escuras borbulhantes.',
+        rescueAndStabilization: 'Remoção urgente para cume de cordão arenoso a barlavento, lavagem ocular com água doce pura e inalação de vapor balsâmico.',
+        icon: '☠️💨',
+        color: '#854d0e'
+      };
+    } else if (ht === 'submerged_oyster_reef_razor_gash') {
+      hazard = {
+        hazardTitle: 'Banco Submerso de Ostras Silvestres com Lâminas Cortantes de Calcita',
+        saveDC: 14,
+        saveType: 'Destreza',
+        marshAndTidalRisk: 'Travessia a vau em esteiro salgado com bancos densos de ostras serrilhadas encobertas por água túrbida; conchas pontiagudas rasgam perneiras e solas causando lacerações profundas, 3d6 de dano cortante com hemorragia e risco de infecção séptica marinha (PHB p. 182-183).',
+        pioneerMitigation: 'Uso de perneiras reforçadas com lâminas de cortiça endurecida e bambu trançado com avanço cauteloso arrastando as solas no leito.',
+        rescueAndStabilization: 'Lavagem imediata com solução salina esterilizada, sutura com fio cirúrgico e cataplasma antisséptico de iodo e própolis vegetal.',
+        icon: '🦪🩸',
+        color: '#b91c1c'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampTidalSaltMarshStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'chenier_shell_mound_elevated_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Crista de Cordão de Conchas (Chenier) Acima da Preamar',
+      marshAndCampSafety: 'Acampamento assentado em crista fóssil elevada de cascalho calcário e conchas marinhas consolidadas a 3 metros de altura, assegurando base firme, seca e imune ao alagamento das marés vivas.',
+      marshTideBarierAndWaterCistern: 'A crista fóssil funciona como baluarte natural de drenagem rápida contra ventos marítimos úmidos e dissipa a energia das ondas sem erodir o terreno.',
+      campRestAndSafetyGuards: 'Garante repouso longo aquecido, seco e seguro para todos os membros do grupo, com vista panorâmica desimpedida para sentinelas de vigília.',
+      icon: '⛺🐚',
+      color: '#0284c7'
+    };
+
+    if (dt === 'interlocking_driftwood_and_marsh_turf_dyke') {
+      tech = {
+        defenseTitle: 'Dique Baluarte de Troncos de Deriva e Torrões Compactados de Espartina',
+        marshAndCampSafety: 'Paliçada semicircular erguida com troncos trazidos pela maré fincados no solo e travados com blocos densos de turfa radicular fibrosa.',
+        marshTideBarierAndWaterCistern: 'Concede cobertura superior (+5 na CA) contra disparos de projéteis e fecha o perímetro do abrigo contra correntes marinhas e predadores anfíbios.',
+        campRestAndSafetyGuards: 'Assegura sono contínuo sem risco de inundação de barracas e proteção sólida para as sentinelas de guarda.',
+        icon: '🪵🛡️',
+        color: '#166534'
+      };
+    } else if (dt === 'solar_evaporation_pot_and_rain_canvas_still') {
+      tech = {
+        defenseTitle: 'Destilador Solar de Salmoura e Coletor de Chuva em Lona Encerada',
+        marshAndCampSafety: 'Sistema piramidal de calhas inclinadas de tecido impermeável que condensa vapor de água salobra purificando-a em água doce potável.',
+        marshTideBarierAndWaterCistern: 'Gera 40 litros diários de água doce cristalina e cristais de flor de sal preservativa, garantindo a autonomia hídrica da comitiva no litoral.',
+        campRestAndSafetyGuards: 'Elimina a desidratação e o consumo de água salobra infectada, recuperando o vigor e a resistência dos exploradores.',
+        icon: '💧☀️',
+        color: '#0ea5e9'
+      };
+    } else if (dt === 'tidal_channel_submerged_tripwire_bell_float') {
+      tech = {
+        defenseTitle: 'Boias de Alarme com Fios de Tensão Submersos e Guizos de Bronze',
+        marshAndCampSafety: 'Cabos submersos cruzando os esteiros navegáveis conectados a flutuadores de cortiça com sinos suspensos nos mastros do bivaque.',
+        marshTideBarierAndWaterCistern: 'Dispara alarme sonoro instantâneo a 70 metros de distância com a aproximação de botes, canoas ou predadores aquáticos nas trevas da maré noturna.',
+        campRestAndSafetyGuards: 'Assegura sono tranquilo e tranquilidade absoluta com proteção antecipada contra emboscadas anfíbias.',
+        icon: '🔔🌊',
+        color: '#d97706'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessYardangCorridorHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'desert').toLowerCase();
@@ -25770,6 +25874,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessTidalSaltMarshHazard: calcWildernessTidalSaltMarshHazard,
+    calcCampTidalSaltMarshStation: calcCampTidalSaltMarshStation,
     calcWildernessYardangCorridorHazard: calcWildernessYardangCorridorHazard,
     calcCampYardangCorridorStation: calcCampYardangCorridorStation,
     calcWildernessRiparianOxbowLeveeHazard: calcWildernessRiparianOxbowLeveeHazard,
