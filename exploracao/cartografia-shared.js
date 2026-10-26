@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 190: CORDILHEIRAS DE DENTES DE DRAGÃO E PINÁCULOS DE DOLOMITO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessDolomiteSawtoothRidgeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'dolomite_couloir_freeze_thaw_rock_barrage').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Bombardeio de Lascas Dolomíticas em Corredor Alpino (Couloir)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      sawtoothRisk: 'Assim que o sol da manhã atinge os pináculos superiores, o gelo que soldava as fendas da rocha dolomítica derrete e dispara uma metralhadora natural de blocos angulosos que ricocheteiam em altíssima velocidade pela calha do corredor com 3d10 de concussão e cortante (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Subida noturna ou de madrugada enquanto o corredor está congelado e colagem estrita sob as paredes laterais côncavas.',
+      rescueAndStabilization: 'Abrigo imediato sob diedro negativo, estancamento de hemorragias cranianas e descida em rapel assistido.',
+      icon: '🏔️☄️',
+      color: '#f59e0b'
+    };
+
+    if (ht === 'sawtooth_knife_edge_arete_vertigo_gust') {
+      hazard = {
+        hazardTitle: 'Travessia de Crista em Fio de Navalha (Arête) sob Vento Cruzado',
+        saveDC: 15,
+        saveType: 'Destreza',
+        sawtoothRisk: 'Aresta serrilhada de dolomito com menos de 40 centímetros de largura ladeada por abismos verticais de 300 metros; rajadas ascendentes de vento alpino desestabilizam os aventureiros causando queda sobre dentes de rocha com 4d6 de dano cortante/concussão (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Progressão a cavaleiro ou encordamento curto passando a corda em lados alternados dos dentes de pedra (costura de crista).',
+        rescueAndStabilization: 'Contrapeso imediato do companheiro no lado oposto da aresta e içamento por blocante mecânico.',
+        icon: '⛰️🌬️',
+        color: '#d97706'
+      };
+    } else if (ht === 'verglas_black_ice_glaze_chimney_slip') {
+      hazard = {
+        hazardTitle: 'Chaminé Vertical Revestida por Película de Gelo Negro (Verglas)',
+        saveDC: 15,
+        saveType: 'Força',
+        sawtoothRisk: 'Fenda vertical entre duas agulhas de dolomito onde o nevoeiro congelante depositou uma camada milimétrica e invisível de gelo vítreo (verglas) sobre a rocha lisa; as mãos e botas perdem toda a aderência resultando em queda no fundo da chaminé com 3d8 de concussão e 1d6 de frio (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Raspagem prévia das agarras com a lâmina da piqueta e uso de grampos frontais de aço temperado nas botas.',
+        rescueAndStabilization: 'Travamento em oposição de costas e joelhos na fenda e aquecimento das mãos com fricção seca.',
+        icon: '🧊🧗‍♂️',
+        color: '#38bdf8'
+      };
+    } else if (ht === 'lightning_conductor_iron_piton_ridge_strike') {
+      hazard = {
+        hazardTitle: 'Descarga Elétrica de Tempestade nas Agulhas de Dolomito (Fogo de Santelmo)',
+        saveDC: 15,
+        saveType: 'Constituição',
+        sawtoothRisk: 'As torres pontiagudas de dolomito carregam-se de eletricidade estática fazendo armas e pítons zumbirem com faíscas azuladas antes da queda de um raio que percorre as fendas úmidas da rocha com 3d8 de dano elétrico e surdez por 1 hora (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Abandono imediato do topo da crista, afastamento de objetos metálicos a 15 metros e agachamento sobre mochila isolante.',
+        rescueAndStabilization: 'Reanimação cardiorrespiratória imediata e tratamento de queimaduras de arco voltaico nos pontos de contato.',
+        icon: '⚡🏔️',
+        color: '#eab308'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampDolomiteSawtoothRidgeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'hanging_ledge_portaledge_and_cairn_wall_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Cornija Suspensa sob Teto Negativo com Muro de Pedra',
+      sawtoothAndCampSafety: 'Acampamento montado em patamar horizontal protegido por um teto saliente de dolomito maciço de 4 metros e fechado na borda externa por mureta de lajes empilhadas.',
+      sawtoothShieldAndWater: 'Desvia integralmente as pedras e avalanches que despencam das paredes superiores, oferecendo ancoragens triplas em rocha sã.',
+      campRestAndSafetyGuards: 'Permite descanso longo seguro nas grandes altitudes sem risco de queda noturna para a comitiva.',
+      icon: '⛺🏔️',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'couloir_deflection_wedge_and_helmet_net_canopy') {
+      tech = {
+        defenseTitle: 'Cunha Defletora de Blocos e Toldo de Malha Retentora na Encosta',
+        sawtoothAndCampSafety: 'Barreira em formato de proa triangular erguida com blocos pesados de dolomito acima das tendas combinada a rede de corda trançada esticada sobre o abrigo.',
+        sawtoothShieldAndWater: 'Divide e desvia o fluxo de detritos de crioclastia para os lados do bivaque e amortece estilhaços menores.',
+        campRestAndSafetyGuards: 'Preserva a integridade física dos exploradores e do equipamento durante o degelo matinal.',
+        icon: '🛡️🪨',
+        color: '#d97706'
+      };
+    } else if (dt === 'high_alpine_snow_pocket_solar_slate_melter') {
+      tech = {
+        defenseTitle: 'Derretedor Térmico de Neve Alpina sobre Lajes Escuras de Dolomito',
+        sawtoothAndCampSafety: 'Arranjo de placas de rocha escura inclinadas ao sol ou aquecidas por braseiro abrigado que derretem a neve limpa acumulada nas fendas sombreadas da crista.',
+        sawtoothShieldAndWater: 'Canaliza a água de degelo por goteira de couro direto para os cantis sem desperdiçar combustível precioso na altitude.',
+        campRestAndSafetyGuards: 'Evita a desidratação severa do ar rarefeito alpino e mantém bebidas quentes para os turnos de vigília.',
+        icon: '❄️💧',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'ridge_saddle_piton_traverse_guide_rope') {
+      tech = {
+        defenseTitle: 'Corrimão de Corda Fixa com Pítons de Anel no Colo da Crista',
+        sawtoothAndCampSafety: 'Cabo estático de cânhamo encerado fixado a cada 4 metros por grampos cravados no dolomito conectando todas as barracas ao posto de sentinela e à latrina de borda.',
+        sawtoothShieldAndWater: 'Impede que qualquer integrante se desgarre no escuro ou sob nevoeiro denso, além de servir como linha de alarme tátil.',
+        campRestAndSafetyGuards: 'Garante movimentação noturna 100% segura e troca rápida de sentinelas na crista.',
+        icon: '🧗‍♂️🔗',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 189: VALES CÁRSTICOS CEGOS DE RESSURGÊNCIA E CAVERNAS DE SIFÃO (D&D 5e)
   // =========================================================================
 
@@ -27540,6 +27644,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessDolomiteSawtoothRidgeHazard: calcWildernessDolomiteSawtoothRidgeHazard,
+    calcCampDolomiteSawtoothRidgeStation: calcCampDolomiteSawtoothRidgeStation,
     calcWildernessVauclusianSiphonHazard: calcWildernessVauclusianSiphonHazard,
     calcCampVauclusianSiphonStation: calcCampVauclusianSiphonStation,
     calcWildernessCoastalBarrierSpitHazard: calcWildernessCoastalBarrierSpitHazard,
