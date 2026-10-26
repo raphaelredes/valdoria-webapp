@@ -19965,6 +19965,130 @@
     };
   }
 
+  // === calcWildernessTepuiMesaAndChasmHazard (Mesetas de Tepui com Fendas Tectônicas e Cascatas Abissais - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessTepuiMesaAndChasmHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'cloud_shrouded_abyssal_cliff_drop').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Precipício Abissal Oculto por Névoa Densa de Tepui',
+      saveDC: 15,
+      saveType: 'Sabedoria',
+      tepuiMesaAndChasmRisk: 'Borda da meseta tabular cercada por abismo de 800 metros encoberto por névoa orográfica espessa com visibilidade nula além de 1 metro; risco de avanço sobre beiral falso de turfeira flutuante despencando no vazio (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam encordoados a cada 4 metros com linha mestra tensa e sondam o piso com bastões de ponta chata antes de firmar passos.',
+      rescueAndStabilization: 'Tração imediata por contra-peso corporal da comitiva através de corda mestra ancorada em laje de quartzito e respiração ritmada.',
+      icon: '🌫️🕳️',
+      color: '#0284c7'
+    };
+
+    if (ht === 'tepui_updraft_gale_shear') {
+      hazard = {
+        hazardTitle: 'Rajada de Vento Ascendente em Escarpa Vertical',
+        saveDC: 15,
+        saveType: 'Força',
+        tepuiMesaAndChasmRisk: 'Correntes térmicas que sobem a escarpa a mais de 90 km/h ao encontrar o paredão vertical de quartzito, arrancando mochilas e arremessando aventureiros contra pináculos afiados da crista rochosa infligindo 3d8 de concussão.',
+        pioneerMitigation: 'Marcha agachada rente às canaletas estruturais de quartzo com mochilas amarradas a mosquetões fixados na cintura.',
+        rescueAndStabilization: 'Imobilização de contusões torácicas com faixas de linho, curativo de ferimentos lacerados e ancoragem imediata ao solo.',
+        icon: '💨🧗‍♂️',
+        color: '#475569'
+      };
+    } else if (ht === 'carnivorous_bog_mat_breakthrough') {
+      hazard = {
+        hazardTitle: 'Rompimento de Turfeira de Plantas Carnívoras Aquáticas',
+        saveDC: 14,
+        saveType: 'Destreza',
+        tepuiMesaAndChasmRisk: 'Camada de musgo e folhas de droseras gigantes que oculta fendas de 4 metros cheias de água ácida gélida e enzimas digestivas vegetais; queda que queima a pele exposta com 2d6 de dano ácido contínuo e causa perda de tração.',
+        pioneerMitigation: 'Travessia apoiando as botas exclusivamente em afloramentos de blocos de arenito rosa sem vegetação sobrejacente.',
+        rescueAndStabilization: 'Lavagem imediata com água limpa de chuva para neutralizar enzimas ácidas e aplicação de pasta de argila com cânfora.',
+        icon: '🌿🧪',
+        color: '#16a34a'
+      };
+    } else if (ht === 'perpetual_cold_soak_hypothermia') {
+      hazard = {
+        hazardTitle: 'Encharcamento Contínuo por Névoa Gélida de Altitude',
+        saveDC: 14,
+        saveType: 'Constituição',
+        tepuiMesaAndChasmRisk: 'Umidade relativa do ar a 100% combinada com temperatura de 5°C no platô que penetra qualquer vestimenta comum em 30 minutos, provocando tremores espasmódicos incontroláveis e 1 nível de exaustão.',
+        pioneerMitigation: 'Uso de ponchos impermeabilizados com gordura de lontra e camadas internas de lã pura de carneiro da montanha.',
+        rescueAndStabilization: 'Troca por roupas secas no interior de caverna aquecida por brasas e administração de infusão de noz-moscada com mel.',
+        icon: '🌧️🥶',
+        color: '#64748b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      tepuiMesaAndChasmRisk: hazard.tepuiMesaAndChasmRisk,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Mesetas Tabulares e Precipícios Abissais) / PHB p. 182-183 (Marcha sob Névoa de Altitude) / XGE p. 78-83 (Geomorfologia de Tepui e Fendas de Quartzito)'
+    };
+  }
+
+  // === calcCampTepuiMesaAndChasmStation (Bivaques em Cavernas de Cume e Muretas Defletoras - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampTepuiMesaAndChasmStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'quartzite_cave_sanctuary_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Caverna Cárstica de Quartzito no Cume',
+      tepuiMesaAnchorageAndAbyssalSafety: 'Gruta profunda aberta em quartzito rosa milenar com piso plano de seixos lavados e teto sólido; proteção absoluta contra vendavais orográficos e tempestades elétricas no platô.',
+      updraftShieldingAndThermalRetention: 'A entrada estreita em forma de fresta quebra a velocidade do vento e retém o calor gerado no bivaque a estáveis 18°C.',
+      campRestAndSafetyGuards: 'Assegura descanso longo perfeito e aquecido para os membros da comitiva com linha de vida de segurança esticada até a foz da gruta.',
+      icon: '⛺🗿',
+      color: '#0284c7'
+    };
+
+    if (dt === 'updraft_deflector_stone_breastwork') {
+      tech = {
+        defenseTitle: 'Parapeito Defletor de Vento com Lajes de Quartzito',
+        tepuiMesaAnchorageAndAbyssalSafety: 'Mureta curva de blocos de rocha entrelaçados montada à entrada da caverna que desvia o fluxo ascendente de ar para cima do teto da gruta.',
+        updraftShieldingAndThermalRetention: 'Impede que rajadas de spray d\'água pulverizada pela cascata alcancem as mantas e provisões do acampamento.',
+        campRestAndSafetyGuards: 'Permite que a sentinela vigie a aproximação externa em posição seca e protegida do vento cortante.',
+        icon: '🧱🛡️',
+        color: '#475569'
+      };
+    } else if (dt === 'crystal_clear_quartz_cascade_siphon') {
+      tech = {
+        defenseTitle: 'Sifão de Captação em Cascata de Quartzito Puro',
+        tepuiMesaAnchorageAndAbyssalSafety: 'Canaleta de bambu instalada em veio de água cristalina que escorre pelas paredes internas da gruta antes de ser lançada no abismo.',
+        updraftShieldingAndThermalRetention: 'Fornece suprimento inesgotável de água hiper-pura livre de matéria orgânica ou taninos ácidos das turfeiras do platô.',
+        campRestAndSafetyGuards: 'Garante hidratação ideal e facilidade para preparar rações quentes sem expor integrantes ao perigo do precipício.',
+        icon: '💧🏺',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'perimetral_static_lifeline_grid') {
+      tech = {
+        defenseTitle: 'Grade Perimetral de Linhas de Vida com Cabos Estáticos',
+        tepuiMesaAnchorageAndAbyssalSafety: 'Rede de cabos de aço galvanizado ancorada com pítons de expansão nos arredores da caverna conectando o bivaque à área de vigília.',
+        updraftShieldingAndThermalRetention: 'Elimina o risco de quedas acidentais no abismo durante movimentações noturnas sob nevoeiro cerrado.',
+        campRestAndSafetyGuards: 'Permite que sentinelas se desloquem entre postos com mosquetões de engate rápido em total segurança.',
+        icon: '⚓🛡️',
+        color: '#10b981'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      tepuiMesaAnchorageAndAbyssalSafety: tech.tepuiMesaAnchorageAndAbyssalSafety,
+      updraftShieldingAndThermalRetention: tech.updraftShieldingAndThermalRetention,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Cumes de Meseta e Cavernas de Tepui) / PHB p. 150 (Linhas de Vida e Cabos de Segurança) / XGE p. 78-83 (Engenharia de Parapeitos Defletores)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -21870,6 +21994,8 @@
     calcCampSlotCanyonAndArchStation: calcCampSlotCanyonAndArchStation,
     calcWildernessRuiniformSandstoneAndLabyrinthHazard: calcWildernessRuiniformSandstoneAndLabyrinthHazard,
     calcCampRuiniformSandstoneAndLabyrinthStation: calcCampRuiniformSandstoneAndLabyrinthStation,
+    calcWildernessTepuiMesaAndChasmHazard: calcWildernessTepuiMesaAndChasmHazard,
+    calcCampTepuiMesaAndChasmStation: calcCampTepuiMesaAndChasmStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
