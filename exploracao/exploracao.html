@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T05:52:43Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T05:56:29Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessCloudForestAndDrizzleHazard) return '';
+        var bKey = (biome && biome.key) || 'forest';
+        var cf = CartShared.calcWildernessCloudForestAndDrizzleHazard(bKey, 'perpetual_hypothermic_drizzle_soak');
+        return '<div class="clp-cloud-forest-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,28,36,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.3);font-size:8px;color:#f0f9ff;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cf.color + ';margin-bottom:2px;">' + cf.icon + ' ' + cf.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Condensação:</b> ' + cf.cloudForestRiskAndDampness + ' (CD ' + cf.saveDC + ' [' + cf.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Mitigação:</b> ' + cf.pioneerMitigation + ' · <i>Estabilização: ' + cf.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampCloudForestFogHarvesterAndHeatedBedStation) return '';
+        var bKey = (biome && biome.key) || 'forest';
+        var fh = CartShared.calcCampCloudForestFogHarvesterAndHeatedBedStation(bKey, 'hydrophobic_waxed_dome_shelter');
+        return '<div class="clp-fog-harvester-card" style="margin:4px 0 6px;text-align:left;background:rgba(16,36,26,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#ecfdf5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + fh.color + ';margin-bottom:2px;">' + fh.icon + ' ' + fh.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Domo Hidrofóbico:</b> ' + fh.cloudForestAnchorageAndDryness + ' · <b>Ambiente:</b> ' + fh.fogHarvestingAndCampWarmth + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + fh.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

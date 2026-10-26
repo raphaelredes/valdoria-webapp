@@ -14633,6 +14633,130 @@
     };
   }
 
+  // === calcWildernessCloudForestAndDrizzleHazard (Matas Nebulosas de Altitude, Garoa Perpétua e Raízes Úmidas - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessCloudForestAndDrizzleHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var ht = (hazardType || 'perpetual_hypothermic_drizzle_soak').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Garoa Gélida Perpétua e Umidade Penetrante',
+      saveDC: 14,
+      saveType: 'Constituição',
+      cloudForestRiskAndDampness: 'Condensação constante a 4°C que encharca roupas de lã e linho em 30 minutos; causa 1 nível de exaustão e desvantagem em testes de iniciativa por dormência muscular (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores aplicam banha de marmota e cera de abelha nas capas externas e trocam meias a cada 4 horas de marcha.',
+      rescueAndStabilization: 'Troca rápida por trajes secos de lã fervida selada em bolsas estanques e caldo quente de raiz de gengibre.',
+      icon: '🌫️🌧️',
+      color: '#38bdf8'
+    };
+
+    if (ht === 'moss_slick_gnarled_root_fall') {
+      hazard = {
+        hazardTitle: 'Queda em Raízes Retorcidas com Musgo Escorregadio',
+        saveDC: 13,
+        saveType: 'Destreza',
+        cloudForestRiskAndDampness: 'Emaranhado de raízes aéreas de árvores anãs recobertas de limo esmeralda úmido; escorregão causando 2d6 de concussão e torção de tornozelo.',
+        pioneerMitigation: 'Avanço com bastões de caminhada com ponteira de tungstênio e fixação de passos apenas nas cavidades de casca.',
+        rescueAndStabilization: 'Enfaixamento de articulações com tiras elásticas de couro cru e massagem com bálsamo de copaíba.',
+        icon: '🪵🌿',
+        color: '#22c55e'
+      };
+    } else if (ht === 'disorienting_whiteout_fog_haze') {
+      hazard = {
+        hazardTitle: 'Névoa Leitosa Rasteira e Desorientação Acústica',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        cloudForestRiskAndDampness: 'Cerração espessa que reduz a visibilidade a 2 metros e absorve sons de passos; risco de dispersão da comitiva e desvio de 1d4 milhas.',
+        pioneerMitigation: 'Comitiva marcha ligada por cabo guia de cânhamo de 15 metros com apitos de osso emitindo sinais rítmicos a cada 10 passos.',
+        rescueAndStabilization: 'Toque prolongado de berrante de campanha e agrupamento defensivo ao redor de tronco de árvore-mestra.',
+        icon: '🌫️🔔',
+        color: '#94a3b8'
+      };
+    } else if (ht === 'spore_laden_epiphyte_pulmonary_chill') {
+      hazard = {
+        hazardTitle: 'Ar Asfixiante com Esporos de Epífitas Encharcadas',
+        saveDC: 13,
+        saveType: 'Constituição',
+        cloudForestRiskAndDampness: 'Bruma saturada de esporos de musgos e liquens antigos suspensos; tosse asmática convulsiva e perda de concentração de magias ativas.',
+        pioneerMitigation: 'Uso de máscaras faciais de linho triplo impregnadas com essência de hortelã e cânfora silvestre.',
+        rescueAndStabilization: 'Inalação de vapor quente com folhas de eucalipto sobre pedras aquecidas e xarope de mel de urze.',
+        icon: '🍄🫁',
+        color: '#a855f7'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      cloudForestRiskAndDampness: hazard.cloudForestRiskAndDampness,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Florestas Nebulosas e Hipotermia por Umidade) / PHB p. 182-183 (Terreno Escorregadio e Salvaguardas)'
+    };
+  }
+
+  // === calcCampCloudForestFogHarvesterAndHeatedBedStation (Domos Hidrofóbicos, Coletores de Nevoeiro e Leitos Aquecidos - DMG p. 111 / XGE p. 78-83 / PHB p. 150) ===
+  function calcCampCloudForestFogHarvesterAndHeatedBedStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var dt = (defenseType || 'hydrophobic_waxed_dome_shelter').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Tenda em Domo de Lona Encerada Hidrofóbica',
+      cloudForestAnchorageAndDryness: 'Armação arqueada flexível de freixo com cobertura dupla de lona impermeabilizada com óleo de linhaça que faz a condensação escorrer para canaletas externas.',
+      fogHarvestingAndCampWarmth: 'Garante interior 100% seco e impermeável mesmo sob cerração gélida de 24 horas ininterruptas.',
+      campRestAndSafetyGuards: 'Permite sono longo revigorante para a comitiva sem risco de hipotermia por roupas úmidas.',
+      icon: '⛺💧',
+      color: '#10b981'
+    };
+
+    if (dt === 'fine_mesh_fog_water_harvester_screen') {
+      tech = {
+        defenseTitle: 'Painel Coletor de Nevoeiro em Malha de Crina Fina',
+        cloudForestAnchorageAndDryness: 'Telas verticais de malha fina esticadas contra o vento da montanha que condensam microgotas de névoa em calhas de bambu.',
+        fogHarvestingAndCampWarmth: 'Produz até 30 litros diários de água destilada cristalina diretamente da cerração sem impurezas do solo.',
+        campRestAndSafetyGuards: 'Supre a hidratação e caldos da comitiva com água puríssima e poupa tempo de fervura dos batedores.',
+        icon: '🕸️💧',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'heated_river_pebble_trench_bed') {
+      tech = {
+        defenseTitle: 'Leito Aquecido por Seixos Fluviais em Trincheira',
+        cloudForestAnchorageAndDryness: 'Canal subterrâneo preenchido com pedras aquecidas na fogueira cobertas por 10 cm de terra seca e esteiras de junco.',
+        fogHarvestingAndCampWarmth: 'Irradia calor suave constante de 28°C por até 8 horas consecutivas sob os sacos de dormir.',
+        campRestAndSafetyGuards: 'Aquece a musculatura dormente dos aventureiros e restaura dados de vida sem fumaça dentro da tenda.',
+        icon: '🪨🔥',
+        color: '#f59e0b'
+      };
+    } else if (dt === 'hanging_clothing_desiccation_rack') {
+      tech = {
+        defenseTitle: 'Armação Dessecadora Suspensa sobre Fogueira Protegida',
+        cloudForestAnchorageAndDryness: 'Grelha de varas de nogueira suspensa a 1,5 metro da lareira com defletor de faíscas de casca verde.',
+        fogHarvestingAndCampWarmth: 'Seca capas, botas e meias da comitiva durante a noite sem queimar os tecidos nem gerar labaredas perigosas.',
+        campRestAndSafetyGuards: 'Garante equipamentos secos e prontos para a jornada da alvorada pelas trilhas nebulosas.',
+        icon: '🪵🧦',
+        color: '#ca8a04'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      cloudForestAnchorageAndDryness: tech.cloudForestAnchorageAndDryness,
+      fogHarvestingAndCampWarmth: tech.fogHarvestingAndCampWarmth,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque em Floresta Anã Nebulosa) / XGE p. 78-83 (Equipamentos de Acampamento e Sobrevivência)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -16452,6 +16576,8 @@
     calcCampSandstoneCanyonCammingStationAndShelter: calcCampSandstoneCanyonCammingStationAndShelter,
     calcWildernessCoastalSpitAndBreakerHazard: calcWildernessCoastalSpitAndBreakerHazard,
     calcCampCoastalSpitPalingAndTidalStation: calcCampCoastalSpitPalingAndTidalStation,
+    calcWildernessCloudForestAndDrizzleHazard: calcWildernessCloudForestAndDrizzleHazard,
+    calcCampCloudForestFogHarvesterAndHeatedBedStation: calcCampCloudForestFogHarvesterAndHeatedBedStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
