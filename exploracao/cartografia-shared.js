@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 227: DUNAS PARABÓLICAS, BACIAS DE DEFLAÇÃO E FLORESTAS FANTASMAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessParabolicBlowoutDuneHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'wind_scoured_blowout_trough_slipface_rotational_slump').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso Rotacional em Talude de Bacia de Deflação (Blowout Bowl)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      parabolicDuneRisk: 'Quando o tapete vegetal que fixa uma duna costeira ou continental se rompe, o vento escava uma profunda cratera em forma de colher (blowout) bordejada por paredões verticais de areia suspensa por raízes mortas em balanço; caminhar próximo à borda subescavada faz a cornija inteira de areia ruir soterrando a comitiva no fundo do funil com 3d6 de concussão e asfixia (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Contornar as bacias de deflação pelos braços laterais baixos consolidados por capim-das-dunas (ammophila).',
+      rescueAndStabilization: 'Desobstrução imediata do rosto do companheiro soterrado com escudos e tração por corda.',
+      icon: '🏖️🌪️',
+      color: '#eab308'
+    };
+
+    if (ht === 'exhumed_snag_ghost_forest_sandblasted_spike_impale') {
+      hazard = {
+        hazardTitle: 'Empalamento em Troncos-Estaca de Floresta Fantasma Exumada pela Areia',
+        saveDC: 15,
+        saveType: 'Destreza',
+        parabolicDuneRisk: 'À medida que o nariz da duna parabólica avança, sua retaguarda exuma os esqueletos de antigas florestas que foram soterradas há séculos e polidas pelo vento com areia até se tornarem lanças verticais de cerne petrificado por resina; escorregar pela face de avalancha lança o aventureiro sobre o paliçado oculto de tocos pontiagudos causando 3d8 perfurante (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Sondar a base da encosta de areia fofa onde pontas escuras de madeira morta afloram antes de descer.',
+        rescueAndStabilization: 'Imobilização sem puxar bruscamente sobre o toco lascado e aplicação de bandagem compressiva.',
+        icon: '🪵🗡️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'interdune_slack_quicksand_perched_water_table_trap') {
+      hazard = {
+        hazardTitle: 'Areia Movediça Hidrostática na Baixada Interdunar (Dune Slack)',
+        saveDC: 15,
+        saveType: 'Força',
+        parabolicDuneRisk: 'O fundo da bacia de deflação é escavado pelo vento exatamente até atingir o lençol freático ascendente; a pressão da água que brota de baixo suspende os grãos de quartzo criando poços circulares de areia movediça cobertos por uma película seca enganosa que engole o explorador até o peito e impõe 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Seguir os rastros de animais leves apenas onde crescem juncos e salgueiros rasteiros enraizados.',
+        rescueAndStabilization: 'Deitar de costas para boiar sobre a areia liquefeita enquanto a comitiva puxa com vara longa.',
+        icon: '🕳️💧',
+        color: '#d97706'
+      };
+    } else if (ht === 'venturi_trough_sand_jet_corrasion_and_marram_razor_cut') {
+      hazard = {
+        hazardTitle: 'Jato Eólico em Efeito Venturi na Calha Parabólica e Folhas-Navalha',
+        saveDC: 14,
+        saveType: 'Constituição',
+        parabolicDuneRisk: 'Os dois braços alongados da duna em U afunilam o vento marítimo ou desértico duplicando sua velocidade no corredor central enquanto as folhas rígidas de sílica do capim-marram chicoteiam a pele e os olhos; marchar contra o funil de vento causa lacerações finas e cegueira por areia com 2d6 cortante (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Subir para a face externa de sotavento de um dos braços da duna fora do corredor de efeito Venturi.',
+        rescueAndStabilization: 'Lavagem ocular com água limpa e proteção facial com capuz fechado.',
+        icon: '🌾💨',
+        color: '#65a30d'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampParabolicBlowoutDuneStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'parabolic_dune_nose_lee_forest_edge_shelter_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque no Sotavento Arborizado à Frente do Nariz da Duna Parabólica',
+      parabolicDuneAndCampSafety: 'Acampamento instalado na mata abrigada imediatamente à frente da crista convexa da duna, onde a muralha de areia bloqueia 100% da tempestade de vento.',
+      parabolicDuneTrenchAndWatch: 'Solo florestal firme, lenha seca abundante e proteção aerodinâmica total.',
+      campRestAndSafetyGuards: 'Garante descanso longo tranquilo e aquecido para todos os membros do grupo.',
+      icon: '⛺🌲',
+      color: '#eab308'
+    };
+
+    if (dt === 'resin_saturated_ghost_tree_heartwood_smokeless_fire') {
+      tech = {
+        defenseTitle: 'Fogueira de Cerne Resinoso de Floresta Fantasma Curada na Areia',
+        parabolicDuneAndCampSafety: 'Os troncos antigos preservados por séculos sem oxigênio sob a duna possuem madeira densa saturada de resina (fatwood) que queima mesmo sob chuva.',
+        parabolicDuneTrenchAndWatch: 'Produz brasa intensa e duradoura com pouquíssima fumaça, mantendo o bivaque aquecido.',
+        campRestAndSafetyGuards: 'Fornece iluminação e calor confiáveis durante toda a vigília.',
+        icon: '🔥🪵',
+        color: '#ea580c'
+      };
+    } else if (dt === 'interdune_slack_willow_filtered_freshwater_seep_well') {
+      tech = {
+        defenseTitle: 'Poço Filtrado por Quartzo na Baixada Úmida Interdunar (Slack Well)',
+        parabolicDuneAndCampSafety: 'Escavação de 40 centímetros junto às raízes de salgueiros-das-dunas na borda firme da baixada interdunar.',
+        parabolicDuneTrenchAndWatch: 'A areia de quartzo da duna filtra a água da chuva até uma pureza cristalina excepcional.',
+        campRestAndSafetyGuards: 'Reabastece todos os cantis da comitiva com rapidez e segurança.',
+        icon: '💧🌿',
+        color: '#0284c7'
+      };
+    } else if (dt === 'trailing_arm_crest_marram_camouflage_observation_post') {
+      tech = {
+        defenseTitle: 'Posto de Observação Camuflado nas Touceiras da Crista do Braço Lateral',
+        parabolicDuneAndCampSafety: 'Sentinela posicionado entre as touceiras altas de capim-das-dunas no topo do braço em U.',
+        parabolicDuneTrenchAndWatch: 'Domina visualmente tanto a bacia interna de deflação quanto os corredores externos sem expor a silhueta contra o céu.',
+        campRestAndSafetyGuards: 'Assegura vigilância de longo alcance para o pernoite do grupo.',
+        icon: '👁️🌾',
+        color: '#65a30d'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 226: CÂNIONS DE LAVAS EM ALMOFADA E BRECHAS DE HIALOCLASTITO (D&D 5e)
   // =========================================================================
 
@@ -31388,6 +31492,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessParabolicBlowoutDuneHazard: calcWildernessParabolicBlowoutDuneHazard,
+    calcCampParabolicBlowoutDuneStation: calcCampParabolicBlowoutDuneStation,
     calcWildernessPillowLavaHyaloclastiteHazard: calcWildernessPillowLavaHyaloclastiteHazard,
     calcCampPillowLavaHyaloclastiteStation: calcCampPillowLavaHyaloclastiteStation,
     calcWildernessTropicalPeatSwampDomeHazard: calcWildernessTropicalPeatSwampDomeHazard,
