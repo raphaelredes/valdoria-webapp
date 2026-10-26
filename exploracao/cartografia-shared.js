@@ -13021,6 +13021,130 @@
     };
   }
 
+  // === calcWildernessDenseForestDeadfallAndAllergenicPollenHazard (Queda de Troncos Podres, Pólen Alucinógeno e Raízes Ocultas - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessDenseForestDeadfallAndAllergenicPollenHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var ht = (hazardType || 'rotten_canopy_deadfall_widowmaker').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda Súbita de Tronco Podre do Dossel (Widowmaker)',
+      saveDC: 14,
+      saveType: 'Destreza',
+      forestDamageAndEntanglement: 'Tronco pesado de 200 kg descolando da copa com o vento; 3d8 de concussão e soterramento sob galhos secos (DMG p. 110).',
+      pioneerMitigation: 'Batedores examinam a copa das árvores em busca de galhos soltos ou fungos necróticos antes de permitir a passagem do grupo.',
+      rescueAndStabilization: 'Alavancagem do tronco com varas de freixo, tração horizontal e aplicação de talas em fraturas.',
+      icon: '🪵🌲',
+      color: '#b45309'
+    };
+
+    if (ht === 'hallucinogenic_forest_pollen_cloud') {
+      hazard = {
+        hazardTitle: 'Névoa de Pólen Alucinógeno e Esporos Dourados',
+        saveDC: 13,
+        saveType: 'Constituição',
+        forestDamageAndEntanglement: 'Pólen denso suspenso em clareiras sem vento; alucinações visuais, 2d6 de dano psíquico/veneno e condição Envenenado.',
+        pioneerMitigation: 'Uso de máscaras de linho embebidas em vinagre ou óleo balsâmico e contorno de clareiras muito floridas.',
+        rescueAndStabilization: 'Infusão desintoxicante de raiz de gengibre selvagem e compressas frias sobre os olhos e fronte.',
+        icon: '🌸🌫️',
+        color: '#d946ef'
+      };
+    } else if (ht === 'snaring_mangrove_root_tripwire') {
+      hazard = {
+        hazardTitle: 'Labirinto de Raízes Retorcidas e Fendas Ocultas',
+        saveDC: 13,
+        saveType: 'Destreza',
+        forestDamageAndEntanglement: 'Maranhado de raízes aéreas sob musgo úmido; queda brusca causando 1d8 de concussão e torção severa no tornozelo.',
+        pioneerMitigation: 'Marcha ritmada com bastões de apoio e perneiras reforçadas com tiras de couro de cervo.',
+        rescueAndStabilization: 'Imobilização da articulação com tala flexível de casca de bétula e massagem com arnica da floresta.',
+        icon: '🌿🥾',
+        color: '#65a30d'
+      };
+    } else if (ht === 'predatory_army_ant_swarm_trail') {
+      hazard = {
+        hazardTitle: 'Coluna de Formigas-Correição Predatórias Carnívoras',
+        saveDC: 13,
+        saveType: 'Destreza',
+        forestDamageAndEntanglement: 'Milhares de mandíbulas afiadas cobrindo o solo; 2d6 de perfuração e ácido com risco de pânico na comitiva.',
+        pioneerMitigation: 'Detecção do farfalhar contínuo no folhiço e contorno por troncos suspensos sem tocar no solo da trilha.',
+        rescueAndStabilization: 'Lavagem rápida com água limpa, dispersão de cinzas frias e bálsamo refrescante nas picadas.',
+        icon: '🐜🍂',
+        color: '#dc2626'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      forestDamageAndEntanglement: hazard.forestDamageAndEntanglement,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Florestas e Queda de Troncos) / PHB p. 182-183 (Asfixia e Terreno Difícil)'
+    };
+  }
+
+  // === calcCampForestCanopyHammockAndDeadfallClearingStation (Redes de Dossel, Desbaste de Galhos e Valetas Protetoras - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampForestCanopyHammockAndDeadfallClearingStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var dt = (defenseType || 'cleared_canopy_safety_perimeter').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Desbaste Preventivo de Galhos Suspensos e Zona Livre',
+      canopySecurityAndElevation: 'Inspeção e remoção de galhos secos da copa acima das barracas antes do assentamento do acampamento.',
+      creatureRepulsionAndInsulation: 'Elimina 100% do risco de esmagamento súbito por queda de madeira morta durante vendavais noturnos.',
+      campRestAndSafetyGuards: 'Garante tranquilidade total aos membros da comitiva durante o repouso sob a copa florestal.',
+      icon: '🪓🌳',
+      color: '#10b981'
+    };
+
+    if (dt === 'treetop_suspended_canvas_hammock_rig') {
+      tech = {
+        defenseTitle: 'Redes Suspensas em Árvores Vigorosas com Toldo Triangular',
+        canopySecurityAndElevation: 'Bivaque elevado a 3 metros do solo ancorado em troncos sadios com fitas largas que não machucam a casca.',
+        creatureRepulsionAndInsulation: 'Mantém os aventureiros completamente isolados de predadores terrestres, fungos e umidade do húmus.',
+        campRestAndSafetyGuards: 'Permite sono longo aquecido e seco sem contato com solo encharcado ou enxames rastejantes.',
+        icon: '🏕️🧗',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'citronella_wood_chip_perimeter_trench') {
+      tech = {
+        defenseTitle: 'Valeta Periférica com Cavacos Aromáticos e Piche Vegetal',
+        canopySecurityAndElevation: 'Sulco contínuo escavado ao redor do acampamento preenchido com lascas de pinho e resina repelente.',
+        creatureRepulsionAndInsulation: 'Barra a passagem de formigas-correição, centopeias gigantes e carrapatos da floresta densa.',
+        campRestAndSafetyGuards: 'Evita picadas noturnas e preserva os suprimentos de viagem intactos na área de cozinha.',
+        icon: '🛡️🌿',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'tree_sap_amber_filtration_and_tallow_station') {
+      tech = {
+        defenseTitle: 'Estação de Calafetagem com Seiva de Pinheiro e Sebo',
+        canopySecurityAndElevation: 'Ponto de fogo seguro para derretimento de resina vegetal e impermeabilização de lonas e botas.',
+        creatureRepulsionAndInsulation: 'Produz tochas resinosas aromáticas que mantêm o perímetro iluminado e afastam feras noturnas.',
+        campRestAndSafetyGuards: 'Mantém as botas e capas dos aventureiros impermeáveis e prontas para a marcha do dia seguinte.',
+        icon: '🍯🔥',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      canopySecurityAndElevation: tech.canopySecurityAndElevation,
+      creatureRepulsionAndInsulation: tech.creatureRepulsionAndInsulation,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque em Floresta) / XGE p. 78 (Equipamento de Acampamento e Ferramentas)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -14814,6 +14938,8 @@
     calcCampDesertThermalTrenchAndReflectiveWall: calcCampDesertThermalTrenchAndReflectiveWall,
     calcWildernessSwampQuicksandAndSporeBloomHazard: calcWildernessSwampQuicksandAndSporeBloomHazard,
     calcCampSwampStiltPlatformAndMudshoeStation: calcCampSwampStiltPlatformAndMudshoeStation,
+    calcWildernessDenseForestDeadfallAndAllergenicPollenHazard: calcWildernessDenseForestDeadfallAndAllergenicPollenHazard,
+    calcCampForestCanopyHammockAndDeadfallClearingStation: calcCampForestCanopyHammockAndDeadfallClearingStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
