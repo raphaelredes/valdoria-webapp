@@ -20575,6 +20575,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 162: BREJOS DE TABOA E SOLOS MOVEDIÇOS ALUVIAS COM ILHAS FLUTUANTES (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessQuakingBogReedHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'quaking_bog_turf_rupture_quagmire_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ruptura de Colchão de Turfa Flutuante com Tragamento em Lodo',
+      saveDC: 15,
+      saveType: 'Destreza',
+      quakingBogAndReedRisk: 'Esteira vegetal flutuante delgada de raízes que se rompe sob o peso da marcha, tragando o explorador em bolsão de lodo movediço e água fria de 5 metros de profundidade com 3d8 de concussão e afundamento rápido (DMG p. 110; PHB p. 183).',
+      pioneerMitigation: 'Batedores avançam com raquetes de pântano alargadas feitas de junco e sondam cada tufo com varas de bambu de 3 metros antes de apoiar o pé.',
+      rescueAndStabilization: 'Lançamento de laço encordoado de esparto, prancha de distribuição de carga estendida e drenagem pulmonar rápida com ervas expectorantes.',
+      icon: '🌾🕳️',
+      color: '#15803d'
+    };
+
+    if (ht === 'methane_pocket_torch_spark_explosion') {
+      hazard = {
+        hazardTitle: 'Detonação de Bolsa de Gás Metano Pantanoso por Tochas a 3 Metros',
+        saveDC: 15,
+        saveType: 'Destreza',
+        quakingBogAndReedRisk: 'Bolhas volumosas de metano fóssil aprisionadas sob a turfa que se rompem com o caminhar e entram em combustão imediata ao contato com tochas ou brasas; provoca labareda em raio de 3 metros com 2d6 de dano de fogo e cegueira por fumaça ácida (DMG p. 110, 246).',
+        pioneerMitigation: 'Uso exclusivo de lanternas estanques de vidro espesso ou bastões de fósforo luminescente frio sem chama aberta na travessia do brejo.',
+        rescueAndStabilization: 'Aplicação rápida de emplastros de polpa de taboa fresca sobre queimaduras e lavagem dos olhos com infusão fria de sabugueiro.',
+        icon: '💥🔥',
+        color: '#dc2626'
+      };
+    } else if (ht === 'cutting_sawgrass_micro_laceration_infection') {
+      hazard = {
+        hazardTitle: 'Lacerações por Capim-Navalha e Farpas Silicificadas de Junco',
+        saveDC: 14,
+        saveType: 'Destreza',
+        quakingBogAndReedRisk: 'Folhas de cortadeira com bordas serrilhadas ricas em sílica que retalham vestes e pele exposta; causam 2d6 de dano cortante e risco de infecção purulenta por bactérias anaeróbicas da lama.',
+        pioneerMitigation: 'Uso de perneiras altas de couro encerado grosso e luvas reforçadas de camurça tratada com sebo repelente.',
+        rescueAndStabilization: 'Cauterização com tintura de própolis e vinagre de brejo, seguida de ataduras limpas com folhas de bardana.',
+        icon: '⚠️🔪',
+        color: '#b45309'
+      };
+    } else if (ht === 'stagnant_bog_fever_miasma_parasites') {
+      hazard = {
+        hazardTitle: 'Febre Palúdica do Brejo e Enxames de Insetos Hematófagos',
+        saveDC: 14,
+        saveType: 'Constituição',
+        quakingBogAndReedRisk: 'Nuvens densas de mosquitos e miasma fétido de matéria vegetal putrefata; picadas incessantes provocam febre intermitente, calafrios e 1 nível de exaustão sem proteção profilática (DMG p. 257; PHB p. 185).',
+        pioneerMitigation: 'Unção corporal com óleo vegetal misturado a cânfora e defumação contínua de resina de cipreste durante a marcha.',
+        rescueAndStabilization: 'Administração de xarope amargo de casca de salgueiro, hidratação copiosa com chá de folhas de menta e repouso coberto.',
+        icon: '🦟☣️',
+        color: '#4d7c0f'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampQuakingBogReedStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'elevated_bamboo_reed_platform_stilt_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Palafita de Bambu com Piso Trançado Elevado a 2 Metros',
+      quakingBogAndCampSafety: 'Acampamento assentado em estacas longas cravadas até o substrato argiloso firme sob o lodo, mantendo as tendas secas e totalmente isoladas da umidade e dos répteis aquáticos.',
+      bogMoatAndReedFumeRepellent: 'O bolsão de água rasa sob a plataforma funciona como fosso natural contra predadores terrestres, com piso permeável que evita acúmulo de chuvas.',
+      campRestAndSafetyGuards: 'Garante sono profundo calmo, seguro e sem sobressaltos para todos os membros do grupo, com visão ampla das redondezas do taboal.',
+      icon: '⛺🌾',
+      color: '#15803d'
+    };
+
+    if (dt === 'anchored_floating_mat_perimeter_crib_bastion') {
+      tech = {
+        defenseTitle: 'Paliçada de Feixes de Taboa Seca Amarrados com Raízes Vivas de Salgueiro',
+        quakingBogAndCampSafety: 'Barreira perimétrica flutuante de 1,8 metro de altura feita com fardos densos de taboa comprimida que amortece impactos e bloqueia investidas vindas das águas.',
+        bogMoatAndReedFumeRepellent: 'Concede cobertura total (+5 na CA) contra ataques à distância e freia botes ou monstros semiaquáticos com bônus defensivo superior.',
+        campRestAndSafetyGuards: 'Permite que as sentinelas mantenham vigília noturna protegidas e alertas sem risco de afogamento acidental.',
+        icon: '🛡️🌾',
+        color: '#166534'
+      };
+    } else if (dt === 'deep_bog_sand_filter_and_boiled_rhizome_pot') {
+      tech = {
+        defenseTitle: 'Filtro Aluvial de Carvão e Caldeirão Coletor de Amido de Taboa',
+        quakingBogAndCampSafety: 'Sistema de purificação por camadas de areia fluvial limpa, cascalho miúdo e carvão vegetal que extrai água pura e cristalina das profundezas da turfa.',
+        bogMoatAndReedFumeRepellent: 'Fornece 50 litros diários de água doce potável e fécula nutritiva de rizomas cozidos para revigorar as forças de toda a expedição.',
+        campRestAndSafetyGuards: 'Elimina cólicas intestinais, febres e carências nutricionais, restaurando completamente o vigor dos membros do grupo.',
+        icon: '🍲💧',
+        color: '#0284c7'
+      };
+    } else if (dt === 'tripwire_reed_rattle_perimeter_cord_alarm') {
+      tech = {
+        defenseTitle: 'Cordão Perimétrico com Guizos de Vime e Chocalhos de Conchas do Brejo',
+        quakingBogAndCampSafety: 'Linhas de fibra vegetal submersas e aéreas contornando o bivaque conectadas a conchas de moluscos e tubos de taboa oca que ressoam ao menor movimento na água ou na mata.',
+        bogMoatAndReedFumeRepellent: 'Alerta precoce a 40 metros de distância eliminando qualquer surpresa por emboscadas nas trevas da névoa pantanosa.',
+        campRestAndSafetyGuards: 'Assegura repouso confiável e tranquilo para toda a comitiva durante o pernoite.',
+        icon: '🔔🌾',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 161: DUNAS MEGABARCANAS DE AREIA CANTANTE E CORREDORES DE DEFLAÇÃO (D&D 5e)
   // =========================================================================
 
@@ -24626,6 +24730,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessQuakingBogReedHazard: calcWildernessQuakingBogReedHazard,
+    calcCampQuakingBogReedStation: calcCampQuakingBogReedStation,
     calcWildernessSingingSandBarchanHazard: calcWildernessSingingSandBarchanHazard,
     calcCampSingingSandBarchanStation: calcCampSingingSandBarchanStation,
     calcWildernessFluvialFiordMeanderHazard: calcWildernessFluvialFiordMeanderHazard,
