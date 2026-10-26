@@ -20462,6 +20462,113 @@
   }
 
   // === calcWildernessRaisedBogAndSphagnumHazard (Turfeiras Altas e Gramados de Esfagno - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+
+  // =========================================================================
+  // FASE 142: FALÉSIAS DE BASALTO COLUNAR, CALÇADAS DOS GIGANTES E GRUTAS MARINHAS RESSONANTES
+  // D&D 5e: DMG p. 110-111 (Hazards, Slick Surfaces, Cliffs), DMG p. 246-247 (Objects, Acoustics),
+  // PHB p. 182-183 (Travel Pace, Navigation), PHB p. 190 (Falling Damage), XGE p. 77-83 (Coastal Hazards)
+  // =========================================================================
+
+  function calcWildernessBasaltColumnsAndGiantCausewayHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'columnar_hexagonal_joint_slippage_and_shear').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Cisalhamento e Deslizamento em Colunas Hexagonais de Basalto',
+      saveDC: 15,
+      saveType: 'Destreza',
+      basaltColumnsAndCausewayRisk: 'Prismas regulares de basalto vulcânico polidos por milênios de ondas marinhas e cobertos por alga lamelar escorregadia; pisada em falso provoca escorregão fatal e queda de 6 a 9 metros em fendas geométricas afiadas, causando 3d6 de dano de concussão e corte (DMG p. 110, 190).',
+      pioneerMitigation: 'Batedores equipam grampões de escalada forjados com pontas de aço temperado e utilizam cordas-guia com nós de segurança travados nas fendas verticais entre os pilares.',
+      rescueAndStabilization: 'Içamento imediato com polias duplas, imobilização de fraturas com talas de madeira leve e aplicação de resina de pinho anti-séptica em lacerações causadas pelo basalto.',
+      icon: '🏛️🌊',
+      color: '#0284c7'
+    };
+
+    if (ht === 'resonant_blowhole_geyser_compression_blast') {
+      hazard = {
+        hazardTitle: 'Jato Compressivo de Ar e Borrifo em Bufador Marinho Ressonante',
+        saveDC: 15,
+        saveType: 'Força',
+        basaltColumnsAndCausewayRisk: 'Ondas de ressaca marítima comprimem toneladas de ar e água do mar no interior de cavernas colunares submersas, disparando violentos jatos pneumáticos a cada 40 segundos que arremessam aventureiros a 4,5 metros de distância, infligindo 2d8 de dano de concussão e surdez temporária por 1 hora.',
+        pioneerMitigation: 'Observação rigorosa do ritmo das marés e das pulsações sonoras da rocha, aguardando os intervalos de refluxo para transpor os canais de bufador.',
+        rescueAndStabilization: 'Arrasto para abrigo protegido da ventania marítima, desobstrução das vias aéreas com drenagem postural e compressas de ervas aromáticas para restabelecimento timpânico.',
+        icon: '💨🌊',
+        color: '#0ea5e9'
+      };
+    } else if (ht === 'prismatic_sea_spray_hypothermia_and_vertigo') {
+      hazard = {
+        hazardTitle: 'Vórtice Marítimo, Névoa Salina Gélida e Vertigem no Cume da Falésia',
+        saveDC: 14,
+        saveType: 'Constituição',
+        basaltColumnsAndCausewayRisk: 'Ventos marítimos cortantes de 50 nós combinados a borrifos salinos a 5°C no topo de paredões de 40 metros de altura; o frio intenso congela as vestes e a vertigem da ressaca abissal impõe 1 nível de exaustão e desvantagem em testes de Percepção e Acrobacia.',
+        pioneerMitigation: 'Uso de capotes forrados com óleo de baleia e capuzes de couro ajustados, avançando agachados em fila indiana amarrados por cabos de retenção.',
+        rescueAndStabilization: 'Substituição das roupas encharcadas por lã virgem seca no bivaque e ingestão de caldo quente de algas ricas em sais e raízes picantes.',
+        icon: '❄️🌀',
+        color: '#64748b'
+      };
+    } else if (ht === 'rockfall_falling_columnar_organ_pipe_hazard') {
+      hazard = {
+        hazardTitle: 'Queda de Prismas Basálticos Fraturados por Intemperismo Salino',
+        saveDC: 14,
+        saveType: 'Destreza',
+        basaltColumnsAndCausewayRisk: 'Colunas basálticas suspensas conhecidas como tubos de órgão que sofrem erosão pela cristalização contínua de sal nas juntas; vibrações de passos ou estrondos de trovão provocam o desprendimento de blocos hexagonais pesados causando 3d8 de dano de concussão.',
+        pioneerMitigation: 'Batedores inspecionam o teto com bastões de toque acústico, identificando sons ocos de fratura e contornando áreas de alta instabilidade estrutural.',
+        rescueAndStabilization: 'Remoção urgente dos escombros com alavancas de ferro, administração de bálsamos hemostáticos e bandagens de sustentação torácica.',
+        icon: '⚠️🪨',
+        color: '#d97706'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampBasaltColumnsAndGiantCausewayStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'basalt_hexagonal_terrace_keyed_anchor_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Travado em Terraço Natural de Colunas Hexagonais',
+      basaltPavementAnchorageAndTidalSafety: 'Acampamento montado em terraço plano de prismas hexagonais de basalto situado 15 metros acima da linha de preamar máxima, com estacas em cunha cravadas nas juntas naturais da rocha.',
+      acousticResonanceShieldAndSaltStill: 'Os paredões verticais protegem a comitiva contra ventos marinhos cortantes e marés vivas, oferecendo piso perfeitamente plano e livre de lamaçais.',
+      campRestAndSafetyGuards: 'Proporciona descanso longo seguro, seco e revigorante para os membros da expedição com zero risco de arrasto por ressaca ou instabilidade do solo.',
+      icon: '⛺🏛️',
+      color: '#0284c7'
+    };
+
+    if (dt === 'acoustic_resonance_windbreak_and_blowhole_seal') {
+      tech = {
+        defenseTitle: 'Barreira Corta-Vento com Blocos Hexagonais e Vedação de Bufador',
+        basaltPavementAnchorageAndTidalSafety: 'Mureta de proteção montada com fragmentos de prismas hexagonais empilhados que bloqueia as correntes ascendentes de vento marinho e desvia a compressão sonora de bufadores vizinhos.',
+        acousticResonanceShieldAndSaltStill: 'Elimina o estrondo ressonante das ondas e os borrifos salinos contínuos, mantendo o interior do bivaque silencioso e abrigado.',
+        campRestAndSafetyGuards: 'Permite sono profundo e ininterrupto para sentinelas e descansantes sem penalidades causadas pela turbulência costeira.',
+        icon: '🛡️🧱',
+        color: '#3b82f6'
+      };
+    } else if (dt === 'driftwood_kelp_smoke_hearth_and_salt_remedy') {
+      tech = {
+        defenseTitle: 'Braseiro Costeiro de Lenha Flutuante com Destilador Térmico de Sal',
+        basaltPavementAnchorageAndTidalSafety: 'Fornilho construído sobre lajes de basalto aquecendo lenha seca da praia e algas desidratadas, com condensador de cobre que purifica água salobra em água potável cristalina.',
+        acousticResonanceShieldAndSaltStill: 'Produz 20 litros diários de água doce mineralizada enquanto a fumaça de algas rica em iodo espanta mosquitos costeiros e umedece o ar do bivaque.',
+        campRestAndSafetyGuards: 'Garante hidratação impecável e recuperação acelerada de estafa térmica sem consumo das reservas transportadas de cantis.',
+        icon: '🔥💧',
+        color: '#ea580c'
+      };
+    } else if (dt === 'hexagonal_stepping_stone_marked_tide_trail') {
+      tech = {
+        defenseTitle: 'Passadiço Hexagonal Balizado com Cordas-Guia de Maré',
+        basaltPavementAnchorageAndTidalSafety: 'Rede de cordas esticadas entre píons de ferro cravados nos cumes das colunas mais salientes, criando corredor seguro de locomoção entre o bivaque e os pontos de vigia.',
+        acousticResonanceShieldAndSaltStill: 'Permite rondas noturnas das sentinelas com total aderência, mesmo sob névoa marinha densa ou borrifo constante.',
+        campRestAndSafetyGuards: 'Anula qualquer risco de escorregão ou queda nas fendas colunares durante as trocas de guarda noturna.',
+        icon: '🪜⚓',
+        color: '#10b981'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessRaisedBogAndSphagnumHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'swamp').toLowerCase();
@@ -22498,6 +22605,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessBasaltColumnsAndGiantCausewayHazard: calcWildernessBasaltColumnsAndGiantCausewayHazard,
+    calcCampBasaltColumnsAndGiantCausewayStation: calcCampBasaltColumnsAndGiantCausewayStation,
     calcWildernessRaisedBogAndSphagnumHazard: calcWildernessRaisedBogAndSphagnumHazard,
     calcCampRaisedBogAndSphagnumStation: calcCampRaisedBogAndSphagnumStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
