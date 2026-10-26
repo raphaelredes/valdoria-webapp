@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T21:13:51Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T21:16:29Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessSandstoneRuiniformLabyrinthHazard) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var sr = CartShared.calcWildernessSandstoneRuiniformLabyrinthHazard(bKey, 'balancing_pedestal_rock_topple_crush');
+        return '<div class="clp-sandstone-ruiniform-labyrinth-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,20,12,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(217,119,6,0.35);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sr.color + ';margin-bottom:2px;">' + sr.icon + ' ' + sr.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Relevo Ruiniforme e Cidade de Pedra:</b> ' + sr.sandstoneRuiniformRisk + ' (CD ' + sr.saveDC + ' [' + sr.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Mitigação:</b> ' + sr.pioneerMitigation + ' · <i>Estabilização: ' + sr.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampSandstoneRuiniformLabyrinthStation) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var sr = CartShared.calcCampSandstoneRuiniformLabyrinthStation(bKey, 'fortified_colonnade_alcove_command_bivouac');
+        return '<div class="clp-sandstone-ruiniform-labyrinth-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(24,18,14,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sr.color + ';margin-bottom:2px;">' + sr.icon + ' ' + sr.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Bivaque em Alcova Colunada:</b> ' + sr.sandstoneRuiniformAndCampSafety + ' · <b>Proteção:</b> ' + sr.sandstoneRuiniformTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + sr.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

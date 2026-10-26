@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 259: RELEVO RUINIFORME E CIDADES DE PEDRA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessSandstoneRuiniformLabyrinthHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'balancing_pedestal_rock_topple_crush').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desabamento e Esmagamento por Rocha Pendular em Equilíbrio Precário',
+      saveDC: 15,
+      saveType: 'Destreza',
+      sandstoneRuiniformRisk: 'Maciços e blocos de arenito de 20 toneladas equilibrados em pedestais delgados de erosão eólica e hídrica sofrem fratura na base sob a passagem da comitiva; a rocha colossal parte-se e rola pelos corredores estreitos do labirinto, esmagando o que estiver no caminho com 3d10 de impacto contundente (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Marchar em fila indiana mantendo distância de segurança de pedestais erodidos e não apoiar pesos ou cordas em pedras pendulares.',
+      rescueAndStabilization: 'Uso de alavancas de ferro e macacos mecânicos para erguer blocos caídos e estabilizar lesões compressivas com poções de cura.',
+      icon: '🪨⚠️',
+      color: '#d97706'
+    };
+
+    if (ht === 'orthogonal_joint_acoustic_echo_confusion') {
+      hazard = {
+        hazardTitle: 'Desorientação Auditiva e Ecos Reverberantes em Vielas Ortogonais',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        sandstoneRuiniformRisk: 'A malha geométrica de fendas verticais de 30 metros de profundidade cria reflexões sonoras contínuas que amplificam passos, respirações e sussurros; os ecos parecem vir de todas as direções ao mesmo tempo, confundindo a audição das sentinelas e mascarando a aproximação de predadores emboscados (DMG p. 111; XGE p. 111).',
+        pioneerMitigation: 'Utilizar sinais visuais com lanternas ou bandeiras em vez de comandos verbais e afixar espelhos angulares em cruzamentos.',
+        rescueAndStabilization: 'Pausa para reagrupamento em espaço aberto e contagem de integrantes do grupo para evitar desgarramentos.',
+        icon: '👂🌀',
+        color: '#7c3aed'
+      };
+    } else if (ht === 'chasm_spanning_natural_arch_fracture') {
+      hazard = {
+        hazardTitle: 'Rompimento de Arco Natural Arenítico Suspenso durante Travessia',
+        saveDC: 14,
+        saveType: 'Destreza',
+        sandstoneRuiniformRisk: 'Arcos e pontes naturais de arenito esculpidos pela erosão conectam pilares isolados a grande altitude sobre desfiladeiros cegos; o vão de pedra desgastado por fissuras internas colapsa sob o peso de aventureiros com armaduras pesadas, arremessando-os em queda de 15 metros (DMG p. 110; PHB p. 182).',
+        pioneerMitigation: 'Fixar cabo de segurança esticado paralelo ao arco antes de qualquer membro cruzar a ponte de pedra.',
+        rescueAndStabilization: 'Retenção imediata pelo arnês de segurança e içamento cuidadoso com corda dinâmica.',
+        icon: '🌉💥',
+        color: '#ea580c'
+      };
+    } else if (ht === 'shaded_crevice_venomous_viper_pit') {
+      hazard = {
+        hazardTitle: 'Ninhos de Serpentes das Rochas em Fendas Sombreadas e Friáveis',
+        saveDC: 14,
+        saveType: 'Constituição',
+        sandstoneRuiniformRisk: 'Os corredores estreitos e frescos no fundo da cidade de pedra abrigam colônias de víboras venenosas camufladas nas fissuras de arenito avermelhado; o apoio involuntário de mãos em reentrâncias provoca botes rápidos com presas inoculadoras de hemotoxina, causando 2d6 de veneno e condição envenenado (DMG p. 111; PHB p. 183).',
+        pioneerMitigation: 'Inspecionar fendas com tochas acesas e bastões compridos antes de apoiar mãos ou armar acampamento próximo às paredes.',
+        rescueAndStabilization: 'Sucção controlada com ventosa estéril, torniquete moderado e soro antiofídico de extrato de erva-de-cobra.',
+        icon: '🐍☠️',
+        color: '#dc2626'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampSandstoneRuiniformLabyrinthStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'fortified_colonnade_alcove_command_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Estratégico em Alcova Colunada com Paredes Naturais de Arenito',
+      sandstoneRuiniformAndCampSafety: 'Instalação do acampamento em uma reentrância côncava ladeada por pilares maciços de 20 metros de altura que lembram uma abóbada fortificada.',
+      sandstoneRuiniformTrenchAndWatch: 'As muralhas de pedra formam um abrigo inexpugnável contra ventos uivantes e tempestades de poeira do deserto.',
+      campRestAndSafetyGuards: 'Permite descanso longo protegido, aquecido e isolado de intempéries climáticas externas.',
+      icon: '⛺🏛️',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'chimney_flue_smoke_dispersion_hearth') {
+      tech = {
+        defenseTitle: 'Lareira em Fenda de Chaminé Natural para Dispersão Silenciosa de Fumaça',
+        sandstoneRuiniformAndCampSafety: 'Instalação da fogueira de acampamento na base de uma chaminé vertical de erosão natural.',
+        sandstoneRuiniformTrenchAndWatch: 'A convecção do duto de pedra puxa a fumaça para cima e a dissipa nas alturas em micropartículas invisíveis ao nível do chão.',
+        campRestAndSafetyGuards: 'Permite cozinhar e aquecer a comitiva sem que a coluna de fumaça denuncie a localização do grupo.',
+        icon: '🔥💨',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'chokepoint_corridor_tripwire_alarm_grid') {
+      tech = {
+        defenseTitle: 'Malha de Tropeço e Alarmes de Guizo em Corredores Estreitos de Acesso',
+        sandstoneRuiniformAndCampSafety: 'Fixação de fios de náilon transparente e guizos de bronze nos três únicos corredores retilíneos que conduzem à alcova.',
+        sandstoneRuiniformTrenchAndWatch: 'Qualquer movimento de intruso ou criatura rasteira aciona o tinir de sinos amplificado pelas paredes de arenito.',
+        campRestAndSafetyGuards: 'Garante alerta antecipado para as sentinelas e elimina qualquer risco de emboscada noturna.',
+        icon: '🔔🕸️',
+        color: '#10b981'
+      };
+    } else if (dt === 'suspended_shade_gallery_thermal_equilibrium') {
+      tech = {
+        defenseTitle: 'Galeria Sombreada Suspensa com Equilíbrio Térmico Agradável',
+        sandstoneRuiniformAndCampSafety: 'Montagem das esteiras de dormir em uma galeria elevada e ventilada permanentemente protegida da radiação solar direta.',
+        sandstoneRuiniformTrenchAndWatch: 'A inércia térmica dos paredões de arenito mantém a temperatura interna amena e fresca mesmo sob calor abrasador do meio-dia.',
+        campRestAndSafetyGuards: 'Elimina exaustão por desidratação e garante repouso reparador e revigorante.',
+        icon: '🍃🛏️',
+        color: '#6366f1'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 258: RECIFES DE CORAL FÓSSIL E CAVERNAS MARINHAS (D&D 5e)
   // =========================================================================
 
@@ -34716,6 +34820,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessSandstoneRuiniformLabyrinthHazard: calcWildernessSandstoneRuiniformLabyrinthHazard,
+    calcCampSandstoneRuiniformLabyrinthStation: calcCampSandstoneRuiniformLabyrinthStation,
     calcWildernessFossilCoralReefCaveHazard: calcWildernessFossilCoralReefCaveHazard,
     calcCampFossilCoralReefCaveStation: calcCampFossilCoralReefCaveStation,
     calcWildernessCinderConeScoriaSlopeHazard: calcWildernessCinderConeScoriaSlopeHazard,
