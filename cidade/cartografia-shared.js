@@ -20532,6 +20532,113 @@
   // PHB p. 182-183 (Travel Pace, Navigation in Blind Valleys), PHB p. 190 (Falling & Drowning), XGE p. 77-83
   // =========================================================================
 
+
+  // =========================================================================
+  // FASE 152: FLORESTAS DE PINHEIROS BÊBADOS EM TERMOCARSTE E PINGOS DEGELADOS
+  // D&D 5e: DMG p. 110-111 (Hazards, Extreme Cold, Quagmire/Thaw Slumps), DMG p. 246-247 (Structural Integrity),
+  // PHB p. 182-183 (Travel Pace, Navigation in Boreal Forests), PHB p. 190 (Falling Trees), XGE p. 77-83
+  // =========================================================================
+
+  function calcWildernessThermokarstAndDrunkenForestHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'arctic').toLowerCase();
+    var ht = (hazardType || 'drunken_forest_tree_tilt_root_tear_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Tombamento Súbito de Pinheiros Bêbados em Solo Termocarstificado',
+      saveDC: 15,
+      saveType: 'Destreza',
+      thermokarstAndForestRisk: 'Coníferas de 20 metros com raízes rasas ancoradas em permafrost em rápido degelo; a vibração de passos faz o solo ceder tombando troncos maciços em efeito dominó sobre a trilha, causando 3d8 de concussão e aprisionamento sob ramagens (DMG p. 110, 190).',
+      pioneerMitigation: 'Batedores observam o ângulo de inclinação das copas e evitam ravinas com árvores cruzadas em X, contornando setores de turfa afundada.',
+      rescueAndStabilization: 'Desobstrução rápida com machados de pioneiro e alavancas de freixo, tratamento de luxações e talas em membros prensados.',
+      icon: '🌲⚠️',
+      color: '#15803d'
+    };
+
+    if (ht === 'pingo_core_explosive_methane_crater_eruption') {
+      hazard = {
+        hazardTitle: 'Erupção Explosiva de Metano em Cratera de Pingo Degelado',
+        saveDC: 15,
+        saveType: 'Destreza',
+        thermokarstAndForestRisk: 'Domo de gelo fóssil recoberto de turfa que acumula gás de decomposição sob alta pressão; o rompimento da crosta dispara explosão violenta de lama congelada e blocos de gelo a 40 metros de distância com 3d8 de concussão e labaredas espontâneas.',
+        pioneerMitigation: 'Identificação prévia de fissuras radiais na cúpula de pingos e reconhecimento de odores sulfurosos pantanosos, mantendo distância mínima de 60 metros.',
+        rescueAndStabilization: 'Resgate com cabos de retenção dinâmicos, lavagem de queimaduras químicas com água pura e aquecimento progressivo em tenda térmica.',
+        icon: '💥❄️',
+        color: '#dc2626'
+      };
+    } else if (ht === 'thermokarst_subsidence_slump_mud_quagmire') {
+      hazard = {
+        hazardTitle: 'Afundamento em Poço de Termossufosão e Lodo Gélido a 2°C',
+        saveDC: 14,
+        saveType: 'Força',
+        thermokarstAndForestRisk: 'Cratera oculta sob musgo ralo onde o gelo subterrâneo derreteu formando atoleiro de lama fluida a 2°C com 2 metros de profundidade; a sucção imobiliza o aventureiro causando choque térmico, 2d6 de dano de frio e 1 nível de exaustão.',
+        pioneerMitigation: 'Avanço com bastões de sondagem e sapatos de neve largos que distribuem a pressão e evitam o colapso da camada vegetal.',
+        rescueAndStabilization: 'Içamento imediato com laço duplo, troca urgente das roupas encharcadas por lã virgem seca no bivaque e ingestão de caldo gordo fervente.',
+        icon: '🕳️🥶',
+        color: '#0284c7'
+      };
+    } else if (ht === 'tilted_spruce_spiky_bough_skewer_hazard') {
+      hazard = {
+        hazardTitle: 'Galhadas Farpadas de Coníferas Inclinadas em Ângulos Agudos',
+        saveDC: 14,
+        saveType: 'Destreza',
+        thermokarstAndForestRisk: 'Emaranhado de ramos secos e pontiagudos de espruce pendentes na altura dos olhos que chicoteiam sob o vento e retalham capuzes e alforjes, infligindo 2d6 de dano perfurante e risco de ferimento ocular.',
+        pioneerMitigation: 'Uso de viseiras de malha fina de bronze e avanço com podões de desbaste limpando galhos salientes da passagem.',
+        rescueAndStabilization: 'Assepsia de arranhões com tintura de própolis silvestre e aplicação de compressas frias para evitar inflamação ocular.',
+        icon: '🌿🗡️',
+        color: '#b45309'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampThermokarstAndDrunkenForestStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'arctic').toLowerCase();
+    var dt = (defenseType || 'solid_bedrock_granite_bench_thermokarst_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Assentado em Espinhaço de Granito Imune a Degelo',
+      thermokarstAnchorageAndPingoSafety: 'Acampamento instalado sobre afloramento de rocha matriz sólida que não sofre subsidência por degelo, fora da linha de queda dos pinheiros inclinados.',
+      corduroyRaftAndTiltGauge: 'Paredões de granito proporcionam barreira natural contra ventanias árticas e oferecem piso firme, seco e nivelado.',
+      campRestAndSafetyGuards: 'Permite repouso longo calmo e protegido para toda a comitiva com zero perigo de abatimentos de terreno sob as tendas.',
+      icon: '⛺🏔️',
+      color: '#15803d'
+    };
+
+    if (dt === 'woven_spruce_bough_corduroy_raft_foundation') {
+      tech = {
+        defenseTitle: 'Plataforma Flutuante de Corduroy com Ramos Entrelaçados',
+        thermokarstAnchorageAndPingoSafety: 'Estrado largo de troncos de conífera dispostos transversalmente que flutua sobre o solo pantanoso e distribui homogeneamente o peso das barracas.',
+        corduroyRaftAndTiltGauge: 'Impede o afundamento e o desnivelamento das camas, mantendo o interior do abrigo aquecido e isolado do lodo gélido.',
+        campRestAndSafetyGuards: 'Garante conforto e estabilidade estrutural mesmo durante degelos rápidos da meia-estação.',
+        icon: '🪵🛡️',
+        color: '#78350f'
+      };
+    } else if (dt === 'permafrost_depth_sounding_spud_and_tilt_gauge') {
+      tech = {
+        defenseTitle: 'Sonda de Profundidade de Degelo com Indicador de Inclinação',
+        thermokarstAnchorageAndPingoSafety: 'Equipamento pioneiro com haste de ferro graduada e prumo de latão que afere a estabilidade do permafrost e alerta sobre riscos de tombamento de árvores vizinhas.',
+        corduroyRaftAndTiltGauge: 'Fornece diagnóstico seguro do terreno circundante, permitindo delimitar com precisão as áreas seguras de circulação.',
+        campRestAndSafetyGuards: 'Elimina surpresas desagradáveis durante o sono, garantindo tranquilidade absoluta para as sentinelas.',
+        icon: '⚗️📐',
+        color: '#0284c7'
+      };
+    } else if (dt === 'cleared_plank_causeway_snowshoe_runway') {
+      tech = {
+        defenseTitle: 'Passarela Elevada de Pranchas Aplainadas de Espruce',
+        thermokarstAnchorageAndPingoSafety: 'Passadiço contínuo de tábuas de conífera sobre estacas curtas que conecta o bivaque aos postos de vigia sobre áreas pantanosas.',
+        corduroyRaftAndTiltGauge: 'Elimina qualquer contato das botas com o atoleiro termocarstificado, garantindo passadas firmes e silenciosas.',
+        campRestAndSafetyGuards: 'Permite rondas de patrulha noturnas rápidas e confortáveis sem risco de quedas ou entorses.',
+        icon: '🪵🚶',
+        color: '#10b981'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessTowerKarstAndBlindValleyHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'swamp').toLowerCase();
@@ -23568,6 +23675,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessThermokarstAndDrunkenForestHazard: calcWildernessThermokarstAndDrunkenForestHazard,
+    calcCampThermokarstAndDrunkenForestStation: calcCampThermokarstAndDrunkenForestStation,
     calcWildernessTowerKarstAndBlindValleyHazard: calcWildernessTowerKarstAndBlindValleyHazard,
     calcCampTowerKarstAndBlindValleyStation: calcCampTowerKarstAndBlindValleyStation,
     calcWildernessTransformFaultAndHorstHazard: calcWildernessTransformFaultAndHorstHazard,
