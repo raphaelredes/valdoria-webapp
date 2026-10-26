@@ -20461,6 +20461,130 @@
     };
   }
 
+  // === calcWildernessRaisedBogAndSphagnumHazard (Turfeiras Altas e Gramados de Esfagno - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessRaisedBogAndSphagnumHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var ht = (hazardType || 'quaking_sphagnum_bog_eye_breakthrough').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Rompimento de Tapete de Esfagno em Olho-d\'Água Negro',
+      saveDC: 15,
+      saveType: 'Destreza',
+      raisedBogAndSphagnumRisk: 'Camada elástica de musgo esfagno de 30 cm flutuando sobre poço de lama ácida de 6 metros de profundidade; rompimento súbito sob os passos engolindo o explorador em lodo negro anóxico (pH 3,8) com sucção implacável que causa 2d6 de dano de asfixia e imobilização completa (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam com raquetes de esteira de vime nos pés e utilizam varas horizontais de bétula de 3 metros para redistribuição imediata de peso.',
+      rescueAndStabilization: 'Tração com cabos de laço duplo e alavancas de prancha, limpeza dos olhos com água destilada e enxágue corporal com solução neutralizante alcalina.',
+      icon: '🌿🕳️',
+      color: '#15803d'
+    };
+
+    if (ht === 'combustible_marsh_gas_methane_flare') {
+      hazard = {
+        hazardTitle: 'Labareda de Gás Metano de Decomposição de Turfa',
+        saveDC: 14,
+        saveType: 'Destreza',
+        raisedBogAndSphagnumRisk: 'Bolsões de gás metano altamente inflamável pressurizados sob a crosta de turfa que entram em combustão espontânea ou ao contato com tochas, explodindo em labareda de 4 metros causando 3d6 de dano de fogo e chamuscamento de mantas.',
+        pioneerMitigation: 'Uso exclusivo de lanternas fechadas de vidro espesso com quebra-chamas de latão e marcha cautelosa sem fricção de calçados ferrados.',
+        rescueAndStabilization: 'Abafamento de chamas com mantas úmidas de lã, aplicação de pasta de folhas de tanchagem para queimaduras e hidratação imediata.',
+        icon: '🔥💥',
+        color: '#dc2626'
+      };
+    } else if (ht === 'acidic_tannin_hypothermia_chill') {
+      hazard = {
+        hazardTitle: 'Choque Térmico em Poça Ácida de Turfeira a 4°C',
+        saveDC: 14,
+        saveType: 'Constituição',
+        raisedBogAndSphagnumRisk: 'Água escura saturada de ácido húmico acumulada em depressões entre montículos; contato prolongado que endurece couros de botas, queima terminações nervosas e induz tremores hipotérmicos severos e 1 nível de exaustão.',
+        pioneerMitigation: 'Uso de perneiras impermeabilizadas com graxa animal espessa e meias de lã de carneiro prensada em dupla camada.',
+        rescueAndStabilization: 'Troca imediata por lã seca no bivaque, massagem revigorante com aguardente de bagaço e imersão dos pés em água morna com sais.',
+        icon: '💧🥶',
+        color: '#64748b'
+      };
+    } else if (ht === 'shifting_fog_acoustic_bog_spook') {
+      hazard = {
+        hazardTitle: 'Névoa Espessa de Turfeira e Desorientação Sensorial',
+        saveDC: 15,
+        saveType: 'Sabedoria',
+        raisedBogAndSphagnumRisk: 'Névoa rasteira impregnada de cheiro de terra úmida e fumaça fria que abafa sons distantes e cria ilusões auditivas de passos próximos, induzindo guias a perderem o azimute e marcharem em círculos sobre o charco.',
+        pioneerMitigation: 'Navegação em comboio atado com corda guia e orientação estrita por bússola solar calibrada com marcos visuais de montículos altos de urze.',
+        rescueAndStabilization: 'Reagrupamento por sinais acústicos de buzina de chifre curta e fixação de estacas de balizamento numeradas no trajeto.',
+        icon: '🌫️🧭',
+        color: '#ca8a04'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      raisedBogAndSphagnumRisk: hazard.raisedBogAndSphagnumRisk,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Turfeiras e Pântanos de Esfagno) / PHB p. 182-183 (Marcha em Terreno Falso) / XGE p. 78-83 (Geomorfologia de Turfeiras Ácidas e Olhos-d\'Água)'
+    };
+  }
+
+  // === calcCampRaisedBogAndSphagnumStation (Bivaques em Montículos de Urze e Lareiras de Turfa - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampRaisedBogAndSphagnumStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'swamp').toLowerCase();
+    var dt = (defenseType || 'heather_hummock_dry_ridge_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Montículo Seco de Urze com Estrado de Vime',
+      raisedBogAnchorageAndDrainageSafety: 'Acampamento montado no cume de montículo consolidado de urze e bétula fossilizada a 1,5 metro acima do nível da turfeira flutuante, com solo firme e drenagem natural perimetral.',
+      peatBrickHearthAndMiasmaVentilation: 'Estrados trançados de varas de salgueiro que mantêm os sacos de dormir elevados, isolados do contato com o solo ácido e úmido.',
+      campRestAndSafetyGuards: 'Garante descanso longo perfeito, aquecido e revigorante para os membros da comitiva sem risco de subsidência ou umidade invasiva.',
+      icon: '⛺🌿',
+      color: '#15803d'
+    };
+
+    if (dt === 'dried_peat_slow_combustion_hearth') {
+      tech = {
+        defenseTitle: 'Lareira de Queima Lenta com Tijolos de Turfa Seca',
+        raisedBogAnchorageAndDrainageSafety: 'Fornilho assentado sobre lajes de xisto com combustível de blocos compactados de turfa desidratada que queimam sem labaredas abertas ou faíscas dispersas.',
+        peatBrickHearthAndMiasmaVentilation: 'Gera calor contínuo e suave que seca roupas e equipamentos enquanto sua fumaça aromática afasta miasmas e mosquitos do charco.',
+        campRestAndSafetyGuards: 'Mantém o bivaque a agradáveis 18°C durante as madrugadas gélidas da charneca sem perigo de incendiar o solo vegetal.',
+        icon: '🧱🔥',
+        color: '#ea580c'
+      };
+    } else if (dt === 'rainwater_catchment_tannin_free_still') {
+      tech = {
+        defenseTitle: 'Lona Suspensa para Captação de Água de Chuva Pura',
+        raisedBogAnchorageAndDrainageSafety: 'Toldo esticado em funil sobre recipientes de barro que coleta água pluvial pura diretamente do céu, evitando o contato com a água ácida e amarga da turfeira.',
+        peatBrickHearthAndMiasmaVentilation: 'Produz 25 litros diários de água doce cristalina com pH neutro, ideal para consumo direto e cozimento de rações de marcha.',
+        campRestAndSafetyGuards: 'Garante total segurança sanitária para a comitiva, prevenindo distúrbios gástricos causados por água rica em taninos.',
+        icon: '💧🏺',
+        color: '#0284c7'
+      };
+    } else if (dt === 'vibrational_bog_stake_perimeter_alarm') {
+      tech = {
+        defenseTitle: 'Rede Perimetral de Varas Sensoras de Vibração de Turfa',
+        raisedBogAnchorageAndDrainageSafety: 'Hastes longas de freixo cravadas profundamente no tapete elástico ao redor do montículo conectadas a sinetas de bronze no posto de guarda.',
+        peatBrickHearthAndMiasmaVentilation: 'Transmite as ondulações mecânicas da turfeira causadas por passos de criaturas pesadas a até 50 metros de distância.',
+        campRestAndSafetyGuards: 'Permite aviso antecipado infalível para as sentinelas mesmo sob nevoeiro impenetrável ou escuridão total.',
+        icon: '🔔🛡️',
+        color: '#eab308'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      raisedBogAnchorageAndDrainageSafety: tech.raisedBogAnchorageAndDrainageSafety,
+      peatBrickHearthAndMiasmaVentilation: tech.peatBrickHearthAndMiasmaVentilation,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Turfeiras e Charnecas) / PHB p. 150 (Kits de Acampamento em Zonas Úmidas) / XGE p. 78-83 (Engenharia de Estrados e Sensores de Vibração)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -22374,6 +22498,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessRaisedBogAndSphagnumHazard: calcWildernessRaisedBogAndSphagnumHazard,
+    calcCampRaisedBogAndSphagnumStation: calcCampRaisedBogAndSphagnumStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
