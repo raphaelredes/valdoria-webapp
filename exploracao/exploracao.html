@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T19:43:47Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T19:46:28Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessVolcanicSolfataraFieldHazard) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var sf = CartShared.calcWildernessVolcanicSolfataraFieldHazard(bKey, 'sublimated_sulfur_needle_crust_collapse_into_molten_sulfur');
+        return '<div class="clp-volcanic-solfatara-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,26,10,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(234,179,8,0.35);font-size:8px;color:#fef9c3;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sf.color + ';margin-bottom:2px;">' + sf.icon + ' ' + sf.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Solfataras e Enxofre Líquido Rubi:</b> ' + sf.solfataraRisk + ' (CD ' + sf.saveDC + ' [' + sf.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fef08a;margin-top:1px;">• <b>Mitigação:</b> ' + sf.pioneerMitigation + ' · <i>Estabilização: ' + sf.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampVolcanicSolfataraFieldStation) return '';
+        var bKey = (biome && biome.key) || 'volcanic';
+        var sc = CartShared.calcCampVolcanicSolfataraFieldStation(bKey, 'windward_silicified_alunite_ridge_above_plume_bivouac');
+        return '<div class="clp-volcanic-solfatara-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(24,20,8,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(202,138,4,0.3);font-size:8px;color:#fef9c3;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sc.color + ';margin-bottom:2px;">' + sc.icon + ' ' + sc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Espigão a Barlavento da Solfatara:</b> ' + sc.solfataraAndCampSafety + ' · <b>Defesa:</b> ' + sc.solfataraTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#fde047;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + sc.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){

@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 229: CAMPOS DE SOLFATARA E LAGOS DE ENXOFRE LÍQUIDO RUBI (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessVolcanicSolfataraFieldHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var ht = (hazardType || 'sublimated_sulfur_needle_crust_collapse_into_molten_sulfur').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Afundamento de Crosta de Agulhas de Enxofre sobre Enxofre Líquido Rubi',
+      saveDC: 15,
+      saveType: 'Destreza',
+      solfataraRisk: 'Ao redor das fumarolas de 130 graus, vapores sulfurosos precipitam abóbadas amarelo-limão de cristais aciculares de enxofre puro que encobrem poças de enxofre derretido viscoso cor de sangue escuro; pisar na crosta oca faz o chão quebrar mergulhando a bota na resina de enxofre em ebulição que adere ao couro e queima com 3d8 de fogo mais 1d8 de veneno (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Evitar totalmente o solo amarelo brilhante ou alaranjado, pisando apenas nos blocos cinzentos de andesito alterado.',
+      rescueAndStabilization: 'Abafamento imediato da chama azulada com areia fria ou manta úmida sem rasgar a pele.',
+      icon: '💛🔥',
+      color: '#eab308'
+    };
+
+    if (ht === 'invisible_blue_sulfur_dioxide_flame_night_flash_ignition') {
+      hazard = {
+        hazardTitle: 'Chamas Azuis Invisíveis ao Sol de Enxofre em Combustão Espontânea',
+        saveDC: 15,
+        saveType: 'Percepção',
+        solfataraRisk: 'Rios de enxofre fundido que escorrem das chaminés queimam ao ar livre com chamas azuis etéreas que são completamente invisíveis sob a luz clara do dia, denunciadas apenas pela miragem trêmula e pelo cheiro sufocante; caminhar sobre um filete de fogo invisível incendeia capas e calças instantaneamente com 2d8 de fogo mais 2d6 de ácido sulfuroso (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Estender uma tira seca de pano ou palha na ponta da lança à frente; se carbonizar no ar vazio, contornar a área.',
+        rescueAndStabilization: 'Rolamento imediato em cascalho úmido fora da calha de escoamento e lavagem nasal.',
+        icon: '🔵🔥',
+        color: '#38bdf8'
+      };
+    } else if (ht === 'boiling_kaolinite_solfatara_acid_mudpot_steam_spatter') {
+      hazard = {
+        hazardTitle: 'Ejeção de Argila Caulinítica Fervente em Caldeirão de Lama Ácida',
+        saveDC: 14,
+        saveType: 'Destreza',
+        solfataraRisk: 'O ácido sulfúrico dissolve a rocha vulcânica transformando-a em poços borbulhantes de lama branca de caulinita e alunita a 95 graus; bolhas gigantes de gás estouram sem aviso lançando pelotes pesados de barro ácido escaldante em um raio de 6 metros com 2d6 de fogo mais 2d6 de ácido (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Manter os escudos erguidos em formação tartaruga ao passar por gargantas estreitas entre caldeirões de lama.',
+        rescueAndStabilization: 'Raspagem imediata do barro fervente com a lâmina da faca antes de jogar água.',
+        icon: '🫧🌋',
+        color: '#f59e0b'
+      };
+    } else if (ht === 'hydrogen_sulfide_olfactory_paralysis_dead_air_hollow') {
+      hazard = {
+        hazardTitle: 'Paralisia Olfativa por Gás Sulfídrico Concentrado (H2S) em Baixada',
+        saveDC: 15,
+        saveType: 'Constituição',
+        solfataraRisk: 'Em baixas concentrações o gás das solfataras cheira a ovo podre, mas em bolsões densos sem vento ele paralisa instantaneamente o nervo olfativo fazendo o aventureiro acreditar que o ar ficou limpo exatamente um segundo antes do colapso respiratório, impondo 3d6 de veneno e inconsciência (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Se o cheiro forte de enxofre desaparecer subitamente ao descer uma ravina, prender a respiração e recuar correndo.',
+        rescueAndStabilization: 'Arraste por corda presa ao cinto para o espigão ventilado e respiração artificial.',
+        icon: '☁️☠️',
+        color: '#ca8a04'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampVolcanicSolfataraFieldStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'volcanic').toLowerCase();
+    var dt = (defenseType || 'windward_silicified_alunite_ridge_above_plume_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque no Espigão de Rocha Silicificada a Barlavento das Plumas',
+      solfataraAndCampSafety: 'Acampamento instalado na crista dura de rocha silicificada 20 metros acima da bacia de fumarolas, sempre na direção de onde sopra o vento dominante.',
+      solfataraTrenchAndWatch: 'Garante ar puro constante, piso indeformável e visão clara das chaminés azuis à noite.',
+      campRestAndSafetyGuards: 'Permite descanso longo seguro sem intoxicação por gases ácidos.',
+      icon: '⛺🌋',
+      color: '#eab308'
+    };
+
+    if (dt === 'sublimated_flowers_of_sulfur_antiseptic_and_alchemical_harvest') {
+      tech = {
+        defenseTitle: 'Colheita de Flor-de-Enxofre Sublimado para Unguentos e Alquimia',
+        solfataraAndCampSafety: 'Raspagem cuidadosa com espátula de madeira dos cristais puros de enxofre depositados em chaminés frias extintas na borda do campo.',
+        solfataraTrenchAndWatch: 'Fornece enxofre puro para fabricação de pólvora, tochas impermeáveis, pomadas antiparasitárias e barreiras contra pragas.',
+        campRestAndSafetyGuards: 'Reabastece bolsas de componentes de conjuradores e kits de alquimia da comitiva.',
+        icon: '⚗️💛',
+        color: '#facc15'
+      };
+    } else if (dt === 'neutral_bicarbonate_peripheral_spring_water_source') {
+      tech = {
+        defenseTitle: 'Fonte Periférica de Água Bicarbonatada Neutra Fora do Anel Ácido',
+        solfataraAndCampSafety: 'Captação de água a 300 metros da borda da solfatara onde o lençol freático emerge neutro e filtrado por tufos antigos.',
+        solfataraTrenchAndWatch: 'Fornece água potável segura e levemente alcalina, ideal para lavar olhos irritados pela fumaça.',
+        campRestAndSafetyGuards: 'Assegura a hidratação do grupo longe das poças sulfúricas venenosas.',
+        icon: '💧🪨',
+        color: '#38bdf8'
+      };
+    } else if (dt === 'silver_coin_tarnish_h2s_chemical_sentry_indicator') {
+      tech = {
+        defenseTitle: 'Indicador Químico de Moeda de Prata Polida contra Mudança de Vento',
+        solfataraAndCampSafety: 'Uma moeda ou lâmina de prata limpa pendurada na entrada da barraca do vigia escurece rapidamente para negro-azulado ao menor contato com gás sulfídrico.',
+        solfataraTrenchAndWatch: 'Funciona como alarme visual silencioso caso o vento vire à noite trazendo gases tóxicos da solfatara.',
+        campRestAndSafetyGuards: 'Permite evacuação ordenada da comitiva antes que qualquer sintoma de envenenamento ocorra.',
+        icon: '🪙🔔',
+        color: '#94a3b8'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 228: FALÉSIAS DE GIZ COSTEIRAS E PLATAFORMAS DE SÍLEX (D&D 5e)
   // =========================================================================
 
@@ -31596,6 +31700,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessVolcanicSolfataraFieldHazard: calcWildernessVolcanicSolfataraFieldHazard,
+    calcCampVolcanicSolfataraFieldStation: calcCampVolcanicSolfataraFieldStation,
     calcWildernessChalkCliffFlintPlatformHazard: calcWildernessChalkCliffFlintPlatformHazard,
     calcCampChalkCliffFlintPlatformStation: calcCampChalkCliffFlintPlatformStation,
     calcWildernessParabolicBlowoutDuneHazard: calcWildernessParabolicBlowoutDuneHazard,
