@@ -20598,6 +20598,110 @@
   // FASE 177: CAMPOS DE TUFAS CALCÁRIAS FLUVIAIS E CASCATAS EM DEGRAUS REPRESADOS (D&D 5e)
   // =========================================================================
 
+  // =========================================================================
+  // FASE 178: FERVEDOUROS DE RESSURGÊNCIA ARENOSA E DRENAGEM EM LENÇOL ARTESIANO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessArtesianFervedouroHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'savanna').toLowerCase();
+    var ht = (hazardType || 'fervedouro_artesian_slurry_buoyancy_drop_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Perda Súbita de Sustentação em Fervedouro com Sucção em Areia Fluida',
+      saveDC: 15,
+      saveType: 'Força',
+      fervedouroRisk: 'Poço artesiano borbulhante de areia fina em suspensão pressurizada; variação brusca na vazão hidrostática ou sobrecarga de carga pesada rompe a sustentação de empuxo; o explorador afunda no lodo arenoso até o peito, sendo aprisionado pela areia fluida com risco de afogamento e 3d8 de concussão por esmagamento (DMG p. 110-111, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Aproximação da borda estritamente por passarelas de troncos de buriti e descarte preventivo de armaduras pesadas antes da aproximação.',
+      rescueAndStabilization: 'Lançamento de cabo flutuante amarrado a arneses peitorais e tração lenta contínua com alavanca de madeira dura na margem firme.',
+      icon: '💧🌀',
+      color: '#0284c7'
+    };
+
+    if (ht === 'buriti_quagmire_root_snag_entrapment') {
+      hazard = {
+        hazardTitle: 'Armadilha de Raízes Submersas de Buriti em Brejo de Vaza Mole',
+        saveDC: 15,
+        saveType: 'Destreza',
+        fervedouroRisk: 'Terreno alagadiço periférico com emaranhado de raízes submersas de palmeiras cobertas por vaza orgânica escura; o aventureiro pisa em falso e tem o tornozelo travado por raiz em laço sob 1 metro de lama, sofrendo torção severa e 3d6 de concussão (PHB p. 182-183).',
+        pioneerMitigation: 'Uso de varas de sondagem de ponta rombuda e avanço cuidadoso pisando nas touceiras vegetadas consolidadas.',
+        rescueAndStabilization: 'Corte das fibras da raiz com lâmina curva sem atingir a perna e imobilização da articulação com tala de talo de buriti.',
+        icon: '🌴🕳️',
+        color: '#16a34a'
+      };
+    } else if (ht === 'artesian_gas_bubble_burst_hypoxia') {
+      hazard = {
+        hazardTitle: 'Explosão de Bolha de Gás Metano e Dióxido Artesiano com Asfixia Súbita',
+        saveDC: 14,
+        saveType: 'Constituição',
+        fervedouroRisk: 'Bolsão de gás aprisionado em falha subterrânea que ascende violentamente através do cone arenoso do fervedouro; ao romper a superfície, desloca o oxigênio da depressão gerando asfixia repentina com 2d8 de veneno e desmaio temporário (DMG p. 110, 257).',
+        pioneerMitigation: 'Identificação prévia de borbulhamento rítmico anormal e uso de panos embebidos em essência aromática cobrindo a respiração.',
+        rescueAndStabilization: 'Arraste imediato da vítima para cume de terreno a barlavento, respiração assistida e hidratação morna.',
+        icon: '🫧☠️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'stingray_silt_bed_venomous_barb_strike') {
+      hazard = {
+        hazardTitle: 'Golpe de Ferrão de Arraia de Água Doce Oculta no Leito de Areia Fina',
+        saveDC: 14,
+        saveType: 'Destreza',
+        fervedouroRisk: 'Arraias fluviais camufladas sob a areia aquecida das lagoas de drenagem; o pisoteio desavisado desencadeia golpe reflexo do aguilhão serrilhado na perna do explorador, infligindo 3d6 de dano perfurante e 2d6 de veneno com dor atrofiante (DMG p. 257; PHB p. 182-183).',
+        pioneerMitigation: 'Caminhada arrastando as solas dos pés na areia para alertar e afugentar os animais antes do pisoteio direto.',
+        rescueAndStabilization: 'Lavagem imediata com água quente para desnaturar a toxina do veneno, desinfecção com extrato de própolis e sutura da ferida.',
+        icon: '🐟🩸',
+        color: '#dc2626'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampArtesianFervedouroStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'savanna').toLowerCase();
+    var dt = (defenseType || 'buriti_palm_terrace_elevated_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Terraço Elevado de Buritizal sobre Platô de Areia Seca',
+      fervedouroAndCampSafety: 'Acampamento assentado em terraço arenoso consolidado a 4 metros acima do nível dos brejos, sob copa protetora de buritis gigantes fora da zona de refluxo artesiano e imune a inundações.',
+      fervedouroBarrierAndWell: 'As palmeiras altas oferecem sombra densa contra o sol do cerrado e o solo arenoso seco permite drenagem instantânea de chuvas torrenciais.',
+      campRestAndSafetyGuards: 'Garante repouso longo revigorante, calmo e seguro para todos os membros do grupo, com vista desimpedida das lagoas para as sentinelas de guarda.',
+      icon: '⛺🌴',
+      color: '#16a34a'
+    };
+
+    if (dt === 'interlocking_buriti_trunk_and_woven_frond_stockade') {
+      tech = {
+        defenseTitle: 'Paliçada de Troncos de Buriti e Painéis Trançados de Palha Seca',
+        fervedouroAndCampSafety: 'Barreira perimetral semicircular construída com toras pesadas de palmeira fincadas no solo arenoso e revestidas com esteiras duplas de folhas entrelaçadas.',
+        fervedouroBarrierAndWell: 'Concede cobertura superior (+5 na CA) contra disparos de projéteis e impede o acesso de grandes predadores noturnos ou serpentes carnívoras.',
+        campRestAndSafetyGuards: 'Assegura sono tranquilo e isolamento térmico ideal contra os ventos noturnos da savana.',
+        icon: '🪵🛡️',
+        color: '#15803d'
+      };
+    } else if (dt === 'artesian_sand_filtration_basin_pot') {
+      tech = {
+        defenseTitle: 'Bacia de Decantação com Filtro de Areia Quartzosa e Carvão Ativado',
+        fervedouroAndCampSafety: 'Sistema de filtragem por gravidade construído em cerâmica e bambu que capta água pura da ressurgência artesiana separando partículas finas de quartzo.',
+        fervedouroBarrierAndWell: 'Fornece 65 litros diários de água mineral gelada, cristalina e livre de qualquer micro-organismo ou sedimento abrasivo.',
+        campRestAndSafetyGuards: 'Mantém a hidratação excelente da comitiva, prevenindo desidratação sob o sol e revigorando os exploradores.',
+        icon: '💧🏺',
+        color: '#0284c7'
+      };
+    } else if (dt === 'wetland_tripwire_reed_rattle_alarm') {
+      tech = {
+        defenseTitle: 'Perímetro de Alarme em Brejo com Linhas Submersas e Chocalhos de Taquara',
+        fervedouroAndCampSafety: 'Linhas de fibra de buriti estendidas ao longo dos canais de vau conectadas a chocalhos de taquara suspensos nos galhos das árvores do acampamento.',
+        fervedouroBarrierAndWell: 'Dispara alerta audível nítido a 70 metros de distância caso qualquer criatura hostil atravesse as águas rasas na escuridão.',
+        campRestAndSafetyGuards: 'Garante serenidade mental absoluta para o repouso noturno com prontidão imediata para as sentinelas de vigília.',
+        icon: '🔔🌾',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessFluvialTufaCascadeHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'river').toLowerCase();
@@ -26290,6 +26394,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessArtesianFervedouroHazard: calcWildernessArtesianFervedouroHazard,
+    calcCampArtesianFervedouroStation: calcCampArtesianFervedouroStation,
     calcWildernessFluvialTufaCascadeHazard: calcWildernessFluvialTufaCascadeHazard,
     calcCampFluvialTufaCascadeStation: calcCampFluvialTufaCascadeStation,
     calcWildernessParabolicDuneLagoonHazard: calcWildernessParabolicDuneLagoonHazard,

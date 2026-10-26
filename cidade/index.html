@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessArtesianFervedouroHazard) return '';
+        var bKey = (biome && biome.key) || 'savanna';
+        var fv = CartShared.calcWildernessArtesianFervedouroHazard(bKey, 'fervedouro_artesian_slurry_buoyancy_drop_plunge');
+        return '<div class="clp-fervedouro-spring-card" style="margin:4px 0 6px;text-align:left;background:rgba(14,30,40,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(2,132,199,0.35);font-size:8px;color:#f0f9ff;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + fv.color + ';margin-bottom:2px;">' + fv.icon + ' ' + fv.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Fervedouros e Lençol Artesiano:</b> ' + fv.fervedouroRisk + ' (CD ' + fv.saveDC + ' [' + fv.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Mitigação:</b> ' + fv.pioneerMitigation + ' · <i>Estabilização: ' + fv.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampArtesianFervedouroStation) return '';
+        var bKey = (biome && biome.key) || 'savanna';
+        var fs = CartShared.calcCampArtesianFervedouroStation(bKey, 'buriti_palm_terrace_elevated_bivouac');
+        return '<div class="clp-fervedouro-spring-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,28,20,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(22,163,74,0.3);font-size:8px;color:#f0fdf4;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + fs.color + ';margin-bottom:2px;">' + fs.icon + ' ' + fs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Buritizal:</b> ' + fs.fervedouroAndCampSafety + ' · <b>Defesa:</b> ' + fs.fervedouroBarrierAndWell + '</div>'
+          + '  <div style="font-size:7.5px;color:#86efac;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + fs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessFluvialTufaCascadeHazard) return '';
         var bKey = (biome && biome.key) || 'river';
         var tf = CartShared.calcWildernessFluvialTufaCascadeHazard(bKey, 'tufa_rimstone_dam_collapse_surge');
