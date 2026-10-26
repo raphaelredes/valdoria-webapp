@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessPeriglacialSolifluctionHazard) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var ps = CartShared.calcWildernessPeriglacialSolifluctionHazard(bKey, 'pipkrake_needle_ice_morning_thaw_carpet_slide');
+        return '<div class="clp-periglacial-pipkrake-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,26,38,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.35);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ps.color + ';margin-bottom:2px;">' + ps.icon + ' ' + ps.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Gelo de Agulha (Pipkrake) e Solifluxão:</b> ' + ps.solifluctionRisk + ' (CD ' + ps.saveDC + ' [' + ps.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Mitigação:</b> ' + ps.pioneerMitigation + ' · <i>Estabilização: ' + ps.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampPeriglacialSolifluctionStation) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var pc = CartShared.calcCampPeriglacialSolifluctionStation(bKey, 'bedrock_tors_outcrop_anchored_above_solifluction_bivouac');
+        return '<div class="clp-periglacial-pipkrake-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(10,20,30,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(14,165,233,0.3);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + pc.color + ';margin-bottom:2px;">' + pc.icon + ' ' + pc.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Bivaque no Tor Periglacial:</b> ' + pc.solifluctionAndCampSafety + ' · <b>Defesa:</b> ' + pc.solifluctionTrenchAndWatch + '</div>'
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + pc.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessStarDuneRhourdHazard) return '';
         var bKey = (biome && biome.key) || 'desert';
         var sd = CartShared.calcWildernessStarDuneRhourdHazard(bKey, 'star_dune_slipface_cornice_avalanche_burial');

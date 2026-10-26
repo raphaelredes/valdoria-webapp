@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 209: CAMPOS DE GELO DE AGULHA (PIPKRAKE) E SOLIFLUXÃO ALPINA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessPeriglacialSolifluctionHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'pipkrake_needle_ice_morning_thaw_carpet_slide').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Deslizamento sobre Tapete de Cristais de Gelo de Agulha (Pipkrake)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      solifluctionRisk: 'Durante a noite fria, colunas verticais de gelo fibroso de 10 centímetros erguem a camada superficial de terra e pedras na encosta; ao pisar pela manhã, os milhões de pilares de gelo quebram em efeito dominó fazendo o chão inteiro deslizar sob as botas rumo ao abismo com 3d8 de concussão (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Esmagamento prévio da crosta fofa de agulhas de gelo com o conto do bastão ferrado e marcha pelas cristas de rocha nua.',
+      rescueAndStabilization: 'Autodetenção imediata com piqueta cravada no subsolo firme e imobilização de contusões.',
+      icon: '🧊⛰️',
+      color: '#38bdf8'
+    };
+
+    if (ht === 'solifluction_lobe_saturated_tundra_tongue_slump') {
+      hazard = {
+        hazardTitle: 'Ruptura de Língua de Solifluxão em Encosta Saturada de Degelo',
+        saveDC: 15,
+        saveType: 'Força',
+        solifluctionRisk: 'Lobo em forma de língua de solo encharcado que escorre lentamente sobre a rocha congelada impermeável; a sobrecarga da comitiva rompe a frente bojuda da língua desencadeando uma corrida pastosa de lama gelada com 2d6 de frio e 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Travessia sempre por cima da cicatriz superior do lobo de solifluxão e nunca sobre sua barriga frontal.',
+        rescueAndStabilization: 'Tracionamento com corda desde afloramento estável e troca de calçados encharcados.',
+        icon: '🌊🏔️',
+        color: '#0284c7'
+      };
+    } else if (ht === 'nivation_hollow_cornice_collapse_and_slush_avalanche') {
+      hazard = {
+        hazardTitle: 'Torrente de Neve Aguada (Slushflow) em Bacia de Nivação',
+        saveDC: 15,
+        saveType: 'Força',
+        solifluctionRisk: 'Depressão côncava de meia-encosta onde bancos perenes de neve represam água de degelo na base; a barreira saturada rompe subitamente disparando uma avalanche densa como concreto úmido que arrasta os aventureiros com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Desvio das manchas de neve escura azulada encharcada no fundo das concavidades alpinas.',
+        rescueAndStabilization: 'Escavação urgente da neve pesada que solidifica rapidamente ao parar e aquecimento.',
+        icon: '❄️🌊',
+        color: '#0ea5e9'
+      };
+    } else if (ht === 'frost_sorted_stone_stripe_unstable_talus_roll') {
+      hazard = {
+        hazardTitle: 'Rolamento em Cadeia nas Listras Criogênicas de Pedra (Stone Stripes)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        solifluctionRisk: 'O ciclo diário de gelo e degelo separa os matacões finos da argila em faixas paralelas verticais na encosta; pisar nas faixas de pedras soltas sem matriz terrosa provoca um desmoronamento ruidoso sobre as canelas com 2d8 de concussão (PHB p. 182-183).',
+        pioneerMitigation: 'Travessia em diagonal curta apoiando o pé nas faixas intermediárias de turfa compacta.',
+        rescueAndStabilization: 'Aplicação de compressas geladas nas contusões tibiais e tala de suporte.',
+        icon: '🪨⛷️',
+        color: '#64748b'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampPeriglacialSolifluctionStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'bedrock_tors_outcrop_anchored_above_solifluction_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Ancorado em Afloramento de Rocha Matriz (Tor Periglacial)',
+      solifluctionAndCampSafety: 'Acampamento instalado sobre o pedestal de rocha viva profundamente enraizado na montanha (tor), ao redor do qual o manto de solifluxão escorre sem afetar o topo firme.',
+      solifluctionTrenchAndWatch: 'Proporciona fundação absolutamente imóvel, seca e imune ao crescimento noturno de agulhas de gelo (pipkrake).',
+      campRestAndSafetyGuards: 'Garante descanso longo estável e seguro para todos os membros do grupo nas encostas altas.',
+      icon: '⛺🪨',
+      color: '#38bdf8'
+    };
+
+    if (dt === 'retaining_stone_riser_terracette_drainage_trench') {
+      tech = {
+        defenseTitle: 'Valeta Drenante em Espinha de Peixe no Terraço de Gelifluxão',
+        solifluctionAndCampSafety: 'Escavação de canais diagonais a montante das barracas revestidos com lajes planas para desviar a água capilar antes do congelamento noturno.',
+        solifluctionTrenchAndWatch: 'Impede a formação de gelo de segregação sob o piso das tendas e mantém o solo firme.',
+        campRestAndSafetyGuards: 'Evita que o acampamento amanheça inclinado ou alagado pelo degelo matinal.',
+        icon: '⛏️💧',
+        color: '#0284c7'
+      };
+    } else if (dt === 'nivation_snowbank_filtered_drip_collector_pot') {
+      tech = {
+        defenseTitle: 'Bica Filtrada na Base Granítica de Banco de Neve de Nivação',
+        solifluctionAndCampSafety: 'Captação da água cristalina que escorre na extremidade lateral segura de uma mancha de neve alpina sobre lajes limpas de granito.',
+        solifluctionTrenchAndWatch: 'Fornece água pura sem a argila coloidal das línguas de solifluxão e economiza lenha de derretimento.',
+        campRestAndSafetyGuards: 'Abastece os cantis da comitiva com rapidez e segurança.',
+        icon: '❄️🏺',
+        color: '#0ea5e9'
+      };
+    } else if (dt === 'frost_heave_tilt_rod_slope_movement_sentinel') {
+      tech = {
+        defenseTitle: 'Pêndulo de Alerta de Rastejo de Encosta no Posto de Guarda',
+        solifluctionAndCampSafety: 'Vara rígida cravada na borda da língua de solo vizinha com um fio de prumo suspenso sobre um prato metálico.',
+        solifluctionTrenchAndWatch: 'Qualquer movimento milimétrico ou aceleração da massa de solifluxão faz o prumo tocar o prato, alertando o vigia.',
+        campRestAndSafetyGuards: 'Garante monitoramento geotécnico contínuo durante noites de chuva ou degelo.',
+        icon: '🔔📐',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 208: DUNAS ESTRELADAS GIGANTES (RHOURDS) E AREIAS CANTANTES (D&D 5e)
   // =========================================================================
 
@@ -29516,6 +29620,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessPeriglacialSolifluctionHazard: calcWildernessPeriglacialSolifluctionHazard,
+    calcCampPeriglacialSolifluctionStation: calcCampPeriglacialSolifluctionStation,
     calcWildernessStarDuneRhourdHazard: calcWildernessStarDuneRhourdHazard,
     calcCampStarDuneRhourdStation: calcCampStarDuneRhourdStation,
     calcWildernessAlkalineSodaLakeHazard: calcWildernessAlkalineSodaLakeHazard,
