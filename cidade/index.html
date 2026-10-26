@@ -5232,7 +5232,7 @@ LOG SINK (Fase 7):
     body.state-cart #footer-collapse-toggle,
     body.state-cart #footer-restore { display: none !important; }
     /* cart-controls (zoom +/-/⌂) sobem pra não colidir com Voltar (bottom:6px+pad) */
-    body.state-cart .cart-controls { bottom: 60px !important; }
+    body.state-cart .cart-controls { bottom: 48px !important; }
     body.state-cart #content {
       position: absolute; inset: 0;
       z-index: 50;
@@ -5250,38 +5250,42 @@ LOG SINK (Fase 7):
     .cart-header {
       flex-shrink: 0;
       text-align: center;
-      padding: 8px 12px 6px;
+      padding: 4px 8px 4px;
       background: linear-gradient(180deg, rgba(18, 13, 8, 0.98) 0%, rgba(24, 18, 12, 0.92) 100%);
       border-bottom: 1px solid rgba(196, 149, 58, 0.35);
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+      box-sizing: border-box;
+      max-width: 100%;
     }
     .cart-header h2 {
       font-family: 'Cinzel', serif;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      letter-spacing: 2px;
+      letter-spacing: 1.5px;
       color: #f4d49a;
       text-shadow: 0 2px 8px rgba(0,0,0,0.9), 0 0 10px rgba(196, 149, 58, 0.4);
-      margin: 0 0 5px;
+      margin: 0 0 3px;
       text-transform: uppercase;
     }
     .cart-prov-bar-wrap {
       position: relative;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       background: rgba(0, 0, 0, 0.5);
       border: 1px solid rgba(196, 149, 58, 0.28);
       border-radius: 20px;
-      padding: 3px 6px;
+      padding: 2px 4px;
       box-shadow: inset 0 1px 4px rgba(0,0,0,0.6);
       width: 100%;
+      box-sizing: border-box;
+      max-width: 100%;
     }
     .cart-prov-bar {
       flex: 1;
       min-width: 0;
       display: flex;
-      gap: 5px;
+      gap: 4px;
       overflow-x: auto;
       scrollbar-width: none;
       padding: 2px 0;
@@ -5289,13 +5293,13 @@ LOG SINK (Fase 7):
     }
     .cart-prov-bar::-webkit-scrollbar { display: none; }
     .cart-prov-nav-btn {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
       background: rgba(40, 28, 16, 0.9);
       border: 1px solid rgba(196, 149, 58, 0.45);
       color: #ffd685;
-      font-size: 14px;
+      font-size: 13px;
       line-height: 1;
       display: flex;
       align-items: center;
@@ -5316,43 +5320,53 @@ LOG SINK (Fase 7):
       transform: scale(0.95);
     }
 
-    /* Dock Inferior de Ações Unificado */
+    /* Dock Inferior de Ações Unificado (Mobile-First / Telegram WebApp Desktop) */
     .cart-dock {
       position: absolute;
-      bottom: 12px;
-      left: 50%;
-      transform: translateX(-50%);
+      bottom: 10px;
+      left: 8px;
+      right: 8px;
+      max-width: 464px;
+      margin: 0 auto;
       z-index: 60;
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 6px;
-      background: linear-gradient(180deg, rgba(30, 22, 14, 0.94) 0%, rgba(14, 10, 6, 0.98) 100%);
+      gap: 4px;
+      background: linear-gradient(180deg, rgba(26, 18, 12, 0.96) 0%, rgba(12, 8, 5, 0.98) 100%);
       border: 1px solid rgba(212, 168, 83, 0.5);
-      border-radius: 24px;
-      padding: 4px 6px;
+      border-radius: 20px;
+      padding: 3px 5px;
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.85), 0 0 15px rgba(196, 149, 58, 0.2), inset 0 1px 0 rgba(255, 235, 175, 0.25);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
+      box-sizing: border-box;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
       white-space: nowrap;
     }
+    .cart-dock::-webkit-scrollbar { display: none; }
     .cart-dock-btn {
       background: rgba(0, 0, 0, 0.45);
       border: 1px solid rgba(196, 149, 58, 0.35);
-      border-radius: 18px;
+      border-radius: 14px;
       color: #ffd685;
       font-family: 'Cinzel', serif;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
-      letter-spacing: 0.5px;
-      height: 34px;
-      padding: 0 13px;
+      letter-spacing: 0.3px;
+      height: 28px;
+      padding: 0 8px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
+      gap: 4px;
       cursor: pointer;
       transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
       user-select: none;
+      flex-shrink: 0;
+      white-space: nowrap;
     }
     .cart-dock-btn:hover {
       background: rgba(196, 149, 58, 0.25);
@@ -5667,22 +5681,22 @@ LOG SINK (Fase 7):
     #cart-canvas:active { cursor: grabbing; }
     .cart-controls {
       position: absolute;
-      bottom: 12px; right: 12px;
+      bottom: 48px !important; right: 8px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
       z-index: 5;
     }
     .cart-ctrl-btn {
-      width: 44px; height: 44px;            /* mobile-friendly Apple HIG */
+      width: 32px; height: 32px;
       background: rgba(28, 22, 16, 0.92);
       border: 1.5px solid rgba(196, 149, 58, 0.7);
       color: #c4953a;
       font-family: 'Cinzel', serif;
-      font-size: calc(20px * var(--v-font-scale, 1));  /* HARDCODED: zoom +/- glyph weight; no exact token (entre xl=16 e 3xl=22) */
+      font-size: 16px;
       font-weight: 700;
       cursor: pointer;
-      border-radius: 8px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -69947,7 +69961,7 @@ function renderCartographyCanvas(el){
     + '    <button class="cart-dock-btn" id="cart-back-btn" type="button" title="Voltar à Cidade [Esc]" aria-label="Voltar para a cidade">🏛️ Cidade</button>'
     + '    <button class="cart-dock-btn primary" id="cart-atlas-picker-btn" type="button" title="Atlas das Províncias [M]" aria-label="Seletor de Províncias">🗺️ Atlas ▾</button>'
     + '    <button class="cart-dock-btn" id="cart-waypoints-btn" type="button" title="Rede de Marcos e Santuários [W]" aria-label="Marcos de Viagem e Santuários">🌀 Marcos</button>'
-    + '    <button class="cart-dock-btn" id="cart-filter-toggle-btn" type="button" title="Alternar Filtro de Nós no Mapa [Teclas 1 a 6]">🎯 Filtro: Todos</button>'
+    + '    <button class="cart-dock-btn" id="cart-filter-toggle-btn" type="button" title="Alternar Filtro de Nós no Mapa [Teclas 1 a 6]">🎯 Todos</button>'
     + '    <button class="cart-dock-btn" id="cart-ruler-btn" type="button" title="Régua Cartográfica / Astrolábio de Medição [X]" aria-label="Régua Cartográfica e Distâncias">📏 Régua</button>'
     + '    <button class="cart-dock-btn" id="cart-layers-btn" type="button" title="Alternar Camadas Táticas do Mapa [L]" aria-label="Camadas do Mapa">🗺️ Camadas</button>'
     + '    <button class="cart-dock-btn" id="cart-guide-btn" type="button" title="Guia do Andarilho e Regras de Viagem D&D 5e [H]" aria-label="Guia de Viagem D&D 5e">📖 Guia</button>'
@@ -71361,14 +71375,14 @@ function _setCartFilter(f) {
   var btn = document.getElementById('cart-filter-toggle-btn');
   if (btn) {
     var labels = {
-      all: '🎯 Filtro: Todos',
+      all: '🎯 Todos',
       settlements: '🏛️ Cidades',
       wilderness: '⚔️ Ermos',
       quests: '📜 Contratos',
       pinned: '📌 Fixados',
       notes: '📝 Anotações'
     };
-    btn.innerHTML = labels[f] || '🎯 Filtro: Todos';
+    btn.innerHTML = labels[f] || '🎯 Todos';
   }
   _drawCart();
 }
