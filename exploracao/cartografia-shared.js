@@ -20610,6 +20610,110 @@
   // FASE 180 (MARCO +80): CAMPOS DE CALDEIRAS VULCÂNICAS E LAGOS CRATERA ÁCIDOS (D&D 5e)
   // =========================================================================
 
+  // =========================================================================
+  // FASE 181: RAVINAS E GARGANTAS EM BADLANDS COM PONTES NATURAIS DE ARGILA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessBadlandClayPipingHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'clay_arch_piping_roof_collapse_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desabamento de Ponte Natural de Argila Ressecada com Queda de 18m',
+      saveDC: 15,
+      saveType: 'Destreza',
+      badlandAndPipingRisk: 'Arco natural de argilito erodido por tubulação hídrica sobre ravina de 18 metros; a passagem da comitiva rompe a abóbada fragilizada pelo calor, despencando blocos endurecidos e os exploradores no fundo pedregoso com risco de 3d8 de concussão por esmagamento (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Travessia em fila espaçada com linha de segurança ancorada em estacas metálicas longas e teste prévio de espessura com punção de percussão.',
+      rescueAndStabilization: 'Ancoragem de tripé de resgate na borda firme com descida de corda em sistema 3:1 para içar os membros feridos.',
+      icon: '🌉⚠️',
+      color: '#ca8a04'
+    };
+
+    if (ht === 'badland_subsurface_piping_sinkhole_swallow') {
+      hazard = {
+        hazardTitle: 'Sumidouro de Tubulação Oculta (Piping Sinkhole) em Fundo de Ravina',
+        saveDC: 15,
+        saveType: 'Destreza',
+        badlandAndPipingRisk: 'Leito aparentemente seco de ravina com duto subterrâneo oco de erosão hídrica; o piso cede sob a bota do aventureiro que é sugado para poço vertical de 6 metros em lama de bentonita com risco de soterramento parcial e 3d6 de concussão (PHB p. 182-183).',
+        pioneerMitigation: 'Sondagem rigorosa de resistência do leito com bastões de ponta chata e avanço pelas ombreiras rochosas da ravina.',
+        rescueAndStabilization: 'Lançamento de cabo reforçado com arnês e alavanca com hastes de madeira para desatarolar os membros da argila pegajosa.',
+        icon: '🕳️🏜️',
+        color: '#b45309'
+      };
+    } else if (ht === 'bentonite_clay_mudflow_flash_surge') {
+      hazard = {
+        hazardTitle: 'Torrente Relâmpago de Lama Bentonítica Espessa a 30 km/h em Cânion',
+        saveDC: 15,
+        saveType: 'Força',
+        badlandAndPipingRisk: 'Chuva súbita torrencial a montante que desce a garganta como pasta densa de argila bentonítica expansiva; arrasta equipamentos pesados e empurra a comitiva contra paredes verticais de argilito, infligindo 3d8 de concussão por arrastamento (DMG p. 110, 246).',
+        pioneerMitigation: 'Observação de nuvens escuras na cabeceira e fuga célere para terraços elevados de erosão ao menor estrondo no cânion.',
+        rescueAndStabilization: 'Içamento para patamares elevados com ganchos de escalada e lavagem urgente dos olhos e vias aéreas com água doce mineral.',
+        icon: '🌊🪨',
+        color: '#78350f'
+      };
+    } else if (ht === 'gypsum_vein_shilf_puncture_laceration') {
+      hazard = {
+        hazardTitle: 'Fraturas de Veios de Gipsita Afiada com Laceração de Perneiras e Calçados',
+        saveDC: 14,
+        saveType: 'Destreza',
+        badlandAndPipingRisk: 'Cristas de argilito recortadas por lâminas de gipsita e selenita cristalina; arestas afiadas que cortam solas de couro e provocam lacerações severas nos pés durante a descida íngreme com 3d6 de dano cortante e perda de mobilidade (PHB p. 182-183).',
+        pioneerMitigation: 'Uso de calçados reforçados com chapas articuladas de ferro e descida cautelosa amparada por cordas guia.',
+        rescueAndStabilization: 'Assepsia profunda com tintura de iodo, extração meticulosa de estilhaços cristalinos e sutura das feridas.',
+        icon: '💎🩸',
+        color: '#dc2626'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampBadlandClayPipingStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'badland_mesa_butte_scarp_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Platô de Testemunho Rochoso (Butte) Acima das Ravinas',
+      badlandAndCampSafety: 'Acampamento instalado no cume plano e seco de uma mesa isolada protegida por escarpas verticais de 30 metros de altura, totalmente fora do alcance de torrentes de lama e desmoronamentos de ravina.',
+      badlandScarpBarrierAndPipingWell: 'O relevo residual inacessível funciona como fortaleza natural inexpugnável, exigindo escalada exposta de qualquer invasor e fornecendo visão periférica de 360 graus contra aproximações nos ermos.',
+      campRestAndSafetyGuards: 'Concede descanso longo seguro, seco e calmo para todos os membros do grupo, garantindo vigilância panorâmica superior para as sentinelas de guarda.',
+      icon: '⛺🏜️',
+      color: '#ca8a04'
+    };
+
+    if (dt === 'interlocking_claystone_and_hardwood_breastwork') {
+      tech = {
+        defenseTitle: 'Trincheira Baluarte de Blocos de Argilito e Toras de Zimbro',
+        badlandAndCampSafety: 'Parapeto semicircular erguido no único esporão de acesso à mesa utilizando blocos endurecidos de argilito e troncos de zimbro seco travados com argamassa de bentonita.',
+        badlandScarpBarrierAndPipingWell: 'Concede cobertura superior (+5 na CA) contra arqueiros e projéteis e barra investidas de predadores das badlands ou invasores noturnos.',
+        campRestAndSafetyGuards: 'Assegura sono tranquilo e proteção inquebrável contra tempestades de poeira e ventanias dos planaltos.',
+        icon: '🪵🛡️',
+        color: '#92400e'
+      };
+    } else if (dt === 'badland_piping_filtered_seepage_cistern') {
+      tech = {
+        defenseTitle: 'Cisterna de Captação em Duto com Filtro de Cascalho e Areia',
+        badlandAndCampSafety: 'Bacia escavada na base de arenito que capta infiltração límpida de duto de drenagem subterrâneo purificada através de leito espesso de cascalho e carvão ativado.',
+        badlandScarpBarrierAndPipingWell: 'Coleta 50 litros diários de água doce fresca, límpida e potável sem turbidez de argila, garantindo autonomia hídrica absoluta nas badlands desérticas.',
+        campRestAndSafetyGuards: 'Elimina o consumo de lama salobra, previne desidratação crônica e restabelece a resistência dos exploradores.',
+        icon: '💧🏺',
+        color: '#0284c7'
+      };
+    } else if (dt === 'ravine_crest_tripwire_clay_bell_alarm') {
+      tech = {
+        defenseTitle: 'Perímetro de Alarme em Ravina com Fios de Tensão e Guizos de Cerâmica',
+        badlandAndCampSafety: 'Linhas finas de latão estendidas ao longo das gargantas e caminhos de subida conectadas a bilhas de pedra dentro de ânforas de cerâmica ressonantes.',
+        badlandScarpBarrierAndPipingWell: 'Emite alarme sonoro agudo a 70 metros de distância com qualquer tentativa de aproximação furtiva pelas fendas das badlands.',
+        campRestAndSafetyGuards: 'Proporciona tranquilidade mental contínua e prontidão rápida das sentinelas durante a noite.',
+        icon: '🔔🏺',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessAcidCalderaCraterHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'volcanic').toLowerCase();
@@ -26602,6 +26706,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessBadlandClayPipingHazard: calcWildernessBadlandClayPipingHazard,
+    calcCampBadlandClayPipingStation: calcCampBadlandClayPipingStation,
     calcWildernessAcidCalderaCraterHazard: calcWildernessAcidCalderaCraterHazard,
     calcCampAcidCalderaCraterStation: calcCampAcidCalderaCraterStation,
     calcWildernessFiordHangingFallsHazard: calcWildernessFiordHangingFallsHazard,
