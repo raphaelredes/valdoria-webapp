@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 265: ESCARPAS DE BASALTOS DE INUNDAÇÃO E TRAPPS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessFloodBasaltTrappHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var ht = (hazardType || 'step_bench_scarp_shear_fall').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ruptura em Escarpa de Degrau de Trapp Basáltico',
+      saveDC: 15,
+      saveType: 'Destreza',
+      trappRisk: 'O platô continental é formado por sucessivos derrames gigantescos de basalto intercalados em degraus abruptos; na borda do patamar, colunas prismáticas frouxas se desprendem sob a marcha da comitiva despencando em abismo de 25 metros com 4d6 de dano de queda contundente sobre taludes pontiagudos (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores sondando diaclases com martelos geológicos e cravando pítons de ferro com cordas estáticas para guiar a passagem pela borda dos degraus (Sobrevivência ou Atletismo CD 14).',
+      rescueAndStabilization: 'Içamento por talha de resgate montada em bloco colunar firme e aplicação de talas em fraturas com ataduras rígidas (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🪜',
+      color: '#94a3b8'
+    };
+
+    if (ht === 'interflow_vesicular_breccia_collapse') {
+      hazard.hazardTitle = 'Colapso de Camada Friável de Brecha Vesicular',
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.trappRisk = 'Entre duas camadas de basalto maciço existe um horizonte de escória vulcânica porosa e vesicular esfarelável; ao pisar sobre essa fresta oca disfarçada por cascalho, o teto cede aprisionando as pernas dos aventureiros com 2d8 de dano perfurante e entorse grave (DMG p. 110).';
+      hazard.pioneerMitigation = 'Inspeção cuidadosa da coloração avermelhada das brechas superficiais e avanço apoiado em bordões longos (Percepção ou Natureza CD 13).';
+      hazard.rescueAndStabilization = 'Uso de alavancas de ferro para remover pedras vesiculares e aplicação de ungüento anti-inflamatório (Sobrevivência CD 12 ou Medicina CD 12).';
+    } else if (ht === 'steppes_wind_funnel_gale_gust') {
+      hazard.hazardTitle = 'Garganta de Vento Acelerado nos Degraus de Escarpa';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.trappRisk = 'Os degraus colossais de trapp canalizam ventos gélidos da estepe em vórtices violentos de alta pressão; rajadas repentinas arremessam cascalho cortante e empurram os aventureiros 15 pés em direção ao precipício com 2d6 de dano de contusão (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Marcha abaixada rente às colunatas basálticas e uso de capas pesadas amarradas com correias duplas (Sobrevivência CD 14).';
+      hazard.rescueAndStabilization = 'Contenção rápida de companheiros desequilibrados segurando arreios de carga e estancamento de cortes faciais (Atletismo CD 13 ou Medicina CD 12).';
+    } else if (ht === 'sulfuric_interbed_fissure_exhalation') {
+      hazard.hazardTitle = 'Exalação Sulfurosa em Fissura Interestratificada';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Constituição';
+      hazard.trappRisk = 'Falhas tectônicas profundas que cortam o pacote de derrames basálticos emitem jatos mornos de gases sulfúricos corrosivos; a inalação involuntária causa queimação traqueal, 2d8 de dano de veneno e tosse convulsiva com desvantagem em testes de Percepção por 1 hora (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Identificação do odor pungente de enxofre e crostas de sublimados amarelados nas fendas antes da aproximação (Percepção CD 13).';
+      hazard.rescueAndStabilization = 'Retirada rápida para contraventos abertos e lavagem das mucosas com água pura e infusões calmantes (Medicina CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampFloodBasaltTrappStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountains').toLowerCase();
+    var dt = (defenseType || 'columnar_colonnade_alcove_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Alcovas de Colunata Prismática',
+      trappAndCampSafety: 'O acampamento é montado no recesso profundo de uma parede de disjunção prismática colossal; os pilares hexagonais de basalto oferecem teto e flancos sólidos imunes a desabamentos e vento lateral (DMG p. 111).',
+      trappTrenchAndWatch: 'A sentinela posiciona-se no topo de uma coluna rebaixada com excelente ângulo de visão de 180 graus sobre toda a escadaria de patamares inferiores (+2 em Percepção Passiva).',
+      campRestAndSafetyGuards: 'Descanso seguro com anteparo pétreo natural contra tempestades da estepe e ameaças terrestres.',
+      icon: '🛡️',
+      color: '#94a3b8'
+    };
+
+    if (dt === 'terraced_waterfall_clearing_basin') {
+      defense.defenseTitle = 'Bacia de Decantação em Degrau de Cascata';
+      defense.trappAndCampSafety = 'Aproveitamento de uma bacia esculpida na rocha basáltica pura onde a cascata do degrau superior deposita água translúcida e límpida, livre de partículas de terra ou matéria orgânica decomposta (PHB p. 150).';
+      defense.trappTrenchAndWatch = 'Abastecimento imediato de cantis com água pura e fria sem risco de contaminação por lodo durante o descanso longo.';
+      defense.campRestAndSafetyGuards = 'Restauração total de recursos hídricos com banho revigorante que remove poeira e fuligem da marcha.';
+    } else if (dt === 'step_bench_chokepoint_stockade') {
+      defense.defenseTitle = 'Paliçada de Garganta em Rampa de Degrau';
+      defense.trappAndCampSafety = 'Barricada de pedras e troncos erguida na única rampa estreita de acesso que sobe do patamar inferior para o acampamento, fechando completamente a passagem contra feras errantes (DMG p. 111).';
+      defense.trappTrenchAndWatch = 'Oferece cobertura total (+5 na CA) contra arqueiros e sentinelas na escuridão, obrigando qualquer agressor a lutar em desvantagem em terreno íngreme e afunilado.';
+      defense.campRestAndSafetyGuards = 'Elimina riscos de emboscada noturna por criaturas quadrúpedes ou hordas incapazes de escalar paredes verticais.';
+    } else if (dt === 'vesicular_hearth_ember_well') {
+      defense.defenseTitle = 'Poço de Brasas em Basalto Vesicular';
+      defense.trappAndCampSafety = 'Lareira cavada em nicho de rocha porosa que absorve as faíscas e canaliza a fumaça rente à parede úmida, evitando sinais de fumaça visíveis à distância na estepe aberta (PHB p. 185).';
+      defense.trappTrenchAndWatch = 'Cozimento seguro de rações quentes e aquecimento contínuo sem revelar a localização do grupo para patrulhas hostis.';
+      defense.campRestAndSafetyGuards = 'Conforto térmico excelente com recuperação eficiente durante o repouso.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 264: DIATREMAS DE KIMBERLITO E BRECHAS MANTÉLICAS (D&D 5e)
   // =========================================================================
 
@@ -35316,6 +35396,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessFloodBasaltTrappHazard: calcWildernessFloodBasaltTrappHazard,
+    calcCampFloodBasaltTrappStation: calcCampFloodBasaltTrappStation,
     calcWildernessKimberliteDiatremeHazard: calcWildernessKimberliteDiatremeHazard,
     calcCampKimberliteDiatremeStation: calcCampKimberliteDiatremeStation,
     calcWildernessSerpentiniteOphioliteHazard: calcWildernessSerpentiniteOphioliteHazard,

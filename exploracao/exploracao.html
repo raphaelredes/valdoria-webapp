@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T21:31:17Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T21:33:32Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessFloodBasaltTrappHazard) return '';
+        var bKey = (biome && biome.key) || 'mountains';
+        var bt = CartShared.calcWildernessFloodBasaltTrappHazard(bKey, 'step_bench_scarp_shear_fall');
+        return '<div class="clp-flood-basalt-trapp-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,24,28,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(148,163,184,0.35);font-size:8px;color:#f8fafc;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + bt.color + ';margin-bottom:2px;">' + bt.icon + ' ' + bt.hazardTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Escarpa de Trapp Basáltico:</b> ' + bt.trappRisk + ' (CD ' + bt.saveDC + ' [' + bt.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#cbd5e1;margin-top:1px;">• <b>Mitigação:</b> ' + bt.pioneerMitigation + ' · <i>Estabilização: ' + bt.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampFloodBasaltTrappStation) return '';
+        var bKey = (biome && biome.key) || 'mountains';
+        var bt = CartShared.calcCampFloodBasaltTrappStation(bKey, 'columnar_colonnade_alcove_bivouac');
+        return '<div class="clp-flood-basalt-trapp-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(24,28,32,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(100,116,139,0.3);font-size:8px;color:#e2e8f0;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + bt.color + ';margin-bottom:2px;">' + bt.icon + ' ' + bt.defenseTitle.toUpperCase() + ' (DMG p. 110):</div>' 
+          + '  <div>• <b>Bivaque em Alcovas de Trapp:</b> ' + bt.trappAndCampSafety + ' · <b>Proteção:</b> ' + bt.trappTrenchAndWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#cbd5e1;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + bt.campRestAndSafetyGuards + '</div>' 
           + '</div>';
       })()
     + (function(){
