@@ -11533,6 +11533,130 @@
     };
   }
 
+  // === calcWildernessFlashFloodAndRiverRapidHazard (Trombas d'Água, Corredeiras Violentas e Vaus Traiçoeiros - DMG p. 110, 112 / PHB p. 182-183) ===
+  function calcWildernessFlashFloodAndRiverRapidHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'river').toLowerCase();
+    var ht = (hazardType || 'canyon_flash_flood_surge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Tromba d\'Água Súbita e Enxurrada em Cânion Fluvial',
+      saveDC: 14,
+      saveType: 'Força',
+      floodDamageAndSweeping: 'Onda de cheia repentina trazendo lama e galhos a 40 km/h; 2d10 de concussão e arrasto de 18 metros a jusante com risco de perda de carga.',
+      pioneerMitigation: 'Batedores identificam rugido grave a montante e coloração barrenta da água, escalando as margens para terra alta em 1 minuto.',
+      waterRescueAndDrying: 'Lançamento de corda com nó de laço para resgatar membros arrastados e secagem imediata de alforjes em fogueira.',
+      icon: '🌊⚡',
+      color: '#0284c7'
+    };
+
+    if (ht === 'whitewater_rapids_cross_hazard') {
+      hazard = {
+        hazardTitle: 'Corredeiras Violentas com Rochas Submersas e Vórtices',
+        saveDC: 13,
+        saveType: 'Destreza',
+        floodDamageAndSweeping: 'Turbulência de classe IV entre pedregulhos afiados; 2d6 de concussão, condição Caído e teste contra afogamento se submerso (PHB p. 183).',
+        pioneerMitigation: 'Mapeamento de banco de seixos calmo a 50 metros e uso de bastão de apoio para manter três pontos de contato na travessia.',
+        waterRescueAndDrying: 'Aventureiros em terra firme seguram corda esticada na transversal para ancorar quem cruza a vau.',
+        icon: '🚣‍♂️💥',
+        color: '#06b6d4'
+      };
+    } else if (ht === 'slimy_slippery_ford_stepping') {
+      hazard = {
+        hazardTitle: 'Vau de Lajes Escorregadias e Algas Fluviais',
+        saveDC: 12,
+        saveType: 'Destreza',
+        floodDamageAndSweeping: 'Lajes polidas sob água rasa de 60 cm; queda súbita e perda de 1 turno com risco de ser levado pela correnteza.',
+        pioneerMitigation: 'Batedores amarram tiras de corda de cânhamo ao redor das solas das botas para tração antiderrapante.',
+        waterRescueAndDrying: 'Apoio mútuo de braços dados entre dois aventureiros corpulentos garantindo estabilidade na marcha.',
+        icon: '🦶💧',
+        color: '#10b981'
+      };
+    } else if (ht === 'undertow_submerged_syphon_whirlpool') {
+      hazard = {
+        hazardTitle: 'Redemoinho de Sucção Subaquática e Fenda Sifão',
+        saveDC: 14,
+        saveType: 'Força',
+        floodDamageAndSweeping: 'Sucção para cavidade submersa na curva côncava do rio; condição Agarrado e asfixia por água se não desengajar em 2 rodadas.',
+        pioneerMitigation: 'Reconhecimento prévio de espuma circular e redemoinhos superficiais contornando a curva pelo lado convexo de praia rasa.',
+        waterRescueAndDrying: 'Tração imediata com gancho de escalada e reanimação cardiopulmonar à beira da margem.',
+        icon: '🌀🏊‍♂️',
+        color: '#6366f1'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      floodDamageAndSweeping: hazard.floodDamageAndSweeping,
+      pioneerMitigation: hazard.pioneerMitigation,
+      waterRescueAndDrying: hazard.waterRescueAndDrying,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110, 112 (Rios e Trombas d\'Água) / PHB p. 182-183 (Afogamento e Correntezas)'
+    };
+  }
+
+  // === calcCampFloodClearanceAndRopeTraverse (Cota de Segurança contra Cheias, Tirolesas e Jangadas de Troncos - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampFloodClearanceAndRopeTraverse(biomeKey, techniqueType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'river').toLowerCase();
+    var tt = (techniqueType || 'high_ground_flood_clearance_perch').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Cota Elevada de Acampamento Fora da Faixa de Inundação',
+      floodClearanceEfficiency: 'Posicionamento das barracas no mínimo 8 metros acima da cota normal do leito fluvial em terraço rochoso firme.',
+      traverseAndCargoSecurity: 'Garante que subidas repentinas do rio durante tempestades na cabeceira passem longe dos sacos de dormir.',
+      campRestAndSafetyGuards: 'Proporciona sono despreocupado para a comitiva com sentinelas monitorando o murmúrio das águas à distância.',
+      icon: '🏕️⛰️',
+      color: '#10b981'
+    };
+
+    if (tt === 'tyrolean_rope_traverse_rigging') {
+      tech = {
+        defenseTitle: 'Tirolesa Estaiada com Corda Dupla e Nós Prusik',
+        floodClearanceEfficiency: 'Cabo mestre de seda trançada tensionado entre duas árvores maciças através da garganta do rio.',
+        traverseAndCargoSecurity: 'Permite transporte aéreo seguro de provisões, baús e aventureiros a 4 metros acima das correntezas furiosas.',
+        campRestAndSafetyGuards: 'Mantém equipamentos secos e prontos para uso, sem risco de calçados ensopados ou perdas materiais.',
+        icon: '🧗‍♀️🪢',
+        color: '#38bdf8'
+      };
+    } else if (tt === 'lashed_log_pontoon_raft') {
+      tech = {
+        defenseTitle: 'Jangada de Troncos Descascados com Estabilizadores Laterais',
+        floodClearanceEfficiency: 'Plataforma flutuante com seis vigas leves amarradas em nós de barcaça suportando até 800 kg de carga.',
+        traverseAndCargoSecurity: 'Transbordo estável de animais de carga e armaduras pesadas impulsionado por varas de bambu em vau largo.',
+        campRestAndSafetyGuards: 'Pode ser ancorada na margem à noite servindo como píer de lavagem de suprimentos e pesca.',
+        icon: '🪵🚣',
+        color: '#ca8a04'
+      };
+    } else if (tt === 'wax_sealed_dry_storage_rig') {
+      tech = {
+        defenseTitle: 'Sacos Estanques Impermeabilizados com Resina e Sebo em Galhos Altos',
+        floodClearanceEfficiency: 'Envoltórios de couro engraxado pendurados em galhos elevados acima do alcance de enxurradas e caranguejos fluviais.',
+        traverseAndCargoSecurity: 'Proteção absoluta para pergaminhos, grimórios, rações de viagem e tochas contra umidade noturna.',
+        campRestAndSafetyGuards: 'Garante fogo rápido pela manhã e pão de viagem seco para o café da comitiva.',
+        icon: '🎒🛡️',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      techniqueType: tt,
+      defenseTitle: tech.defenseTitle,
+      floodClearanceEfficiency: tech.floodClearanceEfficiency,
+      traverseAndCargoSecurity: tech.traverseAndCargoSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Acampamento Ribanceiro) / XGE p. 78 (Engenharia Fluvial e Travessias)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -13304,6 +13428,8 @@
     calcCampSolarStillAndShadeCanopy: calcCampSolarStillAndShadeCanopy,
     calcWildernessRockfallAndAvalancheHazard: calcWildernessRockfallAndAvalancheHazard,
     calcCampRetainingWallAndPitonAnchoring: calcCampRetainingWallAndPitonAnchoring,
+    calcWildernessFlashFloodAndRiverRapidHazard: calcWildernessFlashFloodAndRiverRapidHazard,
+    calcCampFloodClearanceAndRopeTraverse: calcCampFloodClearanceAndRopeTraverse,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e

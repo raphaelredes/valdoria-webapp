@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessFlashFloodAndRiverRapidHazard) return '';
+        var bKey = (biome && biome.key) || 'river';
+        var ff = CartShared.calcWildernessFlashFloodAndRiverRapidHazard(bKey, 'canyon_flash_flood_surge');
+        return '<div class="clp-flash-flood-card" style="margin:4px 0 6px;text-align:left;background:rgba(16,24,32,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(2,132,199,0.3);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ff.color + ';margin-bottom:2px;">' + ff.icon + ' ' + ff.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Perigo:</b> ' + ff.floodDamageAndSweeping + ' (CD ' + ff.saveDC + ' [' + ff.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Prevenção:</b> ' + ff.pioneerMitigation + ' · <i>Resgate: ' + ff.waterRescueAndDrying + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampFloodClearanceAndRopeTraverse) return '';
+        var bKey = (biome && biome.key) || 'river';
+        var fc = CartShared.calcCampFloodClearanceAndRopeTraverse(bKey, 'high_ground_flood_clearance_perch');
+        return '<div class="clp-flood-clearance-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,28,24,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#d1fae5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + fc.color + ';margin-bottom:2px;">' + fc.icon + ' ' + fc.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Cota de Cheia:</b> ' + fc.floodClearanceEfficiency + ' · <b>Carga Segura:</b> ' + fc.traverseAndCargoSecurity + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Sono:</b> ' + fc.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessRockfallAndAvalancheHazard) return '';
         var bKey = (biome && biome.key) || 'mountain';
         var rf = CartShared.calcWildernessRockfallAndAvalancheHazard(bKey, 'scree_slope_rockfall_barrage');
