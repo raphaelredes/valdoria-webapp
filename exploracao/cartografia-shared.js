@@ -20602,6 +20602,110 @@
   // FASE 178: FERVEDOUROS DE RESSURGÊNCIA ARENOSA E DRENAGEM EM LENÇOL ARTESIANO (D&D 5e)
   // =========================================================================
 
+  // =========================================================================
+  // FASE 179: PENHASCOS EM FIORDE MARINHO COM QUEDAS SUSPENSAS E TÁLUS LITORÂNEO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessFiordHangingFallsHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'hanging_fall_wind_whipped_spray_gale_plunge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Lufada Catabática com Névoa Congelante de Queda Suspensa em Queda Livre',
+      saveDC: 15,
+      saveType: 'Destreza',
+      fiordAndFallsRisk: 'Penhasco de fiorde de 400 metros com cascata suspensa pulverizada em spray denso por ventos catabáticos de 75 km/h; a corrente de vento úmido gélido açoita os escaladores arrancando apoios corporais da rocha com risco de queda de 20 metros e 3d8 de concussão com hipotermia (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Escalada ancorada por linhas duplas com pítons de aço forjado e avanço protegido por trás das arestas salientes fora da zona de vento cruzado.',
+      rescueAndStabilization: 'Fixação imediata de polias mecânicas no cabo guia para içar o ferido até plataforma de descanso com aplicação de mantas térmicas.',
+      icon: '🧗‍♂️🌊',
+      color: '#0284c7'
+    };
+
+    if (ht === 'intertidal_boulder_talus_surge_crush') {
+      hazard = {
+        hazardTitle: 'Ressaca de Maré com Choque de Blocos de Tálus em Arrebentação',
+        saveDC: 15,
+        saveType: 'Força',
+        fiordAndFallsRisk: 'Plataforma costeira na base do penhasco coberta por megablocos de tálus; ondas de ressaca de 4 metros arremessam pedregulhos rolantes e puxam os aventureiros contra as arestas de granito com 3d8 de concussão por esmagamento (DMG p. 110, 246-247).',
+        pioneerMitigation: 'Travessia calculada estritamente durante a estofa de baixa-mar e avanço saltando sobre o cume dos blocos mais consolidados.',
+        rescueAndStabilization: 'Laço com cabo flutuante a partir de bote de apoio e imobilização emergencial de fraturas com talas infláveis.',
+        icon: '🌊🪨',
+        color: '#0369a1'
+      };
+    } else if (ht === 'sea_cliff_guillemot_guano_slick_fall') {
+      hazard = {
+        hazardTitle: 'Plataforma de Nidificação com Guano Marinho Escorregadio e Queda',
+        saveDC: 14,
+        saveType: 'Destreza',
+        fiordAndFallsRisk: 'Saliências rochosas do fiorde ocupadas por colônias de aves marinhas; acúmulo de guano oleoso e limo cria superfície sem atrito sobre abismo marítimo de 50 metros com risco de derrapagem e 3d6 de concussão (PHB p. 182-183).',
+        pioneerMitigation: 'Uso de solados com grampos de escalada de ponta temperada e amarração contínua a cabo de segurança de aço trançado.',
+        rescueAndStabilization: 'Ancoragem de machado alpino na fenda superior e rapel de emergência para resgatar o membro suspenso.',
+        icon: '🦅⚠️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'fiord_whirlpool_rip_current_capsize') {
+      hazard = {
+        hazardTitle: 'Redemoinho de Maré em Garganta de Fiorde com Emborcamento de Embarcação',
+        saveDC: 14,
+        saveType: 'Força',
+        fiordAndFallsRisk: 'Corrente de maré violenta estrangulada pelo estreitamento rochoso do fiorde gerando sorvedouro com vórtice de 3 metros; tomba canoas arremessando a comitiva na água marítima gélida com afogamento e 2d6 de frio (DMG p. 110, 246).',
+        pioneerMitigation: 'Navegação rente às contracorrentes da margem com uso de remos duplos reforçados e monitoramento de vórtices visíveis.',
+        rescueAndStabilization: 'Puxada imediata para bordo com bicheiros de resgate, retirada de roupas encharcadas e aquecimento corporal com bolsas térmicas.',
+        icon: '🌀🛶',
+        color: '#0284c7'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampFiordHangingFallsStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'hanging_valley_granite_ledge_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Cornija de Granito de Vale Suspenso Acima do Mar',
+      fiordAndCampSafety: 'Acampamento assentado em cornija rochosa protegida a 80 metros de altitude, abrigada sob sobreteto natural de granito que desvia quedas de pedras e rajadas marítimas do fiorde.',
+      fiordWallBarrierAndFreshWaterfall: 'A elevação isola totalmente o abrigo de ressacas marinhas e enchentes, enquanto a parede vertical pelas costas elimina riscos de ataques pelos flancos.',
+      campRestAndSafetyGuards: 'Concede sono longo revigorante, seco e seguro para todos os membros do grupo, com vista panorâmica ampla de todo o canal do fiorde para as sentinelas de guarda.',
+      icon: '⛺🏔️',
+      color: '#0284c7'
+    };
+
+    if (dt === 'interlocking_driftwood_and_granite_talus_dyke') {
+      tech = {
+        defenseTitle: 'Muralha de Blocos de Granito e Troncos de Naufrágio na Fenda',
+        fiordAndCampSafety: 'Barreira perimetral erguida no único acesso à cornija utilizando blocos pesados de granito arranjados em cantaria seca e travados com vigas de carvalho naval.',
+        fiordWallBarrierAndFreshWaterfall: 'Concede cobertura superior (+5 na CA) contra arqueiros inimigos e impede a subida de predadores voadores ou escaladores invasores.',
+        campRestAndSafetyGuards: 'Assegura isolamento térmico contra vendavais e tranquilidade absoluta para as sentinelas de vigília.',
+        icon: '🪵🛡️',
+        color: '#1e3a8a'
+      };
+    } else if (dt === 'glacial_hanging_stream_gravity_aqueduct') {
+      tech = {
+        defenseTitle: 'Aqueduto Gravitacional com Calhas de Cobre em Riacho Suspenso',
+        fiordAndCampSafety: 'Sistema de canaletas metálicas ancoradas na rocha que capta a água puríssima do riacho de degelo glacial antes da cascata despencar no mar salgado.',
+        fiordWallBarrierAndFreshWaterfall: 'Fornece 60 litros diários de água doce mineral gélida, límpida e cristalina, garantindo a autossuficiência de água doce na beira do oceano salgado.',
+        campRestAndSafetyGuards: 'Revigora as forças da comitiva e elimina o esforço de transportar odres de água doce por encostas íngremes.',
+        icon: '💧🏔️',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'fiord_narrow_tripwire_bronze_gong_alarm') {
+      tech = {
+        defenseTitle: 'Perímetro de Alarme em Garganta com Fios de Aço e Gongo de Bronze',
+        fiordAndCampSafety: 'Cabos de aço estendidos ao longo das vias de acesso e fendas de escalada conectados a gongos de bronze ressonantes instalados no teto da cornija.',
+        fiordWallBarrierAndFreshWaterfall: 'Ecoa estrondo sonoro inconfundível por todo o cânion do fiorde ao menor toque, alertando sobre invasões a 80 metros de distância.',
+        campRestAndSafetyGuards: 'Proporciona repouso noturno ininterrupto e prontidão tática instantânea para as sentinelas de vigília.',
+        icon: '🔔🛡️',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessArtesianFervedouroHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'savanna').toLowerCase();
@@ -26394,6 +26498,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessFiordHangingFallsHazard: calcWildernessFiordHangingFallsHazard,
+    calcCampFiordHangingFallsStation: calcCampFiordHangingFallsStation,
     calcWildernessArtesianFervedouroHazard: calcWildernessArtesianFervedouroHazard,
     calcCampArtesianFervedouroStation: calcCampArtesianFervedouroStation,
     calcWildernessFluvialTufaCascadeHazard: calcWildernessFluvialTufaCascadeHazard,
