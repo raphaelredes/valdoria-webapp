@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessThinIceAndFrigidWaterHazard) return '';
+        var bKey = (biome && biome.key) || 'snow';
+        var ti = CartShared.calcWildernessThinIceAndFrigidWaterHazard(bKey, 'thin_ice_sheet_fracture');
+        return '<div class="clp-thin-ice-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,26,34,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.3);font-size:8px;color:#e0f2fe;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ti.color + ';margin-bottom:2px;">' + ti.icon + ' ' + ti.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Perigo:</b> ' + ti.freezingImmersionAndExhaustion + ' (CD ' + ti.saveDC + ' [' + ti.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Prevenção:</b> ' + ti.pioneerMitigation + ' · <i>Resgate: ' + ti.rescueAndRewarming + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampThermalReflectorAndHypothermiaCare) return '';
+        var bKey = (biome && biome.key) || 'snow';
+        var tr = CartShared.calcCampThermalReflectorAndHypothermiaCare(bKey, 'radiant_heat_stone_reflector_wall');
+        return '<div class="clp-thermal-reflector-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,24,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(234,88,12,0.3);font-size:8px;color:#ffedd5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + tr.color + ';margin-bottom:2px;">' + tr.icon + ' ' + tr.careTitle.toUpperCase() + ' (DMG p. 110):</div>'
+          + '  <div>• <b>Muro Refletor:</b> ' + tr.thermalReflectorEfficiency + ' · <b>Reversão:</b> ' + tr.hypothermiaReversalRating + '</div>'
+          + '  <div style="font-size:7.5px;color:#fdba74;margin-top:1px;">• <b>Conforto Noturno:</b> ' + tr.sleepComfortAndExhaustionMitigation + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessBeastLairAndTerritorialAmbushHazard) return '';
         var bKey = (biome && biome.key) || 'forest';
         var bl = CartShared.calcWildernessBeastLairAndTerritorialAmbushHazard(bKey, 'predator_gorge_chokepoint_ambush');

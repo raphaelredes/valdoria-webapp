@@ -11037,6 +11037,130 @@
     };
   }
 
+  // === calcWildernessThinIceAndFrigidWaterHazard (Gelo Fino, Água Frígida e Hipotermia - DMG p. 110-111 / PHB p. 185) ===
+  function calcWildernessThinIceAndFrigidWaterHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'snow').toLowerCase();
+    var ht = (hazardType || 'thin_ice_sheet_fracture').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Fratura de Camada de Gelo Fino em Lago Congelado',
+      saveDC: 13,
+      saveType: 'Destreza',
+      freezingImmersionAndExhaustion: 'Queda em água frígida abaixo de zero (DMG p. 110); CD 10 Constituição a cada minuto ou sofre 1 nível de Exaustão.',
+      pioneerMitigation: 'Batedores avançam rastejando com o peso distribuído ou testam a espessura do gelo com machados a cada 2 metros.',
+      rescueAndRewarming: 'Membros da comitiva lançam cordas com nós ou bastões longos para içar a vítima sem se aproximarem da borda quebradiça.',
+      icon: '❄️🌊',
+      color: '#38bdf8'
+    };
+
+    if (ht === 'subsurface_river_drag_current') {
+      hazard = {
+        hazardTitle: 'Correnteza Subterrânea Oculta Sob Placa Glacial',
+        saveDC: 14,
+        saveType: 'Força (Atletismo)',
+        freezingImmersionAndExhaustion: 'Arrasto violento para baixo do teto de gelo espesso; risco iminente de sufocamento (PHB p. 183) e hipotermia fulminante.',
+        pioneerMitigation: 'Marcha estritamente em cordada dupla ancorada com pítons de rocha nas margens sólidas do cânion.',
+        rescueAndRewarming: 'Tracionar a corda guia imediatamente trazendo o companheiro de volta ao buraco de entrada.',
+        icon: '🌊🕳️',
+        color: '#0284c7'
+      };
+    } else if (ht === 'slush_and_rime_snowshoe_stick') {
+      hazard = {
+        hazardTitle: 'Atoleiro de Neve Úmida com Crosta Traiçoeira (Slush Bog)',
+        saveDC: 13,
+        saveType: 'Força',
+        freezingImmersionAndExhaustion: 'Acúmulo de lodo de gelo nas botas; deslocamento reduzido em 3 metros e desvantagem em testes de Acrobacia.',
+        pioneerMitigation: 'Raquetes de neve enceradas com gordura de baleia impedem a aderência da massa pastosa de gelo.',
+        rescueAndRewarming: 'Parada tática rápida para raspar as crostas congeladas com facas de caça antes que endureçam como rocha.',
+        icon: '🌨️🥾',
+        color: '#94a3b8'
+      };
+    } else if (ht === 'crevasse_frazil_ice_slurry') {
+      hazard = {
+        hazardTitle: 'Fenda com Suspensão de Cristais Flutuantes (Gelo Frazil)',
+        saveDC: 14,
+        saveType: 'Constituição',
+        freezingImmersionAndExhaustion: 'Pasta gelatinosa de cristais afiados; causa 2d6 de dano de frio por rodada e emperra engrenagens de bestas e bainhas.',
+        pioneerMitigation: 'Contornar depressões glaciais com tonalidade cinza-azulada que indicam água em ponto de congelamento rápido.',
+        rescueAndRewarming: 'Fricção rápida com tecidos secos e aquecimento com fogo mágico ou tochas para descongelar juntas e armas.',
+        icon: '🧊☠️',
+        color: '#7dd3fc'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      freezingImmersionAndExhaustion: hazard.freezingImmersionAndExhaustion,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndRewarming: hazard.rescueAndRewarming,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Gelo Fino e Água Frígida) / PHB p. 185, 291 (Exaustão e Hipotermia)'
+    };
+  }
+
+  // === calcCampThermalReflectorAndHypothermiaCare (Muro Refletor de Calor, Cantis Quentes e Cuidados de Hipotermia - DMG p. 110-112 / XGE p. 78) ===
+  function calcCampThermalReflectorAndHypothermiaCare(biomeKey, careType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'snow').toLowerCase();
+    var ct = (careType || 'radiant_heat_stone_reflector_wall').toLowerCase();
+
+    var care = {
+      careTitle: 'Muro Refletor de Pedras Chatas a Sotavento da Fogueira',
+      thermalReflectorEfficiency: 'Reflete 80% do calor radiante direto para o interior das barracas, elevando a temperatura ambiente em 15°C.',
+      hypothermiaReversalRating: 'Reverte o avanço de exaustão por frio extremo; membros da comitiva acordam totalmente descansados.',
+      sleepComfortAndExhaustionMitigation: 'Permite sono relaxante mesmo sob nevascas intensas externas sem necessidade de vigília sobre o fogo.',
+      icon: '🪨🔥',
+      color: '#ea580c'
+    };
+
+    if (ct === 'boiled_water_bladder_warming') {
+      care = {
+        careTitle: 'Bolsas Térmicas de Água Fervente Aos Pés dos Sacos de Dormir',
+        thermalReflectorEfficiency: 'Cantis de metal envoltos em feltro colocados na base da cama retêm calor corporal por 6 horas.',
+        hypothermiaReversalRating: 'Elimina calafrios noturnos e restaura a circulação periférica em dedos dormentes ou congelados.',
+        sleepComfortAndExhaustionMitigation: 'Aventureiros recuperam 1 nível de exaustão adicional ao completarem um Descanso Longo aquecidos.',
+        icon: '🏺💧',
+        color: '#f59e0b'
+      };
+    } else if (ct === 'rapid_stripped_rewarming_triage') {
+      care = {
+        careTitle: 'Triagem Rápida de Resgate com Roupas Secas e Fricção de Lã',
+        thermalReflectorEfficiency: 'Remoção instantânea de mantos ensopados e isolamento em casulos de mantas secas compartilhadas.',
+        hypothermiaReversalRating: 'Corta imediatamente a perda térmica por evaporação em vítimas que caíram em lagos gelados.',
+        sleepComfortAndExhaustionMitigation: 'Estabiliza a temperatura do aventureiro resgatado sem risco de choque térmico letal.',
+        icon: '🧣🏕️',
+        color: '#38bdf8'
+      };
+    } else if (ct === 'herbal_spiced_tallow_broth') {
+      care = {
+        careTitle: 'Caldo de Gordura com Sal e Raízes Picantes de Montanha',
+        thermalReflectorEfficiency: 'Aporte calórico denso que ativa a termogênese interna do organismo dos aventureiros cansados.',
+        hypothermiaReversalRating: 'Concede vantagem na primeira salvaguarda de Constituição contra o frio ao retomar a marcha ao amanhecer.',
+        sleepComfortAndExhaustionMitigation: 'Aquece o peito e garganta, impedindo tosse e rouquidão provocadas pela inalação de ar glacial.',
+        icon: '🍲🌿',
+        color: '#84cc16'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      careType: ct,
+      careTitle: care.careTitle,
+      thermalReflectorEfficiency: care.thermalReflectorEfficiency,
+      hypothermiaReversalRating: care.hypothermiaReversalRating,
+      sleepComfortAndExhaustionMitigation: care.sleepComfortAndExhaustionMitigation,
+      icon: care.icon,
+      color: care.color,
+      dndRef: 'DMG p. 110-112 (Acampamento no Frio Severo) / XGE p. 78 (Engenharia de Acampamento)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -12800,6 +12924,8 @@
     calcCampBootDryingAndFootwearCare: calcCampBootDryingAndFootwearCare,
     calcWildernessBeastLairAndTerritorialAmbushHazard: calcWildernessBeastLairAndTerritorialAmbushHazard,
     calcCampTripwireAlarmAndDefensiveSnare: calcCampTripwireAlarmAndDefensiveSnare,
+    calcWildernessThinIceAndFrigidWaterHazard: calcWildernessThinIceAndFrigidWaterHazard,
+    calcCampThermalReflectorAndHypothermiaCare: calcCampThermalReflectorAndHypothermiaCare,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
     _nodeMatchesSearch: _nodeMatchesSearch,
     getWeatherDndInfo: getWeatherDndInfo,          // Clima e Efeitos Ambientais D&D 5e
