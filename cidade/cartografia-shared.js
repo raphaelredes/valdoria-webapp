@@ -12773,6 +12773,130 @@
     };
   }
 
+  // === calcWildernessDesertNocturnalFreezingAndShiftingDunesHazard (Queda Térmica Noturna, Dunas Movediças e Crosta Cáustica - DMG p. 110 / PHB p. 182-183) ===
+  function calcWildernessDesertNocturnalFreezingAndShiftingDunesHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'nocturnal_desert_hypothermia_drop').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Queda Térmica Noturna Brutal e Hipotermia de Duna',
+      saveDC: 13,
+      saveType: 'Constituição',
+      desertDamageAndExposure: 'Despencamento brusco de 45°C diurnos para -5°C noturnos; calafrios intensos e 1 nível de exaustão por frio extremo (DMG p. 110).',
+      pioneerMitigation: 'Batedores escavam valas rasas na areia ainda morna e distribuem mantas térmicas antes do anoitecer completo.',
+      rescueAndStabilization: 'Fogueira protegida entre lajes de pedra, isolamento do solo com esteiras e infusão quente de raízes calóricas.',
+      icon: '🥶🏜️',
+      color: '#0284c7'
+    };
+
+    if (ht === 'shifting_sand_slipface_engulfment') {
+      hazard = {
+        hazardTitle: 'Desmoronamento de Crista de Duna e Soterramento Arenoso',
+        saveDC: 13,
+        saveType: 'Destreza',
+        desertDamageAndExposure: 'Crista instável de duna cedendo sob o peso da marcha; 2d6 de concussão e soterramento sob 1 metro de areia fina.',
+        pioneerMitigation: 'Marcha espaçada em 5 metros contornando pela face firme de barlavento com bastões de sondagem.',
+        rescueAndStabilization: 'Desenterro urgente com pás de campanha e limpeza das vias aéreas com compressas úmidas de cantil.',
+        icon: '⏳🧗',
+        color: '#d97706'
+      };
+    } else if (ht === 'sand_viper_burrow_ambush') {
+      hazard = {
+        hazardTitle: 'Ninho Subterrâneo de Víboras das Areias Camufladas',
+        saveDC: 13,
+        saveType: 'Sabedoria',
+        desertDamageAndExposure: 'Serpentes peçonhentas sob a camada superficial da areia morna; 2d6 de dano de veneno e condição Envenenado por 1 hora.',
+        pioneerMitigation: 'Vanguarda bate bastões no solo arenoso para afugentar rastejantes e veste perneiras de couro reforçado.',
+        rescueAndStabilization: 'Aplicação imediata de antídoto de ervas do deserto e imobilização do membro atingido.',
+        icon: '🐍🌵',
+        color: '#84cc16'
+      };
+    } else if (ht === 'dry_salt_pan_crust_collapse') {
+      hazard = {
+        hazardTitle: 'Rompimento de Crosta de Salitre e Lama Cáustica',
+        saveDC: 14,
+        saveType: 'Destreza',
+        desertDamageAndExposure: 'Salinas secas com crosta quebradiça que esconde lodo salgado cáustico; 2d4 de dano corrosivo e aprisionamento até a cintura.',
+        pioneerMitigation: 'Identificação do brilho salino frouxo e desvio da comitiva por afloramentos rochosos firmes.',
+        rescueAndStabilization: 'Lançamento de laço com corda de escalada para extração horizontal e enxágue com água fresca potável.',
+        icon: '🧂⚠️',
+        color: '#cbd5e1'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      desertDamageAndExposure: hazard.desertDamageAndExposure,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110 (Frio Extremo e Desertos) / PHB p. 182-183 (Exaustão e Salvaguardas)'
+    };
+  }
+
+  // === calcCampDesertThermalTrenchAndReflectiveWall (Trincheiras Térmicas, Muros Refletores e Faldas de Areia - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampDesertThermalTrenchAndReflectiveWall(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'subterranean_sand_trench_thermal_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Trincheira Térmica de Areia Aquecida',
+      thermalEfficiencyAndShielding: 'Vala escavada a 50 cm retendo o calor acumulado no solo arenoso durante o dia com forro isolante.',
+      windbreakAndCreatureDefenses: 'Garante que o vento cortante da noite desértica passe por cima das cabeças sem atingir os cobertores.',
+      campRestAndSafetyGuards: 'Permite sono restaurador completo sem necessidade de queimar madeira escassa durante as madrugadas gélidas.',
+      icon: '🏕️🌡️',
+      color: '#10b981'
+    };
+
+    if (dt === 'reflective_stone_hearth_radiant_wall') {
+      tech = {
+        defenseTitle: 'Muro Refletor de Arenito e Fogueira Radiante',
+        thermalEfficiencyAndShielding: 'Paredão semicircular de lajes de arenito polido rebatendo 80% do calor da fogueira para a área de descanso.',
+        windbreakAndCreatureDefenses: 'Bloqueia rajadas de vento carregadas de poeira que poderiam apagar as brasas ou sufocar a vigília.',
+        campRestAndSafetyGuards: 'Mantém o abrigo aquecido por até 6 horas após a queima das últimas brasas de arbustos do deserto.',
+        icon: '🧱🔥',
+        color: '#f59e0b'
+      };
+    } else if (dt === 'wool_felt_insulation_camel_hair_blankets') {
+      tech = {
+        defenseTitle: 'Cobertores Espessos de Lã de Camelo e Feltro Batido',
+        thermalEfficiencyAndShielding: 'Camadas densas de fibra animal repelindo o frio gélido do ar noturno sem retenção de umidade corporal.',
+        windbreakAndCreatureDefenses: 'Protegem os aventureiros contra picadas de insetos noturnos e escorpiões atraídos pelo calor.',
+        campRestAndSafetyGuards: 'Evitam qualquer penalidade de exaustão noturna decorrente de temperaturas negativas no deserto.',
+        icon: '🧶🐫',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'sand_skirt_tent_weighted_with_rocks') {
+      tech = {
+        defenseTitle: 'Tendas com Faldas de Areia e Lastro de Pedras de Duna',
+        thermalEfficiencyAndShielding: 'Abas laterais das barracas enterradas sob 20 cm de areia impedindo correntes de convecção gelada.',
+        windbreakAndCreatureDefenses: 'Vedação total do perímetro contra invasão de víboras da areia, escorpiões e aranhas das dunas.',
+        campRestAndSafetyGuards: 'Proporciona isolamento acústico e térmico hermético para o descanso longo dos companheiros de comitiva.',
+        icon: '⛺🪨',
+        color: '#ca8a04'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      thermalEfficiencyAndShielding: tech.thermalEfficiencyAndShielding,
+      windbreakAndCreatureDefenses: tech.windbreakAndCreatureDefenses,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Acampamento no Deserto) / XGE p. 78 (Equipamento de Proteção e Sobrevivência)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -14562,6 +14686,8 @@
     calcCampUndergroundVentilationAndDavySafetyLamp: calcCampUndergroundVentilationAndDavySafetyLamp,
     calcWildernessSubmergedCavesAndKarstSiphonHazard: calcWildernessSubmergedCavesAndKarstSiphonHazard,
     calcCampSpelunkingLineAndBuoyantPouchStation: calcCampSpelunkingLineAndBuoyantPouchStation,
+    calcWildernessDesertNocturnalFreezingAndShiftingDunesHazard: calcWildernessDesertNocturnalFreezingAndShiftingDunesHazard,
+    calcCampDesertThermalTrenchAndReflectiveWall: calcCampDesertThermalTrenchAndReflectiveWall,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
