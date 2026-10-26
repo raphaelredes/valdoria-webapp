@@ -13269,6 +13269,130 @@
     };
   }
 
+  // === calcWildernessRockyCanyonWindTunnelAndSpallingHazard (Rajadas Venturi em Cânion, Estilhaçamento Térmico e Encostas de Seixos - DMG p. 110-111 / PHB p. 182-183) ===
+  function calcWildernessRockyCanyonWindTunnelAndSpallingHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'canyon').toLowerCase();
+    var ht = (hazardType || 'wind_tunnel_canyon_funnel_gale').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Efeito Venturi e Rajadas Funil em Garganta Rochosa',
+      saveDC: 14,
+      saveType: 'Força',
+      canyonDamageAndDisplacement: 'Corrente de ar comprimida superando 90 km/h; deslocamento forçado de 6 metros, perda de equilíbrio e 2d10 de concussão contra paredões rochosos (DMG p. 110).',
+      pioneerMitigation: 'Batedores avançam rastejando junto a canaletas do piso e ancoram cabos de segurança em fendas de arenito.',
+      rescueAndStabilization: 'Tracionamento com laços de escalada, fixação de ataduras compressivas em contusões e abrigo em reentrâncias.',
+      icon: '💨🏜️',
+      color: '#d97706'
+    };
+
+    if (ht === 'thermal_spalling_rock_burst_shrapnel') {
+      hazard = {
+        hazardTitle: 'Estilhaçamento Térmico de Arenito e Projéteis de Rocha',
+        saveDC: 13,
+        saveType: 'Destreza',
+        canyonDamageAndDisplacement: 'Lajes rochosas que estalam e partem sob choque térmico sol-sombra, disparando lascas afiadas como estilhaços a 2d8 de corte/perfuração.',
+        pioneerMitigation: 'Marcha com escudos erguidos em ângulo oblíquo e uso de capuzes de couro acolchoados sob o elmo.',
+        rescueAndStabilization: 'Remoção cautelosa de farpas de pedra com pinças de cirurgião de campo e aplicação de bálsamo adstringente.',
+        icon: '🪨💥',
+        color: '#b45309'
+      };
+    } else if (ht === 'canyon_flash_resonance_scree_slide') {
+      hazard = {
+        hazardTitle: 'Deslizamento de Seixos por Ressonância Acústica (Scree Slide)',
+        saveDC: 13,
+        saveType: 'Destreza',
+        canyonDamageAndDisplacement: 'Encosta instável de cascalho solto que despenca sob vibração sonora; rolamento de 15 metros com 2d6 de concussão.',
+        pioneerMitigation: 'Travessia em silêncio absoluto com passos diagonais leves apoiados em bordões de ponta dupla.',
+        rescueAndStabilization: 'Içamento por corda guia reforçada e alinhamento de membros com talas de madeira rígida.',
+        icon: '⏳🏔️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'poisonous_canyon_centipede_nest') {
+      hazard = {
+        hazardTitle: 'Ninho de Lacraias Gigantes de Fenda de Basalto',
+        saveDC: 13,
+        saveType: 'Constituição',
+        canyonDamageAndDisplacement: 'Artrópodes predatórios rastejando de fissuras escuras; picadas múltiplas de 2d6 de veneno e condição Envenenado por 1 hora.',
+        pioneerMitigation: 'Inspeção prévia das frestas rochosas com fumaça de enxofre antes de apoiar apoios manuais.',
+        rescueAndStabilization: 'Lavagem imediata com água salgada morna e aplicação de unguento neutralizador de toxinas de insetos.',
+        icon: '🐛🪨',
+        color: '#dc2626'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      canyonDamageAndDisplacement: hazard.canyonDamageAndDisplacement,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Cânions e Ventos Fortes) / PHB p. 182-183 (Concussão e Terreno Difícil)'
+    };
+  }
+
+  // === calcCampCanyonRockOverhangAndWindbreakStation (Abrigos Naturais de Rocha, Muros Defletores e Faixas de Cal - DMG p. 111 / XGE p. 78 / PHB p. 150) ===
+  function calcCampCanyonRockOverhangAndWindbreakStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'canyon').toLowerCase();
+    var dt = (defenseType || 'natural_rock_overhang_bivouac_station').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque Sob Abrigo Natural de Rocha com Teto Inclinado',
+      overheadProtectionAndWindbreak: 'Reentrância em abóbada de pedra que protege contra queda de rochas do alto e amortece correntes de ar.',
+      creatureDefenseAndAnchorSecurity: 'Posicionamento tático de sentinelas na boca da caverna com visão total do desfiladeiro.',
+      campRestAndSafetyGuards: 'Garante descanso longo protegido e confortável sem risco de ser atingido por desabamentos do topo do cânion.',
+      icon: '⛺🪨',
+      color: '#10b981'
+    };
+
+    if (dt === 'dry_stone_baffle_windbreak_wall') {
+      tech = {
+        defenseTitle: 'Mureta Seca Defletora de Vento com Lajes de Basalto',
+        overheadProtectionAndWindbreak: 'Barreira em ziguezague de pedras encaixadas reduzindo o fluxo direto do vento de garganta em 75%.',
+        creatureDefenseAndAnchorSecurity: 'Impede que fagulhas da fogueira ou mantas dos membros da comitiva sejam dispersadas por rajadas.',
+        campRestAndSafetyGuards: 'Permite acender fogo seguro para cozimento e manter o calor concentrado no interior do abrigo.',
+        icon: '🧱💨',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'expansion_bolt_rock_anchor_guyline') {
+      tech = {
+        defenseTitle: 'Estaiamento de Precisão com Parafusos Expansivos na Rocha',
+        overheadProtectionAndWindbreak: 'Ancoragem com cunhas de aço cravadas em fendas da rocha firme suportando 1.200 kg de tração contínua.',
+        creatureDefenseAndAnchorSecurity: 'Garante que toldos e redes permaneçam perfeitamente esticados mesmo sob ventos ciclônicos de cânion.',
+        campRestAndSafetyGuards: 'Elimina o perigo de barracas colapsarem durante vendavais repentinos na calada da noite.',
+        icon: '🔩🛡️',
+        color: '#ca8a04'
+      };
+    } else if (dt === 'crevice_scorpion_barrier_chalk_line') {
+      tech = {
+        defenseTitle: 'Faixa Perimétrica de Cal Virgem e Cinza Sulfurosa',
+        overheadProtectionAndWindbreak: 'Trilha alcalina contínua traçada ao redor dos leitos criando barreira cáustica intransponível.',
+        creatureDefenseAndAnchorSecurity: 'Impede a aproximação de lacraias gigantes, escorpiões da fenda e víboras das pedras durante o sono.',
+        campRestAndSafetyGuards: 'Garante que os aventureiros descansem sem preocupação com picadas peçonhentas no bivaque.',
+        icon: '⚪🦂',
+        color: '#f59e0b'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      overheadProtectionAndWindbreak: tech.overheadProtectionAndWindbreak,
+      creatureDefenseAndAnchorSecurity: tech.creatureDefenseAndAnchorSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaque em Cânion) / XGE p. 78 (Equipamento de Montanhismo e Ferramentas)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -15066,6 +15190,8 @@
     calcCampForestCanopyHammockAndDeadfallClearingStation: calcCampForestCanopyHammockAndDeadfallClearingStation,
     calcWildernessGlacialCrevasseAndPermafrostHazard: calcWildernessGlacialCrevasseAndPermafrostHazard,
     calcCampGlacialSnowBlockShelterAndIceScrewStation: calcCampGlacialSnowBlockShelterAndIceScrewStation,
+    calcWildernessRockyCanyonWindTunnelAndSpallingHazard: calcWildernessRockyCanyonWindTunnelAndSpallingHazard,
+    calcCampCanyonRockOverhangAndWindbreakStation: calcCampCanyonRockOverhangAndWindbreakStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,

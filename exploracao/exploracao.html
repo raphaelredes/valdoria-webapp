@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T05:06:20Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T05:11:01Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessRockyCanyonWindTunnelAndSpallingHazard) return '';
+        var bKey = (biome && biome.key) || 'canyon';
+        var cy = CartShared.calcWildernessRockyCanyonWindTunnelAndSpallingHazard(bKey, 'wind_tunnel_canyon_funnel_gale');
+        return '<div class="clp-canyon-wind-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,24,18,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(217,119,6,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cy.color + ';margin-bottom:2px;">' + cy.icon + ' ' + cy.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Perigo:</b> ' + cy.canyonDamageAndDisplacement + ' (CD ' + cy.saveDC + ' [' + cy.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Prevenção:</b> ' + cy.pioneerMitigation + ' · <i>Estabilização: ' + cy.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampCanyonRockOverhangAndWindbreakStation) return '';
+        var bKey = (biome && biome.key) || 'canyon';
+        var rh = CartShared.calcCampCanyonRockOverhangAndWindbreakStation(bKey, 'natural_rock_overhang_bivouac_station');
+        return '<div class="clp-canyon-overhang-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,32,24,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#d1fae5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + rh.color + ';margin-bottom:2px;">' + rh.icon + ' ' + rh.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Proteção Superior:</b> ' + rh.overheadProtectionAndWindbreak + ' · <b>Defesa:</b> ' + rh.creatureDefenseAndAnchorSecurity + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Sono:</b> ' + rh.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){
