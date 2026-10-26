@@ -17733,6 +17733,130 @@
     };
   }
 
+  // === calcWildernessStarDuneAndGassiHazard (Dunas Estrela Gigantes, Corredores de Gassi e Vórtices - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessStarDuneAndGassiHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'star_dune_knife_ridge_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso de Crista Fina em Duna Estrela Piramidal',
+      saveDC: 15,
+      saveType: 'Destreza',
+      starDuneRiskAndGassi: 'Aresta aguda e instável no topo de duna estelar de 40 metros sujeita a múltiplos regimes de vento; desmoronamento repentino sob os passos da coluna com rolamento violento encosta abaixo por 35 graus causando 4d6 de dano de queda e soterramento (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam encordoados em cordada tripla e caminham 2 metros abaixo da crista pelo flanco consolidado de menor inclinação.',
+      rescueAndStabilization: 'Içamento por corda guia com tracionamento de arreio torácico e desobstrução das narinas com panos umedecidos.',
+      icon: '⭐⚠️',
+      color: '#d97706'
+    };
+
+    if (ht === 'thermal_dust_devil_cyclone_ram') {
+      hazard = {
+        hazardTitle: 'Vórtice Térmico Convectivo de Poeira e Areia Escaldante',
+        saveDC: 14,
+        saveType: 'Força',
+        starDuneRiskAndGassi: 'Redemoinho vertical súbito gerado pelo superaquecimento do solo a 65°C, arremessando areia grossa e cascalho com ventos de 80 km/h que derrubam montarias e cegam temporariamente.',
+        pioneerMitigation: 'Sentinelas observam colunas de poeira à distância e instruem todos a se deitarem voltados contra a base das dunas com mantos sobre a cabeça.',
+        rescueAndStabilization: 'Lavagem imediata dos olhos com colírio de camomila e soro morno, e aplicação de pomada calmante nas queimaduras superficiais de atrito.',
+        icon: '🌪️🔥',
+        color: '#b45309'
+      };
+    } else if (ht === 'gassi_deflation_corridor_blinding_glare') {
+      hazard = {
+        hazardTitle: 'Clarão Cegante e Refração Térmica em Corredor de Deflação',
+        saveDC: 14,
+        saveType: 'Constituição',
+        starDuneRiskAndGassi: 'Piso rochoso de cascalho negro e quartzo polido pelo vento no fundo do corredor interdunar de gassi; reflexão solar intensa e miragens que desorientam batedores e causam insolação severa.',
+        pioneerMitigation: 'Uso obrigatório de viseiras de couro com frestas mínimas e avanço da marcha concentrado nas primeiras horas do amanhecer.',
+        rescueAndStabilization: 'Hidratação lenta com água salinizada de cantil em área de sombra e compressas frias na nuca dos exploradores abatidos.',
+        icon: '☀️🕶️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'aeolian_sand_blast_abrading_gale') {
+      hazard = {
+        hazardTitle: 'Vendaval de Jateamento Eólico com Quartzo Anguloso',
+        saveDC: 13,
+        saveType: 'Destreza',
+        starDuneRiskAndGassi: 'Rajadas rasantes que projetam milhões de microcristais afiados de sílica; desfiamento rápido de correias de couro, perda de faro de animais de tração e abrasão de armaduras.',
+        pioneerMitigation: 'Envolvimento de arreios e alforjes em lonas grossas enceradas e marcha em formação compacta rente ao flanco de sotavento das dunas.',
+        rescueAndStabilization: 'Substituição rápida de tirantes esgarçados e reparo provisório de correias com arames trançados e cola de peixe.',
+        icon: '💨🛡️',
+        color: '#0284c7'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      starDuneRiskAndGassi: hazard.starDuneRiskAndGassi,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Dunas Desérticas e Terrenos Eólicos) / PHB p. 182-183 (Marcha no Deserto) / XGE p. 78-83 (Geomorfologia Eólica e Dunas Estrela)'
+    };
+  }
+
+  // === calcCampStarDuneAndGassiStation (Bivaques em Braço Côncavo, Lastros de Gassi e Condensadores - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampStarDuneAndGassiStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'star_dune_concave_arm_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque no Braço Côncavo de Duna Estrela Gigante',
+      starDuneAnchorageAndGassiSafety: 'Reentrância côncava entre duas cristas radiais de duna piramidal de 40 metros de altura; bolso de calmaria absoluto imune a redemoinhos e rajadas multidirecionais.',
+      gassiShieldingAndCampSecurity: 'Totalmente oculto da visão de viajantes no fundo dos corredores de deflação e protegido do jateamento constante de areia.',
+      campRestAndSafetyGuards: 'Permite sono longo tranquilo, sem sufocamento por poeira em suspensão nem acúmulo de areia nos sacos de dormir da comitiva.',
+      icon: '⭐⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'gassi_stone_pavement_anchor_cairn') {
+      tech = {
+        defenseTitle: 'Moitas Articuladas de Lastro com Estacas em Solo de Reg',
+        starDuneAnchorageAndGassiSafety: 'Âncoras de solo formadas por pedras empilhadas em redes de corda travadas por pítons cravados no pavimento rochoso de gassi.',
+        gassiShieldingAndCampSecurity: 'Garante fixação inabalável das cordas de retenção dos toldos mesmo sob ventanias súbitas de 80 km/h.',
+        campRestAndSafetyGuards: 'Impede o colapso estrutural das barracas durante a madrugada gelada do deserto.',
+        icon: '🪨🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'sand_dew_fog_mesh_condenser') {
+      tech = {
+        defenseTitle: 'Rede de Linho e Seda para Condensação Noturna de Orvalho',
+        starDuneAnchorageAndGassiSafety: 'Telas verticais de malha fina montadas no topo da duna voltadas para a brisa noturna que condensa o vapor atmosférico em canaletas de cobre.',
+        gassiShieldingAndCampSecurity: 'Coleta 8 litros diários de água mineral fresca límpida a partir da amplitude térmica extrema do deserto.',
+        campRestAndSafetyGuards: 'Abastece com abundância os cantis dos batedores sem depender de oásis distantes ou poços salobros.',
+        icon: '💧🏺',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'reflective_white_silk_awning_shield') {
+      tech = {
+        defenseTitle: 'Toldo Duplo de Seda Branca com Câmara de Ventilação Convectiva',
+        starDuneAnchorageAndGassiSafety: 'Duas camadas de tecido claro separadas por vão de 30 centímetros que induz circulação contínua de ar fresco por tiragem natural.',
+        gassiShieldingAndCampSecurity: 'Reduz a temperatura interna do acampamento em até 12°C em comparação com o exterior escaldante durante o meio-dia.',
+        campRestAndSafetyGuards: 'Preserva a estamina e o vigor físico de todos os membros do grupo evitando quadros graves de insolação.',
+        icon: '🎪🛡️',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      starDuneAnchorageAndGassiSafety: tech.starDuneAnchorageAndGassiSafety,
+      gassiShieldingAndCampSecurity: tech.gassiShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques no Deserto e Dunas) / PHB p. 150 (Kits de Exploração Desértica) / XGE p. 78-83 (Engenharia de Abrigo Térmico e Condensação)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -19602,6 +19726,8 @@
     calcCampRestingaBarrierAndLagoonStation: calcCampRestingaBarrierAndLagoonStation,
     calcWildernessRiparianGalleryAndCutbankHazard: calcWildernessRiparianGalleryAndCutbankHazard,
     calcCampRiparianGalleryAndBankStation: calcCampRiparianGalleryAndBankStation,
+    calcWildernessStarDuneAndGassiHazard: calcWildernessStarDuneAndGassiHazard,
+    calcCampStarDuneAndGassiStation: calcCampStarDuneAndGassiStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,

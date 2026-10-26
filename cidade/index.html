@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessStarDuneAndGassiHazard) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var sd = CartShared.calcWildernessStarDuneAndGassiHazard(bKey, 'star_dune_knife_ridge_collapse');
+        return '<div class="clp-star-dune-card" style="margin:4px 0 6px;text-align:left;background:rgba(32,24,20,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(217,119,6,0.3);font-size:8px;color:#fef3c7;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sd.color + ';margin-bottom:2px;">' + sd.icon + ' ' + sd.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Duna Estrela e Gassi:</b> ' + sd.starDuneRiskAndGassi + ' (CD ' + sd.saveDC + ' [' + sd.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Mitigação:</b> ' + sd.pioneerMitigation + ' · <i>Estabilização: ' + sd.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampStarDuneAndGassiStation) return '';
+        var bKey = (biome && biome.key) || 'desert';
+        var cp = CartShared.calcCampStarDuneAndGassiStation(bKey, 'star_dune_concave_arm_bivouac');
+        return '<div class="clp-star-dune-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,34,28,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.3);font-size:8px;color:#ecfdf5;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Braço Côncavo:</b> ' + cp.starDuneAnchorageAndGassiSafety + ' · <b>Proteção:</b> ' + cp.gassiShieldingAndCampSecurity + '</div>'
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessRiparianGalleryAndCutbankHazard) return '';
         var bKey = (biome && biome.key) || 'forest';
         var rg = CartShared.calcWildernessRiparianGalleryAndCutbankHazard(bKey, 'cutbank_alluvial_slump_avalanche');
