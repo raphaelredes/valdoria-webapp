@@ -20594,6 +20594,110 @@
   // FASE 176: CAMPOS DE DUNAS COSTEIRAS PARABÓLICAS E LAGOAS INTERDUNARES (D&D 5e)
   // =========================================================================
 
+  // =========================================================================
+  // FASE 177: CAMPOS DE TUFAS CALCÁRIAS FLUVIAIS E CASCATAS EM DEGRAUS REPRESADOS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessFluvialTufaCascadeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'river').toLowerCase();
+    var ht = (hazardType || 'tufa_rimstone_dam_collapse_surge').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ruptura de Barragem de Tufa em Represa com Torrente e Queda de 10m',
+      saveDC: 15,
+      saveType: 'Destreza',
+      tufaAndCascadeRisk: 'Dique natural de tufa calcária que represa lagoa superior; o peso da comitiva rompe a borda porosa liberando torrente repentina de água e blocos de travertino que arremessam os aventureiros na cascata inferior de 10 metros com risco de afogamento e 3d8 de concussão por impacto (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Travessia escalonada com corda de apoio fixada em troncos de margem e sondagem prévia de solidez com bastão de ferro.',
+      rescueAndStabilization: 'Lançamento de boias de cortiça e içamento rápido da bacia inferior com arreios de içamento e talas de fixação.',
+      icon: '🌊🪨',
+      color: '#0284c7'
+    };
+
+    if (ht === 'slick_cyanobacterial_tufa_slip_plunge') {
+      hazard = {
+        hazardTitle: 'Limo de Cianobactérias Escorregadio em Lâmina de Tufa com Queda Livre',
+        saveDC: 15,
+        saveType: 'Destreza',
+        tufaAndCascadeRisk: 'Superfície de calcita coberta por película escorregadia de algas e cianobactérias; a sola da bota perde qualquer atrito no plano inclinado molhado arremessando o explorador num tobogã de rocha pontiaguda de 8 metros com luxação severa e 3d6 de concussão (PHB p. 182-183).',
+        pioneerMitigation: 'Uso de solados com cravos de feltro ou palha trançada abrasiva sobre botas e marcha rente à parede lateral rochosa.',
+        rescueAndStabilization: 'Aplicação de compressas frias com folhas de confrei maceradas, enfaixamento compressivo e repouso em solo nivelado.',
+        icon: '🧗‍♂️🌿',
+        color: '#16a34a'
+      };
+    } else if (ht === 'karst_spring_subterranean_siphon_vortex') {
+      hazard = {
+        hazardTitle: 'Sifão Submerso Oculto em Fundo de Piscina de Tufa com Sucção Cárstica',
+        saveDC: 14,
+        saveType: 'Força',
+        tufaAndCascadeRisk: 'Poço cristalino de travertino com água aparentemente calma escondendo conduto de drenagem subterrânea profunda; aventureiros na piscina são sugados pelo vórtex em direção a galerias afogadas com risco grave de asfixia aquática (DMG p. 110, 246-247).',
+        pioneerMitigation: 'Entrada na água estritamente ancorado a corda-guia na margem e conferência de fluxo com flutuadores de folhas secas.',
+        rescueAndStabilization: 'Tracionamento imediato da linha de segurança pela comitiva e respiração assistida na margem seca.',
+        icon: '🌀💧',
+        color: '#0ea5e9'
+      };
+    } else if (ht === 'submerged_tufa_blade_hull_laceration') {
+      hazard = {
+        hazardTitle: 'Lâminas Cortantes de Tufa Submersa com Rompimento de Casco e Fissuras',
+        saveDC: 14,
+        saveType: 'Destreza',
+        tufaAndCascadeRisk: 'Formações pontiagudas de carbonato de cálcio que crescem como agulhas submersas logo abaixo da superfície da represa; rasgam o casco de canoas e provocam cortes graves nos membros inferiores durante o vau, causando 3d6 de dano cortante (PHB p. 182-183).',
+        pioneerMitigation: 'Navegação lenta guiada por proeiro em pé com vara de sondagem de fundo e reforço do casco com pranchas de pinho.',
+        rescueAndStabilization: 'Cauterização com bálsamo vegetal de copaíba, sutura de cortes e calafetagem rápida da embarcação com piche e estopa.',
+        icon: '🛶⚠️',
+        color: '#d97706'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampFluvialTufaCascadeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'river').toLowerCase();
+    var dt = (defenseType || 'elevated_tufa_terrace_dry_promontory_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Terraço Fóssil de Tufa Seco Elevado Acima das Cheias',
+      tufaAndCampSafety: 'Acampamento assentado em terraço calcário fóssil inativo a 6 metros acima do nível máximo do rio, em laje de travertino consolidada, drenada e imune a enxurradas e umidade de névoa.',
+      tufaWallBarrierAndMineralSpring: 'O paredão vertical de tufa atua como muralha natural inexpugnável pelas costas e o som constante das cascatas abaixo encobre ruídos da comitiva contra patrulhas inimigas.',
+      campRestAndSafetyGuards: 'Concede sono longo tranquilo, sem insetos da várzea e com temperatura estável, garantindo vigília serena para as sentinelas de guarda.',
+      icon: '⛺🏞️',
+      color: '#0284c7'
+    };
+
+    if (dt === 'interlocking_driftwood_and_tufa_block_weir_parapet') {
+      tech = {
+        defenseTitle: 'Parapeito Baluarte de Blocos de Tufa e Troncos Travados na Garganta',
+        tufaAndCampSafety: 'Barreira perimetral erguida nos flancos do terraço com blocos leves e porosos de travertino encaixados entre toras de deriva trazidas pelas cheias.',
+        tufaWallBarrierAndMineralSpring: 'Concede cobertura superior (+5 na CA) contra arqueiros inimigos e bloqueia passagens de acesso de feras carnívoras ribeirinhas.',
+        campRestAndSafetyGuards: 'Assegura descanso contínuo e proteção perimetral impenetrável contra aproximações nas trevas noturnas.',
+        icon: '🪵🛡️',
+        color: '#15803d'
+      };
+    } else if (dt === 'cascading_mineral_spring_gravity_duct_basin') {
+      tech = {
+        defenseTitle: 'Bacia de Captação Gravitacional em Nascente Calcária com Duto de Bambu',
+        tufaAndCampSafety: 'Sistema de calhas de bambu entalhado que capta água pura brotando diretamente de nascente na rocha antes de entrar em contato com os leitos abertos do rio.',
+        tufaWallBarrierAndMineralSpring: 'Fornece 60 litros diários de água alcalina, cristalina, fresca e potável rica em sais minerais essenciais, livre de sedimentos de enxurrada.',
+        campRestAndSafetyGuards: 'Recupera as forças e a hidratação dos exploradores, prevenindo fadiga muscular e distúrbios intestinais.',
+        icon: '💧🎋',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'cascade_rim_tripwire_bell_float_alarm') {
+      tech = {
+        defenseTitle: 'Alarme de Fios de Tensão e Guizos Flutuantes nas Bordas da Represa',
+        tufaAndCampSafety: 'Cordame estendido sobre os diques de tufa e vãos de passagem da cascata conectado a flutuadores com campainhas de bronze suspensas.',
+        tufaWallBarrierAndMineralSpring: 'Dispara sinal sonoro imediato a 60 metros de distância com qualquer tentativa de travessia do rio ou escalada hostil da represa.',
+        campRestAndSafetyGuards: 'Garante tranquilidade mental e alerta tático antecipado garantido para as sentinelas de vigília.',
+        icon: '🔔🌊',
+        color: '#d97706'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessParabolicDuneLagoonHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'desert').toLowerCase();
@@ -26186,6 +26290,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessFluvialTufaCascadeHazard: calcWildernessFluvialTufaCascadeHazard,
+    calcCampFluvialTufaCascadeStation: calcCampFluvialTufaCascadeStation,
     calcWildernessParabolicDuneLagoonHazard: calcWildernessParabolicDuneLagoonHazard,
     calcCampParabolicDuneLagoonStation: calcCampParabolicDuneLagoonStation,
     calcWildernessTowerKarstPoljeHazard: calcWildernessTowerKarstPoljeHazard,

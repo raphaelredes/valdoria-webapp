@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T16:28:56Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T16:32:30Z - do not edit directly, edit source -->
 
 
 
@@ -93654,6 +93654,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ms.color + ';margin-bottom:2px;">' + ms.icon + ' MARCO DE EXPLORAÇÃO & DESCOBERTA (DMG p. 108):</div>'
           + '  <div>• <b>Monumento:</b> ' + ms.milestoneName + '</div>'
           + '  <div style="font-size:7.5px;color:#c084fc;margin-top:1px;">• <b>Dádiva:</b> ' + ms.passiveBoon + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessFluvialTufaCascadeHazard) return '';
+        var bKey = (biome && biome.key) || 'river';
+        var tf = CartShared.calcWildernessFluvialTufaCascadeHazard(bKey, 'tufa_rimstone_dam_collapse_surge');
+        return '<div class="clp-tufa-cascade-card" style="margin:4px 0 6px;text-align:left;background:rgba(14,32,44,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(2,132,199,0.35);font-size:8px;color:#f0f9ff;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + tf.color + ';margin-bottom:2px;">' + tf.icon + ' ' + tf.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Tufas Calcárias e Cascatas:</b> ' + tf.tufaAndCascadeRisk + ' (CD ' + tf.saveDC + ' [' + tf.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Mitigação:</b> ' + tf.pioneerMitigation + ' · <i>Estabilização: ' + tf.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampFluvialTufaCascadeStation) return '';
+        var bKey = (biome && biome.key) || 'river';
+        var tc = CartShared.calcCampFluvialTufaCascadeStation(bKey, 'elevated_tufa_terrace_dry_promontory_bivouac');
+        return '<div class="clp-tufa-cascade-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,26,38,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(6,182,212,0.3);font-size:8px;color:#f0f9ff;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + tc.color + ';margin-bottom:2px;">' + tc.icon + ' ' + tc.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Terraço de Tufa:</b> ' + tc.tufaAndCampSafety + ' · <b>Defesa:</b> ' + tc.tufaWallBarrierAndMineralSpring + '</div>'
+          + '  <div style="font-size:7.5px;color:#a5f3fc;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + tc.campRestAndSafetyGuards + '</div>'
           + '</div>';
       })()
     + (function(){
