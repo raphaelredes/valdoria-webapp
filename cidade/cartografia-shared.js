@@ -20590,6 +20590,110 @@
   // FASE 175: VALES DE DOLINAS EM CARSTE DE TORRE E LABIRINTOS DE POLJE (D&D 5e)
   // =========================================================================
 
+  // =========================================================================
+  // FASE 176: CAMPOS DE DUNAS COSTEIRAS PARABÓLICAS E LAGOAS INTERDUNARES (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessParabolicDuneLagoonHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'parabolic_slipface_sand_avalanche_burial').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desabamento de Face de Deslizamento de Duna Parabólica de 20 Metros',
+      saveDC: 15,
+      saveType: 'Destreza',
+      duneAndLagoonRisk: 'Crista móvel de duna parabólica de 20 metros em ângulo crítico de repouso (34°); o avanço da comitiva rompe a cumeeira eólica desencadeando avalanche repentina de areia seca que soterra os exploradores na depressão interdunar com risco de asfixia e 3d8 de concussão por esmagamento (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Marcha pelos braços fixos vegetados da duna estabilizados por raízes de restinga e uso de bastões de sondagem de cumeeira.',
+      rescueAndStabilization: 'Escavação ágil com pás de lona dobráveis, remoção de areia das vias aéreas e lavagem com soro fisiológico estéril.',
+      icon: '🏜️⚠️',
+      color: '#d97706'
+    };
+
+    if (ht === 'interdune_quicksand_slurry_trap') {
+      hazard = {
+        hazardTitle: 'Lençol de Areia Movediça Saturada em Borda de Lagoa Interdunar',
+        saveDC: 15,
+        saveType: 'Força',
+        duneAndLagoonRisk: 'Depressão interdunar onde lençol freático aflora sob areia quartzosa fina; a superfície aparente liquifaz sob carga transformando-se em fluido denso que suga o aventureiro até a cintura em segundos sob risco iminente de sufocamento (DMG p. 110-111).',
+        pioneerMitigation: 'Avanço arrastando varas de taquara cruzadas para distribuição do peso corporal e desvio de bordas úmidas espelhadas.',
+        rescueAndStabilization: 'Lançamento de corda com laço amplo e tração com alavanca de remo ancorada na margem firme da bacia.',
+        icon: '🕳️🌊',
+        color: '#0284c7'
+      };
+    } else if (ht === 'windward_sandblast_corrasion_squall') {
+      hazard = {
+        hazardTitle: 'Rajada de Vento Litorâneo a 70 km/h com Jato de Areia Quartzosa',
+        saveDC: 14,
+        saveType: 'Constituição',
+        duneAndLagoonRisk: 'Vento marítimo tempestuoso canalizado entre os braços da duna parabólica arremessando partículas cortantes de quartzo a 70 km/h; atinge o rosto dos batedores causando lacerações na pele, abrasão de córneas e 2d6 de dano cortante com cegueira temporária (DMG p. 110, 246).',
+        pioneerMitigation: 'Uso de viseiras de osso fendido e capuzes pesados de sarja encerada cobrindo inteiramente a face e o pescoço.',
+        rescueAndStabilization: 'Irrigação ocular com água doce pura, compressas tépidas e aplicação de unguento emoliente de óleo vegetal.',
+        icon: '💨👁️',
+        color: '#ca8a04'
+      };
+    } else if (ht === 'hypersaline_lagoon_crust_break_scald') {
+      hazard = {
+        hazardTitle: 'Rompimento de Crosta de Sal em Lagoa Hipersalina com Queimadura Química',
+        saveDC: 14,
+        saveType: 'Destreza',
+        duneAndLagoonRisk: 'Lagoa rasa evaporada com crosta cristalina de halita sobre lodo cáustico fervente a 45°C; a camada de sal quebra sob o peso das botas mergulhando pernas e pés na salmoura concentrada com 3d6 de dano cáustico e infecção dérmica (PHB p. 182-183).',
+        pioneerMitigation: 'Travessia por pontaletes de areia seca e uso de perneiras impermeabilizadas com resina de breu vegetal.',
+        rescueAndStabilization: 'Enxágue abundante imediato com água doce potável para diluir cristais e aplicação de pasta calmante de argila verde.',
+        icon: '🧂🔥',
+        color: '#e11d48'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampParabolicDuneLagoonStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'parabolic_trailing_arm_vegetated_ridge_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Crista Vegetada do Braço Fixo da Duna Parabólica',
+      duneAndCampSafety: 'Acampamento assentado na crista do braço traseiro da duna estabilizado por raízes profundas de restinga a 12 metros de altura, assegurando base firme, sem risco de deslizamentos e acima das enchentes das lagoas interdunares.',
+      duneDikeBarrierAndFreshLensWell: 'A elevação e a densa vegetação rasteira formam barreira corta-vento natural contra tempestades marítimas de areia e ocultam fogueiras e tendas na paisagem costeira.',
+      campRestAndSafetyGuards: 'Concede descanso longo aquecido, ventilado e sem areia invasora para todos os membros do grupo, garantindo vigilância panorâmica limpa para as sentinelas de vigília.',
+      icon: '⛺🌾',
+      color: '#d97706'
+    };
+
+    if (dt === 'interdune_hardwood_sand_fence_and_rush_mat_barrier') {
+      tech = {
+        defenseTitle: 'Cerca de Ripas de Pau-Brasil e Esteiras de Junco Corta-Areia',
+        duneAndCampSafety: 'Paliçada perimetral de estacas entrelaçadas com esteiras grossas de junco costeiro fincadas na areia e ancoradas com sacos de lona cheios de conchas.',
+        duneDikeBarrierAndFreshLensWell: 'Bloqueia 95% da areia eólica rasteira, concede cobertura superior (+5 na CA) contra ataques a distância e barra a passagem de animais peçonhentos das dunas.',
+        campRestAndSafetyGuards: 'Assegura sono tranquilo sem soterramento de equipamentos e guarnição fortificada para a vigília noturna.',
+        icon: '🪵🛡️',
+        color: '#b45309'
+      };
+    } else if (dt === 'perched_freshwater_lens_casings_well') {
+      tech = {
+        defenseTitle: 'Poço de Ponteira de Bambu em Lente de Água Doce Suspensa',
+        duneAndCampSafety: 'Perfuração na areia quartzosa entre dunas que alcança a lente delgada de água doce da chuva flutuando sobre a água salina subterrânea, extraída por tubo filtrante de bambu perfurado.',
+        duneDikeBarrierAndFreshLensWell: 'Fornece 50 litros diários de água doce puríssima e cristalina filtrada naturalmente pela areia, assegurando a autonomia hídrica da comitiva no deserto costeiro.',
+        campRestAndSafetyGuards: 'Restabelece o vigor físico e a hidratação dos exploradores, eliminando o estresse da escassez hídrica nos lençóis litorâneos.',
+        icon: '💧🏺',
+        color: '#0284c7'
+      };
+    } else if (dt === 'dune_crest_tripwire_shell_chime_perimeter') {
+      tech = {
+        defenseTitle: 'Perímetro de Alarme em Crista de Duna com Fios de Tensão e Guizos de Concha',
+        duneAndCampSafety: 'Linhas finas de latão estendidas ao longo dos declives de areia conectadas a colares de conchas marinhas perfuradas que tilintam alto ao menor deslocamento da areia.',
+        duneDikeBarrierAndFreshLensWell: 'Emite alerta antecipado a 60 metros contra predadores noturnos ou invasores que tentem galgar as encostas da duna sob o manto da noite.',
+        campRestAndSafetyGuards: 'Garante tranquilidade mental e prontidão tática instantânea para as sentinelas de guarda.',
+        icon: '🔔🐚',
+        color: '#ca8a04'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessTowerKarstPoljeHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'jungle').toLowerCase();
@@ -26082,6 +26186,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessParabolicDuneLagoonHazard: calcWildernessParabolicDuneLagoonHazard,
+    calcCampParabolicDuneLagoonStation: calcCampParabolicDuneLagoonStation,
     calcWildernessTowerKarstPoljeHazard: calcWildernessTowerKarstPoljeHazard,
     calcCampTowerKarstPoljeStation: calcCampTowerKarstPoljeStation,
     calcWildernessSubglacialEskerKameHazard: calcWildernessSubglacialEskerKameHazard,
