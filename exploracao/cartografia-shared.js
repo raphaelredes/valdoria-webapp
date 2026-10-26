@@ -20735,6 +20735,86 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 280: CAMPOS DE DUNAS EM LENÇÓIS E LAGOAS INTERDUNARES (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessBarchanoidDuneLagoonHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'subaqueous_dune_slipface_slump_avalanche').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Avalanche de Areia Subaquática em Talude de Lagoa Interdunar',
+      saveDC: 15,
+      saveType: 'Destreza',
+      barchanoidRisk: 'A face de deslizamento da crista barcanoide com 25 metros de altura mergulha diretamente nas águas profundas de uma lagoa interdunar cristalina; a passagem da comitiva no topo desencadeia uma liquefação súbita da areia que arrasta aventureiros e cargas para o fundo subaquático da depressão com 3d8 de concussão e risco iminente de soterramento por areia sob a água (DMG p. 110, 246; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores avançados contornando as lagoas pela base firme das encostas de barlavento compactadas pelo vento em vez de marchar pelo topo das cristas móveis (Sobrevivência ou Atletismo CD 14).',
+      rescueAndStabilization: 'Içamento rápido com cabos de flutuação e desobstrução de boca e olhos cobertos por areia fina (Atletismo CD 14 ou Medicina CD 13).',
+      icon: '🏝️',
+      color: '#0284c7'
+    };
+
+    if (ht === 'blinding_quartz_glare_thermal_mirage') {
+      hazard.hazardTitle = 'Ofuscamento em Quartzo Branco e Miragem Térmica';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Constituição';
+      hazard.barchanoidRisk = 'A alvura absoluta dos grãos de quartzo puro reflete a radiação solar com intensidade cegante enquanto as miragens na superfície das lagoas distorcem distâncias e relevos; marchar sem proteção ocular causa fotofobia severa, 2d6 de dano radiante e desvantagem em testes de Percepção e Sobrevivência por 4 horas por desorientação visual (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Uso de viseiras de couro com fendas estreitas enfumaçadas e aplicação de pasta de carvão ao redor dos olhos (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Compressas com água fresca de lagoa e repouso sob toldos de lona escura (Medicina CD 13).';
+    } else if (ht === 'perched_clay_pan_breakthrough_ooze') {
+      hazard.hazardTitle = 'Ruptura de Crosta Argilosa Oculta e Atolamento em Lodo';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.barchanoidRisk = 'Sob a lâmina rasa de água doce entre as dunas esconde-se a camada de argila impermeável recoberta por uma camada fina de areia fofa; o peso de carretas ou montarias rompe a crosta prendendo pernas em lodo pegajoso anóxico que atua como vácuo de sucção, infligindo 2d8 de concussão por esforço muscular e exigindo salvaguarda de Força CD 14 para não ficar Preso (DMG p. 110; PHB p. 185).';
+      hazard.pioneerMitigation = 'Sondagem prévia do fundo com varas de taquara demarcando vaus com solo arenoso firme (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Colocação de pranchas largas sob o peito para distribuir o peso e corte da sucção com pás de cabo curto (Atletismo CD 14).';
+    } else if (ht === 'migrating_ridge_interdune_wind_funnel') {
+      hazard.hazardTitle = 'Turbilhão de Vento Funilado em Garganta Barcanoide';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Destreza';
+      hazard.barchanoidRisk = 'Ventos alísios costeiros canalizados entre duas cristas barcanoides paralelas ganham velocidade de vendaval levantando uma cortina densa de areia jateadora na altura do peito; a rajada fustiga a pele, arranca coberturas de tendas e causa 2d6 de dano cortante com perda de visibilidade para menos de 3 metros (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Avanço rente ao solo na zona de sombra aerodinâmica da encosta suave da duna (Furtividade ou Sobrevivência CD 14).';
+      hazard.rescueAndStabilization = 'Fixação emergencial com estacas espirais e lavagem ocular com água potável (Medicina CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampBarchanoidDuneLagoonStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'windward_dune_plinth_lagoon_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Encosta de Barlavento à Margem da Lagoa',
+      barchanoidAndCampSafety: 'O acampamento é assentado sobre a rampa suave e compactada da vertente de barlavento, 4 metros acima do nível da lagoa de água doce; o piso de areia firme suporta estacas longas de ancoragem e permanece imune a avalanches da crista (DMG p. 111).',
+      barchanoidAndWatch: 'A planície aberta de areia branca ao redor impede qualquer aproximação furtiva noturna, concedendo vantagem em testes de Percepção para as sentinelas sob a luz das estrelas.',
+      campRestAndSafetyGuards: 'Descanso tranquilo em solo fresco e seco com acesso imediato a banhos revigorantes de água doce.',
+      icon: '🛡️',
+      color: '#0284c7'
+    };
+
+    if (dt === 'freshwater_interdune_bath_recovery') {
+      defense.defenseTitle = 'Piscina Natural de Banho e Decantação em Lagoa Cristalina';
+      defense.barchanoidAndCampSafety = 'As águas da lagoa pluvial retidas na areia quartzosa são excepcionalmente limpas, doces e desprovidas de parasitas fluviais ou lodo (PHB p. 150).';
+      defense.barchanoidAndWatch = 'O banho fresco e a hidratação abundante restauram o ânimo dos aventureiros, concedendo +1 de bônus na recuperação de Dados de Vida durante o descanso longo.';
+      defense.campRestAndSafetyGuards = 'Abastecimento irrestrito de água pura sem necessidade de purificação mágica ou filtragem pesada.';
+    } else if (dt === 'cotton_canvas_windbreak_trench_rampart') {
+      defense.defenseTitle = 'Trincheira de Areia com Parapeito de Lona Reforçada';
+      defense.barchanoidAndCampSafety = 'Escavação de trincheira semicircular de 1,2 metro na areia compactada forrada com esteiras de algodão e escorada com estacas enterradas contra o vento dominante (PHB p. 185).';
+      defense.barchanoidAndWatch = 'Quebra 100% da velocidade das rajadas de areia rasantes e oculta completamente fogueiras baixas contra a linha do horizonte.';
+      defense.campRestAndSafetyGuards = 'Abrigo seguro e aquecido contra o vento marinho noturno garantindo sono repousante.';
+    } else if (dt === 'perched_lagoon_perimetral_acoustic_perimeter') {
+      defense.defenseTitle = 'Perímetro com Sinos Flutuantes nas Margens da Lagoa';
+      defense.barchanoidAndCampSafety = 'Linhas de corda esticadas ao longo da margem arenosa e dos vaus rasos da lagoa conectadas a boias leves de cortiça com sinetas de bronze (DMG p. 111).';
+      defense.barchanoidAndWatch = 'Qualquer invasor ou fera que tente vadear a lagoa ou cruzar a margem na escuridão movimenta a água e soa os sinos imediatamente, eliminando surpresas táticas.';
+      defense.campRestAndSafetyGuards = 'Sistema de alerta acústico altamente eficaz contra incursões noturnas.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 279: TÔMBOLOS ARENOSOS, ILHAS DE MARÉ E CALÇADAS INTERMAREAIS (D&D 5e)
   // =========================================================================
 
@@ -36516,6 +36596,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessBarchanoidDuneLagoonHazard: calcWildernessBarchanoidDuneLagoonHazard,
+    calcCampBarchanoidDuneLagoonStation: calcCampBarchanoidDuneLagoonStation,
     calcWildernessCoastalTomboloHazard: calcWildernessCoastalTomboloHazard,
     calcCampCoastalTomboloStation: calcCampCoastalTomboloStation,
     calcWildernessRhyoliteDomeHazard: calcWildernessRhyoliteDomeHazard,

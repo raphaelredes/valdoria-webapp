@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T22:23:00Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-26T22:26:54Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessBarchanoidDuneLagoonHazard) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var bl = CartShared.calcWildernessBarchanoidDuneLagoonHazard(bKey, 'subaqueous_dune_slipface_slump_avalanche');
+        return '<div class="clp-barchanoid-dune-lagoon-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,28,36,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(2,132,199,0.35);font-size:8px;color:#f0f9ff;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + bl.color + ';margin-bottom:2px;">' + bl.icon + ' ' + bl.hazardTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Dunas em Lençóis e Lagoa Interdunar:</b> ' + bl.barchanoidRisk + ' (CD ' + bl.saveDC + ' [' + bl.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Mitigação:</b> ' + bl.pioneerMitigation + ' · <i>Estabilização: ' + bl.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampBarchanoidDuneLagoonStation) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var bl = CartShared.calcCampBarchanoidDuneLagoonStation(bKey, 'windward_dune_plinth_lagoon_bivouac');
+        return '<div class="clp-barchanoid-dune-lagoon-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(14,32,40,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(14,165,233,0.3);font-size:8px;color:#f0f9ff;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + bl.color + ';margin-bottom:2px;">' + bl.icon + ' ' + bl.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>' 
+          + '  <div>• <b>Bivaque em Encosta de Lençol:</b> ' + bl.barchanoidAndCampSafety + ' · <b>Defesa:</b> ' + bl.barchanoidAndWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + bl.campRestAndSafetyGuards + '</div>' 
           + '</div>';
       })()
     + (function(){
