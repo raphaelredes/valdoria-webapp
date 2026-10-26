@@ -18973,6 +18973,130 @@
     };
   }
 
+  // === calcWildernessQuartziteCanyonAndPlungeHazard (Desfiladeiros Fluviais de Quartzito e Cascatas em Queda Livre - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessQuartziteCanyonAndPlungeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'river').toLowerCase();
+    var ht = (hazardType || 'quartzite_plunge_pool_swirl_vortex').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Turbilhão de Sucção em Caldeirão de Cascata de Queda Livre',
+      saveDC: 15,
+      saveType: 'Força',
+      quartziteCanyonAndPlungeRisk: 'Vórtice hidráulico violento gerado pelo impacto da coluna d\'água de 40 metros em caldeirão de quartzito afunilado; arrasto subaquático em espiral com sucção centrípeta causando 3d6 de concussão contra paredes rochosas polidas (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores lançam amarrações de segurança com cordas flutuantes e arneses de couro de lontra antes de atravessar a bacia periférica.',
+      rescueAndStabilization: 'Tração com carretilha de cabo duplo, drenagem postural dos pulmões do mergulhador e massagem torácica com infusão quente de gengibre dos ermos.',
+      icon: '🌊🌀',
+      color: '#0284c7'
+    };
+
+    if (ht === 'sheer_polished_quartzite_wall_slip') {
+      hazard = {
+        hazardTitle: 'Escorregamento em Parede de Quartzito Polido e Limo Fluvial',
+        saveDC: 14,
+        saveType: 'Destreza',
+        quartziteCanyonAndPlungeRisk: 'Falésias de quartzito com 90 graus de inclinação recobertas por biofilme de microalgas hidratadas pelo spray contínuo da cascata; perda imediata de aderência de botas resultando em queda livre de até 15 metros.',
+        pioneerMitigation: 'Uso obrigatório de pítons de aço cravados em microfraturas com marretas pesadas e sapatilhas cravadas com cravos de bronze temperado.',
+        rescueAndStabilization: 'Imobilização de membro com talas de bambu fluvial acolchoadas com musgo e aplicação de emplastro de resina cicatrizante.',
+        icon: '🧗‍♂️🪨',
+        color: '#475569'
+      };
+    } else if (ht === 'waterfall_spray_hypothermia_white_mist') {
+      hazard = {
+        hazardTitle: 'Névoa Fria de Spray d\'Água e Choque Hipotérmico em Desfiladeiro',
+        saveDC: 14,
+        saveType: 'Constituição',
+        quartziteCanyonAndPlungeRisk: 'Spray microscópico impulsionado por correntes de ar comprimido no gargalo do cânion; encharcamento total em minutos sob temperatura de 8°C induzindo tremores incontroláveis e 1 nível de exaustão.',
+        pioneerMitigation: 'Uso de ponchos impermeáveis de couro de enguia encerada e consumo de doses regulares de caldo de tutano fervente com pimenta-do-reino.',
+        rescueAndStabilization: 'Troca imediata por lã seca no interior de fenda abrigada, isolamento corporal com mantas de alumínio e fricção vigorosa da pele.',
+        icon: '🌫️🥶',
+        color: '#0ea5e9'
+      };
+    } else if (ht === 'hydraulic_choke_flash_surge_flood') {
+      hazard = {
+        hazardTitle: 'Estrangulamento Hidráulico e Onda de Cabeça d\'Água no Desfiladeiro',
+        saveDC: 15,
+        saveType: 'Sabedoria',
+        quartziteCanyonAndPlungeRisk: 'Onda de cheia súbita represada a montante por detritos em gargalo estreito de quartzito; parede de água barrenta com troncos e pedregulhos avançando a 45 km/h sem aviso acústico devido ao estrondo da cascata.',
+        pioneerMitigation: 'Sentinelas avançados posicionados em balcões elevados monitoram coloração e turbidez da água comunicando-se por sinais visuais de tochas coloridas.',
+        rescueAndStabilization: 'Ascensão vertical emergencial por cabos de fuga já pré-instalados nas saliências superiores e contagem imediata dos integrantes da comitiva.',
+        icon: '🌊🪵',
+        color: '#d97706'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      quartziteCanyonAndPlungeRisk: hazard.quartziteCanyonAndPlungeRisk,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Desfiladeiros Fluviais e Quedas D\'Água) / PHB p. 182-183 (Escalada e Natação em Correntezas) / XGE p. 78-83 (Geomorfologia Fluvial em Quartzito)'
+    };
+  }
+
+  // === calcCampQuartziteCanyonAndPlungeStation (Bivaques em Balcões de Caverna sob Cascata e Sifões Cristalinos - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampQuartziteCanyonAndPlungeStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'river').toLowerCase();
+    var dt = (defenseType || 'behind_waterfall_quartzite_cave_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Caverna Seca sob Cortina de Cascata de Queda Livre',
+      quartzitePlungeAnchorageAndSecurity: 'Gruta natural esculpida pela retração da base sob o quartzito resistente; abóbada 100% seca e protegida da chuva por trás da coluna d\'água de 40 metros.',
+      cascadeAcousticMaskingAndShelter: 'O ruído ensurdecedor da cascata oculta completamente as fogueiras, conversas e ruídos de preparo do acampamento contra predadores e emboscadores na margem externa.',
+      campRestAndSafetyGuards: 'Assegura descanso longo perfeito e calmo para os membros da comitiva com vigília focada exclusivamente na rampa de acesso molhada.',
+      icon: '⛺🌊',
+      color: '#0284c7'
+    };
+
+    if (dt === 'quartzite_crevice_heavy_piton_belay_matrix') {
+      tech = {
+        defenseTitle: 'Matriz de Ancoragem com Pítons Forjados em Fendas Cegas',
+        quartzitePlungeAnchorageAndSecurity: 'Pontos de amarração de alta resistência cravados em fissuras estruturais de quartzito duro com cabos de aço galvanizado e mosquetões de trava dupla.',
+        cascadeAcousticMaskingAndShelter: 'Impede descolamento ou colapso de redes suspensas e plataformas de bivaque portáteis mesmo contra rajadas de vento turbilhonar do cânion.',
+        campRestAndSafetyGuards: 'Elimina o risco de quedas noturnas nas pedras afiadas do leito fluvial durante o sono dos exploradores.',
+        icon: '⚓🪨',
+        color: '#64748b'
+      };
+    } else if (dt === 'pure_cascade_mist_siphon_water_station') {
+      tech = {
+        defenseTitle: 'Sifão Decantador de Névoa Cristalina e Filtro de Areia de Quartzo',
+        quartzitePlungeAnchorageAndSecurity: 'Canaleta de bambu interceptora posicionada no fluxo laminar traseiro da cascata conectada a vaso cerâmico preenchido com quartzo moído e carvão vegetal ativado.',
+        cascadeAcousticMaskingAndShelter: 'Decanta turbidez e filtra 25 litros por hora de água hipermineralizada pura, livre de micróbios ou parasitas fluviais.',
+        campRestAndSafetyGuards: 'Fornece hidratação salutar e fresca para o preparo de rações de viagem e revigoramento imediato dos aventureiros.',
+        icon: '💧🏺',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'dampened_quartzite_shelf_dry_firepit_hearth') {
+      tech = {
+        defenseTitle: 'Lareira Refratária com Defletor Térmico em Balcão de Quartzito',
+        quartzitePlungeAnchorageAndSecurity: 'Fogueira construída sobre lastro de lajes secas de quartzo com chapa refletora de bronze posicionada para projetar calor para o interior da caverna úmida.',
+        cascadeAcousticMaskingAndShelter: 'Seca roupas, botas e equipamentos encharcados pelo spray da cascata sem emitir clarão visível para fora da cortina d\'água.',
+        campRestAndSafetyGuards: 'Neutraliza hipotermia, eleva a temperatura do bivaque para 20°C e devolve a disposição aos sentinelas de vigília.',
+        icon: '🔥🛡️',
+        color: '#ea580c'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      quartzitePlungeAnchorageAndSecurity: tech.quartzitePlungeAnchorageAndSecurity,
+      cascadeAcousticMaskingAndShelter: tech.cascadeAcousticMaskingAndShelter,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Cânions e Grutas sob Cascatas) / PHB p. 150 (Equipamentos de Montanhismo Fluvial) / XGE p. 78-83 (Engenharia de Abrigos de Balcão e Filtros Naturais)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -20862,6 +20986,8 @@
     calcCampKarstMogoteAndBlindPitStation: calcCampKarstMogoteAndBlindPitStation,
     calcWildernessHamadaRegAndGaleHazard: calcWildernessHamadaRegAndGaleHazard,
     calcCampHamadaRegAndGaleStation: calcCampHamadaRegAndGaleStation,
+    calcWildernessQuartziteCanyonAndPlungeHazard: calcWildernessQuartziteCanyonAndPlungeHazard,
+    calcCampQuartziteCanyonAndPlungeStation: calcCampQuartziteCanyonAndPlungeStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
