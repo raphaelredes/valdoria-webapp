@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 211: RECIFES DE VERMETÍDEOS COSTEIROS (TROTTOIRS) E RESSACA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessVermetidReefHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'vermetid_trottoir_overhang_cornice_wave_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso de Cornija Bioconstruída de Recife de Vermetídeos (Trottoir)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      vermetidRisk: 'Plataformas calcárias salientes construídas por moluscos gastrópodes tubulares (vermetídeos) e algas coralinas na linha de quebra das ondas, projetando-se até 3 metros sobre o mar profundo sem apoio inferior; o peso da comitiva combinado ao impacto de uma vaga submersa parte a cornija oca, lançando os aventureiros contra tubos calcários cortantes como navalhas com 2d6 cortante mais 2d6 de concussão (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Marcha restrita à faixa interna cimentada na rocha costeira, evitando a borda externa em balanço sobre a espuma.',
+      rescueAndStabilization: 'Arremesso de cabo de flutuação antes do recuo da segunda onda e bandagem compressiva nas lacerações.',
+      icon: '🐚🌊',
+      color: '#0284c7'
+    };
+
+    if (ht === 'razor_sharp_vermetid_tube_crust_slip_and_venomous_urchin_pit') {
+      hazard = {
+        hazardTitle: 'Queda Abrasiva em Crosta de Tubos de Vermetídeos e Poço de Ouriços-Negros',
+        saveDC: 14,
+        saveType: 'Destreza',
+        vermetidRisk: 'O topo do recife biológico é revestido por um tapete mucoso de cianobactérias extremamente escorregadio sobre milhões de aberturas tubulares afiadas e bacias rasas repletas de ouriços-do-mar espinhosos; escorregar rasga o couro das botas e crava espinhos calcários quebradiços causando 2d6 perfurante mais 1d8 de veneno (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Uso de solados trançados de corda de cânhamo áspero sobre as botas e apoio em bastão de ponta tripla.',
+        rescueAndStabilization: 'Imersão imediata do membro ferido em água quente com vinagre para dissolver os espinhos calcários.',
+        icon: '🦔🩸',
+        color: '#be123c'
+      };
+    } else if (ht === 'submerged_surge_channel_undertow_suction_tunnel') {
+      hazard = {
+        hazardTitle: 'Sucção Hidráulica em Fenda de Ressaca Submersa no Trottoir',
+        saveDC: 15,
+        saveType: 'Força',
+        vermetidRisk: 'Canais transversais estreitos que cortam o banco de vermetídeos e se fecham parcialmente no topo por crescimento biológico; quando a grande onda recua, o canal funciona como um ralo pressurizado que suga o explorador para baixo da plataforma de coralina com risco de afogamento e 2d8 de concussão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Salto das fendas transversais apenas no intervalo morto entre duas séries de ondas após o esvaziamento total.',
+        rescueAndStabilization: 'Ancoragem em corda de segurança retesada por dois companheiros na escarpa seca.',
+        icon: '🌀🌊',
+        color: '#0369a1'
+      };
+    } else if (ht === 'rim_pool_superheated_hypersaline_brine_and_moray_ambush') {
+      hazard = {
+        hazardTitle: 'Bacia de Maré Represada com Emboscada em Toca de Moreia Costeira',
+        saveDC: 14,
+        saveType: 'Destreza',
+        vermetidRisk: 'Muretas elevadas de vermetídeos represam piscinas profundas de borda (rimmed pools) cujas cavidades basais abrigam grandes predadores bentônicos ocultos sob a espuma; pisar em falso na borda submersa expõe a perna a botes lacerantes e torção articular com 2d8 perfurante (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Travessia pelas cristas divisórias estreitas que separam as bacias após sondagem com lança.',
+        rescueAndStabilization: 'Desinfecção rigorosa de mordidas marinhas com salmoura fervida e imobilização.',
+        icon: '🐍🪸',
+        color: '#0f766e'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampVermetidReefStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'supralittoral_fossil_trottoir_paleo_terrace_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Terraço Fóssil Supralitoral Acima da Zona de Borrifo',
+      vermetidAndCampSafety: 'Acampamento erguido sobre um antigo banco de vermetídeos soerguido tectonicamente a 6 metros acima da preamar atual, plano e cimentado na falésia.',
+      vermetidTrenchAndWatch: 'Piso calcário poroso que drena instantaneamente a chuva e fica fora do alcance de ondas vagabundas noturnas.',
+      campRestAndSafetyGuards: 'Garante descanso longo seco e seguro para todos os membros do grupo na costa rochosa.',
+      icon: '⛺🐚',
+      color: '#0284c7'
+    };
+
+    if (dt === 'coralline_ridge_wave_energy_dissipation_breakwater') {
+      tech = {
+        defenseTitle: 'Quebra-Mar Natural de Crista Algálica Dissipadora de Ressaca',
+        vermetidAndCampSafety: 'Posicionamento das tendas na enseada abrigada atrás de um duplo cordão de recifes de vermetídeos que absorve 90% da energia das ondas de tempestade.',
+        vermetidTrenchAndWatch: 'Permite ancorar botes e jangadas na laguna interna calma sem risco de despedaçamento contra as rochas.',
+        campRestAndSafetyGuards: 'Reduz o estrondo marítimo e o borrifo salino sobre os equipamentos metálicos.',
+        icon: '🛶🪸',
+        color: '#0369a1'
+      };
+    } else if (dt === 'coastal_karst_freshwater_seep_above_vermetid_bench') {
+      tech = {
+        defenseTitle: 'Fonte de Água Doce em Exsurgência Costeira Acima do Banco Calcário',
+        vermetidAndCampSafety: 'Captação de filete de água meteórica doce que brota no contato geológico entre o calcário da falésia e a plataforma marinha superior.',
+        vermetidTrenchAndWatch: 'Abastece a comitiva com água potável fresca sem contaminação pela salmoura das poças de maré.',
+        campRestAndSafetyGuards: 'Sustenta a hidratação do grupo em litorais áridos desprovidos de rios.',
+        icon: '💧🪨',
+        color: '#0ea5e9'
+      };
+    } else if (dt === 'tidal_weir_rimmed_pool_foraging_harvest_basin') {
+      tech = {
+        defenseTitle: 'Curral de Maré nas Bacias Represadas do Trottoir para Coleta',
+        vermetidAndCampSafety: 'Aproveitamento das piscinas naturais represadas pelas muretas de vermetídeos que retêm peixes e crustáceos na baixa-mar.',
+        vermetidTrenchAndWatch: 'Fornece rações frescas abundantes na maré vazante sem necessidade de mergulho em mar aberto.',
+        campRestAndSafetyGuards: 'Complementa o suprimento alimentar da expedição durante o pernoite costeiro.',
+        icon: '🦀🎣',
+        color: '#0f766e'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 210: POLÍGONOS DE DESSECAÇÃO GIGANTES E PEDRAS NAVEGANTES (D&D 5e)
   // =========================================================================
 
@@ -29724,6 +29828,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessVermetidReefHazard: calcWildernessVermetidReefHazard,
+    calcCampVermetidReefStation: calcCampVermetidReefStation,
     calcWildernessDesiccationPolygonHazard: calcWildernessDesiccationPolygonHazard,
     calcCampDesiccationPolygonStation: calcCampDesiccationPolygonStation,
     calcWildernessPeriglacialSolifluctionHazard: calcWildernessPeriglacialSolifluctionHazard,
