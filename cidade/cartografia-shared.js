@@ -16617,6 +16617,130 @@
     };
   }
 
+  // === calcWildernessPetrifiedForestAndSilicaHazard (Florestas Petrificadas, Troncos de Ágata e Sílica Cortante - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessPetrifiedForestAndSilicaHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'petrified_log_rolling_crush').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Rolamento de Tora Petrificada de Ágata',
+      saveDC: 15,
+      saveType: 'Destreza',
+      petrifiedForestRiskAndSilica: 'Segmento de tronco silicificado de 10 toneladas que se descalça de ravina íngreme rolando em alta velocidade; esmagamento contundente causando 3d8 e soterramento parcial (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avaliam fraturas de base com alavancas de ferro e contornam ravinas com blocos fósseis em equilíbrio precário.',
+      rescueAndStabilization: 'Içamento com talha mecânica e cunhas de carvalho, imobilização de fraturas e bálsamo analgésico de mirra.',
+      icon: '🪵💥',
+      color: '#b45309'
+    };
+
+    if (ht === 'silica_shard_scree_talus_slash') {
+      hazard = {
+        hazardTitle: 'Deslizamento em Cascalheira de Estilhaços de Quartzo Fóssil',
+        saveDC: 14,
+        saveType: 'Destreza',
+        petrifiedForestRiskAndSilica: 'Ladeira forrada por lascas vítreas de calcedônia afiadas como facas que rasgam solas de botas; 2d6 perfurante e sangramento mineral contínuo.',
+        pioneerMitigation: 'Uso de caneleiras reforçadas com placas de ferro leve e passos laterais com ancoragem por bastões temperados.',
+        rescueAndStabilization: 'Remoção cuidadosa de estilhaços de sílica com pinças finas, desinfecção com vinagre e curativos de compressão.',
+        icon: '🔪💎',
+        color: '#dc2626'
+      };
+    } else if (ht === 'piezoelectric_silica_spark_flash') {
+      hazard = {
+        hazardTitle: 'Descarga Piezoelétrica e Faíscas de Sílica em Atrito',
+        saveDC: 14,
+        saveType: 'Constituição',
+        petrifiedForestRiskAndSilica: 'Atrito violento de blocos de quartzo durante vendavais gerando clarões e faíscas espontâneas que cegam e chamuscam equipamentos.',
+        pioneerMitigation: 'Uso de mantos impermeáveis isolantes sem partes metálicas soltas e cobertura de materiais inflamáveis.',
+        rescueAndStabilization: 'Lavagem ocular com água doce pura em ambiente escuro e pomada de babosa contra queimaduras de centelha.',
+        icon: '⚡✨',
+        color: '#eab308'
+      };
+    } else if (ht === 'fossil_petrified_hollow_collapse') {
+      hazard = {
+        hazardTitle: 'Ruptura de Teto em Tronco Oco Silicificado',
+        saveDC: 13,
+        saveType: 'Destreza',
+        petrifiedForestRiskAndSilica: 'Casca mineralizada oca que aparenta solidez mas cede sob carga; queda de 4 metros sobre espigões internos com 2d6 perfurante.',
+        pioneerMitigation: 'Teste de percussão acústica com martelo antes de pisar ou acampar sobre cascas de troncos fósseis.',
+        rescueAndStabilization: 'Extração com corda de nó de alça dupla e limpeza de ferimentos com água oxigenada mineral.',
+        icon: '🕳️🪵',
+        color: '#ca8a04'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      petrifiedForestRiskAndSilica: hazard.petrifiedForestRiskAndSilica,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Florestas Petrificadas e Terreno Vítreo) / PHB p. 182-183 (Marcha Árida) / XGE p. 78-83 (Geologia)'
+    };
+  }
+
+  // === calcCampPetrifiedForestAgateHollowAndWall (Ocos de Tronco Fóssil, Solados de Aço e Para-Raios - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampPetrifiedForestAgateHollowAndWall(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'petrified_agate_trunk_chamber_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Tronco Fóssil Oco de Ágata Milenar',
+      petrifiedAnchorageAndSilicaSafety: 'Câmara natural de 3 metros de largura no cerne oco de um tronco colossal petrificado; paredes de calcedônia maciça impenetráveis.',
+      silicaShieldingAndCampSecurity: 'Totalmente à prova de vendavais cortantes, faíscas minerais e predadores carnívoros territoriais.',
+      campRestAndSafetyGuards: 'Permite sono longo tranquilo, aquecido e sem poeira para os membros da comitiva com sentinela postada na abertura estreita.',
+      icon: '🪵⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'lead_soled_pressure_footwear_rack') {
+      tech = {
+        defenseTitle: 'Armação de Botas com Solado Reforçado em Lâmina de Aço',
+        petrifiedAnchorageAndSilicaSafety: 'Sobre-solas metálicas finas e articuladas que impedem estilhaços vítreos de perfurarem os pés durante a guarda noturna.',
+        silicaShieldingAndCampSecurity: 'Elimina ferimentos acidentais nas rondas perimétricas sobre a cascalheira de quartzo pontiaguda.',
+        campRestAndSafetyGuards: 'Mantém as sentinelas atentas, móveis e sem dores musculares provocadas por terreno cortante.',
+        icon: '👢🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'piezoelectric_grounding_copper_rod') {
+      tech = {
+        defenseTitle: 'Haste de Cobre para Aterramento de Cargas Piezoelétricas',
+        petrifiedAnchorageAndSilicaSafety: 'Pino condutor cravado em veio de argila profunda com fiação que desvia centelhas piezoelétricas para o subsolo.',
+        silicaShieldingAndCampSecurity: 'Evita a ignição acidental de fardos de suprimentos secos e lonas durante ventanias com estática.',
+        campRestAndSafetyGuards: 'Garante tranquilidade contra estalos elétricos e centelhas noturnas ao redor do acampamento.',
+        icon: '⚡🛡️',
+        color: '#eab308'
+      };
+    } else if (dt === 'silica_shard_deflector_parapet') {
+      tech = {
+        defenseTitle: 'Mureta de Cascalho Silicioso com Argamassa de Argila',
+        petrifiedAnchorageAndSilicaSafety: 'Parapeito defensivo de blocos de jaspe colados com barro seco erguido na boca da cavidade fóssil.',
+        silicaShieldingAndCampSecurity: 'Protege contra ventos em turbilhão e desvia fragmentos pontiagudos arremessados pela ventania.',
+        campRestAndSafetyGuards: 'Concede refúgio térmico blindado e seguro para todos os aventureiros da expedição.',
+        icon: '🧱💎',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      petrifiedAnchorageAndSilicaSafety: tech.petrifiedAnchorageAndSilicaSafety,
+      silicaShieldingAndCampSecurity: tech.silicaShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Rochas Fósseis) / PHB p. 150 (Kits de Aventureiro) / XGE p. 78-83 (Geologia e Sobrevivência)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -18468,6 +18592,8 @@
     calcCampBorealTaigaLarchPlatformAndFirebreak: calcCampBorealTaigaLarchPlatformAndFirebreak,
     calcWildernessContinentalSaltFlatHazard: calcWildernessContinentalSaltFlatHazard,
     calcCampContinentalSaltFlatPlatformAndDistillerStation: calcCampContinentalSaltFlatPlatformAndDistillerStation,
+    calcWildernessPetrifiedForestAndSilicaHazard: calcWildernessPetrifiedForestAndSilicaHazard,
+    calcCampPetrifiedForestAgateHollowAndWall: calcCampPetrifiedForestAgateHollowAndWall,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
