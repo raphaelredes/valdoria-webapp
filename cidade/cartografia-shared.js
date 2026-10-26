@@ -17237,6 +17237,130 @@
     };
   }
 
+  // === calcWildernessTravertineTerraceAndCascadeHazard (Cânions de Travertino, Terraços Escalonados e Cascatas - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessTravertineTerraceAndCascadeHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'river').toLowerCase();
+    var ht = (hazardType || 'rimstone_fragile_lip_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ruptura de Borda Calcária Friável em Piscina Escalonada',
+      saveDC: 15,
+      saveType: 'Destreza',
+      travertineTerraceRiskAndCascades: 'Dique natural de travertino oco com 4 metros de desnível que cede sob o peso da marcha; queda violenta sobre degraus afiados de calcita causando 2d6 perfurante e 2d6 contundente (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores sondam as bordas de piscina com bastões de ponta chata e distribuem o peso usando pranchas de travessia apoiadas nos pilares de ancoragem.',
+      rescueAndStabilization: 'Içamento por corda ancorada em rocha firme com talas de imobilização e lavagem antisséptica com extrato de mirra.',
+      icon: '🌊⚠️',
+      color: '#0284c7'
+    };
+
+    if (ht === 'slippery_algal_calcite_cascade_fall') {
+      hazard = {
+        hazardTitle: 'Escorregão em Cascata Calcificada com Biofilme Algal',
+        saveDC: 14,
+        saveType: 'Destreza',
+        travertineTerraceRiskAndCascades: 'Laje inclinada de cascata recoberta por limo viscoso de cianobactérias e cristais lisos de carbonato; arrasto contínuo por 15 metros com risco de traumatismo e perda de fôlego.',
+        pioneerMitigation: 'Avanço com sapatilhas de solado cravado em bronze e fixação de corda-guia com estacas cravadas nas margens secas.',
+        rescueAndStabilization: 'Resgate com laço de arremesso, aquecimento com mantas de lã e aplicação de emplastro de cânfora para contusões.',
+        icon: '🧗‍♂️💥',
+        color: '#b45309'
+      };
+    } else if (ht === 'hypereutrophic_calcite_turbidity_swirl') {
+      hazard = {
+        hazardTitle: 'Vórtice Turbilhonar em Marmita de Sifão Cárstico',
+        saveDC: 14,
+        saveType: 'Força',
+        travertineTerraceRiskAndCascades: 'Redemoinho subaquático gerado por sumidouro oculto na base de degrau calcário, puxando nadadores e mochilas pesadas para fenda submersa.',
+        pioneerMitigation: 'Vigias mapeiam vórtices de espuma antes do vau e travessia estrita com flutuadores de pele inflada presos à cintura.',
+        rescueAndStabilization: 'Corte rápido de amarras de carga submersa e tração simultânea com guincho manual de roldana.',
+        icon: '🌀💧',
+        color: '#0891b2'
+      };
+    } else if (ht === 'caustic_lime_mist_inhalation') {
+      hazard = {
+        hazardTitle: 'Névoa Alcalina Asfixiante de Spray Calcário e Enxofre',
+        saveDC: 13,
+        saveType: 'Constituição',
+        travertineTerraceRiskAndCascades: 'Spray fino de água hidrotermal rica em calcita alcalina e emanações sulfurosas que se acumula no fundo abafado da garganta; tosse paroxística e cegueira temporária.',
+        pioneerMitigation: 'Uso de máscaras de gaze de linho umedecidas em vinagre de maçã e avanço veloz contra o vento dominante.',
+        rescueAndStabilization: 'Inalação de vapor de eucalipto balsâmico em tenda arejada e lavagem ocular com soro mineral salino esterilizado.',
+        icon: '🌫️☣️',
+        color: '#ca8a04'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      travertineTerraceRiskAndCascades: hazard.travertineTerraceRiskAndCascades,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Cânions Fluviais e Desníveis Cársticos) / PHB p. 182-183 (Marcha e Terreno Difícil) / XGE p. 78-83 (Geomorfologia Hidrotermal)'
+    };
+  }
+
+  // === calcCampTravertineTerraceAndCascadeFilterStation (Bivaques em Terraço, Vertedouros e Bacias Decantadoras - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampTravertineTerraceAndCascadeFilterStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'river').toLowerCase();
+    var dt = (defenseType || 'stepped_travertine_shelf_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Patamar Elevado de Travertino com Dique Natural',
+      terraceAnchorageAndCalciteSafety: 'Bancada calcificada perfeitamente horizontal 5 metros acima da linha de cheia; laje sólida de travertino que impede infiltração de umidade do solo.',
+      cascadeShieldingAndCampSecurity: 'Totalmente isolado de predadores terrestres por paredões verticais de calcita e protegido de transbordamentos noturnos do cânion.',
+      campRestAndSafetyGuards: 'Garante descanso calmo, seco e seguro para os membros da comitiva com acústica de cascata que abafa ruídos de presença do acampamento.',
+      icon: '🏞️⛺',
+      color: '#10b981'
+    };
+
+    if (dt === 'rimstone_dam_weir_spillway_reinforcement') {
+      tech = {
+        defenseTitle: 'Vertedouro Articulado de Madeira com Estacas em Dique Calcário',
+        terraceAnchorageAndCalciteSafety: 'Comporta rústica de tábuas de pinho fixada na borda do terraço para canalizar o excedente de água longe das tendas da comitiva.',
+        cascadeShieldingAndCampSecurity: 'Evita erosão regressiva da borda onde estão montados os mastros de abrigo mesmo sob chuva copiosa.',
+        campRestAndSafetyGuards: 'Assegura drenagem impecável e piso firme ao redor do fogo do acampamento durante toda a noite.',
+        icon: '🪵🛡️',
+        color: '#6366f1'
+      };
+    } else if (dt === 'calcite_natural_settling_basin_filtration') {
+      tech = {
+        defenseTitle: 'Bacia Decantadora Natural com Filtro de Areia Quartzosa',
+        terraceAnchorageAndCalciteSafety: 'Aproveitamento de piscina suspensa estagnada como tanque de sedimentação, conectada a leito filtrante de cascalho e carvão ativo.',
+        cascadeShieldingAndCampSecurity: 'Fornece 15 litros diários de água mineral fresca cristalina sem turbidez nem excesso de precipitados cársticos.',
+        campRestAndSafetyGuards: 'Permite reidratação plena e preparo seguro de infusões medicinais para todos os integrantes do grupo.',
+        icon: '💧🏺',
+        color: '#06b6d4'
+      };
+    } else if (dt === 'cascade_mist_baffle_woven_wattle') {
+      tech = {
+        defenseTitle: 'Anteparo Trançado de Vime para Bloqueio de Névoa de Cascata',
+        terraceAnchorageAndCalciteSafety: 'Painéis entrelaçados de galhos flexíveis posicionados na borda de montante para deflectar o spray úmido arremessado pela queda.',
+        cascadeShieldingAndCampSecurity: 'Mantém mantas, aljavas, couros e mantimentos completamente secos contra umidade saturada do cânion.',
+        campRestAndSafetyGuards: 'Preserva a temperatura corporal das sentinelas durante seus turnos de vigília noturna.',
+        icon: '🛡️🌿',
+        color: '#f97316'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      terraceAnchorageAndCalciteSafety: tech.terraceAnchorageAndCalciteSafety,
+      cascadeShieldingAndCampSecurity: tech.cascadeShieldingAndCampSecurity,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques em Desfiladeiros e Terraços) / PHB p. 150 (Kits de Acampamento) / XGE p. 78-83 (Engenharia de Drenagem e Filtros)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -19098,6 +19222,8 @@
     calcCampPalafitteStiltDeckAndBoomStation: calcCampPalafitteStiltDeckAndBoomStation,
     calcWildernessGraniteInselbergAndExfoliationHazard: calcWildernessGraniteInselbergAndExfoliationHazard,
     calcCampGraniteInselbergFlakeRoofAndSiphonStation: calcCampGraniteInselbergFlakeRoofAndSiphonStation,
+    calcWildernessTravertineTerraceAndCascadeHazard: calcWildernessTravertineTerraceAndCascadeHazard,
+    calcCampTravertineTerraceAndCascadeFilterStation: calcCampTravertineTerraceAndCascadeFilterStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
