@@ -72884,6 +72884,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessPillowLavaAndBlackSmokerHazard) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var pl = CartShared.calcWildernessPillowLavaAndBlackSmokerHazard(bKey, 'hydrothermal_black_smoker_superheated_jet');
+        return '<div class="clp-pillow-lava-card" style="margin:4px 0 6px;text-align:left;background:rgba(35,16,16,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(220,38,38,0.35);font-size:8px;color:#fee2e2;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + pl.color + ';margin-bottom:2px;">' + pl.icon + ' ' + pl.hazardTitle.toUpperCase() + ':</div>'
+          + '  <div>• <b>Lava Almofadada e Chaminés Negras:</b> ' + pl.pillowLavaAndSmokerRisk + ' (CD ' + pl.saveDC + ' [' + pl.saveType + '])</div>'
+          + '  <div style="font-size:7.5px;color:#fca5a5;margin-top:1px;">• <b>Mitigação:</b> ' + pl.pioneerMitigation + ' · <i>Estabilização: ' + pl.rescueAndStabilization + '</i></div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampPillowLavaAndBlackSmokerStation) return '';
+        var bKey = (biome && biome.key) || 'coastal';
+        var cp = CartShared.calcCampPillowLavaAndBlackSmokerStation(bKey, 'geothermal_chimney_alcove_thermal_bubble_bivouac');
+        return '<div class="clp-pillow-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,12,12,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(239,68,68,0.3);font-size:8px;color:#fee2e2;">'
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cp.color + ';margin-bottom:2px;">' + cp.icon + ' ' + cp.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
+          + '  <div>• <b>Bivaque em Bolha Térmica:</b> ' + cp.pillowLavaAnchorageAndGeothermalSafety + ' · <b>Proteção:</b> ' + cp.sulfideDeflectorAndCopperStill + '</div>'
+          + '  <div style="font-size:7.5px;color:#f87171;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cp.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessPetrifiedAgateForestHazard) return '';
         var bKey = (biome && biome.key) || 'badlands';
         var pa = CartShared.calcWildernessPetrifiedAgateForestHazard(bKey, 'petrified_agate_log_rolling_shear_crush');

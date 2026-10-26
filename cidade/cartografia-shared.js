@@ -20504,6 +20504,113 @@
   // PHB p. 182-183 (Travel Pace, Navigation in Badlands), PHB p. 190 (Cutting Hazards), XGE p. 77-83
   // =========================================================================
 
+
+  // =========================================================================
+  // FASE 148: CAMPOS DE LAVA ALMOFADADA, CHAMINÉS NEGRAS E FOSSAS ABISSAIS
+  // D&D 5e: DMG p. 110-111 (Extreme Heat & Pressure), DMG p. 116-117 (Underwater Hazards & Visibility),
+  // PHB p. 182-183 (Travel Pace & Navigation), PHB p. 198 (Underwater Rules), XGE p. 77-83
+  // =========================================================================
+
+  function calcWildernessPillowLavaAndBlackSmokerHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'hydrothermal_black_smoker_superheated_jet').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Jato Hipertérmico de Chaminé Vulcânica Negra a 350°C',
+      saveDC: 15,
+      saveType: 'Destreza',
+      pillowLavaAndSmokerRisk: 'Colunas de fluido mineral superaquecido a 350°C carregadas de sulfetos de ferro e cobre que jorram sob alta pressão de fossas abissais; atingem a comitiva de raspão causando 3d8 de dano de fogo/queimadura cáustica e corrosão de correias de metal (DMG p. 110, 116).',
+      pioneerMitigation: 'Batedores utilizam sondas de bronze com termopares para mapear correntes térmicas ascendentes e contornam as plumas negras a montante da correnteza.',
+      rescueAndStabilization: 'Arrasto imediato para zonas de água temperada, aplicação de ungüento neutralizante alcalino em queimaduras e reparo de soldas metálicas.',
+      icon: '🌋💨',
+      color: '#dc2626'
+    };
+
+    if (ht === 'crustal_pillow_lava_collapse_steam_eruption') {
+      hazard = {
+        hazardTitle: 'Rompimento de Crosta de Lava Almofadada e Explosão de Vapor',
+        saveDC: 15,
+        saveType: 'Força',
+        pillowLavaAndSmokerRisk: 'Lava basáltica globular oca resfriada rapidamente pela água marinha; a casca de vidro cede sob o peso da expedição liberando bolsão pressurizado de vapor superaquecido e estilhaços que causam 2d8 de concussão e cegueira temporária.',
+        pioneerMitigation: 'Marcha cuidadosa com bastões de percussão para verificar a solidez estrutural das almofadas antes de apoiar o peso total do corpo.',
+        rescueAndStabilization: 'Içamento com laços de cabo duplo de linho alcatroado e assepsia ocular com solução salina destilada isotônica.',
+        icon: '💥🪨',
+        color: '#ea580c'
+      };
+    } else if (ht === 'anoxic_hydrogen_sulfide_brine_pool_asphyxiation') {
+      hazard = {
+        hazardTitle: 'Poço Abissal de Salmoura Anóxica e Ácido Sulfídrico',
+        saveDC: 14,
+        saveType: 'Constituição',
+        pillowLavaAndSmokerRisk: 'Lagos submarinos densos de água hipersalina e gás sulfídrico depositados em depressões de basalto; a aproximação inala emanações asfixiantes que provocam paralisia respiratória, 2d6 de dano de veneno e 1 nível de exaustão.',
+        pioneerMitigation: 'Reconhecimento da superfície espelhada oleosa e amarelada da salmoura e uso de bolsas respiratórias de bexiga animal com cal viva filtrante.',
+        rescueAndStabilization: 'Ventilação pulmonar assistida em bolsão de ar limpo, administração de tônicos cárdicos e aquecimento torácico suave.',
+        icon: '☠️🫧',
+        color: '#7f1d1d'
+      };
+    } else if (ht === 'pillow_lava_glassy_crust_shear_shred') {
+      hazard = {
+        hazardTitle: 'Lâminas Conchoidais de Vidro Vulcânico em Lava Almofadada',
+        saveDC: 14,
+        saveType: 'Destreza',
+        pillowLavaAndSmokerRisk: 'Bordas afiadas de vidro palagonítico vítreo cobrindo as almofadas basálticas que fatiam calçados, luvas de mergulho e mangueiras de ar, causando 2d6 de dano cortante e perda de mobilidade.',
+        pioneerMitigation: 'Uso de botas e perneiras reforçadas com sola tripla de borracha vulcanizada e placas de malha de cobre sobreposta.',
+        rescueAndStabilization: 'Remoção delicada de microfragmentos vítreos com pinças magnéticas e selagem de cortes com cola hemostática de resina natural.',
+        icon: '🔪🩸',
+        color: '#991b1b'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampPillowLavaAndBlackSmokerStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'geothermal_chimney_alcove_thermal_bubble_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Alcova de Domo Basáltico com Bolha Térmica',
+      pillowLavaAnchorageAndGeothermalSafety: 'Acampamento montado em gruta natural de basalto espesso onde emanações termais brandas mantêm a temperatura ambiente em agradáveis 24°C contra o frio abissal.',
+      sulfideDeflectorAndCopperStill: 'Paredes de rocha sólida formam barreira hermética natural contra correntes marítimas violentas e jatos hidrotermais diretos.',
+      campRestAndSafetyGuards: 'Assegura descanso longo calmo, aquecido e revigorante para a comitiva com regeneração total de pontos de vida.',
+      icon: '⛺🌋',
+      color: '#dc2626'
+    };
+
+    if (dt === 'sulfide_deflector_funnel_and_degas_flue') {
+      tech = {
+        defenseTitle: 'Funil Defletor de Sulfetos e Chaminé de Degaseificação',
+        pillowLavaAnchorageAndGeothermalSafety: 'Estrutura cônica montada sobre fissuras vulcânicas menores que capta gases sulfurosos e os canaliza diretamente para fora da área habitável.',
+        sulfideDeflectorAndCopperStill: 'Garante renovação contínua do ar respirável no interior do bivaque, eliminando odores cáusticos e riscos de asfixia química.',
+        campRestAndSafetyGuards: 'Permite que sentinelas e exploradores durmam com total segurança pulmonar sem necessidade de máscaras.',
+        icon: '🛡️💨',
+        color: '#ea580c'
+      };
+    } else if (dt === 'mineral_precipitate_copper_cauldron_still') {
+      tech = {
+        defenseTitle: 'Caldeirão Geotérmico de Cobre para Condensação e Dessalinização',
+        pillowLavaAnchorageAndGeothermalSafety: 'Aparelho de cobre assentado sobre respiradouro térmico que ferve água salgada por calor vulcânico e condensa vapor límpido.',
+        sulfideDeflectorAndCopperStill: 'Produz 35 litros diários de água pura potável e ar fresco oxigenado, assegurando autossuficiência absoluta nas profundezas abissais.',
+        campRestAndSafetyGuards: 'Elimina carência hídrica e intoxicação mineral, preservando o vigor e o moral de todos os membros do grupo.',
+        icon: '⚗️💧',
+        color: '#0284c7'
+      };
+    } else if (dt === 'luminescent_tube_worm_marking_cordon') {
+      tech = {
+        defenseTitle: 'Cordão Perimetral com Marcadores Luminescentes de Vermes Tubulares',
+        pillowLavaAnchorageAndGeothermalSafety: 'Linha guia balizada com colônias de vermes tubulares que emitem forte bioluminescência azul-esmeralda em simbiose com bactérias termais.',
+        sulfideDeflectorAndCopperStill: 'Ilumina os limites seguros do acampamento e alerta sobre o refluxo de marés ou intrusão de predadores abissais.',
+        campRestAndSafetyGuards: 'Permite rondas de vigilância noturna com visibilidade impecável e zero tropeços em fendas vulcânicas.',
+        icon: '🪜✨',
+        color: '#10b981'
+      };
+    }
+
+    return tech;
+  }
+
   function calcWildernessPetrifiedAgateForestHazard(biomeKey, hazardType, options) {
     options = options || {};
     var bk = (biomeKey || 'badlands').toLowerCase();
@@ -23140,6 +23247,8 @@
     calcCampGlacialFjordAndCalvingStation: calcCampGlacialFjordAndCalvingStation,
     calcWildernessTidewaterGlacierAndSeaCaveHazard: calcWildernessTidewaterGlacierAndSeaCaveHazard,
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
+    calcWildernessPillowLavaAndBlackSmokerHazard: calcWildernessPillowLavaAndBlackSmokerHazard,
+    calcCampPillowLavaAndBlackSmokerStation: calcCampPillowLavaAndBlackSmokerStation,
     calcWildernessPetrifiedAgateForestHazard: calcWildernessPetrifiedAgateForestHazard,
     calcCampPetrifiedAgateForestStation: calcCampPetrifiedAgateForestStation,
     calcWildernessHangingRockGlacierHazard: calcWildernessHangingRockGlacierHazard,
