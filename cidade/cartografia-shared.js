@@ -20735,6 +20735,110 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 217: CHAMINÉS DE FADA GLACIOLACUSTRES (DEMOISELLES) E RAVINAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessGlaciolacustrineHoodooHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'capstone_demoiselle_boulder_pedestal_undercut_topple').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Tombamento de Bloco-Chapéu de Chaminé de Fada (Demoiselle) Subescavada',
+      saveDC: 15,
+      saveType: 'Destreza',
+      hoodooRisk: 'Torres esguias de até 25 metros esculpidas em tilo glacial endurecido e silte lacustre, encimadas por um pesado matacão errático (pedra-chapéu) que protege a coluna da chuva vertical; a vibração da marcha ou um vento lateral rompe o pescoço de argila ressecada precipitando o bloco de 8 toneladas sobre a trilha estreita com 4d8 de concussão (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Evitar descansar ou marchar diretamente sob colunas cujo pescoço superior seja mais estreito que um terço da pedra-chapéu.',
+      rescueAndStabilization: 'Retirada imediata da zona de estilhaços de tilo e estabilização de fraturas por impacto.',
+      icon: '🍄🪨',
+      color: '#d97706'
+    };
+
+    if (ht === 'cemented_boulder_clay_fluted_rills_vertical_slump') {
+      hazard = {
+        hazardTitle: 'Desmoronamento de Parede Canelada de Tilo Cimentado (Rills)',
+        saveDC: 14,
+        saveType: 'Destreza',
+        hoodooRisk: 'As paredes das ravinas entre as chaminés de fada aparentam a dureza do concreto quando secas, mas são sulcadas por caneluras verticais profundas (rills) repletas de seixos engastados; apoiar a mão ou cravar piqueta na crista de uma canelura faz a coluna inteira desfarinhar em cascata de cascalho e poeira com 2d8 de concussão (DMG p. 110; XGE p. 109).',
+        pioneerMitigation: 'Progredir pelo leito do talvegue sem usar as aletas verticais de argila como apoio de escalada.',
+        rescueAndStabilization: 'Desobstrução rápida do soterramento parcial por cascalho seco e proteção respiratória.',
+        icon: '🏜️⚠️',
+        color: '#b45309'
+      };
+    } else if (ht === 'blind_box_gully_cloudburst_hyperconcentrated_mud_torrent') {
+      hazard = {
+        hazardTitle: 'Torrente Hiperconcentrada de Lama em Ravina Cega de Chaminés',
+        saveDC: 15,
+        saveType: 'Força',
+        hoodooRisk: 'O solo de silte glaciolacustre é completamente impermeável a aguaceiros súbitos; em minutos, a água escorre das centenas de torres para o corredor estreito em fundo de saco formando uma pasta densa de lama e pedras erráticas que arrasta a comitiva com 3d6 de concussão e 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        pioneerMitigation: 'Escalar imediatamente para os colos divisórios altos (saddles) ao menor sinal de nuvens escuras nas cabeceiras.',
+        rescueAndStabilization: 'Ancoragem em arbustos de zimbro enraizados nas cristas superiores com corda de resgate.',
+        icon: '🌊🪨',
+        color: '#92400e'
+      };
+    } else if (ht === 'labyrinthine_hoodoo_spire_acoustic_reflection_and_ambush') {
+      hazard = {
+        hazardTitle: 'Labirinto Óptico e Acústico de Floresta de Agulhas de Tilo',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        hoodooRisk: 'Centenas de pináculos idênticos cor de ocre criam corredores cegos que bloqueiam a visão do horizonte e refletem o som em múltiplos ângulos falsos; batedores que se afastam três passos perdem o contato visual com o grupo e ficam expostos a emboscadas das alturas (DMG p. 110; PHB p. 183).',
+        pioneerMitigation: 'Marcação dos cruzamentos com risco de giz ou fita colorida e manutenção de formação compacta.',
+        rescueAndStabilization: 'Subida de um observador até o platô marginal para guiar o companheiro perdido por sinais.',
+        icon: '🧭🗼',
+        color: '#ca8a04'
+      };
+    }
+
+    return hazard;
+  }
+
+  function calcCampGlaciolacustrineHoodooStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'fallen_erratic_capstone_megaboulder_fortified_bivouac').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque sob Pedra-Chapéu Errática Já Tombada e Estabilizada',
+      hoodooAndCampSafety: 'Acampamento montado na cavidade seca sob um imenso matacão de granito que já caiu há séculos no fundo largo do vale e repousa sobre o substrato rochoso.',
+      hoodooTrenchAndWatch: 'Elimina totalmente o risco de novo tombamento e oferece escudo de granito maciço contra quedas de seixos.',
+      campRestAndSafetyGuards: 'Garante descanso longo seguro e protegido no interior da ravina.',
+      icon: '⛺🪨',
+      color: '#d97706'
+    };
+
+    if (dt === 'plateau_rim_grassed_interfluve_stable_turf_camp') {
+      tech = {
+        defenseTitle: 'Platô de Gramíneas na Borda Superior Acima da Escarpa de Erosão',
+        hoodooAndCampSafety: 'Instalação das barracas a 15 metros de distância da borda recuante do cânion, sobre solo coeso estabilizado por raízes profundas.',
+        hoodooTrenchAndWatch: 'Proporciona visão completa sobre todo o anfiteatro de chaminés de fada abaixo.',
+        campRestAndSafetyGuards: 'Impede surpresas noturnas vindas dos corredores labirínticos inferiores.',
+        icon: '🏕️👁️',
+        color: '#65a30d'
+      };
+    } else if (dt === 'perched_gravel_lens_seepage_spring_clear_water') {
+      tech = {
+        defenseTitle: 'Fonte Filtrada em Lente de Cascalho Suspensa na Parede do Cânion',
+        hoodooAndCampSafety: 'Coleta de água subterrânea que brota limpa de uma camada antiga de areia e seixos intercalada entre dois estratos impermeáveis de argila.',
+        hoodooTrenchAndWatch: 'Fornece água cristalina sem a suspensão leitosa de silte que torna o riacho do fundo intragável.',
+        campRestAndSafetyGuards: 'Mantém a hidratação saudável de toda a expedição.',
+        icon: '💧🪨',
+        color: '#0284c7'
+      };
+    } else if (dt === 'narrow_col_defile_tripwire_chokepoint_defense') {
+      tech = {
+        defenseTitle: 'Garganta de Estrangulamento entre Pilares Gêmeos com Alerta',
+        hoodooAndCampSafety: 'Fechamento da única passagem estreita de 1,5 metro entre duas torres maciças na entrada do bivaque com fio de alarme e abrolhos.',
+        hoodooTrenchAndWatch: 'Força qualquer intruso a passar em fila indiana pelo corredor vigiado pelos sentinelas.',
+        campRestAndSafetyGuards: 'Multiplica a capacidade defensiva do grupo durante o pernoite.',
+        icon: '🛡️🔔',
+        color: '#eab308'
+      };
+    }
+
+    return tech;
+  }
+
+  // =========================================================================
   // FASE 216: CASCATAS DE BARRAGEM DE TRAVERTINO E DIQUES DE TUFA (D&D 5e)
   // =========================================================================
 
@@ -30348,6 +30452,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessGlaciolacustrineHoodooHazard: calcWildernessGlaciolacustrineHoodooHazard,
+    calcCampGlaciolacustrineHoodooStation: calcCampGlaciolacustrineHoodooStation,
     calcWildernessTravertineTufaBarrageHazard: calcWildernessTravertineTufaBarrageHazard,
     calcCampTravertineTufaBarrageStation: calcCampTravertineTufaBarrageStation,
     calcWildernessMangrovePropRootHazard: calcWildernessMangrovePropRootHazard,
