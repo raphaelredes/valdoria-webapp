@@ -19345,6 +19345,130 @@
     };
   }
 
+  // === calcWildernessRockGlacierAndSolifluctionHazard (Geleiras de Escombros e Crioturbação de Encosta - DMG p. 110-111 / PHB p. 182-183 / XGE p. 78-83) ===
+  function calcWildernessRockGlacierAndSolifluctionHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'solifluction_rock_scree_sliding_avalanche').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Deslizamento de Lóbulo de Crioturbação e Avalanche de Tálus',
+      saveDC: 15,
+      saveType: 'Destreza',
+      rockGlacierAndSolifluctionRisk: 'Encosta de cascalho angular e blocos de granito instáveis assentados sobre núcleo de gelo periglacial em degelo; movimento de massa súbito que arrasta aventureiros por 30 metros ladeira abaixo causando 3d6 de concussão e esmagamento (DMG p. 110-111).',
+      pioneerMitigation: 'Batedores avançam em zigue-zague por cristas consolidadas de morena estável e utilizam bastões de caminhada com ponteiras de tungstênio para ancoragem imediata.',
+      rescueAndStabilization: 'Desenterramento rápido com pás de neve de bordo rígido, imobilização de fraturas com talas de alumínio e administração de tônico revigorante aquecido.',
+      icon: '🪨🏔️',
+      color: '#64748b'
+    };
+
+    if (ht === 'hidden_crevice_interstitial_ice_void') {
+      hazard = {
+        hazardTitle: 'Fenda Oculta em Núcleo de Gelo Intersticial',
+        saveDC: 14,
+        saveType: 'Sabedoria',
+        rockGlacierAndSolifluctionRisk: 'Vazios profundos entre blocos de rocha cobertos por uma fina camada de líquen e neve endurecida; queda imprevista em poço congelado de 5 metros com risco de aprisionamento de pernas em fendas de gelo negro.',
+        pioneerMitigation: 'Sondagem sistemática dos interstícios entre blocos rochosos com hastes telescópicas antes de transferir o peso corporal.',
+        rescueAndStabilization: 'Içamento vertical com roldanas de resgate e aquecimento imediato das extremidades com pedras envoltas em lã para evitar congelamento.',
+        icon: '🕳️❄️',
+        color: '#0284c7'
+      };
+    } else if (ht === 'frost_heave_stone_pattern_slip') {
+      hazard = {
+        hazardTitle: 'Deslocamento por Crioturbação e Círculos de Pedra Escorregadios',
+        saveDC: 14,
+        saveType: 'Destreza',
+        rockGlacierAndSolifluctionRisk: 'Polígonos de pedras selecionadas pelo congelamento e degelo alternado com leito central de argila supersaturada; perda brusca de tração que provoca quedas contra cantos vivos de rochas afiadas.',
+        pioneerMitigation: 'Passadas firmes sobre as pedras perimetrais maiores e uso de solas dentadas com grampões de seis pontas.',
+        rescueAndStabilization: 'Curativo compressivo em lacerações e alinhamento de contusões articulares com bandagens elásticas.',
+        icon: '❄️🪨',
+        color: '#475569'
+      };
+    } else if (ht === 'periglacial_night_freeze_rock_burst') {
+      hazard = {
+        hazardTitle: 'Explosão Criogênica de Rocha por Congelamento Noturno',
+        saveDC: 15,
+        saveType: 'Constituição',
+        rockGlacierAndSolifluctionRisk: 'Água infiltrada em microfissuras de blocos graníticos que se expande subitamente a -12°C ao anoitecer, estilhaçando rochas como granadas de estilhaços que projetam fragmentos a alta velocidade.',
+        pioneerMitigation: 'Desvio de paredões fraturados ao entardecer e marcha sob abrigo de escudos de madeira reforçada.',
+        rescueAndStabilization: 'Extração cirúrgica de lascas de pedra encravadas na derme, sutura hemostática e cobertura térmica emergencial.',
+        icon: '💥🧊',
+        color: '#dc2626'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      hazardType: ht,
+      hazardTitle: hazard.hazardTitle,
+      saveDC: hazard.saveDC,
+      saveType: hazard.saveType,
+      rockGlacierAndSolifluctionRisk: hazard.rockGlacierAndSolifluctionRisk,
+      pioneerMitigation: hazard.pioneerMitigation,
+      rescueAndStabilization: hazard.rescueAndStabilization,
+      icon: hazard.icon,
+      color: hazard.color,
+      dndRef: 'DMG p. 110-111 (Montanhas Periglaciais e Geleiras Rochosas) / PHB p. 182-183 (Escalada e Tálus Instável) / XGE p. 78-83 (Geomorfologia Crio-Alpina e Lóbulos de Solifluxão)'
+    };
+  }
+
+  // === calcCampRockGlacierAndSolifluctionStation (Bivaques em Plataformas de Tálus e Bastiões Defletores - DMG p. 111 / PHB p. 150 / XGE p. 78-83) ===
+  function calcCampRockGlacierAndSolifluctionStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'dry_stone_terraced_bivouac_platform').toLowerCase();
+
+    var tech = {
+      defenseTitle: 'Bivaque em Plataforma Escalonada de Pedra Seca Nivelada',
+      rockGlacierAnchorageAndFrostSafety: 'Piso perfeitamente plano construído com lajes de granito empilhadas sobre crista morenaica estável, afastado de canaletas ativas de avalanche e de degelo subsuperficial.',
+      screeDeflectionAndColdInsulation: 'Manta isolante reflexiva de camada dupla colocada sob as tendas que impede que o calor corporal dos membros da comitiva derreta o gelo intersticial inferior.',
+      campRestAndSafetyGuards: 'Assegura descanso longo calmo e protegido sem perigo de deslizamento ou colapso do piso durante o sono dos exploradores.',
+      icon: '⛺🪨',
+      color: '#64748b'
+    };
+
+    if (dt === 'periglacial_wedge_deflector_bastion') {
+      tech = {
+        defenseTitle: 'Bastião Defletor em Cunha contra Queda de Blocos',
+        rockGlacierAnchorageAndFrostSafety: 'Muralha angular de matacões pesados montada a montante do acampamento que divide e desvia qualquer rolamento de rochas ou cascalho pelas laterais.',
+        screeDeflectionAndColdInsulation: 'Garante segurança total contra avalanches repentinas provocadas pelo congelamento noturno nas encostas superiores.',
+        campRestAndSafetyGuards: 'Permite que as sentinelas mantenham a vigilância voltada para as passagens sem receio de impactos pelas costas.',
+        icon: '🛡️🧱',
+        color: '#334155'
+      };
+    } else if (dt === 'meltwater_subsurface_drainage_flume') {
+      tech = {
+        defenseTitle: 'Canaleta Subsuperficial de Desvio de Água de Degelo',
+        rockGlacierAnchorageAndFrostSafety: 'Valeta forrada com cascalho graúdo que canaliza o fluxo de degelo subterrâneo da geleira rochosa para fora do perímetro do bivaque.',
+        screeDeflectionAndColdInsulation: 'Impede o encharcamento da base do acampamento e a consequente formação de placas de gelo negro escorregadio.',
+        campRestAndSafetyGuards: 'Fornece ponto de coleta de água de degelo límpida e cristalina para consumo e preparo de alimentos da comitiva.',
+        icon: '💧⛏️',
+        color: '#0284c7'
+      };
+    } else if (dt === 'thermal_bivouac_screen_with_slate_chimney') {
+      tech = {
+        defenseTitle: 'Anteparo Térmico Corta-Vento com Chaminé de Lajes de Ardósia',
+        rockGlacierAnchorageAndFrostSafety: 'Lareira enclausurada em nicho de ardósia que projeta o calor de brasas para o interior dos sacos de dormir enquanto expele a fumaça por duto vertical protegido.',
+        screeDeflectionAndColdInsulation: 'Neutraliza ventos catabáticos de até 70 km/h descendo das cristas nevadas e mantém o interior do bivaque a confortáveis 16°C.',
+        campRestAndSafetyGuards: 'Restaura a circulação nas mãos e pés dos sentinelas após turnos gélidos de vigília nos ermos.',
+        icon: '🔥🛡️',
+        color: '#ea580c'
+      };
+    }
+
+    return {
+      biomeKey: bk,
+      defenseType: dt,
+      defenseTitle: tech.defenseTitle,
+      rockGlacierAnchorageAndFrostSafety: tech.rockGlacierAnchorageAndFrostSafety,
+      screeDeflectionAndColdInsulation: tech.screeDeflectionAndColdInsulation,
+      campRestAndSafetyGuards: tech.campRestAndSafetyGuards,
+      icon: tech.icon,
+      color: tech.color,
+      dndRef: 'DMG p. 111 (Bivaques de Montanha e Geleiras de Rocha) / PHB p. 150 (Kits de Montanhismo Crio-Alpino) / XGE p. 78-83 (Engenharia de Plataformas de Pedra Seca)'
+    };
+  }
+
   // === formatExpeditionItinerary (Resumo Imersivo D&D 5e para Prancheta) ===
   function formatExpeditionItinerary(originInput, targetInput, routeKeys, options) {
     options = options || {};
@@ -21240,6 +21364,8 @@
     calcCampLateriteCrustAndMoundStation: calcCampLateriteCrustAndMoundStation,
     calcWildernessTufaPinnacleAndEndorheicHazard: calcWildernessTufaPinnacleAndEndorheicHazard,
     calcCampTufaPinnacleAndEndorheicStation: calcCampTufaPinnacleAndEndorheicStation,
+    calcWildernessRockGlacierAndSolifluctionHazard: calcWildernessRockGlacierAndSolifluctionHazard,
+    calcCampRockGlacierAndSolifluctionStation: calcCampRockGlacierAndSolifluctionStation,
     calcWildernessHighAltitudeHypoxiaAndThinAirHazard: calcWildernessHighAltitudeHypoxiaAndThinAirHazard,
     calcCampAcclimatizationBivouacAndOxygenTrap: calcCampAcclimatizationBivouacAndOxygenTrap,
     _drawSearchMatchBeacon: _drawSearchMatchBeacon,
