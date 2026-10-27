@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 303: ENTRELAÇAMENTOS DRUÍDICOS E AVISOS SILVESTRES NA FLORA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessDruidicFloraSign(biomeKey, signType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var st = (signType || 'woven_bough_druidic_omen_glyph').toLowerCase();
+
+    var sign = {
+      signTitle: 'Entrelaçamento Druídico de Galhos Vivos e Líquens Rúnicos (PHB p. 66)',
+      saveDC: 15,
+      saveType: 'Sabedoria',
+      druidicSignMechanics: 'Galhos de salgueiro ou carvalho sutilmente arqueados em espirais sagradas, acompanhados de padrões de musgo e pedras de rio nas bifurcações da trilha (PHB p. 66); qualquer Druida reconhece e lê a mensagem automaticamente (alertando sobre água pura, covil de aberração, incêndio próximo ou passagem de outra comitiva amiga), enquanto não-druidas precisam passar em Sabedoria (Percepção CD 15) apenas para notar que os ramos foram moldados intencionalmente, mas não conseguem decifrar o idioma secreto sem magia (PHB p. 66).',
+      pioneerMitigation: 'Uso do truque Druidismo (Druidcraft, PHB p. 236) para fazer um botão de flor desabrochar na cor exata do código de alerta quando uma comitiva conhecida se aproxima (Natureza ou Sobrevivência CD 13).',
+      rescueAndStabilization: 'Restauração da harmonia vegetal desfazendo o nó vivo após a leitura para não deixar pistas a rastreadores hostis (Sobrevivência CD 12).',
+      icon: '🌿',
+      color: '#22c55e'
+    };
+
+    if (st === 'druidcraft_weather_and_sensory_spore_beacon') {
+      sign.signTitle = 'Presságio Atmosférico de 24h e Sussurro Sensorial de Druidismo';
+      sign.saveDC = 13;
+      sign.saveType = 'Sabedoria';
+      sign.druidicSignMechanics = 'O Druida conjura o truque Druidismo (PHB p. 236) sobre um marco natural, deixando uma folha encantada com o aroma de ozônio ou pinho e um símbolo efêmero de nuvem/sol que prevê com precisão absoluta o clima das próximas 24 horas para a comitiva aliada que vem atrás na rota (PHB p. 183, 236).';
+      sign.pioneerMitigation = 'Combinação do efeito olfativo inofensivo do Druidismo (cheiro de terra molhada para rota segura; odor acre de enxofre para emboscada) perceptível a 3 metros (Percepção ou Natureza CD 13).';
+      sign.rescueAndStabilization = 'Renovação do encanto sensorial a cada parada de descanso curto durante a jornada em Pointcrawl.';
+    } else if (st === 'speak_with_plants_trail_memory_interrogation') {
+      sign.signTitle = 'Inquirição da Flora Silvestre sobre Passagem de Comitivas (Falar com Plantas)';
+      sign.saveDC = 14;
+      sign.saveType = 'Sabedoria';
+      sign.druidicSignMechanics = 'Através de Falar com Plantas (3º círculo, PHB p. 243) ou leitura de raízes sensíveis dos círculos druídicos, a vegetação relata quem pisou na trilha nas últimas 24 horas: número exato de andarilhos, porte físico, se carregavam feridos ou tochas acesas, sem revelar nomes próprios (PHB p. 243).';
+      sign.pioneerMitigation = 'Oferenda de água limpa ou adubo de cinzas às árvores antigas da encruzilhada para obter descrições detalhadas da direção tomada pelos viajantes (Natureza ou Persuasão CD 13).';
+      sign.rescueAndStabilization = 'Solicitação para que os espinheiros locais se fechem em terreno difícil atrás da comitiva, atrasando perseguidores (PHB p. 243).';
+    } else if (st === 'corrupted_blight_false_druidic_lure') {
+      sign.signTitle = 'Sinal Druídico Corrompido por Bruxas ou Plantas Carnívoras (Blight Lure)';
+      sign.saveDC = 15;
+      sign.saveType = 'Inteligência';
+      sign.druidicSignMechanics = 'Bruxas verdes ou espíritos malignos da mata torcem cipós secos imitando o glifo druídico de "Fonte Curativa" para atrair aventureiros feridos até um lamaçal de cipós-assassinos ou esporos asfixiantes; falha em notar a necrose na casca causa 2d8 de dano de veneno e condição enredado (DMG p. 110; PHB p. 66).';
+      sign.pioneerMitigation = 'Distinção imediata entre um entrelaçamento feito em madeira viva saudável (Druídico verdadeiro) e galhos quebrados à força (Natureza ou Investigação CD 15; automático para Druidas).';
+      sign.rescueAndStabilization = 'Queima controlada dos esporos tóxicos com fogo alquímico ou tochas e purificação do marco com Druidismo (Medicina ou Natureza CD 13).';
+    }
+
+    return sign;
+  }
+
+  function calcCampDruidicGroveSanctuaryStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var dt = (defenseType || 'living_thorn_briar_dome_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque sob Abóbada de Espinheiros Entrelaçados e Camuflagem Viva',
+      druidicAndCampSafety: 'O acampamento é abrigado no interior de uma cúpula natural de roseiras-bravas, raízes de figueira e samambaias moldadas segundo a tradição druídica para ocultar totalmente a luz da fogueira e bloquear o vento (PHB p. 66, 183; DMG p. 111).',
+      druidicAndWatch: 'As paredes de espinhos vivos concedem cobertura três-quartos (+5 CA) e funcionam como barreira natural que causa 2d4 de dano perfurante a qualquer criatura que tente invadir fora da fenda secreta.',
+      campRestAndSafetyGuards: 'Proporciona descanso longo em perfeita comunhão com o bioma, sem deixar vestígios de acampamento ao partir pela manhã.',
+      icon: '⛺',
+      color: '#22c55e'
+    };
+
+    if (dt === 'goodberry_and_herbal_dew_catchment_hollow') {
+      defense.defenseTitle = 'Cálice de Folhas Coletoras de Orvalho e Cultivo de Bom Fruto';
+      defense.druidicAndCampSafety = 'Folhas largas de bromélias e musgo esfagno purificador canalizam o orvalho noturno para cabaças limpas, enquanto arbustos sagrados no centro do círculo potencializam o Kit de Herbalismo e a magia Bom Fruto (PHB p. 154, 219).';
+      defense.druidicAndWatch = 'Garante água pura e nutrição completa para até 10 aventureiros, concedendo +1 dado de vida adicional recuperado durante o descanso longo.';
+      defense.campRestAndSafetyGuards = 'Sustenta a comitiva mesmo em ermos áridos ou pântanos de águas salobras contaminadas.';
+    } else if (dt === 'awakened_songbird_and_cricket_sentinel_chorus') {
+      defense.defenseTitle = 'Coro de Grilos e Aves Noturnas como Alarme Biológico de Perímetro';
+      defense.druidicAndCampSafety = 'Através de Falar com Animais (PHB p. 242) ou empatia silvestre, a fauna miúda ao redor das árvores do bivaque mantém seu canto noturno constante enquanto a mata estiver segura.';
+      defense.druidicAndWatch = 'O silêncio súbito dos grilos em um setor específico ou o pio de alerta de uma coruja indica a direção exata de qualquer intruso furtivo, concedendo vantagem em Percepção às sentinelas.';
+      defense.campRestAndSafetyGuards = 'Sistema de alerta vivo indetectável por Detectar Magia e imune a dissipação arcana.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 302: GLIFOS DE GÍRIA DE LADRÃO E MARCAS CLANDESTINAS DE ESTRADA (D&D 5e)
   // =========================================================================
 
@@ -38274,6 +38349,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessDruidicFloraSign: calcWildernessDruidicFloraSign,
+    calcCampDruidicGroveSanctuaryStation: calcCampDruidicGroveSanctuaryStation,
     calcWildernessThievesCantRoadSign: calcWildernessThievesCantRoadSign,
     calcCampThievesCantSafeDropStation: calcCampThievesCantSafeDropStation,
     calcWildernessHeliographMirrorSignal: calcWildernessHeliographMirrorSignal,
