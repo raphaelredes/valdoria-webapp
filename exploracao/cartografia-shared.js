@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 317: RASTREAMENTO FORENSE DE COMITIVAS (DMG p. 244) E MAGIAS LOCALIZAR OBJETO, LOCALIZAR CRIATURA E VIDÊNCIA (D&D 5e)
+  // =========================================================================
+
+  function resolveWildernessPartyTrackingAndLocate(biomeKey, trackingMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var tm = (trackingMode || 'dmg_survival_tracking_surface_and_time_dc').toLowerCase();
+
+    var tracking = {
+      trackingTitle: 'Rastreamento Físico de Comitivas por Superfície, Clima e Tempo (DMG p. 244)',
+      saveDC: 15,
+      saveType: 'Sabedoria',
+      trackingLocateMechanics: 'Aplicando a tabela oficial de Rastreamento do Dungeon Master’s Guide (DMG p. 244), o Guia ou Batedor realiza Sabedoria (Sobrevivência) contra a CD determinada pelo terreno: CD 10 em superfície macia (neve, lama, cinza vulcânica), CD 15 em terra ou grama, e CD 20 em rocha nua ou pedregulho; a CD recebe +5 para cada dia transcorrido desde a passagem da outra comitiva, +5 se houve chuva ou nevasca, e -5 se a presa deixou rastros óbvios (como sangue de ferimentos ou fogueira apagada).',
+      pioneerMitigation: 'Marcação da largura das passadas e profundidade das botas na lama para distinguir guerreiros de armadura pesada de batedores leves.',
+      rescueAndStabilization: 'Permite seguir o rastro exato de uma comitiva aliada desaparecida ou evitar a rota tomada por um bando hostil.',
+      icon: '🐾',
+      color: '#d97706'
+    };
+
+    if (tm === 'natural_explorer_exact_headcount_and_age') {
+      tracking.trackingTitle = 'Explorador Natural do Patrulheiro: Número Exato, Tamanho e Idade do Rastro (PHB p. 91)';
+      tracking.saveDC = 12;
+      tracking.saveType = 'Sabedoria';
+      tracking.trackingLocateMechanics = 'Enquanto rastreia outras criaturas em seu Terreno Favorito, o Patrulheiro (Explorador Natural, PHB p. 91) descobre automaticamente o número exato de integrantes da outra comitiva, seus tamanhos (Médio, Pequeno, Grande/montarias) e há quanto tempo exato passaram pela área — informações preciosas antes de decidir se vale a pena alcançá-los!',
+      tracking.pioneerMitigation = 'Uso combinado de Percepção Primeval (PHB p. 92) para confirmar se os rastros pertencem a humanoides mortais ou a metamorfos/mortos-vivos.',
+      tracking.rescueAndStabilization = 'Impede que a comitiva caia em emboscadas onde metade do bando inimigo se escondeu fora da trilha principal.';
+    } else if (tm === 'locate_object_and_locate_creature_compass') {
+      tracking.trackingTitle = 'Bússola Arcana de Localizar Objeto (300m) e Localizar Criatura (300m) (PHB p. 256)';
+      tracking.saveDC = 15;
+      tracking.saveType = 'Sabedoria';
+      tracking.trackingLocateMechanics = 'Bardo, Clérigo, Druida, Paladino, Patrulheiro ou Mago conjura Localizar Objeto (2º círculo, alcance 300m / 1.000 pés, PHB p. 256) para sentir a direção exata de um item específico já visto de perto (como o anel de sinete, o estandarte ou a Pedra de Mensagem de um aliado!) ou Localizar Criatura (4º círculo, alcance 300m, PHB p. 256) para rastrear um aventureiro conhecido em movimento.',
+      tracking.pioneerMitigation = 'Atenção às contramedidas canônicas do PHB (p. 256): qualquer espessura de chumbo bloqueia Localizar Objeto, e um curso de água corrente de pelo menos 3 metros de largura bloqueia Localizar Criatura!',
+      tracking.rescueAndStabilization = 'Permite encontrar um companheiro capturado ou perdido em nevoeiro denso e cavernas labirínticas.';
+    } else if (tm === 'scrying_crystal_ball_and_familiarity_modifiers') {
+      tracking.trackingTitle = 'Vidência (Scrying): Modificadores de Conhecimento e Conexão Corporal (PHB p. 286)',
+      tracking.saveDC = 17;
+      tracking.saveType = 'Sabedoria';
+      tracking.trackingLocateMechanics = 'Bardo, Clérigo, Druida, Bruxo ou Mago (5º círculo, foco de 1.000 PO como espelho, fonte ou bola de cristal, PHB p. 286) cria um sensor invisível a até 3m de um aventureiro no mesmo plano por 10 minutos; a salvaguarda de Sabedoria do alvo sofre modificadores diretos da Névoa de Identidade: Segunda mão (+5 para o alvo), Primeira mão / já se conheceram com Selo ◈ (+0), Familiar (-5), Retrato/Pintura (-2), Pertence/Roupa (-4) ou Parte do corpo como cabelo/unha (-10)!',
+      tracking.pioneerMitigation = 'Se o alvo passar na salvaguarda, fica imune a novas tentativas de Vidência do mesmo conjurador por 24 horas (PHB p. 286).',
+      tracking.rescueAndStabilization = 'Caso não se conheça o aventureiro mas sim o marco geográfico, Vidência pode focar diretamente em um local já visitado pelo conjurador sem salvaguarda.';
+    }
+
+    return tracking;
+  }
+
+  function calcCampCounterTrackingAndScentMaskStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'running_water_crossing_and_brush_sweep_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Travessia por Água Corrente (3m) e Varredura de Pegadas Antes do Bivaque (PHB p. 256; DMG p. 244)',
+      counterTrackAndCampSafety: 'Para despistar perseguidores humanos, matilhas de worgs e a magia Localizar Criatura (PHB p. 256), o Batedor conduz a comitiva pelo leito raso de um riacho de água corrente com mais de 3 metros de largura e varre as últimas pegadas com galhos de pinheiro (+5 na CD de Sobrevivência dos rastreadores).',
+      counterTrackAndPerimeterWatch: 'Interrompe instantaneamente tanto o rastro olfativo de farejadores quanto a linha de efeito de Localizar Criatura antes de montar o acampamento na margem oposta.',
+      campRestAndSafetyGuards: 'Garante noite tranquila mesmo quando caçadores de recompensa ou bandos rivais seguem a estrada principal.',
+      icon: '🌊',
+      color: '#d97706'
+    };
+
+    if (dt === 'lead_lined_chest_and_polymorph_locate_block') {
+      defense.defenseTitle = 'Cofre Revestido de Chumbo contra Localizar Objeto e Disfarce Polimórfico (PHB p. 256)';
+      defense.counterTrackAndCampSafety = 'Relíquias de missão, anéis de sinete e artefatos mágicos procurados por facções rivais são guardados dentro de um estojo forrado com uma fina lâmina de chumbo durante o acampamento.',
+      defense.counterTrackAndPerimeterWatch = 'Bloqueia 100% da magia Localizar Objeto e Detectar Magia a qualquer distância (PHB p. 231, 256).',
+      defense.campRestAndSafetyGuards = 'Protege o espólio da comitiva contra ladrões arcanos que rondem o nó à noite.';
+    } else if (dt === 'false_trail_hook_and_ambush_overwatch') {
+      defense.defenseTitle = 'Rastro Falso em Anzol (Buttonhook Track) e Vigília sobre a Própria Trilha',
+      defense.counterTrackAndCampSafety = 'Antes de parar para dormir, a comitiva caminha 200 metros adiante deixando pegadas visíveis, retorna caminhando de costas sobre as próprias pisadas até um rochedo elevado e monta o bivaque com vista para a trilha abaixo.',
+      defense.counterTrackAndPerimeterWatch = 'Qualquer grupo hostil que esteja rastreando a comitiva passa direto sob a mira dos arqueiros e sentinelas do acampamento.',
+      defense.campRestAndSafetyGuards = 'Inverte o papel de caça e caçador, concedendo vantagem tática imediata.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 316: TESTEMUNHAS DA ESTRADA: FALAR COM ANIMAIS, FALAR COM PLANTAS E FALAR COM OS MORTOS (D&D 5e)
   // =========================================================================
 
@@ -39324,6 +39399,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveWildernessPartyTrackingAndLocate: resolveWildernessPartyTrackingAndLocate,
+    calcCampCounterTrackingAndScentMaskStation: calcCampCounterTrackingAndScentMaskStation,
     resolveTrailWitnessSpeakSpells: resolveTrailWitnessSpeakSpells,
     calcCampNatureAndSpiritCommuneStation: calcCampNatureAndSpiritCommuneStation,
     resolveCrossPartyConvergenceAndCombat: resolveCrossPartyConvergenceAndCombat,

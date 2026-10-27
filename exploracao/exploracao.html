@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T01:55:54Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T01:57:52Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.resolveWildernessPartyTrackingAndLocate) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var tk = CartShared.resolveWildernessPartyTrackingAndLocate(bKey, 'dmg_survival_tracking_surface_and_time_dc');
+        return '<div class="clp-party-tracking-locate-card" style="margin:4px 0 6px;text-align:left;background:rgba(38,22,8,0.86);padding:4px 8px;border-radius:4px;border:1px solid rgba(217,119,6,0.38);font-size:8px;color:#fffbeb;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + tk.color + ';margin-bottom:2px;">' + tk.icon + ' ' + tk.trackingTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Rastreamento (DMG p. 244), Localizar e Vidência:</b> ' + tk.trackingLocateMechanics + ' (CD ' + tk.saveDC + ' [' + tk.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Leitura de Pegadas:</b> ' + tk.pioneerMitigation + ' · <i>Rota: ' + tk.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampCounterTrackingAndScentMaskStation) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var tk = CartShared.calcCampCounterTrackingAndScentMaskStation(bKey, 'running_water_crossing_and_brush_sweep_bivouac');
+        return '<div class="clp-party-tracking-locate-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,16,6,0.82);padding:4px 8px;border-radius:4px;border:1px solid rgba(180,83,9,0.32);font-size:8px;color:#fffbeb;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + tk.color + ';margin-bottom:2px;">' + tk.icon + ' ' + tk.defenseTitle.toUpperCase() + ' (DMG p. 244; PHB p. 256):</div>' 
+          + '  <div>• <b>Contramedidas de Rastro e Chumbo:</b> ' + tk.counterTrackAndCampSafety + ' · <b>Vigia:</b> ' + tk.counterTrackAndPerimeterWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#fcd34d;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + tk.campRestAndSafetyGuards + '</div>' 
           + '</div>';
       })()
     + (function(){
