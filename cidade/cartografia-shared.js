@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 307: SUSSURROS ARCANOS EM ENCONTRO: TRUQUE MENSAGEM E MENTE DESPERTA (D&D 5e)
+  // =========================================================================
+
+  function resolveCovertWhisperCommunication(biomeKey, whisperMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var wm = (whisperMode || 'message_cantrip_copper_wire_whisper').toLowerCase();
+
+    var whisper = {
+      whisperTitle: 'Truque Mensagem com Fio de Cobre e Sussurro Bidirecional (PHB p. 259)',
+      saveDC: 15,
+      saveType: 'Sabedoria',
+      whisperMechanics: 'O conjurador (Bardo, Feiticeiro ou Mago, PHB p. 259) aponta o dedo através de um pedaço curto de fio de cobre para uma criatura dentro de 36 metros (120 pés) e sussurra uma mensagem que somente o alvo ouve e à qual somente o alvo pode responder em sussurro; atravessa obstáculos sólidos caso o conjurador conheça o alvo e saiba que está atrás da barreira (bloqueado apenas por 30 cm de pedra, 2,5 cm de metal, folha de chumbo ou Silêncio mágico). Não exige saber o nome verdadeiro do personagem — basta vê-lo ou já tê-lo conhecido pessoalmente.',
+      pioneerMitigation: 'Ocultação do gesto somático sob o manto e sussurro abafado (Prestidigitação ou Furtividade CD 14 contra a Percepção Passiva de terceiros presentes no encontro para não notarem que um truque foi conjurado).',
+      rescueAndStabilization: 'Uso do fio de cobre para coordenar com um companheiro ou com o líder de outra comitiva um sinal de recuo simultâneo sem alertar guardas ou monstros próximos.',
+      icon: '🤫',
+      color: '#8b5cf6'
+    };
+
+    if (wm === 'awakened_mind_great_old_one_pure_telepathy') {
+      whisper.whisperTitle = 'Mente Desperta do Grande Antigo: Telepatia Silenciosa Pura (PHB p. 110)';
+      whisper.saveDC = 18;
+      whisper.saveType = 'Sabedoria';
+      whisper.whisperMechanics = 'Bruxos do patrono Grande Antigo (1º nível, PHB p. 110) projetam sua voz diretamente na mente de qualquer criatura que possam ver a até 9 metros (30 pés); ao contrário do truque Mensagem, não possui componentes verbais, somáticos ou materiais (100% invisível e inaudível para terceiros) e não exige que o alvo fale o mesmo idioma do Bruxo, desde que compreenda ao menos um idioma.';
+      whisper.pioneerMitigation = 'Manutenção de expressão facial neutra durante o parley enquanto transmite alertas táticos mentais ao grupo aliado (Enganação ou Intuição CD 14).';
+      whisper.rescueAndStabilization = 'Funciona inclusive dentro da área da magia Silêncio ou debaixo d’água, garantindo comando tático ininterrupto.';
+    } else if (wm === 'minor_illusion_and_thaumaturgy_ventriloquism_distraction') {
+      whisper.whisperTitle = 'Ventriloquismo Arcano com Ilusão Menor e Taumaturgia (PHB p. 251, 281)';
+      whisper.saveDC = 14;
+      whisper.saveType = 'Inteligência';
+      whisper.whisperMechanics = 'Combinação de Ilusão Menor (PHB p. 251, alcance 9m, sem componente verbal!) para gerar sussurros discretos junto ao ouvido de um aliado ou projetar uma insígnia ilusória dentro de um baú, e Taumaturgia (PHB p. 281, alcance 9m) para criar murmúrios espectrais ou batidas distantes que desviam a atenção de sentinelas enquanto duas comitivas conversam.';
+      whisper.pioneerMitigation = 'Escolha de Ilusão Menor quando o silêncio vocal do conjurador é obrigatório (apenas componente somático e um pouco de lã, PHB p. 251).';
+      whisper.rescueAndStabilization = 'Geração de grito ou som de galhos quebrando a 9 metros na direção oposta para abrir brecha de evasão furtiva.';
+    } else if (wm === 'silence_dome_and_lead_lining_countermeasure') {
+      whisper.whisperTitle = 'Bloqueio Acústico por Magia Silêncio e Barreira de Chumbo (PHB p. 259, 276)';
+      whisper.saveDC = 15;
+      whisper.saveType = 'Inteligência';
+      whisper.whisperMechanics = 'A esfera de 6 metros de raio do ritual Silêncio (2º círculo, PHB p. 276) impede totalmente qualquer som de atravessar ou existir no interior, bloqueando o truque Mensagem e magias com componente verbal; da mesma forma, 30 cm de pedra ou uma fina lâmina de chumbo cortam o caminho tortuoso do fio de cobre de Mensagem (PHB p. 259).';
+      whisper.pioneerMitigation = 'Leitura labial a distância (Percepção ou Intuição CD 15, talento Observador concede +5, PHB p. 168) ou transição para sinais manuais e Mente Desperta quando dentro de uma cúpula de Silêncio.';
+      whisper.rescueAndStabilization = 'Posicionamento estratégico na borda externa da esfera de 6m de Silêncio para recuperar a capacidade vocal imediatamente.';
+    }
+
+    return whisper;
+  }
+
+  function calcCampSilentTelepathicWatchStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'copper_filament_perimeter_message_relay_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Rede de Vigília Silenciosa por Truque Mensagem entre Sentinelas e Tendas',
+      whisperAndCampSafety: 'A sentinela posicionada no ponto elevado a até 36 metros das barracas mantém o fio de cobre em punho e o eixo de caminho livre (contornando árvores e rochas, PHB p. 259) até os companheiros adormecidos.',
+      whisperAndWatch: 'Permite despertar o grupo inteiro com sussurros diretos no ouvido sem emitir nenhum grito, apito ou ruído que revele aos emboscadores que eles foram detectados.',
+      campRestAndSafetyGuards: 'Garante que a comitiva prepare armas e magias em absoluto silêncio antes de abrir as lonas das tendas.',
+      icon: '⛺',
+      color: '#8b5cf6'
+    };
+
+    if (dt === 'silence_ritual_soundproof_campfire_parley') {
+      defense.defenseTitle = 'Cúpula Ritual de Silêncio Externo para Reunião Inaudível na Estrada';
+      defense.whisperAndCampSafety = 'Conjurando Silêncio como ritual (PHB p. 276) sobre o espaço entre o bivaque e a trilha externa, ou usando Ilusão Menor para mascarar as vozes com som de vento e riacho.';
+      defense.whisperAndWatch = 'Duas comitivas reunidas podem debater planos ou negociar termos sem que batedores ocultos na mata além da barreira consigam escutar uma única palavra (falha automática em testes de Percepção auditiva externa).';
+      defense.campRestAndSafetyGuards = 'Blindagem contra espionagem acústica e ecolocalização de predadores noturnos.';
+    } else if (dt === 'observant_lip_reading_fireside_counter_espionage') {
+      defense.defenseTitle = 'Vigilância de Leitura Labial contra Sussurros à Luz da Fogueira (PHB p. 168)';
+      defense.whisperAndCampSafety = 'Posicionamento da lenha da fogueira de modo a iluminar o rosto de visitantes enquanto mantém as sentinelas da comitiva na penumbra.';
+      defense.whisperAndWatch = 'Personagens atentos ou com o talento Observador (PHB p. 168) interpretam o movimento dos lábios de quem tenta cochichar ou conjurar o componente verbal de Mensagem em um idioma conhecido.';
+      defense.campRestAndSafetyGuards = 'Neutraliza conspirações silenciosas durante encontros tensos no acampamento.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 306: MOTOR DE IDIOMAS CANÔNICOS, SOTAQUES E COMPREENSÃO ARCANA (D&D 5e)
   // =========================================================================
 
@@ -38574,6 +38649,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveCovertWhisperCommunication: resolveCovertWhisperCommunication,
+    calcCampSilentTelepathicWatchStation: calcCampSilentTelepathicWatchStation,
     resolveDndLanguageComprehension: resolveDndLanguageComprehension,
     calcCampPolyglotTranslatorStation: calcCampPolyglotTranslatorStation,
     calcWildernessCarrierBirdAndAnimalMessenger: calcWildernessCarrierBirdAndAnimalMessenger,
