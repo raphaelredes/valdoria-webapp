@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T12:25:31Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T12:30:19Z - do not edit directly, edit source -->
 
 
 
@@ -44359,6 +44359,234 @@ const FIXED_MAPS = {
     ]
   },
 
+
+  // ============ MASMORRA: TEMPLO SUBMERSO (sunken_temple) =============
+  // Masmorra AAA Tier 1-3 (Bioma Pântano - Pântanos Brumosos)
+  // Grid hex 20 cols x 24 rows com lajes de lodo, colunas submersas e altar abissal:
+  //   . = path (walkable, lajes de pedra cobertas de agua rasa e lodo)
+  //   # = wall (impassable, estátuas ciclópicas e abismos alagados)
+  //   o = open nave (walkable, atrio elevado do templo e fogueira segura)
+  //   i = inner sanctum (walkable, altar profano da Sacerdotisa Nagash)
+  //   E = edge/exit (entrada/saida unica ao sul)
+  sunken_temple: {
+    id: 'sunken_temple', region: 'valdoria', biome: 'dungeon', is_dungeon: true,
+    name: 'Templo Submerso',
+    cols: 20, rows: 24, seed: 99005, spawnCol: 10, spawnRow: 23,
+    music: 'swamp', danger: 4,
+    boss: {
+      name: 'Sacerdotisa Nagash, a Profanadora Aquática', cr: 3, xp: 750, sugLvl: 3,
+      hp: 60, ac: 15, atk: 6,
+      multiAttack: 2,
+      hasBurstSkill: true,    // Onda Torrencial Profana (TR For CD 13)
+      hasResource: true       // Escudo de Água / Resistência Elemental
+    },
+    worldPos: { x: 0.66, y: 0.50 },
+    weather_pool: ['s'],
+    weights: { '.': 1 },
+    dungeon: true,
+    parentMap: 'misty_marshes',
+    gridTemplate: [
+      '####################',
+      '####iiiiiiiiiiii####',
+      '###iiiiiiiiiiiiii###',
+      '###iiiiiiiiiiiiii###',
+      '####iiii....iiii####',
+      '#####..........#####',
+      '####............####',
+      '###..............###',
+      '###...oooooooo...###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###...oooooooo...###',
+      '#####..........#####',
+      '######...##...######',
+      '#######..##..#######',
+      '########.##.########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########E##########'
+    ],
+    landmarks: [
+      { type: 'throne',    col: 10, row: 2,  _hex: 'K3'  },  // Altar abissal de Nagash
+      { type: 'bonepile',  col: 8,  row: 2,  _hex: 'I3'  },  // Carcaças sacrificadas
+      { type: 'bonepile',  col: 12, row: 2,  _hex: 'M3'  },  // Coral negro e conchas
+      { type: 'armorpile', col: 14, row: 9,  _hex: 'O10' },  // Altar das Quatro Conchas
+      { type: 'bonfire',   col: 10, row: 13, _hex: 'K14' },  // Fogueira no pedestal seco dos acólitos
+      { type: 'totem',     col: 7,  row: 8,  _hex: 'H9'  },  // Estátua de serpente marinha
+      { type: 'totem',     col: 13, row: 8,  _hex: 'N9'  }   // Estátua de serpente marinha
+    ],
+    atmosphereZones: [
+      { col: 10, row: 2,  type: 'evil', radius: 4.5, _hex: 'K3'  },  // Altar profano — névoa esmeralda sulfurosa
+      { col: 10, row: 13, type: 'warm', radius: 5.0, _hex: 'K14' },  // Pedestal seco — brasas acolhedoras
+      { col: 14, row: 9,  type: 'cold', radius: 3.0, _hex: 'O10' }   // Altar das conchas — brisa gélida marinha
+    ],
+    restHex: { col: 10, row: 13, _hex: 'K14' },
+    dungeonEncounters: [
+      { id: 'temple_campfire', col: 10, row: 13, _hex: 'K14',
+        repeatable: true,
+        title: 'Fogueira no Pedestal Seco dos Acólitos',
+        text: 'Sobre uma plataforma de lajes elevadas acima da lâmina d’água escura que inunda o átrio, um braseiro de bronze verde-musgo queima com chama seca. As brasas evaporam a umidade gélida das vestes e o reflexo das labaredas mantém as cobras e sanguessugas afastadas. A comitiva encontra um momento vital de alívio e descanso.',
+        flavor: 'Acampamento · K14 · Repouso',
+        category: 'discovery',
+        choices: [
+          { id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
+            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            outcome_ok: { _short_rest: true,
+              text: 'Você descansa as pernas cansadas na pedra seca. O calor das brasas dissipa o calafrio da água podre.' } },
+          { id: 'long_rest', label: 'Descanso Longo (1× por masmorra)',
+            desc: 'HP/MP cheios + remove 1 nível de Exaustão. Apenas 1 vez nesta masmorra.',
+            outcome_ok: { _long_rest: true,
+              text: 'Com sentinela atenta sobre os degraus secos, o grupo repousa as 8 horas inteiras e renova seus feitiços e energias.' } },
+          { id: 'camp_companion_banter', label: '🗣️ Dialogar com a Comitiva ao Redor do Fogo',
+            desc: 'Reunir os aliados ao calor das brasas para conversar, avaliar os ânimos e estreitar laços',
+            outcome_ok: { _companion_banter: true, text: 'Você convida seus aliados para uma conversa acolhedora junto ao fogo.' } },
+          { label: 'Purificar o lodo das botas com prece da aurora (Clérigo/Paladino)',
+            only_class: ['clerigo', 'paladino'],
+            desc: 'Bênção Sagrada D&D 5e — banir a podridão do pântano com luz purificadora',
+            outcome_ok: { text: 'Uma aura de luz suave seca a umidade e purifica o miasma. Seus aliados sentem o ânimo renovado!', hp_gain: 4, mp_gain: 2, xp: 25, _flag: 'temple_hearth_blessed' } },
+          { id: 'leave_camp', label: 'Sair do Acampamento',
+            outcome_ok: { text: 'Você pisa de volta nas lajes alagadas e retoma o avanço em direção ao santuário submerso.' } }
+        ]
+      },
+      { id: 'temple_naga_scouts', col: 10, row: 20, _hex: 'K21',
+        title: 'Vigias Serpentinos nas Águas Turvas',
+        text: 'Entre duas colunas rachadas cobertas de cracas e algas escuras, a água pantanosa ondula suavemente. Duas cabeças de serpente com olhos esmeralda emergem em silêncio mortal, empunhando tridentes farpados de bronze enferrujado.',
+        flavor: 'Encontro Tático · Sentinelas',
+        category: 'combat',
+        choices: [
+          { label: 'Detectar as ondulações na lâmina d’água (Sobrevivência/Percepção)',
+            skill: 'wis', dc: 12,
+            desc: 'Sabedoria (Percepção ou Sobrevivência) CD 12 — notar o padrão de deslocamento dos répteis antes do bote',
+            outcome_ok: { text: 'Você percebe o rastro da cauda na água antes que ataquem! Seu golpe atinge primeiro — SURPRESA e Vantagem!',
+              xp: 35, dungeon_combat: { enemy: 'yuan_ti', lookup_name: 'Guerreiro Serpentino', surprise: true, preCombatEffects: ['first_attack_adv'] } },
+            outcome_fail: { text: 'A água escura esconde o bote! As serpentes saltam com tridentes em riste!',
+              xp: 5, dungeon_combat: { enemy: 'yuan_ti', lookup_name: 'Guerreiro Serpentino', surprise: false } } },
+          { label: 'Eletrificar a poça com raio arcano (Mago/Bruxo/Feiticeiro)',
+            only_class: ['mago', 'bruxo', 'feiticeiro'],
+            skill: 'int', dc: 12,
+            desc: 'Inteligência (Arcanismo) CD 12 — conduzir estática elétrica pela água rasa para atordoar os répteis',
+            outcome_ok: { text: 'A eletricidade corre pelas poças num estalo azul ofuscante! Os sentinelas espasmaram atordoados — SURPRESA!',
+              xp: 40, dungeon_combat: { enemy: 'yuan_ti', lookup_name: 'Guerreiro Serpentino', surprise: true, preCombatEffects: ['burst_disabled'] } },
+            outcome_fail: { text: 'A estática dissipa na lama espessa sem atingir a postura dos guardas aquáticos.',
+              xp: 8, dungeon_combat: { enemy: 'yuan_ti', lookup_name: 'Guerreiro Serpentino', surprise: false } } },
+          { label: 'Intimidar com pisada forte fazendo a água estalar (Guerreiro/Bárbaro)',
+            only_class: ['guerreiro', 'barbaro'],
+            skill: 'str', dc: 13,
+            desc: 'Força (Intimidação / Presença) CD 13 — demonstrar superioridade física sobre os predadores aquáticos',
+            outcome_ok: { text: 'Sua pisada esmaga o leito de pedra, erguendo jatos de água e impondo terror. As serpentes hesitam (SURPRESA)!',
+              xp: 30, dungeon_combat: { enemy: 'yuan_ti', lookup_name: 'Guerreiro Serpentino', surprise: true } },
+            outcome_fail: { text: 'Elas sibilam em escárnio e partem para o cerco com tridentes duplos.',
+              xp: 5, dungeon_combat: { enemy: 'yuan_ti', lookup_name: 'Guerreiro Serpentino', surprise: false } } }
+        ]
+      },
+      { id: 'temple_drowning_trap', col: 10, row: 16, _hex: 'K17',
+        title: 'Eclusa Submersa e Correnteza Voraz',
+        text: 'Sob uma camada enganosa de musgo flutuante, uma laje de pressão com dreno automático conecta-se a uma eclusa profunda. Um passo em falso puxará a água com violência ciclônica, arrastando tudo em direção a estacas pontiagudas de coral negro.',
+        flavor: 'Armadilha Hidráulica D&D 5e',
+        category: 'trap',
+        choices: [
+          { label: 'Neutralizar o contra-peso da eclusa com cunha (Ladinagem/Investigação)',
+            skill: 'dex', dc: 12,
+            desc: 'Destreza (Ferramentas de Ladrão) CD 12 — travar as engrenagens de ferro sob a lâmina d’água',
+            outcome_ok: { text: 'Você desliza as mãos no lodo e trava o dreno com precisão. O nível da água se estabiliza e o caminho fica seguro!', xp: 35, _flag: 'sluice_disarmed' },
+            outcome_fail: { text: 'A comporta estala e abre com estrondo! Um turbilhão de água gélida puxa seu corpo contra o coral cortante.', xp: 5, hp_loss: 5 } },
+          { label: 'Equilibrar-se sobre os capitéis emersos das colunas',
+            skill: 'dex', dc: 12,
+            desc: 'Destreza (Acrobacia) CD 12 — saltar de coluna em coluna evitando a zona de sucção',
+            outcome_ok: { text: 'Você salta com equilíbrio perfeito de pedra em pedra, guiando a comitiva pelo alto sem tocar no dreno!', xp: 30, _flag: 'sluice_cleared' },
+            outcome_fail: { text: 'O limo escorregadio trai seu salto. Você cai na correnteza e sofre arranhões nas pedras submersas.', xp: 5, hp_loss: 4 } }
+        ]
+      },
+      { id: 'temple_altar_puzzle', col: 14, row: 9, _hex: 'O10',
+        title: 'O Altar das Quatro Conchas Sagradas',
+        text: 'Em uma abside circular de mármore esverdeado, uma bacia de pedra esculpida com figuras marinhas antigas exige oferendas votivas. Quatro conchas rúnicas repousam ao lado: Maré, Sal, Coral e Pérola. A inscrição em elfo antigo diz: "O mar recolhe o sal, mas coroa a pérola."',
+        flavor: 'Enigma Sagrado das Marés · Tesouro Antigo',
+        category: 'mystery',
+        choices: [
+          { label: 'Dispor as conchas na ordem litúrgica correta (Religião/Arcanismo)',
+            skill: 'int', dc: 12,
+            desc: 'Inteligência (Religião ou Arcanismo) CD 12 — harmonizar o fluxo dos elementos aquáticos',
+            outcome_ok: { text: 'A bacia emite um brilho dourado e a água se retrai milagrosamente! Revela-se o Tridente da Maré Calma e pérolas preciosas!', xp: 50, gold: 85, _flag: 'temple_altar_opened' },
+            outcome_fail: { text: 'A ordem incorreta ativa um jato de água pressurizada que te empurra para trás com um banho gélido.', xp: 10, gold: 20 } },
+          { label: 'Comungar com os espíritos aquáticos do pântano (Druida/Patrulheiro)',
+            only_class: ['druida', 'patrulheiro'],
+            skill: 'wis', dc: 12,
+            desc: 'Sabedoria (Natureza) CD 12 — pedir aos espíritos das águas que aceitem a oferenda',
+            outcome_ok: { text: 'O sussurro das águas atende sua prece. As conchas flutuam e se alinham sozinhas, liberando as relíquias do templo!', xp: 50, gold: 85, _flag: 'temple_altar_opened' },
+            outcome_fail: { text: 'Os espíritos rejeitam o contato com um silvo de vapor pantanoso.', xp: 10, gold: 15 } },
+          { label: 'Forçar o compartimento da bacia com cunha de ferro',
+            skill: 'str', dc: 14,
+            desc: 'Força (Atletismo) CD 14 — arrombar a tampa selada de mármore com impacto concentrado',
+            outcome_ok: { text: 'A pedra racha e cede sob sua força bruta! Você resgata as pérolas e as moedas de ouro do recesso interno!', xp: 40, gold: 65, _flag: 'temple_altar_forced' },
+            outcome_fail: { text: 'O mármore resiste e lasca a ponta de sua ferramenta.', xp: 5, gold: 15 } }
+        ]
+      },
+      { id: 'temple_boss_nagash', col: 10, row: 3, _hex: 'K4',
+        title: 'O Santuário da Sacerdotisa Nagash',
+        text: 'No altar central cercado por névoas esmeraldas e cascatas que despencam do teto em ruínas, ergue-se Nagash. Seu corpo serpentino ondula sobre o altar com escamas azul-petróleo brilhantes, enquanto seu torso humanoide empunha um tridente cerimonial faiscante com energia gélida. Os olhos dourados de pupila vertical fixam você com ódio milenar.',
+        flavor: 'Chefe de Masmorra · Confronto Final',
+        category: 'boss',
+        choices: [
+          { label: 'Golpear a base da coluna de apoio de Nagash (Guerreiro/Bárbaro)',
+            only_class: ['guerreiro', 'barbaro'],
+            skill: 'str', dc: 13,
+            desc: 'Força (Atletismo / Impacto Brutal) CD 13 — quebrar o suporte onde a cauda dela se apoia',
+            outcome_ok: { text: 'A coluna desaba com estrondo! Nagash cai desajeitada na água turva, perdendo a postura defensiva — SURPRESA e Vantagem no 1º golpe!',
+              xp: 45, dungeon_combat: { enemy: 'yuan_ti', lookup_name: 'Sacerdotisa Nagash', surprise: true, preCombatEffects: ['first_attack_adv'] } },
+            outcome_fail: { text: 'A pedra maciça resiste ao golpe e Nagash estoca o tridente num bote fulminante!',
+              xp: 8, dungeon_combat: { enemy: 'yuan_ti', lookup_name: 'Sacerdotisa Nagash', surprise: false } } },
+          { label: 'Esquivar do bote e cortar o fluxo de veneno (Ladino/Monge)',
+            only_class: ['ladino', 'monge'],
+            skill: 'dex', dc: 13,
+            desc: 'Destreza (Acrobacia / Ponto Cego) CD 13 — desviar da ponta do tridente e atacar o flanco desprotegido',
+            outcome_ok: { text: 'Você se esquiva com leveza sobre a água e contra-ataca no momento exato! Nagash vacila atônita — SURPRESA e Veneno Cáustico anulado!',
+              xp: 45, dungeon_combat: { enemy: 'yuan_ti', lookup_name: 'Sacerdotisa Nagash', surprise: true, preCombatEffects: ['burst_disabled'] } },
+            outcome_fail: { text: 'A cauda serpentina te atinge em giro rápido, desequilibrando seus passos na lama.',
+              xp: 8, dungeon_combat: { enemy: 'yuan_ti', lookup_name: 'Sacerdotisa Nagash', surprise: false } } },
+          { label: 'Purificar o santuário com Glória Sagrada (Clérigo/Paladino)',
+            only_class: ['clerigo', 'paladino'],
+            skill: 'cha', dc: 13,
+            desc: 'Carisma (Intimidação Sagrada) CD 13 — erguer o símbolo divino e quebrar o escudo aquático da sacerdotisa',
+            outcome_ok: { text: 'Luz radiante explode sobre a água! A barreira profana de Nagash evapora em vapor sibilante — CA -1 e SURPRESA!',
+              xp: 45, dungeon_combat: { enemy: 'yuan_ti', lookup_name: 'Sacerdotisa Nagash', surprise: true, preCombatEffects: ['boss_ac_debuff', 'first_attack_adv'] } },
+            outcome_fail: { text: 'O miasma abissal combate a luz, mas o brilho enfraquece o tridente da fera.',
+              xp: 8, dungeon_combat: { enemy: 'yuan_ti', lookup_name: 'Sacerdotisa Nagash', surprise: false } } },
+          { label: 'Descarregar relâmpago arcano na água da bacia (Arcano)',
+            only_class: ['mago', 'bruxo', 'feiticeiro'],
+            skill: 'int', dc: 12,
+            desc: 'Inteligência (Arcanismo) CD 12 — transformar a água sob os pés de Nagash num condutor mortal de eletricidade',
+            outcome_ok: { text: 'O relâmpago estala na água e percorre a cauda da sacerdotisa num espasmo violento! SURPRESA e Onda Torrencial anulada na abertura!',
+              xp: 45, dungeon_combat: { enemy: 'yuan_ti', lookup_name: 'Sacerdotisa Nagash', surprise: true, preCombatEffects: ['burst_disabled'] } },
+            outcome_fail: { text: 'Nagash ergue uma barreira de lodo que dissipa o choque elétrico.',
+              xp: 8, dungeon_combat: { enemy: 'yuan_ti', lookup_name: 'Sacerdotisa Nagash', surprise: false } } },
+          { label: 'Avançar com pés firmes na água rasa e aceitar o confronto',
+            skill: 'str', dc: 12,
+            desc: 'Força (Atletismo / Equilíbrio) CD 12 — marchar contra a maré e aparar o golpe com escudo',
+            outcome_ok: { text: 'Você corta a água com determinação implacável e apara o tridente, abrindo brecha para o golpe de misericórdia (SURPRESA)!',
+              xp: 35, dungeon_combat: { enemy: 'yuan_ti', lookup_name: 'Sacerdotisa Nagash', surprise: true } },
+            outcome_fail: { text: 'A maré de Nagash empurra seu corpo contra a coluna de pedra. Combate imediato!',
+              xp: 5, hp_loss: 4, dungeon_combat: { enemy: 'yuan_ti', lookup_name: 'Sacerdotisa Nagash', surprise: false } } }
+        ]
+      }
+    ],
+    ambient_tips: [
+      'Água escura pinga de estátuas monumentais afundadas.',
+      'O cheiro de lodo e maresia abissal empesta as câmaras.',
+      'Ondulações suaves na lâmina d’água indicam criaturas nadando ao redor.',
+      'Hieróglifos de povos serpentinos cobrem os mosaicos alagados.',
+      'Sussurros em língua sibilante ecoam das abóbadas inundadas.'
+    ],
+    dungeons: [],
+    edges: [
+      { col: 10, row: 23, targetMap: 'misty_marshes', label: 'Sair (Pântanos Brumosos)' }
+    ]
+  },
+
   whispering_woods: {
 
     id: 'whispering_woods', region: 'valdoria', biome: 'forest',
@@ -85548,24 +85776,28 @@ function triggerDungeonEntry(dg) {
 
   // Demais dungeons mantem placeholder "em dev" ate serem trabalhadas individualmente.
 
-  const isMvpReady = (dg.id === 'orc_chief_tent' || dg.id === 'wolf_den' || dg.id === 'bandit_vault' || dg.id === 'lost_mine') && FIXED_MAPS[dg.id];
+  const isMvpReady = (dg.id === 'orc_chief_tent' || dg.id === 'wolf_den' || dg.id === 'bandit_vault' || dg.id === 'lost_mine' || dg.id === 'sunken_temple') && FIXED_MAPS[dg.id];
 
   if (isMvpReady) {
 
     document.getElementById('dungeon-title').textContent = dg.name;
 
-    var _badgeTitle = (dg.id === 'lost_mine')
-      ? 'Abismo Subterrâneo · Dorgar, Troglodita Colossal'
-      : (dg.id === 'bandit_vault')
-        ? 'Guarnição Clandestina · Malakor, Mestre dos Ladrões'
-        : (dg.id === 'wolf_den') ? 'Covil Feral · Lobo Alfa Cinzento' : 'Acampamento Hostil · Brakthar, Quebrador de Cranios';
-    var _warningDesc = (dg.id === 'lost_mine')
-      ? 'Você vai descer nas galerias escuras da mina abandonada. Dorgar aguarda no poço principal. Tocha recomendada. Sair só na entrada (sul) ou após derrotá-lo.'
-      : (dg.id === 'bandit_vault')
-        ? 'Você vai entrar nas profundezas do cofre dos bandidos. Malakor aguarda na câmara do tesouro. Sair só na entrada (sul) ou após derrotá-lo.'
-        : (dg.id === 'wolf_den')
-          ? 'Você vai entrar numa toca subterrânea de predadores. O Lobo Alfa aguarda nas profundezas. Sair só na entrada (sul) ou após derrotá-lo.'
-          : 'Você vai entrar num acampamento orc fortificado. Brakthar aguarda ao norte. Sair so na entrada (sul) ou apos derrota-lo.';
+    var _badgeTitle = (dg.id === 'sunken_temple')
+      ? 'Ruína Abissal · Sacerdotisa Nagash'
+      : (dg.id === 'lost_mine')
+        ? 'Abismo Subterrâneo · Dorgar, Troglodita Colossal'
+        : (dg.id === 'bandit_vault')
+          ? 'Guarnição Clandestina · Malakor, Mestre dos Ladrões'
+          : (dg.id === 'wolf_den') ? 'Covil Feral · Lobo Alfa Cinzento' : 'Acampamento Hostil · Brakthar, Quebrador de Cranios';
+    var _warningDesc = (dg.id === 'sunken_temple')
+      ? 'Você vai descer nas galerias inundadas do templo submerso. Nagash aguarda no altar profano. Cuidado com águas profundas. Sair só na entrada (sul) ou após derrotá-la.'
+      : (dg.id === 'lost_mine')
+        ? 'Você vai descer nas galerias escuras da mina abandonada. Dorgar aguarda no poço principal. Tocha recomendada. Sair só na entrada (sul) ou após derrotá-lo.'
+        : (dg.id === 'bandit_vault')
+          ? 'Você vai entrar nas profundezas do cofre dos bandidos. Malakor aguarda na câmara do tesouro. Sair só na entrada (sul) ou após derrotá-lo.'
+          : (dg.id === 'wolf_den')
+            ? 'Você vai entrar numa toca subterrânea de predadores. O Lobo Alfa aguarda nas profundezas. Sair só na entrada (sul) ou após derrotá-lo.'
+            : 'Você vai entrar num acampamento orc fortificado. Brakthar aguarda ao norte. Sair so na entrada (sul) ou apos derrota-lo.';
 
     document.getElementById('dungeon-desc').innerHTML =
       '<div style="text-align:center;line-height:1.65">' +
