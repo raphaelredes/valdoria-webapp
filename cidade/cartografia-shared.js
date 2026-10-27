@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 306: MOTOR DE IDIOMAS CANÔNICOS, SOTAQUES E COMPREENSÃO ARCANA (D&D 5e)
+  // =========================================================================
+
+  function resolveDndLanguageComprehension(biomeKey, languageMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var lm = (languageMode || 'standard_exotic_phonetic_cipher_barrier').toLowerCase();
+
+    var lang = {
+      languageTitle: 'Barreira Linguística, Alfabetos Canônicos e Sotaques Regionais (PHB p. 123)',
+      saveDC: 14,
+      saveType: 'Inteligência',
+      languageMechanics: 'Em encontros entre comitivas na estrada ou leituras de inscrições antigas, falas nos 8 Idiomas Comuns (Comum, Anão, Élfico, Gigante, Gnômico, Goblin, Halfling, Orc) e 8 Idiomas Exóticos (Abissal, Celestial, Dialeto Subterrâneo, Dracônico, Infernal, Primordial, Silvestre, Subcomum — PHB p. 123) só são traduzidas na interface se ao menos um membro do grupo ouvinte dominar o idioma; caso contrário, o ouvinte percebe apenas a cadência fonética gutural, sibilante ou melódica e o alfabeto usado (Comum, Anão, Élfico, Dracônico, Celestial ou Infernal), exigindo Inteligência (História ou Arcanismo CD 14) para identificar qual idioma está sendo falado sem compreender seu conteúdo.',
+      pioneerMitigation: 'Designação de um intérprete poliglota na vanguarda da comitiva (Antecedente Sábio ou Acólito, PHB p. 127-138) para traduzir em tempo real para os companheiros.',
+      rescueAndStabilization: 'Uso de mímica universal e gestos de mãos abertas com armas embainhadas (Intuição ou Persuasão CD 13) para evitar combate por mal-entendido linguístico.',
+      icon: '🗣️',
+      color: '#6366f1'
+    };
+
+    if (lm === 'comprehend_languages_ritual_literal_translation') {
+      lang.languageTitle = 'Ritual de Compreender Idiomas e Leitura Tátil de Glifos (PHB p. 224)';
+      lang.saveDC = 13;
+      lang.saveType = 'Inteligência';
+      lang.languageMechanics = 'Conjurada como ritual de 10 minutos (1º círculo — Bardo, Bruxo, Feiticeiro, Mago, PHB p. 224), Compreender Idiomas permite entender o significado literal de qualquer idioma falado que o conjurador ouvir ou qualquer idioma escrito que tocar na superfície por 1 hora; contudo, a magia não decodifica mensagens cifradas, Gíria de Ladrão nem permite falar o idioma de volta (PHB p. 224).';
+      lang.pioneerMitigation = 'Conjuração preventiva do ritual antes de entrar em parley com comitivas estrangeiras ou inspecionar obeliscos planares.';
+      lang.rescueAndStabilization = 'Cópia rápida dos caracteres em pergaminho com carvão para tradução segura no bivaque caso a pedra esteja armadilhada.';
+    } else if (lm === 'tongues_universal_polyglot_parley_spell') {
+      lang.languageTitle = 'Magia Línguas e Diplomacia Universal entre Comitivas (PHB p. 254)';
+      lang.saveDC = 15;
+      lang.saveType = 'Carisma';
+      lang.languageMechanics = 'A magia Línguas (3º círculo — Bardo, Bruxo, Clérigo, Feiticeiro, Mago, PHB p. 254) concede à criatura tocada a capacidade de compreender qualquer idioma falado que ouvir e faz com que qualquer criatura que conheça pelo menos um idioma entenda o que ela diz por 1 hora; rompe instantaneamente barreiras diplomáticas em encontros multi-comitiva.';
+      lang.pioneerMitigation = 'Toque da magia no porta-voz de maior Carisma da comitiva para conduzir negociações delicadas de aliança ou partilha de rota.';
+      lang.rescueAndStabilization = 'Permite acalmar guardiões elementais, celestiais ou feéricos em seu idioma natal antes que iniciem hostilidades.';
+    } else if (lm === 'tongue_of_sun_and_moon_ki_resonance') {
+      lang.languageTitle = 'Língua do Sol e da Lua e Ressonância de Ki Universal (PHB p. 79)';
+      lang.saveDC = 14;
+      lang.saveType = 'Sabedoria';
+      lang.languageMechanics = 'Monges de 13º nível ou superior (PHB p. 79) tocam o Ki de outras mentes ao falar, compreendendo todos os idiomas falados e fazendo-se entender por qualquer criatura que domine ao menos um idioma; funciona continuamente sem gastar espaços de magia ou componentes materiais, mesmo sob silêncio arcano parcial.';
+      lang.pioneerMitigation = 'Percepção imediata de quando dois estranhos trocam de idioma no meio do encontro para ocultar intenções hostis (Intuição CD 13).';
+      lang.rescueAndStabilization = 'Mediação serena entre comitivas de origens e dialetos opostos nos cruzamentos dos ermos.';
+    }
+
+    return lang;
+  }
+
+  function calcCampPolyglotTranslatorStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'shared_script_lexicon_and_rubbing_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque de Decalque Epigráfico e Léxico de Alfabetos Compartilhados',
+      languageAndCampSafety: 'Utilizando papel fino e cera preta no acampamento, os estudiosos do grupo tiram decalques de inscrições em alfabeto Anão (usado também em Gigante, Gnômico, Goblin, Orc e Primordial) ou Élfico (usado em Silvestre e Subcomum — PHB p. 123) para deduzir raízes comuns.',
+      languageAndWatch: 'Mesmo sem dominar um dialeto específico, reconhecer o alfabeto compartilhado concede vantagem em testes de Inteligência (História ou Investigação) para decifrar avisos de perigo em ruínas.',
+      campRestAndSafetyGuards: 'Prepara a comitiva com palavras-chave de saudação e trégua nos idiomas predominantes do bioma.',
+      icon: '⛺',
+      color: '#6366f1'
+    };
+
+    if (dt === 'private_ancestral_tongue_tactical_briefing') {
+      defense.defenseTitle = 'Conselho Tático Noturno em Idioma Ancestral ou Exótico Fechado';
+      defense.languageAndCampSafety = 'Quando a comitiva divide a fogueira com viajantes desconhecidos ou mercenários contratados, os membros do grupo que compartilham um idioma raro (como Dracônico, Celestial, Élfico ou Dialeto Subterrâneo) discutem os planos de guarda à vista de todos (PHB p. 123).';
+      defense.languageAndWatch = 'Impede que ouvintes que falam apenas Comum compreendam a estratégia de vigília ou a divisão de tesouros, a menos que utilizem Compreender Idiomas.';
+      defense.campRestAndSafetyGuards = 'Protege o sigilo operacional da comitiva sem precisar se afastar da fogueira.';
+    } else if (dt === 'ritual_book_comprehend_languages_watch_standby') {
+      defense.defenseTitle = 'Grimório Aberto para Ritual de Compreender Idiomas na Vigília';
+      defense.languageAndCampSafety = 'O conjurador mantém o livro de rituais preparado com fuligem e sal (componentes materiais de Compreender Idiomas, PHB p. 224) junto ao posto de sentinela.';
+      defense.languageAndWatch = 'Permite traduzir sussurros de patrulhas noturnas (Goblin, Orc, Subcomum) que rondam o perímetro do bivaque a distância segura.';
+      defense.campRestAndSafetyGuards = 'Revela os planos de ataque de batedores inimigos antes que eles deem o sinal de investida.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 305: AVES DE RAPINA ADESTRADAS, POMBOS-CORREIO E MENSAGEIROS ANIMAIS (D&D 5e)
   // =========================================================================
 
@@ -38499,6 +38574,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveDndLanguageComprehension: resolveDndLanguageComprehension,
+    calcCampPolyglotTranslatorStation: calcCampPolyglotTranslatorStation,
     calcWildernessCarrierBirdAndAnimalMessenger: calcWildernessCarrierBirdAndAnimalMessenger,
     calcCampFalconryMewsAndLoftStation: calcCampFalconryMewsAndLoftStation,
     calcWildernessSealedMissiveAndCipher: calcWildernessSealedMissiveAndCipher,
