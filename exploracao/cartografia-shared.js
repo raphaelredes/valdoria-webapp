@@ -20735,6 +20735,88 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 329: CARRUAGENS BLINDADAS, VAGÕES DE COMBOIO, TRENÓS ÁRTICOS E ARREIOS (D&D 5e)
+  // =========================================================================
+
+  function resolveWildernessWagonTrainAndSledHazard(biomeKey, wagonMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var wm = (wagonMode || 'heavy_wagon_train_logistics_and_haulage').toLowerCase();
+
+    var wagon = {
+      wagonTitle: 'Vagão de Carga Pesada (Wagon): Logística e Transporte de Comboio (PHB p. 155-157)',
+      saveDC: 14,
+      saveType: 'Veículos Terrestres',
+      wagonMechanics: 'Vagão de quatro rodas de madeira reforçada com aros de ferro (CA 12, 40 PV, peso 200 kg, comporta até 1.250 kg de carga tracionado por parelha de 2 a 4 cavalos de tração ou bois, PHB p. 157); multiplica a autonomia de mantimentos, arcas de moedas, tendas de campanha e equipamentos pesados da comitiva pelas estradas imperiais!',
+      pioneerMitigation: 'Permite transportar suprimentos volumosos para semanas de marcha nos ermos sem sobrecarregar as mochilas dos aventureiros.',
+      rescueAndStabilization: 'Vagão coberto com lona impermeabilizada serve como ambulância de campanha para abrigar companheiros doentes ou feridos.',
+      icon: '🛒',
+      color: '#eab308'
+    };
+
+    if (wm === 'armored_carriage_tactical_transport') {
+      wagon.wagonTitle = 'Carruagem Blindada de Campanha com Parapeito de Atiradores (PHB p. 155-157)';
+      wagon.saveDC = 14;
+      wagon.saveType = 'Veículos Terrestres';
+      wagon.wagonMechanics = 'Carruagem fechada de carvalho maciço com chapas de ferro rebitadas (CA 14, 60 PV, acomoda 6 passageiros sentados com portas trancáveis e seteiras, PHB p. 157); atiradores na plataforma do teto desfrutam de cobertura de meia altura (+2 na CA) enquanto a carruagem avança em velocidade de galope através de emboscadas!';
+      wagon.pioneerMitigation = 'Protege os conjuradores e curandeiros da comitiva de flechas e ataques de oportunidade durante fugas rápidas por trilhas infestadas.';
+      wagon.rescueAndStabilization = 'Interior acolchoado com trincos reforçados impede que criaturas hostis alcancem membros feridos durante a marcha sob fogo inimigo.';
+    } else if (wm === 'arctic_sled_dog_and_snow_glide') {
+      wagon.wagonTitle = 'Trenó Ártico de Carga com Parelha de Tração Polar (PHB p. 155-157)';
+      wagon.saveDC = 13;
+      wagon.saveType = 'Sobrevivência';
+      wagon.wagonMechanics = 'Trenó ligeiro de freixo e osso de baleia (CA 11, 30 PV, peso 150 kg, capacidade 1.000 kg, PHB p. 157); desliza suavemente sobre tundras congeladas, neve fofa e geleiras árticas tracionado por cães polares, pôneis peludos ou mulas árticas onde rodas convencionais atolariam irremediavelmente!';
+      wagon.pioneerMitigation = 'Anula a penalidade de terreno difícil em biomas árticos e neves profundas, mantendo o ritmo de viagem normal de 24 milhas por dia.';
+      wagon.rescueAndStabilization = 'Estrutura com esteiras elevadas isola feridos e mantimentos do contato direto com o gelo úmido, prevenindo hipotermia fatal.';
+    } else if (wm === 'tenser_floating_disk_cargo_barge') {
+      wagon.wagonTitle = 'Disco Flutuante de Tenser: Balsa Arcana de Carga sem Atrito (PHB p. 236)';
+      wagon.saveDC = 12;
+      wagon.saveType = 'Conjuração';
+      wagon.wagonMechanics = 'Mago (1º círculo ritual, tempo 1 ação, duração 1 hora, alcance 9 metros, PHB p. 236) conjura um plano circular côncavo de força mágica de 1 metro de diâmetro que sustenta até 250 kg; flutua a 90 cm do chão e segue o conjurador automaticamente a até 6 metros de distância por qualquer terreno transitável!';
+      wagon.pioneerMitigation = 'Permite carregar espólios de minérios pesados, baús de ferro e armaduras através de pântanos e escadarias em ruínas sem necessidade de animais.';
+      wagon.rescueAndStabilization = 'Maca mágica flutuante perfeitamente estável que transporta aventureiros inconscientes sem qualquer solavanco de solo acidentado.';
+    } else if (wm === 'mending_and_wheelwright_emergency_repair') {
+      wagon.wagonTitle = 'Reparo (Mending) e Carpintaria Expedita de Eixos e Rodas (PHB p. 154, 273)';
+      wagon.saveDC = 12;
+      wagon.saveType = 'Transmutação';
+      wagon.wagonMechanics = 'Bardo, Clérigo, Druida, Feiticeiro ou Mago (truque, tempo 1 minuto, PHB p. 273) repara instantaneamente uma única quebra ou rasgo de até 30 cm num objeto; restaura raios de roda partidos, elos de correntes de arreio ou eixos rachados sem deixar marcas, combinando-se com testes de Ferramentas de Carpinteiro CD 12.';
+      wagon.pioneerMitigation = 'Elimina paradas prolongadas de horas para consertos de ferragens no meio de estradas hostis após buracos ou atolamentos.';
+      wagon.rescueAndStabilization = 'Reforça eixos comprometidos antes de descidas íngremes de serras, evitando acidentes e capotamentos com cargas preciosas.';
+    }
+
+    return wagon;
+  }
+
+  function calcCampWagonCircleFortressStation(biomeKey, fortressType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var ft = (fortressType || 'wagon_circle_laager_fortress').toLowerCase();
+
+    var fortress = {
+      fortressTitle: 'Fortaleza Circular de Carroças (Wagon Circle / Laager) (PHB p. 157; DMG p. 111)',
+      wagonCampSafety: 'Ao preparar o descanso longo em terreno aberto, os vagões são dispostos em círculo fechado com as lanças e parelhas voltadas para o interior; o perímetro contínuo de madeira maciça e aros de ferro forma uma paliçada inexpugnável contra cargas de cavalaria e feras colossais.',
+      wagonWatchAndSentinel: 'Sentinelas montam guarda nas plataformas e tetos das carroças com visão desobstruída de 360°, operando com cobertura de três quartos (+5 na CA) contra disparos de flechas.',
+      campRestAndSafetyGuards: 'Impede infiltrações furtivas de salteadores e lobos, confinando qualquer tentativa de invasão a gargalos estreitos controlados pela comitiva (PHB p. 186; DMG p. 111).',
+      icon: '🛡️',
+      color: '#eab308'
+    };
+
+    if (ft === 'central_livestock_corral_and_draft_protection') {
+      fortress.fortressTitle = 'Curral Central Fechado para Animais de Tração e Carga (PHB p. 155-157)';
+      fortress.wagonCampSafety = 'Cavalos de tração, bois e mulas são recolhidos no centro do círculo de vagões, amarrados a postes com água fresca e sacos de forragem; ficam protegidos do vento cortante, flechas incendiárias e predadores noturnos.';
+      fortress.wagonWatchAndSentinel = 'Animais calmos não entram em pânico, e qualquer sobressalto de relincho atua como alarme precoce de aproximação furtiva na escuridão.';
+      fortress.campRestAndSafetyGuards = 'Evita a dispersão ou roubo de montarias no meio da noite, assegurando que o comboio possa retomar a marcha na alvorada sem perda de animais (PHB p. 155).';
+    } else if (ft === 'reinforced_carriage_bunker_and_lantern_traverse') {
+      fortress.fortressTitle = 'Casamata de Carruagem Blindada com Lanternas Furta-Fogo (PHB p. 152, 157)';
+      fortress.wagonCampSafety = 'A carruagem blindada central é trancada por dentro com trincos de ferro e guarnecida com mantas térmicas; serve de abrigo fortificado para conjuradores e feridos durante o sono, com resistência a intempéries climáticas severas.';
+      fortress.wagonWatchAndSentinel = 'Lanternas furta-fogo direcionais montadas em suportes articulados no teto iluminam setores suspeitos na planície com fachos de luz brilhante de até 18 metros sem ofuscar as sentinelas.';
+      fortress.campRestAndSafetyGuards = 'Proporciona sono ininterrupto e recuperação plena de dados de vida mesmo em biomas de alta hostilidade (PHB p. 186).';
+    }
+
+    return fortress;
+  }
+
+  // =========================================================================
   // FASE 328: PONTES SUSPENSAS, VAUS FORTIFICADOS, TIROLESAS E TRAVESSIAS DE DESFILADEIRO (D&D 5e)
   // =========================================================================
 
@@ -40245,6 +40327,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveWildernessWagonTrainAndSledHazard: resolveWildernessWagonTrainAndSledHazard,
+    calcCampWagonCircleFortressStation: calcCampWagonCircleFortressStation,
     resolveWildernessChasmCrossingAndZiplineHazard: resolveWildernessChasmCrossingAndZiplineHazard,
     calcCampChasmBridgeheadFortificationStation: calcCampChasmBridgeheadFortificationStation,
     resolveWildernessCoastalNavigationAndReefsHazard: resolveWildernessCoastalNavigationAndReefsHazard,

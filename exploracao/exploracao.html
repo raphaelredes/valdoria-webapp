@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T03:07:27Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T03:13:29Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.resolveWildernessWagonTrainAndSledHazard) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var wg = CartShared.resolveWildernessWagonTrainAndSledHazard(bKey, 'heavy_wagon_train_logistics_and_haulage');
+        return '<div class="clp-wagon-train-card" style="margin:4px 0 6px;text-align:left;background:rgba(36,28,8,0.88);padding:4px 8px;border-radius:4px;border:1px solid rgba(234,179,8,0.42);font-size:8px;color:#fef9c3;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + wg.color + ';margin-bottom:2px;">' + wg.icon + ' ' + wg.wagonTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Veículos e Comboios:</b> ' + wg.wagonMechanics + ' (CD ' + wg.saveDC + ' [' + wg.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#fef08a;margin-top:1px;">• <b>Logística de Marcha:</b> ' + wg.pioneerMitigation + ' · <i>Segurança: ' + wg.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampWagonCircleFortressStation) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var wf = CartShared.calcCampWagonCircleFortressStation(bKey, 'wagon_circle_laager_fortress');
+        return '<div class="clp-wagon-train-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,22,6,0.84);padding:4px 8px;border-radius:4px;border:1px solid rgba(202,138,4,0.35);font-size:8px;color:#fef9c3;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + wf.color + ';margin-bottom:2px;">' + wf.icon + ' ' + wf.fortressTitle.toUpperCase() + ' (PHB p. 155-157; DMG p. 111):</div>' 
+          + '  <div>• <b>Fortaleza Circular no Bivaque:</b> ' + wf.wagonCampSafety + ' · <b>Vigia:</b> ' + wf.wagonWatchAndSentinel + '</div>' 
+          + '  <div style="font-size:7.5px;color:#fde047;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + wf.campRestAndSafetyGuards + '</div>' 
           + '</div>';
       })()
     + (function(){
