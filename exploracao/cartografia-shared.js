@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 297: TERRAÇOS DE RECIFE CORALINO FÓSSIL SOERGUIDO E MAKATEA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessMakateaCoralKarstHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var ht = (hazardType || 'makatea_razor_aragonite_pinnacle_laceration').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Labirinto de Pináculos Cortantes de Coral Fóssil (Makatea)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      makateaRisk: 'Terraços costeiros de calcário recifal pleistocênico soerguido (makatea / feo) corroídos pela chuva ácida e pelo spray marinho em milhares de lâminas de aragonita afiadas como navalhas; um tropeço na rocha alveolada rasga botas de couro reforçado e carne, infligindo 3d6 de dano cortante e perfurante e reduzindo o deslocamento à metade até o tratamento (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores avançando com perneiras de couro curtido duplo, testando pontes de coral com bastões ferrados e estendendo pranchas de madeira sobre fendas dentadas (Sobrevivência ou Acrobacia CD 14).',
+      rescueAndStabilization: 'Pinçamento de fragmentos calcários e espículas de coral incrustados nas feridas, lavagem com água doce fervida e bandagem compressiva (Medicina CD 14).',
+      icon: '🪸',
+      color: '#f43f5e'
+    };
+
+    if (ht === 'phreatic_cenote_roof_collapse_ankhialine_pit') {
+      hazard.hazardTitle = 'Colapso de Abóbada de Dolina Anquialina e Poço Subterrâneo';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Destreza';
+      hazard.makateaRisk = 'O teto fino de calcário coralino oco cede subitamente sobre uma caverna inundada de água salobra estratificada (cenote anquialino); o aventureiro despenca 9 metros através de estalactites quebradiças até o poço escuro abaixo, sofrendo 3d6 de concussão e risco de submersão sob a haloclina pobre em oxigênio (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Sondagem acústica da abóbada calcária e marcha encordada mantendo distância de depressões circulares cobertas por samambaias densas (Percepção ou Sobrevivência CD 15).';
+      hazard.rescueAndStabilization = 'Içamento vertical por polia ancorada em raízes de figueira-estranguladora e reanimação imediata no terraço seco (Atletismo CD 14 ou Medicina CD 13).';
+    } else if (ht === 'surge_blowhole_geyser_pneumatic_blast') {
+      hazard.hazardTitle = 'Erupção Pneumática de Bufador de Falésia Recifal (Blowhole)';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.makateaRisk = 'As ondas oceânicas comprimem bolsões de ar em galerias submersas do recife soerguido e disparam gêiseres salinos explosivos por chaminés verticais ocultas no platô; o jato de alta pressão arremessa o personagem a 4,5 metros, causando 2d8 de concussão e condição caído sobre o carste afiado (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Identificação do assobio grave de compressão pneumática no subsolo segundos antes da onda bater na falésia (Percepção ou Natureza CD 14).';
+      hazard.rescueAndStabilization = 'Ancoragem de emergência com ganchos de escalada e retirada rápida da zona de respingo pressurizado (Atletismo CD 13).';
+    } else if (ht === 'karst_fissure_coconut_crab_swarm_ambush') {
+      hazard.hazardTitle = 'Fendas Labirínticas sem Bússola e Emboscada de Crustáceos Gigantes';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Sabedoria';
+      hazard.makateaRisk = 'O emaranhado de muralhas de coral fóssil de 6 metros de altura bloqueia toda linha de visão e abafa o som do mar, enquanto centenas de fendas escuras abrigam caranguejos-dos-coqueiros colossais e centopeias venenosas atraídos pelo suor da comitiva; falha na orientação impõe 1 nível de exaustão por desidratação no calor refletido pelo calcário branco e 2d6 de dano perfurante (DMG p. 110-111).';
+      hazard.pioneerMitigation = 'Marcação rigorosa de bifurcações com giz colorido nos pilares de coral e uso de fumaça aromática para afastar artrópodes das fendas (Sobrevivência CD 14).';
+      hazard.rescueAndStabilization = 'Aplicação de antitoxina herbal nas picadas e reidratação à sombra de cavernas ventiladas (Medicina CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampMakateaCoralKarstStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coastal').toLowerCase();
+    var dt = (defenseType || 'uplifted_paleo_reef_notch_overhang_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Entalhe de Maré Fóssil (Notch de Falésia Recifal)',
+      makateaAndCampSafety: 'O acampamento é instalado sob uma profunda cornija côncava escavada pelo mar antigo a 12 metros acima da arrebentação atual; o teto de calcário coralino maciço protege contra tempestades tropicais e queda de blocos (DMG p. 111).',
+      makateaAndWatch: 'A muralha vertical de makatea exige escalada difícil para qualquer predador e oferece às sentinelas visão desimpedida do litoral e cobertura três-quartos (+5 CA).',
+      campRestAndSafetyGuards: 'Leito nivelado com areia coralina seca e brisa constante que afasta insetos, garantindo descanso longo pleno para a comitiva.',
+      icon: '⛺',
+      color: '#f43f5e'
+    };
+
+    if (dt === 'freshwater_lens_cenote_drip_cistern') {
+      defense.defenseTitle = 'Coleta em Lente de Água Doce de Caverna Anquialina';
+      defense.makateaAndCampSafety = 'Captação cuidadosa da camada superficial de água doce cristalina (lente de Ghyben-Herzberg) que flutua sobre a água salgada no interior de uma gruta calcária fresca e sombreada (PHB p. 150; DMG p. 111).';
+      defense.makateaAndWatch = 'Fornece água potável mineralizada em ilhas e costas onde não existem rios superficiais, concedendo +1 dado de vida recuperado no descanso longo.';
+      defense.campRestAndSafetyGuards = 'Elimina o risco de desidratação severa sob o sol equatorial refletido pelo carste branco.';
+    } else if (dt === 'aragonite_chevaux_de_frise_chokepoint_wall') {
+      defense.defenseTitle = 'Estreito Fortificado com Espigões Naturais de Aragonita';
+      defense.makateaAndCampSafety = 'Fechamento das duas únicas fendas de acesso ao terraço de bivaque utilizando blocos dentados de coral fóssil encaixados a seco como estrepes naturais (PHB p. 185).';
+      defense.makateaAndWatch = 'Transforma a aproximação em terreno difícil letal que causa 2d4 de dano perfurante a invasores terrestres e alerta imediatamente a vigília pelo som vítreo do coral quebrando.';
+      defense.campRestAndSafetyGuards = 'Perímetro defensivo intransponível a ataques surpresa noturnos para os aventureiros.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 296: TORRES DE TUFA SUBLACUSTRES E BACIAS ALCALINAS (D&D 5e)
   // =========================================================================
 
@@ -37824,6 +37899,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessMakateaCoralKarstHazard: calcWildernessMakateaCoralKarstHazard,
+    calcCampMakateaCoralKarstStation: calcCampMakateaCoralKarstStation,
     calcWildernessAlkalineTufaTowerHazard: calcWildernessAlkalineTufaTowerHazard,
     calcCampAlkalineTufaTowerStation: calcCampAlkalineTufaTowerStation,
     calcWildernessStrandflatSkerryHazard: calcWildernessStrandflatSkerryHazard,
