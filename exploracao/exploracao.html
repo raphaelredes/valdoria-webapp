@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T17:39:48Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T17:52:38Z - do not edit directly, edit source -->
 
 
 
@@ -79778,7 +79778,7 @@ function triggerCombatScreen(cfg) {
 
       player: {
 
-        name: p.name || 'Aventureiro',  /* sessão #88: regra Herói≠Personagem (alinha 35586/21097/38705) */
+        name: p.name || 'Aventureiro',  /* sessão #88: regra Personagem/Aventureiro (alinha 35586/21097/38705) */
 
         cls: p.cls || 'Guerreiro',
 
@@ -101920,43 +101920,20 @@ function _doPointcrawlForage() {
 }
 
 function _triggerPointcrawlRegionalEvent() {
+  var biome = window._cartCurrentLocBiome;
   if (typeof S === 'undefined' || !S) return;
-  var _remoteAuthoritative = (window.__EXPLORE_MODE === 'remote'
-    && window.ExploracaoAPI && typeof window.ExploracaoAPI.hasToken === 'function' && window.ExploracaoAPI.hasToken());
-  if (_remoteAuthoritative && (typeof onMoveEnd === 'function' || typeof beginMove === 'function')) {
-    var px = (S.player && typeof S.player.col === 'number') ? S.player.col : 10;
-    var py = (S.player && typeof S.player.row === 'number') ? S.player.row : 10;
-    var odd = (px % 2) === 1;
-    var hexNeighbors = odd
-      ? [[px, py-1], [px+1, py], [px+1, py+1], [px, py+1], [px-1, py+1], [px-1, py]]
-      : [[px, py-1], [px+1, py-1], [px+1, py], [px, py+1], [px-1, py], [px-1, py-1]];
-    var target = null;
-    for (var ni = 0; ni < hexNeighbors.length; ni++) {
-      var nc = hexNeighbors[ni][0];
-      var nr = hexNeighbors[ni][1];
-      if (nc < 0 || nc >= COLS || nr < 0 || nr >= ROWS) continue;
-      if (typeof isTileImpassable === 'function' && isTileImpassable(nc, nr)) continue;
-      if (typeof isEdgeHex === 'function' && isEdgeHex(nc, nr)) continue;
-      if (typeof isDungeonHex === 'function' && isDungeonHex(nc, nr)) continue;
-      target = { col: nc, row: nr };
-      break;
-    }
-    if (target) {
-      if (typeof beginMove === 'function') {
-        beginMove(target.col, target.row);
-      } else {
-        onMoveEnd(target.col, target.row);
-      }
-      return;
-    }
-  }
-  // LOCAL fallback
+  // Fecha o popup de localidade para dar visibilidade imediata ao evento/toast
+  if (typeof _closeCartLocationPopup === 'function') _closeCartLocationPopup();
+
+  // Registra passo e ciclo de tempo nos ermos sem tocar no grid hexagonal
   S.ph = 'idle';
   S.steps = Math.max(3, (S.steps || 0) + 1);
   S._stepsToNextEvent = 0;
   if (typeof tickDayPhase === 'function') {
     try { tickDayPhase(); } catch (_) {}
   }
+
+  // Rolagem de evento regional (narrativo ou combate D&D 5e)
   var rolled = false;
   if (typeof maybeRollEvent === 'function') {
     rolled = maybeRollEvent();
@@ -101965,7 +101942,8 @@ function _triggerPointcrawlRegionalEvent() {
     rolled = maybeRollWanderingMonster();
   }
   if (!rolled && typeof vToast === 'function') {
-    vToast('🧭 A patrulha percorreu os marcos da região sem incidentes hostis no momento.', 'info', 3500);
+    var regName = (biome && (biome.regionalName || biome.name)) ? (biome.regionalName || biome.name) : 'Valdória';
+    vToast('🧭 A comitiva patrulhou os arredores de ' + regName + ' sem incidentes hostis no momento.', 'info', 3500);
   }
   if (typeof updateHud === 'function') updateHud();
 }
