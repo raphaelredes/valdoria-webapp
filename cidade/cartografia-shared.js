@@ -20735,6 +20735,88 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 328: PONTES SUSPENSAS, VAUS FORTIFICADOS, TIROLESAS E TRAVESSIAS DE DESFILADEIRO (D&D 5e)
+  // =========================================================================
+
+  function resolveWildernessChasmCrossingAndZiplineHazard(biomeKey, crossingMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var xm = (crossingMode || 'rope_bridge_and_chasm_traverse_kit').toLowerCase();
+
+    var crossing = {
+      crossingTitle: 'Ponte Suspensa de Cordas e Pranchas de Madeira (PHB p. 150-153; DMG p. 111)',
+      saveDC: 14,
+      saveType: 'Destreza',
+      crossingMechanics: 'Passarela suspensa montada com cabos de cânhamo reforçados e tábuas amarradas sobre fendas de até 18 metros de largura (CA 11, 50 PV, suporta até 1 tonelada ou 6 aventureiros simultâneos, DMG p. 111); permite cruzar abismos rochosos e ravinas verticais com passamanos de segurança sem necessidade de escaladas exaustivas!',
+      pioneerMitigation: 'Conecta trilhas de altitude descontinuadas em desfiladeiros, poupando 1 a 2 dias de desvios tortuosos por escarpas íngremes (PHB p. 182).',
+      rescueAndStabilization: 'Cabos de segurança com mosquetões de ferro impedem quedas fatais de membros do grupo que percam o equilíbrio sob rajadas de vento.',
+      icon: '🪢',
+      color: '#f59e0b'
+    };
+
+    if (xm === 'zipline_and_pulley_canyon_crossing') {
+      crossing.crossingTitle = 'Tirolesa de Desfiladeiro com Polias de Latão e Arreios de Couro (PHB p. 150-153)';
+      crossing.saveDC = 13;
+      crossing.saveType = 'Acrobacia';
+      crossing.crossingMechanics = 'Cabo mestre de seda tensionado em declive com polias duplas de rolamento e arnês de segurança do kit de escalador (PHB p. 151); batedores e mochilas de provisões deslizam a 15 metros por rodada através de gargantas de até 36 metros de vão, alcançando a encosta oposta em segundos!';
+      crossing.pioneerMitigation = 'Permite evacuação rápida de pontos quentes em encostas sob bombardeio de rochas ou emboscadas no alto do cânion.';
+      crossing.rescueAndStabilization = 'Sistema de freio por fricção permite transportar companheiros feridos deitados em maca suspensa sem trepidação violenta.';
+    } else if (xm === 'rigged_ford_and_submerged_lifeline') {
+      crossing.crossingTitle = 'Vau Fortificado com Cabo-Guia Submerso de Amarração (PHB p. 151; DMG p. 116)';
+      crossing.saveDC = 13;
+      crossing.saveType = 'Atletismo';
+      crossing.crossingMechanics = 'Estacas de ferro cravadas com marreta nas duas margens ancorando um cabo de tração de cânhamo esticado na altura da cintura através de leito pedregoso com correnteza rápida; aventureiros e animais de carga seguram o cabo com mosquetões para transpor a água sem risco de serem arrastados!';
+      crossing.pioneerMitigation = 'Permite que comitivas vestindo armaduras médias ou pesadas atravessem rios torrenciais sem penalidade de afogamento (PHB p. 146).';
+      crossing.rescueAndStabilization = 'Corda de salvamento retrátil arremessada com laço recupera companheiros que escorreguem em pedras lodosas.';
+    } else if (xm === 'jump_spell_and_chasm_leaping') {
+      crossing.crossingTitle = 'Salto (Jump): Transposição Mística de Gargantas e Fendas (PHB p. 275)';
+      crossing.saveDC = 12;
+      crossing.saveType = 'Transmutação';
+      crossing.crossingMechanics = 'Druida, Feiticeiro, Mago ou Patrulheiro (1º círculo, patas de gafanhoto, duração 1 minuto, PHB p. 275) toca uma criatura e triplica sua distância de salto em distância e em altura; um bárbaro com Força 16 salta até 14 metros em distância com corrida, transpondo fendas colossais para fixar o primeiro cabo de travessia do outro lado!';
+      crossing.pioneerMitigation = 'Dispensa o arremesso impreciso de ganchos de escalada, garantindo fixação manual firme das amarras na margem oposta.';
+      crossing.rescueAndStabilization = 'Permite saltar sobre ravinas desmoronando para alcançar companheiros isolados em platôs instáveis.';
+    } else if (xm === 'levitate_heavy_wagon_and_cargo_hoist') {
+      crossing.crossingTitle = 'Levitação (Levitate): Içamento Tático de Carroças e Cargas Pesadas (PHB p. 255)';
+      crossing.saveDC = 15;
+      crossing.saveType = 'Transmutação';
+      crossing.crossingMechanics = 'Feiticeiro ou Mago (2º círculo, presilha de couro, concentração até 10 minutos, PHB p. 255) ergue verticalmente até 250 kg de carga ou um membro da comitiva a até 6 metros por rodada; associada a cabos guia horizontais, permite transladar vagões de suprimentos e provisões sobre o vazio do abismo sem tocar o chão!';
+      crossing.pioneerMitigation = 'Supera paredões rochosos verticais e degraus de falha geológica que impediriam a passagem de carroças de carga da comitiva.';
+      crossing.rescueAndStabilization = 'Eleva aventureiros caídos em fendas profundas de volta ao topo da borda sem esforço de içamento por braços exaustos.';
+    }
+
+    return crossing;
+  }
+
+  function calcCampChasmBridgeheadFortificationStation(biomeKey, bridgeheadType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var bt = (bridgeheadType || 'bridgehead_redoubt_and_cut_line').toLowerCase();
+
+    var fortification = {
+      fortificationTitle: 'Reduto de Cabeça de Ponte com Cabo de Corte Imediato (DMG p. 111)',
+      chasmCampSafety: 'O bivaque é montado na borda rochosa adjacente à ancoragem da ponte suspensa; paliçadas de troncos e blocos de pedra formam um gargalo defensivo, enquanto machados ficam posicionados junto aos cabos-mestres para derrubar a ponte em 1 ação caso inimigos tentem cruzar no escuro.',
+      chasmWatchAndSentinel: 'Sentinelas vigiam a outra margem do abismo com visão desobstruída do vão, eliminando qualquer risco de aproximação furtiva por terra.',
+      campRestAndSafetyGuards: 'Em caso de cerco, a destruição tática da ponte isola a comitiva de forças hostis superiores, garantindo descanso longo ininterrupto (PHB p. 186; DMG p. 111).',
+      icon: '🛡️',
+      color: '#f59e0b'
+    };
+
+    if (bt === 'suspended_ledge_camp_and_rappel_access') {
+      fortification.fortificationTitle = 'Bivaque Suspenso em Saliência de Penhasco com Acesso por Rapel (PHB p. 151)';
+      fortification.chasmCampSafety = 'A comitiva desce por cordas de escalada para uma saliência de rocha 15 metros abaixo da borda do desfiladeiro; as cordas são recolhidas durante o repouso, tornando o acampamento inacessível tanto pelo topo quanto pelo fundo da ravina.';
+      fortification.chasmWatchAndSentinel = 'O platô suspenso oferece abrigo natural contra arqueiros do topo da escarpa, e o eco de passos na borda superior avisa os sentinelas muito antes de qualquer perigo real.';
+      fortification.campRestAndSafetyGuards = 'Imunidade total contra emboscadas de predadores terrestres que não escalam paredões verticais (DMG p. 110-111).';
+    } else if (bt === 'chasm_sentry_bastion_and_acoustic_echo_trap') {
+      fortification.fortificationTitle = 'Bastião de Fenda com Armadilha Acústica de Eco da Garganta (PHB p. 151, 177)';
+      fortification.chasmCampSafety = 'Aproveitando a acústica natural da garganta rochosa, esteiras são montadas atrás de uma mureta de pedra; sinos de latão amarrados a fios esticados através da fenda ressoam com o menor toque de vento ou invasores.';
+      fortification.chasmWatchAndSentinel = 'Sentinelas contam com bônus passivo de audição reforçado pelo eco do cânion, detectando ruídos de armaduras ou vozes a centenas de metros de distância.';
+      fortification.campRestAndSafetyGuards = 'Garante reação antecipada para que todos os membros do grupo acordem com armas desembainhadas antes de qualquer contato hostil (PHB p. 183).';
+    }
+
+    return fortification;
+  }
+
+  // =========================================================================
   // FASE 327: NAVEGAÇÃO COSTEIRA, CORRENTES MARÍTIMAS, RECIFES INVISÍVEIS E EMBARCAÇÕES A VELA (D&D 5e)
   // =========================================================================
 
@@ -40163,6 +40245,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveWildernessChasmCrossingAndZiplineHazard: resolveWildernessChasmCrossingAndZiplineHazard,
+    calcCampChasmBridgeheadFortificationStation: calcCampChasmBridgeheadFortificationStation,
     resolveWildernessCoastalNavigationAndReefsHazard: resolveWildernessCoastalNavigationAndReefsHazard,
     calcCampCoastalAnchorageAndBeaconWatchStation: calcCampCoastalAnchorageAndBeaconWatchStation,
     resolveWildernessRiverNavigationAndRapidsHazard: resolveWildernessRiverNavigationAndRapidsHazard,
