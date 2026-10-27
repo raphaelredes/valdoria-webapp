@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 318: SENSORES ARCANOS REMOTOS: OLHO ARCANO, CLARIVIDÊNCIA E FAMILIAR BATEDOR AÉREO (D&D 5e)
+  // =========================================================================
+
+  function resolveRemoteArcaneSensorScouting(biomeKey, sensorMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var sm = (sensorMode || 'find_familiar_telepathic_aerial_recon').toLowerCase();
+
+    var sensor = {
+      sensorTitle: 'Convocar Familiar (Find Familiar): Reconhecimento Aéreo e Compartilhamento de Sentidos (PHB p. 240)',
+      saveDC: 14,
+      saveType: 'Sabedoria',
+      sensorScoutingMechanics: 'O Mago (ou Bruxo do Pacto da Corrente / Bardo com Segredos Mágicos, 1º círculo ritual, carvão, incenso e ervas de 10 PO, PHB p. 240) envia seu Familiar (coruja com Visão no Escuro 36m e Voo Rasante, falcão com Percepção aguçada ou corvo) para sobrevoar a estrada adiante; enquanto o familiar estiver a até 30 metros (100 pés) do conjurador (ou a qualquer distância no mesmo plano com a invocação Voz do Mestre das Correntes, PHB p. 111!), o aventureiro pode usar sua ação para ver através dos olhos do familiar e ouvir o que ele ouve, revelando a Névoa de Identidade de outra comitiva sem sair da cobertura.',
+      pioneerMitigation: 'Durante o compartilhamento sensorial, o corpo físico do conjurador fica cego e surdo em relação aos seus próprios arredores até o início do seu próximo turno (PHB p. 240).',
+      rescueAndStabilization: 'Se o familiar for avistado e abatido a 0 PV, ele desaparece sem deixar vestígios e pode ser reonvocado na tenda de bivaque.',
+      icon: '🦅',
+      color: '#a855f7'
+    };
+
+    if (sm === 'clairvoyance_one_mile_invisible_sensor') {
+      sensor.sensorTitle = 'Clarividência (Clairvoyance): Sensor Invisível a 1,5 km (1 Milha) (PHB p. 222)';
+      sensor.saveDC = 15;
+      sensor.saveType = 'Sabedoria';
+      sensor.sensorScoutingMechanics = 'Bardo, Clérigo, Feiticeiro ou Mago (3º círculo, chifre cravejado de joias para audição ou olho de vidro de 100 PO para visão, duração 10 minutos, PHB p. 222) cria um orbe invisível de 10 cm em um ponto dentro de 1 milha (1,5 km) que seja familiar ao conjurador ou em um local óbvio desconhecido (como o outro lado de um desfiladeiro, o interior de uma caverna ou uma encruzilhada adiante no Pointcrawl); o conjurador pode alternar livremente entre ver (com luz brilhante em 3m) e ouvir através do sensor usando uma ação!',
+      sensor.pioneerMitigation = 'Permite escutar a conversa inteira de outra comitiva acampada a 1,5 km de distância ou inspecionar se um nó possui perigo geomorfológico ativo.',
+      sensor.rescueAndStabilization = 'O sensor permanece imóvel no ponto criado e não pode ser atacado nem sofrer dano (apenas dissipado por Dissipar Magia).';
+    } else if (sm === 'arcane_eye_roaming_darkvision_scout') {
+      sensor.sensorTitle = 'Olho Arcano (Arcane Eye): Sensor Móvel com Visão no Escuro de 9m (PHB p. 264)';
+      sensor.saveDC = 16;
+      sensor.saveType = 'Sabedoria';
+      sensor.sensorScoutingMechanics = 'Mago ou Clérigo do Domínio do Conhecimento (4º círculo, pelo de morcego, Concentração até 1 hora, PHB p. 264) cria um olho mágico invisível flutuante que possui visão normal e Visão no Escuro de 9 metros (30 pés) em todas as direções; com uma ação a cada turno, o conjurador move o olho até 9 metros em qualquer direção (sem limite máximo de distância em relação ao conjurador!) e pode fazê-lo atravessar frestas de até 2,5 centímetros de diâmetro.',
+      sensor.pioneerMitigation = 'Mapeamento completo de todas as bifurcações de uma masmorra ou desfiladeiro antes que o Batedor dê o primeiro passo.',
+      sensor.rescueAndStabilization = 'Bloqueado apenas por barreiras sólidas completamente seladas sem aberturas de 2,5 cm.';
+    } else if (sm === 'see_invisibility_and_truesight_sensor_detection') {
+      sensor.sensorTitle = 'Detecção de Sensores de Espionagem: Ver o Invisível e Sentidos Aguçados (PHB p. 222, 286)';
+      sensor.saveDC = 16;
+      sensor.saveType = 'Sabedoria';
+      sensor.sensorScoutingMechanics = 'Segundo a regra canônica do PHB (p. 222, 264, 286), uma criatura que possa ver objetos invisíveis — através da magia Ver o Invisível (2º círculo, PHB p. 286), Lanterna de Revelação (DMG p. 179), Visão da Verdade (Truesight) ou Sentido Cego — enxerga o sensor de Clarividência, Olho Arcano ou Vidência como um orbe luminoso intangível do tamanho de um punho flutuando no ar!',
+      sensor.pioneerMitigation = 'Conjuração de Dissipar Magia (CD 13 a 15) diretamente sobre o orbe luminoso avistado para cegar imediatamente o espião remoto.',
+      sensor.rescueAndStabilization = 'Encenar informações falsas diante do orbe detectado para atrair a comitiva rival para uma armadilha.';
+    }
+
+    return sensor;
+  }
+
+  function calcCampFamiliarAndClairvoyanceWatchStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'owl_familiar_flyby_and_adv_perception_sentry').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Vigília Noturna de Coruja Familiar com Visão no Escuro de 36m (PHB p. 240, 305)',
+      sensorWatchAndCampSafety: 'Como espíritos feéricos, celestiais ou corruptores em forma animal (PHB p. 240), os Familiares não precisam dormir como mortais e mantêm vigília ininterrupta nos galhos altos acima do bivaque.',
+      sensorWatchAndPerimeter: 'A Coruja (Owl, PHB p. 305) possui Visão no Escuro de 36 metros (120 pés — o dobro de um elfo ou anão!) e a característica Audição e Visão Aguçadas (vantagem em Sabedoria [Percepção], elevando sua Percepção Passiva para 18) para alertar telepaticamente o Mago ao menor sinal de aproximação.',
+      campRestAndSafetyGuards: 'Garante um sentinela aéreo adicional que nunca sofre níveis de Exaustão.',
+      icon: '🦉',
+      color: '#a855f7'
+    };
+
+    if (dt === 'pact_of_the_chain_invisible_imp_sprite_watch') {
+      defense.defenseTitle = 'Sentinela Invisível de Pacto da Corrente: Diabrete, Quasit ou Sprite (PHB p. 107, 305-310)';
+      defense.sensorWatchAndCampSafety = 'O Bruxo do Pacto da Corrente mantém um Diabrete (Imp, Visão do Diabo que enxerga na escuridão mágica!), Quasit ou Sprite (que pode ler o alinhamento emocional do coração com Toque do Coração, MM p. 283) em invisibilidade permanente à vontade na entrada da trilha do acampamento.';
+      defense.sensorWatchAndPerimeter = 'Quando outra comitiva se aproxima na estrada à noite, o familiar invisível os segue de perto sem ser notado e transmite descrições detalhadas ao Bruxo.',
+      defense.campRestAndSafetyGuards = 'Permite saber o tamanho, as armas e as intenções do outro grupo minutos antes de chegarem ao alcance das tendas.';
+    } else if (dt === 'clairvoyance_chokepoint_sensor_rotation') {
+      defense.defenseTitle = 'Vigília Remota de Gargalo Geográfico por Clarividência e Lanterna de Revelação',
+      defense.sensorWatchAndCampSafety = 'Ao acampar em uma caverna ou vale de entrada única, o conjurador posiciona um sensor de Clarividência na boca do desfiladeiro a 1 km de distância e acende uma Lanterna de Revelação no bivaque.',
+      defense.sensorWatchAndPerimeter = 'Revela qualquer tentativa de infiltração física na rota de acesso e denuncia instantaneamente sensores de Vidência ou Olhos Arcanos inimigos dentro do acampamento.',
+      defense.campRestAndSafetyGuards = 'Converte a posição defensiva da comitiva em um bastião de vigilância total.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 317: RASTREAMENTO FORENSE DE COMITIVAS (DMG p. 244) E MAGIAS LOCALIZAR OBJETO, LOCALIZAR CRIATURA E VIDÊNCIA (D&D 5e)
   // =========================================================================
 
@@ -39399,6 +39474,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveRemoteArcaneSensorScouting: resolveRemoteArcaneSensorScouting,
+    calcCampFamiliarAndClairvoyanceWatchStation: calcCampFamiliarAndClairvoyanceWatchStation,
     resolveWildernessPartyTrackingAndLocate: resolveWildernessPartyTrackingAndLocate,
     calcCampCounterTrackingAndScentMaskStation: calcCampCounterTrackingAndScentMaskStation,
     resolveTrailWitnessSpeakSpells: resolveTrailWitnessSpeakSpells,
