@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 320: SANTUÁRIOS MAGNÍFICOS DE CAMPANHA E CONSELHOS DE GUERRA: MANSÃO MAGNÍFICA DE MORDENKAINEN, TEMPLO DOS DEUSES E FORTALEZA PODEROSA (D&D 5e)
+  // =========================================================================
+
+  function resolveMagnificentMansionAndWarCouncil(biomeKey, sanctuaryMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var sm = (sanctuaryMode || 'mordenkainen_magnificent_mansion_banquet_portal').toLowerCase();
+
+    var sanctuary = {
+      sanctuaryTitle: 'Mansão Magnífica de Mordenkainen (Magnificent Mansion) e Conselho de Guerra (PHB p. 257)',
+      saveDC: 16,
+      saveType: 'Sabedoria',
+      sanctuaryMechanics: 'Bardo ou Mago (7º círculo, portal em miniatura de marfim, pedaço de mármore polido e colher de prata de 5 PO cada, tempo de conjuração 1 minuto, duração 24 horas, PHB p. 257) conjura uma habitação extradimensional com até 50 cubos de 3 metros (salas de mapas, dormitórios e salões), atendida por 100 servos quase transparentes e mobiliada com um banquete de 9 pratos (9 banquetes suficientes para alimentar 100 pessoas), permitindo que múltiplas comitivas aliadas realizem um Conselho de Guerra seguro no meio dos ermos!',
+      pioneerMitigation: 'O portal cintilante de 1,2m por 2,4m torna-se invisível quando fechado e apenas criaturas designadas pelo conjurador podem entrar, impedindo emboscadas noturnas (PHB p. 257).',
+      rescueAndStabilization: 'Atmosfera limpa, morna e isolada de qualquer nevasca, cinza vulcânica ou gás tóxico das 300 Fases.',
+      icon: '🏰',
+      color: '#f59e0b'
+    };
+
+    if (sm === 'temple_of_the_gods_consecrated_healing_sanctuary') {
+      sanctuary.sanctuaryTitle = 'Templo dos Deuses (Temple of the Gods): Santuário Consagrado e Cura Maximizada (XGE p. 169)';
+      sanctuary.saveDC = 17;
+      sanctuary.saveType = 'Carisma';
+      sanctuary.sanctuaryMechanics = 'Clérigo (7º círculo, tempo de conjuração 1 hora, duração 24 horas, XGE p. 169) faz surgir um Templo dos Deuses num cubo de até 36 metros; a estrutura bloqueia sensores de adivinhação e viagens planares hostis, exige salvaguarda de Carisma de celestiais, elementais, fadas, corruptores ou mortos-vivos para entrar (sofrendo desvantagem em ataques se falharem) e concede PV adicionais iguais ao modificador de Sabedoria do conjurador em toda magia de cura conjurada lá dentro!',
+      sanctuary.pioneerMitigation = 'Conjurar o Templo dos Deuses no mesmo ponto todos os dias durante 1 ano torna o santuário permanente nos ermos (XGE p. 169).';
+      sanctuary.rescueAndStabilization = 'Acelera drasticamente a recuperação de várias comitivas feridas após uma incursão em masmorra.';
+    } else if (sm === 'mighty_fortress_stone_keep_and_siege_bastion') {
+      sanctuary.sanctuaryTitle = 'Fortaleza Poderosa (Mighty Fortress): Bastião de Pedra de 36m com 4 Torres (XGE p. 162)';
+      sanctuary.saveDC = 17;
+      sanctuary.saveType = 'Força';
+      sanctuary.sanctuaryMechanics = 'Mago (8º círculo, diamante de 500 PO consumido, tempo de conjuração 1 minuto, duração 7 dias, XGE p. 162) faz brotar da terra uma Fortaleza Poderosa quadrada de 36 metros de lado com muralhas de 3 metros de espessura, 4 torres de vigia ligadas por ameias (CA 15, 300 PV por seção de 3x3m, imune a veneno e psíquico), 100 servos invisíveis e provisões de 9 banquetes diários para até 100 pessoas durante uma semana inteira!',
+      sanctuary.pioneerMitigation = 'Conjurada a cada 7 dias no mesmo nó estratégico durante 1 ano, a Fortaleza Poderosa torna-se um bastião permanente da guilda no mapa Pointcrawl (XGE p. 162).';
+      sanctuary.rescueAndStabilization = 'Permite que até 25 comitivas de 4 aventureiros utilizem o bastião como base avançada de cerco.';
+    } else if (sm === 'demiplane_and_sequester_vault_alliance') {
+      sanctuary.sanctuaryTitle = 'Semiplano (Demiplane) e Cofre de Isolamento (Sequester) entre Comitivas (PHB p. 277, 279)';
+      sanctuary.saveDC = 18;
+      sanctuary.saveType = 'Inteligência';
+      sanctuary.sanctuaryMechanics = 'Bruxo, Feiticeiro ou Mago (8º círculo, duração 1 hora, PHB p. 279) cria uma porta sombria para um Semiplano de 9x9x9 metros de madeira ou pedra — ou conecta-se a um Semiplano existente cuja natureza conheça —, enquanto Isolamento (Sequester, 7º círculo, pó de diamante, esmeralda, rubi e safira de 5.000 PO, PHB p. 277) torna um baú da guilda ou um aventureiro voluntário invisível, indetectável por adivinhação e em animação suspensa até um gatilho pactuado!',
+      sanctuary.pioneerMitigation = 'Múltiplos conjuradores aliados podem conectar-se ao mesmo Semiplano compartilhado para depositar relíquias de campanha sem peso de carga na estrada.';
+      sanctuary.rescueAndStabilization = 'Isolamento em estado de animação suspensa preserva um companheiro amaldiçoado ou à beira da morte até a chegada do Clérigo de alto nível.';
+    }
+
+    return sanctuary;
+  }
+
+  function calcCampExtradimensionalSanctuaryStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'invisible_portal_threshold_and_designated_entry').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Limiar Invisível da Mansão Magnífica e Lista de Entrada Designada (PHB p. 257)',
+      sanctuaryAndCampSafety: 'Ao montar o acampamento de alto nível, o conjurador designa nominalmente os membros da sua comitiva (e de comitivas aliadas presentes na encruzilhada, Fase 315) autorizados a cruzar o portal da Mansão Magnífica de Mordenkainen antes de fechar a entrada invisível.',
+      sanctuaryAndCouncilWatch: 'Como o exterior não exibe barraca nem fogueira, patrulhas inimigas e predadores passam pelo nó sem perceber que 10 a 20 aventureiros repousam no plano extradimensional logo acima.',
+      campRestAndSafetyGuards: 'Ao término das 24 horas, todas as criaturas e objetos trazidos são expelidos em segurança nos espaços desocupados mais próximos da entrada (PHB p. 257).',
+      icon: '🏛️',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'hundred_servants_feast_and_poison_immunity_rest') {
+      defense.defenseTitle = 'Banquete dos 100 Servos e Restauração Estratégica em Conselho de Guerra (PHB p. 257, 250)';
+      defense.sanctuaryAndCampSafety = 'Dentro da Mansão Magnífica ou da Fortaleza Poderosa, os 100 servos translúcidos preparam as camas, cuidam dos equipamentos e servem o banquete enquanto os líderes das comitivas comparam mapas regionais (Fase 315) e sequências de Círculos de Teletransporte (Fase 319).';
+      defense.sanctuaryAndCouncilWatch = 'Combinado ao Banquete (6º círculo, taça incrustada de 1.000 PO, PHB p. 250), até 12 aventureiros curam doenças e venenos, tornam-se imunes a veneno e amedrontamento, têm vantagem em testes de Sabedoria e ganham +2d10 PV máximos por 24 horas!';
+      defense.campRestAndSafetyGuards = 'Eleva a preparação do grupo ao ápice tático do D&D 5e antes de enfrentar chefes de campanha.';
+    } else if (dt === 'permanent_year_casting_guild_bastion_node') {
+      defense.defenseTitle = 'Consagração Anual de Bastião Permanente da Guilda nos Ermos (XGE p. 162, 169)';
+      defense.sanctuaryAndCampSafety = 'A guilda mantém um rodízio de conjuradores no mesmo nó durante 365 dias para converter o Templo dos Deuses, a Fortaleza Poderosa ou o Círculo de Teletransporte (PHB p. 224) em um assentamento avançado permanente nas fronteiras selvagens.';
+      defense.sanctuaryAndCouncilWatch = 'Cria um novo ponto seguro de partida e retorno no grafo Pointcrawl, reduzindo a distância para biomas abissais e vulcânicos.';
+      defense.campRestAndSafetyGuards = 'Consolida a conquista territorial das comitivas de aventureiros ao longo das 320 Fases de Cartografia.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 319: TRAVESSIA RÁPIDA E REDES DE SIGILOS: CÍRCULO DE TELETRANSPORTE, CAMINHAR NO VENTO E TRANSPORTE VIA PLANTAS (D&D 5e)
   // =========================================================================
 
@@ -39549,6 +39624,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveMagnificentMansionAndWarCouncil: resolveMagnificentMansionAndWarCouncil,
+    calcCampExtradimensionalSanctuaryStation: calcCampExtradimensionalSanctuaryStation,
     resolveFastTravelSigilAndWindWalk: resolveFastTravelSigilAndWindWalk,
     calcCampTeleportationCircleAnchorStation: calcCampTeleportationCircleAnchorStation,
     resolveRemoteArcaneSensorScouting: resolveRemoteArcaneSensorScouting,
