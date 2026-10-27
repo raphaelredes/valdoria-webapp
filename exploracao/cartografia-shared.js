@@ -20735,6 +20735,88 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 326: NAVEGAÇÃO FLUVIAL, CORREDEIRAS TORRENCIAIS, VAUS SUBMERSOS E EMBARCAÇÕES A REMO/QUILHA (D&D 5e)
+  // =========================================================================
+
+  function resolveWildernessRiverNavigationAndRapidsHazard(biomeKey, riverMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var rm = (riverMode || 'keelboat_river_navigation_and_transport').toLowerCase();
+
+    var river = {
+      riverTitle: 'Barco de Quilha (Keelboat): Transporte Fluvial Pesado e Travessia de Correntezas (PHB p. 155-157)',
+      saveDC: 15,
+      saveType: 'Veículos Aquáticos',
+      riverMechanics: 'Embarcação fluvial de quilha de 18 metros com cabine de carga (CA 15, 100 PV, limiar de dano 10, tripulação 1, passageiros 6, carga 30 toneladas, velocidade 1 a 3 milhas por hora dependendo de remos ou vela, PHB p. 157); permite navegar contra ou a favor da correnteza em rios caudalosos, transportando a comitiva, montarias e provisões com estabilidade contra turbilhões d\'água!',
+      pioneerMitigation: 'Navegação fluvial contínua evita terrenos acidentados e pântanos marginais, cobrindo o dobro da distância diária sem risco de atolamento de carga (DMG p. 116-119).',
+      rescueAndStabilization: 'Cabina coberta e escoras laterais oferecem abrigo fechado e boias flutuantes para resgate imediato de aventureiros que caiam na água.',
+      icon: '⛵',
+      color: '#06b6d4'
+    };
+
+    if (rm === 'rowboat_and_tactical_canoe_reconnaissance') {
+      river.riverTitle = 'Barco a Remo e Canoas de Batedores: Travessia Ágil e Silenciosa (PHB p. 155-157)';
+      river.saveDC = 13;
+      river.saveType = 'Destreza';
+      river.riverMechanics = 'Barco a remo ligeiro de 3 metros (CA 11, 50 PV, passageiros 3, carga 250 kg, velocidade 1,5 milhas por hora, PHB p. 157); ideal para afluentes rasos, manguezais e lagos de bacia, permitindo que batedores avancem silenciosamente com testes de Furtividade em grupo com vantagem em áreas de neblina matinal.';
+      river.pioneerMitigation = 'Permite portagem manual por 2 aventureiros para transpor cachoeiras ou trechos rochosos sem abandonar a embarcação nos ermos.';
+      river.rescueAndStabilization = 'Casco de baixo calado atraca rapidamente em bancos de cascalho para içar companheiros exaustos ou recuperar cargas perdidas.';
+    } else if (rm === 'water_walk_rapid_crossing_ritual') {
+      river.riverTitle = 'Andar sobre as Águas (Water Walk): Marcha Ritual sobre Corredeiras Ferozes (PHB p. 214)';
+      river.saveDC = 14;
+      river.saveType = 'Transmutação';
+      river.riverMechanics = 'Clérigo, Druida, Patrulheiro ou Feiticeiro (3º círculo ritual, tempo 1 ação, duração 1 hora, PHB p. 214) confere a até 10 criaturas voluntárias a capacidade de caminhar sobre a superfície líquida (rios, corredeiras torrenciais, areia movediça e lamaçal) como se fosse solo firme; se submergida, a criatura é impulsionada à superfície a 18 metros por rodada!';
+      river.pioneerMitigation = 'Elimina totalmente a necessidade de pontes ou balsas em vaus profundos e corredeiras de classe IV, permitindo cruzar a pé sem molhar provisões.';
+      river.rescueAndStabilization = 'Evita afogamento instantâneo em redemoinhos ou sumidouros aquáticos, expelindo aventureiros caídos de volta ao topo da água.';
+    } else if (rm === 'control_water_parting_trench') {
+      river.riverTitle = 'Controlar a Água (Control Water): Partir as Águas em Trincheira Seca (PHB p. 227)';
+      river.saveDC = 16;
+      river.saveType = 'Transmutação';
+      river.riverMechanics = 'Clérigo, Druida ou Mago (4º círculo, concentração até 10 minutos, alcance 90 metros, PHB p. 227) separa um rio de até 30 metros de largura num cubo de água, criando uma trincheira seca de 6 metros de profundidade com paredes líquidas estáveis nas margens; a comitiva e carroças marcham pelo leito do rio em terra firme!';
+      river.pioneerMitigation = 'Permite a travessia segura de comboios pesados e montarias que não sabem nadar em rios torrenciais sem perigo de correntezas.';
+      river.rescueAndStabilization = 'Seca momentaneamente o fundo de cachoeiras para resgatar aventureiros enroscados em troncos submersos ou cavernas alagadas.';
+    } else if (rm === 'driftwood_raft_expedient_construction') {
+      river.riverTitle = 'Balsa de Toras e Madeira de Deriva: Engenharia Expedita de Campanha (DMG p. 116-117)';
+      river.saveDC = 12;
+      river.saveType = 'Sobrevivência';
+      river.riverMechanics = 'Utilizando machados de mão, cordas de cânhamo e troncos secos caídos nas margens, a comitiva constrói uma balsa de madeira de deriva em 2 horas (teste de Sabedoria [Sobrevivência] ou Ferramentas de Carpinteiro CD 12); comporta até 4 aventureiros e 500 kg de carga flutuando rio abaixo a 2 milhas por hora.';
+      river.pioneerMitigation = 'Recurso de emergência quando a ponte da rota estiver destruída ou quando o grupo for perseguido por feras terrestres.';
+      river.rescueAndStabilization = 'Plataforma estável para acomodar feridos deitados enquanto a correnteza suave conduz o grupo em direção a postos avançados.';
+    }
+
+    return river;
+  }
+
+  function calcCampRiverineMooringAndDriftwoodRedoubtStation(biomeKey, mooringType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var mt = (mooringType || 'riverbank_keelboat_mooring_and_watch').toLowerCase();
+
+    var mooring = {
+      mooringTitle: 'Atracação Fluvial em Barco de Quilha e Sentinela de Bordo (PHB p. 157)',
+      riverCampSafety: 'Durante o descanso longo, o barco de quilha é amarrado a salgueiros robustos ou estacas de ferro na margem profunda; a comitiva repousa na cabine de proa sobre a água, ficando naturalmente isolada de predadores terrestres, carniceiros e insetos rastejantes da mata.',
+      riverWatchAndSentinel: 'Sentinelas montam guarda na gávea e no convés superior com lanterna furta-fogo e visão panorâmica das duas margens, detectando qualquer aproximação nas águas com vantagem em Sabedoria (Percepção).',
+      campRestAndSafetyGuards: 'Em caso de emboscada noturna na margem, a comitiva solta os cabos de amarração e deixa o barco derivar silenciosamente rio abaixo para fugir sem combate forçado (DMG p. 116-119).',
+      icon: '⚓',
+      color: '#06b6d4'
+    };
+
+    if (mt === 'driftwood_palisade_and_embayment_redoubt') {
+      mooring.mooringTitle = 'Reduto de Madeira de Deriva em Enseada Protegida (DMG p. 111, 116)';
+      mooring.riverCampSafety = 'Na curva de um meandro calmo, os batedores aproveitam bancos de cascalho e troncos encalhados para erguer um semicírculo defensivo de estacas pontiagudas contra a terra, protegendo o bivaque de ataques vindos da mata fechada.';
+      mooring.riverWatchAndSentinel = 'O som da correnteza mascara conversas sussurradas e fogueiras rebaixadas, enquanto estacas de alerta na água rasa produzem ruído de choque caso canoas hostis se aproximem.';
+      mooring.campRestAndSafetyGuards = 'Proporciona cobertura de três quartos (+5 na CA) contra arqueiros inimigos e garante retirada imediata pelas canoas na água funda (PHB p. 196).';
+    } else if (mt === 'concealed_canoe_cove_and_water_breathing_cache') {
+      mooring.mooringTitle = 'Enseada Camuflada de Canoas e Abrigo com Respirar na Água (PHB p. 273)';
+      mooring.riverCampSafety = 'Canoas e mochilas impermeabilizadas são escondidas sob copas de raízes suspensas de manguezais ou sob rochedos côncavos cobertos por musgo e folhagens fluviais, tornando o acampamento invisível a observadores na água aberta.';
+      mooring.riverWatchAndSentinel = 'Com Respirar na Água ativo como ritual por 24 horas, sentinelas podem permanecer parcialmente submersos nas margens sombrias respirando livremente, monitorando o tráfego fluvial como emboscadores invisíveis.';
+      mooring.campRestAndSafetyGuards = 'Garante esconderijo absoluto contra patrulhas de margem e permite fuga anfíbia submersa sem deixar pegadas em terra firme (PHB p. 177, 273).';
+    }
+
+    return mooring;
+  }
+
+  // =========================================================================
   // FASE 325: FORTIFICAÇÕES TELÚRICAS, GEOCINESE DE CAMPANHA E MURALHAS DE DEFESA DE BIVAQUE (D&D 5e) [MARCO 325]
   // =========================================================================
 
@@ -39999,6 +40081,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveWildernessRiverNavigationAndRapidsHazard: resolveWildernessRiverNavigationAndRapidsHazard,
+    calcCampRiverineMooringAndDriftwoodRedoubtStation: calcCampRiverineMooringAndDriftwoodRedoubtStation,
     resolveEarthmovingFortificationAndStoneWall: resolveEarthmovingFortificationAndStoneWall,
     calcCampEarthworkRedoubtAndStoneWallStation: calcCampEarthworkRedoubtAndStoneWallStation,
     resolvePlanarConfluenceAndRiftAnchoring: resolvePlanarConfluenceAndRiftAnchoring,
