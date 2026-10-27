@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.resolveWildernessAerialMountAndCavalryScouting) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var am = CartShared.resolveWildernessAerialMountAndCavalryScouting(bKey, 'pegasus_and_griffon_aerial_reconnaissance');
+        return '<div class="clp-aerial-mount-card" style="margin:4px 0 6px;text-align:left;background:rgba(36,24,8,0.88);padding:4px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.42);font-size:8px;color:#fef3c7;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + am.color + ';margin-bottom:2px;">' + am.icon + ' ' + am.mountTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Montarias e Cavalaria:</b> ' + am.mountMechanics + ' (CD ' + am.saveDC + ' [' + am.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#fde68a;margin-top:1px;">• <b>Reconhecimento Aéreo:</b> ' + am.pioneerMitigation + ' · <i>Segurança: ' + am.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampMountPaddockAndPegasusAerieStation) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var pa = CartShared.calcCampMountPaddockAndPegasusAerieStation(bKey, 'pegasus_cliff_aerie_and_fortified_paddock');
+        return '<div class="clp-aerial-mount-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,18,6,0.84);padding:4px 8px;border-radius:4px;border:1px solid rgba(217,119,6,0.35);font-size:8px;color:#fef3c7;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + pa.color + ';margin-bottom:2px;">' + pa.icon + ' ' + pa.aerieTitle.toUpperCase() + ' (PHB p. 155-157; DMG p. 119):</div>' 
+          + '  <div>• <b>Ninho e Paddock no Bivaque:</b> ' + pa.mountCampSafety + ' · <b>Vigia:</b> ' + pa.mountWatchAndSentinel + '</div>' 
+          + '  <div style="font-size:7.5px;color:#fcd34d;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + pa.campRestAndSafetyGuards + '</div>' 
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.resolveWildernessWagonTrainAndSledHazard) return '';
         var bKey = (biome && biome.key) || 'plains';
         var wg = CartShared.resolveWildernessWagonTrainAndSledHazard(bKey, 'heavy_wagon_train_logistics_and_haulage');

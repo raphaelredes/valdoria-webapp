@@ -20735,6 +20735,88 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 330: MONTARIAS TERRESTRES, ALADAS E MÍSTICAS NOS ERMOS (D&D 5e) [MARCO 330]
+  // =========================================================================
+
+  function resolveWildernessAerialMountAndCavalryScouting(biomeKey, mountMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var mm = (mountMode || 'pegasus_and_griffon_aerial_reconnaissance').toLowerCase();
+
+    var mount = {
+      mountTitle: 'Montarias Aladas: Pégasos e Grifos no Reconhecimento Aéreo (PHB p. 155-157; MM p. 174, 250)',
+      saveDC: 15,
+      saveType: 'Adestrar Animais',
+      mountMechanics: 'Pégaso celestial (Grande, CA 12, 59 PV, voo 27 metros ou 9 milhas por hora, carga 240 kg, compreensão de idiomas celestiais e élficos, MM p. 250) e Grifo (voo 24 metros, percepção passiva 15 com visão aguçada, MM p. 174); sobrevoam a 150 metros de altitude mapeando até 3 nós à frente no Pointcrawl, detectando fumaça de acampamentos inimigos e perigos climáticos horas antes do contato terrestre!',
+      pioneerMitigation: 'Ignora por completo abismos, desfiladeiros, corredeiras e terrenos difíceis de floresta densa ou pântanos, cobrindo até 72 milhas diárias pelo ar (DMG p. 119).',
+      rescueAndStabilization: 'Voo veloz permite evacuar companheiros feridos de cercos ou áreas de perigo para santuários seguros em minutos.',
+      icon: '🦅',
+      color: '#f59e0b'
+    };
+
+    if (mm === 'find_greater_steed_paladin_bond') {
+      mount.mountTitle = 'Encontrar Montaria Maior (Find Greater Steed): Vínculo Telepático Místico (XGE p. 156)';
+      mount.saveDC = 16;
+      mount.saveType = 'Conjuração';
+      mount.mountMechanics = 'Paladino (4º círculo, tempo 10 minutos, alcance 9 metros, XGE p. 156) invoca um espírito nobre sob a forma de Pégaso, Grifo ou Tigre-Dente-de-Sabre (Inteligência 6 a 10); mantém vínculo telepático constante a até 1,6 km de distância e compartilha instantaneamente qualquer magia de alvo pessoal conjurada pelo paladino durante a cavalgada!';
+      mount.pioneerMitigation = 'Permite ao cavaleiro e sua montaria compartilhar magias de proteção (como Escudo da Fé ou Bênção) sem consumo adicional de espaços de magia.';
+      mount.rescueAndStabilization = 'Se a montaria for reduzida a 0 PV, desaparece sem deixar carcaça e pode ser reconvocada em descanso subsequente sem custo de perda definitiva de animal.';
+    } else if (mm === 'phantom_steed_ghostly_dash') {
+      mount.mountTitle = 'Montaria Fantasmagórica (Phantom Steed): Galope Espectral Rápido (PHB p. 265)';
+      mount.saveDC = 13;
+      mount.saveType = 'Ilusão';
+      mount.mountMechanics = 'Bardo ou Mago (3º círculo ritual, tempo 1 minuto ou ritual 11 minutos, duração 1 hora, PHB p. 265) conjura uma criatura equina quase real de pura névoa e fumaça mágica com ferraduras silenciosas; possui velocidade de 30 metros (100 pés, equivalente a 10 milhas por hora de marcha acelerada!), cruzando 10 milhas em terreno acidentado sem exigir teste de exaustão!';
+      mount.pioneerMitigation = 'Velocidade máxima de mensageiro para despachar comunicados de emergência ou desviar de áreas conflagradas em minutos.';
+      mount.rescueAndStabilization = 'Permite fuga rápida de aventureiros desprovidos de montarias mundanas quando emboscados por patrulhas hostis.';
+    } else if (mm === 'warhorse_heavy_cavalry_charge') {
+      mount.mountTitle = 'Cavalo de Guerra Blindado: Carga de Cavalaria Pesada (PHB p. 155-157; MM p. 340)';
+      mount.saveDC = 14;
+      mount.saveType = 'Força';
+      mount.mountMechanics = 'Corcel de batalha puro-sangue com barda de malha e sela militar de combate (Grande, CA 16 com barda, 19 PV, velocidade 18 metros, carga 270 kg, ataque de cascos 2d6+4 concussão com atropelamento CD 14 de Força, PHB p. 157; MM p. 340); confere vantagem em testes de manobra contra infantaria a pé e sustenta marcha rápida de 30 milhas diárias.';
+      mount.pioneerMitigation = 'Concede tração inabalável contra bandos de saqueadores a pé nas estradas, abrindo passagens à força em barreiras improvisadas.';
+      mount.rescueAndStabilization = 'Sela militar com estribos profundos mantém o cavaleiro firme mesmo se atordoado ou ferido gravemente em combate.';
+    } else if (mm === 'hippogriff_stealth_canopy_perch') {
+      mount.mountTitle = 'Hipogrifo de Floresta: Pouso Furtivo em Copas de Árvores (MM p. 182)';
+      mount.saveDC = 13;
+      mount.saveType = 'Furtividade';
+      mount.mountMechanics = 'Besta alada com cabeça de águia e corpo de cavalo (Grande, CA 11, 19 PV, velocidade 12 metros, voo 18 metros, percepção passiva 15 com vantagem em visão, MM p. 182); treinado para pousos silenciosos no topo de carvalhos centenários em florestas e selvas, atuando como posto de vigia elevado invisível a patrulhas no chão!';
+      mount.pioneerMitigation = 'Supera dosséis florestais densos para mapear clareiras e esconderijos de monstros sem alertar os habitantes da mata.';
+      mount.rescueAndStabilization = 'Içamento vertical com garras macias para resgatar aventureiros cercados por predadores em atoleiros pantanosos.';
+    }
+
+    return mount;
+  }
+
+  function calcCampMountPaddockAndPegasusAerieStation(biomeKey, aerieType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var at = (aerieType || 'pegasus_cliff_aerie_and_fortified_paddock').toLowerCase();
+
+    var aerie = {
+      aerieTitle: 'Ninho em Penhasco para Pégasos e Paddock Fortificado (PHB p. 155, 157; DMG p. 119)',
+      mountCampSafety: 'O bivaque é montado em platô rochoso de topo de escarpa com piquetes reforçados para as montarias; pégasos e grifos dispõem de espaço livre para decolagem imediata em qualquer direção, enquanto o desnível vertical isola o acampamento de predadores terrestres sem asas.',
+      mountWatchAndSentinel: 'Pégasos de inteligência humana (Inteligência 10, compreensão de idiomas) montam vigília aérea e terrestre combinada; sua percepção aguçada detecta aproximações terrestres e aéreas a quilômetros de distância, alertando os membros do grupo sem ruídos estridentes.',
+      campRestAndSafetyGuards: 'Em caso de cerco imprevisto, a comitiva pode montar e decolar em 1 rodada, evitando emboscadas noturnas em gargalos de terra firme (PHB p. 186; DMG p. 119).',
+      icon: '🪶',
+      color: '#f59e0b'
+    };
+
+    if (at === 'telepathic_mount_night_sentry_link') {
+      aerie.aerieTitle = 'Vínculo Telepático de Sentinela Noturna com Montaria Mística (PHB p. 237; XGE p. 156)';
+      aerie.mountCampSafety = 'A montaria invocada repousa ao lado da esteira do cavaleiro; o elo telepático mantém uma conexão sensorial contínua mesmo durante o transe ou sono leve dos aventureiros, transmitindo impulsos de alerta mental caso haja perigo no perímetro.';
+      aerie.mountWatchAndSentinel = 'A sentinela de guarda e a montaria alternam turnos com vigília telepática em 360°, garantindo que a comitiva nunca seja apanhada surpresa durante descansos longos (PHB p. 183).';
+      aerie.campRestAndSafetyGuards = 'Anula completamente a condição de Surpreso para a comitiva em caso de ataques furtivos noturnos de criaturas invisíveis ou emboscadores das sombras (PHB p. 189).';
+    } else if (at === 'warhorse_stable_pavilion_and_barding_rack') {
+      aerie.aerieTitle = 'Pavilhão de Cavalaria com Forragem Energética e Suporte de Bardas (PHB p. 155, 157)';
+      aerie.mountCampSafety = 'Tenda estábulo impermeabilizada com mantas de lã e leito de palha seca acomoda até 4 cavalos de guerra; as bardas de metal são retiradas e acomodadas em cavaletes para alívio muscular dos animais, prevenindo perda de vigor por peso contínuo.';
+      aerie.mountWatchAndSentinel = 'Cavalos bem cuidados com aveia e feno de alta caloria recuperam 100% de seus dados de vida no descanso longo, permanecendo atentos a cheiros estranhos de predadores na brisa noturna.';
+      aerie.campRestAndSafetyGuards = 'Garante que na alvorada os cavalos estejam prontos para arrancadas de galope em plena carga de combate sem penalidades de exaustão (PHB p. 155, 186).';
+    }
+
+    return aerie;
+  }
+
+  // =========================================================================
   // FASE 329: CARRUAGENS BLINDADAS, VAGÕES DE COMBOIO, TRENÓS ÁRTICOS E ARREIOS (D&D 5e)
   // =========================================================================
 
@@ -40327,6 +40409,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveWildernessAerialMountAndCavalryScouting: resolveWildernessAerialMountAndCavalryScouting,
+    calcCampMountPaddockAndPegasusAerieStation: calcCampMountPaddockAndPegasusAerieStation,
     resolveWildernessWagonTrainAndSledHazard: resolveWildernessWagonTrainAndSledHazard,
     calcCampWagonCircleFortressStation: calcCampWagonCircleFortressStation,
     resolveWildernessChasmCrossingAndZiplineHazard: resolveWildernessChasmCrossingAndZiplineHazard,
