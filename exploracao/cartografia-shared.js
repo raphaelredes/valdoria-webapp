@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 299: PLANÍCIES DE ARGILA FENDILHADA DE TAKYR E TÚNEIS DE SUFUSÃO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessTakyrClayPanHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'suffosion_piping_tunnel_crust_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Colapso de Teto em Galeria de Sufusão Subterrânea (Pseudocarste de Argila)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      takyrRisk: 'As planícies de argila poligonal endurecida ao sol (takyr) aparentam ter a solidez de um pavimento de pedra, mas escondem extensas redes de túneis de erosão subsuperficial (piping / sufusão) escavados pelo escoamento raro de enxurradas; a laje seca cede sob o passo da comitiva, lançando o aventureiro a 5 metros de profundidade em galerias estreitas e empoeiradas com 3d6 de concussão e soterramento parcial (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores identificando filetes de vegetação halófita alinhada e sumidouros de formigas que denunciam o traçado dos dutos ocos sob a crosta (Sobrevivência ou Percepção CD 14).',
+      rescueAndStabilization: 'Escoramento rápido das bordas de argila quebradiça com pranchas ou escudos e içamento por corda antes de novo desmoronamento (Atletismo CD 14).',
+      icon: '🏜️',
+      color: '#d97706'
+    };
+
+    if (ht === 'flash_rain_smectite_clay_quagmire_immobilization') {
+      hazard.hazardTitle = 'Liquefação Instantânea de Argila Esmectita por Aguaceiro Súbito';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.takyrRisk = 'Basta uma pancada de chuva de cinco minutos na bacia endorreica para que a argila expansiva do takyr absorva água e se transforme em um visgo impermeável e escorregadio que acumula quilos de barro pesado nas botas e patas de montarias; o deslocamento cai a um quarto e a marcha exaustiva impõe 1 nível de exaustão e condição impedido (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Retirada imediata da baixada argilosa para os cordões de dunas arenosas periféricas assim que nuvens de tempestade se formam no horizonte (Sobrevivência ou Natureza CD 13).';
+      hazard.rescueAndStabilization = 'Raspagem sistemática do barro aderido com espátulas e pranchas de apoio para desatolar membros e animais de carga (Atletismo CD 13).';
+    } else if (ht === 'desiccation_polygon_fissure_venomous_viper_den') {
+      hazard.hazardTitle = 'Fendas Poligonais de Dessecação e Ninhos de Víboras e Escorpiões';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Constituição';
+      hazard.takyrRisk = 'As rachaduras térmicas profundas que dividem o takyr em milhares de placas hexagonais servem de refúgio fresco durante o dia para víboras-de-chifre e escorpiões amarelos; pisar na borda oca de uma placa faz a lasca gangorrar, prendendo o tornozelo na fenda e provocando botes defensivos com 2d6 de dano de veneno e condição envenenado (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Uso de grevas altas ou polainas de couro rígido e marcha pisando sempre no centro geométrico das placas poligonais (Acrobacia ou Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Imobilização do membro picado e aplicação de cataplasma absorvente com kit de herbalismo ou antitoxina (Medicina CD 14).';
+    } else if (ht === 'albedo_thermal_mirage_horizon_inversion') {
+      hazard.hazardTitle = 'Miragem Inferior de Alto Albedo e Desorientação na Planície Espelhada';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Sabedoria';
+      hazard.takyrRisk = 'A superfície perfeitamente plana, nua e esbranquiçada do takyr reflete a radiação solar intensa e cria uma camada de ar superaquecido que projeta falsos lagos cintilantes e distorce marcos distantes em 360 graus; a perda de referência visual desvia a comitiva por horas sob insolação severa, causando 2d4 de dano de fogo (calor) e sede extrema (DMG p. 110-111).';
+      hazard.pioneerMitigation = 'Navegação por azimute de bússola e leitura da direção das cristas eólicas nas bordas da bacia sem fixar os olhos no horizonte trêmulo (Sobrevivência CD 14).';
+      hazard.rescueAndStabilization = 'Montagem de toldo de sombra emergencial e reidratação fracionada com sais minerais (Medicina CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampTakyrClayPanStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'khak_freshwater_rain_catchment_cistern_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Cisterna Tradicional de Captação de Takyr (Khak / Sardoba)',
+      takyrAndCampSafety: 'Aproveitando a impermeabilidade natural da crosta de argila como bacia coletora, a comitiva acampa junto a um poço decantador abobadado escavado na margem elevada do takyr (DMG p. 111; PHB p. 150).',
+      takyrAndWatch: 'A superfície plana e limpa ao redor oferece linha de tiro e visão desimpedida de 1 quilômetro em todas as direções, impedindo qualquer aproximação furtiva contra as sentinelas.',
+      campRestAndSafetyGuards: 'Fornece água doce fresca preservada da evaporação sob a cúpula de tijolos de barro, garantindo recuperação plena no descanso longo.',
+      icon: '⛺',
+      color: '#d97706'
+    };
+
+    if (dt === 'baked_clay_slab_modular_breastwork_wall') {
+      defense.defenseTitle = 'Parapeito Modular de Placas Poligonais de Argila Endurecida';
+      defense.takyrAndCampSafety = 'Levantamento de blocos hexagonais naturais de argila ressecada de 15 centímetros de espessura para erguer uma trincheira circular ao redor das tendas (PHB p. 185, 196).';
+      defense.takyrAndWatch = 'Concede cobertura três-quartos (+5 CA e +5 em salvaguardas de Destreza) contra flechas e rajadas de vento carregadas de poeira fina.';
+      defense.campRestAndSafetyGuards = 'Fosso externo raso detém escorpiões e répteis rastejantes durante o repouso noturno da comitiva.';
+    } else if (dt === 'consolidated_sand_ridge_high_ground_camp') {
+      defense.defenseTitle = 'Acampamento Elevado em Cordão Arenoso Marginal (Chink / Borda de Duna)';
+      defense.takyrAndCampSafety = 'Instalação das barracas no terraço arenoso firme 3 metros acima do leito da planície de argila, imune a inundações repentinas e ao enlameamento noturno (PHB p. 183).';
+      defense.takyrAndWatch = 'O solo arenoso drena qualquer chuva instantaneamente e conserva o calor diurno, concedendo +1 dado de vida adicional recuperado no descanso longo.';
+      defense.campRestAndSafetyGuards = 'Protege animais de carga e equipamentos pesados contra o risco de atolamento na bacia.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 298: CAMPOS DE MEGABLOCOS ERRÁTICOS GLACIAIS E ENXAMES DE DRUMLINS (D&D 5e)
   // =========================================================================
 
@@ -37974,6 +38049,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessTakyrClayPanHazard: calcWildernessTakyrClayPanHazard,
+    calcCampTakyrClayPanStation: calcCampTakyrClayPanStation,
     calcWildernessGlacialErraticDrumlinHazard: calcWildernessGlacialErraticDrumlinHazard,
     calcCampGlacialErraticDrumlinStation: calcCampGlacialErraticDrumlinStation,
     calcWildernessMakateaCoralKarstHazard: calcWildernessMakateaCoralKarstHazard,
