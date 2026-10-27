@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 302: GLIFOS DE GÍRIA DE LADRÃO E MARCAS CLANDESTINAS DE ESTRADA (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessThievesCantRoadSign(biomeKey, signType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var st = (signType || 'milestone_charcoal_shadow_glyph_warning').toLowerCase();
+
+    var sign = {
+      signTitle: 'Glifo Clandestino de Gíria de Ladrão em Marco de Estrada (Shadowmarks)',
+      saveDC: 15,
+      saveType: 'Inteligência',
+      thievesCantMechanics: 'Símbolos secretos gravados a ponta de adaga ou giz sob a aba inferior de marcos de légua, pontes de pedra e batentes de estalagens (PHB p. 96); um Ladino no grupo decodifica automaticamente os avisos deixados por outras comitivas (pedágio ilegal, covil de monstros, patrulha corrupta ou rota segura de contrabando), enquanto grupos sem Ladino veem apenas ranhuras gastas pelo tempo (Investigação CD 18 apenas para notar que é artificial, sem traduzir o código).',
+      pioneerMitigation: 'Inspeção tátil discreta na face sombreada dos marcos de pedra durante a marcha sem interromper o passo da comitiva (Furtividade ou Prestidigitação CD 13).',
+      rescueAndStabilization: 'Atualização ou rasura do glifo com sebo e fuligem caso a ameaça local tenha mudado, protegendo a próxima comitiva aliada que passar pelo nó (Prestidigitação CD 12).',
+      icon: '🗡️',
+      color: '#94a3b8'
+    };
+
+    if (st === 'conversational_cant_parley_double_entendre') {
+      sign.signTitle = 'Diálogo Cifrado em Gíria de Ladrão durante Encontro na Estrada';
+      sign.saveDC = 14;
+      sign.saveType = 'Sabedoria';
+      sign.thievesCantMechanics = 'Ao encontrar outra comitiva ou mercadores desconhecidos, o Ladino embute uma mensagem oculta dentro de uma conversa banal sobre o clima e o preço das ferraduras (PHB p. 96: leva quatro vezes mais tempo que o texto normal); permite negociar tréguas, senhas de guilda ou alertar um aliado infiltrado sem que guardas ou terceiros presentes percebam o subtexto (Intuição CD 16 para ouvintes sem Gíria de Ladrão suspeitarem).';
+      sign.pioneerMitigation = 'Manutenção de tom casual e gestos sutis de mão no cinto que confirmam a autenticidade da filiação sem quebrar o disfarce social (Enganação CD 13).';
+      sign.rescueAndStabilization = 'Se um observador hostil desconfiar da demora na conversa, desviar imediatamente o assunto para um boato local verídico (Atuação ou Enganação CD 13).';
+    } else if (st === 'poisoned_false_glyph_ambush_trap') {
+      sign.signTitle = 'Glifo Falso de Emboscadores e Agulha Envenenada no Marco';
+      sign.saveDC = 15;
+      sign.saveType = 'Destreza';
+      sign.thievesCantMechanics = 'Bandidos veteranos ou assassinos rivais forjam o símbolo de "Refúgio Seguro" na pedra para atrair aventureiros para um beco sem saída ou ocultam uma farpa untada com peçonha na ranhura onde o batedor passa os dedos para ler no escuro; falha na verificação aciona 1d4 perfurante mais 2d6 de dano de veneno (PHB p. 96, 153; DMG p. 122).';
+      sign.pioneerMitigation = 'Verificação do traço caligráfico da guilda regional e varredura da fenda com a lâmina da adaga antes de tocar o entalhe com os dedos nus (Investigação ou Ferramentas de Ladrão CD 15).';
+      sign.rescueAndStabilization = 'Desarme do mecanismo de agulha com Ferramentas de Ladrão (CD 14) e marcação do glifo de "Traição / Emboscada" logo acima do sinal falso.';
+    } else if (st === 'waystone_ribbon_and_pebble_directional_code') {
+      sign.signTitle = 'Código de Pedregulhos Empilhados e Fitas Desbotadas para Comitivas Aliadas';
+      sign.saveDC = 13;
+      sign.saveType = 'Sabedoria';
+      sign.thievesCantMechanics = 'Em ermos sem muros ou pontes onde entalhes em pedra seriam óbvios, o Ladino combina a Gíria de Ladrão com o posicionamento angular de três seixos sobre um toco e um fio de lã tingida; indica exatamente quantos dias atrás uma comitiva conhecida passou por ali e qual bifurcação do Pointcrawl ela tomou (PHB p. 96, 183).';
+      sign.pioneerMitigation = 'Ancoragem dos seixos com resina de pinheiro para que o vento ou aves não desfaçam a seta direcional antes da chegada dos companheiros (Sobrevivência ou Prestidigitação CD 13).';
+      sign.rescueAndStabilization = 'Reconstrução do marcador caso animais selvagens tenham revirado o solo ao redor da trilha (Investigação CD 13).';
+    }
+
+    return sign;
+  }
+
+  function calcCampThievesCantSafeDropStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'smuggler_blind_niche_bivouac_sanctuary').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque em Esconderijo Cego de Contrabandistas (Safe House de Estrada)',
+      thievesCantAndCampSafety: 'Seguindo o glifo de "Pouso Limpo" gravado na raiz de um carvalho oco ou sob uma ponte antiga, a comitiva descobre uma câmara seca e camuflada preparada por gerações de batedores e andarilhos (PHB p. 96; DMG p. 111).',
+      thievesCantAndWatch: 'A entrada disfarçada por trepadeiras e pedras móveis confere vantagem em Furtividade para todo o grupo e impede que patrulhas noturnas na estrada principal detectem o acampamento.',
+      campRestAndSafetyGuards: 'Proporciona descanso longo sem necessidade de apagar o braseiro interno, cuja chaminé sai diluída entre as raízes a 20 metros de distância.',
+      icon: '⛺',
+      color: '#94a3b8'
+    };
+
+    if (dt === 'dead_drop_false_stone_cache_exchange') {
+      defense.defenseTitle = 'Caixa-Morta de Pedra Falsa para Troca Assíncrona entre Comitivas (Dead Drop)';
+      defense.thievesCantAndCampSafety = 'Um bloco de alvenaria oco selado com cera impermeável no alicerce de uma ruína, marcado com o glifo pessoal acordado entre dois grupos de jogadores (PHB p. 96, 154).';
+      defense.thievesCantAndWatch = 'Permite deixar mapas copiáveis, chaves, antídotos, moedas ou bilhetes cifrados para outra comitiva que passará pelo mesmo nó horas ou dias depois, exigindo Ferramentas de Ladrão ou o sinal secreto para abrir sem acionar o alarme de chocalho.';
+      defense.campRestAndSafetyGuards = 'Viabiliza cooperação logística real e assíncrona entre grupos aliados nos ermos.';
+    } else if (dt === 'tripwire_bell_and_caltrop_chokepoint_rig') {
+      defense.defenseTitle = 'Perímetro de Bivaque com Fios de Sino Silenciados e Estrepes (Caltrops)';
+      defense.thievesCantAndCampSafety = 'O Ladino espalha bolsas de Estrepes de ferro (PHB p. 151, 20 unidades cobrindo 1,5m quadrado) e Esferas Metálicas nos acessos escuros, deixando um corredor estreito marcado com giz invisível à luz comum (PHB p. 151-152).';
+      defense.thievesCantAndWatch = 'Invasores que não leem os glifos de passagem precisam passar em Destreza CD 15 ou sofrem dano perfurante, param de se mover e têm o deslocamento reduzido em 3 metros até receberem cura.';
+      defense.campRestAndSafetyGuards = 'Neutraliza investidas surpresa noturnas antes que alcancem as tendas da comitiva.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 301: SINALIZAÇÃO ÓPTICA COM ESPELHOS DE AÇO E HELIÓGRAFOS DE CUME (D&D 5e)
   // =========================================================================
 
@@ -38199,6 +38274,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessThievesCantRoadSign: calcWildernessThievesCantRoadSign,
+    calcCampThievesCantSafeDropStation: calcCampThievesCantSafeDropStation,
     calcWildernessHeliographMirrorSignal: calcWildernessHeliographMirrorSignal,
     calcCampHeliographSignalStation: calcCampHeliographSignalStation,
     calcWildernessLeyLineConfluenceHazard: calcWildernessLeyLineConfluenceHazard,
