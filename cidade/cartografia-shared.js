@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 325: FORTIFICAÇÕES TELÚRICAS, GEOCINESE DE CAMPANHA E MURALHAS DE DEFESA DE BIVAQUE (D&D 5e) [MARCO 325]
+  // =========================================================================
+
+  function resolveEarthmovingFortificationAndStoneWall(biomeKey, earthMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var em = (earthMode || 'wall_of_stone_permanent_tactical_fortification').toLowerCase();
+
+    var earth = {
+      earthTitle: 'Muralha de Pedra (Wall of Stone): Bastião de Granito Permanente nos Ermos (PHB p. 262)',
+      saveDC: 16,
+      saveType: 'Destreza',
+      earthMechanics: 'Druida, Feiticeiro ou Mago (5º círculo, bloco de granito, duração concentração até 10 minutos, PHB p. 262) ergue uma muralha sólida não-mágica de pedra contendo até 10 painéis de 3x3 metros e 15 cm de espessura (CA 15, 180 PV por seção, imune a veneno e psíquico); ao manter a concentração pelos 10 minutos completos, a muralha torna-se PERMANENTE no mapa Pointcrawl, podendo incorporar ameias, seteiras e passarelas elevadas!',
+      pioneerMitigation: 'Ergue gargalos defensivos imediatos em desfiladeiros ou portões fortificados que bloqueiam a perseguição de hordas inimigas (PHB p. 262).',
+      rescueAndStabilization: 'Protege comboios e companheiros feridos atrás de cobertura total contra saraivadas de flechas e ataques de sopro de monstros.',
+      icon: '🧱',
+      color: '#eab308'
+    };
+
+    if (em === 'move_earth_trench_and_earthen_rampart_excavation') {
+      earth.earthTitle = 'Mover Terra (Move Earth): Engenharia Rápida de Trincheiras e Fossos (PHB p. 263)';
+      earth.saveDC = 16;
+      earth.saveType = 'Transmutação';
+      earth.earthMechanics = 'Druida, Feiticeiro ou Mago (6º círculo, lâmina de ferro, concentração até 2 horas, alcance 36 metros, PHB p. 263) remodela terra, areia ou argila num quadrado de 12 metros a cada 10 minutos; escava trincheiras e fossos profundos de até 6 metros de desnível, ergue bermas protetoras elevadas e desestabiliza fundações de acampamentos ou paliçadas inimigas sem esforço físico!';
+      earth.pioneerMitigation = 'Altera a topografia de nós de batalha em 20 minutos para conceder vantagem de terreno alto e proteção contra investidas de cavalaria (PHB p. 263).';
+      earth.rescueAndStabilization = 'Cria rampas suaves e passagens de terra firme sobre atoleiros e pântanos para a passagem segura de carroças e montarias.';
+    } else if (em === 'stone_shape_bunker_and_arrowslit_adaptation') {
+      earth.earthTitle = 'Moldar Rochas (Stone Shape): Casamata de Granito e Escadas de Fuga (PHB p. 263)';
+      earth.saveDC = 15;
+      earth.saveType = 'Transmutação';
+      earth.earthMechanics = 'Clérigo, Druida ou Mago (4º círculo, argila e giz, tempo 1 ação, alcance toque, PHB p. 263) molda um bloco de rocha de até 1,5m em qualquer dimensão; abre portas de pedra em penhascos, cria frestas de tiro de três quartos, talha escadas em desfiladeiros verticais ou sela fendas de cavernas para impedir que predadores alcancem a comitiva!';
+      earth.pioneerMitigation = 'Permite criar portões de fuga imediatos em cavernas bloqueadas ou adaptar rochedos naturais em postos de vigia fortificados (PHB p. 263).';
+      earth.rescueAndStabilization = 'Cria cápsulas de abrigo estanque de pedra para isolar feridos de desmoronamentos de terra ou inundações repentinas.';
+    } else if (em === 'earthquake_cataclysmic_fissure_breach') {
+      earth.earthTitle = 'Terremoto (Earthquake): Colapso Sísmico de Túneis e Fortificações Inimigas (PHB p. 281)';
+      earth.saveDC = 18;
+      earth.saveType = 'Destreza';
+      earth.earthMechanics = 'Clérigo, Druida ou Feiticeiro (8º círculo, concentração até 1 minuto, alcance 150 metros, PHB p. 281) desencadeia um tremor devastador num raio de 30 metros; derruba criaturas no chão (salvaguarda de Destreza), quebra concentrações, abre 1d6 fissuras profundas de até 30 metros de profundidade e causa 50 de dano por concussão a estruturas por turno, colapsando muralhas e túneis inimigos!';
+      earth.pioneerMitigation = 'Demolição tática à distância de fortalezas e pontes fortificadas dominadas por bandidos nas rotas de campanha (PHB p. 281).';
+      earth.rescueAndStabilization = 'Sepulta covis subterrâneos e fendas ativas de monstros sem necessidade de incursão corpo a corpo arriscada.';
+    }
+
+    return earth;
+  }
+
+  function calcCampEarthworkRedoubtAndStoneWallStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'permanent_stone_wall_perimeter_fortification').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Paliçada de Granito Permanente por Muralha de Pedra no Bivaque (PHB p. 262)',
+      earthAndCampSafety: 'Durante os preparativos do descanso longo, o conjurador mantém a concentração por 10 minutos para erguer uma muralha perimetral de granito de 3 metros de altura e 15 cm de espessura (CA 15, 180 PV por painel) ao redor das barracas; a muralha torna-se permanente no nó estratégico, transformando o bivaque num reduto fortificado duradouro.',
+      earthAndCouncilWatch: 'Sentinelas patrulham sobre as ameias de pedra com visão panorâmica de 360°, operando com cobertura de três quartos (+5 na CA e salvaguardas de Destreza) contra flechas e ataques à distância.',
+      campRestAndSafetyGuards: 'Anula totalmente o risco de investidas de cavalaria, atropelamentos de feras colossais ou ataques de oportunidade noturnos contra a comitiva (PHB p. 186, 262).',
+      icon: '🏰',
+      color: '#eab308'
+    };
+
+    if (dt === 'earthen_redoubt_and_anti_cavalry_trench') {
+      defense.defenseTitle = 'Reduto Telúrico e Fosso Antinvestida por Mover Terra (PHB p. 263)';
+      defense.earthAndCampSafety = 'Utilizando Mover Terra, a comitiva escava um fosso perimetral de 3 metros de largura por 3 metros de profundidade e ergue uma berma íngreme de terra compactada em 30 minutos, forçando qualquer invasor a escalar sob terreno difícil.';
+      defense.earthAndCouncilWatch = 'Invasores que tentam se aproximar no escuro caem no fosso ou fazem barulho de cascalho ao deslizar, alertando os sentinelas antes de qualquer contato físico.';
+      defense.campRestAndSafetyGuards = 'Garante tempo de reação tática para que os membros do grupo vistam armaduras leves ou tomem armas antes de um combate noturno (PHB p. 263).';
+    } else if (dt === 'stone_shaped_vault_and_sealed_arrowslits') {
+      defense.defenseTitle = 'Casamata de Granito com Frestas de Tiro por Moldar Rochas (PHB p. 263)';
+      defense.earthAndCampSafety = 'Em terrenos rochosos (Montanhas, Cavernas ou Ermos Gelados), os conjuradores fundem blocos de calcário ou granito ao redor das esteiras de dormir, criando uma câmara estanque com porta de pedra maciça travada por dentro.';
+      defense.earthAndCouncilWatch = 'Frestas de tiro em ângulo agudo permitem que os atiradores da comitiva monitorem o exterior sem expor o corpo, disparando magias e projéteis com cobertura quase total.';
+      defense.campRestAndSafetyGuards = 'Proteção hermética absoluta contra intempéries climáticas, gases vulcânicos e predadores escavadores durante o sono (PHB p. 186, 263).';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 324: ANCORAGEM DE PLANOS, CONFLUÊNCIAS ASTRAIS E PORTAIS PLANARES NATURAIS NOS ERMOS (D&D 5e)
   // =========================================================================
 
@@ -39924,6 +39999,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveEarthmovingFortificationAndStoneWall: resolveEarthmovingFortificationAndStoneWall,
+    calcCampEarthworkRedoubtAndStoneWallStation: calcCampEarthworkRedoubtAndStoneWallStation,
     resolvePlanarConfluenceAndRiftAnchoring: resolvePlanarConfluenceAndRiftAnchoring,
     calcCampPlanarAnchorAndManaStabilizerStation: calcCampPlanarAnchorAndManaStabilizerStation,
     resolveCovertPartyInvisibilityAndAntiDivination: resolveCovertPartyInvisibilityAndAntiDivination,
