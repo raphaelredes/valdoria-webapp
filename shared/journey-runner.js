@@ -550,16 +550,16 @@
     if (ch && ch.condition) return ch.condition;
     var text = (((hz && hz.title) || '') + ' ' + ((ch && (ch.fNarr || ch.desc)) || '')).toLowerCase();
     if (text.indexOf('veneno') !== -1 || text.indexOf('peconha') !== -1 || text.indexOf('picada') !== -1 || text.indexOf('gas') !== -1 || text.indexOf('podre') !== -1 || text.indexOf('esporo') !== -1) {
-      return { id: 'poisoned', icon: '🧪', label: 'Envenenado', desc: 'Desvantagem em jogadas de ataque e testes de atributo no mapa hexagonal.' };
+      return { id: 'poisoned', icon: '🧪', label: 'Envenenado', desc: 'Desvantagem em jogadas de ataque e testes de atributo durante a exploração.' };
     }
     if (text.indexOf('torc') !== -1 || text.indexOf('tornozelo') !== -1 || text.indexOf('queda') !== -1 || text.indexOf('tropec') !== -1 || text.indexOf('escorreg') !== -1 || text.indexOf('lama') !== -1 || text.indexOf('atoleiro') !== -1 || text.indexOf('raiz') !== -1) {
-      return { id: 'sprained', icon: '🦶', label: 'Torção no Tornozelo (−3m)', desc: 'Deslocamento reduzido em 3m (-2 hexes) e desvantagem em testes de Destreza no mapa hexagonal.' };
+      return { id: 'sprained', icon: '🦶', label: 'Torção no Tornozelo (−3m)', desc: 'Deslocamento reduzido em 3m e desvantagem em testes de Destreza durante a exploração.' };
     }
     if (text.indexOf('vento') !== -1 || text.indexOf('frio') !== -1 || text.indexOf('gelo') !== -1 || text.indexOf('sede') !== -1 || text.indexOf('cansac') !== -1 || text.indexOf('exaust') !== -1 || text.indexOf('afund') !== -1 || text.indexOf('tempestade') !== -1) {
       return { id: 'exhaustion', icon: '⏳', label: 'Exausto (Fadiga Nv. 1)', desc: 'Exaustão Nível 1: Desvantagem em testes de atributo e perícias durante a exploração.' };
     }
     if (text.indexOf('impacto') !== -1 || text.indexOf('pancada') !== -1 || text.indexOf('galho') !== -1 || text.indexOf('rocha') !== -1 || text.indexOf('pedra') !== -1) {
-      return { id: 'bruised', icon: '💥', label: 'Contusão Muscular (−1)', desc: 'Penalidade em testes físicos de Força e Constituição no mapa hexagonal.' };
+      return { id: 'bruised', icon: '💥', label: 'Contusão Muscular (−1)', desc: 'Penalidade em testes físicos de Força e Constituição durante a exploração.' };
     }
     // Chance de fadiga leve em viagens com biomas desafiadores
     if (Math.random() < 0.45) {

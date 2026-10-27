@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T13:07:11Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T13:36:22Z - do not edit directly, edit source -->
 
 
 
@@ -71539,7 +71539,7 @@ function onMoveEnd(col, row) {
 
           S.event._encId = enc.id;
 
-          S.event._hexId = enc.col + ',' + enc.row;
+          S.event._hexId = (enc.col != null && enc.row != null) ? (enc.col + ',' + enc.row) : (enc._hex || enc.id);
 
         }
 
@@ -72221,7 +72221,7 @@ const BIOME_WANDERING_ENCOUNTERS = {
 
 function maybeRollWanderingMonster() {
 
-  if (S.mapDef && (S.mapDef.dungeon || S.mapDef.is_dungeon || S.biome === 'dungeon' || S.mapId === 'orc_chief_tent' || S.mapId === 'orc_tribe')) return false;
+  if (S.mapDef && (S.mapDef.dungeon || S.mapDef.is_dungeon || S.biome === 'dungeon' || S.mapId === 'orc_chief_tent')) return false;
 
   if (S.steps < 3) return false;  // grace period no início do mapa
 
@@ -93354,16 +93354,7 @@ function _cartTravelTo(mapId){
 
   var _isRemote = (window.__EXPLORE_MODE === 'remote' && !!window.__EXPLORE_TOKEN && !!window.__EXPLORE_API_BASE);
 
-  if (_isRemote) {
-
-    _remoteTravelToMap(mapId, m.name);  // server-authoritative (loader + redirect)
-
-    return;
-
-  }
-
-  // LOCAL: etapas proporcionais à distância real (worldPos 0-1) + reboot client-side
-
+  // Etapas proporcionais à distância real (worldPos 0-1) + jornada D&D 5e
   var _travelSteps = 1;
 
   try {
@@ -93418,6 +93409,10 @@ function _cartTravelTo(mapId){
 
         }
 
+        if (_isRemote) {
+          _remoteTravelToMap(mapId, m.name);
+          return;
+        }
         if (typeof dmNarrate === 'function') dmNarrate({ text: 'Você chega às terras de ' + m.name + '.', type: 'action' });
         if (typeof boot === 'function') boot();
         setTimeout(function(){
@@ -93426,15 +93421,24 @@ function _cartTravelTo(mapId){
         }, 120);
       },
 
-      onDefeat: function () { if (typeof triggerDefeat === 'function') triggerDefeat('Você sucumbiu na viagem.'); }
+      onCombat: function (jinfo) {
+        if (typeof _journeyLaunchRareCombat === 'function') {
+          _journeyLaunchRareCombat({ direction: 'edge', targetMap: mapId, edgeLabel: m.name, biome: (jinfo && jinfo.biome) || m.biome });
+        }
+      },
+
+      onDefeat: function () { if (typeof triggerDefeat === 'function') triggerDefeat('Você sucumbiu na travessia para ' + m.name + '.'); }
 
     });
 
   } else {
 
-    setupChoices.map = mapId;
-
-    if (typeof boot === 'function') boot();
+    if (_isRemote) {
+      _remoteTravelToMap(mapId, m.name);
+    } else {
+      setupChoices.map = mapId;
+      if (typeof boot === 'function') boot();
+    }
 
   }
 
@@ -94417,6 +94421,7 @@ function _openCartLocationPopup(biome){
     + '<h2>' + (biome.regionalName || biome.name) + '</h2>'
     + '<p>' + (biome.desc || 'Um destino misterioso te aguarda além das fronteiras.') + '</p>'
     + (rec ? '<div class="clp-meta"><b>Nível Sugerido:</b> ' + rec + '<br><b>Avaliação de Ameaça:</b> ' + threatBadge + '<br><span style="font-size:9.5px;color:#d2be90;font-style:italic;">' + stanceTip + '</span><br><b>Risco de Emboscada:</b> <span id="clp-risk-badge" style="font-weight:700;color:' + encounterRisk.color + ';">' + encounterRisk.label + '</span><br><b>Bioma:</b> ' + biomePT + ' · <b>Distância:</b> ~' + distMilhas + ' milhas (<span id="clp-meta-hours">~' + horasViagem + 'h de marcha</span>)</div>' : '')
+    + (isCurrent && typeof _buildPointcrawlCurrentNodeActionsHtml === 'function' ? _buildPointcrawlCurrentNodeActionsHtml(biome) : '')
     + (function(){
         var startK = isCurrent ? null : ((typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : 'plains');
         if (!startK || startK === biome.key || !window.CartShared || !CartShared._findRoutePath) return '';
@@ -94840,6 +94845,8 @@ function _openCartLocationPopup(biome){
           + (compInfo && compInfo.hasComplication ? ('  <div>• <b>Complicação:</b> <span style="color:' + compInfo.color + ';">' + compInfo.title + '</span> (' + (compInfo.mitigatedByKit ? 'Prevenido por Kit' : 'Requer Teste') + ')</div>') : '')
           + '</div>';
       })()
+    + '<details class="clp-compendium-drawer" style="margin:6px 0;background:rgba(16,12,8,0.85);border:1px solid rgba(196,149,58,0.4);border-radius:5px;padding:4px 8px;text-align:left;">'
+    + '  <summary style="font-family:Cinzel,serif;font-size:9.5px;color:#ffd700;font-weight:700;cursor:pointer;outline:none;">📚 Compêndio Geomorfológico, Sinais & Bivaques D&D 5e (330 Fases)</summary>'
     + (function(){
         if (!window.CartShared || !CartShared.calcWildernessTracking) return '';
         var track = CartShared.calcWildernessTracking(biome.key || biome.biome || 'plains', 6);
@@ -100777,8 +100784,7 @@ function _openCartLocationPopup(biome){
             + '</div>';
         })()
       ) : '')
-    + '</div>'
-    + (isCurrent && typeof _buildPointcrawlCurrentNodeActionsHtml === 'function' ? _buildPointcrawlCurrentNodeActionsHtml(biome) : '')
+    + '</details>'
     + '</div>'
     + '<div class="clp-buttons">'
     + (isCurrent
@@ -101819,6 +101825,36 @@ function _doPointcrawlForage() {
 
 function _triggerPointcrawlRegionalEvent() {
   if (typeof S === 'undefined' || !S) return;
+  var _remoteAuthoritative = (window.__EXPLORE_MODE === 'remote'
+    && window.ExploracaoAPI && typeof window.ExploracaoAPI.hasToken === 'function' && window.ExploracaoAPI.hasToken());
+  if (_remoteAuthoritative && (typeof onMoveEnd === 'function' || typeof beginMove === 'function')) {
+    var px = (S.player && typeof S.player.col === 'number') ? S.player.col : 10;
+    var py = (S.player && typeof S.player.row === 'number') ? S.player.row : 10;
+    var odd = (px % 2) === 1;
+    var hexNeighbors = odd
+      ? [[px, py-1], [px+1, py], [px+1, py+1], [px, py+1], [px-1, py+1], [px-1, py]]
+      : [[px, py-1], [px+1, py-1], [px+1, py], [px, py+1], [px-1, py], [px-1, py-1]];
+    var target = null;
+    for (var ni = 0; ni < hexNeighbors.length; ni++) {
+      var nc = hexNeighbors[ni][0];
+      var nr = hexNeighbors[ni][1];
+      if (nc < 0 || nc >= COLS || nr < 0 || nr >= ROWS) continue;
+      if (typeof isTileImpassable === 'function' && isTileImpassable(nc, nr)) continue;
+      if (typeof isEdgeHex === 'function' && isEdgeHex(nc, nr)) continue;
+      if (typeof isDungeonHex === 'function' && isDungeonHex(nc, nr)) continue;
+      target = { col: nc, row: nr };
+      break;
+    }
+    if (target) {
+      if (typeof beginMove === 'function') {
+        beginMove(target.col, target.row);
+      } else {
+        onMoveEnd(target.col, target.row);
+      }
+      return;
+    }
+  }
+  // LOCAL fallback
   S.ph = 'idle';
   S.steps = Math.max(3, (S.steps || 0) + 1);
   S._stepsToNextEvent = 0;
