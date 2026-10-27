@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T12:30:19Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T13:07:11Z - do not edit directly, edit source -->
 
 
 
@@ -17622,7 +17622,7 @@ window.__onIntroTap = function() {
 
       <h2>Voltar pra Valdoria?</h2>
 
-      <p>Os portões da cidade ainda te chamam, aventureiro.<br>Desejas retornar agora — ou ver o mapa de cartografia?</p>
+      <p>Os portões da cidade ainda chamam por você, aventureiro.<br>Você deseja retornar agora — ou permanecer no mapa de cartografia?</p>
 
       <div class="cbp-buttons">
 
@@ -18843,7 +18843,7 @@ window.__onIntroTap = function() {
 
               <li><strong>Segurança:</strong> Minimiza o risco de emboscadas e desbloqueia a ação <em>Forragear</em>.</li>
 
-              <li><strong>Deslocamento:</strong> Avança 1 hexágono por ação de marcha.</li>
+              <li><strong>Deslocamento (PHB p. 181):</strong> Marcha Cautelosa nas rotas (18 milhas/dia · 2 milhas/hora).</li>
 
             </ul>
 
@@ -18869,7 +18869,7 @@ window.__onIntroTap = function() {
 
               <li><strong>Segurança:</strong> Taxa equilibrada de encontros e desafios de bioma.</li>
 
-              <li><strong>Deslocamento:</strong> Avança 2 hexágonos por ação de marcha.</li>
+              <li><strong>Deslocamento (PHB p. 181):</strong> Marcha Normal nas rotas (24 milhas/dia · 3 milhas/hora).</li>
 
             </ul>
 
@@ -18895,7 +18895,7 @@ window.__onIntroTap = function() {
 
               <li><strong>Segurança:</strong> Maior chance de tropeçar em armadilhas e sofrer emboscadas.</li>
 
-              <li><strong>Deslocamento:</strong> Avança até 3 hexágonos por ação de marcha.</li>
+              <li><strong>Deslocamento (PHB p. 181):</strong> Marcha Rápida nas rotas (30 milhas/dia · 4 milhas/hora).</li>
 
             </ul>
 
@@ -45424,11 +45424,328 @@ const FIXED_MAPS = {
       { col: 11, row: 0, targetMap: 'underground_passage', label: 'Passagem Subterrânea' },
 
       { col: 12, row: 0, targetMap: 'misty_marshes', label: 'Pântano Nebuloso' }
-
     ]
+  },
 
+  // ============ MASMORRA: CATACUMBAS ESQUECIDAS (forgotten_catacombs) =============
+  // Masmorra AAA Tier 2-4 (Bioma Cemitério - Cemitério Ancestral)
+  forgotten_catacombs: {
+    id: 'forgotten_catacombs', region: 'valdoria', biome: 'dungeon', is_dungeon: true,
+    name: 'Catacumbas Esquecidas',
+    cols: 20, rows: 24, seed: 99006, spawnCol: 10, spawnRow: 23,
+    music: 'graveyard', danger: 5, required_gear: 'torch',
+    boss: {
+      name: 'Lorde Malphas, o Arquiduque Ossário', cr: 4, xp: 1100, sugLvl: 4,
+      hp: 76, ac: 16, atk: 7,
+      multiAttack: 2,
+      hasBurstSkill: true,    // Decreto Necrótico da Coroa Partida
+      hasResource: true       // Falange de Ossos Ancestrais
+    },
+    worldPos: { x: 0.24, y: 0.86 },
+    weather_pool: ['s'],
+    weights: { '.': 1 },
+    dungeon: true,
+    parentMap: 'ancestral_graveyard',
+    gridTemplate: [
+      '####################',
+      '####iiiiiiiiiiii####',
+      '###iiiiiiiiiiiiii###',
+      '###iiiiiiiiiiiiii###',
+      '####iiii....iiii####',
+      '#####..........#####',
+      '####............####',
+      '###..............###',
+      '###...oooooooo...###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###...oooooooo...###',
+      '#####..........#####',
+      '######...##...######',
+      '#######..##..#######',
+      '########.##.########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########E##########'
+    ],
+    landmarks: [
+      { type: 'throne',    col: 10, row: 2,  _hex: 'K3'  },
+      { type: 'bonepile',  col: 8,  row: 2,  _hex: 'I3'  },
+      { type: 'bonepile',  col: 12, row: 2,  _hex: 'M3'  },
+      { type: 'armorpile', col: 14, row: 9,  _hex: 'O10' },
+      { type: 'bonfire',   col: 10, row: 13, _hex: 'K14' },
+      { type: 'totem',     col: 7,  row: 8,  _hex: 'H9'  },
+      { type: 'totem',     col: 13, row: 8,  _hex: 'N9'  }
+    ],
+    atmosphereZones: [
+      { col: 10, row: 2,  type: 'evil', radius: 4.5, _hex: 'K3'  },
+      { col: 10, row: 13, type: 'warm', radius: 5.0, _hex: 'K14' },
+      { col: 14, row: 9,  type: 'cold', radius: 3.0, _hex: 'O10' }
+    ],
+    restHex: { col: 10, row: 13, _hex: 'K14' },
+    dungeonEncounters: [
+      { id: 'catacombs_campfire', col: 10, row: 13, _hex: 'K14',
+        repeatable: true,
+        title: 'Braseiro Consagrado da Capela Subterrânea',
+        text: 'Em uma antiga capela de abóbada gótica protegida por grades de prata oxidada, um braseiro octogonal queima com óleo consagrado deixado por clérigos de eras passadas. Os mortos-vivos evitam cruzar o limiar iluminado, oferecendo um santuário seguro para a comitiva descansar e conversar.',
+        flavor: 'Acampamento · K14 · Repouso',
+        category: 'discovery',
+        choices: [
+          { id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
+            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            outcome_ok: { _short_rest: true,
+              text: 'Você aquece as mãos junto ao braseiro consagrado e sente o frio cadavérico deixar seus ossos.' } },
+          { id: 'long_rest', label: 'Descanso Longo (1× por masmorra)',
+            desc: 'HP/MP cheios + remove 1 nível de Exaustão. Apenas 1 vez nesta masmorra.',
+            outcome_ok: { _long_rest: true,
+              text: 'Sob a proteção dos selos de prata da capela, a comitiva repousa as 8 horas completas e restaura suas forças.' } },
+          { id: 'camp_companion_banter', label: '🗣️ Dialogar com a Comitiva ao Redor do Fogo',
+            desc: 'Reunir os aliados junto às chamas consagradas para conversar, avaliar os ânimos e estreitar laços',
+            outcome_ok: { _companion_banter: true, text: 'Você reúne seus companheiros em torno do braseiro silencioso das catacumbas.' } },
+          { label: 'Entoar litania de proteção contra os inquietos (Clérigo/Paladino)',
+            only_class: ['clerigo', 'paladino'],
+            desc: 'Bênção Sagrada D&D 5e — reforçar os selos de prata com oração solene',
+            outcome_ok: { text: 'As chamas do braseiro ganham um tom branco-prateado puro, revigorando o espírito da comitiva!', hp_gain: 5, mp_gain: 2, xp: 30, _flag: 'catacombs_chapel_blessed' } },
+          { id: 'leave_camp', label: 'Sair do Acampamento',
+            outcome_ok: { text: 'Você ajusta a empunhadura de suas armas e deixa a capela de volta às galerias de ossos.' } }
+        ]
+      },
+      { id: 'catacombs_skeletal_guards', col: 10, row: 20, _hex: 'K21',
+        title: 'Guarda Real Esquelética do Ossário',
+        text: 'Dois esqueletos revestidos em cotas de malha imperiais antigas e alabardas enferrujadas marcham em sincronia silenciosa pelo corredor de nichos funerários. Seus olhos ardem com chamas azuis frias na penumbra.',
+        flavor: 'Encontro Tático · Sentinelas',
+        category: 'combat',
+        choices: [
+          { label: 'Canalizar fulgor sagrado ou exibir símbolo da fé (Clérigo/Paladino)',
+            only_class: ['clerigo', 'paladino'],
+            skill: 'wis', dc: 12,
+            desc: 'Sabedoria (Religião) CD 12 — repelir a animação necromântica dos sentinelas reais',
+            outcome_ok: { text: 'O clarão sagrado desestabiliza os laços necromânticos das armaduras! Os guardas recuam trêmulos — SURPRESA e Vantagem!',
+              xp: 40, dungeon_combat: { enemy: 'skeleton', lookup_name: 'Guarda Esquelético', surprise: true, preCombatEffects: ['first_attack_adv'] } },
+            outcome_fail: { text: 'A névoa fria amortece o clarão e as alabardas baixam em posição de carga!',
+              xp: 5, dungeon_combat: { enemy: 'skeleton', lookup_name: 'Guarda Esquelético', surprise: false } } },
+          { label: 'Golpear os pilares de crânios para soterrar a patrulha (Força)',
+            skill: 'str', dc: 13,
+            desc: 'Força (Atletismo) CD 13 — derrubar a coluna de ossos sobre os guardas esqueléticos',
+            outcome_ok: { text: 'A pilha de ossos desaba sobre a patrulha, prendendo suas alabardas! SURPRESA — você ataca primeiro!',
+              xp: 35, dungeon_combat: { enemy: 'skeleton', lookup_name: 'Guarda Esquelético', surprise: true } },
+            outcome_fail: { text: 'Os ossos rolam sem derrubar os sentinelas, alertando-os para o combate imediato.',
+              xp: 5, dungeon_combat: { enemy: 'skeleton', lookup_name: 'Guarda Esquelético', surprise: false } } },
+          { label: 'Deslizar pelas sombras dos sarcófagos (Furtividade)',
+            skill: 'dex', dc: 13,
+            desc: 'Destreza (Furtividade) CD 13 — emboscar pelo ponto cego dos elmos enferrujados',
+            outcome_ok: { text: 'Você contorna os sarcófagos em silêncio absoluto e desfere o primeiro golpe pelas costas (SURPRESA)!',
+              xp: 35, dungeon_combat: { enemy: 'skeleton', lookup_name: 'Guarda Esquelético', surprise: true, preCombatEffects: ['first_attack_adv'] } },
+            outcome_fail: { text: 'Sua bota pisa em um crânio ressequido que estala alto no corredor!',
+              xp: 5, dungeon_combat: { enemy: 'skeleton', lookup_name: 'Guarda Esquelético', surprise: false } } }
+        ]
+      },
+      { id: 'catacombs_pendulum_trap', col: 10, row: 16, _hex: 'K17',
+        title: 'Galeria das Foices Pendulares',
+        text: 'Lajes soltas no piso de mármore negro acionam correntes ocultas nas abóbadas superiores, liberando foices pesadas de aço que varrem o corredor ao menor sinal de peso.',
+        flavor: 'Armadilha Mecânica D&D 5e',
+        category: 'trap',
+        choices: [
+          { label: 'Travar a corrente mestra na parede (Ladinagem/Investigação)',
+            skill: 'dex', dc: 13,
+            desc: 'Destreza (Ferramentas de Ladrão) CD 13 — inserir um pino de ferro no elo de tração',
+            outcome_ok: { text: 'O mecanismo trava com um clique metálico firme. As foices permanecem imóveis no teto e a passagem fica livre!', xp: 40, _flag: 'pendulum_disarmed' },
+            outcome_fail: { text: 'A corrente escapa e uma foice desce zunindo no escuro, rasgando seu ombro!', xp: 5, hp_loss: 6 } },
+          { label: 'Cronometrar o balanço e atravessar em corrida acrobática',
+            skill: 'dex', dc: 12,
+            desc: 'Destreza (Acrobacia) CD 12 — passar no intervalo exato entre as lâminas',
+            outcome_ok: { text: 'Com reflexos precisos, você conduz o grupo através do corredor sem que nenhuma lâmina os alcance!', xp: 35, _flag: 'pendulum_cleared' },
+            outcome_fail: { text: 'O vento cortante da lâmina atinge você de raspão na travessia.', xp: 5, hp_loss: 4 } }
+        ]
+      },
+      { id: 'catacombs_ossuary_puzzle', col: 14, row: 9, _hex: 'O10',
+        title: 'O Relicário dos Três Reis Sepultados',
+        text: 'Três efígies de mármore representam os antigos soberanos da dinastia caída: o Rei Guerreiro, o Rei Sábio e o Rei Justo. Diante deles repousam uma Balança de Prata, um Tomo de Obsidiana e uma Espada Quebrada fora de seus pedestais.',
+        flavor: 'Enigma Funerário · Relíquia Real',
+        category: 'mystery',
+        choices: [
+          { label: 'Restituir cada insígnia ao soberano correto (História/Religião)',
+            skill: 'int', dc: 13,
+            desc: 'Inteligência (História ou Religião) CD 13 — associar a Espada, o Tomo e a Balança aos brasões reais',
+            outcome_ok: { text: 'Os sarcófagos deslizam para trás com um ronco solene, revelando o cofre funerário da dinastia com ouro antigo e joias reais!', xp: 55, gold: 95, _flag: 'ossuary_solved' },
+            outcome_fail: { text: 'Um pulso de energia fria sopra das efígies, liberando apenas algumas moedas antigas do pedestal.', xp: 10, gold: 20, hp_loss: 2 } },
+          { label: 'Erguer o tampo do relicário com alavanca bruta (Atletismo)',
+            skill: 'str', dc: 14,
+            desc: 'Força (Atletismo) CD 14 — deslocar a tampa de pedra maciça na força dos braços',
+            outcome_ok: { text: 'Seus músculos vencem o peso secular da pedra! O compartimento se abre e revela o tesouro real!', xp: 45, gold: 75, _flag: 'ossuary_forced' },
+            outcome_fail: { text: 'A pedra pesada escorrega e fecha novamente, permitindo resgatar só o ouro da borda.', xp: 5, gold: 15 } }
+        ]
+      },
+      { id: 'catacombs_boss_malphas', col: 10, row: 3, _hex: 'K4',
+        title: 'A Cripta Real de Lorde Malphas',
+        text: 'No centro da rotunda sepulcral, sentado sobre um trono esculpido em fêmures e mármore negro, ergue-se Lorde Malphas, o Arquiduque Ossário. Uma coroa partida de ouro escurecido cinge seu crânio envolto em chamas violetas, enquanto ele ergue um montante cerimonial coberto de runas necróticas.',
+        flavor: 'Chefe de Masmorra · Confronto Final',
+        category: 'boss',
+        choices: [
+          { label: 'Proclamar o descanso eterno em nome da Luz (Clérigo/Paladino)',
+            only_class: ['clerigo', 'paladino'],
+            skill: 'cha', dc: 13,
+            desc: 'Carisma (Intimidação Sagrada) CD 13 — quebrar a aura necrótica do Arquiduque com fé radiante',
+            outcome_ok: { text: 'A luz divina estilhaça o manto de sombras de Malphas! O Arquiduque recua ofuscado — CA -1, SURPRESA e Vantagem!',
+              xp: 50, dungeon_combat: { enemy: 'wight', lookup_name: 'Lorde Malphas, Arquiduque Ossário', surprise: true, preCombatEffects: ['boss_ac_debuff', 'first_attack_adv'] } },
+            outcome_fail: { text: 'Malphas ergue o montante: "A morte é o único reino eterno!" Combate imediato!',
+              xp: 10, dungeon_combat: { enemy: 'wight', lookup_name: 'Lorde Malphas, Arquiduque Ossário', surprise: false } } },
+          { label: 'Dissipar as runas da coroa partida (Mago/Bruxo/Feiticeiro)',
+            only_class: ['mago', 'bruxo', 'feiticeiro'],
+            skill: 'int', dc: 13,
+            desc: 'Inteligência (Arcanismo) CD 13 — interromper o foco necromântico que alimenta o Decreto do chefe',
+            outcome_ok: { text: 'Seu feitiço atinge a coroa de Malphas num estalo violeta! O Decreto Necrótico é silenciado — SURPRESA e habilidade especial anulada!',
+              xp: 50, dungeon_combat: { enemy: 'wight', lookup_name: 'Lorde Malphas, Arquiduque Ossário', surprise: true, preCombatEffects: ['burst_disabled'] } },
+            outcome_fail: { text: 'A energia necrótica deflete o pulso arcano e Malphas avança com o montante erguido!',
+              xp: 10, dungeon_combat: { enemy: 'wight', lookup_name: 'Lorde Malphas, Arquiduque Ossário', surprise: false } } },
+          { label: 'Investida demolidora contra o trono de ossos (Guerreiro/Bárbaro)',
+            only_class: ['guerreiro', 'barbaro'],
+            skill: 'str', dc: 13,
+            desc: 'Força (Atletismo / Quebra de Guarda) CD 13 — saltar os degraus do mausoléu e golpear antes da guarda fechar',
+            outcome_ok: { text: 'Seu impacto faz o trono de ossos rachar ao meio! Malphas perde a base de ataque — SURPRESA e Vantagem no 1º golpe!',
+              xp: 45, dungeon_combat: { enemy: 'wight', lookup_name: 'Lorde Malphas, Arquiduque Ossário', surprise: true, preCombatEffects: ['first_attack_adv'] } },
+            outcome_fail: { text: 'O Arquiduque apara sua investida com força descomunal, iniciando o duelo mortal.',
+              xp: 8, dungeon_combat: { enemy: 'wight', lookup_name: 'Lorde Malphas, Arquiduque Ossário', surprise: false } } },
+          { label: 'Avançar com postura firme e enfrentar o senhor das catacumbas',
+            skill: 'dex', dc: 13,
+            desc: 'Destreza (Acrobacia / Esquiva) CD 13 — desviar do golpe varrido do montante real',
+            outcome_ok: { text: 'Você esquiva do arco necrótico do montante e encontra uma brecha na couraça antiga (SURPRESA)!',
+              xp: 40, dungeon_combat: { enemy: 'wight', lookup_name: 'Lorde Malphas, Arquiduque Ossário', surprise: true } },
+            outcome_fail: { text: 'A onda fria do montante atinge você de raspão. O duelo começa!',
+              xp: 5, hp_loss: 4, dungeon_combat: { enemy: 'wight', lookup_name: 'Lorde Malphas, Arquiduque Ossário', surprise: false } } }
+        ]
+      }
+    ],
+    ambient_tips: [
+      'Sussurros de gerações sepultadas ecoam pelos corredores de crânios.',
+      'Tochas de chama azulada lançam sombras longas nos sarcófagos.',
+      'O ar é seco, gélido e carregado de incenso funerário antigo.',
+      'Brasões reais desgastados adornam as abóbadas das catacumbas.'
+    ],
+    dungeons: [],
+    edges: [
+      { col: 10, row: 23, targetMap: 'ancestral_graveyard', label: 'Sair (Cemitério Ancestral)' }
+    ]
+  },
+
+  // ============ 6 NOVOS BIOMAS DO MAPA-MUNDO (WORLD-1 / POINTCRAWL) =============
+  salty_coast: {
+    id: 'salty_coast', region: 'valdoria', biome: 'coast',
+    name: 'Costa Salgada',
+    cols: 22, rows: 26, seed: 90001, spawnCol: 11, spawnRow: 13,
+    music: 'plains', danger: 4,
+    worldPos: { x: 0.90, y: 0.54 },
+    weather_pool: ['s', 'r', 'f', 't'],
+    weights: { '.': 24, 'S': 24, '~': 18, 'w': 14, 'r': 12, 'p': 8 },
+    ambient_tips: [
+      'As ondas quebram com fúria contra os penhascos cobertos de cracas.',
+      'Destroços de antigas caravelas repousam semissubmersos nos recifes.'
+    ],
+    dungeons: [],
+    edges: [
+      { col: 0, row: 13, targetMap: 'golden_sands', label: 'Deserto Dourado' },
+      { col: 11, row: 0, targetMap: 'burning_crater', label: 'Cratera Vulcânica' },
+      { col: 11, row: 25, targetMap: 'ashen_badlands', label: 'Terras Devastadas' }
+    ]
+  },
+  black_peaks: {
+    id: 'black_peaks', region: 'valdoria', biome: 'dark_mountain',
+    name: 'Montanhas Negras',
+    cols: 22, rows: 26, seed: 90002, spawnCol: 11, spawnRow: 13,
+    music: 'mountain', danger: 6,
+    worldPos: { x: 0.05, y: 0.33 },
+    weather_pool: ['f', 't', 's'],
+    weights: { '.': 18, 'r': 46, 'p': 10, 'R': 10, 'v': 8, 'b': 8 },
+    ambient_tips: [
+      'Ventos uivantes cortam as gargantas de obsidiana negra.',
+      'O ar rarefeito carrega cinzas frias das profundezas da cordilheira.'
+    ],
+    dungeons: [],
+    edges: [
+      { col: 21, row: 13, targetMap: 'stone_peaks', label: 'Picos de Pedra' },
+      { col: 11, row: 0, targetMap: 'korthag', label: 'Korthag' },
+      { col: 11, row: 25, targetMap: 'troll_cave', label: 'Caverna do Troll' }
+    ]
+  },
+  eldritch_mire: {
+    id: 'eldritch_mire', region: 'valdoria', biome: 'eldritch_swamp',
+    name: 'Pântano Eldritch',
+    cols: 22, rows: 26, seed: 90003, spawnCol: 11, spawnRow: 13,
+    music: 'swamp', danger: 7,
+    worldPos: { x: 0.76, y: 0.30 },
+    weather_pool: ['f', 'r', 't'],
+    weights: { '.': 14, '~': 28, 'w': 18, 'T': 18, 'l': 12, 'R': 10 },
+    ambient_tips: [
+      'Luzes fosforescentes púrpuras brilham sob as águas estagnadas.',
+      'Raízes retorcidas parecem se mover quando observadas de soslaio.'
+    ],
+    dungeons: [],
+    edges: [
+      { col: 11, row: 25, targetMap: 'deep_swamp', label: 'Pântano Profundo' },
+      { col: 21, row: 13, targetMap: 'valkrest', label: 'Valkrest' }
+    ]
+  },
+  ashen_badlands: {
+    id: 'ashen_badlands', region: 'valdoria', biome: 'badlands',
+    name: 'Terras Devastadas',
+    cols: 22, rows: 26, seed: 90004, spawnCol: 11, spawnRow: 13,
+    music: 'desert', danger: 5,
+    worldPos: { x: 0.76, y: 0.78 },
+    weather_pool: ['s', 't'],
+    weights: { '.': 28, 'S': 22, 'r': 24, 'p': 10, 'b': 10, 'R': 6 },
+    ambient_tips: [
+      'Ravinas de terra vermelha rachada se estendem até o horizonte.',
+      'Carcaças embranquecidas pelo sol marcam antigas disputas territoriais.'
+    ],
+    dungeons: [],
+    edges: [
+      { col: 0, row: 13, targetMap: 'bandit_fortress', label: 'Forte dos Bandidos' },
+      { col: 0, row: 20, targetMap: 'golden_sands', label: 'Deserto Dourado' },
+      { col: 11, row: 0, targetMap: 'burning_crater', label: 'Cratera Vulcânica' },
+      { col: 21, row: 13, targetMap: 'salty_coast', label: 'Costa Salgada' }
+    ]
+  },
+  elder_woods: {
+    id: 'elder_woods', region: 'valdoria', biome: 'ancient_forest',
+    name: 'Bosque Ancestral',
+    cols: 22, rows: 26, seed: 90005, spawnCol: 11, spawnRow: 13,
+    music: 'forest', danger: 5,
+    worldPos: { x: 0.64, y: 0.25 },
+    weather_pool: ['s', 'f', 'r'],
+    weights: { '.': 20, 'g': 18, 'T': 30, 't': 12, 'R': 12, 'p': 8 },
+    ambient_tips: [
+      'Folhas prateadas sussurram cânticos anteriores à fundação de Valdoria.',
+      'A magia feérica primordial permeia cada tronco colossal deste bosque.'
+    ],
+    dungeons: [],
+    edges: [
+      { col: 0, row: 13, targetMap: 'elven_ruins', label: 'Ruínas Élficas' },
+      { col: 11, row: 0, targetMap: 'frozen_waste', label: 'Ermo Congelado' },
+      { col: 0, row: 0, targetMap: 'glacial_rift', label: 'Abismo Glacial' }
+    ]
+  },
+  glacial_rift: {
+    id: 'glacial_rift', region: 'valdoria', biome: 'frozen_abyss',
+    name: 'Abismo Glacial',
+    cols: 22, rows: 26, seed: 90006, spawnCol: 11, spawnRow: 13,
+    music: 'snow', danger: 8, required_gear: 'torch',
+    worldPos: { x: 0.44, y: 0.07 },
+    weather_pool: ['f', 't', 's'],
+    weights: { '.': 18, 'i': 38, 'r': 24, 'w': 10, 'R': 10 },
+    ambient_tips: [
+      'Paredes de gelo azul milenar refletem a luz com brilho cortante.',
+      'Um frio abissal sobe das fendas glaciais sem fundo.'
+    ],
+    dungeons: [],
+    edges: [
+      { col: 21, row: 13, targetMap: 'frozen_waste', label: 'Ermo Congelado' },
+      { col: 21, row: 25, targetMap: 'elder_woods', label: 'Bosque Ancestral' }
+    ]
   }
-
 };
 
 
@@ -49298,6 +49615,7 @@ function scheduleRender() {
   // O watchdog exige !document.hidden, então não reinicia o loop com a aba oculta.
 
   if (typeof document !== 'undefined' && document.hidden) { _rafScheduled = false; return; }
+  if (typeof document !== 'undefined' && document.body && document.body.classList.contains('pointcrawl-mode') && !window._editorMode) { _rafScheduled = false; return; }
 
   const now = performance.now();
 
@@ -85776,13 +86094,15 @@ function triggerDungeonEntry(dg) {
 
   // Demais dungeons mantem placeholder "em dev" ate serem trabalhadas individualmente.
 
-  const isMvpReady = (dg.id === 'orc_chief_tent' || dg.id === 'wolf_den' || dg.id === 'bandit_vault' || dg.id === 'lost_mine' || dg.id === 'sunken_temple') && FIXED_MAPS[dg.id];
+  const isMvpReady = (dg.id === 'orc_chief_tent' || dg.id === 'wolf_den' || dg.id === 'bandit_vault' || dg.id === 'lost_mine' || dg.id === 'sunken_temple' || dg.id === 'forgotten_catacombs') && FIXED_MAPS[dg.id];
 
   if (isMvpReady) {
 
     document.getElementById('dungeon-title').textContent = dg.name;
 
-    var _badgeTitle = (dg.id === 'sunken_temple')
+    var _badgeTitle = (dg.id === 'forgotten_catacombs')
+      ? 'Cripta Real · Lorde Malphas, Arquiduque Ossário'
+      : (dg.id === 'sunken_temple')
       ? 'Ruína Abissal · Sacerdotisa Nagash'
       : (dg.id === 'lost_mine')
         ? 'Abismo Subterrâneo · Dorgar, Troglodita Colossal'
@@ -92972,8 +93292,12 @@ var visitedMapIds = new Set();
 
 
 
-function closeCartography() {
-
+function closeCartography(forceClose) {
+  if (!forceClose && typeof document !== 'undefined' && document.body && document.body.classList.contains('pointcrawl-mode') && !window._editorMode) {
+    try { if (typeof closeLocationPopup === 'function') closeLocationPopup(); } catch (_) {}
+    try { if (typeof _closeCartLocationPopup === 'function') _closeCartLocationPopup(); } catch (_) {}
+    return;
+  }
   document.getElementById('cartography-overlay').classList.remove('visible');
 
   // 2026-06-21 (user bug): também desfaz os popups de localidade pendurados
@@ -93011,12 +93335,14 @@ function closeCartography() {
 // em LOCAL (file://) faz o reboot client-side com etapas (sandbox dev).
 
 function _cartTravelTo(mapId){
-
+  var origKey = mapId;
+  mapId = (typeof _cartResolveMapId === 'function') ? _cartResolveMapId(mapId) : mapId;
   var m = (typeof FIXED_MAPS !== 'undefined') ? FIXED_MAPS[mapId] : null;
-
   if (!m) { try { console.warn('[E-REM:CART-TRAVEL] no FIXED_MAPS for ' + mapId); } catch (_) {} return; }
-
-  if (window.S && S.mapId === mapId) return;  // já está aqui
+  if (window.S && (S.mapId === mapId || _cartGetPlayerBiomeV2() === origKey)) {
+    if (typeof _openCurrentNodePointcrawlHub === 'function') _openCurrentNodePointcrawlHub();
+    return;
+  }
 
   // fecha TODOS os overlays do mapa (anti-popup-pendurado)
 
@@ -93093,9 +93419,11 @@ function _cartTravelTo(mapId){
         }
 
         if (typeof dmNarrate === 'function') dmNarrate({ text: 'Você chega às terras de ' + m.name + '.', type: 'action' });
-
         if (typeof boot === 'function') boot();
-
+        setTimeout(function(){
+          if (typeof openCartography === 'function') openCartography();
+          if (typeof _openCurrentNodePointcrawlHub === 'function') _openCurrentNodePointcrawlHub();
+        }, 120);
       },
 
       onDefeat: function () { if (typeof triggerDefeat === 'function') triggerDefeat('Você sucumbiu na viagem.'); }
@@ -93884,24 +94212,54 @@ function _drawCartNodeV2(ctx, b, w, h){
 
 // === Pin do personagem V2 (Fase 5.4 — "VOCÊ ESTÁ AQUI") ===
 
-function _cartGetPlayerBiomeV2(){
-
-  // Tenta state da exploracao (S.biome ou S.mapId.biome)
-
-  if (typeof S !== 'undefined' && S && S.biome) return S.biome;
-
-  if (typeof S !== 'undefined' && S && S.mapId && typeof FIXED_MAPS !== 'undefined') {
-
-    var m = FIXED_MAPS[S.mapId];
-
-    if (m && m.biome) return m.biome;
-
+var _MAP_ID_TO_CART_KEY = {
+  city_gates: 'plains',
+  whispering_woods: 'forest',
+  wolf_woods: 'forest',
+  misty_marshes: 'swamp',
+  golden_sands: 'desert',
+  underground_passage: 'cave',
+  stone_peaks: 'mountain',
+  ancient_cemetery: 'graveyard',
+  frozen_waste: 'snow',
+  burning_crater: 'volcanic'
+};
+var _CART_KEY_TO_MAP_ID = {
+  plains: 'city_gates',
+  forest: 'whispering_woods',
+  swamp: 'misty_marshes',
+  desert: 'golden_sands',
+  cave: 'underground_passage',
+  mountain: 'stone_peaks',
+  graveyard: 'ancient_cemetery',
+  snow: 'frozen_waste',
+  volcanic: 'burning_crater'
+};
+function _cartResolveMapId(keyOrMapId) {
+  if (!keyOrMapId) return 'city_gates';
+  if (typeof FIXED_MAPS !== 'undefined' && FIXED_MAPS[keyOrMapId]) return keyOrMapId;
+  if (_CART_KEY_TO_MAP_ID[keyOrMapId] && typeof FIXED_MAPS !== 'undefined' && FIXED_MAPS[_CART_KEY_TO_MAP_ID[keyOrMapId]]) {
+    return _CART_KEY_TO_MAP_ID[keyOrMapId];
   }
-
-  // Cidade default: player está em Valdoria (plains)
-
+  return keyOrMapId;
+}
+function _cartGetPlayerBiomeV2(){
+  if (typeof S !== 'undefined' && S && S.mapId) {
+    var rawId = S.mapId;
+    if (typeof FIXED_MAPS !== 'undefined' && FIXED_MAPS[rawId] && FIXED_MAPS[rawId].parentMap) {
+      rawId = FIXED_MAPS[rawId].parentMap;
+    }
+    var mappedKey = _MAP_ID_TO_CART_KEY[rawId] || rawId;
+    var allB = (window.CartShared && CartShared.CART_BIOMES) || (typeof CART_BIOMES_V2 !== 'undefined' ? CART_BIOMES_V2 : []);
+    if (Array.isArray(allB) && allB.some(function(b){ return b && b.key === mappedKey; })) {
+      return mappedKey;
+    }
+    if (typeof FIXED_MAPS !== 'undefined' && FIXED_MAPS[rawId] && FIXED_MAPS[rawId].biome) {
+      return FIXED_MAPS[rawId].biome;
+    }
+  }
+  if (typeof S !== 'undefined' && S && S.biome) return S.biome;
   return 'plains';
-
 }
 
 
@@ -100420,10 +100778,13 @@ function _openCartLocationPopup(biome){
         })()
       ) : '')
     + '</div>'
+    + (isCurrent && typeof _buildPointcrawlCurrentNodeActionsHtml === 'function' ? _buildPointcrawlCurrentNodeActionsHtml(biome) : '')
+    + '</div>'
     + '<div class="clp-buttons">'
     + (isCurrent
-        ? '<button class="clp-btn clp-btn-back" data-clp="back">Voltar ao Mapa</button>'
-        : '<button class="clp-btn clp-btn-hex-explore" data-clp="travel">🧭 Ir para o Mapa Hexagonal de Exploração</button>'
+        ? '<button class="clp-btn clp-btn-hex-explore" data-clp="explore-poi">🔍 Explorar Arredores & Marcos (Evento D&D 5e)</button>'
+          + '<button class="clp-btn clp-btn-back" data-clp="back">Fechar Detalhes</button>'
+        : '<button class="clp-btn clp-btn-hex-explore" data-clp="travel">🧭 Iniciar Jornada para ' + (biome.regionalName || biome.name) + '</button>'
           + '<button class="clp-btn clp-btn-back" data-clp="back">Voltar ao Mapa</button>'
        )
     + '</div>';
@@ -100447,9 +100808,7 @@ function _openCartLocationPopup(biome){
           + '<span style="font-size:7px;color:#a09484;">' + enc.dndRef + '</span>'
           + '</div>'
           + '<div style="color:#d2be90;margin-bottom:3px;">' + enc.description + '</div>'
-          + '<div style="color:#fde047;font-size:7.5px;"><b>🎲 Teste:</b> ' + enc.checkRequired + '</div>'
-          + '<div style="color:#86efac;font-size:7.5px;margin-top:1px;"><b>✅ Sucesso:</b> ' + enc.successOutcome + '</div>'
-          + '<div style="color:#f87171;font-size:7.5px;margin-top:1px;"><b>❌ Falha:</b> ' + enc.failureOutcome + '</div>';
+          + '<div style="color:#fde047;font-size:7.5px;"><b>🎲 Perícia Sugerida:</b> ' + enc.checkRequired + '</div>';
       }
     };
   }
@@ -100984,6 +101343,28 @@ function _closeCartLocationPopup(){
         } catch(_) {}
         sessionStorage.setItem('valdoria_travel_pace', selPace);
         if (typeof _cartTravelTo === 'function') { _cartTravelTo(biome.key); }
+        return;
+      }
+      if (action === 'explore-poi') {
+        _closeCartLocationPopup();
+        if (typeof _triggerPointcrawlRegionalEvent === 'function') _triggerPointcrawlRegionalEvent();
+        return;
+      }
+      if (action === 'open-camp') {
+        _closeCartLocationPopup();
+        if (typeof _pointcrawlOpenCamp === 'function') _pointcrawlOpenCamp();
+        return;
+      }
+      if (action === 'forage-here') {
+        _closeCartLocationPopup();
+        if (typeof _doPointcrawlForage === 'function') _doPointcrawlForage();
+        return;
+      }
+      if (action === 'enter-dungeon') {
+        var dgId = btn.getAttribute('data-dg-id');
+        _closeCartLocationPopup();
+        if (dgId && typeof _openPointcrawlDungeonDelver === 'function') _openPointcrawlDungeonDelver(dgId);
+        return;
       }
 
     });
@@ -101264,6 +101645,310 @@ function _hydrateExploreKnown(){
 
 
 
+// ============================================================================
+// POINTCRAWL-FIRST EXPLORATION & DUNGEON DELVER MODULE (D&D 5e — Fases 296–330)
+// Substitui a navegação passo-a-passo em grade hexagonal pela Cartografia
+// Pointcrawl e Jornada Estratégica como interface raiz da exploração.
+// ============================================================================
+(function injectPointcrawlStyles(){
+  if (typeof document === 'undefined' || document.getElementById('pointcrawl-mode-styles')) return;
+  var st = document.createElement('style');
+  st.id = 'pointcrawl-mode-styles';
+  st.textContent = ''
+    + 'body.pointcrawl-mode #map-viewport,'
+    + 'body.pointcrawl-mode #minimap-block,'
+    + 'body.pointcrawl-mode #zoom-controls,'
+    + 'body.pointcrawl-mode #hex-nav,'
+    + 'body.pointcrawl-mode #btn-forage {'
+    + '  display: none !important;'
+    + '}'
+    + 'body.pointcrawl-mode #cartography-overlay {'
+    + '  z-index: 90 !important;'
+    + '}'
+    + 'body.pointcrawl-mode #cart-loc-popup {'
+    + '  z-index: 210 !important;'
+    + '}'
+    + 'body.pointcrawl-mode #event-modal,'
+    + 'body.pointcrawl-mode #camp-screen,'
+    + 'body.pointcrawl-mode #dungeon-overlay,'
+    + 'body.pointcrawl-mode #party-popup,'
+    + 'body.pointcrawl-mode #inv-overlay,'
+    + 'body.pointcrawl-mode #journal-overlay,'
+    + 'body.pointcrawl-mode #explore-pace-modal,'
+    + 'body.pointcrawl-mode .explore-modal-overlay,'
+    + 'body.pointcrawl-mode #pointcrawl-dungeon-modal {'
+    + '  z-index: 260 !important;'
+    + '}'
+    + 'body.pointcrawl-mode #confirm-overlay,'
+    + 'body.pointcrawl-mode #cart-back-prompt {'
+    + '  z-index: 310 !important;'
+    + '}'
+    + 'body.pointcrawl-mode #dice-overlay {'
+    + '  z-index: 330 !important;'
+    + '}';
+  document.head.appendChild(st);
+})();
+
+function _activatePointcrawlRootMode() {
+  if (window._editorMode) return;
+  try {
+    var sp = new URLSearchParams(location.search);
+    if (sp.get('legacy_hex') === '1' || sp.get('editor') === '1') return;
+  } catch (_) {}
+  document.body.classList.add('pointcrawl-mode');
+  if (typeof openCartography === 'function') {
+    openCartography();
+  }
+}
+
+function _getDungeonsForBiomeNode(biomeNode) {
+  if (!biomeNode) return [];
+  var mapId = (typeof _cartResolveMapId === 'function') ? _cartResolveMapId(biomeNode.key) : biomeNode.key;
+  var list = [];
+  var seen = {};
+  function addDg(d) {
+    if (!d || !d.id || seen[d.id]) return;
+    seen[d.id] = true;
+    list.push(d);
+  }
+  if (typeof FIXED_MAPS !== 'undefined' && FIXED_MAPS[mapId] && Array.isArray(FIXED_MAPS[mapId].dungeons)) {
+    FIXED_MAPS[mapId].dungeons.forEach(addDg);
+  }
+  // Canonical AAA dungeons mapped to their regional nodes
+  var canonicalByNode = {
+    orc_tribe: [{ id: 'orc_chief_tent', name: 'Tenda do Chefe Brakthar', intro: 'No coração do acampamento orc, a tenda de couro negro de Brakthar pulsa com tambores de guerra.' }],
+    forest: [{ id: 'wolf_den', name: 'Covil do Lobo Cinzento', intro: 'Uma toca escavada entre raízes de carvalho ancião onde o Lobo Alfa comanda sua alcateia.' }],
+    whispering_woods: [{ id: 'wolf_den', name: 'Covil do Lobo Cinzento', intro: 'Uma toca escavada entre raízes de carvalho ancião onde o Lobo Alfa comanda sua alcateia.' }],
+    bandit_fortress: [{ id: 'bandit_vault', name: 'Cofre dos Bandidos', intro: 'Galerias fortificadas sob o forte onde Malakor guarda o ouro saqueado das caravanas.' }],
+    underground_caverns: [{ id: 'lost_mine', name: 'Mina Perdida', intro: 'Trilhos enferrujados e veios de cristal profundos dominados pelo Troglodita Colossal Dorgar.' }],
+    korthag: [{ id: 'lost_mine', name: 'Mina Perdida', intro: 'Trilhos enferrujados e veios de cristal profundos dominados pelo Troglodita Colossal Dorgar.' }],
+    swamp: [{ id: 'sunken_temple', name: 'Templo Submerso', intro: 'Escadarias alagadas que descem ao santuário abissal da Sacerdotisa Serpentina Nagash.' }],
+    misty_marshes: [{ id: 'sunken_temple', name: 'Templo Submerso', intro: 'Escadarias alagadas que descem ao santuário abissal da Sacerdotisa Serpentina Nagash.' }],
+    graveyard: [{ id: 'forgotten_catacombs', name: 'Catacumbas Esquecidas', intro: 'Galerias funerárias sob os mausoléus ancestrais onde Lorde Malphas reina sobre os inquietos.' }],
+    ancient_cemetery: [{ id: 'forgotten_catacombs', name: 'Catacumbas Esquecidas', intro: 'Galerias funerárias sob os mausoléus ancestrais onde Lorde Malphas reina sobre os inquietos.' }],
+    ancestral_graveyard: [{ id: 'forgotten_catacombs', name: 'Catacumbas Esquecidas', intro: 'Galerias funerárias sob os mausoléus ancestrais onde Lorde Malphas reina sobre os inquietos.' }]
+  };
+  if (canonicalByNode[biomeNode.key]) canonicalByNode[biomeNode.key].forEach(addDg);
+  if (canonicalByNode[mapId]) canonicalByNode[mapId].forEach(addDg);
+  return list;
+}
+
+function _buildPointcrawlCurrentNodeActionsHtml(biome) {
+  if (!biome) return '';
+  var dgs = _getDungeonsForBiomeNode(biome);
+  var dgBtns = dgs.map(function(dg){
+    var isAaa = !!(typeof FIXED_MAPS !== 'undefined' && FIXED_MAPS[dg.id] && FIXED_MAPS[dg.id].dungeonEncounters);
+    return '<button type="button" class="clp-btn" data-clp="enter-dungeon" data-dg-id="' + dg.id + '" '
+      + 'style="width:100%;margin-top:5px;background:linear-gradient(180deg,rgba(120,28,28,0.92),rgba(72,14,14,0.96));border:1px solid #f87171;color:#fecaca;font-family:Cinzel,serif;font-size:10.5px;font-weight:700;padding:7px 10px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">'
+      + '<span>🏰 Incursão: ' + dg.name + '</span>'
+      + '<span style="font-size:8.5px;background:rgba(0,0,0,0.45);padding:2px 6px;border-radius:3px;color:#fde047;">' + (isAaa ? '5 Câmaras D&D 5e' : 'Explorar') + '</span>'
+      + '</button>';
+  }).join('');
+
+  return '<div class="clp-pointcrawl-hub-box" style="margin:8px 0 6px;padding:8px 10px;background:linear-gradient(180deg,rgba(32,24,14,0.95),rgba(18,13,8,0.98));border:1.5px solid #ffd700;border-radius:6px;text-align:left;box-shadow:0 4px 14px rgba(0,0,0,0.65);">'
+    + '<div style="font-family:Cinzel,serif;font-size:10px;font-weight:700;color:#ffd700;letter-spacing:0.8px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;">'
+    + '  <span>🧭 AÇÕES DA COMITIVA NESTA REGIÃO</span>'
+    + '  <span style="font-size:8.5px;color:#86efac;">📍 Posição Atual</span>'
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">'
+    + '  <button type="button" data-clp="explore-poi" style="background:linear-gradient(180deg,#3a2c18,#241a0e);border:1px solid #c4953a;color:#fde047;font-family:Cinzel,serif;font-size:9.5px;font-weight:700;padding:6px 6px;border-radius:4px;cursor:pointer;">🔍 Explorar Trilhas</button>'
+    + '  <button type="button" data-clp="open-camp" style="background:linear-gradient(180deg,#1e3222,#122015);border:1px solid #4ade80;color:#bbf7d0;font-family:Cinzel,serif;font-size:9.5px;font-weight:700;padding:6px 6px;border-radius:4px;cursor:pointer;">⛺ Montar Bivaque</button>'
+    + '  <button type="button" data-clp="forage-here" style="background:linear-gradient(180deg,#243018,#161e0e);border:1px solid #a3e635;color:#d9f99d;font-family:Cinzel,serif;font-size:9.5px;font-weight:700;padding:6px 6px;border-radius:4px;cursor:pointer;">🌿 Forragear</button>'
+    + '  <button type="button" onclick="_closeCartLocationPopup();if(typeof _pointcrawlOpenParty==='function')_pointcrawlOpenParty();" style="background:linear-gradient(180deg,#1e2638,#121824);border:1px solid #60a5fa;color:#bfdbfe;font-family:Cinzel,serif;font-size:9.5px;font-weight:700;padding:6px 6px;border-radius:4px;cursor:pointer;">👥 Comitiva & Luz</button>'
+    + '</div>'
+    + dgBtns
+    + '</div>';
+}
+
+function _openCurrentNodePointcrawlHub() {
+  var curKey = (typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : 'plains';
+  var allB = (window.CartShared && CartShared.CART_BIOMES) || (typeof CART_BIOMES_V2 !== 'undefined' ? CART_BIOMES_V2 : []);
+  var node = Array.isArray(allB) ? allB.find(function(b){ return b && b.key === curKey; }) : null;
+  if (!node && Array.isArray(allB) && allB.length) node = allB[0];
+  if (node && typeof _openCartLocationPopup === 'function') {
+    _openCartLocationPopup(node);
+  }
+}
+
+function _pointcrawlOpenCamp() {
+  if (typeof S !== 'undefined' && S) S.ph = 'idle';
+  if (typeof openCampOverlay === 'function') {
+    openCampOverlay();
+  }
+}
+
+function _pointcrawlOpenParty() {
+  var btn = document.getElementById('btn-party');
+  if (btn) { btn.click(); return; }
+  var pp = document.getElementById('party-popup');
+  if (pp) pp.classList.add('visible');
+}
+
+function _doPointcrawlForage() {
+  if (typeof S !== 'undefined' && S) {
+    S.ph = 'idle';
+    S.travelPace = 'cautious';
+    S.pace = 'cautious';
+  }
+  if (window.__EXPLORE_MODE === 'remote' && window.ExploracaoAPI && typeof window.ExploracaoAPI.forage === 'function' && window.ExploracaoAPI.hasToken && window.ExploracaoAPI.hasToken()) {
+    _doForage();
+    return;
+  }
+  // Resolutor canônico D&D 5e para modo Simulador / Pointcrawl local
+  var bKey = (typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : 'plains';
+  var forInfo = (window.CartShared && CartShared.getBiomeForageSustainability) ? CartShared.getBiomeForageSustainability(bKey) : { dc: 12, rating: 'Moderada' };
+  var dc = (forInfo && typeof forInfo.dc === 'number') ? forInfo.dc : 12;
+  var p = (typeof S !== 'undefined' && S && S.player) ? S.player : { hp: 20, mhp: 20, mods: { wis: 2 } };
+  var wisMod = (p.mods && typeof p.mods.wis === 'number') ? p.mods.wis : 2;
+  var d20 = 1 + Math.floor(Math.random() * 20);
+  var total = d20 + wisMod;
+  var ok = total >= dc;
+  if (ok) {
+    var heal = 2 + Math.floor(Math.random() * 4);
+    p.hp = Math.min(p.mhp || 20, (p.hp || 20) + heal);
+    if (typeof updateHud === 'function') updateHud();
+    var msgOk = '🌿 Sobrevivência ' + total + ' (d20=' + d20 + '+' + wisMod + ') vs CD ' + dc + ': Ervas e provisões coletadas (+' + heal + ' PV)!';
+    if (typeof dmNarrate === 'function') dmNarrate({ text: msgOk, type: 'event' });
+    if (typeof vToast === 'function') vToast(msgOk, 'ok', 4000);
+  } else {
+    var msgFail = '🌿 Sobrevivência ' + total + ' (d20=' + d20 + '+' + wisMod + ') vs CD ' + dc + ': Nenhum suprimento próprio para consumo encontrado neste trecho.';
+    if (typeof dmNarrate === 'function') dmNarrate({ text: msgFail, type: 'ambient' });
+    if (typeof vToast === 'function') vToast(msgFail, 'warn', 4000);
+  }
+}
+
+function _triggerPointcrawlRegionalEvent() {
+  if (typeof S === 'undefined' || !S) return;
+  S.ph = 'idle';
+  S.steps = Math.max(3, (S.steps || 0) + 1);
+  S._stepsToNextEvent = 0;
+  if (typeof tickDayPhase === 'function') {
+    try { tickDayPhase(); } catch (_) {}
+  }
+  var rolled = false;
+  if (typeof maybeRollEvent === 'function') {
+    rolled = maybeRollEvent();
+  }
+  if (!rolled && typeof maybeRollWanderingMonster === 'function') {
+    rolled = maybeRollWanderingMonster();
+  }
+  if (!rolled && typeof vToast === 'function') {
+    vToast('🧭 A patrulha percorreu os marcos da região sem incidentes hostis no momento.', 'info', 3500);
+  }
+  if (typeof updateHud === 'function') updateHud();
+}
+
+function _openPointcrawlDungeonDelver(dgId) {
+  if (!dgId || typeof FIXED_MAPS === 'undefined') return;
+  var dgMap = FIXED_MAPS[dgId];
+  if (!dgMap || !Array.isArray(dgMap.dungeonEncounters) || dgMap.dungeonEncounters.length === 0) {
+    // Fallback para modal de masmorra padrão
+    if (typeof triggerDungeonEntry === 'function') {
+      triggerDungeonEntry({ id: dgId, name: (dgMap && dgMap.name) || dgId, intro: 'Entrada descoberta nos ermos.' });
+    }
+    return;
+  }
+  if (typeof S !== 'undefined' && S) {
+    if (!S._dungeonEncountersTriggered) S._dungeonEncountersTriggered = {};
+  }
+  var existing = document.getElementById('pointcrawl-dungeon-modal');
+  if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+
+  var artKey = (dgId === 'orc_chief_tent') ? 'orc_tribe' : dgId;
+  var imgBase = (typeof window !== 'undefined' && window.location.protocol === 'file:')
+    ? './shared/img/map/locations/'
+    : '/shared/img/map/locations/';
+  var imgUrl = imgBase + artKey + '.webp';
+
+  var catLabels = {
+    combat: { ico: '⚔️', tag: 'Guarnição / Sentinelas', color: '#f87171' },
+    trap: { ico: '🪤', tag: 'Perigo / Armadilha D&D 5e', color: '#fb923c' },
+    discovery: { ico: '🔥', tag: 'Santuário / Bivaque Seguro', color: '#4ade80' },
+    mystery: { ico: '🔮', tag: 'Enigma / Relicário Antigo', color: '#c084fc' },
+    boss: { ico: '💀', tag: 'Câmara do Chefe', color: '#ffd700' }
+  };
+
+  var chambersHtml = dgMap.dungeonEncounters.map(function(enc, idx){
+    var cMeta = catLabels[enc.category] || { ico: '🧭', tag: 'Câmara', color: '#d2be90' };
+    var done = !!(typeof S !== 'undefined' && S && S._dungeonEncountersTriggered && S._dungeonEncountersTriggered[enc.id] && !enc.repeatable);
+    return '<div class="pcd-chamber-card" data-enc-idx="' + idx + '" style="background:rgba(24,18,12,0.92);border:1px solid ' + (done ? 'rgba(74,222,128,0.45)' : 'rgba(196,149,58,0.45)') + ';border-radius:6px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;">'
+      + '<div style="text-align:left;flex:1;">'
+      + '  <div style="font-size:9px;color:' + cMeta.color + ';font-family:Cinzel,serif;font-weight:700;">ETAPA ' + (idx + 1) + ' · ' + cMeta.ico + ' ' + cMeta.tag.toUpperCase() + (done ? ' <span style="color:#4ade80;">(CONCLUÍDA)</span>' : '') + '</div>'
+      + '  <div style="font-family:Cinzel,serif;font-size:11.5px;color:#f4d49a;font-weight:700;margin-top:1px;">' + enc.title + '</div>'
+      + '  <div style="font-size:9.5px;color:#a09484;line-height:1.35;margin-top:2px;">' + (enc.flavor || '') + '</div>'
+      + '</div>'
+      + '<button type="button" style="background:linear-gradient(180deg,#4a361a,#2a1e0e);border:1px solid #ffd700;color:#ffd700;font-family:Cinzel,serif;font-size:9.5px;font-weight:700;padding:6px 10px;border-radius:4px;cursor:pointer;white-space:nowrap;">' + (enc.repeatable ? '⛺ Acampar' : (done ? 'Revisitada' : 'Adentrar ➔')) + '</button>'
+      + '</div>';
+  }).join('');
+
+  var bossInfo = dgMap.boss
+    ? '<div style="margin:6px 0 8px;padding:6px 10px;background:rgba(120,20,20,0.28);border:1px solid rgba(248,113,113,0.45);border-radius:5px;font-size:9.5px;color:#fecaca;text-align:left;">'
+      + '💀 <b>Senhor da Masmorra:</b> ' + dgMap.boss.name + ' (ND ' + dgMap.boss.cr + ' · Nível Sugerido ' + dgMap.boss.sugLvl + '+)'
+      + '</div>'
+    : '';
+
+  var modal = document.createElement('div');
+  modal.id = 'pointcrawl-dungeon-modal';
+  modal.className = 'explore-modal-overlay';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.82);display:flex;align-items:center;justify-content:center;padding:12px;z-index:265;';
+  modal.innerHTML = ''
+    + '<div class="em-card" style="max-width:430px;width:100%;max-height:88vh;display:flex;flex-direction:column;background:#16100b;border:1.5px solid #c4953a;border-radius:8px;overflow:hidden;box-shadow:0 12px 32px rgba(0,0,0,0.9);">'
+    + '  <div style="position:relative;height:125px;background:url('' + imgUrl + '') center/cover no-repeat;border-bottom:1px solid rgba(196,149,58,0.4);">'
+    + '    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,8,6,0.25),rgba(16,11,7,0.94));"></div>'
+    + '    <button type="button" id="pcd-close-btn" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.65);border:1px solid #c4953a;color:#f4d49a;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;">✕</button>'
+    + '    <div style="position:absolute;bottom:8px;left:12px;right:12px;text-align:left;">'
+    + '      <div style="font-size:9px;color:#ffd700;font-family:Cinzel,serif;font-weight:700;letter-spacing:1px;">🏰 INCURSÃO POINTCRAWL EM MASMORRA</div>'
+    + '      <div style="font-family:Cinzel,serif;font-size:15px;color:#fff;font-weight:700;text-shadow:0 2px 6px #000;">' + dgMap.name + '</div>'
+    + '    </div>'
+    + '  </div>'
+    + '  <div style="padding:10px 12px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:6px;">'
+    +      bossInfo
+    +      chambersHtml
+    + '  </div>'
+    + '  <div style="padding:8px 12px;border-top:1px solid rgba(196,149,58,0.25);display:flex;justify-content:flex-end;background:rgba(10,7,5,0.9);">'
+    + '    <button type="button" id="pcd-exit-btn" style="background:rgba(40,30,20,0.9);border:1px solid rgba(196,149,58,0.5);color:#d2be90;font-family:Cinzel,serif;font-size:10.5px;padding:6px 14px;border-radius:4px;cursor:pointer;">Retornar à Carta Regional</button>'
+    + '  </div>'
+    + '</div>';
+
+  var frame = document.getElementById('frame') || document.body;
+  frame.appendChild(modal);
+
+  function closePcd() {
+    if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
+  }
+  modal.querySelector('#pcd-close-btn').onclick = closePcd;
+  modal.querySelector('#pcd-exit-btn').onclick = closePcd;
+  modal.addEventListener('click', function(e){
+    if (e.target === modal) { closePcd(); return; }
+    var card = e.target.closest('.pcd-chamber-card');
+    if (!card) return;
+    var idx = parseInt(card.getAttribute('data-enc-idx'), 10);
+    var enc = dgMap.dungeonEncounters[idx];
+    if (!enc) return;
+    closePcd();
+    if (typeof S !== 'undefined' && S) {
+      if (!S._dungeonEncountersTriggered) S._dungeonEncountersTriggered = {};
+      if (!enc.repeatable) S._dungeonEncountersTriggered[enc.id] = true;
+      S.ph = 'event';
+      S.event = Object.assign({}, enc, { resolved: null });
+      if (window.__EXPLORE_MODE === 'remote') {
+        S.event.__remote = true;
+        S.event.__dungeon = true;
+        S.event._mapId = dgId;
+        S.event._encId = enc.id;
+        S.event._hexId = enc.col + ',' + enc.row;
+      }
+      if (window.__EXPLORE_MODE === 'remote' && window.vEncounter && typeof window.vEncounter.render === 'function' && typeof _explShowEventVEnc === 'function') {
+        _explShowEventVEnc(S.event);
+      } else {
+        var evModal = document.getElementById('event-modal');
+        if (evModal) evModal.classList.add('visible');
+        if (typeof openEventModal === 'function') openEventModal();
+      }
+    }
+  });
+}
+
 function openCartography() {
 
   _cartZoom = CART_ZOOM_DEFAULT; _cartPanX = 0; _cartPanY = 0;
@@ -101285,7 +101970,7 @@ function openCartography() {
   overlay.innerHTML = ''
     + '<div class="xcart-wrapper">'
     + '  <div class="xcart-dock" id="xcart-dock">'
-    + '    <button class="xcart-dock-btn" id="xcart-top-back-btn" type="button" title="Voltar para a exploração [Esc]" aria-label="Voltar para a exploração">🧭 Exploração</button>'
+    + '    <button class="xcart-dock-btn primary" id="xcart-top-back-btn" type="button" title="Ações na Região Atual (Explorar Marcos, Masmorras, Bivaque, Forragear) [E]" aria-label="Explorar Região Atual">🧭 Região Atual</button>'
     + '    <button class="xcart-dock-btn primary" id="xcart-atlas-picker-btn" type="button" title="Atlas das Províncias [M]" aria-label="Seletor de Províncias">🗺️ Atlas ▾</button>'
     + '    <button class="xcart-dock-btn" id="xcart-waypoints-btn" type="button" title="Rede de Marcos e Santuários [P]" aria-label="Marcos de Viagem e Santuários">🌀 Marcos</button>'
     + '    <button class="xcart-dock-btn" id="xcart-filter-toggle-btn" type="button" title="Alternar Filtro de Nós no Mapa [Teclas 1 a 6]">🎯 Todos</button>'
@@ -101320,9 +102005,11 @@ function openCartography() {
     + '    </div>'
     + '  </div>'
     + '  <div class="xcart-back-row">'
-    + '    <button class="xcart-back-btn" id="xcart-close-btn">← Voltar pra Exploração</button>'
+    + '    <button class="xcart-back-btn" id="xcart-close-btn" style="border-color:#ffd700;color:#ffd700;font-weight:700;" title="Inspecionar e explorar a região onde a comitiva está">🧭 Explorar Local</button>'
+    + '    <button class="xcart-back-btn" id="xcart-camp-btn" onclick="if(typeof _pointcrawlOpenCamp===\'function\')_pointcrawlOpenCamp();" title="Montar Bivaque / Acampamento (Descanso Curto, Longo e Diálogo)">⛺ Acampar</button>'
+    + '    <button class="xcart-back-btn" id="xcart-party-btn" onclick="if(typeof _pointcrawlOpenParty===\'function\')_pointcrawlOpenParty();" title="Gerenciar Comitiva, Luz e Ritmo de Marcha">👥 Comitiva</button>'
     + '    <button class="xcart-back-btn" id="xcart-continent-btn" style="display:none;" onclick="_xcartFocusProvince(\'world\')">🌍 Continente</button>'
-    + '    <button class="xcart-back-btn xcart-city-btn" id="xcart-city-btn" title="Voltar para os Portões de Valdoria">Voltar pra Cidade</button>'
+    + '    <button class="xcart-back-btn xcart-city-btn" id="xcart-city-btn" title="Voltar para os Portões de Valdoria">🏛️ Cidade</button>'
     + '  </div>'
     + '  <div class="cart-atlas-modal" id="tactical-radar-modal" style="display:none;z-index:115;" aria-label="Radar Tático da Região">'
     + '    <div class="cam-box" style="max-width:380px;">'
@@ -102233,7 +102920,7 @@ function _xcartWireEvents() {
 
   _renderXCartProvinceBar();
 
-  document.getElementById('xcart-close-btn').onclick = function(){ closeCartography(); };
+  document.getElementById('xcart-close-btn').onclick = function(){ if (typeof _openCurrentNodePointcrawlHub === 'function') _openCurrentNodePointcrawlHub(); else closeCartography(); };
 
   /* 2026-05-18 USER REQUEST (Chrome MCP testing): handler do botão "Voltar pra
 
@@ -102299,7 +102986,7 @@ function _xcartWireEvents() {
   }
 
   var topBack = document.getElementById('xcart-top-back-btn');
-  if (topBack) topBack.onclick = function(){ closeCartography(); };
+  if (topBack) topBack.onclick = function(){ if (typeof _openCurrentNodePointcrawlHub === 'function') _openCurrentNodePointcrawlHub(); else closeCartography(); };
 
   var atlasBack = document.getElementById('xcart-atlas-back-btn');
   if (atlasBack) atlasBack.onclick = function(){ _xcartFocusProvince('world'); };
@@ -107008,9 +107695,9 @@ function _showExploreHelp() {
 
     + '<div class="em-section first">Como explorar</div>'
 
-    + tip('<b>Mover:</b> toque num hexágono vizinho pra <b>marcar</b> o destino e toque de novo pra <b>confirmar</b> o passo. Arrastar o dedo desloca o mapa. Cada passo pode revelar eventos, trilhas e perigos.')
-
-    + tip('<b>Ritmo de viagem:</b> no Grupo (menu à direita), escolha Cauteloso (menos encontros), Normal ou Rápido (mais encontros).')
+    + tip('<b>Jornada Pointcrawl D&amp;D 5e:</b> toque em qualquer localidade ou marco na Carta Regional para inspecionar rotas, clima, perigos naturais e iniciar a marcha estratégica entre regiões.')
+    + tip('<b>Explorar Região Atual:</b> toque no pino onde a comitiva está (ou em <b>🧭 Explorar Local</b>) para investigar trilhas, adentrar masmorras, forragear suprimentos e montar bivaque.')
+    + tip('<b>Ritmo e Papéis de Marcha:</b> escolha entre Cauteloso (18 mi/dia · permite Forragear), Normal (24 mi/dia) ou Rápido (30 mi/dia · −5 Percepção Passiva) e designe funções (Sentinela, Guia, Caçador, Escriba).')
 
     + tip('<b>Acampar:</b> use a fogueira (menu à direita) pra Descanso Curto (gasta Dado de Vida) ou Longo (recupera tudo).')
 
@@ -109372,11 +110059,10 @@ function boot() {
     // iframe ou janela) chama estes métodos pra mutar state e pegar JSON.
 
     if (window._editorMode && typeof _exposeEditorAPI === 'function') {
-
       try { _exposeEditorAPI(); LOG('BOOT', 'EditorAPI exposed'); }
-
       catch (eApi) { LOGE('BOOT', 'EditorAPI failed:', eApi.message); }
-
+    } else if (typeof _activatePointcrawlRootMode === 'function') {
+      try { _activatePointcrawlRootMode(); } catch (ePc) { LOGW('BOOT', 'Pointcrawl init warn:', ePc && ePc.message); }
     }
 
     LOG('BOOT', '=== boot() end OK ===');
