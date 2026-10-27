@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T16:33:42Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T16:59:36Z - do not edit directly, edit source -->
 
 
 
@@ -1841,6 +1841,53 @@
 * { box-sizing: border-box; }
 
 
+
+/* POINTCRAWL-FIRST EXPLORATION OVERHAUL (D&D 5e) - Zero Hex Map */
+body.pointcrawl-mode #map-viewport,
+body.pointcrawl-mode #top-bar,
+body.pointcrawl-mode #hud-float,
+body.pointcrawl-mode #right-panel,
+body.pointcrawl-mode #minimap-block,
+body.pointcrawl-mode #zoom-controls,
+body.pointcrawl-mode #btn-minimap-toggle,
+body.pointcrawl-mode #hex-nav,
+body.pointcrawl-mode #dpad,
+body.pointcrawl-mode #pace-bar,
+body.pointcrawl-mode #btn-forage,
+body.pointcrawl-mode #hud-quick,
+body.pointcrawl-mode #footer-quick,
+body.pointcrawl-mode #zoom-indicator,
+body.pointcrawl-mode #dm-panel,
+body.pointcrawl-mode #tap-hint,
+body.pointcrawl-mode #status-card {
+  display: none !important;
+}
+
+body.pointcrawl-mode #cartography-overlay {
+  display: flex !important;
+  z-index: 1200 !important;
+}
+body.pointcrawl-mode #cart-loc-popup {
+  z-index: 1300 !important;
+}
+body.pointcrawl-mode #event-modal,
+body.pointcrawl-mode #camp-screen,
+body.pointcrawl-mode #dungeon-overlay,
+body.pointcrawl-mode #party-popup,
+body.pointcrawl-mode #inv-overlay,
+body.pointcrawl-mode #journal-overlay,
+body.pointcrawl-mode #explore-pace-modal,
+body.pointcrawl-mode .explore-modal-overlay,
+body.pointcrawl-mode #pointcrawl-dungeon-modal {
+  z-index: 1400 !important;
+}
+body.pointcrawl-mode #confirm-overlay,
+body.pointcrawl-mode #cart-back-prompt {
+  z-index: 1500 !important;
+}
+body.pointcrawl-mode #dice-overlay {
+  z-index: 1600 !important;
+}
 
 html, body {
 
@@ -13384,7 +13431,7 @@ document.write('<script src="../shared/party-client.js?v=' + _vti + '"><\/script
 
 </head>
 
-<body>
+<body class="pointcrawl-mode">
 
 <script>
 
@@ -101366,6 +101413,11 @@ function _closeCartLocationPopup(){
         if (typeof _doPointcrawlForage === 'function') _doPointcrawlForage();
         return;
       }
+      if (action === 'open-party') {
+        _closeCartLocationPopup();
+        if (typeof _pointcrawlOpenParty === 'function') _pointcrawlOpenParty();
+        return;
+      }
       if (action === 'enter-dungeon') {
         var dgId = btn.getAttribute('data-dg-id');
         _closeCartLocationPopup();
@@ -101659,17 +101711,30 @@ function _hydrateExploreKnown(){
   st.id = 'pointcrawl-mode-styles';
   st.textContent = ''
     + 'body.pointcrawl-mode #map-viewport,'
+    + 'body.pointcrawl-mode #top-bar,'
+    + 'body.pointcrawl-mode #hud-float,'
+    + 'body.pointcrawl-mode #right-panel,'
     + 'body.pointcrawl-mode #minimap-block,'
     + 'body.pointcrawl-mode #zoom-controls,'
+    + 'body.pointcrawl-mode #btn-minimap-toggle,'
     + 'body.pointcrawl-mode #hex-nav,'
-    + 'body.pointcrawl-mode #btn-forage {'
+    + 'body.pointcrawl-mode #dpad,'
+    + 'body.pointcrawl-mode #pace-bar,'
+    + 'body.pointcrawl-mode #btn-forage,'
+    + 'body.pointcrawl-mode #hud-quick,'
+    + 'body.pointcrawl-mode #footer-quick,'
+    + 'body.pointcrawl-mode #zoom-indicator,'
+    + 'body.pointcrawl-mode #dm-panel,'
+    + 'body.pointcrawl-mode #tap-hint,'
+    + 'body.pointcrawl-mode #status-card {'
     + '  display: none !important;'
     + '}'
     + 'body.pointcrawl-mode #cartography-overlay {'
-    + '  z-index: 90 !important;'
+    + '  display: flex !important;'
+    + '  z-index: 1200 !important;'
     + '}'
     + 'body.pointcrawl-mode #cart-loc-popup {'
-    + '  z-index: 210 !important;'
+    + '  z-index: 1300 !important;'
     + '}'
     + 'body.pointcrawl-mode #event-modal,'
     + 'body.pointcrawl-mode #camp-screen,'
@@ -101680,14 +101745,14 @@ function _hydrateExploreKnown(){
     + 'body.pointcrawl-mode #explore-pace-modal,'
     + 'body.pointcrawl-mode .explore-modal-overlay,'
     + 'body.pointcrawl-mode #pointcrawl-dungeon-modal {'
-    + '  z-index: 260 !important;'
+    + '  z-index: 1400 !important;'
     + '}'
     + 'body.pointcrawl-mode #confirm-overlay,'
     + 'body.pointcrawl-mode #cart-back-prompt {'
-    + '  z-index: 310 !important;'
+    + '  z-index: 1500 !important;'
     + '}'
     + 'body.pointcrawl-mode #dice-overlay {'
-    + '  z-index: 330 !important;'
+    + '  z-index: 1600 !important;'
     + '}';
   document.head.appendChild(st);
 })();
@@ -101696,11 +101761,18 @@ function _activatePointcrawlRootMode() {
   if (window._editorMode) return;
   try {
     var sp = new URLSearchParams(location.search);
-    if (sp.get('legacy_hex') === '1' || sp.get('editor') === '1') return;
+    if (sp.get('legacy_hex') === '1' || sp.get('editor') === '1') {
+      document.body.classList.remove('pointcrawl-mode');
+      return;
+    }
   } catch (_) {}
   document.body.classList.add('pointcrawl-mode');
   if (typeof openCartography === 'function') {
     openCartography();
+  } else {
+    setTimeout(function(){
+      if (typeof openCartography === 'function') openCartography();
+    }, 60);
   }
 }
 
@@ -101757,7 +101829,7 @@ function _buildPointcrawlCurrentNodeActionsHtml(biome) {
     + '  <button type="button" data-clp="explore-poi" style="background:linear-gradient(180deg,#3a2c18,#241a0e);border:1px solid #c4953a;color:#fde047;font-family:Cinzel,serif;font-size:11px;font-weight:700;padding:6px 6px;border-radius:4px;cursor:pointer;">🔍 Explorar Trilhas</button>'
     + '  <button type="button" data-clp="open-camp" style="background:linear-gradient(180deg,#1e3222,#122015);border:1px solid #4ade80;color:#bbf7d0;font-family:Cinzel,serif;font-size:11px;font-weight:700;padding:6px 6px;border-radius:4px;cursor:pointer;">⛺ Montar Bivaque</button>'
     + '  <button type="button" data-clp="forage-here" style="background:linear-gradient(180deg,#243018,#161e0e);border:1px solid #a3e635;color:#d9f99d;font-family:Cinzel,serif;font-size:11px;font-weight:700;padding:6px 6px;border-radius:4px;cursor:pointer;">🌿 Forragear</button>'
-    + '  <button type="button" onclick="_closeCartLocationPopup();if(typeof _pointcrawlOpenParty==='function')_pointcrawlOpenParty();" style="background:linear-gradient(180deg,#1e2638,#121824);border:1px solid #60a5fa;color:#bfdbfe;font-family:Cinzel,serif;font-size:11px;font-weight:700;padding:6px 6px;border-radius:4px;cursor:pointer;">👥 Comitiva & Luz</button>'
+    + '  <button type="button" data-clp="open-party" style="background:linear-gradient(180deg,#1e2638,#121824);border:1px solid #60a5fa;color:#bfdbfe;font-family:Cinzel,serif;font-size:11px;font-weight:700;padding:6px 6px;border-radius:4px;cursor:pointer;">👥 Comitiva & Luz</button>'
     + '</div>'
     + dgBtns
     + '</div>';
@@ -101926,7 +101998,7 @@ function _openPointcrawlDungeonDelver(dgId) {
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.82);display:flex;align-items:center;justify-content:center;padding:12px;z-index:265;';
   modal.innerHTML = ''
     + '<div class="em-card" style="max-width:430px;width:100%;max-height:88vh;display:flex;flex-direction:column;background:#16100b;border:1.5px solid #c4953a;border-radius:8px;overflow:hidden;box-shadow:0 12px 32px rgba(0,0,0,0.9);">'
-    + '  <div style="position:relative;height:125px;background:url('' + imgUrl + '') center/cover no-repeat;border-bottom:1px solid rgba(196,149,58,0.4);">'
+    + '  <div style="position:relative;height:125px;background:url(' + imgUrl + ') center/cover no-repeat;border-bottom:1px solid rgba(196,149,58,0.4);">'
     + '    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,8,6,0.25),rgba(16,11,7,0.94));"></div>'
     + '    <button type="button" id="pcd-close-btn" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.65);border:1px solid #c4953a;color:#f4d49a;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;">✕</button>'
     + '    <div style="position:absolute;bottom:8px;left:12px;right:12px;text-align:left;">'
@@ -111440,6 +111512,11 @@ function _exposeEditorAPI() {
 document.addEventListener('DOMContentLoaded', () => {
 
   LOG('BOOT', 'DOMContentLoaded fired');
+  try {
+    if (typeof _activatePointcrawlRootMode === 'function') {
+      _activatePointcrawlRootMode();
+    }
+  } catch(eEarlyPc) { console.warn('Early pointcrawl activation:', eEarlyPc); }
 
   try {
 
