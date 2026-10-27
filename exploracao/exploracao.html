@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T01:11:29Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T01:15:03Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessCarrierBirdAndAnimalMessenger) return '';
+        var bKey = (biome && biome.key) || 'forest';
+        var cb = CartShared.calcWildernessCarrierBirdAndAnimalMessenger(bKey, 'animal_messenger_ritual_physical_description_delivery');
+        return '<div class="clp-carrier-bird-card" style="margin:4px 0 6px;text-align:left;background:rgba(10,26,40,0.86);padding:4px 8px;border-radius:4px;border:1px solid rgba(14,165,233,0.38);font-size:8px;color:#f0f9ff;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cb.color + ';margin-bottom:2px;">' + cb.icon + ' ' + cb.messengerTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Mensageiros Animais, Pombos-Correio e Familiares:</b> ' + cb.messengerMechanics + ' (CD ' + cb.saveDC + ' [' + cb.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Alcance e Voo:</b> ' + cb.pioneerMitigation + ' · <i>Contingência: ' + cb.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampFalconryMewsAndLoftStation) return '';
+        var bKey = (biome && biome.key) || 'forest';
+        var cb = CartShared.calcCampFalconryMewsAndLoftStation(bKey, 'portable_wicker_pigeon_loft_and_falcon_perch_bivouac');
+        return '<div class="clp-carrier-bird-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(8,20,32,0.82);padding:4px 8px;border-radius:4px;border:1px solid rgba(2,132,199,0.32);font-size:8px;color:#f0f9ff;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cb.color + ';margin-bottom:2px;">' + cb.icon + ' ' + cb.defenseTitle.toUpperCase() + ' (PHB p. 178, 258):</div>' 
+          + '  <div>• <b>Poleiro de Falcoaria e Troca entre Comitivas:</b> ' + cb.messengerAndCampSafety + ' · <b>Prontidão:</b> ' + cb.messengerAndWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cb.campRestAndSafetyGuards + '</div>' 
           + '</div>';
       })()
     + (function(){

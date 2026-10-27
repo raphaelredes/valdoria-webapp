@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 305: AVES DE RAPINA ADESTRADAS, POMBOS-CORREIO E MENSAGEIROS ANIMAIS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessCarrierBirdAndAnimalMessenger(biomeKey, messengerType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var mt = (messengerType || 'animal_messenger_ritual_physical_description_delivery').toLowerCase();
+
+    var messenger = {
+      messengerTitle: 'Ritual de Mensageiro Animal Guiado por Descrição Física (PHB p. 258)',
+      saveDC: 13,
+      saveType: 'Sabedoria',
+      messengerMechanics: 'Conjurado como ritual por Bardo, Druida ou Patrulheiro (2º círculo, PHB p. 258), uma besta Miúda (corvo, falcão, esquilo ou morcego) voa até 75 km em 24 horas (37 km se caminhar) até um local visitado anteriormente e pronuncia um recado de até 25 palavras com a voz do conjurador; não exige saber o nome verdadeiro do destinatário — basta descrever as características físicas e insígnias observadas no último encontro para que a ave entregue a mensagem exclusivamente àquele aventureiro (PHB p. 258).',
+      pioneerMitigation: 'Conjurado em espaço superior (3º círculo ou maior) para estender a duração em +48 horas por nível acima do 2º, permitindo alcançar comitivas distantes em outras províncias.',
+      rescueAndStabilization: 'Se a comitiva destinatária já tiver partido do nó indicado, a ave aguarda pacientemente até o fim da duração antes de retornar ao habitat silvestre.',
+      icon: '🦅',
+      color: '#0ea5e9'
+    };
+
+    if (mt === 'homing_pigeon_and_trained_raven_capsule_flight') {
+      messenger.messengerTitle = 'Pombo-Correio e Corvo Adestrado com Cápsula de Tarso (Adestramento CD 13)';
+      messenger.saveDC = 13;
+      messenger.saveType = 'Sabedoria';
+      messenger.messengerMechanics = 'Aves mensageiras mundanas treinadas com Sabedoria (Adestramento CD 13, PHB p. 178) carregam minúsculos cilindros de osso ou cobre amarrados à pata com tiras de couro fino contendo coordenadas cifradas ou amostras de ervas; retornam automaticamente ao pombal de origem ou ao poleiro da comitiva parceira com a qual as aves foram trocadas durante um encontro presencial.';
+      messenger.pioneerMitigation = 'Soltura da ave nas primeiras horas da alvorada ou no crepúsculo para evitar falcões-peregrinos selvagens e arqueiros de patrulhas nas estradas (Sobrevivência ou Adestramento CD 13).';
+      messenger.rescueAndStabilization = 'Envio em par redundante (duas aves por rotas de vale distintas) quando a mensagem reporta perigo mortal iminente.';
+    } else if (mt === 'find_familiar_telepathic_aerial_recon_relay') {
+      messenger.messengerTitle = 'Reconhecimento Aéreo e Entrega por Familiar Invocado (Convocar Familiar)';
+      messenger.saveDC = 14;
+      messenger.saveType = 'Inteligência';
+      messenger.messengerMechanics = 'O conjurador utiliza Convocar Familiar (1º círculo ritual, PHB p. 226) na forma de coruja (Voo 18m, Visão no Escuro 36m, sem provocar ataques de oportunidade com Sobrevoo) ou corvo (que imita sons simples); a até 30 metros o mestre compartilha os sentidos da ave para inspecionar uma comitiva desconhecida sem se expor, ou envia o familiar além desse alcance levando um anel de sinete ou bilhete lacrado no bico.';
+      messenger.pioneerMitigation = 'Voo silencioso da coruja pela copa das árvores (vantagem em Percepção e Furtividade noturna) mantendo distância de arqueiros alertas.';
+      messenger.rescueAndStabilization = 'Em caso de ameaça à ave, o conjurador usa uma ação para recolher o familiar instantaneamente para uma bolsa extradimensional e reaparecer com ele no próprio ombro (PHB p. 226).';
+    } else if (mt === 'hostile_hawk_and_arrow_interception_hazard') {
+      messenger.messengerTitle = 'Interceptação de Ave Mensageira por Rapineiros ou Vigias Inimigos';
+      messenger.saveDC = 14;
+      messenger.saveType = 'Destreza';
+      messenger.messengerMechanics = 'Batedores inimigos com arcos longos ou gaviões de caça treinados tentam abater pombos-correio e corvos que voam em linha reta sobre desfiladeiros vigiados (CA 12 da ave, 1 a 2 PV); se abatida, a cápsula física pode cair em mãos rivais, motivo pelo qual toda mensagem transportada por ave deve estar protegida por cifra ou Gíria de Ladrão (PHB p. 96, 154).';
+      messenger.pioneerMitigation = 'Escolha de espécies nativas do bioma atual (pombos-das-rochas em montanhas, gaivotas na costa, morcegos em cavernas) para não chamar atenção de vigias (Natureza ou Sobrevivência CD 14).';
+      messenger.rescueAndStabilization = 'Se uma ave ferida pousar no acampamento aliado, estancar o sangramento da asa com Medicina CD 12 e alimentá-la antes do voo de retorno.';
+    }
+
+    return messenger;
+  }
+
+  function calcCampFalconryMewsAndLoftStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'forest').toLowerCase();
+    var dt = (defenseType || 'portable_wicker_pigeon_loft_and_falcon_perch_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Poleiro de Falcoaria e Gaiola de Vime para Aves Mensageiras no Bivaque',
+      messengerAndCampSafety: 'Montagem de poleiro acolchoado com capuzes de couro macio (luva de falcoaria, PHB p. 150) e gaiola de vime ventilada protegida da chuva e de predadores terrestres no centro do acampamento (PHB p. 154, 178).',
+      messengerAndWatch: 'Mantém as aves descansadas e prontas para disparo imediato caso as sentinelas avistem movimentação hostil durante a madrugada.',
+      campRestAndSafetyGuards: 'O arrulhar baixo ou agitação das aves no poleiro alerta a vigília sobre a presença de serpentes ou felinos furtivos (+2 em Percepção Passiva noturna).',
+      icon: '⛺',
+      color: '#0ea5e9'
+    };
+
+    if (dt === 'cross_party_homing_bird_exchange_protocol') {
+      defense.defenseTitle = 'Protocolo de Troca de Aves-Correio entre Comitivas em Fogueira Compartilhada';
+      defense.messengerAndCampSafety = 'Quando dois grupos de aventureiros se encontram pacificamente em um nó ou acampamento, eles podem trocar um pombo-correio ou corvo anilhado de cada gaiola (PHB p. 178).';
+      defense.messengerAndWatch = 'Cria um canal físico direto de retorno: quando solta dias depois, a ave voa de volta para a comitiva de origem mesmo antes de os personagens dominarem magias de 3º círculo como Enviar Mensagem.';
+      defense.campRestAndSafetyGuards = 'Conecta grupos aliados de nível 1 a 4 dentro das regras mundanas e rituais do D&D 5e.';
+    } else if (dt === 'whistling_bone_lure_and_seed_feeding_station') {
+      defense.defenseTitle = 'Isca Sonora de Osso e Comedouro para Atrair Aves de Mensageiro Animal';
+      defense.messengerAndCampSafety = 'Espalhamento de grãos aromáticos e toque de apito de osso em frequência aguda no topo da barraca para guiar aves conjuradas por Mensageiro Animal até o acampamento sob neblina ou copa fechada (PHB p. 258).';
+      defense.messengerAndWatch = 'Garante que mensageiros alados enviados por aliados localizem o bivaque camuflado sem hesitação, além de atrair fauna local amigável para Falar com Animais.';
+      defense.campRestAndSafetyGuards = 'Recepção limpa e silenciosa de recados urgentes durante os turnos de guarda.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 304: PERGAMINHOS CIFRADOS, SINETES DE LACRE E KITS DE FALSIFICAÇÃO (D&D 5e)
   // =========================================================================
 
@@ -38424,6 +38499,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessCarrierBirdAndAnimalMessenger: calcWildernessCarrierBirdAndAnimalMessenger,
+    calcCampFalconryMewsAndLoftStation: calcCampFalconryMewsAndLoftStation,
     calcWildernessSealedMissiveAndCipher: calcWildernessSealedMissiveAndCipher,
     calcCampCipherWritingDeskStation: calcCampCipherWritingDeskStation,
     calcWildernessDruidicFloraSign: calcWildernessDruidicFloraSign,
