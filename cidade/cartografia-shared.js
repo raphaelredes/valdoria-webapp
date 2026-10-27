@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 312: PROTOCOLO DE APRESENTAÇÃO NARRATIVA, PSEUDÔNIMOS (ENGANAÇÃO VS INTUIÇÃO), RECONHECIMENTO POR VOZ E SELO ◈ (D&D 5e)
+  // =========================================================================
+
+  function resolveNarrativeIntroductionAndAlias(biomeKey, introMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var im = (introMode || 'true_name_revelation_and_known_seal').toLowerCase();
+
+    var intro = {
+      introTitle: 'Revelação de Nome Verdadeiro e Gravação do Selo de Conhecido ◈ (NWN Arelith; Sky GDC)',
+      saveDC: 14,
+      saveType: 'Sabedoria',
+      introductionMechanics: 'Inspirado em Neverwinter Nights: Arelith e no ritual de confiança de Sky: Children of the Light (GDC), o nome de um aventureiro de outra comitiva jamais aparece automaticamente na interface; somente quando o personagem escolhe a opção de diálogo "Apresentar-se pelo nome verdadeiro" (ou quando um companheiro mútuo faz as honras da apresentação) a descrição genérica da Névoa de Identidade ("Andarilho Anão de Machado Pesado") se dissolve com um brilho dourado e passa a exibir permanentemente o nome real acompanhado do Selo de Conhecido ◈ para todos os presentes que ouviram a apresentação!',
+      pioneerMitigation: 'Exigência de reciprocidade no parley de estrada ("Direi meu nome e o da minha comitiva se você baixar o capuz e disser o seu").',
+      rescueAndStabilization: 'Uma vez gravado o Selo ◈ no grafo de memória do personagem, ele habilita permanentemente o uso de Enviar Mensagem (Sending, PHB p. 238) e reconhecimento imediato em futuros reencontros.',
+      icon: '◈',
+      color: '#eab308'
+    };
+
+    if (im === 'alias_deception_vs_insight_contest') {
+      intro.introTitle = 'Apresentação sob Pseudônimo: Disputa de Carisma (Enganação) vs. Sabedoria (Intuição) (PHB p. 178-179)';
+      intro.saveDC = 15;
+      intro.saveType = 'Sabedoria';
+      intro.introductionMechanics = 'Um aventureiro cauteloso ou procurado pode optar por apresentar-se com um Pseudônimo (nome de estrada falso); o motor realiza silenciosamente uma disputa canônica de Carisma (Enganação) do falante contra a Sabedoria (Intuição) Passiva ou ativa dos ouvintes (PHB p. 178-179). Se o blefe vencer, a interface do outro grupo passa a rotulá-lo pelo pseudônimo informado; se a Intuição superar a Enganação, o observador percebe a hesitação no olhar (sem revelar o nome real magicamente, mas marcando o nome dito como "[Pseudônimo Suspeito?]").';
+      intro.pioneerMitigation = 'Apoio do Antecedente Charlatão (Identidade Falsa estabelecida com documentação, PHB p. 128) ou da característica de Assassino Impostor (PHB p. 97).';
+      intro.rescueAndStabilization = 'Confrontado com Zona da Verdade (PHB p. 289) ou Detectar Pensamentos (PHB p. 231), o pseudônimo cai imediatamente.';
+    } else if (im === 'disguise_kit_and_disguise_self_illusion') {
+      intro.introTitle = 'Ocultação de Identidade por Kit de Disfarce e Magia Disfarçar-se (PHB p. 154, 233)';
+      intro.saveDC = 16;
+      intro.saveType = 'Inteligência';
+      intro.introductionMechanics = 'Mesmo diante de um aventureiro que já o conheceu no passado (portador do Selo ◈), um personagem pode ocultar sua identidade usando um Kit de Disfarce (cosméticos, tintura de cabelo e próteses, PHB p. 154) ou a magia Disfarçar-se (Disguise Self, 1º círculo, duração 1 hora, PHB p. 233); para atravessar a ilusão visual de Disfarçar-se, o observador precisa usar sua ação para inspecionar a aparência e vencer um teste de Inteligência (Investigação) contra a CD de magia do conjurador (PHB p. 233).';
+      intro.pioneerMitigation = 'Evitar contato físico direto durante o parley, pois as mudanças ilusórias de Disfarçar-se (como um chapéu falso ou barba ilusória) não sustentam inspeção tátil (PHB p. 233).';
+      intro.rescueAndStabilization = 'Uso de Alterar-se (Alter Self, 2º círculo, PHB p. 211) ou Forma Mutável para transformação física real à prova de toque.';
+    } else if (im === 'voice_and_mannerism_recognition_check') {
+      intro.introTitle = 'Reconhecimento Auditivo por Timbre de Voz, Sotaque e Cacoetes (PHB p. 165, 177; NWN Arelith)';
+      intro.saveDC = 15;
+      intro.saveType = 'Sabedoria';
+      intro.introductionMechanics = 'Disfarçar o rosto ou fechar o elmo completo não altera a voz! Assim que um personagem disfarçado pronuncia sua primeira fala no encontro diante de alguém que já o conhece (Selo ◈), o motor dispara um teste de Sabedoria (Percepção Auditiva ou Intuição) contra a Enganação do disfarçado; se o ouvinte passar, reconhece o timbre inconfundível da voz ou o maneirismo de segurar a empunhadura ("Espere... eu conheço essa voz! Você é Kaelen!"), a menos que o disfarçado possua o talento Ator (Actor, PHB p. 165 — vantagem em Enganação e imitação perfeita de vozes!).';
+      intro.pioneerMitigation = 'Comunicar-se apenas por acenos de cabeça, Gíria de Ladrão gestual ou Mente Desperta quando estiver infiltrado diante de antigos conhecidos.';
+      intro.rescueAndStabilization = 'Admissão honesta do disfarce caso descoberto por aliados de sangue para evitar mal-entendidos hostis.';
+    }
+
+    return intro;
+  }
+
+  function calcCampDisguiseAndVoiceRecognitionStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'campfire_mutual_name_and_toast_ritual').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Rito de Apresentação à Beira do Fogo e Partilha de Cantil (Sky GDC; PHB p. 186)',
+      disguiseAndCampSafety: 'Quando duas comitivas decidem baixar as armas e sentar-se ao redor da mesma fogueira de bivaque, os membros podem realizar o Rito de Apresentação de Estrada — removendo elmos e capuzes à luz das chamas para revelar seus nomes e histórias de origem.',
+      disguiseAndIdentityWatch: 'Registra o vínculo de conhecimento mútuo (Selo ◈) entre todos os membros das duas comitivas de uma só vez e concede +2 de bônus moral em testes de Persuasão cooperativos.',
+      campRestAndSafetyGuards: 'Transforma vultos anônimos da estrada em companheiros nomeados na crônica viva de Valdoria.',
+      icon: '🥂',
+      color: '#eab308'
+    };
+
+    if (dt === 'disguise_kit_makeup_and_cloak_maintenance') {
+      defense.defenseTitle = 'Bancada de Kit de Disfarce, Tinturas e Insígnias Reversíveis no Bivaque (PHB p. 154)';
+      defense.disguiseAndCampSafety = 'Durante o descanso no acampamento, o aventureiro proficiente em Kit de Disfarce (PHB p. 154, 25 PO, 1,5 kg) dedica 30 minutos diante de um Espelho de Aço para preparar maquiagem de cicatrizes falsas, tingir mechas e inverter mantos de viagem antes de cruzar uma província hostil.';
+      defense.disguiseAndIdentityWatch = 'Adiciona o bônus de proficiência a todos os testes de Carisma (Enganação) destinados a fazer a comitiva passar por mercadores, peregrinos ou patrulheiros locais.';
+      defense.campRestAndSafetyGuards = 'Impede que espiões de estrada associem a passagem do grupo à sua verdadeira reputação.';
+    } else if (dt === 'actor_feat_and_voice_modulation_rehearsal') {
+      defense.defenseTitle = 'Ensaio de Modulação Vocal, Senhas Falsas e Histórias de Cobertura (PHB p. 128, 165)';
+      defense.disguiseAndCampSafety = 'Os membros da comitiva alinham previamente no acampamento quais pseudônimos usarão e qual história de cobertura contarão caso encontrem outros grupos na estrada no dia seguinte.';
+      defense.disguiseAndIdentityWatch = 'Evita contradições acidentais entre companheiros durante perguntas cruzadas de Sabedoria (Intuição) feitas por outras comitivas.';
+      defense.campRestAndSafetyGuards = 'Concede vantagem no teste de Enganação em grupo quando todos seguem o roteiro ensaiado.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 311: MOTOR DE NÉVOA DE IDENTIDADE POR PERCEPÇÃO PASSIVA, ILUMINAÇÃO E RITMO DE MARCHA (D&D 5e)
   // =========================================================================
 
@@ -38949,6 +39024,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveNarrativeIntroductionAndAlias: resolveNarrativeIntroductionAndAlias,
+    calcCampDisguiseAndVoiceRecognitionStation: calcCampDisguiseAndVoiceRecognitionStation,
     resolveStrangerIdentityPerceptionFog: resolveStrangerIdentityPerceptionFog,
     calcCampCamouflagedOutpostVisibilityStation: calcCampCamouflagedOutpostVisibilityStation,
     resolveParleyTruthAndTelepathy: resolveParleyTruthAndTelepathy,
