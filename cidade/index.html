@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessLeyLineConfluenceHazard) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var lc = CartShared.calcWildernessLeyLineConfluenceHazard(bKey, 'planar_bleed_earthmote_gravity_shear');
+        return '<div class="clp-leyline-confluence-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,14,42,0.85);padding:4px 8px;border-radius:4px;border:1px solid rgba(168,85,247,0.4);font-size:8px;color:#faf5ff;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + lc.color + ';margin-bottom:2px;">' + lc.icon + ' ' + lc.hazardTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Confluência de Linhas de Ley e Locais Anômalos:</b> ' + lc.leyConfluenceRisk + ' (CD ' + lc.saveDC + ' [' + lc.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#e9d5ff;margin-top:1px;">• <b>Mitigação:</b> ' + lc.pioneerMitigation + ' · <i>Estabilização: ' + lc.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampLeyLineConfluenceStation) return '';
+        var bKey = (biome && biome.key) || 'mountain';
+        var lc = CartShared.calcCampLeyLineConfluenceStation(bKey, 'ancient_menhir_circle_hallowed_sanctuary_bivouac');
+        return '<div class="clp-leyline-confluence-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(24,10,34,0.8);padding:4px 8px;border-radius:4px;border:1px solid rgba(147,51,234,0.35);font-size:8px;color:#faf5ff;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + lc.color + ';margin-bottom:2px;">' + lc.icon + ' ' + lc.defenseTitle.toUpperCase() + ' (DMG p. 109-111):</div>' 
+          + '  <div>• <b>Bivaque em Círculo de Menires:</b> ' + lc.leyConfluenceAndCampSafety + ' · <b>Defesa:</b> ' + lc.leyConfluenceAndWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#d8b4fe;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + lc.campRestAndSafetyGuards + '</div>' 
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessTakyrClayPanHazard) return '';
         var bKey = (biome && biome.key) || 'desert';
         var tk = CartShared.calcWildernessTakyrClayPanHazard(bKey, 'suffosion_piping_tunnel_crust_collapse');

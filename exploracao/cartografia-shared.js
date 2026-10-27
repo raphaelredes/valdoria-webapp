@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 300 [MARCO TRICENTENÁRIO]: SANTUÁRIOS DE LINHAS DE LEY, CONFLUÊNCIAS PLANARES E LOCAIS ANÔMALOS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessLeyLineConfluenceHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var ht = (hazardType || 'planar_bleed_earthmote_gravity_shear').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Confluência de Linhas de Ley e Cisalhamento Gravitacional de Rochedos Flutuantes (Earthmotes)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      leyConfluenceRisk: 'No cruzamento de três artérias telúricas arcanas, fragmentos da crosta de quartzo e basalto levitam em órbitas lentas (earthmotes / ilhas de pedra suspensas, DMG p. 109) cercados por bolsões de gravidade invertida; pisar fora da trilha estabilizada lança o aventureiro em queda ascendente e choque contra monólitos suspensos, causando 3d6 de dano de energia (force) e 2d6 de concussão (DMG p. 108-109; TCoE p. 168).',
+      pioneerMitigation: 'Batedores e arcanistas lançando pedregulhos de lastro à frente para mapear os vetores gravitacionais e ancorando cabos de ferro meteorítico nos pilares fixos (Arcanismo ou Sobrevivência CD 15).',
+      rescueAndStabilization: 'Tração coordenada por corda de segurança antes que a anomalia oscile e aplicação de sais de aterramento arcano (Atletismo ou Arcanismo CD 14).',
+      icon: '🌌',
+      color: '#a855f7'
+    };
+
+    if (ht === 'eldritch_flames_arcane_tempest_surge') {
+      hazard.hazardTitle = 'Tempestade Mística de Confluência (Chamas Místicas e Vento de Éter)';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Constituição';
+      hazard.leyConfluenceRisk = 'A sobrecarga do nó de Linhas de Ley manifesta uma Tempestade Mística (Eldritch Storm, TCoE p. 162): relâmpagos violetas silenciosos correm pelo chão vitrificando a areia em fulguritos e drenando a vitalidade mágica; falha na salvaguarda impõe 3d6 de dano de energia e suprime a reação do personagem por 1 hora (TCoE p. 162-163; DMG p. 109).';
+      hazard.pioneerMitigation = 'Aterramento de lanças e armaduras metálicas com hastes de cobre cravadas no solo e travessia durante o intervalo entre os pulsos harmônicos da linha de força (Arcanismo ou Natureza CD 14).';
+      hazard.rescueAndStabilization = 'Dissipação da carga estática residual com água consagrada ou ervas isolantes e repouso fora do raio do obelisco central (Medicina ou Religião CD 13).';
+    } else if (ht === 'feywild_chrono_dilation_mirage_nexus') {
+      hazard.hazardTitle = 'Distorção Temporal de Faéria e Miragem Tangível na Encruzilhada Planar';
+      hazard.saveDC = 15;
+      hazard.saveType = 'Sabedoria';
+      hazard.leyConfluenceRisk = 'O véu entre o Plano Material e a Faéria torna-se translúcido na confluência (DMG p. 50, 109); a paisagem assume contornos ilusórios táteis (Miragem Arcana) e o fluxo do tempo dilata-se, fazendo meia hora dentro da névoa iridescente equivaler a 6 horas de jornada perdida no mundo exterior com 1 nível de exaustão mental (DMG p. 50, 109; TCoE p. 152).';
+      hazard.pioneerMitigation = 'Uso de sinos de ferro frio (cold iron) cujo timbre dissonante quebra o encantamento acústico e mantém o passo ritmado da comitiva (Intuição, Religião ou Sobrevivência CD 15).';
+      hazard.rescueAndStabilization = 'Toque de ferro frio nos pulsos e foco em lembranças âncora da missão para restaurar a percepção temporal (Sabedoria ou Medicina CD 13).';
+    } else if (ht === 'dead_magic_null_vacuum_pocket_collapse') {
+      hazard.hazardTitle = 'Vácuo de Magia Morta e Ressonância Cristalina Cortante';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Constituição';
+      hazard.leyConfluenceRisk = 'No olho do ciclone arcano forma-se uma zona de Magia Morta (DMG p. 109) ladeada por drusas gigantes de quartzo ressonante; itens mágicos e truques apagam-se subitamente enquanto o zumbido harmônico dos cristais estilhaça vidros de poções e causa 2d8 de dano trovejante e surdez temporária (DMG p. 108-109).';
+      hazard.pioneerMitigation = 'Acondicionamento de frascos em lã grossa, proteção auricular com cera de abelha e transição imediata para iluminação por tochas e ferramentas mundanas (Arcanismo ou Sobrevivência CD 14).';
+      hazard.rescueAndStabilization = 'Retirada para a borda externa do anel de menires e tratamento da concussão timpânica (Medicina CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampLeyLineConfluenceStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'ancient_menhir_circle_hallowed_sanctuary_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque no Círculo de Menires de Solo Santificado (Hallowed Ley Sanctuary)',
+      leyConfluenceAndCampSafety: 'O acampamento é erguido no interior de um anel ancestral de monólitos rúnicos que estabiliza o fluxo das Linhas de Ley em um santuário de Solo Santificado (DMG p. 109; PHB p. 279).',
+      leyConfluenceAndWatch: 'A barreira mística dos menires impede que corruptores, mortos-vivos ou fadas hostis cruzem o perímetro de vigília e concede vantagem em testes de Percepção e Intuição às sentinelas.',
+      campRestAndSafetyGuards: 'O influxo telúrico harmonizado restaura o vigor da comitiva e permite recuperar +1 espaço de magia de 1º círculo ou +1 dado de vida adicional no descanso longo.',
+      icon: '⛺',
+      color: '#a855f7'
+    };
+
+    if (dt === 'floating_earthmote_anchored_sky_ledge_camp') {
+      defense.defenseTitle = 'Refúgio Suspenso em Platô de Rochedo Levitante Ancorado (Earthmote Bivouac)';
+      defense.leyConfluenceAndCampSafety = 'A comitiva sobe por cabos até o topo plano e gramado de um rochedo flutuante estacionário 9 metros acima do solo, recolhendo a escada de corda após a subida (DMG p. 109).';
+      defense.leyConfluenceAndWatch = 'Torna o acampamento fisicamente inalcançável para qualquer ameaça terrestre sem voo e garante cobertura três-quartos (+5 CA) na borda rochosa.';
+      defense.campRestAndSafetyGuards = 'Noite de descanso longo absolutamente segura acima das feras e perigos rastejantes dos ermos.';
+    } else if (dt === 'harmonic_quartz_prism_spell_ward_hearth') {
+      defense.defenseTitle = 'Fogueira Refratada em Prisma de Quartzo de Linha de Ley';
+      defense.leyConfluenceAndCampSafety = 'Alinhamento de cristais naturais da confluência ao redor do fogo de bivaque para converter a luz e a fumaça em uma cúpula térmica translúcida e invisível a mais de 10 metros (TCoE p. 150; PHB p. 183).';
+      defense.leyConfluenceAndWatch = 'Concede resistência a dano de frio e energia durante o repouso e alerta silenciosamente o conjurador do grupo caso alguma criatura se aproxime a menos de 18 metros.';
+      defense.campRestAndSafetyGuards = 'Combina ocultação arcana superior com proteção climática integral para todos os aventureiros.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 299: PLANÍCIES DE ARGILA FENDILHADA DE TAKYR E TÚNEIS DE SUFUSÃO (D&D 5e)
   // =========================================================================
 
@@ -38049,6 +38124,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessLeyLineConfluenceHazard: calcWildernessLeyLineConfluenceHazard,
+    calcCampLeyLineConfluenceStation: calcCampLeyLineConfluenceStation,
     calcWildernessTakyrClayPanHazard: calcWildernessTakyrClayPanHazard,
     calcCampTakyrClayPanStation: calcCampTakyrClayPanStation,
     calcWildernessGlacialErraticDrumlinHazard: calcWildernessGlacialErraticDrumlinHazard,
