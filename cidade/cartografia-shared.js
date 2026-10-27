@@ -20735,6 +20735,88 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 327: NAVEGAÇÃO COSTEIRA, CORRENTES MARÍTIMAS, RECIFES INVISÍVEIS E EMBARCAÇÕES A VELA (D&D 5e)
+  // =========================================================================
+
+  function resolveWildernessCoastalNavigationAndReefsHazard(biomeKey, coastalMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coast').toLowerCase();
+    var cm = (coastalMode || 'sailing_ship_coastal_transit_and_cargo').toLowerCase();
+
+    var coastal = {
+      coastalTitle: 'Navio a Vela (Sailing Ship): Cabotagem Costeira e Transporte Marítimo Pesado (PHB p. 155-157)',
+      saveDC: 15,
+      saveType: 'Veículos Aquáticos',
+      coastalMechanics: 'Embarcação costeira de 30 metros de comprimento com três mastros (CA 15, 300 PV, limiar de dano 15, tripulação 20, passageiros 20, carga 100 toneladas, velocidade 2 milhas por hora dependendo dos ventos costeiros, PHB p. 157); contorna penhascos e estuários com estabilidade em mar aberto, transportando montarias, vagões desmontados e provisões com autonomia de semanas!',
+      pioneerMitigation: 'Navegação por cabotagem contorna pântanos intransponíveis e cadeias de montanhas litorâneas, cobrindo até 48 milhas por dia sem fadiga de marcha (DMG p. 117-119).',
+      rescueAndStabilization: 'Botes salva-vidas e cabos com boias de cortiça permitem o resgate rápido de companheiros que caiam no mar bravio.',
+      icon: '⛵',
+      color: '#38bdf8'
+    };
+
+    if (cm === 'longship_beach_landing_and_surf_maneuver') {
+      coastal.coastalTitle = 'Galé Costeira (Longship): Desembarque em Praias e Manobra de Arrebentação (PHB p. 157)';
+      coastal.saveDC = 14;
+      coastal.saveType = 'Força';
+      coastal.coastalMechanics = 'Galé nórdica ligeira de 21 metros com remos e vela quadrada (CA 15, 300 PV, limiar de dano 15, tripulação 40 remadores, passageiros 150, carga 10 toneladas, velocidade 3 milhas por hora a remo ou vela, PHB p. 157); casco de fundo chato projetado para encalhe intencional em praias arenosas e manobras velozes através de quebramares e ondas de ressaca!';
+      coastal.pioneerMitigation = 'Permite desembarque imediato de batedores e comitivas em enseadas remotas sem necessidade de cais ou portos estruturados.';
+      coastal.rescueAndStabilization = 'Casco robusto com remadores sincronizados permite rebocar pequenas embarcações à deriva para fora da zona de quebra de ondas.';
+    } else if (cm === 'gust_of_wind_reef_clearance_and_propulsion') {
+      coastal.coastalTitle = 'Rajada de Vento (Gust of Wind): Escape Tático de Recifes Ocultos (PHB p. 270)';
+      coastal.saveDC = 14;
+      coastal.saveType = 'Evocação';
+      coastal.coastalMechanics = 'Druida, Feiticeiro ou Mago (2º círculo, semente de leguminosa, concentração até 1 minuto, PHB p. 270) canaliza uma linha de vento forte de 18 metros de comprimento por 3 metros de largura; enche velas auxiliares para manobras de emergência em calmaria ou empurra a embarcação 18 metros para longe de recifes afiados e rochedos submersos com salvaguarda de Força!';
+      coastal.pioneerMitigation = 'Evita colisões catastróficas contra bancos de corais e rochas de maré quando o leme perde sustentação na arrebentação.';
+      coastal.rescueAndStabilization = 'Cria correntes de ar controladas para empurrar boias de salvamento e pranchas de náufragos diretamente em direção ao navio.';
+    } else if (cm === 'fog_cloud_pirate_evasion_and_stealth_anchorage') {
+      coastal.coastalTitle = 'Névoa Obscurecente (Fog Cloud): Camuflagem Náutica contra Corsários (PHB p. 261)';
+      coastal.saveDC = 13;
+      coastal.saveType = 'Conjuração';
+      coastal.coastalMechanics = 'Druida, Feiticeiro, Mago ou Patrulheiro (1º círculo, concentração até 1 hora, PHB p. 261) conjura uma esfera de névoa densa de 6 metros de raio (expansível em níveis superiores) que bloqueia completamente a linha de visão; oculta o mastro e a silhueta da embarcação em enseadas e estuários, concedendo área fortemente obscurecida contra vigias de navios hostis!';
+      coastal.pioneerMitigation = 'Permite à comitiva fundear em enseadas dominadas por piratas ou sahuagins sem ser detectada por terra ou mar (DMG p. 117-119).';
+      coastal.rescueAndStabilization = 'Mascara operações de resgate noturno em costões rochosos contra arqueiros inimigos posicionados no topo de falésias.';
+    } else if (cm === 'sounding_pole_and_shoal_pilotage') {
+      coastal.coastalTitle = 'Prática de Praticagem e Sondagem de Sondas de Maré (DMG p. 117-118)';
+      coastal.saveDC = 13;
+      coastal.saveType = 'Percepção';
+      coastal.coastalMechanics = 'Utilizando varas de sondagem graduadas com chumbo e observação de arrebentações em bancos de areia, o batedor na proa realiza testes de Sabedoria (Percepção) ou Inteligência (Veículos Aquáticos) CD 13; mapeia canais profundos de maré baixa e alerta o timoneiro antes que a quilha colida com baixios rochosos.';
+      coastal.pioneerMitigation = 'Reduz à metade a velocidade de marcha náutica em trechos perigosos, mas anula o risco de encalhe ou danos ao leme em águas desconhecidas.';
+      coastal.rescueAndStabilization = 'Identifica lajes submersas seguras para apoio de pés de aventureiros durante desembarques em água na altura do peito.';
+    }
+
+    return coastal;
+  }
+
+  function calcCampCoastalAnchorageAndBeaconWatchStation(biomeKey, anchorageType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'coast').toLowerCase();
+    var at = (anchorageType || 'protected_cove_anchorage_and_crows_nest_watch').toLowerCase();
+
+    var anchorage = {
+      anchorageTitle: 'Ancoragem em Angra Protegida e Vigia no Cesto da Gávea (DMG p. 117)',
+      coastalCampSafety: 'O navio lança duas âncoras de ferro (proa e popa) em enseada protegida de ondas oceânicas por barreiras de ilhotas; a comitiva descansa a bordo nas cabines secas, isolada de marés altas e feras carnívoras do continente.',
+      coastalWatchAndSentinel: 'Sentinelas no cesto da gávea (a 18 metros de altura) mantêm vigilância com lanterna furta-fogo e visão panorâmica da orla e do horizonte marítimo, detectando canoas piratas ou criaturas anfíbias com vantagem em Sabedoria (Percepção).',
+      campRestAndSafetyGuards: 'Em caso de alerta de perigo, o navio pode cortar os cabos de amarração e navegar a pano aberto para o mar aberto antes que invasores alcancem o convés (PHB p. 157; DMG p. 117-119).',
+      icon: '⚓',
+      color: '#38bdf8'
+    };
+
+    if (at === 'beached_longship_palisade_redoubt') {
+      anchorage.anchorageTitle = 'Barricada de Casco Encalhado na Areia com Fogueira Rebaixada (DMG p. 111, 117)';
+      anchorage.coastalCampSafety = 'A galé ligeira é puxada para além da linha de maré cheia com troncos rolantes; o costado de carvalho do navio funciona como parapeito fortificado de 2 metros de altura, bloqueando ventos salinos e ataques de surpresa da restinga.';
+      anchorage.coastalWatchAndSentinel = 'Atiradores da comitiva guarnecem a amurada do barco com visão desobstruída de 360° sobre a praia, dispondo de cobertura de meia altura (+2 na CA e testes de Destreza).';
+      anchorage.campRestAndSafetyGuards = 'O bivaque sob a quilha mantém esteiras e provisões protegidas da umidade da areia e de caranguejos gigantes costeiros (PHB p. 196).';
+    } else if (at === 'tidal_sea_cave_anchorage_with_water_rise_ward') {
+      anchorage.anchorageTitle = 'Abrigo em Gruta Marinha de Maré com Alarme de Elevação da Água (PHB p. 211, 240)';
+      anchorage.coastalCampSafety = 'Botes e esteiras de dormir são acomodados em grutas marinhas de calcário acima da preamar de sizígia; o teto abobadado de pedra amortece rajadas de vento tempestuoso e tempestades elétricas da costa.';
+      anchorage.coastalWatchAndSentinel = 'Fios de alarme com sinos de bronze e a magia ritual Alarme (PHB p. 211) são instalados na boca da caverna e na marca d\'água de meia maré, acordando a comitiva instantaneamente se o nível do mar subir além do normal.';
+      anchorage.campRestAndSafetyGuards = 'Elimina totalmente o risco de afogamento durante o sono e concede refúgio térmico contra a hipotermia da brisa marinha noturna (PHB p. 186; DMG p. 110).';
+    }
+
+    return anchorage;
+  }
+
+  // =========================================================================
   // FASE 326: NAVEGAÇÃO FLUVIAL, CORREDEIRAS TORRENCIAIS, VAUS SUBMERSOS E EMBARCAÇÕES A REMO/QUILHA (D&D 5e)
   // =========================================================================
 
@@ -40081,6 +40163,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveWildernessCoastalNavigationAndReefsHazard: resolveWildernessCoastalNavigationAndReefsHazard,
+    calcCampCoastalAnchorageAndBeaconWatchStation: calcCampCoastalAnchorageAndBeaconWatchStation,
     resolveWildernessRiverNavigationAndRapidsHazard: resolveWildernessRiverNavigationAndRapidsHazard,
     calcCampRiverineMooringAndDriftwoodRedoubtStation: calcCampRiverineMooringAndDriftwoodRedoubtStation,
     resolveEarthmovingFortificationAndStoneWall: resolveEarthmovingFortificationAndStoneWall,
