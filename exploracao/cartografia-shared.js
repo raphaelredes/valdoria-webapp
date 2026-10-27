@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 324: ANCORAGEM DE PLANOS, CONFLUÊNCIAS ASTRAIS E PORTAIS PLANARES NATURAIS NOS ERMOS (D&D 5e)
+  // =========================================================================
+
+  function resolvePlanarConfluenceAndRiftAnchoring(biomeKey, planarMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var pm = (planarMode || 'plane_shift_eight_traveler_interdimensional_transit').toLowerCase();
+
+    var planar = {
+      planarTitle: 'Transição Planar (Plane Shift): Trânsito Interdimensional de 8 Aventureiros (PHB p. 266)',
+      saveDC: 17,
+      saveType: 'Carisma',
+      planarMechanics: 'Clérigo, Druida, Bruxo, Feiticeiro ou Mago (7º círculo, haste bifurcada de metal de 250 PO sintonizada, tempo 1 ação, PHB p. 266) une as mãos de até 8 aventureiros voluntários e os transporta instantaneamente para outro plano de existência (como os Planos Elementais, Arbórea ou o Plano Material Primordial), ou desfere um toque corpo a corpo que força uma salvaguarda de Carisma para banir uma criatura hostil para outro plano!',
+      pioneerMitigation: 'Assegura rota de escape interdimensional imediata caso a rota terrestre Pointcrawl seja bloqueada por cataclismos ou exércitos hostis (PHB p. 266).',
+      rescueAndStabilization: 'Permite resgatar companheiros perdidos no Shadowfell, no Feywild ou nas profundezas do Plano Astral.',
+      icon: '🌌',
+      color: '#8b5cf6'
+    };
+
+    if (pm === 'gate_planar_portal_and_entity_summoning') {
+      planar.planarTitle = 'Portal (Gate): Portal Astral Circular de 6 Metros e Evocação Nominal (PHB p. 269)';
+      planar.saveDC = 19;
+      planar.saveType = 'Carisma';
+      planar.planarMechanics = 'Clérigo, Feiticeiro ou Mago (9º círculo, diamante de 5.000 PO, concentração até 1 minuto, PHB p. 269) rasga o tecido do espaço abrindo um portal circular de 1,5 a 6 metros de diâmetro para um local exato em outro plano; o portal permite travessia bidirecional instantânea para tropas e montarias aliadas, ou puxa irresistivelmente uma entidade planar específica ao pronunciar seu nome verdadeiro!';
+      planar.pioneerMitigation = 'Permite mobilizar exércitos da guilda ou reforços planares diretamente em nós críticos de campanha disputados nos ermos (PHB p. 269).',
+      planar.rescueAndStabilization = 'Evacuação em massa de até centenas de refugiados e aventureiros antes do colapso de uma região.';
+    } else if (pm === 'natural_planar_rift_stabilization_and_fey_crossing') {
+      planar.planarTitle = 'Passagens Feéricas e Fendas Planares Naturais nos Ermos (DMG p. 43-68)';
+      planar.saveDC = 16;
+      planar.saveType = 'Arcanismo';
+      planar.planarMechanics = 'Conjurador de fronteira ou batedor místico (DMG p. 43-68) identifica fendas planares espontâneas nos 15 biomas (Passagens Feéricas na Floresta Ancestral, Fendas Sombrias no Cemitério e Fendas de Magma no Vulcão); realiza um teste de Inteligência (Arcanismo) para estabilizar o vórtice com estacas de prata e ferro frio, impedindo que a comitiva sofra desvios espaciais ou efeitos de magia selvagem instável ao transitar!';
+      planar.pioneerMitigation = 'Atalhos cósmicos naturais que cortam semanas de marcha a pé através de biomas perigosos conectando nós distantes do mapa (DMG p. 45).',
+      planar.rescueAndStabilization = 'Estabiliza fendas ativas para evitar a sucção descontrolada de membros do grupo em tempestades astrais.';
+    } else if (pm === 'unstable_mana_pocket_and_wild_magic_dampening') {
+      planar.planarTitle = 'Bolsões de Mana Instável e Aterramento de Magia Selvagem (DMG p. 108-112)';
+      planar.saveDC = 16;
+      planar.saveType = 'Sabedoria';
+      planar.planarMechanics = 'Em nós anômalos de confluência planar onde a urdidura arcana oscila perigosamente (DMG p. 108), conjurações arriscam desencadear surtos de magia selvagem; o conjurador ergue um campo de aterramento harmônico de 18 metros que canaliza o excesso de éter para cristais telúricos, garantindo que magias de cura e proteção funcionem sem desvios catastróficos.';
+      planar.pioneerMitigation = 'Neutraliza interferências de mana instável em equipamentos mágicos e anula efeitos caóticos durante encontros na rota.',
+      planar.rescueAndStabilization = 'Garante que poções e magias de reviver operem com fidelidade absoluta sem falhas de ressonância.';
+    }
+
+    return planar;
+  }
+
+  function calcCampPlanarAnchorAndManaStabilizerStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'planar_anchor_rod_and_rift_suppression').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Hastes de Aterramento Planar e Supressão de Fendas no Bivaque (DMG p. 45; PHB p. 266)',
+      planarAndCampSafety: 'Ao montar o bivaque em zonas com alta atividade mágica ou proximidade de portais ancestrais, o grupo crava quatro hastes de ferro frio e prata nos vértices do acampamento; o circuito sela microfendas planares espontâneas e impede que demônios do Abismo, espectros do Shadowfell ou aberrações astrais brotem no meio das barracas.',
+      planarAndCouncilWatch: 'Sentinelas de vigília monitoram oscilações de mana e auroras etéreas na atmosfera, detectando aproximações de entidades planares invisíveis com antecedência total.',
+      campRestAndSafetyGuards: 'Garante que o descanso longo transcorra sem flutuações de gravidade, pesadelos do Plano Astral ou drenos necromânticos de fendas locais (PHB p. 186; DMG p. 45).',
+      icon: '🌌',
+      color: '#8b5cf6'
+    };
+
+    if (dt === 'astral_confluence_beacon_and_harmonic_watch') {
+      defense.defenseTitle = 'Farol Harmônico Astral e Vigia de Alinhamento Cósmico (DMG p. 47)';
+      defense.planarAndCampSafety = 'Um cristal sintonizado ao Plano Material Primordial é suspenso sobre a fogueira do acampamento; a emanação estabiliza o espaço-tempo local, concedendo vantagem a todos os aventureiros em salvaguardas de Carisma contra banimentos ou teletransportes involuntários.',
+      defense.planarAndCouncilWatch = 'O vigia noturno conta com sensibilidade aumentada para discernir distorções planares no horizonte, prevenindo ataques surpresa de comitivas montadas em pesadelos ou montarias astrais.',
+      defense.campRestAndSafetyGuards = 'Evita que membros da comitiva sejam projetados para semiplanos hostis durante o sono (DMG p. 47).';
+    } else if (dt === 'emergency_plane_shift_escape_key') {
+      defense.defenseTitle = 'Chave de Transição Planar de Emergência para Refúgio Seguro (PHB p. 266)';
+      defense.planarAndCampSafety = 'O conjurador mantém a haste de Transição Planar sintonizada com um santuário da guilda ou templo consagrado (Fase 320) posicionada no centro do bivaque; caso o acampamento seja emboscado por forças avassaladoras, um comando verbal imediato une a comitiva e a teleporta instantaneamente para a segurança.',
+      defense.planarAndCouncilWatch = 'Confere tranquilidade psicológica e foco tático aos membros do grupo, sabendo que existe um protocolo de escape infalível contra extermínio da comitiva.',
+      defense.campRestAndSafetyGuards = 'Garante sobrevivência garantida da comitiva mesmo nas fronteiras mais hostis do mundo de Valdoria (PHB p. 266).';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 323: BARREIRAS ANTIDIVINAÇÃO, VÉUS DE OCULTAÇÃO E CAMUFLAGEM MÍSTICA DE COMITIVA (D&D 5e)
   // =========================================================================
 
@@ -39849,6 +39924,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolvePlanarConfluenceAndRiftAnchoring: resolvePlanarConfluenceAndRiftAnchoring,
+    calcCampPlanarAnchorAndManaStabilizerStation: calcCampPlanarAnchorAndManaStabilizerStation,
     resolveCovertPartyInvisibilityAndAntiDivination: resolveCovertPartyInvisibilityAndAntiDivination,
     calcCampVeilAndAntiDivinationWardStation: calcCampVeilAndAntiDivinationWardStation,
     resolveIllusionTerrainAndMazeOrientation: resolveIllusionTerrainAndMazeOrientation,
