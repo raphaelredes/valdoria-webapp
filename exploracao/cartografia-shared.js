@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 298: CAMPOS DE MEGABLOCOS ERRÁTICOS GLACIAIS E ENXAMES DE DRUMLINS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessGlacialErraticDrumlinHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'arctic').toLowerCase();
+    var ht = (hazardType || 'perched_rocking_megaboulder_topple').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Desequilíbrio de Megabloco Errático Oscilante (Pedra Balançante)',
+      saveDC: 15,
+      saveType: 'Destreza',
+      erraticDrumlinRisk: 'Monólitos alóctones de gnaisse de 80 toneladas apoiados em pedestais mínimos de tilito glacial consolidado (pedras oscilantes / rocking stones) entram em ressonância com rajadas de vento ou com o apoio inadvertido de escaladores; o tombamento ou esmagamento no ponto de fulcro causa 4d6 de concussão e prende membros sob a rocha (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores verificando calços basais de quartzo e proibindo apoio ou ancoragem de cordas em megablocos sem base enterrada (Natureza ou Sobrevivência CD 14).',
+      rescueAndStabilization: 'Uso de alavancas de ferro (pés-de-cabra) em conjunto e calços de madeira dura para aliviar o peso e extrair o aventureiro (Atletismo em grupo CD 15).',
+      icon: '🪨',
+      color: '#64748b'
+    };
+
+    if (ht === 'inter_drumlin_swale_quagmire_kettle_trap') {
+      hazard.hazardTitle = 'Atolamento em Depressão Inter-Drumlin Alagada (Topografia Cesto-de-Ovos)';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.erraticDrumlinRisk = 'Entre as dezenas de colinas ovais alinhadas do enxame de drumlins, as baixadas impermeáveis de argila glacial formam lagoas cegas cobertas por musgo flutuante; afundar na lama argilosa gelada até o peito impõe condição impedido e 1 nível de exaustão por hipotermia úmida (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Navegação estrita pela linha de crista dos drumlins (whalebacks) evitando cortar caminho pelas baixadas verdes entre as colinas (Sobrevivência CD 14).';
+      hazard.rescueAndStabilization = 'Lançamento de cordas a partir do flanco seco do drumlin e aquecimento imediato com troca de vestes encharcadas (Atletismo CD 13 ou Sobrevivência CD 13).';
+    } else if (ht === 'allochthonous_magnetite_erratic_compass_deviation') {
+      hazard.hazardTitle = 'Desvio de Bússola por Megablocos de Gabro Rico em Magnetita';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Sabedoria';
+      hazard.erraticDrumlinRisk = 'Campos de megablocos erráticos arrancados de formações férricas distantes criam anomalias magnéticas locais em meio ao nevoeiro das colinas idênticas de drumlins; a agulha da bússola gira em falso, induzindo a comitiva a marchar em círculos com perda de 4 horas e desgaste de provisões (DMG p. 110-111; PHB p. 183).';
+      hazard.pioneerMitigation = 'Orientação geomorfológica pelo eixo longo dos drumlins (que sempre aponta a direção do fluxo glacial antigo) em vez de confiar na agulha magnética (Sobrevivência ou Natureza CD 14).';
+      hazard.rescueAndStabilization = 'Subida ao topo do megabloco mais alto para triangulação visual de marcos distantes acima da cerração (Percepção CD 13).';
+    } else if (ht === 'frost_riven_split_erratic_chasm_ambush') {
+      hazard.hazardTitle = 'Fenda de Gelivração em Megabloco Partido e Queda em Fissura';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Destreza';
+      hazard.erraticDrumlinRisk = 'Megablocos colossais rachados ao meio pelo congelamento secular da água escondem corredores estreitos de 7 metros de profundidade cobertos por urzes e líquens; a queda no vão angular de granito afiado causa 2d8 de concussão e 1d6 cortante (DMG p. 110).';
+      hazard.pioneerMitigation = 'Sondagem de tapetes de urze sobre fendas de rocha partida e travessia por pontes de corda tencionada (Acrobacia ou Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Içamento vertical por talha ancorada no topo do monólito e imobilização de entorses (Medicina CD 13).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampGlacialErraticDrumlinStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'arctic').toLowerCase();
+    var dt = (defenseType || 'split_megaboulder_cleft_fortified_sanctuary').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Santuário Fortificado em Fenda de Megabloco Partido',
+      erraticAndCampSafety: 'O bivaque é instalado no corredor interno seco entre as duas metades de um megabloco errático de granito de 10 metros de altura; as paredes de rocha maciça de 3 metros de espessura bloqueiam vendavais polares e retêm o calor da fogueira refletido na pedra (DMG p. 111).',
+      erraticAndWatch: 'O topo plano do megabloco serve como torre de vigia elevada sobre todo o enxame de drumlins, concedendo cobertura três-quartos (+5 CA) e vantagem em Percepção.',
+      campRestAndSafetyGuards: 'Abrigo rochoso inexpugnável contra feras e intempéries, garantindo descanso longo pleno para os aventureiros.',
+      icon: '⛺',
+      color: '#64748b'
+    };
+
+    if (dt === 'drumlin_stoss_crest_drainage_bivouac') {
+      defense.defenseTitle = 'Acampamento Drenado no Flanco Íngreme (Stoss) do Drumlin';
+      defense.erraticAndCampSafety = 'Posicionamento das tendas no patamar bem drenado de cascalho glacial a meia-encosta do drumlin, acima da zona de nevoeiro frio e dos pântanos das baixadas (PHB p. 183; DMG p. 111).';
+      defense.erraticAndWatch = 'Garante solo firme e seco mesmo sob tempestades torrenciais e visão clara de 360 graus das depressões circundantes.';
+      defense.campRestAndSafetyGuards = 'Impede a hipotermia noturna por umidade ascendente do solo argiloso.';
+    } else if (dt === 'glacial_cobble_ring_heat_retaining_hearth') {
+      defense.defenseTitle = 'Fornalha Térmica de Seixos Glaciais de Quartzito';
+      defense.erraticAndCampSafety = 'Construção de um leito térmico com seixos rolados de quartzito denso aquecidos na fogueira e enterrados sob o piso das tendas ao pé do megabloco (PHB p. 150).';
+      defense.erraticAndWatch = 'Irradia calor constante por 8 horas sem emitir fumaça ou brilho visível à distância, concedendo +1 dado de vida recuperado no descanso longo.';
+      defense.campRestAndSafetyGuards = 'Camuflagem luminosa total à noite combinada com conforto térmico superior para a comitiva.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 297: TERRAÇOS DE RECIFE CORALINO FÓSSIL SOERGUIDO E MAKATEA (D&D 5e)
   // =========================================================================
 
@@ -37899,6 +37974,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessGlacialErraticDrumlinHazard: calcWildernessGlacialErraticDrumlinHazard,
+    calcCampGlacialErraticDrumlinStation: calcCampGlacialErraticDrumlinStation,
     calcWildernessMakateaCoralKarstHazard: calcWildernessMakateaCoralKarstHazard,
     calcCampMakateaCoralKarstStation: calcCampMakateaCoralKarstStation,
     calcWildernessAlkalineTufaTowerHazard: calcWildernessAlkalineTufaTowerHazard,
