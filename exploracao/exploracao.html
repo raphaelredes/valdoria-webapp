@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T12:10:49Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T12:19:24Z - do not edit directly, edit source -->
 
 
 
@@ -43903,6 +43903,236 @@ const FIXED_MAPS = {
 
   // ============ FLORESTA (3 mapas) =============
 
+
+  // ============ MASMORRA: COFRE DOS BANDIDOS (bandit_vault) =============
+  // Masmorra AAA Tier 1-3 (Bioma Planície - Fortaleza Bandida)
+  // Grid hex 20 cols x 24 rows com tile types de cantaria e passadiço:
+  //   . = path (walkable, corredor de cantaria e piso de madeira)
+  //   # = wall (impassable, muralha de pedra e grades de ferro)
+  //   o = open hall (walkable, patio dos vigias e fogueira segura)
+  //   i = inner vault (walkable, camara blindada do tesouro)
+  //   E = edge/exit (entrada/saida unica ao sul)
+  bandit_vault: {
+    id: 'bandit_vault', region: 'valdoria', biome: 'dungeon', is_dungeon: true,
+    name: 'Cofre dos Bandidos',
+    cols: 20, rows: 24, seed: 99003, spawnCol: 10, spawnRow: 23,
+    music: 'dungeon', danger: 4,
+    boss: {
+      name: 'Malakor, o Mestre dos Ladrões', cr: 3, xp: 700, sugLvl: 3,
+      hp: 58, ac: 15, atk: 6,
+      multiAttack: 2,
+      hasBurstSkill: true,    // Ataque Furtivo Mortal (3d6 bonus)
+      hasResource: true       // Esquiva Sobrenatural / Fumaça Ofuscante
+    },
+    worldPos: { x: 0.70, y: 0.66 },
+    weather_pool: ['s'],
+    weights: { '.': 1 },
+    dungeon: true,
+    parentMap: 'bandit_fortress',
+    gridTemplate: [
+      '####################',
+      '####iiiiiiiiiiii####',
+      '###iiiiiiiiiiiiii###',
+      '###iiiiiiiiiiiiii###',
+      '####iiii....iiii####',
+      '#####..........#####',
+      '####............####',
+      '###..............###',
+      '###...oooooooo...###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###...oooooooo...###',
+      '#####..........#####',
+      '######...##...######',
+      '#######..##..#######',
+      '########.##.########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########E##########'
+    ],
+    landmarks: [
+      { type: 'throne',    col: 10, row: 2,  _hex: 'K3'  },  // Mesa de comando de Malakor
+      { type: 'bonepile',  col: 8,  row: 2,  _hex: 'I3'  },  // Entulho e baús menores
+      { type: 'bonepile',  col: 12, row: 2,  _hex: 'M3'  },  // Entulho de armas
+      { type: 'armorpile', col: 14, row: 9,  _hex: 'O10' },  // Cofre das Três Fechaduras Runicas
+      { type: 'bonfire',   col: 10, row: 13, _hex: 'K14' },  // Fogueira no patio dos vigias
+      { type: 'banner',    col: 7,  row: 8,  _hex: 'H9'  },  // Flamula dos bandidos
+      { type: 'banner',    col: 13, row: 8,  _hex: 'N9'  }   // Flamula dos bandidos
+    ],
+    atmosphereZones: [
+      { col: 10, row: 2,  type: 'evil', radius: 4.5, _hex: 'K3'  },  // Camara do chefe — penumbra opressiva
+      { col: 10, row: 13, type: 'warm', radius: 5.0, _hex: 'K14' },  // Fogueira — calor acolhedor
+      { col: 14, row: 9,  type: 'cold', radius: 3.0, _hex: 'O10' }   // Cofre rúnico — estatica metálica fria
+    ],
+    restHex: { col: 10, row: 13, _hex: 'K14' },
+    dungeonEncounters: [
+      { id: 'vault_campfire', col: 10, row: 13, _hex: 'K14',
+        repeatable: true,
+        title: 'Fogueira no Aposento dos Vigias',
+        text: 'Em meio a engradados empilhados e mantimentos pilhados de caravanas, um braseiro de ferro forjado emite labaredas vivas. O espaço oferece um ponto cego nas patrulhas dos bandidos, com abrigo seguro para a comitiva revisar as armas, cuidar dos ferimentos e planejar a invasão do cofre principal.',
+        flavor: 'Acampamento · K14 · Repouso',
+        category: 'discovery',
+        choices: [
+          { id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
+            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            outcome_ok: { _short_rest: true,
+              text: 'Você se acomoda junto ao braseiro aquecido. As dores musculares se acalmam e o fôlego retorna.' } },
+          { id: 'long_rest', label: 'Descanso Longo (1× por masmorra)',
+            desc: 'HP/MP cheios + remove 1 nível de Exaustão. Apenas 1 vez nesta masmorra.',
+            outcome_ok: { _long_rest: true,
+              text: 'Com vigília atenta nos corredores, a comitiva descansa as 8 horas necessárias e acorda revigorada.' } },
+          { id: 'camp_companion_banter', label: '🗣️ Dialogar com a Comitiva ao Redor do Fogo',
+            desc: 'Reunir os aliados ao calor das brasas para conversar, avaliar os ânimos e estreitar laços',
+            outcome_ok: { _companion_banter: true, text: 'Você convida seus companheiros para uma pausa ao redor das chamas.' } },
+          { label: 'Revisar gazuas e mapas de rotas (Ladino)',
+            only_class: 'ladino',
+            skill: 'dex', dc: 11,
+            desc: 'Destreza (Prestidigitação) CD 11 — ajustar as ferramentas de arrombamento com óleo fino',
+            outcome_ok: { text: 'Você lubrifica suas gazuas e memoriza a planta do cofre. Vantagem no arrombamento das portas internas!', xp: 25, _flag: 'picks_tuned' },
+            outcome_fail: { text: 'Uma das varetas finas entorta no estojo, mas você consegue desentortá-la com calma.', xp: 5 } },
+          { id: 'leave_camp', label: 'Sair do Acampamento',
+            outcome_ok: { text: 'Você apaga o excesso de chamas no braseiro e retoma a incursão aos corredores do cofre.' } }
+        ]
+      },
+      { id: 'vault_sentinels', col: 10, row: 20, _hex: 'K21',
+        title: 'Vigias da Passarela Subterrânea',
+        text: 'Dois saqueadores veteranos com gibões de couro reforçado e bestas pesadas engatilhadas patrulham a passarela de madeira que cruza o fosso da entrada. O tilintar de suas virotes ecoa no teto abobadado.',
+        flavor: 'Encontro Tático · Vigias',
+        category: 'combat',
+        choices: [
+          { label: 'Disparo sorrateiro das sombras',
+            skill: 'dex', dc: 12,
+            desc: 'Destreza (Furtividade) CD 12 — abater o sentinela antes que soe o gongo de alarme',
+            outcome_ok: { text: 'Seu disparo atinge o mecanismo da besta do vigia, quebrando o disparo dele! SURPRESA — você ataca primeiro na batalha.',
+              xp: 30, dungeon_combat: { enemy: 'bandit', lookup_name: 'Bandido Armado', surprise: true, preCombatEffects: ['first_attack_adv'] } },
+            outcome_fail: { text: 'O virote raspa numa viga de ferro e emite um estrondo metálico. Os bandidos entram em guarda imediata!',
+              xp: 5, dungeon_combat: { enemy: 'bandit', lookup_name: 'Bandido Armado', surprise: false } } },
+          { label: 'Intimidar com determinação de aço',
+            skill: 'cha', dc: 13,
+            desc: 'Carisma (Intimidação) CD 13 — ordenar rendição imediata com autoridade mortal',
+            outcome_ok: { text: 'Sua presença intimidadora gela o sangue dos saqueadores. Eles recuam desnorteados (SURPRESA)!',
+              xp: 30, dungeon_combat: { enemy: 'bandit', lookup_name: 'Bandido Armado', surprise: true } },
+            outcome_fail: { text: 'Eles zombam de sua exigência e engatilham os dardos para o confronto.',
+              xp: 5, dungeon_combat: { enemy: 'bandit', lookup_name: 'Bandido Armado', surprise: false } } },
+          { label: 'Encantar com Sono ou distração mágica (Arcano)',
+            only_class: ['mago', 'bruxo', 'feiticeiro', 'bardo'],
+            skill: 'int', dc: 12,
+            desc: 'Inteligência (Arcanismo) CD 12 — adormecer os sentinelas sem disparar alarme',
+            outcome_ok: { text: 'Uma nuvem de areia cintilante e sussurros sonolentos envolve os guardas. Eles tombam roncando suavemente nas caixas! Caminho livre sem combate!',
+              xp: 50, _flag: 'vault_sentinels_slept' },
+            outcome_fail: { text: 'O fluxo mágico rebate num medalhão protetor de um dos guardas, que ergue a besta furioso!',
+              xp: 8, dungeon_combat: { enemy: 'bandit', lookup_name: 'Bandido Armado', surprise: false } } }
+        ]
+      },
+      { id: 'vault_tripwire_trap', col: 10, row: 16, _hex: 'K17',
+        title: 'Mecanismo Oculto de Disparo',
+        text: 'Entre duas colunas de cantaria, um fio de cobre quase invisível corre rente às lajotas do chão, conectado a um mecanismo embutido na parede que projeta virotes de besta envenenados contra quem atravessar o arco.',
+        flavor: 'Armadilha Mecânica D&D 5e',
+        category: 'trap',
+        choices: [
+          { label: 'Desarmar o fio tensor com ferramentas finas (Investigação/Ladinagem)',
+            skill: 'dex', dc: 12,
+            desc: 'Destreza (Ferramentas de Ladrão) CD 12 — calçar o gatilho com uma cunha de chumbo',
+            outcome_ok: { text: 'Com mãos firmes, você desativa o contrapeso do mecanismo e recolhe 6 virotes envenenados intactos!', xp: 35, _flag: 'tripwire_disarmed' },
+            outcome_fail: { text: 'O fio estala! Dois virotes zunem da fresta e atingem seu ombro de raspão com veneno entorpecente.', xp: 5, hp_loss: 5 } },
+          { label: 'Saltar sobre a armadilha com impulsão atlética',
+            skill: 'str', dc: 12,
+            desc: 'Força (Atletismo) CD 12 — saltar por cima do setor de impacto e apoiar os aliados',
+            outcome_ok: { text: 'Você transpassa o arco num salto limpo e avisa a comitiva para pisar estritamente sobre a cantaria elevada.', xp: 30, _flag: 'tripwire_cleared' },
+            outcome_fail: { text: 'Sua bota toca levemente no arame na descida. O mecanismo dispara e estilhaços de madeira te atingem.', xp: 5, hp_loss: 3 } }
+        ]
+      },
+      { id: 'vault_lock_puzzle', col: 14, row: 9, _hex: 'O10',
+        title: 'O Cofre das Três Fechaduras Rúnicas',
+        text: 'Sob uma alcova de ferro maciço repousa o cofre auxiliar de Malakor, trancado por três fechos rotativos ornamentados com ligas de bronze, prata e ferro fundido. Um mecanismo de travamento automático ameaça selar o cofre caso a sequência errada seja forçada.',
+        flavor: 'Enigma Mecânico · Tesouro Escondido',
+        category: 'mystery',
+        choices: [
+          { label: 'Decifrar a combinação pelos cliques internos (Ladinagem)',
+            only_class: 'ladino',
+            skill: 'dex', dc: 13,
+            desc: 'Destreza (Ladinagem) CD 13 — alinhar os três tambores pelo som dos pinos caindo',
+            outcome_ok: { text: 'Três estalos secos ressoam na câmara. A pesada porta de ferro se abre, revelando sacos de ouro cunhado e elixires preciosos!', xp: 45, gold: 75, _flag: 'vault_puzzle_solved' },
+            outcome_fail: { text: 'O pino central emperra com uma mola dura. Você resgata apenas algumas moedas da gaveta externa.', xp: 10, gold: 20 } },
+          { label: 'Interpretar as runas mágicas de selamento (Arcanismo)',
+            only_class: ['mago', 'bruxo', 'feiticeiro'],
+            skill: 'int', dc: 13,
+            desc: 'Inteligência (Arcanismo) CD 13 — neutralizar a corrente mística que trava a engrenagem',
+            outcome_ok: { text: 'Você direciona um raio de estática que sobrecarrega o fecho rúnico. A trava cede suavemente e o tesouro se revela!', xp: 45, gold: 75, _flag: 'vault_puzzle_solved' },
+            outcome_fail: { text: 'A barreira mágica chia e dá um choque menor em seus dedos.', xp: 10, gold: 15, hp_loss: 2 } },
+          { label: 'Forçar a dobradiça de cantaria com pé-de-cabra',
+            skill: 'str', dc: 14,
+            desc: 'Força (Atletismo) CD 14 — aplicar alavanca pesada no ponto fraco da solda',
+            outcome_ok: { text: 'O metal range e se retorce sob sua força bruta! A fechadura se rompe, liberando o conteúdo do cofre!', xp: 40, gold: 60, _flag: 'vault_puzzle_forced' },
+            outcome_fail: { text: 'A alavanca entorta sem romper o aço. Você recolhe apenas o ouro guardado na cantoneira de fora.', xp: 5, gold: 15 } }
+        ]
+      },
+      { id: 'vault_boss_malakor', col: 10, row: 3, _hex: 'K4',
+        title: 'A Câmara do Mestre dos Ladrões',
+        text: 'No coração blindado do cofre, sobre uma mesa entalhada coberta de mapas de rotas comerciais e moedas reluzentes, Malakor ergue-se com calma calculista. Vestindo um gibão de couro negro pontilhado de rebites de prata e empunhando um florete de lâmina fina e afiada, ele joga uma adaga que crava na madeira da mesa. Seus olhos são gélidos e atentos.',
+        flavor: 'Chefe de Masmorra · Confronto Final',
+        category: 'boss',
+        choices: [
+          { label: 'Chutar a mesa de carvalho e quebrar a postura dele (Guerreiro/Bárbaro)',
+            only_class: ['guerreiro', 'barbaro'],
+            skill: 'str', dc: 13,
+            desc: 'Força (Atletismo / Quebra de Postura) CD 13 — lançar o tampo pesado contra Malakor para anular seu equilíbrio',
+            outcome_ok: { text: 'A mesa pesada voa contra Malakor! Ele salta desajeitado para se esquivar, perdendo a guarda — SURPRESA e Vantagem no 1º golpe!',
+              xp: 45, dungeon_combat: { enemy: 'bandit_captain', lookup_name: 'Malakor, Mestre dos Ladrões', surprise: true, preCombatEffects: ['first_attack_adv'] } },
+            outcome_fail: { text: 'Malakor rola com agilidade felina sob o tampo e desembainha o florete num relance.',
+              xp: 8, dungeon_combat: { enemy: 'bandit_captain', lookup_name: 'Malakor, Mestre dos Ladrões', surprise: false } } },
+          { label: 'Antecipar o jogo de pernas e desferir estocada de contragolpe (Ladino/Monge)',
+            only_class: ['ladino', 'monge'],
+            skill: 'dex', dc: 13,
+            desc: 'Destreza (Acrobacia / Ponto Cego) CD 13 — interceptar a finta nas sombras e tirar a Ação Ardilosa dele',
+            outcome_ok: { text: 'Você lê a finta dele no ar e bloqueia a saída de sombras! Malakor vacila atônito (SURPRESA e Esquiva Sobrenatural cancelada na abertura)!',
+              xp: 45, dungeon_combat: { enemy: 'bandit_captain', lookup_name: 'Malakor, Mestre dos Ladrões', surprise: true, preCombatEffects: ['burst_disabled'] } },
+            outcome_fail: { text: 'Ele desvia de seu golpe no último centímetro com um sorriso irônico.',
+              xp: 8, dungeon_combat: { enemy: 'bandit_captain', lookup_name: 'Malakor, Mestre dos Ladrões', surprise: false } } },
+          { label: 'Condenar o criminoso em nome da Justiça Divina (Paladino/Clérigo)',
+            only_class: ['paladino', 'clerigo'],
+            skill: 'cha', dc: 13,
+            desc: 'Carisma (Intimidação Sagrada) CD 13 — brandir a fé para abalar a audácia do mestre ladrão',
+            outcome_ok: { text: 'Um clarão sagrado irrompe na câmara, expondo todas as sombras onde Malakor planejava se esconder — CA -1 e SURPRESA!',
+              xp: 40, dungeon_combat: { enemy: 'bandit_captain', lookup_name: 'Malakor, Mestre dos Ladrões', surprise: true, preCombatEffects: ['boss_ac_debuff', 'first_attack_adv'] } },
+            outcome_fail: { text: 'Malakor cospe no chão: "Seus deuses nunca pegaram um ladrão experiente." Ele ataca com rapidez letal!',
+              xp: 8, dungeon_combat: { enemy: 'bandit_captain', lookup_name: 'Malakor, Mestre dos Ladrões', surprise: false } } },
+          { label: 'Desorientar com pó cegante ou faíscas arcanas (Arcano)',
+            only_class: ['mago', 'bruxo', 'feiticeiro'],
+            skill: 'int', dc: 12,
+            desc: 'Inteligência (Arcanismo) CD 12 — conjurar um clarão estroboscópico para ofuscar o olhar do capitão',
+            outcome_ok: { text: 'As faíscas mágicas cegam a visão refinada de Malakor! Ele perde o foco predatório (SURPRESA e Ataque Furtivo anulado)!',
+              xp: 45, dungeon_combat: { enemy: 'bandit_captain', lookup_name: 'Malakor, Mestre dos Ladrões', surprise: true, preCombatEffects: ['burst_disabled'] } },
+            outcome_fail: { text: 'Malakor fecha os olhos a tempo e avança pelas laterais com florete em riste!',
+              xp: 8, dungeon_combat: { enemy: 'bandit_captain', lookup_name: 'Malakor, Mestre dos Ladrões', surprise: false } } },
+          { label: 'Avançar em guarda clássica e aceitar o duelo de aço',
+            skill: 'dex', dc: 12,
+            desc: 'Destreza (Acrobacia / Guarda) CD 12 — manter a defesa fechada contra a estocada rápida',
+            outcome_ok: { text: 'Você apara a estocada inicial com precisão e abre a guarda do líder dos bandidos (SURPRESA)!',
+              xp: 35, dungeon_combat: { enemy: 'bandit_captain', lookup_name: 'Malakor, Mestre dos Ladrões', surprise: true } },
+            outcome_fail: { text: 'O florete de Malakor atinge seu braço com velocidade assombrosa. Combate direto!',
+              xp: 5, hp_loss: 4, dungeon_combat: { enemy: 'bandit_captain', lookup_name: 'Malakor, Mestre dos Ladrões', surprise: false } } }
+        ]
+      }
+    ],
+    ambient_tips: [
+      'Moedas de ouro cunhadas tilintam em sacos empilhados nas reentrâncias.',
+      'O odor de cera de tocha, óleo de besta e cerveja barata impregna o ar.',
+      'Sussurros de sentinelas ecoam nas galerias superiores.',
+      'Marcas de gazuas recentes arranham as fechaduras das grades.',
+      'Passos silenciosos de patrulheiros furtivos rondam os cantos escuros.'
+    ],
+    dungeons: [],
+    edges: [
+      { col: 10, row: 23, targetMap: 'bandit_fortress', label: 'Sair (Fortaleza Bandida)' }
+    ]
+  },
+
   whispering_woods: {
 
     id: 'whispering_woods', region: 'valdoria', biome: 'forest',
@@ -84174,6 +84404,24 @@ function applyChoiceOutcome(choice, success, total, dc) {
 
   // Aplicado APENAS no outcome do encontro campfire_rest (repeatable).
 
+  if (outcome._companion_banter) {
+    var pParty = (S.player && S.player.party && S.player.party.length > 0) ? S.player.party : ['adv_027'];
+    var compId = pParty[Math.floor(Math.random() * pParty.length)];
+    var compName = (S.player && S.player.party_status && S.player.party_status[compId] && S.player.party_status[compId].name) || 'Durgan';
+    var compClass = (S.player && S.player.party_status && S.player.party_status[compId] && S.player.party_status[compId].class) || 'Guerreiro';
+
+    var banters = [
+      compName + " senta-se sobre uma pedra chata e limpa o fio de sua arma nas brasas: \"O calor do fogo é uma dádiva nestas profundezas. Mantenha o olhar atento, mas deixe a respiração acalmar. Seguiremos seu comando quando estiver pronto.\"",
+      compName + " ajeita as correias de sua mochila e sopra as cinzas das brasas: \"Não há vergonha em recuperar o fôlego antes do próximo confronto. Em combates como esse, a pressa só alimenta a sepultura.\"",
+      compName + " observa as sombras alongadas na parede da caverna e sorri com serenidade: \"Vi muitos grupos se desfazerem no primeiro sinal de escuridão. Mas esta comitiva tem fibra. Descanse; estarei na sentinela até você se levantar.\""
+    ];
+    var chosenBanter = banters[Math.floor(Math.random() * banters.length)];
+    S.event.resolved.text = chosenBanter;
+    if (typeof showToast === 'function') {
+      showToast('✦ ' + compName + ' aprova o momento de reflexão (+1 Afinidade)', 'success');
+    }
+  }
+
   if (outcome._short_rest) {
 
     var p = S.player;
@@ -85074,16 +85322,20 @@ function triggerDungeonEntry(dg) {
 
   // Demais dungeons mantem placeholder "em dev" ate serem trabalhadas individualmente.
 
-  const isMvpReady = (dg.id === 'orc_chief_tent' || dg.id === 'wolf_den') && FIXED_MAPS[dg.id];
+  const isMvpReady = (dg.id === 'orc_chief_tent' || dg.id === 'wolf_den' || dg.id === 'bandit_vault') && FIXED_MAPS[dg.id];
 
   if (isMvpReady) {
 
     document.getElementById('dungeon-title').textContent = dg.name;
 
-    var _badgeTitle = (dg.id === 'wolf_den') ? 'Covil Feral · Lobo Alfa Cinzento' : 'Acampamento Hostil · Brakthar, Quebrador de Cranios';
-    var _warningDesc = (dg.id === 'wolf_den')
-      ? 'Você vai entrar numa toca subterrânea de predadores. O Lobo Alfa aguarda nas profundezas. Sair só na entrada (sul) ou após derrotá-lo.'
-      : 'Você vai entrar num acampamento orc fortificado. Brakthar aguarda ao norte. Sair so na entrada (sul) ou apos derrota-lo.';
+    var _badgeTitle = (dg.id === 'bandit_vault')
+      ? 'Guarnição Clandestina · Malakor, Mestre dos Ladrões'
+      : (dg.id === 'wolf_den') ? 'Covil Feral · Lobo Alfa Cinzento' : 'Acampamento Hostil · Brakthar, Quebrador de Cranios';
+    var _warningDesc = (dg.id === 'bandit_vault')
+      ? 'Você vai entrar nas profundezas do cofre dos bandidos. Malakor aguarda na câmara do tesouro. Sair só na entrada (sul) ou após derrotá-lo.'
+      : (dg.id === 'wolf_den')
+        ? 'Você vai entrar numa toca subterrânea de predadores. O Lobo Alfa aguarda nas profundezas. Sair só na entrada (sul) ou após derrotá-lo.'
+        : 'Você vai entrar num acampamento orc fortificado. Brakthar aguarda ao norte. Sair so na entrada (sul) ou apos derrota-lo.';
 
     document.getElementById('dungeon-desc').innerHTML =
       '<div style="text-align:center;line-height:1.65">' +
