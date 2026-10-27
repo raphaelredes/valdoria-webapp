@@ -20735,6 +20735,82 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 296: TORRES DE TUFA SUBLACUSTRES E BACIAS ALCALINAS (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessAlkalineTufaTowerHazard(biomeKey, hazardType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var ht = (hazardType || 'sublacustrine_tufa_chimney_crust_collapse').toLowerCase();
+
+    var hazard = {
+      hazardTitle: 'Ruptura de Chaminé de Tufa e Queda em Salmoura Alcalina',
+      saveDC: 14,
+      saveType: 'Destreza',
+      tufaTowerRisk: 'As torres porosas de carbonato de cálcio formadas por nascentes subaquáticas antigas esfarelam sob o peso da marcha; a ruptura da crosta lança o aventureiro sobre pináculos calcários dentados e poças de salmoura cáustica (pH 10) causando 2d6 de concussão e 2d6 de ácido (DMG p. 110; PHB p. 182-183).',
+      pioneerMitigation: 'Batedores testando a ressonância oca das colunas calcárias com bastões ferrados e traçando rota pela base consolidada de basalto (Sobrevivência ou Natureza CD 14).',
+      rescueAndStabilization: 'Içamento imediato com cordas de cânhamo e lavagem abundante da pele com água doce e vinagre diluído para neutralizar a alcalinidade cáustica (Medicina CD 13).',
+      icon: '🧪',
+      color: '#eab308'
+    };
+
+    if (ht === 'caustic_carbonate_brine_spray_blindness') {
+      hazard.hazardTitle = 'Vendaval de Espuma Alcalina e Cegueira Química';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Constituição';
+      hazard.tufaTowerRisk = 'Rajadas violentas varrem a superfície do lago endorreico levantando nuvens de espuma branca saturada de carbonato e sulfato de sódio; a névoa cáustica queima as córneas e mucosas, impondo cegueira temporária por 1 hora e 2d4 de dano de ácido se falhar na salvaguarda (DMG p. 110; PHB p. 183).';
+      hazard.pioneerMitigation = 'Uso de óculos de couro com lentes de mica ou panos úmidos de água doce amarrados sobre os olhos e narinas (Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Irrigação ocular com cantil de água pura e aplicação de compressas frias de ervas calmantes no abrigo (Medicina CD 13).';
+    } else if (ht === 'toxic_arsenic_algal_bloom_miasma') {
+      hazard.hazardTitle = 'Miasma de Floração Bacteriana e Vapores Alcalinos';
+      hazard.saveDC = 13;
+      hazard.saveType = 'Constituição';
+      hazard.tufaTowerRisk = 'O calor solar sobre as margens rasas fermenta tapetes densos de cianobactérias e moscas alcalinas em águas ricas em arsênio natural; a inalação do vapor fétido provoca vertigem aguda e condição envenenado por 4 horas (DMG p. 110; XGE p. 109).';
+      hazard.pioneerMitigation = 'Contorno pelas encostas ventiladas a barlavento e proibição absoluta de tocar ou ferver a água salobra do lago (Natureza ou Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Administração de carvão ativado vegetal e hidratação com reservas seladas da comitiva (Medicina CD 13).';
+    } else if (ht === 'quicksand_calcareous_ooze_entrapment') {
+      hazard.hazardTitle = 'Atolamento em Lodo Calcário Tixotrópico';
+      hazard.saveDC = 14;
+      hazard.saveType = 'Força';
+      hazard.tufaTowerRisk = 'Entre os castelos de tufa aparentemente secos, uma fina casca de sal branco esconde bolsões profundos de vasa carbonática pegajosa; quem pisa afunda até os quadris na lama densa que suga as botas e impõe condição impedido (DMG p. 110).';
+      hazard.pioneerMitigation = 'Caminhada distribuída sobre esteiras de junco seco ou saltos calculados entre os plintos rochosos firmes (Acrobacia ou Sobrevivência CD 13).';
+      hazard.rescueAndStabilization = 'Descompressão lateral do vácuo da lama com pás e tração em grupo com cabos ancorados nas torres sólidas (Atletismo CD 14).';
+    }
+
+    return hazard;
+  }
+
+  function calcCampAlkalineTufaTowerStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'desert').toLowerCase();
+    var dt = (defenseType || 'fossil_tufa_arch_elevated_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque no Terraço Elevado de Castelo de Tufa Fóssil',
+      tufaAndCampSafety: 'O acampamento é montado no patamar superior de um antigo agrupamento de torres de tufa maciça 8 metros acima do nível atual do lago alcalino; a rocha calcária seca isola as tendas da umidade cáustica e oferece paredes naturais contra o vento (DMG p. 111).',
+      tufaAndWatch: 'As seteiras naturais entre as agulhas de calcita permitem vigiar toda a planície salina com cobertura três-quartos e vantagem em testes de Percepção das sentinelas.',
+      campRestAndSafetyGuards: 'Repouso seguro em ar limpo acima da camada de névoa alcalina, garantindo recuperação plena para a comitiva.',
+      icon: '⛺',
+      color: '#eab308'
+    };
+
+    if (dt === 'freshwater_subterranean_seep_spring') {
+      defense.defenseTitle = 'Captação de Nascente Subterrânea de Água Doce';
+      defense.tufaAndCampSafety = 'Identificação de um olho de água doce pura na encosta pedregosa antes que o filete deságue na bacia alcalina hipersalina (PHB p. 150; DMG p. 111).';
+      defense.tufaAndWatch = 'Garante suprimento potável cristalino em meio ao deserto salino, concedendo +1 dado de vida adicional recuperado durante o descanso longo.';
+      defense.campRestAndSafetyGuards = 'Abastecimento seguro de todos os cantis sem risco de contaminação por sais cáusticos.';
+    } else if (dt === 'calcified_driftwood_windbreak_rampart') {
+      defense.defenseTitle = 'Parapeito de Troncos Petrificados por Calcita';
+      defense.tufaAndCampSafety = 'Toras antigas inteiramente revestidas por crostas espessas de rocha calcária são encaixadas entre os pilares de tufa, formando uma muralha incombustível de 1,6 metro (PHB p. 185).';
+      defense.tufaAndWatch = 'Concede +5 na CA e +5 em salvaguardas de Destreza contra rajadas de areia alcalina e disparos de emboscadores.';
+      defense.campRestAndSafetyGuards = 'Abrigo impenetrável ao vento noturno e proteção sólida para o descanso dos membros do grupo.';
+    }
+
+    return defense;
+  }
+
+
+  // =========================================================================
   // FASE 295: PLATAFORMAS DE STRANDFLAT E ARQUIPÉLAGOS DE SKERRIES (D&D 5e)
   // =========================================================================
 
@@ -37748,6 +37824,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessAlkalineTufaTowerHazard: calcWildernessAlkalineTufaTowerHazard,
+    calcCampAlkalineTufaTowerStation: calcCampAlkalineTufaTowerStation,
     calcWildernessStrandflatSkerryHazard: calcWildernessStrandflatSkerryHazard,
     calcCampStrandflatSkerryStation: calcCampStrandflatSkerryStation,
     calcWildernessMachairCoastHazard: calcWildernessMachairCoastHazard,
