@@ -200,7 +200,7 @@
         choices: choices,
         choicesTitle: (content && content.choicesTitle) || 'Preparação de Viagem',
         choicesSubtitle: (content && content.choicesSubtitle) || (j.displayName ? ('Rumo a ' + j.displayName) : ''),
-        choicesBtnLabel: 'Escolher Postura de Viagem',
+        choicesBtnLabel: 'Postura',
         compact: true,
         inline: false,
         noProgress: true,
