@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.resolveCovertPartyInvisibilityAndAntiDivination) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var cv = CartShared.resolveCovertPartyInvisibilityAndAntiDivination(bKey, 'nondetection_eight_hour_anti_scrying_ward');
+        return '<div class="clp-covert-invisibility-card" style="margin:4px 0 6px;text-align:left;background:rgba(8,24,32,0.88);padding:4px 8px;border-radius:4px;border:1px solid rgba(6,182,212,0.42);font-size:8px;color:#cffafe;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cv.color + ';margin-bottom:2px;">' + cv.icon + ' ' + cv.covertTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Antidivinação e Invisibilidade:</b> ' + cv.covertMechanics + ' (CD ' + cv.saveDC + ' [' + cv.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#a5f3fc;margin-top:1px;">• <b>Bloqueio de Vidência:</b> ' + cv.pioneerMitigation + ' · <i>Segurança: ' + cv.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampVeilAndAntiDivinationWardStation) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var cv = CartShared.calcCampVeilAndAntiDivinationWardStation(bKey, 'nondetection_bivouac_anti_scrying_ward');
+        return '<div class="clp-covert-invisibility-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(6,20,26,0.84);padding:4px 8px;border-radius:4px;border:1px solid rgba(8,145,178,0.35);font-size:8px;color:#cffafe;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cv.color + ';margin-bottom:2px;">' + cv.icon + ' ' + cv.defenseTitle.toUpperCase() + ' (PHB p. 260, 261, 285):</div>' 
+          + '  <div>• <b>Véu de Bivaque:</b> ' + cv.veilAndCampSafety + ' · <b>Vigia:</b> ' + cv.veilAndCouncilWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#67e8f9;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cv.campRestAndSafetyGuards + '</div>' 
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.resolveIllusionTerrainAndMazeOrientation) return '';
         var bKey = (biome && biome.key) || 'plains';
         var it = CartShared.resolveIllusionTerrainAndMazeOrientation(bKey, 'mirage_arcane_tactical_terrain_transmutation');

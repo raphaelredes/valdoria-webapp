@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 323: BARREIRAS ANTIDIVINAÇÃO, VÉUS DE OCULTAÇÃO E CAMUFLAGEM MÍSTICA DE COMITIVA (D&D 5e)
+  // =========================================================================
+
+  function resolveCovertPartyInvisibilityAndAntiDivination(biomeKey, covertMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var cm = (covertMode || 'nondetection_eight_hour_anti_scrying_ward').toLowerCase();
+
+    var covert = {
+      covertTitle: 'Indetectabilidade (Nondetection): Bloqueio Total de Sensores e Vidência por 8 Horas (PHB p. 261)',
+      saveDC: 16,
+      saveType: 'Abjuração',
+      covertMechanics: 'Bardo, Clérigo, Patrulheiro ou Mago (3º círculo, pó de diamante de 25 PO consumido, duração 8 horas sem concentração, PHB p. 261) blinda um alvo voluntário ou a comitiva contra qualquer tentativa de localização mágica: o grupo não pode ser visto por sensores de Clarividência, Olho Arcano ou Vidência (Fase 317, 318), nem detectado por Localizar Criatura ou magias de rastreamento arcano!',
+      pioneerMitigation: 'Comitivas rivais ou patrulhas que usem bolas de cristal e adivinhações recebem apenas névoa cinzenta estática ao tentar sintonizar os aventureiros (PHB p. 261).',
+      rescueAndStabilization: 'Permite que a comitiva transporte prisioneiros resgatados ou relíquias cobiçadas sem revelar suas coordenadas na rota Pointcrawl.',
+      icon: '🛡️',
+      color: '#06b6d4'
+    };
+
+    if (cm === 'mass_invisibility_and_covert_scouting_advance') {
+      covert.covertTitle = 'Invisibilidade de Grupo e Manto de Marcha Silenciosa (PHB p. 253, 261)';
+      covert.saveDC = 17;
+      covert.saveType = 'Ilusão';
+      covert.covertMechanics = 'Feiticeiro ou Mago (upcast de 5º círculo ou Manto de Invisibilidade, duração até 1 hora, PHB p. 253) envolve até 4 aventureiros em refração luminosa mágica; a comitiva inteira torna-se invisível para a marcha através de postos de guarda inimigos, desfiladeiros vigiados por bestas territoriais ou acampamentos hostis sem ser avistada!';
+      covert.pioneerMitigation = 'Concede vantagem em testes de Destreza (Furtividade) de grupo e impede ataques de oportunidade caso precisem passar correndo por sentinelas.';
+      covert.rescueAndStabilization = 'Evacuação silenciosa de aventureiros feridos através de linhas de cerco sem disparar alarmes.';
+    } else if (cm === 'rope_trick_pocket_dimension_hideout') {
+      covert.covertTitle = 'Truque da Corda (Rope Trick): Esconderijo Extradimensional de Emergência (PHB p. 285)';
+      covert.saveDC = 15;
+      covert.saveType = 'Transmutação';
+      covert.covertMechanics = 'Mago (2º círculo, corda de até 18 metros, duração 1 hora, PHB p. 285) ergue uma corda que sobe em direção ao céu e abre uma fenda para um espaço extradimensional invisível para até 8 aventureiros Médios; a corda é puxada para dentro, fazendo o esconderijo desaparecer por completo da vista externa enquanto a janela de 1x1m permite olhar para fora com segurança!';
+      covert.pioneerMitigation = 'Permite que a comitiva descanse por 1 hora para realizar um Descanso Curto seguro mesmo cercada por hordas inimigas (PHB p. 285).';
+      covert.rescueAndStabilization = 'Abrigo tático instantâneo contra tempestades de fogo, desmoronamentos ou perseguições imediatas na estrada.';
+    } else if (cm === 'mind_blank_impenetrable_mental_cloak') {
+      covert.covertTitle = 'Manto Mental (Mind Blank): Imunidade Psíquica e Blindagem Telepática Absoluta (PHB p. 260)';
+      covert.saveDC = 18;
+      covert.saveType = 'Abjuração';
+      covert.covertMechanics = 'Bardo ou Mago (8º círculo, duração 24 horas sem concentração, PHB p. 260) confere blindagem mental impenetrável: imunidade a dano psíquico, imunidade a qualquer magia de leitura de emoções ou pensamentos (Detectar Pensamentos, Fase 310), imunidade à condição Enfeitiçado e bloqueio total até mesmo da magia Desejo contra a mente do alvo!';
+      covert.pioneerMitigation = 'Anula completamente a espionagem telepática de bruxos, devoradores de mentes ou aberrações durante negociações de alta tensão (PHB p. 260).';
+      covert.rescueAndStabilization = 'Protege o líder ou conjurador da comitiva contra possessões mentais e ataques psíquicos profundos.';
+    }
+
+    return covert;
+  }
+
+  function calcCampVeilAndAntiDivinationWardStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'nondetection_bivouac_anti_scrying_ward').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Cúpula de Indetectabilidade e Barreira Antividência no Bivaque (PHB p. 261)',
+      veilAndCampSafety: 'Ao fixar o acampamento noturno, o conjurador ancora Indetectabilidade no centro do bivaque (ou utiliza pedras rúnicas polvilhadas com pó de diamante), criando um domo de 8 horas que impede que sensores remotos hostis (Clarividência ou Vidência) espiem a disposição das barracas ou o número de aventureiros adormecidos.',
+      veilAndCouncilWatch: 'Sentinelas de vigília monitoram o perímetro sabendo que nenhum olho invisível ou sensor mágico flutua sobre as cabeças do grupo sem ser repelido pela barreira.',
+      campRestAndSafetyGuards: 'Garante descanso longo livre de emboscadas orquestradas por espiões arcanos à distância (PHB p. 186, 261).',
+      icon: '🔮',
+      color: '#06b6d4'
+    };
+
+    if (dt === 'rope_trick_floating_sentry_lookout_station') {
+      defense.defenseTitle = 'Posto de Vigia Flutuante por Truque da Corda (PHB p. 285)';
+      defense.veilAndCampSafety = 'Um Truque da Corda é conjurado a 12 metros de altura acima do acampamento com a corda recolhida; o sentinela de plantão permanece dentro do espaço extradimensional invisível, observando os arredores em 360° através da janela mágica com visão privilegiada de terreno.',
+      defense.veilAndCouncilWatch = 'Invasores rastejantes ou patrulhas que se aproximam no chão não possuem linha de visão para o sentinela suspenso no ar, perdendo qualquer oportunidade de surpreender a guarda noturna.',
+      defense.campRestAndSafetyGuards = 'O sentinela lança sinais de luz ou solta a corda silenciosamente para alertar a comitiva antes que os invasores alcancem as barracas (PHB p. 285).';
+    } else if (dt === 'telepathic_silence_and_mental_blank_council') {
+      defense.defenseTitle = 'Silêncio Telepático e Conselho de Guerra com Manto Mental (PHB p. 260, 277)';
+      defense.veilAndCampSafety = 'Líderes de comitivas aliadas reunidos na fogueira (Fase 315) sob proteção de Manto Mental e Vínculo Telepático de Rary deliberam estratégias de cerco sem emitir sons audíveis e sem que espiões psíquicos leiam suas memórias.',
+      defense.veilAndCouncilWatch = 'A blindagem impede sondagens telepáticas externas e neutraliza tentativas de charme ou controle mental contra os guardas de plantão.',
+      defense.campRestAndSafetyGuards = 'Preserva a integridade tática e a lealdade da comitiva contra infiltrações de metamorfos e espiões arcanos (PHB p. 260).';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 322: MIRAGENS MÍSTICAS, TERRENOS ILUSÓRIOS E LABIRINTOS MENTAIS (D&D 5e)
   // =========================================================================
 
@@ -39774,6 +39849,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveCovertPartyInvisibilityAndAntiDivination: resolveCovertPartyInvisibilityAndAntiDivination,
+    calcCampVeilAndAntiDivinationWardStation: calcCampVeilAndAntiDivinationWardStation,
     resolveIllusionTerrainAndMazeOrientation: resolveIllusionTerrainAndMazeOrientation,
     calcCampAntiIllusionWardStation: calcCampAntiIllusionWardStation,
     resolveWildernessWeatherManipulation: resolveWildernessWeatherManipulation,
