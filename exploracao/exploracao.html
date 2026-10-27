@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T21:26:53Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T22:29:29Z - do not edit directly, edit source -->
 
 
 
@@ -86707,7 +86707,7 @@ async function confirmEdgeTransition(_skipJourney) {
 
       },
 
-      onCombat: function (jinfo) { _journeyLaunchRareCombat({ direction: 'edge', targetMap: ed.targetMap, edgeLabel: ed.label, biome: (jinfo && jinfo.biome) || _tgtBiome }); },
+      onCombat: function (jinfo) { _journeyLaunchRareCombat({ direction: 'edge', targetMap: ed.targetMap, edgeLabel: ed.label, biome: (jinfo && jinfo.biome) || _tgtBiome, enemyId: jinfo && jinfo.enemyId }); },
 
       onDefeat: function () { if (typeof triggerDefeat === 'function') triggerDefeat('Você sucumbiu na travessia para ' + _tgtName + '.'); }
 
@@ -89171,7 +89171,7 @@ function startReturnToCity() {
 
       onArrive: _returnToCityNow,
 
-      onCombat: function (jinfo) { _journeyLaunchRareCombat({ direction: 'return', biome: (jinfo && jinfo.biome) || biome }); },
+      onCombat: function (jinfo) { _journeyLaunchRareCombat({ direction: 'return', biome: (jinfo && jinfo.biome) || biome, enemyId: jinfo && jinfo.enemyId }); },
 
       onDefeat: function () { if (typeof triggerDefeat === 'function') triggerDefeat('Você sucumbiu na jornada de volta a Valdoria.'); }
 
@@ -89319,21 +89319,25 @@ function _journeyLaunchRareCombat(resumeState) {
 
   var biome = (resumeState && resumeState.biome) || (window.S && S.biome) || 'plains';
 
-  var enemyId = 'goblin';
+  var enemyId = (resumeState && resumeState.enemyId) || 'goblin';
 
-  try {
+  if (!resumeState || !resumeState.enemyId) {
 
-    var bt = (typeof BIOME_WANDERING_ENCOUNTERS !== 'undefined'
+    try {
 
-              && (BIOME_WANDERING_ENCOUNTERS[biome] || BIOME_WANDERING_ENCOUNTERS.plains)) || {};
+      var bt = (typeof BIOME_WANDERING_ENCOUNTERS !== 'undefined'
 
-    var pool = bt[(window.S && S.dayPhase === 'night') ? 'night' : 'day'] || bt.day || [];
+                && (BIOME_WANDERING_ENCOUNTERS[biome] || BIOME_WANDERING_ENCOUNTERS.plains)) || {};
 
-    var picked = (typeof pickRandom === 'function') ? pickRandom(pool) : null;
+      var pool = bt[(window.S && S.dayPhase === 'night') ? 'night' : 'day'] || bt.day || [];
 
-    if (picked && typeof ENEMIES_DB !== 'undefined' && ENEMIES_DB[picked]) enemyId = picked;
+      var picked = (typeof pickRandom === 'function') ? pickRandom(pool) : null;
 
-  } catch (e2) { /* fallback goblin */ }
+      if (picked && typeof ENEMIES_DB !== 'undefined' && ENEMIES_DB[picked]) enemyId = picked;
+
+    } catch (e2) { /* fallback goblin */ }
+
+  }
 
   console.info('[JOURNEY] rare combat -> enemy=' + enemyId + ' dir=' + (rs.direction || '?'));
 
@@ -92556,6 +92560,36 @@ var materialFoundStats = {};     // { itemId: { count: N, sources: Set(enemyId|'
 //     stats customizados (n_exact path)
 
 const ENEMIES_DB = {
+  bandit_leader: {
+    name: 'Líder Fora-da-Lei', cr: '2', hp: 32, ac: 15, speed: '9m',
+    biomes: ['plains', 'forest', 'desert'],
+    threat: 'alto',
+    icon: '',
+    desc: 'Veterano de guerra endurecido que lidera bandos de saqueadores nas estradas.',
+    attacks: 'Espada longa (+5) 1d8+3 cortante; Besta pesada (+4) 1d10+2 perfurante',
+    known_drops: ['worn_coin_pouch', 'stolen_goods', 'iron_longsword'],
+    bestiary_name: 'Bandido'
+  },
+  dire_wolf: {
+    name: 'Lobo Atroz', cr: '1', hp: 37, ac: 14, speed: '15m',
+    biomes: ['forest', 'mountain', 'snow'],
+    threat: 'alto',
+    icon: '',
+    desc: 'Lobo colossal de presas afiadas como adagas. Caça implacavelmente nas terras ermas.',
+    attacks: 'Mordida (+5) 2d6+3 perfurante (Vantagem com aliados / Derruba alvo CD 13)',
+    known_drops: ['wolf_pelt', 'dire_wolf_fang'],
+    bestiary_name: 'Lobo Atroz'
+  },
+  troglodyte: {
+    name: 'Troglodita', cr: '1/4', hp: 13, ac: 11, speed: '9m',
+    biomes: ['cave'],
+    threat: 'médio',
+    icon: '',
+    desc: 'Réptil humanoide subterrâneo de fétor náuseante e pele camuflada.',
+    attacks: 'Mordida (+4) 1d4+2 e Garras (+4) 1d4+2 (Fétor: Teste de CON CD 12 ou Envenenado)',
+    known_drops: ['reptile_scale', 'cave_fungus'],
+    bestiary_name: 'Troglodita'
+  },
 
   // === Forest ===
 

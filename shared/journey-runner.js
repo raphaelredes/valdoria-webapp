@@ -454,10 +454,42 @@
     _dice(roll, function () { _outcome(hz, ch, roll.success, roll); });
   }
 
+  function _findHazardEnemyId(hz) {
+    if (!hz) return null;
+    if (hz.enemyId) return hz.enemyId;
+    if (hz.npc && hz.npc.enemyId) return hz.npc.enemyId;
+    if (Array.isArray(hz.choices)) {
+      for (var i = 0; i < hz.choices.length; i++) {
+        var c = hz.choices[i];
+        if (c && c.enemyId) return c.enemyId;
+        if (c && c.isCombat) return c.enemyId || 'bandit_leader';
+      }
+    }
+    return null;
+  }
+
+  function _isFleeChoice(ch) {
+    if (!ch) return false;
+    if (ch.isFlee) return true;
+    var t = String(ch.t || ch.label || '').toLowerCase();
+    return /fugir|fuga|recuar|correr atrav|desviar.*rota/i.test(t);
+  }
+
+  function _renderHostileFleeEscape(hz, enemyId, foeName) {
+    var j = _j; if (!j) return;
+    var fleeLines = [
+      {
+        type: 'narration',
+        text: 'Você apara os primeiros golpes e mergulha em disparada desesperada! Projéteis e gritos de perseguição cortam o ar, mas você consegue quebrar o cerco de <b>' + foeName + '</b> e despistá-los a alguns quilômetros dali.'
+      }
+    ];
+    _renderContinue(fleeLines, (hz && hz.npc) || null);
+  }
+
   // Combate originado de escolha em perigo/evento de jornada
   function _triggerHazardCombat(hz, ch) {
     var j = _j; if (!j) return;
-    var enemyId = (ch && ch.enemyId) || (hz && hz.enemyId) || (hz && hz.npc && hz.npc.enemyId) || 'bandit_leader';
+    var enemyId = (ch && ch.enemyId) || (hz && hz.enemyId) || (hz && hz.npc && hz.npc.enemyId) || _findHazardEnemyId(hz) || 'bandit_leader';
     var jinfo = {
       biome: j.biome,
       displayName: j.displayName,
@@ -767,6 +799,28 @@
         condition: conditionApplied
       });
     }
+    var hostileEnemyId = (!success && !_isFleeChoice(ch)) ? _findHazardEnemyId(hz) : null;
+    if (hostileEnemyId && p && p.hp > 0) {
+      var foeName = (hz && hz.npc && hz.npc.name) || (hz && hz.title) || 'Inimigos';
+      _vRender({
+        npc: (hz && hz.npc) || null,
+        script: scriptLines,
+        choices: [
+          { id: 'jrn_hostile_fight', label: '⚔️ Enfrentar ' + foeName, enemyId: hostileEnemyId, isCombat: true },
+          { id: 'jrn_hostile_flee', label: '🏃 Romper em fuga desesperada', isFlee: true }
+        ],
+        inline: true,
+        onChoice: function (c) {
+          if (c && c.id === 'jrn_hostile_fight') {
+            _triggerHazardCombat(hz, { enemyId: hostileEnemyId });
+          } else {
+            _renderHostileFleeEscape(hz, hostileEnemyId, foeName);
+          }
+        }
+      });
+      return;
+    }
+
     _renderContinue(scriptLines, (hz && hz.npc) || null);
   }
 

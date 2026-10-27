@@ -278,7 +278,8 @@ var HAZARDS = {
       ] },
 
     { title: 'Bandidos da Estrada',
-      npc: { name: 'Kragor, o Líder Fora-da-Lei', desc: 'Veterano de guerra desempregado', portrait: '../shared/img/npcs/kragor-bandido.webp' },
+      enemyId: 'bandit_leader',
+      npc: { name: 'Kragor, o Líder Fora-da-Lei', enemyId: 'bandit_leader', desc: 'Veterano de guerra desempregado', portrait: '../shared/img/npcs/kragor-bandido.webp' },
       script: [
         { type: 'narration', text: 'Três figuras saem do trigal alto à esquerda. Um homem grisalho de armadura remendada à frente — os outros dois flanqueiam, espadas curtas.' },
         { type: 'speech', speaker: 'Líder dos Bandidos', text: '— Pare aí, viajante. <i>(o tom é cansado, não cruel)</i> Quem cruza nossas terras paga pedágio. Bolsa pra dentro do saco — ou cabeça pra dentro do trigal.' },
@@ -303,25 +304,25 @@ var HAZARDS = {
             good: 'Você não vê inimigos — vê veteranos abandonados. Oferece dois pães da mochila e o nome de um templo que abriga ex-soldados. O líder aceita devagar.',
             evil: 'Você os intimida com cálculo frio: descreve a tortura que receberão se forem capturados. Eles recuam, pálidos.'
           },
-          fNarr: 'Sua lábia é fraca. O líder cospe e avança. Sangue antes da fuga.', dmg: 5 },
+          fNarr: 'Sua lábia não convence. O líder cospe no chão e saca o machado de batalha, ordenando o cerco!', dmg: 5 },
         { i: '⚔️', t: 'Enfrentar os bandidos', isCombat: true, enemyId: 'bandit_leader',
           desc: 'Desembainhar as armas e combater o bando em confronto direto.' },
-        { i: '🏃', t: 'Romper e fugir', stat: 'dex', dc: 12,
+        { i: '🏃', t: 'Romper e fugir', stat: 'dex', dc: 12, isFlee: true,
           desc: 'Surpreender com velocidade — ganhar a brecha entre os dois flanqueadores.',
           sNarr: 'Você dispara entre eles antes que percebam. Vinte metros depois, no trigal alto, eles desistem.',
-          fNarr: 'Uma flecha o atinge nas costas antes de você sumir. O ferimento não é fatal mas sangra muito.', dmg: 4 },
+          fNarr: 'Uma flecha atinge suas costas durante o arranque. A ferida arde forte, mas você rompe o cerco e escapa no trigal.', dmg: 4 },
         { i: '⚔️', t: 'Intimidação militar em comitiva', stat: 'str', dc: 11,
           requires_ally: true,
           desc: 'Você e seus companheiros desembainham as armas ao mesmo tempo em formação marcial perfeita.',
           sNarr: 'O som sincronizado do aço sendo desembainhado pelo seu grupo gela a espinha dos assaltantes; vendo que a luta custará caro, eles abaixam as lâminas e recuam.',
           sNarr_by_ally: 'O som sincronizado do aço sendo desembainhado pelo seu grupo gela a espinha dos assaltantes; vendo que a luta custará caro, eles abaixam as lâminas e recuam.',
-          fNarr: 'Os veteranos aceitam a provocação e cerram fileiras para avançar!', dmg: 3,
-          fNarr_by_ally: 'Os veteranos aceitam a provocação e cerram fileiras para avançar!' },
+          fNarr: 'Os veteranos aceitam a provocação e cerram fileiras para o confronto mortal!', dmg: 3,
+          fNarr_by_ally: 'Os veteranos aceitam a provocação e cerram fileiras para o confronto mortal!' },
         { i: '🎖', t: 'Código de honra militar', stat: 'cha', dc: 10,
           requires_background: ['soldier', 'noble', 'folk_hero'],
           desc: 'Evocar os antigos regimentos da coroa ou o dever para com o povo.',
           sNarr: 'Você recita a antiga saudação dos regimentos de fronteira; o líder arregala os olhos, bate continência com a mão enluvada e dá passagem com respeito sincero.',
-          fNarr: 'O líder balança a cabeça amargurado: "Honra não enche a barriga dos nossos filhos, viajante."', dmg: 2 }
+          fNarr: 'O líder balança a cabeça amargurado: "Honra não enche a barriga dos nossos filhos, viajante!" Ele avança com a lâmina erguida!', dmg: 2 }
       ] },
 
     { title: 'Cavalo Selvagem',
@@ -759,7 +760,8 @@ var HAZARDS = {
 
   snow: [
     { title: 'Lobo Solitário',
-      npc: { name: 'Presa-Cinzenta, o Lobo Solitário', desc: 'Velho macho, sozinho é mais perigoso por isso', portrait: '../shared/img/npcs/presa-cinzenta-lobo.webp' },
+      enemyId: 'dire_wolf',
+      npc: { name: 'Presa-Cinzenta, o Lobo Solitário', enemyId: 'dire_wolf', desc: 'Velho macho, sozinho é mais perigoso por isso', portrait: '../shared/img/npcs/presa-cinzenta-lobo.webp' },
       script: [
         { type: 'narration', text: 'Olhos amarelos brilham na neve à frente. Um lobo enorme, sozinho — o que é incomum. Lobos sozinhos são velhos, expulsos, ou famintos.' },
         { type: 'narration', text: 'Este parece os três. Ele não rosna. Apenas observa. Calcula.' },
@@ -779,18 +781,18 @@ var HAZARDS = {
           sNarr_by_subrace: {
             mountain: 'Firme como um rochedo invernal, você bate a arma no escudo. O som metálico ecoa e afugenta a fera.'
           },
-          fNarr: 'Ele ataca antes de fugir — dentes na sua perna. Sangue na neve, mas você sobrevive.', dmg: 4 },
+          fNarr: 'A fera não recua perante sua tentativa de intimidação e salta contra seu peito com presas à mostra!', dmg: 4 },
         { i: '🐺', t: 'Impor domínio territorial', stat: 'cha', dc: 12,
           requires_race: ['dragonborn', 'halforc'],
           desc: 'Exibir imponência e ferocidade inabaláveis perante a fera.',
           sNarr: 'Sua presença avassaladora e postura ameaçadora fazem o lobo vacilar e recuar com a cauda entre as pernas.',
-          fNarr: 'O lobo avança em investida rápida antes de se afastar, mordendo de raspão.', dmg: 3 },
+          fNarr: 'O lobo rejeita a imposição e ataca em investida violenta cravando os dentes!', dmg: 3 },
         { i: '⚔️', t: 'Enfrentar a fera', isCombat: true, enemyId: 'dire_wolf',
           desc: 'Ficar em posição de guarda e combater o lobo feroz.' },
-        { i: '🏃', t: 'Recuar devagar', stat: 'wis', dc: 12,
+        { i: '🏃', t: 'Recuar devagar', stat: 'wis', dc: 12, isFlee: true,
           desc: 'Não correr. Recuar passo a passo, sem virar de costas.',
           sNarr: 'Você recua sem provocar, olhando ele direto sem ameaça. O lobo perde interesse — não vale o esforço hoje.',
-          fNarr: 'Você escorrega no gelo. Ele avança no instante da queda — mordida superficial.', dmg: 3 },
+          fNarr: 'Você escorrega no gelo e sofre uma mordida na perna durante o recuo, mas se levanta e consegue se distanciar da fera.', dmg: 3 },
         { i: '🤝', t: 'Guarda dupla com parceiro', stat: 'wis', dc: 10,
           requires_ally: true,
           desc: 'Você e seu companheiro assumem postura de combate cobrindo os flancos.',
@@ -871,6 +873,8 @@ var HAZARDS = {
       ] },
 
     { title: 'Eco Estranho',
+      enemyId: 'troglodyte',
+      npc: { name: 'Troglodita Perseguidor', enemyId: 'troglodyte', desc: 'Predador subterrâneo que rasteja pelas sombras', portrait: '../shared/img/npcs/troglodita-caverna.webp' },
       script: [
         { type: 'narration', text: 'Você ouve seus passos voltando como eco — mas os ecos não estão sincronizados. Há mais ecos do que passos.' },
         { type: 'narration', text: 'Você para. Os ecos param. Mas há um milissegundo a mais, um eco que se atrasa. Algo está te imitando.' }
@@ -882,14 +886,14 @@ var HAZARDS = {
           sNarr_by_subrace: {
             drow: 'Acostumado à escuridão do subterrâneo profundo, você distingue o ruído de garras na pedra e antecipa a criatura com facilidade.'
           },
-          fNarr: 'Você não localiza. Quando segue, sente algo seguindo a passos atrás. Não vira pra ver.', dmg: 3 },
+          fNarr: 'Você não localiza a criatura a tempo. Garras afiadas rasgam suas costas na escuridão, revelando o troglodita!', dmg: 3 },
         { i: '⚔️', t: 'Investir contra o perseguidor', isCombat: true, enemyId: 'troglodyte',
           desc: 'Girar com a arma em punho e atacar a criatura das sombras.' },
         { i: '🤫', t: 'Silêncio absoluto e camuflagem', stat: 'dex', dc: 11,
           requires_class: ['ladino', 'monge', 'patrulheiro'],
           desc: 'Paralisar cada músculo e esperar a criatura entregar sua posição pelo ruído.',
           sNarr: 'Você some na penumbra sem emitir respiração; desorientado pela ausência de passos, o perseguidor rasteja para outra galeria.',
-          fNarr: 'Uma gota pinga no seu elmo de aço e revela sua posição com um eco agudo.', dmg: 1 },
+          fNarr: 'Uma gota pinga no seu elmo de aço e revela sua posição com um eco agudo, atraindo o salto da criatura!', dmg: 2 },
         { i: '🤝', t: 'Pinça de emboscada com aliado', stat: 'wis', dc: 10,
           requires_ally: true,
           desc: 'Sinalizar silenciosamente para seu parceiro cobrir a retaguarda.',
@@ -907,6 +911,8 @@ var HAZARDS = {
 
   graveyard: [
     { title: 'Espíritos Inquietos',
+      enemyId: 'skeleton',
+      npc: { name: 'Espectros das Lápides', enemyId: 'skeleton', desc: 'Espíritos angustiados que guardam os túmulos', portrait: '../shared/img/npcs/espectro-tumba.webp' },
       script: [
         { type: 'narration', text: 'O ar fica gelado, denso. Vultos translúcidos cercam você — não veem você, mas sentem você.' },
         { type: 'narration', text: 'Sussurros sem palavras. Mãos sem corpos passando rente ao seu rosto.' },
@@ -926,7 +932,7 @@ var HAZARDS = {
           sNarr_by_subrace: {
             high: 'Sua disciplina mental de alto elfo ergue uma barreira impenetrável contra as sombras da névoa.'
           },
-          fNarr: 'O medo paralisa você por instantes. Quando volta a si, sente lágrimas no rosto. Você lembrou de coisas que não devia.', dmg: 3 },
+          fNarr: 'O medo paralisa seus sentidos e vultos esqueléticos emergem da terra para ceifar sua vida!', dmg: 3 },
         { i: '🕯', t: 'Canalizar autoridade espiritual ou arcana', stat: 'wis', dc: 11,
           requires_class: ['clerigo', 'paladino', 'bruxo', 'mago'],
           desc: 'Impor reverência ou expulsar as almas com poder sobrenatural.',
@@ -935,11 +941,11 @@ var HAZARDS = {
             devotion: 'A luz de seu juramento dissipa a aflição das almas, trazendo-lhes um instante de paz antes de sumirem.',
             fiend: 'Sua marca infernal arde no ar; os espíritos menores recuam aterrorizados perante o fogo sobrenatural.'
           },
-          fNarr: 'As vozes das almas ecoam estridentes na sua mente, drenando sua concentração.', dmg: 3 },
-        { i: '🏃', t: 'Correr através', stat: 'dex', dc: 12,
+          fNarr: 'As vozes das almas ecoam estridentes sobrepujando sua prece e conjurando espectros hostis!', dmg: 3 },
+        { i: '🏃', t: 'Correr através', stat: 'dex', dc: 12, isFlee: true,
           desc: 'Velocidade pura. Não dar tempo deles te tocarem.',
           sNarr: 'Você corre. Vinte segundos depois, está do outro lado, ofegante mas inteiro.',
-          fNarr: 'Um toque gelado nas costas drena sua energia. Você chega exausto.', dmg: 4 },
+          fNarr: 'Um toque gélido drena sua vitalidade enquanto você rompe o nevoeiro, mas você consegue ultrapassar as lápides amaldiçoadas.', dmg: 4 },
         { i: '⚔️', t: 'Banir os espectros pela lâmina', isCombat: true, enemyId: 'skeleton',
           desc: 'Desembainhar sua arma e purificar as aparições em combate.' },
         { i: '🤝', t: 'Círculo de bravura com aliados', stat: 'cha', dc: 10,
@@ -1057,6 +1063,8 @@ var HAZARDS = {
 var HAZARDS_EXTRA = {
   forest: [
     { title: 'O Veado Sangrado',
+      enemyId: 'dire_wolf',
+      npc: { name: 'Matilha de Lobos Vorazes', enemyId: 'dire_wolf', desc: 'Predadores famintos em plena caçada pela floresta', portrait: '../shared/img/npcs/presa-cinzenta-lobo.webp' },
       script: [
         { type: 'narration', text: 'Um veado emerge da mata correndo, ferida aberta no flanco. Não te vê — está em pânico.' },
         { type: 'narration', text: 'Atrás dele, uivos. Lobos caçando. O veado é a presa, mas você cruzou a trilha de caça deles.' }
@@ -1069,11 +1077,11 @@ var HAZARDS_EXTRA = {
             patrulheiro: 'Você se torna parte da floresta — lobos passam a um metro sem te perceber. Você nota dois com pelagem prateada — bando incomum.',
             druida: 'Você sussurra à floresta e ela te abriga. Os lobos sentem a ausência onde você está.'
           },
-          fNarr: 'Um galho range sob seu pé. O lobo da retaguarda desvia da caça e te encara.', dmg: 4 },
+          fNarr: 'Um galho estala sob seu pé. O lobo da retaguarda desvia da caça, rosna feroz e avança com a matilha!', dmg: 4 },
         { i: '🏹', t: 'Subir uma árvore', stat: 'str', dc: 13,
           desc: 'Tronco grosso a três metros — escalada rápida.',
           sNarr: 'Você sobe rápido, agarra galho firme. Os lobos passam embaixo, sem olhar pra cima.',
-          fNarr: 'A casca cede sob seus dedos. Você cai e bate as costas contra raízes.', dmg: 5 },
+          fNarr: 'A casca cede sob seus dedos. Você desaba no chão e os lobos se viram para o ataque!', dmg: 5 },
         { i: '⚔️', t: 'Enfrentar a matilha de lobos', isCombat: true, enemyId: 'dire_wolf',
           desc: 'Desembainhar sua arma e interceptar os lobos em combate aberto.' },
         { i: '🤝', t: 'Emboscada coordenada com aliados', stat: 'wis', dc: 10,
@@ -1087,7 +1095,7 @@ var HAZARDS_EXTRA = {
           requires_class: ['druida', 'patrulheiro'],
           desc: 'Esmagar folhas de menta silvestre para mascarar seu odor corporal.',
           sNarr: 'O aroma penetrante das ervas apaga seu rastro no ar úmido; a matilha passa rente aos arbustos sem notar a presença de mortais.',
-          fNarr: 'O vento sopra as folhas secas e o aroma não se espalha a tempo.', dmg: 2 }
+          fNarr: 'O vento sopra as folhas secas e o aroma não mascara sua presença; os lobos cercam o arbusto!', dmg: 2 }
       ] },
 
     { title: 'O Andarilho Cego',
@@ -1675,6 +1683,8 @@ var HAZARDS_EXTRA = {
 
   desert: [
     { title: 'Caravana Distante',
+      enemyId: 'bandit_leader',
+      npc: { name: 'Bandidos do Deserto', enemyId: 'bandit_leader', desc: 'Saqueadores disfarçados de mascates nas dunas', portrait: '../shared/img/npcs/kragor-bandido.webp' },
       script: [
         { type: 'narration', text: 'Você vê uma caravana três quilômetros adiante — pequenos pontos escuros no horizonte. Cinco camelos, talvez seis figuras humanas. Eles também te viram.' },
         { type: 'narration', text: 'Mercadores legítimos, ou bandidos vestidos? No deserto, nem sempre dá pra saber até estar perto.' }
@@ -1683,11 +1693,11 @@ var HAZARDS_EXTRA = {
         { i: '🌵', t: 'Aproximar-se cauteloso', stat: 'wis', dc: 13,
           desc: 'Avançar com mão na arma, ler sinais.',
           sNarr: 'Mercadores. Bandeirinhas com símbolo de Pormeria — guilda mercantil legítima. Você cruza com eles, troca duas palavras de gentileza. Eles te oferecem água em troca de notícias. Boa troca.',
-          fNarr: 'Bandidos. Você percebe tarde demais. Eles avançam — você precisa correr ou lutar.', dmg: 4 },
-        { i: '🏜', t: 'Desviar — rota alternativa', stat: 'wis', dc: 12,
+          fNarr: 'Bandidos! Você percebe tarde demais. Eles sacam cimitarras e investem para o massacre!', dmg: 4 },
+        { i: '🏜', t: 'Desviar — rota alternativa', stat: 'wis', dc: 12, isFlee: true,
           desc: 'Não vale arriscar. Tomar volta longa pelas dunas.',
           sNarr: 'Você toma rota mais longa pelas dunas. Cansativo, mas chega seguro.',
-          fNarr: 'Você se perde nas dunas. Acaba voltando ao caminho original — onde a caravana já passou.', dmg: 2 },
+          fNarr: 'Você se perde nas dunas escaldantes e sofre cansaço pelo calor, mas contorna o perigo e retoma a trilha com segurança.', dmg: 2 },
         { i: '⚔️', t: 'Enfrentar os bandidos do deserto', isCombat: true, enemyId: 'bandit_leader',
           desc: 'Desembainhar as armas e combater o grupo armado.' },
         { i: '🤝', t: 'Aproximação em delegação com aliados', stat: 'cha', dc: 10,
