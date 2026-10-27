@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 314: A JORNADA UNIFICADA EM POINTCRAWL COM OS 4 PAPÉIS DA COMITIVA (GUIA, BATEDOR, SENTINELA, PROVEDOR — D&D 5e)
+  // =========================================================================
+
+  function resolvePointcrawlPartyRoleJourney(biomeKey, roleMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var rm = (roleMode || 'navigator_guide_survival_route_branching').toLowerCase();
+
+    var journey = {
+      journeyTitle: 'Papel de Guia/Navegador: Orientação em Bifurcações e Atalhos Pointcrawl (PHB p. 182-183; DMG p. 111)',
+      saveDC: 15,
+      saveType: 'Sabedoria',
+      pointcrawlRoleMechanics: 'Substituindo a caminhada em grade de hexágonos vazios por um grafo de nós e rotas com bifurcações dramáticas (Pointcrawl estilo Solasta e Pathfinder: Kingmaker), o Guia da comitiva realiza testes de Sabedoria (Sobrevivência) contra a CD do bioma (CD 10 em campos abertos, CD 15 em florestas/montanhas/pântanos, +5 sob nevasca ou neblina densa, DMG p. 111-112); o sucesso destrava atalhos seguros entre nós e evita perder 1d6 horas de marcha em desvios acidentais. Patrulheiros em seu Terreno Favorito (Explorador Natural, PHB p. 91) impedem que o grupo se perca exceto por meios mágicos e dobram o bônus de proficiência!',
+      pioneerMitigation: 'Consulta ao Mapa Regional de Valdoria (Cartógrafo Corvus) e uso de Ferramentas de Cartógrafo ou Navegador (XGE p. 79, 83) antes de escolher o ramo da bifurcação.',
+      rescueAndStabilization: 'Se o Guia falhar, o grupo avança para um nó secundário de perigo geomorfológico das 300 Fases, exigindo reagrupamento tático.',
+      icon: '🧭',
+      color: '#10b981'
+    };
+
+    if (rm === 'vanguard_scout_terrain_hazard_early_warning') {
+      journey.journeyTitle = 'Papel de Batedor de Vanguarda: Detecção Antecipada das 300 Fases de Perigo (PHB p. 175, 182)';
+      journey.saveDC = 15;
+      journey.saveType = 'Destreza';
+      journey.pointcrawlRoleMechanics = 'O Batedor avança furtivamente à frente da comitiva conectando a travessia do nó diretamente ao banco das 300 Fases Geomorfológicas (`cartografia-shared.js`); através de Destreza (Furtividade) e Inteligência (Investigação ou Natureza), o Batedor identifica pontes de neve ocultas, crostas salinas quebradiças, gases vulcânicos, glifos de Gíria de Ladrão (Fase 302) ou avisos Druídicos (Fase 303) antes que o grupo inteiro pise na armadilha natural — concedendo Vantagem na salvaguarda de mitigação para toda a comitiva!',
+      journey.pioneerMitigation = 'Sinalização silenciosa por Espelho de Aço (Fase 301) ou truque Mensagem (Fase 307) para guiar os passos dos companheiros pesados.',
+      journey.rescueAndStabilization = 'Ancoragem preventiva de corda de seda de 15m pelo Batedor para içar qualquer membro que escorregue no obstáculo.';
+    } else if (rm === 'lookout_sentinel_passive_perception_shield') {
+      journey.journeyTitle = 'Papel de Sentinela/Vigia: Percepção Passiva contra Emboscadas e Outras Comitivas (PHB p. 182)',
+      journey.saveDC = 15;
+      journey.saveType = 'Sabedoria';
+      journey.pointcrawlRoleMechanics = 'Apenas aventureiros que não estejam distraídos desenhando mapas, forrageando ou rastreando contribuem com sua Sabedoria (Percepção) Passiva para notar perigos ocultos e outras comitivas na estrada (PHB p. 182-183); o Sentinela dedica 100% da sua atenção ao redor e à retaguarda, determinando o Grau de Revelação da Névoa de Identidade (Fase 311) e impedindo que o grupo sofra a condição Surpreso ao cruzar com predadores ou bandos furtivos.',
+      journey.pioneerMitigation = 'Escolha do aventureiro com maior Sabedoria, proficiência/especialização em Percepção ou talento Alerta (+5 na Iniciativa e imune a Surpresa, PHB p. 165).',
+      journey.rescueAndStabilization = 'Grito de alerta imediato ou disparo de Alarme mental para colocar a comitiva em formação de escudo.';
+    } else if (rm === 'quartermaster_forager_and_forced_march_con_save') {
+      journey.journeyTitle = 'Papel de Provedor/Intendente: Forrageamento e Salvaguarda de Marcha Forçada (PHB p. 181, 183)',
+      journey.saveDC = 15;
+      journey.saveType = 'Constituição';
+      journey.pointcrawlRoleMechanics = 'Em ritmo Normal ou Lento, o Provedor realiza Sabedoria (Sobrevivência) contra a CD de abundância do bioma (DMG p. 111: CD 10 florestas/costas, CD 15 colinas/pântanos, CD 20 desertos/ártico) colhendo `1d6 + mod SAB` libras de comida e galões de água (PHB p. 183; Antecedente Forasteiro/Wanderer e magia Bom Fruto suprem o grupo automaticamente); além disso, se a comitiva marchar além de 8 horas no dia (Marcha Forçada, PHB p. 181), cada membro realiza salvaguarda de Constituição `CD 10 + 1 por hora extra` ao fim de cada hora ou sofre 1 nível de Exaustão!',
+      journey.pioneerMitigation = 'Purificar Alimentos e Bebidas (1º círculo ritual, PHB p. 270) ou Criar Água (PHB p. 229) em etapas áridas onde o forrageamento falha.',
+      journey.rescueAndStabilization = 'Parada imediata para montar bivaque antes que os aventureiros acumulem Nível 2 de Exaustão (deslocamento reduzido à metade, PHB p. 291).';
+    }
+
+    return journey;
+  }
+
+  function calcCampArmorRestAndRoleWatchStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'doffed_heavy_armor_vs_sleeping_in_armor_xge').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Regra de Dormir de Armadura Pesada/Média vs. Despir Armadura no Bivaque (XGE p. 77-78; PHB p. 146)',
+      armorRestAndCampSafety: 'Seguindo estritamente o Xanathar’s Guide to Everything (p. 77-78), dormir vestindo Armadura Média ou Pesada recupera apenas um quarto (1/4) dos Dados de Vida gastos e NÃO remove níveis de Exaustão acumulados nas 300 Fases de terreno! Para obter recuperação plena, o guerreiro, paladino ou clérigo deve despir a armadura antes de dormir.',
+      armorRestAndRoleWatch: 'Contudo, se o acampamento sofrer ataque noturno ou emboscada, vestir uma Armadura Média exige 5 minutos (50 rodadas) e uma Armadura Pesada exige 10 minutos (100 rodadas, PHB p. 146) — forçando o personagem despertado a lutar com CA base (`10 + mod DES`) mais Escudo (+2 CA, 1 ação para empunhar)!',
+      campRestAndSafetyGuards: 'Torna a escolha de vigília noturna, camuflagem e magias de abrigo vital para a sobrevivência dos combatentes de linha de frente.',
+      icon: '🛡️',
+      color: '#10b981'
+    };
+
+    if (dt === 'elven_trance_and_four_shift_sentinel_rotation') {
+      defense.defenseTitle = 'Escala de 4 Turnos de Vigília Noturna e Transe Élfico de 4 Horas (PHB p. 23, 186)';
+      defense.armorRestAndCampSafety = 'Um Descanso Longo exige 8 horas (mínimo de 6 horas de sono e até 2 horas de atividade leve de sentinela para humanos, anões e demais raças, PHB p. 186), exigindo 3 a 4 membros revezando turnos para cobrir a noite inteira sem lacunas.',
+      defense.armorRestAndRoleWatch = 'Aventureiros Elfos utilizam o Transe (PHB p. 23), meditando profundamente por apenas 4 horas com consciência semirreflexiva e mantendo 4 horas livres para cobrir metade da vigília noturna da comitiva vestindo sua armadura!',
+      defense.campRestAndSafetyGuards = 'Se o descanso longo for interrompido por mais de 1 hora de caminhada ou combate prolongado, deve ser reiniciado do zero (PHB p. 186).';
+    } else if (dt === 'leomund_tiny_hut_and_rope_trick_sanctuary') {
+      defense.defenseTitle = 'Abrigos Extradimensionais e Domos Rituais: Cabana de Leomund e Truque da Corda (PHB p. 268, 284)';
+      defense.armorRestAndCampSafety = 'O ritual de 3º círculo Pequena Cabana de Leomund (Bardo/Mago, duração 8 horas, PHB p. 268) ergue um domo imóvel de 3m de raio onde até 9 criaturas médias descansam em clima seco e ameno (independentemente de nevascas ou tempestades de areia lá fora!), opaco por fora (camuflável na cor da pedra/neve) e impenetrável a criaturas, armas e magias externas.',
+      defense.armorRestAndRoleWatch = 'Para descansos curtos de emergência de 1 hora ou para se esconder quando uma comitiva hostil se aproxima na estrada, Truque da Corda (Rope Trick, 2º círculo, PHB p. 284) puxa a corda para dentro de um espaço extradimensional invisível.',
+      defense.campRestAndSafetyGuards = 'Permite que os combatentes despam suas armaduras pesadas com segurança dentro do domo protegido (vulnerável apenas a Dissipar Magia).';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 313: GRAFO DE MEMÓRIA EPISÓDICA E DIÁLOGOS DINÂMICOS DE REENCONTRO (character_encounters_memory — D&D 5e)
   // =========================================================================
 
@@ -39099,6 +39174,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolvePointcrawlPartyRoleJourney: resolvePointcrawlPartyRoleJourney,
+    calcCampArmorRestAndRoleWatchStation: calcCampArmorRestAndRoleWatchStation,
     resolveCharacterReunionMemoryGraph: resolveCharacterReunionMemoryGraph,
     calcCampSharedMemoryChronicleStation: calcCampSharedMemoryChronicleStation,
     resolveNarrativeIntroductionAndAlias: resolveNarrativeIntroductionAndAlias,

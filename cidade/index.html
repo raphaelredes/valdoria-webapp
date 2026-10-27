@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.resolvePointcrawlPartyRoleJourney) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var pj = CartShared.resolvePointcrawlPartyRoleJourney(bKey, 'navigator_guide_survival_route_branching');
+        return '<div class="clp-pointcrawl-party-role-card" style="margin:4px 0 6px;text-align:left;background:rgba(6,32,24,0.86);padding:4px 8px;border-radius:4px;border:1px solid rgba(16,185,129,0.38);font-size:8px;color:#ecfdf5;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + pj.color + ';margin-bottom:2px;">' + pj.icon + ' ' + pj.journeyTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Pointcrawl e 4 Papéis (Guia, Batedor, Sentinela, Provedor):</b> ' + pj.pointcrawlRoleMechanics + ' (CD ' + pj.saveDC + ' [' + pj.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#a7f3d0;margin-top:1px;">• <b>Coordenação de Rota:</b> ' + pj.pioneerMitigation + ' · <i>Contingência: ' + pj.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampArmorRestAndRoleWatchStation) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var pj = CartShared.calcCampArmorRestAndRoleWatchStation(bKey, 'doffed_heavy_armor_vs_sleeping_in_armor_xge');
+        return '<div class="clp-pointcrawl-party-role-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(4,24,18,0.82);padding:4px 8px;border-radius:4px;border:1px solid rgba(5,150,105,0.32);font-size:8px;color:#ecfdf5;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + pj.color + ';margin-bottom:2px;">' + pj.icon + ' ' + pj.defenseTitle.toUpperCase() + ' (XGE p. 77-78; PHB p. 186):</div>' 
+          + '  <div>• <b>Descanso em Armadura, Transe Élfico e Cabana de Leomund:</b> ' + pj.armorRestAndCampSafety + ' · <b>Vigília:</b> ' + pj.armorRestAndRoleWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#6ee7b7;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + pj.campRestAndSafetyGuards + '</div>' 
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.resolveCharacterReunionMemoryGraph) return '';
         var bKey = (biome && biome.key) || 'plains';
         var rg = CartShared.resolveCharacterReunionMemoryGraph(bKey, 'blood_allies_shared_battle_reunion');
