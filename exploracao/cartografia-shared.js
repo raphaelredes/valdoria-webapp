@@ -4070,7 +4070,7 @@
       : (isHover ? ('~' + distMilhas + ' mi · ~' + horas + 'h · ' + threatBadge + (sanctBadge ? ' · ' + sanctBadge : '')) : (sanctBadge || ''));
     var subW = 0;
     if (subText) {
-      ctx.font = 'italic 8px serif';
+      ctx.font = 'italic 10px Georgia, serif';
       subW = ctx.measureText(subText).width;
       ctx.font = (isHover ? 'bold 11px' : '10px') + ' serif';
     }
@@ -4090,7 +4090,7 @@
     ctx.fillStyle = isHover ? '#ffd685' : '#e8c45a';
     ctx.fillText(labelText, bx, pillY + 2);
     if (subText) {
-      ctx.font = 'italic 8px serif';
+      ctx.font = 'italic 10px Georgia, serif';
       ctx.fillStyle = 'rgba(218,194,148,0.78)';
       ctx.fillText(subText, bx, pillY + 14);
     }
@@ -4390,7 +4390,7 @@
     ctx.stroke();
 
     // Destino Badge acima do nó (evita colisão com o pill de nome/nível abaixo)
-    ctx.font = '700 8.5px Cinzel, serif';
+    ctx.font = '700 11px Cinzel, serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
     ctx.fillStyle = '#ffd700';
@@ -4472,7 +4472,7 @@
     ctx.fillText('⛺', x, y - 14);
 
     if (label) {
-      ctx.font = '700 8px Cinzel, serif';
+      ctx.font = '700 10.5px Cinzel, serif';
       ctx.fillStyle = '#ffd685';
       ctx.shadowColor = 'rgba(0,0,0,0.95)';
       ctx.shadowBlur = 4;
@@ -38647,6 +38647,7 @@
   }
 
   // === _drawCartCompass ===
+  // _drawCartCompass(ctx, w, h, isHovered, isPulsing)
   function _isCompassAt(mx, my, w, h) {
     if (typeof mx !== 'number' || typeof my !== 'number') return false;
     var cx = w - 40, cy = 40;
@@ -39191,8 +39192,8 @@
 
       var known = (typeof cfg.getKnownLocations === 'function') ? cfg.getKnownLocations() :
                   ((typeof window !== 'undefined' && window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.known_locations) || null);
-      var hover = view.hoverNode || null;
-      var hoverKey = hover ? hover.key : null;
+      var hover = null;  // Banimento permanente de mouseover/hover: interações estritamente por clique/toque
+      var hoverKey = null;
       var ownedMaps = (typeof cfg.getOwnedMaps === 'function') ? cfg.getOwnedMaps() :
                       ((typeof window !== 'undefined' && window.CITY_MOCK_PLAYER && (window.CITY_MOCK_PLAYER.owned_maps || window.CITY_MOCK_PLAYER.maps_owned)) || []);
       var pk = (typeof cfg.getPlayerBiomeKey === 'function') ? cfg.getPlayerBiomeKey() : null;

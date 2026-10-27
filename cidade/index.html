@@ -5750,6 +5750,11 @@ LOG SINK (Fase 7):
       z-index: 5;
     }
     .cart-tooltip {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+.cart-tooltip-legacy {
       position: absolute;
       background: linear-gradient(180deg, rgba(28, 20, 12, 0.96) 0%, rgba(14, 10, 6, 0.98) 100%);
       border: 1px solid rgba(212, 168, 83, 0.65);
@@ -69993,13 +69998,7 @@ function renderCartographyCanvas(el){
     + '    <button class="cart-dock-btn" id="cart-guide-btn" type="button" title="Guia do Andarilho e Regras de Viagem D&D 5e [H]" aria-label="Guia de Viagem D&D 5e">📖 Guia</button>'
     + '    <button class="cart-dock-btn accent" id="cart-atlas-back-btn" type="button" title="Voltar ao Continente [Backspace]" style="display:none;" aria-label="Voltar ao Continente">🌍 Continente</button>'
     + '  </div>'
-    + '  <div class="cart-hotkey-strip" style="display:flex;justify-content:center;gap:6px;padding:2px 8px;font-size:8.5px;color:#a09484;font-family:Cinzel,serif;background:rgba(18,14,10,0.65);border-bottom:1px solid rgba(196,149,58,0.2);">'
-    + '    <span><kbd style="color:#ffd700;font-family:monospace;background:rgba(0,0,0,0.4);padding:0 3px;border-radius:2px;">M</kbd> Atlas</span>'
-    + '    <span><kbd style="color:#ffd700;font-family:monospace;background:rgba(0,0,0,0.4);padding:0 3px;border-radius:2px;">L</kbd> Camadas</span>'
-    + '    <span><kbd style="color:#ffd700;font-family:monospace;background:rgba(0,0,0,0.4);padding:0 3px;border-radius:2px;">W</kbd> Marcos</span>'
-    + '    <span><kbd style="color:#ffd700;font-family:monospace;background:rgba(0,0,0,0.4);padding:0 3px;border-radius:2px;">H</kbd> Guia 5e</span>'
-    + '    <span><kbd style="color:#ffd700;font-family:monospace;background:rgba(0,0,0,0.4);padding:0 3px;border-radius:2px;">Esc</kbd> Fechar</span>'
-    + '  </div>'
+    + '  <!-- cart-hotkey-strip removido: mobile-first sem teclas fisicas -->' 
     + '  <div class="cart-header">'
     + '    <h2 id="cart-title">Mapa de Valdória</h2>'
     + '    <div class="cart-prov-bar-wrap">'
@@ -70015,7 +70014,6 @@ function renderCartographyCanvas(el){
     + '      <div class="clo-desc">Desdobrando cartas imperiais e províncias...</div>'
     + '      <div class="clo-bar-track"><div class="clo-bar-fill" id="clo-bar-fill"></div></div>'
     + '    </div>'
-    + '    <div class="cart-zoom-info" id="cart-zoom-info">100%</div>'
     + '    <canvas id="cart-canvas"></canvas>'
     + '    <div class="cart-tooltip" id="cart-tooltip"></div>'
     + '    <div class="cart-controls">'
@@ -70519,10 +70517,9 @@ function _wireCartEvents(){
       _cartPanX = e.offsetX - _cartDragStartX;
       _cartPanY = e.offsetY - _cartDragStartY;
       _cartClampPan();
-      _cartDragDraw();  // Perf #6: throttle 30fps em perf-lite
-    } else {
-      _cartHandleHover(e.offsetX, e.offsetY);
+      _cartDragDraw();
     }
+    // Banimento permanente de mouseover/hover: interações por clique/toque
   });
   _cartCanvas.addEventListener('mouseup', function(){ _cartIsDragging = false; });
   _cartCanvas.addEventListener('mouseleave', function(){
@@ -71872,6 +71869,7 @@ function _cartRequestAnimLoop(){
 }
 
 function _cartHandleHover(mx, my){
+  return; // Banimento permanente de mouseover/hover
   if (_cartHoverRaf) return;
   _cartHoverRaf = requestAnimationFrame(function(){
     _cartHoverRaf = 0;
