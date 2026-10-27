@@ -6134,10 +6134,11 @@ LOG SINK (Fase 7):
 .clp-card {
   width: 100%;
   max-width: 360px;
-  max-height: 90vh;
+  max-height: calc(100dvh - 24px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  overflow-x: hidden !important;
   background: linear-gradient(180deg, rgba(40,32,24,0.98), rgba(22,18,14,0.98));
   border: 1.5px solid #c4953a;
   border-radius: var(--v-radius, 10px);
@@ -6151,6 +6152,9 @@ LOG SINK (Fase 7):
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
   overscroll-behavior: contain;
   padding-right: 2px;
   margin-bottom: 12px;
@@ -6166,6 +6170,18 @@ LOG SINK (Fase 7):
 .clp-body::-webkit-scrollbar-thumb {
   background: rgba(196, 149, 58, 0.4);
   border-radius: 2px;
+}
+.clp-body::-webkit-scrollbar:horizontal {
+  display: none !important;
+  height: 0 !important;
+  width: 0 !important;
+}
+#cart-loc-popup,
+#cart-loc-popup *,
+.clp-prov-preview,
+.clp-prov-stats {
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
 }
 @keyframes clp-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
 .clp-icon {
@@ -9017,37 +9033,14 @@ body.perf-lite .vc-action-btn { transition: none; }
     }
 
     /* Card de Província e Ação Hexagonal */
-    .clp-prov-banner {
-      width: calc(100% + 40px);
-      margin: -20px -20px 14px -20px;
-      height: 130px;
-      background-color: #24180d;
-      background: linear-gradient(180deg, #3d2817 0%, #1a1008 100%);
-      background-size: cover;
-      background-position: center;
-      position: relative;
-      border-bottom: 2px solid rgba(196, 149, 58, 0.45);
-      border-radius: 8px 8px 0 0;
-    }
-    .clp-prov-banner-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(20, 14, 9, 0.95) 100%);
-    }
+    .clp-prov-banner,
+    .clp-prov-banner-overlay,
     .clp-prov-badge {
-      position: absolute;
-      top: 10px;
-      left: 12px;
-      background: rgba(14, 10, 6, 0.88);
-      border: 1px solid #ffd685;
-      border-radius: 12px;
-      padding: 3px 10px;
-      font-family: Cinzel, serif;
-      font-size: 10px;
-      font-weight: 700;
-      color: #ffd685;
-      letter-spacing: 1px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
     }
     .clp-prov-title {
       font-family: Cinzel, serif;
@@ -72137,12 +72130,6 @@ function _openCartProvincePreviewPopup(prov) {
   var locKeys = prov.locKeys || [];
   var knownCount = locKeys.filter(function(k){ return known.indexOf(k) >= 0; }).length;
 
-  var imgBase = (typeof window !== 'undefined' && window.location.protocol === 'file:')
-    ? '/shared/img/map/provinces/'
-    : '/shared/img/map/provinces/';
-  var imgUrl = imgBase + prov.id + '.webp';
-
-  // Checagem de contratos ativos nesta província
   var provQuestName = '';
   if (typeof QUESTS_ACTIVE !== 'undefined' && typeof QUEST_MAP !== 'undefined') {
     for (var pqi = 0; pqi < QUESTS_ACTIVE.length; pqi++) {
@@ -72156,17 +72143,14 @@ function _openCartProvincePreviewPopup(prov) {
   }
 
   card.innerHTML = ''
-    + '<div class="clp-body clp-prov-preview">'
-    + '  <div class="clp-prov-banner" style="background-image:url(\'' + imgUrl + '\');">'
-    + '    <div class="clp-prov-banner-overlay"></div>'
-    + '    <div class="clp-prov-badge">' + (prov.icon || '🗺️') + ' PROVÍNCIA IMPERIAL</div>'
-    + '  </div>'
-    + '  <h2 class="clp-prov-title">' + (prov.icon || '') + ' ' + prov.name + '</h2>'
-    + '  <div class="clp-prov-sub">Carta Regional do Reino de Valdória</div>'
-    + (provQuestName ? '<div class="clp-quest-alert" style="margin: 0 16px 8px;">📜 CONTRATO ATIVO NA REGIÃO: ' + provQuestName.toUpperCase() + '</div>' : '')
-    + '  <p class="clp-prov-desc">' + (prov.desc || 'Uma vasta região com seus próprios mistérios e perigos.') + '</p>'
-    + '  <div class="clp-prov-stats">'
-    + '    <div class="clp-prov-stat-pill">📍 ' + knownCount + ' / ' + locKeys.length + ' locais mapeados</div>'
+    + '<div class="clp-body clp-prov-preview" style="overflow-x:hidden !important;max-width:100%;box-sizing:border-box;">'
+    + '  <div class="clp-icon" style="font-size:42px;margin:4px 0 8px;line-height:1;">' + (prov.icon || '🗺️') + '</div>'
+    + '  <h2 class="clp-prov-title" style="margin:2px 0 4px;">' + prov.name + '</h2>'
+    + '  <div class="clp-prov-sub" style="margin-bottom:8px;">Carta Regional do Reino de Valdória</div>'
+    + (provQuestName ? '<div class="clp-quest-alert" style="margin:0 12px 8px;">📜 CONTRATO ATIVO NA REGIÃO: ' + provQuestName.toUpperCase() + '</div>' : '')
+    + '  <p class="clp-prov-desc" style="margin:0 0 12px;padding:0 8px;">' + (prov.desc || 'Uma vasta região com seus próprios mistérios e perigos.') + '</p>'
+    + '  <div class="clp-prov-stats" style="margin:0 0 12px;display:flex;justify-content:center;overflow-x:hidden !important;">'
+    + '    <div class="clp-prov-stat-pill" style="display:inline-block;white-space:nowrap;">📍 ' + knownCount + ' / ' + locKeys.length + ' locais mapeados</div>'
     + '  </div>'
     + '</div>'
     + '<div class="clp-buttons">'
