@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 319: TRAVESSIA RÁPIDA E REDES DE SIGILOS: CÍRCULO DE TELETRANSPORTE, CAMINHAR NO VENTO E TRANSPORTE VIA PLANTAS (D&D 5e)
+  // =========================================================================
+
+  function resolveFastTravelSigilAndWindWalk(biomeKey, travelMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var tm = (travelMode || 'teleportation_circle_permanent_sigil_sequence').toLowerCase();
+
+    var fastTravel = {
+      travelTitle: 'Círculo de Teletransporte (Teleportation Circle) e Sequências de Sigilos (PHB p. 224)',
+      saveDC: 15,
+      saveType: 'Inteligência',
+      fastTravelMechanics: 'Bardo, Feiticeiro ou Mago (5º círculo, giz raro e tintas infundidas com gemas preciosas no valor de 50 PO consumidos, tempo de conjuração 1 minuto, PHB p. 224) desenha um círculo de 3 metros de diâmetro no chão conectando o nó atual a um círculo permanente de teletransporte no mesmo plano cuja sequência de sigilos o conjurador conheça; o portal permanece aberto até o final do próximo turno, permitindo que duas comitivas aliadas inteiras atravessem instantaneamente entre províncias!',
+      pioneerMitigation: 'Aprender uma nova sequência de sigilos exige estudá-la por 1 minuto (ou recebê-la de outra comitiva amiga na troca de mapas da Fase 315, PHB p. 224).',
+      rescueAndStabilization: 'Permite evacuar aventureiros gravemente feridos diretamente de um marco remoto para um templo urbano.',
+      icon: '🌀',
+      color: '#3b82f6'
+    };
+
+    if (tm === 'transport_via_plants_ancient_tree_network') {
+      fastTravel.travelTitle = 'Transporte via Plantas (Transport via Plants) entre Árvores Ancestrais (PHB p. 283)';
+      fastTravel.saveDC = 15;
+      fastTravel.saveType = 'Sabedoria';
+      fastTravel.fastTravelMechanics = 'Druida (6º círculo, duração 1 rodada, PHB p. 283) cria um elo mágico entre uma planta inanimada Grande ou maior no nó atual e outra planta de mesmo tamanho a qualquer distância no mesmo plano que o conjurador já tenha visto ou tocado pelo menos uma vez; qualquer criatura pode entrar na árvore de origem e sair na árvore de destino usando 1,5m de deslocamento!',
+      fastTravel.pioneerMitigation = 'Marcação de carvalhos ancestrais, sequoias e baobás nos nós visitados com avisos Druídicos (Fase 303) para construir uma rede florestal de resposta rápida.',
+      fastTravel.rescueAndStabilization = 'Ao contrário do Círculo de Teletransporte, não consome componentes materiais caros de 50 PO a cada uso.';
+    } else if (tm === 'wind_walk_gaseous_cloud_three_hundred_ft_dash') {
+      fastTravel.travelTitle = 'Caminhar no Vento (Wind Walk): Nuvem de Vapor a 90m/Rodada (54 km/h) (PHB p. 220)';
+      fastTravel.saveDC = 16;
+      fastTravel.saveType = 'Constituição';
+      fastTravel.fastTravelMechanics = 'Druida (6º círculo, fogo e água benta, duração 8 horas sem Concentração, PHB p. 220) transforma a si mesmo e até 10 criaturas voluntárias (duas comitivas completas!) em nuvens de vapor gasoso com deslocamento de voo de 90 metros (300 pés — 180 metros por rodada com a ação Disparada, equivalente a 108 km/h!) e resistência a dano de armas não-mágicas.',
+      fastTravel.pioneerMitigation = 'Reverter para a forma sólida ou retornar à forma de nuvem exige 1 minuto de transição (10 rodadas durante as quais a criatura fica Incapacitada, PHB p. 220), exigindo pousar fora do alcance de inimigos.',
+      fastTravel.rescueAndStabilization = 'Ignora 100% dos perigos geomorfológicos de solo das 300 Fases, sobrevoando abismos, caldeiras e pântanos.';
+    } else if (tm === 'word_of_recall_and_teleport_mishap_table') {
+      fastTravel.travelTitle = 'Palavra de Regresso (Word of Recall) e Tabela de Desvios de Teletransporte (PHB p. 265, 281)';
+      fastTravel.saveDC = 17;
+      fastTravel.saveType = 'Inteligência';
+      fastTravel.fastTravelMechanics = 'Clérigo (6º círculo, 1 ação, PHB p. 265) teletransporta instantaneamente a si e até 5 aliados a 1,5m para um santuário previamente consagrado ao seu deus sem margem de erro; já a magia Teletransporte (7º círculo, PHB p. 281) para um destino sem Círculo Permanente exige rolagem d100 de familiaridade (Objeto Associado, Muito Familiar, Visto Casual ou Descrição), podendo causar 3d10 de dano de força por Contratempo (Mishap) ou cair Fora do Alvo!',
+      fastTravel.pioneerMitigation = 'Solicitar um Objeto Associado retirado do destino nas últimas 6 meses por outra comitiva para garantir 100% de chegada No Alvo (PHB p. 281).',
+      fastTravel.rescueAndStabilization = 'Palavra de Regresso atua como o botão supremo de extração de emergência da comitiva em combate letal.';
+    }
+
+    return fastTravel;
+  }
+
+  function calcCampTeleportationCircleAnchorStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'rare_chalk_sigil_transcription_and_sharing_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Transcrição de Sequências de Sigilos no Grimório e Partilha no Bivaque (PHB p. 224)',
+      teleportAnchorAndCampSafety: 'Quando o grupo descobre um Círculo de Teletransporte ancestral em uma ruína ou templo das 300 Fases, o Mago ou Bardo dedica 1 minuto para memorizar a sequência única de sigilos e 1 hora no bivaque para gravá-la em seu caderno de cartografia.',
+      teleportAnchorAndWardWatch: 'Permite compartilhar a sequência de sigilos com comitivas aliadas (Fase 315) para que múltiplos grupos possam convergir para aquele nó em futuras expedições.',
+      campRestAndSafetyGuards: 'Transforma ruínas distantes em pontos de salto estratégicos permanentes para a guilda.',
+      icon: '💠',
+      color: '#3b82f6'
+    };
+
+    if (dt === 'forbiddance_and_private_sanctum_anti_teleport_ward') {
+      defense.defenseTitle = 'Santuário Particular de Mordenkainen e Proibição contra Intrusão Planar (PHB p. 270, 276)';
+      defense.teleportAnchorAndCampSafety = 'Para impedir que inimigos se teletransportem para dentro do acampamento ou usem Vidência sobre os aventureiros dormindo, o Mago conjura Santuário Particular de Mordenkainen (4º círculo, folha de chumbo e vidro opaco, duração 24 horas, PHB p. 276) ou o Clérigo realiza o ritual Proibição (Forbiddance, 6º círculo, PHB p. 270).',
+      defense.teleportAnchorAndWardWatch = 'Bloqueia totalmente teletransporte, viagens planares, sensores de adivinhação e faz com que o exterior do bivaque pareça escuro e nebuloso.',
+      defense.campRestAndSafetyGuards = 'Proibição ainda causa 5d10 de dano radiante ou necrótico a celestiais, elementais, fadas, corruptores e mortos-vivos que entrem na área (PHB p. 270).';
+    } else if (dt === 'wind_walk_reversion_and_landing_zone_watch') {
+      defense.defenseTitle = 'Zona de Pouso Protegida para Transição de 1 Minuto de Caminhar no Vento (PHB p. 220)';
+      defense.teleportAnchorAndCampSafety = 'Antes de reverter da forma de nuvem de Caminhar no Vento para a forma física para montar acampamento, a comitiva sobrevoa a clareira em círculos para confirmar a ausência de predadores durante os 60 segundos de vulnerabilidade da transição.',
+      defense.teleportAnchorAndWardWatch = 'Um familiar ou sentinela já em terra assegura o perímetro enquanto os demais companheiros se materializam.',
+      defense.campRestAndSafetyGuards = 'Elimina o risco de emboscada durante a reversão gasosa.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 318: SENSORES ARCANOS REMOTOS: OLHO ARCANO, CLARIVIDÊNCIA E FAMILIAR BATEDOR AÉREO (D&D 5e)
   // =========================================================================
 
@@ -39474,6 +39549,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveFastTravelSigilAndWindWalk: resolveFastTravelSigilAndWindWalk,
+    calcCampTeleportationCircleAnchorStation: calcCampTeleportationCircleAnchorStation,
     resolveRemoteArcaneSensorScouting: resolveRemoteArcaneSensorScouting,
     calcCampFamiliarAndClairvoyanceWatchStation: calcCampFamiliarAndClairvoyanceWatchStation,
     resolveWildernessPartyTrackingAndLocate: resolveWildernessPartyTrackingAndLocate,
