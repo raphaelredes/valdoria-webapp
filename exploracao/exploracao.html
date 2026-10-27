@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T01:46:38Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T01:48:57Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.resolveCrossPartyConvergenceAndCombat) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var cv = CartShared.resolveCrossPartyConvergenceAndCombat(bKey, 'joint_combat2_allied_vanguard_coalescence');
+        return '<div class="clp-cross-party-convergence-card" style="margin:4px 0 6px;text-align:left;background:rgba(42,10,18,0.86);padding:4px 8px;border-radius:4px;border:1px solid rgba(225,29,72,0.38);font-size:8px;color:#fff1f2;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cv.color + ';margin-bottom:2px;">' + cv.icon + ' ' + cv.convergenceTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Combate Conjunto no Combat2, Troca de Mapas e Escambo:</b> ' + cv.convergenceMechanics + ' (CD ' + cv.saveDC + ' [' + cv.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#fecdd3;margin-top:1px;">• <b>Pacto de Vanguarda:</b> ' + cv.pioneerMitigation + ' · <i>Suporte Mútuo: ' + cv.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampSharedBonfireAllianceStation) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var cv = CartShared.calcCampSharedBonfireAllianceStation(bKey, 'dual_party_shared_bonfire_and_double_watch');
+        return '<div class="clp-cross-party-convergence-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(32,8,14,0.82);padding:4px 8px;border-radius:4px;border:1px solid rgba(190,18,60,0.32);font-size:8px;color:#fff1f2;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cv.color + ';margin-bottom:2px;">' + cv.icon + ' ' + cv.defenseTitle.toUpperCase() + ' (PHB p. 54, 167, 186):</div>' 
+          + '  <div>• <b>Fogueira Compartilhada e Vigília Dupla:</b> ' + cv.allianceAndCampSafety + ' · <b>Vigia:</b> ' + cv.allianceAndSharedWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#fda4af;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cv.campRestAndSafetyGuards + '</div>' 
           + '</div>';
       })()
     + (function(){

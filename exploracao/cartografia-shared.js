@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 315 [MARCO FINAL]: CONVERGÊNCIA DE COMITIVAS, FOGUEIRA COMPARTILHADA E COMBATE CONJUNTO NO COMBAT2 (D&D 5e)
+  // =========================================================================
+
+  function resolveCrossPartyConvergenceAndCombat(biomeKey, convergenceMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var cm = (convergenceMode || 'joint_combat2_allied_vanguard_coalescence').toLowerCase();
+
+    var conv = {
+      convergenceTitle: 'Coalescência Tática no Combat2: Duas Comitivas Aliadas contra Ameaças Colossais (D&D 5e)',
+      saveDC: 15,
+      saveType: 'Sabedoria',
+      convergenceMechanics: 'Quando duas comitivas se encontram no mesmo nó da rota ou respondem a um sinal de socorro (Trompa/Píroforos da Fase 301, Ave Mensageira da Fase 305 ou Enviar Mensagem da Fase 308) e selam pacto de aliança, o encontro culmina na Coalescência Tática para o motor Combat2: os aventureiros dos dois grupos entram juntos na ordem de Iniciativa compartilhando auras de Paladino (Aura de Proteção, PHB p. 85), bênçãos de Clérigo, inspiração de Bardo e Vínculo Telepático de Rary (Fase 310) para enfrentar dragões, chefes de masmorra ou emboscadas de guerra que nenhuma comitiva isolada sobreviveria sozinha!',
+      pioneerMitigation: 'Sincronização prévia de papéis de vanguarda, flanqueamento e suporte de cura antes de iniciar o confronto conjunto.',
+      rescueAndStabilization: 'Qualquer aliado de uma das comitivas pode usar Kit de Curandeiro (PHB p. 151) ou Palavra Curativa para estabilizar um companheiro caído do outro grupo a 0 PV.',
+      icon: '⚔️',
+      color: '#e11d48'
+    };
+
+    if (cm === 'corvus_cartography_and_hazard_notes_exchange') {
+      conv.convergenceTitle = 'Troca de Mapas do Cartógrafo Corvus e Notas das 300 Fases de Terreno (XGE p. 79)';
+      conv.saveDC = 12;
+      conv.saveType = 'Inteligência';
+      conv.convergenceMechanics = 'Sem exigir combate, duas comitivas que se encontram pacificamente na estrada podem abrir seus estojos de mapas sobre uma rocha e copiar as anotações de rota uma da outra (Ferramentas de Cartógrafo, XGE p. 79): isso revela instantaneamente os nós adjacentes já explorados pelo outro grupo, destrava atalhos descobertos na Fase 314 e transfere avisos sobre quais das 300 Fases Geomorfológicas aguardam adiante — concedendo +2 nas salvaguardas contra perigos já mapeados pelos colegas!',
+      conv.pioneerMitigation = 'Conferência da assinatura do Cartógrafo Corvus ou do Selo ◈ do Guia parceiro para garantir que o mapa copiado não contém rotas falsas.',
+      conv.rescueAndStabilization = 'Economiza dias inteiros de exploração às cegas em regiões montanhosas, subterrâneas ou pantanosas.';
+    } else if (cm === 'roadside_barter_rations_and_spell_services') {
+      conv.convergenceTitle = 'Escambo de Suprimentos de Estrada e Serviços de Conjuração Ritual (PHB p. 150, 159)',
+      conv.saveDC = 13;
+      conv.saveType = 'Carisma';
+      conv.convergenceMechanics = 'A dezenas de quilômetros da cidade mais próxima, o encontro entre duas comitivas funciona como uma feira de sobrevivência: um grupo rico em ouro mas sem água ou flechas pode negociar com outra comitiva o escambo direto de Rações de Viagem, antídotos, cordas de seda, metade de um par de Pedras de Mensagem (Fase 308) ou a conjuração cooperativa de Restauração Menor, Remover Maldição e Identificação (PHB p. 159).',
+      conv.pioneerMitigation = 'Avaliação justa de valor e raridade local (Sabedoria [Intuição] ou Carisma [Persuasão] CD 13) sem depender de tabelas de lojas urbanas.',
+      conv.rescueAndStabilization = 'Salva comitivas exauridas ou envenenadas que não conseguiriam retornar vivas até os portões da capital.';
+    } else if (cm === 'champion_single_combat_duel_of_honor') {
+      conv.convergenceTitle = 'Duelo de Campeões (1v1) e Resolução Honrada de Disputas no Combat2 (DMG p. 245)',
+      conv.saveDC = 15;
+      conv.saveType = 'Carisma';
+      conv.convergenceMechanics = 'Quando duas comitivas rivais (Fase 313) disputam o direito de passagem por uma ponte estreita, o controle de um santuário de Linha de Ley (Fase 300) ou a posse de uma relíquia sem desejar o massacre total dos dois bandos, os líderes podem acordar um Duelo de Campeões no Combat2 (1 contra 1 até a rendição ou golpe não-letal a 0 PV, PHB p. 198 — Nocauteando uma Criatura), enquanto os demais membros formam o círculo de testemunhas.',
+      conv.pioneerMitigation = 'Juramento do tratado de duelo dentro de uma Zona da Verdade (Fase 310) para garantir que o grupo perdedor respeitará o resultado.',
+      conv.rescueAndStabilization = 'Uso de ataques corpo a corpo declarados como não-letais (PHB p. 198) para que o campeão derrotado caia inconsciente e estável a 0 PV sem morrer.';
+    }
+
+    return conv;
+  }
+
+  function calcCampSharedBonfireAllianceStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'dual_party_shared_bonfire_and_double_watch').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Fogueira Compartilhada de Duas Comitivas e Vigília Dupla de 8 Aventureiros (PHB p. 186)',
+      allianceAndCampSafety: 'Quando duas comitivas unem seus bivaques em um único acampamento fortificado para passar a noite nos ermos, o efetivo de até 8 aventureiros permite manter Sentinelas em dupla em todos os turnos da madrugada sem prejudicar as 6 horas de sono de ninguém.',
+      allianceAndSharedWatch: 'Os dois Sentinelas de cada turno somam apoio mútuo (Ação Ajudar, PHB p. 192 — concedendo Vantagem em Sabedoria [Percepção], equivalente a +5 na Percepção Passiva noturna!) e combinam Cabana de Leomund com Alarme perimetral.',
+      campRestAndSafetyGuards: 'Transforma a noite mais perigosa dos ermos em uma fortaleza impenetrável de camaradagem e prontidão tática.',
+      icon: '🔥',
+      color: '#e11d48'
+    };
+
+    if (dt === 'communal_banquet_and_inspiring_leader_bivouac') {
+      defense.defenseTitle = 'Ceia Comunitária de Acampamento e Discurso de Líder Inspirador (PHB p. 167)',
+      defense.allianceAndCampSafety = 'Ao redor da fogueira compartilhada, um aventureiro com o talento Líder Inspirador (Inspiring Leader, PHB p. 167 — 10 minutos de discurso ou narrativa de batalha) inspira até 6 companheiros presentes (incluindo membros da comitiva aliada!), concedendo Pontos de Vida Temporários iguais ao `nível do personagem + modificador de Carisma`.';
+      defense.allianceAndSharedWatch = 'Complementado pelo talento Cozinheiro (Chef, TCoE p. 79) ou rações especiais preparadas pelo Provedor, todos iniciam a marcha do dia seguinte com reserva extra de vitalidade.',
+      defense.campRestAndSafetyGuards = 'Consolida os laços do grafo de memória episódica (Fase 313) com bônus mecânico imediato para o próximo confronto no Combat2.';
+    } else if (dt === 'song_of_rest_and_healer_kit_cooperative_recovery') {
+      defense.defenseTitle = 'Canção de Descanso do Bardo e Tenda de Curandeiro Cooperativa (PHB p. 54, 165)',
+      defense.allianceAndCampSafety = 'Durante um descanso curto ou antes de dormir no bivaque conjunto, a Canção de Descanso de um Bardo (PHB p. 54 — +1d6 a +1d12 PV extras ao gastar Dados de Vida) beneficia todos os aventureiros aliados que ouvirem a música ao redor do fogo.',
+      defense.allianceAndSharedWatch = 'Simultaneamente, um especialista com o talento Curandeiro (Healer, PHB p. 165) utiliza o Kit de Curandeiro para restaurar `1d6 + 4 + nível` PV em cada membro ferido de ambas as comitivas.',
+      defense.campRestAndSafetyGuards = 'Garante que nenhum grupo retome a estrada no amanhecer com ferimentos abertos ou recursos esgotados.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 314: A JORNADA UNIFICADA EM POINTCRAWL COM OS 4 PAPÉIS DA COMITIVA (GUIA, BATEDOR, SENTINELA, PROVEDOR — D&D 5e)
   // =========================================================================
 
@@ -39174,6 +39249,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveCrossPartyConvergenceAndCombat: resolveCrossPartyConvergenceAndCombat,
+    calcCampSharedBonfireAllianceStation: calcCampSharedBonfireAllianceStation,
     resolvePointcrawlPartyRoleJourney: resolvePointcrawlPartyRoleJourney,
     calcCampArmorRestAndRoleWatchStation: calcCampArmorRestAndRoleWatchStation,
     resolveCharacterReunionMemoryGraph: resolveCharacterReunionMemoryGraph,
