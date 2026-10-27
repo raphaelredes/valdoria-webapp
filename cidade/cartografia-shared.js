@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 301: SINALIZAÇÃO ÓPTICA COM ESPELHOS DE AÇO E HELIÓGRAFOS DE CUME (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessHeliographMirrorSignal(biomeKey, signalType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var st = (signalType || 'steel_mirror_solar_morse_flash_relay').toLowerCase();
+
+    var signal = {
+      signalTitle: 'Transmissão Óptica por Espelho de Aço e Código de Lampejos Solares (Heliógrafo)',
+      saveDC: 13,
+      saveType: 'Sabedoria',
+      heliographMechanics: 'Utilizando um Espelho de Aço polido (PHB p. 150, 5 PO, 0,25 kg) alinhado ao sol, o batedor transmite pulsos codificados silenciosos a até 15 km de distância entre cumes ou nós vizinhos com linha de visão desimpedida; permite alertar outra comitiva sobre emboscadas ou combinar ponto de encontro sem emitir som, exigindo teste de Sabedoria (Sobrevivência ou Intuição CD 13) para decodificar sem Luneta, ou sucesso automático com Luneta (PHB p. 150, 153).',
+      pioneerMitigation: 'Uso de tubo colimador de couro escuro ao redor do espelho para estreitar o feixe luminoso a apenas 2 graus, evitando que batedores hostis fora do eixo visual avistem o brilho (Furtividade ou Sobrevivência CD 14).',
+      rescueAndStabilization: 'Se o reflexo for interceptado por vigias inimigos (Percepção Passiva >= 15), a comitiva emissora deve deslocar sua posição em 300 metros imediatamente e usar sinais falsos de despiste (Enganação CD 13).',
+      icon: '🪞',
+      color: '#f59e0b'
+    };
+
+    if (st === 'hooded_lantern_shutter_night_semaphore') {
+      signal.signalTitle = 'Semáforo Noturno com Lanterna Furta-Fogo e Filtros de Vidro Corado';
+      signal.saveDC = 13;
+      signal.saveType = 'Sabedoria';
+      signal.heliographMechanics = 'Durante a noite ou sob céu encoberto sem sol, a comitiva opera uma Lanterna Furta-Fogo (PHB p. 152, 10 PO) abrindo e fechando a portinhola metálica em cadência rítmica; o feixe direcional de 18 metros projeta sinais visíveis a 3 km na escuridão para aliados atentos sem iluminar o próprio acampamento (PHB p. 152, 183).';
+      signal.pioneerMitigation = 'Acoplamento de lentes de quartzo âmbar ou esmeralda na abertura da lanterna para confundir observadores distantes com olhos de feras ou fogo-fátuo (Prestidigitação ou Sobrevivência CD 13).';
+      signal.rescueAndStabilization = 'Fechamento instantâneo da portinhola (reduzindo a luz a 1,5m de penumbra) e extinção do pavio em caso de patrulha aérea hostil (Destreza CD 12).';
+    } else if (st === 'daylight_spell_prism_overcast_beacon') {
+      signal.signalTitle = 'Heliógrafo Arcano Alimentado por Luz ou Luz do Dia sob Tempestade';
+      signal.saveDC = 14;
+      signal.saveType = 'Inteligência';
+      signal.heliographMechanics = 'Quando neblina densa ou tempestades bloqueiam a luz solar natural, um conjurador focaliza o truque Luz (PHB p. 256) ou a magia Luz do Dia (3º círculo, PHB p. 256) contra o Espelho de Aço côncavo; o feixe concentrado perfura até 5 km de cerração leve ou chuva para transmitir coordenadas de resgate à comitiva aliada (PHB p. 256; DMG p. 110).';
+      signal.pioneerMitigation = 'Modulação da cor do truque Luz (branco para rota limpa, âmbar para cautela, carmesim para perigo iminente) combinada previamente entre os grupos conhecidos (Arcanismo CD 13).';
+      signal.rescueAndStabilization = 'Dissipação imediata da magia após os 3 ciclos de transmissão para não atrair predadores noturnos fototáticos (Arcanismo ou Furtividade CD 13).';
+    } else if (st === 'hostile_mirror_flash_decoy_interception') {
+      signal.signalTitle = 'Contramedida Óptica: Identificação de Reflexo de Luneta ou Emboscada Espelhada';
+      signal.saveDC = 15;
+      signal.saveType = 'Sabedoria';
+      signal.heliographMechanics = 'Batedores ou saqueadores rivais utilizam espelhos falsos para imitar pedidos de socorro de viajantes ou deixam escapar o lampejo momentâneo de uma Luneta/lâmina polida na crista oposta; distinguir um código autêntico de uma isca de emboscada exige leitura da cadência e do ângulo solar (Intuição ou Percepção CD 15, DMG p. 243).';
+      signal.pioneerMitigation = 'Exigência de senha óptica de confirmação (sequência de lampejos curtos e longos acordada no último encontro presencial entre as comitivas) antes de abandonar a rota segura (Intuição CD 14).';
+      signal.rescueAndStabilization = 'Uso do truque Ilusão Menor ou fumaça em ponto distante para forçar o emboscador a revelar sua posição real (Enganação ou Tática CD 14).';
+    }
+
+    return signal;
+  }
+
+  function calcCampHeliographSignalStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'mountain').toLowerCase();
+    var dt = (defenseType || 'periscope_steel_mirror_blind_watch_post').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Posto de Sentinela com Espelho de Aço em Periscópio de Trincheira',
+      heliographAndCampSafety: 'A sentinela do bivaque fixa o Espelho de Aço (PHB p. 150) na ponta de um bastão angulado para observar o vale e a estrada acima do parapeito de pedras sem jamais expor a cabeça a arqueiros ou batedores furtivos (PHB p. 183, 196).',
+      heliographAndWatch: 'Garante Cobertura Total contra ataques à distância diretos enquanto mantém vigilância visual contínua e permite espreitar cantos de ruínas com segurança absoluta.',
+      campRestAndSafetyGuards: 'Protege o turno de guarda contra disparos furtivos e preserva o descanso longo da comitiva.',
+      icon: '⛺',
+      color: '#f59e0b'
+    };
+
+    if (dt === 'spyglass_triangulation_ridge_relay_bivouac') {
+      defense.defenseTitle = 'Estação de Triangulação com Luneta e Heliógrafo de Cume';
+      defense.heliographAndCampSafety = 'Combinação de Luneta de latão (PHB p. 150, amplia objetos em 2x) em tripé firme com espelho sinalizador posicionado a sotavento da crista (PHB p. 153).';
+      defense.heliographAndWatch = 'Concede vantagem em testes de Percepção baseados em visão a longa distância e dobra o alcance efetivo de leitura de sinais de fumaça, bandeiras ou lampejos de grupos aliados.';
+      defense.campRestAndSafetyGuards = 'Antecipa a movimentação de patrulhas ou outras comitivas com até 2 horas de antecedência na rota.';
+    } else if (dt === 'angled_mirror_moonlight_perimeter_tripwire') {
+      defense.defenseTitle = 'Corredor de Reflexo Lunar Cruzado no Perímetro do Acampamento';
+      defense.heliographAndCampSafety = 'Dois pequenos espelhos de aço polido são posicionados nas árvores ou rochas externas para refletir um feixe tênue da fogueira oculta ou do luar através da trilha de acesso (PHB p. 150, 185).';
+      defense.heliographAndWatch = 'Qualquer criatura ou andarilho furtivo que atravesse a garganta de entrada interrompe o reflexo no espelho da sentinela, impondo +5 na Percepção Passiva da vigília noturna.';
+      defense.campRestAndSafetyGuards = 'Alarme óptico 100% silencioso e mundano que funciona mesmo em zonas de Magia Morta.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 300 [MARCO TRICENTENÁRIO]: SANTUÁRIOS DE LINHAS DE LEY, CONFLUÊNCIAS PLANARES E LOCAIS ANÔMALOS (D&D 5e)
   // =========================================================================
 
@@ -38124,6 +38199,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessHeliographMirrorSignal: calcWildernessHeliographMirrorSignal,
+    calcCampHeliographSignalStation: calcCampHeliographSignalStation,
     calcWildernessLeyLineConfluenceHazard: calcWildernessLeyLineConfluenceHazard,
     calcCampLeyLineConfluenceStation: calcCampLeyLineConfluenceStation,
     calcWildernessTakyrClayPanHazard: calcWildernessTakyrClayPanHazard,
