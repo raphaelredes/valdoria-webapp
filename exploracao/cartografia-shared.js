@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 313: GRAFO DE MEMÓRIA EPISÓDICA E DIÁLOGOS DINÂMICOS DE REENCONTRO (character_encounters_memory — D&D 5e)
+  // =========================================================================
+
+  function resolveCharacterReunionMemoryGraph(biomeKey, reunionMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var rm = (reunionMode || 'blood_allies_shared_battle_reunion').toLowerCase();
+
+    var reunion = {
+      reunionTitle: 'Reencontro de Aliados de Sangue: Memória Episódica de Combate e Bivaque (Ensemble Engine / Nemesis)',
+      saveDC: 12,
+      saveType: 'Sabedoria',
+      reunionMemoryMechanics: 'Baseado na arquitetura de memória episódica do Ensemble Engine (UC Santa Cruz / AIIDE) e do Sistema Nemesis (GDC), a tabela persistente character_encounters_memory armazena quem se encontrou, em qual nó e bioma, o dia da campanha, se os nomes verdadeiros foram revelados (Selo ◈) e o histórico de ações conjuntas; quando duas comitivas que já lutaram lado a lado ou partilharam fogueira voltam a cruzar-se semanas depois em outra estrada, o Mestre (DM) abre a cena citando dinamicamente o evento passado ("Entre a neblina da trilha, um rosto familiar surge com o Selo ◈: o mesmo andarilho que segurou a ponte com você nas Colinas de Ferro!") e concede Vantagem em testes de Carisma (Persuasão) mútuos (DMG p. 245).',
+      pioneerMitigation: 'Saudação imediata pelo nome real e referência ao último nó onde acamparam juntos para restabelecer o pacto de confiança sem atraso.',
+      rescueAndStabilization: 'Habilita partilha automática de alertas de perigo da rota e entrada imediata em acampamento cooperativo.',
+      icon: '📜',
+      color: '#f97316'
+    };
+
+    if (rm === 'nameless_familiar_faces_road_reunion') {
+      reunion.reunionTitle = 'Rostos Conhecidos sem Nome: Reencontro Visual sem Apresentação Prévia (PHB p. 177)';
+      reunion.saveDC = 13;
+      reunion.saveType = 'Inteligência';
+      reunion.reunionMemoryMechanics = 'Se dois grupos já se avistaram ou trocaram mercadorias rapidamente em um encontro anterior sem jamais terem revelado seus nomes próprios (`name_revealed: false`), o grafo de memória reconhece a aparência física e o equipamento: a narração do Mestre destaca que você reconhece aquela cicatriz e aquele escudo do cruzamento passado, embora ainda não saiba como o estranho se chama — abrindo opções de diálogo exclusivas ("Então nos cruzamos de novo na estrada... desta vez vai dizer seu nome?").',
+      reunion.pioneerMitigation = 'Teste de Inteligência (História) CD 13 para recordar exatamente qual rota aquela comitiva seguia no encontro anterior.',
+      reunion.rescueAndStabilization = 'Permite quebrar o gelo com muito mais facilidade do que em um primeiro contato entre estranhos absolutos.';
+    } else if (rm === 'bitter_rivals_or_betrayed_treaty_reunion') {
+      reunion.reunionTitle = 'Reencontro de Rivais Antigos, Saqueadores ou Pacto Quebrado (DMG p. 244-245)',
+      reunion.saveDC = 16;
+      reunion.saveType = 'Sabedoria';
+      reunion.reunionMemoryMechanics = 'Quando o grafo registra histórico hostil (`outcome: betrayed_treaty`, `looted_fallen` ou `duel_defeat`), o reencontro na estrada carrega tensão imediata digna do Sistema Nemesis: a atitude inicial segue as regras do DMG (p. 244-245 — Hostil), exigindo Sabedoria (Intuição) e Carisma (Intimidação ou Diplomacia CD 16) caso uma das partes tente exigir reparação em ouro ou evitar o derramamento de sangue.',
+      reunion.pioneerMitigation = 'Manter formação defensiva e armas prontas assim que o Batedor reconhecer o estandarte ou a voz de um antigo rival.',
+      reunion.rescueAndStabilization = 'Oferta de restituição de item saqueado ou duelo singular de campeões (1v1) para encerrar a rixa sem dizimar as duas comitivas.';
+    } else if (rm === 'transitive_companion_vouching_network') {
+      reunion.reunionTitle = 'Apresentação Transitiva por Amigo em Comum ("Amigo do Meu Companheiro")',
+      reunion.saveDC = 12;
+      reunion.saveType = 'Carisma';
+      reunion.reunionMemoryMechanics = 'Se apenas um membro da Comitiva A possui o Selo ◈ de um membro da Comitiva B (por terem viajado juntos no passado ou pertencido à mesma guilda), esse aventureiro pode atuar como fiador social ("Abaixem as armas! Eu conheço Lyra, ela lutou comigo no Passo Cinzento"): essa ação propaga o Selo ◈ para todos os presentes que ouvirem a apresentação e eleva a atitude inicial de Indiferente para Amigável (DMG p. 244).',
+      reunion.pioneerMitigation = 'Verificação rápida de uma lembrança compartilhada entre os dois amigos para provar que não se trata de impostor sob Disfarçar-se.',
+      reunion.rescueAndStabilization = 'Conecta redes inteiras de aventureiros ao longo das províncias de Valdoria de forma orgânica e diegética.';
+    }
+
+    return reunion;
+  }
+
+  function calcCampSharedMemoryChronicleStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'campfire_chronicle_journal_and_encounter_ledger').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Registro no Diário de Estrada e Crônica de Encontros à Luz do Bivaque',
+      chronicleAndCampSafety: 'Ao final de cada jornada diária no acampamento, o escriba ou Guia da comitiva atualiza o Diário de Encontros (`character_encounters_memory`), anotando os nomes revelados (◈), pseudônimos suspeitos, insígnias vistas e favores devidos.',
+      chronicleAndMemoryWatch: 'Permite consultar a qualquer momento no grimório de viagem onde cada aliado ou rival foi visto pela última vez e quais idiomas falava.',
+      campRestAndSafetyGuards: 'Concede vantagem em testes de Inteligência (História) para lembrar detalhes de comitivas encontradas há várias semanas.',
+      icon: '📖',
+      color: '#f97316'
+    };
+
+    if (dt === 'oath_token_and_signet_exchange_bivouac') {
+      defense.defenseTitle = 'Troca de Moedas Marcadas, Anéis de Sinete e Senhas de Reencontro (PHB p. 150)';
+      defense.chronicleAndCampSafety = 'Duas comitivas aliadas que se separam em uma bifurcação trocam metades de uma moeda de prata cortada, impressões de Cera de Lacre (PHB p. 150) ou uma frase-senha única antes de partir.';
+      defense.chronicleAndMemoryWatch = 'Em qualquer reencontro futuro sob escuridão, neblina ou disfarce, exibir a moeda partida ou pronunciar a senha confirma a identidade instantaneamente sem depender de testes de Intuição.',
+      defense.campRestAndSafetyGuards = 'Impede que metamorfos, doppelgängers (MM p. 82) ou ilusionistas se passem por aliados de estrada.';
+    } else if (dt === 'bounty_and_reputation_rumor_verification') {
+      defense.defenseTitle = 'Conferência de Rumores de Estrada e Reputação de Outras Comitivas (DMG p. 245)';
+      defense.chronicleAndCampSafety = 'Durante a conversa ao redor do fogo, duas comitivas comparam seus registros de viagem sobre terceiros grupos que rondam a região.',
+      defense.chronicleAndMemoryWatch = 'Permite descobrir se um bando avistado mais cedo na trilha tem histórico de honrar acordos ou de emboscar viajantes durante o descanso longo.',
+      defense.campRestAndSafetyGuards = 'Alimenta a inteligência coletiva dos jogadores sem recorrer a placares artificiais fora do universo do jogo.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 312: PROTOCOLO DE APRESENTAÇÃO NARRATIVA, PSEUDÔNIMOS (ENGANAÇÃO VS INTUIÇÃO), RECONHECIMENTO POR VOZ E SELO ◈ (D&D 5e)
   // =========================================================================
 
@@ -39024,6 +39099,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveCharacterReunionMemoryGraph: resolveCharacterReunionMemoryGraph,
+    calcCampSharedMemoryChronicleStation: calcCampSharedMemoryChronicleStation,
     resolveNarrativeIntroductionAndAlias: resolveNarrativeIntroductionAndAlias,
     calcCampDisguiseAndVoiceRecognitionStation: calcCampDisguiseAndVoiceRecognitionStation,
     resolveStrangerIdentityPerceptionFog: resolveStrangerIdentityPerceptionFog,
