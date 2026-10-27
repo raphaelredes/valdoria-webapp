@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 322: MIRAGENS MÍSTICAS, TERRENOS ILUSÓRIOS E LABIRINTOS MENTAIS (D&D 5e)
+  // =========================================================================
+
+  function resolveIllusionTerrainAndMazeOrientation(biomeKey, illusionMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var im = (illusionMode || 'mirage_arcane_tactical_terrain_transmutation').toLowerCase();
+
+    var illusion = {
+      illusionTitle: 'Miragem Arcana (Mirage Arcane): Transmutação Ilusória de Terreno de 2,5 km² (PHB p. 260)',
+      saveDC: 17,
+      saveType: 'Inteligência',
+      illusionMechanics: 'Bardo, Druida ou Mago (7º círculo, tempo de conjuração 10 minutos, duração 10 dias, PHB p. 260) remodela o terreno natural e estruturas artificiais numa área colossal de até 2,5 km² (1 milha quadrada), fazendo um ermo inóspito parecer, soar, cheirar e até se comportar fisicamente como campinas com riachos límpidos e castelos táteis; como a ilusão possui substância quase física, membros da comitiva podem subir em torres ilusórias ou cruzar pontes fantasmas sem cair!',
+      pioneerMitigation: 'Criaturas com Sentido Verdadeiro (Truesight) enxergam a forma original do terreno, mas ainda podem interagir fisicamente com as pontes e vegetação da miragem (PHB p. 260).',
+      rescueAndStabilization: 'Converte penhascos intransponíveis e atoleiros venenosos em estradas planas para a passagem segura de comboios de carga.',
+      icon: '🌀',
+      color: '#a855f7'
+    };
+
+    if (im === 'hallucinatory_terrain_chasm_and_quicksand_trap') {
+      illusion.illusionTitle = 'Terreno Alucinógeno (Hallucinatory Terrain): Camuflagem de Ravinas e Armadilhas Naturais (PHB p. 249)';
+      illusion.saveDC = 16;
+      illusion.saveType = 'Investigação';
+      illusion.illusionMechanics = 'Bardo, Bruxo, Druida ou Mago (4º círculo, duração 24 horas, cubo de 45 metros, PHB p. 249) faz um abismo, charco de lodo movediço ou fenda de lava parecer terreno sólido de cascalho; criaturas que inspecionam o local à distância devem ser bem-sucedidas num teste de Inteligência (Investigação) contra a CD de conjuração para notar as incongruências visuais antes de pisar!';
+      illusion.pioneerMitigation = 'O batedor da comitiva utiliza sondas de madeira ou passos cautelosos para testar a resistência física de superfícies suspeitas antes da marcha (PHB p. 249).';
+      illusion.rescueAndStabilization = 'Evita que a comitiva caia em fossos camuflados ou emboscadas preparadas por bandidos nas rotas estreitas.';
+    } else if (im === 'maze_extradimensional_mental_puzzle_banishment') {
+      illusion.illusionTitle = 'Labirinto (Maze): Banimento para Semiplano Labiríntico Extradimensional (PHB p. 279)';
+      illusion.saveDC = 20;
+      illusion.saveType = 'Inteligência';
+      illusion.illusionMechanics = 'Mago (8º círculo, concentração até 10 minutos, alcance 18 metros, PHB p. 279) bane um monstro colossal ou campeão hostil sem direito a salvaguarda inicial para um semiplano labiríntico; para escapar em cada turno subsequente, o alvo deve usar sua ação inteira e obter sucesso num teste puro de Inteligência CD 20 (apenas Minotauros passam automaticamente por Memória Labiríntica, MM p. 218)!';
+      illusion.pioneerMitigation = 'Neutraliza instantaneamente a maior ameaça de um encontro durante o tempo necessário para a comitiva escapar do nó ou se posicionar taticamente.';
+      illusion.rescueAndStabilization = 'Permite evacuar aventureiros caídos ou feridos enquanto o líder inimigo vaga preso no labirinto infinito.';
+    } else if (im === 'true_seeing_and_detect_illusion_scouting') {
+      illusion.illusionTitle = 'Visão da Verdade (True Seeing): Percepção Absoluta Contra Miragens e Portais Secretos (PHB p. 284)';
+      illusion.saveDC = 17;
+      illusion.saveType = 'Sabedoria';
+      illusion.illusionMechanics = 'Bardo, Clérigo, Bruxo, Feiticeiro ou Mago (6º círculo, pó de cogumelo e açafrão de 25 PO, duração 1 hora, alcance toque, PHB p. 284) concede Sentido Verdadeiro até 36 metros, permitindo enxergar através de escuridão mágica e normal, detectar portas secretas ocultas por ilusões, ver criaturas invisíveis e no Plano Etéreo e perceber a verdadeira forma de metamorfos.';
+      illusion.pioneerMitigation = 'Garante que o Guia e o Batedor identifiquem caminhos reais e atalhos ocultos bloqueados por miragens ancestrais nas ruínas dos ermos.';
+      illusion.rescueAndStabilization = 'Detecta imediatamente armadilhas visuais antes que a comitiva seja atraída para precipícios.';
+    }
+
+    return illusion;
+  }
+
+  function calcCampAntiIllusionWardStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'true_seeing_perimeter_and_hallucination_purge').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Perímetro com Visão da Verdade e Purga de Miragens no Bivaque (PHB p. 284)',
+      illusionAndCampSafety: 'Ao estabelecer o acampamento em regiões marcadas por magia residual ou covis feéricos (como Floresta Ancestral ou Pântano Sombrio), o conjurador ativa Visão da Verdade ou Detectar Magia para inspecionar o solo num raio de 36 metros, desfazendo dúvidas sobre se árvores e rochas perimetrais são reais ou disfarces para infiltradores.',
+      illusionAndCouncilWatch: 'Sentinelas na vigília não são enganados por sons falsos, fogueiras fantasma ou formas ilusórias criadas por espiões hostis para desviar a atenção do grupo.',
+      campRestAndSafetyGuards: 'Assegura descanso longo sereno e sem surpresa contra ilusões ou invasores invisíveis (PHB p. 186, 284).',
+      icon: '👁️',
+      color: '#a855f7'
+    };
+
+    if (dt === 'labyrinthine_recall_and_mental_map_orientation') {
+      defense.defenseTitle = 'Orientação por Memória Labiríntica e Bússola Astral de Vigília (PHB p. 279; MM p. 218)';
+      defense.illusionAndCampSafety = 'A comitiva utiliza técnicas de anotação cartográfica em pedra e giz rúnico em torno do bivaque, gravando pontos cardeais fixos e referências astronômicas para garantir que batedores em patrulha noturna não sejam desorientados por névoas hipnóticas ou dobras dimensionais.';
+      defense.illusionAndCouncilWatch = 'Membros da comitiva recebem vantagem em testes de Inteligência e Sabedoria para navegar ou escapar de labirintos mágicos e terrenos de desorientação mental nos arredores do acampamento.';
+      defense.campRestAndSafetyGuards = 'Impede que sentinelas se afastem do posto de guarda sob o efeito de feitiços de extravio.';
+    } else if (dt === 'tactical_mirage_decoy_camp_camo') {
+      defense.defenseTitle = 'Camuflagem Ilusória de Bivaque por Miragem Arcana (PHB p. 260)';
+      defense.illusionAndCampSafety = 'Conjuradores utilizam Terreno Alucinógeno ou Miragem Arcana para sobrepor a imagem de um paredão de rocha íngreme e inóspito exatamente sobre a clareira onde estão montadas as barracas da comitiva.',
+      defense.illusionAndCouncilWatch = 'Patrulhas inimigas e feras carnívoras que passam a poucos passos enxergam apenas pedra bruta e vento uivante, contornando o local sem interagir ou suspeitar da presença do grupo adormecido.',
+      defense.campRestAndSafetyGuards = 'Reduz a chance de encontros noturnos hostis a zero durante toda a permanência da comitiva no nó camuflado (PHB p. 260).';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 321: MANIPULAÇÃO CLIMÁTICA E TEMPESTADES MÍSTICAS NOS ERMOS (D&D 5e)
   // =========================================================================
 
@@ -39699,6 +39774,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveIllusionTerrainAndMazeOrientation: resolveIllusionTerrainAndMazeOrientation,
+    calcCampAntiIllusionWardStation: calcCampAntiIllusionWardStation,
     resolveWildernessWeatherManipulation: resolveWildernessWeatherManipulation,
     calcCampWeatherControlStation: calcCampWeatherControlStation,
     resolveMagnificentMansionAndWarCouncil: resolveMagnificentMansionAndWarCouncil,
