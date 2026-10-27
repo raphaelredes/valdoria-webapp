@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 310: REDE TELEPÁTICA DE ALIANÇA E VERIFICAÇÃO DE VERDADE: VÍNCULO DE RARY, DETECTAR PENSAMENTOS E ZONA DA VERDADE (D&D 5e)
+  // =========================================================================
+
+  function resolveParleyTruthAndTelepathy(biomeKey, parleyMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var pm = (parleyMode || 'rary_telepathic_bond_eight_allies_ritual').toLowerCase();
+
+    var parley = {
+      parleyTitle: 'Vínculo Telepático de Rary (Rary’s Telepathic Bond) entre Comitivas Aliadas (PHB p. 287)',
+      saveDC: 16,
+      saveType: 'Sabedoria',
+      parleyTruthMechanics: 'O Mago (5º círculo ritual, pedaços de casca de ovo de duas espécies diferentes, duração 1 hora sem exigir Concentração, PHB p. 287) interliga mentalmente até 8 criaturas voluntárias que estejam dentro de 9 metros no momento da conjuração — permitindo conectar duas comitivas inteiras de 4 aventureiros que se unem na estrada! Pelo resto da hora, todos os membros vinculados comunicam-se telepaticamente através de qualquer distância (mesmo se as comitivas se separarem em rotas diferentes, desde que no mesmo plano e tenham Inteligência 2 ou superior).',
+      pioneerMitigation: 'Renovação como ritual de 10 minutos antes do término da hora para manter as duas comitivas sincronizadas durante incursões em masmorras ou flanqueamentos nos ermos.',
+      rescueAndStabilization: 'Permite deliberação tática silenciosa instantânea entre os 8 companheiros diante de uma terceira facção hostil sem emitir uma única palavra audível.',
+      icon: '🧠',
+      color: '#14b8a6'
+    };
+
+    if (pm === 'zone_of_truth_charisma_parley_circle') {
+      parley.parleyTitle = 'Zona da Verdade (Zone of Truth) para Tratados e Revelação de Identidade (PHB p. 289)';
+      parley.saveDC = 15;
+      parley.saveType = 'Carisma';
+      parley.parleyTruthMechanics = 'Bardo, Clérigo ou Paladino (2º círculo, esfera de 4,5 metros de raio por 10 minutos, PHB p. 289) santifica o centro do encontro entre duas comitivas desconhecidas; cada criatura realiza uma salvaguarda de Carisma ao entrar ou iniciar turno na zona (o conjurador sabe exatamente quem passou e quem falhou!). Quem falhar não pode proferir nenhuma mentira deliberada — garantindo que o nome revelado na apresentação narrativa e a promessa de não-agressão sejam verdadeiros.',
+      parley.pioneerMitigation = 'Uma criatura afetada conhece a existência da magia e pode ser evasiva ou recusar-se a falar, desde que mantenha-se dentro dos limites da verdade (PHB p. 289).',
+      parley.rescueAndStabilization = 'Formulações de perguntas fechadas diretas pelos líderes das comitivas ("Você ou seu bando planejam nos emboscar nesta estrada?") para impedir respostas ambíguas.';
+    } else if (pm === 'detect_thoughts_surface_and_deep_probe') {
+      parley.parleyTitle = 'Detectar Pensamentos (Detect Thoughts) em Parley de Estrada (PHB p. 231)';
+      parley.saveDC = 15;
+      parley.saveType = 'Sabedoria';
+      parley.parleyTruthMechanics = 'Bardo, Feiticeiro ou Mago (2º círculo, moeda de cobre, alcance 9m, Concentração até 1 minuto, PHB p. 231) lê automaticamente os pensamentos superficiais de um estranho (sem salvaguarda inicial!) para descobrir o que mais ocupa sua mente naquele instante — como um plano de emboscada oculto ou seu nome real; se o conjurador sondar mais fundo (Sabedoria CD do conjurador), o alvo percebe em qualquer resultado que alguém está vasculhando sua mente!';
+      parley.pioneerMitigation = 'Manter-se apenas na leitura de pensamentos superficiais combinada com perguntas sociais que induzam o interlocutor a pensar espontaneamente na informação desejada (estilo Baldur’s Gate 3).';
+      parley.rescueAndStabilization = 'Caso o alvo perceba a sondagem profunda, ele pode usar sua ação em disputa de Inteligência contra a Inteligência do conjurador para encerrar a magia imediatamente (PHB p. 231).';
+    } else if (pm === 'glibness_and_ring_of_mind_shielding_counter') {
+      parley.parleyTitle = 'Anel de Escudo Mental e Loquacidade (Glibness) contra Magias de Verdade (DMG p. 152; PHB p. 256)';
+      parley.saveDC = 18;
+      parley.saveType = 'Carisma';
+      parley.parleyTruthMechanics = 'Aventureiros que portam um Anel de Escudo Mental (Ring of Mind Shielding, item incomum, DMG p. 152) ou estão sob efeito de Loquacidade (Glibness, 8º círculo de Bardo/Bruxo, PHB p. 256) são imunes à leitura de pensamentos não autorizada e fazem com que magias que determinam se estão falando a verdade (como Zona da Verdade) indiquem sempre que suas palavras são verdadeiras!';
+      parley.pioneerMitigation = 'Exigência de remover anéis visíveis ou inspeção prévia com Detectar Magia (aura de Abjuração/Transmutação) antes de juramentos solenes de sangue entre comitivas.';
+      parley.rescueAndStabilization = 'Contraste entre a declaração verbal e evidências físicas de rastros, ferimentos ou insígnias observadas pela Percepção Passiva do grupo.';
+    }
+
+    return parley;
+  }
+
+  function calcCampTelepathicBondParleyStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'eggshell_ritual_telepathic_alliance_circle').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Círculo Ritual de Casca de Ovo para Vínculo Telepático de Duas Comitivas (PHB p. 287)',
+      parleyAndCampSafety: 'Antes de deixar o bivaque compartilhado, o Mago realiza o ritual de 10 minutos de Vínculo Telepático de Rary utilizando cascas de ovo de duas espécies distintas para unir os até 8 aventureiros das duas comitivas sem gastar espaço de magia (PHB p. 287).',
+      parleyAndTelepathicWatch: 'Durante os turnos de vigília ou patrulha perimetral ao redor do acampamento, as sentinelas reportam qualquer movimentação suspeita na mata diretamente na mente de todos os companheiros em silêncio absoluto.',
+      campRestAndSafetyGuards: 'Como a magia não exige Concentração, o conjurador pode manter outras magias defensivas ativas simultaneamente.',
+      icon: '🔗',
+      color: '#14b8a6'
+    };
+
+    if (dt === 'sacred_truth_hearth_treaty_parley') {
+      defense.defenseTitle = 'Fogueira de Parley sob Zona da Verdade Consagrada (PHB p. 289)';
+      defense.parleyAndCampSafety = 'Quando duas comitivas que não se conhecem decidem dividir o mesmo abrigo contra uma tempestade ou perigo de terreno, o Clérigo ou Paladino conjura Zona da Verdade sobre a fogueira central com consentimento mútuo.';
+      defense.parleyAndTelepathicWatch = 'Ambos os grupos declaram abertamente dentro da esfera de 4,5 metros que não atacarão nem furtarão os companheiros de acampamento durante o descanso longo.';
+      defense.campRestAndSafetyGuards = 'Estabelece confiança mecânica verificável para a troca de mapas e vigília conjunta (Fase 315).';
+    } else if (dt === 'mental_privacy_and_deception_screen_bivouac') {
+      defense.defenseTitle = 'Protocolo de Blindagem Mental e Disciplina de Pensamento em Encontros';
+      defense.parleyAndCampSafety = 'Membros da comitiva treinados contra espionagem mental recitam mantras rítmicos ou canções de marcha mentalmente durante negociações tensas para ocultar coordenadas de esconderijos nos pensamentos superficiais (PHB p. 231).';
+      defense.parleyAndTelepathicWatch = 'Vigilância atenta a componentes verbais, somáticos e à moeda de cobre de conjuradores desconhecidos que tentem lançar Detectar Pensamentos sem Sutileza Arcana.';
+      defense.campRestAndSafetyGuards = 'Protege os segredos de rota e o inventário raro do grupo contra batedores oportunistas.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 309: MENSAGENS PROGRAMADAS EM MARCOS: BOCA ENCANTADA, ESCRITA ILUSÓRIA E ALARME (D&D 5e)
   // =========================================================================
 
@@ -38799,6 +38874,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveParleyTruthAndTelepathy: resolveParleyTruthAndTelepathy,
+    calcCampTelepathicBondParleyStation: calcCampTelepathicBondParleyStation,
     resolveNodeImplantedMagicMessage: resolveNodeImplantedMagicMessage,
     calcCampArcaneAlarmAndGlyphStation: calcCampArcaneAlarmAndGlyphStation,
     resolveLongDistanceMagicalMessage: resolveLongDistanceMagicalMessage,
