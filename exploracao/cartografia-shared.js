@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 316: TESTEMUNHAS DA ESTRADA: FALAR COM ANIMAIS, FALAR COM PLANTAS E FALAR COM OS MORTOS (D&D 5e)
+  // =========================================================================
+
+  function resolveTrailWitnessSpeakSpells(biomeKey, witnessMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var wm = (witnessMode || 'speak_with_animals_fauna_witness_ritual').toLowerCase();
+
+    var witness = {
+      witnessTitle: 'Falar com Animais (Speak with Animals) para Interrogar a Fauna da Trilha (PHB p. 242)',
+      saveDC: 13,
+      saveType: 'Sabedoria',
+      witnessSpellMechanics: 'Bardo, Druida ou Patrulheiro (1º círculo ritual, duração 10 minutos, PHB p. 242; Baldur’s Gate 3) compreende e se comunica verbalmente com bestas locais (corvos de carniça, lobos, corujas, marmotas ou cavalos desgarrados); os animais funcionam como testemunhas oculares e olfativas vivas do nó do Pointcrawl, podendo relatar quantas comitivas ou monstros passaram pela estrada no último dia, qual direção tomaram na bifurcação e se carregavam tochas ou feridos sangrando.',
+      pioneerMitigation: 'Oferta de rações frescas ou teste de Sabedoria (Adestrar Animais) / Carisma (Persuasão) CD 13 para que uma besta arisca aceite prestar um pequeno favor de observação ao grupo (PHB p. 242).',
+      rescueAndStabilization: 'Permite descobrir emboscadas montadas adiante na trilha sem precisar expor nenhum membro da comitiva.',
+      icon: '🦉',
+      color: '#22c55e'
+    };
+
+    if (wm === 'speak_with_plants_flora_memory_interrogation') {
+      witness.witnessTitle = 'Falar com Plantas (Speak with Plants) e Memória Botânica das 24 Horas (PHB p. 242)';
+      witness.saveDC = 15;
+      witness.saveType = 'Sabedoria';
+      witness.witnessSpellMechanics = 'Bardo, Druida ou Patrulheiro (3º círculo, raio de 9m por 10 minutos, PHB p. 242) imbuí árvores, arbustos e gramíneas com consciência e voz; você pode questionar a vegetação sobre eventos ocorridos na área durante as últimas 24 horas — descobrindo quem pisoteou a relva mesmo sob Rastro Invisível, onde um tesouro foi enterrado entre as raízes ou qual idioma os estranhos falavam! Além disso, as plantas podem transformar terreno difícil de sarças em terreno normal (ou vice-versa para atrasar perseguidores) e soltar um companheiro Contido por cipós.',
+      witness.pioneerMitigation = 'Respeito estrito à floresta (evitar cortar galhos vivos ou atear fogo perto das árvores interrogadas).',
+      witness.rescueAndStabilization = 'Comando para que os espinheiros fechem a trilha atrás da comitiva, bloqueando a perseguição de bandos hostis.';
+    } else if (wm === 'speak_with_dead_five_questions_corpse_inquest') {
+      witness.witnessTitle = 'Falar com os Mortos (Speak with Dead): Inquérito das 5 Perguntas ao Caído (PHB p. 243)';
+      witness.saveDC = 15;
+      witness.saveType = 'Sabedoria';
+      witness.witnessSpellMechanics = 'Bardo ou Clérigo (3º círculo, incenso aceso, alcance 3m, PHB p. 243; Baldur’s Gate 3) concede semblante de vida a um cadáver na beira da estrada que ainda possua boca e não seja morto-vivo; o conjurador faz até 5 perguntas (exigindo compartilhar um idioma que o falecido conhecia em vida, Fase 306!). O cadáver conhece apenas o que sabia até o momento da morte (quem o atacou, qual era o rosto/voz do assassino ou onde escondeu sua mochila), e a magia não pode ser lançada novamente no mesmo corpo por 10 dias.';
+      witness.pioneerMitigation = 'Uso de Disfarçar-se (Fase 312) caso o conjurador pertença a uma facção que o cadáver reconheceria como inimiga, evitando respostas crípticas ou evasivas (PHB p. 243).';
+      witness.rescueAndStabilization = 'Revela a identidade real de saqueadores que massacraram caravanas na rota e permite recuperar relíquias ocultas.';
+    } else if (wm === 'commune_with_nature_three_mile_radar_ritual') {
+      witness.witnessTitle = 'Comunhão com a Natureza (Commune with Nature): Radar de 4,5 km nos Ermos (PHB p. 224)';
+      witness.saveDC = 16;
+      witness.saveType = 'Sabedoria';
+      witness.witnessSpellMechanics = 'Druida ou Patrulheiro (5º círculo ritual de 1 minuto, PHB p. 224) torna-se um com a natureza em raio de 3 milhas (4,5 km ao ar livre ou 90m em cavernas naturais), adquirindo instantaneamente conhecimento de até 3 fatos à sua escolha sobre o território: povoados ou acampamentos de outras comitivas na região, corpos d’água potáveis, concentração de plantas/minerais raros, ou presença de celestiais, fadas, corruptores, elementais e mortos-vivos poderosos!';
+      witness.pioneerMitigation = 'Execução do ritual em cumes ou clareiras naturais (a magia não funciona em masmorras construídas de pedra talhada ou cidades, PHB p. 224).';
+      witness.rescueAndStabilization = 'Antecipa em vários nós de distância a presença de chefes regionais ou santuários planares (Fase 300).';
+    }
+
+    return witness;
+  }
+
+  function calcCampNatureAndSpiritCommuneStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'beast_sense_and_animal_friendship_watch').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Sentinela Animal por Sentido Bestial (Beast Sense) e Amizade Animal (PHB p. 212, 276)',
+      communeAndCampSafety: 'O Druida ou Patrulheiro encanta uma águia, coruja noturna ou lobo local com Amizade Animal (1º círculo, duração 24 horas, PHB p. 212) e realiza o ritual de 2º círculo Sentido Bestial (PHB p. 276) no bivaque.',
+      communeAndWitnessWatch: 'Por até 1 hora, o conjurador enxerga e ouve diretamente através dos olhos e ouvidos aguçados da fera enquanto ela sobrevoa o dossel da floresta ou patrulha a trilha a centenas de metros do acampamento.',
+      campRestAndSafetyGuards: 'Permite inspecionar o acampamento de outra comitiva vizinha do alto de uma árvore sem risco de detecção humana.',
+      icon: '🦌',
+      color: '#22c55e'
+    };
+
+    if (dt === 'awakened_shrub_and_plant_growth_perimeter') {
+      defense.defenseTitle = 'Perímetro Vivo de Arbustos Despertos e Crescer Plantas (PHB p. 229, 230)';
+      defense.communeAndCampSafety = 'Utilizando Crescer Plantas (3º círculo, PHB p. 229 — exigindo 4 metros de deslocamento para cada 1 metro percorrido na vegetação espessa!) e sentinelas botânicas criadas com Despertar (Awaken, 5º círculo, ágata de 1.000 PO, PHB p. 230), o bivaque é cercado por guardiões vegetais que parecem arbustos comuns enquanto permanecem imóveis.';
+      defense.communeAndWitnessWatch = 'Qualquer intruso que tente se esgueirar pela mata fechada ao redor das tendas fica reduzido a um quarto de sua velocidade normal e é denunciado pelo sussurro das árvores.';
+      defense.campRestAndSafetyGuards = 'Cria uma barreira viva sustentável que permanece leal ao conjurador por 30 dias (PHB p. 230).';
+    } else if (dt === 'gentle_repose_and_corpse_sanctification_rite') {
+      defense.defenseTitle = 'Rito de Repouso Tranquilo (Gentle Repose) e Preservação de Caídos (PHB p. 273)';
+      defense.communeAndCampSafety = 'Quando a comitiva encontra viajantes caídos ou perde um aliado longe de um templo, o Clérigo ou Mago realiza o ritual de 2º círculo Repouso Tranquilo (moedas de cobre sobre os olhos, duração 10 dias, PHB p. 273).';
+      defense.communeAndWitnessWatch = 'Protege o corpo contra decomposição e impede terminantemente que necromantes ou a aura de cemitérios o levantem como morto-vivo, além de estender o limite de tempo para Revivificar ou Falar com os Mortos.';
+      defense.campRestAndSafetyGuards = 'Preserva a dignidade dos companheiros caídos até o retorno seguro à cidade.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 315 [MARCO FINAL]: CONVERGÊNCIA DE COMITIVAS, FOGUEIRA COMPARTILHADA E COMBATE CONJUNTO NO COMBAT2 (D&D 5e)
   // =========================================================================
 
@@ -39249,6 +39324,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveTrailWitnessSpeakSpells: resolveTrailWitnessSpeakSpells,
+    calcCampNatureAndSpiritCommuneStation: calcCampNatureAndSpiritCommuneStation,
     resolveCrossPartyConvergenceAndCombat: resolveCrossPartyConvergenceAndCombat,
     calcCampSharedBonfireAllianceStation: calcCampSharedBonfireAllianceStation,
     resolvePointcrawlPartyRoleJourney: resolvePointcrawlPartyRoleJourney,
