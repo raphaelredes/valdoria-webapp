@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T12:19:24Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T12:25:31Z - do not edit directly, edit source -->
 
 
 
@@ -44133,6 +44133,232 @@ const FIXED_MAPS = {
     ]
   },
 
+
+  // ============ MASMORRA: MINA PERDIDA (lost_mine) =============
+  // Masmorra AAA Tier 1-3 (Bioma Caverna - Cavernas Subterrâneas)
+  // Grid hex 20 cols x 24 rows com trilhos, galerias e forja anã:
+  //   . = path (walkable, trilhos antigos de mina e cascalho solto)
+  //   # = wall (impassable, rocha bruta e estalagmites)
+  //   o = open excavation (walkable, praca da forja e fogueira segura)
+  //   i = inner lair (walkable, poco profundo do Troglodita Colossal)
+  //   E = edge/exit (entrada/saida unica ao sul)
+  lost_mine: {
+    id: 'lost_mine', region: 'valdoria', biome: 'dungeon', is_dungeon: true,
+    name: 'Mina Perdida',
+    cols: 20, rows: 24, seed: 99004, spawnCol: 10, spawnRow: 23,
+    music: 'cave', danger: 4, required_gear: 'torch',
+    boss: {
+      name: 'Dorgar, o Troglodita Colossal', cr: 3, xp: 750, sugLvl: 3,
+      hp: 65, ac: 14, atk: 6,
+      multiAttack: 2,
+      hasBurstSkill: true,    // Fedor Asfixiante Troglodita (TR Con CD 12)
+      hasResource: false
+    },
+    worldPos: { x: 0.06, y: 0.66 },
+    weather_pool: ['s'],
+    weights: { '.': 1 },
+    dungeon: true,
+    parentMap: 'underground_caverns',
+    gridTemplate: [
+      '####################',
+      '####iiiiiiiiiiii####',
+      '###iiiiiiiiiiiiii###',
+      '###iiiiiiiiiiiiii###',
+      '####iiii....iiii####',
+      '#####..........#####',
+      '####............####',
+      '###..............###',
+      '###...oooooooo...###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###...oooooooo...###',
+      '#####..........#####',
+      '######...##...######',
+      '#######..##..#######',
+      '########.##.########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########E##########'
+    ],
+    landmarks: [
+      { type: 'throne',    col: 10, row: 2,  _hex: 'K3'  },  // Ninho rochoso de Dorgar
+      { type: 'bonepile',  col: 8,  row: 2,  _hex: 'I3'  },  // Pilha de ossos roídos
+      { type: 'bonepile',  col: 12, row: 2,  _hex: 'M3'  },  // Minério bruto descartado
+      { type: 'armorpile', col: 14, row: 9,  _hex: 'O10' },  // A Bigorna Rúnica dos Anões
+      { type: 'bonfire',   col: 10, row: 13, _hex: 'K14' },  // Fogueira no alojamento dos mineiros
+      { type: 'totem',     col: 7,  row: 8,  _hex: 'H9'  },  // Estalagmites com marcas de garras
+      { type: 'totem',     col: 13, row: 8,  _hex: 'N9'  }   // Estalagmites com marcas de garras
+    ],
+    atmosphereZones: [
+      { col: 10, row: 2,  type: 'evil', radius: 4.5, _hex: 'K3'  },  // Poço do monstro — fétido e úmido
+      { col: 10, row: 13, type: 'warm', radius: 5.0, _hex: 'K14' },  // Fogueira — calor acolhedor
+      { col: 14, row: 9,  type: 'cold', radius: 3.0, _hex: 'O10' }   // Forja rúnica — aura mística de pedra-ferro
+    ],
+    restHex: { col: 10, row: 13, _hex: 'K14' },
+    dungeonEncounters: [
+      { id: 'mine_campfire', col: 10, row: 13, _hex: 'K14',
+        repeatable: true,
+        title: 'Fogueira no Alojamento dos Mineiros',
+        text: 'Sob uma abóbada reforçada com cantaria anã milenar, uma forja apagada serve de refúgio. As brasas no braseiro secam o suor frio e espantam as criaturas rastejantes da escuridão. O silêncio das profundezas é quebrado apenas pelo gotejar distante e pela respiração compassada de sua comitiva.',
+        flavor: 'Acampamento · K14 · Repouso',
+        category: 'discovery',
+        choices: [
+          { id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
+            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            outcome_ok: { _short_rest: true,
+              text: 'Você descansa recostado no granito maciço. O calor das brasas renova sua disposição.' } },
+          { id: 'long_rest', label: 'Descanso Longo (1× por masmorra)',
+            desc: 'HP/MP cheios + remove 1 nível de Exaustão. Apenas 1 vez nesta masmorra.',
+            outcome_ok: { _long_rest: true,
+              text: 'A comitiva organiza vigília dupla com tochas protegidas e descansa as 8 horas inteiras. Todos acordam vigorosos e prontos para descer ao poço.' } },
+          { id: 'camp_companion_banter', label: '🗣️ Dialogar com a Comitiva ao Redor do Fogo',
+            desc: 'Reunir os aliados ao calor das brasas para conversar, avaliar os ânimos e estreitar laços',
+            outcome_ok: { _companion_banter: true, text: 'Você reúne seus aliados para uma conversa franca ao pé das brasas.' } },
+          { label: 'Harmonizar com os veios de rocha ancestral (Anão)',
+            only_race: 'anao',
+            desc: 'Conhecimento da Pedra (Stonecunning) D&D 5e — interpretar as tensões estruturais do túnel',
+            outcome_ok: { text: 'Suas mãos sentem as veias de minério na pedra. Você compreende a arquitetura da mina e antecipa pontos de desmoronamento!', xp: 30, _flag: 'dwarven_stone_mastery' } },
+          { id: 'leave_camp', label: 'Sair do Acampamento',
+            outcome_ok: { text: 'Você recolhe os pertences e retoma o avanço pelas galerias escuras.' } }
+        ]
+      },
+      { id: 'mine_shaft_scouts', col: 10, row: 20, _hex: 'K21',
+        title: 'Batedores Trogloditas na Penumbra',
+        text: 'À frente, onde a luz da tocha quase não alcança, duas figuras répteis agachadas entre vigas podres farejam o ar com línguas bifurcadas. Seus olhos esbranquicados são cegos à luz do dia, mas hipersensíveis na escuridão subterrânea.',
+        flavor: 'Encontro Tático · Batedores',
+        category: 'combat',
+        choices: [
+          { label: 'Erguer a tocha em clarão ofuscante (Sensibilidade à Luz D&D 5e)',
+            skill: 'wis', dc: 11,
+            desc: 'Sabedoria (Tática / Percepção) CD 11 — projetar a chama viva direto nos olhos adaptados ao breu',
+            outcome_ok: { text: 'O clarão súbito ofusca as pupilas dilatadas dos trogloditas! Eles gritam tapando o focinho — SURPRESA e Vantagem no 1º golpe!',
+              xp: 30, dungeon_combat: { enemy: 'troglodyte', lookup_name: 'Troglodita das Cavernas', surprise: true, preCombatEffects: ['first_attack_adv'] } },
+            outcome_fail: { text: 'O vento da galeria tremeluz a tocha, alertando os batedores que saltam em ataque voraz!',
+              xp: 5, dungeon_combat: { enemy: 'troglodyte', lookup_name: 'Troglodita das Cavernas', surprise: false } } },
+          { label: 'Disparo de precisão das sombras (Ladino/Patrulheiro)',
+            only_class: ['ladino', 'patrulheiro'],
+            skill: 'dex', dc: 12,
+            desc: 'Destreza (Furtividade) CD 12 — perfurar o pescoço da sentinela antes que ela sibile',
+            outcome_ok: { text: 'Seu virote atinge com precisão letal! O primeiro sentinela cai em silêncio — SURPRESA no combate!',
+              xp: 35, dungeon_combat: { enemy: 'troglodyte', lookup_name: 'Troglodita das Cavernas', surprise: true } },
+            outcome_fail: { text: 'O virote ricocheteia numa estalagmite e produz faíscas. Eles avançam em fúria réptil!',
+              xp: 5, dungeon_combat: { enemy: 'troglodyte', lookup_name: 'Troglodita das Cavernas', surprise: false } } },
+          { label: 'Intimidar com ruído de aço nas rochas (Guerreiro/Bárbaro)',
+            only_class: ['guerreiro', 'barbaro'],
+            skill: 'str', dc: 13,
+            desc: 'Força (Intimidação Primal) CD 13 — bater a lâmina no granito provocando eco trovejante',
+            outcome_ok: { text: 'O som metálico estronda no túnel estreito como um raio. Os trogloditas recuam trêmulos perante sua força (SURPRESA)!',
+              xp: 30, dungeon_combat: { enemy: 'troglodyte', lookup_name: 'Troglodita das Cavernas', surprise: true } },
+            outcome_fail: { text: 'Eles respondem com sibilos ensurdecedores e atacam de garras estendidas.',
+              xp: 5, dungeon_combat: { enemy: 'troglodyte', lookup_name: 'Troglodita das Cavernas', surprise: false } } }
+        ]
+      },
+      { id: 'mine_cave_in_trap', col: 10, row: 16, _hex: 'K17',
+        title: 'Vigas Comprometidas e Desmoronamento',
+        text: 'O teto desta seção da mina sofreu infiltrações graves. Vigas de carvalho podre estalam sob o peso de toneladas de granito solto. Um passo mais pesado ou um toque descuidado pode precipitar um deslizamento catastrófico.',
+        flavor: 'Perigo Estrutural D&D 5e',
+        category: 'trap',
+        choices: [
+          { label: 'Identificar as trincas de tensão e escorar o túnel (Percepção/Anão)',
+            skill: 'wis', dc: 12,
+            desc: 'Sabedoria (Percepção ou Stonecunning) CD 12 — encontrar as lajotas seguras e amparar o esteio mestre',
+            outcome_ok: { text: 'Você percebe o ponto de apoio exato e reforça o esteio com uma barra de ferro. O teto estabiliza e a comitiva passa com segurança!', xp: 35, _flag: 'cave_in_stabilized' },
+            outcome_fail: { text: 'A madeira cede num estalo seco! Cascalho e blocos de granito despencam sobre o grupo antes que possam correr.', xp: 5, hp_loss: 5 } },
+          { label: 'Disparar em corrida ágil antes que o teto desabe',
+            skill: 'dex', dc: 12,
+            desc: 'Destreza (Acrobacia) CD 12 — cruzar a zona de desmoronamento em salto contínuo',
+            outcome_ok: { text: 'Você cruza a área com reflexos impecáveis enquanto poeira de pedra desaba logo atrás de seus calcanhares!', xp: 30, _flag: 'cave_in_cleared' },
+            outcome_fail: { text: 'Você tropeça num dormente solto de trilho. Pedras pontiagudas atingem suas costas na passagem.', xp: 5, hp_loss: 4 } }
+        ]
+      },
+      { id: 'mine_forge_puzzle', col: 14, row: 9, _hex: 'O10',
+        title: 'A Bigorna Rúnica do Clã Martelo de Bronze',
+        text: 'Em uma câmara secundária entalhada com colunas octogonais, repousa uma bigorna monumental de pedra-ferro negro, adornada com glifos rúnicos anões que brilham suavemente em azul celeste. Três foles mecânicos de pedra exibem as runas de Força, Fogo e Aço.',
+        flavor: 'Enigma da Forja Anã · Relíquia Antiga',
+        category: 'mystery',
+        choices: [
+          { label: 'Decifrar as inscrições rúnicas anãs (História/Arcanismo ou Raça Anã)',
+            skill: 'int', dc: 12,
+            desc: 'Inteligência (História ou Arcanismo) CD 12 — entoar a fórmula litúrgica da Forja Sagrada',
+            outcome_ok: { text: 'Você aciona os três foles na ordem canônica dos clãs. O compartimento secreto da bigorna desliza suavemente, revelando um Martelo Rúnico e lingotes de prata pura!', xp: 50, gold: 80, _flag: 'rune_forge_unlocked' },
+            outcome_fail: { text: 'A combinação emperra e uma lufada de fuligem sulfurosa sopra contra seu rosto.', xp: 10, gold: 20 } },
+          { label: 'Canalizar Chama Divina nas brasas da forja (Clérigo/Paladino)',
+            only_class: ['clerigo', 'paladino'],
+            skill: 'wis', dc: 12,
+            desc: 'Sabedoria (Religião) CD 12 — invocar o fogo purificador de Moradin nas runas adormecidas',
+            outcome_ok: { text: 'As chamas sagradas reanimam os veios de pedra-ferro da bigorna! O selo rúnico se abre com um sino harmonioso de vitória!', xp: 50, gold: 80, _flag: 'rune_forge_unlocked' },
+            outcome_fail: { text: 'As runas absorvem a luz sem liberar o compartimento, mas deixam um calor reconfortante.', xp: 10, gold: 15 } },
+          { label: 'Quebrar a trava externa com força bruta e alavanca',
+            skill: 'str', dc: 14,
+            desc: 'Força (Atletismo) CD 14 — desencaixar o pino de ferro com impacto concentrado',
+            outcome_ok: { text: 'O pino racha sob seu golpe impetuoso! Você recupera as barras de prata e as moedas guardadas no recesso!', xp: 40, gold: 65, _flag: 'rune_forge_forced' },
+            outcome_fail: { text: 'A alavanca lasca a pedra sem destravar o mecanismo interno.', xp: 5, gold: 15 } }
+        ]
+      },
+      { id: 'mine_boss_dorgar', col: 10, row: 3, _hex: 'K4',
+        title: 'O Poço do Troglodita Colossal',
+        text: 'No abismo mais profundo da mina, cercado por poças de lama mineral e estalagmites colossais, surge Dorgar. A monstruosidade réptil mede mais de três metros de altura, com escamas coriáceas cinzento-esverdeadas cobertas de secreção fétida. Seus braços maciços terminam em garras de pedreiro capazes de rasgar armaduras de placas. Quando ele ruge, o odor nauseabundo empesta o ar como carne putrefata há semanas ao sol.',
+        flavor: 'Chefe de Masmorra · Confronto Final',
+        category: 'boss',
+        choices: [
+          { label: 'Conter o refluxo com disciplina e investir com tudo (Constituição)',
+            skill: 'con', dc: 13,
+            desc: 'Constituição CD 13 — resistir ao Fedor Asfixiante de Dorgar sem vacilar',
+            outcome_ok: { text: 'Seus pulmões resistem à náusea asfixiante! Você avança de olhos fixos no monstro que não esperava tamanha audácia — SURPRESA e Vantagem no 1º ataque!',
+              xp: 45, dungeon_combat: { enemy: 'troglodyte', lookup_name: 'Dorgar, Troglodita Colossal', surprise: true, preCombatEffects: ['first_attack_adv'] } },
+            outcome_fail: { text: 'O fedor nauseabundo queima suas narinas e causa ânsia incontrolável. Você luta com esforço dobrado.',
+              xp: 8, dungeon_combat: { enemy: 'troglodyte', lookup_name: 'Dorgar, Troglodita Colossal', surprise: false } } },
+          { label: 'Lançar óleo de tocha na carapaça viscosa (Destreza/Inteligência)',
+            skill: 'dex', dc: 12,
+            desc: 'Destreza CD 12 — arremessar frasco de óleo inflamável nas escamas oleosas do monstro',
+            outcome_ok: { text: 'O frasco se estilhaça e pega fogo na secreção de Dorgar! O troglodita ruge de pavor enquanto as chamas consomem a gosma — SURPRESA e dano de queimadura!',
+              xp: 45, dungeon_combat: { enemy: 'troglodyte', lookup_name: 'Dorgar, Troglodita Colossal', surprise: true, preCombatEffects: ['burst_disabled'] } },
+            outcome_fail: { text: 'O frasco erra o alvo e espatifa nas pedras molhadas sem inflamar a criatura.',
+              xp: 8, dungeon_combat: { enemy: 'troglodyte', lookup_name: 'Dorgar, Troglodita Colossal', surprise: false } } },
+          { label: 'Purificar o ar fétido com Luz Sagrada (Clérigo/Paladino)',
+            only_class: ['clerigo', 'paladino'],
+            skill: 'wis', dc: 13,
+            desc: 'Sabedoria (Religião) CD 13 — irradiar aura aromática divina que dispersa a podridão troglodita',
+            outcome_ok: { text: 'A luz de sua divindade dissipa o miasma venenoso da caverna! Dorgar sente a pele arder sob a luz pura — CA -1 e SURPRESA!',
+              xp: 45, dungeon_combat: { enemy: 'troglodyte', lookup_name: 'Dorgar, Troglodita Colossal', surprise: true, preCombatEffects: ['boss_ac_debuff', 'first_attack_adv'] } },
+            outcome_fail: { text: 'O miasma espesso atenua o brilho sagrado. Dorgar avança com a cauda em chicote.',
+              xp: 8, dungeon_combat: { enemy: 'troglodyte', lookup_name: 'Dorgar, Troglodita Colossal', surprise: false } } },
+          { label: 'Identificar a fresta entre as placas da garganta (Ladino/Patrulheiro)',
+            only_class: ['ladino', 'patrulheiro'],
+            skill: 'wis', dc: 12,
+            desc: 'Sabedoria (Intuição / Ponto Fraco) CD 12 — mirar onde as escamas se afastam quando ele ruge',
+            outcome_ok: { text: 'Você percebe o ponto desprotegido sob a papada! Mirar ali expõe o coração do monstro (SURPRESA e Vantagem no 1º golpe)!',
+              xp: 40, dungeon_combat: { enemy: 'troglodyte', lookup_name: 'Dorgar, Troglodita Colossal', surprise: true, preCombatEffects: ['first_attack_adv'] } },
+            outcome_fail: { text: 'Dorgar abaixa o queixo blindado a tempo e avança com as garras escavadoras.',
+              xp: 8, dungeon_combat: { enemy: 'troglodyte', lookup_name: 'Dorgar, Troglodita Colossal', surprise: false } } },
+          { label: 'Firmar os pés no cascalho e receber a investida colossal',
+            skill: 'str', dc: 13,
+            desc: 'Força (Atletismo / Bloqueio) CD 13 — conter o choque do réptil gigante com escudo e espada',
+            outcome_ok: { text: 'Você suporta o impacto brutal de três metros de músculo e desfere um golpe limpo no contra-ataque (SURPRESA)!',
+              xp: 35, dungeon_combat: { enemy: 'troglodyte', lookup_name: 'Dorgar, Troglodita Colossal', surprise: true } },
+            outcome_fail: { text: 'O peso avassalador de Dorgar dobra seu escudo, empurrando você contra a rocha.',
+              xp: 5, hp_loss: 5, dungeon_combat: { enemy: 'troglodyte', lookup_name: 'Dorgar, Troglodita Colossal', surprise: false } } }
+        ]
+      }
+    ],
+    ambient_tips: [
+      'Goteiras incessantes ecoam como passos nas galerias abandonadas.',
+      'O odor fétido de réptil e enxofre impregna a pedra úmida.',
+      'Veios brilhantes de pirita e ametista refletem a luz da tocha.',
+      'Trilhos retorcidos de mina desaparecem sob desmoronamentos antigos.',
+      'Sibilos e arranhar de garras reverberam nas fendas do teto.'
+    ],
+    dungeons: [],
+    edges: [
+      { col: 10, row: 23, targetMap: 'underground_caverns', label: 'Sair (Cavernas Subterrâneas)' }
+    ]
+  },
+
   whispering_woods: {
 
     id: 'whispering_woods', region: 'valdoria', biome: 'forest',
@@ -85322,20 +85548,24 @@ function triggerDungeonEntry(dg) {
 
   // Demais dungeons mantem placeholder "em dev" ate serem trabalhadas individualmente.
 
-  const isMvpReady = (dg.id === 'orc_chief_tent' || dg.id === 'wolf_den' || dg.id === 'bandit_vault') && FIXED_MAPS[dg.id];
+  const isMvpReady = (dg.id === 'orc_chief_tent' || dg.id === 'wolf_den' || dg.id === 'bandit_vault' || dg.id === 'lost_mine') && FIXED_MAPS[dg.id];
 
   if (isMvpReady) {
 
     document.getElementById('dungeon-title').textContent = dg.name;
 
-    var _badgeTitle = (dg.id === 'bandit_vault')
-      ? 'Guarnição Clandestina · Malakor, Mestre dos Ladrões'
-      : (dg.id === 'wolf_den') ? 'Covil Feral · Lobo Alfa Cinzento' : 'Acampamento Hostil · Brakthar, Quebrador de Cranios';
-    var _warningDesc = (dg.id === 'bandit_vault')
-      ? 'Você vai entrar nas profundezas do cofre dos bandidos. Malakor aguarda na câmara do tesouro. Sair só na entrada (sul) ou após derrotá-lo.'
-      : (dg.id === 'wolf_den')
-        ? 'Você vai entrar numa toca subterrânea de predadores. O Lobo Alfa aguarda nas profundezas. Sair só na entrada (sul) ou após derrotá-lo.'
-        : 'Você vai entrar num acampamento orc fortificado. Brakthar aguarda ao norte. Sair so na entrada (sul) ou apos derrota-lo.';
+    var _badgeTitle = (dg.id === 'lost_mine')
+      ? 'Abismo Subterrâneo · Dorgar, Troglodita Colossal'
+      : (dg.id === 'bandit_vault')
+        ? 'Guarnição Clandestina · Malakor, Mestre dos Ladrões'
+        : (dg.id === 'wolf_den') ? 'Covil Feral · Lobo Alfa Cinzento' : 'Acampamento Hostil · Brakthar, Quebrador de Cranios';
+    var _warningDesc = (dg.id === 'lost_mine')
+      ? 'Você vai descer nas galerias escuras da mina abandonada. Dorgar aguarda no poço principal. Tocha recomendada. Sair só na entrada (sul) ou após derrotá-lo.'
+      : (dg.id === 'bandit_vault')
+        ? 'Você vai entrar nas profundezas do cofre dos bandidos. Malakor aguarda na câmara do tesouro. Sair só na entrada (sul) ou após derrotá-lo.'
+        : (dg.id === 'wolf_den')
+          ? 'Você vai entrar numa toca subterrânea de predadores. O Lobo Alfa aguarda nas profundezas. Sair só na entrada (sul) ou após derrotá-lo.'
+          : 'Você vai entrar num acampamento orc fortificado. Brakthar aguarda ao norte. Sair so na entrada (sul) ou apos derrota-lo.';
 
     document.getElementById('dungeon-desc').innerHTML =
       '<div style="text-align:center;line-height:1.65">' +
