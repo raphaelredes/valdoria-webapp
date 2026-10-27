@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 309: MENSAGENS PROGRAMADAS EM MARCOS: BOCA ENCANTADA, ESCRITA ILUSÓRIA E ALARME (D&D 5e)
+  // =========================================================================
+
+  function resolveNodeImplantedMagicMessage(biomeKey, messageMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var mm = (messageMode || 'magic_mouth_triggered_monolith_whisper').toLowerCase();
+
+    var nodeMsg = {
+      messageTitle: 'Boca Encantada (Magic Mouth) Programada em Marco de Estrada (PHB p. 219)',
+      saveDC: 15,
+      saveType: 'Inteligência',
+      implantedMessageMechanics: 'O conjurador (Bardo ou Mago, 2º círculo ritual, pó de jade de 10 PO, PHB p. 219) implanta uma mensagem falada de até 25 palavras em uma estátua, menir ou marco de pedra do nó do Pointcrawl; quando a condição de gatilho visual ou auditivo ocorre a até 9 metros (30 pés) — como a aproximação de um aventureiro ostentando o broche combinado ou pronunciando a senha de estrada — uma boca espectral surge na rocha e recita a mensagem no timbre exato da voz do conjurador (permanente até ser dissipada).',
+      pioneerMitigation: 'Definição precisa do gatilho visual ou sonoro (PHB p. 219 — o feitiço não lê alinhamento nem classe, apenas aparência visível, insígnias portadas ou palavras audíveis).',
+      rescueAndStabilization: 'Permite que uma comitiva batedora deixe coordenadas de rota ou alertas de perigo permanentes em cruzamentos para outra comitiva que passará pelo mesmo nó horas ou dias depois.',
+      icon: '🗿',
+      color: '#ec4899'
+    };
+
+    if (mm === 'illusory_script_designated_allies_cipher') {
+      nodeMsg.messageTitle = 'Escrita Ilusória (Illusory Script) para Destinatários Designados (PHB p. 240)';
+      nodeMsg.saveDC = 15;
+      nodeMsg.saveType = 'Inteligência',
+      nodeMsg.implantedMessageMechanics = 'Bardo, Bruxo ou Mago (1º círculo ritual, tinta à base de chumbo de 10 PO, duração 10 dias, PHB p. 240) escreve em pergaminho, casca de árvore ou tábua de madeira; para o conjurador e quaisquer criaturas que ele tenha designado pessoalmente ao lançar a magia, a escrita aparece normal e clara, mas para todos os outros viajantes ela aparenta ser um idioma desconhecido/mágico ou uma mensagem completamente diferente (texto de despiste).';
+      nodeMsg.pioneerMitigation = 'Uso de texto falso convincente (como uma lista de provisões mercantis banal) para que patrulhas hostis que interceptem o marco não suspeitem de mensagem secreta.';
+      nodeMsg.rescueAndStabilization = 'Caso a magia seja dissipada (Dissipar Magia, PHB p. 234), tanto a ilusão quanto a escrita original desaparecem em branco sem entregar o segredo ao inimigo (PHB p. 240).';
+    } else if (mm === 'arcane_lock_and_password_sealed_cache') {
+      nodeMsg.messageTitle = 'Tranca Arcana (Arcane Lock) com Senha em Esconderijo de Estrada (PHB p. 282)';
+      nodeMsg.saveDC = 20;
+      nodeMsg.saveType = 'Força';
+      nodeMsg.implantedMessageMechanics = 'Mago (2º círculo, pó de ouro de 25 PO, permanente, PHB p. 282) sela um baú de ferro, porta de ruína ou cofre de pedra onde suprimentos e cartas foram depositados para outra comitiva; o conjurador designa quais aventureiros conhecidos podem abrir o compartimento livremente ou define uma palavra-senha que, pronunciada a até 1,5 metro, suprime a tranca por 1 minuto (para estranhos, a CD de Força ou Ferramentas de Ladrão aumenta em +10!).';
+      nodeMsg.pioneerMitigation = 'Combinação de Tranca Arcana com Boca Encantada que exige a senha de saudação antes de revelar o compartimento oculto.';
+      nodeMsg.rescueAndStabilization = 'A magia Arrombar (Knock, 2º círculo, PHB p. 214) suprime a Tranca Arcana por 10 minutos, mas emite um estrondo audível a 90 metros de distância.';
+    } else if (mm === 'truesight_and_dispel_magic_counter_inspection') {
+      nodeMsg.messageTitle = 'Inspeção por Detectar Magia, Visão da Verdade e Dissipar Magia (PHB p. 231, 240)';
+      nodeMsg.saveDC = 16;
+      nodeMsg.saveType = 'Inteligência';
+      nodeMsg.implantedMessageMechanics = 'Criaturas com Visão da Verdade (Truesight, PHB p. 185, 240) enxergam instantaneamente a mensagem oculta verdadeira por trás de uma Escrita Ilusória; já o ritual Detectar Magia (PHB p. 231) revela a aura de Ilusão na Boca Encantada/Escrita Ilusória ou de Abjuração na Tranca Arcana e no Alarme.';
+      nodeMsg.pioneerMitigation = 'Ocultação da placa inscrita sob folhagem ou laje de 30 cm de pedra para bloquear a linha de efeito de Detectar Magia (PHB p. 231).';
+      nodeMsg.rescueAndStabilization = 'Verificação sistemática de marcos de estrada por conjuradores do grupo ao chegar a cada novo nó da jornada.';
+    }
+
+    return nodeMsg;
+  }
+
+  function calcCampArcaneAlarmAndGlyphStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'alarm_ritual_silver_wire_mental_ping_perimeter').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Perímetro de Alarme Ritual com Fio de Prata e Ping Mental Silencioso (PHB p. 211)',
+      alarmAndCampSafety: 'O conjurador (Mago ou Patrulheiro, 1º círculo ritual, um pequeno sino e um pedaço de fio de prata fino, duração 8 horas, PHB p. 211) protege um cubo de 6 metros (20 pés) ao redor do bivaque e designa no ato da conjuração todos os membros da comitiva (e aliados conhecidos) que não ativarão o feitiço.',
+      alarmAndPerimeterWatch: 'Escolhendo o modo de Alarme Mental (PHB p. 211), quando qualquer criatura Miúda ou maior não autorizada toca ou entra na área, um alerta silencioso soa exclusivamente na mente do conjurador a até 1,5 km e o desperta imediatamente do sono sem que os intrusos ou outra comitiva percebam que foram detectados!',
+      campRestAndSafetyGuards: 'Permite que os aventureiros se armem silenciosamente no escuro e preparem contra-emboscada antes do contato.',
+      icon: '🔔',
+      color: '#ec4899'
+    };
+
+    if (dt === 'glyph_of_warding_explosive_or_spell_milestone') {
+      defense.defenseTitle = 'Glifo de Vigilância (Glyph of Warding) em Entrada de Abrigo ou Baú (PHB p. 245)';
+      defense.alarmAndCampSafety = 'Bardo, Clérigo ou Mago (3º círculo, incenso e pó de diamante de 200 PO, PHB p. 245) inscreve um glifo quase invisível que exige Inteligência (Investigação) contra a CD de magia do conjurador para ser encontrado.';
+      defense.alarmAndPerimeterWatch = 'Pode armazenar Runas Explosivas (5d8 de dano de ácido, frio, fogo, elétrico ou trovejante em esfera de 6m) ou um Glifo de Magia de até 3º círculo (como Sugestão, Imobilizar Pessoa ou Clarividência) ativado se estranhos violarem o acampamento sem falar a senha.';
+      defense.campRestAndSafetyGuards = 'Se o objeto inscrito for movido mais de 3 metros do local onde a magia foi lançada, o glifo se quebra sem disparar (PHB p. 245).';
+    } else if (dt === 'designated_ally_password_and_familiar_bypass') {
+      defense.defenseTitle = 'Protocolo de Senha de Bivaque e Exclusão de Aliados no Alarme (PHB p. 211, 245)';
+      defense.alarmAndCampSafety = 'Quando duas comitivas amigas combinam se reencontrar no mesmo acampamento noturno, o conjurador inclui os companheiros conhecidos na lista de isenção do Alarme ou transmite a senha de travessia do Glifo.';
+      defense.alarmAndPerimeterWatch = 'Alternativamente, o modo de Alarme Audível (PHB p. 211) produz o som alto de um sinete de mão durante 10 segundos que pode ser ouvido a até 18 metros (60 pés), acordando toda a comitiva de uma só vez.';
+      defense.campRestAndSafetyGuards = 'Combina perfeitamente com a Sentinela Noturna e o Transe Élfico de 4 horas.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 308: COMUNICAÇÃO INTER-REGIONAL À DISTÂNCIA: ENVIAR MENSAGEM, PEDRAS DE MENSAGEM E SONHO (D&D 5e)
   // =========================================================================
 
@@ -38724,6 +38799,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveNodeImplantedMagicMessage: resolveNodeImplantedMagicMessage,
+    calcCampArcaneAlarmAndGlyphStation: calcCampArcaneAlarmAndGlyphStation,
     resolveLongDistanceMagicalMessage: resolveLongDistanceMagicalMessage,
     calcCampDreamAndSendingSanctuaryStation: calcCampDreamAndSendingSanctuaryStation,
     resolveCovertWhisperCommunication: resolveCovertWhisperCommunication,

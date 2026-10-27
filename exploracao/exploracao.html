@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T01:24:59Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T01:31:16Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.resolveNodeImplantedMagicMessage) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var nm = CartShared.resolveNodeImplantedMagicMessage(bKey, 'magic_mouth_triggered_monolith_whisper');
+        return '<div class="clp-node-implanted-magic-card" style="margin:4px 0 6px;text-align:left;background:rgba(38,10,26,0.86);padding:4px 8px;border-radius:4px;border:1px solid rgba(236,72,153,0.38);font-size:8px;color:#fdf2f8;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + nm.color + ';margin-bottom:2px;">' + nm.icon + ' ' + nm.messageTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Boca Encantada, Escrita Ilusória e Tranca Arcana:</b> ' + nm.implantedMessageMechanics + ' (CD ' + nm.saveDC + ' [' + nm.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#fbcfe8;margin-top:1px;">• <b>Gatilho e Destinatários:</b> ' + nm.pioneerMitigation + ' · <i>Segurança: ' + nm.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampArcaneAlarmAndGlyphStation) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var nm = CartShared.calcCampArcaneAlarmAndGlyphStation(bKey, 'alarm_ritual_silver_wire_mental_ping_perimeter');
+        return '<div class="clp-node-implanted-magic-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,8,20,0.82);padding:4px 8px;border-radius:4px;border:1px solid rgba(219,39,119,0.32);font-size:8px;color:#fdf2f8;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + nm.color + ';margin-bottom:2px;">' + nm.icon + ' ' + nm.defenseTitle.toUpperCase() + ' (PHB p. 211, 245):</div>' 
+          + '  <div>• <b>Alarme Ritual e Glifo de Vigilância:</b> ' + nm.alarmAndCampSafety + ' · <b>Vigilância:</b> ' + nm.alarmAndPerimeterWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#f9a8d4;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + nm.campRestAndSafetyGuards + '</div>' 
           + '</div>';
       })()
     + (function(){
