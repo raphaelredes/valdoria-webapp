@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T02:07:09Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T02:25:53Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.resolveWildernessWeatherManipulation) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var wm = CartShared.resolveWildernessWeatherManipulation(bKey, 'control_weather_five_mile_macroclimate_stabilizer');
+        return '<div class="clp-weather-manipulation-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,28,44,0.88);padding:4px 8px;border-radius:4px;border:1px solid rgba(56,189,248,0.42);font-size:8px;color:#e0f2fe;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + wm.color + ';margin-bottom:2px;">' + wm.icon + ' ' + wm.weatherTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Manipulação Climática e Ventos:</b> ' + wm.weatherMechanics + ' (CD ' + wm.saveDC + ' [' + wm.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#bae6fd;margin-top:1px;">• <b>Estabilização e Vento:</b> ' + wm.pioneerMitigation + ' · <i>Alívio: ' + wm.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampWeatherControlStation) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var wm = CartShared.calcCampWeatherControlStation(bKey, 'microclimate_dome_windbreak_and_blizzard_calm');
+        return '<div class="clp-weather-manipulation-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(10,22,36,0.84);padding:4px 8px;border-radius:4px;border:1px solid rgba(14,165,233,0.35);font-size:8px;color:#e0f2fe;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + wm.color + ';margin-bottom:2px;">' + wm.icon + ' ' + wm.defenseTitle.toUpperCase() + ' (PHB p. 228; XGE p. 152):</div>' 
+          + '  <div>• <b>Microclima no Bivaque:</b> ' + wm.weatherAndCampSafety + ' · <b>Vigia:</b> ' + wm.weatherAndCouncilWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#7dd3fc;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + wm.campRestAndSafetyGuards + '</div>' 
           + '</div>';
       })()
     + (function(){

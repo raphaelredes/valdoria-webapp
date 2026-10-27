@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 321: MANIPULAÇÃO CLIMÁTICA E TEMPESTADES MÍSTICAS NOS ERMOS (D&D 5e)
+  // =========================================================================
+
+  function resolveWildernessWeatherManipulation(biomeKey, weatherMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var wm = (weatherMode || 'control_weather_five_mile_macroclimate_stabilizer').toLowerCase();
+
+    var weather = {
+      weatherTitle: 'Controlar o Clima (Control Weather): Estabilizador Macroclimático Regional de 7,5 km (PHB p. 228)',
+      saveDC: 17,
+      saveType: 'Constituição',
+      weatherMechanics: 'Clérigo, Druida ou Mago (8º círculo, incenso e terra com água, tempo de conjuração 10 minutos, duração concentração até 8 horas, PHB p. 228) assume o controle das condições atmosféricas num raio colossal de 7,5 km (5 milhas centrado no conjurador), podendo alterar gradualmente em estágios a precipitação (de chuva torrencial/nevasca para limpo), a temperatura (de calor sufocante ou frio ártico para ameno) e a velocidade do vento (de vendaval/furacão para brisa leve), neutralizando os perigos climáticos mais extremos dos ermos!',
+      pioneerMitigation: 'Cada mudança de estágio leva 1d4 × 10 minutos para se assentar; um batedor experiente planeja a conjuração antes da marcha para transformar terreno difícil climático em marcha padrão (PHB p. 228).',
+      rescueAndStabilization: 'Dissipa nevascas, cinzas vulcânicas e tempestades de areia, zerando o ganho de Exaustão por intempéries extremas para toda a comitiva.',
+      icon: '⛈️',
+      color: '#38bdf8'
+    };
+
+    if (wm === 'control_winds_updraft_downdraft_cliff_crossing') {
+      weather.weatherTitle = 'Controlar Ventos (Control Winds): Corrente Ascendente para Travessia de Despenhadeiros (XGE p. 152)';
+      weather.saveDC = 16;
+      weather.saveType = 'Força';
+      weather.weatherMechanics = 'Druida, Feiticeiro ou Mago (5º círculo, concentração até 1 hora, XGE p. 152) manipula o ar num cubo de 30 metros; no modo Corrente Ascendente, anula dano de queda e triplica a altura de saltos verticais da comitiva sobre abismos e ravinas; no modo Corrente Descendente, impõe salvaguarda de Força forçando criaturas voadoras hostis a pousar no solo e cortando seu deslocamento!';
+      weather.pioneerMitigation = 'Permite que a comitiva inteira cruze desfiladeiros montanhosos e ravinas carsticas sem gastar cordas ou testes arriscados de Atletismo (XGE p. 152).';
+      weather.rescueAndStabilization = 'Amortece a queda de membros do grupo em caso de deslizamento de terra ou colapso de ponte glacial.';
+    } else if (wm === 'storm_of_vengeance_cataclysmic_march_cover') {
+      weather.weatherTitle = 'Tempestade de Vingança (Storm of Vengeance): Cobertura Cataclísmica de Marcha (PHB p. 281)';
+      weather.saveDC = 18;
+      weather.saveType = 'Constituição';
+      weather.weatherMechanics = 'Druida (9º círculo, concentração até 1 minuto, PHB p. 281) invoca uma nuvem tempestuosa de 108 metros de raio: rodada 1 ensurdece com trovões (2d6 trovejante); rodada 2 despeja chuva ácida (1d6 ácido); rodada 3 dispara 6 relâmpagos (10d6 elétrico cada); rodada 4 esmaga com granizo (2d6 concussão); rodadas 5 a 10 flagela com chuva congelante de frio, bloqueando qualquer perseguição hostil!';
+      weather.pioneerMitigation = 'Cobre a fuga estratégica ou travessia de desfiladeiro disputado por emboscadas inimigas nas fronteiras selvagens (PHB p. 281).';
+      weather.rescueAndStabilization = 'Neutraliza acampamentos ou patrulhas que bloqueiem passagens obrigatórias do Pointcrawl.';
+    } else if (wm === 'fog_cloud_and_gust_of_wind_toxic_gas_purge') {
+      weather.weatherTitle = 'Nuvem de Névoa (Fog Cloud) e Ventania (Gust of Wind): Purga de Miasmas e Fumaça (PHB p. 243, 248)';
+      weather.saveDC = 15;
+      weather.saveType = 'Força';
+      weather.weatherMechanics = 'Conjurador arcano ou divino (1º e 2º círculos, PHB p. 243, 248) utiliza Ventania em linha de 18 metros para dispersar vapores sulfurosos, gases asfixiantes de caldeiras vulcânicas ou nuvens de esporos venenosos a até 30 km/h, ou ergue uma Nuvem de Névoa densa de 6 metros para cegar atiradores inimigos durante uma retirada tática.';
+      weather.pioneerMitigation = 'Purga imediata de terrenos fortemente obscurecidos por fumaça ou veneno em fendas subterrâneas e pântanos.';
+      weather.rescueAndStabilization = 'Permite socorrer aventureiros intoxicados sem expor o curador aos mesmos gases tóxicos.';
+    }
+
+    return weather;
+  }
+
+  function calcCampWeatherControlStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'microclimate_dome_windbreak_and_blizzard_calm').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Domo Microclimático e Calmaria contra Nevascas no Bivaque (PHB p. 228)',
+      weatherAndCampSafety: 'Ao fixar o acampamento em biomas de frio extremo (como Neve, Montanha ou Abismo Glacial) ou calor abrasador (Deserto e Vulcão), a conjuração de Controlar o Clima ou Pequena Cabana estabiliza o microclima local em temperatura amena (18°C a 22°C), eliminando testes periódicos de congelamento, exaustão térmica ou insolação durante o descanso longo.',
+      weatherAndCouncilWatch: 'Sentinelas de vigília operam sem desvantagem em Percepção visual decorrente de nevasca uivante ou rajadas de granizo, assegurando detecção de intrusos a distância total.',
+      campRestAndSafetyGuards: 'Garante recuperação integral de dados de vida e remoção plena de níveis de Exaustão mesmo sob nevasca polar contínua (PHB p. 186, 228).',
+      icon: '🏕️',
+      color: '#38bdf8'
+    };
+
+    if (dt === 'wind_deflection_screen_and_missile_ward') {
+      defense.defenseTitle = 'Cortina Eólica Defletora de Projéteis Noturnos (XGE p. 152)';
+      defense.weatherAndCampSafety = 'Controlar Ventos é calibrado em fluxo ascendente circular contínuo ao redor do perímetro do bivaque; projéteis comuns disparados contra o acampamento são desviados para o alto e gases rastejantes são repelidos antes de alcançar as barracas.';
+      defense.weatherAndCouncilWatch = 'A cortina emite um sussurro eólico rítmico que abafa conversas e passos internos da comitiva, impedindo que batedores inimigos escutem os planos do Conselho de Guerra.';
+      defense.campRestAndSafetyGuards = 'Impõe desvantagem em qualquer ataque à distância de emboscada lançado contra o grupo adormecido (XGE p. 152).';
+    } else if (dt === 'controlled_monsoon_rainwater_catchment_station') {
+      defense.defenseTitle = 'Estação de Captação e Chuva Serena Purificada nos Ermos Áridos (PHB p. 228)';
+      defense.weatherAndCampSafety = 'Em travessias de regiões áridas ou águas salobras (Deserto, Badlands e Costa Salgada), o conjurador altera a precipitação para chuva moderada e límpida por 4 horas durante a parada, captando água doce abundante em lonas e tonéis para abastecer toda a comitiva.';
+      defense.weatherAndCouncilWatch = 'Elimina a dependência de forrageamento de água em nós contaminados ou secos, garantindo 8 litros de água potável por aventureiro sem risco de parasitas.';
+      defense.campRestAndSafetyGuards = 'Previne mortes por desidratação e garante rações hidratadas para repor forças antes da próxima jornada de marcha (PHB p. 185, 228).';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 320: SANTUÁRIOS MAGNÍFICOS DE CAMPANHA E CONSELHOS DE GUERRA: MANSÃO MAGNÍFICA DE MORDENKAINEN, TEMPLO DOS DEUSES E FORTALEZA PODEROSA (D&D 5e)
   // =========================================================================
 
@@ -39624,6 +39699,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveWildernessWeatherManipulation: resolveWildernessWeatherManipulation,
+    calcCampWeatherControlStation: calcCampWeatherControlStation,
     resolveMagnificentMansionAndWarCouncil: resolveMagnificentMansionAndWarCouncil,
     calcCampExtradimensionalSanctuaryStation: calcCampExtradimensionalSanctuaryStation,
     resolveFastTravelSigilAndWindWalk: resolveFastTravelSigilAndWindWalk,
