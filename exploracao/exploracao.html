@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T01:21:52Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T01:24:59Z - do not edit directly, edit source -->
 
 
 
@@ -93674,6 +93674,26 @@ function _openCartLocationPopup(biome){
           + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + cs.color + ';margin-bottom:2px;">' + cs.icon + ' ' + cs.defenseTitle.toUpperCase() + ' (DMG p. 111):</div>'
           + '  <div>• <b>Bivaque em Crista de Andesito:</b> ' + cs.glacierAndCampSafety + ' · <b>Defesa:</b> ' + cs.glacierAndVolcanoBarrier + '</div>'
           + '  <div style="font-size:7.5px;color:#fed7aa;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + cs.campRestAndSafetyGuards + '</div>'
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.resolveLongDistanceMagicalMessage) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var ld = CartShared.resolveLongDistanceMagicalMessage(bKey, 'sending_spell_twenty_five_words_familiar_target');
+        return '<div class="clp-long-distance-sending-card" style="margin:4px 0 6px;text-align:left;background:rgba(8,28,38,0.86);padding:4px 8px;border-radius:4px;border:1px solid rgba(6,182,212,0.38);font-size:8px;color:#ecfeff;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ld.color + ';margin-bottom:2px;">' + ld.icon + ' ' + ld.sendingTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Enviar Mensagem, Pedras de Mensagem e Sonho:</b> ' + ld.sendingMechanics + ' (CD ' + ld.saveDC + ' [' + ld.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#a5f3fc;margin-top:1px;">• <b>Protocolo de 25 Palavras:</b> ' + ld.pioneerMitigation + ' · <i>Convergência: ' + ld.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampDreamAndSendingSanctuaryStation) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var ld = CartShared.calcCampDreamAndSendingSanctuaryStation(bKey, 'dawn_sending_stone_synchronization_bivouac');
+        return '<div class="clp-long-distance-sending-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(6,22,30,0.82);padding:4px 8px;border-radius:4px;border:1px solid rgba(8,145,178,0.32);font-size:8px;color:#ecfeff;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + ld.color + ';margin-bottom:2px;">' + ld.icon + ' ' + ld.defenseTitle.toUpperCase() + ' (PHB p. 238, 277; DMG p. 199):</div>' 
+          + '  <div>• <b>Sincronização Matinal e Transe Onírico:</b> ' + ld.sendingAndCampSafety + ' · <b>Vigilância:</b> ' + ld.sendingAndWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#67e8f9;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + ld.campRestAndSafetyGuards + '</div>' 
           + '</div>';
       })()
     + (function(){

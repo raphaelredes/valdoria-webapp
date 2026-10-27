@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 308: COMUNICAÇÃO INTER-REGIONAL À DISTÂNCIA: ENVIAR MENSAGEM, PEDRAS DE MENSAGEM E SONHO (D&D 5e)
+  // =========================================================================
+
+  function resolveLongDistanceMagicalMessage(biomeKey, sendingMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var sm = (sendingMode || 'sending_spell_twenty_five_words_familiar_target').toLowerCase();
+
+    var sending = {
+      sendingTitle: 'Magia Enviar Mensagem (Sending) de 25 Palavras a Distância Ilimitada (PHB p. 238)',
+      saveDC: 15,
+      saveType: 'Inteligência',
+      sendingMechanics: 'O conjurador (Bardo, Clérigo ou Mago, 3º círculo, PHB p. 238) utiliza um pedaço curto de fio de cobre fino para enviar uma mensagem mental curta de até 25 palavras a uma criatura com a qual seja familiarizado; o destinatário ouve a mensagem em sua mente, reconhece imediatamente o conjurador como remetente caso o conheça, e pode responder até 25 palavras na hora (funcionando através de qualquer distância e até entre planos com 5% de chance de falha planar). Regra de Névoa de Identidade: exige obrigatoriamente que os dois aventureiros já tenham se encontrado pessoalmente antes.',
+      pioneerMitigation: 'Redação concisa e objetiva das 25 palavras informando o nó atual do Pointcrawl, o estado da comitiva e a hora combinada de convergência.',
+      rescueAndStabilization: 'Permite pedir socorro ou reforço tático instantâneo a uma comitiva aliada em qualquer província de Valdoria.',
+      icon: '⚡',
+      color: '#06b6d4'
+    };
+
+    if (sm === 'sending_stones_paired_daily_charges') {
+      sending.sendingTitle = 'Par de Pedras de Mensagem (Sending Stones — Item Mágico Incomum, DMG p. 199)';
+      sending.saveDC = 13;
+      sending.saveType = 'Sabedoria';
+      sending.sendingMechanics = 'Duas pedras lisas entalhadas para se encaixarem perfeitamente (DMG p. 199); quando duas comitivas se encontram na estrada e cada grupo fica com uma metade do par, o portador pode usar uma ação uma vez por dia (recarrega ao amanhecer) para conjurar o equivalente a Enviar Mensagem para o portador da outra pedra, mesmo que os grupos sejam formados apenas por classes marciais sem conjuradores.';
+      sending.pioneerMitigation = 'Guarda da pedra em bolsa de couro acolchoada junto ao peito do líder ou batedor; se uma das pedras for destruída, a outra perde a magia permanentemente (DMG p. 199).';
+      sending.rescueAndStabilization = 'Coordenação diária ao amanhecer entre duas comitivas explorando rotas paralelas de uma mesma masmorra ou cordilheira.';
+    } else if (sm === 'dream_spell_trance_messenger_parley') {
+      sending.sendingTitle = 'Magia Sonho (Dream) e Encontro Onírico Durante o Descanso Longo (PHB p. 277)';
+      sending.saveDC = 16;
+      sending.saveType = 'Sabedoria';
+      sending.sendingMechanics = 'Bardo, Bruxo ou Mago (5º círculo, PHB p. 277) designa um mensageiro em transe para entrar no sonho de uma criatura conhecida pelo conjurador que esteja dormindo no mesmo plano; durante todo o sono, os dois conversam livremente sem limite de palavras em uma paisagem onírica moldada pelo mensageiro (como a visão exata do nó onde desejam se reencontrar pela manhã). Elfos em Transe (PHB p. 23) são imunes por não dormirem.';
+      sending.pioneerMitigation = 'Uso pacífico da magia para planejar alianças estratégicas longas entre líderes de comitivas durante a noite.';
+      sending.rescueAndStabilization = 'Se usado de forma hostil como pesadelo monstruoso (Sabedoria CD do conjurador), o alvo que falhar não recebe nenhum benefício do descanso longo e sofre 3d6 de dano psíquico ao acordar (PHB p. 277).';
+    } else if (sm === 'mind_blank_and_nondetection_psychic_shield') {
+      sending.sendingTitle = 'Blindagem Mental contra Intrusão Onírica e Rastreamento (Não-Detecção e Limpar a Mente)';
+      sending.saveDC = 17;
+      sending.saveType = 'Sabedoria';
+      sending.sendingMechanics = 'Aventureiros que desejam viajar em sigilo absoluto contra espionagem de adivinhação ou pesadelos de Sonho utilizam Não-Detecção (3º círculo, PHB p. 263, pó de diamante de 25 PO), Amuleto de Prova contra Detecção e Localização (DMG p. 150) ou Limpar a Mente (8º círculo, PHB p. 254), tornando-se invisíveis a sensores de vidência e imunes a dano psíquico.';
+      sending.pioneerMitigation = 'Posse de um tufo de cabelo ou peça de roupa do alvo por inimigos impõe desvantagem (-5) na salvaguarda contra Sonho (PHB p. 277), exigindo cuidado rigoroso para não deixar pertences pessoais para trás nos acampamentos.';
+      sending.rescueAndStabilization = 'Conjuração de Proteção contra o Bem e Mal ou Círculo Mágico antes de dormir caso a comitiva suspeite de assédio onírico por bruxas Noturnas (Night Hags, MM p. 178).';
+    }
+
+    return sending;
+  }
+
+  function calcCampDreamAndSendingSanctuaryStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'dawn_sending_stone_synchronization_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Bivaque de Sincronização de Alvorada com Pedras de Mensagem e Enviar Mensagem',
+      sendingAndCampSafety: 'Protocolo de acampamento onde as duas comitivas parceiras acordam estabelecer contato mental exato nos primeiros cinco minutos após o nascer do sol, quando as Pedras de Mensagem recarregam e os espaços de magia são recuperados (DMG p. 199; PHB p. 238).',
+      sendingAndWatch: 'Se a comitiva parceira não responder ao chamado matinal ou se o portador da outra pedra não for quem atende mentalmente, o grupo sabe imediatamente que os aliados caíram em emboscada ou cativeiro.',
+      campRestAndSafetyGuards: 'Funciona como sinal de vida diário ("dead man’s switch") entre grupos aliados nos ermos.',
+      icon: '⛺',
+      color: '#06b6d4'
+    };
+
+    if (dt === 'dream_trance_conclave_tent_circle') {
+      defense.defenseTitle = 'Tenda de Transe Onírico Assistido por Punhado de Areia (PHB p. 277)';
+      defense.sendingAndCampSafety = 'O conjurador de Sonho prepara o componente material (um punhado de areia, um pouco de tinta e uma pena arrancada de um pássaro adormecido, PHB p. 277) dentro da barraca protegida pelas sentinelas.';
+      defense.sendingAndWatch = 'Permite transmitir mapas visuais tridimensionais e rostos de inimigos diretamente dentro do sonho do líder de outra comitiva a centenas de quilômetros de distância.';
+      defense.campRestAndSafetyGuards = 'Enquanto o mensageiro permanece em transe cego e surdo ao ambiente físico, a guarda do bivaque dobra a atenção sobre sua tenda.';
+    } else if (dt === 'scrying_and_hair_token_sanitation_hearth') {
+      defense.defenseTitle = 'Rito de Limpeza de Vestígios Pessoais na Fogueira contra Vidência e Sonho';
+      defense.sendingAndCampSafety = 'Antes de levantar acampamento, os aventureiros queimam na fogueira quaisquer fios de cabelo, unhas, bandagens sujas de sangue ou retalhos de roupa (PHB p. 277, 286).';
+      defense.sendingAndWatch = 'Impede que rastreadores arcanos ou inimigos que inspecionem o bivaque abandonado recolham conexões corporais que dariam penalidade de -4 a -10 em salvaguardas de Vidência (Scrying) ou desvantagem em Sonho.';
+      defense.campRestAndSafetyGuards = 'Preserva a segurança mental e o anonimato da comitiva ao longo de toda a campanha.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 307: SUSSURROS ARCANOS EM ENCONTRO: TRUQUE MENSAGEM E MENTE DESPERTA (D&D 5e)
   // =========================================================================
 
@@ -38649,6 +38724,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveLongDistanceMagicalMessage: resolveLongDistanceMagicalMessage,
+    calcCampDreamAndSendingSanctuaryStation: calcCampDreamAndSendingSanctuaryStation,
     resolveCovertWhisperCommunication: resolveCovertWhisperCommunication,
     calcCampSilentTelepathicWatchStation: calcCampSilentTelepathicWatchStation,
     resolveDndLanguageComprehension: resolveDndLanguageComprehension,
