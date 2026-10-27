@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T16:20:16Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T16:33:42Z - do not edit directly, edit source -->
 
 
 
@@ -94365,7 +94365,7 @@ function _openCartLocationPopup(biome){
   var bestiaryInfo = (window.CartShared && CartShared.getBiomeBestiaryThreats) ? CartShared.getBiomeBestiaryThreats(biome.biome || biome.key) : null;
   var bestiaryHtml = (bestiaryInfo && !biome.isOrigin && biome.tier > 0)
     ? '<div class="clp-bestiary-card" style="margin:4px 0 6px;text-align:left;background:rgba(25,15,15,0.7);padding:5px 8px;border-radius:4px;border:1px solid rgba(248,113,113,0.3);">'
-    + '  <div style="font-size:9px;color:#f87171;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">⚔️ FAUNA & BESTIÁRIO REGIONAL (D&D 5e):</div>'
+    + '  <div style="font-size:10.5px;color:#f87171;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">⚔️ FAUNA & BESTIÁRIO REGIONAL (D&D 5e):</div>'
     + '  <div style="font-size:11px;color:#fca5a5;line-height:1.35;">'
     + '    • <b>Ameaças Típicas:</b> ' + bestiaryInfo.threats.join(', ') + '<br>'
     + '    • <b>Predador Alfa:</b> <span style="color:#ffd700;font-weight:700;">' + bestiaryInfo.apex + '</span><br>'
@@ -94408,7 +94408,7 @@ function _openCartLocationPopup(biome){
   var curWeather = (typeof window.S !== 'undefined' && window.S && window.S.weather) ||
                    (typeof window.CITY_MOCK_PLAYER !== 'undefined' && window.CITY_MOCK_PLAYER.weather) || 's';
   var weatherInfo = (window.CartShared && CartShared.getWeatherDndInfo) ? CartShared.getWeatherDndInfo(curWeather) : null;
-  var weatherHtml = weatherInfo ? '<div class="clp-weather-note" style="margin:4px 0 6px;font-size:9.5px;color:#93c5fd;background:rgba(20,30,45,0.7);padding:4px 8px;border-radius:3px;border-left:3px solid #60a5fa;text-align:left;">' + weatherInfo.icon + ' <b>Condição Climática:</b> ' + weatherInfo.name + '<br><span style="font-style:italic;color:#cbd5e1;">' + weatherInfo.effect + '</span></div>' : '';
+  var weatherHtml = weatherInfo ? '<div class="clp-weather-note" style="margin:4px 0 6px;font-size:11.5px;color:#93c5fd;background:rgba(20,30,45,0.7);padding:4px 8px;border-radius:3px;border-left:3px solid #60a5fa;text-align:left;">' + weatherInfo.icon + ' <b>Condição Climática:</b> ' + weatherInfo.name + '<br><span style="font-style:italic;color:#cbd5e1;">' + weatherInfo.effect + '</span></div>' : '';
 
   var curPace = window._cartSelectedPace || 'normal';
   var encounterRisk = (window.CartShared && CartShared.calcEncounterRisk) ? CartShared.calcEncounterRisk(biome, { pace: curPace, isNight: isNight, weather: curWeather, hours: horasViagem }) : { label: '🟢 Zona Segura (0%)', color: '#a3e635' };
@@ -94420,7 +94420,7 @@ function _openCartLocationPopup(biome){
     + questBannerHtml
     + '<h2>' + (biome.regionalName || biome.name) + '</h2>'
     + '<p>' + (biome.desc || 'Um destino misterioso te aguarda além das fronteiras.') + '</p>'
-    + (rec ? '<div class="clp-meta"><b>Nível Sugerido:</b> ' + rec + '<br><b>Avaliação de Ameaça:</b> ' + threatBadge + '<br><span style="font-size:9.5px;color:#d2be90;font-style:italic;">' + stanceTip + '</span><br><b>Risco de Emboscada:</b> <span id="clp-risk-badge" style="font-weight:700;color:' + encounterRisk.color + ';">' + encounterRisk.label + '</span><br><b>Bioma:</b> ' + biomePT + ' · <b>Distância:</b> ~' + distMilhas + ' milhas (<span id="clp-meta-hours">~' + horasViagem + 'h de marcha</span>)</div>' : '')
+    + (rec ? '<div class="clp-meta"><b>Nível Sugerido:</b> ' + rec + '<br><b>Avaliação de Ameaça:</b> ' + threatBadge + '<br><span style="font-size:11.5px;color:#d2be90;font-style:italic;">' + stanceTip + '</span><br><b>Risco de Emboscada:</b> <span id="clp-risk-badge" style="font-weight:700;color:' + encounterRisk.color + ';">' + encounterRisk.label + '</span><br><b>Bioma:</b> ' + biomePT + ' · <b>Distância:</b> ~' + distMilhas + ' milhas (<span id="clp-meta-hours">~' + horasViagem + 'h de marcha</span>)</div>' : '')
     + (isCurrent && typeof _buildPointcrawlCurrentNodeActionsHtml === 'function' ? _buildPointcrawlCurrentNodeActionsHtml(biome) : '')
     + (function(){
         var startK = isCurrent ? null : ((typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : 'plains');
@@ -94441,10 +94441,10 @@ function _openCartLocationPopup(biome){
           : '⛺ Marcha Direta (sem acampamento na estrada)';
         return '<div class="clp-itinerary-box" style="margin:4px 0 6px;text-align:left;background:rgba(20,14,8,0.7);padding:5px 8px;border-radius:4px;border:1px solid rgba(196,149,58,0.35);">'
           + '  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">'
-          + '    <span style="font-size:9px;color:#fde047;font-family:Cinzel,serif;font-weight:700;">🗺️ ITINERÁRIO DA MARCHA (' + (routeKeys.length - 1) + ' ETAPAS):</span>'
+          + '    <span style="font-size:10.5px;color:#fde047;font-family:Cinzel,serif;font-weight:700;">🗺️ ITINERÁRIO DA MARCHA (' + (routeKeys.length - 1) + ' ETAPAS):</span>'
           + '    <button class="clp-btn-copy-itinerary" id="xclp-copy-itinerary-btn" type="button" style="background:rgba(35,25,14,0.9);border:1px solid rgba(255,215,0,0.6);color:#ffd700;font-size:11px;padding:2px 6px;border-radius:3px;cursor:pointer;font-family:Cinzel,serif;" title="Copiar Itinerário Formatado D&D 5e para a Prancheta">📋 Copiar Rota</button>'
           + '  </div>'
-          + '  <div style="font-size:9.5px;color:#f4d49a;line-height:1.4;">' + rNames.join(' <span style="color:#d2be90;">➔</span> ') + '</div>'
+          + '  <div style="font-size:11.5px;color:#f4d49a;line-height:1.4;">' + rNames.join(' <span style="color:#d2be90;">➔</span> ') + '</div>'
           + '  <div style="font-size:11px;color:#86efac;margin-top:3px;">' + campTip + '</div>'
           + '</div>';
       })()
@@ -94457,8 +94457,8 @@ function _openCartLocationPopup(biome){
         var mb = (plObj && CartShared.calcDistanceBearing) ? CartShared.calcDistanceBearing(plObj, biome, false) : null;
         var windImp = CartShared.calcWindImpact(mb ? mb.degrees : 0, baro.windDirectionDeg, baro.windSpeedKmh);
         return '<div class="clp-barometer-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,24,34,0.75);padding:5px 8px;border-radius:4px;border:1px solid rgba(147,197,253,0.35);">'
-          + '  <div style="font-size:9px;color:#93c5fd;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🧭 BARÔMETRO & DINÂMICA DOS VENTOS (D&D 5e):</div>'
-          + '  <div style="font-size:9px;color:#f4d49a;line-height:1.4;">'
+          + '  <div style="font-size:10.5px;color:#93c5fd;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🧭 BARÔMETRO & DINÂMICA DOS VENTOS (D&D 5e):</div>'
+          + '  <div style="font-size:10.5px;color:#f4d49a;line-height:1.4;">'
           + '    Pressão: <b>' + baro.pressureHpa + ' hPa</b> (' + baro.pressureStatus + ')<br>'
           + '    Vento Local: <span>' + baro.windDescription + '</span><br>'
           + '    Impacto na Marcha: <b style="color:' + windImp.color + ';">' + windImp.label + '</b><br>'
@@ -94473,8 +94473,8 @@ function _openCartLocationPopup(biome){
         var forInfo = (window.CartShared && CartShared.getBiomeForageSustainability) ? CartShared.getBiomeForageSustainability(biome.biome || biome.key) : null;
         if (!forInfo) return '';
         return '<div class="clp-forage-card" style="margin:4px 0 6px;text-align:left;background:rgba(15,22,15,0.7);padding:5px 8px;border-radius:4px;border:1px solid rgba(134,239,172,0.35);">'
-          + '  <div style="font-size:9px;color:#86efac;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🌿 FORRAGEAMENTO & ÁGUA SELVAGEM (D&D 5e):</div>'
-          + '  <div style="font-size:9px;color:#f4d49a;">'
+          + '  <div style="font-size:10.5px;color:#86efac;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🌿 FORRAGEAMENTO & ÁGUA SELVAGEM (D&D 5e):</div>'
+          + '  <div style="font-size:10.5px;color:#f4d49a;">'
           + '    Abundância: <b style="color:' + forInfo.color + ';">' + forInfo.rating + '</b> (Sobrevivência CD ' + forInfo.dc + ')<br>'
           + '    Fontes de Água: <span>' + forInfo.water + '</span><br>'
           + '    <span style="font-size:11px;color:#cbd5e1;font-style:italic;">' + forInfo.notes + '</span>'
@@ -94497,15 +94497,15 @@ function _openCartLocationPopup(biome){
         var rat = CartShared.calcExpeditionRationsBudget(horasViagem, 4, biome.biome || biome.key);
         var haz = CartShared.getWildernessHazardDetails(biome.biome || biome.key);
         return '<div class="clp-rations-card" style="margin:4px 0 6px;text-align:left;background:rgba(22,18,12,0.8);padding:5px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.4);">'
-          + '  <div style="font-size:9px;color:#f59e0b;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🍞 PROVISÕES & LOGÍSTICA DE SOBREVIVÊNCIA (D&D 5e):</div>'
-          + '  <div style="font-size:9px;color:#f4d49a;line-height:1.4;">'
+          + '  <div style="font-size:10.5px;color:#f59e0b;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🍞 PROVISÕES & LOGÍSTICA DE SOBREVIVÊNCIA (D&D 5e):</div>'
+          + '  <div style="font-size:10.5px;color:#f4d49a;line-height:1.4;">'
           + '    Demanda da Comitiva: <b>' + rat.rationsGross + ' Rações</b> · <b>' + rat.waterGallonsGross + ' Galões d\'Água</b> (' + rat.partySize + ' integrantes, ' + rat.travelDays + ' dia' + (rat.travelDays > 1 ? 's' : '') + ')<br>'
           + '    <span style="font-size:11px;color:#cbd5e1;font-style:italic;">' + rat.verdict + '</span>'
           + '  </div>'
           + '</div>'
           + '<div class="clp-hazard-card" style="margin:4px 0 6px;text-align:left;background:rgba(25,15,15,0.8);padding:5px 8px;border-radius:4px;border:1px solid rgba(239,68,68,0.4);">'
-          + '  <div style="font-size:9px;color:' + haz.color + ';font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">' + haz.icon + ' PERIGO SELVAGEM: ' + haz.name.toUpperCase() + ' (' + haz.dndRef + ')</div>'
-          + '  <div style="font-size:9px;color:#f4d49a;line-height:1.4;">'
+          + '  <div style="font-size:10.5px;color:' + haz.color + ';font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">' + haz.icon + ' PERIGO SELVAGEM: ' + haz.name.toUpperCase() + ' (' + haz.dndRef + ')</div>'
+          + '  <div style="font-size:10.5px;color:#f4d49a;line-height:1.4;">'
           + '    Efeito no Terreno: <span style="color:#fca5a5;">' + haz.effect + '</span> (' + haz.dcCheck + ')<br>'
           + '    Mitigação Tática: <span style="color:#86efac;font-style:italic;">' + haz.mitigation + '</span>'
           + '  </div>'
@@ -94527,7 +94527,7 @@ function _openCartLocationPopup(biome){
               }).join('');
               return '<div class="clp-encounter-table-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,16,28,0.85);padding:5px 8px;border-radius:4px;border:1px solid rgba(168,85,247,0.4);">'
                 + '  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">'
-                + '    <span style="font-size:9px;color:#c084fc;font-family:Cinzel,serif;font-weight:700;">🎲 TABELA DE ACASOS DA ESTRADA (D&D 5e):</span>'
+                + '    <span style="font-size:10.5px;color:#c084fc;font-family:Cinzel,serif;font-weight:700;">🎲 TABELA DE ACASOS DA ESTRADA (D&D 5e):</span>'
                 + '    <span style="font-size:11px;color:#ffd700;font-weight:700;">Risco: ' + enc.finalChance + '% (d20 ≥ ' + enc.d20Threshold + ')</span>'
                 + '  </div>'
                 + '  <div style="background:rgba(10,8,15,0.6);border-radius:3px;padding:3px 6px;margin-bottom:3px;">' + rows + '</div>'
@@ -94539,8 +94539,8 @@ function _openCartLocationPopup(biome){
               var curTrans = window._xcartSelectedTransport || 'foot';
               var enc = CartShared.calcPartyEncumbranceImpact(180, 52, curTrans);
               return '<div class="clp-encumbrance-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,22,18,0.85);padding:5px 8px;border-radius:4px;border:1px solid rgba(74,222,128,0.35);">'
-                + '  <div style="font-size:9px;color:' + enc.color + ';font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🎒 CARGA & CAPACIDADE DA COMITIVA (D&D 5e):</div>'
-                + '  <div style="font-size:9px;color:#f4d49a;line-height:1.4;">'
+                + '  <div style="font-size:10.5px;color:' + enc.color + ';font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🎒 CARGA & CAPACIDADE DA COMITIVA (D&D 5e):</div>'
+                + '  <div style="font-size:10.5px;color:#f4d49a;line-height:1.4;">'
                 + '    Status: <b style="color:' + enc.color + ';">' + enc.label + '</b> (' + enc.weightLbs + ' / ' + enc.capMax + ' lbs)<br>'
                 + '    <span style="font-size:11px;color:#cbd5e1;font-style:italic;">' + enc.desc + '</span>'
                 + '  </div>'
@@ -94551,8 +94551,8 @@ function _openCartLocationPopup(biome){
               var startK = (typeof _xcartGetPlayerBiome === 'function') ? _xcartGetPlayerBiome() : 'plains';
               var elev = CartShared.calcRouteElevationProfile([startK, biome.key]);
               return '<div class="clp-elevation-card" style="margin:4px 0 6px;text-align:left;background:rgba(20,24,30,0.85);padding:5px 8px;border-radius:4px;border:1px solid rgba(147,197,253,0.35);">'
-                + '  <div style="font-size:9px;color:#93c5fd;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🏔️ PERFIL ALTIMÉTRICO & RELEVO (D&D 5e):</div>'
-                + '  <div style="font-size:9px;color:#f4d49a;line-height:1.4;">'
+                + '  <div style="font-size:10.5px;color:#93c5fd;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🏔️ PERFIL ALTIMÉTRICO & RELEVO (D&D 5e):</div>'
+                + '  <div style="font-size:10.5px;color:#f4d49a;line-height:1.4;">'
                 + '    Trajeto: <b>' + elev.summary + '</b> ' + (elev.hasExtremeAltitude ? '<span style="color:#ef4444;font-weight:700;">[Ar Rarefeito]</span>' : '') + '<br>'
                 + '    <span style="font-family:monospace;letter-spacing:1px;color:#ffd700;font-size:10px;">Perfil: ' + elev.sparkline + '</span><br>'
                 + '    <span style="font-size:11px;color:#cbd5e1;font-style:italic;">Esforço de Aclive: +' + elev.ascentExertionHours + 'h de esforço físico na subida.</span>'
@@ -94565,8 +94565,8 @@ function _openCartLocationPopup(biome){
               var startH = (curTime && typeof curTime.hour === 'number') ? curTime.hour : 8;
               var sched = CartShared.calcExpeditionSchedule(horasViagem, startH);
               return '<div class="clp-schedule-card" style="margin:4px 0 6px;text-align:left;background:rgba(18,20,28,0.85);padding:5px 8px;border-radius:4px;border:1px solid rgba(168,85,247,0.35);">'
-                + '  <div style="font-size:9px;color:#c084fc;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">⏳ CRONOGRAMA & CICLO DIA/NOITE (D&D 5e):</div>'
-                + '  <div style="font-size:9px;color:#f4d49a;line-height:1.4;">'
+                + '  <div style="font-size:10.5px;color:#c084fc;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">⏳ CRONOGRAMA & CICLO DIA/NOITE (D&D 5e):</div>'
+                + '  <div style="font-size:10.5px;color:#f4d49a;line-height:1.4;">'
                 + '    Partida: <b>' + sched.departureStr + '</b> (' + (sched.startIsDay ? '☀️ Dia' : '🌙 Noite') + ') &rarr; Chegada: <b>' + sched.arrivalStr + '</b> (' + (sched.endIsDay ? '☀️ Dia' : '🌙 Noite') + ')<br>'
                 + '    Marcha: <b>' + sched.dayMarchHours + 'h dia</b> / <b>' + sched.nightMarchHours + 'h noite</b> ' + (sched.nightMarchHours > 0 ? '<span style="color:#ef4444;">[Visão no Escuro/Tocha req.]</span>' : '') + '<br>'
                 + (sched.campsitesCount > 0 ? '    <span style="font-size:11px;color:#a3e635;">⛺ Paradas para Descanso Longo: ' + sched.campsitesCount + ' acampamento(s) (' + (sched.campsitesCount * 8) + 'h de repouso)</span>' : '<span style="font-size:11px;color:#38bdf8;">⚡ Jornada Direta (Sem pernoite em acampamento selvagem)</span>')
@@ -94594,8 +94594,8 @@ function _openCartLocationPopup(biome){
               var nearSanc = CartShared.findNearestSanctuary(biome.key);
               var sancHtml = nearSanc ? ('<div style="font-size:11px;color:#86efac;margin-top:3px;border-top:1px dashed rgba(134,239,172,0.25);padding-top:2px;display:flex;justify-content:space-between;align-items:center;"><span>🏛️ <b>Refúgio Mais Próximo:</b> ' + nearSanc.name + ' (' + nearSanc.distanceMiles + ' mi a ' + nearSanc.bearingCode + ', ~' + nearSanc.travelHours + 'h)</span>' + (nearSanc.key !== biome.key ? '<button class="clp-btn-retreat-jump" data-target="' + nearSanc.key + '" type="button" style="background:#1e293b;border:1px solid #38bdf8;color:#38bdf8;font-size:10.5px;padding:1px 5px;border-radius:2px;cursor:pointer;" title="Focar este refúgio no mapa">📍 Ver Refúgio</button>' : '') + '</div>') : '';
               return '<div class="clp-orientation-card" style="margin:4px 0 6px;text-align:left;background:rgba(22,20,16,0.85);padding:5px 8px;border-radius:4px;border:1px solid rgba(250,204,21,0.35);">'
-                + '  <div style="font-size:9px;color:#facc15;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🧭 ORIENTAÇÃO & RASTREAMENTO DA TRILHA (D&D 5e):</div>'
-                + '  <div style="font-size:9px;color:#f4d49a;line-height:1.4;">'
+                + '  <div style="font-size:10.5px;color:#facc15;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">🧭 ORIENTAÇÃO & RASTREAMENTO DA TRILHA (D&D 5e):</div>'
+                + '  <div style="font-size:10.5px;color:#f4d49a;line-height:1.4;">'
                 + '    Orientação: <b style="color:' + nav.color + ';">' + nav.summary + '</b>' + (nav.factors.length ? ' (' + nav.factors.join(', ') + ')' : '') + '<br>'
                 + '    <span style="font-size:11px;color:#cbd5e1;font-style:italic;">Penalidade em Falha: ' + nav.lostPenalty + '</span><br>'
                 + '    Pistas na Trilha: <b>' + spoor.spoorType + '</b> (Sobrevivência CD ' + spoor.survivalDC + ' · <span style="color:#fdba74;">' + spoor.creatureHint + '</span>)<br>'
@@ -94613,8 +94613,8 @@ function _openCartLocationPopup(biome){
               });
               if (!expo.hasHazard) return '';
               return '<div class="clp-exposure-card" style="margin:4px 0 6px;text-align:left;background:rgba(28,16,16,0.85);padding:5px 8px;border-radius:4px;border:1px solid ' + expo.exhaustionColor + ';">'
-                + '  <div style="font-size:9px;color:' + expo.exhaustionColor + ';font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">' + expo.title + '</div>'
-                + '  <div style="font-size:9px;color:#f4d49a;line-height:1.4;">'
+                + '  <div style="font-size:10.5px;color:' + expo.exhaustionColor + ';font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">' + expo.title + '</div>'
+                + '  <div style="font-size:10.5px;color:#f4d49a;line-height:1.4;">'
                 + '    Salvaguarda: <b style="color:#fca5a5;">' + expo.dcCheck + '</b><br>'
                 + '    Risco de Exaustão: <b style="color:' + expo.exhaustionColor + ';">' + expo.exhaustionRisk + '</b>' + (expo.waterMultiplier > 1 ? ' · <span style="color:#67e8f9;">Demanda 2× Água</span>' : '') + '<br>'
                 + '    <span style="font-size:11px;color:#cbd5e1;font-style:italic;">' + expo.mitigationText + '</span>'
@@ -94667,9 +94667,9 @@ function _openCartLocationPopup(biome){
             })();
       })()
     + (biome.isSanctuary
-        ? '<div style="font-size:9.5px;color:#ffd700;margin:4px 0;background:rgba(40,30,15,0.7);border:1px solid rgba(255,215,0,0.4);padding:4px 8px;border-radius:3px;font-family:Cinzel,serif;">🏛️ SANTUÁRIO CONSAGRADO: Descanso longo seguro sem risco de emboscada</div>'
+        ? '<div style="font-size:11.5px;color:#ffd700;margin:4px 0;background:rgba(40,30,15,0.7);border:1px solid rgba(255,215,0,0.4);padding:4px 8px;border-radius:3px;font-family:Cinzel,serif;">🏛️ SANTUÁRIO CONSAGRADO: Descanso longo seguro sem risco de emboscada</div>'
         : (biome.isOrigin || biome.settlement
-            ? '<div style="font-size:9.5px;color:#a3e635;margin-bottom:6px;font-family:Cinzel,serif;">🌀 Santuário & Marco de Viagem Rápida</div>'
+            ? '<div style="font-size:11.5px;color:#a3e635;margin-bottom:6px;font-family:Cinzel,serif;">🌀 Santuário & Marco de Viagem Rápida</div>'
             : ''))
     + (function(){
         if (!window.CartShared || !CartShared.getConnectedLocations) return '';
@@ -94686,19 +94686,19 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + '<div style="text-align:right;margin:4px 0 6px;">'
-    + '  <button class="clp-btn-pin-toggle" id="xclp-pin-toggle-btn" type="button" style="background:rgba(35,25,15,0.85);border:1px solid ' + ((window.CartShared && CartShared.isLocPinned && CartShared.isLocPinned(biome.key)) ? '#ffd700' : 'rgba(196,149,58,0.55)') + ';color:' + ((window.CartShared && CartShared.isLocPinned && CartShared.isLocPinned(biome.key)) ? '#ffd700' : '#d2be90') + ';font-size:9.5px;padding:3px 8px;border-radius:3px;cursor:pointer;">'
+    + '  <button class="clp-btn-pin-toggle" id="xclp-pin-toggle-btn" type="button" style="background:rgba(35,25,15,0.85);border:1px solid ' + ((window.CartShared && CartShared.isLocPinned && CartShared.isLocPinned(biome.key)) ? '#ffd700' : 'rgba(196,149,58,0.55)') + ';color:' + ((window.CartShared && CartShared.isLocPinned && CartShared.isLocPinned(biome.key)) ? '#ffd700' : '#d2be90') + ';font-size:11.5px;padding:3px 8px;border-radius:3px;cursor:pointer;">'
     + ((window.CartShared && CartShared.isLocPinned && CartShared.isLocPinned(biome.key)) ? '📍 Alfinete Ativo (Remover)' : '📌 Fixar no Diário de Rotas')
     + '  </button>'
     + '</div>'
     + '<div class="clp-note-box" style="margin:4px 0 6px;text-align:left;background:rgba(20,14,8,0.7);padding:4px 8px;border-radius:4px;border:1px solid rgba(196,149,58,0.3);">'
-    + '  <div style="font-size:9px;color:#d2be90;margin-bottom:2px;">📝 Anotação de Viagem:</div>'
+    + '  <div style="font-size:10.5px;color:#d2be90;margin-bottom:2px;">📝 Anotação de Viagem:</div>'
     + '  <div style="display:flex;gap:4px;">'
-    + '    <input type="text" id="xclp-note-input" maxlength="45" placeholder="Adicionar nota pessoal..." style="flex:1;background:rgba(0,0,0,0.5);border:1px solid rgba(196,149,58,0.4);color:#ffd685;font-size:9.5px;padding:2px 5px;border-radius:3px;" value="' + ((window.CartShared && CartShared.getLocNote) ? CartShared.getLocNote(biome.key).replace(/"/g, '&quot;') : '') + '">'
-    + '    <button id="xclp-note-save-btn" type="button" style="background:#8b6420;border:1px solid #ffd700;color:#fff;font-size:9px;padding:2px 7px;border-radius:3px;cursor:pointer;">Salvar</button>'
+    + '    <input type="text" id="xclp-note-input" maxlength="45" placeholder="Adicionar nota pessoal..." style="flex:1;background:rgba(0,0,0,0.5);border:1px solid rgba(196,149,58,0.4);color:#ffd685;font-size:11.5px;padding:2px 5px;border-radius:3px;" value="' + ((window.CartShared && CartShared.getLocNote) ? CartShared.getLocNote(biome.key).replace(/"/g, '&quot;') : '') + '">'
+    + '    <button id="xclp-note-save-btn" type="button" style="background:#8b6420;border:1px solid #ffd700;color:#fff;font-size:10.5px;padding:2px 7px;border-radius:3px;cursor:pointer;">Salvar</button>'
     + '  </div>'
     + '</div>'
     + '<div class="clp-pace-wrap" style="margin-top: 8px; text-align: left;">'
-    + '  <div style="font-size: 9.5px; font-family: Cinzel, serif; color: #ffd685; margin-bottom: 3px; font-weight: 600;">RITMO DE MARCHA D&D 5e:</div>'
+    + '  <div style="font-size: 11.5px; font-family: Cinzel, serif; color: #ffd685; margin-bottom: 3px; font-weight: 600;">RITMO DE MARCHA D&D 5e:</div>'
     + '  <div class="clp-pace-selector">'
     + '    <button class="clp-pace-btn" data-pace="stealth" type="button">🐾 Furtivo</button>'
     + '    <button class="clp-pace-btn active" data-pace="normal" type="button">🚶 Normal</button>'
@@ -94708,11 +94708,11 @@ function _openCartLocationPopup(biome){
     + '</div>'
     + (horasViagem > 8 ? (
         '<div class="clp-camp-wrap" style="margin-top: 8px; text-align: left;">'
-        + '  <div style="font-size: 9.5px; font-family: Cinzel, serif; color: #86efac; margin-bottom: 3px; font-weight: 600;">VIGÍLIA NO ACAMPAMENTO SELVAGEM (D&D 5e):</div>'
+        + '  <div style="font-size: 11.5px; font-family: Cinzel, serif; color: #86efac; margin-bottom: 3px; font-weight: 600;">VIGÍLIA NO ACAMPAMENTO SELVAGEM (D&D 5e):</div>'
         + '  <div class="clp-camp-selector" style="display:flex;gap:4px;">'
-        + '    <button class="clp-camp-btn active" data-camp="vigilant" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid #ffd700;color:#ffd700;border-radius:3px;cursor:pointer;">🛡️ Vigília</button>'
-        + '    <button class="clp-camp-btn" data-camp="stealth" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🕯️ Oculto</button>'
-        + '    <button class="clp-camp-btn" data-camp="rest" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">⛺ Pleno</button>'
+        + '    <button class="clp-camp-btn active" data-camp="vigilant" type="button" style="flex:1;font-size:10.5px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid #ffd700;color:#ffd700;border-radius:3px;cursor:pointer;">🛡️ Vigília</button>'
+        + '    <button class="clp-camp-btn" data-camp="stealth" type="button" style="flex:1;font-size:10.5px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🕯️ Oculto</button>'
+        + '    <button class="clp-camp-btn" data-camp="rest" type="button" style="flex:1;font-size:10.5px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">⛺ Pleno</button>'
         + '  </div>'
         + '  <div class="clp-camp-note" id="clp-camp-note" style="font-size:11px;color:#d2be90;margin-top:2px;font-style:italic;">🛡️ Vigília Atenta: Revezamento rigoroso de sentinelas (+5 na Percepção Passiva contra surpresas à noite).</div>'
         + (function(){
@@ -94776,20 +94776,20 @@ function _openCartLocationPopup(biome){
         + '</div>'
       ) : '')
     + '<div class="clp-formation-wrap" style="margin-top: 8px; text-align: left;">'
-    + '  <div style="font-size: 9.5px; font-family: Cinzel, serif; color: #67e8f9; margin-bottom: 3px; font-weight: 600;">ORDEM DE MARCHA DA COMITIVA (D&D 5e):</div>'
+    + '  <div style="font-size: 11.5px; font-family: Cinzel, serif; color: #67e8f9; margin-bottom: 3px; font-weight: 600;">ORDEM DE MARCHA DA COMITIVA (D&D 5e):</div>'
     + '  <div class="clp-formation-selector" style="display:flex;gap:4px;">'
-    + '    <button class="clp-formation-btn active" data-form="standard" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid #ffd700;color:#ffd700;border-radius:3px;cursor:pointer;">🚶 Fila</button>'
-    + '    <button class="clp-formation-btn" data-form="defensive" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🛡️ Fechada</button>'
-    + '    <button class="clp-formation-btn" data-form="spread" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🐾 Dispersa</button>'
+    + '    <button class="clp-formation-btn active" data-form="standard" type="button" style="flex:1;font-size:10.5px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid #ffd700;color:#ffd700;border-radius:3px;cursor:pointer;">🚶 Fila</button>'
+    + '    <button class="clp-formation-btn" data-form="defensive" type="button" style="flex:1;font-size:10.5px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🛡️ Fechada</button>'
+    + '    <button class="clp-formation-btn" data-form="spread" type="button" style="flex:1;font-size:10.5px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🐾 Dispersa</button>'
     + '  </div>'
     + '  <div class="clp-formation-note" id="clp-formation-note" style="font-size:11px;color:#d2be90;margin-top:2px;font-style:italic;">🚶 Fila Indiana: Batedor na frente, comitiva equilibrada para reações rápidas (PHB p. 182).</div>'
     + '</div>'
     + '<div class="clp-transport-wrap" style="margin-top: 8px; text-align: left;">'
-    + '  <div style="font-size: 9.5px; font-family: Cinzel, serif; color: #fde047; margin-bottom: 3px; font-weight: 600;">MODO DE TRANSPORTE (D&D 5e):</div>'
+    + '  <div style="font-size: 11.5px; font-family: Cinzel, serif; color: #fde047; margin-bottom: 3px; font-weight: 600;">MODO DE TRANSPORTE (D&D 5e):</div>'
     + '  <div class="clp-transport-selector" style="display:flex;gap:4px;">'
-    + '    <button class="clp-transport-btn active" data-transport="foot" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid #ffd700;color:#ffd700;border-radius:3px;cursor:pointer;">🚶 A Pé</button>'
-    + '    <button class="clp-transport-btn" data-transport="horse" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🐎 Montaria</button>'
-    + '    <button class="clp-transport-btn" data-transport="wagon" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🛒 Caravana</button>'
+    + '    <button class="clp-transport-btn active" data-transport="foot" type="button" style="flex:1;font-size:10.5px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid #ffd700;color:#ffd700;border-radius:3px;cursor:pointer;">🚶 A Pé</button>'
+    + '    <button class="clp-transport-btn" data-transport="horse" type="button" style="flex:1;font-size:10.5px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🐎 Montaria</button>'
+    + '    <button class="clp-transport-btn" data-transport="wagon" type="button" style="flex:1;font-size:10.5px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🛒 Caravana</button>'
     + '  </div>'
     + '  <div class="clp-transport-note" id="clp-transport-note" style="font-size:11px;color:#d2be90;margin-top:2px;font-style:italic;">🚶 A Pé (Infantaria): 3 milhas/hora · Carga padrão em mochilas e armas prontas.</div>'
     + (function(){
@@ -94820,12 +94820,12 @@ function _openCartLocationPopup(biome){
       })()
     + '</div>'
     + '<div class="clp-role-wrap" style="margin-top: 8px; text-align: left;">'
-    + '  <div style="font-size: 9.5px; font-family: Cinzel, serif; color: #c084fc; margin-bottom: 3px; font-weight: 600;">FUNÇÃO DE VIAGEM DA COMITIVA (D&D 5e):</div>'
+    + '  <div style="font-size: 11.5px; font-family: Cinzel, serif; color: #c084fc; margin-bottom: 3px; font-weight: 600;">FUNÇÃO DE VIAGEM DA COMITIVA (D&D 5e):</div>'
     + '  <div class="clp-role-selector" style="display:flex;gap:4px;">'
-    + '    <button class="clp-role-btn active" data-role="scout" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid #ffd700;color:#ffd700;border-radius:3px;cursor:pointer;">👁️ Sentinela</button>'
-    + '    <button class="clp-role-btn" data-role="navigator" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🧭 Guia</button>'
-    + '    <button class="clp-role-btn" data-role="forager" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🌿 Caçador</button>'
-    + '    <button class="clp-role-btn" data-role="cartographer" type="button" style="flex:1;font-size:9px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">📜 Escriba</button>'
+    + '    <button class="clp-role-btn active" data-role="scout" type="button" style="flex:1;font-size:10.5px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid #ffd700;color:#ffd700;border-radius:3px;cursor:pointer;">👁️ Sentinela</button>'
+    + '    <button class="clp-role-btn" data-role="navigator" type="button" style="flex:1;font-size:10.5px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🧭 Guia</button>'
+    + '    <button class="clp-role-btn" data-role="forager" type="button" style="flex:1;font-size:10.5px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">🌿 Caçador</button>'
+    + '    <button class="clp-role-btn" data-role="cartographer" type="button" style="flex:1;font-size:10.5px;padding:3px 2px;background:rgba(30,22,12,0.85);border:1px solid rgba(196,149,58,0.4);color:#d2be90;border-radius:3px;cursor:pointer;">📜 Escriba</button>'
     + '  </div>'
     + '  <div class="clp-role-note" id="clp-role-note" style="font-size:11px;color:#d2be90;margin-top:2px;font-style:italic;">👁️ Sentinela Atenta: +5 na Percepção Passiva · Evita surpresa em emboscadas inimigas (PHB p. 182).</div>'
     + '</div>'
@@ -100775,7 +100775,7 @@ function _openCartLocationPopup(biome){
         (function(){
           var fm = (window.CartShared && CartShared.calcForcedMarchRiskTable) ? CartShared.calcForcedMarchRiskTable(horasViagem) : null;
           return '<div class="clp-forced-march-warn" id="clp-forced-march-warn" style="margin:4px 0 6px;text-align:left;background:rgba(30,15,10,0.8);padding:5px 8px;border-radius:4px;border-left:3px solid #f87171;">'
-            + '  <div style="font-size:9px;color:#f87171;font-family:Cinzel,serif;font-weight:700;">⚠️ MARCHA FORÇADA & EXAUSTÃO (D&D 5e — PHB p. 181):</div>'
+            + '  <div style="font-size:10.5px;color:#f87171;font-family:Cinzel,serif;font-weight:700;">⚠️ MARCHA FORÇADA & EXAUSTÃO (D&D 5e — PHB p. 181):</div>'
             + '  <div style="font-size:11px;color:#fca5a5;line-height:1.35;margin-top:2px;" id="clp-forced-march-desc">'
             + '    Jornada de <b>~' + horasViagem + 'h</b> excede o limite diário de 8 horas em <b>' + (fm ? fm.extraHours : (horasViagem - 8)) + 'h</b>.<br>'
             + '    • <b>Sem acampamento:</b> Salvaguardas progressivas de <b>CON CD 11 a CD ' + (fm ? fm.maxDC : (10 + (horasViagem - 8))) + '</b> contra níveis de Exaustão.<br>'
@@ -101255,7 +101255,7 @@ function _openCartLocationPopup(biome){
       var newRisk = (window.CartShared && CartShared.calcEncounterRisk) ? CartShared.calcEncounterRisk(biome, { pace: pType, isNight: isNight, weather: curWeather, hours: curHours }) : null;
       var metaEl = el.querySelector('.clp-meta');
       if (metaEl) {
-        metaEl.innerHTML = '<b>Nível Sugerido:</b> ' + rec + '<br><b>Avaliação de Ameaça:</b> ' + threatBadge + '<br><span style="font-size:9.5px;color:#d2be90;font-style:italic;">' + stanceTip + '</span><br><b>Risco de Emboscada:</b> <span id="clp-risk-badge" style="font-weight:700;color:' + (newRisk ? newRisk.color : '#a3e635') + ';">' + (newRisk ? newRisk.label : '') + '</span><br><b>Bioma:</b> ' + biomePT + ' · <b>Distância:</b> ~' + distMilhas + ' milhas (<span id="clp-meta-hours">~' + curHours + 'h de marcha</span>)';
+        metaEl.innerHTML = '<b>Nível Sugerido:</b> ' + rec + '<br><b>Avaliação de Ameaça:</b> ' + threatBadge + '<br><span style="font-size:11.5px;color:#d2be90;font-style:italic;">' + stanceTip + '</span><br><b>Risco de Emboscada:</b> <span id="clp-risk-badge" style="font-weight:700;color:' + (newRisk ? newRisk.color : '#a3e635') + ';">' + (newRisk ? newRisk.label : '') + '</span><br><b>Bioma:</b> ' + biomePT + ' · <b>Distância:</b> ~' + distMilhas + ' milhas (<span id="clp-meta-hours">~' + curHours + 'h de marcha</span>)';
       }
 
       var paceRationsNote = (curHours <= 8)
@@ -101906,7 +101906,7 @@ function _openPointcrawlDungeonDelver(dgId) {
     var done = !!(typeof S !== 'undefined' && S && S._dungeonEncountersTriggered && S._dungeonEncountersTriggered[enc.id] && !enc.repeatable);
     return '<div class="pcd-chamber-card" data-enc-idx="' + idx + '" style="background:rgba(24,18,12,0.92);border:1px solid ' + (done ? 'rgba(74,222,128,0.45)' : 'rgba(196,149,58,0.45)') + ';border-radius:6px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;">'
       + '<div style="text-align:left;flex:1;">'
-      + '  <div style="font-size:9px;color:' + cMeta.color + ';font-family:Cinzel,serif;font-weight:700;">ETAPA ' + (idx + 1) + ' · ' + cMeta.ico + ' ' + cMeta.tag.toUpperCase() + (done ? ' <span style="color:#4ade80;">(CONCLUÍDA)</span>' : '') + '</div>'
+      + '  <div style="font-size:10.5px;color:' + cMeta.color + ';font-family:Cinzel,serif;font-weight:700;">ETAPA ' + (idx + 1) + ' · ' + cMeta.ico + ' ' + cMeta.tag.toUpperCase() + (done ? ' <span style="color:#4ade80;">(CONCLUÍDA)</span>' : '') + '</div>'
       + '  <div style="font-family:Cinzel,serif;font-size:11.5px;color:#f4d49a;font-weight:700;margin-top:1px;">' + enc.title + '</div>'
       + '  <div style="font-size:11px;color:#a09484;line-height:1.4;margin-top:2px;">' + (enc.flavor || '') + '</div>'
       + '</div>'
@@ -102044,7 +102044,7 @@ function openCartography() {
     + '          <span style="font-size:16px;">🧭</span>'
     + '          <div>'
     + '            <h3 style="margin:0;font-size:13px;color:#f4d49a;font-family:Cinzel,serif;">Radar Tático da Região</h3>'
-    + '            <span id="trm-coverage-stat" style="font-size:9.5px;color:#a09484;">Calculando exploração...</span>'
+    + '            <span id="trm-coverage-stat" style="font-size:11.5px;color:#a09484;">Calculando exploração...</span>'
     + '          </div>'
     + '        </div>'
     + '        <button class="cam-close" id="tactical-radar-close-btn" type="button" aria-label="Fechar Radar [Esc]">✕</button>'
@@ -102054,7 +102054,7 @@ function openCartography() {
     + '        <canvas id="tactical-radar-canvas" width="280" height="280" style="background:#1b140d;border:1px solid rgba(196,149,58,0.45);border-radius:6px;cursor:pointer;"></canvas>'
     + '        <div style="font-size:11px;color:#ffd700;font-family:Cinzel,serif;font-weight:700;margin-top:2px;">▼ SUL</div>'
     + '      </div>'
-    + '      <div id="trm-legend" style="padding:6px 12px;font-size:9px;color:#d2be90;display:flex;justify-content:space-around;background:rgba(0,0,0,0.35);">'
+    + '      <div id="trm-legend" style="padding:6px 12px;font-size:10.5px;color:#d2be90;display:flex;justify-content:space-around;background:rgba(0,0,0,0.35);">'
     + '        <span>📍 Comitiva</span>'
     + '        <span>🟢 Saída</span>'
     + '        <span>🟡 Retorno</span>'
@@ -103138,10 +103138,10 @@ function _xcartPopulateWaypointsList(filter, query) {
     var marcos = (typeof b.marcos === 'number') ? b.marcos : (b.tier || 1);
     var distMilhas = Math.max(6, marcos * 8);
 
-    var badge = item.isCurrent ? '<span style="font-size:9px;background:#2e7d32;color:#fff;padding:1px 6px;border-radius:10px;">Você está aqui</span>'
-      : item.isSanctuary ? '<span style="font-size:9px;background:rgba(196,149,58,0.25);border:1px solid #ffd700;color:#ffd700;padding:1px 6px;border-radius:10px;">🏛️ Santuário</span>'
-      : item.isPin ? '<span style="font-size:9px;background:rgba(218,165,32,0.25);border:1px solid #ffd700;color:#ffd700;padding:1px 6px;border-radius:10px;">📍 Alfinete</span>'
-      : '<span style="font-size:9px;background:rgba(196,149,58,0.2);color:#d2be90;padding:1px 6px;border-radius:10px;">🌀 Marco</span>';
+    var badge = item.isCurrent ? '<span style="font-size:10.5px;background:#2e7d32;color:#fff;padding:1px 6px;border-radius:10px;">Você está aqui</span>'
+      : item.isSanctuary ? '<span style="font-size:10.5px;background:rgba(196,149,58,0.25);border:1px solid #ffd700;color:#ffd700;padding:1px 6px;border-radius:10px;">🏛️ Santuário</span>'
+      : item.isPin ? '<span style="font-size:10.5px;background:rgba(218,165,32,0.25);border:1px solid #ffd700;color:#ffd700;padding:1px 6px;border-radius:10px;">📍 Alfinete</span>'
+      : '<span style="font-size:10.5px;background:rgba(196,149,58,0.2);color:#d2be90;padding:1px 6px;border-radius:10px;">🌀 Marco</span>';
 
     html += '<div class="cam-item" style="cursor:pointer;flex-direction:row;align-items:center;justify-content:space-between;padding:8px 12px;" onclick="_xcartFocusWaypoint(\'' + b.key + '\')">'
       + '  <div style="display:flex;align-items:center;gap:10px;">'
@@ -103149,10 +103149,10 @@ function _xcartPopulateWaypointsList(filter, query) {
       + '    <div>'
       + '      <div style="font-family:Cinzel,serif;font-weight:700;color:#f4d49a;font-size:12px;">' + (b.regionalName || b.name) + ' ' + badge + '</div>'
       + '      <div style="font-size:10px;color:#a09484;">' + provName + ' · ~' + distMilhas + ' milhas (~' + marcos + ' marcos)</div>'
-      + ((window.CartShared && CartShared.getLocNote && CartShared.getLocNote(b.key)) ? '<div style="font-size:9.5px;color:#fcd34d;font-style:italic;margin-top:2px;">📝 "' + CartShared.getLocNote(b.key) + '"</div>' : '')
+      + ((window.CartShared && CartShared.getLocNote && CartShared.getLocNote(b.key)) ? '<div style="font-size:11.5px;color:#fcd34d;font-style:italic;margin-top:2px;">📝 "' + CartShared.getLocNote(b.key) + '"</div>' : '')
       + '    </div>'
       + '  </div>'
-      + '  <button class="xcart-dock-btn" type="button" style="height:26px;font-size:9.5px;padding:0 8px;">🔍 Focar</button>'
+      + '  <button class="xcart-dock-btn" type="button" style="height:26px;font-size:11.5px;padding:0 8px;">🔍 Focar</button>'
       + '</div>';
   });
   listEl.innerHTML = html;
@@ -104164,23 +104164,23 @@ function _xcartShowTooltip(b, mx, my){
   var horas = Math.max(2, Math.round(distMilhas / 3));
 
   var isPinned = (window.CartShared && CartShared.isLocPinned) ? CartShared.isLocPinned(b.key) : false;
-  var pinHtml = isPinned ? '<div style="font-size:9.5px;color:#ffd700;margin-top:2px;font-weight:600;">📍 Fixado no Diário de Rotas</div>' : '';
+  var pinHtml = isPinned ? '<div style="font-size:11.5px;color:#ffd700;margin-top:2px;font-weight:600;">📍 Fixado no Diário de Rotas</div>' : '';
 
   var activeQuestTitle = '';
   if (typeof _getXCartProvinceActiveQuest === 'function') {
     var pId = (window.CartShared && CartShared.getLocationProvince) ? CartShared.getLocationProvince(b.key) : '';
     if (pId) activeQuestTitle = _getXCartProvinceActiveQuest(pId);
   }
-  var questHtml = activeQuestTitle ? '<div style="font-size:9.5px;color:#ffd685;margin-top:2px;">📜 Missão: ' + activeQuestTitle + '</div>' : '';
+  var questHtml = activeQuestTitle ? '<div style="font-size:11.5px;color:#ffd685;margin-top:2px;">📜 Missão: ' + activeQuestTitle + '</div>' : '';
 
   var dndInfo = (window.CartShared && CartShared.getBiomeDndInfo) ? CartShared.getBiomeDndInfo(b.biome || b.key) : null;
-  var dndHtml = dndInfo ? '<div style="font-size:9px;color:#81c784;margin-top:2px;">🛡️ ' + dndInfo.saves + '</div>' : '';
+  var dndHtml = dndInfo ? '<div style="font-size:10.5px;color:#81c784;margin-top:2px;">🛡️ ' + dndInfo.saves + '</div>' : '';
   var foragingHtml = (dndInfo && dndInfo.foraging) ? '<div style="font-size:11px;color:#a3e635;margin-top:2px;">' + dndInfo.foraging + '</div>' : '';
   var customNote = (window.CartShared && CartShared.getLocNote) ? CartShared.getLocNote(b.key) : '';
   var noteHtml = customNote ? '<div style="font-size:11px;color:#fcd34d;margin-top:2px;font-style:italic;background:rgba(255,215,0,0.12);padding:2px 5px;border-radius:3px;">📝 Nota: "' + customNote + '"</div>' : '';
 
   var distHtml = (b.isOrigin || b.key === 'plains') ? '' :
-    '<div style="font-size:9.5px;color:#e6d3a3;margin-top:2px;">📏 ~' + distMilhas + ' milhas (~' + marcos + ' marcos · ~' + horas + 'h a pé)</div>';
+    '<div style="font-size:11.5px;color:#e6d3a3;margin-top:2px;">📏 ~' + distMilhas + ' milhas (~' + marcos + ' marcos · ~' + horas + 'h a pé)</div>';
 
   var vm = (_xcartEngine && typeof _xcartEngine.getViewMode === 'function') ? _xcartEngine.getViewMode() : { mode: 'world' };
   var hintText = (vm.mode === 'world') ? 'Duplo clique para Carta Regional' : 'Duplo clique para Iniciar Viagem';
@@ -114297,7 +114297,7 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
   color: #ffd685;
 }
 .cam-item-sub {
-  font-size: 9px;
+  font-size: 10.5px;
   color: #a09484;
   font-style: italic;
 }
@@ -114323,7 +114323,7 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
   flex-wrap: wrap;
   gap: 8px;
   justify-content: center;
-  font-size: 9px;
+  font-size: 10.5px;
   color: #a09484;
 }
 .cam-legend-item {
