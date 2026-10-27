@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.calcWildernessSealedMissiveAndCipher) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var sm = CartShared.calcWildernessSealedMissiveAndCipher(bKey, 'signet_ring_sealing_wax_authenticated_scroll');
+        return '<div class="clp-sealed-missive-card" style="margin:4px 0 6px;text-align:left;background:rgba(38,12,20,0.86);padding:4px 8px;border-radius:4px;border:1px solid rgba(225,29,72,0.38);font-size:8px;color:#fff1f2;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sm.color + ';margin-bottom:2px;">' + sm.icon + ' ' + sm.missiveTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Sinetes de Lacre, Cifras e Kit de Falsificação:</b> ' + sm.missiveMechanics + ' (CD ' + sm.saveDC + ' [' + sm.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#fecdd3;margin-top:1px;">• <b>Inviolabilidade:</b> ' + sm.pioneerMitigation + ' · <i>Contramedida: ' + sm.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampCipherWritingDeskStation) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var sm = CartShared.calcCampCipherWritingDeskStation(bKey, 'portable_calligrapher_and_forgery_scriptorium_bivouac');
+        return '<div class="clp-sealed-missive-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(30,10,16,0.82);padding:4px 8px;border-radius:4px;border:1px solid rgba(190,18,60,0.32);font-size:8px;color:#fff1f2;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + sm.color + ';margin-bottom:2px;">' + sm.icon + ' ' + sm.defenseTitle.toUpperCase() + ' (PHB p. 150, 154):</div>' 
+          + '  <div>• <b>Escrivaninha de Campanha e Lacres:</b> ' + sm.missiveAndCampSafety + ' · <b>Cooperação:</b> ' + sm.missiveAndWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#fda4af;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + sm.campRestAndSafetyGuards + '</div>' 
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.calcWildernessDruidicFloraSign) return '';
         var bKey = (biome && biome.key) || 'forest';
         var df = CartShared.calcWildernessDruidicFloraSign(bKey, 'woven_bough_druidic_omen_glyph');

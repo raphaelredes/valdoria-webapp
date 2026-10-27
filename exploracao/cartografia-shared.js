@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 304: PERGAMINHOS CIFRADOS, SINETES DE LACRE E KITS DE FALSIFICAÇÃO (D&D 5e)
+  // =========================================================================
+
+  function calcWildernessSealedMissiveAndCipher(biomeKey, missiveType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var mt = (missiveType || 'signet_ring_sealing_wax_authenticated_scroll').toLowerCase();
+
+    var missive = {
+      missiveTitle: 'Missiva em Porta-Pergaminho Estanque com Lacre e Anel de Sinete (PHB p. 150)',
+      saveDC: 15,
+      saveType: 'Inteligência',
+      missiveMechanics: 'Documentos, contratos de espólio ou alertas deixados entre comitivas são redigidos com Tinta (10 PO) e Caneta-Tinteiro em Pergaminho, selados com Lacre carmesim (5 PP) marcado pelo Anel de Sinete pessoal do remetente (5 PO) e guardados em um Porta-Mapa ou Porta-Pergaminho cilíndrico de couro impermeável (1 PO, PHB p. 150-152); garante autenticidade criptográfica física (Investigação CD 15 para verificar integridade do relevo do brasão contra violação) mesmo quando os personagens ainda não sabem o nome verdadeiro um do outro, reconhecendo apenas a insígnia do sinete.',
+      pioneerMitigation: 'Adição de fios de seda internos cruzando o pergaminho até o pingo de cera quente (ribbon-lock) para impedir que espiões abram a carta com lâmina aquecida sem partir o selo (Prestidigitação ou Kit de Falsificação CD 14, XGE p. 81).',
+      rescueAndStabilization: 'Se o lacre apresentar microfissuras ou reaquecimento, tratar o conteúdo como armadilha ou desinformação inimiga (Investigação ou Intuição CD 14).',
+      icon: '📜',
+      color: '#e11d48'
+    };
+
+    if (mt === 'alchemical_sympathetic_lemon_vital_ink_cipher') {
+      missive.missiveTitle = 'Esteganografia com Tinta Simpática Alquímica e Cifra de Transposição';
+      missive.saveDC = 15;
+      missive.saveType = 'Inteligência';
+      missive.missiveMechanics = 'Sobre uma carta comercial aparentemente inofensiva, o remetente escreve nas entrelinhas usando tinta invisível preparada com Suprimentos de Alquimista ou Kit de Falsificação (PHB p. 154; XGE p. 79, 81); o texto verdadeiro só emerge quando aquecido sobre a chama de uma vela no bivaque ou banhado com reagente ácido, exigindo Inteligência (Investigação CD 15) para quem desconhece o método.';
+      missive.pioneerMitigation = 'Criptografia adicional por grade de Cardano ou cifra de substituição cuja palavra-chave remete ao local do primeiro encontro entre as duas comitivas (História ou Investigação CD 14).';
+      missive.rescueAndStabilization = 'Destruição imediata da folha no fogo após a leitura para não deixar provas materiais em caso de captura.';
+    } else if (mt === 'forgery_kit_counterfeit_seal_detection') {
+      missive.missiveTitle = 'Perícia contra Falsificação de Sinete e Salvo-Conduto Forjado (XGE p. 81)';
+      missive.saveDC = 16;
+      missive.saveType = 'Inteligência';
+      missive.missiveMechanics = 'Agentes rivais ou impostores utilizam um Kit de Falsificação (PHB p. 154, 15 PO) para moldar réplicas de sinetes de comitivas conhecidas ou falsificar ordens de marcha de guildas; conforme XGE p. 81, proficiência no Kit de Falsificação concede vantagem e soma o bônus de proficiência em testes de Inteligência (Investigação CD 16) para detectar caligrafia imitada, cera adulterada ou pergaminho envelhecido artificialmente com chá.';
+      missive.pioneerMitigation = 'Inclusão de marca-d’água secreta de Suprimentos de Calígrafo (XGE p. 79) e erro ortográfico proposital combinado entre aliados no rodapé do documento.';
+      missive.rescueAndStabilization = 'Rastreamento da origem do papel e do pigmento para descobrir em qual cidade ou acampamento a falsificação foi produzida (Investigação CD 14).';
+    } else if (mt === 'contact_poison_and_explosive_rune_scroll_trap') {
+      missive.missiveTitle = 'Pergaminho Armadilhado com Veneno de Contato ou Glifo de Vigilância';
+      missive.saveDC = 15;
+      missive.saveType = 'Destreza';
+      missive.missiveMechanics = 'Missivas abandonadas propositalmente em estradas ou baús podem conter pó de veneno de contato misturado à areia secante da tinta (DMG p. 257) ou um Glifo de Vigilância explosivo (3º círculo, PHB p. 245) engatilhado para detonar ao quebrar o lacre sem pronunciar a senha; falha causa 5d8 de dano ácido/fogo ou condição envenenado.';
+      missive.pioneerMitigation = 'Abertura de correspondências suspeitas usando luvas de couro grosso, pinças longas ou Mãos Mágicas a 9 metros de distância (Arcanismo ou Investigação CD 15).';
+      missive.rescueAndStabilization = 'Neutralização do pó tóxico com óleo mineral e abafamento do tubo de pergaminho sob manta pesada (Medicina ou Destreza CD 13).';
+    }
+
+    return missive;
+  }
+
+  function calcCampCipherWritingDeskStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'portable_calligrapher_and_forgery_scriptorium_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Escrivaninha de Campanha com Suprimentos de Calígrafo e Kit de Falsificação',
+      missiveAndCampSafety: 'Durante o descanso no bivaque, a comitiva monta uma prancheta nivelada abrigada do vento com Suprimentos de Calígrafo (10 PO, PHB p. 154) e Kit de Cartógrafo (15 PO) para redigir missivas lacradas, duplicar mapas de nós descobertos e autenticar tratados (XGE p. 79, 81).',
+      missiveAndWatch: 'Mapas copiados com Suprimentos de Calígrafo e Cartógrafo podem ser entregues ou deixados em caixas-mortas para outras comitivas, revelando rotas seguras e perigos já sondados no Pointcrawl.',
+      campRestAndSafetyGuards: 'Organização documental que concede vantagem em testes de Inteligência (História e Investigação) sobre a região no dia seguinte.',
+      icon: '⛺',
+      color: '#e11d48'
+    };
+
+    if (dt === 'wax_seal_trip_thread_equipment_lock') {
+      defense.defenseTitle = 'Selagem Antiviolação de Alforjes e Baús com Fio de Lacre no Acampamento';
+      defense.missiveAndCampSafety = 'Aplicação de fios de linho finos presos com gotas ocultas de Lacre (PHB p. 150) e marca de Anel de Sinete nos fechos das mochilas, cantis e alforjes antes de dormir.';
+      defense.missiveAndWatch = 'Impede que batedores furtivos ou visitantes no acampamento compartilhem a fogueira e vasculhem os pertences ou envenenem cantis sem que o rompimento do lacre denuncie imediatamente a sabotagem pela manhã (sucesso automático na detecção pós-fato).';
+      defense.campRestAndSafetyGuards = 'Garante confiança e segurança patrimonial mesmo ao dividir bivaque com comitivas estranhas.';
+    } else if (dt === 'waterproof_waxed_scroll_case_archive') {
+      defense.defenseTitle = 'Arquivo Blindado em Porta-Pergaminhos Revestidos de Cera de Abelha';
+      defense.missiveAndCampSafety = 'Acondicionamento de todos os pergaminhos mágicos, grimórios de viagem e cartas diplomáticas em tubos de couro fervido selados com cera de abelha e breu (PHB p. 152).';
+      defense.missiveAndWatch = 'Protege 100% dos documentos e pergaminhos contra naufrágios, chuvas torrenciais, lamaçais e respingos ácidos durante a travessia dos ermos.';
+      defense.campRestAndSafetyGuards = 'Preserva o patrimônio arcano e cartográfico da comitiva intacto.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 303: ENTRELAÇAMENTOS DRUÍDICOS E AVISOS SILVESTRES NA FLORA (D&D 5e)
   // =========================================================================
 
@@ -38349,6 +38424,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    calcWildernessSealedMissiveAndCipher: calcWildernessSealedMissiveAndCipher,
+    calcCampCipherWritingDeskStation: calcCampCipherWritingDeskStation,
     calcWildernessDruidicFloraSign: calcWildernessDruidicFloraSign,
     calcCampDruidicGroveSanctuaryStation: calcCampDruidicGroveSanctuaryStation,
     calcWildernessThievesCantRoadSign: calcWildernessThievesCantRoadSign,
