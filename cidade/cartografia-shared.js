@@ -20735,6 +20735,81 @@
   // =========================================================================
 
   // =========================================================================
+  // FASE 311: MOTOR DE NÉVOA DE IDENTIDADE POR PERCEPÇÃO PASSIVA, ILUMINAÇÃO E RITMO DE MARCHA (D&D 5e)
+  // =========================================================================
+
+  function resolveStrangerIdentityPerceptionFog(biomeKey, fogMode, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var fm = (fogMode || 'asymmetric_stealth_pace_spotting').toLowerCase();
+
+    var fog = {
+      fogTitle: 'Avistamento Assimétrico por Ritmo Lento/Furtivo vs. Percepção Passiva (PHB p. 175, 182)',
+      saveDC: 15,
+      saveType: 'Sabedoria',
+      identityFogMechanics: 'Em D&D 5e (PHB p. 182; Solasta: Crown of the Magister), uma comitiva que viaja em ritmo Lento (18 milhas/dia) pode mover-se furtivamente nos ermos realizando um Teste em Grupo de Destreza (Furtividade) (PHB p. 175 — sucesso se pelo menos metade dos membros superar a CD); quando o resultado iguala ou supera a Sabedoria (Percepção) Passiva da outra comitiva na estrada, ocorre o Avistamento Assimétrico: o grupo furtivo avista a outra comitiva primeiro sem ser visto! Os aventureiros podem observá-los ocultos na vegetação, preparar uma emboscada (impondo a condição Surpreso na 1ª rodada do Combat2, PHB p. 189) ou deixá-los passar sem que jamais saibam que estiveram ali.',
+      pioneerMitigation: 'Designação de um Batedor furtivo (Ladino, Patrulheiro ou Monge) 30 metros à frente da comitiva ou conjuração de Rastro Invisível (+10 em Furtividade de grupo, PHB p. 271).',
+      rescueAndStabilization: 'Permite evitar confrontos letais contra bandos superiores ou estudar a composição de outra comitiva antes de decidir se apresentar.',
+      icon: '👁️',
+      color: '#6366f1'
+    };
+
+    if (fm === 'four_tier_passive_perception_identity_fog') {
+      fog.fogTitle = 'Revelação Gradual em 4 Graus da Névoa de Identidade (PHB p. 177; NWN Arelith)';
+      fog.saveDC = 15;
+      fog.saveType = 'Sabedoria';
+      fog.identityFogMechanics = 'Nenhum aventureiro desconhecido exibe nome flutuante sobre a cabeça (banimento absoluto de metagaming estilo Neverwinter Nights: Arelith); a interface revela apenas o que a Sabedoria (Percepção) Passiva do observador alcança: Grau 1 (Percepção Passiva < 12 ou forte neblina): "Vulto Encapuzado na Estrada"; Grau 2 (12 a 14): Raça, porte físico e arma empunhada ("Andarilho Anão de Machado Pesado"); Grau 3 (15 a 17): Sub-raça, armadura vestida e arquétipo aparente ("Anão da Colina de Cota de Malha e Símbolo Sagrado"); Grau 4 (18+ ou talento Observador +5, PHB p. 168): Detalhes finos, cicatrizes, manchas de sangue, estado de fadiga e insígnias — porém o Nome Próprio permanece oculto até que ocorra apresentação verbal ou reconhecimento prévio!',
+      fog.pioneerMitigation = 'Uso de Luneta (Spyglass, 1.000 PO, PHB p. 150 — amplia objetos em 2x) ou posicionamento elevado do Sentinela para elevar o grau de leitura visual antes da aproximação.',
+      fog.rescueAndStabilization = 'Identificação precoce de armas envenenadas, focos arcanos ou ferimentos graves nos estranhos antes de abrir parley.';
+    } else if (fm === 'fast_pace_and_lightly_obscured_penalty') {
+      fog.fogTitle = 'Penalidades Cumulativas de Ritmo Rápido (-5) e Penumbra/Neblina (-5) (PHB p. 182-183)',
+      fog.saveDC = 17;
+      fog.saveType = 'Sabedoria';
+      fog.identityFogMechanics = 'Marchar em ritmo Rápido (30 milhas/dia) impõe penalidade canônica de -5 na Sabedoria (Percepção) Passiva e impede qualquer furtividade (PHB p. 182); adicionalmente, viajar sob Área Levemente Obscurecida (penumbra do crepúsculo, nevoeiro matinal, chuva moderada ou folhagem densa, PHB p. 183) impõe Desvantagem em testes de Percepção que dependam da visão (-5 adicional na Percepção Passiva Visual), rebaixando em 1 a 2 graus a leitura da Névoa de Identidade e expondo o grupo a emboscadas.',
+      fog.pioneerMitigation = 'Redução imediata para ritmo Normal ou Lento ao entrar em desfiladeiros, pântanos enevoados ou florestas fechadas.',
+      fog.rescueAndStabilization = 'Em Área Fortemente Obscurecida (escuridão total ou tempestade de cinzas, PHB p. 183), a visão é cega e o grupo depende exclusivamente da Percepção Auditiva (passos, tilintar de cota de malha e vozes).';
+    } else if (fm === 'darkvision_and_torchlight_beacon_tradeoff') {
+      fog.fogTitle = 'Visão no Escuro (Darkvision) vs. Farol de Tochas e Lanternas na Noite (PHB p. 183, 185)',
+      fog.saveDC = 14;
+      fog.saveType = 'Sabedoria';
+      fog.identityFogMechanics = 'Aventureiros com Visão no Escuro (Elfos, Anões, Meio-Orcs, Gnomos e Tieflings, alcance 18m / 60 pés, PHB p. 185) enxergam na escuridão como se fosse penumbra (tons de cinza, -5 na Percepção Passiva visual) sem precisar acender chamas; em contraste, uma comitiva que acende uma Tocha (luz plena 6m + penumbra 6m) ou Lanterna Furta-Fogo (cone de 18m + 18m, PHB p. 152) elimina a penalidade de escuridão de perto, mas projeta um clarão visível a quilômetros na noite — garantindo que outras comitivas a avistem automaticamente de longe!',
+      fog.pioneerMitigation = 'Fechamento do obturador da Lanterna Furta-Fogo (reduzindo a luz a uma fresta de 1,5m, PHB p. 152) ou condução da fila noturna por companheiros dotados de Visão no Escuro.',
+      fog.rescueAndStabilization = 'Apagar ou arremessar a tocha longe no primeiro turno de contato noturno para sair do cone iluminado.';
+    }
+
+    return fog;
+  }
+
+  function calcCampCamouflagedOutpostVisibilityStation(biomeKey, defenseType, options) {
+    options = options || {};
+    var bk = (biomeKey || 'plains').toLowerCase();
+    var dt = (defenseType || 'dakota_fire_hole_and_light_discipline_bivouac').toLowerCase();
+
+    var defense = {
+      defenseTitle: 'Fogueira Enterrada (Dakota Fire Hole) e Disciplina de Luz no Bivaque (PHB p. 183)',
+      visibilityAndCampSafety: 'Para evitar que o brilho das chamas e a coluna de fumaça denunciem a posição da comitiva para outros grupos a quilômetros de distância durante a noite, o Provedor escava uma fornalha subterrânea de duas câmaras em terra firme e alimenta o fogo apenas com madeira seca sem casca.',
+      visibilityAndOutpostWatch: 'Permite cozinhar rações quentes e aquecer os aventureiros sem emitir clarão lateral visível na linha do horizonte, mantendo os sentinelas fora do círculo de luz para preservar sua Visão no Escuro.',
+      campRestAndSafetyGuards: 'Eleva em +5 a CD de Sabedoria (Percepção ou Sobrevivência) para que outras comitivas localizem o acampamento à noite.',
+      icon: '🌑',
+      color: '#6366f1'
+    };
+
+    if (dt === 'pass_without_trace_and_natural_foliage_camouflage') {
+      defense.defenseTitle = 'Camuflagem de Bivaque e Véu de Rastro Invisível (PHB p. 271; Pathfinder Kingmaker)';
+      defense.visibilityAndCampSafety = 'Druida ou Patrulheiro (2º círculo, cinzas de folha de visco queimada e ramo de abeto, PHB p. 271) envolve a comitiva em sombras e silêncio (+10 em testes de Destreza [Furtividade] e impossibilidade de ser rastreado por meios não-mágicos) nos últimos quilômetros antes de montar o acampamento camuflado com folhagem e rochas locais.';
+      defense.visibilityAndOutpostWatch = 'Qualquer comitiva que marche pela estrada adjacente precisa superar a Furtividade camuflada do bivaque com sua Percepção Passiva apenas para notar que há tendas ocultas.';
+      defense.campRestAndSafetyGuards = 'Garante descanso longo invisível mesmo em rotas movimentadas ou territórios patrulhados por rivais.';
+    } else if (dt === 'elevated_darkvision_lookout_perch') {
+      defense.defenseTitle = 'Posto de Vigia Elevado com Visão no Escuro e Sinais de Corda (PHB p. 177, 185)';
+      defense.visibilityAndCampSafety = 'O Sentinela da comitiva posiciona-se em galho alto, rochedo sobranceiro ou ruína a 9 metros das tendas, segurando uma linha fina de cânhamo amarrada ao pulso dos companheiros que dormem abaixo.';
+      defense.visibilityAndOutpostWatch = 'Ao avistar tochas distantes ou ouvir passos de outra comitiva aproximando-se na escuridão, dois puxões secos na corda despertam todo o grupo em silêncio absoluto.';
+      defense.campRestAndSafetyGuards = 'Impede a condição Surpreso e concede tempo hábil para vestir escudos e empunhar armas antes da aproximação.';
+    }
+
+    return defense;
+  }
+
+  // =========================================================================
   // FASE 310: REDE TELEPÁTICA DE ALIANÇA E VERIFICAÇÃO DE VERDADE: VÍNCULO DE RARY, DETECTAR PENSAMENTOS E ZONA DA VERDADE (D&D 5e)
   // =========================================================================
 
@@ -38874,6 +38949,8 @@
     calcCampTidewaterGlacierAndSeaCaveStation: calcCampTidewaterGlacierAndSeaCaveStation,
     calcWildernessStratovolcanoGlacierHazard: calcWildernessStratovolcanoGlacierHazard,
     calcCampStratovolcanoGlacierStation: calcCampStratovolcanoGlacierStation,
+    resolveStrangerIdentityPerceptionFog: resolveStrangerIdentityPerceptionFog,
+    calcCampCamouflagedOutpostVisibilityStation: calcCampCamouflagedOutpostVisibilityStation,
     resolveParleyTruthAndTelepathy: resolveParleyTruthAndTelepathy,
     calcCampTelepathicBondParleyStation: calcCampTelepathicBondParleyStation,
     resolveNodeImplantedMagicMessage: resolveNodeImplantedMagicMessage,

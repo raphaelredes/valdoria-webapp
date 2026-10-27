@@ -72904,6 +72904,26 @@ function _openCartLocationPopup(biome){
           + '</div>';
       })()
     + (function(){
+        if (!window.CartShared || !CartShared.resolveStrangerIdentityPerceptionFog) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var fg = CartShared.resolveStrangerIdentityPerceptionFog(bKey, 'asymmetric_stealth_pace_spotting');
+        return '<div class="clp-stranger-identity-fog-card" style="margin:4px 0 6px;text-align:left;background:rgba(16,18,42,0.86);padding:4px 8px;border-radius:4px;border:1px solid rgba(99,102,241,0.38);font-size:8px;color:#eef2ff;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + fg.color + ';margin-bottom:2px;">' + fg.icon + ' ' + fg.fogTitle.toUpperCase() + ':</div>' 
+          + '  <div>• <b>Névoa de Identidade (4 Graus) e Ritmo de Marcha:</b> ' + fg.identityFogMechanics + ' (CD ' + fg.saveDC + ' [' + fg.saveType + '])</div>' 
+          + '  <div style="font-size:7.5px;color:#c7d2fe;margin-top:1px;">• <b>Batedor e Iluminação:</b> ' + fg.pioneerMitigation + ' · <i>Vantagem Tática: ' + fg.rescueAndStabilization + '</i></div>' 
+          + '</div>';
+      })()
+    + (function(){
+        if (!window.CartShared || !CartShared.calcCampCamouflagedOutpostVisibilityStation) return '';
+        var bKey = (biome && biome.key) || 'plains';
+        var fg = CartShared.calcCampCamouflagedOutpostVisibilityStation(bKey, 'dakota_fire_hole_and_light_discipline_bivouac');
+        return '<div class="clp-stranger-identity-fog-bivouac-card" style="margin:4px 0 6px;text-align:left;background:rgba(12,14,32,0.82);padding:4px 8px;border-radius:4px;border:1px solid rgba(79,70,229,0.32);font-size:8px;color:#eef2ff;">' 
+          + '  <div style="font-size:8.5px;font-family:Cinzel,serif;font-weight:700;color:' + fg.color + ';margin-bottom:2px;">' + fg.icon + ' ' + fg.defenseTitle.toUpperCase() + ' (PHB p. 177, 182-183):</div>' 
+          + '  <div>• <b>Camuflagem e Disciplina de Fogo:</b> ' + fg.visibilityAndCampSafety + ' · <b>Vigia:</b> ' + fg.visibilityAndOutpostWatch + '</div>' 
+          + '  <div style="font-size:7.5px;color:#a5b4fc;margin-top:1px;">• <b>Segurança no Bivaque:</b> ' + fg.campRestAndSafetyGuards + '</div>' 
+          + '</div>';
+      })()
+    + (function(){
         if (!window.CartShared || !CartShared.resolveParleyTruthAndTelepathy) return '';
         var bKey = (biome && biome.key) || 'plains';
         var pt = CartShared.resolveParleyTruthAndTelepathy(bKey, 'rary_telepathic_bond_eight_allies_ritual');
