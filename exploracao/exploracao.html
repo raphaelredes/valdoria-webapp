@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T03:19:42Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-27T12:10:49Z - do not edit directly, edit source -->
 
 
 
@@ -43647,6 +43647,226 @@ const FIXED_MAPS = {
 
   },
 
+
+  // ============ MASMORRA: COVIL DO LOBO CINZENTO (wolf_den) =============
+  // Masmorra AAA Tier 1-2 (Bioma Floresta - Bosque dos Lobos)
+  // Grid hex 18 cols x 20 rows com tile types de caverna:
+  //   . = path (walkable, chao de terra batida e pedra umida)
+  //   # = wall (impassable, estalactites e rocha calcária)
+  //   o = open cavern (walkable, antecamara aberta com fogueira segura)
+  //   i = inner lair (walkable, covil profundo do Lobo Alfa)
+  //   E = edge/exit (entrada/saida unica ao sul)
+  wolf_den: {
+    id: 'wolf_den', region: 'valdoria', biome: 'dungeon', is_dungeon: true,
+    name: 'Covil do Lobo Cinzento',
+    cols: 18, rows: 20, seed: 99002, spawnCol: 9, spawnRow: 19,
+    music: 'dungeon', danger: 3,
+    boss: {
+      name: 'Lobo Alfa Cinzento', cr: 2, xp: 450, sugLvl: 2,
+      hp: 42, ac: 13, atk: 5,
+      multiAttack: 1,
+      hasBurstSkill: true,
+      hasResource: false
+    },
+    worldPos: { x: 0.25, y: 0.25 },
+    weather_pool: ['s'],
+    weights: { '.': 1 },
+    dungeon: true,
+    parentMap: 'wolf_woods',
+    gridTemplate: [
+      '##################',
+      '###iiiiiiiiiiii###',
+      '##iiiiiiiiiiiiii##',
+      '##iiiiiiiiiiiiii##',
+      '###iiii....iiii###',
+      '####..........####',
+      '###............###',
+      '##..............##',
+      '##...oooooooo...##',
+      '##..oooooooooo..##',
+      '##..oooooooooo..##',
+      '##..oooooooooo..##',
+      '##..oooooooooo..##',
+      '##...oooooooo...##',
+      '####..........####',
+      '#####...##...#####',
+      '######..##..######',
+      '#######.##.#######',
+      '########..########',
+      '########E#########'
+    ],
+    landmarks: [
+      { type: 'throne',    col: 9,  row: 2,  _hex: 'J3'  },
+      { type: 'bonepile',  col: 9,  row: 1,  _hex: 'J2'  },
+      { type: 'bonepile',  col: 7,  row: 2,  _hex: 'H3'  },
+      { type: 'bonepile',  col: 11, row: 2,  _hex: 'L3'  },
+      { type: 'bonepile',  col: 8,  row: 3,  _hex: 'I4'  },
+      { type: 'bonfire',   col: 9,  row: 11, _hex: 'J12' },
+      { type: 'armorpile', col: 13, row: 10, _hex: 'N11' },
+      { type: 'totem',     col: 5,  row: 10, _hex: 'F11' }
+    ],
+    atmosphereZones: [
+      { col: 9,  row: 2,  type: 'evil', radius: 4.5, _hex: 'J3'  },
+      { col: 9,  row: 11, type: 'warm', radius: 5.0, _hex: 'J12' },
+      { col: 13, row: 10, type: 'cold', radius: 3.0, _hex: 'N11' }
+    ],
+    restHex: { col: 9, row: 11, _hex: 'J12' },
+    dungeonEncounters: [
+      { id: 'wolf_den_campfire', col: 9, row: 11, _hex: 'J12',
+        repeatable: true,
+        title: 'Fogueira no Recôndito da Caverna',
+        text: 'Sob uma fenda natural no teto de pedra que escoa a fumaça para o exterior, uma fogueira crepita com calor seco. As cinzas afastam a umidade das paredes e os predadores evitam a luz alaranjada. Seus companheiros acomodam suas mochilas nas pedras planas e descansam os músculos tensos.',
+        flavor: 'Acampamento · J12 · Repouso',
+        category: 'discovery',
+        choices: [
+          { id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
+            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            outcome_ok: { _short_rest: true,
+              text: 'Você se senta junto às chamas crepitantes e recupera o fôlego. As feridas fecham sob o calor reconfortante.' } },
+          { id: 'long_rest', label: 'Descanso Longo (1× por masmorra)',
+            desc: 'HP/MP cheios + remove 1 nível de Exaustão. Apenas 1 vez nesta masmorra.',
+            outcome_ok: { _long_rest: true,
+              text: 'A comitiva organiza turnos de sentinela junto à fogueira e descansa as 8 horas inteiras. Todos acordam alertas e revigorados.' } },
+          { label: 'Harmonizar com os espíritos da floresta',
+            only_class: ['druida', 'patrulheiro'],
+            skill: 'wis', dc: 11,
+            desc: 'Sabedoria (Trato com Animais / Natureza) CD 11 — interpretar o eco dos uivos e o ar subterrâneo',
+            outcome_ok: { text: 'O eco dos uivos distantes revela a disposição da matilha nas câmaras superiores. Você antecipa os movimentos dos predadores.', xp: 25, _flag: 'wolf_pack_sensed' },
+            outcome_fail: { text: 'O vento nas galerias confunde seus ouvidos, mascarando o ritmo das feras.', xp: 5 } },
+          { label: 'Consagrar o refúgio com oração sagrada',
+            only_class: ['paladino', 'clerigo'],
+            desc: 'Bênção Divina D&D 5e — abençoar as cinzas com luz protetora',
+            outcome_ok: { text: 'Uma suave luminosidade dourada se espalha pelas pedras, afastando a aura selvagem e reconfortando o espírito do grupo.', hp_gain: 4, mp_gain: 2, xp: 20, _flag: 'cave_sanctified' } },
+          { id: 'leave_camp', label: 'Sair do Acampamento',
+            outcome_ok: { text: 'Você apaga as brasas em excesso e retoma a exploração das galerias profundas.' } }
+        ]
+      },
+      { id: 'wolf_trail_scouts', col: 9, row: 18, _hex: 'J19',
+        title: 'Batedores da Matilha',
+        text: 'O ar úmido carrega o odor forte de pelo molhado e ferro. À sua frente, em meio a saliências de pedra calcária, dois lobos cinzentos com olhos famintos rosnam baixo, deitados sobre ossadas secas. Eles bloqueiam o túnel que avança para as entranhas do covil.',
+        flavor: 'Encontro Tático · Batedores',
+        category: 'combat',
+        choices: [
+          { label: 'Disparar flecha sorrateira das sombras',
+            skill: 'dex', dc: 12,
+            desc: 'Destreza (Furtividade) CD 12 — emboscar os batedores antes que uivem',
+            outcome_ok: { text: 'Seu disparo atinge o flanco do sentinela sem alarde! SURPRESA — você ataca primeiro na batalha.',
+              xp: 25, dungeon_combat: { enemy: 'wolf', lookup_name: 'Lobo Cinzento', surprise: true, preCombatEffects: ['first_attack_adv'] } },
+            outcome_fail: { text: 'Uma pedra rola sob sua bota. Os lobos erguem as orelhas e saltam para o combate!',
+              xp: 5, dungeon_combat: { enemy: 'wolf', lookup_name: 'Lobo Cinzento', surprise: false } } },
+          { label: 'Intimidar com porte firme e arma empunhada',
+            skill: 'cha', dc: 12,
+            desc: 'Carisma (Intimidação) CD 12 — demonstrar domínio de predador para abalar a matilha',
+            outcome_ok: { text: 'Você bate a arma no escudo e avança com firmeza inabalável. Os lobos hesitam e recuam um passo, intimidados (SURPRESA)!',
+              xp: 25, dungeon_combat: { enemy: 'wolf', lookup_name: 'Lobo Cinzento', surprise: true } },
+            outcome_fail: { text: 'Os lobos respondem ao ruído com um rosnado feroz e saltam em sincronia.',
+              xp: 5, dungeon_combat: { enemy: 'wolf', lookup_name: 'Lobo Cinzento', surprise: false } } },
+          { label: 'Acalmar com gestos primitivos e comida (Trato com Animais)',
+            only_class: ['druida', 'patrulheiro'],
+            skill: 'wis', dc: 11,
+            desc: 'Sabedoria (Trato com Animais) CD 11 — oferecer carne seca e evitar o confronto',
+            outcome_ok: { text: 'Você estende um naco de carne e sussurra comandos firmes e calmos. Os lobos apanham o alimento e abrem caminho pacífico pelas sombras da rocha!',
+              xp: 40, _flag: 'wolf_scouts_befriended' },
+            outcome_fail: { text: 'A fome selvagem supera a cautela da fera. Eles avançam vorazes!',
+              xp: 5, dungeon_combat: { enemy: 'wolf', lookup_name: 'Lobo Cinzento', surprise: false } } }
+        ]
+      },
+      { id: 'wolf_den_trap', col: 9, row: 15, _hex: 'J16',
+        title: 'Fosso Camuflado de Ossos',
+        text: 'O piso calcário aqui parece enganosamente nivelado, coberto por uma camada tênue de folhas apodrecidas e poeira de terra. Logo abaixo, uma fissura profunda repleta de estacas afiadas de ossos de cervo aguarda o passo desavisado.',
+        flavor: 'Armadilha D&D 5e · Perigo Físico',
+        category: 'trap',
+        choices: [
+          { label: 'Sondar o solo com o cabo da lança (Percepção)',
+            skill: 'wis', dc: 12,
+            desc: 'Sabedoria (Percepção) CD 12 — identificar as fissuras frágeis e transpor o fosso pelas bordas firmes',
+            outcome_ok: { text: 'Você nota a madeira podre oculta sob as folhas e guia a comitiva rente à parede rochosa com total segurança.', xp: 30, _flag: 'pit_disarmed' },
+            outcome_fail: { text: 'O chão cede sob seus pés! Você escorrega no fosso e se fere nas estacas pontiagudas de osso.', xp: 5, hp_loss: 4 } },
+          { label: 'Saltar sobre a depressão com agilidade atlética',
+            skill: 'dex', dc: 11,
+            desc: 'Destreza (Acrobacia) CD 11 — transpor o vão num salto impulsivo e firme',
+            outcome_ok: { text: 'Você aterrissa com leveza na pedra maciça do outro lado, indicando aos aliados o ponto exato para saltar.', xp: 25, _flag: 'pit_cleared' },
+            outcome_fail: { text: 'A beirada esfarela na impulsão. Você arranha os joelhos e perde o equilíbrio na queda.', xp: 5, hp_loss: 3 } }
+        ]
+      },
+      { id: 'wolf_cervus_puzzle', col: 13, row: 10, _hex: 'N11',
+        title: 'A Caça da Matilha',
+        text: 'Em uma saliência úmida da caverna jaz a carcaça de um magnífico cervo branco da floresta. Entre a galhada imponente da criatura, brilha o reflexo metálico de um amuleto preso por correia de couro curtido, resquício de um guardião florestal de Valdoria que tombou na região.',
+        flavor: 'Descoberta · Ponto de Interesse',
+        category: 'mystery',
+        choices: [
+          { label: 'Investigar a galhada e retirar o medalhão com cuidado',
+            skill: 'int', dc: 11,
+            desc: 'Inteligência (Investigação) CD 11 — recuperar o artefato sem romper a liga de prata antiga',
+            outcome_ok: { text: 'Você liberta o amuleto intacto: o Medalhão da Ordem Florestal! Um símbolo de bravura que concede prestígio e valor.', xp: 35, gold: 35, _flag: 'forest_medallion_found' },
+            outcome_fail: { text: 'A correia rasga e uma ponta de osso corta sua mão, mas você consegue recuperar algumas moedas caídas na poça.', xp: 10, gold: 12, hp_loss: 1 } },
+          { label: 'Realizar rito de passagem para o espírito do animal',
+            only_class: ['druida', 'clerigo', 'patrulheiro'],
+            desc: 'Bênção Natural — honrar a presa e acalmar as energias inquietas da toca',
+            outcome_ok: { text: 'Você deposita musgo sobre a fronte do cervo e murmura preces de libertação. A aura fria da caverna se dissipa em paz espiritual.', hp_gain: 3, xp: 30, _flag: 'cervus_honored' } }
+        ]
+      },
+      { id: 'wolf_alpha_boss', col: 9, row: 3, _hex: 'J4',
+        title: 'O Covil do Lobo Alfa',
+        text: 'No coração mais amplo da caverna, sobre um promontório natural forrado de peles e ossadas antigas, repousa o Lobo Alfa Cinzento. Ao notar sua aproximação, a fera se ergue com calma predatória. Sua pelagem espessa traz cicatrizes profundas de dezenas de invernos e combates mortais. Ele não late nem rosna de forma precipitada — seus olhos âmbar avaliam sua postura com astúcia sanguinária antes de emitir um uivo grave que faz o teto de pedra vibrar.',
+        flavor: 'Chefe de Masmorra · Confronto Final',
+        category: 'boss',
+        choices: [
+          { label: 'Rugir e investir de peito aberto (Bárbaro/Guerreiro)',
+            only_class: ['barbaro', 'guerreiro'],
+            skill: 'str', dc: 13,
+            desc: 'Força (Atletismo / Rugido Marcial) CD 13 — desestabilizar o foco do predador com fúria implacável',
+            outcome_ok: { text: 'Seu grito de guerra ribomba nas pedras da caverna! O Alfa vacila surpreso diante de uma força que não recua — SURPRESA e Vantagem no 1º golpe!',
+              xp: 40, dungeon_combat: { enemy: 'wolf_alpha', lookup_name: 'Lobo Alfa Cinzento', surprise: true, preCombatEffects: ['first_attack_adv'] } },
+            outcome_fail: { text: 'O Alfa não se abala e salta com as mandíbulas abertas em contra-investida!',
+              xp: 8, dungeon_combat: { enemy: 'wolf_alpha', lookup_name: 'Lobo Alfa Cinzento', surprise: false } } },
+          { label: 'Mirar na pata dianteira cicatrizada (Ladino/Patrulheiro)',
+            only_class: ['ladino', 'patrulheiro'],
+            skill: 'wis', dc: 12,
+            desc: 'Sabedoria (Intuição / Ponto Cego) CD 12 — explorar uma fratura mal consolidada para desequilibrar o salto',
+            outcome_ok: { text: 'Você percebe o apoio hesitante da pata dianteira direita. Ao mirar ali, a fera perde o equilíbrio — CA -1 e Vantagem no 1º ataque!',
+              xp: 35, dungeon_combat: { enemy: 'wolf_alpha', lookup_name: 'Lobo Alfa Cinzento', surprise: true, preCombatEffects: ['boss_ac_debuff', 'first_attack_adv'] } },
+            outcome_fail: { text: 'O Alfa gira o corpo no ar com agilidade assombrosa, protegendo o flanco lesionado.',
+              xp: 8, dungeon_combat: { enemy: 'wolf_alpha', lookup_name: 'Lobo Alfa Cinzento', surprise: false } } },
+          { label: 'Projetar labaredas arcanas vivas (Arcano)',
+            only_class: ['mago', 'bruxo', 'feiticeiro'],
+            skill: 'int', dc: 12,
+            desc: 'Inteligência (Arcanismo) CD 12 — conjurar um arco de fogo que desperta o pavor instintivo de animais',
+            outcome_ok: { text: 'Você ergue as mãos e um clarão flamejante ilumina toda a câmara! O Alfa recua com os olhos ardendo, aterrorizado pelas chamas (SURPRESA e Mordida Feroz anulada na abertura)!',
+              xp: 45, dungeon_combat: { enemy: 'wolf_alpha', lookup_name: 'Lobo Alfa Cinzento', surprise: true, preCombatEffects: ['burst_disabled'] } },
+            outcome_fail: { text: 'O lobo ignora as fagulhas menores e avança por baixo da cortina de fumaça!',
+              xp: 8, dungeon_combat: { enemy: 'wolf_alpha', lookup_name: 'Lobo Alfa Cinzento', surprise: false } } },
+          { label: 'Brandir símbolo sagrado em condenação (Clérigo/Paladino)',
+            only_class: ['clerigo', 'paladino'],
+            skill: 'cha', dc: 12,
+            desc: 'Carisma (Intimidação Sagrada) CD 12 — irradiar luz divina para cegar temporariamente a fera na escuridão',
+            outcome_ok: { text: 'A luz pura de sua fé ofusca a visão sensível do predador. O Alfa rosna desnorteado — SURPRESA e Vantagem!',
+              xp: 40, dungeon_combat: { enemy: 'wolf_alpha', lookup_name: 'Lobo Alfa Cinzento', surprise: true, preCombatEffects: ['first_attack_adv'] } },
+            outcome_fail: { text: 'A fera fecha os olhos e se guia pelo olfato aguçado, saltando direto na sua direção.',
+              xp: 8, dungeon_combat: { enemy: 'wolf_alpha', lookup_name: 'Lobo Alfa Cinzento', surprise: false } } },
+          { label: 'Assumir guarda firme de combate e aguardar o bote',
+            skill: 'dex', dc: 13,
+            desc: 'Destreza (Acrobacia / Esquiva) CD 13 — aparar o bote do lobo e contra-atacar no contragolpe',
+            outcome_ok: { text: 'Você se esquiva no último segundo do salto e desfere um golpe limpo no flanco da criatura (SURPRESA)!',
+              xp: 30, dungeon_combat: { enemy: 'wolf_alpha', lookup_name: 'Lobo Alfa Cinzento', surprise: true } },
+            outcome_fail: { text: 'O peso da fera atinge seu peito em cheio. Você absorve o impacto com o escudo, mas o choque é violento.',
+              xp: 5, hp_loss: 4, dungeon_combat: { enemy: 'wolf_alpha', lookup_name: 'Lobo Alfa Cinzento', surprise: false } } }
+        ]
+      }
+    ],
+    ambient_tips: [
+      'O eco de uivos distantes ressoa pelas paredes úmidas de rocha.',
+      'Ossadas de caça e pegadas de garras recobrem a terra batida.',
+      'O vento traz o odor pungente de feras selvagens.',
+      'Frestas estreitas no teto de pedra revelam o céu da floresta.',
+      'Gotas d’água pingam ritmicamente das estalactites no teto.'
+    ],
+    dungeons: [],
+    edges: [
+      { col: 9, row: 19, targetMap: 'wolf_woods', label: 'Sair (Bosque dos Lobos)' }
+    ]
+  },
+
   bandit_fortress: {
 
     id: 'bandit_fortress', region: 'valdoria', biome: 'plains',
@@ -84854,34 +85074,28 @@ function triggerDungeonEntry(dg) {
 
   // Demais dungeons mantem placeholder "em dev" ate serem trabalhadas individualmente.
 
-  const isMvpReady = (dg.id === 'orc_chief_tent') && FIXED_MAPS[dg.id];
+  const isMvpReady = (dg.id === 'orc_chief_tent' || dg.id === 'wolf_den') && FIXED_MAPS[dg.id];
 
   if (isMvpReady) {
 
     document.getElementById('dungeon-title').textContent = dg.name;
 
+    var _badgeTitle = (dg.id === 'wolf_den') ? 'Covil Feral · Lobo Alfa Cinzento' : 'Acampamento Hostil · Brakthar, Quebrador de Cranios';
+    var _warningDesc = (dg.id === 'wolf_den')
+      ? 'Você vai entrar numa toca subterrânea de predadores. O Lobo Alfa aguarda nas profundezas. Sair só na entrada (sul) ou após derrotá-lo.'
+      : 'Você vai entrar num acampamento orc fortificado. Brakthar aguarda ao norte. Sair so na entrada (sul) ou apos derrota-lo.';
+
     document.getElementById('dungeon-desc').innerHTML =
-
       '<div style="text-align:center;line-height:1.65">' +
-
       '<p style="font-style:italic;margin: 0 0 var(--v-space-lg, 12px);color:var(--v-text, #d4c8b0)">' + dg.intro + '</p>' +
-
       '<div style="background:rgba(196,49,49,0.12);border:1px solid rgba(196,49,49,0.4);' +
-
            'padding: var(--v-space-md-lg, 10px) 14px;border-radius: var(--v-radius-sm, 6px);margin:14px 0;color:#d49595;' +
-
            'font-family:Cinzel,serif;font-size:calc(11px * var(--v-font-scale, 1));letter-spacing:1.5px;text-transform:uppercase;font-weight:700">' +
-
-        'Acampamento Hostil · Brakthar, Quebrador de Cranios' +
-
+        _badgeTitle +
       '</div>' +
-
       '<p style="font-size:calc(12px * var(--v-font-scale, 1));color:var(--v-text-dim, #a09484);margin:0">' +
-
-        'Você vai entrar num acampamento orc fortificado. Brakthar aguarda ao norte. Sair so na entrada (sul) ou apos derrota-lo.' +
-
+        _warningDesc +
       '</p>' +
-
       '</div>';
 
     document.getElementById('dungeon-enter').textContent = 'Adentrar';
