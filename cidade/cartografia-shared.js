@@ -3268,7 +3268,7 @@
   }
 
   // Constroi o canvas de nevoa S x S.
-  // knownArr = array de keys conhecidas; biomes = nos da carta; isProvince = booleano.
+  // knownArr = array de keys conhecidas; biomes = nos do mapa; isProvince = booleano.
   function _buildCartFog(S, knownArr, biomes, isProvince){
     if (typeof document === 'undefined' || !knownArr) return null;
     var lite = (typeof window !== 'undefined' && window._valdoriaPerformanceTier === 'lite');
@@ -3922,7 +3922,7 @@
     }
     ctx.stroke();
 
-    // 1.3 Anel Esmeralda para Áreas Mapeadas (Carta Regional de Corvus)
+    // 1.3 Anel Esmeralda para Áreas Mapeadas (Mapa Regional de Corvus)
     if (hasRegionalMap) {
       ctx.beginPath();
       ctx.arc(bx, by, radius + 3, 0, Math.PI * 2);
@@ -5250,10 +5250,10 @@
       factors.push('Trilha batida / estrada (-5 CD)');
     }
 
-    // Carta topográfica regional possuída
+    // Mapa topográfico regional possuído
     if (options.hasChartedMap) {
       mod -= 5;
-      factors.push('Carta regional cartografada (-5 CD)');
+      factors.push('Mapa regional cartografado (-5 CD)');
     }
 
     // Ritmo de marcha (PHB p. 182)
@@ -6088,7 +6088,7 @@
         role: 'cartographer',
         title: 'Mestre Cartógrafo',
         icon: '📜',
-        benefit: 'Registra cartas regionais; concede +2 em testes de navegação ao revisitar a rota.'
+        benefit: 'Registra mapas regionais; concede +2 em testes de navegação ao revisitar a rota.'
       });
     }
 
@@ -8486,7 +8486,7 @@
     }
 
     var mapChartBenefit = (count >= 3)
-      ? 'Redige carta topográfica com escala precisa; comitiva avança com vantagem em salvaguardas de navegação e corta 15% do tempo de marcha.'
+      ? 'Redige mapa topográfico com escala precisa; comitiva avança com vantagem em salvaguardas de navegação e corta 15% do tempo de marcha.'
       : ((count === 2)
         ? 'Traçado com vetor de rota confiável; bônus de +3 na orientação geográfica e -10% de desgaste na jornada.'
         : 'Esboço rústico; fornece referência elementar de direção com bônus modesto de +1.');
@@ -38985,7 +38985,7 @@
     var _activeProvId = 'world';
     var _provImgs = {};
     var _provLoaded = {};
-    // Preload das cartas regionais do Atlas de Províncias (persistem em cache e com multi-path fallback)
+    // Preload dos mapas regionais do Atlas de Províncias (persistem em cache e com multi-path fallback)
     (function(){
       var vHash = (typeof window !== 'undefined' && window.VBUNDLE_HASH) ? ('?v=' + window.VBUNDLE_HASH) : ('?v=' + Date.now());
       CART_PROVINCES.forEach(function(prov){
@@ -39211,7 +39211,7 @@
           }
         });
 
-        // 1. Fog of War na Província (cobre áreas ainda não exploradas salvo se possuir a carta regional)
+        // 1. Fog of War na Província (cobre áreas ainda não exploradas salvo se possuir o mapa regional)
         var provMapOwned = curProv.mapKey && ownedMaps && (ownedMaps.indexOf(curProv.mapKey) >= 0);
         if (known !== null && !provMapOwned) {
           var provFog = _ensureProvFog(_S, known, regNodes, _activeProvId);
@@ -39791,6 +39791,35 @@
       regionalPaths: []
     },
     {
+      id: 'city_valdoria',
+      name: 'Cidade de Valdoria',
+      icon: '🏰',
+      zoom: 1.0,
+      cx: 0.50,
+      cy: 0.50,
+      mapKey: null,
+      desc: 'Capital fortificada do reino, centro comercial e refúgio seguro para aventureiros.',
+      tier: 'Santuário · ND 0.5 (Teto 30 PV)',
+      terrain: 'Capital & Distritos Fortificados',
+      winds: 'Brisa Urbana',
+      hazard: 'Área Protegida pela Guarda da Cidade',
+      isCapital: true,
+      locKeys: ['city_gates', 'city_square', 'city_tavern', 'city_guild', 'city_temple'],
+      regionalCoords: {
+        city_gates: { rx: 0.50, ry: 0.84, name: 'Portões de Valdoria', marcos: 0 },
+        city_square: { rx: 0.50, ry: 0.50, name: 'Praça Central & Mercado', marcos: 0 },
+        city_tavern: { rx: 0.26, ry: 0.46, name: 'Taverna do Javali Bêbado', marcos: 0 },
+        city_guild: { rx: 0.74, ry: 0.48, name: 'Guilda dos Mercenários & Arena', marcos: 0 },
+        city_temple: { rx: 0.50, ry: 0.22, name: 'Templo da Luz Sagrada', marcos: 0 }
+      },
+      regionalPaths: [
+        ['city_gates', 'city_square'],
+        ['city_square', 'city_tavern'],
+        ['city_square', 'city_guild'],
+        ['city_square', 'city_temple']
+      ]
+    },
+    {
       id: 'plains',
       name: 'Planícies Centrais',
       icon: '🌾',
@@ -39803,16 +39832,14 @@
       terrain: 'Pradarias & Estradas Imperiais',
       winds: 'Vento de Pradaria (O · 18 km/h)',
       hazard: 'Bandidos de Estrada & Tempestades',
-      locKeys: ['plains', 'green_fields', 'orc_tribe', 'bandit_fortress', 'ashen_badlands'],
+      locKeys: ['green_fields', 'orc_tribe', 'bandit_fortress', 'ashen_badlands'],
       regionalCoords: {
-        plains: { rx: 0.50, ry: 0.50, name: 'Portões de Valdória', marcos: 0 },
         green_fields: { rx: 0.28, ry: 0.36, name: 'Campos Verdes', marcos: 1 },
         orc_tribe: { rx: 0.74, ry: 0.38, name: 'Acampamento Orc', marcos: 3 },
         bandit_fortress: { rx: 0.46, ry: 0.76, name: 'Forte dos Bandidos', marcos: 2 },
         ashen_badlands: { rx: 0.76, ry: 0.74, name: 'Terras Devastadas', marcos: 4 }
       },
       regionalPaths: [
-        ['plains', 'green_fields'],
         ['green_fields', 'orc_tribe'],
         ['green_fields', 'bandit_fortress'],
         ['bandit_fortress', 'ashen_badlands']
@@ -39993,7 +40020,8 @@
   ];
 
   var _LOCATION_TO_PROVINCE = {
-    plains: 'plains', green_fields: 'plains', orc_tribe: 'plains', bandit_fortress: 'plains', ashen_badlands: 'plains',
+    city_gates: 'city_valdoria', city_square: 'city_valdoria', city_tavern: 'city_valdoria', city_guild: 'city_valdoria', city_temple: 'city_valdoria',
+    plains: 'city_valdoria', green_fields: 'plains', orc_tribe: 'plains', bandit_fortress: 'plains', ashen_badlands: 'plains',
     forest: 'forest', goblin_nest: 'forest', elven_ruins: 'forest', elder_woods: 'forest',
     cave: 'mountain', underground_caverns: 'mountain', crystal_depths: 'mountain', mountain: 'mountain', troll_cave: 'mountain', dragon_pass: 'mountain', korthag: 'mountain', black_peaks: 'mountain',
     swamp: 'swamp', deep_swamp: 'swamp', graveyard: 'swamp', ancestral_graveyard: 'swamp', eldritch_mire: 'swamp',
@@ -40005,14 +40033,14 @@
 
   // Regra de Visibilidade de Províncias (Ordem do Usuário 2026-10):
   // Uma província regional só é revelada se o aventureiro tiver descoberto
-  // pelo menos 1 local pertencente a ela, ou possuir a carta geográfica regional.
+  // pelo menos 1 local pertencente a ela, ou possuir o mapa regional.
   function isProvinceDiscovered(provId, known, ownedMaps, playerLocKey) {
     if (!provId || provId === 'world') return true;
     var p = CART_PROVINCES.find(function(pr){ return pr.id === provId; });
     if (!p) return false;
     if (p.mapKey && ownedMaps && ownedMaps.indexOf(p.mapKey) >= 0) return true;
     var knownArr = known || [];
-    if (provId === 'plains') return true; // Hub de partida (Portões de Valdória)
+    if (provId === 'city_valdoria' || provId === 'plains') return true; // Hub de partida e capital (Portões de Valdória)
     if (!p.locKeys || !p.locKeys.length) return false;
     if (playerLocKey && (_LOCATION_TO_PROVINCE[playerLocKey] === provId || p.locKeys.indexOf(playerLocKey) >= 0)) return true;
     for (var i = 0; i < p.locKeys.length; i++) {
@@ -40106,12 +40134,196 @@
     };
   }
 
+
+  var REGIONS_DATA = {
+
+      // ── CIDADE CAPITAL (MAPA URBANO & SANTUÁRIO) ───────────────────
+      city_valdoria: {
+        id: 'city_valdoria',
+        name: 'Cidade de Valdoria (Capital)',
+        tag: '🏰 Cidade de Valdoria',
+        isCapital: true,
+        img: 'shared/img/map/provinces/city.webp',
+        altImg: '../valdoria-webapp/shared/img/map/provinces/city.webp',
+        fallbackBg: 'radial-gradient(circle, #382c1e 0%, #17120c 100%)',
+        dangerClass: 'badge-safe',
+        dangerText: 'Santuário · ND 0.5 (Teto 30 PV)',
+        days: 0,
+        narrative: 'Valdoria é a principal capital fortificada do continente e o refúgio mais seguro para aventureiros. Suas muralhas altas de granito e torres de vigia protegem quatro grandes áreas: a Praça Central com o mercado no coração da cidade, a Taverna ao sul, a Guilda de Mercenários e Arena a oeste e o Templo Sagrado a leste. Pelos Portões do Sul, os viajantes partem em direção aos ermos das planícies.',
+        intel: '💡 Mapa da Capital. Você pode circular à vontade pelos distritos para descansar, comprar equipamentos, pegar contratos e receber bênçãos sem risco de combate.',
+        nodes: [
+          { id: 'city_gates', name: 'Portões de Valdoria', ico: '🏰', x: 0.50, y: 0.84, maxCR: 0.5, maxHP: 30, desc: 'A colossal muralha de granito e os portões do sul vigiados pelo Capitão Aldric. Saída oficial da cidade rumo aos ermos e planícies.' },
+          { id: 'city_square', name: 'Praça Central & Mercado', ico: '🏛️', x: 0.50, y: 0.50, maxCR: 0.5, maxHP: 30, desc: 'O coração pulsante de Valdoria. Feira livre, fontes de pedra, comércio de provisões, poções e forja de armaduras.' },
+          { id: 'city_tavern', name: 'Taverna do Javali Bêbado', ico: '🍺', x: 0.35, y: 0.68, maxCR: 0.5, maxHP: 30, desc: 'A taverna mais movimentada da capital. Fogueira acolhedora, canecas de hidromel servidas por Gromm e descanso longo seguro em camas confortáveis.' },
+          { id: 'city_guild', name: 'Guilda dos Mercenários & Arena', ico: '⚔️', x: 0.28, y: 0.36, maxCR: 0.5, maxHP: 30, desc: 'Quartel da comandante Tavira. Contratos de caça a monstros, recrutamento de companheiros de equipe e arena de treinos.' },
+          { id: 'city_temple', name: 'Templo da Luz Sagrada', ico: '⛪', x: 0.72, y: 0.32, maxCR: 0.5, maxHP: 30, desc: 'Catedral consagrada de mármore branco. A sacerdotisa Elara oferece curas milagrosas, bênçãos divinas e remoção de maldições.' }
+        ]
+      },
+
+      // ── ERMOS DAS PLANÍCIES (FORA DA CIDADE) ──────────────────────
+      plains: {
+        id: 'plains',
+        name: 'Planícies Centrais (Ermos)',
+        tag: '🌾 Planícies',
+        img: 'shared/img/map/provinces/plains.webp',
+        altImg: '../valdoria-webapp/shared/img/map/provinces/plains.webp',
+        fallbackBg: 'radial-gradient(circle, #2d3e23 0%, #151e12 100%)',
+        dangerClass: 'badge-safe',
+        dangerText: 'ND máx 1.0 a 5.0 (Teto 160 PV)',
+        days: 1,
+        narrative: 'Campos abertos e colinas verdejantes que cercam a capital. É terra de pastores e caçadores, mas o perigo não dá trégua: saqueadores do Forte dos Bandidos e bandos de orcs atacam viajantes e caravanas descuidadas pela estrada principal.',
+        intel: '💡 Estrada aberta e fácil de seguir. A trilha tem boa visibilidade e postos de vigia abandonados pelo caminho.',
+        nodes: [
+          { id: 'green_fields', name: 'Campos Verdes', ico: '🌾', x: 0.30, y: 0.38, maxCR: 1.0, maxHP: 60, desc: 'Colinas verdejantes de pastoreio e caçadores locais. Trilha aberta com antigos postos de vigia.' },
+          { id: 'orc_tribe', name: 'Acampamento Orc', ico: '⛺', x: 0.72, y: 0.46, maxCR: 3.0, maxHP: 110, desc: 'Tendas de couro e tambores de guerra ao redor de grandes fogueiras acesas na estepe a leste.' },
+          { id: 'bandit_fortress', name: 'Forte dos Bandidos', ico: '🏚️', x: 0.50, y: 0.78, maxCR: 5.0, maxHP: 160, desc: 'Fortificação de madeira e pedra construída sobre as ruínas de uma antiga torre de vigia.' }
+        ]
+      },
+
+      // ── FLORESTA (NORTE) ──────────────────────────────────────────
+      forest: {
+        id: 'forest',
+        name: 'Província Silvestre (Norte)',
+        tag: '🌲 Floresta',
+        img: 'shared/img/map/provinces/forest.webp',
+        altImg: '../valdoria-webapp/shared/img/map/provinces/forest.webp',
+        fallbackBg: 'radial-gradient(circle, #1a381e 0%, #0c1c0e 100%)',
+        dangerClass: 'badge-mod',
+        dangerText: 'ND máx 2.0 a 4.0 (Teto 130 PV)',
+        days: 2,
+        narrative: 'Mata densa onde as copas dos carvalhos gigantes cobrem quase toda a luz do sol, deixando a trilha sempre na sombra. O chão é coberto por raízes grossas e musgo úmido. No interior da floresta, antigas ruínas élficas ainda guardam círculos de magia protegidos por feitiços do passado.',
+        intel: '💡 A Trilha dos Lenhadores está aberta. Leve tochas e itens de sobrevivência para não se perder na mata fechada (teste de Sobrevivência CD 12).',
+        nodes: [
+          { id: 'forest', name: 'Floresta dos Sussurros', ico: '🌲', x: 0.46, y: 0.44, maxCR: 2.0, maxHP: 85, desc: 'Bosque fechado onde sons misteriosos ecoam entre as copas das árvores gigantes.' },
+          { id: 'goblin_nest', name: 'Ninho de Goblins', ico: '🪵', x: 0.24, y: 0.30, maxCR: 2.0, maxHP: 75, desc: 'Clareira cheia de armadilhas improvisadas, tocas no chão e vigias escondidos nas copas.' },
+          { id: 'elven_ruins', name: 'Ruínas Élficas', ico: '🏛️', x: 0.55, y: 0.18, maxCR: 4.0, maxHP: 130, desc: 'Arcadas de mármore tomadas por hera mágica. Santuário seguro para descanso longo.' },
+          { id: 'elder_woods', name: 'Bosque Ancestral', ico: '🍃', x: 0.78, y: 0.34, maxCR: 5.0, maxHP: 150, desc: 'Árvores gigantescas carregadas de magia pura e muito antiga, anterior à fundação da capital.' }
+        ]
+      },
+
+      // ── MONTANHAS (OESTE) ─────────────────────────────────────────
+      mountain: {
+        id: 'mountain',
+        name: 'Cordilheira Ocidental (Oeste)',
+        tag: '🏔️ Montanhas',
+        img: 'shared/img/map/provinces/mountain.webp',
+        altImg: '../valdoria-webapp/shared/img/map/provinces/mountain.webp',
+        fallbackBg: 'radial-gradient(circle, #332b26 0%, #171310 100%)',
+        dangerClass: 'badge-high',
+        dangerText: 'ND máx 3.0 a 6.0 (Teto 160 PV)',
+        days: 3,
+        narrative: 'Montanhas rochosas de paredões íngremes onde o vento sopra gelado e impiedoso. As trilhas sobem à beira de abismos perigosos até a vila mineradora de Korthag, onde as forjas dos anões e ferreiros trabalham dia e noite.',
+        intel: '💡 Vento cortante e risco de pedras rolando na trilha. Avance com cuidado pelas passagens altas.',
+        nodes: [
+          { id: 'mountain', name: 'Picos de Pedra', ico: '🏔️', x: 0.34, y: 0.36, maxCR: 4.0, maxHP: 140, desc: 'Montanhas íngremes e vento gelado. Ninhos de harpias nas fendas rochosas do topo.' },
+          { id: 'korthag', name: 'Korthag (Vila Mineira)', ico: '⛏️', x: 0.18, y: 0.20, maxCR: 3.0, maxHP: 100, desc: 'Vila fortificada encravada na rocha. Forjas de ferro, comércio de armas resistentes e descanso seguro.' },
+          { id: 'dragon_pass', name: 'Passo do Dragão', ico: '🐉', x: 0.44, y: 0.14, maxCR: 7.0, maxHP: 220, desc: 'Passagem estreita entre picos vulcânicos, com fumaça sulfurosa subindo dos abismos.' },
+          { id: 'troll_cave', name: 'Caverna do Troll', ico: '👹', x: 0.70, y: 0.60, maxCR: 5.0, maxHP: 160, desc: 'Entrada escura na rocha viva com ossos enormes espalhados na entrada.' }
+        ]
+      },
+
+      // ── PÂNTANO (LESTE) ───────────────────────────────────────────
+      swamp: {
+        id: 'swamp',
+        name: 'Pântanos Nebulosos (Leste)',
+        tag: '🐍 Pântano',
+        img: 'shared/img/map/provinces/swamp.webp',
+        altImg: '../valdoria-webapp/shared/img/map/provinces/swamp.webp',
+        fallbackBg: 'radial-gradient(circle, #1f2d22 0%, #0d150e 100%)',
+        dangerClass: 'badge-mod',
+        dangerText: 'ND máx 3.0 a 5.0 (Teto 150 PV)',
+        days: 2,
+        narrative: 'Águas escuras e paradas cobertas por névoa espessa. A lama traiçoeira esconde buracos fundos que podem atolar cavalos e carroças com facilidade. Entre as árvores retorcidas, tumbas e mausoléus antigos jazem afundados no lodo.',
+        intel: '💡 Terreno pantanoso e difícil. O avanço é mais lento sem um guia que conheça os trechos firmes de pedra.',
+        nodes: [
+          { id: 'swamp', name: 'Pântano Nebuloso', ico: '🐍', x: 0.34, y: 0.42, maxCR: 3.0, maxHP: 120, desc: 'Caminhos alagados e névoa pesada. Lama funda que exige atenção constante a cada passo.' },
+          { id: 'deep_swamp', name: 'Pântano Profundo', ico: '🐊', x: 0.65, y: 0.35, maxCR: 5.0, maxHP: 170, desc: 'Águas escuras e raízes afiadas onde predadores anfíbios e répteis gigantes atacam de surpresa.' },
+          { id: 'graveyard', name: 'Cemitério Antigo', ico: '🪦', x: 0.50, y: 0.76, maxCR: 3.0, maxHP: 110, desc: 'Tumbas e mausoléus esquecidos tomados por musgo espesso e mortos-vivos inquietos.' }
+        ]
+      },
+
+      // ── COSTA (SUDESTE) ───────────────────────────────────────────
+      coast: {
+        id: 'coast',
+        name: 'Costa Salgada (Sudeste)',
+        tag: '🌊 Costa',
+        img: 'shared/img/map/provinces/coast.webp',
+        altImg: '../valdoria-webapp/shared/img/map/provinces/coast.webp',
+        fallbackBg: 'radial-gradient(circle, #1c2e3d 0%, #0e1720 100%)',
+        dangerClass: 'badge-mod',
+        dangerText: 'ND máx 3.0 a 4.0 (Teto 130 PV)',
+        days: 3,
+        narrative: 'Paredões de pedra batidos pela ressaca do mar e maresia forte. O litoral é repleto de praias rochosas e cavernas marinhas que escondem destroços de naufrágios e ninhos de criaturas aquáticas.',
+        intel: '💡 Ventos marítimos fortes. As cavernas só podem ser exploradas com segurança durante a maré baixa.',
+        nodes: [
+          { id: 'salty_coast', name: 'Costa Salgada', ico: '🌊', x: 0.48, y: 0.45, maxCR: 4.0, maxHP: 130, desc: 'Penhascos altos e praias de pedra batidas pelas ondas fortes do oceano.' }
+        ]
+      },
+
+      // ── DESERTO (SUL) ─────────────────────────────────────────────
+      desert: {
+        id: 'desert',
+        name: 'Deserto Dourado (Sul)',
+        tag: '🌵 Deserto',
+        img: 'shared/img/map/provinces/desert.webp',
+        altImg: '../valdoria-webapp/shared/img/map/provinces/desert.webp',
+        fallbackBg: 'radial-gradient(circle, #3d2f16 0%, #1c1508 100%)',
+        dangerClass: 'badge-high',
+        dangerText: 'ND máx 4.0 a 5.0 (Teto 150 PV)',
+        days: 3,
+        narrative: 'Vastas dunas de areia sob um sol escaldante, onde água limpa vale mais do que ouro. Tempestades de poeira cobrem desfiladeiros secos de terra vermelha, lar de escorpiões gigantes e bandidos do deserto.',
+        intel: '💡 Calor extremo. O grupo consome o dobro de água por dia de viagem.',
+        nodes: [
+          { id: 'desert', name: 'Deserto Dourado', ico: '🌵', x: 0.42, y: 0.50, maxCR: 4.0, maxHP: 130, desc: 'Dunas móveis de areia onde escorpiões gigantes e salteadores atacam viajantes desavisados.' },
+          { id: 'ashen_badlands', name: 'Terras Devastadas', ico: '🏜️', x: 0.70, y: 0.35, maxCR: 5.0, maxHP: 150, desc: 'Desfiladeiros profundos de terra vermelha onde a vegetação secou por completo.' }
+        ]
+      },
+
+      // ── ERMO GELADO (EXTREMO NORTE) ───────────────────────────────
+      snow: {
+        id: 'snow',
+        name: 'Ermo Congelado (Extremo Norte)',
+        tag: '❄️ Ermo Gelado',
+        img: 'shared/img/map/provinces/snow.webp',
+        altImg: '../valdoria-webapp/shared/img/map/provinces/snow.webp',
+        fallbackBg: 'radial-gradient(circle, #1a2836 0%, #0c141d 100%)',
+        dangerClass: 'badge-deadly',
+        dangerText: 'ND máx 5.0 a 8.0 (Teto 260 PV)',
+        days: 4,
+        narrative: 'Nevascas constantes castigam o caminho e o frio congelante reduz a velocidade de avanço. Mais ao norte, o Abismo Glacial se abre como uma fenda gigantesca de gelo azul, guardada por feras das neves.',
+        intel: '💡 Risco grave de congelamento e hipotermia. É essencial levar roupas reforçadas de pele e poções de aquecimento.',
+        nodes: [
+          { id: 'snow', name: 'Ermo Congelado', ico: '❄️', x: 0.50, y: 0.45, maxCR: 5.0, maxHP: 160, desc: 'Planície de neve fofa onde o vento gelado congela a respiração em poucos segundos.' },
+          { id: 'glacial_rift', name: 'Abismo Glacial', ico: '🧊', x: 0.70, y: 0.25, maxCR: 8.0, maxHP: 280, desc: 'Fenda colossal na geleira profunda, de onde ecoam rugidos de feras ancestrais do gelo.' }
+        ]
+      },
+
+      // ── CRATERA VULCÂNICA (EXTREMO LESTE) ─────────────────────────
+      volcanic: {
+        id: 'volcanic',
+        name: 'Cratera Vulcânica (Extremo Leste)',
+        tag: '🌋 Vulcão',
+        img: 'shared/img/map/provinces/volcanic.webp',
+        altImg: '../valdoria-webapp/shared/img/map/provinces/volcanic.webp',
+        fallbackBg: 'radial-gradient(circle, #3d1410 0%, #1a0604 100%)',
+        dangerClass: 'badge-deadly',
+        dangerText: 'ND máx 5.0 a 8.0 (Teto 260 PV)',
+        days: 4,
+        narrative: 'Rios de lava fervente e fumaça de enxofre cobrem a paisagem. O calor extremo derrete botas e estraga equipamentos desprotegidos. O posto fortificado de Valkrest vigia a borda da cratera e oferece abrigo seguro contra o magma.',
+        intel: '💡 Fumaça tóxica e poças de lava ativa. As passagens sobre a rocha vulcânica mudam a cada nova erupção.',
+        nodes: [
+          { id: 'valkrest', name: 'Valkrest (Acampamento)', ico: '🛡️', x: 0.35, y: 0.65, maxCR: 5.0, maxHP: 150, desc: 'Posto avançado com muralhas de rocha vulcânica e abrigo seguro para aventureiros.' },
+          { id: 'volcanic', name: 'Cratera Vulcânica', ico: '🌋', x: 0.62, y: 0.38, maxCR: 8.0, maxHP: 260, desc: 'Caldeira vulcânica ativa com cascatas de magma fervente e criaturas de fogo.' }
+        ]
+      }
+    };
+
   // === Export to global namespace ===
   window.CartShared = {
     INK_DARK: INK_DARK, INK_MED: INK_MED, INK_LIGHT: INK_LIGHT,
     INK_FAINT: INK_FAINT, PAPER_BG: PAPER_BG, PAPER_DARK: PAPER_DARK,
     SEA_INK: SEA_INK, SEA_FAINT: SEA_FAINT,
-    CART_BIOMES: CART_BIOMES, CART_PATHS: CART_PATHS, CART_PROVINCES: CART_PROVINCES, getLocationProvince: getLocationProvince, isProvinceDiscovered: isProvinceDiscovered, getDiscoveredProvinces: getDiscoveredProvinces,
+    CART_BIOMES: CART_BIOMES, CART_PATHS: CART_PATHS, CART_PROVINCES: CART_PROVINCES, REGIONS_DATA: REGIONS_DATA, getLocationProvince: getLocationProvince, isProvinceDiscovered: isProvinceDiscovered, getDiscoveredProvinces: getDiscoveredProvinces,
     _cartSeedRand: _cartSeedRand,
     _hatchArea: _hatchArea, _wavyLine: _wavyLine,
     _drawParchmentBase: _drawParchmentBase,

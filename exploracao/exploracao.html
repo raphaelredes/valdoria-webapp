@@ -94468,7 +94468,7 @@ function _openCartProvincePreviewPopup(prov) {
     + '<div class="clp-body clp-prov-preview" style="overflow-x:hidden !important;max-width:100%;box-sizing:border-box;">'
     + '  <div class="clp-icon" style="font-size:42px;margin:4px 0 8px;line-height:1;">' + (prov.icon || '🗺️') + '</div>'
     + '  <h2 class="clp-prov-title" style="margin:2px 0 4px;">' + prov.name + '</h2>'
-    + '  <div class="clp-prov-sub" style="margin-bottom:8px;">Carta Regional do Reino de Valdória</div>'
+    + '  <div class="clp-prov-sub" style="margin-bottom:8px;">Mapa Regional do Reino de Valdória</div>'
     + '  <p class="clp-prov-desc" style="margin:0 0 12px;padding:0 8px;">' + (prov.desc || 'Uma vasta região com seus próprios mistérios e perigos.') + '</p>'
     + '  <div class="clp-prov-stats" style="margin:0 0 12px;display:flex;justify-content:center;overflow-x:hidden !important;">'
     + '    <div class="clp-prov-stat-pill" style="display:inline-block;white-space:nowrap;">📍 ' + knownCount + ' / ' + locKeys.length + ' locais mapeados</div>'
@@ -95924,7 +95924,7 @@ function _openPointcrawlDungeonDelver(dgId) {
     +      chambersHtml
     + '  </div>'
     + '  <div style="padding:8px 12px;border-top:1px solid rgba(196,149,58,0.25);display:flex;justify-content:flex-end;background:rgba(10,7,5,0.9);">'
-    + '    <button type="button" id="pcd-exit-btn" style="background:rgba(40,30,20,0.9);border:1px solid rgba(196,149,58,0.5);color:#d2be90;font-family:Cinzel,serif;font-size:11.5px;padding:6px 14px;border-radius:4px;cursor:pointer;">Retornar à Carta Regional</button>'
+    + '    <button type="button" id="pcd-exit-btn" style="background:rgba(40,30,20,0.9);border:1px solid rgba(196,149,58,0.5);color:#d2be90;font-family:Cinzel,serif;font-size:11.5px;padding:6px 14px;border-radius:4px;cursor:pointer;">Retornar ao Mapa Regional</button>'
     + '  </div>'
     + '</div>';
 
@@ -98184,7 +98184,7 @@ function _xcartShowTooltip(b, mx, my){
     '<div style="font-size:11.5px;color:#e6d3a3;margin-top:2px;">📏 ~' + distMilhas + ' milhas (~' + marcos + ' marcos · ~' + horas + 'h a pé)</div>';
 
   var vm = (_xcartEngine && typeof _xcartEngine.getViewMode === 'function') ? _xcartEngine.getViewMode() : { mode: 'world' };
-  var hintText = (vm.mode === 'world') ? 'Duplo clique para Carta Regional' : 'Duplo clique para Iniciar Viagem';
+  var hintText = (vm.mode === 'world') ? 'Duplo clique para Mapa Regional' : 'Duplo clique para Iniciar Viagem';
 
   tip.innerHTML = '<div class="ctip-title">' + (b.ico || '📍') + ' ' + (b.regionalName || b.name) + '</div>'
                 + '<div class="ctip-meta">'
@@ -101720,7 +101720,7 @@ function _showExploreHelp() {
 
     + '<div class="em-section first">Como explorar</div>'
 
-    + tip('<b>Jornada Pointcrawl D&amp;D 5e:</b> toque em qualquer localidade ou marco na Carta Regional para inspecionar rotas, clima, perigos naturais e iniciar a marcha estratégica entre regiões.')
+    + tip('<b>Jornada Pointcrawl D&amp;D 5e:</b> toque em qualquer localidade ou marco no Mapa Regional para inspecionar rotas, clima, perigos naturais e iniciar a marcha estratégica entre regiões.')
     + tip('<b>Explorar Região Atual:</b> toque no pino onde a comitiva está (ou em <b>🧭 Explorar Local</b>) para investigar trilhas, adentrar masmorras, forragear suprimentos e montar bivaque.')
     + tip('<b>Ritmo e Papéis de Marcha:</b> escolha entre Cauteloso (18 mi/dia · permite Forragear), Normal (24 mi/dia) ou Rápido (30 mi/dia · −5 Percepção Passiva) e designe funções (Sentinela, Guia, Caçador, Escriba).')
 

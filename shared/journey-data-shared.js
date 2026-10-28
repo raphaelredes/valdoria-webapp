@@ -110,10 +110,11 @@ var HAZARDS = {
         { i: '💪', t: 'Empurrar pra desviar', stat: 'str', dc: 12,
           desc: 'Tentar redirecionar o galho com força bruta enquanto cai.',
           sNarr: 'Você crava os ombros no galho e o desvia — ele cai paralelo à trilha. Suor escorre, mas você está inteiro.',
-          fNarr: 'O galho é mais pesado do que parece — torce seu pulso e te empurra contra um tronco lateral.', dmg: 2,
+          fNarr: 'O galho é mais pesado do que parece — torce seu pulso e empurra você contra um tronco lateral.', dmg: 2,
           condition: { id: 'bruised', icon: '💥', label: 'Contusão Muscular (−1)', desc: 'Penalidade em testes físicos de Força e testes atléticos no mapa.' } },
         { i: '🛡', t: 'Guarda marcial com escudo', stat: 'str', dc: 10,
           requires_class: ['guerreiro', 'paladino', 'clerigo'],
+          requires_item: 'escudo',
           desc: 'Fincar a postura defensiva e aparar o impacto no rebordo de aço.',
           sNarr: 'Você crava as botas e ergue o escudo em ângulo oblíquo; a madeira podre se estilhaça em pedaços inofensivos contra o metal reforçado.',
           fNarr: 'O impacto quebra as fibras do escudo e choca com força o seu ombro.', dmg: 2 },
@@ -146,7 +147,7 @@ var HAZARDS = {
             mago: 'Você reconhece a frequência — magia antiga, persuasão sutil. Cancelar é trivial pra quem estuda os princípios.'
           },
           sNarr_by_alignment: {
-            lawful: 'Você ancora-se em código e dever. As vozes não têm âncora pra te puxar.',
+            lawful: 'Você ancora-se em código e dever. As vozes não têm âncora pra puxar você.',
             chaotic: 'Você ri das vozes em alta voz. O choque do som humano dispersa o feitiço.'
           },
           fNarr: 'Por um instante você reconhece a voz da sua mãe. Você para. Quando volta a si, sangue escorre do nariz e há horas que você não anda.', dmg: 3,
@@ -181,7 +182,7 @@ var HAZARDS = {
           sNarr: 'Você lê o desenho das raízes — as antigas suportam peso, as jovens cedem. Cruzando pelas mais grossas, sai limpo.',
           sNarr_by_class: {
             patrulheiro: 'Você lê o pântano como página aberta. Em segundos identifica a trilha de javali que cruza o atoleiro — pisa firme onde eles pisaram, sem afundar.',
-            druida: 'A floresta te diz onde pisar. As raízes da carvalho-mãe se firmam ligeiramente onde sua bota toca, oferecendo apoio.'
+            druida: 'A floresta indica onde pisar. As raízes da carvalho-mãe se firmam ligeiramente onde sua bota toca, oferecendo apoio.'
           },
           fNarr: 'Você afunda até as canelas. Vinte minutos de pânico depois, sai sujo, exausto, com algo se mexendo dentro da bota.', dmg: 2,
           condition: { id: 'exhaustion', icon: '⏳', label: 'Exausto (Fadiga Nv. 1)', desc: 'Exaustão Nível 1: Desvantagem em testes de atributo e perícias durante a exploração.' } },
@@ -196,6 +197,7 @@ var HAZARDS = {
           fNarr: 'Uma raiz fina quebra sob a pisada rápida e a lama espirra em suas vestes.', dmg: 1 },
         { i: '🤝', t: 'Apoio com corda de aliado', stat: 'str', dc: 10,
           requires_ally: true,
+          requires_item: 'corda',
           desc: 'Seu companheiro finca uma estaca ou segura uma corda firme da outra margem.',
           sNarr: 'Trabalhando em equipe com uma corda de escalada, vocês cruzam a depressão lodosa sem risco de afundar.',
           sNarr_by_ally: 'Trabalhando em equipe com uma corda de escalada, vocês cruzam a depressão lodosa sem risco de afundar.',
@@ -256,7 +258,7 @@ var HAZARDS = {
           fNarr: 'O vento o derruba; areia entra nos olhos e nas botas. Você perde tempo precioso esperando passar.', dmg: 2 },
         { i: '🗺', t: 'Buscar abrigo natural', stat: 'wis', dc: 12,
           desc: 'Procurar uma elevação ou pedra que sirva de quebra-vento.',
-          sNarr: 'Você reconhece a forma de uma rocha mãe a vinte metros e se abriga atrás dela. O vento passa por cima sem te tocar.',
+          sNarr: 'Você reconhece a forma de uma rocha mãe a vinte metros e se abriga atrás dela. O vento passa por cima sem tocar você.',
           fNarr: 'Não há abrigo. Você se agacha e espera, cuspindo areia.', dmg: 1 },
         { i: '🤝', t: 'Formação cerrada com aliados', stat: 'con', dc: 10,
           requires_ally: true,
@@ -287,6 +289,8 @@ var HAZARDS = {
       ],
       choices: [
         { i: '🗣', t: 'Negociar com palavras', stat: 'cha', dc: 13,
+          requires_gold: 1,
+          consume_gold: 1,
           desc: 'Reconhecer a humanidade deles, oferecer uma compensação digna.',
           sNarr: 'Você reconhece o brasão na armadura dele — um regimento que serviu na fronteira norte. Sua voz muda de tom: você fala como quem entende. Ele baixa a espada. Você paga uma moeda — chama de "donativo aos veteranos".',
           sNarr_by_class: {
@@ -431,14 +435,14 @@ var HAZARDS = {
     { title: 'Areia Movediça',
       script: [
         { type: 'narration', text: 'Seus pés afundam na lama sem aviso. Não é lama comum — sucção real, puxando pra baixo.' },
-        { type: 'narration', text: 'Cada movimento te puxa mais fundo. Você sente o joelho desaparecer.' }
+        { type: 'narration', text: 'Cada movimento puxa você mais fundo. Você sente o joelho afundar.' }
       ],
       choices: [
         { i: '🧠', t: 'Manter calma', stat: 'wis', dc: 12,
           desc: 'Movimentos lentos e deliberados. Não lutar contra a sucção.',
           sNarr: 'Você respira fundo, deita o peso pra trás, e se solta como uma planta saindo da terra. Lento. Contínuo. Vinte minutos depois, está livre.',
           sNarr_by_class: {
-            druida: 'A lama te conhece. Você sussurra à terra e ela amolece, te oferecendo apoio sólido pra subir.',
+            druida: 'A terra reconhece seus passos. Você sussurra ao solo e a lama cede, oferecendo apoio sólido pra subir.',
             monge: 'Você esvazia a mente. O corpo encontra o ritmo certo: tensionar, relaxar, deslizar. Sai limpo, focado.'
           },
           sNarr_by_subrace: {
@@ -579,7 +583,7 @@ var HAZARDS = {
           desc: 'Procurar a borda lateral do desabamento — fora da linha de queda.',
           sNarr: 'Você dispara em diagonal pra fora da linha de queda. A neve passa rugindo a três metros de você.',
           sNarr_by_subrace: {
-            wood: 'Seus reflexos élficos te lançam encosta abaixo em saltos leves, desviando com maestria da avalanche.'
+            wood: 'Seus reflexos élficos impulsionam seu corpo encosta abaixo em saltos leves, desviando com maestria da avalanche.'
           },
           fNarr: 'A força da neve o derruba e arrasta vinte metros. Você emerge de cabeça pra baixo, gelo nos cabelos.', dmg: 5 },
         { i: '🏔', t: 'Reconhecer a fenda de abrigo', stat: 'int', dc: 11,
@@ -592,13 +596,14 @@ var HAZARDS = {
           fNarr: 'A fenda é rasa demais e o turbilhão de gelo açoita suas costas.', dmg: 3 },
         { i: '🛡', t: 'Proteger-se em rocha', stat: 'con', dc: 12,
           desc: 'Encontrar uma rocha grande e ancorar-se nela.',
-          sNarr: 'Você se prensa contra uma rocha-mãe. A neve quebra ao redor mas não te leva. Cinco minutos enterrado, depois você cava pra fora.',
+          sNarr: 'Você se prensa contra uma rocha-mãe. A neve quebra ao redor mas não arrasta você. Cinco minutos enterrado, depois você cava pra fora.',
           sNarr_by_class: {
             barbaro: 'Você crava as mãos na pedra e aguenta o impacto gelado com músculos retesados, rugindo contra a neve.'
           },
           fNarr: 'Pedras vêm com a neve. Quebra de costela. Você sobrevive mas dói cada respiração.', dmg: 4 },
         { i: '🤝', t: 'Fixar âncora de corda com o grupo', stat: 'str', dc: 11,
           requires_ally: true,
+          requires_item: 'corda',
           desc: 'Você e seu aliado cravam apoios na rocha e ancoram o grupo com corda de escalada.',
           sNarr: 'Cravando os apoios de aço na rocha nua, vocês suportam a torrente de neve presos com segurança enquanto o turbilhão despenca no desfiladeiro.',
           sNarr_by_ally: 'Cravando os apoios de aço na rocha nua, vocês suportam a torrente de neve presos com segurança enquanto o turbilhão despenca no desfiladeiro.',
@@ -628,6 +633,7 @@ var HAZARDS = {
           fNarr: 'A borda de pedra esfarela sob seus dedos e você rala os joelhos ao se puxar.', dmg: 2 },
         { i: '🤝', t: 'Ponte de corda estendida com aliados', stat: 'str', dc: 10,
           requires_ally: true,
+          requires_item: 'corda',
           desc: 'Um aventureiro cruza com a ponta da corda e firma a ancoragem para o restante passar.',
           sNarr: 'Trabalhando em equipe com técnica militar de montanha, todos cruzam o abismo sustentados pela corda esticada.',
           sNarr_by_ally: 'Trabalhando em equipe com técnica militar de montanha, todos cruzam o abismo sustentados pela corda esticada.',
@@ -732,7 +738,7 @@ var HAZARDS = {
     { title: 'Espelhismo Mortal',
       script: [
         { type: 'narration', text: 'Você vê um oásis a noventa metros — palmeiras, água azul. Bonito demais.' },
-        { type: 'narration', text: 'Você sabe que pode ser miragem. Ou pode ser real e te salvar a vida.' }
+        { type: 'narration', text: 'Você sabe que pode ser miragem. Ou pode ser real e salvar sua vida.' }
       ],
       choices: [
         { i: '🧠', t: 'Verificar antes de seguir', stat: 'wis', dc: 12,
@@ -818,6 +824,7 @@ var HAZARDS = {
           fNarr: 'O vento gelado entorpece as pontas dos dedos e desacelera seu avanço.', dmg: 3 },
         { i: '🤝', t: 'Corda guia entre companheiros', stat: 'dex', dc: 10,
           requires_ally: true,
+          requires_item: 'corda',
           desc: 'Ligar os aventureiros com uma corda de escalada para impedir qualquer dispersão no nevoeiro branco.',
           sNarr: 'Atados com segurança, vocês marcham juntos em ritmo constante; ninguém se perde e o grupo supera a nevasca unido.',
           sNarr_by_ally: 'Atados com segurança, vocês marcham juntos em ritmo constante; ninguém se perde e o grupo supera a nevasca unido.',
@@ -851,10 +858,11 @@ var HAZARDS = {
         { i: '⛏', t: 'Prever a fratura da rocha', stat: 'int', dc: 10,
           requires_race: 'dwarf',
           desc: 'Conhecimento de pedra: identificar o ponto cego da queda.',
-          sNarr: 'Seus olhos acostumados à pedra profunda calculam o ângulo exato do impacto. Você recua um passo e a rocha se espatifa sem te tocar.',
+          sNarr: 'Seus olhos acostumados à pedra profunda calculam o ângulo exato do impacto. Você recua um passo e a rocha se espatifa sem tocar você.',
           fNarr: 'A rocha trinca em ângulo irregular e lascas cortam seu braço.', dmg: 2 },
         { i: '🛡', t: 'Aparar estilhaços com escudo', stat: 'str', dc: 11,
           requires_class: ['guerreiro', 'paladino', 'barbaro'],
+          requires_item: 'escudo',
           desc: 'Fincar a postura marcial e desviar as pontas de pedra com a chapa de metal.',
           sNarr: 'Você ergue o escudo firme; o bloco principal espatifa-se ao lado enquanto os fragmentos afiados ricocheteiam no aço.',
           fNarr: 'O impacto de uma lasca pesada amassa a borda do escudo e choca seu pulso.', dmg: 2 },
@@ -943,7 +951,7 @@ var HAZARDS = {
           },
           fNarr: 'As vozes das almas ecoam estridentes sobrepujando sua prece e conjurando espectros hostis!', dmg: 3 },
         { i: '🏃', t: 'Correr através', stat: 'dex', dc: 12, isFlee: true,
-          desc: 'Velocidade pura. Não dar tempo deles te tocarem.',
+          desc: 'Velocidade pura. Não dar tempo de eles alcançarem você.',
           sNarr: 'Você corre. Vinte segundos depois, está do outro lado, ofegante mas inteiro.',
           fNarr: 'Um toque gélido drena sua vitalidade enquanto você rompe o nevoeiro, mas você consegue ultrapassar as lápides amaldiçoadas.', dmg: 4 },
         { i: '⚔️', t: 'Banir os espectros pela lâmina', isCombat: true, enemyId: 'skeleton',
@@ -1074,7 +1082,7 @@ var HAZARDS_EXTRA = {
           desc: 'Camuflagem entre samambaias até o bando passar.',
           sNarr: 'Você se afunda nas samambaias. Quatro lobos cruzam a trilha em fila silenciosa, focados no rastro de sangue.',
           sNarr_by_class: {
-            patrulheiro: 'Você se torna parte da floresta — lobos passam a um metro sem te perceber. Você nota dois com pelagem prateada — bando incomum.',
+            patrulheiro: 'Você se torna parte da floresta — lobos passam a um metro sem notar você. Você nota dois com pelagem prateada — bando incomum.',
             druida: 'Você sussurra à floresta e ela te abriga. Os lobos sentem a ausência onde você está.'
           },
           fNarr: 'Um galho estala sob seu pé. O lobo da retaguarda desvia da caça, rosna feroz e avança com a matilha!', dmg: 4 },
@@ -1110,10 +1118,12 @@ var HAZARDS_EXTRA = {
           desc: 'Conversar honestamente, ouvir as histórias dele em troca da rota segura.',
           sNarr: 'Você senta com ele dez minutos. Ele conta como ficou cego — uma rixa antiga com uma bruxa local. No fim, descreve um atalho que economiza quase um marco e evita um ninho de aranhas.',
           sNarr_by_alignment: {
-            good: 'Você se conecta genuinamente. O velho sorri pela primeira vez em meses. "Tu tens coração limpo. Que a floresta te abrace."'
+            good: 'Você se conecta genuinamente. O velho sorri pela primeira vez em meses. "Você tem o coração limpo. Que a floresta acolha seus passos."'
           },
-          fNarr: 'Você é educado mas distante. Ele te indica o atalho mas avisa: "O caminho é teu, mas a floresta sente quem vem com pressa demais."', dmg: 0 },
+          fNarr: 'Você é educado mas distante. Ele te indica o atalho mas avisa: "O caminho é seu, mas a floresta sente quem vem com pressa demais."', dmg: 0 },
         { i: '🪙', t: 'Pagar uma moeda', stat: null,
+          requires_gold: 1,
+          consume_gold: 1,
           desc: 'Transação direta, sem meias palavras.',
           sNarr: 'Ele aceita a moeda com leve aceno. "Direita na primeira bifurcação após o carvalho rachado. Boa jornada." A trilha indicada corta quase um marco de mata fechada.',
           fNarr: '' },
@@ -1254,6 +1264,8 @@ var HAZARDS_EXTRA = {
       ],
       choices: [
         { i: '🔥', t: 'Queimar com tocha', stat: 'dex', dc: 11,
+          requires_item: 'tocha',
+          consume_item: 'tocha',
           desc: 'Acender uma tocha e queimar as teias rapidamente.',
           sNarr: 'O fogo crepita pelas teias e abre passagem. Você atravessa rápido enquanto aranhas caem chamuscadas no chão.',
           fNarr: 'A tocha solta faísca em folha seca. Você apaga antes de virar incêndio mas perde tempo precioso.', dmg: 2 },
@@ -1322,6 +1334,8 @@ var HAZARDS_EXTRA = {
       ],
       choices: [
         { i: '🪙', t: 'Dar uma moeda', stat: null,
+          requires_gold: 1,
+          consume_gold: 1,
           desc: 'Compaixão simples.',
           sNarr: 'Ele guarda a moeda e fecha os olhos. "Há um carrinho de mercador caído cinco minutos à frente. Maçãs derramadas. O dono pagou bem caro pelas maçãs — guarda alguma pra ele encontrar de volta. Boa jornada." Você cruza o local — ele estava certo.',
           fNarr: '' },
@@ -1331,6 +1345,8 @@ var HAZARDS_EXTRA = {
           fNarr: 'Ele cala-se assim que percebe sua intenção. Você sai sem nada além de constrangimento.', dmg: 0 },
         { i: '🍞', t: 'Partilhar provisões com aliados', stat: null,
           requires_ally: true,
+          requires_item: ['ração', 'comida', 'provisões', 'pão', 'queijo'],
+          consume_item: ['ração', 'comida', 'provisões', 'pão', 'queijo'],
           desc: 'Oferecer pão e queijo da ração compartilhada do grupo.',
           sNarr: 'Comovido com a generosidade da comitiva, o velho divide seu mapa rústico desenhado em couro: "Tomem a trilha das oliveiras, amigos. Evita o atoleiro do rio."',
           sNarr_by_ally: 'Comovido com a generosidade da comitiva, o velho divide seu mapa rústico desenhado em couro: "Tomem a trilha das oliveiras, amigos. Evita o atoleiro do rio."',
@@ -1578,17 +1594,21 @@ var HAZARDS_EXTRA = {
     { title: 'Cobra-Coral',
       script: [
         { type: 'narration', text: 'Listras vermelhas e amarelas se movem entre as raízes. Cobra-coral, um metro de comprimento. Letal.' },
-        { type: 'narration', text: 'Ela ainda não te viu — concentrada num lagarto à sua frente.' }
+        { type: 'narration', text: 'Ela ainda não viu você — concentrada num lagarto à sua frente.' }
       ],
       choices: [
         { i: '🤫', t: 'Passar em silêncio', stat: 'dex', dc: 13,
+          tag: 'FURTIVIDADE',
           desc: 'Movimentos lentos, sem som, ampla volta.',
           sNarr: 'Cada passo deliberado. A cobra continua focada no lagarto. Você passa sem ela jamais saber.',
           fNarr: 'Um galho range. Ela vira instantânea. Bote rápido. Sangue.', dmg: 5 },
         { i: '⚔', t: 'Matar à distância', stat: 'dex', dc: 14,
+          requires_item: ['adaga', 'faca', 'dagger'],
+          recovered_item: 'Adaga',
+          tag: 'ATAQUE À DISTÂNCIA',
           desc: 'Adaga arremessada — uma chance só.',
-          sNarr: 'A adaga voa pura. Cobra morta antes do bote. Você recolhe o veneno (uso futuro?) e prossegue.',
-          fNarr: 'A adaga desvia. A cobra ataca defensiva. Você se afasta antes de mais bote mas leva mordida no braço.', dmg: 6 },
+          sNarr: 'A adaga voa pura e certeira, cravando-se com precisão letal antes do bote. Você se aproxima, recolhe sua lâmina limpa entre as raízes e recolhe uma amostra de veneno antes de prosseguir.',
+          fNarr: 'A adaga desvia no folhiço úmido e alerta a serpente. Ela ataca defensiva com um bote rápido; você recua no susto e sofre uma mordida de raspão no braço, mas consegue recuperar sua lâmina caída antes de acelerar o passo.', dmg: 6 },
         { i: '🤝', t: 'Imobilização com vara em pinça por aliado', stat: 'dex', dc: 10,
           requires_ally: true,
           desc: 'Seu parceiro prende a cabeça do réptil com um galho bifurcado enquanto vocês passam.',
@@ -1597,6 +1617,7 @@ var HAZARDS_EXTRA = {
           fNarr: 'A serpente escapa da pinça de madeira e silva agressiva antes de sumir nas folhas.', dmg: 2,
           fNarr_by_ally: 'A serpente escapa da pinça de madeira e silva agressiva antes de sumir nas folhas.' },
         { i: '🌿', t: 'Tranquilizar a serpente', stat: 'wis', dc: 10,
+          tag: 'LIDAR COM ANIMAIS',
           requires_class: ['druida', 'patrulheiro'],
           desc: 'Compreender o comportamento do réptil e contornar sem acionar sua postura de ataque.',
           sNarr: 'Você lê os movimentos da cauda e respeita o território da cobra; ela captura sua presa e ignora sua passagem.',
@@ -1624,6 +1645,8 @@ var HAZARDS_EXTRA = {
           fNarr: 'Você se mexe demais. A carpa foge. Ele balança a cabeça, mas sem rancor: "Tudo bem. Segue em paz, jovem."', dmg: 0 },
         { i: '🤝', t: 'Oferecer isca ou anzol da mochila', stat: null,
           requires_ally: true,
+          requires_item: ['anzol', 'isca', 'ração', 'peixe', 'provisões'],
+          consume_item: ['anzol', 'isca', 'ração', 'peixe', 'provisões'],
           speech: '"Trago anzóis reforçados na bagagem. Pegue um de presente para sua pescaria."',
           desc: 'Seu parceiro tira uma isca e anzol da bolsa de viagem e oferece gentilmente ao veterano.',
           sNarr: 'O ancião aceita o anzol reforçado com um largo sorriso desdentado: "Que a comitiva de vocês tenha a bênção das águas calmas! Vão pelo banco de areia."',
@@ -1646,7 +1669,7 @@ var HAZARDS_EXTRA = {
   mountain: [
     { title: 'Águia Caída',
       script: [
-        { type: 'narration', text: 'Uma águia enorme está caída numa pedra, asa torcida. Não morta — só ferida. Ela te encara com olhos amarelos furiosos.' },
+        { type: 'narration', text: 'Uma águia enorme está caída numa pedra, asa torcida. Não morta — só ferida. Ela encara você com olhos amarelos furiosos.' },
         { type: 'narration', text: 'Você poderia ajudá-la ou apenas seguir. As duas opções têm consequências.' }
       ],
       choices: [
@@ -1675,6 +1698,8 @@ var HAZARDS_EXTRA = {
           fNarr: 'A magia fecha o ferimento superficial mas a asa ainda requer repouso.', dmg: 0 },
         { i: '🏹', t: 'Empatia de caçador da montanha', stat: 'wis', dc: 10,
           requires_class: ['patrulheiro', 'barbaro'],
+          requires_item: ['ração', 'carne', 'comida', 'provisões'],
+          consume_item: ['ração', 'carne', 'comida', 'provisões'],
           desc: 'Usar tiras de couro e carne de ração para tranquilizar a fera dos picos.',
           sNarr: 'A ave aceita a carne com calma e permite o curativo rápido; seu olhar firme agradece o socorro dos mortais.',
           fNarr: 'A ave rejeita a aproximação e agita as garras afiadas.', dmg: 1 }
@@ -2317,6 +2342,166 @@ var DEPARTURES = {
         };
     }
 
+    // Normalização léxica de itens de inventário e equipamentos (D&D 5e)
+    function _normItem(s) {
+        if (!s) return '';
+        var str = String(s).toLowerCase().trim();
+        if (typeof str.normalize === 'function') {
+            str = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
+        str = str.replace(/[-_(),.]/g, ' ');
+        var rawTokens = str.split(/\s+/);
+        var stopWords = { 'de': 1, 'da': 1, 'do': 1, 'das': 1, 'dos': 1, 'em': 1, 'com': 1, 'para': 1, '15m': 1 };
+        var tokens = [];
+        for (var i = 0; i < rawTokens.length; i++) {
+            var tok = rawTokens[i];
+            if (!tok || stopWords[tok]) continue;
+            // Stemming simples para plurais e desinências PT-BR
+            if (tok.length > 4 && tok.slice(-3) === 'oes') {
+                tok = tok.slice(0, -3) + 'ao';
+            } else if (tok.length > 3 && tok.slice(-1) === 's' && tok.slice(-2) !== 'ss') {
+                tok = tok.slice(0, -1);
+            }
+            tokens.push(tok);
+        }
+        return tokens.join(' ');
+    }
+
+    function _itemMatches(candidate, target) {
+        var c = _normItem(candidate);
+        var t = _normItem(target);
+        if (!c || !t) return false;
+        if (c === t || c.indexOf(t) >= 0 || t.indexOf(c) >= 0) return true;
+        var cTokens = c.split(' ');
+        var tTokens = t.split(' ');
+        for (var i = 0; i < tTokens.length; i++) {
+            for (var j = 0; j < cTokens.length; j++) {
+                if (tTokens[i] === cTokens[j]) return true;
+            }
+        }
+        return false;
+    }
+
+    // Verifica se o aventureiro ou a comitiva possui o item requisitado
+    function hasItem(player, itemReq) {
+        if (!itemReq) return true;
+        if (!player) return false;
+        var targets = Array.isArray(itemReq) ? itemReq : [itemReq];
+        var pool = [];
+
+        // 1. Inventário do próprio aventureiro (strings ou objetos)
+        var inv = player.inventory || [];
+        if (Array.isArray(inv)) {
+            for (var i = 0; i < inv.length; i++) {
+                var it = inv[i];
+                if (typeof it === 'string') pool.push(it);
+                else if (it && typeof it === 'object') {
+                    pool.push(it.name || it.i || it.item || it.id || '');
+                }
+            }
+        }
+
+        // 2. Equipamentos equipados (mãos, torso, etc.)
+        var eq = player.equipment || {};
+        if (typeof eq === 'object' && eq) {
+            for (var slot in eq) {
+                if (eq[slot] && typeof eq[slot] === 'string') pool.push(eq[slot]);
+            }
+        }
+        if (player.weapon) pool.push(player.weapon);
+        if (player.equipped_weapon) pool.push(player.equipped_weapon);
+        if (player.shield) pool.push(player.shield);
+        if (player.equipped_shield) pool.push(player.equipped_shield);
+
+        // 3. Poções (contador player.potions)
+        if (typeof player.potions === 'number' && player.potions > 0) {
+            pool.push('Poção de Cura');
+        }
+
+        // 4. Aliados da comitiva (posses compartilhadas em marcha)
+        var allies = player.allies || (player.party && player.party.members) || [];
+        if (Array.isArray(allies)) {
+            for (var a = 0; a < allies.length; a++) {
+                var al = allies[a];
+                if (al && al.inventory && Array.isArray(al.inventory)) {
+                    for (var ai = 0; ai < al.inventory.length; ai++) {
+                        var ait = al.inventory[ai];
+                        if (typeof ait === 'string') pool.push(ait);
+                        else if (ait && typeof ait === 'object') {
+                            pool.push(ait.name || ait.i || ait.item || ait.id || '');
+                        }
+                    }
+                }
+                if (al && al.equipment && typeof al.equipment === 'object') {
+                    for (var aslot in al.equipment) {
+                        if (al.equipment[aslot] && typeof al.equipment[aslot] === 'string') {
+                            pool.push(al.equipment[aslot]);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Matching de itens
+        for (var tIdx = 0; tIdx < targets.length; tIdx++) {
+            var target = targets[tIdx];
+            for (var pIdx = 0; pIdx < pool.length; pIdx++) {
+                if (_itemMatches(pool[pIdx], target)) return true;
+            }
+        }
+        return false;
+    }
+
+    // Consome atômico 1 unidade do item da mochila do aventureiro
+    function consumeItem(player, itemSpec) {
+        if (!itemSpec || !player) return null;
+        var targets = Array.isArray(itemSpec) ? itemSpec : [itemSpec];
+        var inv = player.inventory;
+        if (!Array.isArray(inv)) return null;
+
+        for (var tIdx = 0; tIdx < targets.length; tIdx++) {
+            var target = targets[tIdx];
+            for (var i = 0; i < inv.length; i++) {
+                var it = inv[i];
+                var name = typeof it === 'string' ? it : (it && (it.name || it.i || it.item || it.id || ''));
+                if (_itemMatches(name, target)) {
+                    var consumedName = name;
+                    if (typeof it === 'string') {
+                        inv.splice(i, 1);
+                    } else if (it && typeof it === 'object') {
+                        var qty = parseInt(it.q || it.qty || it.count || 1, 10);
+                        if (qty > 1) {
+                            if (it.q != null) it.q = qty - 1;
+                            if (it.qty != null) it.qty = qty - 1;
+                            if (it.count != null) it.count = qty - 1;
+                        } else {
+                            inv.splice(i, 1);
+                        }
+                    }
+                    return consumedName;
+                }
+            }
+        }
+        return null;
+    }
+
+    function hasGold(player, amount) {
+        var req = parseInt(amount, 10) || 0;
+        if (req <= 0) return true;
+        if (!player) return false;
+        var curGold = parseInt(player.gold, 10) || 0;
+        return curGold >= req;
+    }
+
+    function consumeGold(player, amount) {
+        var num = parseInt(amount, 10) || 0;
+        if (num <= 0 || !player) return 0;
+        var cur = parseInt(player.gold, 10) || 0;
+        var deducted = Math.min(cur, num);
+        player.gold = Math.max(0, cur - deducted);
+        return deducted;
+    }
+
     function canTakeChoice(player, choice) {
         if (!choice) return false;
         var t = _traits(player);
@@ -2336,6 +2521,12 @@ var DEPARTURES = {
         // Requer presença de aliados no grupo
         if (choice.requires_ally === true && !t.hasAllies) return false;
         if (choice.only_solo === true && t.hasAllies) return false;
+
+        // Requer posse de item específico na mochila/equipamento (Ordem do Usuário 2026-10)
+        if (choice.requires_item && !hasItem(player, choice.requires_item)) return false;
+
+        // Requer quantidade mínima de ouro
+        if (choice.requires_gold && !hasGold(player, choice.requires_gold)) return false;
 
         // Requer classe específica de um aliado
         if (choice.requires_ally_class && !_match(choice.requires_ally_class, t.allyClasses)) return false;
@@ -2525,13 +2716,15 @@ var DEPARTURES = {
                     else if (cDesc.indexOf('amea') >= 0 || cDesc.indexOf('intimid') >= 0 || cDesc.indexOf('força') >= 0 || sKey === 'intimidation') resolvedTag = 'INTIMIDAÇÃO';
                     else resolvedTag = 'PERSUASÃO';
                 } else if (sKey === 'dex' || sKey === 'dexterity' || sKey === 'stealth' || sKey === 'sleight_of_hand' || sKey === 'acrobatics') {
-                    if (cDesc.indexOf('furtiv') >= 0 || cDesc.indexOf('sombra') >= 0 || cDesc.indexOf('escond') >= 0 || cDesc.indexOf('contorn') >= 0 || sKey === 'stealth') resolvedTag = 'FURTIVIDADE';
+                    if (cDesc.indexOf('furtiv') >= 0 || cDesc.indexOf('sombra') >= 0 || cDesc.indexOf('escond') >= 0 || cDesc.indexOf('silêncio') >= 0 || cDesc.indexOf('silencio') >= 0 || cDesc.indexOf('contorn') >= 0 || sKey === 'stealth') resolvedTag = 'FURTIVIDADE';
+                    else if (cDesc.indexOf('adaga') >= 0 || cDesc.indexOf('arremess') >= 0 || cDesc.indexOf('disparo') >= 0 || cDesc.indexOf('flecha') >= 0 || cDesc.indexOf('distância') >= 0 || cDesc.indexOf('distancia') >= 0) resolvedTag = 'ATAQUE À DISTÂNCIA';
                     else if (cDesc.indexOf('corda') >= 0 || cDesc.indexOf('gatilho') >= 0 || cDesc.indexOf('armadilha') >= 0 || cDesc.indexOf('destrav') >= 0 || cDesc.indexOf('desarm') >= 0 || sKey === 'sleight_of_hand') resolvedTag = 'LADINAGEM';
                     else resolvedTag = 'ACROBACIA';
                 } else if (sKey === 'str' || sKey === 'strength' || sKey === 'athletics') {
                     resolvedTag = 'ATLETISMO';
-                } else if (sKey === 'wis' || sKey === 'wisdom' || sKey === 'perception' || sKey === 'survival' || sKey === 'insight') {
-                    if (cDesc.indexOf('olhar') >= 0 || cDesc.indexOf('notar') >= 0 || cDesc.indexOf('perceb') >= 0 || cDesc.indexOf('vigia') >= 0 || cDesc.indexOf('estud') >= 0 || sKey === 'perception') resolvedTag = 'PERCEPÇÃO';
+                } else if (sKey === 'wis' || sKey === 'wisdom' || sKey === 'perception' || sKey === 'survival' || sKey === 'insight' || sKey === 'animal_handling') {
+                    if (cDesc.indexOf('serpente') >= 0 || cDesc.indexOf('animal') >= 0 || cDesc.indexOf('fera') >= 0 || cDesc.indexOf('lobo') >= 0 || cDesc.indexOf('réptil') >= 0 || cDesc.indexOf('reptil') >= 0 || cDesc.indexOf('tranquiliz') >= 0 || sKey === 'animal_handling') resolvedTag = 'LIDAR COM ANIMAIS';
+                    else if (cDesc.indexOf('olhar') >= 0 || cDesc.indexOf('notar') >= 0 || cDesc.indexOf('perceb') >= 0 || cDesc.indexOf('vigia') >= 0 || cDesc.indexOf('estud') >= 0 || sKey === 'perception') resolvedTag = 'PERCEPÇÃO';
                     else if (cDesc.indexOf('trilha') >= 0 || cDesc.indexOf('sobreviv') >= 0 || cDesc.indexOf('rastro') >= 0 || cDesc.indexOf('clima') >= 0 || sKey === 'survival') resolvedTag = 'SOBREVIVÊNCIA';
                     else resolvedTag = 'INTUIÇÃO';
                 } else if (sKey === 'int' || sKey === 'intelligence' || sKey === 'arcana' || sKey === 'investigation' || sKey === 'history') {
@@ -3020,7 +3213,11 @@ var DEPARTURES = {
         pickChoiceVoice: pickChoiceVoice,
         detectWeather: detectWeather,
         isParty: _isParty,
-        adaptPartyNarrative: _adaptPartyNarrative
+        adaptPartyNarrative: _adaptPartyNarrative,
+        hasItem: hasItem,
+        consumeItem: consumeItem,
+        hasGold: hasGold,
+        consumeGold: consumeGold
     };
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = global.JourneyData;

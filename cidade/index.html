@@ -9120,6 +9120,648 @@ body.perf-lite .vc-action-btn { transition: none; }
       transform: translateY(-1px);
     }
     
+
+    /* === CIDADE & CONTINENTAL ROADWARDEN UI === */
+
+    /* =====================================================================
+       CIDADE & CONTINENTAL ROADWARDEN UI (TELEGRAM DESKTOP 390px CANONICAL)
+       Regras Soberanas: Piso >= 11px, Banimento Permanente do Termo Proibido, Zero Carta como Mapa, Mobile-First
+       ===================================================================== */
+    
+    /* ── Switcher de Visualização no Hub da Cidade ── */
+    .hub-city-view-bar {
+      display: flex;
+      gap: 6px;
+      margin: 6px 0 8px;
+      padding: 0 4px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .hub-city-view-btn {
+      flex: 1;
+      background: #18120d;
+      border: 1px solid rgba(196, 149, 58, 0.3);
+      color: #a09484;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: 'Cinzel', serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      touch-action: manipulation;
+    }
+    .hub-city-view-btn.active {
+      background: linear-gradient(180deg, #302214 0%, #1c140c 100%);
+      border-color: #c4953a;
+      color: #ffd685;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    /* ── Container do Mapa Ilustrado da Cidade no Hub ── */
+    .hub-city-map-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+    }
+    .hub-city-map-frame {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      max-height: 380px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1.5px solid rgba(196, 149, 58, 0.45);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+      background: #100d0a;
+    }
+    .hub-city-map-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .hub-city-pins-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .hub-city-pin {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      pointer-events: auto;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.15s ease;
+      touch-action: manipulation;
+      z-index: 10;
+    }
+    .hub-city-pin.active {
+      transform: translate(-50%, -50%) scale(1.12);
+      z-index: 20;
+    }
+    .hub-city-pin-marker {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(24, 18, 12, 0.94);
+      border: 2px solid #c4953a;
+      color: #ffd685;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    }
+    .hub-city-pin.active .hub-city-pin-marker {
+      border-color: #ffd685;
+      background: #3d2a14;
+      box-shadow: 0 0 12px rgba(255, 214, 133, 0.7);
+    }
+    .hub-city-pin-lbl {
+      background: rgba(14, 10, 8, 0.92);
+      border: 1px solid rgba(196, 149, 58, 0.4);
+      color: #f5eedf;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 3px;
+      white-space: nowrap;
+      pointer-events: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+    }
+    .hub-city-landmark-drawer {
+      background: linear-gradient(180deg, #221a13 0%, #16100b 100%);
+      border: 1px solid rgba(196, 149, 58, 0.35);
+      border-radius: 7px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      box-sizing: border-box;
+    }
+    .hcl-drawer-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .hcl-drawer-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffd685;
+      font-family: 'Cinzel', serif;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .hcl-drawer-desc {
+      font-size: 11.5px;
+      color: #a09484;
+      margin-top: 2px;
+      line-height: 1.35;
+    }
+    .hcl-drawer-btn {
+      background: linear-gradient(180deg, #3d2c16 0%, #251a0d 100%);
+      border: 1.5px solid #c4953a;
+      color: #ffd685;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: 'Cinzel', serif;
+      padding: 7px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      touch-action: manipulation;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+    .hcl-drawer-btn:active {
+      transform: scale(0.97);
+    }
+
+    /* ── LEVEL 1: GUIA CONTINENTAL OBJETIVO (CARTOGRAFIA) ── */
+    .cart-continental-guide {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      padding: 8px 10px;
+      box-sizing: border-box;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: #0d0a07;
+    }
+    .capital-city-card {
+      background: linear-gradient(180deg, #2a2016 0%, #1c150e 100%);
+      border: 1.5px solid #c4953a;
+      border-radius: 7px;
+      padding: 8px 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.18s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      touch-action: manipulation;
+    }
+    .capital-city-card.active, .capital-city-card:active {
+      border-color: #ffd685;
+      box-shadow: 0 0 10px rgba(196, 149, 58, 0.45);
+    }
+    .capital-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .capital-name {
+      font-family: 'Cinzel', serif;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #f5eedf;
+    }
+    .capital-tag {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(56, 142, 60, 0.22);
+      border: 1px solid rgba(56, 142, 60, 0.5);
+      color: #81c784;
+      padding: 2px 7px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #a09484;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+      font-family: 'Cinzel', serif;
+    }
+    .province-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+    }
+    .prov-btn {
+      background: #1a130e;
+      border: 1px solid rgba(196, 149, 58, 0.22);
+      color: #a09484;
+      padding: 7px 8px;
+      border-radius: 5px;
+      font-size: 12px;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      transition: all 0.15s ease;
+      touch-action: manipulation;
+    }
+    .prov-btn.active, .prov-btn:active {
+      background: #2b1f14;
+      border-color: #c4953a;
+      color: #ffd685;
+      box-shadow: 0 0 6px rgba(196, 149, 58, 0.35);
+    }
+    .prov-btn-left {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .prov-tier-tag {
+      font-size: 11px;
+      font-weight: 700;
+      opacity: 0.85;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(196, 149, 58, 0.2);
+    }
+    .region-summary-card {
+      background: #18120d;
+      border: 1px solid rgba(196, 149, 58, 0.32);
+      border-radius: 7px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 2px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+    }
+    .summary-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+    .summary-region-name {
+      font-family: 'Cinzel', serif;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #ffd685;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .summary-danger-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .badge-safe {
+      background: rgba(56, 142, 60, 0.2);
+      border: 1px solid rgba(56, 142, 60, 0.5);
+      color: #81c784;
+    }
+    .badge-mod {
+      background: rgba(196, 149, 58, 0.2);
+      border: 1px solid rgba(196, 149, 58, 0.5);
+      color: #f5cf7a;
+    }
+    .badge-high {
+      background: rgba(220, 100, 30, 0.22);
+      border: 1px solid rgba(220, 100, 30, 0.5);
+      color: #ff9e66;
+    }
+    .badge-deadly {
+      background: rgba(166, 50, 50, 0.25);
+      border: 1px solid rgba(166, 50, 50, 0.5);
+      color: #ef9a9a;
+    }
+    .march-specs-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 5px;
+      padding: 4px 8px;
+      font-size: 11.5px;
+      color: #ded5c7;
+    }
+    .btn-read-intel {
+      background: rgba(196, 149, 58, 0.16);
+      border: 1px solid rgba(196, 149, 58, 0.4);
+      color: #ffd685;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 7px;
+      border-radius: 4px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .destinations-box {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      max-height: 120px;
+      overflow-y: auto;
+      padding: 1px 0;
+    }
+    .dest-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 6px;
+      background: rgba(24, 18, 14, 0.7);
+      border: 1px solid rgba(196, 149, 58, 0.15);
+      border-radius: 4px;
+      font-size: 11.5px;
+    }
+    .dest-name-left {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #ded5c7;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .dest-danger-tier {
+      font-size: 11px;
+      color: #a09484;
+      white-space: nowrap;
+    }
+    .btn-march-action {
+      background: linear-gradient(180deg, #3d2a17 0%, #20150b 100%);
+      border: 1.5px solid #c4953a;
+      color: #ffd685;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+      touch-action: manipulation;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 2px;
+    }
+    .btn-march-action:active {
+      transform: scale(0.98);
+    }
+
+    /* ── LEVEL 2: MAPA REGIONAL DEDICADO ── */
+    .cart-regional-view {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      background: #000;
+      overflow: hidden;
+    }
+    .regional-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 10px;
+      background: rgba(18, 14, 10, 0.95);
+      border-bottom: 1px solid rgba(196, 149, 58, 0.28);
+      z-index: 20;
+    }
+    .btn-back-macro {
+      background: rgba(30, 22, 14, 0.9);
+      border: 1px solid rgba(196, 149, 58, 0.4);
+      color: #ffd685;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 9px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      touch-action: manipulation;
+    }
+    .badge-card-name {
+      font-family: 'Cinzel', serif;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #f5eedf;
+    }
+    .province-map-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #080604;
+    }
+    .province-art-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .prov-pins-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .map-pin-target {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      pointer-events: auto;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.15s ease;
+      touch-action: manipulation;
+      z-index: 10;
+    }
+    .map-pin-target.active {
+      transform: translate(-50%, -50%) scale(1.15);
+      z-index: 20;
+    }
+    .pin-icon-bubble {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(26, 18, 12, 0.92);
+      border: 2px solid #c4953a;
+      color: #ffd685;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    }
+    .map-pin-target.active .pin-icon-bubble {
+      border-color: #ffd685;
+      background: #3d2a14;
+      box-shadow: 0 0 12px rgba(255, 214, 133, 0.7);
+    }
+    .pin-label-pill {
+      background: rgba(12, 9, 7, 0.9);
+      border: 1px solid rgba(196, 149, 58, 0.35);
+      color: #f5eedf;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 3px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    .regional-action-drawer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(180deg, #201812 0%, #130f0c 100%);
+      border-top: 1.5px solid rgba(196, 149, 58, 0.4);
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 25;
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.75);
+    }
+    .drawer-header-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .drawer-title-bold {
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffd685;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .drawer-actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+    }
+    .btn-cmd {
+      padding: 7px 6px;
+      border-radius: 5px;
+      font-family: 'Cinzel', serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+    .btn-cmd-primary {
+      background: linear-gradient(180deg, #3d2a17 0%, #22170d 100%);
+      border: 1px solid #c4953a;
+      color: #ffd685;
+    }
+    .btn-cmd-secondary {
+      background: #1b140f;
+      border: 1px solid rgba(196, 149, 58, 0.28);
+      color: #ded5c7;
+    }
+    .btn-cmd:active {
+      transform: scale(0.97);
+    }
+
+    /* ── MODAL DE DETALHES SOB DEMANDA ── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 14px;
+      box-sizing: border-box;
+    }
+    .modal-box {
+      background: linear-gradient(180deg, #221912 0%, #15100c 100%);
+      border: 1.5px solid #c4953a;
+      border-radius: 8px;
+      padding: 14px;
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9);
+      box-sizing: border-box;
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(196, 149, 58, 0.3);
+      padding-bottom: 6px;
+    }
+    .modal-title {
+      font-family: 'Cinzel', serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffd685;
+    }
+    .modal-body-text {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: #ded5c7;
+    }
+    .modal-meta-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(196, 149, 58, 0.22);
+      border-radius: 5px;
+      padding: 6px 8px;
+      font-size: 11.5px;
+      color: #a09484;
+      line-height: 1.45;
+    }
+    .modal-close-btn {
+      background: #2a1f15;
+      border: 1px solid #c4953a;
+      color: #ffd685;
+      padding: 7px 12px;
+      border-radius: 5px;
+      font-family: 'Cinzel', serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      align-self: flex-end;
+      touch-action: manipulation;
+    }
+
 </style>
 </head>
 <body>
@@ -15514,6 +16156,9 @@ function _renderSectorTabs(rootEl){
 
   var tabs = document.createElement('div');
   tabs.className = 'city-sector-tabs';
+  if (window._hubCityViewPref !== 'districts') {
+    tabs.style.display = 'none';
+  }
   CITY_SECTOR_ORDER.forEach(function(sid){
     var sec = CITY_SECTORS[sid];
     var btn = document.createElement('button');
@@ -70008,39 +70653,118 @@ function renderCartographyCanvas(el){
     + '    <button class="cart-dock-btn" id="cart-waypoints-btn" type="button" title="Rede de Marcos e Santuários [W]" aria-label="Marcos de Viagem e Santuários">🌀 Marcos</button>'
     + '    <button class="cart-dock-btn" id="cart-filter-toggle-btn" type="button" title="Alternar Filtro de Nós no Mapa [Teclas 1 a 6]">🎯 Todos</button>'
     + '    <button class="cart-dock-btn" id="cart-ruler-btn" type="button" title="Régua Cartográfica / Astrolábio de Medição [X]" aria-label="Régua Cartográfica e Distâncias">📏 Régua</button>'
-    + '    <button class="cart-dock-btn" id="cart-layers-btn" type="button" title="Alternar Camadas Táticas do Mapa [L]" aria-label="Camadas do Mapa">🗺️ Camadas</button>'
-    + '    <button class="cart-dock-btn" id="cart-guide-btn" type="button" title="Guia do Andarilho e Regras de Viagem D&D 5e [H]" aria-label="Guia de Viagem D&D 5e">📖 Guia</button>'
     + '    <button class="cart-dock-btn accent" id="cart-atlas-back-btn" type="button" title="Voltar ao Continente [Backspace]" style="display:none;" aria-label="Voltar ao Continente">🌍 Continente</button>'
     + '  </div>'
-    + '  <!-- cart-hotkey-strip removido: mobile-first sem teclas fisicas -->' 
     + '  <div class="cart-header">'
-    + '    <h2 id="cart-title">Mapa de Valdória</h2>'
+    + '    <h2 id="cart-title">🧭 Atlas de Valdoria</h2>'
     + '    <div class="cart-prov-bar-wrap">'
     + '      <button class="cart-prov-nav-btn cart-prov-prev" id="cart-prov-prev" type="button" aria-label="Anterior">‹</button>'
     + '      <div class="cart-prov-bar" id="cart-prov-bar"></div>'
     + '      <button class="cart-prov-nav-btn cart-prov-next" id="cart-prov-next" type="button" aria-label="Próximo">›</button>'
     + '    </div>'
     + '  </div>'
-    + '  <div class="cart-canvas-frame">'
-    + '    <div class="cart-loading-overlay" id="cart-loading-overlay">'
-    + '      <div class="clo-astrolabe">✦</div>'
-    + '      <div class="clo-title">CARTOGRAFIA DE VALDÓRIA</div>'
-    + '      <div class="clo-desc">Desdobrando cartas imperiais e províncias...</div>'
-    + '      <div class="clo-bar-track"><div class="clo-bar-fill" id="clo-bar-fill"></div></div>'
+    + '  <!-- LEVEL 1: GUIA CONTINENTAL OBJETIVO (ROADWARDEN STYLE) -->'
+    + '  <div class="cart-continental-guide" id="cart-continental-guide">'
+    + '    <div class="capital-city-card" id="btn-capital-city" onclick="_cartSelectProvince(\'city_valdoria\')">'
+    + '      <div class="capital-left">'
+    + '        <span style="font-size:18px;">🏰</span>'
+    + '        <div>'
+    + '          <div class="capital-name">Cidade de Valdoria</div>'
+    + '          <div style="font-size:11.5px;color:var(--v-text-muted, #a09484);">Capital & Refúgio Central</div>'
+    + '        </div>'
+    + '      </div>'
+    + '      <span class="capital-tag">Santuário · ND 0.5</span>'
     + '    </div>'
+    + '    <div class="section-label">PROVÍNCIAS DOS ERMOS:</div>'
+    + '    <div class="province-grid" id="cart-province-grid">'
+    + '      <button type="button" class="prov-btn" data-prov="plains" onclick="_cartSelectProvince(\'plains\')">'
+    + '        <span class="prov-btn-left">🌾 Planícies</span>'
+    + '        <span class="prov-tier-tag">ND 1</span>'
+    + '      </button>'
+    + '      <button type="button" class="prov-btn" data-prov="forest" onclick="_cartSelectProvince(\'forest\')">'
+    + '        <span class="prov-btn-left">🌲 Floresta</span>'
+    + '        <span class="prov-tier-tag">ND 2</span>'
+    + '      </button>'
+    + '      <button type="button" class="prov-btn" data-prov="mountain" onclick="_cartSelectProvince(\'mountain\')">'
+    + '        <span class="prov-btn-left">🏔️ Montanhas</span>'
+    + '        <span class="prov-tier-tag">ND 4</span>'
+    + '      </button>'
+    + '      <button type="button" class="prov-btn" data-prov="swamp" onclick="_cartSelectProvince(\'swamp\')">'
+    + '        <span class="prov-btn-left">🐍 Pântano</span>'
+    + '        <span class="prov-tier-tag">ND 3</span>'
+    + '      </button>'
+    + '      <button type="button" class="prov-btn" data-prov="coast" onclick="_cartSelectProvince(\'coast\')">'
+    + '        <span class="prov-btn-left">🌊 Costa</span>'
+    + '        <span class="prov-tier-tag">ND 4</span>'
+    + '      </button>'
+    + '      <button type="button" class="prov-btn" data-prov="desert" onclick="_cartSelectProvince(\'desert\')">'
+    + '        <span class="prov-btn-left">🌵 Deserto</span>'
+    + '        <span class="prov-tier-tag">ND 4</span>'
+    + '      </button>'
+    + '      <button type="button" class="prov-btn" data-prov="snow" onclick="_cartSelectProvince(\'snow\')">'
+    + '        <span class="prov-btn-left">❄️ Ermo Gelado</span>'
+    + '        <span class="prov-tier-tag">ND 5</span>'
+    + '      </button>'
+    + '      <button type="button" class="prov-btn" data-prov="volcanic" onclick="_cartSelectProvince(\'volcanic\')">'
+    + '        <span class="prov-btn-left">🌋 Vulcão</span>'
+    + '        <span class="prov-tier-tag">ND 8</span>'
+    + '      </button>'
+    + '    </div>'
+    + '    <div class="region-summary-card" id="cart-region-summary-card">'
+    + '      <div class="summary-header-row">'
+    + '        <span class="summary-region-name" id="card-region-title">Cidade de Valdoria</span>'
+    + '        <span class="summary-danger-tag badge-safe" id="card-danger-badge">Santuário (ND 0.5)</span>'
+    + '      </div>'
+    + '      <div class="march-specs-bar">'
+    + '        <span>Viagem: <b id="card-march-days">Local Atual (0d)</b> · <b id="card-supplies-cost">0 Rações</b></span>'
+    + '        <button type="button" class="btn-read-intel" id="btn-open-intel" onclick="_cartOpenDetailsModal(\'region\')">📜 Detalhes</button>'
+    + '      </div>'
+    + '      <div class="destinations-box" id="card-destinations-list"></div>'
+    + '      <button type="button" class="btn-march-action" id="btn-main-march" onclick="_cartConfirmOpenMap()">'
+    + '        <span>🗺️</span> <span id="btn-march-text">Ver Mapa da Cidade</span>'
+    + '      </button>'
+    + '    </div>'
+    + '  </div>'
+    + '  <!-- LEVEL 2: MAPA REGIONAL DEDICADO -->'
+    + '  <div class="cart-regional-view" id="cart-regional-view" style="display:none;">'
+    + '    <div class="regional-top-bar">'
+    + '      <button type="button" class="btn-back-macro" onclick="_cartFocusProvince(\'world\')">'
+    + '        <span>←</span> Regiões'
+    + '      </button>'
+    + '      <div class="badge-card-name" id="reg-card-name">'
+    + '        Mapa: Cidade de Valdoria'
+    + '      </div>'
+    + '    </div>'
+    + '    <div class="province-map-container" id="prov-map-wrap">'
+    + '      <img class="province-art-img" id="prov-art-img" src="shared/img/map/provinces/city.webp" alt="Mapa Regional">'
+    + '      <div class="prov-pins-overlay" id="prov-pins-overlay"></div>'
+    + '    </div>'
+    + '    <div class="regional-action-drawer" id="reg-action-drawer">'
+    + '      <div class="drawer-header-line">'
+    + '        <div class="drawer-title-bold" id="drawer-node-name"><span>🏰</span> Portões da Cidade</div>'
+    + '        <div class="summary-danger-tag badge-safe" id="drawer-node-danger">Refúgio Seguro (ND 0.5)</div>'
+    + '      </div>'
+    + '      <div class="drawer-actions-grid">'
+    + '        <button type="button" class="btn-cmd btn-cmd-primary" id="drawer-btn-primary">Acessar</button>'
+    + '        <button type="button" class="btn-cmd btn-cmd-secondary" id="drawer-btn-camp">Acampar</button>'
+    + '        <button type="button" class="btn-cmd btn-cmd-secondary" id="drawer-btn-details">Detalhes</button>'
+    + '      </div>'
+    + '    </div>'
+    + '  </div>'
+    + '  <!-- MODAL DE DETALHES SOB DEMANDA -->'
+    + '  <div class="modal-backdrop" id="cart-details-modal" style="display:none;">'
+    + '    <div class="modal-box">'
+    + '      <div class="modal-header">'
+    + '        <span class="modal-title" id="cart-modal-title">Informações da Região</span>'
+    + '        <span style="font-size:16px;cursor:pointer;color:var(--v-text-muted);" onclick="_cartCloseDetailsModal()">✕</span>'
+    + '      </div>'
+    + '      <div class="modal-body-text" id="cart-modal-text"></div>'
+    + '      <div class="modal-meta-box" id="cart-modal-meta"></div>'
+    + '      <button type="button" class="modal-close-btn" onclick="_cartCloseDetailsModal()">Fechar</button>'
+    + '    </div>'
+    + '  </div>'
+    + '  <div class="cart-canvas-frame" style="display:none;">'
     + '    <canvas id="cart-canvas"></canvas>'
-    + '    <div class="cart-tooltip" id="cart-tooltip"></div>'
-    + '    <div class="cart-controls">'
-    + '      <button class="cart-ctrl-btn" id="cart-zoom-in" title="Aproximar (+) [Tecla +]">+</button>'
-    + '      <button class="cart-ctrl-btn" id="cart-zoom-out" title="Afastar (-) [Tecla -]">-</button>'
-    + '      <button class="cart-ctrl-btn" id="cart-zoom-reset" title="Centralizar Comitiva / Norte [Espaço / Home]" style="font-size:calc(18px * var(--v-font-scale, 1));">⌂</button>'
-    + '    </div>'
-    + '    <div class="cart-discovery-toast" id="cart-discovery-toast" style="display:none;">'
-    + '      <div class="cdt-badge">✦ NOVA ROTA REVELADA ✦</div>'
-    + '      <div class="cdt-title" id="cdt-title">Nome do Local</div>'
-    + '      <div class="cdt-desc" id="cdt-desc">Suas explorações nas terras ermas desbravaram este caminho. O local agora está mapeado e disponível para viagem!</div>'
-    + '      <button class="cdt-btn" id="cdt-btn">Examinar no Mapa</button>'
-    + '    </div>'
     + '  </div>'
     + '  <div class="cart-atlas-modal" id="cart-atlas-modal" style="display:none;">'
     + '    <div class="cam-box">'
@@ -70425,6 +71149,7 @@ function _startQuestFocusTick(){
 // === EVENTS ===
 var _PROV_SHORT_NAMES = {
   world: 'Continente',
+  city_valdoria: 'Cidade',
   plains: 'Planícies',
   forest: 'Florestas',
   mountain: 'Montanhas',
@@ -71703,8 +72428,253 @@ function _wireCartKeyboardNavigation() {
   });
 }
 
+
+// =====================================================================
+// CANONICAL ROADWARDEN VIAGEM & MAPA REGIONAL (TELEGRAM DESKTOP 390px)
+// =====================================================================
+
+var _cartCurrentProvKey = 'city_valdoria';
+var _cartSelectedNodeId = null;
+
+function _cartSelectProvince(provKey) {
+  var regData = (window.CartShared && CartShared.REGIONS_DATA) ? CartShared.REGIONS_DATA : null;
+  if (!regData || !regData[provKey]) return;
+  _cartCurrentProvKey = provKey;
+  if (typeof haptic === 'function') haptic('light');
+
+  // Atualiza classes ativas
+  var capBtn = document.getElementById('btn-capital-city');
+  if (capBtn) capBtn.classList.toggle('active', provKey === 'city_valdoria');
+
+  var provBtns = document.querySelectorAll('.prov-btn');
+  provBtns.forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-prov') === provKey);
+  });
+
+  _cartUpdateContinentalGuide();
+}
+
+function _cartUpdateContinentalGuide() {
+  var regData = (window.CartShared && CartShared.REGIONS_DATA) ? CartShared.REGIONS_DATA : null;
+  if (!regData) return;
+  var d = regData[_cartCurrentProvKey] || regData['city_valdoria'];
+
+  var titleEl = document.getElementById('card-region-title');
+  var badgeEl = document.getElementById('card-danger-badge');
+  var marchDaysEl = document.getElementById('card-march-days');
+  var suppliesCostEl = document.getElementById('card-supplies-cost');
+  var destListEl = document.getElementById('card-destinations-list');
+  var marchBtnText = document.getElementById('btn-march-text');
+
+  if (titleEl) titleEl.textContent = d.name;
+  if (badgeEl) {
+    badgeEl.className = 'summary-danger-tag ' + (d.dangerClass || 'badge-safe');
+    badgeEl.textContent = d.dangerText || 'ND 1';
+  }
+  if (marchDaysEl) {
+    marchDaysEl.textContent = d.days === 0 ? 'Local Atual (0d)' : d.days + 'd de marcha';
+  }
+  if (suppliesCostEl) {
+    suppliesCostEl.textContent = d.days === 0 ? '0 Rações' : (d.days * 2) + ' Rações';
+  }
+  if (marchBtnText) {
+    marchBtnText.textContent = d.isCapital ? 'Ver Mapa da Cidade' : 'Ver Mapa da Região';
+  }
+
+  if (destListEl) {
+    destListEl.innerHTML = '';
+    var nodes = d.nodes || [];
+    nodes.forEach(function(n){
+      var row = document.createElement('div');
+      row.className = 'dest-row';
+      row.innerHTML = ''
+        + '<div class="dest-name-left">'
+        + '  <span>' + n.ico + '</span>'
+        + '  <span>' + n.name + '</span>'
+        + '</div>'
+        + '<div class="dest-danger-tier">' + (n.maxCR ? ('ND ' + n.maxCR) : 'Seguro') + '</div>';
+      destListEl.appendChild(row);
+    });
+  }
+}
+
+function _cartConfirmOpenMap() {
+  if (typeof haptic === 'function') haptic('medium');
+  _cartFocusProvince(_cartCurrentProvKey);
+}
+
+function _cartRenderRegionalView(provKey) {
+  var regData = (window.CartShared && CartShared.REGIONS_DATA) ? CartShared.REGIONS_DATA : null;
+  if (!regData) return;
+  var d = regData[provKey] || regData['city_valdoria'];
+
+  var nameBadge = document.getElementById('reg-card-name');
+  if (nameBadge) {
+    nameBadge.textContent = 'Mapa: ' + d.name;
+  }
+
+  var imgEl = document.getElementById('prov-art-img');
+  if (imgEl) {
+    imgEl.src = d.img || ('shared/img/map/provinces/' + (provKey === 'city_valdoria' ? 'city' : provKey) + '.webp');
+    imgEl.onerror = function(){
+      if (d.altImg && this.src.indexOf(d.altImg) === -1) {
+        this.src = d.altImg;
+      }
+    };
+  }
+
+  var pinsWrap = document.getElementById('prov-pins-overlay');
+  if (pinsWrap) {
+    pinsWrap.innerHTML = '';
+    var nodes = d.nodes || [];
+    if (nodes.length > 0) {
+      _cartSelectedNodeId = nodes[0].id;
+    }
+
+    nodes.forEach(function(n){
+      var pin = document.createElement('div');
+      pin.className = 'map-pin-target' + (n.id === _cartSelectedNodeId ? ' active' : '');
+      pin.setAttribute('data-node-id', n.id);
+      pin.style.left = (n.x * 100) + '%';
+      pin.style.top = (n.y * 100) + '%';
+
+      var bubble = document.createElement('div');
+      bubble.className = 'pin-icon-bubble';
+      bubble.textContent = n.ico;
+
+      var lbl = document.createElement('div');
+      lbl.className = 'pin-label-pill';
+      lbl.textContent = n.name;
+
+      pin.appendChild(bubble);
+      pin.appendChild(lbl);
+
+      pin.addEventListener('click', function(e){
+        e.stopPropagation();
+        _cartSelectRegionalNode(n.id, provKey);
+      });
+
+      pinsWrap.appendChild(pin);
+    });
+
+    if (nodes.length > 0) {
+      _cartUpdateDrawer(nodes[0], d);
+    }
+  }
+}
+
+function _cartSelectRegionalNode(nodeId, provKey) {
+  var regData = (window.CartShared && CartShared.REGIONS_DATA) ? CartShared.REGIONS_DATA : null;
+  if (!regData) return;
+  var d = regData[provKey] || regData[_cartCurrentProvKey];
+  var n = (d.nodes || []).find(function(node){ return node.id === nodeId; });
+  if (!n) return;
+
+  _cartSelectedNodeId = nodeId;
+  if (typeof haptic === 'function') haptic('light');
+
+  var allPins = document.querySelectorAll('.map-pin-target');
+  allPins.forEach(function(p){
+    p.classList.toggle('active', p.getAttribute('data-node-id') === nodeId);
+  });
+
+  _cartUpdateDrawer(n, d);
+}
+
+function _cartUpdateDrawer(n, d) {
+  var nameEl = document.getElementById('drawer-node-name');
+  var dangerEl = document.getElementById('drawer-node-danger');
+  var btnPrim = document.getElementById('drawer-btn-primary');
+  var btnCamp = document.getElementById('drawer-btn-camp');
+  var btnDet = document.getElementById('drawer-btn-details');
+
+  if (nameEl) nameEl.innerHTML = '<span>' + n.ico + '</span> ' + n.name;
+  if (dangerEl) {
+    var isSafe = (d.isCapital || (n.maxCR || 0) <= 0.5);
+    dangerEl.className = 'summary-danger-tag ' + (isSafe ? 'badge-safe' : 'badge-mod');
+    dangerEl.textContent = isSafe ? 'Refúgio Seguro (ND 0.5)' : ('Perigo (ND ' + n.maxCR + ')');
+  }
+
+  if (btnPrim) {
+    btnPrim.textContent = d.isCapital ? 'Acessar' : 'Explorar';
+    btnPrim.onclick = function(){
+      if (typeof haptic === 'function') haptic('medium');
+      if (d.isCapital) {
+        if (n.id === 'city_gates') {
+          _cartFocusProvince('world');
+        } else if (n.id === 'city_square') {
+          if (typeof doAction === 'function') doAction('market');
+        } else if (n.id === 'city_tavern') {
+          if (typeof doAction === 'function') doAction('tavern');
+        } else if (n.id === 'city_guild') {
+          if (typeof doAction === 'function') doAction('action_quests');
+        } else if (n.id === 'city_temple') {
+          if (typeof doAction === 'function') doAction('temple');
+        }
+      } else {
+        if (typeof doAction === 'function') {
+          doAction('explore_' + n.id);
+        } else {
+          alert('Partindo para explorar ' + n.name + '...');
+        }
+      }
+    };
+  }
+
+  if (btnCamp) {
+    btnCamp.textContent = 'Acampar';
+    btnCamp.onclick = function(){
+      if (typeof haptic === 'function') haptic('light');
+      if (typeof doAction === 'function') {
+        doAction('rest_camp');
+      } else {
+        alert('O grupo monta acampamento seguro em ' + n.name + '.');
+      }
+    };
+  }
+
+  if (btnDet) {
+    btnDet.textContent = 'Detalhes';
+    btnDet.onclick = function(){
+      _cartOpenDetailsModal('node');
+    };
+  }
+}
+
+function _cartOpenDetailsModal(type) {
+  var modal = document.getElementById('cart-details-modal');
+  var title = document.getElementById('cart-modal-title');
+  var text = document.getElementById('cart-modal-text');
+  var meta = document.getElementById('cart-modal-meta');
+  if (!modal || !title || !text || !meta) return;
+
+  var regData = (window.CartShared && CartShared.REGIONS_DATA) ? CartShared.REGIONS_DATA : null;
+  if (!regData) return;
+  var d = regData[_cartCurrentProvKey] || regData['city_valdoria'];
+
+  if (type === 'region') {
+    title.textContent = 'Informações: ' + d.name;
+    text.textContent = d.narrative || 'Região de Valdoria com perigos e oportunidades.';
+    meta.innerHTML = '<b>Diretriz de Viagem:</b> ' + (d.intel || 'Mantenha suprimentos abastecidos.');
+  } else {
+    var n = (d.nodes || []).find(function(node){ return node.id === _cartSelectedNodeId; }) || (d.nodes || [])[0];
+    title.textContent = 'Local: ' + (n ? n.name : d.name);
+    text.textContent = n ? n.desc : d.narrative;
+    meta.innerHTML = '<b>Ameaça D&D 5e:</b> ' + (n && n.maxCR ? ('ND Máximo ' + n.maxCR + ' · Teto ' + n.maxHP + ' PV') : 'Área Segura / Santuário');
+  }
+
+  modal.style.display = 'flex';
+  if (typeof haptic === 'function') haptic('light');
+}
+
+function _cartCloseDetailsModal() {
+  var modal = document.getElementById('cart-details-modal');
+  if (modal) modal.style.display = 'none';
+  if (typeof haptic === 'function') haptic('light');
+}
+
+
 function _cartFocusProvince(provId){
-  if (!_cartEngine || !_cartCanvas || !_cartW || !_cartH) return;
   try {
     if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
       ValdoriaAudio.playSFX('sfx_scroll');
@@ -71723,29 +72693,33 @@ function _cartFocusProvince(provId){
     }
   }
 
+  var guideEl = document.getElementById('cart-continental-guide');
+  var regViewEl = document.getElementById('cart-regional-view');
+  var canvasFrame = document.querySelector('.cart-canvas-frame');
+
   if (provId === 'world') {
-    if (typeof _cartEngine.closeProvince === 'function') {
-      _cartEngine.closeProvince();
-    }
-    _cartSmoothPanTo(0, 0, CART_ZOOM_DEFAULT, 260);
-    if (titleEl) titleEl.innerHTML = '<span>🌍</span> Continente Geral';
+    if (guideEl) guideEl.style.display = 'flex';
+    if (regViewEl) regViewEl.style.display = 'none';
+    if (canvasFrame) canvasFrame.style.display = 'none';
     if (atlasBackBtn) atlasBackBtn.style.display = 'none';
+    if (titleEl) titleEl.innerHTML = '<span>🧭</span> Atlas de Valdoria';
+    if (typeof _cartUpdateContinentalGuide === 'function') {
+      _cartUpdateContinentalGuide();
+    }
   } else {
-    var res = null;
-    if (typeof _cartEngine.openProvince === 'function') {
-      res = _cartEngine.openProvince(provId, _cartW, _cartH);
-    } else if (typeof _cartEngine.focusProvince === 'function') {
-      res = _cartEngine.focusProvince(provId, _cartW, _cartH);
-    }
-    if (res) {
-      _cartSmoothPanTo(res.panX, res.panY, res.zoom, 260);
-      if (res.province && titleEl) {
-        titleEl.innerHTML = '<span class="cart-title-crumb" onclick="_cartFocusProvince(\'world\')">🌍 Continente</span>'
-          + '<span class="cart-title-sep">›</span>'
-          + '<span>' + res.province.icon + ' ' + res.province.name + '</span>';
-      }
-    }
+    if (guideEl) guideEl.style.display = 'none';
+    if (regViewEl) regViewEl.style.display = 'flex';
+    if (canvasFrame) canvasFrame.style.display = 'none';
     if (atlasBackBtn) atlasBackBtn.style.display = 'inline-flex';
+
+    _cartCurrentProvKey = provId;
+    if (typeof _cartRenderRegionalView === 'function') {
+      _cartRenderRegionalView(provId);
+    }
+    if (titleEl) {
+      var pName = (window.CartShared && CartShared.REGIONS_DATA && CartShared.REGIONS_DATA[provId]) ? CartShared.REGIONS_DATA[provId].name : provId;
+      titleEl.innerHTML = '<span class="cart-title-crumb" onclick="_cartFocusProvince(\'world\')">🧭 Atlas</span><span class="cart-title-sep"> › </span><span>' + pName + '</span>';
+    }
   }
   var chips = document.querySelectorAll('.cart-prov-chip');
   chips.forEach(function(c){
@@ -72067,7 +73041,7 @@ function _cartShowTooltip(b, mx, my){
   var distHtml = (b.isOrigin || b.key === 'plains') ? '' :
     '<div style="font-size:11.5px;color:#e6d3a3;margin-top:2px;">📏 ~' + distMilhas + ' milhas (~' + marcos + ' marcos · ~' + horas + 'h a pé)</div>';
 
-  var hintText = (vm.mode === 'world') ? 'Duplo clique para Carta Regional' : 'Duplo clique para Iniciar Viagem';
+  var hintText = (vm.mode === 'world') ? 'Duplo clique para Mapa Regional' : 'Duplo clique para Iniciar Viagem';
 
   tip.innerHTML = ''
     + '<div class="ctip-title">' + (b.ico || '📍') + ' ' + title + '</div>'
@@ -72163,7 +73137,7 @@ function _openCartProvincePreviewPopup(prov) {
     + '<div class="clp-body clp-prov-preview" style="overflow-x:hidden !important;max-width:100%;box-sizing:border-box;">'
     + '  <div class="clp-icon" style="font-size:42px;margin:4px 0 8px;line-height:1;">' + (prov.icon || '🗺️') + '</div>'
     + '  <h2 class="clp-prov-title" style="margin:2px 0 4px;">' + prov.name + '</h2>'
-    + '  <div class="clp-prov-sub" style="margin-bottom:8px;">Carta Regional do Reino de Valdória</div>'
+    + '  <div class="clp-prov-sub" style="margin-bottom:8px;">Mapa Regional do Reino de Valdória</div>'
     + (provQuestName ? '<div class="clp-quest-alert" style="margin:0 12px 8px;">📜 CONTRATO ATIVO NA REGIÃO: ' + provQuestName.toUpperCase() + '</div>' : '')
     + '  <p class="clp-prov-desc" style="margin:0 0 12px;padding:0 8px;">' + (prov.desc || 'Uma vasta região com seus próprios mistérios e perigos.') + '</p>'
     + '  <div class="clp-prov-stats" style="margin:0 0 12px;display:flex;justify-content:center;overflow-x:hidden !important;">'
@@ -83743,7 +84717,123 @@ function renderHubScreen(el, screen) {
     divEl.appendChild(gemEl);
     frag.appendChild(divEl);
 
+    /* ── 5.1 City View Switcher (Mapa da Cidade vs Distritos) ── */
+    var viewSwitcher = _hubDiv('hub-city-view-bar');
+    var isMapView = (window._hubCityViewPref !== 'districts');
+
+    var btnMap = document.createElement('button');
+    btnMap.type = 'button';
+    btnMap.className = 'hub-city-view-btn' + (isMapView ? ' active' : '');
+    btnMap.innerHTML = '<span>🗺️</span> Mapa da Cidade';
+
+    var btnDist = document.createElement('button');
+    btnDist.type = 'button';
+    btnDist.className = 'hub-city-view-btn' + (!isMapView ? ' active' : '');
+    btnDist.innerHTML = '<span>🏛️</span> Distritos';
+
+    viewSwitcher.appendChild(btnMap);
+    viewSwitcher.appendChild(btnDist);
+    frag.appendChild(viewSwitcher);
+
+    /* ── 5.2 Container do Mapa Ilustrado da Cidade ───────────── */
+    var cityMapWrap = _hubDiv('hub-city-map-container');
+    if (!isMapView) cityMapWrap.style.display = 'none';
+
+    var cityMapFrame = _hubDiv('hub-city-map-frame');
+    var cityImg = document.createElement('img');
+    cityImg.className = 'hub-city-map-img';
+    cityImg.src = 'shared/img/map/provinces/city.webp';
+    cityImg.alt = 'Mapa da Cidade de Valdoria';
+    cityImg.loading = 'eager';
+    cityMapFrame.appendChild(cityImg);
+
+    var pinsOverlay = _hubDiv('hub-city-pins-overlay');
+    var CITY_LANDMARKS = [
+      { id: 'city_gates', name: 'Portões de Valdoria', ico: '🏰', x: 50, y: 84, cb: 'explore_main', role: 'Partir para os Ermos', desc: 'Muralhas fortificadas e saída sul rumo às planícies.', btnText: 'Partir' },
+      { id: 'city_square', name: 'Praça Central & Mercado', ico: '⚖️', x: 50, y: 50, cb: 'market', role: 'Mercado & Oficinas', desc: 'Comércio livre, ferreiros, boticários e mercadores.', btnText: 'Mercado' },
+      { id: 'city_tavern', name: 'Taverna do Javali Bêbado', ico: '🍺', x: 26, y: 46, cb: 'tavern', role: 'Boatos & Hidromel', desc: 'Canecas cheias, descanso acolhedor e fofocas locais.', btnText: 'Entrar' },
+      { id: 'city_guild', name: 'Guilda dos Mercenários & Arena', ico: '⚔️', x: 74, y: 48, cb: 'action_quests', role: 'Missões & Treino', desc: 'Quadro de recompensas, contratos de caça e arena.', btnText: 'Missões' },
+      { id: 'city_temple', name: 'Templo da Luz Sagrada', ico: '🕊️', x: 50, y: 22, cb: 'temple', role: 'Cura & Bênçãos', desc: 'Altar divino com sacerdotes que oferecem bênçãos e curas.', btnText: 'Rezar' }
+    ];
+
+    var selectedLandmark = CITY_LANDMARKS[0];
+
+    var lmDrawer = _hubDiv('hub-city-landmark-drawer');
+    function updateLandmarkDrawer(lm) {
+      selectedLandmark = lm;
+      lmDrawer.innerHTML = ''
+        + '<div class="hcl-drawer-info">'
+        + '  <div class="hcl-drawer-title"><span>' + lm.ico + '</span> ' + lm.name + '</div>'
+        + '  <div class="hcl-drawer-desc">' + lm.desc + '</div>'
+        + '</div>'
+        + '<button type="button" class="hcl-drawer-btn" id="hcl-act-btn">' + lm.btnText + '</button>';
+
+      var actBtn = lmDrawer.querySelector('#hcl-act-btn');
+      if (actBtn) {
+        actBtn.addEventListener('click', function(){
+          if (typeof haptic === 'function') haptic('medium');
+          if (typeof doAction === 'function') doAction(lm.cb);
+        });
+      }
+
+      var allPinEls = pinsOverlay.querySelectorAll('.hub-city-pin');
+      allPinEls.forEach(function(pEl){
+        pEl.classList.toggle('active', pEl.getAttribute('data-id') === lm.id);
+      });
+    }
+
+    CITY_LANDMARKS.forEach(function(lm){
+      var pinEl = _hubDiv('hub-city-pin');
+      pinEl.setAttribute('data-id', lm.id);
+      pinEl.style.left = lm.x + '%';
+      pinEl.style.top = lm.y + '%';
+      if (lm.id === selectedLandmark.id) pinEl.classList.add('active');
+
+      var markerEl = _hubDiv('hub-city-pin-marker');
+      markerEl.textContent = lm.ico;
+      var lblEl = _hubDiv('hub-city-pin-lbl');
+      lblEl.textContent = lm.name;
+
+      pinEl.appendChild(markerEl);
+      pinEl.appendChild(lblEl);
+
+      pinEl.addEventListener('click', function(e){
+        e.stopPropagation();
+        if (typeof haptic === 'function') haptic('light');
+        updateLandmarkDrawer(lm);
+      });
+
+      pinsOverlay.appendChild(pinEl);
+    });
+
+    cityMapFrame.appendChild(pinsOverlay);
+    cityMapWrap.appendChild(cityMapFrame);
+    cityMapWrap.appendChild(lmDrawer);
+    frag.appendChild(cityMapWrap);
+
+    updateLandmarkDrawer(selectedLandmark);
+
     /* ── 6. Location Grid (4 colunas) ────────────────────────── */
+    var locGrid = _hubDiv('hub-loc-grid');
+    if (isMapView) locGrid.style.display = 'none';
+
+    btnMap.addEventListener('click', function(){
+      window._hubCityViewPref = 'map';
+      btnMap.classList.add('active');
+      btnDist.classList.remove('active');
+      cityMapWrap.style.display = 'flex';
+      locGrid.style.display = 'none';
+      if (typeof haptic === 'function') haptic('light');
+    });
+
+    btnDist.addEventListener('click', function(){
+      window._hubCityViewPref = 'districts';
+      btnDist.classList.add('active');
+      btnMap.classList.remove('active');
+      cityMapWrap.style.display = 'none';
+      locGrid.style.display = 'grid';
+      if (typeof haptic === 'function') haptic('light');
+    });
     var locGrid = _hubDiv('hub-loc-grid');
     var locCount = 0;
     var _seenCb = {}; /* Deduplicate by callback — prevents duplicate entries from shortcuts + action_btns */

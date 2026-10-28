@@ -356,6 +356,11 @@
         speech: speech,
         tag: tag,
         badge: tag ? ('[' + tag + ']') : '',
+        requires_item: ch.requires_item,
+        consume_item: ch.consume_item,
+        requires_gold: ch.requires_gold,
+        consume_gold: ch.consume_gold,
+        recovered_item: ch.recovered_item,
         _haz: ch
       };
       if (ch.stat && ch.dc != null) {
@@ -674,8 +679,43 @@
       body += '<br><br><b>🎲 Rolagem de Desvio:</b> d' + dieSides + ' [' + dieRoll + ']' + mitTag + fumbleTag + ' ➔ +' + detourMarcos + (detourMarcos === 1 ? ' Marco' : ' Marcos') + '<br>'
             + '<b>⚠️ Desvio forçado!</b> O relevo difícil e a rota obstruída exigiram um contorno, adicionando <b>+' + detourMarcos + (detourMarcos === 1 ? ' marco' : ' marcos') + '</b> ao caminho.';
     }
-    // Concessão de itens e flags de eventos de jornada (Ordem do Usuário 2026-10)
+    // Concessão, consumo e recuperação de itens e ouro em eventos de jornada (Ordem do Usuário 2026-10)
     var targetCh = (ch && ch._haz) || ch;
+
+    // Consumo atômico de itens da mochila
+    if (targetCh && targetCh.consume_item && JD().consumeItem) {
+      var itemConsumed = JD().consumeItem(p, targetCh.consume_item);
+      if (itemConsumed) {
+        body += '<br><br><b>🎒 Item consumido:</b> 1x ' + itemConsumed;
+        try {
+          if (global.S && S.player && S.player !== p) {
+            S.player.inventory = p.inventory;
+          }
+          localStorage.setItem('player_inventory', JSON.stringify(p.inventory || []));
+        } catch (_) {}
+        if (typeof j.opts.refreshHud === 'function') { try { j.opts.refreshHud(); } catch (e) {} }
+      }
+    }
+
+    // Consumo atômico de moedas de ouro
+    if (targetCh && targetCh.consume_gold && JD().consumeGold) {
+      var goldPaid = JD().consumeGold(p, targetCh.consume_gold);
+      if (goldPaid > 0) {
+        body += '<br><br><b>🪙 Custo pago:</b> ' + goldPaid + (goldPaid === 1 ? ' moeda de ouro' : ' moedas de ouro');
+        try {
+          if (global.S && S.player && S.player !== p) {
+            S.player.gold = p.gold;
+          }
+        } catch (_) {}
+        if (typeof j.opts.refreshHud === 'function') { try { j.opts.refreshHud(); } catch (e) {} }
+      }
+    }
+
+    // Recuperação de armas de arremesso (D&D 5e: armas de arremesso são 100% recuperáveis)
+    if (targetCh && targetCh.recovered_item) {
+      body += '<br><br><b>🗡️ Arma de Arremesso:</b> ' + targetCh.recovered_item + ' recolhida do solo (regra D&D 5e).';
+    }
+
     if (success && targetCh && targetCh.giveItem) {
       if (p) {
         p.inventory = p.inventory || [];
