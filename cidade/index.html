@@ -84954,8 +84954,7 @@ function _openCityMapModal() {
     + '</div>'
     + '<div class="cfm-viewport">'
     + '  <div class="cfm-stage">'
-    + '    <img class="cfm-img" id="cfm-city-img" src="' + imgSrc + '" alt="Mapa da Cidade de Valdoria" '
-    + '         onerror="if(this.src.indexOf('/shared/')===-1){this.src='/shared/img/map/provinces/city.webp';}else if(this.src.indexOf('../shared/')===-1){this.src='../shared/img/map/provinces/city.webp';}">'
+    + '    <img class="cfm-img" id="cfm-city-img" src="' + imgSrc + '" alt="Mapa da Cidade de Valdoria">'
     + '    <div class="cfm-pins-layer" id="cfm-pins-layer"></div>'
     + '  </div>'
     + '</div>'
@@ -84966,6 +84965,17 @@ function _openCityMapModal() {
     + '  </div>'
     + '  <button type="button" class="cfm-drawer-action-btn" id="cfm-drawer-act-btn">' + selected.btnText + '</button>'
     + '</div>';
+
+  var cityImgEl = modal.querySelector('#cfm-city-img');
+  if (cityImgEl) {
+    cityImgEl.onerror = function() {
+      if (this.src.indexOf('/shared/') === -1) {
+        this.src = '/shared/img/map/provinces/city.webp';
+      } else if (this.src.indexOf('../shared/') === -1) {
+        this.src = '../shared/img/map/provinces/city.webp';
+      }
+    };
+  }
 
   var pinsLayer = modal.querySelector('#cfm-pins-layer');
   var drawerName = modal.querySelector('#cfm-drawer-name');
