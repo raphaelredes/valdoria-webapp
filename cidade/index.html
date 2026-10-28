@@ -71785,10 +71785,8 @@ function _cartCenterOnPlayer(){
     return;
   }
 
-  var targetZoom = 1.35;
-  var targetPanX = (_cartW / 2) - (pos.x * targetZoom);
-  var targetPanY = (_cartH / 2) - (pos.y * targetZoom);
-  _cartSmoothPanTo(targetPanX, targetPanY, targetZoom, 280);
+  // No modo de província regional, o enquadramento 1:1 nativo exibe o fólio completo
+  _cartSmoothPanTo(0, 0, 1.0, 240);
 }
 
 function _cartTouchDist(touches){

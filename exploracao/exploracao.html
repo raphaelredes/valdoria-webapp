@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-28T03:10:44Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-28T03:44:10Z - do not edit directly, edit source -->
 
 
 
@@ -96308,10 +96308,8 @@ function _xcartCenterOnPlayer(){
     return;
   }
 
-  var targetZoom = 1.35;
-  var targetPanX = (_xcartW / 2) - (pos.x * targetZoom);
-  var targetPanY = (_xcartH / 2) - (pos.y * targetZoom);
-  _xcartSmoothPanTo(targetPanX, targetPanY, targetZoom, 280);
+  // No modo de província regional, o enquadramento 1:1 nativo exibe o fólio completo
+  _xcartSmoothPanTo(0, 0, 1.0, 240);
 }
 
 
