@@ -71710,23 +71710,21 @@ function _cartFocusProvince(provId){
     if (titleEl) titleEl.innerHTML = '<span>🌍</span> Continente Geral';
     if (atlasBackBtn) atlasBackBtn.style.display = 'none';
   } else {
+    var res = null;
     if (typeof _cartEngine.openProvince === 'function') {
-      var res = _cartEngine.openProvince(provId);
-      _cartSmoothPanTo(0, 0, 1.0, 260);
-      if (res && res.province) {
-        if (titleEl) {
-          titleEl.innerHTML = '<span class="cart-title-crumb" onclick="_cartFocusProvince(\'world\')">🌍 Continente</span>'
-            + '<span class="cart-title-sep">›</span>'
-            + '<span>' + res.province.icon + ' ' + res.province.name + '</span>';
-        }
-      }
-      if (atlasBackBtn) atlasBackBtn.style.display = 'inline-flex';
-    } else {
-      var res = (typeof _cartEngine.focusProvince === 'function') ? _cartEngine.focusProvince(provId, _cartW, _cartH) : null;
-      if (res) {
-        _cartSmoothPanTo(res.panX, res.panY, res.zoom, 260);
+      res = _cartEngine.openProvince(provId, _cartW, _cartH);
+    } else if (typeof _cartEngine.focusProvince === 'function') {
+      res = _cartEngine.focusProvince(provId, _cartW, _cartH);
+    }
+    if (res) {
+      _cartSmoothPanTo(res.panX, res.panY, res.zoom, 260);
+      if (res.province && titleEl) {
+        titleEl.innerHTML = '<span class="cart-title-crumb" onclick="_cartFocusProvince(\'world\')">🌍 Continente</span>'
+          + '<span class="cart-title-sep">›</span>'
+          + '<span>' + res.province.icon + ' ' + res.province.name + '</span>';
       }
     }
+    if (atlasBackBtn) atlasBackBtn.style.display = 'inline-flex';
   }
   var chips = document.querySelectorAll('.cart-prov-chip');
   chips.forEach(function(c){

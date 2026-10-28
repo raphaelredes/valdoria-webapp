@@ -4662,7 +4662,7 @@
     ctx.textAlign = 'center';
     ctx.font = '700 9.5px Cinzel, serif';
     ctx.fillStyle = '#ffd700';
-    ctx.fillText('📏 ' + m.miles + ' Milhas (~' + m.leagues + ' Léguas · ' + m.km + ' km)', mx, my - 10);
+    ctx.fillText('📏 ' + m.miles + ' Milhas (~' + m.marcos + ' Marcos · ' + m.km + ' km)', mx, my - 10);
 
     ctx.font = '8.5px Georgia, serif';
     ctx.fillStyle = '#f4d49a';
@@ -38567,7 +38567,7 @@
     out.push('📍 Origem:     ' + orig.name + ' (' + biomePT(orig.biome || orig.key) + ' · ' + origProv.name + ')');
     out.push('🎯 Destino:    ' + targ.name + ' (' + biomePT(targ.biome || targ.key) + ' · ' + targProv.name + ')');
     out.push('🧭 Rumo:       ' + bearingStr);
-    out.push('📏 Distância:  ~' + miles + ' Milhas (~' + leagues + ' Léguas · ~' + km + ' km)');
+    out.push('📏 Distância:  ~' + miles + ' Milhas (~' + marcos + ' Marcos · ~' + km + ' km)');
     out.push('🗺️ Rota:       ' + routeStepsNames.join(' ➔ '));
     out.push('');
     out.push('⚙️ PARÂMETROS DA MARCHA (D&D 5e):');
@@ -38984,36 +38984,7 @@
     var _viewMode = 'world'; // 'world' | 'province'
     var _activeProvId = 'world';
     var _provImgs = {};
-    var _provLoaded = {};
-    // Preload das 8 cartas regionais do Atlas de Províncias (persistem em cache e com multi-path fallback)
-    (function(){
-      var vHash = (typeof window !== 'undefined' && window.VBUNDLE_HASH) ? ('?v=' + window.VBUNDLE_HASH) : ('?v=' + Date.now());
-      CART_PROVINCES.forEach(function(prov){
-        if (prov.id === 'world') return;
-        var paths = [
-          '/shared/img/map/provinces/' + prov.id + '.webp' + vHash,
-          './shared/img/map/provinces/' + prov.id + '.webp' + vHash,
-          '../shared/img/map/provinces/' + prov.id + '.webp' + vHash,
-          '../valdoria-webapp/shared/img/map/provinces/' + prov.id + '.webp' + vHash
-        ];
-        var pathIdx = 0;
-        var im = new Image();
-        im.onload = function(){
-          _provLoaded[prov.id] = true;
-          if (_viewMode === 'province' && _activeProvId === prov.id) { _baseCache = null; _onLoad(); }
-        };
-        im.onerror = function(){
-          pathIdx++;
-          if (pathIdx < paths.length) {
-            im.src = paths[pathIdx];
-          } else {
-            _provLoaded[prov.id] = false;
-          }
-        };
-        im.src = paths[0];
-        _provImgs[prov.id] = im;
-      });
-    })();  // P-mapa #73: carrega coords c/ retry (race apiBase)
+    var _provLoaded = {};  // P-mapa #73: carrega coords c/ retry (race apiBase)
     var _apiBase = (cfg.apiBase || '');
     var _onLoad = (typeof cfg.onAsyncRedraw === 'function') ? cfg.onAsyncRedraw : function(){};
 
@@ -39039,23 +39010,7 @@
       cv.height = Math.max(1, Math.round(h * dpr));
       var bc = cv.getContext('2d', { alpha: false });
       bc.scale(dpr, dpr);
-      var _mapReady = false;
-      if (_viewMode === 'province' && _activeProvId !== 'world') {
-        bc.fillStyle = '#000';
-        bc.fillRect(0, 0, w, h);
-        var pim = _provImgs[_activeProvId];
-        if (pim && pim.complete && pim.naturalWidth) {
-          var r = _cartWorldMapRect(w, h);
-          bc.drawImage(pim, r.x, r.y, r.s, r.s);
-          bc.fillStyle = 'rgba(42,30,18,0.12)';   // véu sépia leve (medieval)
-          bc.fillRect(r.x, r.y, r.s, r.s);
-          _mapReady = true;
-        } else {
-          _drawParchmentBase(bc, w, h);
-        }
-      } else {
-        _mapReady = _drawWorldMapBg(bc, w, h);
-      }
+      var _mapReady = _drawWorldMapBg(bc, w, h);
       cv._w = w; cv._h = h; cv._dpr = dpr; cv._mapReady = _mapReady; cv._viewMode = _viewMode; cv._prov = _activeProvId;
       _baseCache = cv;
       return cv;
@@ -39199,99 +39154,107 @@
       var pk = (typeof cfg.getPlayerBiomeKey === 'function') ? cfg.getPlayerBiomeKey() : null;
       _ensureLocArt();
 
-      if (_viewMode === 'province' && _activeProvId !== 'world') {
-        // === MODO REGIONAL DE PROVÍNCIA (1:1 Nativo, Alta Nitidez, Sem Zoom Blur) ===
-        var curProv = CART_PROVINCES.find(function(p){ return p.id === _activeProvId; }) || CART_PROVINCES[1];
-        var regNodes = [];
-        CART_BIOMES.forEach(function(b){
-          if (_LOCATION_TO_PROVINCE[b.key] === _activeProvId) {
-            var rc = (curProv.regionalCoords && curProv.regionalCoords[b.key]) || { rx: b.x, ry: b.y };
-            var resolvedNode = Object.assign({}, b, { x: rc.rx, y: rc.ry, regionalName: rc.name, marcos: rc.marcos });
-            regNodes.push(resolvedNode);
+      var RB = CART_BIOMES.map(_resolved);
+      var isProvMode = (_viewMode === 'province' && _activeProvId !== 'world');
+      var curProv = isProvMode ? (CART_PROVINCES.find(function(p){ return p.id === _activeProvId; }) || CART_PROVINCES[1]) : null;
+      var provMapOwned = curProv && curProv.mapKey && ownedMaps && (ownedMaps.indexOf(curProv.mapKey) >= 0);
+
+      // 1. Fog of War Continental sobre regiões inexploradas
+      if (known !== null) {
+        var worldFog = _ensureCartFog(_S, known, RB, ownedMaps);
+        if (worldFog) {
+          ctx.drawImage(worldFog, 0, 0, _S, _S);
+        }
+      }
+
+      // 2. Estradas conhecidas
+      function _pathEndKnown(key){
+        var nodeProv = _LOCATION_TO_PROVINCE[key];
+        var isProvMapOwned = nodeProv && curProv && (nodeProv === curProv.id) && provMapOwned;
+        return known === null || known.indexOf(key) >= 0 || key === 'plains' || isProvMapOwned;
+      }
+      if (_cartLayers.roads) {
+        CART_PATHS.forEach(function(p){
+          if (_pathEndKnown(p[0]) && _pathEndKnown(p[1])) {
+            _drawCartPath(ctx, p[0], p[1], _S, _S, RB);
           }
         });
+      }
 
-        // 1. Fog of War na Província (cobre áreas ainda não exploradas salvo se possuir o mapa de Corvus)
-        var provMapOwned = curProv.mapKey && ownedMaps && (ownedMaps.indexOf(curProv.mapKey) >= 0);
-        if (known !== null && !provMapOwned) {
-          var provFog = _ensureProvFog(_S, known, regNodes, _activeProvId);
-          if (provFog) {
-            ctx.drawImage(provFog, 0, 0, _S, _S);
+      // 3. Rota Continental Ativa e Breadcrumbs (D&D 5e Style)
+      var activeTargetWorld = hoverKey || (typeof window !== 'undefined' && window._cartCurrentLocBiome && window._cartCurrentLocBiome.key);
+      if (activeTargetWorld && CART_PATHS && CART_PATHS.length) {
+        var startKW = (pk && RB.some(function(b){ return b.key === pk; })) ? pk : 'plains';
+        if (startKW && startKW !== activeTargetWorld) {
+          var routeW = _findRoutePath(startKW, activeTargetWorld, CART_PATHS);
+          if (routeW) {
+            _drawActiveRouteBreadcrumbs(ctx, routeW, _S, _S, RB);
           }
         }
-
-        // 2. Desenhar rotas regionais (só reveladas se ambas as pontas forem conhecidas ou possuir o mapa)
-        if (_cartLayers.roads) {
-          (curProv.regionalPaths || []).forEach(function(p){
-            var p0Known = (known === null || known.indexOf(p[0]) >= 0 || provMapOwned);
-            var p1Known = (known === null || known.indexOf(p[1]) >= 0 || provMapOwned);
-            if (p0Known && p1Known) {
-              _drawCartPath(ctx, p[0], p[1], _S, _S, regNodes);
-            }
-          });
+      }
+      if (activeTargetWorld) {
+        var targetNodeW = RB.find(function(b){ return b.key === activeTargetWorld; });
+        if (targetNodeW && targetNodeW.key !== pk) {
+          _drawSelectedTargetHalo(ctx, targetNodeW, _S, _S);
         }
+      }
 
-        // 3. Desenhar nós da província (SOMENTE locais descobertos; Ordem do Usuario: NUNCA desenhar Terra Incognita)
-        var qf = (typeof cfg.getQuestFocus === 'function') ? cfg.getQuestFocus() : null;
-        if (_searchQuery) {
-          regNodes.forEach(function(b){
-            var isDiscovered = (known === null || known.indexOf(b.key) >= 0 || b.isOrigin || provMapOwned);
-            if (isDiscovered && _nodeMatchesSearch(b, _searchQuery)) {
-              _drawSearchMatchBeacon(ctx, b, _S, _S);
-            }
-          });
-        }
-        if (_focusPulseKey && (Date.now() - _focusPulseTime < 2500)) {
-          var pulseRegNode = regNodes.find(function(b){ return b.key === _focusPulseKey; });
-          if (pulseRegNode) {
-            _drawFocusPulseBeacon(ctx, pulseRegNode, _S, _S, (Date.now() - _focusPulseTime) / 1000);
+      // 4. Busca e Beacons de Foco
+      var qf = (typeof cfg.getQuestFocus === 'function') ? cfg.getQuestFocus() : null;
+      if (_searchQuery) {
+        RB.forEach(function(b){
+          var isNodeInProv = !isProvMode || (_LOCATION_TO_PROVINCE[b.key] === _activeProvId);
+          var isDiscovered = (known === null || known.indexOf(b.key) >= 0 || b.isOrigin || (isNodeInProv && provMapOwned));
+          if (isDiscovered && _nodeMatchesSearch(b, _searchQuery)) {
+            _drawSearchMatchBeacon(ctx, b, _S, _S);
           }
+        });
+      }
+      if (_focusPulseKey && (Date.now() - _focusPulseTime < 2500)) {
+        var pulseNode = RB.find(function(b){ return b.key === _focusPulseKey; });
+        if (pulseNode) {
+          _drawFocusPulseBeacon(ctx, pulseNode, _S, _S, (Date.now() - _focusPulseTime) / 1000);
         }
-        regNodes.forEach(function(b){
-          var isDiscovered = (known === null || known.indexOf(b.key) >= 0 || b.isOrigin || provMapOwned);
+      }
+
+      // 5. Nós da Cartografia (lentes náuticas de foco D&D 5e)
+      RB.forEach(function(b){
+        var isNodeInProv = !isProvMode || (_LOCATION_TO_PROVINCE[b.key] === _activeProvId);
+        var isDiscovered = (known === null || known.indexOf(b.key) >= 0 || b.isOrigin || (isNodeInProv && provMapOwned));
+        if (isDiscovered) {
           var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
-          if (isDiscovered || hasMap) {
-            var hasQ = !!(qf && qf.key === b.key);
-            var isPin = _isLocPinned(b.key);
-            _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, isRegional: true, hasActiveQuest: hasQ, isPinned: isPin, activeFilter: view.activeFilter, layers: _cartLayers });
-          }
-          // Locais inexplorados ficam 100% ocultos sob o Fog of War preto solido, sem qualquer icone ou texto.
-        });
-
-        // Rota de Viagem Ativa e Breadcrumbs (D&D 5e / Baldur's Gate 3 Style)
-        var activeTarget = hoverKey || (typeof window !== 'undefined' && window._cartCurrentLocBiome && window._cartCurrentLocBiome.key);
-        if (activeTarget && curProv.regionalPaths && curProv.regionalPaths.length) {
-          var startK = (pk && regNodes.some(function(b){ return b.key === pk; })) ? pk : (regNodes.length ? regNodes[0].key : null);
-          if (startK && startK !== activeTarget) {
-            var route = _findRoutePath(startK, activeTarget, curProv.regionalPaths);
-            if (route) {
-              _drawActiveRouteBreadcrumbs(ctx, route, _S, _S, regNodes);
-            }
-          }
+          var hasQ = !!(qf && qf.key === b.key);
+          var isPin = _isLocPinned(b.key);
+          var isRegLabel = isProvMode && isNodeInProv;
+          _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, {
+            hasRegionalMap: hasMap,
+            ownedMaps: ownedMaps,
+            locArt: _locArt,
+            isRegional: isRegLabel,
+            hasActiveQuest: hasQ,
+            isPinned: isPin,
+            activeFilter: view.activeFilter,
+            layers: _cartLayers
+          });
         }
-        if (activeTarget) {
-          var targetNode = regNodes.find(function(b){ return b.key === activeTarget; });
-          if (targetNode && targetNode.key !== pk) {
-            _drawSelectedTargetHalo(ctx, targetNode, _S, _S);
-          }
-        }
+      });
 
-        // Pin do aventureiro se estiver na província
-        var pn = pk && regNodes.find(function(b){ return b.key === pk; });
-        if (pn) _drawPlayerPin(ctx, pn, _S, _S);
+      // 6. Pin da Comitiva
+      var pn = pk && RB.find(function(b){ return b.key === pk; });
+      if (pn) _drawPlayerPin(ctx, pn, _S, _S);
 
-        // Indicador de Missão / Quest Halo dentro da província
-        var qf = (typeof cfg.getQuestFocus === 'function') ? cfg.getQuestFocus() : null;
-        if (qf && qf.key && typeof cfg.drawQuestHalo === 'function') {
-          var qn = regNodes.find(function(b){ return b.key === qf.key; });
-          if (qn) cfg.drawQuestHalo(ctx, qn, _S, _S, qf.title || 'Missão');
-        }
+      // 7. Quest Halo
+      if (qf && qf.key && typeof cfg.drawQuestHalo === 'function') {
+        var qn = RB.find(function(b){ return b.key === qf.key; });
+        if (qn) cfg.drawQuestHalo(ctx, qn, _S, _S, qf.title || 'Missão');
+      }
 
-        // Cartouche superior elegante com o nome da província e progresso de mapeamento
-        var totalProvLocs = curProv.locKeys ? curProv.locKeys.length : regNodes.length;
+      // 8. Cartouche superior elegante
+      if (isProvMode && curProv) {
+        var totalProvLocs = curProv.locKeys ? curProv.locKeys.length : 5;
         var discProvLocs = curProv.locKeys ? curProv.locKeys.filter(function(k){
           return (known === null || known.indexOf(k) >= 0 || (k === 'plains') || provMapOwned);
-        }).length : regNodes.length;
+        }).length : 5;
         var provPct = Math.round((discProvLocs / Math.max(1, totalProvLocs)) * 100);
         var provProgressText = (provPct >= 100)
           ? '⭐ Território 100% Cartografado'
@@ -39311,72 +39274,6 @@
         ctx.fillText(provProgressText, _S / 2, 42);
         ctx.restore();
       } else {
-        // === MODO CONTINENTE GERAL ===
-        function _pathEndKnown(key){ return known === null || known.indexOf(key) >= 0 || key === 'plains'; }
-        var RB = CART_BIOMES.map(_resolved);
-
-        // 1. Fog of War Continental sobre regiões inexploradas
-        if (known !== null) {
-          var worldFog = _ensureCartFog(_S, known, RB);
-          if (worldFog) {
-            ctx.drawImage(worldFog, 0, 0, _S, _S);
-          }
-        }
-
-        // 2. Estradas conhecidas
-        if (_cartLayers.roads) {
-          CART_PATHS.forEach(function(p){
-            if (_pathEndKnown(p[0]) && _pathEndKnown(p[1])) _drawCartPath(ctx, p[0], p[1], _S, _S, RB);
-          });
-        }
-
-        // Rota Continental Ativa e Breadcrumbs (D&D 5e Style)
-        var activeTargetWorld = hoverKey || (typeof window !== 'undefined' && window._cartCurrentLocBiome && window._cartCurrentLocBiome.key);
-        if (activeTargetWorld && CART_PATHS && CART_PATHS.length) {
-          var startKW = (pk && RB.some(function(b){ return b.key === pk; })) ? pk : 'plains';
-          if (startKW && startKW !== activeTargetWorld) {
-            var routeW = _findRoutePath(startKW, activeTargetWorld, CART_PATHS);
-            if (routeW) {
-              _drawActiveRouteBreadcrumbs(ctx, routeW, _S, _S, RB);
-            }
-          }
-        }
-        if (activeTargetWorld) {
-          var targetNodeW = RB.find(function(b){ return b.key === activeTargetWorld; });
-          if (targetNodeW && targetNodeW.key !== pk) {
-            _drawSelectedTargetHalo(ctx, targetNodeW, _S, _S);
-          }
-        }
-        var qf = (typeof cfg.getQuestFocus === 'function') ? cfg.getQuestFocus() : null;
-        if (_searchQuery) {
-          RB.forEach(function(b){
-            if ((known === null || known.indexOf(b.key) >= 0 || b.isOrigin) && _nodeMatchesSearch(b, _searchQuery)) {
-              _drawSearchMatchBeacon(ctx, b, _S, _S);
-            }
-          });
-        }
-        if (_focusPulseKey && (Date.now() - _focusPulseTime < 2500)) {
-          var pulseNode = RB.find(function(b){ return b.key === _focusPulseKey; });
-          if (pulseNode) {
-            _drawFocusPulseBeacon(ctx, pulseNode, _S, _S, (Date.now() - _focusPulseTime) / 1000);
-          }
-        }
-        RB.forEach(function(b){
-          if (known === null || known.indexOf(b.key) >= 0 || b.isOrigin) {
-            var hasMap = b.mapKey && ownedMaps && (ownedMaps.indexOf(b.mapKey) >= 0);
-            var hasQ = !!(qf && qf.key === b.key);
-            var isPin = _isLocPinned(b.key);
-            _drawCartNode(ctx, b, _S, _S, hoverKey === b.key, { hasRegionalMap: hasMap, ownedMaps: ownedMaps, locArt: _locArt, hasActiveQuest: hasQ, isPinned: isPin, activeFilter: view.activeFilter, layers: _cartLayers });
-          }
-        });
-        var pn = pk && RB.find(function(b){ return b.key === pk; });
-        if (pn) _drawPlayerPin(ctx, pn, _S, _S);
-        if (qf && qf.key && typeof cfg.drawQuestHalo === 'function') {
-          var qn = RB.find(function(b){ return b.key === qf.key; });
-          if (qn) cfg.drawQuestHalo(ctx, qn, _S, _S, qf.title || 'Missão');
-        }
-
-        // Cartouche superior elegante no Modo Continente
         var totalWorld = CART_BIOMES.length;
         var discWorld = (known !== null) ? CART_BIOMES.filter(function(b){
           return known.indexOf(b.key) >= 0 || b.isOrigin || b.key === 'plains';
@@ -39491,65 +39388,33 @@
       var _mr = _cartWorldMapRect(view.w, view.h);
       var _S = _mr.s, _offX = _mr.x, _offY = _mr.y;
       var isTouch = (typeof window !== 'undefined' && (('ontouchstart' in window) || (navigator && navigator.maxTouchPoints > 0)));
-      // P-mapa sessão #73: só locais descobertos (ou origem) são clicáveis — os
-      // não-descobertos não aparecem no mapa, então também não respondem ao tap/hover
-      // (assim o popup "Local Desconhecido" não acontece mais).
+
       var known = (typeof cfg.getKnownLocations === 'function') ? cfg.getKnownLocations() :
                   ((typeof window !== 'undefined' && window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.known_locations) || null);
       var ownedMaps = (typeof cfg.getOwnedMaps === 'function') ? cfg.getOwnedMaps() :
                       ((typeof window !== 'undefined' && window.CITY_MOCK_PLAYER && (window.CITY_MOCK_PLAYER.owned_maps || window.CITY_MOCK_PLAYER.maps_owned)) || []);
-      var best = null, bestD = Infinity;
-      var activeNodes = CART_BIOMES;
-      if (_viewMode === 'province' && _activeProvId !== 'world') {
-        var curProv = CART_PROVINCES.find(function(p){ return p.id === _activeProvId; });
-        activeNodes = CART_BIOMES.filter(function(b){ return _LOCATION_TO_PROVINCE[b.key] === _activeProvId; });
-      }
-      // No modo Continente, permite também hit na área central das províncias descobertas
-      if (_viewMode === 'world') {
-        for (var pi = 0; pi < CART_PROVINCES.length; pi++) {
-          var pr = CART_PROVINCES[pi];
-          if (pr.id === 'world') continue;
-          if (!isProvinceDiscovered(pr.id, known, ownedMaps)) continue;
-          var pcx = _offX + (pr.cx || 0.5) * _S;
-          var pcy = _offY + (pr.cy || 0.5) * _S;
-          var pdx = wx - pcx, pdy = wy - pcy;
-          var provR = Math.max(36, _S * 0.08);
-          if (pdx*pdx + pdy*pdy <= provR * provR) {
-            var firstNode = CART_BIOMES.find(function(b){ return _LOCATION_TO_PROVINCE[b.key] === pr.id; });
-            if (firstNode) {
-              best = firstNode;
-              bestD = pdx*pdx + pdy*pdy;
-            }
-          }
-        }
-      }
 
-      for (var i = 0; i < activeNodes.length; i++) {
-        var b = activeNodes[i];
-        var curProv = CART_PROVINCES.find(function(p){ return p.id === _activeProvId; });
-        var provMapOwned = curProv && curProv.mapKey && ownedMaps && (ownedMaps.indexOf(curProv.mapKey) >= 0);
-        var isDiscovered = (known === null || known.indexOf(b.key) >= 0 || b.isOrigin || provMapOwned);
-        // Lugares sob o Fog of War preto solido nao respondem a toque/clique
+      var best = null;
+      var bestD = Infinity;
+
+      var RB = CART_BIOMES.map(_resolved);
+      var isProvMode = (_viewMode === 'province' && _activeProvId !== 'world');
+      var curProv = isProvMode ? CART_PROVINCES.find(function(p){ return p.id === _activeProvId; }) : null;
+      var provMapOwned = curProv && curProv.mapKey && ownedMaps && (ownedMaps.indexOf(curProv.mapKey) >= 0);
+
+      for (var i = 0; i < RB.length; i++) {
+        var b = RB[i];
+        var isNodeInProv = !isProvMode || (_LOCATION_TO_PROVINCE[b.key] === _activeProvId);
+        var isDiscovered = (known === null || known.indexOf(b.key) >= 0 || b.isOrigin || (isNodeInProv && provMapOwned));
         if (!isDiscovered) continue;
-        var rb = _resolved(b);
-        if (_viewMode === 'province' && _activeProvId !== 'world') {
-          var curProv = CART_PROVINCES.find(function(p){ return p.id === _activeProvId; });
-          var rc = (curProv && curProv.regionalCoords && curProv.regionalCoords[b.key]) || { rx: rb.x, ry: rb.y };
-          rb = Object.assign({}, b, { x: rc.rx, y: rc.ry });
-        }
-        var bx = _offX + rb.x * _S;
-        var by = _offY + rb.y * _S;
-        // P-mapa sessão #73 (user: "efeitos do mouse SÓ na imagem"): raio de hit =
-        // metade da largura REAL da imagem do local (MESMA conta do _drawLocArt: iw =
-        // scale% * _S), não um círculo fixo maior. Mínimo de tap-target pra toque no
-        // smartphone (~56px) e desktop (~24px) — usabilidade sem estourar a imagem.
+        var bx = _offX + b.x * _S;
+        var by = _offY + b.y * _S;
         var _ov = _locCoords[b.key] || {};
-        var imgHalf = (((typeof _ov.scale === 'number' ? _ov.scale : 5) / 100) * _S) / 2;  // default 5 (igual ao _drawLocArt)
+        var imgHalf = (((typeof _ov.scale === 'number' ? _ov.scale : 5) / 100) * _S) / 2;
         var radius = isTouch ? Math.max(imgHalf, 28) : Math.max(imgHalf, 22);
         var rsq = radius * radius;
         var dx = wx - bx, dy = wy - by;
         var d = dx*dx + dy*dy;
-        // Hit no retículo ou na caixa de rótulo logo abaixo do nó
         var inLabel = (Math.abs(dx) <= Math.max(radius, 40) && dy >= 0 && dy <= (radius + 24));
         if ((d <= rsq || inLabel) && d < bestD) { best = b; bestD = d; }
       }
@@ -39587,18 +39452,10 @@
     }
 
     function focusProvince(provId, w, h){
-      var prov = CART_PROVINCES.find(function(p){ return p.id === provId; }) || CART_PROVINCES[0];
-      var _mr = _cartWorldMapRect(w, h);
-      var _S = _mr.s;
-      var targetZoom = prov.zoom || 1.0;
-      var cx = _mr.x + (prov.cx || 0.5) * _S;
-      var cy = _mr.y + (prov.cy || 0.5) * _S;
-      var panX = (w / 2) - (cx * targetZoom);
-      var panY = (h / 2) - (cy * targetZoom);
-      return { panX: panX, panY: panY, zoom: targetZoom, province: prov };
+      return openProvince(provId, w, h);
     }
 
-    function openProvince(provId){
+    function openProvince(provId, w, h){
       if (!provId || provId === 'world') return closeProvince();
       var prov = CART_PROVINCES.find(function(p){ return p.id === provId; });
       if (!prov) return closeProvince();
@@ -39613,7 +39470,15 @@
       _activeProvId = provId;
       _baseCache = null;
       _onLoad();
-      return { panX: 0, panY: 0, zoom: 1.0, province: prov, mode: 'province' };
+      w = w || 400; h = h || 400;
+      var _mr = _cartWorldMapRect(w, h);
+      var _S = _mr.s;
+      var targetZoom = prov.zoom || 1.95;
+      var cx = _mr.x + (prov.cx || 0.5) * _S;
+      var cy = _mr.y + (prov.cy || 0.5) * _S;
+      var panX = (w / 2) - (cx * targetZoom);
+      var panY = (h / 2) - (cy * targetZoom);
+      return { panX: panX, panY: panY, zoom: targetZoom, province: prov, mode: 'province' };
     }
 
     function closeProvince(){
@@ -39829,7 +39694,7 @@
       id: 'plains',
       name: 'Planícies Centrais',
       icon: '🌾',
-      zoom: 1.0,
+      zoom: 1.95,
       cx: 0.50,
       cy: 0.55,
       mapKey: 'Mapa das Planícies',
@@ -39840,11 +39705,11 @@
       hazard: 'Bandidos de Estrada & Tempestades',
       locKeys: ['plains', 'green_fields', 'orc_tribe', 'bandit_fortress', 'ashen_badlands'],
       regionalCoords: {
-        plains: { rx: 0.50, ry: 0.50, name: 'Portões de Valdória', marcos: 0 },
-        green_fields: { rx: 0.28, ry: 0.36, name: 'Campos Verdes', marcos: 1 },
-        orc_tribe: { rx: 0.74, ry: 0.38, name: 'Acampamento Orc', marcos: 3 },
-        bandit_fortress: { rx: 0.46, ry: 0.76, name: 'Forte dos Bandidos', marcos: 2 },
-        ashen_badlands: { rx: 0.76, ry: 0.74, name: 'Terras Devastadas', marcos: 4 }
+        plains: { rx: 0.50, ry: 0.55, name: 'Portões de Valdória', marcos: 0 },
+        green_fields: { rx: 0.36, ry: 0.46, name: 'Campos Verdes', marcos: 1 },
+        orc_tribe: { rx: 0.64, ry: 0.58, name: 'Acampamento Orc', marcos: 3 },
+        bandit_fortress: { rx: 0.50, ry: 0.68, name: 'Forte dos Bandidos', marcos: 2 },
+        ashen_badlands: { rx: 0.76, ry: 0.78, name: 'Terras Devastadas', marcos: 4 }
       },
       regionalPaths: [
         ['plains', 'green_fields'],
@@ -39857,9 +39722,9 @@
       id: 'forest',
       name: 'Grandes Florestas',
       icon: '🌲',
-      zoom: 1.0,
+      zoom: 2.10,
       cx: 0.50,
-      cy: 0.28,
+      cy: 0.27,
       mapKey: 'Mapa da Floresta',
       desc: 'Matas ancestrais densas, arcos élficos de pedra e bosques imemoriais.',
       tier: 'Tier 1-2 (Níveis 3-6)',
@@ -39868,10 +39733,10 @@
       hazard: 'Névoas Ilusórias & Teias de Aranha',
       locKeys: ['forest', 'goblin_nest', 'elven_ruins', 'elder_woods'],
       regionalCoords: {
-        forest: { rx: 0.38, ry: 0.48, name: 'Floresta dos Sussurros', marcos: 2 },
-        goblin_nest: { rx: 0.26, ry: 0.26, name: 'Ninho de Goblins', marcos: 2 },
-        elven_ruins: { rx: 0.64, ry: 0.28, name: 'Ruínas Élficas', marcos: 3 },
-        elder_woods: { rx: 0.74, ry: 0.66, name: 'Bosque Ancestral', marcos: 4 }
+        forest: { rx: 0.48, ry: 0.35, name: 'Floresta dos Sussurros', marcos: 2 },
+        goblin_nest: { rx: 0.36, ry: 0.22, name: 'Ninho de Goblins', marcos: 2 },
+        elven_ruins: { rx: 0.50, ry: 0.20, name: 'Ruínas Élficas', marcos: 3 },
+        elder_woods: { rx: 0.64, ry: 0.25, name: 'Bosque Ancestral', marcos: 4 }
       },
       regionalPaths: [
         ['forest', 'goblin_nest'],
@@ -39884,9 +39749,9 @@
       id: 'swamp',
       name: 'Pântanos do Leste',
       icon: '🐍',
-      zoom: 1.0,
+      zoom: 2.00,
       cx: 0.78,
-      cy: 0.42,
+      cy: 0.44,
       mapKey: 'Mapa do Pântano',
       desc: 'Águas estagnadas escuras, cabanas sobre palafitas e névoas com vapores esmeralda.',
       tier: 'Tier 2 (Níveis 5-8)',
@@ -39895,25 +39760,25 @@
       hazard: 'Lama Movediça & Vapores Venenosos',
       locKeys: ['swamp', 'deep_swamp', 'graveyard', 'ancestral_graveyard', 'eldritch_mire'],
       regionalCoords: {
-        swamp: { rx: 0.30, ry: 0.36, name: 'Pântano Nebuloso', marcos: 3 },
-        deep_swamp: { rx: 0.72, ry: 0.40, name: 'Pântano Profundo', marcos: 4 },
-        graveyard: { rx: 0.40, ry: 0.74, name: 'Cemitério Antigo', marcos: 3 },
-        ancestral_graveyard: { rx: 0.20, ry: 0.82, name: 'Cemitério Ancestral', marcos: 5 },
-        eldritch_mire: { rx: 0.76, ry: 0.74, name: 'Pântano Eldritch', marcos: 5 }
+        swamp: { rx: 0.74, ry: 0.46, name: 'Pântano Nebuloso', marcos: 3 },
+        deep_swamp: { rx: 0.89, ry: 0.40, name: 'Pântano Profundo', marcos: 4 },
+        eldritch_mire: { rx: 0.76, ry: 0.30, name: 'Pântano Eldritch', marcos: 5 },
+        graveyard: { rx: 0.56, ry: 0.86, name: 'Cemitério Antigo', marcos: 3 },
+        ancestral_graveyard: { rx: 0.24, ry: 0.86, name: 'Cemitério Ancestral', marcos: 5 }
       },
       regionalPaths: [
         ['swamp', 'deep_swamp'],
+        ['swamp', 'eldritch_mire'],
         ['swamp', 'graveyard'],
-        ['graveyard', 'ancestral_graveyard'],
-        ['deep_swamp', 'eldritch_mire']
+        ['graveyard', 'ancestral_graveyard']
       ]
     },
     {
       id: 'mountain',
       name: 'Cordilheira Ocidental',
       icon: '🏔️',
-      zoom: 1.0,
-      cx: 0.20,
+      zoom: 1.80,
+      cx: 0.18,
       cy: 0.38,
       mapKey: 'Mapa das Montanhas',
       desc: 'Picos escarpados de granito, forjas mineiras de Korthag e galerias subterrâneas.',
@@ -39923,14 +39788,14 @@
       hazard: 'Desmoronamentos, Frio & Ar Rarefeito',
       locKeys: ['mountain', 'korthag', 'dragon_pass', 'black_peaks', 'cave', 'troll_cave', 'underground_caverns', 'crystal_depths'],
       regionalCoords: {
-        mountain: { rx: 0.48, ry: 0.36, name: 'Picos de Pedra', marcos: 3 },
-        korthag: { rx: 0.26, ry: 0.26, name: 'Korthag (Vila Mineira)', marcos: 3 },
-        dragon_pass: { rx: 0.74, ry: 0.22, name: 'Passo do Dragão', marcos: 5 },
-        black_peaks: { rx: 0.16, ry: 0.44, name: 'Montanhas Negras', marcos: 4 },
-        cave: { rx: 0.38, ry: 0.60, name: 'Passagem Subterrânea', marcos: 3 },
-        troll_cave: { rx: 0.18, ry: 0.68, name: 'Caverna do Troll', marcos: 4 },
-        underground_caverns: { rx: 0.58, ry: 0.72, name: 'Cavernas Subterrâneas', marcos: 4 },
-        crystal_depths: { rx: 0.32, ry: 0.84, name: 'Profundezas de Cristal', marcos: 6 }
+        mountain: { rx: 0.22, ry: 0.32, name: 'Picos de Pedra', marcos: 3 },
+        dragon_pass: { rx: 0.24, ry: 0.12, name: 'Passo do Dragão', marcos: 5 },
+        korthag: { rx: 0.12, ry: 0.22, name: 'Korthag (Vila Mineira)', marcos: 3 },
+        black_peaks: { rx: 0.05, ry: 0.33, name: 'Montanhas Negras', marcos: 4 },
+        cave: { rx: 0.22, ry: 0.45, name: 'Passagem Subterrânea', marcos: 3 },
+        troll_cave: { rx: 0.08, ry: 0.47, name: 'Caverna do Troll', marcos: 4 },
+        underground_caverns: { rx: 0.22, ry: 0.58, name: 'Cavernas Subterrâneas', marcos: 4 },
+        crystal_depths: { rx: 0.08, ry: 0.61, name: 'Profundezas de Cristal', marcos: 6 }
       },
       regionalPaths: [
         ['mountain', 'korthag'],
@@ -39939,15 +39804,14 @@
         ['mountain', 'cave'],
         ['cave', 'troll_cave'],
         ['cave', 'underground_caverns'],
-        ['underground_caverns', 'crystal_depths'],
-        ['crystal_depths', 'mountain']
+        ['underground_caverns', 'crystal_depths']
       ]
     },
     {
       id: 'desert',
       name: 'Dunas do Sul',
       icon: '🌵',
-      zoom: 1.0,
+      zoom: 2.10,
       cx: 0.42,
       cy: 0.80,
       mapKey: 'Mapa do Deserto',
@@ -39958,7 +39822,7 @@
       hazard: 'Calor Extremo, Sede & Tempestades de Areia',
       locKeys: ['desert'],
       regionalCoords: {
-        desert: { rx: 0.50, ry: 0.50, name: 'Deserto Dourado', marcos: 3 }
+        desert: { rx: 0.38, ry: 0.78, name: 'Deserto Dourado', marcos: 3 }
       },
       regionalPaths: []
     },
@@ -39966,7 +39830,7 @@
       id: 'coast',
       name: 'Litoral da Tormenta',
       icon: '🌊',
-      zoom: 1.0,
+      zoom: 2.10,
       cx: 0.88,
       cy: 0.52,
       mapKey: 'Mapa da Costa',
@@ -39977,7 +39841,7 @@
       hazard: 'Ressacas Violentas & Piratas',
       locKeys: ['salty_coast'],
       regionalCoords: {
-        salty_coast: { rx: 0.50, ry: 0.50, name: 'Costa Salgada', marcos: 3 }
+        salty_coast: { rx: 0.90, ry: 0.54, name: 'Costa Salgada', marcos: 3 }
       },
       regionalPaths: []
     },
@@ -39985,9 +39849,9 @@
       id: 'snow',
       name: 'Ermo Boreal',
       icon: '❄️',
-      zoom: 1.0,
-      cx: 0.52,
-      cy: 0.10,
+      zoom: 2.10,
+      cx: 0.54,
+      cy: 0.12,
       mapKey: 'Mapa do Ermo Gelado',
       desc: 'Geleiras azuis eternas, fendas no gelo e montanhas congeladas ao norte.',
       tier: 'Tier 3 (Níveis 8-12)',
@@ -39996,8 +39860,8 @@
       hazard: 'Frio Extremo, Fendas de Gelo & Nevascas',
       locKeys: ['snow', 'glacial_rift'],
       regionalCoords: {
-        snow: { rx: 0.38, ry: 0.46, name: 'Ermo Congelado', marcos: 4 },
-        glacial_rift: { rx: 0.68, ry: 0.56, name: 'Abismo Glacial', marcos: 6 }
+        snow: { rx: 0.66, ry: 0.10, name: 'Ermo Congelado', marcos: 4 },
+        glacial_rift: { rx: 0.44, ry: 0.07, name: 'Abismo Glacial', marcos: 6 }
       },
       regionalPaths: [
         ['snow', 'glacial_rift']
@@ -40007,9 +39871,9 @@
       id: 'volcanic',
       name: 'Terras de Fogo',
       icon: '🌋',
-      zoom: 1.0,
-      cx: 0.80,
-      cy: 0.70,
+      zoom: 2.10,
+      cx: 0.82,
+      cy: 0.68,
       mapKey: 'Mapa Vulcânico',
       desc: 'A grande caldeira ativa, fendas de lava incandescente e platôs de basalto.',
       tier: 'Tier 3-4 (Níveis 10-16)',
@@ -40018,8 +39882,8 @@
       hazard: 'Rios de Lava, Vapores de Enxofre & Brasas',
       locKeys: ['volcanic', 'valkrest'],
       regionalCoords: {
-        volcanic: { rx: 0.42, ry: 0.48, name: 'Cratera Vulcânica', marcos: 5 },
-        valkrest: { rx: 0.74, ry: 0.56, name: 'Valkrest (Acampamento)', marcos: 5 }
+        volcanic: { rx: 0.80, ry: 0.64, name: 'Cratera Vulcânica', marcos: 5 },
+        valkrest: { rx: 0.92, ry: 0.70, name: 'Valkrest (Acampamento)', marcos: 5 }
       },
       regionalPaths: [
         ['volcanic', 'valkrest']
