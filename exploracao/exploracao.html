@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-28T04:11:23Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-28T04:33:48Z - do not edit directly, edit source -->
 
 
 
@@ -94376,13 +94376,27 @@ function _cartResolveMapId(keyOrMapId) {
   return keyOrMapId;
 }
 function _cartGetPlayerBiomeV2(){
-  if (typeof S !== 'undefined' && S && S.mapId) {
-    var rawId = S.mapId;
+  var rawId = null;
+  if (typeof S !== 'undefined' && S) {
+    if (S.current_location_id) rawId = S.current_location_id;
+    else if (S.player && S.player.current_location_id) rawId = S.player.current_location_id;
+    else if (S.player && S.player.metadata && S.player.metadata.current_location_id) rawId = S.player.metadata.current_location_id;
+    else if (S.mapId) rawId = S.mapId;
+    else if (S.location) rawId = S.location;
+  }
+  if (!rawId && window.__EXPLORE_LOCATION_ID) rawId = window.__EXPLORE_LOCATION_ID;
+  if (!rawId && window.__EXPLORE_MAP_ID) rawId = window.__EXPLORE_MAP_ID;
+
+  if (rawId) {
     if (typeof FIXED_MAPS !== 'undefined' && FIXED_MAPS[rawId] && FIXED_MAPS[rawId].parentMap) {
       rawId = FIXED_MAPS[rawId].parentMap;
     }
-    var mappedKey = _MAP_ID_TO_CART_KEY[rawId] || rawId;
     var allB = (window.CartShared && CartShared.CART_BIOMES) || (typeof CART_BIOMES_V2 !== 'undefined' ? CART_BIOMES_V2 : []);
+    if (Array.isArray(allB)) {
+      var exactNode = allB.find(function(b){ return b && (b.key === rawId || b.id === rawId); });
+      if (exactNode) return exactNode.key || exactNode.id;
+    }
+    var mappedKey = _MAP_ID_TO_CART_KEY[rawId] || rawId;
     if (Array.isArray(allB) && allB.some(function(b){ return b && b.key === mappedKey; })) {
       return mappedKey;
     }
@@ -94392,6 +94406,39 @@ function _cartGetPlayerBiomeV2(){
   }
   if (typeof S !== 'undefined' && S && S.biome) return S.biome;
   return 'plains';
+}
+
+function _resolveCurrentPointcrawlBiomeNode(explicitBiome) {
+  if (explicitBiome && (explicitBiome.key || explicitBiome.name)) return explicitBiome;
+  if (window._cartCurrentLocBiome && (window._cartCurrentLocBiome.key || window._cartCurrentLocBiome.name)) return window._cartCurrentLocBiome;
+
+  var curKey = (typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : null;
+  var allB = (window.CartShared && CartShared.CART_BIOMES) || (typeof CART_BIOMES_V2 !== 'undefined' ? CART_BIOMES_V2 : []);
+  if (curKey && Array.isArray(allB)) {
+    var found = allB.find(function(b){ return b && (b.key === curKey || b.id === curKey); });
+    if (found) return found;
+  }
+
+  if (typeof S !== 'undefined' && S) {
+    var locKey = S.current_location_id || (S.player && S.player.current_location_id) || (S.player && S.player.metadata && S.player.metadata.current_location_id) || S.mapId || S.location;
+    if (locKey && Array.isArray(allB)) {
+      var foundLoc = allB.find(function(b){ return b && (b.key === locKey || b.id === locKey); });
+      if (foundLoc) return foundLoc;
+    }
+  }
+
+  return (Array.isArray(allB) && allB.length) ? allB[0] : { key: 'plains', name: 'Portões de Valdória', regionalName: 'Planícies Centrais' };
+}
+
+function _getAbilityMod(p, ab) {
+  if (!p) return 0;
+  if (p.mods && typeof p.mods[ab] === 'number') return p.mods[ab];
+  var score = null;
+  if (p.abilities && typeof p.abilities[ab] === 'number') score = p.abilities[ab];
+  else if (p.stats && typeof p.stats[ab] === 'number') score = p.stats[ab];
+  else if (typeof p[ab] === 'number') score = p[ab];
+  if (score === null || typeof score !== 'number' || isNaN(score)) score = 10;
+  return Math.floor((score - 10) / 2);
 }
 
 
@@ -95114,8 +95161,9 @@ function _closeCartLocationPopup(){
         return;
       }
       if (action === 'explore-poi') {
+        var currentBiome = biome || window._cartCurrentLocBiome || (typeof _resolveCurrentPointcrawlBiomeNode === 'function' ? _resolveCurrentPointcrawlBiomeNode() : null);
         _closeCartLocationPopup();
-        if (typeof _triggerPointcrawlRegionalEvent === 'function') _triggerPointcrawlRegionalEvent();
+        if (typeof _triggerPointcrawlRegionalEvent === 'function') _triggerPointcrawlRegionalEvent(currentBiome);
         return;
       }
       if (action === 'open-camp') {
@@ -95731,8 +95779,11 @@ function _showDungeonDiscoveryModal(dg, biome, checkInfo) {
   });
 }
 
-function _triggerPointcrawlRegionalEvent() {
-  var biome = window._cartCurrentLocBiome;
+function _triggerPointcrawlRegionalEvent(targetBiome) {
+  var biome = (typeof _resolveCurrentPointcrawlBiomeNode === 'function')
+    ? _resolveCurrentPointcrawlBiomeNode(targetBiome || window._cartCurrentLocBiome)
+    : (targetBiome || window._cartCurrentLocBiome);
+
   if (typeof S === 'undefined' || !S) return;
   // Fecha o popup de localidade para dar visibilidade imediata ao evento/toast
   if (typeof _closeCartLocationPopup === 'function') _closeCartLocationPopup();
@@ -95753,14 +95804,23 @@ function _triggerPointcrawlRegionalEvent() {
 
   if (undiscovered.length > 0) {
     var targetDg = undiscovered[0];
-    if (!S._exploreAttempts) S._exploreAttempts = {};
     var bKey = (biome && biome.key) || 'current';
-    var attempts = (S._exploreAttempts[bKey] || 0) + 1;
+    var cid = (S && S.player && (S.player.char_id || S.player.id)) || window.__EXPLORE_USER_ID || 'shared';
+    var storeKey = 'vld_exp_att_' + cid + '_' + bKey;
+    var attempts = 0;
+    try {
+      attempts = parseInt(localStorage.getItem(storeKey) || '0', 10) || 0;
+    } catch (_) {}
+    if (!S._exploreAttempts) S._exploreAttempts = {};
+    attempts = Math.max(attempts, S._exploreAttempts[bKey] || 0) + 1;
     S._exploreAttempts[bKey] = attempts;
+    try {
+      localStorage.setItem(storeKey, String(attempts));
+    } catch (_) {}
 
     var p = (S && S.player) || {};
-    var wisMod = (p.mods && typeof p.mods.wis === 'number') ? p.mods.wis : (p.abilities && typeof p.abilities.wis === 'number' ? p.abilities.wis : 1);
-    var intMod = (p.mods && typeof p.mods.int === 'number') ? p.mods.int : (p.abilities && typeof p.abilities.int === 'number' ? p.abilities.int : 1);
+    var wisMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(p, 'wis') : 1;
+    var intMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(p, 'int') : 1;
     var bestMod = Math.max(wisMod, intMod);
     var d20 = 1 + Math.floor(Math.random() * 20);
     var total = d20 + bestMod;
@@ -95772,7 +95832,7 @@ function _triggerPointcrawlRegionalEvent() {
       if (typeof updateHud === 'function') updateHud();
       return;
     } else {
-      var regName = (biome && (biome.regionalName || biome.name)) ? (biome.regionalName || biome.name) : 'Valdória';
+      var regName = (biome && (biome.name || biome.regionalName)) ? (biome.name || biome.regionalName) : 'Valdória';
       if (typeof vToast === 'function') {
         vToast('🔍 Investigação (' + total + ' vs CD ' + dc + '): A comitiva vasculhou ' + regName + ' e encontrou pistas e sentinelas, mas a entrada oculta ainda não foi localizada. Continue explorando!', 'warning', 4500);
       }
@@ -95790,8 +95850,8 @@ function _triggerPointcrawlRegionalEvent() {
     rolled = maybeRollWanderingMonster();
   }
   if (!rolled && typeof vToast === 'function') {
-    var regName = (biome && (biome.regionalName || biome.name)) ? (biome.regionalName || biome.name) : 'Valdória';
-    vToast('🧭 A comitiva patrulhou os arredores de ' + regName + ' sem incidentes hostis no momento.', 'info', 3500);
+    var regName = (biome && (biome.name || biome.regionalName)) ? (biome.name || biome.regionalName) : 'Valdória';
+    vToast('🧭 A comitiva patrulhou as imediações de ' + regName + ' sem incidentes hostis no momento.', 'info', 3500);
   }
   if (typeof updateHud === 'function') updateHud();
 }
