@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-28T03:44:10Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-28T04:11:23Z - do not edit directly, edit source -->
 
 
 
@@ -31830,6 +31830,11 @@ window.__explFetchTO = function(url, opts, ms) {
 
         }
 
+        if (Array.isArray(res.discovered_dungeons)) {
+          window.__EXPLORE_DISCOVERED_DUNGEONS = res.discovered_dungeons;
+          console.info('[E-REM:API-INIT] discovered_dungeons=' + window.__EXPLORE_DISCOVERED_DUNGEONS.length + ' [' + window.__EXPLORE_DISCOVERED_DUNGEONS.join(',') + ']');
+        }
+
         /* Server-Only State (regra #0): o inventário da exploração vem do SERVIDOR no
 
            /init (não mais do localStorage da cidade — proibido localStorage como cache
@@ -32371,6 +32376,24 @@ window.__explFetchTO = function(url, opts, ms) {
     },
 
 
+
+    discoverDungeon: async function(dungeonId, locationId) {
+      console.info('[E-REM:API-DISCOVER-DGN] send dg=' + dungeonId + ' loc=' + locationId);
+      try {
+        var res = await _post('/api/exploracao/discover_dungeon', {
+          token: _motorToken(),
+          dungeon_id: dungeonId,
+          location_id: locationId
+        });
+        if (res && Array.isArray(res.discovered_dungeons)) {
+          window.__EXPLORE_DISCOVERED_DUNGEONS = res.discovered_dungeons;
+          console.info('[E-REM:API-DISCOVER-DGN] ok count=' + res.discovered_dungeons.length);
+        }
+        return res;
+      } catch (err) {
+        console.warn('[E-REM:API-DISCOVER-DGN] failed', err);
+      }
+    },
 
     // Helper diagnóstico (pra console dev): true se motor_token presente.
 
@@ -95468,7 +95491,7 @@ function _activatePointcrawlRootMode() {
   }
 }
 
-function _getDungeonsForBiomeNode(biomeNode) {
+function _getAllPotentialDungeonsForBiomeNode(biomeNode) {
   if (!biomeNode) return [];
   var mapId = (typeof _cartResolveMapId === 'function') ? _cartResolveMapId(biomeNode.key) : biomeNode.key;
   var list = [];
@@ -95498,6 +95521,72 @@ function _getDungeonsForBiomeNode(biomeNode) {
   if (canonicalByNode[biomeNode.key]) canonicalByNode[biomeNode.key].forEach(addDg);
   if (canonicalByNode[mapId]) canonicalByNode[mapId].forEach(addDg);
   return list;
+}
+
+function _getDiscoveredDungeonsList() {
+  var list = [];
+  if (Array.isArray(window.__EXPLORE_DISCOVERED_DUNGEONS)) {
+    window.__EXPLORE_DISCOVERED_DUNGEONS.forEach(function(id){
+      if (id && list.indexOf(id) === -1) list.push(id);
+    });
+  }
+  if (typeof S !== 'undefined' && S && Array.isArray(S.discovered_dungeons)) {
+    S.discovered_dungeons.forEach(function(id){
+      if (id && list.indexOf(id) === -1) list.push(id);
+    });
+  }
+  try {
+    var cid = (typeof S !== 'undefined' && S && S.player && (S.player.char_id || S.player.id)) || window.__EXPLORE_USER_ID || 'shared';
+    var raw = localStorage.getItem('vld_disc_dungeons_' + cid);
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        parsed.forEach(function(id){
+          if (id && list.indexOf(id) === -1) list.push(id);
+        });
+      }
+    }
+  } catch(_) {}
+  return list;
+}
+
+function _isDungeonDiscovered(dgId) {
+  if (!dgId) return false;
+  var disc = _getDiscoveredDungeonsList();
+  return disc.indexOf(dgId) >= 0;
+}
+
+function _recordDungeonDiscovered(dgId, locationKey) {
+  if (!dgId) return;
+  if (!Array.isArray(window.__EXPLORE_DISCOVERED_DUNGEONS)) {
+    window.__EXPLORE_DISCOVERED_DUNGEONS = [];
+  }
+  if (window.__EXPLORE_DISCOVERED_DUNGEONS.indexOf(dgId) === -1) {
+    window.__EXPLORE_DISCOVERED_DUNGEONS.push(dgId);
+  }
+  if (typeof S !== 'undefined' && S) {
+    if (!Array.isArray(S.discovered_dungeons)) S.discovered_dungeons = [];
+    if (S.discovered_dungeons.indexOf(dgId) === -1) S.discovered_dungeons.push(dgId);
+  }
+  try {
+    var cid = (typeof S !== 'undefined' && S && S.player && (S.player.char_id || S.player.id)) || window.__EXPLORE_USER_ID || 'shared';
+    var disc = _getDiscoveredDungeonsList();
+    localStorage.setItem('vld_disc_dungeons_' + cid, JSON.stringify(disc));
+  } catch(_) {}
+
+  if (window.__EXPLORE_MODE === 'remote' && window.ExploracaoAPI && typeof window.ExploracaoAPI.discoverDungeon === 'function') {
+    window.ExploracaoAPI.discoverDungeon(dgId, locationKey);
+  }
+}
+
+// REGRA SOBERANA DE INCURSÕES (Ordem do Usuário 2026-10 — IMUTÁVEL):
+// Nenhuma incursão ou masmorra pode aparecer por padrão no painel de ações de qualquer localidade.
+// Toda incursão nasce estritamente oculta e só é exibida se o aventureiro a tiver descoberto através da exploração.
+function _getDungeonsForBiomeNode(biomeNode) {
+  var potential = _getAllPotentialDungeonsForBiomeNode(biomeNode);
+  return potential.filter(function(dg){
+    return _isDungeonDiscovered(dg.id);
+  });
 }
 
 function _buildPointcrawlCurrentNodeActionsHtml(biome) {
@@ -95584,6 +95673,64 @@ function _doPointcrawlForage() {
   }
 }
 
+function _showDungeonDiscoveryModal(dg, biome, checkInfo) {
+  var existing = document.getElementById('incursion-discovery-modal');
+  if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+
+  var locName = (biome && (biome.regionalName || biome.name)) ? (biome.regionalName || biome.name) : 'Valdória';
+  var rollText = (checkInfo && checkInfo.guaranteed)
+    ? '🧭 <b>Busca Minuciosa nos Ermos:</b> A comitiva vasculhou o perímetro com cautela até localizar a entrada oculta!'
+    : ('🎲 <b>Teste de Investigação / Percepção (D&D 5e):</b> d20 (' + checkInfo.d20 + ') + mod (' + (checkInfo.mod >= 0 ? '+' : '') + checkInfo.mod + ') = <b>' + checkInfo.total + '</b> vs CD ' + checkInfo.dc + ' <b>(Sucesso!)</b>');
+
+  var artKey = (dg.id === 'orc_chief_tent') ? 'orc_tribe' : dg.id;
+  var imgBase = (typeof window !== 'undefined' && window.location.protocol === 'file:')
+    ? './shared/img/map/locations/'
+    : '/shared/img/map/locations/';
+  var imgUrl = imgBase + artKey + '.webp';
+
+  var modal = document.createElement('div');
+  modal.id = 'incursion-discovery-modal';
+  modal.className = 'explore-modal-overlay';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:12px;z-index:270;';
+  modal.innerHTML = ''
+    + '<div class="em-card" style="max-width:420px;width:100%;background:#16100b;border:2px solid #ffd700;border-radius:8px;overflow:hidden;box-shadow:0 12px 36px rgba(0,0,0,0.95);animation:fadeIn 0.22s ease-out;">'
+    + '  <div style="position:relative;height:120px;background:url(' + imgUrl + ') center/cover no-repeat;border-bottom:1px solid rgba(196,149,58,0.5);">'
+    + '    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,8,6,0.3),rgba(16,11,7,0.95));"></div>'
+    + '    <div style="position:absolute;bottom:8px;left:12px;right:12px;text-align:left;">'
+    + '      <div style="font-size:10.5px;color:#ffd700;font-family:Cinzel,serif;font-weight:700;letter-spacing:1px;">🏰 INCURSÃO DESCOBERTA NOS ERMOS</div>'
+    + '      <div style="font-family:Cinzel,serif;font-size:15px;color:#fff;font-weight:700;text-shadow:0 2px 6px #000;">' + dg.name + '</div>'
+    + '    </div>'
+    + '  </div>'
+    + '  <div style="padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:8px;">'
+    + '    <div style="padding:6px 10px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.35);border-radius:5px;font-size:11px;color:#bbf7d0;">'
+    +        rollText
+    + '    </div>'
+    + '    <div style="font-size:11.5px;color:#f4d49a;line-height:1.45;font-style:italic;">'
+    +        (dg.intro || 'Após vasculhar minuciosamente a área, você localiza a entrada fortificada protegida pela guarda local.')
+    + '    </div>'
+    + '    <div style="padding:6px 10px;background:rgba(217,119,6,0.12);border:1px solid rgba(217,119,6,0.35);border-radius:5px;font-size:11px;color:#fde68a;">'
+    + '      📍 <b>Permanência:</b> Esta incursão agora está <b>desbloqueada permanentemente</b> no painel de ' + locName + ' e pode ser adentrada a qualquer momento.'
+    + '    </div>'
+    + '    <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">'
+    + '      <button type="button" id="incur-disc-enter-btn" style="background:linear-gradient(180deg,rgba(160,32,32,0.95),rgba(90,16,16,0.98));border:1.5px solid #f87171;color:#fecaca;font-family:Cinzel,serif;font-size:11px;font-weight:700;padding:8px 12px;border-radius:5px;cursor:pointer;">🏰 Adentrar Incursão Agora</button>'
+    + '      <button type="button" id="incur-disc-close-btn" style="background:linear-gradient(180deg,#3a2c18,#241a0e);border:1px solid #c4953a;color:#fde047;font-family:Cinzel,serif;font-size:11px;font-weight:700;padding:8px 12px;border-radius:5px;cursor:pointer;">🧭 Voltar às Ações do Local</button>'
+    + '    </div>'
+    + '  </div>'
+    + '</div>';
+
+  document.body.appendChild(modal);
+
+  document.getElementById('incur-disc-enter-btn').addEventListener('click', function(){
+    if (modal.parentNode) modal.parentNode.removeChild(modal);
+    if (typeof _openPointcrawlDungeonDelver === 'function') _openPointcrawlDungeonDelver(dg.id);
+  });
+
+  document.getElementById('incur-disc-close-btn').addEventListener('click', function(){
+    if (modal.parentNode) modal.parentNode.removeChild(modal);
+    if (typeof _openCurrentNodePointcrawlHub === 'function') _openCurrentNodePointcrawlHub();
+  });
+}
+
 function _triggerPointcrawlRegionalEvent() {
   var biome = window._cartCurrentLocBiome;
   if (typeof S === 'undefined' || !S) return;
@@ -95596,6 +95743,42 @@ function _triggerPointcrawlRegionalEvent() {
   S._stepsToNextEvent = 0;
   if (typeof tickDayPhase === 'function') {
     try { tickDayPhase(); } catch (_) {}
+  }
+
+  // REGRA SOBERANA DE INCURSÕES: Checagem de Descoberta nos Ermos
+  var potential = (typeof _getAllPotentialDungeonsForBiomeNode === 'function') ? _getAllPotentialDungeonsForBiomeNode(biome) : [];
+  var undiscovered = potential.filter(function(dg){
+    return !_isDungeonDiscovered(dg.id);
+  });
+
+  if (undiscovered.length > 0) {
+    var targetDg = undiscovered[0];
+    if (!S._exploreAttempts) S._exploreAttempts = {};
+    var bKey = (biome && biome.key) || 'current';
+    var attempts = (S._exploreAttempts[bKey] || 0) + 1;
+    S._exploreAttempts[bKey] = attempts;
+
+    var p = (S && S.player) || {};
+    var wisMod = (p.mods && typeof p.mods.wis === 'number') ? p.mods.wis : (p.abilities && typeof p.abilities.wis === 'number' ? p.abilities.wis : 1);
+    var intMod = (p.mods && typeof p.mods.int === 'number') ? p.mods.int : (p.abilities && typeof p.abilities.int === 'number' ? p.abilities.int : 1);
+    var bestMod = Math.max(wisMod, intMod);
+    var d20 = 1 + Math.floor(Math.random() * 20);
+    var total = d20 + bestMod;
+    var dc = 12; // D&D 5e CD Moderada de Investigação nos Ermos
+
+    if (total >= dc || attempts >= 2) {
+      _recordDungeonDiscovered(targetDg.id, bKey);
+      _showDungeonDiscoveryModal(targetDg, biome, { d20: d20, total: total, mod: bestMod, dc: dc, guaranteed: (attempts >= 2 && total < dc) });
+      if (typeof updateHud === 'function') updateHud();
+      return;
+    } else {
+      var regName = (biome && (biome.regionalName || biome.name)) ? (biome.regionalName || biome.name) : 'Valdória';
+      if (typeof vToast === 'function') {
+        vToast('🔍 Investigação (' + total + ' vs CD ' + dc + '): A comitiva vasculhou ' + regName + ' e encontrou pistas e sentinelas, mas a entrada oculta ainda não foi localizada. Continue explorando!', 'warning', 4500);
+      }
+      if (typeof updateHud === 'function') updateHud();
+      return;
+    }
   }
 
   // Rolagem de evento regional (narrativo ou combate D&D 5e)
