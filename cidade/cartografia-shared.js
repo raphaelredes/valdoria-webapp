@@ -4070,7 +4070,7 @@
       : (isHover ? ('~' + distMilhas + ' mi · ~' + horas + 'h · ' + threatBadge + (sanctBadge ? ' · ' + sanctBadge : '')) : (sanctBadge || ''));
     var subW = 0;
     if (subText) {
-      ctx.font = 'italic 10px Georgia, serif';
+      ctx.font = 'italic 11px Georgia, serif';
       subW = ctx.measureText(subText).width;
       ctx.font = (isHover ? 'bold 11px' : '10px') + ' serif';
     }
@@ -4090,7 +4090,7 @@
     ctx.fillStyle = isHover ? '#ffd685' : '#e8c45a';
     ctx.fillText(labelText, bx, pillY + 2);
     if (subText) {
-      ctx.font = 'italic 10px Georgia, serif';
+      ctx.font = 'italic 11px Georgia, serif';
       ctx.fillStyle = 'rgba(218,194,148,0.78)';
       ctx.fillText(subText, bx, pillY + 14);
     }
@@ -4125,7 +4125,7 @@
 
     // 3. Rótulo discreto inferior
     var labelText = isHover ? 'Ponto Inexplorado' : 'Terra Incognita';
-    ctx.font = 'italic 9px Georgia, serif';
+    ctx.font = 'italic 11px Georgia, serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     var tw = ctx.measureText(labelText).width;
@@ -4472,7 +4472,7 @@
     ctx.fillText('⛺', x, y - 14);
 
     if (label) {
-      ctx.font = '700 10.5px Cinzel, serif';
+      ctx.font = '700 11px Cinzel, serif';
       ctx.fillStyle = '#ffd685';
       ctx.shadowColor = 'rgba(0,0,0,0.95)';
       ctx.shadowBlur = 4;
@@ -4512,7 +4512,7 @@
     ctx.stroke();
 
     // Texto Cinzel ouro
-    ctx.font = '700 8.5px Cinzel, serif';
+    ctx.font = '700 11px Cinzel, serif';
     ctx.fillStyle = '#ffd685';
     ctx.textAlign = 'left';
     ctx.shadowColor = 'rgba(0,0,0,0.9)';
@@ -4660,15 +4660,15 @@
 
     // Textos do cartouche
     ctx.textAlign = 'center';
-    ctx.font = '700 9.5px Cinzel, serif';
+    ctx.font = '700 11px Cinzel, serif';
     ctx.fillStyle = '#ffd700';
     ctx.fillText('📏 ' + m.miles + ' Milhas (~' + m.marcos + ' Marcos · ' + m.km + ' km)', mx, my - 10);
 
-    ctx.font = '8.5px Georgia, serif';
+    ctx.font = '11px Georgia, serif';
     ctx.fillStyle = '#f4d49a';
     ctx.fillText('🧭 Rumo: ' + m.bearingCode + ' (' + m.degrees + '°) · 🚶 ~' + m.hoursFoot + 'h', mx, my + 3);
 
-    ctx.font = 'italic 7.5px Georgia, serif';
+    ctx.font = 'italic 11px Georgia, serif';
     ctx.fillStyle = '#94a3b8';
     ctx.fillText('🐎 ~' + m.hoursHorse + 'h montaria · 🛒 ~' + m.hoursWagon + 'h caravana', mx, my + 15);
 
@@ -4960,7 +4960,7 @@
     ctx.stroke();
 
     // 4. Etiqueta de mira superior
-    ctx.font = 'bold 8.5px Cinzel, serif';
+    ctx.font = 'bold 11px Cinzel, serif';
     ctx.textAlign = 'center';
     ctx.fillStyle = 'rgba(255, 215, 0, ' + alpha + ')';
     ctx.fillText('🎯 ALVO FOCADO', 0, -30);
@@ -38680,7 +38680,7 @@
       ctx.stroke();
 
       ctx.save();
-      ctx.font = 'bold 8.5px Cinzel, serif';
+      ctx.font = 'bold 11px Cinzel, serif';
       ctx.textAlign = 'center';
       ctx.fillStyle = '#ffd700';
       ctx.shadowColor = '#000000';
@@ -38796,7 +38796,7 @@
     if (targetBearing || isHovered) {
       ctx.save();
       var badgeText = targetBearing ? (targetBearing.degrees + '° ' + targetBearing.bearingCode) : 'Norte 0°';
-      ctx.font = '700 8px Cinzel, serif';
+      ctx.font = '700 11px Cinzel, serif';
       ctx.textAlign = 'center';
       ctx.fillStyle = targetBearing ? '#fde047' : '#ffd685';
       ctx.shadowColor = 'rgba(0,0,0,0.95)';
@@ -38964,7 +38964,7 @@
     ctx.textBaseline = 'middle';
     ctx.fillText('📍', 0, 0);
 
-    ctx.font = '700 8.5px Cinzel, serif';
+    ctx.font = '700 11px Cinzel, serif';
     ctx.fillStyle = '#fde047';
     ctx.shadowColor = 'rgba(0,0,0,0.9)';
     ctx.shadowBlur = 4;
@@ -39296,7 +39296,7 @@
           : '🗺️ Mapeado: ' + discProvLocs + '/' + totalProvLocs + ' Locais (' + provPct + '%)';
 
         var provTitleFont = (_S < 380) ? '700 11px Cinzel, serif' : '700 12.5px Cinzel, serif';
-        var provSubFont = (_S < 380) ? 'italic 9px Georgia, serif' : 'italic 10px Georgia, serif';
+        var provSubFont = (_S < 380) ? 'italic 11px Georgia, serif' : 'italic 11px Georgia, serif';
         ctx.save();
         ctx.textAlign = 'center';
         ctx.font = provTitleFont;
@@ -39385,7 +39385,7 @@
           : '🗺️ Atlas Geral: ' + discWorld + '/' + totalWorld + ' Locais Conhecidos (' + worldPct + '%)';
 
         var worldTitleFont = (_S < 380) ? '700 11px Cinzel, serif' : '700 12.5px Cinzel, serif';
-        var worldSubFont = (_S < 380) ? 'italic 9px Georgia, serif' : 'italic 10px Georgia, serif';
+        var worldSubFont = (_S < 380) ? 'italic 11px Georgia, serif' : 'italic 11px Georgia, serif';
         ctx.save();
         ctx.textAlign = 'center';
         ctx.font = worldTitleFont;
