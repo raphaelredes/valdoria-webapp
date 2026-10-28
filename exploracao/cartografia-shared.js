@@ -39463,7 +39463,8 @@
                   ((typeof window !== 'undefined' && window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.known_locations) || null);
       var ownedMaps = (typeof cfg.getOwnedMaps === 'function') ? cfg.getOwnedMaps() :
                       ((typeof window !== 'undefined' && window.CITY_MOCK_PLAYER && (window.CITY_MOCK_PLAYER.owned_maps || window.CITY_MOCK_PLAYER.maps_owned)) || []);
-      if (!isProvinceDiscovered(provId, known, ownedMaps)) {
+      var pk = (typeof cfg.getPlayerBiomeKey === 'function') ? cfg.getPlayerBiomeKey() : null;
+      if (!isProvinceDiscovered(provId, known, ownedMaps, pk)) {
         return closeProvince();
       }
       _viewMode = 'province';
@@ -39905,7 +39906,7 @@
   // Regra de Visibilidade de Províncias (Ordem do Usuário 2026-10):
   // Uma província regional só é revelada se o aventureiro tiver descoberto
   // pelo menos 1 local pertencente a ela, ou possuir a carta geográfica regional.
-  function isProvinceDiscovered(provId, known, ownedMaps) {
+  function isProvinceDiscovered(provId, known, ownedMaps, playerLocKey) {
     if (!provId || provId === 'world') return true;
     var p = CART_PROVINCES.find(function(pr){ return pr.id === provId; });
     if (!p) return false;
@@ -39913,15 +39914,16 @@
     var knownArr = known || [];
     if (provId === 'plains') return true; // Hub de partida (Portões de Valdória)
     if (!p.locKeys || !p.locKeys.length) return false;
+    if (playerLocKey && (_LOCATION_TO_PROVINCE[playerLocKey] === provId || p.locKeys.indexOf(playerLocKey) >= 0)) return true;
     for (var i = 0; i < p.locKeys.length; i++) {
       if (knownArr.indexOf(p.locKeys[i]) >= 0) return true;
     }
     return false;
   }
 
-  function getDiscoveredProvinces(known, ownedMaps) {
+  function getDiscoveredProvinces(known, ownedMaps, playerLocKey) {
     return CART_PROVINCES.filter(function(p){
-      return isProvinceDiscovered(p.id, known, ownedMaps);
+      return isProvinceDiscovered(p.id, known, ownedMaps, playerLocKey);
     });
   }
 

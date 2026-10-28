@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-28T02:48:02Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-28T03:10:44Z - do not edit directly, edit source -->
 
 
 
@@ -93518,6 +93518,10 @@ function _cartTravelTo(mapId){
         if (typeof boot === 'function') boot();
         setTimeout(function(){
           if (typeof openCartography === 'function') openCartography();
+          var targetProv = (window.CartShared && CartShared.getLocationProvince) ? CartShared.getLocationProvince(origKey) : null;
+          if (targetProv && targetProv.id && typeof _xcartFocusProvince === 'function') {
+            _xcartFocusProvince(targetProv.id);
+          }
           if (typeof _openCurrentNodePointcrawlHub === 'function') _openCurrentNodePointcrawlHub();
         }, 120);
       },
@@ -96043,7 +96047,13 @@ function openCartography() {
 
   _xcartWireEvents();
 
-  _xcartCenterOnPlayer();
+  var _initKey = (typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : 'plains';
+  var _initProv = (window.CartShared && CartShared.getLocationProvince) ? CartShared.getLocationProvince(_initKey) : null;
+  if (_initProv && _initProv.id && _initProv.id !== 'world') {
+    _xcartFocusProvince(_initProv.id);
+  } else {
+    _xcartCenterOnPlayer();
+  }
 
 
 
@@ -96091,7 +96101,7 @@ function openCartography() {
 
 
 
-  // Force a one-time zoom-out execution when map is loaded (user directive)
+  // Force a one-time zoom-out execution when map is loaded (user directive, only for world mode)
 
   setTimeout(function(){
 
@@ -96101,7 +96111,11 @@ function openCartography() {
 
       syncXDims();
 
-      _xcartSetZoom(_cartZoom * 0.85, _xcartW / 2, _xcartH / 2);
+      if (!_xcartEngine || _xcartEngine.getViewMode().mode === 'world') {
+
+        _xcartSetZoom(_cartZoom * 0.85, _xcartW / 2, _xcartH / 2);
+
+      }
 
     }
 
@@ -96156,10 +96170,14 @@ function _getXCartProvinceActiveQuest(provId) {
 function _renderXCartProvinceBar() {
   var pBar = document.getElementById('xcart-prov-bar');
   if (!pBar) return;
+  var curKey = (typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : 'plains';
   var known = window.__EXPLORE_KNOWN || ['plains'];
-  var ownedMaps = [];
+  if (curKey && known.indexOf(curKey) === -1) {
+    known.push(curKey);
+  }
+  var ownedMaps = (typeof window.__EXPLORE_OWNED_MAPS !== 'undefined') ? window.__EXPLORE_OWNED_MAPS : [];
   var discProvs = (window.CartShared && CartShared.getDiscoveredProvinces) 
-    ? CartShared.getDiscoveredProvinces(known, ownedMaps) 
+    ? CartShared.getDiscoveredProvinces(known, ownedMaps, curKey) 
     : ((window.CartShared && CartShared.CART_PROVINCES) ? [CartShared.CART_PROVINCES[0], CartShared.CART_PROVINCES[1]] : []);
 
   var curMode = (_xcartEngine && typeof _xcartEngine.getViewMode === 'function') ? _xcartEngine.getViewMode() : { provinceId: 'world' };
@@ -96273,6 +96291,12 @@ function _xcartCenterOnPlayer(){
   var vm = (_xcartEngine && typeof _xcartEngine.getViewMode === 'function') ? _xcartEngine.getViewMode() : { mode: 'world' };
 
   if (vm.mode === 'world') {
+    var pKey = (typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : 'plains';
+    var pProv = (window.CartShared && CartShared.getLocationProvince) ? CartShared.getLocationProvince(pKey) : null;
+    if (pProv && pProv.id && pProv.id !== 'world') {
+      _xcartFocusProvince(pProv.id);
+      return;
+    }
     _xcartSmoothPanTo(0, 0, 1.0, 240);
     return;
   }
