@@ -1,18 +1,14 @@
 /**
- * Processing Overlay v3.0 — Runa Giratoria + Enhanced Orb of Valdoria
- * Lightweight loading overlay for in-game transitions and API calls.
- * v3.0: Orb 56px + wisps + sparks + ambient glow + perf tiers
+ * Processing Overlay v4.0 — Padrão Canônico Anel Dourado Duplo + Losango + Fagulhas
+ * Carregamento prévio padronizado de telas e ações em todo o projeto,
+ * podendo informar instabilidade de conexão mantendo a animação ativa no centro.
  *
  * API:
- *   vProcessing.show(opts)   — opts: { text, contentCheck, onRetry, onTimeout, timeoutMs }
+ *   vProcessing.show(opts)   — opts: { text, tip, contentCheck, onRetry, onTimeout, timeoutMs }
  *   vProcessing.hide()       — hide with 200ms fade
  *   vProcessing.isActive()   — check if showing
  *   vProcessing.setText(text) — update text mid-load
- *
- * contentCheck (NEW in v2.0):
- *   CSS selector string or function returning truthy when content is ready.
- *   Polls every 300ms and auto-hides when content detected.
- *   Example: vProcessing.show({ text: 'Loading...', contentCheck: '#my-canvas' })
+ *   vProcessing.showInstability(opts) — switch text to instability notice while keeping animation
  */
 (function() {
 'use strict';
@@ -21,13 +17,12 @@ var _timers = {};
 var _onRetry = null;
 var _overlayEl = null;
 var _textEl = null;
+var _subEl = null;
+var _hintEl = null;
 var _retryEl = null;
 var _originalText = '';
 var _showTime = 0;
 var _contentCheckDesc = '';
-
-// Elder Futhark runes for the ring
-var RUNES = '\u16A0 \u16A2 \u16A6 \u16A8 \u16B1 \u16B2 \u16B7 \u16B9 \u16BA \u16BE \u16C1 \u16C3 \u16C7 \u16C8 \u16C9 \u16CA \u16CF \u16D2';
 
 function _elapsed() {
     return _showTime ? (Date.now() - _showTime) : 0;
@@ -40,53 +35,7 @@ function _log(level, msg) {
     else console.info(prefix + msg);
 }
 
-/**
- * X-6.5.51BR (2026-05-15): _buildOverlay agora retorna magic-circle
- * (ValdoriaLoadingHTML) — mesma visual da tela "TOQUE PARA INICIAR" +
- * /play/ + _vTransitionLoader. Antes era runa-ring pequena diferente.
- *
- * User pediu padronização: "o que tiver que ser carregado precisa
- * NECESSARIAMENTE ser nessa tela de carregamento logo após a tela
- * TOQUE PARA INICIAR e nas transições de cidade, exploracao e combate
- * mostrar somente essa tela de progresso, precisa ser padronizado"
- *
- * IDs específicos do v-processing (vp-stage / vp-retry / vp-tip) pra
- * evitar conflito com #loading-stage / #loading-retry da tela principal.
- *
- * Fallback _buildOverlayLegacy mantido se ValdoriaLoadingHTML faltar.
- */
 function _buildOverlay() {
-    // PREFERRED: usar ValdoriaLoadingHTML (mesma estrutura da tela
-    // TOQUE PARA INICIAR + /play/ + transition-loader). Padronizado.
-    if (typeof window.ValdoriaLoadingHTML === 'function') {
-        var tmp = document.createElement('div');
-        tmp.innerHTML = window.ValdoriaLoadingHTML({
-            overlayId: 'v-processing',
-            title: 'LENDAS DE VALDORIA',
-            stageId: 'vp-stage',
-            tipId: 'vp-tip',
-            retryId: 'vp-retry',
-            progressId: 'vp-progress',
-            defaultTip: 'Consultando o Mestre…',
-            hasStage: true,
-            hasRetry: true,
-            icon: 'magic-circle',
-            particleSet: 'standard',
-            tier: window._valdoriaPerformanceTier || 'full'
-        });
-        var magicEl = tmp.firstElementChild;
-        if (magicEl) {
-            magicEl.classList.add('v-processing');  // compat com CSS antigo
-            magicEl.style.display = 'none';
-            magicEl.style.background = '#1a1510';   // backdrop sólido
-            return magicEl;
-        }
-    }
-    // FALLBACK: runa ring legacy se loading-template.js não carregou
-    return _buildOverlayLegacy();
-}
-
-function _buildOverlayLegacy() {
     var el = document.createElement('div');
     el.id = 'v-processing';
     el.className = 'v-processing';
@@ -94,120 +43,40 @@ function _buildOverlayLegacy() {
 
     var icon = document.createElement('div');
     icon.className = 'v-processing-icon';
-
-    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('class', 'v-processing-rune');
-    svg.setAttribute('viewBox', '0 0 200 200');
-
-    var defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('id', 'vpRunePath');
-    path.setAttribute('d', 'M100,100 m-80,0 a80,80 0 1,1 160,0 a80,80 0 1,1 -160,0');
-    defs.appendChild(path);
-    svg.appendChild(defs);
-
-    var c1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    c1.setAttribute('cx', '100'); c1.setAttribute('cy', '100'); c1.setAttribute('r', '80');
-    c1.setAttribute('fill', 'none'); c1.setAttribute('stroke', 'rgba(196,149,58,0.12)'); c1.setAttribute('stroke-width', '1');
-    svg.appendChild(c1);
-
-    var c2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    c2.setAttribute('cx', '100'); c2.setAttribute('cy', '100'); c2.setAttribute('r', '82');
-    c2.setAttribute('fill', 'none'); c2.setAttribute('stroke', 'rgba(196,149,58,0.06)');
-    c2.setAttribute('stroke-width', '0.5'); c2.setAttribute('stroke-dasharray', '3 6');
-    svg.appendChild(c2);
-
-    var txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    txt.setAttribute('fill', 'rgba(196,149,58,0.5)'); txt.setAttribute('font-size', '11'); txt.setAttribute('letter-spacing', '3');
-    var tp = document.createElementNS('http://www.w3.org/2000/svg', 'textPath');
-    tp.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '#vpRunePath');
-    tp.setAttribute('startOffset', '0%');
-    tp.textContent = RUNES;
-    txt.appendChild(tp);
-    svg.appendChild(txt);
-
-    icon.appendChild(svg);
-
-    /* Enhanced Orb of Valdoria v3.0 */
-    var isLite = document.body && document.body.classList.contains('perf-lite');
-    var isMed = document.body && document.body.classList.contains('perf-medium');
-
-    /* Ambient glow (behind orb) */
-    var orbAmbient = document.createElement('div');
-    orbAmbient.className = 'vpo-ambient';
-    icon.appendChild(orbAmbient);
-
-    var orbWrap = document.createElement('div');
-    orbWrap.className = 'v-processing-orb';
-    var orbShell = document.createElement('div');
-    orbShell.className = 'vpo-shell';
-    var orbNeb = document.createElement('div');
-    orbNeb.className = 'vpo-nebula';
-    var nebClasses = ['vpo-n1','vpo-n2','vpo-n3','vpo-n4'];
-    for (var ni = 0; ni < nebClasses.length; ni++) {
-        var nd = document.createElement('div');
-        nd.className = nebClasses[ni];
-        orbNeb.appendChild(nd);
-    }
-    /* Wisps (skip on lite) */
-    if (!isLite) {
-        var wispClasses = ['vpo-w1','vpo-w2','vpo-w3'];
-        for (var wi = 0; wi < wispClasses.length; wi++) {
-            var wd = document.createElement('div');
-            wd.className = 'vpo-wisp ' + wispClasses[wi];
-            orbNeb.appendChild(wd);
-        }
-    }
-    /* Sparks (skip on lite + medium) */
-    if (!isLite && !isMed) {
-        var sparkClasses = ['vpo-sp1','vpo-sp2'];
-        for (var si = 0; si < sparkClasses.length; si++) {
-            var sd = document.createElement('div');
-            sd.className = 'vpo-spark ' + sparkClasses[si];
-            orbNeb.appendChild(sd);
-        }
-    }
-    orbShell.appendChild(orbNeb);
-    var orbCore = document.createElement('div');
-    orbCore.className = 'vpo-core';
-    orbShell.appendChild(orbCore);
-    /* Core flare (skip on lite) */
-    if (!isLite) {
-        var orbCoreFl = document.createElement('div');
-        orbCoreFl.className = 'vpo-core-fl';
-        orbShell.appendChild(orbCoreFl);
-    }
-    var orbFresnel = document.createElement('div');
-    orbFresnel.className = 'vpo-fresnel';
-    orbShell.appendChild(orbFresnel);
-    /* SSS (skip on lite) */
-    if (!isLite) {
-        var orbSSS = document.createElement('div');
-        orbSSS.className = 'vpo-sss';
-        orbShell.appendChild(orbSSS);
-    }
-    var orbHighlight = document.createElement('div');
-    orbHighlight.className = 'vpo-highlight';
-    orbShell.appendChild(orbHighlight);
-    /* Glass secondary reflection */
-    var orbGs = document.createElement('div');
-    orbGs.className = 'vpo-gs';
-    orbShell.appendChild(orbGs);
-    orbWrap.appendChild(orbShell);
-    icon.appendChild(orbWrap);
-
+    icon.setAttribute('aria-hidden', 'true');
+    icon.innerHTML =
+        '<div class="v-processing-glow"></div>' +
+        '<div class="v-processing-ring-cw"></div>' +
+        '<div class="v-processing-ring-ccw"></div>' +
+        '<div class="v-processing-core">&#9670;</div>' +
+        '<div class="v-processing-ember-1"></div>' +
+        '<div class="v-processing-ember-2"></div>' +
+        '<div class="v-processing-ember-3"></div>';
     el.appendChild(icon);
 
     var textDiv = document.createElement('div');
     textDiv.id = 'v-processing-text';
     textDiv.className = 'v-processing-text';
-    textDiv.textContent = 'Carregando...';
+    textDiv.textContent = 'Entrando em Valdória…';
     el.appendChild(textDiv);
+
+    var subDiv = document.createElement('div');
+    subDiv.id = 'vp-tip';
+    subDiv.className = 'v-processing-sub';
+    subDiv.textContent = 'Preparando sua aventura…';
+    el.appendChild(subDiv);
+
+    var hintDiv = document.createElement('div');
+    hintDiv.id = 'vp-hint';
+    hintDiv.className = 'v-processing-hint';
+    hintDiv.textContent = 'Aguarde alguns minutos e tente novamente.';
+    el.appendChild(hintDiv);
 
     var retryBtn = document.createElement('button');
     retryBtn.id = 'v-processing-retry';
+    retryBtn.type = 'button';
     retryBtn.className = 'v-processing-retry';
-    retryBtn.textContent = 'Tentar novamente';
+    retryBtn.textContent = 'Tentar Novamente';
     el.appendChild(retryBtn);
 
     return el;
@@ -218,17 +87,25 @@ function _ensureDOM() {
     var el = _buildOverlay();
     document.body.appendChild(el);
     _overlayEl = el;
-    // X-6.5.51BR: textEl/retryEl podem ser do magic-circle (vp-stage/vp-retry)
-    // OU do legacy (v-processing-text/v-processing-retry). Tenta ambos.
-    _textEl = el.querySelector('#vp-stage')
-           || el.querySelector('#v-processing-text');
-    _retryEl = el.querySelector('#vp-retry')
-            || el.querySelector('#v-processing-retry');
+    _textEl = el.querySelector('#v-processing-text');
+    _subEl = el.querySelector('#vp-tip');
+    _hintEl = el.querySelector('#vp-hint');
+    _retryEl = el.querySelector('#v-processing-retry');
     if (_retryEl) {
         _retryEl.addEventListener('click', function() {
             if (typeof haptic === 'function') haptic('light');
             _log('info', 'retry clicked');
-            if (_onRetry) _onRetry();
+            if (_onRetry) {
+                _onRetry();
+            } else {
+                try {
+                    var u = new URL(window.location.href);
+                    u.searchParams.set('_cb', String(Date.now()));
+                    window.location.replace(u.toString());
+                } catch (_e) {
+                    window.location.reload();
+                }
+            }
         });
     }
 }
@@ -243,11 +120,6 @@ function _clearTimers() {
     }
 }
 
-/**
- * True when the element (or a visible canvas/img/svg inside it) occupies space.
- * Collapsed wrappers (e.g. #map-wrapper with only position:absolute children) have
- * offsetHeight 0 even while the map is fully painted — we fall back to descendants.
- */
 function _elementContentReady(el) {
     if (!el) return false;
     try {
@@ -289,7 +161,6 @@ function _captureDOMState(selector, timeoutMs) {
             height: el ? el.offsetHeight : 0,
             visible: el ? _elementContentReady(el) : false,
         };
-        // Capture top-level visible elements for context
         var bodyChildren = [];
         var kids = document.body.children;
         for (var i = 0; i < Math.min(kids.length, 15); i++) {
@@ -302,7 +173,6 @@ function _captureDOMState(selector, timeoutMs) {
             bodyChildren.push(tag + id + cls + '(' + h + 'px)');
         }
         state.bodyChildren = bodyChildren.join(', ');
-        // Check for JS errors that might have prevented content rendering
         var errBuf = window.__valdoria_getConsoleBuffer ? window.__valdoria_getConsoleBuffer() : [];
         var recentErrors = errBuf.filter(function(e) { return e.level === 'E'; }).slice(-3);
         if (recentErrors.length) {
@@ -315,32 +185,59 @@ function _captureDOMState(selector, timeoutMs) {
     }
 }
 
+function showInstability(opts) {
+    opts = opts || {};
+    _ensureDOM();
+    _clearTimers();
+    if (_textEl) {
+        _textEl.textContent = opts.title || 'Não foi possível carregar o jogo';
+        _textEl.classList.add('v-processing-text--slow');
+    }
+    if (_subEl) {
+        _subEl.textContent = opts.subtitle || 'Instabilidade momentânea na conexão com o servidor.';
+        _subEl.style.display = 'block';
+    }
+    if (_hintEl) {
+        _hintEl.textContent = opts.hint != null ? opts.hint : 'Aguarde alguns minutos e tente novamente.';
+        _hintEl.classList.add('visible');
+    }
+    if (opts.onRetry) _onRetry = opts.onRetry;
+    if (_retryEl) _retryEl.classList.add('visible');
+    _overlayEl.classList.remove('hiding');
+    _overlayEl.style.display = 'flex';
+    void _overlayEl.offsetWidth;
+    _overlayEl.classList.add('active');
+}
+
 function show(opts) {
     opts = opts || {};
     _ensureDOM();
     _clearTimers();
 
     _showTime = Date.now();
-    _originalText = opts.text || 'Carregando...';
+    _originalText = opts.text || 'Entrando em Valdória…';
     _onRetry = opts.onRetry || null;
     var timeoutMs = opts.timeoutMs || 8000;
     _contentCheckDesc = '';
 
     _textEl.textContent = _originalText;
     _textEl.className = 'v-processing-text';
-    var _tipEl = _overlayEl ? _overlayEl.querySelector('#vp-tip') : null;
-    if (_tipEl) {
-        _tipEl.textContent = opts.tip || 'Consultando o Mestre…';
+    if (_subEl) {
+        _subEl.textContent = opts.tip || 'Preparando sua aventura…';
+        _subEl.style.display = 'block';
     }
-    _retryEl.classList.remove('visible');
+    if (_hintEl) {
+        _hintEl.classList.remove('visible');
+    }
+    if (_retryEl) {
+        _retryEl.classList.remove('visible');
+    }
     _overlayEl.classList.remove('hiding');
     _overlayEl.style.display = 'flex';
 
-    // Force reflow then add active
     void _overlayEl.offsetWidth;
     _overlayEl.classList.add('active');
 
-    // Log show
     if (opts.contentCheck) {
         _contentCheckDesc = typeof opts.contentCheck === 'string' ? opts.contentCheck : 'fn()';
     }
@@ -348,7 +245,6 @@ function show(opts) {
         + (_contentCheckDesc ? ' contentCheck=' + _contentCheckDesc : '')
         + ' timeout=' + timeoutMs + 'ms');
 
-    // Content polling (NEW in v2.0)
     if (opts.contentCheck) {
         var _checkFn = typeof opts.contentCheck === 'function'
             ? opts.contentCheck
@@ -374,26 +270,33 @@ function show(opts) {
         _timers.content = setInterval(_contentPollTick, _pollMs);
     }
 
-    // Slow connection warning at 12s
+    // Slow connection warning at 8s
     _timers.slow = setTimeout(function() {
         _log('warn', 'still loading — showing slow warning');
         if (_textEl) {
-            _textEl.textContent = 'Demorando um pouco...';
             _textEl.classList.add('v-processing-text--slow');
         }
-    }, 12000);
+        if (_subEl) {
+            _subEl.textContent = 'Instabilidade momentânea detectada. Sincronizando…';
+        }
+    }, 8000);
 
-    // Retry button at 18s
+    // Retry button + instability notice at 15s
     _timers.retry = setTimeout(function() {
-        if (_retryEl && _onRetry) {
-            _log('warn', 'showing retry button');
+        _log('warn', 'showing instability notice and retry button');
+        if (_subEl) {
+            _subEl.textContent = 'Instabilidade momentânea na conexão com o servidor.';
+        }
+        if (_hintEl) {
+            _hintEl.classList.add('visible');
+        }
+        if (_retryEl) {
             _retryEl.classList.add('visible');
         }
-    }, 18000);
+    }, 15000);
 
     // Timeout at configured time — auto-hide if no callback
     _timers.timeout = setTimeout(function() {
-        // Capture DOM state for diagnostics when content never appeared
         if (_contentCheckDesc) {
             _captureDOMState(_contentCheckDesc, timeoutMs);
         }
@@ -432,13 +335,20 @@ function isActive() {
     return _overlayEl ? _overlayEl.classList.contains('active') : false;
 }
 
-function setText(text) {
+function setText(text, subText) {
     if (_showTime) {
         _log('info', 'setText="' + text + '"');
     }
-    if (_textEl) _textEl.textContent = text;
+    if (_textEl && text) _textEl.textContent = text;
+    if (_subEl && subText != null) _subEl.textContent = subText;
 }
 
-window.vProcessing = { show: show, hide: hide, isActive: isActive, setText: setText };
+window.vProcessing = {
+    show: show,
+    hide: hide,
+    isActive: isActive,
+    setText: setText,
+    showInstability: showInstability
+};
 
 })();

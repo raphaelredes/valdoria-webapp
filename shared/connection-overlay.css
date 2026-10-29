@@ -1,98 +1,214 @@
-/* Connection Overlay v1.0 — Reconexao Graceful
- * Semi-transparent overlay for temporary connection losses.
- * Game remains visible behind — only blocks interaction.
+/* Connection Overlay v2.0 — Padrão Canônico Anel Dourado Duplo + Losango + Fagulhas
+ * Exibição unificada de reconexão e instabilidade em todo o projeto.
  * API: vConnection.show(opts), vConnection.hide(), vConnection.isActive()
  */
 
-/* -- Overlay container (semi-transparent) -- */
-.v-conn-overlay{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(15,12,8,0.75);z-index:var(--v-z-overlay,500);opacity:0;pointer-events:none;transition:opacity 0.3s ease}
-.v-conn-overlay.active{opacity:1;pointer-events:auto}
-.v-conn-overlay.hiding{opacity:0;pointer-events:none}
+@keyframes cityRingCW {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+@keyframes cityRingCCW {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(-360deg); }
+}
+@keyframes cityCorePulse {
+    0%, 100% { transform: scale(0.92); opacity: 0.7; }
+    50% { transform: scale(1.1); opacity: 1; }
+}
+@keyframes cityTextShimmer {
+    0%, 100% { opacity: 0.75; }
+    50% { opacity: 1; }
+}
+@keyframes cityEmberFloat {
+    0% { transform: translate3d(0, 0, 0); opacity: 0; }
+    20% { opacity: 0.8; }
+    80% { opacity: 0.4; }
+    100% { transform: translate3d(var(--ex, 8px), -45px, 0); opacity: 0; }
+}
 
-/* -- Content card -- */
-.v-conn-content{display:flex;flex-direction:column;align-items:center;padding:var(--v-space-xl,16px) var(--v-space-2xl,24px);max-width:300px;text-align:center}
+.v-conn-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at center, #261c14 0%, #1a1510 60%, #0d0a08 100%);
+    z-index: var(--v-z-overlay, 500);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    padding: 28px 24px;
+    user-select: none;
+}
+.v-conn-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+.v-conn-overlay.hiding {
+    opacity: 0;
+    pointer-events: none;
+}
 
-/* -- Orb of Valdoria 3D with concentric rings -- */
-.v-conn-icon{position:relative;width:100px;height:100px;margin-bottom:var(--v-space-lg,12px)}
+.v-conn-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+    max-width: 320px;
+    text-align: center;
+}
 
-/* Outer ring — slow rotation, dashed */
-.v-conn-ring-outer{position:absolute;inset:0;border:2px solid transparent;border-top-color:var(--v-gold,#c4953a);border-right-color:var(--v-gold-30);border-radius:50%;animation:vConnRingOuter 4s linear infinite}
+.v-conn-icon {
+    position: relative;
+    width: 68px;
+    height: 68px;
+    margin: 0 auto 20px;
+    flex-shrink: 0;
+}
+.v-conn-glow {
+    position: absolute;
+    inset: -16px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(196, 149, 58, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+}
+.v-conn-ring-cw {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1.5px solid rgba(196, 149, 58, 0.28);
+    border-top-color: #e8c868;
+    border-right-color: rgba(196, 149, 58, 0.65);
+    box-shadow: 0 0 14px rgba(196, 149, 58, 0.18);
+    animation: cityRingCW 7s linear infinite;
+}
+.v-conn-ring-ccw {
+    position: absolute;
+    inset: 9px;
+    border-radius: 50%;
+    border: 1px dashed rgba(196, 149, 58, 0.45);
+    border-bottom-color: #c4953a;
+    animation: cityRingCCW 4.5s linear infinite;
+}
+.v-conn-core {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #e8c868;
+    font-size: 16px;
+    text-shadow: 0 0 10px rgba(232, 200, 104, 0.85);
+    animation: cityCorePulse 2.8s ease-in-out infinite;
+    line-height: 1;
+}
+.v-conn-ember-1 {
+    position: absolute;
+    bottom: 8px;
+    left: 20%;
+    width: 2.5px;
+    height: 2.5px;
+    border-radius: 50%;
+    background: #e8c868;
+    box-shadow: 0 0 6px #e8c868;
+    --ex: -9px;
+    animation: cityEmberFloat 2.6s ease-out infinite 0.2s;
+    pointer-events: none;
+}
+.v-conn-ember-2 {
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: #f3dc92;
+    box-shadow: 0 0 5px #f3dc92;
+    --ex: 5px;
+    animation: cityEmberFloat 3.1s ease-out infinite 1.1s;
+    pointer-events: none;
+}
+.v-conn-ember-3 {
+    position: absolute;
+    bottom: 10px;
+    left: 76%;
+    width: 2.5px;
+    height: 2.5px;
+    border-radius: 50%;
+    background: #c4953a;
+    box-shadow: 0 0 6px #c4953a;
+    --ex: 11px;
+    animation: cityEmberFloat 2.8s ease-out infinite 0.6s;
+    pointer-events: none;
+}
 
-/* Middle ring — counter-rotation, dotted */
-.v-conn-ring-mid{position:absolute;inset:8px;border:1.5px dotted var(--v-gold-20);border-top-color:var(--v-gold-light,#dbb668);border-left-color:rgba(219,182,104,0.4);border-radius:50%;animation:vConnRingMid 3s linear infinite reverse}
+.v-conn-status {
+    font-family: var(--v-font-display, "Cinzel", Georgia, serif);
+    font-size: 14px;
+    font-weight: 700;
+    color: #c4953a;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.45;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85), 0 0 18px rgba(196, 149, 58, 0.25);
+    animation: cityTextShimmer 2.5s ease-in-out infinite;
+    margin-bottom: 8px;
+}
 
-/* Inner ring — fast rotation */
-.v-conn-ring-inner{position:absolute;inset:16px;border:1px solid transparent;border-top-color:var(--v-gold-50);border-bottom-color:var(--v-gold-15);border-radius:50%;animation:vConnRingInner 2s linear infinite}
+.v-conn-detail {
+    font-family: var(--v-font, "Marcellus", Georgia, serif);
+    font-size: 12px;
+    color: rgba(196, 149, 58, 0.75);
+    letter-spacing: 0.8px;
+    font-style: italic;
+    text-align: center;
+    line-height: 1.55;
+    min-height: 1.4em;
+    max-width: 300px;
+}
 
-/* Orb of Valdoria 3D — centered, glass shell + golden nebula */
-.v-conn-orb{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:
-  radial-gradient(circle at 30% 25%, rgba(255,244,208,0.6) 0%, transparent 40%),
-  radial-gradient(circle at 55% 55%, #c4953a 0%, #8b6420 50%, #5a3e10 80%, #3a2810 100%);
-box-shadow:
-  0 0 16px var(--v-gold-60,rgba(196,149,58,0.6)),
-  0 0 32px var(--v-gold-30),
-  0 0 48px var(--v-gold-15),
-  inset 0 -4px 8px rgba(90,62,16,0.6),
-  inset 0 3px 6px rgba(255,244,208,0.35);
-animation:vConnOrbPulse 3s ease-in-out infinite}
+.v-conn-progress {
+    display: none;
+}
+.v-conn-progress-fill {
+    height: 100%;
+    width: 0;
+}
 
-/* Core glow — pulsating inner light */
-.v-conn-orb-core{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,rgba(255,244,208,0.95),rgba(232,196,90,0.5) 60%,transparent);filter:blur(2px);animation:vConnCorePulse 2s ease-in-out infinite}
-
-/* Fresnel rim highlight */
-.v-conn-orb::after{content:'';position:absolute;inset:1px;border-radius:50%;border:1px solid transparent;border-top-color:rgba(255,244,208,0.3);border-left-color:rgba(255,244,208,0.15)}
-
-/* Ambient glow particles (4 orbiting sparks) */
-.v-conn-spark{position:absolute;width:3px;height:3px;border-radius:50%;background:var(--v-gold-light,#dbb668);box-shadow:0 0 6px var(--v-gold,#c4953a);opacity:0}
-.v-conn-spark:nth-child(1){animation:vConnSpark1 4s ease-in-out infinite}
-.v-conn-spark:nth-child(2){animation:vConnSpark2 4s ease-in-out 1s infinite}
-.v-conn-spark:nth-child(3){animation:vConnSpark3 4s ease-in-out 2s infinite}
-.v-conn-spark:nth-child(4){animation:vConnSpark4 4s ease-in-out 3s infinite}
-
-@keyframes vConnRingOuter{to{transform:rotate(360deg)}}
-@keyframes vConnRingMid{to{transform:rotate(360deg)}}
-@keyframes vConnRingInner{to{transform:rotate(360deg)}}
-@keyframes vConnOrbPulse{
-  0%,100%{box-shadow:0 0 16px var(--v-gold-50),0 0 28px var(--v-gold-20),0 0 48px var(--v-gold-10),inset 0 -4px 8px rgba(90,62,16,0.6),inset 0 3px 6px rgba(255,244,208,0.35)}
-  50%{box-shadow:0 0 22px var(--v-gold-70),0 0 40px var(--v-gold-35),0 0 60px var(--v-gold-20),inset 0 -4px 8px rgba(90,62,16,0.6),inset 0 3px 6px rgba(255,244,208,0.4)}}
-@keyframes vConnCorePulse{0%,100%{opacity:0.6;transform:translate(-50%,-50%) scale(0.8)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}}
-@keyframes vConnSpark1{0%,100%{opacity:0;top:50%;left:0}25%{opacity:0.8;top:0;left:50%}50%{opacity:0;top:50%;left:100%}}
-@keyframes vConnSpark2{0%,100%{opacity:0;top:0;left:50%}25%{opacity:0.7;top:50%;left:100%}50%{opacity:0;top:100%;left:50%}}
-@keyframes vConnSpark3{0%,100%{opacity:0;top:100%;left:50%}25%{opacity:0.8;top:50%;left:0}50%{opacity:0;top:0;left:50%}}
-@keyframes vConnSpark4{0%,100%{opacity:0;top:50%;left:100%}25%{opacity:0.6;top:100%;left:50%}50%{opacity:0;top:50%;left:0}}
-
-body.perf-lite .v-conn-ring-outer,body.perf-lite .v-conn-ring-mid,body.perf-lite .v-conn-ring-inner{animation:none!important}
-body.perf-lite .v-conn-orb,body.perf-lite .v-conn-orb-core{animation:none!important}
-body.perf-lite .v-conn-spark{display:none}
-@media(prefers-reduced-motion:reduce){.v-conn-ring-outer,.v-conn-ring-mid,.v-conn-ring-inner,.v-conn-orb,.v-conn-orb-core,.v-conn-spark{animation:none!important}}
-
-/* -- Status text -- */
-.v-conn-status{font-family:var(--v-font,"Marcellus",serif);font-size:var(--v-font-body,14px);color:var(--v-text,#d4c8b0);text-align:center;line-height:1.5;margin-bottom:var(--v-space-sm,4px)}
-
-/* -- Detail text (countdown, attempt number) -- */
-.v-conn-detail{font-family:var(--v-font,"Marcellus",serif);font-size:var(--v-font-sm,12px);color:var(--v-text-dim,#a09484);text-align:center;line-height:1.4;min-height:1.4em}
-
-/* -- Progress bar -- */
-.v-conn-progress{width:120px;height:3px;background:var(--v-gold-15);border-radius:2px;margin-top:var(--v-space-md,8px);overflow:hidden}
-.v-conn-progress-fill{height:100%;width:0;background:var(--v-gold,#c4953a);border-radius:2px;opacity:0.7}
-
-/* -- Buttons -- */
-.v-conn-btn{display:none;margin:var(--v-space-lg,12px) auto 0 auto;padding:var(--v-space-md,8px) var(--v-space-xl,16px);min-height:44px;min-width:160px;border:1px solid var(--v-gold-25);border-radius:var(--v-radius,8px);background:var(--v-bg-raised,#332a22);color:var(--v-gold-light,#dbb668);font-family:var(--v-font,"Marcellus",serif);font-size:var(--v-font-body,14px);cursor:pointer;text-align:center;align-self:center;-webkit-tap-highlight-color:transparent;transition:all var(--v-transition-fast,0.15s) ease}
-.v-conn-btn:active{transform:scale(0.97);opacity:0.9}
-.v-conn-btn.visible{display:block}
-.v-conn-btn--secondary{border-color:var(--v-border,#4a3828);color:var(--v-text-dim,#a09484);font-size:var(--v-font-sm,12px)}
-
-/* -- Performance: Lite -- */
-body.perf-lite .v-conn-rune{animation:none}
-body.perf-lite .v-conn-gem{animation:vProcPulseLite 3s ease-in-out infinite}
-
-/* -- Performance: Medium -- */
-body.perf-medium .v-conn-rune{animation-duration:8s}
-
-/* -- Reduced motion -- */
-@media(prefers-reduced-motion:reduce){
-.v-conn-rune{animation:none}
-.v-conn-gem{animation:none;opacity:0.9}
-.v-conn-overlay{transition:none}
-.v-conn-progress-fill{transition:none}
+.v-conn-btn {
+    display: none;
+    margin: 16px auto 0 auto;
+    padding: 10px 22px;
+    min-height: 40px;
+    min-width: 190px;
+    border: 1px solid rgba(196, 149, 58, 0.45);
+    border-radius: 6px;
+    background: linear-gradient(180deg, rgba(196, 149, 58, 0.2) 0%, rgba(196, 149, 58, 0.08) 100%);
+    color: #e8c868;
+    font-family: var(--v-font-display, "Cinzel", Georgia, serif);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-align: center;
+    align-self: center;
+    -webkit-tap-highlight-color: transparent;
+}
+.v-conn-btn:active {
+    transform: scale(0.97);
+    opacity: 0.9;
+}
+.v-conn-btn.visible {
+    display: block;
+}
+.v-conn-btn--secondary {
+    margin-top: 10px;
+    border-color: rgba(196, 149, 58, 0.22);
+    background: transparent;
+    color: #a89880;
+    font-size: 11.5px;
+    font-weight: 600;
 }
