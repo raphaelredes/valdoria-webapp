@@ -16015,7 +16015,14 @@ var _NAMED_NPC_PORTRAITS = {
   'malakor livreiro': 'npcs/malakor-livreiro.webp',
   'wrenna': 'adventurers/adv_027.webp',
   'wrenna korgrim': 'adventurers/adv_027.webp',
-  'wrenna caelwyn': 'npcs/plaza/dancer_exotic.webp'
+  'wrenna caelwyn': 'npcs/plaza/dancer_exotic.webp',
+  'braun o batedor': 'npcs/braun-batedor.webp',
+  'braun': 'npcs/braun-batedor.webp',
+  'sentinela da guarda': 'npcs/guarda-aldric.webp',
+  'sentinela': 'npcs/guarda-aldric.webp',
+  'jovem das vielas': 'npcs/plaza/batedor_carteira.webp',
+  'trovador errante': 'npcs/plaza/bardo_praca.webp',
+  'nicho votivo dos guardioes': 'levelup/subclasses/lore.webp'
 };
 function _resolveAllyPortraitUrl(m) {
   if (!m) return null;
@@ -16065,6 +16072,8 @@ function _npcPortraitByName(name) {
   var p = _NAMED_NPC_PORTRAITS[k];
   return p ? '/shared/img/' + p : null;
 }
+window._npcPortraitByName = _npcPortraitByName;
+
 function _discoverySpeakerPortrait(speaker) {
   // HARDENING 2026-06-13 (dono): resolve por IDENTIDADE EXATA (mapa _NAMED_NPC_PORTRAITS,
   // fonte única) ANTES da cadeia de substring frágil abaixo. Elimina a colisão de
@@ -16101,7 +16110,13 @@ function _discoverySpeakerPortrait(speaker) {
   // face do Thessil mercador via mestre-thessil.webp). game-rune-scribe.js usa o mesmo.
   if (s.indexOf('eirik') >= 0)   return '/shared/img/npcs/eirik-escriba.webp';
   if (s.indexOf('bjorn') >= 0)   return '/shared/img/merchants/bjorn-anao.webp';  /* Bjorn — seleiro ANÃO (convertido 2026-06-13). merchants/bjorn.webp (humano) e bjorn-comerciante.webp (halfling) ficam reservados. */
-  if (s.indexOf('braun') >= 0)   return '/shared/img/npcs/braun-quartelmestre.webp';
+  if (s.indexOf('braun') >= 0 && (s.indexOf('batedor') >= 0 || s.indexOf('veteran') >= 0)) return '/shared/img/npcs/braun-batedor.webp';
+  if (s.indexOf('braun') >= 0 && s.indexOf('quartelmestre') >= 0) return '/shared/img/npcs/braun-quartelmestre.webp';
+  if (s.indexOf('braun') >= 0)   return '/shared/img/npcs/braun-batedor.webp';
+  if (s.indexOf('sentinela da guarda') >= 0 || (s.indexOf('sentinela') >= 0 && s.indexOf('guarda') >= 0)) return '/shared/img/npcs/guarda-aldric.webp';
+  if (s.indexOf('jovem das vielas') >= 0) return '/shared/img/npcs/plaza/batedor_carteira.webp';
+  if (s.indexOf('trovador errante') >= 0) return '/shared/img/npcs/plaza/bardo_praca.webp';
+  if (s.indexOf('nicho votivo') >= 0) return '/shared/img/levelup/subclasses/lore.webp';
   if (s.indexOf('aventureiro ferido') >= 0) return '/shared/img/npcs/aventureiro-ferido.webp';
   // Sessão #72 (2026-06-03) — NPCs nomeados de discovery quests (portões/oficina/
   // banco/runas/arena/templo) que caíam no ícone heráldico ou num WebP genérico de
@@ -16211,6 +16226,7 @@ function _discoverySpeakerPortrait(speaker) {
   // Fallback universal da identidade do jogo (Medalhão Dourado de Diálogo de Valdoria)
   return '/shared/img/ui/dialogo.webp';
 }
+window._discoverySpeakerPortrait = _discoverySpeakerPortrait;
 
 // Sanitiza HTML mantendo apenas <i>/<em>/<b>/<strong> (mesma whitelist do
 // PADRAO_ALDRIC pra inline aside cinza italic)
@@ -75908,7 +75924,7 @@ var _CITY_WALK_EVENTS = [
       { type: 'narration', text: 'Duas sentinelas da guarda de Valdoria com alabardas reforçadas e lanternas de óleo de baleia cruzam a esquina de cantaria. A luz dourada da lâmpada ilumina seus passos no calçamento.' },
       { type: 'speech', speaker: 'Sentinela da Guarda', text: '— Alto lá, viajante. Para onde se direcionam seus passos dentro dos muros a essa hora?' }
     ],
-    npc: { name: 'Sentinela da Guarda', desc: 'Vigília Municipal de Valdoria' },
+    npc: { name: 'Sentinela da Guarda', desc: 'Vigília Municipal de Valdoria', portrait: '/shared/img/npcs/guarda-aldric.webp' },
     choices: [
       {
         id: 'patrol_persuade',
@@ -75948,7 +75964,7 @@ var _CITY_WALK_EVENTS = [
     script: [
       { type: 'narration', text: 'Conforme você avança pelo estreito corredor entre dois sobrados de madeira, uma silhueta franzina envolta em farrapos passa raspando pela sua capa com rapidez felina.' }
     ],
-    npc: { name: 'Jovem das Vielas', desc: 'Sobrevivente dos becos de Valdoria' },
+    npc: { name: 'Jovem das Vielas', desc: 'Sobrevivente dos becos de Valdoria', portrait: '/shared/img/npcs/plaza/batedor_carteira.webp' },
     choices: [
       {
         id: 'urchin_perceive',
@@ -75989,7 +76005,7 @@ var _CITY_WALK_EVENTS = [
       { type: 'narration', text: 'Sob a marquise de uma velha cantaria, um batedor veterano com cicatrizes de garras no queixo afia a lâmina de um machadinho contra uma pedra úmida.' },
       { type: 'speech', speaker: 'Braun, o Batedor', text: '— Caminhando pela cidade, aventureiro? Se o seu destino for cruzar os portões rumo aos ermos mais tarde, escute: as trilhas de Valdoria enganam até os mais atentos. Quem não conhece os marcos de pedra acaba marchando em círculos.' }
     ],
-    npc: { name: 'Braun, o Batedor', desc: 'Ex-aventureiro e veterano das terras ermas' },
+    npc: { name: 'Braun, o Batedor', desc: 'Ex-aventureiro e veterano das terras ermas', portrait: '/shared/img/npcs/braun-batedor.webp' },
     choices: [
       {
         id: 'veteran_learn',
@@ -76019,7 +76035,7 @@ var _CITY_WALK_EVENTS = [
       { type: 'narration', text: 'Um bardo itinerante sentado num barril de carvalho dedilha acordes suaves em um alaúde, entoando uma antiga balada sobre os primeiros desbravadores de Valdoria.' },
       { type: 'speech', speaker: 'Trovador Errante', text: '— "Sob o manto da noite ou a glória do sol, cada passo do andarilho tece a lenda de Valdoria..."' }
     ],
-    npc: { name: 'Trovador Errante', desc: 'Músico de praça' },
+    npc: { name: 'Trovador Errante', desc: 'Músico de praça', portrait: '/shared/img/npcs/plaza/bardo_praca.webp' },
     choices: [
       {
         id: 'bard_listen',
@@ -76042,6 +76058,7 @@ var _CITY_WALK_EVENTS = [
   {
     id: 'walk_shrine',
     title: 'Nicho Votivo dos Guardiões',
+    npc: { name: 'Nicho Votivo dos Guardiões', desc: 'Oratório dos Antigos Protetores', portrait: '/shared/img/levelup/subclasses/lore.webp' },
     script: [
       { type: 'narration', text: 'Em uma reentrância na parede de pedra, um pequeno oratório talhado dedicado aos Guardiões Antigos exibe uma lamparina de azeite acesa e ramos secos de alecrim.' }
     ],
@@ -76151,7 +76168,25 @@ function _showCityWalkArrival(dest, narrativeText, proceedFn) {
       ? '— "Cheguei ao local. Hora de falar com ' + dest.npcName + '."'
       : '— "Cheguei ao meu destino. É hora de prosseguir."';
 
+    var arrivalNpc = null;
+    if (dest.npcName) {
+      var pUrl = (typeof _npcPortraitByName === 'function') ? _npcPortraitByName(dest.npcName) : null;
+      if (!pUrl && typeof _discoverySpeakerPortrait === 'function') pUrl = _discoverySpeakerPortrait(dest.npcName);
+      arrivalNpc = {
+        name: dest.npcName,
+        desc: dest.placeName || dest.name,
+        portrait: pUrl || '/shared/img/npcs/plaza/square_wanderer.webp'
+      };
+    } else {
+      arrivalNpc = {
+        name: arrivalTarget,
+        desc: 'Destino em Valdoria',
+        portrait: (dest.district && dest.district.img) ? dest.district.img : '/shared/img/locations/praca-central.webp'
+      };
+    }
+
     vEncounter.render({
+      npc: arrivalNpc,
       script: [
         { type: 'narration', text: narrativeText },
         { type: 'narration', text: arrivalNarr }

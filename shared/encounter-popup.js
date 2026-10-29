@@ -110,41 +110,164 @@
      de Diálogo de Valdoria (/shared/img/ui/dialogo.webp), preservando a imersão. */
   var _ENC_IMG_ONERR = "onerror=\"this.onerror=null;this.src='/shared/img/ui/dialogo.webp';\"";
 
-  /* Ordem do Usuário 2026-10: SISTEMA DE IMAGEM GENÉRICA MISTERIOSA & IDENTIDADE DO JOGO.
-     Quando um diálogo ou narrativa não possui imagem oficial/original dedicada (ou se refere
-     a leitura de pergaminho, tomo, mistério, monólogo interior ou crônica geral), este resolver
-     atribui automaticamente uma ilustração oficial de alta resolução de Valdoria. */
+  function _normalizePortraitPath(p) {
+    if (!p || typeof p !== 'string') return p;
+    if (p.indexOf('../valdoria-webapp/') === 0) {
+      if (typeof window !== 'undefined' && window.location && window.location.protocol === 'file:') {
+        return p;
+      }
+      return p.replace(/^\.\.\/valdoria-webapp\//, '/');
+    }
+    return p;
+  }
+
+  /* Ordem do Usuário 2026-10: SISTEMA DE RETRATO DEDICADO & IDENTIDADE TEMÁTICA DE VALDORIA.
+     Quando um diálogo ou narrativa não possui imagem oficial explícita nos dados, este resolver
+     identifica o NPC pelo nome oficial (consultando os registros globais do jogo) ou pela sua
+     classe/arquétipo de fantasia D&D 5e, garantindo que NENHUM NPC fique sem retrato ou com medalhão genérico. */
   function _resolveGenericEncounterPortrait(name, desc) {
-    var s = String((name || '') + ' ' + (desc || '')).toLowerCase();
-    // 1. Pergaminho / Manuscrito / Carta / Edital / Decreto / Leitura / Mapa Antigo
+    var rawName = String(name || '').trim();
+    if (rawName && typeof window !== 'undefined') {
+      if (typeof window._npcPortraitByName === 'function') {
+        try {
+          var p1 = window._npcPortraitByName(rawName);
+          if (p1) return _normalizePortraitPath(p1);
+        } catch (_e1) {}
+      }
+      if (typeof window._discoverySpeakerPortrait === 'function') {
+        try {
+          var p2 = window._discoverySpeakerPortrait(rawName);
+          if (p2) return _normalizePortraitPath(p2);
+        } catch (_e2) {}
+      }
+    }
+
+    var s = String((name || '') + ' ' + (desc || '')).toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    // 1. Mapeamento por Personagens Conhecidos de Valdoria:
+    if (s.indexOf('braun') >= 0) return '/shared/img/npcs/braun-batedor.webp';
+    if (s.indexOf('aldric') >= 0 || s.indexOf('joran') >= 0) return '/shared/img/npcs/guarda-aldric.webp';
+    if (s.indexOf('brevon') >= 0) return '/shared/img/npcs/padre-brevon.webp';
+    if (s.indexOf('hadric') >= 0) return '/shared/img/npcs/hadric-cacador.webp';
+    if (s.indexOf('malakor') >= 0) return '/shared/img/npcs/malakor-livreiro.webp';
+    if (s.indexOf('tavira') >= 0) return '/shared/img/npcs/mestra-tavira.webp';
+    if (s.indexOf('lyana') >= 0) return '/shared/img/npcs/lyana-herbalista.webp';
+    if (s.indexOf('elara') >= 0) return '/shared/img/npcs/irma-elara.webp';
+    if (s.indexOf('theron') >= 0) return '/shared/img/npcs/acolito-theron.webp';
+    if (s.indexOf('miriel') >= 0) return '/shared/img/npcs/sacerdotisa-miriel.webp';
+    if (s.indexOf('corvus') >= 0) return '/shared/img/merchants/corvus-veltharion.webp';
+    if (s.indexOf('garlen') >= 0) return '/shared/img/merchants/garlen.webp';
+    if (s.indexOf('vorhan') >= 0) return '/shared/img/npcs/mestre-vorhan.webp';
+    if (s.indexOf('garrick') >= 0) return '/shared/img/npcs/mestre-garrick.webp';
+    if (s.indexOf('thessil') >= 0) return '/shared/img/npcs/mestre-thessil.webp';
+    if (s.indexOf('eirik') >= 0) return '/shared/img/npcs/eirik-escriba.webp';
+    if (s.indexOf('bjorn') >= 0) return '/shared/img/merchants/bjorn-anao.webp';
+    if (s.indexOf('martha') >= 0) return '/shared/img/npcs/martha.webp';
+    if (s.indexOf('durgan') >= 0 || s.indexOf('thorne') >= 0) return '/shared/img/npcs/durgan.webp';
+    if (s.indexOf('mirena') >= 0) return '/shared/img/merchants/mirena.webp';
+    if (s.indexOf('velithra') >= 0) return '/shared/img/merchants/velithra.webp';
+    if (s.indexOf('krom') >= 0) return '/shared/img/npcs/krom-mercenario.webp';
+    if (s.indexOf('torvin') >= 0) return '/shared/img/npcs/torvin-trabalhador.webp';
+    if (s.indexOf('aldenmar') >= 0 || s.indexOf('aldwin') >= 0) return '/shared/img/npcs/aldenmar-banqueiro.webp';
+    if (s.indexOf('quinto') >= 0) return '/shared/img/npcs/quinto-queijeiro.webp';
+    if (s.indexOf('nila') >= 0) return '/shared/img/npcs/nila-alquimista.webp';
+    if (s.indexOf('orion') >= 0) return '/shared/img/npcs/orion-livreiro.webp';
+    if (s.indexOf('gep') >= 0) return '/shared/img/npcs/gep-brinquedeiro.webp';
+    if (s.indexOf('ruby') >= 0) return '/shared/img/npcs/ruby-joalheira.webp';
+    if (s.indexOf('varneth') >= 0) return '/shared/img/npcs/varneth-cartografo.webp';
+    if (s.indexOf('marilia') >= 0) return '/shared/img/npcs/marilia-fruteira.webp';
+    if (s.indexOf('bertran') >= 0) return '/shared/img/npcs/bertran-pregador.webp';
+    if (s.indexOf('wrenna') >= 0) return '/shared/img/adventurers/adv_027.webp';
+
+    // 2. Taxonomia Temática por Papel e Profissão de Fantasia D&D 5e:
+    // Batedor / Patrulheiro / Rastreador / Guia / Caçador / Veterano
+    if (s.indexOf('batedor') >= 0 || s.indexOf('patrulh') >= 0 || s.indexOf('rastreador') >= 0 ||
+        s.indexOf('guia') >= 0 || s.indexOf('cacador') >= 0 || s.indexOf('veteran') >= 0) {
+      return '/shared/img/npcs/braun-batedor.webp';
+    }
+    // Guarda / Sentinela / Vigia / Soldado / Miliciano / Portão / Patrulha
+    if (s.indexOf('guarda') >= 0 || s.indexOf('sentinela') >= 0 || s.indexOf('vigia') >= 0 ||
+        s.indexOf('vigilia') >= 0 || s.indexOf('soldado') >= 0 || s.indexOf('miliciano') >= 0 ||
+        s.indexOf('capitao') >= 0 || s.indexOf('patrulha') >= 0) {
+      return '/shared/img/npcs/guarda-aldric.webp';
+    }
+    // Jovem / Viela / Garoto / Menino / Moleque / Punguista / Batedor de Carteira / Trombadinha / Ladrão
+    if (s.indexOf('jovem') >= 0 || s.indexOf('viela') >= 0 || s.indexOf('moleque') >= 0 ||
+        s.indexOf('punguista') >= 0 || s.indexOf('carteira') >= 0 || s.indexOf('ladrao') >= 0 ||
+        s.indexOf('trombadinha') >= 0 || s.indexOf('menino') >= 0 || s.indexOf('garoto') >= 0) {
+      return '/shared/img/npcs/plaza/batedor_carteira.webp';
+    }
+    // Bardo / Trovador / Músico / Menestrel / Cantilena / Poeta / Alaúde
+    if (s.indexOf('bardo') >= 0 || s.indexOf('trovador') >= 0 || s.indexOf('musico') >= 0 ||
+        s.indexOf('menestrel') >= 0 || s.indexOf('poeta') >= 0 || s.indexOf('cantor') >= 0) {
+      return '/shared/img/npcs/plaza/bardo_praca.webp';
+    }
+    // Clérigo / Sacerdote / Padre / Irmã / Acólito / Monge / Templo / Prelado / Altar / Nicho
+    if (s.indexOf('clerig') >= 0 || s.indexOf('sacerdot') >= 0 || s.indexOf('padre') >= 0 ||
+        s.indexOf('irma') >= 0 || s.indexOf('acolito') >= 0 || s.indexOf('monge') >= 0 ||
+        s.indexOf('templo') >= 0 || s.indexOf('devoto') >= 0 || s.indexOf('santuar') >= 0 ||
+        s.indexOf('nicho') >= 0 || s.indexOf('votivo') >= 0 || s.indexOf('reliquia') >= 0) {
+      return '/shared/img/npcs/padre-brevon.webp';
+    }
+    // Mercador / Comerciante / Vendedor / Feirante / Tendista / Fruteira / Negociante
+    if (s.indexOf('mercador') >= 0 || s.indexOf('comerciante') >= 0 || s.indexOf('vendedor') >= 0 ||
+        s.indexOf('feirante') >= 0 || s.indexOf('tendista') >= 0 || s.indexOf('fruteir') >= 0 ||
+        s.indexOf('negociante') >= 0 || s.indexOf('cambista') >= 0 || s.indexOf('banqueiro') >= 0) {
+      return '/shared/img/npcs/mercador-apressado.webp';
+    }
+    // Ferreiro / Armeiro / Forjador / Artífice / Ferreiro da Praça
+    if (s.indexOf('ferreir') >= 0 || s.indexOf('forja') >= 0 || s.indexOf('armeiro') >= 0 ||
+        s.indexOf('artifice') >= 0) {
+      return '/shared/img/npcs/durgan.webp';
+    }
+    // Estalajadeiro / Taberneiro / Taverneiro / Cervejeiro / Queijeiro / Cozinheiro
+    if (s.indexOf('estalajad') >= 0 || s.indexOf('taberneir') >= 0 || s.indexOf('taverneir') >= 0 ||
+        s.indexOf('cervejeir') >= 0 || s.indexOf('cozinheir') >= 0 || s.indexOf('atendente') >= 0) {
+      return '/shared/img/npcs/martha.webp';
+    }
+    // Mago / Escriba / Feiticeiro / Arcano / Alquimista / Ervanária / Erborista
+    if (s.indexOf('mago') >= 0 || s.indexOf('escriba') >= 0 || s.indexOf('feiticeir') >= 0 ||
+        s.indexOf('arcano') >= 0 || s.indexOf('alquimist') >= 0 || s.indexOf('herbalist') >= 0 ||
+        s.indexOf('ervanar') >= 0) {
+      return '/shared/img/npcs/malakor-livreiro.webp';
+    }
+    // Mercenário / Gladiador / Guerreiro / Lutador / Duelista
+    if (s.indexOf('mercenar') >= 0 || s.indexOf('gladiador') >= 0 || s.indexOf('guerreir') >= 0 ||
+        s.indexOf('lutador') >= 0 || s.indexOf('duelista') >= 0) {
+      return '/shared/img/npcs/krom-mercenario.webp';
+    }
+
+    // 3. Objetos / Documentos / Itens Narrativos:
+    // Pergaminho / Manuscrito / Carta / Edital / Decreto / Leitura / Mapa Antigo
     if (s.indexOf('pergaminho') >= 0 || s.indexOf('lendo') >= 0 || s.indexOf('carta') >= 0 ||
         s.indexOf('edital') >= 0 || s.indexOf('manuscrito') >= 0 || s.indexOf('decreto') >= 0 ||
         s.indexOf('missiva') >= 0 || s.indexOf('mensagem') >= 0 || s.indexOf('registro') >= 0 ||
         s.indexOf('aviso') >= 0 || s.indexOf('anota') >= 0) {
       return '/shared/img/items/pergaminho-antigo.webp';
     }
-    // 2. Livro / Tomo / Compêndio / Códex / Arquivos / Crônicas / Sabedoria Arcana
-    if (s.indexOf('compêndio') >= 0 || s.indexOf('compendio') >= 0 || s.indexOf('livro') >= 0 ||
-        s.indexOf('tomo') >= 0 || s.indexOf('códex') >= 0 || s.indexOf('codex') >= 0 ||
-        s.indexOf('crônica') >= 0 || s.indexOf('cronica') >= 0 || s.indexOf('arquivo') >= 0 ||
+    // Livro / Tomo / Compêndio / Códex / Arquivos / Crônicas / Sabedoria Arcana
+    if (s.indexOf('compendio') >= 0 || s.indexOf('livro') >= 0 ||
+        s.indexOf('tomo') >= 0 || s.indexOf('codex') >= 0 ||
+        s.indexOf('cronica') >= 0 || s.indexOf('arquivo') >= 0 ||
         s.indexOf('biblioteca') >= 0) {
       return '/shared/img/levelup/subclasses/lore.webp';
     }
-    // 3. Mistério / Sussurro / Voz Oculta / Sombra / Vulto / Enigma / Ruínas / Presença Oculta
-    if (s.indexOf('misteri') >= 0 || s.indexOf('mistéri') >= 0 || s.indexOf('sussurr') >= 0 ||
+    // Mistério / Sussurro / Voz Oculta / Sombra / Vulto / Enigma / Ruínas / Presença Oculta
+    if (s.indexOf('misteri') >= 0 || s.indexOf('sussurr') >= 0 ||
         s.indexOf('voz oculta') >= 0 || s.indexOf('sombra') >= 0 || s.indexOf('vulto') >= 0 ||
         s.indexOf('enigma') >= 0 || s.indexOf('ocult') >= 0 || s.indexOf('desconhecid') >= 0 ||
-        s.indexOf('estranh') >= 0 || s.indexOf('ruina') >= 0 || s.indexOf('ruína') >= 0) {
+        s.indexOf('estranh') >= 0 || s.indexOf('ruina') >= 0) {
       return '/shared/img/npcs/sussurrador-misterioso.webp';
     }
-    // 4. Você / Aventureiro / Monólogo Interior / Reflexão / Pensamento
-    if (s.indexOf('você') >= 0 || s.indexOf('voce') >= 0 || s.indexOf('pensamento') >= 0 ||
-        s.indexOf('reflex') >= 0 || s.indexOf('mente') >= 0 || s.indexOf('monólogo') >= 0 ||
-        s.indexOf('monologo') >= 0) {
+    // Você / Aventureiro / Monólogo Interior / Reflexão / Pensamento
+    if (s.indexOf('voce') >= 0 || s.indexOf('pensamento') >= 0 ||
+        s.indexOf('reflex') >= 0 || s.indexOf('mente') >= 0 || s.indexOf('monologo') >= 0) {
       return '/shared/img/npcs/plaza/square_wanderer.webp';
     }
-    // 5. Fallback Canônico Universal de Identidade do Jogo (Medalhão Dourado de Diálogo de Valdoria)
-    return '/shared/img/ui/dialogo.webp';
+
+    // 4. Fallback Temático de Fantasia: Sempre apresentar uma figura viva de Valdoria
+    return '/shared/img/npcs/plaza/square_wanderer.webp';
   }
 
   /* A3.7 (#90): NORMALIZADOR canônico do shape de NPC de diálogo (vNpc).
@@ -181,17 +304,19 @@
       if (Object.prototype.hasOwnProperty.call(raw, k)) out[k] = raw[k];
     }
     if (out.portraitImg) {
-      out.portrait = out.portraitImg;
+      out.portrait = _normalizePortraitPath(out.portraitImg);
     } else if (out.portrait && _NPC_ICON_RE.test(String(out.portrait))) {
       var thematicPortrait = _resolveGenericEncounterPortrait(out.name, out.desc);
       if (thematicPortrait) {
-        out.portrait = thematicPortrait;
+        out.portrait = _normalizePortraitPath(thematicPortrait);
       } else if (!out.portraitHTML && typeof window._heralIco === 'function') {
         try { out.portraitHTML = window._heralIco(out.portrait); } catch (_eIco) {}
         out.portrait = '';
       }
     } else if (!out.portrait) {
-      out.portrait = _resolveGenericEncounterPortrait(out.name, out.desc);
+      out.portrait = _normalizePortraitPath(_resolveGenericEncounterPortrait(out.name, out.desc));
+    } else {
+      out.portrait = _normalizePortraitPath(out.portrait);
     }
     return out;
   }
