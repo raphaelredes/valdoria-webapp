@@ -1052,22 +1052,27 @@ LOG SINK (Fase 7):
       max-width: 44px !important;
       justify-content: flex-start !important;
       transform: none !important;
-      display: none !important; /* Oculto por padrão até a cidade carregar com sucesso */
     }
-    body.city-ready html body .va-float,
-    body.city-ready html body #app .va-float,
-    body.city-ready .va-float,
-    body.city-ready #app .va-float {
-      display: flex !important; /* Revelado exclusivamente após o hub carregar */
-    }
-    body.game-load-error html body .va-float,
-    body.game-load-error html body #app .va-float,
-    body.game-load-error .va-float,
-    body.game-load-error #app .va-float,
-    body.game-load-error #footer-collapse-toggle,
-    body.game-load-error #footer-restore,
-    body.game-load-error .va-popup,
-    body.game-load-error .va-backdrop {
+    html body:not(.city-ready) .va-float,
+    html body:not(.city-ready) #app .va-float,
+    html body:not(.city-ready) #va-float,
+    html body:not(.city-ready) .va-float-btn,
+    html body:not(.city-ready) #va-btn,
+    html body:not(.city-ready) #footer-collapse-toggle,
+    html body:not(.city-ready) #footer-restore,
+    html body:not(.city-ready) #city-top-bar,
+    html body:not(.city-ready) #bottom-panel,
+    html body.game-load-error .va-float,
+    html body.game-load-error #app .va-float,
+    html body.game-load-error #va-float,
+    html body.game-load-error .va-float-btn,
+    html body.game-load-error #va-btn,
+    html body.game-load-error #footer-collapse-toggle,
+    html body.game-load-error #footer-restore,
+    html body.game-load-error #city-top-bar,
+    html body.game-load-error #bottom-panel,
+    html body.game-load-error .va-popup,
+    html body.game-load-error .va-backdrop {
       display: none !important;
       visibility: hidden !important;
       opacity: 0 !important;
@@ -10286,10 +10291,35 @@ body.perf-lite .vc-action-btn { transition: none; }
   }
   window._showGameLoadError = _showGameLoadError;
 
+  // Verifica se o hub da cidade realmente renderizou (não apenas elementos estáticos de #app)
+  function _cityGameReady() {
+    if (!window.__cityBootRendered) return false;
+    var content = document.getElementById('content');
+    var topBar = document.getElementById('city-top-bar');
+    var footerNav = document.getElementById('footer-nav');
+    return !!(
+      content && content.children.length > 0 && content.textContent.trim() !== '' &&
+      topBar && topBar.children.length > 0 &&
+      footerNav && footerNav.children.length > 0
+    );
+  }
+  window._cityGameReady = _cityGameReady;
+
+  // Se após window.load o script principal não tiver executado (__cityBootRendered !== true),
+  // houve falha de rede/parse/execução no script principal -> exibe tela de erro imediatamente
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      if (!window.__cityBootRendered && !window.__gameLoadErrorShown && !window.__valdoria_transitioning) {
+        console.error('[BOOT-CHECK] Script principal não inicializou (__cityBootRendered=false) — exibindo tela de erro');
+        _showGameLoadError('boot_script_failed');
+      }
+    }, 1000);
+  });
+
   // Watchdog global: se em 14s a cidade não atingir city-ready, aciona a tela de erro
   setTimeout(function(){
-    if (!document.body.classList.contains('city-ready') && !window.__gameLoadErrorShown) {
-      if (typeof _cityGameReady === 'function' && !_cityGameReady()) {
+    if (!document.body.classList.contains('city-ready') && !window.__gameLoadErrorShown && !window.__valdoria_transitioning) {
+      if (!_cityGameReady()) {
         console.warn('[WATCHDOG] 14s watchdog disparado — exibindo tela de erro');
         _showGameLoadError('watchdog_14s');
       }
@@ -10301,12 +10331,12 @@ body.perf-lite .vc-action-btn { transition: none; }
     if (!document.body.classList.contains('city-ready') && !window.__gameLoadErrorShown) {
       console.error('[BOOT-ERROR] Erro crítico antes de city-ready:', e);
       setTimeout(function(){
-        if (!document.body.classList.contains('city-ready') && !window.__gameLoadErrorShown) {
-          if (typeof _cityGameReady === 'function' && !_cityGameReady()) {
+        if (!document.body.classList.contains('city-ready') && !window.__gameLoadErrorShown && !window.__valdoria_transitioning) {
+          if (!_cityGameReady()) {
             _showGameLoadError('js_error');
           }
         }
-      }, 1500);
+      }, 800);
     }
   });
 
@@ -10527,10 +10557,11 @@ body.perf-lite .vc-action-btn { transition: none; }
        intermediária. Fallback de 5s força o hide se o render falhar (não trava
        o jogador num loading eterno). Substitui forceHideIfStuck (que escondia
        cedo demais por checar o overlay vazio em vez do #app). */
-    function _cityGameReady() {
-      var app = document.getElementById('app');
-      return !!(app && app.children.length > 0 && app.textContent.trim() !== '');
-    }
+    var _cityGameReady = window._cityGameReady || function() {
+      if (!window.__cityBootRendered) return false;
+      var content = document.getElementById('content');
+      return !!(content && content.children.length > 0 && content.textContent.trim() !== '');
+    };
     function _cityIntroBlocking() {
       return window.__introBlocking || (window.__introTitle && window.__introTitle.isVisible && window.__introTitle.isVisible());
     }
@@ -13504,9 +13535,13 @@ body.perf-lite .vc-action-btn { transition: none; }
       n++;
       try { sessionStorage.setItem('valdoria_city_reconnect', String(n)); } catch (_s) {}
       try { _cityLog('warn', 'city_reconnect_scheduled', {attempt: n, error: String(e && e.message || e).slice(0, 140)}); } catch (_l) {}
-      if (n > 20){  // ~60s de tentativas (3s cada) — desiste e mostra erro manual
+      if (n > 2){  // após 2 tentativas rápidas (~6s), exibe a tela de erro para o jogador tentar após alguns minutos
         try { sessionStorage.removeItem('valdoria_city_reconnect'); } catch (_c) {}
-        _showSessionErrorOverlay('Servidor indisponivel no momento.', 'reconnect cap apos ' + (n - 1) + ' tentativas');
+        if (typeof _showGameLoadError === 'function') {
+          _showGameLoadError('server_unavailable_after_retries');
+        } else {
+          _showSessionErrorOverlay('Servidor indisponivel no momento.', 'reconnect cap apos ' + (n - 1) + ' tentativas');
+        }
         return;
       }
       try { window.__cityResumePending = true; } catch (_p) {}  // segura o hide do #loading (anti-blank)
@@ -21307,11 +21342,10 @@ function _showStatusPopup(memberIdx){
       + '</button>';
     if (!m.isPlayer) {
       html += '<button type="button" class="ficha-meta-badge fEp-clickable" onclick="_showFichaRelationshipHelp(' + _memArg + ')" title="Vínculo: ' + _hubEsc((typeof _allyRelSummary === "function") ? _allyRelSummary(m) : "Camaradagem") + ' — toque para entender a Convivência e Lealdade">'
-        + '<span>🤝</span> <b>' + ((typeof _allyRelSummary === "function") ? _allyRelSummary(m) : "Camaradagem") + '</b> <span style="font-size: calc(10.5px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); opacity:0.85;">ⓘ</span>'
+        + '<span>🤝</span> <b>' + ((typeof _allyRelSummary === "function") ? _allyRelSummary(m) : "Camaradagem") + '</b> <span style="font-size: calc(11px * var(--v-font-scale, 1)); color:var(--v-gold,#c4953a); opacity:0.85;">ⓘ</span>'
         + '</button>';
     }
     html += '</div>';
-  }
   html += '</div>';
 
   // Banner de Progressão Pendente (se houver ASI ou Skills para alocar)
@@ -74772,7 +74806,10 @@ document.addEventListener('DOMContentLoaded', function(){
   _wireSubScreenContentOnce();  // listener delegado pra sub-screens (uma vez)
   _wireExitModalOnce();  // listener delegado pro modal exit (uma vez — robusto)
   renderFooter();
-  document.body.classList.add('city-ready');
+  window.__cityBootRendered = true;
+  if (!window.__cityResumePending) {
+    document.body.classList.add('city-ready');
+  }
   // Sessão #62 (2026-05-28) — FIX tela branca pós-loading no Telegram WebApp.
   // Quando isTG, o early intro script não escondeu o loading (marcou flag
   // __pendingHideTGLoading). Agora que renderCurrentScreen+renderFooter
