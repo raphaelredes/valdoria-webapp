@@ -18120,108 +18120,58 @@ var TUTORIAL_STEPS = [
   {
     selector: null,  // welcome screen (no spotlight)
     title: 'Bem-vindo a Valdoria',
-    description: 'Esta é a sua cidade base. Aqui você descansa, prepara aventuras, e vive entre aventuras. '
-                + 'Vou te mostrar rapidamente o que cada elemento faz — depois você joga sozinho.'
+    description: 'Esta é a sua cidade base e refúgio seguro entre as expedições. Vou te mostrar rapidamente o funcionamento da comitiva, da marcha e dos <b>4 distritos da capital</b>.'
   },
   {
-    /* 2026-05-21: selector corrigido vs DOM real (linha ~52320: _hubBtn('hub-cta',...)). */
+    selector: '#city-group-panel',
+    title: 'Cards da Comitiva',
+    description: 'No topo da tela: acompanhe os Pontos de Vida (<b>HP</b>), Magia (<b>MP</b>), nível e ouro de cada aventureiro do seu grupo. Quando os recursos estiverem baixos, descanse ou cure seus ferimentos na cidade.'
+  },
+  {
     selector: '.hub-cta',
     title: 'Partir para Aventura',
-    description: 'O coração do jogo. Clique aqui para abrir o <b>Mapa de Valdoria</b> e escolher uma região '
-                + 'para explorar — bosques, montanhas, ruínas. É onde você ganha XP, Valdoritas e itens.'
+    description: 'O coração do jogo. Toque aqui para abrir o <b>Mapa de Valdoria</b> e marchar rumo a florestas, montanhas e masmorras, conquistando XP, ouro e relíquias.'
   },
   {
-    selector: '.hub-loc[data-cb="action_quests"], .hub-loc[data-cb="quests"]',
-    title: 'Missões',
-    description: 'Lista de missões disponíveis. Algumas são <b>diárias</b> (resetam todo dia), outras de <b>história</b> '
-                + '(longas, com recompensa épica), e <b>secundárias</b> aceitas com NPCs.'
+    selector: '.hub-locations-section',
+    title: 'Distritos Urbanos',
+    description: 'A capital está dividida em <b>4 distritos ilustrados</b>. Cada um possui um mapa próprio detalhado com lojas, taverna, estalagem, templos e arenas de treino.'
   },
   {
-    selector: '.hub-loc[data-cb="taverna"], .hub-loc[data-cb="tavern"]',
-    title: 'Taverna',
-    description: 'Onde aventureiros se encontram. Beba para ganhar bônus temporários, ouça boatos sobre '
-                + 'tesouros escondidos, ou jogue dados com outros para ganhar (ou perder) ouro.'
+    selector: '.hub-loc-card[data-did="city_south"]',
+    title: 'Portões do Sul',
+    description: 'As grandes muralhas e posto dos guardas: aqui ficam a <b>Taverna do Javali Bêbado</b> para ouvir boatos, a <b>Estalagem do Grifo</b> para descanso longo e a vigília militar.'
   },
   {
-    /* 2026-05-22: novo step ensinando o tab bar (sector tabs).
-       User reportou que sem isso o player não sabe que precisa clicar
-       Comércio/Combate/Espírito pra ver outras locations. Inserido depois
-       de Taverna (último step default da aba Convívio) e antes de Estalagem/
-       Mercado (steps que auto-switch pra outras abas). Spotlight em
-       .city-sector-tabs (sempre presente no DOM em todas as abas). */
-    selector: '.city-sector-tabs',
-    title: 'Setores da Cidade',
-    description: 'A cidade está dividida em <b>4 áreas</b>: <b>Convívio</b> (taverna, missões), '
-                + '<b>Comércio</b> (mercado, banco), <b>Combate</b> (guilda, arena) e '
-                + '<b>Espírito</b> (templo, praça). Clique nas abas para ver os locais de cada área.'
+    selector: '.hub-loc-card[data-did="city_market"]',
+    title: 'Praça Mercantil',
+    description: 'O centro do comércio: abriga o <b>Mercado Central</b> com armas e poções, o <b>Banco & Cofre</b> para proteger seu ouro, a <b>Oficina & Forja</b> e a vida social da <b>Praça</b>.'
   },
   {
-    /* 2026-05-22: levelReq:2 — cross-ref CITY_LOCATIONS.inn (line ~8995).
-       Sem filtro, popup flasha 750ms e some (target hidden no DOM). */
-    selector: '.hub-loc[data-cb="estalagem"], .hub-loc[data-cb="inn"]',
-    title: 'Estalagem',
-    description: 'Descanso longo (recupera HP/MP totais + remove exaustão). Custa Valdoritas, mas é '
-                + 'essencial após aventuras pesadas. Quartos melhores recuperam mais.',
-    levelReq: 2
+    selector: '.hub-loc-card[data-did="city_military"]',
+    title: 'Arena & Quartel',
+    description: 'O setor militar: reúne a <b>Arena do Coliseu</b> para duelos de gladiadores com apostas e a <b>Guilda dos Aventureiros</b> para contratar aliados e aceitar contratos.'
   },
   {
-    selector: '.hub-loc[data-cb="market"], .hub-loc[data-cb="mercado"]',
-    title: 'Mercado',
-    description: 'Compre poções, armas, armaduras. Venda itens que não usa. Os preços variam — '
-                + 'aprenda a barganhar. Forja, alquimista e ferreiro estão aqui.'
+    selector: '.hub-loc-card[data-did="city_high"]',
+    title: 'Acrópole Sagrada',
+    description: 'O planalto da fé e da magia: visite o <b>Templo da Luz Sagrada</b> para curas imediatas e bênçãos, o <b>Escriba Rúnico</b> para encantamentos e o Festival sazonal.'
   },
   {
-    selector: '.hub-loc[data-cb="temple"], .hub-loc[data-cb="templo"]',
-    title: 'Templo',
-    description: 'Cure ferimentos graves, remova venenos e maldições. Sacerdotes oferecem bênçãos divinas. '
-                + 'Doações geram favor com os deuses (e ganhos passivos).'
+    selector: '.hub-prog, .hub-quest-row',
+    title: 'Metas & Progresso',
+    description: 'Painel de evolução: exibe seus contratos ativos, moedas nobres de platina, total de abates e o objetivo diário com recompensa extra.'
   },
   {
-    /* 2026-05-22: levelReq:4 — cross-ref CITY_LOCATIONS.bank (line ~8999). */
-    selector: '.hub-loc[data-cb="bank"], .hub-loc[data-cb="banco"]',
-    title: 'Banco',
-    description: 'Guarde Valdoritas com segurança (não perde ao morrer). Empréstimos para emergências, '
-                + 'investimentos para ganho passivo. Empreste com sabedoria — juros são reais.',
-    levelReq: 4
-  },
-  {
-    /* 2026-05-22: levelReq:3 — cross-ref CITY_LOCATIONS.guild (line ~9003). */
-    selector: '.hub-loc[data-cb="guild"], .hub-loc[data-cb="guilda"]',
-    title: 'Guilda dos Aventureiros',
-    description: 'Recrute aliados (mercenários, especialistas) para suas aventuras. Suba de rank na guilda '
-                + 'desbloqueando contratos mais lucrativos.',
-    levelReq: 3
-  },
-  {
-    /* 2026-05-22: levelReq:2 — cross-ref CITY_LOCATIONS.square (line ~9009). */
-    selector: '.hub-loc[data-cb="praca"], .hub-loc[data-cb="square"]',
-    title: 'Praça Central',
-    description: 'O coração social da cidade. NPCs falando, eventos aleatórios, festivais ocasionais. '
-                + 'Bom lugar para ouvir boatos sobre o mundo.',
-    levelReq: 2
-  },
-  {
-    /* 2026-05-21 (fix v2): footer está collapsed por default (body.footer-collapsed),
-       #bottom-panel display:none. Auto-expand antes de medir + pointar pro panel. */
     selector: '#bottom-panel, .footer-row.footer-quick',
     expandFooter: true,
-    title: 'Atalhos rápidos',
-    description: 'Barra inferior com <b>Mochila</b>, <b>Ficha</b> e <b>Grupo</b> — atalhos pros recursos mais usados. '
-                + 'O botão <b>· Menu</b> recolhe pra ganhar mais espaço de tela.'
-  },
-  {
-    /* 2026-05-21 (fix v2): cards estão em #city-group-panel (verificado DOM live). */
-    selector: '#city-group-panel',
-    title: 'Cards do seu grupo',
-    description: 'Topo da tela: cards de cada personagem com <b>HP</b> (vida vermelha), <b>MP</b> (mana/fé/vigor), '
-                + '<b>XP</b> (progresso de nível) e <b>Valdoritas</b> (moeda). Quando HP fica baixo, descanse na '
-                + 'estalagem ou cure no templo.'
+    title: 'Atalhos Rápidos',
+    description: 'Barra inferior com <b>Mochila</b>, <b>Ficha</b> de regras D&D 5e, <b>Hall</b> e o botão de <b>Ajuda (?)</b> para abrir o guia explicativo de cada tela do jogo.'
   },
   {
     selector: null,  // closing slide
     title: 'Tudo pronto!',
-    description: 'Você está pronto pra começar. <b>Dica final:</b> sempre que tiver dúvida, clique no '
-                + 'menu (≡) → <em>Guia</em> para reler tutoriais e referências de regras.'
+    description: 'Você está pronto para explorar o reino! Toque em qualquer distrito para acessar seus serviços e toque na interrogação (<b>?</b>) no rodapé sempre que tiver dúvidas.'
   }
 ];
 
@@ -18619,6 +18569,22 @@ function _showFirstTimeTutorial(stepIdx){
                          L2 + 'px ' + T2 + 'px)';
               mask.style.clipPath = clip2;
               mask.style.webkitClipPath = clip2;
+
+              // Recalcula card pos-scroll para nunca sobrepor o alvo em telas verticais
+              var vh2 = window.innerHeight;
+              var cardH2 = card.offsetHeight || 250;
+              var spaceAbove2 = r2.top - marginV;
+              var spaceBelow2 = vh2 - (r2.top + r2.height) - marginV;
+              if (spaceBelow2 >= cardH2 + marginV) {
+                card.style.top = 'auto';
+                card.style.bottom = marginV + 'px';
+              } else if (spaceAbove2 >= cardH2 + marginV) {
+                card.style.bottom = 'auto';
+                card.style.top = marginV + 'px';
+              } else {
+                card.style.top = 'auto';
+                card.style.bottom = marginV + 'px';
+              }
             }
           }, 280);
         } catch(e){}
@@ -34297,78 +34263,59 @@ var SCREEN_TOUR_STEPS = {
   'hub': [
     {
       selector: null,
-      title: 'Tour da Cidade de Valdoria',
-      description: 'Bem-vindo ao seu refúgio seguro! Vou te guiar em tempo real pela tela para desenhar e explicar o funcionamento de cada setor e botão da cidade.'
+      title: 'Cidade de Valdoria',
+      description: 'Bem-vindo à capital e ao seu refúgio seguro! Vou te guiar em tempo real pela tela para desenhar e explicar os <b>4 grandes distritos</b> urbanos, a gestão da comitiva e a marcha de aventura.'
+    },
+    {
+      selector: '#city-group-panel',
+      title: 'Cards da Comitiva',
+      description: 'No topo da tela: monitore em tempo real os Pontos de Vida (<b>HP</b>), Magia (<b>MP</b>), nível e moedas de cada membro do seu grupo.'
     },
     {
       selector: '.hub-cta',
       title: 'Partir para Aventura',
-      description: 'O coração da ação. Clique aqui para abrir o <b>Mapa de Valdoria</b> e viajar para florestas, montanhas e masmorras, conquistando XP e espólios.'
+      description: 'O coração da exploração. Toque aqui para abrir a <b>Cartografia Continental</b> e marchar rumo a florestas, montanhas e masmorras, conquistando XP e espólios.'
     },
     {
-      selector: '.hub-loc[data-cb="action_quests"], .hub-loc[data-cb="quests"]',
-      title: 'Missões & Contratos',
-      description: 'Lista de tarefas disponíveis: missões <b>diárias</b> que renovam a cada amanhecer, contratos de <b>história</b> épicos e tarefas secundárias.'
+      selector: '.hub-locations-section',
+      title: 'Distritos de Valdoria',
+      description: 'A capital é dividida em <b>4 distritos ilustrados</b>. Cada um possui um mapa próprio detalhado com lojas, templos, tavernas, serviços e NPCs.'
     },
     {
-      selector: '.hub-loc[data-cb="taverna"], .hub-loc[data-cb="tavern"]',
-      title: 'Taverna do Javali Bêbado',
-      description: 'O ponto de encontro dos aventureiros. Ouça boatos sobre fraquezas de monstros, aposte nos dados, contrate mercenários ou converse com o bardo.'
+      selector: '.hub-loc-card[data-did="city_south"]',
+      title: 'Portões do Sul',
+      description: 'As grandes muralhas e posto de vigília: abriga a <b>Taverna do Javali Bêbado</b> para ouvir boatos e beber, a <b>Estalagem do Grifo</b> para descanso longo e os sentinelas da guarda.'
     },
     {
-      selector: '.city-sector-tabs',
-      title: 'Os 4 Setores Urbanos',
-      description: 'Valdoria está dividida em 4 distritos: <b>Convívio</b> (taverna e missões), <b>Comércio</b> (mercado e banco), <b>Combate</b> (guilda e arena) e <b>Espírito</b> (templo e praça).'
+      selector: '.hub-loc-card[data-did="city_market"]',
+      title: 'Praça Mercantil',
+      description: 'O centro do comércio: reúne o <b>Mercado Central</b> com armas e poções, o <b>Banco & Cofre</b> blindado, a <b>Oficina & Forja</b> e a vida social da <b>Praça</b>.'
     },
     {
-      selector: '.hub-loc[data-cb="estalagem"], .hub-loc[data-cb="inn"]',
-      title: 'Estalagem Pena-Dourada',
-      description: 'Repouso seguro para <b>Descanso Longo</b>. Recupera todos os seus Pontos de Vida, Magia e remove penalidades de exaustão.',
-      levelReq: 2
+      selector: '.hub-loc-card[data-did="city_military"]',
+      title: 'Arena & Quartel',
+      description: 'O polo militar de Valdoria: acomoda o coliseu da <b>Arena de Duelos</b> para combates e apostas de ouro, e a <b>Guilda dos Aventureiros</b> com contratos de caça.'
     },
     {
-      selector: '.hub-loc[data-cb="market"], .hub-loc[data-cb="mercado"]',
-      title: 'Mercado de Valdoria',
-      description: 'Compre e venda armas, armaduras pesadas, poções de cura, pergaminhos mágicos e mapas de novas regiões.'
+      selector: '.hub-loc-card[data-did="city_high"]',
+      title: 'Acrópole Sagrada',
+      description: 'O santuário da fé e da magia: abriga o <b>Templo da Luz Sagrada</b> para curas e bênçãos, o <b>Escriba Rúnico</b> para encantamentos e celebrações de <b>Festivais</b>.'
     },
     {
-      selector: '.hub-loc[data-cb="temple"], .hub-loc[data-cb="templo"]',
-      title: 'Templo dos Quatro',
-      description: 'Cura sagrada imediata, purificação de venenos, alívio de maldições e bênçãos divinas concedidas pelos clérigos.'
-    },
-    {
-      selector: '.hub-loc[data-cb="bank"], .hub-loc[data-cb="banco"]',
-      title: 'Banco de Valdoria',
-      description: 'Guarde Valdoritas e itens preciosos em cofres blindados. Moedas no banco sobrevivem a derrotas em combate e assaltos na estrada.',
-      levelReq: 4
-    },
-    {
-      selector: '.hub-loc[data-cb="guild"], .hub-loc[data-cb="guilda"]',
-      title: 'Guilda dos Aventureiros',
-      description: 'Recrute novos aliados de diferentes classes para sua comitiva e consulte Braun, o Marcado, sobre táticas de guerra.',
-      levelReq: 3
-    },
-    {
-      selector: '.hub-loc[data-cb="praca"], .hub-loc[data-cb="square"]',
-      title: 'Praça Central',
-      description: 'Vida social ao ar livre: interaja com cidadãos que mudam conforme o horário do dia e adquira mapas com o Cartógrafo Corvus.',
-      levelReq: 2
+      selector: '.hub-prog, .hub-quest-row',
+      title: 'Metas & Progresso',
+      description: 'Acompanhe seu avanço em tempo real: missões ativas em andamento, moedas de platina acumuladas, abates de monstros nos ermos e a meta do <b>Desafio Diário</b>.'
     },
     {
       selector: '#bottom-panel, .footer-row.footer-quick',
       expandFooter: true,
-      title: 'Barra de Atalhos Rápidos',
-      description: 'Acesso imediato à sua <b>Mochila</b>, <b>Ficha</b> de atributos, <b>Grupo</b> de companheiros e menu de <b>Ajuda</b>.'
-    },
-    {
-      selector: '#city-group-panel',
-      title: 'Cards do Grupo no Topo',
-      description: 'Monitore em tempo real os Pontos de Vida (HP), Pontos de Magia (MP), nível e moedas de cada membro do seu grupo.'
+      title: 'Atalhos do Rodapé',
+      description: 'Acesso imediato à sua <b>Mochila</b>, <b>Ficha</b> de atributos D&D 5e, <b>Hall</b> de aventureiros e ao botão de <b>Ajuda (?)</b> para o guia de cada tela.'
     },
     {
       selector: null,
       title: 'Tour da Cidade Concluído!',
-      description: 'Você conhece todos os distritos de Valdoria! Sempre que tiver dúvidas em qualquer tela, basta tocar no ícone de <b>Ajuda</b> no rodapé.'
+      description: 'Você conhece todos os distritos de Valdoria! Toque em qualquer um dos distritos para explorar seus locais e volte à interrogação (<b>?</b>) sempre que precisar de orientação.'
     }
   ],
 
@@ -34898,7 +34845,13 @@ function _formatScreenGuideContent(rawText){
         titlePart = titlePart.replace(/\([^)]+\)/, '').trim();
       } else {
         // Badges contextuais inteligentes baseados no conteúdo
-        if (/estalagem/i.test(titlePart)) badge = 'Descanso Longo';
+        if (/distrito|muralhas|portões do sul/i.test(titlePart)) badge = 'Distrito';
+        else if (/praça mercantil/i.test(titlePart)) badge = 'Distrito';
+        else if (/arena & quartel/i.test(titlePart)) badge = 'Distrito';
+        else if (/acrópole sagrada/i.test(titlePart)) badge = 'Distrito';
+        else if (/comitiva|grupo/i.test(titlePart)) badge = 'Comitiva';
+        else if (/atalhos|rodapé/i.test(titlePart)) badge = 'Navegação';
+        else if (/estalagem/i.test(titlePart)) badge = 'Descanso Longo';
         else if (/mercado|comprar|vender|preço/i.test(titlePart)) badge = 'Comércio';
         else if (/taverna|boatos|rumor/i.test(titlePart)) badge = 'Rumores';
         else if (/bebidas/i.test(titlePart)) badge = 'Consumível';
@@ -51984,7 +51937,7 @@ var HELP_TEXTS_CITY = {
 
     'market': '\\n<b>MERCADO - GUIA RÁPIDO</b>\\n\\nOnde o comércio acontece:\\n\\n<b>Comprar Equipamentos</b>\\n• <b>Ferreiro</b>: Armas e Armaduras pesadas\\n• <b>Alquimista</b>: Poções e Ingredientes\\n• <b>Místico</b>: Itens mágicos e pergaminhos\\n• <b>Viajantes</b>: Itens raros e exóticos (Rotação periódica)\\n\\n<b>Vender Itens</b>\\n• Mercadores só compram o que lhes interessa\\n• O Ferreiro compra metais, o Alquimista compra ervas, etc.\\n• Preço de venda é geralmente 50% do valor base (ou menos)\\n\\n<b>Negociação e Fofoca</b>\\n• Pergunte aos mercadores sobre seus colegas ausentes\\n• Use perícias de Carisma para tentar descontos (arriscado!)\\n\\n<i>Dica</i>: Itens equipados não aparecem na lista de venda para evitar acidentes.\\n',
 
-    'city_main': '\\n<b>CIDADE DE Valdoria - GUIA</b>\\n\\nSeu refúgio seguro. Onde ir?\\n\\n<b>Aventura</b>: Explorar biomas, encontros narrativos e combates\\n<b>Estalagem</b>: Recuperar Vida/Mana (Descanso Longo)\\n<b>Mercado</b>: Comprar/Vender Equipamentos e Mapas\\n<b>Taverna</b>: Rumores, Jogos, Bebidas e Mercenários\\n<b>Guilda</b>: Missões, Recompensas e Recrutar Aventureiros\\n<b>Banco</b>: Guardar Valdoritas e Itens\\n<b>Praça</b>: NPCs, Cartógrafo e Social\\n<b>Templo</b>: Cura, Purificação e Bênçãos\\n<b>Arena</b>: Desafios, Duelos e Apostas\\n<b>Escriba Rúnico</b>: Encantamentos e Gravação\\n<b>Portões</b>: Guardas e Arredores da Cidade\\n\\n<i>Dica</i>: Compre um <b>Mapa de Valdória</b> para viajar entre regiões. Converse com todos — cada morador ou andarilho pode ter informações valiosas!\\n',
+    'city_main': '\\n<b>CIDADE DE VALDORIA - GUIA</b>\\n\\nSeu refúgio fortificado entre as expedições. Onde ir?\\n\\n<b>Partir para Aventura</b>: Marchar além das muralhas para desbravar províncias e ermos do continente\\n<b>Portões do Sul</b>: As grandes muralhas, vigília da guarda, Taverna do Javali Bêbado e Estalagem do Grifo\\n<b>Praça Mercantil</b>: O centro do comércio: Mercado Central, Banco & Cofres, Praça Central e Oficina de Forja\\n<b>Arena & Quartel</b>: O polo militar: Coliseu com duelos e apostas, e o Quartel da Guilda dos Aventureiros\\n<b>Acrópole Sagrada</b>: O santuário divino: Templo da Luz Sagrada para curas e bênçãos, Escriba Rúnico e Festivais\\n<b>Comitiva no Topo</b>: Monitore Vida, Mana, Pontos de Experiência e moedas de todo o grupo em tempo real\\n<b>Atalhos do Rodapé</b>: Acesse sua Mochila, Ficha do Personagem, Hall de Aventureiros e o Guia da Tela no rodapé\\n\\n<i>Dica</i>: Toque em qualquer um dos 4 Distritos ilustrados para abrir o mapa detalhado com seus locais e serviços!\\n',
 
     'arena': '\\n<b>ARENA DE VALDORIA - GUIA RÁPIDO</b>\\n\\nO coliseu dos gladiadores e campeões:\\n\\n<b>Desafios de Duelo</b>\\n• Enfrente oponentes de níveis crescentes em combates táticos individuais\\n• Teste suas melhores estratégias e perícias de combate\\n\\n<b>Apostas em Valdoritas</b>\\n• Aposte suas moedas antes de soar o gongo\\n• Vitórias rendem bolsas fartas de ouro e elevam seu renome marcial\\n\\n<b>Mestre Vorhan</b>\\n• O veterano que comanda a arena\\n• Consulte-o sobre adversários lendários e regras de combate\\n\\n<i>Dica</i>: Descanse na estalagem e traga poções antes de pisar na areia do coliseu!\\n',
 
