@@ -9133,28 +9133,38 @@ body.perf-lite .vc-action-btn { transition: none; }
       width: 100%;
       box-sizing: border-box;
       margin: 8px 0 12px 0;
-      padding: 10px 14px;
-      background: linear-gradient(180deg, #281d12 0%, #17110a 100%);
-      border: 1.5px solid rgba(196, 149, 58, 0.55);
-      border-radius: 6px;
+      padding: 11px 14px;
+      background: linear-gradient(180deg, #2c1e11 0%, #181009 100%);
+      border: 1.5px solid #c4953a;
+      border-radius: 8px;
       color: #ffd685;
       font-family: 'Cinzel', serif;
-      font-size: 12.5px;
+      font-size: 13px;
       font-weight: 700;
       letter-spacing: 0.5px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 7px;
+      gap: 8px;
       cursor: pointer;
       touch-action: manipulation;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 214, 133, 0.2);
       transition: all 0.15s ease;
     }
     .hub-city-map-trigger-btn:active {
       transform: scale(0.98);
       border-color: #ffd685;
-      background: #332415;
+      background: #3c2916;
+    }
+    .hcm-pill {
+      font-size: 11px;
+      font-family: system-ui, sans-serif;
+      font-weight: 700;
+      background: rgba(196, 149, 58, 0.25);
+      border: 1px solid rgba(196, 149, 58, 0.5);
+      color: #ffe099;
+      padding: 2px 7px;
+      border-radius: 10px;
     }
 
     /* ── POPUP MODAL EM TELA CHEIA: MAPA DA CIDADE ── */
@@ -9209,6 +9219,44 @@ body.perf-lite .vc-action-btn { transition: none; }
       background: #362617;
       transform: scale(0.96);
     }
+    .cfm-chips-bar {
+      display: flex;
+      gap: 6px;
+      padding: 6px 8px;
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+      background: #110d08;
+      border-bottom: 1px solid rgba(196, 149, 58, 0.3);
+      box-sizing: border-box;
+      scrollbar-width: none;
+      z-index: 100;
+    }
+    .cfm-chips-bar::-webkit-scrollbar {
+      display: none;
+    }
+    .cfm-chip {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      background: #1c140d;
+      border: 1px solid rgba(196, 149, 58, 0.35);
+      border-radius: 12px;
+      color: #c4b59f;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: all 0.15s ease;
+    }
+    .cfm-chip.active {
+      background: linear-gradient(180deg, #3c2a15 0%, #25190b 100%);
+      border-color: #ffd685;
+      color: #ffd685;
+      box-shadow: 0 0 8px rgba(196, 149, 58, 0.5);
+    }
     .cfm-viewport {
       flex: 1;
       position: relative;
@@ -9254,26 +9302,26 @@ body.perf-lite .vc-action-btn { transition: none; }
     }
     .cfm-pin.active {
       transform: translate(-50%, -50%) scale(1.15);
-      z-index: 25;
+      z-index: 50;
     }
     .cfm-pin-icon {
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       background: rgba(22, 16, 11, 0.95);
-      border: 2px solid #c4953a;
+      border: 1.5px solid #c4953a;
       color: #ffd685;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.8);
+      font-size: 15px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.85);
       transition: all 0.15s ease;
     }
     .cfm-pin.active .cfm-pin-icon {
       border-color: #ffd685;
-      background: #3d2a14;
-      box-shadow: 0 0 14px rgba(255, 214, 133, 0.85);
+      background: #3e2a14;
+      box-shadow: 0 0 16px rgba(255, 214, 133, 0.9);
     }
     .cfm-pin-badge {
       background: rgba(14, 10, 8, 0.94);
@@ -9281,12 +9329,18 @@ body.perf-lite .vc-action-btn { transition: none; }
       color: #f5eedf;
       font-size: 11px;
       font-weight: 700;
-      padding: 3px 7px;
+      padding: 2px 6px;
       border-radius: 4px;
       margin-top: 3px;
       white-space: nowrap;
       pointer-events: none;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+    }
+    .cfm-pin.active .cfm-pin-badge {
+      border-color: #ffd685;
+      color: #ffd685;
+      background: rgba(30, 20, 12, 0.98);
+      box-shadow: 0 0 10px rgba(196, 149, 58, 0.7);
     }
     .cfm-drawer {
       background: linear-gradient(180deg, #221810 0%, #140e09 100%);
@@ -9297,7 +9351,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       justify-content: space-between;
       gap: 12px;
       box-sizing: border-box;
-      min-height: 64px;
+      min-height: 66px;
       z-index: 100;
     }
     .cfm-drawer-info {
@@ -16194,59 +16248,8 @@ function _renderSectorTabs(rootEl){
   if (existing) existing.remove();
   var existingEmpty = rootEl.querySelector('.city-sector-empty');
   if (existingEmpty) existingEmpty.remove();
-
-  // Encontra insertion point — preferência: hub-loc-grid; fallback: hub-div (◆).
-  // Em último caso, append no final do rootEl.
-  var anchor = rootEl.querySelector('.hub-loc-grid');
-  var insertBefore = anchor; /* insertBefore element OU null pra append */
-  if (!anchor) {
-    anchor = rootEl.querySelector('.hub-div'); /* divider ◆ — sempre presente */
-    if (anchor) {
-      insertBefore = anchor.nextSibling; /* insertar APÓS divider */
-    }
-  }
-
-  var tabs = document.createElement('div');
-  tabs.className = 'city-sector-tabs';
-  
-  CITY_SECTOR_ORDER.forEach(function(sid){
-    var sec = CITY_SECTORS[sid];
-    var btn = document.createElement('button');
-    btn.className = 'city-sector-tab' + (sid === window._currentSector ? ' active' : '');
-    btn.innerHTML = '<span class="cst-ico">' + _uiIcoImg(sec.icoImg, 'cst-ico-img') + '</span><span class="cst-lbl">' + sec.label + '</span>';
-    btn.addEventListener('click', function(){
-      if (window._currentSector === sid) return;
-      window._currentSector = sid;
-      _logCity('sector switch: ' + sid);
-      if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
-    });
-    tabs.appendChild(btn);
-  });
-  if (anchor && anchor.parentNode) {
-    anchor.parentNode.insertBefore(tabs, insertBefore);
-  } else {
-    rootEl.appendChild(tabs);
-  }
-
-  // Empty-state: sector ativo sem locations → mostra info com nível requerido.
-  // Sem isso, jogador vê tabs mas tela "vazia" sem explicação.
-  var currentSec = window._currentSector;
-  if (currentSec && typeof _getVisibleLocationsForSector === 'function') {
-    var visible = _getVisibleLocationsForSector(currentSec);
-    if (visible.length === 0) {
-      var minReq = 999;
-      for (var k in CITY_LOCATIONS) {
-        var loc = CITY_LOCATIONS[k];
-        if (loc.sector === currentSec && (loc.levelReq || 1) < minReq) minReq = loc.levelReq || 1;
-      }
-      var empty = document.createElement('div');
-      empty.className = 'city-sector-empty';
-      empty.innerHTML = '<span class="cse-ico"></span>' +
-        '<span class="cse-msg">Locais de <b>' + CITY_SECTORS[currentSec].label +
-        '</b> requerem nível ' + (minReq < 999 ? minReq : '?') + '+ para serem desbloqueados.</span>';
-      tabs.parentNode.insertBefore(empty, tabs.nextSibling);
-    }
-  }
+  // Removido: O menu de setores foi descontinuado; todas as opcoes agora estao no Mapa da Cidade.
+  return;
 }
 
 // Aplica sparkle/badge nas células de locais newly_available / in_progress.
@@ -16296,8 +16299,17 @@ function _applyDiscoveryAnimations(rootEl){
 // + discovery state. CTA fixo. Tab bar inserido no post-render via _renderSectorTabs.
 function buildMockHubScreen(player){
   _ensureCityState();
-  var sector = window._currentSector || 'convivio';
-  var visible = _getVisibleLocationsForSector(sector);
+  // Todas as opcoes da cidade reunidas (sem filtro de setor)
+  var visible = [];
+  var seenKeys = {};
+  for (var key in CITY_LOCATIONS){
+    var loc = CITY_LOCATIONS[key];
+    if (!loc || !loc.cb || seenKeys[loc.cb]) continue;
+    seenKeys[loc.cb] = true;
+    var st = _getLocationState(loc);
+    if (st === 'hidden') continue;
+    visible.push({ key: key, loc: loc, state: st });
+  }
 
   // CTA sempre na primeira linha (P2 emoji ban: sem pictográfico no botão)
   var rows = [[{ text: 'PARTIR PARA AVENTURA', cb: 'explore_main' }]];
@@ -84734,7 +84746,7 @@ function renderHubScreen(el, screen) {
     cityMapTriggerBtn.type = 'button';
     cityMapTriggerBtn.className = 'hub-city-map-trigger-btn';
     cityMapTriggerBtn.id = 'hub-city-map-trigger-btn';
-    cityMapTriggerBtn.innerHTML = '<span>🗺️</span> Ver Mapa da Cidade';
+    cityMapTriggerBtn.innerHTML = '<span>🗺️</span> <b>Mapa da Cidade de Valdoria</b> <span class="hcm-pill">16 Locais</span>';
     cityMapTriggerBtn.addEventListener('click', function(){
         if (typeof haptic === 'function') haptic('light');
         _openCityMapModal();
@@ -84937,12 +84949,24 @@ function _openCityMapModal() {
 
   var imgSrc = _getCityMapImgSrc();
 
+  // Todos os 16 locais canonicos da cidade de Valdoria distribuidos harmonicamente
   var CITY_LANDMARKS = [
-    { id: 'city_gates', name: 'Portões de Valdoria', ico: '🏰', x: 50, y: 84, cb: 'explore_main', desc: 'Muralhas fortificadas e saída sul rumo às planícies.', btnText: 'Partir' },
-    { id: 'city_square', name: 'Praça Central & Mercado', ico: '⚖️', x: 50, y: 50, cb: 'market', desc: 'Comércio livre, ferreiros, boticários e mercadores.', btnText: 'Mercado' },
-    { id: 'city_tavern', name: 'Taverna do Javali Bêbado', ico: '🍺', x: 26, y: 46, cb: 'tavern', desc: 'Canecas cheias, descanso acolhedor e fofocas locais.', btnText: 'Entrar' },
-    { id: 'city_guild', name: 'Guilda dos Mercenários', ico: '⚔️', x: 74, y: 48, cb: 'action_quests', desc: 'Quadro de recompensas, contratos de caça e arena.', btnText: 'Missões' },
-    { id: 'city_temple', name: 'Templo da Luz Sagrada', ico: '🕊️', x: 50, y: 22, cb: 'temple', desc: 'Altar divino com sacerdotes que oferecem bênçãos e curas.', btnText: 'Rezar' }
+    { id: 'city_gates', name: 'Portões de Valdoria', ico: '🏰', category: 'saida', x: 50, y: 88, cb: 'explore_main', desc: 'Muralhas fortificadas, sentinelas de vigília e saída sul rumo às planícies.', btnText: 'Partir' },
+    { id: 'city_tavern', name: 'Taverna do Javali Bêbado', ico: '🍺', category: 'servicos', x: 26, y: 76, cb: 'tavern', desc: 'Canecas cheias de hidromel, lareira acolhedora, descanso e boatos das estradas.', btnText: 'Entrar na Taverna' },
+    { id: 'city_inn', name: 'Estalagem do Grifo', ico: '🛏️', category: 'servicos', x: 74, y: 76, cb: 'inn', desc: 'Aposentos confortáveis e silêncio reparador para descanso longo e recuperação plena.', btnText: 'Descansar' },
+    { id: 'city_quests', name: 'Mural de Missões', ico: '📜', category: 'combate', x: 36, y: 66, cb: 'action_quests', desc: 'Contratos cívicos e avisos de recompensa oficiais do conselho de Valdoria.', btnText: 'Ver Missões' },
+    { id: 'city_daily', name: 'Desafio Diário', ico: '🎯', category: 'combate', x: 64, y: 66, cb: 'daily_challenge', desc: 'Objetivo militar diário com recompensas especiais em barras de platina.', btnText: 'Ver Desafio' },
+    { id: 'city_bonds', name: 'Vínculos & Relações', ico: '🤝', category: 'servicos', x: 14, y: 62, cb: 'rel_main', desc: 'Conversas particulares, aprofundamento de afinidade e lealdade com seus aliados.', btnText: 'Conversar' },
+    { id: 'city_codex', name: 'Compêndio do Mundo', ico: '📖', category: 'espirito', x: 86, y: 62, cb: 'action_codex', desc: 'Biblioteca com crônicas do reino, lendas esquecidas, bestiário e atlas histórico.', btnText: 'Consultar' },
+    { id: 'city_square', name: 'Praça Central', ico: '🏛️', category: 'servicos', x: 50, y: 52, cb: 'square', desc: 'O coração pulsante da capital: pregoeiros, bardos, jogos de dados e contratações.', btnText: 'Visitar Praça' },
+    { id: 'city_market', name: 'Mercado Central', ico: '⚖️', category: 'comercio', x: 33, y: 52, cb: 'market', desc: 'Bancas de mercadores, ferreiros, boticários, armaduras e suprimentos de marcha.', btnText: 'Ir ao Mercado' },
+    { id: 'city_bank', name: 'Banco & Cofre', ico: '🏦', category: 'comercio', x: 67, y: 52, cb: 'bank', desc: 'Cofres de pedra maciça, cambistas juramentados e guarda segura para suas riquezas.', btnText: 'Acessar Cofre' },
+    { id: 'city_workshop', name: 'Oficina & Forja', ico: '⚒️', category: 'comercio', x: 20, y: 42, cb: 'open_workshop', desc: 'Forjas incandescentes, conserto de lâminas, bigornas e aprimoramento de armas.', btnText: 'Entrar na Oficina' },
+    { id: 'city_runes', name: 'Escriba Rúnico', ico: '🔮', category: 'comercio', x: 80, y: 42, cb: 'rune_scribe', desc: 'Pergaminhos místicos, encantamentos arcanos, transmutação e runas de poder.', btnText: 'Falar com Escriba' },
+    { id: 'city_festival', name: 'Festival da Capital', ico: '🎭', category: 'espirito', x: 50, y: 36, cb: 'festival', desc: 'Música festiva, torneios de pontaria, hidromel e comemorações nas ruas.', btnText: 'Celebrar' },
+    { id: 'city_guild', name: 'Guilda dos Mercenários', ico: '⚔️', category: 'combate', x: 24, y: 26, cb: 'guild', desc: 'Quartel de guerreiros experientes sob a comandante Tavira: recrutamento e gestão.', btnText: 'Entrar na Guilda' },
+    { id: 'city_arena', name: 'Arena do Coliseu', ico: '🏟️', category: 'combate', x: 76, y: 26, cb: 'arena', desc: 'Fosso circular de combate com torneios sangrentos, aplausos e glória militar.', btnText: 'Entrar na Arena' },
+    { id: 'city_temple', name: 'Templo da Luz Sagrada', ico: '🕊️', category: 'espirito', x: 50, y: 16, cb: 'temple', desc: 'Altar divino onde sacerdotes concedem bênçãos, curas milagrosas e ritos sagrados.', btnText: 'Rezar no Altar' }
   ];
 
   var selected = CITY_LANDMARKS[0];
@@ -84952,6 +84976,7 @@ function _openCityMapModal() {
     + '  <div class="cfm-header-title"><span>🗺️</span> Mapa da Cidade de Valdoria</div>'
     + '  <button type="button" class="cfm-close-btn" onclick="_closeCityMapModal()">✕ Fechar</button>'
     + '</div>'
+    + '<div class="cfm-chips-bar" id="cfm-chips-bar"></div>'
     + '<div class="cfm-viewport">'
     + '  <div class="cfm-stage">'
     + '    <img class="cfm-img" id="cfm-city-img" src="' + imgSrc + '" alt="Mapa da Cidade de Valdoria">'
@@ -84968,21 +84993,28 @@ function _openCityMapModal() {
 
   var cityImgEl = modal.querySelector('#cfm-city-img');
   if (cityImgEl) {
+    var attempts = 0;
+    var fallbacks = [
+      '/shared/img/map/provinces/city.webp',
+      '../shared/img/map/provinces/city.webp',
+      'shared/img/map/provinces/city.webp',
+      './shared/img/map/provinces/city.webp'
+    ];
     cityImgEl.onerror = function() {
-      if (this.src.indexOf('/shared/') === -1) {
-        this.src = '/shared/img/map/provinces/city.webp';
-      } else if (this.src.indexOf('../shared/') === -1) {
-        this.src = '../shared/img/map/provinces/city.webp';
+      attempts++;
+      if (attempts < fallbacks.length) {
+        this.src = fallbacks[attempts];
       }
     };
   }
 
+  var chipsBar = modal.querySelector('#cfm-chips-bar');
   var pinsLayer = modal.querySelector('#cfm-pins-layer');
   var drawerName = modal.querySelector('#cfm-drawer-name');
   var drawerDesc = modal.querySelector('#cfm-drawer-desc');
   var drawerBtn = modal.querySelector('#cfm-drawer-act-btn');
 
-  function selectLandmark(lm) {
+  function selectLandmark(lm, scrollChip) {
     selected = lm;
     drawerName.innerHTML = '<span>' + lm.ico + '</span> ' + lm.name;
     drawerDesc.textContent = lm.desc;
@@ -84997,6 +85029,15 @@ function _openCityMapModal() {
     pins.forEach(function(p) {
       p.classList.toggle('active', p.getAttribute('data-id') === lm.id);
     });
+
+    var chips = chipsBar.querySelectorAll('.cfm-chip');
+    chips.forEach(function(c) {
+      var isAct = c.getAttribute('data-id') === lm.id;
+      c.classList.toggle('active', isAct);
+      if (isAct && scrollChip) {
+        try { c.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); } catch(_){}
+      }
+    });
   }
 
   drawerBtn.onclick = function() {
@@ -85005,6 +85046,22 @@ function _openCityMapModal() {
     if (typeof doAction === 'function') doAction(selected.cb);
   };
 
+  // Renderiza chips horizontais de selecao rapida
+  CITY_LANDMARKS.forEach(function(lm) {
+    var chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'cfm-chip' + (lm.id === selected.id ? ' active' : '');
+    chip.setAttribute('data-id', lm.id);
+    chip.innerHTML = '<span>' + lm.ico + '</span> ' + lm.name.split(' ')[0];
+    chip.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (typeof haptic === 'function') haptic('light');
+      selectLandmark(lm, false);
+    });
+    chipsBar.appendChild(chip);
+  });
+
+  // Renderiza pins sobre a imagem do mapa da cidade
   CITY_LANDMARKS.forEach(function(lm) {
     var pin = document.createElement('div');
     pin.className = 'cfm-pin' + (lm.id === selected.id ? ' active' : '');
@@ -85019,7 +85076,7 @@ function _openCityMapModal() {
     pin.addEventListener('click', function(e) {
       e.stopPropagation();
       if (typeof haptic === 'function') haptic('light');
-      selectLandmark(lm);
+      selectLandmark(lm, true);
     });
 
     pinsLayer.appendChild(pin);

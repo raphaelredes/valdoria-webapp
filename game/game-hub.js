@@ -191,6 +191,18 @@ function renderHubScreen(el, screen) {
         frag.appendChild(ctaEl);
     }
 
+    /* ── 2.1 Trigger "Ver Mapa da Cidade" (Popup Tela Cheia) ─── */
+    var cityMapTriggerBtn = document.createElement('button');
+    cityMapTriggerBtn.type = 'button';
+    cityMapTriggerBtn.className = 'hub-city-map-trigger-btn';
+    cityMapTriggerBtn.id = 'hub-city-map-trigger-btn';
+    cityMapTriggerBtn.innerHTML = '<span>🗺️</span> <b>Mapa da Cidade de Valdoria</b> <span class="hcm-pill">16 Locais</span>';
+    cityMapTriggerBtn.addEventListener('click', function(){
+        if (typeof haptic === 'function') haptic('light');
+        _openCityMapModal();
+    });
+    frag.appendChild(cityMapTriggerBtn);
+
     /* ── 3. Alert (HP/rest warning) ──────────────────────────── */
     var notifs = screen.notifications || [];
     for (var ni = 0; ni < notifs.length; ni++) {
@@ -365,6 +377,175 @@ function renderHubScreen(el, screen) {
     /* Append everything to the container */
     el.appendChild(frag);
 }
+
+/* ── MODAL POPUP EM TELA CHEIA: MAPA DA CIDADE DE VALDORIA ──────────────── */
+function _getCityMapImgSrc() {
+  if (typeof window !== 'undefined' && window.location) {
+    if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+      return '/shared/img/map/provinces/city.webp';
+    }
+  }
+  return 'shared/img/map/provinces/city.webp';
+}
+
+function _openCityMapModal() {
+  var modal = document.getElementById('city-map-fullscreen-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'city-map-fullscreen-modal';
+    modal.className = 'city-map-fullscreen-modal';
+    document.body.appendChild(modal);
+  }
+
+  var imgSrc = _getCityMapImgSrc();
+
+  // Todos os 16 locais canonicos da cidade de Valdoria distribuidos harmonicamente
+  var CITY_LANDMARKS = [
+    { id: 'city_gates', name: 'Portões de Valdoria', ico: '🏰', category: 'saida', x: 50, y: 88, cb: 'explore_main', desc: 'Muralhas fortificadas, sentinelas de vigília e saída sul rumo às planícies.', btnText: 'Partir' },
+    { id: 'city_tavern', name: 'Taverna do Javali Bêbado', ico: '🍺', category: 'servicos', x: 26, y: 76, cb: 'tavern', desc: 'Canecas cheias de hidromel, lareira acolhedora, descanso e boatos das estradas.', btnText: 'Entrar na Taverna' },
+    { id: 'city_inn', name: 'Estalagem do Grifo', ico: '🛏️', category: 'servicos', x: 74, y: 76, cb: 'inn', desc: 'Aposentos confortáveis e silêncio reparador para descanso longo e recuperação plena.', btnText: 'Descansar' },
+    { id: 'city_quests', name: 'Mural de Missões', ico: '📜', category: 'combate', x: 36, y: 66, cb: 'action_quests', desc: 'Contratos cívicos e avisos de recompensa oficiais do conselho de Valdoria.', btnText: 'Ver Missões' },
+    { id: 'city_daily', name: 'Desafio Diário', ico: '🎯', category: 'combate', x: 64, y: 66, cb: 'daily_challenge', desc: 'Objetivo militar diário com recompensas especiais em barras de platina.', btnText: 'Ver Desafio' },
+    { id: 'city_bonds', name: 'Vínculos & Relações', ico: '🤝', category: 'servicos', x: 14, y: 62, cb: 'rel_main', desc: 'Conversas particulares, aprofundamento de afinidade e lealdade com seus aliados.', btnText: 'Conversar' },
+    { id: 'city_codex', name: 'Compêndio do Mundo', ico: '📖', category: 'espirito', x: 86, y: 62, cb: 'action_codex', desc: 'Biblioteca com crônicas do reino, lendas esquecidas, bestiário e atlas histórico.', btnText: 'Consultar' },
+    { id: 'city_square', name: 'Praça Central', ico: '🏛️', category: 'servicos', x: 50, y: 52, cb: 'square', desc: 'O coração pulsante da capital: pregoeiros, bardos, jogos de dados e contratações.', btnText: 'Visitar Praça' },
+    { id: 'city_market', name: 'Mercado Central', ico: '⚖️', category: 'comercio', x: 33, y: 52, cb: 'market', desc: 'Bancas de mercadores, ferreiros, boticários, armaduras e suprimentos de marcha.', btnText: 'Ir ao Mercado' },
+    { id: 'city_bank', name: 'Banco & Cofre', ico: '🏦', category: 'comercio', x: 67, y: 52, cb: 'bank', desc: 'Cofres de pedra maciça, cambistas juramentados e guarda segura para suas riquezas.', btnText: 'Acessar Cofre' },
+    { id: 'city_workshop', name: 'Oficina & Forja', ico: '⚒️', category: 'comercio', x: 20, y: 42, cb: 'open_workshop', desc: 'Forjas incandescentes, conserto de lâminas, bigornas e aprimoramento de armas.', btnText: 'Entrar na Oficina' },
+    { id: 'city_runes', name: 'Escriba Rúnico', ico: '🔮', category: 'comercio', x: 80, y: 42, cb: 'rune_scribe', desc: 'Pergaminhos místicos, encantamentos arcanos, transmutação e runas de poder.', btnText: 'Falar com Escriba' },
+    { id: 'city_festival', name: 'Festival da Capital', ico: '🎭', category: 'espirito', x: 50, y: 36, cb: 'festival', desc: 'Música festiva, torneios de pontaria, hidromel e comemorações nas ruas.', btnText: 'Celebrar' },
+    { id: 'city_guild', name: 'Guilda dos Mercenários', ico: '⚔️', category: 'combate', x: 24, y: 26, cb: 'guild', desc: 'Quartel de guerreiros experientes sob a comandante Tavira: recrutamento e gestão.', btnText: 'Entrar na Guilda' },
+    { id: 'city_arena', name: 'Arena do Coliseu', ico: '🏟️', category: 'combate', x: 76, y: 26, cb: 'arena', desc: 'Fosso circular de combate com torneios sangrentos, aplausos e glória militar.', btnText: 'Entrar na Arena' },
+    { id: 'city_temple', name: 'Templo da Luz Sagrada', ico: '🕊️', category: 'espirito', x: 50, y: 16, cb: 'temple', desc: 'Altar divino onde sacerdotes concedem bênçãos, curas milagrosas e ritos sagrados.', btnText: 'Rezar no Altar' }
+  ];
+
+  var selected = CITY_LANDMARKS[0];
+
+  modal.innerHTML = ''
+    + '<div class="cfm-header">'
+    + '  <div class="cfm-header-title"><span>🗺️</span> Mapa da Cidade de Valdoria</div>'
+    + '  <button type="button" class="cfm-close-btn" onclick="_closeCityMapModal()">✕ Fechar</button>'
+    + '</div>'
+    + '<div class="cfm-chips-bar" id="cfm-chips-bar"></div>'
+    + '<div class="cfm-viewport">'
+    + '  <div class="cfm-stage">'
+    + '    <img class="cfm-img" id="cfm-city-img" src="' + imgSrc + '" alt="Mapa da Cidade de Valdoria">'
+    + '    <div class="cfm-pins-layer" id="cfm-pins-layer"></div>'
+    + '  </div>'
+    + '</div>'
+    + '<div class="cfm-drawer" id="cfm-drawer">'
+    + '  <div class="cfm-drawer-info">'
+    + '    <div class="cfm-drawer-name" id="cfm-drawer-name"><span>' + selected.ico + '</span> ' + selected.name + '</div>'
+    + '    <div class="cfm-drawer-desc" id="cfm-drawer-desc">' + selected.desc + '</div>'
+    + '  </div>'
+    + '  <button type="button" class="cfm-drawer-action-btn" id="cfm-drawer-act-btn">' + selected.btnText + '</button>'
+    + '</div>';
+
+  var cityImgEl = modal.querySelector('#cfm-city-img');
+  if (cityImgEl) {
+    var attempts = 0;
+    var fallbacks = [
+      '/shared/img/map/provinces/city.webp',
+      '../shared/img/map/provinces/city.webp',
+      'shared/img/map/provinces/city.webp',
+      './shared/img/map/provinces/city.webp'
+    ];
+    cityImgEl.onerror = function() {
+      attempts++;
+      if (attempts < fallbacks.length) {
+        this.src = fallbacks[attempts];
+      }
+    };
+  }
+
+  var chipsBar = modal.querySelector('#cfm-chips-bar');
+  var pinsLayer = modal.querySelector('#cfm-pins-layer');
+  var drawerName = modal.querySelector('#cfm-drawer-name');
+  var drawerDesc = modal.querySelector('#cfm-drawer-desc');
+  var drawerBtn = modal.querySelector('#cfm-drawer-act-btn');
+
+  function selectLandmark(lm, scrollChip) {
+    selected = lm;
+    drawerName.innerHTML = '<span>' + lm.ico + '</span> ' + lm.name;
+    drawerDesc.textContent = lm.desc;
+    drawerBtn.textContent = lm.btnText;
+    drawerBtn.onclick = function() {
+      _closeCityMapModal();
+      if (typeof haptic === 'function') haptic('medium');
+      if (typeof doAction === 'function') doAction(lm.cb);
+    };
+
+    var pins = pinsLayer.querySelectorAll('.cfm-pin');
+    pins.forEach(function(p) {
+      p.classList.toggle('active', p.getAttribute('data-id') === lm.id);
+    });
+
+    var chips = chipsBar.querySelectorAll('.cfm-chip');
+    chips.forEach(function(c) {
+      var isAct = c.getAttribute('data-id') === lm.id;
+      c.classList.toggle('active', isAct);
+      if (isAct && scrollChip) {
+        try { c.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); } catch(_){}
+      }
+    });
+  }
+
+  drawerBtn.onclick = function() {
+    _closeCityMapModal();
+    if (typeof haptic === 'function') haptic('medium');
+    if (typeof doAction === 'function') doAction(selected.cb);
+  };
+
+  // Renderiza chips horizontais de selecao rapida
+  CITY_LANDMARKS.forEach(function(lm) {
+    var chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'cfm-chip' + (lm.id === selected.id ? ' active' : '');
+    chip.setAttribute('data-id', lm.id);
+    chip.innerHTML = '<span>' + lm.ico + '</span> ' + lm.name.split(' ')[0];
+    chip.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (typeof haptic === 'function') haptic('light');
+      selectLandmark(lm, false);
+    });
+    chipsBar.appendChild(chip);
+  });
+
+  // Renderiza pins sobre a imagem do mapa da cidade
+  CITY_LANDMARKS.forEach(function(lm) {
+    var pin = document.createElement('div');
+    pin.className = 'cfm-pin' + (lm.id === selected.id ? ' active' : '');
+    pin.setAttribute('data-id', lm.id);
+    pin.style.left = lm.x + '%';
+    pin.style.top = lm.y + '%';
+
+    pin.innerHTML = ''
+      + '<div class="cfm-pin-icon">' + lm.ico + '</div>'
+      + '<div class="cfm-pin-badge">' + lm.name + '</div>';
+
+    pin.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (typeof haptic === 'function') haptic('light');
+      selectLandmark(lm, true);
+    });
+
+    pinsLayer.appendChild(pin);
+  });
+
+  modal.style.display = 'flex';
+  document.body.classList.add('city-modal-open');
+}
+
+function _closeCityMapModal() {
+  var modal = document.getElementById('city-map-fullscreen-modal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+  document.body.classList.remove('city-modal-open');
+}
+
+window._openCityMapModal = _openCityMapModal;
+window._closeCityMapModal = _closeCityMapModal;
 // === SYNC_REGION END ===
 
 
