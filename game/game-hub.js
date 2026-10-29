@@ -191,70 +191,58 @@ function renderHubScreen(el, screen) {
         frag.appendChild(ctaEl);
     }
 
-        /* ── 2.1 Opções de Regiões da Cidade (Cartografia Urbana Visual) ─── */
-    var districtsWrap = _hubDiv('hub-districts-section');
-    districtsWrap.innerHTML = ''
-      + '<div class="hub-districts-header">'
-      + '  <span>Distritos de Valdoria</span>'
+        /* ── 2.1 Botões das Regiões da Capital (Estilo Clássico com Desenhos Ilustrados) ─── */
+    var locsWrap = _hubDiv('hub-locations-section');
+    locsWrap.innerHTML = ''
+      + '<div class="hub-locations-header">'
+      + '  <span>Locais de Valdoria</span>'
       + '</div>';
 
-    // 1. Distrito Sul & Portões
-    var d1Card = document.createElement('div');
-    d1Card.className = 'hub-district-card';
-    d1Card.innerHTML = ''
-      + '<div class="hdc-info">'
-      + '  <div class="hdc-title">Distrito Sul & Portões</div>'
-      + '</div>'
-      + '<div class="hdc-badge">Abrir</div>';
-    d1Card.addEventListener('click', function() {
-      if (typeof haptic === 'function') haptic('light');
-      _openCityMapModal('city_south');
-    });
-    districtsWrap.appendChild(d1Card);
+    var grid = document.createElement('div');
+    grid.className = 'hub-locations-grid';
 
-    // 2. Distrito Mercantil & Praça Central
-    var d2Card = document.createElement('div');
-    d2Card.className = 'hub-district-card';
-    d2Card.innerHTML = ''
-      + '<div class="hdc-info">'
-      + '  <div class="hdc-title">Distrito Mercantil & Praça</div>'
-      + '</div>'
-      + '<div class="hdc-badge">Abrir</div>';
-    d2Card.addEventListener('click', function() {
-      if (typeof haptic === 'function') haptic('light');
-      _openCityMapModal('city_market');
-    });
-    districtsWrap.appendChild(d2Card);
+    var hubRegions = [
+      { id: 'city_south', name: 'Portões do Sul', img: '/shared/img/map/city_districts/city_south.webp' },
+      { id: 'city_market', name: 'Praça Mercantil', img: '/shared/img/map/city_districts/city_market.webp' },
+      { id: 'city_military', name: 'Arena & Quartel', img: '/shared/img/map/city_districts/city_military.webp' },
+      { id: 'city_high', name: 'Acrópole Sagrada', img: '/shared/img/map/city_districts/city_high.webp' }
+    ];
 
-    // 3. Distrito Militar & Coliseu
-    var d3Card = document.createElement('div');
-    d3Card.className = 'hub-district-card';
-    d3Card.innerHTML = ''
-      + '<div class="hdc-info">'
-      + '  <div class="hdc-title">Distrito Militar & Coliseu</div>'
-      + '</div>'
-      + '<div class="hdc-badge">Abrir</div>';
-    d3Card.addEventListener('click', function() {
-      if (typeof haptic === 'function') haptic('light');
-      _openCityMapModal('city_military');
-    });
-    districtsWrap.appendChild(d3Card);
+    hubRegions.forEach(function(reg) {
+      var card = document.createElement('div');
+      card.className = 'hub-loc-card';
+      card.setAttribute('data-did', reg.id);
+      card.innerHTML = ''
+        + '<div class="hlc-thumb">'
+        + '  <img src="' + reg.img + '" alt="' + reg.name + '" class="hlc-img">'
+        + '</div>'
+        + '<div class="hlc-name">' + reg.name + '</div>';
 
-    // 4. Distrito Sagrado & Acrópole
-    var d4Card = document.createElement('div');
-    d4Card.className = 'hub-district-card';
-    d4Card.innerHTML = ''
-      + '<div class="hdc-info">'
-      + '  <div class="hdc-title">Distrito Sagrado & Acrópole</div>'
-      + '</div>'
-      + '<div class="hdc-badge">Abrir</div>';
-    d4Card.addEventListener('click', function() {
-      if (typeof haptic === 'function') haptic('light');
-      _openCityMapModal('city_high');
-    });
-    districtsWrap.appendChild(d4Card);
+      var imgEl = card.querySelector('.hlc-img');
+      if (imgEl) {
+        var attempts = 0;
+        imgEl.onerror = function() {
+          attempts++;
+          var fallbacks = [
+            '../shared/img/map/city_districts/' + reg.id + '.webp',
+            'shared/img/map/city_districts/' + reg.id + '.webp',
+            './shared/img/map/city_districts/' + reg.id + '.webp'
+          ];
+          if (attempts <= fallbacks.length) {
+            this.src = fallbacks[attempts - 1];
+          }
+        };
+      }
 
-    frag.appendChild(districtsWrap);
+      card.addEventListener('click', function() {
+        if (typeof haptic === 'function') haptic('light');
+        _openCityMapModal(reg.id);
+      });
+      grid.appendChild(card);
+    });
+
+    locsWrap.appendChild(grid);
+    frag.appendChild(locsWrap);
 
 /* ── 7. Quest Mini Tracker ───────────────────────────────── */
     var qt = screen.quest_tracker;
@@ -363,23 +351,24 @@ function renderHubScreen(el, screen) {
 }
 
 /* ── MODAL POPUP EM TELA CHEIA: MAPA DA CIDADE DE VALDORIA ──────────────── */
-// Dados dos 4 Distritos Regionais de Valdoria (D&D 5e - Retículo Cartográfico Canônico)
+// Dados das 4 Regiões Urbanas de Valdoria (D&D 5e - Retículo Cartográfico Canônico)
 var CITY_DISTRICTS_DATA = {
   'city_south': {
     id: 'city_south',
-    name: 'Distrito Sul',
-    fullName: 'Distrito Sul & Portões de Valdoria',
+    name: 'Portões do Sul',
+    fullName: 'Portões do Sul & Muralhas de Valdoria',
     img: '/shared/img/map/city_districts/city_south.webp',
     landmarks: [
       { id: 'loc_gates', name: 'Portões de Valdoria', x: 50, y: 82, cb: 'explore_main', desc: 'Muralhas fortificadas, sentinelas de vigília e saída sul rumo às planícies.', btnText: 'Partir para Aventura' },
       { id: 'loc_tavern', name: 'Taverna do Javali Bêbado', x: 25, y: 46, cb: 'tavern', desc: 'Canecas cheias de hidromel, lareira crepitante, descanso e boatos das estradas.', btnText: 'Entrar na Taverna' },
-      { id: 'loc_inn', name: 'Estalagem do Grifo', x: 75, y: 46, cb: 'inn', desc: 'Aposentos confortáveis e silêncio reparador para descanso longo e recuperação total.', btnText: 'Descansar na Estalagem' }
+      { id: 'loc_inn', name: 'Estalagem do Grifo', x: 75, y: 46, cb: 'inn', desc: 'Aposentos confortáveis, descanso reparador e adega subterrânea sob os cuidados de Martha.', btnText: 'Descansar na Estalagem' },
+      { id: 'loc_sewer', name: 'Grade do Esgoto', x: 50, y: 64, cb: 'passagens_open_sewer', desc: 'Duto pluvial sob a muralha sul. Acesso trancado por correntes, ligado a rumores de infestações subterrâneas.', btnText: 'Inspecionar Grade' }
     ]
   },
   'city_market': {
     id: 'city_market',
-    name: 'Distrito Mercantil',
-    fullName: 'Distrito Mercantil & Praça Central',
+    name: 'Praça Mercantil',
+    fullName: 'Praça Mercantil & Grande Mercado',
     img: '/shared/img/map/city_districts/city_market.webp',
     landmarks: [
       { id: 'loc_square', name: 'Praça Central', x: 50, y: 52, cb: 'square', desc: 'O coração pulsante da capital: pregoeiros, bardos, jogos de dados e contratações.', btnText: 'Visitar a Praça' },
@@ -390,18 +379,18 @@ var CITY_DISTRICTS_DATA = {
   },
   'city_military': {
     id: 'city_military',
-    name: 'Distrito Militar',
-    fullName: 'Distrito Militar & Coliseu',
+    name: 'Arena & Quartel',
+    fullName: 'Arena do Coliseu & Quartel da Guilda',
     img: '/shared/img/map/city_districts/city_military.webp',
     landmarks: [
-      { id: 'loc_guild', name: 'Guilda dos Mercenários', x: 28, y: 50, cb: 'guild', desc: 'Quartel de guerreiros experientes sob a comandante Tavira: recrutamento e gestão.', btnText: 'Entrar na Guilda' },
-      { id: 'loc_arena', name: 'Arena do Coliseu', x: 72, y: 50, cb: 'arena', desc: 'Fosso circular de combate com torneios sangrentos, aplausos e glória militar.', btnText: 'Entrar na Arena' }
+      { id: 'loc_arena', name: 'Arena do Coliseu', x: 28, y: 50, cb: 'arena', desc: 'Fosso circular de combate com torneios sangrentos, aplausos e glória militar.', btnText: 'Entrar na Arena' },
+      { id: 'loc_guild', name: 'Guilda dos Mercenários', x: 72, y: 50, cb: 'guild', desc: 'Quartel de guerreiros experientes sob a comandante Tavira: recrutamento e gestão.', btnText: 'Entrar na Guilda' }
     ]
   },
   'city_high': {
     id: 'city_high',
-    name: 'Distrito Sagrado',
-    fullName: 'Distrito Sagrado da Luz & Acrópole',
+    name: 'Acrópole Sagrada',
+    fullName: 'Acrópole Sagrada & Santuário da Luz',
     img: '/shared/img/map/city_districts/city_high.webp',
     landmarks: [
       { id: 'loc_temple', name: 'Templo da Luz Sagrada', x: 30, y: 44, cb: 'temple', desc: 'Altar divino onde sacerdotes concedem bênçãos, curas milagrosas e ritos sagrados.', btnText: 'Rezar no Altar' },
@@ -433,7 +422,7 @@ function _openCityMapModal(initialDistrictId) {
     + '<div class="cfm-district-tabs" id="cfm-district-tabs"></div>'
     + '<div class="cfm-viewport">'
     + '  <div class="cfm-stage">'
-    + '    <img class="cfm-img" id="cfm-city-img" src="' + district.img + '" alt="Mapa do Distrito">'
+    + '    <img class="cfm-img" id="cfm-city-img" src="' + district.img + '" alt="Mapa do Local">'
     + '    <div class="cfm-pins-layer" id="cfm-pins-layer"></div>'
     + '  </div>'
     + '</div>'
