@@ -10292,18 +10292,38 @@ body.perf-lite .vc-action-btn { transition: none; }
   window._showGameLoadError = _showGameLoadError;
 
   // Verifica se o hub da cidade realmente renderizou (não apenas elementos estáticos de #app)
+  // Nota: #footer-nav fica vazio desde X-6.5.51BG (os 5 botões ficam em #footer-quick).
   function _cityGameReady() {
     if (!window.__cityBootRendered) return false;
     var content = document.getElementById('content');
     var topBar = document.getElementById('city-top-bar');
-    var footerNav = document.getElementById('footer-nav');
+    var footerQuick = document.getElementById('footer-quick');
     return !!(
       content && content.children.length > 0 && content.textContent.trim() !== '' &&
       topBar && topBar.children.length > 0 &&
-      footerNav && footerNav.children.length > 0
+      footerQuick && footerQuick.children.length > 0
     );
   }
   window._cityGameReady = _cityGameReady;
+
+  function _cityRevealIfReady(reason) {
+    if (window.__gameLoadErrorShown) return false;
+    if (window.__introBlocking || (window.__introTitle && window.__introTitle.isVisible && window.__introTitle.isVisible())) return false;
+    if (window.__cityResumePending) return false;
+    if (!_cityGameReady()) return false;
+    document.body.classList.add('city-ready');
+    window.__pendingHideTGLoading = false;
+    var ld = document.getElementById('loading');
+    if (ld) {
+      ld.style.display = 'none';
+      ld.style.opacity = '0';
+      ld.style.visibility = 'hidden';
+      ld.classList.add('hidden');
+    }
+    console.info('[CITY-READY] Hub revelado —', reason || 'ready');
+    return true;
+  }
+  window._cityRevealIfReady = _cityRevealIfReady;
 
   // Se após window.load o script principal não tiver executado (__cityBootRendered !== true),
   // houve falha de rede/parse/execução no script principal -> exibe tela de erro imediatamente
@@ -10318,10 +10338,12 @@ body.perf-lite .vc-action-btn { transition: none; }
 
   // Watchdog global: se em 14s a cidade não atingir city-ready, aciona a tela de erro
   setTimeout(function(){
-    if (!document.body.classList.contains('city-ready') && !window.__gameLoadErrorShown && !window.__valdoria_transitioning) {
-      if (!_cityGameReady()) {
+    if (!document.body.classList.contains('city-ready') && !window.__gameLoadErrorShown && !window.__valdoria_transitioning && !window.__introBlocking) {
+      if (!_cityGameReady() || window.__cityResumePending) {
         console.warn('[WATCHDOG] 14s watchdog disparado — exibindo tela de erro');
         _showGameLoadError('watchdog_14s');
+      } else {
+        _cityRevealIfReady('watchdog_14s_recover');
       }
     }
   }, 14000);
@@ -10447,9 +10469,12 @@ body.perf-lite .vc-action-btn { transition: none; }
           if (window.__pendingHideTGLoading) {
             console.warn('[INTRO] TG loading sanity timeout 12s');
             window.__pendingHideTGLoading = false;
-            if (typeof _cityGameReady === 'function' && !_cityGameReady()) {
+            if ((typeof _cityGameReady === 'function' && !_cityGameReady()) || window.__cityResumePending) {
               if (typeof _showGameLoadError === 'function') _showGameLoadError('timeout_tg_12s');
+            } else if (typeof window._cityRevealIfReady === 'function') {
+              window._cityRevealIfReady('timeout_tg_12s_ok');
             } else {
+              document.body.classList.add('city-ready');
               var ld2 = document.getElementById('loading');
               if (ld2) { ld2.style.display = 'none'; ld2.classList.add('hidden'); }
             }
@@ -10509,7 +10534,8 @@ body.perf-lite .vc-action-btn { transition: none; }
         if (typeof renderCurrentScreen === 'function') renderCurrentScreen();
       } catch(e){ console.warn('[INTRO] content refresh failed:', e); }
       // Conteúdo pronto → esconde o loading (revela a tela direto, sem gap).
-      if (loadingEl) loadingEl.style.display = 'none';
+      if (typeof window._cityRevealIfReady === 'function') window._cityRevealIfReady('intro-tap');
+      if (loadingEl) { loadingEl.style.display = 'none'; loadingEl.classList.add('hidden'); }
       /* X-6.5.51BH (2026-05-15): trigger Dádiva Diária (daily login reward).
          Verifica localStorage['valdoria_daily'] vs hoje. Se for novo dia,
          mostra popup AAA com recompensa progressiva (7-day cycle). */
@@ -10584,8 +10610,12 @@ body.perf-lite .vc-action-btn { transition: none; }
       if (window.__cityResumePending) return false;  // 2026-06-08: decisão de resume em curso — segura
       if (!_cityGameReady()) return false;       // conteúdo do jogo ainda não pronto — espera
       _cityLoadingDone = true;
-      document.body.classList.add('city-ready');
-      _cityHideLoading('game-ready');
+      if (typeof window._cityRevealIfReady === 'function') {
+        window._cityRevealIfReady('load-ready');
+      } else {
+        document.body.classList.add('city-ready');
+        _cityHideLoading('game-ready');
+      }
       return true;
     }
     if (!_cityTryHideWhenReady()) {
@@ -10609,10 +10639,11 @@ body.perf-lite .vc-action-btn { transition: none; }
           _cityLoadingDone = true;
           if (_cityMo) { _cityMo.disconnect(); _cityMo = null; }
           clearInterval(_cityPi);
-          if (!_cityGameReady()) {
+          if (!_cityGameReady() || window.__cityResumePending) {
             console.warn('[INTRO] #app não renderizou após timeout — exibindo tela de erro');
             if (typeof _showGameLoadError === 'function') _showGameLoadError('timeout_render');
           } else {
+            document.body.classList.add('city-ready');
             _cityHideLoading('force-fallback');
           }
         }
@@ -14095,10 +14126,8 @@ body.perf-lite .vc-action-btn { transition: none; }
       // (caso a cobertura tenha sido mantida por falta de state.hud no boot). O
       // jogador só vê o hub já com o personagem — sem flash de hub em branco.
       try { window.__cityResumePending = false; } catch (_e) {}
+      if (typeof window._cityRevealIfReady === 'function') window._cityRevealIfReady('chars-loaded');
     }).catch(function(err){
-      // 2026-06-08 (Loading-First): fetch falhou → NÃO vamos redirecionar; libera o
-      // hide do #loading (fica na cidade ou mostra overlay de erro, ambos visíveis).
-      try { window.__cityResumePending = false; } catch (_e) {}
       console.warn('[CITY] state/characters fetch failed:', err.message || err);
       _cityLog('error', 'state_or_chars_fetch_failed', {error: String(err && err.message || err).slice(0, 300)});
       // Fallback: tenta só /api/auth/characters (sem state restoration)
@@ -14241,7 +14270,10 @@ body.perf-lite .vc-action-btn { transition: none; }
         if (typeof refreshHud === 'function') { try { refreshHud(); } catch(_re){} }
         if (typeof renderCurrentScreen === 'function') { try { renderCurrentScreen(); } catch(_re){} }
         if (typeof _checkAndShowLevelUpNotification === 'function') { try { _checkAndShowLevelUpNotification(); } catch(_re){} }
+        try { window.__cityResumePending = false; } catch (_e) {}
+        if (typeof window._cityRevealIfReady === 'function') window._cityRevealIfReady('fallback-chars-loaded');
       }).catch(function(e){
+        try { window.__cityResumePending = false; } catch (_e) {}
         console.warn('[CITY] fallback failed:', e);
         _cityLog('critical', 'fallback_chars_fetch_failed', {error: String(e && e.message || e).slice(0, 300)});
         // 2026-06-11: state E characters falharam. TRANSIENTE (rede/deploy) →
@@ -21270,13 +21302,13 @@ function _showStatusPopup(memberIdx){
   }
 
   // Avatar pro portrait (50px dentro do ring 64px) — v6 compactado pra Telegram desktop
-  var heroAvatarSvg;
+  var charAvatarSvg;
   if (m.png) {
-    heroAvatarSvg = '<img src="' + m.png + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.style.display=\'none\';">';
+    charAvatarSvg = '<img src="' + m.png + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.style.display=\'none\';">';
   } else if (window.vAssets && typeof vAssets.classIconHTML === 'function') {
-    heroAvatarSvg = vAssets.classIconHTML(heraldicId, '50px');
+    charAvatarSvg = vAssets.classIconHTML(heraldicId, '50px');
   } else {
-    heroAvatarSvg = '<svg viewBox="0 0 120 120" style="width: 50px; height: 50px;"><use href="#' + heraldicId + '"/></svg>';
+    charAvatarSvg = '<svg viewBox="0 0 120 120" style="width: 50px; height: 50px;"><use href="#' + heraldicId + '"/></svg>';
   }
   var hpCritical = hpPct < 25;
 
@@ -21302,7 +21334,7 @@ function _showStatusPopup(memberIdx){
     + 'border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center;'
     + 'border:1px solid var(--v-gold-50,rgba(196,149,58,0.5)); color:var(--v-gold,#c4953a); cursor:pointer;'
     + 'box-shadow:0 0 8px var(--v-gold-30,rgba(196,149,58,0.3));">'
-    + heroAvatarSvg
+    + charAvatarSvg
     + '</div>'
     + '</div>'
     // Nome 17px Cinzel
@@ -74807,7 +74839,9 @@ document.addEventListener('DOMContentLoaded', function(){
   _wireExitModalOnce();  // listener delegado pro modal exit (uma vez — robusto)
   renderFooter();
   window.__cityBootRendered = true;
-  if (!window.__cityResumePending) {
+  if (typeof window._cityRevealIfReady === 'function') {
+    window._cityRevealIfReady('dcl');
+  } else if (!window.__cityResumePending) {
     document.body.classList.add('city-ready');
   }
   // Sessão #62 (2026-05-28) — FIX tela branca pós-loading no Telegram WebApp.
