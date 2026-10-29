@@ -1004,8 +1004,11 @@ LOG SINK (Fase 7):
        Solucao: media query compacta padding/gap quando viewport h < 720px.
        Smartphone (h>=720px) mantem layout original. */
     @media (max-height: 720px) {
-      #city-group-panel { padding: var(--v-space-sm, 4px) 6px !important; gap: var(--v-space-sm, 4px) !important; }
-      .cgp-card { padding: 3px var(--v-space-sm, 4px) var(--v-space-sm, 4px) !important; gap: 1px !important; }
+      #city-group-panel { padding: 2px 4px !important; gap: 3px !important; }
+      .cgp-card.v8-style { height: 74px !important; min-height: 74px !important; max-height: 74px !important; }
+      .cgp-card.empty { height: 74px !important; min-height: 74px !important; max-height: 74px !important; }
+      .cgp-card.v8-style.cgp-card--solo { min-height: 68px !important; }
+      .cgp-card { padding: 2px var(--v-space-sm, 4px) !important; gap: 1px !important; }
       .hub-screen { padding-top: var(--v-space-sm, 4px) !important; padding-bottom: var(--v-space-sm, 4px) !important; gap: var(--v-space-sm, 4px) !important; }
       .hub-loc-grid { gap: var(--v-space-sm, 4px) !important; }
       .hub-loc { padding: 6px var(--v-space-sm, 4px) !important; min-height: 56px !important; }
@@ -4396,10 +4399,10 @@ LOG SINK (Fase 7):
        sim cap) fica ~100px wide. */
     #city-group-panel {
       flex-shrink: 0;
-      padding: 6px 6px;
+      padding: 3px 4px;
       display: grid !important;
       grid-template-columns: repeat(4, 1fr);
-      gap: var(--v-space-sm, 4px);
+      gap: var(--v-space-xs, 3px);
       justify-content: center;
       background: rgba(26, 21, 16, 0.5);
       border-bottom: 1px solid rgba(196, 149, 58, 0.2);
@@ -4412,45 +4415,45 @@ LOG SINK (Fase 7):
     /* ===== CARD SOLO EXPANDIDO (1 membro no grupo) ===== */
     .cgp-card.v8-style.cgp-card--solo {
       height: auto !important;
-      min-height: 104px !important;
+      min-height: 70px !important;
       max-height: none !important;
-      padding: 6px 8px !important;
+      padding: 3px 5px !important;
       display: flex !important;
       flex-direction: column !important;
-      gap: 5px !important;
+      gap: 2px !important;
       background: linear-gradient(180deg, rgba(32, 25, 18, 0.96) 0%, rgba(18, 14, 10, 0.96) 100%);
       border: 1.5px solid var(--v-gold, #c4953a);
-      border-radius: 6px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(196, 149, 58, 0.25);
+      border-radius: 5px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(196, 149, 58, 0.25);
     }
     .cgp-solo-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 6px;
       border-bottom: 1px solid rgba(196, 149, 58, 0.25);
-      padding-bottom: 4px;
+      padding-bottom: 2px;
     }
     .cgp-solo-identity {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       min-width: 0;
     }
     .cgp-solo-avatar {
-      width: 32px;
-      height: 32px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
-      border: 1.5px solid var(--v-gold, #c4953a);
+      border: 1.2px solid var(--v-gold, #c4953a);
       background: rgba(14, 11, 8, 0.9);
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      box-shadow: 0 0 8px rgba(196, 149, 58, 0.35);
+      box-shadow: 0 0 6px rgba(196, 149, 58, 0.35);
       color: var(--v-gold, #c4953a);
     }
-    .cgp-solo-avatar svg { width: 22px; height: 22px; }
+    .cgp-solo-avatar svg { width: 16px; height: 16px; }
     .cgp-solo-info {
       display: flex;
       flex-direction: column;
@@ -4458,10 +4461,10 @@ LOG SINK (Fase 7):
     }
     .cgp-solo-name {
       font-family: var(--v-font-display, 'Cinzel'), serif;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 800;
       color: var(--v-gold-bright, #ffd566);
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
       line-height: 1.1;
       white-space: nowrap;
       overflow: hidden;
@@ -4471,12 +4474,12 @@ LOG SINK (Fase 7):
       font-size: 11px;
       color: var(--v-text-dim, #a09484);
       font-style: italic;
-      line-height: 1.2;
+      line-height: 1.1;
     }
     .cgp-solo-tags {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       flex-shrink: 0;
     }
     .cgp-solo-level {
@@ -4486,32 +4489,32 @@ LOG SINK (Fase 7):
       color: #fff;
       background: rgba(196, 149, 58, 0.25);
       border: 1px solid rgba(196, 149, 58, 0.5);
-      border-radius: 4px;
-      padding: 1px 6px;
+      border-radius: 3px;
+      padding: 1px 5px;
     }
 
     /* Grid de conteúdo do Card Solo (2 colunas: barras à esquerda + combate/ouro à direita) */
     .cgp-solo-content {
       display: grid;
       grid-template-columns: 1fr auto;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
     }
     .cgp-solo-bars {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 2px;
       min-width: 0;
     }
     .cgp-solo-bar-row {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       font-size: 11px;
       line-height: 1;
     }
     .cgp-solo-bar-lbl {
-      width: 32px;
+      width: 28px;
       font-weight: 700;
       font-size: 11px;
       color: var(--v-text-dim, #a09484);
@@ -4521,13 +4524,13 @@ LOG SINK (Fase 7):
     }
     .cgp-solo-bar-track {
       flex: 1;
-      height: 6px;
+      height: 5px;
       background: rgba(0, 0, 0, 0.6);
       border-radius: 3px;
       border: 1px solid rgba(196, 149, 58, 0.25);
       position: relative;
       overflow: hidden;
-      min-width: 60px;
+      min-width: 50px;
     }
     .cgp-solo-bar-fill {
       height: 100%;
@@ -4550,7 +4553,7 @@ LOG SINK (Fase 7):
       color: #fff;
       font-variant-numeric: tabular-nums;
       flex-shrink: 0;
-      min-width: 50px;
+      min-width: 44px;
       text-align: right;
     }
 
@@ -4558,44 +4561,44 @@ LOG SINK (Fase 7):
     .cgp-solo-tactical {
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 2px;
       align-items: flex-end;
       flex-shrink: 0;
       border-left: 1px solid rgba(196, 149, 58, 0.2);
-      padding-left: 8px;
+      padding-left: 6px;
     }
     .cgp-solo-tac-badges {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
     }
     .cgp-solo-badge-item {
       display: inline-flex;
       align-items: center;
-      gap: 3px;
+      gap: 2px;
       background: rgba(14, 11, 8, 0.7);
       border: 1px solid rgba(196, 149, 58, 0.35);
-      border-radius: 4px;
-      padding: 2px 5px;
+      border-radius: 3px;
+      padding: 1px 4px;
       font-size: 11px;
       font-weight: 700;
       color: var(--v-gold, #c4953a);
     }
     .cgp-solo-badge-item img,
     .cgp-solo-badge-item svg {
-      width: 12px;
-      height: 12px;
+      width: 11px;
+      height: 11px;
       object-fit: contain;
     }
     .cgp-solo-gold-row {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      font-size: 12px;
+      gap: 3px;
+      font-size: 11.5px;
       font-weight: 800;
       color: #fff;
       font-family: var(--v-font-display, 'Cinzel'), serif;
-      margin-top: 2px;
+      margin-top: 1px;
     }
 
     /* ===== BORDA PULSANTE LEVEL UP & BADGE ===== */
@@ -4720,8 +4723,8 @@ LOG SINK (Fase 7):
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: var(--v-space-sm, 4px);
-      padding: 6px var(--v-space-sm, 4px);
+      gap: 2px;
+      padding: 3px var(--v-space-xs, 2px);
       color: var(--v-gold, #c4953a);
       font-family: var(--v-font-display, 'Cinzel'), serif;
       transition: background 0.18s ease, color 0.18s ease;
@@ -4738,16 +4741,16 @@ LOG SINK (Fase 7):
       filter: brightness(0.92);
     }
     .c-chat-zone .c-chat-icon {
-      width: calc(26px * var(--v-font-scale, 1));
-      height: calc(26px * var(--v-font-scale, 1));
+      width: calc(18px * var(--v-font-scale, 1));
+      height: calc(18px * var(--v-font-scale, 1));
       object-fit: contain;
-      filter: drop-shadow(0 0 5px rgba(196, 149, 58, 0.45));
+      filter: drop-shadow(0 0 4px rgba(196, 149, 58, 0.45));
     }
     .c-chat-zone .c-chat-label {
       font-size: calc(11px * var(--v-font-scale, 1));
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1.4px;
+      letter-spacing: 1px;
       opacity: 0.92;
       line-height: 1;
     }
@@ -4761,12 +4764,12 @@ LOG SINK (Fase 7):
       width: 100%;
       min-width: 0;
       max-width: none;
-      height: 120px;
-      min-height: 120px;
-      max-height: 120px;
+      height: 78px;
+      min-height: 78px;
+      max-height: 78px;
       flex: none;
       opacity: 0.45;
-      border: 2px dashed rgba(196, 149, 58, 0.32);
+      border: 1.5px dashed rgba(196, 149, 58, 0.32);
       background: rgba(28, 22, 16, 0.45);
       align-items: center;
       justify-content: center;
@@ -4961,14 +4964,13 @@ LOG SINK (Fase 7):
       opacity: 0.5;
     }
 
-    /* ===== CARD V8 — MINI compact (2026-05-11 v4) =====
-       User request: "diminua os 4 cards, para caber em uma única linha".
-       Mudou de 140x140 -> 100% width (responsive) x 120px tall.
-       Em frame 384/430 com 4 cols, cada card fica ~88-100px wide. */
+    /* ===== CARD V8 — MINI compact =====
+       Altura compacta de 78px para economia de tela no Telegram Desktop.
+       Em frame 384/430 com 4 cols, cada card fica ~88-100px wide x 78px tall. */
     .cgp-card.v8-style {
       position: relative;
       background: var(--card-accent-dark, #1a1510);
-      border: 2px solid var(--v-gold, #c4953a);
+      border: 1.5px solid var(--v-gold, #c4953a);
       border-radius: 5px;
       padding: 0 !important;
       gap: 0 !important;
@@ -4977,13 +4979,13 @@ LOG SINK (Fase 7):
         0 3px 8px rgba(0, 0, 0, 0.55),
         inset 0 0 0 1px rgba(255, 220, 140, 0.2);
       font-family: var(--v-font-display, 'Cinzel'), serif;
-      /* Dimensoes mini: largura responsiva (100% grid cell), altura fixa 120 */
+      /* Dimensoes mini compactas: largura responsiva (100% grid cell), altura 78px */
       width: 100% !important;
       min-width: 0 !important;
       max-width: none !important;
-      height: 120px !important;
-      min-height: 120px !important;
-      max-height: 120px !important;
+      height: 78px !important;
+      min-height: 78px !important;
+      max-height: 78px !important;
       flex: none !important;
       display: flex !important;
       flex-direction: column !important;
@@ -4991,11 +4993,11 @@ LOG SINK (Fase 7):
       box-sizing: border-box;
     }
 
-    /* ===== c-name (banner topo) — padding super compacto pra portrait 18x18 ===== */
+    /* ===== c-name (banner topo) — padding super compacto pra portrait 15x15 ===== */
     .cgp-card.v8-style .c-name {
       background: color-mix(in srgb, var(--card-accent-dark, #1a1510) 70%, #000);
       border-bottom: none;
-      padding: 3px 22px 1px 5px;
+      padding: 2px 18px 0px 4px;
       margin: 0;
       font-family: var(--v-font-display, 'Cinzel'), serif;
       font-weight: 900;
@@ -5015,12 +5017,12 @@ LOG SINK (Fase 7):
     .cgp-card.v8-style .c-class-tag {
       background: color-mix(in srgb, var(--card-accent-dark, #1a1510) 70%, #000);
       color: color-mix(in srgb, var(--card-accent, #c4953a) 30%, #fff 70%);
-      padding: 0 22px 3px 5px;
+      padding: 0 18px 1px 4px;
       margin: 0;
       border-bottom: 1px solid var(--v-gold, #c4953a);
       font-family: var(--v-font-display, 'Cinzel'), serif;
-      font-size: calc(10.5px * var(--v-font-scale, 1));
-      letter-spacing: 0.4px;
+      font-size: calc(11px * var(--v-font-scale, 1));
+      letter-spacing: 0.3px;
       text-align: left;
       text-transform: uppercase;
       font-weight: 700;
@@ -5028,15 +5030,16 @@ LOG SINK (Fase 7):
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      line-height: 1.1;
     }
 
-    /* ===== c-portrait (heraldic SVG canto sup. direito) — 18x18 mini ===== */
+    /* ===== c-portrait (heraldic SVG canto sup. direito) — 15x15 mini ===== */
     .cgp-card.v8-style .c-portrait {
       position: absolute;
       top: 2px;
-      right: 3px;
-      width: 18px;
-      height: 18px;
+      right: 2px;
+      width: 15px;
+      height: 15px;
       margin: 0;
       background: transparent;
       border: 0;
@@ -5081,13 +5084,13 @@ LOG SINK (Fase 7):
     /* 2026-05-11 v5: removeu CA do card (user request). Grid simplificado pra
        1 coluna — todas linhas full-width. */
     .cgp-card.v8-style .c-stats {
-      padding: 3px var(--v-space-sm, 4px);
+      padding: 1px 3px 1px;
       background: color-mix(in srgb, var(--card-accent-dark, #1a1510) 70%, #000);
       color: color-mix(in srgb, var(--card-accent, #c4953a) 20%, #fff 80%);
       flex: 1 1 auto;
       display: grid;
       grid-template-columns: 1fr;
-      grid-template-rows: auto auto auto auto;
+      grid-template-rows: repeat(4, minmax(0, 1fr));
       gap: 1px;
       align-items: center;
       justify-items: stretch;
@@ -5107,12 +5110,12 @@ LOG SINK (Fase 7):
     .cgp-card.v8-style .c-stat {
       display: flex;
       flex-direction: row;
-      align-items: baseline;
-      gap: var(--v-space-sm, 4px);
+      align-items: center;
+      gap: var(--v-space-xs, 2px);
       line-height: 1;
       position: relative;
       overflow: hidden;
-      border-radius: 5px;
+      border-radius: 3px;
     }
     .cgp-card.v8-style .c-stat--ca {
       flex-direction: column;
@@ -5128,13 +5131,14 @@ LOG SINK (Fase 7):
     .cgp-card.v8-style .c-stat-label {
       color: color-mix(in srgb, var(--card-accent, #c4953a) 30%, #fff 70%);
       opacity: 0.75;
-      font-size: calc(10.5px * var(--v-font-scale, 1));
-      letter-spacing: 0.3px;
+      font-size: calc(11px * var(--v-font-scale, 1));
+      letter-spacing: 0.2px;
       white-space: nowrap;
       font-family: var(--v-font-display, 'Cinzel'), serif;
       font-weight: 700;
       position: relative;
       z-index: 1;
+      line-height: 1;
     }
     .cgp-card.v8-style .c-stat-val {
       color: color-mix(in srgb, var(--card-accent, #c4953a) 20%, #fff 80%);
@@ -5168,11 +5172,8 @@ LOG SINK (Fase 7):
       gap: 3px;
     }
     .cgp-card.v8-style .c-stat--gold .vi-coin.sm {
-      /* 2026-05-11 v5: removeu override 11x11 — agora usa default .vi-coin.sm
-         (14x14) do shared/coin-icon.css. Moeda detalhada precisa de espaco
-         pra mostrar bordas celtas + V central legivel. */
-      width: 14px;
-      height: 14px;
+      width: 12px;
+      height: 12px;
     }
 
     /* Barras atras de c-stat-val (PV + Recurso + XP) — fill behind */
