@@ -41495,7 +41495,7 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
     npc_data: { name: 'Bêbados Brigando', desc: 'Dois homens redondos e vermelhos em volta de uma mesa virada', portrait: 'ic-cavaleiro', portraitImg: '/shared/img/npcs/plaza/bebados_briga.webp' },
     script: [
       { type: 'narration', text: 'Dois homens robustos viram uma mesa de taverna no meio da praça. <i>Cervejas derramadas, punhos abertos, gritos que ninguém entende.</i> Uma multidão se afasta — a Guarda ainda não chegou.' },
-      { type: 'speech', speaker: 'Bêbado Brigão', text: '— TU É QUEM TRAIU MEU IRMÃO! <i>(o gordo de barba ruiva)</i> NÃO TÁ AQUI POR ACASO! <i>(o outro avança)</i>' }
+      { type: 'speech', speaker: 'Bêbado Brigão', text: '— FOI VOCÊ QUEM TRAIU MEU IRMÃO! <i>(o baderneiro de barba ruiva vocifera)</i> VOCÊ NÃO TÁ AQUI POR ACASO! <i>(o outro avança com os punhos cerrados)</i>' }
     ],
     choices: [
       { id: 'separate', label: '[FOR 13] (Entrar entre eles e separar)',
@@ -41508,8 +41508,8 @@ var PLAZA_INTERACTIVE_DIALOGUES = {
         result: 'skill_check', stat: 'charisma', dc: 14,
         effect: { xp: 14, gold: 0 },
         effect_fail: { xp: 2 },
-        result_text: 'Você grita o nome do irmão morto. <i>Os dois congelam — o gordo da barba ruiva começa a chorar. O outro abaixa o punho.</i> <b>"Você... você conhecia ele?"</b> Você não sabia — chutou. Mas funcionou. <i>Eles se abraçam, soluçando. A briga acabou.</i>',
-        result_text_fail: 'Você grita mas a voz se perde no caos. <i>Eles continuam socando.</i>' },
+        result_text: 'Você grita o nome do irmão morto com firmeza. <i>Os dois congelam — o brigão da barba ruiva amolece os ombros e começa a lacrimejar. O outro abaixa o punho.</i> <b>"Você... você conhecia ele?"</b> Você não sabia — foi pura intuição. Mas funcionou. <i>Eles se abraçam, soluçando. A briga acabou.</i>',
+        result_text_fail: 'Você grita tentando acalmar a confusão, mas a sua voz se perde no clamor da praça. <i>Eles ignoram suas palavras e continuam trocando socos furiosos sobre a cerveja derramada.</i>' },
       { id: 'deduce', label: '[INT 12] (Procurar o motivo real da briga)',
         result: 'skill_check', stat: 'intelligence', dc: 12,
         effect: { xp: 10, gold: 2 },
@@ -41539,7 +41539,14 @@ function _squareShowEntryInteractive(p, ev){
       triggers: [],
       script: dialog.script,
       choices: dialog.choices.map(function(c){
-        return { id: c.id, label: c.label, result: 'plaza_interactive', _interactiveData: c };
+        return {
+          id: c.id,
+          label: c.label,
+          result: 'plaza_interactive',
+          _interactiveData: c,
+          _npc_key: dialog.npc_key,
+          _npc_data: dialog.npc_data
+        };
       }),
       onDone: function(player){}
     };
@@ -41559,16 +41566,138 @@ function _squareShowEntryInteractive(p, ev){
   });
 }
 
-// PADRAO_ALDRIC: resolve interactive choice — skill check d20 vs DC ou
-// effect direto. Mostra _showServiceResultPopup com narrative + dice + deltas.
+// PADRAO_ALDRIC (2026-10): renderizador canônico de desfecho de encontros e eventos.
+// Elimina o popup genérico de serviço e renderiza o desfecho diretamente no card
+// de narrativa (vEncounter), preservando o retrato do NPC, a rolagem D&D 5e, os blocos
+// estruturados de recompensa (XP/Valdoritas) e o card de impacto físico quando há perda de PV.
+function _renderEncounterOutcome(player, choice, data) {
+  var parentEnc = choice._parentEnc;
+  var npcKey = choice._npc_key || (parentEnc && parentEnc.npc) || choice.npc_key || 'npc';
+  var npcRef = (typeof RECURRING_NPCS !== 'undefined' && RECURRING_NPCS[npcKey])
+    || choice._npc_data
+    || { name: choice.npc_label || 'Praça Central', desc: 'Encontro nos Ermos Urbanos' };
+
+  var dnpc = {
+    id: npcKey,
+    name: npcRef.name || choice.npc_label || 'Praça Central',
+    desc: npcRef.desc || ''
+  };
+  if (npcRef.portraitImg) {
+    dnpc.portrait = npcRef.portraitImg;
+  } else if (typeof _npcPortraitByName === 'function' && _npcPortraitByName(dnpc.name)) {
+    dnpc.portrait = _npcPortraitByName(dnpc.name);
+  } else if (npcRef.portrait && typeof _heralIco === 'function') {
+    dnpc.portraitHTML = _heralIco(npcRef.portrait);
+  }
+
+  var scriptLines = [];
+
+  // 1. Linha do Teste de Atributo D&D 5e (se houver rolagem de dados)
+  if (data.rolledLineText) {
+    scriptLines.push({
+      type: 'narration',
+      text: data.rolledLineText
+    });
+  }
+
+  // 2. Narração sensorial do resultado
+  if (data.narrative) {
+    scriptLines.push({
+      type: 'narration',
+      text: data.narrative
+    });
+  }
+
+  // 3. Bloco canônico estruturado de Recompensa (XP / Valdoritas)
+  var rewXp = data.xp || 0;
+  var rewGold = data.gold || 0;
+  if (rewXp > 0 || rewGold > 0) {
+    scriptLines.push({
+      type: 'reward',
+      xp: rewXp > 0 ? rewXp : undefined,
+      gold: rewGold > 0 ? rewGold : undefined
+    });
+  }
+
+  // 4. Bloco canônico de Impacto Físico (se houve dano real sofrido)
+  if (data.dmgApplied > 0 || (data.hpHeal && data.hpHeal > 0)) {
+    scriptLines.push({
+      type: 'player_impact',
+      player: player,
+      prevHp: data.preHp,
+      newHp: player.hp,
+      hpMax: data.hpMax,
+      dmg: data.dmgApplied || 0
+    });
+  }
+
+  var continueAction = function() {
+    if (typeof choice._onContinue === 'function') {
+      choice._onContinue();
+    } else {
+      if (window.vEncounter && typeof window.vEncounter.close === 'function') {
+        window.vEncounter.close();
+      } else {
+        var ov = document.getElementById('encounter-overlay');
+        if (ov) {
+          try { if (ov.close) ov.close(); } catch(_){}
+          ov.style.display = 'none';
+        }
+      }
+      window._encounterActive = false;
+    }
+  };
+
+  var outcomeChoices = [
+    {
+      id: 'enc_outcome_continue',
+      label: 'Continuar',
+      cb: continueAction
+    }
+  ];
+
+  if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+    window.vEncounter.render({
+      npc: dnpc,
+      script: scriptLines,
+      choices: outcomeChoices
+    }, {
+      player: player,
+      onChoice: function(ch) {
+        if (typeof ch.cb === 'function') ch.cb();
+        else continueAction();
+      }
+    });
+    return;
+  }
+
+  // Fallback caso vEncounter não esteja ativo no ambiente
+  if (typeof _showServiceResultPopup === 'function') {
+    _showServiceResultPopup({
+      icon: choice.icon || _heralIco('ic-praca'),
+      npc: dnpc.name,
+      narrative: (data.rolledLineText ? data.rolledLineText + '<br><br>' : '') + data.narrative,
+      deltas: data.deltas || [],
+      rewards: data.rewards || null,
+      dice: data.diceData || null,
+      onContinue: continueAction
+    });
+  }
+}
+
+// PADRAO_ALDRIC: resolve interactive choice — skill check d20 vs DC ou effect direto.
+// Renderiza o resultado padronizado com a narrativa de exploração via _renderEncounterOutcome.
 // #10 (sessão #70): LOCAL (file://) — roll client-side (dev tool). Em REMOTE o
 // servidor é a autoridade (_resolveInteractiveChoiceREMOTE). SUPREME RULE #0.
 function _resolveInteractiveChoiceLOCAL(player, choice) {
-  var STAT_TO_ABBR = { strength: 'FOR', dexterity: 'DES', constitution: 'CON',
-                        intelligence: 'INT', wisdom: 'SAB', charisma: 'CAR' };
+  var STAT_LABELS = {
+    strength: 'Força', dexterity: 'Destreza', constitution: 'Constituição',
+    intelligence: 'Inteligência', wisdom: 'Sabedoria', charisma: 'Carisma'
+  };
   var success = true;
-  var rolledLine = '';
+  var rolledLineText = '';
   var diceData = null;
+
   // Skill check d20 vs DC (apenas se choice tem stat+dc)
   if (choice.stat && choice.dc) {
     var statVal = (player.stats && player.stats[choice.stat]) || 10;
@@ -41576,13 +41705,26 @@ function _resolveInteractiveChoiceLOCAL(player, choice) {
     var roll = 1 + Math.floor(Math.random() * 20);
     var total = roll + mod;
     success = total >= choice.dc;
-    var abbr = STAT_TO_ABBR[choice.stat] || _statAbbrPT(choice.stat);
-    rolledLine = '' + abbr + ': ' + roll + (mod>=0?'+':'') + mod + ' = <b>' + total + '</b> vs CD ' + choice.dc + ' — ' + (success ? 'Sucesso' : 'Falha') + '<br><br>';
+    var statLabel = STAT_LABELS[choice.stat] || choice.stat || 'Atributo';
+    var modStr = (mod >= 0 ? '+' : '') + mod;
+    var statusBadge = (roll === 20)
+      ? '<span style="color:#ffd700;font-weight:700;">Acerto Crítico!</span>'
+      : (roll === 1)
+      ? '<span style="color:#d85848;font-weight:700;">Falha Crítica!</span>'
+      : success
+      ? '<span style="color:#7bc67b;font-weight:700;">Sucesso</span>'
+      : '<span style="color:#e05353;font-weight:700;">Falha</span>';
+
+    rolledLineText = '<b>🎲 Teste de ' + statLabel + ' (CD ' + choice.dc + '):</b> '
+      + 'd20 [' + roll + '] ' + modStr + ' = <b>' + total + '</b> vs CD ' + choice.dc
+      + ' — ' + statusBadge;
+
     diceData = {
-      formula: '1d20' + (mod>=0?'+':'') + mod + ' vs CD ' + choice.dc,
+      formula: '1d20' + modStr + ' vs CD ' + choice.dc,
       sides: 20, value: roll, total: total
     };
   }
+
   // Aplica effect (success vs fail)
   var effect = success ? (choice.effect || {}) : (choice.effect_fail || {});
   var narrative = success ? choice.result_text : (choice.result_text_fail || choice.result_text);
@@ -41594,16 +41736,23 @@ function _resolveInteractiveChoiceLOCAL(player, choice) {
   var hpMax = player.hpMax || 28;
   var deltas = [];
   var rewards = [];
+  var goldGain = 0;
+  var xpGain = 0;
+  var dmgApplied = 0;
+  var hpHeal = 0;
+
   if (effect.gold) {
     player.gold = Math.max(0, preGold + effect.gold);
     deltas.push({ type:'gold', label:'Bolsa', from: preGold, to: player.gold,
                   max: Math.max(preGold, player.gold, 1), bar: false });
-    if (effect.gold > 0) rewards.push({ type:'gold', amount: effect.gold, label: 'Valdoritas' });
+    if (effect.gold > 0) {
+      goldGain = effect.gold;
+      rewards.push({ type:'gold', amount: effect.gold, label: 'Valdoritas' });
+    }
   }
   if (effect.xp) {
     _gainXp(player, effect.xp);
-    /* FIX 2026-05-07: ver _resolveOfferChoice — `to: player.xp` mostra valor
-       pós-level-up, gerando delta -1999 quando user leveled up. Use preXp+gain. */
+    xpGain = effect.xp;
     if ((player.level || 1) > preLevel) {
       deltas.push({ type:'gold', label:'XP', from: preXp, to: preXpNext,
                     max: preXpNext, bar: false,
@@ -41614,8 +41763,14 @@ function _resolveInteractiveChoiceLOCAL(player, choice) {
     }
     rewards.push({ type:'xp', amount: effect.xp, label: 'Experiência' });
   }
-  if (effect.hp_heal) {
-    player.hp = Math.min(hpMax, preHp + effect.hp_heal);
+  if (effect.hp && effect.hp < 0) {
+    dmgApplied = Math.abs(effect.hp);
+    player.hp = Math.max(0, preHp - dmgApplied);
+    deltas.push({ type: 'hp', label: 'HP', from: preHp, to: player.hp,
+                  max: hpMax, bar: true });
+  } else if (effect.hp_heal) {
+    hpHeal = effect.hp_heal;
+    player.hp = Math.min(hpMax, preHp + hpHeal);
     deltas.push({ type: 'hp', label: 'HP', from: preHp, to: player.hp,
                   max: hpMax, bar: true });
   }
@@ -41641,37 +41796,35 @@ function _resolveInteractiveChoiceLOCAL(player, choice) {
     } catch (_eHist) {}
   }
 
-  // 2026-05-12: choice.npc_label e choice.icon permitem que CHANCE_ENCOUNTERS
-  // (Taverna, Portões, Mercado) reusem _resolveInteractiveChoice sem ficar
-  // rotulados como "Praça Central". Fallback mantém compatibilidade.
-  _showServiceResultPopup({
-    icon: choice.icon || _heralIco('ic-praca'),
-    npc: choice.npc_label || 'Praça Central',
-    narrative: rolledLine + narrative,
+  // Renderiza o desfecho no padrão canônico de narrativas do vEncounter
+  _renderEncounterOutcome(player, choice, {
+    rolledLineText: rolledLineText,
+    narrative: narrative,
+    xp: xpGain,
+    gold: goldGain,
+    dmgApplied: dmgApplied,
+    hpHeal: hpHeal,
+    preHp: preHp,
+    hpMax: hpMax,
     deltas: deltas,
     rewards: rewards.length > 0 ? rewards : null,
-    dice: diceData,
-    onContinue: function(){
-      if (typeof choice._onContinue === 'function') choice._onContinue();
-    }
+    diceData: diceData
   });
 }
 
 // #10: REMOTE — o servidor rola o d20 + aplica gold/xp/hp/reputação e persiste
 // (SUPREME RULE #0). O cliente sincroniza o estado autoritativo, anima o d20
-// (valor do servidor) e mostra o texto success/fail do dataset client-side.
+// (valor do servidor) e mostra o texto success/fail do dataset client-side via _renderEncounterOutcome.
 function _resolveInteractiveChoiceREMOTE(player, choice) {
-  var STAT_TO_ABBR = { strength: 'FOR', dexterity: 'DES', constitution: 'CON',
-                        intelligence: 'INT', wisdom: 'SAB', charisma: 'CAR' };
+  var STAT_LABELS = {
+    strength: 'Força', dexterity: 'Destreza', constitution: 'Constituição',
+    intelligence: 'Inteligência', wisdom: 'Sabedoria', charisma: 'Carisma'
+  };
   var preGold = player.gold || 0, preXp = player.xp || 0;
   var preLevel = player.level || 1, preXpNext = player.xpNext || 100;
   var preHp = player.hp || 0, hpMax = player.hpMax || 28;
   if (window.vProcessing) { try { window.vProcessing.show({ text: 'Resolvendo...' }); } catch(_){} }
-  /* A3.4 (#90): normaliza o effect ANTES do POST — allowlist de keys
-     (gold/xp/hp_heal/hp/reputation) + renown→reputation (o applier do
-     servidor lê 'reputation'; os datasets usam 'renown' — sem o mapeamento o
-     renome dos encounters nunca era aplicado). O servidor capa as magnitudes
-     (caps anti-fabricação ±50/50/30/±5). */
+
   function _normEffect(e) {
     if (!e || typeof e !== 'object') return {};
     var out = {};
@@ -41691,7 +41844,6 @@ function _resolveInteractiveChoiceREMOTE(player, choice) {
     effect_fail: _normEffect(choice.effect_fail)
   }).then(function(res){
     if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
-    // Sincroniza o estado autoritativo do servidor (sempre que vier).
     if (res && typeof res.gold === 'number') player.gold = res.gold;
     if (res && typeof res.xp === 'number') player.xp = res.xp;
     if (res && typeof res.level === 'number') player.level = res.level;
@@ -41703,12 +41855,23 @@ function _resolveInteractiveChoiceREMOTE(player, choice) {
     }
     var hasCheck = !!(choice.stat && choice.dc);
     var success = !!res.success;
-    var rolledLine = '', diceData = null;
+    var rolledLineText = '', diceData = null;
     if (hasCheck && typeof res.d20 === 'number') {
-      var abbr = STAT_TO_ABBR[choice.stat] || _statAbbrPT(choice.stat);
+      var statLabel = STAT_LABELS[choice.stat] || choice.stat || 'Atributo';
       var mod = res.modifier || 0;
-      rolledLine = '' + abbr + ': ' + res.d20 + (mod >= 0 ? '+' : '') + mod + ' = <b>' + res.total + '</b> vs CD ' + res.dc + ' — ' + (success ? 'Sucesso' : 'Falha') + '<br><br>';
-      diceData = { formula: '1d20' + (mod >= 0 ? '+' : '') + mod + ' vs CD ' + res.dc, sides: 20, value: res.d20, total: res.total };
+      var modStr = (mod >= 0 ? '+' : '') + mod;
+      var statusBadge = (res.d20 === 20)
+        ? '<span style="color:#ffd700;font-weight:700;">Acerto Crítico!</span>'
+        : (res.d20 === 1)
+        ? '<span style="color:#d85848;font-weight:700;">Falha Crítica!</span>'
+        : success
+        ? '<span style="color:#7bc67b;font-weight:700;">Sucesso</span>'
+        : '<span style="color:#e05353;font-weight:700;">Falha</span>';
+
+      rolledLineText = '<b>🎲 Teste de ' + statLabel + ' (CD ' + res.dc + '):</b> '
+        + 'd20 [' + res.d20 + '] ' + modStr + ' = <b>' + res.total + '</b> vs CD ' + res.dc
+        + ' — ' + statusBadge;
+      diceData = { formula: '1d20' + modStr + ' vs CD ' + res.dc, sides: 20, value: res.d20, total: res.total };
     }
     var narrative = success ? (choice.result_text || '') : (choice.result_text_fail || choice.result_text || '');
     var deltas = [], rewards = [];
@@ -41750,16 +41913,19 @@ function _resolveInteractiveChoiceREMOTE(player, choice) {
       } catch (_eHist) {}
     }
 
-    _showServiceResultPopup({
-      icon: choice.icon || _heralIco('ic-praca'),
-      npc: choice.npc_label || 'Praça Central',
-      narrative: rolledLine + narrative,
+    // Renderiza o desfecho no padrão canônico de narrativas do vEncounter
+    _renderEncounterOutcome(player, choice, {
+      rolledLineText: rolledLineText,
+      narrative: narrative,
+      xp: xpDelta > 0 ? xpDelta : 0,
+      gold: goldDelta > 0 ? goldDelta : 0,
+      dmgApplied: (res.hp != null && res.hp < preHp) ? (preHp - res.hp) : 0,
+      hpHeal: (res.hp != null && res.hp > preHp) ? (res.hp - preHp) : 0,
+      preHp: preHp,
+      hpMax: hpMax,
       deltas: deltas,
       rewards: rewards.length > 0 ? rewards : null,
-      dice: diceData,
-      onContinue: function(){
-        if (typeof choice._onContinue === 'function') choice._onContinue();
-      }
+      diceData: diceData
     });
   }).catch(function(e){
     if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
@@ -83208,6 +83374,9 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
     if (interactiveData && typeof _resolveInteractiveChoice === 'function') {
       interactiveData._encounter_id = (enc && enc.id) || '';  // #10: anti-replay server-side
       interactiveData._choice_id = (choice && choice.id) || '';
+      interactiveData._parentEnc = enc;
+      interactiveData._npc_key = choice._npc_key || (enc && enc.npc);
+      interactiveData._npc_data = choice._npc_data || (enc && typeof RECURRING_NPCS !== 'undefined' && RECURRING_NPCS[enc.npc]);
       // Padrão BG3: se o encontro pertence a CHANCE_ENCOUNTERS (conversa com NPC com múltiplas escolhas),
       // ao concluir o popup do teste de perícia, retorna ao diálogo do NPC com as opções restantes.
       var chanceParent = (enc && typeof CHANCE_ENCOUNTERS !== 'undefined')
