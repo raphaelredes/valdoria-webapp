@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-27T17:14:45Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-29T15:37:21Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -20717,7 +20717,7 @@ function applyBattleCheckpoint(state, cp) {
             try { c.se = JSON.parse(JSON.stringify(match.se)); } catch (_eSe) {}
         }
         if (typeof match.alive === 'boolean') c.alive = match.alive;
-        if (c.hp <= 0 && c.t === 'e') { c.alive = false; c.isDead = true; }
+        if (c.hp <= 0 && c.t === 'e') { c.alive = false; c.isDead = true; if (typeof registerEnemyKill === 'function') registerEnemyKill(c); }
         if (typeof match.temp_hp === 'number' && match.temp_hp > 0) c.tempHp = match.temp_hp;
         if (typeof match.wet_turns === 'number') c.wetTurns = match.wet_turns;
         c.actionSpent = !!match.action_spent;
@@ -36335,7 +36335,7 @@ function render(s) {
             if (typeof stopForceCombatMusic === 'function') {
                 try { stopForceCombatMusic(); } catch (_eS) { /* silent */ }
             }
-            if (ph === 'victory' && typeof sfxPlayMusicVictory === 'function') sfxPlayMusicVictory();
+            if (ph === 'victory' && typeof sfxPlayMusicVictory === 'function') sfxPlayMusicVictory(); if (ph === 'victory' && s && s.order) { s.order.forEach(function(u){ if (u && u.t === 'e' && typeof registerEnemyKill === 'function') registerEnemyKill(u); }); }
             else if ((ph === 'defeat' || ph === 'fled') && typeof sfxPlayMusicDefeat === 'function') sfxPlayMusicDefeat();
         }
         var title = { victory: 'VITÓRIA', defeat: 'DERROTA', fled: 'FUGIU' }[ph];
@@ -49742,6 +49742,98 @@ function simGetDndConditionRule(st) {
     return null;
 }
 
+/* ============================================================================
+   CONHECIMENTO DE BESTIÁRIO & NÉVOA DE GUERRA D&D 5E (FOG OF WAR)
+   Monstros e criaturas só revelam estatísticas numéricas completas (PV exatos,
+   CA real, salvaguardas e fraquezas) caso o jogador já tenha obtido conhecimento
+   prévio (estudo/lore) ou já tenha combatido e derrotado aquela espécie.
+   Caso contrário, aplicam-se as regras canônicas D&D 5e de percepção visual
+   (Know Your Enemy / Avaliação Física Aparente).
+   ============================================================================ */
+function isEnemyKnownByPlayer(u) {
+    if (!u || u.t === 'p' || u.t === 'a') return { known: true, kills: 0, reason: 'ally' };
+    if (u.isKnown || u.studied || u.loreRevealed) return { known: true, kills: (u.kills || 1), reason: 'flag' };
+
+    // Obter abates salvos do jogador (sessão ativa, objeto player ou localStorage)
+    var killsDict = {};
+    if (typeof currentState !== 'undefined' && currentState && currentState.player && currentState.player.kills_by_type) {
+        killsDict = currentState.player.kills_by_type;
+    } else if (typeof window.CITY_MOCK_PLAYER !== 'undefined' && window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.kills_by_type) {
+        killsDict = window.CITY_MOCK_PLAYER.kills_by_type;
+    } else {
+        try {
+            var raw = localStorage.getItem('vld_kills_by_type');
+            if (raw) killsDict = JSON.parse(raw) || {};
+        } catch(e) {}
+    }
+
+    var candidates = [];
+    var rawKeys = [u.species, u.race, u.enemyId, u.id, u.n];
+    for (var i = 0; i < rawKeys.length; i++) {
+        var v = rawKeys[i];
+        if (v && typeof v === 'string') {
+            var s = v.toLowerCase().trim();
+            candidates.push(s);
+            var parts = s.replace(/[^a-z0-9áéíóúãõâêîôûç]/g, ' ').split(/\s+/);
+            for (var p = 0; p < parts.length; p++) {
+                if (parts[p].length >= 4) candidates.push(parts[p]);
+            }
+        }
+    }
+
+    // Em modo LOCAL (file://) com catálogo canônico e defaultKills:
+    if (location.protocol === 'file:' && typeof CANONICAL_BESTIARY_CATALOG !== 'undefined') {
+        for (var ci = 0; ci < candidates.length; ci++) {
+            var cKey = candidates[ci];
+            var bstItem = CANONICAL_BESTIARY_CATALOG.find(function(b){
+                return b.id === cKey || (b.aliases && b.aliases.indexOf(cKey) >= 0) || (b.type && b.type.toLowerCase().indexOf(cKey) >= 0);
+            });
+            if (bstItem && bstItem.defaultKills && bstItem.defaultKills > 0) {
+                if (!killsDict[cKey]) killsDict[cKey] = bstItem.defaultKills;
+            }
+        }
+    }
+
+    for (var c = 0; c < candidates.length; c++) {
+        var cand = candidates[c];
+        if (killsDict[cand] && killsDict[cand] > 0) {
+            return { known: true, kills: killsDict[cand], reason: 'kills' };
+        }
+        for (var k in killsDict) {
+            if (killsDict.hasOwnProperty(k) && killsDict[k] > 0) {
+                var kl = k.toLowerCase();
+                if (cand === kl || cand.indexOf(kl) >= 0 || kl.indexOf(cand) >= 0) {
+                    return { known: true, kills: killsDict[k], reason: 'kills' };
+                }
+            }
+        }
+    }
+
+    return { known: false, kills: 0, reason: 'unknown' };
+}
+
+function registerEnemyKill(u) {
+    if (!u || u.t !== 'e') return;
+    try {
+        var raw = localStorage.getItem('vld_kills_by_type');
+        var kDict = raw ? (JSON.parse(raw) || {}) : {};
+        var key = (u.species || u.race || u.enemyId || u.n || 'inimigo').toLowerCase().trim();
+        kDict[key] = (kDict[key] || 0) + 1;
+        if (u.enemyId && u.enemyId.toLowerCase() !== key) {
+            kDict[u.enemyId.toLowerCase()] = (kDict[u.enemyId.toLowerCase()] || 0) + 1;
+        }
+        localStorage.setItem('vld_kills_by_type', JSON.stringify(kDict));
+        if (typeof currentState !== 'undefined' && currentState && currentState.player) {
+            if (!currentState.player.kills_by_type) currentState.player.kills_by_type = {};
+            currentState.player.kills_by_type[key] = (currentState.player.kills_by_type[key] || 0) + 1;
+        }
+        if (typeof window.CITY_MOCK_PLAYER !== 'undefined' && window.CITY_MOCK_PLAYER) {
+            if (!window.CITY_MOCK_PLAYER.kills_by_type) window.CITY_MOCK_PLAYER.kills_by_type = {};
+            window.CITY_MOCK_PLAYER.kills_by_type[key] = (window.CITY_MOCK_PLAYER.kills_by_type[key] || 0) + 1;
+        }
+    } catch(e) {}
+}
+
 function openUnitDetail(uid) {
     removeEnemyHoverStatHint();
     if (!currentState) return;
@@ -49774,19 +49866,16 @@ function openUnitDetail(uid) {
     var card = document.createElement('div');
     card.className = 'unit-detail-card';
 
+    var knowInfo = isEnemyKnownByPlayer(u);
+    var isKnown = knowInfo.known;
+
     var html = '';
     /* Header */
     html += '<button class="udc-close" aria-label="Fechar">×</button>';
-    /* Determina utype pra escolher crest correto (inimigo/boss vs classe) */
     var _udcUtype = u.t === 'p' ? 'player' : (u.t === 'a' ? 'ally' : 'enemy');
     var _udcIconId = _heraldicIconOf(u, _udcUtype);
     var _udcClsSlug = _heraldicClsSlugOf(u, _udcUtype);
     html += '<div class="udc-header ' + _udcClsSlug + '">';
-    /* #83: o popup de detalhe usa o MESMO resolvedor de imagem do card no
-       tabuleiro (_combatPortraitHTML): mostra a arte WebP real do inimigo
-       (ex.: Cobra Constritora Gigante) quando existe em ENEMY_PNG_AVAILABLE,
-       com fallback pro ícone heráldico/emoji. Antes mostrava só o SVG genérico
-       ic-inimigo. */
     var _udcPortrait = _combatPortraitHTML(_udcIconId, u, _udcUtype);
     if (_udcPortrait) {
         html += '<div class="udc-ico udc-ico--heraldic">' + _udcPortrait + '</div>';
@@ -49801,14 +49890,39 @@ function openUnitDetail(uid) {
         var raceLbl = u.race ? escHtml(u.race) + (u.subrace ? ' (' + escHtml(u.subrace) + ')' : '') + ' · ' : '';
         var clsLbl = escHtml(u.clsLabel || u.cls || 'Aventureiro') + (u.subclass ? ' (' + escHtml(u.subclass) + ')' : '');
         html += '<div class="udc-sub">' + raceLbl + clsLbl + ' · Nível ' + (u.lvl || 1) + '</div>';
-    } else {
+    } else if (isKnown) {
         var spLbl = escHtml(u.species || u.race || 'Criatura') + (u.subrace ? ' [' + escHtml(u.subrace) + ']' : '');
         var roleLbl = (u.cls ? ' · ' + escHtml(u.cls) + (u.subclass ? ' (' + escHtml(u.subclass) + ')' : '') : '');
         var crStr = (u.cr != null ? ' · ND ' + u.cr : (u.sugLvl ? ' · Nível ' + u.sugLvl : ''));
         var xpStr = u.xp ? ' (' + u.xp + ' XP)' : '';
         html += '<div class="udc-sub">' + spLbl + roleLbl + crStr + xpStr + '</div>';
+    } else {
+        var spUnknown = escHtml(u.species || u.race || 'Criatura Desconhecida');
+        var sizeUnknown = escHtml(u.size || 'Médio');
+        html += '<div class="udc-sub">' + spUnknown + ' · Porte ' + sizeUnknown + ' · Desconhecido</div>';
     }
     html += '</div></div>';
+
+    /* Badge de Conhecimento D&D 5e (se for inimigo) */
+    if (u.t === 'e') {
+        if (!isKnown) {
+            html += '<div class="udc-badge-fow" style="background:linear-gradient(90deg,rgba(48,36,24,0.92),rgba(26,18,12,0.96)); border:1px solid rgba(196,149,58,0.45); border-radius:6px; padding:6px 10px; margin:6px 0 8px; display:flex; align-items:center; gap:8px;">'
+                + '<span style="font-size:14px;">🔒</span>'
+                + '<div style="line-height:1.25;">'
+                + '<div style="font-family:Cinzel,serif; font-size:11.5px; font-weight:700; color:#ffd700;">Criatura Desconhecida • Névoa de Batalha</div>'
+                + '<div style="font-size:11px; color:var(--v-text-dim,#a09484);">Sem registro de vitórias no Bestiário. Avaliação física baseada em percepção visual. Derrote-a para revelar suas estatísticas completas.</div>'
+                + '</div>'
+                + '</div>';
+        } else {
+            html += '<div class="udc-badge-known" style="background:linear-gradient(90deg,rgba(26,44,22,0.92),rgba(14,26,12,0.96)); border:1px solid rgba(120,200,80,0.45); border-radius:6px; padding:6px 10px; margin:6px 0 8px; display:flex; align-items:center; gap:8px;">'
+                + '<span style="font-size:14px; color:#86efac;">✦</span>'
+                + '<div style="line-height:1.25;">'
+                + '<div style="font-family:Cinzel,serif; font-size:11.5px; font-weight:700; color:#86efac;">Conhecimento Empírico de Batalha</div>'
+                + '<div style="font-size:11px; color:#a7f3d0;">Espécie catalogada no Bestiário (' + knowInfo.kills + ' ' + (knowInfo.kills === 1 ? 'vitória registrada' : 'vitórias registradas') + '). Estatísticas completas visíveis.</div>'
+                + '</div>'
+                + '</div>';
+        }
+    }
 
     /* Recursos & Status Vital */
     var profBonus = (u.prof != null) ? u.prof : (u.cr != null ? (u.cr < 5 ? 2 : (u.cr < 9 ? 3 : 4)) : (Math.floor(((u.lvl || 1) - 1) / 4) + 2));
@@ -49823,28 +49937,56 @@ function openUnitDetail(uid) {
     html += '<div class="udc-stats">';
     var hpPct = Math.round((u.hp / u.mhp) * 100);
     var hpCls = vBarHpClass(hpPct);
-    var tempHpSuffix = (u.tempHp && u.tempHp > 0) ? ' <span style="color:#7dd3fc;font-weight:800;" title="Pontos de Vida Temporários (PHB p. 198)">+' + (u.tempHp | 0) + '🛡</span>' : '';
-    html += '<div class="udc-stat"><span class="udc-stat-lbl">PV</span><span class="udc-stat-val ' + hpCls + '">' + u.hp + ' / ' + u.mhp + tempHpSuffix + '</span></div>';
-    if (typeof _wsIsTransformed === 'function' && _wsIsTransformed(u)) {
-        var _udcWsName = (u.wildShape && u.wildShape.form_name) || 'Besta';
-        html += '<div class="udc-stat"><span class="udc-stat-lbl">Forma Selvagem</span><span class="udc-stat-val" style="color:#86efac;">🐾 ' + escHtml(_udcWsName) + '</span></div>';
+
+    if (u.t === 'e' && !isKnown) {
+        // D&D 5e Fog of War: Condição vital descritiva sem números exatos de PV
+        var vitalLabel = '';
+        if (!u.alive || (u.hp != null && u.hp <= 0)) vitalLabel = 'Derrotado (0 PV)';
+        else if (hpPct >= 100) vitalLabel = 'Ileso / Vigoroso';
+        else if (hpPct >= 75) vitalLabel = 'Levemente Ferido';
+        else if (hpPct >= 50) vitalLabel = 'Ferido';
+        else if (hpPct >= 25) vitalLabel = 'Gravemente Ferido (Ensanguentado)';
+        else vitalLabel = 'À Beira da Morte (Crítico)';
+
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">Condição Vital</span><span class="udc-stat-val ' + hpCls + '" style="font-size:11.5px;">' + vitalLabel + '</span></div>';
+        
+        var acEstimate;
+        if (u.ac >= 18) acEstimate = 'Armadura Pesada Aparente (~18+)';
+        else if (u.ac >= 15) acEstimate = 'Couro Reforçado / Média (~15–17)';
+        else if (u.ac >= 12) acEstimate = 'Pele Grossa / Leve (~12–14)';
+        else acEstimate = 'Sem Proteção Aparente (~10–11)';
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">Proteção</span><span class="udc-stat-val" style="color:#d4c8b0; font-size:11px;">' + acEstimate + '</span></div>';
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">Postura</span><span class="udc-stat-val" style="color:#ffb090;">Agressiva</span></div>';
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">Dano Visível</span><span class="udc-stat-val">' + (u.die ? ('1d' + u.die) : 'Ataque Físico') + '</span></div>';
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">Proficiência</span><span class="udc-stat-val" style="color:var(--v-text-dim,#a09484);">? (Não Avaliado)</span></div>';
+        if (uAtksPerTurn > 1) {
+            html += '<div class="udc-stat"><span class="udc-stat-lbl">Ataques/Turno</span><span class="udc-stat-val" style="color:#7cdb7c;">' + uAtksPerTurn + '×</span></div>';
+        }
+    } else {
+        var tempHpSuffix = (u.tempHp && u.tempHp > 0) ? ' <span style="color:#7dd3fc;font-weight:800;" title="Pontos de Vida Temporários (PHB p. 198)">+' + (u.tempHp | 0) + '🛡</span>' : '';
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">PV</span><span class="udc-stat-val ' + hpCls + '">' + u.hp + ' / ' + u.mhp + tempHpSuffix + '</span></div>';
+        if (typeof _wsIsTransformed === 'function' && _wsIsTransformed(u)) {
+            var _udcWsName = (u.wildShape && u.wildShape.form_name) || 'Besta';
+            html += '<div class="udc-stat"><span class="udc-stat-lbl">Forma Selvagem</span><span class="udc-stat-val" style="color:#86efac;">🐾 ' + escHtml(_udcWsName) + '</span></div>';
+        }
+        if (u.res && u.res.max) {
+            html += '<div class="udc-stat"><span class="udc-stat-lbl">' + escHtml(u.res.name) + '</span><span class="udc-stat-val res ' + u.res.type + '">' + u.res.ico + ' ' + u.res.value + ' / ' + u.res.max + '</span></div>';
+        }
+        var acB = getStatusAcBonus(u);
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">CA</span><span class="udc-stat-val">' + u.ac + (acB ? ' +' + acB : '') + '</span></div>';
+        var atkB = getAtkFlatFromStatuses(u);
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">Ataque</span><span class="udc-stat-val">+' + u.atk + (atkB ? ' +' + atkB + ' temp' : '') + '</span></div>';
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">Dano</span><span class="udc-stat-val">' + (u.die ? ('1d' + u.die + uDmgModStr) : 'Arma') + (uDmgTypeInfo ? ' <span style="font-size: 11px;color:' + uDmgTypeInfo.col + ';">(' + escHtml(uDmgTypeInfo.pt) + ')</span>' : '') + '</span></div>';
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">Proficiência</span><span class="udc-stat-val" style="color:#ffd700;">+' + profBonus + '</span></div>';
+        if (uAtksPerTurn > 1) {
+            html += '<div class="udc-stat"><span class="udc-stat-lbl">Ataques/Turno</span><span class="udc-stat-val" style="color:#7cdb7c;">' + uAtksPerTurn + '×</span></div>';
+        }
+        if (u.spellSaveDc || (u.spellSlots && u.spellSlots.max)) {
+            var uDc = u.spellSaveDc || (typeof simSpellSaveDc === 'function' ? simSpellSaveDc(u) : 12);
+            html += '<div class="udc-stat"><span class="udc-stat-lbl">CD Magia</span><span class="udc-stat-val" style="color:#a29bfe;">CD ' + uDc + '</span></div>';
+        }
     }
-    if (u.res && u.res.max) {
-        html += '<div class="udc-stat"><span class="udc-stat-lbl">' + escHtml(u.res.name) + '</span><span class="udc-stat-val res ' + u.res.type + '">' + u.res.ico + ' ' + u.res.value + ' / ' + u.res.max + '</span></div>';
-    }
-    var acB = getStatusAcBonus(u);
-    html += '<div class="udc-stat"><span class="udc-stat-lbl">CA</span><span class="udc-stat-val">' + u.ac + (acB ? ' +' + acB : '') + '</span></div>';
-    var atkB = getAtkFlatFromStatuses(u);
-    html += '<div class="udc-stat"><span class="udc-stat-lbl">Ataque</span><span class="udc-stat-val">+' + u.atk + (atkB ? ' +' + atkB + ' temp' : '') + '</span></div>';
-    html += '<div class="udc-stat"><span class="udc-stat-lbl">Dano</span><span class="udc-stat-val">' + (u.die ? ('1d' + u.die + uDmgModStr) : 'Arma') + (uDmgTypeInfo ? ' <span style="font-size: 11px;color:' + uDmgTypeInfo.col + ';">(' + escHtml(uDmgTypeInfo.pt) + ')</span>' : '') + '</span></div>';
-    html += '<div class="udc-stat"><span class="udc-stat-lbl">Proficiência</span><span class="udc-stat-val" style="color:#ffd700;">+' + profBonus + '</span></div>';
-    if (uAtksPerTurn > 1) {
-        html += '<div class="udc-stat"><span class="udc-stat-lbl">Ataques/Turno</span><span class="udc-stat-val" style="color:#7cdb7c;">' + uAtksPerTurn + '×</span></div>';
-    }
-    if (u.spellSaveDc || (u.spellSlots && u.spellSlots.max)) {
-        var uDc = u.spellSaveDc || (typeof simSpellSaveDc === 'function' ? simSpellSaveDc(u) : 12);
-        html += '<div class="udc-stat"><span class="udc-stat-lbl">CD Magia</span><span class="udc-stat-val" style="color:#a29bfe;">CD ' + uDc + '</span></div>';
-    }
+
     if (u.speed != null) {
         html += '<div class="udc-stat"><span class="udc-stat-lbl">Deslocamento</span><span class="udc-stat-val">' + formatHexDistanceMeters(u.speed) + ' (' + u.speed + 'h)</span></div>';
     }
@@ -49866,10 +50008,14 @@ function openUnitDetail(uid) {
     }
     html += '</div></div>';
 
-    /* Bestiário & Lore (quando presente em monstros/chefes) */
-    if (u.desc) {
+    /* Bestiário & Lore */
+    if (u.t === 'e' && !isKnown) {
         html += '<div class="udc-section"><div class="udc-section-title">Bestiário & Lore</div>';
-        html += '<div style="font-size:10.5px; color:#d8cbb3; font-style:italic; line-height:1.4; background:rgba(20,16,12,0.55); border-left:2px solid #d4af37; padding:5px 8px; border-radius:0 4px 4px 0;">' + escHtml(u.desc) + '</div>';
+        html += '<div style="font-size:11px; color:#d8cbb3; font-style:italic; line-height:1.45; background:rgba(20,16,12,0.55); border-left:2px solid rgba(196,149,58,0.5); padding:6px 9px; border-radius:0 4px 4px 0;">Você ainda não possui anotações empíricas sobre os hábitos e pontos fracos desta criatura. Derrote-a para catalogar seu registro completo no Bestiário.</div>';
+        html += '</div>';
+    } else if (u.desc) {
+        html += '<div class="udc-section"><div class="udc-section-title">Bestiário & Lore</div>';
+        html += '<div style="font-size:11px; color:#d8cbb3; font-style:italic; line-height:1.4; background:rgba(20,16,12,0.55); border-left:2px solid #d4af37; padding:5px 8px; border-radius:0 4px 4px 0;">' + escHtml(u.desc) + '</div>';
         html += '</div>';
     }
 
@@ -49887,38 +50033,66 @@ function openUnitDetail(uid) {
     html += '<div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">';
     for (var si = 0; si < statsData.length; si++) {
         var sObj = statsData[si];
-        var sMod = Math.floor((sObj.v - 10) / 2);
-        var sModStr = (sMod >= 0 ? '+' : '') + sMod;
-        var sModCol = sMod > 0 ? '#7cdb7c' : (sMod < 0 ? '#e07c7c' : '#a09484');
         html += '<div style="display:flex; align-items:center; gap:5px; background:rgba(15,12,8,.55); border:1px solid var(--v-border,#4a3828); border-radius:6px; padding:4px 6px;">'
             + '<img src="' + _attrBase + sObj.png + '" alt="" style="width:22px; height:22px; object-fit:contain; flex-shrink:0;" onerror="this.style.display=\'none\';" />'
             + '<div style="flex:1; min-width:0; line-height:1.1;">'
-            + '<div style="font-size: 11px; color:var(--v-text-dim,#a09484);">' + sObj.lb + '</div>'
-            + '<div style="font-family:Cinzel,serif; font-size:13px; font-weight:700; color:#ffd700;">' + sObj.v + ' <span style="font-size: 11px; color:' + sModCol + '; font-weight:600;">' + sModStr + '</span></div>'
-            + '</div>'
-            + '</div>';
+            + '<div style="font-size: 11px; color:var(--v-text-dim,#a09484);">' + sObj.lb + '</div>';
+
+        if (u.t === 'e' && !isKnown) {
+            var qualVal = '? (Oculto)';
+            var qualCol = 'var(--v-text-dim,#a09484)';
+            if (sObj.k === 'str') {
+                qualVal = sObj.v >= 16 ? 'Imponente' : (sObj.v >= 14 ? 'Forte' : (sObj.v <= 8 ? 'Fraco' : 'Médio'));
+                qualCol = sObj.v >= 14 ? '#ffd700' : '#d4c8b0';
+            } else if (sObj.k === 'dex') {
+                qualVal = sObj.v >= 16 ? 'Muito Ágil' : (sObj.v >= 14 ? 'Ágil' : (sObj.v <= 8 ? 'Lento' : 'Padrão'));
+                qualCol = sObj.v >= 14 ? '#7cdb7c' : '#d4c8b0';
+            } else if (sObj.k === 'con') {
+                qualVal = sObj.v >= 16 ? 'Muito Robusto' : (sObj.v >= 14 ? 'Robusto' : (sObj.v <= 8 ? 'Frágil' : 'Padrão'));
+                qualCol = sObj.v >= 14 ? '#ffd700' : '#d4c8b0';
+            }
+            html += '<div style="font-family:Cinzel,serif; font-size:11px; font-weight:700; color:' + qualCol + ';">' + qualVal + '</div>';
+        } else {
+            var sMod = Math.floor((sObj.v - 10) / 2);
+            var sModStr = (sMod >= 0 ? '+' : '') + sMod;
+            var sModCol = sMod > 0 ? '#7cdb7c' : (sMod < 0 ? '#e07c7c' : '#a09484');
+            html += '<div style="font-family:Cinzel,serif; font-size:13px; font-weight:700; color:#ffd700;">' + sObj.v + ' <span style="font-size: 11px; color:' + sModCol + '; font-weight:600;">' + sModStr + '</span></div>';
+        }
+
+        html += '</div></div>';
     }
-    html += '</div></details>';
+    html += '</div>';
+    if (u.t === 'e' && !isKnown) {
+        html += '<div style="font-size:11px; color:var(--v-text-dim,#a09484); margin-top:5px; font-style:italic; line-height:1.35;">D&D 5e: Avaliação física visual. Atributos mentais são revelados ao derrotar ou estudar a espécie.</div>';
+    }
+    html += '</details>';
 
     /* Salvaguardas D&D 5e */
-    var profSaves = u.saving_throw_proficiencies || [];
-    html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Salvaguardas D&D 5e</summary>';
-    html += '<div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:4px;">';
-    for (var si2 = 0; si2 < statsData.length; si2++) {
-        var sObj2 = statsData[si2];
-        var isSaveProf = (profSaves.indexOf(sObj2.k) >= 0 || profSaves.indexOf(sObj2.lb.toLowerCase()) >= 0);
-        var baseSaveMod = Math.floor((sObj2.v - 10) / 2);
-        var totalSave = isSaveProf ? (baseSaveMod + profBonus) : baseSaveMod;
-        var saveStr = (totalSave >= 0 ? '+' : '') + totalSave;
-        html += '<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(20,16,12,0.6); border:1px solid ' + (isSaveProf ? 'rgba(196,149,58,0.5)' : 'rgba(74,56,40,0.4)') + '; border-radius:4px; padding:2px 6px; font-size:10px;">'
-            + '<span style="color:' + (isSaveProf ? '#ffd700' : 'rgba(160,148,132,0.5)') + '; font-size: 10.5px; margin-right:3px;">' + (isSaveProf ? '●' : '○') + '</span>'
-            + '<span style="color:var(--v-text-dim,#a09484); font-weight:700;">' + sObj2.lb + '</span>'
-            + '<span style="color:' + (isSaveProf ? '#ffd700' : '#d4c8b0') + '; font-weight:700;">' + saveStr + '</span>'
-            + '</div>';
+    if (u.t === 'e' && !isKnown) {
+        html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Salvaguardas D&D 5e</summary>';
+        html += '<div style="font-size:11px; color:#c4b49c; font-style:italic; padding:6px 8px; background:rgba(20,14,10,0.5); border:1px solid rgba(196,149,58,0.2); border-radius:4px; line-height:1.4;">'
+            + 'Salvaguardas e bônus permanecem ocultos sob névoa de guerra até serem testados durante o combate ou catalogados após a vitória.'
+            + '</div></details>';
+    } else {
+        var profSaves = u.saving_throw_proficiencies || [];
+        html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Salvaguardas D&D 5e</summary>';
+        html += '<div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:4px;">';
+        for (var si2 = 0; si2 < statsData.length; si2++) {
+            var sObj2 = statsData[si2];
+            var isSaveProf = (profSaves.indexOf(sObj2.k) >= 0 || profSaves.indexOf(sObj2.lb.toLowerCase()) >= 0);
+            var baseSaveMod = Math.floor((sObj2.v - 10) / 2);
+            var totalSave = isSaveProf ? (baseSaveMod + profBonus) : baseSaveMod;
+            var saveStr = (totalSave >= 0 ? '+' : '') + totalSave;
+            html += '<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(20,16,12,0.6); border:1px solid ' + (isSaveProf ? 'rgba(196,149,58,0.5)' : 'rgba(74,56,40,0.4)') + '; border-radius:4px; padding:2px 6px; font-size:11px;">'
+                + '<span style="color:' + (isSaveProf ? '#ffd700' : 'rgba(160,148,132,0.5)') + '; font-size: 11px; margin-right:3px;">' + (isSaveProf ? '●' : '○') + '</span>'
+                + '<span style="color:var(--v-text-dim,#a09484); font-weight:700;">' + sObj2.lb + '</span>'
+                + '<span style="color:' + (isSaveProf ? '#ffd700' : '#d4c8b0') + '; font-weight:700;">' + saveStr + '</span>'
+                + '</div>';
+        }
+        html += '</div></details>';
     }
-    html += '</div></details>';
 
-    /* Traços, Passivas & Regras D&D 5e (Monster Manual / Classes por Nível) */
+    /* Traços, Passivas & Regras D&D 5e */
     var uTraits = (typeof simResolveUnitTraitsDnd5e === 'function') ? simResolveUnitTraitsDnd5e(u) : (u.traits || []);
     if (uTraits && uTraits.length) {
         html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Traços & Características D&D 5e</summary>';
@@ -49926,7 +50100,7 @@ function openUnitDetail(uid) {
         for (var ti = 0; ti < uTraits.length; ti++) {
             var trObj = uTraits[ti];
             if (!trObj || !trObj.n) continue;
-            html += '<div style="background:rgba(22,18,14,0.72); border:1px solid rgba(196,149,58,0.38); border-radius:5px; padding:4px 8px; font-size:10px; line-height:1.35;">'
+            html += '<div style="background:rgba(22,18,14,0.72); border:1px solid rgba(196,149,58,0.38); border-radius:5px; padding:4px 8px; font-size:11px; line-height:1.35;">'
                 + '<div style="color:#ffd700; font-weight:700;">' + escHtml(trObj.ico || '✦') + ' ' + escHtml(trObj.n) + '</div>'
                 + (trObj.desc ? '<div style="color:#d4c8b0; font-size: 11px; margin-top:1px;">' + escHtml(trObj.desc) + '</div>' : '')
                 + '</div>';
@@ -49935,31 +50109,34 @@ function openUnitDetail(uid) {
     }
 
     /* Defesas, Resistências e Imunidades */
-    var _udcFmtDmgList = function (arr) {
-        return arr.map(function (dt) {
-            var info = (typeof simDmgTypeInfoPt === 'function') ? simDmgTypeInfoPt(dt) : { pt: dt, ico: '' };
-            return (info.ico ? info.ico + ' ' : '') + info.pt;
-        }).join(', ');
-    };
-    var hasRes = (u.resistances && u.resistances.length);
-    var hasVuln = (u.vulnerabilities && u.vulnerabilities.length);
-    var hasImm = (u.immunities && u.immunities.length);
-    var hasCondImm = (u.condition_immunities && u.condition_immunities.length);
-    if (hasRes || hasVuln || hasImm || hasCondImm) {
+    if (u.t === 'e' && !isKnown) {
         html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Propriedades & Defesas</summary>';
-        html += '<div style="display:flex; flex-direction:column; gap:3px; font-size:10px; line-height:1.3;">';
-        if (hasVuln) html += '<div style="color:#ff8a4a;"><b>▲ Vulnerável (2× dano):</b> ' + escHtml(_udcFmtDmgList(u.vulnerabilities)) + '</div>';
-        if (hasRes) html += '<div style="color:#ffd700;"><b>⛨ Resistências (½ dano):</b> ' + escHtml(_udcFmtDmgList(u.resistances)) + '</div>';
-        if (hasImm) html += '<div style="color:#7cdb7c;"><b>✦ Imunidades a Dano (0 dano):</b> ' + escHtml(_udcFmtDmgList(u.immunities)) + '</div>';
-        if (hasCondImm) html += '<div style="color:#9adfe8;"><b>◈ Imunidades a Condições:</b> ' + escHtml(u.condition_immunities.join(', ')) + '</div>';
-        html += '</div></details>';
+        html += '<div style="font-size:11px; color:#c4b49c; font-style:italic; padding:6px 8px; background:rgba(20,14,10,0.5); border:1px solid rgba(196,149,58,0.2); border-radius:4px; line-height:1.4;">'
+            + 'Vulnerabilidades e resistências serão reveladas conforme forem testadas com seus ataques ou após registrar a vitória.'
+            + '</div></details>';
+    } else {
+        var _udcFmtDmgList = function (arr) {
+            return arr.map(function (dt) {
+                var info = (typeof simDmgTypeInfoPt === 'function') ? simDmgTypeInfoPt(dt) : { pt: dt, ico: '' };
+                return (info.ico ? info.ico + ' ' : '') + info.pt;
+            }).join(', ');
+        };
+        var hasRes = (u.resistances && u.resistances.length);
+        var hasVuln = (u.vulnerabilities && u.vulnerabilities.length);
+        var hasImm = (u.immunities && u.immunities.length);
+        var hasCondImm = (u.condition_immunities && u.condition_immunities.length);
+        if (hasRes || hasVuln || hasImm || hasCondImm) {
+            html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Propriedades & Defesas</summary>';
+            html += '<div style="display:flex; flex-direction:column; gap:3px; font-size:11px; line-height:1.3;">';
+            if (hasVuln) html += '<div style="color:#ff8a4a;"><b>▲ Vulnerável (2× dano):</b> ' + escHtml(_udcFmtDmgList(u.vulnerabilities)) + '</div>';
+            if (hasRes) html += '<div style="color:#ffd700;"><b>⛨ Resistências (½ dano):</b> ' + escHtml(_udcFmtDmgList(u.resistances)) + '</div>';
+            if (hasImm) html += '<div style="color:#7cdb7c;"><b>✦ Imunidades a Dano (0 dano):</b> ' + escHtml(_udcFmtDmgList(u.immunities)) + '</div>';
+            if (hasCondImm) html += '<div style="color:#9adfe8;"><b>◈ Imunidades a Condições:</b> ' + escHtml(u.condition_immunities.join(', ')) + '</div>';
+            html += '</div></details>';
+        }
     }
 
-    /* Habilidades — X-6.5.51AB (2026-04-26): paginacao quando lista excede
-       UDC_SKILLS_PER_PAGE. User feedback: "exista paginação para não existir
-       necessidade de scrolling, assim como existe no popup de habilidades".
-       Renderiza pagina 0 inicial + pager se skills.length > per_page.
-       Handler em wire pos-mount troca innerHTML da .udc-skills + atualiza info. */
+    /* Habilidades */
     html += '<div class="udc-section udc-section-skills"><div class="udc-section-title">Habilidades</div>';
     var skills = u.skills || (u.t === 'e' ? ['Ataque corpo a corpo'] : []);
     var UDC_SKILLS_PER_PAGE = 4;
@@ -49980,7 +50157,7 @@ function openUnitDetail(uid) {
         if (udcTotalPages > 1) {
             html += '<div class="udc-pager" data-udc-pager>';
             html += '<button type="button" class="udc-pager-btn" data-udc-page-dir="-1" disabled aria-label="Pagina anterior">◀</button>';
-            html += '<span class="udc-pager-info"><span data-udc-page-cur>1</span> / ' + udcTotalPages + '<span class="udc-pager-sep">·</span>' + skills.length + ' skills</span>';
+            html += '<span class="udc-pager-info"><span data-udc-page-cur>1</span> / ' + udcTotalPages + '</span>';
             html += '<button type="button" class="udc-pager-btn" data-udc-page-dir="1"' + (udcTotalPages <= 1 ? ' disabled' : '') + ' aria-label="Proxima pagina">▶</button>';
             html += '</div>';
         }
@@ -49989,7 +50166,7 @@ function openUnitDetail(uid) {
     }
     html += '</div>';
 
-    /* Intenção Tática D&D 5e / Spatial Intent (Into the Breach / Baldur's Gate 3) */
+    /* Intenção Tática D&D 5e */
     if (u.t === 'e' && u.it) {
         var it = u.it;
         var itIcon = (it.tp === 'skill') ? '✦' : (it.isRanged ? '⌖' : (it.tp === 'stun' ? '◈' : '▲'));
@@ -49997,16 +50174,16 @@ function openUnitDetail(uid) {
         html += '<div style="background:rgba(231,76,60,0.14); border:1px solid rgba(231,76,60,0.55); border-radius:6px; padding:6px 10px; font-size:11px; line-height:1.4;">';
         if (it.tp === 'stun') {
             html += '<div style="color:#e07c7c; font-weight:700;">◈ ' + escHtml(it.lb || 'Incapacitado') + '</div>';
-            html += '<div style="color:var(--v-text-dim,#a09484); font-size:10px;">Esta criatura está impedida de agir ou reagir neste turno.</div>';
+            html += '<div style="color:var(--v-text-dim,#a09484); font-size:11px;">Esta criatura está impedida de agir ou reagir neste turno.</div>';
         } else {
             var tgtText = it.targetName ? escHtml(it.targetName) : 'Alvo Próximo';
-            html += '<div style="color:#ffd54f; font-weight:700;">' + itIcon + ' ' + escHtml(it.lb || 'Atacar') + ' <span style="color:#ff6b6b; font-size:10.5px;">(~' + (it.dmg || 1) + ' dano projetado)</span></div>';
-            html += '<div style="color:var(--v-text-dim,#a09484); font-size:10.5px;">Alvo Previsto: <strong style="color:#fff;">' + tgtText + '</strong></div>';
+            html += '<div style="color:#ffd54f; font-weight:700;">' + itIcon + ' ' + escHtml(it.lb || 'Atacar') + (isKnown ? (' <span style="color:#ff6b6b; font-size:11px;">(~' + (it.dmg || 1) + ' dano projetado)</span>') : '') + '</div>';
+            html += '<div style="color:var(--v-text-dim,#a09484); font-size:11px;">Alvo Previsto: <strong style="color:#fff;">' + tgtText + '</strong></div>';
         }
         html += '</div></div>';
     }
 
-    /* Condição (PV + efeitos D&D / simulador com duração em turnos ou rodadas) */
+    /* Condição & Efeitos D&D 5e */
     html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Condição & Efeitos D&D 5e</summary>';
     var conds = [];
     if (!u.alive || (u.hp != null && u.hp <= 0)) conds.push({ ico: '☠️', n: 'Inconsciente (0 PV)' });
@@ -50017,11 +50194,11 @@ function openUnitDetail(uid) {
     conds.forEach(function (c) { html += '<span class="udc-cond"><span>' + c.ico + '</span> ' + escHtml(c.n) + '</span>'; });
     html += '</div>';
 
-    /* Salvaguardas contra a Morte (Death Saves D&D 5e) se caído a 0 PV */
+    /* Salvaguardas contra a Morte se caído a 0 PV */
     if ((!u.alive || (u.hp != null && u.hp <= 0) || u.dying) && (u.t === 'p' || u.t === 'a')) {
         var dsSucc = (u.death_saves && u.death_saves.successes) || 0;
         var dsFail = (u.death_saves && u.death_saves.failures) || 0;
-        html += '<div style="margin-top:6px; background:rgba(20,16,12,0.65); border:1px solid rgba(224,124,124,0.45); border-radius:6px; padding:6px 8px; font-size:10.5px;">';
+        html += '<div style="margin-top:6px; background:rgba(20,16,12,0.65); border:1px solid rgba(224,124,124,0.45); border-radius:6px; padding:6px 8px; font-size:11px;">';
         html += '<div style="display:flex; justify-content:space-between; align-items:center;">';
         html += '<span style="font-weight:700; color:#ffd700;">Salvaguardas de Morte</span>';
         html += '<span><span style="color:#7cdb7c;">' + dsSucc + '/3 ✔</span> <span style="color:#666;margin:0 3px;">|</span> <span style="color:#e07c7c;">' + dsFail + '/3 ✖</span></span>';
@@ -50030,7 +50207,7 @@ function openUnitDetail(uid) {
         html += '</div>';
     }
 
-    /* Compilação de efeitos ativos (u.se + flags canônicas de Caído, Agarrado, Contido, Cego, etc.) */
+    /* Compilação de efeitos ativos */
     var allEffects = [];
     if (u.se && u.se.length) {
         u.se.forEach(function (st) {
@@ -50042,7 +50219,6 @@ function openUnitDetail(uid) {
         });
     }
 
-    // Flag Caído / Prone (PHB p. 190 / p. 292)
     var isProne = !!(u.prone || allEffects.some(function (st) {
         return st && (st.prone || st.id === 'prone' || String(st.n || '').toLowerCase() === 'caído');
     }));
@@ -50050,59 +50226,13 @@ function openUnitDetail(uid) {
         allEffects.push({
             id: 'prone',
             n: 'Caído no Chão',
-            ico: '▾',
+            ico: '🔻',
             kind: 'debuff',
             turnsLeft: null,
             condRule: (typeof simGetDndConditionRule === 'function' ? simGetDndConditionRule('prone').rule : null)
         });
     }
 
-    // Agarrado / Grappled (PHB p. 290)
-    var isGrappled = !!(u.grappled || allEffects.some(function (st) {
-        return st && (st.grappled || st.id === 'grappled' || String(st.n || '').toLowerCase().indexOf('agarrad') >= 0);
-    }));
-    if (isGrappled && !allEffects.some(function (st) { return st && (st.id === 'grappled' || st.grappled); })) {
-        allEffects.push({
-            id: 'grappled',
-            n: 'Agarrado',
-            ico: '✊',
-            kind: 'debuff',
-            turnsLeft: null,
-            condRule: (typeof simGetDndConditionRule === 'function' ? simGetDndConditionRule('grappled').rule : null)
-        });
-    }
-
-    // Contido / Restrained (PHB p. 292)
-    var isRestrained = !!(u.restrained || allEffects.some(function (st) {
-        return st && (st.restrained || st.id === 'restrained' || String(st.n || '').toLowerCase().indexOf('contido') >= 0);
-    }));
-    if (isRestrained && !allEffects.some(function (st) { return st && (st.id === 'restrained' || st.restrained); })) {
-        allEffects.push({
-            id: 'restrained',
-            n: 'Contido',
-            ico: '🕸️',
-            kind: 'debuff',
-            turnsLeft: null,
-            condRule: (typeof simGetDndConditionRule === 'function' ? simGetDndConditionRule('restrained').rule : null)
-        });
-    }
-
-    // Cego / Blinded (PHB p. 290)
-    var isBlinded = !!(u.blinded || u.blind || (typeof isUnitBlinded === 'function' && isUnitBlinded(u)) || allEffects.some(function (st) {
-        return st && (st.blinded || st.blind || st.id === 'blinded' || st.id === 'blindness' || String(st.n || '').toLowerCase().indexOf('cego') >= 0);
-    }));
-    if (isBlinded && !allEffects.some(function (st) { return st && (st.id === 'blinded' || st.id === 'blindness'); })) {
-        allEffects.push({
-            id: 'blinded',
-            n: 'Cego',
-            ico: '◉',
-            kind: 'debuff',
-            turnsLeft: null,
-            condRule: (typeof simGetDndConditionRule === 'function' ? simGetDndConditionRule('blinded').rule : null)
-        });
-    }
-
-    // Envenenado / Poisoned (PHB p. 292)
     var isPoisoned = !!(u.poisoned || allEffects.some(function (st) {
         return st && (st.poisoned || st.id === 'poisoned' || String(st.n || '').toLowerCase().indexOf('envenenad') >= 0);
     }));
@@ -50117,7 +50247,6 @@ function openUnitDetail(uid) {
         });
     }
 
-    // Paralisado / Paralyzed (PHB p. 291)
     var isParalyzed = !!(u.paralyzed || allEffects.some(function (st) {
         return st && (st.paralyzed || st.id === 'paralyzed' || String(st.n || '').toLowerCase().indexOf('paralis') >= 0);
     }));
@@ -50132,7 +50261,6 @@ function openUnitDetail(uid) {
         });
     }
 
-    // Atordoado / Stunned (PHB p. 292)
     var isStunned = !!(u.stunned || allEffects.some(function (st) {
         return st && (st.stunned || st.id === 'stunned' || String(st.n || '').toLowerCase().indexOf('atordo') >= 0);
     }));
@@ -50147,7 +50275,6 @@ function openUnitDetail(uid) {
         });
     }
 
-    // Esquiva / Dodge (PHB p. 192)
     var isDodging = !!(u.dodge || u.dodging || allEffects.some(function (st) {
         return st && (st.dodge || st.id === 'dodge' || st.id === 'esquiva' || String(st.n || '').toLowerCase().indexOf('esquiv') >= 0);
     }));
@@ -50162,7 +50289,6 @@ function openUnitDetail(uid) {
         });
     }
 
-    // Desengajar / Disengaged (PHB p. 192)
     var isDisengaged = !!(u.disengaged || allEffects.some(function (st) {
         return st && (st.disengaged || st.id === 'acao_desengajar' || st.id === 'disengage' || String(st.n || '').toLowerCase().indexOf('desengaj') >= 0);
     }));
@@ -50177,7 +50303,6 @@ function openUnitDetail(uid) {
         });
     }
 
-    // Concentração ativa (PHB p. 203)
     var concStEntry = allEffects.find(function (st) {
         return st && (st.concentration || st.concentrating || st.isConcentrating || st.isConcentration);
     });
@@ -50194,7 +50319,6 @@ function openUnitDetail(uid) {
         });
     }
 
-    // Reação Gasta na rodada (PHB p. 190)
     var hasReactionSpent = !!(u.reactionSpent || u.reaction_spent);
     if (hasReactionSpent && !allEffects.some(function (st) { return st && (st.id === 'reaction_spent' || st.id === 'reactionSpent'); })) {
         allEffects.push({
@@ -50207,7 +50331,6 @@ function openUnitDetail(uid) {
         });
     }
 
-    // Surpreso (PHB p. 189)
     if (u.surprised && !allEffects.some(function (st) { return st && st.id === 'surprised'; })) {
         allEffects.push({
             id: 'surprised',
@@ -50242,7 +50365,7 @@ function openUnitDetail(uid) {
         });
         html += '</div>';
     } else {
-        html += '<div class="udc-empty" style="padding:6px 0 2px;font-size:10px;color:var(--v-text-dim,#a09484);">— sem condições ou efeitos ativos —</div>';
+        html += '<div class="udc-empty" style="padding:6px 0 2px;font-size:11px;color:var(--v-text-dim,#a09484);">— sem condições ou efeitos ativos —</div>';
     }
     html += '</details>';
 
@@ -50251,9 +50374,6 @@ function openUnitDetail(uid) {
         removeInspected();
         ov.remove();
     });
-    /* 2026-06-08 (user): a imagem do detalhe e um THUMBNAIL; tocar abre o lightbox
-       (PADRAO_ALDRIC: imagem grande limitada a tela + nome + descricao). So quando
-       ha arte raster (img); o crest SVG nao tem o que ampliar. */
     (function () {
         var _udcImg = card.querySelector('.udc-ico--heraldic img');
         if (!_udcImg || typeof window.showLightbox !== 'function') return;
@@ -50263,7 +50383,6 @@ function openUnitDetail(uid) {
         var _desc = _subEl ? _subEl.textContent : '';
         _udcImg.addEventListener('click', function (e) { e.stopPropagation(); window.showLightbox(_udcImg.src, u.n, _desc); });
     })();
-    /* X-6.5.51AB: wire pager de skills (se lista paginada) */
     if (skills.length > UDC_SKILLS_PER_PAGE) {
         var udcCurPage = 0;
         var udcSkillsList = card.querySelector('.udc-skills');
