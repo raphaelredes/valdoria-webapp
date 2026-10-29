@@ -1052,6 +1052,26 @@ LOG SINK (Fase 7):
       max-width: 44px !important;
       justify-content: flex-start !important;
       transform: none !important;
+      display: none !important; /* Oculto por padrão até a cidade carregar com sucesso */
+    }
+    body.city-ready html body .va-float,
+    body.city-ready html body #app .va-float,
+    body.city-ready .va-float,
+    body.city-ready #app .va-float {
+      display: flex !important; /* Revelado exclusivamente após o hub carregar */
+    }
+    body.game-load-error html body .va-float,
+    body.game-load-error html body #app .va-float,
+    body.game-load-error .va-float,
+    body.game-load-error #app .va-float,
+    body.game-load-error #footer-collapse-toggle,
+    body.game-load-error #footer-restore,
+    body.game-load-error .va-popup,
+    body.game-load-error .va-backdrop {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
     }
     html body .va-popup,
     html body #app .va-popup {
@@ -1302,16 +1322,19 @@ LOG SINK (Fase 7):
       font-size: var(--v-font-2xl, 18px);
       line-height: 1;
       cursor: pointer;
-      display: flex;
+      display: none; /* Oculto por padrão até a cidade estar carregada com sucesso */
       align-items: center;
       justify-content: center;
       transition: border-color var(--v-transition, 0.15s), color var(--v-transition, 0.15s), transform 0.1s;
     }
+    body.city-ready #footer-collapse-toggle {
+      display: flex; /* Revelado somente quando a cidade carregar */
+    }
     #footer-collapse-toggle:hover { border-color: var(--v-gold, #c4953a); color: var(--v-gold, #c4953a); }
     #footer-collapse-toggle:active { transform: translateX(-50%) scale(0.96); }
-    body.footer-collapsed #footer-collapse-toggle { display: none; }
+    body.footer-collapsed #footer-collapse-toggle { display: none !important; }
 
-    /* Restore pill (modo recolhido) — FIX 2026-05-04: aumentado pra ser mais visível/clicável */
+    /* Restore pill (modo recolhido) */
     #footer-restore {
       position: absolute;
       bottom: var(--v-space-md, 10px); left: 50%;
@@ -1337,8 +1360,8 @@ LOG SINK (Fase 7):
       border-color: var(--v-gold, #c4953a);
     }
     #footer-restore:active { transform: translateX(-50%) scale(0.96); }
-    body.footer-collapsed #bottom-panel { display: none; }
-    body.footer-collapsed #footer-restore { display: block; }
+    body.city-ready.footer-collapsed #bottom-panel { display: none; }
+    body.city-ready.footer-collapsed #footer-restore { display: block; }
 
     /* === City Subscreen Popup Overlay (FULLSCREEN — igual vPopup do bot DEV) === */
     /* Cobre #app inteiro (sem reservar espaço pro bottom-panel — popup OCUPA TUDO) */
@@ -10145,6 +10168,148 @@ body.perf-lite .vc-action-btn { transition: none; }
        duplicadas em cidade/exploracao/combate. Bug fix único vale pros 3. -->
   <script>document.write('<script src="/shared/transition-loader.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');</script>
   <script>
+  /* ============================================================================
+     TELA DE ERRO DE CARREGAMENTO & INSTABILIDADE DE SERVIDOR D&D 5E
+     Exibida se a conexão falhar, tempo limite expirar ou o jogo não carregar.
+     Oculta estritamente os botões de menu e áudio flutuantes.
+     ============================================================================ */
+  function _showGameLoadError(reason) {
+    if (window.__gameLoadErrorShown) return;
+    window.__gameLoadErrorShown = true;
+    console.error('[GAME-LOAD-ERROR] Falha no carregamento:', reason);
+
+    document.body.classList.add('game-load-error');
+    document.body.classList.remove('city-ready');
+
+    // Esconde o loading overlay antigo para não sobrepor
+    var ld = document.getElementById('loading');
+    if (ld) {
+      ld.style.display = 'none';
+      ld.classList.add('hidden');
+    }
+
+    // Remove / esconde botões flutuantes que possam ter sido injetados
+    var fct = document.getElementById('footer-collapse-toggle');
+    if (fct) fct.style.display = 'none';
+    var fr = document.getElementById('footer-restore');
+    if (fr) fr.style.display = 'none';
+    var vaFloats = document.querySelectorAll('.va-float, #va-float, .va-popup, .va-backdrop');
+    vaFloats.forEach(function(el){ el.style.display = 'none'; });
+
+    // Pausa qualquer áudio de fundo
+    if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.stop) {
+      try { ValdoriaAudio.stop(); } catch(e){}
+    }
+
+    // Cria ou atualiza overlay da tela de erro
+    var overlay = document.getElementById('game-load-error-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'game-load-error-overlay';
+      (document.getElementById('app') || document.body).appendChild(overlay);
+    }
+
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;'
+      + 'background:radial-gradient(ellipse at 50% 30%,#261c14 0%,#16110d 60%,#0a0806 100%);'
+      + 'padding:20px;box-sizing:border-box;overflow:hidden;';
+
+    var isTG = !!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData);
+
+    var cardHtml = '<div style="max-width:380px;width:100%;background:linear-gradient(180deg,rgba(38,28,20,0.96) 0%,rgba(20,15,11,0.98) 100%);'
+      + 'border:1px solid rgba(196,149,58,0.45);border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.85),inset 0 1px 0 rgba(196,149,58,0.25);'
+      + 'padding:24px 20px;text-align:center;box-sizing:border-box;position:relative;">'
+      + '<div style="width:62px;height:62px;margin:0 auto 16px;border-radius:50%;background:radial-gradient(circle,rgba(196,149,58,0.2) 0%,rgba(26,18,13,0.8) 70%);'
+      + 'border:1.5px solid var(--v-gold,#c4953a);display:flex;align-items:center;justify-content:center;font-size:26px;color:#ffd700;'
+      + 'box-shadow:0 0 20px rgba(196,149,58,0.3);">'
+      + '<span>⚠️</span>'
+      + '</div>'
+      + '<div style="font-family:var(--v-font-display,Cinzel,serif);font-size:16px;font-weight:700;color:#ffd700;'
+      + 'text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;text-shadow:0 0 10px rgba(196,149,58,0.5);line-height:1.3;">'
+      + 'Não Foi Possível Carregar o Jogo'
+      + '</div>'
+      + '<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;opacity:0.8;">'
+      + '<span style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(196,149,58,0.5));"></span>'
+      + '<span style="color:var(--v-gold,#c4953a);font-size:11px;">◆</span>'
+      + '<span style="flex:1;height:1px;background:linear-gradient(90deg,rgba(196,149,58,0.5),transparent);"></span>'
+      + '</div>'
+      + '<div style="font-size:13.5px;color:var(--v-text,#d4c8b0);line-height:1.6;margin-bottom:22px;">'
+      + 'Os portões de Valdória estão momentaneamente inacessíveis devido a uma instabilidade de conexão com o servidor.'
+      + '<br><br>'
+      + '<span style="color:var(--v-gold,#c4953a);font-weight:600;">Por favor, aguarde alguns minutos e tente novamente.</span>'
+      + '</div>'
+      + '<button id="gle-btn-retry" type="button" style="width:100%;padding:12px 18px;'
+      + 'background:linear-gradient(180deg,rgba(196,149,58,0.35) 0%,rgba(70,50,28,0.85) 100%);'
+      + 'border:1px solid #ffd700;border-radius:6px;color:#ffd700;font-family:var(--v-font-display,Cinzel,serif);'
+      + 'font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;'
+      + 'box-shadow:0 4px 12px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,215,0,0.3);transition:all 0.15s ease;">'
+      + '<span>🔄</span> <span>Tentar Novamente</span>'
+      + '</button>'
+      + (isTG ? ('<button id="gle-btn-close" type="button" style="width:100%;margin-top:10px;padding:9px 16px;'
+        + 'background:rgba(24,18,14,0.7);border:1px solid rgba(196,149,58,0.3);border-radius:6px;'
+        + 'color:var(--v-text-dim,#a09484);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s ease;">'
+        + 'Fechar Janela'
+        + '</button>') : '')
+      + '<div style="margin-top:16px;font-size:11px;color:rgba(160,148,132,0.75);display:flex;align-items:center;justify-content:center;gap:6px;">'
+      + '<span style="width:7px;height:7px;border-radius:50%;background:#e05353;box-shadow:0 0 6px #e05353;display:inline-block;"></span>'
+      + '<span>Servidor temporariamente indisponível</span>'
+      + '</div>'
+      + '</div>';
+
+    overlay.innerHTML = cardHtml;
+
+    var btnRetry = overlay.querySelector('#gle-btn-retry');
+    if (btnRetry) {
+      btnRetry.addEventListener('click', function(){
+        btnRetry.disabled = true;
+        btnRetry.style.opacity = '0.6';
+        btnRetry.innerHTML = '<span>⏳</span> <span>Conectando…</span>';
+        try {
+          sessionStorage.removeItem('valdoria_loop_visits');
+          localStorage.removeItem('valdoria_audio_resume_ts');
+        } catch(e){}
+        var url = new URL(window.location.href);
+        url.searchParams.set('_r', String(Date.now()));
+        window.location.replace(url.toString());
+      });
+    }
+
+    var btnClose = overlay.querySelector('#gle-btn-close');
+    if (btnClose) {
+      btnClose.addEventListener('click', function(){
+        if (window.Telegram && window.Telegram.WebApp && typeof window.Telegram.WebApp.close === 'function') {
+          window.Telegram.WebApp.close();
+        } else {
+          window.close();
+        }
+      });
+    }
+  }
+  window._showGameLoadError = _showGameLoadError;
+
+  // Watchdog global: se em 14s a cidade não atingir city-ready, aciona a tela de erro
+  setTimeout(function(){
+    if (!document.body.classList.contains('city-ready') && !window.__gameLoadErrorShown) {
+      if (typeof _cityGameReady === 'function' && !_cityGameReady()) {
+        console.warn('[WATCHDOG] 14s watchdog disparado — exibindo tela de erro');
+        _showGameLoadError('watchdog_14s');
+      }
+    }
+  }, 14000);
+
+  // Monitora erros JavaScript críticos antes de inicializar o jogo
+  window.addEventListener('error', function(e) {
+    if (!document.body.classList.contains('city-ready') && !window.__gameLoadErrorShown) {
+      console.error('[BOOT-ERROR] Erro crítico antes de city-ready:', e);
+      setTimeout(function(){
+        if (!document.body.classList.contains('city-ready') && !window.__gameLoadErrorShown) {
+          if (typeof _cityGameReady === 'function' && !_cityGameReady()) {
+            _showGameLoadError('js_error');
+          }
+        }
+      }, 1500);
+    }
+  });
+
   /* Early title screen — show IMMEDIATELY, before content loads */
   (function(){
     if (window.__introTitleSkip) { console.log('[INTRO] skip — flag set'); return; }
@@ -10250,10 +10415,14 @@ body.perf-lite .vc-action-btn { transition: none; }
         // re-expondo o blank). DCL normal esconde muito antes.
         setTimeout(function(){
           if (window.__pendingHideTGLoading) {
-            console.warn('[INTRO] TG loading sanity timeout 12s — force hiding');
-            var ld2 = document.getElementById('loading');
-            if (ld2) { ld2.style.display = 'none'; ld2.classList.add('hidden'); }
+            console.warn('[INTRO] TG loading sanity timeout 12s');
             window.__pendingHideTGLoading = false;
+            if (typeof _cityGameReady === 'function' && !_cityGameReady()) {
+              if (typeof _showGameLoadError === 'function') _showGameLoadError('timeout_tg_12s');
+            } else {
+              var ld2 = document.getElementById('loading');
+              if (ld2) { ld2.style.display = 'none'; ld2.classList.add('hidden'); }
+            }
           }
         }, 12000);
       }
@@ -10384,6 +10553,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       if (window.__cityResumePending) return false;  // 2026-06-08: decisão de resume em curso — segura
       if (!_cityGameReady()) return false;       // conteúdo do jogo ainda não pronto — espera
       _cityLoadingDone = true;
+      document.body.classList.add('city-ready');
       _cityHideLoading('game-ready');
       return true;
     }
@@ -10408,8 +10578,12 @@ body.perf-lite .vc-action-btn { transition: none; }
           _cityLoadingDone = true;
           if (_cityMo) { _cityMo.disconnect(); _cityMo = null; }
           clearInterval(_cityPi);
-          console.warn('[INTRO] loading force-hide (#app não renderizou ou resume travou — evita travar)');
-          _cityHideLoading('force-fallback');
+          if (!_cityGameReady()) {
+            console.warn('[INTRO] #app não renderizou após timeout — exibindo tela de erro');
+            if (typeof _showGameLoadError === 'function') _showGameLoadError('timeout_render');
+          } else {
+            _cityHideLoading('force-fallback');
+          }
         }
       }, 200);
     }
@@ -74598,6 +74772,7 @@ document.addEventListener('DOMContentLoaded', function(){
   _wireSubScreenContentOnce();  // listener delegado pra sub-screens (uma vez)
   _wireExitModalOnce();  // listener delegado pro modal exit (uma vez — robusto)
   renderFooter();
+  document.body.classList.add('city-ready');
   // Sessão #62 (2026-05-28) — FIX tela branca pós-loading no Telegram WebApp.
   // Quando isTG, o early intro script não escondeu o loading (marcou flag
   // __pendingHideTGLoading). Agora que renderCurrentScreen+renderFooter
