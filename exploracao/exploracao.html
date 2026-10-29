@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-29T18:47:01Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-29T21:56:40Z - do not edit directly, edit source -->
 
 
 
@@ -1880,6 +1880,65 @@ body.pointcrawl-mode #explore-pace-modal,
 body.pointcrawl-mode .explore-modal-overlay,
 body.pointcrawl-mode #pointcrawl-dungeon-modal {
   z-index: 1400 !important;
+}
+#explore-help-overlay {
+  z-index: 100500 !important;
+}
+.v-help-qbadge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid #e8c45a;
+  background: radial-gradient(circle at 35% 30%, rgba(232,196,90,0.38), rgba(40,28,14,0.96));
+  color: #ffe89e;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 0 0 8px rgba(232,196,90,0.9), 0 1px 2px rgba(0,0,0,0.95);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.65), 0 0 10px rgba(196,149,58,0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+  flex-shrink: 0;
+  pointer-events: none;
+}
+.v-help-qbadge-sm {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid #e8c45a;
+  background: radial-gradient(circle at 35% 30%, rgba(232,196,90,0.42), rgba(40,28,14,0.96));
+  color: #ffe89e;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 0 0 6px rgba(232,196,90,0.9);
+  margin-right: 3px;
+  flex-shrink: 0;
+}
+.em-help-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid #e8c45a;
+  background: radial-gradient(circle at 35% 30%, rgba(232,196,90,0.36), rgba(40,28,14,0.96));
+  color: #ffe89e;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: auto;
+  margin-right: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.6), 0 0 8px rgba(196,149,58,0.35);
 }
 body.pointcrawl-mode #confirm-overlay,
 body.pointcrawl-mode #cart-back-prompt {
@@ -13410,6 +13469,10 @@ document.write('<script src="../shared/journey-runner.js?v=' + _vti + '"><\/scri
 document.write('<link rel="stylesheet" href="../shared/char-card.css?v=' + _vti + '">');
 
 document.write('<script src="../shared/char-card.js?v=' + _vti + '"><\/script>');
+
+// Sistema Universal de Dicas Não-Intrusivas (Opção 10)
+document.write('<link rel="stylesheet" href="../shared/game-screen-tips.css?v=' + _vti + '">');
+document.write('<script src="../shared/game-screen-tips.js?v=' + _vti + '"><\/script>');
 
 
 
@@ -89515,6 +89578,11 @@ function _checkJourneyResume(_attempt) {
 document.addEventListener('DOMContentLoaded', function () {
 
   setTimeout(function () { _checkJourneyResume(0); }, 1200);
+  setTimeout(function () {
+    try {
+      if (window.vldScreenTips) window.vldScreenTips.trigger('explore_travel');
+    } catch (_tipErr) {}
+  }, 1400);
 
 });
 
@@ -95986,7 +96054,7 @@ function openCartography() {
     + '    <button class="xcart-dock-btn" id="xcart-filter-toggle-btn" type="button" title="Alternar Filtro de Nós no Mapa [Teclas 1 a 6]">🎯 Todos</button>'
     + '    <button class="xcart-dock-btn" id="xcart-ruler-btn" type="button" title="Régua Cartográfica / Astrolábio de Medição [X]" aria-label="Régua Cartográfica e Distâncias">📏 Régua</button>'
     + '    <button class="xcart-dock-btn" id="xcart-layers-btn" type="button" title="Alternar Camadas Táticas do Mapa [L]" aria-label="Camadas do Mapa">🗺️ Camadas</button>'
-    + '    <button class="xcart-dock-btn" id="xcart-guide-btn" type="button" title="Guia do Andarilho e Regras de Viagem D&D 5e [H]" aria-label="Guia de Viagem D&D 5e">📖 Guia</button>'
+    + '    <button class="xcart-dock-btn" id="xcart-guide-btn" type="button" title="Guia da Tela Atual e Regras de Viagem D&D 5e [H]" aria-label="Guia de Viagem D&D 5e"><span class="v-help-qbadge-sm" aria-hidden="true">?</span> Guia</button>'
     + '    <button class="xcart-dock-btn accent" id="xcart-atlas-back-btn" type="button" title="Voltar ao Continente [Backspace]" style="display:none;" aria-label="Voltar ao Continente">🌍 Continente</button>'
     + '  </div>'
     + '  <!-- cart-hotkey-strip removido: mobile-first sem teclas fisicas -->' 
@@ -101430,9 +101498,9 @@ function renderExploreFooter() {
 
     + '</button>'
 
-    + '<button class="fb-btn fb-icon-only" data-action="help" title="Ajuda">'
+    + '<button class="fb-btn fb-icon-only" data-action="help" title="Guia da Tela Atual (Ajuda)" aria-label="Guia da Tela Atual">'
 
-    +   '<img class="fb-ico-img" src="../shared/img/ui/ajuda.webp" alt="Ajuda" onerror="this.style.display=\'none\'">'
+    +   '<span class="v-help-qbadge" aria-hidden="true">?</span>'
 
     + '</button>'
 
@@ -101652,7 +101720,7 @@ function _showExploreFicha() {
 
   var h = '<div class="em-card" role="dialog" aria-modal="true">'
 
-    + '<div class="em-head"><span class="em-title">Ficha</span><button class="em-close" id="exf-close" aria-label="Fechar">✕</button></div>'
+    + '<div class="em-head"><span class="em-title">Ficha</span><button type="button" class="em-help-btn" onclick="_showExploreHelp(\'ficha\')" title="Guia da Ficha" aria-label="Ajuda">?</button><button class="em-close" id="exf-close" aria-label="Fechar">✕</button></div>'
 
     + '<div class="em-body">'
 
@@ -101694,39 +101762,139 @@ function _showExploreFicha() {
 
 }
 
-function _showExploreHelp() {
+function _showExploreHelp(explicitCtx) {
 
   _closeExploreModal('explore-help-overlay');
 
-  var frame = document.getElementById('frame');
+  var frame = document.getElementById('frame') || document.body;
 
   if (!frame) return;
 
   function tip(t) { return '<div class="exf-tip">' + t + '</div>'; }
 
+  // Detecta qual tela/modal está ativa no momento na exploração
+  var ctx = explicitCtx || '';
+  if (!ctx) {
+    var vinvEl = document.querySelector('.vinv-overlay.active, .vinv-overlay.open');
+    var fichaEl = document.getElementById('explore-ficha-overlay');
+    var evtEl = document.getElementById('event-modal');
+    var campEl = document.getElementById('camp-screen');
+    var dngEl = document.getElementById('pointcrawl-dungeon-modal') || document.getElementById('dungeon-overlay');
+    var partyEl = document.getElementById('party-popup');
+    var locPopEl = document.getElementById('cart-loc-popup');
+    var xcartEl = document.getElementById('cartography-overlay');
+
+    if (vinvEl) ctx = 'inventory';
+    else if (fichaEl) ctx = 'ficha';
+    else if (evtEl && (evtEl.classList.contains('active') || evtEl.style.display === 'flex' || evtEl.style.display === 'block')) ctx = 'event';
+    else if (campEl && (campEl.classList.contains('active') || campEl.style.display === 'flex' || campEl.style.display === 'block')) ctx = 'camp';
+    else if (dngEl && (dngEl.classList.contains('active') || dngEl.style.display === 'flex' || dngEl.style.display === 'block')) ctx = 'dungeon';
+    else if (partyEl && (partyEl.classList.contains('active') || partyEl.style.display === 'flex' || partyEl.style.display === 'block')) ctx = 'party';
+    else if (locPopEl && locPopEl.classList.contains('active')) ctx = 'location';
+    else if (xcartEl && xcartEl.classList.contains('visible')) ctx = 'cartografia';
+    else ctx = 'pointcrawl';
+  }
+
+  var GUIDES = {
+    cartografia: {
+      title: 'Guia da Tela — Cartografia & Marcha',
+      section: 'Navegação pelos Ermos (D&D 5e)',
+      tips: [
+        '<b>Mapa Continental vs Regional:</b> toque em uma província para abrir o mapa regional dedicado em alta definição ou use os chips no topo para alternar rapidamente.',
+        '<b>Inspecionar &amp; Viajar:</b> toque em qualquer pino de localidade para abrir o painel com Nível de Desafio (ND), distância em milhas, clima e opções de viagem.',
+        '<b>🧭 Explorar Local Atual:</b> toque no pino onde sua comitiva está (ou no botão <b>🧭 Explorar Local</b> na barra inferior) para investigar os arredores, coletar recursos e descobrir incursões ocultas (teste de Investigação/Percepção CD 12).',
+        '<b>📏 Régua &amp; Marcos:</b> use os botões do topo para medir rotas em milhas/horas ou saltar diretamente para marcos e santuários já descobertos.'
+      ]
+    },
+    location: {
+      title: 'Guia da Tela — Painel de Localidade',
+      section: 'Decisões no Ponto de Interesse',
+      tips: [
+        '<b>🔍 Explorar Arredores:</b> realiza patrulha e investigação ativa no local. É assim que você descobre masmorras e covis secretos escondidos na região!',
+        '<b>⚔️ Nível de Desafio (ND):</b> confira sempre a faixa de perigo do local antes de marchar ou adentrar uma incursão.',
+        '<b>🚶 Iniciar Viagem:</b> selecione o ritmo de marcha (Furtivo, Normal ou Rápido) e confira o consumo de rações antes de partir.'
+      ]
+    },
+    event: {
+      title: 'Guia da Tela — Encontro & Evento Narrativo',
+      section: 'Testes de Perícia & Escolhas D&D 5e',
+      tips: [
+        '<b>Escolhas com Perícia (d20):</b> cada opção indica o atributo ou perícia testada (ex.: Sobrevivência, Furtividade, Persuasão, Atletismo) e a chance estimada de sucesso.',
+        '<b>Coesão em Encontros Hostis:</b> tentar enganar, intimidar ou passar furtivamente por inimigos armados exige superar a CD. Em caso de falha contra predadores ou bandidos, prepare-se para enfrentar o combate ou romper em fuga sob ataque!',
+        '<b>Card de Impacto:</b> alterações de Pontos de Vida ou condições aplicadas aparecem destacadas logo após o desfecho.'
+      ]
+    },
+    camp: {
+      title: 'Guia da Tela — Acampamento & Bivaque',
+      section: 'Descanso Curto, Longo & Vigília',
+      tips: [
+        '<b>Descanso Curto (1h):</b> gaste seus <b>Dados de Vida (Hit Dice)</b> para enfaixar ferimentos e recuperar PV sem precisar montar acampamento pesado.',
+        '<b>Descanso Longo (8h):</b> consome 1 Ração de Viagem, restaura PV e PM ao máximo e recupera metade dos Dados de Vida.',
+        '<b>Vigília &amp; Emboscadas:</b> acampar em regiões perigosas pode atrair predadores noturnos. Designar um Sentinela reduz drasticamente o risco de surpresa.'
+      ]
+    },
+    dungeon: {
+      title: 'Guia da Tela — Incursão & Masmorra',
+      section: 'Exploração de Covil Hostil',
+      tips: [
+        '<b>Progressão de Salas:</b> masmorras possuem encontros encadeados, armadilhas e um chefe guardião no final.',
+        '<b>Iluminação &amp; Penumbra:</b> mantenha tochas ou magias de luz ativas caso seu personagem não possua Visão no Escuro.',
+        '<b>Recuo Tático:</b> avalie seus PV e poções antes de avançar para a próxima câmara.'
+      ]
+    },
+    party: {
+      title: 'Guia da Tela — Comitiva & Marcha',
+      section: 'Ritmo, Luz & Funções do Grupo',
+      tips: [
+        '<b>Ritmo de Marcha (PHB p. 181):</b> <b>Furtivo</b> (18 mi/dia, permite forragear e evitar emboscadas), <b>Normal</b> (24 mi/dia, equilibrado) ou <b>Rápido</b> (30 mi/dia, −5 na Percepção Passiva).',
+        '<b>Papéis de Viagem:</b> distribua funções entre Sentinela (alerta), Guia (orientação), Caçador (suprimentos) e Cartógrafo.',
+        '<b>Tochas &amp; Luz:</b> acenda tochas ao viajar à noite ou em ambientes subterrâneos.'
+      ]
+    },
+    ficha: {
+      title: 'Guia da Tela — Ficha na Exploração',
+      section: 'Vitalidade, Dados de Vida & Exaustão',
+      tips: [
+        '<b>Dados de Vida (Hit Dice):</b> sua reserva de recuperação para Descansos Curtos no acampamento.',
+        '<b>Níveis de Exaustão (0 a 6):</b> marchas forçadas sem descanso ou falta de rações acumulam exaustão, aplicando penalidades em testes e velocidade.',
+        '<b>Modificadores de Atributo:</b> somados automaticamente às suas rolagens de d20 nos eventos dos ermos.'
+      ]
+    },
+    pointcrawl: {
+      title: 'Guia da Tela — Exploração nos Ermos',
+      section: 'Sobrevivência & Descoberta D&D 5e',
+      tips: [
+        '<b>Jornada Pointcrawl D&amp;D 5e:</b> toque em qualquer localidade ou marco no Mapa Regional para inspecionar rotas, clima, perigos naturais e iniciar a marcha estratégica entre regiões.',
+        '<b>Explorar Região Atual:</b> toque no pino onde a comitiva está (ou em <b>🧭 Explorar Local</b>) para investigar trilhas, descobrir masmorras ocultas, forragear suprimentos e montar bivaque.',
+        '<b>Acampar &amp; Comitiva:</b> use os botões inferiores para montar acampamento (Descanso Curto/Longo) ou ajustar o ritmo de marcha e iluminação.'
+      ]
+    }
+  };
+
+  var g = GUIDES[ctx] || GUIDES.pointcrawl;
+  var tipsHtml = g.tips.map(tip).join('');
+
   var h = '<div class="em-card" role="dialog" aria-modal="true">'
 
-    + '<div class="em-head"><span class="em-title">Ajuda — Exploração</span><button class="em-close" id="exh-close" aria-label="Fechar">✕</button></div>'
+    + '<div class="em-head"><span class="em-title">' + g.title + '</span><button class="em-close" id="exh-close" aria-label="Fechar">✕</button></div>'
 
     + '<div class="em-body">'
 
-    + '<div class="em-section first">Como explorar</div>'
+    + '<div class="em-section first">' + g.section + '</div>'
 
-    + tip('<b>Jornada Pointcrawl D&amp;D 5e:</b> toque em qualquer localidade ou marco no Mapa Regional para inspecionar rotas, clima, perigos naturais e iniciar a marcha estratégica entre regiões.')
-    + tip('<b>Explorar Região Atual:</b> toque no pino onde a comitiva está (ou em <b>🧭 Explorar Local</b>) para investigar trilhas, adentrar masmorras, forragear suprimentos e montar bivaque.')
-    + tip('<b>Ritmo e Papéis de Marcha:</b> escolha entre Cauteloso (18 mi/dia · permite Forragear), Normal (24 mi/dia) ou Rápido (30 mi/dia · −5 Percepção Passiva) e designe funções (Sentinela, Guia, Caçador, Escriba).')
+    + tipsHtml
 
-    + tip('<b>Acampar:</b> use a fogueira (menu à direita) pra Descanso Curto (gasta Dado de Vida) ou Longo (recupera tudo).')
+    + '<div class="em-section">Atalhos &amp; Outros Guias</div>'
 
-    + tip('<b>Luz:</b> em cavernas e à noite, acenda uma tocha ou feitiço de luz (menu à direita) pra enxergar mais longe.')
+    + '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">'
+    +   '<button type="button" class="xcart-dock-btn" onclick="_showExploreHelp(\'cartografia\')" style="font-size:11px;padding:4px 8px;">🗺️ Mapa</button>'
+    +   '<button type="button" class="xcart-dock-btn" onclick="_showExploreHelp(\'event\')" style="font-size:11px;padding:4px 8px;">🎲 Eventos</button>'
+    +   '<button type="button" class="xcart-dock-btn" onclick="_showExploreHelp(\'camp\')" style="font-size:11px;padding:4px 8px;">⛺ Acampar</button>'
+    +   '<button type="button" class="xcart-dock-btn" onclick="_showExploreHelp(\'party\')" style="font-size:11px;padding:4px 8px;">👥 Comitiva</button>'
+    +   '<button type="button" class="xcart-dock-btn" onclick="_showExploreHelp(\'dungeon\')" style="font-size:11px;padding:4px 8px;">🏰 Masmorras</button>'
+    + '</div>'
 
-    + tip('<b>Mapa de Valdoria:</b> abra a cartografia (menu à direita) pra viajar entre regiões.')
-
-    + tip('<b>Testes de perícia:</b> eventos usam rolagens de d20 + modificadores (D&D 5e). Sucesso e falha são narrados.')
-
-    + '<div class="em-section">Menu</div>'
-
-    + tip('<b>Mochila:</b> itens e equipamento. <b>Ficha:</b> seus atributos. <b>Hall:</b> volta pra cidade / troca de personagem.')
+    + tip('<b>Mochila:</b> itens e equipamento. <b>Ficha:</b> seus atributos e exaustão. <b>Hall:</b> retorna à cidade ou troca de personagem.')
 
     + '</div></div>';
 

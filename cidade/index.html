@@ -761,6 +761,9 @@ LOG SINK (Fase 7):
     document.write('<script src="/shared/merge-dialog.js?v=' + v + '"><\/script>');
     /* Recompensa de veterano (pre-wipe 2026-06-07): popup unico pos-prologo na cidade. */
     document.write('<script src="/shared/legacy-reward-popup.js?v=' + v + '"><\/script>');
+    /* Sistema Universal de Dicas Não-Intrusivas (Opção 10: Pill & Ring Timer) */
+    document.write('<link rel="stylesheet" href="/shared/game-screen-tips.css?v=' + v + '">');
+    document.write('<script src="/shared/game-screen-tips.js?v=' + v + '"><\/script>');
     /* 2026-05-14: vInventory canonical (shared/inventory-screen.{css,js}) — Mochila
        redesign que substitui _showInventoryPopup local. Sprite ic-it-* (519 symbols)
        carregado primeiro pra ser usado em qualquer item icon. Fallback automático
@@ -8558,7 +8561,7 @@ body.perf-lite .vc-action-btn { transition: none; }
     #city-guide-overlay {
       position: fixed;
       inset: 0;
-      z-index: 10500;
+      z-index: 100500;
       display: none;
       align-items: center;
       justify-content: center;
@@ -8846,31 +8849,52 @@ body.perf-lite .vc-action-btn { transition: none; }
       }
     }
     .csp-help-btn {
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
-      border: 1px solid rgba(196,149,58,0.45);
-      background: rgba(196,149,58,0.12);
-      color: var(--v-gold, #c4953a);
+      border: 1.5px solid #e8c45a;
+      background: radial-gradient(circle at 35% 30%, rgba(232,196,90,0.34), rgba(44,31,16,0.96));
+      color: #ffe89e;
       font-family: var(--v-font-display, 'Cinzel', serif);
-      font-size: 13px;
-      font-weight: 700;
-      display: flex;
+      font-size: 16px;
+      font-weight: 900;
+      line-height: 1;
+      text-shadow: 0 0 8px rgba(232,196,90,0.85), 0 1px 2px rgba(0,0,0,0.95);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.65), 0 0 10px rgba(196,149,58,0.35), inset 0 1px 0 rgba(255,255,255,0.28);
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       flex-shrink: 0;
-      transition: all 0.2s ease;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
       margin-left: 6px;
     }
-    .csp-help-btn:hover {
-      background: rgba(196,149,58,0.3);
-      color: #fff;
-      border-color: #c4953a;
-      transform: scale(1.06);
-    }
     .csp-help-btn:active {
-      transform: scale(0.96);
+      transform: scale(0.94);
+    }
+    .v-help-qbadge {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 1.5px solid #e8c45a;
+      background: radial-gradient(circle at 35% 30%, rgba(232,196,90,0.38), rgba(40,28,14,0.96));
+      color: #ffe89e;
+      font-family: var(--v-font-display, 'Cinzel', serif);
+      font-size: 16px;
+      font-weight: 900;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-shadow: 0 0 8px rgba(232,196,90,0.9), 0 1px 2px rgba(0,0,0,0.95);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.65), 0 0 10px rgba(196,149,58,0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+      flex-shrink: 0;
+      pointer-events: none;
+    }
+    .fb-btn[data-action="help"] {
+      border-color: rgba(232,196,90,0.55);
+      background: linear-gradient(180deg, rgba(64,48,26,0.92), rgba(34,25,14,0.96));
+      box-shadow: 0 2px 6px rgba(0,0,0,0.45), inset 0 1px 0 rgba(232,196,90,0.22);
     }
 
   
@@ -10318,6 +10342,9 @@ body.perf-lite .vc-action-btn { transition: none; }
       ld.classList.add('hidden');
     }
     console.info('[CITY-READY] Hub revelado —', reason || 'ready');
+    try {
+      if (window.vldScreenTips) window.vldScreenTips.trigger('city_hub');
+    } catch (_tipErr) {}
     return true;
   }
   window._cityRevealIfReady = _cityRevealIfReady;
@@ -16985,8 +17012,8 @@ function renderFooter(){
     + '<button class="fb-btn" data-action="characters">'
     +   '<img class="fb-ico-img" src="/shared/img/achievements/ach-aventureiro.webp" alt="" onerror="this.style.display=\'none\'"><span>Hall</span>'
     + '</button>'
-    + '<button class="fb-btn fb-icon-only" data-action="help" title="Ajuda">'
-    +   '<img class="fb-ico-img" src="/shared/img/ui/ajuda.webp" alt="Ajuda" onerror="this.style.display=\'none\'">'
+    + '<button class="fb-btn fb-icon-only" data-action="help" title="Guia da Tela Atual (Ajuda)" aria-label="Guia da Tela Atual">'
+    +   '<span class="v-help-qbadge" aria-hidden="true">?</span>'
     + '</button>'
     + '<button class="fb-btn fb-icon-only" data-action="settings" title="Configurações">'
     +   '<img class="fb-ico-img" src="/shared/img/ui/configuracoes.webp" alt="Config" onerror="this.style.display=\'none\'">'
@@ -18220,7 +18247,7 @@ function _showFirstTimeTutorial(stepIdx){
     var st = document.createElement('style');
     st.id = 'first-tut-style';
     st.textContent = ''
-      + '#first-tut-overlay{position:fixed;inset:0;z-index:11000;'
+      + '#first-tut-overlay{position:fixed;inset:0;z-index:100600;'
       + '  pointer-events:auto;animation:ftFadeIn 0.5s ease-out}'
       + '@keyframes ftFadeIn{from{opacity:0}to{opacity:1}}'
       + '#first-tut-mask{position:absolute;inset:0;'
@@ -18255,7 +18282,7 @@ function _showFirstTimeTutorial(stepIdx){
       + '  padding: 22px 20px var(--v-space-xl, 16px);width:calc(100% - 32px);max-width:380px;'
       + '  box-shadow:0 12px 48px rgba(0,0,0,0.85),0 0 40px rgba(196,149,58,0.22),'
       + '    inset 0 1px 0 rgba(196,149,58,0.18);'
-      + '  z-index:11001;'
+      + '  z-index:100601;'
       /* 2026-05-21: transition para mover suavemente entre steps (igual spotlight). */
       + '  transition:top 0.5s cubic-bezier(0.4,0,0.2,1),'
       + '    bottom 0.5s cubic-bezier(0.4,0,0.2,1),'
@@ -18293,7 +18320,7 @@ function _showFirstTimeTutorial(stepIdx){
       + '  margin:6px auto 14px;width:75%;justify-content:center}'
       + '.ft-divider::before,.ft-divider::after{content:"";flex:1;height:1px;'
       + '  background:linear-gradient(90deg,transparent,rgba(196,149,58,0.55),transparent)}'
-      + '.ft-divider span{color:#c4953a;font-size: calc(10.5px * var(--v-font-scale, 1));opacity:0.85;'
+      + '.ft-divider span{color:#c4953a;font-size: calc(11px * var(--v-font-scale, 1));opacity:0.85;'
       + '  text-shadow:0 0 6px rgba(196,149,58,0.6)}'
       + '#first-tut-desc{color:#d4c8b0;font-size:calc(13px * var(--v-font-scale, 1));line-height:1.65;'
       + '  margin:0 0 18px;font-family:var(--v-font);'
@@ -34117,9 +34144,119 @@ var SCREEN_GUIDE_META = {
     subtitle: 'Hall da Fama • Rankings & Façanhas',
     iconId: 'ic-guerreiro'
   },
+  'league': {
+    title: 'Mural dos Aventureiros',
+    subtitle: 'Hall da Fama • Rankings & Façanhas',
+    iconId: 'ic-guerreiro'
+  },
+  'kills': {
+    title: 'Mural de Abates',
+    subtitle: 'Registro de Caçadas & Criaturas Vencidas',
+    iconId: 'ic-guerreiro'
+  },
+  'streak': {
+    title: 'Jornada Diária',
+    subtitle: 'Sequência de Presença & Recompensas',
+    iconId: 'ic-relogio'
+  },
   'social': {
     title: 'Comitiva & Alianças',
     subtitle: 'Comunicação & Andarilhos Conectados',
+    iconId: 'ic-grupo'
+  },
+  'status': {
+    title: 'Ficha do Personagem',
+    subtitle: 'Atributos D&D 5e • Perícias, Magias & Títulos',
+    iconId: 'ic-ficha'
+  },
+  'inventory': {
+    title: 'Mochila & Equipamentos',
+    subtitle: 'Armas, Armaduras, Consumíveis & Carga',
+    iconId: 'ic-mochila'
+  },
+  'characters': {
+    title: 'Hall de Personagens',
+    subtitle: 'Seus Aventureiros • Alternar ou Criar Ficha',
+    iconId: 'ic-grupo'
+  },
+  'quests': {
+    title: 'Diário de Missões',
+    subtitle: 'Contratos Ativos, História & Desafios Diários',
+    iconId: 'ic-missoes'
+  },
+  'daily_challenge': {
+    title: 'Desafio Diário',
+    subtitle: 'Meta do Dia • Recompensa Extra de Valdoritas',
+    iconId: 'ic-missoes'
+  },
+  'relations': {
+    title: 'Vínculos & Alianças',
+    subtitle: 'Afinidade com NPCs, Facções & Companheiros',
+    iconId: 'ic-grupo'
+  },
+  'codex': {
+    title: 'Compêndio & Dossiês',
+    subtitle: 'Bestiário, Lore de Valdoria & Fraquezas',
+    iconId: 'ic-ficha'
+  },
+  'achievements': {
+    title: 'Salão de Conquistas',
+    subtitle: 'Grandes Feitos, Marcos & Títulos Desbloqueados',
+    iconId: 'ic-arena'
+  },
+  'party': {
+    title: 'Comitiva & Grupo',
+    subtitle: 'Companheiros Ativos, Sinergia & Formação',
+    iconId: 'ic-grupo'
+  },
+  'settings': {
+    title: 'Configurações do Jogo',
+    subtitle: 'Áudio, Escala de Texto, Performance & Conta',
+    iconId: 'ic-config'
+  },
+  'dialog_history': {
+    title: 'Histórico de Diálogos',
+    subtitle: 'Registro de Conversas, Pistas & Rumores',
+    iconId: 'ic-ficha'
+  },
+  'festival': {
+    title: 'Festival de Valdoria',
+    subtitle: 'Celebração Sazonal • Jogos, Barracas & Prêmios',
+    iconId: 'ic-taverna'
+  },
+  'shadow_alley': {
+    title: 'Beco das Sombras',
+    subtitle: 'Submundo de Valdoria • Contrabando & Segredos',
+    iconId: 'ic-ladino'
+  },
+  'black_market': {
+    title: 'Mercado Clandestino',
+    subtitle: 'Submundo de Valdoria • Mercadorias Raras',
+    iconId: 'ic-ladino'
+  },
+  'travelers': {
+    title: 'Caravana de Viajantes',
+    subtitle: 'Mercadores Nômades & Relíquias de Outras Terras',
+    iconId: 'ic-cartografia'
+  },
+  'passagens': {
+    title: 'Passagens & Atalhos',
+    subtitle: 'Rotas Secretas, Portais & Travessias Rápidas',
+    iconId: 'ic-cartografia'
+  },
+  'weather': {
+    title: 'Clima & Calendário',
+    subtitle: 'Ciclo Solar, Estações & Efeitos Climáticos',
+    iconId: 'ic-relogio'
+  },
+  'corvus': {
+    title: 'Tenda de Corvus',
+    subtitle: 'Mestre Cartógrafo • Mapas Regionais & Rotas',
+    iconId: 'ic-cartografia'
+  },
+  'npc_dialogue': {
+    title: 'Diálogo com Habitante',
+    subtitle: 'Interação Social • Rumores, Afinidade & Escolhas',
     iconId: 'ic-grupo'
   }
 };
@@ -34631,6 +34768,58 @@ var SCREEN_TOUR_STEPS = {
       title: 'Voltar ao Interior',
       description: 'Retorne ao abrigo acolhedor das ruas de Valdoria.'
     }
+  ],
+
+  // === CARTOGRAFIA & VIAGEM ===
+  'cartografia': [
+    {
+      selector: null,
+      title: 'Tour da Cartografia de Valdoria',
+      description: 'Aqui você planeja suas expedições pelos ermos! Veja como navegar entre o Atlas Continental e os Mapas Regionais dedicados.'
+    },
+    {
+      selector: '#cart-dock',
+      title: 'Barra de Ferramentas Cartográficas',
+      description: 'Alterne entre o <b>Atlas</b> de províncias, a rede de <b>Marcos</b> de viagem rápida, o filtro de pontos de interesse e a <b>Régua</b> de distância.'
+    },
+    {
+      selector: '#cart-province-grid, #prov-map-wrap',
+      title: 'Seleção de Província & Mapa Regional',
+      description: 'Toque em uma província para inspecionar seu Nível de Desafio (ND) ou abrir o mapa regional com os caminhos e locais descobertos.'
+    },
+    {
+      selector: '#cart-region-summary-card, #reg-action-drawer',
+      title: 'Painel de Expedição & Marcha',
+      description: 'Confira a duração da viagem, o custo em rações e os destinos disponíveis antes de partir.'
+    }
+  ],
+
+  // === FICHA DO PERSONAGEM ===
+  'status': [
+    {
+      selector: null,
+      title: 'Tour da Ficha do Personagem',
+      description: 'Consulte todos os atributos, defesas, perícias e magias do seu aventureiro segundo as regras D&D 5e.'
+    },
+    {
+      selector: '#csp-body',
+      title: 'Abas de Atributos, Combate e Magias',
+      description: 'Navegue pelas seções da ficha para verificar Classe de Armadura (CA), modificadores de atributo, proficiências, espaços de magia e títulos conquistados.'
+    }
+  ],
+
+  // === DIÁRIO DE MISSÕES ===
+  'quests': [
+    {
+      selector: null,
+      title: 'Tour do Diário de Missões',
+      description: 'Acompanhe seus objetivos ativos, contratos da Guilda e o progresso nas missões principais e secundárias.'
+    },
+    {
+      selector: '#csp-body',
+      title: 'Contratos & Recompensas',
+      description: 'Verifique os passos necessários de cada missão e onde entregar o contrato concluído para receber XP e Valdoritas.'
+    }
   ]
 };
 
@@ -34817,6 +35006,7 @@ function _startInteractiveScreenTour(screenKey){
   if (key === 'town_square') key = 'square';
   if (key === 'rune_scribe') key = 'runes';
   if (key === 'inn_rest') key = 'inn';
+  if (key === 'travel') key = 'cartografia';
 
   var steps = SCREEN_TOUR_STEPS[key] || SCREEN_TOUR_STEPS['hub'];
   if (!steps || !steps.length) steps = TUTORIAL_STEPS;
@@ -34843,21 +35033,52 @@ function _startInteractiveScreenTour(screenKey){
 }
 
 // canonical: help_texts.py — ajuda contextual baseada na tela atual.
-function _showHelpForCurrentScreen(){
+function _showHelpForCurrentScreen(explicitScreenKey){
   var topScreen = 'hub';
-  if (typeof _popupStack !== 'undefined' && _popupStack.length) {
-    topScreen = _popupStack[_popupStack.length - 1];
-  } else if (typeof _currentScreen !== 'undefined' && _currentScreen) {
-    topScreen = _currentScreen;
+
+  if (typeof explicitScreenKey === 'string' && explicitScreenKey) {
+    topScreen = explicitScreenKey;
+  } else {
+    // 1. Verifica overlays independentes no topo da pilha visual
+    var vinvEl = document.querySelector('.vinv-overlay.open');
+    var weatherEl = document.getElementById('city-weather-overlay');
+    var subPopEl = document.getElementById('city-subscreen-popup');
+
+    if (vinvEl) {
+      topScreen = 'inventory';
+    } else if (weatherEl && weatherEl.classList.contains('active')) {
+      topScreen = 'weather';
+    } else if (subPopEl && subPopEl.classList.contains('active') && typeof _popupStack !== 'undefined' && _popupStack.length) {
+      topScreen = _popupStack[_popupStack.length - 1];
+    } else if (typeof _currentScreen !== 'undefined' && _currentScreen) {
+      topScreen = _currentScreen;
+    } else if (typeof _popupStack !== 'undefined' && _popupStack.length) {
+      topScreen = _popupStack[_popupStack.length - 1];
+    }
   }
 
-  // Normalização de sub-popups para sua tela principal
+  // Normalização de sub-popups para sua tela ou categoria correspondente
   if (typeof topScreen === 'string') {
-    if (topScreen.indexOf('shop_') === 0 || topScreen.indexOf('market_') === 0) topScreen = 'market';
+    if (topScreen === 'corvus' || topScreen.indexOf('corvus_') === 0) topScreen = 'corvus';
+    else if (topScreen.indexOf('shop_') === 0 || topScreen.indexOf('market_') === 0 || topScreen.indexOf('transient_') === 0) topScreen = 'market';
     else if (topScreen.indexOf('bank_') === 0) topScreen = 'bank';
     else if (topScreen.indexOf('guild_') === 0) topScreen = 'guild';
     else if (topScreen.indexOf('tavern_') === 0) topScreen = 'tavern';
     else if (topScreen.indexOf('inn_') === 0) topScreen = 'inn';
+    else if (topScreen.indexOf('temple_') === 0) topScreen = 'temple';
+    else if (topScreen.indexOf('arena_') === 0) topScreen = 'arena';
+    else if (topScreen.indexOf('square_') === 0 || topScreen.indexOf('plaza_') === 0) topScreen = 'square';
+    else if (topScreen.indexOf('workshop_') === 0 || topScreen.indexOf('craft_') === 0) topScreen = 'workshop';
+    else if (topScreen.indexOf('rune_') === 0) topScreen = 'runes';
+    else if (topScreen.indexOf('gates_') === 0 || topScreen === 'travel_prep') topScreen = 'gates';
+    else if (topScreen.indexOf('quest_') === 0) topScreen = 'quests';
+    else if (topScreen.indexOf('codex_') === 0 || topScreen.indexOf('dossier_') === 0) topScreen = 'codex';
+    else if (topScreen.indexOf('rel_') === 0) topScreen = 'relations';
+    else if (topScreen.indexOf('ach_') === 0) topScreen = 'achievements';
+    else if (topScreen.indexOf('party_') === 0) topScreen = 'party';
+    else if (topScreen.indexOf('festival_') === 0) topScreen = 'festival';
+    else if (topScreen.indexOf('shadow_') === 0 || topScreen === 'black_market') topScreen = 'shadow_alley';
+    else if (topScreen.indexOf('npc_') === 0) topScreen = 'npc_dialogue';
   }
 
   var SCREEN_TO_HELP = {
@@ -34881,7 +35102,29 @@ function _showHelpForCurrentScreen(){
     travel: 'travel',
     trade_board: 'trade_board',
     heroes_wall: 'heroes_wall',
-    social: 'social'
+    league: 'heroes_wall',
+    kills: 'kills',
+    streak: 'streak',
+    social: 'social',
+    status: 'status',
+    inventory: 'inventory',
+    characters: 'characters',
+    quests: 'quests',
+    daily_challenge: 'daily_challenge',
+    relations: 'relations',
+    codex: 'codex',
+    achievements: 'achievements',
+    party: 'party',
+    settings: 'settings',
+    dialog_history: 'dialog_history',
+    festival: 'festival',
+    shadow_alley: 'shadow_alley',
+    black_market: 'shadow_alley',
+    travelers: 'travelers',
+    passagens: 'passagens',
+    weather: 'weather',
+    corvus: 'corvus',
+    npc_dialogue: 'npc_dialogue'
   };
 
   var helpKey = SCREEN_TO_HELP[topScreen] || (typeof _currentScreen !== 'undefined' && SCREEN_TO_HELP[_currentScreen]) || 'city_main';
@@ -41006,7 +41249,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
   },
   coins_ground: {
     npc_key: 'narrador_praca',
-    npc_data: { name: 'Praça Central', desc: 'Pedras gastas pelo tempo', portrait: 'ic-praca', portraitImg: '/shared/img/city/square.webp' },
+    npc_data: { name: 'Praça Central', desc: 'Pedras gastas pelo tempo', portrait: 'ic-praca', portraitImg: '/shared/img/city/praca-banner.webp' },
     script: [
       { type: 'narration', text: 'Você nota duas moedas de prata brilhando entre as pedras do calçamento. <i>(ninguém parece ter percebido)</i>' }
     ],
@@ -41053,7 +41296,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
   },
   pigeon: {
     npc_key: 'narrador_praca',
-    npc_data: { name: 'Praça Central', desc: 'Vida cotidiana da cidade', portrait: 'ic-praca', portraitImg: '/shared/img/city/square.webp' },
+    npc_data: { name: 'Praça Central', desc: 'Vida cotidiana da cidade', portrait: 'ic-praca', portraitImg: '/shared/img/city/praca-banner.webp' },
     script: [
       { type: 'narration', text: 'Um pombo gordo pousa no seu ombro com naturalidade. <i>(moradores próximos riem discretamente)</i>' }
     ],
@@ -41100,7 +41343,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
   },
   cat_follow: {
     npc_key: 'narrador_praca',
-    npc_data: { name: 'Praça Central', desc: 'Pedras antigas, vida miúda', portrait: 'ic-praca', portraitImg: '/shared/img/city/square.webp' },
+    npc_data: { name: 'Praça Central', desc: 'Pedras antigas, vida miúda', portrait: 'ic-praca', portraitImg: '/shared/img/city/praca-banner.webp' },
     script: [
       { type: 'narration', text: 'Um gato listrado sai de um beco e começa a andar atrás de você. A cauda balança no ritmo dos seus passos.' },
       { type: 'narration', text: 'Ele para quando você para. Anda quando você anda. <i>(parece estar avaliando)</i>' }
@@ -45917,7 +46160,7 @@ function _renderEpicSquareHub(container, data){
     + '.sqr-epic-wrap{padding:var(--v-space-md,8px);font-family:var(--v-font,serif);}'
     /* Cenário principal — pedra + chao + fontainh */
     /* #praca (sessao #70): cenario EPICO no padrao taverna/estalagem — banner
-       PNG (city/square.webp) cobrindo o topo + titulo sobre gradiente escuro.
+       PNG (city/praca-banner.webp) cobrindo o topo + titulo sobre gradiente escuro.
        Removidos: tochas de fogo, period badge "Amanhecer", fonte ASCII. */
     + '.sqr-cenario{position:relative;min-height:158px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:14px;margin-bottom: var(--v-space-lg, 12px);'
     + 'border:1px solid ' + theme.secondary + ';border-radius:var(--v-radius,10px);overflow:hidden;box-shadow:inset 0 0 24px rgba(0,0,0,0.5);}'
@@ -45937,14 +46180,14 @@ function _renderEpicSquareHub(container, data){
     + '.sqr-card:hover{transform:translateY(-2px);border-color:var(--v-gold,#c4953a);background:linear-gradient(180deg,rgba(196,149,58,0.18) 0%,rgba(74,56,40,0.40) 100%);}'
     + '.sqr-card-icon{width:32px;height:32px;color:var(--v-gold,#c4953a);}'
     + '.sqr-card-label{font-family:var(--v-font-display,Cinzel,serif);font-size:calc(clamp(11px,2.6vw,12px) * var(--v-font-scale, 1));font-weight:600;color:#e8dcc8;line-height:1.3;text-align:center;letter-spacing:0.5px;}'
-    + '.sqr-card-badge{position:absolute;top:4px;right:4px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:linear-gradient(180deg,#c4953a,#9a7530);border:1px solid rgba(0,0,0,0.4);color:#1a1410;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(10px * var(--v-font-scale, 1));font-weight:700;display:grid;place-items:center;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,0.4);}'
+    + '.sqr-card-badge{position:absolute;top:4px;right:4px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:linear-gradient(180deg,#c4953a,#9a7530);border:1px solid rgba(0,0,0,0.4);color:#1a1410;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(11px * var(--v-font-scale, 1));font-weight:700;display:grid;place-items:center;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,0.4);}'
     + '.sqr-card-badge.novo{background:linear-gradient(180deg,#ff8a4a,#c43020);color:#fff;border-color:rgba(0,0,0,0.5);text-shadow:0 1px 0 rgba(0,0,0,0.3);min-width:38px;font-size: calc(11px * var(--v-font-scale, 1));letter-spacing:0.5px;}'
     + '.sqr-card-badge.done{background:linear-gradient(180deg,#7cdb7c,#3a8a3a);color:#fff;}'
     + '</style>';
   /* === CENÁRIO PRINCIPAL === */
   html += '<div class="sqr-epic-wrap">'
     + '<div class="sqr-cenario">'
-    +   '<img class="sqr-cenario-bg" src="../shared/img/city/praca-banner.webp" alt="" onerror="this.onerror=null;this.src=\'../shared/img/city/square.webp\'">'
+    +   '<img class="sqr-cenario-bg" src="../shared/img/city/praca-banner.webp" alt="">'
     +   '<div class="sqr-title">Praça Central</div>';
   if (data.flavor) {
     html += '<div class="sqr-flavor">' + data.flavor + '</div>';
@@ -47819,7 +48062,7 @@ function _squareShowExploreEvent(p){
       return { id: ch.id, label: ch.label + (h ? '  ·  ' + h : ''), _ch: ch };
     });
     window.vEncounter.render({
-      npc: { name: ev.title, desc: 'Praça Central', id: 'pz_' + ev.id, portrait: '/shared/img/city/square.webp' },
+      npc: { name: ev.title, desc: 'Praça Central', id: 'pz_' + ev.id, portrait: '/shared/img/city/praca-banner.webp' },
       script: [{ type: 'narration', text: ev.desc }],
       choices: choices
     }, {
@@ -51729,6 +51972,46 @@ var HELP_TEXTS_SYSTEMS = {
     'travel': '\\n<b>VIAGEM - GUIA RÁPIDO</b>\\n\\nViaje entre regiões de Valdoria:\\n\\n<b>Mapa</b>\\n• Necessário para viajar (compre no Mercado ou Cartógrafo)\\n• Mostra locais conectados à sua posição\\n\\n<b>Encontros na Estrada</b>\\n• Inimigos podem aparecer durante a viagem\\n• Prepare-se antes de partir!\\n\\n<b>Acampamento</b>\\n• Descanse durante viagens longas\\n• Use Descanso Curto para recuperar HP\\n\\n<i>Dica</i>: Leve poções extras — encontros na estrada podem ser perigosos!\\n',
 
     'rune_scribe': '\\n<b>ESCRIBA DE RUNAS - GUIA RÁPIDO</b>\\n\\nInscrição de runas em equipamentos:\\n\\n<b>Selecionar Runa</b>\\n• Escolha uma runa do inventário\\n• Cada runa tem efeitos e bônus diferentes\\n\\n<b>Selecionar Equipamento</b>\\n• Escolha o item a ser encantado\\n• Cada equipamento tem slots limitados\\n\\n<b><span class="vi vi-coin sm"></span> Inscrever</b>\\n• Pague o custo de inscrição\\n• Runas aplicadas concedem bônus permanentes\\n\\n<i>Dica</i>: Guarde runas raras para seus melhores equipamentos!\\n',
+
+    'status': '\\n<b>FICHA DO PERSONAGEM - GUIA RÁPIDO</b>\\n\\nO retrato completo das capacidades do seu aventureiro em D&D 5e:\\n\\n<b>Atributos Principais (FOR, DES, CON, INT, SAB, CAR)</b>\\n• Determinam seus modificadores em ataques, testes de perícia e resistências\\n• A cada 2 pontos acima de 10, você recebe +1 no modificador\\n\\n<b>Combate & Defesas (CA, PV, PM e Iniciativa)</b>\\n• <b>CA (Classe de Armadura)</b>: dificuldade para inimigos acertarem você\\n• <b>Dados de Vida</b>: usados em Descansos Curtos para recuperar PV nos ermos\\n\\n<b>Perícias & Proficiências</b>\\n• Perícias com proficiência somam seu Bônus de Proficiência ao d20\\n\\n<b>Grimório & Habilidades</b>\\n• Consulte suas magias preparadas, espaços de magia (Spell Slots) e talentos de classe\\n\\n<i>Dica</i>: Toque nos atributos ou habilidades para ler a descrição detalhada de cada mecânica!\\n',
+
+    'inventory': '\\n<b>MOCHILA & EQUIPAMENTOS - GUIA RÁPIDO</b>\\n\\nGerencie seu arsenal, armaduras e suprimentos de viagem:\\n\\n<b>Boneco de Equipamento (Slots Ativos)</b>\\n• Mostra o que está equipado na Mão Principal, Mão Secundária, Armadura, Elmo e Acessórios\\n• Toque em um slot ocupado para inspecionar ou desequipar o item\\n\\n<b>Filtros por Categoria</b>\\n• Filtre entre Armas, Armaduras, Poções/Consumíveis, Pergaminhos e Materiais\\n• Itens consumíveis exibem o botão <b>Usar</b> diretamente no painel de detalhes\\n\\n<b>Capacidade & Peso (Carga D&D 5e)</b>\\n• Fique atento ao limite de slots e peso total para não sofrer penalidade de sobrecarga\\n\\n<i>Dica</i>: Guarde materiais pesados e relíquias no cofre do Banco antes de partir para masmorras!\\n',
+
+    'characters': '\\n<b>HALL DE PERSONAGENS - GUIA RÁPIDO</b>\\n\\nGerencie seus aventureiros e acesse os registros de jornada:\\n\\n<b>Alternar Personagem</b>\\n• Selecione outro aventureiro da sua conta para assumir o controle imediatamente\\n• Cada personagem possui progresso, inventário, reputação e história independentes\\n\\n<b>Criar Novo Aventureiro</b>\\n• Use um slot livre para forjar um novo mortal escolhendo Raça, Classe, Antecedente e Atributos\\n\\n<b>Atalhos do Hall</b>\\n• Pelo submenu do Hall no rodapé você também acessa <b>Missões</b>, <b>Vínculos</b>, <b>Compêndio</b>, <b>Conquistas</b> e o <b>Mural dos Aventureiros</b>\\n\\n<i>Dica</i>: Experimente classes diferentes para descobrir estilos táticos variados no combate!\\n',
+
+    'quests': '\\n<b>DIÁRIO DE MISSÕES - GUIA RÁPIDO</b>\\n\\nTodos os seus compromissos, contratos e investigações em andamento:\\n\\n<b>Missões Principais & Secundárias</b>\\n• Acompanhe o passo atual da narrativa e as pistas descobertas em diálogos\\n• Algumas missões possuem múltiplos desfechos conforme suas escolhas morais e testes de perícia\\n\\n<b>Contratos da Guilda & Caçadas</b>\\n• Elimine a quantidade exigida de criaturas nos ermos e retorne à Mestra Tavira para receber o pagamento\\n\\n<b>Missões Diárias</b>\\n• Tarefas rápidas que renovam diariamente e garantem ouro e XP constantes\\n\\n<i>Dica</i>: Leia atentamente a descrição de cada objetivo — ela indica em qual bioma ou distrito procurar!\\n',
+
+    'daily_challenge': '\\n<b>DESAFIO DIÁRIO - GUIA RÁPIDO</b>\\n\\nUma meta especial que se renova a cada ciclo diário:\\n\\n<b>Objetivo do Dia</b>\\n• Cumprir a tarefa proposta (como vencer combates, explorar regiões ou concluir contratos) antes do fim do dia\\n\\n<b>Recompensas Extras</b>\\n• Concede bônus imediato de Valdoritas, XP e progresso para sua sequência diária\\n\\n<i>Dica</i>: Combine o Desafio Diário com os contratos da Guilda para dobrar seus ganhos em uma única expedição!\\n',
+
+    'relations': '\\n<b>VÍNCULOS & ALIANÇAS - GUIA RÁPIDO</b>\\n\\nSua rede de afinidade com habitantes, mercadores e companheiros:\\n\\n<b>Níveis de Afinidade</b>\\n• Suas escolhas em diálogos, presentes e contratos concluídos aumentam (ou reduzem) o respeito de cada NPC\\n• Níveis elevados (Cordial, Amigável, Aliado) destravam descontos, segredos e missões pessoais\\n\\n<b>Companheiros de Comitiva</b>\\n• Acompanhe a lealdade e o histórico dos aventureiros recrutados na Guilda ou na Taverna\\n\\n<i>Dica</i>: Visite os habitantes regularmente e lembre-se do que cada um valoriza nas conversas!\\n',
+
+    'codex': '\\n<b>COMPÊNDIO & DOSSIÊS - GUIA RÁPIDO</b>\\n\\nA enciclopédia viva das suas descobertas em Valdoria:\\n\\n<b>Bestiário & Dossiês de Criaturas</b>\\n• Cada monstro enfrentado ou estudado registra dados sobre CA, PV médios, ataques e comportamento\\n• Descubra <b>Vulnerabilidades</b> e <b>Resistências</b> para preparar o tipo certo de dano antes da batalha\\n\\n<b>Crônicas & Regiões</b>\\n• Consulte informações históricas sobre os distritos, biomas e facções do reino\\n\\n<i>Dica</i>: Conversar com Braun na Guilda ou ouvir boatos na Taverna preenche páginas valiosas do seu Compêndio!\\n',
+
+    'achievements': '\\n<b>SALÃO DE CONQUISTAS - GUIA RÁPIDO</b>\\n\\nO registro permanente das suas façanhas e marcos históricos:\\n\\n<b>Categorias de Proezas</b>\\n• Combate, Exploração, Comércio, Social e Descobertas Secretas\\n\\n<b>Títulos & Recompensas</b>\\n• Conquistas desbloqueadas concedem títulos honrosos para exibir no seu perfil e bônus de progressão\\n\\n<i>Dica</i>: Verifique as conquistas quase concluídas para planejar seus próximos objetivos na jornada!\\n',
+
+    'kills': '\\n<b>MURAL DE ABATES - GUIA RÁPIDO</b>\\n\\nEstatísticas detalhadas de todas as ameaças derrotadas em combate:\\n\\n<b>Contagem por Espécie e Bioma</b>\\n• Veja quantos inimigos de cada tipo você já abateu ao longo da carreira\\n• Útil para acompanhar metas de caçada da Guilda e desbloqueio de dossiês no Compêndio\\n\\n<i>Dica</i>: Criaturas de Nível de Desafio (ND) mais alto rendem muito mais prestígio no ranking!\\n',
+
+    'streak': '\\n<b>JORNADA DIÁRIA - GUIA RÁPIDO</b>\\n\\nSua constância nas terras de Valdoria é recompensada:\\n\\n<b>Sequência de Presença</b>\\n• Retorne diariamente à cidade para manter sua chama acesa e avançar nos marcos da semana\\n• Marcos consecutivos concedem bolsas maiores de Valdoritas e suprimentos\\n\\n<i>Dica</i>: Mesmo em dias corridos, passar na Taverna ou verificar o Desafio Diário já garante sua presença!\\n',
+
+    'party': '\\n<b>COMITIVA & GRUPO - GUIA RÁPIDO</b>\\n\\nGerencie os companheiros que marcham ao seu lado:\\n\\n<b>Formação & Funções Táticas</b>\\n• Equilibre sua comitiva entre linha de frente (Guerreiro, Paladino, Bárbaro), suporte (Clérigo, Bardo, Druida) e dano à distância (Mago, Patrulheiro, Ladino)\\n\\n<b>Saúde & Recursos do Grupo</b>\\n• Acompanhe os PV e PM de cada aliado; ao descansar na Estalagem, toda a comitiva se recupera junto com você\\n\\n<i>Dica</i>: Você pode recrutar novos membros na Guilda dos Aventureiros ou contratar mercenários na Taverna!\\n',
+
+    'settings': '\\n<b>CONFIGURAÇÕES - GUIA RÁPIDO</b>\\n\\nPersonalize sua experiência visual e sonora no WebApp:\\n\\n<b>Áudio & Música Ambiente</b>\\n• Ajuste o volume da trilha sonora e dos efeitos sonoros ou silencie rapidamente quando preferir\\n\\n<b>Escala de Fonte & Leitura</b>\\n• Escolha entre tamanho Normal, Grande ou Extra para leitura confortável no celular ou no Telegram Desktop\\n\\n<b>Modo de Performance</b>\\n• Ative o modo leve caso queira economizar bateria ou suavizar animações de partículas\\n\\n<i>Dica</i>: Suas preferências ficam salvas automaticamente para todas as próximas sessões!\\n',
+
+    'dialog_history': '\\n<b>HISTÓRICO DE DIÁLOGOS - GUIA RÁPIDO</b>\\n\\nNunca perca uma pista ou instrução importante:\\n\\n<b>Registro Cronológico</b>\\n• Releia as últimas falas de NPCs, descrições do Mestre e avisos recebidos na sessão\\n• Ideal para conferir nomes de locais, senhas ou rumores mencionados pelos moradores\\n\\n<i>Dica</i>: Se um habitante mencionou um ponto suspeito nos ermos, consulte o histórico antes de abrir o mapa!\\n',
+
+    'festival': '\\n<b>FESTIVAL DE VALDORIA - GUIA RÁPIDO</b>\\n\\nQuando os estandartes coloridos sobem, a cidade inteira celebra:\\n\\n<b>Jogos & Competições</b>\\n• Participe de desafios festivos de pontaria, força, dados e enigmas para ganhar fichas e prêmios\\n\\n<b>Barracas Sazonais</b>\\n• Saboreie iguarias típicas que concedem bônus temporários e adquira lembranças raras do evento\\n\\n<i>Dica</i>: Os festivais têm duração limitada no calendário do reino — aproveite enquanto as barracas estão abertas!\\n',
+
+    'shadow_alley': '\\n<b>BECO DAS SOMBRAS - GUIA RÁPIDO</b>\\n\\nO submundo discreto onde a guarda raramente ousa patrulhar:\\n\\n<b>Mercado Clandestino</b>\\n• Mercadorias raras, venenos, gazuas e relíquias de origem duvidosa por preços especiais\\n\\n<b>Informantes & Contratos Ocultos</b>\\n• Negocie informações sigilosas e serviços que não aparecem nos quadros oficiais da Guilda\\n\\n<i>Dica</i>: Mantenha a discrição — testes de Furtividade, Enganação ou Intimidação fazem toda a diferença aqui!\\n',
+
+    'travelers': '\\n<b>CARAVANA DE VIAJANTES - GUIA RÁPIDO</b>\\n\\nMercadores e andarilhos recém-chegados de províncias distantes:\\n\\n<b>Estoque Rotativo Exótico</b>\\n• Produtos que os lojistas fixos do Mercado não possuem, renovados a cada passagem da caravana\\n\\n<b>Relatos das Estradas</b>\\n• Converse com os viajantes para descobrir o estado atual das rotas e perigos nos biomas vizinhos\\n\\n<i>Dica</i>: Se encontrar um item raro na caravana, aproveite — o mercador pode partir no próximo turno!\\n',
+
+    'passagens': '\\n<b>PASSAGENS & ATALHOS - GUIA RÁPIDO</b>\\n\\nCaminhos alternativos pelos subterrâneos e arredores de Valdoria:\\n\\n<b>Travessias Rápidas</b>\\n• Permitem cruzar entre setores ou alcançar saídas estratégicas evitando rotas congestionadas\\n\\n<i>Dica</i>: Algumas passagens exigem chaves antigas, tochas ou conhecimento prévio obtido em missões!\\n',
+
+    'weather': '\\n<b>CLIMA & CALENDÁRIO - GUIA RÁPIDO</b>\\n\\nO tempo e as condições atmosféricas moldam a vida em Valdoria:\\n\\n<b>Ciclo Solar (Manhã, Tarde, Noite e Madrugada)</b>\\n• Determina quais estabelecimentos estão abertos e quais habitantes circulam pela Praça e Taverna\\n\\n<b>Impacto do Clima nos Ermos</b>\\n• Chuvas fortes, neblina densa ou calor extremo afetam a visibilidade, testes de Sobrevivência e encontros na estrada\\n\\n<i>Dica</i>: Toque no indicador de clima no topo da cidade a qualquer momento para checar a previsão antes de viajar!\\n',
+
+    'corvus': '\\n<b>TENDA DE CORVUS - GUIA RÁPIDO</b>\\n\\nO Mestre Cartógrafo guarda as chaves para desbravar o continente:\\n\\n<b>Aquisição de Mapas Regionais</b>\\n• Comprar o mapa de uma província destrava suas rotas e pontos de interesse na tela de Cartografia\\n• <b>Mapas Comuns</b>: disponíveis por Valdoritas (Planícies, Floresta, Deserto)\\n• <b>Mapas Avançados</b>: exigem experiência de exploração ou testes de Inteligência/Investigação\\n\\n<i>Dica</i>: Sem o mapa adequado, marchar para regiões desconhecidas é muito mais arriscado!\\n',
+
+    'npc_dialogue': '\\n<b>DIÁLOGO COM HABITANTE - GUIA RÁPIDO</b>\\n\\nSuas palavras têm peso real nas ruas de Valdoria:\\n\\n<b>Opções de Resposta & Perícias</b>\\n• Algumas escolhas acionam testes D&D 5e de <b>Persuasão</b>, <b>Intuição</b>, <b>Enganação</b> ou <b>Intimidação</b>\\n• Respostas respeitosas e atentas fortalecem seu vínculo com o morador\\n\\n<b>Rumores & Ganchos de Aventura</b>\\n• Preste atenção aos nomes e lugares citados — eles frequentemente revelam tesouros ou fraquezas de chefes\\n\\n<i>Dica</i>: Você pode rever conversas importantes a qualquer momento no Histórico de Diálogos!\\n',
 };
 
 var MARKET_WOUNDED_GREETINGS = {
@@ -63185,6 +63468,9 @@ function openCityPopup(key, params){
   var popup = document.getElementById('city-subscreen-popup');
   if (popup) popup.classList.add('active');
   _logCity('popup open -> ' + key + ' (depth=' + _popupStack.length + ')');
+  try {
+    if (window.vldScreenTips) window.vldScreenTips.trigger('city_' + key);
+  } catch (_tipErr) {}
 }
 function closeCityPopup(silent){
   window._isAtMarket = false;
@@ -63334,24 +63620,10 @@ function _renderCityPopup(key){
     // UMA VEZ para cada jogador". Persistência via localStorage (LGPD: UX pref,
     // permitido por CLAUDE.md regra Server-Only State). char_id namespacing
     // garante isolamento por personagem (cada PJ vê a Dica uma vez).
-    var p = window.CITY_MOCK_PLAYER;
-    var tutKey = 'valdoria_bank_tutorial_seen_' + (window._charId || 'default');
-    var tutSeen = false;
-    try { tutSeen = localStorage.getItem(tutKey) === '1'; } catch(_){}
-    if (p && (p.gold || 0) > 100 && !tutSeen && !window._bankTutorialSeen
-        && typeof BANK_TUTORIAL_TEXT === 'string' && typeof _showConfirmPurchase === 'function'){
-      window._bankTutorialSeen = true;
-      try { localStorage.setItem(tutKey, '1'); } catch(_){}
-      // Pequeno delay pro renderBankHub assentar antes do popup sobrepor
-      setTimeout(function(){
-        _showInfoPopup({
-          icon: _heralIco('ic-grupo'), npc: 'Aldwin — Banqueiro',
-          title: 'Dica do Aventureiro',
-          desc: BANK_TUTORIAL_TEXT,
-                onConfirm: function(){}
-        });
-      }, 200);
-    }
+    // Sistema Universal de Dicas Não-Intrusivas (Opção 10: Pill & Ring Timer)
+    try {
+      if (window.vldScreenTips) window.vldScreenTips.trigger('city_bank');
+    } catch (_tipErr) {}
     return;
   }
   if (key === 'square') {
@@ -68346,10 +68618,11 @@ function _showCityWeatherPopup(){
   card.innerHTML = ''
     + '<div class="cwo-header">'
     + '  <div class="cwo-icon-box">' + weatherIcon + '</div>'
-    + '  <div class="cwo-titles">'
+    + '  <div class="cwo-titles" style="flex:1;min-width:0;">'
     + '    <h3 class="cwo-title">CLIMA &amp; CALENDÁRIO</h3>'
     + '    <p class="cwo-subtitle">Atmosfera e Tempo em Valdoria</p>'
     + '  </div>'
+    + '  <button type="button" class="csp-help-btn" onclick="_showHelpForCurrentScreen(\'weather\')" title="Guia de Clima & Calendário" aria-label="Ajuda">?</button>'
     + '</div>'
     + '<div class="cwo-divider">─ ◆ ─</div>'
     + '<div class="cwo-body">'
@@ -71167,6 +71440,7 @@ function renderCartographyCanvas(el){
     + '    <button class="cart-dock-btn" id="cart-filter-toggle-btn" type="button" title="Alternar Filtro de Nós no Mapa [Teclas 1 a 6]">🎯 Todos</button>'
     + '    <button class="cart-dock-btn" id="cart-ruler-btn" type="button" title="Régua Cartográfica / Astrolábio de Medição [X]" aria-label="Régua Cartográfica e Distâncias">📏 Régua</button>'
     + '    <button class="cart-dock-btn accent" id="cart-atlas-back-btn" type="button" title="Voltar ao Continente [Backspace]" style="display:none;" aria-label="Voltar ao Continente">🌍 Continente</button>'
+    + '    <button class="csp-help-btn" id="cart-help-btn" type="button" onclick="_showHelpForCurrentScreen(\'cartografia\')" title="Guia da Cartografia" aria-label="Guia da Cartografia">?</button>'
     + '  </div>'
     + '  <div class="cart-header">'
     + '    <h2 id="cart-title">🧭 Atlas de Valdoria</h2>'
@@ -71247,6 +71521,7 @@ function renderCartographyCanvas(el){
     + '      <div class="badge-card-name" id="reg-card-name">'
     + '        Mapa: Cidade de Valdoria'
     + '      </div>'
+    + '      <button type="button" class="csp-help-btn" onclick="_showHelpForCurrentScreen(\'cartografia\')" title="Guia do Mapa Regional" aria-label="Ajuda">?</button>'
     + '    </div>'
     + '    <div class="province-map-container" id="prov-map-wrap">'
     + '      <img class="province-art-img" id="prov-art-img" src="shared/img/map/provinces/city.webp" alt="Mapa Regional">'
@@ -75837,18 +76112,35 @@ window._tryArrivalEncounter = _tryArrivalEncounter;
 // personagem ir até a estalagem com narrativa do caminho e chance de eventos,
 // assim como toda direção que o personagem toma na cidade (sem contagem de etapas).
 var _CITY_WALK_DESTINATIONS = {
-  'inn': { name: 'Estalagem Pena-Dourada', district: 'Distrito das Tabernas e Hospedarias', icon: 'svc-dormir-comum.webp' },
-  'tavern': { name: 'Taverna do Javali Bêbado', district: 'Beco dos Tonéis', icon: 'svc-bebidas.webp' },
-  'market': { name: 'Mercado de Valdoria', district: 'Praça Central do Comércio', icon: 'svc-vender.webp' },
-  'temple': { name: 'Templo da Luz Radiante', district: 'Colina dos Altares', icon: 'svc-bencao.webp' },
-  'guild': { name: 'Guilda dos Aventureiros', district: 'Pátio das Lâminas', icon: 'svc-treino.webp' },
-  'arena': { name: 'Arena de Valdoria', district: 'Distrito da Fossa', icon: 'svc-arena.webp' },
-  'workshop': { name: 'Oficina dos Artífices', district: 'Rua das Forjas', icon: 'svc-reparar.webp' },
-  'runes': { name: 'Escriba Rúnico', district: 'Torre das Inscrições', icon: 'svc-decifrar.webp' },
-  'bank': { name: 'Banco de Valdoria', district: 'Ala dos Tesouros', icon: 'svc-banco.webp' },
-  'shadow_alley': { name: 'Beco das Sombras', district: 'Vielas Ocultas', icon: 'svc-investigar.webp' },
-  'gates': { name: 'Portões de Valdoria', district: 'Muralhas Externas', icon: 'svc-mapas.webp' }
+  'inn': { name: 'Estalagem Pena-Dourada', district: 'Distrito das Tabernas e Hospedarias', icon: 'svc-dormir-comum.webp', portrait: '/shared/img/estalagem/estalagem-crest.webp', banner: '/shared/img/estalagem/estalagem-banner.webp' },
+  'tavern': { name: 'Taverna do Javali Bêbado', district: 'Beco dos Tonéis', icon: 'svc-bebidas.webp', portrait: '/shared/img/taverna/javali-negro-crest.webp', banner: '/shared/img/taverna/javali-negro-banner.webp' },
+  'market': { name: 'Mercado de Valdoria', district: 'Praça Central do Comércio', icon: 'svc-vender.webp', portrait: '/shared/img/mercado/mercado-crest.webp', banner: '/shared/img/mercado/mercado-banner.webp' },
+  'temple': { name: 'Templo da Luz Radiante', district: 'Colina dos Altares', icon: 'svc-bencao.webp', portrait: '/shared/img/templo/templo-crest.webp', banner: '/shared/img/templo/templo-banner.webp' },
+  'guild': { name: 'Guilda dos Aventureiros', district: 'Pátio das Lâminas', icon: 'svc-treino.webp', portrait: '/shared/img/guilda/guilda-crest.webp', banner: '/shared/img/guilda/guilda-banner.webp' },
+  'arena': { name: 'Arena de Valdoria', district: 'Distrito da Fossa', icon: 'svc-arena.webp', portrait: '/shared/img/arena/arena-crest.webp', banner: '/shared/img/arena/arena-banner.webp' },
+  'workshop': { name: 'Oficina dos Artífices', district: 'Rua das Forjas', icon: 'svc-reparar.webp', portrait: '/shared/img/oficina/oficina-crest.webp', banner: '/shared/img/oficina/oficina-banner.webp' },
+  'runes': { name: 'Escriba Rúnico', district: 'Torre das Inscrições', icon: 'svc-decifrar.webp', portrait: '/shared/img/runas/runas-crest.webp', banner: '/shared/img/runas/runas-banner.webp' },
+  'bank': { name: 'Banco de Valdoria', district: 'Ala dos Tesouros', icon: 'svc-banco.webp', portrait: '/shared/img/banco/banco-crest.webp', banner: '/shared/img/banco/banco-banner.webp' },
+  'shadow_alley': { name: 'Beco das Sombras', district: 'Vielas Ocultas', icon: 'svc-investigar.webp', portrait: '/shared/img/city/beco-banner.webp', banner: '/shared/img/city/beco-banner.webp' },
+  'gates': { name: 'Portões de Valdoria', district: 'Muralhas Externas', icon: 'svc-mapas.webp', portrait: '/shared/img/portoes/portoes-crest.webp', banner: '/shared/img/portoes/portoes-banner.webp' }
 };
+
+function _getCityVenueCrestOrBanner(key) {
+  if (!key) return '/shared/img/city/praca-banner.webp';
+  var k = String(key).toLowerCase();
+  if (k.indexOf('tavern') >= 0 || k.indexOf('javali') >= 0) return '/shared/img/taverna/javali-negro-crest.webp';
+  if (k.indexOf('inn') >= 0 || k.indexOf('estalagem') >= 0 || k.indexOf('hospedaria') >= 0 || k.indexOf('pena-dourada') >= 0) return '/shared/img/estalagem/estalagem-crest.webp';
+  if (k.indexOf('market') >= 0 || k.indexOf('mercado') >= 0) return '/shared/img/mercado/mercado-crest.webp';
+  if (k.indexOf('temple') >= 0 || k.indexOf('templo') >= 0) return '/shared/img/templo/templo-crest.webp';
+  if (k.indexOf('guild') >= 0 || k.indexOf('guilda') >= 0) return '/shared/img/guilda/guilda-crest.webp';
+  if (k.indexOf('arena') >= 0 || k.indexOf('coliseu') >= 0) return '/shared/img/arena/arena-crest.webp';
+  if (k.indexOf('workshop') >= 0 || k.indexOf('oficina') >= 0 || k.indexOf('forja') >= 0) return '/shared/img/oficina/oficina-crest.webp';
+  if (k.indexOf('rune') >= 0 || k.indexOf('escriba') >= 0) return '/shared/img/runas/runas-crest.webp';
+  if (k.indexOf('bank') >= 0 || k.indexOf('banco') >= 0) return '/shared/img/banco/banco-crest.webp';
+  if (k.indexOf('gate') >= 0 || k.indexOf('portao') >= 0 || k.indexOf('portões') >= 0) return '/shared/img/portoes/portoes-crest.webp';
+  if (k.indexOf('beco') >= 0 || k.indexOf('shadow') >= 0 || k.indexOf('sombras') >= 0) return '/shared/img/city/beco-banner.webp';
+  return '/shared/img/city/praca-banner.webp';
+}
 
 function _getCityWalkAtmosphericText(destKey, isNight, isRain) {
   if (destKey === 'inn') {
@@ -76175,10 +76467,11 @@ function _showCityWalkArrival(dest, narrativeText, proceedFn) {
         portrait: pUrl || '/shared/img/npcs/plaza/square_wanderer.webp'
       };
     } else {
+      var venuePortrait = (dest && dest.portrait) || (baseDest && baseDest.portrait) || _getCityVenueCrestOrBanner(dest.key || dest.placeName);
       arrivalNpc = {
         name: arrivalTarget,
         desc: 'Destino em Valdoria',
-        portrait: (dest.district && dest.district.img) ? dest.district.img : '/shared/img/city/square.webp'
+        portrait: venuePortrait
       };
     }
 
@@ -76224,6 +76517,8 @@ function _startCityWalk(targetKey, proceedFn, opts) {
     name: opts.destName || (opts.npcName ? (opts.npcName + ' (' + baseDest.name + ')') : baseDest.name),
     placeName: baseDest.name,
     district: opts.district || baseDest.district || 'Distrito de Valdoria',
+    portrait: (baseDest && baseDest.portrait) || _getCityVenueCrestOrBanner(targetKey),
+    banner: baseDest && baseDest.banner,
     npcName: opts.npcName || null
   };
 

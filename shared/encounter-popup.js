@@ -266,6 +266,20 @@
       return '/shared/img/npcs/plaza/square_wanderer.webp';
     }
 
+    // 3.5. Locais e Brasões Canônicos da Cidade (Ordem do Usuário 2026-10):
+    if (s.indexOf('taverna') >= 0 || s.indexOf('javali') >= 0) return '/shared/img/taverna/javali-negro-crest.webp';
+    if (s.indexOf('estalagem') >= 0 || s.indexOf('hospedaria') >= 0 || s.indexOf('pena-dourada') >= 0) return '/shared/img/estalagem/estalagem-crest.webp';
+    if (s.indexOf('mercado') >= 0) return '/shared/img/mercado/mercado-crest.webp';
+    if (s.indexOf('templo') >= 0) return '/shared/img/templo/templo-crest.webp';
+    if (s.indexOf('guilda') >= 0) return '/shared/img/guilda/guilda-crest.webp';
+    if (s.indexOf('arena') >= 0 || s.indexOf('coliseu') >= 0) return '/shared/img/arena/arena-crest.webp';
+    if (s.indexOf('oficina') >= 0 || s.indexOf('forja') >= 0) return '/shared/img/oficina/oficina-crest.webp';
+    if (s.indexOf('runas') >= 0 || s.indexOf('escriba') >= 0) return '/shared/img/runas/runas-crest.webp';
+    if (s.indexOf('banco') >= 0) return '/shared/img/banco/banco-crest.webp';
+    if (s.indexOf('portao') >= 0 || s.indexOf('portoes') >= 0) return '/shared/img/portoes/portoes-crest.webp';
+    if (s.indexOf('beco') >= 0 || s.indexOf('sombras') >= 0) return '/shared/img/city/beco-banner.webp';
+    if (s.indexOf('praca') >= 0 || s.indexOf('praça') >= 0) return '/shared/img/city/praca-banner.webp';
+
     // 4. Fallback Temático de Fantasia: Sempre apresentar uma figura viva de Valdoria
     return '/shared/img/npcs/plaza/square_wanderer.webp';
   }
@@ -1034,6 +1048,8 @@
       ic.appendChild(coin);
     } else if (kind === 'xp') {
       ic.textContent = '✦';
+    } else if (kind === 'quest') {
+      ic.innerHTML = '📜';
     } else if (kind === 'item') {
       var slug = _rewardItemSlug(name);
       var img = null;
@@ -1043,10 +1059,11 @@
         img.alt = '';
         img.loading = 'lazy';
         img.src = ((window.vItemsConfig && window.vItemsConfig.pngBase) || '/shared/img/items/') + slug + '.webp';
-        img.setAttribute('onerror', "this.style.display='none';this.parentNode.innerHTML='<span class=\"vitem-placeholder-symbol\" style=\"font-size:1.2em;color:#dfbf78;font-weight:700;\">?</span>';");
+        img.setAttribute('onerror', "this.style.display='none';this.parentNode.innerHTML='<span class=\"vitem-placeholder-symbol\" style=\"font-size:1.2em;color:#dfbf78;font-weight:700;\">" + (name && (name.toLowerCase().indexOf('mapa') !== -1 || name.toLowerCase().indexOf('pergaminho') !== -1) ? '🗺️' : '📦') + "</span>';");
         ic.appendChild(img);
       } else {
-        ic.innerHTML = '<span class="vitem-placeholder-symbol" style="font-size:1.2em;color:#dfbf78;font-weight:700;">?</span>';
+        var fallbackIco = (name && (name.toLowerCase().indexOf('mapa') !== -1 || name.toLowerCase().indexOf('pergaminho') !== -1)) ? '🗺️' : '📦';
+        ic.innerHTML = '<span class="vitem-placeholder-symbol" style="font-size:1.2em;color:#dfbf78;font-weight:700;">' + fallbackIco + '</span>';
       }
     } else {
       ic.textContent = '◆';
@@ -1058,16 +1075,25 @@
     /* [kind, valor, label] — kind controla o ícone (G, 2026-06-18: user pediu
        exibição épica de XP/item/Valdoritas com ícone/imagem em vez de texto puro). */
     var rows = [];
+    if (line.quest_accept || line.quest) {
+      rows.push(['quest', String(line.quest_accept || line.quest), 'Missão Aceita']);
+    }
     if (line.gold && line.gold > 0) rows.push(['gold', '+' + (line.gold | 0) + ' Valdoritas', 'Tesouro']);
     if (line.xp && line.xp > 0) rows.push(['xp', '+' + (line.xp | 0) + ' XP', 'Experiência']);
-    (line.items || []).forEach(function (it) { if (it) rows.push(['item', String(it), 'Item']); });
-    if (line.effect) rows.push(['effect', String(line.effect), '']);
+    (line.items || []).forEach(function (it) {
+      if (it) {
+        var itName = String(it);
+        var itLabel = (itName.toLowerCase().indexOf('mapa') >= 0 || itName.toLowerCase().indexOf('pergaminho') >= 0) ? 'Documento / Mapa' : 'Item Obtido';
+        rows.push(['item', itName.indexOf('+') === 0 ? itName : ('+1 ' + itName), itLabel]);
+      }
+    });
+    if (line.effect) rows.push(['effect', String(line.effect), 'Efeito']);
     if (!rows.length) return null;
     var box = document.createElement('div');
     box.className = 'enc-reward';
     var title = document.createElement('div');
     title.className = 'enc-reward-title';
-    title.textContent = '◆ Recompensa ◆';
+    title.textContent = line.title || (line.quest_accept || line.quest ? '❖ Missão Aceita & Espólios ❖' : '◆ Recompensa ◆');
     box.appendChild(title);
     rows.forEach(function (r) {
       var row = document.createElement('div');
@@ -1089,6 +1115,73 @@
       box.appendChild(row);
     });
     return box;
+  }
+
+  function _tryParseRewardNarration(rawText) {
+    if (!rawText || typeof rawText !== 'string') return null;
+    var clean = rawText.replace(/<br\s*\/?>/gi, '\n').replace(/<\/(?:p|div)>/gi, '\n');
+    var lines = clean.split('\n').map(function(s) {
+      return s.replace(/<[^>]+>/g, '').trim();
+    }).filter(Boolean);
+    if (!lines.length) return null;
+
+    var xp = 0;
+    var gold = 0;
+    var items = [];
+    var quest_accept = '';
+    var remainingLines = [];
+
+    lines.forEach(function(l) {
+      var segments = l.split(/(?=\+\s*\d+)/g).map(function(s){ return s.trim(); }).filter(Boolean);
+      var segRemaining = [];
+
+      segments.forEach(function(seg) {
+        var xpM = seg.match(/^\+?\s*(\d+)\s*(?:XP|xp|ponto(?:s)? de experiência)\b/i);
+        if (xpM) {
+          xp += parseInt(xpM[1], 10);
+          return;
+        }
+        var goldM = seg.match(/^\+?\s*(\d+)\s*(?:Valdoritas|valdoritas|Ouro|ouro|PO|po|moedas)\b/i);
+        if (goldM) {
+          gold += parseInt(goldM[1], 10);
+          return;
+        }
+        var questM = seg.match(/^(?:Missão Aceita|Nova Missão|Contrato Aceito|Missão Registrada)(?:\s*:|\s*—|\s*-)?\s*(.+)$/i);
+        if (questM) {
+          quest_accept = questM[1].trim();
+          return;
+        }
+        var itemM = seg.match(/^\+\s*(\d+x?\s+)?([A-Za-zÀ-ÿ0-9\s'’—-]+)$/i);
+        if (itemM) {
+          items.push(itemM[2].trim());
+          return;
+        }
+        var itemObtM = seg.match(/^(?:Item obtido|Item recebido|Espólio)(?:\s*:|\s*—|\s*-)?\s*(.+)$/i);
+        if (itemObtM) {
+          items.push(itemObtM[1].trim());
+          return;
+        }
+        segRemaining.push(seg);
+      });
+
+      if (segRemaining.length > 0) {
+        remainingLines.push(segRemaining.join(' '));
+      }
+    });
+
+    if (xp > 0 || gold > 0 || items.length > 0 || quest_accept) {
+      return {
+        reward: {
+          type: 'reward',
+          xp: xp,
+          gold: gold,
+          items: items,
+          quest_accept: quest_accept
+        },
+        remainingText: remainingLines.join('\n').trim()
+      };
+    }
+    return null;
   }
 
   /* Bloco de NOTIFICAÇÃO TÉCNICA / ALTERAÇÃO DE STATUS estruturado.
@@ -3187,12 +3280,12 @@
     if (cid === 'close' || cid === 'leave' || cid === 'back' || cid === 'done' || ccb === 'close') return false;
     if (clabel.indexOf('continuar') >= 0 || clabel.indexOf('voltar') >= 0 || clabel.indexOf('despedir') >= 0) return false;
 
-    // Regra Soberana #48 (Ordem do Usuário 2026-10): Decisão de Aceitar ou Recusar Missão exige confirmação prévia obrigatória
+    // Ordem do Usuário 2026-10: Decisão de Aceitar ou Recusar Missão no Contrato de Aventura NÃO deve ter janela de confirmação secundária.
     var cres = String(ch.result || '').toLowerCase();
     var isQuestChoice = !!(opts && opts.isQuestScreen) ||
       (cid === 'accept' || cid.indexOf('accept') >= 0 || clabel.indexOf('aceitar') >= 0 || clabel.indexOf('aceito') >= 0 || cres === 'accept_quest' || cres === 'discovery_unlock' || !!ch._questId || !!ch.quest_id) ||
       (cid === 'decline' || cid.indexOf('decline') >= 0 || clabel.indexOf('recusar') >= 0 || clabel.indexOf('desistir') >= 0 || clabel.indexOf('cancelar') >= 0 || clabel.indexOf('outra hora') >= 0 || clabel.indexOf('adiar') >= 0 || cres === 'discovery_defer');
-    if (isQuestChoice) return true;
+    if (isQuestChoice) return false;
 
     return !!(
       ch.isPrep ||
@@ -4630,6 +4723,28 @@
           var pName = (pData && pData.name) || 'Você';
           lineText = String(lineText).replace(/\{player_name\}|\{player\}/g, pName);
         }
+        // Padronização universal AAA: se a linha de narração contiver dados de recompensas/missão aceita em texto bruto,
+        // converte para o componente de recompensa canônico do jogo.
+        if (line.type === 'narration' || !line.type) {
+          var parsedRew = _tryParseRewardNarration(lineText);
+          if (parsedRew) {
+            if (parsedRew.remainingText) {
+              var rNarDiv = document.createElement('div');
+              rNarDiv.className = 'enc-line enc-line--narration enc-narration';
+              rNarDiv.innerHTML = _sanitizeDialogueHTML(_stripEmojis(parsedRew.remainingText));
+              body.appendChild(rNarDiv);
+            }
+            var rel = _buildRewardBlockEl(parsedRew.reward);
+            if (rel) {
+              var rdiv = document.createElement('div');
+              rdiv.className = 'enc-line enc-reward-line';
+              rdiv.appendChild(rel);
+              body.appendChild(rdiv);
+            }
+            return;
+          }
+        }
+
         var _sentences = _splitIntoSentences(_sanitizeDialogueHTML(lineText));
         if (!_sentences.length) return;
         var div = document.createElement('div');

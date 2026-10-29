@@ -1,0 +1,304 @@
+/* ============================================================================
+ * game-screen-tips.css — Sistema Universal de Dicas Não-Intrusivas (Opção 10)
+ * ============================================================================
+ * 
+ * Ordem do Usuário 2026-10 (IMUTÁVEL):
+ * - Banimento permanente de popups/modais intrusivos no carregamento de telas.
+ * - Padrão canônico Opção 10: Cápsula Minimalista com Aro SVG (Pill & Ring Timer).
+ * - Exibição nas 3 primeiras aberturas da tela se não for aberta; se aberta uma vez,
+ *   não exibe mais automaticamente.
+ * - Piso mínimo tipográfico: font-size >= 11px em todos os textos.
+ * - Viewport Telegram Desktop (380px–460px), mobile-first, sem scroll horizontal.
+ * ============================================================================ */
+
+.vld-screen-tip-anchor {
+  position: fixed;
+  left: 0;
+  top: 135px;
+  z-index: 9999;
+  pointer-events: auto;
+  max-width: 90%;
+}
+
+.vld-tip-pill {
+  animation: vldTipSlideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  background: rgba(20, 25, 33, 0.95);
+  border: 1px solid #c9a050;
+  border-left: none;
+  border-radius: 0 24px 24px 0;
+  padding: 6px 12px 6px 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 2px 4px 16px rgba(0, 0, 0, 0.65), 0 0 10px rgba(201, 160, 80, 0.25);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+@keyframes vldTipSlideIn {
+  0% { transform: translateX(-100%) scale(0.85); opacity: 0; }
+  100% { transform: translateX(0) scale(1); opacity: 1; }
+}
+
+.vld-tip-ring-box {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vld-tip-svg-ring {
+  transform: rotate(-90deg);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.vld-tip-ring-bg {
+  fill: none;
+  stroke: #2a3340;
+  stroke-width: 3;
+}
+
+.vld-tip-ring-val {
+  fill: none;
+  stroke: #f3d489;
+  stroke-width: 3;
+  stroke-dasharray: 88;
+  stroke-dashoffset: 0;
+  animation: vldTipDash 7s linear forwards;
+}
+
+@keyframes vldTipDash {
+  to { stroke-dashoffset: 88; }
+}
+
+.vld-tip-icon {
+  font-size: 13px;
+  z-index: 2;
+  filter: drop-shadow(0 0 4px rgba(243, 212, 137, 0.8));
+}
+
+.vld-tip-text-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.vld-tip-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #c9a050;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vld-tip-headline {
+  font-family: 'Cinzel', serif, system-ui;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vld-tip-cta-pill {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1a1306;
+  background: #f3d489;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  border: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+.vld-tip-dismiss-btn {
+  background: none;
+  border: none;
+  color: #8c857b;
+  font-size: 13px;
+  padding: 2px 4px;
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.vld-tip-dismiss-btn:active {
+  color: #ffffff;
+}
+
+/* ============================================================================
+   DRAWER EXPANSÍVEL (MODAL DE DICAS COMPLETO)
+   ============================================================================ */
+.vld-tip-drawer-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  display: none;
+  align-items: flex-end;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.vld-tip-drawer-overlay.active {
+  display: flex;
+  opacity: 1;
+}
+
+.vld-tip-drawer-content {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  max-height: 85vh;
+  background: #14181f;
+  border-top: 2px solid #c9a050;
+  border-radius: 14px 14px 0 0;
+  box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+.vld-tip-drawer-overlay.active .vld-tip-drawer-content {
+  transform: translateY(0);
+}
+
+.vld-tip-drawer-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(201, 160, 80, 0.25);
+  background: #181e26;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.vld-tip-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.vld-tip-avatar-box {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #232c37;
+  border: 1px solid #c9a050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c9a050;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.vld-tip-header-titles {
+  min-width: 0;
+}
+.vld-tip-modal-title {
+  font-family: 'Cinzel', serif, system-ui;
+  font-size: 14px;
+  font-weight: 700;
+  color: #f3d489;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vld-tip-modal-sub {
+  font-size: 11px;
+  color: #a69e92;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vld-tip-close-icon-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(201, 160, 80, 0.3);
+  color: #f3d489;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.vld-tip-drawer-body {
+  padding: 14px 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.vld-tip-card {
+  background: #19202a;
+  border: 1px solid #283444;
+  border-left: 3px solid #c9a050;
+  border-radius: 6px;
+  padding: 9px 12px;
+}
+.vld-tip-card-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #f3d489;
+  margin-bottom: 3px;
+}
+.vld-tip-card-desc {
+  font-size: 11.5px;
+  color: #e8e4dc;
+  line-height: 1.45;
+}
+.vld-tip-card-desc strong {
+  color: #c9a050;
+}
+
+.vld-tip-drawer-footer {
+  padding: 10px 16px 14px;
+  border-top: 1px solid #232b36;
+  background: #13171d;
+  flex-shrink: 0;
+}
+.vld-tip-confirm-btn {
+  width: 100%;
+  background: linear-gradient(180deg, #d4a037 0%, #8c6317 100%);
+  border: 1px solid #f3d489;
+  color: #1a1306;
+  font-family: 'Cinzel', serif, system-ui;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 9px 0;
+  border-radius: 6px;
+  cursor: pointer;
+  text-transform: uppercase;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+}
+.vld-tip-confirm-btn:active {
+  transform: scale(0.98);
+}

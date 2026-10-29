@@ -2746,6 +2746,42 @@ Busca rápida:
                 aria-label="Voltar"
                 style="display:none;">←</button>
         <h1 id="headerTitle">CRIAR PERSONAGEM</h1>
+        <button type="button" id="cc-help-btn" onclick="if(typeof showCreatorScreenGuide==='function')showCreatorScreenGuide()" title="Guia da Tela Atual (Ajuda)" aria-label="Guia da Tela Atual" style="position:absolute;top:10px;right:12px;width:30px;height:30px;border-radius:50%;border:1.5px solid #e8c45a;background:radial-gradient(circle at 35% 30%,rgba(232,196,90,0.38),rgba(40,28,14,0.96));color:#ffe89e;font-family:'Cinzel',serif;font-size:16px;font-weight:900;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;text-shadow:0 0 8px rgba(232,196,90,0.85),0 1px 2px rgba(0,0,0,0.95);box-shadow:0 2px 8px rgba(0,0,0,0.65),0 0 10px rgba(196,149,58,0.38);z-index:10;">?</button>
+        <script>
+        window.showCreatorScreenGuide = function() {
+            var old = document.getElementById('cc-guide-overlay');
+            if (old) old.remove();
+            var idx = (typeof currentScreen === 'number') ? currentScreen : 0;
+            var STEPS = [
+                { t: 'ESCOLHA DE RAÇA (D&D 5e)', b: '<b>◆ Herança Ancestral:</b> Cada raça (Humano, Elfo, Anão, Meio-Orc, Pequenino, Draconato, Gnomo, Meio-Elfo, Tiefling) concede bônus nos atributos, deslocamento base e traços raciais únicos (como Visão no Escuro ou Resistência a Dano).<br><br><b>◆ Dica:</b> Toque em qualquer card de raça para abrir os detalhes completos antes de confirmar.' },
+                { t: 'LINHAGEM & SUB-RAÇA', b: '<b>◆ Especialização Racial:</b> Algumas raças possuem sub-raças (ex.: Elfo da Floresta vs Alto Elfo; Anão da Colina vs Anão da Montanha) que adicionam +1 em um atributo específico e habilidades extras.' },
+                { t: 'ESCOLHA DE CLASSE', b: '<b>◆ Vocação de Combate & Magia:</b> Define seus Pontos de Vida (Dado de Vida d6 a d12), proficiências em armas/armaduras, salvaguardas e estilo tático.<br><br><b>◆ Atributo Principal:</b> Guerreiro/Bárbaro/Paladino (FOR), Ladino/Patrulheiro/Monge (DES), Mago (INT), Clérigo/Druida (SAB), Bardo/Feiticeiro/Bruxo (CAR).' },
+                { t: 'ORIGEM & ANTECEDENTE', b: '<b>◆ Passado do Aventureiro:</b> Concede 2 proficiências em perícias (ex.: Furtividade, Persuasão, Sobrevivência), equipamento inicial extra e traços de personalidade (como Acólito, Soldado, Criminoso ou Defensor do Povo).' },
+                { t: 'MÉTODO DE ATRIBUTOS', b: '<b>◆ Padrão (15, 14, 13, 12, 10, 8):</b> Equilibrado e sem risco.<br><b>◆ Rolagem (4d6 descarta o menor):</b> Emoção pura dos dados 3D — pode gerar valores altos ou imprevisíveis.<br><b>◆ Compra de Pontos (27 pts):</b> Controle cirúrgico para montar sua distribuição entre 8 e 15.' },
+                { t: 'DISTRIBUIÇÃO DE ATRIBUTOS', b: '<b>◆ Alocação nos 6 Atributos:</b> Coloque seus maiores valores no atributo principal da sua classe e em <b>Constituição (CON)</b> para garantir mais Pontos de Vida.' },
+                { t: 'ESTILO DE COMBATE', b: '<b>◆ Especialização Marcial:</b> Escolha seu foco tático (ex.: Defesa +1 CA, Duelismo +2 dano em arma de 1 mão, Arquearia +2 acerto à distância ou Combate com Armas Grandes).' },
+                { t: 'IDENTIDADE & PERSONALIDADE', b: '<b>◆ Nome e Traços:</b> Escolha o nome do seu aventureiro e defina seus ideais, vínculos e defeitos que enriquecem a jornada.' },
+                { t: 'REVISÃO FINAL DA FICHA', b: '<b>◆ Prontidão para Valdoria:</b> Confira seus atributos finais (já somados aos bônus raciais), PV iniciais, Classe de Armadura e pacote de equipamento antes de iniciar a aventura!' }
+            ];
+            var g = STEPS[idx] || STEPS[0];
+            var ov = document.createElement('div');
+            ov.id = 'cc-guide-overlay';
+            ov.style.cssText = 'position:fixed;inset:0;z-index:100500;background:rgba(8,6,4,0.82);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:14px;';
+            ov.innerHTML = '<div style="width:100%;max-width:400px;background:linear-gradient(180deg,rgba(38,30,22,0.98),rgba(20,16,12,0.99));border:1.5px solid #c4953a;border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,0.9);overflow:hidden;">'
+                + '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(196,149,58,0.3);background:linear-gradient(180deg,rgba(196,149,58,0.14),transparent);">'
+                +   '<div><div style="font-family:\'Cinzel\',serif;font-size:11px;color:#c4953a;letter-spacing:1.5px;font-weight:700;">GUIA DA TELA ATUAL</div><div style="font-family:\'Cinzel\',serif;font-size:14px;color:#ffe89e;font-weight:700;margin-top:2px;">' + g.t + '</div></div>'
+                +   '<button type="button" id="cc-guide-x" style="width:28px;height:28px;border-radius:50%;border:1px solid rgba(196,149,58,0.45);background:rgba(0,0,0,0.4);color:#d4c8b0;font-size:13px;cursor:pointer;">✕</button>'
+                + '</div>'
+                + '<div style="padding:14px;font-size:13px;line-height:1.58;color:#dfd3bc;">' + g.b + '</div>'
+                + '<div style="padding:10px 14px;border-top:1px solid rgba(196,149,58,0.25);">'
+                +   '<button type="button" id="cc-guide-ok" style="width:100%;padding:9px;border-radius:8px;border:1px solid #c4953a;background:linear-gradient(180deg,rgba(196,149,58,0.28),rgba(90,68,48,0.45));color:#ffe89e;font-family:\'Cinzel\',serif;font-size:12px;font-weight:700;cursor:pointer;">ENTENDI</button>'
+                + '</div></div>';
+            ov.addEventListener('click', function(ev) {
+                if (ev.target === ov || ev.target.closest('#cc-guide-x') || ev.target.closest('#cc-guide-ok')) ov.remove();
+            });
+            document.body.appendChild(ov);
+        };
+        </script>
         <div class="v-progress-bar" id="progressBar"></div>
         <div class="v-progress-label" id="progressLabel">1/9 - Raça</div>
         <!-- Sessao #37 (2026-05-25 — REVISADO): picker fixo do header REMOVIDO.

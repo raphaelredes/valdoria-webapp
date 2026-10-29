@@ -606,14 +606,56 @@
   // ============================================================
   //  RENDER — HEADER
   // ============================================================
+  function _showInventoryHelpModal() {
+    if (typeof window._showHelpForCurrentScreen === 'function') {
+      window._showHelpForCurrentScreen('inventory');
+      return;
+    }
+    var existing = document.getElementById('vinv-help-modal');
+    if (existing) { existing.remove(); }
+    var host = (_state.overlayEl && _state.overlayEl.querySelector('.vinv-panel')) || document.body;
+    var modal = document.createElement('div');
+    modal.id = 'vinv-help-modal';
+    modal.className = 'vinv-confirm-overlay active';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Guia da Mochila');
+    modal.innerHTML = ''
+      + '<div class="vinv-confirm-card" style="max-width:400px;text-align:left;padding:16px;">'
+      +   '<div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(196,149,58,0.35);padding-bottom:10px;margin-bottom:12px;">'
+      +     '<div>'
+      +       '<div style="font-family:\'Cinzel\',serif;font-size:11px;color:#c4953a;letter-spacing:1.5px;font-weight:700;">GUIA DA TELA ATUAL</div>'
+      +       '<div style="font-family:\'Cinzel\',serif;font-size:15px;color:#f4e5b8;font-weight:700;margin-top:2px;">MOCHILA &amp; EQUIPAMENTOS</div>'
+      +     '</div>'
+      +     '<button type="button" class="vinv-help-close" style="width:28px;height:28px;border-radius:50%;border:1px solid rgba(196,149,58,0.45);background:rgba(0,0,0,0.4);color:#d4c8b0;font-size:13px;cursor:pointer;">✕</button>'
+      +   '</div>'
+      +   '<div style="font-size:13px;line-height:1.55;color:#d4c8b0;max-height:60vh;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">'
+      +     '<div><b style="color:#e8c45a;">◆ Categorias &amp; Filtros:</b> Toque nas abas (Armas, Armaduras, Consumíveis, Tesouros) para filtrar sua mochila. Toque novamente na aba ativa para exibir todos os itens.</div>'
+      +     '<div><b style="color:#e8c45a;">◆ Equipar &amp; Usar:</b> Toque em qualquer item da grade para abrir os detalhes, comparar atributos e acionar <b>Equipar</b>, <b>Desequipar</b> ou <b>Usar</b> (poções, pergaminhos e provisões).</div>'
+      +     '<div><b style="color:#e8c45a;">◆ Slots de Equipamento:</b> Use o botão <b>Equipamento</b> no rodapé da mochila para visualizar os slots ativos do corpo do personagem.</div>'
+      +     '<div><b style="color:#e8c45a;">◆ Capacidade &amp; Carga:</b> Acompanhe o total de slots ocupados no rodapé. Guarde materiais pesados no cofre do Banco na cidade!</div>'
+      +   '</div>'
+      +   '<div style="margin-top:14px;text-align:right;">'
+      +     '<button type="button" class="vinv-help-ok" style="width:100%;padding:10px;border-radius:8px;border:1px solid #c4953a;background:linear-gradient(180deg,rgba(196,149,58,0.28),rgba(90,68,48,0.45));color:#ffe89e;font-family:\'Cinzel\',serif;font-size:12px;font-weight:700;cursor:pointer;">ENTENDI</button>'
+      +   '</div>'
+      + '</div>';
+    modal.addEventListener('click', function (ev) {
+      if (ev.target === modal || ev.target.closest('.vinv-help-close') || ev.target.closest('.vinv-help-ok')) {
+        modal.remove();
+      }
+    });
+    host.appendChild(modal);
+  }
+  window._showInventoryHelpModal = _showInventoryHelpModal;
+
   function _renderHeader(el, cfg) {
     var gold = (cfg.player.gold || 0).toLocaleString('pt-BR');
     el.innerHTML = ''
       + '<div class="vinv-header-title">'
       +   '<span>' + _esc(cfg.title) + '</span>'
       + '</div>'
-      + '<div class="vinv-wallet">'
-      +   '<span class="vinv-coin">V</span><span>' + gold + '</span>'
+      + '<div class="vinv-header-right"><div class="vinv-wallet">'
+      +   '<span class="vinv-coin">V</span><span>' + gold + '</span></div><button type="button" class="vinv-help-btn" onclick="event.stopPropagation();window._showInventoryHelpModal&&window._showInventoryHelpModal()" title="Guia da Mochila (Ajuda)" aria-label="Guia da Mochila">?</button>'
       + '</div>';
   }
 

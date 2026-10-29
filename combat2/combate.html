@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-10-29T18:44:00Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-10-29T22:02:16Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -2845,6 +2845,30 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 }
 
 /* Botão temporário flutuante no topo central para pular movimentação (Ordem do Usuário 2026-10) */
+.cbt-help-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid #e8c45a;
+  background: radial-gradient(circle at 35% 30%, rgba(232,196,90,0.38), rgba(40,28,14,0.96));
+  color: #ffe89e;
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: auto;
+  text-shadow: 0 0 8px rgba(232,196,90,0.85), 0 1px 2px rgba(0,0,0,0.95);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.7), 0 0 10px rgba(196,149,58,0.38), inset 0 1px 0 rgba(255,255,255,0.28);
+  pointer-events: auto;
+  z-index: 5;
+  transition: transform 0.15s ease;
+}
+.cbt-help-btn:active { transform: scale(0.93); }
 .combat-skip-movement-btn {
   position: fixed;
   top: 18px;
@@ -15736,6 +15760,9 @@ document.write('<script src="../shared/loading-template.js?v=' + _vti + '"><\/sc
    2026-05-16: items-resolver.js adicionado pra mochila resolver PNGs AI
    (manifest.json em /shared/img/items/) com fallback pro sprite SVG. */
 document.write('<link rel="stylesheet" href="../shared/inventory-screen.css?v=' + _vti + '">');
+/* Sistema Universal de Dicas Não-Intrusivas (Opção 10: Pill & Ring Timer) */
+document.write('<link rel="stylesheet" href="../shared/game-screen-tips.css?v=' + _vti + '">');
+document.write('<script src="../shared/game-screen-tips.js?v=' + _vti + '"><\/script>');
 // 2026-05-19: heraldic-items-sprite.js REMOVIDO. PNGs OpenAI via items-resolver.
 document.write('<script src="../shared/items-resolver.js?v=' + _vti + '"><\/script>');
 document.write('<script src="../shared/icons-resolver.js?v=' + _vti + '"><\/script>');
@@ -25216,7 +25243,7 @@ function buildTurnQueue(s) {
         }
     }
 
-    var parts = ['<div class="turn-queue" id="turn-queue">'];
+    var parts = ['<div class="turn-queue" id="turn-queue"><button type="button" id="helpBtn" class="cbt-help-btn help-btn" data-action="help" onclick="event.stopPropagation();if(typeof showCombatScreenGuide===\'function\')showCombatScreenGuide();" title="Guia da Tela Atual — Combate D&amp;D 5e" aria-label="Guia da Tela Atual" style="order:99;">?</button>'];
     if (s.ph === 'active' && s.rn > 0) {
         var _hdrWKey = (typeof getBattlefieldWeatherKey === 'function') ? getBattlefieldWeatherKey(s) : 'clear';
         var _hdrWData = (typeof BATTLEFIELD_WEATHER_LABELS !== 'undefined' && BATTLEFIELD_WEATHER_LABELS[_hdrWKey]) || { icon: '☀️', label: 'Céu Limpo' };
@@ -25309,6 +25336,126 @@ function buildTurnQueue(s) {
     parts.push('</div>');
     return parts.join('');
 }
+
+function showCombatScreenGuide(explicitTopic) {
+    var existing = document.getElementById('combat-guide-overlay');
+    if (existing) existing.remove();
+
+    var topic = explicitTopic || '';
+    if (!topic) {
+        var st = (typeof S !== 'undefined' && S) ? S : {};
+        var pUnit = (st.order || []).find(function (u) { return u && u.t === 'p'; });
+        var bfEl = document.querySelector('.bf-outer');
+        if (st.ph === 'init' || st.ph === 'intro') topic = 'init';
+        else if (pUnit && pUnit.hp <= 0 && pUnit.dying) topic = 'death';
+        else if (bfEl && bfEl.classList.contains('bf-outer--selecting-target')) topic = 'target';
+        else if (pUnit && (pUnit.concentrationSpell || pUnit.concentrating)) topic = 'magic';
+        else topic = 'turn';
+    }
+
+    var TOPICS = {
+        turn: {
+            title: 'SEU TURNO & ECONOMIA DE AÇÃO',
+            sub: 'Regras Táticas D&D 5e (PHB p. 189)',
+            items: [
+                '<b>◆ Ação Principal (●):</b> Ataque corpo a corpo/distância, Conjurar uma Magia de 1 Ação, Esquivar, Disparada (dobrar movimento), Desengajar (mover sem provocar Ataques de Oportunidade) ou Usar Item.',
+                '<b>◆ Ação Bônus (◆):</b> Habilidades rápidas de classe (ex.: Fúria, Ação Ardilosa, Palavra Curativa, Ataque com Mão Inábil). Só pode usar 1 Ação Bônus por turno.',
+                '<b>◆ Movimento no Tabuleiro Hexagonal:</b> Cada hexágono equivale a <b>1,5 m (5 ft)</b>. Toque em um hexágono destacado para pré-visualizar a rota e o risco de Ataque de Oportunidade antes de confirmar.',
+                '<b>◆ Reação (⚡):</b> 1 por rodada (ex.: Ataque de Oportunidade quando um inimigo sai do seu alcance sem Desengajar, ou Escudo Arcano).'
+            ]
+        },
+        init: {
+            title: 'INICIATIVA & FILA DE TURNOS',
+            sub: 'Ordem de Combate D&D 5e',
+            items: [
+                '<b>◆ Rolagem de Iniciativa (1d20 + DES):</b> No início do confronto, cada combatente rola 1d20 somado ao modificador de Destreza para definir a ordem de atuação.',
+                '<b>◆ Barra de Iniciativa no Topo:</b> Exibe a sequência da rodada atual (R1, R2...) e o clima do campo de batalha. Toque em qualquer retrato para inspecionar PV, CA e condições daquela unidade.',
+                '<b>◆ Surpresa:</b> Combatentes surpreendidos não podem se mover nem realizar ações ou reações no primeiro turno.'
+            ]
+        },
+        target: {
+            title: 'MIRA TÁTICA, ALCANCE & COBERTURA',
+            sub: 'Posicionamento no Grid Hexagonal',
+            items: [
+                '<b>◆ Alcance & Linha de Visão:</b> Armas corpo a corpo padrão alcançam 1,5 m (1 hex adjacente). Armas de haste alcançam 3 m (2 hexes). Ataques à distância sofrem Desvantagem se houver um inimigo engajado a 1,5 m de você.',
+                '<b>◆ Cobertura (PHB p. 196):</b> Obstáculos e pilares concedem Meia Cobertura (<b>+2 CA e +2 DES</b>) ou Cobertura de Três Quartos (<b>+5 CA e +5 DES</b>).',
+                '<b>◆ Flanqueamento & Vantagem:</b> Cercar o inimigo com aliados ou atacar alvos Caídos corpo a corpo concede <b>Vantagem</b> (rola 2d20 e usa o maior).'
+            ]
+        },
+        magic: {
+            title: 'MAGIAS, ESPAÇOS & CONCENTRAÇÃO',
+            sub: 'Conjuração Arcana & Divina (PHB p. 201)',
+            items: [
+                '<b>◆ Truques vs Espaços de Magia (Slots):</b> Truques (Nível 0) são ilimitados. Magias de Nível 1+ consomem Espaços de Magia ou Pontos de Mana/Pacto.',
+                '<b>◆ Concentração (◈):</b> Você só pode manter <b>uma magia de Concentração ativa por vez</b>. Conjurar outra encerra a anterior imediatamente.',
+                '<b>◆ Teste de Concentração ao Sofrer Dano:</b> Sempre que sofrer dano mantendo concentração, você realiza uma Salvaguarda de Constituição (<b>CD 10 ou metade do dano sofrido</b>, o que for maior).'
+            ]
+        },
+        death: {
+            title: 'CAÍDO A 0 PV & TESTES CONTRA A MORTE',
+            sub: 'Sobrevivência no Limiar (PHB p. 197)',
+            items: [
+                '<b>◆ Salvaguarda Contra a Morte (1d20 puro):</b> No início de cada turno a 0 PV, role 1d20: <b>10 ou mais = 1 Sucesso</b>; <b>9 ou menos = 1 Falha</b>.',
+                '<b>◆ Crítico (20 ou 1 Natural):</b> Rolar <b>20 natural</b> recupera 1 PV imediatamente e levanta o aventureiro! Rolar <b>1 natural</b> conta como 2 falhas.',
+                '<b>◆ Estabilização & Socorrer Aliado:</b> Ao atingir 3 sucessos você fica Estável. Qualquer cura mágica, Poção de Cura ou ação <b>Socorrer Aliado</b> (Medicina CD 10) restaura a consciência.'
+            ]
+        }
+    };
+
+    var cur = TOPICS[topic] || TOPICS.turn;
+    var host = document.getElementById('app') || document.body;
+    var ov = document.createElement('div');
+    ov.id = 'combat-guide-overlay';
+    ov.setAttribute('role', 'dialog');
+    ov.setAttribute('aria-modal', 'true');
+    ov.style.cssText = 'position:fixed;inset:0;z-index:100500;background:rgba(8,6,4,0.82);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:12px;';
+
+    var pillsHtml = [
+        ['turn', '⚔️ Turno'],
+        ['target', '🎯 Alvos'],
+        ['magic', '✨ Magias'],
+        ['death', '💀 0 PV'],
+        ['init', '🎲 Iniciativa']
+    ].map(function (p) {
+        var act = (p[0] === topic);
+        return '<button type="button" data-cguide-tab="' + p[0] + '" style="padding:5px 9px;border-radius:14px;border:1px solid ' + (act ? '#e8c45a' : 'rgba(196,149,58,0.35)') + ';background:' + (act ? 'rgba(196,149,58,0.28)' : 'rgba(20,15,10,0.8)') + ';color:' + (act ? '#ffe89e' : '#c8b89a') + ';font-family:\'Cinzel\',serif;font-size:11px;font-weight:700;cursor:pointer;">' + p[1] + '</button>';
+    }).join('');
+
+    var itemsHtml = cur.items.map(function (it) {
+        return '<div style="background:rgba(28,21,14,0.85);border:1px solid rgba(196,149,58,0.28);border-radius:8px;padding:9px 11px;font-size:12.5px;line-height:1.5;color:#dfd3bc;">' + it + '</div>';
+    }).join('');
+
+    ov.innerHTML = ''
+        + '<div style="width:100%;max-width:420px;max-height:86vh;display:flex;flex-direction:column;background:linear-gradient(180deg,rgba(38,30,22,0.98),rgba(20,16,12,0.99));border:1.5px solid #c4953a;border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,0.9),0 0 24px rgba(196,149,58,0.2);overflow:hidden;">'
+        +   '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(196,149,58,0.3);background:linear-gradient(180deg,rgba(196,149,58,0.14),transparent);">'
+        +     '<div>'
+        +       '<div style="font-family:\'Cinzel\',serif;font-size:11px;letter-spacing:1.6px;color:#c4953a;font-weight:700;">GUIA DA TELA ATUAL — COMBATE</div>'
+        +       '<div style="font-family:\'Cinzel\',serif;font-size:14px;color:#ffe89e;font-weight:700;margin-top:2px;">' + cur.title + '</div>'
+        +       '<div style="font-size:11px;color:#a09484;margin-top:1px;">' + cur.sub + '</div>'
+        +     '</div>'
+        +     '<button type="button" id="cguide-close-x" style="width:28px;height:28px;border-radius:50%;border:1px solid rgba(196,149,58,0.45);background:rgba(0,0,0,0.4);color:#d4c8b0;font-size:13px;cursor:pointer;">✕</button>'
+        +   '</div>'
+        +   '<div style="display:flex;flex-wrap:wrap;gap:5px;padding:8px 12px;border-bottom:1px solid rgba(196,149,58,0.18);background:rgba(12,9,6,0.5);">' + pillsHtml + '</div>'
+        +   '<div style="padding:12px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;flex:1;">' + itemsHtml + '</div>'
+        +   '<div style="padding:10px 14px;border-top:1px solid rgba(196,149,58,0.25);background:rgba(14,10,7,0.9);">'
+        +     '<button type="button" id="cguide-close-btn" style="width:100%;padding:9px;border-radius:8px;border:1px solid #c4953a;background:linear-gradient(180deg,rgba(196,149,58,0.28),rgba(90,68,48,0.45));color:#ffe89e;font-family:\'Cinzel\',serif;font-size:12px;font-weight:700;cursor:pointer;">ENTENDI</button>'
+        +   '</div>'
+        + '</div>';
+
+    ov.addEventListener('click', function (ev) {
+        var tabBtn = ev.target.closest('[data-cguide-tab]');
+        if (tabBtn) {
+            ev.stopPropagation();
+            showCombatScreenGuide(tabBtn.getAttribute('data-cguide-tab'));
+            return;
+        }
+        if (ev.target === ov || ev.target.closest('#cguide-close-x') || ev.target.closest('#cguide-close-btn')) {
+            ov.remove();
+        }
+    });
+    host.appendChild(ov);
+}
+window.showCombatScreenGuide = showCombatScreenGuide;
 
 /* FLIP animation: captura posicoes antes do re-render */
 function captureQueueRects() {
@@ -54274,6 +54421,9 @@ function startSimAfterDiceBoot() {
     }
     if (window.__COMBAT_GODMODE) applyGodmodePatch(currentState);
     render(currentState);
+    try {
+        if (window.vldScreenTips) window.vldScreenTips.trigger('combat_main');
+    } catch (_tipErr) {}
     /* Sub-projeto #1 (2026-04-26) — Pre-combat banner se waves carregadas
        via bridge/showcase. Roda APÓS render() pra que #frame exista. */
     try {

@@ -462,10 +462,22 @@ body.perf-lite #encounter-overlay.active .enc-card {
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6), 0 0 14px var(--v-gold-45, rgba(196, 149, 58, 0.45));
 }
 .enc-reward-lbl {
-  font-size: calc(10px * var(--v-font-scale, 1));
+  font-size: calc(11px * var(--v-font-scale, 1));
   letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--v-text-dim, #a09484);
+}
+.enc-reward-icon-quest {
+  color: #f5e2ba;
+  font-size: calc(20px * var(--v-font-scale, 1));
+  filter: drop-shadow(0 0 8px rgba(196, 149, 58, 0.45));
+}
+.enc-reward-val-quest {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: calc(14px * var(--v-font-scale, 1));
+  font-weight: 700;
+  color: #f5e2ba;
+  letter-spacing: 0.5px;
 }
 /* G (2026-06-18): linha de recompensa com ícone/imagem (moeda Valdorita / ✦ XP /
    imagem WebP do item) à esquerda + valor/label à direita. Mais épico que o texto
@@ -2356,7 +2368,7 @@ body.perf-lite .enc-cho-row {
 }
 .enc-quest-badge {
   font-family: 'Cinzel', serif;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 1.5px;
   color: #c4953a;
@@ -2384,7 +2396,7 @@ body.perf-lite .enc-cho-row {
 }
 .enc-quest-label {
   font-family: 'Cinzel', serif;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 1px;
   color: #8c7b66;
@@ -2439,7 +2451,7 @@ body.perf-lite .enc-cho-row {
 }
 .enc-quest-motto {
   font-family: 'Georgia', serif;
-  font-size: 10px;
+  font-size: 11px;
   font-style: italic;
   color: #7d7161;
   margin-top: 12px;

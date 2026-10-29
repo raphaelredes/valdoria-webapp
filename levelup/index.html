@@ -367,7 +367,7 @@
             color: var(--lvl-accent);
             opacity: 0.7;
             margin: 0 var(--v-space-md, 8px);
-            font-size: 10px;
+            font-size: 11px;
         }
         @keyframes lvlSubReveal {
             from { opacity: 0; transform: translateY(8px); }
@@ -780,7 +780,7 @@
         }
 
         .choice-card-badge {
-            font-size: 10px;
+            font-size: 11px;
             padding: var(--v-space-xs, 2px) 7px;
             border-radius: var(--v-radius);
             font-weight: 600;
@@ -923,7 +923,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
+            font-size: 11px;
             transition: all var(--v-transition);
             flex-shrink: 0;
         }
@@ -1118,7 +1118,7 @@
         }
         .feat-detail-label {
             font-family: 'Cinzel', serif;
-            font-size: 10px;
+            font-size: 11px;
             color: var(--v-gold, #c4953a);
             letter-spacing: 2px;
             text-transform: uppercase;
@@ -1178,7 +1178,7 @@
         }
         .skill-tag-label {
             font-family: 'Cinzel', serif;
-            font-size: 10px;
+            font-size: 11px;
             color: var(--v-gold, #c4953a);
             letter-spacing: 2px;
             text-transform: uppercase;
@@ -1546,6 +1546,34 @@
                 <button id="btnBack" class="lu-back hidden" onclick="goBack()">&#9664;</button>
                 <span class="lu-title" id="luTitle">Subiu de N&#237;vel</span>
                 <div class="lu-dots" id="luDots"></div>
+                <button type="button" id="luHelpBtn" onclick="if(typeof showLevelUpScreenGuide==='function')showLevelUpScreenGuide()" title="Guia da Tela Atual (Ajuda)" aria-label="Guia da Tela Atual" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #e8c45a;background:radial-gradient(circle at 35% 30%,rgba(232,196,90,0.38),rgba(40,28,14,0.96));color:#ffe89e;font-family:'Cinzel',serif;font-size:15px;font-weight:900;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;text-shadow:0 0 8px rgba(232,196,90,0.85),0 1px 2px rgba(0,0,0,0.95);box-shadow:0 2px 6px rgba(0,0,0,0.65),0 0 10px rgba(196,149,58,0.35);">?</button>
+                <script>
+                window.showLevelUpScreenGuide = function() {
+                    var old = document.getElementById('lu-guide-overlay');
+                    if (old) old.remove();
+                    var titleTxt = (document.getElementById('luTitle') && document.getElementById('luTitle').textContent) || 'Subida de Nível';
+                    var bodyHtml = '<b>◆ Evolução D&amp;D 5e:</b> Ao subir de nível, seus Pontos de Vida máximos aumentam (Dado de Vida da classe + modificador de Constituição) e novas capacidades são desbloqueadas.<br><br>'
+                        + '<b>◆ Arquétipo / Subclasse:</b> Define sua especialização marcial ou mágica permanente.<br><br>'
+                        + '<b>◆ Atributos (ASI) ou Talento:</b> Nos níveis de melhoria, você pode distribuir <b>+2 pontos em Atributos</b> (até o limite de 20) ou escolher um <b>Talento (Feat)</b> especial.<br><br>'
+                        + '<b>◆ Grimório &amp; Habilidades:</b> Toque nos cards para inspecionar o efeito, alcance e custo antes de confirmar sua evolução.';
+                    var ov = document.createElement('div');
+                    ov.id = 'lu-guide-overlay';
+                    ov.style.cssText = 'position:fixed;inset:0;z-index:100500;background:rgba(8,6,4,0.82);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:14px;';
+                    ov.innerHTML = '<div style="width:100%;max-width:400px;background:linear-gradient(180deg,rgba(38,30,22,0.98),rgba(20,16,12,0.99));border:1.5px solid #c4953a;border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,0.9);overflow:hidden;">'
+                        + '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(196,149,58,0.3);background:linear-gradient(180deg,rgba(196,149,58,0.14),transparent);">'
+                        +   '<div><div style="font-family:\'Cinzel\',serif;font-size:11px;color:#c4953a;letter-spacing:1.5px;font-weight:700;">GUIA DA TELA ATUAL</div><div style="font-family:\'Cinzel\',serif;font-size:14px;color:#ffe89e;font-weight:700;margin-top:2px;">' + titleTxt.toUpperCase() + '</div></div>'
+                        +   '<button type="button" id="lu-guide-x" style="width:28px;height:28px;border-radius:50%;border:1px solid rgba(196,149,58,0.45);background:rgba(0,0,0,0.4);color:#d4c8b0;font-size:13px;cursor:pointer;">✕</button>'
+                        + '</div>'
+                        + '<div style="padding:14px;font-size:13px;line-height:1.58;color:#dfd3bc;">' + bodyHtml + '</div>'
+                        + '<div style="padding:10px 14px;border-top:1px solid rgba(196,149,58,0.25);">'
+                        +   '<button type="button" id="lu-guide-ok" style="width:100%;padding:9px;border-radius:8px;border:1px solid #c4953a;background:linear-gradient(180deg,rgba(196,149,58,0.28),rgba(90,68,48,0.45));color:#ffe89e;font-family:\'Cinzel\',serif;font-size:12px;font-weight:700;cursor:pointer;">ENTENDI</button>'
+                        + '</div></div>';
+                    ov.addEventListener('click', function(ev) {
+                        if (ev.target === ov || ev.target.closest('#lu-guide-x') || ev.target.closest('#lu-guide-ok')) ov.remove();
+                    });
+                    document.body.appendChild(ov);
+                };
+                </script>
             </div>
             <div class="lu-body" id="luBody"></div>
             <div class="lu-sub" id="luSub">
