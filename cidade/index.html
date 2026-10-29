@@ -12985,7 +12985,7 @@ body.perf-lite .vc-action-btn { transition: none; }
           window.vEncounter.render({
             npc: { name: 'Sacerdote do Templo', desc: 'Despertar no Templo de Valdoria',
                    id: 'temple_awakening',
-                   portraitImg: '/shared/img/npcs/varek-sumo-sacerdote.webp?v=20261011' },
+                   portraitImg: '/shared/img/npcs/varek-sumo-sacerdote.webp' },
             script: res.script,
             choices: [{ id: 'rise', label: 'Erguer-se do Altar' }]
           }, {
@@ -16141,7 +16141,7 @@ function _discoverySpeakerPortrait(speaker) {
   // #2: NPC nomeado com retrato SEMPRE tem WebP dedicado. ANTES dos fallbacks
   // role-based pra ter prioridade sobre 'escrivã'/'sacerdot'.
   if (s.indexOf('sereniel') >= 0) return '/shared/img/npcs/sereniel-escriva.webp';
-  if (s.indexOf('sumo sacerdote') >= 0 || s.indexOf('varek') >= 0) return '/shared/img/npcs/varek-sumo-sacerdote.webp?v=20261011';
+  if (s.indexOf('sumo sacerdote') >= 0 || s.indexOf('varek') >= 0) return '/shared/img/npcs/varek-sumo-sacerdote.webp';
   // Plaza NPCs (Sessao #37 v18 — PADRAO_ALDRIC lightbox parity para discovery quests)
   if (s.indexOf('mendigo') >= 0) return '/shared/img/npcs/plaza/mendigo_praca.webp';
   if (s.indexOf('crian') >= 0)   return '/shared/img/npcs/plaza/crianca_pomar.webp';
@@ -30124,7 +30124,8 @@ var SHADOW_EVENT_POOL = [
     npcData: {
       name: 'Figura Encapuzada',
       desc: 'Conspirador noturno do submundo',
-      portrait: 'ic-bruxo'
+      portrait: 'ic-bruxo',
+      portraitImg: '/shared/img/npcs/sussurrador-misterioso.webp'
     },
     script: [
       { type: 'narration', text: 'Você se espreme atrás de barris empilhados. <b>Duas figuras encapuzadas</b> conversam baixo atrás de uma cortina rasgada — não te viram. As vozes carregam um peso ritualístico, palavras escolhidas com cuidado.' },
@@ -40140,7 +40141,7 @@ var CANON_PLAZA_ENTRY_PASSIVE = [
     "xp": 1
   },
   {
-    "id": "kid_hero",
+    "id": "kid_adventure",
     "text": "Crianças brincam de aventureiros e pedem seu autógrafo!",
     "weight": 6,
     "xp": 3
@@ -40833,7 +40834,8 @@ var PLAZA_OFFER_EVENTS = [
     npc_data: {
       name: 'Quinto, o Queijeiro',
       desc: 'Mercador ambulante com tabuleiro de degustação aos ombros',
-      portrait: 'ic-mercado'
+      portrait: 'ic-mercado',
+      portraitImg: '/shared/img/npcs/quinto-queijeiro.webp'
     },
     script: [
       { type: 'narration', text: 'Um homem rechonchudo de avental manchado de soro de leite te alcança no meio da praça. Ele segura uma tábua de madeira com pequenos cubos de queijo curado, cada um espetado num palito.' },
@@ -41041,7 +41043,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
   },
   coins_ground: {
     npc_key: 'narrador_praca',
-    npc_data: { name: 'Praça Central', desc: 'Pedras gastas pelo tempo', portrait: 'ic-praca' },
+    npc_data: { name: 'Praça Central', desc: 'Pedras gastas pelo tempo', portrait: 'ic-praca', portraitImg: '/shared/img/city/square.webp' },
     script: [
       { type: 'narration', text: 'Você nota duas moedas de prata brilhando entre as pedras do calçamento. <i>(ninguém parece ter percebido)</i>' }
     ],
@@ -41088,7 +41090,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
   },
   pigeon: {
     npc_key: 'narrador_praca',
-    npc_data: { name: 'Praça Central', desc: 'Vida cotidiana da cidade', portrait: 'ic-praca' },
+    npc_data: { name: 'Praça Central', desc: 'Vida cotidiana da cidade', portrait: 'ic-praca', portraitImg: '/shared/img/city/square.webp' },
     script: [
       { type: 'narration', text: 'Um pombo gordo pousa no seu ombro com naturalidade. <i>(moradores próximos riem discretamente)</i>' }
     ],
@@ -41103,7 +41105,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
   },
   mystery_note: {
     npc_key: 'narrador_praca',
-    npc_data: { name: 'Bilhete Misterioso', desc: 'Pergaminho dobrado no chão', portrait: 'ic-mochila' },
+    npc_data: { name: 'Bilhete Misterioso', desc: 'Pergaminho dobrado no chão', portrait: 'ic-mochila', portraitImg: '/shared/img/items/pergaminho-antigo.webp' },
     script: [
       { type: 'narration', text: 'Você encontra um bilhete dobrado no chão. As bordas estão chamuscadas. Letra apressada:' },
       { type: 'narration', text: '<b>"A verdade está sob a fonte."</b>' }
@@ -41135,7 +41137,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
   },
   cat_follow: {
     npc_key: 'narrador_praca',
-    npc_data: { name: 'Praça Central', desc: 'Pedras antigas, vida miúda', portrait: 'ic-praca' },
+    npc_data: { name: 'Praça Central', desc: 'Pedras antigas, vida miúda', portrait: 'ic-praca', portraitImg: '/shared/img/city/square.webp' },
     script: [
       { type: 'narration', text: 'Um gato listrado sai de um beco e começa a andar atrás de você. A cauda balança no ritmo dos seus passos.' },
       { type: 'narration', text: 'Ele para quando você para. Anda quando você anda. <i>(parece estar avaliando)</i>' }
@@ -41182,7 +41184,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
   },
   smith_spark: {
     npc_key: 'ferreiro_pose',
-    npc_data: { name: 'Ferreiro da Praça', desc: 'Artesão de avental queimado', portrait: 'ic-mochila' },
+    npc_data: { name: 'Ferreiro da Praça', desc: 'Artesão de avental queimado', portrait: 'ic-mochila', portraitImg: '/shared/img/npcs/durgan.webp' },
     script: [
       { type: 'narration', text: 'Faíscas voam da forja próxima. Um ferreiro grisalho ergue o martelo num saudar — você é cliente conhecido.' }
     ],
@@ -41195,9 +41197,9 @@ var PLAZA_PASSIVE_DIALOGUES = {
         result_text: 'Ele para e abre um sorriso largo. <i>"Volta lá depois — vou guardar uma lâmina especial pra você."</i>' }
     ]
   },
-  kid_hero: {
+  kid_adventure: {
     npc_key: 'crianca_praca',
-    npc_data: { name: 'Crianças da Praça', desc: 'Pequenos brincando de aventura', portrait: 'ic-praca' },
+    npc_data: { name: 'Crianças da Praça', desc: 'Pequenos brincando de aventura', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/plaza/crianca_pomar.webp' },
     script: [
       { type: 'narration', text: 'Crianças brincam de aventureiros com gravetos por espadas. Uma delas te vê e o jogo congela.' },
       { type: 'speech', speaker: 'Criança da Praça', text: '— É VOCÊ! <i>(elas correm em sua direção)</i> Faz autógrafo! No nosso pergaminho!' }
@@ -41213,7 +41215,7 @@ var PLAZA_PASSIVE_DIALOGUES = {
   },
   rain_shelter: {
     npc_key: 'morador_eldoria',
-    npc_data: { name: 'Morador de Valdoria', desc: 'Vizinho oferecendo abrigo', portrait: 'ic-praca' },
+    npc_data: { name: 'Morador de Valdoria', desc: 'Vizinho oferecendo abrigo', portrait: 'ic-praca', portraitImg: '/shared/img/npcs/torvin-trabalhador.webp' },
     script: [
       { type: 'narration', text: 'Começa uma chuva fina. Moradores oferecem abrigo sob seus toldos.' },
       { type: 'speech', speaker: 'Morador da Cidade', text: '— Vem, aventureiro. <i>(o homem ergue o toldo)</i> Não custa nada e seca rápido.' }
@@ -46272,7 +46274,7 @@ function _squareArtistClosed(p, res){
   }
   var txt = (res && res.scene && res.scene[0] && res.scene[0].text) || 'Os artistas recolheram-se por ora.';
   window.vEncounter.render({
-    npc: { id: 'artists_closed', name: 'Artistas de Rua', desc: '' },
+    npc: { id: 'artists_closed', name: 'Artistas de Rua', desc: 'Apresentações encerradas por ora', portrait: '/shared/img/npcs/plaza/bardo_praca.webp' },
     script: [{ type: 'narration', text: txt }],
     choices: [{ id: 'leave', label: 'Seguir caminho' }]
   }, {
@@ -47854,7 +47856,7 @@ function _squareShowExploreEvent(p){
       return { id: ch.id, label: ch.label + (h ? '  ·  ' + h : ''), _ch: ch };
     });
     window.vEncounter.render({
-      npc: { name: ev.title, desc: 'Praça Central', id: 'pz_' + ev.id },
+      npc: { name: ev.title, desc: 'Praça Central', id: 'pz_' + ev.id, portrait: '/shared/img/city/square.webp' },
       script: [{ type: 'narration', text: ev.desc }],
       choices: choices
     }, {
@@ -75410,7 +75412,16 @@ function _enterSewer(p){
     }
     if (window.vEncounter && window.vEncounter.render) {
       window.vEncounter.render(
-        { npc: null, script: data.script, choices: data.choices },
+        {
+          npc: {
+            id: 'sewer_passageway',
+            name: 'Passagem Subterrânea',
+            desc: 'Galerias pluviais sob a muralha sul',
+            portrait: '/shared/img/combat/esgoto.webp'
+          },
+          script: data.script,
+          choices: data.choices
+        },
         { player: p, closeable: true, onChoice: function(ch){ _resolveSewerChoice(p, ch && ch.id); } }
       );
     }
@@ -75441,7 +75452,16 @@ function _handleSewerResult(p, data){
   // retreat → cena final da subida + fecha + refresh HUD
   var script = Array.isArray(data.script) ? data.script : [];
   window.vEncounter.render(
-    { npc: null, script: script, choices: [{ id: 'done', label: '↩ Voltar' }] },
+    {
+      npc: {
+        id: 'sewer_passageway',
+        name: 'Passagem Subterrânea',
+        desc: 'Retirada das galerias subterrâneas',
+        portrait: '/shared/img/combat/esgoto.webp'
+      },
+      script: script,
+      choices: [{ id: 'done', label: '↩ Voltar' }]
+    },
     { player: p, onChoice: function(){ try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); } }
   );
 }
@@ -76181,7 +76201,7 @@ function _showCityWalkArrival(dest, narrativeText, proceedFn) {
       arrivalNpc = {
         name: arrivalTarget,
         desc: 'Destino em Valdoria',
-        portrait: (dest.district && dest.district.img) ? dest.district.img : '/shared/img/locations/praca-central.webp'
+        portrait: (dest.district && dest.district.img) ? dest.district.img : '/shared/img/city/square.webp'
       };
     }
 
@@ -81561,7 +81581,8 @@ function _openCorvusGreetingDialog(player, opts) {
     RECURRING_NPCS.corvus_greeting = {
       name: 'Mestre Corvus',
       desc: 'Cartógrafo, ex-navegador da Frota Mercante de Solhaven',
-      portrait: 'ic-cartografia'
+      portrait: 'ic-cartografia',
+      portraitImg: '/shared/img/merchants/corvus-veltharion.webp'
     };
   }
 
@@ -84019,7 +84040,8 @@ function _showCorvusMapRevealDialog(player, newMaps) {
     RECURRING_NPCS.corvus_greeting = {
       name: 'Mestre Corvus',
       desc: 'Cartógrafo, ex-navegador da Frota Mercante de Solhaven',
-      portrait: 'ic-cartografia'
+      portrait: 'ic-cartografia',
+      portraitImg: '/shared/img/merchants/corvus-veltharion.webp'
     };
   }
 

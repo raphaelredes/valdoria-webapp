@@ -178,7 +178,7 @@ var SERVICE_DIALOGUES_TEMPLE = {
     npc: {
       name: 'Sumo-Sacerdote Varek',
       desc: 'Sumo-Sacerdote · quarenta anos servindo os Quatro',
-      portrait: '../shared/img/npcs/varek-sumo-sacerdote.webp?v=20261011'
+      portrait: '../shared/img/npcs/varek-sumo-sacerdote.webp'
     },
     script: [
       { type: 'narration', text: 'Sumo-Sacerdote Varek aparece raramente no salão público — sua presença significa que algo grave foi pedido. Ele se aproxima do altar trazendo um cetro de prata e ônix. As vestes púrpura debruadas em fio de platina arrastam-se solenes contra o mármore.' },

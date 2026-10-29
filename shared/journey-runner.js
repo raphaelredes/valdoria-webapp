@@ -128,7 +128,7 @@
       npc: {
         name: 'Compêndio de Cartografia',
         desc: 'Tratado Oficial de Medição e Rotas de Valdoria',
-        portrait: '../shared/img/npcs/corvus.webp'
+        portrait: '/shared/img/merchants/corvus-veltharion.webp'
       },
       script: scriptLines,
       choices: [{ id: 'marco_lore_ack', label: 'Compreendido, planejar postura de marcha ▸' }],
