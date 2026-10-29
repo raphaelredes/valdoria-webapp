@@ -4964,22 +4964,19 @@ LOG SINK (Fase 7):
       opacity: 0.5;
     }
 
-    /* ===== CARD V8 — MINI compact =====
-       Altura compacta de 78px para economia de tela no Telegram Desktop.
-       Em frame 384/430 com 4 cols, cada card fica ~88-100px wide x 78px tall. */
+    /* ===== CARD V8 — OPÇÃO 9: GLASSMORPHISM MEDIEVAL TRANSLÚCIDO =====
+       Altura compacta de 78px com chips arredondados e leitura ultra-nítida no Telegram Desktop. */
     .cgp-card.v8-style {
       position: relative;
-      background: var(--card-accent-dark, #1a1510);
-      border: 1.5px solid var(--v-gold, #c4953a);
-      border-radius: 5px;
+      background: rgba(24, 19, 14, 0.95);
+      border: 1.5px solid rgba(196, 149, 58, 0.45);
+      border-radius: 6px;
       padding: 0 !important;
       gap: 0 !important;
       box-shadow:
-        0 0 0 1px #0a0806,
         0 3px 8px rgba(0, 0, 0, 0.55),
-        inset 0 0 0 1px rgba(255, 220, 140, 0.2);
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
       font-family: var(--v-font-display, 'Cinzel'), serif;
-      /* Dimensoes mini compactas: largura responsiva (100% grid cell), altura 78px */
       width: 100% !important;
       min-width: 0 !important;
       max-width: none !important;
@@ -4991,83 +4988,224 @@ LOG SINK (Fase 7):
       flex-direction: column !important;
       overflow: hidden !important;
       box-sizing: border-box;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
 
-    /* ===== c-name (banner topo) — padding super compacto pra portrait 15x15 ===== */
-    .cgp-card.v8-style .c-name {
-      background: color-mix(in srgb, var(--card-accent-dark, #1a1510) 70%, #000);
-      border-bottom: none;
-      padding: 2px 18px 0px 4px;
-      margin: 0;
-      font-family: var(--v-font-display, 'Cinzel'), serif;
+    /* Player border — gold com sutil glow */
+    .cgp-card.v8-style.player {
+      border-color: rgba(255, 215, 0, 0.65) !important;
+      box-shadow:
+        0 3px 10px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        0 0 8px rgba(196, 149, 58, 0.25) !important;
+    }
+    .cgp-card.v8-style:not(.player) {
+      border-color: rgba(120, 170, 80, 0.5) !important;
+    }
+
+    /* Header Opção 9: Nome à esquerda, Tag/Ouro à direita */
+    .cgp-card.v8-style .cgp-opt9-head {
+      padding: 2px 5px 1px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(196, 149, 58, 0.22);
+      background: rgba(0, 0, 0, 0.35);
+      line-height: 1.1;
+      box-sizing: border-box;
+      width: 100%;
+    }
+    .cgp-card.v8-style .cgp-opt9-name {
+      font-size: calc(11.5px * var(--v-font-scale, 1));
       font-weight: 900;
-      font-size: calc(11px * var(--v-font-scale, 1));
+      color: #ffd566;
       letter-spacing: 0.3px;
-      text-align: left;
-      color: color-mix(in srgb, var(--card-accent, #c4953a) 20%, #fff 80%);
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       text-transform: uppercase;
-      line-height: 1.1;
     }
-
-    /* ===== c-class-tag (subtitle abaixo do nome) ===== */
-    .cgp-card.v8-style .c-class-tag {
-      background: color-mix(in srgb, var(--card-accent-dark, #1a1510) 70%, #000);
-      color: color-mix(in srgb, var(--card-accent, #c4953a) 30%, #fff 70%);
-      padding: 0 18px 1px 4px;
-      margin: 0;
-      border-bottom: 1px solid var(--v-gold, #c4953a);
-      font-family: var(--v-font-display, 'Cinzel'), serif;
+    .cgp-card.v8-style:not(.player) .cgp-opt9-name {
+      color: #c8e4a4;
+    }
+    .cgp-card.v8-style .cgp-opt9-tag {
       font-size: calc(11px * var(--v-font-scale, 1));
-      letter-spacing: 0.3px;
-      text-align: left;
-      text-transform: uppercase;
+      color: #a09484;
       font-weight: 700;
-      opacity: 0.85;
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      line-height: 1.1;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .cgp-card.v8-style:not(.player) .cgp-opt9-tag {
+      color: #8ea870;
+    }
+    .cgp-card.v8-style .cgp-opt9-tag .vi-coin.sm {
+      width: 11px;
+      height: 11px;
+      margin-left: 2px;
+      vertical-align: middle;
     }
 
-    /* ===== c-portrait (heraldic SVG canto sup. direito) — 15x15 mini ===== */
-    .cgp-card.v8-style .c-portrait {
-      position: absolute;
-      top: 2px;
-      right: 2px;
-      width: 15px;
-      height: 15px;
+    /* Stats Body Opção 9: Pills com trilhos elegantes */
+    .cgp-card.v8-style .cgp-opt9-stats {
+      padding: 2px 5px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1 1 auto;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+    .cgp-card.v8-style .cgp-opt9-stat-pill {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(196, 149, 58, 0.22);
+      border-radius: 3px;
+      padding: 1px 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: calc(11px * var(--v-font-scale, 1));
+      line-height: 1;
+      box-sizing: border-box;
+    }
+    .cgp-card.v8-style .cgp-opt9-lbl {
+      font-weight: 800;
+      font-size: calc(11px * var(--v-font-scale, 1));
+      line-height: 1;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+    .cgp-card.v8-style .cgp-opt9-lbl.hp { color: #72ba4a; }
+    .cgp-card.v8-style .cgp-opt9-lbl.mp { color: #5aaaf4; }
+    .cgp-card.v8-style .cgp-opt9-lbl.furia { color: #ff6040; }
+    .cgp-card.v8-style .cgp-opt9-lbl.vigor { color: #ffd060; }
+    .cgp-card.v8-style .cgp-opt9-lbl.energia { color: #60e8d0; }
+    .cgp-card.v8-style .cgp-opt9-lbl.ki { color: #c080ff; }
+
+    .cgp-card.v8-style .cgp-opt9-bar-track {
+      flex: 1 1 auto;
+      height: 3px;
+      background: #000;
+      margin: 0 5px;
+      border-radius: 2px;
+      overflow: hidden;
+      border: 1px solid rgba(196, 149, 58, 0.18);
+    }
+    .cgp-card.v8-style .cgp-opt9-bar-fill {
+      height: 100%;
+      transition: width 400ms ease;
+    }
+    .cgp-card.v8-style .cgp-opt9-bar-fill.hp {
+      background: linear-gradient(90deg, #488030, #72ba4a);
+    }
+    .cgp-card.v8-style .cgp-opt9-bar-fill.hp-mid {
+      background: linear-gradient(90deg, #946820, #d0a040);
+    }
+    .cgp-card.v8-style .cgp-opt9-bar-fill.hp-low {
+      background: linear-gradient(90deg, #8a2a20, #e05040);
+    }
+    .cgp-card.v8-style .cgp-opt9-bar-fill.mp {
+      background: linear-gradient(90deg, #205080, #5aaaf4);
+    }
+    .cgp-card.v8-style .cgp-opt9-bar-fill.furia {
+      background: linear-gradient(90deg, #8a3020, #ff6040);
+    }
+    .cgp-card.v8-style .cgp-opt9-bar-fill.vigor {
+      background: linear-gradient(90deg, #806820, #ffd060);
+    }
+    .cgp-card.v8-style .cgp-opt9-bar-fill.energia {
+      background: linear-gradient(90deg, #208a78, #60e8d0);
+    }
+    .cgp-card.v8-style .cgp-opt9-bar-fill.ki {
+      background: linear-gradient(90deg, #603888, #c080ff);
+    }
+
+    .cgp-card.v8-style .cgp-opt9-val {
+      color: #ffffff;
+      font-weight: 800;
+      font-size: calc(11px * var(--v-font-scale, 1));
+      line-height: 1;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .cgp-card.v8-style .cgp-opt9-xp-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: calc(11px * var(--v-font-scale, 1));
+      padding: 0 2px;
+      line-height: 1;
+      box-sizing: border-box;
+    }
+    .cgp-card.v8-style .cgp-opt9-xp-lbl {
+      color: #d4a024;
+      font-weight: 700;
+    }
+    .cgp-card.v8-style .cgp-opt9-xp-val {
+      color: #ffd566;
+      font-weight: 800;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
+    }
+
+    /* Aliado Chat Zone Opção 9: Botão Translúcido Moderno */
+    .cgp-card.v8-style.chat-only {
+      cursor: pointer;
+    }
+    .cgp-card.v8-style .c-chat-zone {
+      flex: 1 1 auto;
+      width: 100%;
+      height: 100%;
       margin: 0;
+      padding: 3px;
+      box-sizing: border-box;
       background: transparent;
       border: 0;
-      border-radius: 0;
-      box-shadow: none;
-      padding: 0;
       display: flex !important;
       align-items: center;
       justify-content: center;
-      z-index: 3;
-      color: color-mix(in srgb, var(--card-accent, #c4953a) 45%, #fff 55%);
+      cursor: pointer;
     }
-    .cgp-card.v8-style .c-portrait svg {
+    .cgp-card.v8-style .c-chat-zone-inner {
       width: 100%;
       height: 100%;
-      fill: currentColor;
-      stroke: currentColor;
-      filter:
-        drop-shadow(0 0 2px color-mix(in srgb, var(--card-accent, #c4953a) 70%, transparent))
-        drop-shadow(0 1px 1px rgba(0, 0, 0, 0.85));
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(120, 170, 80, 0.4);
+      border-radius: 4px;
+      color: #c8e4a4;
+      font-family: var(--v-font-display, 'Cinzel'), serif;
+      font-size: calc(11px * var(--v-font-scale, 1));
+      font-weight: 800;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.15s ease, border-color 0.15s ease;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      box-sizing: border-box;
+    }
+    .cgp-card.v8-style .c-chat-zone:active .c-chat-zone-inner {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(120, 170, 80, 0.7);
+    }
+    .cgp-card.v8-style .c-chat-zone .c-chat-icon {
+      width: 14px;
+      height: 14px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 3px rgba(120, 170, 80, 0.6));
+    }
+    .cgp-card.v8-style .c-chat-zone .c-chat-label {
+      font-size: calc(11px * var(--v-font-scale, 1));
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      line-height: 1;
     }
 
-    /* ===== Efeitos temporários ATIVOS — anel dourado pulsante (sessão #71h) =====
-       PADRAO_LOCAIS: indica boato/sonho ativo no card do player SEM cobrir conteúdo
-       (o card é minúsculo e denso; um badge de canto colidia com o nome/stats). O
-       anel inset fica DENTRO do card (overflow:hidden → não vaza p/ cards vizinhos)
-       + glow externo contido. O pulso é o sinal "vivo"; tap no card → ficha (seção
-       "Efeitos Ativos") com a lista completa. perf-lite usa estado fixo (sem anim). */
+    /* ===== Efeitos temporários ATIVOS — anel dourado pulsante (sessão #71h) ===== */
     .cgp-card.v8-style.has-active-effects {
       animation: cEffRing 2s ease-in-out infinite;
     }
@@ -5080,137 +5218,6 @@ LOG SINK (Fase 7):
       box-shadow: inset 0 0 0 1.5px var(--v-gold, #c4953a), 0 0 9px rgba(232,196,90,0.5);
     }
 
-    /* ===== c-stats (single column 4 rows: PV/Recurso/XP/Gold — CA removida) ===== */
-    /* 2026-05-11 v5: removeu CA do card (user request). Grid simplificado pra
-       1 coluna — todas linhas full-width. */
-    .cgp-card.v8-style .c-stats {
-      padding: 1px 3px 1px;
-      background: color-mix(in srgb, var(--card-accent-dark, #1a1510) 70%, #000);
-      color: color-mix(in srgb, var(--card-accent, #c4953a) 20%, #fff 80%);
-      flex: 1 1 auto;
-      display: grid;
-      grid-template-columns: 1fr;
-      grid-template-rows: repeat(4, minmax(0, 1fr));
-      gap: 1px;
-      align-items: center;
-      justify-items: stretch;
-      overflow: hidden;
-    }
-    /* Class-based grid placement (1-col layout, sem CA) */
-    .cgp-card.v8-style .c-stat--hp     { grid-row: 1; }
-    .cgp-card.v8-style .c-stat--mp,
-    .cgp-card.v8-style .c-stat--furia,
-    .cgp-card.v8-style .c-stat--vigor,
-    .cgp-card.v8-style .c-stat--energia,
-    .cgp-card.v8-style .c-stat--ki     { grid-row: 2; }
-    .cgp-card.v8-style .c-stat--xp     { grid-row: 3; }
-    .cgp-card.v8-style .c-stat--gold   { grid-row: 4; }
-
-    /* Cada c-stat: horizontal (bar atras + label + val inline); CA vertical */
-    .cgp-card.v8-style .c-stat {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: var(--v-space-xs, 2px);
-      line-height: 1;
-      position: relative;
-      overflow: hidden;
-      border-radius: 3px;
-    }
-    .cgp-card.v8-style .c-stat--ca {
-      flex-direction: column;
-      align-items: center;
-      gap: 1px;
-    }
-    /* Gold row: ouro alinhado direita, label esquerda */
-    .cgp-card.v8-style .c-stat--gold {
-      justify-content: flex-end;
-      gap: 3px;
-    }
-
-    .cgp-card.v8-style .c-stat-label {
-      color: color-mix(in srgb, var(--card-accent, #c4953a) 30%, #fff 70%);
-      opacity: 0.75;
-      font-size: calc(11px * var(--v-font-scale, 1));
-      letter-spacing: 0.2px;
-      white-space: nowrap;
-      font-family: var(--v-font-display, 'Cinzel'), serif;
-      font-weight: 700;
-      position: relative;
-      z-index: 1;
-      line-height: 1;
-    }
-    .cgp-card.v8-style .c-stat-val {
-      color: color-mix(in srgb, var(--card-accent, #c4953a) 20%, #fff 80%);
-      text-shadow: 0 0 3px rgba(0, 0, 0, 0.6), 0 1px 1px rgba(0, 0, 0, 0.9);
-      font-size: calc(11px * var(--v-font-scale, 1));
-      font-weight: 900;
-      white-space: nowrap;
-      font-family: var(--v-font-display, 'Cinzel'), serif;
-      position: relative;
-      z-index: 1;
-    }
-    .cgp-card.v8-style .c-stat-val--hp-low { animation: cgpHpLowBlink 1.2s ease-in-out infinite; }
-    @keyframes cgpHpLowBlink { 0%,100% { opacity: 1; } 50% { opacity: 0.75; } }
-    /* 2026-05-11 v5: XP val em BRANCO pra ficar mais legível sobre o fundo dourado */
-    .cgp-card.v8-style .c-stat--xp .c-stat-label {
-      color: var(--v-gold, #c4953a);
-    }
-    .cgp-card.v8-style .c-stat--xp .c-stat-val {
-      color: #ffffff;
-      font-size: calc(11px * var(--v-font-scale, 1));
-      text-shadow: 0 0 4px rgba(0, 0, 0, 0.85), 0 1px 2px rgba(0, 0, 0, 0.95);
-    }
-    /* 2026-05-11 v5: Gold val em BRANCO + maior pra destaque (era gold 8px) */
-    .cgp-card.v8-style .c-stat--gold .c-stat-val {
-      color: #ffffff;
-      text-shadow: 0 0 4px rgba(0, 0, 0, 0.85), 0 1px 2px rgba(0, 0, 0, 0.95);
-      font-size: calc(11px * var(--v-font-scale, 1));
-      font-weight: 900;
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-    }
-    .cgp-card.v8-style .c-stat--gold .vi-coin.sm {
-      width: 12px;
-      height: 12px;
-    }
-
-    /* Barras atras de c-stat-val (PV + Recurso + XP) — fill behind */
-    .cgp-card.v8-style .c-stat-bar {
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      border-radius: inherit;
-      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
-    }
-    .cgp-card.v8-style .c-stat-bar-fill {
-      display: block;
-      height: 100%;
-      width: var(--bar-pct, 0%);
-      transition: width 700ms cubic-bezier(0.4, 0, 0.2, 1);
-      opacity: 0.6;
-      background: linear-gradient(90deg, var(--fill-from, #5a8a3e), var(--fill-to, #8ab04e));
-    }
-    .cgp-card.v8-style .c-stat-bar-fill--hp-high { --fill-from: #5a8a3e; --fill-to: #8ab04e; }
-    .cgp-card.v8-style .c-stat-bar-fill--hp-mid  { --fill-from: #b08038; --fill-to: #d0a040; }
-    .cgp-card.v8-style .c-stat-bar-fill--hp-low  { --fill-from: #8a2a20; --fill-to: #c04030; }
-    .cgp-card.v8-style .c-stat-bar-fill--mp      { --fill-from: #2a6090; --fill-to: #70c0f0; }
-    .cgp-card.v8-style .c-stat-bar-fill--furia   { --fill-from: #8a3020; --fill-to: #ff6040; }
-    .cgp-card.v8-style .c-stat-bar-fill--vigor   { --fill-from: #806820; --fill-to: #ffd060; }
-    .cgp-card.v8-style .c-stat-bar-fill--energia { --fill-from: #208a78; --fill-to: #60e8d0; }
-    .cgp-card.v8-style .c-stat-bar-fill--ki      { --fill-from: #603888; --fill-to: #c080ff; }
-    .cgp-card.v8-style .c-stat-bar-fill--xp      { --fill-from: var(--v-gold-dim, #8a6620); --fill-to: var(--v-gold, #c4953a); }
-
-    /* Player border — gold full opacidade */
-    .cgp-card.v8-style.player {
-      border-color: var(--v-gold, #c4953a) !important;
-      box-shadow:
-        0 0 0 1px #0a0806,
-        0 4px 16px color-mix(in srgb, var(--card-accent, #c4953a) 30%, transparent),
-        inset 0 0 0 1px rgba(255, 220, 140, 0.3);
-    }
     /* Dead state */
     .cgp-card.v8-style.dead {
       filter: grayscale(0.85) brightness(0.65);
@@ -70403,40 +70410,48 @@ function renderCityGroupPanel(){
       }
 
       var isLivingAlly = !m.isPlayer && !m.dead;
+      var tagStr = isLivingAlly
+        ? (safeCls + ' ' + m.level)
+        : (safeCls + ' ' + m.level + ' · ' + goldStr + '<span class="vi vi-coin sm"></span>');
+
       html += '<div class="cgp-slot" data-slot="' + i + '">'
         + '  <div class="cgp-card v8-style' + clsModifier + playerCls + deadCls + _effClass + pulseCls + (isLivingAlly ? ' chat-only' : '') + '"' + _effTitle + ' data-member="' + i + '">'
         + levelupBadgeHtml
-        + '    <div class="c-name">' + safeName + '</div>'
-        + '    <div class="c-portrait"><svg viewBox="0 0 120 120" aria-hidden="true"><use href="#' + heraldicId + '"/></svg></div>'
-        + '    <div class="c-class-tag">' + safeCls + ' · Nv ' + m.level + '</div>';
+        + '    <div class="cgp-opt9-head">'
+        + '      <span class="cgp-opt9-name">' + safeName + '</span>'
+        + '      <span class="cgp-opt9-tag">' + tagStr + '</span>'
+        + '    </div>';
       if (isLivingAlly) {
         html += '    <button class="c-chat-zone" data-chat-idx="' + i + '" type="button"'
           + ' title="Conversar com ' + safeName + '"'
           + ' aria-label="Conversar com ' + safeName + '">'
-          + '<img class="c-chat-icon" src="/shared/img/ui/dialogo.webp" alt="" onerror="this.style.display=\'none\'">'
-          + '<span class="c-chat-label">Conversar</span>'
-          + '</button>';
+          + '      <div class="c-chat-zone-inner">'
+          + '        <img class="c-chat-icon" src="/shared/img/ui/dialogo.webp" alt="" onerror="this.style.display=\'none\'">'
+          + '        <span class="c-chat-label">CONVERSAR</span>'
+          + '      </div>'
+          + '    </button>';
       } else {
-        html += '    <div class="c-stats">'
-          + '      <div class="c-stat c-stat--hp" style="--bar-pct:' + hpPct + '%">'
-          + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--hp-' + hpThr + '"></span></div>'
-          + '        <span class="c-stat-label">PV</span>'
-          + '        <span class="c-stat-val c-stat-val--hp c-stat-val--hp-' + hpThr + '">' + m.hp + '/' + m.hpMax + '</span>'
+        var xpDisplay = (m.xpNext ? (_fmtV(m.xp) + ' / ' + _fmtV(m.xpNext)) : m.xp);
+        html += '    <div class="cgp-opt9-stats">'
+          + '      <div class="cgp-opt9-stat-pill">'
+          + '        <span class="cgp-opt9-lbl hp">PV</span>'
+          + '        <div class="cgp-opt9-bar-track">'
+          + '          <div class="cgp-opt9-bar-fill hp hp-' + hpThr + '" style="width:' + hpPct + '%;"></div>'
+          + '        </div>'
+          + '        <span class="cgp-opt9-val hp c-stat-val--hp-' + hpThr + '">' + m.hp + '/' + m.hpMax + '</span>'
           + '      </div>';
         if (m.mpMax > 0) {
-          html += '      <div class="c-stat c-stat--' + resBarSuffix + '" style="--bar-pct:' + mpPct + '%">'
-            + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--' + resBarSuffix + '"></span></div>'
-            + '        <span class="c-stat-label">' + safeResName + '</span>'
-            + '        <span class="c-stat-val">' + m.mp + '/' + m.mpMax + '</span>'
+          html += '      <div class="cgp-opt9-stat-pill">'
+            + '        <span class="cgp-opt9-lbl ' + resBarSuffix + '">' + safeResName + '</span>'
+            + '        <div class="cgp-opt9-bar-track">'
+            + '          <div class="cgp-opt9-bar-fill ' + resBarSuffix + '" style="width:' + mpPct + '%;"></div>'
+            + '        </div>'
+            + '        <span class="cgp-opt9-val">' + m.mp + '/' + m.mpMax + '</span>'
             + '      </div>';
         }
-        html += '      <div class="c-stat c-stat--xp" style="--bar-pct:' + xpPct + '%" title="XP ' + m.xp + '/' + m.xpNext + '">'
-          + '        <div class="c-stat-bar"><span class="c-stat-bar-fill c-stat-bar-fill--xp"></span></div>'
-          + '        <span class="c-stat-label">XP</span>'
-          + '        <span class="c-stat-val">' + m.xp + '/' + m.xpNext + '</span>'
-          + '      </div>'
-          + '      <div class="c-stat c-stat--gold" title="' + (m.gold || 0) + ' Valdoritas">'
-          + '        <span class="c-stat-val">' + goldStr + '<span class="vi vi-coin sm"></span></span>'
+        html += '      <div class="cgp-opt9-xp-row" title="XP ' + m.xp + '/' + m.xpNext + '">'
+          + '        <span class="cgp-opt9-xp-lbl">XP</span>'
+          + '        <span class="cgp-opt9-xp-val">' + xpDisplay + '</span>'
           + '      </div>'
           + '    </div>';
       }
