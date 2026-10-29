@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-29T21:56:40Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-29T22:50:02Z - do not edit directly, edit source -->
 
 
 
@@ -6183,28 +6183,65 @@ body.footer-collapsed #footer-restore { display: block; }
 }
 
 .explore-modal-overlay .em-card {
-
-  width: 100%; max-width: 360px; max-height: 90%; overflow-y: auto;
-
-  background: linear-gradient(180deg, var(--v-bg-card,#2e2520), var(--v-bg,#2a2420));
-
-  border: 1px solid var(--v-gold,#c4953a); border-radius: var(--v-radius,10px);
-
-  box-shadow: 0 8px 32px rgba(0,0,0,0.6), inset 0 0 20px rgba(196,149,58,0.08);
-
+  width: 100%; max-width: min(calc(100vw - 20px), 420px); max-height: min(92vh, 680px); overflow-y: auto;
+  background-color: #241a12;
+  background-image: radial-gradient(ellipse at 50% 12%, rgba(68, 50, 32, 0.65) 0%, rgba(20, 15, 10, 0.98) 75%);
+  border: 1.5px solid #c4953a;
+  outline: 1px solid rgba(196, 149, 58, 0.28);
+  outline-offset: -5px;
+  border-radius: 12px;
+  box-shadow: inset 0 0 45px rgba(8, 5, 2, 0.9), 0 0 0 1px rgba(196, 149, 58, 0.25), 0 16px 48px rgba(0, 0, 0, 0.85);
 }
 
-.explore-modal-overlay .em-head { display: flex; align-items: center; justify-content: space-between; padding: var(--v-space-lg, 12px) 14px; border-bottom: 1px solid var(--v-border,#4a3828); }
+.explore-modal-overlay .em-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 16px;
+  background: linear-gradient(180deg, rgba(196, 149, 58, 0.18) 0%, rgba(28, 20, 14, 0.88) 100%);
+  border-bottom: 1px solid rgba(196, 149, 58, 0.35);
+}
 
-.explore-modal-overlay .em-title { font-family: var(--v-font-display,Cinzel,serif); font-size: calc(15px * var(--v-font-scale,1)); color: var(--v-gold,#c4953a); letter-spacing: 1px; text-transform: uppercase; }
+.explore-modal-overlay .em-title {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: calc(15.5px * var(--v-font-scale, 1));
+  font-weight: 800;
+  color: #fff2c4;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.95), 0 0 12px rgba(232,196,90,0.4);
+}
 
-.explore-modal-overlay .em-close { background: none; border: none; color: var(--v-text-dim,#a09484); font-size: calc(18px * var(--v-font-scale,1)); cursor: pointer; line-height: 1; padding: 0 var(--v-space-sm, 4px); }
+.explore-modal-overlay .em-close {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1.5px solid rgba(196, 149, 58, 0.6);
+  background: radial-gradient(circle, rgba(45, 32, 20, 0.95), rgba(20, 15, 10, 0.98));
+  color: #e8c45a; font-size: 13px; font-weight: 700;
+  cursor: pointer; line-height: 1; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s ease;
+}
 
-.explore-modal-overlay .em-close:hover { color: var(--v-gold,#c4953a); }
+.explore-modal-overlay .em-close:hover {
+  background: rgba(196, 149, 58, 0.25);
+  color: #ffffff; border-color: #ffd700;
+  transform: scale(1.06);
+}
 
-.explore-modal-overlay .em-body { padding: var(--v-space-md-lg, 10px) 14px 14px; }
+.explore-modal-overlay .em-body { padding: 14px 16px; }
 
-.explore-modal-overlay .em-section { font-family: var(--v-font-display,Cinzel,serif); font-size: calc(10px * var(--v-font-scale,1)); color: var(--v-gold,#c4953a); letter-spacing: 1.5px; text-transform: uppercase; margin: var(--v-space-lg, 12px) 0 6px; padding-top: 6px; border-top: 1px solid var(--v-gold-12,rgba(196,149,58,0.12)); }
+.explore-modal-overlay .em-section {
+  font-family: var(--v-font-display, 'Cinzel', serif);
+  font-size: calc(11px * var(--v-font-scale, 1));
+  font-weight: 800;
+  color: #ffd700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin: 12px 0 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(196, 149, 58, 0.22);
+  display: flex; align-items: center; gap: 5px;
+}
+
+.explore-modal-overlay .em-section::before { content: '⚜'; font-size: 11px; color: #e8c45a; }
 
 .explore-modal-overlay .em-section.first { margin-top: 0; border-top: none; padding-top: 0; }
 
@@ -101896,7 +101933,11 @@ function _showExploreHelp(explicitCtx) {
 
     + tip('<b>Mochila:</b> itens e equipamento. <b>Ficha:</b> seus atributos e exaustão. <b>Hall:</b> retorna à cidade ou troca de personagem.')
 
-    + '</div></div>';
+    + '</div>'
+    + '<div style="padding:10px 14px;border-top:1px solid rgba(196,149,58,0.25);background:rgba(16,12,8,0.85);">'
+    +   '<button type="button" id="exh-entendido-btn" style="width:100%;padding:10px;border-radius:8px;border:1.5px solid rgba(196,149,58,0.45);background:linear-gradient(180deg,rgba(62,48,34,0.9),rgba(38,28,20,0.95));color:#e4d8c2;font-family:\'Cinzel\',serif;font-size:13px;font-weight:700;letter-spacing:0.8px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.4);">Entendido</button>'
+    + '</div>'
+    + '</div>';
 
   var ov = document.createElement('div');
 
@@ -101911,6 +101952,7 @@ function _showExploreHelp(explicitCtx) {
   ov.addEventListener('click', function (e) { if (e.target === ov) _closeExploreModal('explore-help-overlay'); });
 
   var cb = ov.querySelector('#exh-close'); if (cb) cb.addEventListener('click', function () { _closeExploreModal('explore-help-overlay'); });
+  var entBtn = ov.querySelector('#exh-entendido-btn'); if (entBtn) entBtn.addEventListener('click', function () { _closeExploreModal('explore-help-overlay'); });
 
 }
 

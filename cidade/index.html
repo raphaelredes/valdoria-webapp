@@ -8565,10 +8565,10 @@ body.perf-lite .vc-action-btn { transition: none; }
       display: none;
       align-items: center;
       justify-content: center;
-      background: rgba(8, 6, 4, 0.78);
+      background: rgba(8, 6, 4, 0.82);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
-      padding: 14px;
+      padding: 12px;
     }
     #city-guide-overlay.active {
       display: flex;
@@ -8580,45 +8580,52 @@ body.perf-lite .vc-action-btn { transition: none; }
     }
     .csg-card {
       width: 100%;
-      max-width: 440px;
-      max-height: 88vh;
+      max-width: min(calc(100vw - 20px), 430px);
+      max-height: min(92vh, 680px);
       display: flex;
       flex-direction: column;
-      background: linear-gradient(180deg, rgba(38,30,22,0.98), rgba(22,18,14,0.99));
+      background-color: #241a12;
+      background-image: radial-gradient(ellipse at 50% 12%, rgba(68, 50, 32, 0.65) 0%, rgba(20, 15, 10, 0.98) 75%);
       border: 1.5px solid #c4953a;
-      border-radius: 14px;
-      box-shadow: 0 16px 50px rgba(0,0,0,0.85), inset 0 1px 0 rgba(196,149,58,0.25), 0 0 30px rgba(196,149,58,0.15);
+      outline: 1px solid rgba(196, 149, 58, 0.28);
+      outline-offset: -5px;
+      border-radius: 12px;
+      box-shadow: inset 0 0 45px rgba(8, 5, 2, 0.9), 0 0 0 1px rgba(196, 149, 58, 0.25), 0 18px 50px rgba(0, 0, 0, 0.9);
       position: relative;
       overflow: hidden;
-      animation: csgCardPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      animation: csgCardPop 0.28s cubic-bezier(0.16, 1.08, 0.32, 1);
     }
     @keyframes csgCardPop {
-      from { opacity: 0; transform: scale(0.94) translateY(12px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
+      from { opacity: 0; transform: translateY(14px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
     .csg-header {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 16px 18px 12px;
-      border-bottom: 1px solid rgba(196,149,58,0.3);
-      background: linear-gradient(180deg, rgba(196,149,58,0.12), transparent);
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid rgba(196, 149, 58, 0.35);
+      background: linear-gradient(180deg, rgba(196, 149, 58, 0.18) 0%, rgba(28, 20, 14, 0.88) 100%);
       position: relative;
       flex-shrink: 0;
     }
     .csg-crest {
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       flex-shrink: 0;
+      border-radius: 50%;
+      border: 1.5px solid #d4a54a;
+      background: radial-gradient(circle at 35% 30%, rgba(232, 196, 90, 0.38), rgba(30, 22, 14, 0.96));
+      box-shadow: 0 2px 8px rgba(0,0,0,0.65), 0 0 12px rgba(196, 149, 58, 0.35);
       display: flex;
       align-items: center;
       justify-content: center;
-      filter: drop-shadow(0 2px 8px rgba(196,149,58,0.4));
     }
     .csg-crest svg, .csg-crest img {
-      width: 36px;
-      height: 36px;
+      width: 26px !important;
+      height: 26px !important;
       object-fit: contain;
+      filter: drop-shadow(0 1px 3px rgba(0,0,0,0.8));
     }
     .csg-title-wrap {
       flex: 1;
@@ -8626,59 +8633,72 @@ body.perf-lite .vc-action-btn { transition: none; }
     }
     .csg-kicker {
       font-family: 'Cinzel', serif;
-      font-size: calc(11px * var(--v-font-scale, 1));
+      font-size: 11px;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: #c4953a;
-      opacity: 0.85;
+      color: #d4a54a;
       margin-bottom: 2px;
       font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .csg-kicker::before {
+      content: '⚜';
+      font-size: 11px;
+      color: #e8c45a;
     }
     .csg-title {
       margin: 0;
       font-family: 'Cinzel', serif;
-      font-size: calc(15px * var(--v-font-scale, 1));
-      font-weight: 700;
-      color: #c4953a;
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff2c4;
       letter-spacing: 1.2px;
       text-transform: uppercase;
-      text-shadow: 0 0 12px rgba(196,149,58,0.4);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.95), 0 0 14px rgba(232,196,90,0.45);
       line-height: 1.2;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .csg-subtitle {
-      font-size: calc(11px * var(--v-font-scale, 1));
-      color: #a09484;
-      margin-top: 3px;
+      font-size: 12px;
+      color: #bfaea0;
+      margin-top: 2px;
       font-style: italic;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .csg-close-icon {
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
-      border: 1px solid rgba(196,149,58,0.35);
-      background: rgba(0,0,0,0.3);
-      color: #c4953a;
-      font-size: 13px;
+      border: 1.5px solid rgba(196, 149, 58, 0.6);
+      background: radial-gradient(circle, rgba(45, 32, 20, 0.95), rgba(20, 15, 10, 0.98));
+      color: #e8c45a;
+      font-size: 14px;
+      font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
       flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
     }
     .csg-close-icon:hover {
-      background: rgba(196,149,58,0.25);
-      color: #fff;
-      border-color: #c4953a;
+      background: rgba(196, 149, 58, 0.25);
+      color: #ffffff;
+      border-color: #ffd700;
+      transform: scale(1.06);
     }
     .csg-body {
       flex: 1 1 auto;
       overflow-y: auto;
       overscroll-behavior: contain;
-      padding: 14px 18px;
+      padding: 14px 16px;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -8687,91 +8707,101 @@ body.perf-lite .vc-action-btn { transition: none; }
       width: 5px;
     }
     .csg-body::-webkit-scrollbar-thumb {
-      background: rgba(196,149,58,0.35);
+      background: rgba(196,149,58,0.45);
       border-radius: 4px;
     }
     .csg-intro {
       font-family: var(--v-font);
-      font-size: calc(13px * var(--v-font-scale, 1));
+      font-size: 13px;
       line-height: 1.55;
-      color: #d4c8b0;
-      padding: 4px 2px;
+      color: #f0e6d2;
+      font-style: italic;
+      padding: 8px 12px;
+      background: linear-gradient(90deg, rgba(196, 149, 58, 0.14), rgba(30, 22, 14, 0.45));
+      border-left: 3.5px solid #c4953a;
+      border-radius: 4px;
+      margin-bottom: 2px;
     }
     .csg-item {
-      background: rgba(18, 14, 10, 0.7);
-      border: 1px solid rgba(196, 149, 58, 0.22);
-      border-left: 3px solid #c4953a;
+      background: linear-gradient(135deg, rgba(42, 32, 22, 0.8) 0%, rgba(22, 16, 12, 0.94) 100%);
+      border: 1px solid rgba(196, 149, 58, 0.28);
+      border-left: 3.5px solid #d4a54a;
       border-radius: 8px;
-      padding: 10px 12px;
-      transition: border-color 0.2s ease;
+      padding: 10px 13px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      transition: border-color 0.18s ease;
     }
     .csg-item:hover {
-      border-color: rgba(196, 149, 58, 0.45);
+      border-color: rgba(196, 149, 58, 0.5);
     }
     .csg-item-title {
       font-family: 'Cinzel', serif;
-      font-size: calc(12.5px * var(--v-font-scale, 1));
+      font-size: 13.5px;
       font-weight: 700;
-      color: #e2bd70;
-      margin-bottom: 5px;
+      color: #ffe6a3;
+      margin-bottom: 6px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
       flex-wrap: wrap;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.85);
     }
     .csg-item-title span.csg-diamond {
-      color: #c4953a;
+      color: #ffd700;
       font-size: 11px;
-      margin-right: 4px;
+      margin-right: 6px;
+      text-shadow: 0 0 6px rgba(232,196,90,0.6);
     }
     .csg-item-desc {
       font-family: var(--v-font);
-      font-size: calc(12px * var(--v-font-scale, 1));
+      font-size: 12.5px;
       line-height: 1.55;
-      color: #c8bca4;
+      color: #dcd0bc;
     }
     .csg-badge {
       display: inline-block;
-      padding: 1px 7px;
-      border-radius: 10px;
-      font-family: sans-serif;
+      padding: 2px 9px;
+      border-radius: 12px;
+      font-family: 'Cinzel', serif;
       font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.3px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
       text-transform: uppercase;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
     }
     .csg-badge.gold {
-      background: rgba(196, 149, 58, 0.2);
-      border: 1px solid rgba(196, 149, 58, 0.5);
-      color: #e4b75a;
+      background: radial-gradient(circle, rgba(196, 149, 58, 0.32), rgba(36, 24, 14, 0.9));
+      border: 1px solid #d4a54a;
+      color: #ffd875;
     }
     .csg-badge.green {
-      background: rgba(60, 140, 60, 0.2);
-      border: 1px solid rgba(60, 140, 60, 0.5);
-      color: #72d672;
+      background: radial-gradient(circle, rgba(40, 120, 50, 0.35), rgba(16, 32, 16, 0.9));
+      border: 1px solid #52bd62;
+      color: #8cf29c;
     }
     .csg-badge.blue {
-      background: rgba(60, 100, 180, 0.2);
-      border: 1px solid rgba(60, 100, 180, 0.5);
-      color: #72a6f2;
+      background: radial-gradient(circle, rgba(40, 90, 170, 0.35), rgba(16, 24, 44, 0.9));
+      border: 1px solid #5a9ae6;
+      color: #8ec3ff;
     }
     .csg-tip {
-      background: linear-gradient(180deg, rgba(196,149,58,0.14), rgba(35,26,18,0.45));
-      border: 1px solid rgba(196,149,58,0.5);
+      background: linear-gradient(135deg, rgba(62, 46, 30, 0.75) 0%, rgba(28, 20, 14, 0.92) 100%);
+      border: 1.5px solid rgba(212, 168, 80, 0.5);
       border-radius: 8px;
-      padding: 11px 13px;
+      padding: 11px 14px;
       margin-top: 4px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.5), inset 0 0 15px rgba(196,149,58,0.12);
     }
     .csg-tip-header {
       display: flex;
       align-items: center;
       gap: 6px;
       font-family: 'Cinzel', serif;
-      font-size: calc(11px * var(--v-font-scale, 1));
-      font-weight: 700;
-      color: #c4953a;
-      letter-spacing: 1px;
+      font-size: 11.5px;
+      font-weight: 800;
+      color: #ffd700;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
       margin-bottom: 5px;
     }
@@ -8782,24 +8812,24 @@ body.perf-lite .vc-action-btn { transition: none; }
     .csg-tip-text {
       font-family: var(--v-font);
       font-style: italic;
-      font-size: calc(12px * var(--v-font-scale, 1));
+      font-size: 12.5px;
       line-height: 1.55;
-      color: #e8dcc4;
+      color: #f5ebd7;
     }
     .csg-actions {
       display: flex;
       gap: 10px;
-      padding: 12px 18px 16px;
-      border-top: 1px solid rgba(196,149,58,0.22);
-      background: rgba(15,12,8,0.7);
+      padding: 12px 16px 14px;
+      border-top: 1px solid rgba(196, 149, 58, 0.28);
+      background: rgba(16, 12, 8, 0.85);
       flex-shrink: 0;
     }
     .csg-btn {
       flex: 1;
-      padding: 11px 12px;
+      padding: 10px 14px;
       border-radius: 8px;
       font-family: 'Cinzel', serif;
-      font-size: calc(12px * var(--v-font-scale, 1));
+      font-size: 13px;
       font-weight: 700;
       letter-spacing: 0.8px;
       cursor: pointer;
@@ -8807,34 +8837,35 @@ body.perf-lite .vc-action-btn { transition: none; }
       align-items: center;
       justify-content: center;
       gap: 7px;
+      white-space: nowrap;
       transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
     }
     .csg-btn-tour {
-      background: linear-gradient(180deg, #d4a54a, #9a7530);
-      color: #1a1410;
-      border: 1px solid #e4b75a;
+      background: linear-gradient(180deg, #d4a54a, #9a722a);
+      color: #1a1208;
+      border: 1.5px solid #f2cb6c;
       font-weight: 800;
-      box-shadow: 0 4px 14px rgba(196,149,58,0.4), inset 0 1px 0 rgba(255,255,255,0.25);
-      text-shadow: 0 1px 0 rgba(255,255,255,0.2);
-      animation: csgTourPulse 2.4s ease-in-out infinite;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.35);
+      text-shadow: 0 1px 0 rgba(255,255,255,0.25);
     }
     .csg-btn-tour:hover {
       background: linear-gradient(180deg, #e4b75a, #a78540);
       transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(196,149,58,0.65), inset 0 1px 0 rgba(255,255,255,0.35);
+      box-shadow: 0 6px 18px rgba(196,149,58,0.5), inset 0 1px 0 rgba(255,255,255,0.4);
     }
     .csg-btn-tour:active {
       transform: translateY(0);
     }
     .csg-btn-close {
-      background: linear-gradient(180deg, rgba(74,56,40,0.65), rgba(58,46,34,0.9));
-      color: #d4c8b0;
-      border: 1px solid rgba(196,149,58,0.45);
+      background: linear-gradient(180deg, rgba(62,48,34,0.9), rgba(38,28,20,0.95));
+      color: #e4d8c2;
+      border: 1.5px solid rgba(196,149,58,0.45);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
     .csg-btn-close:hover {
       background: linear-gradient(180deg, rgba(196,149,58,0.25), rgba(90,68,48,0.4));
-      color: #f4e5b8;
-      border-color: #c4953a;
+      color: #ffffff;
+      border-color: #ffd700;
       transform: translateY(-1px);
     }
     .csg-btn-close:active {
@@ -12921,9 +12952,9 @@ body.perf-lite .vc-action-btn { transition: none; }
         <div class="csg-actions" id="csg-actions">
           <button class="csg-btn csg-btn-tour" id="csg-tour-btn">
             <span class="csg-btn-ico">🎯</span>
-            <span class="csg-btn-text">Mostrar na Tela (Tempo Real)</span>
+            <span class="csg-btn-text">Destacar</span>
           </button>
-          <button class="csg-btn csg-btn-close" id="csg-close-btn" onclick="_closeScreenGuideModal()">✓ Entendido</button>
+          <button class="csg-btn csg-btn-close" id="csg-close-btn" onclick="_closeScreenGuideModal()">Entendido</button>
         </div>
       </div>
     </div>
@@ -34959,7 +34990,7 @@ function _openScreenGuideModal(screenKey, helpKey, rawText){
   var bodyEl = document.getElementById('csg-body');
   var tourBtn = document.getElementById('csg-tour-btn');
 
-  if (crestEl) crestEl.innerHTML = _heralIco(meta.iconId || 'ic-mochila');
+  if (crestEl) crestEl.innerHTML = _heralIco(meta.iconId || 'ic-portoes', '#ffe89e', '26px');
   if (kickerEl) kickerEl.textContent = 'GUIA DA TELA ATUAL';
   if (titleEl) titleEl.textContent = (meta.title || 'CIDADE DE VALDORIA').toUpperCase();
   if (subEl) subEl.textContent = meta.subtitle || 'Valdoria • Informações e Mecânicas';

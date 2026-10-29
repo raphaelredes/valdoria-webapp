@@ -2767,14 +2767,14 @@ Busca rápida:
             var ov = document.createElement('div');
             ov.id = 'cc-guide-overlay';
             ov.style.cssText = 'position:fixed;inset:0;z-index:100500;background:rgba(8,6,4,0.82);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:14px;';
-            ov.innerHTML = '<div style="width:100%;max-width:400px;background:linear-gradient(180deg,rgba(38,30,22,0.98),rgba(20,16,12,0.99));border:1.5px solid #c4953a;border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,0.9);overflow:hidden;">'
-                + '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(196,149,58,0.3);background:linear-gradient(180deg,rgba(196,149,58,0.14),transparent);">'
-                +   '<div><div style="font-family:\'Cinzel\',serif;font-size:11px;color:#c4953a;letter-spacing:1.5px;font-weight:700;">GUIA DA TELA ATUAL</div><div style="font-family:\'Cinzel\',serif;font-size:14px;color:#ffe89e;font-weight:700;margin-top:2px;">' + g.t + '</div></div>'
-                +   '<button type="button" id="cc-guide-x" style="width:28px;height:28px;border-radius:50%;border:1px solid rgba(196,149,58,0.45);background:rgba(0,0,0,0.4);color:#d4c8b0;font-size:13px;cursor:pointer;">✕</button>'
+            ov.innerHTML = '<div style="width:100%;max-width:min(calc(100vw - 20px), 430px);max-height:min(92vh, 680px);display:flex;flex-direction:column;background-color:#241a12;background-image:radial-gradient(ellipse at 50% 12%, rgba(68, 50, 32, 0.65) 0%, rgba(20, 15, 10, 0.98) 75%);border:1.5px solid #c4953a;outline:1px solid rgba(196, 149, 58, 0.28);outline-offset:-5px;border-radius:12px;box-shadow:inset 0 0 45px rgba(8, 5, 2, 0.9), 0 0 0 1px rgba(196, 149, 58, 0.25), 0 18px 50px rgba(0, 0, 0, 0.9);overflow:hidden;">'
+                + '<div style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid rgba(196,149,58,0.35);background:linear-gradient(180deg,rgba(196,149,58,0.18),rgba(28,20,14,0.88));">'
+                +   '<div><div style="font-family:\'Cinzel\',serif;font-size:11px;color:#d4a54a;letter-spacing:2px;font-weight:700;">⚜ GUIA DA TELA ATUAL</div><div style="font-family:\'Cinzel\',serif;font-size:15.5px;color:#fff2c4;font-weight:800;letter-spacing:1px;margin-top:2px;text-shadow:0 1px 2px rgba(0,0,0,0.95), 0 0 12px rgba(232,196,90,0.4);">' + g.t + '</div></div>'
+                +   '<button type="button" id="cc-guide-x" style="width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(196,149,58,0.6);background:radial-gradient(circle, rgba(45, 32, 20, 0.95), rgba(20, 15, 10, 0.98));color:#e8c45a;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;box-shadow:0 2px 6px rgba(0,0,0,0.5);">✕</button>'
                 + '</div>'
-                + '<div style="padding:14px;font-size:13px;line-height:1.58;color:#dfd3bc;">' + g.b + '</div>'
-                + '<div style="padding:10px 14px;border-top:1px solid rgba(196,149,58,0.25);">'
-                +   '<button type="button" id="cc-guide-ok" style="width:100%;padding:9px;border-radius:8px;border:1px solid #c4953a;background:linear-gradient(180deg,rgba(196,149,58,0.28),rgba(90,68,48,0.45));color:#ffe89e;font-family:\'Cinzel\',serif;font-size:12px;font-weight:700;cursor:pointer;">ENTENDI</button>'
+                + '<div style="padding:14px 16px;font-size:13px;line-height:1.58;color:#dcd0bc;overflow-y:auto;flex:1;">' + g.b + '</div>'
+                + '<div style="padding:12px 16px 14px;border-top:1px solid rgba(196,149,58,0.28);background:rgba(16,12,8,0.85);">'
+                +   '<button type="button" id="cc-guide-ok" style="width:100%;padding:10px;border-radius:8px;border:1.5px solid rgba(196,149,58,0.45);background:linear-gradient(180deg,rgba(62,48,34,0.9),rgba(38,28,20,0.95));color:#e4d8c2;font-family:\'Cinzel\',serif;font-size:13px;font-weight:700;letter-spacing:0.8px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.4);">Entendido</button>'
                 + '</div></div>';
             ov.addEventListener('click', function(ev) {
                 if (ev.target === ov || ev.target.closest('#cc-guide-x') || ev.target.closest('#cc-guide-ok')) ov.remove();
