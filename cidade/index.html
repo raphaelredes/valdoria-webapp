@@ -9311,43 +9311,15 @@ body.perf-lite .vc-action-btn { transition: none; }
       transform: scale(0.96);
     }
     .cfm-district-tabs {
-      display: flex;
-      gap: 5px;
-      padding: 6px 8px;
-      overflow-x: auto;
-      white-space: nowrap;
-      -webkit-overflow-scrolling: touch;
-      background: #110d08;
-      border-bottom: 1px solid rgba(196, 149, 58, 0.35);
-      box-sizing: border-box;
-      scrollbar-width: none;
-      z-index: 100;
+      display: none !important;
     }
-    .cfm-district-tabs::-webkit-scrollbar {
-      display: none;
-    }
-    .cfm-dtab {
-      flex: 0 0 auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 5px 9px;
-      background: #1b130b;
-      border: 1px solid rgba(196, 149, 58, 0.3);
-      border-radius: 6px;
-      color: #b8a994;
+    .cfm-prompt-hint {
+      color: #9b8e7c;
       font-family: 'Cinzel', serif;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      touch-action: manipulation;
-      transition: all 0.12s ease;
-    }
-    .cfm-dtab.active {
-      background: linear-gradient(180deg, #3d2a15 0%, #23170b 100%);
-      border-color: #ffd685;
-      color: #ffd685;
-      box-shadow: 0 0 8px rgba(196, 149, 58, 0.45);
+      font-size: 12px;
+      font-style: italic;
+      font-weight: 500;
+      letter-spacing: 0.5px;
     }
     .cfm-viewport {
       flex: 1;
@@ -9454,13 +9426,13 @@ body.perf-lite .vc-action-btn { transition: none; }
     .cfm-drawer {
       background: linear-gradient(180deg, #221810 0%, #140e09 100%);
       border-top: 1.5px solid rgba(196, 149, 58, 0.45);
-      padding: 10px 14px;
+      padding: 8px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
       box-sizing: border-box;
-      min-height: 66px;
+      min-height: 52px;
       z-index: 100;
     }
     .cfm-drawer-info {
@@ -9479,15 +9451,6 @@ body.perf-lite .vc-action-btn { transition: none; }
       align-items: center;
       gap: 6px;
     }
-    .cfm-drawer-desc {
-      font-size: 11.5px;
-      color: #a09484;
-      margin-top: 2px;
-      line-height: 1.35;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
     .cfm-drawer-action-btn {
       background: linear-gradient(180deg, #443118 0%, #2a1d0e 100%);
       border: 1.5px solid #c4953a;
@@ -9495,7 +9458,7 @@ body.perf-lite .vc-action-btn { transition: none; }
       font-family: 'Cinzel', serif;
       font-size: 12.5px;
       font-weight: 700;
-      padding: 9px 16px;
+      padding: 8px 15px;
       border-radius: 6px;
       cursor: pointer;
       white-space: nowrap;
@@ -85785,7 +85748,6 @@ function _openCityMapModal(initialDistrictId) {
     + '  <div class="cfm-header-title"><span id="cfm-header-text">' + district.fullName + '</span></div>'
     + '  <button type="button" class="cfm-close-btn" onclick="_closeCityMapModal()">✕ Fechar</button>'
     + '</div>'
-    + '<div class="cfm-district-tabs" id="cfm-district-tabs"></div>'
     + '<div class="cfm-viewport">'
     + '  <div class="cfm-stage">'
     + '    <img class="cfm-img" id="cfm-city-img" src="' + district.img + '" alt="Mapa do Local">'
@@ -85794,35 +85756,16 @@ function _openCityMapModal(initialDistrictId) {
     + '</div>'
     + '<div class="cfm-drawer" id="cfm-drawer">'
     + '  <div class="cfm-drawer-info">'
-    + '    <div class="cfm-drawer-name" id="cfm-drawer-name"></div>'
-    + '    <div class="cfm-drawer-desc" id="cfm-drawer-desc"></div>'
+    + '    <div class="cfm-drawer-name" id="cfm-drawer-name"><span class="cfm-prompt-hint">Toque em um local no mapa</span></div>'
     + '  </div>'
-    + '  <button type="button" class="cfm-drawer-action-btn" id="cfm-drawer-act-btn"></button>'
+    + '  <button type="button" class="cfm-drawer-action-btn" id="cfm-drawer-act-btn" style="display:none;"></button>'
     + '</div>';
 
-  var tabsBar = modal.querySelector('#cfm-district-tabs');
   var cityImgEl = modal.querySelector('#cfm-city-img');
   var pinsLayer = modal.querySelector('#cfm-pins-layer');
   var drawerName = modal.querySelector('#cfm-drawer-name');
-  var drawerDesc = modal.querySelector('#cfm-drawer-desc');
   var drawerBtn = modal.querySelector('#cfm-drawer-act-btn');
   var headerText = modal.querySelector('#cfm-header-text');
-
-  var dOrder = ['city_south', 'city_market', 'city_military', 'city_high'];
-
-  dOrder.forEach(function(did) {
-    var dData = CITY_DISTRICTS_DATA[did];
-    var tab = document.createElement('button');
-    tab.type = 'button';
-    tab.className = 'cfm-dtab' + (did === _currentCityDistrict ? ' active' : '');
-    tab.setAttribute('data-did', did);
-    tab.textContent = dData.name;
-    tab.addEventListener('click', function() {
-      if (typeof haptic === 'function') haptic('light');
-      _switchCityDistrict(did);
-    });
-    tabsBar.appendChild(tab);
-  });
 
   function _wireImageFallbacks(imgEl, distId) {
     var attempts = 0;
@@ -85842,8 +85785,8 @@ function _openCityMapModal(initialDistrictId) {
 
   function _selectLandmark(lm) {
     drawerName.textContent = lm.name;
-    drawerDesc.textContent = lm.desc;
     drawerBtn.textContent = lm.btnText;
+    drawerBtn.style.display = 'inline-flex';
     drawerBtn.onclick = function() {
       if (typeof haptic === 'function') haptic('medium');
       if (lm.cb) {
@@ -85863,9 +85806,9 @@ function _openCityMapModal(initialDistrictId) {
     var lms = distData.landmarks || [];
     if (lms.length === 0) return;
 
-    lms.forEach(function(lm, idx) {
+    lms.forEach(function(lm) {
       var pin = document.createElement('div');
-      pin.className = 'cfm-pin' + (idx === 0 ? ' active' : '');
+      pin.className = 'cfm-pin';
       pin.setAttribute('data-id', lm.id);
       pin.style.left = lm.x + '%';
       pin.style.top = lm.y + '%';
@@ -85883,22 +85826,10 @@ function _openCityMapModal(initialDistrictId) {
       pinsLayer.appendChild(pin);
     });
 
-    _selectLandmark(lms[0]);
-  }
-
-  function _switchCityDistrict(newDistId) {
-    _currentCityDistrict = newDistId;
-    var dData = CITY_DISTRICTS_DATA[newDistId];
-    headerText.textContent = dData.fullName;
-
-    var tabs = tabsBar.querySelectorAll('.cfm-dtab');
-    tabs.forEach(function(t) {
-      t.classList.toggle('active', t.getAttribute('data-did') === newDistId);
-    });
-
-    cityImgEl.src = dData.img;
-    _wireImageFallbacks(cityImgEl, newDistId);
-    _renderDistrictPins(dData);
+    // Estado inicial: nenhum local selecionado por padrão
+    drawerName.innerHTML = '<span class="cfm-prompt-hint">Toque em um local no mapa</span>';
+    drawerBtn.style.display = 'none';
+    drawerBtn.onclick = null;
   }
 
   _wireImageFallbacks(cityImgEl, _currentCityDistrict);
