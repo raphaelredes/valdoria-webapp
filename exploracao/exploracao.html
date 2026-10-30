@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-30T20:30:42Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-30T20:53:28Z - do not edit directly, edit source -->
 
 
 
@@ -45814,6 +45814,863 @@ const FIXED_MAPS = {
     dungeons: [],
     edges: [
       { col: 10, row: 23, targetMap: 'ancestral_graveyard', label: 'Sair (Cemitério Ancestral)' }
+    ]
+  },
+
+
+  // ============ 4 NOVAS MASMORRAS LENDARIAS AAA (POINTCRAWL D&D 5e) =============
+
+  lich_hall: {
+    id: 'lich_hall', region: 'valdoria', biome: 'dungeon', is_dungeon: true,
+    name: 'Cripta da Coroa Funesta',
+    cols: 20, rows: 24, seed: 99007, spawnCol: 10, spawnRow: 23,
+    music: 'graveyard', danger: 8, required_gear: 'torch',
+    boss: {
+      name: 'Azanthor, o Lorde dos Tumulos Gelidos', cr: 8, xp: 3900, sugLvl: 7,
+      hp: 125, ac: 16, atk: 8,
+      multiAttack: 2,
+      hasBurstSkill: true,
+      hasResource: true
+    },
+    worldPos: { x: 0.88, y: 0.72 },
+    weather_pool: ['s'],
+    weights: { '.': 1 },
+    dungeon: true,
+    parentMap: 'ancient_cemetery',
+    gridTemplate: [
+      '####################',
+      '####iiiiiiiiiiii####',
+      '###iiiiiiiiiiiiii###',
+      '###iiiiiiiiiiiiii###',
+      '####iiii....iiii####',
+      '#####..........#####',
+      '####............####',
+      '###..............###',
+      '###...oooooooo...###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###...oooooooo...###',
+      '#####..........#####',
+      '######...##...######',
+      '#######..##..#######',
+      '########.##.########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########E##########'
+    ],
+    landmarks: [
+      { type: 'throne', col: 10, row: 2, _hex: 'K3' },
+      { type: 'bonepile', col: 8, row: 2, _hex: 'I3' },
+      { type: 'bonepile', col: 12, row: 2, _hex: 'M3' },
+      { type: 'bonfire', col: 10, row: 13, _hex: 'K14' },
+      { type: 'totem', col: 7, row: 8, _hex: 'H9' },
+      { type: 'totem', col: 13, row: 8, _hex: 'N9' }
+    ],
+    atmosphereZones: [
+      { col: 10, row: 2, type: 'evil', radius: 4.5, _hex: 'K3' },
+      { col: 10, row: 13, type: 'warm', radius: 5.0, _hex: 'K14' }
+    ],
+    restHex: { col: 10, row: 13, _hex: 'K14' },
+    dungeonEncounters: [
+      {
+        id: 'lich_hall_campfire', col: 10, row: 13, _hex: 'K14',
+        repeatable: true,
+        title: 'Fogueira no Circulo de Sal Consagrado',
+        text: 'Em uma capela subterranea protegida por um circulo de sal milenar gravado no piso de marmore escuro, um braseiro arde com luz pura. O miasma necromantico que assola a cripta nao consegue cruzar a barreira de sal. O calor devolve a sensibilidade aos dedos congelados de sua comitiva.',
+        flavor: 'Acampamento - K14 - Repouso',
+        category: 'discovery',
+        choices: [
+          {
+            id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
+            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            outcome_ok: {
+              _short_rest: true,
+              text: 'Voce repousa apoiado na pedra fria. O calor das brasas dissipa os calafrios do além-tumulo.'
+            }
+          },
+          {
+            id: 'long_rest', label: 'Descanso Longo (1x por masmorra)',
+            desc: 'HP/MP cheios + remove 1 nivel de Exaustao. Apenas 1 vez nesta masmorra.',
+            outcome_ok: {
+              _long_rest: true,
+              text: 'Sob o circulo consagrado, a comitiva mantem vigilia atenta e descansa as 8 horas inteiras, renovando suas forcas e magias.'
+            }
+          },
+          {
+            id: 'camp_companion_banter', label: 'Dialogar com a Comitiva ao Redor do Fogo',
+            desc: 'Reunir os companheiros ao calor das brasas para avaliar a determinacao do grupo',
+            outcome_ok: {
+              _companion_banter: true,
+              text: 'Voce reune seus aliados para uma conversa acolhedora junto ao fogo sagrado.'
+            }
+          },
+          {
+            id: 'leave_camp', label: 'Sair do Acampamento',
+            outcome_ok: {
+              text: 'Voce empunha suas armas e retoma a marcha pelos corredores funerarios.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'lich_hall_skeletal_guards', col: 10, row: 20, _hex: 'K21',
+        title: 'Guarda de Honra dos Sepulcros de Ebano',
+        text: 'Fileiras de sarcofagos de basalto estalam em unissono. Esqueletos com armaduras antigas de aco negro e alabardas enferrujadas erguem-se em formacao disciplinada para barrar o corredor.',
+        flavor: 'Encontro Tatico - Guarda dos Tumulos',
+        category: 'combat',
+        choices: [
+          {
+            label: 'Quebrar a formacao sepulcral com carga de impacto (Atletismo)',
+            skill: 'athletics', dc: 14,
+            desc: 'Forca (Atletismo) CD 14 - arremeter contra a primeira linha de escudos esqueleticos',
+            outcome_ok: {
+              text: 'Sua investida esfacela as falanges frontais! SURPRESA e Vantagem no 1o golpe!',
+              xp: 45,
+              dungeon_combat: { enemy: 'skeleton_warrior', lookup_name: 'Guerreiro Esqueleto de Ebano', surprise: true, preCombatEffects: ['first_attack_adv'] }
+            },
+            outcome_fail: {
+              text: 'As alabardas cruzadas travam seu avanco e os mortos-vivos cercam a comitiva!',
+              xp: 10,
+              dungeon_combat: { enemy: 'skeleton_warrior', lookup_name: 'Guerreiro Esqueleto de Ebano', surprise: false }
+            }
+          },
+          {
+            label: 'Conjurar comando de repulsao de mortos-vivos (Clerigo/Paladino)',
+            only_class: ['clerigo', 'paladino'],
+            skill: 'religion', dc: 13,
+            desc: 'Sabedoria (Religiao) CD 13 - invocar a gloria sagrada para abalar os mortos',
+            outcome_ok: {
+              text: 'Um raio de luz ofuscante cega as orbitas dos esqueletos! Os guardas cambaleiam desorientados!',
+              xp: 50,
+              dungeon_combat: { enemy: 'skeleton_warrior', lookup_name: 'Guerreiro Esqueleto de Ebano', surprise: true }
+            },
+            outcome_fail: {
+              text: 'A aura necromantica da cripta atenua sua prece, mas o combate se inicia!',
+              xp: 10,
+              dungeon_combat: { enemy: 'skeleton_warrior', lookup_name: 'Guerreiro Esqueleto de Ebano', surprise: false }
+            }
+          }
+        ]
+      },
+      {
+        id: 'lich_hall_necrotic_trap', col: 10, row: 16, _hex: 'K17',
+        title: 'O Mosaico do Dreno de Vitalidade',
+        text: 'O piso a frente exibe um mosaico de marmore negro esculpido com rostos em pranto. Glifos runicos cintilam em tom violeta palido, prontos para descarregar uma onda de frio mortal sobre quem pisar em falso.',
+        flavor: 'Perigo Necromantico D&D 5e',
+        category: 'trap',
+        choices: [
+          {
+            label: 'Identificar as runas de dreno e desativar o mecanismo (Investigacao/Arcanismo)',
+            skill: 'investigation', dc: 14,
+            desc: 'Inteligencia (Investigacao) CD 14 - localizar a pedra-chave que ancora a armadilha magica',
+            outcome_ok: {
+              text: 'Com paciencia cirurgica, voce remove a runa de aterramento! O mosaico apaga seu brilho e a passagem fica segura!',
+              xp: 40,
+              _flag: 'lich_trap_disarmed'
+            },
+            outcome_fail: {
+              text: 'Uma onda de frio sepulcral atinge a comitiva, drenando energia vital de seus musculos!',
+              xp: 8,
+              hp_loss: 7
+            }
+          },
+          {
+            label: 'Saltar pelos blocos elevados contornando o mosaico (Acrobacia)',
+            skill: 'acrobatics', dc: 13,
+            desc: 'Destreza (Acrobacia) CD 13 - saltar entre as muretas laterais sem tocar o chao amaldicoado',
+            outcome_ok: {
+              text: 'Voce salta com agilidade felina e aterrissa do outro lado com equilibrio perfeito!',
+              xp: 35,
+              _flag: 'lich_trap_cleared'
+            },
+            outcome_fail: {
+              text: 'Seu pe roca a beirada de uma runa ativa e um raio de gelo queima sua pele!',
+              xp: 8,
+              hp_loss: 5
+            }
+          }
+        ]
+      },
+      {
+        id: 'lich_hall_phylactery_puzzle', col: 14, row: 9, _hex: 'O10',
+        title: 'O Altar dos Tres Espelhos Umbraticos',
+        text: 'Tres espelhos de obsidiana polida refletem a camera com sutis distorcoes espectrais. Em um nicho central, repousa uma urna de prata selada com chumbo. Para abri-la sem disparar a maldicao, e preciso desvendar qual espelho revela a verdade.',
+        flavor: 'Enigma Arcano dos Tumulos',
+        category: 'mystery',
+        choices: [
+          {
+            label: 'Decifrar a refringencia das almas nos espelhos (Arcanismo)',
+            skill: 'arcana', dc: 14,
+            desc: 'Inteligencia (Arcanismo) CD 14 - distinguir a ilusao da necromancia verdadeira',
+            outcome_ok: {
+              text: 'Voce gira o espelho central alinhando a luz espectral. O selo de chumbo cede com suavidade, revelando uma gema sagrada e tesouros de prata!',
+              xp: 60,
+              reward_gold: 45,
+              _flag: 'lich_mirror_solved'
+            },
+            outcome_fail: {
+              text: 'O reflexo distorcido emite um zumbido psiquico que atordoa sua visao temporariamente!',
+              xp: 10,
+              hp_loss: 4
+            }
+          },
+          {
+            label: 'Entoar o salmo de repouso dos sepulcros (Religiao)',
+            skill: 'religion', dc: 13,
+            desc: 'Sabedoria (Religiao) CD 13 - apaziguar as almas enclausuradas na urna',
+            outcome_ok: {
+              text: 'Sua prece aquieta os ecos atormentados. A urna se destrava suavemente, recompensando sua piedade.',
+              xp: 50,
+              reward_gold: 30,
+              _flag: 'lich_mirror_blessed'
+            },
+            outcome_fail: {
+              text: 'Os espiritos sussurram lamentos frios que perturbam sua concentracao.',
+              xp: 10,
+              mp_loss: 4
+            }
+          }
+        ]
+      },
+      {
+        id: 'lich_hall_boss_azanthor', col: 10, row: 3, _hex: 'K4',
+        title: 'O Trono dos Ossos Eternos de Azanthor',
+        text: 'No abside da cripta monumental, cercado por colunas de gelo negro e sarcofagos abertos, ergue-se Azanthor. O arquilich veste mantos rasgados de veludo carmesim e empunha um cajado entalhado em marfim de tita. Orbitas de fogo azul fitam a comitiva com desdem milenar enquanto a temperatura cai vertiginosamente.',
+        flavor: 'Chefe de Masmorra - Batalha Decisiva',
+        category: 'boss',
+        choices: [
+          {
+            label: 'Resistir a Presenca Aterradora e investir com furia (Constituicao/Sabedoria)',
+            skill: 'wis', dc: 14,
+            desc: 'Sabedoria CD 14 - manter a mente inabalavel diante da aura de terror do Lich',
+            outcome_ok: {
+              text: 'Sua determinacao quebra o calafrio magico! Voce avanca com aco firme surpreendendo o arquilich!',
+              xp: 60,
+              dungeon_combat: { enemy: 'frost_lich', lookup_name: 'Azanthor, Lorde dos Tumulos', surprise: true, preCombatEffects: ['first_attack_adv'] }
+            },
+            outcome_fail: {
+              text: 'O terror ancestral aperta seu peito com dedos de gelo, mas a luta pela vida se impoe!',
+              xp: 10,
+              dungeon_combat: { enemy: 'frost_lich', lookup_name: 'Azanthor, Lorde dos Tumulos', surprise: false }
+            }
+          },
+          {
+            label: 'Disparar flecha consagrada mirando o amuleto no peito (Destreza)',
+            skill: 'dex', dc: 14,
+            desc: 'Destreza CD 14 - tiro de precisao para atingir o foco necromantico de Azanthor',
+            outcome_ok: {
+              text: 'Seu disparo atinge o amuleto em cheio, provocando um claror de faiscas e rompendo sua barreira de gelo!',
+              xp: 60,
+              dungeon_combat: { enemy: 'frost_lich', lookup_name: 'Azanthor, Lorde dos Tumulos', surprise: true, preCombatEffects: ['burst_disabled'] }
+            },
+            outcome_fail: {
+              text: 'O disparo e desviado por um escudo de vento frio que sibila ao redor do arquilich!',
+              xp: 10,
+              dungeon_combat: { enemy: 'frost_lich', lookup_name: 'Azanthor, Lorde dos Tumulos', surprise: false }
+            }
+          }
+        ]
+      }
+    ],
+    edges: [
+      { col: 10, row: 23, targetMap: 'ancient_cemetery', label: 'Sair (Cemiterio Antigo)' }
+    ]
+  },
+
+  dragon_lair: {
+    id: 'dragon_lair', region: 'valdoria', biome: 'dungeon', is_dungeon: true,
+    name: 'Cova do Dragao',
+    cols: 20, rows: 24, seed: 99008, spawnCol: 10, spawnRow: 23,
+    music: 'mountain', danger: 6,
+    boss: {
+      name: 'Pyroclast, o Dragao Jovem Vermelho', cr: 6, xp: 2300, sugLvl: 6,
+      hp: 110, ac: 17, atk: 8,
+      multiAttack: 3,
+      hasBurstSkill: true,
+      hasResource: true
+    },
+    worldPos: { x: 0.85, y: 0.35 },
+    weather_pool: ['s'],
+    weights: { '.': 1 },
+    dungeon: true,
+    parentMap: 'dragon_pass',
+    gridTemplate: [
+      '####################',
+      '####iiiiiiiiiiii####',
+      '###iiiiiiiiiiiiii###',
+      '###iiiiiiiiiiiiii###',
+      '####iiii....iiii####',
+      '#####..........#####',
+      '####............####',
+      '###..............###',
+      '###...oooooooo...###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###...oooooooo...###',
+      '#####..........#####',
+      '######...##...######',
+      '#######..##..#######',
+      '########.##.########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########E##########'
+    ],
+    landmarks: [
+      { type: 'throne', col: 10, row: 2, _hex: 'K3' },
+      { type: 'bonfire', col: 10, row: 13, _hex: 'K14' },
+      { type: 'bonepile', col: 8, row: 2, _hex: 'I3' }
+    ],
+    atmosphereZones: [
+      { col: 10, row: 2, type: 'warm', radius: 5.0, _hex: 'K3' },
+      { col: 10, row: 13, type: 'warm', radius: 5.0, _hex: 'K14' }
+    ],
+    restHex: { col: 10, row: 13, _hex: 'K14' },
+    dungeonEncounters: [
+      {
+        id: 'dragon_lair_campfire', col: 10, row: 13, _hex: 'K14',
+        repeatable: true,
+        title: 'Refugio da Fenda Termica',
+        text: 'Uma cavidade natural na parede de basalto oferece abrigo do vento violento que sopra pelo desfiladeiro. O calor das rochas vulcanicas aquece o ar e permite um bivaque seguro antes do ninho draconico.',
+        flavor: 'Acampamento - K14 - Repouso',
+        category: 'discovery',
+        choices: [
+          {
+            id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
+            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            outcome_ok: {
+              _short_rest: true,
+              text: 'Voce descansa as costas na rocha aquecida. O calor dissipa a tensao da marcha montanhosa.'
+            }
+          },
+          {
+            id: 'long_rest', label: 'Descanso Longo (1x por masmorra)',
+            desc: 'HP/MP cheios + remove 1 nivel de Exaustao. Apenas 1 vez nesta masmorra.',
+            outcome_ok: {
+              _long_rest: true,
+              text: 'Com sentinelas discretas observando a fumaca, a comitiva descansa as 8 horas inteiras e se prepara para o fogo do dragao.'
+            }
+          },
+          {
+            id: 'camp_companion_banter', label: 'Dialogar com a Comitiva ao Redor do Fogo',
+            desc: 'Reunir os companheiros ao calor das brasas para fortalecer o animo',
+            outcome_ok: {
+              _companion_banter: true,
+              text: 'Voce alinha as taticas de combate com a comitiva sob o reflexo das chamas.'
+            }
+          },
+          {
+            id: 'leave_camp', label: 'Sair do Acampamento',
+            outcome_ok: {
+              text: 'Voce retoma a subida em direcao ao aroma denso de enxofre e ouro derretido.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'dragon_lair_kobold_sentinels', col: 10, row: 20, _hex: 'K21',
+        title: 'Sentinelas Kobold Piromantes',
+        text: 'Pequenos humanoides reptilianos armados com lancas curtas e potes de enxofre rastejam entre as rochas, adorando as cinzas do dragao. Seus olhos alaranjados brilham com fanatismo flamejante.',
+        flavor: 'Encontro Tatico - Sentinelas do Dragao',
+        category: 'combat',
+        choices: [
+          {
+            label: 'Emboscada silenciosa antes que soem o alarme (Furtividade)',
+            skill: 'stealth', dc: 13,
+            desc: 'Destreza (Furtividade) CD 13 - neutralizar os batedores sem alarde',
+            outcome_ok: {
+              text: 'Voce surge nas costas dos kobolds antes que possam acender os pavios! SURPRESA!',
+              xp: 35,
+              dungeon_combat: { enemy: 'kobold', lookup_name: 'Kobold Piromante', surprise: true, preCombatEffects: ['first_attack_adv'] }
+            },
+            outcome_fail: {
+              text: 'Um kobold derruba um pote de oleo e grita em alerta estridente!',
+              xp: 10,
+              dungeon_combat: { enemy: 'kobold', lookup_name: 'Kobold Piromante', surprise: false }
+            }
+          }
+        ]
+      },
+      {
+        id: 'dragon_lair_lava_fissure_trap', col: 10, row: 16, _hex: 'K17',
+        title: 'A Fenda de Magma Borbulhante',
+        text: 'Uma ruptura no leito de basalto expoe um rio subterraneo de lava incandescente. Vapores toxicos e labaredas espontaneas tornam a travessia uma prova rigorosa de equilibrio.',
+        flavor: 'Perigo Termico D&D 5e',
+        category: 'trap',
+        choices: [
+          {
+            label: 'Saltar pelos blocos firmes de basalto (Acrobacia)',
+            skill: 'acrobatics', dc: 13,
+            desc: 'Destreza (Acrobacia) CD 13 - calcular o momento de travessia entre erupcoes de vapor',
+            outcome_ok: {
+              text: 'Com saltos precisos sobre a rocha solida, voce atravessa a fenda sem queimar as botas!',
+              xp: 35,
+              _flag: 'dragon_fissure_crossed'
+            },
+            outcome_fail: {
+              text: 'Um jato repentino de cinzas quentes queima suas pernas durante o salto!',
+              xp: 8,
+              hp_loss: 6
+            }
+          }
+        ]
+      },
+      {
+        id: 'dragon_lair_draconic_puzzle', col: 14, row: 9, _hex: 'O10',
+        title: 'O Portao dos Brasoes Draconicos',
+        text: 'Uma arcada monumental esculpida com cabeças de dragoes de pedra exige a combinacao correta de tochas e pressao nas mandibulas de obsidiana para abrir o cofre dos tributos.',
+        flavor: 'Enigma Draconico Antigo',
+        category: 'mystery',
+        choices: [
+          {
+            label: 'Interpretar os dialetos draconicos entalhados (Historia/Arcanismo)',
+            skill: 'history', dc: 13,
+            desc: 'Inteligencia (Historia) CD 13 - reconhecer a ordem dos cinco elementos da linhagem dracocromatica',
+            outcome_ok: {
+              text: 'As mandibulas se encaixam com som estrondoso. Um compartimento secreto revela lingotes de ouro e pedras preciosas!',
+              xp: 55,
+              reward_gold: 40,
+              _flag: 'dragon_gate_opened'
+            },
+            outcome_fail: {
+              text: 'Uma labareda de defesa atinge a fechadura antes de desarmar!',
+              xp: 10,
+              hp_loss: 4
+            }
+          }
+        ]
+      },
+      {
+        id: 'dragon_lair_boss_pyroclast', col: 10, row: 3, _hex: 'K4',
+        title: 'O Ninho de Ouro e Cinzas de Pyroclast',
+        text: 'No centro de uma cratera cavernosa iluminada pelo brilho de milhares de moedas fundidas e gemas cintilantes, dormita Pyroclast. O dragao jovem vermelho estica as asas coriaceas e ergue o pescoco escamoso, com fumarolas saindo pelas presas afiadas. Seus olhos de rubi fitam a comitiva com ferocidade tirânica.',
+        flavor: 'Chefe de Masmorra - Batalha Decisiva',
+        category: 'boss',
+        choices: [
+          {
+            label: 'Manter a compostura diante do sopro e atacar com tudo (Constituicao)',
+            skill: 'con', dc: 14,
+            desc: 'Constituicao CD 14 - suportar a onda de calor extremo sem perder a postura de combate',
+            outcome_ok: {
+              text: 'Voce resiste a rajada de cinzas e golpeia antes que o dragao alce voo! SURPRESA!',
+              xp: 60,
+              dungeon_combat: { enemy: 'young_dragon', lookup_name: 'Pyroclast, Dragao Jovem Vermelho', surprise: true, preCombatEffects: ['first_attack_adv'] }
+            },
+            outcome_fail: {
+              text: 'O calor infernal atordoa seu folego enquanto o dragao ruge e avanca com as garras!',
+              xp: 10,
+              dungeon_combat: { enemy: 'young_dragon', lookup_name: 'Pyroclast, Dragao Jovem Vermelho', surprise: false }
+            }
+          }
+        ]
+      }
+    ],
+    edges: [
+      { col: 10, row: 23, targetMap: 'dragon_pass', label: 'Sair (Passo do Dragao)' }
+    ]
+  },
+
+  yeti_cave: {
+    id: 'yeti_cave', region: 'valdoria', biome: 'dungeon', is_dungeon: true,
+    name: 'Gruta do Yeti',
+    cols: 20, rows: 24, seed: 99009, spawnCol: 10, spawnRow: 23,
+    music: 'dungeon', danger: 5,
+    boss: {
+      name: 'O Patriarca Yeti das Nevascas', cr: 5, xp: 1800, sugLvl: 5,
+      hp: 95, ac: 15, atk: 7,
+      multiAttack: 2,
+      hasBurstSkill: true,
+      hasResource: false
+    },
+    worldPos: { x: 0.50, y: 0.12 },
+    weather_pool: ['s'],
+    weights: { '.': 1 },
+    dungeon: true,
+    parentMap: 'frozen_waste',
+    gridTemplate: [
+      '####################',
+      '####iiiiiiiiiiii####',
+      '###iiiiiiiiiiiiii###',
+      '###iiiiiiiiiiiiii###',
+      '####iiii....iiii####',
+      '#####..........#####',
+      '####............####',
+      '###..............###',
+      '###...oooooooo...###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###...oooooooo...###',
+      '#####..........#####',
+      '######...##...######',
+      '#######..##..#######',
+      '########.##.########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########E##########'
+    ],
+    landmarks: [
+      { type: 'throne', col: 10, row: 2, _hex: 'K3' },
+      { type: 'bonepile', col: 8, row: 2, _hex: 'I3' },
+      { type: 'bonfire', col: 10, row: 13, _hex: 'K14' }
+    ],
+    atmosphereZones: [
+      { col: 10, row: 2, type: 'cold', radius: 4.5, _hex: 'K3' },
+      { col: 10, row: 13, type: 'warm', radius: 5.0, _hex: 'K14' }
+    ],
+    restHex: { col: 10, row: 13, _hex: 'K14' },
+    dungeonEncounters: [
+      {
+        id: 'yeti_cave_campfire', col: 10, row: 13, _hex: 'K14',
+        repeatable: true,
+        title: 'Abrigo Termico sob a Abobada de Gelo',
+        text: 'Em uma fenda protegida onde o vento cortante nao alcanca, a comitiva acende um braseiro de pinho seco. O calor dissipa a geada acumulada nas capas de la e devolve o folego para enfrentar a besta do gelo.',
+        flavor: 'Acampamento - K14 - Repouso',
+        category: 'discovery',
+        choices: [
+          {
+            id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
+            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            outcome_ok: {
+              _short_rest: true,
+              text: 'Voce descansa envolto nas peles de viagem. O calor do braseiro renova sua energia.'
+            }
+          },
+          {
+            id: 'long_rest', label: 'Descanso Longo (1x por masmorra)',
+            desc: 'HP/MP cheios + remove 1 nivel de Exaustao. Apenas 1 vez nesta masmorra.',
+            outcome_ok: {
+              _long_rest: true,
+              text: 'Com vigilia atenta aos uivos da nevasca, o grupo descansa as 8 horas inteiras e se revigora plenamente.'
+            }
+          },
+          {
+            id: 'camp_companion_banter', label: 'Dialogar com a Comitiva ao Redor do Fogo',
+            desc: 'Reunir os companheiros para afastar a solidao gélida dos ermos',
+            outcome_ok: {
+              _companion_banter: true,
+              text: 'Voce compartilha racoes quentes e palavras de encorajamento com os aliados.'
+            }
+          },
+          {
+            id: 'leave_camp', label: 'Sair do Acampamento',
+            outcome_ok: {
+              text: 'Voce apaga a brasa e caminha sobre o assoalho de gelo azulado.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'yeti_cave_ice_stalkers', col: 10, row: 20, _hex: 'K21',
+        title: 'Rastreadores das Geadas',
+        text: 'Lobos corpulentos de pelagem branca farejam seus rastros entre as estalagmites de gelo, avisando a presenca de invasores com rosnados abafados.',
+        flavor: 'Encontro Tatico - Matilha do Gelo',
+        category: 'combat',
+        choices: [
+          {
+            label: 'Avancar com tochas acesas intimidando os animais (Sobrevivencia)',
+            skill: 'nature', dc: 12,
+            desc: 'Sabedoria (Natureza/Sobrevivencia) CD 12 - usar o fogo para afugentar a investida',
+            outcome_ok: {
+              text: 'O medo ancestral do fogo faz os lobos recuarem desnorteados! SURPRESA!',
+              xp: 30,
+              dungeon_combat: { enemy: 'wolf', lookup_name: 'Lobo das Neves', surprise: true, preCombatEffects: ['first_attack_adv'] }
+            },
+            outcome_fail: {
+              text: 'O vento apaga sua tocha e a matilha investe em bando!',
+              xp: 10,
+              dungeon_combat: { enemy: 'wolf', lookup_name: 'Lobo das Neves', surprise: false }
+            }
+          }
+        ]
+      },
+      {
+        id: 'yeti_cave_avalanche_trap', col: 10, row: 16, _hex: 'K17',
+        title: 'A Ponte de Gelo Trincado e Estalactites',
+        text: 'Estalactites gigantescas de gelo pendem da abobada como adagas de cristal. O piso de gelo fino range sob cada passo, ameacando precipitar a comitiva em uma fenda congelada.',
+        flavor: 'Perigo Glacial D&D 5e',
+        category: 'trap',
+        choices: [
+          {
+            label: 'Sondar a solidez do gelo com o cabo da lanca (Percepcao)',
+            skill: 'perception', dc: 12,
+            desc: 'Sabedoria (Percepcao) CD 12 - identificar os blocos de gelo seguro para pisar',
+            outcome_ok: {
+              text: 'Voce encontra a trilha de gelo macico e guia a comitiva sem quebrar uma unica casca!',
+              xp: 35,
+              _flag: 'yeti_bridge_cleared'
+            },
+            outcome_fail: {
+              text: 'Uma placa cede sob seu peso e estalactites despencam do teto sobre o grupo!',
+              xp: 8,
+              hp_loss: 5
+            }
+          }
+        ]
+      },
+      {
+        id: 'yeti_cave_frozen_shrine_puzzle', col: 14, row: 9, _hex: 'O10',
+        title: 'O Altar dos Prismas Glaciais',
+        text: 'Um circulo de menires de gelo esculpidos por tribos barbaras ancestrais resguarda um relicario. Para romper a camada de geada sem estragar os pertences, e preciso refratar a luz de tocha atraves dos prismas certos.',
+        flavor: 'Enigma dos Povos do Norte',
+        category: 'mystery',
+        choices: [
+          {
+            label: 'Alinhar os prismas de gelo com a luz (Investigacao/Natureza)',
+            skill: 'investigation', dc: 12,
+            desc: 'Inteligencia (Investigacao) CD 12 - focar os feixes no nucleo do altar',
+            outcome_ok: {
+              text: 'O gelo derrete como agua morna! O relicario revela peles nobres e amuletos de ambar!',
+              xp: 50,
+              reward_gold: 35,
+              _flag: 'yeti_shrine_solved'
+            },
+            outcome_fail: {
+              text: 'A luz quebra em direcao errada e uma rajada de geada atinge suas maos!',
+              xp: 8,
+              hp_loss: 4
+            }
+          }
+        ]
+      },
+      {
+        id: 'yeti_cave_boss_yeti', col: 10, row: 3, _hex: 'K4',
+        title: 'O Covil do Patriarca Yeti',
+        text: 'Em uma clareira de gelo eterno rodeada de ossadas de mamute, ergue-se o Patriarca Yeti. A fera mítica atinge quase quatro metros de altura, com garras de ferro e uma pelagem alva manchada de sangue. Quando seus olhos gélidos fitam a comitiva, o proprio ar parece congelar em volta de sua respiracao.',
+        flavor: 'Chefe de Masmorra - Batalha Decisiva',
+        category: 'boss',
+        choices: [
+          {
+            label: 'Fitar a criatura nos olhos e esquivar do Olhar Gelido (Constituicao)',
+            skill: 'con', dc: 13,
+            desc: 'Constituicao CD 13 - resistir a paralisia do frio sobrenatural do Yeti',
+            outcome_ok: {
+              text: 'Seu sangue queima com bravura inabalavel! Voce desvia do golpe da besta e contra-ataca! SURPRESA!',
+              xp: 55,
+              dungeon_combat: { enemy: 'yeti', lookup_name: 'Patriarca Yeti', surprise: true, preCombatEffects: ['first_attack_adv'] }
+            },
+            outcome_fail: {
+              text: 'O frio sobrenatural paralisa seus musculos por um instante enquanto a besta avanca urrando!',
+              xp: 10,
+              dungeon_combat: { enemy: 'yeti', lookup_name: 'Patriarca Yeti', surprise: false }
+            }
+          }
+        ]
+      }
+    ],
+    edges: [
+      { col: 10, row: 23, targetMap: 'frozen_waste', label: 'Sair (Ermo Gelado)' }
+    ]
+  },
+
+  troll_lair: {
+    id: 'troll_lair', region: 'valdoria', biome: 'dungeon', is_dungeon: true,
+    name: 'Covil do Troll',
+    cols: 20, rows: 24, seed: 99010, spawnCol: 10, spawnRow: 23,
+    music: 'dungeon', danger: 5,
+    boss: {
+      name: 'Gorgar, o Troll Carniceiro', cr: 5, xp: 1800, sugLvl: 4,
+      hp: 84, ac: 15, atk: 7,
+      multiAttack: 3,
+      hasBurstSkill: true,
+      hasResource: false
+    },
+    worldPos: { x: 0.20, y: 0.60 },
+    weather_pool: ['s'],
+    weights: { '.': 1 },
+    dungeon: true,
+    parentMap: 'troll_cave',
+    gridTemplate: [
+      '####################',
+      '####iiiiiiiiiiii####',
+      '###iiiiiiiiiiiiii###',
+      '###iiiiiiiiiiiiii###',
+      '####iiii....iiii####',
+      '#####..........#####',
+      '####............####',
+      '###..............###',
+      '###...oooooooo...###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###...oooooooo...###',
+      '#####..........#####',
+      '######...##...######',
+      '#######..##..#######',
+      '########.##.########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########E##########'
+    ],
+    landmarks: [
+      { type: 'throne', col: 10, row: 2, _hex: 'K3' },
+      { type: 'bonepile', col: 8, row: 2, _hex: 'I3' },
+      { type: 'bonfire', col: 10, row: 13, _hex: 'K14' }
+    ],
+    atmosphereZones: [
+      { col: 10, row: 2, type: 'evil', radius: 4.5, _hex: 'K3' },
+      { col: 10, row: 13, type: 'warm', radius: 5.0, _hex: 'K14' }
+    ],
+    restHex: { col: 10, row: 13, _hex: 'K14' },
+    dungeonEncounters: [
+      {
+        id: 'troll_lair_campfire', col: 10, row: 13, _hex: 'K14',
+        repeatable: true,
+        title: 'Fogueira na Fumarola Ventilada',
+        text: 'Uma saliencia rochosa ventilada por uma fenda natural dissipa o cheiro fetido da caverna principal. Aqui, o grupo pode montar guarda e descansar em relativa seguranca.',
+        flavor: 'Acampamento - K14 - Repouso',
+        category: 'discovery',
+        choices: [
+          {
+            id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
+            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            outcome_ok: {
+              _short_rest: true,
+              text: 'Voce descansa apoiado na parede de pedra. O calor do fogo alivia a fadiga muscular.'
+            }
+          },
+          {
+            id: 'long_rest', label: 'Descanso Longo (1x por masmorra)',
+            desc: 'HP/MP cheios + remove 1 nivel de Exaustao. Apenas 1 vez nesta masmorra.',
+            outcome_ok: {
+              _long_rest: true,
+              text: 'A comitiva descansa as 8 horas com vigilia armada, pronta para o embate contra o monstro regenerativo.'
+            }
+          },
+          {
+            id: 'camp_companion_banter', label: 'Dialogar com a Comitiva ao Redor do Fogo',
+            desc: 'Reunir os companheiros para planejar o combate com fogo e acido',
+            outcome_ok: {
+              _companion_banter: true,
+              text: 'Voce lembra a todos que trolls so sucumbem a fogo e acido.'
+            }
+          },
+          {
+            id: 'leave_camp', label: 'Sair do Acampamento',
+            outcome_ok: {
+              text: 'Voce empunha suas armas e prepara tochas acessas para a cova do troll.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'troll_lair_scavenger_pack', col: 10, row: 20, _hex: 'K21',
+        title: 'Carnicais Devoradores de Ossos',
+        text: 'Criaturas esqueleticas e famintas reviram os restos de carcaças deixados pelo troll. Ao sentirem o cheiro de carne viva, erguem suas presas babando pus paralisante.',
+        flavor: 'Encontro Tatico - Necrofagos da Cova',
+        category: 'combat',
+        choices: [
+          {
+            label: 'Arremeter com espada e escudo antes que avancem (Atletismo)',
+            skill: 'athletics', dc: 12,
+            desc: 'Forca (Atletismo) CD 12 - quebrar a formacao dos necrofagos com investida pesada',
+            outcome_ok: {
+              text: 'Seu escudo esmaga o primeiro carnical! SURPRESA!',
+              xp: 30,
+              dungeon_combat: { enemy: 'ghoul', lookup_name: 'Carnical Faminto', surprise: true, preCombatEffects: ['first_attack_adv'] }
+            },
+            outcome_fail: {
+              text: 'Um carnical salta sobre seu braco tentando morder atraves da cota de malha!',
+              xp: 10,
+              dungeon_combat: { enemy: 'ghoul', lookup_name: 'Carnical Faminto', surprise: false }
+            }
+          }
+        ]
+      },
+      {
+        id: 'troll_lair_pit_trap', col: 10, row: 16, _hex: 'K17',
+        title: 'O Fosso de Ossos Afiados e Piche',
+        text: 'Um fosso escavado no chao da galeria esta disfarcado com galhos finos e peles velhas. No fundo, estacas de osso afiadas e uma camada pegajosa de piche aguardam os incautos.',
+        flavor: 'Armadilha Primitiva D&D 5e',
+        category: 'trap',
+        choices: [
+          {
+            label: 'Identificar as bordas do fosso e desarmar a armadilha (Investigacao)',
+            skill: 'investigation', dc: 12,
+            desc: 'Inteligencia (Investigacao) CD 12 - perceber as peles frouxas cobrindo o chao',
+            outcome_ok: {
+              text: 'Voce sinaliza o perigo e remove a cobertura pelas bordas seguras!',
+              xp: 35,
+              _flag: 'troll_pit_disarmed'
+            },
+            outcome_fail: {
+              text: 'O solo cede sob seu pe e voce escorrega para o fosso raspando nas estacas de osso!',
+              xp: 8,
+              hp_loss: 5
+            }
+          }
+        ]
+      },
+      {
+        id: 'troll_lair_cauldron_puzzle', col: 14, row: 9, _hex: 'O10',
+        title: 'O Caldeirao Alquimico dos Gigantes',
+        text: 'Um caldeirao de ferro macico ferve lentamente com uma mistura pegajosa de gordura animal e acidos naturais. Frascos de ingredientes primitivos estao espalhados em uma bancada de pedra.',
+        flavor: 'Alquimia Primitiva dos Ermos',
+        category: 'mystery',
+        choices: [
+          {
+            label: 'Combinar os extratos acidos para sintetizar frascos causticos (Natureza/Medicina)',
+            skill: 'nature', dc: 12,
+            desc: 'Inteligencia (Natureza) CD 12 - extrair acido concentrado eficaz contra regeneracao',
+            outcome_ok: {
+              text: 'Com habilidade de boticario, voce decanta dois frascos de acido potente para o combate!',
+              xp: 45,
+              reward_item: 'potion_healing',
+              reward_gold: 25,
+              _flag: 'troll_acid_brewed'
+            },
+            outcome_fail: {
+              text: 'O vapor caustico espirra nos seus olhos provocando ardor temporario!',
+              xp: 8,
+              hp_loss: 4
+            }
+          }
+        ]
+      },
+      {
+        id: 'troll_lair_boss_gorgar', col: 10, row: 3, _hex: 'K4',
+        title: 'O Trono de Pedra de Gorgar',
+        text: 'Em uma clareira cavernosa empestada pelo fedor de carniça, ergue-se Gorgar. O troll gigante tem pele verrucosa de tom verde-musgo, musculos deformados e olhos injetados de sangue. Suas feridas antigas fecham-se visivelmente diante dos olhos da comitiva enquanto ele ruge empunhando uma clava feita de tronco arrancado.',
+        flavor: 'Chefe de Masmorra - Batalha Decisiva',
+        category: 'boss',
+        choices: [
+          {
+            label: 'Acender tochas e investir sem recuar contra o monstro (Atletismo)',
+            skill: 'athletics', dc: 13,
+            desc: 'Forca (Atletismo) CD 13 - empurrar o troll em direcao ao braseiro para conter sua regeneracao',
+            outcome_ok: {
+              text: 'Voce queima a pele viscosa de Gorgar, desorientando a besta e anulando sua regeneracao inicial! SURPRESA!',
+              xp: 55,
+              dungeon_combat: { enemy: 'mountain_troll', lookup_name: 'Gorgar, o Troll Carniceiro', surprise: true, preCombatEffects: ['first_attack_adv'] }
+            },
+            outcome_fail: {
+              text: 'Gorgar varre a tocha com a clava pesada e avanca com as garras afiadas!',
+              xp: 10,
+              dungeon_combat: { enemy: 'mountain_troll', lookup_name: 'Gorgar, o Troll Carniceiro', surprise: false }
+            }
+          }
+        ]
+      }
+    ],
+    edges: [
+      { col: 10, row: 23, targetMap: 'troll_cave', label: 'Sair (Caverna do Troll)' }
     ]
   },
 
