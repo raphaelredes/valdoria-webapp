@@ -71606,16 +71606,15 @@ function renderCartographyCanvas(el){
     + '    <div class="cam-box" style="max-width:320px;">'
     + '      <div class="cam-header">'
     + '        <div style="display:flex;align-items:center;gap:6px;">'
-    + '          <span style="font-size:16px;">🗺️</span>'
     + '          <h3 style="margin:0;font-size:13px;color:#f4d49a;font-family:Cinzel,serif;">Camadas Táticas</h3>'
     + '        </div>'
     + '        <button class="cam-close" id="cart-layers-close-btn" type="button">✕</button>'
     + '      </div>'
     + '      <div style="display:flex;flex-direction:column;gap:8px;padding:12px;font-size:11px;color:#d2be90;text-align:left;">'
-    + '        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="cl-chk-roads" checked> 🛣️ Estradas & Trilhas</label>'
-    + '        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="cl-chk-settlements" checked> 🏛️ Povoações & Santuários</label>'
-    + '        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="cl-chk-threats" checked> ⚔️ Zonas de Perigo (Tier 4+)</label>'
-    + '        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="cl-chk-notes" checked> 📝 Alfinetes & Anotações</label>'
+    + '        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="cl-chk-roads" checked> Estradas & Trilhas</label>'
+    + '        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="cl-chk-settlements" checked> Povoações & Santuários</label>'
+    + '        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="cl-chk-threats" checked> Zonas de Perigo (Tier 4+)</label>'
+    + '        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="cl-chk-notes" checked> Alfinetes & Anotações</label>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -71623,25 +71622,24 @@ function renderCartographyCanvas(el){
     + '    <div class="cam-box">'
     + '      <div class="cam-header">'
     + '        <div style="display:flex;align-items:center;gap:6px;">'
-    + '          <span style="font-size:16px;">🌀</span>'
     + '          <h3 style="margin:0;font-size:13px;color:#f4d49a;font-family:Cinzel,serif;">Rede de Marcos & Santuários</h3>'
     + '        </div>'
     + '        <button class="cam-close" id="cart-waypoints-close-btn" type="button">✕</button>'
     + '      </div>'
     + '      <div class="cam-legend" id="cwm-filter-bar" style="padding:6px 12px;border-bottom:1px solid rgba(196,149,58,0.25);">'
     + '        <button class="cam-filter-pill active" data-wfilter="all" type="button">Todos</button>'
-    + '        <button class="cam-filter-pill" data-wfilter="settlements" type="button">🏛️ Vilas & Santuários</button>'
-    + '        <button class="cam-filter-pill" data-wfilter="sanctuaries" type="button">✨ Santuários Sagrados</button>'
-    + '        <button class="cam-filter-pill" data-wfilter="pinned" type="button">📌 Alfinetes Fixados</button>'
-    + '        <button class="cam-filter-pill" data-wfilter="notes" type="button">📝 Anotações</button>'
+    + '        <button class="cam-filter-pill" data-wfilter="settlements" type="button">Vilas & Santuários</button>'
+    + '        <button class="cam-filter-pill" data-wfilter="sanctuaries" type="button">Santuários Sagrados</button>'
+    + '        <button class="cam-filter-pill" data-wfilter="pinned" type="button">Alfinetes Fixados</button>'
+    + '        <button class="cam-filter-pill" data-wfilter="notes" type="button">Anotações</button>'
     + '      </div>'
-    + '      <div style="padding:4px 12px 6px;"><input type="text" class="cam-search-input" id="cwm-search-input" placeholder="🔍 Filtrar por nome, província ou nota..." style="width:100%;box-sizing:border-box;margin:0;font-size:11px;" autocomplete="off"></div>'
+    + '      <div style="padding:4px 12px 6px;"><input type="text" class="cam-search-input" id="cwm-search-input" placeholder="Filtrar por nome, província ou nota..." style="width:100%;box-sizing:border-box;margin:0;font-size:11px;" autocomplete="off"></div>'
     + '      <div class="cam-legend" id="cwm-prov-filter-bar" style="padding:2px 12px 6px;display:flex;gap:4px;overflow-x:auto;">'
-    + '        <button class="cam-filter-pill active" data-wprov="all" type="button" style="font-size:11px;padding:2px 6px;">🌍 Todas</button>'
-    + '        <button class="cam-filter-pill" data-wprov="forest" type="button" style="font-size:11px;padding:2px 6px;">🌲 Florestas</button>'
-    + '        <button class="cam-filter-pill" data-wprov="desert" type="button" style="font-size:11px;padding:2px 6px;">🏜️ Dunas</button>'
-    + '        <button class="cam-filter-pill" data-wprov="mountain" type="button" style="font-size:11px;padding:2px 6px;">⛰️ Cordilheira</button>'
-    + '        <button class="cam-filter-pill" data-wprov="swamp" type="button" style="font-size:11px;padding:2px 6px;">🐸 Pântanos</button>'
+    + '        <button class="cam-filter-pill active" data-wprov="all" type="button" style="font-size:11px;padding:2px 6px;">Todas</button>'
+    + '        <button class="cam-filter-pill" data-wprov="forest" type="button" style="font-size:11px;padding:2px 6px;">Florestas</button>'
+    + '        <button class="cam-filter-pill" data-wprov="desert" type="button" style="font-size:11px;padding:2px 6px;">Dunas</button>'
+    + '        <button class="cam-filter-pill" data-wprov="mountain" type="button" style="font-size:11px;padding:2px 6px;">Cordilheira</button>'
+    + '        <button class="cam-filter-pill" data-wprov="swamp" type="button" style="font-size:11px;padding:2px 6px;">Pântanos</button>'
     + '      </div>'
     + '      <div class="cam-grid" id="cart-waypoints-list" style="max-height:50vh;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:10px;"></div>'
     + '    </div>'
@@ -71667,11 +71665,7 @@ function renderCartographyCanvas(el){
   }
 
   if (typeof _cartRenderCarousel === 'function') _cartRenderCarousel();
-  if (typeof _openRegionalMapModal === 'function') {
-    var curRegKey = _cartCurrentProvKey || 'plains';
-    _openRegionalMapModal(curRegKey, null, { fromDirect: true });
-  }
-    _cartCanvas = document.getElementById('cart-canvas');
+  _cartCanvas = document.getElementById('cart-canvas');
   if (!_cartCanvas) return;
 
   if (!_cartEngine && window.CartShared && CartShared.createWorldCart) {

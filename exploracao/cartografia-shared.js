@@ -39776,7 +39776,7 @@
     {
       id: 'world',
       name: 'Continente Geral',
-      icon: '🗺️',
+      icon: '',
       zoom: 1.0,
       cx: 0.50,
       cy: 0.50,
@@ -39793,7 +39793,7 @@
     {
       id: 'plains',
       name: 'Planícies Centrais',
-      icon: '🌾',
+      icon: '',
       zoom: 1.0,
       cx: 0.50,
       cy: 0.55,
@@ -39820,7 +39820,7 @@
     {
       id: 'forest',
       name: 'Grandes Florestas',
-      icon: '🌲',
+      icon: '',
       zoom: 1.0,
       cx: 0.50,
       cy: 0.28,
@@ -39847,7 +39847,7 @@
     {
       id: 'swamp',
       name: 'Pântanos do Leste',
-      icon: '🐊',
+      icon: '',
       zoom: 1.0,
       cx: 0.78,
       cy: 0.42,
@@ -39875,7 +39875,7 @@
     {
       id: 'mountain',
       name: 'Cordilheira Ocidental',
-      icon: '⛰️',
+      icon: '',
       zoom: 1.0,
       cx: 0.20,
       cy: 0.38,
@@ -39910,7 +39910,7 @@
     {
       id: 'desert',
       name: 'Dunas do Sul',
-      icon: '🏜️',
+      icon: '',
       zoom: 1.0,
       cx: 0.42,
       cy: 0.80,
@@ -39929,7 +39929,7 @@
     {
       id: 'coast',
       name: 'Litoral da Tormenta',
-      icon: '🌊',
+      icon: '',
       zoom: 1.0,
       cx: 0.88,
       cy: 0.52,
@@ -39948,7 +39948,7 @@
     {
       id: 'snow',
       name: 'Ermo Boreal',
-      icon: '❄️',
+      icon: '',
       zoom: 1.0,
       cx: 0.52,
       cy: 0.10,
@@ -39970,7 +39970,7 @@
     {
       id: 'volcanic',
       name: 'Terras de Fogo',
-      icon: '🌋',
+      icon: '',
       zoom: 1.0,
       cx: 0.80,
       cy: 0.70,
@@ -39992,7 +39992,7 @@
     {
       id: 'cave',
       name: 'Galerias Subterrâneas',
-      icon: '🦇',
+      icon: '',
       zoom: 1.0,
       cx: 0.18,
       cy: 0.55,
@@ -40018,7 +40018,7 @@
     {
       id: 'graveyard',
       name: 'Terras dos Mortos',
-      icon: '🪦',
+      icon: '',
       zoom: 1.0,
       cx: 0.40,
       cy: 0.86,
@@ -40623,13 +40623,8 @@
     style.id = 'cfm-injected-styles';
     style.textContent = ''
       + '.city-map-fullscreen-modal { position: fixed; inset: 0; z-index: 99999; background: #0c0906; display: none; flex-direction: column; overflow: hidden; width: 100%; height: 100%; max-width: 480px; margin: 0 auto; box-shadow: 0 0 40px rgba(0, 0, 0, 0.95); }'
-      + '.cfm-header { height: 46px; min-height: 46px; background: linear-gradient(180deg, #1e150d 0%, #120d08 100%); border-bottom: 1.5px solid rgba(196, 149, 58, 0.45); display: flex; align-items: center; justify-content: space-between; padding: 0 10px; box-sizing: border-box; z-index: 100; gap: 8px; }'
-      + '.cfm-region-picker { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }'
-      + '.cfm-region-picker-icon { font-size: 14px; flex-shrink: 0; }'
-      + '.cfm-header-select { background: #1e150d; color: #ffd685; border: 1.5px solid rgba(196, 149, 58, 0.65); border-radius: 5px; padding: 4px 8px; font-family: "Cinzel", Georgia, serif; font-size: 12px; font-weight: 700; cursor: pointer; outline: none; touch-action: manipulation; max-width: 230px; text-overflow: ellipsis; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.65); }'
-      + '.cfm-header-select:focus { border-color: #ffd685; box-shadow: 0 0 8px rgba(255, 214, 133, 0.5); }'
-      + '.cfm-header-select option { background: #18120c; color: #f3e4c8; font-family: sans-serif; font-size: 12px; padding: 6px; }'
-      + '.cfm-header-title { font-family: "Cinzel", serif; font-size: 13.5px; font-weight: 700; color: #ffd685; display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1; }}'
+      + '.cfm-header { height: 46px; min-height: 46px; background: linear-gradient(180deg, #1e150d 0%, #120d08 100%); border-bottom: 1.5px solid rgba(196, 149, 58, 0.45); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; box-sizing: border-box; z-index: 100; gap: 8px; }'
+      + '.cfm-header-title { font-family: "Cinzel", serif; font-size: 14px; font-weight: 700; color: #ffd685; letter-spacing: 0.5px; min-width: 0; flex: 1; }'
       + '.cfm-close-btn { font-family: "Cinzel", serif; font-size: 12px; font-weight: 700; color: #ffd685; background: #251b11; border: 1px solid rgba(196, 149, 58, 0.5); border-radius: 5px; padding: 5px 11px; cursor: pointer; touch-action: manipulation; }'
       + '.cfm-close-btn:active { background: #362617; transform: scale(0.96); }'
       + '.cfm-prompt-hint { color: #9b8e7c; font-family: "Cinzel", serif; font-size: 12px; font-style: italic; font-weight: 500; letter-spacing: 0.5px; }'
@@ -40716,28 +40711,9 @@
       else if (rawSrc.indexOf('../valdoria-webapp/') === 0) rawSrc = rawSrc.replace('../valdoria-webapp/', '/');
     }
 
-    var headerTitleHtml = '';
-    if (discProvs.length > 1) {
-      headerTitleHtml = '<div class="cfm-region-picker">'
-        + '  <span class="cfm-region-picker-icon">🗺️</span>'
-        + '  <select class="cfm-header-select" id="rfm-province-select" aria-label="Selecionar Região de Destino">';
-      for (var pi = 0; pi < discProvs.length; pi++) {
-        var dp = discProvs[pi];
-        var isSel = (dp.id === key);
-        var ico = dp.icon ? (dp.icon + ' ') : '';
-        headerTitleHtml += '<option value="' + dp.id + '"' + (isSel ? ' selected' : '') + '>' + ico + dp.name + '</option>';
-      }
-      headerTitleHtml += '    <option value="world">🌐 Ver Continente (Todas)</option>'
-        + '  </select>'
-        + '</div>';
-    } else {
-      var defIco = (reg.icon || '🌾') + ' ';
-      headerTitleHtml = '<span id="rfm-header-text">' + defIco + reg.name + '</span>';
-    }
-
     modal.innerHTML = ''
       + '<div class="cfm-header">'
-      + '  <div class="cfm-header-title">' + headerTitleHtml + '</div>'
+      + '  <div class="cfm-header-title" id="rfm-header-title">' + reg.name + '</div>'
       + '  <button type="button" class="cfm-close-btn" id="rfm-close-btn">✕ Fechar</button>'
       + '</div>'
       + '<div class="cfm-viewport">'
@@ -40757,33 +40733,16 @@
     var pinsLayer = modal.querySelector('#rfm-pins-layer');
     var drawerName = modal.querySelector('#rfm-drawer-name');
     var drawerBtn = modal.querySelector('#rfm-drawer-act-btn');
-    var provSelect = modal.querySelector('#rfm-province-select');
-    if (provSelect) {
-      provSelect.onchange = function(e) {
-        var nextProvKey = this.value;
-        if (typeof haptic === 'function') haptic('light');
-        if (nextProvKey === 'world') {
-          closeRegionalMapModal();
-          if (typeof _cartFocusProvince === 'function') _cartFocusProvince('world');
-          else if (typeof _cartBackToRegionsList === 'function') _cartBackToRegionsList();
-          else if (typeof navigateTo === 'function') navigateTo('cartografia');
-          return;
-        }
-        if (typeof _cartCurrentProvKey !== 'undefined') _cartCurrentProvKey = nextProvKey;
-        openRegionalMapModal(nextProvKey, null, options);
-      };
-    }
 
     var closeBtn = modal.querySelector('#rfm-close-btn');
     closeBtn.onclick = function() {
       closeRegionalMapModal();
-      if (fromDirectOpen) {
-        if (typeof navigateTo === 'function') navigateTo('hub');
-        else if (typeof _cartHandleReturnToCity === 'function') _cartHandleReturnToCity();
+      if (typeof _cartRenderCarousel === 'function') {
+        _cartRenderCarousel();
       }
     };
 
-    imgEl.onerror = function() {
+        imgEl.onerror = function() {
       var fallbacks = [
         reg.altImg,
         'shared/img/map/provinces/' + (key === 'plains' ? 'plains_v2.webp' : (key + '.webp')),
