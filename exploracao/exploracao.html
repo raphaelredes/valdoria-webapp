@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-30T19:55:28Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-30T20:30:42Z - do not edit directly, edit source -->
 
 
 
@@ -18305,7 +18305,7 @@ window.__onIntroTap = function() {
         <div id="minimap-wrap" role="button" tabindex="0" title="Diário de Missões (clique pra abrir)">
 
           <canvas id="minimap" width="96" height="130"></canvas>
-          <button id="btn-radar-expand" title="Expandir Radar Tático [Z]" aria-label="Expandir Radar Tático" type="button" style="position:absolute;top:2px;right:2px;background:rgba(20,14,8,0.88);border:1px solid rgba(196,149,58,0.6);color:#ffd685;font-size:10.5px;padding:1px 4px;border-radius:3px;cursor:pointer;z-index:10;line-height:1.2;">⛶</button>
+          <button id="btn-radar-expand" title="Expandir Radar Tático [Z]" aria-label="Expandir Radar Tático" type="button" style="position:absolute;top:2px;right:2px;background:rgba(20,14,8,0.88);border:1px solid rgba(196,149,58,0.6);color:#ffd685;font-size:11px;padding:1px 4px;border-radius:3px;cursor:pointer;z-index:10;line-height:1.2;">⛶</button>
 
           <div id="mw-quest-badge" aria-live="polite">
 
@@ -94667,7 +94667,7 @@ function _openCartLocationPopup(biome){
   var bestiaryInfo = (window.CartShared && CartShared.getBiomeBestiaryThreats) ? CartShared.getBiomeBestiaryThreats(biome.biome || biome.key) : null;
   var bestiaryHtml = (bestiaryInfo && !biome.isOrigin && biome.tier > 0)
     ? '<div class="clp-bestiary-card" style="margin:4px 0 6px;text-align:left;background:rgba(25,15,15,0.7);padding:5px 8px;border-radius:4px;border:1px solid rgba(248,113,113,0.3);">'
-    + '  <div style="font-size:10.5px;color:#f87171;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">⚔️ FAUNA & BESTIÁRIO REGIONAL (D&D 5e):</div>'
+    + '  <div style="font-size:11px;color:#f87171;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">⚔️ FAUNA & BESTIÁRIO REGIONAL (D&D 5e):</div>'
     + '  <div style="font-size:11px;color:#fca5a5;line-height:1.35;">'
     + '    • <b>Ameaças Típicas:</b> ' + bestiaryInfo.threats.join(', ') + '<br>'
     + '    • <b>Predador Alfa:</b> <span style="color:#ffd700;font-weight:700;">' + bestiaryInfo.apex + '</span><br>'
@@ -94755,10 +94755,10 @@ function _openCartLocationPopup(biome){
         rollBox.style.display = 'block';
         rollBox.innerHTML = '<div style="font-size:11px;font-weight:700;color:' + enc.categoryColor + ';display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">'
           + '<span>' + enc.categoryIcon + ' ' + enc.categoryName + ': ' + enc.title + '</span>'
-          + '<span style="font-size:10.5px;color:#a09484;">' + enc.dndRef + '</span>'
+          + '<span style="font-size:11px;color:#a09484;">' + enc.dndRef + '</span>'
           + '</div>'
           + '<div style="color:#d2be90;margin-bottom:3px;">' + enc.description + '</div>'
-          + '<div style="color:#fde047;font-size:10.5px;"><b>🎲 Perícia Sugerida:</b> ' + enc.checkRequired + '</div>';
+          + '<div style="color:#fde047;font-size:11px;"><b>🎲 Perícia Sugerida:</b> ' + enc.checkRequired + '</div>';
       }
     };
   }
@@ -95784,7 +95784,7 @@ function _buildPointcrawlCurrentNodeActionsHtml(biome) {
   var dgBtns = dgs.map(function(dg){
     var isAaa = !!(typeof FIXED_MAPS !== 'undefined' && FIXED_MAPS[dg.id] && FIXED_MAPS[dg.id].dungeonEncounters);
     return '<button type="button" class="clp-btn" data-clp="enter-dungeon" data-dg-id="' + dg.id + '" '
-      + 'style="width:100%;margin-top:5px;background:linear-gradient(180deg,rgba(120,28,28,0.92),rgba(72,14,14,0.96));border:1px solid #f87171;color:#fecaca;font-family:Cinzel,serif;font-size:10.5px;font-weight:700;padding:7px 10px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">'
+      + 'style="width:100%;margin-top:5px;background:linear-gradient(180deg,rgba(120,28,28,0.92),rgba(72,14,14,0.96));border:1px solid #f87171;color:#fecaca;font-family:Cinzel,serif;font-size:11px;font-weight:700;padding:7px 10px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">'
       + '<span>🏰 Incursão: ' + dg.name + '</span>'
       + '<span style="font-size:11px;background:rgba(0,0,0,0.45);padding:2px 6px;border-radius:3px;color:#fde047;">' + (isAaa ? '5 Câmaras D&D 5e' : 'Explorar') + '</span>'
       + '</button>';
@@ -95886,7 +95886,7 @@ function _showDungeonDiscoveryModal(dg, biome, checkInfo) {
     + '  <div style="position:relative;height:120px;background:url(' + imgUrl + ') center/cover no-repeat;border-bottom:1px solid rgba(196,149,58,0.5);">'
     + '    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,8,6,0.3),rgba(16,11,7,0.95));"></div>'
     + '    <div style="position:absolute;bottom:8px;left:12px;right:12px;text-align:left;">'
-    + '      <div style="font-size:10.5px;color:#ffd700;font-family:Cinzel,serif;font-weight:700;letter-spacing:1px;">🏰 INCURSÃO DESCOBERTA NOS ERMOS</div>'
+    + '      <div style="font-size:11px;color:#ffd700;font-family:Cinzel,serif;font-weight:700;letter-spacing:1px;">🏰 INCURSÃO DESCOBERTA NOS ERMOS</div>'
     + '      <div style="font-family:Cinzel,serif;font-size:15px;color:#fff;font-weight:700;text-shadow:0 2px 6px #000;">' + dg.name + '</div>'
     + '    </div>'
     + '  </div>'
@@ -96032,7 +96032,7 @@ function _openPointcrawlDungeonDelver(dgId) {
     var done = !!(typeof S !== 'undefined' && S && S._dungeonEncountersTriggered && S._dungeonEncountersTriggered[enc.id] && !enc.repeatable);
     return '<div class="pcd-chamber-card" data-enc-idx="' + idx + '" style="background:rgba(24,18,12,0.92);border:1px solid ' + (done ? 'rgba(74,222,128,0.45)' : 'rgba(196,149,58,0.45)') + ';border-radius:6px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;">'
       + '<div style="text-align:left;flex:1;">'
-      + '  <div style="font-size:10.5px;color:' + cMeta.color + ';font-family:Cinzel,serif;font-weight:700;">ETAPA ' + (idx + 1) + ' · ' + cMeta.ico + ' ' + cMeta.tag.toUpperCase() + (done ? ' <span style="color:#4ade80;">(CONCLUÍDA)</span>' : '') + '</div>'
+      + '  <div style="font-size:11px;color:' + cMeta.color + ';font-family:Cinzel,serif;font-weight:700;">ETAPA ' + (idx + 1) + ' · ' + cMeta.ico + ' ' + cMeta.tag.toUpperCase() + (done ? ' <span style="color:#4ade80;">(CONCLUÍDA)</span>' : '') + '</div>'
       + '  <div style="font-family:Cinzel,serif;font-size:11.5px;color:#f4d49a;font-weight:700;margin-top:1px;">' + enc.title + '</div>'
       + '  <div style="font-size:11px;color:#a09484;line-height:1.4;margin-top:2px;">' + (enc.flavor || '') + '</div>'
       + '</div>'
@@ -96164,7 +96164,7 @@ function openCartography() {
     + '        <canvas id="tactical-radar-canvas" width="280" height="280" style="background:#1b140d;border:1px solid rgba(196,149,58,0.45);border-radius:6px;cursor:pointer;"></canvas>'
     + '        <div style="font-size:11px;color:#ffd700;font-family:Cinzel,serif;font-weight:700;margin-top:2px;">▼ SUL</div>'
     + '      </div>'
-    + '      <div id="trm-legend" style="padding:6px 12px;font-size:10.5px;color:#d2be90;display:flex;justify-content:space-around;background:rgba(0,0,0,0.35);">'
+    + '      <div id="trm-legend" style="padding:6px 12px;font-size:11px;color:#d2be90;display:flex;justify-content:space-around;background:rgba(0,0,0,0.35);">'
     + '        <span>Comitiva</span>'
     + '        <span>Ponto de Partida</span>'
     + '        <span>Retorno</span>'
@@ -96181,7 +96181,7 @@ function openCartography() {
     + '      <div class="cam-search-wrap">'
     + '        <input type="text" class="cam-search-input" id="xcam-search-input" placeholder="Buscar localidade ou região..." autocomplete="off">'
     + '      </div>'
-    + '      <div id="xcam-stats-dossier" style="margin:4px 12px 6px;padding:6px 10px;background:rgba(25,18,10,0.65);border:1px solid rgba(196,149,58,0.3);border-radius:4px;font-size:10.5px;color:#d2be90;display:flex;justify-content:space-between;align-items:center;"></div>'
+    + '      <div id="xcam-stats-dossier" style="margin:4px 12px 6px;padding:6px 10px;background:rgba(25,18,10,0.65);border:1px solid rgba(196,149,58,0.3);border-radius:4px;font-size:11px;color:#d2be90;display:flex;justify-content:space-between;align-items:center;"></div>'
     + '      <div class="cam-grid" id="xcam-grid"></div>'
     + '      <div class="cam-legend" id="xcam-filter-bar">'
     + '        <button class="cam-filter-pill active" data-filter="all" type="button">Todos</button>'
@@ -96568,7 +96568,7 @@ function _renderXCartProvinceBar() {
                     (prov.id === 'snow') ? 'Ermo Gelado' :
                     (prov.id === 'volcanic') ? 'Vulcânico' : prov.name;
     var qTitle = _getXCartProvinceActiveQuest(prov.id);
-    var qBadge = qTitle ? ' <span title="Contrato ativo: ' + qTitle + '" style="color:#ffd685;font-size:10.5px;">📜</span>' : '';
+    var qBadge = qTitle ? ' <span title="Contrato ativo: ' + qTitle + '" style="color:#ffd685;font-size:11px;">📜</span>' : '';
     chip.innerHTML = '<span>' + (prov.icon || '📍') + '</span> ' + shortName + qBadge;
     chip.onclick = function(e){
       e.preventDefault();
@@ -97264,17 +97264,17 @@ function _xcartPopulateWaypointsList(filter, query) {
     var marcos = (typeof b.marcos === 'number') ? b.marcos : (b.tier || 1);
     var distMilhas = Math.max(6, marcos * 8);
 
-    var badge = item.isCurrent ? '<span style="font-size:10.5px;background:#2e7d32;color:#fff;padding:1px 6px;border-radius:10px;">Você está aqui</span>'
-      : item.isSanctuary ? '<span style="font-size:10.5px;background:rgba(196,149,58,0.25);border:1px solid #ffd700;color:#ffd700;padding:1px 6px;border-radius:10px;">🏛️ Santuário</span>'
-      : item.isPin ? '<span style="font-size:10.5px;background:rgba(218,165,32,0.25);border:1px solid #ffd700;color:#ffd700;padding:1px 6px;border-radius:10px;">📍 Alfinete</span>'
-      : '<span style="font-size:10.5px;background:rgba(196,149,58,0.2);color:#d2be90;padding:1px 6px;border-radius:10px;">🌀 Marco</span>';
+    var badge = item.isCurrent ? '<span style="font-size:11px;background:#2e7d32;color:#fff;padding:1px 6px;border-radius:10px;">Você está aqui</span>'
+      : item.isSanctuary ? '<span style="font-size:11px;background:rgba(196,149,58,0.25);border:1px solid #ffd700;color:#ffd700;padding:1px 6px;border-radius:10px;">🏛️ Santuário</span>'
+      : item.isPin ? '<span style="font-size:11px;background:rgba(218,165,32,0.25);border:1px solid #ffd700;color:#ffd700;padding:1px 6px;border-radius:10px;">📍 Alfinete</span>'
+      : '<span style="font-size:11px;background:rgba(196,149,58,0.2);color:#d2be90;padding:1px 6px;border-radius:10px;">🌀 Marco</span>';
 
     html += '<div class="cam-item" style="cursor:pointer;flex-direction:row;align-items:center;justify-content:space-between;padding:8px 12px;" onclick="_xcartFocusWaypoint(\'' + b.key + '\')">'
       + '  <div style="display:flex;align-items:center;gap:10px;">'
       + '    <span style="font-size:22px;">' + (b.ico || '📍') + '</span>'
       + '    <div>'
       + '      <div style="font-family:Cinzel,serif;font-weight:700;color:#f4d49a;font-size:12px;">' + (b.regionalName || b.name) + ' ' + badge + '</div>'
-      + '      <div style="font-size:10.5px;color:#a09484;">' + provName + ' · ~' + distMilhas + ' milhas (~' + marcos + ' marcos)</div>'
+      + '      <div style="font-size:11px;color:#a09484;">' + provName + ' · ~' + distMilhas + ' milhas (~' + marcos + ' marcos)</div>'
       + ((window.CartShared && CartShared.getLocNote && CartShared.getLocNote(b.key)) ? '<div style="font-size:11.5px;color:#fcd34d;font-style:italic;margin-top:2px;">📝 "' + CartShared.getLocNote(b.key) + '"</div>' : '')
       + '    </div>'
       + '  </div>'
@@ -98300,7 +98300,7 @@ function _xcartShowTooltip(b, mx, my){
   var questHtml = activeQuestTitle ? '<div style="font-size:11.5px;color:#ffd685;margin-top:2px;">📜 Missão: ' + activeQuestTitle + '</div>' : '';
 
   var dndInfo = (window.CartShared && CartShared.getBiomeDndInfo) ? CartShared.getBiomeDndInfo(b.biome || b.key) : null;
-  var dndHtml = dndInfo ? '<div style="font-size:10.5px;color:#81c784;margin-top:2px;">🛡️ ' + dndInfo.saves + '</div>' : '';
+  var dndHtml = dndInfo ? '<div style="font-size:11px;color:#81c784;margin-top:2px;">🛡️ ' + dndInfo.saves + '</div>' : '';
   var foragingHtml = (dndInfo && dndInfo.foraging) ? '<div style="font-size:11px;color:#a3e635;margin-top:2px;">' + dndInfo.foraging + '</div>' : '';
   var customNote = (window.CartShared && CartShared.getLocNote) ? CartShared.getLocNote(b.key) : '';
   var noteHtml = customNote ? '<div style="font-size:11px;color:#fcd34d;margin-top:2px;font-style:italic;background:rgba(255,215,0,0.12);padding:2px 5px;border-radius:3px;">📝 Nota: "' + customNote + '"</div>' : '';
@@ -108520,7 +108520,7 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
   color: #ffd685;
 }
 .cam-item-sub {
-  font-size: 10.5px;
+  font-size:11px;
   color: #a09484;
   font-style: italic;
 }
@@ -108535,7 +108535,7 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
   border: 1px solid #ffd685;
   border-radius: 4px;
   padding: 1px 4px;
-  font-size: 10.5px;
+  font-size:11px;
   color: #fff4d0;
   margin-left: 3px;
 }
@@ -108546,7 +108546,7 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
   flex-wrap: wrap;
   gap: 8px;
   justify-content: center;
-  font-size: 10.5px;
+  font-size:11px;
   color: #a09484;
 }
 .cam-legend-item {
@@ -108564,7 +108564,7 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
 }
 .clp-terrain-tag {
   font-family: Cinzel, serif;
-  font-size:10.5px;
+  font-size:11px;
   font-weight: 700;
   color: #ffd685;
   margin-bottom: 2px;
