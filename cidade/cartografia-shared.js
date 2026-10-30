@@ -40623,7 +40623,8 @@
     style.id = 'cfm-injected-styles';
     style.textContent = ''
       + '.city-map-fullscreen-modal { position: fixed; inset: 0; z-index: 99999; background: #0c0906; display: none; flex-direction: column; overflow: hidden; width: 100%; height: 100%; max-width: 480px; margin: 0 auto; box-shadow: 0 0 40px rgba(0, 0, 0, 0.95); }'
-      + '.cfm-header { height: 48px; min-height: 48px; background: linear-gradient(180deg, #1e150d 0%, #120d08 100%); border-bottom: 1.5px solid rgba(196, 149, 58, 0.45); display: flex; align-items: center; justify-content: flex-end; padding: 0 14px; box-sizing: border-box; z-index: 100; }'
+      + '.cfm-header { height: 48px; min-height: 48px; background: linear-gradient(180deg, #1e150d 0%, #120d08 100%); border-bottom: 1.5px solid rgba(196, 149, 58, 0.45); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; box-sizing: border-box; z-index: 100; gap: 8px; }'
+      + '.cfm-header-title { font-family: "Cinzel", Georgia, serif; font-size: 14.5px; font-weight: 700; color: #ffd685; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9); }'
       + '.cfm-close-btn { font-family: "Cinzel", Georgia, serif; font-size: 12.5px; font-weight: 700; color: #ffd685; background: linear-gradient(180deg, #2c1f13 0%, #18110a 100%); border: 1.5px solid rgba(196, 149, 58, 0.7); border-radius: 6px; padding: 6px 14px; cursor: pointer; touch-action: manipulation; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 214, 133, 0.15); display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s ease; }'
       + '.cfm-close-btn:hover { background: #382718; border-color: #ffd685; box-shadow: 0 0 10px rgba(196, 149, 58, 0.5); }'
       + '.cfm-close-btn:active { background: #382718; border-color: #ffd685; transform: scale(0.96); box-shadow: 0 0 12px rgba(196, 149, 58, 0.7); }'
@@ -40713,6 +40714,7 @@
 
     modal.innerHTML = ''
       + '<div class="cfm-header">'
+      + '  <div class="cfm-header-title" id="rfm-header-title">' + reg.name + '</div>'
       + '  <button type="button" class="cfm-close-btn" id="rfm-close-btn">✕ Fechar mapa</button>'
       + '</div>'
       + '<div class="cfm-viewport">'
