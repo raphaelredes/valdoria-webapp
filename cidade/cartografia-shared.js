@@ -40107,26 +40107,24 @@
   }
 
 
-  var REGIONS_DATA = {
-
-      // ── ERMOS DAS PLANÍCIES (FORA DA CIDADE) ──────────────────────
+  var REGIONS_DATA = {      // ── PLANÍCIES CENTRAIS (SEM A CIDADE) ───────────────────────
       plains: {
         id: 'plains',
-        name: 'Planícies Centrais (Ermos)',
+        name: 'Planícies Centrais',
         tag: '🌾 Planícies',
-        img: 'shared/img/map/provinces/plains.webp',
-        altImg: '../valdoria-webapp/shared/img/map/provinces/plains.webp',
+        img: 'shared/img/map/provinces/plains_v2.webp?v=20261030b',
+        altImg: '../valdoria-webapp/shared/img/map/provinces/plains_v2.webp?v=20261030b',
         fallbackBg: 'radial-gradient(circle, #2d3e23 0%, #151e12 100%)',
         dangerClass: 'badge-safe',
-        dangerText: 'ND máx 1.0 a 5.0 (Teto 160 PV)',
+        dangerText: 'Perigo: Nível 1 a 5',
         days: 1,
-        narrative: 'Campos abertos e colinas verdejantes que cercam a capital. É terra de pastores e caçadores, mas o perigo não dá trégua: saqueadores do Forte dos Bandidos e bandos de orcs atacam viajantes e caravanas descuidadas pela estrada principal.',
+        narrative: 'Campos abertos e colinas verdes fora dos portões da capital. É terra de pastores e caçadores, mas o perigo não dá trégua: saqueadores do Forte dos Bandidos e bandos de orcs atacam viajantes e carroças descuidadas pela estrada principal.',
         intel: '💡 Estrada aberta e fácil de seguir. A trilha tem boa visibilidade e postos de vigia abandonados pelo caminho.',
         nodes: [
-          { id: 'green_fields', name: 'Campos Verdes', ico: '🌾', x: 0.28, y: 0.32, maxCR: 1.0, maxHP: 60, desc: 'Colinas verdejantes de pastoreio e caçadores locais. Trilha aberta com antigos postos de vigia e moinho de pedra.' },
-          { id: 'orc_tribe', name: 'Acampamento Orc', ico: '⛺', x: 0.74, y: 0.30, maxCR: 3.0, maxHP: 110, desc: 'Tendas de couro e tambores de guerra ao redor de grandes fogueiras acesas na estepe a leste.' },
-          { id: 'bandit_fortress', name: 'Forte dos Bandidos', ico: '🏚️', x: 0.30, y: 0.74, maxCR: 5.0, maxHP: 160, desc: 'Fortificação de madeira e pedra construída sobre uma elevação rochosa com paliçadas e vigias armados.' },
-          { id: 'ashen_badlands', name: 'Terras Devastadas', ico: '🏜️', x: 0.76, y: 0.74, maxCR: 5.0, maxHP: 150, desc: 'Desfiladeiros profundos de terra vermelha e solo ressecado onde a vegetação secou por completo.' }
+          { id: 'green_fields', name: 'Campos Verdes', ico: '🌾', x: 0.28, y: 0.32, maxCR: 1.0, maxHP: 60, desc: 'Colinas verdes com pastos de ovelhas e granjas de camponeses. Caminho aberto com um moinho de pedra antigo.' },
+          { id: 'orc_tribe', name: 'Acampamento Orc', ico: '⛺', x: 0.74, y: 0.30, maxCR: 3.0, maxHP: 110, desc: 'Tendas de couro escuro e fogueiras cercadas por troncos pontiagudos de madeira.' },
+          { id: 'bandit_fortress', name: 'Forte dos Bandidos', ico: '🛡️', x: 0.30, y: 0.74, maxCR: 5.0, maxHP: 160, desc: 'Forte de pedra no alto de uma encosta rochosa, com torres de vigia e bandidos armados.' },
+          { id: 'ashen_badlands', name: 'Terras Devastadas', ico: '🏜️', x: 0.76, y: 0.74, maxCR: 5.0, maxHP: 150, desc: 'Cânions fundos de terra vermelha rachada onde a vegetação secou totalmente.' }
         ]
       },
 
@@ -40139,7 +40137,7 @@
         altImg: '../valdoria-webapp/shared/img/map/provinces/forest.webp',
         fallbackBg: 'radial-gradient(circle, #1a381e 0%, #0c1c0e 100%)',
         dangerClass: 'badge-mod',
-        dangerText: 'ND máx 2.0 a 4.0 (Teto 130 PV)',
+        dangerText: 'Perigo: Nível 2 a 4',
         days: 2,
         narrative: 'Mata densa onde as copas dos carvalhos gigantes cobrem quase toda a luz do sol, deixando a trilha sempre na sombra. O chão é coberto por raízes grossas e musgo úmido. No interior da floresta, antigas ruínas élficas ainda guardam círculos de magia protegidos por feitiços do passado.',
         intel: '💡 A Trilha dos Lenhadores está aberta. Leve tochas e itens de sobrevivência para não se perder na mata fechada (teste de Sobrevivência CD 12).',
@@ -40238,7 +40236,7 @@
         altImg: '../valdoria-webapp/shared/img/map/provinces/snow.webp',
         fallbackBg: 'radial-gradient(circle, #1a2836 0%, #0c141d 100%)',
         dangerClass: 'badge-deadly',
-        dangerText: 'ND máx 5.0 a 8.0 (Teto 260 PV)',
+        dangerText: 'Perigo: Nível 5 a 8',
         days: 4,
         narrative: 'Nevascas constantes castigam o caminho e o frio congelante reduz a velocidade de avanço. Mais ao norte, o Abismo Glacial se abre como uma fenda gigantesca de gelo azul, guardada por feras das neves.',
         intel: '💡 Risco grave de congelamento e hipotermia. É essencial levar roupas reforçadas de pele e poções de aquecimento.',
@@ -40257,7 +40255,7 @@
         altImg: '../valdoria-webapp/shared/img/map/provinces/volcanic.webp',
         fallbackBg: 'radial-gradient(circle, #3d1410 0%, #1a0604 100%)',
         dangerClass: 'badge-deadly',
-        dangerText: 'ND máx 5.0 a 8.0 (Teto 260 PV)',
+        dangerText: 'Perigo: Nível 5 a 8',
         days: 4,
         narrative: 'Rios de lava fervente e fumaça de enxofre cobrem a paisagem. O calor extremo derrete botas e estraga equipamentos desprotegidos. O posto fortificado de Valkrest vigia a borda da cratera e oferece abrigo seguro contra o magma.',
         intel: '💡 Fumaça tóxica e poças de lava ativa. As passagens sobre a rocha vulcânica mudam a cada nova erupção.',

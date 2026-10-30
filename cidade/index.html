@@ -71423,79 +71423,65 @@ function renderCartographyCanvas(el){
     + '    <button class="cart-dock-btn primary" id="cart-back-btn" type="button" onclick="_cartHandleReturnToCity()" title="Retornar à Cidade" aria-label="Retornar para a cidade" style="padding:6px 18px;font-size:12px;font-weight:700;">🏛️ Retornar à Cidade</button>'
     + '  </div>'
     + '  <div class="cart-header">'
-    + '    <h2 id="cart-title">🧭 Planícies Centrais (Ermos)</h2>'
+    + '    <h2 id="cart-title">🧭 Regiões de Valdoria</h2>'
     + '  </div>'
-    + '  <!-- LEVEL 1: GUIA CONTINENTAL OBJETIVO (ROADWARDEN STYLE) -->'
-    + '  <div class="cart-continental-guide" id="cart-continental-guide">'
-    + '    <div class="section-label">PROVÍNCIAS DOS ERMOS:</div>'
+    + '  <!-- LEVEL 1: GUIA DE REGIÕES (TELA INICIAL) -->'
+    + '  <div class="cart-continental-guide" id="cart-continental-guide" style="display:flex;">'
+    + '    <div class="section-label">REGIÕES:</div>'
     + '    <div class="province-grid" id="cart-province-grid">'
-    + '      <button type="button" class="prov-btn active" data-prov="plains" onclick="_cartSelectProvince(\'plains\')">'
+    + '      <button type="button" class="prov-btn" data-prov="plains" onclick="_cartOpenRegionMap(\'plains\')">'
     + '        <span class="prov-btn-left">🌾 Planícies</span>'
-    + '        <span class="prov-tier-tag">ND 1</span>'
+    + '        <span class="prov-tier-tag">Nível 1</span>'
     + '      </button>'
-    + '      <button type="button" class="prov-btn" data-prov="forest" onclick="_cartSelectProvince(\'forest\')">'
+    + '      <button type="button" class="prov-btn" data-prov="forest" onclick="_cartOpenRegionMap(\'forest\')">'
     + '        <span class="prov-btn-left">🌲 Floresta</span>'
-    + '        <span class="prov-tier-tag">ND 2</span>'
+    + '        <span class="prov-tier-tag">Nível 2</span>'
     + '      </button>'
-    + '      <button type="button" class="prov-btn" data-prov="mountain" onclick="_cartSelectProvince(\'mountain\')">'
-    + '        <span class="prov-btn-left">🏔️ Montanhas</span>'
-    + '        <span class="prov-tier-tag">ND 4</span>'
+    + '      <button type="button" class="prov-btn" data-prov="mountain" onclick="_cartOpenRegionMap(\'mountain\')">'
+    + '        <span class="prov-btn-left">⛰️ Montanhas</span>'
+    + '        <span class="prov-tier-tag">Nível 4</span>'
     + '      </button>'
-    + '      <button type="button" class="prov-btn" data-prov="swamp" onclick="_cartSelectProvince(\'swamp\')">'
+    + '      <button type="button" class="prov-btn" data-prov="swamp" onclick="_cartOpenRegionMap(\'swamp\')">'
     + '        <span class="prov-btn-left">🐍 Pântano</span>'
-    + '        <span class="prov-tier-tag">ND 3</span>'
+    + '        <span class="prov-tier-tag">Nível 3</span>'
     + '      </button>'
-    + '      <button type="button" class="prov-btn" data-prov="coast" onclick="_cartSelectProvince(\'coast\')">'
+    + '      <button type="button" class="prov-btn" data-prov="coast" onclick="_cartOpenRegionMap(\'coast\')">'
     + '        <span class="prov-btn-left">🌊 Costa</span>'
-    + '        <span class="prov-tier-tag">ND 4</span>'
+    + '        <span class="prov-tier-tag">Nível 4</span>'
     + '      </button>'
-    + '      <button type="button" class="prov-btn" data-prov="desert" onclick="_cartSelectProvince(\'desert\')">'
+    + '      <button type="button" class="prov-btn" data-prov="desert" onclick="_cartOpenRegionMap(\'desert\')">'
     + '        <span class="prov-btn-left">🌵 Deserto</span>'
-    + '        <span class="prov-tier-tag">ND 4</span>'
+    + '        <span class="prov-tier-tag">Nível 4</span>'
     + '      </button>'
-    + '      <button type="button" class="prov-btn" data-prov="snow" onclick="_cartSelectProvince(\'snow\')">'
+    + '      <button type="button" class="prov-btn" data-prov="snow" onclick="_cartOpenRegionMap(\'snow\')">'
     + '        <span class="prov-btn-left">❄️ Ermo Gelado</span>'
-    + '        <span class="prov-tier-tag">ND 5</span>'
+    + '        <span class="prov-tier-tag">Nível 5</span>'
     + '      </button>'
-    + '      <button type="button" class="prov-btn" data-prov="volcanic" onclick="_cartSelectProvince(\'volcanic\')">'
+    + '      <button type="button" class="prov-btn" data-prov="volcanic" onclick="_cartOpenRegionMap(\'volcanic\')">'
     + '        <span class="prov-btn-left">🌋 Vulcão</span>'
-    + '        <span class="prov-tier-tag">ND 8</span>'
-    + '      </button>'
-    + '    </div>'
-    + '    <div class="region-summary-card" id="cart-region-summary-card">'
-    + '      <div class="summary-header-row">'
-    + '        <span class="summary-region-name" id="card-region-title">Planícies Centrais (Ermos)</span>'
-    + '        <span class="summary-danger-tag badge-safe" id="card-danger-badge">ND máx 1.0 a 5.0</span>'
-    + '      </div>'
-    + '      <div class="march-specs-bar">'
-    + '        <span>Viagem: <b id="card-march-days">1d de marcha</b> · <b id="card-supplies-cost">2 Rações</b></span>'
-    + '        <button type="button" class="btn-read-intel" id="btn-open-intel" onclick="_cartOpenDetailsModal(\'region\')">📜 Detalhes</button>'
-    + '      </div>'
-    + '      <div class="destinations-box" id="card-destinations-list"></div>'
-    + '      <button type="button" class="btn-march-action" id="btn-main-march" onclick="_cartConfirmOpenMap()">'
-    + '        <span>🗺️</span> <span id="btn-march-text">Ver Mapa da Região</span>'
+    + '        <span class="prov-tier-tag">Nível 8</span>'
     + '      </button>'
     + '    </div>'
     + '  </div>'
-    + '  <!-- LEVEL 2: MAPA REGIONAL DEDICADO -->'
-    + '  <div class="cart-regional-view" id="cart-regional-view" style="display:flex;">'
+    + '  <!-- LEVEL 2: MAPA REGIONAL DEDICADO (ABERTO AO CLICAR NA REGIÃO) -->'
+    + '  <div class="cart-regional-view" id="cart-regional-view" style="display:none;">'
     + '    <div class="regional-top-bar">'
-    + '      <button type="button" class="btn-back-macro" onclick="_cartFocusProvince(\'world\')">'
+    + '      <button type="button" class="btn-back-macro" onclick="_cartBackToRegionsList()">'
     + '        <span>←</span> Regiões'
     + '      </button>'
     + '      <div class="badge-card-name" id="reg-card-name">'
-    + '        Mapa: Planícies Centrais'
+    + '        Mapa da Região'
     + '      </div>'
     + '      <button type="button" class="csp-help-btn" onclick="_showHelpForCurrentScreen(\'cartografia\')" title="Guia do Mapa Regional" aria-label="Ajuda">?</button>'
     + '    </div>'
     + '    <div class="province-map-container" id="prov-map-wrap">'
-    + '      <img class="province-art-img" id="prov-art-img" src="shared/img/map/provinces/plains.webp" alt="Mapa Regional">'
+    + '      <img class="province-art-img" id="prov-art-img" src="shared/img/map/provinces/plains_v2.webp?v=20261030b" alt="Mapa Regional">'
     + '      <div class="prov-pins-overlay" id="prov-pins-overlay"></div>'
     + '    </div>'
     + '    <div class="regional-action-drawer" id="reg-action-drawer">'
     + '      <div class="drawer-header-line">'
-    + '        <div class="drawer-title-bold" id="drawer-node-name"><span>🌾</span> Campos Verdes</div>'
-    + '        <div class="summary-danger-tag badge-safe" id="drawer-node-danger">Perigo (ND 1)</div>'
+    + '        <div class="drawer-title-bold" id="drawer-node-name"><span>📍</span> Destino</div>'
+    + '        <div class="summary-danger-tag badge-safe" id="drawer-node-danger">Perigo Nível 1</div>'
     + '      </div>'
     + '      <div class="drawer-actions-grid">'
     + '        <button type="button" class="btn-cmd btn-cmd-primary" id="drawer-btn-primary">Explorar</button>'
@@ -73189,68 +73175,44 @@ function _wireCartKeyboardNavigation() {
 var _cartCurrentProvKey = 'plains';
 var _cartSelectedNodeId = null;
 
-function _cartSelectProvince(provKey) {
-  var regData = (window.CartShared && CartShared.REGIONS_DATA) ? CartShared.REGIONS_DATA : null;
-  if (!regData || !regData[provKey]) return;
+function _cartOpenRegionMap(provKey) {
+  if (typeof haptic === 'function') haptic('medium');
   _cartCurrentProvKey = provKey;
+
+  var guideEl = document.getElementById('cart-continental-guide');
+  var regViewEl = document.getElementById('cart-regional-view');
+  var headerEl = document.querySelector('.cart-header');
+
+  if (guideEl) guideEl.style.display = 'none';
+  if (regViewEl) regViewEl.style.display = 'flex';
+  if (headerEl) headerEl.style.display = 'none';
+
+  _cartRenderRegionalView(provKey);
+}
+window._cartOpenRegionMap = _cartOpenRegionMap;
+
+function _cartBackToRegionsList() {
   if (typeof haptic === 'function') haptic('light');
 
-  // Atualiza classes ativas
-  var provBtns = document.querySelectorAll('.prov-btn');
-  provBtns.forEach(function(b){
-    b.classList.toggle('active', b.getAttribute('data-prov') === provKey);
-  });
+  var guideEl = document.getElementById('cart-continental-guide');
+  var regViewEl = document.getElementById('cart-regional-view');
+  var headerEl = document.querySelector('.cart-header');
+  var titleEl = document.getElementById('cart-title');
 
-  _cartUpdateContinentalGuide();
+  if (regViewEl) regViewEl.style.display = 'none';
+  if (guideEl) guideEl.style.display = 'flex';
+  if (headerEl) headerEl.style.display = 'flex';
+  if (titleEl) titleEl.innerHTML = '🧭 Regiões de Valdoria';
 }
+window._cartBackToRegionsList = _cartBackToRegionsList;
 
-function _cartUpdateContinentalGuide() {
-  var regData = (window.CartShared && CartShared.REGIONS_DATA) ? CartShared.REGIONS_DATA : null;
-  if (!regData) return;
-  var d = regData[_cartCurrentProvKey] || regData['plains'];
-
-  var titleEl = document.getElementById('card-region-title');
-  var badgeEl = document.getElementById('card-danger-badge');
-  var marchDaysEl = document.getElementById('card-march-days');
-  var suppliesCostEl = document.getElementById('card-supplies-cost');
-  var destListEl = document.getElementById('card-destinations-list');
-  var marchBtnText = document.getElementById('btn-march-text');
-
-  if (titleEl) titleEl.textContent = d.name;
-  if (badgeEl) {
-    badgeEl.className = 'summary-danger-tag ' + (d.dangerClass || 'badge-safe');
-    badgeEl.textContent = d.dangerText || 'ND 1';
-  }
-  if (marchDaysEl) {
-    marchDaysEl.textContent = d.days === 0 ? 'Local Atual (0d)' : d.days + 'd de marcha';
-  }
-  if (suppliesCostEl) {
-    suppliesCostEl.textContent = d.days === 0 ? '0 Rações' : (d.days * 2) + ' Rações';
-  }
-  if (marchBtnText) {
-    marchBtnText.textContent = 'Ver Mapa da Região';
-  }
-
-  if (destListEl) {
-    destListEl.innerHTML = '';
-    var nodes = d.nodes || [];
-    nodes.forEach(function(n){
-      var row = document.createElement('div');
-      row.className = 'dest-row';
-      row.innerHTML = ''
-        + '<div class="dest-name-left">'
-        + '  <span>' + n.ico + '</span>'
-        + '  <span>' + n.name + '</span>'
-        + '</div>'
-        + '<div class="dest-danger-tier">' + (n.maxCR ? ('ND ' + n.maxCR) : 'Seguro') + '</div>';
-      destListEl.appendChild(row);
-    });
-  }
+function _cartSelectProvince(provKey) {
+  _cartOpenRegionMap(provKey);
 }
+window._cartSelectProvince = _cartSelectProvince;
 
 function _cartConfirmOpenMap() {
-  if (typeof haptic === 'function') haptic('medium');
-  _cartFocusProvince(_cartCurrentProvKey);
+  _cartOpenRegionMap(_cartCurrentProvKey);
 }
 
 function _cartRenderRegionalView(provKey) {
@@ -73265,7 +73227,7 @@ function _cartRenderRegionalView(provKey) {
 
   var imgEl = document.getElementById('prov-art-img');
   if (imgEl) {
-    var rawSrc = d.img || ('shared/img/map/provinces/' + provKey + '.webp');
+    var rawSrc = d.img || ('shared/img/map/provinces/' + (provKey === 'plains' ? 'plains_v2.webp?v=20261030b' : (provKey + '.webp?v=20261030b')));
     if (typeof window !== 'undefined' && window.location && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
       if (rawSrc.indexOf('shared/') === 0) rawSrc = '/' + rawSrc;
       else if (rawSrc.indexOf('/') === 0) rawSrc = rawSrc.replace('/', '/');
@@ -73292,22 +73254,20 @@ function _cartRenderRegionalView(provKey) {
       pin.setAttribute('data-node-id', n.id);
       pin.style.left = (n.x * 100) + '%';
       pin.style.top = (n.y * 100) + '%';
+      pin.innerHTML = ''
+        + '<div class="pin-ring"></div>'
+        + '<div class="pin-dot"></div>'
+        + '<div class="pin-tooltip">' + n.name + '</div>';
 
-      var bubble = document.createElement('div');
-      bubble.className = 'pin-icon-bubble';
-
-      var lbl = document.createElement('div');
-      lbl.className = 'pin-label-pill';
-      lbl.textContent = n.name;
-
-      pin.appendChild(bubble);
-      pin.appendChild(lbl);
-
-      pin.addEventListener('click', function(e){
+      pin.onclick = function(e){
         e.stopPropagation();
-        _cartSelectRegionalNode(n.id, provKey);
-      });
-
+        if (typeof haptic === 'function') haptic('light');
+        _cartSelectedNodeId = n.id;
+        document.querySelectorAll('.map-pin-target').forEach(function(p){
+          p.classList.toggle('active', p.getAttribute('data-node-id') === n.id);
+        });
+        _cartUpdateDrawer(n, d);
+      };
       pinsWrap.appendChild(pin);
     });
 
@@ -73317,36 +73277,21 @@ function _cartRenderRegionalView(provKey) {
   }
 }
 
-function _cartSelectRegionalNode(nodeId, provKey) {
-  var regData = (window.CartShared && CartShared.REGIONS_DATA) ? CartShared.REGIONS_DATA : null;
-  if (!regData) return;
-  var d = regData[provKey] || regData[_cartCurrentProvKey];
-  var n = (d.nodes || []).find(function(node){ return node.id === nodeId; });
-  if (!n) return;
-
-  _cartSelectedNodeId = nodeId;
-  if (typeof haptic === 'function') haptic('light');
-
-  var allPins = document.querySelectorAll('.map-pin-target');
-  allPins.forEach(function(p){
-    p.classList.toggle('active', p.getAttribute('data-node-id') === nodeId);
-  });
-
-  _cartUpdateDrawer(n, d);
-}
-
 function _cartUpdateDrawer(n, d) {
+  var drawer = document.getElementById('reg-action-drawer');
   var nameEl = document.getElementById('drawer-node-name');
   var dangerEl = document.getElementById('drawer-node-danger');
   var btnPrim = document.getElementById('drawer-btn-primary');
   var btnCamp = document.getElementById('drawer-btn-camp');
-  var btnDet = document.getElementById('drawer-btn-details');
+  var btnDetails = document.getElementById('drawer-btn-details');
 
-  if (nameEl) nameEl.textContent = n.name;
+  if (!drawer || !n) return;
+
+  if (nameEl) nameEl.innerHTML = '<span>' + (n.ico || '📍') + '</span> ' + n.name;
   if (dangerEl) {
     var isSafe = ((n.maxCR || 0) <= 0.5);
     dangerEl.className = 'summary-danger-tag ' + (isSafe ? 'badge-safe' : 'badge-mod');
-    dangerEl.textContent = isSafe ? 'Refúgio Seguro (ND 0.5)' : ('Perigo (ND ' + n.maxCR + ')');
+    dangerEl.textContent = isSafe ? 'Área Segura' : ('Perigo Nível ' + (n.maxCR || 1));
   }
 
   if (btnPrim) {
@@ -73362,20 +73307,18 @@ function _cartUpdateDrawer(n, d) {
   }
 
   if (btnCamp) {
-    btnCamp.textContent = 'Acampar';
     btnCamp.onclick = function(){
       if (typeof haptic === 'function') haptic('light');
       if (typeof doAction === 'function') {
-        doAction('rest_camp');
+        doAction('camp');
       } else {
-        alert('O grupo monta acampamento seguro em ' + n.name + '.');
+        alert('Montando acampamento para descanso...');
       }
     };
   }
 
-  if (btnDet) {
-    btnDet.textContent = 'Detalhes';
-    btnDet.onclick = function(){
+  if (btnDetails) {
+    btnDetails.onclick = function(){
       _cartOpenDetailsModal('node');
     };
   }
@@ -73386,6 +73329,7 @@ function _cartOpenDetailsModal(type) {
   var title = document.getElementById('cart-modal-title');
   var text = document.getElementById('cart-modal-text');
   var meta = document.getElementById('cart-modal-meta');
+
   if (!modal || !title || !text || !meta) return;
 
   var regData = (window.CartShared && CartShared.REGIONS_DATA) ? CartShared.REGIONS_DATA : null;
@@ -73395,12 +73339,12 @@ function _cartOpenDetailsModal(type) {
   if (type === 'region') {
     title.textContent = 'Informações: ' + d.name;
     text.textContent = d.narrative || 'Região de Valdoria com perigos e oportunidades.';
-    meta.innerHTML = '<b>Diretriz de Viagem:</b> ' + (d.intel || 'Mantenha suprimentos abastecidos.');
+    meta.innerHTML = '<b>Ameaça:</b> ' + (d.dangerText || 'Perigo') + '<br><b>Viagem:</b> ' + d.days + ' dia(s) · ' + (d.days * 2) + ' rações';
   } else {
     var n = (d.nodes || []).find(function(node){ return node.id === _cartSelectedNodeId; }) || (d.nodes || [])[0];
     title.textContent = 'Local: ' + (n ? n.name : d.name);
     text.textContent = n ? n.desc : d.narrative;
-    meta.innerHTML = '<b>Ameaça D&D 5e:</b> ' + (n && n.maxCR ? ('ND Máximo ' + n.maxCR + ' · Teto ' + n.maxHP + ' PV') : 'Área Segura / Santuário');
+    meta.innerHTML = '<b>Perigo:</b> ' + (n && n.maxCR ? ('Nível ' + n.maxCR) : 'Área Segura');
   }
 
   modal.style.display = 'flex';
@@ -73413,74 +73357,19 @@ function _cartCloseDetailsModal() {
   if (typeof haptic === 'function') haptic('light');
 }
 
-
-function _cartFocusProvince(provId){
+function _cartFocusProvince(provId) {
   try {
     if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
       ValdoriaAudio.playSFX('sfx_scroll');
     }
   } catch(_) {}
-  var titleEl = document.getElementById('cart-title');
-  var atlasBackBtn = document.getElementById('cart-atlas-back-btn');
-
-  var p = window.CITY_MOCK_PLAYER || {};
-  var known = p.known_locations || ['plains'];
-  var ownedMaps = p.owned_maps || [];
-
-  if (provId !== 'world' && window.CartShared && CartShared.isProvinceDiscovered) {
-    if (!CartShared.isProvinceDiscovered(provId, known, ownedMaps)) {
-      provId = 'world';
-    }
-  }
-
-  var guideEl = document.getElementById('cart-continental-guide');
-  var regViewEl = document.getElementById('cart-regional-view');
-  var canvasFrame = document.querySelector('.cart-canvas-frame');
-
   if (provId === 'world') {
-    if (guideEl) guideEl.style.display = 'flex';
-    if (regViewEl) regViewEl.style.display = 'none';
-    if (canvasFrame) canvasFrame.style.display = 'none';
-    if (atlasBackBtn) atlasBackBtn.style.display = 'none';
-    if (titleEl) titleEl.innerHTML = '<span>🧭</span> Atlas de Valdoria';
-    if (typeof _cartUpdateContinentalGuide === 'function') {
-      _cartUpdateContinentalGuide();
-    }
+    _cartBackToRegionsList();
   } else {
-    if (guideEl) guideEl.style.display = 'none';
-    if (regViewEl) regViewEl.style.display = 'flex';
-    if (canvasFrame) canvasFrame.style.display = 'none';
-    if (atlasBackBtn) atlasBackBtn.style.display = 'inline-flex';
-
-    _cartCurrentProvKey = provId;
-    if (typeof _cartRenderRegionalView === 'function') {
-      _cartRenderRegionalView(provId);
-    }
-    if (titleEl) {
-      var pName = (window.CartShared && CartShared.REGIONS_DATA && CartShared.REGIONS_DATA[provId]) ? CartShared.REGIONS_DATA[provId].name : provId;
-      titleEl.innerHTML = '<span class="cart-title-crumb" onclick="_cartFocusProvince(\'world\')">🧭 Atlas</span><span class="cart-title-sep"> › </span><span>' + pName + '</span>';
-    }
+    _cartOpenRegionMap(provId);
   }
-  var chips = document.querySelectorAll('.cart-prov-chip');
-  chips.forEach(function(c){
-    c.classList.toggle('active', c.getAttribute('data-prov') === provId);
-  });
-  var activeChip = document.querySelector('.cart-prov-chip[data-prov="' + provId + '"]');
-  var pBar = document.getElementById('cart-prov-bar');
-  if (activeChip && pBar) {
-    try {
-      var chipLeft = activeChip.offsetLeft;
-      var chipWidth = activeChip.offsetWidth;
-      var barWidth = pBar.clientWidth;
-      pBar.scrollTo({ left: chipLeft - (barWidth / 2) + (chipWidth / 2), behavior: 'smooth' });
-    } catch(_) {}
-  }
-  if (window.scrollX !== 0 || window.scrollY !== 0) window.scrollTo(0, 0);
-  var _appEl = document.getElementById('app');
-  if (_appEl && _appEl.scrollLeft !== 0) _appEl.scrollLeft = 0;
-  var _cntEl = document.getElementById('content');
-  if (_cntEl && _cntEl.scrollLeft !== 0) _cntEl.scrollLeft = 0;
 }
+window._cartFocusProvince = _cartFocusProvince;
 
 function _cartCenterOnPlayer(){
   if (!_cartEngine || !_cartCanvas || !_cartW || !_cartH) return;
