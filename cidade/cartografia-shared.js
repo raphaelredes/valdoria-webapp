@@ -39776,7 +39776,7 @@
     {
       id: 'world',
       name: 'Continente Geral',
-      icon: '',
+      icon: '🗺️',
       zoom: 1.0,
       cx: 0.50,
       cy: 0.50,
@@ -39793,7 +39793,7 @@
     {
       id: 'plains',
       name: 'Planícies Centrais',
-      icon: '',
+      icon: '🌾',
       zoom: 1.0,
       cx: 0.50,
       cy: 0.55,
@@ -39803,7 +39803,7 @@
       terrain: 'Pradarias & Estradas Imperiais',
       winds: 'Vento de Pradaria (O · 18 km/h)',
       hazard: 'Bandidos de Estrada & Tempestades',
-      locKeys: ['green_fields', 'orc_tribe', 'bandit_fortress', 'ashen_badlands'],
+      locKeys: ['plains', 'city_gates', 'green_fields', 'orc_tribe', 'bandit_fortress', 'ashen_badlands'],
       regionalCoords: {
         green_fields: { rx: 0.28, ry: 0.32, name: 'Campos Verdes', marcos: 1 },
         orc_tribe: { rx: 0.74, ry: 0.30, name: 'Acampamento Orc', marcos: 3 },
@@ -39820,7 +39820,7 @@
     {
       id: 'forest',
       name: 'Grandes Florestas',
-      icon: '',
+      icon: '🌲',
       zoom: 1.0,
       cx: 0.50,
       cy: 0.28,
@@ -39830,7 +39830,7 @@
       terrain: 'Floresta Antiga & Vales Silvestres',
       winds: 'Brisa Silvestre (NE · 14 km/h)',
       hazard: 'Névoas Ilusórias & Teias de Aranha',
-      locKeys: ['forest', 'goblin_nest', 'elven_ruins', 'elder_woods'],
+      locKeys: ['forest', 'whispering_woods', 'goblin_nest', 'elven_ruins', 'elder_woods'],
       regionalCoords: {
         forest: { rx: 0.38, ry: 0.48, name: 'Floresta dos Sussurros', marcos: 2 },
         goblin_nest: { rx: 0.26, ry: 0.26, name: 'Ninho de Goblins', marcos: 2 },
@@ -39847,7 +39847,7 @@
     {
       id: 'swamp',
       name: 'Pântanos do Leste',
-      icon: '',
+      icon: '🐊',
       zoom: 1.0,
       cx: 0.78,
       cy: 0.42,
@@ -39857,7 +39857,7 @@
       terrain: 'Pântanos Traiçoeiros & Cemitérios',
       winds: 'Ar Estagnado com Miasmas (SE · 8 km/h)',
       hazard: 'Lama Movediça & Vapores Venenosos',
-      locKeys: ['swamp', 'deep_swamp', 'graveyard', 'ancestral_graveyard', 'eldritch_mire'],
+      locKeys: ['swamp', 'misty_marshes', 'deep_swamp', 'graveyard', 'ancestral_graveyard', 'eldritch_mire', 'sunken_temple'],
       regionalCoords: {
         swamp: { rx: 0.30, ry: 0.36, name: 'Pântano Nebuloso', marcos: 3 },
         deep_swamp: { rx: 0.72, ry: 0.40, name: 'Pântano Profundo', marcos: 4 },
@@ -39875,7 +39875,7 @@
     {
       id: 'mountain',
       name: 'Cordilheira Ocidental',
-      icon: '',
+      icon: '⛰️',
       zoom: 1.0,
       cx: 0.20,
       cy: 0.38,
@@ -39885,7 +39885,7 @@
       terrain: 'Cordilheira Escarpada & Minas Profundas',
       winds: 'Ventos de Altitude (NO · 28 km/h)',
       hazard: 'Desmoronamentos, Frio & Ar Rarefeito',
-      locKeys: ['mountain', 'korthag', 'dragon_pass', 'black_peaks', 'cave', 'troll_cave', 'underground_caverns', 'crystal_depths'],
+      locKeys: ['mountain', 'stone_peaks', 'korthag', 'dragon_pass', 'black_peaks', 'cave', 'troll_cave', 'underground_caverns', 'crystal_depths'],
       regionalCoords: {
         mountain: { rx: 0.48, ry: 0.36, name: 'Picos de Pedra', marcos: 3 },
         korthag: { rx: 0.26, ry: 0.26, name: 'Korthag (Vila Mineira)', marcos: 3 },
@@ -39910,7 +39910,7 @@
     {
       id: 'desert',
       name: 'Dunas do Sul',
-      icon: '',
+      icon: '🏜️',
       zoom: 1.0,
       cx: 0.42,
       cy: 0.80,
@@ -39920,7 +39920,7 @@
       terrain: 'Dunas Escaldantes & Cânions de Arenito',
       winds: 'Vento Quente de Siroco (S · 22 km/h)',
       hazard: 'Calor Extremo, Sede & Tempestades de Areia',
-      locKeys: ['desert'],
+      locKeys: ['desert', 'golden_sands', 'sunken_tomb'],
       regionalCoords: {
         desert: { rx: 0.50, ry: 0.50, name: 'Deserto Dourado', marcos: 3 }
       },
@@ -39929,7 +39929,7 @@
     {
       id: 'coast',
       name: 'Litoral da Tormenta',
-      icon: '',
+      icon: '🌊',
       zoom: 1.0,
       cx: 0.88,
       cy: 0.52,
@@ -39939,7 +39939,7 @@
       terrain: 'Costões Rochosos & Enseadas Marítimas',
       winds: 'Brisa Oceânica (L · 30 km/h)',
       hazard: 'Ressacas Violentas & Piratas',
-      locKeys: ['salty_coast'],
+      locKeys: ['coast', 'salty_coast', 'shipwreck_cove', 'lighthouse_ruins'],
       regionalCoords: {
         salty_coast: { rx: 0.50, ry: 0.50, name: 'Costa Salgada', marcos: 3 }
       },
@@ -39948,7 +39948,7 @@
     {
       id: 'snow',
       name: 'Ermo Boreal',
-      icon: '',
+      icon: '❄️',
       zoom: 1.0,
       cx: 0.52,
       cy: 0.10,
@@ -39958,7 +39958,7 @@
       terrain: 'Tundra Boreal & Geleiras Eternas',
       winds: 'Vento Boreal Uivante (N · 35 km/h)',
       hazard: 'Frio Extremo, Fendas de Gelo & Nevascas',
-      locKeys: ['snow', 'glacial_rift'],
+      locKeys: ['snow', 'frozen_waste', 'glacial_rift', 'frost_cave'],
       regionalCoords: {
         snow: { rx: 0.38, ry: 0.46, name: 'Ermo Congelado', marcos: 4 },
         glacial_rift: { rx: 0.68, ry: 0.56, name: 'Abismo Glacial', marcos: 6 }
@@ -39970,7 +39970,7 @@
     {
       id: 'volcanic',
       name: 'Terras de Fogo',
-      icon: '',
+      icon: '🌋',
       zoom: 1.0,
       cx: 0.80,
       cy: 0.70,
@@ -39980,7 +39980,7 @@
       terrain: 'Caldeira Vulcânica & Platôs de Basalto',
       winds: 'Lufadas Térmicas Vulcânicas (SO · 25 km/h)',
       hazard: 'Rios de Lava, Vapores de Enxofre & Brasas',
-      locKeys: ['volcanic', 'valkrest'],
+      locKeys: ['volcanic', 'burning_crater', 'valkrest', 'obsidian_ridge'],
       regionalCoords: {
         volcanic: { rx: 0.42, ry: 0.48, name: 'Cratera Vulcânica', marcos: 5 },
         valkrest: { rx: 0.74, ry: 0.56, name: 'Valkrest (Acampamento)', marcos: 5 }
@@ -39992,7 +39992,7 @@
     {
       id: 'cave',
       name: 'Galerias Subterrâneas',
-      icon: '',
+      icon: '🦇',
       zoom: 1.0,
       cx: 0.18,
       cy: 0.55,
@@ -40002,7 +40002,7 @@
       terrain: 'Subterrâneo & Cavernas Kársticas',
       winds: 'Correntes de Ar Úmidas (Vazio · 4 km/h)',
       hazard: 'Desmoronamentos, Fendas Ocultas & Escuridão Mágica',
-      locKeys: ['cave', 'underground_caverns', 'crystal_depths', 'troll_cave'],
+      locKeys: ['cave', 'underground_passage', 'underground_caverns', 'crystal_depths', 'troll_cave'],
       regionalCoords: {
         cave: { rx: 0.38, ry: 0.36, name: 'Passagem Subterrânea', marcos: 3 },
         underground_caverns: { rx: 0.68, ry: 0.44, name: 'Cavernas Subterrâneas', marcos: 4 },
@@ -40018,7 +40018,7 @@
     {
       id: 'graveyard',
       name: 'Terras dos Mortos',
-      icon: '',
+      icon: '🪦',
       zoom: 1.0,
       cx: 0.40,
       cy: 0.86,
@@ -40028,7 +40028,7 @@
       terrain: 'Cemitério Antigo & Criptas',
       winds: 'Vento Gelado da Morte (S · 10 km/h)',
       hazard: 'Névoas Corruptas, Esqueletos Vigilantes & Tumbeiros',
-      locKeys: ['graveyard', 'ancestral_graveyard', 'crypt_shadows'],
+      locKeys: ['graveyard', 'ancient_cemetery', 'ancestral_graveyard', 'crypt_shadows'],
       regionalCoords: {
         graveyard: { rx: 0.40, ry: 0.42, name: 'Cemitério Antigo', marcos: 3 },
         ancestral_graveyard: { rx: 0.65, ry: 0.65, name: 'Cemitério Ancestral', marcos: 5 },
@@ -40042,18 +40042,161 @@
   ];
 
   var _LOCATION_TO_PROVINCE = {
+    // Plains
     city_gates: 'plains', city_square: 'plains', city_tavern: 'plains', city_guild: 'plains', city_temple: 'plains',
     plains: 'plains', green_fields: 'plains', orc_tribe: 'plains', bandit_fortress: 'plains', ashen_badlands: 'plains',
-    forest: 'forest', goblin_nest: 'forest', elven_ruins: 'forest', elder_woods: 'forest',
-    mountain: 'mountain', korthag: 'mountain', dragon_pass: 'mountain', black_peaks: 'mountain',
-    cave: 'cave', underground_caverns: 'cave', crystal_depths: 'cave', troll_cave: 'cave',
-    swamp: 'swamp', deep_swamp: 'swamp', eldritch_mire: 'swamp',
-    graveyard: 'graveyard', ancestral_graveyard: 'graveyard', crypt_shadows: 'graveyard',
+    // Forest
+    forest: 'forest', whispering_woods: 'forest', goblin_nest: 'forest', elven_ruins: 'forest', elder_woods: 'forest',
+    // Mountain
+    mountain: 'mountain', stone_peaks: 'mountain', korthag: 'mountain', dragon_pass: 'mountain', black_peaks: 'mountain',
+    // Cave
+    cave: 'cave', underground_passage: 'cave', underground_caverns: 'cave', crystal_depths: 'cave', troll_cave: 'cave',
+    // Swamp
+    swamp: 'swamp', misty_marshes: 'swamp', deep_swamp: 'swamp', eldritch_mire: 'swamp', sunken_temple: 'swamp',
+    // Graveyard
+    graveyard: 'graveyard', ancient_cemetery: 'graveyard', ancestral_graveyard: 'graveyard', crypt_shadows: 'graveyard',
+    // Coast
     coast: 'coast', salty_coast: 'coast', shipwreck_cove: 'coast', lighthouse_ruins: 'coast',
+    // Desert
     desert: 'desert', golden_sands: 'desert', sunken_tomb: 'desert',
+    // Snow
     snow: 'snow', frozen_waste: 'snow', glacial_rift: 'snow', frost_cave: 'snow',
+    // Volcanic
     volcanic: 'volcanic', burning_crater: 'volcanic', valkrest: 'volcanic', obsidian_ridge: 'volcanic'
   };
+
+  var _SERVER_TO_CANONICAL_KEY = {
+    'city_gates': 'plains',
+    'whispering_woods': 'forest',
+    'misty_marshes': 'swamp',
+    'golden_sands': 'desert',
+    'underground_passage': 'cave',
+    'stone_peaks': 'mountain',
+    'ancient_cemetery': 'graveyard',
+    'frozen_waste': 'snow',
+    'burning_crater': 'volcanic'
+  };
+  var _CANONICAL_TO_SERVER_KEY = {
+    'plains': 'city_gates',
+    'forest': 'whispering_woods',
+    'swamp': 'misty_marshes',
+    'desert': 'golden_sands',
+    'cave': 'underground_passage',
+    'mountain': 'stone_peaks',
+    'graveyard': 'ancient_cemetery',
+    'snow': 'frozen_waste',
+    'volcanic': 'burning_crater'
+  };
+
+  function extractPlayerMaps(pObj) {
+    if (!pObj) return [];
+    var res = [];
+    var rawOwned = pObj.owned_maps || pObj.maps_owned;
+    if (Array.isArray(rawOwned)) {
+      for (var i = 0; i < rawOwned.length; i++) {
+        var m = rawOwned[i];
+        if (m && res.indexOf(m) < 0) res.push(m);
+      }
+    }
+    // Extract from inventory items (strings or {id, name} objects)
+    var inv = pObj.inventory;
+    if (Array.isArray(inv)) {
+      for (var j = 0; j < inv.length; j++) {
+        var it = inv[j];
+        var name = (typeof it === 'string') ? it : ((it && (it.name || it.id)) || '');
+        var low = name.toLowerCase();
+        if (!low) continue;
+        if (low.indexOf('mapa de valdória') >= 0 || low.indexOf('mapa de valdoria') >= 0 || low.indexOf('mapa mundi') >= 0 || low.indexOf('map_world') >= 0) {
+          var allMaps = ['Mapa das Planícies', 'Mapa da Floresta', 'Mapa do Pântano', 'Mapa das Montanhas', 'Mapa do Deserto', 'Mapa do Ermo Gelado', 'Mapa Vulcânico', 'Mapa da Costa'];
+          for (var k = 0; k < allMaps.length; k++) {
+            if (res.indexOf(allMaps[k]) < 0) res.push(allMaps[k]);
+          }
+        }
+        if (low.indexOf('planície') >= 0 || low.indexOf('planicie') >= 0 || low.indexOf('map_plains') >= 0) {
+          if (res.indexOf('Mapa das Planícies') < 0) res.push('Mapa das Planícies');
+        }
+        if (low.indexOf('floresta') >= 0 || low.indexOf('espólio') >= 0 || low.indexOf('espolio') >= 0 || low.indexOf('map_forest') >= 0) {
+          if (res.indexOf('Mapa da Floresta') < 0) res.push('Mapa da Floresta');
+        }
+        if (low.indexOf('pântano') >= 0 || low.indexOf('pantano') >= 0 || low.indexOf('map_swamp') >= 0) {
+          if (res.indexOf('Mapa do Pântano') < 0) res.push('Mapa do Pântano');
+        }
+        if (low.indexOf('montanha') >= 0 || low.indexOf('caverna') >= 0 || low.indexOf('map_mountain') >= 0 || low.indexOf('map_cave') >= 0) {
+          if (res.indexOf('Mapa das Montanhas') < 0) res.push('Mapa das Montanhas');
+        }
+        if (low.indexOf('deserto') >= 0 || low.indexOf('taverna') >= 0 || low.indexOf('map_desert') >= 0) {
+          if (res.indexOf('Mapa do Deserto') < 0) res.push('Mapa do Deserto');
+        }
+        if (low.indexOf('gelo') >= 0 || low.indexOf('gelado') >= 0 || low.indexOf('boreal') >= 0 || low.indexOf('map_snow') >= 0) {
+          if (res.indexOf('Mapa do Ermo Gelado') < 0) res.push('Mapa do Ermo Gelado');
+        }
+        if (low.indexOf('vulc') >= 0 || low.indexOf('fogo') >= 0 || low.indexOf('map_volcanic') >= 0) {
+          if (res.indexOf('Mapa Vulcânico') < 0) res.push('Mapa Vulcânico');
+        }
+        if (low.indexOf('costa') >= 0 || low.indexOf('litoral') >= 0 || low.indexOf('map_coast') >= 0) {
+          if (res.indexOf('Mapa da Costa') < 0) res.push('Mapa da Costa');
+        }
+      }
+    }
+    return res;
+  }
+
+  function extractDiscoveredLocations(pObj) {
+    if (!pObj) return [];
+    var locs = [];
+    var addLoc = function(l) {
+      if (!l) return;
+      var str = String(l);
+      if (locs.indexOf(str) < 0) locs.push(str);
+      var canon = _SERVER_TO_CANONICAL_KEY[str];
+      if (canon && locs.indexOf(canon) < 0) locs.push(canon);
+      var rev = _CANONICAL_TO_SERVER_KEY[str];
+      if (rev && locs.indexOf(rev) < 0) locs.push(rev);
+    };
+
+    if (Array.isArray(pObj.known_locations)) {
+      pObj.known_locations.forEach(addLoc);
+    }
+    if (Array.isArray(pObj.discovered_locations)) {
+      pObj.discovered_locations.forEach(addLoc);
+    }
+    var dungeons = pObj.discovered_dungeons || (pObj.metadata && pObj.metadata.discovered_dungeons);
+    if (dungeons && typeof dungeons === 'object') {
+      var dKeys = Object.keys(dungeons);
+      for (var di = 0; di < dKeys.length; di++) {
+        var d = dungeons[dKeys[di]];
+        var locId = (d && d.location_id) || dKeys[di];
+        addLoc(locId);
+      }
+    }
+    var quests = pObj.quests;
+    if (quests && typeof quests === 'object') {
+      var qValues = Array.isArray(quests) ? quests : Object.values(quests);
+      for (var qi = 0; qi < qValues.length; qi++) {
+        var q = qValues[qi];
+        if (!q) continue;
+        var qid = q.id || q.quest_id || '';
+        var desc = (q.description || q.desc || '') + ' ' + (q.title || '');
+        var low = (qid + ' ' + desc).toLowerCase();
+        if (low.indexOf('floresta') >= 0 || low.indexOf('goblin') >= 0 || low.indexOf('élfica') >= 0 || low.indexOf('elfica') >= 0) {
+          addLoc('forest');
+        }
+        if (low.indexOf('deserto') >= 0 || low.indexOf('oásis') >= 0 || low.indexOf('oasis') >= 0) {
+          addLoc('desert');
+        }
+        if (low.indexOf('cemitério') >= 0 || low.indexOf('cemiterio') >= 0) {
+          addLoc('graveyard');
+        }
+        if (low.indexOf('pântano') >= 0 || low.indexOf('pantano') >= 0) {
+          addLoc('swamp');
+        }
+        if (low.indexOf('montanha') >= 0 || low.indexOf('korthag') >= 0) {
+          addLoc('mountain');
+        }
+      }
+    }
+    return locs;
+  }
 
   // Regra de Visibilidade de Províncias (Ordem do Usuário 2026-10):
   // Uma província regional só é revelada se o aventureiro tiver descoberto
@@ -40065,10 +40208,23 @@
     if (p.mapKey && ownedMaps && ownedMaps.indexOf(p.mapKey) >= 0) return true;
     var knownArr = known || [];
     if (provId === 'plains') return true; // Hub de partida (Planícies Centrais)
-    if (!p.locKeys || !p.locKeys.length) return false;
-    if (playerLocKey && (_LOCATION_TO_PROVINCE[playerLocKey] === provId || p.locKeys.indexOf(playerLocKey) >= 0)) return true;
-    for (var i = 0; i < p.locKeys.length; i++) {
-      if (knownArr.indexOf(p.locKeys[i]) >= 0) return true;
+    if (playerLocKey && (_LOCATION_TO_PROVINCE[playerLocKey] === provId || (p.locKeys && p.locKeys.indexOf(playerLocKey) >= 0))) return true;
+
+    if (p.locKeys && p.locKeys.length) {
+      for (var i = 0; i < p.locKeys.length; i++) {
+        var k = p.locKeys[i];
+        if (knownArr.indexOf(k) >= 0) return true;
+        var aliased = _SERVER_TO_CANONICAL_KEY[k];
+        if (aliased && knownArr.indexOf(aliased) >= 0) return true;
+        var revAliased = _CANONICAL_TO_SERVER_KEY[k];
+        if (revAliased && knownArr.indexOf(revAliased) >= 0) return true;
+      }
+    }
+    for (var j = 0; j < knownArr.length; j++) {
+      var itemKey = knownArr[j];
+      if (_LOCATION_TO_PROVINCE[itemKey] === provId) return true;
+      var itemCanon = _SERVER_TO_CANONICAL_KEY[itemKey];
+      if (itemCanon && _LOCATION_TO_PROVINCE[itemCanon] === provId) return true;
     }
     return false;
   }
@@ -40098,6 +40254,7 @@
     // Aliases canônicos entre IDs internos do motor e nós do mapa
     var aliases = {
       'green_fields': ['green_fields', 'plains', 'city_gates'],
+      'city_gates': ['green_fields', 'plains', 'city_gates'],
       'forest': ['forest', 'whispering_woods'],
       'whispering_woods': ['forest', 'whispering_woods'],
       'swamp': ['swamp', 'misty_marshes'],
@@ -40109,7 +40266,13 @@
       'snow': ['snow', 'frozen_waste'],
       'frozen_waste': ['snow', 'frozen_waste'],
       'volcanic': ['volcanic', 'burning_crater'],
-      'burning_crater': ['volcanic', 'burning_crater']
+      'burning_crater': ['volcanic', 'burning_crater'],
+      'cave': ['cave', 'underground_passage'],
+      'underground_passage': ['cave', 'underground_passage'],
+      'graveyard': ['graveyard', 'ancient_cemetery'],
+      'ancient_cemetery': ['graveyard', 'ancient_cemetery'],
+      'coast': ['coast', 'salty_coast'],
+      'salty_coast': ['coast', 'salty_coast']
     };
 
     var syns = aliases[nodeId];
@@ -40118,6 +40281,9 @@
         if (known.indexOf(syns[i]) >= 0) return true;
       }
     }
+
+    // Starter nodes in plains
+    if (provKey === 'plains' && (nodeId === 'green_fields' || nodeId === 'plains' || nodeId === 'city_gates')) return true;
 
     return false;
   }
@@ -40457,8 +40623,13 @@
     style.id = 'cfm-injected-styles';
     style.textContent = ''
       + '.city-map-fullscreen-modal { position: fixed; inset: 0; z-index: 99999; background: #0c0906; display: none; flex-direction: column; overflow: hidden; width: 100%; height: 100%; max-width: 480px; margin: 0 auto; box-shadow: 0 0 40px rgba(0, 0, 0, 0.95); }'
-      + '.cfm-header { height: 46px; min-height: 46px; background: linear-gradient(180deg, #1e150d 0%, #120d08 100%); border-bottom: 1.5px solid rgba(196, 149, 58, 0.45); display: flex; align-items: center; justify-content: space-between; padding: 0 12px; box-sizing: border-box; z-index: 100; }'
-      + '.cfm-header-title { font-family: "Cinzel", serif; font-size: 13.5px; font-weight: 700; color: #ffd685; display: flex; align-items: center; gap: 6px; }'
+      + '.cfm-header { height: 46px; min-height: 46px; background: linear-gradient(180deg, #1e150d 0%, #120d08 100%); border-bottom: 1.5px solid rgba(196, 149, 58, 0.45); display: flex; align-items: center; justify-content: space-between; padding: 0 10px; box-sizing: border-box; z-index: 100; gap: 8px; }'
+      + '.cfm-region-picker { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }'
+      + '.cfm-region-picker-icon { font-size: 14px; flex-shrink: 0; }'
+      + '.cfm-header-select { background: #1e150d; color: #ffd685; border: 1.5px solid rgba(196, 149, 58, 0.65); border-radius: 5px; padding: 4px 8px; font-family: "Cinzel", Georgia, serif; font-size: 12px; font-weight: 700; cursor: pointer; outline: none; touch-action: manipulation; max-width: 230px; text-overflow: ellipsis; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.65); }'
+      + '.cfm-header-select:focus { border-color: #ffd685; box-shadow: 0 0 8px rgba(255, 214, 133, 0.5); }'
+      + '.cfm-header-select option { background: #18120c; color: #f3e4c8; font-family: sans-serif; font-size: 12px; padding: 6px; }'
+      + '.cfm-header-title { font-family: "Cinzel", serif; font-size: 13.5px; font-weight: 700; color: #ffd685; display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1; }}'
       + '.cfm-close-btn { font-family: "Cinzel", serif; font-size: 12px; font-weight: 700; color: #ffd685; background: #251b11; border: 1px solid rgba(196, 149, 58, 0.5); border-radius: 5px; padding: 5px 11px; cursor: pointer; touch-action: manipulation; }'
       + '.cfm-close-btn:active { background: #362617; transform: scale(0.96); }'
       + '.cfm-prompt-hint { color: #9b8e7c; font-family: "Cinzel", serif; font-size: 12px; font-style: italic; font-weight: 500; letter-spacing: 0.5px; }'
@@ -40509,20 +40680,35 @@
       document.body.appendChild(modal);
     }
 
-    var key = provKey || 'plains';
-    var reg = (REGIONS_DATA && REGIONS_DATA[key]) ? REGIONS_DATA[key] : (REGIONS_DATA ? REGIONS_DATA['plains'] : null);
-    if (!reg) return;
-
     var pObj = (typeof window !== 'undefined' && (window.CITY_PLAYER || window.CITY_MOCK_PLAYER || window.PLAYER)) || {};
-    var known = (typeof window !== 'undefined' && Array.isArray(window.__EXPLORE_KNOWN) && window.__EXPLORE_KNOWN.length)
-      ? window.__EXPLORE_KNOWN
-      : ((pObj && Array.isArray(pObj.known_locations)) ? pObj.known_locations : ['city_gates', 'plains']);
-    var ownedMaps = (pObj && (pObj.owned_maps || pObj.maps_owned)) || [];
+    var known = (typeof extractDiscoveredLocations === 'function') ? extractDiscoveredLocations(pObj) : [];
+    if (!known.length) {
+      known = (typeof window !== 'undefined' && Array.isArray(window.__EXPLORE_KNOWN) && window.__EXPLORE_KNOWN.length)
+        ? window.__EXPLORE_KNOWN
+        : ((pObj && Array.isArray(pObj.known_locations)) ? pObj.known_locations : ['city_gates', 'plains']);
+    }
+    var ownedMaps = (typeof extractPlayerMaps === 'function') ? extractPlayerMaps(pObj) : ((pObj && (pObj.owned_maps || pObj.maps_owned)) || []);
 
     var discProvs = (typeof CART_PROVINCES !== 'undefined' ? CART_PROVINCES : []).filter(function(pr) {
       return pr.id !== 'world' && isProvinceDiscovered(pr.id, known, ownedMaps);
     });
-    var hasMultipleProvs = (discProvs.length > 1);
+    if (!discProvs.length) {
+      var defaultPlains = (typeof CART_PROVINCES !== 'undefined' ? CART_PROVINCES : []).find(function(pr){ return pr.id === 'plains'; });
+      if (defaultPlains) discProvs.push(defaultPlains);
+    }
+
+    var key = provKey || 'plains';
+    var isCurrentDisc = discProvs.some(function(pr){ return pr.id === key; });
+    if (!isCurrentDisc && discProvs.length > 0) {
+      key = discProvs[0].id;
+    }
+
+    var reg = (REGIONS_DATA && REGIONS_DATA[key]) ? REGIONS_DATA[key] : (REGIONS_DATA ? REGIONS_DATA['plains'] : null);
+    if (!reg) return;
+
+    if (typeof _cartCurrentProvKey !== 'undefined') {
+      _cartCurrentProvKey = key;
+    }
 
     var rawSrc = reg.img || ('shared/img/map/provinces/' + (key === 'plains' ? 'plains_v2.webp?v=20261030b' : (key + '.webp?v=20261030b')));
     if (typeof window !== 'undefined' && window.location && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
@@ -40530,9 +40716,28 @@
       else if (rawSrc.indexOf('../valdoria-webapp/') === 0) rawSrc = rawSrc.replace('../valdoria-webapp/', '/');
     }
 
+    var headerTitleHtml = '';
+    if (discProvs.length > 1) {
+      headerTitleHtml = '<div class="cfm-region-picker">'
+        + '  <span class="cfm-region-picker-icon">🗺️</span>'
+        + '  <select class="cfm-header-select" id="rfm-province-select" aria-label="Selecionar Região de Destino">';
+      for (var pi = 0; pi < discProvs.length; pi++) {
+        var dp = discProvs[pi];
+        var isSel = (dp.id === key);
+        var ico = dp.icon ? (dp.icon + ' ') : '';
+        headerTitleHtml += '<option value="' + dp.id + '"' + (isSel ? ' selected' : '') + '>' + ico + dp.name + '</option>';
+      }
+      headerTitleHtml += '    <option value="world">🌐 Ver Continente (Todas)</option>'
+        + '  </select>'
+        + '</div>';
+    } else {
+      var defIco = (reg.icon || '🌾') + ' ';
+      headerTitleHtml = '<span id="rfm-header-text">' + defIco + reg.name + '</span>';
+    }
+
     modal.innerHTML = ''
       + '<div class="cfm-header">'
-      + '  <div class="cfm-header-title"><span id="rfm-header-text">' + reg.name + '</span></div>'
+      + '  <div class="cfm-header-title">' + headerTitleHtml + '</div>'
       + '  <button type="button" class="cfm-close-btn" id="rfm-close-btn">✕ Fechar</button>'
       + '</div>'
       + '<div class="cfm-viewport">'
@@ -40552,6 +40757,23 @@
     var pinsLayer = modal.querySelector('#rfm-pins-layer');
     var drawerName = modal.querySelector('#rfm-drawer-name');
     var drawerBtn = modal.querySelector('#rfm-drawer-act-btn');
+    var provSelect = modal.querySelector('#rfm-province-select');
+    if (provSelect) {
+      provSelect.onchange = function(e) {
+        var nextProvKey = this.value;
+        if (typeof haptic === 'function') haptic('light');
+        if (nextProvKey === 'world') {
+          closeRegionalMapModal();
+          if (typeof _cartFocusProvince === 'function') _cartFocusProvince('world');
+          else if (typeof _cartBackToRegionsList === 'function') _cartBackToRegionsList();
+          else if (typeof navigateTo === 'function') navigateTo('cartografia');
+          return;
+        }
+        if (typeof _cartCurrentProvKey !== 'undefined') _cartCurrentProvKey = nextProvKey;
+        openRegionalMapModal(nextProvKey, null, options);
+      };
+    }
+
     var closeBtn = modal.querySelector('#rfm-close-btn');
     closeBtn.onclick = function() {
       closeRegionalMapModal();
@@ -40666,7 +40888,7 @@
     INK_DARK: INK_DARK, INK_MED: INK_MED, INK_LIGHT: INK_LIGHT,
     INK_FAINT: INK_FAINT, PAPER_BG: PAPER_BG, PAPER_DARK: PAPER_DARK,
     SEA_INK: SEA_INK, SEA_FAINT: SEA_FAINT,
-    CART_BIOMES: CART_BIOMES, CART_PATHS: CART_PATHS, CART_PROVINCES: CART_PROVINCES, REGIONS_DATA: REGIONS_DATA, handleReturnToCity: handleReturnToCity, openRegionalMapModal: openRegionalMapModal, closeRegionalMapModal: closeRegionalMapModal, getLocationProvince: getLocationProvince, isProvinceDiscovered: isProvinceDiscovered, isNodeDiscovered: isNodeDiscovered, getDiscoveredProvinces: getDiscoveredProvinces,
+    CART_BIOMES: CART_BIOMES, CART_PATHS: CART_PATHS, CART_PROVINCES: CART_PROVINCES, REGIONS_DATA: REGIONS_DATA, handleReturnToCity: handleReturnToCity, openRegionalMapModal: openRegionalMapModal, closeRegionalMapModal: closeRegionalMapModal, getLocationProvince: getLocationProvince, isProvinceDiscovered: isProvinceDiscovered, isNodeDiscovered: isNodeDiscovered, getDiscoveredProvinces: getDiscoveredProvinces, extractPlayerMaps: extractPlayerMaps, extractDiscoveredLocations: extractDiscoveredLocations,
     _cartSeedRand: _cartSeedRand,
     _hatchArea: _hatchArea, _wavyLine: _wavyLine,
     _drawParchmentBase: _drawParchmentBase,

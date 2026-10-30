@@ -73205,10 +73205,14 @@ function _cartRenderCarousel() {
   if (!regData) return;
 
   var p = (typeof window !== 'undefined' && window.CITY_MOCK_PLAYER) || {};
-  var known = (typeof window !== 'undefined' && Array.isArray(window.__EXPLORE_KNOWN) && window.__EXPLORE_KNOWN.length)
-    ? window.__EXPLORE_KNOWN
-    : ((p && Array.isArray(p.known_locations)) ? p.known_locations : ['city_gates', 'plains']);
-  var maps = (p && (p.owned_maps || p.maps_owned)) || [];
+  var known = (window.CartShared && typeof CartShared.extractDiscoveredLocations === 'function')
+    ? CartShared.extractDiscoveredLocations(p)
+    : ((typeof window !== 'undefined' && Array.isArray(window.__EXPLORE_KNOWN) && window.__EXPLORE_KNOWN.length)
+        ? window.__EXPLORE_KNOWN
+        : ((p && Array.isArray(p.known_locations)) ? p.known_locations : ['city_gates', 'plains']));
+  var maps = (window.CartShared && typeof CartShared.extractPlayerMaps === 'function')
+    ? CartShared.extractPlayerMaps(p)
+    : ((p && (p.owned_maps || p.maps_owned)) || []);
 
   var allKeys = ['plains', 'forest', 'swamp', 'mountain', 'cave', 'coast', 'desert', 'graveyard', 'snow', 'volcanic'];
   _cartCarouselKeys = allKeys.filter(function(k) {
