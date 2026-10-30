@@ -18124,46 +18124,55 @@ var TUTORIAL_STEPS = [
   },
   {
     selector: '#city-group-panel',
+    placement: 'bottom',
     title: 'Cards da Comitiva',
     description: 'No topo da tela: acompanhe os Pontos de Vida (<b>HP</b>), Magia (<b>MP</b>), nível e ouro de cada aventureiro do seu grupo. Quando os recursos estiverem baixos, descanse ou cure seus ferimentos na cidade.'
   },
   {
     selector: '.hub-cta',
+    placement: 'bottom',
     title: 'Partir para Aventura',
     description: 'O coração do jogo. Toque aqui para abrir o <b>Mapa de Valdoria</b> e marchar rumo a florestas, montanhas e masmorras, conquistando XP, ouro e relíquias.'
   },
   {
     selector: '.hub-locations-section',
+    placement: 'bottom',
     title: 'Distritos Urbanos',
     description: 'A capital está dividida em <b>4 distritos ilustrados</b>. Cada um possui um mapa próprio detalhado com lojas, taverna, estalagem, templos e arenas de treino.'
   },
   {
     selector: '.hub-loc-card[data-did="city_south"]',
+    placement: 'bottom',
     title: 'Portões do Sul',
     description: 'As grandes muralhas e posto dos guardas: aqui ficam a <b>Taverna do Javali Bêbado</b> para ouvir boatos, a <b>Estalagem do Grifo</b> para descanso longo e a vigília militar.'
   },
   {
     selector: '.hub-loc-card[data-did="city_market"]',
+    placement: 'bottom',
     title: 'Praça Mercantil',
     description: 'O centro do comércio: abriga o <b>Mercado Central</b> com armas e poções, o <b>Banco & Cofre</b> para proteger seu ouro, a <b>Oficina & Forja</b> e a vida social da <b>Praça</b>.'
   },
   {
     selector: '.hub-loc-card[data-did="city_military"]',
+    placement: 'top',
     title: 'Arena & Quartel',
     description: 'O setor militar: reúne a <b>Arena do Coliseu</b> para duelos de gladiadores com apostas e a <b>Guilda dos Aventureiros</b> para contratar aliados e aceitar contratos.'
   },
   {
     selector: '.hub-loc-card[data-did="city_high"]',
+    placement: 'top',
     title: 'Acrópole Sagrada',
     description: 'O planalto da fé e da magia: visite o <b>Templo da Luz Sagrada</b> para curas imediatas e bênçãos, o <b>Escriba Rúnico</b> para encantamentos e o Festival sazonal.'
   },
   {
     selector: '.hub-prog, .hub-quest-row',
+    placement: 'top',
     title: 'Metas & Progresso',
     description: 'Painel de evolução: exibe seus contratos ativos, moedas nobres de platina, total de abates e o objetivo diário com recompensa extra.'
   },
   {
     selector: '#bottom-panel, .footer-row.footer-quick',
+    placement: 'top',
     expandFooter: true,
     title: 'Atalhos Rápidos',
     description: 'Barra inferior com <b>Mochila</b>, <b>Ficha</b> de regras D&D 5e, <b>Hall</b> e o botão de <b>Ajuda (?)</b> para abrir o guia explicativo de cada tela do jogo.'
@@ -18271,6 +18280,8 @@ function _showFirstTimeTutorial(stepIdx){
       + '@keyframes ftCardEnter{'
       + '  from{opacity:0;transform:translateX(-50%) translateY(14px) scale(0.96)}'
       + '  to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}'
+      + '#first-tut-card.is-top{top:12px !important;bottom:auto !important;transform:translateX(-50%) !important}'
+      + '#first-tut-card.is-bottom{bottom:12px !important;top:auto !important;transform:translateX(-50%) !important}'
       + '#first-tut-card.center{top:auto !important;bottom:50% !important;transform:translate(-50%,50%) !important}'
       + '#first-tut-card.center{animation:ftCardEnterCenter 0.4s cubic-bezier(0.34,1.56,0.64,1)}'
       + '@keyframes ftCardEnterCenter{'
@@ -18546,21 +18557,38 @@ function _showFirstTimeTutorial(stepIdx){
         var spaceBelow = vh - tBottom - marginEdge;
 
         // REGRA ABSOLUTA (User Order): o popup NUNCA pode sobrepor o elemento destacado.
-        // Se o elemento está mais para baixo (spaceAbove > spaceBelow), o popup VAI PARA O TOPO.
-        // Se o elemento está mais para cima (spaceBelow >= spaceAbove), o popup VAI PARA O RODAPÉ.
-        var placeOnTop = (spaceAbove > spaceBelow);
-
-        // Se onde escolheu falta espaço mas o outro lado cabe perfeitamente, inverte
-        if (placeOnTop && spaceAbove < (cardH + safetyGap) && spaceBelow >= (cardH + safetyGap)) {
-          placeOnTop = false;
-        } else if (!placeOnTop && spaceBelow < (cardH + safetyGap) && spaceAbove >= (cardH + safetyGap)) {
+        var placeOnTop = false;
+        if (step && step.placement === 'top') {
           placeOnTop = true;
+        } else if (step && step.placement === 'bottom') {
+          placeOnTop = false;
+        } else {
+          // Fallback dinâmico caso placement não seja especificado no passo:
+          // Limites para evitar colisão direta com o alvo
+          var bottomLimit = vh - marginEdge - cardH - safetyGap;
+          var topLimit = marginEdge + cardH + safetyGap;
+          var wouldCollideBottom = tBottom > bottomLimit;
+          var wouldCollideTop = tTop < topLimit;
+
+          if (wouldCollideBottom && !wouldCollideTop) {
+            placeOnTop = true;
+          } else if (wouldCollideTop && !wouldCollideBottom) {
+            placeOnTop = false;
+          } else if (r.top >= 220) {
+            placeOnTop = true;
+          } else {
+            placeOnTop = (spaceAbove >= spaceBelow);
+          }
         }
 
         if (placeOnTop) {
+          card.classList.remove('is-bottom', 'center');
+          card.classList.add('is-top');
           card.style.bottom = 'auto';
           card.style.top = marginEdge + 'px';
         } else {
+          card.classList.remove('is-top', 'center');
+          card.classList.add('is-bottom');
           card.style.top = 'auto';
           card.style.bottom = marginEdge + 'px';
         }
@@ -18593,13 +18621,14 @@ function _showFirstTimeTutorial(stepIdx){
     } /* end _measureAndPosition */
     setTimeout(_measureAndPosition, (targetTab || step.expandFooter) ? 320 : 0);
   } else {
-    /* Welcome/Closing — center mode. Limpa inline pra .center aplicar. */
+    /* Welcome/Closing — center mode. Limpa classes top/bottom pra .center aplicar. */
+    card.classList.remove('is-top', 'is-bottom');
+    card.classList.add('center');
     card.style.top = '';
     card.style.bottom = '';
     spotlight.classList.remove('visible');
     mask.style.clipPath = 'none';
     mask.style.webkitClipPath = 'none';
-    card.classList.add('center');
   }
 }
 
@@ -34269,46 +34298,55 @@ var SCREEN_TOUR_STEPS = {
     },
     {
       selector: '#city-group-panel',
+      placement: 'bottom',
       title: 'Cards da Comitiva',
       description: 'No topo da tela: monitore em tempo real os Pontos de Vida (<b>HP</b>), Magia (<b>MP</b>), nível e moedas de cada membro do seu grupo.'
     },
     {
       selector: '.hub-cta',
+      placement: 'bottom',
       title: 'Partir para Aventura',
       description: 'O coração da exploração. Toque aqui para abrir a <b>Cartografia Continental</b> e marchar rumo a florestas, montanhas e masmorras, conquistando XP e espólios.'
     },
     {
       selector: '.hub-locations-section',
+      placement: 'bottom',
       title: 'Distritos de Valdoria',
       description: 'A capital é dividida em <b>4 distritos ilustrados</b>. Cada um possui um mapa próprio detalhado com lojas, templos, tavernas, serviços e NPCs.'
     },
     {
       selector: '.hub-loc-card[data-did="city_south"]',
+      placement: 'bottom',
       title: 'Portões do Sul',
       description: 'As grandes muralhas e posto de vigília: abriga a <b>Taverna do Javali Bêbado</b> para ouvir boatos e beber, a <b>Estalagem do Grifo</b> para descanso longo e os sentinelas da guarda.'
     },
     {
       selector: '.hub-loc-card[data-did="city_market"]',
+      placement: 'bottom',
       title: 'Praça Mercantil',
       description: 'O centro do comércio: reúne o <b>Mercado Central</b> com armas e poções, o <b>Banco & Cofre</b> blindado, a <b>Oficina & Forja</b> e a vida social da <b>Praça</b>.'
     },
     {
       selector: '.hub-loc-card[data-did="city_military"]',
+      placement: 'top',
       title: 'Arena & Quartel',
       description: 'O polo militar de Valdoria: acomoda o coliseu da <b>Arena de Duelos</b> para combates e apostas de ouro, e a <b>Guilda dos Aventureiros</b> com contratos de caça.'
     },
     {
       selector: '.hub-loc-card[data-did="city_high"]',
+      placement: 'top',
       title: 'Acrópole Sagrada',
       description: 'O santuário da fé e da magia: abriga o <b>Templo da Luz Sagrada</b> para curas e bênçãos, o <b>Escriba Rúnico</b> para encantamentos e celebrações de <b>Festivais</b>.'
     },
     {
       selector: '.hub-prog, .hub-quest-row',
+      placement: 'top',
       title: 'Metas & Progresso',
       description: 'Acompanhe seu avanço em tempo real: missões ativas em andamento, moedas de platina acumuladas, abates de monstros nos ermos e a meta do <b>Desafio Diário</b>.'
     },
     {
       selector: '#bottom-panel, .footer-row.footer-quick',
+      placement: 'top',
       expandFooter: true,
       title: 'Atalhos do Rodapé',
       description: 'Acesso imediato à sua <b>Mochila</b>, <b>Ficha</b> de atributos D&D 5e, <b>Hall</b> de aventureiros e ao botão de <b>Ajuda (?)</b> para o guia de cada tela.'
