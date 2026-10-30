@@ -3484,7 +3484,7 @@
       r: { name: 'Chuva Contínua', icon: '🌧️', hazardMod: 2, effect: 'Terreno escorregadio (+2 CD em testes físicos de marcha). Dificuldade para acender fogueiras sem abrigo.' },
       t: { name: 'Tempestade com Raios', icon: '⛈️', hazardMod: 3, effect: 'Visibilidade obscurecida e ventania. Desvantagem em testes de Percepção auditiva/visual à distância (D&D 5e PHB p. 110).' },
       f: { name: 'Névoa Densa', icon: '🌫️', hazardMod: 2, effect: 'Visibilidade limitada. Desvantagem em testes de Percepção visual além de curta distância (D&D 5e PHB p. 183).' },
-      snow: { name: 'Nevasca Boreal', icon: '❄️', hazardMod: 3, effect: 'Frio extremo e ventos congelantes. Risco de exaustão sem mantos pesados ou tochas.' }
+      snow: { name: 'Nevasca Boreal', icon: '', hazardMod: 3, effect: 'Frio extremo e ventos congelantes. Risco de exaustão sem mantos pesados ou tochas.' }
     };
     return data[w] || data.s;
   }
@@ -4783,7 +4783,7 @@
         dcCheck: 'Salvaguarda de CON CD 12',
         effect: 'Nível de Exaustão sem agasalhos térmicos',
         mitigation: 'Trajes de pele de lobo e fogueira de acampamento',
-        icon: '❄️',
+        icon: '',
         color: '#38bdf8'
       };
     } else if (bk.indexOf('forest') >= 0 || bk.indexOf('floresta') >= 0) {
@@ -4803,7 +4803,7 @@
         dcCheck: 'Salvaguarda de CON CD 13',
         effect: 'Envenenado por 1h ou dano ígneo de 1d6',
         mitigation: 'Máscaras de pano embebidas e passo firme',
-        icon: '🌋',
+        icon: '',
         color: '#ef4444'
       };
     }
@@ -4813,7 +4813,7 @@
       dcCheck: 'Salvaguarda de CON CD 10 sob temporal',
       effect: 'Encharcamento e terreno lamacento reduzindo velocidade',
       mitigation: 'Capas de viagem impermeáveis e marcha constante',
-      icon: '🌾',
+      icon: '',
       color: '#eab308'
     };
   }
@@ -4853,10 +4853,10 @@
     var encTypes = [];
     if (bk.indexOf('desert') >= 0 || bk.indexOf('dunas') >= 0) {
       encTypes = [
-        { label: 'Bandos de Nômades Salteadores', pct: '35%', desc: 'Guerreiros do deserto emboscando em desfiladeiros rochosos.', icon: '⚔️' },
+        { label: 'Bandos de Nômades Salteadores', pct: '35%', desc: 'Guerreiros do deserto emboscando em desfiladeiros rochosos.', icon: '' },
         { label: 'Verme da Areia / Escorpião Gigante', pct: '30%', desc: 'Predador alfa subterrâneo atraído por vibrações na areia.', icon: '🦂' },
         { label: 'Caravana de Especiarias Sitiada', pct: '20%', desc: 'Mercadores perdidos precisando de água e escolta armada.', icon: '🐪' },
-        { label: 'Monólito Arcano Submerso', pct: '15%', desc: 'Ruína de civilização esquecida com runas de teletransporte.', icon: '🏛️' }
+        { label: 'Monólito Arcano Submerso', pct: '15%', desc: 'Ruína de civilização esquecida com runas de teletransporte.', icon: '' }
       ];
     } else if (bk.indexOf('swamp') >= 0 || bk.indexOf('pantan') >= 0) {
       encTypes = [
@@ -4870,12 +4870,12 @@
         { label: 'Patrulha de Gigantes das Colinas / Ogros', pct: '35%', desc: 'Forças brutas arremessando rochedos das alturas.', icon: '🧌' },
         { label: 'Wyverns ou Harpias Aladas', pct: '30%', desc: 'Ataque aéreo vindo das correntes térmicas dos picos.', icon: '🦅' },
         { label: 'Batedores da Guarda de Korthag', pct: '20%', desc: 'Sentinelas anões patrulhando os passos montanhosos.', icon: '🛡️' },
-        { label: 'Entrada de Mina Antiga Desmoronada', pct: '15%', desc: 'Filão de minério nobre com riscos de desabamento.', icon: '⛏️' }
+        { label: 'Entrada de Mina Antiga Desmoronada', pct: '15%', desc: 'Filão de minério nobre com riscos de desabamento.', icon: '' }
       ];
     } else if (bk.indexOf('snow') >= 0 || bk.indexOf('boreal') >= 0) {
       encTypes = [
         { label: 'Matilha de Lobos Invernais', pct: '40%', desc: 'Predadores com sopro gélido flanqueando em meio à nevasca.', icon: '🐺' },
-        { label: 'Gigante do Gelo Solitário', pct: '25%', desc: 'Guerreiro titânico vasculhando os ermos glaciais.', icon: '❄️' },
+        { label: 'Gigante do Gelo Solitário', pct: '25%', desc: 'Guerreiro titânico vasculhando os ermos glaciais.', icon: '' },
         { label: 'Caçadores Nômades da Tundra', pct: '20%', desc: 'Companhia de caça disposta a trocar peles e carne seca.', icon: '🏹' },
         { label: 'Caverna Glacial com Santuário Congelado', pct: '15%', desc: 'Refúgio natural com cristais de gelo perene.', icon: '🧊' }
       ];
@@ -4888,7 +4888,7 @@
       ];
     } else {
       encTypes = [
-        { label: 'Salteadores de Estrada ou Bandidos', pct: '35%', desc: 'Bandidos de estrada buscando tributo de mercadorias.', icon: '⚔️' },
+        { label: 'Salteadores de Estrada ou Bandidos', pct: '35%', desc: 'Bandidos de estrada buscando tributo de mercadorias.', icon: '' },
         { label: 'Caravana de Mercadores Ambulantes', pct: '30%', desc: 'Venda de provisões, tochas e consumíveis de estrada.', icon: '🛒' },
         { label: 'Patrulha da Guarnição de Valdória', pct: '20%', desc: 'Soldados assegurando as fronteiras da capital.', icon: '🛡️' },
         { label: 'Acampamento Abandonado com Rastros', pct: '15%', desc: 'Fogueira recente com pistas de eventos locais.', icon: '⛺' }
@@ -6396,9 +6396,9 @@
     var enc = biomeTable[category] || biomeTable.combat;
 
     var catLabels = {
-      combat: { name: 'Ameaça Hostil', icon: '⚔️', color: '#ef4444' },
+      combat: { name: 'Ameaça Hostil', icon: '', color: '#ef4444' },
       social: { name: 'Encontro Social', icon: '🗣️', color: '#60a5fa' },
-      discovery: { name: 'Descoberta / Marco', icon: '🏛️', color: '#ffd700' },
+      discovery: { name: 'Descoberta / Marco', icon: '', color: '#ffd700' },
       hazard: { name: 'Perigo Ambiental', icon: '⚠️', color: '#fb923c' }
     };
 
@@ -7447,7 +7447,7 @@
         gearMitigation: hasColdGear ? 'Agasalhos pesados de pele neutralizam a salvaguarda de frio.' : 'Exige Agasalho de Inverno (Cold Weather Gear, PHB p. 150) sob pena de 1 nível de Exaustão por hora.',
         isMitigated: hasColdGear,
         ambientHazard: 'Visibilidade contida a 15 pés (escuridão leve); fogueiras pequenas são extintas em minutos.',
-        icon: '❄️',
+        icon: '',
         color: hasColdGear ? '#38bdf8' : '#f87171',
         dndRef: 'DMG p. 110 (Frio Extremo e Nevascas)'
       };
@@ -7730,7 +7730,7 @@
         speedModifierPct: -25,
         specialPerk: 'Perícia anã em rochas: vantagem para superar desfiladeiros montanhosos e forja de campanha ativa.',
         obligation: 'Auxiliar na tração de carretas emperradas em passagens estreitas e combater horrores subterrâneos.',
-        icon: '⛏️',
+        icon: '',
         color: '#fb923c'
       }
     };
@@ -7916,7 +7916,7 @@
         delayHours: 1,
         cargoDamageRiskPct: 5,
         recommendation: 'Ideal para travessia regular a pé e carroças com animais de tração.',
-        icon: '🌊',
+        icon: '',
         color: '#4ade80'
       },
       deep_current: {
@@ -8013,7 +8013,7 @@
         name: 'Campo de Batalha Histórico dos Três Tronos',
         historicalDesc: 'Tumulares cobertos de vegetação, lanças enferrujadas e elmos memoriais cravados na encosta da colina.',
         passiveBoon: 'Resiliência Tática: a comitiva ganha +2 nas rolagens de Iniciativa no primeiro encontro de combate nas próximas 24 horas.',
-        icon: '⚔️',
+        icon: '',
         color: '#facc15'
       },
       natural_geowonder: {
@@ -8074,7 +8074,7 @@
         warmthBenefit: 'Nenhum; a comitiva depende de cobertores e agasalhos pesados de inverno.',
         cookingAllowed: false,
         desc: 'Camuflagem noturna máxima; consumo estrito de rações secas de ferro sem emissão de luz ou cheiro.',
-        icon: '❄️',
+        icon: '',
         color: '#38bdf8'
       },
       magic_flame: {
@@ -8234,7 +8234,7 @@
         yieldDice: '1d4 doses',
         alchemicalEffect: 'Néctar hiper-hidratante; supre a necessidade diária de água de 1 aventureiro.',
         marketValueGold: 10,
-        icon: '🌵',
+        icon: '',
         color: '#facc15'
       };
     } else if (bk === 'snow' || bk === 'tundra') {
@@ -21500,7 +21500,7 @@
       weatherAndCampSafety: 'Ao fixar o acampamento em biomas de frio extremo (como Neve, Montanha ou Abismo Glacial) ou calor abrasador (Deserto e Vulcão), a conjuração de Controlar o Clima ou Pequena Cabana estabiliza o microclima local em temperatura amena (18°C a 22°C), eliminando testes periódicos de congelamento, exaustão térmica ou insolação durante o descanso longo.',
       weatherAndCouncilWatch: 'Sentinelas de vigília operam sem desvantagem em Percepção visual decorrente de nevasca uivante ou rajadas de granizo, assegurando detecção de intrusos a distância total.',
       campRestAndSafetyGuards: 'Garante recuperação integral de dados de vida e remoção plena de níveis de Exaustão mesmo sob nevasca polar contínua (PHB p. 186, 228).',
-      icon: '🏕️',
+      icon: '',
       color: '#38bdf8'
     };
 
@@ -21575,7 +21575,7 @@
       sanctuaryAndCampSafety: 'Ao montar o acampamento de alto nível, o conjurador designa nominalmente os membros da sua comitiva (e de comitivas aliadas presentes na encruzilhada, Fase 315) autorizados a cruzar o portal da Mansão Magnífica de Mordenkainen antes de fechar a entrada invisível.',
       sanctuaryAndCouncilWatch: 'Como o exterior não exibe barraca nem fogueira, patrulhas inimigas e predadores passam pelo nó sem perceber que 10 a 20 aventureiros repousam no plano extradimensional logo acima.',
       campRestAndSafetyGuards: 'Ao término das 24 horas, todas as criaturas e objetos trazidos são expelidos em segurança nos espaços desocupados mais próximos da entrada (PHB p. 257).',
-      icon: '🏛️',
+      icon: '',
       color: '#f59e0b'
     };
 
@@ -21800,7 +21800,7 @@
       counterTrackAndCampSafety: 'Para despistar perseguidores humanos, matilhas de worgs e a magia Localizar Criatura (PHB p. 256), o Batedor conduz a comitiva pelo leito raso de um riacho de água corrente com mais de 3 metros de largura e varre as últimas pegadas com galhos de pinheiro (+5 na CD de Sobrevivência dos rastreadores).',
       counterTrackAndPerimeterWatch: 'Interrompe instantaneamente tanto o rastro olfativo de farejadores quanto a linha de efeito de Localizar Criatura antes de montar o acampamento na margem oposta.',
       campRestAndSafetyGuards: 'Garante noite tranquila mesmo quando caçadores de recompensa ou bandos rivais seguem a estrada principal.',
-      icon: '🌊',
+      icon: '',
       color: '#d97706'
     };
 
@@ -21910,7 +21910,7 @@
       convergenceMechanics: 'Quando duas comitivas se encontram no mesmo nó da rota ou respondem a um sinal de socorro (Trompa/Píroforos da Fase 301, Ave Mensageira da Fase 305 ou Enviar Mensagem da Fase 308) e selam pacto de aliança, o encontro culmina na Coalescência Tática para o motor Combat2: os aventureiros dos dois grupos entram juntos na ordem de Iniciativa compartilhando auras de Paladino (Aura de Proteção, PHB p. 85), bênçãos de Clérigo, inspiração de Bardo e Vínculo Telepático de Rary (Fase 310) para enfrentar dragões, chefes de masmorra ou emboscadas de guerra que nenhuma comitiva isolada sobreviveria sozinha!',
       pioneerMitigation: 'Sincronização prévia de papéis de vanguarda, flanqueamento e suporte de cura antes de iniciar o confronto conjunto.',
       rescueAndStabilization: 'Qualquer aliado de uma das comitivas pode usar Kit de Curandeiro (PHB p. 151) ou Palavra Curativa para estabilizar um companheiro caído do outro grupo a 0 PV.',
-      icon: '⚔️',
+      icon: '',
       color: '#e11d48'
     };
 
@@ -23411,7 +23411,7 @@
       strandflatRisk: 'Quando a maré oscila 4 metros no labirinto de ilhotas, estreitos canais entre skerries de rocha nua canalizam torrentes furiosas de água salgada a 16 nós (turbilhões de maré / straum); botes e nadadores são sugados para fendas submarinas e arremessados contra cristas de granito afiadas com 3d8 de concussão e risco de afogamento por turbulência (DMG p. 110, 246; PHB p. 182-183).',
       pioneerMitigation: 'Batedores navegadores calculando a tábua de marés e cruzando os canais estritamente na calmaria do estofo da maré (Sobrevivência ou Navegação CD 14).',
       rescueAndStabilization: 'Cabos de retinida arremessados de ilhotas secas com ganchos de resgate e tração combinada para retirar náufragos dos vórtices (Atletismo CD 14 ou Sobrevivência CD 13).',
-      icon: '🌊',
+      icon: '',
       color: '#0284c7'
     };
 
@@ -23487,7 +23487,7 @@
       machairRisk: 'Ventos oceânicos tempestuosos empurram uma maré de sizígia furiosa que transpõe o cordão de dunas e afoga a planície de machair; os lochans de água doce transbordam em minutos, convertendo a campina em um lençol de água salobra gelada com correnteza rápida que arrasta a comitiva com 3d6 de concussão e frio (DMG p. 110, 246; PHB p. 182-183).',
       pioneerMitigation: 'Batedores monitorando o refluxo das ondas e a linha de algas nas dunas, conduzindo o avanço pela crista dos cordões de capim-marram (Sobrevivência ou Natureza CD 14).',
       rescueAndStabilization: 'Lançamento de cabos de resgate com boias de cortiça e aquecimento rápido com mantas de lã e chá quente contra choque térmico (Atletismo CD 14 ou Medicina CD 13).',
-      icon: '🌊',
+      icon: '',
       color: '#0ea5e9'
     };
 
@@ -23562,7 +23562,7 @@
       faultRisk: 'O fundo estreito da haste do cânion em taça de vinho é cortado por degraus verticais lisos de 25 metros talhados em quartzito maciço; cordas gastas em rochas cortantes e poços de torvelinho secos ocultos sob cascalho instável ameaçam precipitar o explorador em queda de 20 metros com 4d6 de concussão e entorse articular (DMG p. 110, 246; PHB p. 182-183).',
       pioneerMitigation: 'Batedores cravando grampos de expansão em rocha viva e descendo em rapel duplo com nós bloqueadores de segurança (Sobrevivência ou Atletismo CD 14).',
       rescueAndStabilization: 'Içamento mecânico com polias e imobilização de luxações com talas rígidas de alpinismo (Atletismo CD 14 ou Medicina CD 13).',
-      icon: '🏔️',
+      icon: '',
       color: '#ef4444'
     };
 
@@ -23637,7 +23637,7 @@
       pillarRisk: 'Uma ponte natural estreita de 2 metros de largura suspensa entre dois pilares a 300 metros de altura sofreu fraturas por descompressão no extradorso do arco; o avanço da comitiva com cargas pesadas quebra o bloco-chave, exigindo salvaguarda de Destreza CD 15 para saltar para o platô firme ou despencar no abismo enevoado com 10d6 de concussão (DMG p. 110, 246; PHB p. 182-183).',
       pioneerMitigation: 'Batedores amarrando cabos de aço estáticos entre os dois monólitos e inspecionando fissuras basais antes da travessia de cada membro (Sobrevivência ou Atletismo CD 14).',
       rescueAndStabilization: 'Içamento emergencial por cordas com freios antiqueda e contenção de traumas de suspensão com repouso horizontal (Atletismo CD 14 ou Medicina CD 13).',
-      icon: '🏛️',
+      icon: '',
       color: '#06b6d4'
     };
 
@@ -23788,7 +23788,7 @@
       stoneForestRisk: 'As bordas superiores e laterais dos pináculos de calcário puro são esculpidas pela chuva ácida em arestas cortantes como navalhas de aço; qualquer desequilíbrio na travessia das cristas retalha roupas, polainas e peles de aventureiros com 3d6 de dano cortante e hemorragia ativa (DMG p. 110, 246; PHB p. 182-183).',
       pioneerMitigation: 'Batedores utilizando luvas grossas de couro ferrado e fitas de ancoragem com mosquetões de aço em passadas cadenciadas (Sobrevivência ou Atletismo CD 14).',
       rescueAndStabilization: 'Estancamento imediato de sangramentos por torniquete de emergência, sutura de cortes e aplicação de bálsamo adstringente (Medicina CD 13).',
-      icon: '🏛️',
+      icon: '',
       color: '#10b981'
     };
 
@@ -23978,7 +23978,7 @@
       pavementAndCampSafety: 'O piso do acampamento é estruturado diretamente sobre a couraça de seixos do reg intertravados, que forma uma plataforma horizontal compacta indeformável; estacas de ferro são calçadas nas juntas da carapaça, garantindo fixação rígida imune a tempestades de areia e solo 100% livre de peçonhas escavadoras (DMG p. 111).',
       pavementAndWatch: 'A ausência total de vegetação alta e a rigidez do pavimento plano oferecem visão de 360 graus até o horizonte, concedendo vantagem em testes de Percepção à sentinela contra aproximações furtivas.',
       campRestAndSafetyGuards: 'Repouso estável e seguro sobre piso impermeável, eliminando a infiltração de areia em sacos de dormir e equipamentos da comitiva.',
-      icon: '🏕️',
+      icon: '',
       color: '#eab308'
     };
 
@@ -24128,7 +24128,7 @@
       valleyAndCampSafety: 'O acampamento é estabelecido em uma bancada fóssil de calcário 6 metros acima do talvegue do vale cego; o piso elevado mantém as tendas completamente a salvo de refluxos repentinos de estavelas e inundações torrenciais subterrâneas (DMG p. 111).',
       valleyAndWatch: 'A posição elevada sobre o cânion proporciona visão desimpedida ao longo de todo o leito seco, concedendo vantagem em testes de Percepção para a sentinela contra aproximações furtivas.',
       campRestAndSafetyGuards: 'Descanso seguro e protegido contra surpresas hidrológicas e predadores rastejantes nos vales cársticos.',
-      icon: '🏕️',
+      icon: '',
       color: '#10b981'
     };
 
@@ -24163,7 +24163,7 @@
       tuyaRisk: 'Os flancos verticais de 300 metros da tuya são constituídos por tufos vítreos de palagonita intemperizada e brechas de hialoclastito que repousam em ângulo crítico; a passagem de montarias e aventureiros na trilha estreita de meia-encosta rompe uma camada friável, disparando um desmoronamento maciço de blocos angulosos com 4d8 de concussão e queda no abismo glacial (DMG p. 110, 246; PHB p. 182-183).',
       pioneerMitigation: 'Batedores sondando a coesão das cinzas consolidadas com martelos de geólogo e contornando a montanha por esporões de lavas em almofada estáveis (Sobrevivência ou Investigação CD 14).',
       rescueAndStabilization: 'Ancoragem imediata de cabos estáticos em fraturas duras e imobilização de fraturas por trauma compressivo com talas ortopédicas (Atletismo CD 14 ou Medicina CD 13).',
-      icon: '🏔️',
+      icon: '',
       color: '#f59e0b'
     };
 
@@ -24243,7 +24243,7 @@
       fissureRisk: 'A fissura linear de 2 quilômetros rasga o solo com rugido subterrâneo disparando uma cortina contínua de fontes de lava a 150 metros de altitude; o vento espalha pelotas incandescentes de escória fluida que chovem em raio de 300 metros, exigindo salvaguarda de Destreza CD 15 para se abrigar sob escudos e muretas ou sofrer 3d8 de dano de fogo mais 2d6 de concussão com queima de vestes e arreios de montarias (DMG p. 110, 246; PHB p. 182-183).',
       pioneerMitigation: 'Batedores monitorando o alinhamento da fissura e a direção dos ventos dominantes, contornando a rampa de spatter a barlavento por corredores de cinza resfriada (Sobrevivência ou Natureza CD 14).',
       rescueAndStabilization: 'Abafamento de focos de fogo com cobertores grossos de lã e aplicação de pomadas de gordura de baleia e calêndula para queimaduras térmicas (Medicina CD 13).',
-      icon: '🌋',
+      icon: '',
       color: '#dc2626'
     };
 
@@ -24323,7 +24323,7 @@
       moulinRisk: 'A trilha na superfície da geleira margeia um moinho circular de 6 metros de diâmetro onde uma torrente de degelo mergulha verticalmente por 50 metros em espiral; o lábio do poço é coberto por gelo vítreo lubrificado que cede sem atrito, exigindo salvaguarda de Destreza CD 15 para cravar o piolet de gelo ou despencar no abismo gélido sofrendo 4d8 de concussão por impacto nas paredes cilíndricas mais 2d6 de dano de frio com risco iminente de afogamento e hipotermia terminal (DMG p. 110, 246; PHB p. 182-183).',
       pioneerMitigation: 'Batedores amarrados em cordada com grampos de doze pontas instalando estacas de gelo com linhas de recuo a 10 metros da borda do moinho (Sobrevivência ou Atletismo CD 14).',
       rescueAndStabilization: 'Içamento urgente com guincho de roldanas e polias de escalada técnica e reaquecimento térmico imediato com peles e bolsas de brasas (Atletismo CD 14 ou Medicina CD 13).',
-      icon: '❄️',
+      icon: '',
       color: '#38bdf8'
     };
 
@@ -24403,7 +24403,7 @@
       epigeneticRisk: 'O rio superimposto corta uma crista transversal de gnaisse duro em um desfiladeiro afunilado de apenas 3 metros de largura com paredões verticais de 60 metros; chuvas a montante disparam uma onda de torrente com 4 metros de lâmina de água barrenta e troncos arremessados em alta velocidade, exigindo salvaguarda de Força CD 15 para se fixar em grampos de escalada ou ser arrastado pelas corredeiras sofrendo 4d8 de concussão com risco de afogamento e esmagamento (DMG p. 110, 246; PHB p. 182-183).',
       pioneerMitigation: 'Batedores atentos à mudança de coloração da água e eco prévio de estrondo a montante, instalando linhas estáticas de cabo de aço em banquetas altas de rocha (Sobrevivência ou Atletismo CD 14).',
       rescueAndStabilization: 'Içamento urgente com roldanas de resgate e tratamento de hipotermia com caldos quentes e ataduras compressivas (Atletismo CD 14 ou Medicina CD 13).',
-      icon: '🌊',
+      icon: '',
       color: '#0284c7'
     };
 
@@ -24483,7 +24483,7 @@
       tablelandRisk: 'O tabuleiro costeiro termina em um penhasco avermelhado de 40 metros cuja base arenosa foi solapada pelo mar; a vibração de passos na borda rompe uma fenda de tração oculta, fazendo uma fatia de rocha de centenas de toneladas despencar verticalmente no oceano, exigindo salvaguarda de Destreza CD 15 para saltar para trás ou cair no abismo sofrendo 4d10 de dano de concussão por esmagamento contra lajes e seixos litorâneos (DMG p. 110, 246; PHB p. 182-183).',
       pioneerMitigation: 'Batedores sondando fissuras de recuo na grama do tabuleiro com bastões graduados e mantendo o avanço a uma distância mínima de duas vezes a altura da escarpa (Sobrevivência ou Investigação CD 14).',
       rescueAndStabilization: 'Descida urgente com talha de escalada e ancoragem tripla em solo firme para içar feridos da praia rochosa (Atletismo CD 14 ou Medicina CD 13).',
-      icon: '🌊',
+      icon: '',
       color: '#e11d48'
     };
 
@@ -24643,7 +24643,7 @@
       tomboloRisk: 'O tômbolo de areia e cascalho é atingido simultaneamente por trens de ondas que contornam a ilha por direções opostas; na virada da preamar, a convergência gera vagalhões cruzados de 3 metros que varrem a calçada, exigindo salvaguarda de Força CD 15 para fincar pontões de apoio ou ser arrancado da ponte arenosa e arrastado para correntes oceânicas sofrendo 3d8 de concussão contra blocos de recife com risco iminente de afogamento (DMG p. 110, 246; PHB p. 182-183).',
       pioneerMitigation: 'Batedores consultando tábuas de maré lunares e fixando estacas de marégrafo na calçada para iniciar a travessia no estofo exato da baixamar (Sobrevivência ou Veículos Aquáticos CD 14).',
       rescueAndStabilization: 'Arremesso de laços de resgate flutuantes com nós de boia e ancoragem em cabos estáticos de terra firme (Atletismo CD 14 ou Medicina CD 13).',
-      icon: '🌊',
+      icon: '',
       color: '#0284c7'
     };
 
@@ -24723,7 +24723,7 @@
       rhyoliteDomeRisk: 'Uma agulha colossal de dacito incandescente de 80 metros de altura projetada da cúpula do domo racha por alívio térmico interno; o desabamento catastrófico dispara uma avalanche piroclástica de blocos de rocha e cinza incandescente a 100 km/h pela ravina, exigindo salvaguarda de Destreza CD 15 para escapar da calha de descida ou sofrer 3d8 de dano de concussão mais 2d6 de dano de fogo e ser engolfado pela onda de choque piroclástica (DMG p. 110, 246; PHB p. 183).',
       pioneerMitigation: 'Batedores monitorando o prumo e a fumaça de fratura da agulha com teodolitos rústicos e mantendo a rota em cristas laterais elevadas protegidas de fluxos gravitacionais (Sobrevivência ou Percepção CD 14).',
       rescueAndStabilization: 'Extração de sobreviventes sob o manto de cinzas aquecidas com pás de campanha e tratamento urgente de queimaduras com bálsamos refrescantes (Atletismo CD 14 ou Medicina CD 13).',
-      icon: '🌋',
+      icon: '',
       color: '#dc2626'
     };
 
@@ -24803,7 +24803,7 @@
       gilbertDeltaRisk: 'A borda de avanço do delta lacustre repousa no limite crítico de inclinação de 32 graus sobre águas gélidas de 50 metros de profundidade; a passagem de carretas ou montarias na beirada desestabiliza os estratos arenosos saturados, provocando liquefação súbita que engole o terreno sob a comitiva com 3d8 de concussão e arrasto violento para o abismo lacustre com risco de afogamento (DMG p. 110, 246; PHB p. 182-183).',
       pioneerMitigation: 'Batedores avançados testando a coesão das bordas de praia com estacas de profundidade e demarcando a linha de recuo seguro nos leitos de topo horizontais (Sobrevivência ou Investigação CD 14).',
       rescueAndStabilization: 'Lançamento de cabos de náilon e laços de segurança ancorados em matacões estáveis de leito de topo e drenagem pulmonar de água fria (Atletismo CD 14 ou Medicina CD 13).',
-      icon: '🌊',
+      icon: '',
       color: '#0284c7'
     };
 
@@ -24883,7 +24883,7 @@
       pahoehoeRisk: 'A crosta basáltica cordada de aparência sólida oculta o teto fino e oco de um tubo de lava subterrâneo com 12 metros de profundidade; a passagem de aventureiros e animais de carga provoca o colapso súbito da claraboia, exigindo salvaguarda de Destreza CD 15 para agarrar as bordas de rocha ou despencar no abismo escuro sofrendo 4d6 de concussão pela queda sobre tálus de basalto afiado mais 1d6 de dano de fogo por cascalho ainda incandescente (DMG p. 110, 246; PHB p. 183).',
       pioneerMitigation: 'Batedores sondando o terreno à frente com pontões de ferro e ouvindo a ressonância oca dos passos na crosta vulcânica (Sobrevivência ou Percepção CD 14).',
       rescueAndStabilization: 'Descida e ancoragem de cordas de cânhamo reforçadas e imobilização de fraturas com talas leves de campanha (Atletismo CD 14 ou Medicina CD 13).',
-      icon: '🌋',
+      icon: '',
       color: '#ea580c'
     };
 
@@ -24963,7 +24963,7 @@
       palisadeRisk: 'A escarpa vertical em paliçada ergue-se em colunas hexagonais de diabásio de 30 metros de altura fraturadas por alívio de pressão; o estalo súbito de juntas de resfriamento provoca o tombamento maciço de prismas monolíticos sobre a trilha, exigindo salvaguarda de Destreza CD 15 para saltar fora da linha de queda ou sofrer 4d10 de dano contundente de esmagamento e ser lançado ao chão sob blocos quebrados (DMG p. 110, 246; PHB p. 183).',
       pioneerMitigation: 'Batedores avançados examinando fendas basais com percussão sonora e detectando estalos de rocha antes da passagem da caravana (Sobrevivência ou Investigação CD 14).',
       rescueAndStabilization: 'Remoção urgente com alavancas de ferro e talas compressivas para fraturas por esmagamento (Atletismo CD 14 ou Medicina CD 13).',
-      icon: '🏛️',
+      icon: '',
       color: '#0284c7'
     };
 
@@ -25443,7 +25443,7 @@
       carbonatiteRisk: 'O solo do vale vulcânico é coberto por uma carapaça branca esfarelável de carbonatos de sódio e potássio suspensa sobre lamas de soda altamente cáusticas (pH 11); pisar na crosta oca faz o aventureiro afundar até os joelhos sofrendo 3d8 de dano químico cáustico com destruição acelerada de solados e perneiras de couro (DMG p. 110, 246; PHB p. 182-183).',
       pioneerMitigation: 'Batedores avançados calçando botas com solas duplas impermeabilizadas com gordura espessa e testando a densidade da crosta com varas de sondagem (Sobrevivência ou Natureza CD 14).',
       rescueAndStabilization: 'Extração urgente do atoleiro com cordas e lavagem imediata da pele com água acidificada com vinagre para estancar a corrosão alcalina (Medicina CD 13).',
-      icon: '🌋',
+      icon: '',
       color: '#f1f5f9'
     };
 
@@ -25683,7 +25683,7 @@
       flyschRisk: 'A plataforma intermareal é formada por camadas alternadas verticais de arenito duro e folhelho erodido; as lâminas de arenito emergem como dentes de serra afiados cobertos por limo marinho viscoso onde um escorregão arremessa o aventureiro contra bordas cortantes com 3d6 de dano de corte e laceração de botas e correias (DMG p. 110; PHB p. 182-183).',
       pioneerMitigation: 'Batedores avançados utilizando bastões de apoio e solados reforçados com grampos de ferro para caminhar nas fendas secas de maré baixa (Sobrevivência ou Atletismo CD 14).',
       rescueAndStabilization: 'Extração rápida de fendas lodosas com cordas de nó duplo e desinfecção imediata de cortes marinhos com bálsamos salinos (Medicina CD 13 ou Kit de Primeiros Socorros).',
-      icon: '🌊',
+      icon: '',
       color: '#0284c7'
     };
 
@@ -39776,7 +39776,7 @@
     {
       id: 'world',
       name: 'Continente Geral',
-      icon: '🌍',
+      icon: '',
       zoom: 1.0,
       cx: 0.50,
       cy: 0.50,
@@ -39793,7 +39793,7 @@
     {
       id: 'plains',
       name: 'Planícies Centrais',
-      icon: '🌾',
+      icon: '',
       zoom: 1.0,
       cx: 0.50,
       cy: 0.55,
@@ -39820,7 +39820,7 @@
     {
       id: 'forest',
       name: 'Grandes Florestas',
-      icon: '🌲',
+      icon: '',
       zoom: 1.0,
       cx: 0.50,
       cy: 0.28,
@@ -39847,7 +39847,7 @@
     {
       id: 'swamp',
       name: 'Pântanos do Leste',
-      icon: '🐍',
+      icon: '',
       zoom: 1.0,
       cx: 0.78,
       cy: 0.42,
@@ -39875,7 +39875,7 @@
     {
       id: 'mountain',
       name: 'Cordilheira Ocidental',
-      icon: '🏔️',
+      icon: '',
       zoom: 1.0,
       cx: 0.20,
       cy: 0.38,
@@ -39910,7 +39910,7 @@
     {
       id: 'desert',
       name: 'Dunas do Sul',
-      icon: '🌵',
+      icon: '',
       zoom: 1.0,
       cx: 0.42,
       cy: 0.80,
@@ -39929,7 +39929,7 @@
     {
       id: 'coast',
       name: 'Litoral da Tormenta',
-      icon: '🌊',
+      icon: '',
       zoom: 1.0,
       cx: 0.88,
       cy: 0.52,
@@ -39948,7 +39948,7 @@
     {
       id: 'snow',
       name: 'Ermo Boreal',
-      icon: '❄️',
+      icon: '',
       zoom: 1.0,
       cx: 0.52,
       cy: 0.10,
@@ -39970,7 +39970,7 @@
     {
       id: 'volcanic',
       name: 'Terras de Fogo',
-      icon: '🌋',
+      icon: '',
       zoom: 1.0,
       cx: 0.80,
       cy: 0.70,
@@ -40107,11 +40107,12 @@
   }
 
 
-  var REGIONS_DATA = {      // ── PLANÍCIES CENTRAIS (SEM A CIDADE) ───────────────────────
+  var REGIONS_DATA = {
+      // PLANÍCIES CENTRAIS (SEM A CIDADE)
       plains: {
         id: 'plains',
         name: 'Planícies Centrais',
-        tag: '🌾 Planícies',
+        tag: 'Planícies',
         img: 'shared/img/map/provinces/plains_v2.webp?v=20261030b',
         altImg: '../valdoria-webapp/shared/img/map/provinces/plains_v2.webp?v=20261030b',
         fallbackBg: 'radial-gradient(circle, #2d3e23 0%, #151e12 100%)',
@@ -40119,119 +40120,159 @@
         dangerText: 'Perigo: Nível 1 a 5',
         days: 1,
         narrative: 'Campos abertos e colinas verdes fora dos portões da capital. É terra de pastores e caçadores, mas o perigo não dá trégua: saqueadores do Forte dos Bandidos e bandos de orcs atacam viajantes e carroças descuidadas pela estrada principal.',
-        intel: '💡 Estrada aberta e fácil de seguir. A trilha tem boa visibilidade e postos de vigia abandonados pelo caminho.',
+        intel: 'Estrada aberta e fácil de seguir. A trilha tem boa visibilidade e postos de vigia abandonados pelo caminho.',
         nodes: [
-          { id: 'green_fields', name: 'Campos Verdes', ico: '🌾', x: 0.28, y: 0.32, maxCR: 1.0, maxHP: 60, desc: 'Colinas verdes com pastos de ovelhas e granjas de camponeses. Caminho aberto com um moinho de pedra antigo.' },
-          { id: 'orc_tribe', name: 'Acampamento Orc', ico: '⛺', x: 0.74, y: 0.30, maxCR: 3.0, maxHP: 110, desc: 'Tendas de couro escuro e fogueiras cercadas por troncos pontiagudos de madeira.' },
-          { id: 'bandit_fortress', name: 'Forte dos Bandidos', ico: '🛡️', x: 0.30, y: 0.74, maxCR: 5.0, maxHP: 160, desc: 'Forte de pedra no alto de uma encosta rochosa, com torres de vigia e bandidos armados.' },
-          { id: 'ashen_badlands', name: 'Terras Devastadas', ico: '🏜️', x: 0.76, y: 0.74, maxCR: 5.0, maxHP: 150, desc: 'Cânions fundos de terra vermelha rachada onde a vegetação secou totalmente.' }
+          { id: 'green_fields', name: 'Campos Verdes', ico: '', x: 0.28, y: 0.32, maxCR: 1.0, maxHP: 60, desc: 'Colinas verdes com pastos de ovelhas e granjas de camponeses. Caminho aberto com um moinho de pedra antigo.' },
+          { id: 'orc_tribe', name: 'Acampamento Orc', ico: '', x: 0.74, y: 0.30, maxCR: 3.0, maxHP: 110, desc: 'Tendas de couro escuro e fogueiras cercadas por troncos pontiagudos de madeira.' },
+          { id: 'bandit_fortress', name: 'Forte dos Bandidos', ico: '', x: 0.30, y: 0.74, maxCR: 5.0, maxHP: 160, desc: 'Forte de pedra no alto de uma encosta rochosa, com torres de vigia e bandidos armados.' },
+          { id: 'ashen_badlands', name: 'Terras Devastadas', ico: '', x: 0.76, y: 0.74, maxCR: 5.0, maxHP: 150, desc: 'Cânions fundos de terra vermelha rachada onde a vegetação secou totalmente.' }
         ]
       },
 
-      // ── FLORESTA (NORTE) ──────────────────────────────────────────
+      // FLORESTA (NORTE)
       forest: {
         id: 'forest',
-        name: 'Província Silvestre (Norte)',
-        tag: '🌲 Floresta',
+        name: 'Grandes Florestas',
+        tag: 'Floresta',
         img: 'shared/img/map/provinces/forest.webp',
         altImg: '../valdoria-webapp/shared/img/map/provinces/forest.webp',
         fallbackBg: 'radial-gradient(circle, #1a381e 0%, #0c1c0e 100%)',
         dangerClass: 'badge-mod',
-        dangerText: 'Perigo: Nível 2 a 4',
+        dangerText: 'Perigo: Nível 2 a 5',
         days: 2,
         narrative: 'Mata densa onde as copas dos carvalhos gigantes cobrem quase toda a luz do sol, deixando a trilha sempre na sombra. O chão é coberto por raízes grossas e musgo úmido. No interior da floresta, antigas ruínas élficas ainda guardam círculos de magia protegidos por feitiços do passado.',
-        intel: '💡 A Trilha dos Lenhadores está aberta. Leve tochas e itens de sobrevivência para não se perder na mata fechada (teste de Sobrevivência CD 12).',
+        intel: 'A Trilha dos Lenhadores está aberta. Leve tochas e itens de sobrevivência para não se perder na mata fechada (teste de Sobrevivência CD 12).',
         nodes: [
-          { id: 'forest', name: 'Floresta dos Sussurros', ico: '🌲', x: 0.46, y: 0.44, maxCR: 2.0, maxHP: 85, desc: 'Bosque fechado onde sons misteriosos ecoam entre as copas das árvores gigantes.' },
-          { id: 'goblin_nest', name: 'Ninho de Goblins', ico: '🪵', x: 0.24, y: 0.30, maxCR: 2.0, maxHP: 75, desc: 'Clareira cheia de armadilhas improvisadas, tocas no chão e vigias escondidos nas copas.' },
-          { id: 'elven_ruins', name: 'Ruínas Élficas', ico: '🏛️', x: 0.55, y: 0.18, maxCR: 4.0, maxHP: 130, desc: 'Arcadas de mármore tomadas por hera mágica. Santuário seguro para descanso longo.' },
-          { id: 'elder_woods', name: 'Bosque Ancestral', ico: '🍃', x: 0.78, y: 0.34, maxCR: 5.0, maxHP: 150, desc: 'Árvores gigantescas carregadas de magia pura e muito antiga, anterior à fundação da capital.' }
+          { id: 'forest', name: 'Floresta dos Sussurros', ico: '', x: 0.46, y: 0.44, maxCR: 2.0, maxHP: 85, desc: 'Bosque fechado onde sons misteriosos ecoam entre as copas das árvores gigantes.' },
+          { id: 'goblin_nest', name: 'Ninho de Goblins', ico: '', x: 0.24, y: 0.30, maxCR: 2.0, maxHP: 75, desc: 'Clareira cheia de armadilhas improvisadas, tocas no chão e vigias escondidos nas copas.' },
+          { id: 'elven_ruins', name: 'Ruínas Élficas', ico: '', x: 0.55, y: 0.18, maxCR: 4.0, maxHP: 130, desc: 'Arcadas de mármore tomadas por hera mágica. Santuário seguro para descanso longo.' },
+          { id: 'elder_woods', name: 'Bosque Ancestral', ico: '', x: 0.78, y: 0.34, maxCR: 5.0, maxHP: 150, desc: 'Árvores gigantescas carregadas de magia pura e muito antiga, anterior à fundação da capital.' }
         ]
       },
 
-      // ── MONTANHAS (OESTE) ─────────────────────────────────────────
-      mountain: {
-        id: 'mountain',
-        name: 'Cordilheira Ocidental (Oeste)',
-        tag: '🏔️ Montanhas',
-        img: 'shared/img/map/provinces/mountain.webp',
-        altImg: '../valdoria-webapp/shared/img/map/provinces/mountain.webp',
-        fallbackBg: 'radial-gradient(circle, #332b26 0%, #171310 100%)',
-        dangerClass: 'badge-high',
-        dangerText: 'ND máx 3.0 a 6.0 (Teto 160 PV)',
-        days: 3,
-        narrative: 'Montanhas rochosas de paredões íngremes onde o vento sopra gelado e impiedoso. As trilhas sobem à beira de abismos perigosos até a vila mineradora de Korthag, onde as forjas dos anões e ferreiros trabalham dia e noite.',
-        intel: '💡 Vento cortante e risco de pedras rolando na trilha. Avance com cuidado pelas passagens altas.',
-        nodes: [
-          { id: 'mountain', name: 'Picos de Pedra', ico: '🏔️', x: 0.34, y: 0.36, maxCR: 4.0, maxHP: 140, desc: 'Montanhas íngremes e vento gelado. Ninhos de harpias nas fendas rochosas do topo.' },
-          { id: 'korthag', name: 'Korthag (Vila Mineira)', ico: '⛏️', x: 0.18, y: 0.20, maxCR: 3.0, maxHP: 100, desc: 'Vila fortificada encravada na rocha. Forjas de ferro, comércio de armas resistentes e descanso seguro.' },
-          { id: 'dragon_pass', name: 'Passo do Dragão', ico: '🐉', x: 0.44, y: 0.14, maxCR: 7.0, maxHP: 220, desc: 'Passagem estreita entre picos vulcânicos, com fumaça sulfurosa subindo dos abismos.' },
-          { id: 'troll_cave', name: 'Caverna do Troll', ico: '👹', x: 0.70, y: 0.60, maxCR: 5.0, maxHP: 160, desc: 'Entrada escura na rocha viva com ossos enormes espalhados na entrada.' }
-        ]
-      },
-
-      // ── PÂNTANO (LESTE) ───────────────────────────────────────────
+      // PÂNTANO (LESTE)
       swamp: {
         id: 'swamp',
-        name: 'Pântanos Nebulosos (Leste)',
-        tag: '🐍 Pântano',
+        name: 'Pântanos do Leste',
+        tag: 'Pântano',
         img: 'shared/img/map/provinces/swamp.webp',
         altImg: '../valdoria-webapp/shared/img/map/provinces/swamp.webp',
         fallbackBg: 'radial-gradient(circle, #1f2d22 0%, #0d150e 100%)',
         dangerClass: 'badge-mod',
-        dangerText: 'ND máx 3.0 a 5.0 (Teto 150 PV)',
+        dangerText: 'Perigo: Nível 3 a 7',
         days: 2,
-        narrative: 'Águas escuras e paradas cobertas por névoa espessa. A lama traiçoeira esconde buracos fundos que podem atolar cavalos e carroças com facilidade. Entre as árvores retorcidas, tumbas e mausoléus antigos jazem afundados no lodo.',
-        intel: '💡 Terreno pantanoso e difícil. O avanço é mais lento sem um guia que conheça os trechos firmes de pedra.',
+        narrative: 'Águas escuras e paradas cobertas por névoa espessa. A lama traiçoeira esconde buracos fundos que podem atolar montarias com facilidade. Entre as árvores retorcidas, tumbas e mausoléus antigos jazem afundados no lodo.',
+        intel: 'Terreno pantanoso e difícil. O avanço é mais lento sem um guia que conheça os trechos firmes de pedra.',
         nodes: [
-          { id: 'swamp', name: 'Pântano Nebuloso', ico: '🐍', x: 0.34, y: 0.42, maxCR: 3.0, maxHP: 120, desc: 'Caminhos alagados e névoa pesada. Lama funda que exige atenção constante a cada passo.' },
-          { id: 'deep_swamp', name: 'Pântano Profundo', ico: '🐊', x: 0.65, y: 0.35, maxCR: 5.0, maxHP: 170, desc: 'Águas escuras e raízes afiadas onde predadores anfíbios e répteis gigantes atacam de surpresa.' },
-          { id: 'graveyard', name: 'Cemitério Antigo', ico: '🪦', x: 0.50, y: 0.76, maxCR: 3.0, maxHP: 110, desc: 'Tumbas e mausoléus esquecidos tomados por musgo espesso e mortos-vivos inquietos.' }
+          { id: 'swamp', name: 'Pântano Nebuloso', ico: '', x: 0.34, y: 0.42, maxCR: 3.0, maxHP: 120, desc: 'Caminhos alagados e névoa pesada. Lama funda que exige atenção constante a cada passo.' },
+          { id: 'deep_swamp', name: 'Pântano Profundo', ico: '', x: 0.65, y: 0.35, maxCR: 5.0, maxHP: 170, desc: 'Águas escuras e raízes afiadas onde predadores anfíbios e répteis gigantes atacam de surpresa.' },
+          { id: 'eldritch_mire', name: 'Pântano Eldritch', ico: '', x: 0.80, y: 0.68, maxCR: 7.0, maxHP: 220, desc: 'Águas lodosas tingidas de fosforescência púrpura com segredos ancestrais imemoriais.' }
         ]
       },
 
-      // ── COSTA (SUDESTE) ───────────────────────────────────────────
+      // MONTANHAS (OESTE)
+      mountain: {
+        id: 'mountain',
+        name: 'Cordilheira Ocidental',
+        tag: 'Montanhas',
+        img: 'shared/img/map/provinces/mountain.webp',
+        altImg: '../valdoria-webapp/shared/img/map/provinces/mountain.webp',
+        fallbackBg: 'radial-gradient(circle, #332b26 0%, #171310 100%)',
+        dangerClass: 'badge-high',
+        dangerText: 'Perigo: Nível 3 a 6',
+        days: 3,
+        narrative: 'Montanhas rochosas de paredões íngremes onde o vento sopra gelado e impiedoso. As trilhas sobem à beira de abismos perigosos até a vila mineradora de Korthag, onde as forjas dos ferreiros trabalham dia e noite.',
+        intel: 'Vento cortante e risco de pedras rolando na trilha. Avance com cuidado pelas passagens altas.',
+        nodes: [
+          { id: 'mountain', name: 'Picos de Pedra', ico: '', x: 0.34, y: 0.36, maxCR: 4.0, maxHP: 140, desc: 'Montanhas íngremes e vento gelado. Ninhos de harpias nas fendas rochosas do topo.' },
+          { id: 'korthag', name: 'Korthag (Vila Mineira)', ico: '', x: 0.18, y: 0.20, maxCR: 3.0, maxHP: 100, desc: 'Vila fortificada encravada na rocha. Forjas de ferro, comércio de armas resistentes e descanso seguro.' },
+          { id: 'dragon_pass', name: 'Passo do Dragão', ico: '', x: 0.44, y: 0.14, maxCR: 6.0, maxHP: 220, desc: 'Passagem estreita entre picos rochosos, com fumaça sulfurosa subindo dos abismos.' },
+          { id: 'black_peaks', name: 'Montanhas Negras', ico: '', x: 0.72, y: 0.50, maxCR: 6.0, maxHP: 200, desc: 'Picos de rocha obsidiana onde o ar é pesado e ventos uivantes cortam a pedra.' }
+        ]
+      },
+
+      // GALERIAS SUBTERRÂNEAS (CAVERNAS)
+      cave: {
+        id: 'cave',
+        name: 'Galerias Subterrâneas',
+        tag: 'Subterrâneo',
+        img: 'shared/img/map/provinces/cave.webp',
+        altImg: '../valdoria-webapp/shared/img/map/provinces/cave.webp',
+        fallbackBg: 'radial-gradient(circle, #241c14 0%, #0d0a08 100%)',
+        dangerClass: 'badge-high',
+        dangerText: 'Perigo: Nível 3 a 7',
+        days: 2,
+        narrative: 'Túneis escuros e galerias de rocha úmida talhadas sob as colinas e raízes da terra. Ecos de passos e gotas de água ressoam na escuridão onde feras das profundezas e criaturas trogloditas espreitam.',
+        intel: 'Tochas, cordas e itens de sobrevivência são indispensáveis. A escuridão total impõe desvantagem sem visão no escuro ou fonte de luz.',
+        nodes: [
+          { id: 'cave', name: 'Passagem Subterrânea', ico: '', x: 0.32, y: 0.38, maxCR: 3.0, maxHP: 110, desc: 'Túnel inicial sob as colinas com correntes de ar frio e inscrições antigas na rocha.' },
+          { id: 'underground_caverns', name: 'Cavernas Subterrâneas', ico: '', x: 0.62, y: 0.32, maxCR: 4.0, maxHP: 130, desc: 'Sistema labiríntico de galerias de pedra com estalactites afiadas e abismos escuros.' },
+          { id: 'crystal_depths', name: 'Profundezas de Cristal', ico: '', x: 0.28, y: 0.72, maxCR: 5.0, maxHP: 160, desc: 'Salão subterrâneo iluminado pelo brilho azul de cristais mágicos. Santuário de energia pura.' },
+          { id: 'troll_cave', name: 'Caverna do Troll', ico: '', x: 0.72, y: 0.68, maxCR: 5.0, maxHP: 170, desc: 'Fosso profundo com carcaças de monstros e o covil de um temível troll das cavernas.' }
+        ]
+      },
+
+      // COSTA (SUDESTE)
       coast: {
         id: 'coast',
-        name: 'Costa Salgada (Sudeste)',
-        tag: '🌊 Costa',
+        name: 'Litoral da Tormenta',
+        tag: 'Costa',
         img: 'shared/img/map/provinces/coast.webp',
         altImg: '../valdoria-webapp/shared/img/map/provinces/coast.webp',
         fallbackBg: 'radial-gradient(circle, #1c2e3d 0%, #0e1720 100%)',
         dangerClass: 'badge-mod',
-        dangerText: 'ND máx 3.0 a 4.0 (Teto 130 PV)',
+        dangerText: 'Perigo: Nível 3 a 4',
         days: 3,
         narrative: 'Paredões de pedra batidos pela ressaca do mar e maresia forte. O litoral é repleto de praias rochosas e cavernas marinhas que escondem destroços de naufrágios e ninhos de criaturas aquáticas.',
-        intel: '💡 Ventos marítimos fortes. As cavernas só podem ser exploradas com segurança durante a maré baixa.',
+        intel: 'Ventos marítimos fortes. As cavernas só podem ser exploradas com segurança durante a maré baixa.',
         nodes: [
-          { id: 'salty_coast', name: 'Costa Salgada', ico: '🌊', x: 0.48, y: 0.45, maxCR: 4.0, maxHP: 130, desc: 'Penhascos altos e praias de pedra batidas pelas ondas fortes do oceano.' }
+          { id: 'salty_coast', name: 'Costa Salgada', ico: '', x: 0.48, y: 0.45, maxCR: 4.0, maxHP: 130, desc: 'Penhascos altos e praias de pedra batidas pelas ondas fortes do oceano.' }
         ]
       },
 
-      // ── DESERTO (SUL) ─────────────────────────────────────────────
+      // DESERTO (SUL)
       desert: {
         id: 'desert',
-        name: 'Deserto Dourado (Sul)',
-        tag: '🌵 Deserto',
+        name: 'Dunas do Sul',
+        tag: 'Deserto',
         img: 'shared/img/map/provinces/desert.webp',
         altImg: '../valdoria-webapp/shared/img/map/provinces/desert.webp',
         fallbackBg: 'radial-gradient(circle, #3d2f16 0%, #1c1508 100%)',
         dangerClass: 'badge-high',
-        dangerText: 'ND máx 4.0 a 5.0 (Teto 150 PV)',
+        dangerText: 'Perigo: Nível 4 a 5',
         days: 3,
         narrative: 'Vastas dunas de areia sob um sol escaldante, onde água limpa vale mais do que ouro. Tempestades de poeira cobrem desfiladeiros secos de terra vermelha, lar de escorpiões gigantes e bandidos do deserto.',
-        intel: '💡 Calor extremo. O grupo consome o dobro de água por dia de viagem.',
+        intel: 'Calor extremo. O grupo consome o dobro de água por dia de viagem.',
         nodes: [
-          { id: 'desert', name: 'Deserto Dourado', ico: '🌵', x: 0.42, y: 0.50, maxCR: 4.0, maxHP: 130, desc: 'Dunas móveis de areia onde escorpiões gigantes e salteadores atacam viajantes desavisados.' },
-          { id: 'ashen_badlands', name: 'Terras Devastadas', ico: '🏜️', x: 0.70, y: 0.35, maxCR: 5.0, maxHP: 150, desc: 'Desfiladeiros profundos de terra vermelha onde a vegetação secou por completo.' }
+          { id: 'desert', name: 'Deserto Dourado', ico: '', x: 0.42, y: 0.50, maxCR: 4.0, maxHP: 130, desc: 'Dunas móveis de areia onde escorpiões gigantes e salteadores atacam viajantes desavisados.' },
+          { id: 'ashen_badlands', name: 'Terras Devastadas', ico: '', x: 0.70, y: 0.35, maxCR: 5.0, maxHP: 150, desc: 'Desfiladeiros profundos de terra vermelha onde a vegetação secou por completo.' }
         ]
       },
 
-      // ── ERMO GELADO (EXTREMO NORTE) ───────────────────────────────
+      // CEMITÉRIO (TERRAS DOS MORTOS)
+      graveyard: {
+        id: 'graveyard',
+        name: 'Terras dos Mortos',
+        tag: 'Cemitério',
+        img: 'shared/img/map/provinces/graveyard.webp',
+        altImg: '../valdoria-webapp/shared/img/map/provinces/graveyard.webp',
+        fallbackBg: 'radial-gradient(circle, #1e1b24 0%, #0c0a10 100%)',
+        dangerClass: 'badge-high',
+        dangerText: 'Perigo: Nível 3 a 5',
+        days: 3,
+        narrative: 'Campos de lápides quebradas, criptas abertas e mausoléus esquecidos pela história. Uma bruma espectral rasteja pelo solo revirado e o silêncio fúnebre é quebrado apenas pelos lamentos dos mortos inquietos.',
+        intel: 'Símbolos sagrados e água benta oferecem vantagem contra as aparições e esqueletos que rondam os túmulos.',
+        nodes: [
+          { id: 'graveyard', name: 'Cemitério Antigo', ico: '', x: 0.40, y: 0.42, maxCR: 3.0, maxHP: 110, desc: 'Lápides cobertas por hera e sepulturas violadas de guerreiros e mercenários do passado.' },
+          { id: 'ancestral_graveyard', name: 'Cemitério Ancestral', ico: '', x: 0.65, y: 0.65, maxCR: 5.0, maxHP: 150, desc: 'Grandes mausoléus da antiga aristocracia com catacumbas protegidas por magia necromântica.' }
+        ]
+      },
+
+      // ERMO GELADO (EXTREMO NORTE)
       snow: {
         id: 'snow',
-        name: 'Ermo Congelado (Extremo Norte)',
-        tag: '❄️ Ermo Gelado',
+        name: 'Ermo Boreal',
+        tag: 'Ermo Gelado',
         img: 'shared/img/map/provinces/snow.webp',
         altImg: '../valdoria-webapp/shared/img/map/provinces/snow.webp',
         fallbackBg: 'radial-gradient(circle, #1a2836 0%, #0c141d 100%)',
@@ -40239,18 +40280,18 @@
         dangerText: 'Perigo: Nível 5 a 8',
         days: 4,
         narrative: 'Nevascas constantes castigam o caminho e o frio congelante reduz a velocidade de avanço. Mais ao norte, o Abismo Glacial se abre como uma fenda gigantesca de gelo azul, guardada por feras das neves.',
-        intel: '💡 Risco grave de congelamento e hipotermia. É essencial levar roupas reforçadas de pele e poções de aquecimento.',
+        intel: 'Risco grave de congelamento e hipotermia. É essencial levar roupas reforçadas de pele e poções de aquecimento.',
         nodes: [
-          { id: 'snow', name: 'Ermo Congelado', ico: '❄️', x: 0.50, y: 0.45, maxCR: 5.0, maxHP: 160, desc: 'Planície de neve fofa onde o vento gelado congela a respiração em poucos segundos.' },
-          { id: 'glacial_rift', name: 'Abismo Glacial', ico: '🧊', x: 0.70, y: 0.25, maxCR: 8.0, maxHP: 280, desc: 'Fenda colossal na geleira profunda, de onde ecoam rugidos de feras ancestrais do gelo.' }
+          { id: 'snow', name: 'Ermo Congelado', ico: '', x: 0.50, y: 0.45, maxCR: 5.0, maxHP: 160, desc: 'Planície de neve fofa onde o vento gelado congela a respiração em poucos segundos.' },
+          { id: 'glacial_rift', name: 'Abismo Glacial', ico: '', x: 0.70, y: 0.25, maxCR: 8.0, maxHP: 280, desc: 'Fenda colossal na geleira profunda, de onde ecoam rugidos de feras ancestrais do gelo.' }
         ]
       },
 
-      // ── CRATERA VULCÂNICA (EXTREMO LESTE) ─────────────────────────
+      // CRATERA VULCÂNICA (EXTREMO LESTE)
       volcanic: {
         id: 'volcanic',
-        name: 'Cratera Vulcânica (Extremo Leste)',
-        tag: '🌋 Vulcão',
+        name: 'Terras de Fogo',
+        tag: 'Vulcão',
         img: 'shared/img/map/provinces/volcanic.webp',
         altImg: '../valdoria-webapp/shared/img/map/provinces/volcanic.webp',
         fallbackBg: 'radial-gradient(circle, #3d1410 0%, #1a0604 100%)',
@@ -40258,10 +40299,10 @@
         dangerText: 'Perigo: Nível 5 a 8',
         days: 4,
         narrative: 'Rios de lava fervente e fumaça de enxofre cobrem a paisagem. O calor extremo derrete botas e estraga equipamentos desprotegidos. O posto fortificado de Valkrest vigia a borda da cratera e oferece abrigo seguro contra o magma.',
-        intel: '💡 Fumaça tóxica e poças de lava ativa. As passagens sobre a rocha vulcânica mudam a cada nova erupção.',
+        intel: 'Fumaça tóxica e poças de lava ativa. As passagens sobre a rocha vulcânica mudam a cada nova erupção.',
         nodes: [
-          { id: 'valkrest', name: 'Valkrest (Acampamento)', ico: '🛡️', x: 0.35, y: 0.65, maxCR: 5.0, maxHP: 150, desc: 'Posto avançado com muralhas de rocha vulcânica e abrigo seguro para aventureiros.' },
-          { id: 'volcanic', name: 'Cratera Vulcânica', ico: '🌋', x: 0.62, y: 0.38, maxCR: 8.0, maxHP: 260, desc: 'Caldeira vulcânica ativa com cascatas de magma fervente e criaturas de fogo.' }
+          { id: 'valkrest', name: 'Valkrest (Acampamento)', ico: '', x: 0.35, y: 0.65, maxCR: 5.0, maxHP: 150, desc: 'Posto avançado com muralhas de rocha vulcânica e abrigo seguro para aventureiros.' },
+          { id: 'volcanic', name: 'Cratera Vulcânica', ico: '', x: 0.62, y: 0.38, maxCR: 8.0, maxHP: 260, desc: 'Caldeira vulcânica ativa com cascatas de magma fervente e criaturas de fogo.' }
         ]
       }
     };
