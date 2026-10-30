@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-30T20:53:28Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-30T21:34:59Z - do not edit directly, edit source -->
 
 
 
@@ -46671,6 +46671,793 @@ const FIXED_MAPS = {
     ],
     edges: [
       { col: 10, row: 23, targetMap: 'troll_cave', label: 'Sair (Caverna do Troll)' }
+    ]
+  },
+
+
+  // ============ SEGUNDA ONDA DE MASMORRAS AAA (D&D 5e) =============
+
+  sultan_tomb: {
+    id: 'sultan_tomb', region: 'valdoria', biome: 'dungeon', is_dungeon: true,
+    name: 'Tumba do Sultao',
+    cols: 20, rows: 24, seed: 99011, spawnCol: 10, spawnRow: 23,
+    music: 'desert', danger: 6, required_gear: 'torch',
+    boss: {
+      name: 'Amenhotep, o Lorde Mumia das Dunas', cr: 6, xp: 2300, sugLvl: 6,
+      hp: 105, ac: 16, atk: 8,
+      multiAttack: 2,
+      hasBurstSkill: true,
+      hasResource: true
+    },
+    worldPos: { x: 0.15, y: 0.85 },
+    weather_pool: ['s'],
+    weights: { '.': 1 },
+    dungeon: true,
+    parentMap: 'golden_sands',
+    gridTemplate: [
+      '####################',
+      '####iiiiiiiiiiii####',
+      '###iiiiiiiiiiiiii###',
+      '###iiiiiiiiiiiiii###',
+      '####iiii....iiii####',
+      '#####..........#####',
+      '####............####',
+      '###..............###',
+      '###...oooooooo...###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###...oooooooo...###',
+      '#####..........#####',
+      '######...##...######',
+      '#######..##..#######',
+      '########.##.########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########E##########'
+    ],
+    landmarks: [
+      { type: 'throne', col: 10, row: 2, _hex: 'K3' },
+      { type: 'bonfire', col: 10, row: 13, _hex: 'K14' }
+    ],
+    atmosphereZones: [
+      { col: 10, row: 2, type: 'evil', radius: 4.5, _hex: 'K3' },
+      { col: 10, row: 13, type: 'warm', radius: 5.0, _hex: 'K14' }
+    ],
+    restHex: { col: 10, row: 13, _hex: 'K14' },
+    dungeonEncounters: [
+      {
+        id: 'sultan_tomb_campfire', col: 10, row: 13, _hex: 'K14',
+        repeatable: true,
+        title: 'Fogueira no Atrio dos Pilares Dourados',
+        text: 'Entre colunas de arenito esculpidas com hieroglifos antigos, a comitiva encontra um atrio protegido do vento sufocante do deserto. As brasas no braseiro secam o suor da marcha e iluminam os relevos de chacais vigilantes.',
+        flavor: 'Acampamento - K14 - Repouso',
+        category: 'discovery',
+        choices: [
+          {
+            id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
+            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            outcome_ok: {
+              _short_rest: true,
+              text: 'Voce bebe agua fresca do cantil e descansa sobre a laje fria. O calor das brasas renova sua disposicao.'
+            }
+          },
+          {
+            id: 'long_rest', label: 'Descanso Longo (1x por masmorra)',
+            desc: 'HP/MP cheios + remove 1 nivel de Exaustao. Apenas 1 vez nesta masmorra.',
+            outcome_ok: {
+              _long_rest: true,
+              text: 'Com sentinelas discretas observando as sombras dos obeliscos, a comitiva descansa as 8 horas inteiras.'
+            }
+          },
+          {
+            id: 'camp_companion_banter', label: 'Dialogar com a Comitiva ao Redor do Fogo',
+            desc: 'Reunir os companheiros ao calor das brasas para afastar a tensao das podridoes das tumbas',
+            outcome_ok: {
+              _companion_banter: true,
+              text: 'Voce conversa com os companheiros sobre as maldicoes sepulcrais.'
+            }
+          },
+          {
+            id: 'leave_camp', label: 'Sair do Acampamento',
+            outcome_ok: {
+              text: 'Voce empunha suas armas e retoma o avanco pelos corredores funerarios.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'sultan_tomb_scorpion_pack', col: 10, row: 20, _hex: 'K21',
+        title: 'Escorpioes Gigantes do Sarcofago',
+        text: 'Escorpioes de carapaca negra reluzente emergem de fendas na base de um sarcofago quebrado, erguendo ferroes venenosos que gotejam toxina paralisante.',
+        flavor: 'Encontro Tatico - Predadores das Areias',
+        category: 'combat',
+        choices: [
+          {
+            label: 'Manter distancia e quebrar o cerco com golpes precisos (Atletismo)',
+            skill: 'athletics', dc: 13,
+            desc: 'Forca (Atletismo) CD 13 - esmagar a carapaca antes que o ferrao alcance a armadura',
+            outcome_ok: {
+              text: 'Seu ataque destrói o primeiro escorpiao e desorienta o enxame! SURPRESA!',
+              xp: 40,
+              dungeon_combat: { enemy: 'giant_scorpion', lookup_name: 'Escorpiao Gigante das Areias', surprise: true, preCombatEffects: ['first_attack_adv'] }
+            },
+            outcome_fail: {
+              text: 'O ferrao acerta de raspao no escudo e o predador avanca com as pincas!',
+              xp: 10,
+              dungeon_combat: { enemy: 'giant_scorpion', lookup_name: 'Escorpiao Gigante das Areias', surprise: false }
+            }
+          }
+        ]
+      },
+      {
+        id: 'sultan_tomb_quicksand_trap', col: 10, row: 16, _hex: 'K17',
+        title: 'O Poco de Areia Movedica e Lajes de Papiro',
+        text: 'O piso a frente aparenta ser de mosaicos polidos, mas e na verdade uma camada fina sustentando um fosso profundo de areia movedica voraz.',
+        flavor: 'Armadilha do Deserto D&D 5e',
+        category: 'trap',
+        choices: [
+          {
+            label: 'Sondar as lajes com o bastao de viagem (Investigacao)',
+            skill: 'investigation', dc: 13,
+            desc: 'Inteligencia (Investigacao) CD 13 - mapear o caminho solido pelas bordas de cantaria',
+            outcome_ok: {
+              text: 'Voce marca a trilha firme e guia a comitiva sem que ninguem caia no fosso!',
+              xp: 35,
+              _flag: 'sultan_pit_avoided'
+            },
+            outcome_fail: {
+              text: 'A laje quebra sob o peso do aventureiro e a areia movedica suga as pernas!',
+              xp: 8,
+              hp_loss: 6
+            }
+          }
+        ]
+      },
+      {
+        id: 'sultan_tomb_canopic_puzzle', col: 14, row: 9, _hex: 'O10',
+        title: 'O Altar dos Quatro Vasos Canopicos',
+        text: 'Em um nicho de alabastro, quatro vasos canopicos com tampas em formato de falcao, babuino, chacal e humano exigem a sequencia ritual correta para destravar a porta de ouro.',
+        flavor: 'Enigma dos Antigos Faraos',
+        category: 'mystery',
+        choices: [
+          {
+            label: 'Alinhar os vasos segundo a liturgia dos pontos cardeais (Historia/Religiao)',
+            skill: 'history', dc: 13,
+            desc: 'Inteligencia (Historia) CD 13 - posicionar os quatro guardioes em suas posicoes canonicas',
+            outcome_ok: {
+              text: 'As engrenagens de pedra giram com precisao. A porta se abre revelando joias e lingotes de prata!',
+              xp: 50,
+              reward_gold: 40,
+              _flag: 'sultan_canopic_solved'
+            },
+            outcome_fail: {
+              text: 'Um sopro de poeira sufocante e disparado das aberturas dos vasos!',
+              xp: 8,
+              hp_loss: 4
+            }
+          }
+        ]
+      },
+      {
+        id: 'sultan_tomb_boss_mummy', col: 10, row: 3, _hex: 'K4',
+        title: 'A Camara Sepulcral de Amenhotep',
+        text: 'No coracao da tumba, rodeado por montanhas de moedas antigas e mascaras mortuarias douradas, ergue-se Amenhotep. O lorde mumia esta envolto em bandagens rituais impregnadas de mirra e betume, segurando um cetro de ferro batido. O odor de especiarias funerarias e podredao milenar congela a respiracao.',
+        flavor: 'Chefe de Masmorra - Batalha Decisiva',
+        category: 'boss',
+        choices: [
+          {
+            label: 'Resistir a Maldicao da Mumia e atacar com chamas (Constituicao/Atletismo)',
+            skill: 'con', dc: 13,
+            desc: 'Constituicao CD 13 - suportar a aura de podridao e investir com fogo',
+            outcome_ok: {
+              text: 'O calor da tocha inflama as bandagens secas do lorde mumia! SURPRESA!',
+              xp: 60,
+              dungeon_combat: { enemy: 'sand_mummy', lookup_name: 'Amenhotep, Lorde Mumia', surprise: true, preCombatEffects: ['first_attack_adv'] }
+            },
+            outcome_fail: {
+              text: 'O toque gelado do cetro de Amenhotep faz o ar estalar de podridao enquanto a besta avanca!',
+              xp: 10,
+              dungeon_combat: { enemy: 'sand_mummy', lookup_name: 'Amenhotep, Lorde Mumia', surprise: false }
+            }
+          }
+        ]
+      }
+    ],
+    edges: [
+      { col: 10, row: 23, targetMap: 'golden_sands', label: 'Sair (Areias Douradas)' }
+    ]
+  },
+
+  black_dragon_crypt: {
+    id: 'black_dragon_crypt', region: 'valdoria', biome: 'dungeon', is_dungeon: true,
+    name: 'Cripta do Dragao Negro',
+    cols: 20, rows: 24, seed: 99012, spawnCol: 10, spawnRow: 23,
+    music: 'volcanic', danger: 7, required_gear: 'torch',
+    boss: {
+      name: 'Vaelok, o Wyvern de Magma', cr: 7, xp: 2900, sugLvl: 7,
+      hp: 115, ac: 16, atk: 8,
+      multiAttack: 3,
+      hasBurstSkill: true,
+      hasResource: true
+    },
+    worldPos: { x: 0.90, y: 0.90 },
+    weather_pool: ['s'],
+    weights: { '.': 1 },
+    dungeon: true,
+    parentMap: 'burning_crater',
+    gridTemplate: [
+      '####################',
+      '####iiiiiiiiiiii####',
+      '###iiiiiiiiiiiiii###',
+      '###iiiiiiiiiiiiii###',
+      '####iiii....iiii####',
+      '#####..........#####',
+      '####............####',
+      '###..............###',
+      '###...oooooooo...###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###...oooooooo...###',
+      '#####..........#####',
+      '######...##...######',
+      '#######..##..#######',
+      '########.##.########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########E##########'
+    ],
+    landmarks: [
+      { type: 'throne', col: 10, row: 2, _hex: 'K3' },
+      { type: 'bonfire', col: 10, row: 13, _hex: 'K14' }
+    ],
+    atmosphereZones: [
+      { col: 10, row: 2, type: 'evil', radius: 4.5, _hex: 'K3' },
+      { col: 10, row: 13, type: 'warm', radius: 5.0, _hex: 'K14' }
+    ],
+    restHex: { col: 10, row: 13, _hex: 'K14' },
+    dungeonEncounters: [
+      {
+        id: 'black_dragon_crypt_campfire', col: 10, row: 13, _hex: 'K14',
+        repeatable: true,
+        title: 'Refugio da Laje de Basalto Isolada',
+        text: 'Sobre uma plataforma de rocha negra cercada por poças de lama mineral resfriada, o grupo encontra uma clareira seca. O calor das brasas dissipa o cheiro acido de enxofre.',
+        flavor: 'Acampamento - K14 - Repouso',
+        category: 'discovery',
+        choices: [
+          {
+            id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
+            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            outcome_ok: {
+              _short_rest: true,
+              text: 'Voce repousa sobre a rocha lisa, recompondo o folego para a descida ao abismo.'
+            }
+          },
+          {
+            id: 'long_rest', label: 'Descanso Longo (1x por masmorra)',
+            desc: 'HP/MP cheios + remove 1 nivel de Exaustao. Apenas 1 vez nesta masmorra.',
+            outcome_ok: {
+              _long_rest: true,
+              text: 'A comitiva descansa as 8 horas inteiras em vigilia contra os vapores toxicos.'
+            }
+          },
+          {
+            id: 'camp_companion_banter', label: 'Dialogar com a Comitiva ao Redor do Fogo',
+            desc: 'Reunir os companheiros ao calor das brasas para planejar o combate contra o veneno e fogo',
+            outcome_ok: {
+              _companion_banter: true,
+              text: 'Voce alinha as taticas contra os ataques corrosivos da cripta.'
+            }
+          },
+          {
+            id: 'leave_camp', label: 'Sair do Acampamento',
+            outcome_ok: {
+              text: 'Voce empunha suas armas e retoma o avanco pelas galerias de obsidiana.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'black_dragon_crypt_salamanders', col: 10, row: 20, _hex: 'K21',
+        title: 'Salamandras de Fogo da Vanguarda',
+        text: 'Serpentes draconicas incandescentes emergem de poças de lava borbulhante, sibilando enquanto gotejam magma brilhante sobre as pedras.',
+        flavor: 'Encontro Tatico - Elementais de Fogo',
+        category: 'combat',
+        choices: [
+          {
+            label: 'Atacar com lanca longa fora do alcance do calor (Atletismo)',
+            skill: 'athletics', dc: 13,
+            desc: 'Forca (Atletismo) CD 13 - perfurar o nucleo da criatura antes que cuspa labaredas',
+            outcome_ok: {
+              text: 'Seu golpe atinge em cheio a cabeca da salamandra! SURPRESA!',
+              xp: 40,
+              dungeon_combat: { enemy: 'fire_salamander', lookup_name: 'Salamandra de Fogo', surprise: true, preCombatEffects: ['first_attack_adv'] }
+            },
+            outcome_fail: {
+              text: 'O calor abrasador faz sua lamina fumegar enquanto a criatura ataca!',
+              xp: 10,
+              dungeon_combat: { enemy: 'fire_salamander', lookup_name: 'Salamandra de Fogo', surprise: false }
+            }
+          }
+        ]
+      },
+      {
+        id: 'black_dragon_crypt_acid_pool_trap', col: 10, row: 16, _hex: 'K17',
+        title: 'A Fenda de Acido Corrosivo e Vapor Negro',
+        text: 'Um abismo estreito verte liquefeito borbulhante de cor esmeralda toxica. O vapor corroe o ferro das armaduras se a travessia nao for veloz.',
+        flavor: 'Perigo Corrosivo D&D 5e',
+        category: 'trap',
+        choices: [
+          {
+            label: 'Salto acrobatico aproveitando os pilares de obsidiana (Acrobacia)',
+            skill: 'acrobatics', dc: 13,
+            desc: 'Destreza (Acrobacia) CD 13 - saltar entre os esteios sem tocar a lama acida',
+            outcome_ok: {
+              text: 'Voce salta com agilidade exemplar e aterrissa em seguranca do outro lado!',
+              xp: 35,
+              _flag: 'dragon_crypt_acid_cleared'
+            },
+            outcome_fail: {
+              text: 'Um espirro de liquido acido atinge sua perna causando queimaduras!',
+              xp: 8,
+              hp_loss: 6
+            }
+          }
+        ]
+      },
+      {
+        id: 'black_dragon_crypt_obsidian_puzzle', col: 14, row: 9, _hex: 'O10',
+        title: 'O Enigma das Runas Draconicas de Ebano',
+        text: 'Um sarcofago de dragao gravado em pedra de obsidiana pura possui cinco placas com garras que precisam ser giradas na ordem dos ventos do submundo.',
+        flavor: 'Enigma Arcano dos Dragoes',
+        category: 'mystery',
+        choices: [
+          {
+            label: 'Decifrar a formula de pressao das escamas (Arcanismo)',
+            skill: 'arcana', dc: 14,
+            desc: 'Inteligencia (Arcanismo) CD 14 - alinhar a canalizacao magica das runas',
+            outcome_ok: {
+              text: 'A tampa de obsidiana desliza revelando um machado de aco negro e gemas de fogo!',
+              xp: 55,
+              reward_gold: 45,
+              _flag: 'dragon_crypt_obsidian_solved'
+            },
+            outcome_fail: {
+              text: 'Um choque eletrico acido estala contra seus dedos!',
+              xp: 8,
+              hp_loss: 4
+            }
+          }
+        ]
+      },
+      {
+        id: 'black_dragon_crypt_boss_vaelok', col: 10, row: 3, _hex: 'K4',
+        title: 'O Ninho de Ossos e Acido de Vaelok',
+        text: 'No coracao da abobada de lava resfriada, cercado por esqueletos de gigantes e tesouros meio-fundidos, ergue-se Vaelok. O wyvern de magma tem asas de couro negro, mandibula que verte lodo venenoso e um ferrao com ponta de agulha pronta para injetar veneno letal.',
+        flavor: 'Chefe de Masmorra - Batalha Decisiva',
+        category: 'boss',
+        choices: [
+          {
+            label: 'Aproveitar a brecha de pouso e atacar o ferrao da cauda (Destreza)',
+            skill: 'dex', dc: 14,
+            desc: 'Destreza CD 14 - esquivar do ataque inicial e golpear a cauda com tudo',
+            outcome_ok: {
+              text: 'Seu corte desvia o ferrao venenoso, deixando a monstruosidade vulneravel! SURPRESA!',
+              xp: 60,
+              dungeon_combat: { enemy: 'wyvern', lookup_name: 'Vaelok, Wyvern de Magma', surprise: true, preCombatEffects: ['first_attack_adv'] }
+            },
+            outcome_fail: {
+              text: 'O wyvern bate as asas com violencia, erguendo poeira de cinzas enquanto mergulha!',
+              xp: 10,
+              dungeon_combat: { enemy: 'wyvern', lookup_name: 'Vaelok, Wyvern de Magma', surprise: false }
+            }
+          }
+        ]
+      }
+    ],
+    edges: [
+      { col: 10, row: 23, targetMap: 'burning_crater', label: 'Sair (Cratera Ardente)' }
+    ]
+  },
+
+  elf_library: {
+    id: 'elf_library', region: 'valdoria', biome: 'dungeon', is_dungeon: true,
+    name: 'Biblioteca Esquecida',
+    cols: 20, rows: 24, seed: 99013, spawnCol: 10, spawnRow: 23,
+    music: 'forest', danger: 4,
+    boss: {
+      name: 'O Guardiao Runico de Pedra Elfica', cr: 4, xp: 1100, sugLvl: 4,
+      hp: 80, ac: 16, atk: 7,
+      multiAttack: 2,
+      hasBurstSkill: true,
+      hasResource: false
+    },
+    worldPos: { x: 0.70, y: 0.20 },
+    weather_pool: ['s'],
+    weights: { '.': 1 },
+    dungeon: true,
+    parentMap: 'elven_ruins',
+    gridTemplate: [
+      '####################',
+      '####iiiiiiiiiiii####',
+      '###iiiiiiiiiiiiii###',
+      '###iiiiiiiiiiiiii###',
+      '####iiii....iiii####',
+      '#####..........#####',
+      '####............####',
+      '###..............###',
+      '###...oooooooo...###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###...oooooooo...###',
+      '#####..........#####',
+      '######...##...######',
+      '#######..##..#######',
+      '########.##.########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########E##########'
+    ],
+    landmarks: [
+      { type: 'throne', col: 10, row: 2, _hex: 'K3' },
+      { type: 'bonfire', col: 10, row: 13, _hex: 'K14' }
+    ],
+    atmosphereZones: [
+      { col: 10, row: 2, type: 'evil', radius: 4.5, _hex: 'K3' },
+      { col: 10, row: 13, type: 'warm', radius: 5.0, _hex: 'K14' }
+    ],
+    restHex: { col: 10, row: 13, _hex: 'K14' },
+    dungeonEncounters: [
+      {
+        id: 'elf_library_campfire', col: 10, row: 13, _hex: 'K14',
+        repeatable: true,
+        title: 'Fogueira no Patio dos Tomos de Safira',
+        text: 'Entre colunas de marmore branco envoltas em hera prateada, repousa uma camara de leitura com lareira apagada. As brasas no braseiro acendem um calor sereno e acolhedor entre estantes milenares de pergaminhos.',
+        flavor: 'Acampamento - K14 - Repouso',
+        category: 'discovery',
+        choices: [
+          {
+            id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
+            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            outcome_ok: {
+              _short_rest: true,
+              text: 'Voce descansa recostado nas estantes de cedro ancestral, sentindo o poder da sabedoria elfica revigorar a mente.'
+            }
+          },
+          {
+            id: 'long_rest', label: 'Descanso Longo (1x por masmorra)',
+            desc: 'HP/MP cheios + remove 1 nivel de Exaustao. Apenas 1 vez nesta masmorra.',
+            outcome_ok: {
+              _long_rest: true,
+              text: 'Sob a paz do santuario arcanico, a comitiva repousa as 8 horas inteiras e renova seus canais magicos.'
+            }
+          },
+          {
+            id: 'camp_companion_banter', label: 'Dialogar com a Comitiva ao Redor do Fogo',
+            desc: 'Reunir os companheiros ao calor das brasas para decifrar manuscritos antigos',
+            outcome_ok: {
+              _companion_banter: true,
+              text: 'Voce compartilha reflexoes sobre as lendas da floresta primordial com a comitiva.'
+            }
+          },
+          {
+            id: 'leave_camp', label: 'Sair do Acampamento',
+            outcome_ok: {
+              text: 'Voce empunha suas armas e retoma o avanco pelos corredores de marmore.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'elf_library_animated_scouts', col: 10, row: 20, _hex: 'K21',
+        title: 'Sentinelas Arcanas de Pedra',
+        text: 'Estatuas de marmore de guerreiros elficos ganham vida com estalos de energia cerulea, brandindo alabardas encantadas para defender os tomos sagrados de intrusos.',
+        flavor: 'Encontro Tatico - Constutos Antigos',
+        category: 'combat',
+        choices: [
+          {
+            label: 'Desferir golpe de impacto nas juntas de pedra (Atletismo)',
+            skill: 'athletics', dc: 13,
+            desc: 'Forca (Atletismo) CD 13 - atingir os pontos de tensao magica dos construtos',
+            outcome_ok: {
+              text: 'Seu golpe racha o mecanismo da primeira estatua antes que erga a lanca! SURPRESA!',
+              xp: 35,
+              dungeon_combat: { enemy: 'golem_de_pedra', lookup_name: 'Guardiao de Pedra Elfica', surprise: true, preCombatEffects: ['first_attack_adv'] }
+            },
+            outcome_fail: {
+              text: 'A alabarda magica apara seu ataque com ressonancia de sino e contra-ataca!',
+              xp: 10,
+              dungeon_combat: { enemy: 'golem_de_pedra', lookup_name: 'Guardiao de Pedra Elfica', surprise: false }
+            }
+          }
+        ]
+      },
+      {
+        id: 'elf_library_glyph_trap', col: 10, row: 16, _hex: 'K17',
+        title: 'O Glifo de Ilusao e Paralisia Estelar',
+        text: 'Um mosaico de safiras embutidas no piso projeta uma ilusao de estrelas cadentes que atrai o olhar e ameaca paralisar a mente dos andarilhos.',
+        flavor: 'Armadilha Ilusoria D&D 5e',
+        category: 'trap',
+        choices: [
+          {
+            label: 'Dispersar a ilusao com foco mental e contra-encanto (Arcanismo)',
+            skill: 'arcana', dc: 13,
+            desc: 'Inteligencia (Arcanismo) CD 13 - romper o ciclo da teia ilusoria',
+            outcome_ok: {
+              text: 'As luzes se acalmam e o mosaico revela o caminho solido! Travessia limpa!',
+              xp: 35,
+              _flag: 'elf_glyph_disarmed'
+            },
+            outcome_fail: {
+              text: 'A ilusao faz sua visao girar, causando vertigem dolorosa!',
+              xp: 8,
+              hp_loss: 4
+            }
+          }
+        ]
+      },
+      {
+        id: 'elf_library_astrolabe_puzzle', col: 14, row: 9, _hex: 'O10',
+        title: 'O Astrolabio Celestial dos Arquimagos',
+        text: 'Um instrumento astronomico monumental de bronze e prata repousa sobre uma mesa circular. Ajustando as esferas conforme as constelacoes da Primeira Era, um compartimento secreto se abre.',
+        flavor: 'Enigma Astrologico Elfico',
+        category: 'mystery',
+        choices: [
+          {
+            label: 'Calcular a posicao das constelacoes ancestrais (Historia/Arcanismo)',
+            skill: 'history', dc: 13,
+            desc: 'Inteligencia (Historia) CD 13 - posicionar os tres aneis celestes na conjuncao correta',
+            outcome_ok: {
+              text: 'O mecanismo clica suavemente. Um pergaminho de feitiço e gemas de safira sao revelados!',
+              xp: 50,
+              reward_gold: 35,
+              _flag: 'elf_astrolabe_solved'
+            },
+            outcome_fail: {
+              text: 'As engrenagens travam e um estalo de energia magica atinge a mesa!',
+              xp: 8,
+              hp_loss: 4
+            }
+          }
+        ]
+      },
+      {
+        id: 'elf_library_boss_golem', col: 10, row: 3, _hex: 'K4',
+        title: 'O Santuario do Guardiao Supremo da Sabedoria',
+        text: 'No altar central da biblioteca, cercado por tomos protegidos por redomas de vidro puro, desperta o Guardiao Supremo. Um colossal golem de granito branco adornado com filigranas de ouro e olhos de safira ardente empunha uma espada de duas maos com runas de luz viva.',
+        flavor: 'Chefe de Masmorra - Batalha Decisiva',
+        category: 'boss',
+        choices: [
+          {
+            label: 'Identificar a runa de comando e atacar o peito do golem (Arcanismo/Atletismo)',
+            skill: 'arcana', dc: 13,
+            desc: 'Inteligencia (Arcanismo) CD 13 - atingir a gema central que energiza o construto',
+            outcome_ok: {
+              text: 'Seu ataque rompe a barreira magica do golem, desestabilizando sua armadura! SURPRESA!',
+              xp: 55,
+              dungeon_combat: { enemy: 'golem_de_pedra', lookup_name: 'Guardiao Supremo de Pedra', surprise: true, preCombatEffects: ['first_attack_adv'] }
+            },
+            outcome_fail: {
+              text: 'A lamina do golem desce com forca esmagadora contra o chao de marmore!',
+              xp: 10,
+              dungeon_combat: { enemy: 'golem_de_pedra', lookup_name: 'Guardiao Supremo de Pedra', surprise: false }
+            }
+          }
+        ]
+      }
+    ],
+    edges: [
+      { col: 10, row: 23, targetMap: 'elven_ruins', label: 'Sair (Ruinas Elficas)' }
+    ]
+  },
+
+  goblin_warren: {
+    id: 'goblin_warren', region: 'valdoria', biome: 'dungeon', is_dungeon: true,
+    name: 'Toca dos Goblins',
+    cols: 20, rows: 24, seed: 99014, spawnCol: 10, spawnRow: 23,
+    music: 'dungeon', danger: 2,
+    boss: {
+      name: 'Grak, o Chefe dos Goblins da Toca', cr: 2, xp: 450, sugLvl: 2,
+      hp: 45, ac: 14, atk: 5,
+      multiAttack: 2,
+      hasBurstSkill: true,
+      hasResource: false
+    },
+    worldPos: { x: 0.35, y: 0.45 },
+    weather_pool: ['s'],
+    weights: { '.': 1 },
+    dungeon: true,
+    parentMap: 'goblin_nest',
+    gridTemplate: [
+      '####################',
+      '####iiiiiiiiiiii####',
+      '###iiiiiiiiiiiiii###',
+      '###iiiiiiiiiiiiii###',
+      '####iiii....iiii####',
+      '#####..........#####',
+      '####............####',
+      '###..............###',
+      '###...oooooooo...###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###..oooooooooo..###',
+      '###...oooooooo...###',
+      '#####..........#####',
+      '######...##...######',
+      '#######..##..#######',
+      '########.##.########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########..#########',
+      '#########E##########'
+    ],
+    landmarks: [
+      { type: 'throne', col: 10, row: 2, _hex: 'K3' },
+      { type: 'bonfire', col: 10, row: 13, _hex: 'K14' }
+    ],
+    atmosphereZones: [
+      { col: 10, row: 2, type: 'evil', radius: 4.5, _hex: 'K3' },
+      { col: 10, row: 13, type: 'warm', radius: 5.0, _hex: 'K14' }
+    ],
+    restHex: { col: 10, row: 13, _hex: 'K14' },
+    dungeonEncounters: [
+      {
+        id: 'goblin_warren_campfire', col: 10, row: 13, _hex: 'K14',
+        repeatable: true,
+        title: 'Bivaque na Fenda de Ventilacao',
+        text: 'Uma pequena cavidade na rocha por onde passa ar fresco da superficie oferece um ponto de bivaque protegido dos batedores goblins. As cinzas no chao permitem acender fogo rapido.',
+        flavor: 'Acampamento - K14 - Repouso',
+        category: 'discovery',
+        choices: [
+          {
+            id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
+            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            outcome_ok: {
+              _short_rest: true,
+              text: 'Voce come racoes e descansa recostado na parede de terra batida.'
+            }
+          },
+          {
+            id: 'long_rest', label: 'Descanso Longo (1x por masmorra)',
+            desc: 'HP/MP cheios + remove 1 nivel de Exaustao. Apenas 1 vez nesta masmorra.',
+            outcome_ok: {
+              _long_rest: true,
+              text: 'Com vigilia armada e tochas veladas, a comitiva descansa as 8 horas inteiras.'
+            }
+          },
+          {
+            id: 'camp_companion_banter', label: 'Dialogar com a Comitiva ao Redor do Fogo',
+            desc: 'Reunir os companheiros para planejar o ataque a toca goblin',
+            outcome_ok: {
+              _companion_banter: true,
+              text: 'Voce ajusta as armas e instrui a comitiva sobre as armadilhas goblins.'
+            }
+          },
+          {
+            id: 'leave_camp', label: 'Sair do Acampamento',
+            outcome_ok: {
+              text: 'Voce empunha suas armas e retoma o avanco pelos tuneis estreitos.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'goblin_warren_scouts', col: 10, row: 20, _hex: 'K21',
+        title: 'Batedores Goblins com Zarabatanas',
+        text: 'Pequenos goblins de pele verde-oliva escondidos em balcoes de madeira apontam arcos curtos e zarabatanas com dardos embebidos em veneno de aranha.',
+        flavor: 'Encontro Tatico - Batedores da Toca',
+        category: 'combat',
+        choices: [
+          {
+            label: 'Avancar rapido com o escudo erguido (Atletismo)',
+            skill: 'athletics', dc: 11,
+            desc: 'Forca (Atletismo) CD 11 - bloquear a salva de flechas e derrubar a plataforma de madeira',
+            outcome_ok: {
+              text: 'Seu impacto quebra os esteios de madeira e lanca os goblins no chao! SURPRESA!',
+              xp: 25,
+              dungeon_combat: { enemy: 'goblin_archer', lookup_name: 'Batedor Goblin da Toca', surprise: true, preCombatEffects: ['first_attack_adv'] }
+            },
+            outcome_fail: {
+              text: 'Uma flecha atinge o ombro de raspao enquanto os goblins assobiam em alerta!',
+              xp: 8,
+              dungeon_combat: { enemy: 'goblin_archer', lookup_name: 'Batedor Goblin da Toca', surprise: false }
+            }
+          }
+        ]
+      },
+      {
+        id: 'goblin_warren_tripwire_net', col: 10, row: 16, _hex: 'K17',
+        title: 'A Armadilha de Rede com Espinhos de Bambu',
+        text: 'Um fio de tripa esticado na altura do tornozelo esta conectado a uma rede suspensa carregada de pedras afiadas e estacas pontiagudas.',
+        flavor: 'Armadilha Goblin D&D 5e',
+        category: 'trap',
+        choices: [
+          {
+            label: 'Identificar o fio falso e cortar a corda mestre (Percepcao)',
+            skill: 'perception', dc: 11,
+            desc: 'Sabedoria (Percepcao) CD 11 - desarmar a armadilha sem acionar as estacas',
+            outcome_ok: {
+              text: 'Voce corta a corda e a rede despenca no vazio com estalo inofensivo!',
+              xp: 25,
+              _flag: 'goblin_net_disarmed'
+            },
+            outcome_fail: {
+              text: 'A rede despenca sobre o grupo arranhando bracos e armaduras com espinhos!',
+              xp: 5,
+              hp_loss: 4
+            }
+          }
+        ]
+      },
+      {
+        id: 'goblin_warren_treasure_chest', col: 14, row: 9, _hex: 'O10',
+        title: 'O Bau de Bugigangas Roubadas de Grak',
+        text: 'Um bau de madeira reforçado com aros de ferro enferrujado esta trancado com um cadeado primitivo feito de arame e ossos.',
+        flavor: 'Espolio Roubado dos Ermos',
+        category: 'mystery',
+        choices: [
+          {
+            label: 'Forcar o trinco com ferramentas de ladrao ou lâmina fina (Destreza)',
+            skill: 'dexterity', dc: 11,
+            desc: 'Destreza CD 11 - abrir o cadeado sem quebrar a fechadura',
+            outcome_ok: {
+              text: 'O cadeado estala e abre! O bau contem moedas de prata, pecas de cobre e uma adaga polida!',
+              xp: 35,
+              reward_gold: 25,
+              _flag: 'goblin_chest_opened'
+            },
+            outcome_fail: {
+              text: 'Uma agulha enferrujada salta da tranca picando o dedo do aventureiro!',
+              xp: 5,
+              hp_loss: 3
+            }
+          }
+        ]
+      },
+      {
+        id: 'goblin_warren_boss_grak', col: 10, row: 3, _hex: 'K4',
+        title: 'O Salao dos Caixotes de Grak',
+        text: 'Sentado em um trono improvisado de barris de cerveja e caixotes saqueados de caravanas, surge Grak. O chefe goblin e atarracado, usa um capacete de ferro amassado com chifres de bode e empunha uma espada larga enferrujada, gritando ordens coléricas em dialeto goblin.',
+        flavor: 'Chefe de Masmorra - Batalha Decisiva',
+        category: 'boss',
+        choices: [
+          {
+            label: 'Intimidar o chefe com um rugido de guerra e atacar direto (Atletismo)',
+            skill: 'athletics', dc: 12,
+            desc: 'Forca (Atletismo) CD 12 - saltar sobre os barris e desarmar o chefe goblin',
+            outcome_ok: {
+              text: 'Sua investida esfacela o trono de barris e faz Grak vacilar aterrorizado! SURPRESA!',
+              xp: 45,
+              dungeon_combat: { enemy: 'hobgoblin', lookup_name: 'Grak, Chefe dos Goblins', surprise: true, preCombatEffects: ['first_attack_adv'] }
+            },
+            outcome_fail: {
+              text: 'Grak atira um barril de piche no seu caminho e brande a lamina com furia!',
+              xp: 8,
+              dungeon_combat: { enemy: 'hobgoblin', lookup_name: 'Grak, Chefe dos Goblins', surprise: false }
+            }
+          }
+        ]
+      }
+    ],
+    edges: [
+      { col: 10, row: 23, targetMap: 'goblin_nest', label: 'Sair (Ninho Goblin)' }
     ]
   },
 
