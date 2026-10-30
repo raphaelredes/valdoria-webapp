@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-30T12:37:25Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-30T15:13:45Z - do not edit directly, edit source -->
 
 
 
@@ -18343,7 +18343,7 @@ window.__onIntroTap = function() {
 
         <div class="camp-hud-bar">
 
-          <span class="camp-hud-icon" title="Pontos de Vida">❤️</span>
+          <span class="camp-hud-icon" title="Pontos de Vida" style="font-weight:700;font-size:11.5px;color:#f87171;">PV</span>
 
           <div class="camp-hud-track"><div class="camp-hud-fill camp-hud-hp" id="camp-hp-bar"></div></div>
 
@@ -18353,7 +18353,7 @@ window.__onIntroTap = function() {
 
         <div class="camp-hud-bar">
 
-          <span class="camp-hud-icon" title="Pontos de Mana">🔷</span>
+          <span class="camp-hud-icon" title="Pontos de Mana" style="font-weight:700;font-size:11.5px;color:#60a5fa;">PM</span>
 
           <div class="camp-hud-track"><div class="camp-hud-fill camp-hud-mp" id="camp-mp-bar"></div></div>
 
@@ -18363,7 +18363,7 @@ window.__onIntroTap = function() {
 
         <div class="camp-hud-hd" id="camp-hd-badge" title="Dados de Vida disponíveis">
 
-          <span>🎲</span><span id="camp-hd-text">HD 1/1</span>
+          <span id="camp-hd-text">HD HD 1/1</span>
 
         </div>
 
@@ -18447,9 +18447,9 @@ window.__onIntroTap = function() {
 
           <div class="camp-chips-row">
 
-            <span class="camp-chip camp-chip-cost" id="camp-short-cost">🎲 1 Dado de Vida</span>
+            <span class="camp-chip camp-chip-cost" id="camp-short-cost">1 Dado de Vida</span>
 
-            <span class="camp-chip camp-chip-heal" id="camp-short-formula">💚 1d8 + CON</span>
+            <span class="camp-chip camp-chip-heal" id="camp-short-formula">1d8 + CON</span>
 
             <span class="camp-chip camp-chip-hd" id="camp-short-hd-badge">HD: 1/1</span>
 
@@ -18497,11 +18497,11 @@ window.__onIntroTap = function() {
 
             <span class="camp-chip camp-chip-full">✦ 100% PV & PM</span>
 
-            <span class="camp-chip camp-chip-gain" id="camp-long-hd-gain">🎲 +50% HD</span>
+            <span class="camp-chip camp-chip-gain" id="camp-long-hd-gain">+50% HD</span>
 
-            <span class="camp-chip camp-chip-exh" id="camp-long-exh-chip">🛡 -1 Exaustão</span>
+            <span class="camp-chip camp-chip-exh" id="camp-long-exh-chip">-1 Exaustão</span>
 
-            <span class="camp-chip camp-chip-gear">⛺ Barraca/Kit</span>
+            <span class="camp-chip camp-chip-gear">Barraca/Kit</span>
 
           </div>
 
@@ -18541,9 +18541,9 @@ window.__onIntroTap = function() {
 
           <div class="camp-chips-row">
 
-            <span class="camp-chip camp-chip-full" id="camp-chat-chip-topic">🔥 Ao Redor da Fogueira</span>
+            <span class="camp-chip camp-chip-full" id="camp-chat-chip-topic">Ao Redor da Fogueira</span>
 
-            <span class="camp-chip camp-chip-gain" id="camp-chat-chip-count">👥 Grupo</span>
+            <span class="camp-chip camp-chip-gain" id="camp-chat-chip-count">Grupo</span>
 
           </div>
 
@@ -18611,7 +18611,7 @@ window.__onIntroTap = function() {
 
       <div class="camp-confirm-actions">
 
-        <button type="button" class="camp-confirm-btn camp-confirm-btn--cancel" id="camp-confirm-cancel">✕ Cancelar</button>
+        <button type="button" class="camp-confirm-btn camp-confirm-btn--cancel" id="camp-confirm-cancel">Cancelar</button>
 
         <button type="button" class="camp-confirm-btn camp-confirm-btn--ok" id="camp-confirm-ok">✓ Confirmar Descanso</button>
 
@@ -19069,7 +19069,7 @@ window.__onIntroTap = function() {
 
       <div class="epm-footer">
 
-        <button type="button" class="epm-btn-confirm" id="epm-btn-confirm">✔ Entendido</button>
+        <button type="button" class="epm-btn-confirm" id="epm-btn-confirm">Entendido</button>
 
       </div>
 
@@ -94446,15 +94446,49 @@ function _drawCartNodeV2(ctx, b, w, h){
 
 var _MAP_ID_TO_CART_KEY = {
   city_gates: 'plains',
+  green_fields: 'plains',
+  bandit_fortress: 'plains',
+  orc_tribe: 'plains',
+  ashen_badlands: 'plains',
   whispering_woods: 'forest',
   wolf_woods: 'forest',
+  forest: 'forest',
+  goblin_nest: 'forest',
+  elven_ruins: 'forest',
+  elder_woods: 'forest',
   misty_marshes: 'swamp',
+  swamp: 'swamp',
+  deep_swamp: 'swamp',
+  eldritch_mire: 'swamp',
   golden_sands: 'desert',
+  desert: 'desert',
+  sunken_tomb: 'desert',
   underground_passage: 'cave',
+  cave: 'cave',
+  troll_cave: 'cave',
+  underground_caverns: 'cave',
+  crystal_depths: 'cave',
   stone_peaks: 'mountain',
+  mountain: 'mountain',
+  korthag: 'mountain',
+  dragon_pass: 'mountain',
+  black_peaks: 'mountain',
   ancient_cemetery: 'graveyard',
+  graveyard: 'graveyard',
+  ancestral_graveyard: 'graveyard',
+  crypt_shadows: 'graveyard',
   frozen_waste: 'snow',
-  burning_crater: 'volcanic'
+  snow: 'snow',
+  glacial_rift: 'snow',
+  frost_cave: 'snow',
+  burning_crater: 'volcanic',
+  volcanic: 'volcanic',
+  valkrest: 'volcanic',
+  obsidian_ridge: 'volcanic',
+  salty_coast: 'coast',
+  coast: 'coast',
+  shipwreck_cove: 'coast',
+  lighthouse_ruins: 'coast'
 };
 var _CART_KEY_TO_MAP_ID = {
   plains: 'city_gates',
@@ -94465,7 +94499,8 @@ var _CART_KEY_TO_MAP_ID = {
   mountain: 'stone_peaks',
   graveyard: 'ancient_cemetery',
   snow: 'frozen_waste',
-  volcanic: 'burning_crater'
+  volcanic: 'burning_crater',
+  coast: 'salty_coast'
 };
 function _cartResolveMapId(keyOrMapId) {
   if (!keyOrMapId) return 'city_gates';
@@ -94575,7 +94610,7 @@ function _openCartProvincePreviewPopup(prov) {
     + '  </div>'
     + '</div>'
     + '<div class="clp-buttons">'
-    + '  <button class="clp-btn clp-btn-hex-explore" id="clp-open-prov-btn" data-clp="open-prov-detail">🗺️ Abrir Mapa da Região</button>'
+    + '  <button class="clp-btn clp-btn-hex-explore" id="clp-open-prov-btn" data-clp="open-prov-detail">Abrir Mapa da Região</button>'
     + '  <button class="clp-btn clp-btn-back" data-clp="back">Fechar</button>'
     + '</div>';
 
@@ -94607,7 +94642,7 @@ function _openCartLocationPopup(biome){
     if (foundQ) activeQuestTitle = foundQ.title || 'Missão Ativa';
   }
   var questBannerHtml = activeQuestTitle
-    ? '<div class="clp-quest-alert" style="margin: 0 0 8px;">📜 CONTRATO ATIVO: ' + activeQuestTitle.toUpperCase() + '</div>'
+    ? '<div class="clp-quest-alert" style="margin: 0 0 8px;">CONTRATO ATIVO: ' + activeQuestTitle.toUpperCase() + '</div>'
     : '';
 
   var card = document.getElementById('clp-card-content');
@@ -94650,16 +94685,16 @@ function _openCartLocationPopup(biome){
   var threatBadge = '';
   var stanceTip = '';
   if (biome.tier === 0 || biome.isOrigin) {
-    threatBadge = '<span style="color:#a3e635;font-weight:700;">🟢 Cidade Segura</span>';
+    threatBadge = '<span style="color:#a3e635;font-weight:700;">Cidade Segura</span>';
     stanceTip = 'Zona neutra protegida pelas muralhas imperiais.';
   } else if (threatDiff <= -1) {
-    threatBadge = '<span style="color:#86efac;font-weight:700;">🟢 Sob Controle (ND ' + biome.tier + ')</span>';
+    threatBadge = '<span style="color:#86efac;font-weight:700;">Sob Controle (ND ' + biome.tier + ')</span>';
     stanceTip = 'Comitiva experiente para este terreno. Marcha normal ou rápida.';
   } else if (threatDiff === 0 || threatDiff === 1) {
-    threatBadge = '<span style="color:#fde047;font-weight:700;">🟡 Desafio Equilibrado (ND ' + biome.tier + ')</span>';
+    threatBadge = '<span style="color:#fde047;font-weight:700;">Desafio Equilibrado (ND ' + biome.tier + ')</span>';
     stanceTip = 'Forças emparelhadas. Mantenha os sentidos atentos contra patrulhas.';
   } else {
-    threatBadge = '<span style="color:#f87171;font-weight:700;">🔴 Zona Mortalmente Hostil (ND ' + biome.tier + ')</span>';
+    threatBadge = '<span style="color:#f87171;font-weight:700;">Zona Mortalmente Hostil (ND ' + biome.tier + ')</span>';
     stanceTip = '⚠️ Perigo Extremo! Ritmo Furtivo (🐾) fortemente recomendado.';
   }
 
@@ -94696,10 +94731,10 @@ function _openCartLocationPopup(biome){
     + (isCurrent
         ? ((typeof _buildPointcrawlCurrentNodeActionsHtml === 'function')
             ? '<button class="clp-btn clp-btn-back" data-clp="back">Fechar</button>'
-            : '<button class="clp-btn clp-btn-hex-explore" data-clp="explore-poi">🔍 Explorar</button>'
+            : '<button class="clp-btn clp-btn-hex-explore" data-clp="explore-poi">Explorar</button>'
               + '<button class="clp-btn clp-btn-back" data-clp="back">Fechar</button>'
           )
-        : '<button class="clp-btn clp-btn-hex-explore" data-clp="travel">🧭 Viajar</button>'
+        : '<button class="clp-btn clp-btn-hex-explore" data-clp="travel">Viajar</button>'
           + '<button class="clp-btn clp-btn-back" data-clp="back">Voltar</button>'
        )
     + '</div>';
@@ -94816,7 +94851,7 @@ function _openCartLocationPopup(biome){
           copyItineraryBtn.style.color = '#86efac';
           copyItineraryBtn.style.borderColor = '#86efac';
           setTimeout(function(){
-            copyItineraryBtn.textContent = '📋 Copiar Rota';
+            copyItineraryBtn.textContent = 'Copiar Rota';
             copyItineraryBtn.style.color = '#ffd700';
             copyItineraryBtn.style.borderColor = 'rgba(255,215,0,0.6)';
           }, 2000);
@@ -94893,7 +94928,7 @@ function _openCartLocationPopup(biome){
           copyItineraryBtn.style.color = '#86efac';
           copyItineraryBtn.style.borderColor = '#86efac';
           setTimeout(function(){
-            copyItineraryBtn.textContent = '📋 Copiar Rota';
+            copyItineraryBtn.textContent = 'Copiar Rota';
             copyItineraryBtn.style.color = '#ffd700';
             copyItineraryBtn.style.borderColor = 'rgba(255,215,0,0.6)';
           }, 2000);
@@ -96088,7 +96123,7 @@ function openCartography() {
   overlay.innerHTML = ''
     + '<div class="xcart-wrapper">'
     + '  <div class="xcart-header">'
-    + '    <h2 id="xcart-title">🧭 Cartografia de Valdoria</h2>'
+    + '    <h2 id="xcart-title">CARTOGRAFIA DE VALDORIA</h2>'
     + '  </div>'
     + '  <div class="xcart-canvas-frame">'
     + '    <canvas id="xcart-canvas"></canvas>'
@@ -96100,17 +96135,17 @@ function openCartography() {
     + '    </div>'
     + '  </div>'
     + '  <div class="xcart-back-row">'
-    + '    <button class="xcart-back-btn" id="xcart-close-btn" style="border-color:#ffd700;color:#ffd700;font-weight:700;" title="Inspecionar e explorar a região onde a comitiva está">🧭 Explorar Local</button>'
-    + '    <button class="xcart-back-btn" id="xcart-camp-btn" onclick="if(typeof _pointcrawlOpenCamp===\'function\')_pointcrawlOpenCamp();" title="Montar Bivaque / Acampamento (Descanso Curto, Longo e Diálogo)">⛺ Acampar</button>'
-    + '    <button class="xcart-back-btn" id="xcart-party-btn" onclick="if(typeof _pointcrawlOpenParty===\'function\')_pointcrawlOpenParty();" title="Gerenciar Comitiva, Luz e Ritmo de Marcha">👥 Comitiva</button>'
-    + '    <button class="xcart-back-btn" id="xcart-continent-btn" style="display:none;" onclick="_xcartFocusProvince(\'world\')">🌍 Continente</button>'
-    + '    <button class="xcart-back-btn xcart-city-btn" id="xcart-city-btn" onclick="_cartHandleReturnToCity()" title="Voltar para os Portões de Valdoria">🏛️ Retornar à Cidade</button>'
+    + '    <button class="xcart-back-btn" id="xcart-close-btn" style="border-color:#ffd700;color:#ffd700;font-weight:700;" title="Inspecionar e explorar a região onde a comitiva está">Explorar Local</button>'
+    + '    <button class="xcart-back-btn" id="xcart-camp-btn" onclick="if(typeof _pointcrawlOpenCamp===\'function\')_pointcrawlOpenCamp();" title="Montar Bivaque / Acampamento (Descanso Curto, Longo e Diálogo)">Acampar</button>'
+    + '    <button class="xcart-back-btn" id="xcart-party-btn" onclick="if(typeof _pointcrawlOpenParty===\'function\')_pointcrawlOpenParty();" title="Gerenciar Comitiva, Luz e Ritmo de Marcha">Comitiva</button>'
+    + '    <button class="xcart-back-btn" id="xcart-continent-btn" style="display:none;" onclick="_xcartFocusProvince(\'world\')">Continente</button>'
+    + '    <button class="xcart-back-btn xcart-city-btn" id="xcart-city-btn" onclick="_cartHandleReturnToCity()" title="Voltar para os Portões de Valdoria">Retornar à Cidade</button>'
     + '  </div>'
     + '  <div class="cart-atlas-modal" id="tactical-radar-modal" style="display:none;z-index:115;" aria-label="Radar Tático da Região">'
     + '    <div class="cam-box" style="max-width:380px;">'
     + '      <div class="cam-header">'
     + '        <div style="display:flex;align-items:center;gap:6px;">'
-    + '          <span style="font-size:16px;">🧭</span>'
+    + '          '
     + '          <div>'
     + '            <h3 style="margin:0;font-size:13px;color:#f4d49a;font-family:Cinzel,serif;">Radar Tático da Região</h3>'
     + '            <span id="trm-coverage-stat" style="font-size:11.5px;color:#a09484;">Calculando exploração...</span>'
@@ -96124,10 +96159,10 @@ function openCartography() {
     + '        <div style="font-size:11px;color:#ffd700;font-family:Cinzel,serif;font-weight:700;margin-top:2px;">▼ SUL</div>'
     + '      </div>'
     + '      <div id="trm-legend" style="padding:6px 12px;font-size:10.5px;color:#d2be90;display:flex;justify-content:space-around;background:rgba(0,0,0,0.35);">'
-    + '        <span>📍 Comitiva</span>'
-    + '        <span>🟢 Saída</span>'
-    + '        <span>🟡 Retorno</span>'
-    + '        <span>👁️ Visível</span>'
+    + '        <span>Comitiva</span>'
+    + '        <span>Ponto de Partida</span>'
+    + '        <span>Retorno</span>'
+    + '        <span>Visível</span>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -96138,38 +96173,38 @@ function openCartography() {
     + '        <button class="cam-close" id="xcam-close-btn" type="button">✕</button>'
     + '      </div>'
     + '      <div class="cam-search-wrap">'
-    + '        <input type="text" class="cam-search-input" id="xcam-search-input" placeholder="🔍 Buscar província ou localidade..." autocomplete="off">'
+    + '        <input type="text" class="cam-search-input" id="xcam-search-input" placeholder="Buscar localidade ou região..." autocomplete="off">'
     + '      </div>'
     + '      <div id="xcam-stats-dossier" style="margin:4px 12px 6px;padding:6px 10px;background:rgba(25,18,10,0.65);border:1px solid rgba(196,149,58,0.3);border-radius:4px;font-size:10.5px;color:#d2be90;display:flex;justify-content:space-between;align-items:center;"></div>'
     + '      <div class="cam-grid" id="xcam-grid"></div>'
     + '      <div class="cam-legend" id="xcam-filter-bar">'
     + '        <button class="cam-filter-pill active" data-filter="all" type="button">Todos</button>'
-    + '        <button class="cam-filter-pill" data-filter="settlements" type="button">🏛️ Cidades</button>'
-    + '        <button class="cam-filter-pill" data-filter="wilderness" type="button">⚔️ Terras Ermas</button>'
-    + '        <button class="cam-filter-pill" data-filter="quests" type="button">📜 Contratos</button>'
-    + '        <button class="cam-filter-pill" data-filter="mapped" type="button">🗺️ Cartas</button>'
-    + '        <button class="cam-filter-pill" data-filter="pinned" type="button">📌 Fixados</button>'
-    + '        <button class="cam-filter-pill" data-filter="unexplored" type="button">🧭 Inexplorados</button>'
-    + '        <button class="cam-filter-pill" data-filter="hazards" type="button">⚠️ Perigos</button>'
-    + '        <button class="cam-filter-pill" data-filter="landmarks" type="button">🏛️ Marcos</button>'
-    + '        <button class="cam-filter-pill" data-filter="sanctuaries" type="button">✨ Santuários</button>'
-    + '        <button class="cam-filter-pill" data-filter="altitude" type="button">⛰️ Altitudes</button>'
-    + '        <button class="cam-filter-pill" data-filter="roads" type="button">🛣️ Estradas</button>'
-    + '        <button class="cam-filter-pill" data-filter="mounts" type="button">🫏 Montaria</button>'
-    + '        <button class="cam-filter-pill" data-filter="weather" type="button">⚡ Clima</button>'
-    + '        <button class="cam-filter-pill" data-filter="caravans" type="button">📦 Comboios</button>'
-    + '        <button class="cam-filter-pill" data-filter="shelters" type="button">⛺ Abrigos</button>'
-    + '        <button class="cam-filter-pill" data-filter="rivers" type="button">🌊 Travessias</button>'
-    + '        <button class="cam-filter-pill" data-filter="bounties" type="button">📜 Recompensas</button>'
-    + '        <button class="cam-filter-pill" data-filter="harvest" type="button">🌿 Coleta</button>'
-    + '        <button class="cam-filter-pill" data-filter="rumors" type="button">🍺 Boatos</button>'
-    + '        <button class="cam-filter-pill" data-filter="triangulation" type="button">📐 Triangulação</button>'
-    + '        <button class="cam-filter-pill" data-filter="cooking" type="button">🍲 Culinária</button>'
-    + '        <button class="cam-filter-pill" data-filter="trailblaze" type="button">🪨 Trilhas</button>'
-    + '        <button class="cam-filter-pill" data-filter="acoustics" type="button">👂 Acústica</button>'
-    + '        <button class="cam-filter-pill" data-filter="leylines" type="button">🔮 Linhas Ley</button>'
-    + '        <button class="cam-filter-pill" data-filter="portals" type="button">🏛️ Portais</button>'
-    + '        <button class="cam-filter-pill" data-filter="spoor" type="button">🐾 Rastros</button>'
+    + '        <button class="cam-filter-pill" data-filter="settlements" type="button">Cidades</button>'
+    + '        <button class="cam-filter-pill" data-filter="wilderness" type="button">Terras Ermas</button>'
+    + '        <button class="cam-filter-pill" data-filter="quests" type="button">Contratos</button>'
+    + '        <button class="cam-filter-pill" data-filter="mapped" type="button">Cartas</button>'
+    + '        <button class="cam-filter-pill" data-filter="pinned" type="button">Fixados</button>'
+    + '        <button class="cam-filter-pill" data-filter="unexplored" type="button">Inexplorados</button>'
+    + '        <button class="cam-filter-pill" data-filter="hazards" type="button">Perigos</button>'
+    + '        <button class="cam-filter-pill" data-filter="landmarks" type="button">Marcos</button>'
+    + '        <button class="cam-filter-pill" data-filter="sanctuaries" type="button">Santuários</button>'
+    + '        <button class="cam-filter-pill" data-filter="altitude" type="button">Altitudes</button>'
+    + '        <button class="cam-filter-pill" data-filter="roads" type="button">Estradas</button>'
+    + '        <button class="cam-filter-pill" data-filter="mounts" type="button">Montaria</button>'
+    + '        <button class="cam-filter-pill" data-filter="weather" type="button">Clima</button>'
+    + '        <button class="cam-filter-pill" data-filter="caravans" type="button">Comboios</button>'
+    + '        <button class="cam-filter-pill" data-filter="shelters" type="button">Abrigos</button>'
+    + '        <button class="cam-filter-pill" data-filter="rivers" type="button">Travessias</button>'
+    + '        <button class="cam-filter-pill" data-filter="bounties" type="button">Recompensas</button>'
+    + '        <button class="cam-filter-pill" data-filter="harvest" type="button">Coleta</button>'
+    + '        <button class="cam-filter-pill" data-filter="rumors" type="button">Boatos</button>'
+    + '        <button class="cam-filter-pill" data-filter="triangulation" type="button">Triangulação</button>'
+    + '        <button class="cam-filter-pill" data-filter="cooking" type="button">Culinária</button>'
+    + '        <button class="cam-filter-pill" data-filter="trailblaze" type="button">Trilhas</button>'
+    + '        <button class="cam-filter-pill" data-filter="acoustics" type="button">Acústica</button>'
+    + '        <button class="cam-filter-pill" data-filter="leylines" type="button">Linhas Ley</button>'
+    + '        <button class="cam-filter-pill" data-filter="portals" type="button">Portais</button>'
+    + '        <button class="cam-filter-pill" data-filter="spoor" type="button">Rastros</button>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -96177,28 +96212,28 @@ function openCartography() {
     + '    <div class="cam-box" style="max-width:440px;">'
     + '      <div class="cam-header">'
     + '        <div style="display:flex;align-items:center;gap:6px;">'
-    + '          <span style="font-size:16px;">📖</span>'
+    + '          '
     + '          <h3 style="margin:0;font-size:13px;color:#f4d49a;font-family:Cinzel,serif;">Guia do Andarilho (Regras D&D 5e)</h3>'
     + '        </div>'
     + '        <button class="cam-close" id="xcart-guide-close-btn" type="button">✕</button>'
     + '      </div>'
     + '      <div class="cam-grid" style="max-height:58vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:12px;text-align:left;font-size:11px;color:#d2be90;line-height:1.5;">'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#fde047;font-size:11.5px;margin-bottom:4px;">🚶 RITMOS DE MARCHA (PHB p. 181-182)</div>'
-    + '          <p style="margin:2px 0;"><b>🐾 Furtivo (18 milhas/dia):</b> -33% velocidade, +50% tempo. Permite usar Furtividade para surpreender inimigos ou evitar emboscadas; vantagem em Sobrevivência para forragear alimentos nos ermos.</p>'
-    + '          <p style="margin:2px 0;"><b>🚶 Normal (24 milhas/dia):</b> Ritmo canônico de comitiva. Velocidade equilibrada sem penalidades na Percepção Passiva.</p>'
-    + '          <p style="margin:2px 0;"><b>⚡ Rápido (30 milhas/dia):</b> +33% velocidade, -25% tempo. A comitiva corre em marcha forçada; penalidade de -5 na Percepção Passiva (maior chance de emboscadas).</p>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#fde047;font-size:11.5px;margin-bottom:4px;">RITMOS DE MARCHA (PHB p. 181-182)</div>'
+    + '          <p style="margin:2px 0;"><b>Furtivo (18 milhas/dia):</b> -33% velocidade, +50% tempo. Permite usar Furtividade para surpreender inimigos ou evitar emboscadas; vantagem em Sobrevivência para forragear alimentos nos ermos.</p>'
+    + '          <p style="margin:2px 0;"><b>Normal (24 milhas/dia):</b> Ritmo canônico de comitiva. Velocidade equilibrada sem penalidades na Percepção Passiva.</p>'
+    + '          <p style="margin:2px 0;"><b>Rápido (30 milhas/dia):</b> +33% velocidade, -25% tempo. A comitiva corre em marcha forçada; penalidade de -5 na Percepção Passiva (maior chance de emboscadas).</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#93c5fd;font-size:11.5px;margin-bottom:4px;">🌙 VIAGEM NOTURNA & VISÃO NO ESCURO (PHB p. 183)</div>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#93c5fd;font-size:11.5px;margin-bottom:4px;">VIAGEM NOTURNA & VISÃO NO ESCURO (PHB p. 183)</div>'
     + '          <p style="margin:2px 0;">O sol se põe e a escuridão cobre as estradas. Sem tochas ativas ou Visão no Escuro ancestral (elfos, anões, meio-orcs), a comitiva sofre <b>Desvantagem</b> em testes de Percepção contra emboscadas na escuridão.</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#86efac;font-size:11.5px;margin-bottom:4px;">🍖 SUPRIMENTOS & ACAMPAMENTOS (PHB p. 185)</div>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#86efac;font-size:11.5px;margin-bottom:4px;">SUPRIMENTOS & ACAMPAMENTOS (PHB p. 185)</div>'
     + '          <p style="margin:2px 0;">Jornadas acima de 8 horas exigem paradas de Descanso Longo (8h) em acampamentos na estrada e 1 Ração de Viagem por aventureiro. Em biomas férteis, testes de Sobrevivência permitem caçar e colher água potável.</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#f87171;font-size:11.5px;margin-bottom:4px;">⚠️ MARCHA FORÇADA & EXAUSTÃO (PHB p. 181)</div>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#f87171;font-size:11.5px;margin-bottom:4px;">MARCHA FORÇADA & EXAUSTÃO (PHB p. 181)</div>'
     + '          <p style="margin:2px 0;">O limite de marcha contínua segura é de 8 horas por dia. Cada hora adicional exige Salvaguarda de Constituição (CD 10 + 1 por hora além de 8). Em caso de falha, o aventureiro sofre 1 Nível de Exaustão. Fracionar a rota com acampamentos de Descanso Longo (8h) anula a penalidade.</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
@@ -96206,12 +96241,12 @@ function openCartography() {
     + '          <p style="margin:2px 0;"><b>🚶 A Pé:</b> 3 milhas/hora padrão. Mochilas e armas prontas.<br><b>🐎 Montaria:</b> +33% de velocidade em estradas (4 milhas/h). Reduz o tempo total de viagem.<br><b>🛒 Caravana:</b> 3 milhas/h com carruagens fortificadas. Reduz em -10% o risco de emboscadas noturnas no acampamento.</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#c084fc;font-size:11.5px;margin-bottom:4px;">🧭 ATIVIDADES & FUNÇÕES DE VIAGEM (PHB p. 182)</div>'
-    + '          <p style="margin:2px 0;"><b>👁️ Sentinela:</b> Alerta máximo (+5 Percepção Passiva); impede surpresas em emboscadas.<br><b>🧭 Guia:</b> Evita desvios sob névoas densas e tempestades.<br><b>🌿 Caçador:</b> Colhe comida e água silvestre sem gastar rações em marcha normal/lenta.<br><b>📜 Cartógrafo:</b> Mapeia estradas e detalha anotações táticas de viagem.</p>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#c084fc;font-size:11.5px;margin-bottom:4px;">ATIVIDADES & FUNÇÕES DE VIAGEM (PHB p. 182)</div>'
+    + '          <p style="margin:2px 0;"><b>Sentinela:</b> Alerta máximo (+5 Percepção Passiva); impede surpresas em emboscadas.<br><b>Guia:</b> Evita desvios sob névoas densas e tempestades.<br><b>Caçador:</b> Colhe comida e água silvestre sem gastar rações em marcha normal/lenta.<br><b>Cartógrafo:</b> Mapeia estradas e detalha anotações táticas de viagem.</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#ffd700;font-size:11.5px;margin-bottom:4px;">📏 RÉGUA CARTOGRÁFICA & ASTROLÁBIO DE NAVEGAÇÃO (D&D 5e)</div>'
-    + '          <p style="margin:2px 0;"><b>📏 Régua & Azimute (Tecla X):</b> Ativa a régua de medição tática. Ao mover o cursor ou clicar em nós, calcula a distância em <i>Milhas, Léguas e Quilômetros</i>, o rumo nos 16 ventos náuticos e a duração da marcha a pé, a cavalo ou de caravana.<br><b>🧭 Rosa dos Ventos Dinâmica:</b> O astrolábio no canto superior projeta um ponteiro dourado vivo em direção ao destino selecionado.<br><b>📋 Copiar Itinerário:</b> No popup de viagem, o botão <i>📋 Copiar Rota</i> gera um manifesto de expedição formatado em texto para a prancheta.</p>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#ffd700;font-size:11.5px;margin-bottom:4px;">RÉGUA CARTOGRÁFICA & ASTROLÁBIO DE NAVEGAÇÃO (D&D 5e)</div>'
+    + '          <p style="margin:2px 0;"><b>Régua & Azimute (Tecla X):</b> Ativa a régua de medição tática. Ao mover o cursor ou clicar em nós, calcula a distância em <i>Milhas, Léguas e Quilômetros</i>, o rumo nos 16 ventos náuticos e a duração da marcha a pé, a cavalo ou de caravana.<br><b>Rosa dos Ventos Dinâmica:</b> O astrolábio no canto superior projeta um ponteiro dourado vivo em direção ao destino selecionado.<br><b>Copiar Itinerário:</b> No popup de viagem, o botão <i>Copiar Rota</i> gera um manifesto de expedição formatado em texto para a prancheta.</p>'
     + '        </div>'
     + '      </div>'
     + '    </div>'
@@ -96220,16 +96255,16 @@ function openCartography() {
     + '    <div class="cam-box" style="max-width:320px;">'
     + '      <div class="cam-header">'
     + '        <div style="display:flex;align-items:center;gap:6px;">'
-    + '          <span style="font-size:16px;">🗺️</span>'
+    + '          '
     + '          <h3 style="margin:0;font-size:13px;color:#f4d49a;font-family:Cinzel,serif;">Camadas Táticas</h3>'
     + '        </div>'
     + '        <button class="cam-close" id="xcart-layers-close-btn" type="button">✕</button>'
     + '      </div>'
     + '      <div style="display:flex;flex-direction:column;gap:8px;padding:12px;font-size:11px;color:#d2be90;text-align:left;">'
-    + '        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="xcl-chk-roads" checked> 🛣️ Estradas & Trilhas</label>'
-    + '        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="xcl-chk-settlements" checked> 🏛️ Povoações & Santuários</label>'
-    + '        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="xcl-chk-threats" checked> ⚔️ Zonas de Perigo (Tier 4+)</label>'
-    + '        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="xcl-chk-notes" checked> 📝 Alfinetes & Anotações</label>'
+    + '        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="xcl-chk-roads" checked> Estradas & Trilhas</label>'
+    + '        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="xcl-chk-settlements" checked> Povoações & Santuários</label>'
+    + '        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="xcl-chk-threats" checked> Zonas de Perigo (Tier 4+)</label>'
+    + '        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="xcl-chk-notes" checked> Alfinetes & Anotações</label>'
     + '      </div>'
     + '    </div>'
     + '  </div>'
@@ -96237,24 +96272,24 @@ function openCartography() {
     + '    <div class="cam-box">'
     + '      <div class="cam-header">'
     + '        <div style="display:flex;align-items:center;gap:6px;">'
-    + '          <span style="font-size:16px;">🌀</span>'
+    + '          '
     + '          <h3 style="margin:0;font-size:13px;color:#f4d49a;font-family:Cinzel,serif;">Rede de Marcos & Santuários</h3>'
     + '        </div>'
     + '        <button class="cam-close" id="xcart-waypoints-close-btn" type="button">✕</button>'
     + '      </div>'
     + '      <div class="cam-legend" id="xcwm-filter-bar" style="padding:6px 12px;border-bottom:1px solid rgba(196,149,58,0.25);">'
     + '        <button class="cam-filter-pill active" data-wfilter="all" type="button">Todos</button>'
-    + '        <button class="cam-filter-pill" data-wfilter="settlements" type="button">🏛️ Vilas & Santuários</button>'
-    + '        <button class="cam-filter-pill" data-wfilter="sanctuaries" type="button">✨ Santuários Sagrados</button>'
-    + '        <button class="cam-filter-pill" data-wfilter="pinned" type="button">📌 Alfinetes Fixados</button>'
-    + '        <button class="cam-filter-pill" data-wfilter="notes" type="button">📝 Anotações</button>'
+    + '        <button class="cam-filter-pill" data-wfilter="settlements" type="button">Vilas & Santuários</button>'
+    + '        <button class="cam-filter-pill" data-wfilter="sanctuaries" type="button">Santuários Sagrados</button>'
+    + '        <button class="cam-filter-pill" data-wfilter="pinned" type="button">Alfinetes Fixados</button>'
+    + '        <button class="cam-filter-pill" data-wfilter="notes" type="button">Anotações</button>'
     + '      </div>'
-    + '      <div style="padding:4px 12px 6px;"><input type="text" class="cam-search-input" id="xcwm-search-input" placeholder="🔍 Filtrar por nome, província ou nota..." style="width:100%;box-sizing:border-box;margin:0;font-size:11px;" autocomplete="off"></div>'
+    + '      <div style="padding:4px 12px 6px;"><input type="text" class="cam-search-input" id="xcwm-search-input" placeholder="Filtrar por nome ou anotação..." style="width:100%;box-sizing:border-box;margin:0;font-size:11px;" autocomplete="off"></div>'
     + '      <div class="cam-legend" id="xcwm-prov-filter-bar" style="padding:2px 12px 6px;display:flex;gap:4px;overflow-x:auto;">'
-    + '        <button class="cam-filter-pill active" data-wprov="all" type="button" style="font-size:11px;padding:2px 6px;">🌍 Todas</button>'
-    + '        <button class="cam-filter-pill" data-wprov="forest" type="button" style="font-size:11px;padding:2px 6px;">🌲 Florestas</button>'
-    + '        <button class="cam-filter-pill" data-wprov="desert" type="button" style="font-size:11px;padding:2px 6px;">🏜️ Dunas</button>'
-    + '        <button class="cam-filter-pill" data-wprov="mountain" type="button" style="font-size:11px;padding:2px 6px;">⛰️ Cordilheira</button>'
+    + '        <button class="cam-filter-pill active" data-wprov="all" type="button" style="font-size:11px;padding:2px 6px;">Todas</button>'
+    + '        <button class="cam-filter-pill" data-wprov="forest" type="button" style="font-size:11px;padding:2px 6px;">Florestas</button>'
+    + '        <button class="cam-filter-pill" data-wprov="desert" type="button" style="font-size:11px;padding:2px 6px;">Dunas</button>'
+    + '        <button class="cam-filter-pill" data-wprov="mountain" type="button" style="font-size:11px;padding:2px 6px;">Cordilheira</button>'
     + '        <button class="cam-filter-pill" data-wprov="swamp" type="button" style="font-size:11px;padding:2px 6px;">🐸 Pântanos</button>'
     + '      </div>'
     + '      <div class="cam-grid" id="xcart-waypoints-list" style="max-height:50vh;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:10px;"></div>'
@@ -98096,7 +98131,7 @@ function _xcartHandleHover(mx, my){
       if (_xcartCanvas) _xcartCanvas.style.cursor = 'pointer';
       var tip = document.getElementById('xcart-tooltip');
       if (tip) {
-        tip.innerHTML = '<div class="ctip-title">🧭 Rosa dos Ventos</div><div class="ctip-footer"><span class="ctip-hint">Clique para orientar ao Norte / Centralizar</span></div>';
+        tip.innerHTML = '<div class="ctip-title">Rosa dos Ventos</div><div class="ctip-footer"><span class="ctip-hint">Clique para orientar ao Norte / Centralizar</span></div>';
         tip.classList.add('active');
         tip.style.display = 'block';
         tip.style.left = Math.max(10, mx - 180) + 'px';
@@ -110142,13 +110177,13 @@ function _promptConfirmReturnToCity(onConfirmed){
 
       + '<h2>Confirmar Retorno à Cidade?</h2>'
 
-      + '<p>Você está atualmente em expedição pelas terras ermas.<br>Deseja realmente iniciar a viagem de volta para os portões de <b>Valdoria</b>?<br><br><span style="color:#c4953a;font-size:0.9em;display:inline-block">🛡️ Seus pontos de vida, ouro, experiência e itens acumulados nesta expedição serão preservados com segurança ao retornar.</span></p>'
+      + '<p>Você está atualmente em expedição pelas terras ermas.<br>Deseja realmente iniciar a viagem de volta para os portões de <b>Valdoria</b>?<br><br><span style="color:#c4953a;font-size:0.9em;display:inline-block">Seus pontos de vida, ouro, experiência e itens acumulados nesta expedição serão preservados com segurança ao retornar.</span></p>'
 
       + '<div class="cbp-buttons">'
 
-      + '  <button class="cbp-btn cbp-btn-yes" data-cbp="confirm-return">✓ Sim, Iniciar Viagem de Volta</button>'
+      + '  <button class="cbp-btn cbp-btn-yes" data-cbp="confirm-return">Sim, Retornar à Cidade</button>'
 
-      + '  <button class="cbp-btn cbp-btn-no" data-cbp="cancel-return">✕ Não, Continuar Explorando</button>'
+      + '  <button class="cbp-btn cbp-btn-no" data-cbp="cancel-return">Não, Continuar Explorando</button>'
 
       + '</div>';
 

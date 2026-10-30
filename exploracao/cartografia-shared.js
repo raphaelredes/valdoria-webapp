@@ -39988,6 +39988,56 @@
       regionalPaths: [
         ['volcanic', 'valkrest']
       ]
+    },
+    {
+      id: 'cave',
+      name: 'Galerias Subterrâneas',
+      icon: '',
+      zoom: 1.0,
+      cx: 0.18,
+      cy: 0.55,
+      mapKey: 'Mapa das Montanhas',
+      desc: 'Túneis profundos esculpidos na rocha sólida, rios subterrâneos e fendas com cristais luminescentes.',
+      tier: 'Tier 2 (Níveis 4-7)',
+      terrain: 'Subterrâneo & Cavernas Kársticas',
+      winds: 'Correntes de Ar Úmidas (Vazio · 4 km/h)',
+      hazard: 'Desmoronamentos, Fendas Ocultas & Escuridão Mágica',
+      locKeys: ['cave', 'underground_caverns', 'crystal_depths', 'troll_cave'],
+      regionalCoords: {
+        cave: { rx: 0.38, ry: 0.36, name: 'Passagem Subterrânea', marcos: 3 },
+        underground_caverns: { rx: 0.68, ry: 0.44, name: 'Cavernas Subterrâneas', marcos: 4 },
+        troll_cave: { rx: 0.24, ry: 0.70, name: 'Caverna do Troll', marcos: 4 },
+        crystal_depths: { rx: 0.72, ry: 0.76, name: 'Profundezas de Cristal', marcos: 6 }
+      },
+      regionalPaths: [
+        ['cave', 'underground_caverns'],
+        ['cave', 'troll_cave'],
+        ['underground_caverns', 'crystal_depths']
+      ]
+    },
+    {
+      id: 'graveyard',
+      name: 'Terras dos Mortos',
+      icon: '',
+      zoom: 1.0,
+      cx: 0.40,
+      cy: 0.86,
+      mapKey: 'Mapa do Pântano',
+      desc: 'Campos de lápides antigas, mausoléus esquecidos da nobreza e solo corrompido por energias necromânticas.',
+      tier: 'Tier 2 (Níveis 4-7)',
+      terrain: 'Cemitério Antigo & Criptas',
+      winds: 'Vento Gelado da Morte (S · 10 km/h)',
+      hazard: 'Névoas Corruptas, Esqueletos Vigilantes & Tumbeiros',
+      locKeys: ['graveyard', 'ancestral_graveyard', 'crypt_shadows'],
+      regionalCoords: {
+        graveyard: { rx: 0.40, ry: 0.42, name: 'Cemitério Antigo', marcos: 3 },
+        ancestral_graveyard: { rx: 0.65, ry: 0.65, name: 'Cemitério Ancestral', marcos: 5 },
+        crypt_shadows: { rx: 0.38, ry: 0.72, name: 'Cripta das Sombras', marcos: 5 }
+      },
+      regionalPaths: [
+        ['graveyard', 'ancestral_graveyard'],
+        ['graveyard', 'crypt_shadows']
+      ]
     }
   ];
 
@@ -39995,12 +40045,14 @@
     city_gates: 'plains', city_square: 'plains', city_tavern: 'plains', city_guild: 'plains', city_temple: 'plains',
     plains: 'plains', green_fields: 'plains', orc_tribe: 'plains', bandit_fortress: 'plains', ashen_badlands: 'plains',
     forest: 'forest', goblin_nest: 'forest', elven_ruins: 'forest', elder_woods: 'forest',
-    cave: 'mountain', underground_caverns: 'mountain', crystal_depths: 'mountain', mountain: 'mountain', troll_cave: 'mountain', dragon_pass: 'mountain', korthag: 'mountain', black_peaks: 'mountain',
-    swamp: 'swamp', deep_swamp: 'swamp', graveyard: 'swamp', ancestral_graveyard: 'swamp', eldritch_mire: 'swamp',
-    desert: 'desert',
-    salty_coast: 'coast',
-    snow: 'snow', glacial_rift: 'snow',
-    volcanic: 'volcanic', valkrest: 'volcanic'
+    mountain: 'mountain', korthag: 'mountain', dragon_pass: 'mountain', black_peaks: 'mountain',
+    cave: 'cave', underground_caverns: 'cave', crystal_depths: 'cave', troll_cave: 'cave',
+    swamp: 'swamp', deep_swamp: 'swamp', eldritch_mire: 'swamp',
+    graveyard: 'graveyard', ancestral_graveyard: 'graveyard', crypt_shadows: 'graveyard',
+    coast: 'coast', salty_coast: 'coast', shipwreck_cove: 'coast', lighthouse_ruins: 'coast',
+    desert: 'desert', golden_sands: 'desert', sunken_tomb: 'desert',
+    snow: 'snow', frozen_waste: 'snow', glacial_rift: 'snow', frost_cave: 'snow',
+    volcanic: 'volcanic', burning_crater: 'volcanic', valkrest: 'volcanic', obsidian_ridge: 'volcanic'
   };
 
   // Regra de Visibilidade de Províncias (Ordem do Usuário 2026-10):
@@ -40226,7 +40278,9 @@
         narrative: 'Paredões de pedra batidos pela ressaca do mar e maresia forte. O litoral é repleto de praias rochosas e cavernas marinhas que escondem destroços de naufrágios e ninhos de criaturas aquáticas.',
         intel: 'Ventos marítimos fortes. As cavernas só podem ser exploradas com segurança durante a maré baixa.',
         nodes: [
-          { id: 'salty_coast', name: 'Costa Salgada', ico: '', x: 0.48, y: 0.45, maxCR: 4.0, maxHP: 130, desc: 'Penhascos altos e praias de pedra batidas pelas ondas fortes do oceano.' }
+          { id: 'salty_coast', name: 'Costa Salgada', ico: '', x: 0.48, y: 0.45, maxCR: 4.0, maxHP: 130, desc: 'Penhascos altos e praias de pedra batidas pelas ondas fortes do oceano.' },
+          { id: 'shipwreck_cove', name: 'Cala dos Naufrágios', ico: '', x: 0.28, y: 0.65, maxCR: 3.0, maxHP: 110, desc: 'Enseada rochosa cercada de cascos de caravelas naufragadas e tesouros esquecidos.' },
+          { id: 'lighthouse_ruins', name: 'Farol Abandonado', ico: '', x: 0.72, y: 0.32, maxCR: 4.0, maxHP: 120, desc: 'Antiga torre de pedra no alto da falésia, agora refúgio de harpias e saqueadores do mar.' }
         ]
       },
 
@@ -40244,8 +40298,9 @@
         narrative: 'Vastas dunas de areia sob um sol escaldante, onde água limpa vale mais do que ouro. Tempestades de poeira cobrem desfiladeiros secos de terra vermelha, lar de escorpiões gigantes e bandidos do deserto.',
         intel: 'Calor extremo. O grupo consome o dobro de água por dia de viagem.',
         nodes: [
-          { id: 'desert', name: 'Deserto Dourado', ico: '', x: 0.42, y: 0.50, maxCR: 4.0, maxHP: 130, desc: 'Dunas móveis de areia onde escorpiões gigantes e salteadores atacam viajantes desavisados.' },
-          { id: 'ashen_badlands', name: 'Terras Devastadas', ico: '', x: 0.70, y: 0.35, maxCR: 5.0, maxHP: 150, desc: 'Desfiladeiros profundos de terra vermelha onde a vegetação secou por completo.' }
+          { id: 'desert', name: 'Deserto Dourado', ico: '', x: 0.35, y: 0.50, maxCR: 4.0, maxHP: 120, desc: 'Dunas de areia fina que mudam de lugar com as tempestades de vento.' },
+          { id: 'ashen_badlands', name: 'Terras Devastadas', ico: '', x: 0.70, y: 0.35, maxCR: 5.0, maxHP: 150, desc: 'Desfiladeiros profundos de terra vermelha onde a vegetação secou por completo.' },
+          { id: 'sunken_tomb', name: 'Tumba das Areias', ico: '', x: 0.52, y: 0.74, maxCR: 5.0, maxHP: 150, desc: 'Entrada esculpida em arenito vermelho parcialmente soterrada pelas dunas em movimento.' }
         ]
       },
 
@@ -40264,7 +40319,8 @@
         intel: 'Símbolos sagrados e água benta oferecem vantagem contra as aparições e esqueletos que rondam os túmulos.',
         nodes: [
           { id: 'graveyard', name: 'Cemitério Antigo', ico: '', x: 0.40, y: 0.42, maxCR: 3.0, maxHP: 110, desc: 'Lápides cobertas por hera e sepulturas violadas de guerreiros e mercenários do passado.' },
-          { id: 'ancestral_graveyard', name: 'Cemitério Ancestral', ico: '', x: 0.65, y: 0.65, maxCR: 5.0, maxHP: 150, desc: 'Grandes mausoléus da antiga aristocracia com catacumbas protegidas por magia necromântica.' }
+          { id: 'ancestral_graveyard', name: 'Cemitério Ancestral', ico: '', x: 0.65, y: 0.65, maxCR: 5.0, maxHP: 150, desc: 'Grandes mausoléus da antiga aristocracia com catacumbas protegidas por magia necromântica.' },
+          { id: 'crypt_shadows', name: 'Cripta das Sombras', ico: '', x: 0.38, y: 0.72, maxCR: 5.0, maxHP: 140, desc: 'Galerias fúnebres subterrâneas onde aparições e necromantes vigiam sarcófagos de pedra.' }
         ]
       },
 
@@ -40283,7 +40339,8 @@
         intel: 'Risco grave de congelamento e hipotermia. É essencial levar roupas reforçadas de pele e poções de aquecimento.',
         nodes: [
           { id: 'snow', name: 'Ermo Congelado', ico: '', x: 0.50, y: 0.45, maxCR: 5.0, maxHP: 160, desc: 'Planície de neve fofa onde o vento gelado congela a respiração em poucos segundos.' },
-          { id: 'glacial_rift', name: 'Abismo Glacial', ico: '', x: 0.70, y: 0.25, maxCR: 8.0, maxHP: 280, desc: 'Fenda colossal na geleira profunda, de onde ecoam rugidos de feras ancestrais do gelo.' }
+          { id: 'glacial_rift', name: 'Abismo Glacial', ico: '', x: 0.70, y: 0.25, maxCR: 8.0, maxHP: 280, desc: 'Fenda colossal na geleira profunda, de onde ecoam rugidos de feras ancestrais do gelo.' },
+          { id: 'frost_cave', name: 'Caverna de Gelo', ico: '', x: 0.32, y: 0.70, maxCR: 6.0, maxHP: 180, desc: 'Gruta azul congelada com estalactites afiadas e tocas de lobos invernais.' }
         ]
       },
 
@@ -40302,7 +40359,8 @@
         intel: 'Fumaça tóxica e poças de lava ativa. As passagens sobre a rocha vulcânica mudam a cada nova erupção.',
         nodes: [
           { id: 'valkrest', name: 'Valkrest (Acampamento)', ico: '', x: 0.35, y: 0.65, maxCR: 5.0, maxHP: 150, desc: 'Posto avançado com muralhas de rocha vulcânica e abrigo seguro para aventureiros.' },
-          { id: 'volcanic', name: 'Cratera Vulcânica', ico: '', x: 0.62, y: 0.38, maxCR: 8.0, maxHP: 260, desc: 'Caldeira vulcânica ativa com cascatas de magma fervente e criaturas de fogo.' }
+          { id: 'volcanic', name: 'Cratera Vulcânica', ico: '', x: 0.62, y: 0.38, maxCR: 8.0, maxHP: 260, desc: 'Caldeira vulcânica ativa com cascatas de magma fervente e criaturas de fogo.' },
+          { id: 'obsidian_ridge', name: 'Crista de Obsidiana', ico: '', x: 0.48, y: 0.76, maxCR: 7.0, maxHP: 220, desc: 'Platô elevado de rocha negra afiada cercado por fendas de enxofre e elementais de fogo.' }
         ]
       }
     };

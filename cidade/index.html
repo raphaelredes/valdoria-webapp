@@ -73415,8 +73415,10 @@ function _cartUpdateDrawer(n, d) {
     btnPrim.textContent = 'Explorar';
     btnPrim.onclick = function(){
       if (typeof haptic === 'function') haptic('medium');
-      if (typeof doAction === 'function') {
-        doAction('explore_' + n.id);
+      if (typeof _travelToBiome === 'function') {
+        _travelToBiome(n.id, n.name);
+      } else if (typeof doAction === 'function') {
+        doAction('cart_' + n.id);
       } else {
         alert('Partindo para explorar ' + n.name + '...');
       }
