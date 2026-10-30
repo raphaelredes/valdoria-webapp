@@ -71419,38 +71419,17 @@ var _cartHoverNode = null;
 function renderCartographyCanvas(el){
   el.innerHTML = ''
     + '<div class="cart-wrapper">'
-    + '  <div class="cart-dock" id="cart-dock">'
-    + '    <button class="cart-dock-btn" id="cart-back-btn" type="button" title="Voltar à Cidade [Esc]" aria-label="Voltar para a cidade">🏛️ Cidade</button>'
-    + '    <button class="cart-dock-btn primary" id="cart-atlas-picker-btn" type="button" title="Atlas das Províncias [M]" aria-label="Seletor de Províncias">🗺️ Atlas ▾</button>'
-    + '    <button class="cart-dock-btn" id="cart-waypoints-btn" type="button" title="Rede de Marcos e Santuários [W]" aria-label="Marcos de Viagem e Santuários">🌀 Marcos</button>'
-    + '    <button class="cart-dock-btn" id="cart-filter-toggle-btn" type="button" title="Alternar Filtro de Nós no Mapa [Teclas 1 a 6]">🎯 Todos</button>'
-    + '    <button class="cart-dock-btn" id="cart-ruler-btn" type="button" title="Régua Cartográfica / Astrolábio de Medição [X]" aria-label="Régua Cartográfica e Distâncias">📏 Régua</button>'
-    + '    <button class="cart-dock-btn accent" id="cart-atlas-back-btn" type="button" title="Voltar ao Continente [Backspace]" style="display:none;" aria-label="Voltar ao Continente">🌍 Continente</button>'
-    + '    <button class="csp-help-btn" id="cart-help-btn" type="button" onclick="_showHelpForCurrentScreen(\'cartografia\')" title="Guia da Cartografia" aria-label="Guia da Cartografia">?</button>'
+    + '  <div class="cart-dock" id="cart-dock" style="justify-content:center;">'
+    + '    <button class="cart-dock-btn primary" id="cart-back-btn" type="button" onclick="_cartHandleReturnToCity()" title="Retornar à Cidade" aria-label="Retornar para a cidade" style="padding:6px 18px;font-size:12px;font-weight:700;">🏛️ Retornar à Cidade</button>'
     + '  </div>'
     + '  <div class="cart-header">'
-    + '    <h2 id="cart-title">🧭 Atlas de Valdoria</h2>'
-    + '    <div class="cart-prov-bar-wrap">'
-    + '      <button class="cart-prov-nav-btn cart-prov-prev" id="cart-prov-prev" type="button" aria-label="Anterior">‹</button>'
-    + '      <div class="cart-prov-bar" id="cart-prov-bar"></div>'
-    + '      <button class="cart-prov-nav-btn cart-prov-next" id="cart-prov-next" type="button" aria-label="Próximo">›</button>'
-    + '    </div>'
+    + '    <h2 id="cart-title">🧭 Planícies Centrais (Ermos)</h2>'
     + '  </div>'
     + '  <!-- LEVEL 1: GUIA CONTINENTAL OBJETIVO (ROADWARDEN STYLE) -->'
     + '  <div class="cart-continental-guide" id="cart-continental-guide">'
-    + '    <div class="capital-city-card" id="btn-capital-city" onclick="_cartSelectProvince(\'city_valdoria\')">'
-    + '      <div class="capital-left">'
-    + '        <span style="font-size:18px;">🏰</span>'
-    + '        <div>'
-    + '          <div class="capital-name">Cidade de Valdoria</div>'
-    + '          <div style="font-size:11.5px;color:var(--v-text-muted, #a09484);">Capital & Refúgio Central</div>'
-    + '        </div>'
-    + '      </div>'
-    + '      <span class="capital-tag">Santuário · ND 0.5</span>'
-    + '    </div>'
     + '    <div class="section-label">PROVÍNCIAS DOS ERMOS:</div>'
     + '    <div class="province-grid" id="cart-province-grid">'
-    + '      <button type="button" class="prov-btn" data-prov="plains" onclick="_cartSelectProvince(\'plains\')">'
+    + '      <button type="button" class="prov-btn active" data-prov="plains" onclick="_cartSelectProvince(\'plains\')">'
     + '        <span class="prov-btn-left">🌾 Planícies</span>'
     + '        <span class="prov-tier-tag">ND 1</span>'
     + '      </button>'
@@ -71485,41 +71464,41 @@ function renderCartographyCanvas(el){
     + '    </div>'
     + '    <div class="region-summary-card" id="cart-region-summary-card">'
     + '      <div class="summary-header-row">'
-    + '        <span class="summary-region-name" id="card-region-title">Cidade de Valdoria</span>'
-    + '        <span class="summary-danger-tag badge-safe" id="card-danger-badge">Santuário (ND 0.5)</span>'
+    + '        <span class="summary-region-name" id="card-region-title">Planícies Centrais (Ermos)</span>'
+    + '        <span class="summary-danger-tag badge-safe" id="card-danger-badge">ND máx 1.0 a 5.0</span>'
     + '      </div>'
     + '      <div class="march-specs-bar">'
-    + '        <span>Viagem: <b id="card-march-days">Local Atual (0d)</b> · <b id="card-supplies-cost">0 Rações</b></span>'
+    + '        <span>Viagem: <b id="card-march-days">1d de marcha</b> · <b id="card-supplies-cost">2 Rações</b></span>'
     + '        <button type="button" class="btn-read-intel" id="btn-open-intel" onclick="_cartOpenDetailsModal(\'region\')">📜 Detalhes</button>'
     + '      </div>'
     + '      <div class="destinations-box" id="card-destinations-list"></div>'
     + '      <button type="button" class="btn-march-action" id="btn-main-march" onclick="_cartConfirmOpenMap()">'
-    + '        <span>🗺️</span> <span id="btn-march-text">Ver Mapa da Cidade</span>'
+    + '        <span>🗺️</span> <span id="btn-march-text">Ver Mapa da Região</span>'
     + '      </button>'
     + '    </div>'
     + '  </div>'
     + '  <!-- LEVEL 2: MAPA REGIONAL DEDICADO -->'
-    + '  <div class="cart-regional-view" id="cart-regional-view" style="display:none;">'
+    + '  <div class="cart-regional-view" id="cart-regional-view" style="display:flex;">'
     + '    <div class="regional-top-bar">'
     + '      <button type="button" class="btn-back-macro" onclick="_cartFocusProvince(\'world\')">'
     + '        <span>←</span> Regiões'
     + '      </button>'
     + '      <div class="badge-card-name" id="reg-card-name">'
-    + '        Mapa: Cidade de Valdoria'
+    + '        Mapa: Planícies Centrais'
     + '      </div>'
     + '      <button type="button" class="csp-help-btn" onclick="_showHelpForCurrentScreen(\'cartografia\')" title="Guia do Mapa Regional" aria-label="Ajuda">?</button>'
     + '    </div>'
     + '    <div class="province-map-container" id="prov-map-wrap">'
-    + '      <img class="province-art-img" id="prov-art-img" src="shared/img/map/provinces/city.webp" alt="Mapa Regional">'
+    + '      <img class="province-art-img" id="prov-art-img" src="shared/img/map/provinces/plains.webp" alt="Mapa Regional">'
     + '      <div class="prov-pins-overlay" id="prov-pins-overlay"></div>'
     + '    </div>'
     + '    <div class="regional-action-drawer" id="reg-action-drawer">'
     + '      <div class="drawer-header-line">'
-    + '        <div class="drawer-title-bold" id="drawer-node-name"><span>🏰</span> Portões da Cidade</div>'
-    + '        <div class="summary-danger-tag badge-safe" id="drawer-node-danger">Refúgio Seguro (ND 0.5)</div>'
+    + '        <div class="drawer-title-bold" id="drawer-node-name"><span>🌾</span> Campos Verdes</div>'
+    + '        <div class="summary-danger-tag badge-safe" id="drawer-node-danger">Perigo (ND 1)</div>'
     + '      </div>'
     + '      <div class="drawer-actions-grid">'
-    + '        <button type="button" class="btn-cmd btn-cmd-primary" id="drawer-btn-primary">Acessar</button>'
+    + '        <button type="button" class="btn-cmd btn-cmd-primary" id="drawer-btn-primary">Explorar</button>'
     + '        <button type="button" class="btn-cmd btn-cmd-secondary" id="drawer-btn-camp">Acampar</button>'
     + '        <button type="button" class="btn-cmd btn-cmd-secondary" id="drawer-btn-details">Detalhes</button>'
     + '      </div>'
@@ -71756,6 +71735,7 @@ function renderCartographyCanvas(el){
   syncDims();
   _wireCartEvents();
   _cartCenterOnPlayer();
+  if (typeof _cartRenderRegionalView === 'function') _cartRenderRegionalView('plains');
 
   if (typeof requestAnimationFrame !== 'undefined') {
     requestAnimationFrame(function(){
@@ -71923,7 +71903,6 @@ function _startQuestFocusTick(){
 // === EVENTS ===
 var _PROV_SHORT_NAMES = {
   world: 'Continente',
-  city_valdoria: 'Cidade',
   plains: 'Planícies',
   forest: 'Florestas',
   mountain: 'Montanhas',
@@ -73207,7 +73186,7 @@ function _wireCartKeyboardNavigation() {
 // CANONICAL ROADWARDEN VIAGEM & MAPA REGIONAL (TELEGRAM DESKTOP 390px)
 // =====================================================================
 
-var _cartCurrentProvKey = 'city_valdoria';
+var _cartCurrentProvKey = 'plains';
 var _cartSelectedNodeId = null;
 
 function _cartSelectProvince(provKey) {
@@ -73217,9 +73196,6 @@ function _cartSelectProvince(provKey) {
   if (typeof haptic === 'function') haptic('light');
 
   // Atualiza classes ativas
-  var capBtn = document.getElementById('btn-capital-city');
-  if (capBtn) capBtn.classList.toggle('active', provKey === 'city_valdoria');
-
   var provBtns = document.querySelectorAll('.prov-btn');
   provBtns.forEach(function(b){
     b.classList.toggle('active', b.getAttribute('data-prov') === provKey);
@@ -73231,7 +73207,7 @@ function _cartSelectProvince(provKey) {
 function _cartUpdateContinentalGuide() {
   var regData = (window.CartShared && CartShared.REGIONS_DATA) ? CartShared.REGIONS_DATA : null;
   if (!regData) return;
-  var d = regData[_cartCurrentProvKey] || regData['city_valdoria'];
+  var d = regData[_cartCurrentProvKey] || regData['plains'];
 
   var titleEl = document.getElementById('card-region-title');
   var badgeEl = document.getElementById('card-danger-badge');
@@ -73252,7 +73228,7 @@ function _cartUpdateContinentalGuide() {
     suppliesCostEl.textContent = d.days === 0 ? '0 Rações' : (d.days * 2) + ' Rações';
   }
   if (marchBtnText) {
-    marchBtnText.textContent = d.isCapital ? 'Ver Mapa da Cidade' : 'Ver Mapa da Região';
+    marchBtnText.textContent = 'Ver Mapa da Região';
   }
 
   if (destListEl) {
@@ -73274,17 +73250,13 @@ function _cartUpdateContinentalGuide() {
 
 function _cartConfirmOpenMap() {
   if (typeof haptic === 'function') haptic('medium');
-  if (_cartCurrentProvKey === 'city_valdoria') {
-    _openCityMapModal();
-  } else {
-    _cartFocusProvince(_cartCurrentProvKey);
-  }
+  _cartFocusProvince(_cartCurrentProvKey);
 }
 
 function _cartRenderRegionalView(provKey) {
   var regData = (window.CartShared && CartShared.REGIONS_DATA) ? CartShared.REGIONS_DATA : null;
   if (!regData) return;
-  var d = regData[provKey] || regData['city_valdoria'];
+  var d = regData[provKey] || regData['plains'];
 
   var nameBadge = document.getElementById('reg-card-name');
   if (nameBadge) {
@@ -73293,7 +73265,7 @@ function _cartRenderRegionalView(provKey) {
 
   var imgEl = document.getElementById('prov-art-img');
   if (imgEl) {
-    var rawSrc = d.img || ('shared/img/map/provinces/' + (provKey === 'city_valdoria' ? 'city' : provKey) + '.webp');
+    var rawSrc = d.img || ('shared/img/map/provinces/' + provKey + '.webp');
     if (typeof window !== 'undefined' && window.location && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
       if (rawSrc.indexOf('shared/') === 0) rawSrc = '/' + rawSrc;
       else if (rawSrc.indexOf('/') === 0) rawSrc = rawSrc.replace('/', '/');
@@ -73372,33 +73344,19 @@ function _cartUpdateDrawer(n, d) {
 
   if (nameEl) nameEl.textContent = n.name;
   if (dangerEl) {
-    var isSafe = (d.isCapital || (n.maxCR || 0) <= 0.5);
+    var isSafe = ((n.maxCR || 0) <= 0.5);
     dangerEl.className = 'summary-danger-tag ' + (isSafe ? 'badge-safe' : 'badge-mod');
     dangerEl.textContent = isSafe ? 'Refúgio Seguro (ND 0.5)' : ('Perigo (ND ' + n.maxCR + ')');
   }
 
   if (btnPrim) {
-    btnPrim.textContent = d.isCapital ? 'Acessar' : 'Explorar';
+    btnPrim.textContent = 'Explorar';
     btnPrim.onclick = function(){
       if (typeof haptic === 'function') haptic('medium');
-      if (d.isCapital) {
-        if (n.id === 'city_gates') {
-          _cartFocusProvince('world');
-        } else if (n.id === 'city_square') {
-          if (typeof doAction === 'function') doAction('market');
-        } else if (n.id === 'city_tavern') {
-          if (typeof doAction === 'function') doAction('tavern');
-        } else if (n.id === 'city_guild') {
-          if (typeof doAction === 'function') doAction('action_quests');
-        } else if (n.id === 'city_temple') {
-          if (typeof doAction === 'function') doAction('temple');
-        }
+      if (typeof doAction === 'function') {
+        doAction('explore_' + n.id);
       } else {
-        if (typeof doAction === 'function') {
-          doAction('explore_' + n.id);
-        } else {
-          alert('Partindo para explorar ' + n.name + '...');
-        }
+        alert('Partindo para explorar ' + n.name + '...');
       }
     };
   }
@@ -73432,7 +73390,7 @@ function _cartOpenDetailsModal(type) {
 
   var regData = (window.CartShared && CartShared.REGIONS_DATA) ? CartShared.REGIONS_DATA : null;
   if (!regData) return;
-  var d = regData[_cartCurrentProvKey] || regData['city_valdoria'];
+  var d = regData[_cartCurrentProvKey] || regData['plains'];
 
   if (type === 'region') {
     title.textContent = 'Informações: ' + d.name;

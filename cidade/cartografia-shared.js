@@ -39791,35 +39791,6 @@
       regionalPaths: []
     },
     {
-      id: 'city_valdoria',
-      name: 'Cidade de Valdoria',
-      icon: '🏰',
-      zoom: 1.0,
-      cx: 0.50,
-      cy: 0.50,
-      mapKey: null,
-      desc: 'Capital fortificada do reino, centro comercial e refúgio seguro para aventureiros.',
-      tier: 'Santuário · ND 0.5 (Teto 30 PV)',
-      terrain: 'Capital & Distritos Fortificados',
-      winds: 'Brisa Urbana',
-      hazard: 'Área Protegida pela Guarda da Cidade',
-      isCapital: true,
-      locKeys: ['city_gates', 'city_square', 'city_tavern', 'city_guild', 'city_temple'],
-      regionalCoords: {
-        city_gates: { rx: 0.50, ry: 0.84, name: 'Portões de Valdoria', marcos: 0 },
-        city_square: { rx: 0.50, ry: 0.50, name: 'Praça Central & Mercado', marcos: 0 },
-        city_tavern: { rx: 0.26, ry: 0.46, name: 'Taverna do Javali Bêbado', marcos: 0 },
-        city_guild: { rx: 0.74, ry: 0.48, name: 'Guilda dos Mercenários & Arena', marcos: 0 },
-        city_temple: { rx: 0.50, ry: 0.22, name: 'Templo da Luz Sagrada', marcos: 0 }
-      },
-      regionalPaths: [
-        ['city_gates', 'city_square'],
-        ['city_square', 'city_tavern'],
-        ['city_square', 'city_guild'],
-        ['city_square', 'city_temple']
-      ]
-    },
-    {
       id: 'plains',
       name: 'Planícies Centrais',
       icon: '🌾',
@@ -39834,15 +39805,16 @@
       hazard: 'Bandidos de Estrada & Tempestades',
       locKeys: ['green_fields', 'orc_tribe', 'bandit_fortress', 'ashen_badlands'],
       regionalCoords: {
-        green_fields: { rx: 0.28, ry: 0.36, name: 'Campos Verdes', marcos: 1 },
-        orc_tribe: { rx: 0.74, ry: 0.38, name: 'Acampamento Orc', marcos: 3 },
-        bandit_fortress: { rx: 0.46, ry: 0.76, name: 'Forte dos Bandidos', marcos: 2 },
+        green_fields: { rx: 0.28, ry: 0.32, name: 'Campos Verdes', marcos: 1 },
+        orc_tribe: { rx: 0.74, ry: 0.30, name: 'Acampamento Orc', marcos: 3 },
+        bandit_fortress: { rx: 0.30, ry: 0.74, name: 'Forte dos Bandidos', marcos: 2 },
         ashen_badlands: { rx: 0.76, ry: 0.74, name: 'Terras Devastadas', marcos: 4 }
       },
       regionalPaths: [
         ['green_fields', 'orc_tribe'],
         ['green_fields', 'bandit_fortress'],
-        ['bandit_fortress', 'ashen_badlands']
+        ['bandit_fortress', 'ashen_badlands'],
+        ['orc_tribe', 'ashen_badlands']
       ]
     },
     {
@@ -40020,8 +39992,8 @@
   ];
 
   var _LOCATION_TO_PROVINCE = {
-    city_gates: 'city_valdoria', city_square: 'city_valdoria', city_tavern: 'city_valdoria', city_guild: 'city_valdoria', city_temple: 'city_valdoria',
-    plains: 'city_valdoria', green_fields: 'plains', orc_tribe: 'plains', bandit_fortress: 'plains', ashen_badlands: 'plains',
+    city_gates: 'plains', city_square: 'plains', city_tavern: 'plains', city_guild: 'plains', city_temple: 'plains',
+    plains: 'plains', green_fields: 'plains', orc_tribe: 'plains', bandit_fortress: 'plains', ashen_badlands: 'plains',
     forest: 'forest', goblin_nest: 'forest', elven_ruins: 'forest', elder_woods: 'forest',
     cave: 'mountain', underground_caverns: 'mountain', crystal_depths: 'mountain', mountain: 'mountain', troll_cave: 'mountain', dragon_pass: 'mountain', korthag: 'mountain', black_peaks: 'mountain',
     swamp: 'swamp', deep_swamp: 'swamp', graveyard: 'swamp', ancestral_graveyard: 'swamp', eldritch_mire: 'swamp',
@@ -40040,7 +40012,7 @@
     if (!p) return false;
     if (p.mapKey && ownedMaps && ownedMaps.indexOf(p.mapKey) >= 0) return true;
     var knownArr = known || [];
-    if (provId === 'city_valdoria' || provId === 'plains') return true; // Hub de partida e capital (Portões de Valdória)
+    if (provId === 'plains') return true; // Hub de partida (Planícies Centrais)
     if (!p.locKeys || !p.locKeys.length) return false;
     if (playerLocKey && (_LOCATION_TO_PROVINCE[playerLocKey] === provId || p.locKeys.indexOf(playerLocKey) >= 0)) return true;
     for (var i = 0; i < p.locKeys.length; i++) {
@@ -40137,29 +40109,6 @@
 
   var REGIONS_DATA = {
 
-      // ── CIDADE CAPITAL (MAPA URBANO & SANTUÁRIO) ───────────────────
-      city_valdoria: {
-        id: 'city_valdoria',
-        name: 'Cidade de Valdoria (Capital)',
-        tag: '🏰 Cidade de Valdoria',
-        isCapital: true,
-        img: 'shared/img/map/provinces/city.webp',
-        altImg: '../valdoria-webapp/shared/img/map/provinces/city.webp',
-        fallbackBg: 'radial-gradient(circle, #382c1e 0%, #17120c 100%)',
-        dangerClass: 'badge-safe',
-        dangerText: 'Santuário · ND 0.5 (Teto 30 PV)',
-        days: 0,
-        narrative: 'Valdoria é a principal capital fortificada do continente e o refúgio mais seguro para aventureiros. Suas muralhas altas de granito e torres de vigia protegem quatro grandes áreas: a Praça Central com o mercado no coração da cidade, a Taverna ao sul, a Guilda de Mercenários e Arena a oeste e o Templo Sagrado a leste. Pelos Portões do Sul, os viajantes partem em direção aos ermos das planícies.',
-        intel: '💡 Mapa da Capital. Você pode circular à vontade pelos distritos para descansar, comprar equipamentos, pegar contratos e receber bênçãos sem risco de combate.',
-        nodes: [
-          { id: 'city_gates', name: 'Portões de Valdoria', ico: '🏰', x: 0.50, y: 0.84, maxCR: 0.5, maxHP: 30, desc: 'A colossal muralha de granito e os portões do sul vigiados pelo Capitão Aldric. Saída oficial da cidade rumo aos ermos e planícies.' },
-          { id: 'city_square', name: 'Praça Central & Mercado', ico: '🏛️', x: 0.50, y: 0.50, maxCR: 0.5, maxHP: 30, desc: 'O coração pulsante de Valdoria. Feira livre, fontes de pedra, comércio de provisões, poções e forja de armaduras.' },
-          { id: 'city_tavern', name: 'Taverna do Javali Bêbado', ico: '🍺', x: 0.35, y: 0.68, maxCR: 0.5, maxHP: 30, desc: 'A taverna mais movimentada da capital. Fogueira acolhedora, canecas de hidromel servidas por Gromm e descanso longo seguro em camas confortáveis.' },
-          { id: 'city_guild', name: 'Guilda dos Mercenários & Arena', ico: '⚔️', x: 0.28, y: 0.36, maxCR: 0.5, maxHP: 30, desc: 'Quartel da comandante Tavira. Contratos de caça a monstros, recrutamento de companheiros de equipe e arena de treinos.' },
-          { id: 'city_temple', name: 'Templo da Luz Sagrada', ico: '⛪', x: 0.72, y: 0.32, maxCR: 0.5, maxHP: 30, desc: 'Catedral consagrada de mármore branco. A sacerdotisa Elara oferece curas milagrosas, bênçãos divinas e remoção de maldições.' }
-        ]
-      },
-
       // ── ERMOS DAS PLANÍCIES (FORA DA CIDADE) ──────────────────────
       plains: {
         id: 'plains',
@@ -40174,9 +40123,10 @@
         narrative: 'Campos abertos e colinas verdejantes que cercam a capital. É terra de pastores e caçadores, mas o perigo não dá trégua: saqueadores do Forte dos Bandidos e bandos de orcs atacam viajantes e caravanas descuidadas pela estrada principal.',
         intel: '💡 Estrada aberta e fácil de seguir. A trilha tem boa visibilidade e postos de vigia abandonados pelo caminho.',
         nodes: [
-          { id: 'green_fields', name: 'Campos Verdes', ico: '🌾', x: 0.30, y: 0.38, maxCR: 1.0, maxHP: 60, desc: 'Colinas verdejantes de pastoreio e caçadores locais. Trilha aberta com antigos postos de vigia.' },
-          { id: 'orc_tribe', name: 'Acampamento Orc', ico: '⛺', x: 0.72, y: 0.46, maxCR: 3.0, maxHP: 110, desc: 'Tendas de couro e tambores de guerra ao redor de grandes fogueiras acesas na estepe a leste.' },
-          { id: 'bandit_fortress', name: 'Forte dos Bandidos', ico: '🏚️', x: 0.50, y: 0.78, maxCR: 5.0, maxHP: 160, desc: 'Fortificação de madeira e pedra construída sobre as ruínas de uma antiga torre de vigia.' }
+          { id: 'green_fields', name: 'Campos Verdes', ico: '🌾', x: 0.28, y: 0.32, maxCR: 1.0, maxHP: 60, desc: 'Colinas verdejantes de pastoreio e caçadores locais. Trilha aberta com antigos postos de vigia e moinho de pedra.' },
+          { id: 'orc_tribe', name: 'Acampamento Orc', ico: '⛺', x: 0.74, y: 0.30, maxCR: 3.0, maxHP: 110, desc: 'Tendas de couro e tambores de guerra ao redor de grandes fogueiras acesas na estepe a leste.' },
+          { id: 'bandit_fortress', name: 'Forte dos Bandidos', ico: '🏚️', x: 0.30, y: 0.74, maxCR: 5.0, maxHP: 160, desc: 'Fortificação de madeira e pedra construída sobre uma elevação rochosa com paliçadas e vigias armados.' },
+          { id: 'ashen_badlands', name: 'Terras Devastadas', ico: '🏜️', x: 0.76, y: 0.74, maxCR: 5.0, maxHP: 150, desc: 'Desfiladeiros profundos de terra vermelha e solo ressecado onde a vegetação secou por completo.' }
         ]
       },
 
@@ -40318,12 +40268,59 @@
       }
     };
 
+  // === RETORNO À CIDADE (Ordem do Usuário 2026-10) ===
+  function handleReturnToCity() {
+    try {
+      if (typeof window !== 'undefined' && typeof window.haptic === 'function') {
+        window.haptic('medium');
+      }
+    } catch(_) {}
+
+    var isInsideCity = false;
+    if (typeof window !== 'undefined') {
+      if (typeof window.navigateTo === 'function' && typeof window._currentScreen !== 'undefined') {
+        isInsideCity = true;
+      }
+      var pLoc = (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.location) || '';
+      if (pLoc && (pLoc.indexOf('city_') === 0 || pLoc === 'city_gates')) {
+        isInsideCity = true;
+      }
+    }
+
+    if (isInsideCity) {
+      try { if (typeof window.closeCityPopup === 'function') window.closeCityPopup(true); } catch(_) {}
+      try { if (typeof window.closeCartography === 'function') window.closeCartography(); } catch(_) {}
+      if (typeof window.navigateTo === 'function') {
+        window.navigateTo('hub');
+      }
+      return;
+    }
+
+    if (typeof window._promptConfirmReturnToCity === 'function') {
+      window._promptConfirmReturnToCity(function(){
+        try { if (typeof window.closeCartography === 'function') window.closeCartography(); } catch(_) {}
+      });
+    } else if (typeof window.startReturnToCity === 'function') {
+      if (confirm('Deseja realmente encerrar a exploração e voltar para a cidade de Valdoria?')) {
+        try { if (typeof window.closeCartography === 'function') window.closeCartography(); } catch(_) {}
+        window.startReturnToCity();
+      }
+    } else if (typeof window._returnToCityNow === 'function') {
+      window._returnToCityNow();
+    } else if (typeof window.navigateTo === 'function') {
+      window.navigateTo('hub');
+    }
+  }
+  if (typeof window !== 'undefined') {
+    window._cartHandleReturnToCity = handleReturnToCity;
+  }
+
   // === Export to global namespace ===
   window.CartShared = {
     INK_DARK: INK_DARK, INK_MED: INK_MED, INK_LIGHT: INK_LIGHT,
     INK_FAINT: INK_FAINT, PAPER_BG: PAPER_BG, PAPER_DARK: PAPER_DARK,
     SEA_INK: SEA_INK, SEA_FAINT: SEA_FAINT,
-    CART_BIOMES: CART_BIOMES, CART_PATHS: CART_PATHS, CART_PROVINCES: CART_PROVINCES, REGIONS_DATA: REGIONS_DATA, getLocationProvince: getLocationProvince, isProvinceDiscovered: isProvinceDiscovered, getDiscoveredProvinces: getDiscoveredProvinces,
+    CART_BIOMES: CART_BIOMES, CART_PATHS: CART_PATHS, CART_PROVINCES: CART_PROVINCES, REGIONS_DATA: REGIONS_DATA, handleReturnToCity: handleReturnToCity, getLocationProvince: getLocationProvince, isProvinceDiscovered: isProvinceDiscovered, getDiscoveredProvinces: getDiscoveredProvinces,
     _cartSeedRand: _cartSeedRand,
     _hatchArea: _hatchArea, _wavyLine: _wavyLine,
     _drawParchmentBase: _drawParchmentBase,

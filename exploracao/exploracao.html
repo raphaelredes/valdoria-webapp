@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-29T22:50:02Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-30T12:05:26Z - do not edit directly, edit source -->
 
 
 
@@ -18243,6 +18243,9 @@ window.__onIntroTap = function() {
 
       <img class="qb-icon" src="../shared/img/ui/cartografia.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
 
+    </button>
+    <button class="quick-btn" id="btn-hud-return-city" title="Retornar à Cidade de Valdoria" aria-label="Retornar à Cidade" onclick="_cartHandleReturnToCity()">
+      <img class="qb-icon" src="../shared/img/ui/portoes.webp" alt="Cidade" onerror="this.src='../shared/img/ui/portoes.webp';">
     </button>
 
     <!-- V2.7: btn-download-log removido (user req). Logs continuam salvando em
@@ -96084,24 +96087,8 @@ function openCartography() {
 
   overlay.innerHTML = ''
     + '<div class="xcart-wrapper">'
-    + '  <div class="xcart-dock" id="xcart-dock">'
-    + '    <button class="xcart-dock-btn primary" id="xcart-top-back-btn" type="button" title="Ações na Região Atual (Explorar Marcos, Masmorras, Bivaque, Forragear) [E]" aria-label="Explorar Região Atual">🧭 Região Atual</button>'
-    + '    <button class="xcart-dock-btn primary" id="xcart-atlas-picker-btn" type="button" title="Atlas das Províncias [M]" aria-label="Seletor de Províncias">🗺️ Atlas ▾</button>'
-    + '    <button class="xcart-dock-btn" id="xcart-waypoints-btn" type="button" title="Rede de Marcos e Santuários [P]" aria-label="Marcos de Viagem e Santuários">🌀 Marcos</button>'
-    + '    <button class="xcart-dock-btn" id="xcart-filter-toggle-btn" type="button" title="Alternar Filtro de Nós no Mapa [Teclas 1 a 6]">🎯 Todos</button>'
-    + '    <button class="xcart-dock-btn" id="xcart-ruler-btn" type="button" title="Régua Cartográfica / Astrolábio de Medição [X]" aria-label="Régua Cartográfica e Distâncias">📏 Régua</button>'
-    + '    <button class="xcart-dock-btn" id="xcart-layers-btn" type="button" title="Alternar Camadas Táticas do Mapa [L]" aria-label="Camadas do Mapa">🗺️ Camadas</button>'
-    + '    <button class="xcart-dock-btn" id="xcart-guide-btn" type="button" title="Guia da Tela Atual e Regras de Viagem D&D 5e [H]" aria-label="Guia de Viagem D&D 5e"><span class="v-help-qbadge-sm" aria-hidden="true">?</span> Guia</button>'
-    + '    <button class="xcart-dock-btn accent" id="xcart-atlas-back-btn" type="button" title="Voltar ao Continente [Backspace]" style="display:none;" aria-label="Voltar ao Continente">🌍 Continente</button>'
-    + '  </div>'
-    + '  <!-- cart-hotkey-strip removido: mobile-first sem teclas fisicas -->' 
     + '  <div class="xcart-header">'
-    + '    <h2 id="xcart-title">Cartografia de Valdoria</h2>'
-    + '    <div class="cart-prov-bar-wrap">'
-    + '      <button class="cart-prov-nav-btn cart-prov-prev" id="xcart-prov-prev" type="button" aria-label="Anterior">‹</button>'
-    + '      <div class="cart-prov-bar" id="xcart-prov-bar"></div>'
-    + '      <button class="cart-prov-nav-btn cart-prov-next" id="xcart-prov-next" type="button" aria-label="Próximo">›</button>'
-    + '    </div>'
+    + '    <h2 id="xcart-title">🧭 Cartografia de Valdoria</h2>'
     + '  </div>'
     + '  <div class="xcart-canvas-frame">'
     + '    <canvas id="xcart-canvas"></canvas>'
@@ -96117,7 +96104,7 @@ function openCartography() {
     + '    <button class="xcart-back-btn" id="xcart-camp-btn" onclick="if(typeof _pointcrawlOpenCamp===\'function\')_pointcrawlOpenCamp();" title="Montar Bivaque / Acampamento (Descanso Curto, Longo e Diálogo)">⛺ Acampar</button>'
     + '    <button class="xcart-back-btn" id="xcart-party-btn" onclick="if(typeof _pointcrawlOpenParty===\'function\')_pointcrawlOpenParty();" title="Gerenciar Comitiva, Luz e Ritmo de Marcha">👥 Comitiva</button>'
     + '    <button class="xcart-back-btn" id="xcart-continent-btn" style="display:none;" onclick="_xcartFocusProvince(\'world\')">🌍 Continente</button>'
-    + '    <button class="xcart-back-btn xcart-city-btn" id="xcart-city-btn" title="Voltar para os Portões de Valdoria">🏛️ Cidade</button>'
+    + '    <button class="xcart-back-btn xcart-city-btn" id="xcart-city-btn" onclick="_cartHandleReturnToCity()" title="Voltar para os Portões de Valdoria">🏛️ Retornar à Cidade</button>'
     + '  </div>'
     + '  <div class="cart-atlas-modal" id="tactical-radar-modal" style="display:none;z-index:115;" aria-label="Radar Tático da Região">'
     + '    <div class="cam-box" style="max-width:380px;">'
