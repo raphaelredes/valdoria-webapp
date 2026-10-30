@@ -40412,12 +40412,193 @@
     window._cartHandleReturnToCity = handleReturnToCity;
   }
 
+  function _ensureRegionalMapStyles() {
+    if (typeof document === 'undefined') return;
+    if (document.getElementById('cfm-injected-styles')) return;
+    var style = document.createElement('style');
+    style.id = 'cfm-injected-styles';
+    style.textContent = ''
+      + '.city-map-fullscreen-modal { position: fixed; inset: 0; z-index: 99999; background: #0c0906; display: none; flex-direction: column; overflow: hidden; width: 100%; height: 100%; max-width: 480px; margin: 0 auto; box-shadow: 0 0 40px rgba(0, 0, 0, 0.95); }'
+      + '.cfm-header { height: 46px; min-height: 46px; background: linear-gradient(180deg, #1e150d 0%, #120d08 100%); border-bottom: 1.5px solid rgba(196, 149, 58, 0.45); display: flex; align-items: center; justify-content: space-between; padding: 0 12px; box-sizing: border-box; z-index: 100; }'
+      + '.cfm-header-title { font-family: "Cinzel", serif; font-size: 13.5px; font-weight: 700; color: #ffd685; display: flex; align-items: center; gap: 6px; }'
+      + '.cfm-close-btn { font-family: "Cinzel", serif; font-size: 12px; font-weight: 700; color: #ffd685; background: #251b11; border: 1px solid rgba(196, 149, 58, 0.5); border-radius: 5px; padding: 5px 11px; cursor: pointer; touch-action: manipulation; }'
+      + '.cfm-close-btn:active { background: #362617; transform: scale(0.96); }'
+      + '.cfm-prompt-hint { color: #9b8e7c; font-family: "Cinzel", serif; font-size: 12px; font-style: italic; font-weight: 500; letter-spacing: 0.5px; }'
+      + '.cfm-viewport { flex: 1; position: relative; overflow: hidden; background: #080604; display: flex; align-items: center; justify-content: center; }'
+      + '.cfm-stage { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }'
+      + '.cfm-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; background: #080604; transition: opacity 0.2s ease; }'
+      + '.cfm-pins-layer { position: absolute; inset: 0; pointer-events: none; }'
+      + '.cfm-pin { position: absolute; transform: translate(-50%, -50%); pointer-events: auto; cursor: pointer; display: flex; flex-direction: column; align-items: center; transition: transform 0.15s ease; touch-action: manipulation; z-index: 10; }'
+      + '.cfm-pin.active { transform: translate(-50%, -50%) scale(1.18); z-index: 50; }'
+      + '.cfm-pin-reticle { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid #c4953a; background: radial-gradient(circle, rgba(255, 214, 133, 0.20) 0%, rgba(34, 24, 15, 0.75) 60%, rgba(18, 12, 8, 0.90) 100%); box-shadow: 0 0 8px rgba(0, 0, 0, 0.85), inset 0 0 5px rgba(196, 149, 58, 0.4); display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; position: relative; }'
+      + '.cfm-pin-reticle::after { content: ""; width: 8px; height: 8px; border-radius: 50%; border: 1px solid rgba(255, 214, 133, 0.8); background: rgba(255, 214, 133, 0.5); box-shadow: 0 0 4px rgba(255, 214, 133, 0.6); transition: all 0.2s ease; }'
+      + '.cfm-pin.active .cfm-pin-reticle { border-color: #ffd685; border-width: 2px; box-shadow: 0 0 16px rgba(255, 214, 133, 0.9), inset 0 0 8px rgba(255, 214, 133, 0.5); }'
+      + '.cfm-pin.active .cfm-pin-reticle::after { background: #ffd685; box-shadow: 0 0 8px #ffd685; transform: scale(1.25); }'
+      + '.cfm-pin-badge { font-family: "Cinzel", serif; background: rgba(14, 10, 8, 0.94); border: 1px solid rgba(196, 149, 58, 0.5); color: #f5eedf; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 4px; margin-top: 4px; white-space: nowrap; pointer-events: none; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.85); letter-spacing: 0.3px; }'
+      + '.cfm-pin.active .cfm-pin-badge { border-color: #ffd685; color: #ffd685; background: rgba(30, 20, 12, 0.98); box-shadow: 0 0 10px rgba(196, 149, 58, 0.7); }'
+      + '.cfm-drawer { background: linear-gradient(180deg, #221810 0%, #140e09 100%); border-top: 1.5px solid rgba(196, 149, 58, 0.45); padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-sizing: border-box; min-height: 52px; z-index: 100; }'
+      + '.cfm-drawer-info { flex: 1; min-width: 0; }'
+      + '.cfm-drawer-name { font-family: "Cinzel", serif; font-size: 13.5px; font-weight: 700; color: #ffd685; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; }'
+      + '.cfm-drawer-action-btn { background: linear-gradient(180deg, #443118 0%, #2a1d0e 100%); border: 1.5px solid #c4953a; color: #ffd685; font-family: "Cinzel", serif; font-size: 12.5px; font-weight: 700; padding: 8px 15px; border-radius: 6px; cursor: pointer; white-space: nowrap; touch-action: manipulation; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); }'
+      + '.cfm-drawer-action-btn:active { transform: scale(0.97); }';
+    document.head.appendChild(style);
+  }
+
+  function _getGrammarMoveButtonLabel(nodeName) {
+    var nm = (nodeName || '').toLowerCase().trim();
+    if (nm.startsWith('campos') || nm.startsWith('picos') || nm.startsWith('portões') || nm.startsWith('portoes')) {
+      return 'Ir até os';
+    }
+    if (nm.startsWith('terras') || nm.startsWith('ruínas') || nm.startsWith('ruinas') || nm.startsWith('cavernas') || nm.startsWith('profundezas') || nm.startsWith('montanhas')) {
+      return 'Ir até as';
+    }
+    if (nm.startsWith('floresta') || nm.startsWith('passagem') || nm.startsWith('caverna') || nm.startsWith('costa') || nm.startsWith('cala') || nm.startsWith('tumba') || nm.startsWith('cripta') || nm.startsWith('cratera') || nm.startsWith('crista') || nm.startsWith('vila')) {
+      return 'Ir até a';
+    }
+    return 'Ir até o';
+  }
+
+  function openRegionalMapModal(provKey, initialNodeId) {
+    _ensureRegionalMapStyles();
+    var modal = document.getElementById('regional-map-fullscreen-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'regional-map-fullscreen-modal';
+      modal.className = 'city-map-fullscreen-modal';
+      document.body.appendChild(modal);
+    }
+
+    var key = provKey || 'plains';
+    var reg = (REGIONS_DATA && REGIONS_DATA[key]) ? REGIONS_DATA[key] : (REGIONS_DATA ? REGIONS_DATA['plains'] : null);
+    if (!reg) return;
+
+    var rawSrc = reg.img || ('shared/img/map/provinces/' + (key === 'plains' ? 'plains_v2.webp?v=20261030b' : (key + '.webp?v=20261030b')));
+    if (typeof window !== 'undefined' && window.location && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
+      if (rawSrc.indexOf('shared/') === 0) rawSrc = '/' + rawSrc;
+      else if (rawSrc.indexOf('../valdoria-webapp/') === 0) rawSrc = rawSrc.replace('../valdoria-webapp/', '/');
+    }
+
+    modal.innerHTML = ''
+      + '<div class="cfm-header">'
+      + '  <div class="cfm-header-title"><span id="rfm-header-text">' + reg.name + '</span></div>'
+      + '  <button type="button" class="cfm-close-btn" onclick="_closeRegionalMapModal()">✕ Fechar</button>'
+      + '</div>'
+      + '<div class="cfm-viewport">'
+      + '  <div class="cfm-stage">'
+      + '    <img class="cfm-img" id="rfm-img" src="' + rawSrc + '" alt="' + reg.name + '">'
+      + '    <div class="cfm-pins-layer" id="rfm-pins-layer"></div>'
+      + '  </div>'
+      + '</div>'
+      + '<div class="cfm-drawer" id="rfm-drawer">'
+      + '  <div class="cfm-drawer-info">'
+      + '    <div class="cfm-drawer-name" id="rfm-drawer-name"><span class="cfm-prompt-hint">Toque em um local no mapa</span></div>'
+      + '  </div>'
+      + '  <button type="button" class="cfm-drawer-action-btn" id="rfm-drawer-act-btn" style="display:none;"></button>'
+      + '</div>';
+
+    var imgEl = modal.querySelector('#rfm-img');
+    var pinsLayer = modal.querySelector('#rfm-pins-layer');
+    var drawerName = modal.querySelector('#rfm-drawer-name');
+    var drawerBtn = modal.querySelector('#rfm-drawer-act-btn');
+
+    imgEl.onerror = function() {
+      var fallbacks = [
+        reg.altImg,
+        'shared/img/map/provinces/' + (key === 'plains' ? 'plains_v2.webp' : (key + '.webp')),
+        '/shared/img/map/provinces/' + (key === 'plains' ? 'plains_v2.webp' : (key + '.webp')),
+        '../shared/img/map/provinces/' + (key === 'plains' ? 'plains_v2.webp' : (key + '.webp'))
+      ].filter(Boolean);
+      for (var i = 0; i < fallbacks.length; i++) {
+        if (this.src.indexOf(fallbacks[i]) === -1) {
+          this.src = fallbacks[i];
+          break;
+        }
+      }
+    };
+
+    function _selectRegionalNode(n) {
+      drawerName.textContent = n.name;
+      drawerBtn.textContent = _getGrammarMoveButtonLabel(n.name);
+      drawerBtn.style.display = 'inline-flex';
+      drawerBtn.onclick = function() {
+        if (typeof haptic === 'function') haptic('medium');
+        closeRegionalMapModal();
+        if (typeof _travelToBiome === 'function') {
+          _travelToBiome(n.id, n.name);
+        } else if (typeof doAction === 'function') {
+          doAction('cart_' + n.id);
+        } else if (typeof startCityJourney === 'function') {
+          startCityJourney(n.id, n.name);
+        } else if (typeof _cartTravelTo === 'function') {
+          _cartTravelTo(n.id);
+        } else {
+          alert('Partindo para explorar ' + n.name + '...');
+        }
+      };
+
+      var pins = pinsLayer.querySelectorAll('.cfm-pin');
+      pins.forEach(function(p) {
+        p.classList.toggle('active', p.getAttribute('data-id') === n.id);
+      });
+    }
+
+    pinsLayer.innerHTML = '';
+    var nodes = reg.nodes || [];
+    nodes.forEach(function(n) {
+      var pin = document.createElement('div');
+      pin.className = 'cfm-pin';
+      pin.setAttribute('data-id', n.id);
+      var leftPct = (n.x <= 1 ? (n.x * 100) : n.x);
+      var topPct = (n.y <= 1 ? (n.y * 100) : n.y);
+      pin.style.left = leftPct + '%';
+      pin.style.top = topPct + '%';
+
+      pin.innerHTML = ''
+        + '<div class="cfm-pin-reticle"></div>'
+        + '<div class="cfm-pin-badge">' + n.name + '</div>';
+
+      pin.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (typeof haptic === 'function') haptic('light');
+        _selectRegionalNode(n);
+      });
+
+      pinsLayer.appendChild(pin);
+    });
+
+    // Zero pré-seleção inicial (Regra Soberana 11)
+    drawerName.innerHTML = '<span class="cfm-prompt-hint">Toque em um local no mapa</span>';
+    drawerBtn.style.display = 'none';
+    drawerBtn.onclick = null;
+
+    if (initialNodeId && Array.isArray(nodes)) {
+      var foundNode = nodes.find(function(item){ return item.id === initialNodeId; });
+      if (foundNode) _selectRegionalNode(foundNode);
+    }
+
+    modal.style.display = 'flex';
+    document.body.classList.add('city-modal-open');
+  }
+
+  function closeRegionalMapModal() {
+    var modal = document.getElementById('regional-map-fullscreen-modal');
+    if (modal) {
+      modal.style.display = 'none';
+    }
+    document.body.classList.remove('city-modal-open');
+  }
+
+  if (typeof window !== 'undefined') {
+    window._openRegionalMapModal = openRegionalMapModal;
+    window._closeRegionalMapModal = closeRegionalMapModal;
+  }
+
   // === Export to global namespace ===
   window.CartShared = {
     INK_DARK: INK_DARK, INK_MED: INK_MED, INK_LIGHT: INK_LIGHT,
     INK_FAINT: INK_FAINT, PAPER_BG: PAPER_BG, PAPER_DARK: PAPER_DARK,
     SEA_INK: SEA_INK, SEA_FAINT: SEA_FAINT,
-    CART_BIOMES: CART_BIOMES, CART_PATHS: CART_PATHS, CART_PROVINCES: CART_PROVINCES, REGIONS_DATA: REGIONS_DATA, handleReturnToCity: handleReturnToCity, getLocationProvince: getLocationProvince, isProvinceDiscovered: isProvinceDiscovered, getDiscoveredProvinces: getDiscoveredProvinces,
+    CART_BIOMES: CART_BIOMES, CART_PATHS: CART_PATHS, CART_PROVINCES: CART_PROVINCES, REGIONS_DATA: REGIONS_DATA, handleReturnToCity: handleReturnToCity, openRegionalMapModal: openRegionalMapModal, closeRegionalMapModal: closeRegionalMapModal, getLocationProvince: getLocationProvince, isProvinceDiscovered: isProvinceDiscovered, getDiscoveredProvinces: getDiscoveredProvinces,
     _cartSeedRand: _cartSeedRand,
     _hatchArea: _hatchArea, _wavyLine: _wavyLine,
     _drawParchmentBase: _drawParchmentBase,

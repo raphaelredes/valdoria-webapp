@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-30T15:13:45Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-30T15:35:32Z - do not edit directly, edit source -->
 
 
 
@@ -95279,7 +95279,13 @@ function _closeCartLocationPopup(){
         var prevProv = window._cartCurrentPreviewProv;
         _closeCartLocationPopup();
         if (prevProv && prevProv.id) {
-          _xcartFocusProvince(prevProv.id);
+          if (typeof _openRegionalMapModal === 'function') {
+            _openRegionalMapModal(prevProv.id);
+          } else if (window.CartShared && typeof CartShared.openRegionalMapModal === 'function') {
+            CartShared.openRegionalMapModal(prevProv.id);
+          } else {
+            _xcartFocusProvince(prevProv.id);
+          }
         }
         return;
       }

@@ -73243,7 +73243,7 @@ function _cartRenderCarousel() {
 
   wrap.innerHTML = ''
     + '<div class="cart-expedition-card">'
-    + '  <div class="cart-expedition-art" style="background-image: url(\'' + rawSrc + '\');">'
+    + '  <div class="cart-expedition-art" onclick="_cartOpenRegionMap(\'' + currentKey + '\')" style="background-image: url(\'' + rawSrc + '\');cursor:pointer;">'
     + '    <div class="cart-expedition-gradient"></div>'
     + '    <div class="cart-expedition-badge">' + (reg.dangerText || ('Nível ' + (reg.days || 1))) + '</div>'
     + '  </div>'
@@ -73294,16 +73294,11 @@ window._cartCarouselGoTo = _cartCarouselGoTo;
 function _cartOpenRegionMap(provKey) {
   if (typeof haptic === 'function') haptic('medium');
   _cartCurrentProvKey = provKey;
-
-  var guideEl = document.getElementById('cart-continental-guide');
-  var regViewEl = document.getElementById('cart-regional-view');
-  var headerEl = document.querySelector('.cart-header');
-
-  if (guideEl) guideEl.style.display = 'none';
-  if (regViewEl) regViewEl.style.display = 'flex';
-  if (headerEl) headerEl.style.display = 'none';
-
-  _cartRenderRegionalView(provKey);
+  if (typeof _openRegionalMapModal === 'function') {
+    _openRegionalMapModal(provKey);
+  } else if (window.CartShared && typeof CartShared.openRegionalMapModal === 'function') {
+    CartShared.openRegionalMapModal(provKey);
+  }
 }
 window._cartOpenRegionMap = _cartOpenRegionMap;
 
