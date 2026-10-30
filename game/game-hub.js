@@ -359,10 +359,10 @@ var CITY_DISTRICTS_DATA = {
     fullName: 'Portões do Sul & Muralhas de Valdoria',
     img: '/shared/img/map/city_districts/city_south.webp',
     landmarks: [
-      { id: 'loc_gates', name: 'Portões de Valdoria', x: 50, y: 64, cb: 'explore_main', desc: 'Muralhas fortificadas, sentinelas de vigília e saída sul rumo às planícies.', btnText: 'Partir para Aventura' },
-      { id: 'loc_tavern', name: 'Taverna do Javali Bêbado', x: 25, y: 46, cb: 'tavern', desc: 'Canecas cheias de hidromel, lareira crepitante, descanso e boatos das estradas.', btnText: 'Entrar na Taverna' },
-      { id: 'loc_inn', name: 'Estalagem do Grifo', x: 75, y: 46, cb: 'inn', desc: 'Aposentos confortáveis, descanso reparador e adega subterrânea sob os cuidados de Martha.', btnText: 'Descansar na Estalagem' },
-      { id: 'loc_sewer', name: 'Grade do Esgoto', x: 16, y: 18, cb: 'passagens_open_sewer', desc: 'Duto pluvial sob a muralha sul. Acesso trancado por correntes, ligado a rumores de infestações subterrâneas.', btnText: 'Inspecionar Grade' }
+      { id: 'loc_gates', name: 'Portões de Valdoria', x: 50, y: 64, cb: 'explore_main', desc: 'Muralhas fortificadas, sentinelas de vigília e saída sul rumo às planícies.', btnText: 'Ir até os' },
+      { id: 'loc_tavern', name: 'Taverna do Javali Bêbado', x: 25, y: 46, cb: 'tavern', desc: 'Canecas cheias de hidromel, lareira crepitante, descanso e boatos das estradas.', btnText: 'Ir até a' },
+      { id: 'loc_inn', name: 'Estalagem do Grifo', x: 75, y: 46, cb: 'inn', desc: 'Aposentos confortáveis, descanso reparador e adega subterrânea sob os cuidados de Martha.', btnText: 'Ir até a' },
+      { id: 'loc_sewer', name: 'Grade do Esgoto', x: 16, y: 18, cb: 'passagens_open_sewer', desc: 'Duto pluvial sob a muralha sul. Acesso trancado por correntes, ligado a rumores de infestações subterrâneas.', btnText: 'Ir até a' }
     ]
   },
   'city_market': {
@@ -371,10 +371,10 @@ var CITY_DISTRICTS_DATA = {
     fullName: 'Praça Mercantil & Grande Mercado',
     img: '/shared/img/map/city_districts/city_market.webp',
     landmarks: [
-      { id: 'loc_square', name: 'Praça Central', x: 50, y: 52, cb: 'square', desc: 'O coração pulsante da capital: pregoeiros, bardos, jogos de dados e contratações.', btnText: 'Visitar a Praça' },
-      { id: 'loc_market', name: 'Mercado Central', x: 24, y: 72, cb: 'market', desc: 'Bancas de mercadores, ferreiros, boticários, armaduras e suprimentos de marcha.', btnText: 'Negociar no Mercado' },
-      { id: 'loc_bank', name: 'Banco & Cofre', x: 76, y: 35, cb: 'bank', desc: 'Cofres de pedra maciça, cambistas juramentados e guarda segura para suas riquezas.', btnText: 'Acessar o Banco' },
-      { id: 'loc_workshop', name: 'Oficina & Forja', x: 24, y: 32, cb: 'open_workshop', desc: 'Forjas incandescentes, conserto de lâminas, bigornas e aprimoramento de armas.', btnText: 'Trabalhar na Oficina' }
+      { id: 'loc_square', name: 'Praça Central', x: 50, y: 52, cb: 'square', desc: 'O coração pulsante da capital: pregoeiros, bardos, jogos de dados e contratações.', btnText: 'Ir até a' },
+      { id: 'loc_market', name: 'Mercado Central', x: 24, y: 72, cb: 'market', desc: 'Bancas de mercadores, ferreiros, boticários, armaduras e suprimentos de marcha.', btnText: 'Ir até o' },
+      { id: 'loc_bank', name: 'Banco & Cofre', x: 76, y: 35, cb: 'bank', desc: 'Cofres de pedra maciça, cambistas juramentados e guarda segura para suas riquezas.', btnText: 'Ir até o' },
+      { id: 'loc_workshop', name: 'Oficina & Forja', x: 24, y: 32, cb: 'open_workshop', desc: 'Forjas incandescentes, conserto de lâminas, bigornas e aprimoramento de armas.', btnText: 'Ir até a' }
     ]
   },
   'city_military': {
@@ -383,8 +383,8 @@ var CITY_DISTRICTS_DATA = {
     fullName: 'Arena do Coliseu & Quartel da Guilda',
     img: '/shared/img/map/city_districts/city_military.webp',
     landmarks: [
-      { id: 'loc_arena', name: 'Arena do Coliseu', x: 28, y: 50, cb: 'arena', desc: 'Fosso circular de combate com torneios sangrentos, aplausos e glória militar.', btnText: 'Entrar na Arena' },
-      { id: 'loc_guild', name: 'Guilda dos Mercenários', x: 72, y: 50, cb: 'guild', desc: 'Quartel de guerreiros experientes sob a comandante Tavira: recrutamento e gestão.', btnText: 'Entrar na Guilda' }
+      { id: 'loc_arena', name: 'Arena do Coliseu', x: 28, y: 50, cb: 'arena', desc: 'Fosso circular de combate com torneios sangrentos, aplausos e glória militar.', btnText: 'Ir até a' },
+      { id: 'loc_guild', name: 'Guilda dos Mercenários', x: 72, y: 50, cb: 'guild', desc: 'Quartel de guerreiros experientes sob a comandante Tavira: recrutamento e gestão.', btnText: 'Ir até a' }
     ]
   },
   'city_high': {
@@ -393,9 +393,9 @@ var CITY_DISTRICTS_DATA = {
     fullName: 'Acrópole Sagrada & Santuário da Luz',
     img: '/shared/img/map/city_districts/city_high.webp',
     landmarks: [
-      { id: 'loc_temple', name: 'Templo da Luz Sagrada', x: 30, y: 44, cb: 'temple', desc: 'Altar divino onde sacerdotes concedem bênçãos, curas milagrosas e ritos sagrados.', btnText: 'Rezar no Altar' },
-      { id: 'loc_runes', name: 'Escriba Rúnico', x: 76, y: 46, cb: 'rune_scribe', desc: 'Pergaminhos místicos, encantamentos arcanos, transmutação e runas de poder.', btnText: 'Consultar Escriba' },
-      { id: 'loc_festival', name: 'Festival da Capital', x: 50, y: 78, cb: 'festival', desc: 'Música festiva, torneios de pontaria, hidromel e comemorações nas ruas.', btnText: 'Celebrar o Festival' }
+      { id: 'loc_temple', name: 'Templo da Luz Sagrada', x: 30, y: 44, cb: 'temple', desc: 'Altar divino onde sacerdotes concedem bênçãos, curas milagrosas e ritos sagrados.', btnText: 'Ir até o' },
+      { id: 'loc_runes', name: 'Escriba Rúnico', x: 76, y: 46, cb: 'rune_scribe', desc: 'Pergaminhos místicos, encantamentos arcanos, transmutação e runas de poder.', btnText: 'Ir até o' },
+      { id: 'loc_festival', name: 'Festival da Capital', x: 50, y: 78, cb: 'festival', desc: 'Música festiva, torneios de pontaria, hidromel e comemorações nas ruas.', btnText: 'Ir até o' }
     ]
   }
 };
