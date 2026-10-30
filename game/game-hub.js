@@ -359,10 +359,10 @@ var CITY_DISTRICTS_DATA = {
     fullName: 'Portões do Sul & Muralhas de Valdoria',
     img: '/shared/img/map/city_districts/city_south.webp',
     landmarks: [
-      { id: 'loc_gates', name: 'Portões de Valdoria', x: 50, y: 82, cb: 'explore_main', desc: 'Muralhas fortificadas, sentinelas de vigília e saída sul rumo às planícies.', btnText: 'Partir para Aventura' },
+      { id: 'loc_gates', name: 'Portões de Valdoria', x: 50, y: 64, cb: 'explore_main', desc: 'Muralhas fortificadas, sentinelas de vigília e saída sul rumo às planícies.', btnText: 'Partir para Aventura' },
       { id: 'loc_tavern', name: 'Taverna do Javali Bêbado', x: 25, y: 46, cb: 'tavern', desc: 'Canecas cheias de hidromel, lareira crepitante, descanso e boatos das estradas.', btnText: 'Entrar na Taverna' },
       { id: 'loc_inn', name: 'Estalagem do Grifo', x: 75, y: 46, cb: 'inn', desc: 'Aposentos confortáveis, descanso reparador e adega subterrânea sob os cuidados de Martha.', btnText: 'Descansar na Estalagem' },
-      { id: 'loc_sewer', name: 'Grade do Esgoto', x: 50, y: 64, cb: 'passagens_open_sewer', desc: 'Duto pluvial sob a muralha sul. Acesso trancado por correntes, ligado a rumores de infestações subterrâneas.', btnText: 'Inspecionar Grade' }
+      { id: 'loc_sewer', name: 'Grade do Esgoto', x: 16, y: 18, cb: 'passagens_open_sewer', desc: 'Duto pluvial sob a muralha sul. Acesso trancado por correntes, ligado a rumores de infestações subterrâneas.', btnText: 'Inspecionar Grade' }
     ]
   },
   'city_market': {
@@ -402,7 +402,7 @@ var CITY_DISTRICTS_DATA = {
 
 var _currentCityDistrict = 'city_south';
 
-function _openCityMapModal(initialDistrictId) {
+function _openCityMapModal(initialDistrictId, initialLandmarkId) {
   var modal = document.getElementById('city-map-fullscreen-modal');
   if (!modal) {
     modal = document.createElement('div');
@@ -419,7 +419,6 @@ function _openCityMapModal(initialDistrictId) {
     + '  <div class="cfm-header-title"><span id="cfm-header-text">' + district.fullName + '</span></div>'
     + '  <button type="button" class="cfm-close-btn" onclick="_closeCityMapModal()">✕ Fechar</button>'
     + '</div>'
-    + '<div class="cfm-district-tabs" id="cfm-district-tabs"></div>'
     + '<div class="cfm-viewport">'
     + '  <div class="cfm-stage">'
     + '    <img class="cfm-img" id="cfm-city-img" src="' + district.img + '" alt="Mapa do Local">'
@@ -428,35 +427,16 @@ function _openCityMapModal(initialDistrictId) {
     + '</div>'
     + '<div class="cfm-drawer" id="cfm-drawer">'
     + '  <div class="cfm-drawer-info">'
-    + '    <div class="cfm-drawer-name" id="cfm-drawer-name"></div>'
-    + '    <div class="cfm-drawer-desc" id="cfm-drawer-desc"></div>'
+    + '    <div class="cfm-drawer-name" id="cfm-drawer-name"><span class="cfm-prompt-hint">Toque em um local no mapa</span></div>'
     + '  </div>'
-    + '  <button type="button" class="cfm-drawer-action-btn" id="cfm-drawer-act-btn"></button>'
+    + '  <button type="button" class="cfm-drawer-action-btn" id="cfm-drawer-act-btn" style="display:none;"></button>'
     + '</div>';
 
-  var tabsBar = modal.querySelector('#cfm-district-tabs');
   var cityImgEl = modal.querySelector('#cfm-city-img');
   var pinsLayer = modal.querySelector('#cfm-pins-layer');
   var drawerName = modal.querySelector('#cfm-drawer-name');
-  var drawerDesc = modal.querySelector('#cfm-drawer-desc');
   var drawerBtn = modal.querySelector('#cfm-drawer-act-btn');
   var headerText = modal.querySelector('#cfm-header-text');
-
-  var dOrder = ['city_south', 'city_market', 'city_military', 'city_high'];
-
-  dOrder.forEach(function(did) {
-    var dData = CITY_DISTRICTS_DATA[did];
-    var tab = document.createElement('button');
-    tab.type = 'button';
-    tab.className = 'cfm-dtab' + (did === _currentCityDistrict ? ' active' : '');
-    tab.setAttribute('data-did', did);
-    tab.textContent = dData.name;
-    tab.addEventListener('click', function() {
-      if (typeof haptic === 'function') haptic('light');
-      _switchCityDistrict(did);
-    });
-    tabsBar.appendChild(tab);
-  });
 
   function _wireImageFallbacks(imgEl, distId) {
     var attempts = 0;
@@ -476,12 +456,14 @@ function _openCityMapModal(initialDistrictId) {
 
   function _selectLandmark(lm) {
     drawerName.textContent = lm.name;
-    drawerDesc.textContent = lm.desc;
     drawerBtn.textContent = lm.btnText;
+    drawerBtn.style.display = 'inline-flex';
     drawerBtn.onclick = function() {
       if (typeof haptic === 'function') haptic('medium');
       if (lm.cb) {
-        _closeCityMapModal();
+        if (lm.cb !== 'passagens_open_sewer') {
+          _closeCityMapModal();
+        }
         if (typeof doAction === 'function') doAction(lm.cb);
       }
     };
@@ -497,9 +479,9 @@ function _openCityMapModal(initialDistrictId) {
     var lms = distData.landmarks || [];
     if (lms.length === 0) return;
 
-    lms.forEach(function(lm, idx) {
+    lms.forEach(function(lm) {
       var pin = document.createElement('div');
-      pin.className = 'cfm-pin' + (idx === 0 ? ' active' : '');
+      pin.className = 'cfm-pin';
       pin.setAttribute('data-id', lm.id);
       pin.style.left = lm.x + '%';
       pin.style.top = lm.y + '%';
@@ -517,26 +499,19 @@ function _openCityMapModal(initialDistrictId) {
       pinsLayer.appendChild(pin);
     });
 
-    _selectLandmark(lms[0]);
-  }
-
-  function _switchCityDistrict(newDistId) {
-    _currentCityDistrict = newDistId;
-    var dData = CITY_DISTRICTS_DATA[newDistId];
-    headerText.textContent = dData.fullName;
-
-    var tabs = tabsBar.querySelectorAll('.cfm-dtab');
-    tabs.forEach(function(t) {
-      t.classList.toggle('active', t.getAttribute('data-did') === newDistId);
-    });
-
-    cityImgEl.src = dData.img;
-    _wireImageFallbacks(cityImgEl, newDistId);
-    _renderDistrictPins(dData);
+    // Estado inicial: nenhum local selecionado por padrão
+    drawerName.innerHTML = '<span class="cfm-prompt-hint">Toque em um local no mapa</span>';
+    drawerBtn.style.display = 'none';
+    drawerBtn.onclick = null;
   }
 
   _wireImageFallbacks(cityImgEl, _currentCityDistrict);
   _renderDistrictPins(district);
+
+  if (initialLandmarkId && district && Array.isArray(district.landmarks)) {
+    var foundLm = district.landmarks.find(function(l){ return l.id === initialLandmarkId; });
+    if (foundLm) _selectLandmark(foundLm);
+  }
 
   modal.style.display = 'flex';
   document.body.classList.add('city-modal-open');

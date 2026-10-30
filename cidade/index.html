@@ -75700,7 +75700,17 @@ function _handleSewerResult(p, data){
       script: script,
       choices: [{ id: 'done', label: '↩ Voltar' }]
     },
-    { player: p, onChoice: function(){ try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); } }
+    {
+      player: p,
+      onChoice: function(){
+        try { window.vEncounter.close(); } catch(_){}
+        if (typeof refreshHud === 'function') refreshHud();
+        if (typeof _openCityMapModal === 'function') _openCityMapModal('city_south', 'loc_sewer');
+      },
+      onClose: function(){
+        if (typeof _openCityMapModal === 'function') _openCityMapModal('city_south', 'loc_sewer');
+      }
+    }
   );
 }
 
@@ -75725,6 +75735,7 @@ if (typeof ACTION_HANDLERS !== 'undefined') {
       });
     }
     if (hasSewerQuest) {
+      if (typeof _closeCityMapModal === 'function') _closeCityMapModal();
       _enterSewer(pl);
     } else {
       if (window.vEncounter && window.vEncounter.render) {
@@ -75745,7 +75756,17 @@ if (typeof ACTION_HANDLERS !== 'undefined') {
           ]
         }, {
           player: pl,
-          onChoice: function(){ try { window.vEncounter.close(); } catch(_){} }
+          onChoice: function(){
+            try { window.vEncounter.close(); } catch(_){}
+            if (typeof _openCityMapModal === 'function') {
+              _openCityMapModal('city_south', 'loc_sewer');
+            }
+          },
+          onClose: function(){
+            if (typeof _openCityMapModal === 'function') {
+              _openCityMapModal('city_south', 'loc_sewer');
+            }
+          }
         });
       } else {
         if (typeof vToast === 'function') vToast('Grades trancadas — requer missão de esgoto ativa.', 'warn');
@@ -85731,7 +85752,7 @@ var CITY_DISTRICTS_DATA = {
 
 var _currentCityDistrict = 'city_south';
 
-function _openCityMapModal(initialDistrictId) {
+function _openCityMapModal(initialDistrictId, initialLandmarkId) {
   var modal = document.getElementById('city-map-fullscreen-modal');
   if (!modal) {
     modal = document.createElement('div');
@@ -85790,7 +85811,9 @@ function _openCityMapModal(initialDistrictId) {
     drawerBtn.onclick = function() {
       if (typeof haptic === 'function') haptic('medium');
       if (lm.cb) {
-        _closeCityMapModal();
+        if (lm.cb !== 'passagens_open_sewer') {
+          _closeCityMapModal();
+        }
         if (typeof doAction === 'function') doAction(lm.cb);
       }
     };
@@ -85834,6 +85857,11 @@ function _openCityMapModal(initialDistrictId) {
 
   _wireImageFallbacks(cityImgEl, _currentCityDistrict);
   _renderDistrictPins(district);
+
+  if (initialLandmarkId && district && Array.isArray(district.landmarks)) {
+    var foundLm = district.landmarks.find(function(l){ return l.id === initialLandmarkId; });
+    if (foundLm) _selectLandmark(foundLm);
+  }
 
   modal.style.display = 'flex';
   document.body.classList.add('city-modal-open');
