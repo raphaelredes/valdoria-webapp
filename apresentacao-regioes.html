@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Apresentação: 10 Modelos de Design — Regiões de Valdoria</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Nunito:wght@400;600;700;800&family=MedievalSharp&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="valdoria-design.css">
+  <style>
+    /* RESET & CONTAINER GERAL DA APRESENTAÇÃO */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background: #0d0a08;
+      color: #d4c8b0;
+      font-family: 'Nunito', -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 8px 32px;
+      overflow-x: hidden;
+    }
+
+    /* TOPO DA APRESENTAÇÃO (HEADER GERAL DE CONTROLE) */
+    .showcase-header {
+      width: 100%;
+      max-width: 880px;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .showcase-title {
+      font-family: 'Cinzel', serif;
+      font-size: 19px;
+      font-weight: 800;
+      color: #f3d17a;
+      text-shadow: 0 0 10px rgba(243, 209, 122, 0.4);
+      margin-bottom: 4px;
+    }
+    .showcase-subtitle {
+      font-size: 12.5px;
+      color: #a09484;
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+    .showcase-badge-rule {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(196, 149, 58, 0.15);
+      border: 1px solid rgba(196, 149, 58, 0.4);
+      color: #e8dcc8;
+      padding: 3px 10px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    /* BARRA DE SELEÇÃO DOS 10 MODELOS */
+    .model-selector-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      max-width: 860px;
+      margin-bottom: 12px;
+    }
+    .model-tab-btn {
+      background: #1c1510;
+      border: 1px solid #4a3828;
+      color: #b0a490;
+      font-family: 'Cinzel', serif;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .model-tab-btn:hover {
+      background: #2a2016;
+      border-color: #c4953a;
+      color: #f3d17a;
+    }
+    .model-tab-btn.active {
+      background: linear-gradient(180deg, #3d2c18 0%, #251b0f 100%);
+      border-color: #f3d17a;
+      color: #fff2c4;
+      box-shadow: 0 0 10px rgba(196, 149, 58, 0.45);
+    }
+
+    /* CARD DE EXPLICAÇÃO DO MODELO ATIVO */
+    .model-info-banner {
+      width: 100%;
+      max-width: 480px;
+      background: rgba(28, 22, 17, 0.95);
+      border: 1px solid rgba(196, 149, 58, 0.35);
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      text-align: left;
+    }
+    .model-info-title {
+      font-family: 'Cinzel', serif;
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #f3d17a;
+      margin-bottom: 3px;
+    }
+    .model-info-desc {
+      font-size: 12px;
+      color: #c4b8a4;
+      line-height: 1.45;
+    }
+
+    /* MOLDURA DO SIMULADOR TELEGRAM DESKTOP */
+    .tg-desktop-frame {
+      width: 100%;
+      max-width: 420px;
+      height: 680px;
+      background: #130f0c;
+      border: 2px solid #5a4430;
+      border-radius: 12px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85), 0 0 16px rgba(196, 149, 58, 0.15);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* TOPO DO TELEGRAM WEBAPP */
+    .tg-top-bar {
+      height: 38px;
+      background: #1f1812;
+      border-bottom: 1px solid #3d2f22;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .tg-top-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #e8dcc8;
+    }
+    .tg-top-left span.tg-back {
+      font-size: 16px;
+      color: #c4953a;
+      cursor: pointer;
+    }
+    .tg-top-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #8a7a68;
+      font-size: 15px;
+    }
+
+    /* CORPO DA VIEWPORT DO JOGO DENTRO DO SIMULADOR */
+    .app-viewport {
+      flex: 1;
+      width: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: relative;
+      background: #18130e;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* SCROLLBAR MODERNA CUSTOMIZADA */
+    .app-viewport::-webkit-scrollbar {
+      width: 4px;
+    }
+    .app-viewport::-webkit-scrollbar-thumb {
+      background: rgba(196, 149, 58, 0.35);
+      border-radius: 4px;
+    }
+
+    /* ELEMENTOS COMUNS DE JOGO */
+    .game-screen-header {
+      padding: 8px 12px 6px;
+      text-align: center;
+      border-bottom: 1px solid rgba(196, 149, 58, 0.2);
+      background: linear-gradient(180deg, #241c15 0%, #18130e 100%);
+      flex-shrink: 0;
+    }
+    .game-screen-header h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 15px;
+      font-weight: 800;
+      color: #f3d17a;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .game-screen-header p {
+      font-size: 11px;
+      color: #a09484;
+      margin-top: 1px;
+    }
+
+    /* BOTÃO DE RETORNO À CIDADE (RODAPÉ SOBERANO) */
+    .game-bottom-dock {
+      padding: 8px 12px;
+      background: #19140f;
+      border-top: 1px solid #3d2f22;
+      display: flex;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .btn-return-city {
+      width: 100%;
+      max-width: 280px;
+      background: linear-gradient(180deg, #3d2d1b 0%, #261b0f 100%);
+      border: 1.5px solid #c4953a;
+      color: #f3d17a;
+      font-family: 'Cinzel', serif;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+      transition: all 0.15s ease;
+    }
+    .btn-return-city:active {
+      transform: scale(0.98);
+      filter: brightness(1.2);
+    }
+
+    /* MODAL POPUP DE FEEDBACK DO TOQUE */
+    .touch-feedback-toast {
+      position: absolute;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(20, 16, 12, 0.95);
+      border: 1.5px solid #c4953a;
+      color: #f3d17a;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.8);
+      z-index: 1000;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .touch-feedback-toast.show {
+      opacity: 1;
+    }
+
+    /* ======================================================== */
+    /* MODELO 1: CARDS ILUSTRADOS HORIZONTAIS (ROADWARDEN STYLE) */
+    /* ======================================================== */
+    .m1-list-wrap {
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .m1-card {
+      position: relative;
+      height: 66px;
+      border-radius: 8px;
+      border: 1.5px solid #4a3828;
+      overflow: hidden;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      background-size: cover;
+      background-position: right center;
+      transition: border-color 0.18s ease, transform 0.12s ease;
+    }
+    .m1-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(19, 14, 10, 0.96) 0%, rgba(19, 14, 10, 0.88) 55%, rgba(19, 14, 10, 0.3) 100%);
+      z-index: 1;
+    }
+    .m1-card:active {
+      border-color: #f3d17a;
+      transform: scale(0.99);
+    }
+    .m1-card-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      max-width: 70%;
+    }
+    .m1-card-title {
+      font-family: 'Cinzel', serif;
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #f3d17a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .m1-card-sub {
+      font-size: 11px;
+      color: #a09484;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .m1-card-right {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+    .m1-tier-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(196, 149, 58, 0.2);
+      border: 1px solid rgba(196, 149, 58, 0.4);
+      color: #dbb668;
+    }
+    .m1-tier-badge.safe {
+      background: rgba(76, 175, 80, 0.2);
+      border-color: rgba(76, 175, 80, 0.45);
+      color: #81c784;
+    }
+    .m1-tier-badge.danger {
+      background: rgba(231, 76, 60, 0.25);
+      border-color: rgba(231, 76, 60, 0.5);
+      color: #e57373;
+    }
+    .m1-action-cue {
+      font-size: 11px;
+      color: #e8dcc8;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    /* ======================================================== */
+    /* MODELO 2: ATLAS CONTINENTAL INTERATIVO (MAPA + GAVETA)   */
+    /* ======================================================== */
+    .m2-atlas-wrap {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .m2-map-hero {
+      flex: 1;
+      position: relative;
+      background: #0d0a08 url('shared/img/map/provinces/plains_v2.webp') center/cover no-repeat;
+      overflow: hidden;
+      border-bottom: 2px solid #5a4430;
+    }
+    .m2-map-pin {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(20, 16, 12, 0.85);
+      border: 2px solid #c4953a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0,0,0,0.8), 0 0 8px rgba(196,149,58,0.5);
+      transition: all 0.15s ease;
+    }
+    .m2-map-pin.active {
+      border-color: #fff2c4;
+      background: #c4953a;
+      transform: scale(1.15);
+      box-shadow: 0 0 14px rgba(255, 215, 0, 0.9);
+    }
+    .m2-drawer {
+      height: 190px;
+      background: #19140f;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .m2-drawer-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+    .m2-reg-name {
+      font-family: 'Cinzel', serif;
+      font-size: 15px;
+      font-weight: 800;
+      color: #f3d17a;
+    }
+    .m2-reg-sub {
+      font-size: 11.5px;
+      color: #a09484;
+      margin-top: 2px;
+    }
+    .m2-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background: #130f0c;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #33271d;
+    }
+    .m2-meta-item {
+      font-size: 11px;
+      color: #b0a490;
+    }
+    .m2-meta-item strong {
+      color: #e8dcc8;
+    }
+    .m2-btn-enter {
+      width: 100%;
+      background: linear-gradient(180deg, #8a6728 0%, #5a4014 100%);
+      border: 1.5px solid #f3d17a;
+      color: #fff2c4;
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      font-weight: 800;
+      padding: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    /* ======================================================== */
+    /* MODELO 3: CARROSSEL DE EXPEDIÇÃO (CARDS VERTICAIS DENSOS) */
+    /* ======================================================== */
+    .m3-carousel-wrap {
+      flex: 1;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .m3-card-main {
+      width: 100%;
+      height: 440px;
+      background: #1c1510;
+      border: 2px solid #c4953a;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+    }
+    .m3-art-box {
+      height: 220px;
+      width: 100%;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      border-bottom: 1.5px solid #4a3828;
+    }
+    .m3-art-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 50%, rgba(28, 21, 16, 0.95) 100%);
+    }
+    .m3-tag-float {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(20, 16, 12, 0.88);
+      border: 1px solid #c4953a;
+      color: #f3d17a;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+    .m3-card-body {
+      padding: 10px 14px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .m3-title {
+      font-family: 'Cinzel', serif;
+      font-size: 16px;
+      font-weight: 800;
+      color: #f3d17a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .m3-narrative {
+      font-size: 12px;
+      color: #c4b8a4;
+      line-height: 1.45;
+      margin-top: 4px;
+    }
+    .m3-specs-row {
+      display: flex;
+      gap: 12px;
+      font-size: 11.5px;
+      color: #a09484;
+      border-top: 1px solid #33271d;
+      padding-top: 6px;
+    }
+    .m3-specs-row span strong {
+      color: #e8dcc8;
+    }
+    .m3-nav-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 4px 10px;
+    }
+    .m3-nav-btn {
+      background: #241c15;
+      border: 1px solid #4a3828;
+      color: #f3d17a;
+      font-size: 13px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    /* ======================================================== */
+    /* MODELO 4: PAINEL HERÁLDICO MEDIEVAL (BRASÕES DOS ERMOS)  */
+    /* ======================================================== */
+    .m4-heraldic-grid {
+      padding: 10px 8px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      flex: 1;
+    }
+    .m4-shield-card {
+      background: radial-gradient(circle at center, #271f18 0%, #17120e 100%);
+      border: 1.5px solid #4a3828;
+      border-radius: 8px;
+      padding: 10px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 6px;
+      cursor: pointer;
+      position: relative;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.6);
+      transition: all 0.15s ease;
+    }
+    .m4-shield-card:active {
+      border-color: #f3d17a;
+      box-shadow: 0 0 10px rgba(196,149,58,0.4);
+    }
+    .m4-shield-crest {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid #8a6728;
+      background: #110d0a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.7);
+    }
+    .m4-shield-name {
+      font-family: 'Cinzel', serif;
+      font-size: 12.5px;
+      font-weight: 800;
+      color: #f3d17a;
+    }
+    .m4-shield-tier {
+      font-size: 11px;
+      color: #a09484;
+    }
+
+    /* ======================================================== */
+    /* MODELO 5: DIÁRIO DE BORDO DO CARTÓGRAFO CORVUS          */
+    /* ======================================================== */
+    .m5-parchment-wrap {
+      flex: 1;
+      margin: 8px 10px;
+      background: #2a2015;
+      border: 2px solid #5a4430;
+      border-radius: 6px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.7);
+      position: relative;
+    }
+    .m5-journal-header {
+      border-bottom: 1px dashed #7a5c38;
+      padding-bottom: 6px;
+      text-align: center;
+    }
+    .m5-journal-title {
+      font-family: 'MedievalSharp', cursive, serif;
+      font-size: 15px;
+      color: #e5c178;
+    }
+    .m5-journal-sub {
+      font-size: 11px;
+      color: #a8947a;
+    }
+    .m5-route-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 4px;
+      border-bottom: 1px solid rgba(122, 92, 56, 0.25);
+      cursor: pointer;
+    }
+    .m5-route-row:active {
+      background: rgba(196, 149, 58, 0.12);
+    }
+    .m5-route-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .m5-route-num {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      color: #c4953a;
+      width: 14px;
+    }
+    .m5-route-name {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #e8dcc8;
+    }
+    .m5-route-meta {
+      font-size: 11px;
+      color: #baa288;
+    }
+
+    /* ======================================================== */
+    /* MODELO 6: MOSAICO VISUAL DINÂMICO (GRID 2x4 DE MINIATURAS)*/
+    /* ======================================================== */
+    .m6-mosaic-grid {
+      flex: 1;
+      padding: 6px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: repeat(4, 1fr);
+      gap: 6px;
+    }
+    .m6-mosaic-cell {
+      position: relative;
+      border: 1.5px solid #4a3828;
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 6px;
+      background-size: cover;
+      background-position: center;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.85);
+      transition: all 0.15s ease;
+    }
+    .m6-mosaic-cell::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(15,12,9,0.2) 0%, rgba(15,12,9,0.85) 100%);
+    }
+    .m6-mosaic-cell:active {
+      border-color: #f3d17a;
+      transform: scale(0.98);
+    }
+    .m6-cell-info {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .m6-cell-name {
+      font-family: 'Cinzel', serif;
+      font-size: 12px;
+      font-weight: 800;
+      color: #f3d17a;
+      text-shadow: 0 1px 3px #000;
+    }
+    .m6-cell-tag {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(20, 16, 12, 0.85);
+      border: 1px solid rgba(196, 149, 58, 0.5);
+      color: #dbb668;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    /* ======================================================== */
+    /* MODELO 7: HUB CONCÊNTRICO POR CÍRCULOS DE PERIGO         */
+    /* ======================================================== */
+    .m7-tier-wrap {
+      flex: 1;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .m7-tier-group {
+      background: #1a140f;
+      border: 1px solid #3d2f22;
+      border-radius: 8px;
+      padding: 8px;
+    }
+    .m7-group-title {
+      font-family: 'Cinzel', serif;
+      font-size: 11.5px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .m7-group-title.safe { color: #81c784; }
+    .m7-group-title.mid { color: #f3d17a; }
+    .m7-group-title.hard { color: #e57373; }
+    .m7-items-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+    }
+    .m7-btn-item {
+      background: #241c15;
+      border: 1px solid #4a3828;
+      border-radius: 5px;
+      padding: 6px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #d4c8b0;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .m7-btn-item:active {
+      border-color: #c4953a;
+      background: #2f241a;
+    }
+
+    /* ======================================================== */
+    /* MODELO 8: SPLIT-SCREEN VITRINE (SELETOR + VITRINE GRANDE)*/
+    /* ======================================================== */
+    .m8-split-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 6px 8px;
+      gap: 6px;
+    }
+    .m8-strip-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      background: #16110d;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #33271d;
+    }
+    .m8-pill-btn {
+      flex: 1 1 calc(25% - 4px);
+      background: #241c15;
+      border: 1px solid #4a3828;
+      color: #b0a490;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 2px;
+      border-radius: 4px;
+      text-align: center;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .m8-pill-btn.active {
+      background: #c4953a;
+      border-color: #f3d17a;
+      color: #110d0a;
+      font-weight: 800;
+    }
+    .m8-showcase-box {
+      flex: 1;
+      background: #1d1611;
+      border: 1.5px solid #5a4430;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .m8-showcase-art {
+      height: 180px;
+      width: 100%;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+    .m8-showcase-info {
+      padding: 10px 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .m8-showcase-title {
+      font-family: 'Cinzel', serif;
+      font-size: 15px;
+      font-weight: 800;
+      color: #f3d17a;
+    }
+    .m8-showcase-desc {
+      font-size: 12px;
+      color: #c4b8a4;
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+    .m8-btn-enter {
+      width: 100%;
+      background: linear-gradient(180deg, #7a5820 0%, #4a3410 100%);
+      border: 1.5px solid #c4953a;
+      color: #fff2c4;
+      font-family: 'Cinzel', serif;
+      font-size: 12.5px;
+      font-weight: 800;
+      padding: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* ======================================================== */
+    /* MODELO 9: MESA DE NAVEGAÇÃO DO ANDARILHO (ROSA DOS VENTOS)*/
+    /* ======================================================== */
+    .m9-compass-table {
+      flex: 1;
+      position: relative;
+      background: radial-gradient(circle at center, #231b14 0%, #110d0a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+    }
+    .m9-compass-rose {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      border: 2px dashed rgba(196, 149, 58, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      color: #c4953a;
+      position: relative;
+    }
+    .m9-compass-pin {
+      position: absolute;
+      background: #1c1510;
+      border: 1.5px solid #c4953a;
+      border-radius: 6px;
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #f3d17a;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+      white-space: nowrap;
+    }
+    .m9-pin-north { top: 12px; left: 50%; transform: translateX(-50%); }
+    .m9-pin-south { bottom: 12px; left: 50%; transform: translateX(-50%); }
+    .m9-pin-west  { left: 10px; top: 50%; transform: translateY(-50%); }
+    .m9-pin-east  { right: 10px; top: 50%; transform: translateY(-50%); }
+    .m9-pin-nw    { top: 56px; left: 16px; }
+    .m9-pin-ne    { top: 56px; right: 16px; }
+    .m9-pin-sw    { bottom: 56px; left: 16px; }
+    .m9-pin-se    { bottom: 56px; right: 16px; }
+
+    /* ======================================================== */
+    /* MODELO 10: LISTA TÁTICA ROADWARDEN MINIMALISTA           */
+    /* ======================================================== */
+    .m10-minimal-list {
+      flex: 1;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .m10-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(196, 149, 58, 0.2);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.15s ease;
+    }
+    .m10-row:active {
+      background: rgba(196, 149, 58, 0.15);
+    }
+    .m10-row-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .m10-row-ico {
+      font-size: 16px;
+    }
+    .m10-row-name {
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #f3d17a;
+    }
+    .m10-row-meta {
+      font-size: 11px;
+      color: #a09484;
+    }
+    .m10-row-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .m10-tag-pill {
+      font-size: 11px;
+      font-weight: 700;
+      color: #dbb668;
+      background: rgba(196, 149, 58, 0.15);
+      border: 1px solid rgba(196, 149, 58, 0.35);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .m10-arrow {
+      color: #c4953a;
+      font-size: 13px;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- CABEÇALHO GERAL DE APRESENTAÇÃO -->
+  <header class="showcase-header">
+    <h1 class="showcase-title">Apresentação: 10 Modelos de Design para Regiões de Valdoria</h1>
+    <p class="showcase-subtitle">
+      Alternativas completas para eliminar o vazio escuro e valorizar a tela no formato compacto do Telegram Desktop.
+    </p>
+    <div class="showcase-badge-rule">
+      🛡️ Padrão Telegram Desktop · Toque/Clique sem Hover · Fontes ≥ 11px · PT-BR Moderno
+    </div>
+
+    <!-- SELETOR DOS 10 MODELOS -->
+    <nav class="model-selector-bar" id="model-nav">
+      <button type="button" class="model-tab-btn active" onclick="switchModel(1)">1. Cards Roadwarden</button>
+      <button type="button" class="model-tab-btn" onclick="switchModel(2)">2. Atlas Interativo</button>
+      <button type="button" class="model-tab-btn" onclick="switchModel(3)">3. Carrossel de Expedição</button>
+      <button type="button" class="model-tab-btn" onclick="switchModel(4)">4. Painel Heráldico</button>
+      <button type="button" class="model-tab-btn" onclick="switchModel(5)">5. Diário de Bordo</button>
+      <button type="button" class="model-tab-btn" onclick="switchModel(6)">6. Mosaico Visual</button>
+      <button type="button" class="model-tab-btn" onclick="switchModel(7)">7. Círculos de Perigo</button>
+      <button type="button" class="model-tab-btn" onclick="switchModel(8)">8. Split-Screen Vitrine</button>
+      <button type="button" class="model-tab-btn" onclick="switchModel(9)">9. Mesa do Andarilho</button>
+      <button type="button" class="model-tab-btn" onclick="switchModel(10)">10. Lista Tática Minimalista</button>
+    </nav>
+  </header>
+
+  <!-- BANNER EXPLICATIVO DO MODELO ATIVO -->
+  <div class="model-info-banner" id="model-info-banner">
+    <div class="model-info-title" id="info-title">Modelo 1: Cards Ilustrados Horizontais (Estilo Roadwarden)</div>
+    <div class="model-info-desc" id="info-desc">
+      Cards horizontais preenchidos com a arte oficial de cada região em segundo plano, vinheta escura lateral, tipografia Cinzel e badges de nível de perigo. Elimina 100% do espaço vazio e cria imersão imediata.
+    </div>
+  </div>
+
+  <!-- FRAME DO TELEGRAM DESKTOP SIMULADO -->
+  <main class="tg-desktop-frame" aria-label="Simulador de Tela do Telegram Desktop">
+    <!-- BARRA SUPERIOR DO TELEGRAM -->
+    <div class="tg-top-bar">
+      <div class="tg-top-left">
+        <span class="tg-back" onclick="triggerToast('Retornando ao menu...')">←</span>
+        <span>DEV Lendas de Valdoria</span>
+      </div>
+      <div class="tg-top-right">
+        <span>⋮</span>
+        <span>✕</span>
+      </div>
+    </div>
+
+    <!-- CORPO DO WEBAPP (ÁREA ÚTIL) -->
+    <div class="app-viewport" id="app-viewport">
+      <!-- O CONTEÚDO DOS MODELOS É INJETADO AQUI DINAMICAMENTE -->
+    </div>
+
+    <!-- RODAPÉ SOBERANO: RETORNAR À CIDADE -->
+    <div class="game-bottom-dock">
+      <button type="button" class="btn-return-city" onclick="triggerToast('Retornando à Cidade de Valdoria')">
+        <span>🏛️</span> Retornar à Cidade
+      </button>
+    </div>
+
+    <!-- TOAST DE FEEDBACK -->
+    <div class="touch-feedback-toast" id="touch-toast">Região selecionada!</div>
+  </main>
+
+  <script>
+    // DADOS DAS REGIÕES CANÔNICAS DE VALDORIA
+    const REGIONS_DATA = [
+      {
+        id: 'plains',
+        name: 'Planícies Centrais',
+        icon: '🌾',
+        level: 'Nível 1',
+        danger: 'Baixo (ND 1.0)',
+        tierType: 'safe',
+        img: 'shared/img/map/provinces/plains_v2.webp',
+        desc: 'Campos abertos e rotas de fazendas. O refúgio mais próximo da capital.',
+        march: '1 dia de marcha',
+        food: '2 rações'
+      },
+      {
+        id: 'forest',
+        name: 'Floresta Sombria',
+        icon: '🌲',
+        level: 'Nível 2',
+        danger: 'Médio (ND 2.0)',
+        tierType: 'safe',
+        img: 'shared/img/map/provinces/forest.webp',
+        desc: 'Matas densas com trilhas de caçadores e ruínas esquecidas.',
+        march: '2 dias de marcha',
+        food: '3 rações'
+      },
+      {
+        id: 'swamp',
+        name: 'Pântano dos Murmúrios',
+        icon: '🐍',
+        level: 'Nível 3',
+        danger: 'Ameaçador (ND 3.0)',
+        tierType: 'mid',
+        img: 'shared/img/map/provinces/swamp.webp',
+        desc: 'Charcos traiçoeiros, brumas venenosas e águas profundas.',
+        march: '3 dias de marcha',
+        food: '4 rações'
+      },
+      {
+        id: 'mountain',
+        name: 'Montanhas da Serpente',
+        icon: '⛰️',
+        level: 'Nível 4',
+        danger: 'Perigoso (ND 4.0)',
+        tierType: 'mid',
+        img: 'shared/img/map/provinces/mountain.webp',
+        desc: 'Desfiladeiros rochosos com vento gélido e emboscadas nas alturas.',
+        march: '3 dias de marcha',
+        food: '4 rações'
+      },
+      {
+        id: 'coast',
+        name: 'Costa dos Naufrágios',
+        icon: '🌊',
+        level: 'Nível 4',
+        danger: 'Perigoso (ND 4.0)',
+        tierType: 'mid',
+        img: 'shared/img/map/provinces/coast.webp',
+        desc: 'Penhascos marítimos e enseadas batidas por ondas violentas.',
+        march: '4 dias de marcha',
+        food: '5 rações'
+      },
+      {
+        id: 'desert',
+        name: 'Deserto da Calcinha',
+        icon: '🌵',
+        level: 'Nível 4',
+        danger: 'Perigoso (ND 4.0)',
+        tierType: 'mid',
+        img: 'shared/img/map/provinces/desert.webp',
+        desc: 'Dunas escaldantes durante o dia e noites de frio implacável.',
+        march: '4 dias de marcha',
+        food: '6 rações'
+      },
+      {
+        id: 'snow',
+        name: 'Ermo Gelado do Norte',
+        icon: '❄️',
+        level: 'Nível 5',
+        danger: 'Crítico (ND 5.0)',
+        tierType: 'danger',
+        img: 'shared/img/map/provinces/snow.webp',
+        desc: 'Geleiras ancestrais e nevascas que desafiam a própria vida.',
+        march: '5 dias de marcha',
+        food: '7 rações'
+      },
+      {
+        id: 'volcanic',
+        name: 'Ermo Vulcânico',
+        icon: '🌋',
+        level: 'Nível 8',
+        danger: 'Extremo (ND 8.0)',
+        tierType: 'danger',
+        img: 'shared/img/map/provinces/volcanic.webp',
+        desc: 'Fissuras de lava e fumaça de enxofre nas profundezas da terra.',
+        march: '7 dias de marcha',
+        food: '10 rações'
+      }
+    ];
+
+    let currentModel = 1;
+    let selectedM2Index = 0;
+    let selectedM3Index = 0;
+    let selectedM8Index = 0;
+
+    // INFORMAÇÕES DE CADA MODELO
+    const MODEL_DETAILS = {
+      1: {
+        title: 'Modelo 1: Cards Ilustrados Horizontais (Estilo Roadwarden)',
+        desc: 'Cards horizontais preenchidos com a arte oficial de cada região em segundo plano, vinheta escura lateral, tipografia Cinzel e badges de nível de perigo. Elimina 100% do espaço vazio e cria imersão imediata.'
+      },
+      2: {
+        title: 'Modelo 2: Atlas Continental Interativo (Mapa Superior + Gaveta Tática)',
+        desc: 'O topo exibe o mapa visual com pins interativos. O rodapé tem uma gaveta tática com informações da região tocada e botão direto de exploração. Prioridade total para a visão de mapa.'
+      },
+      3: {
+        title: 'Modelo 3: Carrossel Tático de Expedição (Cards Verticais Densos)',
+        desc: 'Cartas verticais detalhadas com grande destaque visual para a arte, clima, suprimentos necessários e narrativa evocativa de viagem. Navegação por abas ou botões de avanço rápido.'
+      },
+      4: {
+        title: 'Modelo 4: Painel Heráldico Medieval (Brasões dos Ermos)',
+        desc: 'Substitui botões pretos simples por estandartes e brasões metálicos em latão e ouro, com acabamento de pergaminho antigo. Mantém a grade 2 colunas, mas com alto padrão estético de fantasia sombria.'
+      },
+      5: {
+        title: 'Modelo 5: Diário de Bordo do Cartógrafo Corvus (Pergaminho de Guilda)',
+        desc: 'Apresentação em folha de pergaminho envelhecida, como o caderno de notas oficial da Guilda dos Mercenários. Mostra distâncias em dias de marcha, consumo de provisões e nível de segurança.'
+      },
+      6: {
+        title: 'Modelo 6: Mosaico Visual Dinâmico (Grid 2x4 com Miniaturas Vivas)',
+        desc: 'Mantém o acesso imediato em 8 botões sem necessidade de rolagem, mas expande verticalmente cada célula com a imagem real do bioma, moldura dourada e vinheta inferior. Zero espaço vazio!'
+      },
+      7: {
+        title: 'Modelo 7: Hub Concêntrico por Círculos de Perigo (Anéis de Distância)',
+        desc: 'Agrupa as regiões em 3 zonas intuitivas: Arredores Seguros (Nível 1–2), Ermos Intermediários (Nível 3–4) e Terras Extremas (Nível 5–8). Orienta o aventureiro sobre onde é seguro explorar.'
+      },
+      8: {
+        title: 'Modelo 8: Split-Screen Vitrine (Seletor Superior + Vitrine Imersiva)',
+        desc: 'Barra compacta de seleção rápida no topo e painel nobre com ilustração em tamanho generoso, descrição sensorial e botão de marcha na metade inferior.'
+      },
+      9: {
+        title: 'Modelo 9: Mesa de Navegação do Andarilho (Rosa dos Ventos)',
+        desc: 'Mesa de madeira com Rosa dos Ventos central. As regiões são distribuídas pelos pontos cardeais (Norte para o Ermo Gelado, Sul para a Costa, Leste para o Pântano, etc.), dando senso de geografia real.'
+      },
+      10: {
+        title: 'Modelo 10: Lista Tática Roadwarden Minimalista (Alta Densidade)',
+        desc: 'Linhas finas e elegantes com separadores dourados sutis, ícones nobres, indicador de dias de marcha e botão de entrada rápido. Extremamente leve e veloz no Telegram Desktop.'
+      }
+    };
+
+    function triggerToast(msg) {
+      const t = document.getElementById('touch-toast');
+      t.innerText = msg;
+      t.classList.add('show');
+      setTimeout(() => {
+        t.classList.remove('show');
+      }, 1600);
+    }
+
+    function switchModel(modelNum) {
+      currentModel = modelNum;
+
+      // Atualiza botões
+      document.querySelectorAll('.model-tab-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', idx + 1 === modelNum);
+      });
+
+      // Atualiza banner explicativo
+      const info = MODEL_DETAILS[modelNum];
+      document.getElementById('info-title').innerText = info.title;
+      document.getElementById('info-desc').innerText = info.desc;
+
+      // Renderiza viewport
+      renderModelContent();
+    }
+
+    function renderModelContent() {
+      const vp = document.getElementById('app-viewport');
+      vp.innerHTML = '';
+
+      switch (currentModel) {
+        case 1:
+          renderModel1(vp);
+          break;
+        case 2:
+          renderModel2(vp);
+          break;
+        case 3:
+          renderModel3(vp);
+          break;
+        case 4:
+          renderModel4(vp);
+          break;
+        case 5:
+          renderModel5(vp);
+          break;
+        case 6:
+          renderModel6(vp);
+          break;
+        case 7:
+          renderModel7(vp);
+          break;
+        case 8:
+          renderModel8(vp);
+          break;
+        case 9:
+          renderModel9(vp);
+          break;
+        case 10:
+          renderModel10(vp);
+          break;
+      }
+    }
+
+    // ==========================================
+    // RENDERIZADORES INDIVIDUAIS DOS 10 MODELOS
+    // ==========================================
+
+    // MODELO 1: Cards Ilustrados Horizontais
+    function renderModel1(container) {
+      container.innerHTML = `
+        <div class="game-screen-header">
+          <h2>🧭 Regiões de Valdoria</h2>
+          <p>Selecione um destino para abrir o mapa regional</p>
+        </div>
+        <div class="m1-list-wrap">
+          ${REGIONS_DATA.map(r => `
+            <div class="m1-card" style="background-image: url('${r.img}');" onclick="triggerToast('Abrindo mapa: ${r.name}')">
+              <div class="m1-card-content">
+                <div class="m1-card-title">${r.icon} ${r.name}</div>
+                <div class="m1-card-sub">${r.desc}</div>
+              </div>
+              <div class="m1-card-right">
+                <span class="m1-tier-badge ${r.tierType}">${r.level}</span>
+                <span class="m1-action-cue">Ver Mapa ➔</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // MODELO 2: Atlas Continental Interativo
+    function renderModel2(container) {
+      const reg = REGIONS_DATA[selectedM2Index];
+      const pinPositions = [
+        { top: '65%', left: '46%' }, // plains
+        { top: '35%', left: '38%' }, // forest
+        { top: '55%', left: '78%' }, // swamp
+        { top: '22%', left: '60%' }, // mountain
+        { top: '80%', left: '25%' }, // coast
+        { top: '80%', left: '72%' }, // desert
+        { top: '12%', left: '30%' }, // snow
+        { top: '40%', left: '88%' }  // volcanic
+      ];
+
+      container.innerHTML = `
+        <div class="game-screen-header">
+          <h2>🧭 Atlas de Valdoria</h2>
+          <p>Toque em um ponto no mapa para inspecionar a região</p>
+        </div>
+        <div class="m2-atlas-wrap">
+          <div class="m2-map-hero" style="background-image: url('shared/img/map/provinces/plains_v2.webp');">
+            ${REGIONS_DATA.map((r, idx) => `
+              <div class="m2-map-pin ${idx === selectedM2Index ? 'active' : ''}" 
+                   style="top: ${pinPositions[idx].top}; left: ${pinPositions[idx].left};"
+                   onclick="selectM2(${idx})">
+                ${r.icon}
+              </div>
+            `).join('')}
+          </div>
+          <div class="m2-drawer">
+            <div class="m2-drawer-top">
+              <div>
+                <div class="m2-reg-name">${reg.icon} ${reg.name}</div>
+                <div class="m2-reg-sub">${reg.desc}</div>
+              </div>
+              <span class="m1-tier-badge ${reg.tierType}">${reg.level}</span>
+            </div>
+            <div class="m2-meta-grid">
+              <div class="m2-meta-item">Distância: <strong>${reg.march}</strong></div>
+              <div class="m2-meta-item">Provisões: <strong>${reg.food}</strong></div>
+              <div class="m2-meta-item">Perigo: <strong>${reg.danger}</strong></div>
+              <div class="m2-meta-item">Status: <strong>Descoberta</strong></div>
+            </div>
+            <button type="button" class="m2-btn-enter" onclick="triggerToast('Abrindo mapa: ${reg.name}')">
+              🗺️ Abrir Mapa da Região
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function selectM2(idx) {
+      selectedM2Index = idx;
+      renderModel2(document.getElementById('app-viewport'));
+    }
+
+    // MODELO 3: Carrossel de Expedição
+    function renderModel3(container) {
+      const reg = REGIONS_DATA[selectedM3Index];
+      container.innerHTML = `
+        <div class="game-screen-header">
+          <h2>🧭 Cartas de Expedição</h2>
+          <p>Região ${selectedM3Index + 1} de ${REGIONS_DATA.length}</p>
+        </div>
+        <div class="m3-carousel-wrap">
+          <div class="m3-card-main">
+            <div class="m3-art-box" style="background-image: url('${reg.img}');">
+              <div class="m3-art-gradient"></div>
+              <div class="m3-tag-float">${reg.level} · ${reg.danger}</div>
+            </div>
+            <div class="m3-card-body">
+              <div>
+                <div class="m3-title">${reg.icon} ${reg.name}</div>
+                <div class="m3-narrative">${reg.desc}</div>
+              </div>
+              <div class="m3-specs-row">
+                <span>Marcha: <strong>${reg.march}</strong></span>
+                <span>Rações: <strong>${reg.food}</strong></span>
+              </div>
+              <button type="button" class="m2-btn-enter" onclick="triggerToast('Abrindo mapa: ${reg.name}')">
+                🗺️ Explorar Território
+              </button>
+            </div>
+          </div>
+          <div class="m3-nav-strip">
+            <button type="button" class="m3-nav-btn" onclick="prevM3()">◀ Anterior</button>
+            <span style="font-size:11.5px;color:#a09484;">Toque para alternar</span>
+            <button type="button" class="m3-nav-btn" onclick="nextM3()">Próximo ▶</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function prevM3() {
+      selectedM3Index = (selectedM3Index - 1 + REGIONS_DATA.length) % REGIONS_DATA.length;
+      renderModel3(document.getElementById('app-viewport'));
+    }
+    function nextM3() {
+      selectedM3Index = (selectedM3Index + 1) % REGIONS_DATA.length;
+      renderModel3(document.getElementById('app-viewport'));
+    }
+
+    // MODELO 4: Painel Heráldico Medieval
+    function renderModel4(container) {
+      container.innerHTML = `
+        <div class="game-screen-header">
+          <h2>🧭 Brasões dos Ermos</h2>
+          <p>Insígnias das províncias cartografadas</p>
+        </div>
+        <div class="m4-heraldic-grid">
+          ${REGIONS_DATA.map(r => `
+            <div class="m4-shield-card" onclick="triggerToast('Abrindo mapa: ${r.name}')">
+              <div class="m4-shield-crest">${r.icon}</div>
+              <div class="m4-shield-name">${r.name}</div>
+              <div class="m4-shield-tier">${r.level} · ${r.danger}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // MODELO 5: Diário de Bordo do Cartógrafo Corvus
+    function renderModel5(container) {
+      container.innerHTML = `
+        <div class="game-screen-header">
+          <h2>🧭 Rotas de Marcha</h2>
+          <p>Registros da Guilda dos Mercenários</p>
+        </div>
+        <div class="m5-parchment-wrap">
+          <div class="m5-journal-header">
+            <div class="m5-journal-title">Caderno de Rotas do Cartógrafo</div>
+            <div class="m5-journal-sub">Destinos autorizados a partir de Valdoria</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:4px;overflow-y:auto;">
+            ${REGIONS_DATA.map((r, idx) => `
+              <div class="m5-route-row" onclick="triggerToast('Abrindo rota: ${r.name}')">
+                <div class="m5-route-left">
+                  <span class="m5-route-num">${idx + 1}.</span>
+                  <div>
+                    <div class="m5-route-name">${r.icon} ${r.name}</div>
+                    <div class="m5-route-meta">${r.march} · ${r.food}</div>
+                  </div>
+                </div>
+                <span class="m1-tier-badge ${r.tierType}">${r.level}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    // MODELO 6: Mosaico Visual Dinâmico
+    function renderModel6(container) {
+      container.innerHTML = `
+        <div class="game-screen-header">
+          <h2>🧭 Regiões de Valdoria</h2>
+          <p>Toque em uma região para ver seu mapa</p>
+        </div>
+        <div class="m6-mosaic-grid">
+          ${REGIONS_DATA.map(r => `
+            <div class="m6-mosaic-cell" style="background-image: url('${r.img}');" onclick="triggerToast('Abrindo mapa: ${r.name}')">
+              <div class="m6-cell-info">
+                <div class="m6-cell-name">${r.icon} ${r.name}</div>
+                <div class="m6-cell-tag">${r.level}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // MODELO 7: Hub Concêntrico por Círculos de Perigo
+    function renderModel7(container) {
+      const safe = REGIONS_DATA.filter(r => r.tierType === 'safe');
+      const mid = REGIONS_DATA.filter(r => r.tierType === 'mid');
+      const hard = REGIONS_DATA.filter(r => r.tierType === 'danger');
+
+      container.innerHTML = `
+        <div class="game-screen-header">
+          <h2>🧭 Círculos de Perigo</h2>
+          <p>Regiões organizadas por nível de ameaça</p>
+        </div>
+        <div class="m7-tier-wrap">
+          <div class="m7-tier-group">
+            <div class="m7-group-title safe">🛡️ Arredores Seguros (Nível 1–2)</div>
+            <div class="m7-items-grid">
+              ${safe.map(r => `
+                <div class="m7-btn-item" onclick="triggerToast('Abrindo mapa: ${r.name}')">
+                  <span>${r.icon} ${r.name}</span>
+                  <span style="font-size:11px;color:#81c784;">${r.level}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="m7-tier-group">
+            <div class="m7-group-title mid">⚔️ Ermos Médios (Nível 3–4)</div>
+            <div class="m7-items-grid">
+              ${mid.map(r => `
+                <div class="m7-btn-item" onclick="triggerToast('Abrindo mapa: ${r.name}')">
+                  <span>${r.icon} ${r.name}</span>
+                  <span style="font-size:11px;color:#f3d17a;">${r.level}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="m7-tier-group">
+            <div class="m7-group-title hard">💀 Terras Extremas (Nível 5–8)</div>
+            <div class="m7-items-grid">
+              ${hard.map(r => `
+                <div class="m7-btn-item" onclick="triggerToast('Abrindo mapa: ${r.name}')">
+                  <span>${r.icon} ${r.name}</span>
+                  <span style="font-size:11px;color:#e57373;">${r.level}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // MODELO 8: Split-Screen Vitrine
+    function renderModel8(container) {
+      const reg = REGIONS_DATA[selectedM8Index];
+      container.innerHTML = `
+        <div class="game-screen-header">
+          <h2>🧭 Vitrine de Destinos</h2>
+          <p>Escolha no topo para inspecionar no painel</p>
+        </div>
+        <div class="m8-split-wrap">
+          <div class="m8-strip-pills">
+            ${REGIONS_DATA.map((r, idx) => `
+              <div class="m8-pill-btn ${idx === selectedM8Index ? 'active' : ''}" onclick="selectM8(${idx})">
+                ${r.icon} ${r.name.split(' ')[0]}
+              </div>
+            `).join('')}
+          </div>
+          <div class="m8-showcase-box">
+            <div class="m8-showcase-art" style="background-image: url('${reg.img}');"></div>
+            <div class="m8-showcase-info">
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <div class="m8-showcase-title">${reg.icon} ${reg.name}</div>
+                  <span class="m1-tier-badge ${reg.tierType}">${reg.level}</span>
+                </div>
+                <div class="m8-showcase-desc">${reg.desc}</div>
+                <div style="font-size:11.5px;color:#a09484;margin-top:6px;">
+                  Tempo de viagem: <strong>${reg.march}</strong> · Suprimentos: <strong>${reg.food}</strong>
+                </div>
+              </div>
+              <button type="button" class="m8-btn-enter" onclick="triggerToast('Abrindo mapa: ${reg.name}')">
+                🗺️ Abrir Mapa da Região
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function selectM8(idx) {
+      selectedM8Index = idx;
+      renderModel8(document.getElementById('app-viewport'));
+    }
+
+    // MODELO 9: Mesa de Navegação do Andarilho
+    function renderModel9(container) {
+      container.innerHTML = `
+        <div class="game-screen-header">
+          <h2>🧭 Mesa de Navegação</h2>
+          <p>Orientação cartográfica pelos pontos cardeais</p>
+        </div>
+        <div class="m9-compass-table">
+          <div class="m9-compass-rose">
+            <span>VALDORIA<br>CAPITAL</span>
+          </div>
+          <div class="m9-compass-pin m9-pin-north" onclick="triggerToast('Abrindo mapa: Ermo Gelado')">
+            ❄️ Ermo Gelado (Nív. 5)
+          </div>
+          <div class="m9-compass-pin m9-pin-ne" onclick="triggerToast('Abrindo mapa: Montanhas')">
+            ⛰️ Montanhas (Nív. 4)
+          </div>
+          <div class="m9-compass-pin m9-pin-nw" onclick="triggerToast('Abrindo mapa: Floresta')">
+            🌲 Floresta (Nív. 2)
+          </div>
+          <div class="m9-compass-pin m9-pin-west" onclick="triggerToast('Abrindo mapa: Planícies')">
+            🌾 Planícies (Nív. 1)
+          </div>
+          <div class="m9-compass-pin m9-pin-east" onclick="triggerToast('Abrindo mapa: Pântano')">
+            🐍 Pântano (Nív. 3)
+          </div>
+          <div class="m9-compass-pin m9-pin-sw" onclick="triggerToast('Abrindo mapa: Costa')">
+            🌊 Costa (Nív. 4)
+          </div>
+          <div class="m9-compass-pin m9-pin-se" onclick="triggerToast('Abrindo mapa: Vulcão')">
+            🌋 Vulcão (Nív. 8)
+          </div>
+          <div class="m9-compass-pin m9-pin-south" onclick="triggerToast('Abrindo mapa: Deserto')">
+            🌵 Deserto (Nív. 4)
+          </div>
+        </div>
+      `;
+    }
+
+    // MODELO 10: Lista Tática Minimalista
+    function renderModel10(container) {
+      container.innerHTML = `
+        <div class="game-screen-header">
+          <h2>🧭 Rotas dos Ermos</h2>
+          <p>Visualização limpa e de alta densidade</p>
+        </div>
+        <div class="m10-minimal-list">
+          ${REGIONS_DATA.map(r => `
+            <div class="m10-row" onclick="triggerToast('Abrindo mapa: ${r.name}')">
+              <div class="m10-row-left">
+                <span class="m10-row-ico">${r.icon}</span>
+                <div>
+                  <div class="m10-row-name">${r.name}</div>
+                  <div class="m10-row-meta">${r.march} · ${r.danger}</div>
+                </div>
+              </div>
+              <div class="m10-row-right">
+                <span class="m10-tag-pill">${r.level}</span>
+                <span class="m10-arrow">➔</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // INICIALIZAÇÃO
+    window.addEventListener('DOMContentLoaded', () => {
+      renderModelContent();
+    });
+  </script>
+</body>
+</html>
