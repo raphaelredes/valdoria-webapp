@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-30T21:34:59Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-30T21:51:58Z - do not edit directly, edit source -->
 
 
 
@@ -47265,6 +47265,368 @@ const FIXED_MAPS = {
     ]
   },
 
+  valkrest_citadel: {
+    id: 'valkrest_citadel', region: 'valdoria', biome: 'dungeon', is_dungeon: true,
+    name: 'Cidadela em Ruinas de Valkrest',
+    cols: 20, rows: 24, seed: 99015, spawnCol: 10, spawnRow: 23,
+    music: 'volcanic', danger: 7, required_gear: 'torch',
+    boss: {
+      name: 'General Ignis, o Comandante Cinzento', cr: 7, xp: 2900, sugLvl: 7,
+      hp: 135, ac: 17, atk: 9,
+      multiAttack: 2,
+      hasBurstSkill: true,
+      hasResource: true
+    },
+    worldPos: { x: 0.65, y: 0.70 },
+    weather_pool: ['v'],
+    weights: { '.': 1 },
+    dungeon: true,
+    parentMap: 'valkrest',
+    gridTemplate: [
+      '####################',
+      '####iiiiiiiiiiii####',
+      '###iiiiiiiiiiiiii###',
+      '###iiiiiiiiiiiiii###',
+      '####iiii....iiii####',
+      '#####..........#####',
+      '####............####',
+      '####....####....####',
+      '###....######....###',
+      '###...########...###',
+      '###...########...###',
+      '####...######...####',
+      '####....####....####',
+      '#####..........#####',
+      '######........######',
+      '#######......#######',
+      '########....########',
+      '#########..#########',
+      '####################',
+      '####################',
+      '####################',
+      '####################',
+      '####################',
+      '####################'
+    ],
+    dungeonEncounters: [
+      {
+        id: 'valkrest_citadel_campfire', col: 10, row: 13, _hex: 'K14',
+        repeatable: true,
+        title: 'Fogueira no Patio das Maquinas de Guerra',
+        text: 'Entre catapultas despedacadas e escombros de ferro forjado, a comitiva encontra uma arcada abrigada das cinzas sulfurosas. As brasas no braseiro secam o suor e iluminam os estandartes rasgados da guarnicao.',
+        flavor: 'Acampamento - K14 - Repouso',
+        category: 'discovery',
+        choices: [
+          {
+            id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
+            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            outcome_ok: {
+              _short_rest: true,
+              text: 'Voce come racoes secas e afia a lamina sobre a rocha basáltica. O repouso renova o folego da comitiva.'
+            }
+          },
+          {
+            id: 'long_rest', label: 'Descanso Longo (1x por masmorra)',
+            desc: 'HP/MP cheios + remove 1 nivel de Exaustao. Apenas 1 vez nesta masmorra.',
+            outcome_ok: {
+              _long_rest: true,
+              text: 'Com sentinelas atentas vigiando as brechas das muralhas, a comitiva descansa profundamente e recupera suas forcas vitais.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'valkrest_citadel_guards', col: 10, row: 9, _hex: 'K10',
+        title: 'Baluarte dos Guardas Cinzentos',
+        text: 'Sentinelas com armaduras enegrecidas e alabardas afiadas bloqueiam a passagem principal para o salao do comando. Ao menor movimento, eles erguem os escudos em formacao de cerco!',
+        flavor: 'Guarda - K10 - Batalha Tática',
+        category: 'combat',
+        choices: [
+          {
+            id: 'confront', label: 'Enfrentar os Guardas Cinzentos!',
+            desc: 'Combate direto contra a patrulha blindada de Valkrest.',
+            outcome_ok: {
+              dungeon_combat: { enemy: 'veterano', enemy_count: 2, formation: 'pincer' },
+              text: 'O aco ressoa contra as pedras quando os guardas avancam em pinça travando o corredor!'
+            }
+          },
+          {
+            id: 'intimidate', label: '[INTIMIDACAO] Exigir passagem pelo nome de Valdoria (Carisma CD 15)',
+            skill: 'cha', dc: 15,
+            desc: 'Sua presenca imponente pode abalar a confianca dos mercenarios.',
+            outcome_ok: {
+              xp: 140, gold: 80,
+              text: 'Sua voz troveja pelo baluarte. Impressionados pela sua determinacao inabalavel, os sentinelas recuam e liberam a passagem!'
+            },
+            outcome_fail: {
+              dungeon_combat: { enemy: 'veterano', enemy_count: 2, formation: 'flank', surprise: true },
+              text: 'Eles zombam de suas palavras e contra-atacam de surpresa flanqueando suas posicoes!'
+            }
+          }
+        ]
+      },
+      {
+        id: 'valkrest_citadel_hazard', col: 8, row: 7, _hex: 'I8',
+        title: 'Fosso de Oleo Grego e Brasas',
+        text: 'Um canal esculpido no piso transborda oleo mineral fervente, com jatos intermitentes de fogo que varrem a passagem de pedra a cada pulsar de ventilacao.',
+        flavor: 'Perigo D&D 5e - I8 - Armadilha de Chamas',
+        category: 'hazard',
+        choices: [
+          {
+            id: 'dodge_flames', label: '[SALVAGUARDA] Esquivar-se no instante exato do jato de fogo (Destreza CD 15)',
+            skill: 'dex', dc: 15,
+            desc: 'Tempo de reacao perfeito para saltar entre as rajadas ardentes.',
+            outcome_ok: {
+              xp: 110,
+              text: 'Com reflexos apurados, voce salta no intervalo entre as chamas e aterrissa com seguranca no outro lado.'
+            },
+            outcome_fail: {
+              hp_loss: 8, xp: 40,
+              text: 'Uma lufada de calor atinge suas costas durante o salto, chamuscando seu equipamento e causando dor aguda.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'valkrest_citadel_relic', col: 12, row: 7, _hex: 'M8',
+        title: 'Arsenal Secreto de Valkrest',
+        text: 'Uma camara trancada com pesados ferrolhos de bronze contem suportes de armas adamantinas e arcas com o tesouro da antiga guarnicao da fortaleza.',
+        flavor: 'Reliquia - M8 - Enigma e Tesouro',
+        category: 'discovery',
+        choices: [
+          {
+            id: 'unlock_armory', label: '[LADINAGEM] Gazetear a tranca ancestral de bronze (Destreza CD 15)',
+            skill: 'dex', dc: 15,
+            desc: 'Mecanismo engenhoso de pinos triplos forjado pelos anões da montanha.',
+            outcome_ok: {
+              gold: 140, xp: 130,
+              text: 'O fecho estala suavemente! No interior da arca, voce descobre pecas de aco estelar e bolsas abarrotadas de moedas de ouro.'
+            },
+            outcome_fail: {
+              hp_loss: 6, xp: 35,
+              text: 'Uma lamina oculta dispara do mecanismo ao falhar, cortando a palma de sua mão!'
+            }
+          },
+          {
+            id: 'force_door', label: '[ATLETISMO] Arrombar a porta com alavanca de ferro (Forca CD 16)',
+            skill: 'str', dc: 16,
+            desc: 'Forca bruta contra dobradicas desgastadas pelo tempo.',
+            outcome_ok: {
+              gold: 100, xp: 110,
+              text: 'Com um golpe poderoso, a fechadura se parte e o arsenal cede, revelando suas riquezas.'
+            },
+            outcome_fail: {
+              hp_loss: 4, xp: 30,
+              text: 'A madeira solida resiste ao impacto, reverberando o choque em seus musculos e ombros.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'valkrest_citadel_boss', col: 10, row: 3, _hex: 'K4',
+        title: 'Salao do Trono das Cinzas',
+        text: 'No topo da cidadela, sobre um trono esculpido em carvao mineral e ferro, ergue-se o General Ignis. Empunhando uma espada flamejante de duas maos, ele convoca o fogo das muralhas para esmagar os invasores!',
+        flavor: 'Chefe - K4 - Batalha Decisiva',
+        category: 'boss',
+        choices: [
+          {
+            id: 'fight_ignis', label: 'Desafiar o General Ignis em Combate Mortal!',
+            desc: 'Batalha campal decisiva pelo dominio da cidadela vulcânica.',
+            outcome_ok: {
+              dungeon_combat: {
+                enemy: 'gigante_de_fogo',
+                lookup_name: 'General Ignis, o Comandante Cinzento',
+                enemy_count: 1,
+                formation: 'close_quarters'
+              },
+              text: 'O General desce do estrado com passos estrondosos, rugindo ordens de batalha enquanto as chamas envolvem sua lamina!'
+            }
+          }
+        ]
+      }
+    ]
+  },
+  glacial_rift_dungeon: {
+    id: 'glacial_rift_dungeon', region: 'valdoria', biome: 'dungeon', is_dungeon: true,
+    name: 'Abismo do Gelo Eterno',
+    cols: 20, rows: 24, seed: 99016, spawnCol: 10, spawnRow: 23,
+    music: 'snow', danger: 7, required_gear: 'torch',
+    boss: {
+      name: 'Ymir, o Patriarca do Gelo Titanico', cr: 7, xp: 2900, sugLvl: 7,
+      hp: 140, ac: 16, atk: 9,
+      multiAttack: 2,
+      hasBurstSkill: true,
+      hasResource: true
+    },
+    worldPos: { x: 0.82, y: 0.18 },
+    weather_pool: ['b'],
+    weights: { '.': 1 },
+    dungeon: true,
+    parentMap: 'glacial_rift',
+    gridTemplate: [
+      '####################',
+      '####iiiiiiiiiiii####',
+      '###iiiiiiiiiiiiii###',
+      '###iiiiiiiiiiiiii###',
+      '####iiii....iiii####',
+      '#####..........#####',
+      '####............####',
+      '####....####....####',
+      '###....######....###',
+      '###...########...###',
+      '###...########...###',
+      '####...######...####',
+      '####....####....####',
+      '#####..........#####',
+      '######........######',
+      '#######......#######',
+      '########....########',
+      '#########..#########',
+      '####################',
+      '####################',
+      '####################',
+      '####################',
+      '####################',
+      '####################'
+    ],
+    dungeonEncounters: [
+      {
+        id: 'glacial_rift_campfire', col: 10, row: 13, _hex: 'K14',
+        repeatable: true,
+        title: 'Fogueira na Caverna dos Ventos Alvos',
+        text: 'Entre fendas de gelo azul translúcido, a comitiva descobre um abrigo protegido das correntes uivantes da nevasca. A fogueira derrete a geada das cotas de malha e renova o vigor.',
+        flavor: 'Acampamento - K14 - Repouso',
+        category: 'discovery',
+        choices: [
+          {
+            id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
+            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            outcome_ok: {
+              _short_rest: true,
+              text: 'Voce bebe caldo quente e descansa enrolado em mantas grossas de pele. A circulacao retoma o calor.'
+            }
+          },
+          {
+            id: 'long_rest', label: 'Descanso Longo (1x por masmorra)',
+            desc: 'HP/MP cheios + remove 1 nivel de Exaustao. Apenas 1 vez nesta masmorra.',
+            outcome_ok: {
+              _long_rest: true,
+              text: 'Protegidos na reentrancia da fenda com vigia dobrada, todos descansam profundamente e recuperam suas forcas.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'glacial_rift_guards', col: 10, row: 9, _hex: 'K10',
+        title: 'Sentinelas das Lancas Azuis',
+        text: 'Lobos do Inverno com olhos cristalinos e pelagem coberta por geada vigiam a ponte estreita de gelo. Ao notarem sua presenca, uivam em harmonia gélida e saltam em pinça!',
+        flavor: 'Guarda - K10 - Emboscada Polar',
+        category: 'combat',
+        choices: [
+          {
+            id: 'confront_wolves', label: 'Empunhar as Armas contra os Lobos do Inverno!',
+            desc: 'Combate sobre a ponte escorregadia contra os predadores do gelo.',
+            outcome_ok: {
+              dungeon_combat: { enemy: 'lobo_do_inverno', enemy_count: 2, formation: 'flank' },
+              text: 'As feras avancam em flanqueamento duplo, soltando baforadas de vapor congelante!'
+            }
+          },
+          {
+            id: 'animal_handling', label: '[ADESTRAMENTO] Acalmar as feras com carne seca e postura serena (Sabedoria CD 15)',
+            skill: 'wis', dc: 15,
+            desc: 'Compreensao do comportamento da matilha para evitar o confronto mortal.',
+            outcome_ok: {
+              xp: 130, gold: 60,
+              text: 'Os lobos farejam a oferenda, acalmam o rosnado e recuam para as fendas, deixando o caminho livre.'
+            },
+            outcome_fail: {
+              dungeon_combat: { enemy: 'lobo_do_inverno', enemy_count: 2, formation: 'pincer', surprise: true },
+              text: 'O alfa interpreta seu gesto como fraqueza e lidera um ataque fulminante de surpresa!'
+            }
+          }
+        ]
+      },
+      {
+        id: 'glacial_rift_hazard', col: 8, row: 7, _hex: 'I8',
+        title: 'Pingentes de Gelo Negro Cadentes',
+        text: 'Tremores profundos na geleira fazem com que estalagmites macicas de gelo afiado se soltem do teto abobadado, despencando como lancas de cerco sobre a trilha.',
+        flavor: 'Perigo D&D 5e - I8 - Desabamento Glacial',
+        category: 'hazard',
+        choices: [
+          {
+            id: 'dodge_icicles', label: '[SALVAGUARDA] Esquivar-se dos projeteis pontiagudos de gelo (Destreza CD 15)',
+            skill: 'dex', dc: 15,
+            desc: 'Agilidade de reflexo para evitar ser empalado pelas lancas de gelo.',
+            outcome_ok: {
+              xp: 110,
+              text: 'Voce rola com maestria sob uma saliência de rocha firme enquanto as lancas de gelo se estilhacam ao seu redor.'
+            },
+            outcome_fail: {
+              hp_loss: 8, xp: 40,
+              text: 'Um bloco pontiagudo de gelo atinge seu ombro em cheio, cortando carne e malha de aco com frio causticante.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'glacial_rift_relic', col: 12, row: 7, _hex: 'M8',
+        title: 'Cofre dos Titãs Nibelungos',
+        text: 'Um bloco de gelo milenar e translúcido encerra um sarcófago rúnico talhado com runas primordiais dos gigantes do gelo.',
+        flavor: 'Reliquia - M8 - Tesouro Polar',
+        category: 'discovery',
+        choices: [
+          {
+            id: 'melt_ice', label: '[ARCANISMO] Derreter o selo mágico de gelo com calor controlado (Arcanismo CD 15)',
+            skill: 'arcana', dc: 15,
+            desc: 'Canalizar energia térmica sem romper os recipientes arcanos.',
+            outcome_ok: {
+              gold: 150, xp: 140,
+              text: 'As runas azuis brilham e se desarmam suavemente, revelando safiras polares perfeitas e gemas de gelo estelar.'
+            },
+            outcome_fail: {
+              hp_loss: 6, xp: 35,
+              text: 'O selo rebate o calor com uma explosao de estilhacos gélidos que ferem seu rosto e bracos.'
+            }
+          },
+          {
+            id: 'pick_ice', label: '[SOBREVIVÊNCIA] Escavar com picareta de montanha nos pontos de fratura (Sobrevivência CD 15)',
+            skill: 'wis', dc: 15,
+            desc: 'Tecnica precisa de montanhismo para quebrar o gelo sem danificar as relíquias.',
+            outcome_ok: {
+              gold: 110, xp: 120,
+              text: 'Com golpes cirurgicos nos veios naturais, o bloco cede e revela o cofre de oferendas intacto.'
+            },
+            outcome_fail: {
+              hp_loss: 4, xp: 30,
+              text: 'A picareta vibra com violencia contra o gelo negro, causando caimbras e ferindo seus pulsos.'
+            }
+          }
+        ]
+      },
+      {
+        id: 'glacial_rift_boss', col: 10, row: 3, _hex: 'K4',
+        title: 'Santuario do Verme Titanico',
+        text: 'No coracao da fenda colossal, a geleira se abre em uma caverna monumental. Do fundo do permafrost, ergue-se Ymir, o Remorhaz Patriarca, com centenas de pernas afiadas e placas dorsais irradiando vapor escaldante contra o gelo!',
+        flavor: 'Chefe - K4 - Batalha de Vida ou Morte',
+        category: 'boss',
+        choices: [
+          {
+            id: 'fight_ymir', label: 'Confrontar o Patriarca Remorhaz em Combate Mortal!',
+            desc: 'Enfrentar a forca devastadora do predador supremo dos abismos gelados.',
+            outcome_ok: {
+              dungeon_combat: {
+                enemy: 'remorhaz',
+                lookup_name: 'Ymir, o Patriarca do Gelo Titanico',
+                enemy_count: 1,
+                formation: 'close_quarters'
+              },
+              text: 'O colossal verme ruge emitindo ondas de vapor ardente, estalando suas mandibulas afiadas em um ataque impiedoso!'
+            }
+          }
+        ]
+      }
+    ]
+  },
   goblin_warren: {
     id: 'goblin_warren', region: 'valdoria', biome: 'dungeon', is_dungeon: true,
     name: 'Toca dos Goblins',
