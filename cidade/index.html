@@ -71693,6 +71693,10 @@ function renderCartographyCanvas(el){
   }
 
   if (typeof _cartRenderCarousel === 'function') _cartRenderCarousel();
+  if (typeof _openRegionalMapModal === 'function') {
+    var curRegKey = _cartCurrentProvKey || 'plains';
+    _openRegionalMapModal(curRegKey, null, { fromDirect: true });
+  }
     _cartCanvas = document.getElementById('cart-canvas');
   if (!_cartCanvas) return;
 
@@ -73226,6 +73230,20 @@ function _cartRenderCarousel() {
   var regData = (window.CartShared && CartShared.REGIONS_DATA) ? CartShared.REGIONS_DATA : null;
   if (!regData) return;
 
+  var p = (typeof window !== 'undefined' && window.CITY_MOCK_PLAYER) || {};
+  var known = (typeof window !== 'undefined' && Array.isArray(window.__EXPLORE_KNOWN) && window.__EXPLORE_KNOWN.length)
+    ? window.__EXPLORE_KNOWN
+    : ((p && Array.isArray(p.known_locations)) ? p.known_locations : ['city_gates', 'plains']);
+  var maps = (p && (p.owned_maps || p.maps_owned)) || [];
+
+  var allKeys = ['plains', 'forest', 'swamp', 'mountain', 'cave', 'coast', 'desert', 'graveyard', 'snow', 'volcanic'];
+  _cartCarouselKeys = allKeys.filter(function(k) {
+    if (k === 'plains') return true;
+    return window.CartShared && CartShared.isProvinceDiscovered && CartShared.isProvinceDiscovered(k, known, maps);
+  });
+  if (!_cartCarouselKeys.length) _cartCarouselKeys = ['plains'];
+  if (_cartCarouselIndex >= _cartCarouselKeys.length) _cartCarouselIndex = 0;
+
   var currentKey = _cartCarouselKeys[_cartCarouselIndex] || 'plains';
   var reg = regData[currentKey] || regData['plains'];
   var total = _cartCarouselKeys.length;
@@ -73295,9 +73313,9 @@ function _cartOpenRegionMap(provKey) {
   if (typeof haptic === 'function') haptic('medium');
   _cartCurrentProvKey = provKey;
   if (typeof _openRegionalMapModal === 'function') {
-    _openRegionalMapModal(provKey);
+    _openRegionalMapModal(provKey, null, { fromDirect: false });
   } else if (window.CartShared && typeof CartShared.openRegionalMapModal === 'function') {
-    CartShared.openRegionalMapModal(provKey);
+    CartShared.openRegionalMapModal(provKey, null, { fromDirect: false });
   }
 }
 window._cartOpenRegionMap = _cartOpenRegionMap;

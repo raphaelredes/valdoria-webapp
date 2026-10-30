@@ -40084,6 +40084,44 @@
     return CART_PROVINCES.find(function(p){ return p.id === pId; }) || CART_PROVINCES[1];
   }
 
+  // Regra de Visibilidade de Nós Regionais (Ordem do Usuário 2026-10):
+  // Um nó/local no mapa regional só é exibido se o aventureiro o tiver descoberto,
+  // ou se possuir o mapa regional correspondente.
+  function isNodeDiscovered(nodeId, provKey, knownLocations, ownedMaps) {
+    if (!nodeId) return false;
+    var p = (typeof CART_PROVINCES !== 'undefined' ? CART_PROVINCES : []).find(function(pr){ return pr.id === provKey; });
+    if (p && p.mapKey && ownedMaps && ownedMaps.indexOf(p.mapKey) >= 0) return true;
+
+    var known = Array.isArray(knownLocations) ? knownLocations : [];
+    if (known.indexOf(nodeId) >= 0) return true;
+
+    // Aliases canônicos entre IDs internos do motor e nós do mapa
+    var aliases = {
+      'green_fields': ['green_fields', 'plains', 'city_gates'],
+      'forest': ['forest', 'whispering_woods'],
+      'whispering_woods': ['forest', 'whispering_woods'],
+      'swamp': ['swamp', 'misty_marshes'],
+      'misty_marshes': ['swamp', 'misty_marshes'],
+      'mountain': ['mountain', 'stone_peaks'],
+      'stone_peaks': ['mountain', 'stone_peaks'],
+      'desert': ['desert', 'golden_sands'],
+      'golden_sands': ['desert', 'golden_sands'],
+      'snow': ['snow', 'frozen_waste'],
+      'frozen_waste': ['snow', 'frozen_waste'],
+      'volcanic': ['volcanic', 'burning_crater'],
+      'burning_crater': ['volcanic', 'burning_crater']
+    };
+
+    var syns = aliases[nodeId];
+    if (syns) {
+      for (var i = 0; i < syns.length; i++) {
+        if (known.indexOf(syns[i]) >= 0) return true;
+      }
+    }
+
+    return false;
+  }
+
   // P-mapa sessão #73 (user: "Bioma: forest" deve estar em PT-BR): traduz a chave de
   // bioma (ASCII canonical) pro nome PT-BR exibido no popup do mapa.
   var _BIOME_PT = {
@@ -40458,8 +40496,11 @@
     return 'Ir até o';
   }
 
-  function openRegionalMapModal(provKey, initialNodeId) {
+  function openRegionalMapModal(provKey, initialNodeId, options) {
     _ensureRegionalMapStyles();
+    options = options || {};
+    var fromDirectOpen = !!options.fromDirect;
+
     var modal = document.getElementById('regional-map-fullscreen-modal');
     if (!modal) {
       modal = document.createElement('div');
@@ -40472,6 +40513,17 @@
     var reg = (REGIONS_DATA && REGIONS_DATA[key]) ? REGIONS_DATA[key] : (REGIONS_DATA ? REGIONS_DATA['plains'] : null);
     if (!reg) return;
 
+    var pObj = (typeof window !== 'undefined' && window.CITY_MOCK_PLAYER) || {};
+    var known = (typeof window !== 'undefined' && Array.isArray(window.__EXPLORE_KNOWN) && window.__EXPLORE_KNOWN.length)
+      ? window.__EXPLORE_KNOWN
+      : ((pObj && Array.isArray(pObj.known_locations)) ? pObj.known_locations : ['city_gates', 'plains']);
+    var ownedMaps = (pObj && (pObj.owned_maps || pObj.maps_owned)) || [];
+
+    var discProvs = (typeof CART_PROVINCES !== 'undefined' ? CART_PROVINCES : []).filter(function(pr) {
+      return pr.id !== 'world' && isProvinceDiscovered(pr.id, known, ownedMaps);
+    });
+    var hasMultipleProvs = (discProvs.length > 1);
+
     var rawSrc = reg.img || ('shared/img/map/provinces/' + (key === 'plains' ? 'plains_v2.webp?v=20261030b' : (key + '.webp?v=20261030b')));
     if (typeof window !== 'undefined' && window.location && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
       if (rawSrc.indexOf('shared/') === 0) rawSrc = '/' + rawSrc;
@@ -40481,7 +40533,10 @@
     modal.innerHTML = ''
       + '<div class="cfm-header">'
       + '  <div class="cfm-header-title"><span id="rfm-header-text">' + reg.name + '</span></div>'
-      + '  <button type="button" class="cfm-close-btn" onclick="_closeRegionalMapModal()">✕ Fechar</button>'
+      + '  <div style="display:flex;align-items:center;gap:6px;">'
+      + (hasMultipleProvs ? '    <button type="button" class="cfm-close-btn" id="rfm-switch-reg-btn" style="background:#1e150d;border-color:rgba(196,149,58,0.35);font-size:11.5px;padding:4px 9px;">Regiões</button>' : '')
+      + '    <button type="button" class="cfm-close-btn" id="rfm-close-btn">✕ Fechar</button>'
+      + '  </div>'
       + '</div>'
       + '<div class="cfm-viewport">'
       + '  <div class="cfm-stage">'
@@ -40500,6 +40555,27 @@
     var pinsLayer = modal.querySelector('#rfm-pins-layer');
     var drawerName = modal.querySelector('#rfm-drawer-name');
     var drawerBtn = modal.querySelector('#rfm-drawer-act-btn');
+    var closeBtn = modal.querySelector('#rfm-close-btn');
+    var switchBtn = modal.querySelector('#rfm-switch-reg-btn');
+
+    closeBtn.onclick = function() {
+      closeRegionalMapModal();
+      if (fromDirectOpen) {
+        if (typeof navigateTo === 'function') navigateTo('hub');
+        else if (typeof _cartHandleReturnToCity === 'function') _cartHandleReturnToCity();
+      }
+    };
+
+    if (switchBtn) {
+      switchBtn.onclick = function() {
+        closeRegionalMapModal();
+        var guideEl = document.getElementById('cart-continental-guide');
+        if (guideEl) guideEl.style.display = 'flex';
+        var regViewEl = document.getElementById('cart-regional-view');
+        if (regViewEl) regViewEl.style.display = 'none';
+        if (typeof _cartRenderCarousel === 'function') _cartRenderCarousel();
+      };
+    }
 
     imgEl.onerror = function() {
       var fallbacks = [
@@ -40543,7 +40619,19 @@
     }
 
     pinsLayer.innerHTML = '';
-    var nodes = reg.nodes || [];
+    var allNodes = reg.nodes || [];
+    var nodes = allNodes.filter(function(n) {
+      return isNodeDiscovered(n.id, key, known, ownedMaps);
+    });
+
+    if (nodes.length === 0) {
+      drawerName.innerHTML = '<span class="cfm-prompt-hint">Nenhum local descoberto nesta região ainda</span>';
+      drawerBtn.style.display = 'none';
+    } else {
+      drawerName.innerHTML = '<span class="cfm-prompt-hint">Toque em um local no mapa</span>';
+      drawerBtn.style.display = 'none';
+    }
+
     nodes.forEach(function(n) {
       var pin = document.createElement('div');
       pin.className = 'cfm-pin';
@@ -40567,10 +40655,6 @@
     });
 
     // Zero pré-seleção inicial (Regra Soberana 11)
-    drawerName.innerHTML = '<span class="cfm-prompt-hint">Toque em um local no mapa</span>';
-    drawerBtn.style.display = 'none';
-    drawerBtn.onclick = null;
-
     if (initialNodeId && Array.isArray(nodes)) {
       var foundNode = nodes.find(function(item){ return item.id === initialNodeId; });
       if (foundNode) _selectRegionalNode(foundNode);
@@ -40598,7 +40682,7 @@
     INK_DARK: INK_DARK, INK_MED: INK_MED, INK_LIGHT: INK_LIGHT,
     INK_FAINT: INK_FAINT, PAPER_BG: PAPER_BG, PAPER_DARK: PAPER_DARK,
     SEA_INK: SEA_INK, SEA_FAINT: SEA_FAINT,
-    CART_BIOMES: CART_BIOMES, CART_PATHS: CART_PATHS, CART_PROVINCES: CART_PROVINCES, REGIONS_DATA: REGIONS_DATA, handleReturnToCity: handleReturnToCity, openRegionalMapModal: openRegionalMapModal, closeRegionalMapModal: closeRegionalMapModal, getLocationProvince: getLocationProvince, isProvinceDiscovered: isProvinceDiscovered, getDiscoveredProvinces: getDiscoveredProvinces,
+    CART_BIOMES: CART_BIOMES, CART_PATHS: CART_PATHS, CART_PROVINCES: CART_PROVINCES, REGIONS_DATA: REGIONS_DATA, handleReturnToCity: handleReturnToCity, openRegionalMapModal: openRegionalMapModal, closeRegionalMapModal: closeRegionalMapModal, getLocationProvince: getLocationProvince, isProvinceDiscovered: isProvinceDiscovered, isNodeDiscovered: isNodeDiscovered, getDiscoveredProvinces: getDiscoveredProvinces,
     _cartSeedRand: _cartSeedRand,
     _hatchArea: _hatchArea, _wavyLine: _wavyLine,
     _drawParchmentBase: _drawParchmentBase,
