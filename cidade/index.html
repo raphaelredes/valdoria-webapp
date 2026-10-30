@@ -71501,33 +71501,7 @@ function renderCartographyCanvas(el){
     + '  <div class="cart-continental-guide" id="cart-continental-guide" style="display:flex;">'
     + '    <div class="cart-carousel-wrap" id="cart-carousel-wrap"></div>'
     + '  </div>'
-    + '  <!-- LEVEL 2: MAPA REGIONAL DEDICADO (ABERTO AO CLICAR NA REGIÃO) -->'
-    + '  <div class="cart-regional-view" id="cart-regional-view" style="display:none;">'
-    + '    <div class="regional-top-bar">'
-    + '      <button type="button" class="btn-back-macro" onclick="_cartBackToRegionsList()">'
-    + '        <span>←</span> Regiões'
-    + '      </button>'
-    + '      <div class="badge-card-name" id="reg-card-name">'
-    + '        Mapa da Região'
-    + '      </div>'
-    + '      <button type="button" class="csp-help-btn" onclick="_showHelpForCurrentScreen(\'cartografia\')" title="Guia do Mapa Regional" aria-label="Ajuda">?</button>'
-    + '    </div>'
-    + '    <div class="province-map-container" id="prov-map-wrap">'
-    + '      <img class="province-art-img" id="prov-art-img" src="shared/img/map/provinces/plains_v2.webp?v=20261030b" alt="Mapa Regional">'
-    + '      <div class="prov-pins-overlay" id="prov-pins-overlay"></div>'
-    + '    </div>'
-    + '    <div class="regional-action-drawer" id="reg-action-drawer">'
-    + '      <div class="drawer-header-line">'
-    + '        <div class="drawer-title-bold" id="drawer-node-name">Destino</div>'
-    + '        <div class="summary-danger-tag badge-safe" id="drawer-node-danger">Perigo Nível 1</div>'
-    + '      </div>'
-    + '      <div class="drawer-actions-grid">'
-    + '        <button type="button" class="btn-cmd btn-cmd-primary" id="drawer-btn-primary">Explorar</button>'
-    + '        <button type="button" class="btn-cmd btn-cmd-secondary" id="drawer-btn-camp">Acampar</button>'
-    + '        <button type="button" class="btn-cmd btn-cmd-secondary" id="drawer-btn-details">Detalhes</button>'
-    + '      </div>'
-    + '    </div>'
-    + '  </div>'
+    + '  <!-- LEVEL 2: MAPA REGIONAL DEDICADO - padronizado via #regional-map-fullscreen-modal -->\n'
     + '  <!-- MODAL DE DETALHES SOB DEMANDA -->'
     + '  <div class="modal-backdrop" id="cart-details-modal" style="display:none;">'
     + '    <div class="modal-box">'
@@ -71764,7 +71738,7 @@ function renderCartographyCanvas(el){
   syncDims();
   _wireCartEvents();
   _cartCenterOnPlayer();
-  if (typeof _cartRenderRegionalView === 'function') _cartRenderRegionalView('plains');
+  // Nao pré-renderiza mapa inline obsoleto; mapa regional abre via openRegionalMapModal sob demanda
 
   if (typeof requestAnimationFrame !== 'undefined') {
     requestAnimationFrame(function(){
@@ -73251,7 +73225,7 @@ function _cartRenderCarousel() {
   var rawSrc = reg.img || ('shared/img/map/provinces/' + currentKey + '.webp');
   if (typeof window !== 'undefined' && window.location && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
     if (rawSrc.indexOf('shared/') === 0) rawSrc = '/' + rawSrc;
-    else if (rawSrc.indexOf('../valdoria-webapp/') === 0) rawSrc = rawSrc.replace('../valdoria-webapp/', '/');
+    else if (rawSrc.indexOf('/') === 0) rawSrc = rawSrc.replace('/', '/');
   }
 
   var dotsHtml = '';
@@ -73346,6 +73320,8 @@ function _cartConfirmOpenMap() {
 }
 
 function _cartRenderRegionalView(provKey) {
+  _cartOpenRegionMap(provKey);
+  return;
   var regData = (window.CartShared && CartShared.REGIONS_DATA) ? CartShared.REGIONS_DATA : null;
   if (!regData) return;
   var d = regData[provKey] || regData['plains'];
@@ -73360,7 +73336,7 @@ function _cartRenderRegionalView(provKey) {
     var rawSrc = d.img || ('shared/img/map/provinces/' + (provKey === 'plains' ? 'plains_v2.webp?v=20261030b' : (provKey + '.webp?v=20261030b')));
     if (typeof window !== 'undefined' && window.location && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
       if (rawSrc.indexOf('shared/') === 0) rawSrc = '/' + rawSrc;
-      else if (rawSrc.indexOf('../valdoria-webapp/') === 0) rawSrc = rawSrc.replace('../valdoria-webapp/', '/');
+      else if (rawSrc.indexOf('/') === 0) rawSrc = rawSrc.replace('/', '/');
     }
     imgEl.src = rawSrc;
     imgEl.onerror = function(){

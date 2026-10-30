@@ -40513,7 +40513,7 @@
     var reg = (REGIONS_DATA && REGIONS_DATA[key]) ? REGIONS_DATA[key] : (REGIONS_DATA ? REGIONS_DATA['plains'] : null);
     if (!reg) return;
 
-    var pObj = (typeof window !== 'undefined' && window.CITY_MOCK_PLAYER) || {};
+    var pObj = (typeof window !== 'undefined' && (window.CITY_PLAYER || window.CITY_MOCK_PLAYER || window.PLAYER)) || {};
     var known = (typeof window !== 'undefined' && Array.isArray(window.__EXPLORE_KNOWN) && window.__EXPLORE_KNOWN.length)
       ? window.__EXPLORE_KNOWN
       : ((pObj && Array.isArray(pObj.known_locations)) ? pObj.known_locations : ['city_gates', 'plains']);
@@ -40533,10 +40533,7 @@
     modal.innerHTML = ''
       + '<div class="cfm-header">'
       + '  <div class="cfm-header-title"><span id="rfm-header-text">' + reg.name + '</span></div>'
-      + '  <div style="display:flex;align-items:center;gap:6px;">'
-      + (hasMultipleProvs ? '    <button type="button" class="cfm-close-btn" id="rfm-switch-reg-btn" style="background:#1e150d;border-color:rgba(196,149,58,0.35);font-size:11.5px;padding:4px 9px;">Regiões</button>' : '')
-      + '    <button type="button" class="cfm-close-btn" id="rfm-close-btn">✕ Fechar</button>'
-      + '  </div>'
+      + '  <button type="button" class="cfm-close-btn" id="rfm-close-btn">✕ Fechar</button>'
       + '</div>'
       + '<div class="cfm-viewport">'
       + '  <div class="cfm-stage">'
@@ -40556,8 +40553,6 @@
     var drawerName = modal.querySelector('#rfm-drawer-name');
     var drawerBtn = modal.querySelector('#rfm-drawer-act-btn');
     var closeBtn = modal.querySelector('#rfm-close-btn');
-    var switchBtn = modal.querySelector('#rfm-switch-reg-btn');
-
     closeBtn.onclick = function() {
       closeRegionalMapModal();
       if (fromDirectOpen) {
@@ -40565,17 +40560,6 @@
         else if (typeof _cartHandleReturnToCity === 'function') _cartHandleReturnToCity();
       }
     };
-
-    if (switchBtn) {
-      switchBtn.onclick = function() {
-        closeRegionalMapModal();
-        var guideEl = document.getElementById('cart-continental-guide');
-        if (guideEl) guideEl.style.display = 'flex';
-        var regViewEl = document.getElementById('cart-regional-view');
-        if (regViewEl) regViewEl.style.display = 'none';
-        if (typeof _cartRenderCarousel === 'function') _cartRenderCarousel();
-      };
-    }
 
     imgEl.onerror = function() {
       var fallbacks = [
