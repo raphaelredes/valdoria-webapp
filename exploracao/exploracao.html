@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-30T23:42:27Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-31T02:29:24Z - do not edit directly, edit source -->
 
 
 
@@ -1868,9 +1868,12 @@ body.pointcrawl-mode #cartography-overlay {
   z-index: 1200 !important;
 }
 body.pointcrawl-mode #cart-loc-popup {
-  z-index: 1300 !important;
+  z-index: 100020 !important;
 }
 body.pointcrawl-mode #event-modal,
+body.pointcrawl-mode #stub-event-overlay,
+body.pointcrawl-mode #encounter-overlay,
+body.pointcrawl-mode dialog#encounter-overlay,
 body.pointcrawl-mode #camp-screen,
 body.pointcrawl-mode #dungeon-overlay,
 body.pointcrawl-mode #party-popup,
@@ -1878,8 +1881,9 @@ body.pointcrawl-mode #inv-overlay,
 body.pointcrawl-mode #journal-overlay,
 body.pointcrawl-mode #explore-pace-modal,
 body.pointcrawl-mode .explore-modal-overlay,
+body.pointcrawl-mode #incursion-discovery-modal,
 body.pointcrawl-mode #pointcrawl-dungeon-modal {
-  z-index: 1400 !important;
+  z-index: 100050 !important;
 }
 #explore-help-overlay {
   z-index: 100500 !important;
@@ -96701,17 +96705,17 @@ function _openCartLocationPopup(biome){
     stanceTip = 'Forças emparelhadas. Mantenha os sentidos atentos contra patrulhas.';
   } else {
     threatBadge = '<span style="color:#f87171;font-weight:700;">Zona Mortalmente Hostil (ND ' + biome.tier + ')</span>';
-    stanceTip = '⚠️ Perigo Extremo! Ritmo Furtivo (🐾) fortemente recomendado.';
+    stanceTip = 'Perigo Extremo! Ritmo Furtivo fortemente recomendado.';
   }
 
   var isNight = (typeof S !== 'undefined' && S && S.dayPhase === 'night') || (typeof window._getCurrentGameTime === 'function' && window._getCurrentGameTime().hour >= 20);
   var hasDarkvision = !!(p.darkvision || (p.race && ['elf', 'dwarf', 'drow', 'half-orc', 'tiefling'].indexOf(p.race.toLowerCase()) >= 0));
   var hasTorch = !!(p.torch_active || p.has_light || (p.inventory && p.inventory.some(function(it){ return it.id === 'torch' || it.id === 'lantern'; })));
   var nightVisionHtml = isNight ? (hasDarkvision
-    ? '<div class="clp-exp-night-warn" style="color:#93c5fd;border-left-color:#60a5fa;">🌙 Marcha Noturna · 👁️ Visão no Escuro Ativa: Seus olhos ancestrais penetram as sombras sem penalidades de percepção.</div>'
+    ? '<div class="clp-exp-night-warn" style="color:#93c5fd;border-left-color:#60a5fa;">◆ Marcha Noturna · Visão no Escuro Ativa: Seus olhos ancestrais penetram as sombras sem penalidades de percepção.</div>'
     : hasTorch
-      ? '<div class="clp-exp-night-warn" style="color:#fde047;border-left-color:#eab308;">🌙 Marcha Noturna · 🕯️ Tocha da Comitiva: Facho de luz ativo dissipa a escuridão imediata contra emboscadas.</div>'
-      : '<div class="clp-exp-night-warn">🌙 Marcha Noturna: O sol já se pôs além das colinas. Sem tochas ou visão no escuro, desvantagem em testes de Percepção contra emboscadas.</div>') : '';
+      ? '<div class="clp-exp-night-warn" style="color:#fde047;border-left-color:#eab308;">◆ Marcha Noturna · Tocha da Comitiva: Facho de luz ativo dissipa a escuridão imediata contra emboscadas.</div>'
+      : '<div class="clp-exp-night-warn">◆ Marcha Noturna: O sol já se pôs além das colinas. Sem tochas ou visão no escuro, desvantagem em testes de Percepção contra emboscadas.</div>') : '';
 
   var curWeather = (typeof window.S !== 'undefined' && window.S && window.S.weather) ||
                    (typeof window.CITY_MOCK_PLAYER !== 'undefined' && window.CITY_MOCK_PLAYER.weather) || 's';
@@ -96723,7 +96727,7 @@ function _openCartLocationPopup(biome){
 
   card.innerHTML = ''
     + '<div class="clp-body">'
-    + '<div class="clp-icon">' + (CartShared.locArtHtml ? CartShared.locArtHtml(biome) : (biome.ico || '🗺️')) + '</div>'
+    + '<div class="clp-icon">' + (CartShared.locArtHtml ? CartShared.locArtHtml(biome) : (biome.ico || '')) + '</div>'
     + (isCurrent ? '<div class="clp-current-here">VOCÊ ESTÁ AQUI</div>' : '')
     + questBannerHtml
     + '<h2>' + (biome.regionalName || biome.name) + '</h2>'
@@ -97644,9 +97648,12 @@ function _hydrateExploreKnown(){
     + '  z-index: 1200 !important;'
     + '}'
     + 'body.pointcrawl-mode #cart-loc-popup {'
-    + '  z-index: 1300 !important;'
+    + '  z-index: 100020 !important;'
     + '}'
     + 'body.pointcrawl-mode #event-modal,'
+    + 'body.pointcrawl-mode #stub-event-overlay,'
+    + 'body.pointcrawl-mode #encounter-overlay,'
+    + 'body.pointcrawl-mode dialog#encounter-overlay,'
     + 'body.pointcrawl-mode #camp-screen,'
     + 'body.pointcrawl-mode #dungeon-overlay,'
     + 'body.pointcrawl-mode #party-popup,'
@@ -97654,8 +97661,9 @@ function _hydrateExploreKnown(){
     + 'body.pointcrawl-mode #journal-overlay,'
     + 'body.pointcrawl-mode #explore-pace-modal,'
     + 'body.pointcrawl-mode .explore-modal-overlay,'
+    + 'body.pointcrawl-mode #incursion-discovery-modal,'
     + 'body.pointcrawl-mode #pointcrawl-dungeon-modal {'
-    + '  z-index: 1400 !important;'
+    + '  z-index: 100050 !important;'
     + '}'
     + 'body.pointcrawl-mode #confirm-overlay,'
     + 'body.pointcrawl-mode #cart-back-prompt {'
@@ -97669,13 +97677,7 @@ function _hydrateExploreKnown(){
 
 function _activatePointcrawlRootMode() {
   if (window._editorMode) return;
-  try {
-    var sp = new URLSearchParams(location.search);
-    if (sp.get('legacy_hex') === '1' || sp.get('editor') === '1') {
-      document.body.classList.remove('pointcrawl-mode');
-      return;
-    }
-  } catch (_) {}
+  // O mapa de hexágonos foi descontinuado permanentemente. Pointcrawl / Cartografia Regional é a autoridade canônica.
   document.body.classList.add('pointcrawl-mode');
   if (typeof openCartography === 'function') {
     openCartography();
@@ -97790,22 +97792,22 @@ function _buildPointcrawlCurrentNodeActionsHtml(biome) {
   var dgBtns = dgs.map(function(dg){
     var isAaa = !!(typeof FIXED_MAPS !== 'undefined' && FIXED_MAPS[dg.id] && FIXED_MAPS[dg.id].dungeonEncounters);
     return '<button type="button" class="clp-btn" data-clp="enter-dungeon" data-dg-id="' + dg.id + '" '
-      + 'style="width:100%;margin-top:5px;background:linear-gradient(180deg,rgba(120,28,28,0.92),rgba(72,14,14,0.96));border:1px solid #f87171;color:#fecaca;font-family:Cinzel,serif;font-size:11px;font-weight:700;padding:7px 10px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">'
-      + '<span>🏰 Incursão: ' + dg.name + '</span>'
-      + '<span style="font-size:11px;background:rgba(0,0,0,0.45);padding:2px 6px;border-radius:3px;color:#fde047;">' + (isAaa ? '5 Câmaras D&D 5e' : 'Explorar') + '</span>'
+      + 'style="width:100%;margin-top:6px;background:linear-gradient(180deg,#2c1a16,#1a100d);border:1px solid rgba(196,100,80,0.55);color:#fca5a5;font-family:Cinzel,serif;font-size:11.5px;font-weight:700;padding:8px 10px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">'
+      + '<span>◆ Incursão: ' + dg.name + '</span>'
+      + '<span style="font-size:11px;background:rgba(0,0,0,0.45);padding:2px 6px;border-radius:3px;color:#ffd685;">' + (isAaa ? '5 Câmaras D&D 5e' : 'Explorar') + '</span>'
       + '</button>';
   }).join('');
 
-  return '<div class="clp-pointcrawl-hub-box" style="margin:5px 0 4px;padding:6px 8px;background:linear-gradient(180deg,rgba(32,24,14,0.95),rgba(18,13,8,0.98));border:1.5px solid #ffd700;border-radius:6px;text-align:left;box-shadow:0 4px 14px rgba(0,0,0,0.65);">'
-    + '<div style="font-family:Cinzel,serif;font-size:11.5px;font-weight:700;color:#ffd700;letter-spacing:0.8px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;">'
-    + '  <span>🧭 AÇÕES DA COMITIVA NESTA REGIÃO</span>'
-    + '  <span style="font-size:11px;color:#86efac;">📍 Posição Atual</span>'
+  return '<div class="clp-pointcrawl-hub-box" style="margin:5px 0 4px;padding:8px 10px;background:linear-gradient(180deg,rgba(26,20,14,0.96),rgba(14,10,7,0.98));border:1.5px solid rgba(196,149,58,0.5);border-radius:6px;text-align:left;box-shadow:0 4px 14px rgba(0,0,0,0.65);">'
+    + '<div style="font-family:Cinzel,serif;font-size:11.5px;font-weight:700;color:#ffd685;letter-spacing:0.8px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">'
+    + '  <span>◆ AÇÕES DA COMITIVA NESTA REGIÃO</span>'
+    + '  <span style="font-size:11px;color:#d2be90;font-weight:600;">Posição Atual</span>'
     + '</div>'
-    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">'
-    + '  <button type="button" data-clp="explore-poi" style="background:linear-gradient(180deg,#3a2c18,#241a0e);border:1px solid #c4953a;color:#fde047;font-family:Cinzel,serif;font-size:11px;font-weight:700;padding:6px 4px;border-radius:4px;cursor:pointer;">🔍 Explorar</button>'
-    + '  <button type="button" data-clp="open-camp" style="background:linear-gradient(180deg,#1e3222,#122015);border:1px solid #4ade80;color:#bbf7d0;font-family:Cinzel,serif;font-size:11px;font-weight:700;padding:6px 4px;border-radius:4px;cursor:pointer;">⛺ Acampar</button>'
-    + '  <button type="button" data-clp="forage-here" style="background:linear-gradient(180deg,#243018,#161e0e);border:1px solid #a3e635;color:#d9f99d;font-family:Cinzel,serif;font-size:11px;font-weight:700;padding:6px 4px;border-radius:4px;cursor:pointer;">🌿 Forragear</button>'
-    + '  <button type="button" data-clp="open-party" style="background:linear-gradient(180deg,#1e2638,#121824);border:1px solid #60a5fa;color:#bfdbfe;font-family:Cinzel,serif;font-size:11px;font-weight:700;padding:6px 4px;border-radius:4px;cursor:pointer;">👥 Comitiva</button>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">'
+    + '  <button type="button" class="clp-node-act-btn" data-clp="explore-poi" style="background:linear-gradient(180deg,#2a1f14,#17110a);border:1px solid rgba(196,149,58,0.5);color:#ffd685;font-family:Cinzel,serif;font-size:11.5px;font-weight:700;padding:8px 6px;border-radius:4px;cursor:pointer;">Explorar</button>'
+    + '  <button type="button" class="clp-node-act-btn" data-clp="open-camp" style="background:linear-gradient(180deg,#2a1f14,#17110a);border:1px solid rgba(196,149,58,0.5);color:#ffd685;font-family:Cinzel,serif;font-size:11.5px;font-weight:700;padding:8px 6px;border-radius:4px;cursor:pointer;">Acampar</button>'
+    + '  <button type="button" class="clp-node-act-btn" data-clp="forage-here" style="background:linear-gradient(180deg,#2a1f14,#17110a);border:1px solid rgba(196,149,58,0.5);color:#ffd685;font-family:Cinzel,serif;font-size:11.5px;font-weight:700;padding:8px 6px;border-radius:4px;cursor:pointer;">Forragear</button>'
+    + '  <button type="button" class="clp-node-act-btn" data-clp="open-party" style="background:linear-gradient(180deg,#2a1f14,#17110a);border:1px solid rgba(196,149,58,0.5);color:#ffd685;font-family:Cinzel,serif;font-size:11.5px;font-weight:700;padding:8px 6px;border-radius:4px;cursor:pointer;">Comitiva</button>'
     + '</div>'
     + dgBtns
     + '</div>';
@@ -97874,8 +97876,8 @@ function _showDungeonDiscoveryModal(dg, biome, checkInfo) {
 
   var locName = (biome && (biome.regionalName || biome.name)) ? (biome.regionalName || biome.name) : 'Valdória';
   var rollText = (checkInfo && checkInfo.guaranteed)
-    ? '🧭 <b>Busca Minuciosa nos Ermos:</b> A comitiva vasculhou o perímetro com cautela até localizar a entrada oculta!'
-    : ('🎲 <b>Teste de Investigação / Percepção (D&D 5e):</b> d20 (' + checkInfo.d20 + ') + mod (' + (checkInfo.mod >= 0 ? '+' : '') + checkInfo.mod + ') = <b>' + checkInfo.total + '</b> vs CD ' + checkInfo.dc + ' <b>(Sucesso!)</b>');
+    ? '◆ <b>Busca Minuciosa nos Ermos:</b> A comitiva vasculhou o perímetro com cautela até localizar a entrada oculta!'
+    : ('◆ <b>Teste de Investigação / Percepção (D&D 5e):</b> d20 (' + checkInfo.d20 + ') + mod (' + (checkInfo.mod >= 0 ? '+' : '') + checkInfo.mod + ') = <b>' + checkInfo.total + '</b> vs CD ' + checkInfo.dc + ' <b>(Sucesso!)</b>');
 
   var artKey = (dg.id === 'orc_chief_tent') ? 'orc_tribe' : dg.id;
   var imgBase = (typeof window !== 'undefined' && window.location.protocol === 'file:')
@@ -97886,29 +97888,29 @@ function _showDungeonDiscoveryModal(dg, biome, checkInfo) {
   var modal = document.createElement('div');
   modal.id = 'incursion-discovery-modal';
   modal.className = 'explore-modal-overlay';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:12px;z-index:270;';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:12px;z-index:2700;';
   modal.innerHTML = ''
-    + '<div class="em-card" style="max-width:420px;width:100%;background:#16100b;border:2px solid #ffd700;border-radius:8px;overflow:hidden;box-shadow:0 12px 36px rgba(0,0,0,0.95);animation:fadeIn 0.22s ease-out;">'
+    + '<div class="em-card" style="max-width:420px;width:100%;background:#16100b;border:1.5px solid #ffd685;border-radius:8px;overflow:hidden;box-shadow:0 12px 36px rgba(0,0,0,0.95);animation:fadeIn 0.22s ease-out;">'
     + '  <div style="position:relative;height:120px;background:url(' + imgUrl + ') center/cover no-repeat;border-bottom:1px solid rgba(196,149,58,0.5);">'
     + '    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,8,6,0.3),rgba(16,11,7,0.95));"></div>'
     + '    <div style="position:absolute;bottom:8px;left:12px;right:12px;text-align:left;">'
-    + '      <div style="font-size:11px;color:#ffd700;font-family:Cinzel,serif;font-weight:700;letter-spacing:1px;">🏰 INCURSÃO DESCOBERTA NOS ERMOS</div>'
+    + '      <div style="font-size:11px;color:#ffd700;font-family:Cinzel,serif;font-weight:700;letter-spacing:1px;">◆ INCURSÃO DESCOBERTA NOS ERMOS</div>'
     + '      <div style="font-family:Cinzel,serif;font-size:15px;color:#fff;font-weight:700;text-shadow:0 2px 6px #000;">' + dg.name + '</div>'
     + '    </div>'
     + '  </div>'
     + '  <div style="padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:8px;">'
-    + '    <div style="padding:6px 10px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.35);border-radius:5px;font-size:11px;color:#bbf7d0;">'
+    + '    <div style="padding:6px 10px;background:rgba(196,149,58,0.15);border:1px solid rgba(196,149,58,0.4);border-radius:5px;font-size:11px;color:#ffd685;">'
     +        rollText
     + '    </div>'
     + '    <div style="font-size:11.5px;color:#f4d49a;line-height:1.45;font-style:italic;">'
     +        (dg.intro || 'Após vasculhar minuciosamente a área, você localiza a entrada fortificada protegida pela guarda local.')
     + '    </div>'
-    + '    <div style="padding:6px 10px;background:rgba(217,119,6,0.12);border:1px solid rgba(217,119,6,0.35);border-radius:5px;font-size:11px;color:#fde68a;">'
-    + '      📍 <b>Permanência:</b> Esta incursão agora está <b>desbloqueada permanentemente</b> no painel de ' + locName + ' e pode ser adentrada a qualquer momento.'
+    + '    <div style="padding:6px 10px;background:rgba(30,22,14,0.65);border:1px solid rgba(196,149,58,0.3);border-radius:5px;font-size:11px;color:#d2be90;">'
+    + '      ◆ <b>Permanência:</b> Esta incursão agora está <b>desbloqueada permanentemente</b> no painel de ' + locName + ' e pode ser adentrada a qualquer momento.'
     + '    </div>'
     + '    <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">'
-    + '      <button type="button" id="incur-disc-enter-btn" style="background:linear-gradient(180deg,rgba(160,32,32,0.95),rgba(90,16,16,0.98));border:1.5px solid #f87171;color:#fecaca;font-family:Cinzel,serif;font-size:11px;font-weight:700;padding:8px 12px;border-radius:5px;cursor:pointer;">🏰 Adentrar Incursão Agora</button>'
-    + '      <button type="button" id="incur-disc-close-btn" style="background:linear-gradient(180deg,#3a2c18,#241a0e);border:1px solid #c4953a;color:#fde047;font-family:Cinzel,serif;font-size:11px;font-weight:700;padding:8px 12px;border-radius:5px;cursor:pointer;">🧭 Voltar às Ações do Local</button>'
+    + '      <button type="button" id="incur-disc-enter-btn" style="background:linear-gradient(180deg,#3a1a14,#200e0a);border:1.5px solid rgba(196,100,80,0.7);color:#fca5a5;font-family:Cinzel,serif;font-size:11.5px;font-weight:700;padding:8px 12px;border-radius:5px;cursor:pointer;">Adentrar Incursão Agora</button>'
+    + '      <button type="button" id="incur-disc-close-btn" style="background:linear-gradient(180deg,#2a1f14,#17110a);border:1px solid rgba(196,149,58,0.5);color:#ffd685;font-family:Cinzel,serif;font-size:11.5px;font-weight:700;padding:8px 12px;border-radius:5px;cursor:pointer;">Voltar às Ações do Local</button>'
     + '    </div>'
     + '  </div>'
     + '</div>';
@@ -97931,9 +97933,22 @@ function _triggerPointcrawlRegionalEvent(targetBiome) {
     ? _resolveCurrentPointcrawlBiomeNode(targetBiome || window._cartCurrentLocBiome)
     : (targetBiome || window._cartCurrentLocBiome);
 
-  if (typeof S === 'undefined' || !S) return;
-  // Fecha o popup de localidade para dar visibilidade imediata ao evento/toast
+  if (typeof S === 'undefined' || !S) {
+    if (typeof window.S !== 'undefined' && window.S) S = window.S;
+    else return;
+  }
+  // Fecha o popup de localidade para dar visibilidade imediata ao evento
   if (typeof _closeCartLocationPopup === 'function') _closeCartLocationPopup();
+
+  // Sincroniza estado de bioma e localidade
+  var bKey = (biome && (biome.biome || biome.key)) || 'plains';
+  S.biome = bKey;
+  if (typeof _cartResolveMapId === 'function') {
+    S.mapId = _cartResolveMapId(biome.key || bKey);
+  } else {
+    S.mapId = biome.key || bKey;
+  }
+  window._cartCurrentLocBiome = biome;
 
   // Registra passo e ciclo de tempo nos ermos sem tocar no grid hexagonal
   S.ph = 'idle';
@@ -97943,6 +97958,8 @@ function _triggerPointcrawlRegionalEvent(targetBiome) {
     try { tickDayPhase(); } catch (_) {}
   }
 
+  var regName = (biome && (biome.regionalName || biome.name)) ? (biome.regionalName || biome.name) : 'Valdória';
+
   // REGRA SOBERANA DE INCURSÕES: Checagem de Descoberta nos Ermos
   var potential = (typeof _getAllPotentialDungeonsForBiomeNode === 'function') ? _getAllPotentialDungeonsForBiomeNode(biome) : [];
   var undiscovered = potential.filter(function(dg){
@@ -97951,16 +97968,16 @@ function _triggerPointcrawlRegionalEvent(targetBiome) {
 
   if (undiscovered.length > 0) {
     var targetDg = undiscovered[0];
-    var bKey = (biome && biome.key) || 'current';
+    var nodeKey = (biome && biome.key) || 'current';
     var cid = (S && S.player && (S.player.char_id || S.player.id)) || window.__EXPLORE_USER_ID || 'shared';
-    var storeKey = 'vld_exp_att_' + cid + '_' + bKey;
+    var storeKey = 'vld_exp_att_' + cid + '_' + nodeKey;
     var attempts = 0;
     try {
       attempts = parseInt(localStorage.getItem(storeKey) || '0', 10) || 0;
     } catch (_) {}
     if (!S._exploreAttempts) S._exploreAttempts = {};
-    attempts = Math.max(attempts, S._exploreAttempts[bKey] || 0) + 1;
-    S._exploreAttempts[bKey] = attempts;
+    attempts = Math.max(attempts, S._exploreAttempts[nodeKey] || 0) + 1;
+    S._exploreAttempts[nodeKey] = attempts;
     try {
       localStorage.setItem(storeKey, String(attempts));
     } catch (_) {}
@@ -97974,32 +97991,115 @@ function _triggerPointcrawlRegionalEvent(targetBiome) {
     var dc = 12; // D&D 5e CD Moderada de Investigação nos Ermos
 
     if (total >= dc || attempts >= 2) {
-      _recordDungeonDiscovered(targetDg.id, bKey);
+      _recordDungeonDiscovered(targetDg.id, nodeKey);
       _showDungeonDiscoveryModal(targetDg, biome, { d20: d20, total: total, mod: bestMod, dc: dc, guaranteed: (attempts >= 2 && total < dc) });
       if (typeof updateHud === 'function') updateHud();
       return;
     } else {
-      var regName = (biome && (biome.name || biome.regionalName)) ? (biome.name || biome.regionalName) : 'Valdória';
-      if (typeof vToast === 'function') {
-        vToast('🔍 Investigação (' + total + ' vs CD ' + dc + '): A comitiva vasculhou ' + regName + ' e encontrou pistas e sentinelas, mas a entrada oculta ainda não foi localizada. Continue explorando!', 'warning', 4500);
+      // Narrativa de investigação estruturada quando a entrada ainda não é localizada
+      if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+        window.vEncounter.render({
+          npc: {
+            name: 'Patrulha de Reconhecimento',
+            desc: 'Varredura nos Ermos · ' + regName,
+            portrait: '/shared/img/merchants/corvus-veltharion.webp'
+          },
+          script: [
+            { type: 'narration', text: 'A comitiva vasculhou minuciosamente os arredores e desfiladeiros de <b>' + regName + '</b> em busca de entradas e pistas territoriais.' },
+            { type: 'narration', text: '<b>Teste de Investigação / Percepção (D&D 5e):</b> d20 (' + d20 + ') + mod (' + (bestMod >= 0 ? '+' : '') + bestMod + ') = <b>' + total + '</b> vs CD ' + dc + ' <i>(Pistas encontradas, mas a entrada permanece camuflada)</i>.' },
+            { type: 'narration', text: 'Rastros recentes e marcas cravadas no solo confirmam a presença de inimigos na região. Uma nova varredura ou exploração mais profunda revelará o covil com certeza.' }
+          ],
+          choices: [
+            { id: 'exp_retry', label: 'Retornar às ações de ' + regName }
+          ],
+          inline: true
+        }, {
+          player: S.player,
+          onChoice: function () {
+            if (typeof _openCurrentNodePointcrawlHub === 'function') _openCurrentNodePointcrawlHub();
+          }
+        });
+        if (typeof updateHud === 'function') updateHud();
+        return;
       }
-      if (typeof updateHud === 'function') updateHud();
-      return;
     }
   }
 
-  // Rolagem de evento regional (narrativo ou combate D&D 5e)
-  var rolled = false;
-  if (typeof maybeRollEvent === 'function') {
-    rolled = maybeRollEvent();
+  // Tabela Dinâmica dos Ermos (DMG p. 85-87 / XGE p. 92-110)
+  var enc = (window.CartShared && typeof CartShared.rollWildernessEncounterTable === 'function')
+    ? CartShared.rollWildernessEncounterTable(bKey, (biome && biome.tier) || 1)
+    : null;
+
+  if (enc && window.vEncounter && typeof window.vEncounter.render === 'function') {
+    var p = (S && S.player) || {};
+    var wisMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(p, 'wis') : 1;
+    var strMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(p, 'str') : 1;
+    var dexMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(p, 'dex') : 1;
+    var chaMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(p, 'cha') : 1;
+    var bestMod = Math.max(wisMod, strMod, dexMod, chaMod);
+
+    window.vEncounter.render({
+      npc: {
+        name: 'Patrulha dos Ermos',
+        desc: enc.title + ' · ' + regName,
+        portrait: '/shared/img/merchants/corvus-veltharion.webp'
+      },
+      script: [
+        { type: 'narration', text: enc.desc },
+        { type: 'narration', text: '<b>Desafio D&D 5e:</b> ' + (enc.check || 'A comitiva avalia a situação e define como agir.') }
+      ],
+      choices: [
+        { id: 'enc_act', label: 'Transpor o desafio', desc: enc.check || 'Agir de prontidão para superar o obstáculo.' },
+        { id: 'enc_bypass', label: 'Contornar com cautela', desc: 'Evitar riscos desnecessários e patrulhar outra trilha.' }
+      ],
+      inline: true
+    }, {
+      player: S.player,
+      onChoice: function (ch) {
+        var isAct = (ch && ch.id === 'enc_act');
+        var d20 = 1 + Math.floor(Math.random() * 20);
+        var total = d20 + (isAct ? bestMod : dexMod);
+        var dc = 12;
+        var ok = !isAct || (total >= dc);
+
+        var textOutcome = ok
+          ? (isAct ? ('<b>Sucesso no Teste D&D 5e:</b> d20 (' + d20 + ') + mod (' + (bestMod >= 0 ? '+' : '') + bestMod + ') = <b>' + total + '</b> vs CD ' + dc + '.<br>' + enc.success) : 'A comitiva manobra com passos cautelosos, contornando a ameaça sem sofrer danos.')
+          : ('<b>Falha no Teste D&D 5e:</b> d20 (' + d20 + ') + mod (' + (bestMod >= 0 ? '+' : '') + bestMod + ') = <b>' + total + '</b> vs CD ' + dc + '.<br>' + (enc.failure || 'A comitiva sofre complicações ao transpor o terreno.'));
+
+        if (!ok && isAct) {
+          var dmg = 1 + Math.floor(Math.random() * 4);
+          p.hp = Math.max(1, (p.hp || 20) - dmg);
+          textOutcome += '<br><br><span style="color:#fca5a5;font-weight:600;">(A comitiva sofre ' + dmg + ' de dano de desgaste físico na travessia).</span>';
+        }
+
+        window.vEncounter.render({
+          npc: {
+            name: 'Patrulha dos Ermos',
+            desc: enc.title + ' · Desfecho',
+            portrait: '/shared/img/merchants/corvus-veltharion.webp'
+          },
+          script: [
+            { type: 'narration', text: textOutcome }
+          ],
+          choices: [{ id: 'enc_finish', label: 'Retornar às ações de ' + regName }],
+          inline: true
+        }, {
+          player: S.player,
+          onChoice: function () {
+            if (typeof _openCurrentNodePointcrawlHub === 'function') _openCurrentNodePointcrawlHub();
+          }
+        });
+      }
+    });
+    if (typeof updateHud === 'function') updateHud();
+    return;
   }
-  if (!rolled && typeof maybeRollWanderingMonster === 'function') {
-    rolled = maybeRollWanderingMonster();
+
+  // Fallback se vEncounter não estiver disponível
+  if (typeof vToast === 'function') {
+    vToast('A comitiva patrulhou as imediações de ' + regName + ' sem incidentes hostis no momento.', 'info', 3500);
   }
-  if (!rolled && typeof vToast === 'function') {
-    var regName = (biome && (biome.name || biome.regionalName)) ? (biome.name || biome.regionalName) : 'Valdória';
-    vToast('🧭 A comitiva patrulhou as imediações de ' + regName + ' sem incidentes hostis no momento.', 'info', 3500);
-  }
+  if (typeof _openCurrentNodePointcrawlHub === 'function') _openCurrentNodePointcrawlHub();
   if (typeof updateHud === 'function') updateHud();
 }
 
@@ -98026,11 +98126,11 @@ function _openPointcrawlDungeonDelver(dgId) {
   var imgUrl = imgBase + artKey + '.webp';
 
   var catLabels = {
-    combat: { ico: '⚔️', tag: 'Guarnição / Sentinelas', color: '#f87171' },
-    trap: { ico: '🪤', tag: 'Perigo / Armadilha D&D 5e', color: '#fb923c' },
-    discovery: { ico: '🔥', tag: 'Santuário / Bivaque Seguro', color: '#4ade80' },
-    mystery: { ico: '🔮', tag: 'Enigma / Relicário Antigo', color: '#c084fc' },
-    boss: { ico: '💀', tag: 'Câmara do Chefe', color: '#ffd700' }
+    combat: { ico: '◆', tag: 'Guarnição / Sentinelas', color: '#fca5a5' },
+    trap: { ico: '◆', tag: 'Perigo / Armadilha D&D 5e', color: '#fdba74' },
+    discovery: { ico: '◆', tag: 'Santuário / Bivaque Seguro', color: '#86efac' },
+    mystery: { ico: '◆', tag: 'Enigma / Relicário Antigo', color: '#d8b4fe' },
+    boss: { ico: '◆', tag: 'Câmara do Chefe', color: '#ffd700' }
   };
 
   var chambersHtml = dgMap.dungeonEncounters.map(function(enc, idx){
@@ -98042,13 +98142,13 @@ function _openPointcrawlDungeonDelver(dgId) {
       + '  <div style="font-family:Cinzel,serif;font-size:11.5px;color:#f4d49a;font-weight:700;margin-top:1px;">' + enc.title + '</div>'
       + '  <div style="font-size:11px;color:#a09484;line-height:1.4;margin-top:2px;">' + (enc.flavor || '') + '</div>'
       + '</div>'
-      + '<button type="button" style="background:linear-gradient(180deg,#4a361a,#2a1e0e);border:1px solid #ffd700;color:#ffd700;font-family:Cinzel,serif;font-size:11px;font-weight:700;padding:6px 10px;border-radius:4px;cursor:pointer;white-space:nowrap;">' + (enc.repeatable ? '⛺ Acampar' : (done ? 'Revisitada' : 'Adentrar ➔')) + '</button>'
+      + '<button type="button" style="background:linear-gradient(180deg,#4a361a,#2a1e0e);border:1px solid #ffd700;color:#ffd700;font-family:Cinzel,serif;font-size:11px;font-weight:700;padding:6px 10px;border-radius:4px;cursor:pointer;white-space:nowrap;">' + (enc.repeatable ? 'Bivaque' : (done ? 'Revisitada' : 'Adentrar ▸')) + '</button>'
       + '</div>';
   }).join('');
 
   var bossInfo = dgMap.boss
     ? '<div style="margin:6px 0 8px;padding:6px 10px;background:rgba(120,20,20,0.28);border:1px solid rgba(248,113,113,0.45);border-radius:5px;font-size:11px;color:#fecaca;text-align:left;">'
-      + '💀 <b>Senhor da Masmorra:</b> ' + dgMap.boss.name + ' (ND ' + dgMap.boss.cr + ' · Nível Sugerido ' + dgMap.boss.sugLvl + '+)'
+      + '◆ <b>Senhor da Masmorra:</b> ' + dgMap.boss.name + ' (ND ' + dgMap.boss.cr + ' · Nível Sugerido ' + dgMap.boss.sugLvl + '+)'
       + '</div>'
     : '';
 
@@ -98062,7 +98162,7 @@ function _openPointcrawlDungeonDelver(dgId) {
     + '    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,8,6,0.25),rgba(16,11,7,0.94));"></div>'
     + '    <button type="button" id="pcd-close-btn" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.65);border:1px solid #c4953a;color:#f4d49a;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;">✕</button>'
     + '    <div style="position:absolute;bottom:8px;left:12px;right:12px;text-align:left;">'
-    + '      <div style="font-size:11px;color:#ffd700;font-family:Cinzel,serif;font-weight:700;letter-spacing:1px;">🏰 INCURSÃO POINTCRAWL EM MASMORRA</div>'
+    + '      <div style="font-size:11px;color:#ffd700;font-family:Cinzel,serif;font-weight:700;letter-spacing:1px;">◆ INCURSÃO POINTCRAWL EM MASMORRA</div>'
     + '      <div style="font-family:Cinzel,serif;font-size:15px;color:#fff;font-weight:700;text-shadow:0 2px 6px #000;">' + dgMap.name + '</div>'
     + '    </div>'
     + '  </div>'

@@ -3049,6 +3049,121 @@ var DEPARTURES = {
         return preps;
     }
 
+
+    /**
+     * Sistema de Orientação na Marcha D&D 5e (PHB p. 181-183, DMG p. 111-112).
+     * Avalia se a comitiva possui um Especialista em Navegação/Ermos:
+     * - Patrulheiro (Ranger - Explorador Natural / Natural Explorer)
+     * - Druida (Comunhão Natural / Leitura dos Ventos e Relevo)
+     * - Antecedente Forasteiro / Andarilho (Outlander - Wanderer)
+     * - Proficiência em Sobrevivência (Wisdom / Survival)
+     * - Instrumentos de Navegação: Bússola / Astrolábio / Cartas do Mestre Corvus
+     * - Talento Mente Aguçada (Keen Mind)
+     *
+     * Sem especialista: a percepção do progresso é puramente sensorial (posição do sol,
+     * cansaço muscular, transição de marcos no horizonte), sem contador numérico exato.
+     */
+    function getMarchOrientation(player, j) {
+        var t = _traits(player);
+        var p = player || {};
+        var dest = (j && j.displayName) || 'destino';
+        var distLeft = (j && j.distRemaining != null) ? j.distRemaining : 0;
+        var distTotal = (j && j.distTotal != null) ? j.distTotal : 9;
+        var distUnit = (distLeft === 1) ? ' marco' : ' marcos';
+
+        // 1. Patrulheiro (Ranger) - Habilidade Canônica 'Explorador Natural' (PHB p. 91)
+        var hasRanger = (t.partyClasses.indexOf('patrulheiro') >= 0 || t.partyClasses.indexOf('ranger') >= 0);
+        if (hasRanger) {
+            return {
+                hasSpecialist: true,
+                specialistType: 'patrulheiro',
+                label: 'Batedor',
+                badge: '[Batedor: ~' + distLeft + distUnit + ']',
+                speech: 'Reconheço essas ravinas e o vento do vale. Estamos na rota correta; faltam cerca de ' + distLeft + distUnit + ' até ' + dest + '.',
+                speaker: 'Patrulheiro'
+            };
+        }
+
+        // 2. Druida - Leitura dos Ventos, Fauna e Relevo Natural (D&D 5e)
+        var hasDruid = (t.partyClasses.indexOf('druida') >= 0 || t.partyClasses.indexOf('druid') >= 0);
+        if (hasDruid) {
+            return {
+                hasSpecialist: true,
+                specialistType: 'druida',
+                label: 'Druida',
+                badge: '[Druida: ~' + distLeft + distUnit + ']',
+                speech: 'A umidade do ar e a inclinação da vegetação mostram que cobrimos a maior parte das terras selvagens. Restam aproximadamente ' + distLeft + distUnit + '.',
+                speaker: 'Druida'
+            };
+        }
+
+        // 3. Antecedente Forasteiro / Andarilho (Outlander - Wanderer, PHB p. 136)
+        var bg = String(t.bg || '').toLowerCase();
+        var hasOutlander = (bg.indexOf('forasteiro') >= 0 || bg.indexOf('outlander') >= 0 || bg.indexOf('andarilho') >= 0 || bg.indexOf('guia') >= 0);
+        if (hasOutlander) {
+            return {
+                hasSpecialist: true,
+                specialistType: 'forasteiro',
+                label: 'Andarilho',
+                badge: '[Andarilho: ~' + distLeft + distUnit + ']',
+                speech: 'Minha memória para relevos e mapas não falha. Esta crista de terra nos deixa a cerca de ' + distLeft + distUnit + ' do nosso objetivo.',
+                speaker: 'Forasteiro'
+            };
+        }
+
+        // 4. Perícia de Sobrevivência (Sabedoria / Survival, PHB p. 182)
+        var isSurvival = false;
+        if (global.DndRules && typeof DndRules.isProficient === 'function') {
+            isSurvival = DndRules.isProficient(p, 'wis', 'survival') || DndRules.isProficient(p, 'survival');
+        }
+        if (isSurvival) {
+            return {
+                hasSpecialist: true,
+                specialistType: 'survival',
+                label: 'Sobrevivência',
+                badge: '[Batedor: ~' + distLeft + distUnit + ']',
+                speech: 'Pela declinação do sol e as pedras-marco de basalto cravadas na estrada, calculo aproximadamente ' + distLeft + distUnit + ' restantes de marcha.',
+                speaker: 'Batedor'
+            };
+        }
+
+        // 5. Instrumentos de Cartografia / Bússola / Mapas de Corvus (XGtE p. 79)
+        var hasCompass = hasItem(p, 'bussola') || hasItem(p, 'bussola magica') || hasItem(p, 'bussola_magica');
+        var hasMap = (p.owned_maps && p.owned_maps.length > 0) || (p.maps_owned && p.maps_owned.length > 0) || hasItem(p, 'mapa');
+        if (hasCompass || hasMap) {
+            return {
+                hasSpecialist: true,
+                specialistType: 'instrument',
+                label: 'Navegação',
+                badge: '[Cartas & Bússola: ~' + distLeft + distUnit + ']',
+                speech: 'Consultando a agulha de navegação e as anotações cartográficas de viagem, a estimativa precisa indica ' + distLeft + distUnit + ' até ' + dest + '.',
+                speaker: 'Navegação'
+            };
+        }
+
+        // 6. Talento Mente Aguçada (Keen Mind, PHB p. 167)
+        if (p.keen_mind || p.talento_mente_agucada || (p.feats && p.feats.indexOf('keen_mind') >= 0)) {
+            return {
+                hasSpecialist: true,
+                specialistType: 'keen_mind',
+                label: 'Mente Aguçada',
+                badge: '[Mente Aguçada: ~' + distLeft + distUnit + ']',
+                speech: 'O norte absoluto e o ângulo das sombras não deixam dúvida: restam exatamente cerca de ' + distLeft + distUnit + ' de caminhada antes do anoitecer.',
+                speaker: 'Mente Aguçada'
+            };
+        }
+
+        // 7. Aventureiro Comum (Sem especialista - Percepção Sensorial Pura D&D 5e)
+        return {
+            hasSpecialist: false,
+            specialistType: null,
+            label: null,
+            badge: null,
+            speech: null,
+            speaker: null
+        };
+    }
+
     function getConfirmationContent(player, j) {
         var t = _traits(player);
         var dest = (j && j.displayName) || 'destino desconhecido';
@@ -3208,6 +3323,7 @@ var DEPARTURES = {
         resolveJourneyCheck: resolveJourneyCheck,
         successPctForChoice: successPctForChoice,
         canTakeChoice: canTakeChoice,
+        getMarchOrientation: getMarchOrientation,
         getConfirmationContent: getConfirmationContent,
         pickNarrative: pickNarrative,
         pickChoiceVoice: pickChoiceVoice,

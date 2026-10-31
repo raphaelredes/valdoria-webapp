@@ -72705,13 +72705,13 @@ function _cartFocusWaypoint(key) {
             '</div>';
           var metaHtml = (prov.id === 'world') 
             ? '<div class="cam-item-meta">🗺️ Mapa Geral de Valdória</div>'
-            : '<div class="cam-item-meta">📍 ' + knownCount + ' / ' + locKeys.length + ' locais mapeados (' + pct + '%)' + compBadge + qBadge + progBarHtml + '</div>';
+            : '<div class="cam-item-meta">◆ ' + knownCount + ' / ' + locKeys.length + ' locais mapeados (' + pct + '%)' + compBadge + qBadge + progBarHtml + '</div>';
           var dossierHtml = (prov.id === 'world') ? '' :
             '<div class="cam-item-dossier" style="display:flex;flex-wrap:wrap;gap:3px;margin:3px 0;font-size:11px;">' +
             '  <span style="background:rgba(196,149,58,0.22);border:1px solid rgba(196,149,58,0.4);color:#ffd700;padding:1px 5px;border-radius:2px;">⚔️ ' + (prov.tier || 'Tier 1') + '</span>' +
             '  <span style="background:rgba(20,30,45,0.6);border:1px solid rgba(147,197,253,0.3);color:#93c5fd;padding:1px 5px;border-radius:2px;">🌬️ ' + (prov.winds || 'Ventos') + '</span>' +
             '</div>';
-          item.innerHTML = '<div class="cam-item-title">' + (prov.icon || '🗺️') + ' ' + (prov.name || prov.id) + '</div>'
+          item.innerHTML = '<div class="cam-item-title">' + (prov.icon || '') + ' ' + (prov.name || prov.id) + '</div>'
                          + '<div class="cam-item-sub">' + (prov.desc || 'Província de Valdória') + '</div>'
                          + dossierHtml
                          + metaHtml;
@@ -73870,17 +73870,17 @@ function _openCartProvincePreviewPopup(prov) {
 
   card.innerHTML = ''
     + '<div class="clp-body clp-prov-preview" style="overflow-x:hidden !important;max-width:100%;box-sizing:border-box;">'
-    + '  <div class="clp-icon" style="font-size:42px;margin:4px 0 8px;line-height:1;">' + (prov.icon || '🗺️') + '</div>'
+    + '  <div class="clp-icon" style="font-size:42px;margin:4px 0 8px;line-height:1;">' + (prov.icon || '') + '</div>'
     + '  <h2 class="clp-prov-title" style="margin:2px 0 4px;">' + prov.name + '</h2>'
     + '  <div class="clp-prov-sub" style="margin-bottom:8px;">Mapa Regional do Reino de Valdória</div>'
-    + (provQuestName ? '<div class="clp-quest-alert" style="margin:0 12px 8px;">📜 CONTRATO ATIVO NA REGIÃO: ' + provQuestName.toUpperCase() + '</div>' : '')
+    + (provQuestName ? '<div class="clp-quest-alert" style="margin:0 12px 8px;">◆ CONTRATO ATIVO NA REGIÃO: ' + provQuestName.toUpperCase() + '</div>' : '')
     + '  <p class="clp-prov-desc" style="margin:0 0 12px;padding:0 8px;">' + (prov.desc || 'Uma vasta região com seus próprios mistérios e perigos.') + '</p>'
     + '  <div class="clp-prov-stats" style="margin:0 0 12px;display:flex;justify-content:center;overflow-x:hidden !important;">'
-    + '    <div class="clp-prov-stat-pill" style="display:inline-block;white-space:nowrap;">📍 ' + knownCount + ' / ' + locKeys.length + ' locais mapeados</div>'
+    + '    <div class="clp-prov-stat-pill" style="display:inline-block;white-space:nowrap;">◆ ' + knownCount + ' / ' + locKeys.length + ' locais mapeados</div>'
     + '  </div>'
     + '</div>'
     + '<div class="clp-buttons">'
-    + '  <button class="clp-btn clp-btn-hex-explore" id="clp-open-prov-btn" data-clp="open-prov-detail">🗺️ Abrir Mapa da Região</button>'
+    + '  <button class="clp-btn clp-btn-hex-explore" id="clp-open-prov-btn" data-clp="open-prov-detail">Abrir Mapa da Região</button>'
     + '  <button class="clp-btn clp-btn-back" data-clp="back">Fechar</button>'
     + '</div>';
 
@@ -74058,11 +74058,11 @@ function _openCartLocationPopup(biome){
   var weatherHtml = weatherInfo ? '<div class="clp-weather-note" style="margin:4px 0 6px;font-size:11.5px;color:#93c5fd;background:rgba(20,30,45,0.7);padding:4px 8px;border-radius:3px;border-left:3px solid #60a5fa;text-align:left;">' + weatherInfo.icon + ' <b>Condição Climática:</b> ' + weatherInfo.name + '<br><span style="font-style:italic;color:#cbd5e1;">' + weatherInfo.effect + '</span></div>' : '';
 
   var curPace = window._cartSelectedPace || 'normal';
-  var encounterRisk = (window.CartShared && CartShared.calcEncounterRisk) ? CartShared.calcEncounterRisk(biome, { pace: curPace, isNight: isNight, weather: curWeather, hours: horasViagem }) : { label: '🟢 Zona Segura (0%)', color: '#a3e635' };
+  var encounterRisk = (window.CartShared && CartShared.calcEncounterRisk) ? CartShared.calcEncounterRisk(biome, { pace: curPace, isNight: isNight, weather: curWeather, hours: horasViagem }) : { label: 'Zona Segura (0%)', color: '#a3e635' };
 
   card.innerHTML = ''
     + '<div class="clp-body">'
-    + '<div class="clp-icon">' + (CartShared.locArtHtml ? CartShared.locArtHtml(biome) : (biome.ico || '🗺️')) + '</div>'
+    + '<div class="clp-icon">' + (CartShared.locArtHtml ? CartShared.locArtHtml(biome) : (biome.ico || '')) + '</div>'
     + (isCurrent ? '<div class="clp-current-here">VOCÊ ESTÁ AQUI</div>' : '')
     + questBannerHtml
     + '<h2>' + (biome.regionalName || biome.name) + '</h2>'
@@ -74073,11 +74073,11 @@ function _openCartLocationPopup(biome){
     + '</div>'
     + '<div class="clp-buttons">'
     + (canExploreOrigin
-        ? '<button class="clp-btn clp-btn-hex-explore" data-clp="travel">🧭 Viajar</button>'
+        ? '<button class="clp-btn clp-btn-hex-explore" data-clp="travel">Viajar</button>'
           + '<button class="clp-btn clp-btn-back" data-clp="back">Voltar</button>'
         : (isCurrent
           ? '<button class="clp-btn clp-btn-back" data-clp="back">Voltar</button>'
-          : '<button class="clp-btn clp-btn-hex-explore" data-clp="travel">🧭 Viajar</button>'
+          : '<button class="clp-btn clp-btn-hex-explore" data-clp="travel">Viajar</button>'
             + '<button class="clp-btn clp-btn-back" data-clp="back">Voltar</button>'
          ))
     + '</div>';
@@ -74522,6 +74522,71 @@ function _closeCartLocationPopup(){
       var action = btn.dataset.clp;
       var biome = window._cartCurrentLocBiome;
       if (action === 'back') { _closeCartLocationPopup(); return; }
+      if (action === 'explore-poi') {
+        _closeCartLocationPopup();
+        if (typeof _triggerPointcrawlRegionalEvent === 'function') {
+          _triggerPointcrawlRegionalEvent(biome);
+        } else if (biome && ACTION_HANDLERS['cart_' + biome.key]) {
+          ACTION_HANDLERS['cart_' + biome.key](window.CITY_MOCK_PLAYER);
+        } else if (biome && typeof startCityJourney === 'function') {
+          startCityJourney(biome.key, biome.name);
+        } else {
+          try {
+            if (window.CartShared && typeof CartShared.rollWildernessEncounterTable === 'function' && window.vEncounter) {
+              var enc = CartShared.rollWildernessEncounterTable((biome && biome.key) || 'plains', 1);
+              if (enc) {
+                window.vEncounter.render({
+                  npc: { name: 'Patrulha dos Ermos', desc: enc.title, portrait: '/shared/img/merchants/corvus-veltharion.webp' },
+                  script: [
+                    { type: 'narration', text: enc.desc },
+                    { type: 'narration', text: '<b>Desafio D&D 5e:</b> ' + (enc.check || '') }
+                  ],
+                  choices: [
+                    { id: 'enc_act', label: 'Transpor o desafio' },
+                    { id: 'enc_bypass', label: 'Contornar com cautela' }
+                  ],
+                  inline: true
+                }, {
+                  player: window.CITY_MOCK_PLAYER || {},
+                  onChoice: function(ch) {
+                    var isAct = (ch && ch.id === 'enc_act');
+                    window.vEncounter.render({
+                      script: [{ type: 'narration', text: isAct ? enc.success : 'A comitiva manobra cautelosa pelos arredores.' }],
+                      choices: [{ id: 'enc_end', label: 'Retornar' }],
+                      inline: true
+                    }, {
+                      onChoice: function() { _openCartLocationPopup(biome); }
+                    });
+                  }
+                });
+              }
+            }
+          } catch (_) {}
+        }
+        return;
+      }
+      if (action === 'open-camp') {
+        _closeCartLocationPopup();
+        if (typeof openCampOverlay === 'function') openCampOverlay();
+        return;
+      }
+      if (action === 'forage-here') {
+        _closeCartLocationPopup();
+        if (typeof _doPointcrawlForage === 'function') _doPointcrawlForage();
+        return;
+      }
+      if (action === 'open-party') {
+        _closeCartLocationPopup();
+        var pp = document.getElementById('party-popup');
+        if (pp) pp.classList.add('visible');
+        return;
+      }
+      if (action === 'enter-dungeon') {
+        var dgId = btn.getAttribute('data-dg-id');
+        _closeCartLocationPopup();
+        if (dgId && typeof _openPointcrawlDungeonDelver === 'function') _openPointcrawlDungeonDelver(dgId);
+        return;
+      }
       if (action === 'open-prov-detail') {
         var prevProv = window._cartCurrentPreviewProv;
         _closeCartLocationPopup();

@@ -414,12 +414,58 @@
   function _renderContinue(scriptLines, npc) {
     var j = _j; if (!j) return;
     var distLeft = (j.distRemaining != null) ? j.distRemaining : Math.max(0, (j.total - j.step) * 3);
+    var distTotal = j.distTotal || (j.total * 3) || 9;
     var isNear = (distLeft <= 0 || j.step >= j.total);
     var distUnit = (distLeft === 1) ? ' marco' : ' marcos';
+
+    var p = _player();
+    var ori = (JD().getMarchOrientation) ? JD().getMarchOrientation(p, j) : { hasSpecialist: false };
+
+    var buttonLabel = '';
+    if (isNear) {
+      buttonLabel = 'Chegar a ' + j.displayName;
+    } else if (ori && ori.hasSpecialist && ori.badge) {
+      buttonLabel = 'Continuar marcha ' + ori.badge;
+    } else {
+      // Sensorial e sem números exatos para aventureiros comuns (D&D 5e PHB p. 181-183)
+      var ratio = distLeft / Math.max(1, distTotal);
+      if (ratio > 0.6) {
+        buttonLabel = 'Continuar marcha · Seguir estrada';
+      } else if (ratio > 0.25) {
+        buttonLabel = 'Continuar marcha · Cruzar os ermos';
+      } else {
+        buttonLabel = 'Continuar marcha · Destino à vista';
+      }
+    }
+
+    var script = (scriptLines || []).slice();
+
+    // Se temos especialista e ainda não colocamos fala nesta tela, insere nota de orientação
+    if (ori && ori.hasSpecialist && ori.speech && !script.some(function(l){ return l.speaker === ori.speaker; })) {
+      script.push({
+        type: 'narration',
+        text: '<b>' + (ori.label || 'Batedor') + ':</b> <i>"' + ori.speech + '"</i>'
+      });
+    } else if (!ori || !ori.hasSpecialist) {
+      // Pistas sensoriais sutis do ambiente (D&D 5e)
+      var ratio = distLeft / Math.max(1, distTotal);
+      var sensoryText = '';
+      if (isNear) {
+        sensoryText = 'As muralhas e marcos de <b>' + j.displayName + '</b> já se erguem no horizonte. A marcha aproxima-se do seu fim.';
+      } else if (ratio > 0.6) {
+        sensoryText = 'O sol segue firme no céu; a estrada estende-se adiante e o destino ainda requer muitas horas de passos resolutos além das colinas.';
+      } else if (ratio > 0.25) {
+        sensoryText = 'A tarde declina e as sombras se alongam na poeira. A fadiga começa a pesar nas pernas, revelando que metade do trajeto ficou para trás.';
+      } else {
+        sensoryText = 'Pequenos marcos e fumaça ao longe denunciam a proximidade de território conhecido. O trecho final da marcha está diante da comitiva.';
+      }
+      script.push({ type: 'narration', text: sensoryText });
+    }
+
     _vRender({
       npc: npc || null,
-      script: scriptLines,
-      choices: [{ id: 'jrn_cont', label: (isNear ? ('Chegar a ' + j.displayName) : ('Continuar marcha (~' + distLeft + distUnit + ')')) }],
+      script: script,
+      choices: [{ id: 'jrn_cont', label: buttonLabel }],
       inline: true,
       onChoice: function () { _step(); }
     });

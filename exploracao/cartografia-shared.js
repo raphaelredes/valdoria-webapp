@@ -40843,8 +40843,38 @@
     window._closeRegionalMapModal = closeRegionalMapModal;
   }
 
+
+  function buildPointcrawlCurrentNodeActionsHtml(biome) {
+    if (!biome) return '';
+    var dgs = (typeof _getDungeonsForBiomeNode === 'function') ? _getDungeonsForBiomeNode(biome) : [];
+    var dgBtns = dgs.map(function(dg){
+      var isAaa = !!(typeof FIXED_MAPS !== 'undefined' && FIXED_MAPS[dg.id] && FIXED_MAPS[dg.id].dungeonEncounters);
+      return '<button type="button" class="clp-btn" data-clp="enter-dungeon" data-dg-id="' + dg.id + '" '
+        + 'style="width:100%;margin-top:6px;background:linear-gradient(180deg,#2c1a16,#1a100d);border:1px solid rgba(196,100,80,0.55);color:#fca5a5;font-family:Cinzel,serif;font-size:11.5px;font-weight:700;padding:8px 10px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">'
+        + '<span>◆ Incursão: ' + dg.name + '</span>'
+        + '<span style="font-size:11px;background:rgba(0,0,0,0.45);padding:2px 6px;border-radius:3px;color:#ffd685;">' + (isAaa ? '5 Câmaras D&D 5e' : 'Explorar') + '</span>'
+        + '</button>';
+    }).join('');
+
+    return '<div class="clp-pointcrawl-hub-box" style="margin:5px 0 4px;padding:8px 10px;background:linear-gradient(180deg,rgba(26,20,14,0.96),rgba(14,10,7,0.98));border:1.5px solid rgba(196,149,58,0.5);border-radius:6px;text-align:left;box-shadow:0 4px 14px rgba(0,0,0,0.65);">'
+      + '<div style="font-family:Cinzel,serif;font-size:11.5px;font-weight:700;color:#ffd685;letter-spacing:0.8px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">'
+      + '  <span>◆ AÇÕES DA COMITIVA NESTA REGIÃO</span>'
+      + '  <span style="font-size:11px;color:#d2be90;font-weight:600;">Posição Atual</span>'
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">'
+      + '  <button type="button" class="clp-node-act-btn" data-clp="explore-poi" style="background:linear-gradient(180deg,#2a1f14,#17110a);border:1px solid rgba(196,149,58,0.45);color:#ffd685;font-family:Cinzel,serif;font-size:11.5px;font-weight:700;padding:8px 6px;border-radius:4px;cursor:pointer;">Explorar</button>'
+      + '  <button type="button" class="clp-node-act-btn" data-clp="open-camp" style="background:linear-gradient(180deg,#2a1f14,#17110a);border:1px solid rgba(196,149,58,0.45);color:#ffd685;font-family:Cinzel,serif;font-size:11.5px;font-weight:700;padding:8px 6px;border-radius:4px;cursor:pointer;">Acampar</button>'
+      + '  <button type="button" class="clp-node-act-btn" data-clp="forage-here" style="background:linear-gradient(180deg,#2a1f14,#17110a);border:1px solid rgba(196,149,58,0.45);color:#ffd685;font-family:Cinzel,serif;font-size:11.5px;font-weight:700;padding:8px 6px;border-radius:4px;cursor:pointer;">Forragear</button>'
+      + '  <button type="button" class="clp-node-act-btn" data-clp="open-party" style="background:linear-gradient(180deg,#2a1f14,#17110a);border:1px solid rgba(196,149,58,0.45);color:#ffd685;font-family:Cinzel,serif;font-size:11.5px;font-weight:700;padding:8px 6px;border-radius:4px;cursor:pointer;">Comitiva</button>'
+      + '</div>'
+      + dgBtns
+      + '</div>';
+  }
+  window._buildPointcrawlCurrentNodeActionsHtml = buildPointcrawlCurrentNodeActionsHtml;
+
   // === Export to global namespace ===
   window.CartShared = {
+    buildPointcrawlCurrentNodeActionsHtml: buildPointcrawlCurrentNodeActionsHtml,
     INK_DARK: INK_DARK, INK_MED: INK_MED, INK_LIGHT: INK_LIGHT,
     INK_FAINT: INK_FAINT, PAPER_BG: PAPER_BG, PAPER_DARK: PAPER_DARK,
     SEA_INK: SEA_INK, SEA_FAINT: SEA_FAINT,
