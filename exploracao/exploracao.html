@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-31T14:41:29Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-31T15:29:16Z - do not edit directly, edit source -->
 
 
 
@@ -1864,8 +1864,7 @@ body.pointcrawl-mode #status-card {
 }
 
 body.pointcrawl-mode #cartography-overlay {
-  display: flex !important;
-  z-index: 1200 !important;
+  display: none !important;
 }
 body.pointcrawl-mode #cart-loc-popup {
   z-index: 100020 !important;
@@ -11025,7 +11024,7 @@ body.remote-mode #debug-hud { display: none !important; }
 
 }
 
-#cartography-overlay.visible { display: flex; }
+#cartography-overlay.visible { display: none !important; }
 
 /* X-6.5.51j (2026-04-25): cart-card REFATORADO pro design system do jogo.
 
@@ -18799,7 +18798,7 @@ window.__onIntroTap = function() {
 
   <!-- Cartografia: mapa de interligações entre todos os mapas -->
 
-  <div id="cartography-overlay">
+  <div id="cartography-overlay" style="display:none !important;">
 
     <!-- X-6.5.51j: cart-card 3-zonas (header sticky + body scrollavel + footer) -->
 
@@ -97645,8 +97644,7 @@ function _hydrateExploreKnown(){
     + '  display: none !important;'
     + '}'
     + 'body.pointcrawl-mode #cartography-overlay {'
-    + '  display: flex !important;'
-    + '  z-index: 1200 !important;'
+    + '  display: none !important;'
     + '}'
     + 'body.pointcrawl-mode #cart-loc-popup {'
     + '  z-index: 100020 !important;'
@@ -110158,7 +110156,7 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
 
 }
 
-#cartography-overlay.xcart-v2.visible { display: flex; }
+#cartography-overlay.xcart-v2.visible { display: none !important; }
 
 #cartography-overlay.xcart-v2 {
   position: absolute;
