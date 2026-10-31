@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-31T15:50:28Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-31T17:05:29Z - do not edit directly, edit source -->
 
 
 
@@ -9213,7 +9213,7 @@ body.perf-lite #quest-indicator { animation: none; }
 
 #event-modal { z-index: 100; }
 
-#confirm-overlay { z-index: 120; background: rgba(10, 8, 5, 0.7); }
+#confirm-overlay { z-index: 100050 !important; background: rgba(10, 8, 5, 0.7); }
 
 #event-modal.visible, #confirm-overlay.visible { opacity: 1; pointer-events: auto; }
 
@@ -31495,7 +31495,15 @@ window.__explFetchTO = function(url, opts, ms) {
 
           var _S2C = { 'city_gates': 'plains', 'whispering_woods': 'forest', 'misty_marshes': 'swamp', 'golden_sands': 'desert', 'underground_passage': 'cave', 'stone_peaks': 'mountain', 'ancient_cemetery': 'graveyard', 'frozen_waste': 'snow', 'burning_crater': 'volcanic' };
 
-          window.__EXPLORE_KNOWN = res.known_locations.map(function (k) { return _S2C[k] || k; });
+          window.__EXPLORE_KNOWN = [];
+          res.known_locations.forEach(function (k) {
+            if (k && window.__EXPLORE_KNOWN.indexOf(k) < 0) window.__EXPLORE_KNOWN.push(k);
+            var m = _S2C[k];
+            if (m && window.__EXPLORE_KNOWN.indexOf(m) < 0) window.__EXPLORE_KNOWN.push(m);
+          });
+          if (window.S) {
+            window.S.known_locations = window.__EXPLORE_KNOWN.slice();
+          }
 
           console.info('[E-REM:API-INIT] known_locations=' + window.__EXPLORE_KNOWN.length + ' [' + window.__EXPLORE_KNOWN.join(',') + ']');
 

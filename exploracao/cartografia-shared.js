@@ -80150,15 +80150,15 @@
 
     if (!pObj && typeof window !== 'undefined') {
 
-      pObj = (window.CITY_PLAYER || window.CITY_MOCK_PLAYER || window.PLAYER || (window.S && window.S.player)) || {};
+      pObj = (window.CITY_PLAYER || window.PLAYER || (window.S && window.S.player) || window.CITY_MOCK_PLAYER) || {};
 
     }
 
-    if (!pObj) return [];
+    if (!pObj) pObj = {};
 
     var res = [];
 
-    var rawOwned = pObj.owned_maps || pObj.maps_owned;
+    var rawOwned = pObj.owned_maps || pObj.maps_owned || (pObj.metadata && (pObj.metadata.owned_maps || pObj.metadata.maps_owned));
 
     if (Array.isArray(rawOwned)) {
 
@@ -80176,29 +80176,35 @@
 
     var inv = pObj.inventory;
 
-    if ((!inv || !inv.length) && typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
 
-      if (window.S && Array.isArray(window.S.inventory) && window.S.inventory.length) {
+      if (Array.isArray(window.__EXPLORE_SERVER_INV) && window.__EXPLORE_SERVER_INV.length) {
+
+        inv = window.__EXPLORE_SERVER_INV;
+
+      } else if (window.S && Array.isArray(window.S.inventory) && window.S.inventory.length) {
 
         inv = window.S.inventory;
 
-      } else {
-
-        try {
-
-          var rawShared = localStorage.getItem('valdoria_shared_inventory_v1');
-
-          if (rawShared) {
-
-            var parsed = JSON.parse(rawShared);
-
-            if (Array.isArray(parsed)) inv = parsed;
-
-          }
-
-        } catch(_) {}
-
       }
+
+    }
+
+    if ((!inv || !inv.length) && typeof window !== 'undefined') {
+
+      try {
+
+        var rawShared = localStorage.getItem('valdoria_shared_inventory_v1');
+
+        if (rawShared) {
+
+          var parsed = JSON.parse(rawShared);
+
+          if (Array.isArray(parsed)) inv = parsed;
+
+        }
+
+      } catch(_) {}
 
     }
 
@@ -80286,8 +80292,6 @@
 
   function extractDiscoveredLocations(pObj) {
 
-    if (!pObj) return [];
-
     var locs = [];
 
     var addLoc = function(l) {
@@ -80308,33 +80312,103 @@
 
     };
 
+    if (typeof window !== 'undefined') {
 
+      if (Array.isArray(window.__EXPLORE_KNOWN)) {
 
-    if (Array.isArray(pObj.known_locations)) {
+        window.__EXPLORE_KNOWN.forEach(addLoc);
 
-      pObj.known_locations.forEach(addLoc);
+      }
+
+      if (Array.isArray(window.__EXPLORE_DISCOVERED_DUNGEONS)) {
+
+        window.__EXPLORE_DISCOVERED_DUNGEONS.forEach(addLoc);
+
+      }
+
+      if (window.S && Array.isArray(window.S.known_locations)) {
+
+        window.S.known_locations.forEach(addLoc);
+
+      }
+
+      if (window.S && Array.isArray(window.S.visitedBiomes)) {
+
+        window.S.visitedBiomes.forEach(addLoc);
+
+      }
+
+      if (window.CITY_PLAYER) {
+
+        if (Array.isArray(window.CITY_PLAYER.known_locations)) window.CITY_PLAYER.known_locations.forEach(addLoc);
+
+        if (Array.isArray(window.CITY_PLAYER.discovered_locations)) window.CITY_PLAYER.discovered_locations.forEach(addLoc);
+
+        if (window.CITY_PLAYER.metadata) {
+
+          if (Array.isArray(window.CITY_PLAYER.metadata.known_locations)) window.CITY_PLAYER.metadata.known_locations.forEach(addLoc);
+
+          if (Array.isArray(window.CITY_PLAYER.metadata.discovered_locations)) window.CITY_PLAYER.metadata.discovered_locations.forEach(addLoc);
+
+        }
+
+      }
+
+      if (window.PLAYER) {
+
+        if (Array.isArray(window.PLAYER.known_locations)) window.PLAYER.known_locations.forEach(addLoc);
+
+        if (Array.isArray(window.PLAYER.discovered_locations)) window.PLAYER.discovered_locations.forEach(addLoc);
+
+        if (window.PLAYER.metadata) {
+
+          if (Array.isArray(window.PLAYER.metadata.known_locations)) window.PLAYER.metadata.known_locations.forEach(addLoc);
+
+          if (Array.isArray(window.PLAYER.metadata.discovered_locations)) window.PLAYER.metadata.discovered_locations.forEach(addLoc);
+
+        }
+
+      }
 
     }
 
-    if (Array.isArray(pObj.discovered_locations)) {
+    if (pObj) {
 
-      pObj.discovered_locations.forEach(addLoc);
+      if (Array.isArray(pObj.known_locations)) {
 
-    }
+        pObj.known_locations.forEach(addLoc);
 
-    var dungeons = pObj.discovered_dungeons || (pObj.metadata && pObj.metadata.discovered_dungeons);
+      }
 
-    if (dungeons && typeof dungeons === 'object') {
+      if (Array.isArray(pObj.discovered_locations)) {
 
-      var dKeys = Object.keys(dungeons);
+        pObj.discovered_locations.forEach(addLoc);
 
-      for (var di = 0; di < dKeys.length; di++) {
+      }
 
-        var d = dungeons[dKeys[di]];
+      if (pObj.metadata) {
 
-        var locId = (d && d.location_id) || dKeys[di];
+        if (Array.isArray(pObj.metadata.known_locations)) pObj.metadata.known_locations.forEach(addLoc);
 
-        addLoc(locId);
+        if (Array.isArray(pObj.metadata.discovered_locations)) pObj.metadata.discovered_locations.forEach(addLoc);
+
+      }
+
+      var dungeons = pObj.discovered_dungeons || (pObj.metadata && pObj.metadata.discovered_dungeons);
+
+      if (dungeons && typeof dungeons === 'object') {
+
+        var dKeys = Object.keys(dungeons);
+
+        for (var di = 0; di < dKeys.length; di++) {
+
+          var d = dungeons[dKeys[di]];
+
+          var locId = (d && d.location_id) || dKeys[di];
+
+          addLoc(locId);
+
+        }
 
       }
 
@@ -80546,7 +80620,17 @@
 
       'coast': ['coast', 'salty_coast'],
 
-      'salty_coast': ['coast', 'salty_coast']
+      'salty_coast': ['coast', 'salty_coast'],
+
+      'orc_tribe': ['orc_tribe', 'orc_camp', 'acampamento_orc'],
+
+      'orc_camp': ['orc_tribe', 'orc_camp', 'acampamento_orc'],
+
+      'acampamento_orc': ['orc_tribe', 'orc_camp', 'acampamento_orc'],
+
+      'bandit_fortress': ['bandit_fortress', 'bandit_camp', 'forte_dos_bandidos', 'forte_bandidos'],
+
+      'ashen_badlands': ['ashen_badlands', 'badlands', 'terras_devastadas']
 
     };
 
@@ -81196,23 +81280,25 @@
 
 
 
+    try {
+
+      if (typeof closeRegionalMapModal === 'function') closeRegionalMapModal();
+
+      if (typeof window.closeRegionalMapModal === 'function') window.closeRegionalMapModal();
+
+      if (typeof window.closeCartography === 'function') window.closeCartography();
+
+    } catch(_) {}
+
+
+
     if (typeof window._promptConfirmReturnToCity === 'function') {
 
-      window._promptConfirmReturnToCity(function(){
-
-        try { if (typeof window.closeCartography === 'function') window.closeCartography(); } catch(_) {}
-
-      });
+      window._promptConfirmReturnToCity();
 
     } else if (typeof window.startReturnToCity === 'function') {
 
-      if (confirm('Deseja realmente encerrar a exploração e voltar para a cidade de Valdoria?')) {
-
-        try { if (typeof window.closeCartography === 'function') window.closeCartography(); } catch(_) {}
-
-        window.startReturnToCity();
-
-      }
+      window.startReturnToCity();
 
     } else if (typeof window._returnToCityNow === 'function') {
 
@@ -81250,9 +81336,9 @@
 
       + '.cfm-header { height: 48px; min-height: 48px; background: linear-gradient(180deg, #1e150d 0%, #120d08 100%); border-bottom: 1.5px solid rgba(196, 149, 58, 0.45); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; box-sizing: border-box; z-index: 100; gap: 8px; }'
 
-      + '.cfm-header-title { font-family: "Cinzel", Georgia, serif; font-size: 14.5px; font-weight: 700; color: #ffd685; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9); }'
+      + '.cfm-header-title { font-family: "Cinzel", Georgia, serif; font-size: 14px; font-weight: 700; color: #ffd685; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9); }'
 
-      + '.cfm-close-btn { font-family: "Cinzel", Georgia, serif; font-size: 12.5px; font-weight: 700; color: #ffd685; background: linear-gradient(180deg, #2c1f13 0%, #18110a 100%); border: 1.5px solid rgba(196, 149, 58, 0.7); border-radius: 6px; padding: 6px 14px; cursor: pointer; touch-action: manipulation; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 214, 133, 0.15); display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s ease; }'
+      + '.cfm-close-btn { font-family: "Cinzel", Georgia, serif; font-size: 11.5px; font-weight: 700; color: #ffd685; background: linear-gradient(180deg, #2c1f13 0%, #18110a 100%); border: 1.5px solid rgba(196, 149, 58, 0.7); border-radius: 6px; padding: 5px 9px; cursor: pointer; touch-action: manipulation; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 214, 133, 0.15); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; transition: all 0.15s ease; }'
 
       + '.cfm-close-btn:hover { background: #382718; border-color: #ffd685; box-shadow: 0 0 10px rgba(196, 149, 58, 0.5); }'
 
@@ -81406,17 +81492,23 @@
 
 
 
-    var pObj = (typeof window !== 'undefined' && (window.CITY_PLAYER || window.CITY_MOCK_PLAYER || window.PLAYER || (window.S && window.S.player))) || {};
+    var pObj = (typeof window !== 'undefined' && (window.CITY_PLAYER || window.PLAYER || (window.S && window.S.player) || window.CITY_MOCK_PLAYER)) || {};
 
     var known = (typeof extractDiscoveredLocations === 'function') ? extractDiscoveredLocations(pObj) : [];
 
+    if (typeof window !== 'undefined' && Array.isArray(window.__EXPLORE_KNOWN)) {
+
+      window.__EXPLORE_KNOWN.forEach(function(k) {
+
+        if (k && known.indexOf(k) < 0) known.push(k);
+
+      });
+
+    }
+
     if (!known.length) {
 
-      known = (typeof window !== 'undefined' && Array.isArray(window.__EXPLORE_KNOWN) && window.__EXPLORE_KNOWN.length)
-
-        ? window.__EXPLORE_KNOWN
-
-        : ((pObj && Array.isArray(pObj.known_locations)) ? pObj.known_locations : ['city_gates', 'plains']);
+      known = (pObj && Array.isArray(pObj.known_locations) && pObj.known_locations.length) ? pObj.known_locations : ['city_gates', 'plains', 'green_fields'];
 
     }
 
@@ -81516,7 +81608,7 @@
 
       + '  </div>'
 
-      + '  <button type="button" class="cfm-close-btn" id="rfm-close-btn">' + (isInsideCity ? '✕ Fechar mapa' : 'Retornar à Cidade') + '</button>'
+      + '  <button type="button" class="cfm-close-btn" id="rfm-close-btn">' + (isInsideCity ? '✕ Fechar mapa' : '✕ Cidade') + '</button>'
 
       + '</div>'
 
@@ -81566,11 +81658,7 @@
           _cartRenderCarousel();
         }
       } else {
-        if (typeof handleReturnToCity === 'function') {
-          handleReturnToCity();
-        } else if (typeof window.startReturnToCity === 'function') {
-          window.startReturnToCity();
-        }
+        handleReturnToCity();
       }
     };
 
