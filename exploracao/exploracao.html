@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-31T02:29:24Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-31T03:06:33Z - do not edit directly, edit source -->
 
 
 
@@ -98720,7 +98720,7 @@ function _xcartFocusProvince(provId){
       _xcartEngine.closeProvince();
     }
     _xcartSmoothPanTo(0, 0, CART_ZOOM_DEFAULT, 260);
-    if (titleEl) titleEl.innerHTML = '<span>🌍</span> Continente Geral';
+    if (titleEl) titleEl.innerHTML = 'Continente Geral';
     if (continentBtn) continentBtn.style.display = 'none';
     if (atlasBackBtn) atlasBackBtn.style.display = 'none';
   } else {
@@ -98733,9 +98733,9 @@ function _xcartFocusProvince(provId){
     if (res) {
       _xcartSmoothPanTo(res.panX, res.panY, res.zoom, 260);
       if (res.province && titleEl) {
-        titleEl.innerHTML = '<span class="cart-title-crumb" onclick="_xcartFocusProvince(\'world\')">🌍 Continente</span>'
+        titleEl.innerHTML = '<span class="cart-title-crumb" onclick="_xcartFocusProvince(\'world\')">Continente</span>'
           + '<span class="cart-title-sep">›</span>'
-          + '<span>' + res.province.icon + ' ' + res.province.name + '</span>';
+          + '<span>' + res.province.name + '</span>';
       }
     }
     if (continentBtn) continentBtn.style.display = 'inline-flex';
@@ -99414,9 +99414,9 @@ function _xcartFocusWaypoint(key) {
     _xcartActiveProvId = prov.id;
     var titleEl = document.getElementById('xcart-title');
     if (titleEl) {
-      titleEl.innerHTML = '<span class="cart-title-crumb" onclick="_xcartFocusProvince(\'world\')">🌍 Continente</span>'
+      titleEl.innerHTML = '<span class="cart-title-crumb" onclick="_xcartFocusProvince(\'world\')">Continente</span>'
         + '<span class="cart-title-sep">›</span>'
-        + '<span>' + prov.icon + ' ' + prov.name + '</span>';
+        + '<span>' + prov.name + '</span>';
     }
   }
   setTimeout(function() {

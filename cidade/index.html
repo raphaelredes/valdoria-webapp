@@ -72365,9 +72365,9 @@ function _cartFocusWaypoint(key) {
     _cartActiveProvId = prov.id;
     var titleEl = document.getElementById('cart-title');
     if (titleEl) {
-      titleEl.innerHTML = '<span class="cart-title-crumb" onclick="_cartFocusProvince(\'world\')">🌍 Continente</span>'
+      titleEl.innerHTML = '<span class="cart-title-crumb" onclick="_cartFocusProvince(\'world\')">Continente</span>'
         + '<span class="cart-title-sep">›</span>'
-        + '<span>' + prov.icon + ' ' + prov.name + '</span>';
+        + '<span>' + prov.name + '</span>';
     }
   }
   setTimeout(function() {

@@ -3891,33 +3891,25 @@
       }
     }
 
-    // 1.1 Emblema / Miniatura da localidade dentro da lente náutica
-    var ic = (opts.locArt && opts.locArt[b.key]) || null;
-    if (ic && ic.complete && ic.naturalWidth) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(bx, by, radius - 1.5, 0, Math.PI * 2);
-      ctx.clip();
-      ctx.drawImage(ic, bx - radius, by - radius, radius * 2, radius * 2);
-      // Véu suave de integração sobre a miniatura
-      ctx.fillStyle = isHover ? 'rgba(42, 30, 18, 0.05)' : 'rgba(42, 30, 18, 0.15)';
-      ctx.fillRect(bx - radius, by - radius, radius * 2, radius * 2);
-      ctx.restore();
-    } else {
-      // Iluminação interna suave do terreno caso a miniatura ainda esteja carregando
-      ctx.beginPath();
-      ctx.arc(bx, by, radius, 0, Math.PI * 2);
-      ctx.fillStyle = isHover ? 'rgba(255, 214, 133, 0.22)' : 'rgba(255, 214, 133, 0.10)';
-      ctx.fill();
-    }
+    // 1.1 Preenchimento cartográfico sóbrio do retículo (sem ilustrações/miniaturas internas)
+    ctx.beginPath();
+    ctx.arc(bx, by, radius, 0, Math.PI * 2);
+    ctx.fillStyle = isHover ? 'rgba(38, 26, 16, 0.92)' : 'rgba(26, 18, 12, 0.82)';
+    ctx.fill();
+
+    // Ponto central dourado (núcleo da mira náutica)
+    ctx.beginPath();
+    ctx.arc(bx, by, isHover ? 4.5 : 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = isHover ? '#ffd685' : 'rgba(255, 214, 133, 0.85)';
+    ctx.fill();
 
     // 1.2 Anel Dourado Cartográfico (Aro Náutico)
     ctx.beginPath();
     ctx.arc(bx, by, radius, 0, Math.PI * 2);
-    ctx.lineWidth = isHover ? 2.2 : 1.4;
-    ctx.strokeStyle = isHover ? '#ffd685' : (isOrigin ? 'rgba(232, 196, 90, 0.90)' : 'rgba(196, 149, 58, 0.75)');
+    ctx.lineWidth = isHover ? 2.2 : 1.5;
+    ctx.strokeStyle = isHover ? '#ffd685' : (isOrigin ? 'rgba(232, 196, 90, 0.90)' : 'rgba(196, 149, 58, 0.85)');
     if (isHover) {
-      ctx.shadowColor = 'rgba(196, 149, 58, 0.90)';
+      ctx.shadowColor = 'rgba(255, 214, 133, 0.90)';
       ctx.shadowBlur = 12;
     }
     ctx.stroke();
@@ -3979,7 +3971,9 @@
       ctx.font = '9px serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('📜', qx, qy);
+      ctx.font = 'bold 9px serif';
+      ctx.fillStyle = '#ffd685';
+      ctx.fillText('◆', qx, qy);
       ctx.restore();
     }
 
@@ -4014,10 +4008,11 @@
       ctx.strokeStyle = '#ffd700';
       ctx.lineWidth = 1.2;
       ctx.stroke();
-      ctx.font = '9px serif';
+      ctx.font = 'bold 8px serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('📍', px, py);
+      ctx.fillStyle = '#ffd700';
+      ctx.fillText('◈', px, py);
       ctx.restore();
     }
 
@@ -4034,10 +4029,11 @@
       ctx.strokeStyle = '#ffd700';
       ctx.lineWidth = 1.0;
       ctx.stroke();
-      ctx.font = '8px serif';
+      ctx.font = 'bold 8px serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('📝', nx, ny);
+      ctx.fillStyle = '#ffd700';
+      ctx.fillText('·', nx, ny);
       ctx.restore();
     }
 
@@ -4047,7 +4043,7 @@
     if (!isHover && !opts.isRegional) return;
 
     ctx.save();
-    var labelText = (locIsPinned ? '📍 ' : '') + (locHasNote ? '📝 ' : '') + (opts.hasActiveQuest ? '📜 ' : '') + b.name;
+    var labelText = (locIsPinned ? '◈ ' : '') + (opts.hasActiveQuest ? '◆ ' : '') + b.name;
     ctx.font = (isHover ? 'bold 11px' : '10px') + ' serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
@@ -4061,10 +4057,10 @@
     var marcos = (typeof b.marcos === 'number') ? b.marcos : (b.tier || 1);
     var distMilhas = Math.max(6, marcos * 8);
     var horas = Math.max(2, Math.round(distMilhas / 3));
-    var threatBadge = (b.tier >= 6) ? '💀 Letal' :
-                      (b.tier >= 4) ? '⚔️ Difícil' :
-                      (b.tier >= 2) ? '⚠️ Moderado' : '🛡️ Seguro';
-    var sanctBadge = b.isSanctuary ? '🏛️ Refúgio' : '';
+    var threatBadge = (b.tier >= 6) ? '[Letal]' :
+                      (b.tier >= 4) ? '[Difícil]' :
+                      (b.tier >= 2) ? '[Moderado]' : '[Seguro]';
+    var sanctBadge = b.isSanctuary ? '[Refúgio]' : '';
     var subText = hasLvl
       ? (isHover ? (lvlRange + ' · ~' + distMilhas + ' mi · ' + threatBadge + (sanctBadge ? ' · ' + sanctBadge : '')) : (sanctBadge ? lvlRange + ' · ' + sanctBadge : lvlRange))
       : (isHover ? ('~' + distMilhas + ' mi · ~' + horas + 'h · ' + threatBadge + (sanctBadge ? ' · ' + sanctBadge : '')) : (sanctBadge || ''));
@@ -39204,6 +39200,8 @@
         var curProv = CART_PROVINCES.find(function(p){ return p.id === _activeProvId; }) || CART_PROVINCES[1];
         var regNodes = [];
         CART_BIOMES.forEach(function(b){
+          // Banimento de Portões de Valdoria em mapas regionais
+          if (b.key === 'city_gates' || b.key === 'plains' || b.isOrigin || (b.name && b.name.indexOf('Portões de Valdoria') >= 0)) return;
           if (_LOCATION_TO_PROVINCE[b.key] === _activeProvId) {
             var rc = (curProv.regionalCoords && curProv.regionalCoords[b.key]) || { rx: b.x, ry: b.y };
             var resolvedNode = Object.assign({}, b, { x: rc.rx, y: rc.ry, regionalName: rc.name, marcos: rc.marcos });
@@ -39211,18 +39209,13 @@
           }
         });
 
-        // 1. Fog of War na Província (cobre áreas ainda não exploradas salvo se possuir o mapa regional)
+        // 1. O mapa ilustrado da província é sempre exibido em sua glória integral (sem névoa negra cobrindo o desenho)
         var provMapOwned = curProv.mapKey && ownedMaps && (ownedMaps.indexOf(curProv.mapKey) >= 0);
-        if (known !== null && !provMapOwned) {
-          var provFog = _ensureProvFog(_S, known, regNodes, _activeProvId);
-          if (provFog) {
-            ctx.drawImage(provFog, 0, 0, _S, _S);
-          }
-        }
 
         // 2. Desenhar rotas regionais (só reveladas se ambas as pontas forem conhecidas ou possuir o mapa)
         if (_cartLayers.roads) {
           (curProv.regionalPaths || []).forEach(function(p){
+            if (p[0] === 'city_gates' || p[0] === 'plains' || p[1] === 'city_gates' || p[1] === 'plains') return;
             var p0Known = (known === null || known.indexOf(p[0]) >= 0 || provMapOwned);
             var p1Known = (known === null || known.indexOf(p[1]) >= 0 || provMapOwned);
             if (p0Known && p1Known) {
@@ -39285,28 +39278,15 @@
           if (qn) cfg.drawQuestHalo(ctx, qn, _S, _S, qf.title || 'Missão');
         }
 
-        // Cartouche superior elegante com o nome da província e progresso de mapeamento
-        var totalProvLocs = curProv.locKeys ? curProv.locKeys.length : regNodes.length;
-        var discProvLocs = curProv.locKeys ? curProv.locKeys.filter(function(k){
-          return (known === null || known.indexOf(k) >= 0 || (k === 'plains') || provMapOwned);
-        }).length : regNodes.length;
-        var provPct = Math.round((discProvLocs / Math.max(1, totalProvLocs)) * 100);
-        var provProgressText = (provPct >= 100)
-          ? '⭐ Território 100% Cartografado'
-          : '🗺️ Mapeado: ' + discProvLocs + '/' + totalProvLocs + ' Locais (' + provPct + '%)';
-
-        var provTitleFont = (_S < 380) ? '700 11px Cinzel, serif' : '700 12.5px Cinzel, serif';
-        var provSubFont = (_S < 380) ? 'italic 11px Georgia, serif' : 'italic 11px Georgia, serif';
+        // Cartouche superior elegante com o nome da província (sem spoilers de contagem ou percentual e sem emojis)
+        var provTitleFont = (_S < 380) ? '700 11.5px Cinzel, serif' : '700 13px Cinzel, serif';
         ctx.save();
         ctx.textAlign = 'center';
         ctx.font = provTitleFont;
-        ctx.fillStyle = (provPct >= 100) ? '#fde047' : '#f4d896';
+        ctx.fillStyle = '#ffd685';
         ctx.shadowColor = 'rgba(0,0,0,0.85)';
         ctx.shadowBlur = 6;
-        ctx.fillText((curProv.icon || '📍') + ' ' + curProv.name.toUpperCase(), _S / 2, 28);
-        ctx.font = provSubFont;
-        ctx.fillStyle = (provPct >= 100) ? '#fde047' : '#d2be90';
-        ctx.fillText(provProgressText, _S / 2, 42);
+        ctx.fillText(curProv.name.toUpperCase(), _S / 2, 28);
         ctx.restore();
       } else {
         // === MODO CONTINENTE GERAL ===
@@ -39381,8 +39361,8 @@
         }).length : totalWorld;
         var worldPct = Math.round((discWorld / totalWorld) * 100);
         var worldProgressText = (worldPct >= 100)
-          ? '⭐ Continente Totalmente Mapeado (100%)'
-          : '🗺️ Atlas Geral: ' + discWorld + '/' + totalWorld + ' Locais Conhecidos (' + worldPct + '%)';
+          ? 'Continente Totalmente Mapeado'
+          : 'Atlas Geral: ' + discWorld + '/' + totalWorld + ' Locais Conhecidos';
 
         var worldTitleFont = (_S < 380) ? '700 11px Cinzel, serif' : '700 12.5px Cinzel, serif';
         var worldSubFont = (_S < 380) ? 'italic 11px Georgia, serif' : 'italic 11px Georgia, serif';
@@ -39392,7 +39372,7 @@
         ctx.fillStyle = (worldPct >= 100) ? '#fde047' : '#f4d896';
         ctx.shadowColor = 'rgba(0,0,0,0.85)';
         ctx.shadowBlur = 6;
-        ctx.fillText('🌍 CONTINENTE DE VALDÓRIA', _S / 2, 28);
+        ctx.fillText('CONTINENTE DE VALDÓRIA', _S / 2, 28);
         ctx.font = worldSubFont;
         ctx.fillStyle = (worldPct >= 100) ? '#fde047' : '#d2be90';
         ctx.fillText(worldProgressText, _S / 2, 42);
@@ -39500,7 +39480,10 @@
 
       var activeNodes = CART_BIOMES;
       if (_viewMode === 'province' && _activeProvId !== 'world') {
-        activeNodes = CART_BIOMES.filter(function(b){ return _LOCATION_TO_PROVINCE[b.key] === _activeProvId; });
+        activeNodes = CART_BIOMES.filter(function(b){
+          if (b.key === 'city_gates' || b.key === 'plains' || b.isOrigin || (b.name && b.name.indexOf('Portões de Valdoria') >= 0)) return false;
+          return _LOCATION_TO_PROVINCE[b.key] === _activeProvId;
+        });
       }
 
       for (var i = 0; i < activeNodes.length; i++) {
@@ -39803,7 +39786,7 @@
       terrain: 'Pradarias & Estradas Imperiais',
       winds: 'Vento de Pradaria (O · 18 km/h)',
       hazard: 'Bandidos de Estrada & Tempestades',
-      locKeys: ['plains', 'city_gates', 'green_fields', 'orc_tribe', 'bandit_fortress', 'ashen_badlands'],
+      locKeys: ['green_fields', 'orc_tribe', 'bandit_fortress', 'ashen_badlands'],
       regionalCoords: {
         green_fields: { rx: 0.28, ry: 0.32, name: 'Campos Verdes', marcos: 1 },
         orc_tribe: { rx: 0.74, ry: 0.30, name: 'Acampamento Orc', marcos: 3 },
