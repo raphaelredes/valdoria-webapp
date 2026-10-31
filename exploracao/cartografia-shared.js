@@ -9320,7 +9320,7 @@
 
     ctx.fillStyle = '#ffd700';
 
-    ctx.fillText('📏 ' + m.miles + ' Milhas (~' + m.marcos + ' Marcos · ' + m.km + ' km)', mx, my - 10);
+    ctx.fillText(m.miles + ' Milhas (~' + m.marcos + ' Marcos · ' + m.km + ' km)', mx, my - 10);
 
 
 
@@ -77128,15 +77128,15 @@
 
     out.push('🎯 Destino:    ' + targ.name + ' (' + biomePT(targ.biome || targ.key) + ' · ' + targProv.name + ')');
 
-    out.push('🧭 Rumo:       ' + bearingStr);
+    out.push('Rumo:       ' + bearingStr);
 
-    out.push('📏 Distância:  ~' + miles + ' Milhas (~' + marcos + ' Marcos · ~' + km + ' km)');
+    out.push('Distância:  ~' + miles + ' Milhas (~' + marcos + ' Marcos · ~' + km + ' km)');
 
-    out.push('🗺️ Rota:       ' + routeStepsNames.join(' ➔ '));
+    out.push('Rota:       ' + routeStepsNames.join(' ➔ '));
 
     out.push('');
 
-    out.push('⚙️ PARÂMETROS DA MARCHA (D&D 5e):');
+    out.push('PARÂMETROS DA MARCHA (D&D 5e):');
 
     out.push('• Modo de Transporte: ' + transObj.name + ' (' + transObj.speedMph + ' milhas/h)');
 

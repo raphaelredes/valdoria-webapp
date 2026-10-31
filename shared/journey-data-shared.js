@@ -3176,8 +3176,8 @@ var DEPARTURES = {
             {
                 type: 'narration',
                 text: isReturn
-                    ? ('Você contempla a jornada de regresso a <b>' + dest + '</b> a partir das terras ermas. O caminho de volta estima uma distância aproximada de <b>~' + estDist + ' marcos</b> por trilhas que podem variar conforme o relevo e os imprevistos da rota.')
-                    : ('Você contempla a rota para <b>' + dest + '</b> além dos portões. A viagem pelas terras ermas estima uma distância aproximada de <b>~' + estDist + ' marcos</b> de marcha contínua por caminhos sujeitos a desvios e imprevistos.')
+                    ? ('Você contempla a jornada de regresso a <b>' + dest + '</b> a partir das terras ermas. O caminho de volta estima uma distância aproximada de <b><span class="marcos-lore-link" role="button" tabindex="0" title="Toque para entender a medida em Marcos">~' + estDist + ' marcos</span></b> por trilhas que podem variar conforme o relevo e os imprevistos da rota.')
+                    : ('Você contempla a rota para <b>' + dest + '</b> além dos portões. A viagem pelas terras ermas estima uma distância aproximada de <b><span class="marcos-lore-link" role="button" tabindex="0" title="Toque para entender a medida em Marcos">~' + estDist + ' marcos</span></b> de marcha contínua por caminhos sujeitos a desvios e imprevistos.')
             }
         ];
 

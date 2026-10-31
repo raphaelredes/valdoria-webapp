@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-31T18:03:24Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-31T18:49:35Z - do not edit directly, edit source -->
 
 
 
@@ -98972,7 +98972,7 @@ function _xcartPopulateWaypointsList(filter, query) {
       + '    <span style="font-size:22px;">' + (b.ico || '📍') + '</span>'
       + '    <div>'
       + '      <div style="font-family:Cinzel,serif;font-weight:700;color:#f4d49a;font-size:12px;">' + (b.regionalName || b.name) + ' ' + badge + '</div>'
-      + '      <div style="font-size:11px;color:#a09484;">' + provName + ' · ~' + distMilhas + ' milhas (~' + marcos + ' marcos)</div>'
+      + '      <div style="font-size:11px;color:#a09484;">' + provName + ' · ~' + distMilhas + ' milhas (<span class="marcos-lore-link" role="button" tabindex="0" title="Toque para entender a medida em Marcos">~' + marcos + ' marcos</span>)</div>'
       + ((window.CartShared && CartShared.getLocNote && CartShared.getLocNote(b.key)) ? '<div style="font-size:11.5px;color:#fcd34d;font-style:italic;margin-top:2px;">📝 "' + CartShared.getLocNote(b.key) + '"</div>' : '')
       + '    </div>'
       + '  </div>'
@@ -100004,7 +100004,7 @@ function _xcartShowTooltip(b, mx, my){
   var noteHtml = customNote ? '<div style="font-size:11px;color:#fcd34d;margin-top:2px;font-style:italic;background:rgba(255,215,0,0.12);padding:2px 5px;border-radius:3px;">📝 Nota: "' + customNote + '"</div>' : '';
 
   var distHtml = (b.isOrigin || b.key === 'plains') ? '' :
-    '<div style="font-size:11.5px;color:#e6d3a3;margin-top:2px;">📏 ~' + distMilhas + ' milhas (~' + marcos + ' marcos · ~' + horas + 'h a pé)</div>';
+    '<div style="font-size:11.5px;color:#e6d3a3;margin-top:2px;">~' + distMilhas + ' milhas (<span class="marcos-lore-link" role="button" tabindex="0" title="Toque para entender a medida em Marcos">~' + marcos + ' marcos</span> · ~' + horas + 'h a pé)</div>';
 
   var vm = (_xcartEngine && typeof _xcartEngine.getViewMode === 'function') ? _xcartEngine.getViewMode() : { mode: 'world' };
   var hintText = (vm.mode === 'world') ? 'Duplo clique para Mapa Regional' : 'Duplo clique para Iniciar Viagem';

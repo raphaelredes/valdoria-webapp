@@ -75,22 +75,28 @@
     }
   }
 
-  // Verifica se o jogador já viu a introdução aos Marcos de Valdoria (Ordem do Usuário 2026-10)
+  // Verifica se o jogador já viu a introdução canônica aos Marcos com o Capitão Aldric (Ordem do Usuário 2026-10)
   function _hasSeenMarcoTutorial() {
     try {
-      if (localStorage.getItem('valdoria_seen_marcos_lore') === '1') return true;
+      if (localStorage.getItem('valdoria_seen_marcos_lore_v2') === '1') return true;
     } catch (_) {}
     var p = _player();
-    return !!(p && (p.seen_marcos_lore || p.corvus_route_knowledge));
+    return !!(p && (p.seen_marcos_lore_v2 || p.seen_marcos_lore));
   }
 
   function _markSeenMarcoTutorial() {
-    try { localStorage.setItem('valdoria_seen_marcos_lore', '1'); } catch (_) {}
+    try {
+      localStorage.setItem('valdoria_seen_marcos_lore_v2', '1');
+      localStorage.setItem('valdoria_seen_marcos_lore', '1');
+    } catch (_) {}
     var p = _player();
-    if (p) p.seen_marcos_lore = true;
+    if (p) {
+      p.seen_marcos_lore_v2 = true;
+      p.seen_marcos_lore = true;
+    }
   }
 
-  // Janela explicativa instrutiva na 1ª vez que o jogador lida com a medida dos Marcos (Ordem do Usuário 2026-10)
+  // Diálogo imersivo de partida na 1ª vez: Capitão Aldric explica a história e a medida dos Marcos (Ordem do Usuário 2026-10)
   function _showMarcoTutorial(proceedCb) {
     if (_hasSeenMarcoTutorial()) {
       if (typeof proceedCb === 'function') proceedCb();
@@ -100,38 +106,38 @@
     var scriptLines = [
       {
         type: 'narration',
-        text: 'Antes de cruzar os portões rumo às terras ermas, você consulta seus registros de navegação e as cartas terrestres do Conservatório de Valdoria. Nas velhas crônicas falava-se em "léguas" ou "passos", mas neste território a sobrevivência depende de uma medida própria: <b>os Marcos de Valdoria</b>.'
+        text: 'Você se aproxima das pesadas grades de ferro dos Portões de Valdoria com os mantimentos conferidos e as correias da mochila ajustadas. O Capitão Aldric desce da mureta com a mão pousada no cinto, observando sua preparação com olhar experiente.'
       },
       {
-        type: 'narration',
-        text: '<b>A Medida Oficial das Estradas: Os Marcos</b><br><br>Em <i>Lendas de Valdoria</i>, as distâncias entre a cidade e os ermos são medidas em <b>Marcos</b>. Cada Marco equivale à distância percorrida em aproximadamente <b>uma hora de marcha contínua e resoluta</b> em terreno plano (~3 milhas / ~4,8 km no D&D 5e), tendo como base as antigas pedras-marco de basalto cravadas nas estradas pelos pioneiros.'
+        type: 'speech',
+        text: 'Primeira vez que vai cruzar as muralhas para se embrenhar nos ermos, aventureiro? Deixe-me dar uma palavra antes de você colocar as botas na lama lá fora.'
       },
       {
-        type: 'narration',
-        text: '<b>Por que a Distância é uma Estimativa?</b><br><br><b>• Monólitos Esquecidos:</b> Com o passar dos anos, muitos marcos foram tombados, cobertos por musgo ou partidos por feras. Por isso, a rota informa uma <i>estimativa aproximada de marcos restantes</i> calculada pelo grupo.'
+        type: 'speech',
+        text: 'Como você é novo por aqui, convém entender como as pessoas desta região medem as distâncias. Sei que em outras terras o povo tem o costume de contar o caminho por léguas, milhas exatas ou passos... mas aqui em Valdoria a gente só fala em <b>marcos</b>.'
       },
       {
-        type: 'narration',
-        text: '<b>• Desvios e Relevo:</b> Erros de orientação ou terrenos intransponíveis exigem contornos forçados, adicionando marcos à viagem <b>determinados por rolagem de dados (1d4 a 1d6 marcos adicionais)</b> e atraindo mais perigos.'
+        type: 'speech',
+        text: 'Essa medida tem história. Quando os primeiros fundadores desbravaram este vale selvagem, eles cravavam monólitos pesados de basalto negro nas margens das trilhas. Cada marco mede a distância percorrida em cerca de <b>uma hora de marcha firme e decidida</b> a pé — coisa de umas três milhas em terreno firme.'
       },
       {
-        type: 'narration',
-        text: '<b>• Atalhos e Perícia:</b> Conselhos de cartógrafos, batedores veteranos ou testes bem-sucedidos de Sobrevivência e Percepção permitem cortar caminho por trilhas ocultas, <b>encurtando a distância calculada nos dados (1d4 a 1d6 marcos a menos)</b>.'
+        type: 'speech',
+        text: 'Só não caia na tolice de achar que é uma conta exata. Com o passar dos anos, feras derrubaram pedras, enxurradas soterraram picadas e o mato engoliu muitos marcos antigos. Por isso, quando dizemos que um destino fica a uns <b>6 marcos</b>, isso é sempre uma <b>estimativa de marcha</b>, nunca uma certeza de agrimensor.'
       },
       {
-        type: 'narration',
-        text: 'Manter o ritmo da marcha e calcular os marcos restantes com cautela é o que separa um retorno em segurança de um destino trágico nas terras selvagens.'
+        type: 'speech',
+        text: 'Se você pegar tempestade ou lamaçal, desvios forçados podem somar marcos à sua jornada. Mas se tiver olhos atentos ou ouvir conselhos de batedores veteranos, pode achar atalhos e economizar sola de bota. Entendeu o espírito da coisa? Mantenha a cabeça fria lá fora.'
       }
     ];
 
     _vRender({
       npc: {
-        name: 'Compêndio de Cartografia',
-        desc: 'Tratado Oficial de Medição e Rotas de Valdoria',
-        portrait: '/shared/img/merchants/corvus-veltharion.webp'
+        name: 'Capitão Aldric',
+        desc: 'Vigia dos Portões de Valdoria',
+        portrait: '/shared/img/npcs/guarda-aldric.webp'
       },
       script: scriptLines,
-      choices: [{ id: 'marco_lore_ack', label: 'Compreendido, planejar postura de marcha ▸' }],
+      choices: [{ id: 'marco_lore_ack', label: 'Compreendido, planejar marcha ▸' }],
       inline: true,
       noProgress: true,
       onChoice: function () {
@@ -139,6 +145,107 @@
         if (typeof proceedCb === 'function') proceedCb();
       }
     });
+  }
+
+  // ==========================================================================
+  // OS MARCOS DE VALDORIA — Termo Interativo & Janela Explicativa
+  // Ordem do Usuário 2026-10: medida de distância clicável em popup informativo
+  // ==========================================================================
+  function wrapMarcosLoreLinks(html) {
+    if (!html || typeof html !== 'string') return html;
+    if (html.indexOf('marcos-lore-link') >= 0) return html;
+    return html.replace(/(<[^>]+>)|(~?\b\d+\s+marcos?\b)/gi, function (match, tag, textMatch) {
+      if (tag) return tag;
+      return '<span class="marcos-lore-link" role="button" tabindex="0" title="Toque para entender a medida em Marcos">' + textMatch + '</span>';
+    });
+  }
+  global.wrapMarcosLoreLinks = wrapMarcosLoreLinks;
+
+  function showMarcosLorePopup(event) {
+    if (event) {
+      if (typeof event.stopPropagation === 'function') event.stopPropagation();
+      if (typeof event.preventDefault === 'function') event.preventDefault();
+    }
+    var dlg = document.getElementById('marcos-lore-dialog');
+    if (!dlg) {
+      dlg = document.createElement('dialog');
+      dlg.id = 'marcos-lore-dialog';
+      dlg.className = 'marcos-lore-dialog';
+      document.body.appendChild(dlg);
+
+      dlg.addEventListener('click', function (e) {
+        if (e.target === dlg) {
+          try { dlg.close(); } catch (_) { dlg.removeAttribute('open'); }
+        }
+      });
+      dlg.addEventListener('cancel', function (e) {
+        e.preventDefault();
+        try { dlg.close(); } catch (_) { dlg.removeAttribute('open'); }
+      });
+    }
+
+    dlg.innerHTML =
+      '<div class="marcos-lore-card" role="document">' +
+        '<button class="enc-cd-close" type="button" aria-label="Fechar" id="marcos-lore-x-btn">✕</button>' +
+        '<div class="enc-cd-title" style="font-size:16px; color:#ffd685;">OS MARCOS DE VALDORIA</div>' +
+        '<div class="enc-cd-subtitle" style="font-size:12px; color:#c8b89a;">Medida Tradicional de Distância das Estradas</div>' +
+        '<div class="enc-cd-divider"></div>' +
+        '<div class="enc-cd-section">' +
+          '<div class="enc-cd-section-title" style="font-size:11.5px; color:#ffd685;">O Que é um Marco?</div>' +
+          '<div class="enc-cd-box" style="font-size:12px; line-height:1.5; color:#e0d4bc;">' +
+            'Em Valdoria e nas terras ermas, as distâncias entre povoados, ruínas e refúgios não são medidas em milhas frias ou léguas distantes, mas em <b>Marcos de Marcha</b>. ' +
+            'Cada marco corresponde à distância média coberta em aproximadamente <b>uma hora de marcha contínua e resoluta</b> a pé em terreno padrão (~3 milhas / ~4,8 km no D&D 5e).' +
+          '</div>' +
+        '</div>' +
+        '<div class="enc-cd-section">' +
+          '<div class="enc-cd-section-title" style="font-size:11.5px; color:#ffd685;">Origem Histórica</div>' +
+          '<div class="enc-cd-flavor" style="font-size:12px; line-height:1.5; color:#c4b69c;">' +
+            'A tradição remonta aos pioneiros da fundação, que erguiam monólitos talhados de basalto escuro ao longo das trilhas para balizar o avanço das caravanas. ' +
+            'Em terras distantes é comum medir jornadas por milhas ou léguas exatas, mas o relevo imprevisível de Valdoria consagrou o marco como a medida viva dos aventureiros.' +
+          '</div>' +
+        '</div>' +
+        '<div class="enc-cd-section">' +
+          '<div class="enc-cd-section-title" style="font-size:11.5px; color:#ffd685;">Por Que é uma Estimativa?</div>' +
+          '<div class="enc-cd-flavor" style="font-size:12px; line-height:1.5; color:#c4b69c; display:flex; flex-direction:column; gap:6px;">' +
+            '<div><b>• Monólitos Esquecidos:</b> Com o passar dos anos, muitos marcos tombaram, foram soterrados por enxurradas ou partidos por feras. Toda distância informada é uma <i>estimativa calculada pela comitiva</i>.</div>' +
+            '<div><b>• Desvios e Relevo:</b> Pântanos intransponíveis, pontes quebradas ou ameaças forçam contornos, adicionando marcos à viagem (<b>+1d4 a +1d6 marcos</b>).</div>' +
+            '<div><b>• Atalhos e Perícia:</b> Conselhos do Cartógrafo Corvus, batedores veteranos ou testes de Sobrevivência e Percepção revelam picadas ocultas, encurtando o percurso (<b>-1d4 a -1d6 marcos</b>).</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="enc-cd-actions" style="margin-top:14px; display:flex; justify-content:center;">' +
+          '<button type="button" class="enc-cd-btn-confirm" id="marcos-lore-ack-btn" style="min-width:140px; padding:8px 16px; font-size:12.5px; cursor:pointer;">Entendido</button>' +
+        '</div>' +
+      '</div>';
+
+    var closeBtn = dlg.querySelector('#marcos-lore-x-btn');
+    var ackBtn = dlg.querySelector('#marcos-lore-ack-btn');
+    function _close() {
+      try { dlg.close(); } catch (_) { dlg.removeAttribute('open'); }
+    }
+    if (closeBtn) closeBtn.onclick = _close;
+    if (ackBtn) ackBtn.onclick = _close;
+
+    if (typeof dlg.showModal === 'function') {
+      try {
+        if (!dlg.open) dlg.showModal();
+      } catch (_) {
+        dlg.setAttribute('open', '');
+      }
+    } else {
+      dlg.setAttribute('open', '');
+    }
+  }
+  global.showMarcosLorePopup = showMarcosLorePopup;
+
+  if (typeof document !== 'undefined') {
+    document.addEventListener('click', function (e) {
+      var t = e.target && e.target.closest && e.target.closest('.marcos-lore-link');
+      if (t) {
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        showMarcosLorePopup(e);
+      }
+    }, true);
   }
 
   // Render de uma "página" no encounter canônico (vEncounter, PADRAO_ALDRIC).
@@ -161,6 +268,16 @@
         biome: _j.biome,
         destination: _j.displayName
       };
+    }
+    if (cfg && cfg.script && Array.isArray(cfg.script)) {
+      cfg.script.forEach(function (l) {
+        if (l && l.text) l.text = wrapMarcosLoreLinks(l.text);
+      });
+    }
+    if (cfg && cfg.choices && Array.isArray(cfg.choices)) {
+      cfg.choices.forEach(function (ch) {
+        if (ch && ch.desc) ch.desc = wrapMarcosLoreLinks(ch.desc);
+      });
     }
     global.vEncounter.render(
       {
@@ -709,8 +826,8 @@
 
       var corvusTag = corvusBonus ? ' <i>(+1 Conhecimento de Corvus)</i>' : '';
       var critTag = isHighMargin ? ' <b>★ SUCESSO NOTÁVEL</b>' : '';
-      body += '<br><br><b>🎲 Rolagem de Atalho:</b> d' + dieSides + ' [' + dieRoll + ']' + corvusTag + critTag + ' ➔ ' + marcosEncurtados + (marcosEncurtados === 1 ? ' Marco' : ' Marcos') + '<br>'
-            + '<b>🗺️ Atalho de rota aproveitado!</b> O grupo descobre uma picada secreta e encurta o caminho em <b>~' + marcosEncurtados + (marcosEncurtados === 1 ? ' marco' : ' marcos') + '</b>.';
+      body += '<br><br><b>Rolagem de Atalho:</b> d' + dieSides + ' [' + dieRoll + ']' + corvusTag + critTag + ' ➔ ' + marcosEncurtados + (marcosEncurtados === 1 ? ' Marco' : ' Marcos') + '<br>'
+            + '<b>Atalho de rota aproveitado!</b> O grupo descobre uma picada secreta e encurta o caminho em <b><span class="marcos-lore-link" role="button" tabindex="0" title="Toque para entender a medida em Marcos">~' + marcosEncurtados + (marcosEncurtados === 1 ? ' marco' : ' marcos') + '</span></b>.';
     } else if (!success && (ch && (ch.isDetour || (ch._haz && ch._haz.isDetour) || (hz && hz.isOrientationHazard)))) {
       var isSevereFailure = (roll && (roll.d20 === 1 || (roll.total != null && ch && ch.dc && roll.total <= ch.dc - 5)));
       var dieSides = isSevereFailure ? 6 : 4;
@@ -721,9 +838,9 @@
       j.total = (j.total || 3) + 1;
 
       var mitTag = cautiousMitigation ? ' <i>(−1 Marcha Cautelosa)</i>' : '';
-      var fumbleTag = isSevereFailure ? ' <b>⚠ FALHA SEVERA</b>' : '';
-      body += '<br><br><b>🎲 Rolagem de Desvio:</b> d' + dieSides + ' [' + dieRoll + ']' + mitTag + fumbleTag + ' ➔ +' + detourMarcos + (detourMarcos === 1 ? ' Marco' : ' Marcos') + '<br>'
-            + '<b>⚠️ Desvio forçado!</b> O relevo difícil e a rota obstruída exigiram um contorno, adicionando <b>+' + detourMarcos + (detourMarcos === 1 ? ' marco' : ' marcos') + '</b> ao caminho.';
+      var fumbleTag = isSevereFailure ? ' <b>[FALHA SEVERA]</b>' : '';
+      body += '<br><br><b>Rolagem de Desvio:</b> d' + dieSides + ' [' + dieRoll + ']' + mitTag + fumbleTag + ' ➔ +' + detourMarcos + (detourMarcos === 1 ? ' Marco' : ' Marcos') + '<br>'
+            + '<b>Desvio forçado!</b> O relevo difícil e a rota obstruída exigiram um contorno, adicionando <b><span class="marcos-lore-link" role="button" tabindex="0" title="Toque para entender a medida em Marcos">+' + detourMarcos + (detourMarcos === 1 ? ' marco' : ' marcos') + '</span></b> ao caminho.';
     }
     // Concessão, consumo e recuperação de itens e ouro em eventos de jornada (Ordem do Usuário 2026-10)
     var targetCh = (ch && ch._haz) || ch;

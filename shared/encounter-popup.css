@@ -2491,3 +2491,63 @@ body.perf-lite .enc-cho-row {
   border-color: rgba(196, 149, 58, 0.45) !important;
 }
 
+
+
+/* ==========================================================================
+   OS MARCOS DE VALDORIA — Termo Interativo & Janela Explicativa
+   Ordem do Usuário 2026-10: medida de distância clicável em popup informativo
+   ========================================================================== */
+.marcos-lore-link {
+  color: #ffd685 !important;
+  text-decoration: underline dotted #ffd685 1.5px !important;
+  text-underline-offset: 3px !important;
+  cursor: pointer !important;
+  font-weight: 700 !important;
+  display: inline-block;
+  padding: 0 1px;
+  border-radius: 2px;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease, background-color 0.15s ease;
+}
+.marcos-lore-link:hover,
+.marcos-lore-link:focus,
+.marcos-lore-link:active {
+  color: #fff2cc !important;
+  text-decoration-color: #ffe082 !important;
+  background-color: rgba(196, 149, 58, 0.18) !important;
+  text-shadow: 0 0 6px rgba(255, 214, 133, 0.45);
+}
+
+#marcos-lore-dialog {
+  border: none;
+  background: transparent;
+  padding: 0;
+  max-width: 96vw;
+  max-height: 94vh;
+  margin: auto;
+}
+#marcos-lore-dialog::backdrop {
+  background: rgba(8, 6, 4, 0.85);
+  backdrop-filter: blur(2px);
+}
+.marcos-lore-card {
+  position: relative;
+  width: min(92vw, 380px);
+  max-height: 86vh;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin: 0 auto;
+  padding: 18px 16px 16px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(196, 149, 58, 0.22), transparent 70%),
+    linear-gradient(180deg, #382c20 0%, #292117 60%, #1e170f 100%);
+  border: 1.5px solid var(--v-gold, #c4953a);
+  border-radius: var(--v-radius-lg, 12px);
+  box-shadow:
+    0 16px 45px rgba(0, 0, 0, 0.88),
+    0 0 30px rgba(196, 149, 58, 0.25),
+    inset 0 1px 0 rgba(255, 244, 208, 0.08);
+  color: var(--v-text, #d4c8b0);
+  font-family: 'Georgia', serif;
+  animation: encCdCardReveal 240ms cubic-bezier(0.16, 1.08, 0.32, 1) forwards;
+}

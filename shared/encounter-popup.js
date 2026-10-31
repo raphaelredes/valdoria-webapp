@@ -4110,6 +4110,16 @@
     card.appendChild(wrap);
   }
 
+  function _wrapMarcosLoreLinks(html) {
+    if (!html || typeof html !== 'string') return html;
+    if (html.indexOf('marcos-lore-link') >= 0) return html;
+    return html.replace(/(<[^>]+>)|(~?\b\d+\s+marcos?\b)/gi, function (match, tag, textMatch) {
+      if (tag) return tag;
+      return '<span class="marcos-lore-link" role="button" tabindex="0" title="Toque para entender a medida em Marcos">' + textMatch + '</span>';
+    });
+  }
+  if (typeof window !== 'undefined') window.wrapMarcosLoreLinks = _wrapMarcosLoreLinks;
+
   function render(dialogue, opts) {
     opts = opts || {};
     closeChoices(true);
@@ -4123,6 +4133,9 @@
     var _scriptIn = dialogue.script || [];
     var _script = [];
     _scriptIn.forEach(function (l) {
+      if (l && l.text && typeof _wrapMarcosLoreLinks === 'function') {
+        l.text = _wrapMarcosLoreLinks(l.text);
+      }
       _script.push(l);
       if (l && l.check_hint && l.check_hint.phrase) {
         _script.push({ type: 'narration', _checkHint: true, text: '⚀ ' + l.check_hint.phrase });
@@ -4172,9 +4185,9 @@
         var _remain = Math.max(0, (_pg.total || 1) - _cur);
         var _distRem = (_pg.distRemaining != null) ? _pg.distRemaining : (_remain * 3);
         var _distUnit = (_distRem === 1) ? ' marco' : ' marcos';
-        pLabel.textContent = 'Distância estimada: ~' + _distRem + _distUnit;
-        pRemain.textContent = (_remain === 0 || _distRem <= 0) ? 'Destino avistado!'
-          : ('Aproximadamente ~' + _distRem + (_distRem === 1 ? ' marco restante' : ' marcos restantes') + ' (estimativa)');
+        pLabel.innerHTML = 'Distância estimada: <span class="marcos-lore-link" role="button" tabindex="0" title="Toque para entender a medida em Marcos">~' + _distRem + _distUnit + '</span>';
+        pRemain.innerHTML = (_remain === 0 || _distRem <= 0) ? 'Destino avistado!'
+          : ('Aproximadamente <span class="marcos-lore-link" role="button" tabindex="0" title="Toque para entender a medida em Marcos">~' + _distRem + (_distRem === 1 ? ' marco restante' : ' marcos restantes') + '</span> (estimativa)');
       }
 
       // Carta Náutica e Traçador de Rota (Modelo 8)
