@@ -40635,7 +40635,9 @@
       + '.cfm-pin.is-player-here .cfm-pin-reticle { border-color: #ffd685; box-shadow: 0 0 14px rgba(255, 214, 133, 0.95), inset 0 0 6px rgba(255, 214, 133, 0.6); }'
       + '.cfm-pin.is-player-here .cfm-pin-reticle::after { background: #ffd685; box-shadow: 0 0 8px #ffd685; }'
       + '.cfm-drawer-action-btn.cfm-btn-action-here { background: linear-gradient(180deg, #5a401c 0%, #362411 100%); border: 1.5px solid #ffd685; color: #ffd685; box-shadow: 0 0 10px rgba(196, 149, 58, 0.45); }'
-      + '.cfm-drawer-action-btn.cfm-btn-action-here:hover { background: linear-gradient(180deg, #6c4d22 0%, #422d16 100%); box-shadow: 0 0 14px rgba(255, 214, 133, 0.7); }';
+      + '.cfm-drawer-action-btn.cfm-btn-action-here:hover { background: linear-gradient(180deg, #6c4d22 0%, #422d16 100%); box-shadow: 0 0 14px rgba(255, 214, 133, 0.7); }'
+      + '.cfm-fog-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; transition: opacity 0.3s ease; }'
+      + '.cfm-unmapped-badge { font-family: "Cinzel", serif; font-size: 11px; color: #c4953a; background: rgba(20, 14, 8, 0.85); border: 1px solid rgba(196, 149, 58, 0.4); border-radius: 4px; padding: 2px 8px; margin-left: 8px; letter-spacing: 0.4px; font-style: italic; font-weight: 500; }';
     document.head.appendChild(style);
   }
 
@@ -40649,6 +40651,12 @@
     }
     if (nm.startsWith('floresta') || nm.startsWith('passagem') || nm.startsWith('caverna') || nm.startsWith('costa') || nm.startsWith('cala') || nm.startsWith('tumba') || nm.startsWith('cripta') || nm.startsWith('cratera') || nm.startsWith('crista') || nm.startsWith('vila')) {
       return 'Ir até a';
+    }
+    if (nm.indexOf('korthag') >= 0) {
+      return 'Ir até a';
+    }
+    if (nm.indexOf('valkrest') >= 0) {
+      return 'Ir até o';
     }
     return 'Ir até o';
   }
@@ -40714,14 +40722,23 @@
       else if (rawSrc.indexOf('../valdoria-webapp/') === 0) rawSrc = rawSrc.replace('../valdoria-webapp/', '/');
     }
 
+    var curProv = (typeof CART_PROVINCES !== 'undefined' ? CART_PROVINCES : []).find(function(pr){ return pr.id === key; });
+    var provMapOwned = !!(curProv && curProv.mapKey && ownedMaps && (ownedMaps.indexOf(curProv.mapKey) >= 0));
+    var masterMapOwned = !!(ownedMaps && (ownedMaps.indexOf('Mapa de Valdória') >= 0 || ownedMaps.indexOf('Mapa-Mestre') >= 0));
+    var isFullMapUnlocked = provMapOwned || masterMapOwned;
+
     modal.innerHTML = ''
       + '<div class="cfm-header">'
-      + '  <div class="cfm-header-title" id="rfm-header-title">' + reg.name + '</div>'
+      + '  <div class="cfm-header-title" id="rfm-header-title">'
+      + '    <span>' + reg.name + '</span>'
+      + (!isFullMapUnlocked ? ' <span class="cfm-unmapped-badge">Esboço dos Ermos</span>' : '')
+      + '  </div>'
       + '  <button type="button" class="cfm-close-btn" id="rfm-close-btn">✕ Fechar mapa</button>'
       + '</div>'
       + '<div class="cfm-viewport">'
       + '  <div class="cfm-stage">'
       + '    <img class="cfm-img" id="rfm-img" src="' + rawSrc + '" alt="' + reg.name + '">'
+      + '    <canvas class="cfm-fog-canvas" id="rfm-fog-canvas"></canvas>'
       + '    <div class="cfm-pins-layer" id="rfm-pins-layer"></div>'
       + '  </div>'
       + '</div>'
@@ -40858,6 +40875,57 @@
 
       pinsLayer.appendChild(pin);
     });
+
+    // Névoa Cartográfica vs Carta do Cartógrafo Corvus (Relevância de Mapas & Realismo D&D 5e):
+    // Se o aventureiro adquiriu o mapa regional ou o Mapa-Mestre, o mapa é 100% aberto e nítido.
+    // Se não possui o mapa, o território inexplorado fica velado por névoa suave de manuscrito,
+    // revelando organicamente apenas os arredores dos marcos conhecidos.
+    var fogCanvas = modal.querySelector('#rfm-fog-canvas');
+    function _renderRegionalFog() {
+      if (!fogCanvas) return;
+      if (isFullMapUnlocked) {
+        fogCanvas.style.display = 'none';
+        return;
+      }
+      fogCanvas.style.display = 'block';
+      var rect = fogCanvas.getBoundingClientRect();
+      var fw = Math.round(rect.width) || fogCanvas.offsetWidth || 380;
+      var fh = Math.round(rect.height) || fogCanvas.offsetHeight || 520;
+      if (fw <= 0 || fh <= 0) {
+        setTimeout(_renderRegionalFog, 60);
+        return;
+      }
+      fogCanvas.width = fw;
+      fogCanvas.height = fh;
+      var fctx = fogCanvas.getContext('2d');
+      if (!fctx) return;
+      fctx.clearRect(0, 0, fw, fh);
+
+      // Fundo névoa diegética em nanquim e couro escuro
+      fctx.save();
+      fctx.fillStyle = 'rgba(16, 11, 7, 0.88)';
+      fctx.fillRect(0, 0, fw, fh);
+
+      // Abertura suave (feathered) em torno de cada local descoberto
+      fctx.globalCompositeOperation = 'destination-out';
+      var baseR = Math.max(fw, fh) * 0.22;
+      nodes.forEach(function(n) {
+        var nx = (n.x <= 1 ? (n.x * fw) : n.x);
+        var ny = (n.y <= 1 ? (n.y * fh) : n.y);
+        var grad = fctx.createRadialGradient(nx, ny, baseR * 0.25, nx, ny, baseR);
+        grad.addColorStop(0, 'rgba(0, 0, 0, 1.0)');
+        grad.addColorStop(0.60, 'rgba(0, 0, 0, 0.85)');
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
+        fctx.fillStyle = grad;
+        fctx.beginPath();
+        fctx.arc(nx, ny, baseR, 0, Math.PI * 2);
+        fctx.fill();
+      });
+      fctx.restore();
+    }
+
+    _renderRegionalFog();
+    imgEl.onload = function() { _renderRegionalFog(); };
 
     // Seleção inicial: se informado ou se o aventureiro estiver em um dos nós desta região
     var targetInitId = initialNodeId || (pLoc && nodes.some(function(item){ return item.id === pLoc; }) ? pLoc : null);
