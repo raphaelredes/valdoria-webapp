@@ -80630,7 +80630,41 @@
 
       'bandit_fortress': ['bandit_fortress', 'bandit_camp', 'forte_dos_bandidos', 'forte_bandidos'],
 
-      'ashen_badlands': ['ashen_badlands', 'badlands', 'terras_devastadas']
+      'ashen_badlands': ['ashen_badlands', 'badlands', 'terras_devastadas'],
+
+      'goblin_nest': ['goblin_nest', 'ninho_goblins', 'ninho_de_goblins'],
+
+      'elven_ruins': ['elven_ruins', 'ruinas_elficas', 'ruinas'],
+
+      'elder_woods': ['elder_woods', 'bosque_ancestral'],
+
+      'deep_swamp': ['deep_swamp', 'pantano_profundo'],
+
+      'eldritch_mire': ['eldritch_mire', 'pantano_eldritch'],
+
+      'korthag': ['korthag', 'vila_korthag', 'mina_korthag'],
+
+      'dragon_pass': ['dragon_pass', 'passo_dragao', 'passo_do_dragao'],
+
+      'black_peaks': ['black_peaks', 'montanhas_negras'],
+
+      'underground_caverns': ['underground_caverns', 'cavernas_subterraneas'],
+
+      'crystal_depths': ['crystal_depths', 'profundezas_cristal'],
+
+      'troll_cave': ['troll_cave', 'caverna_troll', 'caverna_do_troll'],
+
+      'shipwreck_cove': ['shipwreck_cove', 'cala_dos_naufagios'],
+
+      'sunken_tomb': ['sunken_tomb', 'tumba_areias', 'tumba_das_areias'],
+
+      'ancestral_graveyard': ['ancestral_graveyard', 'cemiterio_ancestral'],
+
+      'glacial_rift': ['glacial_rift', 'abismo_glacial'],
+
+      'frost_cave': ['frost_cave', 'caverna_gelo', 'caverna_de_gelo'],
+
+      'valkrest': ['valkrest', 'acampamento_valkrest']
 
     };
 
@@ -81255,6 +81289,16 @@
       if (pLoc && (pLoc.indexOf('city_') === 0 || pLoc === 'city_gates')) {
 
         isInsideCity = true;
+
+      }
+
+      if (window.__EXPLORE_MODE || (window.S && (window.S.hexGrid || window.S.mapDef)) || (typeof window.startReturnToCity === 'function')) {
+
+        if (!pLoc || (pLoc.indexOf('city_') !== 0 && pLoc !== 'city_gates')) {
+
+          isInsideCity = false;
+
+        }
 
       }
 

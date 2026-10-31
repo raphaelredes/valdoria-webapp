@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-31T17:05:29Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-31T17:52:35Z - do not edit directly, edit source -->
 
 
 
@@ -1942,10 +1942,10 @@ body.pointcrawl-mode #pointcrawl-dungeon-modal {
 }
 body.pointcrawl-mode #confirm-overlay,
 body.pointcrawl-mode #cart-back-prompt {
-  z-index: 1500 !important;
+  z-index: 100060 !important;
 }
 body.pointcrawl-mode #dice-overlay {
-  z-index: 1600 !important;
+  z-index: 100070 !important;
 }
 
 html, body {
@@ -90881,6 +90881,12 @@ function startReturnToCity() {
 
       onArrive: _returnToCityNow,
 
+      onCancel: function () {
+        if (typeof openCartography === 'function') {
+          openCartography();
+        }
+      },
+
       onCombat: function (jinfo) { _journeyLaunchRareCombat({ direction: 'return', biome: (jinfo && jinfo.biome) || biome, enemyId: jinfo && jinfo.enemyId }); },
 
       onDefeat: function () { if (typeof triggerDefeat === 'function') triggerDefeat('Você sucumbiu na jornada de volta a Valdoria.'); }
@@ -97246,10 +97252,10 @@ function _hydrateExploreKnown(){
     + '}'
     + 'body.pointcrawl-mode #confirm-overlay,'
     + 'body.pointcrawl-mode #cart-back-prompt {'
-    + '  z-index: 1500 !important;'
+    + '  z-index: 100060 !important;'
     + '}'
     + 'body.pointcrawl-mode #dice-overlay {'
-    + '  z-index: 1600 !important;'
+    + '  z-index: 100070 !important;'
     + '}';
   document.head.appendChild(st);
 })();
@@ -111306,11 +111312,15 @@ function _promptConfirmReturnToCity(onConfirmed){
 
   if (!prompt) {
 
-    if (confirm('Deseja realmente encerrar a exploração e voltar para a cidade de Valdoria?')) {
+    if (typeof onConfirmed === 'function') { try { onConfirmed(); } catch(_) {} }
 
-      if (typeof onConfirmed === 'function') { try { onConfirmed(); } catch(_) {} }
+    if (typeof startReturnToCity === 'function') {
 
-      if (typeof startReturnToCity === 'function') startReturnToCity();
+      startReturnToCity();
+
+    } else if (typeof _returnToCityNow === 'function') {
+
+      _returnToCityNow();
 
     }
 
