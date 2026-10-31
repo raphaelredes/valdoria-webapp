@@ -81436,9 +81436,7 @@
 
       + '.cfm-drawer-action-btn.cfm-btn-action-here:hover { background: linear-gradient(180deg, #6c4d22 0%, #422d16 100%); box-shadow: 0 0 14px rgba(255, 214, 133, 0.7); }'
 
-      + '.cfm-fog-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; transition: opacity 0.3s ease; }'
-
-      + '.cfm-unmapped-badge { font-family: "Cinzel", serif; font-size: 11px; color: #c4953a; background: rgba(20, 14, 8, 0.85); border: 1px solid rgba(196, 149, 58, 0.4); border-radius: 4px; padding: 2px 8px; margin-left: 8px; letter-spacing: 0.4px; font-style: italic; font-weight: 500; }';
+      + '.cfm-fog-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; transition: opacity 0.3s ease; }';
 
     document.head.appendChild(style);
 
@@ -81647,8 +81645,6 @@
       + '  <div class="cfm-header-title" id="rfm-header-title">'
 
       + '    <span>' + reg.name + '</span>'
-
-      + (!isFullMapUnlocked ? ' <span class="cfm-unmapped-badge">Esboço dos Ermos</span>' : '')
 
       + '  </div>'
 
