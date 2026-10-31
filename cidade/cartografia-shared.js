@@ -4479,6 +4479,7 @@
 
   // === _drawCartScaleBar (Escala Cartográfica Oficial D&D 5e) ===
   function _drawCartScaleBar(ctx, w, h, viewMode) {
+    return; // Removida a escala "5 MARCOS (~15 MILHAS)" conforme solicitacao do usuario
     ctx.save();
     var isProv = (viewMode === 'province');
     var barW = isProv ? 68 : 84;
@@ -40628,7 +40629,13 @@
       + '.cfm-drawer-info { flex: 1; min-width: 0; }'
       + '.cfm-drawer-name { font-family: "Cinzel", serif; font-size: 13.5px; font-weight: 700; color: #ffd685; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; }'
       + '.cfm-drawer-action-btn { background: linear-gradient(180deg, #443118 0%, #2a1d0e 100%); border: 1.5px solid #c4953a; color: #ffd685; font-family: "Cinzel", serif; font-size: 12.5px; font-weight: 700; padding: 8px 15px; border-radius: 6px; cursor: pointer; white-space: nowrap; touch-action: manipulation; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); }'
-      + '.cfm-drawer-action-btn:active { transform: scale(0.97); }';
+      + '.cfm-drawer-action-btn:active { transform: scale(0.97); }'
+      + '.cfm-pin-flag-wrap { position: absolute; bottom: 22px; left: 50%; transform: translateX(-40%); pointer-events: none; z-index: 65; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.85)); }'
+      + '.cfm-pin-flag { width: 34px; height: auto; display: block; user-select: none; pointer-events: none; }'
+      + '.cfm-pin.is-player-here .cfm-pin-reticle { border-color: #ffd685; box-shadow: 0 0 14px rgba(255, 214, 133, 0.95), inset 0 0 6px rgba(255, 214, 133, 0.6); }'
+      + '.cfm-pin.is-player-here .cfm-pin-reticle::after { background: #ffd685; box-shadow: 0 0 8px #ffd685; }'
+      + '.cfm-drawer-action-btn.cfm-btn-action-here { background: linear-gradient(180deg, #5a401c 0%, #362411 100%); border: 1.5px solid #ffd685; color: #ffd685; box-shadow: 0 0 10px rgba(196, 149, 58, 0.45); }'
+      + '.cfm-drawer-action-btn.cfm-btn-action-here:hover { background: linear-gradient(180deg, #6c4d22 0%, #422d16 100%); box-shadow: 0 0 14px rgba(255, 214, 133, 0.7); }';
     document.head.appendChild(style);
   }
 
@@ -40650,6 +40657,18 @@
     _ensureRegionalMapStyles();
     options = options || {};
     var fromDirectOpen = !!options.fromDirect;
+
+    var pLoc = (options && options.playerLocKey) || null;
+    if (!pLoc && typeof _cartGetPlayerBiomeV2 === 'function') {
+      try { pLoc = _cartGetPlayerBiomeV2(); } catch(_) {}
+    }
+    if (!pLoc && typeof window !== 'undefined') {
+      pLoc = window.__CURRENT_LOC_KEY ||
+             (window._cartCurrentLocBiome && window._cartCurrentLocBiome.key) ||
+             window._playerLocationKey ||
+             (window.S && (window.S.currentMapId || window.S.mapId)) ||
+             (window.CITY_PLAYER && window.CITY_PLAYER.location) || null;
+    }
 
     var modal = document.getElementById('regional-map-fullscreen-modal');
     if (!modal) {
@@ -40743,23 +40762,45 @@
 
     function _selectRegionalNode(n) {
       drawerName.textContent = n.name;
-      drawerBtn.textContent = _getGrammarMoveButtonLabel(n.name);
-      drawerBtn.style.display = 'inline-flex';
-      drawerBtn.onclick = function() {
-        if (typeof haptic === 'function') haptic('medium');
-        closeRegionalMapModal();
-        if (typeof _travelToBiome === 'function') {
-          _travelToBiome(n.id, n.name);
-        } else if (typeof doAction === 'function') {
-          doAction('cart_' + n.id);
-        } else if (typeof startCityJourney === 'function') {
-          startCityJourney(n.id, n.name);
-        } else if (typeof _cartTravelTo === 'function') {
-          _cartTravelTo(n.id);
-        } else {
-          alert('Partindo para explorar ' + n.name + '...');
-        }
-      };
+      var isHere = !!(pLoc && (pLoc === n.id || (pLoc === 'plains' && n.id === 'green_fields') || (pLoc === 'city_gates' && n.id === 'green_fields')));
+      if (isHere) {
+        drawerBtn.textContent = 'Explorar';
+        drawerBtn.className = 'cfm-drawer-action-btn cfm-btn-action-here';
+        drawerBtn.style.display = 'inline-flex';
+        drawerBtn.onclick = function() {
+          if (typeof haptic === 'function') haptic('medium');
+          if (typeof _openCurrentNodePointcrawlHub === 'function') {
+            _openCurrentNodePointcrawlHub();
+          } else if (typeof _openCartLocationPopup === 'function') {
+            var allB = (window.CartShared && CartShared.CART_BIOMES) || [];
+            var targetBiome = allB.find(function(b){ return b && b.key === n.id; }) || n;
+            _openCartLocationPopup(targetBiome);
+          } else if (typeof _triggerPointcrawlRegionalEvent === 'function') {
+            _triggerPointcrawlRegionalEvent(n);
+          } else {
+            alert('Explorando ' + n.name + '...');
+          }
+        };
+      } else {
+        drawerBtn.textContent = _getGrammarMoveButtonLabel(n.name);
+        drawerBtn.className = 'cfm-drawer-action-btn';
+        drawerBtn.style.display = 'inline-flex';
+        drawerBtn.onclick = function() {
+          if (typeof haptic === 'function') haptic('medium');
+          closeRegionalMapModal();
+          if (typeof _cartTravelTo === 'function') {
+            _cartTravelTo(n.id);
+          } else if (typeof _travelToBiome === 'function') {
+            _travelToBiome(n.id, n.name);
+          } else if (typeof startCityJourney === 'function') {
+            startCityJourney(n.id, n.name);
+          } else if (typeof doAction === 'function') {
+            doAction('cart_' + n.id);
+          } else {
+            alert('Partindo para explorar ' + n.name + '...');
+          }
+        };
+      }
 
       var pins = pinsLayer.querySelectorAll('.cfm-pin');
       pins.forEach(function(p) {
@@ -40790,9 +40831,24 @@
       pin.style.left = leftPct + '%';
       pin.style.top = topPct + '%';
 
-      pin.innerHTML = ''
-        + '<div class="cfm-pin-reticle"></div>'
-        + '<div class="cfm-pin-badge">' + n.name + '</div>';
+      var isHere = !!(pLoc && (pLoc === n.id || (pLoc === 'plains' && n.id === 'green_fields') || (pLoc === 'city_gates' && n.id === 'green_fields')));
+      if (isHere) {
+        pin.classList.add('is-player-here');
+        var flagSrc = 'shared/img/map/player-pin.webp';
+        if (typeof window !== 'undefined' && window.location && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
+          flagSrc = '/shared/img/map/player-pin.webp';
+        }
+        pin.innerHTML = ''
+          + '<div class="cfm-pin-flag-wrap">'
+          + '  <img src="' + flagSrc + '" class="cfm-pin-flag" alt="Posição Atual" onerror="if(this.src.indexOf(\'../shared/\')===-1)this.src=\'../shared/img/map/player-pin.webp\';">'
+          + '</div>'
+          + '<div class="cfm-pin-reticle"></div>'
+          + '<div class="cfm-pin-badge">' + n.name + '</div>';
+      } else {
+        pin.innerHTML = ''
+          + '<div class="cfm-pin-reticle"></div>'
+          + '<div class="cfm-pin-badge">' + n.name + '</div>';
+      }
 
       pin.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -40803,9 +40859,13 @@
       pinsLayer.appendChild(pin);
     });
 
-    // Zero pré-seleção inicial (Regra Soberana 11)
-    if (initialNodeId && Array.isArray(nodes)) {
-      var foundNode = nodes.find(function(item){ return item.id === initialNodeId; });
+    // Seleção inicial: se informado ou se o aventureiro estiver em um dos nós desta região
+    var targetInitId = initialNodeId || (pLoc && nodes.some(function(item){ return item.id === pLoc; }) ? pLoc : null);
+    if (!targetInitId && pLoc === 'plains' && nodes.some(function(item){ return item.id === 'green_fields'; })) {
+      targetInitId = 'green_fields';
+    }
+    if (targetInitId && Array.isArray(nodes)) {
+      var foundNode = nodes.find(function(item){ return item.id === targetInitId; });
       if (foundNode) _selectRegionalNode(foundNode);
     }
 

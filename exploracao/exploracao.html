@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-31T03:06:33Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-31T14:28:32Z - do not edit directly, edit source -->
 
 
 
@@ -95650,12 +95650,13 @@ function _cartTravelTo(mapId){
         if (typeof dmNarrate === 'function') dmNarrate({ text: 'Você chega às terras de ' + m.name + '.', type: 'action' });
         if (typeof boot === 'function') boot();
         setTimeout(function(){
-          if (typeof openCartography === 'function') openCartography();
           var targetProv = (window.CartShared && CartShared.getLocationProvince) ? CartShared.getLocationProvince(origKey) : null;
-          if (targetProv && targetProv.id && typeof _xcartFocusProvince === 'function') {
-            _xcartFocusProvince(targetProv.id);
+          var pId = (targetProv && targetProv.id) || 'plains';
+          if (window.CartShared && typeof CartShared.openRegionalMapModal === 'function') {
+            CartShared.openRegionalMapModal(pId, origKey, { playerLocKey: origKey });
+          } else if (typeof openCartography === 'function') {
+            openCartography();
           }
-          if (typeof _openCurrentNodePointcrawlHub === 'function') _openCurrentNodePointcrawlHub();
         }, 120);
       },
 
@@ -98215,6 +98216,13 @@ function _openPointcrawlDungeonDelver(dgId) {
 }
 
 function openCartography() {
+  var curKey = (typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : 'green_fields';
+  var targetProv = (window.CartShared && CartShared.getLocationProvince) ? CartShared.getLocationProvince(curKey) : null;
+  var pId = (targetProv && targetProv.id) || 'plains';
+  if (window.CartShared && typeof CartShared.openRegionalMapModal === 'function') {
+    CartShared.openRegionalMapModal(pId, curKey, { playerLocKey: curKey });
+    return;
+  }
 
   _cartZoom = CART_ZOOM_DEFAULT; _cartPanX = 0; _cartPanY = 0;
 
