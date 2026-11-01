@@ -733,22 +733,47 @@
     return true;
   }
 
+  function _stripHtml(str) {
+    return (str || '').replace(/<[^>]+>/g, '').trim();
+  }
+
   function _countWords(str) {
-    return (str || '').trim().split(/\s+/).filter(Boolean).length;
+    return _stripHtml(str).split(/\s+/).filter(Boolean).length;
   }
 
   /* Agrupa estrofes em páginas (canonical PADRAO_ALDRIC):
      - Orçamento adaptativo por página (evita scrolling vertical em telas mobile/Telegram)
-     - Até 2 estrofes por página (se forem curtas)
-     - Limite de ~45-55 palavras ou ~280-340 caracteres por página
+     - Reúne estrofes curtas complementares (intro + marcos + traço sensorial) na mesma tela (evita micro-telas de 1 frase)
+     - Orçamento equilibrado: ~58-65 palavras úteis ou ~360-420 caracteres visuais (sem contar tags HTML)
+     - Até 3 estrofes por página (se forem concisas)
      - Particiona parágrafos longos em limites de sentenças limpos */
   function _groupScriptIntoPages(script, opts) {
     opts = opts || {};
-    var smallScreen = (typeof window !== 'undefined' && window.innerHeight && window.innerHeight <= 640);
-    var MAX_PAGE_WORDS = opts.maxWords || (smallScreen ? 45 : 55);
-    var MAX_PAGE_CHARS = opts.maxChars || (smallScreen ? 280 : 340);
-    var MAX_STROPHES_PER_PAGE = opts.maxStrophes || 2;
-    var MAX_LINES_PER_PAGE = opts.maxLines || 4;
+    // P0 Fix (Ordem do Usuário 2026-10): Evita estilhaçar narrativas/diálogos curtos em micro-telas de 1 frase.
+    // Calibrado para acomodar até 56 palavras úteis e 340 caracteres limpos (sem contar tags HTML),
+    // permitindo reunir intro + marcos (~37 palavras, 211 chars) e traço sensorial de raça (~19 palavras, 108 chars)
+    // na mesma página (total 56 palavras, 319 chars), eliminando cliques redundantes em telas com 80% de vazio.
+    // Calibração Dinâmica por Tamanho de Fonte (Ordem do Usuário 2026-10):
+    // Considera os 3 tamanhos de fonte do jogo: 'small' [0.88], 'normal' [1.10], 'large'/'xlarge' [1.30].
+    var fontScale = 1.0;
+    if (opts.fontScale) {
+      fontScale = opts.fontScale;
+    } else if (typeof document !== 'undefined') {
+      var fsAttr = (document.documentElement && typeof document.documentElement.getAttribute === 'function' && document.documentElement.getAttribute('data-font-size')) ||
+                   (document.body && typeof document.body.getAttribute === 'function' && document.body.getAttribute('data-font-size'));
+      if (!fsAttr && typeof localStorage !== 'undefined') {
+        try { fsAttr = localStorage.getItem('valdoria_font_size'); } catch(_e){}
+      }
+      if (fsAttr === 'large' || fsAttr === 'xlarge') {
+        fontScale = 1.25;
+      } else if (fsAttr === 'small') {
+        fontScale = 0.85;
+      }
+    }
+    var MAX_PAGE_WORDS = opts.maxWords || Math.round(56 / fontScale);
+    var MAX_PAGE_CHARS = opts.maxChars || Math.round(340 / fontScale);
+    var MAX_STROPHES_PER_PAGE = opts.maxStrophes || 3;
+    var MAX_LINES_PER_PAGE = opts.maxLines || 6;
 
     var pages = [];
     var current = [];
@@ -793,8 +818,9 @@
       if (!text) return;
 
       var sentences = _splitIntoSentences(text);
-      var wordCount = _countWords(text);
-      var charCount = text.length;
+      var cleanText = _stripHtml(text);
+      var wordCount = _countWords(cleanText);
+      var charCount = cleanText.length;
 
       // Se a estrofe cabe confortavelmente inteira no orçamento de uma página
       if (sentences.length <= 1 || (wordCount <= MAX_PAGE_WORDS && charCount <= MAX_PAGE_CHARS)) {
@@ -818,8 +844,9 @@
         var chunkChars = 0;
 
         sentences.forEach(function(sent) {
-          var w = _countWords(sent);
-          var c = sent.length;
+          var cleanSent = _stripHtml(sent);
+          var w = _countWords(cleanSent);
+          var c = cleanSent.length;
 
           var wouldExceedChunk = (chunkSentences.length > 0) && (
             (chunkWords + w > MAX_PAGE_WORDS) ||
@@ -860,7 +887,7 @@
 
   /* Modo 'compact' — utiliza limites ligeiramente mais enxutos mantendo a mesma robustez */
   function _groupScriptCompact(script) {
-    return _groupScriptIntoPages(script || [], { maxWords: 45, maxChars: 260, maxLines: 3, maxStrophes: 2 });
+    return _groupScriptIntoPages(script || [], { maxWords: 55, maxChars: 340, maxLines: 5, maxStrophes: 3 });
   }
 
   /* A1.5: API pública de paginação de script[] de diálogo (fonte única).

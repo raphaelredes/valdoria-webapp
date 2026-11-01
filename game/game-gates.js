@@ -32,6 +32,7 @@ var GTS_SVC_META = {
   'open_cartografia':     { icon: '../shared/img/services/svc-mapas.webp',       meta: 'Viajar pelo reino' },
   'open_daily_challenge': { icon: '../shared/img/services/svc-combate-solo.webp', meta: 'Prova de combate do dia' },
   'gates_prep_open':      { icon: '../shared/img/services/svc-mantimentos.webp', meta: 'Suprimentos de estrada' },
+  'gates_buy_rations':    { icon: '../shared/img/services/svc-mantimentos.webp', meta: 'Rações de marcha com Tibor' },
   'action_talk_guard':    { icon: '../shared/img/services/svc-informacoes.webp', meta: 'Novidades da guarda' },
   'action_explore_step':  { icon: '../shared/img/services/svc-explorar.webp',    meta: 'Explorar os arredores' }
 };

@@ -1,6 +1,4 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-10-31T18:49:35Z - do not edit directly, edit source -->
-
 
 
 
@@ -1492,7 +1490,7 @@
 
 <!-- 2026-05-11: Auth Gate (skip em simuladores file:// via hostname check) -->
 
-<script src="../shared/auth-gate.js"></script>
+<script src="/shared/auth-gate.js"></script>
 
 
 
@@ -1506,7 +1504,7 @@
 
      então não interfere no spoof de reduced-motion do sim-full-motion abaixo. -->
 
-<script>document.write('<script src="../bundle-version.js?_=' + Date.now() + '"><\/script>');</script>
+<script>document.write('<script src="/bundle-version.js?_=' + Date.now() + '"><\/script>');</script>
 
 
 
@@ -1536,7 +1534,7 @@
 
        Environment Isolation; espelha o fix do combate em combate.html L586). file:// (sim
 
-       LOCAL) e origin null usam o CDN PROD + o fallback relativo ../valdoria-webapp/shared. */
+       LOCAL) e origin null usam o CDN PROD + o fallback relativo /shared. */
 
     var __EXPBASE = (location.protocol === 'file:' || !location.origin || location.origin === 'null')
 
@@ -1546,13 +1544,13 @@
 
     document.write('<script src="' + __EXPBASE + '/shared/sim-full-motion.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
-    document.write('<script src="../shared/sim-full-motion.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="/shared/sim-full-motion.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     /* X-6.5.51AI: server-log canônico */
 
     document.write('<script src="' + __EXPBASE + '/shared/server-log.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
-    document.write('<script src="../shared/server-log.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="/shared/server-log.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     window.SERVER_LOG_AREA = 'exploracao';
 
@@ -1566,25 +1564,25 @@
 
     document.write('<script src="' + __EXPBASE + '/shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
-    document.write('<script src="../shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="/shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     document.write('<script src="' + __EXPBASE + '/shared/text-timing.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
-    document.write('<script src="../shared/text-timing.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="/shared/text-timing.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     /* Sessão #38: vOverlay + vListen + vScheduler (CLAUDE.md SPA + perf Fase 3.3/3.4). */
 
     document.write('<script src="' + __EXPBASE + '/shared/overlay-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
-    document.write('<script src="../shared/overlay-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="/shared/overlay-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     document.write('<script src="' + __EXPBASE + '/shared/listener-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
-    document.write('<script src="../shared/listener-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="/shared/listener-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     document.write('<script src="' + __EXPBASE + '/shared/scheduler.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
-    document.write('<script src="../shared/scheduler.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="/shared/scheduler.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     /* Sessão #63 (2026-05-28) BUG-7 fix: Single-device session lock pra
 
@@ -1600,11 +1598,11 @@
 
     document.write('<script src="' + __EXPBASE + '/shared/device-id.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
-    document.write('<script src="../shared/device-id.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="/shared/device-id.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     document.write('<script src="' + __EXPBASE + '/shared/session-heartbeat.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
-    document.write('<script src="../shared/session-heartbeat.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="/shared/session-heartbeat.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     /* 2026-06-21 (user "botão nativo = fechar, confirmação DENTRO do jogo"): exit-confirm.js
 
@@ -1614,7 +1612,7 @@
 
        logo após. enableClosingConfirmation (popup nativo) removido. */
 
-    document.write('<script src="../shared/exit-confirm.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="/shared/exit-confirm.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     document.write('<script>try{var _tgBB=window.Telegram&&Telegram.WebApp&&Telegram.WebApp.BackButton;if(_tgBB&&_tgBB.show)_tgBB.show();}catch(_eBB){}<\/script>');
 
@@ -1626,7 +1624,7 @@
 
     document.write('<script src="' + __EXPBASE + '/shared/auth-token-store.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
-    document.write('<script src="../shared/auth-token-store.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="/shared/auth-token-store.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     setTimeout(function(){
 
@@ -1806,7 +1804,7 @@
 
      LGPD-compliant — só localStorage técnico, sem PII. -->
 
-<script>document.write('<script src="../shared/version-check.js?_=' + Date.now() + '"><\/script>');</script>
+<script>document.write('<script src="/shared/version-check.js?_=' + Date.now() + '"><\/script>');</script>
 
 
 
@@ -13033,7 +13031,7 @@ body.remote-mode #debug-hud { display: none !important; }
 
      ambos — browser ignora o que não existir. -->
 
-<link rel="stylesheet" href="../explore/explore-camp.css?v=local">
+<link rel="stylesheet" href="/explore/explore-camp.css?v=local">
 
 <script>document.write('<link rel="stylesheet" href="/explore/explore-camp.css?v=' + (window.VBUNDLE_HASH || Date.now()) + '" onerror="this.remove()">');</script>
 
@@ -13053,35 +13051,35 @@ body.remote-mode #debug-hud { display: none !important; }
 
 <script>var _vti = (window.VBUNDLE_HASH || Date.now());
 
-document.write('<link rel="stylesheet" href="../shared/loading-title.css?v=' + _vti + '">');
+document.write('<link rel="stylesheet" href="/shared/loading-title.css?v=' + _vti + '">');
 
 document.write('<link rel="stylesheet" href="/shared/loading-title.css?v=' + _vti + '" onerror="this.remove()">');
 
-document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + _vti + '">');
+document.write('<link rel="stylesheet" href="/shared/loading.css?v=' + _vti + '">');
 
 document.write('<link rel="stylesheet" href="/shared/loading.css?v=' + _vti + '" onerror="this.remove()">');
 
-document.write('<script src="../shared/loading-title.js?v=' + _vti + '"><\/script>');
+document.write('<script src="/shared/loading-title.js?v=' + _vti + '"><\/script>');
 
-document.write('<script src="../shared/loading-template.js?v=' + _vti + '"><\/script>');
+document.write('<script src="/shared/loading-template.js?v=' + _vti + '"><\/script>');
 
 // dnd-rules-shared.js: fonte unica D&D 5e (FASE 1 single-source consolidation).
 
-document.write('<script src="../shared/dnd-rules-shared.js?v=' + _vti + '"><\/script>');
+document.write('<script src="/shared/dnd-rules-shared.js?v=' + _vti + '"><\/script>');
 
 // status-bars.js: threshold unico de cor de HP (vBarHpClass 60/25) — FASE 4 single-source.
 
-document.write('<script src="../shared/status-bars.js?v=' + _vti + '"><\/script>');
+document.write('<script src="/shared/status-bars.js?v=' + _vti + '"><\/script>');
 
 // journey-data-shared.js: dados + regra da viagem (FASE 2 single-source). Requer DndRules.
 
-document.write('<script src="../shared/journey-data-shared.js?v=' + _vti + '"><\/script>');
+document.write('<script src="/shared/journey-data-shared.js?v=' + _vti + '"><\/script>');
 
 /* 2026-05-14: Mochila canonical compartilhada (vInventory) — substitui
 
    _showExploracaoInventoryPopup local. Sprite ic-it-* (519 symbols) primeiro. */
 
-document.write('<link rel="stylesheet" href="../shared/inventory-screen.css?v=' + _vti + '">');
+document.write('<link rel="stylesheet" href="/shared/inventory-screen.css?v=' + _vti + '">');
 
 // 2026-05-19: heraldic-items-sprite.js REMOVIDO. PNGs OpenAI via items-resolver.
 
@@ -13095,15 +13093,15 @@ document.write('<link rel="stylesheet" href="../shared/inventory-screen.css?v=' 
 
    asset-resolver pra upgrade automatico via MutationObserver. */
 
-document.write('<script src="../shared/items-resolver.js?v=' + _vti + '"><\/script>');
+document.write('<script src="/shared/items-resolver.js?v=' + _vti + '"><\/script>');
 
-document.write('<script src="../shared/icons-resolver.js?v=' + _vti + '"><\/script>');
+document.write('<script src="/shared/icons-resolver.js?v=' + _vti + '"><\/script>');
 
-document.write('<script src="../shared/items-db-generated.js?v=' + _vti + '"><\/script>');
+document.write('<script src="/shared/items-db-generated.js?v=' + _vti + '"><\/script>');
 
-document.write('<script src="../shared/asset-resolver.js?v=' + _vti + '"><\/script>');
+document.write('<script src="/shared/asset-resolver.js?v=' + _vti + '"><\/script>');
 
-document.write('<script src="../shared/inventory-screen.js?v=' + _vti + '"><\/script>');
+document.write('<script src="/shared/inventory-screen.js?v=' + _vti + '"><\/script>');
 
 
 
@@ -13115,25 +13113,25 @@ document.write('<script src="../shared/inventory-screen.js?v=' + _vti + '"><\/sc
 
    animacao/funcionamento entre webapps. */
 
-document.write('<link rel="stylesheet" href="../shared/encounter-popup.css?v=' + _vti + '">');
+document.write('<link rel="stylesheet" href="/shared/encounter-popup.css?v=' + _vti + '">');
 
-document.write('<script src="../shared/coin-utils.js?v=' + _vti + '"><\/script>');
+document.write('<script src="/shared/coin-utils.js?v=' + _vti + '"><\/script>');
 
-document.write('<script src="../shared/encounter-popup.js?v=' + _vti + '"><\/script>');
+document.write('<script src="/shared/encounter-popup.js?v=' + _vti + '"><\/script>');
 
 // PADRAO_VIAGEM (#90): orquestrador UNICO de viagem (volta exploracao + map-to-map). Requer journey-data + encounter-popup + dice-3d.
 
-document.write('<script src="../shared/journey-runner.js?v=' + _vti + '"><\/script>');
+document.write('<script src="/shared/journey-runner.js?v=' + _vti + '"><\/script>');
 
 // char-card.{css,js}: card de personagem estilo COMBATE (shared) p/ o Grupo da exploracao (padronizacao #90).
 
-document.write('<link rel="stylesheet" href="../shared/char-card.css?v=' + _vti + '">');
+document.write('<link rel="stylesheet" href="/shared/char-card.css?v=' + _vti + '">');
 
-document.write('<script src="../shared/char-card.js?v=' + _vti + '"><\/script>');
+document.write('<script src="/shared/char-card.js?v=' + _vti + '"><\/script>');
 
 // Sistema Universal de Dicas Não-Intrusivas (Opção 10)
-document.write('<link rel="stylesheet" href="../shared/game-screen-tips.css?v=' + _vti + '">');
-document.write('<script src="../shared/game-screen-tips.js?v=' + _vti + '"><\/script>');
+document.write('<link rel="stylesheet" href="/shared/game-screen-tips.css?v=' + _vti + '">');
+document.write('<script src="/shared/game-screen-tips.js?v=' + _vti + '"><\/script>');
 
 
 
@@ -13143,13 +13141,13 @@ document.write('<script src="../shared/game-screen-tips.js?v=' + _vti + '"><\/sc
 
    event delegation. */
 
-document.write('<script src="../shared/lightbox.js?v=' + _vti + '"><\/script>');
+document.write('<script src="/shared/lightbox.js?v=' + _vti + '"><\/script>');
 
 // Comitiva multiplayer D&D 5e: HUD do grupo, saques, reações táticas, pings no mapa e ghosting
 
-document.write('<link rel="stylesheet" href="../shared/party-client.css?v=' + _vti + '">');
+document.write('<link rel="stylesheet" href="/shared/party-client.css?v=' + _vti + '">');
 
-document.write('<script src="../shared/party-client.js?v=' + _vti + '"><\/script>');
+document.write('<script src="/shared/party-client.js?v=' + _vti + '"><\/script>');
 
 </script>
 
@@ -13544,7 +13542,7 @@ document.write('<script src="../shared/party-client.js?v=' + _vti + '"><\/script
 
      duplicadas em cidade/exploracao/combate. Bug fix único vale pros 3. -->
 
-<script>document.write('<script src="../shared/transition-loader.js?v=' + Date.now() + '"><\/script>');</script>
+<script>document.write('<script src="/shared/transition-loader.js?v=' + Date.now() + '"><\/script>');</script>
 
 <script>
 
@@ -17683,7 +17681,7 @@ window.__onIntroTap = function() {
 
     <div class="hud-row" title="Vida (HP)">
 
-      <img class="hud-ico" src="../shared/img/ui/stat-hp.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
+      <img class="hud-ico" src="/shared/img/ui/stat-hp.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
 
       <span class="hud-lbl">VIDA</span>
 
@@ -17697,7 +17695,7 @@ window.__onIntroTap = function() {
 
       <div class="hud-row" title="Mana / Recurso (MP)">
 
-        <img class="hud-ico" src="../shared/img/ui/stat-mp.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
+        <img class="hud-ico" src="/shared/img/ui/stat-mp.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
 
         <span class="hud-lbl">MANA</span>
 
@@ -17709,7 +17707,7 @@ window.__onIntroTap = function() {
 
       <div class="hud-row" title="Exaustão (D&D 5e, 0 a 6)">
 
-        <img class="hud-ico" src="../shared/img/ui/stat-exhaustion.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
+        <img class="hud-ico" src="/shared/img/ui/stat-exhaustion.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
 
         <span class="hud-lbl">EXAUS</span>
 
@@ -17723,7 +17721,7 @@ window.__onIntroTap = function() {
 
       <div class="hud-row" title="Experiência (XP) e Nível">
 
-        <img class="hud-ico" src="../shared/img/ui/stat-xp.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
+        <img class="hud-ico" src="/shared/img/ui/stat-xp.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
 
         <span class="hud-lvl" id="hud-level">N1</span>
 
@@ -17835,7 +17833,7 @@ window.__onIntroTap = function() {
 
     <button class="quick-btn" id="btn-party" title="Grupo (membros do partido)" aria-label="Grupo">
 
-      <img class="qb-icon" src="../shared/img/ui/grupo.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
+      <img class="qb-icon" src="/shared/img/ui/grupo.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
 
     </button>
 
@@ -17849,7 +17847,7 @@ window.__onIntroTap = function() {
 
       <button class="quick-btn" id="btn-light" title="Fontes de Luz" aria-label="Tochas">
 
-        <img class="qb-icon" src="../shared/img/ui/tochas.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
+        <img class="qb-icon" src="/shared/img/ui/tochas.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
 
       </button>
 
@@ -17859,17 +17857,17 @@ window.__onIntroTap = function() {
 
     <button class="quick-btn" id="btn-camp" title="Acampar" aria-label="Acampar">
 
-      <img class="qb-icon" src="../shared/img/ui/acampamento.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
+      <img class="qb-icon" src="/shared/img/ui/acampamento.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
 
     </button>
 
     <button class="quick-btn" id="btn-cartografia" title="Mapa de Valdoria" aria-label="Mapa de Valdoria">
 
-      <img class="qb-icon" src="../shared/img/ui/cartografia.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
+      <img class="qb-icon" src="/shared/img/ui/cartografia.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
 
     </button>
     <button class="quick-btn" id="btn-hud-return-city" title="Retornar à Cidade de Valdoria" aria-label="Retornar à Cidade" onclick="_cartHandleReturnToCity()">
-      <img class="qb-icon" src="../shared/img/ui/portoes.webp" alt="Cidade" onerror="this.src='../shared/img/ui/portoes.webp';">
+      <img class="qb-icon" src="/shared/img/ui/portoes.webp" alt="Cidade" onerror="this.src='../shared/img/ui/portoes.webp';">
     </button>
 
     <!-- V2.7: btn-download-log removido (user req). Logs continuam salvando em
@@ -18393,7 +18391,7 @@ window.__onIntroTap = function() {
 
       <div class="inv-header">
 
-        <h2 class="inv-title"><img class="inv-title-icon" src="../shared/img/ui/mochila.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">Mochila</h2>
+        <h2 class="inv-title"><img class="inv-title-icon" src="/shared/img/ui/mochila.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">Mochila</h2>
 
         <div class="inv-subtitle" id="inv-subtitle">— itens</div>
 
@@ -23377,11 +23375,11 @@ window.__onIntroTap = function() {
 
     var smallScreen = (typeof window !== 'undefined' && window.innerHeight && window.innerHeight <= 640);
 
-    var MAX_PAGE_WORDS = smallScreen ? 45 : 55;
+    var MAX_PAGE_WORDS = smallScreen ? 58 : 65;
 
-    var MAX_PAGE_CHARS = smallScreen ? 280 : 340;
+    var MAX_PAGE_CHARS = smallScreen ? 360 : 420;
 
-    var MAX_LINES_PER_PAGE = smallScreen ? 3 : 4;
+    var MAX_LINES_PER_PAGE = smallScreen ? 5 : 6;
 
     var countWords = function (s) { return (s || '').split(/\s+/).filter(Boolean).length; };
 
@@ -30365,7 +30363,7 @@ function parseRewardString(s) {
 
   var s1 = document.createElement('script');
 
-  s1.src = '../explore/explore-camp-fire.js?v=' + v;
+  s1.src = '/explore/explore-camp-fire.js?v=' + v;
 
   s1.async = false;
 
@@ -84189,7 +84187,7 @@ function _explNormImgPath(src) {
 
   if (isLocal && src.startsWith('../shared/')) {
 
-    return '../shared/' + src.slice('../shared/'.length);
+    return '/shared/' + src.slice('../shared/'.length);
 
   }
 
@@ -84203,7 +84201,7 @@ function _explNormImgPath(src) {
 
 function _explResolveFallbackEventPortrait(ev) {
 
-  if (!ev) return '../shared/img/ui/compendio.webp';
+  if (!ev) return '/shared/img/ui/compendio.webp';
 
   if (ev.npc && ev.npc.portrait) return _explNormImgPath(ev.npc.portrait);
 
@@ -84245,95 +84243,95 @@ function _explResolveFallbackEventPortrait(ev) {
 
     if (speaker.indexOf('aldo') !== -1 || speaker.indexOf('refug') !== -1 || speaker.indexOf('campon') !== -1) {
 
-      return '../shared/img/npcs/kaelen-refugiado.webp';
+      return '/shared/img/npcs/kaelen-refugiado.webp';
 
     }
 
     if (speaker.indexOf('tomas') !== -1 || speaker.indexOf('pastor') !== -1) {
 
-      return '../shared/img/npcs/berto-lavrador.webp';
+      return '/shared/img/npcs/berto-lavrador.webp';
 
     }
 
     if (speaker.indexOf('corvin') !== -1 || speaker.indexOf('pedag') !== -1 || speaker.indexOf('drevek') !== -1) {
 
-      return '../shared/img/npcs/drevek-atravessador.webp';
+      return '/shared/img/npcs/drevek-atravessador.webp';
 
     }
 
     if (speaker.indexOf('bran') !== -1 || speaker.indexOf('lenhador') !== -1) {
 
-      return '../shared/img/npcs/hadric-cacador.webp';
+      return '/shared/img/npcs/hadric-cacador.webp';
 
     }
 
     if (speaker.indexOf('selfia') !== -1 || speaker.indexOf('sélfia') !== -1 || speaker.indexOf('driade') !== -1 || speaker.indexOf('dríade') !== -1) {
 
-      return '../shared/img/npcs/sylthara-druida.webp';
+      return '/shared/img/npcs/sylthara-druida.webp';
 
     }
 
     if (speaker.indexOf('elna') !== -1 || speaker.indexOf('coletora') !== -1) {
 
-      return '../shared/img/npcs/tovrik-ervanario.webp';
+      return '/shared/img/npcs/tovrik-ervanario.webp';
 
     }
 
     if (speaker.indexOf('vondal') !== -1 || speaker.indexOf('guarda') !== -1) {
 
-      return '../shared/img/npcs/brunnar-forjafria.webp';
+      return '/shared/img/npcs/brunnar-forjafria.webp';
 
     }
 
     if (speaker.indexOf('bretta') !== -1 || speaker.indexOf('pastora') !== -1) {
 
-      return '../shared/img/npcs/marilia-fruteira.webp';
+      return '/shared/img/npcs/marilia-fruteira.webp';
 
     }
 
     if (speaker.indexOf('perrin') !== -1 || speaker.indexOf('mercador') !== -1 || speaker.indexOf('hakim') !== -1) {
 
-      return '../shared/img/npcs/mercador-errante.webp';
+      return '/shared/img/npcs/mercador-errante.webp';
 
     }
 
     if (speaker.indexOf('orien') !== -1 || speaker.indexOf('orin') !== -1 || speaker.indexOf('eremita') !== -1 || speaker.indexOf('cego') !== -1) {
 
-      return '../shared/img/npcs/othren-recluso.webp';
+      return '/shared/img/npcs/othren-recluso.webp';
 
     }
 
     if (speaker.indexOf('djinn') !== -1 || speaker.indexOf('malhaz') !== -1) {
 
-      return '../shared/img/npcs/vasheen-djinn.webp';
+      return '/shared/img/npcs/vasheen-djinn.webp';
 
     }
 
     if (speaker.indexOf('sacerdote') !== -1 || speaker.indexOf('padre') !== -1 || speaker.indexOf('cornelius') !== -1) {
 
-      return '../shared/img/npcs/padre-othren.webp';
+      return '/shared/img/npcs/padre-othren.webp';
 
     }
 
     if (speaker.indexOf('espirito') !== -1 || speaker.indexOf('espírito') !== -1 || speaker.indexOf('sentinela') !== -1) {
 
-      return '../shared/img/npcs/nerith-espirito.webp';
+      return '/shared/img/npcs/nerith-espirito.webp';
 
     }
 
     if (speaker.indexOf('ferreiro') !== -1 || speaker.indexOf('draust') !== -1) {
 
-      return '../shared/img/npcs/ferreiro-garrick.webp';
+      return '/shared/img/npcs/ferreiro-garrick.webp';
 
     }
 
     if (speaker.indexOf('saqueador') !== -1 || speaker.indexOf('ladrao') !== -1 || speaker.indexOf('ladrão') !== -1 || speaker.indexOf('merek') !== -1 || speaker.indexOf('jorab') !== -1) {
 
-      return '../shared/img/npcs/batedor-carteira.webp';
+      return '/shared/img/npcs/batedor-carteira.webp';
 
     }
 
-    return '../shared/img/npcs/aldeao.webp';
+    return '/shared/img/npcs/aldeao.webp';
 
   }
 
@@ -84345,23 +84343,23 @@ function _explResolveFallbackEventPortrait(ev) {
 
     if (title.indexOf('fonte') !== -1 || title.indexOf('agua') !== -1 || title.indexOf('água') !== -1 || title.indexOf('nascente') !== -1) {
 
-      return '../shared/img/ui/fonte.webp';
+      return '/shared/img/ui/fonte.webp';
 
     }
 
     if (title.indexOf('bau') !== -1 || title.indexOf('baú') !== -1 || title.indexOf('tesouro') !== -1 || title.indexOf('cofre') !== -1) {
 
-      return '../shared/img/ui/cofre.webp';
+      return '/shared/img/ui/cofre.webp';
 
     }
 
     if (title.indexOf('runa') !== -1 || title.indexOf('altar') !== -1 || title.indexOf('monolito') !== -1 || title.indexOf('monólito') !== -1 || title.indexOf('circulo') !== -1 || title.indexOf('círculo') !== -1) {
 
-      return '../shared/img/ui/runas.webp';
+      return '/shared/img/ui/runas.webp';
 
     }
 
-    return '../shared/img/ui/compendio.webp';
+    return '/shared/img/ui/compendio.webp';
 
   }
 
@@ -84371,11 +84369,11 @@ function _explResolveFallbackEventPortrait(ev) {
 
     if (title.indexOf('armadilha') !== -1 || title.indexOf('perigo') !== -1 || title.indexOf('emboscada') !== -1) {
 
-      return '../shared/img/ui/alerta.webp';
+      return '/shared/img/ui/alerta.webp';
 
     }
 
-    return '../shared/img/ui/tochas.webp';
+    return '/shared/img/ui/tochas.webp';
 
   }
 
@@ -84383,7 +84381,7 @@ function _explResolveFallbackEventPortrait(ev) {
 
   if (type === 'quest_hook') {
 
-    return '../shared/img/ui/missoes.webp';
+    return '/shared/img/ui/missoes.webp';
 
   }
 
@@ -84393,23 +84391,23 @@ function _explResolveFallbackEventPortrait(ev) {
 
     if (title.indexOf('lobo') !== -1) {
 
-      return '../shared/img/combat/enemies/lobo.webp';
+      return '/shared/img/combat/enemies/lobo.webp';
 
     }
 
     if (title.indexOf('esqueleto') !== -1) {
 
-      return '../shared/img/combat/enemies/esqueleto.webp';
+      return '/shared/img/combat/enemies/esqueleto.webp';
 
     }
 
     if (title.indexOf('aranha') !== -1) {
 
-      return '../shared/img/ui/aranha.webp';
+      return '/shared/img/ui/aranha.webp';
 
     }
 
-    return '../shared/img/ui/desafio.webp';
+    return '/shared/img/ui/desafio.webp';
 
   }
 
@@ -84417,13 +84415,13 @@ function _explResolveFallbackEventPortrait(ev) {
 
   if (type === 'social') {
 
-    return '../shared/img/npcs/aldeao.webp';
+    return '/shared/img/npcs/aldeao.webp';
 
   }
 
 
 
-  return '../shared/img/ui/compendio.webp';
+  return '/shared/img/ui/compendio.webp';
 
 }
 
@@ -96349,7 +96347,7 @@ function _openCartLocationPopup(biome){
       e.stopPropagation();
       if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_click');
       if (window.CartShared && CartShared.rollWildernessEncounterTable) {
-        var enc = CartShared.rollWildernessEncounterTable(biome.key || biome.biome, biome.tier || 1);
+        var enc = CartShared.rollWildernessEncounterTable(((biome.key === 'green_fields' || biome.biome === 'green_fields') ? 'plains' : (biome.key || biome.biome)), biome.tier || 1);
         rollBox.style.display = 'block';
         rollBox.innerHTML = '<div style="font-size:11px;font-weight:700;color:' + enc.categoryColor + ';display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">'
           + '<span>' + enc.categoryIcon + ' ' + enc.categoryName + ': ' + enc.title + '</span>'
@@ -97462,7 +97460,7 @@ function _showDungeonDiscoveryModal(dg, biome, checkInfo) {
   var locName = (biome && (biome.regionalName || biome.name)) ? (biome.regionalName || biome.name) : 'Valdória';
   var rollText = (checkInfo && checkInfo.guaranteed)
     ? '◆ <b>Busca Minuciosa nos Ermos:</b> A comitiva vasculhou o perímetro com cautela até localizar a entrada oculta!'
-    : ('◆ <b>Teste de Investigação / Percepção (D&D 5e):</b> d20 (' + checkInfo.d20 + ') + mod (' + (checkInfo.mod >= 0 ? '+' : '') + checkInfo.mod + ') = <b>' + checkInfo.total + '</b> vs CD ' + checkInfo.dc + ' <b>(Sucesso!)</b>');
+    : ('◆ <b>Teste de Investigação / Percepção:</b> d20 (' + checkInfo.d20 + ') + mod (' + (checkInfo.mod >= 0 ? '+' : '') + checkInfo.mod + ') = <b>' + checkInfo.total + '</b> vs CD ' + checkInfo.dc + ' <b>(Sucesso!)</b>');
 
   var artKey = (dg.id === 'orc_chief_tent') ? 'orc_tribe' : dg.id;
   var imgBase = (typeof window !== 'undefined' && window.location.protocol === 'file:')
@@ -97591,16 +97589,17 @@ function _triggerPointcrawlRegionalEvent(targetBiome) {
           },
           script: [
             { type: 'narration', text: 'A comitiva vasculhou minuciosamente os arredores e desfiladeiros de <b>' + regName + '</b> em busca de entradas e pistas territoriais.' },
-            { type: 'narration', text: '<b>Teste de Investigação / Percepção (D&D 5e):</b> d20 (' + d20 + ') + mod (' + (bestMod >= 0 ? '+' : '') + bestMod + ') = <b>' + total + '</b> vs CD ' + dc + ' <i>(Pistas encontradas, mas a entrada permanece camuflada)</i>.' },
+            { type: 'narration', text: '<b>Teste de Investigação / Percepção:</b> d20 (' + d20 + ') + mod (' + (bestMod >= 0 ? '+' : '') + bestMod + ') = <b>' + total + '</b> vs CD ' + dc + ' <i>(Pistas encontradas, mas a entrada permanece camuflada)</i>.' },
             { type: 'narration', text: 'Rastros recentes e marcas cravadas no solo confirmam a presença de inimigos na região. Uma nova varredura ou exploração mais profunda revelará o covil com certeza.' }
           ],
           choices: [
-            { id: 'exp_retry', label: 'Retornar às ações de ' + regName }
+            { id: 'exp_retry', label: 'Retornar a ' + regName }
           ],
           inline: true
         }, {
           player: S.player,
           onChoice: function () {
+            if (window.vEncounter && typeof window.vEncounter.close === 'function') window.vEncounter.close();
             if (typeof _openCurrentNodePointcrawlHub === 'function') _openCurrentNodePointcrawlHub();
           }
         });
@@ -97612,7 +97611,7 @@ function _triggerPointcrawlRegionalEvent(targetBiome) {
 
   // Tabela Dinâmica dos Ermos (DMG p. 85-87 / XGE p. 92-110)
   var enc = (window.CartShared && typeof CartShared.rollWildernessEncounterTable === 'function')
-    ? CartShared.rollWildernessEncounterTable(bKey, (biome && biome.tier) || 1)
+    ? CartShared.rollWildernessEncounterTable((bKey === 'green_fields' ? 'plains' : bKey), (biome && biome.tier) || 1)
     : null;
 
   if (enc && window.vEncounter && typeof window.vEncounter.render === 'function') {
@@ -97623,57 +97622,98 @@ function _triggerPointcrawlRegionalEvent(targetBiome) {
     var chaMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(p, 'cha') : 1;
     var bestMod = Math.max(wisMod, strMod, dexMod, chaMod);
 
+    var encTitle = enc.title || 'Desafio nos Ermos';
+    var encDesc = enc.desc || enc.description || 'A comitiva se depara com um obstáculo no caminho.';
+    var encCheck = enc.check || enc.checkRequired || '';
+    var encSuccess = enc.success || enc.successOutcome || 'A comitiva transpõe o obstáculo com sucesso e mantém o ritmo de marcha.';
+    var encFailure = enc.failure || enc.failureOutcome || 'A comitiva sofre complicações ao transpor o terreno.';
+
+    var narrativeText = encDesc;
+    if (encCheck) {
+      narrativeText += '<br><br><b>Perigo à frente:</b> ' + encCheck;
+    }
+
     window.vEncounter.render({
       npc: {
-        name: 'Patrulha dos Ermos',
-        desc: enc.title + ' · ' + regName,
+        name: 'Exploração dos Ermos',
+        desc: encTitle + ' · ' + regName,
         portrait: '/shared/img/merchants/corvus-veltharion.webp'
       },
       script: [
-        { type: 'narration', text: enc.desc },
-        { type: 'narration', text: '<b>Desafio D&D 5e:</b> ' + (enc.check || 'A comitiva avalia a situação e define como agir.') }
+        { type: 'narration', text: narrativeText }
       ],
       choices: [
-        { id: 'enc_act', label: 'Transpor o desafio', desc: enc.check || 'Agir de prontidão para superar o obstáculo.' },
-        { id: 'enc_bypass', label: 'Contornar com cautela', desc: 'Evitar riscos desnecessários e patrulhar outra trilha.' }
+        { id: 'enc_act', label: 'Transpor o desafio', desc: encCheck || 'Agir de prontidão para superar o obstáculo.' },
+        { id: 'enc_bypass', label: 'Contornar com cautela', desc: 'Evitar riscos desnecessários e buscar outra trilha.' }
       ],
       inline: true
     }, {
       player: S.player,
       onChoice: function (ch) {
         var isAct = (ch && ch.id === 'enc_act');
-        var d20 = 1 + Math.floor(Math.random() * 20);
-        var total = d20 + (isAct ? bestMod : dexMod);
-        var dc = 12;
-        var ok = !isAct || (total >= dc);
-
-        var textOutcome = ok
-          ? (isAct ? ('<b>Sucesso no Teste D&D 5e:</b> d20 (' + d20 + ') + mod (' + (bestMod >= 0 ? '+' : '') + bestMod + ') = <b>' + total + '</b> vs CD ' + dc + '.<br>' + enc.success) : 'A comitiva manobra com passos cautelosos, contornando a ameaça sem sofrer danos.')
-          : ('<b>Falha no Teste D&D 5e:</b> d20 (' + d20 + ') + mod (' + (bestMod >= 0 ? '+' : '') + bestMod + ') = <b>' + total + '</b> vs CD ' + dc + '.<br>' + (enc.failure || 'A comitiva sofre complicações ao transpor o terreno.'));
-
-        if (!ok && isAct) {
-          var dmg = 1 + Math.floor(Math.random() * 4);
-          p.hp = Math.max(1, (p.hp || 20) - dmg);
-          textOutcome += '<br><br><span style="color:#fca5a5;font-weight:600;">(A comitiva sofre ' + dmg + ' de dano de desgaste físico na travessia).</span>';
+        if (!isAct) {
+          window.vEncounter.render({
+            npc: {
+              name: 'Exploração dos Ermos',
+              desc: encTitle + ' · Desfecho',
+              portrait: '/shared/img/merchants/corvus-veltharion.webp'
+            },
+            script: [
+              { type: 'narration', text: 'A comitiva manobra com passos cautelosos, contornando a ameaça sem sofrer danos nem expor os companheiros a perigo desnecessário.' }
+            ],
+            choices: [{ id: 'enc_finish', label: 'Retornar a ' + regName }],
+            inline: true
+          }, {
+            player: S.player,
+            onChoice: function () {
+              if (window.vEncounter && typeof window.vEncounter.close === 'function') window.vEncounter.close();
+              if (typeof _openCurrentNodePointcrawlHub === 'function') _openCurrentNodePointcrawlHub();
+            }
+          });
+          return;
         }
 
-        window.vEncounter.render({
-          npc: {
-            name: 'Patrulha dos Ermos',
-            desc: enc.title + ' · Desfecho',
-            portrait: '/shared/img/merchants/corvus-veltharion.webp'
-          },
-          script: [
-            { type: 'narration', text: textOutcome }
-          ],
-          choices: [{ id: 'enc_finish', label: 'Retornar às ações de ' + regName }],
-          inline: true
-        }, {
-          player: S.player,
-          onChoice: function () {
-            if (typeof _openCurrentNodePointcrawlHub === 'function') _openCurrentNodePointcrawlHub();
+        var d20 = 1 + Math.floor(Math.random() * 20);
+        var total = d20 + bestMod;
+        var dc = 12;
+        var ok = (total >= dc);
+
+        var _renderOutcome = function () {
+          var textOutcome = ok
+            ? ('<b>Sucesso no Teste:</b> d20 (' + d20 + ') + mod (' + (bestMod >= 0 ? '+' : '') + bestMod + ') = <b>' + total + '</b> vs CD ' + dc + '.<br><br>' + encSuccess)
+            : ('<b>Falha no Teste:</b> d20 (' + d20 + ') + mod (' + (bestMod >= 0 ? '+' : '') + bestMod + ') = <b>' + total + '</b> vs CD ' + dc + '.<br><br>' + encFailure);
+
+          if (!ok) {
+            var dmg = 1 + Math.floor(Math.random() * 4);
+            p.hp = Math.max(1, (p.hp || 20) - dmg);
+            textOutcome += '<br><br><span style="color:#fca5a5;font-weight:600;">(A comitiva sofre ' + dmg + ' de dano de desgaste físico na travessia).</span>';
           }
-        });
+
+          window.vEncounter.render({
+            npc: {
+              name: 'Exploração dos Ermos',
+              desc: encTitle + ' · Desfecho',
+              portrait: '/shared/img/merchants/corvus-veltharion.webp'
+            },
+            script: [
+              { type: 'narration', text: textOutcome }
+            ],
+            choices: [{ id: 'enc_finish', label: 'Retornar a ' + regName }],
+            inline: true
+          }, {
+            player: S.player,
+            onChoice: function () {
+              if (window.vEncounter && typeof window.vEncounter.close === 'function') window.vEncounter.close();
+              if (typeof _openCurrentNodePointcrawlHub === 'function') _openCurrentNodePointcrawlHub();
+            }
+          });
+        };
+
+        if (typeof _animateDice3D === 'function') {
+          _animateDice3D(d20, bestMod, total, dc, ok, _renderOutcome);
+        } else {
+          _renderOutcome();
+        }
       }
     });
     if (typeof updateHud === 'function') updateHud();
@@ -103245,19 +103285,19 @@ function renderExploreFooter() {
 
     + '<button class="fb-btn" data-action="inventory">'
 
-    +   '<img class="fb-ico-img" src="../shared/img/ui/mochila.webp" alt="" onerror="this.style.display=\'none\'"><span>Mochila</span>'
+    +   '<img class="fb-ico-img" src="/shared/img/ui/mochila.webp" alt="" onerror="this.style.display=\'none\'"><span>Mochila</span>'
 
     + '</button>'
 
     + '<button class="fb-btn" data-action="status">'
 
-    +   '<img class="fb-ico-img" src="../shared/img/items/pergaminho-antigo.webp" alt="" onerror="this.style.display=\'none\'"><span>Ficha</span>'
+    +   '<img class="fb-ico-img" src="/shared/img/items/pergaminho-antigo.webp" alt="" onerror="this.style.display=\'none\'"><span>Ficha</span>'
 
     + '</button>'
 
     + '<button class="fb-btn" data-action="characters">'
 
-    +   '<img class="fb-ico-img" src="../shared/img/achievements/ach-aventureiro.webp" alt="" onerror="this.style.display=\'none\'"><span>Hall</span>'
+    +   '<img class="fb-ico-img" src="/shared/img/achievements/ach-aventureiro.webp" alt="" onerror="this.style.display=\'none\'"><span>Hall</span>'
 
     + '</button>'
 
@@ -103269,7 +103309,7 @@ function renderExploreFooter() {
 
     + '<button class="fb-btn fb-icon-only" data-action="settings" title="Configurações">'
 
-    +   '<img class="fb-ico-img" src="../shared/img/ui/configuracoes.webp" alt="Config" onerror="this.style.display=\'none\'">'
+    +   '<img class="fb-ico-img" src="/shared/img/ui/configuracoes.webp" alt="Config" onerror="this.style.display=\'none\'">'
 
     + '</button>';
 
@@ -104512,7 +104552,7 @@ function bindQuickActions() {
 
     offBtn.className = 'light-opt off' + (!S.lightSource ? ' selected' : '');
 
-    offBtn.innerHTML = '<img class="lo-icon" src="../shared/img/ui/tochas.webp" alt="" aria-hidden="true" onerror="this.style.display=\'none\'">'
+    offBtn.innerHTML = '<img class="lo-icon" src="/shared/img/ui/tochas.webp" alt="" aria-hidden="true" onerror="this.style.display=\'none\'">'
 
                      + '<span class="lo-label">Apagar</span>';
 
@@ -104536,7 +104576,7 @@ function bindQuickActions() {
 
       var _lslug = String(meta.id).replace(/^ic-/, '');
 
-      btn.innerHTML = '<img class="lo-icon" src="../shared/img/ui/' + _lslug
+      btn.innerHTML = '<img class="lo-icon" src="/shared/img/ui/' + _lslug
 
                     + '.webp" alt="" aria-hidden="true" onerror="this.style.display=\'none\'">'
 
@@ -104638,7 +104678,7 @@ function bindQuickActions() {
 
               || { id: 'ic-tochas', color: '#e85020' };
 
-    const _lsrc = '../shared/img/ui/' + String(meta.id).replace(/^ic-/, '') + '.webp';
+    const _lsrc = '/shared/img/ui/' + String(meta.id).replace(/^ic-/, '') + '.webp';
 
     let imgEl = lightBtn.querySelector('img.qb-icon');
 
@@ -111554,7 +111594,7 @@ function _showCampfireAllyPicker(alliesList) {
 
         desc: 'Acampamento de Valdoria · Fogueira Acesa',
 
-        portrait: '../shared/img/ui/acampamento.webp',
+        portrait: '/shared/img/ui/acampamento.webp',
 
         gender: 'neutral'
 

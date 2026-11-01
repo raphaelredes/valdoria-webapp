@@ -39,6 +39,36 @@
     if (global.JourneyData) return;
 
     /* ============ DADOS (ricos, extraidos de cidade.html sessao #77) ============ */
+var STARVATION_HAZARD = {
+  title: 'Escassez de Alimento & Forrageamento Forçado',
+  script: [
+    { type: 'narration', text: 'As provisões da mochila acabaram e o estômago ronca com a marcha pesada. Sem rações secas, a comitiva é forçada a parar a marcha para forragear raízes ou caçar nos arredores (D&D 5e PHB p. 185).' }
+  ],
+  choices: [
+    {
+      t: 'Forragear raízes e caçar nos arredores',
+      stat: 'wis', dc: 12, tag: 'SOBREVIVÊNCIA',
+      badge: '[SOBREVIVÊNCIA CD 12]',
+      desc: 'Dedicar tempo extra para vasculhar o mato atrás de raízes comestíveis e caça miúda (Sobrevivência CD 12).',
+      isDetour: true,
+      sNarr: 'Você localiza raízes nutritivas e abate duas lebres com tiro certeiro. A refeição improvisada sacia o grupo, mas o desvio adiciona marcos ao percurso.',
+      fNarr: 'Você revira troncos podres e arbustos secos sem encontrar nada além de espinhos e folhas amargas. A fraqueza física cobra o preço da inanição.',
+      dmg: 4,
+      condition: { id: 'exhaustion', icon: '⏳', label: 'Exausto por Fome (Fadiga Nv. 1)', desc: 'Exaustão por inanição (D&D 5e): Desvantagem em testes de atributo e perícias até se alimentar.' }
+    },
+    {
+      t: 'Apertar o cinto e marchar em jejum forçado',
+      stat: 'con', dc: 13, tag: 'CONSTITUIÇÃO',
+      badge: '[CONSTITUIÇÃO CD 13]',
+      desc: 'Apertar as correias da armadura e tentar suportar a fraqueza física sem parar a marcha (Constituição CD 13).',
+      sNarr: 'Seu vigor físico de aventureiro resiste à privação de alimento por hoje. A marcha continua.',
+      fNarr: 'A fome drena suas forças. Tonturas e cãibras diminuem seus reflexos. Você sofre dano de fraqueza corporal.',
+      dmg: 5,
+      condition: { id: 'exhaustion', icon: '⏳', label: 'Exausto por Fome (Fadiga Nv. 1)', desc: 'Exaustão por inanição (D&D 5e): Desvantagem em testes de atributo e perícias até se alimentar.' }
+    }
+  ]
+};
+
 var HAZARDS = {
   forest: [
     { title: 'Armadilha de Caçador',
@@ -3172,30 +3202,70 @@ var DEPARTURES = {
         var biome = (j && j.biome) || 'plains';
         var isReturn = (dest === 'Valdoria' || (j && j.isReturn) || (j && j.opts && (j.opts.direction === 'return' || j.opts.isReturn)));
 
+        // Verificação de Rações de Viagem (D&D 5e PHB p. 185 - Comida e Água)
+        var currentRations = 0;
+        var inv = (player && Array.isArray(player.inventory) && player.inventory.length)
+            ? player.inventory
+            : ((typeof global !== 'undefined' && Array.isArray(global.MOCK_PLAYER_INVENTORY))
+                ? global.MOCK_PLAYER_INVENTORY
+                : ((typeof window !== 'undefined' && Array.isArray(window.MOCK_PLAYER_INVENTORY)) ? window.MOCK_PLAYER_INVENTORY : []));
+
+        if (Array.isArray(inv)) {
+            inv.forEach(function(it) {
+                if (!it) return;
+                var n = (typeof it === 'string' ? it : (it.n || it.name || '')).toLowerCase();
+                if (n.indexOf('raç') >= 0 || n.indexOf('rac') >= 0 || n.indexOf('ration') >= 0) {
+                    var q = (typeof it === 'object' && it.q != null) ? it.q : 1;
+                    if (n.indexOf('7 dias') >= 0) q = q * 7;
+                    currentRations += q;
+                }
+            });
+        }
+
+                var paragraphs = [];
+        if (isReturn) {
+            paragraphs.push('Você contempla a jornada de regresso a <b>' + dest + '</b> a partir das terras ermas. O caminho de volta estima uma distância aproximada de <b><span class="marcos-lore-link" role="button" tabindex="0" title="Toque para entender a medida em Marcos">~' + estDist + ' marcos</span></b> por trilhas que podem variar conforme o relevo e os imprevistos da rota.');
+        } else {
+            paragraphs.push('Você contempla a rota para <b>' + dest + '</b> além dos portões. A viagem pelas terras ermas estima uma distância aproximada de <b><span class="marcos-lore-link" role="button" tabindex="0" title="Toque para entender a medida em Marcos">~' + estDist + ' marcos</span></b> de marcha contínua por caminhos sujeitos a desvios e imprevistos.');
+        }
+
+        var rFlavor = _getRaceConfirmationNarration(t, biome);
+        var cFlavor = _getClassConfirmationNarration(t, biome);
+        if (rFlavor && cFlavor) {
+            paragraphs.push(rFlavor + ' ' + cFlavor);
+        } else if (rFlavor) {
+            paragraphs.push(rFlavor);
+        } else if (cFlavor) {
+            paragraphs.push(cFlavor);
+        }
+
+        if (!isReturn && currentRations < steps) {
+            paragraphs.push('<b>Alerta de Provisões:</b> Você possui <b>' + (currentRations === 0 ? 'nenhuma ração' : (currentRations + ' ração(ões)')) + '</b> na mochila. A marcha consome ao menos <b>' + steps + ' rações</b>. Sem comida suficiente, a comitiva será forçada a caçar na estrada sob risco de atrasos e exaustão.');
+        }
+
         var script = [
             {
                 type: 'narration',
-                text: isReturn
-                    ? ('Você contempla a jornada de regresso a <b>' + dest + '</b> a partir das terras ermas. O caminho de volta estima uma distância aproximada de <b><span class="marcos-lore-link" role="button" tabindex="0" title="Toque para entender a medida em Marcos">~' + estDist + ' marcos</span></b> por trilhas que podem variar conforme o relevo e os imprevistos da rota.')
-                    : ('Você contempla a rota para <b>' + dest + '</b> além dos portões. A viagem pelas terras ermas estima uma distância aproximada de <b><span class="marcos-lore-link" role="button" tabindex="0" title="Toque para entender a medida em Marcos">~' + estDist + ' marcos</span></b> de marcha contínua por caminhos sujeitos a desvios e imprevistos.')
+                text: paragraphs.join('<br><br>')
             }
         ];
 
-        var rFlavor = _getRaceConfirmationNarration(t, biome);
-        if (rFlavor) script.push({ type: 'narration', text: rFlavor });
+        var choices = [];
+        if (!isReturn && currentRations < steps) {
+            choices.push({
+                id: 'jrn_buy_provisions_tibor',
+                label: 'Comprar Rações com Tibor nos Portões',
+                desc: 'Adquirir rações de viagem na banca de suprimentos antes de cruzar os portões.'
+            });
+        }
 
-        var cFlavor = _getClassConfirmationNarration(t, biome);
-        if (cFlavor) script.push({ type: 'narration', text: cFlavor });
-
-        var choices = [
-            {
-                id: 'jrn_go',
-                label: isReturn ? 'Iniciar marcha de retorno' : 'Partir em marcha padrão',
-                desc: isReturn
-                    ? 'Avançar com determinação pela estrada de volta aos portões de Valdoria.'
-                    : 'Avançar no ritmo comum da estrada, sem preparação tática especial.'
-            }
-        ];
+        choices.push({
+            id: 'jrn_go',
+            label: isReturn ? 'Iniciar marcha de retorno' : 'Partir em marcha padrão',
+            desc: isReturn
+                ? 'Avançar com determinação pela estrada de volta aos portões de Valdoria.'
+                : 'Avançar no ritmo comum da estrada, sem preparação tática especial.'
+        });
 
         var prepChoices = _getPreparationChoices(t, biome, player);
         for (var i = 0; i < prepChoices.length; i++) {
@@ -3310,6 +3380,7 @@ var DEPARTURES = {
 
     global.JourneyData = {
         HAZARDS: HAZARDS,
+        STARVATION_HAZARD: STARVATION_HAZARD,
         HAZARDS_EXTRA: HAZARDS_EXTRA,
         SAFE: SAFE,
         DEPARTURES: DEPARTURES,

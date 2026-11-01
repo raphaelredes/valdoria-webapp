@@ -324,6 +324,13 @@
         onChoice: function (ch) {
           if (ch && ch.id === 'jrn_cancel') {
             _cancel();
+          } else if (ch && ch.id === 'jrn_buy_provisions_tibor') {
+            _cancel();
+            if (typeof global._cartOpenTiborShop === 'function') {
+              global._cartOpenTiborShop();
+            } else if (typeof _cartOpenTiborShop === 'function') {
+              _cartOpenTiborShop();
+            }
           } else if (ch && ch.isPrep) {
             _prepStance(ch);
           } else {
@@ -433,6 +440,71 @@
 
   function _renderStep() {
     var j = _j; if (!j) return;
+
+    // Consumo de Rações de Viagem (D&D 5e PHB p. 185 - Comida e Água)
+    var pStep = _player();
+    var hasRation = (JD().hasItem) ? JD().hasItem(pStep, 'ração') : false;
+    if (hasRation) {
+      if (JD().consumeItem) {
+        JD().consumeItem(pStep, 'ração');
+        _log('1 ração de viagem consumida da mochila.');
+      }
+    } else if (!j.hasStarvedThisJourney) {
+      // Dispara o evento obrigatório de inanição & forrageamento forçado por falta de suprimentos
+      j.hasStarvedThisJourney = true;
+      var starvHaz = (JD().STARVATION_HAZARD) || {
+        title: 'Escassez de Alimento & Forrageamento Forçado',
+        script: [
+          { type: 'narration', text: 'As provisões da mochila acabaram e o estômago ronca com a marcha pesada. Sem rações secas, a comitiva é forçada a parar a marcha para forragear raízes ou caçar nos arredores (D&D 5e PHB p. 185).' }
+        ],
+        choices: [
+          {
+            t: 'Forragear raízes e caçar nos arredores',
+            stat: 'wis', dc: 12, tag: 'SOBREVIVÊNCIA',
+            badge: '[SOBREVIVÊNCIA CD 12]',
+            desc: 'Dedicar tempo extra para vasculhar o mato atrás de raízes comestíveis e caça miúda (Sobrevivência CD 12).',
+            isDetour: true,
+            sNarr: 'Você localiza raízes nutritivas e abate duas lebres com tiro certeiro. A refeição improvisada sacia o grupo, mas o desvio adiciona marcos ao percurso.',
+            fNarr: 'Você revira troncos podres e arbustos secos sem encontrar nada além de espinhos e folhas amargas. A fraqueza física cobra o preço da inanição.',
+            dmg: 4,
+            condition: { id: 'exhaustion', icon: '⏳', label: 'Exausto por Fome (Fadiga Nv. 1)', desc: 'Exaustão por inanição (D&D 5e): Desvantagem em testes de atributo e perícias até se alimentar.' }
+          },
+          {
+            t: 'Apertar o cinto e marchar em jejum forçado',
+            stat: 'con', dc: 13, tag: 'CONSTITUIÇÃO',
+            badge: '[CONSTITUIÇÃO CD 13]',
+            desc: 'Apertar as correias da armadura e tentar suportar a fraqueza física sem parar a marcha (Constituição CD 13).',
+            sNarr: 'Seu vigor físico de aventureiro resiste à privação de alimento por hoje. A marcha continua.',
+            fNarr: 'A fome drena suas forças. Tonturas e cãibras diminuem seus reflexos. Você sofre dano de fraqueza corporal.',
+            dmg: 5,
+            condition: { id: 'exhaustion', icon: '⏳', label: 'Exausto por Fome (Fadiga Nv. 1)', desc: 'Exaustão por inanição (D&D 5e): Desvantagem em testes de atributo e perícias até se alimentar.' }
+          }
+        ]
+      };
+      var starvChoices = starvHaz.choices.map(function(ch, idx) {
+        return {
+          id: 'jrn_starv_' + idx,
+          label: ch.t,
+          desc: ch.desc,
+          tag: ch.tag,
+          badge: ch.badge,
+          stat: ch.stat,
+          dc: ch.dc,
+          skill: (global.DndRules && DndRules.statLabel) ? DndRules.statLabel(ch.stat) : ch.stat,
+          _haz: ch
+        };
+      });
+      _vRender({
+        script: starvHaz.script,
+        choices: starvChoices,
+        inline: false,
+        onChoice: function(ch) {
+          _resolve(starvHaz, (ch && ch._haz) || ch);
+        }
+      });
+      return;
+    }
+
     // #3 (user 2026-06-16): COMBATE RARO de viagem (emboscada). Só em jornada com
     // opts.onCombat (exploração — combate real). Vence → caller retoma a viagem até
     // o destino; perde → templo (padrão). Nunca na cidade mock (sem onCombat).

@@ -9357,6 +9357,7 @@
     var days = Math.max(1, Math.ceil(h / 8));
 
     var bk = (biomeKey || 'plains').toLowerCase();
+    if (bk === 'green_fields') bk = 'plains';
 
     var isArid = (bk === 'desert' || bk === 'dunas_do_sul' || bk === 'volcanic' || bk.indexOf('desert') >= 0 || bk.indexOf('dunas') >= 0);
 
@@ -81738,7 +81739,7 @@
 
       drawerName.textContent = n.name;
 
-      var isHere = !!(pLoc && (pLoc === n.id || (pLoc === 'plains' && n.id === 'green_fields') || (pLoc === 'city_gates' && n.id === 'green_fields')));
+      var isHere = !!(pLoc && pLoc === n.id);
 
       if (isHere) {
 
@@ -81790,16 +81791,13 @@
 
           closeRegionalMapModal();
 
-          if (typeof _cartTravelTo === 'function') {
-
+          if (isInsideCity && typeof startCityJourney === 'function') {
+            startCityJourney(n.id, n.name);
+          } else if (typeof _cartTravelTo === 'function') {
             _cartTravelTo(n.id);
-
           } else if (typeof _travelToBiome === 'function') {
-
             _travelToBiome(n.id, n.name);
-
           } else if (typeof startCityJourney === 'function') {
-
             startCityJourney(n.id, n.name);
 
           } else if (typeof doAction === 'function') {
@@ -81876,7 +81874,7 @@
 
 
 
-      var isHere = !!(pLoc && (pLoc === n.id || (pLoc === 'plains' && n.id === 'green_fields') || (pLoc === 'city_gates' && n.id === 'green_fields')));
+      var isHere = !!(pLoc && pLoc === n.id);
 
       if (isHere) {
 
@@ -81986,42 +81984,33 @@
 
       fctx.save();
 
-      fctx.fillStyle = 'rgba(16, 11, 7, 0.88)';
+      fctx.fillStyle = '#000000';
 
       fctx.fillRect(0, 0, fw, fh);
 
 
 
-      // Abertura suave (feathered) em torno de cada local descoberto
-
+      // Abertura circular focada apenas em torno de marcos conhecidos / visitados
       fctx.globalCompositeOperation = 'destination-out';
-
-      var baseR = Math.max(fw, fh) * 0.22;
-
-      nodes.forEach(function(n) {
+      var baseR = Math.min(fw, fh) * 0.16;
+      nodes.forEach(function(n, nIdx) {
+        var isNodeDiscovered = isFullMapUnlocked
+          || (known && known.indexOf(n.id) >= 0)
+          || (pLoc && pLoc === n.id)
+          || (nIdx === 0);
+        if (!isNodeDiscovered) return;
 
         var nx = (n.x <= 1 ? (n.x * fw) : n.x);
-
         var ny = (n.y <= 1 ? (n.y * fh) : n.y);
-
-        var grad = fctx.createRadialGradient(nx, ny, baseR * 0.25, nx, ny, baseR);
-
+        var grad = fctx.createRadialGradient(nx, ny, baseR * 0.2, nx, ny, baseR);
         grad.addColorStop(0, 'rgba(0, 0, 0, 1.0)');
-
-        grad.addColorStop(0.60, 'rgba(0, 0, 0, 0.85)');
-
+        grad.addColorStop(0.70, 'rgba(0, 0, 0, 0.95)');
         grad.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
-
         fctx.fillStyle = grad;
-
         fctx.beginPath();
-
         fctx.arc(nx, ny, baseR, 0, Math.PI * 2);
-
         fctx.fill();
-
       });
-
       fctx.restore();
 
     }
@@ -83525,3 +83514,109 @@
   };
 
 })();
+  // Provedor de Provisões nos Portões de Valdoria (Tibor - D&D 5e)
+  function _cartOpenTiborShop() {
+    if (typeof haptic === 'function') haptic('light');
+    if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+      var p = (typeof window !== 'undefined' && window.CITY_MOCK_PLAYER) || {};
+      var gold = (typeof p.gold === 'number') ? p.gold : 10;
+      var curRations = 0;
+      var inv = (p && Array.isArray(p.inventory)) ? p.inventory : ((typeof window !== 'undefined' && Array.isArray(window.MOCK_PLAYER_INVENTORY)) ? window.MOCK_PLAYER_INVENTORY : []);
+      inv.forEach(function(it) {
+        if (!it) return;
+        var n = (typeof it === 'string' ? it : (it.n || it.name || '')).toLowerCase();
+        if (n.indexOf('raç') >= 0 || n.indexOf('rac') >= 0 || n.indexOf('ration') >= 0) {
+          var q = (typeof it === 'object' && it.q != null) ? it.q : 1;
+          if (n.indexOf('7 dias') >= 0) q = q * 7;
+          curRations += q;
+        }
+      });
+
+      var portraitPath = '/shared/img/npcs/mercador-apressado.webp';
+      if (typeof window !== 'undefined' && window.location && window.location.protocol === 'file:') {
+        portraitPath = 'shared/img/npcs/mercador-apressado.webp';
+      }
+
+      window.vEncounter.render({
+        npc: {
+          name: 'Tibor — Provedor da Estrada',
+          desc: 'Assistente dos Armazéns de Garlen nos Portões',
+          portrait: portraitPath
+        },
+        script: [
+          {
+            type: 'narration',
+            text: 'Tibor arruma fardos de lona impermeável e amarras de couro sobre uma banca de madeira ao lado dos Portões de Valdoria. Ele abre um sorriso rústico ao ver você se aproximar da carroça de provisões.'
+          },
+          {
+            type: 'speech',
+            speaker: 'Tibor — Provedor da Estrada',
+            text: 'Vai marchar para as terras ermas? O vento lá fora cobra caro de quem viaja de estômago vazio. Tenho rações secas e carne defumada de primeira qualidade embaladas para viagem. Você tem ' + curRations + ' ração(ões) na mochila e ' + gold + ' PO no bornal.'
+          }
+        ],
+        choices: [
+          {
+            id: 'buy_1_day',
+            label: 'Comprar 2 Rações (1 Dia de Marcha) — 1 PO',
+            desc: 'Suprimento padrão para marcha simples.',
+            cost: 1,
+            qty: 2
+          },
+          {
+            id: 'buy_3_days',
+            label: 'Comprar 6 Rações (3 Dias de Marcha) — 3 PO',
+            desc: 'Fardo completo de provisões para travessias médias.',
+            cost: 3,
+            qty: 6
+          },
+          {
+            id: 'buy_pack_7',
+            label: 'Fardo de Viagem (14 Rações / 7 Dias) — 5 PO',
+            desc: 'Fardo reforçado para longas expedições nos ermos.',
+            cost: 5,
+            qty: 14
+          },
+          {
+            id: 'leave_tibor',
+            label: 'Retornar aos preparativos',
+            desc: 'Agradecer a Tibor e voltar à jornada.'
+          }
+        ],
+        choicesTitle: 'Banca de Provisões do Tibor',
+        inline: true
+      }, {
+        player: p,
+        onChoice: function(ch) {
+          if (!ch || ch.id === 'leave_tibor') {
+            if (window.vEncounter && typeof window.vEncounter.close === 'function') window.vEncounter.close();
+            return;
+          }
+          if (ch.cost && ch.qty) {
+            if (gold < ch.cost) {
+              window.vEncounter.render({
+                npc: { name: 'Tibor — Provedor da Estrada', desc: 'Banca de Suprimentos', portrait: portraitPath },
+                script: [{ type: 'speech', speaker: 'Tibor', text: 'Você não tem ouro suficiente para essa quantia, viajante.' }],
+                choices: [{ id: 'back_tibor', label: 'Ver outras opções' }],
+                inline: true
+              }, { player: p, onChoice: function() { _cartOpenTiborShop(); } });
+              return;
+            }
+            p.gold = gold - ch.cost;
+            var added = false;
+            inv.forEach(function(it) {
+              if (it && typeof it === 'object' && (it.id === 'rations' || it.name === 'Rações de Viagem')) {
+                it.q = (it.q || 1) + ch.qty;
+                added = true;
+              }
+            });
+            if (!added) {
+              inv.push({ id: 'rations', name: 'Rações de Viagem', q: ch.qty, type: 'consumable' });
+            }
+            if (typeof vToast === 'function') vToast('+' + ch.qty + ' Rações adquiridas (' + ch.cost + ' PO pago)', 'ok');
+            if (window.vEncounter && typeof window.vEncounter.close === 'function') window.vEncounter.close();
+          }
+        }
+      });
+    }
+  }
+  window._cartOpenTiborShop = _cartOpenTiborShop;
