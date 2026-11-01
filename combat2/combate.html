@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-11-01T12:01:56Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-11-01T17:34:05Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -1858,7 +1858,7 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   height: 94px;
   transform: scale(0.66);
   transform-origin: center top;
-  margin: 0 auto 16px auto;
+  margin: 0 auto 28px auto;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -1879,8 +1879,8 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   margin-bottom: 6px;
 }
 .dice-overlay.dice-settled .dice-result-label .drl-big {
-  margin-top: 4px;
-  margin-bottom: 12px;
+  margin-top: 8px;
+  margin-bottom: 14px;
 }
 .dice-overlay.dice-settled .dice-result-label .drl-sub--structured {
   margin-top: 0;
@@ -2448,12 +2448,12 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .dmg-dice-summary .drl-num--total { font-size: calc(13px * var(--v-font-scale, 1)); color: #e8a070; border-color: rgba(224,96,64,.45); }
 .dmg-dice-summary .drl-num--partial { color: var(--v-text, #d4c8b0); }
 .dmg-dice-summary .drl-paren-mod { font-weight: 400; font-size: var(--v-font-sm, 12px); color: var(--v-text-dim, #a09484); }
-.drl-sub--structured { width: 100%; max-width: 320px; margin: 4px auto 0; }
+.drl-sub--structured { width: 100%; max-width: 320px; margin: auto auto 2px; }
 .drl-structured-card { display: flex; flex-direction: column; gap: 4px; padding: 6px 10px; background: rgba(15, 12, 8, 0.88); border: 1px solid rgba(196, 149, 58, 0.45); border-radius: 8px; box-shadow: 0 4px 14px rgba(0,0,0,0.6); }
-.drl-structured-kicker { font-family: var(--v-font-display, 'Cinzel'), serif; font-size: 10.5px; font-weight: 700; letter-spacing: 1px; color: var(--v-gold, #c4953a); text-transform: uppercase; text-align: center; border-bottom: 1px solid rgba(196, 149, 58, 0.2); padding-bottom: 3px; }
+.drl-structured-kicker { font-family: var(--v-font-display, 'Cinzel'), serif; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--v-gold, #c4953a); text-transform: uppercase; text-align: center; border-bottom: 1px solid rgba(196, 149, 58, 0.2); padding-bottom: 3px; }
 .drl-structured-metrics { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin: 2px 0; }
 .drl-structured-cell { display: inline-flex; align-items: center; gap: 4px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(196, 149, 58, 0.25); border-radius: 4px; padding: 2px 6px; font-size: 11px; }
-.drl-structured-lbl { color: var(--v-text-dim, #a09484); text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px; }
+.drl-structured-lbl { color: var(--v-text-dim, #a09484); text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px; }
 .drl-structured-val { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; color: var(--v-text, #f0e6d2); }
 .dice-result-label.hit .drl-structured-val { color: #b8e888; }
 .dice-result-label.crit .drl-structured-val { color: #ffd700; }
@@ -2468,10 +2468,10 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 .drl-structured-pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin: 3px 0; }
 .drl-structured-tracker { display: flex; justify-content: center; margin: 4px 0 2px; }
 .drl-step-pips { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; background: rgba(0,0,0,0.45); border: 1px solid rgba(196,149,58,0.35); border-radius: 12px; }
-.drl-step-pip { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; font-weight: 700; font-family: var(--v-font-display, 'Cinzel'), serif; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: var(--v-text-dim, #a09484); }
+.drl-step-pip { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; font-size: 11px; font-weight: 700; font-family: var(--v-font-display, 'Cinzel'), serif; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: var(--v-text-dim, #a09484); }
 .drl-step-pip.is-done { background: rgba(46,204,113,0.22); border-color: rgba(46,204,113,0.7); color: #a8f0c6; }
 .drl-step-pip.is-current { background: rgba(243,156,18,0.32); border-color: rgba(243,156,18,0.9); color: #ffd680; box-shadow: 0 0 8px rgba(243,156,18,0.6); }
-.drl-step-pip-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--v-gold, #c4953a); margin-right: 3px; }
+.drl-step-pip-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--v-gold, #c4953a); margin-right: 3px; }
 .drl-structured-toggle-btn { font-family: var(--v-font, 'MedievalSharp'), serif; font-size: 11px; color: var(--v-gold, #c4953a); background: rgba(196, 149, 58, 0.1); border: 1px solid rgba(196, 149, 58, 0.3); border-radius: 4px; padding: 2px 8px; margin: 4px auto 0; cursor: pointer; transition: background 0.2s, border-color 0.2s; display: inline-flex; align-items: center; gap: 4px; }
 .drl-structured-toggle-btn:hover { background: rgba(196, 149, 58, 0.22); border-color: rgba(196, 149, 58, 0.5); }
 .drl-structured-details-body { display: none; flex-direction: column; gap: 2px; background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(196, 149, 58, 0.2); border-radius: 4px; padding: 4px 8px; margin-top: 4px; text-align: left; animation: ctFade 0.2s ease; width: 100%; box-sizing: border-box; max-height: 160px; overflow-y: auto; overscroll-behavior: contain; }
@@ -2856,7 +2856,7 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 
 .hex-intent-reticle-label {
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   fill: #ff8a80;
   text-anchor: middle;
@@ -2933,7 +2933,7 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 }
 .bf-rhythm-sub {
   font-family: var(--v-font, 'MedievalSharp'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   color: var(--v-text-dim, #a09484);
   letter-spacing: 0.3px;
 }
@@ -6088,7 +6088,7 @@ details.udc-section--collapsible:not([open]) summary.udc-section-title::after { 
     line-height: 1.1;
 }
 .ehs-vital-lbl {
-    font-size: 10.5px;
+    font-size: 11px;
     color: var(--v-text-dim, #a09484);
     text-transform: uppercase;
 }
@@ -6111,7 +6111,7 @@ details.udc-section--collapsible:not([open]) summary.udc-section-title::after { 
     padding: 2px 1px;
 }
 .ehs-attr-lbl {
-    font-size: 10.5px;
+    font-size: 11px;
     color: var(--v-text-dim, #a09484);
 }
 .ehs-attr-val {
@@ -6264,7 +6264,7 @@ details.udc-section--collapsible:not([open]) summary.udc-section-title::after { 
 }
 
 .tam-vital-chip {
-    font-size: 10.5px;
+    font-size: 11px;
     padding: 2px 6px;
     border-radius: 4px;
     background: rgba(15, 12, 8, 0.6);
@@ -6422,7 +6422,7 @@ details.udc-section--collapsible:not([open]) summary.udc-section-title::after { 
 
 .tam-act-desc {
     font-family: var(--v-font, 'MedievalSharp'), serif;
-    font-size: 10.5px;
+    font-size: 11px;
     color: var(--v-text-dim, #a09484);
     line-height: 1.25;
     margin-top: 2px;
@@ -6533,7 +6533,7 @@ details.udc-section--collapsible:not([open]) summary.udc-section-title::after { 
   gap: 4px;
   padding: 3px 8px;
   border-radius: 4px;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   font-family: var(--v-font-display, 'Cinzel'), serif;
   letter-spacing: 0.5px;
@@ -6560,7 +6560,7 @@ details.udc-section--collapsible:not([open]) summary.udc-section-title::after { 
 }
 .dnd-res-modal-sec-title {
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   color: #ffd700;
   margin-bottom: 4px;
@@ -6588,7 +6588,7 @@ details.udc-section--collapsible:not([open]) summary.udc-section-title::after { 
   border: 1px solid rgba(234, 179, 8, 0.55);
   border-radius: 6px;
   padding: 8px 10px;
-  font-size: 10.5px;
+  font-size: 11px;
   line-height: 1.35;
 }
 .dnd-res-modal-btn {
@@ -7316,7 +7316,7 @@ details.udc-section--collapsible:not([open]) summary.udc-section-title::after { 
     border: 1px solid rgba(255, 180, 80, 0.65);
     color: #ffe082;
     font-family: var(--v-font-display, 'Cinzel'), serif;
-    font-size: 10.5px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.6px;
     padding: 6px 10px;
@@ -7466,7 +7466,7 @@ details.udc-section--collapsible:not([open]) summary.udc-section-title::after { 
     display: inline-block;
     font-family: var(--v-font-display, 'Cinzel'), serif;
     font-weight: 700;
-    font-size: 10.5px;
+    font-size: 11px;
     color: #ffd54f;
     letter-spacing: 0.5px;
     margin-bottom: 2px;
@@ -9761,7 +9761,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(220,70,20,0.28) 72%,
         rgba(160,40,10,0.08) 92%,
         rgba(160,40,10,0) 100%);
-    filter: url(#fbFireTurb) blur(2px);
+    filter: blur(2px) drop-shadow(0 0 5px rgba(255,140,50,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     animation: fbAura 0.3s ease-in-out infinite alternate;
     pointer-events: none;
@@ -9776,7 +9776,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(255,140,60,0.28) 40%,
         rgba(200,60,20,0.12) 72%,
         rgba(100,30,10,0) 100%);
-    filter: url(#fbFireTurb) blur(5px);
+    filter: blur(5px) drop-shadow(0 0 5px rgba(255,140,50,0.65)); will-change: transform, opacity;
     animation: fbAuraHalo 0.44s ease-in-out infinite alternate;
 }
 /* Segunda aura contra-rotante pra dupla camada de chamas bruxuleando em
@@ -9795,7 +9795,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
             rgba(255,240,180,0.55) 240deg,
             rgba(200,60,20,0.2) 300deg,
             rgba(255,220,140,0.55) 360deg);
-    filter: url(#fbFireTurb) blur(3px);
+    filter: blur(3px) drop-shadow(0 0 5px rgba(255,140,50,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     animation: fbAuraCounter 0.6s linear infinite;
     opacity: 0.75;
@@ -9851,13 +9851,13 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(255,160,60,0.65) 35%,
         rgba(220,70,20,0.32) 70%,
         rgba(160,40,10,0) 100%);
-    filter: url(#fbFireTurb) blur(1.6px);
+    filter: blur(1.6px) drop-shadow(0 0 5px rgba(255,140,50,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     animation: fbSegFlicker 0.22s ease-in-out infinite alternate;
 }
 @keyframes fbSegFlicker {
-    0%   { filter: url(#fbFireTurb) blur(1.2px); }
-    100% { filter: url(#fbFireTurb) blur(2.6px); }
+    0%   { filter: blur(1.2px) drop-shadow(0 0 5px rgba(255,140,50,0.65)); will-change: transform, opacity; }
+    100% { filter: blur(2.6px) drop-shadow(0 0 5px rgba(255,140,50,0.65)); will-change: transform, opacity; }
 }
 /* ============================================================
    RAIO GÉLIDO — órbita cristalina RÁPIDA, trail denso/pequeno
@@ -9917,7 +9917,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(100,170,230,0.38) 55%,
         rgba(50,100,180,0.18) 78%,
         transparent 100%);
-    filter: url(#rfIceTurb) blur(1.8px);
+    filter: blur(1.8px) drop-shadow(0 0 5px rgba(160,210,255,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     animation: fbAura 0.4s ease-in-out infinite alternate;
     pointer-events: none;
@@ -9932,7 +9932,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(130,200,255,0.24) 42%,
         rgba(80,140,210,0.1) 72%,
         transparent 100%);
-    filter: url(#rfIceTurb) blur(5px);
+    filter: blur(5px) drop-shadow(0 0 5px rgba(160,210,255,0.65)); will-change: transform, opacity;
     animation: fbAuraHalo 0.5s ease-in-out infinite alternate;
 }
 .mm-orbit-missile--ice .mm-orbit-aura::before {
@@ -9949,7 +9949,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
             rgba(220,240,255,0.5) 240deg,
             rgba(130,200,255,0.16) 300deg,
             rgba(220,240,255,0.5) 360deg);
-    filter: url(#rfIceTurb) blur(3px);
+    filter: blur(3px) drop-shadow(0 0 5px rgba(160,210,255,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     animation: fbAuraCounter 0.75s linear infinite;
     opacity: 0.65;
@@ -9972,7 +9972,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(150,210,255,0.7) 45%,
         rgba(70,140,220,0.35) 80%,
         transparent 100%);
-    filter: url(#rfIceTurb) blur(0.5px);
+    filter: blur(0.5px) drop-shadow(0 0 5px rgba(160,210,255,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     box-shadow: 0 0 4px rgba(180,220,255,0.5);
 }
@@ -9989,7 +9989,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(255,255,255,0.95) 60%,
         rgba(180,220,255,0.7) 85%,
         rgba(140,200,255,0) 100%);
-    filter: url(#rfIceTurb) blur(1.2px);
+    filter: blur(1.2px) drop-shadow(0 0 5px rgba(160,210,255,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     z-index: 12;
     box-shadow:
@@ -9998,8 +9998,8 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     animation: rfBeamGlow 0.3s ease-in-out infinite alternate;
 }
 @keyframes rfBeamGlow {
-    0%   { filter: url(#rfIceTurb) blur(1px)   brightness(1); }
-    100% { filter: url(#rfIceTurb) blur(1.6px) brightness(1.25); }
+    0%   { filter: blur(1px)   brightness(1); }
+    100% { filter: blur(1.6px) brightness(1.25); }
 }
 /* Partículas de gelo viajando ao longo do feixe */
 .rf-beam-spark {
@@ -10031,7 +10031,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     z-index: 15;
     overflow: visible;
     animation: rfBoltFlash 560ms cubic-bezier(.22,.61,.36,1) forwards;
-    filter: url(#rfIceTurb);
+    filter: blur(1.2px) drop-shadow(0 0 5px rgba(160,210,255,0.65)); will-change: transform, opacity;
 }
 .rf-bolt .rf-bolt-halo {
     stroke: rgba(160,216,255,0.65);
@@ -10077,7 +10077,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(50,100,180,0.2) 90%,
         transparent 100%);
     pointer-events: none;
-    filter: url(#rfIceTurb) blur(0.5px);
+    filter: blur(0.5px) drop-shadow(0 0 5px rgba(160,210,255,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     z-index: 14;
     animation-name: rfShardFly;
@@ -10133,7 +10133,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(100,180,230,0.15) 50%,
         rgba(200,240,255,0.3) 100%);
     pointer-events: none;
-    filter: url(#rfIceTurb);
+    filter: blur(1.2px) drop-shadow(0 0 5px rgba(160,210,255,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     z-index: 4;
     animation: rfFrostedShimmer 1.4s ease-in-out infinite alternate;
@@ -10192,7 +10192,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(255,220,140,0.38) 52%,
         rgba(100,170,100,0.18) 78%,
         transparent 100%);
-    filter: url(#hsHolyTurb) blur(2px);
+    filter: blur(2px) drop-shadow(0 0 5px rgba(180,240,180,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     animation: fbAura 0.4s ease-in-out infinite alternate;
     pointer-events: none;
@@ -10207,7 +10207,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(255,230,140,0.32) 42%,
         rgba(140,220,140,0.14) 74%,
         transparent 100%);
-    filter: url(#hsHolyTurb) blur(6px);
+    filter: blur(6px) drop-shadow(0 0 5px rgba(180,240,180,0.65)); will-change: transform, opacity;
     animation: fbAuraHalo 0.55s ease-in-out infinite alternate;
 }
 .mm-orbit-missile--holy .mm-orbit-aura::before {
@@ -10224,7 +10224,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
             rgba(255,255,220,0.55) 240deg,
             rgba(160,230,160,0.18) 300deg,
             rgba(255,255,220,0.55) 360deg);
-    filter: url(#hsHolyTurb) blur(3px);
+    filter: blur(3px) drop-shadow(0 0 5px rgba(180,240,180,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     animation: fbAuraCounter 0.8s linear infinite;
     opacity: 0.65;
@@ -10246,7 +10246,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(140,220,140,0.6) 45%,
         rgba(60,140,60,0.22) 80%,
         transparent 100%);
-    filter: url(#hsHolyTurb) blur(0.8px);
+    filter: blur(0.8px) drop-shadow(0 0 5px rgba(180,240,180,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
 }
 
@@ -10289,7 +10289,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(196,149,58,0.4) 58%,
         rgba(120,80,20,0.15) 82%,
         transparent 100%);
-    filter: url(#bsRadiantTurb) blur(2px);
+    filter: blur(2px) drop-shadow(0 0 5px rgba(255,210,100,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     animation: fbAura 0.38s ease-in-out infinite alternate;
     pointer-events: none;
@@ -10304,7 +10304,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(255,200,80,0.32) 42%,
         rgba(196,149,58,0.14) 74%,
         transparent 100%);
-    filter: url(#bsRadiantTurb) blur(6px);
+    filter: blur(6px) drop-shadow(0 0 5px rgba(255,210,100,0.65)); will-change: transform, opacity;
     animation: fbAuraHalo 0.52s ease-in-out infinite alternate;
 }
 .mm-orbit-missile--radiant .mm-orbit-aura::before {
@@ -10321,7 +10321,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
             rgba(255,240,180,0.6) 240deg,
             rgba(255,200,80,0.2) 300deg,
             rgba(255,240,180,0.6) 360deg);
-    filter: url(#bsRadiantTurb) blur(3px);
+    filter: blur(3px) drop-shadow(0 0 5px rgba(255,210,100,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     animation: fbAuraCounter 0.7s linear infinite;
     opacity: 0.7;
@@ -10343,7 +10343,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(255,200,80,0.6) 45%,
         rgba(160,110,30,0.22) 80%,
         transparent 100%);
-    filter: url(#bsRadiantTurb) blur(0.6px);
+    filter: blur(0.6px) drop-shadow(0 0 5px rgba(255,210,100,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
 }
 
@@ -10385,7 +10385,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(110,90,210,0.4) 52%,
         rgba(60,40,140,0.18) 78%,
         transparent 100%);
-    filter: url(#asArcaneTurb) blur(2px);
+    filter: blur(2px) drop-shadow(0 0 5px rgba(180,160,255,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     animation: fbAura 0.42s ease-in-out infinite alternate;
     pointer-events: none;
@@ -10400,7 +10400,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(130,100,220,0.3) 42%,
         rgba(80,50,160,0.12) 74%,
         transparent 100%);
-    filter: url(#asArcaneTurb) blur(6px);
+    filter: blur(6px) drop-shadow(0 0 5px rgba(180,160,255,0.65)); will-change: transform, opacity;
     animation: fbAuraHalo 0.58s ease-in-out infinite alternate;
 }
 .mm-orbit-missile--arcane .mm-orbit-aura::before {
@@ -10417,7 +10417,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
             rgba(220,210,255,0.55) 240deg,
             rgba(130,100,220,0.2) 300deg,
             rgba(220,210,255,0.55) 360deg);
-    filter: url(#asArcaneTurb) blur(3px);
+    filter: blur(3px) drop-shadow(0 0 5px rgba(180,160,255,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     animation: fbAuraCounter 0.85s linear infinite;
     opacity: 0.65;
@@ -10439,7 +10439,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(130,100,220,0.6) 45%,
         rgba(60,40,140,0.22) 80%,
         transparent 100%);
-    filter: url(#asArcaneTurb) blur(0.8px);
+    filter: blur(0.8px) drop-shadow(0 0 5px rgba(180,160,255,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
 }
 
@@ -10463,7 +10463,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
             rgba(100,180,100,0.18) 65%,
             transparent 100%);
     pointer-events: none;
-    filter: url(#hsHolyTurb) blur(2px);
+    filter: blur(2px) drop-shadow(0 0 5px rgba(180,240,180,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     z-index: 5;
     animation: hsHealedFlicker 0.6s ease-in-out infinite alternate;
@@ -10490,7 +10490,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(255,200,80,0.2) 50%,
         rgba(255,240,180,0.35) 100%);
     pointer-events: none;
-    filter: url(#bsRadiantTurb) blur(1.5px);
+    filter: blur(1.5px) drop-shadow(0 0 5px rgba(255,210,100,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     z-index: 4;
     animation: bsBlessedShimmer 1.2s ease-in-out infinite alternate;
@@ -10527,7 +10527,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
             rgba(180,160,255,0.32) 360deg);
     box-shadow: 0 0 14px rgba(180,160,255,0.5), inset 0 0 12px rgba(200,180,255,0.35);
     pointer-events: none;
-    filter: url(#asArcaneTurb) blur(1.5px);
+    filter: blur(1.5px) drop-shadow(0 0 5px rgba(180,160,255,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     z-index: 4;
     animation: asWardedRotate 4s linear infinite;
@@ -10572,7 +10572,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
             rgba(40,20,70,0.35) 45%,
             rgba(20,10,40,0.18) 75%,
             transparent 100%);
-    filter: url(#rfIceTurb) blur(2px);
+    filter: blur(2px) drop-shadow(0 0 5px rgba(160,210,255,0.65)); will-change: transform, opacity;
     mix-blend-mode: multiply;
     z-index: 4;
     animation: frightenedMist 1.6s ease-in-out infinite alternate;
@@ -10770,7 +10770,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(200,255,180,0.7) 40%,
         rgba(255,230,140,0.85) 75%,
         rgba(255,240,200,1) 100%);
-    filter: url(#hsHolyTurb) blur(1.5px);
+    filter: blur(1.5px) drop-shadow(0 0 5px rgba(180,240,180,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     z-index: 13;
     animation: hsPillarIn 0.9s cubic-bezier(.22,.61,.36,1) forwards;
@@ -10808,7 +10808,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(180,255,180,0.85) 35%,
         rgba(120,200,120,0.45) 70%,
         transparent 100%);
-    filter: url(#hsHolyTurb) blur(0.6px);
+    filter: blur(0.6px) drop-shadow(0 0 5px rgba(180,240,180,0.65)); will-change: transform, opacity;
 }
 .as-burst-particle.radiant {
     background: radial-gradient(circle at 50% 50%,
@@ -10816,7 +10816,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(255,210,100,0.85) 35%,
         rgba(196,149,58,0.45) 70%,
         transparent 100%);
-    filter: url(#bsRadiantTurb) blur(0.6px);
+    filter: blur(0.6px) drop-shadow(0 0 5px rgba(255,210,100,0.65)); will-change: transform, opacity;
 }
 .as-burst-particle.arcane {
     background: radial-gradient(circle at 50% 50%,
@@ -10824,7 +10824,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(180,160,255,0.85) 35%,
         rgba(100,80,200,0.45) 70%,
         transparent 100%);
-    filter: url(#asArcaneTurb) blur(0.6px);
+    filter: blur(0.6px) drop-shadow(0 0 5px rgba(180,160,255,0.65)); will-change: transform, opacity;
 }
 @keyframes asBurstFly {
     0% {
@@ -10980,7 +10980,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 }
 .floating-dmg .fct-mod-tag {
     display: inline-block;
-    font-size: 10.5px;
+    font-size: 11px;
     padding: 1px 5px;
     border-radius: 4px;
     margin-top: 2px;
@@ -11213,7 +11213,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(255,160,60,0.7) 36%,
         rgba(220,70,20,0.35) 72%,
         rgba(160,40,10,0) 100%);
-    filter: url(#fbFireTurb) blur(1.4px);
+    filter: blur(1.4px) drop-shadow(0 0 5px rgba(255,140,50,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
 }
 /* Tremor dramático no card ao ser atingido */
@@ -11258,7 +11258,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(255,150,60,0.7) 48%,
         rgba(220,70,20,0.3) 78%,
         transparent 100%);
-    filter: blur(1.5px) url(#fbFireTurb);
+    filter: blur(1.5px) drop-shadow(0 0 5px rgba(255,140,50,0.65)); will-change: transform, opacity;
     animation: fbBoomCore 360ms cubic-bezier(.22,.61,.36,1) forwards;
 }
 @keyframes fbBoomCore {
@@ -11275,7 +11275,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     box-shadow:
         0 0 14px rgba(255,150,60,0.7),
         inset 0 0 8px rgba(255,180,80,0.4);
-    filter: url(#fbFireTurb);
+    filter: blur(1.5px) drop-shadow(0 0 5px rgba(255,140,50,0.65)); will-change: transform, opacity;
     animation: fbBoomRing 520ms cubic-bezier(.22,.61,.36,1) forwards;
 }
 @keyframes fbBoomRing {
@@ -11302,7 +11302,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(255,110,40,0.65) 58%,
         rgba(200,60,20,0.3) 85%,
         transparent 100%);
-    filter: blur(1.2px) url(#fbFireTurb);
+    filter: blur(1.2px) drop-shadow(0 0 5px rgba(255,140,50,0.65)); will-change: transform, opacity;
     animation: fbFireSplat 640ms cubic-bezier(.22,.61,.36,1) forwards;
 }
 @keyframes fbFireSplat {
@@ -11347,7 +11347,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     border-radius: 50% 30% 60% 40%;
     background: radial-gradient(circle at 40% 40%, rgba(255,240,200,1) 0%, rgba(255,160,60,0.9) 45%, rgba(200,60,20,0.4) 80%, transparent 100%);
     pointer-events: none;
-    filter: url(#fbFireTurb) blur(0.8px);
+    filter: blur(0.8px) drop-shadow(0 0 5px rgba(255,140,50,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     z-index: 12;
     animation-name: fbDebrisFly;
@@ -11355,9 +11355,9 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     animation-fill-mode: forwards;
 }
 @keyframes fbDebrisFly {
-    0%   { transform: translate(-50%, -50%) scale(1.4) rotate(0); opacity: 1; filter: url(#fbFireTurb) blur(0.6px); }
+    0%   { transform: translate(-50%, -50%) scale(1.4) rotate(0); opacity: 1; filter: blur(0.6px) drop-shadow(0 0 5px rgba(255,140,50,0.65)); will-change: transform, opacity; }
     60%  { opacity: 0.7; }
-    100% { transform: translate(-50%, -50%) translate(var(--dx, 0px), var(--dy, 0px)) scale(0.25) rotate(var(--rot, 180deg)); opacity: 0; filter: url(#fbFireTurb) blur(3px); }
+    100% { transform: translate(-50%, -50%) translate(var(--dx, 0px), var(--dy, 0px)) scale(0.25) rotate(var(--rot, 180deg)); opacity: 0; filter: blur(3px) drop-shadow(0 0 5px rgba(255,140,50,0.65)); will-change: transform, opacity; }
 }
 /* Fumaça como rastros finos de fogo escuro/marrom: mais traçada que billowy,
    pequena mas alta em opacidade pra ser visível. Aparece de forma intermitente
@@ -11373,7 +11373,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
         rgba(55,42,35,0.45) 65%,
         rgba(30,22,18,0.18) 88%,
         rgba(30,22,18,0) 100%);
-    filter: url(#fbSmokeTurb) blur(1.8px);
+    filter: blur(1.8px) drop-shadow(0 0 4px rgba(60,45,40,0.45)); will-change: transform, opacity;
     transform: translate(-50%, -50%) scale(0.4);
     opacity: 0;
     z-index: 4;
@@ -11382,10 +11382,10 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     animation-fill-mode: forwards;
 }
 @keyframes fbSmokeRise {
-    0%   { transform: translate(-50%, -50%) scale(0.4)  rotate(var(--rot, 0deg)) translate(0, 0); opacity: 0; filter: url(#fbSmokeTurb) blur(1.2px); }
+    0%   { transform: translate(-50%, -50%) scale(0.4)  rotate(var(--rot, 0deg)) translate(0, 0); opacity: 0; filter: blur(1.2px) drop-shadow(0 0 4px rgba(60,45,40,0.45)); will-change: transform, opacity; }
     20%  { opacity: 0.9; }
-    55%  { transform: translate(-50%, -50%) scale(1.15) rotate(calc(var(--rot, 0deg) + 18deg)) translate(calc(var(--sx, 0px) * 0.55), calc(-18px + var(--sy, 0px) * 0.55)); opacity: 0.7; filter: url(#fbSmokeTurb) blur(2.6px); }
-    100% { transform: translate(-50%, -50%) scale(1.9)  rotate(calc(var(--rot, 0deg) + 40deg)) translate(var(--sx, 0px), calc(-42px + var(--sy, 0px))); opacity: 0; filter: url(#fbSmokeTurb) blur(5px); }
+    55%  { transform: translate(-50%, -50%) scale(1.15) rotate(calc(var(--rot, 0deg) + 18deg)) translate(calc(var(--sx, 0px) * 0.55), calc(-18px + var(--sy, 0px) * 0.55)); opacity: 0.7; filter: blur(2.6px) drop-shadow(0 0 4px rgba(60,45,40,0.45)); will-change: transform, opacity; }
+    100% { transform: translate(-50%, -50%) scale(1.9)  rotate(calc(var(--rot, 0deg) + 40deg)) translate(var(--sx, 0px), calc(-42px + var(--sy, 0px))); opacity: 0; filter: blur(5px) drop-shadow(0 0 4px rgba(60,45,40,0.45)); will-change: transform, opacity; }
 }
 /* Brasas emitidas no vôo: cada ember é uma gotinha de fogo que sobe e some.
    Spawna na posição atual da bola cada frame — cauda orgânica que segue o path. */
@@ -11393,7 +11393,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     position: absolute;
     border-radius: 50%;
     pointer-events: none;
-    filter: url(#fbFireTurb) blur(1.2px);
+    filter: blur(1.2px) drop-shadow(0 0 5px rgba(255,140,50,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     transform: translate(-50%, -50%) scale(1);
     opacity: 0.95;
@@ -11403,9 +11403,9 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
     z-index: 9;
 }
 @keyframes fbEmberFade {
-    0%   { transform: translate(-50%, -50%) scale(1) translate(0, 0); opacity: 0.95; filter: url(#fbFireTurb) blur(1px); }
-    60%  { transform: translate(-50%, -50%) scale(1.25) translate(calc(var(--dx) * 0.6), calc(var(--dy) * 0.6)); opacity: 0.55; filter: url(#fbFireTurb) blur(2.4px); }
-    100% { transform: translate(-50%, -50%) scale(0.35) translate(var(--dx), var(--dy)); opacity: 0; filter: url(#fbFireTurb) blur(4px); }
+    0%   { transform: translate(-50%, -50%) scale(1) translate(0, 0); opacity: 0.95; filter: blur(1px) drop-shadow(0 0 5px rgba(255,140,50,0.65)); will-change: transform, opacity; }
+    60%  { transform: translate(-50%, -50%) scale(1.25) translate(calc(var(--dx) * 0.6), calc(var(--dy) * 0.6)); opacity: 0.55; filter: blur(2.4px) drop-shadow(0 0 5px rgba(255,140,50,0.65)); will-change: transform, opacity; }
+    100% { transform: translate(-50%, -50%) scale(0.35) translate(var(--dx), var(--dy)); opacity: 0; filter: blur(4px) drop-shadow(0 0 5px rgba(255,140,50,0.65)); will-change: transform, opacity; }
 }
 /* Flash no impacto de fireball (mais intenso que o mm). */
 .cell.fb-impact-flash {
@@ -11441,7 +11441,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
             rgba(200,60,20,0.18) 65%,
             transparent 100%);
     pointer-events: none;
-    filter: url(#fbFireTurb) blur(2px);
+    filter: blur(2px) drop-shadow(0 0 5px rgba(255,140,50,0.65)); will-change: transform, opacity;
     mix-blend-mode: screen;
     z-index: 5;
     animation: fbBurningFlicker 0.32s ease-in-out infinite alternate;
@@ -13150,7 +13150,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   background: rgba(15, 12, 8, 0.85);
   border: 0.5px solid rgba(196, 149, 58, 0.5);
   color: #c4953a;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   line-height: 14px;
   padding: 0;
@@ -13202,7 +13202,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 
 .battlefield-hex-arena .hex-badge-text {
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   fill: #f6e6bf;
   text-anchor: middle;
@@ -13217,7 +13217,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 
 .battlefield-hex-arena .hex-move-cost {
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   fill: #f6e6bf;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
@@ -13264,7 +13264,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   border-radius: 6px;
   color: #ebd6a7;
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.4px;
   cursor: pointer;
@@ -13310,7 +13310,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 .bf-scale-badge .bf-scale-icon { font-size: 11px; }
 .bf-scale-badge strong { color: #f59e0b; font-weight: 700; }
 .bf-scale-badge .bf-scale-sub {
-  font-size: 10.5px;
+  font-size: 11px;
   color: rgba(235, 214, 167, 0.65);
   letter-spacing: 0.8px;
   border-left: 1px solid rgba(196, 149, 58, 0.4);
@@ -13338,7 +13338,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 .bf-vision-badge .bf-vision-icon { font-size: 11px; }
 .bf-vision-badge strong { color: #60a5fa; font-weight: 700; }
 .bf-vision-badge .bf-vision-sub {
-  font-size: 10.5px;
+  font-size: 11px;
   color: rgba(191, 219, 254, 0.75);
   letter-spacing: 0.8px;
   border-left: 1px solid rgba(100, 150, 220, 0.4);
@@ -13361,7 +13361,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 
 .battlefield-hex-arena .hex-diff-label {
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   fill: rgba(240, 165, 75, 0.85);
   text-anchor: middle;
@@ -13434,7 +13434,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 
 .battlefield-hex-arena .hex-elev-badge-text {
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 800;
   fill: #fde68a;
   text-anchor: middle;
@@ -13461,7 +13461,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 
 .battlefield-hex-arena .hex-obstacle-label {
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 800;
   fill: #f8fafc;
   text-anchor: middle;
@@ -13473,7 +13473,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 
 .battlefield-hex-arena .hex-obstacle-sub {
   font-family: var(--v-font-ui, sans-serif);
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 800;
   fill: #fca5a5;
   text-anchor: middle;
@@ -13491,7 +13491,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
   border: 1px solid #fbbf24;
   color: #fde68a;
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 800;
   padding: 1px 5px;
   border-radius: 6px;
@@ -13521,7 +13521,7 @@ body.perf-lite .boss-charge-dust { animation-duration: 0.3s !important; }
 
 .battlefield-hex-arena .hex-hazard-badge {
   font-family: var(--v-font-ui, sans-serif);
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   fill: #fbbf24;
   text-anchor: middle;
@@ -13959,7 +13959,7 @@ canvas#vfxCanvas,
 }
 
 .token-ac-chip span {
-  font-size: 10.5px;
+  font-size: 11px;
   line-height: 1;
   display: inline-block;
 }
@@ -13974,7 +13974,7 @@ canvas#vfxCanvas,
   border-radius: 6px;
   padding: 1px 5px;
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   color: #f7e7b4;
   z-index: 28;
@@ -14006,7 +14006,7 @@ canvas#vfxCanvas,
   border-radius: 6px;
   padding: 1px 5px;
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   color: #e5c9f5;
   z-index: 28;
@@ -14161,7 +14161,7 @@ canvas#vfxCanvas,
 .hex-threat-badge-text {
   fill: #ffb8b8;
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   text-anchor: middle;
   dominant-baseline: central;
@@ -14218,7 +14218,7 @@ canvas#vfxCanvas,
 .hex-surface-badge {
   pointer-events: none;
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   text-anchor: middle;
   dominant-baseline: central;
@@ -14269,7 +14269,7 @@ canvas#vfxCanvas,
 .hex-flanking-badge-text {
   fill: #fff176;
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   text-anchor: middle;
   dominant-baseline: central;
@@ -14332,7 +14332,7 @@ canvas#vfxCanvas,
 .hex-shove-badge-text {
   fill: #80deea;
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   text-anchor: middle;
   dominant-baseline: central;
@@ -14368,7 +14368,7 @@ canvas#vfxCanvas,
   border-radius: 5px;
   padding: 1px 5px;
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   color: #cbe9ff;
   z-index: 28;
@@ -14401,7 +14401,7 @@ canvas#vfxCanvas,
   border-radius: 5px;
   padding: 1px 4px;
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   color: #ffdfba;
   z-index: 29;
@@ -14420,7 +14420,7 @@ canvas#vfxCanvas,
   border-radius: 5px;
   padding: 1px 4px;
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   color: #ebd6a7;
   z-index: 29;
@@ -14708,7 +14708,7 @@ canvas#vfxCanvas,
 .hex-conc-label {
   fill: #cbe9ff;
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   text-anchor: middle;
   dominant-baseline: central;
@@ -14722,7 +14722,7 @@ canvas#vfxCanvas,
 }
 .token-temphp-pill {
   font-family: var(--v-font-ui, sans-serif);
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 800;
   color: #7dd3fc;
   background: rgba(14, 116, 144, 0.45);
@@ -14801,7 +14801,7 @@ canvas#vfxCanvas,
 .hex-active-aura-label {
   fill: #fef08a;
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   text-anchor: middle;
   dominant-baseline: central;
@@ -14868,7 +14868,7 @@ canvas#vfxCanvas,
 }
 .dnd-crit-banner-kicker {
   font-family: var(--v-font-mono, monospace);
-  font-size: 10.5px;
+  font-size: 11px;
   letter-spacing: 1.5px;
   color: #e5c158;
   text-transform: uppercase;
@@ -14928,7 +14928,7 @@ canvas#vfxCanvas,
 }
 .dnd-fumble-banner-kicker {
   font-family: var(--v-font-mono, monospace);
-  font-size: 10.5px;
+  font-size: 11px;
   letter-spacing: 1.5px;
   color: #fca5a5;
   text-transform: uppercase;
@@ -14998,7 +14998,7 @@ canvas#vfxCanvas,
 .hex-move-node-label {
   fill: #ffd54f;
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   text-anchor: middle;
   dominant-baseline: central;
@@ -15026,7 +15026,7 @@ canvas#vfxCanvas,
 .hex-hazard-badge-text {
   fill: #ff7675;
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   text-anchor: middle;
   dominant-baseline: central;
@@ -15065,7 +15065,7 @@ canvas#vfxCanvas,
 .hex-dest-cover-text {
   fill: #81d4fa;
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   text-anchor: middle;
   dominant-baseline: central;
@@ -15104,7 +15104,7 @@ canvas#vfxCanvas,
 .hex-aoe-badge-text {
   fill: #ffe082;
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   text-anchor: middle;
   dominant-baseline: central;
@@ -15171,7 +15171,7 @@ canvas#vfxCanvas,
   border: 1px solid rgba(212, 175, 55, 0.55);
   border-radius: 4px;
   font-family: var(--v-font-ui, sans-serif);
-  font-size: 10.5px;
+  font-size: 11px;
   color: #eed5a1;
   padding: 1px 5px;
   white-space: nowrap;
@@ -15186,7 +15186,7 @@ canvas#vfxCanvas,
   left: 50%;
   transform: translateX(-50%);
   font-family: var(--v-font-display, 'Cinzel'), serif;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   color: #f0deb4;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95), 0 0 8px rgba(0, 0, 0, 0.9);
@@ -15304,9 +15304,9 @@ canvas#vfxCanvas,
   40%, 60% { transform: translate3d(2px, 0, 0); }
 }
 @keyframes appShakeHeavy {
-  10%, 90% { transform: translate3d(-3px, -1px, 0) scale(1.002); }
+  10%, 90% { transform: translate3d(-3px, -1px, 0); }
   20%, 80% { transform: translate3d(4px, 2px, 0); }
-  30%, 50%, 70% { transform: translate3d(-5px, -2px, 0) scale(0.998); }
+  30%, 50%, 70% { transform: translate3d(-5px, -2px, 0); }
   40%, 60% { transform: translate3d(5px, 1px, 0); }
 }
 #app.crit-vignette-flash::after {
@@ -15315,7 +15315,8 @@ canvas#vfxCanvas,
   top: 0; left: 0; right: 0; bottom: 0;
   pointer-events: none;
   z-index: 99999;
-  box-shadow: inset 0 0 100px 30px rgba(255, 60, 20, 0.55), inset 0 0 40px rgba(255, 215, 0, 0.35);
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(255, 60, 20, 0.42) 85%, rgba(255, 215, 0, 0.5) 100%);
+  will-change: opacity;
   animation: critVignettePulse 0.45s ease-out forwards;
 }
 @keyframes critVignettePulse {
@@ -15653,6 +15654,16 @@ canvas#vfxCanvas,
 }
 
 /* Grade Primária de 5 Botões */
+.action-dock-primary-grid {
+  overflow-x: hidden;
+}
+.action-dock-primary-grid .opt-btn-label {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .action-dock-primary-grid {
   display: grid;
   grid-template-columns: 1.15fr 1fr 1fr 1fr 0.95fr;
@@ -16391,7 +16402,7 @@ window.__onIntroTap = function() {
   <defs>
     <filter id="fbFireTurb" x="-20%" y="-50%" width="140%" height="200%">
       <feTurbulence type="fractalNoise" baseFrequency="0.018 0.055" numOctaves="2" seed="3" result="noise">
-        <animate attributeName="baseFrequency" dur="1.6s" values="0.018 0.055;0.030 0.085;0.018 0.055" repeatCount="indefinite"/>
+        <!-- animated frequency replaced with GPU-accelerated CSS -->
       </feTurbulence>
       <feDisplacementMap in="SourceGraphic" in2="noise" scale="14" xChannelSelector="R" yChannelSelector="G"/>
       <feGaussianBlur stdDeviation="1.2"/>
@@ -16400,7 +16411,7 @@ window.__onIntroTap = function() {
          dá movimento lento e etéreo (diferente do fogo, que é mais rápido). -->
     <filter id="fbSmokeTurb" x="-30%" y="-30%" width="160%" height="160%">
       <feTurbulence type="fractalNoise" baseFrequency="0.012 0.022" numOctaves="3" seed="7" result="noise2">
-        <animate attributeName="baseFrequency" dur="3.2s" values="0.012 0.022;0.020 0.035;0.012 0.022" repeatCount="indefinite"/>
+        <!-- animated frequency replaced with GPU-accelerated CSS -->
       </feTurbulence>
       <feDisplacementMap in="SourceGraphic" in2="noise2" scale="22" xChannelSelector="R" yChannelSelector="G"/>
     </filter>
@@ -16408,7 +16419,7 @@ window.__onIntroTap = function() {
          pequeno (gelo é rígido, quase não se deforma — só pequenas microfraturas). -->
     <filter id="rfIceTurb" x="-20%" y="-20%" width="140%" height="140%">
       <feTurbulence type="fractalNoise" baseFrequency="0.06 0.12" numOctaves="2" seed="11" result="iceNoise">
-        <animate attributeName="baseFrequency" dur="2.4s" values="0.06 0.12;0.09 0.16;0.06 0.12" repeatCount="indefinite"/>
+        <!-- animated frequency replaced with GPU-accelerated CSS -->
       </feTurbulence>
       <feDisplacementMap in="SourceGraphic" in2="iceNoise" scale="6" xChannelSelector="R" yChannelSelector="G"/>
       <feGaussianBlur stdDeviation="0.6"/>
@@ -16416,7 +16427,7 @@ window.__onIntroTap = function() {
     <!-- Turbulência da CURA (holy): fluxo gentil e vital, baixa freq + scale médio -->
     <filter id="hsHolyTurb" x="-25%" y="-25%" width="150%" height="150%">
       <feTurbulence type="fractalNoise" baseFrequency="0.020 0.030" numOctaves="2" seed="5" result="holyNoise">
-        <animate attributeName="baseFrequency" dur="2.8s" values="0.020 0.030;0.030 0.042;0.020 0.030" repeatCount="indefinite"/>
+        <!-- animated frequency replaced with GPU-accelerated CSS -->
       </feTurbulence>
       <feDisplacementMap in="SourceGraphic" in2="holyNoise" scale="10" xChannelSelector="R" yChannelSelector="G"/>
       <feGaussianBlur stdDeviation="0.8"/>
@@ -16424,14 +16435,14 @@ window.__onIntroTap = function() {
     <!-- Turbulência RADIANTE (Bênção/Inspiração): brilho sagrado dinâmico -->
     <filter id="bsRadiantTurb" x="-20%" y="-20%" width="140%" height="140%">
       <feTurbulence type="fractalNoise" baseFrequency="0.030 0.045" numOctaves="2" seed="13" result="radNoise">
-        <animate attributeName="baseFrequency" dur="2.2s" values="0.030 0.045;0.045 0.065;0.030 0.045" repeatCount="indefinite"/>
+        <!-- animated frequency replaced with GPU-accelerated CSS -->
       </feTurbulence>
       <feDisplacementMap in="SourceGraphic" in2="radNoise" scale="8" xChannelSelector="R" yChannelSelector="G"/>
     </filter>
     <!-- Turbulência ARCANA (Escudo/Santuário): padrão rígido mas místico -->
     <filter id="asArcaneTurb" x="-20%" y="-20%" width="140%" height="140%">
       <feTurbulence type="fractalNoise" baseFrequency="0.05 0.08" numOctaves="2" seed="17" result="arcNoise">
-        <animate attributeName="baseFrequency" dur="2.0s" values="0.05 0.08;0.07 0.11;0.05 0.08" repeatCount="indefinite"/>
+        <!-- animated frequency replaced with GPU-accelerated CSS -->
       </feTurbulence>
       <feDisplacementMap in="SourceGraphic" in2="arcNoise" scale="5" xChannelSelector="R" yChannelSelector="G"/>
     </filter>
@@ -23360,7 +23371,7 @@ function simCalcSaveFailChanceDnd5e(s, caster, defender, skill) {
             coverBonus: coverBonus,
             paladinAuraBonus: paladinAuraBonus,
             saveAdvState: 'auto_fail',
-            breakdown: 'FALHA AUTOMÁTICA em TR de ' + saveAbPt + ' (Alvo incapacitado/paralisado — PHB Apêndice A)'
+            breakdown: 'FALHA AUTOMÁTICA em TR de ' + saveAbPt + ' (Alvo incapacitado/paralisado — Condição D&D 5e)'
         };
     }
 
@@ -32674,7 +32685,7 @@ function openConditionPopup(payload) {
     if (payload.rule && String(payload.rule).trim()) {
         var ruleHead = document.createElement('div');
         ruleHead.className = 'v8-cond-popup-rule-head';
-        ruleHead.textContent = '◆ Regra PHB / SRD 5.1 ◆';
+        ruleHead.textContent = '◆ Regra D&D 5e ◆';
         card.appendChild(ruleHead);
         var rule = document.createElement('div');
         rule.className = 'v8-cond-popup-rule';
@@ -35498,7 +35509,7 @@ function _updateActionSheetState(s) {
                sem marcar actionSpent. p.mountedThisTurn previne abuso (1× por turno). */
             if (p.mountedThisTurn) {
                 mountBtn.classList.add('spent');
-                mountBtn.title = 'Já montou/desmontou neste turno (PHB: 1× por turno)';
+                mountBtn.title = 'Já montou/desmontou neste turno (1× por turno)';
             } else {
                 mountBtn.classList.remove('spent');
                 mountBtn.removeAttribute('title');
@@ -36718,7 +36729,7 @@ function render(s) {
                 var rowCls = 'rr-loot-row' + (hasDesc ? ' rr-loot-row--clickable' : '');
                 var rowTitle = hasDesc ? 'Toque para ver a descrição e detalhes' : '';
                 var rowDataAttr = hasDesc ? (' data-loot-idx="' + i + '"') : '';
-                var infoBadge = hasDesc ? '<span class="rr-info-badge" aria-hidden="true" title="Ver descrição">ℹ️</span>' : '';
+                var infoBadge = hasDesc ? '<span class="rr-info-badge" aria-hidden="true" title="Ver descrição">◆</span>' : '';
                 var itemRare = (it && (it.rare || it.rarity)) || 'comum';
                 html += '<div class="' + rowCls + '"' + rowDataAttr + ' title="' + escHtml(rowTitle) + '" style="animation-delay:' + (1.4 + i * 0.15) + 's"><span class="rr-ico">' + _combatItemIconHTML(it) + '</span><span class="rr-name">' + escHtml(itemName) + '</span><span class="rr-qty rare-' + itemRare + '">' + escHtml(itemRare) + '</span>' + infoBadge + '</div>';
             });
@@ -39060,14 +39071,10 @@ function __combatShowShieldPrompt(ev) {
         ov.addEventListener('click', function (e) { if (e.target === ov) done('none'); });
 
         var toggleBtn = card.querySelector('.dmg-inspect-toggle-btn');
-        var detailsBody = card.querySelector('.dmg-math-breakdown');
-        if (toggleBtn && detailsBody) {
+        if (toggleBtn) {
             toggleBtn.addEventListener('click', function (evClick) {
                 evClick.stopPropagation();
-                var isOpen = detailsBody.style.display !== 'none';
-                detailsBody.style.display = isOpen ? 'none' : 'block';
-                toggleBtn.setAttribute('aria-expanded', !isOpen);
-                toggleBtn.textContent = isOpen ? 'Detalhes da Regra' : '▲ Ocultar Regras';
+                showDiceRuleDetailsModal(dRows);
             });
         }
 
@@ -39333,13 +39340,10 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
         }
         ov.addEventListener('click', function (e) { if (e.target === ov) done(false); });
         var toggleBtn = card.querySelector('.dmg-inspect-toggle-btn');
-        var detailsBody = card.querySelector('.dmg-math-breakdown');
-        if (toggleBtn && detailsBody) {
+        if (toggleBtn) {
             toggleBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
-                var isOpen = detailsBody.classList.toggle('is-open');
-                toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-                toggleBtn.textContent = isOpen ? '▲ Ocultar Detalhes' : 'Detalhes da Regra';
+                showDiceRuleDetailsModal(dRows);
             });
         }
         card.querySelector('[data-rs="0"]').addEventListener('click', function () { done(false); });
@@ -45311,8 +45315,9 @@ function _shakeAppSim(intensity) {
     var cls = intensity === 'heavy' ? 'shake-heavy' : 'shake-light';
     var dur = intensity === 'heavy' ? 450 : 300;
     app.classList.remove('shake-light', 'shake-heavy');
-    void app.offsetWidth;
-    app.classList.add(cls);
+    requestAnimationFrame(function () {
+        app.classList.add(cls);
+    });
     var ms = (typeof ValdoriaMotion !== 'undefined' && ValdoriaMotion.duration)
         ? ValdoriaMotion.duration(dur, 0) : dur;
     setTimeout(function () { app.classList.remove(cls); }, ms);
@@ -46002,13 +46007,10 @@ function appendMagicMissileVolleySummary(parent, groupList, darts, s) {
 
     toggleBtn.addEventListener('click', function (e) {
         e.stopPropagation();
-        var isOpen = detailsBody.classList.toggle('is-open');
-        toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-        toggleBtn.textContent = isOpen ? '▲ Ocultar Detalhes' : 'Detalhes da Regra';
+        showDiceRuleDetailsModal(dRows);
     });
 
     structCard.appendChild(toggleBtn);
-    structCard.appendChild(detailsBody);
 
     parent.appendChild(structCard);
 }
@@ -46771,13 +46773,10 @@ function showAllySpellOverlay(actor, target, dart, s, skill, themeKey) {
 
             toggleBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
-                var isOpen = detailsBody.classList.toggle('is-open');
-                toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-                toggleBtn.textContent = isOpen ? '▲ Ocultar Detalhes' : 'Detalhes da Regra';
+                showDiceRuleDetailsModal(dRows);
             });
 
             structCard.appendChild(toggleBtn);
-            structCard.appendChild(detailsBody);
 
             resultEl.appendChild(structCard);
             setTimeout(function () { continueBtn.style.display = ''; }, 400);
@@ -47417,13 +47416,10 @@ function showRayOfFrostOverlay(actor, target, dart, s) {
 
             toggleBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
-                var isOpen = detailsBody.classList.toggle('is-open');
-                toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-                toggleBtn.textContent = isOpen ? '▲ Ocultar Detalhes' : 'Detalhes da Regra';
+                showDiceRuleDetailsModal(dRows);
             });
 
             structCard.appendChild(toggleBtn);
-            structCard.appendChild(detailsBody);
 
             resultEl.appendChild(structCard);
 
@@ -47689,7 +47685,7 @@ function showTurnUndeadSummaryOverlay(caster, results, dc, skill, s) {
 
         dRows.push({
             l: 'Regra D&D 5e',
-            v: '-59: Como uma ação, você ergue o símbolo sagrado e ora. Cada morto-vivo a até 9m que possa ver ou ouvir deve fazer uma salvaguarda de Sabedoria. Se falhar, fica expulso por 1 minuto (ou até sofrer dano). Uma criatura expulsa deve gastar seus turnos tentando fugir, não pode usar reações e só pode usar Disparada ou Esquivar.'
+            v: 'Como uma ação, você ergue o símbolo sagrado e ora. Cada morto-vivo a até 9m que possa ver ou ouvir deve fazer uma salvaguarda de Sabedoria. Se falhar, fica expulso por 1 minuto (ou até sofrer dano). Uma criatura expulsa deve gastar seus turnos tentando fugir, não pode usar reações e só pode usar Disparada ou Esquivar.'
         });
 
         detailsBody.innerHTML = dRows.map(function (rw) {
@@ -47698,13 +47694,10 @@ function showTurnUndeadSummaryOverlay(caster, results, dc, skill, s) {
 
         toggleBtn.addEventListener('click', function (e) {
             e.stopPropagation();
-            var isOpen = detailsBody.classList.toggle('is-open');
-            toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-            toggleBtn.textContent = isOpen ? '▲ Ocultar Detalhes' : 'Detalhes da Regra';
+            showDiceRuleDetailsModal(dRows);
         });
 
         structCard.appendChild(toggleBtn);
-        structCard.appendChild(detailsBody);
 
         resultEl.appendChild(structCard);
         ov.appendChild(resultEl);
@@ -47939,13 +47932,10 @@ function showFireballSpellOverlay(actor, target, dart, s) {
 
                         toggleBtn.addEventListener('click', function (e) {
                             e.stopPropagation();
-                            var isOpen = detailsBody.classList.toggle('is-open');
-                            toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-                            toggleBtn.textContent = isOpen ? '▲ Ocultar Detalhes' : 'Detalhes da Regra';
+                            showDiceRuleDetailsModal(dRows);
                         });
 
                         structCard.appendChild(toggleBtn);
-                        structCard.appendChild(detailsBody);
 
                         resultEl.appendChild(structCard);
 
@@ -49747,12 +49737,9 @@ function showHealDice(rolls, die, mod, actor, target, oldHp, newHp, rolledTotal,
                         }).join('');
                         toggleBtn.addEventListener('click', function (e) {
                             e.stopPropagation();
-                            var isOpen = detailsBody.classList.toggle('is-open');
-                            toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-                            toggleBtn.textContent = isOpen ? '▲ Ocultar Detalhes' : 'Detalhes da Regra';
+                            showDiceRuleDetailsModal(dRows);
                         });
                         stack.appendChild(toggleBtn);
-                        stack.appendChild(detailsBody);
                         resultEl.appendChild(stack);
                         var cellRoot = scene.querySelector('[data-dice-heal-result-card="1"]');
                         if (cellRoot) cellRoot.classList.add('dmg-header-target-pop');
@@ -53744,7 +53731,7 @@ async function playTurn(aIdx, tIdx, opts) {
             } else {
                 (target.se = target.se || []).push({
                     id: (_coh.condition || 'petrified'), kind: 'debuff', ico: '',
-                    n: 'Petrificado', dndCondition: 'Petrificado (PHB App.A)',
+                    n: 'Petrificado', dndCondition: 'Petrificado (Condição D&D 5e)',
                     turnsLeft: Math.max(1, (+_coh.turns || 3)), tickCombat2: true,
                     skipTurn: true, speed0: true, targetedAdvantage: true,
                     autoFailStrDex: true, resistAllDmg: true,
