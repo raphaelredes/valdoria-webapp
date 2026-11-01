@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-11-01T10:55:17Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-11-01T12:01:56Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -1717,9 +1717,8 @@ canvas#vfxCanvas {
 }
 @media (max-height: 680px) {
   .dice-overlay {
-    justify-content: flex-start;
-    padding-top: 10px;
-    gap: 6px;
+    padding-top: 8px;
+    gap: 4px;
   }
   .dice-canvas-holder {
     width: 150px;
@@ -1741,10 +1740,26 @@ canvas#vfxCanvas {
     margin-bottom: 2px;
     gap: 6px;
   }
+  .dice-overlay.dice-settled {
+    padding-top: 6px;
+    gap: 2px;
+  }
   .dice-overlay.dice-settled .dice-canvas-holder {
-    height: 100px;
-    transform: scale(0.68);
-    margin: -6px 0 14px;
+    height: 80px;
+    transform: scale(0.58);
+    margin: 0 auto 12px auto;
+  }
+  .dice-overlay.dice-settled .dice-result-label .drl-big {
+    margin-top: 2px;
+    margin-bottom: 8px;
+    font-size: 15px;
+  }
+  .dice-overlay.dice-settled .dice-result-label .drl-sub--structured {
+    margin-bottom: 4px;
+  }
+  .dice-overlay.dice-settled .drl-structured-card {
+    padding: 8px 10px;
+    gap: 6px;
   }
 }
 .dice-overlay.dice-overlay--frozen, .dice-overlay.dice-overlay--frozen * { animation-play-state: paused !important; transition: none !important; }
@@ -1805,17 +1820,49 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   z-index: 2;
   transition: height 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), margin 0.35s ease;
 }
-/* Estado assentado: rolagem concluída, compacta suavemente o canvas 3D liberando espaço para o card tático e botão Continuar no mobile/Telegram */
+/* Centralização absoluta do dado durante rolagem e ajuste superior suave ao assentar */
+.dice-overlay:not(.dice-settled) {
+  justify-content: space-between;
+}
+.dice-overlay:not(.dice-settled) .dice-overlay-combatant,
+.dice-overlay:not(.dice-settled) .dice-combat-header-row {
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.dice-overlay:not(.dice-settled) .dice-canvas-holder {
+  margin: auto auto;
+  align-self: center;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dice-canvas-holder canvas {
+  display: block;
+  margin: 0 auto;
+}
+/* Estado assentado: rolagem concluída, compacta e ajusta o canvas 3D para cima liberando espaço para o card tático e botões no Telegram Desktop */
 .dice-overlay.dice-settled {
-  gap: var(--v-space-sm, 6px);
+  gap: var(--v-space-xs, 4px);
   justify-content: flex-start;
-  padding-top: 14px;
+  padding-top: 10px;
+  padding-bottom: 74px;
+}
+.dice-overlay.dice-settled .dice-overlay-combatant,
+.dice-overlay.dice-settled .dice-combat-header-row {
+  margin-bottom: 0px;
+  flex-shrink: 0;
 }
 .dice-overlay.dice-settled .dice-canvas-holder {
-  height: 124px;
-  transform: scale(0.74);
-  transform-origin: center center;
-  margin: -4px 0 16px;
+  width: 140px;
+  height: 94px;
+  transform: scale(0.66);
+  transform-origin: center top;
+  margin: 0 auto 16px auto;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .dice-overlay.dice-settled .dice-combat-header-row {
   margin-bottom: 2px;
@@ -1825,18 +1872,19 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: flex-end;
   width: 100%;
   max-width: min(calc(100vw - 20px), 340px);
   min-height: 0;
+  margin-bottom: 6px;
 }
 .dice-overlay.dice-settled .dice-result-label .drl-big {
-  margin-top: 6px;
-  margin-bottom: 8px;
+  margin-top: 4px;
+  margin-bottom: 12px;
 }
 .dice-overlay.dice-settled .dice-result-label .drl-sub--structured {
-  margin-top: auto;
-  margin-bottom: 8px;
+  margin-top: 0;
+  margin-bottom: 4px;
   width: 100%;
 }
 .dice-overlay.dice-settled .dice-hint {
@@ -20503,6 +20551,7 @@ function buildCharUnitFromSetup(spec, roleTag, useRandom) {
            Thorne). Honrada em newCombatFromSetup — sem isso o ally rola d20+0
            (DEX 10 default) e age por último, sumindo na luta curta do prólogo. */
         init_exact: (spec.init_exact != null) ? (parseInt(spec.init_exact, 10) || null) : null,
+        init_roll: (spec.init_roll != null) ? (parseInt(spec.init_roll, 10) || null) : null,
         /* C2.9 #90: Monge usa o dado de Artes Marciais escalado (d4/d6/d8/d10). */
         hp: hp, mhp: mhp, ac: ac, atk: atk,
         die: (cdef.cls === 'Monge') ? _simMonkMartialDie(lvl) : cdef.die,
@@ -20704,6 +20753,7 @@ function buildEnemyFromSetup(spec, globalDiff, useRandom, labelIdx, totalEnemies
         enemy.lvl = enemy.sugLvl;
         if (!spec.prof_exact) enemy.prof = Math.floor((Math.max(1, enemy.sugLvl | 0) - 1) / 4) + 2;
     }
+    if (spec.init_roll != null) enemy.init_roll = parseInt(spec.init_roll, 10) || null;
     return enemy;
 }
 
@@ -20730,6 +20780,8 @@ function _gatherCheckpointSnapshot(state) {
             hp: c.hp | 0,
             alive: (c.alive !== false),
             init: (typeof c.init === 'number') ? c.init : 0,
+            init_roll: (typeof c.init_roll === 'number') ? c.init_roll : 0,
+            init_revealed: !!c.initRevealed,
             temp_hp: c.tempHp | 0,
             wet_turns: c.wetTurns | 0,
             action_spent: !!c.actionSpent,
@@ -20783,16 +20835,36 @@ function _gatherCheckpointSnapshot(state) {
         log_lines: (state.log || []).slice(-20).map(function(l){ return String(l).slice(0, 200); })
     };
 }
-function sendBattleCheckpoint(state) {
-    if (!window.__COMBAT_IS_REMOTE_SESSION) return;
-    if (!window.__COMBAT_API_BASE || !window.__COMBAT_TOKEN) return;
-    // Sessão #66: só persiste checkpoint de combate ATIVO. Salvar durante a fase
-    // 'intro' fazia o resume restaurar ph='intro' → loop na tela "Combate Iniciado".
-    if (state && state.ph !== 'active') return;
+function sendBattleCheckpoint(state, opts) {
+    if (!state) return;
+    opts = opts || {};
+    // Permite persistir checkpoint em 'intro', 'init', 'init_done' e 'active' (anti-save-scumming)
+    if (state.ph !== 'intro' && state.ph !== 'init' && state.ph !== 'init_done' && state.ph !== 'active') return;
     var snap = _gatherCheckpointSnapshot(state);
     if (!snap) return;
+
+    /* Persistência local imediata e síncrona (anti-save-scumming no fechamento abrupto) */
     try {
-        fetch(window.__COMBAT_API_BASE + '/api/combat2/checkpoint', {
+        var cpKey = 'valdoria_combat_cp_' + (window.__COMBAT_USER_ID || 'local');
+        localStorage.setItem(cpKey, JSON.stringify(snap));
+    } catch (_) {}
+
+    if (!window.__COMBAT_IS_REMOTE_SESSION) return;
+    if (!window.__COMBAT_API_BASE || !window.__COMBAT_TOKEN) return;
+
+    var url = window.__COMBAT_API_BASE + '/api/combat2/checkpoint?token=' + encodeURIComponent(window.__COMBAT_TOKEN);
+    snap.token = window.__COMBAT_TOKEN;
+
+    if (opts.beacon && typeof navigator !== 'undefined' && navigator.sendBeacon) {
+        try {
+            var blob = new Blob([JSON.stringify(snap)], { type: 'application/json' });
+            navigator.sendBeacon(url, blob);
+            return;
+        } catch (_eBeacon) {}
+    }
+
+    try {
+        fetch(url, {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + window.__COMBAT_TOKEN, 'Content-Type': 'application/json' },
             body: JSON.stringify(snap)
@@ -20811,6 +20883,18 @@ function sendBattleCheckpoint(state) {
         window.__lastFailedCombatCheckpoint = snap;
     }
 }
+
+// Persistência ao fechar a janela / trocar de aba (anti-save-scumming)
+window.addEventListener('pagehide', function () {
+    if (currentState && (currentState.ph === 'init' || currentState.ph === 'init_done' || currentState.ph === 'active')) {
+        sendBattleCheckpoint(currentState, { force: true, beacon: true });
+    }
+});
+window.addEventListener('beforeunload', function () {
+    if (currentState && (currentState.ph === 'init' || currentState.ph === 'init_done' || currentState.ph === 'active')) {
+        sendBattleCheckpoint(currentState, { force: true, beacon: true });
+    }
+});
 
 // Resiliência de Conexão no Combate (Online/Offline) — Re-envio de Checkpoint Pendente
 window.addEventListener('online', function() {
@@ -20882,7 +20966,13 @@ function applyBattleCheckpoint(state, cp) {
         }
         /* Iniciativa salva: restaura o valor rolado na sessão original em vez
            do re-roll do rebuild (a ordem do array vem de order_ids abaixo). */
-        if (typeof match.init === 'number') { c.init = match.init; c.initRevealed = true; c.initRolling = false; }
+        if (typeof match.init === 'number') {
+            c.init = match.init;
+            if (typeof match.init_roll === 'number' && match.init_roll >= 1) c.init_roll = match.init_roll;
+            if (typeof match.init_revealed === 'boolean') c.initRevealed = match.init_revealed;
+            else c.initRevealed = true;
+            c.initRolling = false;
+        }
     });
     /* Restauração do grid e terreno do campo de batalha */
     if (cp.battlefield && typeof cp.battlefield === 'object') {
@@ -20935,7 +21025,7 @@ function applyBattleCheckpoint(state, cp) {
     if (typeof cp.turn === 'number') state.turn = cp.turn;
     // Sessão #66: restaura FASE/turno-ativo/round — sem isto o resume ficava em
     // ph='intro' e a tela "Combate Iniciado" entrava em loop ao recarregar.
-    if (cp.ph) state.ph = cp.ph;
+    if (cp.ph && (cp.ph === 'init' || cp.ph === 'init_done' || cp.ph === 'active')) state.ph = cp.ph;
     if (typeof cp.active_idx === 'number') state.active_idx = cp.active_idx;
     if (typeof cp.rn === 'number') state.rn = cp.rn;
     // Defensivo: um checkpoint mid-fight NUNCA deve restaurar pro intro. Se a fase
@@ -36526,13 +36616,14 @@ function mountBattlefieldWeather(s) {
    vezes por segundo durante animações — debounce para 1 POST a cada 2s.
    _lastCheckpointAt prev. dup-suppression durante a mesma frame. */
 var _lastCheckpointAt = 0;
-function _maybeDispatchCheckpoint(s) {
-    if (!window.__COMBAT_IS_REMOTE_SESSION || !s) return;
+function _maybeDispatchCheckpoint(s, opts) {
+    if (!s) return;
     if (s.ph === 'victory' || s.ph === 'defeat' || s.ph === 'fled') return;
     var now = Date.now();
-    if (now - _lastCheckpointAt < 2000) return;
+    var force = !!(opts && opts.force);
+    if (!force && now - _lastCheckpointAt < 1500) return;
     _lastCheckpointAt = now;
-    try { sendBattleCheckpoint(s); } catch (_e) {}
+    try { sendBattleCheckpoint(s, opts); } catch (_e) {}
 }
 
 /* 2026-06-07 FIX (turno travado): true enquanto um popup de reação (Repreensão
@@ -48880,6 +48971,9 @@ function showDice(value, cb, actor, context, opts) {
 
     function _applyPostResultAndContinue() {
         ov.classList.add('dice-settled');
+        if (typeof sendBattleCheckpoint === 'function' && currentState) {
+            try { sendBattleCheckpoint(currentState, { force: true }); } catch (_) {}
+        }
         /* Result label: enriquecido se houver postResult, simples senao */
         var info = opts.postResult ? opts.postResult() : null;
         if (info) {
@@ -50723,6 +50817,9 @@ async function animInit(preSkip) {
     s.ph = 'init';
     if (!preSkip) _skipInit = false;
     render(s);
+    if (typeof sendBattleCheckpoint === 'function') {
+        try { sendBattleCheckpoint(s, { force: true }); } catch (_) {}
+    }
     for (var i = 0; i < s.order.length; i++) {
         if (_skipInit) break;
         var c = s.order[i];
@@ -50811,6 +50908,9 @@ async function animInit(preSkip) {
     });
     s.ph = 'init_done';
     render(s);
+    if (typeof sendBattleCheckpoint === 'function') {
+        try { sendBattleCheckpoint(s, { force: true }); } catch (_) {}
+    }
     /* Sessão #66: libera o guard de re-entrância — iniciativa terminou. */
     window.__COMBAT_ANIMINIT_RUNNING = false;
     /* Só o popup de ordem final (“Combate começa pelo topo” + Começar Combate) — sem popup intermédio de resumo */
@@ -54662,14 +54762,21 @@ async function startCombatRemoteCanonical() {
         /* 2026-05-21 ANTI-CHEAT: restaurar checkpoint mid-battle se servidor
            enviou. Bloqueia farming por reload (combate resetava de inicio).
            Checkpoint contém HP/MP/turn/conditions snapshot do estado atual. */
-        if (data.resume === true && data.checkpoint && typeof applyBattleCheckpoint === 'function') {
+        var cpToRestore = (data.resume === true && data.checkpoint) ? data.checkpoint : null;
+        if (!cpToRestore && data.resume) {
+            try {
+                var localCpRaw = localStorage.getItem('valdoria_combat_cp_' + (window.__COMBAT_USER_ID || 'local'));
+                if (localCpRaw) cpToRestore = JSON.parse(localCpRaw);
+            } catch (_) {}
+        }
+        if (cpToRestore && typeof applyBattleCheckpoint === 'function') {
             try {
                 // Ao retomar combate após fechamento do jogo, reseta pan/zoom para forçar a Visão Geral do Cenário
                 window.__bfPanState = null;
                 window.__bfActiveCombatKey = null;
                 window.__bfUserHasInteracted = false;
-                applyBattleCheckpoint(currentState, data.checkpoint);
-                console.info('[C-REM:PIVOT-BOOT] CHECKPOINT RESUMED turn=' + data.checkpoint.turn);
+                applyBattleCheckpoint(currentState, cpToRestore);
+                console.info('[C-REM:PIVOT-BOOT] CHECKPOINT RESUMED turn=' + cpToRestore.turn);
             } catch (_eCp) {
                 console.error('[C-REM:PIVOT-BOOT] checkpoint_apply_fail', _eCp);
             }
