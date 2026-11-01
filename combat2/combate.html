@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-11-01T03:16:27Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-11-01T10:21:40Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -1744,7 +1744,7 @@ canvas#vfxCanvas {
   .dice-overlay.dice-settled .dice-canvas-holder {
     height: 100px;
     transform: scale(0.68);
-    margin: -12px 0 -4px;
+    margin: -6px 0 14px;
   }
 }
 .dice-overlay.dice-overlay--frozen, .dice-overlay.dice-overlay--frozen * { animation-play-state: paused !important; transition: none !important; }
@@ -1808,15 +1808,39 @@ body.sim-paused-bg .sim-skip-confirm-overlay, body.sim-paused-bg .sim-skip-confi
 /* Estado assentado: rolagem concluída, compacta suavemente o canvas 3D liberando espaço para o card tático e botão Continuar no mobile/Telegram */
 .dice-overlay.dice-settled {
   gap: var(--v-space-sm, 6px);
+  justify-content: flex-start;
+  padding-top: 14px;
 }
 .dice-overlay.dice-settled .dice-canvas-holder {
   height: 124px;
   transform: scale(0.74);
   transform-origin: center center;
-  margin: -8px 0 -4px;
+  margin: -4px 0 16px;
 }
 .dice-overlay.dice-settled .dice-combat-header-row {
   margin-bottom: 2px;
+}
+.dice-overlay.dice-settled .dice-result-label {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: min(calc(100vw - 20px), 340px);
+  min-height: 0;
+}
+.dice-overlay.dice-settled .dice-result-label .drl-big {
+  margin-top: 6px;
+  margin-bottom: 8px;
+}
+.dice-overlay.dice-settled .dice-result-label .drl-sub--structured {
+  margin-top: auto;
+  margin-bottom: 8px;
+  width: 100%;
+}
+.dice-overlay.dice-settled .dice-hint {
+  display: none !important;
 }
 .dice-result-label { font-family: var(--v-font-display, 'Cinzel'), serif; font-weight: 700; font-size: calc(16px * var(--v-font-scale, 1)); color: var(--v-text, #d4c8b0); letter-spacing: 2px; opacity: 0; transition: opacity .3s ease; text-shadow: 0 0 12px rgba(196,149,58,.4); min-height: 22px; display: flex; flex-direction: column; gap: var(--v-space-sm, 4px); align-items: center; max-width: 280px; text-align: center; }
 .dice-result-label.drl-has-structured,
