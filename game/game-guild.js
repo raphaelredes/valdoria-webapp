@@ -186,6 +186,13 @@ function renderGuildHub(container, data) {
   info.appendChild(_gldEl('div', 'quote', vagasMsg));
   npcRow.appendChild(info);
   npcRow.appendChild(_gldEl('div', 'npc-chev', '›'));
+  var readyLocs = (typeof _getReadyQuestDeliveryLocations === 'function') ? _getReadyQuestDeliveryLocations() : null;
+  if (readyLocs && readyLocs.npcNames && (readyLocs.npcNames['tavira'] || readyLocs.npcNames['mestra tavira'])) {
+    npcRow.classList.add('has-quest-turnin');
+    var qb = _gldEl('div', 'hlc-quest-turnin-badge', '?');
+    qb.title = 'Missão pronta para entrega';
+    npcRow.appendChild(qb);
+  }
   npcRow.addEventListener('click', function(){
     // PADRAO_SERVIDOR (P4): o servidor monta a saudação rotativa da Tavira e resolve.
     if (typeof window._openCityDialogue === 'function' && _gldIsRemote()) {
@@ -240,6 +247,12 @@ function renderGuildHub(container, data) {
     data.services.forEach(function(svc) {
       var card = _gldEl('div', 'svc');
       if (svc.disabled) card.classList.add('disabled');
+      if (svc.hasQuestTurnin || (typeof _isServiceQuestTurnin === 'function' && _isServiceQuestTurnin('guild', svc))) {
+        card.classList.add('has-quest-turnin');
+        var qb = _gldEl('div', 'hlc-quest-turnin-badge', '?');
+        qb.title = 'Missão pronta para entrega';
+        card.appendChild(qb);
+      }
       card.setAttribute('data-svc', svc.cb || '');
 
       var ico = _gldEl('div', 'svc-ico');

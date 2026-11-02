@@ -112,6 +112,13 @@ function serviceGrid(services) {
 function serviceCard(svc) {
   var card = el('div', 'vc-service-card');
   if (svc.disabled) card.classList.add('disabled');
+  if (svc.hasQuestTurnin) {
+    card.classList.add('has-quest-turnin');
+    var qb = el('div', 'hlc-quest-turnin-badge');
+    qb.textContent = '?';
+    qb.title = 'Missão pronta para entrega';
+    card.appendChild(qb);
+  }
 
   /* Icon — suporta SVG heraldico, IMG portrait (innerHTML) ou emoji (textContent)
      2026-05-18 BUG FIX: <img> tag (merchant portraits AAA) era escapado como

@@ -128,6 +128,13 @@ function renderInnHub(container, data) {
   info.appendChild(_innEl('div', 'quote', '"Aqui se descansa em paz."'));
   npcRow.appendChild(info);
   npcRow.appendChild(_innEl('div', 'npc-chev', '›'));
+  var readyLocs = (typeof _getReadyQuestDeliveryLocations === 'function') ? _getReadyQuestDeliveryLocations() : null;
+  if (readyLocs && readyLocs.npcNames && readyLocs.npcNames['martha']) {
+    npcRow.classList.add('has-quest-turnin');
+    var qb = _innEl('div', 'hlc-quest-turnin-badge', '?');
+    qb.title = 'Missão pronta para entrega';
+    npcRow.appendChild(qb);
+  }
   npcRow.addEventListener('click', function(){
     // PADRAO_SERVIDOR: o servidor monta o greeting da Martha (estado vivo) e resolve.
     if (typeof window._openCityDialogue === 'function' && _isRemote()) {
@@ -197,6 +204,12 @@ function renderInnHub(container, data) {
       var svc = data.services[i];
       var card = vCity.el('div', 'svc');
       if (svc.disabled) card.classList.add('disabled');
+      if (svc.hasQuestTurnin || (typeof _isServiceQuestTurnin === 'function' && _isServiceQuestTurnin('inn', svc))) {
+        card.classList.add('has-quest-turnin');
+        var qb = _innEl('div', 'hlc-quest-turnin-badge', '?');
+        qb.title = 'Missão pronta para entrega';
+        card.appendChild(qb);
+      }
       card.setAttribute('data-svc', svc.cb || '');
 
       var ico = vCity.el('div', 'svc-ico');

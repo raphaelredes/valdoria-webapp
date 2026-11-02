@@ -210,6 +210,17 @@ function _mktBuildMerchantRow(npcKey, merchantData) {
   var chev = vCity.el('div', 'npc-chev');
   chev.textContent = '›';
   row.appendChild(chev);
+  var readyLocs = (typeof _getReadyQuestDeliveryLocations === 'function') ? _getReadyQuestDeliveryLocations() : null;
+  var rawNpcName = (npcDef && npcDef.npc && npcDef.npc.name ? npcDef.npc.name : '').toLowerCase();
+  var isTurnin = (merchantData && merchantData.hasQuestTurnin)
+    || (readyLocs && readyLocs.npcNames && (readyLocs.npcNames[rawNpcName] || readyLocs.npcNames[npcKey]));
+  if (isTurnin) {
+    row.classList.add('has-quest-turnin');
+    var qb = vCity.el('div', 'hlc-quest-turnin-badge');
+    qb.textContent = '?';
+    qb.title = 'Missão pronta para entrega';
+    row.appendChild(qb);
+  }
 
   // Click → open PADRAO_ALDRIC dialogue
   row.addEventListener('click', function(){

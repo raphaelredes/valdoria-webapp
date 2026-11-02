@@ -128,6 +128,15 @@ function _tavBuildNpcRow(data) {
   chev.textContent = '›';
   row.appendChild(chev);
 
+  var readyLocs = (typeof _getReadyQuestDeliveryLocations === 'function') ? _getReadyQuestDeliveryLocations() : null;
+  if (readyLocs && readyLocs.npcNames && readyLocs.npcNames['grom']) {
+    row.classList.add('has-quest-turnin');
+    var qb = vCity.el('div', 'hlc-quest-turnin-badge');
+    qb.textContent = '?';
+    qb.title = 'Missão pronta para entrega';
+    row.appendChild(qb);
+  }
+
   row.addEventListener('click', function(){
     if (typeof window._openCityDialogue === 'function' && _isRemote()) {
       window._openCityDialogue('tavern', 'grom');
@@ -173,6 +182,13 @@ function _tavBuildServices(services) {
   (services || []).forEach(function(svc) {
     var card = vCity.el('div', 'svc');
     if (svc.disabled) card.classList.add('disabled');
+    if (svc.hasQuestTurnin || (typeof _isServiceQuestTurnin === 'function' && _isServiceQuestTurnin('tavern', svc))) {
+      card.classList.add('has-quest-turnin');
+      var qb = vCity.el('div', 'hlc-quest-turnin-badge');
+      qb.textContent = '?';
+      qb.title = 'Missão pronta para entrega';
+      card.appendChild(qb);
+    }
     card.setAttribute('data-svc', svc.cb || '');
 
     var meta = TAVERN_SVC_META[svc.cb] || {};

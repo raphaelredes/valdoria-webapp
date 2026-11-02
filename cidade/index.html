@@ -26161,8 +26161,12 @@ function _buildTempleMockData(player){
   });
   // Downtime: cooldown 1x/long rest
   var dtCooldown = _isLongRestCooldownActive('CITY_TEMPLE_DOWNTIME_AT_REST');
+  if (typeof _annotateServicesWithQuestTurnin === 'function') {
+    _annotateServicesWithQuestTurnin('temple', services);
+  }
   return {
     type: 'hub',
+    venueKey: 'temple',
     // canonical: visitas 1-3 = TEMPLE_FLAVORS (10), visitas 4+ = TEMPLE_AMBIENT (3)
     flavor: (function(){
       var visits = (player.metadata && player.metadata.temple_visits) || 0;
@@ -26288,24 +26292,31 @@ function _buildTavernMockData(player){
       // Sessão #44 (2026-05-27): PNG fallback (regra "no SVG in city"). aldeao.webp pra NPCs sem ícone específico.
       return { icon: '<img src="/shared/img/npcs/aldeao.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', label: n.name + ' — ' + n.role, cb: 'tavern_npc_' + n.id };
     }),
-    services: [
-      // PADRAO_LOCAIS (sessão #71d): "Boatos" REMOVIDO como serviço solto — vive só
-      // no diálogo do Grom (clicar no NPC → "Conta um boato"), com info real + teto
-      // diário + anti-repeat (tavern_rumor_service.py). Não duplicar aqui.
-      { icon: _heralIco('ic-cerveja'), label: 'Bebidas',           cb: 'tavern_drinks_open' },
-      // Sessao #37 v17: labels abreviadas (Exploradores→Aventura, Mesa de Jogos→Jogos)
-      { icon: _heralIco('ic-stat-attack'), label: 'Mercenários',  cb: 'tavern_mercenaries_open' },
-      { icon: _heralIco('ic-grupo'), label: 'Aventura',           cb: 'tavern_adventurers_open' },
-      { icon: _heralIco('ic-cartas'), label: 'Jogos',             cb: 'tavern_games_open' },
-      { icon: _heralIco('ic-bardo'), label: 'Bardo',             cb: 'tavern_bard_open',
-        badge: 'Inspiração 30%' },  // canonical TavernBardManager (tavern_bard.py)
-      { icon: _heralIco('ic-cerveja'), label: 'Socializar',        cb: 'tavern_carousing_open' },
-      { icon: _heralIco('ic-stat-wis'), label: 'Informações',       cb: 'tavern_gather_open' },
-      { icon: _heralIco('ic-stat-attack'), label: 'Rinha',             cb: 'tavern_pitfight_open' },
-      // Sessao #37 v17: Mural de Avisos→Mural
-      { icon: _heralIco('ic-missões'), label: 'Mural',            cb: 'tavern_bulletin_open' },
-      { icon: _heralIco('ic-grupo'), label: 'Comitiva (LFG)',    cb: 'tavern_lfg_open', badge: 'Online' }
-    ]
+    services: (function(){
+      var svcs = [
+        // PADRAO_LOCAIS (sessão #71d): "Boatos" REMOVIDO como serviço solto — vive só
+        // no diálogo do Grom (clicar no NPC → "Conta um boato"), com info real + teto
+        // diário + anti-repeat (tavern_rumor_service.py). Não duplicar aqui.
+        { icon: _heralIco('ic-cerveja'), label: 'Bebidas',           cb: 'tavern_drinks_open' },
+        // Sessao #37 v17: labels abreviadas (Exploradores→Aventura, Mesa de Jogos→Jogos)
+        { icon: _heralIco('ic-stat-attack'), label: 'Mercenários',  cb: 'tavern_mercenaries_open' },
+        { icon: _heralIco('ic-grupo'), label: 'Aventura',           cb: 'tavern_adventurers_open' },
+        { icon: _heralIco('ic-cartas'), label: 'Jogos',             cb: 'tavern_games_open' },
+        { icon: _heralIco('ic-bardo'), label: 'Bardo',             cb: 'tavern_bard_open',
+          badge: 'Inspiração 30%' },  // canonical TavernBardManager (tavern_bard.py)
+        { icon: _heralIco('ic-cerveja'), label: 'Socializar',        cb: 'tavern_carousing_open' },
+        { icon: _heralIco('ic-stat-wis'), label: 'Informações',       cb: 'tavern_gather_open' },
+        { icon: _heralIco('ic-stat-attack'), label: 'Rinha',             cb: 'tavern_pitfight_open' },
+        // Sessao #37 v17: Mural de Avisos→Mural
+        { icon: _heralIco('ic-missões'), label: 'Mural',            cb: 'tavern_bulletin_open' },
+        { icon: _heralIco('ic-grupo'), label: 'Comitiva (LFG)',    cb: 'tavern_lfg_open', badge: 'Online' }
+      ];
+      if (typeof _annotateServicesWithQuestTurnin === 'function') {
+        _annotateServicesWithQuestTurnin('tavern', svcs);
+      }
+      return svcs;
+    })(),
+    venueKey: 'tavern'
   };
 }
 
@@ -26417,6 +26428,7 @@ function _buildInnMockData(player){
     type: 'hub',
     flavor: greeting,
     renome: { inn: rep },
+    venueKey: 'inn',
     npc: {
       icon: '<img src="/shared/img/npcs/martha.webp" alt="" style="width:48px;height:48px;object-fit:contain;">',
       name: 'Martha',
@@ -26424,16 +26436,22 @@ function _buildInnMockData(player){
       subtitle: '<i>"Que bom que voltou! O que precisa hoje?"</i>',
       cb: 'inn_npc_inn_martha'
     },
-    services: [
-      // Replica canonical inn.py L113-152 (InnManager.get_menu) + SUBSCREEN_DATA['inn']
-      // X-6.5.51BN: badges PT-BR + coin icon canonical (não "V" texto cru, não "Quest" em inglês).
-      { icon: _heralIco('ic-sono'),     label: 'Quartos / Descanso', badge: '3 tipos',                                   cb: 'nav:inn_rest' },
-      { icon: _heralIco('ic-mochila'),  label: 'Comer Algo',          badge: '7 pratos',                                  cb: 'nav:inn_meals' },
-      { icon: _heralIco('ic-estalagem'),label: 'Descanso Curto',      badge: 'Grátis',                                    cb: 'inn_short_rest' },
-      { icon: _heralIco('ic-estalagem'),label: 'Relaxar',             badge: '10 <span class="vi vi-coin sm"></span>',    cb: 'inn_relaxation' },
-      { icon: _heralIco('ic-grupo'),    label: 'Aliados na sala',     badge: '0 res.',                                    cb: 'inn_allies' },
-      { icon: _heralIco('ic-missões'),  label: 'Investigar adega',    badge: 'Missão',                                    cb: 'inn_cellar_quest' }
-    ]
+    services: (function(){
+      var svcs = [
+        // Replica canonical inn.py L113-152 (InnManager.get_menu) + SUBSCREEN_DATA['inn']
+        // X-6.5.51BN: badges PT-BR + coin icon canonical (não "V" texto cru, não "Quest" em inglês).
+        { icon: _heralIco('ic-sono'),     label: 'Quartos / Descanso', badge: '3 tipos',                                   cb: 'nav:inn_rest' },
+        { icon: _heralIco('ic-mochila'),  label: 'Comer Algo',          badge: '7 pratos',                                  cb: 'nav:inn_meals' },
+        { icon: _heralIco('ic-estalagem'),label: 'Descanso Curto',      badge: 'Grátis',                                    cb: 'inn_short_rest' },
+        { icon: _heralIco('ic-estalagem'),label: 'Relaxar',             badge: '10 <span class="vi vi-coin sm"></span>',    cb: 'inn_relaxation' },
+        { icon: _heralIco('ic-grupo'),    label: 'Aliados na sala',     badge: '0 res.',                                    cb: 'inn_allies' },
+        { icon: _heralIco('ic-missões'),  label: 'Investigar adega',    badge: 'Missão',                                    cb: 'inn_cellar_quest' }
+      ];
+      if (typeof _annotateServicesWithQuestTurnin === 'function') {
+        _annotateServicesWithQuestTurnin('inn', svcs);
+      }
+      return svcs;
+    })()
   };
 }
 
@@ -26628,11 +26646,14 @@ function _renderInnHubAAA(container, data) {
     var sec = document.createElement('div');
     sec.className = 'tav-section';
     sec.innerHTML = '<div class="inn-sec-title"><span style="color:#e8c45a;">◈</span> Estalajadeira</div>';
+    var readyLocs = (typeof _getReadyQuestDeliveryLocations === 'function') ? _getReadyQuestDeliveryLocations() : null;
+    var marthaTurnin = !!(readyLocs && readyLocs.npcNames && readyLocs.npcNames['martha']);
     var card = document.createElement('button');
-    card.className = 'inn-npc';
+    card.className = 'inn-npc' + (marthaTurnin ? ' has-quest-turnin' : '');
     card.type = 'button';
     card.innerHTML =
-      '<div class="inn-npc-portrait">' + (data.npc.icon || '') + '</div>'
+      (marthaTurnin ? '<div class="hlc-quest-turnin-badge" title="Missão pronta para entrega">?</div>' : '')
+      + '<div class="inn-npc-portrait">' + (data.npc.icon || '') + '</div>'
       + '<div class="inn-npc-info">'
       +   '<div class="inn-npc-name">' + (data.npc.name || 'Estalajadeira') + '</div>'
       +   '<div class="inn-npc-role">' + (data.npc.role || '') + '</div>'
@@ -26652,11 +26673,14 @@ function _renderInnHubAAA(container, data) {
     var grid = document.createElement('div');
     grid.className = 'inn-svc-grid';
     data.services.forEach(function (s) {
+      var hasTurnin = s.hasQuestTurnin || (typeof _isServiceQuestTurnin === 'function' && _isServiceQuestTurnin('inn', s));
+      var turninBadge = hasTurnin ? '<div class="hlc-quest-turnin-badge" title="Missão pronta para entrega">?</div>' : '';
       var b = document.createElement('button');
-      b.className = 'inn-svc';
+      b.className = 'inn-svc' + (hasTurnin ? ' has-quest-turnin' : '');
       b.type = 'button';
       b.innerHTML =
-        '<div class="inn-svc-icon">' + (s.icon || '') + '</div>'
+        turninBadge
+        + '<div class="inn-svc-icon">' + (s.icon || '') + '</div>'
         + '<div class="inn-svc-lbl">' + (s.label || '') + '</div>'
         + (s.badge ? '<div class="inn-svc-badge">' + s.badge + '</div>' : '');
       b.addEventListener('click', function () { _fire(s.cb); });
@@ -28434,19 +28458,26 @@ function _buildMarketMockData(player){
     ? _marketAtmosphereLine()
     : '';
 
+  var extras = [
+    { icon: '<img src="../shared/img/services/svc-mapas.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', label: 'Banca de Cartografia', desc: 'Mestre Corvus · Encomenda de Mapas', badge: 'Corvus', cb: 'open_cartographer' },
+    { icon: '<img src="../shared/img/services/svc-vender.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', label: 'Vender Itens', cb: 'market_sell_open' },
+    { icon: '<img src="../shared/img/services/svc-decifrar.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', label: 'Escriba Rúnico', cb: 'market_rune_redirect',
+      badge: 'Eirik' }
+  ];
+  if (typeof _annotateServicesWithQuestTurnin === 'function') {
+    _annotateServicesWithQuestTurnin('market', presentMerchants);
+    _annotateServicesWithQuestTurnin('market', extras);
+  }
+
   return {
     type: 'hub',
+    venueKey: 'market',
     gold: player.gold,
     item_count: (window._bankItems || []).length,
     flavor: atmosphere,
     merchants: presentMerchants,
     // 2026-05-27: SVG _heralIco substituído por PNG (regra "no SVG in city").
-    extras: [
-      { icon: '<img src="../shared/img/services/svc-mapas.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', label: 'Banca de Cartografia', desc: 'Mestre Corvus · Encomenda de Mapas', badge: 'Corvus', cb: 'open_cartographer' },
-      { icon: '<img src="../shared/img/services/svc-vender.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', label: 'Vender Itens', cb: 'market_sell_open' },
-      { icon: '<img src="../shared/img/services/svc-decifrar.webp" alt="" style="width:38px;height:38px;object-fit:contain;">', label: 'Escriba Rúnico', cb: 'market_rune_redirect',
-        badge: 'Eirik' }
-    ],
+    extras: extras,
     wandering_npcs: wandering
   };
 }
@@ -28628,40 +28659,47 @@ function _buildGuildMockData(player, recruitCount){
     gold: player.gold,
     recruit_available: (_rc !== null ? _rc : GUILD_RECRUITS.length),
     rotation_hours: 12,
-    services: [
-      // Ordem canonical (guild.py L151-195)
-      { icon: _heralIco('ic-paladino'), label: 'Ver aventureiros disponíveis',
-        desc: (_rc !== null
-          ? (_rc + ' aventureiro' + (_rc === 1 ? '' : 's') + ' aguardando contrato')
-          : 'Contrate companheiros para o seu grupo'),
-        cb: 'guild_recruit_open',
-        badge: (_rc !== null ? (_rc + '') : '') },
-      { icon: _heralIco('ic-missões'), label: 'Quadro de missões',
-        desc: 'Contratos ativos da Guilda',
-        cb: 'guild_quests_open',
-        badge: ((window.SERVER_QUEST_BOARD_LOADED && Array.isArray(window.SERVER_QUEST_BOARD))
-                  ? window.SERVER_QUEST_BOARD.length : GUILD_QUESTS_AVAILABLE.length) + '' },
-      { icon: _heralIco('ic-trofeu'), label: 'Tavira — Recompensas',
-        desc: 'Contratos de caça ativos',
-        cb: 'guild_rewards_open' },
-      { icon: _heralIco('ic-grupo'), label: 'Gerenciar meu grupo',
-        desc: partyCount + ' de 3 aventureiros com você',
-        cb: 'guild_party_open',
-        badge: partyCount + '/3' },
-      { icon: _heralIco('ic-grupo'), label: 'Reunir Comitiva (Multiplayer)',
-        desc: 'Jogue em cooperação com até 4 amigos online',
-        cb: 'guild_party_multiplayer_open',
-        badge: 'Co-op' },
-      { icon: _heralIco('ic-guerreiro'), label: 'Treinar com Braun, o Marcado',
-        desc: 'Mestre de armas veterano',
-        cb: 'guild_npc_guild_braun' },
-      { icon: _heralIco('ic-stat-str'), label: 'Sala de Treinamento',
-        desc: 'Aprimorar habilidades',
-        cb: 'guild_train_open' },
-      { icon: _heralIco('ic-ach-erudito'), label: 'Consultar a Biblioteca',
-        desc: 'Lore e crônicas antigas',
-        cb: 'guild_research_open' }
-    ]
+    venueKey: 'guild',
+    services: (function(){
+      var svcs = [
+        // Ordem canonical (guild.py L151-195)
+        { icon: _heralIco('ic-paladino'), label: 'Ver aventureiros disponíveis',
+          desc: (_rc !== null
+            ? (_rc + ' aventureiro' + (_rc === 1 ? '' : 's') + ' aguardando contrato')
+            : 'Contrate companheiros para o seu grupo'),
+          cb: 'guild_recruit_open',
+          badge: (_rc !== null ? (_rc + '') : '') },
+        { icon: _heralIco('ic-missões'), label: 'Quadro de missões',
+          desc: 'Contratos ativos da Guilda',
+          cb: 'guild_quests_open',
+          badge: ((window.SERVER_QUEST_BOARD_LOADED && Array.isArray(window.SERVER_QUEST_BOARD))
+                    ? window.SERVER_QUEST_BOARD.length : GUILD_QUESTS_AVAILABLE.length) + '' },
+        { icon: _heralIco('ic-trofeu'), label: 'Tavira — Recompensas',
+          desc: 'Contratos de caça ativos',
+          cb: 'guild_rewards_open' },
+        { icon: _heralIco('ic-grupo'), label: 'Gerenciar meu grupo',
+          desc: partyCount + ' de 3 aventureiros com você',
+          cb: 'guild_party_open',
+          badge: partyCount + '/3' },
+        { icon: _heralIco('ic-grupo'), label: 'Reunir Comitiva (Multiplayer)',
+          desc: 'Jogue em cooperação com até 4 amigos online',
+          cb: 'guild_party_multiplayer_open',
+          badge: 'Co-op' },
+        { icon: _heralIco('ic-guerreiro'), label: 'Treinar com Braun, o Marcado',
+          desc: 'Mestre de armas veterano',
+          cb: 'guild_npc_guild_braun' },
+        { icon: _heralIco('ic-stat-str'), label: 'Sala de Treinamento',
+          desc: 'Aprimorar habilidades',
+          cb: 'guild_train_open' },
+        { icon: _heralIco('ic-ach-erudito'), label: 'Consultar a Biblioteca',
+          desc: 'Lore e crônicas antigas',
+          cb: 'guild_research_open' }
+      ];
+      if (typeof _annotateServicesWithQuestTurnin === 'function') {
+        _annotateServicesWithQuestTurnin('guild', svcs);
+      }
+      return svcs;
+    })()
   };
 }
 
@@ -29087,10 +29125,14 @@ function _buildArenaMockData(player){
     { label: 'Histórico de Lutas', desc: 'Crônica dos seus combates', cb: 'arena_history' },
     { label: 'Ranking do Dia',     desc: 'Os melhores gladiadores',   cb: 'arena_daily_board' },
     { label: 'Regras do Coliseu',  desc: 'As leis da areia',          cb: 'arena_rules' }
-  ]);
+  ]).map(function(s){ return s; });
+  if (typeof _annotateServicesWithQuestTurnin === 'function') {
+    _annotateServicesWithQuestTurnin('arena', services);
+  }
 
   return {
     type: 'main',
+    venueKey: 'arena',
     flavor: 'Arena de areia avermelhada. A multidão ruge. Cheiro de suor, sangue e cerveja paira no ar.',
     tier: { id: curTier.id, name: curTier.name.replace(/^Tier\s+/i, ''), min: curTier.min_lvl, max: maxLvl },
     stats: {
@@ -30013,25 +30055,30 @@ function _buildShadowAlleyMockData(player){
   if (!flavorText){
     flavorText = '<i>Beco escuro entre a Taverna e o muro leste. O Vulto comerciante observa de baixo do capuz. Itens não-vendidos abertamente.</i>';
   }
+  var services = [
+    { icon: _heralIco('ic-bruxo'), label: 'Conversar com O Vulto', cb: 'shadow_npc_shadow_vulto' },
+    { icon: _heralIco('ic-bruxo'), label: 'Trabalho Sujo (Crime)', cb: 'shadow_crime_open' },
+    { icon: _heralIco('ic-bruxo'), label: 'Andar pelo Beco',      cb: 'shadow_event_open' }
+  ].concat(SHADOW_ITEMS.map(function(it){
+    return {
+      icon: it.icon,
+      label: it.name,
+      cb: 'shadow_buy_' + it.id,
+      badge: it.cost + ' V'
+    };
+  }));
+  if (typeof _annotateServicesWithQuestTurnin === 'function') {
+    _annotateServicesWithQuestTurnin('shadow_alley', services);
+  }
   return {
     type: 'hub',
+    venueKey: 'shadow_alley',
     // P6 (2026-07-02): banner-cenário épico (PADRAO_LOCAIS faceta A)
     bannerImg: '/shared/img/city/beco-banner.webp',
     bannerTitle: 'BECO SOMBRIO',
     flavor: flavorText,
     rep_label: SHADOW_ITEMS.length + ' itens disponíveis · 4 fixos + 4 rotativos diariamente',
-    services: [
-      { icon: _heralIco('ic-bruxo'), label: 'Conversar com O Vulto', cb: 'shadow_npc_shadow_vulto' },
-      { icon: _heralIco('ic-bruxo'), label: 'Trabalho Sujo (Crime)', cb: 'shadow_crime_open' },
-      { icon: _heralIco('ic-bruxo'), label: 'Andar pelo Beco',      cb: 'shadow_event_open' }
-    ].concat(SHADOW_ITEMS.map(function(it){
-      return {
-        icon: it.icon,
-        label: it.name,
-        cb: 'shadow_buy_' + it.id,
-        badge: it.cost + ' V'
-      };
-    }))
+    services: services
   };
 }
 
@@ -30707,15 +30754,21 @@ function _buildGatesMockData(player){
   // P1 (2026-07-01): 'Falar com Aldric' saiu do grid — a NPC row canonical do
   // renderGatesHub cobre (clique abre o diálogo server-driven 'gates'/'aldric').
   // Tibor (assistente de provisões) fica nos Portões para compra rápida de rações de marcha (Ordem do Usuário 2026-10).
+  var actions = [
+    { icon: _heralIco('ic-portoes'), label: 'Partir para Aventura', cb: 'gates_explore' },
+    { icon: _heralIco('ic-mochila'), label: 'Comprar Provisões (Tibor)', cb: 'gates_buy_rations' },
+    { icon: _heralIco('ic-cartografia'), label: 'Mapa de Valdoria', cb: 'open_cartografia' },
+    { icon: _heralIco('ic-mochila'), label: 'Preparar Viagem', cb: 'gates_prep_open' }
+  ];
+  if (typeof _annotateServicesWithQuestTurnin === 'function') {
+    _annotateServicesWithQuestTurnin('gates', actions);
+  }
   return {
     type: 'hub',
+    venueKey: 'gates',
     flavor: 'Os portões de pedra arqueiam-se oito metros acima da estrada. O guarda Aldric observa cada entrada e saída com o olho que lhe restou, postado junto à fogueira de carvão que aquece os guardas mais jovens. Ao lado das ameias, Tibor, assistente dos Armazéns de Garlen, atende aventureiros em sua banca de provisões e rações de marcha.',
-    actions: [
-      { icon: _heralIco('ic-portoes'), label: 'Partir para Aventura', cb: 'gates_explore' },
-      { icon: _heralIco('ic-mochila'), label: 'Comprar Provisões (Tibor)', cb: 'gates_buy_rations' },
-      { icon: _heralIco('ic-cartografia'), label: 'Mapa de Valdoria', cb: 'open_cartografia' },
-      { icon: _heralIco('ic-mochila'), label: 'Preparar Viagem', cb: 'gates_prep_open' }
-    ],
+    actions: actions,
+    services: actions,
     wandering_npcs: [
       { id: 'tibor', name: 'Tibor — Provedor de Marcha', desc: 'Assistente de Suprimentos dos Armazéns de Garlen', cb: 'gates_buy_rations' }
     ]
@@ -31427,56 +31480,67 @@ function _srvAbandonQuestConfirmed(serverId){
 // O aventureiro faz o caminho físico até o local/NPC específico ("A caminho de...")
 // para entregar a missão presencialmente, mantendo imersão total de D&D 5e.
 var _QUEST_DELIVERY_DESTINATIONS = {
-  'quest_lyana_scroll': { destKey: 'market', npcName: 'Lyana', placeName: 'Praça Central', encounterFn: function(){ if (typeof _startLyanaEncounter === 'function') _startLyanaEncounter(); } },
-  'lyana':              { destKey: 'market', npcName: 'Lyana', placeName: 'Praça Central', encounterFn: function(){ if (typeof _startLyanaEncounter === 'function') _startLyanaEncounter(); } },
-  'quest_martha_cellar':{ destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada', encounterFn: function(){ if (typeof ACTION_HANDLERS !== 'undefined' && ACTION_HANDLERS['quest_cellar_deliver']) ACTION_HANDLERS['quest_cellar_deliver'](); else _srvCompleteQuest('quest_martha_cellar'); } },
-  'cellar':             { destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada', encounterFn: function(){ if (typeof ACTION_HANDLERS !== 'undefined' && ACTION_HANDLERS['quest_cellar_deliver']) ACTION_HANDLERS['quest_cellar_deliver'](); else _srvCompleteQuest('cellar'); } },
-  'quest_martha_journal':{ destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada' },
-  'quest_martha_shadow':{ destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada' },
-  'quest_martha_relic': { destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada' },
-  'quest_thorne_forge': { destKey: 'market', npcName: 'Thorne', placeName: 'Mercado de Valdoria' },
-  'quest_thorne_son':   { destKey: 'market', npcName: 'Thorne', placeName: 'Mercado de Valdoria' },
-  'quest_aldric_smugglers': { destKey: 'gates', npcName: 'Guarda Aldric', placeName: 'Portões de Valdoria' },
-  'dragonet':           { destKey: 'gates', npcName: 'Guarda Aldric', placeName: 'Portões de Valdoria' },
-  'escort':             { destKey: 'gates', npcName: 'Brael', placeName: 'Portões de Valdoria' },
-  'patrol':             { destKey: 'gates', npcName: 'Tomás', placeName: 'Portões de Valdoria' },
-  'quest_tavira_recruit':{ destKey: 'guild', npcName: 'Mestra Tavira', placeName: 'Guilda dos Aventureiros' },
-  'quest_tavira_traitor':{ destKey: 'guild', npcName: 'Mestra Tavira', placeName: 'Guilda dos Aventureiros' },
-  'wolves':             { destKey: 'guild', npcName: 'Mestra Tavira', placeName: 'Guilda dos Aventureiros' },
-  'quest_open_wolves':  { destKey: 'guild', npcName: 'Mestra Tavira', placeName: 'Guilda dos Aventureiros' },
-  'goblins':            { destKey: 'guild', npcName: 'Capitã Helga', placeName: 'Guilda dos Aventureiros' },
-  'bandit_lord':        { destKey: 'guild', npcName: 'Capitã Helga', placeName: 'Guilda dos Aventureiros' },
-  'defend':             { destKey: 'guild', npcName: 'Capitã Helga', placeName: 'Guilda dos Aventureiros' },
-  'quest_grom_brawl':   { destKey: 'tavern', npcName: 'Grom', placeName: 'Taverna do Javali Bêbado' },
-  'quest_grom_past':    { destKey: 'tavern', npcName: 'Grom', placeName: 'Taverna do Javali Bêbado' },
-  'herbs':              { destKey: 'market', npcName: 'Sylvi', placeName: 'Mercado de Valdoria' },
-  'quest_open_herbs':   { destKey: 'market', npcName: 'Sylvi', placeName: 'Mercado de Valdoria' },
-  'rat_den':            { destKey: 'market', npcName: 'Erlan', placeName: 'Mercado de Valdoria' },
-  'ruin':               { destKey: 'temple', npcName: 'Maeve', placeName: 'Colina dos Altares' },
-  'cleric_blessing':    { destKey: 'temple', npcName: 'Irmã Elara', placeName: 'Templo da Luz Radiante' },
-  'quest_class_cleric': { destKey: 'temple', npcName: 'Irmã Elara', placeName: 'Templo da Luz Radiante' },
-  'quest_class_fighter':{ destKey: 'arena', npcName: 'Brakos', placeName: 'Arena de Valdoria' },
-  'arena_fighter':      { destKey: 'arena', npcName: 'Brakos', placeName: 'Arena de Valdoria' },
-  'quest_mirena_experiment': { destKey: 'market', npcName: 'Mirena', placeName: 'Mercado de Valdoria' },
-  'quest_mirena_rival': { destKey: 'market', npcName: 'Mirena', placeName: 'Mercado de Valdoria' },
-  'velithra_necklace':  { destKey: 'shadow_alley', npcName: 'Velithra', placeName: 'Beco das Sombras' },
-  'quest_velithra_heist':{ destKey: 'shadow_alley', npcName: 'Velithra', placeName: 'Beco das Sombras' },
-  'quest_velithra_patron':{ destKey: 'shadow_alley', npcName: 'Velithra', placeName: 'Beco das Sombras' }
+  'quest_lyana_scroll': { destKey: 'square', npcName: 'Lyana', placeName: 'Praça Central', actionCb: 'square_investigate_open', encounterFn: function(){ if (typeof _startLyanaEncounter === 'function') _startLyanaEncounter(); } },
+  'lyana':              { destKey: 'square', npcName: 'Lyana', placeName: 'Praça Central', actionCb: 'square_investigate_open', encounterFn: function(){ if (typeof _startLyanaEncounter === 'function') _startLyanaEncounter(); } },
+  'qa_lyana':           { destKey: 'square', npcName: 'Lyana', placeName: 'Praça Central', actionCb: 'square_investigate_open', encounterFn: function(){ if (typeof _startLyanaEncounter === 'function') _startLyanaEncounter(); } },
+  'quest_martha_cellar':{ destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada', actionCb: 'inn_cellar_quest', encounterFn: function(){ if (typeof ACTION_HANDLERS !== 'undefined' && ACTION_HANDLERS['quest_cellar_deliver']) ACTION_HANDLERS['quest_cellar_deliver'](); else _srvCompleteQuest('quest_martha_cellar'); } },
+  'cellar':             { destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada', actionCb: 'inn_cellar_quest', encounterFn: function(){ if (typeof ACTION_HANDLERS !== 'undefined' && ACTION_HANDLERS['quest_cellar_deliver']) ACTION_HANDLERS['quest_cellar_deliver'](); else _srvCompleteQuest('cellar'); } },
+  'quest_martha_journal':{ destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada', actionCb: 'inn_cellar_quest' },
+  'quest_martha_shadow':{ destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada', actionCb: 'inn_cellar_quest' },
+  'quest_martha_relic': { destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada', actionCb: 'inn_cellar_quest' },
+  'quest_thorne_forge': { destKey: 'market', npcName: 'Thorne', placeName: 'Mercado de Valdoria', actionCb: 'market_npc_thorne' },
+  'quest_thorne_son':   { destKey: 'market', npcName: 'Thorne', placeName: 'Mercado de Valdoria', actionCb: 'market_npc_thorne' },
+  'quest_aldric_smugglers': { destKey: 'gates', npcName: 'Guarda Aldric', placeName: 'Portões de Valdoria', actionCb: 'gates_guard_open' },
+  'dragonet':           { destKey: 'gates', npcName: 'Guarda Aldric', placeName: 'Portões de Valdoria', actionCb: 'gates_guard_open' },
+  'escort':             { destKey: 'gates', npcName: 'Brael', placeName: 'Portões de Valdoria', actionCb: 'gates_scout_open' },
+  'patrol':             { destKey: 'gates', npcName: 'Tomás', placeName: 'Portões de Valdoria', actionCb: 'gates_patrol_open' },
+  'quest_tavira_recruit':{ destKey: 'guild', npcName: 'Mestra Tavira', placeName: 'Guilda dos Aventureiros', actionCb: 'guild_bounties_open' },
+  'quest_tavira_traitor':{ destKey: 'guild', npcName: 'Mestra Tavira', placeName: 'Guilda dos Aventureiros', actionCb: 'guild_bounties_open' },
+  'wolves':             { destKey: 'guild', npcName: 'Mestra Tavira', placeName: 'Guilda dos Aventureiros', actionCb: 'guild_bounties_open' },
+  'quest_open_wolves':  { destKey: 'guild', npcName: 'Mestra Tavira', placeName: 'Guilda dos Aventureiros', actionCb: 'guild_bounties_open' },
+  'goblins':            { destKey: 'guild', npcName: 'Capitã Helga', placeName: 'Guilda dos Aventureiros', actionCb: 'guild_training_open' },
+  'bandit_lord':        { destKey: 'guild', npcName: 'Capitã Helga', placeName: 'Guilda dos Aventureiros', actionCb: 'guild_training_open' },
+  'defend':             { destKey: 'guild', npcName: 'Capitã Helga', placeName: 'Guilda dos Aventureiros', actionCb: 'guild_training_open' },
+  'quest_grom_brawl':   { destKey: 'tavern', npcName: 'Grom', placeName: 'Taverna do Javali Bêbado', actionCb: 'tavern_drinks_open' },
+  'quest_grom_past':    { destKey: 'tavern', npcName: 'Grom', placeName: 'Taverna do Javali Bêbado', actionCb: 'tavern_drinks_open' },
+  'herbs':              { destKey: 'market', npcName: 'Sylvi', placeName: 'Mercado de Valdoria', actionCb: 'market_npc_sylvi' },
+  'quest_open_herbs':   { destKey: 'market', npcName: 'Sylvi', placeName: 'Mercado de Valdoria', actionCb: 'market_npc_sylvi' },
+  'rat_den':            { destKey: 'market', npcName: 'Erlan', placeName: 'Mercado de Valdoria', actionCb: 'market_npc_erlan' },
+  'ruin':               { destKey: 'temple', npcName: 'Maeve', placeName: 'Colina dos Altares', actionCb: 'temple_altar' },
+  'cleric_blessing':    { destKey: 'temple', npcName: 'Irmã Elara', placeName: 'Templo da Luz Radiante', actionCb: 'temple_bless' },
+  'quest_class_cleric': { destKey: 'temple', npcName: 'Irmã Elara', placeName: 'Templo da Luz Radiante', actionCb: 'temple_bless' },
+  'quest_class_fighter':{ destKey: 'arena', npcName: 'Brakos', placeName: 'Arena de Valdoria', actionCb: 'arena_challenge_open' },
+  'arena_fighter':      { destKey: 'arena', npcName: 'Brakos', placeName: 'Arena de Valdoria', actionCb: 'arena_challenge_open' },
+  'quest_mirena_experiment': { destKey: 'market', npcName: 'Mirena', placeName: 'Mercado de Valdoria', actionCb: 'market_npc_mirena' },
+  'quest_mirena_rival': { destKey: 'market', npcName: 'Mirena', placeName: 'Mercado de Valdoria', actionCb: 'market_npc_mirena' },
+  'velithra_necklace':  { destKey: 'shadow_alley', npcName: 'Velithra', placeName: 'Beco das Sombras', actionCb: 'shadow_alley_dealer' },
+  'quest_velithra_heist':{ destKey: 'shadow_alley', npcName: 'Velithra', placeName: 'Beco das Sombras', actionCb: 'shadow_alley_dealer' },
+  'quest_velithra_patron':{ destKey: 'shadow_alley', npcName: 'Velithra', placeName: 'Beco das Sombras', actionCb: 'shadow_alley_dealer' },
+  'quest_class_sorcerer': { destKey: 'runes', npcName: 'Escriba Rúnico', placeName: 'Escriba Rúnico', actionCb: 'rune_enchant' },
+  'quest_cross_nature_city': { destKey: 'market', npcName: 'Sylvi', placeName: 'Mercado de Valdoria', actionCb: 'market_npc_sylvi' },
+  'quest_sylthara_balance': { destKey: 'market', npcName: 'Sylvi', placeName: 'Mercado de Valdoria', actionCb: 'market_npc_sylvi' },
+  'quest_moral_plague_cure': { destKey: 'temple', npcName: 'Irmã Elara', placeName: 'Templo da Luz Radiante', actionCb: 'temple_bless' },
+  'quest_moral_prisoner': { destKey: 'gates', npcName: 'Guarda Aldric', placeName: 'Portões de Valdoria', actionCb: 'gates_guard_open' },
+  'quest_moral_temple_secret': { destKey: 'temple', npcName: 'Maeve', placeName: 'Colina dos Altares', actionCb: 'temple_altar' }
 };
 
 function _getQuestDeliveryDestination(serverId, sq) {
   var id = serverId || (sq && sq.serverId) || (sq && sq.id) || '';
   if (_QUEST_DELIVERY_DESTINATIONS[id]) return _QUEST_DELIVERY_DESTINATIONS[id];
   var desc = ((sq && sq.desc) || '') + ' ' + ((sq && sq.title) || '');
-  if (/estalagem|martha|porão|adega/i.test(desc)) return { destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada' };
-  if (/lyana|praça|fonte/i.test(desc)) return { destKey: 'market', npcName: 'Lyana', placeName: 'Praça Central' };
-  if (/mercado|thorne|ferreiro|mirena/i.test(desc)) return { destKey: 'market', npcName: 'Comerciante', placeName: 'Mercado de Valdoria' };
-  if (/portões|aldric|brael|fronteira/i.test(desc)) return { destKey: 'gates', npcName: 'Guarda dos Portões', placeName: 'Portões de Valdoria' };
-  if (/taverna|grom/i.test(desc)) return { destKey: 'tavern', npcName: 'Grom', placeName: 'Taverna do Javali Bêbado' };
-  if (/templo|elara|altar|bênção/i.test(desc)) return { destKey: 'temple', npcName: 'Irmã Elara', placeName: 'Templo da Luz Radiante' };
-  if (/arena|combate|gladiador/i.test(desc)) return { destKey: 'arena', npcName: 'Mestre da Arena', placeName: 'Arena de Valdoria' };
-  if (/beco|sombras|velithra/i.test(desc)) return { destKey: 'shadow_alley', npcName: 'Contato das Sombras', placeName: 'Beco das Sombras' };
-  return { destKey: 'guild', npcName: 'Mestra Tavira', placeName: 'Guilda dos Aventureiros' };
+  if (/lyana|praça|fonte/i.test(desc)) return { destKey: 'square', npcName: 'Lyana', placeName: 'Praça Central', actionCb: 'square_investigate_open' };
+  if (/edital|recompensa|oficial|kaelen/i.test(desc)) return { destKey: 'square', npcName: 'Oficial de Recompensas', placeName: 'Praça Central', actionCb: 'square_bounty_officer_open' };
+  if (/estalagem|martha|porão|adega/i.test(desc)) return { destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada', actionCb: 'inn_cellar_quest' };
+  if (/mercado|thorne|ferreiro/i.test(desc)) return { destKey: 'market', npcName: 'Thorne', placeName: 'Mercado de Valdoria', actionCb: 'market_npc_thorne' };
+  if (/sylvi|erva|herbalista/i.test(desc)) return { destKey: 'market', npcName: 'Sylvi', placeName: 'Mercado de Valdoria', actionCb: 'market_npc_sylvi' };
+  if (/erlan|padaria/i.test(desc)) return { destKey: 'market', npcName: 'Erlan', placeName: 'Mercado de Valdoria', actionCb: 'market_npc_erlan' };
+  if (/mirena|alquimi/i.test(desc)) return { destKey: 'market', npcName: 'Mirena', placeName: 'Mercado de Valdoria', actionCb: 'market_npc_mirena' };
+  if (/portões|aldric|brael|fronteira/i.test(desc)) return { destKey: 'gates', npcName: 'Guarda Aldric', placeName: 'Portões de Valdoria', actionCb: 'gates_guard_open' };
+  if (/taverna|grom/i.test(desc)) return { destKey: 'tavern', npcName: 'Grom', placeName: 'Taverna do Javali Bêbado', actionCb: 'tavern_drinks_open' };
+  if (/templo|elara|altar|bênção/i.test(desc)) return { destKey: 'temple', npcName: 'Irmã Elara', placeName: 'Templo da Luz Radiante', actionCb: 'temple_bless' };
+  if (/arena|combate|gladiador|brakos/i.test(desc)) return { destKey: 'arena', npcName: 'Brakos', placeName: 'Arena de Valdoria', actionCb: 'arena_challenge_open' };
+  if (/beco|sombras|velithra/i.test(desc)) return { destKey: 'shadow_alley', npcName: 'Velithra', placeName: 'Beco das Sombras', actionCb: 'shadow_alley_dealer' };
+  return { destKey: 'guild', npcName: 'Mestra Tavira', placeName: 'Guilda dos Aventureiros', actionCb: 'guild_bounties_open' };
 }
 
 // Diálogos diegéticos de conclusão de missões (D&D 5e / Ordem do Usuário 2026-10):
@@ -46432,6 +46496,8 @@ function _renderEpicSquareHub(container, data){
     + '.sqr-card-badge{position:absolute;top:4px;right:4px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:linear-gradient(180deg,#c4953a,#9a7530);border:1px solid rgba(0,0,0,0.4);color:#1a1410;font-family:var(--v-font-display,Cinzel,serif);font-size:calc(11px * var(--v-font-scale, 1));font-weight:700;display:grid;place-items:center;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,0.4);}'
     + '.sqr-card-badge.novo{background:linear-gradient(180deg,#ff8a4a,#c43020);color:#fff;border-color:rgba(0,0,0,0.5);text-shadow:0 1px 0 rgba(0,0,0,0.3);min-width:38px;font-size: calc(11px * var(--v-font-scale, 1));letter-spacing:0.5px;}'
     + '.sqr-card-badge.done{background:linear-gradient(180deg,#7cdb7c,#3a8a3a);color:#fff;}'
+    + '.sqr-card.has-quest-turnin{border-color:rgba(255,68,68,0.85)!important;box-shadow:0 0 14px rgba(255,40,40,0.35),inset 0 0 8px rgba(255,40,40,0.18)!important;}'
+    + '.sqr-card.has-quest-turnin .sqr-card-badge{right:auto;left:4px;}'
     + '</style>';
   /* === CENÁRIO PRINCIPAL === */
   html += '<div class="sqr-epic-wrap">'
@@ -46453,6 +46519,8 @@ function _renderEpicSquareHub(container, data){
   if (data.services && data.services.length) {
     html += '<div class="sqr-grid">';
     data.services.forEach(function(s, idx){
+      var hasTurnin = s.hasQuestTurnin || (typeof _isServiceQuestTurnin === 'function' && _isServiceQuestTurnin('square', s));
+      var turninBadgeHtml = hasTurnin ? '<div class="hlc-quest-turnin-badge" title="Missão pronta para entrega">?</div>' : '';
       var badgeHtml = '';
       if (s.badge) {
         var isNovo = /Novo|Nova/i.test(s.badge);
@@ -46466,7 +46534,8 @@ function _renderEpicSquareHub(container, data){
       if (iconHtml.indexOf('class="sqr-card-icon"') < 0) {
         iconHtml = iconHtml.replace(/<svg/, '<svg class="sqr-card-icon"');
       }
-      html += '<button class="sqr-card" data-cb="' + s.cb + '" style="animation-delay:' + (0.05 * idx + 0.1) + 's;">'
+      html += '<button class="sqr-card' + (hasTurnin ? ' has-quest-turnin' : '') + '" data-cb="' + s.cb + '" style="animation-delay:' + (0.05 * idx + 0.1) + 's;">'
+        +   turninBadgeHtml
         +   badgeHtml
         +   iconHtml
         +   '<span class="sqr-card-label">' + s.label + '</span>'
@@ -46536,7 +46605,10 @@ function renderSquareHub(container, data){
       var label = s.label || '';
       var cb    = s.cb || '';
       var badge = s.badge || s.desc || '';
-      html += '<button class="subscreen-btn" data-cb="' + cb + '">'
+      var hasTurnin = s.hasQuestTurnin || (typeof _isServiceQuestTurnin === 'function' && _isServiceQuestTurnin(data.venueKey || '', s));
+      var turninBadge = hasTurnin ? '<div class="hlc-quest-turnin-badge" title="Missão pronta para entrega">?</div>' : '';
+      html += '<button class="subscreen-btn' + (hasTurnin ? ' has-quest-turnin' : '') + '" data-cb="' + cb + '">'
+        + turninBadge
         + '<span class="sb-icon">' + icon + '</span>'
         + '<span class="sb-text">' + label + '</span>'
         + (badge ? '<span class="sb-info">' + badge + '</span>' : '')
@@ -46573,27 +46645,32 @@ function _buildSquareMockData(player){
       + 'style="width:100%;max-width:72px;max-height:72px;height:auto;object-fit:contain;'
       + 'display:block;margin:0 auto" onerror="this.remove()">';
   };
+  var services = [
+    { icon: _sqIco('dialogo'),  label: 'Investigar (NPCs)',  cb: 'square_investigate_open' },
+    { icon: _sqIco('recompensa'), label: 'Oficial de Recompensas', cb: 'square_bounty_officer_open',
+      badge: ((player && player.metadata && player.metadata.daily_challenge_completed) || window._dailyChallengeDone) ? '✓ Concluído' : 'Edital Ativo' },
+    { icon: _sqIco('tochas'),   label: 'Explorar Área',      cb: 'square_explore_open' },
+    // canonical: data/plaza_objects_data.py — 3 objetos interativos (fonte/quadro/estátua)
+    { icon: _sqIco('fonte'),    label: 'Objetos da Praça',   cb: 'square_objects_open' },
+    { icon: _sqIco('bolsa'),    label: 'Mesa de Dados',      cb: 'square_gamble_open',
+      badge: gambleRem > 0 ? gambleRem + '/3' : '✓' },
+    { icon: _sqIco('mercado'),  label: 'Vendedor Itinerante',cb: 'square_vendor_open',
+      badge: window._squareVendorVisited ? '' : 'Novo!' },
+    { icon: _sqIco('som'),      label: 'Artistas de Rua',    cb: 'square_artists_open',
+      badge: activeBuff ? '✓' : '' },
+    { icon: _sqIco('coroa'),    label: 'Mural dos Aventureiros', cb: 'square_mural_open' }
+  ];
+  if (typeof _annotateServicesWithQuestTurnin === 'function') {
+    _annotateServicesWithQuestTurnin('square', services);
+  }
   return {
     type: 'hub',
+    venueKey: 'square',
     flavor: flavor,
     rep_label: _squareRepLabel(player),
     buff: activeBuff ? (player.metadata.artist_buff_name || 'Inspiração de Artista') : '',
     sectionLabel: 'Atividades da Praça',  // P6: seção ornamentada (PADRAO_LOCAIS A)
-    services: [
-      { icon: _sqIco('dialogo'),  label: 'Investigar (NPCs)',  cb: 'square_investigate_open' },
-      { icon: _sqIco('recompensa'), label: 'Oficial de Recompensas', cb: 'square_bounty_officer_open',
-        badge: ((player && player.metadata && player.metadata.daily_challenge_completed) || window._dailyChallengeDone) ? '✓ Concluído' : 'Edital Ativo' },
-      { icon: _sqIco('tochas'),   label: 'Explorar Área',      cb: 'square_explore_open' },
-      // canonical: data/plaza_objects_data.py — 3 objetos interativos (fonte/quadro/estátua)
-      { icon: _sqIco('fonte'),    label: 'Objetos da Praça',   cb: 'square_objects_open' },
-      { icon: _sqIco('bolsa'),    label: 'Mesa de Dados',      cb: 'square_gamble_open',
-        badge: gambleRem > 0 ? gambleRem + '/3' : '✓' },
-      { icon: _sqIco('mercado'),  label: 'Vendedor Itinerante',cb: 'square_vendor_open',
-        badge: window._squareVendorVisited ? '' : 'Novo!' },
-      { icon: _sqIco('som'),      label: 'Artistas de Rua',    cb: 'square_artists_open',
-        badge: activeBuff ? '✓' : '' },
-      { icon: _sqIco('coroa'),    label: 'Mural dos Aventureiros', cb: 'square_mural_open' }
-    ]
+    services: services
   };
 }
 
@@ -47781,6 +47858,7 @@ function _aaaListSubScreen(opts){
     +   'color:var(--v-text,#d4c8b0);cursor:pointer;text-align:left;width:100%;overflow:hidden;'
     +   'transition:border-color 0.18s,background 0.18s,transform 0.12s,box-shadow 0.18s;'
     +   'animation:aaaSubItemIn 0.4s ease-out both;}'
+    + '.aaa-sub-item.has-quest-turnin{border-color:rgba(255,68,68,0.85)!important;box-shadow:0 0 14px rgba(255,40,40,0.32),inset 0 0 8px rgba(255,40,40,0.18)!important;}'
     + '.aaa-sub-item:hover{border-color:' + th.primary + ';background:linear-gradient(180deg,rgba(196,149,58,0.16),rgba(74,56,40,0.55));'
     +   'box-shadow:0 0 14px rgba(196,149,58,0.18);}'
     + '.aaa-sub-item:active{transform:scale(0.98);}'
@@ -47845,9 +47923,13 @@ function _aaaListSubScreen(opts){
       ? '<img src="' + item.portrait + '" alt="" onerror="this.style.display=\'none\';">'
         + '<span class="aaa-sub-pfb">' + (item.icon || '·') + '</span>'
       : (item.icon || '·');
-    html += '<button class="aaa-sub-item' + (hasPort ? ' has-portrait' : '') + '" data-idx="' + idx + '"'
+    var turninBadge = item.hasQuestTurnin
+      ? '<div class="hlc-quest-turnin-badge" title="Missão pronta para entrega">?</div>'
+      : '';
+    html += '<button class="aaa-sub-item' + (hasPort ? ' has-portrait' : '') + (item.hasQuestTurnin ? ' has-quest-turnin' : '') + '" data-idx="' + idx + '"'
       + (item.disabled ? ' disabled' : '') + ' type="button"'
       + ' style="animation-delay:' + (idx * 40) + 'ms">'
+      + turninBadge
       + '<div class="aaa-sub-iico">' + iicoInner + '</div>'
       + '<div class="aaa-sub-itxt">'
       +   '<div class="aaa-sub-ilbl">' + (item.label || item.name || '') + '</div>'
@@ -48170,6 +48252,7 @@ function _squareShowInvestigatePopup(p){
   var visible = _squareGetDailyNpcPool(p);
   // Se a missão da Lyana estiver ativa, garante a presença da herbalista na praça com badge de missão
   var hasLyanaQuest = false;
+  var readyLocs = (typeof _getReadyQuestDeliveryLocations === 'function') ? _getReadyQuestDeliveryLocations() : null;
   try {
     var _qa = (typeof QUESTS_ACTIVE !== 'undefined' ? QUESTS_ACTIVE : []);
     hasLyanaQuest = _qa.some(function(q){
@@ -48180,9 +48263,10 @@ function _squareShowInvestigatePopup(p){
     visible = visible.filter(function(n){ return (n.name || '').indexOf('Lyana') < 0; });
     visible.unshift({
       name: 'Lyana, a Herbalista',
-      role: '📜 Entregar Carta da Missão',
+      role: 'Entregar Carta da Missão',
       portraitImg: '/shared/img/npcs/lyana-herbalista.webp',
-      _isLyanaQuest: true
+      _isLyanaQuest: true,
+      hasQuestTurnin: true
     });
   }
   var _portraitFor = function(npc){
@@ -48197,10 +48281,15 @@ function _squareShowInvestigatePopup(p){
   };
   var items = visible.map(function(npc){
     var more = (typeof _npcHasMore === 'function') ? _npcHasMore(npc) : true;
+    var rawName = (npc.name || '').toLowerCase();
+    var firstName = rawName.replace(/^(mestra|irmã|capitã|guarda|vigia|mestre)\s+/, '').split(/[\s,]/)[0];
+    var isTurnin = !!npc.hasQuestTurnin
+      || !!(readyLocs && readyLocs.npcNames && (readyLocs.npcNames[rawName] || readyLocs.npcNames[firstName]));
     return {
       portrait: _portraitFor(npc),
       label: npc.name,
       desc: (npc.role || 'Cidadão') + (more ? '' : ' · ✓ conhecido'),
+      hasQuestTurnin: isTurnin,
       _npc: npc
     };
   });
@@ -86514,15 +86603,43 @@ function renderHubScreen(el, screen) {
     el.appendChild(frag);
 }
 
-// Helper canônico: mapeia missões ativas prontas para entrega aos distritos e marcos da cidade
+// Helper canônico: mapeia missões ativas prontas para entrega aos distritos, marcos, telas e serviços da cidade
 function _getReadyQuestDeliveryLocations() {
-  var res = { districtIds: {}, landmarkIds: {} };
+  var res = {
+    districtIds: {},
+    landmarkIds: {},
+    venueKeys: {},
+    actionCbs: {},
+    npcNames: {},
+    readyQuests: []
+  };
   var activeList = (typeof QUESTS_ACTIVE !== 'undefined' && Array.isArray(QUESTS_ACTIVE)) ? QUESTS_ACTIVE : [];
   for (var i = 0; i < activeList.length; i++) {
     var q = activeList[i];
     if (!q) continue;
     var progressStr = String(q.progress || '');
-    var isReady = progressStr.indexOf('✓') >= 0 || q.ready === true || q.status === 'ready';
+    var isReady = q.ready === true
+      || q.status === 'ready'
+      || q.status === 'completed_pending_turnin'
+      || progressStr.indexOf('✓') >= 0
+      || progressStr.toLowerCase().indexOf('pronto') >= 0
+      || progressStr.toLowerCase().indexOf('conclu') >= 0;
+    if (!isReady && typeof q.progress === 'string') {
+      var parts = q.progress.split('/');
+      if (parts.length === 2) {
+        var cur = parseInt(parts[0], 10);
+        var tot = parseInt(parts[1], 10);
+        if (!isNaN(cur) && !isNaN(tot) && tot > 0 && cur >= tot) {
+          isReady = true;
+        }
+      }
+    }
+    if (!isReady && q.current !== undefined && q.target !== undefined && q.current >= q.target && q.target > 0) {
+      isReady = true;
+    }
+    if (!isReady && q.current !== undefined && q.required !== undefined && q.current >= q.required && q.required > 0) {
+      isReady = true;
+    }
     if (!isReady) continue;
 
     var dest = null;
@@ -86532,6 +86649,7 @@ function _getReadyQuestDeliveryLocations() {
     var destKey = (dest && dest.destKey) || '';
     var placeName = (dest && dest.placeName) || '';
     var npcName = (dest && dest.npcName) || '';
+    var actionCb = (dest && dest.actionCb) || '';
     var qTitle = String(q.title || '');
 
     var targetLandmark = null;
@@ -86540,48 +86658,151 @@ function _getReadyQuestDeliveryLocations() {
     if (placeName === 'Praça Central' || npcName === 'Lyana' || destKey === 'square' || /lyana|praça|fonte/i.test(qTitle)) {
       targetLandmark = 'loc_square';
       targetDistrict = 'city_market';
+      destKey = 'square';
+      if (!actionCb) actionCb = 'square_investigate_open';
     } else if (destKey === 'market' || /mercado|thorne|ferreiro|mirena|sylvi|erlan/i.test(qTitle)) {
       targetLandmark = 'loc_market';
       targetDistrict = 'city_market';
+      destKey = 'market';
     } else if (destKey === 'workshop' || /oficina|forja/i.test(qTitle)) {
       targetLandmark = 'loc_workshop';
       targetDistrict = 'city_market';
+      destKey = 'workshop';
     } else if (destKey === 'bank' || /banco|cofre/i.test(qTitle)) {
       targetLandmark = 'loc_bank';
       targetDistrict = 'city_market';
+      destKey = 'bank';
     } else if (destKey === 'inn' || /estalagem|martha|adega|porão/i.test(qTitle)) {
       targetLandmark = 'loc_inn';
       targetDistrict = 'city_south';
+      destKey = 'inn';
+      if (!actionCb) actionCb = 'inn_cellar_quest';
     } else if (destKey === 'tavern' || /taverna|grom|javali/i.test(qTitle)) {
       targetLandmark = 'loc_tavern';
       targetDistrict = 'city_south';
+      destKey = 'tavern';
+      if (!actionCb) actionCb = 'tavern_drinks_open';
     } else if (destKey === 'gates' || /portões|aldric|brael|fronteira|tomás/i.test(qTitle)) {
       targetLandmark = 'loc_gates';
       targetDistrict = 'city_south';
+      destKey = 'gates';
+      if (!actionCb) actionCb = 'gates_guard_open';
     } else if (destKey === 'sewer' || destKey === 'shadow_alley' || /esgoto|grade|beco|sombras|velithra/i.test(qTitle)) {
       targetLandmark = 'loc_sewer';
       targetDistrict = 'city_south';
+      destKey = 'shadow_alley';
+      if (!actionCb) actionCb = 'shadow_alley_dealer';
     } else if (destKey === 'guild' || /guilda|tavira|helga|recrutamento/i.test(qTitle)) {
       targetLandmark = 'loc_guild';
       targetDistrict = 'city_military';
+      destKey = 'guild';
+      if (!actionCb) actionCb = 'guild_bounties_open';
     } else if (destKey === 'arena' || /arena|coliseu|brakos/i.test(qTitle)) {
       targetLandmark = 'loc_arena';
       targetDistrict = 'city_military';
+      destKey = 'arena';
+      if (!actionCb) actionCb = 'arena_challenge_open';
     } else if (destKey === 'temple' || /templo|altar|luz|elara|maeve/i.test(qTitle)) {
       targetLandmark = 'loc_temple';
       targetDistrict = 'city_high';
+      destKey = 'temple';
+      if (!actionCb) actionCb = 'temple_bless';
     } else if (destKey === 'runes' || /escriba|rúnico|runas/i.test(qTitle)) {
       targetLandmark = 'loc_runes';
       targetDistrict = 'city_high';
+      destKey = 'runes';
     } else if (destKey === 'festival' || /festival|jogos/i.test(qTitle)) {
       targetLandmark = 'loc_festival';
       targetDistrict = 'city_high';
+      destKey = 'festival';
     }
 
     if (targetDistrict) res.districtIds[targetDistrict] = true;
     if (targetLandmark) res.landmarkIds[targetLandmark] = true;
+    if (destKey)        res.venueKeys[destKey] = true;
+    if (actionCb)       res.actionCbs[actionCb] = true;
+    if (npcName) {
+      res.npcNames[npcName.toLowerCase()] = true;
+      var simpleName = npcName.toLowerCase().replace(/^(mestra|irmã|capitã|guarda|vigia|mestre)\s+/, '').split(/[\s,]/)[0];
+      if (simpleName) res.npcNames[simpleName] = true;
+    }
+    res.readyQuests.push({
+      id: q.serverId || q.id,
+      title: qTitle,
+      destKey: destKey,
+      landmarkId: targetLandmark,
+      districtId: targetDistrict,
+      actionCb: actionCb,
+      npcName: npcName
+    });
   }
   return res;
+}
+
+// Verifica se um serviço ou opção de localidade corresponde a uma entrega de missão pronta
+function _isServiceQuestTurnin(venueKey, svc, readyLocs) {
+  if (!svc) return false;
+  if (svc.hasQuestTurnin === true) return true;
+  readyLocs = readyLocs || (typeof _getReadyQuestDeliveryLocations === 'function' ? _getReadyQuestDeliveryLocations() : null);
+  if (!readyLocs || !readyLocs.readyQuests || readyLocs.readyQuests.length === 0) return false;
+
+  var cb = String(svc.cb || '');
+  var lbl = String(svc.label || svc.name || '').toLowerCase();
+
+  // Match direto por actionCb
+  if (cb && readyLocs.actionCbs && readyLocs.actionCbs[cb]) return true;
+
+  // Match por prefixos conhecidos
+  for (var targetCb in readyLocs.actionCbs) {
+    if (targetCb && (cb.indexOf(targetCb) === 0 || targetCb.indexOf(cb) === 0)) return true;
+  }
+
+  // Match contextual por venueKey e keywords do serviço
+  var vKey = String(venueKey || '').toLowerCase();
+  var names = readyLocs.npcNames || {};
+
+  if (vKey === 'square') {
+    if ((names['lyana'] || names['lyana, a herbalista']) && (/investigar|npcs/i.test(lbl) || /square_investigate/i.test(cb))) return true;
+    if (readyLocs.actionCbs['square_bounty_officer_open'] && (/oficial|recompensa/i.test(lbl) || /bounty_officer/i.test(cb))) return true;
+  } else if (vKey === 'inn') {
+    if (names['martha'] && (/porão|adega|martha/i.test(lbl) || /cellar/i.test(cb))) return true;
+  } else if (vKey === 'tavern') {
+    if (names['grom'] && (/balcão|bebidas|refeições|grom/i.test(lbl) || /drinks/i.test(cb))) return true;
+  } else if (vKey === 'guild') {
+    if ((names['tavira'] || names['mestra tavira']) && (/contrato|caçada|recompensa/i.test(lbl) || /bounties|quests/i.test(cb))) return true;
+    if ((names['helga'] || names['capitã helga']) && (/treino|pátio|helga/i.test(lbl) || /training|hall/i.test(cb))) return true;
+  } else if (vKey === 'market') {
+    if (names['thorne'] && (/thorne|ferreiro|forja/i.test(lbl) || /blacksmith|weapons/i.test(cb))) return true;
+    if (names['sylvi'] && (/sylvi|erva|herbalista/i.test(lbl) || /herbs|alchemy/i.test(cb))) return true;
+    if (names['erlan'] && (/erlan|padaria/i.test(lbl) || /bakery/i.test(cb))) return true;
+    if (names['mirena'] && (/mirena|alquimi/i.test(lbl) || /alchemist/i.test(cb))) return true;
+  } else if (vKey === 'temple') {
+    if ((names['elara'] || names['irmã elara']) && (/bênção|elara/i.test(lbl) || /bless/i.test(cb))) return true;
+    if (names['maeve'] && (/altar|maeve/i.test(lbl) || /altar/i.test(cb))) return true;
+  } else if (vKey === 'gates') {
+    if ((names['aldric'] || names['guarda aldric']) && (/posto|guarda|aldric/i.test(lbl) || /guard/i.test(cb))) return true;
+    if (names['brael'] && (/batedor|brael/i.test(lbl) || /scout/i.test(cb))) return true;
+    if ((names['tomás'] || names['tomas']) && (/sentinela|tomás|ameias/i.test(lbl) || /patrol/i.test(cb))) return true;
+  } else if (vKey === 'arena') {
+    if ((names['brakos'] || names['mestre da arena']) && (/desafio|arena|combate/i.test(lbl) || /challenge|daily/i.test(cb))) return true;
+  } else if (vKey === 'shadow_alley' || vKey === 'sewer') {
+    if (names['velithra'] && (/velithra|contato|sombras/i.test(lbl) || /shadow|dealer/i.test(cb))) return true;
+  }
+
+  return false;
+}
+
+// Anota uma lista de serviços com hasQuestTurnin
+function _annotateServicesWithQuestTurnin(venueKey, services) {
+  if (!services || !Array.isArray(services)) return services;
+  var readyLocs = (typeof _getReadyQuestDeliveryLocations === 'function') ? _getReadyQuestDeliveryLocations() : null;
+  if (!readyLocs) return services;
+  services.forEach(function(s) {
+    if (_isServiceQuestTurnin(venueKey, s, readyLocs)) {
+      s.hasQuestTurnin = true;
+    }
+  });
+  return services;
 }
 
 /* ── MODAL POPUP EM TELA CHEIA: MAPA DA CIDADE DE VALDORIA ──────────────── */
