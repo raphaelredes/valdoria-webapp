@@ -6966,9 +6966,9 @@
 
       r: { name: 'Chuva Contínua', icon: '🌧️', hazardMod: 2, effect: 'Terreno escorregadio (+2 CD em testes físicos de marcha). Dificuldade para acender fogueiras sem abrigo.' },
 
-      t: { name: 'Tempestade com Raios', icon: '⛈️', hazardMod: 3, effect: 'Visibilidade obscurecida e ventania. Desvantagem em testes de Percepção auditiva/visual à distância (D&D 5e PHB p. 110).' },
+      t: { name: 'Tempestade com Raios', icon: '⛈️', hazardMod: 3, effect: 'Visibilidade obscurecida e ventania. Desvantagem em testes de Percepção auditiva/visual à distância.' },
 
-      f: { name: 'Névoa Densa', icon: '🌫️', hazardMod: 2, effect: 'Visibilidade limitada. Desvantagem em testes de Percepção visual além de curta distância (D&D 5e PHB p. 183).' },
+      f: { name: 'Névoa Densa', icon: '🌫️', hazardMod: 2, effect: 'Visibilidade limitada. Desvantagem em testes de Percepção visual além de curta distância.' },
 
       snow: { name: 'Nevasca Boreal', icon: '', hazardMod: 3, effect: 'Frio extremo e ventos congelantes. Risco de exaustão sem mantos pesados ou tochas.' }
 
@@ -7398,7 +7398,7 @@
 
       icon: '👁️',
 
-      summary: 'Prontidão Máxima: +5 na Percepção Passiva; evita surpresa em emboscadas inimigas (PHB p. 182).',
+      summary: 'Prontidão Máxima: +5 na Percepção Passiva; evita surpresa em emboscadas inimigas.',
 
       riskMod: -10
 
@@ -7412,7 +7412,7 @@
 
       icon: '🧭',
 
-      summary: 'Orientação Perfeita: Imunidade a desvios de rota sob névoa densa ou tempestades (PHB p. 182).',
+      summary: 'Orientação Perfeita: Imunidade a desvios de rota sob névoa densa ou tempestades.',
 
       riskMod: -5
 
@@ -7590,7 +7590,7 @@
 
       icon: '🚶',
 
-      summary: 'Equilibrada (PHB p. 182): batedor à frente, comitiva em linha com espaço para reagir.',
+      summary: 'Equilibrada: batedor à frente, comitiva em linha com espaço para reagir.',
 
       riskMod: 0
 
@@ -9443,7 +9443,7 @@
 
     } else {
 
-      verdict = 'Consumo padrão de 1 ração e 1 galão d\'água diários por integrante da comitiva (PHB p. 185).';
+      verdict = 'Consumo padrão de 1 ração e 1 galão d\'água diários por integrante da comitiva.';
 
     }
 
@@ -9965,7 +9965,7 @@
 
     var label = '🟢 Marcha Livre (Carga Leve)';
 
-    var desc = 'Comitiva ágil com mochilas equilibradas. Deslocamento sem penalidades (PHB p. 176).';
+    var desc = 'Comitiva ágil com mochilas equilibradas. Deslocamento sem penalidades.';
 
     var color = '#86efac';
 
@@ -10183,7 +10183,7 @@
 
     var list = [
 
-      { key: 'foot',  name: 'A Pé',        icon: '🚶', speedMph: 3.0, feature: 'Mochilas prontas e sentidos aguçados (PHB p. 181)' },
+      { key: 'foot',  name: 'A Pé',        icon: '🚶', speedMph: 3.0, feature: 'Mochilas prontas e sentidos aguçados' },
 
       { key: 'horse', name: 'Montaria',    icon: '🐎', speedMph: 4.0, feature: '+33% Velocidade em estradas; consome ração de forragem' },
 
@@ -10463,7 +10463,7 @@
 
 
 
-    // CD Base por Terreno (DMG p. 111)
+    // CD Base por Terreno
 
     var baseDC = 10;
 
@@ -10509,7 +10509,7 @@
 
 
 
-    // Ritmo de marcha (PHB p. 182)
+    // Ritmo de marcha
 
     var pace = options.pace || 'normal';
 
@@ -10591,7 +10591,7 @@
 
 
 
-    var lostPenalty = 'Desvio de 1d6 milhas fora do rumo pretendido e perda de 1d4 horas para se reorientar (DMG p. 111).';
+    var lostPenalty = 'Desvio de 1d6 milhas fora do rumo pretendido e perda de 1d4 horas para se reorientar.';
 
 
 
@@ -10935,7 +10935,7 @@
 
         hazardType: 'extreme_cold',
 
-        title: '❄️ Frio Extremo (DMG p. 110)',
+        title: '❄️ Frio Extremo',
 
         dcCheck: 'Salvaguarda de Constituição CD 10 ao fim de cada hora',
 
@@ -10977,7 +10977,7 @@
 
         hazardType: 'extreme_heat',
 
-        title: '☀️ Calor Escaldante (DMG p. 110)',
+        title: '☀️ Calor Escaldante',
 
         dcCheck: 'Salvaguarda de Constituição CD 5 (+1 por hora adicional)' + heatDisadvNote,
 
@@ -11005,7 +11005,7 @@
 
 
 
-    // 3. Ventos Fortes e Precipitação Torrencial (DMG p. 110)
+    // 3. Ventos Fortes e Precipitação Torrencial
 
     if (w === 'storm' || w === 'tempestade' || w === 't' || w === 'blizzard' || w === 'sandstorm') {
 
@@ -11015,7 +11015,7 @@
 
         hazardType: 'heavy_storm',
 
-        title: '🌪️ Intempérie Severa (DMG p. 110)',
+        title: '🌪️ Intempérie Severa',
 
         dcCheck: 'Desvantagem em ataques à distância e Percepção visual/auditiva',
 
@@ -11111,7 +11111,7 @@
 
       horse: {
 
-        name: 'Cavalos de Montaria (PHB p. 157)',
+        name: 'Cavalos de Montaria',
 
         carryCap: 480,
 
@@ -11127,7 +11127,7 @@
 
       wagon: {
 
-        name: 'Carroça com Animais de Tração (PHB p. 157)',
+        name: 'Carroça com Animais de Tração',
 
         carryCap: 1200,
 
@@ -11143,7 +11143,7 @@
 
       boat: {
 
-        name: 'Embarcação Fluvial / Bote a Remos (PHB p. 157)',
+        name: 'Embarcação Fluvial / Bote a Remos',
 
         carryCap: 1500,
 
@@ -11225,7 +11225,7 @@
 
         restType: 'short',
 
-        name: 'Descanso Curto (1 Hora - PHB p. 186)',
+        name: 'Descanso Curto (1 Hora)',
 
         hoursConsumed: 1,
 
@@ -11263,7 +11263,7 @@
 
       restType: 'long',
 
-      name: 'Descanso Longo (8 Horas - PHB p. 186)',
+      name: 'Descanso Longo (8 Horas)',
 
       hoursConsumed: 8,
 
@@ -11273,7 +11273,7 @@
 
       resourcesRecovered: 'Restaura todos os espaços de magia (círculos 1 a 9) e habilidades diárias.',
 
-      exhaustionRecovery: 'Reduz 1 nível de exaustão (requer ração de comida e água diária consumidas - PHB p. 185).',
+      exhaustionRecovery: 'Reduz 1 nível de exaustão (requer ração de comida e água diária consumidas).',
 
       interruptionRisk: longRisk,
 
@@ -11431,7 +11431,7 @@
 
         horizonKm: 0.2,
 
-        viewDescription: 'Névoa Espessa: Visibilidade obstruída além de 300 pés (DMG p. 243).',
+        viewDescription: 'Névoa Espessa: Visibilidade obstruída além de 300 pés.',
 
         visibilityRating: 'Ofuscada',
 
@@ -11519,7 +11519,7 @@
 
         horizonKm: 48.0,
 
-        viewDescription: 'Pico Elevado: Visada espetacular alcançando marcos em províncias distantes (DMG p. 243).',
+        viewDescription: 'Pico Elevado: Visada espetacular alcançando marcos em províncias distantes.',
 
         visibilityRating: 'Máxima',
 
@@ -11601,7 +11601,7 @@
 
       horizonKm: 3.2,
 
-      viewDescription: 'Terreno Aberto / Planície: Visada clara até a curvatura do horizonte (DMG p. 243).',
+      viewDescription: 'Terreno Aberto / Planície: Visada clara até a curvatura do horizonte.',
 
       visibilityRating: 'Normal',
 
@@ -11865,9 +11865,9 @@
 
     var tranceNote = options.hasTrance
 
-      ? 'Aventureiros élficos necessitam de apenas 4h de transe meditativo e podem cobrir 2 turnos inteiros de vigília sem sofrer exaustão (PHB p. 23).'
+      ? 'Aventureiros élficos necessitam de apenas 4h de transe meditativo e podem cobrir 2 turnos inteiros de vigília sem sofrer exaustão.'
 
-      : 'Cada aventureiro cobre 1 turno de 2 horas de vigília leve durante o descanso longo de 8 horas (PHB p. 186).';
+      : 'Cada aventureiro cobre 1 turno de 2 horas de vigília leve durante o descanso longo de 8 horas.';
 
 
 
@@ -11907,7 +11907,7 @@
 
       plains: {
 
-        primaryHerb: { name: 'Flor do Alvorecer', rarity: 'Comum', dndUse: 'Ingrediente base para Poções de Cura (PHB p. 153)', checkDC: 10 },
+        primaryHerb: { name: 'Flor do Alvorecer', rarity: 'Comum', dndUse: 'Ingrediente base para Poções de Cura', checkDC: 10 },
 
         secondaryMineral: { name: 'Argila Vermelha dos Vales', rarity: 'Comum', dndUse: 'Selagem hermética de frascos alquímicos e pomadas', checkDC: 11 }
 
@@ -12067,7 +12067,7 @@
 
         icon: '👁️',
 
-        benefit: '+5 Percepção Passiva; evita condição de Surpreso contra emboscadas (PHB p. 182).'
+        benefit: '+5 Percepção Passiva; evita condição de Surpreso contra emboscadas.'
 
       });
 
@@ -12127,7 +12127,7 @@
 
           title: 'Ritmo Rápido Incompatível',
 
-          warning: 'Em ritmo rápido, forragear e caçar é inviável devido à velocidade acelerada (PHB p. 182).'
+          warning: 'Em ritmo rápido, forragear e caçar é inviável devido à velocidade acelerada.'
 
         });
 
@@ -12141,7 +12141,7 @@
 
           icon: '🌿',
 
-          benefit: 'Reduz em 50% o consumo diário de rações empacotadas através de caça e coleta (DMG p. 111).'
+          benefit: 'Reduz em 50% o consumo diário de rações empacotadas através de caça e coleta.'
 
         });
 
@@ -12275,7 +12275,7 @@
 
         label: 'Ritmo Rápido Impede Coleta',
 
-        desc: 'Aventureiros em marcha acelerada não conseguem forragear ou caçar no caminho (PHB p. 182).',
+        desc: 'Aventureiros em marcha acelerada não conseguem forragear ou caçar no caminho.',
 
         expectedFoodLbs: 0,
 
@@ -12365,7 +12365,7 @@
 
       label: 'Fertilidade ' + fertility + ' (CD ' + dc + ')',
 
-      desc: 'Teste de Sabedoria (Sobrevivência) CD ' + dc + ' para colher 1d6+' + avgWisMod + ' lbs de caça e ' + expectedWater + ' gal de água potável (DMG p. 111).',
+      desc: 'Teste de Sabedoria (Sobrevivência) CD ' + dc + ' para colher 1d6+' + avgWisMod + ' lbs de caça e ' + expectedWater + ' gal de água potável.',
 
       expectedFoodLbs: expectedFood,
 
@@ -13151,7 +13151,7 @@
 
         coverBonus: 'Alarme auditivo (alcance 18m)',
 
-        desc: 'Linhas de cânhamo esticadas a 15cm do solo ao redor do perímetro com pequenos guizos de latão (PHB p. 150); anula condição de Surpreso contra invasores terrestres.',
+        desc: 'Linhas de cânhamo esticadas a 15cm do solo ao redor do perímetro com pequenos guizos de latão; anula condição de Surpreso contra invasores terrestres.',
 
         color: '#facc15'
 
@@ -13171,7 +13171,7 @@
 
         coverBonus: 'Terreno acidentado no perímetro',
 
-        desc: 'Armadilhas de aço e estrepes ocultos nas trilhas de acesso (PHB p. 152 / DMG p. 122); causam 1d4+1 de dano perfurante e imobilizam invasores (CD 13 de Força).',
+        desc: 'Armadilhas de aço e estrepes ocultos nas trilhas de acesso; causam 1d4+1 de dano perfurante e imobilizam invasores (CD 13 de Força).',
 
         color: '#fb923c'
 
@@ -13191,7 +13191,7 @@
 
         coverBonus: 'Detecção invisível e mental',
 
-        desc: 'Esfera ritual de proteção mágica em cubo de 6m (PHB p. 211); acorda imediatamente o conjurador por aviso mental sem produzir barulho exterior.',
+        desc: 'Esfera ritual de proteção mágica em cubo de 6m; acorda imediatamente o conjurador por aviso mental sem produzir barulho exterior.',
 
         color: '#c084fc'
 
@@ -13211,7 +13211,7 @@
 
         coverBonus: '+2 na CA e Salvaguardas de Destreza (Meia Cobertura)',
 
-        desc: 'Galhos pontiagudos entrelaçados formando trincheira improvisada (DMG p. 120); concede Meia Cobertura para sentinelas em vigília e dificulta a aproximação inimiga.',
+        desc: 'Galhos pontiagudos entrelaçados formando trincheira improvisada; concede Meia Cobertura para sentinelas em vigília e dificulta a aproximação inimiga.',
 
         color: '#4ade80'
 
@@ -13781,7 +13781,7 @@
 
         icon: '🧭',
 
-        benefit: '+3 em testes de navegação; imunidade a perder-se sob céu estrelado (XGE p. 83).'
+        benefit: '+3 em testes de navegação; imunidade a perder-se sob céu estrelado.'
 
       });
 
@@ -13797,7 +13797,7 @@
 
         icon: '🌿',
 
-        benefit: 'Identificação botânica precisa; dobra o rendimento na coleta de ervas medicinais (XGE p. 82).'
+        benefit: 'Identificação botânica precisa; dobra o rendimento na coleta de ervas medicinais.'
 
       });
 
@@ -13813,7 +13813,7 @@
 
         icon: '📜',
 
-        benefit: 'Mapeamento topográfico; concede +1 em testes de iniciativa ao revisitar a região (XGE p. 80).'
+        benefit: 'Mapeamento topográfico; concede +1 em testes de iniciativa ao revisitar a região.'
 
       });
 
@@ -13829,7 +13829,7 @@
 
         icon: '🧗',
 
-        benefit: 'Arreios e pitões; neutraliza o risco de queda mortal em encostas e gargantas rochosas (PHB p. 151).'
+        benefit: 'Arreios e pitões; neutraliza o risco de queda mortal em encostas e gargantas rochosas.'
 
       });
 
@@ -13939,7 +13939,7 @@
 
         color = '#f87171';
 
-        desc = 'Altitude de ' + alt + ' pés (~' + meters + 'm). Cada hora de marcha exige Salvaguarda de CON CD ' + conSaveDC + ' contra 1 nível de Exaustão (DMG p. 110).';
+        desc = 'Altitude de ' + alt + ' pés (~' + meters + 'm). Cada hora de marcha exige Salvaguarda de CON CD ' + conSaveDC + ' contra 1 nível de Exaustão.';
 
       }
 
@@ -14397,7 +14397,7 @@
 
         consequence: 'Salvaguarda de CON CD 11 contra febre do pântano (1 nível de Exaustão persistente).',
 
-        mitigation: 'Ferver a água ou usar Utensílios de Cozinheiro (XGE p. 133).'
+        mitigation: 'Ferver a água ou usar Utensílios de Cozinheiro.'
 
       },
 
@@ -14407,7 +14407,7 @@
 
         consequence: 'Condição Envenenado por 4 horas ao ingerir frutos de aparência comestível.',
 
-        mitigation: 'Kit de Herbalismo (XGE p. 82) identifica e descarta os frutos tóxicos.'
+        mitigation: 'Kit de Herbalismo identifica e descarta os frutos tóxicos.'
 
       },
 
@@ -14885,7 +14885,7 @@
 
         speedPenaltyPct: -50,
 
-        gearMitigation: hasColdGear ? 'Agasalhos pesados de pele neutralizam a salvaguarda de frio.' : 'Exige Agasalho de Inverno (Cold Weather Gear, PHB p. 150) sob pena de 1 nível de Exaustão por hora.',
+        gearMitigation: hasColdGear ? 'Agasalhos pesados de pele neutralizam a salvaguarda de frio.' : 'Exige Agasalho de Inverno (Agasalho de Inverno) sob pena de 1 nível de Exaustão por hora.',
 
         isMitigated: hasColdGear,
 
@@ -15077,7 +15077,7 @@
 
         category: 'alquimia_cura',
 
-        requiredTool: 'Kit de Herbalismo (XGE p. 82)',
+        requiredTool: 'Kit de Herbalismo',
 
         dcCheck: 12,
 
@@ -15095,7 +15095,7 @@
 
         category: 'forja_oficina',
 
-        requiredTool: 'Ferramentas de Ferreiro ou Coureiro (XGE p. 84)',
+        requiredTool: 'Ferramentas de Ferreiro ou Coureiro',
 
         dcCheck: 11,
 
@@ -15113,7 +15113,7 @@
 
         category: 'seguranca_tática',
 
-        requiredTool: 'Ferramentas de Ladrão ou Armadilha de Caça (PHB p. 150)',
+        requiredTool: 'Ferramentas de Ladrão ou Armadilha de Caça',
 
         dcCheck: 13,
 
@@ -15131,7 +15131,7 @@
 
         category: 'navegacao_erudicao',
 
-        requiredTool: 'Suprimentos de Calígrafo ou Ferramentas de Cartógrafo (XGE p. 80)',
+        requiredTool: 'Suprimentos de Calígrafo ou Ferramentas de Cartógrafo',
 
         dcCheck: 12,
 
@@ -15149,7 +15149,7 @@
 
         category: 'espiritual_adivinhacao',
 
-        requiredTool: 'Símbolo Sagrado ou Foco Druídico (PHB p. 151)',
+        requiredTool: 'Símbolo Sagrado ou Foco Druídico',
 
         dcCheck: 11,
 
@@ -16597,7 +16597,7 @@
 
       passivePerceptionMod = -5;
 
-      ambientNote = 'Escuridão total: sem tocha ou visão no escuro, aplica-se penalidade de -5 na Percepção Passiva (PHB p. 183).';
+      ambientNote = 'Escuridão total: sem tocha ou visão no escuro, aplica-se penalidade de -5 na Percepção Passiva.';
 
       icon = '🌑';
 
@@ -16777,7 +16777,7 @@
 
         credibility: 'Confiável (Marco Histórico Cartografado)',
 
-        tacticalBenefit: 'Vantagem automática em salvaguardas de orientação geográfica contra se perder na tundra (DMG p. 111).',
+        tacticalBenefit: 'Vantagem automática em salvaguardas de orientação geográfica contra se perder na tundra.',
 
         dangerWarning: 'Gelo quebradiço nas bordas da rocha exige cuidado ao transitar a pé.',
 
@@ -16861,9 +16861,9 @@
 
 
 
-    var dehydrationPenalty = 'CD 15 de Constituição após 1 dia com meia ração de água, ou ganho de 1 nível automático de exaustão sem água (DMG p. 111).';
+    var dehydrationPenalty = 'CD 15 de Constituição após 1 dia com meia ração de água, ou ganho de 1 nível automático de exaustão sem água.';
 
-    var starvationPenalty = 'Após ' + starvationDays + ' dias sem comida, ganho de 1 nível automático de exaustão a cada dia subsequente (PHB p. 185).';
+    var starvationPenalty = 'Após ' + starvationDays + ' dias sem comida, ganho de 1 nível automático de exaustão a cada dia subsequente.';
 
 
 
@@ -17021,7 +17021,7 @@
 
       alarm_spell: {
 
-        name: 'Magia Alarme Ritualística (PHB p. 211)',
+        name: 'Magia Alarme Ritualística',
 
         alertRadiusFeet: 20,
 
@@ -17043,7 +17043,7 @@
 
       guard_mastiff: {
 
-        name: 'Mastim de Guarda Treinado (PHB p. 157)',
+        name: 'Mastim de Guarda Treinado',
 
         alertRadiusFeet: 60,
 
@@ -17065,7 +17065,7 @@
 
       familiar_scout: {
 
-        name: 'Familiar Alado Coruja em Poleiro (PHB p. 240)',
+        name: 'Familiar Alado Coruja em Poleiro',
 
         alertRadiusFeet: 120,
 
@@ -17177,7 +17177,7 @@
 
       seasoned_forage_stew: {
 
-        name: 'Ensopado de Caça e Ervas dos Ermos (XGE p. 79)',
+        name: 'Ensopado de Caça e Ervas dos Ermos',
 
         prepDC: 11,
 
@@ -17195,7 +17195,7 @@
 
       hearty_travelers_feast: {
 
-        name: 'Banquete do Chef de Estrada (TCoE p. 79)',
+        name: 'Banquete do Chef de Estrada',
 
         prepDC: 13,
 
@@ -17547,7 +17547,7 @@
 
       penaltyDesc = acclim
 
-        ? 'Aclimatado ao ar rarefeito; ainda assim exige salvaguarda de Constituição CD 10 a cada hora de esforço ou ganho de 1 nível de exaustão (DMG p. 110).'
+        ? 'Aclimatado ao ar rarefeito; ainda assim exige salvaguarda de Constituição CD 10 a cada hora de esforço ou ganho de 1 nível de exaustão.'
 
         : 'Ar hipóxico severo: 1 hora de viagem conta como 2 horas de marcha forçada e salvaguarda de Con CD 10 a cada hora contra exaustão.';
 
@@ -17567,7 +17567,7 @@
 
         ? 'Aclimatado (30+ dias na elevação): marcha normal sem duplicar desgaste de fadiga.'
 
-        : 'Não aclimatado: cada hora de viagem conta como 2 horas para propósitos de marcha forçada e exaustão (DMG p. 110).';
+        : 'Não aclimatado: cada hora de viagem conta como 2 horas para propósitos de marcha forçada e exaustão.';
 
       icon = '⛰️🌬️';
 
@@ -17637,7 +17637,7 @@
 
         baselineFeet: 300,
 
-        stealthModDesc: 'Desvantagem automática em testes de Furtividade (PHB p. 144).',
+        stealthModDesc: 'Desvantagem automática em testes de Furtividade.',
 
         ambushRiskPct: 35,
 
@@ -18083,7 +18083,7 @@
 
         resonanceDesc: 'A urdidura mágica está rompida; faíscas prismáticas brotam das rochas e do solo.',
 
-        spellcasterBoon: 'Toda magia de 1º círculo ou superior conjurada aqui exige rolagem de d20 na Tabela de Surto Selvagem (PHB p. 103).',
+        spellcasterBoon: 'Toda magia de 1º círculo ou superior conjurada aqui exige rolagem de d20 na Tabela de Surto Selvagem.',
 
         campBenefit: 'Descansos produzem sonhos proféticos desconexos; vantagem em 1 teste de iniciativa matinal.',
 
@@ -18447,7 +18447,7 @@
 
     var spoor = {
 
-      spoorTitle: 'Covil Dracônico Próximo & Efeitos Regionais (MM p. 8)',
+      spoorTitle: 'Covil Dracônico Próximo & Efeitos Regionais',
 
       trackingSigns: 'Árvores chamuscadas e cheiro acre de enxofre em um raio de 3 milhas.',
 
@@ -18595,7 +18595,7 @@
 
 
 
-    var sinkingFormula = 'Afunda 1d4 + 1 pés imediatamente e 1d4 pés no início de cada um dos seus turnos (DMG p. 110).';
+    var sinkingFormula = 'Afunda 1d4 + 1 pés imediatamente e 1d4 pés no início de cada um dos seus turnos.';
 
     var escapeFormula = 'Teste de Força (Atletismo) CD 10 + quantidade de pés afundados; ou CD 10 se auxiliado por companheiros com corda.';
 
@@ -18683,7 +18683,7 @@
 
       saveType: 'Constituição',
 
-      purificationOutcome: 'Fervura de 5 minutos torna a água totalmente pura para cantis de viagem (DMG p. 111).',
+      purificationOutcome: 'Fervura de 5 minutos torna a água totalmente pura para cantis de viagem.',
 
       dailyGallonsYield: 'Abundante (riacho com fluxo ativo contínuo)',
 
@@ -18723,11 +18723,11 @@
 
       if (hasPurifySpell) {
 
-        purifOutcomeSwamp = 'Purificação milagrosa instantânea via magia canônica *Purificar Alimentos e Bebidas* (PHB p. 270). Água 100% esterilizada.';
+        purifOutcomeSwamp = 'Purificação milagrosa instantânea via magia canônica *Purificar Alimentos e Bebidas*. Água 100% esterilizada.';
 
       } else if (canBoil) {
 
-        purifOutcomeSwamp = 'Fervura prolongada por 10 minutos elimina 100% dos micróbios e parasitas biológicos (DMG p. 111).';
+        purifOutcomeSwamp = 'Fervura prolongada por 10 minutos elimina 100% dos micróbios e parasitas biológicos.';
 
       } else if (hasHerbalismKit) {
 
@@ -18741,7 +18741,7 @@
 
         purityStatus: 'Contaminada por Lodo e Parasitas (Miasma Pantanoso)',
 
-        diseaseOrPoison: 'Praga do Esgoto (Sewer Plague - DMG p. 257) e disenteria pútrida.',
+        diseaseOrPoison: 'Praga do Esgoto (Sewer Plague) e disenteria pútrida.',
 
         saveDC: 12,
 
@@ -18763,7 +18763,7 @@
 
       if (hasPurifySpell) {
 
-        purifOutcomeVolc = 'Magia divina *Purificar Alimentos e Bebidas* (PHB p. 270) neutraliza as toxinas minerais e enxofre por completo!';
+        purifOutcomeVolc = 'Magia divina *Purificar Alimentos e Bebidas* neutraliza as toxinas minerais e enxofre por completo!';
 
       } else if (canBoil) {
 
@@ -18803,7 +18803,7 @@
 
       if (hasPurifySpell) {
 
-        purifOutcomeBog = 'Magia divina *Purificar Alimentos e Bebidas* (PHB p. 270) dissipa a mácula profana da água.';
+        purifOutcomeBog = 'Magia divina *Purificar Alimentos e Bebidas* dissipa a mácula profana da água.';
 
       }
 
@@ -18851,7 +18851,7 @@
 
       dailyGallonsYield: purity.dailyGallonsYield,
 
-      survivalTip: 'Em clima temperado, cada aventureiro consome 1 galão/dia; em calor extremo ou marcha acelerada no deserto, consome 2 galões/dia (PHB p. 185).',
+      survivalTip: 'Em clima temperado, cada aventureiro consome 1 galão/dia; em calor extremo ou marcha acelerada no deserto, consome 2 galões/dia.',
 
       icon: purity.icon,
 
@@ -18879,7 +18879,7 @@
 
     var bivouac = {
 
-      shelterTitle: 'Rede Suspensa em Troncos Altos (DMG p. 111)',
+      shelterTitle: 'Rede Suspensa em Troncos Altos',
 
       viability: 'Alta em florestas e biomas arborizados.',
 
@@ -18933,7 +18933,7 @@
 
       bivouac = {
 
-        shelterTitle: 'Plataforma Arbórea Camuflada nas Copas (PHB p. 153 / XGE p. 78)',
+        shelterTitle: 'Plataforma Arbórea Camuflada nas Copas',
 
         viability: 'Alta em matas fechadas e selvas virgens; requer cordas de escalada e 1 hora de montagem.',
 
@@ -18959,7 +18959,7 @@
 
       bivouac = {
 
-        shelterTitle: 'Bivaque Suspenso em Paredão de Rocha com Pítons (PHB p. 153)',
+        shelterTitle: 'Bivaque Suspenso em Paredão de Rocha com Pítons',
 
         viability: 'Excelente em montanhas, cânions e escarpamentos rochosos verticais.',
 
@@ -19207,7 +19207,7 @@
 
         baseSpeedFt: 50,
 
-        terrainAdaptation: 'Reserva biológica de água: suporta até 10 dias sem beber água antes de sofrer exaustão (PHB p. 157); ignora terreno difícil em areia fofa.',
+        terrainAdaptation: 'Reserva biológica de água: suporta até 10 dias sem beber água antes de sofrer exaustão; ignora terreno difícil em areia fofa.',
 
         dailyFeedWater: 'Arbustos secos espinhosos / consumo abundante cíclico a cada 5 a 10 dias.',
 
@@ -19365,13 +19365,13 @@
 
       hazard = {
 
-        hazardTitle: 'Desmoronamento Maciço de Encosta (DMG p. 110)',
+        hazardTitle: 'Desmoronamento Maciço de Encosta',
 
         saveDC: 15,
 
         saveType: 'Força (Atletismo) ou Destreza (Acrobacia)',
 
-        damageOrBurial: '4d6 de dano contundente e soterramento sob 1d4 pés de entulho (regras de Sufocamento - PHB p. 183).',
+        damageOrBurial: '4d6 de dano contundente e soterramento sob 1d4 pés de entulho (regras de Sufocamento).',
 
         excavationEffort: 'Exige 1d4 horas de escavação manual contínua; pás e picaretas reduzem o tempo pela metade.',
 
@@ -19463,7 +19463,7 @@
 
       smokeVisibility: 'Fumaça fina e cinzenta; visibilidade de até 2 milhas durante a queima noturna.',
 
-      coldSaveBonus: '+2 nas Salvaguardas de Constituição contra frio extremo (DMG p. 110).',
+      coldSaveBonus: '+2 nas Salvaguardas de Constituição contra frio extremo.',
 
       icon: '🪵🔥',
 
@@ -19541,7 +19541,7 @@
 
     if (options.hasColdWeatherGear) {
 
-      shelterNotes = 'Roupas de Inverno Acolchoadas (PHB p. 150) concedem sucesso automático contra frio moderado.';
+      shelterNotes = 'Roupas de Inverno Acolchoadas concedem sucesso automático contra frio moderado.';
 
     }
 
@@ -19637,11 +19637,11 @@
 
       crossing = {
 
-        crossingTitle: 'Rio Enchente Turbulentíssimo (DMG p. 111 / PHB p. 182)',
+        crossingTitle: 'Rio Enchente Turbulentíssimo',
 
         athleticsDC: 16,
 
-        currentHazard: 'Águas profundas e redemoinhos; nadar contra a correnteza exige teste a cada turno sob risco de afogamento (PHB p. 182).',
+        currentHazard: 'Águas profundas e redemoinhos; nadar contra a correnteza exige teste a cada turno sob risco de afogamento.',
 
         ropeSafetyMitigation: 'Montagem de balsa improvisada ou travessia ancorada com cabos duplos de 15 metros entre árvores firmes.',
 
@@ -19713,7 +19713,7 @@
 
     var defense = {
 
-      defenseTitle: 'Campo de Abrolhos e Esferas de Metal (PHB p. 150-151)',
+      defenseTitle: 'Campo de Abrolhos e Esferas de Metal',
 
       tacticalEffect: 'Invasores devem superar Salvaguarda de Destreza CD 15 ou sofrer 1 ponto de dano perfurante e ter sua velocidade reduzida em 10 pés.',
 
@@ -19751,7 +19751,7 @@
 
       defense = {
 
-        defenseTitle: 'Fio de Desarme com Guizos de Latão e Conchas (PHB p. 152)',
+        defenseTitle: 'Fio de Desarme com Guizos de Latão e Conchas',
 
         tacticalEffect: 'Disparo acústico ecoa a até 60 pés ao redor; acorda instantaneamente todos os membros adormecidos do grupo.',
 
@@ -19829,7 +19829,7 @@
 
     var hazard = {
 
-      hazardTitle: 'Avalanche de Neve em Pó & Soterramento (DMG p. 110)',
+      hazardTitle: 'Avalanche de Neve em Pó & Soterramento',
 
       saveDC: 15,
 
@@ -20019,7 +20019,7 @@
 
       sanit = {
 
-        sanitizationTitle: 'Aspersão de Água Benta Consagrada (PHB p. 151)',
+        sanitizationTitle: 'Aspersão de Água Benta Consagrada',
 
         diseaseResistanceBonus: 'Imunidade a contaminações necróticas sobrenaturais e maldições menores de solo corrompido.',
 
@@ -20079,7 +20079,7 @@
 
     var hazard = {
 
-      hazardTitle: 'Tempestade de Areia Haboob & Redemoinhos Cegantes (DMG p. 110)',
+      hazardTitle: 'Tempestade de Areia Haboob & Redemoinhos Cegantes',
 
       saveDC: 15,
 
@@ -20153,7 +20153,7 @@
 
       hazard = {
 
-        hazardTitle: 'Onda de Calor Tórrido Acima de 40°C (DMG p. 110)',
+        hazardTitle: 'Onda de Calor Tórrido Acima de 40°C',
 
         saveDC: 10,
 
@@ -20163,7 +20163,7 @@
 
         abrasiveDamageOrBlindness: 'Falha acarreta 1 nível de exaustão acumulativa (armaduras médias e pesadas impõem desvantagem no teste).',
 
-        hydrationDemand: 'Consumo obrigatório de 2 galões/dia; sem água a exaustão é automática sem teste de salvaguarda (PHB p. 185).',
+        hydrationDemand: 'Consumo obrigatório de 2 galões/dia; sem água a exaustão é automática sem teste de salvaguarda.',
 
         survivalAdvice: 'Montar tenda de lona suspensa durante o zênite solar e avançar exclusivamente em marcha noturna.',
 
@@ -20223,7 +20223,7 @@
 
     var horn = {
 
-      hornTitle: 'Trompa de Latão de Reagrupamento (PHB p. 154)',
+      hornTitle: 'Trompa de Latão de Reagrupamento',
 
       audibleRangeMiles: 2.0,
 
@@ -20265,7 +20265,7 @@
 
       horn = {
 
-        hornTitle: 'Gongo de Ferro / Tambor de Guerra de Sentinela (DMG p. 105)',
+        hornTitle: 'Gongo de Ferro / Tambor de Guerra de Sentinela',
 
         audibleRangeMiles: 3.0,
 
@@ -20383,7 +20383,7 @@
 
         pioneerMitigation: 'Evitar ruídos sonoros estrondosos, trompas de guerra ou magias trovejantes sob tetos calcários instáveis.',
 
-        rescueDetails: 'Primeiros socorros rápidos com Kit de Curativo (PHB p. 151) estancam perfurações de calcário.',
+        rescueDetails: 'Primeiros socorros rápidos com Kit de Curativo estancam perfurações de calcário.',
 
         icon: '🗡️🪨',
 
@@ -20423,7 +20423,7 @@
 
         saveType: 'Força (Atletismo)',
 
-        depthAndImpact: 'Arrasto violento para galeria subterrânea alagada; risco de afogamento contínuo (PHB p. 182).',
+        depthAndImpact: 'Arrasto violento para galeria subterrânea alagada; risco de afogamento contínuo.',
 
         pioneerMitigation: 'Evitar acampar ou cruzar o fundo de dolinas secas durante tempestades repentinas nas cabeceiras.',
 
@@ -21167,7 +21167,7 @@
 
         saveType: 'Constituição',
 
-        obscurementPenalty: 'Cristais pontiagudos congelam cílios e barbas; 1 nível de exaustão por frio severo (PHB p. 185).',
+        obscurementPenalty: 'Cristais pontiagudos congelam cílios e barbas; 1 nível de exaustão por frio severo.',
 
         pioneerMitigation: 'Gordura de foca ou ungüento oleoso na face previne queimaduras de geada durante a marcha.',
 
@@ -21663,7 +21663,7 @@
 
         saveType: 'Destreza',
 
-        acidicImpactAndTrapping: 'Rompimento da esteira vegetal; queda em água lodosa profunda de 4 metros com risco de sufocamento (PHB p. 183).',
+        acidicImpactAndTrapping: 'Rompimento da esteira vegetal; queda em água lodosa profunda de 4 metros com risco de sufocamento.',
 
         pioneerMitigation: 'Marcha em cordada de 3 metros ancorada em raízes grossas de mangue impede a submersão total do viajante.',
 
@@ -21867,7 +21867,7 @@
 
         saveType: 'Destreza',
 
-        ambushDangerAndDamage: 'Teias viscosas (DMG p. 105); impõe a condição Contido e atrai aranhas monstruosas em 1 rodada.',
+        ambushDangerAndDamage: 'Teias viscosas; impõe a condição Contido e atrai aranhas monstruosas em 1 rodada.',
 
         pioneerMitigation: 'Tochas acesas na vanguarda queimam as teias rapidamente (causa 2d4 de dano de fogo à vegetação de teias).',
 
@@ -22091,7 +22091,7 @@
 
       saveType: 'Destreza',
 
-      freezingImmersionAndExhaustion: 'Queda em água frígida abaixo de zero (DMG p. 110); CD 10 Constituição a cada minuto ou sofre 1 nível de Exaustão.',
+      freezingImmersionAndExhaustion: 'Queda em água frígida abaixo de zero; CD 10 Constituição a cada minuto ou sofre 1 nível de Exaustão.',
 
       pioneerMitigation: 'Batedores avançam rastejando com o peso distribuído ou testam a espessura do gelo com machados a cada 2 metros.',
 
@@ -22115,7 +22115,7 @@
 
         saveType: 'Força (Atletismo)',
 
-        freezingImmersionAndExhaustion: 'Arrasto violento para baixo do teto de gelo espesso; risco iminente de sufocamento (PHB p. 183) e hipotermia fulminante.',
+        freezingImmersionAndExhaustion: 'Arrasto violento para baixo do teto de gelo espesso; risco iminente de sufocamento e hipotermia fulminante.',
 
         pioneerMitigation: 'Marcha estritamente em cordada dupla ancorada com pítons de rocha nas margens sólidas do cânion.',
 
@@ -22385,7 +22385,7 @@
 
         saveType: 'Constituição',
 
-        fumaroleDamageAndAsphyxiation: 'Calor extremo irradiado pelo chão derretendo solas de bota; 1d10 de fogo por minuto e risco de Exaustão (DMG p. 110).',
+        fumaroleDamageAndAsphyxiation: 'Calor extremo irradiado pelo chão derretendo solas de bota; 1d10 de fogo por minuto e risco de Exaustão.',
 
         pioneerMitigation: 'Avançar pisando estritamente em cristas de rocha escura resfriada com reforço de placas de ferro nos calçados.',
 
@@ -22407,7 +22407,7 @@
 
         saveType: 'Constituição',
 
-        fumaroleDamageAndAsphyxiation: 'Gás pesado inodoro acumulado no fundo de fendas; queda Inconsciente por asfixia súbita (PHB p. 183).',
+        fumaroleDamageAndAsphyxiation: 'Gás pesado inodoro acumulado no fundo de fendas; queda Inconsciente por asfixia súbita.',
 
         pioneerMitigation: 'Observar a ausência de insetos e tochas que se apagam subitamente ao aproximar da borda da cavidade.',
 
@@ -22587,7 +22587,7 @@
 
       saveType: 'Constituição',
 
-      heatstrokeDamageAndExhaustion: 'Calor acima de 38°C (100°F); salvaguarda horária de CON (CD 5 + 1 por hora adicional) ou sofre 1 nível de Exaustão (DMG p. 110).',
+      heatstrokeDamageAndExhaustion: 'Calor acima de 38°C (100°F); salvaguarda horária de CON (CD 5 + 1 por hora adicional) ou sofre 1 nível de Exaustão.',
 
       pioneerMitigation: 'Batedores recomendam descanso nas 4 horas de pico solar e marcha noturna fresca com mantas de linho leve.',
 
@@ -22835,7 +22835,7 @@
 
       saveType: 'Destreza',
 
-      rockfallDamageAndBurial: 'Queda repentina de rochas soltas; 3d10 de concussão e condição Caído, sendo parcialmente soterrado (PHB p. 182).',
+      rockfallDamageAndBurial: 'Queda repentina de rochas soltas; 3d10 de concussão e condição Caído, sendo parcialmente soterrado.',
 
       pioneerMitigation: 'Batedores examinam encostas instáveis e conduzem a comitiva em fila espaçada a 15 metros entre cada aventureiro.',
 
@@ -22859,7 +22859,7 @@
 
         saveType: 'Força',
 
-        rockfallDamageAndBurial: 'Muralha de neve compacta a 100 km/h; 8d10 de concussão (metade no sucesso), soterramento e risco de asfixia (DMG p. 110).',
+        rockfallDamageAndBurial: 'Muralha de neve compacta a 100 km/h; 8d10 de concussão (metade no sucesso), soterramento e risco de asfixia.',
 
         pioneerMitigation: 'Evitar gritos, estalos de chicote ou sons altos na base de cornijas nevadas e cruzar antes do degelo do meio-dia.',
 
@@ -23107,7 +23107,7 @@
 
         saveType: 'Destreza',
 
-        floodDamageAndSweeping: 'Turbulência de classe IV entre pedregulhos afiados; 2d6 de concussão, condição Caído e teste contra afogamento se submerso (PHB p. 183).',
+        floodDamageAndSweeping: 'Turbulência de classe IV entre pedregulhos afiados; 2d6 de concussão, condição Caído e teste contra afogamento se submerso.',
 
         pioneerMitigation: 'Mapeamento de banco de seixos calmo a 50 metros e uso de bastão de apoio para manter três pontos de contato na travessia.',
 
@@ -23331,7 +23331,7 @@
 
       saveType: 'Destreza',
 
-      vineDamageAndEntanglement: 'Cipós com garras afiadas como lâminas; 1d10 de dano cortante (2d10 em ritmo rápido) e rasgo em vestes de viagem (DMG p. 110).',
+      vineDamageAndEntanglement: 'Cipós com garras afiadas como lâminas; 1d10 de dano cortante (2d10 em ritmo rápido) e rasgo em vestes de viagem.',
 
       pioneerMitigation: 'Batedores identificam bordas triangulares luzidias nas folhas e abrem trilha segura com golpes cadenciados de facão.',
 
@@ -23355,7 +23355,7 @@
 
         saveType: 'Força',
 
-        vineDamageAndEntanglement: 'Vinha predatória que laça o pescoço da retaguarda; 2d6 de concussão, condição Agarrado e asfixia progressiva se não cortada (PHB p. 183).',
+        vineDamageAndEntanglement: 'Vinha predatória que laça o pescoço da retaguarda; 2d6 de concussão, condição Agarrado e asfixia progressiva se não cortada.',
 
         pioneerMitigation: 'Vigilância de sentinelas voltada para galhos suspensos e teste de Percepção para notar movimentos sem vento.',
 
@@ -23579,7 +23579,7 @@
 
       saveType: 'Constituição',
 
-      parasiteDamageAndInfection: 'Milhares de insetos ferroando simultaneamente; 2d4 de perfuração e risco de contrair Febre do Pântano (DMG p. 257).',
+      parasiteDamageAndInfection: 'Milhares de insetos ferroando simultaneamente; 2d4 de perfuração e risco de contrair Febre do Pântano.',
 
       pioneerMitigation: 'Batedores utilizam capuzes de malha fina e orientam a comitiva a evitar lagoas estagnadas sob o crepúsculo.',
 
@@ -23625,7 +23625,7 @@
 
         saveType: 'Destreza',
 
-        parasiteDamageAndInfection: 'Ataque furioso ao pisar em ninho subterrâneo; 2d8 de veneno e condição Envenenado por 10 minutos (PHB p. 183).',
+        parasiteDamageAndInfection: 'Ataque furioso ao pisar em ninho subterrâneo; 2d8 de veneno e condição Envenenado por 10 minutos.',
 
         pioneerMitigation: 'Sentinelas de vanguarda reconhecem montículos de terra batida com zumbido ativo e sinalizam desvio imediato.',
 
@@ -23827,7 +23827,7 @@
 
       saveType: 'Sabedoria',
 
-      arcaneFalloutAndSurge: 'Oscilação repentina no tecido mágico; 2d8 de dano de força e risco de efeito caótico imprevisível da tabela de magia selvagem (TCoE p. 150).',
+      arcaneFalloutAndSurge: 'Oscilação repentina no tecido mágico; 2d8 de dano de força e risco de efeito caótico imprevisível da tabela de magia selvagem.',
 
       pioneerMitigation: 'Batedores atentos notam arrepios na nuca e cabelos eriçados, contornando bolsas de ar cintilante a 20 metros.',
 
@@ -23851,7 +23851,7 @@
 
         saveType: 'Inteligência',
 
-        arcaneFalloutAndSurge: 'Apagamento completo de auras mágicas e itens encantados; teste de Arcanismo para não desorientar bússolas e runas (DMG p. 136).',
+        arcaneFalloutAndSurge: 'Apagamento completo de auras mágicas e itens encantados; teste de Arcanismo para não desorientar bússolas e runas.',
 
         pioneerMitigation: 'Navegação baseada estritamente em marcos estelares e bússolas mecânicas magnéticas de bronze.',
 
@@ -23895,7 +23895,7 @@
 
         saveType: 'Constituição',
 
-        arcaneFalloutAndSurge: 'Radiação necrótica residual; impede recuperação natural de PV em descanso curto e impõe 1d6 de dano necrótico por hora (DMG p. 110).',
+        arcaneFalloutAndSurge: 'Radiação necrótica residual; impede recuperação natural de PV em descanso curto e impõe 1d6 de dano necrótico por hora.',
 
         pioneerMitigation: 'Especialistas religiosos reconhecem ossadas petrificadas e guiam o grupo por encostas ventiladas de pedra viva.',
 
@@ -24075,7 +24075,7 @@
 
       saveType: 'Constituição',
 
-      blizzardDamageAndDisorientation: 'Vendaval a -20°C com neve horizontal; visibilidade nula, salvaguarda horária contra 1 nível de Exaustão e congelamento (DMG p. 110).',
+      blizzardDamageAndDisorientation: 'Vendaval a -20°C com neve horizontal; visibilidade nula, salvaguarda horária contra 1 nível de Exaustão e congelamento.',
 
       pioneerMitigation: 'Batedores amarram a comitiva em corda mestra de segurança e mantêm ritmo lento com bastões de sondagem.',
 
@@ -24323,7 +24323,7 @@
 
       saveType: 'Constituição',
 
-      altitudeDamageAndHypoxia: 'Altitude acima de 3.000 metros (10.000 pés); salvaguarda horária de CON ou sofre 1 nível de Exaustão por falta de oxigênio (DMG p. 110).',
+      altitudeDamageAndHypoxia: 'Altitude acima de 3.000 metros (10.000 pés); salvaguarda horária de CON ou sofre 1 nível de Exaustão por falta de oxigênio.',
 
       pioneerMitigation: 'Batedores conduzem ritmo cadenciado com paradas de 10 minutos a cada hora para equalização pulmonar da comitiva.',
 
@@ -24571,7 +24571,7 @@
 
       saveType: 'Destreza',
 
-      seismicDamageAndDisruption: 'Rompimento abrupto do terreno abrindo fenda de até 6 metros de profundidade; 2d6 de concussão e risco de soterramento pelas bordas instáveis (DMG p. 284).',
+      seismicDamageAndDisruption: 'Rompimento abrupto do terreno abrindo fenda de até 6 metros de profundidade; 2d6 de concussão e risco de soterramento pelas bordas instáveis.',
 
       pioneerMitigation: 'Batedores atentos notam rachaduras em zigue-zague e pássaros fugindo em revoada, saltando para rocha firme lateral.',
 
@@ -24819,7 +24819,7 @@
 
       saveType: 'Força',
 
-      coastalDamageAndSweeping: 'Fluxo oceânico veloz puxando para o largo a 15 km/h; arrasto de 30 metros mar adentro e risco de afogamento em mar agitado (PHB p. 183).',
+      coastalDamageAndSweeping: 'Fluxo oceânico veloz puxando para o largo a 15 km/h; arrasto de 30 metros mar adentro e risco de afogamento em mar agitado.',
 
       pioneerMitigation: 'Batedores identificam faixa de água calma e sem ondas entre arrebentações e orientam nadar paralelo à praia.',
 
@@ -25067,7 +25067,7 @@
 
       saveType: 'Constituição',
 
-      subterraneanDamageAndSuffocation: 'Gás carbônico pesado e inodoro acumulado em poços baixos; extingue tochas instantaneamente e causa sufocamento (PHB p. 183).',
+      subterraneanDamageAndSuffocation: 'Gás carbônico pesado e inodoro acumulado em poços baixos; extingue tochas instantaneamente e causa sufocamento.',
 
       pioneerMitigation: 'Batedores avançam com tocha erguida na ponta de vara de 3 metros e testam depressões de solo antes de permitir descida da comitiva.',
 
@@ -25315,7 +25315,7 @@
 
       saveType: 'Força',
 
-      karstDamageAndDrowningRisk: 'Garganta estreita de rocha calcária puxando a água a 20 km/h; arrasto involuntário de 18 metros e risco de afogamento (PHB p. 183).',
+      karstDamageAndDrowningRisk: 'Garganta estreita de rocha calcária puxando a água a 20 km/h; arrasto involuntário de 18 metros e risco de afogamento.',
 
       pioneerMitigation: 'Batedores ancoram cabo guia de cânhamo em rocha seca e realizam teste de correnteza com flutuadores de cortiça.',
 
@@ -25563,7 +25563,7 @@
 
       saveType: 'Constituição',
 
-      desertDamageAndExposure: 'Despencamento brusco de 45°C diurnos para -5°C noturnos; calafrios intensos e 1 nível de exaustão por frio extremo (DMG p. 110).',
+      desertDamageAndExposure: 'Despencamento brusco de 45°C diurnos para -5°C noturnos; calafrios intensos e 1 nível de exaustão por frio extremo.',
 
       pioneerMitigation: 'Batedores escavam valas rasas na areia ainda morna e distribuem mantas térmicas antes do anoitecer completo.',
 
@@ -25811,7 +25811,7 @@
 
       saveType: 'Força',
 
-      swampDamageAndEntrapment: 'Bolsão de lodo profundo coberto por folhiço podre; afunda 1d4+1 pés na entrada e mais 1d4 pés por tentativa sem apoio até risco de asfixia (DMG p. 110).',
+      swampDamageAndEntrapment: 'Bolsão de lodo profundo coberto por folhiço podre; afunda 1d4+1 pés na entrada e mais 1d4 pés por tentativa sem apoio até risco de asfixia.',
 
       pioneerMitigation: 'Batedores avançam sondando o leito com varas de 3 metros e pisam exclusivamente em touceiras de juncos firmes.',
 
@@ -26059,7 +26059,7 @@
 
       saveType: 'Destreza',
 
-      forestDamageAndEntanglement: 'Tronco pesado de 200 kg descolando da copa com o vento; 3d8 de concussão e soterramento sob galhos secos (DMG p. 110).',
+      forestDamageAndEntanglement: 'Tronco pesado de 200 kg descolando da copa com o vento; 3d8 de concussão e soterramento sob galhos secos.',
 
       pioneerMitigation: 'Batedores examinam a copa das árvores em busca de galhos soltos ou fungos necróticos antes de permitir a passagem do grupo.',
 
@@ -26307,7 +26307,7 @@
 
       saveType: 'Destreza',
 
-      glacialDamageAndExposure: 'Ponte de neve frágil desmoronando sob o peso da marcha; queda de 4d6 de concussão e risco de hipotermia grave no gelo azul profundo (DMG p. 110).',
+      glacialDamageAndExposure: 'Ponte de neve frágil desmoronando sob o peso da marcha; queda de 4d6 de concussão e risco de hipotermia grave no gelo azul profundo.',
 
       pioneerMitigation: 'Batedores avançam encordoados a cada 5 metros e sondam o leito com bastões de ponta de aço endurecido.',
 
@@ -26555,7 +26555,7 @@
 
       saveType: 'Força',
 
-      canyonDamageAndDisplacement: 'Corrente de ar comprimida superando 90 km/h; deslocamento forçado de 6 metros, perda de equilíbrio e 2d10 de concussão contra paredões rochosos (DMG p. 110).',
+      canyonDamageAndDisplacement: 'Corrente de ar comprimida superando 90 km/h; deslocamento forçado de 6 metros, perda de equilíbrio e 2d10 de concussão contra paredões rochosos.',
 
       pioneerMitigation: 'Batedores avançam rastejando junto a canaletas do piso e ancoram cabos de segurança em fendas de arenito.',
 
@@ -26803,7 +26803,7 @@
 
       saveType: 'Destreza',
 
-      steppeDamageAndDisruption: 'Labaredas rasteiras impulsionadas a 40 km/h; calor abrasador de 3d8 de fogo e risco de asfixia por fumaça densa (DMG p. 110).',
+      steppeDamageAndDisruption: 'Labaredas rasteiras impulsionadas a 40 km/h; calor abrasador de 3d8 de fogo e risco de asfixia por fumaça densa.',
 
       pioneerMitigation: 'Batedores iniciam contra-fogo preventivo a sotavento e conduzem a comitiva para solo já calcinado.',
 
@@ -27051,7 +27051,7 @@
 
       saveType: 'Força',
 
-      mangroveDamageAndTrapping: 'Lamaçal salino profundo de sucção a vácuo; perda total de deslocamento e risco crítico de submersão na maré enchente (DMG p. 110).',
+      mangroveDamageAndTrapping: 'Lamaçal salino profundo de sucção a vácuo; perda total de deslocamento e risco crítico de submersão na maré enchente.',
 
       pioneerMitigation: 'Batedores avançam exclusivamente pelas raízes escora de mangue vermelho e usam pranchas de bambu para cruzar canais.',
 
@@ -27299,7 +27299,7 @@
 
       saveType: 'Destreza',
 
-      volcanicDamageAndEjection: 'Projéteis de magma semifundido em trajetória parabólica a 120 km/h; 4d6 de fogo e 2d6 de concussão com estilhaços em raio de 4,5 metros (DMG p. 110).',
+      volcanicDamageAndEjection: 'Projéteis de magma semifundido em trajetória parabólica a 120 km/h; 4d6 de fogo e 2d6 de concussão com estilhaços em raio de 4,5 metros.',
 
       pioneerMitigation: 'Batedores observam rastros de fumaça ascendente na caldeira e orientam corrida imediata para a base de esporões de basalto maciço.',
 
@@ -27547,7 +27547,7 @@
 
       saveType: 'Destreza',
 
-      acidDamageAndCorrosion: 'Lamaçal salino ácido de pH extremo sob crosta fétida; 2d8 de dano ácido imediato e risco de corrosão de armaduras não mágicas (-1 CA se não lavada com água potável) (DMG p. 110).',
+      acidDamageAndCorrosion: 'Lamaçal salino ácido de pH extremo sob crosta fétida; 2d8 de dano ácido imediato e risco de corrosão de armaduras não mágicas (-1 CA se não lavada com água potável).',
 
       pioneerMitigation: 'Batedores testam o solo com tiras de tornassol vegetal e sondam a consistência com bastões graduados de teca.',
 
@@ -27795,7 +27795,7 @@
 
       saveType: 'Constituição',
 
-      electricalDamageAndShock: 'Corrente de terra por impacto de raio a 30 metros; 3d10 de dano de eletricidade e paralisia temporária nas pernas por diferença de potencial (DMG p. 110).',
+      electricalDamageAndShock: 'Corrente de terra por impacto de raio a 30 metros; 3d10 de dano de eletricidade e paralisia temporária nas pernas por diferença de potencial.',
 
       pioneerMitigation: 'Batedores adotam postura de agachamento compacto com pés juntos sem encostar mãos na rocha e proíbem passadas largas.',
 
@@ -28043,7 +28043,7 @@
 
       saveType: 'Sabedoria',
 
-      opticalDistortionAndRisk: 'Refração térmica inferior projetando ilusão de palmeirais e lagoas translúcidas; teste de Sabedoria (Percepção) CD 14 para não desviar a rota da comitiva em 1d4 milhas em direção a dunas áridas (DMG p. 111).',
+      opticalDistortionAndRisk: 'Refração térmica inferior projetando ilusão de palmeirais e lagoas translúcidas; teste de Sabedoria (Percepção) CD 14 para não desviar a rota da comitiva em 1d4 milhas em direção a dunas áridas.',
 
       pioneerMitigation: 'Batedores usam bússolas solares, conferem o horizonte real com prumo de cartógrafo e identificam a ausência de aves aquáticas.',
 
@@ -28291,7 +28291,7 @@
 
       saveType: 'Destreza',
 
-      glacialRiskAndFall: 'Camada delgada de neve congelada mascarando fenda abissal de 20 metros; colapso sob peso da comitiva causando 6d6 de queda e soterramento no gelo (DMG p. 110-111).',
+      glacialRiskAndFall: 'Camada delgada de neve congelada mascarando fenda abissal de 20 metros; colapso sob peso da comitiva causando 6d6 de queda e soterramento no gelo.',
 
       pioneerMitigation: 'Batedores avançam encordoados a 10 metros com sondagem contínua de piolet e grampões serrilhados cravados.',
 
@@ -28481,7 +28481,7 @@
 
         crevasseShieldingAndCampSecurity: 'Impede o derretimento do gelo sob os corpos dos aventureiros que formaria poças d\'água gélida.',
 
-        campRestAndSafetyGuards: 'Garante recuperação completa de dados de vida e imunidade ao frio extremo durante o sono (DMG p. 110).',
+        campRestAndSafetyGuards: 'Garante recuperação completa de dados de vida e imunidade ao frio extremo durante o sono.',
 
         icon: '🛏️❄️',
 
@@ -28539,7 +28539,7 @@
 
       saveType: 'Destreza',
 
-      bambooRiskAndImpact: 'Vara de bambu gigante arqueada sob tensão que se solta como catapulta; impacto de 3d8 de concussão e arremesso a 3 metros (DMG p. 110-111).',
+      bambooRiskAndImpact: 'Vara de bambu gigante arqueada sob tensão que se solta como catapulta; impacto de 3d8 de concussão e arremesso a 3 metros.',
 
       pioneerMitigation: 'Batedores usam podões de lâmina curva para alívio gradual de tensão em nós e caminham em fila única com 3 metros de espaçamento.',
 
@@ -28787,7 +28787,7 @@
 
       saveType: 'Destreza',
 
-      sandstoneRiskAndCollapse: 'Desabamento repentino de bloco de arco erodido pelo vento; chuva de lajes pesadas causando 4d8 de concussão e soterramento parcial (DMG p. 110-111).',
+      sandstoneRiskAndCollapse: 'Desabamento repentino de bloco de arco erodido pelo vento; chuva de lajes pesadas causando 4d8 de concussão e soterramento parcial.',
 
       pioneerMitigation: 'Batedores conferem linhas de fratura por percussão com martelo de geólogo e desviam a rota por fora do raio de queda de arcos ocos.',
 
@@ -29035,7 +29035,7 @@
 
       saveType: 'Força',
 
-      coastalRiskAndImpact: 'Vaga oceânica de 4 metros varrendo a restinga arenosa; impacto de 3d8 de concussão com arrasto de 12 metros em direção a rochedos submersos (DMG p. 110-111).',
+      coastalRiskAndImpact: 'Vaga oceânica de 4 metros varrendo a restinga arenosa; impacto de 3d8 de concussão com arrasto de 12 metros em direção a rochedos submersos.',
 
       pioneerMitigation: 'Batedores conferem tábuas de maré, evitam barras estreitas na preamar e avançam fixando cabos guias em estacas profundas.',
 
@@ -29283,7 +29283,7 @@
 
       saveType: 'Constituição',
 
-      cloudForestRiskAndDampness: 'Condensação constante a 4°C que encharca roupas de lã e linho em 30 minutos; causa 1 nível de exaustão e desvantagem em testes de iniciativa por dormência muscular (DMG p. 110-111).',
+      cloudForestRiskAndDampness: 'Condensação constante a 4°C que encharca roupas de lã e linho em 30 minutos; causa 1 nível de exaustão e desvantagem em testes de iniciativa por dormência muscular.',
 
       pioneerMitigation: 'Batedores aplicam banha de marmota e cera de abelha nas capas externas e trocam meias a cada 4 horas de marcha.',
 
@@ -29531,7 +29531,7 @@
 
       saveType: 'Destreza',
 
-      pillowLavaRiskAndSteam: 'Jato repentino de vapor a 180°C irrompendo de fissura basáltica submarina; 3d8 de dano ígneo e arremesso em piscina de água fervente (DMG p. 110-111).',
+      pillowLavaRiskAndSteam: 'Jato repentino de vapor a 180°C irrompendo de fissura basáltica submarina; 3d8 de dano ígneo e arremesso em piscina de água fervente.',
 
       pioneerMitigation: 'Batedores observam silvos acústicos na rocha e avançam apenas por cristas de basalto escuro resfriado.',
 
@@ -29779,7 +29779,7 @@
 
       saveType: 'Destreza',
 
-      savannaRiskAndDust: 'Solo argiloso ressecado mascarando rede de galerias subterrâneas de 3 metros; queda de 2d8 de concussão com mordidas corrosivas de insetos guardiões ácaros (DMG p. 110-111).',
+      savannaRiskAndDust: 'Solo argiloso ressecado mascarando rede de galerias subterrâneas de 3 metros; queda de 2d8 de concussão com mordidas corrosivas de insetos guardiões ácaros.',
 
       pioneerMitigation: 'Batedores inspecionam chaminés cônicas de ventilação no capim alto e avançam apenas por trilhas consolidadas de manadas.',
 
@@ -30027,7 +30027,7 @@
 
       saveType: 'Força',
 
-      tarPitRiskAndSuffocation: 'Brejo viscoso de piche negro camuflado por folhas caídas de samambaias gigantes; afundamento com teste de Força CD 14 para não ficar preso e sofrer sufocamento por asfalto fervente (DMG p. 110-111).',
+      tarPitRiskAndSuffocation: 'Brejo viscoso de piche negro camuflado por folhas caídas de samambaias gigantes; afundamento com teste de Força CD 14 para não ficar preso e sofrer sufocamento por asfalto fervente.',
 
       pioneerMitigation: 'Batedores usam varas longas de bambu com feltro na ponta para sondar manchas escuras e avançam apenas por raízes aéreas de fetos.',
 
@@ -30275,7 +30275,7 @@
 
       saveType: 'Força',
 
-      karstRiverRiskAndDrowning: 'Torrente turbulenta no escuro arremessando botes contra rochas cársticas submersas; impacto de 3d8 de concussão e risco de afogamento em água a 5°C (DMG p. 110-111).',
+      karstRiverRiskAndDrowning: 'Torrente turbulenta no escuro arremessando botes contra rochas cársticas submersas; impacto de 3d8 de concussão e risco de afogamento em água a 5°C.',
 
       pioneerMitigation: 'Batedores avançam com corda guia na margem rochosa e ancoram espias de retenção antes de corredeiras de classe IV.',
 
@@ -30523,7 +30523,7 @@
 
       saveType: 'Destreza',
 
-      moraineRiskAndSlump: 'Manto de cascalho negro que desliza repentinamente sobre núcleo de gelo derretido pelo sol; deslizamento de brita afiada e queda de 10 metros causando 3d8 de concussão (DMG p. 110-111).',
+      moraineRiskAndSlump: 'Manto de cascalho negro que desliza repentinamente sobre núcleo de gelo derretido pelo sol; deslizamento de brita afiada e queda de 10 metros causando 3d8 de concussão.',
 
       pioneerMitigation: 'Batedores conferem a espessura da camada de till com piolets de haste longa e proíbem travessia pelas cristas instáveis nos horários mais quentes.',
 
@@ -30771,7 +30771,7 @@
 
       saveType: 'Destreza',
 
-      obsidianRiskAndShrapnel: 'Cacos vítreos de vidro vulcânico de corte molecular; queda causa 3d6 de dano cortante e laceração de botas e cordas de sustentação (DMG p. 110-111).',
+      obsidianRiskAndShrapnel: 'Cacos vítreos de vidro vulcânico de corte molecular; queda causa 3d6 de dano cortante e laceração de botas e cordas de sustentação.',
 
       pioneerMitigation: 'Batedores calçam solados de placas de ferro rebitadas e usam bastões com ponteira de chumbo para testar a estabilidade dos cacos.',
 
@@ -31019,7 +31019,7 @@
 
       saveType: 'Destreza',
 
-      brackishMarshRiskAndMud: 'Trama delgada de aguapés e juncos flutuantes sobre canal de 4 metros de lama negra e água salobra; colapso sob peso com teste de Destreza CD 14 para não afundar no lodo (DMG p. 110-111).',
+      brackishMarshRiskAndMud: 'Trama delgada de aguapés e juncos flutuantes sobre canal de 4 metros de lama negra e água salobra; colapso sob peso com teste de Destreza CD 14 para não afundar no lodo.',
 
       pioneerMitigation: 'Batedores avançam com pranchas leves de cedro distribuindo peso e sondam o leito com percha graduada de 3 metros.',
 
@@ -31267,7 +31267,7 @@
 
       saveType: 'Destreza',
 
-      columnarBasaltRiskAndScree: 'Pilar basáltico hexagonal de 12 metros sofre descompressão térmica e tomba transversalmente sobre a trilha; chuva de blocos pesados causando 3d8 de dano contundente e soterramento parcial (DMG p. 110-111).',
+      columnarBasaltRiskAndScree: 'Pilar basáltico hexagonal de 12 metros sofre descompressão térmica e tomba transversalmente sobre a trilha; chuva de blocos pesados causando 3d8 de dano contundente e soterramento parcial.',
 
       pioneerMitigation: 'Batedores avaliam fraturas de tensão com martelo geológico e identificam juntas disjuntivas soltas antes de permitir a passagem do grupo.',
 
@@ -31515,7 +31515,7 @@
 
       saveType: 'Destreza',
 
-      karstPavementRiskAndSinkholes: 'Gretas profundas ocultas sob tufos de musgo e samambaias entre blocos de clint liso; aprisionamento repentino do pé com fratura por torção e 2d8 de dano contundente (DMG p. 110-111).',
+      karstPavementRiskAndSinkholes: 'Gretas profundas ocultas sob tufos de musgo e samambaias entre blocos de clint liso; aprisionamento repentino do pé com fratura por torção e 2d8 de dano contundente.',
 
       pioneerMitigation: 'Batedores avançam com bastões de sondagem medindo as gretas e marcam trilhas seguras com giz vermelho.',
 
@@ -31763,7 +31763,7 @@
 
       saveType: 'Destreza',
 
-      coastalDuneRiskAndSandSlump: 'Aresta instável de duna costeira de 15 metros que cede sob o avanço da comitiva; avalanche de areia fofa causando 2d8 de contusão e risco de soterramento parcial (DMG p. 110-111).',
+      coastalDuneRiskAndSandSlump: 'Aresta instável de duna costeira de 15 metros que cede sob o avanço da comitiva; avalanche de areia fofa causando 2d8 de contusão e risco de soterramento parcial.',
 
       pioneerMitigation: 'Batedores avançam com calçados largos de trama de palha e evitam a crista de barlavento íngreme durante rajadas de vento.',
 
@@ -32011,7 +32011,7 @@
 
       saveType: 'Destreza',
 
-      stiltRootMangroveRiskAndTidalMud: 'Emaranhado de raízes aéreas arqueadas recobertas por bancos de ostras e cracas pontiagudas; quedas repentinas causando 2d6 de corte e risco de infecção séptica marinha (DMG p. 110-111).',
+      stiltRootMangroveRiskAndTidalMud: 'Emaranhado de raízes aéreas arqueadas recobertas por bancos de ostras e cracas pontiagudas; quedas repentinas causando 2d6 de corte e risco de infecção séptica marinha.',
 
       pioneerMitigation: 'Batedores usam perneiras de couro curtido com tanino e facões de mato pesados abrindo clareiras de avanço.',
 
@@ -32259,7 +32259,7 @@
 
       saveType: 'Destreza',
 
-      abyssalCenoteRiskAndTravertine: 'Borda calcária recoberta por limo escorregadio pendendo sobre abismo vertical de 25 metros; queda iminente causando 4d6 de dano contundente a menos que ancorado (DMG p. 110-111).',
+      abyssalCenoteRiskAndTravertine: 'Borda calcária recoberta por limo escorregadio pendendo sobre abismo vertical de 25 metros; queda iminente causando 4d6 de dano contundente a menos que ancorado.',
 
       pioneerMitigation: 'Batedores avançam encordoados com pítons de ferro forjado e instalam cabos de corrimão antes da aproximação do grupo.',
 
@@ -32507,7 +32507,7 @@
 
       saveType: 'Destreza',
 
-      permafrostRiskAndPenitentes: 'Fenda vertical de 18 metros encoberta por fina ponte de neve dura; ruptura súbita com queda em fresta congelante causando 3d6 de impacto contundente e 1d6 de frio (DMG p. 110-111).',
+      permafrostRiskAndPenitentes: 'Fenda vertical de 18 metros encoberta por fina ponte de neve dura; ruptura súbita com queda em fresta congelante causando 3d6 de impacto contundente e 1d6 de frio.',
 
       pioneerMitigation: 'Batedores avançam com bastões de sondagem medindo a densidade da neve e caminham encordoados em trios.',
 
@@ -32755,7 +32755,7 @@
 
       saveType: 'Destreza',
 
-      borealTaigaRiskAndPeat: 'Camada de musgo superficial verdejante que oculta covas de combustão lenta de turfa a 400°C; colapso sob passos causando 3d6 de fogo e destruição de solas de botas (DMG p. 110-111).',
+      borealTaigaRiskAndPeat: 'Camada de musgo superficial verdejante que oculta covas de combustão lenta de turfa a 400°C; colapso sob passos causando 3d6 de fogo e destruição de solas de botas.',
 
       pioneerMitigation: 'Batedores avançam com varas de freixo pontiagudas medindo calor do solo e detectam vapores cinzentos entre as raízes.',
 
@@ -33003,7 +33003,7 @@
 
       saveType: 'Destreza',
 
-      saltFlatRiskAndBrine: 'Crosta superficial de sal de 4 cm que desaba sob o avanço da comitiva; afundamento em salmoura cáustica e quente a 50°C causando 2d6 ácido e 1d6 de fogo (DMG p. 110-111).',
+      saltFlatRiskAndBrine: 'Crosta superficial de sal de 4 cm que desaba sob o avanço da comitiva; afundamento em salmoura cáustica e quente a 50°C causando 2d6 ácido e 1d6 de fogo.',
 
       pioneerMitigation: 'Batedores usam calçados estribo de madeira de balsa que dispersam a pressão sobre a crosta salina e testam o solo com lanças leves.',
 
@@ -33251,7 +33251,7 @@
 
       saveType: 'Destreza',
 
-      petrifiedForestRiskAndSilica: 'Segmento de tronco silicificado de 10 toneladas que se descalça de ravina íngreme rolando em alta velocidade; esmagamento contundente causando 3d8 e soterramento parcial (DMG p. 110-111).',
+      petrifiedForestRiskAndSilica: 'Segmento de tronco silicificado de 10 toneladas que se descalça de ravina íngreme rolando em alta velocidade; esmagamento contundente causando 3d8 e soterramento parcial.',
 
       pioneerMitigation: 'Batedores avaliam fraturas de base com alavancas de ferro e contornam ravinas com blocos fósseis em equilíbrio precário.',
 
@@ -33499,7 +33499,7 @@
 
       saveType: 'Constituição',
 
-      blackSandRiskAndVents: 'Dunas móveis de magnetita e basalto moído que atingem 70°C sob sol forte; desmoronamento sobre a comitiva causando 2d8 de fogo e queimaduras térmicas nas pernas (DMG p. 110-111).',
+      blackSandRiskAndVents: 'Dunas móveis de magnetita e basalto moído que atingem 70°C sob sol forte; desmoronamento sobre a comitiva causando 2d8 de fogo e queimaduras térmicas nas pernas.',
 
       pioneerMitigation: 'Batedores usam sandálias com solado duplo de cortiça isolante e avançam em marcha noturna ou nas primeiras horas do amanhecer.',
 
@@ -33747,7 +33747,7 @@
 
       saveType: 'Destreza',
 
-      ignimbriteRiskAndTafoni: 'Saliência oca de tufo vulcânico esfarelável em favo de mel que quebra durante escalada; queda de 8 metros sobre cascalheira áspera com 3d6 contundente e entorse (DMG p. 110-111).',
+      ignimbriteRiskAndTafoni: 'Saliência oca de tufo vulcânico esfarelável em favo de mel que quebra durante escalada; queda de 8 metros sobre cascalheira áspera com 3d6 contundente e entorse.',
 
       pioneerMitigation: 'Batedores usam pítons expansivos de haste longa para rocha porosa e testam a rigidez dos apoios com martelo geológico.',
 
@@ -33995,7 +33995,7 @@
 
       saveType: 'Força',
 
-      palafitteRiverRiskAndMonsoon: 'Vaga repentina de 2,5 metros de água túrbida descendo a curva de meandro com troncos pesados; impacto contundente causando 3d6 e arrasto violento (DMG p. 110-111).',
+      palafitteRiverRiskAndMonsoon: 'Vaga repentina de 2,5 metros de água túrbida descendo a curva de meandro com troncos pesados; impacto contundente causando 3d6 e arrasto violento.',
 
       pioneerMitigation: 'Batedores monitoram a cor da água e o som de estalos na cabeceira, posicionando a expedição em elevações de margem convexa.',
 
@@ -34243,7 +34243,7 @@
 
       saveType: 'Destreza',
 
-      graniteInselbergRiskAndSlabs: 'Declive liso de granito maciço com 50 graus de inclinação sem agarras manuais; derrapagem descontrolada por 30 metros causando 4d6 de abrasão e impacto (DMG p. 110-111).',
+      graniteInselbergRiskAndSlabs: 'Declive liso de granito maciço com 50 graus de inclinação sem agarras manuais; derrapagem descontrolada por 30 metros causando 4d6 de abrasão e impacto.',
 
       pioneerMitigation: 'Batedores usam sapatilhas de couro com sola de borracha vegetal resinada para alta aderência e fixam linhas de corrimão encordoadas.',
 
@@ -34491,7 +34491,7 @@
 
       saveType: 'Destreza',
 
-      travertineTerraceRiskAndCascades: 'Dique natural de travertino oco com 4 metros de desnível que cede sob o peso da marcha; queda violenta sobre degraus afiados de calcita causando 2d6 perfurante e 2d6 contundente (DMG p. 110-111).',
+      travertineTerraceRiskAndCascades: 'Dique natural de travertino oco com 4 metros de desnível que cede sob o peso da marcha; queda violenta sobre degraus afiados de calcita causando 2d6 perfurante e 2d6 contundente.',
 
       pioneerMitigation: 'Batedores sondam as bordas de piscina com bastões de ponta chata e distribuem o peso usando pranchas de travessia apoiadas nos pilares de ancoragem.',
 
@@ -34739,7 +34739,7 @@
 
       saveType: 'Destreza',
 
-      cryogenicPingoRiskAndThermokarst: 'Montículo criógeno com núcleo de gelo maciço de 20 metros que implode subitamente pelo degelo da base; cratera de lama congelada e blocos pontiagudos de gelo causando 3d6 contundente e hipotermia (DMG p. 110-111).',
+      cryogenicPingoRiskAndThermokarst: 'Montículo criógeno com núcleo de gelo maciço de 20 metros que implode subitamente pelo degelo da base; cratera de lama congelada e blocos pontiagudos de gelo causando 3d6 contundente e hipotermia.',
 
       pioneerMitigation: 'Batedores usam sondas graduadas de perfuração térmica para checar a solidez da cobertura de turfa e contornam cumes com fendas radiais ativas.',
 
@@ -34987,7 +34987,7 @@
 
       saveType: 'Destreza',
 
-      restingaBarrierRiskAndLagoons: 'Crista móvel de duna barcana com 12 metros de desnível no ângulo crítico de repouso (34 graus); colapso em massa com deslocamento repentino de toneladas de areia fina causando 3d6 contundente e soterramento parcial (DMG p. 110-111).',
+      restingaBarrierRiskAndLagoons: 'Crista móvel de duna barcana com 12 metros de desnível no ângulo crítico de repouso (34 graus); colapso em massa com deslocamento repentino de toneladas de areia fina causando 3d6 contundente e soterramento parcial.',
 
       pioneerMitigation: 'Batedores contornam o barlavento consolidado e evitam transpor o topo das barcanas durante rajadas de vento marítimo intenso.',
 
@@ -35235,7 +35235,7 @@
 
       saveType: 'Destreza',
 
-      riparianGalleryRiskAndCutbanks: 'Erosão basal oculta que solapa barranco vertical de 8 metros de altura na curva externa do meandro; colapso súbito de terra saturada e raízes expostas causando 3d6 contundente e soterramento parcial (DMG p. 110-111).',
+      riparianGalleryRiskAndCutbanks: 'Erosão basal oculta que solapa barranco vertical de 8 metros de altura na curva externa do meandro; colapso súbito de terra saturada e raízes expostas causando 3d6 contundente e soterramento parcial.',
 
       pioneerMitigation: 'Batedores avançam recuados 10 metros da borda de erosão e examinam trincas longitudinais no solo antes de permitir a passagem da comitiva.',
 
@@ -35483,7 +35483,7 @@
 
       saveType: 'Destreza',
 
-      starDuneRiskAndGassi: 'Aresta aguda e instável no topo de duna estelar de 40 metros sujeita a múltiplos regimes de vento; desmoronamento repentino sob os passos da coluna com rolamento violento encosta abaixo por 35 graus causando 4d6 de dano de queda e soterramento (DMG p. 110-111).',
+      starDuneRiskAndGassi: 'Aresta aguda e instável no topo de duna estelar de 40 metros sujeita a múltiplos regimes de vento; desmoronamento repentino sob os passos da coluna com rolamento violento encosta abaixo por 35 graus causando 4d6 de dano de queda e soterramento.',
 
       pioneerMitigation: 'Batedores avançam encordoados em cordada tripla e caminham 2 metros abaixo da crista pelo flanco consolidado de menor inclinação.',
 
@@ -35731,7 +35731,7 @@
 
       saveType: 'Destreza',
 
-      geyserBasinRiskAndAcid: 'Coluna explosiva de água fervente a 100°C e vapor pressurizado que irrompe repentinamente de conduto oculto a 60 metros de altura; escaldamento violento com 4d6 de dano de fogo e choque térmico (DMG p. 110-111).',
+      geyserBasinRiskAndAcid: 'Coluna explosiva de água fervente a 100°C e vapor pressurizado que irrompe repentinamente de conduto oculto a 60 metros de altura; escaldamento violento com 4d6 de dano de fogo e choque térmico.',
 
       pioneerMitigation: 'Batedores identificam orifícios borbulhantes por ressonância acústica e respeitam perímetro de segurança de 30 metros ao redor de cones de sílica.',
 
@@ -35979,7 +35979,7 @@
 
       saveType: 'Destreza',
 
-      glacialMoraineRiskAndDrumlins: 'Encosta de morena lateral de 45 graus formada por detritos glaciais soltos e blocos angulares sem consolidação; colapso em massa sob os passos da coluna causando rolamento com 3d6 contundente e soterramento parcial (DMG p. 110-111).',
+      glacialMoraineRiskAndDrumlins: 'Encosta de morena lateral de 45 graus formada por detritos glaciais soltos e blocos angulares sem consolidação; colapso em massa sob os passos da coluna causando rolamento com 3d6 contundente e soterramento parcial.',
 
       pioneerMitigation: 'Batedores sondam o leito com bastões de ferro temperado e contornam as cristas soltas pela base sólida de rocha polida.',
 
@@ -36227,7 +36227,7 @@
 
       saveType: 'Destreza',
 
-      blackwaterIgapoRiskAndMats: 'Camada entrelaçada de gramíneas e juncos aquáticos de 30 centímetros que cede sob a marcha da comitiva; afundamento em 6 metros de água preta anóxica emaranhada em raízes causando 3d6 e sufocamento por afogamento (DMG p. 110-111).',
+      blackwaterIgapoRiskAndMats: 'Camada entrelaçada de gramíneas e juncos aquáticos de 30 centímetros que cede sob a marcha da comitiva; afundamento em 6 metros de água preta anóxica emaranhada em raízes causando 3d6 e sufocamento por afogamento.',
 
       pioneerMitigation: 'Batedores avançam com varas longas de bambu de sondagem horizontal e amarram linhas de retenção aos troncos firmes de igapó.',
 
@@ -36475,7 +36475,7 @@
 
       saveType: 'Destreza',
 
-      badlandsMudstoneRiskAndHoodoos: 'Erosão regressiva violenta em talude de argilito fissurado de 15 metros; colapso súbito da borda do desfiladeiro sob a coluna de marcha com rolamento de blocos de barro ressequido causando 3d6 contundente e soterramento (DMG p. 110-111).',
+      badlandsMudstoneRiskAndHoodoos: 'Erosão regressiva violenta em talude de argilito fissurado de 15 metros; colapso súbito da borda do desfiladeiro sob a coluna de marcha com rolamento de blocos de barro ressequido causando 3d6 contundente e soterramento.',
 
       pioneerMitigation: 'Batedores avançam recuados 8 metros das fendas de tração e utilizam bastões de madeira leve para sondar vazios ocos de cabeceira.',
 
@@ -36723,7 +36723,7 @@
 
       saveType: 'Destreza',
 
-      blackMangroveRiskAndPneumatophores: 'Campos densos de milhares de raízes respiratórias pontiagudas de 30 centímetros que despontam da vasa cinzenta; queda violenta com perfuração múltipla causando 3d6 perfurante e risco severo de septicemia por bactérias marinhas (DMG p. 110-111).',
+      blackMangroveRiskAndPneumatophores: 'Campos densos de milhares de raízes respiratórias pontiagudas de 30 centímetros que despontam da vasa cinzenta; queda violenta com perfuração múltipla causando 3d6 perfurante e risco severo de septicemia por bactérias marinhas.',
 
       pioneerMitigation: 'Batedores calçam caneleiras de couro crú forradas com lâminas de madeira e progridem apoiando pranchas de travessia sobre os espetos.',
 
@@ -36971,7 +36971,7 @@
 
       saveType: 'Destreza',
 
-      aaLavaRiskAndChasms: 'Campo caótico de clínqueres afiados e blocos escoriáceos de basalto vítreo sem aderência firme; desequilíbrio e queda desgovernada com lacerações profundas causando 3d6 cortante e perfurante com destruição de perneiras de couro (DMG p. 110-111).',
+      aaLavaRiskAndChasms: 'Campo caótico de clínqueres afiados e blocos escoriáceos de basalto vítreo sem aderência firme; desequilíbrio e queda desgovernada com lacerações profundas causando 3d6 cortante e perfurante com destruição de perneiras de couro.',
 
       pioneerMitigation: 'Batedores calçam solados de placas de ferro fixadas com arames e avançam apoiados em bordões longos com ponta chata para testar a estabilidade dos blocos.',
 
@@ -37219,7 +37219,7 @@
 
       saveType: 'Força',
 
-      papyrusSwampRiskAndSiphons: 'Muralha impenetrável de hastes triangulares de papiro de 5 metros de altura entrelaçadas em rizomas flutuantes; desorientação sensorial e aprisionamento elástico causando exaustão severa e risco de asfixia em lamaçal (DMG p. 110-111).',
+      papyrusSwampRiskAndSiphons: 'Muralha impenetrável de hastes triangulares de papiro de 5 metros de altura entrelaçadas em rizomas flutuantes; desorientação sensorial e aprisionamento elástico causando exaustão severa e risco de asfixia em lamaçal.',
 
       pioneerMitigation: 'Batedores avançam empunhando foices longas de ceifa e abrem trilha alinhada por bússola solar com estacas marcadoras a cada 15 metros.',
 
@@ -37467,7 +37467,7 @@
 
       saveType: 'Destreza',
 
-      karstMogoteRiskAndPits: 'Poço vertical de dissolução kárstica de 20 metros de profundidade camuflado por tapete denso de samambaias e orquídeas aéreas; ruptura súbita com queda sobre espigas pontiagudas de espeleotemas causando 4d6 de queda e perfuração (DMG p. 110-111).',
+      karstMogoteRiskAndPits: 'Poço vertical de dissolução kárstica de 20 metros de profundidade camuflado por tapete denso de samambaias e orquídeas aéreas; ruptura súbita com queda sobre espigas pontiagudas de espeleotemas causando 4d6 de queda e perfuração.',
 
       pioneerMitigation: 'Batedores avançam tateando o solo com varas de bambu compridas e amarram fitas refletivas demarcatórias nas fendas ocultas.',
 
@@ -37715,7 +37715,7 @@
 
       saveType: 'Destreza',
 
-      hamadaRegRiskAndGales: 'Pavimento contínuo de seixos silicosos e lascas de pederneira envernizadas com óxidos de manganês; fratura concoidal com bordas afiadas como bisturis que rasgam botas e cortam tendões em quedas causando 3d6 cortante e perfurante (DMG p. 110-111).',
+      hamadaRegRiskAndGales: 'Pavimento contínuo de seixos silicosos e lascas de pederneira envernizadas com óxidos de manganês; fratura concoidal com bordas afiadas como bisturis que rasgam botas e cortam tendões em quedas causando 3d6 cortante e perfurante.',
 
       pioneerMitigation: 'Batedores fixam solas de ferro dobrado sob as botas e marcham em fila única apoiando os passos nos seixos maiores arredondados.',
 
@@ -37963,7 +37963,7 @@
 
       saveType: 'Força',
 
-      quartziteCanyonAndPlungeRisk: 'Vórtice hidráulico violento gerado pelo impacto da coluna d\'água de 40 metros em caldeirão de quartzito afunilado; arrasto subaquático em espiral com sucção centrípeta causando 3d6 de concussão contra paredes rochosas polidas (DMG p. 110-111).',
+      quartziteCanyonAndPlungeRisk: 'Vórtice hidráulico violento gerado pelo impacto da coluna d\'água de 40 metros em caldeirão de quartzito afunilado; arrasto subaquático em espiral com sucção centrípeta causando 3d6 de concussão contra paredes rochosas polidas.',
 
       pioneerMitigation: 'Batedores lançam amarrações de segurança com cordas flutuantes e arneses de couro de lontra antes de atravessar a bacia periférica.',
 
@@ -38211,7 +38211,7 @@
 
       saveType: 'Constituição',
 
-      lateriteCrustAndMoundRisk: 'Carapaça de canga férrea negra e ocre aquecida pelo sol tropical a 58°C; calor radiante ascendente que desidrata a comitiva em dobro (4 galões/dia) e induz exaustão precoce (DMG p. 110-111).',
+      lateriteCrustAndMoundRisk: 'Carapaça de canga férrea negra e ocre aquecida pelo sol tropical a 58°C; calor radiante ascendente que desidrata a comitiva em dobro (4 galões/dia) e induz exaustão precoce.',
 
       pioneerMitigation: 'Marcha estritamente crepuscular e noturna, com botas de sola dupla isoladas por cortiça e capas claras de linho reflexivo.',
 
@@ -38459,7 +38459,7 @@
 
       saveType: 'Destreza',
 
-      tufaPinnacleAndEndorheicRisk: 'Crosta fina de carbonato de sódio e salitre que simula solo seco sobre camada de lodo alcalino viscoso (pH 10); rompimento súbito sob peso engolindo pernas dos aventureiros causando 2d6 de dano cáustico e imobilização em areia movediça (DMG p. 110-111).',
+      tufaPinnacleAndEndorheicRisk: 'Crosta fina de carbonato de sódio e salitre que simula solo seco sobre camada de lodo alcalino viscoso (pH 10); rompimento súbito sob peso engolindo pernas dos aventureiros causando 2d6 de dano cáustico e imobilização em areia movediça.',
 
       pioneerMitigation: 'Batedores marcham com sapatos de esteira de vime entrelaçado e sondam o piso a cada passo com bastões de ponta chata.',
 
@@ -38707,7 +38707,7 @@
 
       saveType: 'Destreza',
 
-      rockGlacierAndSolifluctionRisk: 'Encosta de cascalho angular e blocos de granito instáveis assentados sobre núcleo de gelo periglacial em degelo; movimento de massa súbito que arrasta aventureiros por 30 metros ladeira abaixo causando 3d6 de concussão e esmagamento (DMG p. 110-111).',
+      rockGlacierAndSolifluctionRisk: 'Encosta de cascalho angular e blocos de granito instáveis assentados sobre núcleo de gelo periglacial em degelo; movimento de massa súbito que arrasta aventureiros por 30 metros ladeira abaixo causando 3d6 de concussão e esmagamento.',
 
       pioneerMitigation: 'Batedores avançam em zigue-zague por cristas consolidadas de morena estável e utilizam bastões de caminhada com ponteiras de tungstênio para ancoragem imediata.',
 
@@ -38955,7 +38955,7 @@
 
       saveType: 'Destreza',
 
-      karstPavementAndGrykeRisk: 'Pavimento de lapiás com blocos tabulares de calcário polido separados por fendas verticais de até 3 metros de profundidade com arestas cortantes como serras; escorregamento ao saltar entre blocos prendendo a perna na fresta e infligindo 2d8 de dano cortante e perfurante com risco de fratura exposta (DMG p. 110-111).',
+      karstPavementAndGrykeRisk: 'Pavimento de lapiás com blocos tabulares de calcário polido separados por fendas verticais de até 3 metros de profundidade com arestas cortantes como serras; escorregamento ao saltar entre blocos prendendo a perna na fresta e infligindo 2d8 de dano cortante e perfurante com risco de fratura exposta.',
 
       pioneerMitigation: 'Batedores avançam com cordas guias esticadas entre os integrantes e marcham sobre pranchas de travessia portáteis de cedro leve.',
 
@@ -39203,7 +39203,7 @@
 
       saveType: 'Força',
 
-      hypersalineApicumRisk: 'Planície de apicum desprovida de árvores com fina casca salina sobre lodo sulfídrico viscoso e hipersalino; rompimento súbito que engole pernas até as coxas com sucção mecânica implacável de lama salgada causando 2d6 de dano de contusão e imobilização total (DMG p. 110-111).',
+      hypersalineApicumRisk: 'Planície de apicum desprovida de árvores com fina casca salina sobre lodo sulfídrico viscoso e hipersalino; rompimento súbito que engole pernas até as coxas com sucção mecânica implacável de lama salgada causando 2d6 de dano de contusão e imobilização total.',
 
       pioneerMitigation: 'Batedores avançam com raquetes de praia feitas de talas de palmeira entrelaçadas e utilizam remos como pontes de apoio horizontal.',
 
@@ -39451,7 +39451,7 @@
 
       saveType: 'Destreza',
 
-      slotCanyonAndArchRisk: 'Enxurrada relâmpago gerada por tempestade a quilômetros de distância a montante; parede de água barrenta de 3 metros de altura avançando a 40 km/h pelo gargalo estreito de arenito sem aviso acústico, arrastando aventureiros e infligindo 3d8 de dano de concussão contra as paredes polidas com afogamento iminente (DMG p. 110-111).',
+      slotCanyonAndArchRisk: 'Enxurrada relâmpago gerada por tempestade a quilômetros de distância a montante; parede de água barrenta de 3 metros de altura avançando a 40 km/h pelo gargalo estreito de arenito sem aviso acústico, arrastando aventureiros e infligindo 3d8 de dano de concussão contra as paredes polidas com afogamento iminente.',
 
       pioneerMitigation: 'Batedores monitoram vibrações no piso rochoso e mantêm cordas de fuga já instaladas com nós prussik nas fendas elevadas.',
 
@@ -39699,7 +39699,7 @@
 
       saveType: 'Sabedoria',
 
-      ruiniformSandstoneAndLabyrinthRisk: 'Cânions sinuosos de arenito idênticos com 25 metros de altura que convergem para fendas cegas em fundo de saco; entrada em ramificação errônea que adiciona 1d4 horas de marcha estéril sob calor escaldante gerando 1 nível de exaustão e desorientação total de bússola (DMG p. 110-111).',
+      ruiniformSandstoneAndLabyrinthRisk: 'Cânions sinuosos de arenito idênticos com 25 metros de altura que convergem para fendas cegas em fundo de saco; entrada em ramificação errônea que adiciona 1d4 horas de marcha estéril sob calor escaldante gerando 1 nível de exaustão e desorientação total de bússola.',
 
       pioneerMitigation: 'Batedores marcam cruzamentos rochosos com pirâmides de seixos de sílica e mantêm cartografia contínua em prancheta de navegação.',
 
@@ -39947,7 +39947,7 @@
 
       saveType: 'Sabedoria',
 
-      tepuiMesaAndChasmRisk: 'Borda da meseta tabular cercada por abismo de 800 metros encoberto por névoa orográfica espessa com visibilidade nula além de 1 metro; risco de avanço sobre beiral falso de turfeira flutuante despencando no vazio (DMG p. 110-111).',
+      tepuiMesaAndChasmRisk: 'Borda da meseta tabular cercada por abismo de 800 metros encoberto por névoa orográfica espessa com visibilidade nula além de 1 metro; risco de avanço sobre beiral falso de turfeira flutuante despencando no vazio.',
 
       pioneerMitigation: 'Batedores avançam encordoados a cada 4 metros com linha mestra tensa e sondam o piso com bastões de ponta chata antes de firmar passos.',
 
@@ -40195,7 +40195,7 @@
 
       saveType: 'Sabedoria',
 
-      boomingDuneAndSlipRisk: 'Vibração subsônica e estrondo harmônico contínuo de até 105 dB gerado pelo atrito de grãos de quartzo na descida da duna; ondas de pressão que provocam vertigem labiríntica, desorientação de marcha e pânico incontrolável em montarias de carga (DMG p. 110-111).',
+      boomingDuneAndSlipRisk: 'Vibração subsônica e estrondo harmônico contínuo de até 105 dB gerado pelo atrito de grãos de quartzo na descida da duna; ondas de pressão que provocam vertigem labiríntica, desorientação de marcha e pânico incontrolável em montarias de carga.',
 
       pioneerMitigation: 'Uso obrigatório de tampões auriculares de lã encerada e cabrestos de contenção com antolhos para os animais de carga.',
 
@@ -40443,7 +40443,7 @@
 
       saveType: 'Destreza',
 
-      glacialFjordAndCalvingRisk: 'Colapso de torre de gelo de 40 metros de altura na frente marinha da geleira; impacto que gera onda repentina de 5 metros avançando pelo fiorde estreito que vira embarcações e lança aventureiros na água a 1°C infligindo 3d8 de concussão e risco imediato de hipotermia letal (DMG p. 110-111).',
+      glacialFjordAndCalvingRisk: 'Colapso de torre de gelo de 40 metros de altura na frente marinha da geleira; impacto que gera onda repentina de 5 metros avançando pelo fiorde estreito que vira embarcações e lança aventureiros na água a 1°C infligindo 3d8 de concussão e risco imediato de hipotermia letal.',
 
       pioneerMitigation: 'Navegação mantendo distância mínima de 500 metros da frente da geleira e proa voltada perpendicularmente à direção da onda.',
 
@@ -40691,7 +40691,7 @@
 
       saveType: 'Força',
 
-      tidewaterGlacierAndSeaCaveRisk: 'Bolsão de água doce represada sob alta pressão na base da geleira que arrebenta pelo fundo da caverna marinha, projetando uma torrente gélida violenta de 4 metros com blocos de gelo pontiagudos a 45 km/h causando 3d8 de concussão e risco imediato de afogamento (DMG p. 110-111).',
+      tidewaterGlacierAndSeaCaveRisk: 'Bolsão de água doce represada sob alta pressão na base da geleira que arrebenta pelo fundo da caverna marinha, projetando uma torrente gélida violenta de 4 metros com blocos de gelo pontiagudos a 45 km/h causando 3d8 de concussão e risco imediato de afogamento.',
 
       pioneerMitigation: 'Batedores ancoram canoas em cabos de retenção tensionados nas paredes laterais de rocha sólida e mantêm rotas de evacuação desimpedidas.',
 
@@ -41267,7 +41267,7 @@
 
       saveType: 'Força',
 
-      glacierVolcanoRisk: 'Bolsa subglacial aquecida por fumarola que rompe em torrente de lahar com lama de cinza e blocos de gelo a 45 km/h descendo a garganta; arrasta equipamentos pesados e causa risco de 3d10 de concussão por choque mecânico e queimaduras de lama a 60°C (DMG p. 110, 246-247).',
+      glacierVolcanoRisk: 'Bolsa subglacial aquecida por fumarola que rompe em torrente de lahar com lama de cinza e blocos de gelo a 45 km/h descendo a garganta; arrasta equipamentos pesados e causa risco de 3d10 de concussão por choque mecânico e queimaduras de lama a 60°C.',
 
       pioneerMitigation: 'Observação contínua de degelo anormal da morena frontal e fuga urgente para contrafortes de rocha andesítica saliente.',
 
@@ -41291,7 +41291,7 @@
 
         saveType: 'Destreza',
 
-        glacierVolcanoRisk: 'Caverna subglacial esculpida por vapor geotérmico com teto translúcido fraturado; o choque térmico rompe blocos de gelo de 1 tonelada liberando vapor escaldante saturado de enxofre com 3d8 de concussão e 2d6 de fogo/vapor (PHB p. 182-183).',
+        glacierVolcanoRisk: 'Caverna subglacial esculpida por vapor geotérmico com teto translúcido fraturado; o choque térmico rompe blocos de gelo de 1 tonelada liberando vapor escaldante saturado de enxofre com 3d8 de concussão e 2d6 de fogo/vapor.',
 
         pioneerMitigation: 'Sondagem de solidez do gelo com piolet e uso de respiradores de feltro umedecido com vinagre diluído.',
 
@@ -41313,7 +41313,7 @@
 
         saveType: 'Destreza',
 
-        glacierVolcanoRisk: 'Fenda glaciovulcânica profunda (bergschrund) com ponte de neve frágil; o aventureiro despenca 15 metros em nicho aquecido com acúmulo letal de CO₂ e H₂S, sofrendo 3d8 de concussão e risco iminente de asfixia (DMG p. 110, 246; PHB p. 182-183).',
+        glacierVolcanoRisk: 'Fenda glaciovulcânica profunda (bergschrund) com ponte de neve frágil; o aventureiro despenca 15 metros em nicho aquecido com acúmulo letal de CO₂ e H₂S, sofrendo 3d8 de concussão e risco iminente de asfixia.',
 
         pioneerMitigation: 'Travessia em cordada tensa de 3 membros com teste prévio de pontes de neve com sonda de avalanche de 3 metros.',
 
@@ -41335,7 +41335,7 @@
 
         saveType: 'Destreza',
 
-        glacierVolcanoRisk: 'Pressão de vapor acumulada sob morena congelada que explode arremessando fragmentos pontiagudos de basalto e gelo pressurizado como estilhaços balísticos a mais de 100 metros de raio com 3d6 de dano perfurante (DMG p. 246-247).',
+        glacierVolcanoRisk: 'Pressão de vapor acumulada sob morena congelada que explode arremessando fragmentos pontiagudos de basalto e gelo pressurizado como estilhaços balísticos a mais de 100 metros de raio com 3d6 de dano perfurante.',
 
         pioneerMitigation: 'Reconhecimento de ruídos de estalo subterrâneo e marcha mantendo distância de segurança de 80 metros da crista da morena.',
 
@@ -41485,15 +41485,15 @@
 
     var mount = {
 
-      mountTitle: 'Montarias Aladas: Pégasos e Grifos no Reconhecimento Aéreo (PHB p. 155-157; MM p. 174, 250)',
+      mountTitle: 'Montarias Aladas: Pégasos e Grifos no Reconhecimento Aéreo',
 
       saveDC: 15,
 
       saveType: 'Adestrar Animais',
 
-      mountMechanics: 'Pégaso celestial (Grande, CA 12, 59 PV, voo 27 metros ou 9 milhas por hora, carga 240 kg, compreensão de idiomas celestiais e élficos, MM p. 250) e Grifo (voo 24 metros, percepção passiva 15 com visão aguçada, MM p. 174); sobrevoam a 150 metros de altitude mapeando até 3 nós à frente no Pointcrawl, detectando fumaça de acampamentos inimigos e perigos climáticos horas antes do contato terrestre!',
+      mountMechanics: 'Pégaso celestial (Grande, CA 12, 59 PV, voo 27 metros ou 9 milhas por hora, carga 240 kg, compreensão de idiomas celestiais e élficos) e Grifo (voo 24 metros, percepção passiva 15 com visão aguçada); sobrevoam a 150 metros de altitude mapeando até 3 nós à frente no Pointcrawl, detectando fumaça de acampamentos inimigos e perigos climáticos horas antes do contato terrestre!',
 
-      pioneerMitigation: 'Ignora por completo abismos, desfiladeiros, corredeiras e terrenos difíceis de floresta densa ou pântanos, cobrindo até 72 milhas diárias pelo ar (DMG p. 119).',
+      pioneerMitigation: 'Ignora por completo abismos, desfiladeiros, corredeiras e terrenos difíceis de floresta densa ou pântanos, cobrindo até 72 milhas diárias pelo ar.',
 
       rescueAndStabilization: 'Voo veloz permite evacuar companheiros feridos de cercos ou áreas de perigo para santuários seguros em minutos.',
 
@@ -41507,13 +41507,13 @@
 
     if (mm === 'find_greater_steed_paladin_bond') {
 
-      mount.mountTitle = 'Encontrar Montaria Maior (Find Greater Steed): Vínculo Telepático Místico (XGE p. 156)';
+      mount.mountTitle = 'Encontrar Montaria Maior (Find Greater Steed): Vínculo Telepático Místico';
 
       mount.saveDC = 16;
 
       mount.saveType = 'Conjuração';
 
-      mount.mountMechanics = 'Paladino (4º círculo, tempo 10 minutos, alcance 9 metros, XGE p. 156) invoca um espírito nobre sob a forma de Pégaso, Grifo ou Tigre-Dente-de-Sabre (Inteligência 6 a 10); mantém vínculo telepático constante a até 1,6 km de distância e compartilha instantaneamente qualquer magia de alvo pessoal conjurada pelo paladino durante a cavalgada!';
+      mount.mountMechanics = 'Paladino (4º círculo, tempo 10 minutos, alcance 9 metros) invoca um espírito nobre sob a forma de Pégaso, Grifo ou Tigre-Dente-de-Sabre (Inteligência 6 a 10); mantém vínculo telepático constante a até 1,6 km de distância e compartilha instantaneamente qualquer magia de alvo pessoal conjurada pelo paladino durante a cavalgada!';
 
       mount.pioneerMitigation = 'Permite ao cavaleiro e sua montaria compartilhar magias de proteção (como Escudo da Fé ou Bênção) sem consumo adicional de espaços de magia.';
 
@@ -41521,13 +41521,13 @@
 
     } else if (mm === 'phantom_steed_ghostly_dash') {
 
-      mount.mountTitle = 'Montaria Fantasmagórica (Phantom Steed): Galope Espectral Rápido (PHB p. 265)';
+      mount.mountTitle = 'Montaria Fantasmagórica (Phantom Steed): Galope Espectral Rápido';
 
       mount.saveDC = 13;
 
       mount.saveType = 'Ilusão';
 
-      mount.mountMechanics = 'Bardo ou Mago (3º círculo ritual, tempo 1 minuto ou ritual 11 minutos, duração 1 hora, PHB p. 265) conjura uma criatura equina quase real de pura névoa e fumaça mágica com ferraduras silenciosas; possui velocidade de 30 metros (100 pés, equivalente a 10 milhas por hora de marcha acelerada!), cruzando 10 milhas em terreno acidentado sem exigir teste de exaustão!';
+      mount.mountMechanics = 'Bardo ou Mago (3º círculo ritual, tempo 1 minuto ou ritual 11 minutos, duração 1 hora) conjura uma criatura equina quase real de pura névoa e fumaça mágica com ferraduras silenciosas; possui velocidade de 30 metros (100 pés, equivalente a 10 milhas por hora de marcha acelerada!), cruzando 10 milhas em terreno acidentado sem exigir teste de exaustão!';
 
       mount.pioneerMitigation = 'Velocidade máxima de mensageiro para despachar comunicados de emergência ou desviar de áreas conflagradas em minutos.';
 
@@ -41535,13 +41535,13 @@
 
     } else if (mm === 'warhorse_heavy_cavalry_charge') {
 
-      mount.mountTitle = 'Cavalo de Guerra Blindado: Carga de Cavalaria Pesada (PHB p. 155-157; MM p. 340)';
+      mount.mountTitle = 'Cavalo de Guerra Blindado: Carga de Cavalaria Pesada';
 
       mount.saveDC = 14;
 
       mount.saveType = 'Força';
 
-      mount.mountMechanics = 'Corcel de batalha puro-sangue com barda de malha e sela militar de combate (Grande, CA 16 com barda, 19 PV, velocidade 18 metros, carga 270 kg, ataque de cascos 2d6+4 concussão com atropelamento CD 14 de Força, PHB p. 157; MM p. 340); confere vantagem em testes de manobra contra infantaria a pé e sustenta marcha rápida de 30 milhas diárias.';
+      mount.mountMechanics = 'Corcel de batalha puro-sangue com barda de malha e sela militar de combate (Grande, CA 16 com barda, 19 PV, velocidade 18 metros, carga 270 kg, ataque de cascos 2d6+4 concussão com atropelamento CD 14 de Força); confere vantagem em testes de manobra contra infantaria a pé e sustenta marcha rápida de 30 milhas diárias.';
 
       mount.pioneerMitigation = 'Concede tração inabalável contra bandos de saqueadores a pé nas estradas, abrindo passagens à força em barreiras improvisadas.';
 
@@ -41549,13 +41549,13 @@
 
     } else if (mm === 'hippogriff_stealth_canopy_perch') {
 
-      mount.mountTitle = 'Hipogrifo de Floresta: Pouso Furtivo em Copas de Árvores (MM p. 182)';
+      mount.mountTitle = 'Hipogrifo de Floresta: Pouso Furtivo em Copas de Árvores';
 
       mount.saveDC = 13;
 
       mount.saveType = 'Furtividade';
 
-      mount.mountMechanics = 'Besta alada com cabeça de águia e corpo de cavalo (Grande, CA 11, 19 PV, velocidade 12 metros, voo 18 metros, percepção passiva 15 com vantagem em visão, MM p. 182); treinado para pousos silenciosos no topo de carvalhos centenários em florestas e selvas, atuando como posto de vigia elevado invisível a patrulhas no chão!';
+      mount.mountMechanics = 'Besta alada com cabeça de águia e corpo de cavalo (Grande, CA 11, 19 PV, velocidade 12 metros, voo 18 metros, percepção passiva 15 com vantagem em visão); treinado para pousos silenciosos no topo de carvalhos centenários em florestas e selvas, atuando como posto de vigia elevado invisível a patrulhas no chão!';
 
       mount.pioneerMitigation = 'Supera dosséis florestais densos para mapear clareiras e esconderijos de monstros sem alertar os habitantes da mata.';
 
@@ -41583,13 +41583,13 @@
 
     var aerie = {
 
-      aerieTitle: 'Ninho em Penhasco para Pégasos e Paddock Fortificado (PHB p. 155, 157; DMG p. 119)',
+      aerieTitle: 'Ninho em Penhasco para Pégasos e Paddock Fortificado',
 
       mountCampSafety: 'O bivaque é montado em platô rochoso de topo de escarpa com piquetes reforçados para as montarias; pégasos e grifos dispõem de espaço livre para decolagem imediata em qualquer direção, enquanto o desnível vertical isola o acampamento de predadores terrestres sem asas.',
 
       mountWatchAndSentinel: 'Pégasos de inteligência humana (Inteligência 10, compreensão de idiomas) montam vigília aérea e terrestre combinada; sua percepção aguçada detecta aproximações terrestres e aéreas a quilômetros de distância, alertando os membros do grupo sem ruídos estridentes.',
 
-      campRestAndSafetyGuards: 'Em caso de cerco imprevisto, a comitiva pode montar e decolar em 1 rodada, evitando emboscadas noturnas em gargalos de terra firme (PHB p. 186; DMG p. 119).',
+      campRestAndSafetyGuards: 'Em caso de cerco imprevisto, a comitiva pode montar e decolar em 1 rodada, evitando emboscadas noturnas em gargalos de terra firme.',
 
       icon: '🪶',
 
@@ -41601,23 +41601,23 @@
 
     if (at === 'telepathic_mount_night_sentry_link') {
 
-      aerie.aerieTitle = 'Vínculo Telepático de Sentinela Noturna com Montaria Mística (PHB p. 237; XGE p. 156)';
+      aerie.aerieTitle = 'Vínculo Telepático de Sentinela Noturna com Montaria Mística';
 
       aerie.mountCampSafety = 'A montaria invocada repousa ao lado da esteira do cavaleiro; o elo telepático mantém uma conexão sensorial contínua mesmo durante o transe ou sono leve dos aventureiros, transmitindo impulsos de alerta mental caso haja perigo no perímetro.';
 
-      aerie.mountWatchAndSentinel = 'A sentinela de guarda e a montaria alternam turnos com vigília telepática em 360°, garantindo que a comitiva nunca seja apanhada surpresa durante descansos longos (PHB p. 183).';
+      aerie.mountWatchAndSentinel = 'A sentinela de guarda e a montaria alternam turnos com vigília telepática em 360°, garantindo que a comitiva nunca seja apanhada surpresa durante descansos longos.';
 
-      aerie.campRestAndSafetyGuards = 'Anula completamente a condição de Surpreso para a comitiva em caso de ataques furtivos noturnos de criaturas invisíveis ou emboscadores das sombras (PHB p. 189).';
+      aerie.campRestAndSafetyGuards = 'Anula completamente a condição de Surpreso para a comitiva em caso de ataques furtivos noturnos de criaturas invisíveis ou emboscadores das sombras.';
 
     } else if (at === 'warhorse_stable_pavilion_and_barding_rack') {
 
-      aerie.aerieTitle = 'Pavilhão de Cavalaria com Forragem Energética e Suporte de Bardas (PHB p. 155, 157)';
+      aerie.aerieTitle = 'Pavilhão de Cavalaria com Forragem Energética e Suporte de Bardas';
 
       aerie.mountCampSafety = 'Tenda estábulo impermeabilizada com mantas de lã e leito de palha seca acomoda até 4 cavalos de guerra; as bardas de metal são retiradas e acomodadas em cavaletes para alívio muscular dos animais, prevenindo perda de vigor por peso contínuo.';
 
       aerie.mountWatchAndSentinel = 'Cavalos bem cuidados com aveia e feno de alta caloria recuperam 100% de seus dados de vida no descanso longo, permanecendo atentos a cheiros estranhos de predadores na brisa noturna.';
 
-      aerie.campRestAndSafetyGuards = 'Garante que na alvorada os cavalos estejam prontos para arrancadas de galope em plena carga de combate sem penalidades de exaustão (PHB p. 155, 186).';
+      aerie.campRestAndSafetyGuards = 'Garante que na alvorada os cavalos estejam prontos para arrancadas de galope em plena carga de combate sem penalidades de exaustão.';
 
     }
 
@@ -41649,13 +41649,13 @@
 
     var wagon = {
 
-      wagonTitle: 'Vagão de Carga Pesada (Wagon): Logística e Transporte de Comboio (PHB p. 155-157)',
+      wagonTitle: 'Vagão de Carga Pesada (Wagon): Logística e Transporte de Comboio',
 
       saveDC: 14,
 
       saveType: 'Veículos Terrestres',
 
-      wagonMechanics: 'Vagão de quatro rodas de madeira reforçada com aros de ferro (CA 12, 40 PV, peso 200 kg, comporta até 1.250 kg de carga tracionado por parelha de 2 a 4 cavalos de tração ou bois, PHB p. 157); multiplica a autonomia de mantimentos, arcas de moedas, tendas de campanha e equipamentos pesados da comitiva pelas estradas imperiais!',
+      wagonMechanics: 'Vagão de quatro rodas de madeira reforçada com aros de ferro (CA 12, 40 PV, peso 200 kg, comporta até 1.250 kg de carga tracionado por parelha de 2 a 4 cavalos de tração ou bois); multiplica a autonomia de mantimentos, arcas de moedas, tendas de campanha e equipamentos pesados da comitiva pelas estradas imperiais!',
 
       pioneerMitigation: 'Permite transportar suprimentos volumosos para semanas de marcha nos ermos sem sobrecarregar as mochilas dos aventureiros.',
 
@@ -41671,13 +41671,13 @@
 
     if (wm === 'armored_carriage_tactical_transport') {
 
-      wagon.wagonTitle = 'Carruagem Blindada de Campanha com Parapeito de Atiradores (PHB p. 155-157)';
+      wagon.wagonTitle = 'Carruagem Blindada de Campanha com Parapeito de Atiradores';
 
       wagon.saveDC = 14;
 
       wagon.saveType = 'Veículos Terrestres';
 
-      wagon.wagonMechanics = 'Carruagem fechada de carvalho maciço com chapas de ferro rebitadas (CA 14, 60 PV, acomoda 6 passageiros sentados com portas trancáveis e seteiras, PHB p. 157); atiradores na plataforma do teto desfrutam de cobertura de meia altura (+2 na CA) enquanto a carruagem avança em velocidade de galope através de emboscadas!';
+      wagon.wagonMechanics = 'Carruagem fechada de carvalho maciço com chapas de ferro rebitadas (CA 14, 60 PV, acomoda 6 passageiros sentados com portas trancáveis e seteiras); atiradores na plataforma do teto desfrutam de cobertura de meia altura (+2 na CA) enquanto a carruagem avança em velocidade de galope através de emboscadas!';
 
       wagon.pioneerMitigation = 'Protege os conjuradores e curandeiros da comitiva de flechas e ataques de oportunidade durante fugas rápidas por trilhas infestadas.';
 
@@ -41685,13 +41685,13 @@
 
     } else if (wm === 'arctic_sled_dog_and_snow_glide') {
 
-      wagon.wagonTitle = 'Trenó Ártico de Carga com Parelha de Tração Polar (PHB p. 155-157)';
+      wagon.wagonTitle = 'Trenó Ártico de Carga com Parelha de Tração Polar';
 
       wagon.saveDC = 13;
 
       wagon.saveType = 'Sobrevivência';
 
-      wagon.wagonMechanics = 'Trenó ligeiro de freixo e osso de baleia (CA 11, 30 PV, peso 150 kg, capacidade 1.000 kg, PHB p. 157); desliza suavemente sobre tundras congeladas, neve fofa e geleiras árticas tracionado por cães polares, pôneis peludos ou mulas árticas onde rodas convencionais atolariam irremediavelmente!';
+      wagon.wagonMechanics = 'Trenó ligeiro de freixo e osso de baleia (CA 11, 30 PV, peso 150 kg, capacidade 1.000 kg); desliza suavemente sobre tundras congeladas, neve fofa e geleiras árticas tracionado por cães polares, pôneis peludos ou mulas árticas onde rodas convencionais atolariam irremediavelmente!';
 
       wagon.pioneerMitigation = 'Anula a penalidade de terreno difícil em biomas árticos e neves profundas, mantendo o ritmo de viagem normal de 24 milhas por dia.';
 
@@ -41699,13 +41699,13 @@
 
     } else if (wm === 'tenser_floating_disk_cargo_barge') {
 
-      wagon.wagonTitle = 'Disco Flutuante de Tenser: Balsa Arcana de Carga sem Atrito (PHB p. 236)';
+      wagon.wagonTitle = 'Disco Flutuante de Tenser: Balsa Arcana de Carga sem Atrito';
 
       wagon.saveDC = 12;
 
       wagon.saveType = 'Conjuração';
 
-      wagon.wagonMechanics = 'Mago (1º círculo ritual, tempo 1 ação, duração 1 hora, alcance 9 metros, PHB p. 236) conjura um plano circular côncavo de força mágica de 1 metro de diâmetro que sustenta até 250 kg; flutua a 90 cm do chão e segue o conjurador automaticamente a até 6 metros de distância por qualquer terreno transitável!';
+      wagon.wagonMechanics = 'Mago (1º círculo ritual, tempo 1 ação, duração 1 hora, alcance 9 metros) conjura um plano circular côncavo de força mágica de 1 metro de diâmetro que sustenta até 250 kg; flutua a 90 cm do chão e segue o conjurador automaticamente a até 6 metros de distância por qualquer terreno transitável!';
 
       wagon.pioneerMitigation = 'Permite carregar espólios de minérios pesados, baús de ferro e armaduras através de pântanos e escadarias em ruínas sem necessidade de animais.';
 
@@ -41713,13 +41713,13 @@
 
     } else if (wm === 'mending_and_wheelwright_emergency_repair') {
 
-      wagon.wagonTitle = 'Reparo (Mending) e Carpintaria Expedita de Eixos e Rodas (PHB p. 154, 273)';
+      wagon.wagonTitle = 'Reparo (Mending) e Carpintaria Expedita de Eixos e Rodas';
 
       wagon.saveDC = 12;
 
       wagon.saveType = 'Transmutação';
 
-      wagon.wagonMechanics = 'Bardo, Clérigo, Druida, Feiticeiro ou Mago (truque, tempo 1 minuto, PHB p. 273) repara instantaneamente uma única quebra ou rasgo de até 30 cm num objeto; restaura raios de roda partidos, elos de correntes de arreio ou eixos rachados sem deixar marcas, combinando-se com testes de Ferramentas de Carpinteiro CD 12.';
+      wagon.wagonMechanics = 'Bardo, Clérigo, Druida, Feiticeiro ou Mago (truque, tempo 1 minuto) repara instantaneamente uma única quebra ou rasgo de até 30 cm num objeto; restaura raios de roda partidos, elos de correntes de arreio ou eixos rachados sem deixar marcas, combinando-se com testes de Ferramentas de Carpinteiro CD 12.';
 
       wagon.pioneerMitigation = 'Elimina paradas prolongadas de horas para consertos de ferragens no meio de estradas hostis após buracos ou atolamentos.';
 
@@ -41747,13 +41747,13 @@
 
     var fortress = {
 
-      fortressTitle: 'Fortaleza Circular de Carroças (Wagon Circle / Laager) (PHB p. 157; DMG p. 111)',
+      fortressTitle: 'Fortaleza Circular de Carroças (Wagon Circle / Laager)',
 
       wagonCampSafety: 'Ao preparar o descanso longo em terreno aberto, os vagões são dispostos em círculo fechado com as lanças e parelhas voltadas para o interior; o perímetro contínuo de madeira maciça e aros de ferro forma uma paliçada inexpugnável contra cargas de cavalaria e feras colossais.',
 
       wagonWatchAndSentinel: 'Sentinelas montam guarda nas plataformas e tetos das carroças com visão desobstruída de 360°, operando com cobertura de três quartos (+5 na CA) contra disparos de flechas.',
 
-      campRestAndSafetyGuards: 'Impede infiltrações furtivas de salteadores e lobos, confinando qualquer tentativa de invasão a gargalos estreitos controlados pela comitiva (PHB p. 186; DMG p. 111).',
+      campRestAndSafetyGuards: 'Impede infiltrações furtivas de salteadores e lobos, confinando qualquer tentativa de invasão a gargalos estreitos controlados pela comitiva.',
 
       icon: '🛡️',
 
@@ -41765,23 +41765,23 @@
 
     if (ft === 'central_livestock_corral_and_draft_protection') {
 
-      fortress.fortressTitle = 'Curral Central Fechado para Animais de Tração e Carga (PHB p. 155-157)';
+      fortress.fortressTitle = 'Curral Central Fechado para Animais de Tração e Carga';
 
       fortress.wagonCampSafety = 'Cavalos de tração, bois e mulas são recolhidos no centro do círculo de vagões, amarrados a postes com água fresca e sacos de forragem; ficam protegidos do vento cortante, flechas incendiárias e predadores noturnos.';
 
       fortress.wagonWatchAndSentinel = 'Animais calmos não entram em pânico, e qualquer sobressalto de relincho atua como alarme precoce de aproximação furtiva na escuridão.';
 
-      fortress.campRestAndSafetyGuards = 'Evita a dispersão ou roubo de montarias no meio da noite, assegurando que o comboio possa retomar a marcha na alvorada sem perda de animais (PHB p. 155).';
+      fortress.campRestAndSafetyGuards = 'Evita a dispersão ou roubo de montarias no meio da noite, assegurando que o comboio possa retomar a marcha na alvorada sem perda de animais.';
 
     } else if (ft === 'reinforced_carriage_bunker_and_lantern_traverse') {
 
-      fortress.fortressTitle = 'Casamata de Carruagem Blindada com Lanternas Furta-Fogo (PHB p. 152, 157)';
+      fortress.fortressTitle = 'Casamata de Carruagem Blindada com Lanternas Furta-Fogo';
 
       fortress.wagonCampSafety = 'A carruagem blindada central é trancada por dentro com trincos de ferro e guarnecida com mantas térmicas; serve de abrigo fortificado para conjuradores e feridos durante o sono, com resistência a intempéries climáticas severas.';
 
       fortress.wagonWatchAndSentinel = 'Lanternas furta-fogo direcionais montadas em suportes articulados no teto iluminam setores suspeitos na planície com fachos de luz brilhante de até 18 metros sem ofuscar as sentinelas.';
 
-      fortress.campRestAndSafetyGuards = 'Proporciona sono ininterrupto e recuperação plena de dados de vida mesmo em biomas de alta hostilidade (PHB p. 186).';
+      fortress.campRestAndSafetyGuards = 'Proporciona sono ininterrupto e recuperação plena de dados de vida mesmo em biomas de alta hostilidade.';
 
     }
 
@@ -41813,15 +41813,15 @@
 
     var crossing = {
 
-      crossingTitle: 'Ponte Suspensa de Cordas e Pranchas de Madeira (PHB p. 150-153; DMG p. 111)',
+      crossingTitle: 'Ponte Suspensa de Cordas e Pranchas de Madeira',
 
       saveDC: 14,
 
       saveType: 'Destreza',
 
-      crossingMechanics: 'Passarela suspensa montada com cabos de cânhamo reforçados e tábuas amarradas sobre fendas de até 18 metros de largura (CA 11, 50 PV, suporta até 1 tonelada ou 6 aventureiros simultâneos, DMG p. 111); permite cruzar abismos rochosos e ravinas verticais com passamanos de segurança sem necessidade de escaladas exaustivas!',
+      crossingMechanics: 'Passarela suspensa montada com cabos de cânhamo reforçados e tábuas amarradas sobre fendas de até 18 metros de largura (CA 11, 50 PV, suporta até 1 tonelada ou 6 aventureiros simultâneos); permite cruzar abismos rochosos e ravinas verticais com passamanos de segurança sem necessidade de escaladas exaustivas!',
 
-      pioneerMitigation: 'Conecta trilhas de altitude descontinuadas em desfiladeiros, poupando 1 a 2 dias de desvios tortuosos por escarpas íngremes (PHB p. 182).',
+      pioneerMitigation: 'Conecta trilhas de altitude descontinuadas em desfiladeiros, poupando 1 a 2 dias de desvios tortuosos por escarpas íngremes.',
 
       rescueAndStabilization: 'Cabos de segurança com mosquetões de ferro impedem quedas fatais de membros do grupo que percam o equilíbrio sob rajadas de vento.',
 
@@ -41835,13 +41835,13 @@
 
     if (xm === 'zipline_and_pulley_canyon_crossing') {
 
-      crossing.crossingTitle = 'Tirolesa de Desfiladeiro com Polias de Latão e Arreios de Couro (PHB p. 150-153)';
+      crossing.crossingTitle = 'Tirolesa de Desfiladeiro com Polias de Latão e Arreios de Couro';
 
       crossing.saveDC = 13;
 
       crossing.saveType = 'Acrobacia';
 
-      crossing.crossingMechanics = 'Cabo mestre de seda tensionado em declive com polias duplas de rolamento e arnês de segurança do kit de escalador (PHB p. 151); batedores e mochilas de provisões deslizam a 15 metros por rodada através de gargantas de até 36 metros de vão, alcançando a encosta oposta em segundos!';
+      crossing.crossingMechanics = 'Cabo mestre de seda tensionado em declive com polias duplas de rolamento e arnês de segurança do kit de escalador; batedores e mochilas de provisões deslizam a 15 metros por rodada através de gargantas de até 36 metros de vão, alcançando a encosta oposta em segundos!';
 
       crossing.pioneerMitigation = 'Permite evacuação rápida de pontos quentes em encostas sob bombardeio de rochas ou emboscadas no alto do cânion.';
 
@@ -41849,7 +41849,7 @@
 
     } else if (xm === 'rigged_ford_and_submerged_lifeline') {
 
-      crossing.crossingTitle = 'Vau Fortificado com Cabo-Guia Submerso de Amarração (PHB p. 151; DMG p. 116)';
+      crossing.crossingTitle = 'Vau Fortificado com Cabo-Guia Submerso de Amarração';
 
       crossing.saveDC = 13;
 
@@ -41857,19 +41857,19 @@
 
       crossing.crossingMechanics = 'Estacas de ferro cravadas com marreta nas duas margens ancorando um cabo de tração de cânhamo esticado na altura da cintura através de leito pedregoso com correnteza rápida; aventureiros e animais de carga seguram o cabo com mosquetões para transpor a água sem risco de serem arrastados!';
 
-      crossing.pioneerMitigation = 'Permite que comitivas vestindo armaduras médias ou pesadas atravessem rios torrenciais sem penalidade de afogamento (PHB p. 146).';
+      crossing.pioneerMitigation = 'Permite que comitivas vestindo armaduras médias ou pesadas atravessem rios torrenciais sem penalidade de afogamento.';
 
       crossing.rescueAndStabilization = 'Corda de salvamento retrátil arremessada com laço recupera companheiros que escorreguem em pedras lodosas.';
 
     } else if (xm === 'jump_spell_and_chasm_leaping') {
 
-      crossing.crossingTitle = 'Salto (Jump): Transposição Mística de Gargantas e Fendas (PHB p. 275)';
+      crossing.crossingTitle = 'Salto (Jump): Transposição Mística de Gargantas e Fendas';
 
       crossing.saveDC = 12;
 
       crossing.saveType = 'Transmutação';
 
-      crossing.crossingMechanics = 'Druida, Feiticeiro, Mago ou Patrulheiro (1º círculo, patas de gafanhoto, duração 1 minuto, PHB p. 275) toca uma criatura e triplica sua distância de salto em distância e em altura; um bárbaro com Força 16 salta até 14 metros em distância com corrida, transpondo fendas colossais para fixar o primeiro cabo de travessia do outro lado!';
+      crossing.crossingMechanics = 'Druida, Feiticeiro, Mago ou Patrulheiro (1º círculo, patas de gafanhoto, duração 1 minuto) toca uma criatura e triplica sua distância de salto em distância e em altura; um bárbaro com Força 16 salta até 14 metros em distância com corrida, transpondo fendas colossais para fixar o primeiro cabo de travessia do outro lado!';
 
       crossing.pioneerMitigation = 'Dispensa o arremesso impreciso de ganchos de escalada, garantindo fixação manual firme das amarras na margem oposta.';
 
@@ -41877,13 +41877,13 @@
 
     } else if (xm === 'levitate_heavy_wagon_and_cargo_hoist') {
 
-      crossing.crossingTitle = 'Levitação (Levitate): Içamento Tático de Carroças e Cargas Pesadas (PHB p. 255)';
+      crossing.crossingTitle = 'Levitação (Levitate): Içamento Tático de Carroças e Cargas Pesadas';
 
       crossing.saveDC = 15;
 
       crossing.saveType = 'Transmutação';
 
-      crossing.crossingMechanics = 'Feiticeiro ou Mago (2º círculo, presilha de couro, concentração até 10 minutos, PHB p. 255) ergue verticalmente até 250 kg de carga ou um membro da comitiva a até 6 metros por rodada; associada a cabos guia horizontais, permite transladar vagões de suprimentos e provisões sobre o vazio do abismo sem tocar o chão!';
+      crossing.crossingMechanics = 'Feiticeiro ou Mago (2º círculo, presilha de couro, concentração até 10 minutos) ergue verticalmente até 250 kg de carga ou um membro da comitiva a até 6 metros por rodada; associada a cabos guia horizontais, permite transladar vagões de suprimentos e provisões sobre o vazio do abismo sem tocar o chão!';
 
       crossing.pioneerMitigation = 'Supera paredões rochosos verticais e degraus de falha geológica que impediriam a passagem de carroças de carga da comitiva.';
 
@@ -41911,13 +41911,13 @@
 
     var fortification = {
 
-      fortificationTitle: 'Reduto de Cabeça de Ponte com Cabo de Corte Imediato (DMG p. 111)',
+      fortificationTitle: 'Reduto de Cabeça de Ponte com Cabo de Corte Imediato',
 
       chasmCampSafety: 'O bivaque é montado na borda rochosa adjacente à ancoragem da ponte suspensa; paliçadas de troncos e blocos de pedra formam um gargalo defensivo, enquanto machados ficam posicionados junto aos cabos-mestres para derrubar a ponte em 1 ação caso inimigos tentem cruzar no escuro.',
 
       chasmWatchAndSentinel: 'Sentinelas vigiam a outra margem do abismo com visão desobstruída do vão, eliminando qualquer risco de aproximação furtiva por terra.',
 
-      campRestAndSafetyGuards: 'Em caso de cerco, a destruição tática da ponte isola a comitiva de forças hostis superiores, garantindo descanso longo ininterrupto (PHB p. 186; DMG p. 111).',
+      campRestAndSafetyGuards: 'Em caso de cerco, a destruição tática da ponte isola a comitiva de forças hostis superiores, garantindo descanso longo ininterrupto.',
 
       icon: '🛡️',
 
@@ -41929,23 +41929,23 @@
 
     if (bt === 'suspended_ledge_camp_and_rappel_access') {
 
-      fortification.fortificationTitle = 'Bivaque Suspenso em Saliência de Penhasco com Acesso por Rapel (PHB p. 151)';
+      fortification.fortificationTitle = 'Bivaque Suspenso em Saliência de Penhasco com Acesso por Rapel';
 
       fortification.chasmCampSafety = 'A comitiva desce por cordas de escalada para uma saliência de rocha 15 metros abaixo da borda do desfiladeiro; as cordas são recolhidas durante o repouso, tornando o acampamento inacessível tanto pelo topo quanto pelo fundo da ravina.';
 
       fortification.chasmWatchAndSentinel = 'O platô suspenso oferece abrigo natural contra arqueiros do topo da escarpa, e o eco de passos na borda superior avisa os sentinelas muito antes de qualquer perigo real.';
 
-      fortification.campRestAndSafetyGuards = 'Imunidade total contra emboscadas de predadores terrestres que não escalam paredões verticais (DMG p. 110-111).';
+      fortification.campRestAndSafetyGuards = 'Imunidade total contra emboscadas de predadores terrestres que não escalam paredões verticais.';
 
     } else if (bt === 'chasm_sentry_bastion_and_acoustic_echo_trap') {
 
-      fortification.fortificationTitle = 'Bastião de Fenda com Armadilha Acústica de Eco da Garganta (PHB p. 151, 177)';
+      fortification.fortificationTitle = 'Bastião de Fenda com Armadilha Acústica de Eco da Garganta';
 
       fortification.chasmCampSafety = 'Aproveitando a acústica natural da garganta rochosa, esteiras são montadas atrás de uma mureta de pedra; sinos de latão amarrados a fios esticados através da fenda ressoam com o menor toque de vento ou invasores.';
 
       fortification.chasmWatchAndSentinel = 'Sentinelas contam com bônus passivo de audição reforçado pelo eco do cânion, detectando ruídos de armaduras ou vozes a centenas de metros de distância.';
 
-      fortification.campRestAndSafetyGuards = 'Garante reação antecipada para que todos os membros do grupo acordem com armas desembainhadas antes de qualquer contato hostil (PHB p. 183).';
+      fortification.campRestAndSafetyGuards = 'Garante reação antecipada para que todos os membros do grupo acordem com armas desembainhadas antes de qualquer contato hostil.';
 
     }
 
@@ -41977,15 +41977,15 @@
 
     var coastal = {
 
-      coastalTitle: 'Navio a Vela (Sailing Ship): Cabotagem Costeira e Transporte Marítimo Pesado (PHB p. 155-157)',
+      coastalTitle: 'Navio a Vela (Sailing Ship): Cabotagem Costeira e Transporte Marítimo Pesado',
 
       saveDC: 15,
 
       saveType: 'Veículos Aquáticos',
 
-      coastalMechanics: 'Embarcação costeira de 30 metros de comprimento com três mastros (CA 15, 300 PV, limiar de dano 15, tripulação 20, passageiros 20, carga 100 toneladas, velocidade 2 milhas por hora dependendo dos ventos costeiros, PHB p. 157); contorna penhascos e estuários com estabilidade em mar aberto, transportando montarias, vagões desmontados e provisões com autonomia de semanas!',
+      coastalMechanics: 'Embarcação costeira de 30 metros de comprimento com três mastros (CA 15, 300 PV, limiar de dano 15, tripulação 20, passageiros 20, carga 100 toneladas, velocidade 2 milhas por hora dependendo dos ventos costeiros); contorna penhascos e estuários com estabilidade em mar aberto, transportando montarias, vagões desmontados e provisões com autonomia de semanas!',
 
-      pioneerMitigation: 'Navegação por cabotagem contorna pântanos intransponíveis e cadeias de montanhas litorâneas, cobrindo até 48 milhas por dia sem fadiga de marcha (DMG p. 117-119).',
+      pioneerMitigation: 'Navegação por cabotagem contorna pântanos intransponíveis e cadeias de montanhas litorâneas, cobrindo até 48 milhas por dia sem fadiga de marcha.',
 
       rescueAndStabilization: 'Botes salva-vidas e cabos com boias de cortiça permitem o resgate rápido de companheiros que caiam no mar bravio.',
 
@@ -41999,13 +41999,13 @@
 
     if (cm === 'longship_beach_landing_and_surf_maneuver') {
 
-      coastal.coastalTitle = 'Galé Costeira (Longship): Desembarque em Praias e Manobra de Arrebentação (PHB p. 157)';
+      coastal.coastalTitle = 'Galé Costeira (Longship): Desembarque em Praias e Manobra de Arrebentação';
 
       coastal.saveDC = 14;
 
       coastal.saveType = 'Força';
 
-      coastal.coastalMechanics = 'Galé nórdica ligeira de 21 metros com remos e vela quadrada (CA 15, 300 PV, limiar de dano 15, tripulação 40 remadores, passageiros 150, carga 10 toneladas, velocidade 3 milhas por hora a remo ou vela, PHB p. 157); casco de fundo chato projetado para encalhe intencional em praias arenosas e manobras velozes através de quebramares e ondas de ressaca!';
+      coastal.coastalMechanics = 'Galé nórdica ligeira de 21 metros com remos e vela quadrada (CA 15, 300 PV, limiar de dano 15, tripulação 40 remadores, passageiros 150, carga 10 toneladas, velocidade 3 milhas por hora a remo ou vela); casco de fundo chato projetado para encalhe intencional em praias arenosas e manobras velozes através de quebramares e ondas de ressaca!';
 
       coastal.pioneerMitigation = 'Permite desembarque imediato de batedores e comitivas em enseadas remotas sem necessidade de cais ou portos estruturados.';
 
@@ -42013,13 +42013,13 @@
 
     } else if (cm === 'gust_of_wind_reef_clearance_and_propulsion') {
 
-      coastal.coastalTitle = 'Rajada de Vento (Gust of Wind): Escape Tático de Recifes Ocultos (PHB p. 270)';
+      coastal.coastalTitle = 'Rajada de Vento (Gust of Wind): Escape Tático de Recifes Ocultos';
 
       coastal.saveDC = 14;
 
       coastal.saveType = 'Evocação';
 
-      coastal.coastalMechanics = 'Druida, Feiticeiro ou Mago (2º círculo, semente de leguminosa, concentração até 1 minuto, PHB p. 270) canaliza uma linha de vento forte de 18 metros de comprimento por 3 metros de largura; enche velas auxiliares para manobras de emergência em calmaria ou empurra a embarcação 18 metros para longe de recifes afiados e rochedos submersos com salvaguarda de Força!';
+      coastal.coastalMechanics = 'Druida, Feiticeiro ou Mago (2º círculo, semente de leguminosa, concentração até 1 minuto) canaliza uma linha de vento forte de 18 metros de comprimento por 3 metros de largura; enche velas auxiliares para manobras de emergência em calmaria ou empurra a embarcação 18 metros para longe de recifes afiados e rochedos submersos com salvaguarda de Força!';
 
       coastal.pioneerMitigation = 'Evita colisões catastróficas contra bancos de corais e rochas de maré quando o leme perde sustentação na arrebentação.';
 
@@ -42027,21 +42027,21 @@
 
     } else if (cm === 'fog_cloud_pirate_evasion_and_stealth_anchorage') {
 
-      coastal.coastalTitle = 'Névoa Obscurecente (Fog Cloud): Camuflagem Náutica contra Corsários (PHB p. 261)';
+      coastal.coastalTitle = 'Névoa Obscurecente (Fog Cloud): Camuflagem Náutica contra Corsários';
 
       coastal.saveDC = 13;
 
       coastal.saveType = 'Conjuração';
 
-      coastal.coastalMechanics = 'Druida, Feiticeiro, Mago ou Patrulheiro (1º círculo, concentração até 1 hora, PHB p. 261) conjura uma esfera de névoa densa de 6 metros de raio (expansível em níveis superiores) que bloqueia completamente a linha de visão; oculta o mastro e a silhueta da embarcação em enseadas e estuários, concedendo área fortemente obscurecida contra vigias de navios hostis!';
+      coastal.coastalMechanics = 'Druida, Feiticeiro, Mago ou Patrulheiro (1º círculo, concentração até 1 hora) conjura uma esfera de névoa densa de 6 metros de raio (expansível em níveis superiores) que bloqueia completamente a linha de visão; oculta o mastro e a silhueta da embarcação em enseadas e estuários, concedendo área fortemente obscurecida contra vigias de navios hostis!';
 
-      coastal.pioneerMitigation = 'Permite à comitiva fundear em enseadas dominadas por piratas ou sahuagins sem ser detectada por terra ou mar (DMG p. 117-119).';
+      coastal.pioneerMitigation = 'Permite à comitiva fundear em enseadas dominadas por piratas ou sahuagins sem ser detectada por terra ou mar.';
 
       coastal.rescueAndStabilization = 'Mascara operações de resgate noturno em costões rochosos contra arqueiros inimigos posicionados no topo de falésias.';
 
     } else if (cm === 'sounding_pole_and_shoal_pilotage') {
 
-      coastal.coastalTitle = 'Prática de Praticagem e Sondagem de Sondas de Maré (DMG p. 117-118)';
+      coastal.coastalTitle = 'Prática de Praticagem e Sondagem de Sondas de Maré';
 
       coastal.saveDC = 13;
 
@@ -42075,13 +42075,13 @@
 
     var anchorage = {
 
-      anchorageTitle: 'Ancoragem em Angra Protegida e Vigia no Cesto da Gávea (DMG p. 117)',
+      anchorageTitle: 'Ancoragem em Angra Protegida e Vigia no Cesto da Gávea',
 
       coastalCampSafety: 'O navio lança duas âncoras de ferro (proa e popa) em enseada protegida de ondas oceânicas por barreiras de ilhotas; a comitiva descansa a bordo nas cabines secas, isolada de marés altas e feras carnívoras do continente.',
 
       coastalWatchAndSentinel: 'Sentinelas no cesto da gávea (a 18 metros de altura) mantêm vigilância com lanterna furta-fogo e visão panorâmica da orla e do horizonte marítimo, detectando canoas piratas ou criaturas anfíbias com vantagem em Sabedoria (Percepção).',
 
-      campRestAndSafetyGuards: 'Em caso de alerta de perigo, o navio pode cortar os cabos de amarração e navegar a pano aberto para o mar aberto antes que invasores alcancem o convés (PHB p. 157; DMG p. 117-119).',
+      campRestAndSafetyGuards: 'Em caso de alerta de perigo, o navio pode cortar os cabos de amarração e navegar a pano aberto para o mar aberto antes que invasores alcancem o convés.',
 
       icon: '⚓',
 
@@ -42093,23 +42093,23 @@
 
     if (at === 'beached_longship_palisade_redoubt') {
 
-      anchorage.anchorageTitle = 'Barricada de Casco Encalhado na Areia com Fogueira Rebaixada (DMG p. 111, 117)';
+      anchorage.anchorageTitle = 'Barricada de Casco Encalhado na Areia com Fogueira Rebaixada';
 
       anchorage.coastalCampSafety = 'A galé ligeira é puxada para além da linha de maré cheia com troncos rolantes; o costado de carvalho do navio funciona como parapeito fortificado de 2 metros de altura, bloqueando ventos salinos e ataques de surpresa da restinga.';
 
       anchorage.coastalWatchAndSentinel = 'Atiradores da comitiva guarnecem a amurada do barco com visão desobstruída de 360° sobre a praia, dispondo de cobertura de meia altura (+2 na CA e testes de Destreza).';
 
-      anchorage.campRestAndSafetyGuards = 'O bivaque sob a quilha mantém esteiras e provisões protegidas da umidade da areia e de caranguejos gigantes costeiros (PHB p. 196).';
+      anchorage.campRestAndSafetyGuards = 'O bivaque sob a quilha mantém esteiras e provisões protegidas da umidade da areia e de caranguejos gigantes costeiros.';
 
     } else if (at === 'tidal_sea_cave_anchorage_with_water_rise_ward') {
 
-      anchorage.anchorageTitle = 'Abrigo em Gruta Marinha de Maré com Alarme de Elevação da Água (PHB p. 211, 240)';
+      anchorage.anchorageTitle = 'Abrigo em Gruta Marinha de Maré com Alarme de Elevação da Água';
 
       anchorage.coastalCampSafety = 'Botes e esteiras de dormir são acomodados em grutas marinhas de calcário acima da preamar de sizígia; o teto abobadado de pedra amortece rajadas de vento tempestuoso e tempestades elétricas da costa.';
 
-      anchorage.coastalWatchAndSentinel = 'Fios de alarme com sinos de bronze e a magia ritual Alarme (PHB p. 211) são instalados na boca da caverna e na marca d\'água de meia maré, acordando a comitiva instantaneamente se o nível do mar subir além do normal.';
+      anchorage.coastalWatchAndSentinel = 'Fios de alarme com sinos de bronze e a magia ritual Alarme são instalados na boca da caverna e na marca d\'água de meia maré, acordando a comitiva instantaneamente se o nível do mar subir além do normal.';
 
-      anchorage.campRestAndSafetyGuards = 'Elimina totalmente o risco de afogamento durante o sono e concede refúgio térmico contra a hipotermia da brisa marinha noturna (PHB p. 186; DMG p. 110).';
+      anchorage.campRestAndSafetyGuards = 'Elimina totalmente o risco de afogamento durante o sono e concede refúgio térmico contra a hipotermia da brisa marinha noturna.';
 
     }
 
@@ -42141,15 +42141,15 @@
 
     var river = {
 
-      riverTitle: 'Barco de Quilha (Keelboat): Transporte Fluvial Pesado e Travessia de Correntezas (PHB p. 155-157)',
+      riverTitle: 'Barco de Quilha (Keelboat): Transporte Fluvial Pesado e Travessia de Correntezas',
 
       saveDC: 15,
 
       saveType: 'Veículos Aquáticos',
 
-      riverMechanics: 'Embarcação fluvial de quilha de 18 metros com cabine de carga (CA 15, 100 PV, limiar de dano 10, tripulação 1, passageiros 6, carga 30 toneladas, velocidade 1 a 3 milhas por hora dependendo de remos ou vela, PHB p. 157); permite navegar contra ou a favor da correnteza em rios caudalosos, transportando a comitiva, montarias e provisões com estabilidade contra turbilhões d\'água!',
+      riverMechanics: 'Embarcação fluvial de quilha de 18 metros com cabine de carga (CA 15, 100 PV, limiar de dano 10, tripulação 1, passageiros 6, carga 30 toneladas, velocidade 1 a 3 milhas por hora dependendo de remos ou vela); permite navegar contra ou a favor da correnteza em rios caudalosos, transportando a comitiva, montarias e provisões com estabilidade contra turbilhões d\'água!',
 
-      pioneerMitigation: 'Navegação fluvial contínua evita terrenos acidentados e pântanos marginais, cobrindo o dobro da distância diária sem risco de atolamento de carga (DMG p. 116-119).',
+      pioneerMitigation: 'Navegação fluvial contínua evita terrenos acidentados e pântanos marginais, cobrindo o dobro da distância diária sem risco de atolamento de carga.',
 
       rescueAndStabilization: 'Cabina coberta e escoras laterais oferecem abrigo fechado e boias flutuantes para resgate imediato de aventureiros que caiam na água.',
 
@@ -42163,13 +42163,13 @@
 
     if (rm === 'rowboat_and_tactical_canoe_reconnaissance') {
 
-      river.riverTitle = 'Barco a Remo e Canoas de Batedores: Travessia Ágil e Silenciosa (PHB p. 155-157)';
+      river.riverTitle = 'Barco a Remo e Canoas de Batedores: Travessia Ágil e Silenciosa';
 
       river.saveDC = 13;
 
       river.saveType = 'Destreza';
 
-      river.riverMechanics = 'Barco a remo ligeiro de 3 metros (CA 11, 50 PV, passageiros 3, carga 250 kg, velocidade 1,5 milhas por hora, PHB p. 157); ideal para afluentes rasos, manguezais e lagos de bacia, permitindo que batedores avancem silenciosamente com testes de Furtividade em grupo com vantagem em áreas de neblina matinal.';
+      river.riverMechanics = 'Barco a remo ligeiro de 3 metros (CA 11, 50 PV, passageiros 3, carga 250 kg, velocidade 1,5 milhas por hora); ideal para afluentes rasos, manguezais e lagos de bacia, permitindo que batedores avancem silenciosamente com testes de Furtividade em grupo com vantagem em áreas de neblina matinal.';
 
       river.pioneerMitigation = 'Permite portagem manual por 2 aventureiros para transpor cachoeiras ou trechos rochosos sem abandonar a embarcação nos ermos.';
 
@@ -42177,13 +42177,13 @@
 
     } else if (rm === 'water_walk_rapid_crossing_ritual') {
 
-      river.riverTitle = 'Andar sobre as Águas (Water Walk): Marcha Ritual sobre Corredeiras Ferozes (PHB p. 214)';
+      river.riverTitle = 'Andar sobre as Águas (Water Walk): Marcha Ritual sobre Corredeiras Ferozes';
 
       river.saveDC = 14;
 
       river.saveType = 'Transmutação';
 
-      river.riverMechanics = 'Clérigo, Druida, Patrulheiro ou Feiticeiro (3º círculo ritual, tempo 1 ação, duração 1 hora, PHB p. 214) confere a até 10 criaturas voluntárias a capacidade de caminhar sobre a superfície líquida (rios, corredeiras torrenciais, areia movediça e lamaçal) como se fosse solo firme; se submergida, a criatura é impulsionada à superfície a 18 metros por rodada!';
+      river.riverMechanics = 'Clérigo, Druida, Patrulheiro ou Feiticeiro (3º círculo ritual, tempo 1 ação, duração 1 hora) confere a até 10 criaturas voluntárias a capacidade de caminhar sobre a superfície líquida (rios, corredeiras torrenciais, areia movediça e lamaçal) como se fosse solo firme; se submergida, a criatura é impulsionada à superfície a 18 metros por rodada!';
 
       river.pioneerMitigation = 'Elimina totalmente a necessidade de pontes ou balsas em vaus profundos e corredeiras de classe IV, permitindo cruzar a pé sem molhar provisões.';
 
@@ -42191,13 +42191,13 @@
 
     } else if (rm === 'control_water_parting_trench') {
 
-      river.riverTitle = 'Controlar a Água (Control Water): Partir as Águas em Trincheira Seca (PHB p. 227)';
+      river.riverTitle = 'Controlar a Água (Control Water): Partir as Águas em Trincheira Seca';
 
       river.saveDC = 16;
 
       river.saveType = 'Transmutação';
 
-      river.riverMechanics = 'Clérigo, Druida ou Mago (4º círculo, concentração até 10 minutos, alcance 90 metros, PHB p. 227) separa um rio de até 30 metros de largura num cubo de água, criando uma trincheira seca de 6 metros de profundidade com paredes líquidas estáveis nas margens; a comitiva e carroças marcham pelo leito do rio em terra firme!';
+      river.riverMechanics = 'Clérigo, Druida ou Mago (4º círculo, concentração até 10 minutos, alcance 90 metros) separa um rio de até 30 metros de largura num cubo de água, criando uma trincheira seca de 6 metros de profundidade com paredes líquidas estáveis nas margens; a comitiva e carroças marcham pelo leito do rio em terra firme!';
 
       river.pioneerMitigation = 'Permite a travessia segura de comboios pesados e montarias que não sabem nadar em rios torrenciais sem perigo de correntezas.';
 
@@ -42205,7 +42205,7 @@
 
     } else if (rm === 'driftwood_raft_expedient_construction') {
 
-      river.riverTitle = 'Balsa de Toras e Madeira de Deriva: Engenharia Expedita de Campanha (DMG p. 116-117)';
+      river.riverTitle = 'Balsa de Toras e Madeira de Deriva: Engenharia Expedita de Campanha';
 
       river.saveDC = 12;
 
@@ -42239,13 +42239,13 @@
 
     var mooring = {
 
-      mooringTitle: 'Atracação Fluvial em Barco de Quilha e Sentinela de Bordo (PHB p. 157)',
+      mooringTitle: 'Atracação Fluvial em Barco de Quilha e Sentinela de Bordo',
 
       riverCampSafety: 'Durante o descanso longo, o barco de quilha é amarrado a salgueiros robustos ou estacas de ferro na margem profunda; a comitiva repousa na cabine de proa sobre a água, ficando naturalmente isolada de predadores terrestres, carniceiros e insetos rastejantes da mata.',
 
       riverWatchAndSentinel: 'Sentinelas montam guarda na gávea e no convés superior com lanterna furta-fogo e visão panorâmica das duas margens, detectando qualquer aproximação nas águas com vantagem em Sabedoria (Percepção).',
 
-      campRestAndSafetyGuards: 'Em caso de emboscada noturna na margem, a comitiva solta os cabos de amarração e deixa o barco derivar silenciosamente rio abaixo para fugir sem combate forçado (DMG p. 116-119).',
+      campRestAndSafetyGuards: 'Em caso de emboscada noturna na margem, a comitiva solta os cabos de amarração e deixa o barco derivar silenciosamente rio abaixo para fugir sem combate forçado.',
 
       icon: '⚓',
 
@@ -42257,23 +42257,23 @@
 
     if (mt === 'driftwood_palisade_and_embayment_redoubt') {
 
-      mooring.mooringTitle = 'Reduto de Madeira de Deriva em Enseada Protegida (DMG p. 111, 116)';
+      mooring.mooringTitle = 'Reduto de Madeira de Deriva em Enseada Protegida';
 
       mooring.riverCampSafety = 'Na curva de um meandro calmo, os batedores aproveitam bancos de cascalho e troncos encalhados para erguer um semicírculo defensivo de estacas pontiagudas contra a terra, protegendo o bivaque de ataques vindos da mata fechada.';
 
       mooring.riverWatchAndSentinel = 'O som da correnteza mascara conversas sussurradas e fogueiras rebaixadas, enquanto estacas de alerta na água rasa produzem ruído de choque caso canoas hostis se aproximem.';
 
-      mooring.campRestAndSafetyGuards = 'Proporciona cobertura de três quartos (+5 na CA) contra arqueiros inimigos e garante retirada imediata pelas canoas na água funda (PHB p. 196).';
+      mooring.campRestAndSafetyGuards = 'Proporciona cobertura de três quartos (+5 na CA) contra arqueiros inimigos e garante retirada imediata pelas canoas na água funda.';
 
     } else if (mt === 'concealed_canoe_cove_and_water_breathing_cache') {
 
-      mooring.mooringTitle = 'Enseada Camuflada de Canoas e Abrigo com Respirar na Água (PHB p. 273)';
+      mooring.mooringTitle = 'Enseada Camuflada de Canoas e Abrigo com Respirar na Água';
 
       mooring.riverCampSafety = 'Canoas e mochilas impermeabilizadas são escondidas sob copas de raízes suspensas de manguezais ou sob rochedos côncavos cobertos por musgo e folhagens fluviais, tornando o acampamento invisível a observadores na água aberta.';
 
       mooring.riverWatchAndSentinel = 'Com Respirar na Água ativo como ritual por 24 horas, sentinelas podem permanecer parcialmente submersos nas margens sombrias respirando livremente, monitorando o tráfego fluvial como emboscadores invisíveis.';
 
-      mooring.campRestAndSafetyGuards = 'Garante esconderijo absoluto contra patrulhas de margem e permite fuga anfíbia submersa sem deixar pegadas em terra firme (PHB p. 177, 273).';
+      mooring.campRestAndSafetyGuards = 'Garante esconderijo absoluto contra patrulhas de margem e permite fuga anfíbia submersa sem deixar pegadas em terra firme.';
 
     }
 
@@ -42305,15 +42305,15 @@
 
     var earth = {
 
-      earthTitle: 'Muralha de Pedra (Wall of Stone): Bastião de Granito Permanente nos Ermos (PHB p. 262)',
+      earthTitle: 'Muralha de Pedra (Wall of Stone): Bastião de Granito Permanente nos Ermos',
 
       saveDC: 16,
 
       saveType: 'Destreza',
 
-      earthMechanics: 'Druida, Feiticeiro ou Mago (5º círculo, bloco de granito, duração concentração até 10 minutos, PHB p. 262) ergue uma muralha sólida não-mágica de pedra contendo até 10 painéis de 3x3 metros e 15 cm de espessura (CA 15, 180 PV por seção, imune a veneno e psíquico); ao manter a concentração pelos 10 minutos completos, a muralha torna-se PERMANENTE no mapa Pointcrawl, podendo incorporar ameias, seteiras e passarelas elevadas!',
+      earthMechanics: 'Druida, Feiticeiro ou Mago (5º círculo, bloco de granito, duração concentração até 10 minutos) ergue uma muralha sólida não-mágica de pedra contendo até 10 painéis de 3x3 metros e 15 cm de espessura (CA 15, 180 PV por seção, imune a veneno e psíquico); ao manter a concentração pelos 10 minutos completos, a muralha torna-se PERMANENTE no mapa Pointcrawl, podendo incorporar ameias, seteiras e passarelas elevadas!',
 
-      pioneerMitigation: 'Ergue gargalos defensivos imediatos em desfiladeiros ou portões fortificados que bloqueiam a perseguição de hordas inimigas (PHB p. 262).',
+      pioneerMitigation: 'Ergue gargalos defensivos imediatos em desfiladeiros ou portões fortificados que bloqueiam a perseguição de hordas inimigas.',
 
       rescueAndStabilization: 'Protege comboios e companheiros feridos atrás de cobertura total contra saraivadas de flechas e ataques de sopro de monstros.',
 
@@ -42327,43 +42327,43 @@
 
     if (em === 'move_earth_trench_and_earthen_rampart_excavation') {
 
-      earth.earthTitle = 'Mover Terra (Move Earth): Engenharia Rápida de Trincheiras e Fossos (PHB p. 263)';
+      earth.earthTitle = 'Mover Terra (Move Earth): Engenharia Rápida de Trincheiras e Fossos';
 
       earth.saveDC = 16;
 
       earth.saveType = 'Transmutação';
 
-      earth.earthMechanics = 'Druida, Feiticeiro ou Mago (6º círculo, lâmina de ferro, concentração até 2 horas, alcance 36 metros, PHB p. 263) remodela terra, areia ou argila num quadrado de 12 metros a cada 10 minutos; escava trincheiras e fossos profundos de até 6 metros de desnível, ergue bermas protetoras elevadas e desestabiliza fundações de acampamentos ou paliçadas inimigas sem esforço físico!';
+      earth.earthMechanics = 'Druida, Feiticeiro ou Mago (6º círculo, lâmina de ferro, concentração até 2 horas, alcance 36 metros) remodela terra, areia ou argila num quadrado de 12 metros a cada 10 minutos; escava trincheiras e fossos profundos de até 6 metros de desnível, ergue bermas protetoras elevadas e desestabiliza fundações de acampamentos ou paliçadas inimigas sem esforço físico!';
 
-      earth.pioneerMitigation = 'Altera a topografia de nós de batalha em 20 minutos para conceder vantagem de terreno alto e proteção contra investidas de cavalaria (PHB p. 263).';
+      earth.pioneerMitigation = 'Altera a topografia de nós de batalha em 20 minutos para conceder vantagem de terreno alto e proteção contra investidas de cavalaria.';
 
       earth.rescueAndStabilization = 'Cria rampas suaves e passagens de terra firme sobre atoleiros e pântanos para a passagem segura de carroças e montarias.';
 
     } else if (em === 'stone_shape_bunker_and_arrowslit_adaptation') {
 
-      earth.earthTitle = 'Moldar Rochas (Stone Shape): Casamata de Granito e Escadas de Fuga (PHB p. 263)';
+      earth.earthTitle = 'Moldar Rochas (Stone Shape): Casamata de Granito e Escadas de Fuga';
 
       earth.saveDC = 15;
 
       earth.saveType = 'Transmutação';
 
-      earth.earthMechanics = 'Clérigo, Druida ou Mago (4º círculo, argila e giz, tempo 1 ação, alcance toque, PHB p. 263) molda um bloco de rocha de até 1,5m em qualquer dimensão; abre portas de pedra em penhascos, cria frestas de tiro de três quartos, talha escadas em desfiladeiros verticais ou sela fendas de cavernas para impedir que predadores alcancem a comitiva!';
+      earth.earthMechanics = 'Clérigo, Druida ou Mago (4º círculo, argila e giz, tempo 1 ação, alcance toque) molda um bloco de rocha de até 1,5m em qualquer dimensão; abre portas de pedra em penhascos, cria frestas de tiro de três quartos, talha escadas em desfiladeiros verticais ou sela fendas de cavernas para impedir que predadores alcancem a comitiva!';
 
-      earth.pioneerMitigation = 'Permite criar portões de fuga imediatos em cavernas bloqueadas ou adaptar rochedos naturais em postos de vigia fortificados (PHB p. 263).';
+      earth.pioneerMitigation = 'Permite criar portões de fuga imediatos em cavernas bloqueadas ou adaptar rochedos naturais em postos de vigia fortificados.';
 
       earth.rescueAndStabilization = 'Cria cápsulas de abrigo estanque de pedra para isolar feridos de desmoronamentos de terra ou inundações repentinas.';
 
     } else if (em === 'earthquake_cataclysmic_fissure_breach') {
 
-      earth.earthTitle = 'Terremoto (Earthquake): Colapso Sísmico de Túneis e Fortificações Inimigas (PHB p. 281)';
+      earth.earthTitle = 'Terremoto (Earthquake): Colapso Sísmico de Túneis e Fortificações Inimigas';
 
       earth.saveDC = 18;
 
       earth.saveType = 'Destreza';
 
-      earth.earthMechanics = 'Clérigo, Druida ou Feiticeiro (8º círculo, concentração até 1 minuto, alcance 150 metros, PHB p. 281) desencadeia um tremor devastador num raio de 30 metros; derruba criaturas no chão (salvaguarda de Destreza), quebra concentrações, abre 1d6 fissuras profundas de até 30 metros de profundidade e causa 50 de dano por concussão a estruturas por turno, colapsando muralhas e túneis inimigos!';
+      earth.earthMechanics = 'Clérigo, Druida ou Feiticeiro (8º círculo, concentração até 1 minuto, alcance 150 metros) desencadeia um tremor devastador num raio de 30 metros; derruba criaturas no chão (salvaguarda de Destreza), quebra concentrações, abre 1d6 fissuras profundas de até 30 metros de profundidade e causa 50 de dano por concussão a estruturas por turno, colapsando muralhas e túneis inimigos!';
 
-      earth.pioneerMitigation = 'Demolição tática à distância de fortalezas e pontes fortificadas dominadas por bandidos nas rotas de campanha (PHB p. 281).';
+      earth.pioneerMitigation = 'Demolição tática à distância de fortalezas e pontes fortificadas dominadas por bandidos nas rotas de campanha.';
 
       earth.rescueAndStabilization = 'Sepulta covis subterrâneos e fendas ativas de monstros sem necessidade de incursão corpo a corpo arriscada.';
 
@@ -42389,13 +42389,13 @@
 
     var defense = {
 
-      defenseTitle: 'Paliçada de Granito Permanente por Muralha de Pedra no Bivaque (PHB p. 262)',
+      defenseTitle: 'Paliçada de Granito Permanente por Muralha de Pedra no Bivaque',
 
       earthAndCampSafety: 'Durante os preparativos do descanso longo, o conjurador mantém a concentração por 10 minutos para erguer uma muralha perimetral de granito de 3 metros de altura e 15 cm de espessura (CA 15, 180 PV por painel) ao redor das barracas; a muralha torna-se permanente no nó estratégico, transformando o bivaque num reduto fortificado duradouro.',
 
       earthAndCouncilWatch: 'Sentinelas patrulham sobre as ameias de pedra com visão panorâmica de 360°, operando com cobertura de três quartos (+5 na CA e salvaguardas de Destreza) contra flechas e ataques à distância.',
 
-      campRestAndSafetyGuards: 'Anula totalmente o risco de investidas de cavalaria, atropelamentos de feras colossais ou ataques de oportunidade noturnos contra a comitiva (PHB p. 186, 262).',
+      campRestAndSafetyGuards: 'Anula totalmente o risco de investidas de cavalaria, atropelamentos de feras colossais ou ataques de oportunidade noturnos contra a comitiva.',
 
       icon: '🏰',
 
@@ -42407,23 +42407,23 @@
 
     if (dt === 'earthen_redoubt_and_anti_cavalry_trench') {
 
-      defense.defenseTitle = 'Reduto Telúrico e Fosso Antinvestida por Mover Terra (PHB p. 263)';
+      defense.defenseTitle = 'Reduto Telúrico e Fosso Antinvestida por Mover Terra';
 
       defense.earthAndCampSafety = 'Utilizando Mover Terra, a comitiva escava um fosso perimetral de 3 metros de largura por 3 metros de profundidade e ergue uma berma íngreme de terra compactada em 30 minutos, forçando qualquer invasor a escalar sob terreno difícil.';
 
       defense.earthAndCouncilWatch = 'Invasores que tentam se aproximar no escuro caem no fosso ou fazem barulho de cascalho ao deslizar, alertando os sentinelas antes de qualquer contato físico.';
 
-      defense.campRestAndSafetyGuards = 'Garante tempo de reação tática para que os membros do grupo vistam armaduras leves ou tomem armas antes de um combate noturno (PHB p. 263).';
+      defense.campRestAndSafetyGuards = 'Garante tempo de reação tática para que os membros do grupo vistam armaduras leves ou tomem armas antes de um combate noturno.';
 
     } else if (dt === 'stone_shaped_vault_and_sealed_arrowslits') {
 
-      defense.defenseTitle = 'Casamata de Granito com Frestas de Tiro por Moldar Rochas (PHB p. 263)';
+      defense.defenseTitle = 'Casamata de Granito com Frestas de Tiro por Moldar Rochas';
 
       defense.earthAndCampSafety = 'Em terrenos rochosos (Montanhas, Cavernas ou Ermos Gelados), os conjuradores fundem blocos de calcário ou granito ao redor das esteiras de dormir, criando uma câmara estanque com porta de pedra maciça travada por dentro.';
 
       defense.earthAndCouncilWatch = 'Frestas de tiro em ângulo agudo permitem que os atiradores da comitiva monitorem o exterior sem expor o corpo, disparando magias e projéteis com cobertura quase total.';
 
-      defense.campRestAndSafetyGuards = 'Proteção hermética absoluta contra intempéries climáticas, gases vulcânicos e predadores escavadores durante o sono (PHB p. 186, 263).';
+      defense.campRestAndSafetyGuards = 'Proteção hermética absoluta contra intempéries climáticas, gases vulcânicos e predadores escavadores durante o sono.';
 
     }
 
@@ -42455,15 +42455,15 @@
 
     var planar = {
 
-      planarTitle: 'Transição Planar (Plane Shift): Trânsito Interdimensional de 8 Aventureiros (PHB p. 266)',
+      planarTitle: 'Transição Planar (Plane Shift): Trânsito Interdimensional de 8 Aventureiros',
 
       saveDC: 17,
 
       saveType: 'Carisma',
 
-      planarMechanics: 'Clérigo, Druida, Bruxo, Feiticeiro ou Mago (7º círculo, haste bifurcada de metal de 250 PO sintonizada, tempo 1 ação, PHB p. 266) une as mãos de até 8 aventureiros voluntários e os transporta instantaneamente para outro plano de existência (como os Planos Elementais, Arbórea ou o Plano Material Primordial), ou desfere um toque corpo a corpo que força uma salvaguarda de Carisma para banir uma criatura hostil para outro plano!',
+      planarMechanics: 'Clérigo, Druida, Bruxo, Feiticeiro ou Mago (7º círculo, haste bifurcada de metal de 250 PO sintonizada, tempo 1 ação) une as mãos de até 8 aventureiros voluntários e os transporta instantaneamente para outro plano de existência (como os Planos Elementais, Arbórea ou o Plano Material Primordial), ou desfere um toque corpo a corpo que força uma salvaguarda de Carisma para banir uma criatura hostil para outro plano!',
 
-      pioneerMitigation: 'Assegura rota de escape interdimensional imediata caso a rota terrestre Pointcrawl seja bloqueada por cataclismos ou exércitos hostis (PHB p. 266).',
+      pioneerMitigation: 'Assegura rota de escape interdimensional imediata caso a rota terrestre Pointcrawl seja bloqueada por cataclismos ou exércitos hostis.',
 
       rescueAndStabilization: 'Permite resgatar companheiros perdidos no Shadowfell, no Feywild ou nas profundezas do Plano Astral.',
 
@@ -42477,41 +42477,41 @@
 
     if (pm === 'gate_planar_portal_and_entity_summoning') {
 
-      planar.planarTitle = 'Portal (Gate): Portal Astral Circular de 6 Metros e Evocação Nominal (PHB p. 269)';
+      planar.planarTitle = 'Portal (Gate): Portal Astral Circular de 6 Metros e Evocação Nominal';
 
       planar.saveDC = 19;
 
       planar.saveType = 'Carisma';
 
-      planar.planarMechanics = 'Clérigo, Feiticeiro ou Mago (9º círculo, diamante de 5.000 PO, concentração até 1 minuto, PHB p. 269) rasga o tecido do espaço abrindo um portal circular de 1,5 a 6 metros de diâmetro para um local exato em outro plano; o portal permite travessia bidirecional instantânea para tropas e montarias aliadas, ou puxa irresistivelmente uma entidade planar específica ao pronunciar seu nome verdadeiro!';
+      planar.planarMechanics = 'Clérigo, Feiticeiro ou Mago (9º círculo, diamante de 5.000 PO, concentração até 1 minuto) rasga o tecido do espaço abrindo um portal circular de 1,5 a 6 metros de diâmetro para um local exato em outro plano; o portal permite travessia bidirecional instantânea para tropas e montarias aliadas, ou puxa irresistivelmente uma entidade planar específica ao pronunciar seu nome verdadeiro!';
 
-      planar.pioneerMitigation = 'Permite mobilizar exércitos da guilda ou reforços planares diretamente em nós críticos de campanha disputados nos ermos (PHB p. 269).',
+      planar.pioneerMitigation = 'Permite mobilizar exércitos da guilda ou reforços planares diretamente em nós críticos de campanha disputados nos ermos.',
 
       planar.rescueAndStabilization = 'Evacuação em massa de até centenas de refugiados e aventureiros antes do colapso de uma região.';
 
     } else if (pm === 'natural_planar_rift_stabilization_and_fey_crossing') {
 
-      planar.planarTitle = 'Passagens Feéricas e Fendas Planares Naturais nos Ermos (DMG p. 43-68)';
+      planar.planarTitle = 'Passagens Feéricas e Fendas Planares Naturais nos Ermos';
 
       planar.saveDC = 16;
 
       planar.saveType = 'Arcanismo';
 
-      planar.planarMechanics = 'Conjurador de fronteira ou batedor místico (DMG p. 43-68) identifica fendas planares espontâneas nos 15 biomas (Passagens Feéricas na Floresta Ancestral, Fendas Sombrias no Cemitério e Fendas de Magma no Vulcão); realiza um teste de Inteligência (Arcanismo) para estabilizar o vórtice com estacas de prata e ferro frio, impedindo que a comitiva sofra desvios espaciais ou efeitos de magia selvagem instável ao transitar!';
+      planar.planarMechanics = 'Conjurador de fronteira ou batedor místico identifica fendas planares espontâneas nos 15 biomas (Passagens Feéricas na Floresta Ancestral, Fendas Sombrias no Cemitério e Fendas de Magma no Vulcão); realiza um teste de Inteligência (Arcanismo) para estabilizar o vórtice com estacas de prata e ferro frio, impedindo que a comitiva sofra desvios espaciais ou efeitos de magia selvagem instável ao transitar!';
 
-      planar.pioneerMitigation = 'Atalhos cósmicos naturais que cortam semanas de marcha a pé através de biomas perigosos conectando nós distantes do mapa (DMG p. 45).',
+      planar.pioneerMitigation = 'Atalhos cósmicos naturais que cortam semanas de marcha a pé através de biomas perigosos conectando nós distantes do mapa.',
 
       planar.rescueAndStabilization = 'Estabiliza fendas ativas para evitar a sucção descontrolada de membros do grupo em tempestades astrais.';
 
     } else if (pm === 'unstable_mana_pocket_and_wild_magic_dampening') {
 
-      planar.planarTitle = 'Bolsões de Mana Instável e Aterramento de Magia Selvagem (DMG p. 108-112)';
+      planar.planarTitle = 'Bolsões de Mana Instável e Aterramento de Magia Selvagem';
 
       planar.saveDC = 16;
 
       planar.saveType = 'Sabedoria';
 
-      planar.planarMechanics = 'Em nós anômalos de confluência planar onde a urdidura arcana oscila perigosamente (DMG p. 108), conjurações arriscam desencadear surtos de magia selvagem; o conjurador ergue um campo de aterramento harmônico de 18 metros que canaliza o excesso de éter para cristais telúricos, garantindo que magias de cura e proteção funcionem sem desvios catastróficos.';
+      planar.planarMechanics = 'Em nós anômalos de confluência planar onde a urdidura arcana oscila perigosamente, conjurações arriscam desencadear surtos de magia selvagem; o conjurador ergue um campo de aterramento harmônico de 18 metros que canaliza o excesso de éter para cristais telúricos, garantindo que magias de cura e proteção funcionem sem desvios catastróficos.';
 
       planar.pioneerMitigation = 'Neutraliza interferências de mana instável em equipamentos mágicos e anula efeitos caóticos durante encontros na rota.',
 
@@ -42539,13 +42539,13 @@
 
     var defense = {
 
-      defenseTitle: 'Hastes de Aterramento Planar e Supressão de Fendas no Bivaque (DMG p. 45; PHB p. 266)',
+      defenseTitle: 'Hastes de Aterramento Planar e Supressão de Fendas no Bivaque',
 
       planarAndCampSafety: 'Ao montar o bivaque em zonas com alta atividade mágica ou proximidade de portais ancestrais, o grupo crava quatro hastes de ferro frio e prata nos vértices do acampamento; o circuito sela microfendas planares espontâneas e impede que demônios do Abismo, espectros do Shadowfell ou aberrações astrais brotem no meio das barracas.',
 
       planarAndCouncilWatch: 'Sentinelas de vigília monitoram oscilações de mana e auroras etéreas na atmosfera, detectando aproximações de entidades planares invisíveis com antecedência total.',
 
-      campRestAndSafetyGuards: 'Garante que o descanso longo transcorra sem flutuações de gravidade, pesadelos do Plano Astral ou drenos necromânticos de fendas locais (PHB p. 186; DMG p. 45).',
+      campRestAndSafetyGuards: 'Garante que o descanso longo transcorra sem flutuações de gravidade, pesadelos do Plano Astral ou drenos necromânticos de fendas locais.',
 
       icon: '🌌',
 
@@ -42557,23 +42557,23 @@
 
     if (dt === 'astral_confluence_beacon_and_harmonic_watch') {
 
-      defense.defenseTitle = 'Farol Harmônico Astral e Vigia de Alinhamento Cósmico (DMG p. 47)';
+      defense.defenseTitle = 'Farol Harmônico Astral e Vigia de Alinhamento Cósmico';
 
       defense.planarAndCampSafety = 'Um cristal sintonizado ao Plano Material Primordial é suspenso sobre a fogueira do acampamento; a emanação estabiliza o espaço-tempo local, concedendo vantagem a todos os aventureiros em salvaguardas de Carisma contra banimentos ou teletransportes involuntários.',
 
       defense.planarAndCouncilWatch = 'O vigia noturno conta com sensibilidade aumentada para discernir distorções planares no horizonte, prevenindo ataques surpresa de comitivas montadas em pesadelos ou montarias astrais.',
 
-      defense.campRestAndSafetyGuards = 'Evita que membros da comitiva sejam projetados para semiplanos hostis durante o sono (DMG p. 47).';
+      defense.campRestAndSafetyGuards = 'Evita que membros da comitiva sejam projetados para semiplanos hostis durante o sono.';
 
     } else if (dt === 'emergency_plane_shift_escape_key') {
 
-      defense.defenseTitle = 'Chave de Transição Planar de Emergência para Refúgio Seguro (PHB p. 266)';
+      defense.defenseTitle = 'Chave de Transição Planar de Emergência para Refúgio Seguro';
 
       defense.planarAndCampSafety = 'O conjurador mantém a haste de Transição Planar sintonizada com um santuário da guilda ou templo consagrado (Fase 320) posicionada no centro do bivaque; caso o acampamento seja emboscado por forças avassaladoras, um comando verbal imediato une a comitiva e a teleporta instantaneamente para a segurança.',
 
       defense.planarAndCouncilWatch = 'Confere tranquilidade psicológica e foco tático aos membros do grupo, sabendo que existe um protocolo de escape infalível contra extermínio da comitiva.',
 
-      defense.campRestAndSafetyGuards = 'Garante sobrevivência garantida da comitiva mesmo nas fronteiras mais hostis do mundo de Valdoria (PHB p. 266).';
+      defense.campRestAndSafetyGuards = 'Garante sobrevivência garantida da comitiva mesmo nas fronteiras mais hostis do mundo de Valdoria.';
 
     }
 
@@ -42605,15 +42605,15 @@
 
     var covert = {
 
-      covertTitle: 'Indetectabilidade (Nondetection): Bloqueio Total de Sensores e Vidência por 8 Horas (PHB p. 261)',
+      covertTitle: 'Indetectabilidade (Nondetection): Bloqueio Total de Sensores e Vidência por 8 Horas',
 
       saveDC: 16,
 
       saveType: 'Abjuração',
 
-      covertMechanics: 'Bardo, Clérigo, Patrulheiro ou Mago (3º círculo, pó de diamante de 25 PO consumido, duração 8 horas sem concentração, PHB p. 261) blinda um alvo voluntário ou a comitiva contra qualquer tentativa de localização mágica: o grupo não pode ser visto por sensores de Clarividência, Olho Arcano ou Vidência (Fase 317, 318), nem detectado por Localizar Criatura ou magias de rastreamento arcano!',
+      covertMechanics: 'Bardo, Clérigo, Patrulheiro ou Mago (3º círculo, pó de diamante de 25 PO consumido, duração 8 horas sem concentração) blinda um alvo voluntário ou a comitiva contra qualquer tentativa de localização mágica: o grupo não pode ser visto por sensores de Clarividência, Olho Arcano ou Vidência (Fase 317, 318), nem detectado por Localizar Criatura ou magias de rastreamento arcano!',
 
-      pioneerMitigation: 'Comitivas rivais ou patrulhas que usem bolas de cristal e adivinhações recebem apenas névoa cinzenta estática ao tentar sintonizar os aventureiros (PHB p. 261).',
+      pioneerMitigation: 'Comitivas rivais ou patrulhas que usem bolas de cristal e adivinhações recebem apenas névoa cinzenta estática ao tentar sintonizar os aventureiros.',
 
       rescueAndStabilization: 'Permite que a comitiva transporte prisioneiros resgatados ou relíquias cobiçadas sem revelar suas coordenadas na rota Pointcrawl.',
 
@@ -42627,13 +42627,13 @@
 
     if (cm === 'mass_invisibility_and_covert_scouting_advance') {
 
-      covert.covertTitle = 'Invisibilidade de Grupo e Manto de Marcha Silenciosa (PHB p. 253, 261)';
+      covert.covertTitle = 'Invisibilidade de Grupo e Manto de Marcha Silenciosa';
 
       covert.saveDC = 17;
 
       covert.saveType = 'Ilusão';
 
-      covert.covertMechanics = 'Feiticeiro ou Mago (upcast de 5º círculo ou Manto de Invisibilidade, duração até 1 hora, PHB p. 253) envolve até 4 aventureiros em refração luminosa mágica; a comitiva inteira torna-se invisível para a marcha através de postos de guarda inimigos, desfiladeiros vigiados por bestas territoriais ou acampamentos hostis sem ser avistada!';
+      covert.covertMechanics = 'Feiticeiro ou Mago (upcast de 5º círculo ou Manto de Invisibilidade, duração até 1 hora) envolve até 4 aventureiros em refração luminosa mágica; a comitiva inteira torna-se invisível para a marcha através de postos de guarda inimigos, desfiladeiros vigiados por bestas territoriais ou acampamentos hostis sem ser avistada!';
 
       covert.pioneerMitigation = 'Concede vantagem em testes de Destreza (Furtividade) de grupo e impede ataques de oportunidade caso precisem passar correndo por sentinelas.';
 
@@ -42641,29 +42641,29 @@
 
     } else if (cm === 'rope_trick_pocket_dimension_hideout') {
 
-      covert.covertTitle = 'Truque da Corda (Rope Trick): Esconderijo Extradimensional de Emergência (PHB p. 285)';
+      covert.covertTitle = 'Truque da Corda (Rope Trick): Esconderijo Extradimensional de Emergência';
 
       covert.saveDC = 15;
 
       covert.saveType = 'Transmutação';
 
-      covert.covertMechanics = 'Mago (2º círculo, corda de até 18 metros, duração 1 hora, PHB p. 285) ergue uma corda que sobe em direção ao céu e abre uma fenda para um espaço extradimensional invisível para até 8 aventureiros Médios; a corda é puxada para dentro, fazendo o esconderijo desaparecer por completo da vista externa enquanto a janela de 1x1m permite olhar para fora com segurança!';
+      covert.covertMechanics = 'Mago (2º círculo, corda de até 18 metros, duração 1 hora) ergue uma corda que sobe em direção ao céu e abre uma fenda para um espaço extradimensional invisível para até 8 aventureiros Médios; a corda é puxada para dentro, fazendo o esconderijo desaparecer por completo da vista externa enquanto a janela de 1x1m permite olhar para fora com segurança!';
 
-      covert.pioneerMitigation = 'Permite que a comitiva descanse por 1 hora para realizar um Descanso Curto seguro mesmo cercada por hordas inimigas (PHB p. 285).';
+      covert.pioneerMitigation = 'Permite que a comitiva descanse por 1 hora para realizar um Descanso Curto seguro mesmo cercada por hordas inimigas.';
 
       covert.rescueAndStabilization = 'Abrigo tático instantâneo contra tempestades de fogo, desmoronamentos ou perseguições imediatas na estrada.';
 
     } else if (cm === 'mind_blank_impenetrable_mental_cloak') {
 
-      covert.covertTitle = 'Manto Mental (Mind Blank): Imunidade Psíquica e Blindagem Telepática Absoluta (PHB p. 260)';
+      covert.covertTitle = 'Manto Mental (Mind Blank): Imunidade Psíquica e Blindagem Telepática Absoluta';
 
       covert.saveDC = 18;
 
       covert.saveType = 'Abjuração';
 
-      covert.covertMechanics = 'Bardo ou Mago (8º círculo, duração 24 horas sem concentração, PHB p. 260) confere blindagem mental impenetrável: imunidade a dano psíquico, imunidade a qualquer magia de leitura de emoções ou pensamentos (Detectar Pensamentos, Fase 310), imunidade à condição Enfeitiçado e bloqueio total até mesmo da magia Desejo contra a mente do alvo!';
+      covert.covertMechanics = 'Bardo ou Mago (8º círculo, duração 24 horas sem concentração) confere blindagem mental impenetrável: imunidade a dano psíquico, imunidade a qualquer magia de leitura de emoções ou pensamentos (Detectar Pensamentos, Fase 310), imunidade à condição Enfeitiçado e bloqueio total até mesmo da magia Desejo contra a mente do alvo!';
 
-      covert.pioneerMitigation = 'Anula completamente a espionagem telepática de bruxos, devoradores de mentes ou aberrações durante negociações de alta tensão (PHB p. 260).';
+      covert.pioneerMitigation = 'Anula completamente a espionagem telepática de bruxos, devoradores de mentes ou aberrações durante negociações de alta tensão.';
 
       covert.rescueAndStabilization = 'Protege o líder ou conjurador da comitiva contra possessões mentais e ataques psíquicos profundos.';
 
@@ -42689,13 +42689,13 @@
 
     var defense = {
 
-      defenseTitle: 'Cúpula de Indetectabilidade e Barreira Antividência no Bivaque (PHB p. 261)',
+      defenseTitle: 'Cúpula de Indetectabilidade e Barreira Antividência no Bivaque',
 
       veilAndCampSafety: 'Ao fixar o acampamento noturno, o conjurador ancora Indetectabilidade no centro do bivaque (ou utiliza pedras rúnicas polvilhadas com pó de diamante), criando um domo de 8 horas que impede que sensores remotos hostis (Clarividência ou Vidência) espiem a disposição das barracas ou o número de aventureiros adormecidos.',
 
       veilAndCouncilWatch: 'Sentinelas de vigília monitoram o perímetro sabendo que nenhum olho invisível ou sensor mágico flutua sobre as cabeças do grupo sem ser repelido pela barreira.',
 
-      campRestAndSafetyGuards: 'Garante descanso longo livre de emboscadas orquestradas por espiões arcanos à distância (PHB p. 186, 261).',
+      campRestAndSafetyGuards: 'Garante descanso longo livre de emboscadas orquestradas por espiões arcanos à distância.',
 
       icon: '🔮',
 
@@ -42707,23 +42707,23 @@
 
     if (dt === 'rope_trick_floating_sentry_lookout_station') {
 
-      defense.defenseTitle = 'Posto de Vigia Flutuante por Truque da Corda (PHB p. 285)';
+      defense.defenseTitle = 'Posto de Vigia Flutuante por Truque da Corda';
 
       defense.veilAndCampSafety = 'Um Truque da Corda é conjurado a 12 metros de altura acima do acampamento com a corda recolhida; o sentinela de plantão permanece dentro do espaço extradimensional invisível, observando os arredores em 360° através da janela mágica com visão privilegiada de terreno.',
 
       defense.veilAndCouncilWatch = 'Invasores rastejantes ou patrulhas que se aproximam no chão não possuem linha de visão para o sentinela suspenso no ar, perdendo qualquer oportunidade de surpreender a guarda noturna.',
 
-      defense.campRestAndSafetyGuards = 'O sentinela lança sinais de luz ou solta a corda silenciosamente para alertar a comitiva antes que os invasores alcancem as barracas (PHB p. 285).';
+      defense.campRestAndSafetyGuards = 'O sentinela lança sinais de luz ou solta a corda silenciosamente para alertar a comitiva antes que os invasores alcancem as barracas.';
 
     } else if (dt === 'telepathic_silence_and_mental_blank_council') {
 
-      defense.defenseTitle = 'Silêncio Telepático e Conselho de Guerra com Manto Mental (PHB p. 260, 277)';
+      defense.defenseTitle = 'Silêncio Telepático e Conselho de Guerra com Manto Mental';
 
       defense.veilAndCampSafety = 'Líderes de comitivas aliadas reunidos na fogueira (Fase 315) sob proteção de Manto Mental e Vínculo Telepático de Rary deliberam estratégias de cerco sem emitir sons audíveis e sem que espiões psíquicos leiam suas memórias.',
 
       defense.veilAndCouncilWatch = 'A blindagem impede sondagens telepáticas externas e neutraliza tentativas de charme ou controle mental contra os guardas de plantão.',
 
-      defense.campRestAndSafetyGuards = 'Preserva a integridade tática e a lealdade da comitiva contra infiltrações de metamorfos e espiões arcanos (PHB p. 260).';
+      defense.campRestAndSafetyGuards = 'Preserva a integridade tática e a lealdade da comitiva contra infiltrações de metamorfos e espiões arcanos.';
 
     }
 
@@ -42755,15 +42755,15 @@
 
     var illusion = {
 
-      illusionTitle: 'Miragem Arcana (Mirage Arcane): Transmutação Ilusória de Terreno de 2,5 km² (PHB p. 260)',
+      illusionTitle: 'Miragem Arcana (Mirage Arcane): Transmutação Ilusória de Terreno de 2,5 km²',
 
       saveDC: 17,
 
       saveType: 'Inteligência',
 
-      illusionMechanics: 'Bardo, Druida ou Mago (7º círculo, tempo de conjuração 10 minutos, duração 10 dias, PHB p. 260) remodela o terreno natural e estruturas artificiais numa área colossal de até 2,5 km² (1 milha quadrada), fazendo um ermo inóspito parecer, soar, cheirar e até se comportar fisicamente como campinas com riachos límpidos e castelos táteis; como a ilusão possui substância quase física, membros da comitiva podem subir em torres ilusórias ou cruzar pontes fantasmas sem cair!',
+      illusionMechanics: 'Bardo, Druida ou Mago (7º círculo, tempo de conjuração 10 minutos, duração 10 dias) remodela o terreno natural e estruturas artificiais numa área colossal de até 2,5 km² (1 milha quadrada), fazendo um ermo inóspito parecer, soar, cheirar e até se comportar fisicamente como campinas com riachos límpidos e castelos táteis; como a ilusão possui substância quase física, membros da comitiva podem subir em torres ilusórias ou cruzar pontes fantasmas sem cair!',
 
-      pioneerMitigation: 'Criaturas com Sentido Verdadeiro (Truesight) enxergam a forma original do terreno, mas ainda podem interagir fisicamente com as pontes e vegetação da miragem (PHB p. 260).',
+      pioneerMitigation: 'Criaturas com Sentido Verdadeiro (Truesight) enxergam a forma original do terreno, mas ainda podem interagir fisicamente com as pontes e vegetação da miragem.',
 
       rescueAndStabilization: 'Converte penhascos intransponíveis e atoleiros venenosos em estradas planas para a passagem segura de comboios de carga.',
 
@@ -42777,27 +42777,27 @@
 
     if (im === 'hallucinatory_terrain_chasm_and_quicksand_trap') {
 
-      illusion.illusionTitle = 'Terreno Alucinógeno (Hallucinatory Terrain): Camuflagem de Ravinas e Armadilhas Naturais (PHB p. 249)';
+      illusion.illusionTitle = 'Terreno Alucinógeno (Hallucinatory Terrain): Camuflagem de Ravinas e Armadilhas Naturais';
 
       illusion.saveDC = 16;
 
       illusion.saveType = 'Investigação';
 
-      illusion.illusionMechanics = 'Bardo, Bruxo, Druida ou Mago (4º círculo, duração 24 horas, cubo de 45 metros, PHB p. 249) faz um abismo, charco de lodo movediço ou fenda de lava parecer terreno sólido de cascalho; criaturas que inspecionam o local à distância devem ser bem-sucedidas num teste de Inteligência (Investigação) contra a CD de conjuração para notar as incongruências visuais antes de pisar!';
+      illusion.illusionMechanics = 'Bardo, Bruxo, Druida ou Mago (4º círculo, duração 24 horas, cubo de 45 metros) faz um abismo, charco de lodo movediço ou fenda de lava parecer terreno sólido de cascalho; criaturas que inspecionam o local à distância devem ser bem-sucedidas num teste de Inteligência (Investigação) contra a CD de conjuração para notar as incongruências visuais antes de pisar!';
 
-      illusion.pioneerMitigation = 'O batedor da comitiva utiliza sondas de madeira ou passos cautelosos para testar a resistência física de superfícies suspeitas antes da marcha (PHB p. 249).';
+      illusion.pioneerMitigation = 'O batedor da comitiva utiliza sondas de madeira ou passos cautelosos para testar a resistência física de superfícies suspeitas antes da marcha.';
 
       illusion.rescueAndStabilization = 'Evita que a comitiva caia em fossos camuflados ou emboscadas preparadas por bandidos nas rotas estreitas.';
 
     } else if (im === 'maze_extradimensional_mental_puzzle_banishment') {
 
-      illusion.illusionTitle = 'Labirinto (Maze): Banimento para Semiplano Labiríntico Extradimensional (PHB p. 279)';
+      illusion.illusionTitle = 'Labirinto (Maze): Banimento para Semiplano Labiríntico Extradimensional';
 
       illusion.saveDC = 20;
 
       illusion.saveType = 'Inteligência';
 
-      illusion.illusionMechanics = 'Mago (8º círculo, concentração até 10 minutos, alcance 18 metros, PHB p. 279) bane um monstro colossal ou campeão hostil sem direito a salvaguarda inicial para um semiplano labiríntico; para escapar em cada turno subsequente, o alvo deve usar sua ação inteira e obter sucesso num teste puro de Inteligência CD 20 (apenas Minotauros passam automaticamente por Memória Labiríntica, MM p. 218)!';
+      illusion.illusionMechanics = 'Mago (8º círculo, concentração até 10 minutos, alcance 18 metros) bane um monstro colossal ou campeão hostil sem direito a salvaguarda inicial para um semiplano labiríntico; para escapar em cada turno subsequente, o alvo deve usar sua ação inteira e obter sucesso num teste puro de Inteligência CD 20 (apenas Minotauros passam automaticamente por Memória Labiríntica)!';
 
       illusion.pioneerMitigation = 'Neutraliza instantaneamente a maior ameaça de um encontro durante o tempo necessário para a comitiva escapar do nó ou se posicionar taticamente.';
 
@@ -42805,13 +42805,13 @@
 
     } else if (im === 'true_seeing_and_detect_illusion_scouting') {
 
-      illusion.illusionTitle = 'Visão da Verdade (True Seeing): Percepção Absoluta Contra Miragens e Portais Secretos (PHB p. 284)';
+      illusion.illusionTitle = 'Visão da Verdade (True Seeing): Percepção Absoluta Contra Miragens e Portais Secretos';
 
       illusion.saveDC = 17;
 
       illusion.saveType = 'Sabedoria';
 
-      illusion.illusionMechanics = 'Bardo, Clérigo, Bruxo, Feiticeiro ou Mago (6º círculo, pó de cogumelo e açafrão de 25 PO, duração 1 hora, alcance toque, PHB p. 284) concede Sentido Verdadeiro até 36 metros, permitindo enxergar através de escuridão mágica e normal, detectar portas secretas ocultas por ilusões, ver criaturas invisíveis e no Plano Etéreo e perceber a verdadeira forma de metamorfos.';
+      illusion.illusionMechanics = 'Bardo, Clérigo, Bruxo, Feiticeiro ou Mago (6º círculo, pó de cogumelo e açafrão de 25 PO, duração 1 hora, alcance toque) concede Sentido Verdadeiro até 36 metros, permitindo enxergar através de escuridão mágica e normal, detectar portas secretas ocultas por ilusões, ver criaturas invisíveis e no Plano Etéreo e perceber a verdadeira forma de metamorfos.';
 
       illusion.pioneerMitigation = 'Garante que o Guia e o Batedor identifiquem caminhos reais e atalhos ocultos bloqueados por miragens ancestrais nas ruínas dos ermos.';
 
@@ -42839,13 +42839,13 @@
 
     var defense = {
 
-      defenseTitle: 'Perímetro com Visão da Verdade e Purga de Miragens no Bivaque (PHB p. 284)',
+      defenseTitle: 'Perímetro com Visão da Verdade e Purga de Miragens no Bivaque',
 
       illusionAndCampSafety: 'Ao estabelecer o acampamento em regiões marcadas por magia residual ou covis feéricos (como Floresta Ancestral ou Pântano Sombrio), o conjurador ativa Visão da Verdade ou Detectar Magia para inspecionar o solo num raio de 36 metros, desfazendo dúvidas sobre se árvores e rochas perimetrais são reais ou disfarces para infiltradores.',
 
       illusionAndCouncilWatch: 'Sentinelas na vigília não são enganados por sons falsos, fogueiras fantasma ou formas ilusórias criadas por espiões hostis para desviar a atenção do grupo.',
 
-      campRestAndSafetyGuards: 'Assegura descanso longo sereno e sem surpresa contra ilusões ou invasores invisíveis (PHB p. 186, 284).',
+      campRestAndSafetyGuards: 'Assegura descanso longo sereno e sem surpresa contra ilusões ou invasores invisíveis.',
 
       icon: '👁️',
 
@@ -42857,7 +42857,7 @@
 
     if (dt === 'labyrinthine_recall_and_mental_map_orientation') {
 
-      defense.defenseTitle = 'Orientação por Memória Labiríntica e Bússola Astral de Vigília (PHB p. 279; MM p. 218)';
+      defense.defenseTitle = 'Orientação por Memória Labiríntica e Bússola Astral de Vigília';
 
       defense.illusionAndCampSafety = 'A comitiva utiliza técnicas de anotação cartográfica em pedra e giz rúnico em torno do bivaque, gravando pontos cardeais fixos e referências astronômicas para garantir que batedores em patrulha noturna não sejam desorientados por névoas hipnóticas ou dobras dimensionais.';
 
@@ -42867,13 +42867,13 @@
 
     } else if (dt === 'tactical_mirage_decoy_camp_camo') {
 
-      defense.defenseTitle = 'Camuflagem Ilusória de Bivaque por Miragem Arcana (PHB p. 260)';
+      defense.defenseTitle = 'Camuflagem Ilusória de Bivaque por Miragem Arcana';
 
       defense.illusionAndCampSafety = 'Conjuradores utilizam Terreno Alucinógeno ou Miragem Arcana para sobrepor a imagem de um paredão de rocha íngreme e inóspito exatamente sobre a clareira onde estão montadas as barracas da comitiva.',
 
       defense.illusionAndCouncilWatch = 'Patrulhas inimigas e feras carnívoras que passam a poucos passos enxergam apenas pedra bruta e vento uivante, contornando o local sem interagir ou suspeitar da presença do grupo adormecido.',
 
-      defense.campRestAndSafetyGuards = 'Reduz a chance de encontros noturnos hostis a zero durante toda a permanência da comitiva no nó camuflado (PHB p. 260).';
+      defense.campRestAndSafetyGuards = 'Reduz a chance de encontros noturnos hostis a zero durante toda a permanência da comitiva no nó camuflado.';
 
     }
 
@@ -42905,15 +42905,15 @@
 
     var weather = {
 
-      weatherTitle: 'Controlar o Clima (Control Weather): Estabilizador Macroclimático Regional de 7,5 km (PHB p. 228)',
+      weatherTitle: 'Controlar o Clima (Control Weather): Estabilizador Macroclimático Regional de 7,5 km',
 
       saveDC: 17,
 
       saveType: 'Constituição',
 
-      weatherMechanics: 'Clérigo, Druida ou Mago (8º círculo, incenso e terra com água, tempo de conjuração 10 minutos, duração concentração até 8 horas, PHB p. 228) assume o controle das condições atmosféricas num raio colossal de 7,5 km (5 milhas centrado no conjurador), podendo alterar gradualmente em estágios a precipitação (de chuva torrencial/nevasca para limpo), a temperatura (de calor sufocante ou frio ártico para ameno) e a velocidade do vento (de vendaval/furacão para brisa leve), neutralizando os perigos climáticos mais extremos dos ermos!',
+      weatherMechanics: 'Clérigo, Druida ou Mago (8º círculo, incenso e terra com água, tempo de conjuração 10 minutos, duração concentração até 8 horas) assume o controle das condições atmosféricas num raio colossal de 7,5 km (5 milhas centrado no conjurador), podendo alterar gradualmente em estágios a precipitação (de chuva torrencial/nevasca para limpo), a temperatura (de calor sufocante ou frio ártico para ameno) e a velocidade do vento (de vendaval/furacão para brisa leve), neutralizando os perigos climáticos mais extremos dos ermos!',
 
-      pioneerMitigation: 'Cada mudança de estágio leva 1d4 × 10 minutos para se assentar; um batedor experiente planeja a conjuração antes da marcha para transformar terreno difícil climático em marcha padrão (PHB p. 228).',
+      pioneerMitigation: 'Cada mudança de estágio leva 1d4 × 10 minutos para se assentar; um batedor experiente planeja a conjuração antes da marcha para transformar terreno difícil climático em marcha padrão.',
 
       rescueAndStabilization: 'Dissipa nevascas, cinzas vulcânicas e tempestades de areia, zerando o ganho de Exaustão por intempéries extremas para toda a comitiva.',
 
@@ -42927,41 +42927,41 @@
 
     if (wm === 'control_winds_updraft_downdraft_cliff_crossing') {
 
-      weather.weatherTitle = 'Controlar Ventos (Control Winds): Corrente Ascendente para Travessia de Despenhadeiros (XGE p. 152)';
+      weather.weatherTitle = 'Controlar Ventos (Control Winds): Corrente Ascendente para Travessia de Despenhadeiros';
 
       weather.saveDC = 16;
 
       weather.saveType = 'Força';
 
-      weather.weatherMechanics = 'Druida, Feiticeiro ou Mago (5º círculo, concentração até 1 hora, XGE p. 152) manipula o ar num cubo de 30 metros; no modo Corrente Ascendente, anula dano de queda e triplica a altura de saltos verticais da comitiva sobre abismos e ravinas; no modo Corrente Descendente, impõe salvaguarda de Força forçando criaturas voadoras hostis a pousar no solo e cortando seu deslocamento!';
+      weather.weatherMechanics = 'Druida, Feiticeiro ou Mago (5º círculo, concentração até 1 hora) manipula o ar num cubo de 30 metros; no modo Corrente Ascendente, anula dano de queda e triplica a altura de saltos verticais da comitiva sobre abismos e ravinas; no modo Corrente Descendente, impõe salvaguarda de Força forçando criaturas voadoras hostis a pousar no solo e cortando seu deslocamento!';
 
-      weather.pioneerMitigation = 'Permite que a comitiva inteira cruze desfiladeiros montanhosos e ravinas carsticas sem gastar cordas ou testes arriscados de Atletismo (XGE p. 152).';
+      weather.pioneerMitigation = 'Permite que a comitiva inteira cruze desfiladeiros montanhosos e ravinas carsticas sem gastar cordas ou testes arriscados de Atletismo.';
 
       weather.rescueAndStabilization = 'Amortece a queda de membros do grupo em caso de deslizamento de terra ou colapso de ponte glacial.';
 
     } else if (wm === 'storm_of_vengeance_cataclysmic_march_cover') {
 
-      weather.weatherTitle = 'Tempestade de Vingança (Storm of Vengeance): Cobertura Cataclísmica de Marcha (PHB p. 281)';
+      weather.weatherTitle = 'Tempestade de Vingança (Storm of Vengeance): Cobertura Cataclísmica de Marcha';
 
       weather.saveDC = 18;
 
       weather.saveType = 'Constituição';
 
-      weather.weatherMechanics = 'Druida (9º círculo, concentração até 1 minuto, PHB p. 281) invoca uma nuvem tempestuosa de 108 metros de raio: rodada 1 ensurdece com trovões (2d6 trovejante); rodada 2 despeja chuva ácida (1d6 ácido); rodada 3 dispara 6 relâmpagos (10d6 elétrico cada); rodada 4 esmaga com granizo (2d6 concussão); rodadas 5 a 10 flagela com chuva congelante de frio, bloqueando qualquer perseguição hostil!';
+      weather.weatherMechanics = 'Druida (9º círculo, concentração até 1 minuto) invoca uma nuvem tempestuosa de 108 metros de raio: rodada 1 ensurdece com trovões (2d6 trovejante); rodada 2 despeja chuva ácida (1d6 ácido); rodada 3 dispara 6 relâmpagos (10d6 elétrico cada); rodada 4 esmaga com granizo (2d6 concussão); rodadas 5 a 10 flagela com chuva congelante de frio, bloqueando qualquer perseguição hostil!';
 
-      weather.pioneerMitigation = 'Cobre a fuga estratégica ou travessia de desfiladeiro disputado por emboscadas inimigas nas fronteiras selvagens (PHB p. 281).';
+      weather.pioneerMitigation = 'Cobre a fuga estratégica ou travessia de desfiladeiro disputado por emboscadas inimigas nas fronteiras selvagens.';
 
       weather.rescueAndStabilization = 'Neutraliza acampamentos ou patrulhas que bloqueiem passagens obrigatórias do Pointcrawl.';
 
     } else if (wm === 'fog_cloud_and_gust_of_wind_toxic_gas_purge') {
 
-      weather.weatherTitle = 'Nuvem de Névoa (Fog Cloud) e Ventania (Gust of Wind): Purga de Miasmas e Fumaça (PHB p. 243, 248)';
+      weather.weatherTitle = 'Nuvem de Névoa (Fog Cloud) e Ventania (Gust of Wind): Purga de Miasmas e Fumaça';
 
       weather.saveDC = 15;
 
       weather.saveType = 'Força';
 
-      weather.weatherMechanics = 'Conjurador arcano ou divino (1º e 2º círculos, PHB p. 243, 248) utiliza Ventania em linha de 18 metros para dispersar vapores sulfurosos, gases asfixiantes de caldeiras vulcânicas ou nuvens de esporos venenosos a até 30 km/h, ou ergue uma Nuvem de Névoa densa de 6 metros para cegar atiradores inimigos durante uma retirada tática.';
+      weather.weatherMechanics = 'Conjurador arcano ou divino (1º e 2º círculos) utiliza Ventania em linha de 18 metros para dispersar vapores sulfurosos, gases asfixiantes de caldeiras vulcânicas ou nuvens de esporos venenosos a até 30 km/h, ou ergue uma Nuvem de Névoa densa de 6 metros para cegar atiradores inimigos durante uma retirada tática.';
 
       weather.pioneerMitigation = 'Purga imediata de terrenos fortemente obscurecidos por fumaça ou veneno em fendas subterrâneas e pântanos.';
 
@@ -42989,13 +42989,13 @@
 
     var defense = {
 
-      defenseTitle: 'Domo Microclimático e Calmaria contra Nevascas no Bivaque (PHB p. 228)',
+      defenseTitle: 'Domo Microclimático e Calmaria contra Nevascas no Bivaque',
 
       weatherAndCampSafety: 'Ao fixar o acampamento em biomas de frio extremo (como Neve, Montanha ou Abismo Glacial) ou calor abrasador (Deserto e Vulcão), a conjuração de Controlar o Clima ou Pequena Cabana estabiliza o microclima local em temperatura amena (18°C a 22°C), eliminando testes periódicos de congelamento, exaustão térmica ou insolação durante o descanso longo.',
 
       weatherAndCouncilWatch: 'Sentinelas de vigília operam sem desvantagem em Percepção visual decorrente de nevasca uivante ou rajadas de granizo, assegurando detecção de intrusos a distância total.',
 
-      campRestAndSafetyGuards: 'Garante recuperação integral de dados de vida e remoção plena de níveis de Exaustão mesmo sob nevasca polar contínua (PHB p. 186, 228).',
+      campRestAndSafetyGuards: 'Garante recuperação integral de dados de vida e remoção plena de níveis de Exaustão mesmo sob nevasca polar contínua.',
 
       icon: '',
 
@@ -43007,23 +43007,23 @@
 
     if (dt === 'wind_deflection_screen_and_missile_ward') {
 
-      defense.defenseTitle = 'Cortina Eólica Defletora de Projéteis Noturnos (XGE p. 152)';
+      defense.defenseTitle = 'Cortina Eólica Defletora de Projéteis Noturnos';
 
       defense.weatherAndCampSafety = 'Controlar Ventos é calibrado em fluxo ascendente circular contínuo ao redor do perímetro do bivaque; projéteis comuns disparados contra o acampamento são desviados para o alto e gases rastejantes são repelidos antes de alcançar as barracas.';
 
       defense.weatherAndCouncilWatch = 'A cortina emite um sussurro eólico rítmico que abafa conversas e passos internos da comitiva, impedindo que batedores inimigos escutem os planos do Conselho de Guerra.';
 
-      defense.campRestAndSafetyGuards = 'Impõe desvantagem em qualquer ataque à distância de emboscada lançado contra o grupo adormecido (XGE p. 152).';
+      defense.campRestAndSafetyGuards = 'Impõe desvantagem em qualquer ataque à distância de emboscada lançado contra o grupo adormecido.';
 
     } else if (dt === 'controlled_monsoon_rainwater_catchment_station') {
 
-      defense.defenseTitle = 'Estação de Captação e Chuva Serena Purificada nos Ermos Áridos (PHB p. 228)';
+      defense.defenseTitle = 'Estação de Captação e Chuva Serena Purificada nos Ermos Áridos';
 
       defense.weatherAndCampSafety = 'Em travessias de regiões áridas ou águas salobras (Deserto, Badlands e Costa Salgada), o conjurador altera a precipitação para chuva moderada e límpida por 4 horas durante a parada, captando água doce abundante em lonas e tonéis para abastecer toda a comitiva.';
 
       defense.weatherAndCouncilWatch = 'Elimina a dependência de forrageamento de água em nós contaminados ou secos, garantindo 8 litros de água potável por aventureiro sem risco de parasitas.';
 
-      defense.campRestAndSafetyGuards = 'Previne mortes por desidratação e garante rações hidratadas para repor forças antes da próxima jornada de marcha (PHB p. 185, 228).';
+      defense.campRestAndSafetyGuards = 'Previne mortes por desidratação e garante rações hidratadas para repor forças antes da próxima jornada de marcha.';
 
     }
 
@@ -43055,15 +43055,15 @@
 
     var sanctuary = {
 
-      sanctuaryTitle: 'Mansão Magnífica de Mordenkainen (Magnificent Mansion) e Conselho de Guerra (PHB p. 257)',
+      sanctuaryTitle: 'Mansão Magnífica de Mordenkainen (Magnificent Mansion) e Conselho de Guerra',
 
       saveDC: 16,
 
       saveType: 'Sabedoria',
 
-      sanctuaryMechanics: 'Bardo ou Mago (7º círculo, portal em miniatura de marfim, pedaço de mármore polido e colher de prata de 5 PO cada, tempo de conjuração 1 minuto, duração 24 horas, PHB p. 257) conjura uma habitação extradimensional com até 50 cubos de 3 metros (salas de mapas, dormitórios e salões), atendida por 100 servos quase transparentes e mobiliada com um banquete de 9 pratos (9 banquetes suficientes para alimentar 100 pessoas), permitindo que múltiplas comitivas aliadas realizem um Conselho de Guerra seguro no meio dos ermos!',
+      sanctuaryMechanics: 'Bardo ou Mago (7º círculo, portal em miniatura de marfim, pedaço de mármore polido e colher de prata de 5 PO cada, tempo de conjuração 1 minuto, duração 24 horas) conjura uma habitação extradimensional com até 50 cubos de 3 metros (salas de mapas, dormitórios e salões), atendida por 100 servos quase transparentes e mobiliada com um banquete de 9 pratos (9 banquetes suficientes para alimentar 100 pessoas), permitindo que múltiplas comitivas aliadas realizem um Conselho de Guerra seguro no meio dos ermos!',
 
-      pioneerMitigation: 'O portal cintilante de 1,2m por 2,4m torna-se invisível quando fechado e apenas criaturas designadas pelo conjurador podem entrar, impedindo emboscadas noturnas (PHB p. 257).',
+      pioneerMitigation: 'O portal cintilante de 1,2m por 2,4m torna-se invisível quando fechado e apenas criaturas designadas pelo conjurador podem entrar, impedindo emboscadas noturnas.',
 
       rescueAndStabilization: 'Atmosfera limpa, morna e isolada de qualquer nevasca, cinza vulcânica ou gás tóxico das 300 Fases.',
 
@@ -43077,41 +43077,41 @@
 
     if (sm === 'temple_of_the_gods_consecrated_healing_sanctuary') {
 
-      sanctuary.sanctuaryTitle = 'Templo dos Deuses (Temple of the Gods): Santuário Consagrado e Cura Maximizada (XGE p. 169)';
+      sanctuary.sanctuaryTitle = 'Templo dos Deuses (Temple of the Gods): Santuário Consagrado e Cura Maximizada';
 
       sanctuary.saveDC = 17;
 
       sanctuary.saveType = 'Carisma';
 
-      sanctuary.sanctuaryMechanics = 'Clérigo (7º círculo, tempo de conjuração 1 hora, duração 24 horas, XGE p. 169) faz surgir um Templo dos Deuses num cubo de até 36 metros; a estrutura bloqueia sensores de adivinhação e viagens planares hostis, exige salvaguarda de Carisma de celestiais, elementais, fadas, corruptores ou mortos-vivos para entrar (sofrendo desvantagem em ataques se falharem) e concede PV adicionais iguais ao modificador de Sabedoria do conjurador em toda magia de cura conjurada lá dentro!',
+      sanctuary.sanctuaryMechanics = 'Clérigo (7º círculo, tempo de conjuração 1 hora, duração 24 horas) faz surgir um Templo dos Deuses num cubo de até 36 metros; a estrutura bloqueia sensores de adivinhação e viagens planares hostis, exige salvaguarda de Carisma de celestiais, elementais, fadas, corruptores ou mortos-vivos para entrar (sofrendo desvantagem em ataques se falharem) e concede PV adicionais iguais ao modificador de Sabedoria do conjurador em toda magia de cura conjurada lá dentro!',
 
-      sanctuary.pioneerMitigation = 'Conjurar o Templo dos Deuses no mesmo ponto todos os dias durante 1 ano torna o santuário permanente nos ermos (XGE p. 169).';
+      sanctuary.pioneerMitigation = 'Conjurar o Templo dos Deuses no mesmo ponto todos os dias durante 1 ano torna o santuário permanente nos ermos.';
 
       sanctuary.rescueAndStabilization = 'Acelera drasticamente a recuperação de várias comitivas feridas após uma incursão em masmorra.';
 
     } else if (sm === 'mighty_fortress_stone_keep_and_siege_bastion') {
 
-      sanctuary.sanctuaryTitle = 'Fortaleza Poderosa (Mighty Fortress): Bastião de Pedra de 36m com 4 Torres (XGE p. 162)';
+      sanctuary.sanctuaryTitle = 'Fortaleza Poderosa (Mighty Fortress): Bastião de Pedra de 36m com 4 Torres';
 
       sanctuary.saveDC = 17;
 
       sanctuary.saveType = 'Força';
 
-      sanctuary.sanctuaryMechanics = 'Mago (8º círculo, diamante de 500 PO consumido, tempo de conjuração 1 minuto, duração 7 dias, XGE p. 162) faz brotar da terra uma Fortaleza Poderosa quadrada de 36 metros de lado com muralhas de 3 metros de espessura, 4 torres de vigia ligadas por ameias (CA 15, 300 PV por seção de 3x3m, imune a veneno e psíquico), 100 servos invisíveis e provisões de 9 banquetes diários para até 100 pessoas durante uma semana inteira!',
+      sanctuary.sanctuaryMechanics = 'Mago (8º círculo, diamante de 500 PO consumido, tempo de conjuração 1 minuto, duração 7 dias) faz brotar da terra uma Fortaleza Poderosa quadrada de 36 metros de lado com muralhas de 3 metros de espessura, 4 torres de vigia ligadas por ameias (CA 15, 300 PV por seção de 3x3m, imune a veneno e psíquico), 100 servos invisíveis e provisões de 9 banquetes diários para até 100 pessoas durante uma semana inteira!',
 
-      sanctuary.pioneerMitigation = 'Conjurada a cada 7 dias no mesmo nó estratégico durante 1 ano, a Fortaleza Poderosa torna-se um bastião permanente da guilda no mapa Pointcrawl (XGE p. 162).';
+      sanctuary.pioneerMitigation = 'Conjurada a cada 7 dias no mesmo nó estratégico durante 1 ano, a Fortaleza Poderosa torna-se um bastião permanente da guilda no mapa Pointcrawl.';
 
       sanctuary.rescueAndStabilization = 'Permite que até 25 comitivas de 4 aventureiros utilizem o bastião como base avançada de cerco.';
 
     } else if (sm === 'demiplane_and_sequester_vault_alliance') {
 
-      sanctuary.sanctuaryTitle = 'Semiplano (Demiplane) e Cofre de Isolamento (Sequester) entre Comitivas (PHB p. 277, 279)';
+      sanctuary.sanctuaryTitle = 'Semiplano (Demiplane) e Cofre de Isolamento (Sequester) entre Comitivas';
 
       sanctuary.saveDC = 18;
 
       sanctuary.saveType = 'Inteligência';
 
-      sanctuary.sanctuaryMechanics = 'Bruxo, Feiticeiro ou Mago (8º círculo, duração 1 hora, PHB p. 279) cria uma porta sombria para um Semiplano de 9x9x9 metros de madeira ou pedra — ou conecta-se a um Semiplano existente cuja natureza conheça —, enquanto Isolamento (Sequester, 7º círculo, pó de diamante, esmeralda, rubi e safira de 5.000 PO, PHB p. 277) torna um baú da guilda ou um aventureiro voluntário invisível, indetectável por adivinhação e em animação suspensa até um gatilho pactuado!',
+      sanctuary.sanctuaryMechanics = 'Bruxo, Feiticeiro ou Mago (8º círculo, duração 1 hora) cria uma porta sombria para um Semiplano de 9x9x9 metros de madeira ou pedra — ou conecta-se a um Semiplano existente cuja natureza conheça —, enquanto Isolamento (Sequester, 7º círculo, pó de diamante, esmeralda, rubi e safira de 5.000 PO) torna um baú da guilda ou um aventureiro voluntário invisível, indetectável por adivinhação e em animação suspensa até um gatilho pactuado!',
 
       sanctuary.pioneerMitigation = 'Múltiplos conjuradores aliados podem conectar-se ao mesmo Semiplano compartilhado para depositar relíquias de campanha sem peso de carga na estrada.';
 
@@ -43139,13 +43139,13 @@
 
     var defense = {
 
-      defenseTitle: 'Limiar Invisível da Mansão Magnífica e Lista de Entrada Designada (PHB p. 257)',
+      defenseTitle: 'Limiar Invisível da Mansão Magnífica e Lista de Entrada Designada',
 
       sanctuaryAndCampSafety: 'Ao montar o acampamento de alto nível, o conjurador designa nominalmente os membros da sua comitiva (e de comitivas aliadas presentes na encruzilhada, Fase 315) autorizados a cruzar o portal da Mansão Magnífica de Mordenkainen antes de fechar a entrada invisível.',
 
       sanctuaryAndCouncilWatch: 'Como o exterior não exibe barraca nem fogueira, patrulhas inimigas e predadores passam pelo nó sem perceber que 10 a 20 aventureiros repousam no plano extradimensional logo acima.',
 
-      campRestAndSafetyGuards: 'Ao término das 24 horas, todas as criaturas e objetos trazidos são expelidos em segurança nos espaços desocupados mais próximos da entrada (PHB p. 257).',
+      campRestAndSafetyGuards: 'Ao término das 24 horas, todas as criaturas e objetos trazidos são expelidos em segurança nos espaços desocupados mais próximos da entrada.',
 
       icon: '',
 
@@ -43157,19 +43157,19 @@
 
     if (dt === 'hundred_servants_feast_and_poison_immunity_rest') {
 
-      defense.defenseTitle = 'Banquete dos 100 Servos e Restauração Estratégica em Conselho de Guerra (PHB p. 257, 250)';
+      defense.defenseTitle = 'Banquete dos 100 Servos e Restauração Estratégica em Conselho de Guerra';
 
       defense.sanctuaryAndCampSafety = 'Dentro da Mansão Magnífica ou da Fortaleza Poderosa, os 100 servos translúcidos preparam as camas, cuidam dos equipamentos e servem o banquete enquanto os líderes das comitivas comparam mapas regionais (Fase 315) e sequências de Círculos de Teletransporte (Fase 319).';
 
-      defense.sanctuaryAndCouncilWatch = 'Combinado ao Banquete (6º círculo, taça incrustada de 1.000 PO, PHB p. 250), até 12 aventureiros curam doenças e venenos, tornam-se imunes a veneno e amedrontamento, têm vantagem em testes de Sabedoria e ganham +2d10 PV máximos por 24 horas!';
+      defense.sanctuaryAndCouncilWatch = 'Combinado ao Banquete (6º círculo, taça incrustada de 1.000 PO), até 12 aventureiros curam doenças e venenos, tornam-se imunes a veneno e amedrontamento, têm vantagem em testes de Sabedoria e ganham +2d10 PV máximos por 24 horas!';
 
       defense.campRestAndSafetyGuards = 'Eleva a preparação do grupo ao ápice tático do D&D 5e antes de enfrentar chefes de campanha.';
 
     } else if (dt === 'permanent_year_casting_guild_bastion_node') {
 
-      defense.defenseTitle = 'Consagração Anual de Bastião Permanente da Guilda nos Ermos (XGE p. 162, 169)';
+      defense.defenseTitle = 'Consagração Anual de Bastião Permanente da Guilda nos Ermos';
 
-      defense.sanctuaryAndCampSafety = 'A guilda mantém um rodízio de conjuradores no mesmo nó durante 365 dias para converter o Templo dos Deuses, a Fortaleza Poderosa ou o Círculo de Teletransporte (PHB p. 224) em um assentamento avançado permanente nas fronteiras selvagens.';
+      defense.sanctuaryAndCampSafety = 'A guilda mantém um rodízio de conjuradores no mesmo nó durante 365 dias para converter o Templo dos Deuses, a Fortaleza Poderosa ou o Círculo de Teletransporte em um assentamento avançado permanente nas fronteiras selvagens.';
 
       defense.sanctuaryAndCouncilWatch = 'Cria um novo ponto seguro de partida e retorno no grafo Pointcrawl, reduzindo a distância para biomas abissais e vulcânicos.';
 
@@ -43205,15 +43205,15 @@
 
     var fastTravel = {
 
-      travelTitle: 'Círculo de Teletransporte (Teleportation Circle) e Sequências de Sigilos (PHB p. 224)',
+      travelTitle: 'Círculo de Teletransporte (Teleportation Circle) e Sequências de Sigilos',
 
       saveDC: 15,
 
       saveType: 'Inteligência',
 
-      fastTravelMechanics: 'Bardo, Feiticeiro ou Mago (5º círculo, giz raro e tintas infundidas com gemas preciosas no valor de 50 PO consumidos, tempo de conjuração 1 minuto, PHB p. 224) desenha um círculo de 3 metros de diâmetro no chão conectando o nó atual a um círculo permanente de teletransporte no mesmo plano cuja sequência de sigilos o conjurador conheça; o portal permanece aberto até o final do próximo turno, permitindo que duas comitivas aliadas inteiras atravessem instantaneamente entre províncias!',
+      fastTravelMechanics: 'Bardo, Feiticeiro ou Mago (5º círculo, giz raro e tintas infundidas com gemas preciosas no valor de 50 PO consumidos, tempo de conjuração 1 minuto) desenha um círculo de 3 metros de diâmetro no chão conectando o nó atual a um círculo permanente de teletransporte no mesmo plano cuja sequência de sigilos o conjurador conheça; o portal permanece aberto até o final do próximo turno, permitindo que duas comitivas aliadas inteiras atravessem instantaneamente entre províncias!',
 
-      pioneerMitigation: 'Aprender uma nova sequência de sigilos exige estudá-la por 1 minuto (ou recebê-la de outra comitiva amiga na troca de mapas da Fase 315, PHB p. 224).',
+      pioneerMitigation: 'Aprender uma nova sequência de sigilos exige estudá-la por 1 minuto (ou recebê-la de outra comitiva amiga na troca de mapas da Fase 315).',
 
       rescueAndStabilization: 'Permite evacuar aventureiros gravemente feridos diretamente de um marco remoto para um templo urbano.',
 
@@ -43227,13 +43227,13 @@
 
     if (tm === 'transport_via_plants_ancient_tree_network') {
 
-      fastTravel.travelTitle = 'Transporte via Plantas (Transport via Plants) entre Árvores Ancestrais (PHB p. 283)';
+      fastTravel.travelTitle = 'Transporte via Plantas (Transport via Plants) entre Árvores Ancestrais';
 
       fastTravel.saveDC = 15;
 
       fastTravel.saveType = 'Sabedoria';
 
-      fastTravel.fastTravelMechanics = 'Druida (6º círculo, duração 1 rodada, PHB p. 283) cria um elo mágico entre uma planta inanimada Grande ou maior no nó atual e outra planta de mesmo tamanho a qualquer distância no mesmo plano que o conjurador já tenha visto ou tocado pelo menos uma vez; qualquer criatura pode entrar na árvore de origem e sair na árvore de destino usando 1,5m de deslocamento!',
+      fastTravel.fastTravelMechanics = 'Druida (6º círculo, duração 1 rodada) cria um elo mágico entre uma planta inanimada Grande ou maior no nó atual e outra planta de mesmo tamanho a qualquer distância no mesmo plano que o conjurador já tenha visto ou tocado pelo menos uma vez; qualquer criatura pode entrar na árvore de origem e sair na árvore de destino usando 1,5m de deslocamento!',
 
       fastTravel.pioneerMitigation = 'Marcação de carvalhos ancestrais, sequoias e baobás nos nós visitados com avisos Druídicos (Fase 303) para construir uma rede florestal de resposta rápida.',
 
@@ -43241,29 +43241,29 @@
 
     } else if (tm === 'wind_walk_gaseous_cloud_three_hundred_ft_dash') {
 
-      fastTravel.travelTitle = 'Caminhar no Vento (Wind Walk): Nuvem de Vapor a 90m/Rodada (54 km/h) (PHB p. 220)';
+      fastTravel.travelTitle = 'Caminhar no Vento (Wind Walk): Nuvem de Vapor a 90m/Rodada (54 km/h)';
 
       fastTravel.saveDC = 16;
 
       fastTravel.saveType = 'Constituição';
 
-      fastTravel.fastTravelMechanics = 'Druida (6º círculo, fogo e água benta, duração 8 horas sem Concentração, PHB p. 220) transforma a si mesmo e até 10 criaturas voluntárias (duas comitivas completas!) em nuvens de vapor gasoso com deslocamento de voo de 90 metros (300 pés — 180 metros por rodada com a ação Disparada, equivalente a 108 km/h!) e resistência a dano de armas não-mágicas.',
+      fastTravel.fastTravelMechanics = 'Druida (6º círculo, fogo e água benta, duração 8 horas sem Concentração) transforma a si mesmo e até 10 criaturas voluntárias (duas comitivas completas!) em nuvens de vapor gasoso com deslocamento de voo de 90 metros (300 pés — 180 metros por rodada com a ação Disparada, equivalente a 108 km/h!) e resistência a dano de armas não-mágicas.',
 
-      fastTravel.pioneerMitigation = 'Reverter para a forma sólida ou retornar à forma de nuvem exige 1 minuto de transição (10 rodadas durante as quais a criatura fica Incapacitada, PHB p. 220), exigindo pousar fora do alcance de inimigos.',
+      fastTravel.pioneerMitigation = 'Reverter para a forma sólida ou retornar à forma de nuvem exige 1 minuto de transição (10 rodadas durante as quais a criatura fica Incapacitada), exigindo pousar fora do alcance de inimigos.',
 
       fastTravel.rescueAndStabilization = 'Ignora 100% dos perigos geomorfológicos de solo das 300 Fases, sobrevoando abismos, caldeiras e pântanos.';
 
     } else if (tm === 'word_of_recall_and_teleport_mishap_table') {
 
-      fastTravel.travelTitle = 'Palavra de Regresso (Word of Recall) e Tabela de Desvios de Teletransporte (PHB p. 265, 281)';
+      fastTravel.travelTitle = 'Palavra de Regresso (Word of Recall) e Tabela de Desvios de Teletransporte';
 
       fastTravel.saveDC = 17;
 
       fastTravel.saveType = 'Inteligência';
 
-      fastTravel.fastTravelMechanics = 'Clérigo (6º círculo, 1 ação, PHB p. 265) teletransporta instantaneamente a si e até 5 aliados a 1,5m para um santuário previamente consagrado ao seu deus sem margem de erro; já a magia Teletransporte (7º círculo, PHB p. 281) para um destino sem Círculo Permanente exige rolagem d100 de familiaridade (Objeto Associado, Muito Familiar, Visto Casual ou Descrição), podendo causar 3d10 de dano de força por Contratempo (Mishap) ou cair Fora do Alvo!',
+      fastTravel.fastTravelMechanics = 'Clérigo (6º círculo, 1 ação) teletransporta instantaneamente a si e até 5 aliados a 1,5m para um santuário previamente consagrado ao seu deus sem margem de erro; já a magia Teletransporte (7º círculo) para um destino sem Círculo Permanente exige rolagem d100 de familiaridade (Objeto Associado, Muito Familiar, Visto Casual ou Descrição), podendo causar 3d10 de dano de força por Contratempo (Mishap) ou cair Fora do Alvo!',
 
-      fastTravel.pioneerMitigation = 'Solicitar um Objeto Associado retirado do destino nas últimas 6 meses por outra comitiva para garantir 100% de chegada No Alvo (PHB p. 281).',
+      fastTravel.pioneerMitigation = 'Solicitar um Objeto Associado retirado do destino nas últimas 6 meses por outra comitiva para garantir 100% de chegada No Alvo.',
 
       fastTravel.rescueAndStabilization = 'Palavra de Regresso atua como o botão supremo de extração de emergência da comitiva em combate letal.';
 
@@ -43289,7 +43289,7 @@
 
     var defense = {
 
-      defenseTitle: 'Transcrição de Sequências de Sigilos no Grimório e Partilha no Bivaque (PHB p. 224)',
+      defenseTitle: 'Transcrição de Sequências de Sigilos no Grimório e Partilha no Bivaque',
 
       teleportAnchorAndCampSafety: 'Quando o grupo descobre um Círculo de Teletransporte ancestral em uma ruína ou templo das 300 Fases, o Mago ou Bardo dedica 1 minuto para memorizar a sequência única de sigilos e 1 hora no bivaque para gravá-la em seu caderno de cartografia.',
 
@@ -43307,17 +43307,17 @@
 
     if (dt === 'forbiddance_and_private_sanctum_anti_teleport_ward') {
 
-      defense.defenseTitle = 'Santuário Particular de Mordenkainen e Proibição contra Intrusão Planar (PHB p. 270, 276)';
+      defense.defenseTitle = 'Santuário Particular de Mordenkainen e Proibição contra Intrusão Planar';
 
-      defense.teleportAnchorAndCampSafety = 'Para impedir que inimigos se teletransportem para dentro do acampamento ou usem Vidência sobre os aventureiros dormindo, o Mago conjura Santuário Particular de Mordenkainen (4º círculo, folha de chumbo e vidro opaco, duração 24 horas, PHB p. 276) ou o Clérigo realiza o ritual Proibição (Forbiddance, 6º círculo, PHB p. 270).',
+      defense.teleportAnchorAndCampSafety = 'Para impedir que inimigos se teletransportem para dentro do acampamento ou usem Vidência sobre os aventureiros dormindo, o Mago conjura Santuário Particular de Mordenkainen (4º círculo, folha de chumbo e vidro opaco, duração 24 horas) ou o Clérigo realiza o ritual Proibição (Forbiddance, 6º círculo).',
 
       defense.teleportAnchorAndWardWatch = 'Bloqueia totalmente teletransporte, viagens planares, sensores de adivinhação e faz com que o exterior do bivaque pareça escuro e nebuloso.',
 
-      defense.campRestAndSafetyGuards = 'Proibição ainda causa 5d10 de dano radiante ou necrótico a celestiais, elementais, fadas, corruptores e mortos-vivos que entrem na área (PHB p. 270).';
+      defense.campRestAndSafetyGuards = 'Proibição ainda causa 5d10 de dano radiante ou necrótico a celestiais, elementais, fadas, corruptores e mortos-vivos que entrem na área.';
 
     } else if (dt === 'wind_walk_reversion_and_landing_zone_watch') {
 
-      defense.defenseTitle = 'Zona de Pouso Protegida para Transição de 1 Minuto de Caminhar no Vento (PHB p. 220)';
+      defense.defenseTitle = 'Zona de Pouso Protegida para Transição de 1 Minuto de Caminhar no Vento';
 
       defense.teleportAnchorAndCampSafety = 'Antes de reverter da forma de nuvem de Caminhar no Vento para a forma física para montar acampamento, a comitiva sobrevoa a clareira em círculos para confirmar a ausência de predadores durante os 60 segundos de vulnerabilidade da transição.',
 
@@ -43355,15 +43355,15 @@
 
     var sensor = {
 
-      sensorTitle: 'Convocar Familiar (Find Familiar): Reconhecimento Aéreo e Compartilhamento de Sentidos (PHB p. 240)',
+      sensorTitle: 'Convocar Familiar (Find Familiar): Reconhecimento Aéreo e Compartilhamento de Sentidos',
 
       saveDC: 14,
 
       saveType: 'Sabedoria',
 
-      sensorScoutingMechanics: 'O Mago (ou Bruxo do Pacto da Corrente / Bardo com Segredos Mágicos, 1º círculo ritual, carvão, incenso e ervas de 10 PO, PHB p. 240) envia seu Familiar (coruja com Visão no Escuro 36m e Voo Rasante, falcão com Percepção aguçada ou corvo) para sobrevoar a estrada adiante; enquanto o familiar estiver a até 30 metros (100 pés) do conjurador (ou a qualquer distância no mesmo plano com a invocação Voz do Mestre das Correntes, PHB p. 111!), o aventureiro pode usar sua ação para ver através dos olhos do familiar e ouvir o que ele ouve, revelando a Névoa de Identidade de outra comitiva sem sair da cobertura.',
+      sensorScoutingMechanics: 'O Mago (ou Bruxo do Pacto da Corrente / Bardo com Segredos Mágicos, 1º círculo ritual, carvão, incenso e ervas de 10 PO) envia seu Familiar (coruja com Visão no Escuro 36m e Voo Rasante, falcão com Percepção aguçada ou corvo) para sobrevoar a estrada adiante; enquanto o familiar estiver a até 30 metros (100 pés) do conjurador (ou a qualquer distância no mesmo plano com a invocação Voz do Mestre das Correntes, PHB p. 111!), o aventureiro pode usar sua ação para ver através dos olhos do familiar e ouvir o que ele ouve, revelando a Névoa de Identidade de outra comitiva sem sair da cobertura.',
 
-      pioneerMitigation: 'Durante o compartilhamento sensorial, o corpo físico do conjurador fica cego e surdo em relação aos seus próprios arredores até o início do seu próximo turno (PHB p. 240).',
+      pioneerMitigation: 'Durante o compartilhamento sensorial, o corpo físico do conjurador fica cego e surdo em relação aos seus próprios arredores até o início do seu próximo turno.',
 
       rescueAndStabilization: 'Se o familiar for avistado e abatido a 0 PV, ele desaparece sem deixar vestígios e pode ser reonvocado na tenda de bivaque.',
 
@@ -43377,13 +43377,13 @@
 
     if (sm === 'clairvoyance_one_mile_invisible_sensor') {
 
-      sensor.sensorTitle = 'Clarividência (Clairvoyance): Sensor Invisível a 1,5 km (1 Milha) (PHB p. 222)';
+      sensor.sensorTitle = 'Clarividência (Clairvoyance): Sensor Invisível a 1,5 km (1 Milha)';
 
       sensor.saveDC = 15;
 
       sensor.saveType = 'Sabedoria';
 
-      sensor.sensorScoutingMechanics = 'Bardo, Clérigo, Feiticeiro ou Mago (3º círculo, chifre cravejado de joias para audição ou olho de vidro de 100 PO para visão, duração 10 minutos, PHB p. 222) cria um orbe invisível de 10 cm em um ponto dentro de 1 milha (1,5 km) que seja familiar ao conjurador ou em um local óbvio desconhecido (como o outro lado de um desfiladeiro, o interior de uma caverna ou uma encruzilhada adiante no Pointcrawl); o conjurador pode alternar livremente entre ver (com luz brilhante em 3m) e ouvir através do sensor usando uma ação!',
+      sensor.sensorScoutingMechanics = 'Bardo, Clérigo, Feiticeiro ou Mago (3º círculo, chifre cravejado de joias para audição ou olho de vidro de 100 PO para visão, duração 10 minutos) cria um orbe invisível de 10 cm em um ponto dentro de 1 milha (1,5 km) que seja familiar ao conjurador ou em um local óbvio desconhecido (como o outro lado de um desfiladeiro, o interior de uma caverna ou uma encruzilhada adiante no Pointcrawl); o conjurador pode alternar livremente entre ver (com luz brilhante em 3m) e ouvir através do sensor usando uma ação!',
 
       sensor.pioneerMitigation = 'Permite escutar a conversa inteira de outra comitiva acampada a 1,5 km de distância ou inspecionar se um nó possui perigo geomorfológico ativo.',
 
@@ -43391,13 +43391,13 @@
 
     } else if (sm === 'arcane_eye_roaming_darkvision_scout') {
 
-      sensor.sensorTitle = 'Olho Arcano (Arcane Eye): Sensor Móvel com Visão no Escuro de 9m (PHB p. 264)';
+      sensor.sensorTitle = 'Olho Arcano (Arcane Eye): Sensor Móvel com Visão no Escuro de 9m';
 
       sensor.saveDC = 16;
 
       sensor.saveType = 'Sabedoria';
 
-      sensor.sensorScoutingMechanics = 'Mago ou Clérigo do Domínio do Conhecimento (4º círculo, pelo de morcego, Concentração até 1 hora, PHB p. 264) cria um olho mágico invisível flutuante que possui visão normal e Visão no Escuro de 9 metros (30 pés) em todas as direções; com uma ação a cada turno, o conjurador move o olho até 9 metros em qualquer direção (sem limite máximo de distância em relação ao conjurador!) e pode fazê-lo atravessar frestas de até 2,5 centímetros de diâmetro.',
+      sensor.sensorScoutingMechanics = 'Mago ou Clérigo do Domínio do Conhecimento (4º círculo, pelo de morcego, Concentração até 1 hora) cria um olho mágico invisível flutuante que possui visão normal e Visão no Escuro de 9 metros (30 pés) em todas as direções; com uma ação a cada turno, o conjurador move o olho até 9 metros em qualquer direção (sem limite máximo de distância em relação ao conjurador!) e pode fazê-lo atravessar frestas de até 2,5 centímetros de diâmetro.',
 
       sensor.pioneerMitigation = 'Mapeamento completo de todas as bifurcações de uma masmorra ou desfiladeiro antes que o Batedor dê o primeiro passo.',
 
@@ -43405,13 +43405,13 @@
 
     } else if (sm === 'see_invisibility_and_truesight_sensor_detection') {
 
-      sensor.sensorTitle = 'Detecção de Sensores de Espionagem: Ver o Invisível e Sentidos Aguçados (PHB p. 222, 286)';
+      sensor.sensorTitle = 'Detecção de Sensores de Espionagem: Ver o Invisível e Sentidos Aguçados';
 
       sensor.saveDC = 16;
 
       sensor.saveType = 'Sabedoria';
 
-      sensor.sensorScoutingMechanics = 'Segundo a regra canônica do PHB (p. 222, 264, 286), uma criatura que possa ver objetos invisíveis — através da magia Ver o Invisível (2º círculo, PHB p. 286), Lanterna de Revelação (DMG p. 179), Visão da Verdade (Truesight) ou Sentido Cego — enxerga o sensor de Clarividência, Olho Arcano ou Vidência como um orbe luminoso intangível do tamanho de um punho flutuando no ar!',
+      sensor.sensorScoutingMechanics = 'Segundo a regra canônica do PHB (p. 222, 264, 286), uma criatura que possa ver objetos invisíveis — através da magia Ver o Invisível (2º círculo), Lanterna de Revelação, Visão da Verdade (Truesight) ou Sentido Cego — enxerga o sensor de Clarividência, Olho Arcano ou Vidência como um orbe luminoso intangível do tamanho de um punho flutuando no ar!',
 
       sensor.pioneerMitigation = 'Conjuração de Dissipar Magia (CD 13 a 15) diretamente sobre o orbe luminoso avistado para cegar imediatamente o espião remoto.',
 
@@ -43439,11 +43439,11 @@
 
     var defense = {
 
-      defenseTitle: 'Vigília Noturna de Coruja Familiar com Visão no Escuro de 36m (PHB p. 240, 305)',
+      defenseTitle: 'Vigília Noturna de Coruja Familiar com Visão no Escuro de 36m',
 
-      sensorWatchAndCampSafety: 'Como espíritos feéricos, celestiais ou corruptores em forma animal (PHB p. 240), os Familiares não precisam dormir como mortais e mantêm vigília ininterrupta nos galhos altos acima do bivaque.',
+      sensorWatchAndCampSafety: 'Como espíritos feéricos, celestiais ou corruptores em forma animal, os Familiares não precisam dormir como mortais e mantêm vigília ininterrupta nos galhos altos acima do bivaque.',
 
-      sensorWatchAndPerimeter: 'A Coruja (Owl, PHB p. 305) possui Visão no Escuro de 36 metros (120 pés — o dobro de um elfo ou anão!) e a característica Audição e Visão Aguçadas (vantagem em Sabedoria [Percepção], elevando sua Percepção Passiva para 18) para alertar telepaticamente o Mago ao menor sinal de aproximação.',
+      sensorWatchAndPerimeter: 'A Coruja (Owl) possui Visão no Escuro de 36 metros (120 pés — o dobro de um elfo ou anão!) e a característica Audição e Visão Aguçadas (vantagem em Sabedoria [Percepção], elevando sua Percepção Passiva para 18) para alertar telepaticamente o Mago ao menor sinal de aproximação.',
 
       campRestAndSafetyGuards: 'Garante um sentinela aéreo adicional que nunca sofre níveis de Exaustão.',
 
@@ -43457,9 +43457,9 @@
 
     if (dt === 'pact_of_the_chain_invisible_imp_sprite_watch') {
 
-      defense.defenseTitle = 'Sentinela Invisível de Pacto da Corrente: Diabrete, Quasit ou Sprite (PHB p. 107, 305-310)';
+      defense.defenseTitle = 'Sentinela Invisível de Pacto da Corrente: Diabrete, Quasit ou Sprite';
 
-      defense.sensorWatchAndCampSafety = 'O Bruxo do Pacto da Corrente mantém um Diabrete (Imp, Visão do Diabo que enxerga na escuridão mágica!), Quasit ou Sprite (que pode ler o alinhamento emocional do coração com Toque do Coração, MM p. 283) em invisibilidade permanente à vontade na entrada da trilha do acampamento.';
+      defense.sensorWatchAndCampSafety = 'O Bruxo do Pacto da Corrente mantém um Diabrete (Imp, Visão do Diabo que enxerga na escuridão mágica!), Quasit ou Sprite (que pode ler o alinhamento emocional do coração com Toque do Coração) em invisibilidade permanente à vontade na entrada da trilha do acampamento.';
 
       defense.sensorWatchAndPerimeter = 'Quando outra comitiva se aproxima na estrada à noite, o familiar invisível os segue de perto sem ser notado e transmite descrições detalhadas ao Bruxo.',
 
@@ -43505,13 +43505,13 @@
 
     var tracking = {
 
-      trackingTitle: 'Rastreamento Físico de Comitivas por Superfície, Clima e Tempo (DMG p. 244)',
+      trackingTitle: 'Rastreamento Físico de Comitivas por Superfície, Clima e Tempo',
 
       saveDC: 15,
 
       saveType: 'Sabedoria',
 
-      trackingLocateMechanics: 'Aplicando a tabela oficial de Rastreamento do Dungeon Master’s Guide (DMG p. 244), o Guia ou Batedor realiza Sabedoria (Sobrevivência) contra a CD determinada pelo terreno: CD 10 em superfície macia (neve, lama, cinza vulcânica), CD 15 em terra ou grama, e CD 20 em rocha nua ou pedregulho; a CD recebe +5 para cada dia transcorrido desde a passagem da outra comitiva, +5 se houve chuva ou nevasca, e -5 se a presa deixou rastros óbvios (como sangue de ferimentos ou fogueira apagada).',
+      trackingLocateMechanics: 'Aplicando a tabela oficial de Rastreamento do Dungeon Master’s Guide, o Guia ou Batedor realiza Sabedoria (Sobrevivência) contra a CD determinada pelo terreno: CD 10 em superfície macia (neve, lama, cinza vulcânica), CD 15 em terra ou grama, e CD 20 em rocha nua ou pedregulho; a CD recebe +5 para cada dia transcorrido desde a passagem da outra comitiva, +5 se houve chuva ou nevasca, e -5 se a presa deixou rastros óbvios (como sangue de ferimentos ou fogueira apagada).',
 
       pioneerMitigation: 'Marcação da largura das passadas e profundidade das botas na lama para distinguir guerreiros de armadura pesada de batedores leves.',
 
@@ -43527,43 +43527,43 @@
 
     if (tm === 'natural_explorer_exact_headcount_and_age') {
 
-      tracking.trackingTitle = 'Explorador Natural do Patrulheiro: Número Exato, Tamanho e Idade do Rastro (PHB p. 91)';
+      tracking.trackingTitle = 'Explorador Natural do Patrulheiro: Número Exato, Tamanho e Idade do Rastro';
 
       tracking.saveDC = 12;
 
       tracking.saveType = 'Sabedoria';
 
-      tracking.trackingLocateMechanics = 'Enquanto rastreia outras criaturas em seu Terreno Favorito, o Patrulheiro (Explorador Natural, PHB p. 91) descobre automaticamente o número exato de integrantes da outra comitiva, seus tamanhos (Médio, Pequeno, Grande/montarias) e há quanto tempo exato passaram pela área — informações preciosas antes de decidir se vale a pena alcançá-los!',
+      tracking.trackingLocateMechanics = 'Enquanto rastreia outras criaturas em seu Terreno Favorito, o Patrulheiro (Explorador Natural) descobre automaticamente o número exato de integrantes da outra comitiva, seus tamanhos (Médio, Pequeno, Grande/montarias) e há quanto tempo exato passaram pela área — informações preciosas antes de decidir se vale a pena alcançá-los!',
 
-      tracking.pioneerMitigation = 'Uso combinado de Percepção Primeval (PHB p. 92) para confirmar se os rastros pertencem a humanoides mortais ou a metamorfos/mortos-vivos.',
+      tracking.pioneerMitigation = 'Uso combinado de Percepção Primeval para confirmar se os rastros pertencem a humanoides mortais ou a metamorfos/mortos-vivos.',
 
       tracking.rescueAndStabilization = 'Impede que a comitiva caia em emboscadas onde metade do bando inimigo se escondeu fora da trilha principal.';
 
     } else if (tm === 'locate_object_and_locate_creature_compass') {
 
-      tracking.trackingTitle = 'Bússola Arcana de Localizar Objeto (300m) e Localizar Criatura (300m) (PHB p. 256)';
+      tracking.trackingTitle = 'Bússola Arcana de Localizar Objeto (300m) e Localizar Criatura (300m)';
 
       tracking.saveDC = 15;
 
       tracking.saveType = 'Sabedoria';
 
-      tracking.trackingLocateMechanics = 'Bardo, Clérigo, Druida, Paladino, Patrulheiro ou Mago conjura Localizar Objeto (2º círculo, alcance 300m / 1.000 pés, PHB p. 256) para sentir a direção exata de um item específico já visto de perto (como o anel de sinete, o estandarte ou a Pedra de Mensagem de um aliado!) ou Localizar Criatura (4º círculo, alcance 300m, PHB p. 256) para rastrear um aventureiro conhecido em movimento.',
+      tracking.trackingLocateMechanics = 'Bardo, Clérigo, Druida, Paladino, Patrulheiro ou Mago conjura Localizar Objeto (2º círculo, alcance 300m / 1.000 pés) para sentir a direção exata de um item específico já visto de perto (como o anel de sinete, o estandarte ou a Pedra de Mensagem de um aliado!) ou Localizar Criatura (4º círculo, alcance 300m) para rastrear um aventureiro conhecido em movimento.',
 
-      tracking.pioneerMitigation = 'Atenção às contramedidas canônicas do PHB (p. 256): qualquer espessura de chumbo bloqueia Localizar Objeto, e um curso de água corrente de pelo menos 3 metros de largura bloqueia Localizar Criatura!',
+      tracking.pioneerMitigation = 'Atenção às contramedidas canônicas: qualquer espessura de chumbo bloqueia Localizar Objeto, e um curso de água corrente de pelo menos 3 metros de largura bloqueia Localizar Criatura!',
 
       tracking.rescueAndStabilization = 'Permite encontrar um companheiro capturado ou perdido em nevoeiro denso e cavernas labirínticas.';
 
     } else if (tm === 'scrying_crystal_ball_and_familiarity_modifiers') {
 
-      tracking.trackingTitle = 'Vidência (Scrying): Modificadores de Conhecimento e Conexão Corporal (PHB p. 286)',
+      tracking.trackingTitle = 'Vidência (Scrying): Modificadores de Conhecimento e Conexão Corporal',
 
       tracking.saveDC = 17;
 
       tracking.saveType = 'Sabedoria';
 
-      tracking.trackingLocateMechanics = 'Bardo, Clérigo, Druida, Bruxo ou Mago (5º círculo, foco de 1.000 PO como espelho, fonte ou bola de cristal, PHB p. 286) cria um sensor invisível a até 3m de um aventureiro no mesmo plano por 10 minutos; a salvaguarda de Sabedoria do alvo sofre modificadores diretos da Névoa de Identidade: Segunda mão (+5 para o alvo), Primeira mão / já se conheceram com Selo ◈ (+0), Familiar (-5), Retrato/Pintura (-2), Pertence/Roupa (-4) ou Parte do corpo como cabelo/unha (-10)!',
+      tracking.trackingLocateMechanics = 'Bardo, Clérigo, Druida, Bruxo ou Mago (5º círculo, foco de 1.000 PO como espelho, fonte ou bola de cristal) cria um sensor invisível a até 3m de um aventureiro no mesmo plano por 10 minutos; a salvaguarda de Sabedoria do alvo sofre modificadores diretos da Névoa de Identidade: Segunda mão (+5 para o alvo), Primeira mão / já se conheceram com Selo ◈ (+0), Familiar (-5), Retrato/Pintura (-2), Pertence/Roupa (-4) ou Parte do corpo como cabelo/unha (-10)!',
 
-      tracking.pioneerMitigation = 'Se o alvo passar na salvaguarda, fica imune a novas tentativas de Vidência do mesmo conjurador por 24 horas (PHB p. 286).',
+      tracking.pioneerMitigation = 'Se o alvo passar na salvaguarda, fica imune a novas tentativas de Vidência do mesmo conjurador por 24 horas.',
 
       tracking.rescueAndStabilization = 'Caso não se conheça o aventureiro mas sim o marco geográfico, Vidência pode focar diretamente em um local já visitado pelo conjurador sem salvaguarda.';
 
@@ -43589,9 +43589,9 @@
 
     var defense = {
 
-      defenseTitle: 'Travessia por Água Corrente (3m) e Varredura de Pegadas Antes do Bivaque (PHB p. 256; DMG p. 244)',
+      defenseTitle: 'Travessia por Água Corrente (3m) e Varredura de Pegadas Antes do Bivaque',
 
-      counterTrackAndCampSafety: 'Para despistar perseguidores humanos, matilhas de worgs e a magia Localizar Criatura (PHB p. 256), o Batedor conduz a comitiva pelo leito raso de um riacho de água corrente com mais de 3 metros de largura e varre as últimas pegadas com galhos de pinheiro (+5 na CD de Sobrevivência dos rastreadores).',
+      counterTrackAndCampSafety: 'Para despistar perseguidores humanos, matilhas de worgs e a magia Localizar Criatura, o Batedor conduz a comitiva pelo leito raso de um riacho de água corrente com mais de 3 metros de largura e varre as últimas pegadas com galhos de pinheiro (+5 na CD de Sobrevivência dos rastreadores).',
 
       counterTrackAndPerimeterWatch: 'Interrompe instantaneamente tanto o rastro olfativo de farejadores quanto a linha de efeito de Localizar Criatura antes de montar o acampamento na margem oposta.',
 
@@ -43607,11 +43607,11 @@
 
     if (dt === 'lead_lined_chest_and_polymorph_locate_block') {
 
-      defense.defenseTitle = 'Cofre Revestido de Chumbo contra Localizar Objeto e Disfarce Polimórfico (PHB p. 256)';
+      defense.defenseTitle = 'Cofre Revestido de Chumbo contra Localizar Objeto e Disfarce Polimórfico';
 
       defense.counterTrackAndCampSafety = 'Relíquias de missão, anéis de sinete e artefatos mágicos procurados por facções rivais são guardados dentro de um estojo forrado com uma fina lâmina de chumbo durante o acampamento.',
 
-      defense.counterTrackAndPerimeterWatch = 'Bloqueia 100% da magia Localizar Objeto e Detectar Magia a qualquer distância (PHB p. 231, 256).',
+      defense.counterTrackAndPerimeterWatch = 'Bloqueia 100% da magia Localizar Objeto e Detectar Magia a qualquer distância.',
 
       defense.campRestAndSafetyGuards = 'Protege o espólio da comitiva contra ladrões arcanos que rondem o nó à noite.';
 
@@ -43655,7 +43655,7 @@
 
     var witness = {
 
-      witnessTitle: 'Falar com Animais (Speak with Animals) para Interrogar a Fauna da Trilha (PHB p. 242)',
+      witnessTitle: 'Falar com Animais (Speak with Animals) para Interrogar a Fauna da Trilha',
 
       saveDC: 13,
 
@@ -43663,7 +43663,7 @@
 
       witnessSpellMechanics: 'Bardo, Druida ou Patrulheiro (1º círculo ritual, duração 10 minutos, PHB p. 242; Baldur’s Gate 3) compreende e se comunica verbalmente com bestas locais (corvos de carniça, lobos, corujas, marmotas ou cavalos desgarrados); os animais funcionam como testemunhas oculares e olfativas vivas do nó do Pointcrawl, podendo relatar quantas comitivas ou monstros passaram pela estrada no último dia, qual direção tomaram na bifurcação e se carregavam tochas ou feridos sangrando.',
 
-      pioneerMitigation: 'Oferta de rações frescas ou teste de Sabedoria (Adestrar Animais) / Carisma (Persuasão) CD 13 para que uma besta arisca aceite prestar um pequeno favor de observação ao grupo (PHB p. 242).',
+      pioneerMitigation: 'Oferta de rações frescas ou teste de Sabedoria (Adestrar Animais) / Carisma (Persuasão) CD 13 para que uma besta arisca aceite prestar um pequeno favor de observação ao grupo.',
 
       rescueAndStabilization: 'Permite descobrir emboscadas montadas adiante na trilha sem precisar expor nenhum membro da comitiva.',
 
@@ -43677,13 +43677,13 @@
 
     if (wm === 'speak_with_plants_flora_memory_interrogation') {
 
-      witness.witnessTitle = 'Falar com Plantas (Speak with Plants) e Memória Botânica das 24 Horas (PHB p. 242)';
+      witness.witnessTitle = 'Falar com Plantas (Speak with Plants) e Memória Botânica das 24 Horas';
 
       witness.saveDC = 15;
 
       witness.saveType = 'Sabedoria';
 
-      witness.witnessSpellMechanics = 'Bardo, Druida ou Patrulheiro (3º círculo, raio de 9m por 10 minutos, PHB p. 242) imbuí árvores, arbustos e gramíneas com consciência e voz; você pode questionar a vegetação sobre eventos ocorridos na área durante as últimas 24 horas — descobrindo quem pisoteou a relva mesmo sob Rastro Invisível, onde um tesouro foi enterrado entre as raízes ou qual idioma os estranhos falavam! Além disso, as plantas podem transformar terreno difícil de sarças em terreno normal (ou vice-versa para atrasar perseguidores) e soltar um companheiro Contido por cipós.',
+      witness.witnessSpellMechanics = 'Bardo, Druida ou Patrulheiro (3º círculo, raio de 9m por 10 minutos) imbuí árvores, arbustos e gramíneas com consciência e voz; você pode questionar a vegetação sobre eventos ocorridos na área durante as últimas 24 horas — descobrindo quem pisoteou a relva mesmo sob Rastro Invisível, onde um tesouro foi enterrado entre as raízes ou qual idioma os estranhos falavam! Além disso, as plantas podem transformar terreno difícil de sarças em terreno normal (ou vice-versa para atrasar perseguidores) e soltar um companheiro Contido por cipós.',
 
       witness.pioneerMitigation = 'Respeito estrito à floresta (evitar cortar galhos vivos ou atear fogo perto das árvores interrogadas).',
 
@@ -43691,7 +43691,7 @@
 
     } else if (wm === 'speak_with_dead_five_questions_corpse_inquest') {
 
-      witness.witnessTitle = 'Falar com os Mortos (Speak with Dead): Inquérito das 5 Perguntas ao Caído (PHB p. 243)';
+      witness.witnessTitle = 'Falar com os Mortos (Speak with Dead): Inquérito das 5 Perguntas ao Caído';
 
       witness.saveDC = 15;
 
@@ -43699,21 +43699,21 @@
 
       witness.witnessSpellMechanics = 'Bardo ou Clérigo (3º círculo, incenso aceso, alcance 3m, PHB p. 243; Baldur’s Gate 3) concede semblante de vida a um cadáver na beira da estrada que ainda possua boca e não seja morto-vivo; o conjurador faz até 5 perguntas (exigindo compartilhar um idioma que o falecido conhecia em vida, Fase 306!). O cadáver conhece apenas o que sabia até o momento da morte (quem o atacou, qual era o rosto/voz do assassino ou onde escondeu sua mochila), e a magia não pode ser lançada novamente no mesmo corpo por 10 dias.';
 
-      witness.pioneerMitigation = 'Uso de Disfarçar-se (Fase 312) caso o conjurador pertença a uma facção que o cadáver reconheceria como inimiga, evitando respostas crípticas ou evasivas (PHB p. 243).';
+      witness.pioneerMitigation = 'Uso de Disfarçar-se (Fase 312) caso o conjurador pertença a uma facção que o cadáver reconheceria como inimiga, evitando respostas crípticas ou evasivas.';
 
       witness.rescueAndStabilization = 'Revela a identidade real de saqueadores que massacraram caravanas na rota e permite recuperar relíquias ocultas.';
 
     } else if (wm === 'commune_with_nature_three_mile_radar_ritual') {
 
-      witness.witnessTitle = 'Comunhão com a Natureza (Commune with Nature): Radar de 4,5 km nos Ermos (PHB p. 224)';
+      witness.witnessTitle = 'Comunhão com a Natureza (Commune with Nature): Radar de 4,5 km nos Ermos';
 
       witness.saveDC = 16;
 
       witness.saveType = 'Sabedoria';
 
-      witness.witnessSpellMechanics = 'Druida ou Patrulheiro (5º círculo ritual de 1 minuto, PHB p. 224) torna-se um com a natureza em raio de 3 milhas (4,5 km ao ar livre ou 90m em cavernas naturais), adquirindo instantaneamente conhecimento de até 3 fatos à sua escolha sobre o território: povoados ou acampamentos de outras comitivas na região, corpos d’água potáveis, concentração de plantas/minerais raros, ou presença de celestiais, fadas, corruptores, elementais e mortos-vivos poderosos!';
+      witness.witnessSpellMechanics = 'Druida ou Patrulheiro (5º círculo ritual de 1 minuto) torna-se um com a natureza em raio de 3 milhas (4,5 km ao ar livre ou 90m em cavernas naturais), adquirindo instantaneamente conhecimento de até 3 fatos à sua escolha sobre o território: povoados ou acampamentos de outras comitivas na região, corpos d’água potáveis, concentração de plantas/minerais raros, ou presença de celestiais, fadas, corruptores, elementais e mortos-vivos poderosos!';
 
-      witness.pioneerMitigation = 'Execução do ritual em cumes ou clareiras naturais (a magia não funciona em masmorras construídas de pedra talhada ou cidades, PHB p. 224).';
+      witness.pioneerMitigation = 'Execução do ritual em cumes ou clareiras naturais (a magia não funciona em masmorras construídas de pedra talhada ou cidades).';
 
       witness.rescueAndStabilization = 'Antecipa em vários nós de distância a presença de chefes regionais ou santuários planares (Fase 300).';
 
@@ -43739,9 +43739,9 @@
 
     var defense = {
 
-      defenseTitle: 'Sentinela Animal por Sentido Bestial (Beast Sense) e Amizade Animal (PHB p. 212, 276)',
+      defenseTitle: 'Sentinela Animal por Sentido Bestial (Beast Sense) e Amizade Animal',
 
-      communeAndCampSafety: 'O Druida ou Patrulheiro encanta uma águia, coruja noturna ou lobo local com Amizade Animal (1º círculo, duração 24 horas, PHB p. 212) e realiza o ritual de 2º círculo Sentido Bestial (PHB p. 276) no bivaque.',
+      communeAndCampSafety: 'O Druida ou Patrulheiro encanta uma águia, coruja noturna ou lobo local com Amizade Animal (1º círculo, duração 24 horas) e realiza o ritual de 2º círculo Sentido Bestial no bivaque.',
 
       communeAndWitnessWatch: 'Por até 1 hora, o conjurador enxerga e ouve diretamente através dos olhos e ouvidos aguçados da fera enquanto ela sobrevoa o dossel da floresta ou patrulha a trilha a centenas de metros do acampamento.',
 
@@ -43757,19 +43757,19 @@
 
     if (dt === 'awakened_shrub_and_plant_growth_perimeter') {
 
-      defense.defenseTitle = 'Perímetro Vivo de Arbustos Despertos e Crescer Plantas (PHB p. 229, 230)';
+      defense.defenseTitle = 'Perímetro Vivo de Arbustos Despertos e Crescer Plantas';
 
-      defense.communeAndCampSafety = 'Utilizando Crescer Plantas (3º círculo, PHB p. 229 — exigindo 4 metros de deslocamento para cada 1 metro percorrido na vegetação espessa!) e sentinelas botânicas criadas com Despertar (Awaken, 5º círculo, ágata de 1.000 PO, PHB p. 230), o bivaque é cercado por guardiões vegetais que parecem arbustos comuns enquanto permanecem imóveis.';
+      defense.communeAndCampSafety = 'Utilizando Crescer Plantas (3º círculo, PHB p. 229 — exigindo 4 metros de deslocamento para cada 1 metro percorrido na vegetação espessa!) e sentinelas botânicas criadas com Despertar (Awaken, 5º círculo, ágata de 1.000 PO), o bivaque é cercado por guardiões vegetais que parecem arbustos comuns enquanto permanecem imóveis.';
 
       defense.communeAndWitnessWatch = 'Qualquer intruso que tente se esgueirar pela mata fechada ao redor das tendas fica reduzido a um quarto de sua velocidade normal e é denunciado pelo sussurro das árvores.';
 
-      defense.campRestAndSafetyGuards = 'Cria uma barreira viva sustentável que permanece leal ao conjurador por 30 dias (PHB p. 230).';
+      defense.campRestAndSafetyGuards = 'Cria uma barreira viva sustentável que permanece leal ao conjurador por 30 dias.';
 
     } else if (dt === 'gentle_repose_and_corpse_sanctification_rite') {
 
-      defense.defenseTitle = 'Rito de Repouso Tranquilo (Gentle Repose) e Preservação de Caídos (PHB p. 273)';
+      defense.defenseTitle = 'Rito de Repouso Tranquilo (Gentle Repose) e Preservação de Caídos';
 
-      defense.communeAndCampSafety = 'Quando a comitiva encontra viajantes caídos ou perde um aliado longe de um templo, o Clérigo ou Mago realiza o ritual de 2º círculo Repouso Tranquilo (moedas de cobre sobre os olhos, duração 10 dias, PHB p. 273).';
+      defense.communeAndCampSafety = 'Quando a comitiva encontra viajantes caídos ou perde um aliado longe de um templo, o Clérigo ou Mago realiza o ritual de 2º círculo Repouso Tranquilo (moedas de cobre sobre os olhos, duração 10 dias).';
 
       defense.communeAndWitnessWatch = 'Protege o corpo contra decomposição e impede terminantemente que necromantes ou a aura de cemitérios o levantem como morto-vivo, além de estender o limite de tempo para Revivificar ou Falar com os Mortos.';
 
@@ -43805,17 +43805,17 @@
 
     var conv = {
 
-      convergenceTitle: 'Coalescência Tática no Combat2: Duas Comitivas Aliadas contra Ameaças Colossais (D&D 5e)',
+      convergenceTitle: 'Coalescência Tática no Combat2: Duas Comitivas Aliadas contra Ameaças Colossais',
 
       saveDC: 15,
 
       saveType: 'Sabedoria',
 
-      convergenceMechanics: 'Quando duas comitivas se encontram no mesmo nó da rota ou respondem a um sinal de socorro (Trompa/Píroforos da Fase 301, Ave Mensageira da Fase 305 ou Enviar Mensagem da Fase 308) e selam pacto de aliança, o encontro culmina na Coalescência Tática para o motor Combat2: os aventureiros dos dois grupos entram juntos na ordem de Iniciativa compartilhando auras de Paladino (Aura de Proteção, PHB p. 85), bênçãos de Clérigo, inspiração de Bardo e Vínculo Telepático de Rary (Fase 310) para enfrentar dragões, chefes de masmorra ou emboscadas de guerra que nenhuma comitiva isolada sobreviveria sozinha!',
+      convergenceMechanics: 'Quando duas comitivas se encontram no mesmo nó da rota ou respondem a um sinal de socorro (Trompa/Píroforos da Fase 301, Ave Mensageira da Fase 305 ou Enviar Mensagem da Fase 308) e selam pacto de aliança, o encontro culmina na Coalescência Tática para o motor Combat2: os aventureiros dos dois grupos entram juntos na ordem de Iniciativa compartilhando auras de Paladino (Aura de Proteção), bênçãos de Clérigo, inspiração de Bardo e Vínculo Telepático de Rary (Fase 310) para enfrentar dragões, chefes de masmorra ou emboscadas de guerra que nenhuma comitiva isolada sobreviveria sozinha!',
 
       pioneerMitigation: 'Sincronização prévia de papéis de vanguarda, flanqueamento e suporte de cura antes de iniciar o confronto conjunto.',
 
-      rescueAndStabilization: 'Qualquer aliado de uma das comitivas pode usar Kit de Curandeiro (PHB p. 151) ou Palavra Curativa para estabilizar um companheiro caído do outro grupo a 0 PV.',
+      rescueAndStabilization: 'Qualquer aliado de uma das comitivas pode usar Kit de Curandeiro ou Palavra Curativa para estabilizar um companheiro caído do outro grupo a 0 PV.',
 
       icon: '',
 
@@ -43827,13 +43827,13 @@
 
     if (cm === 'corvus_cartography_and_hazard_notes_exchange') {
 
-      conv.convergenceTitle = 'Troca de Mapas do Cartógrafo Corvus e Notas das 300 Fases de Terreno (XGE p. 79)';
+      conv.convergenceTitle = 'Troca de Mapas do Cartógrafo Corvus e Notas das 300 Fases de Terreno';
 
       conv.saveDC = 12;
 
       conv.saveType = 'Inteligência';
 
-      conv.convergenceMechanics = 'Sem exigir combate, duas comitivas que se encontram pacificamente na estrada podem abrir seus estojos de mapas sobre uma rocha e copiar as anotações de rota uma da outra (Ferramentas de Cartógrafo, XGE p. 79): isso revela instantaneamente os nós adjacentes já explorados pelo outro grupo, destrava atalhos descobertos na Fase 314 e transfere avisos sobre quais das 300 Fases Geomorfológicas aguardam adiante — concedendo +2 nas salvaguardas contra perigos já mapeados pelos colegas!',
+      conv.convergenceMechanics = 'Sem exigir combate, duas comitivas que se encontram pacificamente na estrada podem abrir seus estojos de mapas sobre uma rocha e copiar as anotações de rota uma da outra (Ferramentas de Cartógrafo): isso revela instantaneamente os nós adjacentes já explorados pelo outro grupo, destrava atalhos descobertos na Fase 314 e transfere avisos sobre quais das 300 Fases Geomorfológicas aguardam adiante — concedendo +2 nas salvaguardas contra perigos já mapeados pelos colegas!',
 
       conv.pioneerMitigation = 'Conferência da assinatura do Cartógrafo Corvus ou do Selo ◈ do Guia parceiro para garantir que o mapa copiado não contém rotas falsas.',
 
@@ -43841,13 +43841,13 @@
 
     } else if (cm === 'roadside_barter_rations_and_spell_services') {
 
-      conv.convergenceTitle = 'Escambo de Suprimentos de Estrada e Serviços de Conjuração Ritual (PHB p. 150, 159)',
+      conv.convergenceTitle = 'Escambo de Suprimentos de Estrada e Serviços de Conjuração Ritual',
 
       conv.saveDC = 13;
 
       conv.saveType = 'Carisma';
 
-      conv.convergenceMechanics = 'A dezenas de quilômetros da cidade mais próxima, o encontro entre duas comitivas funciona como uma feira de sobrevivência: um grupo rico em ouro mas sem água ou flechas pode negociar com outra comitiva o escambo direto de Rações de Viagem, antídotos, cordas de seda, metade de um par de Pedras de Mensagem (Fase 308) ou a conjuração cooperativa de Restauração Menor, Remover Maldição e Identificação (PHB p. 159).',
+      conv.convergenceMechanics = 'A dezenas de quilômetros da cidade mais próxima, o encontro entre duas comitivas funciona como uma feira de sobrevivência: um grupo rico em ouro mas sem água ou flechas pode negociar com outra comitiva o escambo direto de Rações de Viagem, antídotos, cordas de seda, metade de um par de Pedras de Mensagem (Fase 308) ou a conjuração cooperativa de Restauração Menor, Remover Maldição e Identificação.',
 
       conv.pioneerMitigation = 'Avaliação justa de valor e raridade local (Sabedoria [Intuição] ou Carisma [Persuasão] CD 13) sem depender de tabelas de lojas urbanas.',
 
@@ -43855,7 +43855,7 @@
 
     } else if (cm === 'champion_single_combat_duel_of_honor') {
 
-      conv.convergenceTitle = 'Duelo de Campeões (1v1) e Resolução Honrada de Disputas no Combat2 (DMG p. 245)',
+      conv.convergenceTitle = 'Duelo de Campeões (1v1) e Resolução Honrada de Disputas no Combat2',
 
       conv.saveDC = 15;
 
@@ -43865,7 +43865,7 @@
 
       conv.pioneerMitigation = 'Juramento do tratado de duelo dentro de uma Zona da Verdade (Fase 310) para garantir que o grupo perdedor respeitará o resultado.',
 
-      conv.rescueAndStabilization = 'Uso de ataques corpo a corpo declarados como não-letais (PHB p. 198) para que o campeão derrotado caia inconsciente e estável a 0 PV sem morrer.';
+      conv.rescueAndStabilization = 'Uso de ataques corpo a corpo declarados como não-letais para que o campeão derrotado caia inconsciente e estável a 0 PV sem morrer.';
 
     }
 
@@ -43889,7 +43889,7 @@
 
     var defense = {
 
-      defenseTitle: 'Fogueira Compartilhada de Duas Comitivas e Vigília Dupla de 8 Aventureiros (PHB p. 186)',
+      defenseTitle: 'Fogueira Compartilhada de Duas Comitivas e Vigília Dupla de 8 Aventureiros',
 
       allianceAndCampSafety: 'Quando duas comitivas unem seus bivaques em um único acampamento fortificado para passar a noite nos ermos, o efetivo de até 8 aventureiros permite manter Sentinelas em dupla em todos os turnos da madrugada sem prejudicar as 6 horas de sono de ninguém.',
 
@@ -43907,21 +43907,21 @@
 
     if (dt === 'communal_banquet_and_inspiring_leader_bivouac') {
 
-      defense.defenseTitle = 'Ceia Comunitária de Acampamento e Discurso de Líder Inspirador (PHB p. 167)',
+      defense.defenseTitle = 'Ceia Comunitária de Acampamento e Discurso de Líder Inspirador',
 
       defense.allianceAndCampSafety = 'Ao redor da fogueira compartilhada, um aventureiro com o talento Líder Inspirador (Inspiring Leader, PHB p. 167 — 10 minutos de discurso ou narrativa de batalha) inspira até 6 companheiros presentes (incluindo membros da comitiva aliada!), concedendo Pontos de Vida Temporários iguais ao `nível do personagem + modificador de Carisma`.';
 
-      defense.allianceAndSharedWatch = 'Complementado pelo talento Cozinheiro (Chef, TCoE p. 79) ou rações especiais preparadas pelo Provedor, todos iniciam a marcha do dia seguinte com reserva extra de vitalidade.',
+      defense.allianceAndSharedWatch = 'Complementado pelo talento Cozinheiro (Chef) ou rações especiais preparadas pelo Provedor, todos iniciam a marcha do dia seguinte com reserva extra de vitalidade.',
 
       defense.campRestAndSafetyGuards = 'Consolida os laços do grafo de memória episódica (Fase 313) com bônus mecânico imediato para o próximo confronto no Combat2.';
 
     } else if (dt === 'song_of_rest_and_healer_kit_cooperative_recovery') {
 
-      defense.defenseTitle = 'Canção de Descanso do Bardo e Tenda de Curandeiro Cooperativa (PHB p. 54, 165)',
+      defense.defenseTitle = 'Canção de Descanso do Bardo e Tenda de Curandeiro Cooperativa',
 
       defense.allianceAndCampSafety = 'Durante um descanso curto ou antes de dormir no bivaque conjunto, a Canção de Descanso de um Bardo (PHB p. 54 — +1d6 a +1d12 PV extras ao gastar Dados de Vida) beneficia todos os aventureiros aliados que ouvirem a música ao redor do fogo.',
 
-      defense.allianceAndSharedWatch = 'Simultaneamente, um especialista com o talento Curandeiro (Healer, PHB p. 165) utiliza o Kit de Curandeiro para restaurar `1d6 + 4 + nível` PV em cada membro ferido de ambas as comitivas.',
+      defense.allianceAndSharedWatch = 'Simultaneamente, um especialista com o talento Curandeiro (Healer) utiliza o Kit de Curandeiro para restaurar `1d6 + 4 + nível` PV em cada membro ferido de ambas as comitivas.',
 
       defense.campRestAndSafetyGuards = 'Garante que nenhum grupo retome a estrada no amanhecer com ferimentos abertos ou recursos esgotados.';
 
@@ -43955,15 +43955,15 @@
 
     var journey = {
 
-      journeyTitle: 'Papel de Guia/Navegador: Orientação em Bifurcações e Atalhos Pointcrawl (PHB p. 182-183; DMG p. 111)',
+      journeyTitle: 'Papel de Guia/Navegador: Orientação em Bifurcações e Atalhos Pointcrawl',
 
       saveDC: 15,
 
       saveType: 'Sabedoria',
 
-      pointcrawlRoleMechanics: 'Substituindo a caminhada em grade de hexágonos vazios por um grafo de nós e rotas com bifurcações dramáticas (Pointcrawl estilo Solasta e Pathfinder: Kingmaker), o Guia da comitiva realiza testes de Sabedoria (Sobrevivência) contra a CD do bioma (CD 10 em campos abertos, CD 15 em florestas/montanhas/pântanos, +5 sob nevasca ou neblina densa, DMG p. 111-112); o sucesso destrava atalhos seguros entre nós e evita perder 1d6 horas de marcha em desvios acidentais. Patrulheiros em seu Terreno Favorito (Explorador Natural, PHB p. 91) impedem que o grupo se perca exceto por meios mágicos e dobram o bônus de proficiência!',
+      pointcrawlRoleMechanics: 'Substituindo a caminhada em grade de hexágonos vazios por um grafo de nós e rotas com bifurcações dramáticas (Pointcrawl estilo Solasta e Pathfinder: Kingmaker), o Guia da comitiva realiza testes de Sabedoria (Sobrevivência) contra a CD do bioma (CD 10 em campos abertos, CD 15 em florestas/montanhas/pântanos, +5 sob nevasca ou neblina densa); o sucesso destrava atalhos seguros entre nós e evita perder 1d6 horas de marcha em desvios acidentais. Patrulheiros em seu Terreno Favorito (Explorador Natural) impedem que o grupo se perca exceto por meios mágicos e dobram o bônus de proficiência!',
 
-      pioneerMitigation: 'Consulta ao Mapa Regional de Valdoria (Cartógrafo Corvus) e uso de Ferramentas de Cartógrafo ou Navegador (XGE p. 79, 83) antes de escolher o ramo da bifurcação.',
+      pioneerMitigation: 'Consulta ao Mapa Regional de Valdoria (Cartógrafo Corvus) e uso de Ferramentas de Cartógrafo ou Navegador antes de escolher o ramo da bifurcação.',
 
       rescueAndStabilization: 'Se o Guia falhar, o grupo avança para um nó secundário de perigo geomorfológico das 300 Fases, exigindo reagrupamento tático.',
 
@@ -43977,7 +43977,7 @@
 
     if (rm === 'vanguard_scout_terrain_hazard_early_warning') {
 
-      journey.journeyTitle = 'Papel de Batedor de Vanguarda: Detecção Antecipada das 300 Fases de Perigo (PHB p. 175, 182)';
+      journey.journeyTitle = 'Papel de Batedor de Vanguarda: Detecção Antecipada das 300 Fases de Perigo';
 
       journey.saveDC = 15;
 
@@ -43991,31 +43991,31 @@
 
     } else if (rm === 'lookout_sentinel_passive_perception_shield') {
 
-      journey.journeyTitle = 'Papel de Sentinela/Vigia: Percepção Passiva contra Emboscadas e Outras Comitivas (PHB p. 182)',
+      journey.journeyTitle = 'Papel de Sentinela/Vigia: Percepção Passiva contra Emboscadas e Outras Comitivas',
 
       journey.saveDC = 15;
 
       journey.saveType = 'Sabedoria';
 
-      journey.pointcrawlRoleMechanics = 'Apenas aventureiros que não estejam distraídos desenhando mapas, forrageando ou rastreando contribuem com sua Sabedoria (Percepção) Passiva para notar perigos ocultos e outras comitivas na estrada (PHB p. 182-183); o Sentinela dedica 100% da sua atenção ao redor e à retaguarda, determinando o Grau de Revelação da Névoa de Identidade (Fase 311) e impedindo que o grupo sofra a condição Surpreso ao cruzar com predadores ou bandos furtivos.',
+      journey.pointcrawlRoleMechanics = 'Apenas aventureiros que não estejam distraídos desenhando mapas, forrageando ou rastreando contribuem com sua Sabedoria (Percepção) Passiva para notar perigos ocultos e outras comitivas na estrada; o Sentinela dedica 100% da sua atenção ao redor e à retaguarda, determinando o Grau de Revelação da Névoa de Identidade (Fase 311) e impedindo que o grupo sofra a condição Surpreso ao cruzar com predadores ou bandos furtivos.',
 
-      journey.pioneerMitigation = 'Escolha do aventureiro com maior Sabedoria, proficiência/especialização em Percepção ou talento Alerta (+5 na Iniciativa e imune a Surpresa, PHB p. 165).',
+      journey.pioneerMitigation = 'Escolha do aventureiro com maior Sabedoria, proficiência/especialização em Percepção ou talento Alerta (+5 na Iniciativa e imune a Surpresa).',
 
       journey.rescueAndStabilization = 'Grito de alerta imediato ou disparo de Alarme mental para colocar a comitiva em formação de escudo.';
 
     } else if (rm === 'quartermaster_forager_and_forced_march_con_save') {
 
-      journey.journeyTitle = 'Papel de Provedor/Intendente: Forrageamento e Salvaguarda de Marcha Forçada (PHB p. 181, 183)',
+      journey.journeyTitle = 'Papel de Provedor/Intendente: Forrageamento e Salvaguarda de Marcha Forçada',
 
       journey.saveDC = 15;
 
       journey.saveType = 'Constituição';
 
-      journey.pointcrawlRoleMechanics = 'Em ritmo Normal ou Lento, o Provedor realiza Sabedoria (Sobrevivência) contra a CD de abundância do bioma (DMG p. 111: CD 10 florestas/costas, CD 15 colinas/pântanos, CD 20 desertos/ártico) colhendo `1d6 + mod SAB` libras de comida e galões de água (PHB p. 183; Antecedente Forasteiro/Wanderer e magia Bom Fruto suprem o grupo automaticamente); além disso, se a comitiva marchar além de 8 horas no dia (Marcha Forçada, PHB p. 181), cada membro realiza salvaguarda de Constituição `CD 10 + 1 por hora extra` ao fim de cada hora ou sofre 1 nível de Exaustão!',
+      journey.pointcrawlRoleMechanics = 'Em ritmo Normal ou Lento, o Provedor realiza Sabedoria (Sobrevivência) contra a CD de abundância do bioma (DMG p. 111: CD 10 florestas/costas, CD 15 colinas/pântanos, CD 20 desertos/ártico) colhendo `1d6 + mod SAB` libras de comida e galões de água; além disso, se a comitiva marchar além de 8 horas no dia (Marcha Forçada), cada membro realiza salvaguarda de Constituição `CD 10 + 1 por hora extra` ao fim de cada hora ou sofre 1 nível de Exaustão!',
 
-      journey.pioneerMitigation = 'Purificar Alimentos e Bebidas (1º círculo ritual, PHB p. 270) ou Criar Água (PHB p. 229) em etapas áridas onde o forrageamento falha.',
+      journey.pioneerMitigation = 'Purificar Alimentos e Bebidas (1º círculo ritual) ou Criar Água em etapas áridas onde o forrageamento falha.',
 
-      journey.rescueAndStabilization = 'Parada imediata para montar bivaque antes que os aventureiros acumulem Nível 2 de Exaustão (deslocamento reduzido à metade, PHB p. 291).';
+      journey.rescueAndStabilization = 'Parada imediata para montar bivaque antes que os aventureiros acumulem Nível 2 de Exaustão (deslocamento reduzido à metade).';
 
     }
 
@@ -44039,11 +44039,11 @@
 
     var defense = {
 
-      defenseTitle: 'Regra de Dormir de Armadura Pesada/Média vs. Despir Armadura no Bivaque (XGE p. 77-78; PHB p. 146)',
+      defenseTitle: 'Regra de Dormir de Armadura Pesada/Média vs. Despir Armadura no Bivaque',
 
       armorRestAndCampSafety: 'Seguindo estritamente o Xanathar’s Guide to Everything (p. 77-78), dormir vestindo Armadura Média ou Pesada recupera apenas um quarto (1/4) dos Dados de Vida gastos e NÃO remove níveis de Exaustão acumulados nas 300 Fases de terreno! Para obter recuperação plena, o guerreiro, paladino ou clérigo deve despir a armadura antes de dormir.',
 
-      armorRestAndRoleWatch: 'Contudo, se o acampamento sofrer ataque noturno ou emboscada, vestir uma Armadura Média exige 5 minutos (50 rodadas) e uma Armadura Pesada exige 10 minutos (100 rodadas, PHB p. 146) — forçando o personagem despertado a lutar com CA base (`10 + mod DES`) mais Escudo (+2 CA, 1 ação para empunhar)!',
+      armorRestAndRoleWatch: 'Contudo, se o acampamento sofrer ataque noturno ou emboscada, vestir uma Armadura Média exige 5 minutos (50 rodadas) e uma Armadura Pesada exige 10 minutos (100 rodadas) — forçando o personagem despertado a lutar com CA base (`10 + mod DES`) mais Escudo (+2 CA, 1 ação para empunhar)!',
 
       campRestAndSafetyGuards: 'Torna a escolha de vigília noturna, camuflagem e magias de abrigo vital para a sobrevivência dos combatentes de linha de frente.',
 
@@ -44057,21 +44057,21 @@
 
     if (dt === 'elven_trance_and_four_shift_sentinel_rotation') {
 
-      defense.defenseTitle = 'Escala de 4 Turnos de Vigília Noturna e Transe Élfico de 4 Horas (PHB p. 23, 186)';
+      defense.defenseTitle = 'Escala de 4 Turnos de Vigília Noturna e Transe Élfico de 4 Horas';
 
-      defense.armorRestAndCampSafety = 'Um Descanso Longo exige 8 horas (mínimo de 6 horas de sono e até 2 horas de atividade leve de sentinela para humanos, anões e demais raças, PHB p. 186), exigindo 3 a 4 membros revezando turnos para cobrir a noite inteira sem lacunas.',
+      defense.armorRestAndCampSafety = 'Um Descanso Longo exige 8 horas (mínimo de 6 horas de sono e até 2 horas de atividade leve de sentinela para humanos, anões e demais raças), exigindo 3 a 4 membros revezando turnos para cobrir a noite inteira sem lacunas.',
 
-      defense.armorRestAndRoleWatch = 'Aventureiros Elfos utilizam o Transe (PHB p. 23), meditando profundamente por apenas 4 horas com consciência semirreflexiva e mantendo 4 horas livres para cobrir metade da vigília noturna da comitiva vestindo sua armadura!',
+      defense.armorRestAndRoleWatch = 'Aventureiros Elfos utilizam o Transe, meditando profundamente por apenas 4 horas com consciência semirreflexiva e mantendo 4 horas livres para cobrir metade da vigília noturna da comitiva vestindo sua armadura!',
 
-      defense.campRestAndSafetyGuards = 'Se o descanso longo for interrompido por mais de 1 hora de caminhada ou combate prolongado, deve ser reiniciado do zero (PHB p. 186).';
+      defense.campRestAndSafetyGuards = 'Se o descanso longo for interrompido por mais de 1 hora de caminhada ou combate prolongado, deve ser reiniciado do zero.';
 
     } else if (dt === 'leomund_tiny_hut_and_rope_trick_sanctuary') {
 
-      defense.defenseTitle = 'Abrigos Extradimensionais e Domos Rituais: Cabana de Leomund e Truque da Corda (PHB p. 268, 284)';
+      defense.defenseTitle = 'Abrigos Extradimensionais e Domos Rituais: Cabana de Leomund e Truque da Corda';
 
-      defense.armorRestAndCampSafety = 'O ritual de 3º círculo Pequena Cabana de Leomund (Bardo/Mago, duração 8 horas, PHB p. 268) ergue um domo imóvel de 3m de raio onde até 9 criaturas médias descansam em clima seco e ameno (independentemente de nevascas ou tempestades de areia lá fora!), opaco por fora (camuflável na cor da pedra/neve) e impenetrável a criaturas, armas e magias externas.',
+      defense.armorRestAndCampSafety = 'O ritual de 3º círculo Pequena Cabana de Leomund (Bardo/Mago, duração 8 horas) ergue um domo imóvel de 3m de raio onde até 9 criaturas médias descansam em clima seco e ameno (independentemente de nevascas ou tempestades de areia lá fora!), opaco por fora (camuflável na cor da pedra/neve) e impenetrável a criaturas, armas e magias externas.',
 
-      defense.armorRestAndRoleWatch = 'Para descansos curtos de emergência de 1 hora ou para se esconder quando uma comitiva hostil se aproxima na estrada, Truque da Corda (Rope Trick, 2º círculo, PHB p. 284) puxa a corda para dentro de um espaço extradimensional invisível.',
+      defense.armorRestAndRoleWatch = 'Para descansos curtos de emergência de 1 hora ou para se esconder quando uma comitiva hostil se aproxima na estrada, Truque da Corda (Rope Trick, 2º círculo) puxa a corda para dentro de um espaço extradimensional invisível.',
 
       defense.campRestAndSafetyGuards = 'Permite que os combatentes despam suas armaduras pesadas com segurança dentro do domo protegido (vulnerável apenas a Dissipar Magia).';
 
@@ -44111,7 +44111,7 @@
 
       saveType: 'Sabedoria',
 
-      reunionMemoryMechanics: 'Baseado na arquitetura de memória episódica do Ensemble Engine (UC Santa Cruz / AIIDE) e do Sistema Nemesis (GDC), a tabela persistente character_encounters_memory armazena quem se encontrou, em qual nó e bioma, o dia da campanha, se os nomes verdadeiros foram revelados (Selo ◈) e o histórico de ações conjuntas; quando duas comitivas que já lutaram lado a lado ou partilharam fogueira voltam a cruzar-se semanas depois em outra estrada, o Mestre (DM) abre a cena citando dinamicamente o evento passado ("Entre a neblina da trilha, um rosto familiar surge com o Selo ◈: o mesmo andarilho que segurou a ponte com você nas Colinas de Ferro!") e concede Vantagem em testes de Carisma (Persuasão) mútuos (DMG p. 245).',
+      reunionMemoryMechanics: 'Baseado na arquitetura de memória episódica do Ensemble Engine (UC Santa Cruz / AIIDE) e do Sistema Nemesis (GDC), a tabela persistente character_encounters_memory armazena quem se encontrou, em qual nó e bioma, o dia da campanha, se os nomes verdadeiros foram revelados (Selo ◈) e o histórico de ações conjuntas; quando duas comitivas que já lutaram lado a lado ou partilharam fogueira voltam a cruzar-se semanas depois em outra estrada, o Mestre (DM) abre a cena citando dinamicamente o evento passado ("Entre a neblina da trilha, um rosto familiar surge com o Selo ◈: o mesmo andarilho que segurou a ponte com você nas Colinas de Ferro!") e concede Vantagem em testes de Carisma (Persuasão) mútuos.',
 
       pioneerMitigation: 'Saudação imediata pelo nome real e referência ao último nó onde acamparam juntos para restabelecer o pacto de confiança sem atraso.',
 
@@ -44127,7 +44127,7 @@
 
     if (rm === 'nameless_familiar_faces_road_reunion') {
 
-      reunion.reunionTitle = 'Rostos Conhecidos sem Nome: Reencontro Visual sem Apresentação Prévia (PHB p. 177)';
+      reunion.reunionTitle = 'Rostos Conhecidos sem Nome: Reencontro Visual sem Apresentação Prévia';
 
       reunion.saveDC = 13;
 
@@ -44141,7 +44141,7 @@
 
     } else if (rm === 'bitter_rivals_or_betrayed_treaty_reunion') {
 
-      reunion.reunionTitle = 'Reencontro de Rivais Antigos, Saqueadores ou Pacto Quebrado (DMG p. 244-245)',
+      reunion.reunionTitle = 'Reencontro de Rivais Antigos, Saqueadores ou Pacto Quebrado',
 
       reunion.saveDC = 16;
 
@@ -44161,7 +44161,7 @@
 
       reunion.saveType = 'Carisma';
 
-      reunion.reunionMemoryMechanics = 'Se apenas um membro da Comitiva A possui o Selo ◈ de um membro da Comitiva B (por terem viajado juntos no passado ou pertencido à mesma guilda), esse aventureiro pode atuar como fiador social ("Abaixem as armas! Eu conheço Lyra, ela lutou comigo no Passo Cinzento"): essa ação propaga o Selo ◈ para todos os presentes que ouvirem a apresentação e eleva a atitude inicial de Indiferente para Amigável (DMG p. 244).',
+      reunion.reunionMemoryMechanics = 'Se apenas um membro da Comitiva A possui o Selo ◈ de um membro da Comitiva B (por terem viajado juntos no passado ou pertencido à mesma guilda), esse aventureiro pode atuar como fiador social ("Abaixem as armas! Eu conheço Lyra, ela lutou comigo no Passo Cinzento"): essa ação propaga o Selo ◈ para todos os presentes que ouvirem a apresentação e eleva a atitude inicial de Indiferente para Amigável.',
 
       reunion.pioneerMitigation = 'Verificação rápida de uma lembrança compartilhada entre os dois amigos para provar que não se trata de impostor sob Disfarçar-se.',
 
@@ -44207,17 +44207,17 @@
 
     if (dt === 'oath_token_and_signet_exchange_bivouac') {
 
-      defense.defenseTitle = 'Troca de Moedas Marcadas, Anéis de Sinete e Senhas de Reencontro (PHB p. 150)';
+      defense.defenseTitle = 'Troca de Moedas Marcadas, Anéis de Sinete e Senhas de Reencontro';
 
-      defense.chronicleAndCampSafety = 'Duas comitivas aliadas que se separam em uma bifurcação trocam metades de uma moeda de prata cortada, impressões de Cera de Lacre (PHB p. 150) ou uma frase-senha única antes de partir.';
+      defense.chronicleAndCampSafety = 'Duas comitivas aliadas que se separam em uma bifurcação trocam metades de uma moeda de prata cortada, impressões de Cera de Lacre ou uma frase-senha única antes de partir.';
 
       defense.chronicleAndMemoryWatch = 'Em qualquer reencontro futuro sob escuridão, neblina ou disfarce, exibir a moeda partida ou pronunciar a senha confirma a identidade instantaneamente sem depender de testes de Intuição.',
 
-      defense.campRestAndSafetyGuards = 'Impede que metamorfos, doppelgängers (MM p. 82) ou ilusionistas se passem por aliados de estrada.';
+      defense.campRestAndSafetyGuards = 'Impede que metamorfos, doppelgängers ou ilusionistas se passem por aliados de estrada.';
 
     } else if (dt === 'bounty_and_reputation_rumor_verification') {
 
-      defense.defenseTitle = 'Conferência de Rumores de Estrada e Reputação de Outras Comitivas (DMG p. 245)';
+      defense.defenseTitle = 'Conferência de Rumores de Estrada e Reputação de Outras Comitivas';
 
       defense.chronicleAndCampSafety = 'Durante a conversa ao redor do fogo, duas comitivas comparam seus registros de viagem sobre terceiros grupos que rondam a região.',
 
@@ -44265,7 +44265,7 @@
 
       pioneerMitigation: 'Exigência de reciprocidade no parley de estrada ("Direi meu nome e o da minha comitiva se você baixar o capuz e disser o seu").',
 
-      rescueAndStabilization: 'Uma vez gravado o Selo ◈ no grafo de memória do personagem, ele habilita permanentemente o uso de Enviar Mensagem (Sending, PHB p. 238) e reconhecimento imediato em futuros reencontros.',
+      rescueAndStabilization: 'Uma vez gravado o Selo ◈ no grafo de memória do personagem, ele habilita permanentemente o uso de Enviar Mensagem (Sending) e reconhecimento imediato em futuros reencontros.',
 
       icon: '◈',
 
@@ -44277,35 +44277,35 @@
 
     if (im === 'alias_deception_vs_insight_contest') {
 
-      intro.introTitle = 'Apresentação sob Pseudônimo: Disputa de Carisma (Enganação) vs. Sabedoria (Intuição) (PHB p. 178-179)';
+      intro.introTitle = 'Apresentação sob Pseudônimo: Disputa de Carisma (Enganação) vs. Sabedoria (Intuição)';
 
       intro.saveDC = 15;
 
       intro.saveType = 'Sabedoria';
 
-      intro.introductionMechanics = 'Um aventureiro cauteloso ou procurado pode optar por apresentar-se com um Pseudônimo (nome de estrada falso); o motor realiza silenciosamente uma disputa canônica de Carisma (Enganação) do falante contra a Sabedoria (Intuição) Passiva ou ativa dos ouvintes (PHB p. 178-179). Se o blefe vencer, a interface do outro grupo passa a rotulá-lo pelo pseudônimo informado; se a Intuição superar a Enganação, o observador percebe a hesitação no olhar (sem revelar o nome real magicamente, mas marcando o nome dito como "[Pseudônimo Suspeito?]").';
+      intro.introductionMechanics = 'Um aventureiro cauteloso ou procurado pode optar por apresentar-se com um Pseudônimo (nome de estrada falso); o motor realiza silenciosamente uma disputa canônica de Carisma (Enganação) do falante contra a Sabedoria (Intuição) Passiva ou ativa dos ouvintes. Se o blefe vencer, a interface do outro grupo passa a rotulá-lo pelo pseudônimo informado; se a Intuição superar a Enganação, o observador percebe a hesitação no olhar (sem revelar o nome real magicamente, mas marcando o nome dito como "[Pseudônimo Suspeito?]").';
 
-      intro.pioneerMitigation = 'Apoio do Antecedente Charlatão (Identidade Falsa estabelecida com documentação, PHB p. 128) ou da característica de Assassino Impostor (PHB p. 97).';
+      intro.pioneerMitigation = 'Apoio do Antecedente Charlatão (Identidade Falsa estabelecida com documentação) ou da característica de Assassino Impostor.';
 
-      intro.rescueAndStabilization = 'Confrontado com Zona da Verdade (PHB p. 289) ou Detectar Pensamentos (PHB p. 231), o pseudônimo cai imediatamente.';
+      intro.rescueAndStabilization = 'Confrontado com Zona da Verdade ou Detectar Pensamentos, o pseudônimo cai imediatamente.';
 
     } else if (im === 'disguise_kit_and_disguise_self_illusion') {
 
-      intro.introTitle = 'Ocultação de Identidade por Kit de Disfarce e Magia Disfarçar-se (PHB p. 154, 233)';
+      intro.introTitle = 'Ocultação de Identidade por Kit de Disfarce e Magia Disfarçar-se';
 
       intro.saveDC = 16;
 
       intro.saveType = 'Inteligência';
 
-      intro.introductionMechanics = 'Mesmo diante de um aventureiro que já o conheceu no passado (portador do Selo ◈), um personagem pode ocultar sua identidade usando um Kit de Disfarce (cosméticos, tintura de cabelo e próteses, PHB p. 154) ou a magia Disfarçar-se (Disguise Self, 1º círculo, duração 1 hora, PHB p. 233); para atravessar a ilusão visual de Disfarçar-se, o observador precisa usar sua ação para inspecionar a aparência e vencer um teste de Inteligência (Investigação) contra a CD de magia do conjurador (PHB p. 233).';
+      intro.introductionMechanics = 'Mesmo diante de um aventureiro que já o conheceu no passado (portador do Selo ◈), um personagem pode ocultar sua identidade usando um Kit de Disfarce (cosméticos, tintura de cabelo e próteses) ou a magia Disfarçar-se (Disguise Self, 1º círculo, duração 1 hora); para atravessar a ilusão visual de Disfarçar-se, o observador precisa usar sua ação para inspecionar a aparência e vencer um teste de Inteligência (Investigação) contra a CD de magia do conjurador.';
 
-      intro.pioneerMitigation = 'Evitar contato físico direto durante o parley, pois as mudanças ilusórias de Disfarçar-se (como um chapéu falso ou barba ilusória) não sustentam inspeção tátil (PHB p. 233).';
+      intro.pioneerMitigation = 'Evitar contato físico direto durante o parley, pois as mudanças ilusórias de Disfarçar-se (como um chapéu falso ou barba ilusória) não sustentam inspeção tátil.';
 
-      intro.rescueAndStabilization = 'Uso de Alterar-se (Alter Self, 2º círculo, PHB p. 211) ou Forma Mutável para transformação física real à prova de toque.';
+      intro.rescueAndStabilization = 'Uso de Alterar-se (Alter Self, 2º círculo) ou Forma Mutável para transformação física real à prova de toque.';
 
     } else if (im === 'voice_and_mannerism_recognition_check') {
 
-      intro.introTitle = 'Reconhecimento Auditivo por Timbre de Voz, Sotaque e Cacoetes (PHB p. 165, 177; NWN Arelith)';
+      intro.introTitle = 'Reconhecimento Auditivo por Timbre de Voz, Sotaque e Cacoetes';
 
       intro.saveDC = 15;
 
@@ -44339,7 +44339,7 @@
 
     var defense = {
 
-      defenseTitle: 'Rito de Apresentação à Beira do Fogo e Partilha de Cantil (Sky GDC; PHB p. 186)',
+      defenseTitle: 'Rito de Apresentação à Beira do Fogo e Partilha de Cantil (Sky GDC)',
 
       disguiseAndCampSafety: 'Quando duas comitivas decidem baixar as armas e sentar-se ao redor da mesma fogueira de bivaque, os membros podem realizar o Rito de Apresentação de Estrada — removendo elmos e capuzes à luz das chamas para revelar seus nomes e histórias de origem.',
 
@@ -44357,9 +44357,9 @@
 
     if (dt === 'disguise_kit_makeup_and_cloak_maintenance') {
 
-      defense.defenseTitle = 'Bancada de Kit de Disfarce, Tinturas e Insígnias Reversíveis no Bivaque (PHB p. 154)';
+      defense.defenseTitle = 'Bancada de Kit de Disfarce, Tinturas e Insígnias Reversíveis no Bivaque';
 
-      defense.disguiseAndCampSafety = 'Durante o descanso no acampamento, o aventureiro proficiente em Kit de Disfarce (PHB p. 154, 25 PO, 1,5 kg) dedica 30 minutos diante de um Espelho de Aço para preparar maquiagem de cicatrizes falsas, tingir mechas e inverter mantos de viagem antes de cruzar uma província hostil.';
+      defense.disguiseAndCampSafety = 'Durante o descanso no acampamento, o aventureiro proficiente em Kit de Disfarce dedica 30 minutos diante de um Espelho de Aço para preparar maquiagem de cicatrizes falsas, tingir mechas e inverter mantos de viagem antes de cruzar uma província hostil.';
 
       defense.disguiseAndIdentityWatch = 'Adiciona o bônus de proficiência a todos os testes de Carisma (Enganação) destinados a fazer a comitiva passar por mercadores, peregrinos ou patrulheiros locais.';
 
@@ -44367,7 +44367,7 @@
 
     } else if (dt === 'actor_feat_and_voice_modulation_rehearsal') {
 
-      defense.defenseTitle = 'Ensaio de Modulação Vocal, Senhas Falsas e Histórias de Cobertura (PHB p. 128, 165)';
+      defense.defenseTitle = 'Ensaio de Modulação Vocal, Senhas Falsas e Histórias de Cobertura';
 
       defense.disguiseAndCampSafety = 'Os membros da comitiva alinham previamente no acampamento quais pseudônimos usarão e qual história de cobertura contarão caso encontrem outros grupos na estrada no dia seguinte.';
 
@@ -44405,15 +44405,15 @@
 
     var fog = {
 
-      fogTitle: 'Avistamento Assimétrico por Ritmo Lento/Furtivo vs. Percepção Passiva (PHB p. 175, 182)',
+      fogTitle: 'Avistamento Assimétrico por Ritmo Lento/Furtivo vs. Percepção Passiva',
 
       saveDC: 15,
 
       saveType: 'Sabedoria',
 
-      identityFogMechanics: 'Em D&D 5e (PHB p. 182; Solasta: Crown of the Magister), uma comitiva que viaja em ritmo Lento (18 milhas/dia) pode mover-se furtivamente nos ermos realizando um Teste em Grupo de Destreza (Furtividade) (PHB p. 175 — sucesso se pelo menos metade dos membros superar a CD); quando o resultado iguala ou supera a Sabedoria (Percepção) Passiva da outra comitiva na estrada, ocorre o Avistamento Assimétrico: o grupo furtivo avista a outra comitiva primeiro sem ser visto! Os aventureiros podem observá-los ocultos na vegetação, preparar uma emboscada (impondo a condição Surpreso na 1ª rodada do Combat2, PHB p. 189) ou deixá-los passar sem que jamais saibam que estiveram ali.',
+      identityFogMechanics: 'Uma comitiva que viaja em ritmo Lento (18 milhas/dia) pode mover-se furtivamente nos ermos realizando um Teste em Grupo de Destreza (Furtividade) (sucesso se pelo menos metade dos membros superar a CD); quando o resultado iguala ou supera a Sabedoria (Percepção) Passiva da outra comitiva na estrada, ocorre o Avistamento Assimétrico: o grupo furtivo avista a outra comitiva primeiro sem ser visto! Os aventureiros podem observá-los ocultos na vegetação, preparar uma emboscada (impondo a condição Surpreso na 1ª rodada do combate) ou deixá-los passar sem que jamais saibam que estiveram ali.',
 
-      pioneerMitigation: 'Designação de um Batedor furtivo (Ladino, Patrulheiro ou Monge) 30 metros à frente da comitiva ou conjuração de Rastro Invisível (+10 em Furtividade de grupo, PHB p. 271).',
+      pioneerMitigation: 'Designação de um Batedor furtivo (Ladino, Patrulheiro ou Monge) 30 metros à frente da comitiva ou conjuração de Rastro Invisível (+10 em Furtividade de grupo).',
 
       rescueAndStabilization: 'Permite evitar confrontos letais contra bandos superiores ou estudar a composição de outra comitiva antes de decidir se apresentar.',
 
@@ -44427,43 +44427,43 @@
 
     if (fm === 'four_tier_passive_perception_identity_fog') {
 
-      fog.fogTitle = 'Revelação Gradual em 4 Graus da Névoa de Identidade (PHB p. 177; NWN Arelith)';
+      fog.fogTitle = 'Revelação Gradual em 4 Graus da Névoa de Identidade';
 
       fog.saveDC = 15;
 
       fog.saveType = 'Sabedoria';
 
-      fog.identityFogMechanics = 'Nenhum aventureiro desconhecido exibe nome flutuante sobre a cabeça (banimento absoluto de metagaming estilo Neverwinter Nights: Arelith); a interface revela apenas o que a Sabedoria (Percepção) Passiva do observador alcança: Grau 1 (Percepção Passiva < 12 ou forte neblina): "Vulto Encapuzado na Estrada"; Grau 2 (12 a 14): Raça, porte físico e arma empunhada ("Andarilho Anão de Machado Pesado"); Grau 3 (15 a 17): Sub-raça, armadura vestida e arquétipo aparente ("Anão da Colina de Cota de Malha e Símbolo Sagrado"); Grau 4 (18+ ou talento Observador +5, PHB p. 168): Detalhes finos, cicatrizes, manchas de sangue, estado de fadiga e insígnias — porém o Nome Próprio permanece oculto até que ocorra apresentação verbal ou reconhecimento prévio!',
+      fog.identityFogMechanics = 'Nenhum aventureiro desconhecido exibe nome flutuante sobre a cabeça (banimento absoluto de metagaming estilo Neverwinter Nights: Arelith); a interface revela apenas o que a Sabedoria (Percepção) Passiva do observador alcança: Grau 1 (Percepção Passiva < 12 ou forte neblina): "Vulto Encapuzado na Estrada"; Grau 2 (12 a 14): Raça, porte físico e arma empunhada ("Andarilho Anão de Machado Pesado"); Grau 3 (15 a 17): Sub-raça, armadura vestida e arquétipo aparente ("Anão da Colina de Cota de Malha e Símbolo Sagrado"); Grau 4 (18+ ou talento Observador +5): Detalhes finos, cicatrizes, manchas de sangue, estado de fadiga e insígnias — porém o Nome Próprio permanece oculto até que ocorra apresentação verbal ou reconhecimento prévio!',
 
-      fog.pioneerMitigation = 'Uso de Luneta (Spyglass, 1.000 PO, PHB p. 150 — amplia objetos em 2x) ou posicionamento elevado do Sentinela para elevar o grau de leitura visual antes da aproximação.',
+      fog.pioneerMitigation = 'Uso de Luneta (amplia objetos em 2x) ou posicionamento elevado do Sentinela para elevar o grau de leitura visual antes da aproximação.',
 
       fog.rescueAndStabilization = 'Identificação precoce de armas envenenadas, focos arcanos ou ferimentos graves nos estranhos antes de abrir parley.';
 
     } else if (fm === 'fast_pace_and_lightly_obscured_penalty') {
 
-      fog.fogTitle = 'Penalidades Cumulativas de Ritmo Rápido (-5) e Penumbra/Neblina (-5) (PHB p. 182-183)',
+      fog.fogTitle = 'Penalidades Cumulativas de Ritmo Rápido (-5) e Penumbra/Neblina (-5)',
 
       fog.saveDC = 17;
 
       fog.saveType = 'Sabedoria';
 
-      fog.identityFogMechanics = 'Marchar em ritmo Rápido (30 milhas/dia) impõe penalidade canônica de -5 na Sabedoria (Percepção) Passiva e impede qualquer furtividade (PHB p. 182); adicionalmente, viajar sob Área Levemente Obscurecida (penumbra do crepúsculo, nevoeiro matinal, chuva moderada ou folhagem densa, PHB p. 183) impõe Desvantagem em testes de Percepção que dependam da visão (-5 adicional na Percepção Passiva Visual), rebaixando em 1 a 2 graus a leitura da Névoa de Identidade e expondo o grupo a emboscadas.',
+      fog.identityFogMechanics = 'Marchar em ritmo Rápido (30 milhas/dia) impõe penalidade canônica de -5 na Sabedoria (Percepção) Passiva e impede qualquer furtividade; adicionalmente, viajar sob Área Levemente Obscurecida (penumbra do crepúsculo, nevoeiro matinal, chuva moderada ou folhagem densa) impõe Desvantagem em testes de Percepção que dependam da visão (-5 adicional na Percepção Passiva Visual), rebaixando em 1 a 2 graus a leitura da Névoa de Identidade e expondo o grupo a emboscadas.',
 
       fog.pioneerMitigation = 'Redução imediata para ritmo Normal ou Lento ao entrar em desfiladeiros, pântanos enevoados ou florestas fechadas.',
 
-      fog.rescueAndStabilization = 'Em Área Fortemente Obscurecida (escuridão total ou tempestade de cinzas, PHB p. 183), a visão é cega e o grupo depende exclusivamente da Percepção Auditiva (passos, tilintar de cota de malha e vozes).';
+      fog.rescueAndStabilization = 'Em Área Fortemente Obscurecida (escuridão total ou tempestade de cinzas), a visão é cega e o grupo depende exclusivamente da Percepção Auditiva (passos, tilintar de cota de malha e vozes).';
 
     } else if (fm === 'darkvision_and_torchlight_beacon_tradeoff') {
 
-      fog.fogTitle = 'Visão no Escuro (Darkvision) vs. Farol de Tochas e Lanternas na Noite (PHB p. 183, 185)',
+      fog.fogTitle = 'Visão no Escuro (Darkvision) vs. Farol de Tochas e Lanternas na Noite',
 
       fog.saveDC = 14;
 
       fog.saveType = 'Sabedoria';
 
-      fog.identityFogMechanics = 'Aventureiros com Visão no Escuro (Elfos, Anões, Meio-Orcs, Gnomos e Tieflings, alcance 18m / 60 pés, PHB p. 185) enxergam na escuridão como se fosse penumbra (tons de cinza, -5 na Percepção Passiva visual) sem precisar acender chamas; em contraste, uma comitiva que acende uma Tocha (luz plena 6m + penumbra 6m) ou Lanterna Furta-Fogo (cone de 18m + 18m, PHB p. 152) elimina a penalidade de escuridão de perto, mas projeta um clarão visível a quilômetros na noite — garantindo que outras comitivas a avistem automaticamente de longe!',
+      fog.identityFogMechanics = 'Aventureiros com Visão no Escuro (Elfos, Anões, Meio-Orcs, Gnomos e Tieflings, alcance 18m / 60 pés) enxergam na escuridão como se fosse penumbra (tons de cinza, -5 na Percepção Passiva visual) sem precisar acender chamas; em contraste, uma comitiva que acende uma Tocha (luz plena 6m + penumbra 6m) ou Lanterna Furta-Fogo (cone de 18m + 18m) elimina a penalidade de escuridão de perto, mas projeta um clarão visível a quilômetros na noite — garantindo que outras comitivas a avistem automaticamente de longe!',
 
-      fog.pioneerMitigation = 'Fechamento do obturador da Lanterna Furta-Fogo (reduzindo a luz a uma fresta de 1,5m, PHB p. 152) ou condução da fila noturna por companheiros dotados de Visão no Escuro.',
+      fog.pioneerMitigation = 'Fechamento do obturador da Lanterna Furta-Fogo (reduzindo a luz a uma fresta de 1,5m) ou condução da fila noturna por companheiros dotados de Visão no Escuro.',
 
       fog.rescueAndStabilization = 'Apagar ou arremessar a tocha longe no primeiro turno de contato noturno para sair do cone iluminado.';
 
@@ -44489,7 +44489,7 @@
 
     var defense = {
 
-      defenseTitle: 'Fogueira Enterrada (Dakota Fire Hole) e Disciplina de Luz no Bivaque (PHB p. 183)',
+      defenseTitle: 'Fogueira Enterrada (Dakota Fire Hole) e Disciplina de Luz no Bivaque',
 
       visibilityAndCampSafety: 'Para evitar que o brilho das chamas e a coluna de fumaça denunciem a posição da comitiva para outros grupos a quilômetros de distância durante a noite, o Provedor escava uma fornalha subterrânea de duas câmaras em terra firme e alimenta o fogo apenas com madeira seca sem casca.',
 
@@ -44507,9 +44507,9 @@
 
     if (dt === 'pass_without_trace_and_natural_foliage_camouflage') {
 
-      defense.defenseTitle = 'Camuflagem de Bivaque e Véu de Rastro Invisível (PHB p. 271; Pathfinder Kingmaker)';
+      defense.defenseTitle = 'Camuflagem de Bivaque e Véu de Rastro Invisível';
 
-      defense.visibilityAndCampSafety = 'Druida ou Patrulheiro (2º círculo, cinzas de folha de visco queimada e ramo de abeto, PHB p. 271) envolve a comitiva em sombras e silêncio (+10 em testes de Destreza [Furtividade] e impossibilidade de ser rastreado por meios não-mágicos) nos últimos quilômetros antes de montar o acampamento camuflado com folhagem e rochas locais.';
+      defense.visibilityAndCampSafety = 'Druida ou Patrulheiro (2º círculo, cinzas de folha de visco queimada e ramo de abeto) envolve a comitiva em sombras e silêncio (+10 em testes de Destreza [Furtividade] e impossibilidade de ser rastreado por meios não-mágicos) nos últimos quilômetros antes de montar o acampamento camuflado com folhagem e rochas locais.';
 
       defense.visibilityAndOutpostWatch = 'Qualquer comitiva que marche pela estrada adjacente precisa superar a Furtividade camuflada do bivaque com sua Percepção Passiva apenas para notar que há tendas ocultas.';
 
@@ -44517,7 +44517,7 @@
 
     } else if (dt === 'elevated_darkvision_lookout_perch') {
 
-      defense.defenseTitle = 'Posto de Vigia Elevado com Visão no Escuro e Sinais de Corda (PHB p. 177, 185)';
+      defense.defenseTitle = 'Posto de Vigia Elevado com Visão no Escuro e Sinais de Corda';
 
       defense.visibilityAndCampSafety = 'O Sentinela da comitiva posiciona-se em galho alto, rochedo sobranceiro ou ruína a 9 metros das tendas, segurando uma linha fina de cânhamo amarrada ao pulso dos companheiros que dormem abaixo.';
 
@@ -44555,13 +44555,13 @@
 
     var parley = {
 
-      parleyTitle: 'Vínculo Telepático de Rary (Rary’s Telepathic Bond) entre Comitivas Aliadas (PHB p. 287)',
+      parleyTitle: 'Vínculo Telepático de Rary (Rary’s Telepathic Bond) entre Comitivas Aliadas',
 
       saveDC: 16,
 
       saveType: 'Sabedoria',
 
-      parleyTruthMechanics: 'O Mago (5º círculo ritual, pedaços de casca de ovo de duas espécies diferentes, duração 1 hora sem exigir Concentração, PHB p. 287) interliga mentalmente até 8 criaturas voluntárias que estejam dentro de 9 metros no momento da conjuração — permitindo conectar duas comitivas inteiras de 4 aventureiros que se unem na estrada! Pelo resto da hora, todos os membros vinculados comunicam-se telepaticamente através de qualquer distância (mesmo se as comitivas se separarem em rotas diferentes, desde que no mesmo plano e tenham Inteligência 2 ou superior).',
+      parleyTruthMechanics: 'O Mago (5º círculo ritual, pedaços de casca de ovo de duas espécies diferentes, duração 1 hora sem exigir Concentração) interliga mentalmente até 8 criaturas voluntárias que estejam dentro de 9 metros no momento da conjuração — permitindo conectar duas comitivas inteiras de 4 aventureiros que se unem na estrada! Pelo resto da hora, todos os membros vinculados comunicam-se telepaticamente através de qualquer distância (mesmo se as comitivas se separarem em rotas diferentes, desde que no mesmo plano e tenham Inteligência 2 ou superior).',
 
       pioneerMitigation: 'Renovação como ritual de 10 minutos antes do término da hora para manter as duas comitivas sincronizadas durante incursões em masmorras ou flanqueamentos nos ermos.',
 
@@ -44577,41 +44577,41 @@
 
     if (pm === 'zone_of_truth_charisma_parley_circle') {
 
-      parley.parleyTitle = 'Zona da Verdade (Zone of Truth) para Tratados e Revelação de Identidade (PHB p. 289)';
+      parley.parleyTitle = 'Zona da Verdade (Zone of Truth) para Tratados e Revelação de Identidade';
 
       parley.saveDC = 15;
 
       parley.saveType = 'Carisma';
 
-      parley.parleyTruthMechanics = 'Bardo, Clérigo ou Paladino (2º círculo, esfera de 4,5 metros de raio por 10 minutos, PHB p. 289) santifica o centro do encontro entre duas comitivas desconhecidas; cada criatura realiza uma salvaguarda de Carisma ao entrar ou iniciar turno na zona (o conjurador sabe exatamente quem passou e quem falhou!). Quem falhar não pode proferir nenhuma mentira deliberada — garantindo que o nome revelado na apresentação narrativa e a promessa de não-agressão sejam verdadeiros.',
+      parley.parleyTruthMechanics = 'Bardo, Clérigo ou Paladino (2º círculo, esfera de 4,5 metros de raio por 10 minutos) santifica o centro do encontro entre duas comitivas desconhecidas; cada criatura realiza uma salvaguarda de Carisma ao entrar ou iniciar turno na zona (o conjurador sabe exatamente quem passou e quem falhou!). Quem falhar não pode proferir nenhuma mentira deliberada — garantindo que o nome revelado na apresentação narrativa e a promessa de não-agressão sejam verdadeiros.',
 
-      parley.pioneerMitigation = 'Uma criatura afetada conhece a existência da magia e pode ser evasiva ou recusar-se a falar, desde que mantenha-se dentro dos limites da verdade (PHB p. 289).',
+      parley.pioneerMitigation = 'Uma criatura afetada conhece a existência da magia e pode ser evasiva ou recusar-se a falar, desde que mantenha-se dentro dos limites da verdade.',
 
       parley.rescueAndStabilization = 'Formulações de perguntas fechadas diretas pelos líderes das comitivas ("Você ou seu bando planejam nos emboscar nesta estrada?") para impedir respostas ambíguas.';
 
     } else if (pm === 'detect_thoughts_surface_and_deep_probe') {
 
-      parley.parleyTitle = 'Detectar Pensamentos (Detect Thoughts) em Parley de Estrada (PHB p. 231)';
+      parley.parleyTitle = 'Detectar Pensamentos (Detect Thoughts) em Parley de Estrada';
 
       parley.saveDC = 15;
 
       parley.saveType = 'Sabedoria';
 
-      parley.parleyTruthMechanics = 'Bardo, Feiticeiro ou Mago (2º círculo, moeda de cobre, alcance 9m, Concentração até 1 minuto, PHB p. 231) lê automaticamente os pensamentos superficiais de um estranho (sem salvaguarda inicial!) para descobrir o que mais ocupa sua mente naquele instante — como um plano de emboscada oculto ou seu nome real; se o conjurador sondar mais fundo (Sabedoria CD do conjurador), o alvo percebe em qualquer resultado que alguém está vasculhando sua mente!';
+      parley.parleyTruthMechanics = 'Bardo, Feiticeiro ou Mago (2º círculo, moeda de cobre, alcance 9m, Concentração até 1 minuto) lê automaticamente os pensamentos superficiais de um estranho (sem salvaguarda inicial!) para descobrir o que mais ocupa sua mente naquele instante — como um plano de emboscada oculto ou seu nome real; se o conjurador sondar mais fundo (Sabedoria CD do conjurador), o alvo percebe em qualquer resultado que alguém está vasculhando sua mente!';
 
       parley.pioneerMitigation = 'Manter-se apenas na leitura de pensamentos superficiais combinada com perguntas sociais que induzam o interlocutor a pensar espontaneamente na informação desejada (estilo Baldur’s Gate 3).';
 
-      parley.rescueAndStabilization = 'Caso o alvo perceba a sondagem profunda, ele pode usar sua ação em disputa de Inteligência contra a Inteligência do conjurador para encerrar a magia imediatamente (PHB p. 231).';
+      parley.rescueAndStabilization = 'Caso o alvo perceba a sondagem profunda, ele pode usar sua ação em disputa de Inteligência contra a Inteligência do conjurador para encerrar a magia imediatamente.';
 
     } else if (pm === 'glibness_and_ring_of_mind_shielding_counter') {
 
-      parley.parleyTitle = 'Anel de Escudo Mental e Loquacidade (Glibness) contra Magias de Verdade (DMG p. 152; PHB p. 256)';
+      parley.parleyTitle = 'Anel de Escudo Mental e Loquacidade (Glibness) contra Magias de Verdade';
 
       parley.saveDC = 18;
 
       parley.saveType = 'Carisma';
 
-      parley.parleyTruthMechanics = 'Aventureiros que portam um Anel de Escudo Mental (Ring of Mind Shielding, item incomum, DMG p. 152) ou estão sob efeito de Loquacidade (Glibness, 8º círculo de Bardo/Bruxo, PHB p. 256) são imunes à leitura de pensamentos não autorizada e fazem com que magias que determinam se estão falando a verdade (como Zona da Verdade) indiquem sempre que suas palavras são verdadeiras!';
+      parley.parleyTruthMechanics = 'Aventureiros que portam um Anel de Escudo Mental (Ring of Mind Shielding, item incomum) ou estão sob efeito de Loquacidade (Glibness, 8º círculo de Bardo/Bruxo) são imunes à leitura de pensamentos não autorizada e fazem com que magias que determinam se estão falando a verdade (como Zona da Verdade) indiquem sempre que suas palavras são verdadeiras!';
 
       parley.pioneerMitigation = 'Exigência de remover anéis visíveis ou inspeção prévia com Detectar Magia (aura de Abjuração/Transmutação) antes de juramentos solenes de sangue entre comitivas.';
 
@@ -44639,9 +44639,9 @@
 
     var defense = {
 
-      defenseTitle: 'Círculo Ritual de Casca de Ovo para Vínculo Telepático de Duas Comitivas (PHB p. 287)',
+      defenseTitle: 'Círculo Ritual de Casca de Ovo para Vínculo Telepático de Duas Comitivas',
 
-      parleyAndCampSafety: 'Antes de deixar o bivaque compartilhado, o Mago realiza o ritual de 10 minutos de Vínculo Telepático de Rary utilizando cascas de ovo de duas espécies distintas para unir os até 8 aventureiros das duas comitivas sem gastar espaço de magia (PHB p. 287).',
+      parleyAndCampSafety: 'Antes de deixar o bivaque compartilhado, o Mago realiza o ritual de 10 minutos de Vínculo Telepático de Rary utilizando cascas de ovo de duas espécies distintas para unir os até 8 aventureiros das duas comitivas sem gastar espaço de magia.',
 
       parleyAndTelepathicWatch: 'Durante os turnos de vigília ou patrulha perimetral ao redor do acampamento, as sentinelas reportam qualquer movimentação suspeita na mata diretamente na mente de todos os companheiros em silêncio absoluto.',
 
@@ -44657,7 +44657,7 @@
 
     if (dt === 'sacred_truth_hearth_treaty_parley') {
 
-      defense.defenseTitle = 'Fogueira de Parley sob Zona da Verdade Consagrada (PHB p. 289)';
+      defense.defenseTitle = 'Fogueira de Parley sob Zona da Verdade Consagrada';
 
       defense.parleyAndCampSafety = 'Quando duas comitivas que não se conhecem decidem dividir o mesmo abrigo contra uma tempestade ou perigo de terreno, o Clérigo ou Paladino conjura Zona da Verdade sobre a fogueira central com consentimento mútuo.';
 
@@ -44669,7 +44669,7 @@
 
       defense.defenseTitle = 'Protocolo de Blindagem Mental e Disciplina de Pensamento em Encontros';
 
-      defense.parleyAndCampSafety = 'Membros da comitiva treinados contra espionagem mental recitam mantras rítmicos ou canções de marcha mentalmente durante negociações tensas para ocultar coordenadas de esconderijos nos pensamentos superficiais (PHB p. 231).';
+      defense.parleyAndCampSafety = 'Membros da comitiva treinados contra espionagem mental recitam mantras rítmicos ou canções de marcha mentalmente durante negociações tensas para ocultar coordenadas de esconderijos nos pensamentos superficiais.';
 
       defense.parleyAndTelepathicWatch = 'Vigilância atenta a componentes verbais, somáticos e à moeda de cobre de conjuradores desconhecidos que tentem lançar Detectar Pensamentos sem Sutileza Arcana.';
 
@@ -44705,15 +44705,15 @@
 
     var nodeMsg = {
 
-      messageTitle: 'Boca Encantada (Magic Mouth) Programada em Marco de Estrada (PHB p. 219)',
+      messageTitle: 'Boca Encantada (Magic Mouth) Programada em Marco de Estrada',
 
       saveDC: 15,
 
       saveType: 'Inteligência',
 
-      implantedMessageMechanics: 'O conjurador (Bardo ou Mago, 2º círculo ritual, pó de jade de 10 PO, PHB p. 219) implanta uma mensagem falada de até 25 palavras em uma estátua, menir ou marco de pedra do nó do Pointcrawl; quando a condição de gatilho visual ou auditivo ocorre a até 9 metros (30 pés) — como a aproximação de um aventureiro ostentando o broche combinado ou pronunciando a senha de estrada — uma boca espectral surge na rocha e recita a mensagem no timbre exato da voz do conjurador (permanente até ser dissipada).',
+      implantedMessageMechanics: 'O conjurador (Bardo ou Mago, 2º círculo ritual, pó de jade de 10 PO) implanta uma mensagem falada de até 25 palavras em uma estátua, menir ou marco de pedra do nó do Pointcrawl; quando a condição de gatilho visual ou auditivo ocorre a até 9 metros (30 pés) — como a aproximação de um aventureiro ostentando o broche combinado ou pronunciando a senha de estrada — uma boca espectral surge na rocha e recita a mensagem no timbre exato da voz do conjurador (permanente até ser dissipada).',
 
-      pioneerMitigation: 'Definição precisa do gatilho visual ou sonoro (PHB p. 219 — o feitiço não lê alinhamento nem classe, apenas aparência visível, insígnias portadas ou palavras audíveis).',
+      pioneerMitigation: 'Definição precisa do gatilho visual ou sonoro (o feitiço não lê alinhamento nem classe, apenas aparência visível, insígnias portadas ou palavras audíveis).',
 
       rescueAndStabilization: 'Permite que uma comitiva batedora deixe coordenadas de rota ou alertas de perigo permanentes em cruzamentos para outra comitiva que passará pelo mesmo nó horas ou dias depois.',
 
@@ -44727,43 +44727,43 @@
 
     if (mm === 'illusory_script_designated_allies_cipher') {
 
-      nodeMsg.messageTitle = 'Escrita Ilusória (Illusory Script) para Destinatários Designados (PHB p. 240)';
+      nodeMsg.messageTitle = 'Escrita Ilusória (Illusory Script) para Destinatários Designados';
 
       nodeMsg.saveDC = 15;
 
       nodeMsg.saveType = 'Inteligência',
 
-      nodeMsg.implantedMessageMechanics = 'Bardo, Bruxo ou Mago (1º círculo ritual, tinta à base de chumbo de 10 PO, duração 10 dias, PHB p. 240) escreve em pergaminho, casca de árvore ou tábua de madeira; para o conjurador e quaisquer criaturas que ele tenha designado pessoalmente ao lançar a magia, a escrita aparece normal e clara, mas para todos os outros viajantes ela aparenta ser um idioma desconhecido/mágico ou uma mensagem completamente diferente (texto de despiste).';
+      nodeMsg.implantedMessageMechanics = 'Bardo, Bruxo ou Mago (1º círculo ritual, tinta à base de chumbo de 10 PO, duração 10 dias) escreve em pergaminho, casca de árvore ou tábua de madeira; para o conjurador e quaisquer criaturas que ele tenha designado pessoalmente ao lançar a magia, a escrita aparece normal e clara, mas para todos os outros viajantes ela aparenta ser um idioma desconhecido/mágico ou uma mensagem completamente diferente (texto de despiste).';
 
       nodeMsg.pioneerMitigation = 'Uso de texto falso convincente (como uma lista de provisões mercantis banal) para que patrulhas hostis que interceptem o marco não suspeitem de mensagem secreta.';
 
-      nodeMsg.rescueAndStabilization = 'Caso a magia seja dissipada (Dissipar Magia, PHB p. 234), tanto a ilusão quanto a escrita original desaparecem em branco sem entregar o segredo ao inimigo (PHB p. 240).';
+      nodeMsg.rescueAndStabilization = 'Caso a magia seja dissipada (Dissipar Magia), tanto a ilusão quanto a escrita original desaparecem em branco sem entregar o segredo ao inimigo.';
 
     } else if (mm === 'arcane_lock_and_password_sealed_cache') {
 
-      nodeMsg.messageTitle = 'Tranca Arcana (Arcane Lock) com Senha em Esconderijo de Estrada (PHB p. 282)';
+      nodeMsg.messageTitle = 'Tranca Arcana (Arcane Lock) com Senha em Esconderijo de Estrada';
 
       nodeMsg.saveDC = 20;
 
       nodeMsg.saveType = 'Força';
 
-      nodeMsg.implantedMessageMechanics = 'Mago (2º círculo, pó de ouro de 25 PO, permanente, PHB p. 282) sela um baú de ferro, porta de ruína ou cofre de pedra onde suprimentos e cartas foram depositados para outra comitiva; o conjurador designa quais aventureiros conhecidos podem abrir o compartimento livremente ou define uma palavra-senha que, pronunciada a até 1,5 metro, suprime a tranca por 1 minuto (para estranhos, a CD de Força ou Ferramentas de Ladrão aumenta em +10!).';
+      nodeMsg.implantedMessageMechanics = 'Mago (2º círculo, pó de ouro de 25 PO, permanente) sela um baú de ferro, porta de ruína ou cofre de pedra onde suprimentos e cartas foram depositados para outra comitiva; o conjurador designa quais aventureiros conhecidos podem abrir o compartimento livremente ou define uma palavra-senha que, pronunciada a até 1,5 metro, suprime a tranca por 1 minuto (para estranhos, a CD de Força ou Ferramentas de Ladrão aumenta em +10!).';
 
       nodeMsg.pioneerMitigation = 'Combinação de Tranca Arcana com Boca Encantada que exige a senha de saudação antes de revelar o compartimento oculto.';
 
-      nodeMsg.rescueAndStabilization = 'A magia Arrombar (Knock, 2º círculo, PHB p. 214) suprime a Tranca Arcana por 10 minutos, mas emite um estrondo audível a 90 metros de distância.';
+      nodeMsg.rescueAndStabilization = 'A magia Arrombar (Knock, 2º círculo) suprime a Tranca Arcana por 10 minutos, mas emite um estrondo audível a 90 metros de distância.';
 
     } else if (mm === 'truesight_and_dispel_magic_counter_inspection') {
 
-      nodeMsg.messageTitle = 'Inspeção por Detectar Magia, Visão da Verdade e Dissipar Magia (PHB p. 231, 240)';
+      nodeMsg.messageTitle = 'Inspeção por Detectar Magia, Visão da Verdade e Dissipar Magia';
 
       nodeMsg.saveDC = 16;
 
       nodeMsg.saveType = 'Inteligência';
 
-      nodeMsg.implantedMessageMechanics = 'Criaturas com Visão da Verdade (Truesight, PHB p. 185, 240) enxergam instantaneamente a mensagem oculta verdadeira por trás de uma Escrita Ilusória; já o ritual Detectar Magia (PHB p. 231) revela a aura de Ilusão na Boca Encantada/Escrita Ilusória ou de Abjuração na Tranca Arcana e no Alarme.';
+      nodeMsg.implantedMessageMechanics = 'Criaturas com Visão da Verdade (Truesight) enxergam instantaneamente a mensagem oculta verdadeira por trás de uma Escrita Ilusória; já o ritual Detectar Magia revela a aura de Ilusão na Boca Encantada/Escrita Ilusória ou de Abjuração na Tranca Arcana e no Alarme.';
 
-      nodeMsg.pioneerMitigation = 'Ocultação da placa inscrita sob folhagem ou laje de 30 cm de pedra para bloquear a linha de efeito de Detectar Magia (PHB p. 231).';
+      nodeMsg.pioneerMitigation = 'Ocultação da placa inscrita sob folhagem ou laje de 30 cm de pedra para bloquear a linha de efeito de Detectar Magia.';
 
       nodeMsg.rescueAndStabilization = 'Verificação sistemática de marcos de estrada por conjuradores do grupo ao chegar a cada novo nó da jornada.';
 
@@ -44789,11 +44789,11 @@
 
     var defense = {
 
-      defenseTitle: 'Perímetro de Alarme Ritual com Fio de Prata e Ping Mental Silencioso (PHB p. 211)',
+      defenseTitle: 'Perímetro de Alarme Ritual com Fio de Prata e Ping Mental Silencioso',
 
-      alarmAndCampSafety: 'O conjurador (Mago ou Patrulheiro, 1º círculo ritual, um pequeno sino e um pedaço de fio de prata fino, duração 8 horas, PHB p. 211) protege um cubo de 6 metros (20 pés) ao redor do bivaque e designa no ato da conjuração todos os membros da comitiva (e aliados conhecidos) que não ativarão o feitiço.',
+      alarmAndCampSafety: 'O conjurador (Mago ou Patrulheiro, 1º círculo ritual, um pequeno sino e um pedaço de fio de prata fino, duração 8 horas) protege um cubo de 6 metros (20 pés) ao redor do bivaque e designa no ato da conjuração todos os membros da comitiva (e aliados conhecidos) que não ativarão o feitiço.',
 
-      alarmAndPerimeterWatch: 'Escolhendo o modo de Alarme Mental (PHB p. 211), quando qualquer criatura Miúda ou maior não autorizada toca ou entra na área, um alerta silencioso soa exclusivamente na mente do conjurador a até 1,5 km e o desperta imediatamente do sono sem que os intrusos ou outra comitiva percebam que foram detectados!',
+      alarmAndPerimeterWatch: 'Escolhendo o modo de Alarme Mental, quando qualquer criatura Miúda ou maior não autorizada toca ou entra na área, um alerta silencioso soa exclusivamente na mente do conjurador a até 1,5 km e o desperta imediatamente do sono sem que os intrusos ou outra comitiva percebam que foram detectados!',
 
       campRestAndSafetyGuards: 'Permite que os aventureiros se armem silenciosamente no escuro e preparem contra-emboscada antes do contato.',
 
@@ -44807,21 +44807,21 @@
 
     if (dt === 'glyph_of_warding_explosive_or_spell_milestone') {
 
-      defense.defenseTitle = 'Glifo de Vigilância (Glyph of Warding) em Entrada de Abrigo ou Baú (PHB p. 245)';
+      defense.defenseTitle = 'Glifo de Vigilância (Glyph of Warding) em Entrada de Abrigo ou Baú';
 
-      defense.alarmAndCampSafety = 'Bardo, Clérigo ou Mago (3º círculo, incenso e pó de diamante de 200 PO, PHB p. 245) inscreve um glifo quase invisível que exige Inteligência (Investigação) contra a CD de magia do conjurador para ser encontrado.';
+      defense.alarmAndCampSafety = 'Bardo, Clérigo ou Mago (3º círculo, incenso e pó de diamante de 200 PO) inscreve um glifo quase invisível que exige Inteligência (Investigação) contra a CD de magia do conjurador para ser encontrado.';
 
       defense.alarmAndPerimeterWatch = 'Pode armazenar Runas Explosivas (5d8 de dano de ácido, frio, fogo, elétrico ou trovejante em esfera de 6m) ou um Glifo de Magia de até 3º círculo (como Sugestão, Imobilizar Pessoa ou Clarividência) ativado se estranhos violarem o acampamento sem falar a senha.';
 
-      defense.campRestAndSafetyGuards = 'Se o objeto inscrito for movido mais de 3 metros do local onde a magia foi lançada, o glifo se quebra sem disparar (PHB p. 245).';
+      defense.campRestAndSafetyGuards = 'Se o objeto inscrito for movido mais de 3 metros do local onde a magia foi lançada, o glifo se quebra sem disparar.';
 
     } else if (dt === 'designated_ally_password_and_familiar_bypass') {
 
-      defense.defenseTitle = 'Protocolo de Senha de Bivaque e Exclusão de Aliados no Alarme (PHB p. 211, 245)';
+      defense.defenseTitle = 'Protocolo de Senha de Bivaque e Exclusão de Aliados no Alarme';
 
       defense.alarmAndCampSafety = 'Quando duas comitivas amigas combinam se reencontrar no mesmo acampamento noturno, o conjurador inclui os companheiros conhecidos na lista de isenção do Alarme ou transmite a senha de travessia do Glifo.';
 
-      defense.alarmAndPerimeterWatch = 'Alternativamente, o modo de Alarme Audível (PHB p. 211) produz o som alto de um sinete de mão durante 10 segundos que pode ser ouvido a até 18 metros (60 pés), acordando toda a comitiva de uma só vez.';
+      defense.alarmAndPerimeterWatch = 'Alternativamente, o modo de Alarme Audível produz o som alto de um sinete de mão durante 10 segundos que pode ser ouvido a até 18 metros (60 pés), acordando toda a comitiva de uma só vez.';
 
       defense.campRestAndSafetyGuards = 'Combina perfeitamente com a Sentinela Noturna e o Transe Élfico de 4 horas.';
 
@@ -44855,13 +44855,13 @@
 
     var sending = {
 
-      sendingTitle: 'Magia Enviar Mensagem (Sending) de 25 Palavras a Distância Ilimitada (PHB p. 238)',
+      sendingTitle: 'Magia Enviar Mensagem (Sending) de 25 Palavras a Distância Ilimitada',
 
       saveDC: 15,
 
       saveType: 'Inteligência',
 
-      sendingMechanics: 'O conjurador (Bardo, Clérigo ou Mago, 3º círculo, PHB p. 238) utiliza um pedaço curto de fio de cobre fino para enviar uma mensagem mental curta de até 25 palavras a uma criatura com a qual seja familiarizado; o destinatário ouve a mensagem em sua mente, reconhece imediatamente o conjurador como remetente caso o conheça, e pode responder até 25 palavras na hora (funcionando através de qualquer distância e até entre planos com 5% de chance de falha planar). Regra de Névoa de Identidade: exige obrigatoriamente que os dois aventureiros já tenham se encontrado pessoalmente antes.',
+      sendingMechanics: 'O conjurador (Bardo, Clérigo ou Mago, 3º círculo) utiliza um pedaço curto de fio de cobre fino para enviar uma mensagem mental curta de até 25 palavras a uma criatura com a qual seja familiarizado; o destinatário ouve a mensagem em sua mente, reconhece imediatamente o conjurador como remetente caso o conheça, e pode responder até 25 palavras na hora (funcionando através de qualquer distância e até entre planos com 5% de chance de falha planar). Regra de Névoa de Identidade: exige obrigatoriamente que os dois aventureiros já tenham se encontrado pessoalmente antes.',
 
       pioneerMitigation: 'Redação concisa e objetiva das 25 palavras informando o nó atual do Pointcrawl, o estado da comitiva e a hora combinada de convergência.',
 
@@ -44877,31 +44877,31 @@
 
     if (sm === 'sending_stones_paired_daily_charges') {
 
-      sending.sendingTitle = 'Par de Pedras de Mensagem (Sending Stones — Item Mágico Incomum, DMG p. 199)';
+      sending.sendingTitle = 'Par de Pedras de Mensagem (Sending Stones — Item Mágico Incomum)';
 
       sending.saveDC = 13;
 
       sending.saveType = 'Sabedoria';
 
-      sending.sendingMechanics = 'Duas pedras lisas entalhadas para se encaixarem perfeitamente (DMG p. 199); quando duas comitivas se encontram na estrada e cada grupo fica com uma metade do par, o portador pode usar uma ação uma vez por dia (recarrega ao amanhecer) para conjurar o equivalente a Enviar Mensagem para o portador da outra pedra, mesmo que os grupos sejam formados apenas por classes marciais sem conjuradores.';
+      sending.sendingMechanics = 'Duas pedras lisas entalhadas para se encaixarem perfeitamente; quando duas comitivas se encontram na estrada e cada grupo fica com uma metade do par, o portador pode usar uma ação uma vez por dia (recarrega ao amanhecer) para conjurar o equivalente a Enviar Mensagem para o portador da outra pedra, mesmo que os grupos sejam formados apenas por classes marciais sem conjuradores.';
 
-      sending.pioneerMitigation = 'Guarda da pedra em bolsa de couro acolchoada junto ao peito do líder ou batedor; se uma das pedras for destruída, a outra perde a magia permanentemente (DMG p. 199).';
+      sending.pioneerMitigation = 'Guarda da pedra em bolsa de couro acolchoada junto ao peito do líder ou batedor; se uma das pedras for destruída, a outra perde a magia permanentemente.';
 
       sending.rescueAndStabilization = 'Coordenação diária ao amanhecer entre duas comitivas explorando rotas paralelas de uma mesma masmorra ou cordilheira.';
 
     } else if (sm === 'dream_spell_trance_messenger_parley') {
 
-      sending.sendingTitle = 'Magia Sonho (Dream) e Encontro Onírico Durante o Descanso Longo (PHB p. 277)';
+      sending.sendingTitle = 'Magia Sonho (Dream) e Encontro Onírico Durante o Descanso Longo';
 
       sending.saveDC = 16;
 
       sending.saveType = 'Sabedoria';
 
-      sending.sendingMechanics = 'Bardo, Bruxo ou Mago (5º círculo, PHB p. 277) designa um mensageiro em transe para entrar no sonho de uma criatura conhecida pelo conjurador que esteja dormindo no mesmo plano; durante todo o sono, os dois conversam livremente sem limite de palavras em uma paisagem onírica moldada pelo mensageiro (como a visão exata do nó onde desejam se reencontrar pela manhã). Elfos em Transe (PHB p. 23) são imunes por não dormirem.';
+      sending.sendingMechanics = 'Bardo, Bruxo ou Mago (5º círculo) designa um mensageiro em transe para entrar no sonho de uma criatura conhecida pelo conjurador que esteja dormindo no mesmo plano; durante todo o sono, os dois conversam livremente sem limite de palavras em uma paisagem onírica moldada pelo mensageiro (como a visão exata do nó onde desejam se reencontrar pela manhã). Elfos em Transe são imunes por não dormirem.';
 
       sending.pioneerMitigation = 'Uso pacífico da magia para planejar alianças estratégicas longas entre líderes de comitivas durante a noite.';
 
-      sending.rescueAndStabilization = 'Se usado de forma hostil como pesadelo monstruoso (Sabedoria CD do conjurador), o alvo que falhar não recebe nenhum benefício do descanso longo e sofre 3d6 de dano psíquico ao acordar (PHB p. 277).';
+      sending.rescueAndStabilization = 'Se usado de forma hostil como pesadelo monstruoso (Sabedoria CD do conjurador), o alvo que falhar não recebe nenhum benefício do descanso longo e sofre 3d6 de dano psíquico ao acordar.';
 
     } else if (sm === 'mind_blank_and_nondetection_psychic_shield') {
 
@@ -44911,11 +44911,11 @@
 
       sending.saveType = 'Sabedoria';
 
-      sending.sendingMechanics = 'Aventureiros que desejam viajar em sigilo absoluto contra espionagem de adivinhação ou pesadelos de Sonho utilizam Não-Detecção (3º círculo, PHB p. 263, pó de diamante de 25 PO), Amuleto de Prova contra Detecção e Localização (DMG p. 150) ou Limpar a Mente (8º círculo, PHB p. 254), tornando-se invisíveis a sensores de vidência e imunes a dano psíquico.';
+      sending.sendingMechanics = 'Aventureiros que desejam viajar em sigilo absoluto contra espionagem de adivinhação ou pesadelos de Sonho utilizam Não-Detecção (3º círculo), Amuleto de Prova contra Detecção e Localização ou Limpar a Mente (8º círculo), tornando-se invisíveis a sensores de vidência e imunes a dano psíquico.';
 
-      sending.pioneerMitigation = 'Posse de um tufo de cabelo ou peça de roupa do alvo por inimigos impõe desvantagem (-5) na salvaguarda contra Sonho (PHB p. 277), exigindo cuidado rigoroso para não deixar pertences pessoais para trás nos acampamentos.';
+      sending.pioneerMitigation = 'Posse de um tufo de cabelo ou peça de roupa do alvo por inimigos impõe desvantagem (-5) na salvaguarda contra Sonho, exigindo cuidado rigoroso para não deixar pertences pessoais para trás nos acampamentos.';
 
-      sending.rescueAndStabilization = 'Conjuração de Proteção contra o Bem e Mal ou Círculo Mágico antes de dormir caso a comitiva suspeite de assédio onírico por bruxas Noturnas (Night Hags, MM p. 178).';
+      sending.rescueAndStabilization = 'Conjuração de Proteção contra o Bem e Mal ou Círculo Mágico antes de dormir caso a comitiva suspeite de assédio onírico por bruxas Noturnas (Night Hags).';
 
     }
 
@@ -44941,7 +44941,7 @@
 
       defenseTitle: 'Bivaque de Sincronização de Alvorada com Pedras de Mensagem e Enviar Mensagem',
 
-      sendingAndCampSafety: 'Protocolo de acampamento onde as duas comitivas parceiras acordam estabelecer contato mental exato nos primeiros cinco minutos após o nascer do sol, quando as Pedras de Mensagem recarregam e os espaços de magia são recuperados (DMG p. 199; PHB p. 238).',
+      sendingAndCampSafety: 'Protocolo de acampamento onde as duas comitivas parceiras acordam estabelecer contato mental exato nos primeiros cinco minutos após o nascer do sol, quando as Pedras de Mensagem recarregam e os espaços de magia são recuperados.',
 
       sendingAndWatch: 'Se a comitiva parceira não responder ao chamado matinal ou se o portador da outra pedra não for quem atende mentalmente, o grupo sabe imediatamente que os aliados caíram em emboscada ou cativeiro.',
 
@@ -44957,9 +44957,9 @@
 
     if (dt === 'dream_trance_conclave_tent_circle') {
 
-      defense.defenseTitle = 'Tenda de Transe Onírico Assistido por Punhado de Areia (PHB p. 277)';
+      defense.defenseTitle = 'Tenda de Transe Onírico Assistido por Punhado de Areia';
 
-      defense.sendingAndCampSafety = 'O conjurador de Sonho prepara o componente material (um punhado de areia, um pouco de tinta e uma pena arrancada de um pássaro adormecido, PHB p. 277) dentro da barraca protegida pelas sentinelas.';
+      defense.sendingAndCampSafety = 'O conjurador de Sonho prepara o componente material (um punhado de areia, um pouco de tinta e uma pena arrancada de um pássaro adormecido) dentro da barraca protegida pelas sentinelas.';
 
       defense.sendingAndWatch = 'Permite transmitir mapas visuais tridimensionais e rostos de inimigos diretamente dentro do sonho do líder de outra comitiva a centenas de quilômetros de distância.';
 
@@ -44969,7 +44969,7 @@
 
       defense.defenseTitle = 'Rito de Limpeza de Vestígios Pessoais na Fogueira contra Vidência e Sonho';
 
-      defense.sendingAndCampSafety = 'Antes de levantar acampamento, os aventureiros queimam na fogueira quaisquer fios de cabelo, unhas, bandagens sujas de sangue ou retalhos de roupa (PHB p. 277, 286).';
+      defense.sendingAndCampSafety = 'Antes de levantar acampamento, os aventureiros queimam na fogueira quaisquer fios de cabelo, unhas, bandagens sujas de sangue ou retalhos de roupa.';
 
       defense.sendingAndWatch = 'Impede que rastreadores arcanos ou inimigos que inspecionem o bivaque abandonado recolham conexões corporais que dariam penalidade de -4 a -10 em salvaguardas de Vidência (Scrying) ou desvantagem em Sonho.';
 
@@ -45005,13 +45005,13 @@
 
     var whisper = {
 
-      whisperTitle: 'Truque Mensagem com Fio de Cobre e Sussurro Bidirecional (PHB p. 259)',
+      whisperTitle: 'Truque Mensagem com Fio de Cobre e Sussurro Bidirecional',
 
       saveDC: 15,
 
       saveType: 'Sabedoria',
 
-      whisperMechanics: 'O conjurador (Bardo, Feiticeiro ou Mago, PHB p. 259) aponta o dedo através de um pedaço curto de fio de cobre para uma criatura dentro de 36 metros (120 pés) e sussurra uma mensagem que somente o alvo ouve e à qual somente o alvo pode responder em sussurro; atravessa obstáculos sólidos caso o conjurador conheça o alvo e saiba que está atrás da barreira (bloqueado apenas por 30 cm de pedra, 2,5 cm de metal, folha de chumbo ou Silêncio mágico). Não exige saber o nome verdadeiro do personagem — basta vê-lo ou já tê-lo conhecido pessoalmente.',
+      whisperMechanics: 'O conjurador (Bardo, Feiticeiro ou Mago) aponta o dedo através de um pedaço curto de fio de cobre para uma criatura dentro de 36 metros (120 pés) e sussurra uma mensagem que somente o alvo ouve e à qual somente o alvo pode responder em sussurro; atravessa obstáculos sólidos caso o conjurador conheça o alvo e saiba que está atrás da barreira (bloqueado apenas por 30 cm de pedra, 2,5 cm de metal, folha de chumbo ou Silêncio mágico). Não exige saber o nome verdadeiro do personagem — basta vê-lo ou já tê-lo conhecido pessoalmente.',
 
       pioneerMitigation: 'Ocultação do gesto somático sob o manto e sussurro abafado (Prestidigitação ou Furtividade CD 14 contra a Percepção Passiva de terceiros presentes no encontro para não notarem que um truque foi conjurado).',
 
@@ -45027,13 +45027,13 @@
 
     if (wm === 'awakened_mind_great_old_one_pure_telepathy') {
 
-      whisper.whisperTitle = 'Mente Desperta do Grande Antigo: Telepatia Silenciosa Pura (PHB p. 110)';
+      whisper.whisperTitle = 'Mente Desperta do Grande Antigo: Telepatia Silenciosa Pura';
 
       whisper.saveDC = 18;
 
       whisper.saveType = 'Sabedoria';
 
-      whisper.whisperMechanics = 'Bruxos do patrono Grande Antigo (1º nível, PHB p. 110) projetam sua voz diretamente na mente de qualquer criatura que possam ver a até 9 metros (30 pés); ao contrário do truque Mensagem, não possui componentes verbais, somáticos ou materiais (100% invisível e inaudível para terceiros) e não exige que o alvo fale o mesmo idioma do Bruxo, desde que compreenda ao menos um idioma.';
+      whisper.whisperMechanics = 'Bruxos do patrono Grande Antigo (1º nível) projetam sua voz diretamente na mente de qualquer criatura que possam ver a até 9 metros (30 pés); ao contrário do truque Mensagem, não possui componentes verbais, somáticos ou materiais (100% invisível e inaudível para terceiros) e não exige que o alvo fale o mesmo idioma do Bruxo, desde que compreenda ao menos um idioma.';
 
       whisper.pioneerMitigation = 'Manutenção de expressão facial neutra durante o parley enquanto transmite alertas táticos mentais ao grupo aliado (Enganação ou Intuição CD 14).';
 
@@ -45041,29 +45041,29 @@
 
     } else if (wm === 'minor_illusion_and_thaumaturgy_ventriloquism_distraction') {
 
-      whisper.whisperTitle = 'Ventriloquismo Arcano com Ilusão Menor e Taumaturgia (PHB p. 251, 281)';
+      whisper.whisperTitle = 'Ventriloquismo Arcano com Ilusão Menor e Taumaturgia';
 
       whisper.saveDC = 14;
 
       whisper.saveType = 'Inteligência';
 
-      whisper.whisperMechanics = 'Combinação de Ilusão Menor (PHB p. 251, alcance 9m, sem componente verbal!) para gerar sussurros discretos junto ao ouvido de um aliado ou projetar uma insígnia ilusória dentro de um baú, e Taumaturgia (PHB p. 281, alcance 9m) para criar murmúrios espectrais ou batidas distantes que desviam a atenção de sentinelas enquanto duas comitivas conversam.';
+      whisper.whisperMechanics = 'Combinação de Ilusão Menor (PHB p. 251, alcance 9m, sem componente verbal!) para gerar sussurros discretos junto ao ouvido de um aliado ou projetar uma insígnia ilusória dentro de um baú, e Taumaturgia para criar murmúrios espectrais ou batidas distantes que desviam a atenção de sentinelas enquanto duas comitivas conversam.';
 
-      whisper.pioneerMitigation = 'Escolha de Ilusão Menor quando o silêncio vocal do conjurador é obrigatório (apenas componente somático e um pouco de lã, PHB p. 251).';
+      whisper.pioneerMitigation = 'Escolha de Ilusão Menor quando o silêncio vocal do conjurador é obrigatório (apenas componente somático e um pouco de lã).';
 
       whisper.rescueAndStabilization = 'Geração de grito ou som de galhos quebrando a 9 metros na direção oposta para abrir brecha de evasão furtiva.';
 
     } else if (wm === 'silence_dome_and_lead_lining_countermeasure') {
 
-      whisper.whisperTitle = 'Bloqueio Acústico por Magia Silêncio e Barreira de Chumbo (PHB p. 259, 276)';
+      whisper.whisperTitle = 'Bloqueio Acústico por Magia Silêncio e Barreira de Chumbo';
 
       whisper.saveDC = 15;
 
       whisper.saveType = 'Inteligência';
 
-      whisper.whisperMechanics = 'A esfera de 6 metros de raio do ritual Silêncio (2º círculo, PHB p. 276) impede totalmente qualquer som de atravessar ou existir no interior, bloqueando o truque Mensagem e magias com componente verbal; da mesma forma, 30 cm de pedra ou uma fina lâmina de chumbo cortam o caminho tortuoso do fio de cobre de Mensagem (PHB p. 259).';
+      whisper.whisperMechanics = 'A esfera de 6 metros de raio do ritual Silêncio (2º círculo) impede totalmente qualquer som de atravessar ou existir no interior, bloqueando o truque Mensagem e magias com componente verbal; da mesma forma, 30 cm de pedra ou uma fina lâmina de chumbo cortam o caminho tortuoso do fio de cobre de Mensagem.';
 
-      whisper.pioneerMitigation = 'Leitura labial a distância (Percepção ou Intuição CD 15, talento Observador concede +5, PHB p. 168) ou transição para sinais manuais e Mente Desperta quando dentro de uma cúpula de Silêncio.';
+      whisper.pioneerMitigation = 'Leitura labial a distância (Percepção ou Intuição CD 15, talento Observador concede +5) ou transição para sinais manuais e Mente Desperta quando dentro de uma cúpula de Silêncio.';
 
       whisper.rescueAndStabilization = 'Posicionamento estratégico na borda externa da esfera de 6m de Silêncio para recuperar a capacidade vocal imediatamente.';
 
@@ -45091,7 +45091,7 @@
 
       defenseTitle: 'Rede de Vigília Silenciosa por Truque Mensagem entre Sentinelas e Tendas',
 
-      whisperAndCampSafety: 'A sentinela posicionada no ponto elevado a até 36 metros das barracas mantém o fio de cobre em punho e o eixo de caminho livre (contornando árvores e rochas, PHB p. 259) até os companheiros adormecidos.',
+      whisperAndCampSafety: 'A sentinela posicionada no ponto elevado a até 36 metros das barracas mantém o fio de cobre em punho e o eixo de caminho livre (contornando árvores e rochas) até os companheiros adormecidos.',
 
       whisperAndWatch: 'Permite despertar o grupo inteiro com sussurros diretos no ouvido sem emitir nenhum grito, apito ou ruído que revele aos emboscadores que eles foram detectados.',
 
@@ -45109,7 +45109,7 @@
 
       defense.defenseTitle = 'Cúpula Ritual de Silêncio Externo para Reunião Inaudível na Estrada';
 
-      defense.whisperAndCampSafety = 'Conjurando Silêncio como ritual (PHB p. 276) sobre o espaço entre o bivaque e a trilha externa, ou usando Ilusão Menor para mascarar as vozes com som de vento e riacho.';
+      defense.whisperAndCampSafety = 'Conjurando Silêncio como ritual sobre o espaço entre o bivaque e a trilha externa, ou usando Ilusão Menor para mascarar as vozes com som de vento e riacho.';
 
       defense.whisperAndWatch = 'Duas comitivas reunidas podem debater planos ou negociar termos sem que batedores ocultos na mata além da barreira consigam escutar uma única palavra (falha automática em testes de Percepção auditiva externa).';
 
@@ -45117,11 +45117,11 @@
 
     } else if (dt === 'observant_lip_reading_fireside_counter_espionage') {
 
-      defense.defenseTitle = 'Vigilância de Leitura Labial contra Sussurros à Luz da Fogueira (PHB p. 168)';
+      defense.defenseTitle = 'Vigilância de Leitura Labial contra Sussurros à Luz da Fogueira';
 
       defense.whisperAndCampSafety = 'Posicionamento da lenha da fogueira de modo a iluminar o rosto de visitantes enquanto mantém as sentinelas da comitiva na penumbra.';
 
-      defense.whisperAndWatch = 'Personagens atentos ou com o talento Observador (PHB p. 168) interpretam o movimento dos lábios de quem tenta cochichar ou conjurar o componente verbal de Mensagem em um idioma conhecido.';
+      defense.whisperAndWatch = 'Personagens atentos ou com o talento Observador interpretam o movimento dos lábios de quem tenta cochichar ou conjurar o componente verbal de Mensagem em um idioma conhecido.';
 
       defense.campRestAndSafetyGuards = 'Neutraliza conspirações silenciosas durante encontros tensos no acampamento.';
 
@@ -45155,7 +45155,7 @@
 
     var lang = {
 
-      languageTitle: 'Barreira Linguística, Alfabetos Canônicos e Sotaques Regionais (PHB p. 123)',
+      languageTitle: 'Barreira Linguística, Alfabetos Canônicos e Sotaques Regionais',
 
       saveDC: 14,
 
@@ -45163,7 +45163,7 @@
 
       languageMechanics: 'Em encontros entre comitivas na estrada ou leituras de inscrições antigas, falas nos 8 Idiomas Comuns (Comum, Anão, Élfico, Gigante, Gnômico, Goblin, Halfling, Orc) e 8 Idiomas Exóticos (Abissal, Celestial, Dialeto Subterrâneo, Dracônico, Infernal, Primordial, Silvestre, Subcomum — PHB p. 123) só são traduzidas na interface se ao menos um membro do grupo ouvinte dominar o idioma; caso contrário, o ouvinte percebe apenas a cadência fonética gutural, sibilante ou melódica e o alfabeto usado (Comum, Anão, Élfico, Dracônico, Celestial ou Infernal), exigindo Inteligência (História ou Arcanismo CD 14) para identificar qual idioma está sendo falado sem compreender seu conteúdo.',
 
-      pioneerMitigation: 'Designação de um intérprete poliglota na vanguarda da comitiva (Antecedente Sábio ou Acólito, PHB p. 127-138) para traduzir em tempo real para os companheiros.',
+      pioneerMitigation: 'Designação de um intérprete poliglota na vanguarda da comitiva (Antecedente Sábio ou Acólito) para traduzir em tempo real para os companheiros.',
 
       rescueAndStabilization: 'Uso de mímica universal e gestos de mãos abertas com armas embainhadas (Intuição ou Persuasão CD 13) para evitar combate por mal-entendido linguístico.',
 
@@ -45177,13 +45177,13 @@
 
     if (lm === 'comprehend_languages_ritual_literal_translation') {
 
-      lang.languageTitle = 'Ritual de Compreender Idiomas e Leitura Tátil de Glifos (PHB p. 224)';
+      lang.languageTitle = 'Ritual de Compreender Idiomas e Leitura Tátil de Glifos';
 
       lang.saveDC = 13;
 
       lang.saveType = 'Inteligência';
 
-      lang.languageMechanics = 'Conjurada como ritual de 10 minutos (1º círculo — Bardo, Bruxo, Feiticeiro, Mago, PHB p. 224), Compreender Idiomas permite entender o significado literal de qualquer idioma falado que o conjurador ouvir ou qualquer idioma escrito que tocar na superfície por 1 hora; contudo, a magia não decodifica mensagens cifradas, Gíria de Ladrão nem permite falar o idioma de volta (PHB p. 224).';
+      lang.languageMechanics = 'Conjurada como ritual de 10 minutos (1º círculo — Bardo, Bruxo, Feiticeiro, Mago), Compreender Idiomas permite entender o significado literal de qualquer idioma falado que o conjurador ouvir ou qualquer idioma escrito que tocar na superfície por 1 hora; contudo, a magia não decodifica mensagens cifradas, Gíria de Ladrão nem permite falar o idioma de volta.';
 
       lang.pioneerMitigation = 'Conjuração preventiva do ritual antes de entrar em parley com comitivas estrangeiras ou inspecionar obeliscos planares.';
 
@@ -45191,13 +45191,13 @@
 
     } else if (lm === 'tongues_universal_polyglot_parley_spell') {
 
-      lang.languageTitle = 'Magia Línguas e Diplomacia Universal entre Comitivas (PHB p. 254)';
+      lang.languageTitle = 'Magia Línguas e Diplomacia Universal entre Comitivas';
 
       lang.saveDC = 15;
 
       lang.saveType = 'Carisma';
 
-      lang.languageMechanics = 'A magia Línguas (3º círculo — Bardo, Bruxo, Clérigo, Feiticeiro, Mago, PHB p. 254) concede à criatura tocada a capacidade de compreender qualquer idioma falado que ouvir e faz com que qualquer criatura que conheça pelo menos um idioma entenda o que ela diz por 1 hora; rompe instantaneamente barreiras diplomáticas em encontros multi-comitiva.';
+      lang.languageMechanics = 'A magia Línguas (3º círculo — Bardo, Bruxo, Clérigo, Feiticeiro, Mago) concede à criatura tocada a capacidade de compreender qualquer idioma falado que ouvir e faz com que qualquer criatura que conheça pelo menos um idioma entenda o que ela diz por 1 hora; rompe instantaneamente barreiras diplomáticas em encontros multi-comitiva.';
 
       lang.pioneerMitigation = 'Toque da magia no porta-voz de maior Carisma da comitiva para conduzir negociações delicadas de aliança ou partilha de rota.';
 
@@ -45205,13 +45205,13 @@
 
     } else if (lm === 'tongue_of_sun_and_moon_ki_resonance') {
 
-      lang.languageTitle = 'Língua do Sol e da Lua e Ressonância de Ki Universal (PHB p. 79)';
+      lang.languageTitle = 'Língua do Sol e da Lua e Ressonância de Ki Universal';
 
       lang.saveDC = 14;
 
       lang.saveType = 'Sabedoria';
 
-      lang.languageMechanics = 'Monges de 13º nível ou superior (PHB p. 79) tocam o Ki de outras mentes ao falar, compreendendo todos os idiomas falados e fazendo-se entender por qualquer criatura que domine ao menos um idioma; funciona continuamente sem gastar espaços de magia ou componentes materiais, mesmo sob silêncio arcano parcial.';
+      lang.languageMechanics = 'Monges de 13º nível ou superior tocam o Ki de outras mentes ao falar, compreendendo todos os idiomas falados e fazendo-se entender por qualquer criatura que domine ao menos um idioma; funciona continuamente sem gastar espaços de magia ou componentes materiais, mesmo sob silêncio arcano parcial.';
 
       lang.pioneerMitigation = 'Percepção imediata de quando dois estranhos trocam de idioma no meio do encontro para ocultar intenções hostis (Intuição CD 13).';
 
@@ -45259,7 +45259,7 @@
 
       defense.defenseTitle = 'Conselho Tático Noturno em Idioma Ancestral ou Exótico Fechado';
 
-      defense.languageAndCampSafety = 'Quando a comitiva divide a fogueira com viajantes desconhecidos ou mercenários contratados, os membros do grupo que compartilham um idioma raro (como Dracônico, Celestial, Élfico ou Dialeto Subterrâneo) discutem os planos de guarda à vista de todos (PHB p. 123).';
+      defense.languageAndCampSafety = 'Quando a comitiva divide a fogueira com viajantes desconhecidos ou mercenários contratados, os membros do grupo que compartilham um idioma raro (como Dracônico, Celestial, Élfico ou Dialeto Subterrâneo) discutem os planos de guarda à vista de todos.';
 
       defense.languageAndWatch = 'Impede que ouvintes que falam apenas Comum compreendam a estratégia de vigília ou a divisão de tesouros, a menos que utilizem Compreender Idiomas.';
 
@@ -45269,7 +45269,7 @@
 
       defense.defenseTitle = 'Grimório Aberto para Ritual de Compreender Idiomas na Vigília';
 
-      defense.languageAndCampSafety = 'O conjurador mantém o livro de rituais preparado com fuligem e sal (componentes materiais de Compreender Idiomas, PHB p. 224) junto ao posto de sentinela.';
+      defense.languageAndCampSafety = 'O conjurador mantém o livro de rituais preparado com fuligem e sal (componentes materiais de Compreender Idiomas) junto ao posto de sentinela.';
 
       defense.languageAndWatch = 'Permite traduzir sussurros de patrulhas noturnas (Goblin, Orc, Subcomum) que rondam o perímetro do bivaque a distância segura.';
 
@@ -45305,13 +45305,13 @@
 
     var messenger = {
 
-      messengerTitle: 'Ritual de Mensageiro Animal Guiado por Descrição Física (PHB p. 258)',
+      messengerTitle: 'Ritual de Mensageiro Animal Guiado por Descrição Física',
 
       saveDC: 13,
 
       saveType: 'Sabedoria',
 
-      messengerMechanics: 'Conjurado como ritual por Bardo, Druida ou Patrulheiro (2º círculo, PHB p. 258), uma besta Miúda (corvo, falcão, esquilo ou morcego) voa até 75 km em 24 horas (37 km se caminhar) até um local visitado anteriormente e pronuncia um recado de até 25 palavras com a voz do conjurador; não exige saber o nome verdadeiro do destinatário — basta descrever as características físicas e insígnias observadas no último encontro para que a ave entregue a mensagem exclusivamente àquele aventureiro (PHB p. 258).',
+      messengerMechanics: 'Conjurado como ritual por Bardo, Druida ou Patrulheiro (2º círculo), uma besta Miúda (corvo, falcão, esquilo ou morcego) voa até 75 km em 24 horas (37 km se caminhar) até um local visitado anteriormente e pronuncia um recado de até 25 palavras com a voz do conjurador; não exige saber o nome verdadeiro do destinatário — basta descrever as características físicas e insígnias observadas no último encontro para que a ave entregue a mensagem exclusivamente àquele aventureiro.',
 
       pioneerMitigation: 'Conjurado em espaço superior (3º círculo ou maior) para estender a duração em +48 horas por nível acima do 2º, permitindo alcançar comitivas distantes em outras províncias.',
 
@@ -45333,7 +45333,7 @@
 
       messenger.saveType = 'Sabedoria';
 
-      messenger.messengerMechanics = 'Aves mensageiras mundanas treinadas com Sabedoria (Adestramento CD 13, PHB p. 178) carregam minúsculos cilindros de osso ou cobre amarrados à pata com tiras de couro fino contendo coordenadas cifradas ou amostras de ervas; retornam automaticamente ao pombal de origem ou ao poleiro da comitiva parceira com a qual as aves foram trocadas durante um encontro presencial.';
+      messenger.messengerMechanics = 'Aves mensageiras mundanas treinadas com Sabedoria (Adestramento CD 13) carregam minúsculos cilindros de osso ou cobre amarrados à pata com tiras de couro fino contendo coordenadas cifradas ou amostras de ervas; retornam automaticamente ao pombal de origem ou ao poleiro da comitiva parceira com a qual as aves foram trocadas durante um encontro presencial.';
 
       messenger.pioneerMitigation = 'Soltura da ave nas primeiras horas da alvorada ou no crepúsculo para evitar falcões-peregrinos selvagens e arqueiros de patrulhas nas estradas (Sobrevivência ou Adestramento CD 13).';
 
@@ -45347,11 +45347,11 @@
 
       messenger.saveType = 'Inteligência';
 
-      messenger.messengerMechanics = 'O conjurador utiliza Convocar Familiar (1º círculo ritual, PHB p. 226) na forma de coruja (Voo 18m, Visão no Escuro 36m, sem provocar ataques de oportunidade com Sobrevoo) ou corvo (que imita sons simples); a até 30 metros o mestre compartilha os sentidos da ave para inspecionar uma comitiva desconhecida sem se expor, ou envia o familiar além desse alcance levando um anel de sinete ou bilhete lacrado no bico.';
+      messenger.messengerMechanics = 'O conjurador utiliza Convocar Familiar (1º círculo ritual) na forma de coruja (Voo 18m, Visão no Escuro 36m, sem provocar ataques de oportunidade com Sobrevoo) ou corvo (que imita sons simples); a até 30 metros o mestre compartilha os sentidos da ave para inspecionar uma comitiva desconhecida sem se expor, ou envia o familiar além desse alcance levando um anel de sinete ou bilhete lacrado no bico.';
 
       messenger.pioneerMitigation = 'Voo silencioso da coruja pela copa das árvores (vantagem em Percepção e Furtividade noturna) mantendo distância de arqueiros alertas.';
 
-      messenger.rescueAndStabilization = 'Em caso de ameaça à ave, o conjurador usa uma ação para recolher o familiar instantaneamente para uma bolsa extradimensional e reaparecer com ele no próprio ombro (PHB p. 226).';
+      messenger.rescueAndStabilization = 'Em caso de ameaça à ave, o conjurador usa uma ação para recolher o familiar instantaneamente para uma bolsa extradimensional e reaparecer com ele no próprio ombro.';
 
     } else if (mt === 'hostile_hawk_and_arrow_interception_hazard') {
 
@@ -45361,7 +45361,7 @@
 
       messenger.saveType = 'Destreza';
 
-      messenger.messengerMechanics = 'Batedores inimigos com arcos longos ou gaviões de caça treinados tentam abater pombos-correio e corvos que voam em linha reta sobre desfiladeiros vigiados (CA 12 da ave, 1 a 2 PV); se abatida, a cápsula física pode cair em mãos rivais, motivo pelo qual toda mensagem transportada por ave deve estar protegida por cifra ou Gíria de Ladrão (PHB p. 96, 154).';
+      messenger.messengerMechanics = 'Batedores inimigos com arcos longos ou gaviões de caça treinados tentam abater pombos-correio e corvos que voam em linha reta sobre desfiladeiros vigiados (CA 12 da ave, 1 a 2 PV); se abatida, a cápsula física pode cair em mãos rivais, motivo pelo qual toda mensagem transportada por ave deve estar protegida por cifra ou Gíria de Ladrão.';
 
       messenger.pioneerMitigation = 'Escolha de espécies nativas do bioma atual (pombos-das-rochas em montanhas, gaivotas na costa, morcegos em cavernas) para não chamar atenção de vigias (Natureza ou Sobrevivência CD 14).';
 
@@ -45391,7 +45391,7 @@
 
       defenseTitle: 'Poleiro de Falcoaria e Gaiola de Vime para Aves Mensageiras no Bivaque',
 
-      messengerAndCampSafety: 'Montagem de poleiro acolchoado com capuzes de couro macio (luva de falcoaria, PHB p. 150) e gaiola de vime ventilada protegida da chuva e de predadores terrestres no centro do acampamento (PHB p. 154, 178).',
+      messengerAndCampSafety: 'Montagem de poleiro acolchoado com capuzes de couro macio (luva de falcoaria) e gaiola de vime ventilada protegida da chuva e de predadores terrestres no centro do acampamento.',
 
       messengerAndWatch: 'Mantém as aves descansadas e prontas para disparo imediato caso as sentinelas avistem movimentação hostil durante a madrugada.',
 
@@ -45409,7 +45409,7 @@
 
       defense.defenseTitle = 'Protocolo de Troca de Aves-Correio entre Comitivas em Fogueira Compartilhada';
 
-      defense.messengerAndCampSafety = 'Quando dois grupos de aventureiros se encontram pacificamente em um nó ou acampamento, eles podem trocar um pombo-correio ou corvo anilhado de cada gaiola (PHB p. 178).';
+      defense.messengerAndCampSafety = 'Quando dois grupos de aventureiros se encontram pacificamente em um nó ou acampamento, eles podem trocar um pombo-correio ou corvo anilhado de cada gaiola.';
 
       defense.messengerAndWatch = 'Cria um canal físico direto de retorno: quando solta dias depois, a ave voa de volta para a comitiva de origem mesmo antes de os personagens dominarem magias de 3º círculo como Enviar Mensagem.';
 
@@ -45419,7 +45419,7 @@
 
       defense.defenseTitle = 'Isca Sonora de Osso e Comedouro para Atrair Aves de Mensageiro Animal';
 
-      defense.messengerAndCampSafety = 'Espalhamento de grãos aromáticos e toque de apito de osso em frequência aguda no topo da barraca para guiar aves conjuradas por Mensageiro Animal até o acampamento sob neblina ou copa fechada (PHB p. 258).';
+      defense.messengerAndCampSafety = 'Espalhamento de grãos aromáticos e toque de apito de osso em frequência aguda no topo da barraca para guiar aves conjuradas por Mensageiro Animal até o acampamento sob neblina ou copa fechada.';
 
       defense.messengerAndWatch = 'Garante que mensageiros alados enviados por aliados localizem o bivaque camuflado sem hesitação, além de atrair fauna local amigável para Falar com Animais.';
 
@@ -45455,15 +45455,15 @@
 
     var missive = {
 
-      missiveTitle: 'Missiva em Porta-Pergaminho Estanque com Lacre e Anel de Sinete (PHB p. 150)',
+      missiveTitle: 'Missiva em Porta-Pergaminho Estanque com Lacre e Anel de Sinete',
 
       saveDC: 15,
 
       saveType: 'Inteligência',
 
-      missiveMechanics: 'Documentos, contratos de espólio ou alertas deixados entre comitivas são redigidos com Tinta (10 PO) e Caneta-Tinteiro em Pergaminho, selados com Lacre carmesim (5 PP) marcado pelo Anel de Sinete pessoal do remetente (5 PO) e guardados em um Porta-Mapa ou Porta-Pergaminho cilíndrico de couro impermeável (1 PO, PHB p. 150-152); garante autenticidade criptográfica física (Investigação CD 15 para verificar integridade do relevo do brasão contra violação) mesmo quando os personagens ainda não sabem o nome verdadeiro um do outro, reconhecendo apenas a insígnia do sinete.',
+      missiveMechanics: 'Documentos, contratos de espólio ou alertas deixados entre comitivas são redigidos com Tinta (10 PO) e Caneta-Tinteiro em Pergaminho, selados com Lacre carmesim (5 PP) marcado pelo Anel de Sinete pessoal do remetente (5 PO) e guardados em um Porta-Mapa ou Porta-Pergaminho cilíndrico de couro impermeável (1 PO); garante autenticidade criptográfica física (Investigação CD 15 para verificar integridade do relevo do brasão contra violação) mesmo quando os personagens ainda não sabem o nome verdadeiro um do outro, reconhecendo apenas a insígnia do sinete.',
 
-      pioneerMitigation: 'Adição de fios de seda internos cruzando o pergaminho até o pingo de cera quente (ribbon-lock) para impedir que espiões abram a carta com lâmina aquecida sem partir o selo (Prestidigitação ou Kit de Falsificação CD 14, XGE p. 81).',
+      pioneerMitigation: 'Adição de fios de seda internos cruzando o pergaminho até o pingo de cera quente (ribbon-lock) para impedir que espiões abram a carta com lâmina aquecida sem partir o selo (Prestidigitação ou Kit de Falsificação CD 14).',
 
       rescueAndStabilization: 'Se o lacre apresentar microfissuras ou reaquecimento, tratar o conteúdo como armadilha ou desinformação inimiga (Investigação ou Intuição CD 14).',
 
@@ -45483,7 +45483,7 @@
 
       missive.saveType = 'Inteligência';
 
-      missive.missiveMechanics = 'Sobre uma carta comercial aparentemente inofensiva, o remetente escreve nas entrelinhas usando tinta invisível preparada com Suprimentos de Alquimista ou Kit de Falsificação (PHB p. 154; XGE p. 79, 81); o texto verdadeiro só emerge quando aquecido sobre a chama de uma vela no bivaque ou banhado com reagente ácido, exigindo Inteligência (Investigação CD 15) para quem desconhece o método.';
+      missive.missiveMechanics = 'Sobre uma carta comercial aparentemente inofensiva, o remetente escreve nas entrelinhas usando tinta invisível preparada com Suprimentos de Alquimista ou Kit de Falsificação; o texto verdadeiro só emerge quando aquecido sobre a chama de uma vela no bivaque ou banhado com reagente ácido, exigindo Inteligência (Investigação CD 15) para quem desconhece o método.';
 
       missive.pioneerMitigation = 'Criptografia adicional por grade de Cardano ou cifra de substituição cuja palavra-chave remete ao local do primeiro encontro entre as duas comitivas (História ou Investigação CD 14).';
 
@@ -45491,15 +45491,15 @@
 
     } else if (mt === 'forgery_kit_counterfeit_seal_detection') {
 
-      missive.missiveTitle = 'Perícia contra Falsificação de Sinete e Salvo-Conduto Forjado (XGE p. 81)';
+      missive.missiveTitle = 'Perícia contra Falsificação de Sinete e Salvo-Conduto Forjado';
 
       missive.saveDC = 16;
 
       missive.saveType = 'Inteligência';
 
-      missive.missiveMechanics = 'Agentes rivais ou impostores utilizam um Kit de Falsificação (PHB p. 154, 15 PO) para moldar réplicas de sinetes de comitivas conhecidas ou falsificar ordens de marcha de guildas; conforme XGE p. 81, proficiência no Kit de Falsificação concede vantagem e soma o bônus de proficiência em testes de Inteligência (Investigação CD 16) para detectar caligrafia imitada, cera adulterada ou pergaminho envelhecido artificialmente com chá.';
+      missive.missiveMechanics = 'Agentes rivais ou impostores utilizam um Kit de Falsificação para moldar réplicas de sinetes de comitivas conhecidas ou falsificar ordens de marcha de guildas; conforme XGE p. 81, proficiência no Kit de Falsificação concede vantagem e soma o bônus de proficiência em testes de Inteligência (Investigação CD 16) para detectar caligrafia imitada, cera adulterada ou pergaminho envelhecido artificialmente com chá.';
 
-      missive.pioneerMitigation = 'Inclusão de marca-d’água secreta de Suprimentos de Calígrafo (XGE p. 79) e erro ortográfico proposital combinado entre aliados no rodapé do documento.';
+      missive.pioneerMitigation = 'Inclusão de marca-d’água secreta de Suprimentos de Calígrafo e erro ortográfico proposital combinado entre aliados no rodapé do documento.';
 
       missive.rescueAndStabilization = 'Rastreamento da origem do papel e do pigmento para descobrir em qual cidade ou acampamento a falsificação foi produzida (Investigação CD 14).';
 
@@ -45511,7 +45511,7 @@
 
       missive.saveType = 'Destreza';
 
-      missive.missiveMechanics = 'Missivas abandonadas propositalmente em estradas ou baús podem conter pó de veneno de contato misturado à areia secante da tinta (DMG p. 257) ou um Glifo de Vigilância explosivo (3º círculo, PHB p. 245) engatilhado para detonar ao quebrar o lacre sem pronunciar a senha; falha causa 5d8 de dano ácido/fogo ou condição envenenado.';
+      missive.missiveMechanics = 'Missivas abandonadas propositalmente em estradas ou baús podem conter pó de veneno de contato misturado à areia secante da tinta ou um Glifo de Vigilância explosivo (3º círculo) engatilhado para detonar ao quebrar o lacre sem pronunciar a senha; falha causa 5d8 de dano ácido/fogo ou condição envenenado.';
 
       missive.pioneerMitigation = 'Abertura de correspondências suspeitas usando luvas de couro grosso, pinças longas ou Mãos Mágicas a 9 metros de distância (Arcanismo ou Investigação CD 15).';
 
@@ -45541,7 +45541,7 @@
 
       defenseTitle: 'Escrivaninha de Campanha com Suprimentos de Calígrafo e Kit de Falsificação',
 
-      missiveAndCampSafety: 'Durante o descanso no bivaque, a comitiva monta uma prancheta nivelada abrigada do vento com Suprimentos de Calígrafo (10 PO, PHB p. 154) e Kit de Cartógrafo (15 PO) para redigir missivas lacradas, duplicar mapas de nós descobertos e autenticar tratados (XGE p. 79, 81).',
+      missiveAndCampSafety: 'Durante o descanso no bivaque, a comitiva monta uma prancheta nivelada abrigada do vento com Suprimentos de Calígrafo (10 PO) e Kit de Cartógrafo (15 PO) para redigir missivas lacradas, duplicar mapas de nós descobertos e autenticar tratados.',
 
       missiveAndWatch: 'Mapas copiados com Suprimentos de Calígrafo e Cartógrafo podem ser entregues ou deixados em caixas-mortas para outras comitivas, revelando rotas seguras e perigos já sondados no Pointcrawl.',
 
@@ -45559,7 +45559,7 @@
 
       defense.defenseTitle = 'Selagem Antiviolação de Alforjes e Baús com Fio de Lacre no Acampamento';
 
-      defense.missiveAndCampSafety = 'Aplicação de fios de linho finos presos com gotas ocultas de Lacre (PHB p. 150) e marca de Anel de Sinete nos fechos das mochilas, cantis e alforjes antes de dormir.';
+      defense.missiveAndCampSafety = 'Aplicação de fios de linho finos presos com gotas ocultas de Lacre e marca de Anel de Sinete nos fechos das mochilas, cantis e alforjes antes de dormir.';
 
       defense.missiveAndWatch = 'Impede que batedores furtivos ou visitantes no acampamento compartilhem a fogueira e vasculhem os pertences ou envenenem cantis sem que o rompimento do lacre denuncie imediatamente a sabotagem pela manhã (sucesso automático na detecção pós-fato).';
 
@@ -45569,7 +45569,7 @@
 
       defense.defenseTitle = 'Arquivo Blindado em Porta-Pergaminhos Revestidos de Cera de Abelha';
 
-      defense.missiveAndCampSafety = 'Acondicionamento de todos os pergaminhos mágicos, grimórios de viagem e cartas diplomáticas em tubos de couro fervido selados com cera de abelha e breu (PHB p. 152).';
+      defense.missiveAndCampSafety = 'Acondicionamento de todos os pergaminhos mágicos, grimórios de viagem e cartas diplomáticas em tubos de couro fervido selados com cera de abelha e breu.';
 
       defense.missiveAndWatch = 'Protege 100% dos documentos e pergaminhos contra naufrágios, chuvas torrenciais, lamaçais e respingos ácidos durante a travessia dos ermos.';
 
@@ -45605,15 +45605,15 @@
 
     var sign = {
 
-      signTitle: 'Entrelaçamento Druídico de Galhos Vivos e Líquens Rúnicos (PHB p. 66)',
+      signTitle: 'Entrelaçamento Druídico de Galhos Vivos e Líquens Rúnicos',
 
       saveDC: 15,
 
       saveType: 'Sabedoria',
 
-      druidicSignMechanics: 'Galhos de salgueiro ou carvalho sutilmente arqueados em espirais sagradas, acompanhados de padrões de musgo e pedras de rio nas bifurcações da trilha (PHB p. 66); qualquer Druida reconhece e lê a mensagem automaticamente (alertando sobre água pura, covil de aberração, incêndio próximo ou passagem de outra comitiva amiga), enquanto não-druidas precisam passar em Sabedoria (Percepção CD 15) apenas para notar que os ramos foram moldados intencionalmente, mas não conseguem decifrar o idioma secreto sem magia (PHB p. 66).',
+      druidicSignMechanics: 'Galhos de salgueiro ou carvalho sutilmente arqueados em espirais sagradas, acompanhados de padrões de musgo e pedras de rio nas bifurcações da trilha; qualquer Druida reconhece e lê a mensagem automaticamente (alertando sobre água pura, covil de aberração, incêndio próximo ou passagem de outra comitiva amiga), enquanto não-druidas precisam passar em Sabedoria (Percepção CD 15) apenas para notar que os ramos foram moldados intencionalmente, mas não conseguem decifrar o idioma secreto sem magia.',
 
-      pioneerMitigation: 'Uso do truque Druidismo (Druidcraft, PHB p. 236) para fazer um botão de flor desabrochar na cor exata do código de alerta quando uma comitiva conhecida se aproxima (Natureza ou Sobrevivência CD 13).',
+      pioneerMitigation: 'Uso do truque Druidismo (Druidcraft) para fazer um botão de flor desabrochar na cor exata do código de alerta quando uma comitiva conhecida se aproxima (Natureza ou Sobrevivência CD 13).',
 
       rescueAndStabilization: 'Restauração da harmonia vegetal desfazendo o nó vivo após a leitura para não deixar pistas a rastreadores hostis (Sobrevivência CD 12).',
 
@@ -45633,7 +45633,7 @@
 
       sign.saveType = 'Sabedoria';
 
-      sign.druidicSignMechanics = 'O Druida conjura o truque Druidismo (PHB p. 236) sobre um marco natural, deixando uma folha encantada com o aroma de ozônio ou pinho e um símbolo efêmero de nuvem/sol que prevê com precisão absoluta o clima das próximas 24 horas para a comitiva aliada que vem atrás na rota (PHB p. 183, 236).';
+      sign.druidicSignMechanics = 'O Druida conjura o truque Druidismo sobre um marco natural, deixando uma folha encantada com o aroma de ozônio ou pinho e um símbolo efêmero de nuvem/sol que prevê com precisão absoluta o clima das próximas 24 horas para a comitiva aliada que vem atrás na rota.';
 
       sign.pioneerMitigation = 'Combinação do efeito olfativo inofensivo do Druidismo (cheiro de terra molhada para rota segura; odor acre de enxofre para emboscada) perceptível a 3 metros (Percepção ou Natureza CD 13).';
 
@@ -45647,11 +45647,11 @@
 
       sign.saveType = 'Sabedoria';
 
-      sign.druidicSignMechanics = 'Através de Falar com Plantas (3º círculo, PHB p. 243) ou leitura de raízes sensíveis dos círculos druídicos, a vegetação relata quem pisou na trilha nas últimas 24 horas: número exato de andarilhos, porte físico, se carregavam feridos ou tochas acesas, sem revelar nomes próprios (PHB p. 243).';
+      sign.druidicSignMechanics = 'Através de Falar com Plantas (3º círculo) ou leitura de raízes sensíveis dos círculos druídicos, a vegetação relata quem pisou na trilha nas últimas 24 horas: número exato de andarilhos, porte físico, se carregavam feridos ou tochas acesas, sem revelar nomes próprios.';
 
       sign.pioneerMitigation = 'Oferenda de água limpa ou adubo de cinzas às árvores antigas da encruzilhada para obter descrições detalhadas da direção tomada pelos viajantes (Natureza ou Persuasão CD 13).';
 
-      sign.rescueAndStabilization = 'Solicitação para que os espinheiros locais se fechem em terreno difícil atrás da comitiva, atrasando perseguidores (PHB p. 243).';
+      sign.rescueAndStabilization = 'Solicitação para que os espinheiros locais se fechem em terreno difícil atrás da comitiva, atrasando perseguidores.';
 
     } else if (st === 'corrupted_blight_false_druidic_lure') {
 
@@ -45661,7 +45661,7 @@
 
       sign.saveType = 'Inteligência';
 
-      sign.druidicSignMechanics = 'Bruxas verdes ou espíritos malignos da mata torcem cipós secos imitando o glifo druídico de "Fonte Curativa" para atrair aventureiros feridos até um lamaçal de cipós-assassinos ou esporos asfixiantes; falha em notar a necrose na casca causa 2d8 de dano de veneno e condição enredado (DMG p. 110; PHB p. 66).';
+      sign.druidicSignMechanics = 'Bruxas verdes ou espíritos malignos da mata torcem cipós secos imitando o glifo druídico de "Fonte Curativa" para atrair aventureiros feridos até um lamaçal de cipós-assassinos ou esporos asfixiantes; falha em notar a necrose na casca causa 2d8 de dano de veneno e condição enredado.';
 
       sign.pioneerMitigation = 'Distinção imediata entre um entrelaçamento feito em madeira viva saudável (Druídico verdadeiro) e galhos quebrados à força (Natureza ou Investigação CD 15; automático para Druidas).';
 
@@ -45691,7 +45691,7 @@
 
       defenseTitle: 'Bivaque sob Abóbada de Espinheiros Entrelaçados e Camuflagem Viva',
 
-      druidicAndCampSafety: 'O acampamento é abrigado no interior de uma cúpula natural de roseiras-bravas, raízes de figueira e samambaias moldadas segundo a tradição druídica para ocultar totalmente a luz da fogueira e bloquear o vento (PHB p. 66, 183; DMG p. 111).',
+      druidicAndCampSafety: 'O acampamento é abrigado no interior de uma cúpula natural de roseiras-bravas, raízes de figueira e samambaias moldadas segundo a tradição druídica para ocultar totalmente a luz da fogueira e bloquear o vento.',
 
       druidicAndWatch: 'As paredes de espinhos vivos concedem cobertura três-quartos (+5 CA) e funcionam como barreira natural que causa 2d4 de dano perfurante a qualquer criatura que tente invadir fora da fenda secreta.',
 
@@ -45709,7 +45709,7 @@
 
       defense.defenseTitle = 'Cálice de Folhas Coletoras de Orvalho e Cultivo de Bom Fruto';
 
-      defense.druidicAndCampSafety = 'Folhas largas de bromélias e musgo esfagno purificador canalizam o orvalho noturno para cabaças limpas, enquanto arbustos sagrados no centro do círculo potencializam o Kit de Herbalismo e a magia Bom Fruto (PHB p. 154, 219).';
+      defense.druidicAndCampSafety = 'Folhas largas de bromélias e musgo esfagno purificador canalizam o orvalho noturno para cabaças limpas, enquanto arbustos sagrados no centro do círculo potencializam o Kit de Herbalismo e a magia Bom Fruto.';
 
       defense.druidicAndWatch = 'Garante água pura e nutrição completa para até 10 aventureiros, concedendo +1 dado de vida adicional recuperado durante o descanso longo.';
 
@@ -45719,7 +45719,7 @@
 
       defense.defenseTitle = 'Coro de Grilos e Aves Noturnas como Alarme Biológico de Perímetro';
 
-      defense.druidicAndCampSafety = 'Através de Falar com Animais (PHB p. 242) ou empatia silvestre, a fauna miúda ao redor das árvores do bivaque mantém seu canto noturno constante enquanto a mata estiver segura.';
+      defense.druidicAndCampSafety = 'Através de Falar com Animais ou empatia silvestre, a fauna miúda ao redor das árvores do bivaque mantém seu canto noturno constante enquanto a mata estiver segura.';
 
       defense.druidicAndWatch = 'O silêncio súbito dos grilos em um setor específico ou o pio de alerta de uma coruja indica a direção exata de qualquer intruso furtivo, concedendo vantagem em Percepção às sentinelas.';
 
@@ -45761,7 +45761,7 @@
 
       saveType: 'Inteligência',
 
-      thievesCantMechanics: 'Símbolos secretos gravados a ponta de adaga ou giz sob a aba inferior de marcos de légua, pontes de pedra e batentes de estalagens (PHB p. 96); um Ladino no grupo decodifica automaticamente os avisos deixados por outras comitivas (pedágio ilegal, covil de monstros, patrulha corrupta ou rota segura de contrabando), enquanto grupos sem Ladino veem apenas ranhuras gastas pelo tempo (Investigação CD 18 apenas para notar que é artificial, sem traduzir o código).',
+      thievesCantMechanics: 'Símbolos secretos gravados a ponta de adaga ou giz sob a aba inferior de marcos de légua, pontes de pedra e batentes de estalagens; um Ladino no grupo decodifica automaticamente os avisos deixados por outras comitivas (pedágio ilegal, covil de monstros, patrulha corrupta ou rota segura de contrabando), enquanto grupos sem Ladino veem apenas ranhuras gastas pelo tempo (Investigação CD 18 apenas para notar que é artificial, sem traduzir o código).',
 
       pioneerMitigation: 'Inspeção tátil discreta na face sombreada dos marcos de pedra durante a marcha sem interromper o passo da comitiva (Furtividade ou Prestidigitação CD 13).',
 
@@ -45797,7 +45797,7 @@
 
       sign.saveType = 'Destreza';
 
-      sign.thievesCantMechanics = 'Bandidos veteranos ou assassinos rivais forjam o símbolo de "Refúgio Seguro" na pedra para atrair aventureiros para um beco sem saída ou ocultam uma farpa untada com peçonha na ranhura onde o batedor passa os dedos para ler no escuro; falha na verificação aciona 1d4 perfurante mais 2d6 de dano de veneno (PHB p. 96, 153; DMG p. 122).';
+      sign.thievesCantMechanics = 'Bandidos veteranos ou assassinos rivais forjam o símbolo de "Refúgio Seguro" na pedra para atrair aventureiros para um beco sem saída ou ocultam uma farpa untada com peçonha na ranhura onde o batedor passa os dedos para ler no escuro; falha na verificação aciona 1d4 perfurante mais 2d6 de dano de veneno.';
 
       sign.pioneerMitigation = 'Verificação do traço caligráfico da guilda regional e varredura da fenda com a lâmina da adaga antes de tocar o entalhe com os dedos nus (Investigação ou Ferramentas de Ladrão CD 15).';
 
@@ -45811,7 +45811,7 @@
 
       sign.saveType = 'Sabedoria';
 
-      sign.thievesCantMechanics = 'Em ermos sem muros ou pontes onde entalhes em pedra seriam óbvios, o Ladino combina a Gíria de Ladrão com o posicionamento angular de três seixos sobre um toco e um fio de lã tingida; indica exatamente quantos dias atrás uma comitiva conhecida passou por ali e qual bifurcação do Pointcrawl ela tomou (PHB p. 96, 183).';
+      sign.thievesCantMechanics = 'Em ermos sem muros ou pontes onde entalhes em pedra seriam óbvios, o Ladino combina a Gíria de Ladrão com o posicionamento angular de três seixos sobre um toco e um fio de lã tingida; indica exatamente quantos dias atrás uma comitiva conhecida passou por ali e qual bifurcação do Pointcrawl ela tomou.';
 
       sign.pioneerMitigation = 'Ancoragem dos seixos com resina de pinheiro para que o vento ou aves não desfaçam a seta direcional antes da chegada dos companheiros (Sobrevivência ou Prestidigitação CD 13).';
 
@@ -45841,7 +45841,7 @@
 
       defenseTitle: 'Bivaque em Esconderijo Cego de Contrabandistas (Safe House de Estrada)',
 
-      thievesCantAndCampSafety: 'Seguindo o glifo de "Pouso Limpo" gravado na raiz de um carvalho oco ou sob uma ponte antiga, a comitiva descobre uma câmara seca e camuflada preparada por gerações de batedores e andarilhos (PHB p. 96; DMG p. 111).',
+      thievesCantAndCampSafety: 'Seguindo o glifo de "Pouso Limpo" gravado na raiz de um carvalho oco ou sob uma ponte antiga, a comitiva descobre uma câmara seca e camuflada preparada por gerações de batedores e andarilhos.',
 
       thievesCantAndWatch: 'A entrada disfarçada por trepadeiras e pedras móveis confere vantagem em Furtividade para todo o grupo e impede que patrulhas noturnas na estrada principal detectem o acampamento.',
 
@@ -45859,7 +45859,7 @@
 
       defense.defenseTitle = 'Caixa-Morta de Pedra Falsa para Troca Assíncrona entre Comitivas (Dead Drop)';
 
-      defense.thievesCantAndCampSafety = 'Um bloco de alvenaria oco selado com cera impermeável no alicerce de uma ruína, marcado com o glifo pessoal acordado entre dois grupos de jogadores (PHB p. 96, 154).';
+      defense.thievesCantAndCampSafety = 'Um bloco de alvenaria oco selado com cera impermeável no alicerce de uma ruína, marcado com o glifo pessoal acordado entre dois grupos de jogadores.';
 
       defense.thievesCantAndWatch = 'Permite deixar mapas copiáveis, chaves, antídotos, moedas ou bilhetes cifrados para outra comitiva que passará pelo mesmo nó horas ou dias depois, exigindo Ferramentas de Ladrão ou o sinal secreto para abrir sem acionar o alarme de chocalho.';
 
@@ -45869,7 +45869,7 @@
 
       defense.defenseTitle = 'Perímetro de Bivaque com Fios de Sino Silenciados e Estrepes (Caltrops)';
 
-      defense.thievesCantAndCampSafety = 'O Ladino espalha bolsas de Estrepes de ferro (PHB p. 151, 20 unidades cobrindo 1,5m quadrado) e Esferas Metálicas nos acessos escuros, deixando um corredor estreito marcado com giz invisível à luz comum (PHB p. 151-152).';
+      defense.thievesCantAndCampSafety = 'O Ladino espalha bolsas de Estrepes de ferro e Esferas Metálicas nos acessos escuros, deixando um corredor estreito marcado com giz invisível à luz comum.';
 
       defense.thievesCantAndWatch = 'Invasores que não leem os glifos de passagem precisam passar em Destreza CD 15 ou sofrem dano perfurante, param de se mover e têm o deslocamento reduzido em 3 metros até receberem cura.';
 
@@ -45911,7 +45911,7 @@
 
       saveType: 'Sabedoria',
 
-      heliographMechanics: 'Utilizando um Espelho de Aço polido (PHB p. 150, 5 PO, 0,25 kg) alinhado ao sol, o batedor transmite pulsos codificados silenciosos a até 15 km de distância entre cumes ou nós vizinhos com linha de visão desimpedida; permite alertar outra comitiva sobre emboscadas ou combinar ponto de encontro sem emitir som, exigindo teste de Sabedoria (Sobrevivência ou Intuição CD 13) para decodificar sem Luneta, ou sucesso automático com Luneta (PHB p. 150, 153).',
+      heliographMechanics: 'Utilizando um Espelho de Aço polido alinhado ao sol, o batedor transmite pulsos codificados silenciosos a até 15 km de distância entre cumes ou nós vizinhos com linha de visão desimpedida; permite alertar outra comitiva sobre emboscadas ou combinar ponto de encontro sem emitir som, exigindo teste de Sabedoria (Sobrevivência ou Intuição CD 13) para decodificar sem Luneta, ou sucesso automático com Luneta.',
 
       pioneerMitigation: 'Uso de tubo colimador de couro escuro ao redor do espelho para estreitar o feixe luminoso a apenas 2 graus, evitando que batedores hostis fora do eixo visual avistem o brilho (Furtividade ou Sobrevivência CD 14).',
 
@@ -45933,7 +45933,7 @@
 
       signal.saveType = 'Sabedoria';
 
-      signal.heliographMechanics = 'Durante a noite ou sob céu encoberto sem sol, a comitiva opera uma Lanterna Furta-Fogo (PHB p. 152, 10 PO) abrindo e fechando a portinhola metálica em cadência rítmica; o feixe direcional de 18 metros projeta sinais visíveis a 3 km na escuridão para aliados atentos sem iluminar o próprio acampamento (PHB p. 152, 183).';
+      signal.heliographMechanics = 'Durante a noite ou sob céu encoberto sem sol, a comitiva opera uma Lanterna Furta-Fogo abrindo e fechando a portinhola metálica em cadência rítmica; o feixe direcional de 18 metros projeta sinais visíveis a 3 km na escuridão para aliados atentos sem iluminar o próprio acampamento.';
 
       signal.pioneerMitigation = 'Acoplamento de lentes de quartzo âmbar ou esmeralda na abertura da lanterna para confundir observadores distantes com olhos de feras ou fogo-fátuo (Prestidigitação ou Sobrevivência CD 13).';
 
@@ -45947,7 +45947,7 @@
 
       signal.saveType = 'Inteligência';
 
-      signal.heliographMechanics = 'Quando neblina densa ou tempestades bloqueiam a luz solar natural, um conjurador focaliza o truque Luz (PHB p. 256) ou a magia Luz do Dia (3º círculo, PHB p. 256) contra o Espelho de Aço côncavo; o feixe concentrado perfura até 5 km de cerração leve ou chuva para transmitir coordenadas de resgate à comitiva aliada (PHB p. 256; DMG p. 110).';
+      signal.heliographMechanics = 'Quando neblina densa ou tempestades bloqueiam a luz solar natural, um conjurador focaliza o truque Luz ou a magia Luz do Dia (3º círculo) contra o Espelho de Aço côncavo; o feixe concentrado perfura até 5 km de cerração leve ou chuva para transmitir coordenadas de resgate à comitiva aliada.';
 
       signal.pioneerMitigation = 'Modulação da cor do truque Luz (branco para rota limpa, âmbar para cautela, carmesim para perigo iminente) combinada previamente entre os grupos conhecidos (Arcanismo CD 13).';
 
@@ -45961,7 +45961,7 @@
 
       signal.saveType = 'Sabedoria';
 
-      signal.heliographMechanics = 'Batedores ou saqueadores rivais utilizam espelhos falsos para imitar pedidos de socorro de viajantes ou deixam escapar o lampejo momentâneo de uma Luneta/lâmina polida na crista oposta; distinguir um código autêntico de uma isca de emboscada exige leitura da cadência e do ângulo solar (Intuição ou Percepção CD 15, DMG p. 243).';
+      signal.heliographMechanics = 'Batedores ou saqueadores rivais utilizam espelhos falsos para imitar pedidos de socorro de viajantes ou deixam escapar o lampejo momentâneo de uma Luneta/lâmina polida na crista oposta; distinguir um código autêntico de uma isca de emboscada exige leitura da cadência e do ângulo solar (Intuição ou Percepção CD 15).';
 
       signal.pioneerMitigation = 'Exigência de senha óptica de confirmação (sequência de lampejos curtos e longos acordada no último encontro presencial entre as comitivas) antes de abandonar a rota segura (Intuição CD 14).';
 
@@ -45991,7 +45991,7 @@
 
       defenseTitle: 'Posto de Sentinela com Espelho de Aço em Periscópio de Trincheira',
 
-      heliographAndCampSafety: 'A sentinela do bivaque fixa o Espelho de Aço (PHB p. 150) na ponta de um bastão angulado para observar o vale e a estrada acima do parapeito de pedras sem jamais expor a cabeça a arqueiros ou batedores furtivos (PHB p. 183, 196).',
+      heliographAndCampSafety: 'A sentinela do bivaque fixa o Espelho de Aço na ponta de um bastão angulado para observar o vale e a estrada acima do parapeito de pedras sem jamais expor a cabeça a arqueiros ou batedores furtivos.',
 
       heliographAndWatch: 'Garante Cobertura Total contra ataques à distância diretos enquanto mantém vigilância visual contínua e permite espreitar cantos de ruínas com segurança absoluta.',
 
@@ -46009,7 +46009,7 @@
 
       defense.defenseTitle = 'Estação de Triangulação com Luneta e Heliógrafo de Cume';
 
-      defense.heliographAndCampSafety = 'Combinação de Luneta de latão (PHB p. 150, amplia objetos em 2x) em tripé firme com espelho sinalizador posicionado a sotavento da crista (PHB p. 153).';
+      defense.heliographAndCampSafety = 'Combinação de Luneta de latão em tripé firme com espelho sinalizador posicionado a sotavento da crista.';
 
       defense.heliographAndWatch = 'Concede vantagem em testes de Percepção baseados em visão a longa distância e dobra o alcance efetivo de leitura de sinais de fumaça, bandeiras ou lampejos de grupos aliados.';
 
@@ -46019,7 +46019,7 @@
 
       defense.defenseTitle = 'Corredor de Reflexo Lunar Cruzado no Perímetro do Acampamento';
 
-      defense.heliographAndCampSafety = 'Dois pequenos espelhos de aço polido são posicionados nas árvores ou rochas externas para refletir um feixe tênue da fogueira oculta ou do luar através da trilha de acesso (PHB p. 150, 185).';
+      defense.heliographAndCampSafety = 'Dois pequenos espelhos de aço polido são posicionados nas árvores ou rochas externas para refletir um feixe tênue da fogueira oculta ou do luar através da trilha de acesso.';
 
       defense.heliographAndWatch = 'Qualquer criatura ou andarilho furtivo que atravesse a garganta de entrada interrompe o reflexo no espelho da sentinela, impondo +5 na Percepção Passiva da vigília noturna.';
 
@@ -46061,7 +46061,7 @@
 
       saveType: 'Destreza',
 
-      leyConfluenceRisk: 'No cruzamento de três artérias telúricas arcanas, fragmentos da crosta de quartzo e basalto levitam em órbitas lentas (earthmotes / ilhas de pedra suspensas, DMG p. 109) cercados por bolsões de gravidade invertida; pisar fora da trilha estabilizada lança o aventureiro em queda ascendente e choque contra monólitos suspensos, causando 3d6 de dano de energia (force) e 2d6 de concussão (DMG p. 108-109; TCoE p. 168).',
+      leyConfluenceRisk: 'No cruzamento de três artérias telúricas arcanas, fragmentos da crosta de quartzo e basalto levitam em órbitas lentas (earthmotes / ilhas de pedra suspensas) cercados por bolsões de gravidade invertida; pisar fora da trilha estabilizada lança o aventureiro em queda ascendente e choque contra monólitos suspensos, causando 3d6 de dano de energia (force) e 2d6 de concussão.',
 
       pioneerMitigation: 'Batedores e arcanistas lançando pedregulhos de lastro à frente para mapear os vetores gravitacionais e ancorando cabos de ferro meteorítico nos pilares fixos (Arcanismo ou Sobrevivência CD 15).',
 
@@ -46083,7 +46083,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.leyConfluenceRisk = 'A sobrecarga do nó de Linhas de Ley manifesta uma Tempestade Mística (Eldritch Storm, TCoE p. 162): relâmpagos violetas silenciosos correm pelo chão vitrificando a areia em fulguritos e drenando a vitalidade mágica; falha na salvaguarda impõe 3d6 de dano de energia e suprime a reação do personagem por 1 hora (TCoE p. 162-163; DMG p. 109).';
+      hazard.leyConfluenceRisk = 'A sobrecarga do nó de Linhas de Ley manifesta uma Tempestade Mística (Eldritch Storm): relâmpagos violetas silenciosos correm pelo chão vitrificando a areia em fulguritos e drenando a vitalidade mágica; falha na salvaguarda impõe 3d6 de dano de energia e suprime a reação do personagem por 1 hora.';
 
       hazard.pioneerMitigation = 'Aterramento de lanças e armaduras metálicas com hastes de cobre cravadas no solo e travessia durante o intervalo entre os pulsos harmônicos da linha de força (Arcanismo ou Natureza CD 14).';
 
@@ -46097,7 +46097,7 @@
 
       hazard.saveType = 'Sabedoria';
 
-      hazard.leyConfluenceRisk = 'O véu entre o Plano Material e a Faéria torna-se translúcido na confluência (DMG p. 50, 109); a paisagem assume contornos ilusórios táteis (Miragem Arcana) e o fluxo do tempo dilata-se, fazendo meia hora dentro da névoa iridescente equivaler a 6 horas de jornada perdida no mundo exterior com 1 nível de exaustão mental (DMG p. 50, 109; TCoE p. 152).';
+      hazard.leyConfluenceRisk = 'O véu entre o Plano Material e a Faéria torna-se translúcido na confluência; a paisagem assume contornos ilusórios táteis (Miragem Arcana) e o fluxo do tempo dilata-se, fazendo meia hora dentro da névoa iridescente equivaler a 6 horas de jornada perdida no mundo exterior com 1 nível de exaustão mental.';
 
       hazard.pioneerMitigation = 'Uso de sinos de ferro frio (cold iron) cujo timbre dissonante quebra o encantamento acústico e mantém o passo ritmado da comitiva (Intuição, Religião ou Sobrevivência CD 15).';
 
@@ -46111,7 +46111,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.leyConfluenceRisk = 'No olho do ciclone arcano forma-se uma zona de Magia Morta (DMG p. 109) ladeada por drusas gigantes de quartzo ressonante; itens mágicos e truques apagam-se subitamente enquanto o zumbido harmônico dos cristais estilhaça vidros de poções e causa 2d8 de dano trovejante e surdez temporária (DMG p. 108-109).';
+      hazard.leyConfluenceRisk = 'No olho do ciclone arcano forma-se uma zona de Magia Morta ladeada por drusas gigantes de quartzo ressonante; itens mágicos e truques apagam-se subitamente enquanto o zumbido harmônico dos cristais estilhaça vidros de poções e causa 2d8 de dano trovejante e surdez temporária.';
 
       hazard.pioneerMitigation = 'Acondicionamento de frascos em lã grossa, proteção auricular com cera de abelha e transição imediata para iluminação por tochas e ferramentas mundanas (Arcanismo ou Sobrevivência CD 14).';
 
@@ -46141,7 +46141,7 @@
 
       defenseTitle: 'Bivaque no Círculo de Menires de Solo Santificado (Hallowed Ley Sanctuary)',
 
-      leyConfluenceAndCampSafety: 'O acampamento é erguido no interior de um anel ancestral de monólitos rúnicos que estabiliza o fluxo das Linhas de Ley em um santuário de Solo Santificado (DMG p. 109; PHB p. 279).',
+      leyConfluenceAndCampSafety: 'O acampamento é erguido no interior de um anel ancestral de monólitos rúnicos que estabiliza o fluxo das Linhas de Ley em um santuário de Solo Santificado.',
 
       leyConfluenceAndWatch: 'A barreira mística dos menires impede que corruptores, mortos-vivos ou fadas hostis cruzem o perímetro de vigília e concede vantagem em testes de Percepção e Intuição às sentinelas.',
 
@@ -46159,7 +46159,7 @@
 
       defense.defenseTitle = 'Refúgio Suspenso em Platô de Rochedo Levitante Ancorado (Earthmote Bivouac)';
 
-      defense.leyConfluenceAndCampSafety = 'A comitiva sobe por cabos até o topo plano e gramado de um rochedo flutuante estacionário 9 metros acima do solo, recolhendo a escada de corda após a subida (DMG p. 109).';
+      defense.leyConfluenceAndCampSafety = 'A comitiva sobe por cabos até o topo plano e gramado de um rochedo flutuante estacionário 9 metros acima do solo, recolhendo a escada de corda após a subida.';
 
       defense.leyConfluenceAndWatch = 'Torna o acampamento fisicamente inalcançável para qualquer ameaça terrestre sem voo e garante cobertura três-quartos (+5 CA) na borda rochosa.';
 
@@ -46169,7 +46169,7 @@
 
       defense.defenseTitle = 'Fogueira Refratada em Prisma de Quartzo de Linha de Ley';
 
-      defense.leyConfluenceAndCampSafety = 'Alinhamento de cristais naturais da confluência ao redor do fogo de bivaque para converter a luz e a fumaça em uma cúpula térmica translúcida e invisível a mais de 10 metros (TCoE p. 150; PHB p. 183).';
+      defense.leyConfluenceAndCampSafety = 'Alinhamento de cristais naturais da confluência ao redor do fogo de bivaque para converter a luz e a fumaça em uma cúpula térmica translúcida e invisível a mais de 10 metros.';
 
       defense.leyConfluenceAndWatch = 'Concede resistência a dano de frio e energia durante o repouso e alerta silenciosamente o conjurador do grupo caso alguma criatura se aproxime a menos de 18 metros.';
 
@@ -46211,7 +46211,7 @@
 
       saveType: 'Destreza',
 
-      takyrRisk: 'As planícies de argila poligonal endurecida ao sol (takyr) aparentam ter a solidez de um pavimento de pedra, mas escondem extensas redes de túneis de erosão subsuperficial (piping / sufusão) escavados pelo escoamento raro de enxurradas; a laje seca cede sob o passo da comitiva, lançando o aventureiro a 5 metros de profundidade em galerias estreitas e empoeiradas com 3d6 de concussão e soterramento parcial (DMG p. 110; PHB p. 182-183).',
+      takyrRisk: 'As planícies de argila poligonal endurecida ao sol (takyr) aparentam ter a solidez de um pavimento de pedra, mas escondem extensas redes de túneis de erosão subsuperficial (piping / sufusão) escavados pelo escoamento raro de enxurradas; a laje seca cede sob o passo da comitiva, lançando o aventureiro a 5 metros de profundidade em galerias estreitas e empoeiradas com 3d6 de concussão e soterramento parcial.',
 
       pioneerMitigation: 'Batedores identificando filetes de vegetação halófita alinhada e sumidouros de formigas que denunciam o traçado dos dutos ocos sob a crosta (Sobrevivência ou Percepção CD 14).',
 
@@ -46233,7 +46233,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.takyrRisk = 'Basta uma pancada de chuva de cinco minutos na bacia endorreica para que a argila expansiva do takyr absorva água e se transforme em um visgo impermeável e escorregadio que acumula quilos de barro pesado nas botas e patas de montarias; o deslocamento cai a um quarto e a marcha exaustiva impõe 1 nível de exaustão e condição impedido (DMG p. 110; PHB p. 183).';
+      hazard.takyrRisk = 'Basta uma pancada de chuva de cinco minutos na bacia endorreica para que a argila expansiva do takyr absorva água e se transforme em um visgo impermeável e escorregadio que acumula quilos de barro pesado nas botas e patas de montarias; o deslocamento cai a um quarto e a marcha exaustiva impõe 1 nível de exaustão e condição impedido.';
 
       hazard.pioneerMitigation = 'Retirada imediata da baixada argilosa para os cordões de dunas arenosas periféricas assim que nuvens de tempestade se formam no horizonte (Sobrevivência ou Natureza CD 13).';
 
@@ -46247,7 +46247,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.takyrRisk = 'As rachaduras térmicas profundas que dividem o takyr em milhares de placas hexagonais servem de refúgio fresco durante o dia para víboras-de-chifre e escorpiões amarelos; pisar na borda oca de uma placa faz a lasca gangorrar, prendendo o tornozelo na fenda e provocando botes defensivos com 2d6 de dano de veneno e condição envenenado (DMG p. 110; XGE p. 109).';
+      hazard.takyrRisk = 'As rachaduras térmicas profundas que dividem o takyr em milhares de placas hexagonais servem de refúgio fresco durante o dia para víboras-de-chifre e escorpiões amarelos; pisar na borda oca de uma placa faz a lasca gangorrar, prendendo o tornozelo na fenda e provocando botes defensivos com 2d6 de dano de veneno e condição envenenado.';
 
       hazard.pioneerMitigation = 'Uso de grevas altas ou polainas de couro rígido e marcha pisando sempre no centro geométrico das placas poligonais (Acrobacia ou Sobrevivência CD 13).';
 
@@ -46261,7 +46261,7 @@
 
       hazard.saveType = 'Sabedoria';
 
-      hazard.takyrRisk = 'A superfície perfeitamente plana, nua e esbranquiçada do takyr reflete a radiação solar intensa e cria uma camada de ar superaquecido que projeta falsos lagos cintilantes e distorce marcos distantes em 360 graus; a perda de referência visual desvia a comitiva por horas sob insolação severa, causando 2d4 de dano de fogo (calor) e sede extrema (DMG p. 110-111).';
+      hazard.takyrRisk = 'A superfície perfeitamente plana, nua e esbranquiçada do takyr reflete a radiação solar intensa e cria uma camada de ar superaquecido que projeta falsos lagos cintilantes e distorce marcos distantes em 360 graus; a perda de referência visual desvia a comitiva por horas sob insolação severa, causando 2d4 de dano de fogo (calor) e sede extrema.';
 
       hazard.pioneerMitigation = 'Navegação por azimute de bússola e leitura da direção das cristas eólicas nas bordas da bacia sem fixar os olhos no horizonte trêmulo (Sobrevivência CD 14).';
 
@@ -46291,7 +46291,7 @@
 
       defenseTitle: 'Bivaque em Cisterna Tradicional de Captação de Takyr (Khak / Sardoba)',
 
-      takyrAndCampSafety: 'Aproveitando a impermeabilidade natural da crosta de argila como bacia coletora, a comitiva acampa junto a um poço decantador abobadado escavado na margem elevada do takyr (DMG p. 111; PHB p. 150).',
+      takyrAndCampSafety: 'Aproveitando a impermeabilidade natural da crosta de argila como bacia coletora, a comitiva acampa junto a um poço decantador abobadado escavado na margem elevada do takyr.',
 
       takyrAndWatch: 'A superfície plana e limpa ao redor oferece linha de tiro e visão desimpedida de 1 quilômetro em todas as direções, impedindo qualquer aproximação furtiva contra as sentinelas.',
 
@@ -46309,7 +46309,7 @@
 
       defense.defenseTitle = 'Parapeito Modular de Placas Poligonais de Argila Endurecida';
 
-      defense.takyrAndCampSafety = 'Levantamento de blocos hexagonais naturais de argila ressecada de 15 centímetros de espessura para erguer uma trincheira circular ao redor das tendas (PHB p. 185, 196).';
+      defense.takyrAndCampSafety = 'Levantamento de blocos hexagonais naturais de argila ressecada de 15 centímetros de espessura para erguer uma trincheira circular ao redor das tendas.';
 
       defense.takyrAndWatch = 'Concede cobertura três-quartos (+5 CA e +5 em salvaguardas de Destreza) contra flechas e rajadas de vento carregadas de poeira fina.';
 
@@ -46319,7 +46319,7 @@
 
       defense.defenseTitle = 'Acampamento Elevado em Cordão Arenoso Marginal (Chink / Borda de Duna)';
 
-      defense.takyrAndCampSafety = 'Instalação das barracas no terraço arenoso firme 3 metros acima do leito da planície de argila, imune a inundações repentinas e ao enlameamento noturno (PHB p. 183).';
+      defense.takyrAndCampSafety = 'Instalação das barracas no terraço arenoso firme 3 metros acima do leito da planície de argila, imune a inundações repentinas e ao enlameamento noturno.';
 
       defense.takyrAndWatch = 'O solo arenoso drena qualquer chuva instantaneamente e conserva o calor diurno, concedendo +1 dado de vida adicional recuperado no descanso longo.';
 
@@ -46361,7 +46361,7 @@
 
       saveType: 'Destreza',
 
-      erraticDrumlinRisk: 'Monólitos alóctones de gnaisse de 80 toneladas apoiados em pedestais mínimos de tilito glacial consolidado (pedras oscilantes / rocking stones) entram em ressonância com rajadas de vento ou com o apoio inadvertido de escaladores; o tombamento ou esmagamento no ponto de fulcro causa 4d6 de concussão e prende membros sob a rocha (DMG p. 110; PHB p. 182-183).',
+      erraticDrumlinRisk: 'Monólitos alóctones de gnaisse de 80 toneladas apoiados em pedestais mínimos de tilito glacial consolidado (pedras oscilantes / rocking stones) entram em ressonância com rajadas de vento ou com o apoio inadvertido de escaladores; o tombamento ou esmagamento no ponto de fulcro causa 4d6 de concussão e prende membros sob a rocha.',
 
       pioneerMitigation: 'Batedores verificando calços basais de quartzo e proibindo apoio ou ancoragem de cordas em megablocos sem base enterrada (Natureza ou Sobrevivência CD 14).',
 
@@ -46383,7 +46383,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.erraticDrumlinRisk = 'Entre as dezenas de colinas ovais alinhadas do enxame de drumlins, as baixadas impermeáveis de argila glacial formam lagoas cegas cobertas por musgo flutuante; afundar na lama argilosa gelada até o peito impõe condição impedido e 1 nível de exaustão por hipotermia úmida (DMG p. 110; PHB p. 183).';
+      hazard.erraticDrumlinRisk = 'Entre as dezenas de colinas ovais alinhadas do enxame de drumlins, as baixadas impermeáveis de argila glacial formam lagoas cegas cobertas por musgo flutuante; afundar na lama argilosa gelada até o peito impõe condição impedido e 1 nível de exaustão por hipotermia úmida.';
 
       hazard.pioneerMitigation = 'Navegação estrita pela linha de crista dos drumlins (whalebacks) evitando cortar caminho pelas baixadas verdes entre as colinas (Sobrevivência CD 14).';
 
@@ -46397,7 +46397,7 @@
 
       hazard.saveType = 'Sabedoria';
 
-      hazard.erraticDrumlinRisk = 'Campos de megablocos erráticos arrancados de formações férricas distantes criam anomalias magnéticas locais em meio ao nevoeiro das colinas idênticas de drumlins; a agulha da bússola gira em falso, induzindo a comitiva a marchar em círculos com perda de 4 horas e desgaste de provisões (DMG p. 110-111; PHB p. 183).';
+      hazard.erraticDrumlinRisk = 'Campos de megablocos erráticos arrancados de formações férricas distantes criam anomalias magnéticas locais em meio ao nevoeiro das colinas idênticas de drumlins; a agulha da bússola gira em falso, induzindo a comitiva a marchar em círculos com perda de 4 horas e desgaste de provisões.';
 
       hazard.pioneerMitigation = 'Orientação geomorfológica pelo eixo longo dos drumlins (que sempre aponta a direção do fluxo glacial antigo) em vez de confiar na agulha magnética (Sobrevivência ou Natureza CD 14).';
 
@@ -46411,7 +46411,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.erraticDrumlinRisk = 'Megablocos colossais rachados ao meio pelo congelamento secular da água escondem corredores estreitos de 7 metros de profundidade cobertos por urzes e líquens; a queda no vão angular de granito afiado causa 2d8 de concussão e 1d6 cortante (DMG p. 110).';
+      hazard.erraticDrumlinRisk = 'Megablocos colossais rachados ao meio pelo congelamento secular da água escondem corredores estreitos de 7 metros de profundidade cobertos por urzes e líquens; a queda no vão angular de granito afiado causa 2d8 de concussão e 1d6 cortante.';
 
       hazard.pioneerMitigation = 'Sondagem de tapetes de urze sobre fendas de rocha partida e travessia por pontes de corda tencionada (Acrobacia ou Sobrevivência CD 13).';
 
@@ -46441,7 +46441,7 @@
 
       defenseTitle: 'Santuário Fortificado em Fenda de Megabloco Partido',
 
-      erraticAndCampSafety: 'O bivaque é instalado no corredor interno seco entre as duas metades de um megabloco errático de granito de 10 metros de altura; as paredes de rocha maciça de 3 metros de espessura bloqueiam vendavais polares e retêm o calor da fogueira refletido na pedra (DMG p. 111).',
+      erraticAndCampSafety: 'O bivaque é instalado no corredor interno seco entre as duas metades de um megabloco errático de granito de 10 metros de altura; as paredes de rocha maciça de 3 metros de espessura bloqueiam vendavais polares e retêm o calor da fogueira refletido na pedra.',
 
       erraticAndWatch: 'O topo plano do megabloco serve como torre de vigia elevada sobre todo o enxame de drumlins, concedendo cobertura três-quartos (+5 CA) e vantagem em Percepção.',
 
@@ -46459,7 +46459,7 @@
 
       defense.defenseTitle = 'Acampamento Drenado no Flanco Íngreme (Stoss) do Drumlin';
 
-      defense.erraticAndCampSafety = 'Posicionamento das tendas no patamar bem drenado de cascalho glacial a meia-encosta do drumlin, acima da zona de nevoeiro frio e dos pântanos das baixadas (PHB p. 183; DMG p. 111).';
+      defense.erraticAndCampSafety = 'Posicionamento das tendas no patamar bem drenado de cascalho glacial a meia-encosta do drumlin, acima da zona de nevoeiro frio e dos pântanos das baixadas.';
 
       defense.erraticAndWatch = 'Garante solo firme e seco mesmo sob tempestades torrenciais e visão clara de 360 graus das depressões circundantes.';
 
@@ -46469,7 +46469,7 @@
 
       defense.defenseTitle = 'Fornalha Térmica de Seixos Glaciais de Quartzito';
 
-      defense.erraticAndCampSafety = 'Construção de um leito térmico com seixos rolados de quartzito denso aquecidos na fogueira e enterrados sob o piso das tendas ao pé do megabloco (PHB p. 150).';
+      defense.erraticAndCampSafety = 'Construção de um leito térmico com seixos rolados de quartzito denso aquecidos na fogueira e enterrados sob o piso das tendas ao pé do megabloco.';
 
       defense.erraticAndWatch = 'Irradia calor constante por 8 horas sem emitir fumaça ou brilho visível à distância, concedendo +1 dado de vida recuperado no descanso longo.';
 
@@ -46511,7 +46511,7 @@
 
       saveType: 'Destreza',
 
-      makateaRisk: 'Terraços costeiros de calcário recifal pleistocênico soerguido (makatea / feo) corroídos pela chuva ácida e pelo spray marinho em milhares de lâminas de aragonita afiadas como navalhas; um tropeço na rocha alveolada rasga botas de couro reforçado e carne, infligindo 3d6 de dano cortante e perfurante e reduzindo o deslocamento à metade até o tratamento (DMG p. 110; PHB p. 182-183).',
+      makateaRisk: 'Terraços costeiros de calcário recifal pleistocênico soerguido (makatea / feo) corroídos pela chuva ácida e pelo spray marinho em milhares de lâminas de aragonita afiadas como navalhas; um tropeço na rocha alveolada rasga botas de couro reforçado e carne, infligindo 3d6 de dano cortante e perfurante e reduzindo o deslocamento à metade até o tratamento.',
 
       pioneerMitigation: 'Batedores avançando com perneiras de couro curtido duplo, testando pontes de coral com bastões ferrados e estendendo pranchas de madeira sobre fendas dentadas (Sobrevivência ou Acrobacia CD 14).',
 
@@ -46533,7 +46533,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.makateaRisk = 'O teto fino de calcário coralino oco cede subitamente sobre uma caverna inundada de água salobra estratificada (cenote anquialino); o aventureiro despenca 9 metros através de estalactites quebradiças até o poço escuro abaixo, sofrendo 3d6 de concussão e risco de submersão sob a haloclina pobre em oxigênio (DMG p. 110; XGE p. 109).';
+      hazard.makateaRisk = 'O teto fino de calcário coralino oco cede subitamente sobre uma caverna inundada de água salobra estratificada (cenote anquialino); o aventureiro despenca 9 metros através de estalactites quebradiças até o poço escuro abaixo, sofrendo 3d6 de concussão e risco de submersão sob a haloclina pobre em oxigênio.';
 
       hazard.pioneerMitigation = 'Sondagem acústica da abóbada calcária e marcha encordada mantendo distância de depressões circulares cobertas por samambaias densas (Percepção ou Sobrevivência CD 15).';
 
@@ -46547,7 +46547,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.makateaRisk = 'As ondas oceânicas comprimem bolsões de ar em galerias submersas do recife soerguido e disparam gêiseres salinos explosivos por chaminés verticais ocultas no platô; o jato de alta pressão arremessa o personagem a 4,5 metros, causando 2d8 de concussão e condição caído sobre o carste afiado (DMG p. 110; PHB p. 183).';
+      hazard.makateaRisk = 'As ondas oceânicas comprimem bolsões de ar em galerias submersas do recife soerguido e disparam gêiseres salinos explosivos por chaminés verticais ocultas no platô; o jato de alta pressão arremessa o personagem a 4,5 metros, causando 2d8 de concussão e condição caído sobre o carste afiado.';
 
       hazard.pioneerMitigation = 'Identificação do assobio grave de compressão pneumática no subsolo segundos antes da onda bater na falésia (Percepção ou Natureza CD 14).';
 
@@ -46561,7 +46561,7 @@
 
       hazard.saveType = 'Sabedoria';
 
-      hazard.makateaRisk = 'O emaranhado de muralhas de coral fóssil de 6 metros de altura bloqueia toda linha de visão e abafa o som do mar, enquanto centenas de fendas escuras abrigam caranguejos-dos-coqueiros colossais e centopeias venenosas atraídos pelo suor da comitiva; falha na orientação impõe 1 nível de exaustão por desidratação no calor refletido pelo calcário branco e 2d6 de dano perfurante (DMG p. 110-111).';
+      hazard.makateaRisk = 'O emaranhado de muralhas de coral fóssil de 6 metros de altura bloqueia toda linha de visão e abafa o som do mar, enquanto centenas de fendas escuras abrigam caranguejos-dos-coqueiros colossais e centopeias venenosas atraídos pelo suor da comitiva; falha na orientação impõe 1 nível de exaustão por desidratação no calor refletido pelo calcário branco e 2d6 de dano perfurante.';
 
       hazard.pioneerMitigation = 'Marcação rigorosa de bifurcações com giz colorido nos pilares de coral e uso de fumaça aromática para afastar artrópodes das fendas (Sobrevivência CD 14).';
 
@@ -46591,7 +46591,7 @@
 
       defenseTitle: 'Bivaque em Entalhe de Maré Fóssil (Notch de Falésia Recifal)',
 
-      makateaAndCampSafety: 'O acampamento é instalado sob uma profunda cornija côncava escavada pelo mar antigo a 12 metros acima da arrebentação atual; o teto de calcário coralino maciço protege contra tempestades tropicais e queda de blocos (DMG p. 111).',
+      makateaAndCampSafety: 'O acampamento é instalado sob uma profunda cornija côncava escavada pelo mar antigo a 12 metros acima da arrebentação atual; o teto de calcário coralino maciço protege contra tempestades tropicais e queda de blocos.',
 
       makateaAndWatch: 'A muralha vertical de makatea exige escalada difícil para qualquer predador e oferece às sentinelas visão desimpedida do litoral e cobertura três-quartos (+5 CA).',
 
@@ -46609,7 +46609,7 @@
 
       defense.defenseTitle = 'Coleta em Lente de Água Doce de Caverna Anquialina';
 
-      defense.makateaAndCampSafety = 'Captação cuidadosa da camada superficial de água doce cristalina (lente de Ghyben-Herzberg) que flutua sobre a água salgada no interior de uma gruta calcária fresca e sombreada (PHB p. 150; DMG p. 111).';
+      defense.makateaAndCampSafety = 'Captação cuidadosa da camada superficial de água doce cristalina (lente de Ghyben-Herzberg) que flutua sobre a água salgada no interior de uma gruta calcária fresca e sombreada.';
 
       defense.makateaAndWatch = 'Fornece água potável mineralizada em ilhas e costas onde não existem rios superficiais, concedendo +1 dado de vida recuperado no descanso longo.';
 
@@ -46619,7 +46619,7 @@
 
       defense.defenseTitle = 'Estreito Fortificado com Espigões Naturais de Aragonita';
 
-      defense.makateaAndCampSafety = 'Fechamento das duas únicas fendas de acesso ao terraço de bivaque utilizando blocos dentados de coral fóssil encaixados a seco como estrepes naturais (PHB p. 185).';
+      defense.makateaAndCampSafety = 'Fechamento das duas únicas fendas de acesso ao terraço de bivaque utilizando blocos dentados de coral fóssil encaixados a seco como estrepes naturais.';
 
       defense.makateaAndWatch = 'Transforma a aproximação em terreno difícil letal que causa 2d4 de dano perfurante a invasores terrestres e alerta imediatamente a vigília pelo som vítreo do coral quebrando.';
 
@@ -46661,7 +46661,7 @@
 
       saveType: 'Destreza',
 
-      tufaTowerRisk: 'As torres porosas de carbonato de cálcio formadas por nascentes subaquáticas antigas esfarelam sob o peso da marcha; a ruptura da crosta lança o aventureiro sobre pináculos calcários dentados e poças de salmoura cáustica (pH 10) causando 2d6 de concussão e 2d6 de ácido (DMG p. 110; PHB p. 182-183).',
+      tufaTowerRisk: 'As torres porosas de carbonato de cálcio formadas por nascentes subaquáticas antigas esfarelam sob o peso da marcha; a ruptura da crosta lança o aventureiro sobre pináculos calcários dentados e poças de salmoura cáustica (pH 10) causando 2d6 de concussão e 2d6 de ácido.',
 
       pioneerMitigation: 'Batedores testando a ressonância oca das colunas calcárias com bastões ferrados e traçando rota pela base consolidada de basalto (Sobrevivência ou Natureza CD 14).',
 
@@ -46683,7 +46683,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.tufaTowerRisk = 'Rajadas violentas varrem a superfície do lago endorreico levantando nuvens de espuma branca saturada de carbonato e sulfato de sódio; a névoa cáustica queima as córneas e mucosas, impondo cegueira temporária por 1 hora e 2d4 de dano de ácido se falhar na salvaguarda (DMG p. 110; PHB p. 183).';
+      hazard.tufaTowerRisk = 'Rajadas violentas varrem a superfície do lago endorreico levantando nuvens de espuma branca saturada de carbonato e sulfato de sódio; a névoa cáustica queima as córneas e mucosas, impondo cegueira temporária por 1 hora e 2d4 de dano de ácido se falhar na salvaguarda.';
 
       hazard.pioneerMitigation = 'Uso de óculos de couro com lentes de mica ou panos úmidos de água doce amarrados sobre os olhos e narinas (Sobrevivência CD 13).';
 
@@ -46697,7 +46697,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.tufaTowerRisk = 'O calor solar sobre as margens rasas fermenta tapetes densos de cianobactérias e moscas alcalinas em águas ricas em arsênio natural; a inalação do vapor fétido provoca vertigem aguda e condição envenenado por 4 horas (DMG p. 110; XGE p. 109).';
+      hazard.tufaTowerRisk = 'O calor solar sobre as margens rasas fermenta tapetes densos de cianobactérias e moscas alcalinas em águas ricas em arsênio natural; a inalação do vapor fétido provoca vertigem aguda e condição envenenado por 4 horas.';
 
       hazard.pioneerMitigation = 'Contorno pelas encostas ventiladas a barlavento e proibição absoluta de tocar ou ferver a água salobra do lago (Natureza ou Sobrevivência CD 13).';
 
@@ -46711,7 +46711,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.tufaTowerRisk = 'Entre os castelos de tufa aparentemente secos, uma fina casca de sal branco esconde bolsões profundos de vasa carbonática pegajosa; quem pisa afunda até os quadris na lama densa que suga as botas e impõe condição impedido (DMG p. 110).';
+      hazard.tufaTowerRisk = 'Entre os castelos de tufa aparentemente secos, uma fina casca de sal branco esconde bolsões profundos de vasa carbonática pegajosa; quem pisa afunda até os quadris na lama densa que suga as botas e impõe condição impedido.';
 
       hazard.pioneerMitigation = 'Caminhada distribuída sobre esteiras de junco seco ou saltos calculados entre os plintos rochosos firmes (Acrobacia ou Sobrevivência CD 13).';
 
@@ -46741,7 +46741,7 @@
 
       defenseTitle: 'Bivaque no Terraço Elevado de Castelo de Tufa Fóssil',
 
-      tufaAndCampSafety: 'O acampamento é montado no patamar superior de um antigo agrupamento de torres de tufa maciça 8 metros acima do nível atual do lago alcalino; a rocha calcária seca isola as tendas da umidade cáustica e oferece paredes naturais contra o vento (DMG p. 111).',
+      tufaAndCampSafety: 'O acampamento é montado no patamar superior de um antigo agrupamento de torres de tufa maciça 8 metros acima do nível atual do lago alcalino; a rocha calcária seca isola as tendas da umidade cáustica e oferece paredes naturais contra o vento.',
 
       tufaAndWatch: 'As seteiras naturais entre as agulhas de calcita permitem vigiar toda a planície salina com cobertura três-quartos e vantagem em testes de Percepção das sentinelas.',
 
@@ -46759,7 +46759,7 @@
 
       defense.defenseTitle = 'Captação de Nascente Subterrânea de Água Doce';
 
-      defense.tufaAndCampSafety = 'Identificação de um olho de água doce pura na encosta pedregosa antes que o filete deságue na bacia alcalina hipersalina (PHB p. 150; DMG p. 111).';
+      defense.tufaAndCampSafety = 'Identificação de um olho de água doce pura na encosta pedregosa antes que o filete deságue na bacia alcalina hipersalina.';
 
       defense.tufaAndWatch = 'Garante suprimento potável cristalino em meio ao deserto salino, concedendo +1 dado de vida adicional recuperado durante o descanso longo.';
 
@@ -46769,7 +46769,7 @@
 
       defense.defenseTitle = 'Parapeito de Troncos Petrificados por Calcita';
 
-      defense.tufaAndCampSafety = 'Toras antigas inteiramente revestidas por crostas espessas de rocha calcária são encaixadas entre os pilares de tufa, formando uma muralha incombustível de 1,6 metro (PHB p. 185).';
+      defense.tufaAndCampSafety = 'Toras antigas inteiramente revestidas por crostas espessas de rocha calcária são encaixadas entre os pilares de tufa, formando uma muralha incombustível de 1,6 metro.';
 
       defense.tufaAndWatch = 'Concede +5 na CA e +5 em salvaguardas de Destreza contra rajadas de areia alcalina e disparos de emboscadores.';
 
@@ -46813,7 +46813,7 @@
 
       saveType: 'Força',
 
-      strandflatRisk: 'Quando a maré oscila 4 metros no labirinto de ilhotas, estreitos canais entre skerries de rocha nua canalizam torrentes furiosas de água salgada a 16 nós (turbilhões de maré / straum); botes e nadadores são sugados para fendas submarinas e arremessados contra cristas de granito afiadas com 3d8 de concussão e risco de afogamento por turbulência (DMG p. 110, 246; PHB p. 182-183).',
+      strandflatRisk: 'Quando a maré oscila 4 metros no labirinto de ilhotas, estreitos canais entre skerries de rocha nua canalizam torrentes furiosas de água salgada a 16 nós (turbilhões de maré / straum); botes e nadadores são sugados para fendas submarinas e arremessados contra cristas de granito afiadas com 3d8 de concussão e risco de afogamento por turbulência.',
 
       pioneerMitigation: 'Batedores navegadores calculando a tábua de marés e cruzando os canais estritamente na calmaria do estofo da maré (Sobrevivência ou Navegação CD 14).',
 
@@ -46835,7 +46835,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.strandflatRisk = 'Rochedos glaciais arredondados e bancos de rocha submersa (båe / skerries cegos) ficam ocultos a poucos centímetros da superfície na maré alta; o fundo do casco ou as pernas dos aventureiros em marcha vadeando o raso chocam-se contra as cristas afiadas de cracas e rocha fraturada, rompendo o fundo da embarcação e causando 2d8 cortante e contundente com risco de perder mantimentos no mar gelado (DMG p. 110; XGE p. 109).';
+      hazard.strandflatRisk = 'Rochedos glaciais arredondados e bancos de rocha submersa (båe / skerries cegos) ficam ocultos a poucos centímetros da superfície na maré alta; o fundo do casco ou as pernas dos aventureiros em marcha vadeando o raso chocam-se contra as cristas afiadas de cracas e rocha fraturada, rompendo o fundo da embarcação e causando 2d8 cortante e contundente com risco de perder mantimentos no mar gelado.';
 
       hazard.pioneerMitigation = 'Vigia constante na proa com vara de sondagem graduada (prumo de mão) mapeando desníveis de rocha e padrões de arrebentação (Percepção ou Navegação CD 14).';
 
@@ -46849,7 +46849,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.strandflatRisk = 'O vento antártico sopra névoa salina gélida sobre as superfícies lisas e polidas pelo gelo das ilhotas rasas de strandflat, formando em minutos uma película invisível de gelo vitrificado (verglas salino); o menor passo desatento resulta em queda violenta sobre blocos de tálus costeiro ou escorregão direto para a ressaca gélida com 2d6 de concussão e 2d6 de frio (PHB p. 183; DMG p. 110).';
+      hazard.strandflatRisk = 'O vento antártico sopra névoa salina gélida sobre as superfícies lisas e polidas pelo gelo das ilhotas rasas de strandflat, formando em minutos uma película invisível de gelo vitrificado (verglas salino); o menor passo desatento resulta em queda violenta sobre blocos de tálus costeiro ou escorregão direto para a ressaca gélida com 2d6 de concussão e 2d6 de frio.';
 
       hazard.pioneerMitigation = 'Uso de cravos de ferro (grampões) nas botas e corda-guia amarrada entre a comitiva ancorada em pitões nas fendas da rocha (Sobrevivência CD 13).';
 
@@ -46863,7 +46863,7 @@
 
       hazard.saveType = 'Sabedoria';
 
-      hazard.strandflatRisk = 'O choque térmico entre o ar polar a -15°C e a água do mar gera densas colunas de vapor congelante (sea smoke / fumaça do mar) que cobrem o arquipélago com visibilidade zero; as centenas de ilhotas idênticas e a acústica reverberante das ondas desorientam os batedores, isolando a comitiva em um ilhéu rochoso submersível na maré seguinte com 1 nível de exaustão e hipotermia (DMG p. 110-111).';
+      hazard.strandflatRisk = 'O choque térmico entre o ar polar a -15°C e a água do mar gera densas colunas de vapor congelante (sea smoke / fumaça do mar) que cobrem o arquipélago com visibilidade zero; as centenas de ilhotas idênticas e a acústica reverberante das ondas desorientam os batedores, isolando a comitiva em um ilhéu rochoso submersível na maré seguinte com 1 nível de exaustão e hipotermia.';
 
       hazard.pioneerMitigation = 'Orientação contínua por bússola giroscópica e escuta das ondas que quebram nos paredões externos do continente (Sobrevivência ou Navegação CD 14).';
 
@@ -46893,7 +46893,7 @@
 
       defenseTitle: 'Bivaque em Corcova de Rocha Polida (Whaleback Skerry)',
 
-      strandflatAndCampSafety: 'O acampamento é montado no topo convexo de uma ilhota de rocha granítica lisa e maciça polida pelo gelo, elevada 5 metros acima da preamar máxima; a superfície sólida e sem solo retém zero lama, drenando a água da chuva e respingos de maré diretamente para o mar sem risco de inundação (DMG p. 111).',
+      strandflatAndCampSafety: 'O acampamento é montado no topo convexo de uma ilhota de rocha granítica lisa e maciça polida pelo gelo, elevada 5 metros acima da preamar máxima; a superfície sólida e sem solo retém zero lama, drenando a água da chuva e respingos de maré diretamente para o mar sem risco de inundação.',
 
       strandflatAndWatch: 'A posição insular oferece 360 graus de visão marítima sobre todo o canal e cordão de ilhotas circundantes com vantagem em testes de Percepção contra predadores aquáticos ou botes invasores.',
 
@@ -46911,7 +46911,7 @@
 
       defense.defenseTitle = 'Fogueira de Algaporca Seca e Defumador de Peixes de Fundo';
 
-      defense.strandflatAndCampSafety = 'Feixes de algas pardas laminares e algaporca colhidas na maré baixa são desidratadas nas pedras e queimadas com lascas de madeira flutuante, gerando brasa densa e fumaça iodada que repele mosquitos litorâneos e insetos de praia (PHB p. 150).';
+      defense.strandflatAndCampSafety = 'Feixes de algas pardas laminares e algaporca colhidas na maré baixa são desidratadas nas pedras e queimadas com lascas de madeira flutuante, gerando brasa densa e fumaça iodada que repele mosquitos litorâneos e insetos de praia.';
 
       defense.strandflatAndWatch = 'Fornece calor contínuo para secagem rápida de botas e roupas de lã salgadas, permitindo que os membros do grupo recuperem +1 dado de vida adicional ao completar um descanso longo.';
 
@@ -46921,7 +46921,7 @@
 
       defense.defenseTitle = 'Baluarte de Troncos de Deriva e Matacões de Morena';
 
-      defense.strandflatAndCampSafety = 'Troncos maciços de pinheiro trazidos pelas ressacas são calçados entre matacões de granito trazidos por geleiras antigas, erguendo um parapeito de 1,5 metro de altura contra os vendavais marítimos de proa (PHB p. 185).';
+      defense.strandflatAndCampSafety = 'Troncos maciços de pinheiro trazidos pelas ressacas são calçados entre matacões de granito trazidos por geleiras antigas, erguendo um parapeito de 1,5 metro de altura contra os vendavais marítimos de proa.';
 
       defense.strandflatAndWatch = 'Garante cobertura três-quartos (+5 na CA e +5 em salvaguardas de Destreza) contra ventanias glaciais de 70 km/h e virote ou arpões inimigos vindos da água.';
 
@@ -46965,7 +46965,7 @@
 
       saveType: 'Força',
 
-      machairRisk: 'Ventos oceânicos tempestuosos empurram uma maré de sizígia furiosa que transpõe o cordão de dunas e afoga a planície de machair; os lochans de água doce transbordam em minutos, convertendo a campina em um lençol de água salobra gelada com correnteza rápida que arrasta a comitiva com 3d6 de concussão e frio (DMG p. 110, 246; PHB p. 182-183).',
+      machairRisk: 'Ventos oceânicos tempestuosos empurram uma maré de sizígia furiosa que transpõe o cordão de dunas e afoga a planície de machair; os lochans de água doce transbordam em minutos, convertendo a campina em um lençol de água salobra gelada com correnteza rápida que arrasta a comitiva com 3d6 de concussão e frio.',
 
       pioneerMitigation: 'Batedores monitorando o refluxo das ondas e a linha de algas nas dunas, conduzindo o avanço pela crista dos cordões de capim-marram (Sobrevivência ou Natureza CD 14).',
 
@@ -46987,7 +46987,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.machairRisk = 'Vendavais de 80 km/h levantam turbilhões de areia branca de conchas marinhas moídas ricas em microesquírolas de calcita; o pó cortante queima os olhos, fura tecidos leves e causa cegueira temporária por 1 hora e tosse áspera se falhar na salvaguarda (PHB p. 183; DMG p. 110).';
+      hazard.machairRisk = 'Vendavais de 80 km/h levantam turbilhões de areia branca de conchas marinhas moídas ricas em microesquírolas de calcita; o pó cortante queima os olhos, fura tecidos leves e causa cegueira temporária por 1 hora e tosse áspera se falhar na salvaguarda.';
 
       hazard.pioneerMitigation = 'Uso de máscaras de couro com viseiras de fenda e bandagens umedecidas com água doce sobre o rosto (Sobrevivência CD 13).';
 
@@ -47001,7 +47001,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.machairRisk = 'Aparentando ser uma campina firme de grama e flores raras, a depressão interdunar oculta uma camada flutuante de turfa de algas sobre lama movediça de cascalho conquífero; o tapete verde cede sob montarias e aventureiros, sugando membros até a cintura com condição impedido e risco de soterramento lento (DMG p. 110; XGE p. 109).';
+      hazard.machairRisk = 'Aparentando ser uma campina firme de grama e flores raras, a depressão interdunar oculta uma camada flutuante de turfa de algas sobre lama movediça de cascalho conquífero; o tapete verde cede sob montarias e aventureiros, sugando membros até a cintura com condição impedido e risco de soterramento lento.';
 
       hazard.pioneerMitigation = 'Sondagem de solo com bordões de marcha e travessia espaçada sobre pranchas de madeira distribuindo o peso (Sobrevivência CD 13).';
 
@@ -47015,7 +47015,7 @@
 
       hazard.saveType = 'Sabedoria';
 
-      hazard.machairRisk = 'Uma muralha gélida de nevoeiro marinho denso (haaf-fog) engole a planície plana e uniforme de machair, reduzindo o campo de visão a 3 metros; a falta de marcos físicos e a reverberação das ondas confundem os sentidos, fazendo a comitiva marchar direto para a arrebentação ou atoleiros salobros com 1 nível de exaustão (DMG p. 111).';
+      hazard.machairRisk = 'Uma muralha gélida de nevoeiro marinho denso (haaf-fog) engole a planície plana e uniforme de machair, reduzindo o campo de visão a 3 metros; a falta de marcos físicos e a reverberação das ondas confundem os sentidos, fazendo a comitiva marchar direto para a arrebentação ou atoleiros salobros com 1 nível de exaustão.';
 
       hazard.pioneerMitigation = 'Navegação rigorosa por bússola magnética e monitoramento acústico do ritmo sonoro das marés (Sobrevivência ou Navegação CD 14).';
 
@@ -47045,7 +47045,7 @@
 
       defenseTitle: 'Bivaque na Crista de Duna com Capim-Marram',
 
-      machairAndCampSafety: 'O acampamento é estruturado na crista gramada de uma duna frontal firme fixada por densas redes de raízes de capim-marram; o solo é seco, bem drenado e elevado 6 metros acima da planície, completamente a salvo de transbordamentos de lochans e inundações de sizígia (DMG p. 111).',
+      machairAndCampSafety: 'O acampamento é estruturado na crista gramada de uma duna frontal firme fixada por densas redes de raízes de capim-marram; o solo é seco, bem drenado e elevado 6 metros acima da planície, completamente a salvo de transbordamentos de lochans e inundações de sizígia.',
 
       machairAndWatch: 'A elevação sobre a campina proporciona vigília desobstruída em 360 graus vigiando tanto a linha de praia quanto as pastagens interiores com vantagem em testes de Percepção.',
 
@@ -47063,7 +47063,7 @@
 
       defense.defenseTitle = 'Poço de Água Doce Filtrada em Areia Conquífera';
 
-      defense.machairAndCampSafety = 'A espessa camada de areia de conchas moídas atua como filtro biológico alcalino que purifica a lente de água da chuva suspensa sobre o lençol salobro inferior (PHB p. 150).';
+      defense.machairAndCampSafety = 'A espessa camada de areia de conchas moídas atua como filtro biológico alcalino que purifica a lente de água da chuva suspensa sobre o lençol salobro inferior.';
 
       defense.machairAndWatch = 'Produz até 40 litros diários de água doce cristalina rica em cálcio puro, restaurando +1 dado de vida adicional aos membros do grupo durante o descanso longo.';
 
@@ -47073,7 +47073,7 @@
 
       defense.defenseTitle = 'Parapeito de Leivas de Turfa e Madeira Flutuante';
 
-      defense.machairAndCampSafety = 'Leivas densas de grama do machair são cortadas e empilhadas com troncos pesados trazidos pela maré, erguendo um baluarte de 1,6 metro de altura (PHB p. 185).';
+      defense.machairAndCampSafety = 'Leivas densas de grama do machair são cortadas e empilhadas com troncos pesados trazidos pela maré, erguendo um baluarte de 1,6 metro de altura.';
 
       defense.machairAndWatch = 'Concede cobertura três-quartos (+5 na CA e +5 em salvaguardas de Destreza) contra ventanias marítimas e investidas de predadores anfíbios da praia.';
 
@@ -47115,7 +47115,7 @@
 
       saveType: 'Destreza',
 
-      faultRisk: 'O fundo estreito da haste do cânion em taça de vinho é cortado por degraus verticais lisos de 25 metros talhados em quartzito maciço; cordas gastas em rochas cortantes e poços de torvelinho secos ocultos sob cascalho instável ameaçam precipitar o explorador em queda de 20 metros com 4d6 de concussão e entorse articular (DMG p. 110, 246; PHB p. 182-183).',
+      faultRisk: 'O fundo estreito da haste do cânion em taça de vinho é cortado por degraus verticais lisos de 25 metros talhados em quartzito maciço; cordas gastas em rochas cortantes e poços de torvelinho secos ocultos sob cascalho instável ameaçam precipitar o explorador em queda de 20 metros com 4d6 de concussão e entorse articular.',
 
       pioneerMitigation: 'Batedores cravando grampos de expansão em rocha viva e descendo em rapel duplo com nós bloqueadores de segurança (Sobrevivência ou Atletismo CD 14).',
 
@@ -47137,7 +47137,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.faultRisk = 'O espelho de falha normal expõe rochas intensamente cisalhadas por atrito tectônico; a passagem da comitiva rompe a cunha friável da base da faceta triangular, deflagrando uma avalanche maciça de cascalho anguloso com 3d8 de concussão e corte sobre a trilha (DMG p. 110; PHB p. 185).';
+      hazard.faultRisk = 'O espelho de falha normal expõe rochas intensamente cisalhadas por atrito tectônico; a passagem da comitiva rompe a cunha friável da base da faceta triangular, deflagrando uma avalanche maciça de cascalho anguloso com 3d8 de concussão e corte sobre a trilha.';
 
       hazard.pioneerMitigation = 'Inspeção de espelhos de falha com estrias ativas e marcha rápida fora da linha de desprendimento dos taludes (Percepção ou Natureza CD 13).';
 
@@ -47151,7 +47151,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.faultRisk = 'Pequenas acomodações sísmicas no plano da falha produzem estalos secos que ejetam blocos de granito de cornijas suspensas a 300 metros de altura sobre a garganta estreita; a saraivada de pedras inflige 3d10 de concussão e obstrui o desfiladeiro (PHB p. 183; DMG p. 110).';
+      hazard.faultRisk = 'Pequenas acomodações sísmicas no plano da falha produzem estalos secos que ejetam blocos de granito de cornijas suspensas a 300 metros de altura sobre a garganta estreita; a saraivada de pedras inflige 3d10 de concussão e obstrui o desfiladeiro.';
 
       hazard.pioneerMitigation = 'Uso de capacetes de aço acolchoados e corrida imediata para nichos escavados sob a parede côncava da falha (Sobrevivência CD 13).';
 
@@ -47165,7 +47165,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.faultRisk = 'Chuvas torrenciais no cálice da bacia superior convergem pela haste estreita da taça de vinho e jorram na boca da falha como torrente violenta de lama e pedregulhos a 50 km/h, arrastando aventureiros por 40 pés com 3d8 de concussão e perda de equipamentos leves (DMG p. 110; XGE p. 109).';
+      hazard.faultRisk = 'Chuvas torrenciais no cálice da bacia superior convergem pela haste estreita da taça de vinho e jorram na boca da falha como torrente violenta de lama e pedregulhos a 50 km/h, arrastando aventureiros por 40 pés com 3d8 de concussão e perda de equipamentos leves.';
 
       hazard.pioneerMitigation = 'Monitoramento do ruído surdo de trovão subterrâneo a montante e escalada rápida para os esporões rochosos laterais (Percepção CD 14).';
 
@@ -47195,7 +47195,7 @@
 
       defenseTitle: 'Bivaque Suspenso na Bacia do Cálice da Taça de Vinho',
 
-      faultAndCampSafety: 'O acampamento é estabelecido na bacia suspensa superior do cânion, 200 metros acima da planície tectônica; o único acesso é a garganta estreita da haste do cânion, transformando a posição em fortaleza natural inexpugnável a salvo de predadores de planície e de inundações basais (DMG p. 111).',
+      faultAndCampSafety: 'O acampamento é estabelecido na bacia suspensa superior do cânion, 200 metros acima da planície tectônica; o único acesso é a garganta estreita da haste do cânion, transformando a posição em fortaleza natural inexpugnável a salvo de predadores de planície e de inundações basais.',
 
       faultAndWatch: 'A sentinela de vigia na borda do cálice domina toda a escarpa de falha com visão panorâmica até o horizonte e vantagem em testes de Percepção contra aproximações furtivas.',
 
@@ -47213,7 +47213,7 @@
 
       defense.defenseTitle = 'Captação em Surgência Hidrogeológica no Plano de Falha';
 
-      defense.faultAndCampSafety = 'A barreira impermeável de argila de falha força lençõis freáticos profundos a emergirem em nascentes límpidas e perenes na base da escarpa rochosa (PHB p. 150).';
+      defense.faultAndCampSafety = 'A barreira impermeável de argila de falha força lençõis freáticos profundos a emergirem em nascentes límpidas e perenes na base da escarpa rochosa.';
 
       defense.faultAndWatch = 'Produz até 40 litros diários de água mineral pura e cristalina rica em cálcio, restaurando +1 dado de vida adicional aos membros do grupo durante o descanso longo.';
 
@@ -47223,7 +47223,7 @@
 
       defense.defenseTitle = 'Parapeito em Reentrância de Esporão Facetado';
 
-      defense.faultAndCampSafety = 'Blocos de granito caídos da faceta são empilhados em cunha em nicho côncavo na parede da escarpa, imune a quedas de pedras da linha de prumo (PHB p. 185).';
+      defense.faultAndCampSafety = 'Blocos de granito caídos da faceta são empilhados em cunha em nicho côncavo na parede da escarpa, imune a quedas de pedras da linha de prumo.';
 
       defense.faultAndWatch = 'Concede cobertura três-quartos (+5 na CA e +5 em salvaguardas de Destreza) contra ventos canalizados e flechas de emboscadores da encosta.';
 
@@ -47265,7 +47265,7 @@
 
       saveType: 'Destreza',
 
-      pillarRisk: 'Uma ponte natural estreita de 2 metros de largura suspensa entre dois pilares a 300 metros de altura sofreu fraturas por descompressão no extradorso do arco; o avanço da comitiva com cargas pesadas quebra o bloco-chave, exigindo salvaguarda de Destreza CD 15 para saltar para o platô firme ou despencar no abismo enevoado com 10d6 de concussão (DMG p. 110, 246; PHB p. 182-183).',
+      pillarRisk: 'Uma ponte natural estreita de 2 metros de largura suspensa entre dois pilares a 300 metros de altura sofreu fraturas por descompressão no extradorso do arco; o avanço da comitiva com cargas pesadas quebra o bloco-chave, exigindo salvaguarda de Destreza CD 15 para saltar para o platô firme ou despencar no abismo enevoado com 10d6 de concussão.',
 
       pioneerMitigation: 'Batedores amarrando cabos de aço estáticos entre os dois monólitos e inspecionando fissuras basais antes da travessia de cada membro (Sobrevivência ou Atletismo CD 14).',
 
@@ -47287,7 +47287,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.pillarRisk = 'A névoa subtropical perene satura as cornijas talhadas nos paredões de 400 metros com uma camada viscosa de musgo e líquen gelatinoso; a perda de aderência precipita o explorador pela face de arenito liso sem agarras (Salvaguarda de Destreza CD 15 para cravar pítons de escalada ou sofrer 4d6 de concussão e ficar pendurado por cabos; PHB p. 185; DMG p. 110).';
+      hazard.pillarRisk = 'A névoa subtropical perene satura as cornijas talhadas nos paredões de 400 metros com uma camada viscosa de musgo e líquen gelatinoso; a perda de aderência precipita o explorador pela face de arenito liso sem agarras (Salvaguarda de Destreza CD 15 para cravar pítons de escalada ou sofrer 4d6 de concussão e ficar pendurado por cabos; PHB p. 185).';
 
       hazard.pioneerMitigation = 'Uso de calçados com cravos de aço rígidos e progressão em linha com ancoragens múltiplas em fendas de quartzo (Sobrevivência CD 13).';
 
@@ -47301,7 +47301,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.pillarRisk = 'O vento soprando pelas gargantas estreitas entre os pilares verticais gera turbilhões oscilantes a 90 km/h que arrancam coberturas de tendas e empurram aventureiros que transpõem passadiços expostos (Salvaguarda de Força CD 14 para não ser desequilibrado e arremessado contra as agulhas com 3d6 de concussão; DMG p. 110; PHB p. 183).';
+      hazard.pillarRisk = 'O vento soprando pelas gargantas estreitas entre os pilares verticais gera turbilhões oscilantes a 90 km/h que arrancam coberturas de tendas e empurram aventureiros que transpõem passadiços expostos (Salvaguarda de Força CD 14 para não ser desequilibrado e arremessado contra as agulhas com 3d6 de concussão; DMG p. 110).';
 
       hazard.pioneerMitigation = 'Rastejamento rente à rocha durante as rajadas e fixação de lonas com lastro de pedras pesadas (Atletismo ou Sobrevivência CD 13).';
 
@@ -47315,7 +47315,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.pillarRisk = 'No cume estreito dos pilares, pinheiros centenários crescem em fendas que alargam a rocha sob peso e vento; sob tempestade, a rocha que ancora as raízes parte-se de repente, despencando troncos e blocos de quartzo sobre a trilha com 3d8 de concussão e soterramento parcial (DMG p. 110; XGE p. 109).';
+      hazard.pillarRisk = 'No cume estreito dos pilares, pinheiros centenários crescem em fendas que alargam a rocha sob peso e vento; sob tempestade, a rocha que ancora as raízes parte-se de repente, despencando troncos e blocos de quartzo sobre a trilha com 3d8 de concussão e soterramento parcial.';
 
       hazard.pioneerMitigation = 'Inspeção visual de árvores com raízes expostas e montagem de passadiços fora do raio de tombamento dos pinheiros (Natureza ou Sobrevivência CD 13).';
 
@@ -47345,7 +47345,7 @@
 
       defenseTitle: 'Bivaque Fortaleza no Cume Isolado do Pilar de Arenito',
 
-      pillarAndCampSafety: 'O acampamento é instalado no topo plano de um pilar monolítico de 250 metros de altitude, alcançado unicamente por escadas de corda recolhíveis; o cume rochoso isolado é 100% inacessível a predadores terrestres dos ermos e imune a enxurradas que assolam o fundo dos desfiladeiros (DMG p. 111).',
+      pillarAndCampSafety: 'O acampamento é instalado no topo plano de um pilar monolítico de 250 metros de altitude, alcançado unicamente por escadas de corda recolhíveis; o cume rochoso isolado é 100% inacessível a predadores terrestres dos ermos e imune a enxurradas que assolam o fundo dos desfiladeiros.',
 
       pillarAndWatch: 'A posição elevada acima do mar de nuvens oferece visão periférica em 360 graus de todo o arquipélago de torres de pedra com vantagem em testes de Percepção para a sentinela.',
 
@@ -47363,7 +47363,7 @@
 
       defense.defenseTitle = 'Bacia de Captação Filtrada por Fendas de Quartzo Puro';
 
-      defense.pillarAndCampSafety = 'A espessa camada de arenito quartzítico atua como filtro de sílica de alta eficiência, purificando a água pluvial que escorre por fraturas verticais até bacias rochosas suspensas (PHB p. 150).';
+      defense.pillarAndCampSafety = 'A espessa camada de arenito quartzítico atua como filtro de sílica de alta eficiência, purificando a água pluvial que escorre por fraturas verticais até bacias rochosas suspensas.';
 
       defense.pillarAndWatch = 'Produz até 40 litros diários de água mineral pura e límpida, restaurando +1 dado de vida adicional aos membros do grupo durante o descanso longo.';
 
@@ -47373,7 +47373,7 @@
 
       defense.defenseTitle = 'Parapeito de Lajes de Arenito Intertravadas a Barlavento';
 
-      defense.pillarAndCampSafety = 'Lajes planas de quartzo soltas no cume são empilhadas em semicírculo de 1,5 metro travadas com cunhas de ferro, criando um abrigo sólido contra os ventos do abismo (PHB p. 185).';
+      defense.pillarAndCampSafety = 'Lajes planas de quartzo soltas no cume são empilhadas em semicírculo de 1,5 metro travadas com cunhas de ferro, criando um abrigo sólido contra os ventos do abismo.';
 
       defense.pillarAndWatch = 'Concede cobertura três-quartos (+5 na CA e +5 em salvaguardas de Destreza) contra arqueiros, ventos cortantes e predadores aéreos.';
 
@@ -47415,7 +47415,7 @@
 
       saveType: 'Destreza',
 
-      seifRisk: 'A crista estreita e sinuosa da duna em seif atua como faca de areia onde dois regimes oblíquos de vento colidem; o avanço da comitiva rompe a tensão da crista viva, deflagrando uma avalanche em leque de 30 metros que arrasta exploradores para o talude íngreme com 3d6 de concussão e soterramento parcial (DMG p. 110, 246; PHB p. 182-183).',
+      seifRisk: 'A crista estreita e sinuosa da duna em seif atua como faca de areia onde dois regimes oblíquos de vento colidem; o avanço da comitiva rompe a tensão da crista viva, deflagrando uma avalanche em leque de 30 metros que arrasta exploradores para o talude íngreme com 3d6 de concussão e soterramento parcial.',
 
       pioneerMitigation: 'Batedores sondando a coesão do topo com bordões de marcha e contornando a crista pelo plinto basal de cascalho consolidado (Sobrevivência ou Natureza CD 14).',
 
@@ -47437,7 +47437,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.seifRisk = 'O corredor plano de cascalho entre duas dunas em seif paralelas de 80 metros canaliza ventos convergentes a 110 km/h; a tempestade rasteira de areia de quartzo arranca mantas, fura odres e inflige 3d6 de dano perfurante e cortante com cegueira temporária por 1 hora se falhar na salvaguarda (PHB p. 185; DMG p. 110).';
+      hazard.seifRisk = 'O corredor plano de cascalho entre duas dunas em seif paralelas de 80 metros canaliza ventos convergentes a 110 km/h; a tempestade rasteira de areia de quartzo arranca mantas, fura odres e inflige 3d6 de dano perfurante e cortante com cegueira temporária por 1 hora se falhar na salvaguarda.';
 
       hazard.pioneerMitigation = 'Uso de óculos de fenda de madeira e alinhamento cerrado da coluna atrás de escudos pesados na vanguarda (Sobrevivência ou Atletismo CD 13).';
 
@@ -47451,7 +47451,7 @@
 
       hazard.saveType = 'Sabedoria';
 
-      hazard.seifRisk = 'As cristas em curva de cimitarra estendem-se por centenas de quilômetros sem marcos visuais, com curvatura quase imperceptível que desvia sutilmente o rumo da marcha para o núcleo hiperárido do deserto; viajantes perdem as referências solares sob vento rodopiante, acumulando 1 nível de exaustão (DMG p. 111).';
+      hazard.seifRisk = 'As cristas em curva de cimitarra estendem-se por centenas de quilômetros sem marcos visuais, com curvatura quase imperceptível que desvia sutilmente o rumo da marcha para o núcleo hiperárido do deserto; viajantes perdem as referências solares sob vento rodopiante, acumulando 1 nível de exaustão.';
 
       hazard.pioneerMitigation = 'Conferência contínua da rota por bússola magnética ou sombras de gnomon fixas na areia (Sobrevivência ou Navegação CD 14).';
 
@@ -47465,7 +47465,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.seifRisk = 'Na base da duna em seif, lençõis de areia rica em ilmenita e magnetita formam crostas rígidas milimétricas sobre bolsões de areia oca sem sustentação mecânica; o peso das montarias esmaga a crosta, afundando membros até a virilha em areia movediça seca com condição impedido e risco de torção articular (DMG p. 110; XGE p. 109).';
+      hazard.seifRisk = 'Na base da duna em seif, lençõis de areia rica em ilmenita e magnetita formam crostas rígidas milimétricas sobre bolsões de areia oca sem sustentação mecânica; o peso das montarias esmaga a crosta, afundando membros até a virilha em areia movediça seca com condição impedido e risco de torção articular.';
 
       hazard.pioneerMitigation = 'Sondagem prévia com bordões de ferro e marcha espaçada sobre o centro pedregoso do plinto (Sobrevivência CD 13).';
 
@@ -47495,7 +47495,7 @@
 
       defenseTitle: 'Bivaque em Terraço de Cascalho no Plinto de Sotavento',
 
-      seifAndCampSafety: 'O acampamento é estruturado sobre o piso consolidado de seixos e britas do plinto basal protegido pelo flanco de 60 metros da duna em seif; a fundação firme sustenta estacas indeformáveis, enquanto a duna bloqueia o vento dominante e corta a poeira eólica (DMG p. 111).',
+      seifAndCampSafety: 'O acampamento é estruturado sobre o piso consolidado de seixos e britas do plinto basal protegido pelo flanco de 60 metros da duna em seif; a fundação firme sustenta estacas indeformáveis, enquanto a duna bloqueia o vento dominante e corta a poeira eólica.',
 
       seifAndWatch: 'A sentinela posicionada no ombro do plinto domina a visão retilínea de todo o corredor interdunar com vantagem em testes de Percepção contra aproximações furtivas.',
 
@@ -47513,7 +47513,7 @@
 
       defense.defenseTitle = 'Coletor de Orvalho Capilar na Raiz da Duna em Seif';
 
-      defense.seifAndCampSafety = 'A massa monumental de areia de quartzo da duna retém a umidade da noite e a drena por gravidade até a linha de contato impermeável com o plinto rochoso subjacente (PHB p. 150).';
+      defense.seifAndCampSafety = 'A massa monumental de areia de quartzo da duna retém a umidade da noite e a drena por gravidade até a linha de contato impermeável com o plinto rochoso subjacente.';
 
       defense.seifAndWatch = 'Produz até 35 litros de água pura fresca filtrada pela areia sílica, restaurando +1 dado de vida adicional aos membros do grupo durante o descanso longo.';
 
@@ -47523,7 +47523,7 @@
 
       defense.defenseTitle = 'Parapeito em Cunha de Cascalho Interdunar Intertravado';
 
-      defense.seifAndCampSafety = 'Placas de caliche e seixos pesados recolhidos no plinto são empilhados em cunha aerodinâmica apontada contra o vento do corredor, criando um reduto de 1,5 metro de altura (PHB p. 185).';
+      defense.seifAndCampSafety = 'Placas de caliche e seixos pesados recolhidos no plinto são empilhados em cunha aerodinâmica apontada contra o vento do corredor, criando um reduto de 1,5 metro de altura.';
 
       defense.seifAndWatch = 'Concede cobertura três-quartos (+5 na CA e +5 em salvaguardas de Destreza) contra ventos rasantes de areia e disparos de salteadores das dunas.';
 
@@ -47567,7 +47567,7 @@
 
       saveType: 'Destreza',
 
-      stoneForestRisk: 'As bordas superiores e laterais dos pináculos de calcário puro são esculpidas pela chuva ácida em arestas cortantes como navalhas de aço; qualquer desequilíbrio na travessia das cristas retalha roupas, polainas e peles de aventureiros com 3d6 de dano cortante e hemorragia ativa (DMG p. 110, 246; PHB p. 182-183).',
+      stoneForestRisk: 'As bordas superiores e laterais dos pináculos de calcário puro são esculpidas pela chuva ácida em arestas cortantes como navalhas de aço; qualquer desequilíbrio na travessia das cristas retalha roupas, polainas e peles de aventureiros com 3d6 de dano cortante e hemorragia ativa.',
 
       pioneerMitigation: 'Batedores utilizando luvas grossas de couro ferrado e fitas de ancoragem com mosquetões de aço em passadas cadenciadas (Sobrevivência ou Atletismo CD 14).',
 
@@ -47589,7 +47589,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.stoneForestRisk = 'Entre as lâminas de pedra abrem-se fendas verticais de 30 metros de profundidade encobertas por esteiras delgadas de trepadeiras e musgos secos; o piso ilusório desmorona sob o peso da marcha, projetando o explorador em queda livre contra paredes pontiagudas de lapiás com 4d6 de concussão e fraturas ósseas (DMG p. 110; PHB p. 185).';
+      hazard.stoneForestRisk = 'Entre as lâminas de pedra abrem-se fendas verticais de 30 metros de profundidade encobertas por esteiras delgadas de trepadeiras e musgos secos; o piso ilusório desmorona sob o peso da marcha, projetando o explorador em queda livre contra paredes pontiagudas de lapiás com 4d6 de concussão e fraturas ósseas.';
 
       hazard.pioneerMitigation = 'Sondagem de solo com bordões pesados e avanço encordoado em duplas interligadas por cabo de tração (Sobrevivência CD 13).';
 
@@ -47603,7 +47603,7 @@
 
       hazard.saveType = 'Sabedoria';
 
-      hazard.stoneForestRisk = 'Centenas de agulhas verticais idênticas de 50 metros bloqueiam o horizonte e geram ecos sonoros múltiplos que anulam chamados e distorcem a orientação; a comitiva corre o risco de rodar em círculos pelas fendas escuras sob calor sufocante e ar estagnado, sofrendo 1 nível de exaustão por fadiga mental e desidratação (PHB p. 183; DMG p. 111).';
+      hazard.stoneForestRisk = 'Centenas de agulhas verticais idênticas de 50 metros bloqueiam o horizonte e geram ecos sonoros múltiplos que anulam chamados e distorcem a orientação; a comitiva corre o risco de rodar em círculos pelas fendas escuras sob calor sufocante e ar estagnado, sofrendo 1 nível de exaustão por fadiga mental e desidratação.';
 
       hazard.pioneerMitigation = 'Pintura sistemática de setas de cal nas esquinas de pedra e observação da posição solar através de fendas de prumo (Sobrevivência CD 14).';
 
@@ -47617,7 +47617,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.stoneForestRisk = 'A base corroída de um monólito de 30 metros cede subitamente sob a vibração de ganchos de escalada; o pilar de calcário tomba como uma árvore de pedra sobre o corredor estreito, despedaçando-se em blocos angulosos com 3d10 de concussão que soterram a passagem (DMG p. 110; XGE p. 109).';
+      hazard.stoneForestRisk = 'A base corroída de um monólito de 30 metros cede subitamente sob a vibração de ganchos de escalada; o pilar de calcário tomba como uma árvore de pedra sobre o corredor estreito, despedaçando-se em blocos angulosos com 3d10 de concussão que soterram a passagem.';
 
       hazard.pioneerMitigation = 'Inspeção de fendas de alívio na raiz dos monólitos e marcha contornando a projeção de pilares inclinados (Percepção ou Natureza CD 13).';
 
@@ -47647,7 +47647,7 @@
 
       defenseTitle: 'Bivaque Suspenso em Nicho de Fenda de Grike',
 
-      forestAndCampSafety: 'O acampamento é estruturado em redes e plataformas de lona ancoradas 5 metros acima do solo nas paredes verticais de uma fenda de grike; a posição suspensa mantém a comitiva totalmente a salvo de umidade rasteira, inundações repentinas e predadores terrestres (DMG p. 111).',
+      forestAndCampSafety: 'O acampamento é estruturado em redes e plataformas de lona ancoradas 5 metros acima do solo nas paredes verticais de uma fenda de grike; a posição suspensa mantém a comitiva totalmente a salvo de umidade rasteira, inundações repentinas e predadores terrestres.',
 
       forestAndWatch: 'As paredes estreitas de calcário afunilam o acesso a um único corredor vigiado pela sentinela com vantagem em testes de Percepção contra aproximações hostis.',
 
@@ -47665,7 +47665,7 @@
 
       defense.defenseTitle = 'Funil de Captação em Caneluras Cársticas Puras';
 
-      defense.forestAndCampSafety = 'Caneluras verticais (karren) talhadas pela água pluvial nas faces dos pináculos são interligadas por calhas de lona encerada para coleta de água de condensação noturna e chuva pura (PHB p. 150).';
+      defense.forestAndCampSafety = 'Caneluras verticais (karren) talhadas pela água pluvial nas faces dos pináculos são interligadas por calhas de lona encerada para coleta de água de condensação noturna e chuva pura.';
 
       defense.forestAndWatch = 'Coleta até 40 litros diários de água mineral cristalina e perfeitamente potável, acelerando a eliminação de fadiga e restaurando +1 dado de vida adicional aos membros do grupo durante o descanso longo.';
 
@@ -47675,7 +47675,7 @@
 
       defense.defenseTitle = 'Parapeito Entrincheirado em Frestas de Agulhas';
 
-      defense.forestAndCampSafety = 'O estrangulamento natural entre duas lâminas de tsingy é travado com lajes de calcário e troncos de madeira de lei, criando uma barreira de 1,6 metro com seteira de tiro protegida (PHB p. 185).';
+      defense.forestAndCampSafety = 'O estrangulamento natural entre duas lâminas de tsingy é travado com lajes de calcário e troncos de madeira de lei, criando uma barreira de 1,6 metro com seteira de tiro protegida.';
 
       defense.forestAndWatch = 'Concede cobertura total (+5 na CA e +5 em salvaguardas de Destreza) contra arqueiros e impede o avanço de predadores gigantes incapazes de penetrar no afunilamento.';
 
@@ -47717,7 +47717,7 @@
 
       saveType: 'Força',
 
-      yardangRisk: 'O vento constante é afunilado e comprimido entre cristas de yardangs paralelas de 15 metros, acelerando para além de 100 km/h; a esteira violenta de areia e silte fustiga a comitiva como lixa rápida, exigindo salvaguarda de Força ou Constituição CD 15 contra cegueira temporária, perda de fôlego e 3d6 de dano perfurante e cortante (DMG p. 110, 246; PHB p. 182-183).',
+      yardangRisk: 'O vento constante é afunilado e comprimido entre cristas de yardangs paralelas de 15 metros, acelerando para além de 100 km/h; a esteira violenta de areia e silte fustiga a comitiva como lixa rápida, exigindo salvaguarda de Força ou Constituição CD 15 contra cegueira temporária, perda de fôlego e 3d6 de dano perfurante e cortante.',
 
       pioneerMitigation: 'Batedores amarrando cabos de guia entre as reentrâncias basais e avançando de joelhos com coberturas faciais duplas (Sobrevivência ou Atletismo CD 14).',
 
@@ -47739,7 +47739,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.yardangRisk = 'A base do yardang sofre erosão contínua por grãos de areia basais, formando beirais suspensos delgados em forma de quilha de navio invertida; a passagem de exploradores e montarias deflagra vibrações que desmoronam blocos de argilito compactado com 3d8 de concussão e soterramento parcial (DMG p. 110; PHB p. 185).';
+      hazard.yardangRisk = 'A base do yardang sofre erosão contínua por grãos de areia basais, formando beirais suspensos delgados em forma de quilha de navio invertida; a passagem de exploradores e montarias deflagra vibrações que desmoronam blocos de argilito compactado com 3d8 de concussão e soterramento parcial.';
 
       hazard.pioneerMitigation = 'Inspeção ótica de fraturas de tração na base da quilha e avanço rápido pelo centro da calha fora da projeção dos beirais (Percepção CD 13).';
 
@@ -47753,7 +47753,7 @@
 
       hazard.saveType = 'Sabedoria';
 
-      hazard.yardangRisk = 'Corredores paralelos repetitivos com paredões idênticos de silte e eco eólico abafador enganam os sentidos; a comitiva arrisca entrar em canais sem saída bloqueados por barcanas transversais sob calor escaldante, sofrendo 1 nível de exaustão por desidratação e perda de tempo (PHB p. 183; DMG p. 111).';
+      hazard.yardangRisk = 'Corredores paralelos repetitivos com paredões idênticos de silte e eco eólico abafador enganam os sentidos; a comitiva arrisca entrar em canais sem saída bloqueados por barcanas transversais sob calor escaldante, sofrendo 1 nível de exaustão por desidratação e perda de tempo.';
 
       hazard.pioneerMitigation = 'Marcação sistemática das cristas com traços de giz ou carvão e orientação pelo eixo dominante de alinhamento eólico dos yardangs (Sobrevivência CD 14).';
 
@@ -47767,7 +47767,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.yardangRisk = 'Batedores que sobem à crista afilada do yardang para triangulação visual enfrentam bordas friáveis de argilito sob rajadas laterais súbitas; a perda de equilíbrio projeta o aventureiro em queda de 12 metros encosta abaixo com 4d6 de concussão e lacerações (DMG p. 110; XGE p. 109).';
+      hazard.yardangRisk = 'Batedores que sobem à crista afilada do yardang para triangulação visual enfrentam bordas friáveis de argilito sob rajadas laterais súbitas; a perda de equilíbrio projeta o aventureiro em queda de 12 metros encosta abaixo com 4d6 de concussão e lacerações.';
 
       hazard.pioneerMitigation = 'Uso de arreios de escalada com grampos de ancoragem e progressão a cavalo sobre a crista (Atletismo ou Sobrevivência CD 13).';
 
@@ -47797,7 +47797,7 @@
 
       defenseTitle: 'Bivaque em Sulco Côncavo de Sotavento do Yardang',
 
-      yardangAndCampSafety: 'O acampamento é instalado no flanco protegido do yardang, aninhado em um sulco eólico côncavo esculpido pela aerodinâmica natural da montanha; a crista deflete completamente as tempestades frontais e gera sombra contínua 10°C mais fresca que o deserto aberto (DMG p. 111).',
+      yardangAndCampSafety: 'O acampamento é instalado no flanco protegido do yardang, aninhado em um sulco eólico côncavo esculpido pela aerodinâmica natural da montanha; a crista deflete completamente as tempestades frontais e gera sombra contínua 10°C mais fresca que o deserto aberto.',
 
       yardangAndWatch: 'A sentinela posicionada no ombro intermediário da crista domina a visão de todo o corredor de deflação com vantagem em testes de Percepção contra aproximações hostis.',
 
@@ -47815,7 +47815,7 @@
 
       defense.defenseTitle = 'Poço de Umidade Fóssil em Calha de Deflação';
 
-      defense.yardangAndCampSafety = 'Escavação rápida no ponto mais profundo da calha onde a ação eólica expôs sedimentos lacustres ancestrais com umidade capilar ascendente (PHB p. 150).';
+      defense.yardangAndCampSafety = 'Escavação rápida no ponto mais profundo da calha onde a ação eólica expôs sedimentos lacustres ancestrais com umidade capilar ascendente.';
 
       defense.yardangAndWatch = 'Produz até 30 litros de água límpida filtrada pelo silte argiloso, restaurando +1 dado de vida adicional aos membros do grupo durante o descanso longo.';
 
@@ -47825,7 +47825,7 @@
 
       defense.defenseTitle = 'Parapeito de Lajes de Argilito Compactado';
 
-      defense.yardangAndCampSafety = 'Lajes tabulares recolhidas da base do yardang são assentadas em cunha defensiva cruzando a entrada do corredor, criando um reduto de 1,5 metro de altura (PHB p. 185).';
+      defense.yardangAndCampSafety = 'Lajes tabulares recolhidas da base do yardang são assentadas em cunha defensiva cruzando a entrada do corredor, criando um reduto de 1,5 metro de altura.';
 
       defense.yardangAndWatch = 'Concede cobertura três-quartos (+5 na CA e +5 em salvaguardas de Destreza) contra rajadas de areia e flechas de saqueadores do deserto.';
 
@@ -47867,7 +47867,7 @@
 
       saveType: 'Destreza',
 
-      pavementRisk: 'Ventos rasantes de 90 km/h canalizam grãos de sílica dura contra o pavimento de ventifactos facetados no nível do solo; a esteira de areia atua como jato abrasivo pontiagudo que rasga polainas de couro, fura odres e inflige 3d6 de dano perfurante e cortante na comitiva (DMG p. 110, 246; PHB p. 182-183).',
+      pavementRisk: 'Ventos rasantes de 90 km/h canalizam grãos de sílica dura contra o pavimento de ventifactos facetados no nível do solo; a esteira de areia atua como jato abrasivo pontiagudo que rasga polainas de couro, fura odres e inflige 3d6 de dano perfurante e cortante na comitiva.',
 
       pioneerMitigation: 'Batedores posicionando escudos pesados rente ao solo na vanguarda e envolvendo calçados e patas de montarias em bandagens duplas de lona encerada (Sobrevivência ou Atletismo CD 14).',
 
@@ -47889,7 +47889,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.pavementRisk = 'O orvalho da madrugada umedece a película vítrea de óxidos de manganês e ferro que recobre os seixos intertravados do reg; o piso rochoso torna-se tão escorregadio quanto gelo negro, exigindo salvaguarda de Destreza CD 14 para não sofrer quedas violentas com 2d8 de concussão e torção de ligamentos (DMG p. 110; PHB p. 185).';
+      hazard.pavementRisk = 'O orvalho da madrugada umedece a película vítrea de óxidos de manganês e ferro que recobre os seixos intertravados do reg; o piso rochoso torna-se tão escorregadio quanto gelo negro, exigindo salvaguarda de Destreza CD 14 para não sofrer quedas violentas com 2d8 de concussão e torção de ligamentos.';
 
       hazard.pioneerMitigation = 'Uso de bastões de marcha com pontas de ferro e marcha compassada evitando acelerações bruscas sobre o mosaico polido (Sobrevivência CD 13).';
 
@@ -47903,7 +47903,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.pavementRisk = 'A queda térmica brusca de 45°C para o congelamento sob o céu limpo dispara contração violenta nos blocos de basalto e sílex do pavimento; os seixos explodem espontaneamente em lascas cortantes que voam em estilhaços com 2d6 de dano cortante e perfuração de membros inferiores (PHB p. 183; DMG p. 110).';
+      hazard.pavementRisk = 'A queda térmica brusca de 45°C para o congelamento sob o céu limpo dispara contração violenta nos blocos de basalto e sílex do pavimento; os seixos explodem espontaneamente em lascas cortantes que voam em estilhaços com 2d6 de dano cortante e perfuração de membros inferiores.';
 
       hazard.pioneerMitigation = 'Uso de caneleiras reforçadas com placas de metal e dispersão tática da linha de marcha evitando aglomeração (Sobrevivência CD 13).';
 
@@ -47917,7 +47917,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.pavementRisk = 'A carapaça negra de manganês do reg absorve calor solar maciço e projeta colunas de ar trêmulas que encobrem depressões e geram miragens ilusórias; aventureiros sofrem cegueira luminosa temporária e perdem pontos de orientação sob risco de 1 nível de exaustão (DMG p. 110; XGE p. 109).';
+      hazard.pavementRisk = 'A carapaça negra de manganês do reg absorve calor solar maciço e projeta colunas de ar trêmulas que encobrem depressões e geram miragens ilusórias; aventureiros sofrem cegueira luminosa temporária e perdem pontos de orientação sob risco de 1 nível de exaustão.';
 
       hazard.pioneerMitigation = 'Uso de viseiras de fenda de madeira ou osso polido e navegação rigorosa por sombras solares e ventifactos orientados (Natureza ou Sobrevivência CD 13).';
 
@@ -47947,7 +47947,7 @@
 
       defenseTitle: 'Bivaque Ancorado em Mosaico de Reg Intertravado',
 
-      pavementAndCampSafety: 'O piso do acampamento é estruturado diretamente sobre a couraça de seixos do reg intertravados, que forma uma plataforma horizontal compacta indeformável; estacas de ferro são calçadas nas juntas da carapaça, garantindo fixação rígida imune a tempestades de areia e solo 100% livre de peçonhas escavadoras (DMG p. 111).',
+      pavementAndCampSafety: 'O piso do acampamento é estruturado diretamente sobre a couraça de seixos do reg intertravados, que forma uma plataforma horizontal compacta indeformável; estacas de ferro são calçadas nas juntas da carapaça, garantindo fixação rígida imune a tempestades de areia e solo 100% livre de peçonhas escavadoras.',
 
       pavementAndWatch: 'A ausência total de vegetação alta e a rigidez do pavimento plano oferecem visão de 360 graus até o horizonte, concedendo vantagem em testes de Percepção à sentinela contra aproximações furtivas.',
 
@@ -47965,7 +47965,7 @@
 
       defense.defenseTitle = 'Leito Aquecido em Silte Sub-Pavimento Aerado';
 
-      defense.pavementAndCampSafety = 'Remoção parcial de placas do mosaico superficial para acessar o horizonte de silte e argila aerada subjacente; brasas e pedras aquecidas são enterradas para gerar irradiação térmica contínua durante a noite glacial do deserto (PHB p. 150).';
+      defense.pavementAndCampSafety = 'Remoção parcial de placas do mosaico superficial para acessar o horizonte de silte e argila aerada subjacente; brasas e pedras aquecidas são enterradas para gerar irradiação térmica contínua durante a noite glacial do deserto.';
 
       defense.pavementAndWatch = 'Mantém o abrigo a 18°C constante mesmo com temperaturas externas de 0°C, restaurando +1 dado de vida adicional aos aventureiros durante o descanso longo.';
 
@@ -47975,7 +47975,7 @@
 
       defense.defenseTitle = 'Marco de Vigília em Moledro de Ventifactos Facetados';
 
-      defense.pavementAndCampSafety = 'Moledro cônico de 2 metros erguido com ventifactos angulares e seixos de verniz negro pesados, servindo de parapeito de vigia e ponto de triangulação inabalável (PHB p. 185).';
+      defense.pavementAndCampSafety = 'Moledro cônico de 2 metros erguido com ventifactos angulares e seixos de verniz negro pesados, servindo de parapeito de vigia e ponto de triangulação inabalável.';
 
       defense.pavementAndWatch = 'Concede cobertura três-quartos (+5 na CA e +5 em salvaguardas de Destreza) contra ventanias de areia e arqueiros inimigos na planície aberta.';
 
@@ -48017,7 +48017,7 @@
 
       saveType: 'Constituição',
 
-      windRisk: 'O vento orográfico descende abruptamente pelo flanco de sotavento a 120 km/h, elevando a temperatura em 22°C em minutos e derrubando a umidade relativa para menos de 7%; a evaporação celular violenta drena cantis e inflige 3d6 de dano de fogo/desidratação, impondo 1 nível de exaustão caso falhe na salvaguarda de Constituição CD 15 (DMG p. 110, 246; PHB p. 182-183).',
+      windRisk: 'O vento orográfico descende abruptamente pelo flanco de sotavento a 120 km/h, elevando a temperatura em 22°C em minutos e derrubando a umidade relativa para menos de 7%; a evaporação celular violenta drena cantis e inflige 3d6 de dano de fogo/desidratação, impondo 1 nível de exaustão caso falhe na salvaguarda de Constituição CD 15.',
 
       pioneerMitigation: 'Batedores monitorando a formação do muro de nuvens de barlavento (Föhn-Wall) e racionando sais eletrolíticos com imersão prévia de odres de água em sacas de lã umedecida (Sobrevivência ou Natureza CD 14).',
 
@@ -48039,7 +48039,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.windRisk = 'O ar superaquecido e ressecado sopra como fole de fornalha sobre os capins e bosques secos do sopé da montanha; fagulhas minerais de atrito inflamam uma frente de chamas de 5 quilômetros que corre a 80 km/h, exigindo salvaguarda de Destreza CD 15 para transpor a linha de fogo ou sofrer 4d6 de dano de fogo mais 2d6 de concussão por queda de árvores incandescentes (DMG p. 110; PHB p. 185).';
+      hazard.windRisk = 'O ar superaquecido e ressecado sopra como fole de fornalha sobre os capins e bosques secos do sopé da montanha; fagulhas minerais de atrito inflamam uma frente de chamas de 5 quilômetros que corre a 80 km/h, exigindo salvaguarda de Destreza CD 15 para transpor a linha de fogo ou sofrer 4d6 de dano de fogo mais 2d6 de concussão por queda de árvores incandescentes.';
 
       hazard.pioneerMitigation = 'Abertura imediata de aceiros com foices e lançamento de contra-fogo controlado para consumir o combustível a barlavento da posição da comitiva (Sobrevivência CD 14).';
 
@@ -48053,7 +48053,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.windRisk = 'Turbilhões em rotor descem as escarpas em vórtices oscilantes com pressão dinâmica de 140 km/h, arremessando aventureiros contra esporões rochosos e arrancando arreios de montarias; salvaguarda de Força CD 14 para não ser derrubado e arrastado 40 pés com 3d6 de concussão (PHB p. 183; DMG p. 110).';
+      hazard.windRisk = 'Turbilhões em rotor descem as escarpas em vórtices oscilantes com pressão dinâmica de 140 km/h, arremessando aventureiros contra esporões rochosos e arrancando arreios de montarias; salvaguarda de Força CD 14 para não ser derrubado e arrastado 40 pés com 3d6 de concussão.';
 
       hazard.pioneerMitigation = 'Ancoragem imediata com estacas de aço fincadas em juntas de rocha e progressão de gatinhas rastejando junto à encosta (Atletismo ou Sobrevivência CD 13).';
 
@@ -48067,7 +48067,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.windRisk = 'Na transição dos campos de neve altos, o calor adiabático derrete e sublima as raízes de sustentação de cornijas e placas de gelo em minutos; blocos de centenas de toneladas desmoronam em avalanche de fusão mista com 3d10 de concussão sobre a trilha (DMG p. 110; XGE p. 109).';
+      hazard.windRisk = 'Na transição dos campos de neve altos, o calor adiabático derrete e sublima as raízes de sustentação de cornijas e placas de gelo em minutos; blocos de centenas de toneladas desmoronam em avalanche de fusão mista com 3d10 de concussão sobre a trilha.';
 
       hazard.pioneerMitigation = 'Inspeção ótica de fraturas basais nas cornijas com luneta e recuo acelerado para espigões rochosos convexos (Percepção ou Natureza CD 13).';
 
@@ -48097,7 +48097,7 @@
 
       defenseTitle: 'Bivaque em Reentrância Sob Parede de Sotavento',
 
-      windAndCampSafety: 'O bivaque é montado em uma caverna rasa ou reentrância côncava sob o paredão da escarpa de sotavento; a rocha suspensa deflete o jato de vento descendente por cima do vão, mantendo as tendas e o fogo de acampamento em calmaria estável (DMG p. 111).',
+      windAndCampSafety: 'O bivaque é montado em uma caverna rasa ou reentrância côncava sob o paredão da escarpa de sotavento; a rocha suspensa deflete o jato de vento descendente por cima do vão, mantendo as tendas e o fogo de acampamento em calmaria estável.',
 
       windAndWatch: 'A posição protegida impede que faíscas sejam sopradas para a estepe e garante campo visual desobstruído sobre o vale sem ofuscamento por turbilhões de poeira e cinzas, concedendo vantagem em testes de Percepção para a sentinela.',
 
@@ -48115,7 +48115,7 @@
 
       defense.defenseTitle = 'Armadilha Térmica de Condensação e Cisterna Evaporativa';
 
-      defense.windAndCampSafety = 'Telas e mantas de condensação com pedras decantadas montadas contra as primeiras correntes orográficas frescas capturam a umidade residual antes do dessecamento total (PHB p. 150).';
+      defense.windAndCampSafety = 'Telas e mantas de condensação com pedras decantadas montadas contra as primeiras correntes orográficas frescas capturam a umidade residual antes do dessecamento total.';
 
       defense.windAndWatch = 'Assegura reserva de até 35 litros de água fresca resfriada para hidratação preventiva do grupo e alívio do calor extremo, restaurando +1 dado de vida adicional aos aventureiros.';
 
@@ -48125,7 +48125,7 @@
 
       defense.defenseTitle = 'Parapeito Defletor Aerodinâmico de Pedra em Cunha';
 
-      defense.windAndCampSafety = 'Blocos pesados de granito ou gnaisse são empilhados em formato de cunha apontando para a crista do monte, criando uma rampa defletora que conduz os ventos catabáticos de 120 km/h por cima do abrigo (PHB p. 185).';
+      defense.windAndCampSafety = 'Blocos pesados de granito ou gnaisse são empilhados em formato de cunha apontando para a crista do monte, criando uma rampa defletora que conduz os ventos catabáticos de 120 km/h por cima do abrigo.';
 
       defense.windAndWatch = 'Garante cobertura três-quartos (+5 na CA e +5 em salvaguardas de Destreza) contra estilhaços de galhos e pedregulhos e impede desabamento das tendas.';
 
@@ -48167,7 +48167,7 @@
 
       saveType: 'Destreza',
 
-      valleyRisk: 'O leito seco de seixos calcários oculta um engolidouro cárstico instável coberto por crostas finas de carbonato; a passagem da comitiva rompe a abóbada fóssil, colapsando o piso em funil abissal de brita e blocos com 3d8 de concussão e soterramento parcial (DMG p. 110, 246; PHB p. 182-183).',
+      valleyRisk: 'O leito seco de seixos calcários oculta um engolidouro cárstico instável coberto por crostas finas de carbonato; a passagem da comitiva rompe a abóbada fóssil, colapsando o piso em funil abissal de brita e blocos com 3d8 de concussão e soterramento parcial.',
 
       pioneerMitigation: 'Batedores sondando o leito de seixos com varas rígidas de ferro e amarrando cordadas antes da transposição de linhas de fratura cárstica (Sobrevivência ou Investigação CD 14).',
 
@@ -48189,7 +48189,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.valleyRisk = 'Chuvas torrenciais no planalto cárstico superior sobrecarregam o lençol freático confinado, provocando refluxo explosivo através das estavelas do vale cego; jatos repentinos de lama e cascalho inundam o cânion seco em segundos com 3d6 de concussão, empurrando aventureiros por 30 pés contra rochedos pontiagudos com perda de itens leves (DMG p. 110; PHB p. 185).';
+      hazard.valleyRisk = 'Chuvas torrenciais no planalto cárstico superior sobrecarregam o lençol freático confinado, provocando refluxo explosivo através das estavelas do vale cego; jatos repentinos de lama e cascalho inundam o cânion seco em segundos com 3d6 de concussão, empurrando aventureiros por 30 pés contra rochedos pontiagudos com perda de itens leves.';
 
       hazard.pioneerMitigation = 'Observação de borbulhamento ruidoso nas fendas do talvegue e fuga imediata para os terraços aluviais fósseis elevados (Percepção CD 14).';
 
@@ -48203,7 +48203,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.valleyRisk = 'Ventos fortes canalizados pelas paredes verticais do vale cego levantam turbilhões abrasivos de pó de carbonato de cálcio e cal micronizada; a inalação cáustica inflige 2d6 de dano de veneno, tosse convulsiva e cegueira temporária por 1 hora se falhar na salvaguarda (PHB p. 183; DMG p. 110).';
+      hazard.valleyRisk = 'Ventos fortes canalizados pelas paredes verticais do vale cego levantam turbilhões abrasivos de pó de carbonato de cálcio e cal micronizada; a inalação cáustica inflige 2d6 de dano de veneno, tosse convulsiva e cegueira temporária por 1 hora se falhar na salvaguarda.';
 
       hazard.pioneerMitigation = 'Uso de lenços umedecidos com vinagre ou água limpa amarrados sobre boca e narinas e óculos com lentes protegidas (Sobrevivência CD 13).';
 
@@ -48217,7 +48217,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.valleyRisk = 'No término cego do vale, onde o rio ancestral outrora desaparecia, blocos de travertino e calcário fraturado desabam do arco residual e do paredão terminal de 60 metros; o estrondo lança chuvas de escombros de 3d10 de concussão que bloqueiam o recuo da comitiva (DMG p. 110; XGE p. 109).';
+      hazard.valleyRisk = 'No término cego do vale, onde o rio ancestral outrora desaparecia, blocos de travertino e calcário fraturado desabam do arco residual e do paredão terminal de 60 metros; o estrondo lança chuvas de escombros de 3d10 de concussão que bloqueiam o recuo da comitiva.';
 
       hazard.pioneerMitigation = 'Identificação de fendas de tração ativas e estalagmites caídas no fundo do cânion, contornando a projeção vertical dos arcos (Percepção ou Natureza CD 13).';
 
@@ -48247,7 +48247,7 @@
 
       defenseTitle: 'Bivaque em Terraço Aluvial Fóssil Elevado',
 
-      valleyAndCampSafety: 'O acampamento é estabelecido em uma bancada fóssil de calcário 6 metros acima do talvegue do vale cego; o piso elevado mantém as tendas completamente a salvo de refluxos repentinos de estavelas e inundações torrenciais subterrâneas (DMG p. 111).',
+      valleyAndCampSafety: 'O acampamento é estabelecido em uma bancada fóssil de calcário 6 metros acima do talvegue do vale cego; o piso elevado mantém as tendas completamente a salvo de refluxos repentinos de estavelas e inundações torrenciais subterrâneas.',
 
       valleyAndWatch: 'A posição elevada sobre o cânion proporciona visão desimpedida ao longo de todo o leito seco, concedendo vantagem em testes de Percepção para a sentinela contra aproximações furtivas.',
 
@@ -48265,7 +48265,7 @@
 
       defense.defenseTitle = 'Poço de Filtração em Cascalho Cárstico Profundo';
 
-      defense.valleyAndCampSafety = 'Escavação manual em leito de seixos e britas calcárias limpas próxima ao sumidouro inativo canaliza o fluxo freático perene com decantação de argilas e detritos (PHB p. 150).';
+      defense.valleyAndCampSafety = 'Escavação manual em leito de seixos e britas calcárias limpas próxima ao sumidouro inativo canaliza o fluxo freático perene com decantação de argilas e detritos.';
 
       defense.valleyAndWatch = 'Produz água mineral límpida, pura e abundante (até 40 litros por descanso), acelerando a recuperação de exaustão e restaurando +1 dado de vida adicional aos membros do grupo.';
 
@@ -48275,7 +48275,7 @@
 
       defense.defenseTitle = 'Parapeito de Lajes de Calcário Intertravadas';
 
-      defense.valleyAndCampSafety = 'Placas planas de calcário fraturado recolhidas nas escarpas do vale são empilhadas em junta seca, formando trincheiras de 1,5 metro de altura ao redor do perímetro das tendas (PHB p. 185).';
+      defense.valleyAndCampSafety = 'Placas planas de calcário fraturado recolhidas nas escarpas do vale são empilhadas em junta seca, formando trincheiras de 1,5 metro de altura ao redor do perímetro das tendas.';
 
       defense.valleyAndWatch = 'Concede cobertura três-quartos (+5 na CA e +5 em salvaguardas de Destreza) contra rajadas de vento com poeira e ataques de projéteis de emboscadores trogloditas.';
 
@@ -48317,7 +48317,7 @@
 
       saveType: 'Destreza',
 
-      tuyaRisk: 'Os flancos verticais de 300 metros da tuya são constituídos por tufos vítreos de palagonita intemperizada e brechas de hialoclastito que repousam em ângulo crítico; a passagem de montarias e aventureiros na trilha estreita de meia-encosta rompe uma camada friável, disparando um desmoronamento maciço de blocos angulosos com 4d8 de concussão e queda no abismo glacial (DMG p. 110, 246; PHB p. 182-183).',
+      tuyaRisk: 'Os flancos verticais de 300 metros da tuya são constituídos por tufos vítreos de palagonita intemperizada e brechas de hialoclastito que repousam em ângulo crítico; a passagem de montarias e aventureiros na trilha estreita de meia-encosta rompe uma camada friável, disparando um desmoronamento maciço de blocos angulosos com 4d8 de concussão e queda no abismo glacial.',
 
       pioneerMitigation: 'Batedores sondando a coesão das cinzas consolidadas com martelos de geólogo e contornando a montanha por esporões de lavas em almofada estáveis (Sobrevivência ou Investigação CD 14).',
 
@@ -48339,7 +48339,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.tuyaRisk = 'O calor geotérmico residual das paredes da tuya derrete a borda do manto de gelo circundante, criando um fosso abissal oculto de 40 metros coberto por pontes finas de neve fofa; a ruptura súbita da ponte precipita o explorador entre a parede de rocha quente e o paredão de gelo azul com 3d8 de concussão e risco de esmagamento criogênico (DMG p. 110; PHB p. 185).';
+      hazard.tuyaRisk = 'O calor geotérmico residual das paredes da tuya derrete a borda do manto de gelo circundante, criando um fosso abissal oculto de 40 metros coberto por pontes finas de neve fofa; a ruptura súbita da ponte precipita o explorador entre a parede de rocha quente e o paredão de gelo azul com 3d8 de concussão e risco de esmagamento criogênico.';
 
       hazard.pioneerMitigation = 'Sondagem sistemática com varas de avalanche de 3 metros e travessia amarrada em cordada tripla (Sobrevivência CD 13).';
 
@@ -48353,7 +48353,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.tuyaRisk = 'A capa de basalto prismático horizontal que coroa a tuya projeta-se em beirais suspensos sobre o talude inferior; o gelo intersticial nas juntas colunares expande-se por congelamento e desaloja prismas hexagonais de 5 toneladas que despencam em cascata sobre as rampas de acesso com 3d10 de concussão (DMG p. 110; XGE p. 109).';
+      hazard.tuyaRisk = 'A capa de basalto prismático horizontal que coroa a tuya projeta-se em beirais suspensos sobre o talude inferior; o gelo intersticial nas juntas colunares expande-se por congelamento e desaloja prismas hexagonais de 5 toneladas que despencam em cascata sobre as rampas de acesso com 3d10 de concussão.';
 
       hazard.pioneerMitigation = 'Observação ótica de fendas de tração na borda superior e marcha acelerada fora da linha de prumo dos beirais (Percepção CD 13).';
 
@@ -48367,7 +48367,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.tuyaRisk = 'Ventos fortes canalizados pelas escarpas verticais da montanha arrancam esquírolas microscópicas de vidro basáltico e sideromelano das brechas friáveis; a nuvem abrasiva rasga roupas, inflige 2d6 de dano cortante e penetra nos olhos e garganta, exigindo salvaguarda de Constituição CD 14 para não sofrer cegueira temporária por 1 hora e tosse sufocante (DMG p. 110; PHB p. 183).';
+      hazard.tuyaRisk = 'Ventos fortes canalizados pelas escarpas verticais da montanha arrancam esquírolas microscópicas de vidro basáltico e sideromelano das brechas friáveis; a nuvem abrasiva rasga roupas, inflige 2d6 de dano cortante e penetra nos olhos e garganta, exigindo salvaguarda de Constituição CD 14 para não sofrer cegueira temporária por 1 hora e tosse sufocante.';
 
       hazard.pioneerMitigation = 'Uso de máscaras de couro fechadas com visores de cristal e proteção integral de peles seladas (Sobrevivência CD 13).';
 
@@ -48397,7 +48397,7 @@
 
       defenseTitle: 'Bivaque Fortaleza no Platô Superior da Tuya',
 
-      tuyaAndCampSafety: 'O acampamento é instalado na mesa plana de basalto subaéreo no cume da tuya, 300 metros acima da geleira circundante; o platô possui piso sólido horizontal indeformável e drenagem perfeita imune a enxurradas e avalanches (DMG p. 111).',
+      tuyaAndCampSafety: 'O acampamento é instalado na mesa plana de basalto subaéreo no cume da tuya, 300 metros acima da geleira circundante; o platô possui piso sólido horizontal indeformável e drenagem perfeita imune a enxurradas e avalanches.',
 
       tuyaAndWatch: 'As falésias verticais em 360 graus tornam o cume inacessível a qualquer criatura sem asas, transformando a única garganta de escalada em um afunilamento guardado por uma sentinela com vantagem em Percepção.',
 
@@ -48415,7 +48415,7 @@
 
       defense.defenseTitle = 'Bacia Cisterna de Degelo em Cavidade Basáltica';
 
-      defense.tuyaAndCampSafety = 'Depressões naturais na rocha basáltica negra aquecida pela insolação acumulam água de degelo pura, filtrada pelo leito rochoso e aquecida a 15°C durante o dia (PHB p. 150).';
+      defense.tuyaAndCampSafety = 'Depressões naturais na rocha basáltica negra aquecida pela insolação acumulam água de degelo pura, filtrada pelo leito rochoso e aquecida a 15°C durante o dia.';
 
       defense.tuyaAndWatch = 'Garante suprimento de até 35 litros diários de água potável límpida para toda a comitiva sem esforço de derretimento artificial de gelo.';
 
@@ -48425,7 +48425,7 @@
 
       defense.defenseTitle = 'Baluarte de Colunas Hexagonais de Basalto';
 
-      defense.tuyaAndCampSafety = 'Prismas caídos de diabásio e basalto são empilhados em meia-lua na entrada da rampa de acesso, formando um parapeito de 1,6 metro de espessura (PHB p. 185).';
+      defense.tuyaAndCampSafety = 'Prismas caídos de diabásio e basalto são empilhados em meia-lua na entrada da rampa de acesso, formando um parapeito de 1,6 metro de espessura.';
 
       defense.tuyaAndWatch = 'Concede cobertura total (+5 na CA) contra arqueiros inimigos e impede qualquer investida física contra o perímetro do acampamento.';
 
@@ -48435,7 +48435,7 @@
 
       defense.defenseTitle = 'Nicho Abrigado em Bancada de Palagonita com Calor Geotérmico';
 
-      defense.tuyaAndCampSafety = 'Cavidades naturais na meia-encosta da tuya aquecidas por condução magmática fóssil a 22°C que cortam o vento polar externo (DMG p. 111).';
+      defense.tuyaAndCampSafety = 'Cavidades naturais na meia-encosta da tuya aquecidas por condução magmática fóssil a 22°C que cortam o vento polar externo.';
 
       defense.tuyaAndWatch = 'Fornece dormitório quente e protegido que elimina qualquer risco de hipotermia sem produzir chamas visíveis no horizonte.';
 
@@ -48477,7 +48477,7 @@
 
       saveType: 'Destreza',
 
-      fissureRisk: 'A fissura linear de 2 quilômetros rasga o solo com rugido subterrâneo disparando uma cortina contínua de fontes de lava a 150 metros de altitude; o vento espalha pelotas incandescentes de escória fluida que chovem em raio de 300 metros, exigindo salvaguarda de Destreza CD 15 para se abrigar sob escudos e muretas ou sofrer 3d8 de dano de fogo mais 2d6 de concussão com queima de vestes e arreios de montarias (DMG p. 110, 246; PHB p. 182-183).',
+      fissureRisk: 'A fissura linear de 2 quilômetros rasga o solo com rugido subterrâneo disparando uma cortina contínua de fontes de lava a 150 metros de altitude; o vento espalha pelotas incandescentes de escória fluida que chovem em raio de 300 metros, exigindo salvaguarda de Destreza CD 15 para se abrigar sob escudos e muretas ou sofrer 3d8 de dano de fogo mais 2d6 de concussão com queima de vestes e arreios de montarias.',
 
       pioneerMitigation: 'Batedores monitorando o alinhamento da fissura e a direção dos ventos dominantes, contornando a rampa de spatter a barlavento por corredores de cinza resfriada (Sobrevivência ou Natureza CD 14).',
 
@@ -48499,7 +48499,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.fissureRisk = 'A fenda eruptiva libera plumas densas e rasteiras de dióxido de enxofre e gás fluorídrico que se acumulam nas depressões do terreno formando uma neblina azulada corrosiva; inalar o gás queima as mucosas pulmonares, causa 3d6 de veneno e impõe 1 nível de exaustão e tosse com sangue em aventureiros desprotegidos (DMG p. 110; PHB p. 183).';
+      hazard.fissureRisk = 'A fenda eruptiva libera plumas densas e rasteiras de dióxido de enxofre e gás fluorídrico que se acumulam nas depressões do terreno formando uma neblina azulada corrosiva; inalar o gás queima as mucosas pulmonares, causa 3d6 de veneno e impõe 1 nível de exaustão e tosse com sangue em aventureiros desprotegidos.';
 
       hazard.pioneerMitigation = 'Uso de máscaras faciais de couro embebidas em solução de cal e água doce e marcha pelas cristas elevadas do terreno (Sobrevivência CD 14).';
 
@@ -48513,7 +48513,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.fissureRisk = 'Sobre a garganta da fissura forma-se uma abóbada frágil de bombas vulcânicas aglutinadas e escória espatiforme semi-oca que parece uma ponte de pedra natural; o peso da comitiva rompe a crosta térmica de 20 cm, exigindo salvaguarda de Destreza CD 14 para saltar para as margens sólidas ou cair na calha incandescente com 3d10 de fogo e soterramento parcial (DMG p. 110; PHB p. 185).';
+      hazard.fissureRisk = 'Sobre a garganta da fissura forma-se uma abóbada frágil de bombas vulcânicas aglutinadas e escória espatiforme semi-oca que parece uma ponte de pedra natural; o peso da comitiva rompe a crosta térmica de 20 cm, exigindo salvaguarda de Destreza CD 14 para saltar para as margens sólidas ou cair na calha incandescente com 3d10 de fogo e soterramento parcial.';
 
       hazard.pioneerMitigation = 'Teste de sustentação da ponte com pontões pesados de ferro e avanço com cabo guia ancorado em rocha sã distante (Atletismo CD 13).';
 
@@ -48527,7 +48527,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.fissureRisk = 'A injeção veloz de magma basáltico a pouca profundidade ergue o solo em um domo de tensão que racha em fendas laterais de 2 metros de largura acompanhadas de tremores de terra; a terra se abre sob os pés dos exploradores, exigindo salvaguarda de Destreza CD 14 ou cair na greta sofrendo 2d8 de concussão e ficando Caído entre blocos instáveis (DMG p. 110; XGE p. 109).';
+      hazard.fissureRisk = 'A injeção veloz de magma basáltico a pouca profundidade ergue o solo em um domo de tensão que racha em fendas laterais de 2 metros de largura acompanhadas de tremores de terra; a terra se abre sob os pés dos exploradores, exigindo salvaguarda de Destreza CD 14 ou cair na greta sofrendo 2d8 de concussão e ficando Caído entre blocos instáveis.';
 
       hazard.pioneerMitigation = 'Percepção de microsismos contínuos no solo e desvio de linhas com desprendimento de vapor e trincas frescas (Percepção ou Sobrevivência CD 13).';
 
@@ -48557,7 +48557,7 @@
 
       defenseTitle: 'Bivaque na Crista de Rampa de Escória a Barlavento',
 
-      fissureAndCampSafety: 'O acampamento é estabelecido no dorso de uma rampa fóssil de escória soldada a 20 metros de altura, rigorosamente posicionado a barlavento das fumarolas ativas para receber ar puro constante do platô (DMG p. 111).',
+      fissureAndCampSafety: 'O acampamento é estabelecido no dorso de uma rampa fóssil de escória soldada a 20 metros de altura, rigorosamente posicionado a barlavento das fumarolas ativas para receber ar puro constante do platô.',
 
       fissureAndWatch: 'A crista elevada de rocha aglutinada oferece linha de visão de 360 graus por 3 milhas sobre a planície basáltica e barreira natural intransponível contra fluxos de lava rasteiros.',
 
@@ -48575,7 +48575,7 @@
 
       defense.defenseTitle = 'Coletor de Água Pluvial em Funil de Basalto Limpo';
 
-      defense.fissureAndCampSafety = 'Depressões circulares revestidas por placas de basalto vítreo impermeável limpas pela chuva que acumulam exclusivamente água doce pluvial longe da cinza ácida (PHB p. 150).';
+      defense.fissureAndCampSafety = 'Depressões circulares revestidas por placas de basalto vítreo impermeável limpas pela chuva que acumulam exclusivamente água doce pluvial longe da cinza ácida.';
 
       defense.fissureAndWatch = 'Fornece suprimento de até 30 litros diários de água doce potável para a comitiva, eliminando o risco de consumir poças contaminadas por flúor ou enxofre.';
 
@@ -48585,7 +48585,7 @@
 
       defense.defenseTitle = 'Muralha Corta-Fogo e Parapeito de Escória Soldada';
 
-      defense.fissureAndCampSafety = 'Trincheira ladeada por muretas de blocos densos de escória vulcânica de 1,5 metro que desvia pequenos fluxos de lava e bloqueia projéteis piroclásticos errantes (PHB p. 185).';
+      defense.fissureAndCampSafety = 'Trincheira ladeada por muretas de blocos densos de escória vulcânica de 1,5 metro que desvia pequenos fluxos de lava e bloqueia projéteis piroclásticos errantes.';
 
       defense.fissureAndWatch = 'Concede cobertura total (+5 na CA) para as sentinelas contra disparos e impede aproximações de bestas ígneas hostis.';
 
@@ -48595,7 +48595,7 @@
 
       defense.defenseTitle = 'Forno Natural em Câmara de Dique de Resfriamento';
 
-      defense.fissureAndCampSafety = 'Nichos basais em diques antigos que irradiam calor residual suave e constante a 30°C, perfeitos para cozinhar provisões e secar roupas sem chamas delatoras (DMG p. 111).';
+      defense.fissureAndCampSafety = 'Nichos basais em diques antigos que irradiam calor residual suave e constante a 30°C, perfeitos para cozinhar provisões e secar roupas sem chamas delatoras.';
 
       defense.fissureAndWatch = 'Elimina necessidade de fogueiras que soltam fumaça preta no horizonte noturno, camuflando a presença do grupo.';
 
@@ -48637,7 +48637,7 @@
 
       saveType: 'Destreza',
 
-      moulinRisk: 'A trilha na superfície da geleira margeia um moinho circular de 6 metros de diâmetro onde uma torrente de degelo mergulha verticalmente por 50 metros em espiral; o lábio do poço é coberto por gelo vítreo lubrificado que cede sem atrito, exigindo salvaguarda de Destreza CD 15 para cravar o piolet de gelo ou despencar no abismo gélido sofrendo 4d8 de concussão por impacto nas paredes cilíndricas mais 2d6 de dano de frio com risco iminente de afogamento e hipotermia terminal (DMG p. 110, 246; PHB p. 182-183).',
+      moulinRisk: 'A trilha na superfície da geleira margeia um moinho circular de 6 metros de diâmetro onde uma torrente de degelo mergulha verticalmente por 50 metros em espiral; o lábio do poço é coberto por gelo vítreo lubrificado que cede sem atrito, exigindo salvaguarda de Destreza CD 15 para cravar o piolet de gelo ou despencar no abismo gélido sofrendo 4d8 de concussão por impacto nas paredes cilíndricas mais 2d6 de dano de frio com risco iminente de afogamento e hipotermia terminal.',
 
       pioneerMitigation: 'Batedores amarrados em cordada com grampos de doze pontas instalando estacas de gelo com linhas de recuo a 10 metros da borda do moinho (Sobrevivência ou Atletismo CD 14).',
 
@@ -48659,7 +48659,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.moulinRisk = 'Dentro das galerias basais da geleira, o entupimento temporário de um dreno por blocos de gelo represados acumula milhares de toneladas de água sob pressão colossal; a rolha de gelo se rompe disparando um jato pressurizado de água a 0°C com pedregulhos e blocos de gelo que varre o túnel com 3d8 de concussão e risco de esmagamento contra o teto de gelo (DMG p. 110; PHB p. 185).';
+      hazard.moulinRisk = 'Dentro das galerias basais da geleira, o entupimento temporário de um dreno por blocos de gelo represados acumula milhares de toneladas de água sob pressão colossal; a rolha de gelo se rompe disparando um jato pressurizado de água a 0°C com pedregulhos e blocos de gelo que varre o túnel com 3d8 de concussão e risco de esmagamento contra o teto de gelo.';
 
       hazard.pioneerMitigation = 'Observação de ruídos de compressão e flutuações no nível das poças internas antes de adentrar galerias basais (Percepção ou Investigação CD 14).';
 
@@ -48673,7 +48673,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.moulinRisk = 'O impacto da cascata de 50 metros contra o leito rochoso ecoa pelas galerias de gelo azul em frequências infrassônicas e estrondos contínuos de 105 dB; a reverberação causa náuseas severas, desequilíbrio labiríntico e surdez temporária por 1 hora, impondo desvantagem em testes de iniciativa e percepção auditiva (DMG p. 110; PHB p. 183).';
+      hazard.moulinRisk = 'O impacto da cascata de 50 metros contra o leito rochoso ecoa pelas galerias de gelo azul em frequências infrassônicas e estrondos contínuos de 105 dB; a reverberação causa náuseas severas, desequilíbrio labiríntico e surdez temporária por 1 hora, impondo desvantagem em testes de iniciativa e percepção auditiva.';
 
       hazard.pioneerMitigation = 'Uso de protetores de lã cardada com cera de abelha e comunicação tática exclusivamente por sinais manuais padronizados (Sobrevivência CD 13).';
 
@@ -48687,7 +48687,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.moulinRisk = 'O calor do ar externo que penetra pelo moinho derrete os apoios de seracs pontiagudos de 4 toneladas suspensos no teto da galeria; a quebra súbita precipita agulhas e estalagmites gigantescas de gelo cristalino sobre a passagem com 2d10 de perfuração e soterramento parcial (DMG p. 110; XGE p. 109).';
+      hazard.moulinRisk = 'O calor do ar externo que penetra pelo moinho derrete os apoios de seracs pontiagudos de 4 toneladas suspensos no teto da galeria; a quebra súbita precipita agulhas e estalagmites gigantescas de gelo cristalino sobre a passagem com 2d10 de perfuração e soterramento parcial.';
 
       hazard.pioneerMitigation = 'Inspeção com lanternas direcionadas para fraturas de tração no teto e travessia rápida em fila indiana espaçada (Percepção CD 13).';
 
@@ -48717,7 +48717,7 @@
 
       defenseTitle: 'Bivaque em Alcova Seca de Caverna de Gelo Azul',
 
-      moulinAndCampSafety: 'O acampamento é instalado em uma câmara lateral fóssil e desobstruída esculpida em gelo azul denso, situada 10 metros acima do conduto ativo de drenagem; o abrigo possui teto estável em abóbada imune a ventanias e tempestades de nevasca da superfície da geleira (DMG p. 111).',
+      moulinAndCampSafety: 'O acampamento é instalado em uma câmara lateral fóssil e desobstruída esculpida em gelo azul denso, situada 10 metros acima do conduto ativo de drenagem; o abrigo possui teto estável em abóbada imune a ventanias e tempestades de nevasca da superfície da geleira.',
 
       moulinAndWatch: 'A temperatura interna se mantém constante em 0°C mesmo quando o exterior atinge -25°C, e a entrada estreita do conduto é monitorada pelas sentinelas com cobertura natural e vantagem em Percepção.',
 
@@ -48735,7 +48735,7 @@
 
       defense.defenseTitle = 'Poço de Captação em Leito de Seixos Subglacial';
 
-      defense.moulinAndCampSafety = 'Bolsão de água de degelo decantada naturalmente através de bancos de seixos rolados no piso rochoso da caverna, límpida e livre de farinha de rocha glacial em suspensão (PHB p. 150).';
+      defense.moulinAndCampSafety = 'Bolsão de água de degelo decantada naturalmente através de bancos de seixos rolados no piso rochoso da caverna, límpida e livre de farinha de rocha glacial em suspensão.';
 
       defense.moulinAndWatch = 'Fornece suprimento abundante de água puríssima e cristalina para toda a comitiva sem necessidade de gastar combustível de fogueira derretendo neve.';
 
@@ -48745,7 +48745,7 @@
 
       defense.defenseTitle = 'Barricada de Blocos de Gelo Azul em Meia-Lua';
 
-      defense.moulinAndCampSafety = 'Blocos pesados de gelo denso cortados com serras de geleira são empilhados na boca de acesso da alcova, formando uma mureta inexpugnável de 1,6 metro (PHB p. 185).';
+      defense.moulinAndCampSafety = 'Blocos pesados de gelo denso cortados com serras de geleira são empilhados na boca de acesso da alcova, formando uma mureta inexpugnável de 1,6 metro.';
 
       defense.moulinAndWatch = 'Oferece cobertura total (+5 na CA) contra arqueiros e corta totalmente correntes de ar catabáticas geladas que descem pelos moinhos.';
 
@@ -48755,7 +48755,7 @@
 
       defense.defenseTitle = 'Perímetro Tático com Guizos e Fios de Cobre em Fissuras';
 
-      defense.moulinAndCampSafety = 'Fios finos de cobre tensionados na galeria de acesso com sinetas de bronze afixadas em parafusos tubulares de gelo (DMG p. 111).';
+      defense.moulinAndCampSafety = 'Fios finos de cobre tensionados na galeria de acesso com sinetas de bronze afixadas em parafusos tubulares de gelo.';
 
       defense.moulinAndWatch = 'Qualquer criatura que tente rastejar pelo túnel rompe os fios e faz as sinetas ressoarem na câmara de gelo, despertando as sentinelas com antecedência absoluta.';
 
@@ -48797,7 +48797,7 @@
 
       saveType: 'Força',
 
-      epigeneticRisk: 'O rio superimposto corta uma crista transversal de gnaisse duro em um desfiladeiro afunilado de apenas 3 metros de largura com paredões verticais de 60 metros; chuvas a montante disparam uma onda de torrente com 4 metros de lâmina de água barrenta e troncos arremessados em alta velocidade, exigindo salvaguarda de Força CD 15 para se fixar em grampos de escalada ou ser arrastado pelas corredeiras sofrendo 4d8 de concussão com risco de afogamento e esmagamento (DMG p. 110, 246; PHB p. 182-183).',
+      epigeneticRisk: 'O rio superimposto corta uma crista transversal de gnaisse duro em um desfiladeiro afunilado de apenas 3 metros de largura com paredões verticais de 60 metros; chuvas a montante disparam uma onda de torrente com 4 metros de lâmina de água barrenta e troncos arremessados em alta velocidade, exigindo salvaguarda de Força CD 15 para se fixar em grampos de escalada ou ser arrastado pelas corredeiras sofrendo 4d8 de concussão com risco de afogamento e esmagamento.',
 
       pioneerMitigation: 'Batedores atentos à mudança de coloração da água e eco prévio de estrondo a montante, instalando linhas estáticas de cabo de aço em banquetas altas de rocha (Sobrevivência ou Atletismo CD 14).',
 
@@ -48819,7 +48819,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.epigeneticRisk = 'No leito rochoso polido do cânion ocultam-se marmitas de gigante cilíndricas de 3 metros de profundidade escavadas por matacões giratórios; a água translúcida esconde a borda lisa como vidro onde o aventureiro escorrega caindo no poço com turbilhão de sucção que gira o corpo contra pedregulhos esféricos causando 2d8 de concussão e perda de fôlego (DMG p. 110; XGE p. 109).';
+      hazard.epigeneticRisk = 'No leito rochoso polido do cânion ocultam-se marmitas de gigante cilíndricas de 3 metros de profundidade escavadas por matacões giratórios; a água translúcida esconde a borda lisa como vidro onde o aventureiro escorrega caindo no poço com turbilhão de sucção que gira o corpo contra pedregulhos esféricos causando 2d8 de concussão e perda de fôlego.';
 
       hazard.pioneerMitigation = 'Sondagem sistemática do fundo de vau com varas ferradas e avanço amarrado em cordada dupla (Sobrevivência CD 13).';
 
@@ -48833,7 +48833,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.epigeneticRisk = 'A constrição da garganta rochosa acelera os ventos de altitude gerando rajadas supersônicas canalizadas com assovios estridentes de até 110 dB reverberados pelas paredes de gnaisse; o estrondo contínuo causa vertigem espacial, 2d6 de dano trovejante e surdez temporária por 1 hora com desvantagem em testes de Percepção auditiva (DMG p. 110; PHB p. 183).';
+      hazard.epigeneticRisk = 'A constrição da garganta rochosa acelera os ventos de altitude gerando rajadas supersônicas canalizadas com assovios estridentes de até 110 dB reverberados pelas paredes de gnaisse; o estrondo contínuo causa vertigem espacial, 2d6 de dano trovejante e surdez temporária por 1 hora com desvantagem em testes de Percepção auditiva.';
 
       hazard.pioneerMitigation = 'Uso de protetores auriculares de cera de abelha e avanço em fila baixa junto aos recortes de soco da parede (Sobrevivência CD 14).';
 
@@ -48847,7 +48847,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.epigeneticRisk = 'Matacões gigantescos de erosão fluvial ficam entalados entre as paredes da fenda 15 metros acima da trilha; a vibração de passos e a água de gotejamento soltam as cunhas de apoio, fazendo o bloco de 6 toneladas despencar como martelo gigante sobre a comitiva com 3d10 de concussão e bloqueio do desfiladeiro (DMG p. 110; PHB p. 185).';
+      hazard.epigeneticRisk = 'Matacões gigantescos de erosão fluvial ficam entalados entre as paredes da fenda 15 metros acima da trilha; a vibração de passos e a água de gotejamento soltam as cunhas de apoio, fazendo o bloco de 6 toneladas despencar como martelo gigante sobre a comitiva com 3d10 de concussão e bloqueio do desfiladeiro.';
 
       hazard.pioneerMitigation = 'Inspeção ótica de fissuras nos blocos suspensos e passagem individual rápida sem produzir ruídos (Investigação ou Furtividade CD 13).';
 
@@ -48877,7 +48877,7 @@
 
       defenseTitle: 'Bivaque em Terraço Fluvial Suspenso de Rocha Sã',
 
-      epigeneticAndCampSafety: 'O acampamento é montado em uma cornija plana de gnaisse 20 metros acima do leito do rio, totalmente fora do alcance da maior enxurrada de cheia histórica e protegido de enxurradas de tálus (DMG p. 111).',
+      epigeneticAndCampSafety: 'O acampamento é montado em uma cornija plana de gnaisse 20 metros acima do leito do rio, totalmente fora do alcance da maior enxurrada de cheia histórica e protegido de enxurradas de tálus.',
 
       epigeneticAndWatch: 'A elevação na garganta afunila qualquer aproximação a uma rampa estreita de escalada facilmente vigiada por uma única sentinela com vantagem em testes de Percepção.',
 
@@ -48895,7 +48895,7 @@
 
       defense.defenseTitle = 'Cisterna Natural em Marmita Fóssil Elevada';
 
-      defense.epigeneticAndCampSafety = 'Marmita de gigante fóssil situada na banqueta alta acima do rio que capta e decanta exclusivamente água da chuva e orvalho pluvial (PHB p. 150).';
+      defense.epigeneticAndCampSafety = 'Marmita de gigante fóssil situada na banqueta alta acima do rio que capta e decanta exclusivamente água da chuva e orvalho pluvial.';
 
       defense.epigeneticAndWatch = 'Fornece reservatório de até 40 litros de água mineral cristalina e fria, poupando os aventureiros de descer ao rio barrento e caudaloso da garganta.';
 
@@ -48905,7 +48905,7 @@
 
       defense.defenseTitle = 'Parapeito de Pedras Encaixadas em Estrangulamento';
 
-      defense.epigeneticAndCampSafety = 'Mureta de pedras roladas empilhadas a seco fechando a única passagem de acesso à cornija do bivaque (PHB p. 185).';
+      defense.epigeneticAndCampSafety = 'Mureta de pedras roladas empilhadas a seco fechando a única passagem de acesso à cornija do bivaque.';
 
       defense.epigeneticAndWatch = 'Concede cobertura total (+5 na CA) contra arqueiros inimigos e força qualquer invasor a avançar por uma borda vertiginosa de abismo.';
 
@@ -48915,7 +48915,7 @@
 
       defense.defenseTitle = 'Linha de Alarme com Ressonância Acústica de Cânion';
 
-      defense.epigeneticAndCampSafety = 'Cabos de cobre tensionados de parede a parede na entrada da fenda conectados a cones de bronze que amplificam vibrações sonoras através do eco natural da garganta (DMG p. 111).';
+      defense.epigeneticAndCampSafety = 'Cabos de cobre tensionados de parede a parede na entrada da fenda conectados a cones de bronze que amplificam vibrações sonoras através do eco natural da garganta.';
 
       defense.epigeneticAndWatch = 'O mínimo tropeço ou corte de linha ecoa como um trovão pela garganta rochosa, acordando as sentinelas com minutos de antecedência.';
 
@@ -48957,7 +48957,7 @@
 
       saveType: 'Destreza',
 
-      tablelandRisk: 'O tabuleiro costeiro termina em um penhasco avermelhado de 40 metros cuja base arenosa foi solapada pelo mar; a vibração de passos na borda rompe uma fenda de tração oculta, fazendo uma fatia de rocha de centenas de toneladas despencar verticalmente no oceano, exigindo salvaguarda de Destreza CD 15 para saltar para trás ou cair no abismo sofrendo 4d10 de dano de concussão por esmagamento contra lajes e seixos litorâneos (DMG p. 110, 246; PHB p. 182-183).',
+      tablelandRisk: 'O tabuleiro costeiro termina em um penhasco avermelhado de 40 metros cuja base arenosa foi solapada pelo mar; a vibração de passos na borda rompe uma fenda de tração oculta, fazendo uma fatia de rocha de centenas de toneladas despencar verticalmente no oceano, exigindo salvaguarda de Destreza CD 15 para saltar para trás ou cair no abismo sofrendo 4d10 de dano de concussão por esmagamento contra lajes e seixos litorâneos.',
 
       pioneerMitigation: 'Batedores sondando fissuras de recuo na grama do tabuleiro com bastões graduados e mantendo o avanço a uma distância mínima de duas vezes a altura da escarpa (Sobrevivência ou Investigação CD 14).',
 
@@ -48979,7 +48979,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.tablelandRisk = 'A trilha na praia costeira passa por baixo de um arco monumental de arenito esculpido pelas ondas; a salinidade e a pressão do ar comprimido nas frestas fraturam a pedra-fecho do arco, despencando blocos pontiagudos de rocha ferruginosa sobre a comitiva com 2d10 de dano contundente (DMG p. 110; PHB p. 185).';
+      hazard.tablelandRisk = 'A trilha na praia costeira passa por baixo de um arco monumental de arenito esculpido pelas ondas; a salinidade e a pressão do ar comprimido nas frestas fraturam a pedra-fecho do arco, despencando blocos pontiagudos de rocha ferruginosa sobre a comitiva com 2d10 de dano contundente.';
 
       hazard.pioneerMitigation = 'Inspeção visual prévia de fraturas frescas no intradorso do arco e travessia rápida em fila espaçada (Percepção CD 13).';
 
@@ -48993,7 +48993,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.tablelandRisk = 'Ao explorar cavernas marinhas na base da falésia, a entrada de uma grande onda de maré sela a boca da gruta comprimindo o bolsão de ar interno a pressões violentas; a onda explode para fora com rugido ensurdecedor arrastando exploradores com 3d6 de concussão, rompimento timpânico temporário por 1 hora e risco de afogamento (DMG p. 110; PHB p. 183).';
+      hazard.tablelandRisk = 'Ao explorar cavernas marinhas na base da falésia, a entrada de uma grande onda de maré sela a boca da gruta comprimindo o bolsão de ar interno a pressões violentas; a onda explode para fora com rugido ensurdecedor arrastando exploradores com 3d6 de concussão, rompimento timpânico temporário por 1 hora e risco de afogamento.';
 
       hazard.pioneerMitigation = 'Cálculo rigoroso do ciclo de marés e entrada apenas no estofo da maré baixa mantendo vigia externo com corneta (Veículos Aquáticos ou Sobrevivência CD 14).';
 
@@ -49007,7 +49007,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.tablelandRisk = 'Águas pluviais que drenam do topo do tabuleiro saturam as camadas de argila variegada intercaladas com arenito, disparando uma torrente viscosa de lama vermelha espessa que soterra trilhas de descida com 2d8 de concussão e velocidade reduzida a zero até que o aventureiro se desvencilhe (DMG p. 110; PHB p. 182-183).';
+      hazard.tablelandRisk = 'Águas pluviais que drenam do topo do tabuleiro saturam as camadas de argila variegada intercaladas com arenito, disparando uma torrente viscosa de lama vermelha espessa que soterra trilhas de descida com 2d8 de concussão e velocidade reduzida a zero até que o aventureiro se desvencilhe.';
 
       hazard.pioneerMitigation = 'Desvio por lombadas drenadas cobertas por restinga nativa e fixação de cordas de sustentação (Sobrevivência CD 13).';
 
@@ -49037,7 +49037,7 @@
 
       defenseTitle: 'Reduto em Tabuleiro Plano com Recuo Seguro da Falésia',
 
-      tablelandAndCampSafety: 'O acampamento é estabelecido no platô plano do tabuleiro costeiro a 60 metros da borda da falésia, sobre leito de arenito ferruginoso consolidado imune a desabamentos marinhos e inundações de maré (DMG p. 111).',
+      tablelandAndCampSafety: 'O acampamento é estabelecido no platô plano do tabuleiro costeiro a 60 metros da borda da falésia, sobre leito de arenito ferruginoso consolidado imune a desabamentos marinhos e inundações de maré.',
 
       tablelandAndWatch: 'A altitude dominante de 40 metros acima da praia concede visão desimpedida de todo o litoral por 4 milhas de distância, impedindo qualquer aproximação clandestina de embarcações ou incursores.',
 
@@ -49055,7 +49055,7 @@
 
       defense.defenseTitle = 'Nascente Suspensa em Fratura Basal de Arenito';
 
-      defense.tablelandAndCampSafety = 'O contato estratigráfico entre os arenitos porosos do topo e os argilitos impermeáveis inferiores drena água doce puríssima que brota como uma cascata límpida na cabeceira de uma ravina protegida (PHB p. 150).';
+      defense.tablelandAndCampSafety = 'O contato estratigráfico entre os arenitos porosos do topo e os argilitos impermeáveis inferiores drena água doce puríssima que brota como uma cascata límpida na cabeceira de uma ravina protegida.';
 
       defense.tablelandAndWatch = 'Fornece mais de 30 litros diários de água doce mineral filtrada para toda a comitiva, eliminando a dependência de fontes costeiras salobras.';
 
@@ -49065,7 +49065,7 @@
 
       defense.defenseTitle = 'Parapeito de Lajes Ferruginosas de Canga Costeira';
 
-      defense.tablelandAndCampSafety = 'Blocos pesados de arenito enriquecido com ferro são dispostos em muretas de abrigo de 1,4 metro contra os ventos costeiros dominantes (PHB p. 185).';
+      defense.tablelandAndCampSafety = 'Blocos pesados de arenito enriquecido com ferro são dispostos em muretas de abrigo de 1,4 metro contra os ventos costeiros dominantes.';
 
       defense.tablelandAndWatch = 'Oferece cobertura superior (+5 na CA) contra arqueiros e bloqueia totalmente a luz e faíscas de fogueiras baixas contra o horizonte noturno.';
 
@@ -49075,7 +49075,7 @@
 
       defense.defenseTitle = 'Acesso Tático Retrátil com Escada de Corda e Contrapeso';
 
-      defense.tablelandAndCampSafety = 'Guincho mecânico de madeira instalado na borda de um promontório rochoso sólido com escada de corda reforçada com degraus de madeira que pode ser içada para o platô em segundos (DMG p. 111).';
+      defense.tablelandAndCampSafety = 'Guincho mecânico de madeira instalado na borda de um promontório rochoso sólido com escada de corda reforçada com degraus de madeira que pode ser içada para o platô em segundos.';
 
       defense.tablelandAndWatch = 'Permite descida rápida à praia para pescar ou coletar moluscos durante o dia e corte absoluto do acesso de qualquer perseguidor à noite.';
 
@@ -49117,7 +49117,7 @@
 
       saveType: 'Destreza',
 
-      barchanoidRisk: 'A face de deslizamento da crista barcanoide com 25 metros de altura mergulha diretamente nas águas profundas de uma lagoa interdunar cristalina; a passagem da comitiva no topo desencadeia uma liquefação súbita da areia que arrasta aventureiros e cargas para o fundo subaquático da depressão com 3d8 de concussão e risco iminente de soterramento por areia sob a água (DMG p. 110, 246; PHB p. 182-183).',
+      barchanoidRisk: 'A face de deslizamento da crista barcanoide com 25 metros de altura mergulha diretamente nas águas profundas de uma lagoa interdunar cristalina; a passagem da comitiva no topo desencadeia uma liquefação súbita da areia que arrasta aventureiros e cargas para o fundo subaquático da depressão com 3d8 de concussão e risco iminente de soterramento por areia sob a água.',
 
       pioneerMitigation: 'Batedores avançados contornando as lagoas pela base firme das encostas de barlavento compactadas pelo vento em vez de marchar pelo topo das cristas móveis (Sobrevivência ou Atletismo CD 14).',
 
@@ -49139,7 +49139,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.barchanoidRisk = 'A alvura absoluta dos grãos de quartzo puro reflete a radiação solar com intensidade cegante enquanto as miragens na superfície das lagoas distorcem distâncias e relevos; marchar sem proteção ocular causa fotofobia severa, 2d6 de dano radiante e desvantagem em testes de Percepção e Sobrevivência por 4 horas por desorientação visual (DMG p. 110; PHB p. 183).';
+      hazard.barchanoidRisk = 'A alvura absoluta dos grãos de quartzo puro reflete a radiação solar com intensidade cegante enquanto as miragens na superfície das lagoas distorcem distâncias e relevos; marchar sem proteção ocular causa fotofobia severa, 2d6 de dano radiante e desvantagem em testes de Percepção e Sobrevivência por 4 horas por desorientação visual.';
 
       hazard.pioneerMitigation = 'Uso de viseiras de couro com fendas estreitas enfumaçadas e aplicação de pasta de carvão ao redor dos olhos (Sobrevivência CD 13).';
 
@@ -49153,7 +49153,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.barchanoidRisk = 'Sob a lâmina rasa de água doce entre as dunas esconde-se a camada de argila impermeável recoberta por uma camada fina de areia fofa; o peso de carretas ou montarias rompe a crosta prendendo pernas em lodo pegajoso anóxico que atua como vácuo de sucção, infligindo 2d8 de concussão por esforço muscular e exigindo salvaguarda de Força CD 14 para não ficar Preso (DMG p. 110; PHB p. 185).';
+      hazard.barchanoidRisk = 'Sob a lâmina rasa de água doce entre as dunas esconde-se a camada de argila impermeável recoberta por uma camada fina de areia fofa; o peso de carretas ou montarias rompe a crosta prendendo pernas em lodo pegajoso anóxico que atua como vácuo de sucção, infligindo 2d8 de concussão por esforço muscular e exigindo salvaguarda de Força CD 14 para não ficar Preso.';
 
       hazard.pioneerMitigation = 'Sondagem prévia do fundo com varas de taquara demarcando vaus com solo arenoso firme (Sobrevivência CD 13).';
 
@@ -49167,7 +49167,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.barchanoidRisk = 'Ventos alísios costeiros canalizados entre duas cristas barcanoides paralelas ganham velocidade de vendaval levantando uma cortina densa de areia jateadora na altura do peito; a rajada fustiga a pele, arranca coberturas de tendas e causa 2d6 de dano cortante com perda de visibilidade para menos de 3 metros (DMG p. 110; XGE p. 109).';
+      hazard.barchanoidRisk = 'Ventos alísios costeiros canalizados entre duas cristas barcanoides paralelas ganham velocidade de vendaval levantando uma cortina densa de areia jateadora na altura do peito; a rajada fustiga a pele, arranca coberturas de tendas e causa 2d6 de dano cortante com perda de visibilidade para menos de 3 metros.';
 
       hazard.pioneerMitigation = 'Avanço rente ao solo na zona de sombra aerodinâmica da encosta suave da duna (Furtividade ou Sobrevivência CD 14).';
 
@@ -49197,7 +49197,7 @@
 
       defenseTitle: 'Bivaque em Encosta de Barlavento à Margem da Lagoa',
 
-      barchanoidAndCampSafety: 'O acampamento é assentado sobre a rampa suave e compactada da vertente de barlavento, 4 metros acima do nível da lagoa de água doce; o piso de areia firme suporta estacas longas de ancoragem e permanece imune a avalanches da crista (DMG p. 111).',
+      barchanoidAndCampSafety: 'O acampamento é assentado sobre a rampa suave e compactada da vertente de barlavento, 4 metros acima do nível da lagoa de água doce; o piso de areia firme suporta estacas longas de ancoragem e permanece imune a avalanches da crista.',
 
       barchanoidAndWatch: 'A planície aberta de areia branca ao redor impede qualquer aproximação furtiva noturna, concedendo vantagem em testes de Percepção para as sentinelas sob a luz das estrelas.',
 
@@ -49215,7 +49215,7 @@
 
       defense.defenseTitle = 'Piscina Natural de Banho e Decantação em Lagoa Cristalina';
 
-      defense.barchanoidAndCampSafety = 'As águas da lagoa pluvial retidas na areia quartzosa são excepcionalmente limpas, doces e desprovidas de parasitas fluviais ou lodo (PHB p. 150).';
+      defense.barchanoidAndCampSafety = 'As águas da lagoa pluvial retidas na areia quartzosa são excepcionalmente limpas, doces e desprovidas de parasitas fluviais ou lodo.';
 
       defense.barchanoidAndWatch = 'O banho fresco e a hidratação abundante restauram o ânimo dos aventureiros, concedendo +1 de bônus na recuperação de Dados de Vida durante o descanso longo.';
 
@@ -49225,7 +49225,7 @@
 
       defense.defenseTitle = 'Trincheira de Areia com Parapeito de Lona Reforçada';
 
-      defense.barchanoidAndCampSafety = 'Escavação de trincheira semicircular de 1,2 metro na areia compactada forrada com esteiras de algodão e escorada com estacas enterradas contra o vento dominante (PHB p. 185).';
+      defense.barchanoidAndCampSafety = 'Escavação de trincheira semicircular de 1,2 metro na areia compactada forrada com esteiras de algodão e escorada com estacas enterradas contra o vento dominante.';
 
       defense.barchanoidAndWatch = 'Quebra 100% da velocidade das rajadas de areia rasantes e oculta completamente fogueiras baixas contra a linha do horizonte.';
 
@@ -49235,7 +49235,7 @@
 
       defense.defenseTitle = 'Perímetro com Sinos Flutuantes nas Margens da Lagoa';
 
-      defense.barchanoidAndCampSafety = 'Linhas de corda esticadas ao longo da margem arenosa e dos vaus rasos da lagoa conectadas a boias leves de cortiça com sinetas de bronze (DMG p. 111).';
+      defense.barchanoidAndCampSafety = 'Linhas de corda esticadas ao longo da margem arenosa e dos vaus rasos da lagoa conectadas a boias leves de cortiça com sinetas de bronze.';
 
       defense.barchanoidAndWatch = 'Qualquer invasor ou fera que tente vadear a lagoa ou cruzar a margem na escuridão movimenta a água e soa os sinos imediatamente, eliminando surpresas táticas.';
 
@@ -49277,7 +49277,7 @@
 
       saveType: 'Força',
 
-      tomboloRisk: 'O tômbolo de areia e cascalho é atingido simultaneamente por trens de ondas que contornam a ilha por direções opostas; na virada da preamar, a convergência gera vagalhões cruzados de 3 metros que varrem a calçada, exigindo salvaguarda de Força CD 15 para fincar pontões de apoio ou ser arrancado da ponte arenosa e arrastado para correntes oceânicas sofrendo 3d8 de concussão contra blocos de recife com risco iminente de afogamento (DMG p. 110, 246; PHB p. 182-183).',
+      tomboloRisk: 'O tômbolo de areia e cascalho é atingido simultaneamente por trens de ondas que contornam a ilha por direções opostas; na virada da preamar, a convergência gera vagalhões cruzados de 3 metros que varrem a calçada, exigindo salvaguarda de Força CD 15 para fincar pontões de apoio ou ser arrancado da ponte arenosa e arrastado para correntes oceânicas sofrendo 3d8 de concussão contra blocos de recife com risco iminente de afogamento.',
 
       pioneerMitigation: 'Batedores consultando tábuas de maré lunares e fixando estacas de marégrafo na calçada para iniciar a travessia no estofo exato da baixamar (Sobrevivência ou Veículos Aquáticos CD 14).',
 
@@ -49299,7 +49299,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.tomboloRisk = 'A elevação do lençol freático costeiro com a maré enchente pressuriza os estratos de areia fina do tômbolo, convertendo o piso aparentemente firme em uma armadilha movediça semi-líquida; aventureiros e mulas de carga afundam rapidamente até os quadris, exigindo salvaguarda de Destreza CD 14 ou ficarem Impossibilitados de se Mover enquanto a água do mar sobe sobre suas cabeças (DMG p. 110; PHB p. 185).';
+      hazard.tomboloRisk = 'A elevação do lençol freático costeiro com a maré enchente pressuriza os estratos de areia fina do tômbolo, convertendo o piso aparentemente firme em uma armadilha movediça semi-líquida; aventureiros e mulas de carga afundam rapidamente até os quadris, exigindo salvaguarda de Destreza CD 14 ou ficarem Impossibilitados de se Mover enquanto a água do mar sobe sobre suas cabeças.';
 
       hazard.pioneerMitigation = 'Progressão sobre pranchas de madeira distribuídas em fila indiana e sondagem com bordões graduados (Sobrevivência CD 13).';
 
@@ -49313,7 +49313,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.tomboloRisk = 'Quando a ilha de maré é ladeada por enseadas estreitas, a maré enchente avança em uma parede líquida abrupta de espuma e detritos que sobrepuja a calçada em segundos; o impacto violento arremessa os membros da comitiva sobre o cascalho rolante com 3d6 de concussão e perda imediata de fardos leves (DMG p. 110; PHB p. 183).';
+      hazard.tomboloRisk = 'Quando a ilha de maré é ladeada por enseadas estreitas, a maré enchente avança em uma parede líquida abrupta de espuma e detritos que sobrepuja a calçada em segundos; o impacto violento arremessa os membros da comitiva sobre o cascalho rolante com 3d6 de concussão e perda imediata de fardos leves.';
 
       hazard.pioneerMitigation = 'Escuta atenta do rugido distante da vaga de maré e recuo imediato para a falésia rochosa mais próxima (Percepção CD 14).';
 
@@ -49327,7 +49327,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.tomboloRisk = 'Bancos móveis de seixos rolados de sílex cobrem o istmo submerso em água rasa de 40 cm; pisar nos cascalhos arredondados sob correnteza faz as pedras rolarem sob os pés prendendo tornozelos em fendas ocultas, causando 2d8 de concussão e reduzindo a velocidade pela metade até o término do descanso (DMG p. 110; XGE p. 109).';
+      hazard.tomboloRisk = 'Bancos móveis de seixos rolados de sílex cobrem o istmo submerso em água rasa de 40 cm; pisar nos cascalhos arredondados sob correnteza faz as pedras rolarem sob os pés prendendo tornozelos em fendas ocultas, causando 2d8 de concussão e reduzindo a velocidade pela metade até o término do descanso.';
 
       hazard.pioneerMitigation = 'Uso de calçados altos com amarração no tornozelo e apoio em bordões duplos de equilíbrio (Sobrevivência CD 13).';
 
@@ -49357,7 +49357,7 @@
 
       defenseTitle: 'Bivaque no Cume Granítico da Ilha de Maré',
 
-      tomboloAndCampSafety: 'O acampamento é estabelecido no topo escarpado da ilha de maré rochosa 20 metros acima do nível da preamar máxima, totalmente a salvo de ondas de ressaca e inundações oceânicas (DMG p. 111).',
+      tomboloAndCampSafety: 'O acampamento é estabelecido no topo escarpado da ilha de maré rochosa 20 metros acima do nível da preamar máxima, totalmente a salvo de ondas de ressaca e inundações oceânicas.',
 
       tomboloAndWatch: 'A subida da maré isola a ilha transformando o mar bravio em um fosso aquático impenetrável que barra invasores terrestres por 8 horas, enquanto as sentinelas dominam o istmo submerso com vantagem em Percepção.',
 
@@ -49375,7 +49375,7 @@
 
       defense.defenseTitle = 'Baluarte de Amarração e Cabeços de Amarração no Istmo';
 
-      defense.tomboloAndCampSafety = 'Cabeços de granito talhado fincados na entrada da calçada permitem esticar cabos de segurança e guias com roldanas de bronze que facilitam evacuações emergenciais mesmo sob maré enchente (PHB p. 150).';
+      defense.tomboloAndCampSafety = 'Cabeços de granito talhado fincados na entrada da calçada permitem esticar cabos de segurança e guias com roldanas de bronze que facilitam evacuações emergenciais mesmo sob maré enchente.';
 
       defense.tomboloAndWatch = 'Fornece rota segura de retirada balizada com cabos flutuantes de cortiça que impedem que aventureiros se percam em redemoinhos noturnos.';
 
@@ -49385,7 +49385,7 @@
 
       defense.defenseTitle = 'Surgência de Água Doce em Falésia da Ilha';
 
-      defense.tomboloAndCampSafety = 'Fratura de cisalhamento na falésia da ilha verte água doce pluvial filtrada através da cúpula de granito antes de misturar-se com a salmoura marítima (PHB p. 150).';
+      defense.tomboloAndCampSafety = 'Fratura de cisalhamento na falésia da ilha verte água doce pluvial filtrada através da cúpula de granito antes de misturar-se com a salmoura marítima.';
 
       defense.tomboloAndWatch = 'Abastecimento contínuo de até 25 litros diários de água potável fresca para a comitiva sem necessidade de carregar tonéis pela calçada arenosa.';
 
@@ -49395,7 +49395,7 @@
 
       defense.defenseTitle = 'Empaliçada de Troncos de Naufrágio e Seixos de Praia';
 
-      defense.tomboloAndCampSafety = 'Troncos pesados trazidos pelas marés são calçados com grandes seixos rolados de sílex, formando uma mureta defensiva de 2 metros na cabeceira da ilha (PHB p. 185).';
+      defense.tomboloAndCampSafety = 'Troncos pesados trazidos pelas marés são calçados com grandes seixos rolados de sílex, formando uma mureta defensiva de 2 metros na cabeceira da ilha.';
 
       defense.tomboloAndWatch = 'Oferece cobertura total (+5 na CA) para as sentinelas contra disparos vindos de botes ou invasores que tentem desembarcar pela baixamar.';
 
@@ -49437,7 +49437,7 @@
 
       saveType: 'Destreza',
 
-      rhyoliteDomeRisk: 'Uma agulha colossal de dacito incandescente de 80 metros de altura projetada da cúpula do domo racha por alívio térmico interno; o desabamento catastrófico dispara uma avalanche piroclástica de blocos de rocha e cinza incandescente a 100 km/h pela ravina, exigindo salvaguarda de Destreza CD 15 para escapar da calha de descida ou sofrer 3d8 de dano de concussão mais 2d6 de dano de fogo e ser engolfado pela onda de choque piroclástica (DMG p. 110, 246; PHB p. 183).',
+      rhyoliteDomeRisk: 'Uma agulha colossal de dacito incandescente de 80 metros de altura projetada da cúpula do domo racha por alívio térmico interno; o desabamento catastrófico dispara uma avalanche piroclástica de blocos de rocha e cinza incandescente a 100 km/h pela ravina, exigindo salvaguarda de Destreza CD 15 para escapar da calha de descida ou sofrer 3d8 de dano de concussão mais 2d6 de dano de fogo e ser engolfado pela onda de choque piroclástica.',
 
       pioneerMitigation: 'Batedores monitorando o prumo e a fumaça de fratura da agulha com teodolitos rústicos e mantendo a rota em cristas laterais elevadas protegidas de fluxos gravitacionais (Sobrevivência ou Percepção CD 14).',
 
@@ -49459,7 +49459,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.rhyoliteDomeRisk = 'O avanço lento do coulee riolítico quebra sua própria crosta externa resfriada em um tálus colossal de blocos angulosos de obsidiana pura e rocha vítrea; pisar nessa rampa instável mobiliza dezenas de toneladas de lâminas de vidro vulcânico, infligindo 2d8 de dano cortante e desvantagem permanente em deslocamento até um descanso curto devido a cortes nos pés e patas de montarias (DMG p. 110; XGE p. 109).';
+      hazard.rhyoliteDomeRisk = 'O avanço lento do coulee riolítico quebra sua própria crosta externa resfriada em um tálus colossal de blocos angulosos de obsidiana pura e rocha vítrea; pisar nessa rampa instável mobiliza dezenas de toneladas de lâminas de vidro vulcânico, infligindo 2d8 de dano cortante e desvantagem permanente em deslocamento até um descanso curto devido a cortes nos pés e patas de montarias.';
 
       hazard.pioneerMitigation = 'Fixação de passadeiras de toros e pranchas sobre as zonas de blocos móveis e uso de calçados com sola de ferro (Sobrevivência CD 13).';
 
@@ -49473,7 +49473,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.rhyoliteDomeRisk = 'Fissuras radiais na crosta resfriada do domo de lava concentram vapor e gases voláteis selados a alta pressão; a detonação súbita de uma rolha mineral arremessa estilhaços vítreos acompanhados de uma baforada sulfurosa a 120°C, exigindo salvaguarda de Constituição CD 15 ou sofrer 3d6 de fogo e cegueira por fumaça ácida por 1 rodada (DMG p. 110; PHB p. 183).';
+      hazard.rhyoliteDomeRisk = 'Fissuras radiais na crosta resfriada do domo de lava concentram vapor e gases voláteis selados a alta pressão; a detonação súbita de uma rolha mineral arremessa estilhaços vítreos acompanhados de uma baforada sulfurosa a 120°C, exigindo salvaguarda de Constituição CD 15 ou sofrer 3d6 de fogo e cegueira por fumaça ácida por 1 rodada.';
 
       hazard.pioneerMitigation = 'Avanço com máscaras de linho embebidas em vinagre e desvio de fumarolas com coloração amarela ou ocre (Natureza ou Sobrevivência CD 14).';
 
@@ -49487,7 +49487,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.rhyoliteDomeRisk = 'A superfície rugosa do domo é formada por blocos gigantes de riolito que ocultam fendas verticais de 8 metros entre as pedras sem apoio basal; o afundamento acidental prende aventureiros no fosso com risco de esmagamento se os blocos vizinhos se moverem, exigindo salvaguarda de Força CD 14 para não sofrer 2d10 de concussão e condição Preso (DMG p. 110; PHB p. 182-183).';
+      hazard.rhyoliteDomeRisk = 'A superfície rugosa do domo é formada por blocos gigantes de riolito que ocultam fendas verticais de 8 metros entre as pedras sem apoio basal; o afundamento acidental prende aventureiros no fosso com risco de esmagamento se os blocos vizinhos se moverem, exigindo salvaguarda de Força CD 14 para não sofrer 2d10 de concussão e condição Preso.';
 
       hazard.pioneerMitigation = 'Marcha amarrada em cordada de três membros com batedor testando fendas com vara longa (Atletismo CD 13).';
 
@@ -49517,7 +49517,7 @@
 
       defenseTitle: 'Bivaque em Contraforte Estável de Flanco Frio',
 
-      rhyoliteDomeAndCampSafety: 'O acampamento é montado em um contraforte de riolito antigo e resfriado fora do alcance de avalanches da cúpula ativa, protegido por muralhas maciças de pedra dura e piso nivelado (DMG p. 111).',
+      rhyoliteDomeAndCampSafety: 'O acampamento é montado em um contraforte de riolito antigo e resfriado fora do alcance de avalanches da cúpula ativa, protegido por muralhas maciças de pedra dura e piso nivelado.',
 
       rhyoliteDomeAndWatch: 'A elevação de 30 metros acima da encosta proporciona visão desimpedida de vales e acessos por 3 milhas e abrigo contra ventanias cortantes de altitude.',
 
@@ -49535,7 +49535,7 @@
 
       defense.defenseTitle = 'Alambique Coletor de Vapor de Fumarola Limpa';
 
-      defense.rhyoliteDomeAndCampSafety = 'Vapor de condensação limpo emitido por diaclases termais é canalizado por tubos de cobre e panos de linho estendidos sobre calhas de pedra, condensando água pura e quente (PHB p. 150).';
+      defense.rhyoliteDomeAndCampSafety = 'Vapor de condensação limpo emitido por diaclases termais é canalizado por tubos de cobre e panos de linho estendidos sobre calhas de pedra, condensando água pura e quente.';
 
       defense.rhyoliteDomeAndWatch = 'Produz até 20 litros diários de água destilada quente para a comitiva, reabastecendo caldeirões sem risco de intoxicação mineral.';
 
@@ -49545,7 +49545,7 @@
 
       defense.defenseTitle = 'Perímetro Tático com Lâminas e Lascas de Obsidiana';
 
-      defense.rhyoliteDomeAndCampSafety = 'Faixa de 4 metros ao redor do acampamento recoberta com lascas afiadas de obsidiana descartadas do coulee que estalam ruidosamente e cortam patas de predadores furtivos (PHB p. 185).';
+      defense.rhyoliteDomeAndCampSafety = 'Faixa de 4 metros ao redor do acampamento recoberta com lascas afiadas de obsidiana descartadas do coulee que estalam ruidosamente e cortam patas de predadores furtivos.';
 
       defense.rhyoliteDomeAndWatch = 'Qualquer invasor que tente cruzar a faixa sem asas sofre penalidade em Furtividade e alerta imediatamente as sentinelas em guarda com vantagem em Percepção Passiva.';
 
@@ -49555,7 +49555,7 @@
 
       defense.defenseTitle = 'Leito de Pedra com Aquecimento Geotérmico Suave';
 
-      defense.rhyoliteDomeAndCampSafety = 'Lajes de riolito sobre fraturas termais com circulação de ar aquecido a 25°C são forradas com palha e cobertores de lã para o descanso (DMG p. 111).';
+      defense.rhyoliteDomeAndCampSafety = 'Lajes de riolito sobre fraturas termais com circulação de ar aquecido a 25°C são forradas com palha e cobertores de lã para o descanso.';
 
       defense.rhyoliteDomeAndWatch = 'Mantém o grupo aquecido durante as madrugadas congelantes da alta montanha vulcânica sem necessidade de queima de lenha combustível.';
 
@@ -49597,7 +49597,7 @@
 
       saveType: 'Destreza',
 
-      gilbertDeltaRisk: 'A borda de avanço do delta lacustre repousa no limite crítico de inclinação de 32 graus sobre águas gélidas de 50 metros de profundidade; a passagem de carretas ou montarias na beirada desestabiliza os estratos arenosos saturados, provocando liquefação súbita que engole o terreno sob a comitiva com 3d8 de concussão e arrasto violento para o abismo lacustre com risco de afogamento (DMG p. 110, 246; PHB p. 182-183).',
+      gilbertDeltaRisk: 'A borda de avanço do delta lacustre repousa no limite crítico de inclinação de 32 graus sobre águas gélidas de 50 metros de profundidade; a passagem de carretas ou montarias na beirada desestabiliza os estratos arenosos saturados, provocando liquefação súbita que engole o terreno sob a comitiva com 3d8 de concussão e arrasto violento para o abismo lacustre com risco de afogamento.',
 
       pioneerMitigation: 'Batedores avançados testando a coesão das bordas de praia com estacas de profundidade e demarcando a linha de recuo seguro nos leitos de topo horizontais (Sobrevivência ou Investigação CD 14).',
 
@@ -49619,7 +49619,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.gilbertDeltaRisk = 'Canais anastomosados de cascalho no topo do delta sofrem transbordamento violento por degelo repentino a montante; uma lâmina de água de 1 metro com seixos rolantes pesados varre a planície aluvial, exigindo salvaguarda de Força CD 14 ou ser derrubado e arrastado por 15 metros sofrendo 2d8 de dano de concussão e perda de fardos de carga (DMG p. 110; PHB p. 185).';
+      hazard.gilbertDeltaRisk = 'Canais anastomosados de cascalho no topo do delta sofrem transbordamento violento por degelo repentino a montante; uma lâmina de água de 1 metro com seixos rolantes pesados varre a planície aluvial, exigindo salvaguarda de Força CD 14 ou ser derrubado e arrastado por 15 metros sofrendo 2d8 de dano de concussão e perda de fardos de carga.';
 
       hazard.pioneerMitigation = 'Observação da turbidez e de troncos flutuantes a montante e fixação de cordas-guia em blocos ancorados (Sobrevivência CD 13).';
 
@@ -49633,7 +49633,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.gilbertDeltaRisk = 'Águas fluviais densas e carregadas de silte mergulham diretamente sob a lâmina superficial pura do lago, criando uma contracorrente de fundo oculta de alta velocidade e temperatura próxima a 2°C; nadar ou vauzejar atrai o explorador para o mergulho túrgido causando choque térmico, 3d6 de frio e 1 nível de exaustão imediata por hipotermia aguda (DMG p. 110; PHB p. 183).';
+      hazard.gilbertDeltaRisk = 'Águas fluviais densas e carregadas de silte mergulham diretamente sob a lâmina superficial pura do lago, criando uma contracorrente de fundo oculta de alta velocidade e temperatura próxima a 2°C; nadar ou vauzejar atrai o explorador para o mergulho túrgido causando choque térmico, 3d6 de frio e 1 nível de exaustão imediata por hipotermia aguda.';
 
       hazard.pioneerMitigation = 'Uso de canoas leves em arco aberto afastado da pluma lamacenta de deságue (Veículos Aquáticos CD 14).';
 
@@ -49647,7 +49647,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.gilbertDeltaRisk = 'Tempestades no lago escavam entalhes basais profundos nos terraços antigos do delta; a borda suspensa de cascalho cede sob a marcha, despencando 10 metros em blocos desarticulados com 2d10 de concussão (DMG p. 110; PHB p. 182).';
+      hazard.gilbertDeltaRisk = 'Tempestades no lago escavam entalhes basais profundos nos terraços antigos do delta; a borda suspensa de cascalho cede sob a marcha, despencando 10 metros em blocos desarticulados com 2d10 de concussão.';
 
       hazard.pioneerMitigation = 'Inspeção prévia da crista e identificação de fendas de tração paralelas à margem (Percepção CD 13).';
 
@@ -49677,7 +49677,7 @@
 
       defenseTitle: 'Bivaque em Terraço Elevado de Leito de Topo',
 
-      gilbertDeltaAndCampSafety: 'O acampamento é assentado em um terraço relictal de cascalho consolidado 15 metros acima do nível do lago, com drenagem natural instantânea de chuvas por porosidade e piso firme (DMG p. 111).',
+      gilbertDeltaAndCampSafety: 'O acampamento é assentado em um terraço relictal de cascalho consolidado 15 metros acima do nível do lago, com drenagem natural instantânea de chuvas por porosidade e piso firme.',
 
       gilbertDeltaAndWatch: 'A posição dominante descortina tanto o desfiladeiro fluvial a montante quanto todo o espelho de água do lago por milhas, impedindo aproximações furtivas de embarcações ou feras costeiras.',
 
@@ -49695,7 +49695,7 @@
 
       defense.defenseTitle = 'Poço de Captação Filtrado em Cascalheira Deltaica';
 
-      defense.gilbertDeltaAndCampSafety = 'Escavação rasa na faixa de seixos limpos que capta água freática decantada pelas camadas de areia de topo, límpida, gelada e livre do silte lacustre (PHB p. 150).';
+      defense.gilbertDeltaAndCampSafety = 'Escavação rasa na faixa de seixos limpos que capta água freática decantada pelas camadas de areia de topo, límpida, gelada e livre do silte lacustre.';
 
       defense.gilbertDeltaAndWatch = 'Fornece suprimento inesgotável de água potável pura para toda a comitiva durante o descanso longo.';
 
@@ -49705,7 +49705,7 @@
 
       defense.defenseTitle = 'Entrincheiramento em Canal Anastomosado Abandonado';
 
-      defense.gilbertDeltaAndCampSafety = 'Leito seco de cascalho flanqueado por diques naturais de seixos de 2 metros de altura, criando uma trincheira protegida de ventos lacustres (DMG p. 111).';
+      defense.gilbertDeltaAndCampSafety = 'Leito seco de cascalho flanqueado por diques naturais de seixos de 2 metros de altura, criando uma trincheira protegida de ventos lacustres.';
 
       defense.gilbertDeltaAndWatch = 'As bermas laterais concedem cobertura superior (+5 na CA) contra arqueiros e ocultam fogueiras e tendas de qualquer vigia no lago aberto.';
 
@@ -49715,7 +49715,7 @@
 
       defense.defenseTitle = 'Paliçada de Madeiramento Flutuante Acumulado';
 
-      defense.gilbertDeltaAndCampSafety = 'Troncos de árvores arrastados por cheias e depositados na praia do delta são entrelaçados com cordas e estacas cravadas no cascalho, formando um baluarte perimetral contra predadores (PHB p. 185).';
+      defense.gilbertDeltaAndCampSafety = 'Troncos de árvores arrastados por cheias e depositados na praia do delta são entrelaçados com cordas e estacas cravadas no cascalho, formando um baluarte perimetral contra predadores.';
 
       defense.gilbertDeltaAndWatch = 'Bloqueia o acesso direto de bestas anfíbias e concede sentinelas postos de observação elevados e firmes.';
 
@@ -49757,7 +49757,7 @@
 
       saveType: 'Destreza',
 
-      pahoehoeRisk: 'A crosta basáltica cordada de aparência sólida oculta o teto fino e oco de um tubo de lava subterrâneo com 12 metros de profundidade; a passagem de aventureiros e animais de carga provoca o colapso súbito da claraboia, exigindo salvaguarda de Destreza CD 15 para agarrar as bordas de rocha ou despencar no abismo escuro sofrendo 4d6 de concussão pela queda sobre tálus de basalto afiado mais 1d6 de dano de fogo por cascalho ainda incandescente (DMG p. 110, 246; PHB p. 183).',
+      pahoehoeRisk: 'A crosta basáltica cordada de aparência sólida oculta o teto fino e oco de um tubo de lava subterrâneo com 12 metros de profundidade; a passagem de aventureiros e animais de carga provoca o colapso súbito da claraboia, exigindo salvaguarda de Destreza CD 15 para agarrar as bordas de rocha ou despencar no abismo escuro sofrendo 4d6 de concussão pela queda sobre tálus de basalto afiado mais 1d6 de dano de fogo por cascalho ainda incandescente.',
 
       pioneerMitigation: 'Batedores sondando o terreno à frente com pontões de ferro e ouvindo a ressonância oca dos passos na crosta vulcânica (Sobrevivência ou Percepção CD 14).',
 
@@ -49779,7 +49779,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.pahoehoeRisk = 'As cristas entrelaçadas de rocha pāhoehoe se assemelham a cordas petrificadas cobertas por uma película delgada de vidro vulcânico negro extremamente afiado; escorregar ou tropeçar nas dobras basálticas estilhaça a casca vítrea em lascas navalhadas que rasgam botas e perneiras, causando 2d8 de dano cortante e desvantagem em testes de Destreza por sangramento até que seja realizado curativo de primeiros socorros (DMG p. 110; XGE p. 109).';
+      hazard.pahoehoeRisk = 'As cristas entrelaçadas de rocha pāhoehoe se assemelham a cordas petrificadas cobertas por uma película delgada de vidro vulcânico negro extremamente afiado; escorregar ou tropeçar nas dobras basálticas estilhaça a casca vítrea em lascas navalhadas que rasgam botas e perneiras, causando 2d8 de dano cortante e desvantagem em testes de Destreza por sangramento até que seja realizado curativo de primeiros socorros.';
 
       hazard.pioneerMitigation = 'Marcha cautelosa com botas reforçadas com solado de couro duplo e cabos estáticos de apoio mútuo (Sobrevivência CD 13).';
 
@@ -49793,7 +49793,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.pahoehoeRisk = 'Dormitórios elípticos de lava intumescida (tumuli) acumulam bolsas seladas de dióxido de enxofre e vapor superaquecido sob pressão magmática; a quebra da cúpula estala a rocha expelindo uma nuvem asfixiante tóxica a 90°C sobre a trilha, exigindo salvaguarda de Constituição CD 15 ou sofrer 3d6 de dano de veneno e condição Envenenado por 1 hora por inalação ácida (DMG p. 110; PHB p. 183).';
+      hazard.pahoehoeRisk = 'Dormitórios elípticos de lava intumescida (tumuli) acumulam bolsas seladas de dióxido de enxofre e vapor superaquecido sob pressão magmática; a quebra da cúpula estala a rocha expelindo uma nuvem asfixiante tóxica a 90°C sobre a trilha, exigindo salvaguarda de Constituição CD 15 ou sofrer 3d6 de dano de veneno e condição Envenenado por 1 hora por inalação ácida.';
 
       hazard.pioneerMitigation = 'Detecção prévia de eflorescências amareladas de enxofre nas fraturas e desvio a barlavento das cúpulas de tumuli (Natureza ou Percepção CD 14).';
 
@@ -49807,7 +49807,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.pahoehoeRisk = 'Ao transitar por galerias de lava semi-abertas, estalactites gotejadas de lava e agulhas de sulfato suspensas no teto se soltam com as vibrações sonoras e passos da comitiva, despencando como flechas de basalto pesado com 2d10 de perfuração sobre os exploradores (DMG p. 110; PHB p. 185).';
+      hazard.pahoehoeRisk = 'Ao transitar por galerias de lava semi-abertas, estalactites gotejadas de lava e agulhas de sulfato suspensas no teto se soltam com as vibrações sonoras e passos da comitiva, despencando como flechas de basalto pesado com 2d10 de perfuração sobre os exploradores.';
 
       hazard.pioneerMitigation = 'Avanço silencioso em formação dispersa protegida sob escudos erguidos em cobertura superior (Sobrevivência ou Furtividade CD 13).';
 
@@ -49837,7 +49837,7 @@
 
       defenseTitle: 'Bivaque Subterrâneo em Galeria de Tubo de Lava',
 
-      pahoehoeAndCampSafety: 'O acampamento é instalado no interior seco e plano de um tubo de lava desobstruído com paredes circulares de basalto espesso, imune a tempestades de cinza, ventos árticos e intempéries da superfície (DMG p. 111).',
+      pahoehoeAndCampSafety: 'O acampamento é instalado no interior seco e plano de um tubo de lava desobstruído com paredes circulares de basalto espesso, imune a tempestades de cinza, ventos árticos e intempéries da superfície.',
 
       pahoehoeLavaAndWatch: 'A entrada estreita sob a claraboia colapsada restringe qualquer avanço hostil a um afunilamento vertical facilmente guardado por uma única sentinela com vantagem em testes de Percepção (Sabedoria).',
 
@@ -49855,7 +49855,7 @@
 
       defense.defenseTitle = 'Reduto de Vigília no Topo de Túmulo de Lava Solidificado';
 
-      defense.pahoehoeAndCampSafety = 'A cúpula intumescida e sólida de um tumulus basáltico ergue o bivaque 6 metros acima do campo de lavas circundante, com piso rígido que barra animais peçonhentos e escorpiões da cinza (DMG p. 111).';
+      defense.pahoehoeAndCampSafety = 'A cúpula intumescida e sólida de um tumulus basáltico ergue o bivaque 6 metros acima do campo de lavas circundante, com piso rígido que barra animais peçonhentos e escorpiões da cinza.';
 
       defense.pahoehoeLavaAndWatch = 'Posto de vigília elevado que descortina toda a planície basáltica a 2 milhas de alcance, com parapeitos naturais de cristas pāhoehoe que garantem meia cobertura (+2 na CA) aos arqueiros.';
 
@@ -49865,7 +49865,7 @@
 
       defense.defenseTitle = 'Coletor de Condensação em Paredes Basálticas do Tubo';
 
-      defense.pahoehoeAndCampSafety = 'A umidade do ar subterrâneo condensa nas paredes frias e vitrificadas do tubo de lava, escorrendo em canaletas naturais até uma cisterna de pedra lavada (PHB p. 150).';
+      defense.pahoehoeAndCampSafety = 'A umidade do ar subterrâneo condensa nas paredes frias e vitrificadas do tubo de lava, escorrendo em canaletas naturais até uma cisterna de pedra lavada.';
 
       defense.pahoehoeLavaAndWatch = 'Gera até 15 litros diários de água mineral fresca e límpida, abastecendo cantis e caldeirões da comitiva sem necessidade de arriscar batedores no deserto exterior.';
 
@@ -49875,7 +49875,7 @@
 
       defense.defenseTitle = 'Fosso Geotérmico com Leito Térmico para Refeições e Aquecimento';
 
-      defense.pahoehoeAndCampSafety = 'Fraturas basais profundas que irradiam calor residual da câmara magmática a 60°C são aproveitadas para forrar o bivaque e cozer rações sem necessidade de acender fogueiras que emitam fumaça (PHB p. 185).';
+      defense.pahoehoeAndCampSafety = 'Fraturas basais profundas que irradiam calor residual da câmara magmática a 60°C são aproveitadas para forrar o bivaque e cozer rações sem necessidade de acender fogueiras que emitam fumaça.';
 
       defense.pahoehoeLavaAndWatch = 'Elimina chamas e odores delatores no horizonte noturno, impedindo que patrulhas hostis localizem o acampamento pela fumaça.';
 
@@ -49917,7 +49917,7 @@
 
       saveType: 'Destreza',
 
-      palisadeRisk: 'A escarpa vertical em paliçada ergue-se em colunas hexagonais de diabásio de 30 metros de altura fraturadas por alívio de pressão; o estalo súbito de juntas de resfriamento provoca o tombamento maciço de prismas monolíticos sobre a trilha, exigindo salvaguarda de Destreza CD 15 para saltar fora da linha de queda ou sofrer 4d10 de dano contundente de esmagamento e ser lançado ao chão sob blocos quebrados (DMG p. 110, 246; PHB p. 183).',
+      palisadeRisk: 'A escarpa vertical em paliçada ergue-se em colunas hexagonais de diabásio de 30 metros de altura fraturadas por alívio de pressão; o estalo súbito de juntas de resfriamento provoca o tombamento maciço de prismas monolíticos sobre a trilha, exigindo salvaguarda de Destreza CD 15 para saltar fora da linha de queda ou sofrer 4d10 de dano contundente de esmagamento e ser lançado ao chão sob blocos quebrados.',
 
       pioneerMitigation: 'Batedores avançados examinando fendas basais com percussão sonora e detectando estalos de rocha antes da passagem da caravana (Sobrevivência ou Investigação CD 14).',
 
@@ -49939,7 +49939,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.palisadeRisk = 'Na base da soleira de diabásio, o contato com o estrato sedimentar frio gerou uma crosta vítrea e microlítica que se quebrou em tálus de lascas afiadas como lâminas de vidro vulcânico; atravessar a encosta instável sem ancoragem rasga grevas e mochilas, infligindo 2d8 de dano cortante e reduzindo o deslocamento da comitiva em 3 metros até o próximo descanso curto (DMG p. 110; XGE p. 109).';
+      hazard.palisadeRisk = 'Na base da soleira de diabásio, o contato com o estrato sedimentar frio gerou uma crosta vítrea e microlítica que se quebrou em tálus de lascas afiadas como lâminas de vidro vulcânico; atravessar a encosta instável sem ancoragem rasga grevas e mochilas, infligindo 2d8 de dano cortante e reduzindo o deslocamento da comitiva em 3 metros até o próximo descanso curto.';
 
       hazard.pioneerMitigation = 'Uso de calçados reforçados com placas de sola e progressão por banquetas sedimentares não vitrificadas (Sobrevivência CD 13).';
 
@@ -49953,7 +49953,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.palisadeRisk = 'A junta estratigráfica entre o diabásio impermeável e os arenitos cozidos em hornfels canaliza lençóis de água fervente e vapor sulfuroso retidos sob pressão termal; a abertura súbita de uma diaclase expulsa um jato escaldante na trilha, exigindo salvaguarda de Constituição CD 15 ou sofrer 3d6 de dano de fogo e cegueira temporária por 1 rodada pelo vapor mineralizado (DMG p. 110; PHB p. 183).';
+      hazard.palisadeRisk = 'A junta estratigráfica entre o diabásio impermeável e os arenitos cozidos em hornfels canaliza lençóis de água fervente e vapor sulfuroso retidos sob pressão termal; a abertura súbita de uma diaclase expulsa um jato escaldante na trilha, exigindo salvaguarda de Constituição CD 15 ou sofrer 3d6 de dano de fogo e cegueira temporária por 1 rodada pelo vapor mineralizado.';
 
       hazard.pioneerMitigation = 'Identificação de depósitos esbranquiçados de sílica e sibilados de vapor nas juntas antes da marcha (Percepção ou Natureza CD 14).';
 
@@ -49967,7 +49967,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.palisadeRisk = 'Para cruzar a escarpa, a rota penetra em fendas colunares estreitíssimas onde paredes verticais de dolerito tenaz aprisionam mochilas e arreios de montarias; um desmoronamento de topo entala os aventureiros na greta com risco de asfixia postural e 2d10 de concussão por compressão de rocha rígida (DMG p. 110; PHB p. 182-183).';
+      hazard.palisadeRisk = 'Para cruzar a escarpa, a rota penetra em fendas colunares estreitíssimas onde paredes verticais de dolerito tenaz aprisionam mochilas e arreios de montarias; um desmoronamento de topo entala os aventureiros na greta com risco de asfixia postural e 2d10 de concussão por compressão de rocha rígida.';
 
       hazard.pioneerMitigation = 'Descarregamento prévio de fardos volumosos e passagem em fila espaçada com cabo guia tático (Atletismo CD 13).';
 
@@ -49997,7 +49997,7 @@
 
       defenseTitle: 'Reduto em Alcova Colunar de Soleira de Diabásio',
 
-      diabaseAndCampSafety: 'O acampamento é montado em uma alcova natural escavada na base da soleira de diabásio, rodeada por colunas prismáticas hexagonais que formam ameias monolíticas inexpugnáveis imunes a vendavais e tempestades de montanha (DMG p. 111).',
+      diabaseAndCampSafety: 'O acampamento é montado em uma alcova natural escavada na base da soleira de diabásio, rodeada por colunas prismáticas hexagonais que formam ameias monolíticas inexpugnáveis imunes a vendavais e tempestades de montanha.',
 
       diabasePalisadeAndWatch: 'As colunas verticais fornecem cobertura total (+5 na CA) contra disparos de projéteis e limitam o acesso a um único pórtico estreito facilmente vigiado pelas sentinelas com vantagem em Percepção.',
 
@@ -50015,7 +50015,7 @@
 
       defense.defenseTitle = 'Fonte Artesiana em Diaclase Basal de Diabásio';
 
-      defense.diabaseAndCampSafety = 'Fraturas profundas de resfriamento na base da soleira vertem água límpida e fria, filtrada por dezenas de metros de quartzo e piroxênio sob alta pressão hidrostática (PHB p. 150).';
+      defense.diabaseAndCampSafety = 'Fraturas profundas de resfriamento na base da soleira vertem água límpida e fria, filtrada por dezenas de metros de quartzo e piroxênio sob alta pressão hidrostática.';
 
       defense.diabasePalisadeAndWatch = 'Fonte inesgotável de água potável pura que reabastece cantis de toda a comitiva e concede +1 de bônus na recuperação de Dados de Vida no descanso longo.';
 
@@ -50025,7 +50025,7 @@
 
       defense.defenseTitle = 'Baluarte Panorâmico em Cornija de Hornfels';
 
-      defense.diabaseAndCampSafety = 'A cornija superior de hornfels endurecido pelo metamorfismo de contato forma uma sacada natural 40 metros acima da garganta do vale, fora do alcance de feras e predadores rastejantes (DMG p. 111).';
+      defense.diabaseAndCampSafety = 'A cornija superior de hornfels endurecido pelo metamorfismo de contato forma uma sacada natural 40 metros acima da garganta do vale, fora do alcance de feras e predadores rastejantes.';
 
       defense.diabasePalisadeAndWatch = 'Posto elevado de vigília com visão panorâmica de 360 graus que detecta aproximações hostis a até 3 milhas de distância, impedindo surpresas táticas.';
 
@@ -50035,7 +50035,7 @@
 
       defense.defenseTitle = 'Bancada de Cantaria e Afiação em Grão Fino de Dolerito';
 
-      defense.diabaseAndCampSafety = 'Bancadas de diabásio de granulação fina homogênea são utilizadas como pedras naturais de amolar de qualidade artesanal superior (PHB p. 154, 185).';
+      defense.diabaseAndCampSafety = 'Bancadas de diabásio de granulação fina homogênea são utilizadas como pedras naturais de amolar de qualidade artesanal superior.';
 
       defense.diabasePalisadeAndWatch = 'Aventureiros e guerreiros afiam espadas, machados e virotes, concedendo +1 de dano no primeiro golpe armado bem-sucedido de cada combatente na manhã seguinte.';
 
@@ -50077,7 +50077,7 @@
 
       saveType: 'Destreza',
 
-      lamprophyreRisk: 'Os diques densos de lamprófiro intemperizam rapidamente ao ar livre em solo ocre fofo e argilas micáceas untosas; ao descer na trincheira escavada entre paredões sãos, o talude cede sob a marcha da comitiva soterrando o aventureiro até o peito com 3d6 de concussão e velocidade reduzida a zero (DMG p. 110; PHB p. 182-183).',
+      lamprophyreRisk: 'Os diques densos de lamprófiro intemperizam rapidamente ao ar livre em solo ocre fofo e argilas micáceas untosas; ao descer na trincheira escavada entre paredões sãos, o talude cede sob a marcha da comitiva soterrando o aventureiro até o peito com 3d6 de concussão e velocidade reduzida a zero.',
 
       pioneerMitigation: 'Batedores avançados utilizando varas graduadas para testar a coesão do solo nas trincheiras e abrindo picadas pelo topo das rochas encaixantes firmes (Sobrevivência ou Natureza CD 14).',
 
@@ -50099,7 +50099,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.lamprophyreRisk = 'Fissuras que cortam o núcleo do dique rompem cavidades ocelares esféricas de carbonato que aprisionam dióxido de carbono denso e radônio residual; a inalação involuntária causa vertigem súbita, 3d6 de dano de veneno e desvantagem em testes físicos por 1 hora por hipóxia tóxica (DMG p. 110; PHB p. 183).';
+      hazard.lamprophyreRisk = 'Fissuras que cortam o núcleo do dique rompem cavidades ocelares esféricas de carbonato que aprisionam dióxido de carbono denso e radônio residual; a inalação involuntária causa vertigem súbita, 3d6 de dano de veneno e desvantagem em testes físicos por 1 hora por hipóxia tóxica.';
 
       hazard.pioneerMitigation = 'Observação atenta da ausência de liquens e detecção de odores acres antes de avançar em corredores estreitos (Percepção CD 14).';
 
@@ -50113,7 +50113,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.lamprophyreRisk = 'Paredes verticais do dique expõem planos de clivagem formados por grandes fenocristais de biotita e piroxênio que se desfolham em lâminas vítreas afiadíssimas; apoiar as mãos ou pisar na rocha lubrificada rasga luvas e botas com 2d8 de dano cortante e queda de 10 metros (DMG p. 110; XGE p. 109).';
+      hazard.lamprophyreRisk = 'Paredes verticais do dique expõem planos de clivagem formados por grandes fenocristais de biotita e piroxênio que se desfolham em lâminas vítreas afiadíssimas; apoiar as mãos ou pisar na rocha lubrificada rasga luvas e botas com 2d8 de dano cortante e queda de 10 metros.';
 
       hazard.pioneerMitigation = 'Uso de luvas reforçadas com cota de malha e ancoragem com grampos de aço em rocha matriz dura (Atletismo CD 14).';
 
@@ -50127,7 +50127,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.lamprophyreRisk = 'Encostas íngremes do lamprófiro acumulam detritos angulares densos de peridotito mantélico arrastados na ascensão magmática; a vibração de passos desaba uma torrente de pedregulhos pesados sobre a comitiva causando 2d10 de concussão e risco de soterramento de carga (DMG p. 110; PHB p. 185).';
+      hazard.lamprophyreRisk = 'Encostas íngremes do lamprófiro acumulam detritos angulares densos de peridotito mantélico arrastados na ascensão magmática; a vibração de passos desaba uma torrente de pedregulhos pesados sobre a comitiva causando 2d10 de concussão e risco de soterramento de carga.';
 
       hazard.pioneerMitigation = 'Marcha em diagonal espaçada e fixação de estacas com cabos-guia nas nervuras de rocha sã (Sobrevivência CD 13).';
 
@@ -50157,7 +50157,7 @@
 
       defenseTitle: 'Bivaque em Corredor Natural de Rocha Encaixante',
 
-      lamprophyreAndCampSafety: 'O acampamento é estabelecido no leito plano e firme entre duas muralhas de rocha matriz dura deixadas pela erosão do dique; as paredes laterais paralelas oferecem blindagem sólida imune a ventos de altitude e tempestades (DMG p. 111).',
+      lamprophyreAndCampSafety: 'O acampamento é estabelecido no leito plano e firme entre duas muralhas de rocha matriz dura deixadas pela erosão do dique; as paredes laterais paralelas oferecem blindagem sólida imune a ventos de altitude e tempestades.',
 
       lamprophyreTrenchAndWatch: 'Acesso estreito de fácil monitoramento guarnecido por blocos de pedra, concedendo +2 de bônus na Percepção Passiva das sentinelas durante a vigília.',
 
@@ -50175,7 +50175,7 @@
 
       defense.defenseTitle = 'Poço de Captação Filtrado em Areias de Quartzo';
 
-      defense.lamprophyreAndCampSafety = 'Cova rasa escavada no fundo arenoso do corredor que capta água de infiltração decantada naturalmente pelas areias puras do dique, límpida e livre de argilas coloidais (PHB p. 150).';
+      defense.lamprophyreAndCampSafety = 'Cova rasa escavada no fundo arenoso do corredor que capta água de infiltração decantada naturalmente pelas areias puras do dique, límpida e livre de argilas coloidais.';
 
       defense.lamprophyreTrenchAndWatch = 'Abastecimento ininterrupto de água potável fresca para toda a comitiva durante o descanso longo.';
 
@@ -50185,7 +50185,7 @@
 
       defense.defenseTitle = 'Barricada de Garganta com Blocos Encaixantes';
 
-      defense.lamprophyreAndCampSafety = 'Fechamento do estrangulamento da ravina com pedras empilhadas a seco, criando um baluarte inexpugnável com seteiras protegidas para arqueiros (DMG p. 111).';
+      defense.lamprophyreAndCampSafety = 'Fechamento do estrangulamento da ravina com pedras empilhadas a seco, criando um baluarte inexpugnável com seteiras protegidas para arqueiros.';
 
       defense.lamprophyreTrenchAndWatch = 'Concede cobertura total (+5 na CA) contra arqueiros hostis e força invasores a avançarem por um corredor afunilado e vulnerável.';
 
@@ -50195,7 +50195,7 @@
 
       defense.defenseTitle = 'Lareira com Revestimento Térmico em Lâminas de Biotita';
 
-      defense.lamprophyreAndCampSafety = 'Forno circular forrado com placas espessas de mica e rocha máfica que acumulam calor e impedem labaredas altas ou faíscas de atingirem as tendas (PHB p. 185).';
+      defense.lamprophyreAndCampSafety = 'Forno circular forrado com placas espessas de mica e rocha máfica que acumulam calor e impedem labaredas altas ou faíscas de atingirem as tendas.';
 
       defense.lamprophyreTrenchAndWatch = 'Permite aquecer as refeições e o acampamento na madrugada gelada dos ermos com queima limpa e sem fumaça delatora.';
 
@@ -50237,7 +50237,7 @@
 
       saveType: 'Força',
 
-      blueHoleRisk: 'O buraco azul é um cilindro abissal de calcário de 150 metros de profundidade conectado ao mar aberto por galerias cársticas profundas; na virada da maré, a diferença de pressão gera um vórtice gigante de sucção que traga botes e nadadores para as entranhas escuras do poço com 3d8 de dano contundente de impacto contra estalactites marinhas e risco imediato de afogamento (DMG p. 110, 246; PHB p. 182-183).',
+      blueHoleRisk: 'O buraco azul é um cilindro abissal de calcário de 150 metros de profundidade conectado ao mar aberto por galerias cársticas profundas; na virada da maré, a diferença de pressão gera um vórtice gigante de sucção que traga botes e nadadores para as entranhas escuras do poço com 3d8 de dano contundente de impacto contra estalactites marinhas e risco imediato de afogamento.',
 
       pioneerMitigation: 'Batedores monitorando o horário exato de preamar e baixamar e amarrando cabos flutuantes de cortiça ancorados nas margens sólidas do recife (Sobrevivência ou Veículos Aquáticos CD 14).',
 
@@ -50259,7 +50259,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.blueHoleRisk = 'Abaixo de 25 metros de profundidade, uma névoa leitosa marca a transição para águas anóxicas saturadas de gás sulfídrico (H2S); a inalação ou contato desprotegido corrói tecidos moles, causa queimação ocular e impõe 3d6 de dano de veneno mais paralisia respiratória por hipóxia tóxica (DMG p. 110; PHB p. 183).';
+      hazard.blueHoleRisk = 'Abaixo de 25 metros de profundidade, uma névoa leitosa marca a transição para águas anóxicas saturadas de gás sulfídrico (H2S); a inalação ou contato desprotegido corrói tecidos moles, causa queimação ocular e impõe 3d6 de dano de veneno mais paralisia respiratória por hipóxia tóxica.';
 
       hazard.pioneerMitigation = 'Inspeção visual da camada opaca de bactérias e uso de máscaras de respiração com carvão ativado e ungüento oleoso na pele (Natureza ou Sobrevivência CD 14).';
 
@@ -50273,7 +50273,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.blueHoleRisk = 'A borda circular do abismo é formada por plataformas de coral fóssil delgadas suspensas sobre 100 metros de vazio aquático; o peso concentrado da comitiva ou a ancoragem de barcos quebra a laje em queda livre no poço causando 3d8 de concussão por choque contra saliências inferiores (DMG p. 110; XGE p. 109).';
+      hazard.blueHoleRisk = 'A borda circular do abismo é formada por plataformas de coral fóssil delgadas suspensas sobre 100 metros de vazio aquático; o peso concentrado da comitiva ou a ancoragem de barcos quebra a laje em queda livre no poço causando 3d8 de concussão por choque contra saliências inferiores.';
 
       hazard.pioneerMitigation = 'Ancoragem exclusiva em cabeços de rocha calcária sólida recuados da borda vertical do buraco (Percepção CD 14).';
 
@@ -50287,7 +50287,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.blueHoleRisk = 'Nas paredes do buraco azul pendem estalactites colossais gotejadas antes da inundação marinha; cabos de mergulho, mochilas e membros enroscam-se nos pilares pontiagudos no escuro abissal, reduzindo o deslocamento a zero e impondo risco iminente de asfixia aquática (DMG p. 110; PHB p. 185).';
+      hazard.blueHoleRisk = 'Nas paredes do buraco azul pendem estalactites colossais gotejadas antes da inundação marinha; cabos de mergulho, mochilas e membros enroscam-se nos pilares pontiagudos no escuro abissal, reduzindo o deslocamento a zero e impondo risco iminente de asfixia aquática.';
 
       hazard.pioneerMitigation = 'Navegação subaquática com lanternas estanques em rota direta e facas de mergulho presas ao peito prontas para corte (Sobrevivência CD 13).';
 
@@ -50317,7 +50317,7 @@
 
       defenseTitle: 'Bivaque em Plataforma de Recife de Coral Emerso',
 
-      blueHoleAndCampSafety: 'O acampamento é montado no anel emerso de calcário de coral que circunda a abertura do buraco azul, bem acima da preamar de sizígia; base estável e ventilada protegida contra ondas de mar aberto pelas bancadas externas do recife (DMG p. 111).',
+      blueHoleAndCampSafety: 'O acampamento é montado no anel emerso de calcário de coral que circunda a abertura do buraco azul, bem acima da preamar de sizígia; base estável e ventilada protegida contra ondas de mar aberto pelas bancadas externas do recife.',
 
       blueHoleTrenchAndWatch: 'Vista desafogada de 360 graus sobre a lagoa azul e o oceano ao redor, permitindo avistar barcos piratas ou criaturas marinhas a quilômetros de distância (+2 de bônus na Percepção Passiva).',
 
@@ -50335,7 +50335,7 @@
 
       defense.defenseTitle = 'Cisterna de Lente de Água Doce em Bacia de Coral';
 
-      defense.blueHoleAndCampSafety = 'Aproveitamento de uma cavidade de dissolução rasa no alto do anel calcário que capta exclusivamente água de chuva, formando uma lente doce que flutua pura sobre a umidade salina (PHB p. 150).';
+      defense.blueHoleAndCampSafety = 'Aproveitamento de uma cavidade de dissolução rasa no alto do anel calcário que capta exclusivamente água de chuva, formando uma lente doce que flutua pura sobre a umidade salina.';
 
       defense.blueHoleTrenchAndWatch = 'Garante abastecimento constante de água doce límpida para toda a expedição sem risco de salinização ou contaminação.',
 
@@ -50345,7 +50345,7 @@
 
       defense.defenseTitle = 'Barricada Flutuante de Cabos e Toras de Mangue';
 
-      defense.blueHoleAndCampSafety = 'Rede de toras pesadas de mangue amarradas com correntes estendidas em arco sobre o buraco azul, bloqueando a subida de monstros abissais da caverna submersa (DMG p. 111).';
+      defense.blueHoleAndCampSafety = 'Rede de toras pesadas de mangue amarradas com correntes estendidas em arco sobre o buraco azul, bloqueando a subida de monstros abissais da caverna submersa.';
 
       defense.blueHoleTrenchAndWatch = 'Concede cobertura total (+5 na CA) contra ataques vindos da água e impede que predadores anfíbios alcancem as barracas.',
 
@@ -50355,7 +50355,7 @@
 
       defense.defenseTitle = 'Balizas de Algas Bioluminescentes na Borda Submersa';
 
-      defense.blueHoleAndCampSafety = 'Lanternas de vidro com algas fosforescentes afundadas a 5 metros nas paredes do buraco azul que iluminam a entrada da dolina em brilho esmeralda suave (PHB p. 185).';
+      defense.blueHoleAndCampSafety = 'Lanternas de vidro com algas fosforescentes afundadas a 5 metros nas paredes do buraco azul que iluminam a entrada da dolina em brilho esmeralda suave.';
 
       defense.blueHoleTrenchAndWatch = 'Denuncia instantaneamente a silhueta de qualquer criatura que nade para fora do poço em direção à superfície.',
 
@@ -50397,7 +50397,7 @@
 
       saveType: 'Destreza',
 
-      bauxiteRisk: 'A couraça laterítica de bauxita sobre o maciço cárstico desagrega em milhares de nódulos esféricos pisolíticos duros de gibbsita de 2 cm; sobre lajes calcárias inclinadas, esse cascalho rola como rolamentos de ferro sob os passos da comitiva, arremessando o aventureiro por ravina íngreme com 3d6 de concussão e perda de tração de montarias (DMG p. 110; PHB p. 182-183).',
+      bauxiteRisk: 'A couraça laterítica de bauxita sobre o maciço cárstico desagrega em milhares de nódulos esféricos pisolíticos duros de gibbsita de 2 cm; sobre lajes calcárias inclinadas, esse cascalho rola como rolamentos de ferro sob os passos da comitiva, arremessando o aventureiro por ravina íngreme com 3d6 de concussão e perda de tração de montarias.',
 
       pioneerMitigation: 'Batedores avançados conduzindo marcha em passo curto com sapatilhas de couro áspero e evitando bordas com cascalho solto de coloração avermelhada (Sobrevivência ou Atletismo CD 14).',
 
@@ -50419,7 +50419,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.bauxiteRisk = 'Depressões no topo do platô acumulam argila residual vermelha aluminosa saturada que age como cola ultra-adesiva; pisar na lamaçal tenaz suga botas e pernas com deslocamento zero e exige força colossal para não rasgar calçados nem tombar de costas no barro espesso (DMG p. 110; PHB p. 183).';
+      hazard.bauxiteRisk = 'Depressões no topo do platô acumulam argila residual vermelha aluminosa saturada que age como cola ultra-adesiva; pisar na lamaçal tenaz suga botas e pernas com deslocamento zero e exige força colossal para não rasgar calçados nem tombar de costas no barro espesso.';
 
       hazard.pioneerMitigation = 'Sondagem prévia com bordão de madeira e uso de esteiras de bambu trançado para distribuir o peso sobre áreas lamacentas (Percepção ou Natureza CD 13).';
 
@@ -50433,7 +50433,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.bauxiteRisk = 'A couraça endurecida de bauxita oculta cavidades cegas de dissolução cárstica profunda no calcário subjacente; o peso concentrado da marcha rompe a crosta de 15 cm em queda livre vertical de 8 metros sobre escombros pontiagudos com 3d8 de dano contundente de impacto (DMG p. 110, 246).';
+      hazard.bauxiteRisk = 'A couraça endurecida de bauxita oculta cavidades cegas de dissolução cárstica profunda no calcário subjacente; o peso concentrado da marcha rompe a crosta de 15 cm em queda livre vertical de 8 metros sobre escombros pontiagudos com 3d8 de dano contundente de impacto.';
 
       hazard.pioneerMitigation = 'Escuta atenta do eco metálico oco das pisadas e caminhada em fila espaçada de 6 metros (Percepção CD 14).';
 
@@ -50447,7 +50447,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.bauxiteRisk = 'Toda água pluvial drena instantaneamente pelas fendas e sumidouros do carste para rios subterrâneos a 300 metros de profundidade; a marcha sobre o platô árido e reflexivo sob sol implacável sem fontes hídricas superficiais induz desidratação aguda e 1 nível de exaustão (DMG p. 110; PHB p. 185).';
+      hazard.bauxiteRisk = 'Toda água pluvial drena instantaneamente pelas fendas e sumidouros do carste para rios subterrâneos a 300 metros de profundidade; a marcha sobre o platô árido e reflexivo sob sol implacável sem fontes hídricas superficiais induz desidratação aguda e 1 nível de exaustão.';
 
       hazard.pioneerMitigation = 'Racionamento militar de cantis e busca por orvalho em cavernas rasas sombreadas (Sobrevivência CD 14).';
 
@@ -50477,7 +50477,7 @@
 
       defenseTitle: 'Bivaque em Laje Maciça de Couraça de Bauxita',
 
-      bauxiteAndCampSafety: 'O acampamento é estabelecido sobre uma laje tabular horizontal de bauxita pisolítica consolidada de alta dureza; o piso indeformável é imune a atolamentos e completamente livre da umidade da terra vermelha circundante (DMG p. 111).',
+      bauxiteAndCampSafety: 'O acampamento é estabelecido sobre uma laje tabular horizontal de bauxita pisolítica consolidada de alta dureza; o piso indeformável é imune a atolamentos e completamente livre da umidade da terra vermelha circundante.',
 
       bauxiteTrenchAndWatch: 'Plataforma rochosa sem vegetação alta que impede aproximações furtivas, concedendo +2 de bônus na Percepção Passiva das sentinelas durante a vigília.',
 
@@ -50495,7 +50495,7 @@
 
       defense.defenseTitle = 'Funil Condensador de Orvalho Noturno com Lona Encerada';
 
-      defense.bauxiteAndCampSafety = 'Estrutura de lonas estendidas em ângulo sobre vasilhames limpos que capta a forte condensação de orvalho da madrugada no platô, colhendo 30 litros de água pura e potável (PHB p. 150).';
+      defense.bauxiteAndCampSafety = 'Estrutura de lonas estendidas em ângulo sobre vasilhames limpos que capta a forte condensação de orvalho da madrugada no platô, colhendo 30 litros de água pura e potável.';
 
       defense.bauxiteTrenchAndWatch = 'Resolve totalmente a escassez hídrica do relevo cárstico sem exigir expedições arriscadas a cavernas profundas.',
 
@@ -50505,7 +50505,7 @@
 
       defense.defenseTitle = 'Mureta Perimétrica de Blocos Pisolíticos de Bauxita';
 
-      defense.bauxiteAndCampSafety = 'Parapeito defensivo construído com blocos pesados de couraça laterítica empilhados ao redor das barracas, conferindo cobertura total (+5 na CA) contra arqueiros na escuridão (DMG p. 111).';
+      defense.bauxiteAndCampSafety = 'Parapeito defensivo construído com blocos pesados de couraça laterítica empilhados ao redor das barracas, conferindo cobertura total (+5 na CA) contra arqueiros na escuridão.';
 
       defense.bauxiteTrenchAndWatch = 'Paredão maciço que barra ventanias de tempestade e impede o acesso de predadores carnívoros à área das tendas.',
 
@@ -50515,7 +50515,7 @@
 
       defense.defenseTitle = 'Lareira Térmica com Argila Refratária de Terra Rossa';
 
-      defense.bauxiteAndCampSafety = 'Forno artesanal moldado com argila aluminosa que acumula e irradia calor por até 10 horas, consumindo um terço da lenha e sem fumaça visível acima da borda do acampamento (PHB p. 185).';
+      defense.bauxiteAndCampSafety = 'Forno artesanal moldado com argila aluminosa que acumula e irradia calor por até 10 horas, consumindo um terço da lenha e sem fumaça visível acima da borda do acampamento.';
 
       defense.bauxiteTrenchAndWatch = 'Permite cozinhar e manter o bivaque aquecido sem denunciar a posição para patrulhas hostis à distância.',
 
@@ -50557,7 +50557,7 @@
 
       saveType: 'Destreza',
 
-      meanderRisk: 'Nas curvas fechadas do cânion incisado, a força centrífuga do rio escava profundamente a base do paredão côncavo externo, deixando cornijas rochosas maciças suspensas em balanço; a passagem da comitiva desaba lajes de 30 metros sobre o leito com 3d8 de dano contundente de impacto e esmagamento por blocos fluviais (DMG p. 110, 246; PHB p. 182-183).',
+      meanderRisk: 'Nas curvas fechadas do cânion incisado, a força centrífuga do rio escava profundamente a base do paredão côncavo externo, deixando cornijas rochosas maciças suspensas em balanço; a passagem da comitiva desaba lajes de 30 metros sobre o leito com 3d8 de dano contundente de impacto e esmagamento por blocos fluviais.',
 
       pioneerMitigation: 'Batedores avançados conduzindo a rota pelo terraço convexo de acresção e fincando amarras de segurança longe da zona de queda da margem externa (Sobrevivência ou Natureza CD 14).',
 
@@ -50579,7 +50579,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.meanderRisk = 'Chuvas torrenciais a montante fazem a torrente romper o colo rochoso estreito do meandro entalhado (gooseneck), abrindo um atalho subterrâneo violento que jorra em catarata repentina varrendo o fundo do cânion com 3d8 de concussão e arrasto violento de 60 metros (DMG p. 110; XGE p. 109).';
+      hazard.meanderRisk = 'Chuvas torrenciais a montante fazem a torrente romper o colo rochoso estreito do meandro entalhado (gooseneck), abrindo um atalho subterrâneo violento que jorra em catarata repentina varrendo o fundo do cânion com 3d8 de concussão e arrasto violento de 60 metros.';
 
       hazard.pioneerMitigation = 'Observação atenta da tonalidade barrenta da água e do estrondo hidrodinâmico nas gargantas altas, buscando abrigo imediato em patamares rochosos elevados (Percepção CD 14).';
 
@@ -50593,7 +50593,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.meanderRisk = 'No vértice de retorno da curva sinuosa contra esporões rochosos, a correnteza desenvolve turbilhões descendentes de alta sucção; o redemoinho traga montarias e aventureiros para baixo d’água com 2d8 de concussão por choque contra pedras submersas e risco crítico de afogamento (DMG p. 110; PHB p. 183).';
+      hazard.meanderRisk = 'No vértice de retorno da curva sinuosa contra esporões rochosos, a correnteza desenvolve turbilhões descendentes de alta sucção; o redemoinho traga montarias e aventureiros para baixo d’água com 2d8 de concussão por choque contra pedras submersas e risco crítico de afogamento.';
 
       hazard.pioneerMitigation = 'Remo compassado com lemes direcionais longos mantendo embarcações e nadadores no fluxo periférico laminar (Atletismo ou Veículos Aquáticos CD 14).';
 
@@ -50607,7 +50607,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.meanderRisk = 'Os paredões semicirculares do cânion comprimem os ventos de altitude em vórtices uivantes de ressonância acústica violenta; as rajadas arremessam cascalho pesado na face dos viajantes causando 2d6 de concussão e desorientação sensorial severa (DMG p. 110; PHB p. 185).';
+      hazard.meanderRisk = 'Os paredões semicirculares do cânion comprimem os ventos de altitude em vórtices uivantes de ressonância acústica violenta; as rajadas arremessam cascalho pesado na face dos viajantes causando 2d6 de concussão e desorientação sensorial severa.';
 
       hazard.pioneerMitigation = 'Uso de capuzes de couro ajustados e marcha agachada rente às depressões do terraço de seixos (Sobrevivência CD 13).';
 
@@ -50637,7 +50637,7 @@
 
       defenseTitle: 'Bivaque em Terraço Convexo de Seixos Drenantes',
 
-      meanderAndCampSafety: 'O acampamento é montado no terraço de acresção suave na margem interna da curva do meandro, fora da linha de impacto hidrodinâmico e 4 metros acima da cota normal de vazante; cascalheira porosa de drenagem rápida imune a alagamentos (DMG p. 111).',
+      meanderAndCampSafety: 'O acampamento é montado no terraço de acresção suave na margem interna da curva do meandro, fora da linha de impacto hidrodinâmico e 4 metros acima da cota normal de vazante; cascalheira porosa de drenagem rápida imune a alagamentos.',
 
       meanderTrenchAndWatch: 'Vista desafogada de 180 graus de toda a ferradura do rio, permitindo que a sentinela monitore qualquer barco ou criatura descendo a correnteza.',
 
@@ -50655,7 +50655,7 @@
 
       defense.defenseTitle = 'Reduto Natural em Esporão Isolado de Meandro Cortado';
 
-      defense.meanderAndCampSafety = 'Assentamento de bivaque na península rochosa elevada circundada pelo antigo leito abandonado do rio, acessível apenas por uma crista de 2 metros de largura facilmente barricável (DMG p. 111).';
+      defense.meanderAndCampSafety = 'Assentamento de bivaque na península rochosa elevada circundada pelo antigo leito abandonado do rio, acessível apenas por uma crista de 2 metros de largura facilmente barricável.';
 
       defense.meanderTrenchAndWatch = 'Concede cobertura total (+5 na CA) contra ataques terrestres e defesa inexpugnável com sentinelas em plano superior.',
 
@@ -50665,7 +50665,7 @@
 
       defense.defenseTitle = 'Poço de Filtragem em Areias Aluviais do Terraço';
 
-      defense.meanderAndCampSafety = 'Cova de 1 metro escavada no banco de seixos a 10 metros da margem do rio que capta a água subsuperficial límpida filtrada naturalmente pelas camadas de quartzo (PHB p. 150).';
+      defense.meanderAndCampSafety = 'Cova de 1 metro escavada no banco de seixos a 10 metros da margem do rio que capta a água subsuperficial límpida filtrada naturalmente pelas camadas de quartzo.';
 
       defense.meanderTrenchAndWatch = 'Abastece a comitiva com água cristalina, fresca e pura, livre do barro e das carcaças arrastadas pela correnteza principal.',
 
@@ -50675,7 +50675,7 @@
 
       defense.defenseTitle = 'Posto de Vigia com Amplificação Acústica de Cânion';
 
-      defense.meanderAndCampSafety = 'Instalação do posto de vigia na curvatura rochosa que funciona como uma concha acústica parabólica natural, captando ecos de remos ou passos na água a centenas de metros (PHB p. 185).';
+      defense.meanderAndCampSafety = 'Instalação do posto de vigia na curvatura rochosa que funciona como uma concha acústica parabólica natural, captando ecos de remos ou passos na água a centenas de metros.';
 
       defense.meanderTrenchAndWatch = 'Concede +2 de bônus na Percepção Passiva das sentinelas para detectar ameaças fluviais mesmo na escuridão fechada.',
 
@@ -50717,7 +50717,7 @@
 
       saveType: 'Destreza',
 
-      rapakiviRisk: 'O granito rapakivi sofre desagregação granular severa (grus/moro), transformando as encostas em cascalheiras instáveis de feldspato esfarelado que rolam como esferas sob os passos da comitiva; o solo cede subitamente arremessando o aventureiro 25 metros encosta abaixo com 3d6 de concussão e perda de tração de montarias (DMG p. 110; PHB p. 182-183).',
+      rapakiviRisk: 'O granito rapakivi sofre desagregação granular severa (grus/moro), transformando as encostas em cascalheiras instáveis de feldspato esfarelado que rolam como esferas sob os passos da comitiva; o solo cede subitamente arremessando o aventureiro 25 metros encosta abaixo com 3d6 de concussão e perda de tração de montarias.',
 
       pioneerMitigation: 'Batedores avançados utilizando bastões com ponteiras de aço para sondar a firmeza do cascalho e abrindo caminho em ziguezague por costões sãos (Sobrevivência ou Natureza CD 14).',
 
@@ -50739,7 +50739,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.rapakiviRisk = 'Blocos esféricos gigantescos de granito ovoide de 8 metros de diâmetro equilibram-se precariamente sobre pedestais estreitos de rocha intemperizada; vibrações de passos pesados ou ventanias colapsam o pedestal, fazendo o matacão rolar como uma mó gigante sobre a trilha com 3d8 de dano contundente de esmagamento (DMG p. 110, 246).';
+      hazard.rapakiviRisk = 'Blocos esféricos gigantescos de granito ovoide de 8 metros de diâmetro equilibram-se precariamente sobre pedestais estreitos de rocha intemperizada; vibrações de passos pesados ou ventanias colapsam o pedestal, fazendo o matacão rolar como uma mó gigante sobre a trilha com 3d8 de dano contundente de esmagamento.';
 
       hazard.pioneerMitigation = 'Inspeção visual da linha de sustentação dos matacões e desvio preventivo da linha de queda dos blocos arredondados (Percepção CD 14).';
 
@@ -50753,7 +50753,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.rapakiviRisk = 'Grandes placas arqueadas de granito esfoliam das cúpulas monolíticas por alívio de pressão térmica; o choque térmico noturno destaca lâminas de rocha de meia tonelada que escorregam sobre a trilha causando 3d8 de concussão e corte por bordas lascadas (DMG p. 110; XGE p. 109).';
+      hazard.rapakiviRisk = 'Grandes placas arqueadas de granito esfoliam das cúpulas monolíticas por alívio de pressão térmica; o choque térmico noturno destaca lâminas de rocha de meia tonelada que escorregam sobre a trilha causando 3d8 de concussão e corte por bordas lascadas.';
 
       hazard.pioneerMitigation = 'Evitar acampamentos ou paradas prolongadas diretamente abaixo de paredes com placas soltas em casca de cebola (Sobrevivência CD 13).';
 
@@ -50767,7 +50767,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.rapakiviRisk = 'Fraturas verticais de tração profundas de 10 metros entre matacões de granito acumulam uma cobertura enganadora de areia grossa e musgo seco; o piso falso cede sob os pés do explorador, prendendo-o em fenda em cunha com 3d6 de dano de queda e asfixia mecânica parcial (DMG p. 110; PHB p. 185).';
+      hazard.rapakiviRisk = 'Fraturas verticais de tração profundas de 10 metros entre matacões de granito acumulam uma cobertura enganadora de areia grossa e musgo seco; o piso falso cede sob os pés do explorador, prendendo-o em fenda em cunha com 3d6 de dano de queda e asfixia mecânica parcial.';
 
       hazard.pioneerMitigation = 'Sondagem sistemática com bordões longos antes de firmar passos pesados em fissuras duvidosas (Percepção CD 13).';
 
@@ -50797,7 +50797,7 @@
 
       defenseTitle: 'Bivaque em Alcova de Matacão Ovoide Monolítico',
 
-      rapakiviAndCampSafety: 'O acampamento é instalado sob o abrigo natural da base protegida de um matacão gigante e estável de viborgito; o teto monolítico de granito maciço oferece abrigo inquebrável imune a tempestades torrenciais e desabamentos externos (DMG p. 111).',
+      rapakiviAndCampSafety: 'O acampamento é instalado sob o abrigo natural da base protegida de um matacão gigante e estável de viborgito; o teto monolítico de granito maciço oferece abrigo inquebrável imune a tempestades torrenciais e desabamentos externos.',
 
       rapakiviTrenchAndWatch: 'Entrada afunilada de fácil monitoramento guarnecida por blocos de granito, concedendo +2 de bônus na Percepção Passiva das sentinelas durante a vigília.',
 
@@ -50815,7 +50815,7 @@
 
       defense.defenseTitle = 'Poço de Filtragem em Leito de Areia de Grus';
 
-      defense.rapakiviAndCampSafety = 'Cova rasa escavada no leito espesso de areia de grus quartzofeldspática que filtra naturalmente águas pluviais, decantando qualquer resíduo e fornecendo água doce fresca e translúcida (PHB p. 150).';
+      defense.rapakiviAndCampSafety = 'Cova rasa escavada no leito espesso de areia de grus quartzofeldspática que filtra naturalmente águas pluviais, decantando qualquer resíduo e fornecendo água doce fresca e translúcida.';
 
       defense.rapakiviTrenchAndWatch = 'Abastecimento ininterrupto de água potável límpida para todos os membros da comitiva durante o descanso longo.',
 
@@ -50825,7 +50825,7 @@
 
       defense.defenseTitle = 'Barricada em Garganta entre Matacões Ovoides';
 
-      defense.rapakiviAndCampSafety = 'Fechamento do vão estreito entre dois grandes matacões com pedregulhos empilhados e toras travadas, criando um portão defensivo inexpugnável (DMG p. 111).';
+      defense.rapakiviAndCampSafety = 'Fechamento do vão estreito entre dois grandes matacões com pedregulhos empilhados e toras travadas, criando um portão defensivo inexpugnável.';
 
       defense.rapakiviTrenchAndWatch = 'Concede cobertura total (+5 na CA) contra disparos de projéteis e canaliza eventuais predadores para um ponto cego desvantajoso.',
 
@@ -50835,7 +50835,7 @@
 
       defense.defenseTitle = 'Plataforma Nivelada e Drenante de Feldspato';
 
-      defense.rapakiviAndCampSafety = 'Nivelamento e compactação da areia de grus sob as tendas com bordaduras de madeira, criando um colchão drenante e macio que impede acúmulo de poças e isola a friagem do solo rochoso (PHB p. 185).';
+      defense.rapakiviAndCampSafety = 'Nivelamento e compactação da areia de grus sob as tendas com bordaduras de madeira, criando um colchão drenante e macio que impede acúmulo de poças e isola a friagem do solo rochoso.';
 
       defense.rapakiviTrenchAndWatch = 'Mantém o piso das barracas seco mesmo sob aguaceiros intensos da montanha.',
 
@@ -50877,7 +50877,7 @@
 
       saveType: 'Destreza',
 
-      carbonatiteRisk: 'O solo do vale vulcânico é coberto por uma carapaça branca esfarelável de carbonatos de sódio e potássio suspensa sobre lamas de soda altamente cáusticas (pH 11); pisar na crosta oca faz o aventureiro afundar até os joelhos sofrendo 3d8 de dano químico cáustico com destruição acelerada de solados e perneiras de couro (DMG p. 110, 246; PHB p. 182-183).',
+      carbonatiteRisk: 'O solo do vale vulcânico é coberto por uma carapaça branca esfarelável de carbonatos de sódio e potássio suspensa sobre lamas de soda altamente cáusticas (pH 11); pisar na crosta oca faz o aventureiro afundar até os joelhos sofrendo 3d8 de dano químico cáustico com destruição acelerada de solados e perneiras de couro.',
 
       pioneerMitigation: 'Batedores avançados calçando botas com solas duplas impermeabilizadas com gordura espessa e testando a densidade da crosta com varas de sondagem (Sobrevivência ou Natureza CD 14).',
 
@@ -50899,7 +50899,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.carbonatiteRisk = 'A brancura ofuscante dos precipitados de natrocarbonatito sob luz intensa reflete 95% da radiação solar, gerando queimaduras de córnea dolorosas e cegueira temporária que impõe desvantagem em testes de Percepção visual e ataques à distância por 2 horas (DMG p. 110; PHB p. 183).';
+      hazard.carbonatiteRisk = 'A brancura ofuscante dos precipitados de natrocarbonatito sob luz intensa reflete 95% da radiação solar, gerando queimaduras de córnea dolorosas e cegueira temporária que impõe desvantagem em testes de Percepção visual e ataques à distância por 2 horas.';
 
       hazard.pioneerMitigation = 'Uso obrigatório de óculos de fenda fina esculpidos em osso ou madeira com lentes enfumaçadas com fuligem (Sobrevivência CD 13).';
 
@@ -50913,7 +50913,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.carbonatiteRisk = 'Poços termais borbulhantes de soda cáustica a 500 graus ejetam jatos corrosivos sem fumaça prévia; a torrente atinge os aventureiros com 2d8 de dano de fogo mais 2d6 de dano cáustico alcalino contínuo (DMG p. 110; XGE p. 109).';
+      hazard.carbonatiteRisk = 'Poços termais borbulhantes de soda cáustica a 500 graus ejetam jatos corrosivos sem fumaça prévia; a torrente atinge os aventureiros com 2d8 de dano de fogo mais 2d6 de dano cáustico alcalino contínuo.';
 
       hazard.pioneerMitigation = 'Observação atenta da pulsação acústica subterrânea e manutenção de rota em cristas rochosas altas (Percepção CD 14).';
 
@@ -50927,7 +50927,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.carbonatiteRisk = 'Agulhas e torres ocas de carbonatito hidratado ressecam ao vento transformando-se em giz quebradiço; o choque acidental de um fardo ou montaria derruba a torre inteira em pedregulhos pesados sobre a comitiva com 2d8 de concussão e poeira sufocante de soda (DMG p. 110; PHB p. 185).';
+      hazard.carbonatiteRisk = 'Agulhas e torres ocas de carbonatito hidratado ressecam ao vento transformando-se em giz quebradiço; o choque acidental de um fardo ou montaria derruba a torre inteira em pedregulhos pesados sobre a comitiva com 2d8 de concussão e poeira sufocante de soda.';
 
       hazard.pioneerMitigation = 'Contorno amplo de formações espiculares frágeis mantendo marcha em corda espaçada (Sobrevivência CD 13).';
 
@@ -50957,7 +50957,7 @@
 
       defenseTitle: 'Bivaque em Cornija de Fenito Insolúvel',
 
-      carbonatiteAndCampSafety: 'O acampamento é estabelecido sobre uma cornija de fenito maciço no halo de contato da intrusão magmática; a rocha silicificada insolúvel é imune a reações alcalinas e oferece solo firme e seco livre da soda cáustica circundante (DMG p. 111).',
+      carbonatiteAndCampSafety: 'O acampamento é estabelecido sobre uma cornija de fenito maciço no halo de contato da intrusão magmática; a rocha silicificada insolúvel é imune a reações alcalinas e oferece solo firme e seco livre da soda cáustica circundante.',
 
       carbonatiteTrenchAndWatch: 'Posição elevada que domina o vale esbranquiçado, permitindo avistar aproximações hostis a centenas de metros e concedendo +2 de bônus na Percepção Passiva das sentinelas.',
 
@@ -50975,7 +50975,7 @@
 
       defense.defenseTitle = 'Coletor de Lona Suspensa para Água Neutra';
 
-      defense.carbonatiteAndCampSafety = 'Montagem de lonas enceradas limpas estendidas entre mastros para coletar chuva ou condensação noturna antes que toquem o solo de carbonatito, garantindo água doce com pH neutro (PHB p. 150).';
+      defense.carbonatiteAndCampSafety = 'Montagem de lonas enceradas limpas estendidas entre mastros para coletar chuva ou condensação noturna antes que toquem o solo de carbonatito, garantindo água doce com pH neutro.';
 
       defense.carbonatiteTrenchAndWatch = 'Evita que os membros do grupo consumam água contaminada por carbonatos cáusticos de sódio.',
 
@@ -50985,7 +50985,7 @@
 
       defense.defenseTitle = 'Trincheira de Poeira Cáustica Anti-Invasão';
 
-      defense.carbonatiteAndCampSafety = 'Cava circular em torno das barracas preenchida com pó fino e corrosivo de natrocarbonatito; predadores e feras descalças sofrem dor intensa nas patas ao pisar e recuam imediatamente (DMG p. 111).';
+      defense.carbonatiteAndCampSafety = 'Cava circular em torno das barracas preenchida com pó fino e corrosivo de natrocarbonatito; predadores e feras descalças sofrem dor intensa nas patas ao pisar e recuam imediatamente.';
 
       defense.carbonatiteTrenchAndWatch = 'Alarme tátil infalível que bloqueia investidas furtivas noturnas por criaturas terrestres.',
 
@@ -50995,7 +50995,7 @@
 
       defense.defenseTitle = 'Posto de Neutralização com Vinagre e Sabão Gordo';
 
-      defense.carbonatiteAndCampSafety = 'Cuba de lavagem com água pura e vinagre diluído na entrada do acampamento para desintoxicar botas, calças e arreios de montarias de toda poeira de soda antes do repouso (PHB p. 185).';
+      defense.carbonatiteAndCampSafety = 'Cuba de lavagem com água pura e vinagre diluído na entrada do acampamento para desintoxicar botas, calças e arreios de montarias de toda poeira de soda antes do repouso.';
 
       defense.carbonatiteTrenchAndWatch = 'Preserva a integridade do couro e dos tecidos de proteção contra apodrecimento alcalino rápido.',
 
@@ -51037,7 +51037,7 @@
 
       saveType: 'Destreza',
 
-      pegmatiteRisk: 'O núcleo do dique de pegmatito encerra bolsões ocos (geodos gigantes) forrados por prismas colossais de quartzo e berilo afiados como lanças; ao pisar sobre essa crosta oca fraturada, o teto cede sob o peso da comitiva em queda vertical de 6 metros sobre pontas cristalinas pontiagudas causando 3d8 de dano perfurante e laceração de botas e correias (DMG p. 110, 246; PHB p. 182-183).',
+      pegmatiteRisk: 'O núcleo do dique de pegmatito encerra bolsões ocos (geodos gigantes) forrados por prismas colossais de quartzo e berilo afiados como lanças; ao pisar sobre essa crosta oca fraturada, o teto cede sob o peso da comitiva em queda vertical de 6 metros sobre pontas cristalinas pontiagudas causando 3d8 de dano perfurante e laceração de botas e correias.',
 
       pioneerMitigation: 'Batedores sondando as lajes de feldspato com martelos pesados para escutar o eco oco de cavidades subterrâneas e fincando cordas de segurança (Sobrevivência ou Natureza CD 14).',
 
@@ -51059,7 +51059,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.pegmatiteRisk = 'Encostas íngremes do pegmatito expõem pacotes de folhas gigantescas de mica (muscovita) que se soltam em lâminas flexíveis e escorregadias como graxa; pisar no plano de clivagem desestabiliza a marcha e arremessa o aventureiro desgovernado encosta abaixo com 3d6 de concussão e perda de tração de carga (DMG p. 110; PHB p. 182).';
+      hazard.pegmatiteRisk = 'Encostas íngremes do pegmatito expõem pacotes de folhas gigantescas de mica (muscovita) que se soltam em lâminas flexíveis e escorregadias como graxa; pisar no plano de clivagem desestabiliza a marcha e arremessa o aventureiro desgovernado encosta abaixo com 3d6 de concussão e perda de tração de carga.';
 
       hazard.pioneerMitigation = 'Uso de calçados com travas pontiagudas de aço e contorno cauteloso de veios micáceos reluzentes (Atletismo ou Sobrevivência CD 14).';
 
@@ -51073,7 +51073,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.pegmatiteRisk = 'A bertura acidental de uma câmara selada de cristalização magmática libera vapores residuais altamente ionizados de radônio e ácido fluorídrico concentrados; a inalação involuntária causa queimação broncopulmonar aguda, 3d6 de dano de veneno e cegueira transitória por irritação ocular química (DMG p. 110; PHB p. 183).';
+      hazard.pegmatiteRisk = 'A bertura acidental de uma câmara selada de cristalização magmática libera vapores residuais altamente ionizados de radônio e ácido fluorídrico concentrados; a inalação involuntária causa queimação broncopulmonar aguda, 3d6 de dano de veneno e cegueira transitória por irritação ocular química.';
 
       hazard.pioneerMitigation = 'Identificação de eflorescências coloridas de flúor e detecção de odores acres antes de romper qualquer cavidade cristalina (Percepção CD 14).';
 
@@ -51087,7 +51087,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.pegmatiteRisk = 'Taludes escarpados do pegmatito acumulam monólitos soltos de cristais de espodumênio de até três metros de comprimento em equilíbrio precário; a tentativa de minerar gemas brutas desaba uma enxurrada de pedregulhos cristalinos densos que causam 2d10 de dano contundente por impacto e esmagamento (DMG p. 110; XGE p. 109).';
+      hazard.pegmatiteRisk = 'Taludes escarpados do pegmatito acumulam monólitos soltos de cristais de espodumênio de até três metros de comprimento em equilíbrio precário; a tentativa de minerar gemas brutas desaba uma enxurrada de pedregulhos cristalinos densos que causam 2d10 de dano contundente por impacto e esmagamento.';
 
       hazard.pioneerMitigation = 'Proibição de mineração desordenada na base de taludes e estabelecimento de barreiras de contenção com cabos de aço (Sobrevivência CD 13).';
 
@@ -51117,7 +51117,7 @@
 
       defenseTitle: 'Bivaque em Alcova de Megacristal de Feldspato',
 
-      pegmatiteAndCampSafety: 'O acampamento é montado no recesso natural esculpido em um cristal colossal de feldspato de cinco metros; as paredes de rocha ígnea ultra-densa oferecem isolamento térmico perfeito e teto impenetrável imune a desabamentos ou umidade (DMG p. 111).',
+      pegmatiteAndCampSafety: 'O acampamento é montado no recesso natural esculpido em um cristal colossal de feldspato de cinco metros; as paredes de rocha ígnea ultra-densa oferecem isolamento térmico perfeito e teto impenetrável imune a desabamentos ou umidade.',
 
       pegmatiteTrenchAndWatch: 'Entrada estreita de fácil defesa guarnecida por blocos minerais que canalizam aproximações hostis, concedendo +2 de bônus na Percepção Passiva das sentinelas.',
 
@@ -51135,7 +51135,7 @@
 
       defense.defenseTitle = 'Canaleta de Captação em Veio de Quartzo Puro';
 
-      defense.pegmatiteAndCampSafety = 'Canalização artesanal aproveitando uma fenda lisa de quartzo translúcido que escorre água pura de orvalho e degelo, totalmente livre de contaminação por argilas ou toxinas minerais (PHB p. 150).';
+      defense.pegmatiteAndCampSafety = 'Canalização artesanal aproveitando uma fenda lisa de quartzo translúcido que escorre água pura de orvalho e degelo, totalmente livre de contaminação por argilas ou toxinas minerais.';
 
       defense.pegmatiteTrenchAndWatch = 'Fornece suprimento abundante de água potável límpida e fresca para cantis e animais durante o repouso da comitiva.';
 
@@ -51145,7 +51145,7 @@
 
       defense.defenseTitle = 'Pára-Vento e Escudo de Faíscas em Placas de Mica';
 
-      defense.pegmatiteAndCampSafety = 'Mureta protetora erguida com placas laminares translúcidas de muscovita gigante sobrepostas como escamas minerais, absolutamente incombustíveis e impermeáveis ao vento cortante (PHB p. 185).';
+      defense.pegmatiteAndCampSafety = 'Mureta protetora erguida com placas laminares translúcidas de muscovita gigante sobrepostas como escamas minerais, absolutamente incombustíveis e impermeáveis ao vento cortante.';
 
       defense.pegmatiteTrenchAndWatch = 'Concede cobertura total (+5 na CA) contra arqueiros na escuridão e bloqueia faíscas da fogueira de atingirem as tendas de lona.';
 
@@ -51155,7 +51155,7 @@
 
       defense.defenseTitle = 'Posto de Vigia em Cavidade Mirolítica de Crista';
 
-      defense.pegmatiteAndCampSafety = 'Nicho elevado escavado na crista superior do dique com visibilidade de 360 graus sobre todo o relevo circundante, permitindo detectar aproximações a mais de um quilômetro (DMG p. 111).';
+      defense.pegmatiteAndCampSafety = 'Nicho elevado escavado na crista superior do dique com visibilidade de 360 graus sobre todo o relevo circundante, permitindo detectar aproximações a mais de um quilômetro.';
 
       defense.pegmatiteTrenchAndWatch = 'As paredes de quartzo e turmalina escura camuflam a silhueta da sentinela contra o luar, concedendo vantagem em testes de Furtividade para vigilância noturna.';
 
@@ -51197,7 +51197,7 @@
 
       saveType: 'Destreza',
 
-      dikeRisk: 'Muralhas estreitas de arenito quartzoso de 10 metros de altura emergem onde a rocha encaixante mais mole foi erodida; a perda de sustentação lateral faz placas de arenito cimentado tombarem como monólitos sobre a trilha ao menor abalo, esmagando a comitiva com 3d8 de dano contundente (DMG p. 110, 246; PHB p. 182-183).',
+      dikeRisk: 'Muralhas estreitas de arenito quartzoso de 10 metros de altura emergem onde a rocha encaixante mais mole foi erodida; a perda de sustentação lateral faz placas de arenito cimentado tombarem como monólitos sobre a trilha ao menor abalo, esmagando a comitiva com 3d8 de dano contundente.',
 
       pioneerMitigation: 'Batedores sondando a estabilidade da base das muralhas com pontas de ferro e traçando rotas afastadas da zona de queda das lajes (Sobrevivência ou Natureza CD 14).',
 
@@ -51219,7 +51219,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.dikeRisk = 'Fissuras verticais de injeção de areia onde a drenagem subterrânea carreada lavou o sedimento interno, deixando um vazio cego de 8 metros coberto apenas por uma casca fina de solo ressecado; o piso cede sob os pés do aventureiro em queda livre com 3d6 de concussão e aprisionamento (DMG p. 110).';
+      hazard.dikeRisk = 'Fissuras verticais de injeção de areia onde a drenagem subterrânea carreada lavou o sedimento interno, deixando um vazio cego de 8 metros coberto apenas por uma casca fina de solo ressecado; o piso cede sob os pés do aventureiro em queda livre com 3d6 de concussão e aprisionamento.';
 
       hazard.pioneerMitigation = 'Inspeção de depressões lineares e avanço com varas de sondagem para testar o chão antes de descarregar o peso do corpo (Percepção CD 14).';
 
@@ -51233,7 +51233,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.dikeRisk = 'Depósito residual de areia fina saturada sob pressão intersticial que perde toda a coesão mecânica ao ser pisada com frequência; o explorador afunda subitamente até o peito em lama pastosa com deslocamento reduzido a zero e risco de perda de carga pesada (DMG p. 110; PHB p. 183).';
+      hazard.dikeRisk = 'Depósito residual de areia fina saturada sob pressão intersticial que perde toda a coesão mecânica ao ser pisada com frequência; o explorador afunda subitamente até o peito em lama pastosa com deslocamento reduzido a zero e risco de perda de carga pesada.';
 
       hazard.pioneerMitigation = 'Distribuição de peso amarrando pranchas de madeira sob os calçados e evitando passos pesados em fila única (Sobrevivência CD 14).';
 
@@ -51247,7 +51247,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.dikeRisk = 'Ventos canalizados entre as muralhas paralelas de diques arrastam fragmentos afiados de cherte e quartzo intemperizado das paredes; a rajada retalha roupas, fere a pele e causa 2d6 de dano cortante com risco de cegueira momentânea por poeira de sílica (DMG p. 110; XGE p. 109).';
+      hazard.dikeRisk = 'Ventos canalizados entre as muralhas paralelas de diques arrastam fragmentos afiados de cherte e quartzo intemperizado das paredes; a rajada retalha roupas, fere a pele e causa 2d6 de dano cortante com risco de cegueira momentânea por poeira de sílica.';
 
       hazard.pioneerMitigation = 'Uso de mantos pesados de couro com capuzes ajustados e óculos de proteção com frestas de osso (Sobrevivência CD 13).';
 
@@ -51277,7 +51277,7 @@
 
       defenseTitle: 'Bivaque em Trincheira Natural de Diques Paralelos',
 
-      dikeAndCampSafety: 'O acampamento é estabelecido no corredor plano entre duas muralhas paralelas de diques clásticos maciços; as lajes verticais de arenito silicificado funcionam como muralhas ciclópicas que barram ventanias e ataques laterais (DMG p. 111).',
+      dikeAndCampSafety: 'O acampamento é estabelecido no corredor plano entre duas muralhas paralelas de diques clásticos maciços; as lajes verticais de arenito silicificado funcionam como muralhas ciclópicas que barram ventanias e ataques laterais.',
 
       dikeTrenchAndWatch: 'Sentinela instalada no topo da muralha de arenito com visão limpa das terras ermas ao redor, garantindo +2 de bônus na Percepção Passiva.',
 
@@ -51295,7 +51295,7 @@
 
       defense.defenseTitle = 'Filtro Subterrâneo em Surgência de Chaminé Arenosa';
 
-      defense.dikeAndCampSafety = 'Captação de água doce de um filete subterrâneo que ascende filtrado naturalmente pelo quartzo purificado da chaminé clástica, brotando limpo e sem argilas em suspensão (PHB p. 150).';
+      defense.dikeAndCampSafety = 'Captação de água doce de um filete subterrâneo que ascende filtrado naturalmente pelo quartzo purificado da chaminé clástica, brotando limpo e sem argilas em suspensão.';
 
       defense.dikeTrenchAndWatch = 'Fornece suprimento constante de água fresca e pura para toda a comitiva durante o descanso longo nos ermos.';
 
@@ -51305,7 +51305,7 @@
 
       defense.defenseTitle = 'Barricada de Cascalho no Estreitamento do Corredor';
 
-      defense.dikeAndCampSafety = 'Fechamento da entrada do desfiladeiro com blocos empilhados de arenito clástico, criando uma fortaleza inexpugnável com frestas de disparo para armas de longo alcance (DMG p. 111).';
+      defense.dikeAndCampSafety = 'Fechamento da entrada do desfiladeiro com blocos empilhados de arenito clástico, criando uma fortaleza inexpugnável com frestas de disparo para armas de longo alcance.';
 
       defense.dikeTrenchAndWatch = 'Concede cobertura total (+5 na CA) contra disparos de flechas e canaliza eventuais atacantes para um ponto de estrangulamento mortal.';
 
@@ -51315,7 +51315,7 @@
 
       defense.defenseTitle = 'Lareira com Refletor Térmico em Parede Silicificada';
 
-      defense.dikeAndCampSafety = 'Fogueira construída junto à face lisa do dique de arenito quartzoso que absorve e reflete o calor para o centro do bivaque como um forno cerâmico (PHB p. 185).';
+      defense.dikeAndCampSafety = 'Fogueira construída junto à face lisa do dique de arenito quartzoso que absorve e reflete o calor para o centro do bivaque como um forno cerâmico.';
 
       defense.dikeTrenchAndWatch = 'Permite manter o acampamento aquecido por horas usando um quarto da lenha comum e sem gerar labaredas altas visíveis à distância.';
 
@@ -51357,7 +51357,7 @@
 
       saveType: 'Destreza',
 
-      flyschRisk: 'A plataforma intermareal é formada por camadas alternadas verticais de arenito duro e folhelho erodido; as lâminas de arenito emergem como dentes de serra afiados cobertos por limo marinho viscoso onde um escorregão arremessa o aventureiro contra bordas cortantes com 3d6 de dano de corte e laceração de botas e correias (DMG p. 110; PHB p. 182-183).',
+      flyschRisk: 'A plataforma intermareal é formada por camadas alternadas verticais de arenito duro e folhelho erodido; as lâminas de arenito emergem como dentes de serra afiados cobertos por limo marinho viscoso onde um escorregão arremessa o aventureiro contra bordas cortantes com 3d6 de dano de corte e laceração de botas e correias.',
 
       pioneerMitigation: 'Batedores avançados utilizando bastões de apoio e solados reforçados com grampos de ferro para caminhar nas fendas secas de maré baixa (Sobrevivência ou Atletismo CD 14).',
 
@@ -51379,7 +51379,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.flyschRisk = 'Nas falésias verticais de flysch que marginam a plataforma costeira, a vibração do impacto das ondas descola placas delgadas de rocha laminada que despencam como guilhotinas de pedra sobre a praia causando 3d8 de dano cortante e contundente (DMG p. 110; XGE p. 109).';
+      hazard.flyschRisk = 'Nas falésias verticais de flysch que marginam a plataforma costeira, a vibração do impacto das ondas descola placas delgadas de rocha laminada que despencam como guilhotinas de pedra sobre a praia causando 3d8 de dano cortante e contundente.';
 
       hazard.pioneerMitigation = 'Observação atenta do som oco emitido pelas placas ao vento e manutenção de distância segura de 10 metros da base da falésia (Percepção CD 14).';
 
@@ -51393,7 +51393,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.flyschRisk = 'Canais profundos esculpidos na rocha onde camadas moles de argilito cederam funcionam como funis hidráulicos; a maré enchente empurra trombas de água salgada a grande velocidade que arrastam exploradores contra dentes rochosos com 2d8 de concussão e risco de afogamento (DMG p. 110; PHB p. 183).';
+      hazard.flyschRisk = 'Canais profundos esculpidos na rocha onde camadas moles de argilito cederam funcionam como funis hidráulicos; a maré enchente empurra trombas de água salgada a grande velocidade que arrastam exploradores contra dentes rochosos com 2d8 de concussão e risco de afogamento.';
 
       hazard.pioneerMitigation = 'Monitoramento do ciclo de maré e travessia rápida das calhas estreitas usando amarras de segurança coletivas (Sobrevivência CD 14).';
 
@@ -51407,7 +51407,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.flyschRisk = 'Entre duas cristas de arenito formam-se depressões cheias de lama negra putrefata e mantos densos de algas marinhas escorregadias; o aventureiro afunda até a coxa ficando com deslocamento reduzido a zero enquanto a maré começa a subir (DMG p. 110; PHB p. 185).';
+      hazard.flyschRisk = 'Entre duas cristas de arenito formam-se depressões cheias de lama negra putrefata e mantos densos de algas marinhas escorregadias; o aventureiro afunda até a coxa ficando com deslocamento reduzido a zero enquanto a maré começa a subir.';
 
       hazard.pioneerMitigation = 'Sondagem sistemática do fundo das poças com bastão longo de madeira antes de pisar (Percepção CD 13).';
 
@@ -51437,7 +51437,7 @@
 
       defenseTitle: 'Bivaque em Crista Elevada de Arenito Rígido',
 
-      flyschAndCampSafety: 'O acampamento é montado sobre uma crista de arenito espessa e resistente de flysch erguida bem acima da cota da maré de sizígia; base de rocha sólida imune a desabamentos e livre da umidade salina do lodo costeiro (DMG p. 111).',
+      flyschAndCampSafety: 'O acampamento é montado sobre uma crista de arenito espessa e resistente de flysch erguida bem acima da cota da maré de sizígia; base de rocha sólida imune a desabamentos e livre da umidade salina do lodo costeiro.',
 
       flyschTrenchAndWatch: 'Posição com visão desimpedida do canal marítimo e da falésia, concedendo +2 de bônus na Percepção Passiva das sentinelas para detectar embarcações e criaturas anfíbias.',
 
@@ -51455,7 +51455,7 @@
 
       defense.defenseTitle = 'Bacia de Captação e Decantação de Degelo de Falésia';
 
-      defense.flyschAndCampSafety = 'Poça natural na bancada superior de arenito abastecida por filetes de água doce que brotam da falésia, decantando areia e permitindo coletar água potável cristalina antes de se misturar ao mar salgado (PHB p. 150).';
+      defense.flyschAndCampSafety = 'Poça natural na bancada superior de arenito abastecida por filetes de água doce que brotam da falésia, decantando areia e permitindo coletar água potável cristalina antes de se misturar ao mar salgado.';
 
       defense.flyschTrenchAndWatch = 'Abastecimento seguro de água doce para a comitiva sem necessidade de adentrar pântanos salobros perigosos.';
 
@@ -51465,7 +51465,7 @@
 
       defense.defenseTitle = 'Paliçada Aproveitando Cristas em Dentes de Serra';
 
-      defense.flyschAndCampSafety = 'Aproveitamento das cristas paralelas de rocha vertical como muralhas naturais afiadas, fechando os vãos intermediários com troncos de deriva e estacas pontiagudas (DMG p. 111).';
+      defense.flyschAndCampSafety = 'Aproveitamento das cristas paralelas de rocha vertical como muralhas naturais afiadas, fechando os vãos intermediários com troncos de deriva e estacas pontiagudas.';
 
       defense.flyschTrenchAndWatch = 'Concede cobertura total (+5 na CA) contra arqueiros nas falésias e força qualquer atacante a avançar por desfiladeiros cortantes e estreitos.';
 
@@ -51475,7 +51475,7 @@
 
       defense.defenseTitle = 'Lareira de Lenha de Deriva em Recesso de Rocha';
 
-      defense.flyschAndCampSafety = 'Fogueira acesa com madeiras marinhas secas e mantos de algas desidratadas alojada em nicho profundo de arenito, liberando calor contínuo sem chamas altas (PHB p. 185).';
+      defense.flyschAndCampSafety = 'Fogueira acesa com madeiras marinhas secas e mantos de algas desidratadas alojada em nicho profundo de arenito, liberando calor contínuo sem chamas altas.';
 
       defense.flyschTrenchAndWatch = 'Evita que a luz do acampamento seja avistada por piratas no horizonte marinho durante a noite costeira.';
 
@@ -51517,7 +51517,7 @@
 
       saveType: 'Destreza',
 
-      trappRisk: 'O platô continental é formado por sucessivos derrames gigantescos de basalto intercalados em degraus abruptos; na borda do patamar, colunas prismáticas frouxas se desprendem sob a marcha da comitiva despencando em abismo de 25 metros com 4d6 de dano de queda contundente sobre taludes pontiagudos (DMG p. 110, 246; PHB p. 182-183).',
+      trappRisk: 'O platô continental é formado por sucessivos derrames gigantescos de basalto intercalados em degraus abruptos; na borda do patamar, colunas prismáticas frouxas se desprendem sob a marcha da comitiva despencando em abismo de 25 metros com 4d6 de dano de queda contundente sobre taludes pontiagudos.',
 
       pioneerMitigation: 'Batedores sondando diaclases com martelos geológicos e cravando pítons de ferro com cordas estáticas para guiar a passagem pela borda dos degraus (Sobrevivência ou Atletismo CD 14).',
 
@@ -51539,7 +51539,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.trappRisk = 'Entre duas camadas de basalto maciço existe um horizonte de escória vulcânica porosa e vesicular esfarelável; ao pisar sobre essa fresta oca disfarçada por cascalho, o teto cede aprisionando as pernas dos aventureiros com 2d8 de dano perfurante e entorse grave (DMG p. 110).';
+      hazard.trappRisk = 'Entre duas camadas de basalto maciço existe um horizonte de escória vulcânica porosa e vesicular esfarelável; ao pisar sobre essa fresta oca disfarçada por cascalho, o teto cede aprisionando as pernas dos aventureiros com 2d8 de dano perfurante e entorse grave.';
 
       hazard.pioneerMitigation = 'Inspeção cuidadosa da coloração avermelhada das brechas superficiais e avanço apoiado em bordões longos (Percepção ou Natureza CD 13).';
 
@@ -51553,7 +51553,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.trappRisk = 'Os degraus colossais de trapp canalizam ventos gélidos da estepe em vórtices violentos de alta pressão; rajadas repentinas arremessam cascalho cortante e empurram os aventureiros 15 pés em direção ao precipício com 2d6 de dano de contusão (DMG p. 110; XGE p. 109).';
+      hazard.trappRisk = 'Os degraus colossais de trapp canalizam ventos gélidos da estepe em vórtices violentos de alta pressão; rajadas repentinas arremessam cascalho cortante e empurram os aventureiros 15 pés em direção ao precipício com 2d6 de dano de contusão.';
 
       hazard.pioneerMitigation = 'Marcha abaixada rente às colunatas basálticas e uso de capas pesadas amarradas com correias duplas (Sobrevivência CD 14).';
 
@@ -51567,7 +51567,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.trappRisk = 'Falhas tectônicas profundas que cortam o pacote de derrames basálticos emitem jatos mornos de gases sulfúricos corrosivos; a inalação involuntária causa queimação traqueal, 2d8 de dano de veneno e tosse convulsiva com desvantagem em testes de Percepção por 1 hora (DMG p. 110; PHB p. 183).';
+      hazard.trappRisk = 'Falhas tectônicas profundas que cortam o pacote de derrames basálticos emitem jatos mornos de gases sulfúricos corrosivos; a inalação involuntária causa queimação traqueal, 2d8 de dano de veneno e tosse convulsiva com desvantagem em testes de Percepção por 1 hora.';
 
       hazard.pioneerMitigation = 'Identificação do odor pungente de enxofre e crostas de sublimados amarelados nas fendas antes da aproximação (Percepção CD 13).';
 
@@ -51597,7 +51597,7 @@
 
       defenseTitle: 'Bivaque em Alcovas de Colunata Prismática',
 
-      trappAndCampSafety: 'O acampamento é montado no recesso profundo de uma parede de disjunção prismática colossal; os pilares hexagonais de basalto oferecem teto e flancos sólidos imunes a desabamentos e vento lateral (DMG p. 111).',
+      trappAndCampSafety: 'O acampamento é montado no recesso profundo de uma parede de disjunção prismática colossal; os pilares hexagonais de basalto oferecem teto e flancos sólidos imunes a desabamentos e vento lateral.',
 
       trappTrenchAndWatch: 'A sentinela posiciona-se no topo de uma coluna rebaixada com excelente ângulo de visão de 180 graus sobre toda a escadaria de patamares inferiores (+2 em Percepção Passiva).',
 
@@ -51615,7 +51615,7 @@
 
       defense.defenseTitle = 'Bacia de Decantação em Degrau de Cascata';
 
-      defense.trappAndCampSafety = 'Aproveitamento de uma bacia esculpida na rocha basáltica pura onde a cascata do degrau superior deposita água translúcida e límpida, livre de partículas de terra ou matéria orgânica decomposta (PHB p. 150).';
+      defense.trappAndCampSafety = 'Aproveitamento de uma bacia esculpida na rocha basáltica pura onde a cascata do degrau superior deposita água translúcida e límpida, livre de partículas de terra ou matéria orgânica decomposta.';
 
       defense.trappTrenchAndWatch = 'Abastecimento imediato de cantis com água pura e fria sem risco de contaminação por lodo durante o descanso longo.';
 
@@ -51625,7 +51625,7 @@
 
       defense.defenseTitle = 'Paliçada de Garganta em Rampa de Degrau';
 
-      defense.trappAndCampSafety = 'Barricada de pedras e troncos erguida na única rampa estreita de acesso que sobe do patamar inferior para o acampamento, fechando completamente a passagem contra feras errantes (DMG p. 111).';
+      defense.trappAndCampSafety = 'Barricada de pedras e troncos erguida na única rampa estreita de acesso que sobe do patamar inferior para o acampamento, fechando completamente a passagem contra feras errantes.';
 
       defense.trappTrenchAndWatch = 'Oferece cobertura total (+5 na CA) contra arqueiros e sentinelas na escuridão, obrigando qualquer agressor a lutar em desvantagem em terreno íngreme e afunilado.';
 
@@ -51635,7 +51635,7 @@
 
       defense.defenseTitle = 'Poço de Brasas em Basalto Vesicular';
 
-      defense.trappAndCampSafety = 'Lareira cavada em nicho de rocha porosa que absorve as faíscas e canaliza a fumaça rente à parede úmida, evitando sinais de fumaça visíveis à distância na estepe aberta (PHB p. 185).';
+      defense.trappAndCampSafety = 'Lareira cavada em nicho de rocha porosa que absorve as faíscas e canaliza a fumaça rente à parede úmida, evitando sinais de fumaça visíveis à distância na estepe aberta.';
 
       defense.trappTrenchAndWatch = 'Cozimento seguro de rações quentes e aquecimento contínuo sem revelar a localização do grupo para patrulhas hostis.';
 
@@ -51677,7 +51677,7 @@
 
       saveType: 'Destreza',
 
-      diatremeRisk: 'O preenchimento tubular da chaminé vulcânica é composto por brecha de kimberlito friável alterada em argilas azuis; ao pisar nessa crosta instável sobre vazios verticais de descompressão gasosa, o solo cede em funil tragando o aventureiro por 20 metros com 3d8 de dano contundente de impacto e soterramento parcial (DMG p. 110, 246; PHB p. 182-183).',
+      diatremeRisk: 'O preenchimento tubular da chaminé vulcânica é composto por brecha de kimberlito friável alterada em argilas azuis; ao pisar nessa crosta instável sobre vazios verticais de descompressão gasosa, o solo cede em funil tragando o aventureiro por 20 metros com 3d8 de dano contundente de impacto e soterramento parcial.',
 
       pioneerMitigation: 'Batedores avançados utilizando varas longas de madeira reforçada e cordas de segurança para sondar a resistência mecânica das argilas antes da passagem da comitiva (Sobrevivência ou Natureza CD 14).',
 
@@ -51699,7 +51699,7 @@
 
       hazard.saveType = 'Constituição';
 
-      hazard.diatremeRisk = 'Fissuras profundas conectadas à raiz mantélica da chaminé liberam repentinamente bolsas pressurizadas de gases inodoros densos (metano, gás carbônico e sulfeto); a inalação causa vertigem súbita, 3d6 de dano de veneno e desvantagem em testes de Percepção e Sobrevivência por 1 hora por hipóxia tóxica (DMG p. 110; PHB p. 183).';
+      hazard.diatremeRisk = 'Fissuras profundas conectadas à raiz mantélica da chaminé liberam repentinamente bolsas pressurizadas de gases inodoros densos (metano, gás carbônico e sulfeto); a inalação causa vertigem súbita, 3d6 de dano de veneno e desvantagem em testes de Percepção e Sobrevivência por 1 hora por hipóxia tóxica.';
 
       hazard.pioneerMitigation = 'Observação atenta da ausência de pássaros e uso de tochas de vigia que vacilam e mudam de cor na borda de fendas suspeitas (Percepção CD 14).';
 
@@ -51713,7 +51713,7 @@
 
       hazard.saveType = 'Força';
 
-      hazard.diatremeRisk = 'Encostas escarpadas do diatrema acumulam cascalheiras soltas de xenólitos mantélicos ultradensos; passos pesados desencadeiam uma torrente de pedras pesadas de alta gravidade que derrubam aventureiros e causam 2d10 de dano contundente por impacto e esmagamento (DMG p. 110; XGE p. 109).';
+      hazard.diatremeRisk = 'Encostas escarpadas do diatrema acumulam cascalheiras soltas de xenólitos mantélicos ultradensos; passos pesados desencadeiam uma torrente de pedras pesadas de alta gravidade que derrubam aventureiros e causam 2d10 de dano contundente por impacto e esmagamento.';
 
       hazard.pioneerMitigation = 'Travessia em linha escalonada e fixação de pitões de aço nas nervuras de rocha sã para ancorar a linha de marcha (Atletismo CD 14).';
 
@@ -51727,7 +51727,7 @@
 
       hazard.saveType = 'Destreza';
 
-      hazard.diatremeRisk = 'Cristais brutos de diamante e granadas piropo reluzem na terra azul intemperizada da encosta; a tentativa afobada de coletar gemas sem segurança faz o talude ceder, arremessando o explorador contra rochas cortantes com 2d6 de dano perfurante e perda de itens da mochila (DMG p. 110; XGE p. 109).';
+      hazard.diatremeRisk = 'Cristais brutos de diamante e granadas piropo reluzem na terra azul intemperizada da encosta; a tentativa afobada de coletar gemas sem segurança faz o talude ceder, arremessando o explorador contra rochas cortantes com 2d6 de dano perfurante e perda de itens da mochila.';
 
       hazard.pioneerMitigation = 'Disciplina rígida de exploração militar, mantendo os aventureiros amarrados à linha guia antes de examinar depósitos minerais suspeitos (Intuição ou Sobrevivência CD 13).';
 
@@ -51757,7 +51757,7 @@
 
       defenseTitle: 'Bivaque em Crista de Eclogito Maciço',
 
-      diatremeAndCampSafety: 'O acampamento é estabelecido sobre uma crista sólida de eclogito mantélico ultradenso na borda do diatrema, imune a colapsos de teto e cujo leito de rocha impenetrável impede completamente que monstros escavadores perfurem o chão das barracas (DMG p. 111).',
+      diatremeAndCampSafety: 'O acampamento é estabelecido sobre uma crista sólida de eclogito mantélico ultradenso na borda do diatrema, imune a colapsos de teto e cujo leito de rocha impenetrável impede completamente que monstros escavadores perfurem o chão das barracas.',
 
       diatremeTrenchAndWatch: 'Plataforma elevada com visão limpa de 360 graus sobre a cratera e a planície circundante, concedendo +2 de bônus na Percepção Passiva das sentinelas durante a vigília noturna.',
 
@@ -51775,7 +51775,7 @@
 
       defense.defenseTitle = 'Calha Gravimétrica de Decantação e Filtragem';
 
-      defense.diatremeAndCampSafety = 'Canalização artesanal de um filete de degelo ou nascente por calhas de madeira que decantam areias densas de kimberlito, fornecendo água límpida filtrada e concentrando cristais brutos de granada e quartzo (PHB p. 150; XGE p. 78).';
+      defense.diatremeAndCampSafety = 'Canalização artesanal de um filete de degelo ou nascente por calhas de madeira que decantam areias densas de kimberlito, fornecendo água límpida filtrada e concentrando cristais brutos de granada e quartzo.';
 
       defense.diatremeTrenchAndWatch = 'Garante abastecimento contínuo de água potável livre de argilas coloidais tóxicas para todos os membros da comitiva durante o descanso longo.';
 
@@ -51785,7 +51785,7 @@
 
       defense.defenseTitle = 'Mureta Corta-Vento em Nódulos Mantélicos';
 
-      defense.diatremeAndCampSafety = 'Parapeito defensivo construído com blocos pesados de peridotito e cromitita empilhados ao redor das tendas, suportando tempestades severas e concedendo cobertura superior (+5 na CA) contra ataques à distância (DMG p. 111).';
+      defense.diatremeAndCampSafety = 'Parapeito defensivo construído com blocos pesados de peridotito e cromitita empilhados ao redor das tendas, suportando tempestades severas e concedendo cobertura superior (+5 na CA) contra ataques à distância.';
 
       defense.diatremeTrenchAndWatch = 'Fendas de tiro protegidas permitem que arqueiros e conjuradores monitorem os acessos da garganta vulcânica em total segurança.';
 
@@ -51795,7 +51795,7 @@
 
       defense.defenseTitle = 'Lareira de Acúmulo Térmico em Rochas de Olivina';
 
-      defense.diatremeAndCampSafety = 'Círculo de fogo montado com pedras densas de olivina e minerais de ferro-magnésio que retêm calor residual por 8 horas sem gerar labaredas altas ou fumaça delatora (PHB p. 185).';
+      defense.diatremeAndCampSafety = 'Círculo de fogo montado com pedras densas de olivina e minerais de ferro-magnésio que retêm calor residual por 8 horas sem gerar labaredas altas ou fumaça delatora.';
 
       defense.diatremeTrenchAndWatch = 'Mantém o bivaque aquecido na madrugada gelada dos ermos sem atrair predadores noturnos pela claridade excessiva.';
 
@@ -51837,7 +51837,7 @@
 
       saveType: 'Destreza',
 
-      serpentiniteRisk: 'Os planos de falha tectônica do maciço ofiolítico são compostos por serpentinito verde polido pelo atrito crustal, adquirindo consistência gordurosa e extremamente escorregadia quando umedecidos por neblina; pisar nessas rampas lisas como sabão sem ancoragem mecânica arremessa o aventureiro por declives de 50 metros com 3d8 de dano contundente contra blocos pontiagudos de harzburgito (DMG p. 110; PHB p. 182-183).',
+      serpentiniteRisk: 'Os planos de falha tectônica do maciço ofiolítico são compostos por serpentinito verde polido pelo atrito crustal, adquirindo consistência gordurosa e extremamente escorregadia quando umedecidos por neblina; pisar nessas rampas lisas como sabão sem ancoragem mecânica arremessa o aventureiro por declives de 50 metros com 3d8 de dano contundente contra blocos pontiagudos de harzburgito.',
 
       pioneerMitigation: 'Equipar calçados com cravos afiados de aço endurecido, fixar cunhas de retenção em fendas transversais e contornar lajes polidas de cor verde-esmeralda.',
 
@@ -51861,7 +51861,7 @@
 
         saveType: 'Constituição',
 
-        serpentiniteRisk: 'O intemperismo das rochas peridotíticas gera um solo vermelho ocre estéril com concentrações letais de níquel, cromo hexavalente e cádmio; inalar a poeira fina levantada pela marcha ou consumir água de poças turvas induz dores estomacais lancinantes, gosto metálico na boca e 2d6 de dano de veneno com condição envenenado (DMG p. 110; PHB p. 183).',
+        serpentiniteRisk: 'O intemperismo das rochas peridotíticas gera um solo vermelho ocre estéril com concentrações letais de níquel, cromo hexavalente e cádmio; inalar a poeira fina levantada pela marcha ou consumir água de poças turvas induz dores estomacais lancinantes, gosto metálico na boca e 2d6 de dano de veneno com condição envenenado.',
 
         pioneerMitigation: 'Marchar com máscaras de feltro umedecidas em água limpa e consumir estritamente água transportada em odres vedados.',
 
@@ -51883,7 +51883,7 @@
 
         saveType: 'Constituição',
 
-        serpentiniteRisk: 'Veios fraturados de crisotila sedosa que cortam o serpentinito liberam microagulhas de asbesto no ar quando fragmentados pelo pisoteio da comitiva; as fibras microscópicas alojam-se nos brônquios, provocando queimação respiratória, acessos incontroláveis de tosse com expectoração sanguinolenta e 1 nível de exaustão (DMG p. 110; PHB p. 183).',
+        serpentiniteRisk: 'Veios fraturados de crisotila sedosa que cortam o serpentinito liberam microagulhas de asbesto no ar quando fragmentados pelo pisoteio da comitiva; as fibras microscópicas alojam-se nos brônquios, provocando queimação respiratória, acessos incontroláveis de tosse com expectoração sanguinolenta e 1 nível de exaustão.',
 
         pioneerMitigation: 'Evitar áreas de rocha fibrosa esbranquiçada e contornar encostas expostas ao vento desfavorável.',
 
@@ -51905,7 +51905,7 @@
 
         saveType: 'Sabedoria',
 
-        serpentiniteRisk: 'A desproporção extrema entre magnésio e cálcio no solo ultramáfico impede o crescimento de gramíneas comestíveis e forrageiras comuns; animais de montaria e bestas de carga sofrem cãibras musculares severas e apatia por desnutrição mineral, exigindo descarte de cargas ou divisão das rações secas da própria comitiva (DMG p. 111; PHB p. 185).',
+        serpentiniteRisk: 'A desproporção extrema entre magnésio e cálcio no solo ultramáfico impede o crescimento de gramíneas comestíveis e forrageiras comuns; animais de montaria e bestas de carga sofrem cãibras musculares severas e apatia por desnutrição mineral, exigindo descarte de cargas ou divisão das rações secas da própria comitiva.',
 
         pioneerMitigation: 'Transportar suplementos de sal marinho rico em cálcio para as montarias e racionar cuidadosamente o feno antes da entrada no complexo.',
 
@@ -52045,7 +52045,7 @@
 
       saveType: 'Destreza',
 
-      loessGullyRisk: 'A cabeceira vertical de 15 metros da ravina de loess sofre subsidência rápida durante chuvas fortes por perda de coesão na base; um bloco de dezenas de toneladas de solo desaba repentinamente para trás sob os pés dos exploradores, arrastando aventureiros para o fundo do desfiladeiro com 3d8 de dano contundente e soterramento parcial (DMG p. 110; PHB p. 182-183).',
+      loessGullyRisk: 'A cabeceira vertical de 15 metros da ravina de loess sofre subsidência rápida durante chuvas fortes por perda de coesão na base; um bloco de dezenas de toneladas de solo desaba repentinamente para trás sob os pés dos exploradores, arrastando aventureiros para o fundo do desfiladeiro com 3d8 de dano contundente e soterramento parcial.',
 
       pioneerMitigation: 'Marchar afastado a pelo menos 30 metros das bordas de recuo de cabeceiras ativas e evitar depressões com fissuras concêntricas de tração.',
 
@@ -52069,7 +52069,7 @@
 
         saveType: 'Destreza',
 
-        loessGullyRisk: 'A percolação da água da chuva em subsuperfície escava canais e galerias tubulares invisíveis sob a crosta seca do terreno; o piso oco cede sob a marcha de mulas e fardos de carga, precipitando a vítima 6 metros abaixo em um canal estreito de lama líquida (DMG p. 111; PHB p. 182).',
+        loessGullyRisk: 'A percolação da água da chuva em subsuperfície escava canais e galerias tubulares invisíveis sob a crosta seca do terreno; o piso oco cede sob a marcha de mulas e fardos de carga, precipitando a vítima 6 metros abaixo em um canal estreito de lama líquida.',
 
         pioneerMitigation: 'Batedores avançam com bastões longos golpeando o solo à procura de eco oco e contornam dolinas de colapso recentes.',
 
@@ -52091,7 +52091,7 @@
 
         saveType: 'Constituição',
 
-        loessGullyRisk: 'Rajadas térmicas repentinas erguem o silte eólico extremamente fino em tempestades amarelas opacas que bloqueiam a luz solar; a poeira penetra roupas, cega a visão e queima os alvéolos pulmonares com tosse seca espasmódica, infligindo 2d6 de dano de asfixia e desvantagem em testes de Percepção (DMG p. 110; PHB p. 183).',
+        loessGullyRisk: 'Rajadas térmicas repentinas erguem o silte eólico extremamente fino em tempestades amarelas opacas que bloqueiam a luz solar; a poeira penetra roupas, cega a visão e queima os alvéolos pulmonares com tosse seca espasmódica, infligindo 2d6 de dano de asfixia e desvantagem em testes de Percepção.',
 
         pioneerMitigation: 'Marchar com véus de seda fina umedecidos cobrindo nariz e boca e óculos de osso com fendas estreitas.',
 
@@ -52113,7 +52113,7 @@
 
         saveType: 'Destreza',
 
-        loessGullyRisk: 'O loess possui juntas de alívio verticais que formam pilares colunares paralelos aos desfiladeiros; ancorar grampos ou puxar cordas de escalada desestabiliza a base da coluna de 10 metros, que tomba como um monólito de terra compactada em direção à trilha inferior (DMG p. 110; PHB p. 182).',
+        loessGullyRisk: 'O loess possui juntas de alívio verticais que formam pilares colunares paralelos aos desfiladeiros; ancorar grampos ou puxar cordas de escalada desestabiliza a base da coluna de 10 metros, que tomba como um monólito de terra compactada em direção à trilha inferior.',
 
         pioneerMitigation: 'Não fixar pitons em paredes verticais de loess e transpor os desfiladeiros exclusivamente por rampas suaves de tálus estabilizado.',
 
@@ -52253,7 +52253,7 @@
 
       saveType: 'Sabedoria',
 
-      bandedIronRisk: 'A presença de espessas camadas alternadas de magnetita e hematita de alta densidade distorce o campo magnético local em centenas de metros; bússolas de navegação giram desordenadamente ou apontam para depósitos locais de minério, induzindo o grupo em labirintos de gargantas cegas com perda de 1d4 dias de marcha (DMG p. 111; XGE p. 111).',
+      bandedIronRisk: 'A presença de espessas camadas alternadas de magnetita e hematita de alta densidade distorce o campo magnético local em centenas de metros; bússolas de navegação giram desordenadamente ou apontam para depósitos locais de minério, induzindo o grupo em labirintos de gargantas cegas com perda de 1d4 dias de marcha.',
 
       pioneerMitigation: 'Navegar por marcos visuais orográficos e posições do sol e das estrelas, guardando as bússolas metálicas em caixas de chumbo isolantes.',
 
@@ -52277,7 +52277,7 @@
 
         saveType: 'Destreza',
 
-        bandedIronRisk: 'Durante tempestades e trovoadas secas de altitude, a crista de itabirito atua como um condutor elétrico colossal que atrai descargas atmosféricas contínuas; arcos de plasma percorrem a superfície da rocha nua e descarregam em cotas de malha e armas de aço, infligindo 3d10 de dano elétrico (DMG p. 110; PHB p. 182-183).',
+        bandedIronRisk: 'Durante tempestades e trovoadas secas de altitude, a crista de itabirito atua como um condutor elétrico colossal que atrai descargas atmosféricas contínuas; arcos de plasma percorrem a superfície da rocha nua e descarregam em cotas de malha e armas de aço, infligindo 3d10 de dano elétrico.',
 
         pioneerMitigation: 'Descer imediatamente das arestas expostas para vales de xisto e descartar temporariamente armaduras e armas de metal em depressões protegidas.',
 
@@ -52299,7 +52299,7 @@
 
         saveType: 'Destreza',
 
-        bandedIronRisk: 'As encostas de tálus do itabirito esfarelam em lascas metálicas de óxido de ferro e lâminas de jaspe vermelho afiadas como facas de açougueiro; escorregar no cascalho rasga solas e calças, talhando artérias e causando 2d8 de dano cortante e hemorragia ativa (DMG p. 110; PHB p. 182).',
+        bandedIronRisk: 'As encostas de tálus do itabirito esfarelam em lascas metálicas de óxido de ferro e lâminas de jaspe vermelho afiadas como facas de açougueiro; escorregar no cascalho rasga solas e calças, talhando artérias e causando 2d8 de dano cortante e hemorragia ativa.',
 
         pioneerMitigation: 'Marchar com perneiras reforçadas com placas de couro cru e testar cada laje com ponteiras de ferro antes de transferir o peso do corpo.',
 
@@ -52321,7 +52321,7 @@
 
         saveType: 'Força',
 
-        bandedIronRisk: 'A intensa indução magnética de blocos maciços de magnetita subterrâneos exerce atração física direta sobre peças de armadura pesada, escudos e maças de ferro; a força invisível puxa o equipamento em direção ao solo rochoso, aumentando o peso percebido em 50%, reduzindo o deslocamento pela metade e impondo desvantagem em testes de perícia física (DMG p. 110; PHB p. 182).',
+        bandedIronRisk: 'A intensa indução magnética de blocos maciços de magnetita subterrâneos exerce atração física direta sobre peças de armadura pesada, escudos e maças de ferro; a força invisível puxa o equipamento em direção ao solo rochoso, aumentando o peso percebido em 50%, reduzindo o deslocamento pela metade e impondo desvantagem em testes de perícia física.',
 
         pioneerMitigation: 'Distribuir mochilas e armas metálicas em trenós de madeira ou substituir equipamentos ferrosos por peças de bronze, osso ou prata.',
 
@@ -52461,7 +52461,7 @@
 
       saveType: 'Destreza',
 
-      karstPoljeRisk: 'Um sumidouro (ponor) que normalmente drena as águas do polje sofre reversão hidrostática instantânea quando chuvas torrenciais pressurizam os aquíferos dos maciços calcários circundantes; a boca da fenda explode em um gêiser colossal de água barrenta e cascalho que submerge a várzea sob 2 metros de torrente veloz em poucos minutos, arrastando aventureiros com 3d8 de dano contundente (DMG p. 110; PHB p. 182-183).',
+      karstPoljeRisk: 'Um sumidouro (ponor) que normalmente drena as águas do polje sofre reversão hidrostática instantânea quando chuvas torrenciais pressurizam os aquíferos dos maciços calcários circundantes; a boca da fenda explode em um gêiser colossal de água barrenta e cascalho que submerge a várzea sob 2 metros de torrente veloz em poucos minutos, arrastando aventureiros com 3d8 de dano contundente.',
 
       pioneerMitigation: 'Marchar pelas margens elevadas do polje junto aos contrafortes de rocha nua e observar borbulhamentos e mudanças repentinas de cor nas águas dos sumidouros.',
 
@@ -52485,7 +52485,7 @@
 
         saveType: 'Força',
 
-        karstPoljeRisk: 'O ponto de fuga onde o rio da planície mergulha para o subterrâneo forma um funil afunilado de sucção violenta bloqueado por troncos e detritos; nadar ou vauzejar próximo ao vórtice puxa corpos para condutos submersos escuros e sem bolsas de ar, exigindo vigor muscular extremo para não ser tragado para o abismo (DMG p. 110; PHB p. 182).',
+        karstPoljeRisk: 'O ponto de fuga onde o rio da planície mergulha para o subterrâneo forma um funil afunilado de sucção violenta bloqueado por troncos e detritos; nadar ou vauzejar próximo ao vórtice puxa corpos para condutos submersos escuros e sem bolsas de ar, exigindo vigor muscular extremo para não ser tragado para o abismo.',
 
         pioneerMitigation: 'Fixar estacas de advertência a 50 metros a montante do ponor e lançar linhas de retenção transversais ancoradas na rocha.',
 
@@ -52507,7 +52507,7 @@
 
         saveType: 'Destreza',
 
-        karstPoljeRisk: 'O fundo plano da uvala é recoberto por espessas camadas férteis de terra rossa que ocultam fendas de coalescência cárstica; a dissolução da rocha calcária basal provoca o desabamento repentino de uma nova dolina sob a marcha, tragando exploradores e mulas de carga em uma cratera de 8 metros de profundidade (DMG p. 111; PHB p. 182).',
+        karstPoljeRisk: 'O fundo plano da uvala é recoberto por espessas camadas férteis de terra rossa que ocultam fendas de coalescência cárstica; a dissolução da rocha calcária basal provoca o desabamento repentino de uma nova dolina sob a marcha, tragando exploradores e mulas de carga em uma cratera de 8 metros de profundidade.',
 
         pioneerMitigation: 'Batedores avançam encordoados sondando a espessura do solo argiloso com bastões de ferro antes da passagem de cargas pesadas.',
 
@@ -52529,7 +52529,7 @@
 
         saveType: 'Constituição',
 
-        karstPoljeRisk: 'Após a cheia estacional, bolsões de água estagnada retidos sobre a argila impermeável de terra rossa apodrecem a vegetação rasteira, desprendendo nuvens baixas de gás metano e vapores sulfídricos fétidos; respirar o miasma causa náuseas, tontura e 2d6 de dano de veneno com desvantagem em testes de Percepção (DMG p. 110; PHB p. 183).',
+        karstPoljeRisk: 'Após a cheia estacional, bolsões de água estagnada retidos sobre a argila impermeável de terra rossa apodrecem a vegetação rasteira, desprendendo nuvens baixas de gás metano e vapores sulfídricos fétidos; respirar o miasma causa náuseas, tontura e 2d6 de dano de veneno com desvantagem em testes de Percepção.',
 
         pioneerMitigation: 'Cruzar as baixadas exclusivamente em horas de vento forte e umedecer máscaras de linho em vinagre aromático.',
 
@@ -52669,7 +52669,7 @@
 
       saveType: 'Destreza',
 
-      sandstoneRuiniformRisk: 'Maciços e blocos de arenito de 20 toneladas equilibrados em pedestais delgados de erosão eólica e hídrica sofrem fratura na base sob a passagem da comitiva; a rocha colossal parte-se e rola pelos corredores estreitos do labirinto, esmagando o que estiver no caminho com 3d10 de impacto contundente (DMG p. 110; PHB p. 182-183).',
+      sandstoneRuiniformRisk: 'Maciços e blocos de arenito de 20 toneladas equilibrados em pedestais delgados de erosão eólica e hídrica sofrem fratura na base sob a passagem da comitiva; a rocha colossal parte-se e rola pelos corredores estreitos do labirinto, esmagando o que estiver no caminho com 3d10 de impacto contundente.',
 
       pioneerMitigation: 'Marchar em fila indiana mantendo distância de segurança de pedestais erodidos e não apoiar pesos ou cordas em pedras pendulares.',
 
@@ -52693,7 +52693,7 @@
 
         saveType: 'Sabedoria',
 
-        sandstoneRuiniformRisk: 'A malha geométrica de fendas verticais de 30 metros de profundidade cria reflexões sonoras contínuas que amplificam passos, respirações e sussurros; os ecos parecem vir de todas as direções ao mesmo tempo, confundindo a audição das sentinelas e mascarando a aproximação de predadores emboscados (DMG p. 111; XGE p. 111).',
+        sandstoneRuiniformRisk: 'A malha geométrica de fendas verticais de 30 metros de profundidade cria reflexões sonoras contínuas que amplificam passos, respirações e sussurros; os ecos parecem vir de todas as direções ao mesmo tempo, confundindo a audição das sentinelas e mascarando a aproximação de predadores emboscados.',
 
         pioneerMitigation: 'Utilizar sinais visuais com lanternas ou bandeiras em vez de comandos verbais e afixar espelhos angulares em cruzamentos.',
 
@@ -52715,7 +52715,7 @@
 
         saveType: 'Destreza',
 
-        sandstoneRuiniformRisk: 'Arcos e pontes naturais de arenito esculpidos pela erosão conectam pilares isolados a grande altitude sobre desfiladeiros cegos; o vão de pedra desgastado por fissuras internas colapsa sob o peso de aventureiros com armaduras pesadas, arremessando-os em queda de 15 metros (DMG p. 110; PHB p. 182).',
+        sandstoneRuiniformRisk: 'Arcos e pontes naturais de arenito esculpidos pela erosão conectam pilares isolados a grande altitude sobre desfiladeiros cegos; o vão de pedra desgastado por fissuras internas colapsa sob o peso de aventureiros com armaduras pesadas, arremessando-os em queda de 15 metros.',
 
         pioneerMitigation: 'Fixar cabo de segurança esticado paralelo ao arco antes de qualquer membro cruzar a ponte de pedra.',
 
@@ -52737,7 +52737,7 @@
 
         saveType: 'Constituição',
 
-        sandstoneRuiniformRisk: 'Os corredores estreitos e frescos no fundo da cidade de pedra abrigam colônias de víboras venenosas camufladas nas fissuras de arenito avermelhado; o apoio involuntário de mãos em reentrâncias provoca botes rápidos com presas inoculadoras de hemotoxina, causando 2d6 de veneno e condição envenenado (DMG p. 111; PHB p. 183).',
+        sandstoneRuiniformRisk: 'Os corredores estreitos e frescos no fundo da cidade de pedra abrigam colônias de víboras venenosas camufladas nas fissuras de arenito avermelhado; o apoio involuntário de mãos em reentrâncias provoca botes rápidos com presas inoculadoras de hemotoxina, causando 2d6 de veneno e condição envenenado.',
 
         pioneerMitigation: 'Inspecionar fendas com tochas acesas e bastões compridos antes de apoiar mãos ou armar acampamento próximo às paredes.',
 
@@ -52877,7 +52877,7 @@
 
       saveType: 'Destreza',
 
-      fossilCoralRisk: 'A barreira de recife soerguida é composta por esqueletos fossilizados de corais pétreos eriçados de septos pontiagudos e lâminas de calcita cortantes como navalhas; qualquer desequilíbrio na marcha rasga perneiras de couro grosso e talha carnes até o osso com 3d6 de dano cortante e risco de infecção óssea por microrganismos incrustantes (DMG p. 110; PHB p. 182-183).',
+      fossilCoralRisk: 'A barreira de recife soerguida é composta por esqueletos fossilizados de corais pétreos eriçados de septos pontiagudos e lâminas de calcita cortantes como navalhas; qualquer desequilíbrio na marcha rasga perneiras de couro grosso e talha carnes até o osso com 3d6 de dano cortante e risco de infecção óssea por microrganismos incrustantes.',
 
       pioneerMitigation: 'Equipar solados de couro dobrado com cravos de bronze, apoiar os passos exclusivamente em trilhas de cascalho moído e não apoiar mãos desprotegidas.',
 
@@ -52901,7 +52901,7 @@
 
         saveType: 'Força',
 
-        fossilCoralRisk: 'A preamar de sizígia avança rapidamente sobre as grutas de abrasão na base do recife, comprimindo grandes bolsões de ar contra o teto e canalizando ondas de choque hidropneumáticas que arremessam aventureiros contra estalactites com 2d8 de impacto, fechando a rota de saída sob 4 metros de água revolta (DMG p. 110; PHB p. 182).',
+        fossilCoralRisk: 'A preamar de sizígia avança rapidamente sobre as grutas de abrasão na base do recife, comprimindo grandes bolsões de ar contra o teto e canalizando ondas de choque hidropneumáticas que arremessam aventureiros contra estalactites com 2d8 de impacto, fechando a rota de saída sob 4 metros de água revolta.',
 
         pioneerMitigation: 'Consultar tabelas lunares de maré antes de entrar em cavernas e fixar cordas guias de evacuação rápida na linha de preamar.',
 
@@ -52923,7 +52923,7 @@
 
         saveType: 'Destreza',
 
-        fossilCoralRisk: 'O platô superior do recife é perfurado por poços verticais cilíndricos escavados pela água da chuva em zonas ricas em esponjas fósseis friáveis; disfarçados por esteiras de gramíneas halófitas secas, o piso oco cede sob o peso da marcha, precipitando a vítima em queda de 10 metros sobre seixos pontiagudos (DMG p. 110; PHB p. 182).',
+        fossilCoralRisk: 'O platô superior do recife é perfurado por poços verticais cilíndricos escavados pela água da chuva em zonas ricas em esponjas fósseis friáveis; disfarçados por esteiras de gramíneas halófitas secas, o piso oco cede sob o peso da marcha, precipitando a vítima em queda de 10 metros sobre seixos pontiagudos.',
 
         pioneerMitigation: 'Sondar o terreno com hastes de madeira à frente dos pés e evitar avançar sobre manchas densas de vegetação costeira suspensa.',
 
@@ -52945,7 +52945,7 @@
 
         saveType: 'Constituição',
 
-        fossilCoralRisk: 'Depressões rochosas rasas isoladas pelo recuo da maré concentram salmouras cáusticas e colônias de anêmonas venenosas camufladas em algas pardas; o contato direto da pele com os cnidócitos libera neurotoxinas urticantes que causam choque doloroso, infligindo 2d6 de veneno e condição envenenado por 1 hora (DMG p. 110; PHB p. 183).',
+        fossilCoralRisk: 'Depressões rochosas rasas isoladas pelo recuo da maré concentram salmouras cáusticas e colônias de anêmonas venenosas camufladas em algas pardas; o contato direto da pele com os cnidócitos libera neurotoxinas urticantes que causam choque doloroso, infligindo 2d6 de veneno e condição envenenado por 1 hora.',
 
         pioneerMitigation: 'Marchar calçado com botas impermeáveis de cano alto e não mergulhar as mãos em poças estagnadas para capturar mariscos.',
 
@@ -53085,7 +53085,7 @@
 
       saveType: 'Destreza',
 
-      cinderConeRisk: 'As encostas íngremes do cone vulcânico acumulam cascalho de lapilli e fragmentos de escória vesicular empilhados no limite do repouso gravitacional a 33 graus; passos da marcha rompem o equilíbrio estático, desencadeando um escorregamento violento de pedras pontiagudas e abrasivas que arrasta a comitiva encosta abaixo com 3d8 de dano cortante (DMG p. 110; PHB p. 182-183).',
+      cinderConeRisk: 'As encostas íngremes do cone vulcânico acumulam cascalho de lapilli e fragmentos de escória vesicular empilhados no limite do repouso gravitacional a 33 graus; passos da marcha rompem o equilíbrio estático, desencadeando um escorregamento violento de pedras pontiagudas e abrasivas que arrasta a comitiva encosta abaixo com 3d8 de dano cortante.',
 
       pioneerMitigation: 'Marchar em zigue-zague com bastões de ponta chata, calçando perneiras de couro grosso e fixando ancoragens em diques de lava consolidados.',
 
@@ -53109,7 +53109,7 @@
 
         saveType: 'Constituição',
 
-        cinderConeRisk: 'Fraturas radiais no flanco da montanha expelem jatos contínuos de vapor a 180°C carregados de dióxido de enxofre e aerossóis sulfúricos; o gás corrosivo ataca os pulmões, corrói correias de couro e irrita os olhos, impondo tosse espasmódica, 2d6 de dano de veneno e condição envenenado por 1 hora (DMG p. 110; PHB p. 183).',
+        cinderConeRisk: 'Fraturas radiais no flanco da montanha expelem jatos contínuos de vapor a 180°C carregados de dióxido de enxofre e aerossóis sulfúricos; o gás corrosivo ataca os pulmões, corrói correias de couro e irrita os olhos, impondo tosse espasmódica, 2d6 de dano de veneno e condição envenenado por 1 hora.',
 
         pioneerMitigation: 'Equipar máscaras de feltro embebidas em água calcária e marchar estritamente pelo lado de barlavento das plumas.',
 
@@ -53131,7 +53131,7 @@
 
         saveType: 'Destreza',
 
-        cinderConeRisk: 'Bombas vulcânicas esferoidais arremessadas na última erupção resfriaram apenas na casca externa de cinza, mantendo o núcleo basáltico a mais de 400°C; apoiar o pé ou as mãos na pedra quebra a casca fina vítrea, liberando calor incandescente que queima solas de botas e carne com 2d8 de dano de fogo (DMG p. 110; PHB p. 182).',
+        cinderConeRisk: 'Bombas vulcânicas esferoidais arremessadas na última erupção resfriaram apenas na casca externa de cinza, mantendo o núcleo basáltico a mais de 400°C; apoiar o pé ou as mãos na pedra quebra a casca fina vítrea, liberando calor incandescente que queima solas de botas e carne com 2d8 de dano de fogo.',
 
         pioneerMitigation: 'Sondar rochas escuras com varas de ferro antes de qualquer apoio e observar a cintilação do ar quente sobre as lajes.',
 
@@ -53153,7 +53153,7 @@
 
         saveType: 'Destreza',
 
-        cinderConeRisk: 'O lábio superior da cratera é uma aresta delgada e friável açoitada por rajadas de vento turbulento de altitude; a borda de cinza compactada cede sob o peso das sentinelas, arremessando-as em direção ao fosso interno pontilhado de respiradouros fumegantes (DMG p. 110; PHB p. 182).',
+        cinderConeRisk: 'O lábio superior da cratera é uma aresta delgada e friável açoitada por rajadas de vento turbulento de altitude; a borda de cinza compactada cede sob o peso das sentinelas, arremessando-as em direção ao fosso interno pontilhado de respiradouros fumegantes.',
 
         pioneerMitigation: 'Manter a linha de observação a pelo menos 4 metros recuada da borda e fixar estacas de aço temperado para ancoragem dorsal.',
 
@@ -53293,7 +53293,7 @@
 
       saveType: 'Força',
 
-      braidedRiverRisk: 'Um bolsão de silte saturado alimentado por fluxo freático ascendente mantém os grãos de areia em suspensão fluida sob uma crosta superficial seca e enganosa; pisar no poço liquefaz a lama instantaneamente, sugando o explorador 1d4+1 pés para baixo por rodada e impondo risco iminente de sufocamento se debater-se sem apoio (DMG p. 110-111; PHB p. 182-183).',
+      braidedRiverRisk: 'Um bolsão de silte saturado alimentado por fluxo freático ascendente mantém os grãos de areia em suspensão fluida sob uma crosta superficial seca e enganosa; pisar no poço liquefaz a lama instantaneamente, sugando o explorador 1d4+1 pés para baixo por rodada e impondo risco iminente de sufocamento se debater-se sem apoio.',
 
       pioneerMitigation: 'Marchar espalhado com bastões de sondagem graduados de 2 metros, projetar o corpo na horizontal para boiar e usar raquetes de lama nos pés.',
 
@@ -53317,7 +53317,7 @@
 
         saveType: 'Destreza',
 
-        braidedRiverRisk: 'Degelo acelerado ou chuvas distantes no topo da bacia canalizam uma onda de cheia multifacetada por dezenas de esteiras sinuosas de cascalho; os canais mudam de rota em minutos, erodindo bancos de areia e isolando aventureiros em ilhotas efêmeras prestes a desabar na correnteza veloz (DMG p. 110; PHB p. 182).',
+        braidedRiverRisk: 'Degelo acelerado ou chuvas distantes no topo da bacia canalizam uma onda de cheia multifacetada por dezenas de esteiras sinuosas de cascalho; os canais mudam de rota em minutos, erodindo bancos de areia e isolando aventureiros em ilhotas efêmeras prestes a desabar na correnteza veloz.',
 
         pioneerMitigation: 'Fixar vigias nas margens altas para alertar mudanças no fluxo e avançar sempre em direção às barras de cascalho com salgueiros ancorados.',
 
@@ -53339,7 +53339,7 @@
 
         saveType: 'Força',
 
-        braidedRiverRisk: 'Trechos de vau com água turva na altura dos joelhos escondem leitos instáveis de matacões arredondados que rolam sob a força da correnteza; um pé desatento preso na fenda entre duas pedras móveis sofre esmagamento de 2d8 de dano contundente, aprisionando o explorador contra o fluxo turbulento (DMG p. 110; PHB p. 182).',
+        braidedRiverRisk: 'Trechos de vau com água turva na altura dos joelhos escondem leitos instáveis de matacões arredondados que rolam sob a força da correnteza; um pé desatento preso na fenda entre duas pedras móveis sofre esmagamento de 2d8 de dano contundente, aprisionando o explorador contra o fluxo turbulento.',
 
         pioneerMitigation: 'Cruzar o vau em fila indiana segurando em corda guia esticada de margem a margem, apoiando os pés com sapatos reforçados.',
 
@@ -53361,7 +53361,7 @@
 
         saveType: 'Sabedoria',
 
-        braidedRiverRisk: 'O sol a pino do meio-dia seca uma fina crosta de 2 centímetros na superfície dos leitos aluviais secos, criando um padrão de rachaduras poligonais indistinguível de solo firme; marchar com bestas de carga sobre a armadilha parte a lâmina rígida e mergulha pernas e bagagens em lodo pegajoso profundo (DMG p. 111; XGE p. 111).',
+        braidedRiverRisk: 'O sol a pino do meio-dia seca uma fina crosta de 2 centímetros na superfície dos leitos aluviais secos, criando um padrão de rachaduras poligonais indistinguível de solo firme; marchar com bestas de carga sobre a armadilha parte a lâmina rígida e mergulha pernas e bagagens em lodo pegajoso profundo.',
 
         pioneerMitigation: 'Batedores experientes identificam a umidade subterrânea pela vegetação marginal e arremessam pedras pesadas à frente para testar a resistência.',
 
@@ -53501,7 +53501,7 @@
 
       saveType: 'Destreza',
 
-      cenoteRisk: 'A dissolução subterrânea pelo ácido carbônico escavou uma câmara colossal cujo teto de calcário foi reduzido a uma casca de 30 centímetros; a passagem da marcha quebra a abóbada em estrondo repentino, arremessando aventureiros em queda livre de 40 metros em direção a uma lagoa subterrânea de águas escuras cercada de paredes verticais lisas, causando 3d10 de impacto e risco de afogamento (DMG p. 110; PHB p. 182-183).',
+      cenoteRisk: 'A dissolução subterrânea pelo ácido carbônico escavou uma câmara colossal cujo teto de calcário foi reduzido a uma casca de 30 centímetros; a passagem da marcha quebra a abóbada em estrondo repentino, arremessando aventureiros em queda livre de 40 metros em direção a uma lagoa subterrânea de águas escuras cercada de paredes verticais lisas, causando 3d10 de impacto e risco de afogamento.',
 
       pioneerMitigation: 'Marchar encordoados a cada 10 metros, tateando o solo com varas de percussão e contornando depressões com vegetação rasteira amarelada.',
 
@@ -53525,7 +53525,7 @@
 
         saveType: 'Força',
 
-        cenoteRisk: 'As profundezas do cenote conectam-se a uma rede de túneis e sifões submersos que drenam água para o oceano ou cavernas inferiores; quando marés ou cheias mudam a pressão hidráulica, redemoinhos repentinos de sucção violenta tragam nadadores e barcos em direção aos condutos escuros, exigindo braçadas vigorosas contra o vórtice (DMG p. 110; PHB p. 182).',
+        cenoteRisk: 'As profundezas do cenote conectam-se a uma rede de túneis e sifões submersos que drenam água para o oceano ou cavernas inferiores; quando marés ou cheias mudam a pressão hidráulica, redemoinhos repentinos de sucção violenta tragam nadadores e barcos em direção aos condutos escuros, exigindo braçadas vigorosas contra o vórtice.',
 
         pioneerMitigation: 'Amarrar cabos guias transversais na superfície da lagoa e jamais nadar desprovido de linha de retenção dorsal ancorada na margem.',
 
@@ -53547,7 +53547,7 @@
 
         saveType: 'Constituição',
 
-        cenoteRisk: 'Abaixo da lente superficial de água doce límpida, repousa uma haloclina leitosa e densa de água salgada aprisionada com matéria orgânica em decomposição; perturbar essa camada com mergulho ou remos libera bolhas de gás sulfídrico concentrado que queimam os olhos, corroem as mucosas respiratórias e causam 2d6 de dano de veneno (DMG p. 110; PHB p. 183).',
+        cenoteRisk: 'Abaixo da lente superficial de água doce límpida, repousa uma haloclina leitosa e densa de água salgada aprisionada com matéria orgânica em decomposição; perturbar essa camada com mergulho ou remos libera bolhas de gás sulfídrico concentrado que queimam os olhos, corroem as mucosas respiratórias e causam 2d6 de dano de veneno.',
 
         pioneerMitigation: 'Navegar com cuidado sem agitar as pás de remo nas camadas profundas e coletar água exclusivamente da superfície límpida.',
 
@@ -53569,7 +53569,7 @@
 
         saveType: 'Destreza',
 
-        cenoteRisk: 'A borda superior da dolina foi escavada por baixo pelas chuvas ácidas, formando lábios de rocha em balanço sem sustentação inferior; pisar na borda para espiar o abismo ou armar vigília faz o beiral de rocha partir-se sob os pés, desequilibrando o explorador em direção ao precipício (DMG p. 110; PHB p. 182).',
+        cenoteRisk: 'A borda superior da dolina foi escavada por baixo pelas chuvas ácidas, formando lábios de rocha em balanço sem sustentação inferior; pisar na borda para espiar o abismo ou armar vigília faz o beiral de rocha partir-se sob os pés, desequilibrando o explorador em direção ao precipício.',
 
         pioneerMitigation: 'Aproximar-se da borda exclusivamente deitado de bruços sobre pranchas de madeira e ancorado com mosquetão em estacas traseiras.',
 
@@ -53709,7 +53709,7 @@
 
       saveType: 'Destreza',
 
-      glaciolacustrineRisk: 'Um lago proglacial represado por morenas instáveis de gelo e cascalho colapsa sob a pressão do degelo; uma torrente catastrófica de água a 1°C misturada com blocos de gelo do tamanho de carruagens desce o vale a 50 km/h, arrastando tudo em seu caminho e causando 3d10 de dano contundente mais hipotermia severa (DMG p. 110; PHB p. 182-183).',
+      glaciolacustrineRisk: 'Um lago proglacial represado por morenas instáveis de gelo e cascalho colapsa sob a pressão do degelo; uma torrente catastrófica de água a 1°C misturada com blocos de gelo do tamanho de carruagens desce o vale a 50 km/h, arrastando tudo em seu caminho e causando 3d10 de dano contundente mais hipotermia severa.',
 
       pioneerMitigation: 'Manter a marcha sobre terraços elevados de praia fóssil e observar atentamente a turvação repentina das águas da drenagem.',
 
@@ -53733,7 +53733,7 @@
 
         saveType: 'Destreza',
 
-        glaciolacustrineRisk: 'As argilas rítmicas e varvitos da bacia lacustre drenada parecem solo firme e seco à superfície, mas possuem estrutura floculada altamente saturada; a vibração repetida de botas pesadas rompe as ligações minerais, liquefazendo o solo instantaneamente em uma pasta fluida onde aventureiros afundam até o peito (DMG p. 111; PHB p. 182).',
+        glaciolacustrineRisk: 'As argilas rítmicas e varvitos da bacia lacustre drenada parecem solo firme e seco à superfície, mas possuem estrutura floculada altamente saturada; a vibração repetida de botas pesadas rompe as ligações minerais, liquefazendo o solo instantaneamente em uma pasta fluida onde aventureiros afundam até o peito.',
 
         pioneerMitigation: 'Distribuir raquetes de lama nos pés, marchar espaçados e carregar varas longas de madeira na horizontal.',
 
@@ -53755,7 +53755,7 @@
 
         saveType: 'Destreza',
 
-        glaciolacustrineRisk: 'As margens elevadas do antigo lago glacial acumulam cordões instáveis de seixos e matacões erráticos descarregados por icebergs ancestrais; a erosão pelas águas de degelo descalça as bases dessas rochas, fazendo matacões de granito de toneladas rolarem descontroladamente pelas encostas (DMG p. 110; PHB p. 182).',
+        glaciolacustrineRisk: 'As margens elevadas do antigo lago glacial acumulam cordões instáveis de seixos e matacões erráticos descarregados por icebergs ancestrais; a erosão pelas águas de degelo descalça as bases dessas rochas, fazendo matacões de granito de toneladas rolarem descontroladamente pelas encostas.',
 
         pioneerMitigation: 'Batedores sondam os contrafortes com alavancas e sinalizam rotas de travessia fora dos cones de dejetos.',
 
@@ -53777,7 +53777,7 @@
 
         saveType: 'Constituição',
 
-        glaciolacustrineRisk: 'Aquíferos artesianos subglaciais confinados sob o estrato argiloso impermeável rompem a superfície em gêiseres de lama pastosa a 0°C saturada de cascalho afiado; o jato encharca roupas protetoras e impõe choque térmico com 2d6 de dano de frio e 1 nível de exaustão (DMG p. 110; PHB p. 183).',
+        glaciolacustrineRisk: 'Aquíferos artesianos subglaciais confinados sob o estrato argiloso impermeável rompem a superfície em gêiseres de lama pastosa a 0°C saturada de cascalho afiado; o jato encharca roupas protetoras e impõe choque térmico com 2d6 de dano de frio e 1 nível de exaustão.',
 
         pioneerMitigation: 'Evitar depressões circulares fumegantes e contornar fissuras com eflorescência argilosa fresca.',
 
@@ -53917,7 +53917,7 @@
 
       saveType: 'Destreza',
 
-      inselbergRisk: 'O inselberg se ergue como um domo maciço e liso de rocha cristalina cujas encostas convexas sofrem esfoliação em casca de cebola; placas soltas de pedra de dezenas de metros desprendem-se sob passos desatentos, arremessando o explorador em um escorregamento descontrolado por encostas de 60 graus que causa 3d8 de dano contundente (DMG p. 110; PHB p. 182-183).',
+      inselbergRisk: 'O inselberg se ergue como um domo maciço e liso de rocha cristalina cujas encostas convexas sofrem esfoliação em casca de cebola; placas soltas de pedra de dezenas de metros desprendem-se sob passos desatentos, arremessando o explorador em um escorregamento descontrolado por encostas de 60 graus que causa 3d8 de dano contundente.',
 
       pioneerMitigation: 'Marchar com calçados de borracha resinada, cravando pitons em fendas primárias e evitando placas convexas delaminadas.',
 
@@ -53941,7 +53941,7 @@
 
         saveType: 'Força',
 
-        inselbergRisk: 'O monólito de pedra nua aquece intensamente sob o sol e funciona como uma chaminé térmica gigante que atrai ar frio da planície e gera correntes ascendentes turbulentas de 80 km/h; rajadas súbitas atingem a comitiva ao contornar arestas afiadas, ameaçando arremessar mochilas e corpos para o abismo (DMG p. 110; PHB p. 182).',
+        inselbergRisk: 'O monólito de pedra nua aquece intensamente sob o sol e funciona como uma chaminé térmica gigante que atrai ar frio da planície e gera correntes ascendentes turbulentas de 80 km/h; rajadas súbitas atingem a comitiva ao contornar arestas afiadas, ameaçando arremessar mochilas e corpos para o abismo.',
 
         pioneerMitigation: 'Avançar agachado em marcha de quatro apoios perto da linha de cume e amarrar equipamentos com cordeletes reforçados.',
 
@@ -53963,7 +53963,7 @@
 
         saveType: 'Sabedoria',
 
-        inselbergRisk: 'Fissuras e cornijas inatingíveis da face vertical do inselberg abrigam colônias de águias gigantes e gaviões carniceiros territoriais; a invasão da rota de subida provoca mergulhos aéreos fulminantes com garras afiadas que visam cegar ou derrubar aventureiros dos paredões, infligindo 2d6 de dano cortante e desestabilização (DMG p. 111; PHB p. 183).',
+        inselbergRisk: 'Fissuras e cornijas inatingíveis da face vertical do inselberg abrigam colônias de águias gigantes e gaviões carniceiros territoriais; a invasão da rota de subida provoca mergulhos aéreos fulminantes com garras afiadas que visam cegar ou derrubar aventureiros dos paredões, infligindo 2d6 de dano cortante e desestabilização.',
 
         pioneerMitigation: 'Empunhar escudos voltados para o alto e utilizar tochas de fumaça aromática para desorientar as aves sem ferir seus filhotes.',
 
@@ -53985,7 +53985,7 @@
 
         saveType: 'Destreza',
 
-        inselbergRisk: 'A base do maciço residual acumula encostas íngremes de pedras angulares e detritos de erosão laminar em ângulo de repouso crítico; a vibração de passos pesados desencadeia avalanches de seixos cortantes que soterram pernas e esmagam tornozelos com 2d6 de dano perfurante e lentidão (DMG p. 110; PHB p. 182).',
+        inselbergRisk: 'A base do maciço residual acumula encostas íngremes de pedras angulares e detritos de erosão laminar em ângulo de repouso crítico; a vibração de passos pesados desencadeia avalanches de seixos cortantes que soterram pernas e esmagam tornozelos com 2d6 de dano perfurante e lentidão.',
 
         pioneerMitigation: 'Transpor a encosta em zigue-zague sobre cristas consolidadas e testar cada laje com bastão de ferro antes de apoiar o peso.',
 
@@ -54125,7 +54125,7 @@
 
       saveType: 'Destreza',
 
-      sabkhaSalineRisk: 'Uma crosta branca de sal puro de 5 centímetros de espessura parece rocha sólida uniforme, mas oculta lamas anóxicas e bolsões subterrâneos de salmoura saturada em ácido sulfídrico; a quebra da placa sob a marcha mergulha pernas e botas em líquido cáustico e fétido que corrói couros e queima tecidos vivos, causando 2d8 de dano ácido (DMG p. 110; PHB p. 182-183).',
+      sabkhaSalineRisk: 'Uma crosta branca de sal puro de 5 centímetros de espessura parece rocha sólida uniforme, mas oculta lamas anóxicas e bolsões subterrâneos de salmoura saturada em ácido sulfídrico; a quebra da placa sob a marcha mergulha pernas e botas em líquido cáustico e fétido que corrói couros e queima tecidos vivos, causando 2d8 de dano ácido.',
 
       pioneerMitigation: 'Marchar em fila com bastão graduado sondando cavidades ocas antes de cada passo e usar pranchas de travessia para distribuir o peso.',
 
@@ -54149,7 +54149,7 @@
 
         saveType: 'Constituição',
 
-        sabkhaSalineRisk: 'O albedo extremo da crosta branca sob o sol a pino do deserto reflete mais de 90% da radiação ultravioleta diretamente nos olhos dos exploradores; marchar sem lentes escuras de chifre entalhado ou véus de linho causa ceratite solar severa, impondo desvantagem em testes de Percepção baseados em visão e cegueira transitória de 1d4 horas (DMG p. 110; XGE p. 112).',
+        sabkhaSalineRisk: 'O albedo extremo da crosta branca sob o sol a pino do deserto reflete mais de 90% da radiação ultravioleta diretamente nos olhos dos exploradores; marchar sem lentes escuras de chifre entalhado ou véus de linho causa ceratite solar severa, impondo desvantagem em testes de Percepção baseados em visão e cegueira transitória de 1d4 horas.',
 
         pioneerMitigation: 'Pintar fuligem negra sob os olhos e equipar viseiras de madeira ou osso com fendas estreitas.',
 
@@ -54171,7 +54171,7 @@
 
         saveType: 'Constituição',
 
-        sabkhaSalineRisk: 'Rajadas térmicas repentinas erguem redemoinhos violentos de cristais microscópicos e cortantes de anidrita e gesso em pó fino; a inalação da poeira alcalina queima as vias aéreas superiores, provocando espasmos pulmonares, tosse com sangue e 2d6 de dano de veneno com condição envenenado por 1 hora (DMG p. 110; PHB p. 183).',
+        sabkhaSalineRisk: 'Rajadas térmicas repentinas erguem redemoinhos violentos de cristais microscópicos e cortantes de anidrita e gesso em pó fino; a inalação da poeira alcalina queima as vias aéreas superiores, provocando espasmos pulmonares, tosse com sangue e 2d6 de dano de veneno com condição envenenado por 1 hora.',
 
         pioneerMitigation: 'Umedecer lenços faciais em vinagre diluído e agachar-se de costas para a tempestade de poeira.',
 
@@ -54193,7 +54193,7 @@
 
         saveType: 'Força',
 
-        sabkhaSalineRisk: 'Faixas periféricas onde a crosta evaporítica se dissolve em lodo denso e movediço de lama salgada; animais de montaria e bestas de carga afundam rapidamente até a barriga sem apoio, correndo risco de exaustão e soterramento se não forem içados em poucos minutos (DMG p. 111; PHB p. 182).',
+        sabkhaSalineRisk: 'Faixas periféricas onde a crosta evaporítica se dissolve em lodo denso e movediço de lama salgada; animais de montaria e bestas de carga afundam rapidamente até a barriga sem apoio, correndo risco de exaustão e soterramento se não forem içados em poucos minutos.',
 
         pioneerMitigation: 'Descarregar os animais imediatamente e ancorar esteiras de vime sob as patas para criar sustentação.',
 
@@ -54333,7 +54333,7 @@
 
       saveType: 'Destreza',
 
-      karstLimestoneRisk: 'Tempestades distantes a dezenas de quilômetros canalizam milhares de toneladas de água por gargantas de calcário com menos de um metro de largura; a onda de choque chega em minutos como um muro de lama, cascalho e troncos rugindo entre paredes verticais de 50 metros de altura sem saída lateral, causando 3d10 de dano contundente e risco de afogamento (DMG p. 110; PHB p. 182-183; XGE p. 111).',
+      karstLimestoneRisk: 'Tempestades distantes a dezenas de quilômetros canalizam milhares de toneladas de água por gargantas de calcário com menos de um metro de largura; a onda de choque chega em minutos como um muro de lama, cascalho e troncos rugindo entre paredes verticais de 50 metros de altura sem saída lateral, causando 3d10 de dano contundente e risco de afogamento.',
 
       pioneerMitigation: 'Marchar atento aos estrondos ecoantes na fenda e fixar cordas de segurança e tirantes de subida nas paredes antes do avanço.',
 
@@ -54357,7 +54357,7 @@
 
         saveType: 'Destreza',
 
-        karstLimestoneRisk: 'As paredes verticais da garganta foram esculpidas e polidas por milênios de enxurradas arenosas, formando calhas e chaminés lisas como vidro; tentar escalar para fugir da água ou transpor um estrangulamento exige apoios precários em nós de rocha, e qualquer escorregão precipita o explorador em fendas pontiagudas, causando 2d8 de dano de impacto (DMG p. 110; PHB p. 182).',
+        karstLimestoneRisk: 'As paredes verticais da garganta foram esculpidas e polidas por milênios de enxurradas arenosas, formando calhas e chaminés lisas como vidro; tentar escalar para fugir da água ou transpor um estrangulamento exige apoios precários em nós de rocha, e qualquer escorregão precipita o explorador em fendas pontiagudas, causando 2d8 de dano de impacto.',
 
         pioneerMitigation: 'Utilizar sapatilhas de atrito, magnésio nas mãos e cunhas de ferro cravadas nas fendas para pontos de apoio firmes.',
 
@@ -54379,7 +54379,7 @@
 
         saveType: 'Sabedoria',
 
-        karstLimestoneRisk: 'Gargantas em zigue-zague com paredes que quase se tocam no topo bloqueiam qualquer visibilidade do céu, do sol ou das estrelas; os ecos reverberam em todas as direções desorientando a audição e bússolas oscilam sob depósitos minerais, prendendo o grupo num labirinto úmido e claustrofóbico que impõe 1 nível de exaustão e atraso de dias (DMG p. 111; XGE p. 111).',
+        karstLimestoneRisk: 'Gargantas em zigue-zague com paredes que quase se tocam no topo bloqueiam qualquer visibilidade do céu, do sol ou das estrelas; os ecos reverberam em todas as direções desorientando a audição e bússolas oscilam sob depósitos minerais, prendendo o grupo num labirinto úmido e claustrofóbico que impõe 1 nível de exaustão e atraso de dias.',
 
         pioneerMitigation: 'Marcar as paredes de calcário com giz resistente à água e usar fio de Ariadne em cruzamentos sinuosos.',
 
@@ -54401,7 +54401,7 @@
 
         saveType: 'Constituição',
 
-        karstLimestoneRisk: 'Trechos profundos onde a fenda afunda em piscinas permanentes de água gélida que nunca recebem luz solar direta; cruzar nadando com mochilas pesadas e armaduras enquanto se empurra lama pegajosa consome as forças musculares e induz tremores incontroláveis de hipotermia com 2d6 de dano de frio (DMG p. 110; PHB p. 183).',
+        karstLimestoneRisk: 'Trechos profundos onde a fenda afunda em piscinas permanentes de água gélida que nunca recebem luz solar direta; cruzar nadando com mochilas pesadas e armaduras enquanto se empurra lama pegajosa consome as forças musculares e induz tremores incontroláveis de hipotermia com 2d6 de dano de frio.',
 
         pioneerMitigation: 'Embalar suprimentos em sacos estanques flutuantes e amarrar linhas guia de apoio para travessia em fila.',
 
@@ -54541,7 +54541,7 @@
 
       saveType: 'Destreza',
 
-      geyseriteThermalRisk: 'Quando a sílica precipitada veda canais subterrâneos profundos, a água superaquecida a 200 graus sob pressão extrema entra em ebulição instantânea ao sofrer descompressão por terremoto ou fratura da crosta; o solo inteiro explode para cima arremessando fragmentos de geiserita afiada e uma nuvem de vapor escaldante por 30 metros de raio, causando 3d8 de dano ígneo e concussão (DMG p. 110; XGE p. 109).',
+      geyseriteThermalRisk: 'Quando a sílica precipitada veda canais subterrâneos profundos, a água superaquecida a 200 graus sob pressão extrema entra em ebulição instantânea ao sofrer descompressão por terremoto ou fratura da crosta; o solo inteiro explode para cima arremessando fragmentos de geiserita afiada e uma nuvem de vapor escaldante por 30 metros de raio, causando 3d8 de dano ígneo e concussão.',
 
       pioneerMitigation: 'Manter a marcha sobre solo frio de cascalho basáltico e afastar-se de fumarolas cujo fluxo de vapor assobie em tom agudo.',
 
@@ -54565,7 +54565,7 @@
 
         saveType: 'Destreza',
 
-        geyseriteThermalRisk: 'Ao redor das lagoas prismáticas de água turquesa abrem-se terraços brancos decorados em couve-flor de sílica amorfa que se projetam sobre o lago fervente como prateleiras sem apoio; pisar além da borda firme rompe a casca de 3 centímetros e mergulha as pernas em água a 95 graus rica em ácido sulfúrico e sílica coloidal, causando 3d6 de dano de fogo e destruição das botas (DMG p. 110; PHB p. 182-183).',
+        geyseriteThermalRisk: 'Ao redor das lagoas prismáticas de água turquesa abrem-se terraços brancos decorados em couve-flor de sílica amorfa que se projetam sobre o lago fervente como prateleiras sem apoio; pisar além da borda firme rompe a casca de 3 centímetros e mergulha as pernas em água a 95 graus rica em ácido sulfúrico e sílica coloidal, causando 3d6 de dano de fogo e destruição das botas.',
 
         pioneerMitigation: 'Sondar a borda da piscina com o bastão de ferro antes de cada passo e jamais aproximar-se da margem sem ancoragem traseira.',
 
@@ -54587,7 +54587,7 @@
 
         saveType: 'Destreza',
 
-        geyseriteThermalRisk: 'Cones maciços de geiserita de 3 metros de altura que parecem adormecidos entre ciclos de atividade; quando o duto subterrâneo atinge a temperatura crítica, o gêiser ejeta uma coluna de água fervente e vapor a 60 metros de altura a cada 40 minutos sem outro aviso prévio além de um borbulhar na boca do cone, atingindo a comitiva com 2d8 de dano de fogo (DMG p. 110; PHB p. 182).',
+        geyseriteThermalRisk: 'Cones maciços de geiserita de 3 metros de altura que parecem adormecidos entre ciclos de atividade; quando o duto subterrâneo atinge a temperatura crítica, o gêiser ejeta uma coluna de água fervente e vapor a 60 metros de altura a cada 40 minutos sem outro aviso prévio além de um borbulhar na boca do cone, atingindo a comitiva com 2d8 de dano de fogo.',
 
         pioneerMitigation: 'Observar o ciclo de erupção a uma distância segura com ampulheta antes de cruzar o campo termal.',
 
@@ -54609,7 +54609,7 @@
 
         saveType: 'Constituição',
 
-        geyseriteThermalRisk: 'Nas noites frias e madrugadas sem vento, o vapor denso dos gêiseres condensa e aprisiona gás sulfídrico, dióxido de carbono e aerossóis de ácido nas depressões entre os terraços de sílica; inalar o nevoeiro concentrado queima as mucosas pulmonares, impondo condição envenenado e 1 nível de exaustão (DMG p. 110; PHB p. 183).',
+        geyseriteThermalRisk: 'Nas noites frias e madrugadas sem vento, o vapor denso dos gêiseres condensa e aprisiona gás sulfídrico, dióxido de carbono e aerossóis de ácido nas depressões entre os terraços de sílica; inalar o nevoeiro concentrado queima as mucosas pulmonares, impondo condição envenenado e 1 nível de exaustão.',
 
         pioneerMitigation: 'Marchar pelas cristas ventiladas acima da camada de vapor e usar máscaras de linho umedecidas.',
 
@@ -54749,7 +54749,7 @@
 
       saveType: 'Constituição',
 
-      climbingDuneRisk: 'Encostas de dunas formadas por grãos de quartzo perfeitamente calibrados e secos que, ao sofrerem cisalhamento sob o peso da marcha, colidem emitindo um estrondo ressonante de baixa frequência tão potente quanto um trovão contínuo; a vibração acústica no solo e no labirinto auricular causa vertigem aguda, náusea e perda de equilíbrio, lançando os aventureiros encosta abaixo com 3d6 de concussão e desorientação sonora (DMG p. 110; PHB p. 182-183; XGE p. 109).',
+      climbingDuneRisk: 'Encostas de dunas formadas por grãos de quartzo perfeitamente calibrados e secos que, ao sofrerem cisalhamento sob o peso da marcha, colidem emitindo um estrondo ressonante de baixa frequência tão potente quanto um trovão contínuo; a vibração acústica no solo e no labirinto auricular causa vertigem aguda, náusea e perda de equilíbrio, lançando os aventureiros encosta abaixo com 3d6 de concussão e desorientação sonora.',
 
       pioneerMitigation: 'Descer contornando pelas cristas de menor inclinação ou apoiar o peso sobre esteiras de lona para amortecer o atrito entre os grãos.',
 
@@ -54773,7 +54773,7 @@
 
         saveType: 'Destreza',
 
-        climbingDuneRisk: 'Grandes massas de areia empurradas por ventos costeiros que sobem rampas rochosas íngremes até transbordar no topo de falésias de 50 metros; caminhar na borda da duna onde a areia não tem suporte rochoso inferior rompe a crista móvel em uma cascata que despenca diretamente para as arrebentações nas pedras com 3d8 de concussão (DMG p. 110; PHB p. 182).',
+        climbingDuneRisk: 'Grandes massas de areia empurradas por ventos costeiros que sobem rampas rochosas íngremes até transbordar no topo de falésias de 50 metros; caminhar na borda da duna onde a areia não tem suporte rochoso inferior rompe a crista móvel em uma cascata que despenca diretamente para as arrebentações nas pedras com 3d8 de concussão.',
 
         pioneerMitigation: 'Manter a marcha a pelo menos dez metros recuado da linha de quebra da falésia, guiando-se por afloramentos rochosos.',
 
@@ -54795,7 +54795,7 @@
 
         saveType: 'Destreza',
 
-        climbingDuneRisk: 'No topo da escarpa, as rajadas marinhas aceleradas varrem a rocha nua a velocidades tempestuosas, arrastando grãos de areia cortantes rente ao chão que trituram tiras de mochilas, rasgam tendas e ferem tornozelos e olhos, causando 2d8 de dano cortante e cegueira temporária (DMG p. 110; PHB p. 185).',
+        climbingDuneRisk: 'No topo da escarpa, as rajadas marinhas aceleradas varrem a rocha nua a velocidades tempestuosas, arrastando grãos de areia cortantes rente ao chão que trituram tiras de mochilas, rasgam tendas e ferem tornozelos e olhos, causando 2d8 de dano cortante e cegueira temporária.',
 
         pioneerMitigation: 'Rastejar sob a proteção de escudos e avançar apenas nos momentos de calmaria entre as frentes de brisa.',
 
@@ -54817,7 +54817,7 @@
 
         saveType: 'Força',
 
-        climbingDuneRisk: 'A face de sotavento da duna costeira equilibra-se exatamente a 34 graus de inclinação; pisar no terço superior desencadeia um escorregamento em cunha que soterra o explorador até o peito em areia fofa e seca, impondo condição impedido e 1 nível de exaustão por compressão torácica (DMG p. 109-110; PHB p. 183).',
+        climbingDuneRisk: 'A face de sotavento da duna costeira equilibra-se exatamente a 34 graus de inclinação; pisar no terço superior desencadeia um escorregamento em cunha que soterra o explorador até o peito em areia fofa e seca, impondo condição impedido e 1 nível de exaustão por compressão torácica.',
 
         pioneerMitigation: 'Atravessar as faces de deslizamento em diagonal rápida com passos largos sem parar para descansar.',
 
@@ -54957,7 +54957,7 @@
 
       saveType: 'Destreza',
 
-      oysterPluffRisk: 'Diques vivos de milhões de conchas de ostras cimentadas verticalmente umas às outras nos canais estuarinos, cujas bordas calcárias serrilhadas são tão afiadas quanto lâminas de aço e fervilham de bactérias marinhas (Vibrio); encalhar a canoa ou escorregar sobre o banco na meia-maré rasga botas de couro, cascos de madeira e panturrilhas com 2d8 de dano cortante e infecção séptica rápida (DMG p. 110; PHB p. 182; XGE p. 109).',
+      oysterPluffRisk: 'Diques vivos de milhões de conchas de ostras cimentadas verticalmente umas às outras nos canais estuarinos, cujas bordas calcárias serrilhadas são tão afiadas quanto lâminas de aço e fervilham de bactérias marinhas (Vibrio); encalhar a canoa ou escorregar sobre o banco na meia-maré rasga botas de couro, cascos de madeira e panturrilhas com 2d8 de dano cortante e infecção séptica rápida.',
 
       pioneerMitigation: 'Navegar exclusivamente pelo eixo profundo do canal na preamar e usar solados reforçados com madeira ou metal.',
 
@@ -54981,7 +54981,7 @@
 
         saveType: 'Força',
 
-        oysterPluffRisk: 'Lodo argilo-orgânico cinza-escuro saturado de gás sulfídrico nas margens dos canais de maré (pluff mud) que parece firme sob o capim-marinho (Spartina), mas engole o aventureiro até a coxa ao primeiro passo fora das raízes; o vácuo da lama arranca as botas e trava as pernas enquanto a maré sobe um metro por hora, impondo condição impedido e risco letal de afogamento (DMG p. 109-110; PHB p. 183).',
+        oysterPluffRisk: 'Lodo argilo-orgânico cinza-escuro saturado de gás sulfídrico nas margens dos canais de maré (pluff mud) que parece firme sob o capim-marinho (Spartina), mas engole o aventureiro até a coxa ao primeiro passo fora das raízes; o vácuo da lama arranca as botas e trava as pernas enquanto a maré sobe um metro por hora, impondo condição impedido e risco letal de afogamento.',
 
         pioneerMitigation: 'Deitar-se de bruços para distribuir o peso ou caminhar pisando exclusivamente sobre as touceiras vivas de capim Spartina.',
 
@@ -55003,7 +55003,7 @@
 
         saveType: 'Sabedoria',
 
-        oysterPluffRisk: 'Milhares de canais sinuosos idênticos cercados por muralhas de capim-marinho de dois metros de altura que bloqueiam a visão do horizonte; quando a maré vaza rapidamente, nove em cada dez canais secam por completo e deixam a embarcação encalhada em um fosso de lama sem água potável sob o sol e enxames de mutucas, impondo 1 nível de exaustão (DMG p. 110-111; PHB p. 185).',
+        oysterPluffRisk: 'Milhares de canais sinuosos idênticos cercados por muralhas de capim-marinho de dois metros de altura que bloqueiam a visão do horizonte; quando a maré vaza rapidamente, nove em cada dez canais secam por completo e deixam a embarcação encalhada em um fosso de lama sem água potável sob o sol e enxames de mutucas, impondo 1 nível de exaustão.',
 
         pioneerMitigation: 'Observar a direção de inclinação das pontas do capim submerso e a espuma para distinguir o canal principal das gamboas cegas.',
 
@@ -55025,7 +55025,7 @@
 
         saveType: 'Constituição',
 
-        oysterPluffRisk: 'As bordas das folhas de Spartina são revestidas de dentes microscópicos de sílica que cortam a pele exposta a cada braçada pelo brejo salgado, enquanto milhões de maruins (biting midges) emergem da lama na calmaria do crepúsculo, impedindo o descanso e causando 1d6 de dano cortante e exaustão (DMG p. 109; PHB p. 182).',
+        oysterPluffRisk: 'As bordas das folhas de Spartina são revestidas de dentes microscópicos de sílica que cortam a pele exposta a cada braçada pelo brejo salgado, enquanto milhões de maruins (biting midges) emergem da lama na calmaria do crepúsculo, impedindo o descanso e causando 1d6 de dano cortante e exaustão.',
 
         pioneerMitigation: 'Manter mangas compridas abotoadas, luvas leves e untar o rosto com lama seca ou óleo aromático.',
 
@@ -55165,7 +55165,7 @@
 
       saveType: 'Destreza',
 
-      stringBogRisk: 'Pântanos boreais listrados (aapa mires) onde centenas de diques fibrosos de meio metro de largura (strangs) correm perpendicularmente ao declive como pontes sinuosas entre lagoas negras paralelas (flarks); muitas dessas cristas não têm base mineral e flutuam apenas pelo entrelaçamento de raízes de bétula-anã, cedendo sob o peso da comitiva e afundando os aventureiros na fenda de água gelada com 2d8 de frio e restrição (DMG p. 109-110; PHB p. 182).',
+      stringBogRisk: 'Pântanos boreais listrados (aapa mires) onde centenas de diques fibrosos de meio metro de largura (strangs) correm perpendicularmente ao declive como pontes sinuosas entre lagoas negras paralelas (flarks); muitas dessas cristas não têm base mineral e flutuam apenas pelo entrelaçamento de raízes de bétula-anã, cedendo sob o peso da comitiva e afundando os aventureiros na fenda de água gelada com 2d8 de frio e restrição.',
 
       pioneerMitigation: 'Pisar apenas nos trechos do cordão onde crescem arbustos lenhosos densos e manter três metros de intervalo entre cada membro.',
 
@@ -55189,7 +55189,7 @@
 
         saveType: 'Força',
 
-        stringBogRisk: 'As trincheiras aquáticas alongadas entre os cordões de turfa parecem ter apenas um palmo de água escura sobre fundo firme, mas escondem até 4 metros de sapropel (lodo orgânico gelatinoso em suspensão) sob a lâmina d’água; tentar atalhar cruzando um flark a vau engole o explorador até o pescoço em lodo negro anóxico, impondo risco de sufocamento e 1 nível de exaustão (DMG p. 109; XGE p. 109).',
+        stringBogRisk: 'As trincheiras aquáticas alongadas entre os cordões de turfa parecem ter apenas um palmo de água escura sobre fundo firme, mas escondem até 4 metros de sapropel (lodo orgânico gelatinoso em suspensão) sob a lâmina d’água; tentar atalhar cruzando um flark a vau engole o explorador até o pescoço em lodo negro anóxico, impondo risco de sufocamento e 1 nível de exaustão.',
 
         pioneerMitigation: 'Sondar toda lagoa de flark com bastão graduado antes de tentar vadear; usar pontes de varas.',
 
@@ -55211,7 +55211,7 @@
 
         saveType: 'Força',
 
-        stringBogRisk: 'Nas cabeceiras alimentadas por água subterrânea, tapetes de junco verde-vivo cobrem chaminés verticais de ressurgência fria; ao romper a malha vegetal, o peso da mochila puxa o aventureiro para debaixo do tapete flutuante como sob uma placa de gelo com 2d6 de frio (DMG p. 109-110; PHB p. 183).',
+        stringBogRisk: 'Nas cabeceiras alimentadas por água subterrânea, tapetes de junco verde-vivo cobrem chaminés verticais de ressurgência fria; ao romper a malha vegetal, o peso da mochila puxa o aventureiro para debaixo do tapete flutuante como sob uma placa de gelo com 2d6 de frio.',
 
         pioneerMitigation: 'Evitar manchas circulares de junco verde brilhante que ondulem a cada passo.',
 
@@ -55233,7 +55233,7 @@
 
         saveType: 'Constituição',
 
-        stringBogRisk: 'Como todos os cordões de turfa e lagoas de flark são orientados transversalmente à direção de descida do vale, avançar uma única légua exige dezenas de quilômetros de desvios laterais em busca de conexões entre as cristas, dobrando o tempo de viagem e impondo 1 nível de exaustão (DMG p. 111; PHB p. 181-182).',
+        stringBogRisk: 'Como todos os cordões de turfa e lagoas de flark são orientados transversalmente à direção de descida do vale, avançar uma única légua exige dezenas de quilômetros de desvios laterais em busca de conexões entre as cristas, dobrando o tempo de viagem e impondo 1 nível de exaustão.',
 
         pioneerMitigation: 'Carregar duas varas leves de ponte para saltar os canais estreitos em linha reta sem desviar.',
 
@@ -55373,7 +55373,7 @@
 
       saveType: 'Destreza',
 
-      loessPipingRisk: 'Platôs espessos de silte eólico amarelo (loess) onde a água da chuva infiltra por fraturas verticais e escava galerias subterrâneas ocultas de 4 metros de diâmetro (soil piping) sem alterar a superfície gramada; o peso da comitiva rompe a casca seca de meio metro sobre o túnel oco e precipita aventureiros e montarias em um funil cego de poeira e lama com 3d6 de concussão (DMG p. 110; XGE p. 109).',
+      loessPipingRisk: 'Platôs espessos de silte eólico amarelo (loess) onde a água da chuva infiltra por fraturas verticais e escava galerias subterrâneas ocultas de 4 metros de diâmetro (soil piping) sem alterar a superfície gramada; o peso da comitiva rompe a casca seca de meio metro sobre o túnel oco e precipita aventureiros e montarias em um funil cego de poeira e lama com 3d6 de concussão.',
 
       pioneerMitigation: 'Evitar caminhar sobre alinhamentos de pequenas depressões em funil rumo à borda da ravina.',
 
@@ -55397,7 +55397,7 @@
 
         saveType: 'Destreza',
 
-        loessPipingRisk: 'O loess seco mantém paredões perfeitamente verticais de 40 metros de altura sustentados apenas por juntas colunares de contração e cimento calcário frágil; a vibração da marcha ou um trovão destaca uma fatia vertical inteira da falésia que tomba sem aviso sobre o caminho do cânion com 3d8 de concussão e soterramento (DMG p. 110; PHB p. 182).',
+        loessPipingRisk: 'O loess seco mantém paredões perfeitamente verticais de 40 metros de altura sustentados apenas por juntas colunares de contração e cimento calcário frágil; a vibração da marcha ou um trovão destaca uma fatia vertical inteira da falésia que tomba sem aviso sobre o caminho do cânion com 3d8 de concussão e soterramento.',
 
         pioneerMitigation: 'Nunca marchar colado à base de paredões de silte que apresentem fendas verticais abertas no topo.',
 
@@ -55419,7 +55419,7 @@
 
         saveType: 'Força',
 
-        loessPipingRisk: 'Quando seco, o piso de loess é duro como tijolo, mas sua estrutura porosa aberta perde 100% da coesão ao saturar sob um aguaceiro repentino (hidroconsolidação); o solo inteiro cede meio metro de uma vez e vira um mingau amarelo denso que prende as pernas até os joelhos, impondo condição impedido e 1 nível de exaustão (DMG p. 109-110; PHB p. 185).',
+        loessPipingRisk: 'Quando seco, o piso de loess é duro como tijolo, mas sua estrutura porosa aberta perde 100% da coesão ao saturar sob um aguaceiro repentino (hidroconsolidação); o solo inteiro cede meio metro de uma vez e vira um mingau amarelo denso que prende as pernas até os joelhos, impondo condição impedido e 1 nível de exaustão.',
 
         pioneerMitigation: 'Subir para os divisores gramados ou abrigar-se em alcovas secas antes que a chuva encharque o fundo do vale.',
 
@@ -55441,7 +55441,7 @@
 
         saveType: 'Constituição',
 
-        loessPipingRisk: 'O desprendimento de um único bloco na ravina ou o vento canalizado levanta uma cortina impenetrável de partículas de quartzo e argila de 20 mícrons que permanece em suspensão por horas, reduzindo a visibilidade a zero e causando asfixia e irritação ocular severa (DMG p. 110; PHB p. 183).',
+        loessPipingRisk: 'O desprendimento de um único bloco na ravina ou o vento canalizado levanta uma cortina impenetrável de partículas de quartzo e argila de 20 mícrons que permanece em suspensão por horas, reduzindo a visibilidade a zero e causando asfixia e irritação ocular severa.',
 
         pioneerMitigation: 'Cobrir boca e nariz com lenço úmido e manter cabo guia entre os membros do grupo.',
 
@@ -55581,7 +55581,7 @@
 
       saveType: 'Destreza',
 
-      hogbackFlatironRisk: 'Placas triangulares gigantes de arenito e calcário inclinadas a 45 graus (flatirons) encostadas no flanco da cordilheira como escudos de titãs; como cada laje repousa sobre uma película milimétrica de folhelho argiloso impermeável, a infiltração de chuva lubrifica o plano de acamamento e faz placas inteiras de rocha ou aventureiros escorregarem sem freio por 60 metros até a ravina basal com 3d8 de concussão (DMG p. 110; PHB p. 182; XGE p. 109).',
+      hogbackFlatironRisk: 'Placas triangulares gigantes de arenito e calcário inclinadas a 45 graus (flatirons) encostadas no flanco da cordilheira como escudos de titãs; como cada laje repousa sobre uma película milimétrica de folhelho argiloso impermeável, a infiltração de chuva lubrifica o plano de acamamento e faz placas inteiras de rocha ou aventureiros escorregarem sem freio por 60 metros até a ravina basal com 3d8 de concussão.',
 
       pioneerMitigation: 'Evitar subir pela face lisa inclinada (dip-slope) do flatiron; usar os degraus das ravinas laterais em V.',
 
@@ -55605,7 +55605,7 @@
 
         saveType: 'Destreza',
 
-        hogbackFlatironRisk: 'Quando o dobramento tectônico empina as camadas de quartzito a quase 90 graus, a erosão das rochas macias laterais deixa uma muralha em barbatana dorsal (hogback) cujo topo tem menos de meio metro de largura com abismos verticais de ambos os lados; rajadas de vento lateral na crista estreita desequilibram a comitiva e provocam quedas de 25 metros com 3d6 de concussão (DMG p. 110; PHB p. 182).',
+        hogbackFlatironRisk: 'Quando o dobramento tectônico empina as camadas de quartzito a quase 90 graus, a erosão das rochas macias laterais deixa uma muralha em barbatana dorsal (hogback) cujo topo tem menos de meio metro de largura com abismos verticais de ambos os lados; rajadas de vento lateral na crista estreita desequilibram a comitiva e provocam quedas de 25 metros com 3d6 de concussão.',
 
         pioneerMitigation: 'Progredir encordado pelo fio da crista ou marchar pelo vale longitudinal na base da muralha.',
 
@@ -55627,7 +55627,7 @@
 
         saveType: 'Destreza',
 
-        hogbackFlatironRisk: 'Na face oposta à rampa inclinada (escarpa de frente), o folhelho mole da base erode rapidamente e deixa a camada superior de arenito duro em balanço sem apoio; caminhar na trilha de meia-encosta sob a cornija desprende blocos prismáticos com 2d8 de concussão (DMG p. 110; XGE p. 109).',
+        hogbackFlatironRisk: 'Na face oposta à rampa inclinada (escarpa de frente), o folhelho mole da base erode rapidamente e deixa a camada superior de arenito duro em balanço sem apoio; caminhar na trilha de meia-encosta sob a cornija desprende blocos prismáticos com 2d8 de concussão.',
 
         pioneerMitigation: 'Manter a marcha afastada da linha de gotejamento das cornijas em balanço.',
 
@@ -55649,7 +55649,7 @@
 
         saveType: 'Força',
 
-        hogbackFlatironRisk: 'O único ponto de travessia ao nível do chão através de uma muralha de hogback de vinte quilômetros é o boqueirão estreito (water gap) onde um rio serrou a crista; qualquer chuva a montante represa no gargalo rochoso e eleva o nível da água em três metros em minutos, bloqueando a passagem e impondo 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        hogbackFlatironRisk: 'O único ponto de travessia ao nível do chão através de uma muralha de hogback de vinte quilômetros é o boqueirão estreito (water gap) onde um rio serrou a crista; qualquer chuva a montante represa no gargalo rochoso e eleva o nível da água em três metros em minutos, bloqueando a passagem e impondo 1 nível de exaustão.',
 
         pioneerMitigation: 'Preferir atravessar a crista por um boqueirão seco superior (wind gap) quando o tempo estiver fechado.',
 
@@ -55789,7 +55789,7 @@
 
       saveType: 'Força',
 
-      blowholeGloupRisk: 'Quando grandes ondas de ressaca entram em cavernas marinhas estreitas na base do promontório, a água comprime o bolsão de ar preso no fundo até dezenas de atmosferas e dispara um gêiser salgado rugidor por orifícios verticais no planalto rochoso 20 metros acima; passar sobre uma chaminé de sopro entre duas séries de ondas lança o aventureiro aos ares com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+      blowholeGloupRisk: 'Quando grandes ondas de ressaca entram em cavernas marinhas estreitas na base do promontório, a água comprime o bolsão de ar preso no fundo até dezenas de atmosferas e dispara um gêiser salgado rugidor por orifícios verticais no planalto rochoso 20 metros acima; passar sobre uma chaminé de sopro entre duas séries de ondas lança o aventureiro aos ares com 3d8 de concussão.',
 
       pioneerMitigation: 'Observar aneis de rocha molhada e espuma branca no planalto antes de avançar e contar o intervalo entre as séries de ondas.',
 
@@ -55813,7 +55813,7 @@
 
         saveType: 'Força',
 
-        blowholeGloupRisk: 'Imediatamente após o disparo do jato de espuma, a coluna de toneladas de água recua de volta pelo tubo vertical como um pistão descendente, gerando um vácuo poderoso na boca da cratera; quem escorregar no anel de algas ao redor do orifício é sugado para dentro da caverna escura submersa, sofrendo 3d6 de concussão e risco imediato de afogamento (DMG p. 110; PHB p. 182-183).',
+        blowholeGloupRisk: 'Imediatamente após o disparo do jato de espuma, a coluna de toneladas de água recua de volta pelo tubo vertical como um pistão descendente, gerando um vácuo poderoso na boca da cratera; quem escorregar no anel de algas ao redor do orifício é sugado para dentro da caverna escura submersa, sofrendo 3d6 de concussão e risco imediato de afogamento.',
 
         pioneerMitigation: 'Manter distância mínima de cinco metros das crateras afuniladas cobertas de limo verde.',
 
@@ -55835,7 +55835,7 @@
 
         saveType: 'Destreza',
 
-        blowholeGloupRisk: 'A dezenas de metros da borda da falésia, em meio ao pasto costeiro aparentemente firme, abrem-se poços verticais sem parapeito (gloups) onde o teto de uma galeria marinha subterrânea desabou; na neblina costeira ou à noite, dar um passo em falso na relva úmida precipita o batedor por 15 metros direto na caldeira de espuma fervente lá embaixo com 3d6 de concussão (DMG p. 110; PHB p. 182).',
+        blowholeGloupRisk: 'A dezenas de metros da borda da falésia, em meio ao pasto costeiro aparentemente firme, abrem-se poços verticais sem parapeito (gloups) onde o teto de uma galeria marinha subterrânea desabou; na neblina costeira ou à noite, dar um passo em falso na relva úmida precipita o batedor por 15 metros direto na caldeira de espuma fervente lá embaixo com 3d6 de concussão.',
 
         pioneerMitigation: 'Guiar-se pelo estrondo surdo do mar sob os pés para detectar clarabóias ocultas sob o capim.',
 
@@ -55857,7 +55857,7 @@
 
         saveType: 'Destreza',
 
-        blowholeGloupRisk: 'Pontes estreitas de rocha residual que ligam o continente a ilhotas escarpadas; a interferência construtiva de duas ondas refletidas nos flancos faz uma parede de água subir verticalmente e varrer o topo da ponte a 10 metros de altura, exigindo agarrar-se à rocha com 2d6 de concussão para não ser arremessado ao mar revolto (DMG p. 110; PHB p. 185).',
+        blowholeGloupRisk: 'Pontes estreitas de rocha residual que ligam o continente a ilhotas escarpadas; a interferência construtiva de duas ondas refletidas nos flancos faz uma parede de água subir verticalmente e varrer o topo da ponte a 10 metros de altura, exigindo agarrar-se à rocha com 2d6 de concussão para não ser arremessado ao mar revolto.',
 
         pioneerMitigation: 'Cruzar o arco natural encordado e apenas durante a janela de baixa-mar.',
 
@@ -55997,7 +55997,7 @@
 
       saveType: 'Destreza',
 
-      hummockTorevaRisk: 'Milhares de colinas cônicas e cristas caóticas espalhadas pela bacia ao pé de um estratovulcão colapsado; embora cada colina (hummock) pareça uma montanha de rocha sólida, seu interior é um único megabloco de lava inteiramente estilhaçado em milhões de peças encaixadas sem cimento (jigsaw cracks) durante o transporte da avalanche, desmoronando em cascata ao menor golpe de picão ou escalada com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+      hummockTorevaRisk: 'Milhares de colinas cônicas e cristas caóticas espalhadas pela bacia ao pé de um estratovulcão colapsado; embora cada colina (hummock) pareça uma montanha de rocha sólida, seu interior é um único megabloco de lava inteiramente estilhaçado em milhões de peças encaixadas sem cimento (jigsaw cracks) durante o transporte da avalanche, desmoronando em cascata ao menor golpe de picão ou escalada com 3d8 de concussão.',
 
       pioneerMitigation: 'Evitar escalar faces íngremes de hummocks com textura de mosaico trincado; contornar pela sela basal.',
 
@@ -56021,7 +56021,7 @@
 
         saveType: 'Destreza',
 
-        hummockTorevaRisk: 'Enormes fatias da encosta da montanha (blocos Toreva) que escorregaram girando para trás em direção ao paredão principal, formando falsos terraços inclinados para dentro onde a fenda de separação traseira fica camuflada por samambaias e cinzas; caminhar para a borda interna do terraço precipita o aventureiro no abismo em cunha entre o bloco e o penhasco com 3d6 de concussão (DMG p. 110; PHB p. 182).',
+        hummockTorevaRisk: 'Enormes fatias da encosta da montanha (blocos Toreva) que escorregaram girando para trás em direção ao paredão principal, formando falsos terraços inclinados para dentro onde a fenda de separação traseira fica camuflada por samambaias e cinzas; caminhar para a borda interna do terraço precipita o aventureiro no abismo em cunha entre o bloco e o penhasco com 3d6 de concussão.',
 
         pioneerMitigation: 'Manter a marcha pelo centro do patamar rotacionado, longe da linha de contato com o paredão.',
 
@@ -56043,7 +56043,7 @@
 
         saveType: 'Força',
 
-        hummockTorevaRisk: 'Entre uma colina cônica e outra não existe rede de drenagem conectada; as depressões fechadas acumulam a matriz fina de argila hidrotermal da avalanche e água pluvial em charcos tixotrópicos sem fundo; descer de um hummock diretamente para a várzea plana faz o explorador afundar até o peito em lama cinzenta ácida, impondo condição impedido e 1 nível de exaustão (DMG p. 109-110; PHB p. 185).',
+        hummockTorevaRisk: 'Entre uma colina cônica e outra não existe rede de drenagem conectada; as depressões fechadas acumulam a matriz fina de argila hidrotermal da avalanche e água pluvial em charcos tixotrópicos sem fundo; descer de um hummock diretamente para a várzea plana faz o explorador afundar até o peito em lama cinzenta ácida, impondo condição impedido e 1 nível de exaustão.',
 
         pioneerMitigation: 'Transitar de colina em colina pelas cristas divisoras de cascalho sem descer ao centro das bacias fechadas.',
 
@@ -56065,7 +56065,7 @@
 
         saveType: 'Sabedoria',
 
-        hummockTorevaRisk: 'Campos de hummocks vulcanoclásticos com dezenas de quilômetros quadrados onde centenas de cones de 30 metros de altura bloqueiam a linha de visão em todas as direções e abafam sons de trompas ou gritos; perder o marco de referência da montanha sob nevoeiro faz a comitiva andar em círculos pelo labirinto de colinas (DMG p. 111; PHB p. 183).',
+        hummockTorevaRisk: 'Campos de hummocks vulcanoclásticos com dezenas de quilômetros quadrados onde centenas de cones de 30 metros de altura bloqueiam a linha de visão em todas as direções e abafam sons de trompas ou gritos; perder o marco de referência da montanha sob nevoeiro faz a comitiva andar em círculos pelo labirinto de colinas.',
 
         pioneerMitigation: 'Subir a um montículo mais alto a cada hora para confirmar o azimute com bússola e erguer marcos de pedra.',
 
@@ -56205,7 +56205,7 @@
 
       saveType: 'Destreza',
 
-      gilgaiVertisolRisk: 'Planícies de argila esmectítica negra ("Black Cotton Soil") que ao secar no estio contraem violentamente e abrem uma rede poligonal de fendas verticais de 20 centímetros de largura e até 2 metros de profundidade ocultas sob o capim amarelado; pisar em falso engole a perna inteira do aventureiro ou o casco de uma montaria como uma armadilha de mandíbula de pedra dura, causando 2d8 de concussão e fratura (DMG p. 110; PHB p. 182).',
+      gilgaiVertisolRisk: 'Planícies de argila esmectítica negra ("Black Cotton Soil") que ao secar no estio contraem violentamente e abrem uma rede poligonal de fendas verticais de 20 centímetros de largura e até 2 metros de profundidade ocultas sob o capim amarelado; pisar em falso engole a perna inteira do aventureiro ou o casco de uma montaria como uma armadilha de mandíbula de pedra dura, causando 2d8 de concussão e fratura.',
 
       pioneerMitigation: 'Avançar com batedor abrindo o capim seco com vara longa para revelar o traçado das fendas poligonais.',
 
@@ -56229,7 +56229,7 @@
 
         saveType: 'Destreza',
 
-        gilgaiVertisolRisk: 'Micro-relevo ondulado de montículos e bacias circulares (melon-holes) onde a água das primeiras chuvas escoa pelas fendas profundas e escava túneis subterrâneos invisíveis por erosão tubular (soil piping); a crosta superficial seca cede de repente sob a marcha e derruba o explorador em uma caverna de lama escura com 3d6 de concussão (DMG p. 110; XGE p. 109).',
+        gilgaiVertisolRisk: 'Micro-relevo ondulado de montículos e bacias circulares (melon-holes) onde a água das primeiras chuvas escoa pelas fendas profundas e escava túneis subterrâneos invisíveis por erosão tubular (soil piping); a crosta superficial seca cede de repente sob a marcha e derruba o explorador em uma caverna de lama escura com 3d6 de concussão.',
 
         pioneerMitigation: 'Contornar o centro das depressões circulares e caminhar apenas pelas cristas dos montículos convexos.',
 
@@ -56251,7 +56251,7 @@
 
         saveType: 'Força',
 
-        gilgaiVertisolRisk: 'Basta meia hora de chuva para a argila montmorilonítica expandir e se transformar em um visco negro impermeável que adere quimicamente ao couro e ao ferro; cada passo acumula blocos de dez quilos de barro nas botas e trava rodas de carroça até a imobilidade completa, reduzindo o deslocamento a um terço e impondo 1 nível de exaustão (DMG p. 109-110; PHB p. 185).',
+        gilgaiVertisolRisk: 'Basta meia hora de chuva para a argila montmorilonítica expandir e se transformar em um visco negro impermeável que adere quimicamente ao couro e ao ferro; cada passo acumula blocos de dez quilos de barro nas botas e trava rodas de carroça até a imobilidade completa, reduzindo o deslocamento a um terço e impondo 1 nível de exaustão.',
 
         pioneerMitigation: 'Envolver as botas em tiras de pano oleado ou palha trançada e buscar terrenos arenosos altos ao primeiro sinal de chuva.',
 
@@ -56273,7 +56273,7 @@
 
         saveType: 'Constituição',
 
-        gilgaiVertisolRisk: 'Durante o calor escaldante do dia na savana ou estepe, milhares de fendas profundas de contração do vertissolo funcionam como abrigos frescos e úmidos onde víboras e escorpiões se aglomeram a poucos centímetros da superfície; tropeçar em uma fenda desperta o ninho e provoca picadas com 2d8 de dano de veneno e condição envenenado (DMG p. 109; PHB p. 183).',
+        gilgaiVertisolRisk: 'Durante o calor escaldante do dia na savana ou estepe, milhares de fendas profundas de contração do vertissolo funcionam como abrigos frescos e úmidos onde víboras e escorpiões se aglomeram a poucos centímetros da superfície; tropeçar em uma fenda desperta o ninho e provoca picadas com 2d8 de dano de veneno e condição envenenado.',
 
         pioneerMitigation: 'Usar perneiras altas de couro rígido e nunca introduzir as mãos em fendas do solo.',
 
@@ -56413,7 +56413,7 @@
 
       saveType: 'Destreza',
 
-      graniteTorRisk: 'Torres acasteladas de blocos de granito arredondados (tors ou kopjes) empilhados a 15 metros de altura sobre o topo de colinas e charnecas, onde o manto de rocha decomposta foi lavado pela chuva deixando os núcleos duros apoiados uns sobre os outros por cantos mínimos corroídos; escalar ou disparar ondas de choque perto da pilha desloca o bloco-chave e derruba uma cascata de matacões de cinco toneladas com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+      graniteTorRisk: 'Torres acasteladas de blocos de granito arredondados (tors ou kopjes) empilhados a 15 metros de altura sobre o topo de colinas e charnecas, onde o manto de rocha decomposta foi lavado pela chuva deixando os núcleos duros apoiados uns sobre os outros por cantos mínimos corroídos; escalar ou disparar ondas de choque perto da pilha desloca o bloco-chave e derruba uma cascata de matacões de cinco toneladas com 3d8 de concussão.',
 
       pioneerMitigation: 'Subir apenas pelas chaminés entalhadas no plúton maciço basal, evitando pilhas de matacões soltos no topo.',
 
@@ -56437,7 +56437,7 @@
 
         saveType: 'Destreza',
 
-        graniteTorRisk: 'A desagregação granular do feldspato e quartzo cobre as lajes inclinadas na base do tor com um tapete solto de grãos esféricos de 4 milímetros (grus) que rolam sob a sola das botas exatamente como bolinhas de gude sobre mármore; o aventureiro perde os pés instantaneamente e desliza pela rampa rochosa até as fendas da base com 2d8 de concussão (DMG p. 110; PHB p. 182).',
+        graniteTorRisk: 'A desagregação granular do feldspato e quartzo cobre as lajes inclinadas na base do tor com um tapete solto de grãos esféricos de 4 milímetros (grus) que rolam sob a sola das botas exatamente como bolinhas de gude sobre mármore; o aventureiro perde os pés instantaneamente e desliza pela rampa rochosa até as fendas da base com 2d8 de concussão.',
 
         pioneerMitigation: 'Varrer os grãos de quartzo com o pé ou bastão antes de firmar o passo em lajes inclinadas.',
 
@@ -56459,7 +56459,7 @@
 
         saveType: 'Destreza',
 
-        graniteTorRisk: 'Juntas curvas de descompressão dividem os flancos do tor em cascas concêntricas de granito separadas por filmes de argila caulinítica úmida; caminhar sobre uma aba lateral em declive vence o atrito residual da argila e dispara a prancha inteira de rocha morro abaixo, levando a comitiva junto com 3d6 de concussão (DMG p. 110; PHB p. 185).',
+        graniteTorRisk: 'Juntas curvas de descompressão dividem os flancos do tor em cascas concêntricas de granito separadas por filmes de argila caulinítica úmida; caminhar sobre uma aba lateral em declive vence o atrito residual da argila e dispara a prancha inteira de rocha morro abaixo, levando a comitiva junto com 3d6 de concussão.',
 
         pioneerMitigation: 'Evitar placas de granito separadas do núcleo por fendas horizontais barrentas após chuvas.',
 
@@ -56481,7 +56481,7 @@
 
         saveType: 'Força',
 
-        graniteTorRisk: 'Ao redor do tor estende-se um avental caótico de blocos tombados (clitter) cujos vãos cavernosos de 2 metros de profundidade são mascarados por moitas fechadas de urze roxa e turfa seca; afundar a perna entre dois blocos angulosos trava o joelho e impõe 2d6 de concussão e condição impedido (DMG p. 110; PHB p. 182).',
+        graniteTorRisk: 'Ao redor do tor estende-se um avental caótico de blocos tombados (clitter) cujos vãos cavernosos de 2 metros de profundidade são mascarados por moitas fechadas de urze roxa e turfa seca; afundar a perna entre dois blocos angulosos trava o joelho e impõe 2d6 de concussão e condição impedido.',
 
         pioneerMitigation: 'Saltar de topo em topo visível dos matacões em vez de pisar nas moitas de urze entre eles.',
 
@@ -56621,7 +56621,7 @@
 
       saveType: 'Destreza',
 
-      gypsumKarstRisk: 'Como o gesso (sulfato de cálcio hidratado) dissolve na água da chuva cem vezes mais rápido que o calcário comum, as pontes naturais e tetos de cavernas rasas de alabastro afinam até a espessura de uma casca de ovo entre uma estação chuvosa e outra; pisar sobre um domo branco oco provoca a ruptura silenciosa do piso fibroso e queda de 8 metros sobre lâminas de selenita com 3d8 de dano perfurante e concussão (DMG p. 110; XGE p. 109).',
+      gypsumKarstRisk: 'Como o gesso (sulfato de cálcio hidratado) dissolve na água da chuva cem vezes mais rápido que o calcário comum, as pontes naturais e tetos de cavernas rasas de alabastro afinam até a espessura de uma casca de ovo entre uma estação chuvosa e outra; pisar sobre um domo branco oco provoca a ruptura silenciosa do piso fibroso e queda de 8 metros sobre lâminas de selenita com 3d8 de dano perfurante e concussão.',
 
       pioneerMitigation: 'Evitar caminhar sobre crostas brancas sacaróides que soem ocas ao toque do bastão; seguir pelas cristas de dolomito cinza.',
 
@@ -56645,7 +56645,7 @@
 
         saveType: 'Destreza',
 
-        gypsumKarstRisk: 'Quando camadas de anidrita anidra absorvem água de orvalho ou chuva, os cristais incham mais de 60% em volume e arqueiam o terreno em tendas de pedra sob tensão extrema; o impacto de uma bota ou bastão no ápice tensionado faz a abóbada inteira estourar para cima como uma mola de pedra e depois abater, atingindo o explorador com 3d6 de concussão (DMG p. 110; PHB p. 182).',
+        gypsumKarstRisk: 'Quando camadas de anidrita anidra absorvem água de orvalho ou chuva, os cristais incham mais de 60% em volume e arqueiam o terreno em tendas de pedra sob tensão extrema; o impacto de uma bota ou bastão no ápice tensionado faz a abóbada inteira estourar para cima como uma mola de pedra e depois abater, atingindo o explorador com 3d6 de concussão.',
 
         pioneerMitigation: 'Contornar empolamentos poligonais rachados que emitam estalos secos ao aquecer sob o sol.',
 
@@ -56667,7 +56667,7 @@
 
         saveType: 'Constituição',
 
-        gypsumKarstRisk: 'Fendas e cavidades rasas atravessadas por prismas translúcidos de selenita de até 3 metros de comprimento com arestas cortantes como vidro e umidade interna de 100% aquecida por fontes sulfurosas; escorregar entre os feixes de cristal causa 2d8 de dano cortante e impõe 1 nível de exaustão pelo vapor abafado (DMG p. 110; PHB p. 183).',
+        gypsumKarstRisk: 'Fendas e cavidades rasas atravessadas por prismas translúcidos de selenita de até 3 metros de comprimento com arestas cortantes como vidro e umidade interna de 100% aquecida por fontes sulfurosas; escorregar entre os feixes de cristal causa 2d8 de dano cortante e impõe 1 nível de exaustão pelo vapor abafado.',
 
         pioneerMitigation: 'Limitar a travessia de galerias de cristal a poucos minutos e usar luvas de couro grosso.',
 
@@ -56689,7 +56689,7 @@
 
         saveType: 'Constituição',
 
-        gypsumKarstRisk: 'As nascentes e poças nos vales de carste de gesso são enganadoramente transparentes e inodoras, mas carregam concentrações saturadas de sulfato de cálcio e sais de Epsom (sulfato de magnésio); beber dessa água sem destilar provoca cólicas severas, desidratação osmótica e a condição envenenado (DMG p. 110-111; PHB p. 185).',
+        gypsumKarstRisk: 'As nascentes e poças nos vales de carste de gesso são enganadoramente transparentes e inodoras, mas carregam concentrações saturadas de sulfato de cálcio e sais de Epsom (sulfato de magnésio); beber dessa água sem destilar provoca cólicas severas, desidratação osmótica e a condição envenenado.',
 
         pioneerMitigation: 'Testar uma gota na ponta da língua (sabor amargo-metálico) ou ferver uma amostra em colher para ver se deixa crosta branca.',
 
@@ -56829,7 +56829,7 @@
 
       saveType: 'Destreza',
 
-      rocheMoutonneeRisk: 'Lombadas rochosas de gnaisse e granito (roches moutonnées) cuja rampa suave de subida foi lixada pelo pó de quartzo sob uma geleira antiga até adquirir um verniz espelhado (glacial polish) coberto por líquen negro mucilaginoso; ao primeiro orvalho ou garoa, o atrito cai a zero e lança o aventureiro que pisa na rampa como num tobogã diretamente para o precipício na face oposta com 3d6 de concussão (DMG p. 110; PHB p. 182).',
+      rocheMoutonneeRisk: 'Lombadas rochosas de gnaisse e granito (roches moutonnées) cuja rampa suave de subida foi lixada pelo pó de quartzo sob uma geleira antiga até adquirir um verniz espelhado (glacial polish) coberto por líquen negro mucilaginoso; ao primeiro orvalho ou garoa, o atrito cai a zero e lança o aventureiro que pisa na rampa como num tobogã diretamente para o precipício na face oposta com 3d6 de concussão.',
 
       pioneerMitigation: 'Caminhar pisando dentro das fendas de fratura ou nas estrias profundas da rocha, evitando as placas espelhadas úmidas.',
 
@@ -56853,7 +56853,7 @@
 
         saveType: 'Sabedoria',
 
-        rocheMoutonneeRisk: 'Toda roche moutonnée possui perfil enganosamente assimétrico: uma subida mansa e arredondada seguida por um corte vertical abrupto de 15 metros no lado de sotavento onde o gelo arrancou blocos inteiros (glacial plucking); marchar na neblina ou contra o sol pelo dorso suave leva o batedor a dar um passo no vazio sobre a escarpa cega com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+        rocheMoutonneeRisk: 'Toda roche moutonnée possui perfil enganosamente assimétrico: uma subida mansa e arredondada seguida por um corte vertical abrupto de 15 metros no lado de sotavento onde o gelo arrancou blocos inteiros (glacial plucking); marchar na neblina ou contra o sol pelo dorso suave leva o batedor a dar um passo no vazio sobre a escarpa cega com 3d8 de concussão.',
 
         pioneerMitigation: 'Reduzir o passo ao atingir o topo arredondado de qualquer lombada glacial e sondar a descida antes de avançar.',
 
@@ -56875,7 +56875,7 @@
 
         saveType: 'Destreza',
 
-        rocheMoutonneeRisk: 'Terraços subglaciais onde milhares de matacões tiveram o topo aplanado e riscado na mesma direção pelo fluxo de gelo como uma calçada ciclópica, mas com frestas estreitas e profundas de 1 metro entre um bloco e outro; escorregar da face polida crava a perna na cunha entre dois matacões de granito, causando 2d8 de concussão e condição impedido (DMG p. 110; PHB p. 185).',
+        rocheMoutonneeRisk: 'Terraços subglaciais onde milhares de matacões tiveram o topo aplanado e riscado na mesma direção pelo fluxo de gelo como uma calçada ciclópica, mas com frestas estreitas e profundas de 1 metro entre um bloco e outro; escorregar da face polida crava a perna na cunha entre dois matacões de granito, causando 2d8 de concussão e condição impedido.',
 
         pioneerMitigation: 'Usar o bastão de caminhada para testar o vão oculto por musgo entre os blocos aplanados.',
 
@@ -56897,7 +56897,7 @@
 
         saveType: 'Força',
 
-        rocheMoutonneeRisk: 'Matacões de dez toneladas trazidos de montanhas distantes e depositados pela geleira sobre três pequenos seixos de apoio na crista polida; o bloco inteiro balança ao toque de um ombro ou rajada de vento e pode perder o calço basal, esmagando quem busca abrigo à sua sombra com 3d8 de concussão (DMG p. 110; PHB p. 182).',
+        rocheMoutonneeRisk: 'Matacões de dez toneladas trazidos de montanhas distantes e depositados pela geleira sobre três pequenos seixos de apoio na crista polida; o bloco inteiro balança ao toque de um ombro ou rajada de vento e pode perder o calço basal, esmagando quem busca abrigo à sua sombra com 3d8 de concussão.',
 
         pioneerMitigation: 'Verificar se grandes blocos isolados possuem base larga soldada à laje antes de encostar ou acampar sob eles.',
 
@@ -57037,7 +57037,7 @@
 
       saveType: 'Destreza',
 
-      plugRingDikeRisk: 'Muralhas retilíneas de basalto negro de 25 metros de altura que cortam a paisagem como fortificações ciclópicas naturais onde o magma solidificou em fendas verticais; diferente das colunas verticais de derrames comuns, nos diques os prismas hexagonais de resfriamento jazem deitados na horizontal como gavetas soltas de meia tonelada que escorregam para fora da parede quando o escalador se pendura nelas, despencando com 3d8 de concussão (DMG p. 110; PHB p. 182; XGE p. 109).',
+      plugRingDikeRisk: 'Muralhas retilíneas de basalto negro de 25 metros de altura que cortam a paisagem como fortificações ciclópicas naturais onde o magma solidificou em fendas verticais; diferente das colunas verticais de derrames comuns, nos diques os prismas hexagonais de resfriamento jazem deitados na horizontal como gavetas soltas de meia tonelada que escorregam para fora da parede quando o escalador se pendura nelas, despencando com 3d8 de concussão.',
 
       pioneerMitigation: 'Nunca escalar a face de prismas horizontais de um dique; procurar selas erodidas ou contornar até uma brecha transversal.',
 
@@ -57061,7 +57061,7 @@
 
         saveType: 'Destreza',
 
-        plugRingDikeRisk: 'Monólitos cilíndricos de 150 metros que formavam a garganta central de antigos vulcões extintos, compostos por um aglomerado caótico de blocos angulosos soldados por cinza alterada (brecha de conduto); o intemperismo dissolve o cimento de tufo e faz blocos do tamanho de baús se soltarem da torre vertical a cada rajada de vento, atingindo a base com 3d6 de concussão (DMG p. 110; XGE p. 109).',
+        plugRingDikeRisk: 'Monólitos cilíndricos de 150 metros que formavam a garganta central de antigos vulcões extintos, compostos por um aglomerado caótico de blocos angulosos soldados por cinza alterada (brecha de conduto); o intemperismo dissolve o cimento de tufo e faz blocos do tamanho de baús se soltarem da torre vertical a cada rajada de vento, atingindo a base com 3d6 de concussão.',
 
         pioneerMitigation: 'Manter distância de segurança do cone de dejeção na base do pescoço vulcânico durante ventanias.',
 
@@ -57083,7 +57083,7 @@
 
         saveType: 'Destreza',
 
-        plugRingDikeRisk: 'Ao redor do pescoço vulcânico e dos diques anelares, o folhelho antigo foi cozido pelo calor do magma em uma rocha metamórfica negra e vítrea (hornfels) que se parte em lascas sonoras e escorregadias como telhas quebradas; atravessar o colar de estilhaços a meia-encosta dispara avalanches de placas cortantes que causam 2d8 de dano cortante (DMG p. 110; PHB p. 182).',
+        plugRingDikeRisk: 'Ao redor do pescoço vulcânico e dos diques anelares, o folhelho antigo foi cozido pelo calor do magma em uma rocha metamórfica negra e vítrea (hornfels) que se parte em lascas sonoras e escorregadias como telhas quebradas; atravessar o colar de estilhaços a meia-encosta dispara avalanches de placas cortantes que causam 2d8 de dano cortante.',
 
         pioneerMitigation: 'Cruzar o talude de hornfels em diagonal ascendente apoiando os pés nos afloramentos firmes de rocha.',
 
@@ -57105,7 +57105,7 @@
 
         saveType: 'Força',
 
-        plugRingDikeRisk: 'Vales circulares fechados entre duas muralhas concêntricas de diques anelares onde a rocha sedimentar macia foi erodida em uma trincheira curva sem saída lateral; uma tromba d’água na montanha canaliza toda a drenagem para o anel rochoso em minutos, varrendo o fundo do fosso e impondo 1 nível de exaustão e arrasto (DMG p. 110; PHB p. 185).',
+        plugRingDikeRisk: 'Vales circulares fechados entre duas muralhas concêntricas de diques anelares onde a rocha sedimentar macia foi erodida em uma trincheira curva sem saída lateral; uma tromba d’água na montanha canaliza toda a drenagem para o anel rochoso em minutos, varrendo o fundo do fosso e impondo 1 nível de exaustão e arrasto.',
 
         pioneerMitigation: 'Marchar pelo terraço elevado junto à base da muralha de basalto, nunca pelo talvegue do fosso anelar.',
 
@@ -57245,7 +57245,7 @@
 
       saveType: 'Destreza',
 
-      kettleEskerRisk: 'Planícies de lavagem glaciofluvial (pitted sandur) onde blocos colossais de gelo desprendidos da geleira em recuo ficaram soterrados sob metros de areia e cascalho; quando o coração do bloco derrete na primavera, a abóbada de areia perde sustentação e desaba de uma só vez sob o peso das montarias, abrindo uma cratera em funil de 8 metros cheia de água e lama glacial com 3d6 de concussão e frio (DMG p. 110; XGE p. 109).',
+      kettleEskerRisk: 'Planícies de lavagem glaciofluvial (pitted sandur) onde blocos colossais de gelo desprendidos da geleira em recuo ficaram soterrados sob metros de areia e cascalho; quando o coração do bloco derrete na primavera, a abóbada de areia perde sustentação e desaba de uma só vez sob o peso das montarias, abrindo uma cratera em funil de 8 metros cheia de água e lama glacial com 3d6 de concussão e frio.',
 
       pioneerMitigation: 'Marchar pelo alto das cristas sinuosas de cascalho (eskers) evitando depressões circulares úmidas na planície.',
 
@@ -57269,7 +57269,7 @@
 
         saveType: 'Destreza',
 
-        kettleEskerRisk: 'Diques sinuosos de cascalho e seixos rolados de 20 metros de altura depositados por antigos túneis subglaciais, cujas encostas laterais repousam exatamente no ângulo crítico de 35 graus; pisar em falso na borda da crista dispara uma enxurrada de pedras redondas que rolam como esferas de aço ladeira abaixo e projetam o aventureiro para o pântano na base com 2d8 de concussão (DMG p. 110; PHB p. 182).',
+        kettleEskerRisk: 'Diques sinuosos de cascalho e seixos rolados de 20 metros de altura depositados por antigos túneis subglaciais, cujas encostas laterais repousam exatamente no ângulo crítico de 35 graus; pisar em falso na borda da crista dispara uma enxurrada de pedras redondas que rolam como esferas de aço ladeira abaixo e projetam o aventureiro para o pântano na base com 2d8 de concussão.',
 
         pioneerMitigation: 'Caminhar estritamente pelo eixo central da espinha do esker, mantendo um metro de distância das bordas de seixos.',
 
@@ -57291,7 +57291,7 @@
 
         saveType: 'Força',
 
-        kettleEskerRisk: 'Crateras circulares antigas de gelo morto convertidas em lagos profundos sem riachos de entrada ou saída, cujas margens crescem para dentro como um anel flutuante de musgo sobre 10 metros de água negra gelada; pisar na borda elástica rompe o anel vegetal e mergulha o explorador sob a prateleira submersa sem degrau de apoio, impondo risco de afogamento e 1 nível de exaustão (DMG p. 109-110; PHB p. 183).',
+        kettleEskerRisk: 'Crateras circulares antigas de gelo morto convertidas em lagos profundos sem riachos de entrada ou saída, cujas margens crescem para dentro como um anel flutuante de musgo sobre 10 metros de água negra gelada; pisar na borda elástica rompe o anel vegetal e mergulha o explorador sob a prateleira submersa sem degrau de apoio, impondo risco de afogamento e 1 nível de exaustão.',
 
         pioneerMitigation: 'Nunca se aproximar da beira verde-clara de lagoas circulares em funil para coletar água.',
 
@@ -57313,7 +57313,7 @@
 
         saveType: 'Força',
 
-        kettleEskerRisk: 'Na base das colinas cônicas de areia estratificada (kames), a água de degelo infiltrada no topo brota sob pressão artesiana e fluidifica os bancos de areia fina da encosta inferior; o aventureiro que marcha pelo sopé do kame afunda até a cintura em areia movediça fria, ficando impedido (DMG p. 109; PHB p. 185).',
+        kettleEskerRisk: 'Na base das colinas cônicas de areia estratificada (kames), a água de degelo infiltrada no topo brota sob pressão artesiana e fluidifica os bancos de areia fina da encosta inferior; o aventureiro que marcha pelo sopé do kame afunda até a cintura em areia movediça fria, ficando impedido.',
 
         pioneerMitigation: 'Contornar as colinas de kame pela meia-encosta de cascalho grosso, acima da linha de surgência de água.',
 
@@ -57453,7 +57453,7 @@
 
       saveType: 'Destreza',
 
-      supraglacialDebrisRisk: 'Geleiras alpinas inteiramente ocultas sob um manto escuro de 2 metros de seixos e blocos angulosos que parecem uma encosta pedregosa comum, mas rasgadas por paredões verticais de gelo negro de 25 metros aquecidos pelo sol; a fusão constante da face libera avalanches súbitas dos matacões empilhados na crista sem qualquer aviso sísmico, esmagando a comitiva com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+      supraglacialDebrisRisk: 'Geleiras alpinas inteiramente ocultas sob um manto escuro de 2 metros de seixos e blocos angulosos que parecem uma encosta pedregosa comum, mas rasgadas por paredões verticais de gelo negro de 25 metros aquecidos pelo sol; a fusão constante da face libera avalanches súbitas dos matacões empilhados na crista sem qualquer aviso sísmico, esmagando a comitiva com 3d8 de concussão.',
 
       pioneerMitigation: 'Jamais caminhar na base ou na borda superior de falésias de gelo exposto após o nascer do sol.',
 
@@ -57477,7 +57477,7 @@
 
         saveType: 'Força',
 
-        supraglacialDebrisRisk: 'Lagoas verde-turquesa suspensas em bacias sobre o gelo morto coberto de detritos; quando a água morna perfura o tampão de gelo no fundo, a lagoa inteira esvazia em minutos por um sifão subglacial rugidor, arrastando quem estiver vadeando as margens lodosas para as entranhas escuras da geleira com 3d6 de frio e concussão (DMG p. 110; PHB p. 182-183).',
+        supraglacialDebrisRisk: 'Lagoas verde-turquesa suspensas em bacias sobre o gelo morto coberto de detritos; quando a água morna perfura o tampão de gelo no fundo, a lagoa inteira esvazia em minutos por um sifão subglacial rugidor, arrastando quem estiver vadeando as margens lodosas para as entranhas escuras da geleira com 3d6 de frio e concussão.',
 
         pioneerMitigation: 'Contornar lagoas supraglaciais pelas cristas altas de detritos, longe das margens de lodo saturado.',
 
@@ -57499,7 +57499,7 @@
 
         saveType: 'Destreza',
 
-        supraglacialDebrisRisk: 'Nas tardes de sol, o filme de contato entre o cascalho escuro aquecido e o gelo impermeável logo abaixo derrete e vira um plano de sabão inclinado; ao pisar no talude, todo o tapete de pedras e lama escorrega de uma vez sobre o espelho de gelo oculto, lançando o aventureiro para dentro de fendas abertas com 2d8 de concussão (DMG p. 110; PHB p. 182).',
+        supraglacialDebrisRisk: 'Nas tardes de sol, o filme de contato entre o cascalho escuro aquecido e o gelo impermeável logo abaixo derrete e vira um plano de sabão inclinado; ao pisar no talude, todo o tapete de pedras e lama escorrega de uma vez sobre o espelho de gelo oculto, lançando o aventureiro para dentro de fendas abertas com 2d8 de concussão.',
 
         pioneerMitigation: 'Marchar apenas sobre lombadas onde o manto de blocos grandes exceda 1 metro de espessura seca.',
 
@@ -57521,7 +57521,7 @@
 
         saveType: 'Destreza',
 
-        supraglacialDebrisRisk: 'Vazios cavernosos derretidos por riachos internos sob uma ponte enganadora de lajes de gnaisse e cascalho cimentado apenas por geada matinal; o peso da marcha rompe o arco de detritos e derruba o batedor em um poço de paredes de gelo negro e água a zero grau, impondo 2d6 de frio e 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        supraglacialDebrisRisk: 'Vazios cavernosos derretidos por riachos internos sob uma ponte enganadora de lajes de gnaisse e cascalho cimentado apenas por geada matinal; o peso da marcha rompe o arco de detritos e derruba o batedor em um poço de paredes de gelo negro e água a zero grau, impondo 2d6 de frio e 1 nível de exaustão.',
 
         pioneerMitigation: 'Progredir encordado escutando o som de água corrente oca sob os pés antes de cruzar depressões.',
 
@@ -57661,7 +57661,7 @@
 
       saveType: 'Destreza',
 
-      drownedSnagRisk: 'Vales florestados inundados por barragens naturais de deslizamento onde milhares de troncos branqueados erguem-se da água escura como mastros fantasmagóricos; um metro abaixo da superfície espelhada, pontas de galhos de cerne endurecido pela água fria rasgam o fundo de canoas e prendem mochilas de nadadores a 6 metros de profundidade com 3d6 de dano perfurante e risco de afogamento (DMG p. 110; XGE p. 109).',
+      drownedSnagRisk: 'Vales florestados inundados por barragens naturais de deslizamento onde milhares de troncos branqueados erguem-se da água escura como mastros fantasmagóricos; um metro abaixo da superfície espelhada, pontas de galhos de cerne endurecido pela água fria rasgam o fundo de canoas e prendem mochilas de nadadores a 6 metros de profundidade com 3d6 de dano perfurante e risco de afogamento.',
 
       pioneerMitigation: 'Navegar em velocidade reduzida com proeiro sondando a água turva com vara longa.',
 
@@ -57685,7 +57685,7 @@
 
         saveType: 'Destreza',
 
-        drownedSnagRisk: 'As partes aéreas das árvores afogadas apodrecem exatamente na linha d’água pelo ataque de fungos, enquanto o fuste superior de duas toneladas permanece em pé por equilíbrio precário; o simples toque de uma vara de impulsão ou a marola da embarcação parte o tronco na linha d’água e desaba a copa seca sobre o barco com 3d8 de concussão (DMG p. 110; PHB p. 182).',
+        drownedSnagRisk: 'As partes aéreas das árvores afogadas apodrecem exatamente na linha d’água pelo ataque de fungos, enquanto o fuste superior de duas toneladas permanece em pé por equilíbrio precário; o simples toque de uma vara de impulsão ou a marola da embarcação parte o tronco na linha d’água e desaba a copa seca sobre o barco com 3d8 de concussão.',
 
         pioneerMitigation: 'Nunca empurrar nem amarrar embarcações em troncos ocos de casca solta ou inclinados.',
 
@@ -57707,7 +57707,7 @@
 
         saveType: 'Destreza',
 
-        drownedSnagRisk: 'Tapetes compactos de milhares de troncos flutuantes represados nas curvas do lago que parecem formar uma ponte sólida de madeira; ao caminhar sobre eles, um tronco cilíndrico gira sob a bota e abre uma fenda que engole a perna do aventureiro antes que as toras vizinhas batam novamente como uma prensa hidráulica, causando 2d8 de concussão (DMG p. 110; PHB p. 185).',
+        drownedSnagRisk: 'Tapetes compactos de milhares de troncos flutuantes represados nas curvas do lago que parecem formar uma ponte sólida de madeira; ao caminhar sobre eles, um tronco cilíndrico gira sob a bota e abre uma fenda que engole a perna do aventureiro antes que as toras vizinhas batam novamente como uma prensa hidráulica, causando 2d8 de concussão.',
 
         pioneerMitigation: 'Atravessar jangadas de troncos apenas pisando nas junções cruzadas ou estendendo pranchas de apoio.',
 
@@ -57729,7 +57729,7 @@
 
         saveType: 'Constituição',
 
-        drownedSnagRisk: 'No fundo da floresta submersa, toneladas de folhedo e cascas em decomposição consomem todo o oxigênio e geram bolsões de sulfeto de hidrogênio e metano presos sob tapetes de raízes; perturbar o fundo com âncora ou vara libera uma fervura fétida que envenena o ar rente à água e impõe a condição envenenado e 1 nível de exaustão (DMG p. 110; PHB p. 183).',
+        drownedSnagRisk: 'No fundo da floresta submersa, toneladas de folhedo e cascas em decomposição consomem todo o oxigênio e geram bolsões de sulfeto de hidrogênio e metano presos sob tapetes de raízes; perturbar o fundo com âncora ou vara libera uma fervura fétida que envenena o ar rente à água e impõe a condição envenenado e 1 nível de exaustão.',
 
         pioneerMitigation: 'Amarrar os barcos nos troncos firmes acima da superfície em vez de lançar âncoras no lodo.',
 
@@ -57869,7 +57869,7 @@
 
       saveType: 'Constituição',
 
-      yardangKalutRisk: 'Cristas paralelas de argilito e siltito lacustre esculpidas pelo vento unidirecional em forma de cascos de navio invertidos de 30 metros de altura, separadas por corredores retilíneos estreitos; quando o vento sopra, esses becos funcionam como bocais Venturi que duplicam a velocidade das rajadas carregadas de grãos de quartzo na altura dos joelhos e do rosto, causando 3d6 de dano cortante e cegueira por abrasão (DMG p. 110; XGE p. 109).',
+      yardangKalutRisk: 'Cristas paralelas de argilito e siltito lacustre esculpidas pelo vento unidirecional em forma de cascos de navio invertidos de 30 metros de altura, separadas por corredores retilíneos estreitos; quando o vento sopra, esses becos funcionam como bocais Venturi que duplicam a velocidade das rajadas carregadas de grãos de quartzo na altura dos joelhos e do rosto, causando 3d6 de dano cortante e cegueira por abrasão.',
 
       pioneerMitigation: 'Envolver rosto, olhos e perneiras em panos duplos e marchar apenas nas horas calmas da alvorada.',
 
@@ -57893,7 +57893,7 @@
 
         saveType: 'Destreza',
 
-        yardangKalutRisk: 'Como a abrasão de areia é máxima no primeiro metro acima do chão, a proa frontal de cada yardang é corroída na base até restar um pescoço fino sustentando uma cabeça pesada de argilito ressecado; abrigar-se diretamente sob esse beiral ou vibrar a parede faz a proa partir e despencar com 3d8 de concussão (DMG p. 110; PHB p. 182).',
+        yardangKalutRisk: 'Como a abrasão de areia é máxima no primeiro metro acima do chão, a proa frontal de cada yardang é corroída na base até restar um pescoço fino sustentando uma cabeça pesada de argilito ressecado; abrigar-se diretamente sob esse beiral ou vibrar a parede faz a proa partir e despencar com 3d8 de concussão.',
 
         pioneerMitigation: 'Jamais descansar sob as proas em balanço voltadas para o vento; usar sempre a extremidade traseira afilada.',
 
@@ -57915,7 +57915,7 @@
 
         saveType: 'Sabedoria',
 
-        yardangKalutRisk: 'Centenas de cristas idênticas alinhadas por dezenas de quilômetros sem pontos de referência transversais nem água; entrar no corredor errado aprisiona a comitiva entre paredões verticais intransponíveis de 20 metros sob temperaturas de solo de 65 graus, impondo perda de rumo e 1 nível de exaustão por desidratação (DMG p. 110-111; PHB p. 183).',
+        yardangKalutRisk: 'Centenas de cristas idênticas alinhadas por dezenas de quilômetros sem pontos de referência transversais nem água; entrar no corredor errado aprisiona a comitiva entre paredões verticais intransponíveis de 20 metros sob temperaturas de solo de 65 graus, impondo perda de rumo e 1 nível de exaustão por desidratação.',
 
         pioneerMitigation: 'Marcar cada bifurcação de corredor com setas de pedras escuras e manter rumo por bússola e estrelas.',
 
@@ -57937,7 +57937,7 @@
 
         saveType: 'Força',
 
-        yardangKalutRisk: 'As encostas laterais dos yardangs são polidas pelo vento como porcelana e incrustadas de halita quebradiça; tentar escalar de um corredor para a crista superior resulta na quebra dos apoios de crosta salina e queda de retorno ao fundo pedregoso com 2d8 de concussão (DMG p. 110; PHB p. 185).',
+        yardangKalutRisk: 'As encostas laterais dos yardangs são polidas pelo vento como porcelana e incrustadas de halita quebradiça; tentar escalar de um corredor para a crista superior resulta na quebra dos apoios de crosta salina e queda de retorno ao fundo pedregoso com 2d8 de concussão.',
 
         pioneerMitigation: 'Subir exclusivamente pela rampa suave da cauda de sotavento do yardang, nunca pelos flancos verticais.',
 
@@ -58077,7 +58077,7 @@
 
       saveType: 'Destreza',
 
-      palsaThermokarstRisk: 'Colinas ovais de turfa seca de 4 a 7 metros de altura erguidas no meio do pântano subártico pela expansão de uma lente maciça de gelo eterno em seu interior; no verão, rachaduras pretas na casca de musgo expõem o núcleo derretendo em lama gelada, fazendo o topo da palsa abater sob a comitiva e engolir aventureiros em uma caldeira de lama congelante com 3d6 de frio e restrição (DMG p. 109-110; XGE p. 109).',
+      palsaThermokarstRisk: 'Colinas ovais de turfa seca de 4 a 7 metros de altura erguidas no meio do pântano subártico pela expansão de uma lente maciça de gelo eterno em seu interior; no verão, rachaduras pretas na casca de musgo expõem o núcleo derretendo em lama gelada, fazendo o topo da palsa abater sob a comitiva e engolir aventureiros em uma caldeira de lama congelante com 3d6 de frio e restrição.',
 
       pioneerMitigation: 'Subir apenas em domos de palsa cobertos de líquen branco contínuo, evitando montículos com fendas escuras ou poças laterais.',
 
@@ -58101,7 +58101,7 @@
 
         saveType: 'Destreza',
 
-        palsaThermokarstRisk: 'Bosques de abetos e lariços cujos troncos pendem em ângulos bizarros de 45 graus porque o permafrost subjacente derreteu de forma desigual; o peso de uma mochila apoiada ou o vento derruba fileiras inteiras de árvores com raízes rasas em efeito dominó, prendendo exploradores na lama com 2d8 de concussão (DMG p. 110; PHB p. 182).',
+        palsaThermokarstRisk: 'Bosques de abetos e lariços cujos troncos pendem em ângulos bizarros de 45 graus porque o permafrost subjacente derreteu de forma desigual; o peso de uma mochila apoiada ou o vento derruba fileiras inteiras de árvores com raízes rasas em efeito dominó, prendendo exploradores na lama com 2d8 de concussão.',
 
         pioneerMitigation: 'Jamais amarrar cordas ou apoiar carga em árvores inclinadas sobre solo de degelo.',
 
@@ -58123,7 +58123,7 @@
 
         saveType: 'Constituição',
 
-        palsaThermokarstRisk: 'Lagos circulares escuros formados pelo abatimento do solo congelado onde bactérias anaeróbicas decompõem turfa milenar liberando colunas contínuas de gás dos pântanos (metano e gás sulfídrico); aproximar uma tocha acesa da margem provoca um clarão explosivo de 3d6 de fogo, enquanto o gás acumulado nas depressões causa tontura e asfixia (DMG p. 110; PHB p. 183).',
+        palsaThermokarstRisk: 'Lagos circulares escuros formados pelo abatimento do solo congelado onde bactérias anaeróbicas decompõem turfa milenar liberando colunas contínuas de gás dos pântanos (metano e gás sulfídrico); aproximar uma tocha acesa da margem provoca um clarão explosivo de 3d6 de fogo, enquanto o gás acumulado nas depressões causa tontura e asfixia.',
 
         pioneerMitigation: 'Apagar chamas abertas ao contornar lagoas borbulhantes ou crostas de gelo com bolhas brancas presas.',
 
@@ -58145,7 +58145,7 @@
 
         saveType: 'Força',
 
-        palsaThermokarstRisk: 'Ao redor de cada colina de palsa forma-se um anel de abatimento térmico profundo coberto por um tapete enganador de esfagno verde-claro flutuante; tentar subir ou descer do domo sem ponte de varas rompe a película vegetal e mergulha o batedor até o peito em água ácida a zero grau, impondo 1 nível de exaustão (DMG p. 109; PHB p. 185).',
+        palsaThermokarstRisk: 'Ao redor de cada colina de palsa forma-se um anel de abatimento térmico profundo coberto por um tapete enganador de esfagno verde-claro flutuante; tentar subir ou descer do domo sem ponte de varas rompe a película vegetal e mergulha o batedor até o peito em água ácida a zero grau, impondo 1 nível de exaustão.',
 
         pioneerMitigation: 'Estender troncos de lariço sobre o anel verde-claro antes de acessar o domo central da palsa.',
 
@@ -58285,7 +58285,7 @@
 
       saveType: 'Destreza',
 
-      petrifiedWoodRisk: 'Troncos colossais de coníferas pré-históricas inteiramente substituídos por quartzo, calcedônia e jaspe que atravessam ravinas erodidas como pontes suspensas; apesar da aparência de madeira maciça, a sílica cristalina não possui elasticidade nem fibras e já está segmentada por fraturas transversais invisíveis, partindo-se sob o peso da comitiva e despencando toneladas de blocos vítreos por 12 metros com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+      petrifiedWoodRisk: 'Troncos colossais de coníferas pré-históricas inteiramente substituídos por quartzo, calcedônia e jaspe que atravessam ravinas erodidas como pontes suspensas; apesar da aparência de madeira maciça, a sílica cristalina não possui elasticidade nem fibras e já está segmentada por fraturas transversais invisíveis, partindo-se sob o peso da comitiva e despencando toneladas de blocos vítreos por 12 metros com 3d8 de concussão.',
 
       pioneerMitigation: 'Jamais cruzar sobre troncos fósseis suspensos sem apoio central de rocha; descer e contornar pelo fundo seco da ravina.',
 
@@ -58309,7 +58309,7 @@
 
         saveType: 'Destreza',
 
-        petrifiedWoodRisk: 'Encostas juncadas de discos e cascas de madeira fóssil silicificada (xilópala) cuja fratura conchoidal produz bordas tão afiadas quanto obsidiana; escorregar nos taludes soltos projeta o explorador contra navalhas minerais multicoloridas que rasgam botas e perneiras com 2d8 de dano cortante (DMG p. 110; PHB p. 182).',
+        petrifiedWoodRisk: 'Encostas juncadas de discos e cascas de madeira fóssil silicificada (xilópala) cuja fratura conchoidal produz bordas tão afiadas quanto obsidiana; escorregar nos taludes soltos projeta o explorador contra navalhas minerais multicoloridas que rasgam botas e perneiras com 2d8 de dano cortante.',
 
         pioneerMitigation: 'Usar perneiras de couro grosso e escolher passagens de arenito firme fora dos cones de estilhaços.',
 
@@ -58331,7 +58331,7 @@
 
         saveType: 'Força',
 
-        petrifiedWoodRisk: 'Seções cilíndricas de troncos petrificados pesando três toneladas equilibradas precariamente no topo de pilares estreitos de argilito mole esculpidos pela chuva; apoiar a mão ou vibrar o terreno faz o pedestal ceder e dispara um rolo compressor de pedra morro abaixo sobre a fileira de marcha com 3d6 de concussão (DMG p. 110; PHB p. 185).',
+        petrifiedWoodRisk: 'Seções cilíndricas de troncos petrificados pesando três toneladas equilibradas precariamente no topo de pilares estreitos de argilito mole esculpidos pela chuva; apoiar a mão ou vibrar o terreno faz o pedestal ceder e dispara um rolo compressor de pedra morro abaixo sobre a fileira de marcha com 3d6 de concussão.',
 
         pioneerMitigation: 'Marchar pela crista das lombadas, nunca diretamente abaixo de toras fósseis equilibradas em encostas.',
 
@@ -58353,7 +58353,7 @@
 
         saveType: 'Força',
 
-        petrifiedWoodRisk: 'A matriz de cinza vulcânica onde a floresta foi soterrada decompôs-se em montmorilonita pura (bentonita) de textura crocante a seco, mas que ao primeiro chuvisco absorve cinco vezes seu volume em água e vira um sabão coloidal escorregadio e pegajoso nas ravinas, reduzindo o deslocamento a um quarto e impondo 1 nível de exaustão (DMG p. 110; PHB p. 182-183).',
+        petrifiedWoodRisk: 'A matriz de cinza vulcânica onde a floresta foi soterrada decompôs-se em montmorilonita pura (bentonita) de textura crocante a seco, mas que ao primeiro chuvisco absorve cinco vezes seu volume em água e vira um sabão coloidal escorregadio e pegajoso nas ravinas, reduzindo o deslocamento a um quarto e impondo 1 nível de exaustão.',
 
         pioneerMitigation: 'Subir imediatamente para os terraços de cascalho de quartzo ou lajes de arenito ao avistar nuvens de chuva.',
 
@@ -58493,7 +58493,7 @@
 
       saveType: 'Destreza',
 
-      torossPolynyaRisk: 'Muralhas caóticas de blocos de gelo marinho de 6 metros de altura empurrados uns sobre os outros pela colisão de placas de banquisa sob o vento polar; quando a maré muda, a crista inteira range com estrondos de canhão e desmorona ou fecha fendas como mandíbulas, esmagando exploradores entre lajes de duas toneladas com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+      torossPolynyaRisk: 'Muralhas caóticas de blocos de gelo marinho de 6 metros de altura empurrados uns sobre os outros pela colisão de placas de banquisa sob o vento polar; quando a maré muda, a crista inteira range com estrondos de canhão e desmorona ou fecha fendas como mandíbulas, esmagando exploradores entre lajes de duas toneladas com 3d8 de concussão.',
 
       pioneerMitigation: 'Cruzar apenas cristas antigas de contornos arredondados e azulados que não emitam estalos acústicos.',
 
@@ -58517,7 +58517,7 @@
 
         saveType: 'Sabedoria',
 
-        torossPolynyaRisk: 'Clarabóias de água aberta permanente no meio do mar congelado mantidas por correntes ascendentes e ventos catabáticos; o contraste entre o oceano a zero grau e o ar a trinta negativos gera densas colunas de fumaça de geada que cegam a comitiva e ocultam a borda da água negra a poucos passos, provocando imersão hipotérmica imediata com 3d6 de frio (DMG p. 110; PHB p. 183).',
+        torossPolynyaRisk: 'Clarabóias de água aberta permanente no meio do mar congelado mantidas por correntes ascendentes e ventos catabáticos; o contraste entre o oceano a zero grau e o ar a trinta negativos gera densas colunas de fumaça de geada que cegam a comitiva e ocultam a borda da água negra a poucos passos, provocando imersão hipotérmica imediata com 3d6 de frio.',
 
         pioneerMitigation: 'Avançar encordado contornando bancos de vapor escuro pelo lado de barlavento e sondando a borda.',
 
@@ -58539,7 +58539,7 @@
 
         saveType: 'Destreza',
 
-        torossPolynyaRisk: 'Canais recém-congelados cobertos por uma crosta fosca e escura de apenas 5 centímetros de espessura que ondula elasticamente sob o peso das botas sem estalar antes de ceder de súbito; o aventureiro afunda silenciosamente na água salgada super-resfriada sob placas entrelaçadas (finger rafting), sofrendo 2d8 de frio e restrição de nado (DMG p. 110; PHB p. 182).',
+        torossPolynyaRisk: 'Canais recém-congelados cobertos por uma crosta fosca e escura de apenas 5 centímetros de espessura que ondula elasticamente sob o peso das botas sem estalar antes de ceder de súbito; o aventureiro afunda silenciosamente na água salgada super-resfriada sob placas entrelaçadas (finger rafting), sofrendo 2d8 de frio e restrição de nado.',
 
         pioneerMitigation: 'Testar toda faixa de gelo cinza-escuro com golpe firme de bastão ferrado (tuk) antes de transferir o peso.',
 
@@ -58561,7 +58561,7 @@
 
         saveType: 'Força',
 
-        torossPolynyaRisk: 'Uma mudança de vento ou corrente marinha rasga a placa de gelo sob o acampamento ou coluna de marcha em minutos, abrindo um canal de água negra de 30 metros de largura que separa batedores, trenós e suprimentos em bandos à deriva no mar polar com 1 nível de exaustão por exposição (DMG p. 110; PHB p. 185).',
+        torossPolynyaRisk: 'Uma mudança de vento ou corrente marinha rasga a placa de gelo sob o acampamento ou coluna de marcha em minutos, abrindo um canal de água negra de 30 metros de largura que separa batedores, trenós e suprimentos em bandos à deriva no mar polar com 1 nível de exaustão por exposição.',
 
         pioneerMitigation: 'Manter a comitiva e os trenós na mesma placa mãe e lançar arpão com cabo ao primeiro sinal de fissura.',
 
@@ -58701,7 +58701,7 @@
 
       saveType: 'Força',
 
-      stridPotholeRisk: 'Trecho enganador onde um rio largo de montanha é subitamente comprimido em uma fenda de rocha matriz de apenas 1,5 metro de largura que parece fácil de saltar, mas cuja calha tem 20 metros de profundidade com cavernas laterais subescavadas e correntes descendentes letais; um escorregão na borda polida suga o aventureiro imediatamente para as galerias submersas com 3d8 de concussão e risco severo de afogamento (DMG p. 110; PHB p. 182-183).',
+      stridPotholeRisk: 'Trecho enganador onde um rio largo de montanha é subitamente comprimido em uma fenda de rocha matriz de apenas 1,5 metro de largura que parece fácil de saltar, mas cuja calha tem 20 metros de profundidade com cavernas laterais subescavadas e correntes descendentes letais; um escorregão na borda polida suga o aventureiro imediatamente para as galerias submersas com 3d8 de concussão e risco severo de afogamento.',
 
       pioneerMitigation: 'Jamais tentar saltar a garganta a seco sem corda de segurança ancorada em árvore ou pitão na margem oposta.',
 
@@ -58725,7 +58725,7 @@
 
         saveType: 'Força',
 
-        stridPotholeRisk: 'Cilindros verticais perfeitamente lisos de 4 metros de profundidade perfurados na laje do rio pelo giro perpétuo de balas de granito (grinders) movidas por vórtices de cheia; cair em uma marmita ativa submete o explorador a uma centrífuga de paredes polidas sem apoios enquanto os matacões do fundo rolam esmagando pernas com 3d6 de concussão (DMG p. 110; XGE p. 109).',
+        stridPotholeRisk: 'Cilindros verticais perfeitamente lisos de 4 metros de profundidade perfurados na laje do rio pelo giro perpétuo de balas de granito (grinders) movidas por vórtices de cheia; cair em uma marmita ativa submete o explorador a uma centrífuga de paredes polidas sem apoios enquanto os matacões do fundo rolam esmagando pernas com 3d6 de concussão.',
 
         pioneerMitigation: 'Evitar caminhar pela laje rasa quando a água espumar em espirais circulares sobre poços escuros.',
 
@@ -58747,7 +58747,7 @@
 
         saveType: 'Destreza',
 
-        stridPotholeRisk: 'Nos terraços rochosos laterais do leito de vazante abrem-se dezenas de marmitas secas cujo diâmetro no fundo é o dobro da boca estreita na superfície (perfil em garrafa ou sino), ocultas por arbustos ribeirinhos; pisar na boca de 50 centímetros engole o aventureiro em um poço de paredes côncavas impossível de escalar a mãos nuas, causando 2d8 de concussão (DMG p. 110; PHB p. 185).',
+        stridPotholeRisk: 'Nos terraços rochosos laterais do leito de vazante abrem-se dezenas de marmitas secas cujo diâmetro no fundo é o dobro da boca estreita na superfície (perfil em garrafa ou sino), ocultas por arbustos ribeirinhos; pisar na boca de 50 centímetros engole o aventureiro em um poço de paredes côncavas impossível de escalar a mãos nuas, causando 2d8 de concussão.',
 
         pioneerMitigation: 'Varrer a laje marginal com o bastão antes de pisar entre moitas de salgueiro ou pilhas de madeira flutuante.',
 
@@ -58769,7 +58769,7 @@
 
         saveType: 'Constituição',
 
-        stridPotholeRisk: 'No pé dos degraus da garganta rochosa, a água batida contém até 60% de bolhas de ar em suspensão formando uma espuma branca fervente onde a densidade do líquido cai pela metade; nem mesmo nadadores experientes ou barris conseguem boiar nessa água aerada, afundando como chumbo até o leito turbulento e sofrendo 1 nível de exaustão e asfixia por espuma (DMG p. 110; PHB p. 183).',
+        stridPotholeRisk: 'No pé dos degraus da garganta rochosa, a água batida contém até 60% de bolhas de ar em suspensão formando uma espuma branca fervente onde a densidade do líquido cai pela metade; nem mesmo nadadores experientes ou barris conseguem boiar nessa água aerada, afundando como chumbo até o leito turbulento e sofrendo 1 nível de exaustão e asfixia por espuma.',
 
         pioneerMitigation: 'Portagem obrigatória das embarcações e carga pelas lajes altas contornando toda a seção de espuma branca.',
 
@@ -58909,7 +58909,7 @@
 
       saveType: 'Destreza',
 
-      solfataraRisk: 'Ao redor das fumarolas de 130 graus, vapores sulfurosos precipitam abóbadas amarelo-limão de cristais aciculares de enxofre puro que encobrem poças de enxofre derretido viscoso cor de sangue escuro; pisar na crosta oca faz o chão quebrar mergulhando a bota na resina de enxofre em ebulição que adere ao couro e queima com 3d8 de fogo mais 1d8 de veneno (DMG p. 110; PHB p. 182-183).',
+      solfataraRisk: 'Ao redor das fumarolas de 130 graus, vapores sulfurosos precipitam abóbadas amarelo-limão de cristais aciculares de enxofre puro que encobrem poças de enxofre derretido viscoso cor de sangue escuro; pisar na crosta oca faz o chão quebrar mergulhando a bota na resina de enxofre em ebulição que adere ao couro e queima com 3d8 de fogo mais 1d8 de veneno.',
 
       pioneerMitigation: 'Evitar totalmente o solo amarelo brilhante ou alaranjado, pisando apenas nos blocos cinzentos de andesito alterado.',
 
@@ -58933,7 +58933,7 @@
 
         saveType: 'Percepção',
 
-        solfataraRisk: 'Rios de enxofre fundido que escorrem das chaminés queimam ao ar livre com chamas azuis etéreas que são completamente invisíveis sob a luz clara do dia, denunciadas apenas pela miragem trêmula e pelo cheiro sufocante; caminhar sobre um filete de fogo invisível incendeia capas e calças instantaneamente com 2d8 de fogo mais 2d6 de ácido sulfuroso (DMG p. 110; XGE p. 109).',
+        solfataraRisk: 'Rios de enxofre fundido que escorrem das chaminés queimam ao ar livre com chamas azuis etéreas que são completamente invisíveis sob a luz clara do dia, denunciadas apenas pela miragem trêmula e pelo cheiro sufocante; caminhar sobre um filete de fogo invisível incendeia capas e calças instantaneamente com 2d8 de fogo mais 2d6 de ácido sulfuroso.',
 
         pioneerMitigation: 'Estender uma tira seca de pano ou palha na ponta da lança à frente; se carbonizar no ar vazio, contornar a área.',
 
@@ -58955,7 +58955,7 @@
 
         saveType: 'Destreza',
 
-        solfataraRisk: 'O ácido sulfúrico dissolve a rocha vulcânica transformando-a em poços borbulhantes de lama branca de caulinita e alunita a 95 graus; bolhas gigantes de gás estouram sem aviso lançando pelotes pesados de barro ácido escaldante em um raio de 6 metros com 2d6 de fogo mais 2d6 de ácido (DMG p. 110; PHB p. 185).',
+        solfataraRisk: 'O ácido sulfúrico dissolve a rocha vulcânica transformando-a em poços borbulhantes de lama branca de caulinita e alunita a 95 graus; bolhas gigantes de gás estouram sem aviso lançando pelotes pesados de barro ácido escaldante em um raio de 6 metros com 2d6 de fogo mais 2d6 de ácido.',
 
         pioneerMitigation: 'Manter os escudos erguidos em formação tartaruga ao passar por gargantas estreitas entre caldeirões de lama.',
 
@@ -58977,7 +58977,7 @@
 
         saveType: 'Constituição',
 
-        solfataraRisk: 'Em baixas concentrações o gás das solfataras cheira a ovo podre, mas em bolsões densos sem vento ele paralisa instantaneamente o nervo olfativo fazendo o aventureiro acreditar que o ar ficou limpo exatamente um segundo antes do colapso respiratório, impondo 3d6 de veneno e inconsciência (DMG p. 110; PHB p. 183).',
+        solfataraRisk: 'Em baixas concentrações o gás das solfataras cheira a ovo podre, mas em bolsões densos sem vento ele paralisa instantaneamente o nervo olfativo fazendo o aventureiro acreditar que o ar ficou limpo exatamente um segundo antes do colapso respiratório, impondo 3d6 de veneno e inconsciência.',
 
         pioneerMitigation: 'Se o cheiro forte de enxofre desaparecer subitamente ao descer uma ravina, prender a respiração e recuar correndo.',
 
@@ -59117,7 +59117,7 @@
 
       saveType: 'Destreza',
 
-      chalkCliffRisk: 'Falésias verticais de 90 metros de calcário coccolítico branco puro (giz) altamente poroso que absorve água da chuva e se expande com a geada, abrindo fendas de tração invisíveis sob a grama da borda; pisar no gramado costeiro faz uma fatia inteira do penhasco branco desprender-se rumo ao mar revolto, ou sepultar quem caminha na praia estreita abaixo com 4d8 de concussão (DMG p. 110; PHB p. 182-183).',
+      chalkCliffRisk: 'Falésias verticais de 90 metros de calcário coccolítico branco puro (giz) altamente poroso que absorve água da chuva e se expande com a geada, abrindo fendas de tração invisíveis sob a grama da borda; pisar no gramado costeiro faz uma fatia inteira do penhasco branco desprender-se rumo ao mar revolto, ou sepultar quem caminha na praia estreita abaixo com 4d8 de concussão.',
 
       pioneerMitigation: 'Manter distância mínima de cinco metros da borda da falésia e jamais marchar sob manchas úmidas amareladas na parede branca.',
 
@@ -59141,7 +59141,7 @@
 
         saveType: 'Destreza',
 
-        chalkCliffRisk: 'A erosão do giz macio libera milhões de nódulos duros de sílex negro (pederneira) que o mar quebra ao meio na plataforma de maré baixa, expondo bordas conchoidais mais afiadas que vidro combinadas a uma pasta branca de giz molhado escorregadia como graxa; escorregar corta botas e joelhos profundamente causando 2d6 cortante mais 1d8 de concussão (DMG p. 110; XGE p. 109).',
+        chalkCliffRisk: 'A erosão do giz macio libera milhões de nódulos duros de sílex negro (pederneira) que o mar quebra ao meio na plataforma de maré baixa, expondo bordas conchoidais mais afiadas que vidro combinadas a uma pasta branca de giz molhado escorregadia como graxa; escorregar corta botas e joelhos profundamente causando 2d6 cortante mais 1d8 de concussão.',
 
         pioneerMitigation: 'Caminhar sobre os cordões de seixos já rolados e arredondados na parte alta da praia evitando o giz liso recém-molhado.',
 
@@ -59163,7 +59163,7 @@
 
         saveType: 'Destreza',
 
-        chalkCliffRisk: 'No planalto gramado acima das falésias, a água ácida escava poços cilíndricos verticais de 1 metro de largura e 15 metros de profundidade no giz branco, preenchidos frouxamente por argila vermelha pegajosa e pedras de sílex (clay-with-flints); após chuvas fortes o tampão de argila cede como um pistão engolindo o aventureiro no poço estreito com 3d6 de concussão e soterramento (DMG p. 110; PHB p. 185).',
+        chalkCliffRisk: 'No planalto gramado acima das falésias, a água ácida escava poços cilíndricos verticais de 1 metro de largura e 15 metros de profundidade no giz branco, preenchidos frouxamente por argila vermelha pegajosa e pedras de sílex (clay-with-flints); após chuvas fortes o tampão de argila cede como um pistão engolindo o aventureiro no poço estreito com 3d6 de concussão e soterramento.',
 
         pioneerMitigation: 'Desviar de depressões circulares onde a grama é mais verde-escura ou onde afloram seixos avermelhados no solo branco.',
 
@@ -59185,7 +59185,7 @@
 
         saveType: 'Sabedoria',
 
-        chalkCliffRisk: 'Quando o nevoeiro marinho branco-leitoso envolve a falésia de giz igualmente branca, o horizonte, o céu e o abismo de 90 metros fundem-se em um vazio óptico sem contraste nem sombra (whiteout costeiro); um passo desorientado leva diretamente ao precipício vertical (DMG p. 110; PHB p. 183).',
+        chalkCliffRisk: 'Quando o nevoeiro marinho branco-leitoso envolve a falésia de giz igualmente branca, o horizonte, o céu e o abismo de 90 metros fundem-se em um vazio óptico sem contraste nem sombra (whiteout costeiro); um passo desorientado leva diretamente ao precipício vertical.',
 
         pioneerMitigation: 'Arremessar pedras escuras de sílex à frente para marcar o chão real e progredir encordado longe da costa.',
 
@@ -59325,7 +59325,7 @@
 
       saveType: 'Destreza',
 
-      parabolicDuneRisk: 'Quando o tapete vegetal que fixa uma duna costeira ou continental se rompe, o vento escava uma profunda cratera em forma de colher (blowout) bordejada por paredões verticais de areia suspensa por raízes mortas em balanço; caminhar próximo à borda subescavada faz a cornija inteira de areia ruir soterrando a comitiva no fundo do funil com 3d6 de concussão e asfixia (DMG p. 110; PHB p. 182-183).',
+      parabolicDuneRisk: 'Quando o tapete vegetal que fixa uma duna costeira ou continental se rompe, o vento escava uma profunda cratera em forma de colher (blowout) bordejada por paredões verticais de areia suspensa por raízes mortas em balanço; caminhar próximo à borda subescavada faz a cornija inteira de areia ruir soterrando a comitiva no fundo do funil com 3d6 de concussão e asfixia.',
 
       pioneerMitigation: 'Contornar as bacias de deflação pelos braços laterais baixos consolidados por capim-das-dunas (ammophila).',
 
@@ -59349,7 +59349,7 @@
 
         saveType: 'Destreza',
 
-        parabolicDuneRisk: 'À medida que o nariz da duna parabólica avança, sua retaguarda exuma os esqueletos de antigas florestas que foram soterradas há séculos e polidas pelo vento com areia até se tornarem lanças verticais de cerne petrificado por resina; escorregar pela face de avalancha lança o aventureiro sobre o paliçado oculto de tocos pontiagudos causando 3d8 perfurante (DMG p. 110; XGE p. 109).',
+        parabolicDuneRisk: 'À medida que o nariz da duna parabólica avança, sua retaguarda exuma os esqueletos de antigas florestas que foram soterradas há séculos e polidas pelo vento com areia até se tornarem lanças verticais de cerne petrificado por resina; escorregar pela face de avalancha lança o aventureiro sobre o paliçado oculto de tocos pontiagudos causando 3d8 perfurante.',
 
         pioneerMitigation: 'Sondar a base da encosta de areia fofa onde pontas escuras de madeira morta afloram antes de descer.',
 
@@ -59371,7 +59371,7 @@
 
         saveType: 'Força',
 
-        parabolicDuneRisk: 'O fundo da bacia de deflação é escavado pelo vento exatamente até atingir o lençol freático ascendente; a pressão da água que brota de baixo suspende os grãos de quartzo criando poços circulares de areia movediça cobertos por uma película seca enganosa que engole o explorador até o peito e impõe 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        parabolicDuneRisk: 'O fundo da bacia de deflação é escavado pelo vento exatamente até atingir o lençol freático ascendente; a pressão da água que brota de baixo suspende os grãos de quartzo criando poços circulares de areia movediça cobertos por uma película seca enganosa que engole o explorador até o peito e impõe 1 nível de exaustão.',
 
         pioneerMitigation: 'Seguir os rastros de animais leves apenas onde crescem juncos e salgueiros rasteiros enraizados.',
 
@@ -59393,7 +59393,7 @@
 
         saveType: 'Constituição',
 
-        parabolicDuneRisk: 'Os dois braços alongados da duna em U afunilam o vento marítimo ou desértico duplicando sua velocidade no corredor central enquanto as folhas rígidas de sílica do capim-marram chicoteiam a pele e os olhos; marchar contra o funil de vento causa lacerações finas e cegueira por areia com 2d6 cortante (DMG p. 110; PHB p. 183).',
+        parabolicDuneRisk: 'Os dois braços alongados da duna em U afunilam o vento marítimo ou desértico duplicando sua velocidade no corredor central enquanto as folhas rígidas de sílica do capim-marram chicoteiam a pele e os olhos; marchar contra o funil de vento causa lacerações finas e cegueira por areia com 2d6 cortante.',
 
         pioneerMitigation: 'Subir para a face externa de sotavento de um dos braços da duna fora do corredor de efeito Venturi.',
 
@@ -59533,7 +59533,7 @@
 
       saveType: 'Destreza',
 
-      pillowLavaRisk: 'Paredões de antigas lavas submarinas soerguidas tectonicamente formados por lóbulos bulbosos de basalto (pillow lavas) cimentados por uma matriz amarelada friável de vidro vulcânico granulado por choque térmico (hialoclastito e palagonita); quando o explorador pisa ou crava apoio entre duas almofadas, a matriz vítrea esfarela instantaneamente soltando o lóbulo de basalto de meia tonelada com 3d8 de concussão mais 1d6 cortante (DMG p. 110; PHB p. 182-183).',
+      pillowLavaRisk: 'Paredões de antigas lavas submarinas soerguidas tectonicamente formados por lóbulos bulbosos de basalto (pillow lavas) cimentados por uma matriz amarelada friável de vidro vulcânico granulado por choque térmico (hialoclastito e palagonita); quando o explorador pisa ou crava apoio entre duas almofadas, a matriz vítrea esfarela instantaneamente soltando o lóbulo de basalto de meia tonelada com 3d8 de concussão mais 1d6 cortante.',
 
       pioneerMitigation: 'Apoiar o peso apenas no pescoço peduncular das almofadas soldadas entre si e nunca na brecha amarela intersticial.',
 
@@ -59557,7 +59557,7 @@
 
         saveType: 'Destreza',
 
-        pillowLavaRisk: 'Cada travesseiro de basalto possui uma casca externa vítrea negra de 3 centímetros e juntas de contração radiais como fatias de torta que convergem para o centro; puxar para fora uma saliência na barriga da almofada arranca um bloco triangular inteiro em forma de cunha contra o peito do escalador causando 2d8 de concussão (DMG p. 110; XGE p. 109).',
+        pillowLavaRisk: 'Cada travesseiro de basalto possui uma casca externa vítrea negra de 3 centímetros e juntas de contração radiais como fatias de torta que convergem para o centro; puxar para fora uma saliência na barriga da almofada arranca um bloco triangular inteiro em forma de cunha contra o peito do escalador causando 2d8 de concussão.',
 
         pioneerMitigation: 'Aplicar força apenas verticalmente para baixo sobre o topo convexo das almofadas sem tracionar para fora.',
 
@@ -59579,7 +59579,7 @@
 
         saveType: 'Destreza',
 
-        pillowLavaRisk: 'Muitos lóbulos de lava esvaziaram seu magma interno antes de solidificar completamente, deixando bolhas de basalto ocas com múltiplas prateleiras horizontais finas de vidro basáltico no interior; saltar sobre um domo bulboso faz a abóbada de 4 centímetros quebrar sob as botas cravando as pernas nas divisórias internas afiadas com 2d6 perfurante mais 2d6 de concussão (DMG p. 110; PHB p. 185).',
+        pillowLavaRisk: 'Muitos lóbulos de lava esvaziaram seu magma interno antes de solidificar completamente, deixando bolhas de basalto ocas com múltiplas prateleiras horizontais finas de vidro basáltico no interior; saltar sobre um domo bulboso faz a abóbada de 4 centímetros quebrar sob as botas cravando as pernas nas divisórias internas afiadas com 2d6 perfurante mais 2d6 de concussão.',
 
         pioneerMitigation: 'Bater na carapaça de cada travesseiro de basalto com o bastão ferrado para evitar aqueles que soam como tambor oco.',
 
@@ -59601,7 +59601,7 @@
 
         saveType: 'Força',
 
-        pillowLavaRisk: 'O complexo de lavas em almofada é cortado por corredores de falha revestidos por serpentinita verde-escura e talco hidrotermal polidos pelo movimento tectônico (slickensides); ao menor chuvisco, a rampa mineral fica mais escorregadia que gelo engraxado, disparando a comitiva rumo ao fundo do desfiladeiro com 3d6 de concussão e 1 nível de exaustão (DMG p. 110; PHB p. 183).',
+        pillowLavaRisk: 'O complexo de lavas em almofada é cortado por corredores de falha revestidos por serpentinita verde-escura e talco hidrotermal polidos pelo movimento tectônico (slickensides); ao menor chuvisco, a rampa mineral fica mais escorregadia que gelo engraxado, disparando a comitiva rumo ao fundo do desfiladeiro com 3d6 de concussão e 1 nível de exaustão.',
 
         pioneerMitigation: 'Evitar as faixas de rocha verde cerosa e brilhante, mantendo-se nas paredes rugosas de gabro ou diques de diabásio.',
 
@@ -59741,7 +59741,7 @@
 
       saveType: 'Destreza',
 
-      peatSwampRisk: 'Nas florestas de turfeira ombrotrófica, as árvores gigantes apoiam-se em um falso chão suspenso de raízes entrelaçadas e serrapilheira a 2 metros acima de um bolsão de turfa semilíquida e troncos submersos; pisar entre dois contrafortes radiculares podres rompe o teto fibroso, mergulhando o aventureiro na polpa escura sem oxigênio com 2d6 de concussão e risco de sufocamento (DMG p. 110; PHB p. 182-183).',
+      peatSwampRisk: 'Nas florestas de turfeira ombrotrófica, as árvores gigantes apoiam-se em um falso chão suspenso de raízes entrelaçadas e serrapilheira a 2 metros acima de um bolsão de turfa semilíquida e troncos submersos; pisar entre dois contrafortes radiculares podres rompe o teto fibroso, mergulhando o aventureiro na polpa escura sem oxigênio com 2d6 de concussão e risco de sufocamento.',
 
       pioneerMitigation: 'Caminhar estritamente sobre as cristas grossas das raízes em tábua (buttress roots) sondando os vãos com vara longa.',
 
@@ -59765,7 +59765,7 @@
 
         saveType: 'Constituição',
 
-        peatSwampRisk: 'Rios lentos cor de chá preto concentrado saturados de ácidos húmicos e fúlvicos que impedem o apodrecimento da madeira mas maceram a pele humana e atraem nuvens de sanguessugas arborícolas e aquáticas; vadear com escoriações abertas provoca infecção fúngica e perda sanguínea contínua impondo 2d6 necrótico e 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        peatSwampRisk: 'Rios lentos cor de chá preto concentrado saturados de ácidos húmicos e fúlvicos que impedem o apodrecimento da madeira mas maceram a pele humana e atraem nuvens de sanguessugas arborícolas e aquáticas; vadear com escoriações abertas provoca infecção fúngica e perda sanguínea contínua impondo 2d6 necrótico e 1 nível de exaustão.',
 
         pioneerMitigation: 'Vedação das bocas das calças nas botas com cera de abelha e óleo de cânfora ou tabaco.',
 
@@ -59787,7 +59787,7 @@
 
         saveType: 'Destreza',
 
-        peatSwampRisk: 'Como o lençol freático ácido impede raízes profundas, gigantes florestais de 45 metros ancoram-se apenas na camada superficial fofa de turfa; uma rajada de vento de tempestade ou o corte de cipós tensores faz um colosso tombar arrancando todo o tapete radicular em um raio de 10 metros e puxando três árvores vizinhas sobre a comitiva com 4d8 de concussão (DMG p. 110; XGE p. 109).',
+        peatSwampRisk: 'Como o lençol freático ácido impede raízes profundas, gigantes florestais de 45 metros ancoram-se apenas na camada superficial fofa de turfa; uma rajada de vento de tempestade ou o corte de cipós tensores faz um colosso tombar arrancando todo o tapete radicular em um raio de 10 metros e puxando três árvores vizinhas sobre a comitiva com 4d8 de concussão.',
 
         pioneerMitigation: 'Observar a inclinação da copa das árvores emergentes e jamais cortar lianas grossas que funcionam como estais.',
 
@@ -59809,7 +59809,7 @@
 
         saveType: 'Constituição',
 
-        peatSwampRisk: 'Na coroa ressecada do domo de turfa durante a estação seca, raios antigos iniciam fogos subterrâneos sem chama nem fumaça visível que queimam por meses sob a crosta intacta; pisar sobre a cavidade consumida faz o explorador afundar até a cintura em brasas de turfa a 400 graus sofrendo 3d8 de fogo (DMG p. 110; PHB p. 183).',
+        peatSwampRisk: 'Na coroa ressecada do domo de turfa durante a estação seca, raios antigos iniciam fogos subterrâneos sem chama nem fumaça visível que queimam por meses sob a crosta intacta; pisar sobre a cavidade consumida faz o explorador afundar até a cintura em brasas de turfa a 400 graus sofrendo 3d8 de fogo.',
 
         pioneerMitigation: 'Detectar o cheiro adocicado de alcatrão de turfa tostada e observar folhas amareladas murchas sem razão aparente.',
 
@@ -59949,7 +59949,7 @@
 
       saveType: 'Destreza',
 
-      astroblemeRisk: 'As muralhas internas do anel da cratera são formadas por brechas polimíticas fundidas pelo impacto cósmico (suevita) repletas de bombas de vidro negro lechatelierita e quartzo chocado quebradiço; o peso da comitiva desencadeia um desmoronamento de lascas vítreas afiadas como bisturis cirúrgicos causando 2d6 cortante mais 2d6 de concussão (DMG p. 110; PHB p. 182-183).',
+      astroblemeRisk: 'As muralhas internas do anel da cratera são formadas por brechas polimíticas fundidas pelo impacto cósmico (suevita) repletas de bombas de vidro negro lechatelierita e quartzo chocado quebradiço; o peso da comitiva desencadeia um desmoronamento de lascas vítreas afiadas como bisturis cirúrgicos causando 2d6 cortante mais 2d6 de concussão.',
 
       pioneerMitigation: 'Descer à bacia da cratera pelas ravinas radiais onde a suevita solta já foi lavada até a rocha cristalina.',
 
@@ -59973,7 +59973,7 @@
 
         saveType: 'Destreza',
 
-        astroblemeRisk: 'No centro da cratera complexa ergue-se o anel de rebote elástico composto por rochas inteiramente atravessadas por fraturas cônicas estriadas (shatter cones) produzidas pela onda de choque de gigapascals; apoiar-se ou cravar pítons nos cones imbricados faz o bloco inteiro descolar ao longo das superfícies cônicas lisas com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+        astroblemeRisk: 'No centro da cratera complexa ergue-se o anel de rebote elástico composto por rochas inteiramente atravessadas por fraturas cônicas estriadas (shatter cones) produzidas pela onda de choque de gigapascals; apoiar-se ou cravar pítons nos cones imbricados faz o bloco inteiro descolar ao longo das superfícies cônicas lisas com 3d8 de concussão.',
 
         pioneerMitigation: 'Nunca cravar grampos na direção do ápice dos cones de estilhaçamento; contornar a base do maciço central.',
 
@@ -59995,7 +59995,7 @@
 
         saveType: 'Sabedoria',
 
-        astroblemeRisk: 'Massas soterradas do meteorito metálico de camacita e taenita junto à remagnetização de choque do embasamento fazem a agulha da bússola girar loucamente ou apontar para o chão da cratera; sob nevoeiro ou tempestade de poeira na bacia circular simétrica, o grupo caminha em círculos acumulando 1 nível de exaustão (DMG p. 110; PHB p. 183).',
+        astroblemeRisk: 'Massas soterradas do meteorito metálico de camacita e taenita junto à remagnetização de choque do embasamento fazem a agulha da bússola girar loucamente ou apontar para o chão da cratera; sob nevoeiro ou tempestade de poeira na bacia circular simétrica, o grupo caminha em círculos acumulando 1 nível de exaustão.',
 
         pioneerMitigation: 'Guardar a bússola magnética e navegar estritamente por azimute solar ou alinhamento com o pico central.',
 
@@ -60017,7 +60017,7 @@
 
         saveType: 'Constituição',
 
-        astroblemeRisk: 'Na depressão circular entre a muralha externa e o pico central acumulam-se águas paradas esverdeadas saturadas por sais de níquel, cobalto e irídio lixiviados da brecha de impacto; beber ou cozinhar com essa água cristalina sem cheiro provoca cólicas severas e vertigem com 3d6 de veneno (DMG p. 110; PHB p. 185).',
+        astroblemeRisk: 'Na depressão circular entre a muralha externa e o pico central acumulam-se águas paradas esverdeadas saturadas por sais de níquel, cobalto e irídio lixiviados da brecha de impacto; beber ou cozinhar com essa água cristalina sem cheiro provoca cólicas severas e vertigem com 3d6 de veneno.',
 
         pioneerMitigation: 'Proibição absoluta de consumir água estagnada do fosso anelar; usar apenas água pluvial das bordas altas.',
 
@@ -60157,7 +60157,7 @@
 
       saveType: 'Destreza',
 
-      frostPolygonRisk: 'A tundra ártica é dividida em redes geométricas de polígonos de 20 metros delimitados por valas sobre enormes cunhas de gelo subterrâneas que se abrem com estalos sísmicos no frio intenso; quando o topo da cunha derrete parcialmente ou racha sob uma ponte de neve soprada pelo vento, o aventureiro cai na fenda estreita de paredes de gelo azul com 2d8 de concussão mais 2d6 de frio (DMG p. 110; PHB p. 182-183).',
+      frostPolygonRisk: 'A tundra ártica é dividida em redes geométricas de polígonos de 20 metros delimitados por valas sobre enormes cunhas de gelo subterrâneas que se abrem com estalos sísmicos no frio intenso; quando o topo da cunha derrete parcialmente ou racha sob uma ponte de neve soprada pelo vento, o aventureiro cai na fenda estreita de paredes de gelo azul com 2d8 de concussão mais 2d6 de frio.',
 
       pioneerMitigation: 'Cruzar as valas poligonais apenas perpendicularmente e sondar a depressão marginal antes de transferir o peso.',
 
@@ -60181,7 +60181,7 @@
 
         saveType: 'Força',
 
-        frostPolygonRisk: 'No centro dos círculos de pedras selecionadas pelo gelo afloram medalhões circulares de argila siltosa nua saturada sob pressão hidrostática pelo congelamento lateral; pisar no medalhão faz o barro se liquefazer instantaneamente como cimento fresco sob vibração, engolindo as pernas até os joelhos na pasta congelante e impondo 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        frostPolygonRisk: 'No centro dos círculos de pedras selecionadas pelo gelo afloram medalhões circulares de argila siltosa nua saturada sob pressão hidrostática pelo congelamento lateral; pisar no medalhão faz o barro se liquefazer instantaneamente como cimento fresco sob vibração, engolindo as pernas até os joelhos na pasta congelante e impondo 1 nível de exaustão.',
 
         pioneerMitigation: 'Saltar exclusivamente de anel de pedra em anel de pedra na borda dos círculos sem jamais pisar no centro argiloso nu.',
 
@@ -60203,7 +60203,7 @@
 
         saveType: 'Constituição',
 
-        frostPolygonRisk: 'Polígonos com bordas soerguidas funcionam como tanques rasos impermeáveis cheios de água de degelo sobre o permafrost a zero grau recobertos por uma película enganosa de gelo matinal; romper a crosta mergulha as botas e perneiras na água gelada sob vento polar causando congelamento rápido das extremidades com 2d8 de frio (DMG p. 110; XGE p. 109).',
+        frostPolygonRisk: 'Polígonos com bordas soerguidas funcionam como tanques rasos impermeáveis cheios de água de degelo sobre o permafrost a zero grau recobertos por uma película enganosa de gelo matinal; romper a crosta mergulha as botas e perneiras na água gelada sob vento polar causando congelamento rápido das extremidades com 2d8 de frio.',
 
         pioneerMitigation: 'Caminhar estritamente sobre as muretas elevadas de turfa (ramparts) que separam as bacias poligonais.',
 
@@ -60225,7 +60225,7 @@
 
         saveType: 'Sabedoria',
 
-        frostPolygonRisk: 'Quando a temperatura despenca abaixo de -30 graus, o solo congelado contrai violentamente abrindo fendas milimétricas de centenas de metros com estrondos ensurdecedores de tiro de canhão e tremores sob as botas; o choque acústico assusta montarias em disparada pelo campo de blocos e interrompe manobras (DMG p. 110; PHB p. 183).',
+        frostPolygonRisk: 'Quando a temperatura despenca abaixo de -30 graus, o solo congelado contrai violentamente abrindo fendas milimétricas de centenas de metros com estrondos ensurdecedores de tiro de canhão e tremores sob as botas; o choque acústico assusta montarias em disparada pelo campo de blocos e interrompe manobras.',
 
         pioneerMitigation: 'Amarrar firmemente as montarias em estacas duplas e manter a calma reconhecendo o fenômeno criossísmico.',
 
@@ -60365,7 +60365,7 @@
 
       saveType: 'Destreza',
 
-      gibberRisk: 'Planícies infinitas recobertas por um pavimento compacto de seixos de calcedônia e quartzo polidos pelo vento e revestidos por verniz do deserto negro-azulado rico em ferro e manganês, lisos como bilhas de aço; marchar sobre o tapete de pedras rolantes provoca torções articulares violentas e quedas sobre clastos pontiagudos com 2d8 de concussão (DMG p. 110; PHB p. 182-183).',
+      gibberRisk: 'Planícies infinitas recobertas por um pavimento compacto de seixos de calcedônia e quartzo polidos pelo vento e revestidos por verniz do deserto negro-azulado rico em ferro e manganês, lisos como bilhas de aço; marchar sobre o tapete de pedras rolantes provoca torções articulares violentas e quedas sobre clastos pontiagudos com 2d8 de concussão.',
 
       pioneerMitigation: 'Passos curtos de sola inteira sem impulsionar na ponta da bota e uso de bastão com ponteira de borracha ou couro cru.',
 
@@ -60389,7 +60389,7 @@
 
         saveType: 'Destreza',
 
-        gibberRisk: 'Blocos de basalto e sílex esculpidos por milênios de jateamento de areia em pirâmides de três faces côncavas cujas arestas superiores (dreikanter) são afiadas como machados de pedra lascada; durante rajadas de vento rasante que varrem o reg, ser derrubado contra os ventifactos rasga armaduras de couro e tendões com 3d6 cortante (DMG p. 110; XGE p. 109).',
+        gibberRisk: 'Blocos de basalto e sílex esculpidos por milênios de jateamento de areia em pirâmides de três faces côncavas cujas arestas superiores (dreikanter) são afiadas como machados de pedra lascada; durante rajadas de vento rasante que varrem o reg, ser derrubado contra os ventifactos rasga armaduras de couro e tendões com 3d6 cortante.',
 
         pioneerMitigation: 'Deitar-se de bruços atrás de um bloco grande com a mochila voltada para o vento ao perceber a frente de poeira.',
 
@@ -60411,7 +60411,7 @@
 
         saveType: 'Constituição',
 
-        gibberRisk: 'A camada de seixos do pavimento desértico tem apenas uma pedra de espessura e repousa sobre um colchão de 40 centímetros de silte eólico finíssimo e poroso como espuma seca (horizonte vesicular Av); quando as patas das montarias ou botas pesadas rompem o mosaico protetor, os pés afundam no talco sufocante que sobe em nuvens densas impondo 1 nível de exaustão e tosse seca (DMG p. 110; PHB p. 185).',
+        gibberRisk: 'A camada de seixos do pavimento desértico tem apenas uma pedra de espessura e repousa sobre um colchão de 40 centímetros de silte eólico finíssimo e poroso como espuma seca (horizonte vesicular Av); quando as patas das montarias ou botas pesadas rompem o mosaico protetor, os pés afundam no talco sufocante que sobe em nuvens densas impondo 1 nível de exaustão e tosse seca.',
 
         pioneerMitigation: 'Manter a comitiva em fila única pisando apenas onde o mosaico de pedras grandes estiver intacto.',
 
@@ -60433,7 +60433,7 @@
 
         saveType: 'Constituição',
 
-        gibberRisk: 'O revestimento negro espelhado de óxidos de manganês e ferro sobre milhões de pedras absorve toda a radiação solar e aquece a superfície da planície a 75 graus ao meio-dia, derretendo a cola de calçados e criando uma camada de ar superaquecido que distorce toda a linha do horizonte; a travessia diurna impõe 2d6 de fogo nas solas e exaustão térmica (DMG p. 110; PHB p. 183).',
+        gibberRisk: 'O revestimento negro espelhado de óxidos de manganês e ferro sobre milhões de pedras absorve toda a radiação solar e aquece a superfície da planície a 75 graus ao meio-dia, derretendo a cola de calçados e criando uma camada de ar superaquecido que distorce toda a linha do horizonte; a travessia diurna impõe 2d6 de fogo nas solas e exaustão térmica.',
 
         pioneerMitigation: 'Marcha crepuscular e noturna guiada pelas estrelas ou uso de palmilhas isolantes de cortiça e feltro duplo.',
 
@@ -60573,7 +60573,7 @@
 
       saveType: 'Constituição',
 
-      gossanRisk: 'Rios de cor vermelho-vinho translúcida que drenam maciços de sulfetos metálicos oxidados (pirita e calcopirita) onde bactérias extremófilas acidófilas geram ácido sulfúrico puro rico em ferro férrico e arsênio dissolvido; vadear sem proteção corrói fivelas de ferro, destrói o couro das botas e causa queimaduras químicas com 3d6 de ácido (DMG p. 110; PHB p. 182-183).',
+      gossanRisk: 'Rios de cor vermelho-vinho translúcida que drenam maciços de sulfetos metálicos oxidados (pirita e calcopirita) onde bactérias extremófilas acidófilas geram ácido sulfúrico puro rico em ferro férrico e arsênio dissolvido; vadear sem proteção corrói fivelas de ferro, destrói o couro das botas e causa queimaduras químicas com 3d6 de ácido.',
 
       pioneerMitigation: 'Transposição aérea por corda ou ponte de troncos envernizados com piche vegetal sem tocar no líquido rubi.',
 
@@ -60597,7 +60597,7 @@
 
         saveType: 'Constituição',
 
-        gossanRisk: 'Nas margens secas do vale precipitam crostas coloridas amarelo-enxofre e azul-esverdeadas de copiapita, melanterita e calcantita solúveis; pisar nessas flores de sal levanta um pó metálico altamente ácido e venenoso que queima as mucosas nasais e olhos com 2d6 de ácido mais 1d8 de veneno (DMG p. 110; XGE p. 109).',
+        gossanRisk: 'Nas margens secas do vale precipitam crostas coloridas amarelo-enxofre e azul-esverdeadas de copiapita, melanterita e calcantita solúveis; pisar nessas flores de sal levanta um pó metálico altamente ácido e venenoso que queima as mucosas nasais e olhos com 2d6 de ácido mais 1d8 de veneno.',
 
         pioneerMitigation: 'Marcha a barlavento das incrustações amarelas e azuis com máscara úmida embebida em cal ou cinza.',
 
@@ -60619,7 +60619,7 @@
 
         saveType: 'Destreza',
 
-        gossanRisk: 'O topo oxidado do veio mineral (chapéu-de-ferro ou gossan) teve todos os seus sulfetos dissolvidos pela chuva ácida ao longo de eras, restando apenas um esqueleto oco e quebradiço de limonita e hematita ocre; apoiar o peso na escarpa enferrujada faz a rocha esfarelar como biscoito seco lançando o explorador no abismo com 3d6 de concussão (DMG p. 110; PHB p. 185).',
+        gossanRisk: 'O topo oxidado do veio mineral (chapéu-de-ferro ou gossan) teve todos os seus sulfetos dissolvidos pela chuva ácida ao longo de eras, restando apenas um esqueleto oco e quebradiço de limonita e hematita ocre; apoiar o peso na escarpa enferrujada faz a rocha esfarelar como biscoito seco lançando o explorador no abismo com 3d6 de concussão.',
 
         pioneerMitigation: 'Ancorar-se exclusivamente nos veios brancos de quartzo maciço que resistem à lixiviação ácida.',
 
@@ -60641,7 +60641,7 @@
 
         saveType: 'Constituição',
 
-        gossanRisk: 'Fissuras profundas no maciço pirítico úmido onde a oxidação bacteriana acelerada libera calor intenso de até 60 graus e baforadas sufocantes de gás sulfuroso sem origem vulcânica; explorar abrigos na encosta sem ventilação provoca broncoespasmo e tontura com 2d8 de veneno e 1 nível de exaustão (DMG p. 110; PHB p. 183).',
+        gossanRisk: 'Fissuras profundas no maciço pirítico úmido onde a oxidação bacteriana acelerada libera calor intenso de até 60 graus e baforadas sufocantes de gás sulfuroso sem origem vulcânica; explorar abrigos na encosta sem ventilação provoca broncoespasmo e tontura com 2d8 de veneno e 1 nível de exaustão.',
 
         pioneerMitigation: 'Sondar a temperatura das frestas na rocha ferruginosa e evitar qualquer cavidade com cheiro de fósforo queimado.',
 
@@ -60781,7 +60781,7 @@
 
       saveType: 'Destreza',
 
-      penitenteRisk: 'Nos campos de neve áridos de alta altitude acima de 4.500 metros, a sublimação direta pelo vento seco e o sol zenital esculpem milhões de torres e adagas de gelo endurecido (nieves penitentes) de até 5 metros de altura inclinadas para o equador; tropeçar nos sulcos estreitos lança o aventureiro sobre fileiras de lâminas vítreas afiadas causando 2d8 perfurante mais 2d6 de frio (DMG p. 110; PHB p. 182-183).',
+      penitenteRisk: 'Nos campos de neve áridos de alta altitude acima de 4.500 metros, a sublimação direta pelo vento seco e o sol zenital esculpem milhões de torres e adagas de gelo endurecido (nieves penitentes) de até 5 metros de altura inclinadas para o equador; tropeçar nos sulcos estreitos lança o aventureiro sobre fileiras de lâminas vítreas afiadas causando 2d8 perfurante mais 2d6 de frio.',
 
       pioneerMitigation: 'Marcha estritamente alinhada aos sulcos leste-oeste (na direção da inclinação solar das lâminas) ou quebra controlada das pontas com piqueta.',
 
@@ -60805,7 +60805,7 @@
 
         saveType: 'Constituição',
 
-        penitenteRisk: 'As paredes côncavas espelhadas entre duas fileiras de penitentes funcionam como refletores parabólicos que concentram a radiação ultravioleta extrema no fundo do corredor enquanto derretem poços ocultos sob uma casca fina de gelo; o explorador sofre queimadura actínica severa no rosto e afunda até o peito na água a zero grau no fundo da trincheira com 2d6 radiante mais 2d6 de frio (DMG p. 110; XGE p. 109).',
+        penitenteRisk: 'As paredes côncavas espelhadas entre duas fileiras de penitentes funcionam como refletores parabólicos que concentram a radiação ultravioleta extrema no fundo do corredor enquanto derretem poços ocultos sob uma casca fina de gelo; o explorador sofre queimadura actínica severa no rosto e afunda até o peito na água a zero grau no fundo da trincheira com 2d6 radiante mais 2d6 de frio.',
 
         pioneerMitigation: 'Cobertura total da pele exposta, óculos de fenda estreita e sondagem do fundo entre os penitentes antes de pisar.',
 
@@ -60827,7 +60827,7 @@
 
         saveType: 'Destreza',
 
-        penitenteRisk: 'Quando o vento catabático vespertino sopra perpendicularmente às fileiras de penitentes subescavados na base por sublimação, o choque de uma única mochila contra uma torre de 4 metros desencadeia a quebra em cadeia de dezenas de colunas de gelo maciço sobre a comitiva com 3d8 de concussão (DMG p. 110; PHB p. 185).',
+        penitenteRisk: 'Quando o vento catabático vespertino sopra perpendicularmente às fileiras de penitentes subescavados na base por sublimação, o choque de uma única mochila contra uma torre de 4 metros desencadeia a quebra em cadeia de dezenas de colunas de gelo maciço sobre a comitiva com 3d8 de concussão.',
 
         pioneerMitigation: 'Evitar corredores onde as colunas de gelo apresentem cintura basal translúcida menor que um palmo.',
 
@@ -60849,7 +60849,7 @@
 
         saveType: 'Sabedoria',
 
-        penitenteRisk: 'Cercados por paredes de gelo branco de 4 metros que bloqueiam qualquer referência de relevo sob o ar rarefeito da zona da morte, os membros do grupo perdem a noção de direção e gastam o triplo de esforço saltando de corredor em corredor, acumulando 1 nível de exaustão e hipóxia (DMG p. 110; PHB p. 183).',
+        penitenteRisk: 'Cercados por paredes de gelo branco de 4 metros que bloqueiam qualquer referência de relevo sob o ar rarefeito da zona da morte, os membros do grupo perdem a noção de direção e gastam o triplo de esforço saltando de corredor em corredor, acumulando 1 nível de exaustão e hipóxia.',
 
         pioneerMitigation: 'Uso da própria inclinação geométrica constante das lâminas de gelo (sempre apontadas para o sol do meio-dia) como bússola natural.',
 
@@ -60989,7 +60989,7 @@
 
       saveType: 'Destreza',
 
-      rockGlacierRisk: 'Línguas colossais de detritos rochosos cimentados internamente por um núcleo de gelo plástico que escorrem pelo vale alpino a centímetros por dia, mantendo uma parede frontal de 40 metros inclinada a 42 graus além do equilíbrio natural; o empuxo do gelo interno cospe matacões angulares continuamente do topo da frente, bombardeando a comitiva com 4d8 de concussão (DMG p. 110; PHB p. 182-183).',
+      rockGlacierRisk: 'Línguas colossais de detritos rochosos cimentados internamente por um núcleo de gelo plástico que escorrem pelo vale alpino a centímetros por dia, mantendo uma parede frontal de 40 metros inclinada a 42 graus além do equilíbrio natural; o empuxo do gelo interno cospe matacões angulares continuamente do topo da frente, bombardeando a comitiva com 4d8 de concussão.',
 
       pioneerMitigation: 'Jamais subir diretamente pela rampa frontal cinza-clara; contornar pelo sulco lateral entre a geleira de rocha e a parede do vale.',
 
@@ -61013,7 +61013,7 @@
 
         saveType: 'Destreza',
 
-        rockGlacierRisk: 'A superfície da geleira de rocha é enrugada como lava pahoehoe gigante em cristas e sulcos arqueados de 8 metros de profundidade; no fundo sombrio dos sulcos aflora o núcleo de gelo intersticial liso como espelho onde o aventureiro escorrega para fendas estreitas entre blocos congelados sofrendo 2d6 de concussão mais 2d6 de frio (DMG p. 110; XGE p. 109).',
+        rockGlacierRisk: 'A superfície da geleira de rocha é enrugada como lava pahoehoe gigante em cristas e sulcos arqueados de 8 metros de profundidade; no fundo sombrio dos sulcos aflora o núcleo de gelo intersticial liso como espelho onde o aventureiro escorrega para fendas estreitas entre blocos congelados sofrendo 2d6 de concussão mais 2d6 de frio.',
 
         pioneerMitigation: 'Marcha ao longo da crista longitudinal de uma ruga de compressão sem descer aos vales transversais.',
 
@@ -61035,7 +61035,7 @@
 
         saveType: 'Força',
 
-        rockGlacierRisk: 'O derretimento localizado do núcleo de gelo abre crateras cônicas instáveis no manto de pedras (funis de termocarste) cujo fundo comunica diretamente com rios pressurizados dentro da geleira de rocha; pisar na borda faz o anel de cascalho ceder em espiral sugando o explorador para a água a zero grau com 2d8 de concussão e hipotermia (DMG p. 110; PHB p. 185).',
+        rockGlacierRisk: 'O derretimento localizado do núcleo de gelo abre crateras cônicas instáveis no manto de pedras (funis de termocarste) cujo fundo comunica diretamente com rios pressurizados dentro da geleira de rocha; pisar na borda faz o anel de cascalho ceder em espiral sugando o explorador para a água a zero grau com 2d8 de concussão e hipotermia.',
 
         pioneerMitigation: 'Desviar por pelo menos dez metros de qualquer depressão circular onde as pedras pareçam lavadas ou úmidas.',
 
@@ -61057,7 +61057,7 @@
 
         saveType: 'Destreza',
 
-        rockGlacierRisk: 'A camada superior de 2 metros de matacões descongelados desliza livremente sobre o topo lubrificado do núcleo de gelo subjacente; cada passo provoca um rearranjo surdo de dezenas de pedras interligadas que abrem e fecham como mandíbulas, esmagando botas e tornozelos com 2d8 de concussão (DMG p. 110; PHB p. 183).',
+        rockGlacierRisk: 'A camada superior de 2 metros de matacões descongelados desliza livremente sobre o topo lubrificado do núcleo de gelo subjacente; cada passo provoca um rearranjo surdo de dezenas de pedras interligadas que abrem e fecham como mandíbulas, esmagando botas e tornozelos com 2d8 de concussão.',
 
         pioneerMitigation: 'Selecionar apenas os maiores blocos tabulares (>3 metros) que já assentaram diretamente no núcleo congelado.',
 
@@ -61197,7 +61197,7 @@
 
       saveType: 'Destreza',
 
-      stromatoliteRisk: 'Colunas e domos calcários biogênicos construídos camada por camada por cianobactérias em lagunas hipersalinas rasas cujo interior foi dissolvido pela salmoura ácida; pisar no topo de um bioerma aparentemente sólido faz a casca de aragonita quebrar como porcelana, cravando as canelas nos anéis laminados cortantes com 2d6 cortante mais 1d8 de ácido salino (DMG p. 110; PHB p. 182-183).',
+      stromatoliteRisk: 'Colunas e domos calcários biogênicos construídos camada por camada por cianobactérias em lagunas hipersalinas rasas cujo interior foi dissolvido pela salmoura ácida; pisar no topo de um bioerma aparentemente sólido faz a casca de aragonita quebrar como porcelana, cravando as canelas nos anéis laminados cortantes com 2d6 cortante mais 1d8 de ácido salino.',
 
       pioneerMitigation: 'Marcha pelos canais arenosos claros entre os domos escuros sem pisar nas cabeças de estromatolito.',
 
@@ -61221,7 +61221,7 @@
 
         saveType: 'Força',
 
-        stromatoliteRisk: 'Nas margens da laguna estende-se um tapete elástico alaranjado e coriáceo de 5 centímetros de espessura tecido por filamentos bacterianos que flutua sobre um metro de lama negra anaeróbica fervilhante de gás sulfídrico; quando a membrana biológica rasga sob a bota, ela se fecha ao redor da coxa prendendo o aventureiro na lama tóxica com 2d8 de veneno e 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        stromatoliteRisk: 'Nas margens da laguna estende-se um tapete elástico alaranjado e coriáceo de 5 centímetros de espessura tecido por filamentos bacterianos que flutua sobre um metro de lama negra anaeróbica fervilhante de gás sulfídrico; quando a membrana biológica rasga sob a bota, ela se fecha ao redor da coxa prendendo o aventureiro na lama tóxica com 2d8 de veneno e 1 nível de exaustão.',
 
         pioneerMitigation: 'Sondar a margem elástica com lança; se o solo ondular como gelatina, contornar pela berma de conchas.',
 
@@ -61243,7 +61243,7 @@
 
         saveType: 'Constituição',
 
-        stromatoliteRisk: 'Bacias costeiras onde uma camada fina de água menos salgada na superfície funciona como lente de estufa impedindo a convecção da salmoura densa do fundo, que atinge 65 graus sob o sol sem ferver nem soltar vapor; vadear pela piscina morna na superfície queima subitamente pés e pernas ao cruzar a haloclina com 3d6 de fogo (DMG p. 110; XGE p. 109).',
+        stromatoliteRisk: 'Bacias costeiras onde uma camada fina de água menos salgada na superfície funciona como lente de estufa impedindo a convecção da salmoura densa do fundo, que atinge 65 graus sob o sol sem ferver nem soltar vapor; vadear pela piscina morna na superfície queima subitamente pés e pernas ao cruzar a haloclina com 3d6 de fogo.',
 
         pioneerMitigation: 'Medir a temperatura do fundo da bacia com a ponta metálica do bastão antes de entrar na água.',
 
@@ -61265,7 +61265,7 @@
 
         saveType: 'Constituição',
 
-        stromatoliteRisk: 'A proliferação de microalgas halófilas tinge a laguna de vermelho-sangue espelhado enquanto o vento levanta borrifos saturados que cristalizam instantaneamente nas pestanas e córneas; o reflexo ofuscante combinado à queimação salina impõe cegueira temporária e desorientação (DMG p. 110; PHB p. 183).',
+        stromatoliteRisk: 'A proliferação de microalgas halófilas tinge a laguna de vermelho-sangue espelhado enquanto o vento levanta borrifos saturados que cristalizam instantaneamente nas pestanas e córneas; o reflexo ofuscante combinado à queimação salina impõe cegueira temporária e desorientação.',
 
         pioneerMitigation: 'Uso de viseiras baixas de couro escurecido com fuligem e pano úmido sobre as maçãs do rosto.',
 
@@ -61405,7 +61405,7 @@
 
       saveType: 'Destreza',
 
-      hoodooRisk: 'Torres esguias de até 25 metros esculpidas em tilo glacial endurecido e silte lacustre, encimadas por um pesado matacão errático (pedra-chapéu) que protege a coluna da chuva vertical; a vibração da marcha ou um vento lateral rompe o pescoço de argila ressecada precipitando o bloco de 8 toneladas sobre a trilha estreita com 4d8 de concussão (DMG p. 110; PHB p. 182-183).',
+      hoodooRisk: 'Torres esguias de até 25 metros esculpidas em tilo glacial endurecido e silte lacustre, encimadas por um pesado matacão errático (pedra-chapéu) que protege a coluna da chuva vertical; a vibração da marcha ou um vento lateral rompe o pescoço de argila ressecada precipitando o bloco de 8 toneladas sobre a trilha estreita com 4d8 de concussão.',
 
       pioneerMitigation: 'Evitar descansar ou marchar diretamente sob colunas cujo pescoço superior seja mais estreito que um terço da pedra-chapéu.',
 
@@ -61429,7 +61429,7 @@
 
         saveType: 'Destreza',
 
-        hoodooRisk: 'As paredes das ravinas entre as chaminés de fada aparentam a dureza do concreto quando secas, mas são sulcadas por caneluras verticais profundas (rills) repletas de seixos engastados; apoiar a mão ou cravar piqueta na crista de uma canelura faz a coluna inteira desfarinhar em cascata de cascalho e poeira com 2d8 de concussão (DMG p. 110; XGE p. 109).',
+        hoodooRisk: 'As paredes das ravinas entre as chaminés de fada aparentam a dureza do concreto quando secas, mas são sulcadas por caneluras verticais profundas (rills) repletas de seixos engastados; apoiar a mão ou cravar piqueta na crista de uma canelura faz a coluna inteira desfarinhar em cascata de cascalho e poeira com 2d8 de concussão.',
 
         pioneerMitigation: 'Progredir pelo leito do talvegue sem usar as aletas verticais de argila como apoio de escalada.',
 
@@ -61451,7 +61451,7 @@
 
         saveType: 'Força',
 
-        hoodooRisk: 'O solo de silte glaciolacustre é completamente impermeável a aguaceiros súbitos; em minutos, a água escorre das centenas de torres para o corredor estreito em fundo de saco formando uma pasta densa de lama e pedras erráticas que arrasta a comitiva com 3d6 de concussão e 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        hoodooRisk: 'O solo de silte glaciolacustre é completamente impermeável a aguaceiros súbitos; em minutos, a água escorre das centenas de torres para o corredor estreito em fundo de saco formando uma pasta densa de lama e pedras erráticas que arrasta a comitiva com 3d6 de concussão e 1 nível de exaustão.',
 
         pioneerMitigation: 'Escalar imediatamente para os colos divisórios altos (saddles) ao menor sinal de nuvens escuras nas cabeceiras.',
 
@@ -61473,7 +61473,7 @@
 
         saveType: 'Sabedoria',
 
-        hoodooRisk: 'Centenas de pináculos idênticos cor de ocre criam corredores cegos que bloqueiam a visão do horizonte e refletem o som em múltiplos ângulos falsos; batedores que se afastam três passos perdem o contato visual com o grupo e ficam expostos a emboscadas das alturas (DMG p. 110; PHB p. 183).',
+        hoodooRisk: 'Centenas de pináculos idênticos cor de ocre criam corredores cegos que bloqueiam a visão do horizonte e refletem o som em múltiplos ângulos falsos; batedores que se afastam três passos perdem o contato visual com o grupo e ficam expostos a emboscadas das alturas.',
 
         pioneerMitigation: 'Marcação dos cruzamentos com risco de giz ou fita colorida e manutenção de formação compacta.',
 
@@ -61613,7 +61613,7 @@
 
       saveType: 'Destreza',
 
-      travertineRisk: 'Diques naturais de carbonato de cálcio precipitado sobre galhos e musgos que represam lagos escalonados de águas azul-turquesa; a borda da barragem é uma estrutura porosa e oca de baixa densidade que cede sob o peso da comitiva, lançando os aventureiros cachoeira abaixo junto com blocos de calcita e a onda da represa rompida com 3d6 de concussão (DMG p. 110; PHB p. 182-183).',
+      travertineRisk: 'Diques naturais de carbonato de cálcio precipitado sobre galhos e musgos que represam lagos escalonados de águas azul-turquesa; a borda da barragem é uma estrutura porosa e oca de baixa densidade que cede sob o peso da comitiva, lançando os aventureiros cachoeira abaixo junto com blocos de calcita e a onda da represa rompida com 3d6 de concussão.',
 
       pioneerMitigation: 'Evitar caminhar sobre o lábio fino da barragem onde a água transborda, vadeando pela rampa interna de cascalho calcário.',
 
@@ -61637,7 +61637,7 @@
 
         saveType: 'Destreza',
 
-        travertineRisk: 'As rampas arredondadas entre as piscinas de travertino são revestidas por uma película invisível de diatomáceas e cianobactérias calcificantes mais escorregadia que sabão; perder o apoio dispara uma queda descontrolada em tobogã por três degraus de cascatas sucessivas causando 2d8 de concussão (DMG p. 110; XGE p. 109).',
+        travertineRisk: 'As rampas arredondadas entre as piscinas de travertino são revestidas por uma película invisível de diatomáceas e cianobactérias calcificantes mais escorregadia que sabão; perder o apoio dispara uma queda descontrolada em tobogã por três degraus de cascatas sucessivas causando 2d8 de concussão.',
 
         pioneerMitigation: 'Uso de sandálias de feltro ou corda trançada sobre as botas e progressão encordada pelas raízes marginais.',
 
@@ -61659,7 +61659,7 @@
 
         saveType: 'Força',
 
-        travertineRisk: 'O crescimento contínuo de cortinas pendentes de tufa fecha o espaço atrás das cachoeiras formando câmaras semissubmersas alimentadas pelo refluxo da queda d’água; ser puxado para trás da cortina calcária prende o explorador em um redemoinho escuro e ruidoso com ar rarefeito e 2d6 de concussão mais risco de afogamento (DMG p. 110; PHB p. 185).',
+        travertineRisk: 'O crescimento contínuo de cortinas pendentes de tufa fecha o espaço atrás das cachoeiras formando câmaras semissubmersas alimentadas pelo refluxo da queda d’água; ser puxado para trás da cortina calcária prende o explorador em um redemoinho escuro e ruidoso com ar rarefeito e 2d6 de concussão mais risco de afogamento.',
 
         pioneerMitigation: 'Manter distância de segurança de três metros do pé das quedas d’água em cortina fechada.',
 
@@ -61681,7 +61681,7 @@
 
         saveType: 'Força',
 
-        travertineRisk: 'No fundo das lagoas translúcidas de travertino, antigas árvores caídas foram inteiramente revestidas por crostas espessas de calcita formando grades rígidas como pedra sob a água; prender a bota em uma forquilha petrificada a 1,5 metro de profundidade sob correnteza contínua ameaça quebrar o tornozelo e afogar o aventureiro com 2d6 de concussão (DMG p. 110; PHB p. 183).',
+        travertineRisk: 'No fundo das lagoas translúcidas de travertino, antigas árvores caídas foram inteiramente revestidas por crostas espessas de calcita formando grades rígidas como pedra sob a água; prender a bota em uma forquilha petrificada a 1,5 metro de profundidade sob correnteza contínua ameaça quebrar o tornozelo e afogar o aventureiro com 2d6 de concussão.',
 
         pioneerMitigation: 'Sondagem do fundo turquesa com vara antes de dar cada passo e desatar as fivelas rápidas das botas ao vadear.',
 
@@ -61821,7 +61821,7 @@
 
       saveType: 'Destreza',
 
-      mangroveRisk: 'Emaranhado tridimensional impenetrável de raízes aéreas arqueadas (rizóforos) recobertas até a linha da preamar por colônias de cracas e ostras-de-mangue afiadas como bisturis; perder o equilíbrio sobre uma raiz limosa prende os membros na gaiola lenhosa causando 2d6 cortante e infecção séptica salobra (DMG p. 110; PHB p. 182-183).',
+      mangroveRisk: 'Emaranhado tridimensional impenetrável de raízes aéreas arqueadas (rizóforos) recobertas até a linha da preamar por colônias de cracas e ostras-de-mangue afiadas como bisturis; perder o equilíbrio sobre uma raiz limosa prende os membros na gaiola lenhosa causando 2d6 cortante e infecção séptica salobra.',
 
       pioneerMitigation: 'Progressão apoiada nas forquilhas superiores secas acima da linha das cracas com perneiras de couro grosso.',
 
@@ -61845,7 +61845,7 @@
 
         saveType: 'Força',
 
-        mangroveRisk: 'Sob o mangue-preto estende-se um lodo orgânico sem fundo rico em gás sulfídrico atravessado por milhares de raízes respiratórias verticais pontiagudas como estacas (pneumatóforos); saltar do arco das raízes para o barro faz o aventureiro afundar até a cintura enquanto as pontas rígidas perfuram as solas com 2d6 perfurante mais 1d8 de veneno gasoso (DMG p. 110; XGE p. 109).',
+        mangroveRisk: 'Sob o mangue-preto estende-se um lodo orgânico sem fundo rico em gás sulfídrico atravessado por milhares de raízes respiratórias verticais pontiagudas como estacas (pneumatóforos); saltar do arco das raízes para o barro faz o aventureiro afundar até a cintura enquanto as pontas rígidas perfuram as solas com 2d6 perfurante mais 1d8 de veneno gasoso.',
 
         pioneerMitigation: 'Deitar pranchas de casca ou feixes de galhos sobre os pneumatóforos para distribuir o peso da comitiva.',
 
@@ -61867,7 +61867,7 @@
 
         saveType: 'Força',
 
-        mangroveRisk: 'Canais sinuosos de fundo argiloso que secam na baixa-mar mas enchem em minutos quando a maré montante avança pelo estuário como uma parede d’água barrenta; a correnteza afoga as trilhas baixas e traz grandes predadores encouraçados que patrulham o canal turvo, impondo 2d8 de concussão e risco de submersão (DMG p. 110; PHB p. 185).',
+        mangroveRisk: 'Canais sinuosos de fundo argiloso que secam na baixa-mar mas enchem em minutos quando a maré montante avança pelo estuário como uma parede d’água barrenta; a correnteza afoga as trilhas baixas e traz grandes predadores encouraçados que patrulham o canal turvo, impondo 2d8 de concussão e risco de submersão.',
 
         pioneerMitigation: 'Marcação da altura máxima das cracas nos troncos para calcular o teto da maré antes de descer ao canal.',
 
@@ -61889,7 +61889,7 @@
 
         saveType: 'Constituição',
 
-        mangroveRisk: 'Abrir caminho a golpes de facão sem identificar os troncos pálidos do mangue-de-leite (Excoecaria) projeta jatos de látex branco alcalino que causam bolhas químicas severas na pele e cegueira excruciante ao atingir os olhos com 2d6 de ácido (DMG p. 110; PHB p. 183).',
+        mangroveRisk: 'Abrir caminho a golpes de facão sem identificar os troncos pálidos do mangue-de-leite (Excoecaria) projeta jatos de látex branco alcalino que causam bolhas químicas severas na pele e cegueira excruciante ao atingir os olhos com 2d6 de ácido.',
 
         pioneerMitigation: 'Identificação botânica das folhas serrilhadas com glândulas na base e desvio sem cortar os ramos.',
 
@@ -62029,7 +62029,7 @@
 
       saveType: 'Destreza',
 
-      tafoniRisk: 'Domos monolíticos de granito e gnaisse submetidos a alívio de pressão e insolação diurna cujas placas curvas externas (folhas de esfoliação de 15 centímetros de espessura) estão descoladas da rocha-mãe; o peso da comitiva sob o calor do meio-dia faz a placa arquear com um estrondo de canhão e escorregar pelo domo liso com 3d8 de concussão (DMG p. 110; PHB p. 182-183).',
+      tafoniRisk: 'Domos monolíticos de granito e gnaisse submetidos a alívio de pressão e insolação diurna cujas placas curvas externas (folhas de esfoliação de 15 centímetros de espessura) estão descoladas da rocha-mãe; o peso da comitiva sob o calor do meio-dia faz a placa arquear com um estrondo de canhão e escorregar pelo domo liso com 3d8 de concussão.',
 
       pioneerMitigation: 'Percussão prévia da laje com o bastão para detectar som oco de descolamento e subida por veios de quartzo rugoso.',
 
@@ -62053,7 +62053,7 @@
 
         saveType: 'Destreza',
 
-        tafoniRisk: 'Paredões de arenito e granito costeiro ou desértico inteiramente esculpidos por haloclastia (cristalização de sal) em milhares de alvéolos ocos separados por paredes de rocha finas como casca de ovo; agarrar ou apoiar o pé em um septo de tafoni provoca sua pulverização instantânea, precipitando o explorador com 2d8 de concussão mais 1d6 cortante (DMG p. 110; XGE p. 109).',
+        tafoniRisk: 'Paredões de arenito e granito costeiro ou desértico inteiramente esculpidos por haloclastia (cristalização de sal) em milhares de alvéolos ocos separados por paredes de rocha finas como casca de ovo; agarrar ou apoiar o pé em um septo de tafoni provoca sua pulverização instantânea, precipitando o explorador com 2d8 de concussão mais 1d6 cortante.',
 
         pioneerMitigation: 'Testar cada apoio três vezes e ancorar cordas somente em pilares maciços sem alvéolos salinos.',
 
@@ -62075,7 +62075,7 @@
 
         saveType: 'Destreza',
 
-        tafoniRisk: 'No topo achatado dos inselbergs abrem-se bacias circulares profundas de fundo plano e paredes negativas (panholes ou gnammas) cheias de lodo escuro de folhas decompostas, algas mucilaginosas e água ácida estagnada; escorregar na borda úmida lança o aventureiro na cuba de paredes lisas impossíveis de escalar sem auxílio, causando 2d6 de veneno por ingestão séptica (DMG p. 110; PHB p. 185).',
+        tafoniRisk: 'No topo achatado dos inselbergs abrem-se bacias circulares profundas de fundo plano e paredes negativas (panholes ou gnammas) cheias de lodo escuro de folhas decompostas, algas mucilaginosas e água ácida estagnada; escorregar na borda úmida lança o aventureiro na cuba de paredes lisas impossíveis de escalar sem auxílio, causando 2d6 de veneno por ingestão séptica.',
 
         pioneerMitigation: 'Contornar as bacias escuras pelo anel externo seco a pelo menos um metro da borda negativa.',
 
@@ -62097,7 +62097,7 @@
 
         saveType: 'Constituição',
 
-        tafoniRisk: 'Grandes cavernas alveolares na base dos domos funcionam como estufas térmicas naturais que abrigam colônias agressivas de vespas-caçadoras e víboras de pedra camufladas nos alvéolos; buscar sombra sem inspeção prévia desencadeia múltiplos ataques em espaço confinado com 3d6 de veneno (DMG p. 110; PHB p. 183).',
+        tafoniRisk: 'Grandes cavernas alveolares na base dos domos funcionam como estufas térmicas naturais que abrigam colônias agressivas de vespas-caçadoras e víboras de pedra camufladas nos alvéolos; buscar sombra sem inspeção prévia desencadeia múltiplos ataques em espaço confinado com 3d6 de veneno.',
 
         pioneerMitigation: 'Inspeção das cavidades alveolares com fumaça de tocha resinosa na ponta de uma vara antes de entrar.',
 
@@ -62237,7 +62237,7 @@
 
       saveType: 'Destreza',
 
-      cinderRisk: 'Encostas íngremes de 33 graus formadas por cascalho vulcânico alveolar solto (lapilli e escória basáltica) empilhado no limite exato do ângulo de repouso; um único passo em falso dispara um tapete rolante de fragmentos vítreos afiados como obsidiana que arrasta a comitiva ladeira abaixo rasgando couro e carne com 2d6 cortante mais 2d6 de concussão (DMG p. 110; PHB p. 182-183).',
+      cinderRisk: 'Encostas íngremes de 33 graus formadas por cascalho vulcânico alveolar solto (lapilli e escória basáltica) empilhado no limite exato do ângulo de repouso; um único passo em falso dispara um tapete rolante de fragmentos vítreos afiados como obsidiana que arrasta a comitiva ladeira abaixo rasgando couro e carne com 2d6 cortante mais 2d6 de concussão.',
 
       pioneerMitigation: 'Subida exclusivamente pela crista de um dique de lava solidificada (spatter rampart) que corta o cone de cinzas.',
 
@@ -62261,7 +62261,7 @@
 
         saveType: 'Destreza',
 
-        cinderRisk: 'Blocos esféricos de magma de 2 metros ejetados na encosta cuja crosta externa resfriou e rachou enquanto o núcleo permaneceu incandescente ou oco e pressurizado por gases; apoiar o peso sobre a casca vitrificada rompe o domo frágil liberando um jato de vapor ácido e cacos cortantes com 2d6 de fogo mais 2d6 perfurante (DMG p. 110; XGE p. 109).',
+        cinderRisk: 'Blocos esféricos de magma de 2 metros ejetados na encosta cuja crosta externa resfriou e rachou enquanto o núcleo permaneceu incandescente ou oco e pressurizado por gases; apoiar o peso sobre a casca vitrificada rompe o domo frágil liberando um jato de vapor ácido e cacos cortantes com 2d6 de fogo mais 2d6 perfurante.',
 
         pioneerMitigation: 'Evitar matacões arredondados com fissuras poligonais na casca que exibam miragem de calor ou cheiro de enxofre.',
 
@@ -62283,7 +62283,7 @@
 
         saveType: 'Constituição',
 
-        cinderRisk: 'No fundo em funil da cratera do cone de escória, fumarolas silenciosas exalam dióxido de carbono mais pesado que o ar misturado a dióxido de enxofre; descer à depressão sem vento causa sufocamento súbito e queimação pulmonar com 3d6 de veneno e 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        cinderRisk: 'No fundo em funil da cratera do cone de escória, fumarolas silenciosas exalam dióxido de carbono mais pesado que o ar misturado a dióxido de enxofre; descer à depressão sem vento causa sufocamento súbito e queimação pulmonar com 3d6 de veneno e 1 nível de exaustão.',
 
         pioneerMitigation: 'Permanência estrita no anel superior ventilado da borda da cratera com pano úmido alcalino sobre o rosto.',
 
@@ -62305,7 +62305,7 @@
 
         saveType: 'Constituição',
 
-        cinderRisk: 'Rajadas de vento varrem o manto de cinza vulcânica microscópica composta por agulhas de sílica pura e vidro pulverizado; a nuvem cinzenta reduz a visibilidade a zero, arranha as córneas e inflama os brônquios causando cegueira temporária e 2d6 perfurante interno (DMG p. 110; PHB p. 183).',
+        cinderRisk: 'Rajadas de vento varrem o manto de cinza vulcânica microscópica composta por agulhas de sílica pura e vidro pulverizado; a nuvem cinzenta reduz a visibilidade a zero, arranha as córneas e inflama os brônquios causando cegueira temporária e 2d6 perfurante interno.',
 
         pioneerMitigation: 'Uso de óculos de fenda de osso ou couro vedados com graxa e respiração através de duplo lenço molhado.',
 
@@ -62445,7 +62445,7 @@
 
       saveType: 'Destreza',
 
-      felsenmeerRisk: 'Campos periglaciais de blocos angulares de granito e basalto sem qualquer matriz terrosa, onde matacões de 5 toneladas repousam em equilíbrio instável sobre fulcros agudos; transferir o peso do aventureiro para a extremidade livre faz a laje bascular subitamente como um alçapão de pedra, prendendo pernas ou escudos com 3d8 de concussão (DMG p. 110; PHB p. 182-183).',
+      felsenmeerRisk: 'Campos periglaciais de blocos angulares de granito e basalto sem qualquer matriz terrosa, onde matacões de 5 toneladas repousam em equilíbrio instável sobre fulcros agudos; transferir o peso do aventureiro para a extremidade livre faz a laje bascular subitamente como um alçapão de pedra, prendendo pernas ou escudos com 3d8 de concussão.',
 
       pioneerMitigation: 'Teste de firmeza com o pé dianteiro sem transferir o centro de gravidade e apoio em três pontos.',
 
@@ -62469,7 +62469,7 @@
 
         saveType: 'Destreza',
 
-        felsenmeerRisk: 'Entre os megablocos empilhados abrem-se cavernas intersticiais escuras de até 4 metros de altura recobertas no topo por falsas pontes de líquen, musgo espesso e raízes secas; pisar no tapete vegetal rompe a cobertura oca precipitando o explorador no labirinto inferior com 2d6 de concussão mais 1d6 de frio nas frestas geladas (DMG p. 110; XGE p. 109).',
+        felsenmeerRisk: 'Entre os megablocos empilhados abrem-se cavernas intersticiais escuras de até 4 metros de altura recobertas no topo por falsas pontes de líquen, musgo espesso e raízes secas; pisar no tapete vegetal rompe a cobertura oca precipitando o explorador no labirinto inferior com 2d6 de concussão mais 1d6 de frio nas frestas geladas.',
 
         pioneerMitigation: 'Pisar exclusivamente na rocha nua cinzenta visível e sondar qualquer mancha de musgo com o bastão.',
 
@@ -62491,7 +62491,7 @@
 
         saveType: 'Sabedoria',
 
-        felsenmeerRisk: 'Mar de matacões de diabásio e fonolito sob tensão elástica interna que emitem notas metálicas de sino ao menor toque de botas ferradas ou queda de pedras; sob nevoeiro fechado, os múltiplos ecos acústicos cruzados mascaram o som de passos ou desmoronamentos reais e desorientam a bússola auditiva da comitiva (DMG p. 110; PHB p. 183).',
+        felsenmeerRisk: 'Mar de matacões de diabásio e fonolito sob tensão elástica interna que emitem notas metálicas de sino ao menor toque de botas ferradas ou queda de pedras; sob nevoeiro fechado, os múltiplos ecos acústicos cruzados mascaram o som de passos ou desmoronamentos reais e desorientam a bússola auditiva da comitiva.',
 
         pioneerMitigation: 'Envolver as ponteiras metálicas dos bastões em tiras de couro e navegar por balizas visuais de pedra (cairns).',
 
@@ -62513,7 +62513,7 @@
 
         saveType: 'Força',
 
-        felsenmeerRisk: 'Toda a drenagem da montanha corre invisível a 3 metros abaixo da superfície do felsenmeer em cachoeiras subterrâneas furiosas; escorregar para o fundo de uma fenda expõe o aventureiro à correnteza gelada que o arrasta para sob os blocos seguintes sem abertura para emergir com 2d8 de concussão e risco de afogamento (DMG p. 110; PHB p. 185).',
+        felsenmeerRisk: 'Toda a drenagem da montanha corre invisível a 3 metros abaixo da superfície do felsenmeer em cachoeiras subterrâneas furiosas; escorregar para o fundo de uma fenda expõe o aventureiro à correnteza gelada que o arrasta para sob os blocos seguintes sem abertura para emergir com 2d8 de concussão e risco de afogamento.',
 
         pioneerMitigation: 'Evitar marchar sobre a calha central onde o rugido abafado de água corrente ressoa sob as botas.',
 
@@ -62653,7 +62653,7 @@
 
       saveType: 'Destreza',
 
-      vermetidRisk: 'Plataformas calcárias salientes construídas por moluscos gastrópodes tubulares (vermetídeos) e algas coralinas na linha de quebra das ondas, projetando-se até 3 metros sobre o mar profundo sem apoio inferior; o peso da comitiva combinado ao impacto de uma vaga submersa parte a cornija oca, lançando os aventureiros contra tubos calcários cortantes como navalhas com 2d6 cortante mais 2d6 de concussão (DMG p. 110; PHB p. 182-183).',
+      vermetidRisk: 'Plataformas calcárias salientes construídas por moluscos gastrópodes tubulares (vermetídeos) e algas coralinas na linha de quebra das ondas, projetando-se até 3 metros sobre o mar profundo sem apoio inferior; o peso da comitiva combinado ao impacto de uma vaga submersa parte a cornija oca, lançando os aventureiros contra tubos calcários cortantes como navalhas com 2d6 cortante mais 2d6 de concussão.',
 
       pioneerMitigation: 'Marcha restrita à faixa interna cimentada na rocha costeira, evitando a borda externa em balanço sobre a espuma.',
 
@@ -62677,7 +62677,7 @@
 
         saveType: 'Destreza',
 
-        vermetidRisk: 'O topo do recife biológico é revestido por um tapete mucoso de cianobactérias extremamente escorregadio sobre milhões de aberturas tubulares afiadas e bacias rasas repletas de ouriços-do-mar espinhosos; escorregar rasga o couro das botas e crava espinhos calcários quebradiços causando 2d6 perfurante mais 1d8 de veneno (DMG p. 110; XGE p. 109).',
+        vermetidRisk: 'O topo do recife biológico é revestido por um tapete mucoso de cianobactérias extremamente escorregadio sobre milhões de aberturas tubulares afiadas e bacias rasas repletas de ouriços-do-mar espinhosos; escorregar rasga o couro das botas e crava espinhos calcários quebradiços causando 2d6 perfurante mais 1d8 de veneno.',
 
         pioneerMitigation: 'Uso de solados trançados de corda de cânhamo áspero sobre as botas e apoio em bastão de ponta tripla.',
 
@@ -62699,7 +62699,7 @@
 
         saveType: 'Força',
 
-        vermetidRisk: 'Canais transversais estreitos que cortam o banco de vermetídeos e se fecham parcialmente no topo por crescimento biológico; quando a grande onda recua, o canal funciona como um ralo pressurizado que suga o explorador para baixo da plataforma de coralina com risco de afogamento e 2d8 de concussão (DMG p. 110; PHB p. 185).',
+        vermetidRisk: 'Canais transversais estreitos que cortam o banco de vermetídeos e se fecham parcialmente no topo por crescimento biológico; quando a grande onda recua, o canal funciona como um ralo pressurizado que suga o explorador para baixo da plataforma de coralina com risco de afogamento e 2d8 de concussão.',
 
         pioneerMitigation: 'Salto das fendas transversais apenas no intervalo morto entre duas séries de ondas após o esvaziamento total.',
 
@@ -62721,7 +62721,7 @@
 
         saveType: 'Destreza',
 
-        vermetidRisk: 'Muretas elevadas de vermetídeos represam piscinas profundas de borda (rimmed pools) cujas cavidades basais abrigam grandes predadores bentônicos ocultos sob a espuma; pisar em falso na borda submersa expõe a perna a botes lacerantes e torção articular com 2d8 perfurante (DMG p. 110; PHB p. 183).',
+        vermetidRisk: 'Muretas elevadas de vermetídeos represam piscinas profundas de borda (rimmed pools) cujas cavidades basais abrigam grandes predadores bentônicos ocultos sob a espuma; pisar em falso na borda submersa expõe a perna a botes lacerantes e torção articular com 2d8 perfurante.',
 
         pioneerMitigation: 'Travessia pelas cristas divisórias estreitas que separam as bacias após sondagem com lança.',
 
@@ -62861,7 +62861,7 @@
 
       saveType: 'Destreza',
 
-      desiccationRisk: 'A dessecação secular de antigas bacias lacustres rasga o solo argiloso em polígonos hexagonais de 100 metros bordejados por fendas em cunha de até 6 metros de profundidade cobertas por finas pontes de poeira eólica; pisar na borda colapsa o lábio seco precipitando o explorador na fenda estreita com 3d6 de concussão e entalamento dos membros (DMG p. 110; PHB p. 182-183).',
+      desiccationRisk: 'A dessecação secular de antigas bacias lacustres rasga o solo argiloso em polígonos hexagonais de 100 metros bordejados por fendas em cunha de até 6 metros de profundidade cobertas por finas pontes de poeira eólica; pisar na borda colapsa o lábio seco precipitando o explorador na fenda estreita com 3d6 de concussão e entalamento dos membros.',
 
       pioneerMitigation: 'Sondagem da linha escura do polígono com vara longa e salto de impulso pelo centro duro da placa.',
 
@@ -62885,7 +62885,7 @@
 
         saveType: 'Destreza',
 
-        desiccationRisk: 'Após uma fina chuva invernal que congela à noite em lâminas vítreas sobre a argila escorregadia da playa, rajadas catabáticas matinais empurram jangadas de gelo que arrastam blocos de dolomita de 300 quilos deixando sulcos retilíneos na lama; a marcha silenciosa das pedras sob nevoeiro colide contra a comitiva com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+        desiccationRisk: 'Após uma fina chuva invernal que congela à noite em lâminas vítreas sobre a argila escorregadia da playa, rajadas catabáticas matinais empurram jangadas de gelo que arrastam blocos de dolomita de 300 quilos deixando sulcos retilíneos na lama; a marcha silenciosa das pedras sob nevoeiro colide contra a comitiva com 3d8 de concussão.',
 
         pioneerMitigation: 'Observação dos sulcos frescos paralelos na lama e travessia perpendicular à direção do vento dominante.',
 
@@ -62907,7 +62907,7 @@
 
         saveType: 'Força',
 
-        desiccationRisk: 'Colinas e baixadas de argila esmectita vulcânica com superfície encaroçada seca que, ao menor aguaceiro repentino, absorve oito vezes seu volume em água transformando-se em uma cola pesada e escorregadia que arranca botas, derruba montarias e impõe 1 nível de exaustão por esforço extremo (DMG p. 110; PHB p. 185).',
+        desiccationRisk: 'Colinas e baixadas de argila esmectita vulcânica com superfície encaroçada seca que, ao menor aguaceiro repentino, absorve oito vezes seu volume em água transformando-se em uma cola pesada e escorregadia que arranca botas, derruba montarias e impõe 1 nível de exaustão por esforço extremo.',
 
         pioneerMitigation: 'Subida imediata para cristas de cascalho aluvial antes que a garoa molhe o solo de bentonita.',
 
@@ -62929,7 +62929,7 @@
 
         saveType: 'Destreza',
 
-        desiccationRisk: 'A água de tempestades raras escoa pelas fendas de dessecação escavando túneis ocultos no subsolo argiloso dispersivo (pseudocarste de argila) enquanto a superfície parece intacta; o peso da comitiva rompe a abóbada seca afundando os aventureiros em galerias poeirentas com 2d8 de concussão e asfixia por silte (DMG p. 110; PHB p. 183).',
+        desiccationRisk: 'A água de tempestades raras escoa pelas fendas de dessecação escavando túneis ocultos no subsolo argiloso dispersivo (pseudocarste de argila) enquanto a superfície parece intacta; o peso da comitiva rompe a abóbada seca afundando os aventureiros em galerias poeirentas com 2d8 de concussão e asfixia por silte.',
 
         pioneerMitigation: 'Evitar marchar alinhado sobre fileiras de pequenos sumidouros em funil ou arbustos secos alinhados.',
 
@@ -63069,7 +63069,7 @@
 
       saveType: 'Destreza',
 
-      solifluctionRisk: 'Durante a noite fria, colunas verticais de gelo fibroso de 10 centímetros erguem a camada superficial de terra e pedras na encosta; ao pisar pela manhã, os milhões de pilares de gelo quebram em efeito dominó fazendo o chão inteiro deslizar sob as botas rumo ao abismo com 3d8 de concussão (DMG p. 110; PHB p. 182-183).',
+      solifluctionRisk: 'Durante a noite fria, colunas verticais de gelo fibroso de 10 centímetros erguem a camada superficial de terra e pedras na encosta; ao pisar pela manhã, os milhões de pilares de gelo quebram em efeito dominó fazendo o chão inteiro deslizar sob as botas rumo ao abismo com 3d8 de concussão.',
 
       pioneerMitigation: 'Esmagamento prévio da crosta fofa de agulhas de gelo com o conto do bastão ferrado e marcha pelas cristas de rocha nua.',
 
@@ -63093,7 +63093,7 @@
 
         saveType: 'Força',
 
-        solifluctionRisk: 'Lobo em forma de língua de solo encharcado que escorre lentamente sobre a rocha congelada impermeável; a sobrecarga da comitiva rompe a frente bojuda da língua desencadeando uma corrida pastosa de lama gelada com 2d6 de frio e 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        solifluctionRisk: 'Lobo em forma de língua de solo encharcado que escorre lentamente sobre a rocha congelada impermeável; a sobrecarga da comitiva rompe a frente bojuda da língua desencadeando uma corrida pastosa de lama gelada com 2d6 de frio e 1 nível de exaustão.',
 
         pioneerMitigation: 'Travessia sempre por cima da cicatriz superior do lobo de solifluxão e nunca sobre sua barriga frontal.',
 
@@ -63115,7 +63115,7 @@
 
         saveType: 'Força',
 
-        solifluctionRisk: 'Depressão côncava de meia-encosta onde bancos perenes de neve represam água de degelo na base; a barreira saturada rompe subitamente disparando uma avalanche densa como concreto úmido que arrasta os aventureiros com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+        solifluctionRisk: 'Depressão côncava de meia-encosta onde bancos perenes de neve represam água de degelo na base; a barreira saturada rompe subitamente disparando uma avalanche densa como concreto úmido que arrasta os aventureiros com 3d8 de concussão.',
 
         pioneerMitigation: 'Desvio das manchas de neve escura azulada encharcada no fundo das concavidades alpinas.',
 
@@ -63137,7 +63137,7 @@
 
         saveType: 'Destreza',
 
-        solifluctionRisk: 'O ciclo diário de gelo e degelo separa os matacões finos da argila em faixas paralelas verticais na encosta; pisar nas faixas de pedras soltas sem matriz terrosa provoca um desmoronamento ruidoso sobre as canelas com 2d8 de concussão (PHB p. 182-183).',
+        solifluctionRisk: 'O ciclo diário de gelo e degelo separa os matacões finos da argila em faixas paralelas verticais na encosta; pisar nas faixas de pedras soltas sem matriz terrosa provoca um desmoronamento ruidoso sobre as canelas com 2d8 de concussão.',
 
         pioneerMitigation: 'Travessia em diagonal curta apoiando o pé nas faixas intermediárias de turfa compacta.',
 
@@ -63277,7 +63277,7 @@
 
       saveType: 'Destreza',
 
-      starDuneRisk: 'Montanha piramidal de areia de 250 metros de altura com múltiplos braços sinuosos; pisar na cornija de sotavento em ângulo crítico de repouso (34 graus) dispara uma placa inteira de areia seca que soterra a comitiva no caldeirão basal com 3d8 de concussão e asfixia (DMG p. 110; PHB p. 182-183).',
+      starDuneRisk: 'Montanha piramidal de areia de 250 metros de altura com múltiplos braços sinuosos; pisar na cornija de sotavento em ângulo crítico de repouso (34 graus) dispara uma placa inteira de areia seca que soterra a comitiva no caldeirão basal com 3d8 de concussão e asfixia.',
 
       pioneerMitigation: 'Marcha estrita pelo lado firme de barlavento (ondulado pelo vento) a 3 metros da linha da aresta.',
 
@@ -63301,7 +63301,7 @@
 
         saveType: 'Constituição',
 
-        starDuneRisk: 'O deslizamento sincronizado de milhões de grãos de quartzo polidos e extremamente secos gera um bramido grave ensurdecedor que faz vibrar o tórax e o solo por minutos; o estrondo mascara chamadas de alerta e impõe a condição Surdo por 1 hora e vertigem (DMG p. 110; PHB p. 183).',
+        starDuneRisk: 'O deslizamento sincronizado de milhões de grãos de quartzo polidos e extremamente secos gera um bramido grave ensurdecedor que faz vibrar o tórax e o solo por minutos; o estrondo mascara chamadas de alerta e impõe a condição Surdo por 1 hora e vertigem.',
 
         pioneerMitigation: 'Comunicação visual por bandeiras de mão entre o batedor da crista e o grupo da base.',
 
@@ -63323,7 +63323,7 @@
 
         saveType: 'Força',
 
-        starDuneRisk: 'Nas bacias fechadas entre os braços radiais da duna estrelada, uma casca milimétrica de argila ressecada esconde um metro de talco mineral sem coesão (fech-fech); animais e aventureiros afundam instantaneamente levantando nuvem sufocante e sofrendo 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        starDuneRisk: 'Nas bacias fechadas entre os braços radiais da duna estrelada, uma casca milimétrica de argila ressecada esconde um metro de talco mineral sem coesão (fech-fech); animais e aventureiros afundam instantaneamente levantando nuvem sufocante e sofrendo 1 nível de exaustão.',
 
         pioneerMitigation: 'Contorno das manchas cinza-claras fofas no fundo da bacia mantendo-se sobre o cascalho escuro.',
 
@@ -63345,7 +63345,7 @@
 
         saveType: 'Constituição',
 
-        starDuneRisk: 'O encontro de correntes de ar que sobem pelas três faces côncavas da duna estrelada gera redemoinhos verticais de areia cortante no cume, impondo a condição Cego e causando 2d6 de dano cortante por abrasão (DMG p. 110; XGE p. 109).',
+        starDuneRisk: 'O encontro de correntes de ar que sobem pelas três faces côncavas da duna estrelada gera redemoinhos verticais de areia cortante no cume, impondo a condição Cego e causando 2d6 de dano cortante por abrasão.',
 
         pioneerMitigation: 'Travessia pelos colos mais baixos dos braços laterais evitando o pico piramidal central.',
 
@@ -63485,7 +63485,7 @@
 
       saveType: 'Destreza',
 
-      sodaLakeRisk: 'Placa rosada de carbonato de sódio cristalizado que flutua sobre lama alcalina cáustica a 60°C; o piso quebra sob as botas mergulhando as pernas do aventureiro em lixívia natural corrosiva com 2d8 de dano de ácido e 2d6 de dano de fogo (DMG p. 110; PHB p. 182-183).',
+      sodaLakeRisk: 'Placa rosada de carbonato de sódio cristalizado que flutua sobre lama alcalina cáustica a 60°C; o piso quebra sob as botas mergulhando as pernas do aventureiro em lixívia natural corrosiva com 2d8 de dano de ácido e 2d6 de dano de fogo.',
 
       pioneerMitigation: 'Teste de resistência da crosta branca com estaca longa e marcha exclusiva sobre as cristas escuras de rocha vulcânica.',
 
@@ -63509,7 +63509,7 @@
 
         saveType: 'Constituição',
 
-        sodaLakeRisk: 'Pináculos brancos porosos de bicarbonato de sódio (trona) erguidos por nascentes subaquáticas quentes; a obstrução momentânea do conduto dispara um esguicho de água alcalina a 80°C que causa 3d8 de dano de ácido/fogo e cegueira química (DMG p. 110; XGE p. 109).',
+        sodaLakeRisk: 'Pináculos brancos porosos de bicarbonato de sódio (trona) erguidos por nascentes subaquáticas quentes; a obstrução momentânea do conduto dispara um esguicho de água alcalina a 80°C que causa 3d8 de dano de ácido/fogo e cegueira química.',
 
         pioneerMitigation: 'Contorno a barlavento das torres brancas fumegantes mantendo distância mínima de 12 metros.',
 
@@ -63531,7 +63531,7 @@
 
         saveType: 'Constituição',
 
-        sodaLakeRisk: 'Sob o sol implacável, a proliferação de microrganismos extremófilos tinge a água de vermelho-sangue e libera gases irritantes de amônia e aminas voláteis; a inalação contínua impõe a condição Envenenado por 1 hora e vertigem severa (DMG p. 110-111; PHB p. 183).',
+        sodaLakeRisk: 'Sob o sol implacável, a proliferação de microrganismos extremófilos tinge a água de vermelho-sangue e libera gases irritantes de amônia e aminas voláteis; a inalação contínua impõe a condição Envenenado por 1 hora e vertigem severa.',
 
         pioneerMitigation: 'Uso de lenços umedecidos em suco cítrico ou vinagre diluído para filtrar os vapores alcalinos.',
 
@@ -63553,7 +63553,7 @@
 
         saveType: 'Destreza',
 
-        sodaLakeRisk: 'As margens secas do lago são atapetadas por rosetas de cristais aciculares duros que corroem o couro ressecado das botas; escorregar sobre o banco mineral provoca cortes profundos impregnados de soda cáustica com 2d8 de dano cortante e 1d6 de ácido (PHB p. 182-183).',
+        sodaLakeRisk: 'As margens secas do lago são atapetadas por rosetas de cristais aciculares duros que corroem o couro ressecado das botas; escorregar sobre o banco mineral provoca cortes profundos impregnados de soda cáustica com 2d8 de dano cortante e 1d6 de ácido.',
 
         pioneerMitigation: 'Reforço das solas com chapas de madeira ou couro cru engraxado com sebo espesso.',
 
@@ -63693,7 +63693,7 @@
 
       saveType: 'Destreza',
 
-      slotCanyonRisk: 'Mesmo sob céu azul diretamente acima da fenda, uma tempestade nas cabeceiras a 20 quilômetros canaliza uma parede rugidora de água barrenta e troncos por uma garganta de 1 metro de largura e 50 metros de altura, esmagando a comitiva contra as curvas sinuosas com 4d8 de concussão (DMG p. 110; PHB p. 182-183).',
+      slotCanyonRisk: 'Mesmo sob céu azul diretamente acima da fenda, uma tempestade nas cabeceiras a 20 quilômetros canaliza uma parede rugidora de água barrenta e troncos por uma garganta de 1 metro de largura e 50 metros de altura, esmagando a comitiva contra as curvas sinuosas com 4d8 de concussão.',
 
       pioneerMitigation: 'Mapeamento prévio das rotas de escalada para o topo a cada 300 metros e monitoramento das nuvens na bacia hidrográfica superior.',
 
@@ -63717,7 +63717,7 @@
 
         saveType: 'Força',
 
-        slotCanyonRisk: 'Caldeirão circular de 4 metros de profundidade escavado no piso do cânion por seixos giratórios, com paredes negativas lisas como vidro e poça de água gelada na sombra eterna do fundo; quem desce não consegue subir sem ajuda externa sofrendo 2d6 de frio e 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        slotCanyonRisk: 'Caldeirão circular de 4 metros de profundidade escavado no piso do cânion por seixos giratórios, com paredes negativas lisas como vidro e poça de água gelada na sombra eterna do fundo; quem desce não consegue subir sem ajuda externa sofrendo 2d6 de frio e 1 nível de exaustão.',
 
         pioneerMitigation: 'Lançamento de saco de areia amarrado a uma corda (pot shot) além da borda oposta da marmita antes do primeiro aventureiro descer.',
 
@@ -63739,7 +63739,7 @@
 
         saveType: 'Destreza',
 
-        slotCanyonRisk: 'Bloco redondo de 5 toneladas preso a 6 metros de altura apenas pelo atrito entre as duas paredes convergentes da fenda; apoiar o peso ou ancorar corda na pedra instável rompe o equilíbrio fazendo o matacão desabar sobre o corredor estreito com 3d10 de concussão (DMG p. 110; XGE p. 109).',
+        slotCanyonRisk: 'Bloco redondo de 5 toneladas preso a 6 metros de altura apenas pelo atrito entre as duas paredes convergentes da fenda; apoiar o peso ou ancorar corda na pedra instável rompe o equilíbrio fazendo o matacão desabar sobre o corredor estreito com 3d10 de concussão.',
 
         pioneerMitigation: 'Passagem silenciosa por baixo do bloco sem tocá-lo ou contorno por chaminé superior ancorada na rocha matriz.',
 
@@ -63761,7 +63761,7 @@
 
         saveType: 'Destreza',
 
-        slotCanyonRisk: 'Para evitar poços inundados no fundo, o grupo avança a 8 metros de altura pressionando pés e costas contra as paredes opostas do cânito; grãos de areia solta sob a sola fazem o pé escorregar em efeito zíper causando queda de 3d6 de concussão e abrasão severa (PHB p. 182-183).',
+        slotCanyonRisk: 'Para evitar poços inundados no fundo, o grupo avança a 8 metros de altura pressionando pés e costas contra as paredes opostas do cânito; grãos de areia solta sob a sola fazem o pé escorregar em efeito zíper causando queda de 3d6 de concussão e abrasão severa.',
 
         pioneerMitigation: 'Limpeza da areia das solas antes de cada passo e manutenção de três pontos de contato de pressão.',
 
@@ -63901,7 +63901,7 @@
 
       saveType: 'Destreza',
 
-      cypressBayouRisk: 'O tapete contínuo de lentilha-d’água verde esconde centenas de projeções cônicas de madeira dura que brotam das raízes submersas dos ciprestes-calvos; tropeçar ou virar o bote sobre essas lanças naturais causa 3d8 de dano perfurante e concussão (DMG p. 109-110; PHB p. 182-183).',
+      cypressBayouRisk: 'O tapete contínuo de lentilha-d’água verde esconde centenas de projeções cônicas de madeira dura que brotam das raízes submersas dos ciprestes-calvos; tropeçar ou virar o bote sobre essas lanças naturais causa 3d8 de dano perfurante e concussão.',
 
       pioneerMitigation: 'Sondagem contínua à frente da proa ou das botas com vara de freixo e avanço lento pelo canal profundo.',
 
@@ -63925,7 +63925,7 @@
 
         saveType: 'Sabedoria',
 
-        cypressBayouRisk: 'Bancos espessos de turfa e capim aquático sem raízes no fundo movem-se silenciosamente com o vento no lago de meandro abandonado (oxbow), fechando o canal por onde a comitiva entrou e induzindo 4 horas de desorientação e 1 nível de exaustão (DMG p. 110-111; PHB p. 185).',
+        cypressBayouRisk: 'Bancos espessos de turfa e capim aquático sem raízes no fundo movem-se silenciosamente com o vento no lago de meandro abandonado (oxbow), fechando o canal por onde a comitiva entrou e induzindo 4 horas de desorientação e 1 nível de exaustão.',
 
         pioneerMitigation: 'Entalhe de marcas visíveis na casca alta dos ciprestes centenários (que têm raiz fixa no fundo) e nunca nas margens de capim.',
 
@@ -63947,7 +63947,7 @@
 
         saveType: 'Constituição',
 
-        cypressBayouRisk: 'As bases alargadas e caneladas dos grandes troncos formam cavernas secas logo acima da linha d’água onde serpentes aquáticas peçonhentas se aglomeram; apoiar as mãos nas fendas do tronco provoca botes múltiplos com 2d8 de dano de veneno e condição Envenenado por 1 hora (DMG p. 110; XGE p. 109).',
+        cypressBayouRisk: 'As bases alargadas e caneladas dos grandes troncos formam cavernas secas logo acima da linha d’água onde serpentes aquáticas peçonhentas se aglomeram; apoiar as mãos nas fendas do tronco provoca botes múltiplos com 2d8 de dano de veneno e condição Envenenado por 1 hora.',
 
         pioneerMitigation: 'Inspeção das cavidades dos troncos com fumaça de tocha resinosa antes de atracar ou apoiar o equipamento.',
 
@@ -63969,7 +63969,7 @@
 
         saveType: 'Força',
 
-        cypressBayouRisk: 'O fundo do braço morto do rio acumula metros de folhas decompostas em lama preta sem oxigênio; pisar no depósito libera bolhas sufocantes de metano e gás sulfídrico enquanto a vasa suga as pernas causando 2d6 de dano de veneno (DMG p. 109; PHB p. 182).',
+        cypressBayouRisk: 'O fundo do braço morto do rio acumula metros de folhas decompostas em lama preta sem oxigênio; pisar no depósito libera bolhas sufocantes de metano e gás sulfídrico enquanto a vasa suga as pernas causando 2d6 de dano de veneno.',
 
         pioneerMitigation: 'Marcha sobre troncos caídos submersos de madeira de cipreste (que não apodrecem sob a água).',
 
@@ -64109,7 +64109,7 @@
 
       saveType: 'Destreza',
 
-      highlandSalarRisk: 'Poço vertical cilíndrico aberto na placa de sal que comunica com o lago subterrâneo de salmoura rica em lítio e magnésio a -5°C (líquida abaixo de zero pela salinidade extrema); a borda em balanço quebra mergulhando o explorador no abismo cáustico e gelado com 3d8 de dano de frio (DMG p. 110; PHB p. 182-183).',
+      highlandSalarRisk: 'Poço vertical cilíndrico aberto na placa de sal que comunica com o lago subterrâneo de salmoura rica em lítio e magnésio a -5°C (líquida abaixo de zero pela salinidade extrema); a borda em balanço quebra mergulhando o explorador no abismo cáustico e gelado com 3d8 de dano de frio.',
 
       pioneerMitigation: 'Desvio de manchas circulares azul-turquesa ou alaranjadas na planície branca e marcha encordada.',
 
@@ -64133,7 +64133,7 @@
 
         saveType: 'Destreza',
 
-        highlandSalarRisk: 'A expansão térmica da crosta de halita levanta bordas poligonais hexagonais de 40 centímetros duras como concreto e eriçadas de cristais agudos; tropeçar nas placas empenadas causa torções severas e cortes profundos com 2d8 de dano cortante/concussão (PHB p. 182-183).',
+        highlandSalarRisk: 'A expansão térmica da crosta de halita levanta bordas poligonais hexagonais de 40 centímetros duras como concreto e eriçadas de cristais agudos; tropeçar nas placas empenadas causa torções severas e cortes profundos com 2d8 de dano cortante/concussão.',
 
         pioneerMitigation: 'Uso de botas de cano alto reforçado e apoio rítmico de bastões duplos no centro plano de cada hexágono.',
 
@@ -64155,7 +64155,7 @@
 
         saveType: 'Constituição',
 
-        highlandSalarRisk: 'Uma lâmina de 2 centímetros de água sobre o sal plano transforma a bacia inteira em um espelho perfeito que funde céu e chão a 4.000 metros de altitude; a ausência total de horizonte e a radiação solar duplicada impõem a condição Cego e perda de direção (DMG p. 110-111; PHB p. 183).',
+        highlandSalarRisk: 'Uma lâmina de 2 centímetros de água sobre o sal plano transforma a bacia inteira em um espelho perfeito que funde céu e chão a 4.000 metros de altitude; a ausência total de horizonte e a radiação solar duplicada impõem a condição Cego e perda de direção.',
 
         pioneerMitigation: 'Navegação estrita por azimute de bússola e uso de viseiras de fenda estreita escurecidas com carvão.',
 
@@ -64177,7 +64177,7 @@
 
         saveType: 'Constituição',
 
-        highlandSalarRisk: 'Sem nenhuma árvore ou rocha por dezenas de quilômetros, o vento gelado desce dos vulcões vizinhos carregando poeira fina de sal e bórax no ar rarefeito; a queda brusca para -20°C causa 2d8 de dano de frio e 1 nível de exaustão (DMG p. 110; XGE p. 109).',
+        highlandSalarRisk: 'Sem nenhuma árvore ou rocha por dezenas de quilômetros, o vento gelado desce dos vulcões vizinhos carregando poeira fina de sal e bórax no ar rarefeito; a queda brusca para -20°C causa 2d8 de dano de frio e 1 nível de exaustão.',
 
         pioneerMitigation: 'Construção rápida de mureta corta-vento com blocos de sal serrados na própria crosta.',
 
@@ -64317,7 +64317,7 @@
 
       saveType: 'Força',
 
-      poljeEstavelleRisk: 'Orifício cárstico de dupla função no fundo plano do vale fechado que, após chuvas nas montanhas distantes, inverte seu fluxo de sumidouro para gêiser artesiano; a água fria brota do chão inundando os prados do polje com 3d8 de concussão e isolando as rotas terrestres (DMG p. 110; PHB p. 182-183).',
+      poljeEstavelleRisk: 'Orifício cárstico de dupla função no fundo plano do vale fechado que, após chuvas nas montanhas distantes, inverte seu fluxo de sumidouro para gêiser artesiano; a água fria brota do chão inundando os prados do polje com 3d8 de concussão e isolando as rotas terrestres.',
 
       pioneerMitigation: 'Escuta do rugido de ar expelido pelas bocas de rocha no chão do vale e marcha pelo sopé alto das escarpas.',
 
@@ -64341,7 +64341,7 @@
 
         saveType: 'Força',
 
-        poljeEstavelleRisk: 'Quando o lago intermitente (turlough) drena para o subsolo, deixa uma película branca contínua de algas secas entrelaçadas sobre marga calcária fluida; a crosta rasga sob as botas prendendo os exploradores em barro branco pegajoso e impondo 1 nível de exaustão (DMG p. 109-110; PHB p. 185).',
+        poljeEstavelleRisk: 'Quando o lago intermitente (turlough) drena para o subsolo, deixa uma película branca contínua de algas secas entrelaçadas sobre marga calcária fluida; a crosta rasga sob as botas prendendo os exploradores em barro branco pegajoso e impondo 1 nível de exaustão.',
 
         pioneerMitigation: 'Sondagem da espessura da marga com cajado antes de cruzar o leito vazante do lago estacional.',
 
@@ -64363,7 +64363,7 @@
 
         saveType: 'Destreza',
 
-        poljeEstavelleRisk: 'Durante a subida rápida das águas do polje, toda a fauna terrestre e víboras-de-chifre buscam abrigo nas mesmas colinas cônicas de calcário residual (hums) crivadas de poços; a escalada apressada causa quedas e picadas com 2d8 de dano perfurante/veneno (DMG p. 110; XGE p. 109).',
+        poljeEstavelleRisk: 'Durante a subida rápida das águas do polje, toda a fauna terrestre e víboras-de-chifre buscam abrigo nas mesmas colinas cônicas de calcário residual (hums) crivadas de poços; a escalada apressada causa quedas e picadas com 2d8 de dano perfurante/veneno.',
 
         pioneerMitigation: 'Batida prévia das lajes calcárias com bastão longo e uso de perneiras altas de couro grosso.',
 
@@ -64385,7 +64385,7 @@
 
         saveType: 'Força',
 
-        poljeEstavelleRisk: 'Na fase de vazante do lago turlough, o volume inteiro da bacia é sugado por fendas submersas no calcário; o vórtex oculto entre os juncos puxa os aventureiros contra grades naturais de rocha afiada com 3d6 de concussão (PHB p. 182-183).',
+        poljeEstavelleRisk: 'Na fase de vazante do lago turlough, o volume inteiro da bacia é sugado por fendas submersas no calcário; o vórtex oculto entre os juncos puxa os aventureiros contra grades naturais de rocha afiada com 3d6 de concussão.',
 
         pioneerMitigation: 'Observação de movimentos circulares na superfície da água e contorno a 25 metros das depressões marginais.',
 
@@ -64525,7 +64525,7 @@
 
       saveType: 'Constituição',
 
-      maarLakeRisk: 'O fundo profundo do lago de cratera acumula milhões de metros cúbicos de gás carbônico magmático dissolvido sob pressão; a queda de uma rocha na encosta desencadeia a efervescência súbita de uma coluna leitosa que libera um manto invisível e sufocante de CO2 causando 3d8 de dano necrótico por hipóxia (DMG p. 110; PHB p. 183).',
+      maarLakeRisk: 'O fundo profundo do lago de cratera acumula milhões de metros cúbicos de gás carbônico magmático dissolvido sob pressão; a queda de uma rocha na encosta desencadeia a efervescência súbita de uma coluna leitosa que libera um manto invisível e sufocante de CO2 causando 3d8 de dano necrótico por hipóxia.',
 
       pioneerMitigation: 'Proibição absoluta de descer até a praia interna quando a água apresentar manchas avermelhadas de ferro oxidado ou ausência de aves.',
 
@@ -64549,7 +64549,7 @@
 
         saveType: 'Destreza',
 
-        maarLakeRisk: 'As paredes internas da cratera são formadas por lâminas finas de cinza úmida pouco consolidada depositadas por nuvens rasantes (base surge); o peso da comitiva destaca placas inteiras que escorregam rumo às águas profundas do maar com 3d8 de concussão (DMG p. 110; PHB p. 182).',
+        maarLakeRisk: 'As paredes internas da cratera são formadas por lâminas finas de cinza úmida pouco consolidada depositadas por nuvens rasantes (base surge); o peso da comitiva destaca placas inteiras que escorregam rumo às águas profundas do maar com 3d8 de concussão.',
 
         pioneerMitigation: 'Caminhada sobre os afloramentos radiais de diques basálticos firmes que cortam o anel de tufo.',
 
@@ -64571,7 +64571,7 @@
 
         saveType: 'Destreza',
 
-        maarLakeRisk: 'A infiltração súbita de água do lago através de uma falha atinge rocha incandescente rasa, gerando uma detonação de vapor que arremessa blocos angulares de granito e peridotito sem aviso prévio com 3d10 de dano de concussão e fogo (DMG p. 110; XGE p. 109).',
+        maarLakeRisk: 'A infiltração súbita de água do lago através de uma falha atinge rocha incandescente rasa, gerando uma detonação de vapor que arremessa blocos angulares de granito e peridotito sem aviso prévio com 3d10 de dano de concussão e fogo.',
 
         pioneerMitigation: 'Monitoramento de borbulhamentos quentes nas margens e travessia rápida pelo setor externo do anel.',
 
@@ -64593,7 +64593,7 @@
 
         saveType: 'Força',
 
-        maarLakeRisk: 'As margens rasas do lago estratificado acumulam um precipitado gelatinoso cor de ferrugem sobre areia vulcânica sem oxigênio; quem pisa na borda afunda em talude subaquático abrupto de 45 graus sofrendo 1 nível de exaustão para escapar (DMG p. 109-110; PHB p. 185).',
+        maarLakeRisk: 'As margens rasas do lago estratificado acumulam um precipitado gelatinoso cor de ferrugem sobre areia vulcânica sem oxigênio; quem pisa na borda afunda em talude subaquático abrupto de 45 graus sofrendo 1 nível de exaustão para escapar.',
 
         pioneerMitigation: 'Coleta de amostras à distância com balde amarrado em corda sem jamais pisar na linha d’água alaranjada.',
 
@@ -64733,7 +64733,7 @@
 
       saveType: 'Força',
 
-      sandurJokulhlaupRisk: 'O derretimento geotérmico sob a calota de gelo rompe o túnel frontal liberando um dilúvio repentino de água barrenta e blocos de gelo do tamanho de casas que varre toda a planície negra de sandur com 4d8 de concussão e 2d6 de frio (DMG p. 110; PHB p. 182-183).',
+      sandurJokulhlaupRisk: 'O derretimento geotérmico sob a calota de gelo rompe o túnel frontal liberando um dilúvio repentino de água barrenta e blocos de gelo do tamanho de casas que varre toda a planície negra de sandur com 4d8 de concussão e 2d6 de frio.',
 
       pioneerMitigation: 'Atenção imediata ao cheiro de gás sulfídrico vindo dos rios glaciais e travessia rápida entre afloramentos rochosos.',
 
@@ -64757,7 +64757,7 @@
 
         saveType: 'Força',
 
-        sandurJokulhlaupRisk: 'Centenas de braços rasos de água leitosa mudam de leito a cada hora sobre areia basáltica saturada; o fundo cede sob o peso das botas prendendo o explorador na correnteza congelante e impondo 1 nível de exaustão (DMG p. 109-110; PHB p. 185).',
+        sandurJokulhlaupRisk: 'Centenas de braços rasos de água leitosa mudam de leito a cada hora sobre areia basáltica saturada; o fundo cede sob o peso das botas prendendo o explorador na correnteza congelante e impondo 1 nível de exaustão.',
 
         pioneerMitigation: 'Travessia nas barras diagonais onde a água forma ondulações rasas (riffles) e formação em triângulo de apoio mútuo.',
 
@@ -64779,7 +64779,7 @@
 
         saveType: 'Destreza',
 
-        sandurJokulhlaupRisk: 'Antigos blocos gigantes de gelo deixados pela última cheia derretem lentamente sob metros de cinza e cascalho, deixando cavernas ocas invisíveis na superfície; o piso desaba precipitando o batedor em cratera de paredes escorregadias com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+        sandurJokulhlaupRisk: 'Antigos blocos gigantes de gelo deixados pela última cheia derretem lentamente sob metros de cinza e cascalho, deixando cavernas ocas invisíveis na superfície; o piso desaba precipitando o batedor em cratera de paredes escorregadias com 3d8 de concussão.',
 
         pioneerMitigation: 'Desvio de anéis circulares de subsidência na areia negra e marcha encordada.',
 
@@ -64801,7 +64801,7 @@
 
         saveType: 'Constituição',
 
-        sandurJokulhlaupRisk: 'O vento gelado que despenca da geleira acelera sobre a planície nua levantando nuvens negras de vidro vulcânico moído e poeira ácida; a tempestade fere os olhos impondo a condição Cego e 2d6 de dano de veneno/cortante (DMG p. 110; PHB p. 183).',
+        sandurJokulhlaupRisk: 'O vento gelado que despenca da geleira acelera sobre a planície nua levantando nuvens negras de vidro vulcânico moído e poeira ácida; a tempestade fere os olhos impondo a condição Cego e 2d6 de dano de veneno/cortante.',
 
         pioneerMitigation: 'Uso de máscaras de couro com lentes de mica e abrigo atrás de matacões erráticos.',
 
@@ -64941,7 +64941,7 @@
 
       saveType: 'Destreza',
 
-      tepuiSimaRisk: 'Poço gigante de abatimento vertical com 300 metros de profundidade escavado no platô pré-cambriano da meseta (tepui) e encoberto por cerração perpétua; um passo em falso na borda negativa precipita o batedor contra ressaltos de quartzito com 4d10 de concussão (DMG p. 110, 201; PHB p. 182-183).',
+      tepuiSimaRisk: 'Poço gigante de abatimento vertical com 300 metros de profundidade escavado no platô pré-cambriano da meseta (tepui) e encoberto por cerração perpétua; um passo em falso na borda negativa precipita o batedor contra ressaltos de quartzito com 4d10 de concussão.',
 
       pioneerMitigation: 'Avanço encordado com sondagem acústica (lançamento de seixos no nevoeiro) e leitura da drenagem radial das lajes.',
 
@@ -64965,7 +64965,7 @@
 
         saveType: 'Força',
 
-        tepuiSimaRisk: 'O choque de nuvens oceânicas contra a muralha do tepui despeja dilúvios instantâneos sobre a rocha nua sem solo; os riachos cor de âmbar incham em segundos arrastando a comitiva em direção ao salto vertical do abismo com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+        tepuiSimaRisk: 'O choque de nuvens oceânicas contra a muralha do tepui despeja dilúvios instantâneos sobre a rocha nua sem solo; os riachos cor de âmbar incham em segundos arrastando a comitiva em direção ao salto vertical do abismo com 3d8 de concussão.',
 
         pioneerMitigation: 'Travessia dos rios do cume a pelo menos 200 metros de distância da linha de queda da escarpa com cabo estendido.',
 
@@ -64987,7 +64987,7 @@
 
         saveType: 'Destreza',
 
-        tepuiSimaRisk: 'O topo da montanha-mesa é coberto por crosta negra escorregadia de colônias de algas primitivas, charcos de plantas carnívoras (Heliamphora) e fendas afiadas de dissolução siliciosa; a queda corta membros e desorienta na cerração com 2d8 de dano cortante (DMG p. 110-111; PHB p. 182).',
+        tepuiSimaRisk: 'O topo da montanha-mesa é coberto por crosta negra escorregadia de colônias de algas primitivas, charcos de plantas carnívoras (Heliamphora) e fendas afiadas de dissolução siliciosa; a queda corta membros e desorienta na cerração com 2d8 de dano cortante.',
 
         pioneerMitigation: 'Uso de solados cravejados e balizamento da trilha com fitas vermelhas visíveis sob nevoeiro denso.',
 
@@ -65009,7 +65009,7 @@
 
         saveType: 'Constituição',
 
-        tepuiSimaRisk: 'Correntes ascendentes violentas que sobem dos vales de selva batem no paredão vertical de 1.000 metros e invertem o curso das cachoeiras em tempestade ascendente de névoa gelada; as vestes encharcam de baixo para cima causando 2d6 de dano de frio e 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        tepuiSimaRisk: 'Correntes ascendentes violentas que sobem dos vales de selva batem no paredão vertical de 1.000 metros e invertem o curso das cachoeiras em tempestade ascendente de névoa gelada; as vestes encharcam de baixo para cima causando 2d6 de dano de frio e 1 nível de exaustão.',
 
         pioneerMitigation: 'Capas impermeáveis amarradas na cintura e nas coxas e recuo para galerias abrigadas no interior das diáclases.',
 
@@ -65149,7 +65149,7 @@
 
       saveType: 'Constituição',
 
-      seleniteCaveRisk: 'Geodo subterrâneo aquecido por intrusão magmática profunda a 50°C com 98% de umidade; como o ar é mais quente que o corpo humano, o vapor condensa diretamente dentro dos alvéolos pulmonares causando afogamento a seco com 2d8 de dano de fogo e 1 nível de exaustão (DMG p. 110, 201; PHB p. 185).',
+      seleniteCaveRisk: 'Geodo subterrâneo aquecido por intrusão magmática profunda a 50°C com 98% de umidade; como o ar é mais quente que o corpo humano, o vapor condensa diretamente dentro dos alvéolos pulmonares causando afogamento a seco com 2d8 de dano de fogo e 1 nível de exaustão.',
 
       pioneerMitigation: 'Incursões cronometradas de no máximo 15 minutos respirando através de esponjas embebidas em água fria trazida da superfície.',
 
@@ -65173,7 +65173,7 @@
 
         saveType: 'Destreza',
 
-        seleniteCaveRisk: 'Travessia sobre colunas gigantes de gipsita cristalina de 12 metros de comprimento que cruzam o vazio da caverna; a superfície lisa de dureza 2 recoberta de suor mineral arremessa o aventureiro sobre drusas pontiagudas no piso com 3d8 de dano perfurante/cortante (DMG p. 201; PHB p. 182-183).',
+        seleniteCaveRisk: 'Travessia sobre colunas gigantes de gipsita cristalina de 12 metros de comprimento que cruzam o vazio da caverna; a superfície lisa de dureza 2 recoberta de suor mineral arremessa o aventureiro sobre drusas pontiagudas no piso com 3d8 de dano perfurante/cortante.',
 
         pioneerMitigation: 'Revestimento das botas com meias grossas de lã áspera (nunca cravos de ferro que racham o cristal) e corda passada em laço largo.',
 
@@ -65195,7 +65195,7 @@
 
         saveType: 'Destreza',
 
-        seleniteCaveRisk: 'Os megacristais de sulfato de cálcio hidratado possuem planos de clivagem perfeitos submetidos a imensa tensão interna; o impacto de uma marreta ou jato de água gelada fende uma viga de 20 toneladas que desaba em guilhotinas transparentes com 3d10 de dano cortante (DMG p. 110; XGE p. 109).',
+        seleniteCaveRisk: 'Os megacristais de sulfato de cálcio hidratado possuem planos de clivagem perfeitos submetidos a imensa tensão interna; o impacto de uma marreta ou jato de água gelada fende uma viga de 20 toneladas que desaba em guilhotinas transparentes com 3d10 de dano cortante.',
 
         pioneerMitigation: 'Proibição absoluta de cravar pítons nos cristais ou usar magias de frio/trovão dentro do geodo gigante.',
 
@@ -65217,7 +65217,7 @@
 
         saveType: 'Destreza',
 
-        seleniteCaveRisk: 'O piso da caverna composto por anidrita absorve a umidade termal e expande de volume, formando domos ocos e quebradiços sobre fissuras de água sulfurosa a 70°C; a casca cede queimando os pés e pernas com 2d8 de dano de fogo (PHB p. 182-183).',
+        seleniteCaveRisk: 'O piso da caverna composto por anidrita absorve a umidade termal e expande de volume, formando domos ocos e quebradiços sobre fissuras de água sulfurosa a 70°C; a casca cede queimando os pés e pernas com 2d8 de dano de fogo.',
 
         pioneerMitigation: 'Caminhada sobre a base maciça dos grandes cristais ancorados na rocha matriz calcária.',
 
@@ -65357,7 +65357,7 @@
 
       saveType: 'Força',
 
-      blowholeSurgeRisk: 'Poço vertical no topo do promontório rochoso conectado a uma caverna submarina; a entrada de uma onda de tempestade comprime o ar na galeria e dispara um gêiser violento de espuma, seixos e água salgada que arremessa quem passa sobre a fenda com 3d8 de concussão (DMG p. 110, 117; PHB p. 182-183).',
+      blowholeSurgeRisk: 'Poço vertical no topo do promontório rochoso conectado a uma caverna submarina; a entrada de uma onda de tempestade comprime o ar na galeria e dispara um gêiser violento de espuma, seixos e água salgada que arremessa quem passa sobre a fenda com 3d8 de concussão.',
 
       pioneerMitigation: 'Observação das manchas circulares úmidas e sem líquen na laje costeira e travessia a 15 metros dos respiradouros.',
 
@@ -65381,7 +65381,7 @@
 
         saveType: 'Força',
 
-        blowholeSurgeRisk: 'Quando o vagalhão recua do interior da caverna costeira, cria-se um vácuo poderoso que suga tudo no piso da galeria através do sifão estreito em direção ao mar aberto, raspando os aventureiros contra paredes de cracas com 3d6 de dano cortante e risco de afogamento (DMG p. 117; PHB p. 182-183).',
+        blowholeSurgeRisk: 'Quando o vagalhão recua do interior da caverna costeira, cria-se um vácuo poderoso que suga tudo no piso da galeria através do sifão estreito em direção ao mar aberto, raspando os aventureiros contra paredes de cracas com 3d6 de dano cortante e risco de afogamento.',
 
         pioneerMitigation: 'Ancoragem em grampos altos na parede da caverna antes da chegada da série de ondas maiores.',
 
@@ -65403,7 +65403,7 @@
 
         saveType: 'Constituição',
 
-        blowholeSurgeRisk: 'Em galerias marinhas sem chaminé superior de escape, a parede de água sela a entrada e comprime o bolsão de ar interno como um cilindro de bomba; o estrondo sônico e o salto barométrico causam 3d8 de dano trovejante e a condição Surdo por 1 hora (DMG p. 110; XGE p. 109).',
+        blowholeSurgeRisk: 'Em galerias marinhas sem chaminé superior de escape, a parede de água sela a entrada e comprime o bolsão de ar interno como um cilindro de bomba; o estrondo sônico e o salto barométrico causam 3d8 de dano trovejante e a condição Surdo por 1 hora.',
 
         pioneerMitigation: 'Proibição de adentrar câmaras costeiras sem chaminé de ventilação durante a maré enchente.',
 
@@ -65425,7 +65425,7 @@
 
         saveType: 'Destreza',
 
-        blowholeSurgeRisk: 'Os degraus inferiores do promontório são inteiramente revestidos por carapaças calcárias cônicas e conchas bivalves afiadas como bisturis; o impacto de uma onda lateral arrasta o explorador sobre a crosta biológica causando 3d6 de dano cortante (PHB p. 182-183).',
+        blowholeSurgeRisk: 'Os degraus inferiores do promontório são inteiramente revestidos por carapaças calcárias cônicas e conchas bivalves afiadas como bisturis; o impacto de uma onda lateral arrasta o explorador sobre a crosta biológica causando 3d6 de dano cortante.',
 
         pioneerMitigation: 'Uso de botas de sola grossa cravada e perneiras de couro curtido ao cruzar a zona entremarés.',
 
@@ -65565,7 +65565,7 @@
 
       saveType: 'Força',
 
-      palsaMireRisk: 'Pântano boreal estriado formado por diques estreitos de musgo (strängar) separados por lagoas lineares de lodo orgânico líquido (flarks); escorregar da crista estreita submerge o aventureiro em turfa gelada até os ombros impondo 1 nível de exaustão e 2d6 de frio (DMG p. 109-110; PHB p. 182-183).',
+      palsaMireRisk: 'Pântano boreal estriado formado por diques estreitos de musgo (strängar) separados por lagoas lineares de lodo orgânico líquido (flarks); escorregar da crista estreita submerge o aventureiro em turfa gelada até os ombros impondo 1 nível de exaustão e 2d6 de frio.',
 
       pioneerMitigation: 'Marcha em fila indiana rigorosa sobre a crista dos cordões de carriço sondando a firmeza com vara longa.',
 
@@ -65589,7 +65589,7 @@
 
         saveType: 'Destreza',
 
-        palsaMireRisk: 'Colina oval de 6 metros de altura com núcleo perene de turfa congelada cercada por um fosso circular de água negra onde o gelo interno está derretendo; blocos inteiros da encosta escura desabam no fosso causando 2d8 de concussão e 2d6 de frio (DMG p. 110; XGE p. 109).',
+        palsaMireRisk: 'Colina oval de 6 metros de altura com núcleo perene de turfa congelada cercada por um fosso circular de água negra onde o gelo interno está derretendo; blocos inteiros da encosta escura desabam no fosso causando 2d8 de concussão e 2d6 de frio.',
 
         pioneerMitigation: 'Subida na palsa apenas pela rampa de barlavento intacta evitando as paredes verticais escavadas pela água.',
 
@@ -65611,7 +65611,7 @@
 
         saveType: 'Destreza',
 
-        palsaMireRisk: 'Prado verdejante elástico que ondula a cada passo por flutuar sobre uma lagoa subterrânea de 5 metros de profundidade; o peso concentrado rasga a malha de raízes fechando a abertura sobre a cabeça do explorador com risco severo de afogamento (DMG p. 109; PHB p. 183).',
+        palsaMireRisk: 'Prado verdejante elástico que ondula a cada passo por flutuar sobre uma lagoa subterrânea de 5 metros de profundidade; o peso concentrado rasga a malha de raízes fechando a abertura sobre a cabeça do explorador com risco severo de afogamento.',
 
         pioneerMitigation: 'Travessia rastejante ou com raquetes largas de vime mantendo distância de 6 metros entre os integrantes.',
 
@@ -65633,7 +65633,7 @@
 
         saveType: 'Constituição',
 
-        palsaMireRisk: 'Sob o sol abafado, os arbustos densos de Rhododendron boreal liberam vapores pesados de terpenos voláteis que provocam cefaleia e vertigem, agravados por enxames sufocantes de moscas negras que impõem a condição Envenenado por 1 hora (DMG p. 110; PHB p. 183).',
+        palsaMireRisk: 'Sob o sol abafado, os arbustos densos de Rhododendron boreal liberam vapores pesados de terpenos voláteis que provocam cefaleia e vertigem, agravados por enxames sufocantes de moscas negras que impõem a condição Envenenado por 1 hora.',
 
         pioneerMitigation: 'Uso de véus de crina trançada sobre o rosto e aplicação de alcatrão de casca de bétula na pele exposta.',
 
@@ -65773,7 +65773,7 @@
 
       saveType: 'Destreza',
 
-      loessRavineRisk: 'Os depósitos eólicos de silte amarelo apresentam juntas de clivagem perfeitamente verticais de 25 metros de altura; o ressecamento ou vibração destaca fatias inteiras do barranco que desabam silenciosamente soterrando o fundo da garganta com 3d10 de concussão (DMG p. 110; PHB p. 182-183).',
+      loessRavineRisk: 'Os depósitos eólicos de silte amarelo apresentam juntas de clivagem perfeitamente verticais de 25 metros de altura; o ressecamento ou vibração destaca fatias inteiras do barranco que desabam silenciosamente soterrando o fundo da garganta com 3d10 de concussão.',
 
       pioneerMitigation: 'Inspeção de fendas de tração no topo da barranca e marcha pelo leito central longe da base dos paredões.',
 
@@ -65797,7 +65797,7 @@
 
         saveType: 'Destreza',
 
-        loessRavineRisk: 'A infiltração das águas pluviais dissolve o cimento calcário do silte e escava galerias cegas de 15 metros de profundidade sob o capim aparentemente contínuo da estepe; o teto desmorona sob os pés lançando o explorador no fundo do poço seco com 3d8 de concussão (DMG p. 110; PHB p. 182).',
+        loessRavineRisk: 'A infiltração das águas pluviais dissolve o cimento calcário do silte e escava galerias cegas de 15 metros de profundidade sob o capim aparentemente contínuo da estepe; o teto desmorona sob os pés lançando o explorador no fundo do poço seco com 3d8 de concussão.',
 
         pioneerMitigation: 'Desvio de alinhamentos de depressões em funil e marcha encordada nas cabeceiras das ravinas (ovragi).',
 
@@ -65819,7 +65819,7 @@
 
         saveType: 'Constituição',
 
-        loessRavineRisk: 'O vento canalizado pelas gargantas levanta nuvens densas de partículas microscópicas de quartzo e feldspato que penetram nas vestes e pulmões; a visibilidade cai a zero impondo a condição Cego e 1 nível de exaustão por asfixia seca (DMG p. 110; PHB p. 183).',
+        loessRavineRisk: 'O vento canalizado pelas gargantas levanta nuvens densas de partículas microscópicas de quartzo e feldspato que penetram nas vestes e pulmões; a visibilidade cai a zero impondo a condição Cego e 1 nível de exaustão por asfixia seca.',
 
         pioneerMitigation: 'Proteção ocular com óculos de couro vedados e respiração através de pano úmido dobrado.',
 
@@ -65841,7 +65841,7 @@
 
         saveType: 'Força',
 
-        loessRavineRisk: 'Assim que um aguaceiro atinge o platô, a estrutura porosa do loess colapsa instantaneamente transformando paredes sólidas em um rio denso de lama amarela que corre pelas ravinas com 3d6 de concussão e arrastamento (DMG p. 110; XGE p. 109).',
+        loessRavineRisk: 'Assim que um aguaceiro atinge o platô, a estrutura porosa do loess colapsa instantaneamente transformando paredes sólidas em um rio denso de lama amarela que corre pelas ravinas com 3d6 de concussão e arrastamento.',
 
         pioneerMitigation: 'Subida imediata para os terraços escalonados superiores ao primeiro sinal de trovoada no horizonte.',
 
@@ -65981,7 +65981,7 @@
 
       saveType: 'Destreza',
 
-      grabenFissureRisk: 'Enxame de fendas paralelas de afastamento crustal com 2 metros de largura e 30 metros de profundidade, cujas bocas são encobertas por tapetes espessos de musgo lanoso; o tapete vegetal rasga sob as botas precipitando o batedor entre paredes verticais de basalto com 3d10 de concussão (DMG p. 110; PHB p. 182-183).',
+      grabenFissureRisk: 'Enxame de fendas paralelas de afastamento crustal com 2 metros de largura e 30 metros de profundidade, cujas bocas são encobertas por tapetes espessos de musgo lanoso; o tapete vegetal rasga sob as botas precipitando o batedor entre paredes verticais de basalto com 3d10 de concussão.',
 
       pioneerMitigation: 'Marcha perpendicular ao eixo do rifte sondando cada tapete de musgo com ponteira de ferro antes de transferir o peso.',
 
@@ -66005,7 +66005,7 @@
 
         saveType: 'Destreza',
 
-        grabenFissureRisk: 'Paredão vertical de falha normal que delimita o vale abatido (graben); tremores harmônicos recorrentes sacodem a escarpa soltando colunas inteiras de basalto que tombam como árvores de pedra sobre a trilha de base com 3d8 de concussão (DMG p. 110; XGE p. 109).',
+        grabenFissureRisk: 'Paredão vertical de falha normal que delimita o vale abatido (graben); tremores harmônicos recorrentes sacodem a escarpa soltando colunas inteiras de basalto que tombam como árvores de pedra sobre a trilha de base com 3d8 de concussão.',
 
         pioneerMitigation: 'Deslocamento pelo centro aberto do piso do graben mantendo distância mínima de 30 metros do sopé da falha.',
 
@@ -66027,7 +66027,7 @@
 
         saveType: 'Constituição',
 
-        grabenFissureRisk: 'Emanação silenciosa e inodora de dióxido de carbono vulcânico frio que, por ser mais denso que o ar, acumula-se como um rio invisível no fundo das fendas sem vento; aventurar-se na depressão apaga tochas instantaneamente e causa asfixia com 2d8 de dano necrótico (DMG p. 110; PHB p. 183).',
+        grabenFissureRisk: 'Emanação silenciosa e inodora de dióxido de carbono vulcânico frio que, por ser mais denso que o ar, acumula-se como um rio invisível no fundo das fendas sem vento; aventurar-se na depressão apaga tochas instantaneamente e causa asfixia com 2d8 de dano necrótico.',
 
         pioneerMitigation: 'Avanço com lanterna de chama baixa pendurada na ponta de uma vara abaixo da cintura para testar o nível de oxigênio.',
 
@@ -66049,7 +66049,7 @@
 
         saveType: 'Destreza',
 
-        grabenFissureRisk: 'Torreões ocos de lava aglutinada de 6 metros de altura alinhados sobre a fissura eruptiva extinta; ao escalar o cone para observação, a casca vítrea quebradiça cede lançando o aventureiro no conduto interno eriçado de escória cortante com 2d8 de dano perfurante (PHB p. 182-183).',
+        grabenFissureRisk: 'Torreões ocos de lava aglutinada de 6 metros de altura alinhados sobre a fissura eruptiva extinta; ao escalar o cone para observação, a casca vítrea quebradiça cede lançando o aventureiro no conduto interno eriçado de escória cortante com 2d8 de dano perfurante.',
 
         pioneerMitigation: 'Proibição de subir na boca de cones de escória soldada e contorno pela laje basáltica basal.',
 
@@ -66189,7 +66189,7 @@
 
       saveType: 'Destreza',
 
-      lateriteBowalRisk: 'A crosta superficial endurecida de óxidos de ferro e alumínio (canga) permanece suspensa como uma ponte oca após a erosão hídrica remover a argila macia inferior; o teto ferruginoso quebra sob o grupo lançando os exploradores sobre estalagmites ásperas de limonita com 3d8 de dano perfurante/concussão (DMG p. 110; PHB p. 182-183).',
+      lateriteBowalRisk: 'A crosta superficial endurecida de óxidos de ferro e alumínio (canga) permanece suspensa como uma ponte oca após a erosão hídrica remover a argila macia inferior; o teto ferruginoso quebra sob o grupo lançando os exploradores sobre estalagmites ásperas de limonita com 3d8 de dano perfurante/concussão.',
 
       pioneerMitigation: 'Marcha pelos bordos maciços de afloramento compacto evitando depressões circulares com vegetação arbustiva anã.',
 
@@ -66213,7 +66213,7 @@
 
         saveType: 'Constituição',
 
-        lateriteBowalRisk: 'Clareira estéril quilométrica onde a couraça de ferro negro sem solo nem árvores absorve o sol tropical e atinge 65°C na superfície; a reverberação térmica queima através das botas e impõe 1 nível de exaustão por insolação severa (DMG p. 110; XGE p. 109).',
+        lateriteBowalRisk: 'Clareira estéril quilométrica onde a couraça de ferro negro sem solo nem árvores absorve o sol tropical e atinge 65°C na superfície; a reverberação térmica queima através das botas e impõe 1 nível de exaustão por insolação severa.',
 
         pioneerMitigation: 'Travessia exclusiva no crepúsculo ou alvorada com panos úmidos sobre a nuca e hidratação reforçada.',
 
@@ -66235,7 +66235,7 @@
 
         saveType: 'Destreza',
 
-        lateriteBowalRisk: 'Encosta da chapada coberta por milhões de concreções esféricas soltas de hematita do tamanho de ervilhas; pisar nessa camada equivale a caminhar sobre esferas de aço, arremessando o aventureiro contra degraus cortantes de canga com 2d8 de dano cortante (PHB p. 182-183).',
+        lateriteBowalRisk: 'Encosta da chapada coberta por milhões de concreções esféricas soltas de hematita do tamanho de ervilhas; pisar nessa camada equivale a caminhar sobre esferas de aço, arremessando o aventureiro contra degraus cortantes de canga com 2d8 de dano cortante.',
 
         pioneerMitigation: 'Varredura da trilha com cajado antes de firmar o pé e descida em diagonal apoiando nas raízes de canela-de-ema.',
 
@@ -66257,7 +66257,7 @@
 
         saveType: 'Constituição',
 
-        lateriteBowalRisk: 'O deslocamento em tetos baixos de cavernas de canga levanta pó fino de hidróxido de ferro misturado a guano seco e esporos fúngicos; a inalação irrita os brônquios causando 2d6 de dano de veneno e a condição Envenenado por 1 hora (DMG p. 110; PHB p. 183).',
+        lateriteBowalRisk: 'O deslocamento em tetos baixos de cavernas de canga levanta pó fino de hidróxido de ferro misturado a guano seco e esporos fúngicos; a inalação irrita os brônquios causando 2d6 de dano de veneno e a condição Envenenado por 1 hora.',
 
         pioneerMitigation: 'Amarração de lenço embebido em água e vinagre sobre o nariz e a boca antes de rastejar sob a couraça.',
 
@@ -66397,7 +66397,7 @@
 
       saveType: 'Destreza',
 
-      saltDiapirRisk: 'Língua de sal-gema extrudida da montanha e esculpida pelas raras chuvas em milhares de agulhas e cristas translúcidas afiadas como vidro; uma queda rasga couro e carne com 3d8 de dano cortante agravado pela incrustação imediata de sal puro nas feridas (DMG p. 110; PHB p. 182-183).',
+      saltDiapirRisk: 'Língua de sal-gema extrudida da montanha e esculpida pelas raras chuvas em milhares de agulhas e cristas translúcidas afiadas como vidro; uma queda rasga couro e carne com 3d8 de dano cortante agravado pela incrustação imediata de sal puro nas feridas.',
 
       pioneerMitigation: 'Quebra metódica das pontas cristalinas com marreta de ferro para abrir vereda plana e uso de solados duplos de madeira.',
 
@@ -66421,7 +66421,7 @@
 
         saveType: 'Destreza',
 
-        saltDiapirRisk: 'A altíssima solubilidade da halita cria chaminés verticais ocultas sob pontes finas de sal recristalizado; o teto cede precipitando o explorador em poço subterrâneo de salmoura hipersaturada com 3d8 de concussão e desidratação osmótica severa (DMG p. 110; PHB p. 185).',
+        saltDiapirRisk: 'A altíssima solubilidade da halita cria chaminés verticais ocultas sob pontes finas de sal recristalizado; o teto cede precipitando o explorador em poço subterrâneo de salmoura hipersaturada com 3d8 de concussão e desidratação osmótica severa.',
 
         pioneerMitigation: 'Marcha encordada sobre as nervuras escuras de argila residual insolúvel que demarcam as zonas maciças.',
 
@@ -66443,7 +66443,7 @@
 
         saveType: 'Constituição',
 
-        saltDiapirRisk: 'As paredes espelhadas de halita branca e gipsita refletem 90% da radiação solar do deserto em todas as direções; a exposição sem proteção queima a córnea impondo a condição Cego por 2 horas e desorientação na marcha (DMG p. 110; PHB p. 183).',
+        saltDiapirRisk: 'As paredes espelhadas de halita branca e gipsita refletem 90% da radiação solar do deserto em todas as direções; a exposição sem proteção queima a córnea impondo a condição Cego por 2 horas e desorientação na marcha.',
 
         pioneerMitigation: 'Uso de viseiras de osso ou madeira com fenda estreita (óculos de fenda) e fuligem de carvão aplicada sob os olhos.',
 
@@ -66465,7 +66465,7 @@
 
         saveType: 'Força',
 
-        saltDiapirRisk: 'A frente da geleira de sal avança lentamente por gravidade criando blocos suspensos de halita avermelhada e silvita que se desprendem subitamente com o estalo térmico da tarde, esmagando o fundo do cânion com 3d10 de concussão (DMG p. 110; PHB p. 182).',
+        saltDiapirRisk: 'A frente da geleira de sal avança lentamente por gravidade criando blocos suspensos de halita avermelhada e silvita que se desprendem subitamente com o estalo térmico da tarde, esmagando o fundo do cânion com 3d10 de concussão.',
 
         pioneerMitigation: 'Travessia afastada da parede frontal da língua de sal e proibição de descansar à sombra das cornijas salinas.',
 
@@ -66605,7 +66605,7 @@
 
       saveType: 'Destreza',
 
-      pingoThermokarstRisk: 'O domo cônico de 30 metros erguido por pressão hidrostática apresenta fendas radiais de tensão no cume cobertas por turfa fina; a ponte de solo cede lançando os exploradores no interior da caverna da lente de gelo maciço com 3d8 de concussão e 2d6 de frio (DMG p. 110; PHB p. 182-183).',
+      pingoThermokarstRisk: 'O domo cônico de 30 metros erguido por pressão hidrostática apresenta fendas radiais de tensão no cume cobertas por turfa fina; a ponte de solo cede lançando os exploradores no interior da caverna da lente de gelo maciço com 3d8 de concussão e 2d6 de frio.',
 
       pioneerMitigation: 'Contorno da borda da cratera pelo anel estrutural externo e proibição de marchar pelo centro deprimido do domo.',
 
@@ -66629,7 +66629,7 @@
 
         saveType: 'Força',
 
-        pingoThermokarstRisk: 'Anfiteatro lamacento na margem de uma depressão de termocarste onde a parede de permafrost derrete ao sol e desmorona em avalanches de lama gelada; a massa viscosa arrasta a comitiva para o lago turvo com 3d6 de concussão e risco de soterramento (DMG p. 110; XGE p. 109).',
+        pingoThermokarstRisk: 'Anfiteatro lamacento na margem de uma depressão de termocarste onde a parede de permafrost derrete ao sol e desmorona em avalanches de lama gelada; a massa viscosa arrasta a comitiva para o lago turvo com 3d6 de concussão e risco de soterramento.',
 
         pioneerMitigation: 'Marcha recuada a pelo menos 15 metros das cicatrizes semicirculares de abatimento na borda do alas.',
 
@@ -66651,7 +66651,7 @@
 
         saveType: 'Destreza',
 
-        pingoThermokarstRisk: 'Bosque subártico onde o abatimento irregular do permafrost inclina as árvores em ângulos caóticos sobre poços de lama tixotrópica e raízes emaranhadas; o solo liquefaz sob a vibração dos passos prendendo as pernas e impondo 1 nível de exaustão (DMG p. 110-111; PHB p. 185).',
+        pingoThermokarstRisk: 'Bosque subártico onde o abatimento irregular do permafrost inclina as árvores em ângulos caóticos sobre poços de lama tixotrópica e raízes emaranhadas; o solo liquefaz sob a vibração dos passos prendendo as pernas e impondo 1 nível de exaustão.',
 
         pioneerMitigation: 'Progressão apoiada sobre os troncos tombados e tapetes contínuos de musgo esfagno seco.',
 
@@ -66673,7 +66673,7 @@
 
         saveType: 'Constituição',
 
-        pingoThermokarstRisk: 'Montículo inchado na tundra que explode subitamente liberando gás metano pressurizado e blocos de solo congelado; o jato desloca o ar respirável e inflama ao menor contato com tochas causando 3d8 de dano de concussão/fogo (DMG p. 110; PHB p. 183).',
+        pingoThermokarstRisk: 'Montículo inchado na tundra que explode subitamente liberando gás metano pressurizado e blocos de solo congelado; o jato desloca o ar respirável e inflama ao menor contato com tochas causando 3d8 de dano de concussão/fogo.',
 
         pioneerMitigation: 'Extinção imediata de chamas abertas ao detectar borbulhamento a seco nas poças da tundra.',
 
@@ -66813,7 +66813,7 @@
 
       saveType: 'Destreza',
 
-      geyserBasinRisk: 'Laje branca aparentemente sólida de sílica precipitada (geyserita) com apenas 3 centímetros de espessura cobrindo um bolsão de água a 95°C; a crosta quebra sob o peso das botas mergulhando as pernas do batedor no líquido fervente com 4d6 de dano de fogo por escaldadura (DMG p. 110; PHB p. 182-183).',
+      geyserBasinRisk: 'Laje branca aparentemente sólida de sílica precipitada (geyserita) com apenas 3 centímetros de espessura cobrindo um bolsão de água a 95°C; a crosta quebra sob o peso das botas mergulhando as pernas do batedor no líquido fervente com 4d6 de dano de fogo por escaldadura.',
 
       pioneerMitigation: 'Sondagem rítmica do timbre da crosta com bastão ferrado (evitando som oco de tambor) e marcha estrita sobre rocha matriz.',
 
@@ -66837,7 +66837,7 @@
 
         saveType: 'Constituição',
 
-        geyserBasinRisk: 'Tremor subterrâneo seguido pelo disparo violento de um jato de água alcalina e vapor a 40 metros de altura; a chuva fervente e a nuvem de vapor envolvem a comitiva causando 3d8 de dano de fogo e cegueira temporária pela névoa densa de sílica (DMG p. 110; XGE p. 109).',
+        geyserBasinRisk: 'Tremor subterrâneo seguido pelo disparo violento de um jato de água alcalina e vapor a 40 metros de altura; a chuva fervente e a nuvem de vapor envolvem a comitiva causando 3d8 de dano de fogo e cegueira temporária pela névoa densa de sílica.',
 
         pioneerMitigation: 'Deslocamento estrito a barlavento (contra o vento) dos cones de geyserita e cronometragem do intervalo entre erupções.',
 
@@ -66859,7 +66859,7 @@
 
         saveType: 'Destreza',
 
-        geyserBasinRisk: 'Poço de argila vulcânica dissolvida por ácido sulfúrico onde grandes bolhas viscosas estouram arremessando coágulos pesados de lama aderente a 8 metros de distância; a lama gruda nas vestes causando 2d6 de dano de fogo e 2d6 de dano de ácido (DMG p. 110; PHB p. 183).',
+        geyserBasinRisk: 'Poço de argila vulcânica dissolvida por ácido sulfúrico onde grandes bolhas viscosas estouram arremessando coágulos pesados de lama aderente a 8 metros de distância; a lama gruda nas vestes causando 2d6 de dano de fogo e 2d6 de dano de ácido.',
 
         pioneerMitigation: 'Uso de capas de couro oleado com capuz e manutenção de distância mínima de 10 metros das bordas de argila borbulhante.',
 
@@ -66881,7 +66881,7 @@
 
         saveType: 'Destreza',
 
-        geyserBasinRisk: 'Canais rasos de escoamento das fontes prismáticas revestidos por biofilmes vibrantes amarelos, laranjas e esmeraldas; a superfície é mais escorregadia que sabão líquido, derrubando o aventureiro na correnteza escaldante com 2d8 de dano de fogo (PHB p. 182-183).',
+        geyserBasinRisk: 'Canais rasos de escoamento das fontes prismáticas revestidos por biofilmes vibrantes amarelos, laranjas e esmeraldas; a superfície é mais escorregadia que sabão líquido, derrubando o aventureiro na correnteza escaldante com 2d8 de dano de fogo.',
 
         pioneerMitigation: 'Salto sobre os canais nos pontos estreitos de rocha seca ou uso de pranchão portátil de cedro.',
 
@@ -67021,7 +67021,7 @@
 
       saveType: 'Destreza',
 
-      sawtoothRisk: 'Assim que o sol da manhã atinge os pináculos superiores, o gelo que soldava as fendas da rocha dolomítica derrete e dispara uma metralhadora natural de blocos angulosos que ricocheteiam em altíssima velocidade pela calha do corredor com 3d10 de concussão e cortante (DMG p. 110; PHB p. 182-183).',
+      sawtoothRisk: 'Assim que o sol da manhã atinge os pináculos superiores, o gelo que soldava as fendas da rocha dolomítica derrete e dispara uma metralhadora natural de blocos angulosos que ricocheteiam em altíssima velocidade pela calha do corredor com 3d10 de concussão e cortante.',
 
       pioneerMitigation: 'Subida noturna ou de madrugada enquanto o corredor está congelado e colagem estrita sob as paredes laterais côncavas.',
 
@@ -67045,7 +67045,7 @@
 
         saveType: 'Destreza',
 
-        sawtoothRisk: 'Aresta serrilhada de dolomito com menos de 40 centímetros de largura ladeada por abismos verticais de 300 metros; rajadas ascendentes de vento alpino desestabilizam os aventureiros causando queda sobre dentes de rocha com 4d6 de dano cortante/concussão (DMG p. 110; XGE p. 109).',
+        sawtoothRisk: 'Aresta serrilhada de dolomito com menos de 40 centímetros de largura ladeada por abismos verticais de 300 metros; rajadas ascendentes de vento alpino desestabilizam os aventureiros causando queda sobre dentes de rocha com 4d6 de dano cortante/concussão.',
 
         pioneerMitigation: 'Progressão a cavaleiro ou encordamento curto passando a corda em lados alternados dos dentes de pedra (costura de crista).',
 
@@ -67067,7 +67067,7 @@
 
         saveType: 'Força',
 
-        sawtoothRisk: 'Fenda vertical entre duas agulhas de dolomito onde o nevoeiro congelante depositou uma camada milimétrica e invisível de gelo vítreo (verglas) sobre a rocha lisa; as mãos e botas perdem toda a aderência resultando em queda no fundo da chaminé com 3d8 de concussão e 1d6 de frio (DMG p. 110; PHB p. 182).',
+        sawtoothRisk: 'Fenda vertical entre duas agulhas de dolomito onde o nevoeiro congelante depositou uma camada milimétrica e invisível de gelo vítreo (verglas) sobre a rocha lisa; as mãos e botas perdem toda a aderência resultando em queda no fundo da chaminé com 3d8 de concussão e 1d6 de frio.',
 
         pioneerMitigation: 'Raspagem prévia das agarras com a lâmina da piqueta e uso de grampos frontais de aço temperado nas botas.',
 
@@ -67089,7 +67089,7 @@
 
         saveType: 'Constituição',
 
-        sawtoothRisk: 'As torres pontiagudas de dolomito carregam-se de eletricidade estática fazendo armas e pítons zumbirem com faíscas azuladas antes da queda de um raio que percorre as fendas úmidas da rocha com 3d8 de dano elétrico e surdez por 1 hora (DMG p. 110; PHB p. 183).',
+        sawtoothRisk: 'As torres pontiagudas de dolomito carregam-se de eletricidade estática fazendo armas e pítons zumbirem com faíscas azuladas antes da queda de um raio que percorre as fendas úmidas da rocha com 3d8 de dano elétrico e surdez por 1 hora.',
 
         pioneerMitigation: 'Abandono imediato do topo da crista, afastamento de objetos metálicos a 15 metros e agachamento sobre mochila isolante.',
 
@@ -67229,7 +67229,7 @@
 
       saveType: 'Força',
 
-      vauclusianRisk: 'Tempestade distante nos platôs superiores sobrecarrega a rede de condutos subterrâneos e dispara uma coluna de água gelada pelo poço ascendente da nascente vauclusiana; o nível do rio sobe 3 metros em minutos varrendo o vale cego com 3d8 de concussão (DMG p. 110, 201; PHB p. 182-183).',
+      vauclusianRisk: 'Tempestade distante nos platôs superiores sobrecarrega a rede de condutos subterrâneos e dispara uma coluna de água gelada pelo poço ascendente da nascente vauclusiana; o nível do rio sobe 3 metros em minutos varrendo o vale cego com 3d8 de concussão.',
 
       pioneerMitigation: 'Observação constante da turbidez da nascente e marcha pela cornija calcária a 6 metros acima da calha de vazão.',
 
@@ -67253,7 +67253,7 @@
 
         saveType: 'Constituição',
 
-        vauclusianRisk: 'Trecho de galeria cárstica totalmente submerso onde o teto de calcário mergulha abaixo do lençol freático; o movimento das nadadeiras ou botas levanta nuvem opaca de argila de descalcificação zerando a visibilidade e induzindo asfixia e 2d6 de dano de frio (DMG p. 201; PHB p. 183).',
+        vauclusianRisk: 'Trecho de galeria cárstica totalmente submerso onde o teto de calcário mergulha abaixo do lençol freático; o movimento das nadadeiras ou botas levanta nuvem opaca de argila de descalcificação zerando a visibilidade e induzindo asfixia e 2d6 de dano de frio.',
 
         pioneerMitigation: 'Uso obrigatório de carretilha com cabo-guia tensionado (linha de Ariadne) marcado com setas táteis de couro na direção da saída.',
 
@@ -67275,7 +67275,7 @@
 
         saveType: 'Força',
 
-        vauclusianRisk: 'Paredão terminal do vale cego onde o rio superficial desaparece integralmente por fendas estreitas entulhadas de troncos na base do penhasco; o redemoinho puxa os exploradores contra grades de rocha e galhos submersos causando 3d6 de concussão (DMG p. 110; PHB p. 182).',
+        vauclusianRisk: 'Paredão terminal do vale cego onde o rio superficial desaparece integralmente por fendas estreitas entulhadas de troncos na base do penhasco; o redemoinho puxa os exploradores contra grades de rocha e galhos submersos causando 3d6 de concussão.',
 
         pioneerMitigation: 'Contorno amplo da bacia de engolimento (ponor) utilizando passadeira suspensa cravada na parede calcária.',
 
@@ -67297,7 +67297,7 @@
 
         saveType: 'Destreza',
 
-        vauclusianRisk: 'Diques sinuosos naturais de calcita precipitada que represam piscinas sucessivas na saída da caverna; a borda cristalina dentada é coberta por película escorregadia de cianobactérias provocando quedas severas com 2d8 de dano cortante e concussão (PHB p. 182-183).',
+        vauclusianRisk: 'Diques sinuosos naturais de calcita precipitada que represam piscinas sucessivas na saída da caverna; a borda cristalina dentada é coberta por película escorregadia de cianobactérias provocando quedas severas com 2d8 de dano cortante e concussão.',
 
         pioneerMitigation: 'Apoio de bastão ferrado no fundo plano das bacias e proibição de caminhar sobre a crista fina dos diques de calcita.',
 
@@ -67437,7 +67437,7 @@
 
       saveType: 'Força',
 
-      barrierSpitRisk: 'Garganta estreita de barra arenosa onde toda a massa de água da lagoa escoa para o mar aberto na maré vazante; o fluxo violento arranca o equilíbrio dos exploradores arrastando-os contra bancos de conchas cortantes e arrebentação externa com 3d8 de dano cortante/concussão (DMG p. 109-110, 117; PHB p. 182-183).',
+      barrierSpitRisk: 'Garganta estreita de barra arenosa onde toda a massa de água da lagoa escoa para o mar aberto na maré vazante; o fluxo violento arranca o equilíbrio dos exploradores arrastando-os contra bancos de conchas cortantes e arrebentação externa com 3d8 de dano cortante/concussão.',
 
       pioneerMitigation: 'Travessia estrita no estofo da maré (repouso entre enchente e vazante) com cabo de segurança ancorado em troncos de aroeira na margem.',
 
@@ -67461,7 +67461,7 @@
 
         saveType: 'Destreza',
 
-        barrierSpitRisk: 'Série de vagalhões de ressaca que transpõem a crista baixa da barreira de areia abrindo um leque de galgamento (overwash fan); a enxurrada salgada soterra equipamentos e derruba a comitiva na lagoa interna com 3d6 de concussão (DMG p. 110, 117; XGE p. 109).',
+        barrierSpitRisk: 'Série de vagalhões de ressaca que transpõem a crista baixa da barreira de areia abrindo um leque de galgamento (overwash fan); a enxurrada salgada soterra equipamentos e derruba a comitiva na lagoa interna com 3d6 de concussão.',
 
         pioneerMitigation: 'Marcha pelo reverso vegetado das dunas frontais altas evitando depressões interdunares sem vegetação fixadora.',
 
@@ -67483,7 +67483,7 @@
 
         saveType: 'Força',
 
-        barrierSpitRisk: 'Fundo raso de lagoa costeira hipersalina enganosamente coberto por crosta clara de sal e algas secas sobre 2 metros de lodo orgânico negro (sapropel) e gás sulfídrico; o piso cede prendendo as pernas até a cintura e causando 2d6 de dano de veneno por inalação fétida (DMG p. 109-110; PHB p. 182).',
+        barrierSpitRisk: 'Fundo raso de lagoa costeira hipersalina enganosamente coberto por crosta clara de sal e algas secas sobre 2 metros de lodo orgânico negro (sapropel) e gás sulfídrico; o piso cede prendendo as pernas até a cintura e causando 2d6 de dano de veneno por inalação fétida.',
 
         pioneerMitigation: 'Uso de pranchas largas de madeira de deriva ou raquetes de junco trançado para distribuir o peso sobre a crosta salina.',
 
@@ -67505,7 +67505,7 @@
 
         saveType: 'Constituição',
 
-        barrierSpitRisk: 'Moitas impenetráveis de bromélias terrestres de serrilha dura, cactos-de-praia e espinheiros retorcidos pelo vento salino; o avanço forçado rasga botas e perneiras causando 2d6 de dano perfurante e inflamação salina dolorosa (DMG p. 110; PHB p. 182-183).',
+        barrierSpitRisk: 'Moitas impenetráveis de bromélias terrestres de serrilha dura, cactos-de-praia e espinheiros retorcidos pelo vento salino; o avanço forçado rasga botas e perneiras causando 2d6 de dano perfurante e inflamação salina dolorosa.',
 
         pioneerMitigation: 'Abertura paciente de picada com facão pesado seguindo trilhas de mamíferos costeiros sobre a crista seca.',
 
@@ -67645,7 +67645,7 @@
 
       saveType: 'Destreza',
 
-      ruiniformRisk: 'Bloco de arenito de 40 toneladas esculpido em taça equilibrada sobre pedestal fino erodido; rajada de vento ou apoio de corda rompe o ponto de fulcro provocando o tombamento do monólito sobre o corredor com 3d10 de concussão por esmagamento (DMG p. 110, 246; PHB p. 182-183).',
+      ruiniformRisk: 'Bloco de arenito de 40 toneladas esculpido em taça equilibrada sobre pedestal fino erodido; rajada de vento ou apoio de corda rompe o ponto de fulcro provocando o tombamento do monólito sobre o corredor com 3d10 de concussão por esmagamento.',
 
       pioneerMitigation: 'Proibição estrita de ancorar cabos em colunas de base estreita e travessia rápida pelo eixo desimpedido das galerias.',
 
@@ -67669,7 +67669,7 @@
 
         saveType: 'Destreza',
 
-        ruiniformRisk: 'Poço cilíndrico vertical (furna) de 40 metros com paredes negativas e lago subterrâneo no fundo; a borda é camuflada por samambaias; o batedor pisa na vegetação suspensa despencando no abismo com 3d8 de concussão e risco de afogamento (DMG p. 246-247; PHB p. 182-183).',
+        ruiniformRisk: 'Poço cilíndrico vertical (furna) de 40 metros com paredes negativas e lago subterrâneo no fundo; a borda é camuflada por samambaias; o batedor pisa na vegetação suspensa despencando no abismo com 3d8 de concussão e risco de afogamento.',
 
         pioneerMitigation: 'Marcha encordada com distância de 8 metros e sondagem da borda vegetada com vara longa de bambu antes de avançar.',
 
@@ -67691,7 +67691,7 @@
 
         saveType: 'Sabedoria',
 
-        ruiniformRisk: 'Rede claustrofóbica de fendas retilíneas de 15 metros com crostas ricas em hematita e magnetita que desviam bússolas; corredores idênticos desorientam a comitiva induzindo marcha em círculos por 4 horas e 1 nível de exaustão (DMG p. 110-111; PHB p. 185).',
+        ruiniformRisk: 'Rede claustrofóbica de fendas retilíneas de 15 metros com crostas ricas em hematita e magnetita que desviam bússolas; corredores idênticos desorientam a comitiva induzindo marcha em círculos por 4 horas e 1 nível de exaustão.',
 
         pioneerMitigation: 'Marcação física das esquinas com giz branco mineral e orientação solar pelo zênite das fendas.',
 
@@ -67713,7 +67713,7 @@
 
         saveType: 'Destreza',
 
-        ruiniformRisk: 'Canaleta inclinada de arenito friável coberta por grãos de quartzo rolados; o piso granulado escorre sob as botas arremessando o aventureiro contra paredões ásperos como lixa grossa com 3d6 de dano cortante/abrasivo (PHB p. 182-183).',
+        ruiniformRisk: 'Canaleta inclinada de arenito friável coberta por grãos de quartzo rolados; o piso granulado escorre sob as botas arremessando o aventureiro contra paredões ásperos como lixa grossa com 3d6 de dano cortante/abrasivo.',
 
         pioneerMitigation: 'Uso de joelheiras e luvas de couro grosso cravando pítons de cantoneira nas fendas laterais de quartzo sólido.',
 
@@ -67845,7 +67845,7 @@
 
       saveType: 'Destreza',
 
-      tunnelValleyRisk: 'Flancos de vale em túnel de 40 metros formados por tálus de morena instável; o degelo solta matriz de cascalho e argila desencadeando deslizamento de 30 toneladas de rocha sobre o leito com risco de 3d8 de concussão por esmagamento (DMG p. 110, 246; PHB p. 182-183).',
+      tunnelValleyRisk: 'Flancos de vale em túnel de 40 metros formados por tálus de morena instável; o degelo solta matriz de cascalho e argila desencadeando deslizamento de 30 toneladas de rocha sobre o leito com risco de 3d8 de concussão por esmagamento.',
 
       pioneerMitigation: 'Marcha em fila única pelo centro drenado do vale mantendo vigilância contínua das escarpas superiores com sentinela avançada.',
 
@@ -67869,7 +67869,7 @@
 
         saveType: 'Força',
 
-        tunnelValleyRisk: 'Depressão circular de kettle lake onde núcleo remanescente de gelo glacial no fundo colapsa repentinamente; a cavidade drena milhares de litros gerando turbilhão de sucção em água a 2°C com 3d8 de concussão por choque térmico (DMG p. 110, 246-247).',
+        tunnelValleyRisk: 'Depressão circular de kettle lake onde núcleo remanescente de gelo glacial no fundo colapsa repentinamente; a cavidade drena milhares de litros gerando turbilhão de sucção em água a 2°C com 3d8 de concussão por choque térmico.',
 
         pioneerMitigation: 'Navegação cautelosa amarrada a linhas de segurança na borda da morena e sondagem de profundidade com cabo graduado.',
 
@@ -67891,7 +67891,7 @@
 
         saveType: 'Destreza',
 
-        tunnelValleyRisk: 'Encosta de morena frontal com mistura de argila moída e seixos saturados por degelo subterrâneo; o piso cede sob os pés transformando-se em pasta fluida que atola o aventureiro até as coxas com 2d8 de concussão por deslizamento (PHB p. 182-183).',
+        tunnelValleyRisk: 'Encosta de morena frontal com mistura de argila moída e seixos saturados por degelo subterrâneo; o piso cede sob os pés transformando-se em pasta fluida que atola o aventureiro até as coxas com 2d8 de concussão por deslizamento.',
 
         pioneerMitigation: 'Travessia sobre sapatilhas largas de lona reforçada e apoio contínuo em bastões alpinos de ponta dupla.',
 
@@ -67913,7 +67913,7 @@
 
         saveType: 'Força',
 
-        tunnelValleyRisk: 'Riacho encaixado no fundo do vale em túnel alimentado por lagos subglaciares; rompimento de dique de gelo lança torrente de água gélida e seixos a 35 km/h sem escape lateral imediato com 3d6 de concussão e risco de afogamento (DMG p. 110, 246).',
+        tunnelValleyRisk: 'Riacho encaixado no fundo do vale em túnel alimentado por lagos subglaciares; rompimento de dique de gelo lança torrente de água gélida e seixos a 35 km/h sem escape lateral imediato com 3d6 de concussão e risco de afogamento.',
 
         pioneerMitigation: 'Reconhecimento antecipado de degraus de escalada nas margens e monitoramento de turbidez súbita da água.',
 
@@ -68045,7 +68045,7 @@
 
       saveType: 'Destreza',
 
-      cliffDuneRisk: 'Rampa íngreme de areia móvel subindo falésia marinha em ângulo de 38°; o avanço da comitiva rompe a cumeeira eólica fofa provocando avalanche de areia que arrasta os exploradores penhasco abaixo contra as rochas da arrebentação com 3d8 de concussão por queda (DMG p. 110, 246; PHB p. 182-183).',
+      cliffDuneRisk: 'Rampa íngreme de areia móvel subindo falésia marinha em ângulo de 38°; o avanço da comitiva rompe a cumeeira eólica fofa provocando avalanche de areia que arrasta os exploradores penhasco abaixo contra as rochas da arrebentação com 3d8 de concussão por queda.',
 
       pioneerMitigation: 'Escalada ancorada por cabos com pítons cravados na rocha sólida da falésia e uso de bastões de sondagem de base rochosa.',
 
@@ -68069,7 +68069,7 @@
 
         saveType: 'Destreza',
 
-        cliffDuneRisk: 'Crista consolidada de arenito eólico projetada em balanço sobre o abismo marinho; a ação das intempéries solapa a base da cornija que cede sob o peso das botas com risco de 3d10 de concussão por queda livre no oceano (PHB p. 182-183).',
+        cliffDuneRisk: 'Crista consolidada de arenito eólico projetada em balanço sobre o abismo marinho; a ação das intempéries solapa a base da cornija que cede sob o peso das botas com risco de 3d10 de concussão por queda livre no oceano.',
 
         pioneerMitigation: 'Delimitação estrita de linha de marcha a 10 metros da borda do abismo e teste de sustentação com vara articulada.',
 
@@ -68091,7 +68091,7 @@
 
         saveType: 'Constituição',
 
-        cliffDuneRisk: 'Ventos alísios impetuosos comprimidos contra o paredão acelerando a 80 km/h carregando areia e borrifos cáusticos; corta a pele, arranha córneas e induz cegueira temporária nos batedores com 2d6 de dano cortante e desorientação por 1 hora (DMG p. 110, 246).',
+        cliffDuneRisk: 'Ventos alísios impetuosos comprimidos contra o paredão acelerando a 80 km/h carregando areia e borrifos cáusticos; corta a pele, arranha córneas e induz cegueira temporária nos batedores com 2d6 de dano cortante e desorientação por 1 hora.',
 
         pioneerMitigation: 'Uso de viseiras vedadas de chifre polido com fenda fina e capuzes de lona encerada amarrados firmemente sob o queixo.',
 
@@ -68113,7 +68113,7 @@
 
         saveType: 'Força',
 
-        cliffDuneRisk: 'Lajes duras de arenito praial cimentado que afloram sob a arrebentação; cascos de embarcações são destroçados ao aportar na maré vazante arremessando tripulantes contra as lajes com 3d6 de concussão (PHB p. 182-183).',
+        cliffDuneRisk: 'Lajes duras de arenito praial cimentado que afloram sob a arrebentação; cascos de embarcações são destroçados ao aportar na maré vazante arremessando tripulantes contra as lajes com 3d6 de concussão.',
 
         pioneerMitigation: 'Reconhecimento prévio de canais de maré desimpedidos por batedor em ponto elevado e desembarque exclusivo na estofa de preamar.',
 
@@ -68245,7 +68245,7 @@
 
       saveType: 'Destreza',
 
-      inselbergRisk: 'Domo monolítico de granito com inclinação convexa de 45° a 60° sem fendas para apoio; a sola da bota perde aderência no quartzo polido; o explorador derrapa pela laje lisa arremessando-se contra tálus rochoso na base com risco de 3d8 de concussão por abrasão generalizada (DMG p. 110, 246; PHB p. 182-183).',
+      inselbergRisk: 'Domo monolítico de granito com inclinação convexa de 45° a 60° sem fendas para apoio; a sola da bota perde aderência no quartzo polido; o explorador derrapa pela laje lisa arremessando-se contra tálus rochoso na base com risco de 3d8 de concussão por abrasão generalizada.',
 
       pioneerMitigation: 'Uso de calçados de borracha resinada de alta fricção, aplicação de magnésio em pó nas palmas e avanço em cordada triangular com pítons de expansão.',
 
@@ -68269,7 +68269,7 @@
 
         saveType: 'Destreza',
 
-        inselbergRisk: 'Aquecimento solar extremo seguido de resfriamento brusco gera dilatação térmica diferencial que rompe laje de granito esfoliado de 10 cm; a casca rochosa rompe com estrondo explosivo e desliza sobre a encosta, causando 3d10 de concussão por esmagamento (DMG p. 246-247).',
+        inselbergRisk: 'Aquecimento solar extremo seguido de resfriamento brusco gera dilatação térmica diferencial que rompe laje de granito esfoliado de 10 cm; a casca rochosa rompe com estrondo explosivo e desliza sobre a encosta, causando 3d10 de concussão por esmagamento.',
 
         pioneerMitigation: 'Observação de fendas de descamação ressonantes e avanço cauteloso pelas caneluras consolidadas de drenagem hídrica.',
 
@@ -68291,7 +68291,7 @@
 
         saveType: 'Constituição',
 
-        inselbergRisk: 'O domo granítico eleva-se isolado sobre a planície funcionando como para-raios durante tempestades; raio de 100.000 amperes atinge a crista rochosa; a onda de choque e a corrente de retorno causam surdez e 3d8 de dano elétrico com atordoamento por 1 hora (DMG p. 110, 246).',
+        inselbergRisk: 'O domo granítico eleva-se isolado sobre a planície funcionando como para-raios durante tempestades; raio de 100.000 amperes atinge a crista rochosa; a onda de choque e a corrente de retorno causam surdez e 3d8 de dano elétrico com atordoamento por 1 hora.',
 
         pioneerMitigation: 'Descida imediata do cume ao menor sinal de eletricidade estática e refúgio em depressões côncavas sem tocar em superfícies metálicas.',
 
@@ -68313,7 +68313,7 @@
 
         saveType: 'Destreza',
 
-        inselbergRisk: 'Sulcos verticais profundos esculpidos por água ácida de bromélias (karren granítico) revestidos de algas úmidas; o aventureiro pisa na canaleta escorregadia torcendo o tornozelo nas paredes estreitas de quartzo com 3d6 de concussão e luxação severa (PHB p. 182-183).',
+        inselbergRisk: 'Sulcos verticais profundos esculpidos por água ácida de bromélias (karren granítico) revestidos de algas úmidas; o aventureiro pisa na canaleta escorregadia torcendo o tornozelo nas paredes estreitas de quartzo com 3d6 de concussão e luxação severa.',
 
         pioneerMitigation: 'Marcha pelas lombadas convexas secas evitando as canaletas escuras de escoamento de água.',
 
@@ -68445,7 +68445,7 @@
 
       saveType: 'Destreza',
 
-      dolineAndVoidRisk: 'Planície de cascalho aparentemente sólida sobre cavidade cárstica; a passagem da comitiva sobrecarrega o teto de solo saturado que desaba repentinamente em funil vertical de 25 metros; terra e os aventureiros despencam no vazio com risco de soterramento completo e 3d10 de concussão por esmagamento (DMG p. 110, 246; PHB p. 182-183).',
+      dolineAndVoidRisk: 'Planície de cascalho aparentemente sólida sobre cavidade cárstica; a passagem da comitiva sobrecarrega o teto de solo saturado que desaba repentinamente em funil vertical de 25 metros; terra e os aventureiros despencam no vazio com risco de soterramento completo e 3d10 de concussão por esmagamento.',
 
       pioneerMitigation: 'Avanço em cordada com linhas de 10 metros, sondagem com haste de percussão e identificação prévia de trincas anelares no solo.',
 
@@ -68469,7 +68469,7 @@
 
         saveType: 'Força',
 
-        dolineAndVoidRisk: 'Lago circular de água turva formado por desabamento recente com sedimento fino de cascalho e argila fluida em suspensão coloidal; a superfície da água esconde leito sem sustentação firme; o explorador afunda até o peito na pasta viscosa sob risco de sucção e asfixia (DMG p. 110-111, 246).',
+        dolineAndVoidRisk: 'Lago circular de água turva formado por desabamento recente com sedimento fino de cascalho e argila fluida em suspensão coloidal; a superfície da água esconde leito sem sustentação firme; o explorador afunda até o peito na pasta viscosa sob risco de sucção e asfixia.',
 
         pioneerMitigation: 'Uso de pranchas transversais de madeira leve para distribuição do peso corporal e sondagem de profundidade com varas longas.',
 
@@ -68491,7 +68491,7 @@
 
         saveType: 'Destreza',
 
-        dolineAndVoidRisk: 'Margens instáveis de solo aluvial ao redor da voragem que sofrem deslizamento rotacional com a aproximação de batedores; fatias de terra de 20 toneladas escorregam encosta abaixo levando mochilas e equipamentos com 3d8 de concussão (PHB p. 182-183).',
+        dolineAndVoidRisk: 'Margens instáveis de solo aluvial ao redor da voragem que sofrem deslizamento rotacional com a aproximação de batedores; fatias de terra de 20 toneladas escorregam encosta abaixo levando mochilas e equipamentos com 3d8 de concussão.',
 
         pioneerMitigation: 'Manutenção de perímetro de segurança de 15 metros da crista do colapso e abordagem estritamente por terreno plano exterior.',
 
@@ -68513,7 +68513,7 @@
 
         saveType: 'Constituição',
 
-        dolineAndVoidRisk: 'Fundo côncavo da dolina de colapso onde gás carbônico expelido por falha cárstica profunda se acumula sem circulação de ar; o aventureiro que desce na depressão sofre hipóxia fulminante com desmaio, confusão mental e 2d8 de veneno/asfixia (DMG p. 110, 257).',
+        dolineAndVoidRisk: 'Fundo côncavo da dolina de colapso onde gás carbônico expelido por falha cárstica profunda se acumula sem circulação de ar; o aventureiro que desce na depressão sofre hipóxia fulminante com desmaio, confusão mental e 2d8 de veneno/asfixia.',
 
         pioneerMitigation: 'Teste de chama guia com tocha suspensa por corda antes de qualquer descida humana e uso de panos impregnados com essência canforada.',
 
@@ -68645,7 +68645,7 @@
 
       saveType: 'Destreza',
 
-      badlandAndPipingRisk: 'Arco natural de argilito erodido por tubulação hídrica sobre ravina de 18 metros; a passagem da comitiva rompe a abóbada fragilizada pelo calor, despencando blocos endurecidos e os exploradores no fundo pedregoso com risco de 3d8 de concussão por esmagamento (DMG p. 110, 246; PHB p. 182-183).',
+      badlandAndPipingRisk: 'Arco natural de argilito erodido por tubulação hídrica sobre ravina de 18 metros; a passagem da comitiva rompe a abóbada fragilizada pelo calor, despencando blocos endurecidos e os exploradores no fundo pedregoso com risco de 3d8 de concussão por esmagamento.',
 
       pioneerMitigation: 'Travessia em fila espaçada com linha de segurança ancorada em estacas metálicas longas e teste prévio de espessura com punção de percussão.',
 
@@ -68669,7 +68669,7 @@
 
         saveType: 'Destreza',
 
-        badlandAndPipingRisk: 'Leito aparentemente seco de ravina com duto subterrâneo oco de erosão hídrica; o piso cede sob a bota do aventureiro que é sugado para poço vertical de 6 metros em lama de bentonita com risco de soterramento parcial e 3d6 de concussão (PHB p. 182-183).',
+        badlandAndPipingRisk: 'Leito aparentemente seco de ravina com duto subterrâneo oco de erosão hídrica; o piso cede sob a bota do aventureiro que é sugado para poço vertical de 6 metros em lama de bentonita com risco de soterramento parcial e 3d6 de concussão.',
 
         pioneerMitigation: 'Sondagem rigorosa de resistência do leito com bastões de ponta chata e avanço pelas ombreiras rochosas da ravina.',
 
@@ -68691,7 +68691,7 @@
 
         saveType: 'Força',
 
-        badlandAndPipingRisk: 'Chuva súbita torrencial a montante que desce a garganta como pasta densa de argila bentonítica expansiva; arrasta equipamentos pesados e empurra a comitiva contra paredes verticais de argilito, infligindo 3d8 de concussão por arrastamento (DMG p. 110, 246).',
+        badlandAndPipingRisk: 'Chuva súbita torrencial a montante que desce a garganta como pasta densa de argila bentonítica expansiva; arrasta equipamentos pesados e empurra a comitiva contra paredes verticais de argilito, infligindo 3d8 de concussão por arrastamento.',
 
         pioneerMitigation: 'Observação de nuvens escuras na cabeceira e fuga célere para terraços elevados de erosão ao menor estrondo no cânion.',
 
@@ -68713,7 +68713,7 @@
 
         saveType: 'Destreza',
 
-        badlandAndPipingRisk: 'Cristas de argilito recortadas por lâminas de gipsita e selenita cristalina; arestas afiadas que cortam solas de couro e provocam lacerações severas nos pés durante a descida íngreme com 3d6 de dano cortante e perda de mobilidade (PHB p. 182-183).',
+        badlandAndPipingRisk: 'Cristas de argilito recortadas por lâminas de gipsita e selenita cristalina; arestas afiadas que cortam solas de couro e provocam lacerações severas nos pés durante a descida íngreme com 3d6 de dano cortante e perda de mobilidade.',
 
         pioneerMitigation: 'Uso de calçados reforçados com chapas articuladas de ferro e descida cautelosa amparada por cordas guia.',
 
@@ -68845,7 +68845,7 @@
 
       saveType: 'Destreza',
 
-      calderaAndAcidRisk: 'Lago de cratera com água hipersulfúrica a pH 1,5 a 65°C; erupção freática subaquática gera onda ácida de 3 metros que inunda a margem rochosa; a água cáustica corrói roupas e atinge os exploradores com risco grave de 3d10 de dano de ácido corrosivo (DMG p. 110, 246-247).',
+      calderaAndAcidRisk: 'Lago de cratera com água hipersulfúrica a pH 1,5 a 65°C; erupção freática subaquática gera onda ácida de 3 metros que inunda a margem rochosa; a água cáustica corrói roupas e atinge os exploradores com risco grave de 3d10 de dano de ácido corrosivo.',
 
       pioneerMitigation: 'Observação de manchas de enxofre em ebulição na superfície do lago e uso de botas e perneiras tratadas com cera mineral grossa.',
 
@@ -68869,7 +68869,7 @@
 
         saveType: 'Destreza',
 
-        calderaAndAcidRisk: 'Borda íngreme da caldeira formada por tálus de escória solta e lapilli vulcânico; os passos da comitiva desencadeiam rolamento em massa de cascalho basáltico arremessando os aventureiros encosta abaixo com 3d8 de concussão e queimaduras abrasivas (PHB p. 182-183).',
+        calderaAndAcidRisk: 'Borda íngreme da caldeira formada por tálus de escória solta e lapilli vulcânico; os passos da comitiva desencadeiam rolamento em massa de cascalho basáltico arremessando os aventureiros encosta abaixo com 3d8 de concussão e queimaduras abrasivas.',
 
         pioneerMitigation: 'Fixação de cabos de aço em ancoragens perfuradas na rocha basáltica sólida e avanço em cordada espaçada de 6 metros.',
 
@@ -68891,7 +68891,7 @@
 
         saveType: 'Constituição',
 
-        calderaAndAcidRisk: 'Conduto subaquático na margem rasa que expele repentinamente coluna de vapor superaquecido saturado de SO₂ e H₂S; a nuvem cáustica envolve a trilha eliminando o oxigênio com 2d8 de fogo, 2d8 de veneno e tosse hemorrágica por 1 hora (DMG p. 110, 257).',
+        calderaAndAcidRisk: 'Conduto subaquático na margem rasa que expele repentinamente coluna de vapor superaquecido saturado de SO₂ e H₂S; a nuvem cáustica envolve a trilha eliminando o oxigênio com 2d8 de fogo, 2d8 de veneno e tosse hemorrágica por 1 hora.',
 
         pioneerMitigation: 'Uso de respiradores de couro vedados com filtros de carvão vegetal ativo embebidos em solução básica neutralizante.',
 
@@ -68913,7 +68913,7 @@
 
         saveType: 'Destreza',
 
-        calderaAndAcidRisk: 'Campo de solfataras com crosta frágil de enxofre cristalizado sobre bolsões de lama termal a 95°C; o peso da bota quebra a laje mergulhando a perna do explorador no lodo incandescente com 3d8 de dano ígneo e queimaduras severas (DMG p. 246; PHB p. 182-183).',
+        calderaAndAcidRisk: 'Campo de solfataras com crosta frágil de enxofre cristalizado sobre bolsões de lama termal a 95°C; o peso da bota quebra a laje mergulhando a perna do explorador no lodo incandescente com 3d8 de dano ígneo e queimaduras severas.',
 
         pioneerMitigation: 'Sondagem rigorosa de piso com haste de ferro temperado a cada passo e caminhada restrita a lajes de basalto escuro.',
 
@@ -69045,7 +69045,7 @@
 
       saveType: 'Destreza',
 
-      fiordAndFallsRisk: 'Penhasco de fiorde de 400 metros com cascata suspensa pulverizada em spray denso por ventos catabáticos de 75 km/h; a corrente de vento úmido gélido açoita os escaladores arrancando apoios corporais da rocha com risco de queda de 20 metros e 3d8 de concussão com hipotermia (DMG p. 110, 246; PHB p. 182-183).',
+      fiordAndFallsRisk: 'Penhasco de fiorde de 400 metros com cascata suspensa pulverizada em spray denso por ventos catabáticos de 75 km/h; a corrente de vento úmido gélido açoita os escaladores arrancando apoios corporais da rocha com risco de queda de 20 metros e 3d8 de concussão com hipotermia.',
 
       pioneerMitigation: 'Escalada ancorada por linhas duplas com pítons de aço forjado e avanço protegido por trás das arestas salientes fora da zona de vento cruzado.',
 
@@ -69069,7 +69069,7 @@
 
         saveType: 'Força',
 
-        fiordAndFallsRisk: 'Plataforma costeira na base do penhasco coberta por megablocos de tálus; ondas de ressaca de 4 metros arremessam pedregulhos rolantes e puxam os aventureiros contra as arestas de granito com 3d8 de concussão por esmagamento (DMG p. 110, 246-247).',
+        fiordAndFallsRisk: 'Plataforma costeira na base do penhasco coberta por megablocos de tálus; ondas de ressaca de 4 metros arremessam pedregulhos rolantes e puxam os aventureiros contra as arestas de granito com 3d8 de concussão por esmagamento.',
 
         pioneerMitigation: 'Travessia calculada estritamente durante a estofa de baixa-mar e avanço saltando sobre o cume dos blocos mais consolidados.',
 
@@ -69091,7 +69091,7 @@
 
         saveType: 'Destreza',
 
-        fiordAndFallsRisk: 'Saliências rochosas do fiorde ocupadas por colônias de aves marinhas; acúmulo de guano oleoso e limo cria superfície sem atrito sobre abismo marítimo de 50 metros com risco de derrapagem e 3d6 de concussão (PHB p. 182-183).',
+        fiordAndFallsRisk: 'Saliências rochosas do fiorde ocupadas por colônias de aves marinhas; acúmulo de guano oleoso e limo cria superfície sem atrito sobre abismo marítimo de 50 metros com risco de derrapagem e 3d6 de concussão.',
 
         pioneerMitigation: 'Uso de solados com grampos de escalada de ponta temperada e amarração contínua a cabo de segurança de aço trançado.',
 
@@ -69113,7 +69113,7 @@
 
         saveType: 'Força',
 
-        fiordAndFallsRisk: 'Corrente de maré violenta estrangulada pelo estreitamento rochoso do fiorde gerando sorvedouro com vórtice de 3 metros; tomba canoas arremessando a comitiva na água marítima gélida com afogamento e 2d6 de frio (DMG p. 110, 246).',
+        fiordAndFallsRisk: 'Corrente de maré violenta estrangulada pelo estreitamento rochoso do fiorde gerando sorvedouro com vórtice de 3 metros; tomba canoas arremessando a comitiva na água marítima gélida com afogamento e 2d6 de frio.',
 
         pioneerMitigation: 'Navegação rente às contracorrentes da margem com uso de remos duplos reforçados e monitoramento de vórtices visíveis.',
 
@@ -69245,7 +69245,7 @@
 
       saveType: 'Força',
 
-      fervedouroRisk: 'Poço artesiano borbulhante de areia fina em suspensão pressurizada; variação brusca na vazão hidrostática ou sobrecarga de carga pesada rompe a sustentação de empuxo; o explorador afunda no lodo arenoso até o peito, sendo aprisionado pela areia fluida com risco de afogamento e 3d8 de concussão por esmagamento (DMG p. 110-111, 246; PHB p. 182-183).',
+      fervedouroRisk: 'Poço artesiano borbulhante de areia fina em suspensão pressurizada; variação brusca na vazão hidrostática ou sobrecarga de carga pesada rompe a sustentação de empuxo; o explorador afunda no lodo arenoso até o peito, sendo aprisionado pela areia fluida com risco de afogamento e 3d8 de concussão por esmagamento.',
 
       pioneerMitigation: 'Aproximação da borda estritamente por passarelas de troncos de buriti e descarte preventivo de armaduras pesadas antes da aproximação.',
 
@@ -69269,7 +69269,7 @@
 
         saveType: 'Destreza',
 
-        fervedouroRisk: 'Terreno alagadiço periférico com emaranhado de raízes submersas de palmeiras cobertas por vaza orgânica escura; o aventureiro pisa em falso e tem o tornozelo travado por raiz em laço sob 1 metro de lama, sofrendo torção severa e 3d6 de concussão (PHB p. 182-183).',
+        fervedouroRisk: 'Terreno alagadiço periférico com emaranhado de raízes submersas de palmeiras cobertas por vaza orgânica escura; o aventureiro pisa em falso e tem o tornozelo travado por raiz em laço sob 1 metro de lama, sofrendo torção severa e 3d6 de concussão.',
 
         pioneerMitigation: 'Uso de varas de sondagem de ponta rombuda e avanço cuidadoso pisando nas touceiras vegetadas consolidadas.',
 
@@ -69291,7 +69291,7 @@
 
         saveType: 'Constituição',
 
-        fervedouroRisk: 'Bolsão de gás aprisionado em falha subterrânea que ascende violentamente através do cone arenoso do fervedouro; ao romper a superfície, desloca o oxigênio da depressão gerando asfixia repentina com 2d8 de veneno e desmaio temporário (DMG p. 110, 257).',
+        fervedouroRisk: 'Bolsão de gás aprisionado em falha subterrânea que ascende violentamente através do cone arenoso do fervedouro; ao romper a superfície, desloca o oxigênio da depressão gerando asfixia repentina com 2d8 de veneno e desmaio temporário.',
 
         pioneerMitigation: 'Identificação prévia de borbulhamento rítmico anormal e uso de panos embebidos em essência aromática cobrindo a respiração.',
 
@@ -69313,7 +69313,7 @@
 
         saveType: 'Destreza',
 
-        fervedouroRisk: 'Arraias fluviais camufladas sob a areia aquecida das lagoas de drenagem; o pisoteio desavisado desencadeia golpe reflexo do aguilhão serrilhado na perna do explorador, infligindo 3d6 de dano perfurante e 2d6 de veneno com dor atrofiante (DMG p. 257; PHB p. 182-183).',
+        fervedouroRisk: 'Arraias fluviais camufladas sob a areia aquecida das lagoas de drenagem; o pisoteio desavisado desencadeia golpe reflexo do aguilhão serrilhado na perna do explorador, infligindo 3d6 de dano perfurante e 2d6 de veneno com dor atrofiante.',
 
         pioneerMitigation: 'Caminhada arrastando as solas dos pés na areia para alertar e afugentar os animais antes do pisoteio direto.',
 
@@ -69445,7 +69445,7 @@
 
       saveType: 'Destreza',
 
-      tufaAndCascadeRisk: 'Dique natural de tufa calcária que represa lagoa superior; o peso da comitiva rompe a borda porosa liberando torrente repentina de água e blocos de travertino que arremessam os aventureiros na cascata inferior de 10 metros com risco de afogamento e 3d8 de concussão por impacto (DMG p. 110, 246; PHB p. 182-183).',
+      tufaAndCascadeRisk: 'Dique natural de tufa calcária que represa lagoa superior; o peso da comitiva rompe a borda porosa liberando torrente repentina de água e blocos de travertino que arremessam os aventureiros na cascata inferior de 10 metros com risco de afogamento e 3d8 de concussão por impacto.',
 
       pioneerMitigation: 'Travessia escalonada com corda de apoio fixada em troncos de margem e sondagem prévia de solidez com bastão de ferro.',
 
@@ -69469,7 +69469,7 @@
 
         saveType: 'Destreza',
 
-        tufaAndCascadeRisk: 'Superfície de calcita coberta por película escorregadia de algas e cianobactérias; a sola da bota perde qualquer atrito no plano inclinado molhado arremessando o explorador num tobogã de rocha pontiaguda de 8 metros com luxação severa e 3d6 de concussão (PHB p. 182-183).',
+        tufaAndCascadeRisk: 'Superfície de calcita coberta por película escorregadia de algas e cianobactérias; a sola da bota perde qualquer atrito no plano inclinado molhado arremessando o explorador num tobogã de rocha pontiaguda de 8 metros com luxação severa e 3d6 de concussão.',
 
         pioneerMitigation: 'Uso de solados com cravos de feltro ou palha trançada abrasiva sobre botas e marcha rente à parede lateral rochosa.',
 
@@ -69491,7 +69491,7 @@
 
         saveType: 'Força',
 
-        tufaAndCascadeRisk: 'Poço cristalino de travertino com água aparentemente calma escondendo conduto de drenagem subterrânea profunda; aventureiros na piscina são sugados pelo vórtex em direção a galerias afogadas com risco grave de asfixia aquática (DMG p. 110, 246-247).',
+        tufaAndCascadeRisk: 'Poço cristalino de travertino com água aparentemente calma escondendo conduto de drenagem subterrânea profunda; aventureiros na piscina são sugados pelo vórtex em direção a galerias afogadas com risco grave de asfixia aquática.',
 
         pioneerMitigation: 'Entrada na água estritamente ancorado a corda-guia na margem e conferência de fluxo com flutuadores de folhas secas.',
 
@@ -69513,7 +69513,7 @@
 
         saveType: 'Destreza',
 
-        tufaAndCascadeRisk: 'Formações pontiagudas de carbonato de cálcio que crescem como agulhas submersas logo abaixo da superfície da represa; rasgam o casco de canoas e provocam cortes graves nos membros inferiores durante o vau, causando 3d6 de dano cortante (PHB p. 182-183).',
+        tufaAndCascadeRisk: 'Formações pontiagudas de carbonato de cálcio que crescem como agulhas submersas logo abaixo da superfície da represa; rasgam o casco de canoas e provocam cortes graves nos membros inferiores durante o vau, causando 3d6 de dano cortante.',
 
         pioneerMitigation: 'Navegação lenta guiada por proeiro em pé com vara de sondagem de fundo e reforço do casco com pranchas de pinho.',
 
@@ -69645,7 +69645,7 @@
 
       saveType: 'Destreza',
 
-      duneAndLagoonRisk: 'Crista móvel de duna parabólica de 20 metros em ângulo crítico de repouso (34°); o avanço da comitiva rompe a cumeeira eólica desencadeando avalanche repentina de areia seca que soterra os exploradores na depressão interdunar com risco de asfixia e 3d8 de concussão por esmagamento (DMG p. 110, 246; PHB p. 182-183).',
+      duneAndLagoonRisk: 'Crista móvel de duna parabólica de 20 metros em ângulo crítico de repouso (34°); o avanço da comitiva rompe a cumeeira eólica desencadeando avalanche repentina de areia seca que soterra os exploradores na depressão interdunar com risco de asfixia e 3d8 de concussão por esmagamento.',
 
       pioneerMitigation: 'Marcha pelos braços fixos vegetados da duna estabilizados por raízes de restinga e uso de bastões de sondagem de cumeeira.',
 
@@ -69669,7 +69669,7 @@
 
         saveType: 'Força',
 
-        duneAndLagoonRisk: 'Depressão interdunar onde lençol freático aflora sob areia quartzosa fina; a superfície aparente liquifaz sob carga transformando-se em fluido denso que suga o aventureiro até a cintura em segundos sob risco iminente de sufocamento (DMG p. 110-111).',
+        duneAndLagoonRisk: 'Depressão interdunar onde lençol freático aflora sob areia quartzosa fina; a superfície aparente liquifaz sob carga transformando-se em fluido denso que suga o aventureiro até a cintura em segundos sob risco iminente de sufocamento.',
 
         pioneerMitigation: 'Avanço arrastando varas de taquara cruzadas para distribuição do peso corporal e desvio de bordas úmidas espelhadas.',
 
@@ -69691,7 +69691,7 @@
 
         saveType: 'Constituição',
 
-        duneAndLagoonRisk: 'Vento marítimo tempestuoso canalizado entre os braços da duna parabólica arremessando partículas cortantes de quartzo a 70 km/h; atinge o rosto dos batedores causando lacerações na pele, abrasão de córneas e 2d6 de dano cortante com cegueira temporária (DMG p. 110, 246).',
+        duneAndLagoonRisk: 'Vento marítimo tempestuoso canalizado entre os braços da duna parabólica arremessando partículas cortantes de quartzo a 70 km/h; atinge o rosto dos batedores causando lacerações na pele, abrasão de córneas e 2d6 de dano cortante com cegueira temporária.',
 
         pioneerMitigation: 'Uso de viseiras de osso fendido e capuzes pesados de sarja encerada cobrindo inteiramente a face e o pescoço.',
 
@@ -69713,7 +69713,7 @@
 
         saveType: 'Destreza',
 
-        duneAndLagoonRisk: 'Lagoa rasa evaporada com crosta cristalina de halita sobre lodo cáustico fervente a 45°C; a camada de sal quebra sob o peso das botas mergulhando pernas e pés na salmoura concentrada com 3d6 de dano cáustico e infecção dérmica (PHB p. 182-183).',
+        duneAndLagoonRisk: 'Lagoa rasa evaporada com crosta cristalina de halita sobre lodo cáustico fervente a 45°C; a camada de sal quebra sob o peso das botas mergulhando pernas e pés na salmoura concentrada com 3d6 de dano cáustico e infecção dérmica.',
 
         pioneerMitigation: 'Travessia por pontaletes de areia seca e uso de perneiras impermeabilizadas com resina de breu vegetal.',
 
@@ -69845,7 +69845,7 @@
 
       saveType: 'Destreza',
 
-      karstAndPoljeRisk: 'Paredão vertical de calcário de 200 metros com fendas de dissolução ácida; chuvas tropicais soltam blocos de 500 kg que despencam sobre o sopé da torre, impondo salvaguarda para esquivar de soterramento e 3d10 de concussão por impacto de pedregulhos (DMG p. 110, 246; PHB p. 182-183).',
+      karstAndPoljeRisk: 'Paredão vertical de calcário de 200 metros com fendas de dissolução ácida; chuvas tropicais soltam blocos de 500 kg que despencam sobre o sopé da torre, impondo salvaguarda para esquivar de soterramento e 3d10 de concussão por impacto de pedregulhos.',
 
       pioneerMitigation: 'Observação sistemática de fissuras ativas e ninhos de andorinhões com avanço rápido pela zona aberta fora da área de queda direta de detritos.',
 
@@ -69869,7 +69869,7 @@
 
         saveType: 'Força',
 
-        karstAndPoljeRisk: 'Planície plana de polje cercada por torres de calcário; chuvas torrenciais inundam a bacia em minutos enquanto o sumidouro subterrâneo (ponor) drena a água gerando vórtice violento de sucção de 12 metros; teste contra arrastamento e 3d8 de concussão por sucção submersa (DMG p. 110, 246-247).',
+        karstAndPoljeRisk: 'Planície plana de polje cercada por torres de calcário; chuvas torrenciais inundam a bacia em minutos enquanto o sumidouro subterrâneo (ponor) drena a água gerando vórtice violento de sucção de 12 metros; teste contra arrastamento e 3d8 de concussão por sucção submersa.',
 
         pioneerMitigation: 'Monitoramento de drenagem de córregos cársticos e fixação imediata de linhas de vida nas raízes de figueiras-bravas das encostas.',
 
@@ -69891,7 +69891,7 @@
 
         saveType: 'Constituição',
 
-        karstAndPoljeRisk: 'Fenda cárstica profunda habitada por colônias imensas de morcegos; acúmulo de guano em fermentação libera metano volátil e esporos fúngicos; fagulhas ou tochas provocam deflagração térmica com 2d8 de dano ígneo e condição cego/intoxicado por 1 hora (DMG p. 110, 257).',
+        karstAndPoljeRisk: 'Fenda cárstica profunda habitada por colônias imensas de morcegos; acúmulo de guano em fermentação libera metano volátil e esporos fúngicos; fagulhas ou tochas provocam deflagração térmica com 2d8 de dano ígneo e condição cego/intoxicado por 1 hora.',
 
         pioneerMitigation: 'Uso de lanternas de óleo de baleia com filtro estanque de mica e toalhas umedecidas com água de eucalipto cobrindo narinas e boca.',
 
@@ -69913,7 +69913,7 @@
 
         saveType: 'Destreza',
 
-        karstAndPoljeRisk: 'Cristas e pináculos afiados de calcário erodido (lapiaz em agulha) encobertos por musgo tropical rasteiro; lâminas de rocha com bordas cortantes furam solas de botas causando 3d6 de dano perfurante e redução da velocidade pela metade por 24 horas (PHB p. 182-183).',
+        karstAndPoljeRisk: 'Cristas e pináculos afiados de calcário erodido (lapiaz em agulha) encobertos por musgo tropical rasteiro; lâminas de rocha com bordas cortantes furam solas de botas causando 3d6 de dano perfurante e redução da velocidade pela metade por 24 horas.',
 
         pioneerMitigation: 'Uso de palmilhas de ferro fundido articuladas e sondagem de piso com bastão reforçado antes de apoiar os pés.',
 
@@ -70045,7 +70045,7 @@
 
       saveType: 'Destreza',
 
-      eskerAndGlacialRisk: 'Crista estreita de cascalho e pedregulhos fluvioglaciares de 15 metros que cede sob os passos da comitiva em marcha; desencadeia avalanche localizada de seixos soltos arremessando os exploradores encosta abaixo com risco de fraturas e 3d8 de concussão (DMG p. 110, 246; PHB p. 182-183).',
+      eskerAndGlacialRisk: 'Crista estreita de cascalho e pedregulhos fluvioglaciares de 15 metros que cede sob os passos da comitiva em marcha; desencadeia avalanche localizada de seixos soltos arremessando os exploradores encosta abaixo com risco de fraturas e 3d8 de concussão.',
 
       pioneerMitigation: 'Marcha em fila única pela linha de cume com bastões alpinos de ponta reforçada e botas com cãibras de fixação lateral.',
 
@@ -70069,7 +70069,7 @@
 
         saveType: 'Destreza',
 
-        eskerAndGlacialRisk: 'Túnel tubular escavado por drenagem subglaciar com teto instável de gelo azul fóssil; o calor corporal e vibrações provocam colapso de placas de 2 toneladas, causando 3d10 de concussão por esmagamento e soterramento parcial (DMG p. 246-247).',
+        eskerAndGlacialRisk: 'Túnel tubular escavado por drenagem subglaciar com teto instável de gelo azul fóssil; o calor corporal e vibrações provocam colapso de placas de 2 toneladas, causando 3d10 de concussão por esmagamento e soterramento parcial.',
 
         pioneerMitigation: 'Sondagem de ressonância acústica do teto com martelo geológico antes da entrada e escoramento com pranchas de abeto silvestre.',
 
@@ -70091,7 +70091,7 @@
 
         saveType: 'Força',
 
-        eskerAndGlacialRisk: 'Depressão circular de kettle hole com areia fina e farinha de rocha saturada de água gélida de desgelo; a crosta superficial aparente liquifaz sob peso corporal, sugando o aventureiro na pasta viscosa com risco de asfixia e 2d6 de concussão (DMG p. 110-111).',
+        eskerAndGlacialRisk: 'Depressão circular de kettle hole com areia fina e farinha de rocha saturada de água gélida de desgelo; a crosta superficial aparente liquifaz sob peso corporal, sugando o aventureiro na pasta viscosa com risco de asfixia e 2d6 de concussão.',
 
         pioneerMitigation: 'Disposição prévia de troncos transversais formando esteira de apoio e teste de compactação do solo com vara longa de pinho.',
 
@@ -70113,7 +70113,7 @@
 
         saveType: 'Força',
 
-        eskerAndGlacialRisk: 'Ruptura catastrófica de barreira de morena em lago subglaciar com torrente violenta de água gélida e blocos de gelo a 40 km/h pelo fundo do cânion; teste contra arrastamento pela cheia e 3d8 de concussão por blocos de gelo flutuantes (DMG p. 110, 246).',
+        eskerAndGlacialRisk: 'Ruptura catastrófica de barreira de morena em lago subglaciar com torrente violenta de água gélida e blocos de gelo a 40 km/h pelo fundo do cânion; teste contra arrastamento pela cheia e 3d8 de concussão por blocos de gelo flutuantes.',
 
         pioneerMitigation: 'Vigilância contínua de variações súbitas no leito do córrego e estalos nas morenas com fuga rápida para o dorso elevado do esker.',
 
@@ -70245,7 +70245,7 @@
 
       saveType: 'Força',
 
-      marshAndTidalRisk: 'Maré de sizígia avança rapidamente pelos canais sinuosos da marisma inundando os flats de vaza a 25 km/h; a lama viscosa retém as pernas e botas dos exploradores enquanto a lâmina d\'água sobe 1,8 metro em minutos, impondo risco de afogamento e 3d8 de concussão por impacto de detritos flutuantes e hipotermia estuarina (DMG p. 110, 246-247).',
+      marshAndTidalRisk: 'Maré de sizígia avança rapidamente pelos canais sinuosos da marisma inundando os flats de vaza a 25 km/h; a lama viscosa retém as pernas e botas dos exploradores enquanto a lâmina d\'água sobe 1,8 metro em minutos, impondo risco de afogamento e 3d8 de concussão por impacto de detritos flutuantes e hipotermia estuarina.',
 
       pioneerMitigation: 'Uso de raquetes de lama de ripas leves de vime que distribuem o peso corporal e marcha rigorosa sincronizada com a tábua de marés local.',
 
@@ -70269,7 +70269,7 @@
 
         saveType: 'Destreza',
 
-        marshAndTidalRisk: 'Esteira densa de capim espartina que cresce sobre a borda erodida de canal de maré de 3 metros formando ponte oca falsa; a vegetação suspensa rompe sob o peso, arremessando o aventureiro na lama lodosa do fundo com correnteza de vazante, causando 3d6 de concussão e risco de torção severa (PHB p. 182-183).',
+        marshAndTidalRisk: 'Esteira densa de capim espartina que cresce sobre a borda erodida de canal de maré de 3 metros formando ponte oca falsa; a vegetação suspensa rompe sob o peso, arremessando o aventureiro na lama lodosa do fundo com correnteza de vazante, causando 3d6 de concussão e risco de torção severa.',
 
         pioneerMitigation: 'Sondagem sistemática de solo a cada passo com vara flexível de freixo e avanço em cordada espaçada de 5 metros.',
 
@@ -70291,7 +70291,7 @@
 
         saveType: 'Constituição',
 
-        marshAndTidalRisk: 'Rompimento acidental da crosta de lodo anaeróbico que libera nuvem cáustica de gás sulfídrico a alta pressão; induz asfixia imediata, ardor ocular severo e 2d8 de dano de veneno com condição envenenado e tosse convulsiva por 1 hora (DMG p. 110, 257).',
+        marshAndTidalRisk: 'Rompimento acidental da crosta de lodo anaeróbico que libera nuvem cáustica de gás sulfídrico a alta pressão; induz asfixia imediata, ardor ocular severo e 2d8 de dano de veneno com condição envenenado e tosse convulsiva por 1 hora.',
 
         pioneerMitigation: 'Uso de máscaras faciais de tecido triplo umedecidas com vinagre aromático e desvio cauteloso de depressões escuras borbulhantes.',
 
@@ -70313,7 +70313,7 @@
 
         saveType: 'Destreza',
 
-        marshAndTidalRisk: 'Travessia a vau em esteiro salgado com bancos densos de ostras serrilhadas encobertas por água túrbida; conchas pontiagudas rasgam perneiras e solas causando lacerações profundas, 3d6 de dano cortante com hemorragia e risco de infecção séptica marinha (PHB p. 182-183).',
+        marshAndTidalRisk: 'Travessia a vau em esteiro salgado com bancos densos de ostras serrilhadas encobertas por água túrbida; conchas pontiagudas rasgam perneiras e solas causando lacerações profundas, 3d6 de dano cortante com hemorragia e risco de infecção séptica marinha.',
 
         pioneerMitigation: 'Uso de perneiras reforçadas com lâminas de cortiça endurecida e bambu trançado com avanço cauteloso arrastando as solas no leito.',
 
@@ -70445,7 +70445,7 @@
 
       saveType: 'Força',
 
-      yardangAndWindRisk: 'Corredor estreito de argilito que comprime tempestade eólica gerando jato de vento de 80 km/h carregado de partículas abrasivas; desequilibra aventureiros, tomba montarias e arremessa a comitiva contra arestas afiadas de argilito causando 3d8 de concussão e cegueira momentânea (DMG p. 110, 246).',
+      yardangAndWindRisk: 'Corredor estreito de argilito que comprime tempestade eólica gerando jato de vento de 80 km/h carregado de partículas abrasivas; desequilibra aventureiros, tomba montarias e arremessa a comitiva contra arestas afiadas de argilito causando 3d8 de concussão e cegueira momentânea.',
 
       pioneerMitigation: 'Batedores avançam rente à base dos yardangs utilizando ganchos de arrasto no solo e operam em fila cerrada com mantos de lã pesada protegendo o rosto.',
 
@@ -70469,7 +70469,7 @@
 
         saveType: 'Destreza',
 
-        yardangAndWindRisk: 'Paredão vertical esculpido pelo vento com lâminas de argilito quebradiço que se desprendem sob a pressão da bota na escalada; o explorador despenca sobre o chão endurecido sofrendo 3d6 de concussão e risco de fraturas de tornozelo (PHB p. 182-183).',
+        yardangAndWindRisk: 'Paredão vertical esculpido pelo vento com lâminas de argilito quebradiço que se desprendem sob a pressão da bota na escalada; o explorador despenca sobre o chão endurecido sofrendo 3d6 de concussão e risco de fraturas de tornozelo.',
 
         pioneerMitigation: 'Uso de pítons de estaca longa para terrenos brandos e verificação de firmeza com haste de ferro antes de qualquer apoio de peso corporal.',
 
@@ -70513,7 +70513,7 @@
 
         saveType: 'Constituição',
 
-        yardangAndWindRisk: 'Paredes curvas de argila compacta que concentram a radiação solar transformando a vala eólica em forno térmico sem brisa; desidratação acelerada que induz cãibras críticas e 1 nível de exaustão por insolação extrema (DMG p. 110; PHB p. 185).',
+        yardangAndWindRisk: 'Paredes curvas de argila compacta que concentram a radiação solar transformando a vala eólica em forno térmico sem brisa; desidratação acelerada que induz cãibras críticas e 1 nível de exaustão por insolação extrema.',
 
         pioneerMitigation: 'Deslocamento restrito às horas de sombra matutina e consumo rigoroso de água com eletrólitos minerais a cada 30 minutos.',
 
@@ -70653,7 +70653,7 @@
 
       saveType: 'Destreza',
 
-      riparianAndOxbowRisk: 'O dique de silte e areia cede sob a pressão da cheia do rio principal, abrindo brecha de 8 metros que arremessa torrente de água barrenta e troncos pesados contra a comitiva; provoca 3d8 de concussão por arrasto e aprisionamento em lamaçal de várzea (DMG p. 110, 246).',
+      riparianAndOxbowRisk: 'O dique de silte e areia cede sob a pressão da cheia do rio principal, abrindo brecha de 8 metros que arremessa torrente de água barrenta e troncos pesados contra a comitiva; provoca 3d8 de concussão por arrasto e aprisionamento em lamaçal de várzea.',
 
       pioneerMitigation: 'Batedores sondam fissuras de percolação na crista do dique e instalam sacos de lona com cascalho para contenção de pontos fracos.',
 
@@ -70699,7 +70699,7 @@
 
         saveType: 'Constituição',
 
-        riparianAndOxbowRisk: 'Água estagnada tépida de meandro abandonado repleta de sanguessugas e bactérias decompositoras; fixam-se nas pernas drenando sangue e inoculando toxinas que causam náusea, anemia aguda e 1 nível de exaustão (DMG p. 111; PHB p. 185).',
+        riparianAndOxbowRisk: 'Água estagnada tépida de meandro abandonado repleta de sanguessugas e bactérias decompositoras; fixam-se nas pernas drenando sangue e inoculando toxinas que causam náusea, anemia aguda e 1 nível de exaustão.',
 
         pioneerMitigation: 'Uso de meias impermeáveis amarradas com cordões de couro e unção das pernas com pasta de tabaco verde e cinza de madeira.',
 
@@ -70861,7 +70861,7 @@
 
       saveType: 'Destreza',
 
-      riftAndGrabenRisk: 'Paredão vertical de falha tectônica com espelho de atrito polido que desaba parcialmente sob tremores; a perda de aderência precipita a comitiva em abismo de fenda cortical causando 4d10 de concussão catastrófica e perda de cargas (DMG p. 110, 183).',
+      riftAndGrabenRisk: 'Paredão vertical de falha tectônica com espelho de atrito polido que desaba parcialmente sob tremores; a perda de aderência precipita a comitiva em abismo de fenda cortical causando 4d10 de concussão catastrófica e perda de cargas.',
 
       pioneerMitigation: 'Batedores instalam cabos de sustentação em pítons de expansão de aço maciço e operam guinchos mecânicos de descenso com freio centrífugo duplo.',
 
@@ -70885,7 +70885,7 @@
 
         saveType: 'Destreza',
 
-        riftAndGrabenRisk: 'Abalo sísmico violento que racha o assoalho do vale em fenda de 3 metros de largura engolindo aventureiros; projeta lajes basálticas desestabilizadas causando 3d8 de concussão e aprisionamento nas profundezas (PHB p. 182-183; DMG p. 246).',
+        riftAndGrabenRisk: 'Abalo sísmico violento que racha o assoalho do vale em fenda de 3 metros de largura engolindo aventureiros; projeta lajes basálticas desestabilizadas causando 3d8 de concussão e aprisionamento nas profundezas.',
 
         pioneerMitigation: 'Marcha dispersa mantendo 10 metros entre exploradores e identificação prévia de linhas de fratura ativa através de bússolas e pêndulos de chumbo.',
 
@@ -70907,7 +70907,7 @@
 
         saveType: 'Constituição',
 
-        riftAndGrabenRisk: 'Emissão explosiva de vapor superaquecido com ácido clorídrico e sulfeto que irrompe de fenda do graben; causa queimaduras severas na pele exposta, 2d6 de dano de fogo e 1 nível de exaustão por queimação brônquica (DMG p. 111; PHB p. 185).',
+        riftAndGrabenRisk: 'Emissão explosiva de vapor superaquecido com ácido clorídrico e sulfeto que irrompe de fenda do graben; causa queimaduras severas na pele exposta, 2d6 de dano de fogo e 1 nível de exaustão por queimação brônquica.',
 
         pioneerMitigation: 'Uso de capas de couro curtido com forro de lã impermeável tratada com óxido de zinco e respiradores de cerâmica com carvão mineral.',
 
@@ -71069,7 +71069,7 @@
 
       saveType: 'Destreza',
 
-      hoodooAndTuffRisk: 'Borda de cornija de tufo vulcânico poroso que se esfarela sob a passada em fenda de 14 metros entre chaminés de fadas; o explorador despenca prensado entre paredes de cinza compacta sofrendo 3d8 de concussão e risco de esmagamento por bloco basáltico do topo (DMG p. 110, 190).',
+      hoodooAndTuffRisk: 'Borda de cornija de tufo vulcânico poroso que se esfarela sob a passada em fenda de 14 metros entre chaminés de fadas; o explorador despenca prensado entre paredes de cinza compacta sofrendo 3d8 de concussão e risco de esmagamento por bloco basáltico do topo.',
 
       pioneerMitigation: 'Batedores avançam testando apoios com ponteiros de ferro doce e fixam grampos de expansão alargados para rochas moles.',
 
@@ -71093,7 +71093,7 @@
 
         saveType: 'Constituição',
 
-        hoodooAndTuffRisk: 'Rajadas de vento comprimidas entre torres cônicas de tufo que erguem nuvens densas de microcristais de quartzo e cinza vulcânica; provoca espasmos respiratórios, queimação pulmonar e 1 nível de exaustão por silicose aguda (DMG p. 110; PHB p. 185).',
+        hoodooAndTuffRisk: 'Rajadas de vento comprimidas entre torres cônicas de tufo que erguem nuvens densas de microcristais de quartzo e cinza vulcânica; provoca espasmos respiratórios, queimação pulmonar e 1 nível de exaustão por silicose aguda.',
 
         pioneerMitigation: 'Uso de máscaras de tecido duplo de lã embebidas em água e óculos de viseira de fenda fina de cobre.',
 
@@ -71277,7 +71277,7 @@
 
       saveType: 'Destreza',
 
-      mangroveAndTidalRisk: 'Arco de raiz aérea de mangue-vermelho coberto por algas limosas e colônias de cracas afiadas; o pé escorrega e o aventureiro cai sobre cascas cortantes despencando em lodo anaeróbico movediço com 3d8 de concussão, cortes sangrentos e afundamento rápido (DMG p. 110, 246).',
+      mangroveAndTidalRisk: 'Arco de raiz aérea de mangue-vermelho coberto por algas limosas e colônias de cracas afiadas; o pé escorrega e o aventureiro cai sobre cascas cortantes despencando em lodo anaeróbico movediço com 3d8 de concussão, cortes sangrentos e afundamento rápido.',
 
       pioneerMitigation: 'Batedores avançam encordoados utilizando bastões com ganchos de fixação em forquilhas altas e botas reforçadas com caneleiras rígidas de couro cru.',
 
@@ -71301,7 +71301,7 @@
 
         saveType: 'Força',
 
-        mangroveAndTidalRisk: 'Subida repentina da preamar que canaliza onda de choque de 2 metros em canal meândrico estreito a 35 km/h; despedaça embarcações contra as raízes aéreas causando 2d8 de concussão e risco iminente de perda de suprimentos por afogamento (DMG p. 110, 118).',
+        mangroveAndTidalRisk: 'Subida repentina da preamar que canaliza onda de choque de 2 metros em canal meândrico estreito a 35 km/h; despedaça embarcações contra as raízes aéreas causando 2d8 de concussão e risco iminente de perda de suprimentos por afogamento.',
 
         pioneerMitigation: 'Vigia permanente na proa atento ao estrondo prévio da maré e amarração preventiva de emergência em raízes mestras consolidadas.',
 
@@ -71323,7 +71323,7 @@
 
         saveType: 'Constituição',
 
-        mangroveAndTidalRisk: 'Emissão maciça de gás sulfídrico desprendido da lama preta fétida sob o calor do sol da tarde; provoca ardência nas vias respiratórias, náusea incapacitante e 1 nível de exaustão por hipóxia química (DMG p. 111; PHB p. 185).',
+        mangroveAndTidalRisk: 'Emissão maciça de gás sulfídrico desprendido da lama preta fétida sob o calor do sol da tarde; provoca ardência nas vias respiratórias, náusea incapacitante e 1 nível de exaustão por hipóxia química.',
 
         pioneerMitigation: 'Uso de máscaras de linho embebidas em vinagre silvestre e folhas de mangue-preto e ascensão para os galhos superiores ventilados.',
 
@@ -71485,7 +71485,7 @@
 
       saveType: 'Destreza',
 
-      rockGlacierAndPermafrostRisk: 'Frente ativa de geleira de rocha com tálus instável sobre núcleo de gelo deslizante; a camada de detritos de 2 metros se rompe sob a marcha gerando avalanche de blocos de meia tonelada com 3d8 de concussão e soterramento parcial (DMG p. 110, 190).',
+      rockGlacierAndPermafrostRisk: 'Frente ativa de geleira de rocha com tálus instável sobre núcleo de gelo deslizante; a camada de detritos de 2 metros se rompe sob a marcha gerando avalanche de blocos de meia tonelada com 3d8 de concussão e soterramento parcial.',
 
       pioneerMitigation: 'Batedores avançam com bastões de ponta de tungstênio sondando a solidez da capa rochosa e guiam a marcha exclusivamente por costilhas laterais estáticas.',
 
@@ -71509,7 +71509,7 @@
 
         saveType: 'Constituição',
 
-        rockGlacierAndPermafrostRisk: 'Espaço oco de 6 metros entre blocos colossais diretamente sobre o núcleo de gelo fóssil onde o ar atinge -20°C; o explorador despenca na fenda sofrendo 2d6 de concussão e risco iminente de hipotermia grave e necrose por congelamento nas extremidades (PHB p. 183, 185).',
+        rockGlacierAndPermafrostRisk: 'Espaço oco de 6 metros entre blocos colossais diretamente sobre o núcleo de gelo fóssil onde o ar atinge -20°C; o explorador despenca na fenda sofrendo 2d6 de concussão e risco iminente de hipotermia grave e necrose por congelamento nas extremidades.',
 
         pioneerMitigation: 'Uso de calçados alpinos com cano alto forrados com pele de foca e progressão encordoada em grupos de três com espaçamento de 4 metros.',
 
@@ -71693,7 +71693,7 @@
 
       saveType: 'Força',
 
-      blindGorgeAndPonorRisk: 'Garganta cárstica terminal onde o rio volumoso desaba em funil subterrâneo com vórtice de sucção que traga botes e nadadores para dentro de sifão subaquático fechado; provoca 3d8 de concussão contra rochas e risco crítico de asfixia prolongada (DMG p. 110, 118; PHB p. 183).',
+      blindGorgeAndPonorRisk: 'Garganta cárstica terminal onde o rio volumoso desaba em funil subterrâneo com vórtice de sucção que traga botes e nadadores para dentro de sifão subaquático fechado; provoca 3d8 de concussão contra rochas e risco crítico de asfixia prolongada.',
 
       pioneerMitigation: 'Batedores fixam cabos de retenção de aço com estacas de ancoragem nas margens e desviam a navegação para terraço seco de desembarque prévio.',
 
@@ -71717,7 +71717,7 @@
 
         saveType: 'Constituição',
 
-        blindGorgeAndPonorRisk: 'Bolsão de ar estagnado rico em gás carbônico no fundo do túnel fóssil sem ventilação; apaga tochas instantaneamente e causa tontura repentina, fraqueza muscular e 1 nível de exaustão por hipóxia se inalado sem proteção (DMG p. 111; PHB p. 185).',
+        blindGorgeAndPonorRisk: 'Bolsão de ar estagnado rico em gás carbônico no fundo do túnel fóssil sem ventilação; apaga tochas instantaneamente e causa tontura repentina, fraqueza muscular e 1 nível de exaustão por hipóxia se inalado sem proteção.',
 
         pioneerMitigation: 'Avanço com candeias de prova de chama erguidas na altura da cabeça e uso de máscaras com carvão ativado embebidas em vinagre aromático.',
 
@@ -71901,7 +71901,7 @@
 
       saveType: 'Destreza',
 
-      restingaAndSwaleRisk: 'Mata fechada de restinga sobre areia solta com cactos colunares e bromélias com espilhos recurvados; tropeços no terreno fofo precipitam aventureiros contra touceiras pontiagudas causando 2d8 de dano perfurante e sangramento lacerante (DMG p. 110, 246).',
+      restingaAndSwaleRisk: 'Mata fechada de restinga sobre areia solta com cactos colunares e bromélias com espilhos recurvados; tropeços no terreno fofo precipitam aventureiros contra touceiras pontiagudas causando 2d8 de dano perfurante e sangramento lacerante.',
 
       pioneerMitigation: 'Batedores abrem caminho com podões curtos e usam perneiras de couro espesso com reforço frontal de lona encerada impermeável.',
 
@@ -71925,7 +71925,7 @@
 
         saveType: 'Constituição',
 
-        restingaAndSwaleRisk: 'Lagoa salobra estagnada entre cordões arenosos saturada de cloretos, sulfatos e cianobactérias; o contato com mucosas e ingestão inadvertida induz vômitos imediatos, queimação estomacal e 1 nível de exaustão por desidratação osmótica (DMG p. 111; PHB p. 185).',
+        restingaAndSwaleRisk: 'Lagoa salobra estagnada entre cordões arenosos saturada de cloretos, sulfatos e cianobactérias; o contato com mucosas e ingestão inadvertida induz vômitos imediatos, queimação estomacal e 1 nível de exaustão por desidratação osmótica.',
 
         pioneerMitigation: 'Uso de canudos de bambu com carvão ativado e testes de salinidade com reagentes químicos antes de qualquer coleta.',
 
@@ -71947,7 +71947,7 @@
 
         saveType: 'Constituição',
 
-        restingaAndSwaleRisk: 'Radiação solar incidente refratada em 360 graus por areias brancas de quartzo puro; provoca dor ocular lancinante, conjuntivite actínica e desvantagem em testes de Percepção visual por 2 horas (PHB p. 182-183).',
+        restingaAndSwaleRisk: 'Radiação solar incidente refratada em 360 graus por areias brancas de quartzo puro; provoca dor ocular lancinante, conjuntivite actínica e desvantagem em testes de Percepção visual por 2 horas.',
 
         pioneerMitigation: 'Uso de faixas oculares de linho escurecido com carvão vegetal e aplicação de pigmento negro de fuligem sob os olhos.',
 
@@ -72109,7 +72109,7 @@
 
       saveType: 'Destreza',
 
-      lapiesAndGlaciokarstRisk: 'Pavimento cárstico fraturado por fendas verticais de 12 metros de profundidade com bordas afiadas como facas; o salto entre cristas falha e o explorador despenca prensado entre lâminas calcárias sofrendo 3d8 de concussão e lacerações profundas (DMG p. 110, 190).',
+      lapiesAndGlaciokarstRisk: 'Pavimento cárstico fraturado por fendas verticais de 12 metros de profundidade com bordas afiadas como facas; o salto entre cristas falha e o explorador despenca prensado entre lâminas calcárias sofrendo 3d8 de concussão e lacerações profundas.',
 
       pioneerMitigation: 'Batedores avançam encordoados em dupla e utilizam pranchas de travessia de alumínio forjado ou madeira densa sobre as fendas mais largas.',
 
@@ -72155,7 +72155,7 @@
 
         saveType: 'Constituição',
 
-        lapiesAndGlaciokarstRisk: 'Ventos descendentes gelados canalizados através de chaminés cársticas com velocidade de 60 km/h; congelam o suor nas roupas em minutos, provocando choque hipotérmico e 1 nível de exaustão com perda de sensibilidade motora fina (PHB p. 182-183, 185).',
+        lapiesAndGlaciokarstRisk: 'Ventos descendentes gelados canalizados através de chaminés cársticas com velocidade de 60 km/h; congelam o suor nas roupas em minutos, provocando choque hipotérmico e 1 nível de exaustão com perda de sensibilidade motora fina.',
 
         pioneerMitigation: 'Uso de trajes térmicos em camadas de lã pura cobertos por anoraques de couro estanque com gola de pele espessa.',
 
@@ -72317,7 +72317,7 @@
 
       saveType: 'Destreza',
 
-      slotCanyonAndTorrentRisk: 'Garganta estreita de arenito de 1,2 metro de largura invadida por onda de cheia relâmpago violenta carregando troncos e detritos; a água sobe repentinamente arrastando exploradores contra paredões polidos com 3d10 de concussão e aprisionamento em marmita submersa (DMG p. 110, 246).',
+      slotCanyonAndTorrentRisk: 'Garganta estreita de arenito de 1,2 metro de largura invadida por onda de cheia relâmpago violenta carregando troncos e detritos; a água sobe repentinamente arrastando exploradores contra paredões polidos com 3d10 de concussão e aprisionamento em marmita submersa.',
 
       pioneerMitigation: 'Batedores monitoram ecos acústicos e marcas de lodo nas paredes, mantendo estribos de corda pré-fixados e avançando com arreios de escalada rápida.',
 
@@ -72341,7 +72341,7 @@
 
         saveType: 'Força',
 
-        slotCanyonAndTorrentRisk: 'Progressão em atrito corporal entre paredes opostas de arenito fino recobertas por poeira escorregadia; a perda de aderência provoca queda de 12 metros no fundo rochoso da fenda com 3d6 de concussão e fraturas em membros inferiores (PHB p. 182-183).',
+        slotCanyonAndTorrentRisk: 'Progressão em atrito corporal entre paredes opostas de arenito fino recobertas por poeira escorregadia; a perda de aderência provoca queda de 12 metros no fundo rochoso da fenda com 3d6 de concussão e fraturas em membros inferiores.',
 
         pioneerMitigation: 'Uso de calçados com sola de borracha antiderrapante resinada e instalação de pítons de proteção com fitas tubulares a cada 3 metros.',
 
@@ -72385,7 +72385,7 @@
 
         saveType: 'Constituição',
 
-        slotCanyonAndTorrentRisk: 'Ausência de circulação de ar no fundo da fenda somada ao calor irradiado pelas rochas aquecidas; induz desidratação acelerada, cãibras severas e 1 nível de exaustão por insolação convectiva (DMG p. 110; PHB p. 185).',
+        slotCanyonAndTorrentRisk: 'Ausência de circulação de ar no fundo da fenda somada ao calor irradiado pelas rochas aquecidas; induz desidratação acelerada, cãibras severas e 1 nível de exaustão por insolação convectiva.',
 
         pioneerMitigation: 'Travessia durante as primeiras horas da aurora e transporte de cantis térmicos de couro duplo forrados com feltro úmido.',
 
@@ -72525,7 +72525,7 @@
 
       saveType: 'Destreza',
 
-      quakingBogAndReedRisk: 'Esteira vegetal flutuante delgada de raízes que se rompe sob o peso da marcha, tragando o explorador em bolsão de lodo movediço e água fria de 5 metros de profundidade com 3d8 de concussão e afundamento rápido (DMG p. 110; PHB p. 183).',
+      quakingBogAndReedRisk: 'Esteira vegetal flutuante delgada de raízes que se rompe sob o peso da marcha, tragando o explorador em bolsão de lodo movediço e água fria de 5 metros de profundidade com 3d8 de concussão e afundamento rápido.',
 
       pioneerMitigation: 'Batedores avançam com raquetes de pântano alargadas feitas de junco e sondam cada tufo com varas de bambu de 3 metros antes de apoiar o pé.',
 
@@ -72549,7 +72549,7 @@
 
         saveType: 'Destreza',
 
-        quakingBogAndReedRisk: 'Bolhas volumosas de metano fóssil aprisionadas sob a turfa que se rompem com o caminhar e entram em combustão imediata ao contato com tochas ou brasas; provoca labareda em raio de 3 metros com 2d6 de dano de fogo e cegueira por fumaça ácida (DMG p. 110, 246).',
+        quakingBogAndReedRisk: 'Bolhas volumosas de metano fóssil aprisionadas sob a turfa que se rompem com o caminhar e entram em combustão imediata ao contato com tochas ou brasas; provoca labareda em raio de 3 metros com 2d6 de dano de fogo e cegueira por fumaça ácida.',
 
         pioneerMitigation: 'Uso exclusivo de lanternas estanques de vidro espesso ou bastões de fósforo luminescente frio sem chama aberta na travessia do brejo.',
 
@@ -72593,7 +72593,7 @@
 
         saveType: 'Constituição',
 
-        quakingBogAndReedRisk: 'Nuvens densas de mosquitos e miasma fétido de matéria vegetal putrefata; picadas incessantes provocam febre intermitente, calafrios e 1 nível de exaustão sem proteção profilática (DMG p. 257; PHB p. 185).',
+        quakingBogAndReedRisk: 'Nuvens densas de mosquitos e miasma fétido de matéria vegetal putrefata; picadas incessantes provocam febre intermitente, calafrios e 1 nível de exaustão sem proteção profilática.',
 
         pioneerMitigation: 'Unção corporal com óleo vegetal misturado a cânfora e defumação contínua de resina de cipreste durante a marcha.',
 
@@ -72733,7 +72733,7 @@
 
       saveType: 'Destreza',
 
-      barchanAndAcousticRisk: 'Crista instável de duna barcana de 90 metros de altura no ângulo crítico de 34 graus que desaba sob a marcha da comitiva; provoca avalanche de areia abrasiva com 3d8 de concussão e risco iminente de soterramento e asfixia (DMG p. 110; PHB p. 183).',
+      barchanAndAcousticRisk: 'Crista instável de duna barcana de 90 metros de altura no ângulo crítico de 34 graus que desaba sob a marcha da comitiva; provoca avalanche de areia abrasiva com 3d8 de concussão e risco iminente de soterramento e asfixia.',
 
       pioneerMitigation: 'Batedores avançam encordoados utilizando esquis de madeira leve e varas de sondagem para distribuir a pressão sobre a crista da duna.',
 
@@ -72757,7 +72757,7 @@
 
         saveType: 'Constituição',
 
-        barchanAndAcousticRisk: 'Atrito sincronizado de grãos de areia esféricos em declive gerando zumbido grave contínuo de 105 dB que ecoa pelos corredores interdunas; causa vertigem espacial, náusea e desvantagem em testes de Percepção auditiva e Sobrevivência por 2 horas (PHB p. 182; DMG p. 111).',
+        barchanAndAcousticRisk: 'Atrito sincronizado de grãos de areia esféricos em declive gerando zumbido grave contínuo de 105 dB que ecoa pelos corredores interdunas; causa vertigem espacial, náusea e desvantagem em testes de Percepção auditiva e Sobrevivência por 2 horas.',
 
         pioneerMitigation: 'Uso de protetores de ouvido confeccionados com cera pura e algodão cardado amarrados sob turbantes grossos.',
 
@@ -72801,7 +72801,7 @@
 
         saveType: 'Constituição',
 
-        barchanAndAcousticRisk: 'Falso lago gerado por miragem térmica sobre piso fino de gesso que cede sob o peso, expondo lodo salino quente que queima os pés e induz desidratação crítica com 1 nível de exaustão (DMG p. 110; PHB p. 185).',
+        barchanAndAcousticRisk: 'Falso lago gerado por miragem térmica sobre piso fino de gesso que cede sob o peso, expondo lodo salino quente que queima os pés e induz desidratação crítica com 1 nível de exaustão.',
 
         pioneerMitigation: 'Observação de horizontes com lunetas com filtros de vidro fumê e marcha guiada exclusivamente por afloramentos de cascalho firme.',
 
@@ -72941,7 +72941,7 @@
 
       saveType: 'Força',
 
-      fiordAndMeanderRisk: 'Garganta estreita de 12 metros onde o choque de correntes em curva sinuosa gera redemoinho de sucção que traga embarcações e nadadores para covões submersos de 30 metros de profundidade; provoca 3d8 de concussão e teste imediato para evitar submersão prolongada (DMG p. 110, 118).',
+      fiordAndMeanderRisk: 'Garganta estreita de 12 metros onde o choque de correntes em curva sinuosa gera redemoinho de sucção que traga embarcações e nadadores para covões submersos de 30 metros de profundidade; provoca 3d8 de concussão e teste imediato para evitar submersão prolongada.',
 
       pioneerMitigation: 'Batedores sondam o fluxo da água com flutuadores de cortiça e guiam a navegação exclusivamente pelo canal de corte externo com apoio de remos de governo pesados.',
 
@@ -72965,7 +72965,7 @@
 
         saveType: 'Destreza',
 
-        fiordAndMeanderRisk: 'Onda de cheia repentina de 4 metros de altura comprimida pelo cânion que avança sem aviso prévio carregando árvores e blocos rolantes; destrói botes e arrasta aventureiros contra os desfiladeiros causando 3d10 de concussão (DMG p. 110, 246).',
+        fiordAndMeanderRisk: 'Onda de cheia repentina de 4 metros de altura comprimida pelo cânion que avança sem aviso prévio carregando árvores e blocos rolantes; destrói botes e arrasta aventureiros contra os desfiladeiros causando 3d10 de concussão.',
 
         pioneerMitigation: 'Sentinelas instaladas em postos elevados com trompas de alarme sonoro identificam o bramido da onda a montante e ordenam escalada urgente para terraços superiores.',
 
@@ -72987,7 +72987,7 @@
 
         saveType: 'Constituição',
 
-        fiordAndMeanderRisk: 'Água glacial a 4°C em corredeiras violentas de classe IV que causa paralisia muscular súbita, perda de fôlego imediata e 2d6 de dano de frio com 1 nível de exaustão em caso de queda na água (PHB p. 183, 185).',
+        fiordAndMeanderRisk: 'Água glacial a 4°C em corredeiras violentas de classe IV que causa paralisia muscular súbita, perda de fôlego imediata e 2d6 de dano de frio com 1 nível de exaustão em caso de queda na água.',
 
         pioneerMitigation: 'Uso de trajes estanques de couro encerado forrados com lã espessa e coletes salva-vidas acolchoados com crina de cavalo tratada.',
 
@@ -73149,7 +73149,7 @@
 
       saveType: 'Destreza',
 
-      basaltAndMesetaRisk: 'Encosta de tálus instável com inclinação de 45 graus formada por blocos basálticos angulosos de meia tonelada que se deslocam sob o impacto dos passos da comitiva; provoca avalanche de rocha negra com 3d8 de concussão e risco de esmagamento de membros inferiores (DMG p. 110, 190).',
+      basaltAndMesetaRisk: 'Encosta de tálus instável com inclinação de 45 graus formada por blocos basálticos angulosos de meia tonelada que se deslocam sob o impacto dos passos da comitiva; provoca avalanche de rocha negra com 3d8 de concussão e risco de esmagamento de membros inferiores.',
 
       pioneerMitigation: 'Batedores instalam amarras de corda em garras de aço cravadas no topo da cornija basáltica e avançam em ziguezague por costilhas rochosas fixas.',
 
@@ -73173,7 +73173,7 @@
 
         saveType: 'Força',
 
-        basaltAndMesetaRisk: 'Correntes de ar ascendentes comprimidas pela parede vertical da meseta que estouram no topo em rajadas horizontais de 80 km/h; desequilibram aventureiros junto à borda do abismo causando risco de arremesso no vazio e 2d6 de dano de impacto com o solo rochoso (PHB p. 182, DMG p. 110).',
+        basaltAndMesetaRisk: 'Correntes de ar ascendentes comprimidas pela parede vertical da meseta que estouram no topo em rajadas horizontais de 80 km/h; desequilibram aventureiros junto à borda do abismo causando risco de arremesso no vazio e 2d6 de dano de impacto com o solo rochoso.',
 
         pioneerMitigation: 'Marcha agachada rente às depressões do topo e uso de cinturões com tirantes de ancoragem rápida em fendas de basalto.',
 
@@ -73195,7 +73195,7 @@
 
         saveType: 'Constituição',
 
-        basaltAndMesetaRisk: 'Água estagnada retida em cavidade de basalto fóssil altamente concentrada em sais minerais e carbonatos cáusticos sob a evaporação solar; provoca queimação gástrica severa, vômitos e 1 nível de exaustão se ingerida sem destilação (DMG p. 111, PHB p. 185).',
+        basaltAndMesetaRisk: 'Água estagnada retida em cavidade de basalto fóssil altamente concentrada em sais minerais e carbonatos cáusticos sob a evaporação solar; provoca queimação gástrica severa, vômitos e 1 nível de exaustão se ingerida sem destilação.',
 
         pioneerMitigation: 'Uso de tiras reagentes de teste mineral e alambique portátil de cobre para destilação solar por condensação limpa.',
 
@@ -73357,7 +73357,7 @@
 
       saveType: 'Destreza',
 
-      cockpitAndBambooRisk: 'Fundo de dolina conica de 25 metros de profundidade encoberto por lodo argiloso coloidal e detritos de bambu podre; o piso cede sob os passos tragando o explorador em succao rapida com 3d8 de concussao e risco iminente de asfixia (DMG p. 110, 190).',
+      cockpitAndBambooRisk: 'Fundo de dolina conica de 25 metros de profundidade encoberto por lodo argiloso coloidal e detritos de bambu podre; o piso cede sob os passos tragando o explorador em succao rapida com 3d8 de concussao e risco iminente de asfixia.',
 
       pioneerMitigation: 'Batedores avancam sondando a firmeza do terreno com varas longas de bambu verde e estendem esteiras trancadas de colmos para distribuir a carga.',
 
@@ -73381,7 +73381,7 @@
 
         saveType: 'Constituicao',
 
-        cockpitAndBambooRisk: 'Ventanias no topo dos cones carsticos vergam colmos gigantes de 30 metros acumulando energia elastica que se rompe com estrondo sonico de 110 dB reverberando no funil carstico; provoca desorientacao severa, vertigem e 2d6 de dano trovejante com surdez temporaria por 1 hora (PHB p. 182, DMG p. 246).',
+        cockpitAndBambooRisk: 'Ventanias no topo dos cones carsticos vergam colmos gigantes de 30 metros acumulando energia elastica que se rompe com estrondo sonico de 110 dB reverberando no funil carstico; provoca desorientacao severa, vertigem e 2d6 de dano trovejante com surdez temporaria por 1 hora.',
 
         pioneerMitigation: 'Uso de protetores auriculares de cera de abelha envolvida em algodao cru e avanco protegido rente as paredes calcarias do vale.',
 
@@ -73425,7 +73425,7 @@
 
         saveType: 'Constituicao',
 
-        cockpitAndBambooRisk: 'Acumulo de gases pesados de fermentacao anaerobica de materia vegetal retidos no fundo sem vento da dolina; provoca nausea sufocante, visao turva e 1 nivel de exaustao por hipoxia se respirado sem protecao (DMG p. 111, PHB p. 185).',
+        cockpitAndBambooRisk: 'Acumulo de gases pesados de fermentacao anaerobica de materia vegetal retidos no fundo sem vento da dolina; provoca nausea sufocante, visao turva e 1 nivel de exaustao por hipoxia se respirado sem protecao.',
 
         pioneerMitigation: 'Uso de lencos embebidos em vinagre de maca e folhas de menta silvestre amarrados sobre a boca e nariz, com ascensao rapida para as encostas ventiladas.',
 
@@ -73557,7 +73557,7 @@
 
       saveType: 'Destreza',
 
-      hogbackAndCluseRisk: 'Crista estreita de quartzito puro de 40 cm de largura esculpida em ângulo de 60 graus; rajadas de vento laterais desequilibram aventureiros causando queda desgovernada de 18 metros pela escarpa rochosa com 3d8 de concussão e lacerações múltiplas (DMG p. 110, 190).',
+      hogbackAndCluseRisk: 'Crista estreita de quartzito puro de 40 cm de largura esculpida em ângulo de 60 graus; rajadas de vento laterais desequilibram aventureiros causando queda desgovernada de 18 metros pela escarpa rochosa com 3d8 de concussão e lacerações múltiplas.',
 
       pioneerMitigation: 'Batedores avançam encordoados a cavaleiro da crista e instalam piquetes de expansão com cordas-guia laterais para a travessia segura da comitiva.',
 
@@ -73757,7 +73757,7 @@
 
       saveType: 'Destreza',
 
-      ignimbriteAndFumaroleRisk: 'Crosta delgada de tufo vulcânico soldado suspensa sobre duto vertical de fumarola fóssil de 15 metros de profundidade; o solo se rompe sob os passos da comitiva tragando o explorador em queda livre com 3d8 de concussão e aprisionamento em funil de cinza compacta (DMG p. 110, 246).',
+      ignimbriteAndFumaroleRisk: 'Crosta delgada de tufo vulcânico soldado suspensa sobre duto vertical de fumarola fóssil de 15 metros de profundidade; o solo se rompe sob os passos da comitiva tragando o explorador em queda livre com 3d8 de concussão e aprisionamento em funil de cinza compacta.',
 
       pioneerMitigation: 'Batedores sondam o solo à frente com pontas de aço forjado identificando ressonâncias ocas e guiam a marcha exclusivamente por cristas densas de tufo.',
 
@@ -73957,7 +73957,7 @@
 
       saveType: 'Destreza',
 
-      whiteSandAndBlackwaterRisk: 'Areia silicosa pura lixiviada saturada por lençol freático raso; o solo perde a sustentação sob o peso da expedição colapsando em poço de areia movediça de 2 metros de profundidade que traga o explorador em sucção coloidal com 2d6 de concussão e asfixia (DMG p. 110-111).',
+      whiteSandAndBlackwaterRisk: 'Areia silicosa pura lixiviada saturada por lençol freático raso; o solo perde a sustentação sob o peso da expedição colapsando em poço de areia movediça de 2 metros de profundidade que traga o explorador em sucção coloidal com 2d6 de concussão e asfixia.',
 
       pioneerMitigation: 'Batedores avançam com varas longas de bambu testando a firmeza do solo e utilizam pranchas de madeira leve nos pés para travessia de manchas arenosas.',
 
@@ -74157,7 +74157,7 @@
 
       saveType: 'Destreza',
 
-      submergedForestRisk: 'Galhadas e tocos fósseis de quartzo e calcedônia submersos na água lacustre turva; a aproximação de barcas ou nadadores colide contra pontas pétreas afiadas que rasgam cascos de madeira e causam 3d8 de perfuração e naufrágio em minutos (DMG p. 110, 116).',
+      submergedForestRisk: 'Galhadas e tocos fósseis de quartzo e calcedônia submersos na água lacustre turva; a aproximação de barcas ou nadadores colide contra pontas pétreas afiadas que rasgam cascos de madeira e causam 3d8 de perfuração e naufrágio em minutos.',
 
       pioneerMitigation: 'Batedores na proa sondam a lâmina d\'água com varas graduadas e utilizam placas de chumbo no fundo das embarcações para amortecimento.',
 
@@ -74357,7 +74357,7 @@
 
       saveType: 'Destreza',
 
-      namakierAndSaltRisk: 'Maciço de halita fóssil de 400 metros de extensão fluindo plasticamente pela encosta montanhosa; a dilatação térmica sob o sol do meio-dia provoca fratura repentina de blocos de sal de 10 toneladas que despencam em cascata causando 3d8 de concussão e soterramento cáustico (DMG p. 110, 246).',
+      namakierAndSaltRisk: 'Maciço de halita fóssil de 400 metros de extensão fluindo plasticamente pela encosta montanhosa; a dilatação térmica sob o sol do meio-dia provoca fratura repentina de blocos de sal de 10 toneladas que despencam em cascata causando 3d8 de concussão e soterramento cáustico.',
 
       pioneerMitigation: 'Batedores escutam os estalos de alívio de tensão com pontas de ferro no solo e conduzem a marcha pelas bordas rochosas de calcário.',
 
@@ -74557,7 +74557,7 @@
 
       saveType: 'Destreza',
 
-      thermokarstAndForestRisk: 'Coníferas de 20 metros com raízes rasas ancoradas em permafrost em rápido degelo; a vibração de passos faz o solo ceder tombando troncos maciços em efeito dominó sobre a trilha, causando 3d8 de concussão e aprisionamento sob ramagens (DMG p. 110, 190).',
+      thermokarstAndForestRisk: 'Coníferas de 20 metros com raízes rasas ancoradas em permafrost em rápido degelo; a vibração de passos faz o solo ceder tombando troncos maciços em efeito dominó sobre a trilha, causando 3d8 de concussão e aprisionamento sob ramagens.',
 
       pioneerMitigation: 'Batedores observam o ângulo de inclinação das copas e evitam ravinas com árvores cruzadas em X, contornando setores de turfa afundada.',
 
@@ -74757,7 +74757,7 @@
 
       saveType: 'Força',
 
-      towerKarstAndValleyRisk: 'Tempestades torrenciais canalizadas em desfiladeiro sem saída; o sumidouro cárstico se obstrui com troncos e lama acumulando lâmina d\'água de 3 metros em minutos que arrasta a comitiva com 3d6 de concussão e risco de afogamento (DMG p. 110-111).',
+      towerKarstAndValleyRisk: 'Tempestades torrenciais canalizadas em desfiladeiro sem saída; o sumidouro cárstico se obstrui com troncos e lama acumulando lâmina d\'água de 3 metros em minutos que arrasta a comitiva com 3d6 de concussão e risco de afogamento.',
 
       pioneerMitigation: 'Batedores posicionados em plataformas elevadas monitoram o escoamento do sumidouro e mantêm rotas de escalada com cordas prontas nos paredões da torre.',
 
@@ -74957,7 +74957,7 @@
 
       saveType: 'Destreza',
 
-      transformFaultAndHorstRisk: 'Ruptura tectônica repentina ao longo de plano de falha de compressão que abre fenda abissal de 30 metros de profundidade no piso do graben; o solo se separa tragando aventureiros e montarias sob estrondo ensurdecedor, causando 4d6 de concussão e risco de esmagamento por lajes (DMG p. 110, 190).',
+      transformFaultAndHorstRisk: 'Ruptura tectônica repentina ao longo de plano de falha de compressão que abre fenda abissal de 30 metros de profundidade no piso do graben; o solo se separa tragando aventureiros e montarias sob estrondo ensurdecedor, causando 4d6 de concussão e risco de esmagamento por lajes.',
 
       pioneerMitigation: 'Batedores atentos a microtremores no solo utilizam cabos de retenção dinâmicos entre os membros da expedição e avançam pelas cristas monolíticas do horst.',
 
@@ -75157,7 +75157,7 @@
 
       saveType: 'Destreza',
 
-      saltDomeAndDiapirRisk: 'Plugue vertical de sal e gesso fóssil de 600 metros de altura sob deformação plástica contínua; estalos sísmicos repentinos provocam o desprendimento de blocos maciços de halita de 20 toneladas que despencam em cascata causando 3d8 de concussão e esmagamento (DMG p. 110, 246).',
+      saltDomeAndDiapirRisk: 'Plugue vertical de sal e gesso fóssil de 600 metros de altura sob deformação plástica contínua; estalos sísmicos repentinos provocam o desprendimento de blocos maciços de halita de 20 toneladas que despencam em cascata causando 3d8 de concussão e esmagamento.',
 
       pioneerMitigation: 'Batedores monitoram vibrações acústicas nas paredes com estetoscópios de osso e evitam falhas ativas de extrusão durante períodos de dilatação térmica.',
 
@@ -75357,7 +75357,7 @@
 
       saveType: 'Destreza',
 
-      pillowLavaAndSmokerRisk: 'Colunas de fluido mineral superaquecido a 350°C carregadas de sulfetos de ferro e cobre que jorram sob alta pressão de fossas abissais; atingem a comitiva de raspão causando 3d8 de dano de fogo/queimadura cáustica e corrosão de correias de metal (DMG p. 110, 116).',
+      pillowLavaAndSmokerRisk: 'Colunas de fluido mineral superaquecido a 350°C carregadas de sulfetos de ferro e cobre que jorram sob alta pressão de fossas abissais; atingem a comitiva de raspão causando 3d8 de dano de fogo/queimadura cáustica e corrosão de correias de metal.',
 
       pioneerMitigation: 'Batedores utilizam sondas de bronze com termopares para mapear correntes térmicas ascendentes e contornam as plumas negras a montante da correnteza.',
 
@@ -75557,7 +75557,7 @@
 
       saveType: 'Destreza',
 
-      agateForestAndSilicaRisk: 'Colossais toras fósseis de quartzo e calcedônia equilibradas precariamente sobre encostas de argila erodida; passos pesados desestabilizam os blocos pétreos gerando rolamento violento que esmaga o solo com 3d8 de concussão (DMG p. 110, 246).',
+      agateForestAndSilicaRisk: 'Colossais toras fósseis de quartzo e calcedônia equilibradas precariamente sobre encostas de argila erodida; passos pesados desestabilizam os blocos pétreos gerando rolamento violento que esmaga o solo com 3d8 de concussão.',
 
       pioneerMitigation: 'Batedores observam os pontos de apoio na base dos troncos fósseis e guiam a expedição exclusivamente pelo topo das cristas consolidadas de arenito.',
 
@@ -75757,7 +75757,7 @@
 
       saveType: 'Destreza',
 
-      rockGlacierAndTalusRisk: 'Encosta de cascalho afiado e blocos soltos de permafrost em declive de 40 graus; o solo cede sob a marcha da expedição desencadeando corrida de detritos rochosos de 12 metros que inflige 3d6 de concussão e risco de soterramento parcial (DMG p. 110, 190).',
+      rockGlacierAndTalusRisk: 'Encosta de cascalho afiado e blocos soltos de permafrost em declive de 40 graus; o solo cede sob a marcha da expedição desencadeando corrida de detritos rochosos de 12 metros que inflige 3d6 de concussão e risco de soterramento parcial.',
 
       pioneerMitigation: 'Batedores avançam com bastões alpinos de ponta de aço e utilizam passadas em diagonal amarrados por cabos de retenção dinâmicos.',
 
@@ -75957,7 +75957,7 @@
 
       saveType: 'Destreza',
 
-      quebrachoAndVertisolRisk: 'Fissuras verticais de dessecação de até 1,2 metro de profundidade que se abrem na argila preta expansiva durante a estiagem, ocultas sob tapete rasteiro de folhas secas; passos desatentos prendem o tornozelo provocando torção severa, 2d6 de concussão e deslocamento reduzido à metade (DMG p. 110-111).',
+      quebrachoAndVertisolRisk: 'Fissuras verticais de dessecação de até 1,2 metro de profundidade que se abrem na argila preta expansiva durante a estiagem, ocultas sob tapete rasteiro de folhas secas; passos desatentos prendem o tornozelo provocando torção severa, 2d6 de concussão e deslocamento reduzido à metade.',
 
       pioneerMitigation: 'Batedores avançam com varas longas de madeira testando o folhiço e utilizam perneiras de couro rijo com tala articulada para estabilização de articulações.',
 
@@ -76157,7 +76157,7 @@
 
       saveType: 'Destreza',
 
-      haliteSaltFlatRisk: 'Crosta quebradiça de sal de apenas 5 cm de espessura suspensa sobre bolsão profundo de salmoura líquida hipersalina a 38° Bé; o piso cede repentinamente tragando o aventureiro em lodo salgado com densidade asfixiante que inflige 2d8 de dano cáustico/ácido e risco de sufocamento (DMG p. 110-111).',
+      haliteSaltFlatRisk: 'Crosta quebradiça de sal de apenas 5 cm de espessura suspensa sobre bolsão profundo de salmoura líquida hipersalina a 38° Bé; o piso cede repentinamente tragando o aventureiro em lodo salgado com densidade asfixiante que inflige 2d8 de dano cáustico/ácido e risco de sufocamento.',
 
       pioneerMitigation: 'Batedores sondam o solo à frente com bastões de ponta de ferro e utilizam raquetes largas de madeira leve nos pés para distribuição homogênea de peso.',
 
@@ -76357,7 +76357,7 @@
 
       saveType: 'Constituição',
 
-      caatingaAndInselbergRisk: 'Superfície rochosa nua de granito escuro que atinge 55°C ao meio-dia, gerando bolsões de ar superaquecido que cozinham as solas de botas de couro e provocam desidratação fulminante, impondo 1 nível de exaustão e 2d6 de dano de fogo radiante (DMG p. 110, PHB p. 185).',
+      caatingaAndInselbergRisk: 'Superfície rochosa nua de granito escuro que atinge 55°C ao meio-dia, gerando bolsões de ar superaquecido que cozinham as solas de botas de couro e provocam desidratação fulminante, impondo 1 nível de exaustão e 2d6 de dano de fogo radiante.',
 
       pioneerMitigation: 'Marcha noturna ou matinal entre 04h e 09h, calçados reforçados com solado duplo de cortiça isolante e capuzes de linho cru com proteção de nuca.',
 
@@ -76557,7 +76557,7 @@
 
       saveType: 'Destreza',
 
-      basaltColumnsAndCausewayRisk: 'Prismas regulares de basalto vulcânico polidos por milênios de ondas marinhas e cobertos por alga lamelar escorregadia; pisada em falso provoca escorregão fatal e queda de 6 a 9 metros em fendas geométricas afiadas, causando 3d6 de dano de concussão e corte (DMG p. 110, 190).',
+      basaltColumnsAndCausewayRisk: 'Prismas regulares de basalto vulcânico polidos por milênios de ondas marinhas e cobertos por alga lamelar escorregadia; pisada em falso provoca escorregão fatal e queda de 6 a 9 metros em fendas geométricas afiadas, causando 3d6 de dano de concussão e corte.',
 
       pioneerMitigation: 'Batedores equipam grampões de escalada forjados com pontas de aço temperado e utilizam cordas-guia com nós de segurança travados nas fendas verticais entre os pilares.',
 
@@ -76757,7 +76757,7 @@
 
       saveType: 'Destreza',
 
-      raisedBogAndSphagnumRisk: 'Camada elástica de musgo esfagno de 30 cm flutuando sobre poço de lama ácida de 6 metros de profundidade; rompimento súbito sob os passos engolindo o explorador em lodo negro anóxico (pH 3,8) com sucção implacável que causa 2d6 de dano de asfixia e imobilização completa (DMG p. 110-111).',
+      raisedBogAndSphagnumRisk: 'Camada elástica de musgo esfagno de 30 cm flutuando sobre poço de lama ácida de 6 metros de profundidade; rompimento súbito sob os passos engolindo o explorador em lodo negro anóxico (pH 3,8) com sucção implacável que causa 2d6 de dano de asfixia e imobilização completa.',
 
       pioneerMitigation: 'Batedores avançam com raquetes de esteira de vime nos pés e utilizam varas horizontais de bétula de 3 metros para redistribuição imediata de peso.',
 
@@ -77107,7 +77107,7 @@
 
     var forcedMarchWarning = (travelHours > 8 && campCount === 0)
 
-      ? ('⚠️ ALERTA DE MARCHA FORÇADA (PHB p. 181): Salvaguarda de CON CD ' + (10 + Math.floor(travelHours - 8)) + ' contra Exaustão Nível 1.')
+      ? ('⚠️ ALERTA DE MARCHA FORÇADA: Salvaguarda de CON CD ' + (10 + Math.floor(travelHours - 8)) + ' contra Exaustão Nível 1.')
 
       : 'Marcha dentro do limite diário padrão (sem risco de exaustão).';
 
@@ -77137,7 +77137,7 @@
 
     out.push('');
 
-    out.push('PARÂMETROS DA MARCHA (D&D 5e):');
+    out.push('PARÂMETROS DA MARCHA:');
 
     out.push('• Modo de Transporte: ' + transObj.name + ' (' + transObj.speedMph + ' milhas/h)');
 
@@ -77187,7 +77187,7 @@
 
     out.push('• Salvaguarda Alerta:  Percepção Passiva CD ' + encBreakdown.surpriseDC + ' contra emboscada');
 
-    out.push('• Perigo Selvagem:    ' + hazardInfo.icon + ' ' + hazardInfo.name + ' (' + hazardInfo.dndRef + ')');
+    out.push('• Perigo Selvagem:    ' + hazardInfo.icon + ' ' + hazardInfo.name);
 
     out.push('• Efeito do Terreno:  ' + hazardInfo.effect + ' · ' + hazardInfo.dcCheck);
 
@@ -78217,11 +78217,11 @@
 
             fetch(cbase + '/api/exploracao/map-coords', { cache: 'no-store' })
 
-              .then(function (r) { return r.ok ? r.json() : null; })
+.then(function (r) { return r.ok ? r.json() : null; })
 
-              .then(function (j) { _coordsFetching = false; if (j && j.coords) { _locCoords = j.coords; _coordsLoaded = true; _fogCache = null; _onLoad(); } })
+.then(function (j) { _coordsFetching = false; if (j && j.coords) { _locCoords = j.coords; _coordsLoaded = true; _fogCache = null; _onLoad(); } })
 
-              .catch(function () { _coordsFetching = false; });
+.catch(function () { _coordsFetching = false; });
 
           } catch (_) { _coordsFetching = false; }
 
@@ -80725,9 +80725,9 @@
 
       hazard: 'Perigos: Vento cortante, tempestades repentinas ou valas ocultas no capim alto.',
 
-      saves: 'Salvaguardas D&D 5e: DES CD 12 (Obstáculos), CON CD 11 (Tempestades).',
+      saves: 'Salvaguardas: DES CD 12 (Obstáculos), CON CD 11 (Tempestades).',
 
-      foraging: 'Forrageamento D&D 5e: Abundante · Sobrevivência CD 10 (Ervas e água doce).'
+      foraging: 'Forrageamento: Abundante · Sobrevivência CD 10 (Ervas e água doce).'
 
     },
 
@@ -80737,9 +80737,9 @@
 
       hazard: 'Perigos: Galhos baixos espinhosos, raízes escorregadias e névoas alucinógenas.',
 
-      saves: 'Salvaguardas D&D 5e: DES CD 13 (Galhos), SAB CD 12 (Névoa), FOR CD 13 (Teias).',
+      saves: 'Salvaguardas: DES CD 13 (Galhos), SAB CD 12 (Névoa), FOR CD 13 (Teias).',
 
-      foraging: 'Forrageamento D&D 5e: Fértil · Sobrevivência CD 10 (Frutos silvestres e caça menor).'
+      foraging: 'Forrageamento: Fértil · Sobrevivência CD 10 (Frutos silvestres e caça menor).'
 
     },
 
@@ -80749,9 +80749,9 @@
 
       hazard: 'Perigos: Lamaçal movediço, miasmas pútridos e enxames de sanguessugas.',
 
-      saves: 'Salvaguardas D&D 5e: CON CD 13 (Miasma Tóxico), FOR CD 14 (Lodo Movediço).',
+      saves: 'Salvaguardas: CON CD 13 (Miasma Tóxico), FOR CD 14 (Lodo Movediço).',
 
-      foraging: 'Forrageamento D&D 5e: Traiçoeiro · Sobrevivência CD 14 (Água requer fervura e filtragem).'
+      foraging: 'Forrageamento: Traiçoeiro · Sobrevivência CD 14 (Água requer fervura e filtragem).'
 
     },
 
@@ -80761,9 +80761,9 @@
 
       hazard: 'Perigos: Queda de rochas, desfiladeiros vertiginosos e ar rarefeito gélido.',
 
-      saves: 'Salvaguardas D&D 5e: DES CD 14 (Desmoronamento), CON CD 13 (Exaustão/Frio).',
+      saves: 'Salvaguardas: DES CD 14 (Desmoronamento), CON CD 13 (Exaustão/Frio).',
 
-      foraging: 'Forrageamento D&D 5e: Escasso · Sobrevivência CD 15 (Raízes amargas e líquens).'
+      foraging: 'Forrageamento: Escasso · Sobrevivência CD 15 (Raízes amargas e líquens).'
 
     },
 
@@ -80773,9 +80773,9 @@
 
       hazard: 'Perigos: Calor extremo de dia, miragens traiçoeiras e tempestades de areia cortante.',
 
-      saves: 'Salvaguardas D&D 5e: CON CD 14 (Desidratação), SAB CD 13 (Miragens).',
+      saves: 'Salvaguardas: CON CD 14 (Desidratação), SAB CD 13 (Miragens).',
 
-      foraging: 'Forrageamento D&D 5e: Crítico · Sobrevivência CD 17 (Cactos raros e água subterrânea).'
+      foraging: 'Forrageamento: Crítico · Sobrevivência CD 17 (Cactos raros e água subterrânea).'
 
     },
 
@@ -80785,9 +80785,9 @@
 
       hazard: 'Perigos: Frio penetrante, gelo fino quebradiço e nevascas ofuscantes.',
 
-      saves: 'Salvaguardas D&D 5e: CON CD 14 (Frio Extremo), SOB CD 13 (Orientação).',
+      saves: 'Salvaguardas: CON CD 14 (Frio Extremo), SOB CD 13 (Orientação).',
 
-      foraging: 'Forrageamento D&D 5e: Severo · Sobrevivência CD 16 (Gelo para derreter, escassez de caça).'
+      foraging: 'Forrageamento: Severo · Sobrevivência CD 16 (Gelo para derreter, escassez de caça).'
 
     },
 
@@ -80797,9 +80797,9 @@
 
       hazard: 'Perigos: Eflúvios necromânticos, sepulcros profanados e calafrios espectrais.',
 
-      saves: 'Salvaguardas D&D 5e: SAB CD 13 (Pavor/Aura), CON CD 14 (Corrupção Profana).'
+      saves: 'Salvaguardas: SAB CD 13 (Pavor/Aura), CON CD 14 (Corrupção Profana).'
 
-      , foraging: 'Forrageamento D&D 5e: Impossível · Água estagnada e vegetação necrosada.'
+, foraging: 'Forrageamento: Impossível · Água estagnada e vegetação necrosada.'
 
     },
 
@@ -80809,9 +80809,9 @@
 
       hazard: 'Perigos: Vapores de enxofre, solo incandescente e fumaça asfixiante.',
 
-      saves: 'Salvaguardas D&D 5e: CON CD 14 (Gases Tóxicos), DES CD 13 (Brasas Soltas).'
+      saves: 'Salvaguardas: CON CD 14 (Gases Tóxicos), DES CD 13 (Brasas Soltas).'
 
-      , foraging: 'Forrageamento D&D 5e: Impossível · Solo calcinado e fontes de água ácidas/ferventes.'
+, foraging: 'Forrageamento: Impossível · Solo calcinado e fontes de água ácidas/ferventes.'
 
     },
 
@@ -80821,9 +80821,9 @@
 
       hazard: 'Perigos: Escuridão absoluta, estalagmites pontiagudas e abismos sem fundo.',
 
-      saves: 'Salvaguardas D&D 5e: DES CD 13 (Terreno Irregular), SAB CD 12 (Orientação no Escuro).'
+      saves: 'Salvaguardas: DES CD 13 (Terreno Irregular), SAB CD 12 (Orientação no Escuro).'
 
-      , foraging: 'Forrageamento D&D 5e: Especial · Sobrevivência CD 15 (Fungos luminescentes e goteiras puras).'
+, foraging: 'Forrageamento: Especial · Sobrevivência CD 15 (Fungos luminescentes e goteiras puras).'
 
     }
 
@@ -80837,7 +80837,7 @@
 
       hazard: 'Perigos naturais e criaturas hostis nas estradas ermas.',
 
-      saves: 'Salvaguarda D&D 5e: CON CD 12.'
+      saves: 'Salvaguarda: CON CD 12.'
 
     };
 
@@ -81407,13 +81407,13 @@
 
       + '.cfm-pin-reticle::after { content: ""; width: 8px; height: 8px; border-radius: 50%; border: 1px solid rgba(255, 214, 133, 0.8); background: rgba(255, 214, 133, 0.5); box-shadow: 0 0 4px rgba(255, 214, 133, 0.6); transition: all 0.2s ease; }'
 
-      + '.cfm-pin.active .cfm-pin-reticle { border-color: #ffd685; border-width: 2px; box-shadow: 0 0 16px rgba(255, 214, 133, 0.9), inset 0 0 8px rgba(255, 214, 133, 0.5); }'
+      + '.cfm-pin.active.cfm-pin-reticle { border-color: #ffd685; border-width: 2px; box-shadow: 0 0 16px rgba(255, 214, 133, 0.9), inset 0 0 8px rgba(255, 214, 133, 0.5); }'
 
-      + '.cfm-pin.active .cfm-pin-reticle::after { background: #ffd685; box-shadow: 0 0 8px #ffd685; transform: scale(1.25); }'
+      + '.cfm-pin.active.cfm-pin-reticle::after { background: #ffd685; box-shadow: 0 0 8px #ffd685; transform: scale(1.25); }'
 
       + '.cfm-pin-badge { font-family: "Cinzel", serif; background: rgba(14, 10, 8, 0.94); border: 1px solid rgba(196, 149, 58, 0.5); color: #f5eedf; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 4px; margin-top: 4px; white-space: nowrap; pointer-events: none; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.85); letter-spacing: 0.3px; }'
 
-      + '.cfm-pin.active .cfm-pin-badge { border-color: #ffd685; color: #ffd685; background: rgba(30, 20, 12, 0.98); box-shadow: 0 0 10px rgba(196, 149, 58, 0.7); }'
+      + '.cfm-pin.active.cfm-pin-badge { border-color: #ffd685; color: #ffd685; background: rgba(30, 20, 12, 0.98); box-shadow: 0 0 10px rgba(196, 149, 58, 0.7); }'
 
       + '.cfm-drawer { background: linear-gradient(180deg, #221810 0%, #140e09 100%); border-top: 1.5px solid rgba(196, 149, 58, 0.45); padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-sizing: border-box; min-height: 52px; z-index: 100; }'
 
@@ -81429,9 +81429,9 @@
 
       + '.cfm-pin-flag { width: 34px; height: auto; display: block; user-select: none; pointer-events: none; }'
 
-      + '.cfm-pin.is-player-here .cfm-pin-reticle { border-color: #ffd685; box-shadow: 0 0 14px rgba(255, 214, 133, 0.95), inset 0 0 6px rgba(255, 214, 133, 0.6); }'
+      + '.cfm-pin.is-player-here.cfm-pin-reticle { border-color: #ffd685; box-shadow: 0 0 14px rgba(255, 214, 133, 0.95), inset 0 0 6px rgba(255, 214, 133, 0.6); }'
 
-      + '.cfm-pin.is-player-here .cfm-pin-reticle::after { background: #ffd685; box-shadow: 0 0 8px #ffd685; }'
+      + '.cfm-pin.is-player-here.cfm-pin-reticle::after { background: #ffd685; box-shadow: 0 0 8px #ffd685; }'
 
       + '.cfm-drawer-action-btn.cfm-btn-action-here { background: linear-gradient(180deg, #5a401c 0%, #362411 100%); border: 1.5px solid #ffd685; color: #ffd685; box-shadow: 0 0 10px rgba(196, 149, 58, 0.45); }'
 
@@ -82191,9 +82191,9 @@
 
     getBiomeAltitude: getBiomeAltitude,            // Perfil Topográfico e Altitude D&D 5e
 
-    TRAVEL_ROLES: TRAVEL_ROLES,                    // Funções de Viagem da Comitiva (PHB p. 182)
+    TRAVEL_ROLES: TRAVEL_ROLES,                    // Funções de Viagem da Comitiva
 
-    getBiomeTerrainDifficulty: getBiomeTerrainDifficulty, // Custo de Movimento e Terreno Difícil (PHB p. 182)
+    getBiomeTerrainDifficulty: getBiomeTerrainDifficulty, // Custo de Movimento e Terreno Difícil
 
     TRANSPORT_MODES: TRANSPORT_MODES,              // Modos de Transporte D&D 5e (A Pé, Montaria, Caravana)
 

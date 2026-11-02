@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-11-02T01:29:55Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-11-02T02:03:51Z - do not edit directly, edit source -->
 
 
 
@@ -17609,7 +17609,7 @@ window.__onIntroTap = function() {
 
         <div class="bdp-title" id="bdp-title">Análise de Perigo</div>
 
-        <div class="bdp-flavor">D&amp;D 5e · DMG p.81-83</div>
+        <div class="bdp-flavor">Avaliação Tática de Ameaça</div>
 
       </div>
 
@@ -17641,7 +17641,7 @@ window.__onIntroTap = function() {
 
         <div class="bdtp-title" id="bdtp-title">Detalhes Técnicos</div>
 
-        <div class="bdtp-flavor">D&amp;D 5e · DMG p.82 — cálculo do encontro</div>
+        <div class="bdtp-flavor">Avaliação Tática de Ameaça</div>
 
       </div>
 
@@ -17747,7 +17747,7 @@ window.__onIntroTap = function() {
 
            p.wet > 0. Vulnerabilidade frio + resistência fogo em combate. -->
 
-      <div id="hud-float-status" title="Status MOLHADO — vulnerabilidade a frio + resistência a fogo (D&D 5e DMG p.110)">
+      <div id="hud-float-status" title="Status MOLHADO — vulnerabilidade a frio e resistência a fogo">
 
         <span class="icon"></span>
 
@@ -17765,7 +17765,7 @@ window.__onIntroTap = function() {
 
            _renderConditionsHud() a partir de S.player.conditions (server-authoritative). -->
 
-      <div id="hud-cond-status" title="Condições ativas — desvantagem nos testes até o Descanso Longo (D&D 5e PHB Apêndice A)"></div>
+      <div id="hud-cond-status" title="Condições ativas — desvantagem nos testes até o Descanso Longo"></div>
 
     </div>
 
@@ -96353,7 +96353,7 @@ function _openCartLocationPopup(biome){
         rollBox.style.display = 'block';
         rollBox.innerHTML = '<div style="font-size:11px;font-weight:700;color:' + enc.categoryColor + ';display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">'
           + '<span>' + enc.categoryIcon + ' ' + enc.categoryName + ': ' + enc.title + '</span>'
-          + '<span style="font-size:11px;color:#a09484;">' + enc.dndRef + '</span>'
+          + '<span style="font-size:11px;color:#a09484;">Encontro dos Ermos</span>'
           + '</div>'
           + '<div style="color:#d2be90;margin-bottom:3px;">' + enc.description + '</div>'
           + '<div style="color:#fde047;font-size:11px;"><b>🎲 Perícia Sugerida:</b> ' + enc.checkRequired + '</div>';
@@ -97965,29 +97965,29 @@ function openCartography() {
     + '      </div>'
     + '      <div class="cam-grid" style="max-height:58vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:12px;text-align:left;font-size:11px;color:#d2be90;line-height:1.5;">'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#fde047;font-size:11.5px;margin-bottom:4px;">RITMOS DE MARCHA (PHB p. 181-182)</div>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#fde047;font-size:11.5px;margin-bottom:4px;">RITMOS DE MARCHA</div>'
     + '          <p style="margin:2px 0;"><b>Furtivo (18 milhas/dia):</b> -33% velocidade, +50% tempo. Permite usar Furtividade para surpreender inimigos ou evitar emboscadas; vantagem em Sobrevivência para forragear alimentos nos ermos.</p>'
     + '          <p style="margin:2px 0;"><b>Normal (24 milhas/dia):</b> Ritmo canônico de comitiva. Velocidade equilibrada sem penalidades na Percepção Passiva.</p>'
     + '          <p style="margin:2px 0;"><b>Rápido (30 milhas/dia):</b> +33% velocidade, -25% tempo. A comitiva corre em marcha forçada; penalidade de -5 na Percepção Passiva (maior chance de emboscadas).</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#93c5fd;font-size:11.5px;margin-bottom:4px;">VIAGEM NOTURNA & VISÃO NO ESCURO (PHB p. 183)</div>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#93c5fd;font-size:11.5px;margin-bottom:4px;">VIAGEM NOTURNA & VISÃO NO ESCURO</div>'
     + '          <p style="margin:2px 0;">O sol se põe e a escuridão cobre as estradas. Sem tochas ativas ou Visão no Escuro ancestral (elfos, anões, meio-orcs), a comitiva sofre <b>Desvantagem</b> em testes de Percepção contra emboscadas na escuridão.</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#86efac;font-size:11.5px;margin-bottom:4px;">SUPRIMENTOS & ACAMPAMENTOS (PHB p. 185)</div>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#86efac;font-size:11.5px;margin-bottom:4px;">SUPRIMENTOS & ACAMPAMENTOS</div>'
     + '          <p style="margin:2px 0;">Jornadas acima de 8 horas exigem paradas de Descanso Longo (8h) em acampamentos na estrada e 1 Ração de Viagem por aventureiro. Em biomas férteis, testes de Sobrevivência permitem caçar e colher água potável.</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#f87171;font-size:11.5px;margin-bottom:4px;">MARCHA FORÇADA & EXAUSTÃO (PHB p. 181)</div>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#f87171;font-size:11.5px;margin-bottom:4px;">MARCHA FORÇADA & EXAUSTÃO</div>'
     + '          <p style="margin:2px 0;">O limite de marcha contínua segura é de 8 horas por dia. Cada hora adicional exige Salvaguarda de Constituição (CD 10 + 1 por hora além de 8). Em caso de falha, o aventureiro sofre 1 Nível de Exaustão. Fracionar a rota com acampamentos de Descanso Longo (8h) anula a penalidade.</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#fde047;font-size:11.5px;margin-bottom:4px;">🐎 MODOS DE TRANSPORTE & CARAVANAS (PHB p. 157)</div>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#fde047;font-size:11.5px;margin-bottom:4px;">🐎 MODOS DE TRANSPORTE & CARAVANAS</div>'
     + '          <p style="margin:2px 0;"><b>🚶 A Pé:</b> 3 milhas/hora padrão. Mochilas e armas prontas.<br><b>🐎 Montaria:</b> +33% de velocidade em estradas (4 milhas/h). Reduz o tempo total de viagem.<br><b>🛒 Caravana:</b> 3 milhas/h com carruagens fortificadas. Reduz em -10% o risco de emboscadas noturnas no acampamento.</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#c084fc;font-size:11.5px;margin-bottom:4px;">ATIVIDADES & FUNÇÕES DE VIAGEM (PHB p. 182)</div>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#c084fc;font-size:11.5px;margin-bottom:4px;">ATIVIDADES & FUNÇÕES DE VIAGEM</div>'
     + '          <p style="margin:2px 0;"><b>Sentinela:</b> Alerta máximo (+5 Percepção Passiva); impede surpresas em emboscadas.<br><b>Guia:</b> Evita desvios sob névoas densas e tempestades.<br><b>Caçador:</b> Colhe comida e água silvestre sem gastar rações em marcha normal/lenta.<br><b>Cartógrafo:</b> Mapeia estradas e detalha anotações táticas de viagem.</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
