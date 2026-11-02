@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-11-02T01:58:34Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-11-02T23:08:39Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -7235,7 +7235,7 @@ details.udc-section--collapsible:not([open]) summary.udc-section-title::after { 
 .tcc-dmg-val.tcc-none { color: var(--v-text-dim, #a09484); font-weight: 400; font-style: italic; }
 
 /* ============================================================================
-   ATAQUE DE OPORTUNIDADE — Alerta Chamativo & Modal de Regras (D&D 5e )
+   ATAQUE DE OPORTUNIDADE — Alerta Chamativo & Modal de Regras (D&D 5e)
    ============================================================================ */
 .tcc-oa-banner {
     display: flex;
@@ -21864,7 +21864,7 @@ async function simResolveEndTurnConditions(s, unitIdx) {
                                 { l: 'Condição Alvo', v: _condLbl },
                                 { l: 'Atributo do TR', v: abPt + ' (' + (smod >= 0 ? '+' : '') + smod + ')' },
                                 { l: 'CD da Salvaguarda', v: String(dc) },
-                                { l: 'Regra D&D 5e', v: 'Salvaguarda no fim do turno' },
+                                { l: 'Mecânica', v: 'Salvaguarda no fim do turno' },
                                 { l: 'Resultado', v: ok ? 'Efeito dissipado imediatamente' : 'Permanece ativo até a próxima rodada' }
                             ];
 
@@ -22434,7 +22434,7 @@ function _simAttackAdvDetails(actor, target, skill) {
     // Flanqueamento D&D 5e (DMG p. 251): corpo a corpo com aliado adjacente oposto
     if (!isRanged && typeof simCheckFlanking === 'function' && currentState && currentState.order) {
         if (simCheckFlanking(actor, target, currentState.order)) {
-            advReasons.push('Flanqueamento com aliado oposto (DMG p. 251)');
+            advReasons.push('Flanqueamento com aliado oposto');
         }
     }
 
@@ -23472,15 +23472,15 @@ function simResolveUnitTraitsDnd5e(u) {
         }
     } else {
         if ((u.multiAttack | 0) > 1) {
-            addTrait('Ataque Múltiplo (' + u.multiAttack + '×)', '⚔️', 'Realiza ' + u.multiAttack + ' ataques no mesmo turno de combate (MM p.11).');
+            addTrait('Ataque Múltiplo (' + u.multiAttack + '×)', '⚔️', 'Realiza ' + u.multiAttack + ' ataques no mesmo turno de combate.');
         }
         if (u.packTactics) {
-            addTrait('Táticas de Matilha (MM p.341)', '🐺', 'Recebe Vantagem nas rolagens de ataque quando um aliado não-incapacitado está adjacente ao alvo.');
+            addTrait('Táticas de Matilha', '🐺', 'Recebe Vantagem nas rolagens de ataque quando um aliado não-incapacitado está adjacente ao alvo.');
         }
         var legRes = (u.legendaryResistances | 0) || (u.legendary_resistances | 0) || 0;
         if (legRes > 0) {
             var legUsed = (u.legendaryResistancesUsed | 0) || (u.legendary_resistances_used | 0) || 0;
-            addTrait('Resistência Lendária (' + Math.max(0, legRes - legUsed) + '/' + legRes + ')', '👑', 'Pode converter uma falha em Teste de Resistência em sucesso automático (MM p.11).');
+            addTrait('Resistência Lendária (' + Math.max(0, legRes - legUsed) + '/' + legRes + ')', '👑', 'Pode converter uma falha em Teste de Resistência em sucesso automático.');
         }
         if (u.conditionOnHit && u.conditionOnHit.condition) {
             addTrait('Efeito ao Atingir (CD ' + (u.conditionOnHit.dc || 12) + ')', '☠️', 'Ataques impõem Teste de Resistência contra ' + u.conditionOnHit.condition + '.');
@@ -24754,7 +24754,7 @@ function describeDeathSavePreview(u, r, postState) {
         resCls = 'miss';
         resLabel = '✗ Falha (<10)';
         resNote = isDeadNow
-            ? 'Três falhas acumuladas resultam no falecimento do personagem (D&D 5e ).'
+            ? 'Três falhas acumuladas resultam no falecimento do personagem.'
             : 'Rolagem ' + r + ' < 10 falhou! Acumula ' + nf + '/3 falhas (3 falhas causam a morte).';
         resPills.push('<span class="dmg-pill dmg-pill--crit">✗ Falha (<10)</span>');
         if (isDeadNow) resPills.push('<span class="dmg-pill dmg-pill--vuln">💀 Óbito</span>');
@@ -24764,7 +24764,7 @@ function describeDeathSavePreview(u, r, postState) {
     var detailsRows = [
         { l: 'Combatente', v: u.n },
         { l: 'Condição Atual', v: 'Inconsciente (0 PV)' },
-        { l: 'Regra D&D 5e', v: '(d20 sem modificador de atributo)' },
+        { l: 'Mecânica', v: '(d20 sem modificador de atributo)' },
         { l: 'CD Alvo', v: '10' },
         { l: 'Sucessos Atuais', v: ns + ' de 3 necessários para estabilizar' },
         { l: 'Falhas Atuais', v: nf + ' de 3 que causam óbito' }
@@ -25049,7 +25049,7 @@ function simClassifyLogLineDnd5e(ln) {
 
 /** Uma linha do array s.log -> HTML (marcadores internos + números). */
 function simBuildLogEntryHtml(ln, filterCat) {
-    if (typeof ln !== 'string') ln = String(ln == null ? '' : ln);
+    if (typeof ln !== 'string') ln = String(ln == null ? '' : ln); ln = ln.replace(/\s*\((?:D&D\s*5e\s*)?(?:PHB|DMG|MM|XGE|XGtE|TCoE|SRD)[^)]*\)/gi, '').replace(/\s*\(D&D\s*5e\s*\)/gi, '');
     if (ln === '::SIM_OPEN::') {
         if (filterCat && filterCat !== 'all') return '';
         return '<div class="lp-log-block lp-log-block--open" role="presentation"><div class="lp-log-open-line">Início do combate</div></div>';
@@ -25818,7 +25818,7 @@ function simComputeSkillAoeGeometry(caster, centerCol, centerRow, skill) {
     var skDmgLow = String(skill.dmgType || '').toLowerCase();
 
     if (skill.fireball || skNameLow.indexOf('bola de fogo') >= 0 || skNameLow.indexOf('meteoro') >= 0) {
-        radiusHex = 4; // 20 pés = 6m = 4 hexes (D&D 5e )
+        radiusHex = 4; // 20 pés = 6m = 4 hexes (D&D 5e)
         aoeType = 'fire';
         aoeShape = 'sphere';
     } else if (skill.coneOfCold || skNameLow.indexOf('cone de frio') >= 0 || skNameLow.indexOf('medo') >= 0) {
@@ -28208,7 +28208,7 @@ function getBiomeDifficultTerrain(biome, cols, rows) {
     if (b.indexOf('swamp') >= 0 || b.indexOf('pantano') >= 0 || b.indexOf('pântano') >= 0) {
         dtPrimary = { name: 'Lamaçal Profundo', cost: 2, kind: 'mud', desc: 'Terreno Difícil : cada 1,5m custa +1,5m extra de movimento.' };
         dtSecondary = { name: 'Charco de Raízes', cost: 2, kind: 'roots', desc: 'Terreno Difícil : água turva e raízes submersas.' };
-        dtHazard = { name: 'Espinheiros Venenosos', cost: 2, kind: 'thorns', hazard_kind: 'damage', damage_dice: '1d4', damage_type: 'piercing', symbol: '▲', desc: 'Perigo Ambiental (DMG p. 110): 1d4 perfurante ao entrar + Terreno Difícil (3m).' };
+        dtHazard = { name: 'Espinheiros Venenosos', cost: 2, kind: 'thorns', hazard_kind: 'damage', damage_dice: '1d4', damage_type: 'piercing', symbol: '▲', desc: 'Perigo Ambiental: 1d4 perfurante ao entrar + Terreno Difícil (3m).' };
     } else if (b.indexOf('cave') >= 0 || b.indexOf('caverna') >= 0 || b.indexOf('dungeon') >= 0 || b.indexOf('masmorra') >= 0 || b.indexOf('crypt') >= 0 || b.indexOf('ruins') >= 0 || b.indexOf('ruinas') >= 0) {
         dtPrimary = { name: 'Escombros de Pedra', cost: 2, kind: 'rubble', desc: 'Terreno Difícil : lajes quebradas exigem o dobro de movimento.' };
         dtSecondary = { name: 'Entulho Antigo', cost: 2, kind: 'rubble', desc: 'Terreno Difícil : blocos desmoronados no piso.' };
@@ -28216,11 +28216,11 @@ function getBiomeDifficultTerrain(biome, cols, rows) {
     } else if (b.indexOf('snow') >= 0 || b.indexOf('ice') >= 0 || b.indexOf('gelo') >= 0 || b.indexOf('mountain') >= 0 || b.indexOf('montanha') >= 0) {
         dtPrimary = { name: 'Cascalho Íngreme', cost: 2, kind: 'rubble', desc: 'Terreno Difícil : pedras soltas reduzem o avanço.' };
         dtSecondary = { name: 'Neve Fofa Profunda', cost: 2, kind: 'ice', desc: 'Terreno Difícil : neve acumulada exige esforço dobrado.' };
-        dtHazard = { name: 'Gelo Escorregadio', cost: 2, kind: 'ice', hazard_kind: 'save_prone', save_dc: 10, save_ability: 'dex', symbol: '❄', desc: 'Gelo Escorregadio (DMG p. 110): exige TR de Destreza CD 10 ao entrar ou cai Prostrado.' };
+        dtHazard = { name: 'Gelo Escorregadio', cost: 2, kind: 'ice', hazard_kind: 'save_prone', save_dc: 10, save_ability: 'dex', symbol: '❄', desc: 'Gelo Escorregadio: exige TR de Destreza CD 10 ao entrar ou cai Prostrado.' };
     } else {
         dtPrimary = { name: 'Raízes Emaranhadas', cost: 2, kind: 'roots', desc: 'Terreno Difícil : raízes densas custam 3m (2 hexes) para atravessar.' };
         dtSecondary = { name: 'Mata Fechada', cost: 2, kind: 'roots', desc: 'Terreno Difícil : vegetação rasteira fechada.' };
-        dtHazard = { name: 'Sarça de Espinhos', cost: 2, kind: 'thorns', hazard_kind: 'damage', damage_dice: '1d4', damage_type: 'piercing', symbol: '▲', desc: 'Sarça Espinhosa (DMG p. 110): causa 1d4 perfurante ao entrar + Terreno Difícil (3m).' };
+        dtHazard = { name: 'Sarça de Espinhos', cost: 2, kind: 'thorns', hazard_kind: 'damage', damage_dice: '1d4', damage_type: 'piercing', symbol: '▲', desc: 'Sarça Espinhosa: causa 1d4 perfurante ao entrar + Terreno Difícil (3m).' };
     }
 
     var rawCoords = (cols >= 12 && rows >= 10) ? [
@@ -29023,7 +29023,7 @@ function showOpportunityAttackHelpModal(provokingNames, provokingHostiles) {
     h += '  <div class="oa-help-icon-badge">⚔️</div>';
     h += '  <div class="oa-help-titles">';
     h += '    <div class="oa-help-title">Ataque de Oportunidade</div>';
-    h += '    <div class="oa-help-subtitle">Livro do Jogador D&amp;D 5e</div>';
+    h += '    <div class="oa-help-subtitle">Guia Tático de Combate</div>';
     h += '  </div>';
     h += '</div>';
 
@@ -29049,7 +29049,7 @@ function showOpportunityAttackHelpModal(provokingNames, provokingHostiles) {
     h += '  <div class="oa-help-section oa-help-section--tips">';
     h += '    <div class="oa-help-sec-title">🛡️ Como Evitar ou Lidar</div>';
     h += '    <div class="oa-help-tip-item">';
-    h += '      <span class="oa-help-tip-tag">1. Ação Desengajar (Disengage)</span>';
+    h += '      <span class="oa-help-tip-tag">1. Ação Desengajar</span>';
     h += '      <p>Use a ação <strong>Desengajar</strong> (botão <em>Agir ▸ Desengajar</em>) antes de se mover. Seu deslocamento não provocará ataques de oportunidade pelo restante do turno!</p>';
     h += '    </div>';
     h += '    <div class="oa-help-tip-item">';
@@ -29228,7 +29228,7 @@ function showMoveConfirm(tCol, tRow) {
     var destElev = (typeof simGetHexElevation === 'function') ? simGetHexElevation(currentState, tCol, tRow) : 0;
     if (destElev > 0) {
         var elevMetersStr = (destElev >= 2) ? '+3,0m' : '+1,5m';
-        destBenefits.push('⛰️ <strong>Terreno Elevado (' + elevMetersStr + ')</strong>: Concede <strong>+2 nas jogadas de ataque à distância</strong> contra alvos em nível inferior (DMG p. 251)');
+        destBenefits.push('▲ <strong>Terreno Elevado (' + elevMetersStr + ')</strong>: Concede <strong>+2 nas jogadas de ataque à distância</strong> contra alvos em nível inferior');
     } else if (destElev < 0) {
         destBenefits.push('▼ <strong>Depressão Tática (-1,5m)</strong>: Atenção — ataques à distância contra alvos mais altos sofrem penalidade de -2');
     }
@@ -29245,7 +29245,7 @@ function showMoveConfirm(tCol, tRow) {
                 }
             }
             if (flankedEnemies.length > 0) {
-                destBenefits.push('▲ <strong>Flanqueia ' + escHtml(flankedEnemies.join(', ')) + '</strong>: confere Vantagem (2d20kh1) em ataques corpo a corpo (DMG p. 251)');
+                destBenefits.push('▲ <strong>Flanqueia ' + escHtml(flankedEnemies.join(', ')) + '</strong>: confere Vantagem (2d20kh1) em ataques corpo a corpo');
             }
         }
         if (typeof simComputeCover === 'function') {
@@ -29316,7 +29316,7 @@ function showMoveConfirm(tCol, tRow) {
         html += '    Sair do alcance de <strong>' + escHtml(provokingNames.join(', ')) + '</strong> sem <em>Desengajar</em> provocará um golpe imediato!';
         html += '  </div>';
         html += '  <button type="button" class="tcc-oa-details-btn" data-act="oa-details">';
-        html += '    <span class="tcc-oa-btn-ico">⚡</span> Ver Regras D&amp;D 5e e Como Evitar ▸';
+        html += '    <span class="tcc-oa-btn-ico">◆</span> Ver Regras &amp; Como Evitar ▸';
         html += '  </button>';
         html += '</div>';
     }
@@ -29344,7 +29344,7 @@ function showMoveConfirm(tCol, tRow) {
                 hzDescriptions.push('<strong>' + ehzSym + ' ' + escHtml(ehzName) + '</strong>');
             }
         }
-        html += 'A rota atravessa: ' + hzDescriptions.join(', ') + '. Você sofrerá os efeitos do terreno ao entrar (DMG p. 110-112)!';
+        html += 'A rota atravessa: ' + hzDescriptions.join(', ') + '. Você sofrerá os efeitos do terreno ao entrar!';
         html += '  </div>';
         html += '</div>';
     }
@@ -29905,7 +29905,7 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     var concBadge = '';
     if (fogState !== 'shrouded' && u.alive && !u.isDead && isConcentrating) {
         classes += ' token--concentrating';
-        concBadge = '<div class="token-conc-chip" title="D&D 5e: Mantendo Concentração em ' + escHtml(concSpellName) + ' — Sofrer dano exige Teste de Resistência de Constituição (CD 10 ou metade do dano)">◈ ' + escHtml(concSpellName) + '</div>';
+        concBadge = '<div class="token-conc-chip" title="Mantendo Concentração em ' + escHtml(concSpellName) + ' — Sofrer dano exige Teste de Resistência de Constituição (CD 10 ou metade do dano)">◈ ' + escHtml(concSpellName) + '</div>';
     }
 
     // Caído / Prone D&D 5e (/ p. 292)
@@ -29923,7 +29923,7 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     if (fogState !== 'shrouded' && u.alive && !u.isDead && typeof _wsIsTransformed === 'function' && _wsIsTransformed(u)) {
         var _wsFormLbl = (u.wildShape && u.wildShape.form_name) || 'Forma Bestial';
         condChipList.push({
-            html: '<div class="token-cond-chip token-cond-chip--wildshape" title="D&D 5e : Forma Selvagem Ativa (' + escHtml(_wsFormLbl) + ')">🐾 ' + escHtml(_wsFormLbl) + '</div>',
+            html: '<div class="token-cond-chip token-cond-chip--wildshape" title="Forma Selvagem Ativa (' + escHtml(_wsFormLbl) + ')">🐾 ' + escHtml(_wsFormLbl) + '</div>',
             name: 'Forma Selvagem (' + _wsFormLbl + ')'
         });
     }
@@ -29946,7 +29946,7 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
         }
         if (_palAuraBonus > 0) {
             condChipList.push({
-                html: '<div class="token-cond-chip token-cond-chip--paladin-aura" title="D&D 5e: Aura de Proteção (+' + _palAuraBonus + ' em todos os Testes de Resistência)">⛨ Aura +' + _palAuraBonus + '</div>',
+                html: '<div class="token-cond-chip token-cond-chip--paladin-aura" title="Aura de Proteção (+' + _palAuraBonus + ' em todos os Testes de Resistência)">⛨ Aura +' + _palAuraBonus + '</div>',
                 name: 'Aura de Proteção (+' + _palAuraBonus + ')'
             });
         }
@@ -29983,88 +29983,88 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
             if (stObj.prone || stId === 'prone') continue;
             if (stObj.regenPerTurn && stObj.regenPerTurn > 0) {
                 condChipList.push({
-                    html: '<div class="token-cond-chip token-cond-chip--regen" title="D&D 5e: Regeneração Ativa (+' + stObj.regenPerTurn + ' PV/turno)">🌿 +' + stObj.regenPerTurn + ' PV</div>',
+                    html: '<div class="token-cond-chip token-cond-chip--regen" title="Regeneração Ativa (+' + stObj.regenPerTurn + ' PV/turno)">🌿 +' + stObj.regenPerTurn + ' PV</div>',
                     name: 'Regeneração (+' + stObj.regenPerTurn + ' PV)'
                 });
             }
             if (stId === 'bless' || stName.indexOf('bênção') >= 0 || stName.indexOf('bencao') >= 0) {
                 condChipList.push({
-                    html: '<div class="token-cond-chip token-cond-chip--bless" title="D&D 5e: Bênção (+1d4 em ataques e salvaguardas)">✦ Bênção</div>',
+                    html: '<div class="token-cond-chip token-cond-chip--bless" title="Bênção (+1d4 em ataques e salvaguardas)">✦ Bênção</div>',
                     name: 'Bênção'
                 });
             } else if (stId === 'blindness' || stObj.blind || stName.indexOf('cego') >= 0) {
                 condChipList.push({
-                    html: '<div class="token-cond-chip token-cond-chip--blind" title="D&D 5e : Cego">◉ Cego</div>',
+                    html: '<div class="token-cond-chip token-cond-chip--blind" title="Cego">◉ Cego</div>',
                     name: 'Cego'
                 });
             } else if (stId.indexOf('poison') >= 0 || stName.indexOf('envenenad') >= 0) {
                 condChipList.push({
-                    html: '<div class="token-cond-chip token-cond-chip--poison" title="D&D 5e : Envenenado">▲ Envenenado</div>',
+                    html: '<div class="token-cond-chip token-cond-chip--poison" title="Envenenado">▲ Envenenado</div>',
                     name: 'Envenenado'
                 });
             } else if (stObj.stunned || stId.indexOf('stun') >= 0 || stName.indexOf('atordo') >= 0) {
                 condChipList.push({
-                    html: '<div class="token-cond-chip token-cond-chip--stun" title="D&D 5e : Atordoado">◈ Atordoado</div>',
+                    html: '<div class="token-cond-chip token-cond-chip--stun" title="Atordoado">◈ Atordoado</div>',
                     name: 'Atordoado'
                 });
             } else if (stObj.paralyzed || stId.indexOf('paraly') >= 0 || stName.indexOf('paralis') >= 0) {
                 condChipList.push({
-                    html: '<div class="token-cond-chip token-cond-chip--paralyzed" title="D&D 5e : Paralisado (Incapacitado; ataques a 1,5m são acertos críticos)">◈ Paralisado</div>',
+                    html: '<div class="token-cond-chip token-cond-chip--paralyzed" title="Paralisado (Incapacitado; ataques a 1,5m são acertos críticos)">◈ Paralisado</div>',
                     name: 'Paralisado'
                 });
             } else if (stId.indexOf('fright') >= 0 || stId.indexOf('fear') >= 0 || stName.indexOf('amedront') >= 0 || stName.indexOf('medo') >= 0) {
                 condChipList.push({
-                    html: '<div class="token-cond-chip token-cond-chip--frightened" title="D&D 5e : Amedrontado (Desvantagem em ataques e testes)">▲ Amedrontado</div>',
+                    html: '<div class="token-cond-chip token-cond-chip--frightened" title="Amedrontado (Desvantagem em ataques e testes)">▲ Amedrontado</div>',
                     name: 'Amedrontado'
                 });
             } else if (stId.indexOf('charm') >= 0 || stName.indexOf('enfeitiç') >= 0 || stName.indexOf('enfeitic') >= 0) {
                 condChipList.push({
-                    html: '<div class="token-cond-chip token-cond-chip--charmed" title="D&D 5e : Enfeitiçado">✦ Enfeitiçado</div>',
+                    html: '<div class="token-cond-chip token-cond-chip--charmed" title="Enfeitiçado">✦ Enfeitiçado</div>',
                     name: 'Enfeitiçado'
                 });
             } else if (stObj.restrained || stId.indexOf('restrain') >= 0 || stName.indexOf('contido') >= 0 || stName.indexOf('impedido') >= 0) {
                 condChipList.push({
-                    html: '<div class="token-cond-chip token-cond-chip--restrained" title="D&D 5e : Contido (Deslocamento 0; ataques recebidos com Vantagem)">⛨ Contido</div>',
+                    html: '<div class="token-cond-chip token-cond-chip--restrained" title="Contido (Deslocamento 0; ataques recebidos com Vantagem)">⛨ Contido</div>',
                     name: 'Contido'
                 });
             } else if (stObj.grappled || stId.indexOf('grapple') >= 0 || stName.indexOf('agarrad') >= 0) {
                 condChipList.push({
-                    html: '<div class="token-cond-chip token-cond-chip--grappled" title="D&D 5e : Agarrado (Deslocamento 0; não pode se beneficiar de bônus ao deslocamento)">✊ Agarrado</div>',
+                    html: '<div class="token-cond-chip token-cond-chip--grappled" title="Agarrado (Deslocamento 0; não pode se beneficiar de bônus ao deslocamento)">✊ Agarrado</div>',
                     name: 'Agarrado'
                 });
             } else if (stId.indexOf('invis') >= 0 || stId === 'hidden' || stName.indexOf('invisív') >= 0 || stName.indexOf('invisiv') >= 0 || stName.indexOf('oculto') >= 0) {
                 condChipList.push({
-                    html: '<div class="token-cond-chip token-cond-chip--invisible" title="D&D 5e : Invisível / Oculto (Ataques com Vantagem; atacantes com Desvantagem)">✦ Invisível</div>',
+                    html: '<div class="token-cond-chip token-cond-chip--invisible" title="Invisível / Oculto (Ataques com Vantagem; atacantes com Desvantagem)">✦ Invisível</div>',
                     name: 'Invisível'
                 });
             } else if (stId === 'shield' || stId === 'escudo_arcano' || stName.indexOf('escudo arcano') >= 0) {
                 condChipList.push({
-                    html: '<div class="token-cond-chip token-cond-chip--shield" title="D&D 5e: Escudo Arcano (+5 CA até próximo turno)">⛨ Escudo (+5 CA)</div>',
+                    html: '<div class="token-cond-chip token-cond-chip--shield" title="Escudo Arcano (+5 CA até próximo turno)">⛨ Escudo (+5 CA)</div>',
                     name: 'Escudo Arcano'
                 });
             } else if (stId === 'esquiva' || stName.indexOf('esquiv') >= 0) {
                 condChipList.push({
-                    html: '<div class="token-cond-chip token-cond-chip--dodge" title="D&D 5e : Esquivar (Atacantes têm Desvantagem; Vantagem em TR de Destreza)">🛡️ Esquiva</div>',
+                    html: '<div class="token-cond-chip token-cond-chip--dodge" title="Esquivar (Atacantes têm Desvantagem; Vantagem em TR de Destreza)">🛡️ Esquiva</div>',
                     name: 'Esquiva'
                 });
             } else if (stId === 'acao_desengajar' || u.disengaged || stName.indexOf('desengajar') >= 0) {
                 condChipList.push({
-                    html: '<div class="token-cond-chip token-cond-chip--disengage" title="D&D 5e : Desengajado (Não provoca Ataques de Oportunidade)">💨 Desengajado</div>',
+                    html: '<div class="token-cond-chip token-cond-chip--disengage" title="Desengajado (Não provoca Ataques de Oportunidade)">💨 Desengajado</div>',
                     name: 'Desengajado'
                 });
             } else if (stId === 'bane' || stName.indexOf('perdição') >= 0 || stName.indexOf('perdicao') >= 0) {
                 condChipList.push({
-                    html: '<div class="token-cond-chip token-cond-chip--bane" title="D&D 5e : Perdição (-1d4 em ataques e salvaguardas)">▼ Perdição (-1d4)</div>',
+                    html: '<div class="token-cond-chip token-cond-chip--bane" title="Perdição (-1d4 em ataques e salvaguardas)">▼ Perdição (-1d4)</div>',
                     name: 'Perdição (-1d4)'
                 });
             } else if (stId === 'furia' || stId === 'rage' || stObj.isRaging || stObj.rageResistance || stName.indexOf('fúria') >= 0 || stName.indexOf('furia') >= 0) {
                 condChipList.push({
-                    html: '<div class="token-cond-chip token-cond-chip--rage" title="D&D 5e: Fúria Bárbara Ativa (Resistência a Concussão, Perfuração e Cortante)">🔥 Fúria</div>',
+                    html: '<div class="token-cond-chip token-cond-chip--rage" title="Fúria Bárbara Ativa (Resistência a Concussão, Perfuração e Cortante)">🔥 Fúria</div>',
                     name: 'Fúria'
                 });
             } else if (stObj.petrified || stId.indexOf('petrif') >= 0 || stName.indexOf('petrificad') >= 0) {
                 condChipList.push({
-                    html: '<div class="token-cond-chip token-cond-chip--petrified" title="D&D 5e : Petrificado (Incapacitado; ataques recebidos com Vantagem; resistência a todo dano; imune a veneno)">🗿 Petrificado</div>',
+                    html: '<div class="token-cond-chip token-cond-chip--petrified" title="Petrificado (Incapacitado; ataques recebidos com Vantagem; resistência a todo dano; imune a veneno)">🗿 Petrificado</div>',
                     name: 'Petrificado'
                 });
             } else if (stId === 'surpreso' || stId === 'surprised' || stName.indexOf('surpreso') >= 0 || stName.indexOf('surprised') >= 0) {
@@ -30074,7 +30074,7 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
                 });
             } else if (stObj.incapacitated || stId.indexOf('incapacit') >= 0 || stName.indexOf('incapacitad') >= 0) {
                 condChipList.push({
-                    html: '<div class="token-cond-chip token-cond-chip--incapacitated" title="D&D 5e : Incapacitado (Não pode realizar ações nem reações)">🚫 Incapacitado</div>',
+                    html: '<div class="token-cond-chip token-cond-chip--incapacitated" title="Incapacitado (Não pode realizar ações nem reações)">🚫 Incapacitado</div>',
                     name: 'Incapacitado'
                 });
             }
@@ -30082,13 +30082,13 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     }
     if (fogState !== 'shrouded' && u.alive && !u.isDead && u.grappled && !condChipList.some(function (c) { return c.name === 'Agarrado'; })) {
         condChipList.push({
-            html: '<div class="token-cond-chip token-cond-chip--grappled" title="D&D 5e : Agarrado (Deslocamento 0; não pode se beneficiar de bônus ao deslocamento)">✊ Agarrado</div>',
+            html: '<div class="token-cond-chip token-cond-chip--grappled" title="Agarrado (Deslocamento 0; não pode se beneficiar de bônus ao deslocamento)">✊ Agarrado</div>',
             name: 'Agarrado'
         });
     }
     if (fogState !== 'shrouded' && u.alive && !u.isDead && (u.reactionSpent || u.reaction_spent)) {
         condChipList.push({
-            html: '<div class="token-cond-chip token-cond-chip--reaction-spent" title="D&D 5e : Reação Utilizada nesta rodada — A criatura não pode fazer Ataques de Oportunidade nem magias de reação até o próximo turno.">Sem Reação</div>',
+            html: '<div class="token-cond-chip token-cond-chip--reaction-spent" title="Reação Utilizada nesta rodada — A criatura não pode fazer Ataques de Oportunidade nem magias de reação até o próximo turno.">Sem Reação</div>',
             name: 'Reação Utilizada'
         });
     }
@@ -30164,28 +30164,28 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     var uSpecies = String(u.species || u.race || '').toLowerCase();
     var hasDarkvision = /(elfo|elf|anao|anão|dwarf|tiefling|gnomo|gnome|meio-orc|half-orc)/.test(uSpecies);
     if (hasDarkvision && (isPlayer || isAlly)) {
-        html += '<div class="token-darkvision-aura" title="D&D 5e : Visão no Escuro (18m)"></div>';
+        html += '<div class="token-darkvision-aura" title="Visão no Escuro (18m)"></div>';
     }
     var hasTorch = !!(u.hasTorch || (u.equipment && (u.equipment.off_hand === 'Tocha' || u.equipment.main_hand === 'Tocha')) ||
         (u.se && u.se.some(function (st) { return st && (st.id === 'luz' || st.id === 'torch' || (st.n && st.n.indexOf('Luz') >= 0)); })));
     if (hasTorch && (isPlayer || isAlly)) {
-        html += '<div class="token-light-aura" title="D&D 5e : Fonte de Luz (Tocha / Magia)"></div>';
+        html += '<div class="token-light-aura" title="Fonte de Luz (Tocha / Magia)"></div>';
     }
     var isRaging = !!(u.isRaging || (u.se && u.se.some(function (st) { return st && (st.id === 'furia' || st.id === 'rage' || st.rageResistance); })));
     if (isRaging) {
-        html += '<div class="token-rage-aura" title="D&D 5e: Fúria Bárbara Ativa (Resistência a dano físico e dano extra)"></div>';
+        html += '<div class="token-rage-aura" title="Fúria Bárbara Ativa (Resistência a dano físico e dano extra)"></div>';
     }
     var isBlessed = !!(u.se && u.se.some(function (st) { return st && (st.id === 'bless' || st.blessSpell || (st.n && (st.n.indexOf('Bênção') >= 0 || st.n.indexOf('Bencao') >= 0))); }));
     if (isBlessed) {
-        html += '<div class="token-bless-aura" title="D&D 5e : Bênção (+1d4 em ataques e salvaguardas)"></div>';
+        html += '<div class="token-bless-aura" title="Bênção (+1d4 em ataques e salvaguardas)"></div>';
     }
     var isPoisoned = !!(u.se && u.se.some(function (st) { return st && (st.id === 'poison' || st.poisoned || (st.n && st.n.indexOf('Envenenad') >= 0)); }));
     if (isPoisoned) {
-        html += '<div class="token-poison-aura" title="D&D 5e : Condição Envenenado (Desvantagem em ataques e testes)"></div>';
+        html += '<div class="token-poison-aura" title="Condição Envenenado (Desvantagem em ataques e testes)"></div>';
     }
     var hasShieldSpell = !!(u.se && u.se.some(function (st) { return st && (st.id === 'shield' || st.id === 'escudo_arcano' || (st.n && st.n.indexOf('Escudo Arcano') >= 0)); }));
     if (hasShieldSpell) {
-        html += '<div class="token-shield-aura" title="D&D 5e: Escudo Arcano (+5 CA)"></div>';
+        html += '<div class="token-shield-aura" title="Escudo Arcano (+5 CA)"></div>';
     }
     if (inTargetReach) {
         html += '<div class="token-target-lock-ring"></div>';
@@ -30198,7 +30198,7 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     html += '<div class="token-hp-track"><div class="token-hp-fill ' + fillCls + '" style="width:' + hpPct + '%;"></div></div>';
     html += '<span class="token-hp-text ' + hpCls + '">' + hpVal + '/' + u.mhp + '</span>';
     if (tempHpVal > 0) {
-        html += '<span class="token-temphp-pill" title="D&D 5e : +' + tempHpVal + ' PV Temporários (absorvem dano antes dos PV reais)">+' + tempHpVal + '🛡</span>';
+        html += '<span class="token-temphp-pill" title="+' + tempHpVal + ' PV Temporários (absorvem dano antes dos PV reais)">+' + tempHpVal + '🛡</span>';
     }
     html += '</div>';
 
@@ -31074,7 +31074,7 @@ function spawnCritDramaticBanner(actorUnit, targetUnit, ev) {
     banner.className = 'dnd-crit-banner-overlay';
     banner.innerHTML =
         '<div class="dnd-crit-banner-box">' +
-        '  <div class="dnd-crit-banner-kicker">D&D 5e • LIVRO DO JOGADOR p. 196</div>' +
+        '  <div class="dnd-crit-banner-kicker">GOLPE DECISIVO • DADOS DOBRADOS</div>' +
         '  <div class="dnd-crit-banner-title">✦ ACERTO CRÍTICO ✦</div>' +
         '  <div class="dnd-crit-banner-die">NATURAL 20</div>' +
         '  <div class="dnd-crit-banner-desc">' + escHtml(aName) + ' desfere um golpe demolidor contra ' + escHtml(tName) + '! Dados de dano dobrados.</div>' +
@@ -31111,7 +31111,7 @@ function spawnFumbleDramaticBanner(actorUnit, targetUnit, ev) {
     banner.className = 'dnd-fumble-banner-overlay';
     banner.innerHTML =
         '<div class="dnd-fumble-banner-box">' +
-        '  <div class="dnd-fumble-banner-kicker">D&D 5e • LIVRO DO JOGADOR p. 194</div>' +
+        '  <div class="dnd-fumble-banner-kicker">GOLPE DESVIADO • ERRO AUTOMÁTICO</div>' +
         '  <div class="dnd-fumble-banner-title">✕ FALHA CRÍTICA ✕</div>' +
         '  <div class="dnd-fumble-banner-die">NATURAL 1</div>' +
         '  <div class="dnd-fumble-banner-desc">' + escHtml(aName) + ' vacila o golpe contra ' + escHtml(tName) + '! Erro automático independentemente de modificadores.</div>' +
@@ -31321,8 +31321,8 @@ function buildPartyRhythmClockBadge(s) {
     var title = isMomentumEligible ? 'ÍMPETO TÁTICO' : 'RITMO DO TURNO';
     var sub = isMomentumEligible ? '+5 INSPIRAÇÃO (<15s)' : '+5s POR AÇÃO';
     var tooltip = isMomentumEligible
-        ? 'D&D 5e Ímpeto Tático: A comitiva está agindo em menos de 15 segundos! Conclua o bloco cooperativo para receber +5 de Inspiração de Comitiva.'
-        : 'Chess-Clock Cooperativo D&D 5e: Cada ação realizada adiciona +5 segundos ao relógio tático (máximo 45s).';
+        ? 'Ímpeto Tático: A comitiva está agindo em menos de 15 segundos! Conclua o bloco cooperativo para receber +5 de Inspiração de Comitiva.'
+        : 'Relógio Tático Cooperativo: Cada ação realizada adiciona +5 segundos ao relógio tático (máximo 45s).';
 
     var bonusHtml = '';
     if (typeof window !== 'undefined' && window.__recentClockBonusTriggered) {
@@ -31641,8 +31641,8 @@ function buildBattlefield(s) {
     var visionBadgeCls = 'bf-vision-badge' + (isPlayerBlinded ? ' bf-vision-badge--blinded' : '');
     var visionIcon = isPlayerBlinded ? '✕' : '◉';
     var visionTitle = isPlayerBlinded
-        ? 'Regras D&D 5e : Condição Cego! Você não pode ver o campo de batalha e o terreno ao seu redor está imerso na escuridão total.'
-        : 'Regras D&D 5e : Campo de visão ativo da equipe (' + partyVisionMeters + ' / ' + maxPartyVr + ' hexes). Além deste raio, a penumbra e a névoa de guerra encobrem o terreno.';
+        ? 'Condição Cego! Você não pode ver o campo de batalha e o terreno ao seu redor está imerso na escuridão total.'
+        : 'Campo de visão ativo da equipe (' + partyVisionMeters + ' / ' + maxPartyVr + ' hexes). Além deste raio, a penumbra e a névoa de guerra encobrem o terreno.';
     var visionText = isPlayerBlinded
         ? 'VISÃO: <strong>0m (0 HEXES)</strong>'
         : 'VISÃO: <strong>' + partyVisionMeters + ' (' + maxPartyVr + ' HEXES)</strong>';
@@ -31689,7 +31689,7 @@ function buildBattlefield(s) {
 
     // AI Turn ja e exibido no cabecalho nobre current-turn.ai-turn acima do grid
 
-    html += '<div class="bf-pan-viewport" data-bf-pan-viewport aria-label="Mesa Tática de Combate D&D 5e — arraste para mover, roda ou botões para zoom">';
+    html += '<div class="bf-pan-viewport" data-bf-pan-viewport aria-label="Mesa Tática de Combate — arraste para mover, roda ou botões para zoom">';
 
     var arenaW = (bCols - 1) * HEX_COL_STEP + HEX_W + HEX_PAD_X * 2;
     var arenaH = bRows * HEX_ROW_STEP + Math.round(HEX_H / 2) + HEX_PAD_Y * 2;
@@ -31838,7 +31838,7 @@ function buildBattlefield(s) {
     friendlyUnits.forEach(function (fu) {
         var vr = calcUnitVisionRange(fu, curWeather, curBiome);
         if (vr <= 0) {
-            // Unidade cega (D&D 5e ): visão zero. Apenas a sua própria casa imediata é conhecida.
+            // Unidade cega (D&D 5e): visão zero. Apenas a sua própria casa imediata é conhecida.
             var selfK = fu.pos.col + ',' + fu.pos.row;
             if (!partyVisionMap[selfK]) {
                 partyVisionMap[selfK] = { visible: true, dim: false, dist: 0, isEdge: false };
@@ -33045,7 +33045,7 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
         tacticalPills.push('<span class="dmg-pill dmg-pill--buff">🛡️ Evasão</span>');
     }
     if (reductionMeta.aoeSharedDamage) {
-        tacticalPills.push('<span class="dmg-pill dmg-pill--type">💥 Dano de Área (D&D 5e)</span>');
+        tacticalPills.push('<span class="dmg-pill dmg-pill--type">◆ Dano de Área</span>');
     }
     if (reductionMeta.heavyArmorMaster > 0) {
         tacticalPills.push('<span class="dmg-pill dmg-pill--resist">🛡️ Armadura Pesada (−' + reductionMeta.heavyArmorMaster + ')</span>');
@@ -33095,7 +33095,7 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
         tacticalPills.push('<span class="dmg-pill dmg-pill--buff">⚔️ ' + escHtml(reductionMeta.multiSeqText) + '</span>');
     }
     if (reductionMeta.reactionKind && reductionMeta.reactionKind !== 'attack') {
-        var _rkLabel = 'Reação (D&D 5e)';
+        var _rkLabel = 'Reação';
         if (reductionMeta.reactionKind === 'reaction_sentinel') _rkLabel = 'Reação (Sentinela)';
         else if (reductionMeta.reactionKind === 'reaction_riposte') _rkLabel = '⚔️ Reação (Resposta)';
         else if (reductionMeta.reactionKind === 'reaction_retaliation') _rkLabel = '🔥 Reação (Retaliação)';
@@ -33204,7 +33204,7 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
     }
     rowsHtml += '<div class="dmg-math-breakdown-row"><span>Tipo de Dano:</span><strong>' + dtInfo.ico + ' ' + escHtml(dtInfo.lb) + '</strong></div>';
     if (reductionMeta && typeof reductionMeta.appliedTotal === 'number' && reductionMeta.appliedTotal !== total) {
-        rowsHtml += '<div class="dmg-math-breakdown-row"><span>Dano Final D&D 5e:</span><strong style="color:#e8a070;">' + total + ' → ' + reductionMeta.appliedTotal + '</strong></div>';
+        rowsHtml += '<div class="dmg-math-breakdown-row"><span>Dano Final:</span><strong style="color:#e8a070;">' + total + ' → ' + reductionMeta.appliedTotal + '</strong></div>';
     }
     if (reductionMeta && reductionMeta.hasConcentration) {
         rowsHtml += '<div class="dmg-math-breakdown-row"><span>Salvaguarda de Concentração:</span><strong>TR CON CD ' + (reductionMeta.concDc || 10) + '</strong></div>';
@@ -33665,7 +33665,7 @@ function _buildDndResourcesBarHtml(s, p, opts) {
     var reactionUsed = !!p.reactionSpent;
     var baWasSpell = !!p.bonusActionWasSpell;
     var html = '<div class="dnd-resources-bar' + (compactReaction ? ' dnd-resources-bar--compact-reaction' : '') +
-               '" aria-label="Recursos D&D 5e do personagem">';
+               '" aria-label="Recursos táticos do personagem">';
     if (!compactReaction) {
         /* Pílula Ação ◆ */
         html += '<button type="button" class="dnd-res-pill dnd-res-action ' + (actionUsed ? 'spent' : 'available') + '"' +
@@ -33727,7 +33727,7 @@ function _buildDndResourcesBarHtml(s, p, opts) {
                 movCondBadge = '<span class="dnd-mov-cond-badge dnd-mov-cond-badge--warn" title="Amedrontado : Desvantagem em testes e ataques enquanto a fonte do medo estiver visível. Não pode se aproximar voluntariamente.">🚫 AMEDRONTADO</span>';
             }
         }
-        html += '<div class="dnd-movement-bar" data-act="dnd-mov-info" aria-label="Deslocamento restante no turno" title="Deslocamento restante no turno (D&D 5e ) — Toque para detalhes">' +
+        html += '<div class="dnd-movement-bar" data-act="dnd-mov-info" aria-label="Deslocamento restante no turno" title="Deslocamento restante no turno — Toque para detalhes">' +
             '<span class="dnd-mov-icon" aria-hidden="true">' + _combatDistanceIconSVG(16) + '</span>' +
             '<span class="dnd-mov-label">DESLOCAMENTO:</span>' +
             '<span class="dnd-mov-val"><strong>' + curMovM + '</strong> / ' + maxMovM + '</span>' +
@@ -34071,8 +34071,8 @@ async function castSummonPack(s, p, sk) {
     }
     if (typeof simLogPushTurnHeader === 'function') simLogPushTurnHeader(s, p);
     s.log.push(p.n + ' conjura ' + count + ' ' + (ws.name || 'bestas espirituais') +
-               (ps.concentration ? ' (PHB Conjure Animals — concentração).'
-                                 : ' (PHB Conjure Animals — duração ' + dur + ' rodadas).'));
+               (ps.concentration ? ' (concentração).'
+                                 : ' (duração ' + dur + ' rodadas).'));
     /* Spawn N entries no order, com init logo após o caster (frações pra evitar conflito) */
     var pIdx = s.order.indexOf(p);
     var insertPos = pIdx + 1;
@@ -34815,7 +34815,7 @@ async function _resolvePassiveSummonAttack(s, summonOrderIdx, targetIdx) {
 
                     var _pills = [];
                     if (crit) {
-                        _pills.push('<span class="dmg-pill dmg-pill--crit">💥 Crítico Natural (D&D 5e)</span>');
+                        _pills.push('<span class="dmg-pill dmg-pill--crit">✦ Crítico Natural</span>');
                     } else if (d20 === 1) {
                         _pills.push('<span class="dmg-pill dmg-pill--crit">Falha Crítica (Nat 1)</span>');
                     }
@@ -34825,7 +34825,7 @@ async function _resolvePassiveSummonAttack(s, summonOrderIdx, targetIdx) {
                     _pills.push('<span class="dmg-pill dmg-pill--type">🐾 Invocação Aliada</span>');
 
                     var _note = crit
-                        ? 'Natural 20! Acerto crítico automático e dados duplicados (D&D 5e ).'
+                        ? 'Natural 20! Acerto crítico automático e dados duplicados.'
                         : (hit
                             ? ('Total ' + total + ' ≥ CA ' + target.ac + ' — Golpe da criatura acertou!')
                             : ('Total ' + total + ' < CA ' + target.ac + ' — O golpe da criatura não superou a CA.'));
@@ -34834,10 +34834,10 @@ async function _resolvePassiveSummonAttack(s, summonOrderIdx, targetIdx) {
                         { l: 'Criatura Atacante', v: summon.n },
                         { l: 'Defensor', v: target.n },
                         { l: 'CA Base do Alvo', v: String(target.ac) },
-                        { l: 'Regra D&D 5e', v: 'Ataque de criatura invocada (/ MM p. 11)' }
+                        { l: 'Mecânica', v: 'Ataque de criatura invocada' }
                     ];
                     if (advMode === 'advantage') {
-                        _detailsRows.push({ l: 'Táticas de Matilha', v: 'Vantagem quando há pelo menos 1 aliado vivo adjacente (MM p. 341)' });
+                        _detailsRows.push({ l: 'Táticas de Matilha', v: 'Vantagem quando há pelo menos 1 aliado vivo adjacente' });
                     }
 
                     var _subHtml = crit
@@ -34991,7 +34991,7 @@ async function _resolveAttachedSummonAttack(s, attachedIdx, targetIdx) {
                     ];
                     var _pills = [];
                     if (crit) {
-                        _pills.push('<span class="dmg-pill dmg-pill--crit">💥 Crítico Natural (D&D 5e)</span>');
+                        _pills.push('<span class="dmg-pill dmg-pill--crit">✦ Crítico Natural</span>');
                     } else if (d20 === 1) {
                         _pills.push('<span class="dmg-pill dmg-pill--crit">Falha Crítica (Nat 1)</span>');
                     }
@@ -34999,13 +34999,13 @@ async function _resolveAttachedSummonAttack(s, attachedIdx, targetIdx) {
                     _pills.push('<span class="dmg-pill dmg-pill--type">⚔️ Dano de Força</span>');
 
                     var _note = crit
-                        ? 'Natural 20! Acerto crítico e dados de dano duplicados (D&D 5e ).'
+                        ? 'Natural 20! Acerto crítico e dados de dano duplicados.'
                         : (hit
                             ? ('Total ' + total + ' ≥ CA ' + target.ac + ' — Arma espectral acerta em cheio!')
                             : ('Total ' + total + ' < CA ' + target.ac + ' — Golpe da arma espectral não superou a CA.'));
 
                     var _detailsRows = [
-                        { l: 'Magia', v: 'Arma Espiritual (D&D 5e )' },
+                        { l: 'Magia', v: 'Arma Espiritual' },
                         { l: 'Defensor', v: target.n },
                         { l: 'Tipo de Ataque', v: 'Ataque corpo a corpo com magia' },
                         { l: 'Concentração', v: 'Não exige concentração ' }
@@ -36976,7 +36976,7 @@ function render(s) {
                     if (cSt) concSpell = cSt.n || cSt.id;
                 }
                 var concPillHtml = concSpell
-                    ? '<span class="econ-pill concentration" title="D&D 5e: Concentrando em ' + escHtml(concSpell) + '. Conjurar outra magia de concentração encerrará esta.">✦ Conc: ' + escHtml(concSpell) + '</span>'
+                    ? '<span class="econ-pill concentration" title="Concentrando em ' + escHtml(concSpell) + '. Conjurar outra magia de concentração encerrará esta.">✦ Conc: ' + escHtml(concSpell) + '</span>'
                     : '';
                 var anySkillOk = (typeof _simAnySkillUsable === 'function') ? _simAnySkillUsable(s, pCur) : true;
                 var skillsExtraChip = '';
@@ -37363,7 +37363,7 @@ function bindActions() {
                         cTitle = '✦ Estabilizado (–198)';
                         cTone = 'adv';
                     } else if (clickedChip.classList.contains('token-elev-chip')) {
-                        cTitle = '⛰️ Terreno Elevado (DMG p. 251)';
+                        cTitle = '▲ Terreno Elevado';
                         cTone = 'adv';
                     } else if (clickedChip.classList.contains('token-cond-chip--reaction-spent')) {
                         cTitle = 'Reação Utilizada ';
@@ -37435,7 +37435,7 @@ function bindActions() {
                         cTitle = '📜 Condições Adicionais';
                         cTone = 'warn';
                     } else if (clickedChip.classList.contains('token-cond-chip')) {
-                        cTitle = '✨ ' + (cText || 'Condição D&D 5e');
+                        cTitle = '✦ ' + (cText || 'Condição Ativa');
                         cTone = (clickedChip.classList.contains('token-cond-chip--frightened') ||
                                  clickedChip.classList.contains('token-cond-chip--blind') ||
                                  clickedChip.classList.contains('token-cond-chip--poison') ||
@@ -38068,18 +38068,18 @@ function showTargetActionMenu(targetIdx, uid) {
     else if (coverInfo.cover === 'half') metaBadges.push('<span class="tam-meta-badge warn">⛨ ½ Cobertura (+2 CA)</span>');
     else if (coverInfo.cover === 'three_quarters') metaBadges.push('<span class="tam-meta-badge warn">⛨ ¾ Cobertura (+5 CA)</span>');
 
-    if (advDetails.state === 'cancelled') metaBadges.push('<span class="tam-meta-badge" style="background:rgba(74,85,104,0.3);border-color:#718096;color:#e2e8f0;" title="D&D 5e : Vantagem e Desvantagem ativas se anulam mutuamente">⚖️ Vant/Desv Anuladas</span>');
+    if (advDetails.state === 'cancelled') metaBadges.push('<span class="tam-meta-badge" style="background:rgba(74,85,104,0.3);border-color:#718096;color:#e2e8f0;" title="Vantagem e Desvantagem ativas se anulam mutuamente">⚖️ Vant/Desv Anuladas</span>');
     else if (isFlanked) metaBadges.push('<span class="tam-meta-badge good">▲ Flanqueado (Vantagem)</span>');
     else if (advState === 'advantage') metaBadges.push('<span class="tam-meta-badge good">▲ Vantagem</span>');
     else if (advState === 'disadvantage') metaBadges.push('<span class="tam-meta-badge danger">▼ Desvantagem</span>');
 
     if (u.prone) metaBadges.push('<span class="tam-meta-badge warn">▾ Caído no Chão</span>');
-    if (u.grappled) metaBadges.push('<span class="tam-meta-badge danger" title="D&D 5e : Agarrado — Deslocamento é 0m e não pode ser aumentado. Termina se o agarrador for incapacitado ou empurrado.">✊ Agarrado (0m)</span>');
-    if (u.restrained) metaBadges.push('<span class="tam-meta-badge danger" title="D&D 5e : Contido — Deslocamento é 0m; ataques contra têm Vantagem; ataques do alvo têm Desvantagem">🕸️ Contido (0m)</span>');
-    if (u.blinded || u.blind) metaBadges.push('<span class="tam-meta-badge warn" title="D&D 5e : Cego — Ataques contra têm Vantagem; ataques do alvo têm Desvantagem">◉ Cego</span>');
-    if (u.paralyzed) metaBadges.push('<span class="tam-meta-badge danger" title="D&D 5e : Paralisado — Incapacitado; ataques a até 1,5m são acertos críticos automáticos">Paralisado (Crítico!)</span>');
-    if (u.stunned) metaBadges.push('<span class="tam-meta-badge danger" title="D&D 5e : Atordoado — Incapacitado; ataques contra têm Vantagem">💫 Atordoado</span>');
-    if (u.poisoned) metaBadges.push('<span class="tam-meta-badge warn" title="D&D 5e : Envenenado — Desvantagem em ataques e testes">🧪 Envenenado</span>');
+    if (u.grappled) metaBadges.push('<span class="tam-meta-badge danger" title="Agarrado — Deslocamento é 0m e não pode ser aumentado. Termina se o agarrador for incapacitado ou empurrado.">✊ Agarrado (0m)</span>');
+    if (u.restrained) metaBadges.push('<span class="tam-meta-badge danger" title="Contido — Deslocamento é 0m; ataques contra têm Vantagem; ataques do alvo têm Desvantagem">🕸️ Contido (0m)</span>');
+    if (u.blinded || u.blind) metaBadges.push('<span class="tam-meta-badge warn" title="Cego — Ataques contra têm Vantagem; ataques do alvo têm Desvantagem">◉ Cego</span>');
+    if (u.paralyzed) metaBadges.push('<span class="tam-meta-badge danger" title="Paralisado — Incapacitado; ataques a até 1,5m são acertos críticos automáticos">Paralisado (Crítico!)</span>');
+    if (u.stunned) metaBadges.push('<span class="tam-meta-badge danger" title="Atordoado — Incapacitado; ataques contra têm Vantagem">💫 Atordoado</span>');
+    if (u.poisoned) metaBadges.push('<span class="tam-meta-badge warn" title="Envenenado — Desvantagem em ataques e testes">🧪 Envenenado</span>');
     if (u.packTactics) metaBadges.push('<span class="tam-meta-badge warn" title="Vantagem no ataque quando há aliado adjacente">🐺 Táticas de Matilha</span>');
     if ((u.multiAttack | 0) > 1) metaBadges.push('<span class="tam-meta-badge danger" title="Realiza múltiplos ataques por turno">⚔ Ataque Múltiplo (' + u.multiAttack + '×)</span>');
     if (u.vulnerabilities && u.vulnerabilities.length) {
@@ -38092,7 +38092,7 @@ function showTargetActionMenu(targetIdx, uid) {
     }
     if (u.immunities && u.immunities.length) {
         var imList = u.immunities.slice(0, 2).map(function (im) { return (typeof simDmgTypeInfoPt === 'function') ? simDmgTypeInfoPt(im).lb : im; }).join(', ') + (u.immunities.length > 2 ? '…' : '');
-        metaBadges.push('<span class="tam-meta-badge" style="background:rgba(160,174,192,0.2);border-color:rgba(203,213,225,0.6);color:#f1f5f9;" title="D&D 5e: Imune — não sofre dano deste tipo">🚫 Imune: ' + escHtml(imList) + '</span>');
+        metaBadges.push('<span class="tam-meta-badge" style="background:rgba(160,174,192,0.2);border-color:rgba(203,213,225,0.6);color:#f1f5f9;" title="Imune — não sofre dano deste tipo">🚫 Imune: ' + escHtml(imList) + '</span>');
     }
     var condImms = [].concat(u.condition_immunities || [], u.conditionImmunities || []);
     if (condImms.length > 0) {
@@ -38101,18 +38101,18 @@ function showTargetActionMenu(targetIdx, uid) {
             return rule ? rule.name : c;
         });
         var ciText = ciLabels.join(', ') + (condImms.length > 3 ? '…' : '');
-        metaBadges.push('<span class="tam-meta-badge" style="background:rgba(147,51,234,0.2);border-color:rgba(168,85,247,0.6);color:#f3e8ff;" title="D&D 5e: Imune a condições — ' + escHtml(condImms.join(', ')) + '">🚫 Imunidade: ' + escHtml(ciText) + '</span>');
+        metaBadges.push('<span class="tam-meta-badge" style="background:rgba(147,51,234,0.2);border-color:rgba(168,85,247,0.6);color:#f3e8ff;" title="Imune a condições — ' + escHtml(condImms.join(', ')) + '">🚫 Imunidade: ' + escHtml(ciText) + '</span>');
     }
     var concBuff = (u.se || []).find(function (st) { return st && st.concentration; });
     if (concBuff) {
-        metaBadges.push('<span class="tam-meta-badge" style="background:rgba(159,122,234,0.22);border-color:rgba(183,148,244,0.7);color:#e9d8fd;" title="D&D 5e: Dano força TR CON (CD 10 ou metade do dano) para quebrar">🧠 Conc: ' + escHtml(concBuff.n || 'Magia') + '</span>');
+        metaBadges.push('<span class="tam-meta-badge" style="background:rgba(159,122,234,0.22);border-color:rgba(183,148,244,0.7);color:#e9d8fd;" title="Dano força TR CON (CD 10 ou metade do dano) para quebrar">🧠 Conc: ' + escHtml(concBuff.n || 'Magia') + '</span>');
     }
     (u.se || []).forEach(function (st) {
         if (!st || st.concentration) return;
         var cName = st.dndCondition || st.condName || st.n || '';
         if (cName) {
             var cIco = st.ico || '✦';
-            metaBadges.push('<span class="tam-meta-badge warn" title="Condição D&D 5e ativa">' + escHtml(cIco + ' ' + cName) + '</span>');
+            metaBadges.push('<span class="tam-meta-badge warn" title="Condição ativa">' + escHtml(cIco + ' ' + cName) + '</span>');
         }
     });
 
@@ -38503,37 +38503,37 @@ function showAllyActionMenu(targetIdx, uid) {
     var allyBadges = [];
     if (u.hp <= 0 && u.dying && !u.stable) {
         var ds = u.deathSaves || { s: 0, f: 0 };
-        allyBadges.push('<span class="tam-meta-badge danger" title="D&D 5e: Caído a 0 PV fazendo testes de morte">💀 Inconsciente (' + ds.s + 'S / ' + ds.f + 'F)</span>');
+        allyBadges.push('<span class="tam-meta-badge danger" title="Caído a 0 PV fazendo testes de morte">💀 Inconsciente (' + ds.s + 'S / ' + ds.f + 'F)</span>');
     } else if (u.hp <= 0 && u.stable) {
-        allyBadges.push('<span class="tam-meta-badge good" title="D&D 5e: Estabilizado a 0 PV">✦ Estável (0 PV)</span>');
+        allyBadges.push('<span class="tam-meta-badge good" title="Estabilizado a 0 PV">✦ Estável (0 PV)</span>');
     }
     if (u.tempHp > 0) {
         allyBadges.push('<span class="tam-meta-badge good" title="Pontos de vida temporários ativos">🛡 +' + u.tempHp + ' PV Temp</span>');
     }
     if (u.prone) {
-        allyBadges.push('<span class="tam-meta-badge warn" title="D&D 5e : Caído no Chão">▾ Caído</span>');
+        allyBadges.push('<span class="tam-meta-badge warn" title="Caído no Chão">▾ Caído</span>');
     }
     if (u.grappled) {
-        allyBadges.push('<span class="tam-meta-badge danger" title="D&D 5e : Agarrado — Deslocamento é 0m">✊ Agarrado (0m)</span>');
+        allyBadges.push('<span class="tam-meta-badge danger" title="Agarrado — Deslocamento é 0m">✊ Agarrado (0m)</span>');
     }
     if (u.restrained) {
-        allyBadges.push('<span class="tam-meta-badge danger" title="D&D 5e : Contido — Deslocamento é 0m">🕸️ Contido (0m)</span>');
+        allyBadges.push('<span class="tam-meta-badge danger" title="Contido — Deslocamento é 0m">🕸️ Contido (0m)</span>');
     }
     if (u.blinded || u.blind) {
-        allyBadges.push('<span class="tam-meta-badge warn" title="D&D 5e : Cego — Ataques contra o companheiro têm Vantagem">◉ Cego</span>');
+        allyBadges.push('<span class="tam-meta-badge warn" title="Cego — Ataques contra o companheiro têm Vantagem">◉ Cego</span>');
     }
     if (u.paralyzed) {
-        allyBadges.push('<span class="tam-meta-badge danger" title="D&D 5e : Paralisado — Incapacitado">Paralisado</span>');
+        allyBadges.push('<span class="tam-meta-badge danger" title="Paralisado — Incapacitado">Paralisado</span>');
     }
     if (u.stunned) {
-        allyBadges.push('<span class="tam-meta-badge danger" title="D&D 5e : Atordoado — Incapacitado">💫 Atordoado</span>');
+        allyBadges.push('<span class="tam-meta-badge danger" title="Atordoado — Incapacitado">💫 Atordoado</span>');
     }
     if (u.poisoned) {
-        allyBadges.push('<span class="tam-meta-badge warn" title="D&D 5e : Envenenado — Desvantagem em ataques e testes">🧪 Envenenado</span>');
+        allyBadges.push('<span class="tam-meta-badge warn" title="Envenenado — Desvantagem em ataques e testes">🧪 Envenenado</span>');
     }
     var aConcBuff = (u.se || []).find(function (st) { return st && st.concentration; });
     if (aConcBuff) {
-        allyBadges.push('<span class="tam-meta-badge" style="background:rgba(159,122,234,0.22);border-color:rgba(183,148,244,0.7);color:#e9d8fd;" title="D&D 5e: Concentrando em magia ativa">🧠 Conc: ' + escHtml(aConcBuff.n || 'Magia') + '</span>');
+        allyBadges.push('<span class="tam-meta-badge" style="background:rgba(159,122,234,0.22);border-color:rgba(183,148,244,0.7);color:#e9d8fd;" title="Concentrando em magia ativa">🧠 Conc: ' + escHtml(aConcBuff.n || 'Magia') + '</span>');
     }
     (u.se || []).forEach(function (st) {
         if (!st || st.concentration) return;
@@ -38584,7 +38584,7 @@ function showAllyActionMenu(targetIdx, uid) {
         html += '<button type="button" class="tam-act-btn' + (helpDisabled ? ' is-disabled' : '') + '" data-tam-act="help">';
         html +=   '<div class="tam-act-ico">🤝</div>';
         html +=   '<div class="tam-act-text">';
-        html +=     '<div class="tam-act-label">Ajudar Companheiro (Help)</div>';
+        html +=     '<div class="tam-act-label">Ajudar Companheiro</div>';
         html +=     '<div class="tam-act-desc">' + helpDesc + '</div>';
         html +=   '</div>';
         html +=   '<div class="tam-act-chev">▸</div>';
@@ -39223,26 +39223,26 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
         var ruleDetailText = '';
         if (variant === 'mm') {
             reactionPills.push('<span class="dmg-pill dmg-pill--immune">✨ Imunidade (0 Dano)</span>');
-            ruleDetailText = 'D&D 5e: Escudo Arcano impede que qualquer dardo de Mísseis Mágicos cause dano à criatura protegida.';
+            ruleDetailText = 'Escudo Arcano impede que qualquer dardo de Mísseis Mágicos cause dano à criatura protegida.';
         } else if (variant === 'crit') {
             reactionPills.push('<span class="dmg-pill dmg-pill--vuln">20 Natural</span>');
             reactionPills.push('<span class="dmg-pill dmg-pill--save">+5 CA Subsequente</span>');
-            ruleDetailText = 'D&D 5e : Crítico natural (20) acerta independentemente da CA. O bônus de +5 CA permanecerá ativo contra outros ataques até o seu próximo turno.';
+            ruleDetailText = 'Crítico natural (20) acerta independentemente da CA. O bônus de +5 CA permanecerá ativo contra outros ataques até o seu próximo turno.';
         } else if (variant === 'contramagica') {
             reactionPills.push('<span class="dmg-pill dmg-pill--save">✨ Anulação Arcana</span>');
-            ruleDetailText = 'D&D 5e : Intercepta e encerra a conjuração inimiga no momento do disparo.';
+            ruleDetailText = 'Intercepta e encerra a conjuração inimiga no momento do disparo.';
         } else if (variant === 'rebuke') {
             reactionPills.push('<span class="dmg-pill dmg-pill--crit">🔥 2d10 Fogo no Inimigo</span>');
-            ruleDetailText = 'D&D 5e : Reação ao sofrer dano, envolvendo o agressor em chamas infernais (TR Destreza para metade).';
+            ruleDetailText = 'Reação ao sofrer dano, envolvendo o agressor em chamas infernais (TR Destreza para metade).';
         } else if (variant === 'deflect') {
             reactionPills.push('<span class="dmg-pill dmg-pill--save">✋ Reduz 1d10+DES+Nível</span>');
-            ruleDetailText = 'D&D 5e : Monge usa reação para amortecer o projétil disparado à distância.';
+            ruleDetailText = 'Monge usa reação para amortecer o projétil disparado à distância.';
         } else if (variant === 'cutting') {
             reactionPills.push('<span class="dmg-pill dmg-pill--save">🎭 Subtrai 1d6 do Ataque</span>');
-            ruleDetailText = 'D&D 5e : Bardo do Saber gasta 1 dado de inspiração para reduzir a rolagem de ataque de um oponente visível.';
+            ruleDetailText = 'Bardo do Saber gasta 1 dado de inspiração para reduzir a rolagem de ataque de um oponente visível.';
         } else if (variant === 'uncanny') {
             reactionPills.push('<span class="dmg-pill dmg-pill--save">💨 Dano à Metade (½)</span>');
-            ruleDetailText = 'D&D 5e: Ladino desvia agilmente, absorvendo apenas metade do impacto de um ataque visível.';
+            ruleDetailText = 'Ladino desvia agilmente, absorvendo apenas metade do impacto de um ataque visível.';
         } else {
             // shield normal
             if (effAc != null && total != null && (effAc + 5) > total) {
@@ -39250,7 +39250,7 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             } else if (effAc != null && total != null) {
                 reactionPills.push('<span class="dmg-pill dmg-pill--vuln">Ataque ainda supera CA</span>');
             }
-            ruleDetailText = 'D&D 5e: Concede +5 de CA retroativo contra o ataque que causou a reação e todos os ataques seguintes até o início do seu próximo turno.';
+            ruleDetailText = 'Concede +5 de CA retroativo contra o ataque que causou a reação e todos os ataques seguintes até o início do seu próximo turno.';
         }
 
         var dRows = [
@@ -40821,7 +40821,7 @@ function openDndResourceInfoModal(resKind, p) {
 
     if (resKind === 'action') {
         glyph = '◆';
-        title = 'Ação do Turno (D&D 5e)';
+        title = 'Ação do Turno';
         isSpent = actionUsed;
         statusText = actionUsed ? 'GASTA NESTE TURNO' : 'DISPONÍVEL';
         ruleText = 'Cada combatente possui 1 ação principal em seu turno. A ação é o recurso primário para desferir ataques, conjurar a grande maioria das magias ou realizar manobras táticas.';
@@ -40847,7 +40847,7 @@ function openDndResourceInfoModal(resKind, p) {
         }
     } else if (resKind === 'bonus') {
         glyph = '▲';
-        title = 'Ação Bônus (D&D 5e)';
+        title = 'Ação Bônus';
         isSpent = baUsed;
         statusText = baUsed ? 'GASTA NESTE TURNO' : 'DISPONÍVEL';
         ruleText = 'Você só pode realizar uma Ação Bônus quando uma característica de classe, magia ou efeito especial conceder explicitamente esse uso adicional no turno.';
@@ -40857,22 +40857,22 @@ function openDndResourceInfoModal(resKind, p) {
             '🎭 Ladino: Ação Ardilosa (Disparada, Desengajar, Esconder)',
             '🥋 Monge: Artes Marciais / Passo do Vento / Rajada de Golpes',
             '⚔️ Guerreiro: Retomar o Fôlego (Cura de 1d10 + Nível)',
-            '🪓 Bárbaro: Entrar em Fúria (Rage)',
+            '◆ Bárbaro: Entrar em Fúria',
             '🎵 Bardo: Conceder Inspiração de Bardo a um aliado'
         ];
         resetText = 'Limite de 1 Ação Bônus por turno. Reseta no início do seu próximo turno.';
         if (baWasSpell) {
             alertBox = {
                 title: '✨ Magia Conjurada como Ação Bônus',
-                body: 'Esta Ação Bônus foi utilizada para conjurar uma magia. Pela regra D&D 5e , sua ação principal do turno fica restrita a truques, ataques ou manobras físicas.'
+                body: 'Esta Ação Bônus foi utilizada para conjurar uma magia. Sua ação principal do turno fica restrita a truques, ataques ou manobras físicas.'
             };
         }
     } else if (resKind === 'reaction') {
         glyph = '⚡';
-        title = 'Reação de Combate (D&D 5e)';
+        title = 'Reação de Combate';
         isSpent = reactionUsed;
         statusText = reactionUsed ? 'GASTA NESTA RODADA' : 'DISPONÍVEL (PRONTA)';
-        ruleText = 'Conforme o Livro do Jogador , uma Reação é uma resposta instantânea a um gatilho específico de combate. Diferente de Ações normais, uma Reação pode ocorrer no seu turno ou no turno de QUALQUER outro combatente.';
+        ruleText = 'Uma Reação é uma resposta instantânea a um gatilho específico de combate. Diferente de Ações normais, uma Reação pode ocorrer no seu turno ou no turno de QUALQUER outro combatente.';
         optionsList = [
             '⚔️ Ataque de Oportunidade (Inimigo se afasta do seu alcance sem desengajar)',
             '🛡️ Escudo Arcano (+5 CA contra ataque iminente ou Mísseis Mágicos)',
@@ -40908,7 +40908,7 @@ function openDndResourceInfoModal(resKind, p) {
     }
 
     html += '<div class="dnd-res-modal-section">' +
-        '<div class="dnd-res-modal-sec-title">📜 Regra Oficial D&D 5e</div>' +
+        '<div class="dnd-res-modal-sec-title">◆ Regra &amp; Mecânica</div>' +
         '<div>' + escHtml(ruleText) + '</div>' +
     '</div>';
 
@@ -41128,7 +41128,7 @@ async function runPlayerStabilizeMedicine() {
                     { l: 'Alvo', v: p.n },
                     { l: 'Perícia', v: 'Sabedoria (Medicina)' },
                     { l: 'CD Alvo', v: '10' },
-                    { l: 'Regra D&D 5e', v: 'Teste de Sabedoria (Medicina) CD 10 para estabilizar criatura inconsciente a 0 PV.' },
+                    { l: 'Mecânica', v: 'Teste de Sabedoria (Medicina) CD 10 para estabilizar criatura inconsciente a 0 PV.' },
                     { l: 'Efeito', v: ok ? 'Estabiliza a 0 PV e cessa os testes contra a morte.' : 'Permanece instável, devendo rolar novo teste contra a morte no seu turno.' }
                 ];
                 var pills = [
@@ -41205,7 +41205,7 @@ async function runPlayerStabilizeAlly(targetIdx) {
                     { l: 'Alvo', v: target.n },
                     { l: 'Perícia', v: 'Sabedoria (Medicina)' },
                     { l: 'CD Alvo', v: '10' },
-                    { l: 'Regra D&D 5e', v: 'Teste de Sabedoria (Medicina) CD 10 para estabilizar criatura inconsciente a 0 PV.' },
+                    { l: 'Mecânica', v: 'Teste de Sabedoria (Medicina) CD 10 para estabilizar criatura inconsciente a 0 PV.' },
                     { l: 'Efeito', v: ok ? 'Estabiliza a 0 PV e encerra os testes contra a morte.' : 'Permanece instável, devendo rolar novo teste contra a morte no seu turno.' }
                 ];
                 var pills = [
@@ -41528,7 +41528,7 @@ async function passPlayerMetaAction(kind, opts) {
 function getLatestCombatLogMessage(s) {
     if (!s || !s.log || !s.log.length) return 'Batalha iniciada. Escolha sua ação no dock abaixo.';
     for (var i = s.log.length - 1; i >= 0; i--) {
-        var line = String(s.log[i] || '').trim();
+        var line = String(s.log[i] || '').trim().replace(/\s*\((?:D&D\s*5e\s*)?(?:PHB|DMG|MM|XGE|XGtE|TCoE|SRD)[^)]*\)/gi, '').replace(/\s*\(D&D\s*5e\s*\)/gi, '');
         if (!line || /^::/.test(line)) continue;
         return line;
     }
@@ -41932,11 +41932,11 @@ function openSkillHelpMini(overlayEl, skill) {
             .replace(/\(não modelado\)/gi, '')
             .replace(/Arena stub:.*$/gi, '')
             .replace(/Arena:.*$/gi, '')
-            .replace(/\s*\((?:D&D\s*5e\s*)?PHB\s+p\.\s*\d+\)/gi, '')
+            .replace(/\s*\((?:D&D\s*5e\s*)?(?:PHB|DMG|MM|XGE|XGtE|TCoE|SRD)[^)]*\)/gi, '')
             .replace(/\s*\(PHB\s+p\.\s*\d+[^)]*\)/gi, '')
             .replace(/\s*\(PHB[^)]*\)/gi, '')
             .replace(/\s*\(SRD[^)]*\)/gi, '')
-            .replace(/\bPHB\s+p\.\s*\d+:\s*/gi, '')
+            .replace(/\b(?:PHB|DMG|MM|XGE|XGtE|TCoE|SRD)\s+p\.\s*\d+:\s*/gi, '')
             .replace(/\bD&D\s*5e\s*PHB:\s*/gi, '')
             .replace(/\b1 action\b/gi, '1 Ação')
             .replace(/\b1 bonus action\b/gi, '1 Ação Bônus')
@@ -42371,7 +42371,7 @@ function _buildSkillListHtml(skills, filter, resIco, resValue, page, pageSize) {
             }
         }
         if (sk.concentration) {
-            tacMetaParts.push('<span style="color:#a5d6a7;font-weight:700;" title="Exige Concentração D&D 5e ">◈ Conc.</span>');
+            tacMetaParts.push('<span style="color:#a5d6a7;font-weight:700;" title="Exige Concentração">◈ Conc.</span>');
         }
         if (sk.scale === 'cantrip') {
             tacMetaParts.push('<span style="color:#ce93d8;">Truque</span>');
@@ -42394,7 +42394,7 @@ function _buildSkillListHtml(skills, filter, resIco, resValue, page, pageSize) {
         html += '</div>';
         html += '<div class="lp-item-cost' + (canUse ? '' : ' cant') + '">' + resIco + ' ' + sk.cost + '</div>';
         html += '</button>';
-        html += '<button type="button" class="lp-item-help" data-skill-help="' + i + '" title="Detalhes D&D 5e" aria-label="Detalhes técnicos">?</button>';
+        html += '<button type="button" class="lp-item-help" data-skill-help="' + i + '" title="Regras &amp; Mecânica" aria-label="Detalhes técnicos">?</button>';
         html += '</div>';
     }
     if (!filteredCount) html = '<div class="lp-empty">Nenhuma habilidade nesta categoria.</div>';
@@ -44314,7 +44314,7 @@ async function attemptFlee() {
                     { l: 'Ação Tática', v: 'Fuga do Combate (Retirada)' },
                     { l: 'Perícia', v: 'Destreza (Acrobacia)' },
                     { l: 'CD Alvo', v: DC + ' (calculada com base nos oponentes ativos)' },
-                    { l: 'Regra D&D 5e', v: 'Ao sair da área de ameaça sem a ação Desengajar, o combatente provoca ataques de oportunidade.' },
+                    { l: 'Mecânica', v: 'Ao sair da área de ameaça sem a ação Desengajar, o combatente provoca ataques de oportunidade.' },
                     { l: 'Consequência de Falha', v: 'Cada inimigo ativo no combate realiza um ataque de oportunidade imediato.' }
                 ];
                 var pills = [
@@ -44486,9 +44486,9 @@ function showTargetConfirm(tgtIdx) {
         : { bonus: 0, label: null };
     var advBadge = '';
     if (advDetails.state === 'cancelled') {
-        advBadge = ' <span class="badge" style="background:#2d3748;color:#e2e8f0;border:1px solid #718096;padding:1px 6px;border-radius:3px;font-size:11px;font-weight:bold;letter-spacing:0.5px;" title="D&D 5e : Vantagem e Desvantagem ativas se anulam mutuamente">⚖️ VANT & DESV ANULADAS</span>';
+        advBadge = ' <span class="badge" style="background:#2d3748;color:#e2e8f0;border:1px solid #718096;padding:1px 6px;border-radius:3px;font-size:11px;font-weight:bold;letter-spacing:0.5px;" title="Vantagem e Desvantagem ativas se anulam mutuamente">⚖️ VANT & DESV ANULADAS</span>';
     } else if (isFlanked) {
-        advBadge = ' <span class="badge adv" style="background:#1b4d24;color:#c6f6d5;border:1px solid #2ecc71;padding:1px 6px;border-radius:3px;font-size:11px;font-weight:bold;letter-spacing:0.5px;" title="Flanqueamento D&D 5e (DMG p. 251): Aliado em posição oposta">▲ FLANQUEADO (VANT)</span>';
+        advBadge = ' <span class="badge adv" style="background:#1b4d24;color:#c6f6d5;border:1px solid #2ecc71;padding:1px 6px;border-radius:3px;font-size:11px;font-weight:bold;letter-spacing:0.5px;" title="Flanqueamento: Aliado em posição oposta">▲ FLANQUEADO (VANT)</span>';
     } else if (advMode === 'advantage') {
         var _advShort = (advDetails.advReasons && advDetails.advReasons[0])
             ? (' (' + advDetails.advReasons[0].replace(/ \(PHB.*\)/, '') + ')')
@@ -44549,7 +44549,7 @@ function showTargetConfirm(tgtIdx) {
                 + '<span style="font-family:Cinzel,serif;font-size:12px;font-weight:800;color:#fdba74;">💥 ' + aoeShapePt.toUpperCase() + ' DE ' + aoeRadiusM + ' (' + aoeGeo.radiusHex + ' hexes)</span>'
                 + '<span style="font-size:11px;color:#fed7aa;background:rgba(0,0,0,0.4);border:1px solid rgba(251,146,60,0.4);padding:1px 6px;border-radius:4px;">🎯 ' + nEnemies + ' Alvo(s) Hostil(is)</span>'
                 + '</div>'
-                + '<div style="font-size:11px;color:#fdba74;opacity:0.9;margin-top:2px;">D&D 5e : Afeta todas as criaturas na área a partir do ponto de mira.</div>'
+                + '<div style="font-size:11px;color:#fdba74;opacity:0.9;margin-top:2px;">Afeta todas as criaturas na área a partir do ponto de mira.</div>'
                 + ffWarning
                 + '</div>';
         }
@@ -44639,12 +44639,12 @@ function showTargetConfirm(tgtIdx) {
     }
     if (skill && skill.concentration && (p.concentrationSpell || p.concentrating)) {
         var _prevConc = p.concentrationSpell || (p.concentrating && (p.concentrating.spellName || p.concentrating.n)) || 'magia ativa';
-        html += '<div style="background:rgba(30,90,140,0.24);border:1px solid #38bdf8;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:11.5px;color:#bae6fd;text-align:center;">◈ <strong>Concentração D&D 5e:</strong> Conjurar encerrará <em>' + escHtml(_prevConc) + '</em>.</div>';
+        html += '<div style="background:rgba(30,90,140,0.24);border:1px solid #38bdf8;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:11.5px;color:#bae6fd;text-align:center;">◈ <strong>Concentração:</strong> Conjurar encerrará <em>' + escHtml(_prevConc) + '</em>.</div>';
     }
     if (isSaveSpell && legRes > 0) {
         var _legRem = Math.max(0, legRes - legResUsed);
         if (_legRem > 0) {
-            html += '<div style="background:rgba(217,119,6,0.22);border:1px solid #f59e0b;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:11.5px;color:#fde68a;font-weight:700;text-align:center;">👑 RESISTÊNCIA LENDÁRIA: ' + _legRem + '/' + legRes + ' restantes — O alvo pode escolher passar no TR (MM p. 11)</div>';
+            html += '<div style="background:rgba(217,119,6,0.22);border:1px solid #f59e0b;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:11.5px;color:#fde68a;font-weight:700;text-align:center;">◈ RESISTÊNCIA LENDÁRIA: ' + _legRem + '/' + legRes + ' restantes — O alvo pode escolher passar no TR</div>';
         } else {
             html += '<div style="background:rgba(30,130,60,0.22);border:1px solid #4ade80;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:11.5px;color:#bbf7d0;text-align:center;">👑 Resistências Lendárias Esgotadas (0/' + legRes + ') — O alvo sofrerá o efeito se falhar!</div>';
         }
@@ -44777,7 +44777,7 @@ function showTargetConfirm(tgtIdx) {
 
     if (advDetails.state === 'cancelled') {
         drawerHtml += '<div class="tcc-dmg-row" style="background:rgba(45,55,72,0.35);border:1px solid rgba(113,128,150,0.5);border-radius:4px;padding:5px 8px;margin-top:4px;display:flex;flex-direction:column;gap:3px;">'
-            + '<div style="font-size:11.5px;color:#e2e8f0;font-weight:700;">⚖️ Anulação Mútua D&D 5e :</div>'
+            + '<div style="font-size:11.5px;color:#e2e8f0;font-weight:700;">◆ Anulação Mútua:</div>'
             + '<div style="font-size:11px;color:#86efac;">▲ <strong>Vantagem:</strong> ' + escHtml(advDetails.advReasons.join('; ')) + '</div>'
             + '<div style="font-size:11px;color:#fca5a5;">▼ <strong>Desvantagem:</strong> ' + escHtml(advDetails.disReasons.join('; ')) + '</div>'
             + '</div>';
@@ -44788,7 +44788,7 @@ function showTargetConfirm(tgtIdx) {
     }
 
     if (drawerHtml) {
-        html += '<button type="button" class="tcc-details-toggle" data-tcc-toggle="details"><span>▾ Detalhes &amp; Matemática D&amp;D 5e</span><span data-tcc-arrow>▸</span></button>';
+        html += '<button type="button" class="tcc-details-toggle" data-tcc-toggle="details"><span>▾ Detalhes &amp; Matemática Tática</span><span data-tcc-arrow>▸</span></button>';
         html += '<div class="tcc-details-drawer" data-tcc-drawer="details">' + drawerHtml + '</div>';
     }
     html += '</div>';
@@ -46279,7 +46279,7 @@ function applyMagicMissileDartImpact(dart, s, _staleTargetEl) {
     if (isFireball) {
         var _svAb = dart.saveAbility || 'dex';
         var _svDc = dart.saveDc || 12;
-        var aoeRadius = dart.aoeRadius || 4; // 4 hexes = 20ft raio (D&D 5e )
+        var aoeRadius = dart.aoeRadius || 4; // 4 hexes = 20ft raio (D&D 5e)
 
         // Determina quem está estritamente dentro da área de efeito:
         var hasGrid = t.pos && typeof t.pos.col === 'number';
@@ -46734,7 +46734,7 @@ function showAllySpellOverlay(actor, target, dart, s, skill, themeKey) {
             var pillsList = [];
             if (dart.dmg) {
                 pillsList.push('<span class="dmg-pill dmg-pill--heal">❤️ +' + dart.dmg + ' PV Restaurados</span>');
-                pillsList.push('<span class="dmg-pill dmg-pill--buff">✨ Cura Divina (D&D 5e)</span>');
+                pillsList.push('<span class="dmg-pill dmg-pill--buff">✦ Cura Divina</span>');
                 if (target && target.hp <= 0) {
                     pillsList.push('<span class="dmg-pill dmg-pill--conc-pass">✦ Consciência Restaurada</span>');
                 }
@@ -46761,10 +46761,10 @@ function showAllySpellOverlay(actor, target, dart, s, skill, themeKey) {
             ];
             if (dart.rolls && dart.rolls.length > 0) {
                 var rollBreakdown = dart.rolls.join(' + ') + (dart.flat ? (' + ' + dart.flat) : '') + ' = ' + dart.dmg + ' PV';
-                dRows.push({ l: 'Fórmula D&D 5e', v: dart.rolls.length + 'd' + dart.d + ': (' + rollBreakdown + ')' });
+                dRows.push({ l: 'Fórmula de Dados', v: dart.rolls.length + 'd' + dart.d + ': (' + rollBreakdown + ')' });
                 dRows.push({ l: 'Regra de Cura', v: 'A cura restaura pontos de vida perdidos até o limite máximo de PV. Se o alvo estiver a 0 PV, ele recupera a consciência e zera suas salvaguardas de morte acumuladas.' });
             } else if (skill.desc) {
-                dRows.push({ l: 'Efeito D&D 5e', v: skill.desc });
+                dRows.push({ l: 'Efeito', v: skill.desc });
             }
 
             detailsBody.innerHTML = dRows.map(function (rw) {
@@ -47407,7 +47407,7 @@ function showRayOfFrostOverlay(actor, target, dart, s) {
                 { l: 'Alvo Atingido', v: target ? target.n : 'Alvo' },
                 { l: 'Rolagem de Dano', v: dart.rolls.length + 'd' + dart.d + ': (' + rollBreakdown + ')' },
                 { l: 'Efeito Secundário', v: 'Velocidade do alvo é reduzida em 3 metros (10 pés / 2 hexes) até o início do seu próximo turno.' },
-                { l: 'Regra D&D 5e', v: 'Um feixe gélido de luz atinge o alvo, causando dano de frio e desacelerando seu movimento com geada mística.' }
+                { l: 'Mecânica', v: 'Um feixe gélido de luz atinge o alvo, causando dano de frio e desacelerando seu movimento com geada mística.' }
             ];
 
             detailsBody.innerHTML = dRows.map(function (rw) {
@@ -47923,7 +47923,7 @@ function showFireballSpellOverlay(actor, target, dart, s) {
                             { l: 'Salvaguarda', v: 'TR Destreza ' + svTotalStr + ' vs CD ' + svDcStr + ' (' + (sv.success ? 'Sucesso: sofre metade' : 'Falha: sofre dano total') + ')' },
                             { l: 'Rolagem de Dano', v: diceBadgeText + ': (' + rollMath + ')' },
                             { l: 'Resolução D&D 5e', v: sv.success ? (dart.dmg + ' / 2 = ' + finalDmg + ' PV de fogo') : (dart.dmg + ' PV de fogo pleno') },
-                            { l: 'Regra D&D 5e', v: 'Cada criatura em uma esfera de 6m de raio deve fazer uma salvaguarda de Destreza. Sofre 8d6 de dano de fogo se falhar, ou metade se obtiver sucesso.' }
+                            { l: 'Mecânica', v: 'Cada criatura em uma esfera de 6m de raio deve fazer uma salvaguarda de Destreza. Sofre 8d6 de dano de fogo se falhar, ou metade se obtiver sucesso.' }
                         ];
 
                         detailsBody.innerHTML = dRows.map(function (rw) {
@@ -49727,7 +49727,7 @@ function showHealDice(rolls, die, mod, actor, target, oldHp, newHp, rolledTotal,
                             { l: 'Fórmula D&D 5e', v: rolls.length + dieType + (mod ? (mod > 0 ? ' +' + mod : ' ' + mod) : '') },
                             { l: 'Rolagem dos Dados', v: rolls.join(' + ') + (mod ? (mod > 0 ? ' +' + mod : ' ' + mod) : '') + ' = ' + totalRolled + ' PV' },
                             { l: 'Ganho Efetivo', v: '+' + gained + ' PV (' + oldHp + ' ➔ ' + newHp + '/' + (target.mhp || target.hp) + ')' },
-                            { l: 'Regra D&D 5e', v: 'Pontos de vida recuperados não excedem o PV máximo. A criatura desperta de imediato ao recuperar PV a 0.' }
+                            { l: 'Mecânica', v: 'Pontos de vida recuperados não excedem o PV máximo. A criatura desperta de imediato ao recuperar PV a 0.' }
                         ];
                         if (showReviveLine) {
                             dRows.push({ l: 'Retorno da Inconsciência', v: 'Recupera sentidos e pode agir normalmente no seu próximo turno.' });
@@ -50412,7 +50412,7 @@ function openUnitDetail(uid) {
         { k: 'wis', lb: 'SAB', v: (u.wis != null ? u.wis : (u.wisdom != null ? u.wisdom : 10)), png: 'sabedoria.webp' },
         { k: 'cha', lb: 'CAR', v: (u.cha != null ? u.cha : (u.charisma != null ? u.charisma : 10)), png: 'carisma.webp' }
     ];
-    html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Atributos D&D 5e</summary>';
+    html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Atributos</summary>';
     html += '<div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">';
     for (var si = 0; si < statsData.length; si++) {
         var sObj = statsData[si];
@@ -50446,19 +50446,19 @@ function openUnitDetail(uid) {
     }
     html += '</div>';
     if (u.t === 'e' && !isKnown) {
-        html += '<div style="font-size:11px; color:var(--v-text-dim,#a09484); margin-top:5px; font-style:italic; line-height:1.35;">D&D 5e: Avaliação física visual. Atributos mentais são revelados ao derrotar ou estudar a espécie.</div>';
+        html += '<div style="font-size:11px; color:var(--v-text-dim,#a09484); margin-top:5px; font-style:italic; line-height:1.35;">Avaliação física visual. Atributos mentais são revelados ao derrotar ou estudar a espécie.</div>';
     }
     html += '</details>';
 
     /* Salvaguardas D&D 5e */
     if (u.t === 'e' && !isKnown) {
-        html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Salvaguardas D&D 5e</summary>';
+        html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Salvaguardas</summary>';
         html += '<div style="font-size:11px; color:#c4b49c; font-style:italic; padding:6px 8px; background:rgba(20,14,10,0.5); border:1px solid rgba(196,149,58,0.2); border-radius:4px; line-height:1.4;">'
             + 'Salvaguardas e bônus permanecem ocultos sob névoa de guerra até serem testados durante o combate ou catalogados após a vitória.'
             + '</div></details>';
     } else {
         var profSaves = u.saving_throw_proficiencies || [];
-        html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Salvaguardas D&D 5e</summary>';
+        html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Salvaguardas</summary>';
         html += '<div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:4px;">';
         for (var si2 = 0; si2 < statsData.length; si2++) {
             var sObj2 = statsData[si2];
@@ -50478,7 +50478,7 @@ function openUnitDetail(uid) {
     /* Traços, Passivas & Regras D&D 5e */
     var uTraits = (typeof simResolveUnitTraitsDnd5e === 'function') ? simResolveUnitTraitsDnd5e(u) : (u.traits || []);
     if (uTraits && uTraits.length) {
-        html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Traços & Características D&D 5e</summary>';
+        html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Traços & Características</summary>';
         html += '<div style="display:flex; flex-direction:column; gap:5px;">';
         for (var ti = 0; ti < uTraits.length; ti++) {
             var trObj = uTraits[ti];
@@ -50553,7 +50553,7 @@ function openUnitDetail(uid) {
     if (u.t === 'e' && u.it) {
         var it = u.it;
         var itIcon = (it.tp === 'skill') ? '✦' : (it.isRanged ? '⌖' : (it.tp === 'stun' ? '◈' : '▲'));
-        html += '<div class="udc-section udc-section-intent"><div class="udc-section-title">Intenção Tática D&D 5e</div>';
+        html += '<div class="udc-section udc-section-intent"><div class="udc-section-title">Intenção Tática</div>';
         html += '<div style="background:rgba(231,76,60,0.14); border:1px solid rgba(231,76,60,0.55); border-radius:6px; padding:6px 10px; font-size:11px; line-height:1.4;">';
         if (it.tp === 'stun') {
             html += '<div style="color:#e07c7c; font-weight:700;">◈ ' + escHtml(it.lb || 'Incapacitado') + '</div>';
@@ -50567,7 +50567,7 @@ function openUnitDetail(uid) {
     }
 
     /* Condição & Efeitos D&D 5e */
-    html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Condição & Efeitos D&D 5e</summary>';
+    html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Condição & Efeitos</summary>';
     var conds = [];
     if (!u.alive || (u.hp != null && u.hp <= 0)) conds.push({ ico: '☠️', n: 'Inconsciente (0 PV)' });
     else if (hpPct <= 25) conds.push({ ico: '⚠️', n: 'Ferido grave (≤25%)' });
@@ -50904,7 +50904,7 @@ async function animInit(preSkip) {
     showInitiativeOrderPopup();
 }
 
-/** Trata a condição Surpreso (D&D 5e ) quando chega o turno do jogador.
+/** Trata a condição Surpreso (D&D 5e) quando chega o turno do jogador.
  * Na Rodada 1, uma unidade surpresa perde o turno (sem ações, reações ou deslocamento).
  * A condição se encerra no fim deste turno. */
 async function checkAndHandlePlayerSurprise(s) {
@@ -51823,8 +51823,8 @@ async function playTurn(aIdx, tIdx, opts) {
     var atkShown = actor.atk + atkExtra;
     var dspecForCritRule = atkSkill && atkSkill.damageSpec;
     var critDmgRuleLine = (dspecForCritRule && dspecForCritRule.n != null && dspecForCritRule.d != null)
-        ? ('Natural 20 no d20: role <strong>+1d' + (dspecForCritRule.d | 0) + '</strong> extra (mesmo tipo da habilidade) antes de somar o modificador (D&D 5e).')
-        : 'Natural 20 no d20: na rolagem de dano, role um dado de arma a mais antes de somar o modificador (D&D 5e).';
+        ? ('Natural 20 no d20: role <strong>+1d' + (dspecForCritRule.d | 0) + '</strong> extra (mesmo tipo da habilidade) antes de somar o modificador.')
+        : 'Natural 20 no d20: na rolagem de dano, role um dado de arma a mais antes de somar o modificador.';
 
     /* Badges táticos visuais para o card de resultado da rolagem de d20 */
     var _tacticalDiceBadgesHtml = '';
@@ -51919,12 +51919,12 @@ async function playTurn(aIdx, tIdx, opts) {
                         var _note = '';
                         if (hasEvasion && _svAb === 'dex') {
                             _note = saveSuccess
-                                ? 'Passou na salvaguarda — Evasão reduz o dano a zero (0 Dano, D&D 5e )!'
-                                : 'Falhou na salvaguarda — Evasão reduz o dano à metade (½ Dano, D&D 5e )!';
+                                ? 'Passou na salvaguarda — Evasão reduz o dano a zero (0 Dano)!'
+                                : 'Falhou na salvaguarda — Evasão reduz o dano à metade (½ Dano)!';
                         } else {
                             _note = saveSuccess
-                                ? (atkSkill.saveNegates ? 'Passou na salvaguarda — Anulou o efeito (0 Dano, D&D 5e ).' : 'Passou na salvaguarda — Sofre metade do dano (½, D&D 5e ).')
-                                : 'Falhou na salvaguarda — Sofre dano integral (D&D 5e ).';
+                                ? (atkSkill.saveNegates ? 'Passou na salvaguarda — Anulou o efeito (0 Dano).' : 'Passou na salvaguarda — Sofre metade do dano (½).')
+                                : 'Falhou na salvaguarda — Sofre dano integral.';
                         }
 
                         var _detailsRows = [
@@ -51934,7 +51934,7 @@ async function playTurn(aIdx, tIdx, opts) {
                             { l: 'Modificador Base', v: (simSaveMod(target, atkSkill.save.ability) >= 0 ? '+' : '') + simSaveMod(target, atkSkill.save.ability) }
                         ];
                         if (_svCover && _svCover.bonus > 0) {
-                            _detailsRows.push({ l: 'Bônus de Cobertura', v: '+' + _svCover.bonus + ' (' + (_svCover.cover === 'half' ? 'Meia' : '¾') + ' Cobertura, )' });
+                            _detailsRows.push({ l: 'Bônus de Cobertura', v: '+' + _svCover.bonus + ' (' + (_svCover.cover === 'half' ? 'Meia' : '¾') + ' Cobertura)' });
                         }
                         if (_saveDetails && _saveDetails.state === 'cancelled') {
                             _detailsRows.push({ l: 'Anulação Mútua', v: 'Vantagem (' + (_saveDetails.advReasons || []).join(', ') + ') e Desvantagem (' + (_saveDetails.disReasons || []).join(', ') + ') anulam-se mutuamente ' });
@@ -51955,7 +51955,7 @@ async function playTurn(aIdx, tIdx, opts) {
                             subHtml: simFormatVsDcHTML(saveRoll, saveMod, saveTotal, saveDc, saveSuccess) +
                                 _svCoverBadge +
                                 _svPillRowHtml +
-                                '<div class="drl-crit-rule">' + (atkSkill.saveNegates ? (escHtml(atkSkill.n || 'Magia') + ': nenhum dano se passar na resistência (D&D 5e ).') : (escHtml(atkSkill.n || 'Magia') + ': metade do dano se passar na resistência (D&D 5e ).')) + '</div>'
+                                '<div class="drl-crit-rule">' + (atkSkill.saveNegates ? (escHtml(atkSkill.n || 'Magia') + ': nenhum dano se passar na resistência.') : (escHtml(atkSkill.n || 'Magia') + ': metade do dano se passar na resistência.')) + '</div>'
                         };
                     }
                 });
@@ -52036,7 +52036,7 @@ async function playTurn(aIdx, tIdx, opts) {
                             if (hitRes.autoCritNear) {
                                 _attackPills.push('<span class="dmg-pill dmg-pill--crit">✦ Crítico Automático (Alvo Indefeso)</span>');
                             } else {
-                                _attackPills.push('<span class="dmg-pill dmg-pill--crit">💥 Crítico Natural (D&D 5e)</span>');
+                                _attackPills.push('<span class="dmg-pill dmg-pill--crit">✦ Crítico Natural</span>');
                             }
                         } else if (hitRes.reason === 'falha_critica' || r === 1) {
                             _attackPills.push('<span class="dmg-pill dmg-pill--crit">Falha Crítica (Nat 1)</span>');
@@ -52082,12 +52082,12 @@ async function playTurn(aIdx, tIdx, opts) {
                         var _note = '';
                         if (hitRes.crit) {
                             _note = hitRes.autoCritNear
-                                ? 'Alvo paralisado ou inconsciente a 1,5m: qualquer acerto se torna acerto crítico automático (D&D 5e /292)!'
-                                : 'Natural 20! Acerto garantido e dados de dano duplicados (D&D 5e ).';
+                                ? 'Alvo paralisado ou inconsciente a 1,5m: qualquer acerto se torna acerto crítico automático!'
+                                : 'Natural 20! Acerto garantido e dados de dano duplicados.';
                         } else if (hitRes.hit) {
                             _note = 'Total ' + hitRes.total + ' ≥ CA ' + effAc + ' — Golpe acertou em cheio!';
                         } else if (hitRes.reason === 'falha_critica' || r === 1) {
-                            _note = 'Natural 1! Erro automático feio independente de bônus (D&D 5e ).';
+                            _note = 'Natural 1! Erro automático feio independente de bônus.';
                         } else if (_isCoverBlocked) {
                             _note = 'Total ' + hitRes.total + ' superaria a CA base ' + (effAc - _atkCover.bonus) + ', mas foi bloqueado pelos +' + _atkCover.bonus + ' de cobertura!';
                         } else if (_hasTargetDodge) {
@@ -52102,7 +52102,7 @@ async function playTurn(aIdx, tIdx, opts) {
                             { l: 'CA Base do Alvo', v: String(target.ac) }
                         ];
                         if (opts.oa) {
-                            _detailsRows.push({ l: 'Economia de Ação', v: 'Ataque de Oportunidade (Reação, )' });
+                            _detailsRows.push({ l: 'Economia de Ação', v: 'Ataque de Oportunidade (Reação)' });
                         } else if (opts.multiAttackTotal > 1) {
                             _detailsRows.push({ l: 'Ataque Múltiplo', v: opts.multiAttackCurrent + ' de ' + opts.multiAttackTotal + '' });
                         } else if (opts.rayTotal > 1) {
@@ -52111,10 +52111,10 @@ async function playTurn(aIdx, tIdx, opts) {
                             _detailsRows.push({ l: 'Ataque Extra / Ação', v: opts.attackIndex + ' de ' + opts.attackTotal + '' });
                         }
                         if (opts.aoeSecondary) {
-                            _detailsRows.push({ l: 'Abrangência', v: 'Alvo adicional na área de efeito (D&D 5e )' });
+                            _detailsRows.push({ l: 'Abrangência', v: 'Alvo adicional na área de efeito' });
                         }
                         if (_atkCover && _atkCover.bonus > 0) {
-                            _detailsRows.push({ l: 'Bônus de Cobertura', v: '+' + _atkCover.bonus + ' CA (' + (_atkCover.cover === 'half' ? 'Meia' : '¾') + ' Cobertura, )' });
+                            _detailsRows.push({ l: 'Bônus de Cobertura', v: '+' + _atkCover.bonus + ' CA (' + (_atkCover.cover === 'half' ? 'Meia' : '¾') + ' Cobertura)' });
                         }
                         if (atkBonusPack && atkBonusPack.entries && atkBonusPack.entries.length) {
                             atkBonusPack.entries.forEach(function (be) {
@@ -56194,7 +56194,7 @@ async function __combatAnimateOneEvent(ev) {
                                     _savePills.push('<span class="dmg-pill dmg-pill--type">⚖️ Vantagem/Desvantagem Anuladas </span>');
                                 }
                                 if (ev.legendaryResistanceUsed) {
-                                    _savePills.push('<span class="dmg-pill dmg-pill--buff">👑 Resistência Lendária (MM p. 11)</span>');
+                                    _savePills.push('<span class="dmg-pill dmg-pill--buff">👑 Resistência Lendária</span>');
                                 }
                                 if (ev.coverBonus > 0) {
                                     _savePills.push('<span class="dmg-pill dmg-pill--resist">⛨ Cobertura (+' + ev.coverBonus + ')</span>');
@@ -56225,7 +56225,7 @@ async function __combatAnimateOneEvent(ev) {
                                     _saveDetailsRows.push({ l: 'Regra de Área', v: 'dano rolado uma vez pelo conjurador' });
                                 }
                                 if (ev.evasionUsed) {
-                                    _saveDetailsRows.push({ l: 'Evasão (D&D 5e)', v: 'Ladino/Monge: sucesso = 0 dano; falha = metade do dano' });
+                                    _saveDetailsRows.push({ l: 'Evasão', v: 'Ladino/Monge: sucesso = 0 dano; falha = metade do dano' });
                                 }
                                 if (ev.potentCantripUsed) {
                                     _saveDetailsRows.push({ l: 'Truque Potente', v: 'Sucesso no TR ainda sofre metade do dano' });
@@ -56237,7 +56237,7 @@ async function __combatAnimateOneEvent(ev) {
                                     _saveDetailsRows.push({ l: 'Dobrar a Sorte', v: 'Feiticeiro gastou feitiçaria e reação para alterar o TR ' });
                                 }
                                 if (ev.hasMagicResistance) {
-                                    _saveDetailsRows.push({ l: 'Resistência à Magia', v: 'Vantagem nos testes de resistência contra magias (MM p. 11)' });
+                                    _saveDetailsRows.push({ l: 'Resistência à Magia', v: 'Vantagem nos testes de resistência contra magias' });
                                 }
 
                                 return {
@@ -56295,7 +56295,7 @@ async function __combatAnimateOneEvent(ev) {
                             var _dtLabel = _dtInfo ? (' (' + _dtInfo.ico + ' ' + _dtInfo.lb + ')') : '';
                             var _tacticalPills = [];
                             if (ev.crit) {
-                                _tacticalPills.push('<span class="dmg-pill dmg-pill--crit">💥 Crítico Natural (D&D 5e)</span>');
+                                _tacticalPills.push('<span class="dmg-pill dmg-pill--crit">✦ Crítico Natural</span>');
                             } else if (ev.d20 === 1) {
                                 _tacticalPills.push('<span class="dmg-pill dmg-pill--crit">Falha Crítica (Nat 1)</span>');
                             }
@@ -56996,7 +56996,7 @@ async function __combatAnimateOneEvent(ev) {
                                     ],
                                     details: {
                                         rows: [
-                                            { l: 'Regra D&D 5e', v: 'Salvaguarda contra a Morte ao iniciar turno com 0 PV' },
+                                            { l: 'Mecânica', v: 'Salvaguarda contra a Morte ao iniciar turno com 0 PV' },
                                             { l: 'Sucesso', v: 'Rolagem de 10 ou mais no d20. Três sucessos estabilizam o aventureiro com 0 PV.' },
                                             { l: 'Falha', v: 'Rolagem de 9 ou menos no d20. Três falhas causam a morte definitiva.' },
                                             { l: 'Extremos Críticos', v: '1 natural = 2 falhas imediatas; 20 natural = recupera 1 PV e recobra a consciência.' },

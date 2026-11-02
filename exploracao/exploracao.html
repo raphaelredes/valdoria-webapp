@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-11-02T02:03:51Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-11-02T23:08:30Z - do not edit directly, edit source -->
 
 
 
@@ -17707,7 +17707,7 @@ window.__onIntroTap = function() {
 
       </div>
 
-      <div class="hud-row" title="Exaustão (D&D 5e, 0 a 6)">
+      <div class="hud-row" title="Níveis de Exaustão (0 a 6)">
 
         <img class="hud-ico" src="../shared/img/ui/stat-exhaustion.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
 
@@ -18549,7 +18549,7 @@ window.__onIntroTap = function() {
 
           <h2 class="epm-title">Formas de Viajar</h2>
 
-          <span class="epm-sub">Diretrizes de Marcha e Ritmo (D&D 5e)</span>
+          <span class="epm-sub">Diretrizes de Marcha e Ritmo</span>
 
         </div>
 
@@ -86317,7 +86317,7 @@ function rollBlindPerceptionCheck(ev, onDone) {
 
     var modSign = totalMod >= 0 ? '+' : '';
 
-    formula.innerHTML = '<div style="font-family:var(--v-font-display,\'Cinzel\'),serif; font-size:15px; color:var(--v-gold,#c4953a); margin-bottom:4px;">TESTE DE SENTIDOS &middot; D&D 5e</div>' +
+    formula.innerHTML = '<div style="font-family:var(--v-font-display,\'Cinzel\'),serif; font-size:15px; color:var(--v-gold,#c4953a); margin-bottom:4px;">TESTE DE SENTIDOS</div>' +
 
                         '<div style="font-size:14px; color:var(--v-text,#e0d8c3);">' +
 
@@ -96265,7 +96265,7 @@ function _openCartLocationPopup(biome){
   var bestiaryInfo = (window.CartShared && CartShared.getBiomeBestiaryThreats) ? CartShared.getBiomeBestiaryThreats(biome.biome || biome.key) : null;
   var bestiaryHtml = (bestiaryInfo && !biome.isOrigin && biome.tier > 0)
     ? '<div class="clp-bestiary-card" style="margin:4px 0 6px;text-align:left;background:rgba(25,15,15,0.7);padding:5px 8px;border-radius:4px;border:1px solid rgba(248,113,113,0.3);">'
-    + '  <div style="font-size:11px;color:#f87171;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">⚔️ FAUNA & BESTIÁRIO REGIONAL (D&D 5e):</div>'
+    + '  <div style="font-size:11px;color:#f87171;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">◆ FAUNA & BESTIÁRIO REGIONAL:</div>'
     + '  <div style="font-size:11px;color:#fca5a5;line-height:1.35;">'
     + '    • <b>Ameaças Típicas:</b> ' + bestiaryInfo.threats.join(', ') + '<br>'
     + '    • <b>Predador Alfa:</b> <span style="color:#ffd700;font-weight:700;">' + bestiaryInfo.apex + '</span><br>'
@@ -96323,7 +96323,7 @@ function _openCartLocationPopup(biome){
     + (rec ? '<div class="clp-meta"><b>Nível Sugerido:</b> ' + rec + '<br><b>Avaliação de Ameaça:</b> ' + threatBadge + '<br><span style="font-size:11.5px;color:#d2be90;font-style:italic;">' + stanceTip + '</span><br><b>Risco de Emboscada:</b> <span id="clp-risk-badge" style="font-weight:700;color:' + encounterRisk.color + ';">' + encounterRisk.label + '</span><br><b>Bioma:</b> ' + biomePT + ' · <b>Distância:</b> ~' + distMilhas + ' milhas (<span id="clp-meta-hours">~' + horasViagem + 'h de marcha</span>)</div>' : '')
     + weatherHtml
     + (isCurrent && typeof _buildPointcrawlCurrentNodeActionsHtml === 'function' ? _buildPointcrawlCurrentNodeActionsHtml(biome) : '')
-    + '<details class="clp-compendium-drawer" style="display:none;"><summary>Compêndio Geomorfológico, Sinais & Bivaques D&D 5e (330 Fases)</summary></details>'
+    + '<details class="clp-compendium-drawer" style="display:none;"><summary>Compêndio Geomorfológico, Sinais & Bivaques dos Ermos</summary></details>'
     + '</div>'
     + '<div class="clp-buttons">'
     + (isCurrent
@@ -96768,7 +96768,7 @@ function _openCartLocationPopup(biome){
         var forInfoR = CartShared.calcForageYieldCheck(3, biome.key || biome.biome || 'plains', { pace: window._cartSelectedPace || 'normal' });
         var hazInfoR = CartShared.getWildernessHazardDetails ? CartShared.getWildernessHazardDetails(biome.key || biome.biome || 'plains') : null;
         var compInfoR = (CartShared.calcForageComplication && forInfoR.allowedByPace) ? CartShared.calcForageComplication(biome.key || biome.biome || 'plains', 8, { hasHerbalismKit: true }) : null;
-        synCardR.innerHTML = '  <div style="font-size:11px;font-family:Cinzel,serif;font-weight:700;color:#e9d5ff;margin-bottom:2px;">✨ SINERGIA DE MARCHA & FORRAGEAMENTO (D&D 5e):</div>'
+        synCardR.innerHTML = '  <div style="font-size:11px;font-family:Cinzel,serif;font-weight:700;color:#e9d5ff;margin-bottom:2px;">◆ SINERGIA DE MARCHA & FORRAGEAMENTO:</div>'
           + '  <div>• <b>Função Ativa:</b> ' + (synR.synergies.length ? synR.synergies[0].title + ' (' + synR.synergies[0].benefit + ')' : 'Sentinela') + '</div>'
           + '  <div>• <b>Coleta nos Ermos:</b> <span style="color:' + forInfoR.color + ';">' + forInfoR.label + '</span> · ' + (forInfoR.allowedByPace ? forInfoR.expectedFoodLbs + ' lbs caça/dia' : 'Bloqueado') + '</div>'
           + (hazInfoR ? ('  <div>• <b>Perigo Natural:</b> <span style="color:' + hazInfoR.color + ';">' + hazInfoR.name + '</span> (' + hazInfoR.dcCheck + ')</div>') : '')
@@ -96813,11 +96813,11 @@ function _openCartLocationPopup(biome){
 
       if (paceNote) {
         if (pType === 'stealth') {
-          paceNote.textContent = '🐾 Marcha Furtiva (18 milhas/dia · ~' + curHours + 'h): Comitiva avança em sigilo (+50% tempo). Permite surpreender inimigos ou evitar emboscadas; vantagem em testes de Sobrevivência para forragear suprimentos.';
+          paceNote.textContent = 'Marcha Furtiva (18 milhas/dia · ~' + curHours + 'h): Comitiva avança em sigilo (+50% tempo). Permite surpreender inimigos ou evitar emboscadas; vantagem em testes de Sobrevivência para forragear suprimentos.';
         } else if (pType === 'fast') {
-          paceNote.textContent = '⚡ Marcha Rápida (30 milhas/dia · ~' + curHours + 'h): Marcha acelerada (-25% tempo), porém comitiva sofre penalidade de -5 na Percepção Passiva D&D 5e (maior risco de emboscadas).';
+          paceNote.textContent = 'Marcha Rápida (30 milhas/dia · ~' + curHours + 'h): Marcha acelerada (-25% tempo), porém comitiva sofre penalidade de -5 na Percepção Passiva (maior risco de emboscadas).';
         } else {
-          paceNote.textContent = '🚶 Ritmo Normal (24 milhas/dia · ~' + curHours + 'h): Equilíbrio canônico D&D 5e entre velocidade de deslocamento e prontidão tática passiva.';
+          paceNote.textContent = 'Ritmo Normal (24 milhas/dia · ~' + curHours + 'h): Equilíbrio entre velocidade de deslocamento e prontidão tática passiva.';
         }
       }
       var synCardP = el.querySelector('#clp-synergy-card');
@@ -96826,7 +96826,7 @@ function _openCartLocationPopup(biome){
         var forInfoP = CartShared.calcForageYieldCheck(3, biome.key || biome.biome || 'plains', { pace: pType });
         var hazInfoP = CartShared.getWildernessHazardDetails ? CartShared.getWildernessHazardDetails(biome.key || biome.biome || 'plains') : null;
         var compInfoP = (CartShared.calcForageComplication && forInfoP.allowedByPace) ? CartShared.calcForageComplication(biome.key || biome.biome || 'plains', 8, { hasHerbalismKit: true }) : null;
-        synCardP.innerHTML = '  <div style="font-size:11px;font-family:Cinzel,serif;font-weight:700;color:#e9d5ff;margin-bottom:2px;">✨ SINERGIA DE MARCHA & FORRAGEAMENTO (D&D 5e):</div>'
+        synCardP.innerHTML = '  <div style="font-size:11px;font-family:Cinzel,serif;font-weight:700;color:#e9d5ff;margin-bottom:2px;">◆ SINERGIA DE MARCHA & FORRAGEAMENTO:</div>'
           + '  <div>• <b>Função Ativa:</b> ' + (synP.synergies.length ? synP.synergies[0].title + ' (' + synP.synergies[0].benefit + ')' : 'Sentinela') + '</div>'
           + '  <div>• <b>Coleta nos Ermos:</b> <span style="color:' + forInfoP.color + ';">' + forInfoP.label + '</span> · ' + (forInfoP.allowedByPace ? forInfoP.expectedFoodLbs + ' lbs caça/dia' : 'Bloqueado') + '</div>'
           + (hazInfoP ? ('  <div>• <b>Perigo Natural:</b> <span style="color:' + hazInfoP.color + ';">' + hazInfoP.name + '</span> (' + hazInfoP.dcCheck + ')</div>') : '')
@@ -97379,7 +97379,7 @@ function _buildPointcrawlCurrentNodeActionsHtml(biome) {
     return '<button type="button" class="clp-btn" data-clp="enter-dungeon" data-dg-id="' + dg.id + '" '
       + 'style="width:100%;margin-top:6px;background:linear-gradient(180deg,#2c1a16,#1a100d);border:1px solid rgba(196,100,80,0.55);color:#fca5a5;font-family:Cinzel,serif;font-size:11.5px;font-weight:700;padding:8px 10px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">'
       + '<span>◆ Incursão: ' + dg.name + '</span>'
-      + '<span style="font-size:11px;background:rgba(0,0,0,0.45);padding:2px 6px;border-radius:3px;color:#ffd685;">' + (isAaa ? '5 Câmaras D&D 5e' : 'Explorar') + '</span>'
+      + '<span style="font-size:11px;background:rgba(0,0,0,0.45);padding:2px 6px;border-radius:3px;color:#ffd685;">' + (isAaa ? '5 Câmaras' : 'Explorar') + '</span>'
       + '</button>';
   }).join('');
 
@@ -97754,14 +97754,14 @@ function _openPointcrawlDungeonDelver(dgId) {
 
   var catLabels = {
     combat: { ico: '◆', tag: 'Guarnição / Sentinelas', color: '#fca5a5' },
-    trap: { ico: '◆', tag: 'Perigo / Armadilha D&D 5e', color: '#fdba74' },
+    trap: { ico: '◆', tag: 'Perigo / Armadilha', color: '#fdba74' },
     discovery: { ico: '◆', tag: 'Santuário / Bivaque Seguro', color: '#86efac' },
     mystery: { ico: '◆', tag: 'Enigma / Relicário Antigo', color: '#d8b4fe' },
     boss: { ico: '◆', tag: 'Câmara do Chefe', color: '#ffd700' }
   };
 
   var chambersHtml = dgMap.dungeonEncounters.map(function(enc, idx){
-    var cMeta = catLabels[enc.category] || { ico: '🧭', tag: 'Câmara', color: '#d2be90' };
+    var cMeta = catLabels[enc.category] || { ico: '◆', tag: 'Câmara', color: '#d2be90' };
     var done = !!(typeof S !== 'undefined' && S && S._dungeonEncountersTriggered && S._dungeonEncountersTriggered[enc.id] && !enc.repeatable);
     return '<div class="pcd-chamber-card" data-enc-idx="' + idx + '" style="background:rgba(24,18,12,0.92);border:1px solid ' + (done ? 'rgba(74,222,128,0.45)' : 'rgba(196,149,58,0.45)') + ';border-radius:6px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;">'
       + '<div style="text-align:left;flex:1;">'
@@ -97789,7 +97789,7 @@ function _openPointcrawlDungeonDelver(dgId) {
     + '    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,8,6,0.25),rgba(16,11,7,0.94));"></div>'
     + '    <button type="button" id="pcd-close-btn" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.65);border:1px solid #c4953a;color:#f4d49a;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;">✕</button>'
     + '    <div style="position:absolute;bottom:8px;left:12px;right:12px;text-align:left;">'
-    + '      <div style="font-size:11px;color:#ffd700;font-family:Cinzel,serif;font-weight:700;letter-spacing:1px;">◆ INCURSÃO POINTCRAWL EM MASMORRA</div>'
+    + '      <div style="font-size:11px;color:#ffd700;font-family:Cinzel,serif;font-weight:700;letter-spacing:1px;">◆ INCURSÃO EM MASMORRA</div>'
     + '      <div style="font-family:Cinzel,serif;font-size:15px;color:#fff;font-weight:700;text-shadow:0 2px 6px #000;">' + dgMap.name + '</div>'
     + '    </div>'
     + '  </div>'
@@ -97959,7 +97959,7 @@ function openCartography() {
     + '      <div class="cam-header">'
     + '        <div style="display:flex;align-items:center;gap:6px;">'
     + '          '
-    + '          <h3 style="margin:0;font-size:13px;color:#f4d49a;font-family:Cinzel,serif;">Guia do Andarilho (Regras D&D 5e)</h3>'
+    + '          <h3 style="margin:0;font-size:13px;color:#f4d49a;font-family:Cinzel,serif;">Guia do Andarilho (Regras & Mecânica)</h3>'
     + '        </div>'
     + '        <button class="cam-close" id="xcart-guide-close-btn" type="button">✕</button>'
     + '      </div>'
@@ -97983,15 +97983,15 @@ function openCartography() {
     + '          <p style="margin:2px 0;">O limite de marcha contínua segura é de 8 horas por dia. Cada hora adicional exige Salvaguarda de Constituição (CD 10 + 1 por hora além de 8). Em caso de falha, o aventureiro sofre 1 Nível de Exaustão. Fracionar a rota com acampamentos de Descanso Longo (8h) anula a penalidade.</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#fde047;font-size:11.5px;margin-bottom:4px;">🐎 MODOS DE TRANSPORTE & CARAVANAS</div>'
-    + '          <p style="margin:2px 0;"><b>🚶 A Pé:</b> 3 milhas/hora padrão. Mochilas e armas prontas.<br><b>🐎 Montaria:</b> +33% de velocidade em estradas (4 milhas/h). Reduz o tempo total de viagem.<br><b>🛒 Caravana:</b> 3 milhas/h com carruagens fortificadas. Reduz em -10% o risco de emboscadas noturnas no acampamento.</p>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#fde047;font-size:11.5px;margin-bottom:4px;">MODOS DE TRANSPORTE & CARAVANAS</div>'
+    + '          <p style="margin:2px 0;"><b>A Pé:</b> 3 milhas/hora padrão. Mochilas e armas prontas.<br><b>Montaria:</b> +33% de velocidade em estradas (4 milhas/h). Reduz o tempo total de viagem.<br><b>Caravana:</b> 3 milhas/h com carruagens fortificadas. Reduz em -10% o risco de emboscadas noturnas no acampamento.</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
     + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#c084fc;font-size:11.5px;margin-bottom:4px;">ATIVIDADES & FUNÇÕES DE VIAGEM</div>'
     + '          <p style="margin:2px 0;"><b>Sentinela:</b> Alerta máximo (+5 Percepção Passiva); impede surpresas em emboscadas.<br><b>Guia:</b> Evita desvios sob névoas densas e tempestades.<br><b>Caçador:</b> Colhe comida e água silvestre sem gastar rações em marcha normal/lenta.<br><b>Cartógrafo:</b> Mapeia estradas e detalha anotações táticas de viagem.</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#ffd700;font-size:11.5px;margin-bottom:4px;">RÉGUA CARTOGRÁFICA & ASTROLÁBIO DE NAVEGAÇÃO (D&D 5e)</div>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#ffd700;font-size:11.5px;margin-bottom:4px;">RÉGUA CARTOGRÁFICA & ASTROLÁBIO DE NAVEGAÇÃO</div>'
     + '          <p style="margin:2px 0;"><b>Régua & Azimute (Tecla X):</b> Ativa a régua de medição tática. Ao mover o cursor ou clicar em nós, calcula a distância em <i>Milhas, Léguas e Quilômetros</i>, o rumo nos 16 ventos náuticos e a duração da marcha a pé, a cavalo ou de caravana.<br><b>Rosa dos Ventos Dinâmica:</b> O astrolábio no canto superior projeta um ponteiro dourado vivo em direção ao destino selecionado.<br><b>Copiar Itinerário:</b> No popup de viagem, o botão <i>Copiar Rota</i> gera um manifesto de expedição formatado em texto para a prancheta.</p>'
     + '        </div>'
     + '      </div>'
@@ -101829,7 +101829,7 @@ function _showTbConditionPopup(kind) {
 
     [
 
-      'Mês de geadas severas e noites prematuras (DMG p. 110)',
+      'Mês de geadas severas e noites prematuras',
 
       'Forragear alimentos tem CD +2 pela escassez e congelamento da vegetação',
 
@@ -103603,26 +103603,26 @@ function _showExploreHelp(explicitCtx) {
   var GUIDES = {
     cartografia: {
       title: 'Guia da Tela — Cartografia & Marcha',
-      section: 'Navegação pelos Ermos (D&D 5e)',
+      section: 'Navegação pelos Ermos',
       tips: [
         '<b>Mapa Continental vs Regional:</b> toque em uma província para abrir o mapa regional dedicado em alta definição ou use os chips no topo para alternar rapidamente.',
         '<b>Inspecionar &amp; Viajar:</b> toque em qualquer pino de localidade para abrir o painel com Nível de Desafio (ND), distância em milhas, clima e opções de viagem.',
-        '<b>🧭 Explorar Local Atual:</b> toque no pino onde sua comitiva está (ou no botão <b>🧭 Explorar Local</b> na barra inferior) para investigar os arredores, coletar recursos e descobrir incursões ocultas (teste de Investigação/Percepção CD 12).',
-        '<b>📏 Régua &amp; Marcos:</b> use os botões do topo para medir rotas em milhas/horas ou saltar diretamente para marcos e santuários já descobertos.'
+        '<b>Explorar Local Atual:</b> toque no pino onde sua comitiva está (ou no botão <b>Explorar Local</b> na barra inferior) para investigar os arredores, coletar recursos e descobrir incursões ocultas (teste de Investigação/Percepção CD 12).',
+        '<b>Régua &amp; Marcos:</b> use os botões do topo para medir rotas em milhas/horas ou saltar diretamente para marcos e santuários já descobertos.'
       ]
     },
     location: {
       title: 'Guia da Tela — Painel de Localidade',
       section: 'Decisões no Ponto de Interesse',
       tips: [
-        '<b>🔍 Explorar Arredores:</b> realiza patrulha e investigação ativa no local. É assim que você descobre masmorras e covis secretos escondidos na região!',
-        '<b>⚔️ Nível de Desafio (ND):</b> confira sempre a faixa de perigo do local antes de marchar ou adentrar uma incursão.',
-        '<b>🚶 Iniciar Viagem:</b> selecione o ritmo de marcha (Furtivo, Normal ou Rápido) e confira o consumo de rações antes de partir.'
+        '<b>Explorar Arredores:</b> realiza patrulha e investigação ativa no local. É assim que você descobre masmorras e covis secretos escondidos na região!',
+        '<b>Nível de Desafio (ND):</b> confira sempre a faixa de perigo do local antes de marchar ou adentrar uma incursão.',
+        '<b>Iniciar Viagem:</b> selecione o ritmo de marcha (Furtivo, Normal ou Rápido) e confira o consumo de rações antes de partir.'
       ]
     },
     event: {
       title: 'Guia da Tela — Encontro & Evento Narrativo',
-      section: 'Testes de Perícia & Escolhas D&D 5e',
+      section: 'Testes de Perícia & Escolhas',
       tips: [
         '<b>Escolhas com Perícia (d20):</b> cada opção indica o atributo ou perícia testada (ex.: Sobrevivência, Furtividade, Persuasão, Atletismo) e a chance estimada de sucesso.',
         '<b>Coesão em Encontros Hostis:</b> tentar enganar, intimidar ou passar furtivamente por inimigos armados exige superar a CD. Em caso de falha contra predadores ou bandidos, prepare-se para enfrentar o combate ou romper em fuga sob ataque!',
@@ -103633,7 +103633,7 @@ function _showExploreHelp(explicitCtx) {
       title: 'Guia da Tela — Acampamento & Bivaque',
       section: 'Descanso Curto, Longo & Vigília',
       tips: [
-        '<b>Descanso Curto (1h):</b> gaste seus <b>Dados de Vida (Hit Dice)</b> para enfaixar ferimentos e recuperar PV sem precisar montar acampamento pesado.',
+        '<b>Descanso Curto (1h):</b> gaste seus <b>Dados de Vida</b> para enfaixar ferimentos e recuperar PV sem precisar montar acampamento pesado.',
         '<b>Descanso Longo (8h):</b> consome 1 Ração de Viagem, restaura PV e PM ao máximo e recupera metade dos Dados de Vida.',
         '<b>Vigília &amp; Emboscadas:</b> acampar em regiões perigosas pode atrair predadores noturnos. Designar um Sentinela reduz drasticamente o risco de surpresa.'
       ]
@@ -103660,17 +103660,17 @@ function _showExploreHelp(explicitCtx) {
       title: 'Guia da Tela — Ficha na Exploração',
       section: 'Vitalidade, Dados de Vida & Exaustão',
       tips: [
-        '<b>Dados de Vida (Hit Dice):</b> sua reserva de recuperação para Descansos Curtos no acampamento.',
+        '<b>Dados de Vida:</b> sua reserva de recuperação para Descansos Curtos no acampamento.',
         '<b>Níveis de Exaustão (0 a 6):</b> marchas forçadas sem descanso ou falta de rações acumulam exaustão, aplicando penalidades em testes e velocidade.',
         '<b>Modificadores de Atributo:</b> somados automaticamente às suas rolagens de d20 nos eventos dos ermos.'
       ]
     },
     pointcrawl: {
       title: 'Guia da Tela — Exploração nos Ermos',
-      section: 'Sobrevivência & Descoberta D&D 5e',
+      section: 'Sobrevivência & Descoberta',
       tips: [
-        '<b>Jornada Pointcrawl D&amp;D 5e:</b> toque em qualquer localidade ou marco no Mapa Regional para inspecionar rotas, clima, perigos naturais e iniciar a marcha estratégica entre regiões.',
-        '<b>Explorar Região Atual:</b> toque no pino onde a comitiva está (ou em <b>🧭 Explorar Local</b>) para investigar trilhas, descobrir masmorras ocultas, forragear suprimentos e montar bivaque.',
+        '<b>Jornada pelos Ermos:</b> toque em qualquer localidade ou marco no Mapa Regional para inspecionar rotas, clima, perigos naturais e iniciar a marcha estratégica entre regiões.',
+        '<b>Explorar Região Atual:</b> toque no pino onde a comitiva está (ou em <b>Explorar Local</b>) para investigar trilhas, descobrir masmorras ocultas, forragear suprimentos e montar bivaque.',
         '<b>Acampar &amp; Comitiva:</b> use os botões inferiores para montar acampamento (Descanso Curto/Longo) ou ajustar o ritmo de marcha e iluminação.'
       ]
     }

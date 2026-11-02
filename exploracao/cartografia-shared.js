@@ -21099,7 +21099,7 @@
 
       saveType: 'Sabedoria (Percepção)',
 
-      obscurementPenalty: 'Visibilidade limitada a 3 metros (Heavy Obscurement PHB p. 183); ataques à distância com desvantagem.',
+      obscurementPenalty: 'Visibilidade limitada a 3 metros (área fortemente obscurecida); ataques à distância com desvantagem.',
 
       pioneerMitigation: 'Batedores amarrados por corda de guia de 6 metros avançam em fila indiana sem risco de separação.',
 
@@ -82107,7 +82107,7 @@
 
         + '<span>◆ Incursão: ' + dg.name + '</span>'
 
-        + '<span style="font-size:11px;background:rgba(0,0,0,0.45);padding:2px 6px;border-radius:3px;color:#ffd685;">' + (isAaa ? '5 Câmaras D&D 5e' : 'Explorar') + '</span>'
+        + '<span style="font-size:11px;background:rgba(0,0,0,0.45);padding:2px 6px;border-radius:3px;color:#ffd685;">' + (isAaa ? '5 Câmaras' : 'Explorar') + '</span>'
 
         + '</button>';
 

@@ -18371,7 +18371,7 @@ var TUTORIAL_STEPS = [
     placement: 'top',
     expandFooter: true,
     title: 'Atalhos Rápidos',
-    description: 'Barra inferior com <b>Mochila</b>, <b>Ficha</b> de regras D&D 5e, <b>Hall</b> e o botão de <b>Ajuda (?)</b> para abrir o guia explicativo de cada tela do jogo.'
+    description: 'Barra inferior com <b>Mochila</b>, <b>Ficha</b> do aventureiro, <b>Hall</b> e o botão de <b>Ajuda (?)</b> para abrir o guia explicativo de cada tela do jogo.'
   },
   {
     selector: null,  // closing slide
@@ -34612,7 +34612,7 @@ var SCREEN_TOUR_STEPS = {
       placement: 'top',
       expandFooter: true,
       title: 'Atalhos do Rodapé',
-      description: 'Acesso imediato à sua <b>Mochila</b>, <b>Ficha</b> de atributos D&D 5e, <b>Hall</b> de aventureiros e ao botão de <b>Ajuda (?)</b> para o guia de cada tela.'
+      description: 'Acesso imediato à sua <b>Mochila</b>, <b>Ficha</b> de atributos, <b>Hall</b> de aventureiros e ao botão de <b>Ajuda (?)</b> para o guia de cada tela.'
     },
     {
       selector: null,
@@ -52450,7 +52450,7 @@ var HELP_TEXTS_SYSTEMS = {
 
     'corvus': '\\n<b>TENDA DE CORVUS - GUIA RÁPIDO</b>\\n\\nO Mestre Cartógrafo guarda as chaves para desbravar o continente:\\n\\n<b>Aquisição de Mapas Regionais</b>\\n• Comprar o mapa de uma província destrava suas rotas e pontos de interesse na tela de Cartografia\\n• <b>Mapas Comuns</b>: disponíveis por Valdoritas (Planícies, Floresta, Deserto)\\n• <b>Mapas Avançados</b>: exigem experiência de exploração ou testes de Inteligência/Investigação\\n\\n<i>Dica</i>: Sem o mapa adequado, marchar para regiões desconhecidas é muito mais arriscado!\\n',
 
-    'npc_dialogue': '\\n<b>DIÁLOGO COM HABITANTE - GUIA RÁPIDO</b>\\n\\nSuas palavras têm peso real nas ruas de Valdoria:\\n\\n<b>Opções de Resposta & Perícias</b>\\n• Algumas escolhas acionam testes D&D 5e de <b>Persuasão</b>, <b>Intuição</b>, <b>Enganação</b> ou <b>Intimidação</b>\\n• Respostas respeitosas e atentas fortalecem seu vínculo com o morador\\n\\n<b>Rumores & Ganchos de Aventura</b>\\n• Preste atenção aos nomes e lugares citados — eles frequentemente revelam tesouros ou fraquezas de chefes\\n\\n<i>Dica</i>: Você pode rever conversas importantes a qualquer momento no Histórico de Diálogos!\\n',
+    'npc_dialogue': '\\n<b>DIÁLOGO COM HABITANTE - GUIA RÁPIDO</b>\\n\\nSuas palavras têm peso real nas ruas de Valdoria:\\n\\n<b>Opções de Resposta & Perícias</b>\\n• Algumas escolhas acionam testes de <b>Persuasão</b>, <b>Intuição</b>, <b>Enganação</b> ou <b>Intimidação</b>\\n• Respostas respeitosas e atentas fortalecem seu vínculo com o morador\\n\\n<b>Rumores & Ganchos de Aventura</b>\\n• Preste atenção aos nomes e lugares citados — eles frequentemente revelam tesouros ou fraquezas de chefes\\n\\n<i>Dica</i>: Você pode rever conversas importantes a qualquer momento no Histórico de Diálogos!\\n',
 };
 
 var MARKET_WOUNDED_GREETINGS = {
@@ -71984,41 +71984,41 @@ function renderCartographyCanvas(el){
     + '    <div class="cam-box" style="max-width:440px;">'
     + '      <div class="cam-header">'
     + '        <div style="display:flex;align-items:center;gap:6px;">'
-    + '          <span style="font-size:16px;">📖</span>'
-    + '          <h3 style="margin:0;font-size:13px;color:#f4d49a;font-family:Cinzel,serif;">Guia do Andarilho (Regras D&D 5e)</h3>'
+    + '          '
+    + '          <h3 style="margin:0;font-size:13px;color:#f4d49a;font-family:Cinzel,serif;">Guia do Andarilho (Regras & Mecânica)</h3>'
     + '        </div>'
     + '        <button class="cam-close" id="cart-guide-close-btn" type="button">✕</button>'
     + '      </div>'
     + '      <div class="cam-grid" style="max-height:58vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:12px;text-align:left;font-size:11px;color:#d2be90;line-height:1.5;">'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#fde047;font-size:11.5px;margin-bottom:4px;">🚶 RITMOS DE MARCHA (PHB p. 181-182)</div>'
-    + '          <p style="margin:2px 0;"><b>🐾 Furtivo (18 milhas/dia):</b> -33% velocidade, +50% tempo. Permite usar Furtividade para surpreender inimigos ou evitar emboscadas; vantagem em Sobrevivência para forragear alimentos nos ermos.</p>'
-    + '          <p style="margin:2px 0;"><b>🚶 Normal (24 milhas/dia):</b> Ritmo canônico de comitiva. Velocidade equilibrada sem penalidades na Percepção Passiva.</p>'
-    + '          <p style="margin:2px 0;"><b>⚡ Rápido (30 milhas/dia):</b> +33% velocidade, -25% tempo. A comitiva corre em marcha forçada; penalidade de -5 na Percepção Passiva (maior chance de emboscadas).</p>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#fde047;font-size:11.5px;margin-bottom:4px;">RITMOS DE MARCHA</div>'
+    + '          <p style="margin:2px 0;"><b>Furtivo (18 milhas/dia):</b> -33% velocidade, +50% tempo. Permite usar Furtividade para surpreender inimigos ou evitar emboscadas; vantagem em Sobrevivência para forragear alimentos nos ermos.</p>'
+    + '          <p style="margin:2px 0;"><b>Normal (24 milhas/dia):</b> Ritmo canônico de comitiva. Velocidade equilibrada sem penalidades na Percepção Passiva.</p>'
+    + '          <p style="margin:2px 0;"><b>Rápido (30 milhas/dia):</b> +33% velocidade, -25% tempo. A comitiva corre em marcha forçada; penalidade de -5 na Percepção Passiva (maior chance de emboscadas).</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#93c5fd;font-size:11.5px;margin-bottom:4px;">🌙 VIAGEM NOTURNA & VISÃO NO ESCURO (PHB p. 183)</div>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#93c5fd;font-size:11.5px;margin-bottom:4px;">VIAGEM NOTURNA & VISÃO NO ESCURO</div>'
     + '          <p style="margin:2px 0;">O sol se põe e a escuridão cobre as estradas. Sem tochas ativas ou Visão no Escuro ancestral (elfos, anões, meio-orcs), a comitiva sofre <b>Desvantagem</b> em testes de Percepção contra emboscadas na escuridão.</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#86efac;font-size:11.5px;margin-bottom:4px;">🍖 SUPRIMENTOS & ACAMPAMENTOS (PHB p. 185)</div>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#86efac;font-size:11.5px;margin-bottom:4px;">SUPRIMENTOS & ACAMPAMENTOS</div>'
     + '          <p style="margin:2px 0;">Jornadas acima de 8 horas exigem paradas de Descanso Longo (8h) em acampamentos na estrada e 1 Ração de Viagem por aventureiro. Em biomas férteis, testes de Sobrevivência permitem caçar e colher água potável.</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#f87171;font-size:11.5px;margin-bottom:4px;">⚠️ MARCHA FORÇADA & EXAUSTÃO (PHB p. 181)</div>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#f87171;font-size:11.5px;margin-bottom:4px;">MARCHA FORÇADA & EXAUSTÃO</div>'
     + '          <p style="margin:2px 0;">O limite de marcha contínua segura é de 8 horas por dia. Cada hora adicional exige Salvaguarda de Constituição (CD 10 + 1 por hora além de 8). Em caso de falha, o aventureiro sofre 1 Nível de Exaustão. Fracionar a rota com acampamentos de Descanso Longo (8h) anula a penalidade.</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#fde047;font-size:11.5px;margin-bottom:4px;">🐎 MODOS DE TRANSPORTE & CARAVANAS (PHB p. 157)</div>'
-    + '          <p style="margin:2px 0;"><b>🚶 A Pé:</b> 3 milhas/hora padrão. Mochilas e armas prontas.<br><b>🐎 Montaria:</b> +33% de velocidade em estradas (4 milhas/h). Reduz o tempo total de viagem.<br><b>🛒 Caravana:</b> 3 milhas/h com carruagens fortificadas. Reduz em -10% o risco de emboscadas noturnas no acampamento.</p>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#fde047;font-size:11.5px;margin-bottom:4px;">MODOS DE TRANSPORTE & CARAVANAS</div>'
+    + '          <p style="margin:2px 0;"><b>A Pé:</b> 3 milhas/hora padrão. Mochilas e armas prontas.<br><b>Montaria:</b> +33% de velocidade em estradas (4 milhas/h). Reduz o tempo total de viagem.<br><b>Caravana:</b> 3 milhas/h com carruagens fortificadas. Reduz em -10% o risco de emboscadas noturnas no acampamento.</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#c084fc;font-size:11.5px;margin-bottom:4px;">🧭 ATIVIDADES & FUNÇÕES DE VIAGEM (PHB p. 182)</div>'
-    + '          <p style="margin:2px 0;"><b>👁️ Sentinela:</b> Alerta máximo (+5 Percepção Passiva); impede surpresas em emboscadas.<br><b>🧭 Guia:</b> Evita desvios sob névoas densas e tempestades.<br><b>🌿 Caçador:</b> Colhe comida e água silvestre sem gastar rações em marcha normal/lenta.<br><b>📜 Cartógrafo:</b> Mapeia estradas e detalha anotações táticas de viagem.</p>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#c084fc;font-size:11.5px;margin-bottom:4px;">ATIVIDADES & FUNÇÕES DE VIAGEM</div>'
+    + '          <p style="margin:2px 0;"><b>Sentinela:</b> Alerta máximo (+5 Percepção Passiva); impede surpresas em emboscadas.<br><b>Guia:</b> Evita desvios sob névoas densas e tempestades.<br><b>Caçador:</b> Colhe comida e água silvestre sem gastar rações em marcha normal/lenta.<br><b>Cartógrafo:</b> Mapeia estradas e detalha anotações táticas de viagem.</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
-    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#ffd700;font-size:11.5px;margin-bottom:4px;">📏 RÉGUA CARTOGRÁFICA & ASTROLÁBIO DE NAVEGAÇÃO (D&D 5e)</div>'
-    + '          <p style="margin:2px 0;"><b>📏 Régua & Azimute (Tecla X):</b> Ativa a régua de medição tática. Ao mover o cursor ou clicar em nós, calcula a distância em <i>Milhas, Léguas e Quilômetros</i>, o rumo nos 16 ventos náuticos e a duração da marcha a pé, a cavalo ou de caravana.<br><b>🧭 Rosa dos Ventos Dinâmica:</b> O astrolábio no canto superior projeta um ponteiro dourado vivo em direção ao destino selecionado.<br><b>📋 Copiar Itinerário:</b> No popup de viagem, o botão <i>📋 Copiar Rota</i> gera um manifesto de expedição formatado em texto para a prancheta.</p>'
+    + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#ffd700;font-size:11.5px;margin-bottom:4px;">RÉGUA CARTOGRÁFICA & ASTROLÁBIO DE NAVEGAÇÃO</div>'
+    + '          <p style="margin:2px 0;"><b>Régua & Azimute (Tecla X):</b> Ativa a régua de medição tática. Ao mover o cursor ou clicar em nós, calcula a distância em <i>Milhas, Léguas e Quilômetros</i>, o rumo nos 16 ventos náuticos e a duração da marcha a pé, a cavalo ou de caravana.<br><b>Rosa dos Ventos Dinâmica:</b> O astrolábio no canto superior projeta um ponteiro dourado vivo em direção ao destino selecionado.<br><b>Copiar Itinerário:</b> No popup de viagem, o botão <i>Copiar Rota</i> gera um manifesto de expedição formatado em texto para a prancheta.</p>'
     + '        </div>'
     + '      </div>'
     + '    </div>'
@@ -74247,7 +74247,7 @@ function _showTiborTechnicalRules() {
       script: [
         {
           type: 'narration',
-          text: '<b>◆ Consumo Diário de Provisões:</b> Cada aventureiro necessita de 1 libra (1 ração seca) e 1 galão de água por dia de marcha contínua para manter seu rendimento normal (D&D 5e PHB p. 185).'
+          text: '<b>◆ Consumo Diário de Provisões:</b> Cada aventureiro necessita de 1 ração de viagem e 1 cantil cheio de água limpa por dia de marcha contínua para manter o vigor nas estradas.'
         },
         {
           type: 'narration',
@@ -74266,7 +74266,7 @@ function _showTiborTechnicalRules() {
         { id: 'back_to_shop', label: 'Comprar Provisões com Tibor', desc: 'Retornar à banca de Tibor para adquirir rações.' },
         { id: 'done', label: '↩ Concluir e Retornar', desc: 'Fechar o compêndio e retornar à expedição.' }
       ],
-      choicesTitle: 'Mecânicas Oficiais D&D 5e',
+      choicesTitle: 'Regras & Mecânica',
       choicesSubtitle: 'Consulta Técnica de Mesa Solicitada pelo Jogador',
       compact: true
     }, {
@@ -74981,7 +74981,7 @@ function _openCartLocationPopup(biome){
   var bestiaryInfo = (window.CartShared && CartShared.getBiomeBestiaryThreats) ? CartShared.getBiomeBestiaryThreats(biome.biome || biome.key) : null;
   var bestiaryHtml = (bestiaryInfo && !biome.isOrigin && biome.tier > 0)
     ? '<div class="clp-bestiary-card" style="margin:4px 0 6px;text-align:left;background:rgba(25,15,15,0.7);padding:5px 8px;border-radius:4px;border:1px solid rgba(248,113,113,0.3);">'
-    + '  <div style="font-size:11px;color:#f87171;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">⚔️ FAUNA & BESTIÁRIO REGIONAL (D&D 5e):</div>'
+    + '  <div style="font-size:11px;color:#f87171;font-family:Cinzel,serif;font-weight:700;margin-bottom:2px;">◆ FAUNA & BESTIÁRIO REGIONAL:</div>'
     + '  <div style="font-size:11px;color:#fca5a5;line-height:1.35;">'
     + '    • <b>Ameaças Típicas:</b> ' + bestiaryInfo.threats.join(', ') + '<br>'
     + '    • <b>Predador Alfa:</b> <span style="color:#ffd700;font-weight:700;">' + bestiaryInfo.apex + '</span><br>'
@@ -75407,7 +75407,7 @@ function _openCartLocationPopup(biome){
         var forInfoR = CartShared.calcForageYieldCheck(3, biome.key || biome.biome || 'plains', { pace: window._cartSelectedPace || 'normal' });
         var hazInfoR = CartShared.getWildernessHazardDetails ? CartShared.getWildernessHazardDetails(biome.key || biome.biome || 'plains') : null;
         var compInfoR = (CartShared.calcForageComplication && forInfoR.allowedByPace) ? CartShared.calcForageComplication(biome.key || biome.biome || 'plains', 8, { hasHerbalismKit: true }) : null;
-        synCardR.innerHTML = '  <div style="font-size:11px;font-family:Cinzel,serif;font-weight:700;color:#e9d5ff;margin-bottom:2px;">✨ SINERGIA DE MARCHA & FORRAGEAMENTO (D&D 5e):</div>'
+        synCardR.innerHTML = '  <div style="font-size:11px;font-family:Cinzel,serif;font-weight:700;color:#e9d5ff;margin-bottom:2px;">◆ SINERGIA DE MARCHA & FORRAGEAMENTO:</div>'
           + '  <div>• <b>Função Ativa:</b> ' + (synR.synergies.length ? synR.synergies[0].title + ' (' + synR.synergies[0].benefit + ')' : 'Sentinela') + '</div>'
           + '  <div>• <b>Coleta nos Ermos:</b> <span style="color:' + forInfoR.color + ';">' + forInfoR.label + '</span> · ' + (forInfoR.allowedByPace ? forInfoR.expectedFoodLbs + ' lbs caça/dia' : 'Bloqueado') + '</div>'
           + (hazInfoR ? ('  <div>• <b>Perigo Natural:</b> <span style="color:' + hazInfoR.color + ';">' + hazInfoR.name + '</span> (' + hazInfoR.dcCheck + ')</div>') : '')
@@ -75451,11 +75451,11 @@ function _openCartLocationPopup(biome){
 
       if (paceNote) {
         if (pType === 'stealth') {
-          paceNote.textContent = '🐾 Marcha Furtiva (18 milhas/dia · ~' + curHours + 'h): Comitiva avança em sigilo (+50% tempo). Permite surpreender inimigos ou evitar emboscadas; vantagem em testes de Sobrevivência para forragear suprimentos.';
+          paceNote.textContent = 'Marcha Furtiva (18 milhas/dia · ~' + curHours + 'h): Comitiva avança em sigilo (+50% tempo). Permite surpreender inimigos ou evitar emboscadas; vantagem em testes de Sobrevivência para forragear suprimentos.';
         } else if (pType === 'fast') {
-          paceNote.textContent = '⚡ Marcha Rápida (30 milhas/dia · ~' + curHours + 'h): Marcha acelerada (-25% tempo), porém comitiva sofre penalidade de -5 na Percepção Passiva D&D 5e (maior risco de emboscadas).';
+          paceNote.textContent = 'Marcha Rápida (30 milhas/dia · ~' + curHours + 'h): Marcha acelerada (-25% tempo), porém comitiva sofre penalidade de -5 na Percepção Passiva (maior risco de emboscadas).';
         } else {
-          paceNote.textContent = '🚶 Ritmo Normal (24 milhas/dia · ~' + curHours + 'h): Equilíbrio canônico D&D 5e entre velocidade de deslocamento e prontidão tática passiva.';
+          paceNote.textContent = 'Ritmo Normal (24 milhas/dia · ~' + curHours + 'h): Equilíbrio entre velocidade de deslocamento e prontidão tática passiva.';
         }
       }
       var synCardP = el.querySelector('#clp-synergy-card');
@@ -75464,7 +75464,7 @@ function _openCartLocationPopup(biome){
         var forInfoP = CartShared.calcForageYieldCheck(3, biome.key || biome.biome || 'plains', { pace: pType });
         var hazInfoP = CartShared.getWildernessHazardDetails ? CartShared.getWildernessHazardDetails(biome.key || biome.biome || 'plains') : null;
         var compInfoP = (CartShared.calcForageComplication && forInfoP.allowedByPace) ? CartShared.calcForageComplication(biome.key || biome.biome || 'plains', 8, { hasHerbalismKit: true }) : null;
-        synCardP.innerHTML = '  <div style="font-size:11px;font-family:Cinzel,serif;font-weight:700;color:#e9d5ff;margin-bottom:2px;">✨ SINERGIA DE MARCHA & FORRAGEAMENTO (D&D 5e):</div>'
+        synCardP.innerHTML = '  <div style="font-size:11px;font-family:Cinzel,serif;font-weight:700;color:#e9d5ff;margin-bottom:2px;">◆ SINERGIA DE MARCHA & FORRAGEAMENTO:</div>'
           + '  <div>• <b>Função Ativa:</b> ' + (synP.synergies.length ? synP.synergies[0].title + ' (' + synP.synergies[0].benefit + ')' : 'Sentinela') + '</div>'
           + '  <div>• <b>Coleta nos Ermos:</b> <span style="color:' + forInfoP.color + ';">' + forInfoP.label + '</span> · ' + (forInfoP.allowedByPace ? forInfoP.expectedFoodLbs + ' lbs caça/dia' : 'Bloqueado') + '</div>'
           + (hazInfoP ? ('  <div>• <b>Perigo Natural:</b> <span style="color:' + hazInfoP.color + ';">' + hazInfoP.name + '</span> (' + hazInfoP.dcCheck + ')</div>') : '')
