@@ -3904,27 +3904,27 @@
           } else {
             var _tagMatch = _trimmed.match(/^\[(.*?)\]\s*(.*)$/);
           if (_tagMatch) {
+            var _rawTag = _tagMatch[1].trim();
             var _potSpeech = _tagMatch[2].trim();
+            if (!tagText && _rawTag) {
+              tagText = _rawTag;
+              if (tagText.toUpperCase() === 'AÇÃO') tagText = '';
+              tagPill = tagText ? '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>' : '';
+            }
+            _choLabel = _potSpeech;
             var _qParen = _potSpeech.match(/^([“"][^”"]+[”"])\s*(?:\((.*?)\))?$/);
             if (_qParen) {
               hasSpeech = true;
               speechClean = _cleanSpeechText(_qParen[1]);
-              if (!tagText) {
-                tagText = _tagMatch[1].trim();
-                if (tagText.toUpperCase() === 'AÇÃO') tagText = '';
-                tagPill = tagText ? '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>' : '';
-              }
               if (_qParen[2] && !subText) {
                 subText = _qParen[2].trim();
               }
             } else if (_potSpeech.indexOf('“') === 0 || (_potSpeech.indexOf('"') === 0 && _potSpeech.length > 2)) {
               hasSpeech = true;
               speechClean = _cleanSpeechText(_potSpeech);
-              if (!tagText) {
-                tagText = _tagMatch[1].trim();
-                if (tagText.toUpperCase() === 'AÇÃO') tagText = '';
-                tagPill = tagText ? '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>' : '';
-              }
+            } else if (_potSpeech.charAt(0) === '(' && _potSpeech.charAt(_potSpeech.length - 1) === ')') {
+              hasSpeech = true;
+              speechClean = _cleanSpeechText(_potSpeech);
             }
           } else if (_trimmed.indexOf('— "') === 0 || _trimmed.indexOf('— “') === 0 || _trimmed.indexOf('“') === 0 || (_trimmed.indexOf('"') === 0 && _trimmed.length > 2)) {
             hasSpeech = true;
@@ -3932,6 +3932,19 @@
           }
         }
       }
+    }
+    if (!tagText && !ch.badge && ch.stat && ch.dc && !ch.skill) {
+      var _STAT_ABBR = {
+        str: 'FOR', strength: 'FOR', forca: 'FOR', força: 'FOR',
+        dex: 'DES', dexterity: 'DES', destreza: 'DES',
+        con: 'CON', constitution: 'CON', constituicao: 'CON', constituição: 'CON',
+        int: 'INT', intelligence: 'INT', inteligencia: 'INT', inteligência: 'INT',
+        wis: 'SAB', wisdom: 'SAB', sabedoria: 'SAB',
+        cha: 'CAR', charisma: 'CAR', carisma: 'CAR'
+      };
+      var statAbbr = _STAT_ABBR[String(ch.stat).toLowerCase()] || String(ch.stat).substring(0, 3).toUpperCase();
+      tagText = statAbbr + ' ' + ch.dc;
+      tagPill = '<span class="enc-cho-bg3-tag">[' + tagText + ']</span>';
     }
     if (hasSpeech && !speechClean) {
         speechClean = _cleanSpeechText(ch.speech);
@@ -3948,7 +3961,7 @@
 
       if (isCompact) {
         var speechFormattedCompact = _isThought ? _coinify(speechClean) : ('“' + _coinify(speechClean) + '”');
-        var titleText = hasSpeech ? (tagPill + speechFormattedCompact) : _choLabel;
+        var titleText = hasSpeech ? (tagPill + speechFormattedCompact) : (tagPill ? (tagPill + ' ' + _choLabel) : _choLabel);
         var subText = '';
         if (_choLabel.indexOf(':') !== -1 && !hasSpeech) {
           var lp = _choLabel.split(':');
@@ -4014,7 +4027,9 @@
             }
           }
         } else {
-          mainContent = (tagPill ? tagPill : '') + _coinify(_choLabel);
+          mainContent = tagPill
+            ? (tagPill + '<span class="enc-cho-action-label">' + _coinify(_choLabel) + '</span>')
+            : _coinify(_choLabel);
           subDesc = _stripEmojis(ch.desc || '');
           if (subDesc) {
             subDesc = subDesc.replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').trim();

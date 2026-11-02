@@ -1475,6 +1475,15 @@ body.perf-lite .enc-body.revealed .enc-cs-line { animation: none; }
   color: #c9d8e8;
   font-style: italic;
 }
+.enc-cho-action-label {
+  display: block;
+  font-family: var(--v-font, 'Marcellus', 'Georgia', serif);
+  font-size: calc(13.5px * var(--v-font-scale, 1));
+  font-weight: 500;
+  color: #e6dac2;
+  line-height: 1.4;
+  margin-top: 2px;
+}
 
 /* Deliberação Cooperativa da Comitiva (Multiplayer D&D 5e / BG3) */
 .enc-cho-party-votes {
