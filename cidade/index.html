@@ -5387,7 +5387,7 @@ LOG SINK (Fase 7):
        mantendo estritamente a borda nobre centrada no próprio botão de Retornar à Cidade. */
     .cart-dock {
       position: absolute;
-      bottom: 12px;
+      bottom: calc(10px + env(safe-area-inset-bottom, 0px));
       left: 0;
       right: 0;
       max-width: 464px;
@@ -9716,30 +9716,34 @@ body.perf-lite .vc-action-btn { transition: none; }
     
         /* ── LEVEL 1: CARROSSEL DE EXPEDIÇÃO (REGIÕES DE DESTINO) ── */
     .cart-continental-guide {
+      flex: 1 1 auto;
+      min-height: 0;
+      height: auto;
       display: flex;
       flex-direction: column;
-      padding: 6px 8px;
+      padding: 8px 10px calc(54px + env(safe-area-inset-bottom, 0px));
       box-sizing: border-box;
       width: 100%;
-      height: 100%;
       overflow-y: auto;
       overflow-x: hidden;
       background: #0d0a07;
     }
     .cart-carousel-wrap {
-      flex: 1;
+      flex: 1 1 auto;
+      min-height: 0;
       width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      gap: 6px;
+      justify-content: flex-start;
+      gap: 8px;
       box-sizing: border-box;
     }
     .cart-expedition-card {
+      flex: 1 1 auto;
+      min-height: 290px;
       width: 100%;
-      max-width: 420px;
-      height: 420px;
+      max-width: 440px;
       background: #1c1510;
       border: 1.5px solid #c4953a;
       border-radius: 10px;
@@ -9750,13 +9754,13 @@ body.perf-lite .vc-action-btn { transition: none; }
       position: relative;
     }
     .cart-expedition-art {
-      height: 200px;
+      flex: 1 1 180px;
+      min-height: 120px;
       width: 100%;
       background-size: cover;
       background-position: center;
       position: relative;
       border-bottom: 1.5px solid #4a3828;
-      flex-shrink: 0;
     }
     .cart-expedition-gradient {
       position: absolute;
@@ -9779,12 +9783,17 @@ body.perf-lite .vc-action-btn { transition: none; }
     }
     .cart-expedition-body {
       padding: 10px 14px;
-      flex: 1;
+      flex: 0 0 auto;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      gap: 6px;
+      justify-content: flex-start;
+      gap: 8px;
       background: #18120d;
+    }
+    .cart-expedition-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
     .cart-expedition-title {
       font-family: 'Cinzel', serif;
@@ -9797,15 +9806,28 @@ body.perf-lite .vc-action-btn { transition: none; }
       font-size: 12px;
       color: #c4b8a4;
       line-height: 1.45;
+    }
+    .cart-expedition-desc-text {
       display: -webkit-box;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+    .cart-expedition-lore-hint {
+      margin-top: 5px;
+      font-size: 11px;
+      color: #dbb668;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
     .cart-expedition-specs {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 4px;
       font-size: 11.5px;
       color: #a09484;
       border-top: 1px solid #33271d;
@@ -9813,6 +9835,20 @@ body.perf-lite .vc-action-btn { transition: none; }
     }
     .cart-expedition-specs strong {
       color: #e8dcc8;
+    }
+    .cart-rations-quick-btn {
+      background: rgba(196, 149, 58, 0.18);
+      border: 1px solid rgba(212, 168, 83, 0.45);
+      border-radius: 12px;
+      color: #ffd685;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      touch-action: manipulation;
     }
     .cart-expedition-btn {
       width: 100%;
@@ -9836,14 +9872,34 @@ body.perf-lite .vc-action-btn { transition: none; }
       transform: scale(0.98);
       filter: brightness(1.2);
     }
+    .cart-carousel-footer {
+      flex-shrink: 0;
+      margin-top: auto;
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 2px;
+      box-sizing: border-box;
+    }
     .cart-carousel-nav {
       display: flex;
       align-items: center;
       justify-content: space-between;
       width: 100%;
-      max-width: 420px;
-      padding: 4px 6px 0;
+      padding: 2px 2px 0;
       box-sizing: border-box;
+      gap: 8px;
+    }
+    .cart-carousel-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      min-width: 0;
+      flex: 1;
     }
     .cart-carousel-nav-btn {
       background: #241c15;
@@ -9852,11 +9908,14 @@ body.perf-lite .vc-action-btn { transition: none; }
       font-family: 'Cinzel', serif;
       font-size: 12px;
       font-weight: 700;
+      min-height: 36px;
+      min-width: 92px;
       padding: 6px 14px;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
       touch-action: manipulation;
       transition: all 0.15s ease;
+      flex-shrink: 0;
     }
     .cart-carousel-nav-btn:active {
       background: #3d2d1b;
@@ -9869,12 +9928,14 @@ body.perf-lite .vc-action-btn { transition: none; }
       font-weight: 700;
       color: #dbb668;
       letter-spacing: 0.5px;
+      line-height: 1.1;
     }
     .cart-carousel-dots {
       display: flex;
       gap: 5px;
       justify-content: center;
-      padding: 2px 0 4px;
+      flex-wrap: wrap;
+      padding: 1px 0;
     }
     .cart-carousel-dot {
       width: 7px;
@@ -9889,6 +9950,46 @@ body.perf-lite .vc-action-btn { transition: none; }
       background: #f3d17a;
       box-shadow: 0 0 6px rgba(243, 209, 122, 0.8);
       transform: scale(1.25);
+    }
+    @media (min-height: 780px) {
+      .cart-expedition-body {
+        padding: 12px 16px;
+        gap: 10px;
+      }
+      .cart-expedition-desc-text {
+        -webkit-line-clamp: 4;
+      }
+      .cart-expedition-btn {
+        padding: 10px 14px;
+      }
+    }
+    @media (max-height: 640px) {
+      .cart-continental-guide {
+        padding: 5px 8px calc(50px + env(safe-area-inset-bottom, 0px));
+      }
+      .cart-carousel-wrap {
+        gap: 5px;
+      }
+      .cart-expedition-card {
+        min-height: 250px;
+      }
+      .cart-expedition-art {
+        min-height: 105px;
+      }
+      .cart-expedition-body {
+        padding: 8px 12px;
+        gap: 5px;
+      }
+      .cart-expedition-desc-text {
+        -webkit-line-clamp: 2;
+      }
+      .cart-expedition-btn {
+        padding: 7px 10px;
+      }
+      .cart-carousel-nav-btn {
+        min-height: 32px;
+        padding: 5px 12px;
+      }
     }
     .region-summary-card {
       background: #18120d;
@@ -73558,29 +73659,33 @@ function _cartRenderCarousel() {
     + '    <div class="cart-expedition-badge">' + (reg.dangerText || ('Nível ' + (reg.days || 1))) + '</div>'
     + '  </div>'
     + '  <div class="cart-expedition-body">'
-    + '    <div>'
+    + '    <div class="cart-expedition-info">'
     + '      <div class="cart-expedition-title">' + reg.name + '</div>'
     + '      <div class="cart-expedition-desc" role="button" tabindex="0" onclick="_cartOpenRegionLoreModal(\'' + currentKey + '\')" title="Toque para ler relatos e detalhes da região" style="cursor:pointer;">'
-    +          reg.narrative
-    + '        <div class="cart-expedition-lore-hint" style="margin-top:6px;font-size:11px;color:#dbb668;font-weight:700;display:flex;align-items:center;gap:4px;"><span>▸</span> <span>Toque para ler relatos e detalhes da região</span></div>'
+    + '        <div class="cart-expedition-desc-text">' + reg.narrative + '</div>'
+    + '        <div class="cart-expedition-lore-hint"><span>▸</span> <span>Toque para ler relatos e detalhes da região</span></div>'
     + '      </div>'
     + '    </div>'
-    + '    <div class="cart-expedition-specs" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;">'
+    + '    <div class="cart-expedition-specs">'
     + '      <span>Marcha: <strong>' + reg.days + ' dia(s)</strong></span>'
     + '      <span>Provisões: <strong>' + (reg.days * 2) + ' rações</strong></span>'
-    + '      <button type="button" class="cart-rations-quick-btn" onclick="_cartOpenTiborShop()" title="Abastecer rações com Tibor nos Portões" style="background:rgba(196,149,58,0.18);border:1px solid rgba(212,168,83,0.45);border-radius:12px;color:#ffd685;font-size:11px;font-weight:700;padding:2px 8px;cursor:pointer;display:inline-flex;align-items:center;gap:3px;">+ Provisões</button>'
+    + '      <button type="button" class="cart-rations-quick-btn" onclick="_cartOpenTiborShop()" title="Abastecer rações com Tibor nos Portões">+ Provisões</button>'
     + '    </div>'
     + '    <button type="button" class="cart-expedition-btn" onclick="_cartOpenRegionMap(\'' + currentKey + '\')">'
     + '      Ver Mapa da Região'
     + '    </button>'
     + '  </div>'
     + '</div>'
-    + '<div class="cart-carousel-nav">'
-    + '  <button type="button" class="cart-carousel-nav-btn" onclick="_cartCarouselPrev()">Anterior</button>'
-    + '  <span class="cart-carousel-counter">' + (_cartCarouselIndex + 1) + ' de ' + total + '</span>'
-    + '  <button type="button" class="cart-carousel-nav-btn" onclick="_cartCarouselNext()">Próximo</button>'
-    + '</div>'
-    + '<div class="cart-carousel-dots">' + dotsHtml + '</div>';
+    + '<div class="cart-carousel-footer">'
+    + '  <div class="cart-carousel-nav">'
+    + '    <button type="button" class="cart-carousel-nav-btn" onclick="_cartCarouselPrev()">Anterior</button>'
+    + '    <div class="cart-carousel-center">'
+    + '      <span class="cart-carousel-counter">' + (_cartCarouselIndex + 1) + ' de ' + total + '</span>'
+    + '      <div class="cart-carousel-dots">' + dotsHtml + '</div>'
+    + '    </div>'
+    + '    <button type="button" class="cart-carousel-nav-btn" onclick="_cartCarouselNext()">Próximo</button>'
+    + '  </div>'
+    + '</div>';
 }
 window._cartRenderCarousel = _cartRenderCarousel;
 
