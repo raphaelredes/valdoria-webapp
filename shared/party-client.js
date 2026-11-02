@@ -1319,12 +1319,12 @@
 
         var html = '';
         html += '<div class="v-party-modal-header">';
-        html += '  <div class="v-party-modal-title">🏕️ Acampamento & Gestão de Vigília (PHB p. 186)</div>';
+        html += '  <div class="v-party-modal-title">Acampamento & Gestão de Vigília</div>';
         html += '  <button type="button" class="v-party-icon-btn" id="v-camp-close">✖</button>';
         html += '</div>';
         html += '<div class="v-party-modal-body">';
         html += '  <p style="font-size:12px; color:#c7b59d; margin-top:0;">';
-        html += '    Conforme o Livro do Jogador (D&D 5e PHB p. 186), acampar restaura a vitalidade física e mental da comitiva através de descanso consensual e escala tática de tarefas noturnas.';
+        html += '    Acampar restaura a vitalidade física e mental da comitiva através de descanso consensual e escala tática de tarefas noturnas.';
         html += '  </p>';
 
         // O Que Está Sendo Escolhido (Regra #24)
@@ -1343,7 +1343,7 @@
         html += '      <div class="v-party-camp-block-title">🌙 Opção 2: Descanso Longo (8 Horas)</div>';
         html += '      <div class="v-party-camp-block-desc"><strong>O Que Está Sendo Escolhido:</strong> Repouso solene e prolongado de 8 horas. Restaura 100% de PV e MP, recupera metade dos Dados de Vida totais, reduz 1 nível de exaustão e define a escala de vigília e tarefas de fogueira.</div>';
         html += '      <div class="v-party-camp-block-benefit">✔ <strong>Benefícios:</strong> Vitalidade plena, bônus de refeição (+5 PV temp) e redução do alerta da masmorra (-15 pontos) se o camuflador tiver sucesso.</div>';
-        html += '      <div class="v-party-camp-block-risk">⚠️ <strong>Atenção:</strong> Risco de emboscada se as sentinelas cochilarem durante a noite (PHB p. 189).</div>';
+        html += '      <div class="v-party-camp-block-risk">◆ <strong>Atenção:</strong> Risco de emboscada se as sentinelas cochilarem durante a noite.</div>';
 
         // Seletor de Papel do Proponente
         html += '      <div style="margin-top:8px;">';
@@ -1451,7 +1451,7 @@
         html += '  <p><strong>' + proposer + '</strong> propôs um <strong>' + (isLong ? 'Descanso Longo de 8 Horas' : 'Descanso Curto de 1 Hora') + '</strong> para a comitiva.</p>';
         html += '  <div class="v-party-camp-explainer">';
         if (isLong) {
-            html += '    <p style="font-size:12px; color:#e0d0b8;">✔ <strong>Efeito:</strong> Recuperação de 100% dos PV e Mana para todos, remoção de exaustão e resolução de tarefas de vigília (PHB p. 186).</p>';
+            html += '    <p style="font-size:12px; color:#e0d0b8;">✔ <strong>Efeito:</strong> Recuperação de 100% dos PV e Mana para todos, remoção de exaustão e resolução de tarefas de vigília.</p>';
             html += '    <div style="margin-top:8px;">';
             html += '      <div style="font-size:11px; font-weight:700; color:#c4953a; text-transform:uppercase; margin-bottom:4px;">Escolha sua Tarefa na Noite:</div>';
             html += '      <div class="v-party-camp-roles-grid" id="v-camp-vote-roles">';
@@ -1692,7 +1692,7 @@
             var isLeader = (_partyState.leader_uid === _cfg.uid || _partyState.is_leader);
 
             var FORMATIONS_DICT = {
-                line: { name: 'Linha Padrão', icon: '🛡️', benefit: 'Retaguarda ganha +2 CA de cobertura contra ataques à distância (PHB p. 196).' },
+                line: { name: 'Linha Padrão', icon: '🛡️', benefit: 'Retaguarda ganha +2 CA de cobertura contra ataques à distância.' },
                 wedge: { name: 'Cunha de Assalto', icon: '⚔️', benefit: 'Toda a comitiva recebe +1 de bônus no ataque na 1ª rodada de combate.' },
                 protect: { name: 'Proteção ao Núcleo', icon: '🧙', benefit: 'Conjuradores no centro ganham Vantagem em salvaguardas de Concentração.' },
                 scattered: { name: 'Marcha Dispersa', icon: '🌫️', benefit: 'Espaçamento aberto: Vantagem em DES contra magias ou armadilhas de área.' }
@@ -2439,7 +2439,7 @@
 
         var html = '';
         html += '<div class="v-party-modal-header">';
-        html += '  <div class="v-party-modal-title">🔻 Salvaguarda Contra a Morte (PHB p. 197)</div>';
+        html += '  <div class="v-party-modal-title">Salvaguarda Contra a Morte</div>';
         html += '  <button type="button" class="v-party-icon-btn" id="v-ds-close">✖</button>';
         html += '</div>';
 
@@ -2723,7 +2723,7 @@
 
         var html = '';
         html += '<div class="v-party-modal-header">';
-        html += '  <div class="v-party-modal-title">🤝 Ação de Ajuda (PHB p. 192)</div>';
+        html += '  <div class="v-party-modal-title">Ação de Ajuda</div>';
         html += '  <button type="button" class="v-party-icon-btn" id="v-ast-close">✖</button>';
         html += '</div>';
         html += '<div class="v-party-modal-body">';
@@ -3011,7 +3011,7 @@
     var _REACTION_DEFS = [
         {
             id: 'shield',
-            name: 'Escudo Arcano (PHB p. 242)',
+            name: 'Escudo Arcano',
             icon: '🛡️',
             cost: '1 Slot Nv.1',
             desc: 'Concede +5 na CA contra o ataque desencadeante e imunidade a Mísseis Mágicos.',
@@ -3023,7 +3023,7 @@
         },
         {
             id: 'protect_ally',
-            name: 'Proteger Aliado / Interceptar (PHB p. 192)',
+            name: 'Proteger Aliado / Interceptar',
             icon: '🤝',
             cost: 'Reação',
             desc: 'Impõe Desvantagem no ataque do inimigo contra um companheiro adjacente (1 hexágono).',
@@ -3035,7 +3035,7 @@
         },
         {
             id: 'uncanny_dodge',
-            name: 'Esquiva Sobrenatural (PHB p. 96)',
+            name: 'Esquiva Sobrenatural',
             icon: '⚡',
             cost: 'Reação',
             desc: 'Reduz o dano recebido pela metade contra um atacante visível.',
@@ -3047,7 +3047,7 @@
         },
         {
             id: 'opportunity_attack',
-            name: 'Ataque de Oportunidade (PHB p. 195)',
+            name: 'Ataque de Oportunidade',
             icon: '⚔️',
             cost: 'Reação',
             desc: 'Desfere um golpe corpo a corpo imediato quando um inimigo sai do seu alcance sem Desengajar.',
@@ -3077,7 +3077,7 @@
 
         var html = '';
         html += '<div class="v-party-modal-header">';
-        html += '  <div class="v-party-modal-title">⚡ Matriz Inteligente de Reações (D&D 5e)</div>';
+        html += '  <div class="v-party-modal-title">Matriz Inteligente de Reações</div>';
         html += '  <button type="button" class="v-party-icon-btn" id="v-rx-close">✖</button>';
         html += '</div>';
 
@@ -3241,7 +3241,7 @@
             });
             if (res && res.ok) {
                 if (res.combat) _partyState.combat = res.combat;
-                if (global.vToast) global.vToast('🎯 Ação Preparada armada (PHB p. 193)! Aguardando gatilho do inimigo.', 'ok');
+                if (global.vToast) global.vToast('Ação Preparada armada! Aguardando gatilho do inimigo.', 'ok');
                 _renderHud();
                 return res;
             }

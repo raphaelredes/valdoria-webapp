@@ -34299,7 +34299,7 @@ var SCREEN_GUIDE_META = {
   },
   'status': {
     title: 'Ficha do Personagem',
-    subtitle: 'Atributos D&D 5e • Perícias, Magias & Títulos',
+    subtitle: 'Atributos • Perícias, Magias & Títulos',
     iconId: 'ic-ficha'
   },
   'inventory': {
@@ -73608,7 +73608,7 @@ function _cartOpenRegionLoreModal(provKey) {
     +        landmarksHtml
     + '    </div>'
     + '    <div style="background:rgba(20,14,10,0.7);border:1px solid rgba(196,149,58,0.25);border-radius:8px;padding:10px;margin-bottom:10px;">'
-    + '      <div style="font-family:Cinzel,serif;font-size:12px;font-weight:700;color:#ffd685;margin-bottom:4px;">Sobrevivência e Provisões (D&D 5e)</div>'
+    + '      <div style="font-family:Cinzel,serif;font-size:12px;font-weight:700;color:#ffd685;margin-bottom:4px;">Sobrevivência e Provisões</div>'
     + '      <div style="font-size:12px;color:#c4b69c;line-height:1.5;margin-bottom:8px;">' + lore.survivalAdvice + '</div>'
     + '      <button type="button" onclick="_cartCloseRegionLoreModal();_cartOpenTiborShop();" style="width:100%;background:linear-gradient(180deg,rgba(196,149,58,0.3) 0%,rgba(110,78,25,0.45) 100%);border:1px solid #ffd685;border-radius:14px;color:#ffd685;font-family:Cinzel,serif;font-size:11.5px;font-weight:700;padding:6px;cursor:pointer;">+ Comprar Rações com Tibor nos Portões</button>'
     + '    </div>'
@@ -73629,7 +73629,7 @@ function _cartCloseRegionLoreModal() {
 window._cartCloseRegionLoreModal = _cartCloseRegionLoreModal;
 
 /* ==========================================================================
- * TIBOR — BANCA DE PROVISÕES DOS PORTÕES (D&D 5e)
+ * TIBOR — BANCA DE PROVISÕES DOS PORTÕES
  * NPC provedor de rações de marcha e suprimentos básicos de viagem,
  * instalado junto às muralhas dos Portões de Valdoria (city_gates).
  * ========================================================================== */
@@ -73661,7 +73661,7 @@ function _cartOpenTiborShop() {
     {
       id: 'buy_1_ration',
       label: 'Comprar 1 Ração de Viagem (1 Valdorita)',
-      desc: 'Provisão nutritiva de carne seca, biscoito duro e frutas secas para 1 dia de marcha individual (D&D 5e).',
+      desc: 'Provisão nutritiva de carne seca, biscoito duro e frutas secas para 1 dia de marcha individual.',
       tag: '1 RAÇÃO',
       cost: 1,
       qty: 1
@@ -73685,7 +73685,7 @@ function _cartOpenTiborShop() {
     {
       id: 'lore_starvation',
       label: 'O que acontece se eu viajar sem comida?',
-      desc: 'Perguntar sobre as regras de sobrevivência e os perigos da inanição nas estradas.',
+      desc: 'Perguntar sobre a sobrevivência e os perigos da fome nas estradas.',
       tag: 'CONSELHO'
     },
     {
@@ -73705,12 +73705,15 @@ function _cartOpenTiborShop() {
       script: script,
       choices: choices,
       choicesTitle: 'Banca de Provisões do Tibor',
-      choicesSubtitle: 'Suprimentos e Rações de Marcha (D&D 5e)',
+      choicesSubtitle: 'Suprimentos e Rações de Marcha',
       compact: true
     }, {
       player: p,
       onChoice: function(ch) {
         if (!ch || ch.id === 'close_shop') {
+          if (window.vEncounter && typeof window.vEncounter.close === 'function') {
+            window.vEncounter.close();
+          }
           if (typeof _cartRenderCarousel === 'function') _cartRenderCarousel();
           return;
         }
@@ -73758,8 +73761,14 @@ function _handleTiborPurchase(cost, qty) {
       }, {
         player: p,
         onChoice: function(ch) {
-          if (ch && ch.id === 'try_again') _cartOpenTiborShop();
-          else if (typeof _cartRenderCarousel === 'function') _cartRenderCarousel();
+          if (ch && ch.id === 'try_again') {
+            _cartOpenTiborShop();
+          } else {
+            if (window.vEncounter && typeof window.vEncounter.close === 'function') {
+              window.vEncounter.close();
+            }
+            if (typeof _cartRenderCarousel === 'function') _cartRenderCarousel();
+          }
         }
       });
     }
@@ -73812,8 +73821,14 @@ function _handleTiborPurchase(cost, qty) {
     }, {
       player: p,
       onChoice: function(ch) {
-        if (ch && ch.id === 'buy_more') _cartOpenTiborShop();
-        else if (typeof _cartRenderCarousel === 'function') _cartRenderCarousel();
+        if (ch && ch.id === 'buy_more') {
+          _cartOpenTiborShop();
+        } else {
+          if (window.vEncounter && typeof window.vEncounter.close === 'function') {
+            window.vEncounter.close();
+          }
+          if (typeof _cartRenderCarousel === 'function') _cartRenderCarousel();
+        }
       }
     });
   }
@@ -73833,26 +73848,90 @@ function _showTiborStarvationAdvice() {
         {
           type: 'speech',
           speaker: 'Tibor — Provedor da Estrada',
-          text: 'A regra das estradas é implacável: o corpo humano precisa de 1 libra de alimento por dia de marcha contínua (D&D 5e PHB p. 185).'
+          text: 'A regra das estradas é implacável: um viajante precisa de alimento consistente a cada dia de marcha para manter as forças e os reflexos afiados.'
         },
         {
           type: 'speech',
           speaker: 'Tibor — Provedor da Estrada',
-          text: 'Se você sair sem comida, a fome vai bater no meio da caminhada e você será forçado a parar a marcha para revirar a terra atrás de raízes ou caçar lebres (teste de Sobrevivência CD 12 a 15). Se falhar, a fraqueza física se instala: você sofre dano por inanição e fadiga. Vale muito mais a pena gastar duas moedinhas aqui do que arriscar a vida passando fome lá fora!'
+          text: 'Se você sair sem provisões, a fome vai bater no meio da caminhada e você terá que parar a marcha para revirar a terra atrás de raízes ou tentar caçar o que cruzar seu caminho. Se a terra for estéril, a fraqueza logo cobra o preço: as pernas pesam, a visão turva e a exaustão se instala. Vale muito mais a pena garantir seu fardo aqui nos portões do que arriscar a vida definhando nas estradas!'
         }
       ],
       choices: [
-        { id: 'back_to_shop', label: 'Entendido, quero comprar provisões', desc: 'Retornar à banca de Tibor.' }
+        { id: 'back_to_shop', label: 'Quero comprar provisões', desc: 'Retornar à banca de Tibor e abastecer a mochila.' },
+        { id: 'tech_rules', label: '◆ Consultar regras de sobrevivência', desc: 'Abrir compêndio com mecânicas detalhadas de rações, fome e exaustão.' },
+        { id: 'done', label: '↩ Pronto para partir', desc: 'Retornar à seleção de expedições.' }
       ],
-      choicesTitle: 'Regras de Sobrevivência & Inanição (D&D 5e)',
+      choicesTitle: 'Conselhos de Sobrevivência nas Estradas',
       compact: true
     }, {
       player: p,
-      onChoice: function() { _cartOpenTiborShop(); }
+      onChoice: function(ch) {
+        if (ch && ch.id === 'back_to_shop') {
+          _cartOpenTiborShop();
+        } else if (ch && ch.id === 'tech_rules') {
+          _showTiborTechnicalRules();
+        } else {
+          if (window.vEncounter && typeof window.vEncounter.close === 'function') {
+            window.vEncounter.close();
+          }
+          if (typeof _cartRenderCarousel === 'function') _cartRenderCarousel();
+        }
+      }
     });
   }
 }
 window._showTiborStarvationAdvice = _showTiborStarvationAdvice;
+
+function _showTiborTechnicalRules() {
+  var p = (typeof window !== 'undefined' && window.CITY_MOCK_PLAYER) || {};
+  if (window.vEncounter && typeof vEncounter.render === 'function') {
+    vEncounter.render({
+      npc: {
+        name: 'Compêndio de Regras de Sobrevivência',
+        desc: 'Mecânicas de Marcha, Ração & Inanição (D&D 5e RAW)',
+        portrait: '/shared/img/npcs/mercador-apressado.webp'
+      },
+      script: [
+        {
+          type: 'narration',
+          text: '<b>◆ Consumo Diário de Provisões:</b> Cada aventureiro necessita de 1 libra (1 ração seca) e 1 galão de água por dia de marcha contínua para manter seu rendimento normal (D&D 5e PHB p. 185).'
+        },
+        {
+          type: 'narration',
+          text: '<b>◆ Forrageamento em Marcha:</b> Viajar sem provisões força a comitiva a interromper a velocidade ou desviar da rota para buscar alimentos silvestres (Teste de Sabedoria [Sobrevivência] CD 10 a 15, dependendo da fertilidade do bioma).'
+        },
+        {
+          type: 'narration',
+          text: '<b>◆ Inanição & Níveis de Exaustão:</b> Dias em privação alimentar acumulam fraqueza física direta. Falhas sucessivas impõem Níveis de Exaustão: Nível 1 (desvantagem em testes de atributo e perícias), Nível 2 (deslocamento reduzido à metade), Nível 3 (desvantagem em ataques e salvaguardas).'
+        },
+        {
+          type: 'narration',
+          text: '<b>◆ Recuperação em Descanso Longo:</b> Ingerir ração completa e água limpa durante um Descanso Longo de 8 horas permite recuperar 1 nível de exaustão acumulado.'
+        }
+      ],
+      choices: [
+        { id: 'back_to_shop', label: 'Comprar Provisões com Tibor', desc: 'Retornar à banca de Tibor para adquirir rações.' },
+        { id: 'done', label: '↩ Concluir e Retornar', desc: 'Fechar o compêndio e retornar à expedição.' }
+      ],
+      choicesTitle: 'Mecânicas Oficiais D&D 5e',
+      choicesSubtitle: 'Consulta Técnica de Mesa Solicitada pelo Jogador',
+      compact: true
+    }, {
+      player: p,
+      onChoice: function(ch) {
+        if (ch && ch.id === 'back_to_shop') {
+          _cartOpenTiborShop();
+        } else {
+          if (window.vEncounter && typeof window.vEncounter.close === 'function') {
+            window.vEncounter.close();
+          }
+          if (typeof _cartRenderCarousel === 'function') _cartRenderCarousel();
+        }
+      }
+    });
+  }
+}
+window._showTiborTechnicalRules = _showTiborTechnicalRules;
 
 
 function _cartRenderRegionalView(provKey) {
@@ -74856,11 +74935,11 @@ function _openCartLocationPopup(biome){
       if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_click');
       if (formNote) {
         if (fType === 'standard') {
-          formNote.textContent = '🚶 Fila Indiana: Batedor na frente, comitiva equilibrada para reações rápidas (PHB p. 182).';
+          formNote.textContent = 'Fila Indiana: Batedor na frente, comitiva equilibrada para reações rápidas.';
         } else if (fType === 'defensive') {
-          formNote.textContent = '🛡️ Formação Fechada: Escudos erguidos e retaguarda reforçada (-10% no risco de emboscada).';
+          formNote.textContent = 'Formação Fechada: Escudos erguidos e retaguarda reforçada (-10% no risco de emboscada).';
         } else {
-          formNote.textContent = '🐾 Vanguarda Dispersa: Batedor 30 pés adiante (+5 na Percepção Passiva para detectar armadilhas e pistas antecipadamente).';
+          formNote.textContent = 'Vanguarda Dispersa: Batedor 30 pés adiante (+5 na Percepção Passiva para detectar armadilhas e pistas antecipadamente).';
         }
       }
       var newRisk3 = (window.CartShared && CartShared.calcEncounterRisk) ? CartShared.calcEncounterRisk(biome, { pace: window._cartSelectedPace || 'normal', isNight: isNight, weather: curWeather, hours: horasViagem, campStance: window._cartSelectedCampStance || 'vigilant', formation: fType, transport: window._cartSelectedTransport || 'foot' }) : null;
@@ -74891,11 +74970,11 @@ function _openCartLocationPopup(biome){
       if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_click');
       if (transNote) {
         if (tType === 'foot') {
-          transNote.textContent = '🚶 A Pé (Infantaria): 3 milhas/hora · Carga padrão em mochilas e armas prontas.';
+          transNote.textContent = 'A Pé (Infantaria): 3 milhas/hora · Carga padrão em mochilas e armas prontas.';
         } else if (tType === 'horse') {
-          transNote.textContent = '🐎 Montaria (Cavalos de Viagem): +33% de velocidade em estrada · Reduz horas de viagem.';
+          transNote.textContent = 'Montaria (Cavalos de Viagem): +33% de velocidade em estrada · Reduz horas de viagem.';
         } else {
-          transNote.textContent = '🛒 Caravana / Carroça: Tendas e provisões protegidas (-10% no risco de emboscada).';
+          transNote.textContent = 'Caravana / Carroça: Tendas e provisões protegidas (-10% no risco de emboscada).';
         }
       }
       var pType = window._cartSelectedPace || 'normal';
@@ -74952,13 +75031,13 @@ function _openCartLocationPopup(biome){
       if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_click');
       if (roleNote) {
         if (rType === 'scout') {
-          roleNote.textContent = '👁️ Sentinela Atenta: +5 na Percepção Passiva · Evita surpresa em emboscadas inimigas (PHB p. 182).';
+          roleNote.textContent = 'Sentinela Atenta: +5 na Percepção Passiva · Evita surpresa em emboscadas inimigas.';
         } else if (rType === 'navigator') {
-          roleNote.textContent = '🧭 Guia da Rota: Imunidade a desvios e desorientação de marcha sob névoa ou tempestade.';
+          roleNote.textContent = 'Guia da Rota: Imunidade a desvios e desorientação de marcha sob névoa ou tempestade.';
         } else if (rType === 'forager') {
-          roleNote.textContent = '🌿 Caçador Forrageador: Caça e água garantidas ao viajar em ritmo normal ou lento sem consumir rações.';
+          roleNote.textContent = 'Caçador Forrageador: Caça e água garantidas ao viajar em ritmo normal ou lento sem consumir rações.';
         } else {
-          roleNote.textContent = '📜 Mestre Cartógrafo: Registra marcos e acidentes geográficos para o diário da comitiva.';
+          roleNote.textContent = 'Mestre Cartógrafo: Registra marcos e acidentes geográficos para o diário da comitiva.';
         }
       }
       var newRiskR = (window.CartShared && CartShared.calcEncounterRisk)

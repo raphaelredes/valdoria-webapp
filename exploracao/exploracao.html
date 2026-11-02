@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-11-02T01:29:55Z - do not edit directly, edit source -->
+
 
 
 
@@ -1490,7 +1492,7 @@
 
 <!-- 2026-05-11: Auth Gate (skip em simuladores file:// via hostname check) -->
 
-<script src="/shared/auth-gate.js"></script>
+<script src="../shared/auth-gate.js"></script>
 
 
 
@@ -1504,7 +1506,7 @@
 
      então não interfere no spoof de reduced-motion do sim-full-motion abaixo. -->
 
-<script>document.write('<script src="/bundle-version.js?_=' + Date.now() + '"><\/script>');</script>
+<script>document.write('<script src="../bundle-version.js?_=' + Date.now() + '"><\/script>');</script>
 
 
 
@@ -1534,7 +1536,7 @@
 
        Environment Isolation; espelha o fix do combate em combate.html L586). file:// (sim
 
-       LOCAL) e origin null usam o CDN PROD + o fallback relativo /shared. */
+       LOCAL) e origin null usam o CDN PROD + o fallback relativo ../valdoria-webapp/shared. */
 
     var __EXPBASE = (location.protocol === 'file:' || !location.origin || location.origin === 'null')
 
@@ -1544,13 +1546,13 @@
 
     document.write('<script src="' + __EXPBASE + '/shared/sim-full-motion.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
-    document.write('<script src="/shared/sim-full-motion.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/sim-full-motion.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     /* X-6.5.51AI: server-log canônico */
 
     document.write('<script src="' + __EXPBASE + '/shared/server-log.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
-    document.write('<script src="/shared/server-log.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/server-log.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     window.SERVER_LOG_AREA = 'exploracao';
 
@@ -1564,25 +1566,25 @@
 
     document.write('<script src="' + __EXPBASE + '/shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
-    document.write('<script src="/shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/maintenance-overlay.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     document.write('<script src="' + __EXPBASE + '/shared/text-timing.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
-    document.write('<script src="/shared/text-timing.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/text-timing.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     /* Sessão #38: vOverlay + vListen + vScheduler (CLAUDE.md SPA + perf Fase 3.3/3.4). */
 
     document.write('<script src="' + __EXPBASE + '/shared/overlay-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
-    document.write('<script src="/shared/overlay-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/overlay-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     document.write('<script src="' + __EXPBASE + '/shared/listener-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
-    document.write('<script src="/shared/listener-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/listener-registry.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     document.write('<script src="' + __EXPBASE + '/shared/scheduler.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
-    document.write('<script src="/shared/scheduler.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/scheduler.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     /* Sessão #63 (2026-05-28) BUG-7 fix: Single-device session lock pra
 
@@ -1598,11 +1600,11 @@
 
     document.write('<script src="' + __EXPBASE + '/shared/device-id.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
-    document.write('<script src="/shared/device-id.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/device-id.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     document.write('<script src="' + __EXPBASE + '/shared/session-heartbeat.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
-    document.write('<script src="/shared/session-heartbeat.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/session-heartbeat.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     /* 2026-06-21 (user "botão nativo = fechar, confirmação DENTRO do jogo"): exit-confirm.js
 
@@ -1612,7 +1614,7 @@
 
        logo após. enableClosingConfirmation (popup nativo) removido. */
 
-    document.write('<script src="/shared/exit-confirm.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/exit-confirm.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     document.write('<script>try{var _tgBB=window.Telegram&&Telegram.WebApp&&Telegram.WebApp.BackButton;if(_tgBB&&_tgBB.show)_tgBB.show();}catch(_eBB){}<\/script>');
 
@@ -1624,7 +1626,7 @@
 
     document.write('<script src="' + __EXPBASE + '/shared/auth-token-store.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
-    document.write('<script src="/shared/auth-token-store.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
+    document.write('<script src="../shared/auth-token-store.js?v=' + __vEarly + '" onerror="this.remove()"><\/script>');
 
     setTimeout(function(){
 
@@ -1804,7 +1806,7 @@
 
      LGPD-compliant — só localStorage técnico, sem PII. -->
 
-<script>document.write('<script src="/shared/version-check.js?_=' + Date.now() + '"><\/script>');</script>
+<script>document.write('<script src="../shared/version-check.js?_=' + Date.now() + '"><\/script>');</script>
 
 
 
@@ -13031,7 +13033,7 @@ body.remote-mode #debug-hud { display: none !important; }
 
      ambos — browser ignora o que não existir. -->
 
-<link rel="stylesheet" href="/explore/explore-camp.css?v=local">
+<link rel="stylesheet" href="../explore/explore-camp.css?v=local">
 
 <script>document.write('<link rel="stylesheet" href="/explore/explore-camp.css?v=' + (window.VBUNDLE_HASH || Date.now()) + '" onerror="this.remove()">');</script>
 
@@ -13051,35 +13053,35 @@ body.remote-mode #debug-hud { display: none !important; }
 
 <script>var _vti = (window.VBUNDLE_HASH || Date.now());
 
-document.write('<link rel="stylesheet" href="/shared/loading-title.css?v=' + _vti + '">');
+document.write('<link rel="stylesheet" href="../shared/loading-title.css?v=' + _vti + '">');
 
 document.write('<link rel="stylesheet" href="/shared/loading-title.css?v=' + _vti + '" onerror="this.remove()">');
 
-document.write('<link rel="stylesheet" href="/shared/loading.css?v=' + _vti + '">');
+document.write('<link rel="stylesheet" href="../shared/loading.css?v=' + _vti + '">');
 
 document.write('<link rel="stylesheet" href="/shared/loading.css?v=' + _vti + '" onerror="this.remove()">');
 
-document.write('<script src="/shared/loading-title.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/loading-title.js?v=' + _vti + '"><\/script>');
 
-document.write('<script src="/shared/loading-template.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/loading-template.js?v=' + _vti + '"><\/script>');
 
 // dnd-rules-shared.js: fonte unica D&D 5e (FASE 1 single-source consolidation).
 
-document.write('<script src="/shared/dnd-rules-shared.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/dnd-rules-shared.js?v=' + _vti + '"><\/script>');
 
 // status-bars.js: threshold unico de cor de HP (vBarHpClass 60/25) — FASE 4 single-source.
 
-document.write('<script src="/shared/status-bars.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/status-bars.js?v=' + _vti + '"><\/script>');
 
 // journey-data-shared.js: dados + regra da viagem (FASE 2 single-source). Requer DndRules.
 
-document.write('<script src="/shared/journey-data-shared.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/journey-data-shared.js?v=' + _vti + '"><\/script>');
 
 /* 2026-05-14: Mochila canonical compartilhada (vInventory) — substitui
 
    _showExploracaoInventoryPopup local. Sprite ic-it-* (519 symbols) primeiro. */
 
-document.write('<link rel="stylesheet" href="/shared/inventory-screen.css?v=' + _vti + '">');
+document.write('<link rel="stylesheet" href="../shared/inventory-screen.css?v=' + _vti + '">');
 
 // 2026-05-19: heraldic-items-sprite.js REMOVIDO. PNGs OpenAI via items-resolver.
 
@@ -13093,15 +13095,15 @@ document.write('<link rel="stylesheet" href="/shared/inventory-screen.css?v=' + 
 
    asset-resolver pra upgrade automatico via MutationObserver. */
 
-document.write('<script src="/shared/items-resolver.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/items-resolver.js?v=' + _vti + '"><\/script>');
 
-document.write('<script src="/shared/icons-resolver.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/icons-resolver.js?v=' + _vti + '"><\/script>');
 
-document.write('<script src="/shared/items-db-generated.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/items-db-generated.js?v=' + _vti + '"><\/script>');
 
-document.write('<script src="/shared/asset-resolver.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/asset-resolver.js?v=' + _vti + '"><\/script>');
 
-document.write('<script src="/shared/inventory-screen.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/inventory-screen.js?v=' + _vti + '"><\/script>');
 
 
 
@@ -13113,25 +13115,25 @@ document.write('<script src="/shared/inventory-screen.js?v=' + _vti + '"><\/scri
 
    animacao/funcionamento entre webapps. */
 
-document.write('<link rel="stylesheet" href="/shared/encounter-popup.css?v=' + _vti + '">');
+document.write('<link rel="stylesheet" href="../shared/encounter-popup.css?v=' + _vti + '">');
 
-document.write('<script src="/shared/coin-utils.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/coin-utils.js?v=' + _vti + '"><\/script>');
 
-document.write('<script src="/shared/encounter-popup.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/encounter-popup.js?v=' + _vti + '"><\/script>');
 
 // PADRAO_VIAGEM (#90): orquestrador UNICO de viagem (volta exploracao + map-to-map). Requer journey-data + encounter-popup + dice-3d.
 
-document.write('<script src="/shared/journey-runner.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/journey-runner.js?v=' + _vti + '"><\/script>');
 
 // char-card.{css,js}: card de personagem estilo COMBATE (shared) p/ o Grupo da exploracao (padronizacao #90).
 
-document.write('<link rel="stylesheet" href="/shared/char-card.css?v=' + _vti + '">');
+document.write('<link rel="stylesheet" href="../shared/char-card.css?v=' + _vti + '">');
 
-document.write('<script src="/shared/char-card.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/char-card.js?v=' + _vti + '"><\/script>');
 
 // Sistema Universal de Dicas Não-Intrusivas (Opção 10)
-document.write('<link rel="stylesheet" href="/shared/game-screen-tips.css?v=' + _vti + '">');
-document.write('<script src="/shared/game-screen-tips.js?v=' + _vti + '"><\/script>');
+document.write('<link rel="stylesheet" href="../shared/game-screen-tips.css?v=' + _vti + '">');
+document.write('<script src="../shared/game-screen-tips.js?v=' + _vti + '"><\/script>');
 
 
 
@@ -13141,13 +13143,13 @@ document.write('<script src="/shared/game-screen-tips.js?v=' + _vti + '"><\/scri
 
    event delegation. */
 
-document.write('<script src="/shared/lightbox.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/lightbox.js?v=' + _vti + '"><\/script>');
 
 // Comitiva multiplayer D&D 5e: HUD do grupo, saques, reações táticas, pings no mapa e ghosting
 
-document.write('<link rel="stylesheet" href="/shared/party-client.css?v=' + _vti + '">');
+document.write('<link rel="stylesheet" href="../shared/party-client.css?v=' + _vti + '">');
 
-document.write('<script src="/shared/party-client.js?v=' + _vti + '"><\/script>');
+document.write('<script src="../shared/party-client.js?v=' + _vti + '"><\/script>');
 
 </script>
 
@@ -13542,7 +13544,7 @@ document.write('<script src="/shared/party-client.js?v=' + _vti + '"><\/script>'
 
      duplicadas em cidade/exploracao/combate. Bug fix único vale pros 3. -->
 
-<script>document.write('<script src="/shared/transition-loader.js?v=' + Date.now() + '"><\/script>');</script>
+<script>document.write('<script src="../shared/transition-loader.js?v=' + Date.now() + '"><\/script>');</script>
 
 <script>
 
@@ -17681,7 +17683,7 @@ window.__onIntroTap = function() {
 
     <div class="hud-row" title="Vida (HP)">
 
-      <img class="hud-ico" src="/shared/img/ui/stat-hp.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
+      <img class="hud-ico" src="../shared/img/ui/stat-hp.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
 
       <span class="hud-lbl">VIDA</span>
 
@@ -17695,7 +17697,7 @@ window.__onIntroTap = function() {
 
       <div class="hud-row" title="Mana / Recurso (MP)">
 
-        <img class="hud-ico" src="/shared/img/ui/stat-mp.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
+        <img class="hud-ico" src="../shared/img/ui/stat-mp.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
 
         <span class="hud-lbl">MANA</span>
 
@@ -17707,7 +17709,7 @@ window.__onIntroTap = function() {
 
       <div class="hud-row" title="Exaustão (D&D 5e, 0 a 6)">
 
-        <img class="hud-ico" src="/shared/img/ui/stat-exhaustion.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
+        <img class="hud-ico" src="../shared/img/ui/stat-exhaustion.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
 
         <span class="hud-lbl">EXAUS</span>
 
@@ -17721,7 +17723,7 @@ window.__onIntroTap = function() {
 
       <div class="hud-row" title="Experiência (XP) e Nível">
 
-        <img class="hud-ico" src="/shared/img/ui/stat-xp.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
+        <img class="hud-ico" src="../shared/img/ui/stat-xp.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
 
         <span class="hud-lvl" id="hud-level">N1</span>
 
@@ -17833,7 +17835,7 @@ window.__onIntroTap = function() {
 
     <button class="quick-btn" id="btn-party" title="Grupo (membros do partido)" aria-label="Grupo">
 
-      <img class="qb-icon" src="/shared/img/ui/grupo.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
+      <img class="qb-icon" src="../shared/img/ui/grupo.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
 
     </button>
 
@@ -17847,7 +17849,7 @@ window.__onIntroTap = function() {
 
       <button class="quick-btn" id="btn-light" title="Fontes de Luz" aria-label="Tochas">
 
-        <img class="qb-icon" src="/shared/img/ui/tochas.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
+        <img class="qb-icon" src="../shared/img/ui/tochas.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
 
       </button>
 
@@ -17857,17 +17859,17 @@ window.__onIntroTap = function() {
 
     <button class="quick-btn" id="btn-camp" title="Acampar" aria-label="Acampar">
 
-      <img class="qb-icon" src="/shared/img/ui/acampamento.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
+      <img class="qb-icon" src="../shared/img/ui/acampamento.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
 
     </button>
 
     <button class="quick-btn" id="btn-cartografia" title="Mapa de Valdoria" aria-label="Mapa de Valdoria">
 
-      <img class="qb-icon" src="/shared/img/ui/cartografia.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
+      <img class="qb-icon" src="../shared/img/ui/cartografia.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">
 
     </button>
     <button class="quick-btn" id="btn-hud-return-city" title="Retornar à Cidade de Valdoria" aria-label="Retornar à Cidade" onclick="_cartHandleReturnToCity()">
-      <img class="qb-icon" src="/shared/img/ui/portoes.webp" alt="Cidade" onerror="this.src='../shared/img/ui/portoes.webp';">
+      <img class="qb-icon" src="../shared/img/ui/portoes.webp" alt="Cidade" onerror="this.src='../shared/img/ui/portoes.webp';">
     </button>
 
     <!-- V2.7: btn-download-log removido (user req). Logs continuam salvando em
@@ -18391,7 +18393,7 @@ window.__onIntroTap = function() {
 
       <div class="inv-header">
 
-        <h2 class="inv-title"><img class="inv-title-icon" src="/shared/img/ui/mochila.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">Mochila</h2>
+        <h2 class="inv-title"><img class="inv-title-icon" src="../shared/img/ui/mochila.webp" alt="" aria-hidden="true" onerror="this.style.display='none'">Mochila</h2>
 
         <div class="inv-subtitle" id="inv-subtitle">— itens</div>
 
@@ -18581,7 +18583,7 @@ window.__onIntroTap = function() {
 
               <li><strong>Segurança:</strong> Minimiza o risco de emboscadas e desbloqueia a ação <em>Forragear</em>.</li>
 
-              <li><strong>Deslocamento (PHB p. 181):</strong> Marcha Cautelosa nas rotas (18 milhas/dia · 2 milhas/hora).</li>
+              <li><strong>Deslocamento:</strong> Marcha Cautelosa nas rotas (18 milhas/dia · 2 milhas/hora).</li>
 
             </ul>
 
@@ -18607,7 +18609,7 @@ window.__onIntroTap = function() {
 
               <li><strong>Segurança:</strong> Taxa equilibrada de encontros e desafios de bioma.</li>
 
-              <li><strong>Deslocamento (PHB p. 181):</strong> Marcha Normal nas rotas (24 milhas/dia · 3 milhas/hora).</li>
+              <li><strong>Deslocamento:</strong> Marcha Normal nas rotas (24 milhas/dia · 3 milhas/hora).</li>
 
             </ul>
 
@@ -18633,7 +18635,7 @@ window.__onIntroTap = function() {
 
               <li><strong>Segurança:</strong> Maior chance de tropeçar em armadilhas e sofrer emboscadas.</li>
 
-              <li><strong>Deslocamento (PHB p. 181):</strong> Marcha Rápida nas rotas (30 milhas/dia · 4 milhas/hora).</li>
+              <li><strong>Deslocamento:</strong> Marcha Rápida nas rotas (30 milhas/dia · 4 milhas/hora).</li>
 
             </ul>
 
@@ -30363,7 +30365,7 @@ function parseRewardString(s) {
 
   var s1 = document.createElement('script');
 
-  s1.src = '/explore/explore-camp-fire.js?v=' + v;
+  s1.src = '../explore/explore-camp-fire.js?v=' + v;
 
   s1.async = false;
 
@@ -42162,7 +42164,7 @@ const FIXED_MAPS = {
 
           { id: 'short_rest', label: '⏸ Descanso Curto (gasta 1 HD)',
 
-            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            desc: 'Recupera 1d8 + CON PV. Gasta 1 Dado de Vida (DV).',
 
             outcome_ok: { _short_rest: true,
 
@@ -42180,7 +42182,7 @@ const FIXED_MAPS = {
 
             only_class: ['paladino', 'clerigo'],
 
-            desc: 'Prece Divina D&D 5e — abencoar o fogo com luz sagrada purificadora',
+            desc: 'Prece Divina — abençoar o fogo com luz sagrada purificadora',
 
             outcome_ok: { text: 'Você ergue seu simbolo sagrado e murmura uma prece solene. As chamas adquirem um brilho dourado e sereno, dissipando a atmosfera opressiva do acampamento.', hp_gain: 4, mp_gain: 2, xp: 20, _flag: 'hearth_blessed' } },
 
@@ -42196,7 +42198,7 @@ const FIXED_MAPS = {
 
             outcome_fail: { text: 'O vento gira bruscamente, soprando fagulhas em seus olhos. Você nao consegue discernir a marcha dos sentinelas.', xp: 5 } },
 
-          { label: 'Transe Elfico contemplativo (PHB p. 23)',
+          { label: 'Transe Élfico contemplativo',
 
             only_race: ['elfo', 'meio_elfo'],
 
@@ -43489,7 +43491,7 @@ const FIXED_MAPS = {
         category: 'discovery',
         choices: [
           { id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
-            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            desc: 'Recupera 1d8 + CON PV. Gasta 1 Dado de Vida (DV).',
             outcome_ok: { _short_rest: true,
               text: 'Você se senta junto às chamas crepitantes e recupera o fôlego. As feridas fecham sob o calor reconfortante.' } },
           { id: 'long_rest', label: 'Descanso Longo (1× por masmorra)',
@@ -43504,7 +43506,7 @@ const FIXED_MAPS = {
             outcome_fail: { text: 'O vento nas galerias confunde seus ouvidos, mascarando o ritmo das feras.', xp: 5 } },
           { label: 'Consagrar o refúgio com oração sagrada',
             only_class: ['paladino', 'clerigo'],
-            desc: 'Bênção Divina D&D 5e — abençoar as cinzas com luz protetora',
+            desc: 'Bênção Divina — abençoar as cinzas com luz protetora',
             outcome_ok: { text: 'Uma suave luminosidade dourada se espalha pelas pedras, afastando a aura selvagem e reconfortando o espírito do grupo.', hp_gain: 4, mp_gain: 2, xp: 20, _flag: 'cave_sanctified' } },
           { id: 'leave_camp', label: 'Sair do Acampamento',
             outcome_ok: { text: 'Você apaga as brasas em excesso e retoma a exploração das galerias profundas.' } }
@@ -43543,7 +43545,7 @@ const FIXED_MAPS = {
       { id: 'wolf_den_trap', col: 9, row: 15, _hex: 'J16',
         title: 'Fosso Camuflado de Ossos',
         text: 'O piso calcário aqui parece enganosamente nivelado, coberto por uma camada tênue de folhas apodrecidas e poeira de terra. Logo abaixo, uma fissura profunda repleta de estacas afiadas de ossos de cervo aguarda o passo desavisado.',
-        flavor: 'Armadilha D&D 5e · Perigo Físico',
+        flavor: 'Armadilha Antiga · Perigo Físico',
         category: 'trap',
         choices: [
           { label: 'Sondar o solo com o cabo da lança (Percepção)',
@@ -43748,7 +43750,7 @@ const FIXED_MAPS = {
         category: 'discovery',
         choices: [
           { id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
-            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            desc: 'Recupera 1d8 + CON PV. Gasta 1 Dado de Vida (DV).',
             outcome_ok: { _short_rest: true,
               text: 'Você se acomoda junto ao braseiro aquecido. As dores musculares se acalmam e o fôlego retorna.' } },
           { id: 'long_rest', label: 'Descanso Longo (1× por masmorra)',
@@ -43801,7 +43803,7 @@ const FIXED_MAPS = {
       { id: 'vault_tripwire_trap', col: 10, row: 16, _hex: 'K17',
         title: 'Mecanismo Oculto de Disparo',
         text: 'Entre duas colunas de cantaria, um fio de cobre quase invisível corre rente às lajotas do chão, conectado a um mecanismo embutido na parede que projeta virotes de besta envenenados contra quem atravessar o arco.',
-        flavor: 'Armadilha Mecânica D&D 5e',
+        flavor: 'Armadilha Mecânica · Perigo Físico',
         category: 'trap',
         choices: [
           { label: 'Desarmar o fio tensor com ferramentas finas (Investigação/Ladinagem)',
@@ -43978,7 +43980,7 @@ const FIXED_MAPS = {
         category: 'discovery',
         choices: [
           { id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
-            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            desc: 'Recupera 1d8 + CON PV. Gasta 1 Dado de Vida (DV).',
             outcome_ok: { _short_rest: true,
               text: 'Você descansa recostado no granito maciço. O calor das brasas renova sua disposição.' } },
           { id: 'long_rest', label: 'Descanso Longo (1× por masmorra)',
@@ -43990,7 +43992,7 @@ const FIXED_MAPS = {
             outcome_ok: { _companion_banter: true, text: 'Você reúne seus aliados para uma conversa franca ao pé das brasas.' } },
           { label: 'Harmonizar com os veios de rocha ancestral (Anão)',
             only_race: 'anao',
-            desc: 'Conhecimento da Pedra (Stonecunning) D&D 5e — interpretar as tensões estruturais do túnel',
+            desc: 'Conhecimento da Pedra — interpretar as tensões estruturais do túnel',
             outcome_ok: { text: 'Suas mãos sentem as veias de minério na pedra. Você compreende a arquitetura da mina e antecipa pontos de desmoronamento!', xp: 30, _flag: 'dwarven_stone_mastery' } },
           { id: 'leave_camp', label: 'Sair do Acampamento',
             outcome_ok: { text: 'Você recolhe os pertences e retoma o avanço pelas galerias escuras.' } }
@@ -44002,7 +44004,7 @@ const FIXED_MAPS = {
         flavor: 'Encontro Tático · Batedores',
         category: 'combat',
         choices: [
-          { label: 'Erguer a tocha em clarão ofuscante (Sensibilidade à Luz D&D 5e)',
+          { label: 'Erguer a tocha em clarão ofuscante (Sensibilidade à Luz)',
             skill: 'wis', dc: 11,
             desc: 'Sabedoria (Tática / Percepção) CD 11 — projetar a chama viva direto nos olhos adaptados ao breu',
             outcome_ok: { text: 'O clarão súbito ofusca as pupilas dilatadas dos trogloditas! Eles gritam tapando o focinho — SURPRESA e Vantagem no 1º golpe!',
@@ -44030,7 +44032,7 @@ const FIXED_MAPS = {
       { id: 'mine_cave_in_trap', col: 10, row: 16, _hex: 'K17',
         title: 'Vigas Comprometidas e Desmoronamento',
         text: 'O teto desta seção da mina sofreu infiltrações graves. Vigas de carvalho podre estalam sob o peso de toneladas de granito solto. Um passo mais pesado ou um toque descuidado pode precipitar um deslizamento catastrófico.',
-        flavor: 'Perigo Estrutural D&D 5e',
+        flavor: 'Perigo Estrutural',
         category: 'trap',
         choices: [
           { label: 'Identificar as trincas de tensão e escorar o túnel (Percepção/Anão)',
@@ -44204,7 +44206,7 @@ const FIXED_MAPS = {
         category: 'discovery',
         choices: [
           { id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
-            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            desc: 'Recupera 1d8 + CON PV. Gasta 1 Dado de Vida (DV).',
             outcome_ok: { _short_rest: true,
               text: 'Você descansa as pernas cansadas na pedra seca. O calor das brasas dissipa o calafrio da água podre.' } },
           { id: 'long_rest', label: 'Descanso Longo (1× por masmorra)',
@@ -44216,7 +44218,7 @@ const FIXED_MAPS = {
             outcome_ok: { _companion_banter: true, text: 'Você convida seus aliados para uma conversa acolhedora junto ao fogo.' } },
           { label: 'Purificar o lodo das botas com prece da aurora (Clérigo/Paladino)',
             only_class: ['clerigo', 'paladino'],
-            desc: 'Bênção Sagrada D&D 5e — banir a podridão do pântano com luz purificadora',
+            desc: 'Bênção Sagrada — banir a podridão do pântano com luz purificadora',
             outcome_ok: { text: 'Uma aura de luz suave seca a umidade e purifica o miasma. Seus aliados sentem o ânimo renovado!', hp_gain: 4, mp_gain: 2, xp: 25, _flag: 'temple_hearth_blessed' } },
           { id: 'leave_camp', label: 'Sair do Acampamento',
             outcome_ok: { text: 'Você pisa de volta nas lajes alagadas e retoma o avanço em direção ao santuário submerso.' } }
@@ -44256,7 +44258,7 @@ const FIXED_MAPS = {
       { id: 'temple_drowning_trap', col: 10, row: 16, _hex: 'K17',
         title: 'Eclusa Submersa e Correnteza Voraz',
         text: 'Sob uma camada enganosa de musgo flutuante, uma laje de pressão com dreno automático conecta-se a uma eclusa profunda. Um passo em falso puxará a água com violência ciclônica, arrastando tudo em direção a estacas pontiagudas de coral negro.',
-        flavor: 'Armadilha Hidráulica D&D 5e',
+        flavor: 'Armadilha Hidráulica',
         category: 'trap',
         choices: [
           { label: 'Neutralizar o contra-peso da eclusa com cunha (Ladinagem/Investigação)',
@@ -45265,7 +45267,7 @@ const FIXED_MAPS = {
         category: 'discovery',
         choices: [
           { id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
-            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            desc: 'Recupera 1d8 + CON PV. Gasta 1 Dado de Vida (DV).',
             outcome_ok: { _short_rest: true,
               text: 'Você aquece as mãos junto ao braseiro consagrado e sente o frio cadavérico deixar seus ossos.' } },
           { id: 'long_rest', label: 'Descanso Longo (1× por masmorra)',
@@ -45277,7 +45279,7 @@ const FIXED_MAPS = {
             outcome_ok: { _companion_banter: true, text: 'Você reúne seus companheiros em torno do braseiro silencioso das catacumbas.' } },
           { label: 'Entoar litania de proteção contra os inquietos (Clérigo/Paladino)',
             only_class: ['clerigo', 'paladino'],
-            desc: 'Bênção Sagrada D&D 5e — reforçar os selos de prata com oração solene',
+            desc: 'Bênção Sagrada — reforçar os selos de prata com oração solene',
             outcome_ok: { text: 'As chamas do braseiro ganham um tom branco-prateado puro, revigorando o espírito da comitiva!', hp_gain: 5, mp_gain: 2, xp: 30, _flag: 'catacombs_chapel_blessed' } },
           { id: 'leave_camp', label: 'Sair do Acampamento',
             outcome_ok: { text: 'Você ajusta a empunhadura de suas armas e deixa a capela de volta às galerias de ossos.' } }
@@ -45316,7 +45318,7 @@ const FIXED_MAPS = {
       { id: 'catacombs_pendulum_trap', col: 10, row: 16, _hex: 'K17',
         title: 'Galeria das Foices Pendulares',
         text: 'Lajes soltas no piso de mármore negro acionam correntes ocultas nas abóbadas superiores, liberando foices pesadas de aço que varrem o corredor ao menor sinal de peso.',
-        flavor: 'Armadilha Mecânica D&D 5e',
+        flavor: 'Armadilha Mecânica · Perigo Físico',
         category: 'trap',
         choices: [
           { label: 'Travar a corrente mestra na parede (Ladinagem/Investigação)',
@@ -45471,7 +45473,7 @@ const FIXED_MAPS = {
         choices: [
           {
             id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
-            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            desc: 'Recupera 1d8 + CON PV. Gasta 1 Dado de Vida (DV).',
             outcome_ok: {
               _short_rest: true,
               text: 'Voce repousa apoiado na pedra fria. O calor das brasas dissipa os calafrios do além-tumulo.'
@@ -45545,7 +45547,7 @@ const FIXED_MAPS = {
         id: 'lich_hall_necrotic_trap', col: 10, row: 16, _hex: 'K17',
         title: 'O Mosaico do Dreno de Vitalidade',
         text: 'O piso a frente exibe um mosaico de marmore negro esculpido com rostos em pranto. Glifos runicos cintilam em tom violeta palido, prontos para descarregar uma onda de frio mortal sobre quem pisar em falso.',
-        flavor: 'Perigo Necromantico D&D 5e',
+        flavor: 'Perigo Necromântico',
         category: 'trap',
         choices: [
           {
@@ -45730,7 +45732,7 @@ const FIXED_MAPS = {
         choices: [
           {
             id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
-            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            desc: 'Recupera 1d8 + CON PV. Gasta 1 Dado de Vida (DV).',
             outcome_ok: {
               _short_rest: true,
               text: 'Voce descansa as costas na rocha aquecida. O calor dissipa a tensao da marcha montanhosa.'
@@ -45788,7 +45790,7 @@ const FIXED_MAPS = {
         id: 'dragon_lair_lava_fissure_trap', col: 10, row: 16, _hex: 'K17',
         title: 'A Fenda de Magma Borbulhante',
         text: 'Uma ruptura no leito de basalto expoe um rio subterraneo de lava incandescente. Vapores toxicos e labaredas espontaneas tornam a travessia uma prova rigorosa de equilibrio.',
-        flavor: 'Perigo Termico D&D 5e',
+        flavor: 'Perigo Térmico',
         category: 'trap',
         choices: [
           {
@@ -45927,7 +45929,7 @@ const FIXED_MAPS = {
         choices: [
           {
             id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
-            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            desc: 'Recupera 1d8 + CON PV. Gasta 1 Dado de Vida (DV).',
             outcome_ok: {
               _short_rest: true,
               text: 'Voce descansa envolto nas peles de viagem. O calor do braseiro renova sua energia.'
@@ -45985,7 +45987,7 @@ const FIXED_MAPS = {
         id: 'yeti_cave_avalanche_trap', col: 10, row: 16, _hex: 'K17',
         title: 'A Ponte de Gelo Trincado e Estalactites',
         text: 'Estalactites gigantescas de gelo pendem da abobada como adagas de cristal. O piso de gelo fino range sob cada passo, ameacando precipitar a comitiva em uma fenda congelada.',
-        flavor: 'Perigo Glacial D&D 5e',
+        flavor: 'Perigo Glacial',
         category: 'trap',
         choices: [
           {
@@ -46124,7 +46126,7 @@ const FIXED_MAPS = {
         choices: [
           {
             id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
-            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            desc: 'Recupera 1d8 + CON PV. Gasta 1 Dado de Vida (DV).',
             outcome_ok: {
               _short_rest: true,
               text: 'Voce descansa apoiado na parede de pedra. O calor do fogo alivia a fadiga muscular.'
@@ -46182,7 +46184,7 @@ const FIXED_MAPS = {
         id: 'troll_lair_pit_trap', col: 10, row: 16, _hex: 'K17',
         title: 'O Fosso de Ossos Afiados e Piche',
         text: 'Um fosso escavado no chao da galeria esta disfarcado com galhos finos e peles velhas. No fundo, estacas de osso afiadas e uma camada pegajosa de piche aguardam os incautos.',
-        flavor: 'Armadilha Primitiva D&D 5e',
+        flavor: 'Armadilha Primitiva',
         category: 'trap',
         choices: [
           {
@@ -46324,7 +46326,7 @@ const FIXED_MAPS = {
         choices: [
           {
             id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
-            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            desc: 'Recupera 1d8 + CON PV. Gasta 1 Dado de Vida (DV).',
             outcome_ok: {
               _short_rest: true,
               text: 'Voce bebe agua fresca do cantil e descansa sobre a laje fria. O calor das brasas renova sua disposicao.'
@@ -46382,7 +46384,7 @@ const FIXED_MAPS = {
         id: 'sultan_tomb_quicksand_trap', col: 10, row: 16, _hex: 'K17',
         title: 'O Poco de Areia Movedica e Lajes de Papiro',
         text: 'O piso a frente aparenta ser de mosaicos polidos, mas e na verdade uma camada fina sustentando um fosso profundo de areia movedica voraz.',
-        flavor: 'Armadilha do Deserto D&D 5e',
+        flavor: 'Armadilha do Deserto',
         category: 'trap',
         choices: [
           {
@@ -46520,7 +46522,7 @@ const FIXED_MAPS = {
         choices: [
           {
             id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
-            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            desc: 'Recupera 1d8 + CON PV. Gasta 1 Dado de Vida (DV).',
             outcome_ok: {
               _short_rest: true,
               text: 'Voce repousa sobre a rocha lisa, recompondo o folego para a descida ao abismo.'
@@ -46578,7 +46580,7 @@ const FIXED_MAPS = {
         id: 'black_dragon_crypt_acid_pool_trap', col: 10, row: 16, _hex: 'K17',
         title: 'A Fenda de Acido Corrosivo e Vapor Negro',
         text: 'Um abismo estreito verte liquefeito borbulhante de cor esmeralda toxica. O vapor corroe o ferro das armaduras se a travessia nao for veloz.',
-        flavor: 'Perigo Corrosivo D&D 5e',
+        flavor: 'Perigo Corrosivo',
         category: 'trap',
         choices: [
           {
@@ -46716,7 +46718,7 @@ const FIXED_MAPS = {
         choices: [
           {
             id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
-            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            desc: 'Recupera 1d8 + CON PV. Gasta 1 Dado de Vida (DV).',
             outcome_ok: {
               _short_rest: true,
               text: 'Voce descansa recostado nas estantes de cedro ancestral, sentindo o poder da sabedoria elfica revigorar a mente.'
@@ -46774,7 +46776,7 @@ const FIXED_MAPS = {
         id: 'elf_library_glyph_trap', col: 10, row: 16, _hex: 'K17',
         title: 'O Glifo de Ilusao e Paralisia Estelar',
         text: 'Um mosaico de safiras embutidas no piso projeta uma ilusao de estrelas cadentes que atrai o olhar e ameaca paralisar a mente dos andarilhos.',
-        flavor: 'Armadilha Ilusoria D&D 5e',
+        flavor: 'Armadilha Ilusória',
         category: 'trap',
         choices: [
           {
@@ -46903,7 +46905,7 @@ const FIXED_MAPS = {
         choices: [
           {
             id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
-            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            desc: 'Recupera 1d8 + CON PV. Gasta 1 Dado de Vida (DV).',
             outcome_ok: {
               _short_rest: true,
               text: 'Voce come racoes secas e afia a lamina sobre a rocha basáltica. O repouso renova o folego da comitiva.'
@@ -46953,7 +46955,7 @@ const FIXED_MAPS = {
         id: 'valkrest_citadel_hazard', col: 8, row: 7, _hex: 'I8',
         title: 'Fosso de Oleo Grego e Brasas',
         text: 'Um canal esculpido no piso transborda oleo mineral fervente, com jatos intermitentes de fogo que varrem a passagem de pedra a cada pulsar de ventilacao.',
-        flavor: 'Perigo D&D 5e - I8 - Armadilha de Chamas',
+        flavor: 'Perigo das Profundezas · Armadilha de Chamas',
         category: 'hazard',
         choices: [
           {
@@ -47084,7 +47086,7 @@ const FIXED_MAPS = {
         choices: [
           {
             id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
-            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            desc: 'Recupera 1d8 + CON PV. Gasta 1 Dado de Vida (DV).',
             outcome_ok: {
               _short_rest: true,
               text: 'Voce bebe caldo quente e descansa enrolado em mantas grossas de pele. A circulacao retoma o calor.'
@@ -47134,7 +47136,7 @@ const FIXED_MAPS = {
         id: 'glacial_rift_hazard', col: 8, row: 7, _hex: 'I8',
         title: 'Pingentes de Gelo Negro Cadentes',
         text: 'Tremores profundos na geleira fazem com que estalagmites macicas de gelo afiado se soltem do teto abobadado, despencando como lancas de cerco sobre a trilha.',
-        flavor: 'Perigo D&D 5e - I8 - Desabamento Glacial',
+        flavor: 'Perigo das Profundezas · Desabamento Glacial',
         category: 'hazard',
         choices: [
           {
@@ -47274,7 +47276,7 @@ const FIXED_MAPS = {
         choices: [
           {
             id: 'short_rest', label: 'Descanso Curto (gasta 1 HD)',
-            desc: 'Recupera 1d8 + CON HP. Custa 1 dado de vida (HD). PHB p.186.',
+            desc: 'Recupera 1d8 + CON PV. Gasta 1 Dado de Vida (DV).',
             outcome_ok: {
               _short_rest: true,
               text: 'Voce come racoes e descansa recostado na parede de terra batida.'
@@ -47332,7 +47334,7 @@ const FIXED_MAPS = {
         id: 'goblin_warren_tripwire_net', col: 10, row: 16, _hex: 'K17',
         title: 'A Armadilha de Rede com Espinhos de Bambu',
         text: 'Um fio de tripa esticado na altura do tornozelo esta conectado a uma rede suspensa carregada de pedras afiadas e estacas pontiagudas.',
-        flavor: 'Armadilha Goblin D&D 5e',
+        flavor: 'Armadilha Goblin · Perigo Físico',
         category: 'trap',
         choices: [
           {
@@ -84187,7 +84189,7 @@ function _explNormImgPath(src) {
 
   if (isLocal && src.startsWith('../shared/')) {
 
-    return '/shared/' + src.slice('../shared/'.length);
+    return '../shared/' + src.slice('../shared/'.length);
 
   }
 
@@ -84201,7 +84203,7 @@ function _explNormImgPath(src) {
 
 function _explResolveFallbackEventPortrait(ev) {
 
-  if (!ev) return '/shared/img/ui/compendio.webp';
+  if (!ev) return '../shared/img/ui/compendio.webp';
 
   if (ev.npc && ev.npc.portrait) return _explNormImgPath(ev.npc.portrait);
 
@@ -84243,95 +84245,95 @@ function _explResolveFallbackEventPortrait(ev) {
 
     if (speaker.indexOf('aldo') !== -1 || speaker.indexOf('refug') !== -1 || speaker.indexOf('campon') !== -1) {
 
-      return '/shared/img/npcs/kaelen-refugiado.webp';
+      return '../shared/img/npcs/kaelen-refugiado.webp';
 
     }
 
     if (speaker.indexOf('tomas') !== -1 || speaker.indexOf('pastor') !== -1) {
 
-      return '/shared/img/npcs/berto-lavrador.webp';
+      return '../shared/img/npcs/berto-lavrador.webp';
 
     }
 
     if (speaker.indexOf('corvin') !== -1 || speaker.indexOf('pedag') !== -1 || speaker.indexOf('drevek') !== -1) {
 
-      return '/shared/img/npcs/drevek-atravessador.webp';
+      return '../shared/img/npcs/drevek-atravessador.webp';
 
     }
 
     if (speaker.indexOf('bran') !== -1 || speaker.indexOf('lenhador') !== -1) {
 
-      return '/shared/img/npcs/hadric-cacador.webp';
+      return '../shared/img/npcs/hadric-cacador.webp';
 
     }
 
     if (speaker.indexOf('selfia') !== -1 || speaker.indexOf('sélfia') !== -1 || speaker.indexOf('driade') !== -1 || speaker.indexOf('dríade') !== -1) {
 
-      return '/shared/img/npcs/sylthara-druida.webp';
+      return '../shared/img/npcs/sylthara-druida.webp';
 
     }
 
     if (speaker.indexOf('elna') !== -1 || speaker.indexOf('coletora') !== -1) {
 
-      return '/shared/img/npcs/tovrik-ervanario.webp';
+      return '../shared/img/npcs/tovrik-ervanario.webp';
 
     }
 
     if (speaker.indexOf('vondal') !== -1 || speaker.indexOf('guarda') !== -1) {
 
-      return '/shared/img/npcs/brunnar-forjafria.webp';
+      return '../shared/img/npcs/brunnar-forjafria.webp';
 
     }
 
     if (speaker.indexOf('bretta') !== -1 || speaker.indexOf('pastora') !== -1) {
 
-      return '/shared/img/npcs/marilia-fruteira.webp';
+      return '../shared/img/npcs/marilia-fruteira.webp';
 
     }
 
     if (speaker.indexOf('perrin') !== -1 || speaker.indexOf('mercador') !== -1 || speaker.indexOf('hakim') !== -1) {
 
-      return '/shared/img/npcs/mercador-errante.webp';
+      return '../shared/img/npcs/mercador-errante.webp';
 
     }
 
     if (speaker.indexOf('orien') !== -1 || speaker.indexOf('orin') !== -1 || speaker.indexOf('eremita') !== -1 || speaker.indexOf('cego') !== -1) {
 
-      return '/shared/img/npcs/othren-recluso.webp';
+      return '../shared/img/npcs/othren-recluso.webp';
 
     }
 
     if (speaker.indexOf('djinn') !== -1 || speaker.indexOf('malhaz') !== -1) {
 
-      return '/shared/img/npcs/vasheen-djinn.webp';
+      return '../shared/img/npcs/vasheen-djinn.webp';
 
     }
 
     if (speaker.indexOf('sacerdote') !== -1 || speaker.indexOf('padre') !== -1 || speaker.indexOf('cornelius') !== -1) {
 
-      return '/shared/img/npcs/padre-othren.webp';
+      return '../shared/img/npcs/padre-othren.webp';
 
     }
 
     if (speaker.indexOf('espirito') !== -1 || speaker.indexOf('espírito') !== -1 || speaker.indexOf('sentinela') !== -1) {
 
-      return '/shared/img/npcs/nerith-espirito.webp';
+      return '../shared/img/npcs/nerith-espirito.webp';
 
     }
 
     if (speaker.indexOf('ferreiro') !== -1 || speaker.indexOf('draust') !== -1) {
 
-      return '/shared/img/npcs/ferreiro-garrick.webp';
+      return '../shared/img/npcs/ferreiro-garrick.webp';
 
     }
 
     if (speaker.indexOf('saqueador') !== -1 || speaker.indexOf('ladrao') !== -1 || speaker.indexOf('ladrão') !== -1 || speaker.indexOf('merek') !== -1 || speaker.indexOf('jorab') !== -1) {
 
-      return '/shared/img/npcs/batedor-carteira.webp';
+      return '../shared/img/npcs/batedor-carteira.webp';
 
     }
 
-    return '/shared/img/npcs/aldeao.webp';
+    return '../shared/img/npcs/aldeao.webp';
 
   }
 
@@ -84343,23 +84345,23 @@ function _explResolveFallbackEventPortrait(ev) {
 
     if (title.indexOf('fonte') !== -1 || title.indexOf('agua') !== -1 || title.indexOf('água') !== -1 || title.indexOf('nascente') !== -1) {
 
-      return '/shared/img/ui/fonte.webp';
+      return '../shared/img/ui/fonte.webp';
 
     }
 
     if (title.indexOf('bau') !== -1 || title.indexOf('baú') !== -1 || title.indexOf('tesouro') !== -1 || title.indexOf('cofre') !== -1) {
 
-      return '/shared/img/ui/cofre.webp';
+      return '../shared/img/ui/cofre.webp';
 
     }
 
     if (title.indexOf('runa') !== -1 || title.indexOf('altar') !== -1 || title.indexOf('monolito') !== -1 || title.indexOf('monólito') !== -1 || title.indexOf('circulo') !== -1 || title.indexOf('círculo') !== -1) {
 
-      return '/shared/img/ui/runas.webp';
+      return '../shared/img/ui/runas.webp';
 
     }
 
-    return '/shared/img/ui/compendio.webp';
+    return '../shared/img/ui/compendio.webp';
 
   }
 
@@ -84369,11 +84371,11 @@ function _explResolveFallbackEventPortrait(ev) {
 
     if (title.indexOf('armadilha') !== -1 || title.indexOf('perigo') !== -1 || title.indexOf('emboscada') !== -1) {
 
-      return '/shared/img/ui/alerta.webp';
+      return '../shared/img/ui/alerta.webp';
 
     }
 
-    return '/shared/img/ui/tochas.webp';
+    return '../shared/img/ui/tochas.webp';
 
   }
 
@@ -84381,7 +84383,7 @@ function _explResolveFallbackEventPortrait(ev) {
 
   if (type === 'quest_hook') {
 
-    return '/shared/img/ui/missoes.webp';
+    return '../shared/img/ui/missoes.webp';
 
   }
 
@@ -84391,23 +84393,23 @@ function _explResolveFallbackEventPortrait(ev) {
 
     if (title.indexOf('lobo') !== -1) {
 
-      return '/shared/img/combat/enemies/lobo.webp';
+      return '../shared/img/combat/enemies/lobo.webp';
 
     }
 
     if (title.indexOf('esqueleto') !== -1) {
 
-      return '/shared/img/combat/enemies/esqueleto.webp';
+      return '../shared/img/combat/enemies/esqueleto.webp';
 
     }
 
     if (title.indexOf('aranha') !== -1) {
 
-      return '/shared/img/ui/aranha.webp';
+      return '../shared/img/ui/aranha.webp';
 
     }
 
-    return '/shared/img/ui/desafio.webp';
+    return '../shared/img/ui/desafio.webp';
 
   }
 
@@ -84415,13 +84417,13 @@ function _explResolveFallbackEventPortrait(ev) {
 
   if (type === 'social') {
 
-    return '/shared/img/npcs/aldeao.webp';
+    return '../shared/img/npcs/aldeao.webp';
 
   }
 
 
 
-  return '/shared/img/ui/compendio.webp';
+  return '../shared/img/ui/compendio.webp';
 
 }
 
@@ -96647,7 +96649,7 @@ function _openCartLocationPopup(biome){
       if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_click');
       if (formNote) {
         if (fType === 'standard') {
-          formNote.textContent = '🚶 Fila Indiana: Batedor na frente, comitiva equilibrada para reações rápidas (PHB p. 182).';
+          formNote.textContent = 'Fila Indiana: Batedor na frente, comitiva equilibrada para reações rápidas.';
         } else if (fType === 'defensive') {
           formNote.textContent = '🛡️ Formação Fechada: Escudos erguidos e retaguarda reforçada (-10% no risco de emboscada).';
         } else {
@@ -96743,7 +96745,7 @@ function _openCartLocationPopup(biome){
       if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_click');
       if (roleNote) {
         if (rType === 'scout') {
-          roleNote.textContent = '👁️ Sentinela Atenta: +5 na Percepção Passiva · Evita surpresa em emboscadas inimigas (PHB p. 182).';
+          roleNote.textContent = 'Sentinela Atenta: +5 na Percepção Passiva · Evita surpresa em emboscadas inimigas.';
         } else if (rType === 'navigator') {
           roleNote.textContent = '🧭 Guia da Rota: Imunidade a desvios e desorientação de marcha sob névoa ou tempestade.';
         } else if (rType === 'forager') {
@@ -101653,7 +101655,7 @@ const TB_BIOME_INFO = {
 
   cave:      { ico: '', name: 'Caverna',    desc: 'Túneis úmidos onde a luz não alcança. Cuidado com o que espreita.', effects: ['Escuridão total — Tocha/Luz obrigatória', 'Encontros de criaturas das profundezas (CR maior)', 'Quedas e armadilhas frequentes (DEX saves)', 'Eco delata sua presença'] },
 
-  dungeon:   { ico: '🏰', name: 'Masmorra',   desc: 'Estrutura fortificada e confinada. Paredes de rocha, estacas e sentinelas em alerta.', effects: ['Sem céu aberto — intempéries externas não afetam o interior', 'Visibilidade restrita ao alcance de tochas e magias de luz (PHB p. 183)', 'Encontros hostis e sentinelas em posições defensivas', 'Descanso longo limitado a locais seguros (fogueira central)'] },
+  dungeon:   { ico: '🏰', name: 'Masmorra',   desc: 'Estrutura fortificada e confinada. Paredes de rocha, estacas e sentinelas em alerta.', effects: ['Sem céu aberto — intempéries externas não afetam o interior', 'Visibilidade restrita ao alcance de tochas e magias de luz', 'Encontros hostis e sentinelas em posições defensivas', 'Descanso longo limitado a locais seguros (fogueira central)'] },
 
   mountain:  { ico: '', name: 'Montanha',  desc: 'Picos rochosos e penhascos. O ar fica rarefeito.', effects: ['Terreno difícil — movimento custa o dobro', 'Quedas perigosas (DEX DC 14)', 'Encontros: trolls, ogros, águias', 'Frio noturno (CON saves)'] },
 
@@ -101677,7 +101679,7 @@ const TB_WEATHER_INFO = {
 
   t: { ico: '', name: 'Tempestade', desc: 'Trovões e raios. A natureza te avisa: pare.', effects: ['Movimento muito lento', 'Risco de raio (DEX DC 15) em áreas abertas', 'Visibilidade quase nula', 'Encontros aleatórios reduzidos (criaturas se escondem)'] },
 
-  snow:      { ico: '❄️', name: 'Neve / Nevasca', desc: 'Frio congelante e rajadas brancas cortam o horizonte.', effects: ['Visibilidade reduzida a 1 hex (PHB p. 183)', 'Terreno escorregadio e passos lentos', 'Risco de exaustão por frio sem abrigo ou agasalho (CD 10)', 'Rastreamento na neve fresca facilitado'] },
+  snow:      { ico: '❄️', name: 'Neve / Nevasca', desc: 'Frio congelante e rajadas brancas cortam o horizonte.', effects: ['Visibilidade reduzida a 1 hex sob nevasca', 'Terreno escorregadio e passos lentos', 'Risco de exaustão por frio sem abrigo ou agasalho (CD 10)', 'Rastreamento na neve fresca facilitado'] },
 
   dungeon:   { ico: '🔥', name: 'Confinado', desc: 'Ar denso e pesado, aquecido por tochas e fogueiras de guerra.', effects: ['Protegido contra chuvas ou ventos do exterior', 'Fumaça e sombras podem camuflar aproximações', 'Sons ecoam pelas galerias e corredores de pedra'] },
 
@@ -101695,7 +101697,7 @@ const TB_PHASE_INFO = {
 
   dawn:    { ico: '', name: 'Aurora',      desc: 'O primeiro raio dourado. Esperança renova.', effects: ['Visibilidade volta gradualmente', 'Mortos-vivos recuam', 'Bônus pra cura matinal (+1d4 HP)', 'NPCs camponeses começam o dia'] },
 
-  torches: { ico: '🕯️', name: 'Luz de Tochas / Penumbra', desc: 'O interior não recebe luz solar direta. A iluminação é gerada por tochas e braseiros.', effects: ['Penumbra fora do raio direto das tochas (PHB p. 183)', 'Tochas ativas ampliam o raio de visão e afastam emboscadas', 'Fontes mágicas de luz clareiam a escuridão circundante'] },
+  torches: { ico: '🕯️', name: 'Luz de Tochas / Penumbra', desc: 'O interior não recebe luz solar direta. A iluminação é gerada por tochas e braseiros.', effects: ['Penumbra fora do raio direto das tochas', 'Tochas ativas ampliam o raio de visão e afastam emboscadas', 'Fontes mágicas de luz clareiam a escuridão circundante'] },
 
 };
 
@@ -103285,19 +103287,19 @@ function renderExploreFooter() {
 
     + '<button class="fb-btn" data-action="inventory">'
 
-    +   '<img class="fb-ico-img" src="/shared/img/ui/mochila.webp" alt="" onerror="this.style.display=\'none\'"><span>Mochila</span>'
+    +   '<img class="fb-ico-img" src="../shared/img/ui/mochila.webp" alt="" onerror="this.style.display=\'none\'"><span>Mochila</span>'
 
     + '</button>'
 
     + '<button class="fb-btn" data-action="status">'
 
-    +   '<img class="fb-ico-img" src="/shared/img/items/pergaminho-antigo.webp" alt="" onerror="this.style.display=\'none\'"><span>Ficha</span>'
+    +   '<img class="fb-ico-img" src="../shared/img/items/pergaminho-antigo.webp" alt="" onerror="this.style.display=\'none\'"><span>Ficha</span>'
 
     + '</button>'
 
     + '<button class="fb-btn" data-action="characters">'
 
-    +   '<img class="fb-ico-img" src="/shared/img/achievements/ach-aventureiro.webp" alt="" onerror="this.style.display=\'none\'"><span>Hall</span>'
+    +   '<img class="fb-ico-img" src="../shared/img/achievements/ach-aventureiro.webp" alt="" onerror="this.style.display=\'none\'"><span>Hall</span>'
 
     + '</button>'
 
@@ -103309,7 +103311,7 @@ function renderExploreFooter() {
 
     + '<button class="fb-btn fb-icon-only" data-action="settings" title="Configurações">'
 
-    +   '<img class="fb-ico-img" src="/shared/img/ui/configuracoes.webp" alt="Config" onerror="this.style.display=\'none\'">'
+    +   '<img class="fb-ico-img" src="../shared/img/ui/configuracoes.webp" alt="Config" onerror="this.style.display=\'none\'">'
 
     + '</button>';
 
@@ -103649,7 +103651,7 @@ function _showExploreHelp(explicitCtx) {
       title: 'Guia da Tela — Comitiva & Marcha',
       section: 'Ritmo, Luz & Funções do Grupo',
       tips: [
-        '<b>Ritmo de Marcha (PHB p. 181):</b> <b>Furtivo</b> (18 mi/dia, permite forragear e evitar emboscadas), <b>Normal</b> (24 mi/dia, equilibrado) ou <b>Rápido</b> (30 mi/dia, −5 na Percepção Passiva).',
+        '<b>Ritmo de Marcha:</b> <b>Furtivo</b> (18 mi/dia, permite forragear e evitar emboscadas), <b>Normal</b> (24 mi/dia, equilibrado) ou <b>Rápido</b> (30 mi/dia, −5 na Percepção Passiva).',
         '<b>Papéis de Viagem:</b> distribua funções entre Sentinela (alerta), Guia (orientação), Caçador (suprimentos) e Cartógrafo.',
         '<b>Tochas &amp; Luz:</b> acenda tochas ao viajar à noite ou em ambientes subterrâneos.'
       ]
@@ -104552,7 +104554,7 @@ function bindQuickActions() {
 
     offBtn.className = 'light-opt off' + (!S.lightSource ? ' selected' : '');
 
-    offBtn.innerHTML = '<img class="lo-icon" src="/shared/img/ui/tochas.webp" alt="" aria-hidden="true" onerror="this.style.display=\'none\'">'
+    offBtn.innerHTML = '<img class="lo-icon" src="../shared/img/ui/tochas.webp" alt="" aria-hidden="true" onerror="this.style.display=\'none\'">'
 
                      + '<span class="lo-label">Apagar</span>';
 
@@ -104576,7 +104578,7 @@ function bindQuickActions() {
 
       var _lslug = String(meta.id).replace(/^ic-/, '');
 
-      btn.innerHTML = '<img class="lo-icon" src="/shared/img/ui/' + _lslug
+      btn.innerHTML = '<img class="lo-icon" src="../shared/img/ui/' + _lslug
 
                     + '.webp" alt="" aria-hidden="true" onerror="this.style.display=\'none\'">'
 
@@ -104678,7 +104680,7 @@ function bindQuickActions() {
 
               || { id: 'ic-tochas', color: '#e85020' };
 
-    const _lsrc = '/shared/img/ui/' + String(meta.id).replace(/^ic-/, '') + '.webp';
+    const _lsrc = '../shared/img/ui/' + String(meta.id).replace(/^ic-/, '') + '.webp';
 
     let imgEl = lightBtn.querySelector('img.qb-icon');
 
@@ -111594,7 +111596,7 @@ function _showCampfireAllyPicker(alliesList) {
 
         desc: 'Acampamento de Valdoria · Fogueira Acesa',
 
-        portrait: '/shared/img/ui/acampamento.webp',
+        portrait: '../shared/img/ui/acampamento.webp',
 
         gender: 'neutral'
 

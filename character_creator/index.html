@@ -5590,7 +5590,7 @@ Busca rápida:
             html += `</div></div>`;
             // Sessao #35: Skill Versatility — 2 perícias livres (PHB p.39)
             html += `<div class="detail-section"><div class="detail-section-title">Versatilidade (Skill Versatility)</div>`;
-            html += `<div class="v-caption" style="margin-bottom:6px">Meio-Elfos ganham proficiência em <b>2 perícias à escolha</b> (PHB p.39).</div>`;
+            html += `<div class="v-caption" style="margin-bottom:6px">Meio-Elfos ganham proficiência em <b>2 perícias à escolha</b>.</div>`;
             html += `<div class="lang-grid" id="heSkillOptions">`;
             const allSkills = Object.keys(SKILL_PT);
             allSkills.forEach(sk => {
@@ -6655,7 +6655,7 @@ Busca rápida:
             }
             let html = `<button class="v-btn v-btn-secondary v-btn-pill sub-back" onclick="cancelRogueExpertise()">← Voltar</button>`;
             html += `<div class="detail-header"><div class="detail-title">Especialização (Expertise)</div>`;
-            html += `<div class="detail-subtitle">Ladino — escolha 2 perícias para dobrar o bônus de proficiência. (PHB p.96)</div></div>`;
+            html += `<div class="detail-subtitle">Ladino — escolha 2 perícias para dobrar o bônus de proficiência.</div></div>`;
             html += `<div class="v-caption" style="margin-bottom: var(--v-space-md, 8px)"><b>${(sel.rogueExpertise||[]).length}/2</b> selecionadas. Toque para alternar.</div>`;
             html += `<div class="lang-grid">`;
             allSkills.forEach(sk => {
@@ -7233,7 +7233,7 @@ Busca rápida:
                 const _allLangs = [...LANGUAGES.standard, ...LANGUAGES.exotic];
                 const _availLangs = _allLangs.filter(l => !_raceKnown.includes(l.key) && !_racePicked.includes(l.key));
                 html += `<div class="detail-section"><div class="detail-section-title">Idiomas do Antecedente <span class="section-summary" id="bgLangStatus">0/${bg.languageChoice}</span></div>`;
-                html += `<div class="v-caption" style="margin-bottom: var(--v-space-md, 8px)">Escolha ${bg.languageChoice} idioma(s) — PHB.</div>`;
+                html += `<div class="v-caption" style="margin-bottom: var(--v-space-md, 8px)">Escolha ${bg.languageChoice} idioma(s).</div>`;
                 html += `<div class="lang-grid" id="bgLangOptions">`;
                 _availLangs.forEach(l => {
                     const _on = (sel.bgLanguages || []).includes(l.key);
@@ -7747,7 +7747,7 @@ Busca rápida:
             }
             if (Array.isArray(sel.rogueExpertise) && sel.rogueExpertise.length === 2) {
                 const skillNames = sel.rogueExpertise.map(s => SKILL_PT[s] || s).join(', ');
-                combatBody += `<div class="trait-item"><div class="trait-name">Especialização: ${skillNames}</div><div class="trait-desc">Dobra o bônus de proficiência nessas perícias (PHB p.96).</div></div>`;
+                combatBody += `<div class="trait-item"><div class="trait-name">Especialização: ${skillNames}</div><div class="trait-desc">Dobra o bônus de proficiência nessas perícias.</div></div>`;
             }
             if (sel.draconicAncestry && typeof SORCERER_DRACONIC_ANCESTRY !== 'undefined' && SORCERER_DRACONIC_ANCESTRY[sel.draconicAncestry]) {
                 const da = SORCERER_DRACONIC_ANCESTRY[sel.draconicAncestry];
@@ -7756,7 +7756,7 @@ Busca rápida:
             // Sessao #35 (2026-05-25): Half-Elf Skill Versatility no summary
             if (Array.isArray(sel.halfElfSkills) && sel.halfElfSkills.length === 2) {
                 const skillNames = sel.halfElfSkills.map(s => SKILL_PT[s] || s).join(', ');
-                combatBody += `<div class="trait-item"><div class="trait-name">Versatilidade Meio-Elfo: ${skillNames}</div><div class="trait-desc">Proficiência em 2 perícias livres (PHB p.39).</div></div>`;
+                combatBody += `<div class="trait-item"><div class="trait-name">Versatilidade Meio-Elfo: ${skillNames}</div><div class="trait-desc">Proficiência em 2 perícias livres.</div></div>`;
             }
             if (lv1 && lv1.spells.length > 0) {
                 lv1.spells.forEach(sp => {

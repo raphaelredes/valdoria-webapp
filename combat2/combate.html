@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-11-01T17:34:05Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-11-02T01:28:02Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -37148,12 +37148,12 @@ function inspectHexTerrainOnBar(col, row) {
     if (elev !== 0) {
         if (elev > 0) {
             var eM = (elev >= 2) ? '+3,0m' : '+1,5m';
-            if (!surf && !dt) title = '⛰️ Elevação Tática (' + eM + ')';
+            if (!surf && !dt) title = 'Elevação Tática (' + eM + ')';
             if (tone === 'normal') tone = 'adv';
-            chips.push({ kind: 'good', text: '▲ ' + eM + ': +2 em ataques à distância contra nível inferior (DMG p. 251)' });
+            chips.push({ kind: 'good', text: '▲ ' + eM + ': +2 em ataques à distância contra nível inferior' });
             chips.push({ kind: 'info', text: '⇥ Subir exige +1,5m de deslocamento extra ' });
         } else {
-            if (!surf && !dt) title = '🕳️ Depressão Tática (-1,5m)';
+            if (!surf && !dt) title = 'Depressão Tática (-1,5m)';
             chips.push({ kind: 'warn', text: '▼ -1,5m: -2 em ataques à distância contra nível superior' });
         }
     }
@@ -37812,7 +37812,7 @@ function bindActions() {
                 if (!tip) return;
                 showBfTacticalPreviewBar({
                     tone: 'normal',
-                    title: '📜 Regra de Mesa D&D 5e',
+                    title: '◆ Regra Tática',
                     chips: [{ kind: 'info', text: tip }]
                 });
             });
@@ -37823,7 +37823,7 @@ function bindActions() {
     for (var tci = 0; tci < tacChips.length; tci++) {
         (function (cEl) {
             cEl.addEventListener('click', function () {
-                var rTitle = cEl.getAttribute('data-rule-title') || '📜 Recurso Tático D&D 5e';
+                var rTitle = cEl.getAttribute('data-rule-title') || '◆ Recurso Tático';
                 var rDesc = cEl.getAttribute('data-rule-desc') || cEl.getAttribute('title') || '';
                 showBfTacticalPreviewBar({
                     tone: 'normal',

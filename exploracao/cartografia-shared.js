@@ -83514,7 +83514,7 @@
   };
 
 })();
-  // Provedor de Provisões nos Portões de Valdoria (Tibor - D&D 5e)
+  // Provedor de Provisões nos Portões de Valdoria (Tibor)
   function _cartOpenTiborShop() {
     if (typeof haptic === 'function') haptic('light');
     if (window.vEncounter && typeof window.vEncounter.render === 'function') {
@@ -83556,39 +83556,52 @@
         ],
         choices: [
           {
-            id: 'buy_1_day',
-            label: 'Comprar 2 Rações (1 Dia de Marcha) — 1 PO',
-            desc: 'Suprimento padrão para marcha simples.',
+            id: 'buy_1_ration',
+            label: 'Comprar 1 Ração de Viagem (1 Valdorita)',
+            desc: 'Provisão nutritiva de carne seca, biscoito duro e frutas secas para 1 dia de marcha individual.',
             cost: 1,
-            qty: 2
+            qty: 1
           },
           {
-            id: 'buy_3_days',
-            label: 'Comprar 6 Rações (3 Dias de Marcha) — 3 PO',
-            desc: 'Fardo completo de provisões para travessias médias.',
-            cost: 3,
-            qty: 6
+            id: 'buy_5_rations',
+            label: 'Comprar Fardo com 5 Rações (2 Valdoritas)',
+            desc: 'Pacote econômico de provisões em tecido encerado. Recomendado para expedições de múltiplos dias.',
+            cost: 2,
+            qty: 5
           },
           {
-            id: 'buy_pack_7',
-            label: 'Fardo de Viagem (14 Rações / 7 Dias) — 5 PO',
-            desc: 'Fardo reforçado para longas expedições nos ermos.',
-            cost: 5,
-            qty: 14
+            id: 'buy_10_rations',
+            label: 'Comprar Fardo Completo com 10 Rações (4 Valdoritas)',
+            desc: 'Provisões para longas expedições e travessias profundas das terras ermas com seus companheiros.',
+            cost: 4,
+            qty: 10
+          },
+          {
+            id: 'lore_starvation',
+            label: 'O que acontece se eu viajar sem comida?',
+            desc: 'Perguntar sobre a sobrevivência e os perigos da fome nas estradas.'
           },
           {
             id: 'leave_tibor',
-            label: 'Retornar aos preparativos',
+            label: '↩ Concluir compras',
             desc: 'Agradecer a Tibor e voltar à jornada.'
           }
         ],
         choicesTitle: 'Banca de Provisões do Tibor',
+        choicesSubtitle: 'Suprimentos e Rações de Marcha',
         inline: true
       }, {
         player: p,
         onChoice: function(ch) {
           if (!ch || ch.id === 'leave_tibor') {
             if (window.vEncounter && typeof window.vEncounter.close === 'function') window.vEncounter.close();
+            if (typeof _cartRenderCarousel === 'function') _cartRenderCarousel();
+            return;
+          }
+          if (ch.id === 'lore_starvation') {
+            if (typeof _showTiborStarvationAdvice === 'function') {
+              _showTiborStarvationAdvice();
+            }
             return;
           }
           if (ch.cost && ch.qty) {
@@ -83596,9 +83609,18 @@
               window.vEncounter.render({
                 npc: { name: 'Tibor — Provedor da Estrada', desc: 'Banca de Suprimentos', portrait: portraitPath },
                 script: [{ type: 'speech', speaker: 'Tibor', text: 'Você não tem ouro suficiente para essa quantia, viajante.' }],
-                choices: [{ id: 'back_tibor', label: 'Ver outras opções' }],
+                choices: [
+                  { id: 'back_tibor', label: 'Ver outras opções' },
+                  { id: 'exit', label: '↩ Voltar' }
+                ],
                 inline: true
-              }, { player: p, onChoice: function() { _cartOpenTiborShop(); } });
+              }, { player: p, onChoice: function(subCh) {
+                if (subCh && subCh.id === 'back_tibor') _cartOpenTiborShop();
+                else {
+                  if (window.vEncounter && typeof window.vEncounter.close === 'function') window.vEncounter.close();
+                  if (typeof _cartRenderCarousel === 'function') _cartRenderCarousel();
+                }
+              } });
               return;
             }
             p.gold = gold - ch.cost;
@@ -83614,6 +83636,7 @@
             }
             if (typeof vToast === 'function') vToast('+' + ch.qty + ' Rações adquiridas (' + ch.cost + ' PO pago)', 'ok');
             if (window.vEncounter && typeof window.vEncounter.close === 'function') window.vEncounter.close();
+            if (typeof _cartRenderCarousel === 'function') _cartRenderCarousel();
           }
         }
       });

@@ -42,7 +42,7 @@
 var STARVATION_HAZARD = {
   title: 'Escassez de Alimento & Forrageamento Forçado',
   script: [
-    { type: 'narration', text: 'As provisões da mochila acabaram e o estômago ronca com a marcha pesada. Sem rações secas, a comitiva é forçada a parar a marcha para forragear raízes ou caçar nos arredores (D&D 5e PHB p. 185).' }
+    { type: 'narration', text: 'As provisões da mochila acabaram e o estômago ronca com a marcha pesada. Sem rações secas, a comitiva é forçada a parar a marcha para forragear raízes ou tentar caçar o que encontrar pelo caminho.' }
   ],
   choices: [
     {
@@ -54,7 +54,7 @@ var STARVATION_HAZARD = {
       sNarr: 'Você localiza raízes nutritivas e abate duas lebres com tiro certeiro. A refeição improvisada sacia o grupo, mas o desvio adiciona marcos ao percurso.',
       fNarr: 'Você revira troncos podres e arbustos secos sem encontrar nada além de espinhos e folhas amargas. A fraqueza física cobra o preço da inanição.',
       dmg: 4,
-      condition: { id: 'exhaustion', icon: '⏳', label: 'Exausto por Fome (Fadiga Nv. 1)', desc: 'Exaustão por inanição (D&D 5e): Desvantagem em testes de atributo e perícias até se alimentar.' }
+      condition: { id: 'exhaustion', icon: '⏳', label: 'Exausto por Fome (Fadiga Nv. 1)', desc: 'Exaustão por inanição: Desvantagem em testes de atributo e perícias até se alimentar.' }
     },
     {
       t: 'Apertar o cinto e marchar em jejum forçado',
@@ -64,7 +64,7 @@ var STARVATION_HAZARD = {
       sNarr: 'Seu vigor físico de aventureiro resiste à privação de alimento por hoje. A marcha continua.',
       fNarr: 'A fome drena suas forças. Tonturas e cãibras diminuem seus reflexos. Você sofre dano de fraqueza corporal.',
       dmg: 5,
-      condition: { id: 'exhaustion', icon: '⏳', label: 'Exausto por Fome (Fadiga Nv. 1)', desc: 'Exaustão por inanição (D&D 5e): Desvantagem em testes de atributo e perícias até se alimentar.' }
+      condition: { id: 'exhaustion', icon: '⏳', label: 'Exausto por Fome (Fadiga Nv. 1)', desc: 'Exaustão por inanição: Desvantagem em testes de atributo e perícias até se alimentar.' }
     }
   ]
 };
