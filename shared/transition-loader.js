@@ -36,6 +36,10 @@
             '@keyframes cityRingCW{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}',
             '@keyframes cityRingCCW{0%{transform:rotate(0deg)}100%{transform:rotate(-360deg)}}',
             '@keyframes cityCorePulse{0%,100%{transform:scale(.92);opacity:.7}50%{transform:scale(1.1);opacity:1}}',
+            '@keyframes cityOrbNebulaRot{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}',
+            '@keyframes cityOrbBreathe{0%,100%{transform:scale(0.95);filter:brightness(0.95)}50%{transform:scale(1.08);filter:brightness(1.15)}}',
+            '@keyframes cityOrbCorePulse{0%,100%{transform:scale(0.9);opacity:0.8}50%{transform:scale(1.15);opacity:1}}',
+            '@keyframes cityOrbCoreFlare{0%,100%{opacity:0;transform:scale(0.8)}20%{opacity:0.8;transform:scale(1.1)}30%{opacity:0}75%{opacity:0}85%{opacity:0.6;transform:scale(1.05)}95%{opacity:0}}',
             '@keyframes cityTextShimmer{0%,100%{opacity:.75}50%{opacity:1}}',
             '@keyframes cityEmberFloat{0%{transform:translate3d(0,0,0);opacity:0}20%{opacity:.8}80%{opacity:.4}100%{transform:translate3d(var(--ex,8px),-45px,0);opacity:0}}',
             '.vld-std-loader-bg{background:radial-gradient(ellipse at center,#261c14 0%,#1a1510 60%,#0d0a08 100%) !important;}',
@@ -44,7 +48,17 @@
             '.vld-std-emblem-glow{position:absolute;inset:-16px;border-radius:50%;background:radial-gradient(circle,rgba(196,149,58,.15) 0%,transparent 70%);pointer-events:none;}',
             '.vld-std-ring-cw{position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(196,149,58,.28);border-top-color:#e8c868;border-right-color:rgba(196,149,58,.65);box-shadow:0 0 14px rgba(196,149,58,.18);animation:cityRingCW 7s linear infinite;}',
             '.vld-std-ring-ccw{position:absolute;inset:9px;border-radius:50%;border:1px dashed rgba(196,149,58,.45);border-bottom-color:#c4953a;animation:cityRingCCW 4.5s linear infinite;}',
-            '.vld-std-core{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#e8c868;font-size:16px;text-shadow:0 0 10px rgba(232,200,104,.85);animation:cityCorePulse 2.8s ease-in-out infinite;line-height:1;}',
+            '.vld-std-core{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}',
+            '.vld-std-core-orb{position:relative;width:28px;height:28px;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 50% 50%,rgba(220,180,50,0.18) 0%,rgba(160,120,30,0.3) 40%,rgba(90,60,15,0.45) 100%);box-shadow:0 0 16px rgba(232,196,58,0.5),0 0 30px rgba(232,196,58,0.2),inset 0 0 8px rgba(255,244,160,0.15),inset 0 -5px 8px rgba(0,0,0,0.5),inset 0 3px 6px rgba(255,248,180,0.2),0 0 0 1px rgba(255,244,208,0.15);animation:cityOrbBreathe 3s ease-in-out infinite;flex-shrink:0;}',
+            '.vld-orb-nebula{position:absolute;inset:0;border-radius:50%;animation:cityOrbNebulaRot 24s linear infinite;}',
+            '.vld-orb-neb1{position:absolute;inset:8%;border-radius:50%;background:radial-gradient(ellipse at 30% 40%,rgba(255,220,60,0.6) 0%,rgba(232,196,58,0.35) 30%,transparent 70%);filter:blur(1.5px);}',
+            '.vld-orb-neb2{position:absolute;inset:12%;border-radius:50%;background:radial-gradient(ellipse at 70% 60%,rgba(255,210,50,0.5) 0%,rgba(220,160,30,0.25) 40%,transparent 70%);filter:blur(2px);}',
+            '.vld-orb-core{position:absolute;top:25%;left:25%;width:50%;height:50%;border-radius:50%;background:radial-gradient(circle,rgba(255,248,180,0.95) 0%,rgba(255,235,100,0.5) 40%,transparent 75%);filter:blur(1px);animation:cityOrbCorePulse 3.5s ease-in-out infinite;}',
+            '.vld-orb-core-fl{position:absolute;top:28%;left:28%;width:44%;height:44%;border-radius:50%;background:radial-gradient(circle,rgba(255,255,220,0.7) 0%,transparent 70%);filter:blur(0.8px);animation:cityOrbCoreFlare 6s ease-in-out infinite;}',
+            '.vld-orb-term{position:absolute;inset:0;border-radius:50%;background:linear-gradient(135deg,transparent 0%,transparent 45%,rgba(0,0,0,0.25) 65%,rgba(0,0,0,0.45) 100%);z-index:5;pointer-events:none;}',
+            '.vld-orb-fresnel{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 50%,transparent 60%,rgba(255,244,208,0.08) 75%,rgba(255,244,208,0.2) 90%,rgba(255,244,208,0.1) 100%);z-index:6;pointer-events:none;}',
+            '.vld-orb-gp{position:absolute;top:6%;left:10%;width:48%;height:34%;border-radius:50%;background:linear-gradient(180deg,rgba(255,255,255,0.65) 0%,rgba(255,255,255,0.2) 45%,transparent 100%);filter:blur(0.5px);transform:rotate(-15deg);z-index:7;}',
+            '.vld-orb-spec{position:absolute;top:15%;left:22%;width:2.5px;height:1.5px;border-radius:50%;background:#ffffff;box-shadow:0 0 3px #ffffff;z-index:8;}',
             '.vld-std-ember-1{position:absolute;bottom:8px;left:20%;width:2.5px;height:2.5px;border-radius:50%;background:#e8c868;box-shadow:0 0 6px #e8c868;--ex:-9px;animation:cityEmberFloat 2.6s ease-out infinite .2s;pointer-events:none;}',
             '.vld-std-ember-2{position:absolute;bottom:6px;left:50%;width:2px;height:2px;border-radius:50%;background:#f3dc92;box-shadow:0 0 5px #f3dc92;--ex:5px;animation:cityEmberFloat 3.1s ease-out infinite 1.1s;pointer-events:none;}',
             '.vld-std-ember-3{position:absolute;bottom:10px;left:76%;width:2.5px;height:2.5px;border-radius:50%;background:#c4953a;box-shadow:0 0 6px #c4953a;--ex:11px;animation:cityEmberFloat 2.8s ease-out infinite .6s;pointer-events:none;}',
@@ -72,7 +86,19 @@
                 '<div class="vld-std-emblem-glow"></div>' +
                 '<div class="vld-std-ring-cw"></div>' +
                 '<div class="vld-std-ring-ccw"></div>' +
-                '<div class="vld-std-core">&#9670;</div>' +
+                '<div class="vld-std-core">' +
+                    '<div class="vld-std-core-orb">' +
+                        '<div class="vld-orb-nebula">' +
+                            '<div class="vld-orb-neb1"></div><div class="vld-orb-neb2"></div>' +
+                        '</div>' +
+                        '<div class="vld-orb-core"></div>' +
+                        '<div class="vld-orb-core-fl"></div>' +
+                        '<div class="vld-orb-term"></div>' +
+                        '<div class="vld-orb-fresnel"></div>' +
+                        '<div class="vld-orb-gp"></div>' +
+                        '<div class="vld-orb-spec"></div>' +
+                    '</div>' +
+                '</div>' +
                 '<div class="vld-std-ember-1"></div>' +
                 '<div class="vld-std-ember-2"></div>' +
                 '<div class="vld-std-ember-3"></div>' +
