@@ -2135,31 +2135,23 @@ LOG SINK (Fase 7):
     .srp-rewards {
       width: 100%;
       max-width: 320px;
-      padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
+      padding: var(--v-space-md-lg, 10px) 0;
       margin: var(--v-space-md, 8px) auto var(--v-space-sm, 4px);
-      background: rgba(15,12,8,0.55);
-      border-left: 3px solid rgba(196,149,58,0.65);
-      border-radius: var(--v-radius-xs, 4px);
+      border-top: 1px solid var(--v-gold-30, rgba(196, 149, 58, 0.3));
+      border-bottom: 1px solid var(--v-gold-30, rgba(196, 149, 58, 0.3));
+      background: linear-gradient(180deg, var(--v-gold-08, rgba(196, 149, 58, 0.08)), transparent);
+      text-align: center;
       display: flex;
       flex-direction: column;
-      gap: var(--v-space-sm, 4px);
       animation: srpFadeIn 0.35s ease both;
     }
-    .srp-rr-title {
-      font-family: var(--v-font-display, 'Cinzel'), serif;
-      font-weight: 600;
-      font-size: calc(10px * var(--v-font-scale, 1));
-      color: rgba(255,214,128,0.80);
-      letter-spacing: 1.5px;
+    .srp-rewards .enc-reward-title {
+      font-family: var(--v-font-display, 'Cinzel', serif);
+      font-size: calc(11px * var(--v-font-scale, 1));
+      letter-spacing: 3px;
       text-transform: uppercase;
-      padding-bottom: var(--v-space-sm, 4px);
-      border-bottom: 1px solid rgba(196,149,58,0.20);
-      margin-bottom: var(--v-space-xs, 2px);
-    }
-    .srp-rr-list {
-      display: flex;
-      flex-direction: column;
-      gap: var(--v-space-xs, 2px);
+      color: var(--v-gold, #c4953a);
+      margin-bottom: 5px;
     }
     .srp-rr-item {
       display: flex;
@@ -12977,9 +12969,9 @@ body.perf-lite .vc-action-btn { transition: none; }
             <span id="srp-dice-total"></span>
           </div>
           <div class="srp-delta-row" id="srp-delta-row"></div>
-          <div class="srp-rewards" id="srp-rewards" style="display:none">
-            <div class="srp-rr-title">✦ RECOMPENSAS ✦</div>
-            <div class="srp-rr-list" id="srp-rr-list"></div>
+          <div class="srp-rewards enc-reward" id="srp-rewards" style="display:none">
+            <div class="enc-reward-title">◆ RECOMPENSA ◆</div>
+            <div class="enc-reward-list" id="srp-rr-list"></div>
           </div>
         </div>
         <div class="srp-footer">
@@ -35526,15 +35518,19 @@ function _npcHandleTalkEncounter(p, npc, opt, opts){
     _npcHandleTalk(p, npc, opt, opts.parentRestoreFn);
     return;
   }
-  var msgExtra = _npcApplyTalkEffects(p, npc, opt);
-  var answerText = opt.a + (opt.buff ? '<br><br><b>Efeito:</b> ' + opt.buff : '') + msgExtra;
-  _showSharedNpcDialogue(opts, { answer: { speaker: npc.name, text: answerText }, answeredId: opt.id });
+  var talkRes = _npcApplyTalkEffects(p, npc, opt);
+  var answerText = opt.a + (opt.buff ? '<br><br><b>Efeito:</b> ' + opt.buff : '');
+  _showSharedNpcDialogue(opts, {
+    answer: { speaker: npc.name, text: answerText },
+    answeredId: opt.id,
+    reward: talkRes && (talkRes.xp || talkRes.gold || (talkRes.items && talkRes.items.length)) ? talkRes : null
+  });
 }
 
 // Aplica os efeitos de uma talkOption SEM custo (mark-used + visit count + quest
 // flags + XP/gold/item rewards). Extraído de _npcHandleTalk pra ser reusado tanto
 // pelo fluxo legacy (_showServiceResultPopup) quanto pelo novo (vEncounter in-popup).
-// Retorna msgExtra (HTML das linhas de recompensa) pra anexar à narrativa.
+// Retorna objeto canônico de recompensa { xp, gold, items } pra renderização estruturada.
 function _npcApplyTalkEffects(p, npc, opt){
   _npcMarkUsed(npc.id, opt.id);
   if (npc._isCanonUnique && npc._canonKey){
@@ -35547,13 +35543,14 @@ function _npcApplyTalkEffects(p, npc, opt){
     // Fatia 2: usa o helper canonical (local + servidor) ao invés do inline original.
     _persistNarrativeFlag(p, 'town_lia_helped', true);
   }
-  var msgExtra = '';
+  var reward = null;
   if (opt._grantsXp){
     _gainXp(p, opt._grantsXp);
+    reward = reward || {};
+    reward.xp = (reward.xp || 0) + opt._grantsXp;
   }
   if (opt._isUniqueFinish && opt._reward){
     var r = opt._reward;
-    var rewardLines = [];
     // SERVER-AUTHORITATIVE (#0, 2026-06-18, Fatia 1 NPC Interaction): antes os rewards
     // de "Concluir História" eram LOCAL — só o XP escapava via service.xp; gold + item
     // sumiam no próximo reload e o usuário podia farmar resetando localStorage
@@ -35562,10 +35559,10 @@ function _npcApplyTalkEffects(p, npc, opt){
     // bloqueia repeats. O cliente faz otimismo (UX) e re-hidrata gold/level do servidor.
     var alreadyDoneLocal = !!(npc._canonKey && window._uniqueNpcsFinished && window._uniqueNpcsFinished[npc._canonKey]);
     if (!alreadyDoneLocal){
-      if (r.xp){ _gainXp(p, r.xp); rewardLines.push('+' + r.xp + ' XP'); }
-      if (r.gold){ p.gold += r.gold; rewardLines.push('<span class="vi vi-coin sm"></span> +' + r.gold + ' Valdoritas'); }
-      if (r.item){ _applyBoughtItem(r.item); rewardLines.push('Obteve: ' + r.item); }
-      if (rewardLines.length){ msgExtra = '<br><br>' + rewardLines.join('<br>'); }
+      reward = reward || {};
+      if (r.xp){ _gainXp(p, r.xp); reward.xp = (reward.xp || 0) + r.xp; }
+      if (r.gold){ p.gold += r.gold; reward.gold = (reward.gold || 0) + r.gold; }
+      if (r.item){ _applyBoughtItem(r.item); reward.items = reward.items || []; reward.items.push(r.item); }
     }
     if (npc._canonKey){
       window._uniqueNpcsFinished[npc._canonKey] = true;
@@ -35589,7 +35586,7 @@ function _npcApplyTalkEffects(p, npc, opt){
     }
   }
   if (typeof refreshHud === 'function') { try { refreshHud(); } catch(_){} }
-  return msgExtra;
+  return reward;
 }
 
 // Helper genérico: mostra dialogue NPC com greeting + options não-usadas via
@@ -35656,6 +35653,14 @@ function _showSharedNpcDialogue(opts, internalState){
       } else {
         script.push({ type: 'narration', text: (npc.name || 'O interlocutor') + ' ouve com atenção antes de responder.' });
         script.push({ type: 'speech', speaker: npc.name || '', text: rawAns });
+      }
+      if (internalState.reward) {
+        script.push({
+          type: 'reward',
+          xp: internalState.reward.xp,
+          gold: internalState.reward.gold,
+          items: internalState.reward.items
+        });
       }
     } else {
       var greeting = _npcGreet(npc) || '— Saudações, viajante.';  // PADRAO_ALDRIC: narração sensorial do Mestre SEMPRE precede a fala (Regra #14)
@@ -35817,24 +35822,24 @@ function _npcHandleTalk(p, npc, opt, parentRestoreFn){
       _gainXp(p, opt._grantsXp);
       deltas.push(_lastXpDelta(p));
     }
+    var talkRewards = [];
+    if (opt._grantsXp) {
+      talkRewards.push({ type: 'xp', amount: opt._grantsXp, label: 'Experiência' });
+    }
     if (opt._isUniqueFinish && opt._reward){
       var r = opt._reward;
-      var rewardLines = [];
-      if (r.xp){ _gainXp(p, r.xp); rewardLines.push('+' + r.xp + ' XP'); }
+      if (r.xp){ _gainXp(p, r.xp); talkRewards.push({ type: 'xp', amount: r.xp, label: 'Experiência' }); }
       if (r.gold){
         p.gold += r.gold;
-        rewardLines.push('<span class="vi vi-coin sm"></span> +' + r.gold + ' Valdoritas');
+        talkRewards.push({ type: 'gold', amount: r.gold, label: 'Tesouro' });
         deltas.push({ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, p.gold, 1), bar: false });
       }
       if (r.item){
         _applyBoughtItem(r.item);
-        rewardLines.push('Obteve: ' + r.item);
+        talkRewards.push({ type: 'item', amount: 1, label: r.item });
       }
       if (r.xp){
         deltas.push(_lastXpDelta(p));
-      }
-      if (rewardLines.length){
-        msgExtra = '<br><br>' + rewardLines.join('<br>');
       }
       // Marca finalizado (canonical: town_unique_<id>_finished flag)
       // task #80 (2026-05-20): persiste em localStorage char-namespaced
@@ -35864,8 +35869,9 @@ function _npcHandleTalk(p, npc, opt, parentRestoreFn){
     }
     _showServiceResultPopup({
       icon: _heralIco('ic-dialogo'), npc: (npc.role || '') + ' ' + npc.name,
-      narrative: opt.a + (opt.buff ? '<br><br><b>Efeito:</b> ' + opt.buff : '') + msgExtra,
+      narrative: opt.a + (opt.buff ? '<br><br><b>Efeito:</b> ' + opt.buff : ''),
       deltas: deltas,
+      rewards: talkRewards.length ? talkRewards : undefined,
       onContinue: function(){
         _showSharedNpcDialogue({ npc: npc, player: p, parentRestoreFn: parentRestoreFn });
       }
@@ -42056,14 +42062,18 @@ function _renderEncounterOutcome(player, choice, data) {
     });
   }
 
-  // 3. Bloco canônico estruturado de Recompensa (XP / Valdoritas)
+  // 3. Bloco canônico estruturado de Recompensa (XP / Valdoritas / Itens / Efeito)
   var rewXp = data.xp || 0;
   var rewGold = data.gold || 0;
-  if (rewXp > 0 || rewGold > 0) {
+  var rewItems = data.items || (data.item ? [data.item] : null);
+  var rewEffect = data.effectDesc || data.effect_text || null;
+  if (rewXp > 0 || rewGold > 0 || (rewItems && rewItems.length > 0) || rewEffect) {
     scriptLines.push({
       type: 'reward',
       xp: rewXp > 0 ? rewXp : undefined,
-      gold: rewGold > 0 ? rewGold : undefined
+      gold: rewGold > 0 ? rewGold : undefined,
+      items: (rewItems && rewItems.length > 0) ? rewItems : undefined,
+      effect: rewEffect || undefined
     });
   }
 
@@ -58117,10 +58127,14 @@ function _guildShowRewards(p){
       refreshHud();
       _showServiceResultPopup({
         icon: _heralIco('ic-bolsa'), npc: 'Tavira',
-        narrative: '<i>Tavira anota no livro e entrega a bolsa.</i><br><b>+50 Valdoritas + 80 XP</b>',
+        narrative: '<i>Tavira anota no livro e entrega a bolsa.</i>',
         deltas: [
           { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false },
           _lastXpDelta(p)
+        ],
+        rewards: [
+          { type: 'gold', amount: 50, label: 'Tesouro' },
+          { type: 'xp', amount: 80, label: 'Experiência' }
         ],
         onContinue: function(){ navigateBack(); }
       });
@@ -58211,14 +58225,18 @@ function _guildBountyTurnin(p, questId){
     if (typeof res.xp === 'number') { p.xp = preXp + res.xp; p._lastXpGain = res.xp; }
     if (typeof refreshHud === 'function') refreshHud();
     var lvlUp = res.leveled ? '<br><br><b>SUBIU DE NÍVEL!</b>' : '';
-    var itemsTxt = (res.items && res.items.length) ? ('<br>' + res.items.join('<br>')) : '';
+    var bRewards = [];
+    if (res.gold) bRewards.push({ type: 'gold', amount: res.gold, label: 'Tesouro' });
+    if (res.xp) bRewards.push({ type: 'xp', amount: res.xp, label: 'Experiência' });
+    (res.items || []).forEach(function(it){ bRewards.push({ type: 'item', amount: 1, label: it }); });
     _showServiceResultPopup({
       icon: _heralIco('ic-bolsa'), npc: 'Mestra Tavira',
-      narrative: '<i>' + (res.tavira_line || 'Tavira anota no livro e entrega a bolsa.') + '</i><br><br><b>Contrato "' + (res.title || '') + '" entregue.</b>' + itemsTxt + lvlUp,
+      narrative: '<i>' + (res.tavira_line || 'Tavira anota no livro e entrega a bolsa.') + '</i><br><br><b>Contrato "' + (res.title || '') + '" entregue.</b>' + lvlUp,
       deltas: [
         { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false },
         { type:'gold', label:'XP', from: preXp, to: preXp + (res.xp || 0), max: Math.max(preXp + (res.xp || 0), 1), bar: false }
       ],
+      rewards: bRewards,
       onContinue: function(){ _guildBountiesMenu(p); }
     });
   }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } if (typeof vToast === 'function') vToast('Erro ao entregar contrato.', 'warn'); });
@@ -58239,6 +58257,9 @@ function _guildBountyBatch(p){
     if (typeof refreshHud === 'function') refreshHud();
     var lvlUp = res.leveled ? '<br><br><b>SUBIU DE NÍVEL!</b>' : '';
     var titlesTxt = (res.titles && res.titles.length) ? ('<br>· ' + res.titles.join('<br>· ')) : '';
+    var batchRewards = [];
+    if (res.total_gold) batchRewards.push({ type: 'gold', amount: res.total_gold, label: 'Tesouro' });
+    if (res.total_xp) batchRewards.push({ type: 'xp', amount: res.total_xp, label: 'Experiência' });
     _showServiceResultPopup({
       icon: _heralIco('ic-bolsa'), npc: 'Mestra Tavira',
       narrative: '<i>' + (res.tavira_line || '') + '</i><br><br><b>' + (res.count || 0) + ' contratos entregues.</b>' + titlesTxt + lvlUp,
@@ -58246,6 +58267,7 @@ function _guildBountyBatch(p){
         { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false },
         { type:'gold', label:'XP', from: preXp, to: preXp + (res.total_xp || 0), max: Math.max(preXp + (res.total_xp || 0), 1), bar: false }
       ],
+      rewards: batchRewards,
       onContinue: function(){ _guildBountiesMenu(p); }
     });
   }).catch(function(_e){ if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} } if (typeof vToast === 'function') vToast('Erro ao entregar contratos.', 'warn'); });
@@ -60504,6 +60526,10 @@ function _questsShowTab(p, tab){
               deltas: [
                 { type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(p.gold,1), bar: false },
                 _lastXpDelta(p)
+              ],
+              rewards: [
+                { type: 'gold', amount: q.reward, label: 'Tesouro' },
+                { type: 'xp', amount: q.xp, label: 'Experiência' }
               ],
               onContinue: function(){ navigateBack(); }
             });
@@ -62901,9 +62927,9 @@ function _showServiceResultPopup(opts){
       (opts.deltas || []).forEach(function(d){
         if (d.type === 'gold' && (d.to - d.from) > 0){
           if (d.label === 'XP'){
-            rewards.push({ type:'xp', amount: d.to - d.from, label: 'XP' });
+            rewards.push({ type:'xp', amount: d.to - d.from, label: 'Experiência' });
           } else {
-            rewards.push({ type:'gold', amount: d.to - d.from, label: 'Valdoritas' });
+            rewards.push({ type:'gold', amount: d.to - d.from, label: 'Tesouro' });
           }
         }
       });
@@ -62911,36 +62937,59 @@ function _showServiceResultPopup(opts){
         rewards.push({ type:'item', amount: 1, label: opts.itemReceived });
       }
     }
-    // Threshold canonical: bloco só aparece para recompensas significativas
     var significantRewards = (rewards || []).filter(function(r){
-      if (r.type === 'gold' && r.amount >= 5) return true;
-      if (r.type === 'xp' && r.amount >= 10) return true;
-      if (r.type === 'item') return true;
-      return false;
+      return (r.type === 'gold' && r.amount > 0) ||
+             (r.type === 'xp' && r.amount > 0) ||
+             (r.type === 'item');
     });
     if (significantRewards.length > 0){
       significantRewards.forEach(function(r){
-        var icon = '';
-        var amountCls = 'xp-amount';
-        var amountText = '+' + r.amount;
+        var row = document.createElement('div');
+        row.className = 'enc-reward-row';
+        var iconSpan = document.createElement('span');
+        iconSpan.className = 'enc-reward-icon enc-reward-icon-' + r.type;
+        var col = document.createElement('div');
+        col.className = 'enc-reward-col';
+        var val = document.createElement('div');
+        val.className = 'enc-reward-val enc-reward-val-' + r.type;
+        var lbl = document.createElement('div');
+        lbl.className = 'enc-reward-lbl';
+
         if (r.type === 'gold'){
-          icon = '<span class="vi vi-coin sm"></span>';
-          amountCls = 'gold-amount';
-          amountText = '+' + r.amount;
+          var coin = document.createElement('span');
+          coin.className = 'vi vi-coin';
+          iconSpan.appendChild(coin);
+          val.textContent = '+' + (r.amount | 0) + ' Valdoritas';
+          lbl.textContent = r.label || 'Tesouro';
         } else if (r.type === 'xp'){
-          icon = '';
-          amountCls = 'xp-amount';
-          amountText = '+' + r.amount + ' XP';
+          iconSpan.textContent = '✦';
+          val.textContent = '+' + (r.amount | 0) + ' XP';
+          lbl.textContent = r.label || 'Experiência';
         } else if (r.type === 'item'){
-          icon = '';
-          amountCls = 'item-amount';
-          amountText = r.amount > 1 ? ('×' + r.amount) : 'Obtido';
+          var itName = String(r.label || r.name || 'Item');
+          var slug = '';
+          try {
+            slug = itName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+          } catch(e){}
+          if (slug && window.vItems && typeof window.vItems.has === 'function' && window.vItems.has(slug)) {
+            var img = document.createElement('img');
+            img.className = 'enc-reward-item-img';
+            img.alt = '';
+            img.loading = 'lazy';
+            img.src = ((window.vItemsConfig && window.vItemsConfig.pngBase) || '/shared/img/items/') + slug + '.webp';
+            img.setAttribute('onerror', "this.style.display='none';this.parentNode.innerHTML='<span class=\"vitem-placeholder-symbol\" style=\"font-size:1.2em;color:#dfbf78;font-weight:700;\">◆</span>';");
+            iconSpan.appendChild(img);
+          } else {
+            iconSpan.innerHTML = '<span class="vitem-placeholder-symbol" style="font-size:1.2em;color:#dfbf78;font-weight:700;">◆</span>';
+          }
+          val.textContent = itName.indexOf('+') === 0 ? itName : ('+1 ' + itName);
+          lbl.textContent = (itName.toLowerCase().indexOf('mapa') >= 0 || itName.toLowerCase().indexOf('pergaminho') >= 0) ? 'Documento / Mapa' : 'Item Obtido';
         }
-        var html = '<div class="srp-rr-item">'
-                 + '<span class="srp-rr-item-label">' + icon + ' ' + r.label + '</span>'
-                 + '<span class="srp-rr-item-amount ' + amountCls + '">' + amountText + '</span>'
-                 + '</div>';
-        rrList.insertAdjacentHTML('beforeend', html);
+        col.appendChild(val);
+        col.appendChild(lbl);
+        row.appendChild(iconSpan);
+        row.appendChild(col);
+        rrList.appendChild(row);
       });
       rewardsEl.style.display = '';
     } else {
@@ -84767,12 +84816,24 @@ function _resolveOfferChoice(player, offerChoice, subResult) {
   }
 
   refreshHud();
-  _showServiceResultPopup({
-    icon: _heralIco('ic-mercado'),
-    npc: 'Praça Central',
+  var gainXp = 0;
+  if (subResult === 'apply_now' && ef.xp) gainXp = ef.xp;
+  else if (subResult === 'take_along') gainXp = 1;
+  else if (subResult === 'decline' && offerChoice.effect && offerChoice.effect.xp) gainXp = offerChoice.effect.xp;
+
+  var gainGold = (subResult === 'apply_now' && ef.gold) ? ef.gold : 0;
+  var gainItem = (subResult === 'take_along' && offerChoice.item) ? offerChoice.item : null;
+  var healAmt = (subResult === 'apply_now' && ef.hp_heal) ? ef.hp_heal : 0;
+
+  _renderEncounterOutcome(player, offerChoice, {
     narrative: offerChoice.result_text || 'Você segue seu caminho.',
-    deltas: deltas,
-    onContinue: function(){}
+    xp: gainXp,
+    gold: gainGold,
+    items: gainItem ? [gainItem] : undefined,
+    hpHeal: healAmt,
+    preHp: preHp,
+    hpMax: player.hpMax || 28,
+    deltas: deltas
   });
 }
 window._resolveOfferChoice = _resolveOfferChoice;

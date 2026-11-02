@@ -1076,7 +1076,7 @@
     } else if (kind === 'xp') {
       ic.textContent = '✦';
     } else if (kind === 'quest') {
-      ic.innerHTML = '📜';
+      ic.textContent = '❖';
     } else if (kind === 'item') {
       var slug = _rewardItemSlug(name);
       var img = null;
@@ -1086,10 +1086,10 @@
         img.alt = '';
         img.loading = 'lazy';
         img.src = ((window.vItemsConfig && window.vItemsConfig.pngBase) || '/shared/img/items/') + slug + '.webp';
-        img.setAttribute('onerror', "this.style.display='none';this.parentNode.innerHTML='<span class=\"vitem-placeholder-symbol\" style=\"font-size:1.2em;color:#dfbf78;font-weight:700;\">" + (name && (name.toLowerCase().indexOf('mapa') !== -1 || name.toLowerCase().indexOf('pergaminho') !== -1) ? '🗺️' : '📦') + "</span>';");
+        img.setAttribute('onerror', "this.style.display='none';this.parentNode.innerHTML='<span class=\"vitem-placeholder-symbol\" style=\"font-size:1.2em;color:#dfbf78;font-weight:700;\">◆</span>';");
         ic.appendChild(img);
       } else {
-        var fallbackIco = (name && (name.toLowerCase().indexOf('mapa') !== -1 || name.toLowerCase().indexOf('pergaminho') !== -1)) ? '🗺️' : '📦';
+        var fallbackIco = '◆';
         ic.innerHTML = '<span class="vitem-placeholder-symbol" style="font-size:1.2em;color:#dfbf78;font-weight:700;">' + fallbackIco + '</span>';
       }
     } else {
@@ -4780,24 +4780,35 @@
         }
         // Padronização universal AAA: se a linha de narração contiver dados de recompensas/missão aceita em texto bruto,
         // converte para o componente de recompensa canônico do jogo.
-        if (line.type === 'narration' || !line.type) {
-          var parsedRew = _tryParseRewardNarration(lineText);
-          if (parsedRew) {
-            if (parsedRew.remainingText) {
-              var rNarDiv = document.createElement('div');
-              rNarDiv.className = 'enc-line enc-line--narration enc-narration';
-              rNarDiv.innerHTML = _sanitizeDialogueHTML(_stripEmojis(parsedRew.remainingText));
-              body.appendChild(rNarDiv);
+        var parsedRew = _tryParseRewardNarration(lineText);
+        if (parsedRew) {
+          if (parsedRew.remainingText) {
+            var isLinePlayer = line.type === 'player_speech' || !!line.is_player || line.speaker === '{player_name}' || line.speaker === '{player}' || line.speaker === 'Você' || (pData && pData.name && line.speaker === pData.name);
+            var _lineCls = (line.type === 'speech' || line.type === 'player_speech') ? ('enc-speech' + (isLinePlayer ? ' enc-speech--player' : ''))
+              : (line.type === 'dm') ? 'enc-narration enc-dm'
+              : 'enc-narration' + (line._checkHint ? ' enc-check-hint' : '');
+            var rDiv = document.createElement('div');
+            rDiv.className = 'enc-line ' + _lineCls;
+            if ((line.type === 'speech' || line.type === 'player_speech') && line.speaker) {
+              var _spk = String(line.speaker);
+              if (isLinePlayer || _spk === '{player_name}' || _spk === '{player}') {
+                _spk = (pData && pData.name) || 'Você';
+              } else if (/^[a-z0-9_]+$/.test(_spk) || _spk === d.id || _spk === (d.npc && d.npc.id)) {
+                _spk = (d.npc && d.npc.name) || 'Interlocutor';
+              }
+              rDiv.setAttribute('data-speaker', _spk);
             }
-            var rel = _buildRewardBlockEl(parsedRew.reward);
-            if (rel) {
-              var rdiv = document.createElement('div');
-              rdiv.className = 'enc-line enc-reward-line';
-              rdiv.appendChild(rel);
-              body.appendChild(rdiv);
-            }
-            return;
+            rDiv.innerHTML = _sanitizeDialogueHTML(_stripEmojis(parsedRew.remainingText));
+            body.appendChild(rDiv);
           }
+          var rel = _buildRewardBlockEl(parsedRew.reward);
+          if (rel) {
+            var rdiv = document.createElement('div');
+            rdiv.className = 'enc-line enc-reward-line';
+            rdiv.appendChild(rel);
+            body.appendChild(rdiv);
+          }
+          return;
         }
 
         var _sentences = _splitIntoSentences(_sanitizeDialogueHTML(lineText));
@@ -5542,6 +5553,8 @@
     attachData: attachData,
     close: close,
     isOpen: isOpen,
+    buildRewardBlock: _buildRewardBlockEl,
+    parseRewardNarration: _tryParseRewardNarration,
     /* task #49 (2026-05-20) — Choice sub-overlay AAA: módulo público
        pra reuso por _renderEncounterPopup legacy + qualquer outro renderer. */
     openChoices: openChoices,
