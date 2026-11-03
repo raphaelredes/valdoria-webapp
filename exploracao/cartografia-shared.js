@@ -81999,44 +81999,188 @@
 
 
   function _getGrammarMoveButtonLabel(nodeName) {
-
     var nm = (nodeName || '').toLowerCase().trim();
-
+    var prefix = 'Ir até o';
     if (nm.startsWith('campos') || nm.startsWith('picos') || nm.startsWith('portões') || nm.startsWith('portoes')) {
-
-      return 'Ir até os';
-
+      prefix = 'Ir até os';
+    } else if (nm.startsWith('terras') || nm.startsWith('ruínas') || nm.startsWith('ruinas') || nm.startsWith('cavernas') || nm.startsWith('profundezas') || nm.startsWith('montanhas')) {
+      prefix = 'Ir até as';
+    } else if (nm.startsWith('floresta') || nm.startsWith('passagem') || nm.startsWith('caverna') || nm.startsWith('costa') || nm.startsWith('cala') || nm.startsWith('tumba') || nm.startsWith('cripta') || nm.startsWith('cratera') || nm.startsWith('crista') || nm.startsWith('vila') || nm.indexOf('korthag') >= 0) {
+      prefix = 'Ir até a';
     }
-
-    if (nm.startsWith('terras') || nm.startsWith('ruínas') || nm.startsWith('ruinas') || nm.startsWith('cavernas') || nm.startsWith('profundezas') || nm.startsWith('montanhas')) {
-
-      return 'Ir até as';
-
-    }
-
-    if (nm.startsWith('floresta') || nm.startsWith('passagem') || nm.startsWith('caverna') || nm.startsWith('costa') || nm.startsWith('cala') || nm.startsWith('tumba') || nm.startsWith('cripta') || nm.startsWith('cratera') || nm.startsWith('crista') || nm.startsWith('vila')) {
-
-      return 'Ir até a';
-
-    }
-
-    if (nm.indexOf('korthag') >= 0) {
-
-      return 'Ir até a';
-
-    }
-
-    if (nm.indexOf('valkrest') >= 0) {
-
-      return 'Ir até o';
-
-    }
-
-    return 'Ir até o';
-
+    return prefix + (nodeName ? (' ' + nodeName) : '');
   }
 
+  function _showCartSharedConfirmModal(opts) {
+    var existing = document.getElementById('cart-confirm-modal-overlay');
+    if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
 
+    var ov = document.createElement('div');
+    ov.id = 'cart-confirm-modal-overlay';
+    ov.style.cssText = 'position:fixed; inset:0; z-index:100005; display:flex; align-items:center; justify-content:center; padding:16px; background:radial-gradient(circle at center, rgba(22, 17, 12, 0.94) 0%, rgba(8, 6, 4, 0.98) 100%); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); animation:cpp-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);';
+
+    var card = document.createElement('div');
+    card.style.cssText = 'position:relative; width:100%; max-width:375px; max-height:92vh; display:flex; flex-direction:column; overflow:hidden; padding:18px 18px 16px; background:linear-gradient(180deg, #241c13 0%, #16110b 45%, #0e0a07 100%); border:1.5px solid #d4a34b; border-radius:14px; box-shadow:0 16px 48px rgba(0,0,0,0.92), 0 0 0 1px rgba(255,214,133,0.18), inset 0 0 24px rgba(196,149,58,0.14); text-align:center; box-sizing:border-box;';
+
+    // Botão Fechar X
+    var closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.setAttribute('aria-label', 'Fechar');
+    closeBtn.style.cssText = 'position:absolute; top:10px; right:12px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; background:rgba(26,20,14,0.85); border:1px solid rgba(196,149,58,0.4); border-radius:50%; color:#c8b89a; font-size:13px; line-height:1; cursor:pointer; z-index:15; transition:all 0.15s ease; touch-action:manipulation;';
+    closeBtn.textContent = '✕';
+
+    // Top subtle divider line
+    var topFiligree = document.createElement('div');
+    topFiligree.style.cssText = 'height:1px; width:80%; margin:0 auto 10px; background:linear-gradient(90deg, transparent, rgba(212,163,75,0.65), transparent); flex-shrink:0;';
+
+    // Kicker (>= 11px per Rule 9)
+    var kicker = null;
+    if (opts.kicker) {
+      kicker = document.createElement('div');
+      kicker.style.cssText = 'font-family:"Cinzel", Georgia, serif; font-size:11px; letter-spacing:2px; color:#ffd685; font-weight:700; text-transform:uppercase; margin-bottom:4px; text-shadow:0 1px 3px rgba(0,0,0,0.8); flex-shrink:0;';
+      kicker.textContent = opts.kicker.toUpperCase();
+    }
+
+    // Título
+    var title = document.createElement('h3');
+    title.style.cssText = 'font-family:"Cinzel", Georgia, serif; font-size:15px; font-weight:700; color:#ffd685; margin:0 0 8px 0; letter-spacing:0.08em; text-transform:uppercase; text-shadow:0 2px 6px rgba(0,0,0,0.9), 0 0 12px rgba(212,163,75,0.25); flex-shrink:0; line-height:1.35;';
+    title.textContent = (opts.title || 'CONFIRMAR MARCHA').toUpperCase();
+
+    // Chips (>= 11.5px per Rule 9)
+    var chipsWrap = null;
+    if (Array.isArray(opts.chips) && opts.chips.length > 0) {
+      chipsWrap = document.createElement('div');
+      chipsWrap.style.cssText = 'display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:10px; flex-shrink:0;';
+      opts.chips.forEach(function(c) {
+        var chip = document.createElement('div');
+        chip.style.cssText = 'background:rgba(28,21,14,0.9); border:1px solid rgba(196,149,58,0.45); border-radius:6px; padding:4px 9px; font-size:11.5px; color:#e2d6c2; box-shadow:0 2px 6px rgba(0,0,0,0.5);';
+        chip.innerHTML = (c.label ? '<span style="color:#c4953a; font-family:\'Cinzel\',serif; font-weight:700; letter-spacing:0.03em;">' + c.label + ':</span> ' : '')
+          + '<span style="color:#ffd685; font-weight:600;">' + (c.val || c.value || c) + '</span>';
+        chipsWrap.appendChild(chip);
+      });
+    }
+
+    // Body / Desc
+    var desc = document.createElement('div');
+    desc.style.cssText = 'color:#d8cdb8; font-size:13px; line-height:1.55; margin-bottom:12px; padding:10px 14px; background:rgba(12,9,6,0.7); border-left:2.5px solid #d4a34b; border-radius:0 6px 6px 0; text-align:left; box-shadow:inset 0 0 10px rgba(0,0,0,0.5);';
+    desc.innerHTML = opts.desc || '';
+
+    // Actions (Rule 8: ultra concise 1-2 words)
+    var actions = document.createElement('div');
+    actions.style.cssText = 'display:flex; gap:10px; justify-content:center; flex-shrink:0; width:100%; margin-top:auto;';
+
+    var cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.style.cssText = 'flex:1; padding:11px 12px; background:rgba(38,29,20,0.85); border:1px solid rgba(196,149,58,0.4); border-radius:8px; color:#c8b89a; font-family:"Cinzel", Georgia, serif; font-size:12.5px; font-weight:700; cursor:pointer; letter-spacing:0.08em; text-transform:uppercase; transition:all 0.15s ease; touch-action:manipulation;';
+    cancelBtn.textContent = opts.cancelLabel || 'Voltar';
+
+    var confirmBtn = document.createElement('button');
+    confirmBtn.type = 'button';
+    confirmBtn.style.cssText = 'flex:1.2; padding:11px 12px; background:linear-gradient(180deg, #c4953a 0%, #8b6420 100%); border:1.5px solid #ffd685; border-radius:8px; color:#1a1208; font-family:"Cinzel", Georgia, serif; font-size:12.5px; font-weight:700; cursor:pointer; letter-spacing:0.08em; text-transform:uppercase; box-shadow:0 4px 14px rgba(196,149,58,0.45), inset 0 1px 0 rgba(255,240,190,0.4); text-shadow:0 1px 1px rgba(255,235,180,0.4); transition:all 0.15s ease; touch-action:manipulation;';
+    confirmBtn.textContent = opts.confirmLabel || 'Partir ▸';
+
+    function _close() {
+      if (ov.parentNode) ov.parentNode.removeChild(ov);
+    }
+
+    closeBtn.onclick = function() {
+      _close();
+      if (typeof opts.onCancel === 'function') opts.onCancel();
+    };
+    cancelBtn.onclick = function() {
+      _close();
+      if (typeof opts.onCancel === 'function') opts.onCancel();
+    };
+    confirmBtn.onclick = function() {
+      _close();
+      if (typeof opts.onConfirm === 'function') opts.onConfirm();
+    };
+    ov.onclick = function(e) {
+      if (e.target === ov) {
+        _close();
+        if (typeof opts.onCancel === 'function') opts.onCancel();
+      }
+    };
+
+    actions.appendChild(cancelBtn);
+    actions.appendChild(confirmBtn);
+
+    card.appendChild(closeBtn);
+    card.appendChild(topFiligree);
+    if (kicker) card.appendChild(kicker);
+    card.appendChild(title);
+    if (chipsWrap) card.appendChild(chipsWrap);
+    card.appendChild(desc);
+    card.appendChild(actions);
+    ov.appendChild(card);
+    document.body.appendChild(ov);
+  }
+
+  function confirmTravel(node, onConfirm, onCancel, extraOpts) {
+    if (!node) {
+      if (typeof onConfirm === 'function') onConfirm();
+      return;
+    }
+    extraOpts = extraOpts || {};
+    var destName = (node && (node.regionalName || node.name)) || 'Destino';
+    var reg = extraOpts.region || (window.CartShared && CartShared.REGIONS_DATA && (CartShared.REGIONS_DATA[extraOpts.provKey || ''] || CartShared.REGIONS_DATA[node.regionKey || ''])) || null;
+
+    var kicker = (reg && reg.name) ? ('EXPEDIÇÃO · ' + reg.name) : 'EXPEDIÇÃO DE VIAGEM';
+
+    var chips = [];
+    if (reg && reg.dangerText) {
+      chips.push({ label: 'Perigo', val: reg.dangerText.replace(/^Perigo:\s*/i, '') });
+    } else if (node.tier) {
+      chips.push({ label: 'Perigo', val: 'ND ' + node.tier });
+    }
+
+    // Distância canônica em Marcos (Regra 13)
+    var daysCount = (reg && reg.days) ? reg.days : 1;
+    var marcosCount = daysCount * 6;
+    var marcosHtml = '<span class="marcos-lore-link" role="button" tabindex="0" title="Toque para entender a medida em Marcos">~' + marcosCount + ' marcos</span>';
+    chips.push({ label: 'Marcha', val: marcosHtml });
+
+    var rations = daysCount * 2;
+    chips.push({ label: 'Provisões', val: rations + ' rações' });
+
+    var descHtml = '';
+    if (node.desc) {
+      descHtml += '<div style="margin-bottom:8px; color:#e0d4bc; font-size:12px; font-style:italic; border-bottom:1px solid rgba(196,149,58,0.25); padding-bottom:6px;">' + node.desc + '</div>';
+    }
+    descHtml += '<div style="font-size:13px; line-height:1.55; color:#d8cdb8;">Deseja iniciar a marcha rumo a <b style="color:#ffd685;">' + destName + '</b>?<br>'
+      + '<span style="font-size:11.5px; color:#a09484; display:block; margin-top:5px;">'
+      + 'Sua comitiva deixará a segurança da cidade para avançar pelas estradas da região.'
+      + '</span></div>';
+
+    if (typeof window._showInfoPopup === 'function') {
+      window._showInfoPopup({
+        title: 'Partir para ' + destName,
+        kicker: kicker,
+        chips: chips,
+        desc: descHtml,
+        confirmLabel: 'Partir ▸',
+        cancelLabel: 'Voltar',
+        onConfirm: function() {
+          if (typeof onConfirm === 'function') onConfirm();
+        },
+        onCancel: function() {
+          if (typeof onCancel === 'function') onCancel();
+        }
+      });
+      return;
+    }
+
+    _showCartSharedConfirmModal({
+      title: 'Partir para ' + destName,
+      kicker: kicker,
+      chips: chips,
+      desc: descHtml,
+      confirmLabel: 'Partir ▸',
+      cancelLabel: 'Voltar',
+      onConfirm: onConfirm,
+      onCancel: onCancel
+    });
+  }
 
   function openRegionalMapModal(provKey, initialNodeId, options) {
 
@@ -82340,26 +82484,25 @@
 
           if (typeof haptic === 'function') haptic('medium');
 
-          closeRegionalMapModal();
+          confirmTravel(n, function() {
+            closeRegionalMapModal();
 
-          if (isInsideCity && typeof startCityJourney === 'function') {
-            startCityJourney(n.id, n.name);
-          } else if (typeof _cartTravelTo === 'function') {
-            _cartTravelTo(n.id);
-          } else if (typeof _travelToBiome === 'function') {
-            _travelToBiome(n.id, n.name);
-          } else if (typeof startCityJourney === 'function') {
-            startCityJourney(n.id, n.name);
-
-          } else if (typeof doAction === 'function') {
-
-            doAction('cart_' + n.id);
-
-          } else {
-
-            alert('Partindo para explorar ' + n.name + '...');
-
-          }
+            if (isInsideCity && typeof startCityJourney === 'function') {
+              startCityJourney(n.id, n.name, null, { confirm: false });
+            } else if (typeof _cartTravelTo === 'function') {
+              _cartTravelTo(n.id);
+            } else if (typeof _travelToBiome === 'function') {
+              _travelToBiome(n.id, n.name);
+            } else if (typeof startCityJourney === 'function') {
+              startCityJourney(n.id, n.name, null, { confirm: false });
+            } else if (typeof doAction === 'function') {
+              doAction('cart_' + n.id);
+            } else {
+              alert('Partindo para explorar ' + n.name + '...');
+            }
+          }, function() {
+            // Cancelado / Voltar ao Mapa: permanece no mapa regional
+          });
 
         };
 
@@ -82803,7 +82946,7 @@
 
     SEA_INK: SEA_INK, SEA_FAINT: SEA_FAINT,
 
-    CART_BIOMES: CART_BIOMES, CART_PATHS: CART_PATHS, CART_PROVINCES: CART_PROVINCES, REGIONS_DATA: REGIONS_DATA, handleReturnToCity: handleReturnToCity, openRegionalMapModal: openRegionalMapModal, closeRegionalMapModal: closeRegionalMapModal, getLocationProvince: getLocationProvince, isProvinceDiscovered: isProvinceDiscovered, isNodeDiscovered: isNodeDiscovered, getDiscoveredProvinces: getDiscoveredProvinces, extractPlayerMaps: extractPlayerMaps, extractDiscoveredLocations: extractDiscoveredLocations,
+    CART_BIOMES: CART_BIOMES, CART_PATHS: CART_PATHS, CART_PROVINCES: CART_PROVINCES, REGIONS_DATA: REGIONS_DATA, handleReturnToCity: handleReturnToCity, openRegionalMapModal: openRegionalMapModal, closeRegionalMapModal: closeRegionalMapModal, confirmTravel: confirmTravel, getLocationProvince: getLocationProvince, isProvinceDiscovered: isProvinceDiscovered, isNodeDiscovered: isNodeDiscovered, getDiscoveredProvinces: getDiscoveredProvinces, extractPlayerMaps: extractPlayerMaps, extractDiscoveredLocations: extractDiscoveredLocations,
 
     _cartSeedRand: _cartSeedRand,
 

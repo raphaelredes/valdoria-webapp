@@ -2271,8 +2271,10 @@ LOG SINK (Fase 7):
       align-items: center;
       justify-content: center;
       padding: 18px;
-      background: linear-gradient(180deg, rgba(15,12,8,0.96) 0%, rgba(8,6,4,0.99) 100%);
-      animation: cpp-in 0.2s ease-out;
+      background: radial-gradient(circle at center, rgba(22, 17, 12, 0.94) 0%, rgba(8, 6, 4, 0.98) 100%);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      animation: cpp-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     #confirm-purchase-overlay.active { display: flex; }
     @keyframes cpp-in {
@@ -2280,35 +2282,85 @@ LOG SINK (Fase 7):
       100% { opacity: 1; transform: scale(1); }
     }
     .cpp-card {
+      position: relative;
       width: 100%;
-      max-width: 360px;
-      max-height: 90vh;
+      max-width: 375px;
+      max-height: 92vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      padding: 18px 20px 16px;
-      background: linear-gradient(180deg, rgba(40,32,24,0.98), rgba(22,18,14,0.98));
-      border: 1.5px solid #c4953a;
-      border-radius: 12px;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.7), inset 0 0 12px rgba(196,149,58,0.15);
+      padding: 18px 18px 16px;
+      background: linear-gradient(180deg, #241c13 0%, #16110b 45%, #0e0a07 100%);
+      border: 1.5px solid #d4a34b;
+      border-radius: 14px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.92), 0 0 0 1px rgba(255,214,133,0.18), inset 0 0 24px rgba(196,149,58,0.14);
       text-align: center;
       box-sizing: border-box;
     }
+    .cpp-close-btn {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(26, 20, 14, 0.85);
+      border: 1px solid rgba(196, 149, 58, 0.4);
+      border-radius: 50%;
+      color: #c8b89a;
+      font-size: 13px;
+      line-height: 1;
+      cursor: pointer;
+      z-index: 15;
+      transition: all 0.15s ease;
+      touch-action: manipulation;
+    }
+    .cpp-close-btn:hover {
+      border-color: #ffd685;
+      color: #ffd685;
+      background: rgba(45, 34, 22, 0.95);
+      transform: scale(1.08);
+    }
+    .cpp-close-btn:active {
+      transform: scale(0.94);
+    }
+    .cpp-top-filigree {
+      height: 1px;
+      width: 80%;
+      margin: 0 auto 10px;
+      background: linear-gradient(90deg, transparent, rgba(212, 163, 75, 0.65), transparent);
+      flex-shrink: 0;
+    }
+    .cpp-kicker {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: #ffd685;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      flex-shrink: 0;
+    }
     .cpp-icon {
-      font-size: calc(42px * var(--v-font-scale, 1));
-      margin-bottom: var(--v-space-md-lg, 10px);
-      filter: drop-shadow(0 0 12px rgba(196,149,58,0.4));
+      font-size: calc(36px * var(--v-font-scale, 1));
+      margin-bottom: 8px;
+      filter: drop-shadow(0 0 10px rgba(196,149,58,0.4));
       flex-shrink: 0;
     }
     .cpp-title {
       font-family: 'Cinzel', serif;
-      color: #c4953a;
-      font-size: var(--v-font-lg, 15px);
-      letter-spacing: 0.1em;
-      margin: 0 0 var(--v-space-sm, 4px);
+      color: #ffd685;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin: 0 0 8px;
       text-transform: uppercase;
-      text-shadow: 0 0 10px rgba(196,149,58,0.3);
+      text-shadow: 0 2px 6px rgba(0,0,0,0.9), 0 0 12px rgba(212,163,75,0.25);
       flex-shrink: 0;
+      line-height: 1.35;
     }
     .cpp-npc {
       color: #d4c8b0;
@@ -2316,6 +2368,33 @@ LOG SINK (Fase 7):
       font-size: var(--v-font-sm, 12px);
       margin-bottom: var(--v-space-lg, 12px);
       flex-shrink: 0;
+    }
+    .cpp-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+    .cpp-chip {
+      background: rgba(28, 21, 14, 0.9);
+      border: 1px solid rgba(196, 149, 58, 0.45);
+      border-radius: 6px;
+      padding: 4px 9px;
+      font-size: 11.5px;
+      color: #e2d6c2;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+    .cpp-chip-label {
+      color: #c4953a;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+    .cpp-chip-val {
+      color: #ffd685;
+      font-weight: 600;
     }
     .cpp-body {
       flex: 1 1 auto;
@@ -2337,35 +2416,40 @@ LOG SINK (Fase 7):
       border-radius: 2px;
     }
     .cpp-desc {
-      color: #d4c8b0;
-      font-size: var(--v-font-base, 13px);
-      line-height: 1.6;
-      margin-bottom: 14px;
-      padding: var(--v-space-md, 8px) var(--v-space-lg, 12px);
-      background: rgba(15,12,8,0.5);
-      border-left: 2px solid #c4953a;
+      color: #d8cdb8;
+      font-size: 13px;
+      line-height: 1.55;
+      margin-bottom: 12px;
+      padding: 10px 14px;
+      background: rgba(12, 9, 6, 0.7);
+      border-left: 2.5px solid #d4a34b;
+      border-radius: 0 6px 6px 0;
       text-align: left;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    }
+    .cpp-desc b {
+      color: #ffd685;
     }
     .cpp-cost-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: var(--v-space-md-lg, 10px) 14px;
+      padding: 9px 12px;
       background: rgba(196,149,58,0.12);
       border: 1px solid rgba(196,149,58,0.4);
       border-radius: var(--v-radius-sm, 6px);
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
     .cpp-cost-label {
       font-family: 'Cinzel', serif;
       color: #c4953a;
-      font-size: var(--v-font-sm, 12px);
+      font-size: 11.5px;
       letter-spacing: 0.06em;
     }
     .cpp-cost-value {
       font-family: ui-monospace, Consolas, monospace;
       color: #ffd700;
-      font-size: var(--v-font-base, 13px);
+      font-size: 13px;
       font-weight: 700;
     }
     .cpp-cost-value.insufficient {
@@ -2374,54 +2458,66 @@ LOG SINK (Fase 7):
     }
     .cpp-warning {
       color: #e87050;
-      font-size: var(--v-font-xs, 11px);
+      font-size: 11px;
       font-style: italic;
-      margin-bottom: var(--v-space-lg, 12px);
-      padding: 6px var(--v-space-md, 8px);
+      margin-bottom: 10px;
+      padding: 6px 8px;
       background: rgba(232,112,80,0.1);
       border: 1px solid rgba(232,112,80,0.3);
-      border-radius: var(--v-radius-xs, 4px);
+      border-radius: 4px;
     }
     .cpp-actions {
       display: flex;
-      gap: var(--v-space-md, 8px);
+      gap: 10px;
       flex-shrink: 0;
       width: 100%;
       margin-top: auto;
     }
     .cpp-btn {
       flex: 1;
-      padding: 11px var(--v-space-md-lg, 10px);
+      padding: 11px 12px;
       border-radius: 8px;
       font-family: 'Cinzel', serif;
       font-weight: 700;
-      font-size: var(--v-font-sm, 12px);
+      font-size: 12.5px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+      touch-action: manipulation;
+    }
+    .cpp-btn:active {
+      transform: scale(0.97);
     }
     .cpp-btn-confirm {
       background: linear-gradient(180deg, #c4953a 0%, #8b6420 100%);
-      border: 1px solid #c4953a;
-      color: #1a1510;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-      box-shadow: 0 4px 12px rgba(196,149,58,0.4), inset 0 1px 0 rgba(255,230,180,0.3);
+      border: 1.5px solid #ffd685;
+      color: #1a1208;
+      text-shadow: 0 1px 1px rgba(255,235,180,0.4);
+      box-shadow: 0 4px 14px rgba(196,149,58,0.45), inset 0 1px 0 rgba(255,240,190,0.4);
     }
-    .cpp-btn-confirm:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(196,149,58,0.6); }
+    .cpp-btn-confirm:hover {
+      background: linear-gradient(180deg, #d4a34b 0%, #9a7024 100%);
+      box-shadow: 0 6px 18px rgba(212,163,75,0.65), inset 0 1px 0 rgba(255,245,200,0.5);
+    }
     .cpp-btn-confirm.disabled, .cpp-btn-confirm:disabled {
       background: linear-gradient(180deg, #4a3828, #2a2018);
       color: #6a5848;
+      border-color: #4a3828;
       cursor: not-allowed;
       box-shadow: none;
       text-shadow: none;
     }
     .cpp-btn-cancel {
-      background: rgba(74,56,40,0.5);
-      border: 1px solid #4a3828;
-      color: #a09484;
+      background: rgba(38, 29, 20, 0.85);
+      border: 1px solid rgba(196, 149, 58, 0.4);
+      color: #c8b89a;
     }
-    .cpp-btn-cancel:hover { border-color: #c4953a; color: #c4953a; }
+    .cpp-btn-cancel:hover {
+      border-color: #ffd685;
+      color: #ffd685;
+      background: rgba(50, 38, 26, 0.95);
+    }
 
     /* ============================================================
        === VÍNCULOS & ALIANÇAS — AAA RPG SYSTEM (Persona/Hades/BG3)
@@ -13109,9 +13205,13 @@ body.perf-lite .vc-action-btn { transition: none; }
     <!-- Confirm Purchase Popup (Fase 9.3 — obrigatório em TODA compra) -->
     <div id="confirm-purchase-overlay">
       <div class="cpp-card">
-        <div class="cpp-icon" id="cpp-icon"></div>
-        <h3 class="cpp-title" id="cpp-title">Confirmar Compra</h3>
-        <p class="cpp-npc" id="cpp-npc"></p>
+        <button class="cpp-close-btn" id="cpp-close-btn" type="button" aria-label="Fechar">✕</button>
+        <div class="cpp-top-filigree"></div>
+        <div class="cpp-kicker" id="cpp-kicker" style="display:none"></div>
+        <div class="cpp-icon" id="cpp-icon" style="display:none"></div>
+        <h3 class="cpp-title" id="cpp-title">Confirmar</h3>
+        <p class="cpp-npc" id="cpp-npc" style="display:none"></p>
+        <div class="cpp-chips" id="cpp-chips" style="display:none"></div>
         <div class="cpp-body" id="cpp-body">
           <div class="cpp-desc" id="cpp-desc"></div>
           <div class="cpp-cost-row" id="cpp-cost-row">
@@ -13125,7 +13225,7 @@ body.perf-lite .vc-action-btn { transition: none; }
           <div class="cpp-warning" id="cpp-warning" style="display:none"></div>
         </div>
         <div class="cpp-actions">
-          <button class="cpp-btn cpp-btn-cancel" id="cpp-cancel-btn">Cancelar</button>
+          <button class="cpp-btn cpp-btn-cancel" id="cpp-cancel-btn">Voltar</button>
           <button class="cpp-btn cpp-btn-confirm" id="cpp-confirm-btn">Confirmar</button>
         </div>
       </div>
@@ -63549,8 +63649,31 @@ function _showConfirmPurchase(opts){
   //   sem warning, sem opção de dívida/empréstimo.
   var creditMode = !!opts.creditMode;
   var canAfford = creditMode ? true : (p.gold >= opts.cost);
+
+  // Reseta elementos visuais avançados
+  var kickerEl = document.getElementById('cpp-kicker');
+  if (kickerEl) kickerEl.style.display = 'none';
+  var chipsEl = document.getElementById('cpp-chips');
+  if (chipsEl) chipsEl.style.display = 'none';
+  var closeBtn = document.getElementById('cpp-close-btn');
+  if (closeBtn) {
+    closeBtn.onclick = function() {
+      ov.classList.remove('active');
+      if (typeof opts.onCancel === 'function') opts.onCancel();
+    };
+  }
+
   // USER FIX 2026-05-05: innerHTML pra suportar SVG icons (_heralIco)
-  document.getElementById('cpp-icon').innerHTML = opts.icon || '';
+  var iconEl = document.getElementById('cpp-icon');
+  if (iconEl) {
+    if (opts.icon && opts.icon !== '◆' && opts.icon !== '?' && !opts.icon.includes('◆')) {
+      iconEl.innerHTML = opts.icon;
+      iconEl.style.display = 'block';
+    } else {
+      iconEl.innerHTML = '';
+      iconEl.style.display = 'none';
+    }
+  }
   document.getElementById('cpp-title').textContent = (opts.title || 'Confirmar').toUpperCase();
   document.getElementById('cpp-npc').textContent = opts.npc || '';
   document.getElementById('cpp-npc').style.display = opts.npc ? '' : 'none';
@@ -63681,9 +63804,61 @@ function _showInfoPopup(opts){
   var confirmBtn = document.getElementById('cpp-confirm-btn');
   var cancelBtn = document.getElementById('cpp-cancel-btn');
   if (!confirmBtn || !cancelBtn) return;
-  // USER FIX 2026-05-05: innerHTML pra suportar SVG icons (_heralIco)
-  // textContent fazia SVG markup virar texto literal na tela.
-  document.getElementById('cpp-icon').innerHTML = opts.icon || '◆';
+
+  // Kicker
+  var kickerEl = document.getElementById('cpp-kicker');
+  if (kickerEl) {
+    if (opts.kicker) {
+      kickerEl.textContent = opts.kicker.toUpperCase();
+      kickerEl.style.display = 'block';
+    } else {
+      kickerEl.style.display = 'none';
+    }
+  }
+
+  // Icon (losango removido permanentemente — Ordem do Usuário 2026-11)
+  var iconEl = document.getElementById('cpp-icon');
+  if (iconEl) {
+    if (opts.icon && opts.icon !== '◆' && opts.icon !== '?' && !opts.icon.includes('◆')) {
+      iconEl.innerHTML = opts.icon;
+      iconEl.style.display = 'block';
+    } else {
+      iconEl.innerHTML = '';
+      iconEl.style.display = 'none';
+    }
+  }
+
+  // Chips
+  var chipsEl = document.getElementById('cpp-chips');
+  if (chipsEl) {
+    if (opts.chipsHtml) {
+      chipsEl.innerHTML = opts.chipsHtml;
+      chipsEl.style.display = 'flex';
+    } else if (Array.isArray(opts.chips) && opts.chips.length > 0) {
+      chipsEl.innerHTML = opts.chips.map(function(c) {
+        return '<div class="cpp-chip">'
+          + (c.label ? '<span class="cpp-chip-label">' + c.label + ':</span> ' : '')
+          + '<span class="cpp-chip-val">' + (c.val || c.value || c) + '</span>'
+          + '</div>';
+      }).join('');
+      chipsEl.style.display = 'flex';
+    } else {
+      chipsEl.style.display = 'none';
+      chipsEl.innerHTML = '';
+    }
+  }
+
+  // Close X button
+  var closeBtn = document.getElementById('cpp-close-btn');
+  if (closeBtn) {
+    closeBtn.onclick = function() {
+      ov.classList.remove('active');
+      var cRows = ov.querySelectorAll('.cpp-cost-row');
+      cRows.forEach(function(r){ r.style.display = ''; });
+      if (typeof opts.onCancel === 'function') opts.onCancel();
+    };
+  }
+
   document.getElementById('cpp-title').textContent = (opts.title || 'Confirmar').toUpperCase();
   document.getElementById('cpp-npc').textContent = opts.npc || '';
   document.getElementById('cpp-npc').style.display = opts.npc ? '' : 'none';
