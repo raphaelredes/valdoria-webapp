@@ -81999,44 +81999,123 @@
 
 
   function _getGrammarMoveButtonLabel(nodeName) {
-
     var nm = (nodeName || '').toLowerCase().trim();
-
+    var prefix = 'Ir até o';
     if (nm.startsWith('campos') || nm.startsWith('picos') || nm.startsWith('portões') || nm.startsWith('portoes')) {
-
-      return 'Ir até os';
-
+      prefix = 'Ir até os';
+    } else if (nm.startsWith('terras') || nm.startsWith('ruínas') || nm.startsWith('ruinas') || nm.startsWith('cavernas') || nm.startsWith('profundezas') || nm.startsWith('montanhas')) {
+      prefix = 'Ir até as';
+    } else if (nm.startsWith('floresta') || nm.startsWith('passagem') || nm.startsWith('caverna') || nm.startsWith('costa') || nm.startsWith('cala') || nm.startsWith('tumba') || nm.startsWith('cripta') || nm.startsWith('cratera') || nm.startsWith('crista') || nm.startsWith('vila') || nm.indexOf('korthag') >= 0) {
+      prefix = 'Ir até a';
     }
-
-    if (nm.startsWith('terras') || nm.startsWith('ruínas') || nm.startsWith('ruinas') || nm.startsWith('cavernas') || nm.startsWith('profundezas') || nm.startsWith('montanhas')) {
-
-      return 'Ir até as';
-
-    }
-
-    if (nm.startsWith('floresta') || nm.startsWith('passagem') || nm.startsWith('caverna') || nm.startsWith('costa') || nm.startsWith('cala') || nm.startsWith('tumba') || nm.startsWith('cripta') || nm.startsWith('cratera') || nm.startsWith('crista') || nm.startsWith('vila')) {
-
-      return 'Ir até a';
-
-    }
-
-    if (nm.indexOf('korthag') >= 0) {
-
-      return 'Ir até a';
-
-    }
-
-    if (nm.indexOf('valkrest') >= 0) {
-
-      return 'Ir até o';
-
-    }
-
-    return 'Ir até o';
-
+    return prefix + (nodeName ? (' ' + nodeName) : '');
   }
 
+  function _showCartSharedConfirmModal(opts) {
+    var existing = document.getElementById('cart-confirm-modal-overlay');
+    if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
 
+    var ov = document.createElement('div');
+    ov.id = 'cart-confirm-modal-overlay';
+    ov.style.cssText = 'position:fixed; inset:0; z-index:100005; display:flex; align-items:center; justify-content:center; padding:18px; background:linear-gradient(180deg, rgba(15,12,8,0.96) 0%, rgba(8,6,4,0.99) 100%); animation:cpp-in 0.2s ease-out;';
+
+    var card = document.createElement('div');
+    card.style.cssText = 'width:100%; max-width:360px; display:flex; flex-direction:column; overflow:hidden; padding:18px 20px 16px; background:linear-gradient(180deg, rgba(40,32,24,0.98), rgba(22,18,14,0.98)); border:1.5px solid #c4953a; border-radius:12px; box-shadow:0 12px 40px rgba(0,0,0,0.85), inset 0 0 12px rgba(196,149,58,0.15); text-align:center; box-sizing:border-box;';
+
+    var icon = document.createElement('div');
+    icon.style.cssText = 'font-size:32px; color:#ffd685; margin-bottom:10px; filter:drop-shadow(0 0 8px rgba(196,149,58,0.6));';
+    icon.innerHTML = opts.icon || '◆';
+
+    var title = document.createElement('h3');
+    title.style.cssText = 'font-family:"Cinzel", Georgia, serif; font-size:15px; font-weight:700; color:#ffd685; margin:0 0 10px 0; letter-spacing:0.5px; text-transform:uppercase;';
+    title.textContent = (opts.title || 'CONFIRMAR MARCHA').toUpperCase();
+
+    var desc = document.createElement('div');
+    desc.style.cssText = 'font-size:12.5px; color:#e0d4bc; line-height:1.5; margin-bottom:16px;';
+    desc.innerHTML = opts.desc || '';
+
+    var actions = document.createElement('div');
+    actions.style.cssText = 'display:flex; gap:10px; justify-content:center;';
+
+    var cancelBtn = document.createElement('button');
+    cancelBtn.style.cssText = 'flex:1; padding:9px 12px; background:rgba(30,22,15,0.9); border:1px solid rgba(196,149,58,0.4); border-radius:6px; color:#c8b89a; font-family:"Cinzel", Georgia, serif; font-size:12px; font-weight:700; cursor:pointer;';
+    cancelBtn.textContent = opts.cancelLabel || 'Voltar ao Mapa';
+
+    var confirmBtn = document.createElement('button');
+    confirmBtn.style.cssText = 'flex:1.2; padding:9px 12px; background:linear-gradient(180deg, #8a6428 0%, #5a3f16 100%); border:1.5px solid #ffd685; border-radius:6px; color:#fff3d1; font-family:"Cinzel", Georgia, serif; font-size:12px; font-weight:700; cursor:pointer; box-shadow:0 0 10px rgba(196,149,58,0.35);';
+    confirmBtn.textContent = opts.confirmLabel || 'Confirmar Marcha ▸';
+
+    function _close() {
+      if (ov.parentNode) ov.parentNode.removeChild(ov);
+    }
+
+    cancelBtn.onclick = function() {
+      _close();
+      if (typeof opts.onCancel === 'function') opts.onCancel();
+    };
+
+    confirmBtn.onclick = function() {
+      _close();
+      if (typeof opts.onConfirm === 'function') opts.onConfirm();
+    };
+
+    ov.onclick = function(e) {
+      if (e.target === ov) {
+        _close();
+        if (typeof opts.onCancel === 'function') opts.onCancel();
+      }
+    };
+
+    actions.appendChild(cancelBtn);
+    actions.appendChild(confirmBtn);
+
+    card.appendChild(icon);
+    card.appendChild(title);
+    card.appendChild(desc);
+    card.appendChild(actions);
+    ov.appendChild(card);
+    document.body.appendChild(ov);
+  }
+
+  function confirmTravel(node, onConfirm, onCancel) {
+    if (!node) {
+      if (typeof onConfirm === 'function') onConfirm();
+      return;
+    }
+    var destName = (node && (node.regionalName || node.name)) || 'Destino';
+    var iconHtml = '<span style="font-size:32px; color:#ffd685; display:inline-block; filter:drop-shadow(0 0 8px rgba(196,149,58,0.6));">◆</span>';
+    var descHtml = 'Deseja iniciar a marcha rumo a <b>' + destName + '</b>?<br>'
+      + '<span style="font-size:12px; color:#c8b89a; display:block; margin-top:6px;">'
+      + 'Sua comitiva deixará a segurança da cidade para avançar pelas estradas da região.'
+      + '</span>';
+
+    if (typeof window._showInfoPopup === 'function') {
+      window._showInfoPopup({
+        title: 'Partir para ' + destName,
+        icon: iconHtml,
+        desc: descHtml,
+        confirmLabel: 'Confirmar Marcha ▸',
+        cancelLabel: 'Voltar ao Mapa',
+        onConfirm: function() {
+          if (typeof onConfirm === 'function') onConfirm();
+        },
+        onCancel: function() {
+          if (typeof onCancel === 'function') onCancel();
+        }
+      });
+      return;
+    }
+
+    _showCartSharedConfirmModal({
+      title: 'Partir para ' + destName,
+      icon: iconHtml,
+      desc: descHtml,
+      confirmLabel: 'Confirmar Marcha ▸',
+      cancelLabel: 'Voltar ao Mapa',
+      onConfirm: onConfirm,
+      onCancel: onCancel
+    });
+  }
 
   function openRegionalMapModal(provKey, initialNodeId, options) {
 
@@ -82340,26 +82419,25 @@
 
           if (typeof haptic === 'function') haptic('medium');
 
-          closeRegionalMapModal();
+          confirmTravel(n, function() {
+            closeRegionalMapModal();
 
-          if (isInsideCity && typeof startCityJourney === 'function') {
-            startCityJourney(n.id, n.name);
-          } else if (typeof _cartTravelTo === 'function') {
-            _cartTravelTo(n.id);
-          } else if (typeof _travelToBiome === 'function') {
-            _travelToBiome(n.id, n.name);
-          } else if (typeof startCityJourney === 'function') {
-            startCityJourney(n.id, n.name);
-
-          } else if (typeof doAction === 'function') {
-
-            doAction('cart_' + n.id);
-
-          } else {
-
-            alert('Partindo para explorar ' + n.name + '...');
-
-          }
+            if (isInsideCity && typeof startCityJourney === 'function') {
+              startCityJourney(n.id, n.name, null, { confirm: false });
+            } else if (typeof _cartTravelTo === 'function') {
+              _cartTravelTo(n.id);
+            } else if (typeof _travelToBiome === 'function') {
+              _travelToBiome(n.id, n.name);
+            } else if (typeof startCityJourney === 'function') {
+              startCityJourney(n.id, n.name, null, { confirm: false });
+            } else if (typeof doAction === 'function') {
+              doAction('cart_' + n.id);
+            } else {
+              alert('Partindo para explorar ' + n.name + '...');
+            }
+          }, function() {
+            // Cancelado / Voltar ao Mapa: permanece no mapa regional
+          });
 
         };
 
@@ -82803,7 +82881,7 @@
 
     SEA_INK: SEA_INK, SEA_FAINT: SEA_FAINT,
 
-    CART_BIOMES: CART_BIOMES, CART_PATHS: CART_PATHS, CART_PROVINCES: CART_PROVINCES, REGIONS_DATA: REGIONS_DATA, handleReturnToCity: handleReturnToCity, openRegionalMapModal: openRegionalMapModal, closeRegionalMapModal: closeRegionalMapModal, getLocationProvince: getLocationProvince, isProvinceDiscovered: isProvinceDiscovered, isNodeDiscovered: isNodeDiscovered, getDiscoveredProvinces: getDiscoveredProvinces, extractPlayerMaps: extractPlayerMaps, extractDiscoveredLocations: extractDiscoveredLocations,
+    CART_BIOMES: CART_BIOMES, CART_PATHS: CART_PATHS, CART_PROVINCES: CART_PROVINCES, REGIONS_DATA: REGIONS_DATA, handleReturnToCity: handleReturnToCity, openRegionalMapModal: openRegionalMapModal, closeRegionalMapModal: closeRegionalMapModal, confirmTravel: confirmTravel, getLocationProvince: getLocationProvince, isProvinceDiscovered: isProvinceDiscovered, isNodeDiscovered: isNodeDiscovered, getDiscoveredProvinces: getDiscoveredProvinces, extractPlayerMaps: extractPlayerMaps, extractDiscoveredLocations: extractDiscoveredLocations,
 
     _cartSeedRand: _cartSeedRand,
 

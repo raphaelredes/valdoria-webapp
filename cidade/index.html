@@ -2264,9 +2264,9 @@ LOG SINK (Fase 7):
        OBRIGATÓRIO em TODA compra/serviço da cidade. Mostra: NPC + descrição +
        custo + ouro disponível + warning se sem ouro + Confirmar/Cancelar. */
     #confirm-purchase-overlay {
-      position: absolute;
+      position: fixed;
       inset: 0;
-      z-index: 9300;
+      z-index: 100005;
       display: none;
       align-items: center;
       justify-content: center;
@@ -63746,6 +63746,7 @@ function _showInfoPopup(opts){
   };
   ov.classList.add('active');
 }
+window._showInfoPopup = _showInfoPopup;
 
 // ============================================================================
 // === NPC DIALOGUE POPUP (Fase 9.3) — drill-down: card NPC → diálogo =========
@@ -71708,7 +71709,7 @@ function _cityTravelInfo(mapId) {
   } catch (e) { return fb; }
 }
 
-function startCityJourney(mapId, displayName, finalUrl) {
+function startCityJourney(mapId, displayName, finalUrl, opts) {
   var info = _cityTravelInfo(mapId);
   // Portões adjacentes (0 etapas) → sem tela de etapas, vai direto (realismo:
   // sair dos portões da cidade já te coloca no mapa dos portões).
@@ -71719,11 +71720,12 @@ function startCityJourney(mapId, displayName, finalUrl) {
   }
   if (window.JourneyRunner && typeof JourneyRunner.start === 'function') {
     if (typeof _logCity === 'function') _logCity('city journey ' + mapId + ' biome=' + info.biome + ' etapas=' + info.steps + ' (dist-proporcional)');
+    var shouldConfirm = (opts && typeof opts.confirm === 'boolean') ? opts.confirm : false;
     JourneyRunner.start({
       biome: info.biome,
       displayName: displayName,
       player: function () { return window.CITY_MOCK_PLAYER || {}; },
-      confirm: true,
+      confirm: shouldConfirm,
       audioBiome: true,
       totalSteps: info.steps,
       log: (typeof _logCity === 'function') ? _logCity : null,
@@ -75501,16 +75503,29 @@ if (typeof window._openDirectionalRoadCrossroads !== 'function') {
     try {
       if (edgeId) sessionStorage.setItem('vld_preselect_road_edge', edgeId);
     } catch (_) {}
-    if (window.CartShared && typeof CartShared.closeRegionalMapModal === 'function') {
-      CartShared.closeRegionalMapModal();
-    }
     var targetKey = (fromNodeId === 'green_fields' || !fromNodeId) ? 'plains' : fromNodeId;
     var resolvedNode = (window.CartShared && typeof CartShared.resolveRegionalBiomeNode === 'function')
       ? CartShared.resolveRegionalBiomeNode(fromNodeId || targetKey)
       : null;
     var targetLabel = (resolvedNode && (resolvedNode.regionalName || resolvedNode.name)) || 'Campos Verdes';
+    var targetObj = resolvedNode || { key: targetKey, name: targetLabel };
+
+    if (window.CartShared && typeof CartShared.confirmTravel === 'function') {
+      CartShared.confirmTravel(targetObj, function() {
+        if (window.CartShared && typeof CartShared.closeRegionalMapModal === 'function') {
+          CartShared.closeRegionalMapModal();
+        }
+        if (typeof startCityJourney === 'function') {
+          startCityJourney(targetKey, targetLabel, null, { confirm: false });
+        }
+      });
+      return;
+    }
+    if (window.CartShared && typeof CartShared.closeRegionalMapModal === 'function') {
+      CartShared.closeRegionalMapModal();
+    }
     if (typeof startCityJourney === 'function') {
-      startCityJourney(targetKey, targetLabel);
+      startCityJourney(targetKey, targetLabel, null, { confirm: false });
     }
   };
 }
@@ -75622,15 +75637,25 @@ if (typeof window._openDirectionalRoadCrossroads !== 'function') {
       }
       if (action === 'travel' && biome) {
         var selPace = window._cartSelectedPace || 'normal';
-        _closeCartLocationPopup();
         try {
           if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
             ValdoriaAudio.playSFX('sfx_confirm');
           }
         } catch(_) {}
+        sessionStorage.setItem('valdoria_travel_pace', selPace);
+
+        if (window.CartShared && typeof CartShared.confirmTravel === 'function') {
+          CartShared.confirmTravel(biome, function() {
+            _closeCartLocationPopup();
+            if (ACTION_HANDLERS['cart_' + biome.key]) {
+              ACTION_HANDLERS['cart_' + biome.key](window.CITY_MOCK_PLAYER);
+            }
+          });
+          return;
+        }
+
+        _closeCartLocationPopup();
         if (ACTION_HANDLERS['cart_' + biome.key]) {
-          // Armazena ritmo escolhido para a sessão de exploração
-          sessionStorage.setItem('valdoria_travel_pace', selPace);
           ACTION_HANDLERS['cart_' + biome.key](window.CITY_MOCK_PLAYER);
         }
       }
