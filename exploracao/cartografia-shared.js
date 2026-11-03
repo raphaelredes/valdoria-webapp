@@ -80869,6 +80869,8 @@
 
         altImg: '../valdoria-webapp/shared/img/map/provinces/plains_v2.webp?v=20261030b',
 
+        cardImg: 'shared/img/map/expeditions/plains.webp',
+
         fallbackBg: 'radial-gradient(circle, #2d3e23 0%, #151e12 100%)',
 
         dangerClass: 'badge-safe',
@@ -80910,6 +80912,8 @@
         img: 'shared/img/map/provinces/forest.webp',
 
         altImg: '../valdoria-webapp/shared/img/map/provinces/forest.webp',
+
+        cardImg: 'shared/img/map/expeditions/forest.webp',
 
         fallbackBg: 'radial-gradient(circle, #1a381e 0%, #0c1c0e 100%)',
 
@@ -80953,6 +80957,8 @@
 
         altImg: '../valdoria-webapp/shared/img/map/provinces/swamp.webp',
 
+        cardImg: 'shared/img/map/expeditions/swamp.webp',
+
         fallbackBg: 'radial-gradient(circle, #1f2d22 0%, #0d150e 100%)',
 
         dangerClass: 'badge-mod',
@@ -80992,6 +80998,8 @@
         img: 'shared/img/map/provinces/mountain.webp',
 
         altImg: '../valdoria-webapp/shared/img/map/provinces/mountain.webp',
+
+        cardImg: 'shared/img/map/expeditions/mountain.webp',
 
         fallbackBg: 'radial-gradient(circle, #332b26 0%, #171310 100%)',
 
@@ -81035,6 +81043,8 @@
 
         altImg: '../valdoria-webapp/shared/img/map/provinces/cave.webp',
 
+        cardImg: 'shared/img/map/expeditions/cave.webp',
+
         fallbackBg: 'radial-gradient(circle, #241c14 0%, #0d0a08 100%)',
 
         dangerClass: 'badge-high',
@@ -81077,6 +81087,8 @@
 
         altImg: '../valdoria-webapp/shared/img/map/provinces/coast.webp',
 
+        cardImg: 'shared/img/map/expeditions/coast.webp',
+
         fallbackBg: 'radial-gradient(circle, #1c2e3d 0%, #0e1720 100%)',
 
         dangerClass: 'badge-mod',
@@ -81116,6 +81128,8 @@
         img: 'shared/img/map/provinces/desert.webp',
 
         altImg: '../valdoria-webapp/shared/img/map/provinces/desert.webp',
+
+        cardImg: 'shared/img/map/expeditions/desert.webp',
 
         fallbackBg: 'radial-gradient(circle, #3d2f16 0%, #1c1508 100%)',
 
@@ -81157,6 +81171,8 @@
 
         altImg: '../valdoria-webapp/shared/img/map/provinces/graveyard.webp',
 
+        cardImg: 'shared/img/map/expeditions/graveyard.webp',
+
         fallbackBg: 'radial-gradient(circle, #1e1b24 0%, #0c0a10 100%)',
 
         dangerClass: 'badge-high',
@@ -81197,6 +81213,8 @@
 
         altImg: '../valdoria-webapp/shared/img/map/provinces/snow.webp',
 
+        cardImg: 'shared/img/map/expeditions/snow.webp',
+
         fallbackBg: 'radial-gradient(circle, #1a2836 0%, #0c141d 100%)',
 
         dangerClass: 'badge-deadly',
@@ -81236,6 +81254,8 @@
         img: 'shared/img/map/provinces/volcanic.webp',
 
         altImg: '../valdoria-webapp/shared/img/map/provinces/volcanic.webp',
+
+        cardImg: 'shared/img/map/expeditions/volcanic.webp',
 
         fallbackBg: 'radial-gradient(circle, #3d1410 0%, #1a0604 100%)',
 

@@ -73650,11 +73650,20 @@ function _cartRenderCarousel() {
   var reg = regData[currentKey] || regData['plains'];
   var total = _cartCarouselKeys.length;
 
-  var rawSrc = reg.img || ('shared/img/map/provinces/' + currentKey + '.webp');
+  var regNodes = (reg && Array.isArray(reg.nodes)) ? reg.nodes : [];
+  var isRegionFullyExplored = regNodes.length > 0 && regNodes.every(function(n) {
+    return known && (known.indexOf(n.id) >= 0 || (window.CartShared && CartShared.normalizeRegionalNodeId && known.indexOf(CartShared.normalizeRegionalNodeId(n.id)) >= 0));
+  });
+
+  var rawSrc = reg.cardImg || ('shared/img/map/expeditions/' + currentKey + '.webp');
   if (typeof window !== 'undefined' && window.location && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
     if (rawSrc.indexOf('shared/') === 0) rawSrc = '/' + rawSrc;
     else if (rawSrc.indexOf('/') === 0) rawSrc = rawSrc.replace('/', '/');
   }
+
+  var badgeHtml = isRegionFullyExplored
+    ? '<div class="cart-expedition-badge" style="background:linear-gradient(180deg,#2b2014,#140f09);border:1px solid #ffd685;color:#ffd685;box-shadow:0 0 8px rgba(255,214,133,0.35);">◆ Região 100% Mapeada ◆</div>'
+    : '<div class="cart-expedition-badge">' + (reg.dangerText || ('Nível ' + (reg.days || 1))) + '</div>';
 
   var dotsHtml = '';
   for (var i = 0; i < total; i++) {
@@ -73665,7 +73674,7 @@ function _cartRenderCarousel() {
     + '<div class="cart-expedition-card">'
     + '  <div class="cart-expedition-art" onclick="_cartOpenRegionMap(\'' + currentKey + '\')" style="background-image: url(\'' + rawSrc + '\');cursor:pointer;">'
     + '    <div class="cart-expedition-gradient"></div>'
-    + '    <div class="cart-expedition-badge">' + (reg.dangerText || ('Nível ' + (reg.days || 1))) + '</div>'
+    +      badgeHtml
     + '  </div>'
     + '  <div class="cart-expedition-body">'
     + '    <div class="cart-expedition-info">'
