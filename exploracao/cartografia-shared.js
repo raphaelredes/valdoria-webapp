@@ -80665,6 +80665,12 @@
 
       'frost_cave': ['frost_cave', 'caverna_gelo', 'caverna_de_gelo'],
 
+      'lighthouse_ruins': ['lighthouse_ruins', 'farol_abandonado'],
+
+      'crypt_shadows': ['crypt_shadows', 'cripta_das_sombras', 'cripta_sombras'],
+
+      'obsidian_ridge': ['obsidian_ridge', 'crista_de_obsidiana', 'crista_obsidiana'],
+
       'valkrest': ['valkrest', 'acampamento_valkrest']
 
     };
@@ -81258,6 +81264,467 @@
     };
 
 
+
+  // === EXPLORAÇÃO DIRECIONAL POR ESTRADAS, BÚSSOLA DINÂMICA & MEMÓRIA DE ROTA ===
+
+  var _REGIONAL_NODE_NORMALIZE = {
+    'city_gates': 'green_fields',
+    'plains': 'green_fields',
+    'whispering_woods': 'forest',
+    'misty_marshes': 'swamp',
+    'misty_swamps': 'swamp',
+    'stone_peaks': 'mountain',
+    'underground_passage': 'cave',
+    'golden_sands': 'desert',
+    'ancient_cemetery': 'graveyard',
+    'frozen_waste': 'snow',
+    'frozen_lands': 'snow',
+    'burning_crater': 'volcanic',
+    'coast': 'salty_coast'
+  };
+
+  var _REGIONAL_TO_SERVER_NODE = {
+    'plains': 'green_fields',
+    'green_fields': 'green_fields',
+    'forest': 'whispering_woods',
+    'swamp': 'misty_marshes',
+    'mountain': 'stone_peaks',
+    'cave': 'underground_passage',
+    'desert': 'golden_sands',
+    'graveyard': 'ancient_cemetery',
+    'snow': 'frozen_waste',
+    'volcanic': 'burning_crater',
+    'coast': 'salty_coast'
+  };
+
+  function normalizeRegionalNodeId(nodeId) {
+    if (!nodeId) return 'green_fields';
+    var s = String(nodeId).trim();
+    if (s.indexOf('city_') === 0) return 'green_fields';
+    return _REGIONAL_NODE_NORMALIZE[s] || s;
+  }
+
+  function toServerNodeId(nodeId) {
+    if (!nodeId) return 'green_fields';
+    var s = String(nodeId).trim();
+    return _REGIONAL_TO_SERVER_NODE[s] || s;
+  }
+
+  function canonicalRoadEdgeId(nodeA, nodeB) {
+    var a = toServerNodeId(normalizeRegionalNodeId(nodeA));
+    var b = toServerNodeId(normalizeRegionalNodeId(nodeB));
+    return (a < b) ? (a + '__' + b) : (b + '__' + a);
+  }
+
+  function computeCompassBearing(fromX, fromY, toX, toY) {
+    var dx = (typeof toX === 'number' ? toX : 0.5) - (typeof fromX === 'number' ? fromX : 0.5);
+    var dy = (typeof toY === 'number' ? toY : 0.5) - (typeof fromY === 'number' ? fromY : 0.5);
+    if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) {
+      return { code: 'N', label: 'Norte', glyph: '\u2191', angleDeg: 90 };
+    }
+    var deg = Math.atan2(-dy, dx) * 180 / Math.PI;
+    if (deg >= -22.5 && deg < 22.5) return { code: 'L', label: 'Leste', glyph: '\u2192', angleDeg: deg };
+    if (deg >= 22.5 && deg < 67.5) return { code: 'NE', label: 'Nordeste', glyph: '\u2197', angleDeg: deg };
+    if (deg >= 67.5 && deg < 112.5) return { code: 'N', label: 'Norte', glyph: '\u2191', angleDeg: deg };
+    if (deg >= 112.5 && deg < 157.5) return { code: 'NO', label: 'Noroeste', glyph: '\u2196', angleDeg: deg };
+    if (deg >= -67.5 && deg < -22.5) return { code: 'SE', label: 'Sudeste', glyph: '\u2198', angleDeg: deg };
+    if (deg >= -112.5 && deg < -67.5) return { code: 'S', label: 'Sul', glyph: '\u2193', angleDeg: deg };
+    if (deg >= -157.5 && deg < -112.5) return { code: 'SO', label: 'Sudoeste', glyph: '\u2199', angleDeg: deg };
+    return { code: 'O', label: 'Oeste', glyph: '\u2190', angleDeg: deg };
+  }
+
+  var DIRECTIONAL_ROADS_DB = [
+    // 1. PLANICIES CENTRAIS (plains)
+    { a: 'green_fields', provA: 'plains', b: 'orc_tribe', provB: 'plains', name: 'Estrada das Colinas Orientais', marcos: 2, minLvl: 1, maxLvl: 3, biome: 'plains', omen: 'Marcas de carrocas saqueadas e fumaca escura ao longe nas colinas.' },
+    { a: 'green_fields', provA: 'plains', b: 'bandit_fortress', provB: 'plains', name: 'Vereda da Encosta Rochosa', marcos: 3, minLvl: 2, maxLvl: 4, biome: 'plains', omen: 'Pegadas de botas ferradas e estacas quebradas subindo o vale.' },
+    { a: 'bandit_fortress', provA: 'plains', b: 'ashen_badlands', provB: 'plains', name: 'Desfiladeiro da Terra Rachada', marcos: 3, minLvl: 3, maxLvl: 5, biome: 'badlands', omen: 'O vento traz poeira vermelha seca e o calor aumenta a cada passo.' },
+    { a: 'orc_tribe', provA: 'plains', b: 'ashen_badlands', provB: 'plains', name: 'Trilha Seca das Carcacas', marcos: 3, minLvl: 3, maxLvl: 5, biome: 'badlands', omen: 'Ossadas ressecadas e ravinas avermelhadas se abrem no horizonte.' },
+
+    // Fronteiras partindo das Planicies Centrais
+    { a: 'green_fields', provA: 'plains', b: 'forest', provB: 'forest', isFrontier: true, borderA: { x: 0.36, y: 0.06 }, borderB: { x: 0.44, y: 0.92 }, name: 'Estrada Real dos Carvalhos', marcos: 2, minLvl: 2, maxLvl: 3, biome: 'forest', omen: 'A sombra densa de carvalhos gigantes desponta na fronteira norte.' },
+    { a: 'green_fields', provA: 'plains', b: 'cave', provB: 'cave', isFrontier: true, borderA: { x: 0.06, y: 0.42 }, borderB: { x: 0.92, y: 0.38 }, name: 'Descida das Fendas Antigas', marcos: 2, minLvl: 2, maxLvl: 4, biome: 'cave', omen: 'Uma corrente de ar frio e umido escapa de fendas calcarias.' },
+    { a: 'green_fields', provA: 'plains', b: 'mountain', provB: 'mountain', isFrontier: true, borderA: { x: 0.06, y: 0.14 }, borderB: { x: 0.92, y: 0.68 }, name: 'Subida da Cordilheira Ocidental', marcos: 3, minLvl: 3, maxLvl: 5, biome: 'mountain', omen: 'Picos cinzentos rasgam as nuvens frias na subida rochosa.' },
+    { a: 'orc_tribe', provA: 'plains', b: 'swamp', provB: 'swamp', isFrontier: true, borderA: { x: 0.94, y: 0.34 }, borderB: { x: 0.06, y: 0.42 }, name: 'Passagem das Brumas do Leste', marcos: 3, minLvl: 2, maxLvl: 4, biome: 'swamp', omen: 'O solo cede a umidade e o cheiro de turfa vem trazido pela brisa.' },
+    { a: 'bandit_fortress', provA: 'plains', b: 'desert', provB: 'desert', isFrontier: true, borderA: { x: 0.34, y: 0.94 }, borderB: { x: 0.35, y: 0.08 }, name: 'Garganta das Dunas do Sul', marcos: 3, minLvl: 3, maxLvl: 5, biome: 'desert', omen: 'Areia fina dourada acumula-se nas fendas de pedra rumo ao sul.' },
+
+    // 2. GRANDES FLORESTAS (forest)
+    { a: 'forest', provA: 'forest', b: 'goblin_nest', provB: 'forest', name: 'Trilha das Armadilhas de Cipo', marcos: 2, minLvl: 2, maxLvl: 3, biome: 'forest', omen: 'Galhos quebrados na altura dos joelhos e totens rusticos entre as raizes.' },
+    { a: 'forest', provA: 'forest', b: 'elven_ruins', provB: 'forest', name: 'Alameda das Colunas de Hera', marcos: 3, minLvl: 3, maxLvl: 5, biome: 'forest', omen: 'Pedras de marmore branco cobertas de musgo marcam uma antiga via.' },
+    { a: 'forest', provA: 'forest', b: 'elder_woods', provB: 'forest', name: 'Vereda das Folhas Prateadas', marcos: 3, minLvl: 4, maxLvl: 6, biome: 'ancient_forest', omen: 'Arvores colossais vibram com um sussurro arcano antigo.' },
+    { a: 'elven_ruins', provA: 'forest', b: 'elder_woods', provB: 'forest', name: 'Caminho dos Sentinelas Antigos', marcos: 3, minLvl: 4, maxLvl: 6, biome: 'ancient_forest', omen: 'Lanternas de pedra apagadas ha seculos ladeiam a mata primordial.' },
+    { a: 'elven_ruins', provA: 'forest', b: 'snow', provB: 'snow', isFrontier: true, borderA: { x: 0.56, y: 0.05 }, borderB: { x: 0.50, y: 0.92 }, name: 'Passo Boreal dos Pinheiros', marcos: 4, minLvl: 5, maxLvl: 7, biome: 'snow', omen: 'Geada branca cobre as agulhas dos pinheiros conforme o vento gela.' },
+    { a: 'elder_woods', provA: 'forest', b: 'glacial_rift', provB: 'snow', isFrontier: true, borderA: { x: 0.86, y: 0.06 }, borderB: { x: 0.72, y: 0.90 }, name: 'Fenda das Raizes Congeladas', marcos: 4, minLvl: 6, maxLvl: 8, biome: 'frozen_abyss', omen: 'Cristais de gelo azul brotam nos troncos na divisa boreal.' },
+
+    // 3. PANTANOS DO LESTE (swamp)
+    { a: 'swamp', provA: 'swamp', b: 'deep_swamp', provB: 'swamp', name: 'Passarela das Raizes Submersas', marcos: 3, minLvl: 3, maxLvl: 5, biome: 'swamp', omen: 'Estacas antigas indicam os poucos bancos firmes sobre a agua escura.' },
+    { a: 'deep_swamp', provA: 'swamp', b: 'eldritch_mire', provB: 'swamp', name: 'Canal da Bruma Fosforescente', marcos: 4, minLvl: 5, maxLvl: 7, biome: 'eldritch_swamp', omen: 'Um brilho purpura estranho pulsa sob o lodo estagnado.' },
+    { a: 'swamp', provA: 'swamp', b: 'graveyard', provB: 'graveyard', isFrontier: true, borderA: { x: 0.24, y: 0.92 }, borderB: { x: 0.42, y: 0.08 }, name: 'Vereda dos Salgueiros Funebres', marcos: 2, minLvl: 3, maxLvl: 5, biome: 'graveyard', omen: 'Grades de ferro enferrujado e lapides inclinadas surgem na nevoa.' },
+    { a: 'deep_swamp', provA: 'swamp', b: 'volcanic', provB: 'volcanic', isFrontier: true, borderA: { x: 0.94, y: 0.24 }, borderB: { x: 0.08, y: 0.44 }, name: 'Travessia do Vapor Sulfuroso', marcos: 4, minLvl: 5, maxLvl: 8, biome: 'volcanic', omen: 'A agua do brejo torna-se morna e cheira a cinza e enxofre.' },
+    { a: 'eldritch_mire', provA: 'swamp', b: 'valkrest', provB: 'volcanic', isFrontier: true, borderA: { x: 0.94, y: 0.62 }, borderB: { x: 0.08, y: 0.65 }, name: 'Trilha de Basalto Escuro', marcos: 4, minLvl: 5, maxLvl: 7, biome: 'volcanic', omen: 'Rochas vulcanicas negras substituem o lodo na borda oriental.' },
+
+    // 4. CORDILHEIRA OCIDENTAL (mountain)
+    { a: 'mountain', provA: 'mountain', b: 'korthag', provB: 'mountain', name: 'Estrada das Forjas de Korthag', marcos: 2, minLvl: 3, maxLvl: 4, biome: 'mountain', omen: 'Trilhos de vagonetas e fumaca de carvao indicam atividade mineira.' },
+    { a: 'mountain', provA: 'mountain', b: 'dragon_pass', provB: 'mountain', name: 'Espinhaco da Garganta Alta', marcos: 4, minLvl: 4, maxLvl: 6, biome: 'mountain', omen: 'O vento uiva entre penhascos estreitos marcados por fuligem.' },
+    { a: 'mountain', provA: 'mountain', b: 'black_peaks', provB: 'mountain', name: 'Crista de Rocha Obsidiana', marcos: 3, minLvl: 5, maxLvl: 7, biome: 'dark_mountain', omen: 'Paredoes negros cortantes erguem-se contra o ceu carregado.' },
+    { a: 'korthag', provA: 'mountain', b: 'black_peaks', provB: 'mountain', name: 'Cornija dos Mineiros Perdidos', marcos: 3, minLvl: 4, maxLvl: 6, biome: 'dark_mountain', omen: 'Pontes de corda antigas cruzam abismos escuros na cordilheira.' },
+    { a: 'mountain', provA: 'mountain', b: 'snow', provB: 'snow', isFrontier: true, borderA: { x: 0.64, y: 0.06 }, borderB: { x: 0.12, y: 0.48 }, name: 'Passo das Neves Eternas', marcos: 4, minLvl: 5, maxLvl: 7, biome: 'snow', omen: 'Nevascas brancas cobrem a trilha de pedra acima das nuvens.' },
+    { a: 'dragon_pass', provA: 'mountain', b: 'valkrest', provB: 'volcanic', isFrontier: true, borderA: { x: 0.88, y: 0.12 }, borderB: { x: 0.16, y: 0.20 }, name: 'Descida da Caldeira Fumegante', marcos: 4, minLvl: 5, maxLvl: 8, biome: 'volcanic', omen: 'Claroes avermelhados iluminam a fumaca distante no horizonte.' },
+    { a: 'korthag', provA: 'mountain', b: 'cave', provB: 'cave', isFrontier: true, borderA: { x: 0.12, y: 0.78 }, borderB: { x: 0.22, y: 0.12 }, name: 'Galeria Funda das Minas', marcos: 3, minLvl: 3, maxLvl: 5, biome: 'cave', omen: 'Escoras de madeira descem para tuneis subterraneos profundos.' },
+
+    // 5. GALERIAS SUBTERRANEAS (cave)
+    { a: 'cave', provA: 'cave', b: 'underground_caverns', provB: 'cave', name: 'Tunel das Estalactites', marcos: 3, minLvl: 3, maxLvl: 5, biome: 'cave', omen: 'Goteiras ecoam em saloes amplos de calcario umido.' },
+    { a: 'underground_caverns', provA: 'cave', b: 'crystal_depths', provB: 'cave', name: 'Fenda dos Cristais Azuis', marcos: 4, minLvl: 4, maxLvl: 6, biome: 'cave', omen: 'Reflexos azulados bruxuleiam nas paredes profundas da rocha.' },
+    { a: 'underground_caverns', provA: 'cave', b: 'troll_cave', provB: 'cave', name: 'Corredor dos Ossos Roidos', marcos: 3, minLvl: 4, maxLvl: 6, biome: 'cave', omen: 'Um odor acido e marcas pesadas de garras riscam o chao de pedra.' },
+    { a: 'cave', provA: 'cave', b: 'crystal_depths', provB: 'cave', name: 'Abismo da Agua Silenciosa', marcos: 3, minLvl: 4, maxLvl: 5, biome: 'cave', omen: 'Degraus gastos descem margeando um riacho subterraneo gelado.' },
+    { a: 'cave', provA: 'cave', b: 'graveyard', provB: 'graveyard', isFrontier: true, borderA: { x: 0.50, y: 0.94 }, borderB: { x: 0.14, y: 0.36 }, name: 'Passagem das Catacumbas Velhas', marcos: 2, minLvl: 3, maxLvl: 5, biome: 'graveyard', omen: 'Arcos de alvenaria funeraria conectam a caverna a criptas antigas.' },
+    { a: 'crystal_depths', provA: 'cave', b: 'mountain', provB: 'mountain', isFrontier: true, borderA: { x: 0.08, y: 0.68 }, borderB: { x: 0.34, y: 0.88 }, name: 'Chamine dos Ventos Alpinos', marcos: 4, minLvl: 4, maxLvl: 6, biome: 'mountain', omen: 'Uma fresta vertical traz luz fria e vento cortante das montanhas.' },
+    { a: 'troll_cave', provA: 'cave', b: 'black_peaks', provB: 'mountain', isFrontier: true, borderA: { x: 0.92, y: 0.72 }, borderB: { x: 0.74, y: 0.88 }, name: 'Fenda da Obsidiana Profunda', marcos: 3, minLvl: 5, maxLvl: 6, biome: 'dark_mountain', omen: 'Veios de pedra negra sobem rumo as encostas sombrias.' },
+
+    // 6. LITORAL DA TORMENTA (coast)
+    { a: 'salty_coast', provA: 'coast', b: 'shipwreck_cove', provB: 'coast', name: 'Costao da Mare Baixa', marcos: 2, minLvl: 3, maxLvl: 4, biome: 'coast', omen: 'Madeirame partido de navios e cordames presos entre os recifes.' },
+    { a: 'salty_coast', provA: 'coast', b: 'lighthouse_ruins', provB: 'coast', name: 'Trilha Alta da Falesia', marcos: 3, minLvl: 3, maxLvl: 5, biome: 'coast', omen: 'Degraus batidos pelo vento salgado sobem rumo ao promontorio.' },
+    { a: 'salty_coast', provA: 'coast', b: 'desert', provB: 'desert', isFrontier: true, borderA: { x: 0.08, y: 0.44 }, borderB: { x: 0.92, y: 0.56 }, name: 'Estrada das Dunas Salgadas', marcos: 3, minLvl: 3, maxLvl: 5, biome: 'desert', omen: 'A maresia cede lugar ao vento quente e seco do interior arenoso.' },
+    { a: 'salty_coast', provA: 'coast', b: 'volcanic', provB: 'volcanic', isFrontier: true, borderA: { x: 0.52, y: 0.06 }, borderB: { x: 0.62, y: 0.92 }, name: 'Peninsula das Cinzas Marinhas', marcos: 4, minLvl: 5, maxLvl: 8, biome: 'volcanic', omen: 'Pedra-pomes boia na espuma e nuvens escuras cobrem o horizonte.' },
+
+    // 7. DUNAS DO SUL (desert)
+    { a: 'desert', provA: 'desert', b: 'sunken_tomb', provB: 'desert', name: 'Rota dos Obeliscos Soterrados', marcos: 3, minLvl: 4, maxLvl: 5, biome: 'desert', omen: 'Pontas de pilares de arenito emergem das dunas em movimento.' },
+    { a: 'desert', provA: 'desert', b: 'ashen_badlands', provB: 'desert', name: 'Canion do Vento Escaldante', marcos: 3, minLvl: 4, maxLvl: 6, biome: 'badlands', omen: 'O areal abre caminho para paredoes de argila vermelha rachada.' },
+    { a: 'ashen_badlands', provA: 'desert', b: 'volcanic', provB: 'volcanic', isFrontier: true, borderA: { x: 0.88, y: 0.12 }, borderB: { x: 0.22, y: 0.90 }, name: 'Fronteira da Escoria Ardente', marcos: 4, minLvl: 5, maxLvl: 8, biome: 'volcanic', omen: 'Cinzas quentes caem sobre a terra seca na direcao da caldeira.' },
+    { a: 'ashen_badlands', provA: 'plains', b: 'salty_coast', provB: 'coast', isFrontier: true, borderA: { x: 0.94, y: 0.82 }, borderB: { x: 0.10, y: 0.80 }, name: 'Ravina da Maresia Distante', marcos: 3, minLvl: 3, maxLvl: 5, biome: 'coast', omen: 'Gaivotas marinhas sobrevoam o fim dos desfiladeiros secos.' },
+
+    // 8. TERRAS DOS MORTOS (graveyard)
+    { a: 'graveyard', provA: 'graveyard', b: 'ancestral_graveyard', provB: 'graveyard', name: 'Via dos Mausoleus Nobres', marcos: 3, minLvl: 4, maxLvl: 6, biome: 'graveyard', omen: 'Estatuas antigas ladeiam uma calcada de lajes frias.' },
+    { a: 'graveyard', provA: 'graveyard', b: 'crypt_shadows', provB: 'graveyard', name: 'Escadaria das Lapides Partidas', marcos: 3, minLvl: 4, maxLvl: 6, biome: 'graveyard', omen: 'Uma nevoa densa e gelida escorre para criptas fundas.' },
+    { a: 'ancestral_graveyard', provA: 'graveyard', b: 'deep_swamp', provB: 'swamp', isFrontier: true, borderA: { x: 0.92, y: 0.56 }, borderB: { x: 0.52, y: 0.92 }, name: 'Aterro do Brejo Morto', marcos: 3, minLvl: 4, maxLvl: 6, biome: 'swamp', omen: 'Sarcofagos afundados anunciam a transicao para aguas pantanosas.' },
+
+    // 9. ERMO BOREAL (snow)
+    { a: 'snow', provA: 'snow', b: 'frost_cave', provB: 'snow', name: 'Trilha das Presas de Gelo', marcos: 3, minLvl: 5, maxLvl: 7, biome: 'snow', omen: 'Rastros largos na neve fresca seguem para uma encosta congelada.' },
+    { a: 'snow', provA: 'snow', b: 'glacial_rift', provB: 'snow', name: 'Travessia da Geleira Azul', marcos: 4, minLvl: 6, maxLvl: 9, biome: 'frozen_abyss', omen: 'O gelo estala sob as botas diante de uma fenda colossal.' },
+
+    // 10. TERRAS DE FOGO (volcanic)
+    { a: 'valkrest', provA: 'volcanic', b: 'volcanic', provB: 'volcanic', name: 'Calcada de Basalto da Caldeira', marcos: 3, minLvl: 6, maxLvl: 9, biome: 'volcanic', omen: 'Rios incandescentes iluminam a subida ingreme ate a cratera ativa.' },
+    { a: 'volcanic', provA: 'volcanic', b: 'obsidian_ridge', provB: 'volcanic', name: 'Crista das Fendas de Enxofre', marcos: 3, minLvl: 6, maxLvl: 8, biome: 'volcanic', omen: 'Laminas naturais de vidro vulcanico brilham sob a fumaca rubra.' },
+    { a: 'valkrest', provA: 'volcanic', b: 'obsidian_ridge', provB: 'volcanic', name: 'Patrulha da Muralha Negra', marcos: 2, minLvl: 5, maxLvl: 7, biome: 'volcanic', omen: 'Estacas de ferro dos vigias de Valkrest marcam o plato.' }
+  ];
+
+  function _findRegionalNodeRecord(nodeId, preferredProvKey) {
+    var norm = normalizeRegionalNodeId(nodeId);
+    if (preferredProvKey && REGIONS_DATA[preferredProvKey] && Array.isArray(REGIONS_DATA[preferredProvKey].nodes)) {
+      var direct = REGIONS_DATA[preferredProvKey].nodes.find(function(n) { return n.id === norm || n.id === nodeId; });
+      if (direct) return { node: direct, provKey: preferredProvKey };
+    }
+    var provKeys = Object.keys(REGIONS_DATA);
+    for (var i = 0; i < provKeys.length; i++) {
+      var pk = provKeys[i];
+      var arr = REGIONS_DATA[pk].nodes || [];
+      for (var j = 0; j < arr.length; j++) {
+        if (arr[j].id === norm || arr[j].id === nodeId) {
+          return { node: arr[j], provKey: pk };
+        }
+      }
+    }
+    return null;
+  }
+
+  function extractRoadExplorationState(pObj) {
+    var out = {};
+    var mergeMap = function(src) {
+      if (!src || typeof src !== 'object') return;
+      var keys = Object.keys(src);
+      for (var i = 0; i < keys.length; i++) {
+        var k = keys[i];
+        var v = src[k];
+        if (!v || typeof v !== 'object') continue;
+        var prev = out[k] || {};
+        var mc = Math.max(Number(prev.marcos_cleared || prev.marcosCleared || 0), Number(v.marcos_cleared || v.marcosCleared || 0));
+        var tm = Math.max(Number(prev.total_marcos || prev.totalMarcos || 0), Number(v.total_marcos || v.totalMarcos || 0));
+        var clues = [];
+        var srcClues = (Array.isArray(prev.clues) ? prev.clues : []).concat(Array.isArray(v.clues) ? v.clues : []);
+        for (var ci = 0; ci < srcClues.length; ci++) {
+          if (srcClues[ci] && clues.indexOf(srcClues[ci]) < 0) clues.push(srcClues[ci]);
+        }
+        var pois = [];
+        var srcPois = (Array.isArray(prev.pois) ? prev.pois : []).concat(Array.isArray(v.pois) ? v.pois : []);
+        for (var pi = 0; pi < srcPois.length; pi++) {
+          if (srcPois[pi] && pois.indexOf(srcPois[pi]) < 0) pois.push(srcPois[pi]);
+        }
+        out[k] = {
+          marcos_cleared: mc,
+          total_marcos: tm,
+          completed: !!(prev.completed || v.completed || (tm > 0 && mc >= tm)),
+          shortcut: !!(prev.shortcut || v.shortcut),
+          threat_seen: v.threat_seen || prev.threat_seen || '',
+          clues: clues.slice(-4),
+          pois: pois.slice(-4)
+        };
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      if (window.__EXPLORE_MODE !== 'remote') {
+        try {
+          var rawSim = localStorage.getItem('valdoria_road_exploration_sim_v1');
+          if (rawSim) mergeMap(JSON.parse(rawSim));
+        } catch (_) {}
+      }
+      if (window.__EXPLORE_ROAD_STATE) mergeMap(window.__EXPLORE_ROAD_STATE);
+      if (window.S && window.S.road_exploration) mergeMap(window.S.road_exploration);
+      if (window.S && window.S.player && window.S.player.road_exploration) mergeMap(window.S.player.road_exploration);
+      if (window.S && window.S.player && window.S.player.metadata && window.S.player.metadata.road_exploration) mergeMap(window.S.player.metadata.road_exploration);
+      if (window.CITY_PLAYER) {
+        if (window.CITY_PLAYER.road_exploration) mergeMap(window.CITY_PLAYER.road_exploration);
+        if (window.CITY_PLAYER.metadata && window.CITY_PLAYER.metadata.road_exploration) mergeMap(window.CITY_PLAYER.metadata.road_exploration);
+      }
+      if (window.PLAYER) {
+        if (window.PLAYER.road_exploration) mergeMap(window.PLAYER.road_exploration);
+        if (window.PLAYER.metadata && window.PLAYER.metadata.road_exploration) mergeMap(window.PLAYER.metadata.road_exploration);
+      }
+    }
+    if (pObj) {
+      if (pObj.road_exploration) mergeMap(pObj.road_exploration);
+      if (pObj.metadata && pObj.metadata.road_exploration) mergeMap(pObj.metadata.road_exploration);
+    }
+    return out;
+  }
+
+  function recordLocalRoadProgress(edgeId, patch) {
+    if (!edgeId || !patch) return {};
+    var cur = extractRoadExplorationState();
+    var entry = cur[edgeId] || { marcos_cleared: 0, total_marcos: patch.total_marcos || 3, completed: false, shortcut: false, clues: [], pois: [] };
+    if (typeof patch.marcos_cleared === 'number') {
+      entry.marcos_cleared = Math.max(entry.marcos_cleared || 0, patch.marcos_cleared);
+    }
+    if (typeof patch.total_marcos === 'number' && patch.total_marcos > 0) {
+      entry.total_marcos = patch.total_marcos;
+    }
+    if (patch.completed || (entry.total_marcos > 0 && entry.marcos_cleared >= entry.total_marcos)) {
+      entry.completed = true;
+      entry.marcos_cleared = entry.total_marcos;
+    }
+    if (patch.shortcut) entry.shortcut = true;
+    if (patch.threat_seen) entry.threat_seen = String(patch.threat_seen);
+    if (patch.clue && entry.clues.indexOf(patch.clue) < 0) {
+      entry.clues.push(patch.clue);
+      if (entry.clues.length > 4) entry.clues = entry.clues.slice(-4);
+    }
+    if (patch.poi && entry.pois.indexOf(patch.poi) < 0) {
+      entry.pois.push(patch.poi);
+      if (entry.pois.length > 4) entry.pois = entry.pois.slice(-4);
+    }
+    cur[edgeId] = entry;
+    if (typeof window !== 'undefined') {
+      window.__EXPLORE_ROAD_STATE = cur;
+      if (window.S) window.S.road_exploration = cur;
+      if (window.CITY_PLAYER) window.CITY_PLAYER.road_exploration = cur;
+      if (window.__EXPLORE_MODE !== 'remote') {
+        try { localStorage.setItem('valdoria_road_exploration_sim_v1', JSON.stringify(cur)); } catch (_) {}
+      }
+    }
+    return entry;
+  }
+
+  function _formatDangerTierForRoad(minLvl, maxLvl, playerLevel) {
+    var pLvl = Number(playerLevel || 1);
+    if (minLvl >= pLvl + 3) {
+      return { tierLabel: 'Mortal', badgeColor: '#fca5a5', borderColor: 'rgba(239,68,68,0.55)', bgColor: 'rgba(127,29,29,0.35)' };
+    }
+    if (minLvl >= pLvl + 1) {
+      return { tierLabel: 'Elevado', badgeColor: '#fdba74', borderColor: 'rgba(249,115,22,0.5)', bgColor: 'rgba(124,45,18,0.3)' };
+    }
+    if (maxLvl >= pLvl) {
+      return { tierLabel: 'Moderado', badgeColor: '#fde68a', borderColor: 'rgba(217,119,6,0.45)', bgColor: 'rgba(120,53,15,0.26)' };
+    }
+    return { tierLabel: 'Controlado', badgeColor: '#86efac', borderColor: 'rgba(34,197,94,0.4)', bgColor: 'rgba(20,83,45,0.25)' };
+  }
+
+  function getOutgoingRoadsForNode(nodeId, provKey, pObj) {
+    var normNode = normalizeRegionalNodeId(nodeId);
+    var resolvedProv = provKey || _LOCATION_TO_PROVINCE[normNode] || _LOCATION_TO_PROVINCE[nodeId] || 'plains';
+    var known = extractDiscoveredLocations(pObj);
+    var ownedMaps = extractPlayerMaps(pObj);
+    var roadState = extractRoadExplorationState(pObj);
+    var pLvl = Number((pObj && pObj.level) || (typeof window !== 'undefined' && window.S && window.S.player && window.S.player.level) || (typeof window !== 'undefined' && window.CITY_PLAYER && window.CITY_PLAYER.level) || 1);
+
+    var curRec = _findRegionalNodeRecord(normNode, resolvedProv);
+    var fromX = (curRec && curRec.node) ? curRec.node.x : 0.5;
+    var fromY = (curRec && curRec.node) ? curRec.node.y : 0.5;
+    var activeProv = (curRec && curRec.provKey) ? curRec.provKey : resolvedProv;
+
+    var results = [];
+    for (var i = 0; i < DIRECTIONAL_ROADS_DB.length; i++) {
+      var r = DIRECTIONAL_ROADS_DB[i];
+      var isForward = (normalizeRegionalNodeId(r.a) === normNode);
+      var isReverse = (normalizeRegionalNodeId(r.b) === normNode);
+      if (!isForward && !isReverse) continue;
+
+      var targetRegId = isForward ? normalizeRegionalNodeId(r.b) : normalizeRegionalNodeId(r.a);
+      var targetProvKey = isForward ? r.provB : r.provA;
+      var targetRec = _findRegionalNodeRecord(targetRegId, targetProvKey);
+      var targetNode = targetRec ? targetRec.node : { id: targetRegId, name: targetRegId, x: 0.5, y: 0.5 };
+      var targetRegObj = REGIONS_DATA[targetProvKey] || REGIONS_DATA[activeProv] || REGIONS_DATA.plains;
+
+      var toX = targetNode.x;
+      var toY = targetNode.y;
+      if (r.isFrontier) {
+        var bAnchor = isForward ? r.borderA : r.borderB;
+        if (bAnchor && typeof bAnchor.x === 'number') {
+          toX = bAnchor.x;
+          toY = bAnchor.y;
+        }
+      }
+
+      var bearing = computeCompassBearing(fromX, fromY, toX, toY);
+      var edgeId = canonicalRoadEdgeId(normNode, targetRegId);
+      var mem = roadState[edgeId] || { marcos_cleared: 0, total_marcos: r.marcos, completed: false, shortcut: false, clues: [], pois: [] };
+      var totalMarcos = r.marcos || 3;
+      var marcosCleared = Math.min(totalMarcos, Number(mem.marcos_cleared || 0));
+
+      var physicallyKnown = isNodeDiscovered(targetRegId, targetProvKey, known, []);
+      var mapGuided = !physicallyKnown && isNodeDiscovered(targetRegId, targetProvKey, known, ownedMaps);
+      var isCompleted = !!(mem.completed || physicallyKnown || marcosCleared >= totalMarcos);
+      if (physicallyKnown && marcosCleared === 0 && mem.completed) {
+        marcosCleared = totalMarcos;
+      }
+
+      var destDisplay = 'Destino Inexplorado';
+      if (physicallyKnown || mem.completed) {
+        destDisplay = targetNode.name + (r.isFrontier ? (' \u00b7 ' + targetRegObj.name) : '');
+      } else if (mapGuided) {
+        destDisplay = targetNode.name + ' (Mapa de Corvus)';
+      } else if (r.isFrontier) {
+        destDisplay = 'Fronteira Inexplorada';
+      }
+
+      var dangerInfo = _formatDangerTierForRoad(r.minLvl, r.maxLvl, pLvl);
+
+      results.push({
+        edgeId: edgeId,
+        roadName: r.name,
+        fromNodeId: normNode,
+        fromServerId: toServerNodeId(normNode),
+        toNodeId: targetRegId,
+        toServerId: toServerNodeId(targetRegId),
+        toNodeTrueName: targetNode.name,
+        toProvinceKey: targetProvKey,
+        toProvinceName: targetRegObj.name,
+        isFrontier: !!r.isFrontier,
+        fromX: fromX,
+        fromY: fromY,
+        toX: toX,
+        toY: toY,
+        bearing: bearing,
+        biome: r.biome || targetProvKey || 'plains',
+        totalMarcos: totalMarcos,
+        marcosCleared: marcosCleared,
+        completed: isCompleted,
+        physicallyKnown: physicallyKnown,
+        hasCorvusGuide: mapGuided,
+        displayDestName: destDisplay,
+        minLevel: r.minLvl,
+        maxLevel: r.maxLvl,
+        recommendedLevelLabel: 'Nv ' + r.minLvl + '\u2013' + r.maxLvl,
+        dangerTierLabel: dangerInfo.tierLabel,
+        dangerBadgeColor: dangerInfo.badgeColor,
+        dangerBorderColor: dangerInfo.borderColor,
+        dangerBgColor: dangerInfo.bgColor,
+        entryOmen: r.omen,
+        shortcut: !!mem.shortcut,
+        threatSeen: mem.threat_seen || '',
+        clues: Array.isArray(mem.clues) ? mem.clues.slice() : [],
+        pois: Array.isArray(mem.pois) ? mem.pois.slice() : []
+      });
+    }
+
+    // Ordena: intra-regionais antes de fronteiras, depois por menor nivel recomendado
+    results.sort(function(x, y) {
+      if (x.isFrontier !== y.isFrontier) return x.isFrontier ? 1 : -1;
+      if (x.minLevel !== y.minLevel) return x.minLevel - y.minLevel;
+      return x.roadName.localeCompare(y.roadName);
+    });
+    return results;
+  }
+
+  function getRegionRoadsForFog(provKey, pObj) {
+    var reg = REGIONS_DATA[provKey];
+    if (!reg || !Array.isArray(reg.nodes)) return [];
+    var known = extractDiscoveredLocations(pObj);
+    var roadState = extractRoadExplorationState(pObj);
+    var nodeMap = {};
+    for (var ni = 0; ni < reg.nodes.length; ni++) {
+      nodeMap[reg.nodes[ni].id] = reg.nodes[ni];
+    }
+
+    var segments = [];
+    for (var i = 0; i < DIRECTIONAL_ROADS_DB.length; i++) {
+      var r = DIRECTIONAL_ROADS_DB[i];
+      var aIn = (r.provA === provKey && nodeMap[normalizeRegionalNodeId(r.a)]);
+      var bIn = (r.provB === provKey && nodeMap[normalizeRegionalNodeId(r.b)]);
+      if (!aIn && !bIn) continue;
+
+      var idA = normalizeRegionalNodeId(r.a);
+      var idB = normalizeRegionalNodeId(r.b);
+      var edgeId = canonicalRoadEdgeId(idA, idB);
+      var mem = roadState[edgeId];
+      var totalM = r.marcos || 3;
+      var clearedM = mem ? Math.min(totalM, Number(mem.marcos_cleared || 0)) : 0;
+
+      var aKnown = isNodeDiscovered(idA, r.provA, known, []);
+      var bKnown = isNodeDiscovered(idB, r.provB, known, []);
+
+      if (!r.isFrontier && aIn && bIn) {
+        var nA = nodeMap[idA];
+        var nB = nodeMap[idB];
+        var bothKnown = aKnown && bKnown;
+        if (clearedM <= 0 && !bothKnown) continue;
+        var startNode = aKnown ? nA : (bKnown ? nB : nA);
+        var endNode = (startNode === nA) ? nB : nA;
+        var targetId = (startNode === nA) ? idB : idA;
+        var isFull = !!(bothKnown || (mem && mem.completed) || clearedM >= totalM);
+        var frac = isFull ? 1.0 : Math.min(0.86, Math.max(0.22, clearedM / totalM));
+        segments.push({
+          edgeId: edgeId,
+          roadName: r.name,
+          fromNodeId: startNode.id,
+          toNodeId: targetId,
+          x0: startNode.x,
+          y0: startNode.y,
+          x1: endNode.x,
+          y1: endNode.y,
+          frac: frac,
+          isFull: isFull,
+          marcosCleared: isFull ? totalM : clearedM,
+          totalMarcos: totalM,
+          bearing: computeCompassBearing(startNode.x, startNode.y, endNode.x, endNode.y)
+        });
+      } else if (r.isFrontier) {
+        var localNode = aIn ? nodeMap[idA] : nodeMap[idB];
+        var localKnown = aIn ? aKnown : bKnown;
+        var remoteKnown = aIn ? bKnown : aKnown;
+        var borderPt = aIn ? r.borderA : r.borderB;
+        if (!localNode || !borderPt) continue;
+        if (clearedM <= 0 && !(localKnown && remoteKnown)) continue;
+        var isFullF = !!((localKnown && remoteKnown) || (mem && mem.completed) || clearedM >= totalM);
+        var fracF = isFullF ? 1.0 : Math.min(0.86, Math.max(0.22, clearedM / totalM));
+        segments.push({
+          edgeId: edgeId,
+          roadName: r.name,
+          fromNodeId: localNode.id,
+          toNodeId: aIn ? idB : idA,
+          isFrontier: true,
+          x0: localNode.x,
+          y0: localNode.y,
+          x1: borderPt.x,
+          y1: borderPt.y,
+          frac: fracF,
+          isFull: isFullF,
+          marcosCleared: isFullF ? totalM : clearedM,
+          totalMarcos: totalM,
+          bearing: computeCompassBearing(localNode.x, localNode.y, borderPt.x, borderPt.y)
+        });
+      }
+    }
+    return segments;
+  }
 
   // === RETORNO À CIDADE (Ordem do Usuário 2026-10) ===
 
@@ -81930,89 +82397,162 @@
 
 
 
-    // Névoa Cartográfica vs Carta do Cartógrafo Corvus (Relevância de Mapas & Realismo D&D 5e):
+    // Pinos de Ponta de Nevoa para estradas parcialmente desbravadas (0 < marcos < total)
+    var roadSegments = getRegionRoadsForFog(key, pObj);
+    roadSegments.forEach(function(seg) {
+      if (seg.isFull || seg.marcosCleared <= 0) return;
+      var tipX = (seg.x0 + (seg.x1 - seg.x0) * seg.frac) * 100;
+      var tipY = (seg.y0 + (seg.y1 - seg.y0) * seg.frac) * 100;
+      var fPin = document.createElement('div');
+      fPin.className = 'cfm-pin cfm-pin-frontier';
+      fPin.setAttribute('data-id', 'frontier_' + seg.edgeId);
+      fPin.style.left = tipX.toFixed(1) + '%';
+      fPin.style.top = tipY.toFixed(1) + '%';
+      fPin.innerHTML = ''
+        + '<div class="cfm-pin-reticle" style="border-color:#ffd685;background:rgba(196,149,58,0.28);box-shadow:0 0 8px rgba(255,214,133,0.5);"></div>'
+        + '<div class="cfm-pin-badge" style="color:#ffd685;border-color:rgba(196,149,58,0.65);">'
+        + seg.bearing.glyph + ' ' + seg.marcosCleared + '/' + seg.totalMarcos + ' Marcos'
+        + '</div>';
+      fPin.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (typeof haptic === 'function') haptic('light');
+        drawerName.textContent = seg.bearing.glyph + ' ' + seg.roadName + ' (' + seg.marcosCleared + '/' + seg.totalMarcos + ' Marcos)';
+        var playerAtOrigin = !!(pLoc && normalizeRegionalNodeId(pLoc) === normalizeRegionalNodeId(seg.fromNodeId));
+        if (playerAtOrigin && typeof window !== 'undefined' && typeof window._openDirectionalRoadCrossroads === 'function') {
+          drawerBtn.textContent = 'Retomar Estrada';
+          drawerBtn.className = 'cfm-drawer-action-btn cfm-btn-action-here';
+          drawerBtn.style.display = 'inline-flex';
+          drawerBtn.onclick = function() {
+            if (typeof haptic === 'function') haptic('medium');
+            window._openDirectionalRoadCrossroads(seg.fromNodeId, seg.edgeId);
+          };
+        } else {
+          drawerBtn.style.display = 'none';
+        }
+      });
+      pinsLayer.appendChild(fPin);
+    });
 
-    // Se o aventureiro adquiriu o mapa regional ou o Mapa-Mestre, o mapa é 100% aberto e nítido.
-
-    // Se não possui o mapa, o território inexplorado fica velado por névoa suave de manuscrito,
-
-    // revelando organicamente apenas os arredores dos marcos conhecidos.
-
+    // Nevoa Cartografica Progressiva por Direcao + Trilhas Desbravadas:
+    // Se possui o Mapa Regional de Corvus, a arte fica 100% aberta e apenas as trilhas percorridas recebem marcacao dourada.
+    // Sem o mapa de Corvus, areas nao exploradas permanecem em escuridao opaca (#000000), abrindo-se marco a marco na direcao escolhida.
     var fogCanvas = modal.querySelector('#rfm-fog-canvas');
 
     function _renderRegionalFog() {
-
       if (!fogCanvas) return;
-
-      if (isFullMapUnlocked) {
-
-        fogCanvas.style.display = 'none';
-
-        return;
-
-      }
-
       fogCanvas.style.display = 'block';
+      fogCanvas.style.pointerEvents = 'none';
 
       var rect = fogCanvas.getBoundingClientRect();
-
       var fw = Math.round(rect.width) || fogCanvas.offsetWidth || 380;
-
       var fh = Math.round(rect.height) || fogCanvas.offsetHeight || 520;
-
       if (fw <= 0 || fh <= 0) {
-
         setTimeout(_renderRegionalFog, 60);
-
         return;
-
       }
 
       fogCanvas.width = fw;
-
       fogCanvas.height = fh;
-
       var fctx = fogCanvas.getContext('2d');
-
       if (!fctx) return;
-
       fctx.clearRect(0, 0, fw, fh);
 
+      var baseR = Math.min(fw, fh) * 0.165;
 
+      if (!isFullMapUnlocked) {
+        fctx.save();
+        fctx.fillStyle = '#000000';
+        fctx.fillRect(0, 0, fw, fh);
 
-      // Fundo névoa diegética em nanquim e couro escuro
+        fctx.globalCompositeOperation = 'destination-out';
 
-      fctx.save();
+        // 1) Clareiras circulares nos marcos conhecidos
+        nodes.forEach(function(n, nIdx) {
+          var nodeOpen = (known && known.indexOf(n.id) >= 0)
+            || (pLoc && normalizeRegionalNodeId(pLoc) === normalizeRegionalNodeId(n.id))
+            || isNodeDiscovered(n.id, key, known, [])
+            || (nIdx === 0);
+          if (!nodeOpen) return;
 
-      fctx.fillStyle = '#000000';
+          var nx = (n.x <= 1 ? (n.x * fw) : n.x);
+          var ny = (n.y <= 1 ? (n.y * fh) : n.y);
+          var grad = fctx.createRadialGradient(nx, ny, baseR * 0.22, nx, ny, baseR);
+          grad.addColorStop(0, 'rgba(0, 0, 0, 1.0)');
+          grad.addColorStop(0.70, 'rgba(0, 0, 0, 0.95)');
+          grad.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
+          fctx.fillStyle = grad;
+          fctx.beginPath();
+          fctx.arc(nx, ny, baseR, 0, Math.PI * 2);
+          fctx.fill();
+        });
 
-      fctx.fillRect(0, 0, fw, fh);
+        // 2) Corredores direcionais progressivos ao longo das estradas exploradas (marco a marco)
+        var corridorR = baseR * 0.64;
+        roadSegments.forEach(function(seg) {
+          var sx0 = seg.x0 * fw;
+          var sy0 = seg.y0 * fh;
+          var sx1 = seg.x1 * fw;
+          var sy1 = seg.y1 * fh;
+          var steps = Math.max(6, Math.round(18 * seg.frac));
+          for (var si = 1; si <= steps; si++) {
+            var t = (si / steps) * seg.frac;
+            var cx = sx0 + (sx1 - sx0) * t;
+            var cy = sy0 + (sy1 - sy0) * t;
+            var cGrad = fctx.createRadialGradient(cx, cy, corridorR * 0.18, cx, cy, corridorR);
+            cGrad.addColorStop(0, 'rgba(0, 0, 0, 1.0)');
+            cGrad.addColorStop(0.66, 'rgba(0, 0, 0, 0.92)');
+            cGrad.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
+            fctx.fillStyle = cGrad;
+            fctx.beginPath();
+            fctx.arc(cx, cy, corridorR, 0, Math.PI * 2);
+            fctx.fill();
+          }
+        });
+        fctx.restore();
+      }
 
+      // 3) Trilha cartografada em ouro envelhecido + pipas dos Marcos conquistados
+      if (roadSegments.length > 0) {
+        fctx.save();
+        fctx.globalCompositeOperation = 'source-over';
+        roadSegments.forEach(function(seg) {
+          var sx0 = seg.x0 * fw;
+          var sy0 = seg.y0 * fh;
+          var sxEnd = (seg.x0 + (seg.x1 - seg.x0) * seg.frac) * fw;
+          var syEnd = (seg.y0 + (seg.y1 - seg.y0) * seg.frac) * fh;
 
+          fctx.beginPath();
+          fctx.setLineDash([6, 5]);
+          fctx.strokeStyle = seg.isFull ? 'rgba(255, 214, 133, 0.72)' : 'rgba(255, 214, 133, 0.55)';
+          fctx.lineWidth = 2.2;
+          fctx.moveTo(sx0, sy0);
+          fctx.lineTo(sxEnd, syEnd);
+          fctx.stroke();
+          fctx.setLineDash([]);
 
-      // Abertura circular focada apenas em torno de marcos conhecidos / visitados
-      fctx.globalCompositeOperation = 'destination-out';
-      var baseR = Math.min(fw, fh) * 0.16;
-      nodes.forEach(function(n, nIdx) {
-        var isNodeDiscovered = isFullMapUnlocked
-          || (known && known.indexOf(n.id) >= 0)
-          || (pLoc && pLoc === n.id)
-          || (nIdx === 0);
-        if (!isNodeDiscovered) return;
-
-        var nx = (n.x <= 1 ? (n.x * fw) : n.x);
-        var ny = (n.y <= 1 ? (n.y * fh) : n.y);
-        var grad = fctx.createRadialGradient(nx, ny, baseR * 0.2, nx, ny, baseR);
-        grad.addColorStop(0, 'rgba(0, 0, 0, 1.0)');
-        grad.addColorStop(0.70, 'rgba(0, 0, 0, 0.95)');
-        grad.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
-        fctx.fillStyle = grad;
-        fctx.beginPath();
-        fctx.arc(nx, ny, baseR, 0, Math.PI * 2);
-        fctx.fill();
-      });
-      fctx.restore();
-
+          var totalPips = Math.max(2, seg.totalMarcos || 3);
+          var clearedPips = Math.min(totalPips, seg.marcosCleared || 0);
+          for (var mi = 1; mi <= clearedPips; mi++) {
+            if (mi === totalPips && !seg.isFrontier) continue; // destino ja possui pino proprio
+            var mt = (mi / totalPips);
+            if (mt > seg.frac + 0.02) break;
+            var mx = (seg.x0 + (seg.x1 - seg.x0) * mt) * fw;
+            var my = (seg.y0 + (seg.y1 - seg.y0) * mt) * fh;
+            fctx.fillStyle = '#ffd685';
+            fctx.strokeStyle = '#18110a';
+            fctx.lineWidth = 1.5;
+            fctx.beginPath();
+            fctx.moveTo(mx, my - 4.5);
+            fctx.lineTo(mx + 4.5, my);
+            fctx.lineTo(mx, my + 4.5);
+            fctx.lineTo(mx - 4.5, my);
+            fctx.closePath();
+            fctx.fill();
+            fctx.stroke();
+          }
+        });
+        fctx.restore();
+      }
     }
 
 
@@ -82152,6 +82692,24 @@
   window.CartShared = {
 
     buildPointcrawlCurrentNodeActionsHtml: buildPointcrawlCurrentNodeActionsHtml,
+
+    DIRECTIONAL_ROADS_DB: DIRECTIONAL_ROADS_DB,
+
+    normalizeRegionalNodeId: normalizeRegionalNodeId,
+
+    toServerNodeId: toServerNodeId,
+
+    canonicalRoadEdgeId: canonicalRoadEdgeId,
+
+    computeCompassBearing: computeCompassBearing,
+
+    extractRoadExplorationState: extractRoadExplorationState,
+
+    recordLocalRoadProgress: recordLocalRoadProgress,
+
+    getOutgoingRoadsForNode: getOutgoingRoadsForNode,
+
+    getRegionRoadsForFog: getRegionRoadsForFog,
 
     INK_DARK: INK_DARK, INK_MED: INK_MED, INK_LIGHT: INK_LIGHT,
 

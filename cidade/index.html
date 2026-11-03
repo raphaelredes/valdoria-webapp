@@ -13361,7 +13361,7 @@ body.perf-lite .vc-action-btn { transition: none; }
     // cartografia-shared.js (Fase 7.3 — 2026-04-30): SINGLE SOURCE pra
     // funções de drawing + data. Mesmo código carregado por exploracao.html
     // pra garantir que cidade ↔ exploracao tenham mapas IDÊNTICOS.
-    document.write('<script src="./cartografia-shared.js?v=' + (window.VBUNDLE_HASH || 'v') + '_20261030_withtitle"><\/script>');
+    document.write('<script src="./cartografia-shared.js?v=' + (window.VBUNDLE_HASH || 'v') + '_20261102_directional_roads"><\/script>');
   </script>
   <script>
   /* Bridge: aliases pra usar CartShared no namespace local da cidade.
@@ -14239,6 +14239,11 @@ body.perf-lite .vc-action-btn { transition: none; }
         });
         console.log('[CITY] known_locations hydrated from server:', p.known_locations.length, 'locations:', p.known_locations.join(','));
       }
+      var _srvRoadExp = (picked && picked.road_exploration) || (_savedState && _savedState.road_exploration) || null;
+      if (_srvRoadExp && typeof _srvRoadExp === 'object') {
+        p.road_exploration = _srvRoadExp;
+        window.__EXPLORE_ROAD_STATE = _srvRoadExp;
+      }
       // FASE 4 (2026-06-23): afinidade/reputação REAIS de NPC (server-authoritative,
       // Player.narrative). A tela de Vínculos passa a exibir o valor real (não o proxy
       // de nº-de-diálogos×12). Aditivo: chave sem match em REL_SERVER_KEY cai no proxy.
@@ -14459,6 +14464,10 @@ body.perf-lite .vc-action-btn { transition: none; }
             return SERVER_TO_CART_FB[k] || k;
           });
           console.log('[CITY] known_locations hydrated from server (fallback):', p.known_locations.length, 'locations:', p.known_locations.join(','));
+        }
+        if (picked.road_exploration && typeof picked.road_exploration === 'object') {
+          p.road_exploration = picked.road_exploration;
+          window.__EXPLORE_ROAD_STATE = picked.road_exploration;
         }
         if (picked.stats && typeof picked.stats === 'object') {
           var _sx = picked.stats;
@@ -75478,6 +75487,20 @@ function _closeCartLocationPopup(){
   if (el) el.classList.remove('active');
   window._cartCurrentLocBiome = null;
 }
+if (typeof window._openDirectionalRoadCrossroads !== 'function') {
+  window._openDirectionalRoadCrossroads = function(fromNodeId, edgeId) {
+    try {
+      if (edgeId) sessionStorage.setItem('vld_preselect_road_edge', edgeId);
+    } catch (_) {}
+    if (window.CartShared && typeof CartShared.closeRegionalMapModal === 'function') {
+      CartShared.closeRegionalMapModal();
+    }
+    var targetKey = (fromNodeId === 'green_fields' || !fromNodeId) ? 'plains' : fromNodeId;
+    if (typeof startCityJourney === 'function') {
+      startCityJourney(targetKey, 'Campos Verdes');
+    }
+  };
+}
 // Listener attached UMA VEZ via DOMContentLoaded
 (function(){
   document.addEventListener('DOMContentLoaded', function(){
@@ -75496,27 +75519,22 @@ function _closeCartLocationPopup(){
         _closeCartLocationPopup();
         if (typeof _triggerPointcrawlRegionalEvent === 'function') {
           _triggerPointcrawlRegionalEvent(biome);
-        } else if (biome && ACTION_HANDLERS['cart_' + biome.key]) {
-          ACTION_HANDLERS['cart_' + biome.key](window.CITY_MOCK_PLAYER);
         } else if (biome && typeof startCityJourney === 'function') {
           startCityJourney(biome.key, biome.name);
+        } else if (biome && ACTION_HANDLERS['cart_' + biome.key]) {
+          ACTION_HANDLERS['cart_' + biome.key](window.CITY_MOCK_PLAYER);
         } else {
           try {
             if (window.CartShared && typeof CartShared.rollWildernessEncounterTable === 'function' && window.vEncounter) {
               var enc = CartShared.rollWildernessEncounterTable((biome && biome.key) || 'plains', 1);
               if (enc) {
-                var encT = enc.title || 'Desafio nos Ermos';
-                var encD = enc.desc || enc.description || 'A comitiva se depara com um obstáculo no caminho.';
-                var encC = enc.check || enc.checkRequired || '';
-                var encS = enc.success || enc.successOutcome || 'A comitiva transpõe o obstáculo com sucesso.';
-                var nText = encD + (encC ? '<br><br><b>Perigo à frente:</b> ' + encC : '');
+                var encT = enc.title || 'Desafio na Estrada';
+                var encD = enc.desc || enc.description || 'Sua comitiva avista sinais recentes na margem da trilha.';
                 window.vEncounter.render({
-                  npc: { name: 'Exploração dos Ermos', desc: encT, portrait: '/shared/img/merchants/corvus-veltharion.webp' },
-                  script: [
-                    { type: 'narration', text: nText }
-                  ],
+                  npc: { name: 'Patrulha da Estrada', desc: encT },
+                  script: [{ type: 'narration', text: encD }],
                   choices: [
-                    { id: 'enc_act', label: 'Transpor o desafio' },
+                    { id: 'enc_act', label: '[SAB 12] Investigar sinais na trilha' },
                     { id: 'enc_bypass', label: 'Contornar com cautela' }
                   ],
                   inline: true
@@ -75524,8 +75542,17 @@ function _closeCartLocationPopup(){
                   player: window.CITY_MOCK_PLAYER || {},
                   onChoice: function(ch) {
                     var isAct = (ch && ch.id === 'enc_act');
+                    var d20 = 1 + Math.floor(Math.random() * 20);
+                    var mod = 2;
+                    var tot = d20 + mod;
+                    var ok = tot >= 12;
+                    var rollLine = 'Teste de Sabedoria (CD 12): d20 [' + d20 + '] + ' + mod + ' = ' + tot + ' vs CD 12 — ' + (ok ? 'Sucesso.' : 'Falha.');
+                    var outText = isAct
+                      ? (rollLine + ' ' + (ok ? (enc.success || enc.successOutcome || 'Você identifica uma passagem segura na estrada.') : (enc.failure || enc.failureOutcome || 'O terreno irregular obriga sua comitiva a recuar.')))
+                      : 'Sua comitiva contorna o trecho com cautela e mantém a posição.';
                     window.vEncounter.render({
-                      script: [{ type: 'narration', text: isAct ? encS : 'A comitiva manobra cautelosa pelos arredores.' }],
+                      npc: { name: 'Patrulha da Estrada', desc: encT },
+                      script: [{ type: 'narration', text: outText }],
                       choices: [{ id: 'enc_end', label: 'Retornar' }],
                       inline: true
                     }, {

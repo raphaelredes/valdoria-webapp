@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-11-02T23:08:30Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-11-03T00:01:08Z - do not edit directly, edit source -->
 
 
 
@@ -31515,6 +31515,11 @@ window.__explFetchTO = function(url, opts, ms) {
           window.__EXPLORE_DISCOVERED_DUNGEONS = res.discovered_dungeons;
           console.info('[E-REM:API-INIT] discovered_dungeons=' + window.__EXPLORE_DISCOVERED_DUNGEONS.length + ' [' + window.__EXPLORE_DISCOVERED_DUNGEONS.join(',') + ']');
         }
+        if (res.road_exploration && typeof res.road_exploration === 'object') {
+          window.__EXPLORE_ROAD_STATE = res.road_exploration;
+          if (window.S) window.S.road_exploration = res.road_exploration;
+          console.info('[E-REM:API-INIT] road_exploration edges=' + Object.keys(res.road_exploration).length);
+        }
 
         /* Server-Only State (regra #0): o inventário da exploração vem do SERVIDOR no
 
@@ -31880,6 +31885,11 @@ window.__explFetchTO = function(url, opts, ms) {
 
       var res = await _get('/api/exploracao/state?token=' + encodeURIComponent(tok) + '&known=1');
 
+      if (res && res.road_exploration && typeof res.road_exploration === 'object') {
+        window.__EXPLORE_ROAD_STATE = res.road_exploration;
+        if (window.S) window.S.road_exploration = res.road_exploration;
+      }
+
       return (res && Array.isArray(res.known_locations)) ? res.known_locations : null;
 
     },
@@ -32074,6 +32084,41 @@ window.__explFetchTO = function(url, opts, ms) {
       } catch (err) {
         console.warn('[E-REM:API-DISCOVER-DGN] failed', err);
       }
+    },
+
+    roadStep: async function(payload) {
+      var tok = _motorToken();
+      if (!tok) return { error: 'no_motor_token' };
+      var body = Object.assign({ token: tok }, payload || {});
+      console.info('[E-REM:API-ROAD-STEP] edge=' + (body.edge_id || '?') + ' marco=' + (body.marco_index || 1) + '/' + (body.total_marcos || 3));
+      return await _post('/api/exploracao/road_step', body);
+    },
+
+    roadDecision: async function(payload) {
+      var tok = _motorToken();
+      if (!tok) return { error: 'no_motor_token' };
+      var body = Object.assign({ token: tok }, payload || {});
+      console.info('[E-REM:API-ROAD-DECISION] action=' + (body.action || '?') + ' edge=' + (body.edge_id || '?'));
+      var res = await _post('/api/exploracao/road_decision', body);
+      if (res && res.road_exploration && typeof res.road_exploration === 'object') {
+        window.__EXPLORE_ROAD_STATE = res.road_exploration;
+        if (window.S) window.S.road_exploration = res.road_exploration;
+      }
+      if (res && Array.isArray(res.known_locations) && res.known_locations.length) {
+        var _S2C_RD = {
+          city_gates: 'plains', whispering_woods: 'forest', misty_marshes: 'swamp',
+          golden_sands: 'desert', underground_passage: 'cave', stone_peaks: 'mountain',
+          ancient_cemetery: 'graveyard', frozen_waste: 'snow', burning_crater: 'volcanic'
+        };
+        window.__EXPLORE_KNOWN = [];
+        res.known_locations.forEach(function (k) {
+          if (k && window.__EXPLORE_KNOWN.indexOf(k) < 0) window.__EXPLORE_KNOWN.push(k);
+          var m = _S2C_RD[k];
+          if (m && window.__EXPLORE_KNOWN.indexOf(m) < 0) window.__EXPLORE_KNOWN.push(m);
+        });
+        if (window.S) window.S.known_locations = window.__EXPLORE_KNOWN.slice();
+      }
+      return res;
     },
 
     // Helper diagnóstico (pra console dev): true se motor_token presente.
@@ -47522,6 +47567,78 @@ const FIXED_MAPS = {
       { col: 21, row: 13, targetMap: 'frozen_waste', label: 'Ermo Congelado' },
       { col: 21, row: 25, targetMap: 'elder_woods', label: 'Bosque Ancestral' }
     ]
+  },
+  shipwreck_cove: {
+    id: 'shipwreck_cove', region: 'valdoria', biome: 'coast',
+    name: 'Cala dos Naufrágios',
+    cols: 20, rows: 22, seed: 90101, spawnCol: 10, spawnRow: 11,
+    music: 'coast', danger: 3, required_gear: null,
+    worldPos: { x: 0.14, y: 0.62 },
+    weather_pool: ['s', 'r', 'f'],
+    weights: { '.': 34, 'w': 30, 'r': 22, 't': 14 },
+    ambient_tips: ['Cascos despedaçados rangem ao sabor da maré entre os recifes.'],
+    dungeons: [],
+    edges: [{ col: 0, row: 11, targetMap: 'salty_coast', label: 'Costa Salgada' }]
+  },
+  lighthouse_ruins: {
+    id: 'lighthouse_ruins', region: 'valdoria', biome: 'coast',
+    name: 'Farol Abandonado',
+    cols: 20, rows: 22, seed: 90102, spawnCol: 10, spawnRow: 11,
+    music: 'coast', danger: 4, required_gear: null,
+    worldPos: { x: 0.10, y: 0.50 },
+    weather_pool: ['r', 'f', 't'],
+    weights: { '.': 32, 'r': 32, 'w': 24, 'R': 12 },
+    ambient_tips: ['O vento marítimo assobia pelas frestas da antiga torre costeira.'],
+    dungeons: [],
+    edges: [{ col: 19, row: 11, targetMap: 'salty_coast', label: 'Costa Salgada' }]
+  },
+  sunken_tomb: {
+    id: 'sunken_tomb', region: 'valdoria', biome: 'desert',
+    name: 'Tumba das Areias',
+    cols: 20, rows: 22, seed: 90103, spawnCol: 10, spawnRow: 11,
+    music: 'desert', danger: 5, required_gear: 'torch',
+    worldPos: { x: 0.82, y: 0.87 },
+    weather_pool: ['s', 't'],
+    weights: { '.': 42, 'r': 30, 'R': 28 },
+    ambient_tips: ['Colunas de arenito vermelho emergem das dunas escaldantes.'],
+    dungeons: [],
+    edges: [{ col: 10, row: 0, targetMap: 'golden_sands', label: 'Areias Douradas' }]
+  },
+  crypt_shadows: {
+    id: 'crypt_shadows', region: 'valdoria', biome: 'graveyard',
+    name: 'Cripta das Sombras',
+    cols: 20, rows: 22, seed: 90104, spawnCol: 10, spawnRow: 11,
+    music: 'graveyard', danger: 5, required_gear: 'torch',
+    worldPos: { x: 0.25, y: 0.90 },
+    weather_pool: ['f', 'r'],
+    weights: { '.': 36, 'r': 32, 'R': 22, 't': 10 },
+    ambient_tips: ['Uma bruma fria escapa pelas grades de ferro dos mausoléus subterrâneos.'],
+    dungeons: [],
+    edges: [{ col: 10, row: 0, targetMap: 'ancestral_graveyard', label: 'Cemitério Ancestral' }]
+  },
+  frost_cave: {
+    id: 'frost_cave', region: 'valdoria', biome: 'snow',
+    name: 'Caverna de Gelo',
+    cols: 20, rows: 22, seed: 90105, spawnCol: 10, spawnRow: 11,
+    music: 'snow', danger: 6, required_gear: 'torch',
+    worldPos: { x: 0.30, y: 0.10 },
+    weather_pool: ['f', 't', 's'],
+    weights: { '.': 24, 'i': 36, 'r': 26, 'R': 14 },
+    ambient_tips: ['Estalactites translúcidas pendem sobre trilhas congeladas.'],
+    dungeons: [],
+    edges: [{ col: 19, row: 11, targetMap: 'frozen_waste', label: 'Ermo Congelado' }]
+  },
+  obsidian_ridge: {
+    id: 'obsidian_ridge', region: 'valdoria', biome: 'volcanic',
+    name: 'Crista de Obsidiana',
+    cols: 20, rows: 22, seed: 90106, spawnCol: 10, spawnRow: 11,
+    music: 'volcanic', danger: 7, required_gear: null,
+    worldPos: { x: 0.90, y: 0.50 },
+    weather_pool: ['s', 't', 'f'],
+    weights: { '.': 28, 'r': 38, 'R': 22, 'l': 12 },
+    ambient_tips: ['Lâminas naturais de vidro negro ladeiam fissuras incandescentes.'],
+    dungeons: [],
+    edges: [{ col: 0, row: 11, targetMap: 'burning_crater', label: 'Cratera Ardente' }]
   }
 };
 
@@ -81257,6 +81374,12 @@ function triggerCombatScreen(cfg) {
 
   try {
 
+    if (window._activeRoadExpedition) {
+      window._activeRoadExpedition.combatPending = true;
+      window._activeRoadExpedition.ts = Date.now();
+      sessionStorage.setItem('vld_active_road_exp_v1', JSON.stringify(window._activeRoadExpedition));
+    }
+
     var _augQs = new URLSearchParams(location.search);
 
     localStorage.setItem('valdoria_explore_resume', JSON.stringify({
@@ -84001,6 +84124,12 @@ function _remoteShowOutcome(ch, oc) {
 
   if (oc.combat_trigger) {
 
+    if (window._activeRoadExpedition) {
+      window._activeRoadExpedition.combatPending = true;
+      window._activeRoadExpedition.ts = Date.now();
+      try { sessionStorage.setItem('vld_active_road_exp_v1', JSON.stringify(window._activeRoadExpedition)); } catch (_) {}
+    }
+
     LOG('API', 'combat_redirect enemy=' + oc.combat_trigger.enemy_id);
 
     setTimeout(function() {
@@ -85377,7 +85506,16 @@ function _explEventVEncFinish(oc) {
 
   scheduleRender();
 
-  if (oc && oc.combat_trigger) { _explFinalizeCombatRedirect(oc); }
+  if (oc && oc.combat_trigger) {
+    if (window._activeRoadExpedition) {
+      window._activeRoadExpedition.combatPending = true;
+      window._activeRoadExpedition.ts = Date.now();
+      try { sessionStorage.setItem('vld_active_road_exp_v1', JSON.stringify(window._activeRoadExpedition)); } catch (_) {}
+    }
+    _explFinalizeCombatRedirect(oc);
+  } else if (S.ph !== 'defeat' && window._activeRoadExpedition && !window._activeRoadExpedition.combatPending && typeof window._onRoadMarcoEventResolved === 'function') {
+    setTimeout(function () { window._onRoadMarcoEventResolved(); }, 100);
+  }
 
 }
 
@@ -87581,6 +87719,10 @@ function closeEventModal() {
 
     }, 350);
 
+  }
+
+  if (!chained && !pendingCombat && !pendingGameOver && S.ph !== 'defeat' && window._activeRoadExpedition && !window._activeRoadExpedition.combatPending && typeof window._onRoadMarcoEventResolved === 'function') {
+    setTimeout(function () { window._onRoadMarcoEventResolved(); }, 100);
   }
 
 }
@@ -97513,221 +97655,1067 @@ function _showDungeonDiscoveryModal(dg, biome, checkInfo) {
   });
 }
 
-function _triggerPointcrawlRegionalEvent(targetBiome) {
-  var biome = (typeof _resolveCurrentPointcrawlBiomeNode === 'function')
-    ? _resolveCurrentPointcrawlBiomeNode(targetBiome || window._cartCurrentLocBiome)
-    : (targetBiome || window._cartCurrentLocBiome);
+function _injectDirectionalRoadStyles() {
+  if (document.getElementById('directional-road-styles')) return;
+  var st = document.createElement('style');
+  st.id = 'directional-road-styles';
+  st.textContent = ''
+    + '#directional-road-modal { position: fixed; inset: 0; z-index: 100045 !important; background: rgba(6, 4, 3, 0.88); display: flex; align-items: center; justify-content: center; padding: 10px; box-sizing: border-box; max-width: 480px; margin: 0 auto; overflow-x: hidden; }'
+    + '.drm-card { width: 100%; max-width: 448px; max-height: calc(100dvh - 20px); background: linear-gradient(180deg, #1b140d 0%, #100b07 100%); border: 1.5px solid rgba(196, 149, 58, 0.72); border-radius: 8px; box-shadow: 0 14px 40px rgba(0, 0, 0, 0.96); display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box; }'
+    + '.drm-header { padding: 10px 12px; background: linear-gradient(180deg, #24190f 0%, #150f09 100%); border-bottom: 1px solid rgba(196, 149, 58, 0.45); display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }'
+    + '.drm-header-titles { min-width: 0; flex: 1; text-align: left; }'
+    + '.drm-kicker { font-family: "Cinzel", Georgia, serif; font-size: 11px; font-weight: 700; color: #c4953a; letter-spacing: 0.9px; text-transform: uppercase; }'
+    + '.drm-title { font-family: "Cinzel", Georgia, serif; font-size: 14px; font-weight: 700; color: #ffd685; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }'
+    + '.drm-close-btn { font-family: "Cinzel", Georgia, serif; font-size: 11.5px; font-weight: 700; color: #ffd685; background: linear-gradient(180deg, #2c1f13 0%, #18110a 100%); border: 1px solid rgba(196, 149, 58, 0.65); border-radius: 5px; padding: 5px 9px; cursor: pointer; touch-action: manipulation; flex-shrink: 0; }'
+    + '.drm-close-btn:active { transform: scale(0.96); }'
+    + '.drm-body { padding: 10px 12px 12px; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; gap: 9px; text-align: left; box-sizing: border-box; }'
+    + '.drm-pace-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; background: rgba(12, 9, 6, 0.78); padding: 5px; border: 1px solid rgba(196, 149, 58, 0.3); border-radius: 6px; }'
+    + '.drm-pace-btn { background: rgba(28, 20, 13, 0.85); border: 1px solid rgba(196, 149, 58, 0.28); border-radius: 4px; padding: 5px 4px; color: #cbb68c; font-family: "Cinzel", Georgia, serif; font-size: 11px; font-weight: 700; cursor: pointer; text-align: center; touch-action: manipulation; }'
+    + '.drm-pace-btn.active { background: linear-gradient(180deg, #473218 0%, #2a1d0e 100%); border-color: #ffd685; color: #ffd685; box-shadow: 0 0 8px rgba(196, 149, 58, 0.35); }'
+    + '.drm-pace-hint { font-size: 11px; color: #b8a47e; text-align: center; margin-top: -3px; font-style: italic; }'
+    + '.drm-road-card { background: linear-gradient(180deg, rgba(31, 22, 15, 0.96) 0%, rgba(19, 13, 9, 0.98) 100%); border: 1px solid rgba(196, 149, 58, 0.42); border-radius: 6px; padding: 9px 10px; display: flex; flex-direction: column; gap: 6px; box-sizing: border-box; overflow-x: hidden; }'
+    + '.drm-road-card.preselected { border-color: #ffd685; box-shadow: 0 0 12px rgba(255, 214, 133, 0.28); }'
+    + '.drm-road-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }'
+    + '.drm-compass-pill { display: inline-flex; align-items: center; gap: 4px; background: #2d1f11; border: 1px solid rgba(255, 214, 133, 0.6); color: #ffd685; font-family: "Cinzel", Georgia, serif; font-size: 11.5px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }'
+    + '.drm-threat-pill { display: inline-flex; align-items: center; gap: 4px; font-family: "Cinzel", Georgia, serif; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }'
+    + '.drm-road-name { font-family: "Cinzel", Georgia, serif; font-size: 13px; font-weight: 700; color: #f6e7c8; line-height: 1.25; word-break: break-word; }'
+    + '.drm-dest-line { font-size: 11.5px; color: #dec99e; display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }'
+    + '.drm-marcos-track { display: flex; align-items: center; justify-content: space-between; gap: 6px; background: rgba(10, 7, 5, 0.68); border: 1px solid rgba(196, 149, 58, 0.24); border-radius: 4px; padding: 5px 8px; font-size: 11px; color: #e8d5ae; flex-wrap: wrap; }'
+    + '.drm-marcos-pips { font-family: monospace; font-size: 12px; letter-spacing: 1px; color: #ffd685; font-weight: 700; }'
+    + '.drm-memory-box { font-size: 11.5px; color: #cbb68c; line-height: 1.4; border-left: 2px solid rgba(196, 149, 58, 0.55); padding-left: 8px; word-break: break-word; }'
+    + '.drm-act-btn { width: 100%; min-height: 36px; background: linear-gradient(180deg, #49341a 0%, #2a1d0d 100%); border: 1.5px solid #c4953a; border-radius: 5px; color: #ffd685; font-family: "Cinzel", Georgia, serif; font-size: 11.5px; font-weight: 700; padding: 7px 10px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; gap: 6px; text-align: center; box-sizing: border-box; }'
+    + '.drm-act-btn:active { transform: scale(0.98); }'
+    + '.drm-act-btn.secondary { background: linear-gradient(180deg, #281d13 0%, #16100a 100%); border-color: rgba(196, 149, 58, 0.48); color: #e4cfa4; }'
+    + '.drm-act-btn.return-safe { background: linear-gradient(180deg, #1d2b1f 0%, #101912 100%); border-color: rgba(134, 239, 172, 0.52); color: #bbf7d0; }'
+    + '.drm-vitals-strip { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; padding: 6px 9px; background: rgba(12, 9, 6, 0.82); border: 1px solid rgba(196, 149, 58, 0.3); border-radius: 5px; font-size: 11px; color: #e8d5ae; }'
+    + '.drm-omen-box { padding: 8px 10px; background: rgba(29, 21, 13, 0.88); border: 1px solid rgba(196, 149, 58, 0.42); border-radius: 6px; font-size: 12px; color: #f0dfc0; line-height: 1.45; word-break: break-word; }'
+    + '.drm-roll-banner { padding: 7px 9px; background: rgba(196, 149, 58, 0.14); border: 1px solid rgba(255, 214, 133, 0.45); border-radius: 5px; font-size: 11.5px; color: #ffd685; line-height: 1.4; }'
+    + '.drm-attr-tag { display: inline-block; background: linear-gradient(180deg, #3b2a12 0%, #241809 100%); border: 1px solid #eab308; color: #fde047; font-family: "Cinzel", Georgia, serif; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 3px; margin-right: 4px; }';
+  document.head.appendChild(st);
+}
 
-  if (typeof S === 'undefined' || !S) {
-    if (typeof window.S !== 'undefined' && window.S) S = window.S;
-    else return;
+function _buildCanonicalRoadRewardHtml(opts) {
+  opts = opts || {};
+  var gold = Number(opts.gold || 0);
+  var xp = Number(opts.xp || 0);
+  var cartText = opts.cartography || '';
+  if (gold <= 0 && xp <= 0 && !cartText) return '';
+
+  var coinBase = (typeof window !== 'undefined' && window.location && window.location.protocol === 'file:')
+    ? './shared/img/items/valdorita.webp'
+    : '/shared/img/items/valdorita.webp';
+
+  var rowsHtml = '';
+  if (gold > 0) {
+    rowsHtml += ''
+      + '<div class="enc-reward-row">'
+      + '  <span class="enc-reward-icon enc-reward-icon-gold">'
+      + '    <img class="enc-reward-item-img" src="' + coinBase + '" alt="" onerror="this.style.display=\'none\';this.parentNode.innerHTML=\'<span class=&quot;vi vi-coin&quot;></span>\';">'
+      + '  </span>'
+      + '  <div class="enc-reward-col">'
+      + '    <div class="enc-reward-val enc-reward-val-gold">+' + Math.round(gold) + ' ' + (Math.round(gold) === 1 ? 'Valdorita' : 'Valdoritas') + '</div>'
+      + '    <div class="enc-reward-lbl">TESOURO</div>'
+      + '  </div>'
+      + '</div>';
   }
-  // Fecha o popup de localidade para dar visibilidade imediata ao evento
-  if (typeof _closeCartLocationPopup === 'function') _closeCartLocationPopup();
-
-  // Sincroniza estado de bioma e localidade
-  var bKey = (biome && (biome.biome || biome.key)) || 'plains';
-  S.biome = bKey;
-  if (typeof _cartResolveMapId === 'function') {
-    S.mapId = _cartResolveMapId(biome.key || bKey);
-  } else {
-    S.mapId = biome.key || bKey;
+  if (xp > 0) {
+    rowsHtml += ''
+      + '<div class="enc-reward-row">'
+      + '  <span class="enc-reward-icon enc-reward-icon-xp" style="color:#48bb78;">◆</span>'
+      + '  <div class="enc-reward-col">'
+      + '    <div class="enc-reward-val enc-reward-val-xp" style="color:#48bb78;">+' + Math.round(xp) + ' XP</div>'
+      + '    <div class="enc-reward-lbl">EXPERIÊNCIA</div>'
+      + '  </div>'
+      + '</div>';
   }
-  window._cartCurrentLocBiome = biome;
+  if (cartText) {
+    rowsHtml += ''
+      + '<div class="enc-reward-row">'
+      + '  <span class="enc-reward-icon" style="color:#ffd685;">◆</span>'
+      + '  <div class="enc-reward-col">'
+      + '    <div class="enc-reward-val" style="color:#ffd685;">' + cartText + '</div>'
+      + '    <div class="enc-reward-lbl">CARTOGRAFIA</div>'
+      + '  </div>'
+      + '</div>';
+  }
+  return ''
+    + '<div class="enc-reward" style="margin:4px 0;">'
+    + '  <div class="enc-reward-title">◆ RECOMPENSA ◆</div>'
+    +    rowsHtml
+    + '</div>';
+}
 
-  // Registra passo e ciclo de tempo nos ermos sem tocar no grid hexagonal
-  S.ph = 'idle';
-  S.steps = Math.max(3, (S.steps || 0) + 1);
-  S._stepsToNextEvent = 0;
-  if (typeof tickDayPhase === 'function') {
-    try { tickDayPhase(); } catch (_) {}
+function _formatMarcosPips(cleared, total) {
+  var t = Math.max(1, Number(total || 3));
+  var c = Math.max(0, Math.min(t, Number(cleared || 0)));
+  var parts = [];
+  for (var i = 1; i <= t; i++) {
+    parts.push(i <= c ? '◆' : '◇');
+  }
+  return parts.join(' ━━ ');
+}
+
+function _getRoadDaylightAndWeatherLabels() {
+  var dp = (typeof S !== 'undefined' && S && S.dayPhase) ? String(S.dayPhase).toLowerCase() : 'day';
+  var dpLabel = { dawn: 'Alvorada', day: 'Dia Claro', dusk: 'Entardecer', night: 'Noite' }[dp] || 'Dia';
+  var w = (typeof S !== 'undefined' && S && S.weather) ? String(S.weather).toLowerCase() : 's';
+  var wLabel = { s: 'Céu Limpo', clear: 'Céu Limpo', r: 'Chuva', rain: 'Chuva', f: 'Névoa', fog: 'Névoa', t: 'Tempestade', storm: 'Tempestade', snow: 'Nevasca' }[w] || 'Estável';
+  return { dayLabel: dpLabel, weatherLabel: wLabel };
+}
+
+function _pickLocalBiomeRoadEvent(biomeKey) {
+  var pLvl = (typeof S !== 'undefined' && S && S.player && (S.player.level || S.player.lvl)) || 1;
+  if (!window._roadSeenLocalEvents) window._roadSeenLocalEvents = {};
+  var candidates = [];
+  var fallbackCombat = [];
+
+  var db = window.__EXPLORACAO_EVENTS;
+  if (db && typeof db === 'object') {
+    Object.keys(db).forEach(function (evId) {
+      var ev = db[evId];
+      if (!ev || typeof ev !== 'object') return;
+      var evBiomes = Array.isArray(ev.biomes) ? ev.biomes : (ev.biome ? [ev.biome] : []);
+      var matchesBiome = !evBiomes.length || evBiomes.indexOf(biomeKey) >= 0 || evBiomes.indexOf('any') >= 0;
+      if (!matchesBiome) return;
+      if (ev.min_level && Number(ev.min_level) > pLvl + 1) return;
+      var copy = Object.assign({}, ev, { id: ev.id || evId });
+      var isComb = (typeof _isCombatEvent === 'function') ? _isCombatEvent(copy) : !!(copy.combat);
+      if (!isComb && window._roadSeenLocalEvents[copy.id]) return;
+      if (isComb) fallbackCombat.push(copy);
+      else candidates.push(copy);
+    });
   }
 
-  var regName = (biome && (biome.regionalName || biome.name)) ? (biome.regionalName || biome.name) : 'Valdória';
+  if (!candidates.length && typeof EVENTS_POOL !== 'undefined' && Array.isArray(EVENTS_POOL)) {
+    EVENTS_POOL.forEach(function (ev) {
+      if (!ev) return;
+      var evBiomes = Array.isArray(ev.biomes) ? ev.biomes : (ev.biome ? [ev.biome] : []);
+      if (evBiomes.length && evBiomes.indexOf(biomeKey) < 0 && evBiomes.indexOf('any') < 0) return;
+      var isComb = (typeof _isCombatEvent === 'function') ? _isCombatEvent(ev) : !!(ev.combat);
+      if (!isComb && window._roadSeenLocalEvents[ev.id]) return;
+      candidates.push(Object.assign({}, ev));
+    });
+  }
 
-  // REGRA SOBERANA DE INCURSÕES: Checagem de Descoberta nos Ermos
-  var potential = (typeof _getAllPotentialDungeonsForBiomeNode === 'function') ? _getAllPotentialDungeonsForBiomeNode(biome) : [];
-  var undiscovered = potential.filter(function(dg){
-    return !_isDungeonDiscovered(dg.id);
-  });
+  var pool = candidates.length ? candidates : fallbackCombat;
+  if (candidates.length && fallbackCombat.length && Math.random() < 0.35) {
+    pool = fallbackCombat;
+  }
+  if (!pool.length) return null;
+  var picked = pool[Math.floor(Math.random() * pool.length)];
+  var pickedIsCombat = (typeof _isCombatEvent === 'function') ? _isCombatEvent(picked) : !!(picked.combat);
+  if (!pickedIsCombat && picked.id) {
+    window._roadSeenLocalEvents[picked.id] = true;
+  }
+  return picked;
+}
+
+function _closeDirectionalRoadModal() {
+  var existing = document.getElementById('directional-road-modal');
+  if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+}
+
+function _saveRoadExpeditionSession(exp) {
+  window._activeRoadExpedition = exp || null;
+  try {
+    if (exp) {
+      exp.ts = Date.now();
+      sessionStorage.setItem('vld_active_road_exp_v1', JSON.stringify(exp));
+    } else {
+      sessionStorage.removeItem('vld_active_road_exp_v1');
+    }
+  } catch (_) {}
+}
+
+function _resolveCurrentRegionalOrigin(explicitNodeOrBiome) {
+  var rawKey = null;
+  if (typeof explicitNodeOrBiome === 'string' && explicitNodeOrBiome) {
+    rawKey = explicitNodeOrBiome;
+  } else if (explicitNodeOrBiome && (explicitNodeOrBiome.id || explicitNodeOrBiome.key)) {
+    rawKey = explicitNodeOrBiome.id || explicitNodeOrBiome.key;
+  }
+  if (!rawKey && typeof S !== 'undefined' && S) {
+    rawKey = S.current_location_id
+      || (S.player && S.player.current_location_id)
+      || (S.player && S.player.metadata && S.player.metadata.current_location_id)
+      || S.mapId;
+  }
+  if (!rawKey && typeof _cartGetPlayerBiomeV2 === 'function') {
+    rawKey = _cartGetPlayerBiomeV2();
+  }
+  var normId = (window.CartShared && typeof CartShared.normalizeRegionalNodeId === 'function')
+    ? CartShared.normalizeRegionalNodeId(rawKey || 'green_fields')
+    : (rawKey || 'green_fields');
+  var provObj = (window.CartShared && typeof CartShared.getLocationProvince === 'function')
+    ? CartShared.getLocationProvince(normId)
+    : null;
+  var provKey = (provObj && provObj.id) || 'plains';
+  var regData = (window.CartShared && CartShared.REGIONS_DATA && CartShared.REGIONS_DATA[provKey]) || null;
+  var nodeRec = (regData && Array.isArray(regData.nodes))
+    ? regData.nodes.find(function (n) { return n.id === normId; })
+    : null;
+  var displayName = (nodeRec && nodeRec.name)
+    || (explicitNodeOrBiome && (explicitNodeOrBiome.regionalName || explicitNodeOrBiome.name))
+    || normId;
+  return {
+    nodeId: normId,
+    provKey: provKey,
+    provName: (regData && regData.name) || (provObj && provObj.name) || 'Valdoria',
+    nodeName: displayName
+  };
+}
+
+function _runLocalPerimeterSweep(originInfo, biomeObj) {
+  _closeDirectionalRoadModal();
+  var regName = originInfo.nodeName || 'Arredores';
+  var potential = (typeof _getAllPotentialDungeonsForBiomeNode === 'function')
+    ? _getAllPotentialDungeonsForBiomeNode(biomeObj || { key: originInfo.nodeId, name: regName })
+    : [];
+  var undiscovered = potential.filter(function (dg) { return !_isDungeonDiscovered(dg.id); });
 
   if (undiscovered.length > 0) {
     var targetDg = undiscovered[0];
-    var nodeKey = (biome && biome.key) || 'current';
+    var nodeKey = originInfo.nodeId || 'current';
     var cid = (S && S.player && (S.player.char_id || S.player.id)) || window.__EXPLORE_USER_ID || 'shared';
     var storeKey = 'vld_exp_att_' + cid + '_' + nodeKey;
     var attempts = 0;
-    try {
-      attempts = parseInt(localStorage.getItem(storeKey) || '0', 10) || 0;
-    } catch (_) {}
+    try { attempts = parseInt(localStorage.getItem(storeKey) || '0', 10) || 0; } catch (_) {}
     if (!S._exploreAttempts) S._exploreAttempts = {};
     attempts = Math.max(attempts, S._exploreAttempts[nodeKey] || 0) + 1;
     S._exploreAttempts[nodeKey] = attempts;
-    try {
-      localStorage.setItem(storeKey, String(attempts));
-    } catch (_) {}
+    try { localStorage.setItem(storeKey, String(attempts)); } catch (_) {}
 
     var p = (S && S.player) || {};
-    var wisMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(p, 'wis') : 1;
-    var intMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(p, 'int') : 1;
-    var bestMod = Math.max(wisMod, intMod);
+    var wisMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(p, 'wis') : 0;
+    var intMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(p, 'int') : 0;
+    var useInt = intMod >= wisMod;
+    var bestMod = useInt ? intMod : wisMod;
+    var attrName = useInt ? 'Inteligência' : 'Sabedoria';
     var d20 = 1 + Math.floor(Math.random() * 20);
     var total = d20 + bestMod;
-    var dc = 12; // D&D 5e CD Moderada de Investigação nos Ermos
+    var dc = 12;
+    var ok = (total >= dc || attempts >= 2);
 
-    if (total >= dc || attempts >= 2) {
-      _recordDungeonDiscovered(targetDg.id, nodeKey);
-      _showDungeonDiscoveryModal(targetDg, biome, { d20: d20, total: total, mod: bestMod, dc: dc, guaranteed: (attempts >= 2 && total < dc) });
-      if (typeof updateHud === 'function') updateHud();
-      return;
-    } else {
-      // Narrativa de investigação estruturada quando a entrada ainda não é localizada
-      if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+    var finishRoll = function () {
+      if (ok) {
+        _recordDungeonDiscovered(targetDg.id, nodeKey);
+        _showDungeonDiscoveryModal(targetDg, { key: nodeKey, name: regName }, {
+          d20: d20, total: total, mod: bestMod, dc: dc, guaranteed: (attempts >= 2 && total < dc)
+        });
+        if (typeof updateHud === 'function') updateHud();
+      } else if (window.vEncounter && typeof window.vEncounter.render === 'function') {
         window.vEncounter.render({
-          npc: {
-            name: 'Patrulha de Reconhecimento',
-            desc: 'Varredura nos Ermos · ' + regName,
-            portrait: '/shared/img/merchants/corvus-veltharion.webp'
-          },
+          npc: { name: 'Reconhecimento do Perímetro', desc: regName },
           script: [
-            { type: 'narration', text: 'A comitiva vasculhou minuciosamente os arredores e desfiladeiros de <b>' + regName + '</b> em busca de entradas e pistas territoriais.' },
-            { type: 'narration', text: '<b>Teste de Investigação / Percepção:</b> d20 (' + d20 + ') + mod (' + (bestMod >= 0 ? '+' : '') + bestMod + ') = <b>' + total + '</b> vs CD ' + dc + ' <i>(Pistas encontradas, mas a entrada permanece camuflada)</i>.' },
-            { type: 'narration', text: 'Rastros recentes e marcas cravadas no solo confirmam a presença de inimigos na região. Uma nova varredura ou exploração mais profunda revelará o covil com certeza.' }
+            { type: 'narration', text: 'Teste de ' + attrName + ' (CD ' + dc + '): d20 [' + d20 + '] ' + (bestMod >= 0 ? '+ ' + bestMod : '- ' + Math.abs(bestMod)) + ' = ' + total + ' vs CD ' + dc + ' — Falha.' },
+            { type: 'narration', text: 'Você encontra rastros recentes entre as fendas e raízes de ' + regName + ', mas a passagem principal segue oculta. Uma nova busca revelará a entrada com segurança.' }
           ],
-          choices: [
-            { id: 'exp_retry', label: 'Retornar a ' + regName }
-          ],
+          choices: [{ id: 'back_roads', label: 'Voltar à Encruzilhada' }],
           inline: true
         }, {
           player: S.player,
           onChoice: function () {
             if (window.vEncounter && typeof window.vEncounter.close === 'function') window.vEncounter.close();
-            if (typeof _openCurrentNodePointcrawlHub === 'function') _openCurrentNodePointcrawlHub();
+            window._openDirectionalRoadCrossroads(originInfo.nodeId);
           }
         });
-        if (typeof updateHud === 'function') updateHud();
-        return;
       }
+    };
+
+    if (typeof _animateDice3D === 'function') {
+      _animateDice3D(d20, bestMod, total, dc, total >= dc, finishRoll);
+    } else {
+      finishRoll();
     }
-  }
-
-  // Tabela Dinâmica dos Ermos (DMG p. 85-87 / XGE p. 92-110)
-  var enc = (window.CartShared && typeof CartShared.rollWildernessEncounterTable === 'function')
-    ? CartShared.rollWildernessEncounterTable((bKey === 'green_fields' ? 'plains' : bKey), (biome && biome.tier) || 1)
-    : null;
-
-  if (enc && window.vEncounter && typeof window.vEncounter.render === 'function') {
-    var p = (S && S.player) || {};
-    var wisMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(p, 'wis') : 1;
-    var strMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(p, 'str') : 1;
-    var dexMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(p, 'dex') : 1;
-    var chaMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(p, 'cha') : 1;
-    var bestMod = Math.max(wisMod, strMod, dexMod, chaMod);
-
-    var encTitle = enc.title || 'Desafio nos Ermos';
-    var encDesc = enc.desc || enc.description || 'A comitiva se depara com um obstáculo no caminho.';
-    var encCheck = enc.check || enc.checkRequired || '';
-    var encSuccess = enc.success || enc.successOutcome || 'A comitiva transpõe o obstáculo com sucesso e mantém o ritmo de marcha.';
-    var encFailure = enc.failure || enc.failureOutcome || 'A comitiva sofre complicações ao transpor o terreno.';
-
-    var narrativeText = encDesc;
-    if (encCheck) {
-      narrativeText += '<br><br><b>Perigo à frente:</b> ' + encCheck;
-    }
-
-    window.vEncounter.render({
-      npc: {
-        name: 'Exploração dos Ermos',
-        desc: encTitle + ' · ' + regName,
-        portrait: '/shared/img/merchants/corvus-veltharion.webp'
-      },
-      script: [
-        { type: 'narration', text: narrativeText }
-      ],
-      choices: [
-        { id: 'enc_act', label: 'Transpor o desafio', desc: encCheck || 'Agir de prontidão para superar o obstáculo.' },
-        { id: 'enc_bypass', label: 'Contornar com cautela', desc: 'Evitar riscos desnecessários e buscar outra trilha.' }
-      ],
-      inline: true
-    }, {
-      player: S.player,
-      onChoice: function (ch) {
-        var isAct = (ch && ch.id === 'enc_act');
-        if (!isAct) {
-          window.vEncounter.render({
-            npc: {
-              name: 'Exploração dos Ermos',
-              desc: encTitle + ' · Desfecho',
-              portrait: '/shared/img/merchants/corvus-veltharion.webp'
-            },
-            script: [
-              { type: 'narration', text: 'A comitiva manobra com passos cautelosos, contornando a ameaça sem sofrer danos nem expor os companheiros a perigo desnecessário.' }
-            ],
-            choices: [{ id: 'enc_finish', label: 'Retornar a ' + regName }],
-            inline: true
-          }, {
-            player: S.player,
-            onChoice: function () {
-              if (window.vEncounter && typeof window.vEncounter.close === 'function') window.vEncounter.close();
-              if (typeof _openCurrentNodePointcrawlHub === 'function') _openCurrentNodePointcrawlHub();
-            }
-          });
-          return;
-        }
-
-        var d20 = 1 + Math.floor(Math.random() * 20);
-        var total = d20 + bestMod;
-        var dc = 12;
-        var ok = (total >= dc);
-
-        var _renderOutcome = function () {
-          var textOutcome = ok
-            ? ('<b>Sucesso no Teste:</b> d20 (' + d20 + ') + mod (' + (bestMod >= 0 ? '+' : '') + bestMod + ') = <b>' + total + '</b> vs CD ' + dc + '.<br><br>' + encSuccess)
-            : ('<b>Falha no Teste:</b> d20 (' + d20 + ') + mod (' + (bestMod >= 0 ? '+' : '') + bestMod + ') = <b>' + total + '</b> vs CD ' + dc + '.<br><br>' + encFailure);
-
-          if (!ok) {
-            var dmg = 1 + Math.floor(Math.random() * 4);
-            p.hp = Math.max(1, (p.hp || 20) - dmg);
-            textOutcome += '<br><br><span style="color:#fca5a5;font-weight:600;">(A comitiva sofre ' + dmg + ' de dano de desgaste físico na travessia).</span>';
-          }
-
-          window.vEncounter.render({
-            npc: {
-              name: 'Exploração dos Ermos',
-              desc: encTitle + ' · Desfecho',
-              portrait: '/shared/img/merchants/corvus-veltharion.webp'
-            },
-            script: [
-              { type: 'narration', text: textOutcome }
-            ],
-            choices: [{ id: 'enc_finish', label: 'Retornar a ' + regName }],
-            inline: true
-          }, {
-            player: S.player,
-            onChoice: function () {
-              if (window.vEncounter && typeof window.vEncounter.close === 'function') window.vEncounter.close();
-              if (typeof _openCurrentNodePointcrawlHub === 'function') _openCurrentNodePointcrawlHub();
-            }
-          });
-        };
-
-        if (typeof _animateDice3D === 'function') {
-          _animateDice3D(d20, bestMod, total, dc, ok, _renderOutcome);
-        } else {
-          _renderOutcome();
-        }
-      }
-    });
-    if (typeof updateHud === 'function') updateHud();
     return;
   }
 
-  // Fallback se vEncounter não estiver disponível
-  if (typeof vToast === 'function') {
-    vToast('A comitiva patrulhou as imediações de ' + regName + ' sem incidentes hostis no momento.', 'info', 3500);
+  // Sem incursao oculta pendente: dispara 1 evento real de patrulha local no bioma atual
+  var localBiome = (biomeObj && biomeObj.biome) || originInfo.provKey || 'plains';
+  var isRemote = (window.__EXPLORE_MODE === 'remote' && window.ExploracaoAPI && typeof window.ExploracaoAPI.hasToken === 'function' && window.ExploracaoAPI.hasToken());
+  _saveRoadExpeditionSession(null);
+
+  if (isRemote && typeof window.ExploracaoAPI.roadStep === 'function') {
+    window.ExploracaoAPI.roadStep({
+      mode: 'local',
+      from_node: originInfo.nodeId,
+      to_node: originInfo.nodeId,
+      edge_id: 'local__' + originInfo.nodeId,
+      marco_index: 1,
+      total_marcos: 1,
+      pace: (S && S.travelPace) || 'normal',
+      biome: localBiome
+    }).then(function (res) {
+      if (res && res.state && typeof _explSyncStateFromServer === 'function') {
+        _explSyncStateFromServer(res.state);
+      }
+      if (res && res.event) {
+        S.event = Object.assign({}, res.event, { resolved: null, __remote: true });
+        S.ph = 'event';
+        if (typeof _explEventUsesVEncounter === 'function' && _explEventUsesVEncounter(S.event)) {
+          _explShowEventVEnc(S.event);
+        } else if (typeof openEventModal === 'function') {
+          openEventModal();
+        }
+      }
+    }).catch(function () {
+      window._openDirectionalRoadCrossroads(originInfo.nodeId);
+    });
+    return;
   }
-  if (typeof _openCurrentNodePointcrawlHub === 'function') _openCurrentNodePointcrawlHub();
-  if (typeof updateHud === 'function') updateHud();
+
+  var localEv = _pickLocalBiomeRoadEvent(localBiome);
+  if (localEv && typeof openEventModal === 'function') {
+    S.biome = localBiome;
+    S.event = Object.assign({}, localEv, { resolved: null });
+    S.ph = 'event';
+    openEventModal();
+  }
+}
+
+function _startOrAdvanceRoadStep(road, originInfo, nextMarcoIndex) {
+  _closeDirectionalRoadModal();
+  if (typeof _closeCartLocationPopup === 'function') _closeCartLocationPopup();
+  if (window.CartShared && typeof CartShared.closeRegionalMapModal === 'function') {
+    CartShared.closeRegionalMapModal();
+  }
+
+  var pace = (typeof S !== 'undefined' && S && S.travelPace) || window._roadSelectedPace || 'normal';
+  var curGold = (typeof S !== 'undefined' && S) ? Number(S.gold != null ? S.gold : ((S.player && S.player.gold) || 0)) : 0;
+  var curXp = (typeof S !== 'undefined' && S && S.player) ? Number(S.player.xp || 0) : 0;
+
+  var prevExp = window._activeRoadExpedition;
+  var isContinuation = !!(prevExp && prevExp.edgeId === road.edgeId && nextMarcoIndex > 1);
+
+  var exp = {
+    edgeId: road.edgeId,
+    road: road,
+    originInfo: originInfo,
+    fromNodeId: road.fromNodeId,
+    fromServerId: road.fromServerId,
+    toNodeId: road.toNodeId,
+    toServerId: road.toServerId,
+    toProvinceKey: road.toProvinceKey,
+    toProvinceName: road.toProvinceName,
+    toNodeTrueName: road.toNodeTrueName,
+    roadName: road.roadName,
+    bearingLabel: (road.bearing && road.bearing.label) || 'Adiante',
+    bearingArrow: (road.bearing && road.bearing.arrow) || '→',
+    biome: road.biome || 'plains',
+    marcoIndex: nextMarcoIndex,
+    totalMarcos: road.totalMarcos || 3,
+    pace: pace,
+    startGold: isContinuation ? Number(prevExp.startGold || curGold) : curGold,
+    startXp: isContinuation ? Number(prevExp.startXp || curXp) : curXp,
+    bivouacUsed: isContinuation ? !!prevExp.bivouacUsed : false,
+    vestigesChecked: isContinuation && Array.isArray(prevExp.vestigesChecked) ? prevExp.vestigesChecked.slice() : [],
+    combatPending: false,
+    lastOmen: null
+  };
+  _saveRoadExpeditionSession(exp);
+
+  if (typeof S !== 'undefined' && S) {
+    S.biome = exp.biome;
+    S.travelPace = pace;
+    S.steps = Math.max(1, (S.steps || 0) + 1);
+    if (typeof tickDayPhase === 'function') {
+      try { tickDayPhase(); } catch (_) {}
+    }
+    if (typeof updateHud === 'function') updateHud();
+  }
+
+  var isRemote = (window.__EXPLORE_MODE === 'remote'
+    && window.ExploracaoAPI
+    && typeof window.ExploracaoAPI.hasToken === 'function'
+    && window.ExploracaoAPI.hasToken()
+    && typeof window.ExploracaoAPI.roadStep === 'function');
+
+  if (isRemote) {
+    window.ExploracaoAPI.roadStep({
+      mode: 'road',
+      from_node: exp.fromServerId,
+      to_node: exp.toServerId,
+      edge_id: exp.edgeId,
+      marco_index: exp.marcoIndex,
+      total_marcos: exp.totalMarcos,
+      pace: exp.pace,
+      biome: exp.biome
+    }).then(function (res) {
+      if (!res || res.error) {
+        if (typeof vToast === 'function') vToast('Não foi possível avançar pela estrada agora. Tente novamente.', 'warn', 3200);
+        _saveRoadExpeditionSession(null);
+        window._openDirectionalRoadCrossroads(originInfo.nodeId, road.edgeId);
+        return;
+      }
+      if (res.state && typeof _explSyncStateFromServer === 'function') {
+        _explSyncStateFromServer(res.state);
+      }
+      exp.lastOmen = res.omen || null;
+      _saveRoadExpeditionSession(exp);
+
+      if (res.event) {
+        S.event = Object.assign({}, res.event, { resolved: null, __remote: true, __roadExpedition: true });
+        S.ph = 'event';
+        if (typeof _explEventUsesVEncounter === 'function' && _explEventUsesVEncounter(S.event)) {
+          _explShowEventVEnc(S.event);
+        } else if (typeof openEventModal === 'function') {
+          openEventModal();
+        }
+      } else {
+        window._onRoadMarcoEventResolved();
+      }
+    }).catch(function () {
+      _saveRoadExpeditionSession(null);
+      window._openDirectionalRoadCrossroads(originInfo.nodeId, road.edgeId);
+    });
+    return;
+  }
+
+  // Modo Simulador / Local: usa encontros reais de bioma de __EXPLORACAO_EVENTS / EVENTS_POOL
+  var evLocal = _pickLocalBiomeRoadEvent(exp.biome);
+  if (evLocal && typeof openEventModal === 'function') {
+    S.event = Object.assign({}, evLocal, { resolved: null, __roadExpedition: true });
+    S.ph = 'event';
+    openEventModal();
+  } else {
+    window._onRoadMarcoEventResolved();
+  }
+}
+
+function _renderRoadMilestoneDecisionModal(exp, decisionData) {
+  _injectDirectionalRoadStyles();
+  _closeDirectionalRoadModal();
+
+  var isCompleted = !!(decisionData && decisionData.completed) || (exp.marcoIndex >= exp.totalMarcos);
+  var p = (typeof S !== 'undefined' && S && S.player) || { hp: 20, mhp: 20, mp: 10, mmp: 10 };
+  var curGold = (typeof S !== 'undefined' && S) ? Number(S.gold != null ? S.gold : (p.gold || 0)) : 0;
+  var curXp = Number(p.xp || 0);
+  var summary = (decisionData && decisionData.expedition_summary) || {
+    xp_gained: Math.max(0, curXp - Number(exp.startXp || 0)),
+    gold_gained: Math.max(0, curGold - Number(exp.startGold || 0))
+  };
+  var envLabels = _getRoadDaylightAndWeatherLabels();
+
+  var modal = document.createElement('div');
+  modal.id = 'directional-road-modal';
+  modal.className = 'explore-modal-overlay';
+
+  if (isCompleted) {
+    _saveRoadExpeditionSession(null);
+    var destTrueName = (decisionData && decisionData.destination_name) || exp.toNodeTrueName || exp.toNodeId;
+    var destProvKey = exp.toProvinceKey || (exp.originInfo && exp.originInfo.provKey) || 'plains';
+    var discBonus = (decisionData && decisionData.discovery_bonus) || { xp: 0, gold: 0 };
+    var totalGoldEarned = Math.max(Number(summary.gold_gained || 0), Number(discBonus.gold || 0));
+    var totalXpEarned = Math.max(Number(summary.xp_gained || 0), Number(discBonus.xp || 0));
+
+    // Atualiza posicao atual para o destino recem-alcancado
+    if (typeof S !== 'undefined' && S) {
+      S.current_location_id = exp.toServerId || exp.toNodeId;
+      if (S.player) {
+        S.player.current_location_id = S.current_location_id;
+        if (S.player.metadata) S.player.metadata.current_location_id = S.current_location_id;
+      }
+      if (typeof _cartResolveMapId === 'function') {
+        S.mapId = _cartResolveMapId(exp.toNodeId);
+      }
+      var allB = (window.CartShared && CartShared.CART_BIOMES) || [];
+      var destBiomeObj = Array.isArray(allB) ? allB.find(function (b) { return b && (b.key === exp.toNodeId || b.id === exp.toNodeId || b.key === exp.toServerId); }) : null;
+      if (destBiomeObj) window._cartCurrentLocBiome = destBiomeObj;
+    }
+
+    var rewardCompletedHtml = _buildCanonicalRoadRewardHtml({
+      gold: totalGoldEarned,
+      xp: totalXpEarned,
+      cartography: 'Rota Completa: ' + destTrueName + ' (' + exp.totalMarcos + '/' + exp.totalMarcos + ' Marcos)'
+    });
+
+    modal.innerHTML = ''
+      + '<div class="drm-card">'
+      + '  <div class="drm-header">'
+      + '    <div class="drm-header-titles">'
+      + '      <div class="drm-kicker">◆ TRAVESSIA CONCLUÍDA · RUMO ' + exp.bearingArrow + ' ' + exp.bearingLabel.toUpperCase() + '</div>'
+      + '      <div class="drm-title">' + destTrueName + '</div>'
+      + '    </div>'
+      + '  </div>'
+      + '  <div class="drm-body">'
+      + '    <div class="drm-marcos-track">'
+      + '      <span>' + (exp.originInfo ? exp.originInfo.nodeName : 'Origem') + '</span>'
+      + '      <span class="drm-marcos-pips">' + _formatMarcosPips(exp.totalMarcos, exp.totalMarcos) + '</span>'
+      + '      <span style="color:#86efac;font-weight:700;">✓ ' + destTrueName + '</span>'
+      + '    </div>'
+      + '    <div class="drm-omen-box">'
+      + '      Após superar o último marco de <b>' + exp.roadName + '</b>, a névoa se dissipa por completo diante de <b>' + destTrueName + '</b>. A rota permanece registrada de forma permanente na sua cartografia.'
+      + '    </div>'
+      +      rewardCompletedHtml
+      + '    <button type="button" class="drm-act-btn" id="drm-btn-open-map">◆ Ver Mapa Regional Desbravado</button>'
+      + '    <button type="button" class="drm-act-btn secondary" id="drm-btn-stay-dest">Permanecer em ' + destTrueName + '</button>'
+      + '  </div>'
+      + '</div>';
+
+    (document.getElementById('frame') || document.body).appendChild(modal);
+
+    modal.querySelector('#drm-btn-open-map').onclick = function () {
+      _closeDirectionalRoadModal();
+      if (window.CartShared && typeof CartShared.openRegionalMapModal === 'function') {
+        CartShared.openRegionalMapModal(destProvKey, exp.toNodeId, { playerLocKey: exp.toNodeId });
+      }
+    };
+    modal.querySelector('#drm-btn-stay-dest').onclick = function () {
+      _closeDirectionalRoadModal();
+      if (typeof _openCurrentNodePointcrawlHub === 'function') {
+        _openCurrentNodePointcrawlHub();
+      } else if (window.CartShared && typeof CartShared.openRegionalMapModal === 'function') {
+        CartShared.openRegionalMapModal(destProvKey, exp.toNodeId, { playerLocKey: exp.toNodeId });
+      }
+    };
+    return;
+  }
+
+  // Marco Intermediario (k < N): Agencia no Meio da Jornada (Continuar, Vestigio, Bivaque ou Retornar)
+  var omenObj = (decisionData && decisionData.omen_ahead) || exp.lastOmen || {
+    keen: true,
+    passive_score: 12,
+    dc: 12,
+    text: (exp.road && exp.road.entryOmen) || 'Os marcos antigos seguem rumo ao horizonte ainda encoberto pela bruma.'
+  };
+  var bivouacAvailable = (decisionData && typeof decisionData.bivouac_available === 'boolean')
+    ? decisionData.bivouac_available
+    : !exp.bivouacUsed;
+  var vestigeAvailable = (decisionData && typeof decisionData.vestige_available === 'boolean')
+    ? decisionData.vestige_available
+    : (exp.vestigesChecked.indexOf(exp.marcoIndex) < 0);
+
+  var wisMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(p, 'wis') : 0;
+  var intMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(p, 'int') : 0;
+  var bestTagAttr = (intMod >= wisMod) ? 'INT' : 'SAB';
+  var vestigeDc = (omenObj && omenObj.dc) ? omenObj.dc : 12;
+  var originName = (exp.originInfo && exp.originInfo.nodeName) || 'Origem';
+  var destPreviewLabel = (exp.road && (exp.road.physicallyKnown || exp.road.completed || exp.road.hasCorvusGuide))
+    ? exp.road.displayDestName
+    : ('? Rumo ' + exp.bearingLabel);
+
+  modal.innerHTML = ''
+    + '<div class="drm-card">'
+    + '  <div class="drm-header">'
+    + '    <div class="drm-header-titles">'
+    + '      <div class="drm-kicker">◆ MARCO DE BASALTO ' + exp.marcoIndex + ' DE ' + exp.totalMarcos + ' · ' + exp.bearingArrow + ' ' + exp.bearingLabel.toUpperCase() + '</div>'
+    + '      <div class="drm-title">' + exp.roadName + '</div>'
+    + '    </div>'
+    + '  </div>'
+    + '  <div class="drm-body">'
+    + '    <div class="drm-marcos-track">'
+    + '      <span>' + originName + '</span>'
+    + '      <span class="drm-marcos-pips">' + _formatMarcosPips(exp.marcoIndex, exp.totalMarcos) + '</span>'
+    + '      <span>' + destPreviewLabel + '</span>'
+    + '    </div>'
+    + '    <div class="drm-vitals-strip" id="drm-vitals-strip">'
+    + '      <span><b>PV:</b> ' + (p.hp || 0) + '/' + (p.mhp || 20) + '</span>'
+    + '      <span><b>Mana:</b> ' + (p.mp || 0) + '/' + (p.mmp || 0) + '</span>'
+    + '      <span><b>Luz:</b> ' + envLabels.dayLabel + ' · ' + envLabels.weatherLabel + '</span>'
+    + '    </div>'
+    + '    <div class="drm-omen-box">'
+    + '      <div style="font-size:11px;color:#c4953a;font-family:Cinzel,serif;font-weight:700;margin-bottom:3px;">◆ SINAIS DO PRÓXIMO TRECHO (Percepção Passiva ' + (omenObj.passive_score || 12) + ')</div>'
+    + '      <div>' + (omenObj.text || 'A estrada avança por terreno ainda não demarcado.') + '</div>'
+    + '    </div>'
+    + '    <div id="drm-inline-feedback" style="display:none;flex-direction:column;gap:6px;"></div>'
+    + '    <div style="font-size:11px;color:#cbb68c;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;">'
+    + '      <span><b>Espólios na travessia:</b> +' + Number(summary.xp_gained || 0) + ' XP · +' + Number(summary.gold_gained || 0) + ' Valdoritas</span>'
+    + '      <span style="color:#86efac;">Trecho ' + exp.marcoIndex + '/' + exp.totalMarcos + ' já salvo no mapa</span>'
+    + '    </div>'
+    + '    <button type="button" class="drm-act-btn" id="drm-btn-continue">◆ Continuar Rumo ' + exp.bearingArrow + ' ' + exp.bearingLabel + ' (Marco ' + (exp.marcoIndex + 1) + ' de ' + exp.totalMarcos + ')</button>'
+    + (vestigeAvailable
+        ? '<button type="button" class="drm-act-btn secondary" id="drm-btn-vestige"><span class="enc-cho-bg3-tag drm-attr-tag">[' + bestTagAttr + ' ' + vestigeDc + ']</span> Investigar Vestígio na Margem</button>'
+        : '')
+    + (bivouacAvailable
+        ? '<button type="button" class="drm-act-btn secondary" id="drm-btn-bivouac">◆ Bivaque Rápido na Margem (Recuperar Fôlego · 1×)</button>'
+        : '')
+    + '    <button type="button" class="drm-act-btn return-safe" id="drm-btn-return">← Retornar em Segurança para ' + originName + '</button>'
+    + '  </div>'
+    + '</div>';
+
+  (document.getElementById('frame') || document.body).appendChild(modal);
+
+  var feedbackBox = modal.querySelector('#drm-inline-feedback');
+  var isRemote = (window.__EXPLORE_MODE === 'remote'
+    && window.ExploracaoAPI
+    && typeof window.ExploracaoAPI.hasToken === 'function'
+    && window.ExploracaoAPI.hasToken()
+    && typeof window.ExploracaoAPI.roadDecision === 'function');
+
+  modal.querySelector('#drm-btn-continue').onclick = function () {
+    _startOrAdvanceRoadStep(exp.road, exp.originInfo, exp.marcoIndex + 1);
+  };
+
+  var vestigeBtn = modal.querySelector('#drm-btn-vestige');
+  if (vestigeBtn) {
+    vestigeBtn.onclick = function () {
+      vestigeBtn.disabled = true;
+      vestigeBtn.style.opacity = '0.5';
+      exp.vestigesChecked.push(exp.marcoIndex);
+      _saveRoadExpeditionSession(exp);
+
+      var showVestigeResult = function (chk, narrativeText, deltaObj) {
+        var modSign = chk.mod >= 0 ? ('+ ' + chk.mod) : ('- ' + Math.abs(chk.mod));
+        var rollHeader = 'Teste de ' + (chk.skill_label || 'Investigação') + ' (CD ' + chk.dc + '): d20 [' + chk.d20 + '] ' + modSign + ' = ' + chk.total + ' vs CD ' + chk.dc + ' — ' + (chk.success ? 'Sucesso' : 'Falha');
+        var rewHtml = (deltaObj && (deltaObj.gold > 0 || deltaObj.xp > 0))
+          ? _buildCanonicalRoadRewardHtml({
+              gold: deltaObj.gold || 0,
+              xp: deltaObj.xp || 0,
+              cartography: chk.success ? ('Atalho demarcado no Marco ' + exp.marcoIndex) : ''
+            })
+          : '';
+        if (feedbackBox) {
+          feedbackBox.style.display = 'flex';
+          feedbackBox.innerHTML = ''
+            + '<div class="drm-roll-banner"><b>' + rollHeader + '</b><br>' + narrativeText + '</div>'
+            + rewHtml;
+        }
+        var vitEl = modal.querySelector('#drm-vitals-strip');
+        if (vitEl && S && S.player) {
+          var envNow = _getRoadDaylightAndWeatherLabels();
+          vitEl.innerHTML = '<span><b>PV:</b> ' + (S.player.hp || 0) + '/' + (S.player.mhp || 20) + '</span>'
+            + '<span><b>Mana:</b> ' + (S.player.mp || 0) + '/' + (S.player.mmp || 0) + '</span>'
+            + '<span><b>Luz:</b> ' + envNow.dayLabel + ' · ' + envNow.weatherLabel + '</span>';
+        }
+        if (vestigeBtn.parentNode) vestigeBtn.parentNode.removeChild(vestigeBtn);
+      };
+
+      if (isRemote) {
+        window.ExploracaoAPI.roadDecision({
+          action: 'investigate_vestige',
+          from_node: exp.fromServerId,
+          to_node: exp.toServerId,
+          edge_id: exp.edgeId,
+          marco_index: exp.marcoIndex,
+          total_marcos: exp.totalMarcos,
+          biome: exp.biome
+        }).then(function (res) {
+          if (!res || !res.ok || !res.check) return;
+          if (res.state && typeof _explSyncStateFromServer === 'function') {
+            _explSyncStateFromServer(res.state);
+          }
+          var chk = res.check;
+          var doneAnim = function () { showVestigeResult(chk, res.narrative || '', res.delta || {}); };
+          if (typeof _animateDice3D === 'function') {
+            _animateDice3D(chk.d20, chk.mod, chk.total, chk.dc, chk.success, doneAnim);
+          } else {
+            doneAnim();
+          }
+        });
+        return;
+      }
+
+      // Modo Local: rolagem obrigatoria d20 + mod vs CD
+      var d20 = 1 + Math.floor(Math.random() * 20);
+      var useInt = intMod >= wisMod;
+      var modVal = useInt ? intMod : wisMod;
+      var tot = d20 + modVal;
+      var ok = tot >= vestigeDc;
+      var chkLocal = {
+        d20: d20, mod: modVal, total: tot, dc: vestigeDc, success: ok,
+        skill_label: useInt ? 'Investigação' : 'Sobrevivência'
+      };
+      var deltaLocal = { xp: ok ? 20 : 5, gold: ok ? 5 : 0, hp: ok ? 0 : -2 };
+      if (S && S.player) {
+        S.player.xp = Number(S.player.xp || 0) + deltaLocal.xp;
+        S.gold = Number(S.gold || 0) + deltaLocal.gold;
+        S.player.gold = S.gold;
+        if (!ok) S.player.hp = Math.max(1, Number(S.player.hp || 10) - 2);
+        if (typeof updateHud === 'function') updateHud();
+      }
+      if (ok && window.CartShared && typeof CartShared.recordLocalRoadProgress === 'function') {
+        CartShared.recordLocalRoadProgress(exp.edgeId, {
+          marcos_cleared: exp.marcoIndex,
+          total_marcos: exp.totalMarcos,
+          shortcut: true,
+          clue: 'Atalho cartografado no Marco ' + exp.marcoIndex
+        });
+      }
+      var narrLocal = ok
+        ? 'Entre as pedras laterais da estrada, você decifra marcas antigas de batedores, registra um atalho firme no mapa e recupera moedas ocultas.'
+        : 'O barranco lateral cede sob suas botas ao afastar a mata fechada. Você recua com escoriações leves (-2 PV), sem achar passagem segura.';
+      var doneLocalAnim = function () { showVestigeResult(chkLocal, narrLocal, deltaLocal); };
+      if (typeof _animateDice3D === 'function') {
+        _animateDice3D(d20, modVal, tot, vestigeDc, ok, doneLocalAnim);
+      } else {
+        doneLocalAnim();
+      }
+    };
+  }
+
+  var bivBtn = modal.querySelector('#drm-btn-bivouac');
+  if (bivBtn) {
+    bivBtn.onclick = function () {
+      bivBtn.disabled = true;
+      bivBtn.style.opacity = '0.5';
+      exp.bivouacUsed = true;
+      _saveRoadExpeditionSession(exp);
+
+      var renderBivouacFeedback = function (healedHp) {
+        if (feedbackBox) {
+          feedbackBox.style.display = 'flex';
+          feedbackBox.innerHTML = '<div class="drm-roll-banner"><b>◆ Bivaque Rápido Concluído:</b> Sua comitiva faz uma pausa curta abrigada junto ao marco de pedra, enfaixa ferimentos (+' + healedHp + ' PV) e observa a mudança da luz na estrada.</div>';
+        }
+        var vitEl = modal.querySelector('#drm-vitals-strip');
+        if (vitEl && S && S.player) {
+          var envNow = _getRoadDaylightAndWeatherLabels();
+          vitEl.innerHTML = '<span><b>PV:</b> ' + (S.player.hp || 0) + '/' + (S.player.mhp || 20) + '</span>'
+            + '<span><b>Mana:</b> ' + (S.player.mp || 0) + '/' + (S.player.mmp || 0) + '</span>'
+            + '<span><b>Luz:</b> ' + envNow.dayLabel + ' · ' + envNow.weatherLabel + '</span>';
+        }
+        if (bivBtn.parentNode) bivBtn.parentNode.removeChild(bivBtn);
+      };
+
+      if (isRemote) {
+        window.ExploracaoAPI.roadDecision({
+          action: 'bivouac',
+          from_node: exp.fromServerId,
+          to_node: exp.toServerId,
+          edge_id: exp.edgeId,
+          marco_index: exp.marcoIndex,
+          total_marcos: exp.totalMarcos
+        }).then(function (res) {
+          if (res && res.state && typeof _explSyncStateFromServer === 'function') {
+            _explSyncStateFromServer(res.state);
+          }
+          renderBivouacFeedback((res && res.bivouac && res.bivouac.healed_hp) || 0);
+        });
+        return;
+      }
+
+      var conMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(p, 'con') : 1;
+      var heal = Math.max(2, (1 + Math.floor(Math.random() * 8)) + conMod);
+      var beforeHp = Number(p.hp || 10);
+      p.hp = Math.min(Number(p.mhp || 20), beforeHp + heal);
+      if (typeof tickDayPhase === 'function') { try { tickDayPhase(); } catch (_) {} }
+      if (typeof updateHud === 'function') updateHud();
+      renderBivouacFeedback(Math.max(0, p.hp - beforeHp));
+    };
+  }
+
+  modal.querySelector('#drm-btn-return').onclick = function () {
+    var finishReturnModal = function (retSummary) {
+      _saveRoadExpeditionSession(null);
+      var gGold = Number((retSummary && retSummary.gold_gained) || 0);
+      var gXp = Number((retSummary && retSummary.xp_gained) || 0);
+      var retRewardHtml = _buildCanonicalRoadRewardHtml({
+        gold: gGold,
+        xp: gXp,
+        cartography: exp.marcoIndex + '/' + exp.totalMarcos + ' Marcos Cartografados Rumo ' + exp.bearingLabel
+      });
+      var provOrigin = (exp.originInfo && exp.originInfo.provKey) || 'plains';
+      var bodyEl = modal.querySelector('.drm-body');
+      var titleEl = modal.querySelector('.drm-title');
+      var kickerEl = modal.querySelector('.drm-kicker');
+      if (kickerEl) kickerEl.textContent = '◆ RETORNO ESTRATÉGICO CONCLUÍDO';
+      if (titleEl) titleEl.textContent = originName;
+      if (bodyEl) {
+        bodyEl.innerHTML = ''
+          + '<div class="drm-omen-box">'
+          + '  Sua comitiva retorna em segurança para <b>' + originName + '</b> seguindo os marcos já firmados. Todo o trecho aberto rumo a <b>' + exp.bearingLabel + '</b> (' + exp.marcoIndex + '/' + exp.totalMarcos + ') permanece revelado no Mapa Regional para a próxima investida.'
+          + '</div>'
+          + retRewardHtml
+          + '<button type="button" class="drm-act-btn" id="drm-btn-ret-map">◆ Ver Mapa Regional Aberto</button>'
+          + '<button type="button" class="drm-act-btn secondary" id="drm-btn-ret-close">Concluir em ' + originName + '</button>';
+        bodyEl.querySelector('#drm-btn-ret-map').onclick = function () {
+          _closeDirectionalRoadModal();
+          if (window.CartShared && typeof CartShared.openRegionalMapModal === 'function') {
+            CartShared.openRegionalMapModal(provOrigin, exp.fromNodeId, { playerLocKey: exp.fromNodeId });
+          }
+        };
+        bodyEl.querySelector('#drm-btn-ret-close').onclick = function () {
+          _closeDirectionalRoadModal();
+          if (typeof _openCurrentNodePointcrawlHub === 'function') _openCurrentNodePointcrawlHub();
+        };
+      }
+    };
+
+    if (isRemote) {
+      window.ExploracaoAPI.roadDecision({
+        action: 'return',
+        from_node: exp.fromServerId,
+        to_node: exp.toServerId,
+        edge_id: exp.edgeId,
+        marco_index: exp.marcoIndex,
+        total_marcos: exp.totalMarcos
+      }).then(function (res) {
+        if (res && res.state && typeof _explSyncStateFromServer === 'function') {
+          _explSyncStateFromServer(res.state);
+        }
+        finishReturnModal((res && res.expedition_summary) || summary);
+      }).catch(function () {
+        finishReturnModal(summary);
+      });
+      return;
+    }
+
+    var nowGold = (typeof S !== 'undefined' && S) ? Number(S.gold != null ? S.gold : (p.gold || 0)) : 0;
+    var nowXp = Number(p.xp || 0);
+    finishReturnModal({
+      gold_gained: Math.max(0, nowGold - Number(exp.startGold || 0)),
+      xp_gained: Math.max(0, nowXp - Number(exp.startXp || 0))
+    });
+  };
+}
+
+window._onRoadMarcoEventResolved = function () {
+  var exp = window._activeRoadExpedition;
+  if (!exp || exp.combatPending) return;
+  if (typeof S !== 'undefined' && S && (S.ph === 'defeat' || (S.player && S.player.hp <= 0))) {
+    _saveRoadExpeditionSession(null);
+    return;
+  }
+
+  var isRemote = (window.__EXPLORE_MODE === 'remote'
+    && window.ExploracaoAPI
+    && typeof window.ExploracaoAPI.hasToken === 'function'
+    && window.ExploracaoAPI.hasToken()
+    && typeof window.ExploracaoAPI.roadDecision === 'function');
+
+  if (isRemote) {
+    window.ExploracaoAPI.roadDecision({
+      action: 'marco_reached',
+      from_node: exp.fromServerId,
+      to_node: exp.toServerId,
+      edge_id: exp.edgeId,
+      marco_index: exp.marcoIndex,
+      total_marcos: exp.totalMarcos,
+      biome: exp.biome
+    }).then(function (res) {
+      if (res && res.state && typeof _explSyncStateFromServer === 'function') {
+        _explSyncStateFromServer(res.state);
+      }
+      _renderRoadMilestoneDecisionModal(exp, res || {});
+    }).catch(function () {
+      _renderRoadMilestoneDecisionModal(exp, {});
+    });
+    return;
+  }
+
+  // Modo Local: atualiza progresso cartografico da estrada e descobre destino se Marco N/N
+  var isDone = exp.marcoIndex >= exp.totalMarcos;
+  if (window.CartShared && typeof CartShared.recordLocalRoadProgress === 'function') {
+    CartShared.recordLocalRoadProgress(exp.edgeId, {
+      marcos_cleared: exp.marcoIndex,
+      total_marcos: exp.totalMarcos,
+      completed: isDone
+    });
+  }
+  var discBonusLocal = { xp: 0, gold: 0 };
+  if (isDone) {
+    if (!Array.isArray(window.__EXPLORE_KNOWN)) window.__EXPLORE_KNOWN = ['plains', 'green_fields'];
+    [exp.toNodeId, exp.toServerId].forEach(function (k) {
+      if (k && window.__EXPLORE_KNOWN.indexOf(k) < 0) window.__EXPLORE_KNOWN.push(k);
+    });
+    if (typeof S !== 'undefined' && S) {
+      S.known_locations = window.__EXPLORE_KNOWN.slice();
+      discBonusLocal = { xp: 35, gold: 8 };
+      if (S.player) S.player.xp = Number(S.player.xp || 0) + discBonusLocal.xp;
+      S.gold = Number(S.gold || 0) + discBonusLocal.gold;
+      if (S.player) S.player.gold = S.gold;
+      if (typeof updateHud === 'function') updateHud();
+    }
+  }
+  _renderRoadMilestoneDecisionModal(exp, {
+    completed: isDone,
+    destination_name: exp.toNodeTrueName,
+    discovery_bonus: discBonusLocal,
+    bivouac_available: !exp.bivouacUsed,
+    vestige_available: exp.vestigesChecked.indexOf(exp.marcoIndex) < 0
+  });
+};
+
+window._tryResumeRoadExpeditionAfterCombat = function () {
+  try {
+    var raw = sessionStorage.getItem('vld_active_road_exp_v1');
+    if (!raw) return;
+    var parsed = JSON.parse(raw);
+    if (!parsed || !parsed.edgeId || !parsed.combatPending) return;
+    if (Date.now() - Number(parsed.ts || 0) > 45 * 60 * 1000) {
+      sessionStorage.removeItem('vld_active_road_exp_v1');
+      return;
+    }
+    if (typeof S !== 'undefined' && S && (S.ph === 'defeat' || (S.player && S.player.hp <= 0))) {
+      sessionStorage.removeItem('vld_active_road_exp_v1');
+      return;
+    }
+    parsed.combatPending = false;
+    _saveRoadExpeditionSession(parsed);
+    setTimeout(function () {
+      if (typeof window._onRoadMarcoEventResolved === 'function') {
+        window._onRoadMarcoEventResolved();
+      }
+    }, 180);
+  } catch (_) {}
+};
+
+window._openDirectionalRoadCrossroads = function (fromNodeOrBiome, preselectEdgeId) {
+  _injectDirectionalRoadStyles();
+  _closeDirectionalRoadModal();
+
+  if (!preselectEdgeId) {
+    try {
+      var queuedEdge = sessionStorage.getItem('vld_preselect_road_edge');
+      if (queuedEdge) {
+        preselectEdgeId = queuedEdge;
+        sessionStorage.removeItem('vld_preselect_road_edge');
+      }
+    } catch (_) {}
+  }
+
+  var originInfo = _resolveCurrentRegionalOrigin(fromNodeOrBiome);
+  var pObj = (typeof S !== 'undefined' && S && S.player) || {};
+  var roads = (window.CartShared && typeof CartShared.getOutgoingRoadsForNode === 'function')
+    ? CartShared.getOutgoingRoadsForNode(originInfo.nodeId, originInfo.provKey, pObj)
+    : [];
+
+  if (preselectEdgeId && roads.length > 1) {
+    roads.sort(function (a, b) {
+      if (a.edgeId === preselectEdgeId) return -1;
+      if (b.edgeId === preselectEdgeId) return 1;
+      return 0;
+    });
+  }
+
+  var curPace = (typeof S !== 'undefined' && S && S.travelPace) || window._roadSelectedPace || 'normal';
+  if (['cautious', 'normal', 'fast'].indexOf(curPace) < 0) curPace = 'normal';
+  window._roadSelectedPace = curPace;
+
+  var paceHints = {
+    cautious: 'Marcha Cautelosa: +2 Percepção Passiva para presságios e vestígios na estrada.',
+    normal: 'Marcha Normal: equilíbrio entre velocidade e vigilância ao longo dos marcos.',
+    fast: 'Marcha Audaz: avanço acelerado pelos marcos (-3 Percepção Passiva).'
+  };
+
+  var potentialDgs = (typeof _getAllPotentialDungeonsForBiomeNode === 'function')
+    ? _getAllPotentialDungeonsForBiomeNode({ key: originInfo.nodeId, name: originInfo.nodeName })
+    : [];
+  var hasHiddenIncursion = potentialDgs.some(function (dg) { return !_isDungeonDiscovered(dg.id); });
+  var wisMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(pObj, 'wis') : 0;
+  var intMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(pObj, 'int') : 0;
+  var sweepTagAttr = (intMod >= wisMod) ? 'INT' : 'SAB';
+
+  var roadsHtml = roads.map(function (r, idx) {
+    var nextMarco = (r.completed || r.marcosCleared >= r.totalMarcos) ? 1 : (r.marcosCleared + 1);
+    var btnLabel = '◆ Seguir Rumo ' + r.bearing.arrow + ' ' + r.bearing.label + ' (Marco 1 de ' + r.totalMarcos + ')';
+    if (!r.completed && r.marcosCleared > 0 && r.marcosCleared < r.totalMarcos) {
+      btnLabel = '◆ Retomar Rumo ' + r.bearing.arrow + ' ' + r.bearing.label + ' (Marco ' + nextMarco + ' de ' + r.totalMarcos + ')';
+    } else if (r.completed) {
+      btnLabel = '→ Percorrer Estrada Conhecida (' + r.bearing.label + ')';
+    }
+
+    var memLines = [];
+    if (r.shortcut) memLines.push('<span style="color:#86efac;">✓ Atalho dos pioneiros demarcado</span>');
+    if (Array.isArray(r.clues) && r.clues.length) {
+      memLines.push('• Memória da Rota: ' + r.clues[r.clues.length - 1]);
+    } else {
+      memLines.push('• Sinais na Entrada: ' + (r.entryOmen || 'Trilha marcada por pedras antigas.'));
+    }
+
+    var isPre = (preselectEdgeId && r.edgeId === preselectEdgeId);
+    return ''
+      + '<div class="drm-road-card' + (isPre ? ' preselected' : '') + '">'
+      + '  <div class="drm-road-top">'
+      + '    <span class="drm-compass-pill">' + r.bearing.arrow + ' ' + r.bearing.label + (r.isFrontier ? ' · Fronteira' : '') + '</span>'
+      + '    <span class="drm-threat-pill" style="color:' + r.dangerBadgeColor + ';border:1px solid ' + r.dangerBorderColor + ';background:' + r.dangerBgColor + ';">' + r.recommendedLevelLabel + ' · ' + r.dangerTierLabel + '</span>'
+      + '  </div>'
+      + '  <div class="drm-road-name">' + r.roadName + '</div>'
+      + '  <div class="drm-dest-line">'
+      + '    <span><b>Destino:</b> ' + r.displayDestName + '</span>'
+      + '  </div>'
+      + '  <div class="drm-marcos-track">'
+      + '    <span class="drm-marcos-pips">' + _formatMarcosPips(r.marcosCleared, r.totalMarcos) + '</span>'
+      + '    <span>' + r.marcosCleared + '/' + r.totalMarcos + ' Marcos</span>'
+      + '  </div>'
+      + '  <div class="drm-memory-box">' + memLines.join('<br>') + '</div>'
+      + '  <button type="button" class="drm-act-btn" data-road-idx="' + idx + '">' + btnLabel + '</button>'
+      + '</div>';
+  }).join('');
+
+  var sweepBtnHtml = hasHiddenIncursion
+    ? '<button type="button" class="drm-act-btn secondary" id="drm-btn-local-sweep"><span class="enc-cho-bg3-tag drm-attr-tag">[' + sweepTagAttr + ' 12]</span> Vasculhar Arredores de ' + originInfo.nodeName + '</button>'
+    : '<button type="button" class="drm-act-btn secondary" id="drm-btn-local-sweep">◇ Patrulhar Arredores de ' + originInfo.nodeName + '</button>';
+
+  var modal = document.createElement('div');
+  modal.id = 'directional-road-modal';
+  modal.className = 'explore-modal-overlay';
+  modal.innerHTML = ''
+    + '<div class="drm-card">'
+    + '  <div class="drm-header">'
+    + '    <div class="drm-header-titles">'
+    + '      <div class="drm-kicker">◆ ESCOLHA SUA ESTRADA · ' + originInfo.provName.toUpperCase() + '</div>'
+    + '      <div class="drm-title">' + originInfo.nodeName + '</div>'
+    + '    </div>'
+    + '    <button type="button" class="drm-close-btn" id="drm-btn-close">✗ Fechar</button>'
+    + '  </div>'
+    + '  <div class="drm-body">'
+    + '    <div class="drm-pace-bar">'
+    + '      <button type="button" class="drm-pace-btn' + (curPace === 'cautious' ? ' active' : '') + '" data-pace="cautious">Cauteloso</button>'
+    + '      <button type="button" class="drm-pace-btn' + (curPace === 'normal' ? ' active' : '') + '" data-pace="normal">Normal</button>'
+    + '      <button type="button" class="drm-pace-btn' + (curPace === 'fast' ? ' active' : '') + '" data-pace="fast">Audaz</button>'
+    + '    </div>'
+    + '    <div class="drm-pace-hint" id="drm-pace-hint">' + paceHints[curPace] + '</div>'
+    +      (roadsHtml || '<div class="drm-omen-box">Nenhuma estrada demarcada parte diretamente deste ponto. Vasculhe os arredores abaixo.</div>')
+    +      sweepBtnHtml
+    + '  </div>'
+    + '</div>';
+
+  (document.getElementById('frame') || document.body).appendChild(modal);
+
+  modal.querySelector('#drm-btn-close').onclick = function () {
+    _closeDirectionalRoadModal();
+  };
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) {
+      _closeDirectionalRoadModal();
+      return;
+    }
+    var paceBtn = e.target.closest('[data-pace]');
+    if (paceBtn) {
+      var newPace = paceBtn.getAttribute('data-pace') || 'normal';
+      window._roadSelectedPace = newPace;
+      if (typeof S !== 'undefined' && S) {
+        S.travelPace = newPace;
+        S.pace = newPace;
+      }
+      modal.querySelectorAll('.drm-pace-btn').forEach(function (b) {
+        b.classList.toggle('active', b.getAttribute('data-pace') === newPace);
+      });
+      var hintEl = modal.querySelector('#drm-pace-hint');
+      if (hintEl && paceHints[newPace]) hintEl.textContent = paceHints[newPace];
+      return;
+    }
+    var roadBtn = e.target.closest('[data-road-idx]');
+    if (roadBtn) {
+      var rIdx = parseInt(roadBtn.getAttribute('data-road-idx'), 10);
+      var chosen = roads[rIdx];
+      if (!chosen) return;
+      var startMarco = (chosen.completed || chosen.marcosCleared >= chosen.totalMarcos)
+        ? 1
+        : (chosen.marcosCleared + 1);
+      _startOrAdvanceRoadStep(chosen, originInfo, startMarco);
+    }
+  });
+
+  var sweepBtn = modal.querySelector('#drm-btn-local-sweep');
+  if (sweepBtn) {
+    sweepBtn.onclick = function () {
+      var biomeRef = (typeof fromNodeOrBiome === 'object' && fromNodeOrBiome) ? fromNodeOrBiome : null;
+      _runLocalPerimeterSweep(originInfo, biomeRef);
+    };
+  }
+};
+
+function _triggerPointcrawlRegionalEvent(targetBiome, preselectEdgeId) {
+  if (typeof S === 'undefined' || !S) {
+    if (typeof window.S !== 'undefined' && window.S) S = window.S;
+    else return;
+  }
+  if (typeof _closeCartLocationPopup === 'function') _closeCartLocationPopup();
+  var biome = (typeof _resolveCurrentPointcrawlBiomeNode === 'function')
+    ? _resolveCurrentPointcrawlBiomeNode(targetBiome || window._cartCurrentLocBiome)
+    : (targetBiome || window._cartCurrentLocBiome);
+  window._openDirectionalRoadCrossroads(biome, preselectEdgeId);
 }
 
 function _openPointcrawlDungeonDelver(dgId) {
@@ -97842,7 +98830,13 @@ function _openPointcrawlDungeonDelver(dgId) {
 }
 
 function openCartography() {
-  var curKey = (typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : 'green_fields';
+  var rawLoc = (typeof S !== 'undefined' && S && (S.current_location_id || (S.player && S.player.current_location_id) || S.mapId)) || null;
+  var normLoc = (rawLoc && window.CartShared && typeof CartShared.normalizeRegionalNodeId === 'function')
+    ? CartShared.normalizeRegionalNodeId(rawLoc)
+    : null;
+  var curKey = (normLoc && window.CartShared && CartShared.getLocationProvince && CartShared.getLocationProvince(normLoc))
+    ? normLoc
+    : ((typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : 'green_fields');
   var targetProv = (window.CartShared && CartShared.getLocationProvince) ? CartShared.getLocationProvince(curKey) : null;
   var pId = (targetProv && targetProv.id) || 'plains';
   if (window.CartShared && typeof CartShared.openRegionalMapModal === 'function') {
@@ -105657,6 +106651,8 @@ function boot() {
 
                 try { if (typeof scheduleRender === 'function') scheduleRender(); } catch (_eRenId) {}
 
+                try { if (typeof window._tryResumeRoadExpeditionAfterCombat === 'function') window._tryResumeRoadExpeditionAfterCombat(); } catch (_) {}
+
                 if (res.stale_corrected || res.source === 'db') {
 
                   // Reload visual: atualiza HUD imediatamente. Sem flash, sem
@@ -105699,6 +106695,8 @@ function boot() {
 
       }
 
+    } else if (typeof window._tryResumeRoadExpeditionAfterCombat === 'function') {
+      setTimeout(function () { window._tryResumeRoadExpeditionAfterCombat(); }, 220);
     }
 
 
