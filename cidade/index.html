@@ -75496,8 +75496,12 @@ if (typeof window._openDirectionalRoadCrossroads !== 'function') {
       CartShared.closeRegionalMapModal();
     }
     var targetKey = (fromNodeId === 'green_fields' || !fromNodeId) ? 'plains' : fromNodeId;
+    var resolvedNode = (window.CartShared && typeof CartShared.resolveRegionalBiomeNode === 'function')
+      ? CartShared.resolveRegionalBiomeNode(fromNodeId || targetKey)
+      : null;
+    var targetLabel = (resolvedNode && (resolvedNode.regionalName || resolvedNode.name)) || 'Campos Verdes';
     if (typeof startCityJourney === 'function') {
-      startCityJourney(targetKey, 'Campos Verdes');
+      startCityJourney(targetKey, targetLabel);
     }
   };
 }

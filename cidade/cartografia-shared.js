@@ -81349,6 +81349,7 @@
 
     // 2. GRANDES FLORESTAS (forest)
     { a: 'forest', provA: 'forest', b: 'goblin_nest', provB: 'forest', name: 'Trilha das Armadilhas de Cipo', marcos: 2, minLvl: 2, maxLvl: 3, biome: 'forest', omen: 'Galhos quebrados na altura dos joelhos e totens rusticos entre as raizes.' },
+    { a: 'goblin_nest', provA: 'forest', b: 'elven_ruins', provB: 'forest', name: 'Atalho das Copas Musgosas', marcos: 3, minLvl: 2, maxLvl: 4, biome: 'forest', omen: 'Trilhas estreitas entre troncos caidos levam a pedras brancas antigas.' },
     { a: 'forest', provA: 'forest', b: 'elven_ruins', provB: 'forest', name: 'Alameda das Colunas de Hera', marcos: 3, minLvl: 3, maxLvl: 5, biome: 'forest', omen: 'Pedras de marmore branco cobertas de musgo marcam uma antiga via.' },
     { a: 'forest', provA: 'forest', b: 'elder_woods', provB: 'forest', name: 'Vereda das Folhas Prateadas', marcos: 3, minLvl: 4, maxLvl: 6, biome: 'ancient_forest', omen: 'Arvores colossais vibram com um sussurro arcano antigo.' },
     { a: 'elven_ruins', provA: 'forest', b: 'elder_woods', provB: 'forest', name: 'Caminho dos Sentinelas Antigos', marcos: 3, minLvl: 4, maxLvl: 6, biome: 'ancient_forest', omen: 'Lanternas de pedra apagadas ha seculos ladeiam a mata primordial.' },
@@ -81383,11 +81384,14 @@
     // 6. LITORAL DA TORMENTA (coast)
     { a: 'salty_coast', provA: 'coast', b: 'shipwreck_cove', provB: 'coast', name: 'Costao da Mare Baixa', marcos: 2, minLvl: 3, maxLvl: 4, biome: 'coast', omen: 'Madeirame partido de navios e cordames presos entre os recifes.' },
     { a: 'salty_coast', provA: 'coast', b: 'lighthouse_ruins', provB: 'coast', name: 'Trilha Alta da Falesia', marcos: 3, minLvl: 3, maxLvl: 5, biome: 'coast', omen: 'Degraus batidos pelo vento salgado sobem rumo ao promontorio.' },
+    { a: 'shipwreck_cove', provA: 'coast', b: 'sunken_tomb', provB: 'desert', isFrontier: true, borderA: { x: 0.06, y: 0.72 }, borderB: { x: 0.92, y: 0.78 }, name: 'Enseada das Dunas Marinhas', marcos: 3, minLvl: 4, maxLvl: 5, biome: 'coast', omen: 'Bancos de areia dourada encontram destrocos gastos pela maresia.' },
+    { a: 'lighthouse_ruins', provA: 'coast', b: 'obsidian_ridge', provB: 'volcanic', isFrontier: true, borderA: { x: 0.80, y: 0.06 }, borderB: { x: 0.56, y: 0.94 }, name: 'Falesia das Cinzas Negras', marcos: 4, minLvl: 5, maxLvl: 7, biome: 'volcanic', omen: 'O vento do norte traz fuligem morna sobre os penhascos do farol.' },
     { a: 'salty_coast', provA: 'coast', b: 'desert', provB: 'desert', isFrontier: true, borderA: { x: 0.08, y: 0.44 }, borderB: { x: 0.92, y: 0.56 }, name: 'Estrada das Dunas Salgadas', marcos: 3, minLvl: 3, maxLvl: 5, biome: 'desert', omen: 'A maresia cede lugar ao vento quente e seco do interior arenoso.' },
     { a: 'salty_coast', provA: 'coast', b: 'volcanic', provB: 'volcanic', isFrontier: true, borderA: { x: 0.52, y: 0.06 }, borderB: { x: 0.62, y: 0.92 }, name: 'Peninsula das Cinzas Marinhas', marcos: 4, minLvl: 5, maxLvl: 8, biome: 'volcanic', omen: 'Pedra-pomes boia na espuma e nuvens escuras cobrem o horizonte.' },
 
     // 7. DUNAS DO SUL (desert)
     { a: 'desert', provA: 'desert', b: 'sunken_tomb', provB: 'desert', name: 'Rota dos Obeliscos Soterrados', marcos: 3, minLvl: 4, maxLvl: 5, biome: 'desert', omen: 'Pontas de pilares de arenito emergem das dunas em movimento.' },
+    { a: 'sunken_tomb', provA: 'desert', b: 'ashen_badlands', provB: 'desert', name: 'Fenda dos Escorpioes Rubros', marcos: 3, minLvl: 4, maxLvl: 6, biome: 'badlands', omen: 'Ravinas de arenito vermelho sobem das dunas fundas rumo ao plato seco.' },
     { a: 'desert', provA: 'desert', b: 'ashen_badlands', provB: 'desert', name: 'Canion do Vento Escaldante', marcos: 3, minLvl: 4, maxLvl: 6, biome: 'badlands', omen: 'O areal abre caminho para paredoes de argila vermelha rachada.' },
     { a: 'ashen_badlands', provA: 'desert', b: 'volcanic', provB: 'volcanic', isFrontier: true, borderA: { x: 0.88, y: 0.12 }, borderB: { x: 0.22, y: 0.90 }, name: 'Fronteira da Escoria Ardente', marcos: 4, minLvl: 5, maxLvl: 8, biome: 'volcanic', omen: 'Cinzas quentes caem sobre a terra seca na direcao da caldeira.' },
     { a: 'ashen_badlands', provA: 'plains', b: 'salty_coast', provB: 'coast', isFrontier: true, borderA: { x: 0.94, y: 0.82 }, borderB: { x: 0.10, y: 0.80 }, name: 'Ravina da Maresia Distante', marcos: 3, minLvl: 3, maxLvl: 5, biome: 'coast', omen: 'Gaivotas marinhas sobrevoam o fim dos desfiladeiros secos.' },
@@ -81395,10 +81399,12 @@
     // 8. TERRAS DOS MORTOS (graveyard)
     { a: 'graveyard', provA: 'graveyard', b: 'ancestral_graveyard', provB: 'graveyard', name: 'Via dos Mausoleus Nobres', marcos: 3, minLvl: 4, maxLvl: 6, biome: 'graveyard', omen: 'Estatuas antigas ladeiam uma calcada de lajes frias.' },
     { a: 'graveyard', provA: 'graveyard', b: 'crypt_shadows', provB: 'graveyard', name: 'Escadaria das Lapides Partidas', marcos: 3, minLvl: 4, maxLvl: 6, biome: 'graveyard', omen: 'Uma nevoa densa e gelida escorre para criptas fundas.' },
+    { a: 'crypt_shadows', provA: 'graveyard', b: 'ancestral_graveyard', provB: 'graveyard', name: 'Galeria dos Sarcofagos Antigos', marcos: 3, minLvl: 4, maxLvl: 6, biome: 'graveyard', omen: 'Passagens funebres ligam as criptas sombrias aos mausoleus da nobreza.' },
     { a: 'ancestral_graveyard', provA: 'graveyard', b: 'deep_swamp', provB: 'swamp', isFrontier: true, borderA: { x: 0.92, y: 0.56 }, borderB: { x: 0.52, y: 0.92 }, name: 'Aterro do Brejo Morto', marcos: 3, minLvl: 4, maxLvl: 6, biome: 'swamp', omen: 'Sarcofagos afundados anunciam a transicao para aguas pantanosas.' },
 
     // 9. ERMO BOREAL (snow)
     { a: 'snow', provA: 'snow', b: 'frost_cave', provB: 'snow', name: 'Trilha das Presas de Gelo', marcos: 3, minLvl: 5, maxLvl: 7, biome: 'snow', omen: 'Rastros largos na neve fresca seguem para uma encosta congelada.' },
+    { a: 'frost_cave', provA: 'snow', b: 'dragon_pass', provB: 'mountain', isFrontier: true, borderA: { x: 0.08, y: 0.76 }, borderB: { x: 0.44, y: 0.04 }, name: 'Desfiladeiro da Geada Negra', marcos: 4, minLvl: 5, maxLvl: 7, biome: 'snow', omen: 'Gargantas de gelo e rocha escura descem rumo aos picos ocidentais.' },
     { a: 'snow', provA: 'snow', b: 'glacial_rift', provB: 'snow', name: 'Travessia da Geleira Azul', marcos: 4, minLvl: 6, maxLvl: 9, biome: 'frozen_abyss', omen: 'O gelo estala sob as botas diante de uma fenda colossal.' },
 
     // 10. TERRAS DE FOGO (volcanic)
@@ -81537,6 +81543,57 @@
     return { tierLabel: 'Controlado', badgeColor: '#86efac', borderColor: 'rgba(34,197,94,0.4)', bgColor: 'rgba(20,83,45,0.25)' };
   }
 
+  function resolveRegionalBiomeNode(nodeId, preferredProvKey) {
+    if (!nodeId) return null;
+    var norm = normalizeRegionalNodeId(nodeId);
+    var allB = (typeof CART_BIOMES !== 'undefined' && Array.isArray(CART_BIOMES)) ? CART_BIOMES : [];
+    var rec = _findRegionalNodeRecord(norm, preferredProvKey) || _findRegionalNodeRecord(nodeId, preferredProvKey);
+    var exactB = allB.find(function(b) { return b && (b.key === nodeId || b.key === norm || b.id === nodeId || b.id === norm); });
+    if (exactB && (!rec || exactB.key === rec.node.id || (norm === 'green_fields' && exactB.key === 'green_fields'))) {
+      return Object.assign({}, exactB, rec && rec.provKey && REGIONS_DATA[rec.provKey] ? { provKey: rec.provKey, regionalName: REGIONS_DATA[rec.provKey].name } : {});
+    }
+    if (rec && rec.node) {
+      var pk = rec.provKey || preferredProvKey || 'plains';
+      var regObj = REGIONS_DATA[pk] || {};
+      var provObj = (typeof CART_PROVINCES !== 'undefined' ? CART_PROVINCES : []).find(function(pr) { return pr.id === pk; });
+      return {
+        key: rec.node.id,
+        id: rec.node.id,
+        name: rec.node.name,
+        desc: rec.node.desc || regObj.narrative || '',
+        biome: pk,
+        provKey: pk,
+        tier: Math.max(1, Math.round(rec.node.maxCR || 3)),
+        ico: '',
+        mapKey: (provObj && provObj.mapKey) || '',
+        regionalName: regObj.name || ''
+      };
+    }
+    return exactB || null;
+  }
+
+  function _resolveCrossRegionExitPoint(localNode, remoteNodeId, remoteProvKey, activeProvKey, roadDef, localIsA) {
+    if (localIsA && roadDef.provA === activeProvKey && roadDef.borderA) return roadDef.borderA;
+    if (!localIsA && roadDef.provB === activeProvKey && roadDef.borderB) return roadDef.borderB;
+    // Nos compartilhados entre dois mapas regionais (ex.: ashen_badlands em plains e desert)
+    var sharedAnchors = {
+      'plains:desert:desert': { x: 0.62, y: 0.94 },
+      'plains:sunken_tomb:desert': { x: 0.72, y: 0.94 },
+      'plains:volcanic:volcanic': { x: 0.94, y: 0.62 },
+      'desert:bandit_fortress:plains': { x: 0.48, y: 0.06 },
+      'desert:orc_tribe:plains': { x: 0.72, y: 0.06 },
+      'desert:salty_coast:coast': { x: 0.94, y: 0.42 }
+    };
+    var sk = activeProvKey + ':' + remoteNodeId + ':' + remoteProvKey;
+    if (sharedAnchors[sk]) return sharedAnchors[sk];
+    var lx = (localNode && typeof localNode.x === 'number') ? localNode.x : 0.5;
+    var ly = (localNode && typeof localNode.y === 'number') ? localNode.y : 0.5;
+    return {
+      x: lx >= 0.5 ? 0.94 : 0.06,
+      y: Math.min(0.92, Math.max(0.08, ly))
+    };
+  }
+
   function getOutgoingRoadsForNode(nodeId, provKey, pObj) {
     var normNode = normalizeRegionalNodeId(nodeId);
     var resolvedProv = provKey || _LOCATION_TO_PROVINCE[normNode] || _LOCATION_TO_PROVINCE[nodeId] || 'plains';
@@ -81549,6 +81606,7 @@
     var fromX = (curRec && curRec.node) ? curRec.node.x : 0.5;
     var fromY = (curRec && curRec.node) ? curRec.node.y : 0.5;
     var activeProv = (curRec && curRec.provKey) ? curRec.provKey : resolvedProv;
+    var activeRegNodes = (REGIONS_DATA[activeProv] && Array.isArray(REGIONS_DATA[activeProv].nodes)) ? REGIONS_DATA[activeProv].nodes : [];
 
     var results = [];
     for (var i = 0; i < DIRECTIONAL_ROADS_DB.length; i++) {
@@ -81559,14 +81617,20 @@
 
       var targetRegId = isForward ? normalizeRegionalNodeId(r.b) : normalizeRegionalNodeId(r.a);
       var targetProvKey = isForward ? r.provB : r.provA;
-      var targetRec = _findRegionalNodeRecord(targetRegId, targetProvKey);
+      var localTargetInMap = activeRegNodes.find(function(n) { return n.id === targetRegId; }) || null;
+      var effectiveIsFrontier = !!(r.isFrontier || !localTargetInMap);
+      if (!effectiveIsFrontier && targetProvKey !== activeProv) {
+        targetProvKey = activeProv;
+      }
+
+      var targetRec = localTargetInMap ? { node: localTargetInMap, provKey: activeProv } : _findRegionalNodeRecord(targetRegId, targetProvKey);
       var targetNode = targetRec ? targetRec.node : { id: targetRegId, name: targetRegId, x: 0.5, y: 0.5 };
       var targetRegObj = REGIONS_DATA[targetProvKey] || REGIONS_DATA[activeProv] || REGIONS_DATA.plains;
 
       var toX = targetNode.x;
       var toY = targetNode.y;
-      if (r.isFrontier) {
-        var bAnchor = isForward ? r.borderA : r.borderB;
+      if (effectiveIsFrontier) {
+        var bAnchor = _resolveCrossRegionExitPoint(curRec ? curRec.node : null, targetRegId, targetProvKey, activeProv, r, isForward);
         if (bAnchor && typeof bAnchor.x === 'number') {
           toX = bAnchor.x;
           toY = bAnchor.y;
@@ -81588,10 +81652,10 @@
 
       var destDisplay = 'Destino Inexplorado';
       if (physicallyKnown || mem.completed) {
-        destDisplay = targetNode.name + (r.isFrontier ? (' \u00b7 ' + targetRegObj.name) : '');
+        destDisplay = targetNode.name + (effectiveIsFrontier ? (' \u00b7 ' + targetRegObj.name) : '');
       } else if (mapGuided) {
         destDisplay = targetNode.name + ' (Mapa de Corvus)';
-      } else if (r.isFrontier) {
+      } else if (effectiveIsFrontier) {
         destDisplay = 'Fronteira Inexplorada';
       }
 
@@ -81607,7 +81671,7 @@
         toNodeTrueName: targetNode.name,
         toProvinceKey: targetProvKey,
         toProvinceName: targetRegObj.name,
-        isFrontier: !!r.isFrontier,
+        isFrontier: effectiveIsFrontier,
         fromX: fromX,
         fromY: fromY,
         toX: toX,
@@ -81651,29 +81715,28 @@
     var roadState = extractRoadExplorationState(pObj);
     var nodeMap = {};
     for (var ni = 0; ni < reg.nodes.length; ni++) {
+      nodeMap[normalizeRegionalNodeId(reg.nodes[ni].id)] = reg.nodes[ni];
       nodeMap[reg.nodes[ni].id] = reg.nodes[ni];
     }
 
     var segments = [];
     for (var i = 0; i < DIRECTIONAL_ROADS_DB.length; i++) {
       var r = DIRECTIONAL_ROADS_DB[i];
-      var aIn = (r.provA === provKey && nodeMap[normalizeRegionalNodeId(r.a)]);
-      var bIn = (r.provB === provKey && nodeMap[normalizeRegionalNodeId(r.b)]);
-      if (!aIn && !bIn) continue;
-
       var idA = normalizeRegionalNodeId(r.a);
       var idB = normalizeRegionalNodeId(r.b);
+      var nA = nodeMap[idA] || null;
+      var nB = nodeMap[idB] || null;
+      if (!nA && !nB) continue;
+
       var edgeId = canonicalRoadEdgeId(idA, idB);
       var mem = roadState[edgeId];
       var totalM = r.marcos || 3;
       var clearedM = mem ? Math.min(totalM, Number(mem.marcos_cleared || 0)) : 0;
 
-      var aKnown = isNodeDiscovered(idA, r.provA, known, []);
-      var bKnown = isNodeDiscovered(idB, r.provB, known, []);
+      var aKnown = isNodeDiscovered(idA, nA ? provKey : r.provA, known, []);
+      var bKnown = isNodeDiscovered(idB, nB ? provKey : r.provB, known, []);
 
-      if (!r.isFrontier && aIn && bIn) {
-        var nA = nodeMap[idA];
-        var nB = nodeMap[idB];
+      if (!r.isFrontier && nA && nB) {
         var bothKnown = aKnown && bKnown;
         if (clearedM <= 0 && !bothKnown) continue;
         var startNode = aKnown ? nA : (bKnown ? nB : nA);
@@ -81696,11 +81759,14 @@
           totalMarcos: totalM,
           bearing: computeCompassBearing(startNode.x, startNode.y, endNode.x, endNode.y)
         });
-      } else if (r.isFrontier) {
-        var localNode = aIn ? nodeMap[idA] : nodeMap[idB];
-        var localKnown = aIn ? aKnown : bKnown;
-        var remoteKnown = aIn ? bKnown : aKnown;
-        var borderPt = aIn ? r.borderA : r.borderB;
+      } else {
+        var localIsA = !!nA;
+        var localNode = localIsA ? nA : nB;
+        var localKnown = localIsA ? aKnown : bKnown;
+        var remoteKnown = localIsA ? bKnown : aKnown;
+        var remoteId = localIsA ? idB : idA;
+        var remoteProv = localIsA ? r.provB : r.provA;
+        var borderPt = _resolveCrossRegionExitPoint(localNode, remoteId, remoteProv, provKey, r, localIsA);
         if (!localNode || !borderPt) continue;
         if (clearedM <= 0 && !(localKnown && remoteKnown)) continue;
         var isFullF = !!((localKnown && remoteKnown) || (mem && mem.completed) || clearedM >= totalM);
@@ -81709,7 +81775,7 @@
           edgeId: edgeId,
           roadName: r.name,
           fromNodeId: localNode.id,
-          toNodeId: aIn ? idB : idA,
+          toNodeId: remoteId,
           isFrontier: true,
           x0: localNode.x,
           y0: localNode.y,
@@ -82206,7 +82272,7 @@
 
       drawerName.textContent = n.name;
 
-      var isHere = !!(pLoc && pLoc === n.id);
+      var isHere = !!(pLoc && normalizeRegionalNodeId(pLoc) === normalizeRegionalNodeId(n.id));
 
       if (isHere) {
 
@@ -82220,21 +82286,19 @@
 
           if (typeof haptic === 'function') haptic('medium');
 
+          var targetBiome = resolveRegionalBiomeNode(n.id, key) || n;
+
           if (typeof _openCurrentNodePointcrawlHub === 'function') {
 
-            _openCurrentNodePointcrawlHub();
+            _openCurrentNodePointcrawlHub(targetBiome);
 
           } else if (typeof _openCartLocationPopup === 'function') {
-
-            var allB = (window.CartShared && CartShared.CART_BIOMES) || [];
-
-            var targetBiome = allB.find(function(b){ return b && b.key === n.id; }) || n;
 
             _openCartLocationPopup(targetBiome);
 
           } else if (typeof _triggerPointcrawlRegionalEvent === 'function') {
 
-            _triggerPointcrawlRegionalEvent(n);
+            _triggerPointcrawlRegionalEvent(targetBiome);
 
           } else {
 
@@ -82341,7 +82405,7 @@
 
 
 
-      var isHere = !!(pLoc && pLoc === n.id);
+      var isHere = !!(pLoc && normalizeRegionalNodeId(pLoc) === normalizeRegionalNodeId(n.id));
 
       if (isHere) {
 
@@ -82706,6 +82770,8 @@
     extractRoadExplorationState: extractRoadExplorationState,
 
     recordLocalRoadProgress: recordLocalRoadProgress,
+
+    resolveRegionalBiomeNode: resolveRegionalBiomeNode,
 
     getOutgoingRoadsForNode: getOutgoingRoadsForNode,
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-11-03T00:01:08Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-11-03T00:49:06Z - do not edit directly, edit source -->
 
 
 
@@ -96275,6 +96275,10 @@ function _cartGetPlayerBiomeV2(){
     if (Array.isArray(allB) && allB.some(function(b){ return b && b.key === mappedKey; })) {
       return mappedKey;
     }
+    if (window.CartShared && typeof CartShared.resolveRegionalBiomeNode === 'function') {
+      var regNode = CartShared.resolveRegionalBiomeNode(rawId);
+      if (regNode && (regNode.key || regNode.id)) return regNode.key || regNode.id;
+    }
     if (typeof FIXED_MAPS !== 'undefined' && FIXED_MAPS[rawId] && FIXED_MAPS[rawId].biome) {
       return FIXED_MAPS[rawId].biome;
     }
@@ -96293,12 +96297,20 @@ function _resolveCurrentPointcrawlBiomeNode(explicitBiome) {
     var found = allB.find(function(b){ return b && (b.key === curKey || b.id === curKey); });
     if (found) return found;
   }
+  if (curKey && window.CartShared && typeof CartShared.resolveRegionalBiomeNode === 'function') {
+    var regCur = CartShared.resolveRegionalBiomeNode(curKey);
+    if (regCur) return regCur;
+  }
 
   if (typeof S !== 'undefined' && S) {
     var locKey = S.current_location_id || (S.player && S.player.current_location_id) || (S.player && S.player.metadata && S.player.metadata.current_location_id) || S.mapId || S.location;
     if (locKey && Array.isArray(allB)) {
       var foundLoc = allB.find(function(b){ return b && (b.key === locKey || b.id === locKey); });
       if (foundLoc) return foundLoc;
+    }
+    if (locKey && window.CartShared && typeof CartShared.resolveRegionalBiomeNode === 'function') {
+      var regLoc = CartShared.resolveRegionalBiomeNode(locKey);
+      if (regLoc) return regLoc;
     }
   }
 
@@ -97540,10 +97552,16 @@ function _buildPointcrawlCurrentNodeActionsHtml(biome) {
     + '</div>';
 }
 
-function _openCurrentNodePointcrawlHub() {
+function _openCurrentNodePointcrawlHub(optNode) {
+  var node = (optNode && (optNode.key || optNode.id || optNode.name)) ? optNode : null;
   var curKey = (typeof _cartGetPlayerBiomeV2 === 'function') ? _cartGetPlayerBiomeV2() : 'plains';
   var allB = (window.CartShared && CartShared.CART_BIOMES) || (typeof CART_BIOMES_V2 !== 'undefined' ? CART_BIOMES_V2 : []);
-  var node = Array.isArray(allB) ? allB.find(function(b){ return b && b.key === curKey; }) : null;
+  if (!node && Array.isArray(allB)) {
+    node = allB.find(function(b){ return b && (b.key === curKey || b.id === curKey); });
+  }
+  if (!node && window.CartShared && typeof CartShared.resolveRegionalBiomeNode === 'function') {
+    node = CartShared.resolveRegionalBiomeNode(curKey);
+  }
   if (!node && Array.isArray(allB) && allB.length) node = allB[0];
   if (node && typeof _openCartLocationPopup === 'function') {
     _openCartLocationPopup(node);
@@ -97846,10 +97864,15 @@ function _resolveCurrentRegionalOrigin(explicitNodeOrBiome) {
   var normId = (window.CartShared && typeof CartShared.normalizeRegionalNodeId === 'function')
     ? CartShared.normalizeRegionalNodeId(rawKey || 'green_fields')
     : (rawKey || 'green_fields');
+  var preferredProv = (explicitNodeOrBiome && typeof explicitNodeOrBiome === 'object' && explicitNodeOrBiome.provKey) || null;
   var provObj = (window.CartShared && typeof CartShared.getLocationProvince === 'function')
     ? CartShared.getLocationProvince(normId)
     : null;
-  var provKey = (provObj && provObj.id) || 'plains';
+  var provKey = (preferredProv && window.CartShared && CartShared.REGIONS_DATA && CartShared.REGIONS_DATA[preferredProv]
+    && Array.isArray(CartShared.REGIONS_DATA[preferredProv].nodes)
+    && CartShared.REGIONS_DATA[preferredProv].nodes.some(function (n) { return n.id === normId; }))
+    ? preferredProv
+    : ((provObj && provObj.id) || 'plains');
   var regData = (window.CartShared && CartShared.REGIONS_DATA && CartShared.REGIONS_DATA[provKey]) || null;
   var nodeRec = (regData && Array.isArray(regData.nodes))
     ? regData.nodes.find(function (n) { return n.id === normId; })
@@ -98119,7 +98142,9 @@ function _renderRoadMilestoneDecisionModal(exp, decisionData) {
         S.mapId = _cartResolveMapId(exp.toNodeId);
       }
       var allB = (window.CartShared && CartShared.CART_BIOMES) || [];
-      var destBiomeObj = Array.isArray(allB) ? allB.find(function (b) { return b && (b.key === exp.toNodeId || b.id === exp.toNodeId || b.key === exp.toServerId); }) : null;
+      var destBiomeObj = (window.CartShared && typeof CartShared.resolveRegionalBiomeNode === 'function')
+        ? CartShared.resolveRegionalBiomeNode(exp.toNodeId, destProvKey)
+        : (Array.isArray(allB) ? allB.find(function (b) { return b && (b.key === exp.toNodeId || b.id === exp.toNodeId || b.key === exp.toServerId); }) : null);
       if (destBiomeObj) window._cartCurrentLocBiome = destBiomeObj;
     }
 
@@ -98528,7 +98553,18 @@ window._onRoadMarcoEventResolved = function () {
 window._tryResumeRoadExpeditionAfterCombat = function () {
   try {
     var raw = sessionStorage.getItem('vld_active_road_exp_v1');
-    if (!raw) return;
+    if (!raw) {
+      var queuedEdge = sessionStorage.getItem('vld_preselect_road_edge');
+      if (queuedEdge) {
+        sessionStorage.removeItem('vld_preselect_road_edge');
+        setTimeout(function () {
+          if (typeof window._openDirectionalRoadCrossroads === 'function') {
+            window._openDirectionalRoadCrossroads(null, queuedEdge);
+          }
+        }, 220);
+      }
+      return;
+    }
     var parsed = JSON.parse(raw);
     if (!parsed || !parsed.edgeId || !parsed.combatPending) return;
     if (Date.now() - Number(parsed.ts || 0) > 45 * 60 * 1000) {
