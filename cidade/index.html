@@ -13426,6 +13426,7 @@ body.perf-lite .vc-action-btn { transition: none; }
     // dialogue-engine: loader JSON + evalConditions + skill check + impact apply.
     // Doc canonical: docs/sistemas/npc-dialogue-engine.md
     document.write('<script src="/shared/npc-affinity.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
+    document.write('<script src="/shared/inter-npc-dynamics.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     document.write('<script src="/shared/dialogue-engine.js?v=' + (window.VBUNDLE_HASH || Date.now()) + '"><\/script>');
     // === PADRAO_LIGHTBOX (task #55, 2026-05-20) — clicar nas imagens de NPCs
     // pra ver maior. Engine carrega aqui pra estar disponivel pro encounter-popup
@@ -35653,7 +35654,9 @@ window._persistNpcTalkoptsUsed = function(){
 var _HEARD_GLOBALS = ['_npcGreetingsHeard', '_marketWalkHeard', '_marketChatHeard',
   '_aldwinPickHeard', '_templePickHeard', '_cityFlavorHeard', '_marketReactHeard',
   '_marketAtmoHeard', '_shadowFlavorHeard', '_gromInteractHeard', '_merResultHeard',
-  '_plazaHeard', '_chanceEncHeard'];  // B3.3/B3.9 #90: anti-repeat praça + chance encounters
+  '_plazaHeard', '_chanceEncHeard', '_heardTimestamps', '_lastInteractionTs'];  // B3.3/B3.9 #90: anti-repeat praça + chance encounters + timestamps tempo real
+window._heardTimestamps = window._heardTimestamps || {};
+window._lastInteractionTs = window._lastInteractionTs || {};
 (function _hydrateHeardSets(){
   try {
     var raw = localStorage.getItem('valdoria_npc_heard_' + (window._charId || 'default'));
@@ -35710,42 +35713,68 @@ function _npcHasMore(npc){
 }
 
 // Helper genérico: pick non-repeating de pool ate exaurir, depois reset.
-// poolKey identifica o tracking set (ex: 'greet_npcId', 'walk_npcId', 'chat_npcId').
-// Retorna o item escolhido ou null se pool vazio.
-function _pickNonRepeating(poolKey, items, trackingObj){
+// poolKey identifica o tracking set. Suporta cooldown de tempo real (default: 20h).
+function _pickNonRepeating(poolKey, items, trackingObj, opts){
   if (!items || !items.length) return null;
   trackingObj[poolKey] = trackingObj[poolKey] || [];
   var heard = trackingObj[poolKey];
-  // Reset quando todas usadas — guardando a ÚLTIMA usada pra NÃO repetir o
-  // mesmo item 2x seguidas na virada do ciclo (B1.5 #90; espelha a exclusão
-  // do último que o npc_lines.pick_line do servidor já fazia).
+  window._heardTimestamps = window._heardTimestamps || {};
+  var now = Date.now(), cd = (opts && opts.cooldownMs) || 72000000;
+  // REGRA SOBERANA: Se neverRepeat for ativo e todos foram ouvidos, nunca reseta
+  if (opts && opts.neverRepeat && heard.length >= items.length) {
+    return (opts && opts.fallbackReturn) || null;
+  }
+  // Reset quando todas usadas — guardando lastUsed pra NÃO repetir na virada (B1.5 #90)
   var lastUsed = null;
   if (heard.length >= items.length){
     lastUsed = heard[heard.length - 1] || null;
     trackingObj[poolKey] = [];
     heard = trackingObj[poolKey];
   }
-  // Filtra disponiveis
   var available = [];
   for (var i = 0; i < items.length; i++){
     var key = (typeof items[i] === 'string') ? items[i] : (items[i].id || JSON.stringify(items[i]));
+    var onCd = (window._heardTimestamps[poolKey + '::' + key] || 0) > (now - cd);
     if (heard.indexOf(key) === -1 && !(lastUsed !== null && key === lastUsed && items.length > 1)){
-      available.push({ item: items[i], key: key, idx: i });
+      available.push({ item: items[i], key: key, idx: i, onCd: onCd });
     }
   }
-  if (!available.length) return items[0]; // safety
-  var pick = available[Math.floor(Math.random() * available.length)];
+  var fresh = available.filter(function(a){ return !a.onCd; });
+  var pool = fresh.length ? fresh : available;
+  if (!pool.length) return items[0];
+  var pick = pool[Math.floor(Math.random() * pool.length)];
   heard.push(pick.key);
-  // B1.6 #90: persiste os heard-sets globais (debounced) — sobrevive a reload
+  window._heardTimestamps[poolKey + '::' + pick.key] = now;
   if (typeof window._persistHeardSets === 'function') window._persistHeardSets();
   return pick.item;
 }
 
-// Greeting non-repeating — usa _pickNonRepeating; cicla apenas após exaurir todas
+var NPC_CASUAL_RETURN_GREETINGS = [
+  '— De volta por aqui? Bom ver você.',
+  '— Olá novamente, viajante. Tudo em ordem?',
+  '— Reconheço seus passos. O que traz você de volta?',
+  '— Passando por aqui outra vez? Fique à vontade.',
+  '— Bom reencontrar você. Algo novo pelos distritos?',
+  '— Caminhando pelas ruas de novo? Se cuide por aí.'
+];
+
+// Greeting non-repeating — usa _pickNonRepeating; intros nunca repetem
 function _npcGreet(npc){
   if (!npc.greetings || !npc.greetings.length) return '';
   var poolKey = npc.id;
-  return _pickNonRepeating(poolKey, npc.greetings, window._npcGreetingsHeard);
+  var now = Date.now();
+  window._lastInteractionTs = window._lastInteractionTs || {};
+  window._npcGreetingsHeard = window._npcGreetingsHeard || {};
+  var lastTalk = window._lastInteractionTs['npc_' + poolKey] || 0;
+  var heard = window._npcGreetingsHeard[poolKey] || [];
+  // REGRA SOBERANA: Monólogos e frases introdutórias nunca se repetem.
+  if ((heard.length >= npc.greetings.length || lastTalk > 0) && typeof NPC_CASUAL_RETURN_GREETINGS !== 'undefined') {
+    window._lastInteractionTs['npc_' + poolKey] = now;
+    return _pickNonRepeating('npc_ret_' + poolKey, NPC_CASUAL_RETURN_GREETINGS, window._npcGreetingsHeard);
+  }
+
+  window._lastInteractionTs['npc_' + poolKey] = now;
+  return _pickNonRepeating(poolKey, npc.greetings, window._npcGreetingsHeard, { neverRepeat: true });
 }
 
 // canonical: data/plaza_npc_walk_data.py MARKET_WALK_DESCRIPTIONS (9 textos)
@@ -42364,9 +42393,8 @@ function _renderEncounterOutcome(player, choice, data) {
   }
 
   var continueAction = function() {
-    if (typeof choice._onContinue === 'function') {
-      choice._onContinue();
-    } else {
+    if (typeof choice._onContinue === 'function') choice._onContinue();
+    else {
       if (window.vEncounter && typeof window.vEncounter.close === 'function') {
         window.vEncounter.close();
       } else {
@@ -69805,6 +69833,908 @@ var ALLY_INTRO_EXTRA = {
   ]
 };
 
+// Saudações breves e dinâmicas de retorno para companheiros (evita monólogos teatrais repetitivos
+// quando conversado novamente na mesma sessão ou dentro de 20h de tempo real).
+var ALLY_CASUAL_GREETINGS = {
+  ladino: [
+    [ {type: 'speech', text: "Posso ajudar?"} ],
+    [ {type: 'speech', text: "Pois não? Notou algo de estranho por aqui?"} ],
+    [ {type: 'speech', text: "O que manda?"} ],
+    [ {type: 'speech', text: "Sim? Algum problema?"} ],
+    [ {type: 'speech', text: "De volta? O que temos em vista?"} ],
+    [ {type: 'speech', text: "Mãos livres e ouvidos atentos. Pode falar."} ]
+  ],
+  guerreiro: [
+    [ {type: 'speech', text: "Pois não? O que manda?"} ],
+    [ {type: 'speech', text: "Posso ajudar?"} ],
+    [ {type: 'speech', text: "Firme e a postos. Diga."} ],
+    [ {type: 'speech', text: "Sim? Alguma ordem para o grupo?"} ],
+    [ {type: 'speech', text: "Pronto para o combate. Pode falar."} ],
+    [ {type: 'speech', text: "De volta. Qual é o plano de agora?"} ]
+  ],
+  clerigo: [
+    [ {type: 'speech', text: "Posso ajudar?"} ],
+    [ {type: 'speech', text: "Pois não? Como posso ser útil agora?"} ],
+    [ {type: 'speech', text: "A paz esteja com você. Precisa de algo?"} ],
+    [ {type: 'speech', text: "Sim? O que pesa em seus pensamentos?"} ],
+    [ {type: 'speech', text: "Caminhamos sob boa guarda. O que manda?"} ]
+  ],
+  mago: [
+    [ {type: 'speech', text: "Posso ajudar?"} ],
+    [ {type: 'speech', text: "Pois não? Alguma dúvida nos planos?"} ],
+    [ {type: 'speech', text: "Sim? O que você precisa?"} ],
+    [ {type: 'speech', text: "Mente focada. Pode falar."} ],
+    [ {type: 'speech', text: "De volta? O que traz em mente?"} ]
+  ],
+  patrulheiro: [
+    [ {type: 'speech', text: "Pois não? Alguma pista nova?"} ],
+    [ {type: 'speech', text: "Posso ajudar?"} ],
+    [ {type: 'speech', text: "O que manda para a trilha?"} ],
+    [ {type: 'speech', text: "Sim? Notou algo no horizonte?"} ],
+    [ {type: 'speech', text: "A postos. Diga o que precisa."} ]
+  ],
+  paladino: [
+    [ {type: 'speech', text: "Pois não? Em que posso ajudar?"} ],
+    [ {type: 'speech', text: "Posso ajudar a nossa causa?"} ],
+    [ {type: 'speech', text: "A honra nos guia. Quais são as ordens?"} ],
+    [ {type: 'speech', text: "Sim? Como posso servir ao avanço do grupo?"} ],
+    [ {type: 'speech', text: "Sempre a postos pela justiça. Diga."} ]
+  ],
+  bardo: [
+    [ {type: 'speech', text: "Pois não? Alguma boa nova?"} ],
+    [ {type: 'speech', text: "Posso ajudar?"} ],
+    [ {type: 'speech', text: "O que manda, meu parceiro de estrada?"} ],
+    [ {type: 'speech', text: "Sim? Um novo plano em mente?"} ],
+    [ {type: 'speech', text: "Ouvidos atentos para o que vier. Diga!"} ]
+  ],
+  druida: [
+    [ {type: 'speech', text: "Pois não? Os ventos trazem algo novo?"} ],
+    [ {type: 'speech', text: "Posso ajudar?"} ],
+    [ {type: 'speech', text: "O que manda?"} ],
+    [ {type: 'speech', text: "Sim? O que precisa da terra e das matas?"} ],
+    [ {type: 'speech', text: "A quietude nos protege. Diga."} ]
+  ],
+  monge: [
+    [ {type: 'speech', text: "Pois não? Em que posso ajudar?"} ],
+    [ {type: 'speech', text: "Posso ajudar?"} ],
+    [ {type: 'speech', text: "Respiração serena e mente calma. Diga."} ],
+    [ {type: 'speech', text: "Sim? Qual é a necessidade do momento?"} ],
+    [ {type: 'speech', text: "Foco e equilíbrio. O que manda?"} ]
+  ],
+  barbaro: [
+    [ {type: 'speech', text: "Pois não, amigo! Do que precisa?"} ],
+    [ {type: 'speech', text: "Opa! Esqueceu de me falar algo?"} ],
+    [ {type: 'speech', text: "Posso ajudar?"} ],
+    [ {type: 'speech', text: "Diga lá, qual é a boa?"} ],
+    [ {type: 'speech', text: "Machado pronto e sangue quente. O que vamos encarar?"} ]
+  ],
+  feiticeiro: [
+    [ {type: 'speech', text: "Pois não? O que manda?"} ],
+    [ {type: 'speech', text: "Posso ajudar em algo?"} ],
+    [ {type: 'speech', text: "Sim? As correntes de energia estão atentas. Diga."} ],
+    [ {type: 'speech', text: "De volta? Precisa de apoio arcano?"} ],
+    [ {type: 'speech', text: "A postos. Pode falar livremente."} ]
+  ],
+  bruxo: [
+    [ {type: 'speech', text: "Pois não? Algum sinal?"} ],
+    [ {type: 'speech', text: "Posso ajudar?"} ],
+    [ {type: 'speech', text: "O que manda?"} ],
+    [ {type: 'speech', text: "Sim? O que você gostaria de resolver?"} ],
+    [ {type: 'speech', text: "Olhos atentos. Pode falar com franqueza."} ]
+  ]
+};
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SISTEMA DE FALAS INTELIGENTES & CONTEXTUAIS (D&D 5e / BG3 PERSONALITY ENGINE)
+// Vincula a personalidade da ficha do NPC (12 arquétipos canônicos) e a ficha do
+// Personagem (classe, antecedente e condição física), com pontuação utilitária e
+// cooldown de 20h em tempo real para banir qualquer repetição robótica.
+// ═══════════════════════════════════════════════════════════════════════════════
+var ADV_PERSONALITY_MAP = {"adv_001":"jovial","adv_002":"avido","adv_003":"idealista","adv_004":"astuto","adv_005":"avido","adv_006":"cauteloso","adv_007":"mercenario","adv_008":"estoico","adv_009":"ganancioso","adv_010":"taciturno","adv_011":"taciturno","adv_012":"idealista","adv_013":"astuto","adv_014":"jovial","adv_015":"estoico","adv_016":"estoico","adv_017":"cauteloso","adv_018":"taciturno","adv_019":"idealista","adv_020":"taciturno","adv_021":"taciturno","adv_022":"estoico","adv_023":"taciturno","adv_024":"nobre","adv_025":"taciturno","adv_026":"rude","adv_027":"astuto","adv_028":"nobre","adv_029":"ganancioso","adv_030":"estoico","adv_031":"avido","adv_032":"avido","adv_033":"cauteloso","adv_034":"ganancioso","adv_035":"avido","adv_036":"idealista","adv_037":"idealista","adv_038":"rude","adv_039":"astuto","adv_040":"nobre","adv_041":"astuto","adv_042":"fanfarrao","adv_043":"idealista","adv_044":"idealista","adv_045":"ganancioso","adv_046":"nobre","adv_047":"avido","adv_048":"rude","adv_049":"taciturno","adv_050":"ganancioso","adv_051":"nobre","adv_052":"avido","adv_053":"mercenario","adv_054":"nobre","adv_055":"jovial","adv_056":"cauteloso","adv_057":"idealista","adv_058":"jovial","adv_059":"astuto","adv_060":"fanfarrao","adv_061":"fanfarrao","adv_062":"astuto","adv_063":"rude","adv_064":"cauteloso","adv_065":"jovial","adv_066":"estoico","adv_067":"rude","adv_068":"cauteloso","adv_069":"cauteloso","adv_070":"ganancioso","adv_071":"rude","adv_072":"jovial","adv_073":"cauteloso","adv_074":"idealista","adv_075":"estoico","adv_076":"ganancioso","adv_077":"estoico","adv_078":"jovial","adv_079":"jovial","adv_080":"mercenario","adv_081":"taciturno","adv_082":"taciturno","adv_083":"taciturno","adv_084":"estoico","adv_085":"mercenario","adv_086":"estoico","adv_087":"jovial","adv_088":"cauteloso","adv_089":"idealista","adv_090":"estoico","adv_091":"ganancioso","adv_092":"cauteloso","adv_093":"taciturno","adv_094":"ganancioso","adv_095":"avido","adv_096":"rude","adv_097":"cauteloso","adv_098":"nobre","adv_099":"ganancioso","adv_100":"idealista"};
+window.ADV_PERSONALITY_MAP = ADV_PERSONALITY_MAP;
+
+function _resolveAllyPersonality(m) {
+  if (!m) return 'estoico';
+  if (m.pers) return m.pers;
+  if (m.personality) return m.personality;
+  if (m.archetype) return m.archetype;
+  if (m.id && window.ADV_PERSONALITY_MAP && window.ADV_PERSONALITY_MAP[m.id]) {
+    return window.ADV_PERSONALITY_MAP[m.id];
+  }
+  var n = String(m.name || '').toLowerCase();
+  if (n.indexOf('wrenna') === 0) return 'astuto';
+  if (n.indexOf('korin') === 0) return 'estoico';
+  if (n.indexOf('liriel') === 0) return 'idealista';
+  if (n.indexOf('maldra') === 0) return 'jovial';
+  if (n.indexOf('aldric') === 0) return 'estoico';
+  if (n.indexOf('lyana') === 0) return 'estoico';
+  var cls = String(m.cls || '').toLowerCase();
+  if (cls === 'ladino') return 'astuto';
+  if (cls === 'barbaro') return 'jovial';
+  if (cls === 'bardo') return 'fanfarrao';
+  if (cls === 'clerigo' || cls === 'paladino' || cls === 'sacerdotisa' || cls === 'sacerdote') return 'idealista';
+  if (cls === 'mago' || cls === 'bruxo' || cls === 'feiticeiro') return 'cauteloso';
+  if (cls === 'druida' || cls === 'patrulheiro') return 'taciturno';
+  return 'estoico';
+}
+window._resolveAllyPersonality = _resolveAllyPersonality;
+
+var ALLY_PERSONALITY_GREETINGS = {
+  "astuto": [
+    {
+      "id": "ast_1",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Posso ajudar?"
+        }
+      ]
+    },
+    {
+      "id": "ast_2",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Notou algo de estranho por aqui?"
+        }
+      ]
+    },
+    {
+      "id": "ast_3",
+      "script": [
+        {
+          "type": "speech",
+          "text": "O que manda?"
+        }
+      ]
+    },
+    {
+      "id": "ast_4",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Sim? Algum problema?"
+        }
+      ]
+    },
+    {
+      "id": "ast_bg_soldado",
+      "bg": "soldado",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não, comandante? Quais são as ordens para a retaguarda?"
+        }
+      ]
+    },
+    {
+      "id": "ast_bg_criminoso",
+      "bg": "criminoso",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? O que temos na mira agora, parceiro?"
+        }
+      ]
+    },
+    {
+      "id": "ast_cond_ferido",
+      "condition": "wounded",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Você ainda tá ferido... precisa de algo urgente?"
+        }
+      ]
+    }
+  ],
+  "estoico": [
+    {
+      "id": "est_1",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? O que manda?"
+        }
+      ]
+    },
+    {
+      "id": "est_2",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Posso ajudar?"
+        }
+      ]
+    },
+    {
+      "id": "est_3",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Firme e a postos. Diga."
+        }
+      ]
+    },
+    {
+      "id": "est_4",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Sim? Alguma ordem para o grupo?"
+        }
+      ]
+    },
+    {
+      "id": "est_bg_soldado",
+      "bg": "soldado",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Instruções para a formação?"
+        }
+      ]
+    },
+    {
+      "id": "est_cond_ferido",
+      "condition": "wounded",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Precisa de descanso para esses cortes?"
+        }
+      ]
+    }
+  ],
+  "jovial": [
+    {
+      "id": "jov_1",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não, amigo! Do que precisa?"
+        }
+      ]
+    },
+    {
+      "id": "jov_2",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Opa! Esqueceu de me falar algo?"
+        }
+      ]
+    },
+    {
+      "id": "jov_3",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Posso ajudar?"
+        }
+      ]
+    },
+    {
+      "id": "jov_4",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Diga lá, qual é a boa?"
+        }
+      ]
+    },
+    {
+      "id": "jov_bg_campones",
+      "bg": "campones",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não, camarada da terra? O que manda?"
+        }
+      ]
+    },
+    {
+      "id": "jov_cond_ferido",
+      "condition": "wounded",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Ei, você tá sangrando! Precisa de uma poção ou descanso?"
+        }
+      ]
+    }
+  ],
+  "idealista": [
+    {
+      "id": "ide_1",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Posso ajudar?"
+        }
+      ]
+    },
+    {
+      "id": "ide_2",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Como posso ser útil agora?"
+        }
+      ]
+    },
+    {
+      "id": "ide_3",
+      "script": [
+        {
+          "type": "speech",
+          "text": "A paz esteja com você. Precisa de algo?"
+        }
+      ]
+    },
+    {
+      "id": "ide_4",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Sim? O que pesa em seus pensamentos?"
+        }
+      ]
+    },
+    {
+      "id": "ide_bg_acolito",
+      "bg": "acolito",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não, fiel companheiro? A bênção segue viva entre nós."
+        }
+      ]
+    },
+    {
+      "id": "ide_cond_ferido",
+      "condition": "wounded",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Seus ferimentos estão graves... Deixe-me ajudar."
+        }
+      ]
+    }
+  ],
+  "cauteloso": [
+    {
+      "id": "cau_1",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Posso ajudar?"
+        }
+      ]
+    },
+    {
+      "id": "cau_2",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Alguma novidade no caminho?"
+        }
+      ]
+    },
+    {
+      "id": "cau_3",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Tudo em ordem? O que manda?"
+        }
+      ]
+    },
+    {
+      "id": "cau_4",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Sim? Verificou os arredores antes de vir?"
+        }
+      ]
+    },
+    {
+      "id": "cau_bg_sabio",
+      "bg": "sabio",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Algum detalhe novo nos manuscritos ou na rota?"
+        }
+      ]
+    },
+    {
+      "id": "cau_cond_ferido",
+      "condition": "wounded",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Eu sabia que aquele confronto cobraria caro! Precisa de curativos?"
+        }
+      ]
+    }
+  ],
+  "mercenario": [
+    {
+      "id": "mer_1",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Novo serviço em vista?"
+        }
+      ]
+    },
+    {
+      "id": "mer_2",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Posso ajudar?"
+        }
+      ]
+    },
+    {
+      "id": "mer_3",
+      "script": [
+        {
+          "type": "speech",
+          "text": "O que manda, parceiro?"
+        }
+      ]
+    },
+    {
+      "id": "mer_4",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Minha lâmina segue contratada. Diga."
+        }
+      ]
+    },
+    {
+      "id": "mer_bg_soldado",
+      "bg": "soldado",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Soldado conhece soldado. Qual é o contrato de hoje?"
+        }
+      ]
+    },
+    {
+      "id": "mer_cond_ferido",
+      "condition": "wounded",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Lâmina cega e aventureiro sangrando dão prejuízo. Quer curativo?"
+        }
+      ]
+    }
+  ],
+  "nobre": [
+    {
+      "id": "nob_1",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Em que posso ajudar?"
+        }
+      ]
+    },
+    {
+      "id": "nob_2",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Saudações. Quais são as ordens para a comitiva?"
+        }
+      ]
+    },
+    {
+      "id": "nob_3",
+      "script": [
+        {
+          "type": "speech",
+          "text": "À sua inteira disposição. Diga."
+        }
+      ]
+    },
+    {
+      "id": "nob_4",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Sim? Algum assunto prioritário para tratarmos?"
+        }
+      ]
+    },
+    {
+      "id": "nob_bg_nobre",
+      "bg": "nobre",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? É um privilégio marchar com alguém de semelhante distinção. Diga."
+        }
+      ]
+    },
+    {
+      "id": "nob_cond_ferido",
+      "condition": "wounded",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Não negligencie esses cortes. A comitiva precisa de você em plena forma."
+        }
+      ]
+    }
+  ],
+  "taciturno": [
+    {
+      "id": "tac_1",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não?"
+        }
+      ]
+    },
+    {
+      "id": "tac_2",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Estou ouvindo. O que precisa?"
+        }
+      ]
+    },
+    {
+      "id": "tac_3",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Diga."
+        }
+      ]
+    },
+    {
+      "id": "tac_4",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Posso ajudar?"
+        }
+      ]
+    },
+    {
+      "id": "tac_bg_ermitao",
+      "bg": "ermitao",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? A quietude da estrada nos entende. O que precisa?"
+        }
+      ]
+    },
+    {
+      "id": "tac_cond_ferido",
+      "condition": "wounded",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Você tá sangrando. Senta e cuida disso."
+        }
+      ]
+    }
+  ],
+  "rude": [
+    {
+      "id": "rud_1",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? O que é desta vez?"
+        }
+      ]
+    },
+    {
+      "id": "rud_2",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Fala logo. Posso ajudar em quê?"
+        }
+      ]
+    },
+    {
+      "id": "rud_3",
+      "script": [
+        {
+          "type": "speech",
+          "text": "O que manda?"
+        }
+      ]
+    },
+    {
+      "id": "rud_4",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Sim? Desembucha."
+        }
+      ]
+    },
+    {
+      "id": "rud_bg_marinheiro",
+      "bg": "marinheiro",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Não fica aí enrolando que nem marujo bêbado. O que quer?"
+        }
+      ]
+    },
+    {
+      "id": "rud_cond_ferido",
+      "condition": "wounded",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Já vi gente morrer por não cuidar de corte feio. Limpa isso logo!"
+        }
+      ]
+    }
+  ],
+  "ganancioso": [
+    {
+      "id": "gan_1",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Boas notícias de ouro ou contratos?"
+        }
+      ]
+    },
+    {
+      "id": "gan_2",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Posso ajudar?"
+        }
+      ]
+    },
+    {
+      "id": "gan_3",
+      "script": [
+        {
+          "type": "speech",
+          "text": "O que temos em vista para lucrar?"
+        }
+      ]
+    },
+    {
+      "id": "gan_4",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Sim? Algum achado valioso pela cidade?"
+        }
+      ]
+    },
+    {
+      "id": "gan_bg_artesao",
+      "bg": "artesao",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Mãos habilidosas sabem fazer dinheiro. Do que precisa?"
+        }
+      ]
+    },
+    {
+      "id": "gan_cond_ferido",
+      "condition": "wounded",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Aventureiro caído não ganha valdoritas. Cuida desses cortes!"
+        }
+      ]
+    }
+  ],
+  "fanfarrao": [
+    {
+      "id": "fan_1",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não, meu valoroso parceiro? Pronto para mais uma?"
+        }
+      ]
+    },
+    {
+      "id": "fan_2",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Posso ajudar a nossa comitiva?"
+        }
+      ]
+    },
+    {
+      "id": "fan_3",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Onde está o espetáculo de hoje? Diga!"
+        }
+      ]
+    },
+    {
+      "id": "fan_4",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Sim? Mais uma história para a posteridade?"
+        }
+      ]
+    },
+    {
+      "id": "fan_bg_artista",
+      "bg": "artista",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não, mestre dos palcos e das estradas? Qual é a próxima canção?"
+        }
+      ]
+    },
+    {
+      "id": "fan_cond_ferido",
+      "condition": "wounded",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Cicatrizes dão boas canções, mas sangue no chão é exagero! Quer poção?"
+        }
+      ]
+    }
+  ],
+  "avido": [
+    {
+      "id": "avi_1",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Hora de partir para a ação?"
+        }
+      ]
+    },
+    {
+      "id": "avi_2",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Posso ajudar? O que vamos fazer?"
+        }
+      ]
+    },
+    {
+      "id": "avi_3",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Tô pronto! Qual é o plano?"
+        }
+      ]
+    },
+    {
+      "id": "avi_4",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Sim? Alguma novidade urgente?"
+        }
+      ]
+    },
+    {
+      "id": "avi_bg_soldado",
+      "bg": "soldado",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Pronto para a marcha! Para onde vamos?"
+        }
+      ]
+    },
+    {
+      "id": "avi_cond_ferido",
+      "condition": "wounded",
+      "script": [
+        {
+          "type": "speech",
+          "text": "Pois não? Nem a dor para você! Mas vamos estancar isso antes da briga?"
+        }
+      ]
+    }
+  ]
+};
+window.ALLY_PERSONALITY_GREETINGS = ALLY_PERSONALITY_GREETINGS;
+
+function _pickContextualAllyGreeting(pers, m, player, trackingObj) {
+  pers = pers || 'estoico';
+  var pool = (typeof ALLY_PERSONALITY_GREETINGS === 'object' && ALLY_PERSONALITY_GREETINGS[pers])
+    ? ALLY_PERSONALITY_GREETINGS[pers] : null;
+  if (!pool || !pool.length) return null;
+
+  var p = player || window.CITY_MOCK_PLAYER || {};
+  var pBg = String(p.background || '').toLowerCase();
+  var pCls = String(p.cls || p.hero_class || '').toLowerCase();
+  var isWounded = Boolean(p.hpMax && p.hp <= p.hpMax * 0.5);
+  var isExhausted = Boolean(p.exh && p.exh > 0);
+
+  var now = Date.now();
+  var cooldownMs = 20 * 3600 * 1000; // 20 horas em tempo real
+  var heardTs = window._heardTimestamps || {};
+
+  // Filtra elegíveis e calcula Utility AI score
+  var eligible = [];
+  for (var i = 0; i < pool.length; i++) {
+    var item = pool[i];
+    // Requisitos estritos: não diz fala de ferido se não estiver ferido, etc.
+    if (item.bg && item.bg !== pBg) continue;
+    if (item.cls && item.cls !== pCls) continue;
+    if (item.condition === 'wounded' && !isWounded) continue;
+    if (item.condition === 'exhausted' && !isExhausted) continue;
+
+    var itemKey = 'ally_p_' + pers + '_' + item.id;
+    var lastHeard = heardTs[itemKey] || 0;
+    var score = 10;
+    if (item.condition) score += 25;
+    else if (item.bg) score += 20;
+    else if (item.cls) score += 15;
+
+    if (lastHeard > 0 && (now - lastHeard) < cooldownMs) {
+      score -= 100; // Penaliza falas ouvidas recentemente
+    }
+    eligible.push({ score: score, item: item, key: itemKey });
+  }
+
+  if (!eligible.length) return null;
+
+  // Ordena por score decrescente
+  eligible.sort(function(a, b){ return b.score - a.score; });
+  var bestScore = eligible[0].score;
+  var topTier = eligible.filter(function(e){ return e.score >= bestScore - 5; });
+
+  // Dentre as falas de maior relevância contextual, rotaciona sem repetição imediata
+  var candidateScripts = topTier.map(function(e){ return e.item.script; });
+  var pickedScript = (typeof _pickNonRepeating === 'function')
+    ? _pickNonRepeating('ally_p_ctx_' + pers + '_' + (m.id || m.name || pers), candidateScripts, trackingObj)
+    : candidateScripts[0];
+
+  // Identifica a key do script escolhido para registrar timestamp de tempo real
+  for (var j = 0; j < topTier.length; j++) {
+    if (topTier[j].item.script === pickedScript) {
+      window._heardTimestamps = window._heardTimestamps || {};
+      window._heardTimestamps[topTier[j].key] = now;
+      break;
+    }
+  }
+
+  return pickedScript;
+}
+window._pickContextualAllyGreeting = _pickContextualAllyGreeting;
+
 function _allyRelSummary(m) {
   if (!m) return 'Neutro';
   var apr = (m.approval != null) ? m.approval : ((m.apr != null) ? m.apr : 0);
@@ -70952,6 +71882,84 @@ function _showAllyGiftDialogue(idx) {
 }
 window._showAllyGiftDialogue = _showAllyGiftDialogue;
 
+function _allyCandidateKeys(m, cls) {
+  var keys = [];
+  cls = (typeof _allyTplKey === 'function') ? _allyTplKey(cls || (m && m.cls) || '') : (cls || (m && m.cls) || '');
+  if (cls) keys.push('cls_' + cls);
+  if (m) {
+    if (m.id) {
+      keys.push(String(m.id));
+      if (cls) keys.push(cls + '_' + m.id);
+    }
+    if (m.name) {
+      keys.push(m.name);
+      var fName = (m.name || '').split(/\s+/)[0];
+      if (fName && fName !== m.name) keys.push(fName);
+      if (cls) {
+        keys.push(cls + '_' + m.name);
+        if (fName && fName !== m.name) keys.push(cls + '_' + fName);
+      }
+    }
+  }
+  return keys;
+}
+window._allyCandidateKeys = _allyCandidateKeys;
+
+function _isAllyIntroduced(m, cls) {
+  if (!m) return false;
+  if (m._introduced) return true;
+  cls = (typeof _allyTplKey === 'function') ? _allyTplKey(cls || m.cls) : (cls || m.cls);
+  var candKeys = _allyCandidateKeys(m, cls);
+  var cid = window._charId || 'default';
+  window._introducedAllies = window._introducedAllies || {};
+  window._lastInteractionTs = window._lastInteractionTs || {};
+  window._cityFlavorHeard = window._cityFlavorHeard || {};
+
+  for (var i = 0; i < candKeys.length; i++) {
+    var k = candKeys[i];
+    if (window._introducedAllies[k] || window._introducedAllies[cid + '_' + k]) return true;
+    try {
+      if (localStorage.getItem('valdoria_intro_done_' + cid + '_' + k) === '1') return true;
+      if (localStorage.getItem('valdoria_intro_done_any_' + k) === '1') return true;
+    } catch(_) {}
+    var legKey = 'ally_intro_' + k;
+    if (window._cityFlavorHeard[legKey] && window._cityFlavorHeard[legKey].length > 0) return true;
+    if (window._lastInteractionTs[legKey] > 0) return true;
+  }
+  return false;
+}
+
+function _markAllyIntroduced(m, cls) {
+  if (!m) return;
+  m._introduced = true;
+  cls = (typeof _allyTplKey === 'function') ? _allyTplKey(cls || m.cls) : (cls || m.cls);
+  var candKeys = _allyCandidateKeys(m, cls);
+  var cid = window._charId || 'default';
+  var now = Date.now();
+  window._introducedAllies = window._introducedAllies || {};
+  window._lastInteractionTs = window._lastInteractionTs || {};
+  window._cityFlavorHeard = window._cityFlavorHeard || {};
+
+  for (var i = 0; i < candKeys.length; i++) {
+    var k = candKeys[i];
+    window._introducedAllies[k] = true;
+    window._introducedAllies[cid + '_' + k] = true;
+    try {
+      localStorage.setItem('valdoria_intro_done_' + cid + '_' + k, '1');
+      localStorage.setItem('valdoria_intro_done_any_' + k, '1');
+    } catch(_) {}
+    var legKey = 'ally_intro_' + k;
+    window._cityFlavorHeard[legKey] = window._cityFlavorHeard[legKey] || [];
+    if (window._cityFlavorHeard[legKey].indexOf('introduced') === -1) {
+      window._cityFlavorHeard[legKey].push('introduced');
+    }
+    window._lastInteractionTs[legKey] = now;
+  }
+  if (typeof window._persistHeardSets === 'function') window._persistHeardSets();
+}
+window._isAllyIntroduced = _isAllyIntroduced;
+window._markAllyIntroduced = _markAllyIntroduced;
+
 // _showAllyDialogue(memberIdx) — Menu Geral do Companheiro
 function _showAllyDialogue(idx){
   var m = (window.GROUP_MEMBERS || [])[idx];
@@ -70964,10 +71972,46 @@ function _showAllyDialogue(idx){
 
   var _introPool = [tpl.script || []].concat(ALLY_INTRO_EXTRA[cls] || []);
   var _introScript = tpl.script || [];
-  if (typeof _pickNonRepeating === 'function' && _introPool.length > 1) {
-    window._cityFlavorHeard = window._cityFlavorHeard || {};
-    _introScript = _pickNonRepeating('ally_intro_' + cls, _introPool,
-      window._cityFlavorHeard) || (tpl.script || []);
+  var _now = Date.now();
+  var _allyKey = (m.id || m.name || ('cls_' + cls));
+  var _allyIntroKey = 'ally_intro_' + cls + '_' + _allyKey;
+  window._lastInteractionTs = window._lastInteractionTs || {};
+  window._cityFlavorHeard = window._cityFlavorHeard || {};
+  var _alreadyIntroduced = _isAllyIntroduced(m, cls);
+
+  // REGRA SOBERANA: Monólogos de apresentação de classe e narrações descritivas NUNCA se repetem.
+  // Uma vez que o aliado já se apresentou, todas as conversas subsequentes usam exclusivamente
+  // saudações de retorno curtas, diretas e humanas ("Posso ajudar?", "Pois não?", "O que manda?").
+  if (_alreadyIntroduced) {
+    var _pers = (typeof _resolveAllyPersonality === 'function') ? _resolveAllyPersonality(m) : 'estoico';
+    var _pScript = (typeof _pickContextualAllyGreeting === 'function')
+      ? _pickContextualAllyGreeting(_pers, m, window.CITY_MOCK_PLAYER, window._cityFlavorHeard) : null;
+    if (_pScript) {
+      _introScript = _pScript;
+    } else if (typeof ALLY_CASUAL_GREETINGS === 'object' && ALLY_CASUAL_GREETINGS[cls]) {
+      var _casualPool = ALLY_CASUAL_GREETINGS[cls];
+      _introScript = (typeof _pickNonRepeating === 'function')
+        ? _pickNonRepeating('ally_cas_' + cls + '_' + _allyKey, _casualPool, window._cityFlavorHeard)
+        : _casualPool[0];
+    } else {
+      _introScript = [ { type: 'speech', text: 'Posso ajudar?' } ];
+    }
+    // Invariante absoluta de retorno: elimina qualquer nó de narração descritiva ({ type: 'narration' })
+    _introScript = (_introScript || []).filter(function(line){ return line && line.type === 'speech'; });
+    if (!_introScript.length) {
+      _introScript = [ { type: 'speech', text: 'Posso ajudar?' } ];
+    }
+    window._lastInteractionTs[_allyIntroKey] = _now;
+    if (typeof window._persistHeardSets === 'function') window._persistHeardSets();
+  } else {
+    // Primeira interação: apresentação dramática inicial (ouvida estritamente UMA VEZ)
+    if (typeof _pickNonRepeating === 'function' && _introPool.length > 1) {
+      _introScript = _pickNonRepeating('ally_intro_' + cls, _introPool,
+        window._cityFlavorHeard, { neverRepeat: true }) || (tpl.script || []);
+    } else {
+      _introScript = tpl.script || [];
+    }
+    _markAllyIntroduced(m, cls);
   }
   // Personaliza {name} no script escolhido
   var personalizedScript = _introScript.map(function(line){
@@ -71061,7 +72105,7 @@ function _showAllyDialogue(idx){
   if (availableGifts.length > 0) {
     primaryChoices.push({
       id: 'nav_gift',
-      label: '🎁 Oferecer um presente da mochila ▸',
+      label: 'Oferecer um presente da mochila ▸',
       cb: function() { _showAllyGiftDialogue(idx); }
     });
   }
@@ -80218,12 +81262,72 @@ function _merchantGreeting(merchantId){
       ]
     ]
   };
+
+  var MERCHANT_RETURN_GREETINGS = {
+    thorne: [
+      [ { type: 'speech', speaker: 'Thorne', text: '"De volta à forja? O que precisa reparar ou forjar hoje?"' } ],
+      [ { type: 'speech', speaker: 'Thorne', text: '"Mais aço? Pode olhar as peças à vontade."' } ],
+      [ { type: 'speech', speaker: 'Thorne', text: '"O fole continua aceso. O que procura agora?"' } ],
+      [ { type: 'speech', speaker: 'Thorne', text: '"Vejo que suas placas aguentaram o impacto da última marcha. Quer dar uma reforçada nos rebites?"' } ],
+      [ { type: 'speech', speaker: 'Thorne', text: '"Adagas balanceadas no fundo da bancada. Lâminas silenciosas que não refletem luz. Quer ver?"' } ]
+    ],
+    mirena: [
+      [ { type: 'speech', speaker: 'Mirena Virelle', text: '"De volta? Precisa de mais algum elixir ou ingrediente?"' } ],
+      [ { type: 'speech', speaker: 'Mirena Virelle', text: '"Os frascos continuam à mão. Diga o que procura."' } ],
+      [ { type: 'speech', speaker: 'Mirena Virelle', text: '"Reconheço seus passos. Posso preparar mais alguma mistura?"' } ],
+      [ { type: 'speech', speaker: 'Mirena Virelle', text: '"Ah, outro estudioso das propriedades ocultas da natureza. O extrato de raiz lunar destilou perfeitamente esta manhã."' } ],
+      [ { type: 'speech', speaker: 'Mirena Virelle', text: '"Essas escoriações na pele precisam de bálsamo de arnica antes que infeccionem com a poeira das trilhas. Diga o que precisa."' } ]
+    ],
+    velithra: [
+      [ { type: 'speech', speaker: 'Velithra Aelmira', text: '"Mais alguma joia chamou sua atenção? Fique à vontade."' } ],
+      [ { type: 'speech', speaker: 'Velithra Aelmira', text: '"De volta ao brilho das pedras. Em que posso ajudar?"' } ],
+      [ { type: 'speech', speaker: 'Velithra Aelmira', text: '"As gemas continuam expostas. Diga o que tem em mente."' } ],
+      [ { type: 'speech', speaker: 'Velithra Aelmira', text: '"Um olhar refinado que sabe apreciar a pureza de um corte bem lapidado. Deseja inspecionar nossos engastes sacros?"' } ]
+    ],
+    corvus: [
+      [ { type: 'speech', speaker: 'Corvus Veltharion', text: '"De volta às cartas? Escolheu o próximo rumo?"' } ],
+      [ { type: 'speech', speaker: 'Corvus Veltharion', text: '"Mapas frescos sobre a mesa. Diga qual rota precisa traçar."' } ],
+      [ { type: 'speech', speaker: 'Corvus Veltharion', text: '"Ainda decidindo para onde marchar? Veja os registros."' } ],
+      [ { type: 'speech', speaker: 'Corvus Veltharion', text: '"Reconheço o olhar de quem dorme sob o céu aberto. Os ermos lá fora estão mudando... quer conferir os novos limites?"' } ]
+    ],
+    bjorn: [
+      [ { type: 'speech', speaker: 'Bjorn, o Seleiro', text: '"Mais suprimentos para a estrada? Pode escolher à vontade."' } ],
+      [ { type: 'speech', speaker: 'Bjorn, o Seleiro', text: '"De volta? Cuidou bem das correias da mochila?"' } ],
+      [ { type: 'speech', speaker: 'Bjorn, o Seleiro', text: '"Equipamento resistente é com a gente. O que precisa hoje?"' } ],
+      [ { type: 'speech', speaker: 'Bjorn, o Seleiro', text: '"Mochila firme é metade da sobrevivência nas colinas. Precisa de cordas de cânhamo reforçado ou lonas impermeáveis?"' } ]
+    ]
+  };
+
+  var poolKey = 'mer_greet_' + merchantId;
+  var storageKey = 'valdoria_intro_done_mer_' + (window._charId || 'default') + '_' + merchantId;
+  var now = Date.now();
+  window._lastInteractionTs = window._lastInteractionTs || {};
+  window._npcGreetingsHeard = window._npcGreetingsHeard || {};
+  var lastMerchantVisit = window._lastInteractionTs[poolKey] || 0;
+  var heardList = window._npcGreetingsHeard[poolKey] || [];
+  var localMark = false;
+  try { localMark = (localStorage.getItem(storageKey) === '1'); } catch(_) {}
+  // REGRA SOBERANA: Monólogos de ofício e narrações descritivas NUNCA se repetem.
+  // Uma vez que o mercador já se apresentou ao personagem, ele sempre usa saudações de retorno.
+  var isReturn = localMark || (lastMerchantVisit > 0) || (heardList.length > 0);
+
+  if (isReturn && typeof MERCHANT_RETURN_GREETINGS === 'object' && MERCHANT_RETURN_GREETINGS[merchantId]) {
+    var retPool = MERCHANT_RETURN_GREETINGS[merchantId];
+    window._lastInteractionTs[poolKey] = now;
+    var retLine = (typeof _pickNonRepeating === 'function')
+      ? _pickNonRepeating('mer_ret_' + merchantId, retPool, window._npcGreetingsHeard)
+      : retPool[0];
+    return (retLine || []).filter(function(node){ return node && node.type === 'speech'; });
+  }
+
+  try { localStorage.setItem(storageKey, '1'); } catch(_) {}
+  window._lastInteractionTs[poolKey] = now;
   var pool = GREETINGS[merchantId] || GREETINGS.thorne;
   // Reusa _pickNonRepeating se disponível pra evitar repetição
   if (typeof _pickNonRepeating === 'function') {
-    return _pickNonRepeating('mer_greet_' + merchantId, pool, window._npcGreetingsHeard);
+    return _pickNonRepeating(poolKey, pool, window._npcGreetingsHeard, { neverRepeat: true });
   }
-  return pool[Math.floor(Math.random() * pool.length)];
+  return pool[0];
 }
 
 // Topics por mercador — cada um é um sub-encounter PADRAO_ALDRIC

@@ -32,13 +32,14 @@
 
   // === AFFINITY TIERS (D&D 5e-inspired social ladder) ===
   // Canonical: market_npcs_data.py REPUTATION_TIERS + Martha inn_rep tiers
+  // Regra Soberana: Tolerância zero para emojis na UI. Usar glifos heráldicos sóbrios.
   var AFFINITY_TIERS = [
-    { id: 'allied',    min:  50, max: 100, label: 'Aliado',      color: '#7cdb7c', emoji: '💚' },
-    { id: 'friendly',  min:  20, max:  49, label: 'Amigável',    color: '#c4953a', emoji: '👍' },
-    { id: 'known',     min:   5, max:  19, label: 'Conhecido',   color: '#a09484', emoji: '😐' },
-    { id: 'neutral',   min:  -4, max:   4, label: 'Neutro',      color: '#8a7a6a', emoji: '😶' },
-    { id: 'suspicious',min: -19, max:  -5, label: 'Desconfiado', color: '#b07060', emoji: '🤨' },
-    { id: 'hostile',   min:-100, max: -20, label: 'Hostil',      color: '#c63d3d', emoji: '😠' }
+    { id: 'allied',    min:  50, max: 100, label: 'Aliado',      color: '#7cdb7c', glyph: '◆', emoji: '◆' },
+    { id: 'friendly',  min:  20, max:  49, label: 'Amigável',    color: '#c4953a', glyph: '◆', emoji: '◆' },
+    { id: 'known',     min:   5, max:  19, label: 'Conhecido',   color: '#a09484', glyph: '◇', emoji: '◇' },
+    { id: 'neutral',   min:  -4, max:   4, label: 'Neutro',      color: '#8a7a6a', glyph: '◇', emoji: '◇' },
+    { id: 'suspicious',min: -19, max:  -5, label: 'Desconfiado', color: '#b07060', glyph: '◇', emoji: '◇' },
+    { id: 'hostile',   min:-100, max: -20, label: 'Hostil',      color: '#c63d3d', glyph: '◆', emoji: '◆' }
   ];
 
   function _getTierForValue(val){
@@ -88,11 +89,15 @@
     return clamped;
   }
 
-  /** Ajusta affinity por delta (clamped). Retorna novo valor. */
+  /** Ajusta affinity por delta (clamped). Retorna novo valor e processa ondulação inter-NPC. */
   function adjust(player, npcKey, delta){
     var cur = get(player, npcKey);
     var newVal = _clamp(cur + (delta | 0));
     set(player, npcKey, newVal);
+    // Efeito dominó inter-NPC (halo/rival ripple)
+    if (delta !== 0 && window.interNpcDynamics && typeof window.interNpcDynamics.processRipple === 'function') {
+      try { window.interNpcDynamics.processRipple(player, npcKey, delta); } catch(_e){}
+    }
     return newVal;
   }
 
@@ -186,12 +191,13 @@
     var v = get(player, npcKey);
     if (v === 0 && !hasMet(player, npcKey)) return ''; // sem badge se nunca interagiu
     var tier = _getTierForValue(v);
-    return '<span class="npc-aff-badge" style="display:inline-flex;align-items:center;gap:3px;'
+    var glyph = tier.glyph || tier.emoji || '◆';
+    return '<span class="npc-aff-badge" style="display:inline-flex;align-items:center;gap:4px;'
       + 'padding:2px 7px;font-size:10px;border-radius:10px;letter-spacing:0.5px;'
       + 'background:' + tier.color + '18;border:1px solid ' + tier.color + '55;'
       + 'color:' + tier.color + ';font-family:var(--v-font-display,Cinzel,serif);'
       + 'text-transform:uppercase;font-weight:700;">'
-      + tier.emoji + ' ' + tier.label + '</span>';
+      + glyph + ' ' + tier.label + '</span>';
   }
 
   // === EXPORT ===

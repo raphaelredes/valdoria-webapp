@@ -356,6 +356,17 @@
         window.npcAffinity.adjust(player, target, impact.affinity[target]);
       });
     }
+    // BG3 style: gatilhos de aprovação de companheiros da comitiva
+    if (impact.approval_trigger && window.interNpcDynamics) {
+      try { window.interNpcDynamics.triggerPartyApproval(player, impact.approval_trigger, npcKey); } catch(_e){}
+    }
+    // Mutação de relacionamento inter-NPC
+    if (impact.inter_npc_mutation && window.interNpcDynamics) {
+      var m = impact.inter_npc_mutation;
+      try {
+        window.interNpcDynamics.mutateRelation(player, m.source, m.target, m.type, m.strength, m.gossip, m.reason);
+      } catch(_em){}
+    }
     if (impact.flag) {
       player.metadata = player.metadata || {};
       player.metadata.flags = player.metadata.flags || {};

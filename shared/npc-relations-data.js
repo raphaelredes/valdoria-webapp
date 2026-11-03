@@ -54,7 +54,18 @@
     // Runas
     'thessil',
     // Mercado
-    'thorne', 'mirena', 'velithra', 'corvus', 'bjorn', 'garlen'
+    'thorne', 'mirena', 'velithra', 'corvus', 'bjorn', 'garlen',
+    // NPCs Únicos (Praça e Distritos)
+    'unique_survivor_wolves', 'unique_survivor_blizzard', 'unique_noble_exile',
+    'unique_pilgrim_lost', 'unique_orphan_doll', 'unique_seer_blind',
+    'unique_bard_broken', 'unique_thief_repentant', 'unique_wizard_failed',
+    'unique_guard_veteran', 'unique_gourmet', 'unique_monk_peace',
+    'unique_smith_apprentice', 'unique_alchemist_student', 'unique_hunter_traine',
+    'unique_cleric_acolyte', 'unique_baker_master', 'unique_fisher_old',
+    'unique_farmer_lost', 'unique_miner_gold', 'unique_woodcutter',
+    'unique_gravedigger', 'unique_librarian', 'unique_painter_visionary',
+    'unique_sculptor', 'unique_dancer_exotic', 'unique_juggler_fire',
+    'unique_snake_charmer', 'unique_illusionist', 'unique_beast_tamer'
   ];
 
   // === NPC_RELATIONS matrix =================================================
@@ -333,8 +344,86 @@
         reveal_threshold: 0,
         gossip: 'Bjorn vende ração e queijo que dura semanas. Faço meus mapas com a barriga cheia graças a ele.'
       }
-    }
+    },
 
+
+    // === UNIQUE NPCS & CROSS RELATIONS (Praça e Distritos) =================
+    'unique_survivor_wolves': {
+      'garrick': { type: 'old_friend', strength: 0.85, reveal_threshold: 1, gossip: 'Mestre Garrick me ofereceu carvão e consolo quando perdi tudo para a matilha.' },
+      'martha': { type: 'old_friend', strength: 0.70, reveal_threshold: 1, gossip: 'Martha me deu uma tigela quente quando cheguei sem nada além de cicatrizes.' }
+    },
+    'unique_survivor_blizzard': {
+      'martha': { type: 'old_friend', strength: 0.75, reveal_threshold: 1, gossip: 'O fogo da estalagem de Martha é o único lugar onde a nevasca não parece me alcançar.' },
+      'bjorn': { type: 'peer', strength: 0.70, reveal_threshold: 1, gossip: 'Bjorn sabe o valor de uma capa grossa e de provisões que não congelam.' }
+    },
+    'unique_noble_exile': {
+      'aldwin': { type: 'creditor', strength: 0.65, reveal_threshold: 1, gossip: 'Aldwin conhece as antigas glórias da Casa Corvo. Trata-me com cortesia.' },
+      'corvus': { type: 'rival', strength: 0.60, reveal_threshold: 2, gossip: 'Corvus cobiça os últimos anéis e pergaminhos da minha família.' },
+      'thessil': { type: 'peer', strength: 0.50, reveal_threshold: 1, gossip: 'Thessil ainda aprecia a história heráldica das antigas linhagens de Valdoria.' }
+    },
+    'unique_pilgrim_lost': {
+      'aldwynn': { type: 'mentor', strength: 0.85, reveal_threshold: 1, gossip: 'Padre Aldwynn me acolheu como um pai espiritual quando o deserto quase devorou minha sanidade.' },
+      'elara': { type: 'mentor', strength: 0.80, reveal_threshold: 1, gossip: 'Irmã Elara curou minhas feridas com orações e paciência inabalável.' }
+    },
+    'unique_orphan_doll': {
+      'martha': { type: 'mentor', strength: 0.90, reveal_threshold: 0, gossip: 'Tia Martha me dá ensopado quentinho e deixa eu dormir perto do fogão quando tá frio.' },
+      'elara': { type: 'mentor', strength: 0.85, reveal_threshold: 0, gossip: 'Irmã Elara acendeu uma vela bonita para a minha mãe no altar grande do Templo.' }
+    },
+    'unique_seer_blind': {
+      'thessil': { type: 'peer', strength: 0.70, reveal_threshold: 1, gossip: 'Thessil lê nos glifos o que meus olhos cegos contemplam nas correntes do tempo.' },
+      'corvus': { type: 'peer', strength: 0.60, reveal_threshold: 2, gossip: 'Corvus busca respostas nas sombras.' },
+      'aldwynn': { type: 'rival', strength: 0.50, reveal_threshold: 2, gossip: 'O bom padre teme o que não cabe nos cânones sagrados.' }
+    },
+    'unique_bard_broken': {
+      'martha': { type: 'old_friend', strength: 0.75, reveal_threshold: 1, gossip: 'Martha nunca me cobrou pela caneca de água enquanto meus dedos tremiam sem conseguir tocar.' },
+      'tavira': { type: 'peer', strength: 0.60, reveal_threshold: 1, gossip: 'A Mestra da Guilda respeita os que marcharam e caíram.' }
+    },
+    'unique_thief_repentant': {
+      'aldwynn': { type: 'mentor', strength: 0.70, reveal_threshold: 1, gossip: 'Padre Aldwynn não chamou os guardas quando confessei meus roubos. Ofereceu penitência e trabalho honesto.' },
+      'corvus': { type: 'rival', strength: 0.75, reveal_threshold: 2, gossip: 'Corvus sabe quem eu era antes de queimar minhas gazuas.' }
+    },
+    'unique_wizard_failed': {
+      'thessil': { type: 'mentor', strength: 0.60, reveal_threshold: 1, gossip: 'Mestre Thessil me disse que se eu canalizar magia rúnica em vez de fogo bruto, meu chapéu não queima.' },
+      'velithra': { type: 'peer', strength: 0.60, reveal_threshold: 1, gossip: 'Velithra me vende pós azuis fascinantes.' }
+    },
+    'unique_guard_veteran': {
+      'tavira': { type: 'peer', strength: 0.80, reveal_threshold: 1, gossip: 'A Guarda e a Guilda precisam caminhar juntas. Tavira sabe disso.' },
+      'vorhan': { type: 'old_friend', strength: 0.75, reveal_threshold: 1, gossip: 'Vorhan lutou nas trincheiras do norte comigo. Homem duro, mas de palavra inabalável.' },
+      'thorne': { type: 'peer', strength: 0.75, reveal_threshold: 1, gossip: 'O aço de Thorne nunca falhou com meus homens em patrulha noturna.' }
+    },
+    'unique_gourmet': {
+      'martha': { type: 'rival', strength: 0.65, reveal_threshold: 1, gossip: 'Martha tem mão pesada no sal, mas devo admitir que seu ensopado tem alma de lareira.' },
+      'grom': { type: 'peer', strength: 0.60, reveal_threshold: 1, gossip: 'Grom tem um hidromel defumado excelente.' }
+    },
+    'unique_monk_peace': {
+      'elara': { type: 'peer', strength: 0.75, reveal_threshold: 1, gossip: 'Irmã Elara compreende que a verdadeira força repousa no silêncio.' },
+      'vorhan': { type: 'rival', strength: 0.50, reveal_threshold: 1, gossip: 'Vorhan busca o ápice pelo embate físico; eu o busco pela imobilidade serena.' }
+    },
+    'unique_smith_apprentice': {
+      'garrick': { type: 'mentor', strength: 0.90, reveal_threshold: 0, gossip: 'Mestre Garrick é exigente e rígido, mas seu martelo me ensinou a respeitar o metal.' }
+    },
+    'unique_alchemist_student': {
+      'velithra': { type: 'mentor', strength: 0.85, reveal_threshold: 0, gossip: 'Mestra Velithra é a mente alquímica mais brilhante de Valdoria.' }
+    },
+    'unique_hunter_traine': {
+      'bjorn': { type: 'mentor', strength: 0.80, reveal_threshold: 0, gossip: 'Bjorn me ensinou a rastrear sem quebrar gravetos na neve.' }
+    },
+    'unique_cleric_acolyte': {
+      'aldwynn': { type: 'mentor', strength: 0.85, reveal_threshold: 0, gossip: 'Padre Aldwynn me ensina que a devoção se constrói no serviço humilde.' },
+      'elara': { type: 'mentor', strength: 0.80, reveal_threshold: 0, gossip: 'Irmã Elara é o exemplo vivo de graça e acolhimento no Templo.' }
+    },
+    'unique_baker_master': {
+      'martha': { type: 'peer', strength: 0.85, reveal_threshold: 0, gossip: 'Martha e eu mantemos o estômago de Valdoria funcionando.' },
+      'grom': { type: 'peer', strength: 0.70, reveal_threshold: 0, gossip: 'Grom encomenda dezenas de pães crocantes toda semana.' }
+    },
+    'unique_miner_gold': {
+      'aldwin': { type: 'peer', strength: 0.75, reveal_threshold: 0, gossip: 'Aldwin pesa meu ouro com balança justa.' },
+      'garrick': { type: 'peer', strength: 0.80, reveal_threshold: 0, gossip: 'Mestre Garrick sabe distinguir ferro bom de escória.' }
+    },
+    'unique_librarian': {
+      'thessil': { type: 'peer', strength: 0.85, reveal_threshold: 0, gossip: 'Thessil é a única pessoa autorizada a manusear os pergaminhos antigos do arquivo.' },
+      'corvus': { type: 'rival', strength: 0.65, reveal_threshold: 1, gossip: 'Corvus vive tentando comprar meus códices antigos.' }
+    }
   };
 
   // === NPC_EVENTS_TIMELINE ==================================================
