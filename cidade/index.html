@@ -71487,7 +71487,6 @@ function _showAllyTopicsMenu(idx, opts) {
 
   var allyStorageKey = _allyStorageKey(m, idx);
   var freshTopics = [];
-  var doneTopics = [];
   var allCityTopics = [
     { key: 'camp_campfire',      label: '◆ Ao redor da fogueira ▸', requiresCampfire: true },
     { key: 'backstory_secret',   label: '◆ Segredos e o passado ▸' },
@@ -71505,11 +71504,13 @@ function _showAllyTopicsMenu(idx, opts) {
     });
     if (remaining.length > 0) {
       freshTopics.push({ key: t.key, label: t.label });
-    } else {
-      doneTopics.push({ key: t.key, label: '✓ ' + t.label.replace(/^◆\s*/, '').replace(/\s*▸$/, ' (Relembrar) ▸') });
     }
   });
-  var activeTopics = freshTopics.concat(doneTopics);
+  var activeTopics = freshTopics;
+  if (activeTopics.length === 0) {
+    _showAllyDialogue(idx, { autoOpenChoices: true, isSubmenu: true });
+    return;
+  }
   var choices = activeTopics.map(function(t) {
     return {
       id: 'topic_' + t.key,
@@ -71622,67 +71623,11 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
   });
 
   if (availableChoices.length === 0) {
-    var exhaustedDialogue = {
-      npc: {
-        id: 'ally_' + allyStorageKey + '_' + topicKey,
-        name: displayName,
-        desc: _classLabelPT(m.cls) + ' · ' + cfg.title + ' · ' + _allyRelSummary(m),
-        portrait: allyPort,
-        portraitHTML: portraitHTML,
-        gender: allyGender
-      },
-      script: [
-        {
-          type: 'narration',
-          text: displayName + ' acolhe você com um sorriso sereno e um olhar de profunda cumplicidade ao retomar o assunto.'
-        },
-        {
-          type: 'speech',
-          speaker: displayName,
-          text: 'Nós já conversamos com franqueza sobre isso. É reconfortante saber que posso contar com a sua escuta e compreensão na estrada.'
-        }
-      ],
-      choices: [
-        {
-          id: 'back_to_topics_menu',
-          label: '↩ Escolher outro assunto',
-          isSubmenu: true,
-          cb: function() { _showAllyTopicsMenu(idx, { autoOpenChoices: true }); }
-        },
-        {
-          id: 'back_to_ally_main',
-          label: '↩ "Gostaria de falar de outro assunto."',
-          isSubmenu: true,
-          cb: function() { _showAllyDialogue(idx, { autoOpenChoices: true }); }
-        }
-      ]
-    };
-    if (window.vEncounter && typeof window.vEncounter.isOpen === 'function' && window.vEncounter.isOpen()) {
-      var exhaustedChoices = exhaustedDialogue.choices;
-      if (typeof window.vEncounter.attachData === 'function') {
-        window.vEncounter.attachData({
-          npc: exhaustedDialogue.npc,
-          choices: exhaustedChoices,
-          choicesTitle: displayName + ' · ' + cfg.title,
-          choicesSubtitle: 'Assunto já explorado'
-        });
-      }
-      if (typeof window.vEncounter.openChoices === 'function') {
-        window.vEncounter.openChoices(exhaustedChoices, {
-          title: displayName + ' · ' + cfg.title,
-          npcName: displayName,
-          isSubmenu: true,
-          dialogue: exhaustedDialogue,
-          contextSpeech: 'Nós já conversamos com franqueza sobre isso. É reconfortante saber que posso contar com a sua escuta e compreensão na estrada.',
-          onChoice: function(ch) {
-            if (typeof ch.cb === 'function') ch.cb();
-          }
-        });
-      }
-      return;
-    }
-    if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-      window.vEncounter.render(exhaustedDialogue, { closeable: true, autoOpenChoices: true });
+    var remTopics = (typeof _getAvailableAllyTopics === 'function') ? _getAvailableAllyTopics(idx) : [];
+    if (remTopics.length > 0) {
+      _showAllyTopicsMenu(idx, { autoOpenChoices: true, isSubmenu: true });
+    } else {
+      _showAllyDialogue(idx, { autoOpenChoices: true, isSubmenu: true });
     }
     return;
   }
