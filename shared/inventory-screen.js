@@ -365,20 +365,25 @@
       var detailEl = _state.overlay.querySelector('[data-region="detail"]');
       if (!detailEl) return;
 
+      _state.overlay.classList.add('active');
+      _state.overlay.classList.add('vinv-overlay--standalone-detail');
+
       _showDetail(it, { readOnly: true, fromStandalone: true });
       detailEl.classList.add('vinv-detail-standalone');
       detailEl.classList.add('active');
 
       var _onStandaloneBackdropClick = function (ev) {
-        if (ev.target === detailEl) {
+        if (ev.target === detailEl || ev.target === _state.overlay) {
           _hideDetail();
           detailEl.removeEventListener('click', _onStandaloneBackdropClick);
+          if (_state.overlay) _state.overlay.removeEventListener('click', _onStandaloneBackdropClick);
           if (typeof options.onClose === 'function') {
             try { options.onClose(); } catch (_e) {}
           }
         }
       };
       detailEl.addEventListener('click', _onStandaloneBackdropClick);
+      if (_state.overlay) _state.overlay.addEventListener('click', _onStandaloneBackdropClick);
     },
 
     /**
@@ -2185,6 +2190,10 @@
     if (ov) {
       ov.classList.remove('active');
       ov.classList.remove('vinv-detail-standalone');
+    }
+    if (_state.overlay && _state.overlay.classList.contains('vinv-overlay--standalone-detail')) {
+      _state.overlay.classList.remove('active');
+      _state.overlay.classList.remove('vinv-overlay--standalone-detail');
     }
     _state.selectedItem = null;
   }

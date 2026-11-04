@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-11-02T23:08:39Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-11-03T22:33:54Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -38762,9 +38762,9 @@ function mountEnemyHoverStatHints() {
 
 function _showVictoryItemDetailPopup(itemObj) {
     if (!itemObj) return;
-    var name = itemObj.n || itemObj.name || '';
-    var it = Object.assign({ name: name }, itemObj);
-    if (!it.name) it.name = name;
+    var it = typeof itemObj === 'string' ? { name: itemObj } : Object.assign({}, itemObj);
+    var name = it.name || it.n || '';
+    it.name = name;
 
     // Enriquece com dados do ITEMS_DB_GEN se disponível
     if (window.ITEMS_DB_GEN && window.ITEMS_DB_GEN[name]) {
@@ -51173,13 +51173,9 @@ function showIntroChoicePopup() {
        setHTML — evita reescrever o array literal). currentState.narrative vem do
        servidor (setup.narrative → newCombatFromSetup). Narração 3ª pessoa pura;
        combates sem narrativa mantêm o fluxo clássico (CTAs já visíveis). */
-    /* #intro-no-narr (2026-06-23, user): a descrição pré-luta ("Dois indivíduos…") foi REMOVIDA
-       da tela COMBATE INICIADO — a tela vai DIRETO pros CTAs (Começar Rolagens / Pular Todas).
-       A narrativa do servidor (currentState.narrative) não é mais exibida aqui. _introNarr fica
-       '' e _hasNarr false → os blocos de injeção/typewriter abaixo ficam inertes; os CTAs não
-       são mais ocultados (c2-cta-hidden) → aparecem imediatamente. */
-    var _introNarr = '';
-    var _hasNarr = false;
+    /* Restaura narrativa pré-combate contextual e imersiva vinda do servidor (currentState.narrative). */
+    var _introNarr = (currentState && currentState.narrative) ? String(currentState.narrative).trim() : '';
+    var _hasNarr = !!_introNarr;
     var _ctasEl = card.querySelector('.iop-start-wrap');
     var _narrEl = null, _hintEl = null;
     if (_hasNarr && _ctasEl) {

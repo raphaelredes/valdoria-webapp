@@ -74,7 +74,7 @@ function _gldSpeech(partyCount, partyMax, available, rotationHours) {
   if (available && available > 0) {
     parts.push(' Temos ' + available + ' aventureiro' + (available !== 1 ? 's' : '') + ' dispostos hoje');
     if (rotationHours) {
-      parts.push(' — a lista se renova em ' + rotationHours + ' horas.');
+      parts.push(' — a lista se renova no próximo ciclo.');
     } else {
       parts.push('.');
     }
@@ -117,8 +117,10 @@ var TAVIRA_DIALOGUE = {
     portrait: '../shared/img/npcs/mestra-tavira.webp'
   },
   script: [
-    { type: 'narration', text: 'O Salão dos Aventureiros respira lenta. Tochas de óleo pendem das vigas, iluminando o brasão da Guilda — espada cruzada com pena — entalhado no mármore atrás do balcão. Tavira ergue os olhos do registro, reconhece você, sorri de canto.' },
-    { type: 'speech', speaker: 'Mestra Tavira', text: 'Bem-vindo de volta, aventureiro. <i>(fecha o livro com um clique seco)</i> O Salão sempre tem trabalho pra quem busca. Diz o que precisa.' }
+    { type: 'narration', text: 'O Salão dos Aventureiros respira calmo. Tochas de óleo pendem das vigas, iluminando o brasão da Guilda — espada cruzada com pena — entalhado no mármore atrás do balcão. Tavira ergue os olhos do registro, reconhece você, sorri de canto.' },
+    { type: 'speech', speaker: 'Mestra Tavira', text: 'Bem-vindo de volta, aventureiro.' },
+    { type: 'narration', text: 'Tavira fecha o livro de registros com um clique seco.' },
+    { type: 'speech', speaker: 'Mestra Tavira', text: 'O Salão sempre tem trabalho pra quem busca. Diz o que precisa.' }
   ],
   choices: [
     // task #70 (2026-05-20): cb's alinhadas com backend canonical em guild.py:151-178.
@@ -199,7 +201,7 @@ function renderGuildHub(container, data) {
       window._openCityDialogue('guild', 'tavira');
     } else if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
       window._SVC_CONFIG = window._SVC_CONFIG_GUILD;
-      window.vEncounter.render(TAVIRA_DIALOGUE);
+      window.vEncounter.render(TAVIRA_DIALOGUE, { autoOpenChoices: true });
     }
   });
   body.appendChild(npcRow);

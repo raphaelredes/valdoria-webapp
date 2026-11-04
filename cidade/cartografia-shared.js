@@ -7092,7 +7092,7 @@
 
         relation: 'crosswind',
 
-        label: '🌬️ Vento Lateral Neutro',
+        label: '◆ Vento Lateral (Neutro)',
 
         speedMod: 1.0,
 
@@ -7122,7 +7122,7 @@
 
         relation: 'tailwind',
 
-        label: '🍃 Vento a Favor (+10% Velocidade)',
+        label: '◆ Vento a Favor (+10% Velocidade)',
 
         speedMod: 1.10,
 
@@ -7138,7 +7138,7 @@
 
         relation: 'headwind',
 
-        label: '💨 Vento Contrário (-10% Velocidade)',
+        label: '◆ Vento Contrário (-10% Velocidade)',
 
         speedMod: 0.90,
 
@@ -7154,7 +7154,7 @@
 
         relation: 'crosswind',
 
-        label: '🌬️ Vento Lateral (Neutro)',
+        label: '◆ Vento Lateral (Neutro)',
 
         speedMod: 1.0,
 
@@ -7360,29 +7360,29 @@
 
     if (raw.indexOf('cordilheira') >= 0 || raw.indexOf('mountain') >= 0 || raw.indexOf('peaks') >= 0) {
 
-      return { meters: 1800 + t * 250, isHighAltitude: true, label: '🏔️ Altitude Extrema (Ar Rarefeito · ' + (1800 + t * 250) + 'm)' };
+      return { meters: 1800 + t * 250, isHighAltitude: true, label: '◆ Altitude Extrema (Ar Rarefeito · ' + (1800 + t * 250) + 'm)' };
 
     }
 
     if (raw.indexOf('colina') >= 0 || raw.indexOf('hills') >= 0) {
 
-      return { meters: 600 + t * 80, isHighAltitude: false, label: '⛰️ Colinas Elevadas (' + (600 + t * 80) + 'm)' };
+      return { meters: 600 + t * 80, isHighAltitude: false, label: '◆ Colinas Elevadas (' + (600 + t * 80) + 'm)' };
 
     }
 
     if (raw.indexOf('pantano') >= 0 || raw.indexOf('swamp') >= 0) {
 
-      return { meters: 15, isHighAltitude: false, label: '🌊 Baixada Alagada (15m)' };
+      return { meters: 15, isHighAltitude: false, label: '◆ Baixada Alagada (15m)' };
 
     }
 
     if (raw.indexOf('duna') >= 0 || raw.indexOf('desert') >= 0) {
 
-      return { meters: 220, isHighAltitude: false, label: '🏜️ Planalto de Dunas (220m)' };
+      return { meters: 220, isHighAltitude: false, label: '◆ Planalto de Dunas (220m)' };
 
     }
 
-    return { meters: 120 + t * 30, isHighAltitude: false, label: '🌾 Planície (' + (120 + t * 30) + 'm)' };
+    return { meters: 120 + t * 30, isHighAltitude: false, label: '◆ Planície (' + (120 + t * 30) + 'm)' };
 
   }
 
@@ -7396,7 +7396,7 @@
 
       name: 'Sentinela Atenta',
 
-      icon: '👁️',
+      icon: '◆',
 
       summary: 'Prontidão Máxima: +5 na Percepção Passiva; evita surpresa em emboscadas inimigas.',
 
@@ -7424,7 +7424,7 @@
 
       name: 'Caçador Forrageador',
 
-      icon: '🌿',
+      icon: '◆',
 
       summary: 'Sustento dos Ermos: Caça e água garantidas em marcha normal ou lenta sem gastar rações.',
 
@@ -7536,7 +7536,7 @@
 
       name: 'Caravana / Carroça',
 
-      icon: '🛒',
+      icon: '◆',
 
       speedMph: 3,
 
@@ -7602,7 +7602,7 @@
 
       name: 'Formação Fechada',
 
-      icon: '🛡️',
+      icon: '◆',
 
       summary: 'Defensiva: batedores recuados, escudos erguidos e retaguarda reforçada (-10% no risco de emboscada).',
 
@@ -7630,9 +7630,9 @@
 
   function calcEncounterRisk(biome, options) {
 
-    if (!biome) return { riskPct: 0, label: '🟢 Zona Segura (0%)', color: '#a3e635' };
+    if (!biome) return { riskPct: 0, label: '◆ Zona Segura (0%)', color: '#a3e635' };
 
-    if (biome.tier === 0 || biome.isOrigin) return { riskPct: 0, label: '🟢 Zona Segura (0% Risco de Emboscada)', color: '#a3e635' };
+    if (biome.tier === 0 || biome.isOrigin) return { riskPct: 0, label: '◆ Zona Segura (0% Risco de Emboscada)', color: '#a3e635' };
 
 
 
@@ -9583,7 +9583,7 @@
 
         mitigation: 'Navegador com Percepção Passiva 12+ ou Bússola',
 
-        icon: '🌿',
+        icon: '◆',
 
         color: '#22c55e'
 
@@ -9705,9 +9705,9 @@
 
         { label: 'Bandos de Nômades Salteadores', pct: '35%', desc: 'Guerreiros do deserto emboscando em desfiladeiros rochosos.', icon: '' },
 
-        { label: 'Verme da Areia / Escorpião Gigante', pct: '30%', desc: 'Predador alfa subterrâneo atraído por vibrações na areia.', icon: '🦂' },
+        { label: 'Verme da Areia / Escorpião Gigante', pct: '30%', desc: 'Predador alfa subterrâneo atraído por vibrações na areia.', icon: '◆' },
 
-        { label: 'Caravana de Especiarias Sitiada', pct: '20%', desc: 'Mercadores perdidos precisando de água e escolta armada.', icon: '🐪' },
+        { label: 'Caravana de Especiarias Sitiada', pct: '20%', desc: 'Mercadores perdidos precisando de água e escolta armada.', icon: '◆' },
 
         { label: 'Monólito Arcano Submerso', pct: '15%', desc: 'Ruína de civilização esquecida com runas de teletransporte.', icon: '' }
 
@@ -9717,13 +9717,13 @@
 
       encTypes = [
 
-        { label: 'Emboscada de Trogloditas & Homens-Lagarto', pct: '40%', desc: 'Ataque surpresa emergindo das águas escuras com dardos venenosos.', icon: '🦎' },
+        { label: 'Emboscada de Trogloditas & Homens-Lagarto', pct: '40%', desc: 'Ataque surpresa emergindo das águas escuras com dardos venenosos.', icon: '◆' },
 
-        { label: 'Fogo-Fátuo & Assombrações', pct: '25%', desc: 'Entidades ilusórias que atraem incautos para charcos profundos.', icon: '👻' },
+        { label: 'Fogo-Fátuo & Assombrações', pct: '25%', desc: 'Entidades ilusórias que atraem incautos para charcos profundos.', icon: '◆' },
 
-        { label: 'Herborista Selvagem ou Eremita', pct: '20%', desc: 'Habitante do pântano oferecendo poções em troca de itens raros.', icon: '🧪' },
+        { label: 'Herborista Selvagem ou Eremita', pct: '20%', desc: 'Habitante do pântano oferecendo poções em troca de itens raros.', icon: '◆' },
 
-        { label: 'Ninho Submerso de Hidra Jovem', pct: '15%', desc: 'Monstro lendário guardando relicário encharcado.', icon: '🐉' }
+        { label: 'Ninho Submerso de Hidra Jovem', pct: '15%', desc: 'Monstro lendário guardando relicário encharcado.', icon: '◆' }
 
       ];
 
@@ -9731,11 +9731,11 @@
 
       encTypes = [
 
-        { label: 'Patrulha de Gigantes das Colinas / Ogros', pct: '35%', desc: 'Forças brutas arremessando rochedos das alturas.', icon: '🧌' },
+        { label: 'Patrulha de Gigantes das Colinas / Ogros', pct: '35%', desc: 'Forças brutas arremessando rochedos das alturas.', icon: '◆' },
 
-        { label: 'Wyverns ou Harpias Aladas', pct: '30%', desc: 'Ataque aéreo vindo das correntes térmicas dos picos.', icon: '🦅' },
+        { label: 'Wyverns ou Harpias Aladas', pct: '30%', desc: 'Ataque aéreo vindo das correntes térmicas dos picos.', icon: '◆' },
 
-        { label: 'Batedores da Guarda de Korthag', pct: '20%', desc: 'Sentinelas anões patrulhando os passos montanhosos.', icon: '🛡️' },
+        { label: 'Batedores da Guarda de Korthag', pct: '20%', desc: 'Sentinelas anões patrulhando os passos montanhosos.', icon: '◆' },
 
         { label: 'Entrada de Mina Antiga Desmoronada', pct: '15%', desc: 'Filão de minério nobre com riscos de desabamento.', icon: '' }
 
@@ -9745,13 +9745,13 @@
 
       encTypes = [
 
-        { label: 'Matilha de Lobos Invernais', pct: '40%', desc: 'Predadores com sopro gélido flanqueando em meio à nevasca.', icon: '🐺' },
+        { label: 'Matilha de Lobos Invernais', pct: '40%', desc: 'Predadores com sopro gélido flanqueando em meio à nevasca.', icon: '◆' },
 
         { label: 'Gigante do Gelo Solitário', pct: '25%', desc: 'Guerreiro titânico vasculhando os ermos glaciais.', icon: '' },
 
-        { label: 'Caçadores Nômades da Tundra', pct: '20%', desc: 'Companhia de caça disposta a trocar peles e carne seca.', icon: '🏹' },
+        { label: 'Caçadores Nômades da Tundra', pct: '20%', desc: 'Companhia de caça disposta a trocar peles e carne seca.', icon: '◆' },
 
-        { label: 'Caverna Glacial com Santuário Congelado', pct: '15%', desc: 'Refúgio natural com cristais de gelo perene.', icon: '🧊' }
+        { label: 'Caverna Glacial com Santuário Congelado', pct: '15%', desc: 'Refúgio natural com cristais de gelo perene.', icon: '◆' }
 
       ];
 
@@ -9759,13 +9759,13 @@
 
       encTypes = [
 
-        { label: 'Bando de Goblins ou Aranhas Gigantes', pct: '35%', desc: 'Armadilhas de teia suspensas nas copas ancestrais.', icon: '🕷️' },
+        { label: 'Bando de Goblins ou Aranhas Gigantes', pct: '35%', desc: 'Armadilhas de teia suspensas nas copas ancestrais.', icon: '◆' },
 
-        { label: 'Entidade Feérica / Dríade Protetora', pct: '30%', desc: 'Guardiã do bosque exigindo respeito ou oferenda.', icon: '🧚' },
+        { label: 'Entidade Feérica / Dríade Protetora', pct: '30%', desc: 'Guardiã do bosque exigindo respeito ou oferenda.', icon: '◆' },
 
-        { label: 'Caçadores Élficos em Rastreio', pct: '20%', desc: 'Arqueiros das ruínas trocando informações sobre a mata.', icon: '🏹' },
+        { label: 'Caçadores Élficos em Rastreio', pct: '20%', desc: 'Arqueiros das ruínas trocando informações sobre a mata.', icon: '◆' },
 
-        { label: 'Círculo de Pedras Mágicas Ancestrais', pct: '15%', desc: 'Altar druídico que restaura pontos de magia ou vida.', icon: '🌿' }
+        { label: 'Círculo de Pedras Mágicas Ancestrais', pct: '15%', desc: 'Altar druídico que restaura pontos de magia ou vida.', icon: '◆' }
 
       ];
 
@@ -9775,11 +9775,11 @@
 
         { label: 'Salteadores de Estrada ou Bandidos', pct: '35%', desc: 'Bandidos de estrada buscando tributo de mercadorias.', icon: '' },
 
-        { label: 'Caravana de Mercadores Ambulantes', pct: '30%', desc: 'Venda de provisões, tochas e consumíveis de estrada.', icon: '🛒' },
+        { label: 'Caravana de Mercadores Ambulantes', pct: '30%', desc: 'Venda de provisões, tochas e consumíveis de estrada.', icon: '◆' },
 
-        { label: 'Patrulha da Guarnição de Valdória', pct: '20%', desc: 'Soldados assegurando as fronteiras da capital.', icon: '🛡️' },
+        { label: 'Patrulha da Guarnição de Valdória', pct: '20%', desc: 'Soldados assegurando as fronteiras da capital.', icon: '◆' },
 
-        { label: 'Acampamento Abandonado com Rastros', pct: '15%', desc: 'Fogueira recente com pistas de eventos locais.', icon: '⛺' }
+        { label: 'Acampamento Abandonado com Rastros', pct: '15%', desc: 'Fogueira recente com pistas de eventos locais.', icon: '◆' }
 
       ];
 
@@ -10187,7 +10187,7 @@
 
       { key: 'horse', name: 'Montaria',    icon: '🐎', speedMph: 4.0, feature: '+33% Velocidade em estradas; consome ração de forragem' },
 
-      { key: 'wagon', name: 'Caravana',    icon: '🛒', speedMph: 3.0, feature: 'Carga pesada segura; -10% risco de emboscada noturna' },
+      { key: 'wagon', name: 'Caravana',    icon: '◆', speedMph: 3.0, feature: 'Carga pesada segura; -10% risco de emboscada noturna' },
 
       { key: 'boat',  name: 'Barco Fluvial', icon: '⛵', speedMph: 5.0, feature: 'Velocidade fluvial acelerada; sem fadiga de marcha' }
 
@@ -12065,7 +12065,7 @@
 
         title: 'Sentinela Atenta',
 
-        icon: '👁️',
+        icon: '◆',
 
         benefit: '+5 Percepção Passiva; evita condição de Surpreso contra emboscadas.'
 
@@ -12139,7 +12139,7 @@
 
           title: 'Caçador Forrageador',
 
-          icon: '🌿',
+          icon: '◆',
 
           benefit: 'Reduz em 50% o consumo diário de rações empacotadas através de caça e coleta.'
 
@@ -12997,7 +12997,7 @@
 
           name: 'Salgueiro dos Afogados',
 
-          icon: '🌿',
+          icon: '◆',
 
           provinceId: 'swamp',
 
@@ -13045,7 +13045,7 @@
 
           name: 'Túmulo do Lobo Branco',
 
-          icon: '🐺',
+          icon: '◆',
 
           provinceId: 'snow',
 
@@ -13121,7 +13121,7 @@
 
         name: 'Sem Defesas Adicionais',
 
-        icon: '⛺',
+        icon: '◆',
 
         stealthNegation: false,
 
@@ -13201,7 +13201,7 @@
 
         name: 'Barricada de Troncos e Galhos (Abatis)',
 
-        icon: '🛡️',
+        icon: '◆',
 
         stealthNegation: true,
 
@@ -13795,7 +13795,7 @@
 
         name: 'Kit de Herbalismo',
 
-        icon: '🌿',
+        icon: '◆',
 
         benefit: 'Identificação botânica precisa; dobra o rendimento na coleta de ervas medicinais.'
 
@@ -14535,7 +14535,7 @@
 
       riding_horse: { name: 'Cavalo de Montaria', baseCapacity: 480, baseSpeedMod: 25, fodder: 15, costCp: 7500, icon: '🏇' },
 
-      warhorse: { name: 'Cavalo de Guerra', baseCapacity: 540, baseSpeedMod: 20, fodder: 20, costCp: 40000, icon: '🛡️' },
+      warhorse: { name: 'Cavalo de Guerra', baseCapacity: 540, baseSpeedMod: 20, fodder: 20, costCp: 40000, icon: '◆' },
 
       camel: { name: 'Camelo do Deserto', baseCapacity: 480, baseSpeedMod: 0, fodder: 10, costCp: 5000, icon: '🐫' },
 
@@ -15065,7 +15065,7 @@
 
         boonEffect: 'Recuperação canônica de Pontos de Vida e metade dos Dados de Vida gastos no descanso longo.',
 
-        icon: '⛺',
+        icon: '◆',
 
         color: '#94a3b8'
 
@@ -15083,7 +15083,7 @@
 
         boonEffect: 'Produz 1 Bálsamo Cicatrizante dos Ermos (+1d4 PV curados adicionais no despertar matinal para 2 aventureiros).',
 
-        icon: '🌿',
+        icon: '◆',
 
         color: '#4ade80'
 
@@ -15437,7 +15437,7 @@
 
         obligation: 'Compor a guarda de flanco e obedecer à hierarquia tática dos sargentos de infantaria.',
 
-        icon: '🛡️',
+        icon: '◆',
 
         color: '#4ade80'
 
@@ -16367,7 +16367,7 @@
 
       marketValueGold: 4,
 
-      icon: '🌿',
+      icon: '◆',
 
       color: '#a3e635'
 
@@ -41497,7 +41497,7 @@
 
       rescueAndStabilization: 'Voo veloz permite evacuar companheiros feridos de cercos ou áreas de perigo para santuários seguros em minutos.',
 
-      icon: '🦅',
+      icon: '◆',
 
       color: '#f59e0b'
 
@@ -41661,7 +41661,7 @@
 
       rescueAndStabilization: 'Vagão coberto com lona impermeabilizada serve como ambulância de campanha para abrigar companheiros doentes ou feridos.',
 
-      icon: '🛒',
+      icon: '◆',
 
       color: '#eab308'
 
@@ -41755,7 +41755,7 @@
 
       campRestAndSafetyGuards: 'Impede infiltrações furtivas de salteadores e lobos, confinando qualquer tentativa de invasão a gargalos estreitos controlados pela comitiva.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#eab308'
 
@@ -41919,7 +41919,7 @@
 
       campRestAndSafetyGuards: 'Em caso de cerco, a destruição tática da ponte isola a comitiva de forças hostis superiores, garantindo descanso longo ininterrupto.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#f59e0b'
 
@@ -42617,7 +42617,7 @@
 
       rescueAndStabilization: 'Permite que a comitiva transporte prisioneiros resgatados ou relíquias cobiçadas sem revelar suas coordenadas na rota Pointcrawl.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#06b6d4'
 
@@ -42847,7 +42847,7 @@
 
       campRestAndSafetyGuards: 'Assegura descanso longo sereno e sem surpresa contra ilusões ou invasores invisíveis.',
 
-      icon: '👁️',
+      icon: '◆',
 
       color: '#a855f7'
 
@@ -43367,7 +43367,7 @@
 
       rescueAndStabilization: 'Se o familiar for avistado e abatido a 0 PV, ele desaparece sem deixar vestígios e pode ser reonvocado na tenda de bivaque.',
 
-      icon: '🦅',
+      icon: '◆',
 
       color: '#a855f7'
 
@@ -44047,7 +44047,7 @@
 
       campRestAndSafetyGuards: 'Torna a escolha de vigília noturna, camuflagem e magias de abrigo vital para a sobrevivência dos combatentes de linha de frente.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#10b981'
 
@@ -44417,7 +44417,7 @@
 
       rescueAndStabilization: 'Permite evitar confrontos letais contra bandos superiores ou estudar a composição de outra comitiva antes de decidir se apresentar.',
 
-      icon: '👁️',
+      icon: '◆',
 
       color: '#6366f1'
 
@@ -44947,7 +44947,7 @@
 
       campRestAndSafetyGuards: 'Funciona como sinal de vida diário ("dead man’s switch") entre grupos aliados nos ermos.',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#06b6d4'
 
@@ -45097,7 +45097,7 @@
 
       campRestAndSafetyGuards: 'Garante que a comitiva prepare armas e magias em absoluto silêncio antes de abrir as lonas das tendas.',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#8b5cf6'
 
@@ -45247,7 +45247,7 @@
 
       campRestAndSafetyGuards: 'Prepara a comitiva com palavras-chave de saudação e trégua nos idiomas predominantes do bioma.',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#6366f1'
 
@@ -45317,7 +45317,7 @@
 
       rescueAndStabilization: 'Se a comitiva destinatária já tiver partido do nó indicado, a ave aguarda pacientemente até o fim da duração antes de retornar ao habitat silvestre.',
 
-      icon: '🦅',
+      icon: '◆',
 
       color: '#0ea5e9'
 
@@ -45397,7 +45397,7 @@
 
       campRestAndSafetyGuards: 'O arrulhar baixo ou agitação das aves no poleiro alerta a vigília sobre a presença de serpentes ou felinos furtivos (+2 em Percepção Passiva noturna).',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#0ea5e9'
 
@@ -45547,7 +45547,7 @@
 
       campRestAndSafetyGuards: 'Organização documental que concede vantagem em testes de Inteligência (História e Investigação) sobre a região no dia seguinte.',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#e11d48'
 
@@ -45617,7 +45617,7 @@
 
       rescueAndStabilization: 'Restauração da harmonia vegetal desfazendo o nó vivo após a leitura para não deixar pistas a rastreadores hostis (Sobrevivência CD 12).',
 
-      icon: '🌿',
+      icon: '◆',
 
       color: '#22c55e'
 
@@ -45697,7 +45697,7 @@
 
       campRestAndSafetyGuards: 'Proporciona descanso longo em perfeita comunhão com o bioma, sem deixar vestígios de acampamento ao partir pela manhã.',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#22c55e'
 
@@ -45847,7 +45847,7 @@
 
       campRestAndSafetyGuards: 'Proporciona descanso longo sem necessidade de apagar o braseiro interno, cuja chaminé sai diluída entre as raízes a 20 metros de distância.',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#94a3b8'
 
@@ -45997,7 +45997,7 @@
 
       campRestAndSafetyGuards: 'Protege o turno de guarda contra disparos furtivos e preserva o descanso longo da comitiva.',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#f59e0b'
 
@@ -46147,7 +46147,7 @@
 
       campRestAndSafetyGuards: 'O influxo telúrico harmonizado restaura o vigor da comitiva e permite recuperar +1 espaço de magia de 1º círculo ou +1 dado de vida adicional no descanso longo.',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#a855f7'
 
@@ -46297,7 +46297,7 @@
 
       campRestAndSafetyGuards: 'Fornece água doce fresca preservada da evaporação sob a cúpula de tijolos de barro, garantindo recuperação plena no descanso longo.',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#d97706'
 
@@ -46447,7 +46447,7 @@
 
       campRestAndSafetyGuards: 'Abrigo rochoso inexpugnável contra feras e intempéries, garantindo descanso longo pleno para os aventureiros.',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#64748b'
 
@@ -46597,7 +46597,7 @@
 
       campRestAndSafetyGuards: 'Leito nivelado com areia coralina seca e brisa constante que afasta insetos, garantindo descanso longo pleno para a comitiva.',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#f43f5e'
 
@@ -46667,7 +46667,7 @@
 
       rescueAndStabilization: 'Içamento imediato com cordas de cânhamo e lavagem abundante da pele com água doce e vinagre diluído para neutralizar a alcalinidade cáustica (Medicina CD 13).',
 
-      icon: '🧪',
+      icon: '◆',
 
       color: '#eab308'
 
@@ -46747,7 +46747,7 @@
 
       campRestAndSafetyGuards: 'Repouso seguro em ar limpo acima da camada de névoa alcalina, garantindo recuperação plena para a comitiva.',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#eab308'
 
@@ -46899,7 +46899,7 @@
 
       campRestAndSafetyGuards: 'Repouso seco e estável sobre leitos de lona esticados com cabos ancorados em cunhas de fenda, restaurando plenamente as energias dos aventureiros.',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#0284c7'
 
@@ -47051,7 +47051,7 @@
 
       campRestAndSafetyGuards: 'Descanso enxuto e estável com forragem macia que garante recuperação integral de forças para a comitiva.',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#0ea5e9'
 
@@ -47201,7 +47201,7 @@
 
       campRestAndSafetyGuards: 'Descanso protegido em platô elevado que bloqueia ventos do vale e assegura recuperação integral de forças para a comitiva.',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#ef4444'
 
@@ -47351,7 +47351,7 @@
 
       campRestAndSafetyGuards: 'Repouso seguro e sereno em ninho de águia inexpugnável, assegurando recuperação plena de forças para a comitiva.',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#06b6d4'
 
@@ -47501,7 +47501,7 @@
 
       campRestAndSafetyGuards: 'Repouso estável livre de afundamento em areia fofa, garantindo recuperação plena de forças para a comitiva.',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#f59e0b'
 
@@ -47653,7 +47653,7 @@
 
       campRestAndSafetyGuards: 'Repouso estável e protegido no coração das muralhas de pedra, garantindo recuperação integral de pontos de vida.',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#10b981'
 
@@ -47803,7 +47803,7 @@
 
       campRestAndSafetyGuards: 'Repouso resguardado do calor extenuante e dos ventos uivantes, assegurando recuperação integral de pontos de vida.',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#d97706'
 
@@ -48103,7 +48103,7 @@
 
       campRestAndSafetyGuards: 'Descanso tranquilo e resguardado do estresse térmico, permitindo recuperação plena de vigor para toda a comitiva.',
 
-      icon: '⛺',
+      icon: '◆',
 
       color: '#f97316'
 
@@ -48403,7 +48403,7 @@
 
       campRestAndSafetyGuards: 'Descanso inexpugnável em ninho de águia isolado do terreno hostil dos ermos glaciais.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#f59e0b'
 
@@ -48563,7 +48563,7 @@
 
       campRestAndSafetyGuards: 'Descanso seguro com ar ventilado imune a gases tóxicos e temperatura do solo amena e estável.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#dc2626'
 
@@ -48723,7 +48723,7 @@
 
       campRestAndSafetyGuards: 'Descanso pleno em ambiente protegido de nevascas glaciais severas e predadores da tundra.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#38bdf8'
 
@@ -48883,7 +48883,7 @@
 
       campRestAndSafetyGuards: 'Descanso tranquilo em rocha sólida e seca imune a inundações relâmpago repentinas do cânion.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#0284c7'
 
@@ -49043,7 +49043,7 @@
 
       campRestAndSafetyGuards: 'Descanso pleno em terreno firme, plano e arejado com ventilação marítima fresca e sem umidade salobra.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#e11d48'
 
@@ -49203,7 +49203,7 @@
 
       campRestAndSafetyGuards: 'Descanso tranquilo em solo fresco e seco com acesso imediato a banhos revigorantes de água doce.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#0284c7'
 
@@ -49363,7 +49363,7 @@
 
       campRestAndSafetyGuards: 'Descanso inexpugnável protegido por fosso marítimo natural e parapeitos de rocha nua.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#0284c7'
 
@@ -49523,7 +49523,7 @@
 
       campRestAndSafetyGuards: 'Descanso pleno em solo estável imune a desabamentos do domo e protegido de emboscadas terrestres.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#dc2626'
 
@@ -49683,7 +49683,7 @@
 
       campRestAndSafetyGuards: 'Descanso seco e seguro sem risco de umidade no solo ou inundações.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#0284c7'
 
@@ -49843,7 +49843,7 @@
 
       campRestAndSafetyGuards: 'Descanso pleno protegido de predadores terrestres, com temperatura interna estável e sem fumaça visível na superfície.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#ea580c'
 
@@ -50003,7 +50003,7 @@
 
       campRestAndSafetyGuards: 'Descanso tranquilo protegido de emboscadas noturnas sob muralhas de rocha ultra-resistente.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#0284c7'
 
@@ -50163,7 +50163,7 @@
 
       campRestAndSafetyGuards: 'Descanso seguro com barreira pétrea natural contra predadores errantes e estabilidade de terreno impecável.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#a855f7'
 
@@ -50323,7 +50323,7 @@
 
       campRestAndSafetyGuards: 'Descanso seguro com barreira natural contra monstros terrestres e isolamento perfeito contra marés.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#0284c7'
 
@@ -50483,7 +50483,7 @@
 
       campRestAndSafetyGuards: 'Descanso seguro com solo rígido e estável imune a desbarrancamentos ou alagamentos repentinos.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#ea580c'
 
@@ -50643,7 +50643,7 @@
 
       campRestAndSafetyGuards: 'Descanso seguro com barreira hídrica natural e fundação estável longe de paredões instáveis.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#0ea5e9'
 
@@ -50803,7 +50803,7 @@
 
       campRestAndSafetyGuards: 'Descanso sereno em solo protegido com isolamento térmico e blindagem pétrea contra invasões noturnas.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#f43f5e'
 
@@ -50963,7 +50963,7 @@
 
       campRestAndSafetyGuards: 'Descanso seguro com estabilidade de terreno e isolamento absoluto contra poeiras cáusticas.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#f1f5f9'
 
@@ -51123,7 +51123,7 @@
 
       campRestAndSafetyGuards: 'Descanso longo tranquilo em abrigo estável protegido contra tempestades de montanha e predadores errantes.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#c084fc'
 
@@ -51283,7 +51283,7 @@
 
       campRestAndSafetyGuards: 'Descanso seguro com excelente barreira contra ventos cortantes e invasões terrestres.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#f97316'
 
@@ -51443,7 +51443,7 @@
 
       campRestAndSafetyGuards: 'Descanso seguro com barreira pétrea natural contra o avanço das ondas e invasões noturnas.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#0284c7'
 
@@ -51603,7 +51603,7 @@
 
       campRestAndSafetyGuards: 'Descanso seguro com anteparo pétreo natural contra tempestades da estepe e ameaças terrestres.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#94a3b8'
 
@@ -51763,7 +51763,7 @@
 
       campRestAndSafetyGuards: 'Descanso seguro com barreira natural contra infiltrações subterrâneas e estabilidade sísmica perfeita.',
 
-      icon: '🛡️',
+      icon: '◆',
 
       color: '#38bdf8'
 
@@ -84302,7 +84302,8 @@
 
 })();
   // Provedor de Provisões nos Portões de Valdoria (Tibor)
-  function _cartOpenTiborShop() {
+  function _cartOpenTiborShop(opts) {
+    var autoOpen = (opts && opts.autoOpenChoices !== false);
     if (typeof haptic === 'function') haptic('light');
     if (window.vEncounter && typeof window.vEncounter.render === 'function') {
       var p = (typeof window !== 'undefined' && window.CITY_MOCK_PLAYER) || {};
@@ -84379,6 +84380,7 @@
         inline: true
       }, {
         player: p,
+        autoOpenChoices: autoOpen,
         onChoice: function(ch) {
           if (!ch || ch.id === 'leave_tibor') {
             if (window.vEncounter && typeof window.vEncounter.close === 'function') window.vEncounter.close();
@@ -84401,8 +84403,8 @@
                   { id: 'exit', label: '↩ Voltar' }
                 ],
                 inline: true
-              }, { player: p, onChoice: function(subCh) {
-                if (subCh && subCh.id === 'back_tibor') _cartOpenTiborShop();
+              }, { player: p, autoOpenChoices: true, onChoice: function(subCh) {
+                if (subCh && subCh.id === 'back_tibor') _cartOpenTiborShop({ autoOpenChoices: true });
                 else {
                   if (window.vEncounter && typeof window.vEncounter.close === 'function') window.vEncounter.close();
                   if (typeof _cartRenderCarousel === 'function') _cartRenderCarousel();

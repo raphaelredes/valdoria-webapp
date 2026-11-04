@@ -3729,6 +3729,8 @@
      Native top-layer rendering elimina conflitos z-index estruturalmente.
      ::backdrop pseudo-element substitui .enc-cho-backdrop manual.
      ESC key + inert background tratados nativamente pelo browser. */
+  var _lastChoiceInteractionTs = 0;
+
   function _ensureChoicesOverlay() {
     var sub = document.getElementById('enc-choices-overlay');
     if (sub) {
@@ -3738,7 +3740,16 @@
         newSub.id = 'enc-choices-overlay';
         sub.parentNode.replaceChild(newSub, sub);
         sub = newSub;
-      } else {
+      } else if (sub.querySelector('.enc-cho-list')) {
+        if (!sub.querySelector('.enc-cho-context-speech')) {
+          var cSpeech = document.createElement('div');
+          cSpeech.className = 'enc-cho-context-speech';
+          cSpeech.style.display = 'none';
+          var divElem = sub.querySelector('.enc-cho-divider');
+          if (divElem && divElem.parentNode) {
+            divElem.parentNode.insertBefore(cSpeech, divElem);
+          }
+        }
         return sub;
       }
     } else {
@@ -3750,6 +3761,7 @@
       '<div class="enc-cho-card" role="document">' +
         '<button class="enc-cho-close" aria-label="Fechar" type="button">✕</button>' +
         '<div class="enc-cho-title"></div>' +
+        '<div class="enc-cho-context-speech" style="display:none;"></div>' +
         '<div class="enc-cho-divider"><span class="enc-cho-divider-gem">◆</span></div>' +
         '<div class="enc-cho-list"></div>' +
         '<button class="enc-cho-back" type="button">← Voltar à narrativa</button>' +
@@ -3758,12 +3770,12 @@
     // Wire close interactions
     var closeBtn = sub.querySelector('.enc-cho-close');
     var backBtn = sub.querySelector('.enc-cho-back');
-    if (closeBtn) closeBtn.addEventListener('click', closeChoices);
-    if (backBtn) backBtn.addEventListener('click', closeChoices);
+    if (closeBtn) closeBtn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); closeChoices(); });
+    if (backBtn) backBtn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); closeChoices(); });
     // Click on backdrop (clicking outside the card) closes
     sub.addEventListener('click', function(e) {
       // event.target is the <dialog> itself when clicking on ::backdrop
-      if (e.target === sub) closeChoices();
+      if (e.target === sub && sub.classList.contains('open')) closeChoices();
     });
     // <dialog> native cancel event (ESC key)
     sub.addEventListener('cancel', function(e) {
@@ -3785,7 +3797,10 @@
     var card = sub.querySelector('.enc-cho-card');
     var listEl = sub.querySelector('.enc-cho-list');
     var titleEl = sub.querySelector('.enc-cho-title');
+    var speechEl = sub.querySelector('.enc-cho-context-speech');
     listEl.innerHTML = '';
+    if (listEl) listEl.scrollTop = 0;
+    if (card) card.scrollTop = 0;
 
     // Remove any previously injected guide button
     var oldGuide = card ? card.querySelector('.enc-cho-guide-btn') : null;
@@ -3812,6 +3827,31 @@
                         '<span class="enc-cho-title-text">' + title + '</span>' +
                         '<span class="enc-cho-title-orn">✦</span>' +
                         (ctxName ? '<div class="enc-cho-title-sub">' + ctxName + '</div>' : '');
+
+    var contextSpeech = opts.contextSpeech || (opts.dialogue && opts.dialogue.contextSpeech) || '';
+    if (!contextSpeech && opts.dialogue && Array.isArray(opts.dialogue.script)) {
+      for (var _si = opts.dialogue.script.length - 1; _si >= 0; _si--) {
+        var _sLine = opts.dialogue.script[_si];
+        if (_sLine && (_sLine.type === 'speech' || _sLine.type === 'player_speech') && _sLine.text) {
+          contextSpeech = _cleanSpeechText(_sLine.text);
+          break;
+        }
+      }
+    }
+    if (speechEl) {
+      var isSubmenuTransition = Boolean(
+        opts.isSubmenu || (opts.dialogue && opts.dialogue.isSubmenu) ||
+        opts.showSpeechContext ||
+        (typeof title === 'string' && (title.indexOf('Resposta') >= 0 || title.indexOf('Conversa') >= 0 || title.indexOf('Interagir') >= 0))
+      );
+      if (contextSpeech && isSubmenuTransition) {
+        speechEl.innerHTML = '“' + _coinify(contextSpeech) + '”';
+        speechEl.style.display = '';
+      } else {
+        speechEl.innerHTML = '';
+        speechEl.style.display = 'none';
+      }
+    }
 
     // Separate guide button if compact
     if (isCompact && listEl.parentNode) {
@@ -4057,18 +4097,65 @@
       if (_thumb) row.insertBefore(_thumb, row.firstChild);
       row.addEventListener('click', function(e) {
         e.preventDefault();
+        e.stopPropagation();
+        _lastChoiceInteractionTs = Date.now();
         // REGRA MANDATÓRIA (Ordem do Usuário 2026-10): Quando existir apenas uma opção (choices.length === 1),
         // ou a escolha for puramente narrativa/conversacional, a janela NUNCA deverá aparecer para solicitar confirmação.
         var confirmOpts = Object.assign({}, opts, { totalChoices: choices.length });
         if (_isChoiceConfirmable(ch, confirmOpts)) {
           _openChoiceDetailDialog(ch, confirmOpts);
         } else {
-          closeChoices(true);
+          var isClosingChoice = Boolean(
+            ch.cb === 'close' || ch.id === 'leave' || ch.id === 'close' || ch.id === '_enc_auto_close'
+          );
+          var _isSub = Boolean(
+            !isClosingChoice && (
+            ch.isSubmenu || ch.isCategory || ch.isReturn || ch._replyScript || ch.replyScript || ch.resultScript ||
+            (typeof ch.cb === 'function') ||
+            (opts.isSubmenu && ch.cb !== 'close' && ch.id !== 'leave') ||
+            (opts.dialogue && opts.dialogue.isSubmenu && ch.cb !== 'close' && ch.id !== 'leave') ||
+            (ch.id && (
+              String(ch.id).startsWith("topic_") ||
+              String(ch.id).startsWith("camp_top_") ||
+              String(ch.id).startsWith("nav_") ||
+              String(ch.id).startsWith("pick_ally_") ||
+              String(ch.id).startsWith("shop_cat_") ||
+              String(ch.id).startsWith("craft_cat_") ||
+              String(ch.id).startsWith("back_") ||
+              String(ch.id) === "back" ||
+              String(ch.id) === "return" ||
+              String(ch.id) === "next" ||
+              String(ch.id).endsWith("_back") ||
+              String(ch.id).indexOf("return_") >= 0
+            )) ||
+            (ch.label && (
+              String(ch.label).indexOf("Voltar") >= 0 ||
+              String(ch.label).indexOf("↩") >= 0 ||
+              String(ch.label).indexOf("←") >= 0 ||
+              String(ch.label).indexOf("outro assunto") >= 0 ||
+              String(ch.label).indexOf("este assunto") >= 0 ||
+              String(ch.label).indexOf("Interagir") >= 0 ||
+              String(ch.label).endsWith("▸") ||
+              String(ch.label).endsWith("►") ||
+              String(ch.label).endsWith(">")
+            )) ||
+            Boolean(ch.continueDialogue || ch.target || (opts.dialogue && opts.dialogue.choices && opts.dialogue.choices.length > 1 && ch.result === 'goto_dialog') || (opts.dialogues && ch.id && opts.dialogues[ch.id]) || ch.result === 'goto_dialog')
+            )
+          );
+          if (!_isSub) {
+            closeChoices(true);
+          }
           if (typeof ch.cb === 'function') {
-            try { ch.cb(ch, opts.dialogue); } catch (_eCb) { console.warn('[ENC] ch.cb threw', _eCb); }
+            setTimeout(function() {
+              try { ch.cb(ch, opts.dialogue); } catch (_eCb) { console.warn('[ENC] ch.cb threw', _eCb); }
+            }, 0);
             return;
           }
-          if (typeof opts.onChoice === 'function') opts.onChoice(ch);
+          if (typeof opts.onChoice === 'function') {
+            setTimeout(function() {
+              opts.onChoice(ch);
+            }, 0);
+          }
         }
       });
       listEl.appendChild(row);
@@ -4082,17 +4169,26 @@
       sub.classList.add('active');
     }
     void sub.offsetWidth; // force reflow
-    sub.classList.add('opening');
-    setTimeout(function() {
-      sub.classList.remove('opening');
+    if (!sub.classList.contains('open')) {
+      sub.classList.add('opening');
+      setTimeout(function() {
+        sub.classList.remove('opening');
+        sub.classList.add('open');
+      }, 50);
+    } else {
       sub.classList.add('open');
-    }, 50);
+    }
   }
 
   var _closeChoicesTimer = null;
   function closeChoices(immediate) {
     if (_closeChoicesTimer) { clearTimeout(_closeChoicesTimer); _closeChoicesTimer = null; }
     _closeChoiceDetailDialog();
+    // Proteção inteligente contra ghost backdrop click: quando um botão interno é desmontado
+    // durante transição de submenus, o browser pode disparar click sintético no dialog backdrop.
+    if (!immediate && Date.now() - _lastChoiceInteractionTs < 450) {
+      return;
+    }
     var sub = document.getElementById('enc-choices-overlay');
     if (!sub) return;
     // task #69: check open via <dialog>.open OR .active class (compat)
@@ -4164,7 +4260,9 @@
 
   function render(dialogue, opts) {
     opts = opts || {};
-    closeChoices(true);
+    if (!opts.autoOpenChoices && !(dialogue && dialogue.autoOpenChoices) && !opts.isSubmenu && !opts.isReturn && !(dialogue && (dialogue.isSubmenu || dialogue.isReturn))) {
+      closeChoices(true);
+    }
     var ov = _ensureOverlay();
     ov.innerHTML = '';
 
@@ -4172,13 +4270,146 @@
        linha com { check_hint: { phrase } } ganha uma sub-linha dourada própria
        ("⚀ Sabedoria (Percepção) CD 13") logo após a estrofe — anuncia o teste
        antes das choices. Estrofe sintética flui pelo pipeline normal. */
-    var _scriptIn = dialogue.script || [];
+    function _normalizeScriptIntegrity(rawList, defSpeaker) {
+      if (!Array.isArray(rawList)) return [];
+      var norm = [];
+      var i = 0;
+      while (i < rawList.length) {
+        var item = rawList[i];
+        if (!item) { i++; continue; }
+        var itype = item.type;
+        var text = String(item.text || '').trim();
+
+        // Caso 1: Narração contendo fala entre aspas
+        if (itype === 'narration' && text) {
+          var mQuote = text.match(/["“]([^"”]+)["”]/);
+          if (mQuote) {
+            var speechText = mQuote[1].trim();
+            var prefixNarr = text.slice(0, mQuote.index).trim();
+            var suffixNarr = text.slice(mQuote.index + mQuote[0].length).trim();
+            var nextItem = (i + 1 < rawList.length) ? rawList[i + 1] : null;
+
+            // Se o item seguinte for fala com resumo narrativo em 3ª pessoa (ex.: 'A conversa encerrou sem desacordos.')
+            if (nextItem && (nextItem.type === 'speech' || nextItem.type === 'player_speech')) {
+              var nextText = String(nextItem.text || '').trim();
+              if (!/["“”]/.test(nextText) && /\b(?:encerrou|terminou|passou|ficou|permaneceu|sorriu|acenou|olhou|desviou|seguiu|reconhece|afasta|concluiu|acena)\b/i.test(nextText)) {
+                var combNarr = [prefixNarr, suffixNarr, nextText].filter(Boolean).join(' ').trim();
+                var spk = nextItem.speaker || defSpeaker;
+                norm.push(Object.assign({}, item, { type: 'narration', text: combNarr }));
+                norm.push(Object.assign({}, nextItem, { type: nextItem.type, speaker: spk, text: speechText }));
+                i += 2;
+                continue;
+              }
+            }
+            // Caso padrão: narração com fala embutida
+            var remNarr = [prefixNarr, suffixNarr].filter(Boolean).join(' ').trim();
+            if (remNarr) {
+              norm.push(Object.assign({}, item, { type: 'narration', text: remNarr }));
+            }
+            norm.push({ type: 'speech', speaker: defSpeaker, text: speechText });
+            i++;
+            continue;
+          }
+        }
+
+        // Caso 2: Fala contendo apenas descrição/resumo em 3ª pessoa sem nenhum diálogo
+        if ((itype === 'speech' || itype === 'player_speech') && text) {
+          if (!/["“”]/.test(text) && /^(?:[A-Z][a-zÀ-ÿ]+\s+)?(?:sorri|assente|acena|desvia|encerra|conclui|permaneceu|olhou|observa|fica|hesita|suspira|afasta)\b/i.test(text) && !/\b(?:eu|você|nós|meu|minha|aqui|vamos|estou|sou|tenho)\b/i.test(text)) {
+            norm.push(Object.assign({}, item, { type: 'narration', text: text }));
+            i++;
+            continue;
+          }
+        }
+
+        norm.push(item);
+        i++;
+      }
+      return norm;
+    }
+
+    var _rawScriptIn = dialogue.script || [];
+    var _scriptIn = _normalizeScriptIntegrity(_rawScriptIn, (dialogue.npc && dialogue.npc.name) || 'Interlocutor');
     var _script = [];
     _scriptIn.forEach(function (l) {
-      if (l && l.text && typeof _wrapMarcosLoreLinks === 'function') {
-        l.text = _wrapMarcosLoreLinks(l.text);
+      if (!l) return;
+      var copy = Object.assign({}, l);
+      if (copy.text && typeof _wrapMarcosLoreLinks === 'function') {
+        copy.text = _wrapMarcosLoreLinks(copy.text);
       }
-      _script.push(l);
+      var lType = copy.type;
+      var isSpeechType = (lType === 'speech' || lType === 'player_speech');
+      if (isSpeechType && copy.text) {
+        var rawT = String(copy.text).trim();
+
+        // 1. Linha inteira de rubrica/direção de cena em 3ª pessoa (ex: <i>(Você assente em reverência silenciosa...)</i>)
+        // Não é fala audível — converte para narração
+        var mPureStage = rawT.match(/^\s*(?:<i>)?\s*\(([^)]+)\)\s*(?:<\/i>)?\s*$/);
+        if (mPureStage) {
+          _script.push({ type: 'narration', text: mPureStage[1].trim() });
+          return;
+        }
+
+        // 2. Extrai notificações mecânicas <b>...</b> da fala para não serem ditas pelo personagem
+        var mechTags = [];
+        rawT = rawT.replace(/\s*<b>([\s\S]*?)<\/b>\.?/gi, function(_, inner) {
+          var cleanTag = String(inner || '').replace(/^\s*[—–-]\s*/, '').trim();
+          if (cleanTag) mechTags.push('<b>' + cleanTag + '</b>');
+          return '';
+        }).trim();
+
+        // 3. Narração em 3ª pessoa antes de fala entre aspas (ex: Wrenna sorri suavemente. "Filosofia interessante...")
+        var mPrefix = rawT.match(/^([^"“«]+?[.!?])\s+((?:<i>\([^)]+\)<\/i>\s*)?["“«][\s\S]+)$/);
+        if (mPrefix && !/^<i>/.test(mPrefix[1].trim())) {
+          var prefixText = mPrefix[1].trim();
+          var isActionPrefix = /(?:sorri|assente|olha|suspira|fecha|abre|recua|avança|estende|pede|responde|avalia|toca|aponta|cospe|escarra|vibra|gira|ergue|puxa|segura|cai|chora|mastiga|diz|fala)/i.test(prefixText);
+          if (isActionPrefix) {
+            _script.push({ type: 'narration', text: prefixText });
+            rawT = mPrefix[2].trim();
+          }
+        }
+
+        // 4. Divide e extrai rubricas/direções de cena (<i>(...)</i> ou <i>[...]</i> ou (...)) de dentro da fala
+        // Ex: "Cuidado com o chão. <i>(aponta com o martelo)</i> Tem prego solto."
+        // Vira: Fala ("Cuidado com o chão.") -> Narração ("Aponta com o martelo.") -> Fala ("Tem prego solto.")
+        var stagePattern = /(?:<i>)?\s*[\(\[]([^()\[\]]+)[\)\]]\s*(?:<\/i>)?/g;
+        var hasStageMatch = stagePattern.test(rawT);
+        stagePattern.lastIndex = 0;
+        if (hasStageMatch) {
+          var lastIdx = 0;
+          var match;
+          while ((match = stagePattern.exec(rawT)) !== null) {
+            var before = rawT.substring(lastIdx, match.index).trim();
+            var stageText = match[1].trim();
+            before = before.replace(/^["“«]\s*/, '').replace(/\s*["”»]$/, '').trim();
+            if (before) {
+              _script.push(Object.assign({}, copy, { text: before }));
+            }
+            if (stageText) {
+              var fmtStage = stageText.charAt(0).toUpperCase() + stageText.slice(1);
+              if (!/[.!?]$/.test(fmtStage)) fmtStage += '.';
+              _script.push({ type: 'narration', text: fmtStage });
+            }
+            lastIdx = stagePattern.lastIndex;
+          }
+          var remainder = rawT.substring(lastIdx).trim();
+          remainder = remainder.replace(/^["“«]\s*/, '').replace(/\s*["”»]$/, '').trim();
+          if (remainder) {
+            _script.push(Object.assign({}, copy, { text: remainder }));
+          }
+        } else {
+          // 5. Remove aspas externas redundantes na fala
+          rawT = rawT.replace(/^["“«]\s*/, '').replace(/\s*["”»]$/, '').trim();
+          copy.text = rawT;
+          _script.push(copy);
+        }
+
+        // Se havia tags mecânicas extraídas, adiciona como narração posterior
+        if (mechTags.length > 0) {
+          _script.push({ type: 'narration', text: mechTags.join(' ') });
+        }
+      } else {
+        _script.push(copy);
+      }
       if (l && l.check_hint && l.check_hint.phrase) {
         _script.push({ type: 'narration', _checkHint: true, text: '⚀ ' + l.check_hint.phrase });
       }
@@ -4608,12 +4839,16 @@
       header.style.display = (hasSpeech || pages.length > 1) ? '' : 'none';
 
       // Rule #15: Integridade de Speaker — sincroniza cabeçalho e retrato com o interlocutor da página ativa
+      var pData = (opts && opts.player)
+        || window.CURRENT_PLAYER
+        || window.CITY_MOCK_PLAYER
+        || (window.S && (window.S.player || (window.S.playerName ? { name: window.S.playerName, char_class: window.S.playerClass, gender: window.S.playerGender } : null)))
+        || null;
       var firstSpeech = page.find(function(line){ return line.type === 'speech'; }) || page.find(function(line){ return line.type === 'player_speech'; });
-      if (firstSpeech && firstSpeech.speaker) {
-        var pageSpkKey = firstSpeech.speaker;
-        var pData = (opts && opts.player) || window.CURRENT_PLAYER || null;
+      if (firstSpeech && (firstSpeech.speaker || firstSpeech.type === 'player_speech' || firstSpeech.is_player)) {
+        var pageSpkKey = firstSpeech.speaker || 'Você';
         var playerName = (pData && pData.name) || 'Você';
-        var isPlayerSpeaker = !!firstSpeech.is_player || firstSpeech.type === 'player_speech' || pageSpkKey === '{player_name}' || pageSpkKey === '{player}' || pageSpkKey === playerName || pageSpkKey === 'Você';
+        var isPlayerSpeaker = !!firstSpeech.is_player || firstSpeech.type === 'player_speech' || pageSpkKey === '{player_name}' || pageSpkKey === '{player}' || pageSpkKey === playerName || pageSpkKey === 'Você' || (pageSpkKey === 'Aventureiro' && (!dialogue.npc || dialogue.npc.name !== 'Aventureiro'));
 
         // Se a fala da página pertence ao próprio aventureiro e o encontro possui um interlocutor/NPC
         // principal (ex: Garrik, o Condutor; Martha; Grom, o Caolho):
@@ -4769,7 +5004,6 @@
            caixa com fundo/borda VAZIA no dialogo (ex.: resultado dos Primeiros
            Socorros). So renderiza estrofe que de fato tem conteudo. */
         var lineText = line.text;
-        var pData = (opts && opts.player) || window.CURRENT_PLAYER || null;
         if (lineText && typeof _resolveGenderTokens === 'function') {
           var _pG = (pData && pData.gender) || '';
           lineText = _resolveGenderTokens(lineText, _pG);
@@ -4783,15 +5017,15 @@
         var parsedRew = _tryParseRewardNarration(lineText);
         if (parsedRew) {
           if (parsedRew.remainingText) {
-            var isLinePlayer = line.type === 'player_speech' || !!line.is_player || line.speaker === '{player_name}' || line.speaker === '{player}' || line.speaker === 'Você' || (pData && pData.name && line.speaker === pData.name);
+            var isLinePlayer = line.type === 'player_speech' || !!line.is_player || line.speaker === '{player_name}' || line.speaker === '{player}' || line.speaker === 'Você' || (line.speaker === 'Aventureiro' && (!dialogue.npc || dialogue.npc.name !== 'Aventureiro')) || (pData && pData.name && line.speaker === pData.name);
             var _lineCls = (line.type === 'speech' || line.type === 'player_speech') ? ('enc-speech' + (isLinePlayer ? ' enc-speech--player' : ''))
               : (line.type === 'dm') ? 'enc-narration enc-dm'
               : 'enc-narration' + (line._checkHint ? ' enc-check-hint' : '');
             var rDiv = document.createElement('div');
             rDiv.className = 'enc-line ' + _lineCls;
-            if ((line.type === 'speech' || line.type === 'player_speech') && line.speaker) {
-              var _spk = String(line.speaker);
-              if (isLinePlayer || _spk === '{player_name}' || _spk === '{player}') {
+            if ((line.type === 'speech' || line.type === 'player_speech') && (line.speaker || isLinePlayer)) {
+              var _spk = String(line.speaker || '');
+              if (isLinePlayer || _spk === '{player_name}' || _spk === '{player}' || _spk === 'Aventureiro') {
                 _spk = (pData && pData.name) || 'Você';
               } else if (/^[a-z0-9_]+$/.test(_spk) || _spk === d.id || _spk === (d.npc && d.npc.id)) {
                 _spk = (d.npc && d.npc.name) || 'Interlocutor';
@@ -4817,12 +5051,12 @@
         /* sessão #88: tipo 'dm' (voz de Mestre, doc §4.0.1) ganha visual próprio
            (sépia + label MESTRE via .enc-dm); qualquer type desconhecido cai em
            narration (antes caía em speech — invertido vs. legacy/Stub). */
-        var isLinePlayer = line.type === 'player_speech' || !!line.is_player || line.speaker === '{player_name}' || line.speaker === '{player}' || line.speaker === 'Você' || (pData && pData.name && line.speaker === pData.name);
+        var isLinePlayer = line.type === 'player_speech' || !!line.is_player || line.speaker === '{player_name}' || line.speaker === '{player}' || line.speaker === 'Você' || (line.speaker === 'Aventureiro' && (!dialogue.npc || dialogue.npc.name !== 'Aventureiro')) || (pData && pData.name && line.speaker === pData.name);
         var _lineCls = (line.type === 'speech' || line.type === 'player_speech') ? ('enc-speech' + (isLinePlayer ? ' enc-speech--player' : ''))
           : (line.type === 'dm') ? 'enc-narration enc-dm'
           : 'enc-narration' + (line._checkHint ? ' enc-check-hint' : '');
         div.className = 'enc-line ' + _lineCls;
-        if ((line.type === 'speech' || line.type === 'player_speech') && line.speaker) {
+        if ((line.type === 'speech' || line.type === 'player_speech') && (line.speaker || isLinePlayer)) {
           /* GUARD anti-vazamento (sessão #88 — bug reportado pelo user: key de
              backend exibida como nome do NPC). speaker DEVE ser display name;
              o CSS exibe data-speaker VERBATIM (content:attr). Key snake_case
@@ -4830,8 +5064,8 @@
              do diálogo NUNCA aparece — cai pro nome do NPC e loga o vazamento.
              Display names legítimos ('Martha', 'Grom Barba-Cinza', 'Aldwin de
              Tholram') têm maiúscula/acento/espaço e passam intactos. */
-          var _spk = String(line.speaker);
-          if (isLinePlayer || _spk === '{player_name}' || _spk === '{player}') {
+          var _spk = String(line.speaker || '');
+          if (isLinePlayer || _spk === '{player_name}' || _spk === '{player}' || _spk === 'Aventureiro') {
             _spk = (pData && pData.name) || 'Você';
           } else if (/^[a-z0-9_]+$/.test(_spk) ||
               (dialogue.npc && (_spk === dialogue.npc.id || _spk === dialogue.npc.key))) {
@@ -4955,7 +5189,7 @@
         textLines.every(function(l) { return _isTextSeen(l.text); })
       );
 
-      if (isPageRepeated) {
+      if (isPageRepeated || (_isNavContext && state.isLastPage) || (opts && opts.autoOpenChoices) || (dialogue && dialogue.autoOpenChoices)) {
         _instantReveal();
       } else {
         typeNextSentence();
@@ -5120,6 +5354,12 @@
       }
     });
 
+    var _isNavContext = Boolean(
+      (opts && (opts.autoOpenChoices === true || opts.isSubmenu || opts.isReturn || opts.isOutcome)) ||
+      (dialogue && (dialogue.autoOpenChoices === true || dialogue.isSubmenu || dialogue.isReturn || dialogue.isOutcome))
+    );
+    var _autoOpenPending = !(opts && opts.autoOpenChoices === false) && !(dialogue && dialogue.autoOpenChoices === false);
+
     /* 2026-05-20 task #49 — AAA choice sub-overlay (reabrível).
        Em vez de listar choices inline no encounter, mostra UM botão primário
        "⚔ Escolher ação" que ABRE sub-tela acima (z=9700) com choices em
@@ -5128,6 +5368,7 @@
 
        Fallback: se opts.inlineChoices === true OU dialogue tem 1 choice única,
        mantém comportamento antigo (inline buttons). */
+    var _openChoicesModal = null;
     function renderActions() {
       actions.innerHTML = '';
       /* sessão #90: limpa ação prévia da nav band (renderActions roda 2x:
@@ -5154,6 +5395,7 @@
       var isQuestScreen = _isQuestDecisionScreen(dialogue, choices);
       var useInline = opts.inlineChoices === true || choices.length === 1 || isQuestScreen;
       var btns = [];
+      _openChoicesModal = null;
       if (useInline) {
         choices.forEach(function(ch, idx) {
           var btn = document.createElement('button');
@@ -5196,16 +5438,19 @@
         btn.innerHTML = '<span class="enc-btn-choose-icon">⚔</span>' +
                         '<span class="enc-btn-choose-label">' + _stripEmojis(_chooseBtnText) + '</span>' +
                         '<span class="enc-btn-choose-count">' + choices.length + '</span>';
-        btn.addEventListener('click', function() {
+        _openChoicesModal = function() {
           openChoices(choices, {
             title: _stripEmojis((dialogue && (dialogue.choicesTitle || dialogue.title)) || 'Escolher ação'),
             npcName: _stripEmojis((dialogue && dialogue.choicesSubtitle) || (dialogue && dialogue.npc && dialogue.npc.name) || ''),
             compact: (dialogue && dialogue.compact) || opts.compact || false,
             dialogue: dialogue,
+            isSubmenu: Boolean(opts.isSubmenu || (dialogue && dialogue.isSubmenu)),
+            contextSpeech: (dialogue && dialogue.contextSpeech) || '',
             isQuestScreen: isQuestScreen,
             onChoice: _handleChoiceInternal
           });
-        });
+        };
+        btn.addEventListener('click', _openChoicesModal);
         btns.push(btn);
       }
       /* sessão #90 (user): AÇÃO ÚNICA fica na MESMA FAIXA do "← Anterior" (nav band),
@@ -5222,11 +5467,56 @@
         btns.forEach(function(b) { actions.appendChild(b); });
         actions.style.display = '';
       }
+      if (_autoOpenPending || _isNavContext) {
+        _autoOpenPending = false;
+        if (typeof _openChoicesModal === 'function') {
+          _openChoicesModal();
+        }
+      }
     }
 
     /* Dispatch único usado por renderActions (closure sobre dialogue + opts). */
     function _handleChoiceInternal(ch) {
-      closeChoices(true); /* fecha sub-overlay imediatamente antes de dispatch */
+      var isClosingChoice = Boolean(
+        ch.cb === 'close' || ch.id === 'leave' || ch.id === 'close' || ch.id === '_enc_auto_close'
+      );
+      var _isSubInternal = Boolean(
+        !isClosingChoice && (
+        ch.isSubmenu || ch.isCategory || ch.isReturn || ch._replyScript || ch.replyScript || ch.resultScript ||
+        (typeof ch.cb === 'function') ||
+        (opts.isSubmenu && ch.cb !== 'close' && ch.id !== 'leave') ||
+        (dialogue && dialogue.isSubmenu && ch.cb !== 'close' && ch.id !== 'leave') ||
+        (ch.id && (
+          String(ch.id).startsWith("topic_") ||
+          String(ch.id).startsWith("camp_top_") ||
+          String(ch.id).startsWith("nav_") ||
+          String(ch.id).startsWith("pick_ally_") ||
+          String(ch.id).startsWith("shop_cat_") ||
+          String(ch.id).startsWith("craft_cat_") ||
+          String(ch.id).startsWith("back_") ||
+          String(ch.id) === "back" ||
+          String(ch.id) === "return" ||
+          String(ch.id) === "next" ||
+          String(ch.id).endsWith("_back") ||
+          String(ch.id).indexOf("return_") >= 0
+        )) ||
+        (ch.label && (
+          String(ch.label).indexOf("Voltar") >= 0 ||
+          String(ch.label).indexOf("↩") >= 0 ||
+          String(ch.label).indexOf("←") >= 0 ||
+          String(ch.label).indexOf("outro assunto") >= 0 ||
+          String(ch.label).indexOf("este assunto") >= 0 ||
+          String(ch.label).indexOf("Interagir") >= 0 ||
+          String(ch.label).endsWith("▸") ||
+          String(ch.label).endsWith("►") ||
+          String(ch.label).endsWith(">")
+        )) ||
+        Boolean(ch.continueDialogue || ch.target || (opts.dialogues && ch.id && opts.dialogues[ch.id]) || ch.result === 'goto_dialog')
+        )
+      );
+      if (!_isSubInternal) {
+        closeChoices(true);
+      }
       /* sessão #76: diálogos de ALIADO (npc.id 'ally_*') marcam a pergunta de
          LORE como USADA ao escolher — mesmo em falha de skill check → não
          reaparece. B2.2 #90: SÓ marca choices `_oneShot` (perguntas de lore);
@@ -5324,8 +5614,14 @@
       }
       var cb = ch.cb || '';
       if (cb === 'close') { close(); return; }
-      if (opts.dialogues && opts.dialogues[ch.id]) {
-        render(opts.dialogues[ch.id], opts);
+      var _targetNodeKey = (opts.dialogues && (
+        (ch.continueDialogue && opts.dialogues[ch.continueDialogue]) ? ch.continueDialogue :
+        (ch.target && opts.dialogues[ch.target]) ? ch.target :
+        (ch.id && opts.dialogues[ch.id]) ? ch.id : null
+      ));
+      if (_targetNodeKey && opts.dialogues && opts.dialogues[_targetNodeKey]) {
+        var isLoreNode = (String(_targetNodeKey || '').indexOf('about_') === 0);
+        render(opts.dialogues[_targetNodeKey], Object.assign({}, opts, { autoOpenChoices: !isLoreNode }));
         return;
       }
       // task #70 (2026-05-20) — BACKEND DISPATCH FALLBACK
@@ -5372,15 +5668,21 @@
       getCurrentPage: function() { return currentPage; },
       setCurrentPage: function(cp) { currentPage = cp; },
       renderPage: renderPage,
-      renderActions: renderActions
+      renderActions: renderActions,
+      openChoicesModal: function() {
+        if (typeof _openChoicesModal === 'function') _openChoicesModal();
+      }
     };
 
     var _startPg = (opts && typeof opts.startPage === 'number' && opts.startPage > 0)
       ? Math.min(opts.startPage, pages.length - 1)
-      : 0;
+      : (_isNavContext ? Math.max(0, pages.length - 1) : 0);
     currentPage = _startPg;
     _saveActiveState(dialogue, opts, currentPage);
     renderPage(_startPg);
+    if (_isNavContext) {
+      _instantReveal();
+    }
   }
 
   /* Conexão transparente com dados remotos (Ordem do Usuário 2026-10):
@@ -5394,6 +5696,8 @@
     newOpts = newOpts || {};
 
     if (data.choices) dialogue.choices = data.choices;
+    if (data.choicesTitle) dialogue.choicesTitle = data.choicesTitle;
+    if (data.choicesSubtitle) dialogue.choicesSubtitle = data.choicesSubtitle;
     if (newOpts.onChoice) {
       inst.opts.onChoice = newOpts.onChoice;
       if (inst.rawOpts) inst.rawOpts.onChoice = newOpts.onChoice;
@@ -5420,18 +5724,30 @@
       }
     }
 
+    var isReturn = Boolean(data && data.is_return);
     var existingScript = dialogue.script || [];
     var incomingScript = (data.script && Array.isArray(data.script)) ? data.script : [];
-    var combinedScript = existingScript.slice();
-    incomingScript.forEach(function(incLine) {
-      if (!incLine) return;
-      var isDup = combinedScript.some(function(extLine) {
-        return extLine && extLine.text && _normalizeTextForSeen(extLine.text) === _normalizeTextForSeen(incLine.text);
+    var combinedScript;
+
+    if (isReturn && inst.opts && inst.opts.pendingRemote) {
+      // REGRA SOBERANA: Em visitas de retorno, NUNCA mantém a narração teatral de aproximação.
+      // O script é estritamente a fala curta e viva de retorno do NPC.
+      combinedScript = incomingScript.filter(function(n) {
+        return n && (n.type === 'speech' || n.type === 'dialogue');
       });
-      if (!isDup) {
-        combinedScript.push(incLine);
-      }
-    });
+      if (combinedScript.length === 0) combinedScript = incomingScript.slice();
+    } else {
+      combinedScript = existingScript.slice();
+      incomingScript.forEach(function(incLine) {
+        if (!incLine) return;
+        var isDup = combinedScript.some(function(extLine) {
+          return extLine && extLine.text && _normalizeTextForSeen(extLine.text) === _normalizeTextForSeen(incLine.text);
+        });
+        if (!isDup) {
+          combinedScript.push(incLine);
+        }
+      });
+    }
     dialogue.script = combinedScript;
 
     // Atualiza histórico com as falas recebidas dinamicamente
@@ -5444,6 +5760,31 @@
 
     var newPages = _groupScriptIntoPages(combinedScript);
     inst.setPages(newPages);
+
+    var wantAutoOpen = Boolean(
+      (newOpts && newOpts.autoOpenChoices) ||
+      (data && data.autoOpenChoices) ||
+      (inst.opts && inst.opts.autoOpenChoices)
+    );
+    if (wantAutoOpen && newPages.length > 0 && typeof inst.renderPage === 'function') {
+      var lastPg = Math.max(0, newPages.length - 1);
+      inst.setCurrentPage(lastPg);
+      inst.renderPage(lastPg);
+      _instantReveal();
+      inst.renderActions();
+      if (typeof inst.openChoicesModal === 'function' && Array.isArray(dialogue.choices) && dialogue.choices.length > 1) {
+        inst.openChoicesModal();
+      }
+      _saveActiveState(dialogue, inst.opts, lastPg);
+      return true;
+    }
+
+    if (isReturn && inst.opts && inst.opts.pendingRemote && typeof inst.renderPage === 'function') {
+      inst.setCurrentPage(0);
+      inst.renderPage(0);
+      _saveActiveState(dialogue, inst.opts, 0);
+      return true;
+    }
 
     var curPage = inst.getCurrentPage();
     var isLastPage = curPage >= newPages.length - 1;

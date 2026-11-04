@@ -377,7 +377,7 @@ function _tmpBuildNpcRow(data) {
       return;
     }
     if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
-      window.vEncounter.render(BREVON_DIALOGUE, { dialogues: SERVICE_DIALOGUES_TEMPLE });
+      window.vEncounter.render(BREVON_DIALOGUE, { dialogues: SERVICE_DIALOGUES_TEMPLE, autoOpenChoices: true });
     }
   });
 
@@ -552,7 +552,7 @@ function _tmpBuildServices(services) {
         var dialogue = SERVICE_DIALOGUES_TEMPLE[dialogueKey];
         if (dialogue && typeof window.vEncounter === 'object' && window.vEncounter.render) {
           window._SVC_CONFIG = window._SVC_CONFIG_TEMPLE;
-          window.vEncounter.render(dialogue, { dialogues: SERVICE_DIALOGUES_TEMPLE });
+          window.vEncounter.render(dialogue, { dialogues: SERVICE_DIALOGUES_TEMPLE, autoOpenChoices: true });
         } else if (typeof vCity.act === 'function') {
           console.warn('[TEMPLE] no dialogue mapped for cb=' + svc.cb + ', fallback vCity.act');
           vCity.act(svc.cb);

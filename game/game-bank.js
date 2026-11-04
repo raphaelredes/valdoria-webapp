@@ -59,7 +59,7 @@ var ALDWIN_DIALOGUE = {
   },
   script: [
     { type: 'narration', text: 'O salão principal do Banco de Valdoria respira em silêncio. Lustres de ferro forjado sustentam velas de cera virgem que pingam lentas sobre bandejas de bronze. Atrás de um balcão de mogno escuro, Aldwin — vestes de veludo azul-marinho debruadas a fio de ouro, monóculo pendurado no peito, dedos finos manchados de tinta sépia — ergue os olhos do livro de tarja com a precisão de quem soma fortunas há vinte e dois anos.' },
-    { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Bem-vindo. <i>(fecha o livro com um clique de fivela de prata)</i> Sente-se, por favor. O cofre está aberto até a oitava hora, e a Casa de Tholram honra todo selo que entra por aquela porta.' },
+    { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Bem-vindo. <i>(fecha o livro com um clique de fivela de prata)</i> Sente-se, por favor. O cofre está aberto até o cair da noite, e a Casa de Tholram honra todo selo que entra por aquela porta.' },
     { type: 'speech', speaker: 'Aldwin de Tholram', text: 'O Cofre Real opera pelo padrão Tholram. <i>(passa o monóculo pelos números do livro)</i> Cem peças de cobre fazem dez de prata; dez de prata, uma de ouro; cem de ouro, uma de platina. <i>(sorri com cortesia medida)</i> Os números são velhos. As pessoas, não.' },
     { type: 'speech', speaker: 'Aldwin de Tholram', text: 'O que traz você à Casa de Tholram? <i>(entrelaça os dedos sobre o balcão)</i> Depósito, retirada, ou negócio de maior peso? Tudo passa por aqui — só uma coisa nunca sai: a discrição.' }
   ],
@@ -108,7 +108,7 @@ var SERVICE_DIALOGUES_BANK = {
     script: [
       { type: 'narration', text: 'Aldwin puxa o grande livro de retiradas para o centro do balcão de mármore, destrava a gaveta de mogno com uma chave presa ao colete e posiciona o sinete oficial da Casa ao lado do tinteiro.' },
       { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Retirada exige selo e contra-selo. <i>(estende a mão, palma pra cima)</i> O selo que você possui — o anel da Casa, marcado quando da abertura da conta. O contra-selo está aqui, na minha gaveta.' },
-      { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Dois por cento de taxa em retiradas — política da Casa, não decisão minha. <i>(coloca o carimbo sobre o lacre)</i> Quanto você precisa hoje? O cofre não fecha até a oitava hora.' }
+      { type: 'speech', speaker: 'Aldwin de Tholram', text: 'Dois por cento de taxa em retiradas — política da Casa, não decisão minha. <i>(coloca o carimbo sobre o lacre)</i> Quanto você precisa hoje? O cofre não fecha até o cair da noite.' }
     ],
     choices: [
       // task #64: backend canonical bank.py:361-372 "bank_withdraw_gold_<amount>"
@@ -415,7 +415,7 @@ function _bnkBuildNpcRow(data) {
   name.textContent = 'Aldwin de Tholram';
   info.appendChild(name);
   var quote = vCity.el('div', 'quote');
-  quote.textContent = '"Bem-vindo, cliente. O cofre real abre na quarta hora."';
+  quote.textContent = '"Bem-vindo, cliente. O cofre real abre ao romper do dia."';
   info.appendChild(quote);
   row.appendChild(info);
 
@@ -436,7 +436,7 @@ function _bnkBuildNpcRow(data) {
     }
     if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
       window._SVC_CONFIG = window._SVC_CONFIG_BANK;
-      window.vEncounter.render(ALDWIN_DIALOGUE, { dialogues: SERVICE_DIALOGUES_BANK });
+      window.vEncounter.render(ALDWIN_DIALOGUE, { dialogues: SERVICE_DIALOGUES_BANK, autoOpenChoices: true });
     }
   });
 
@@ -532,7 +532,7 @@ function _bnkBuildServices(services) {
         var dialogue = SERVICE_DIALOGUES_BANK[dialogueKey];
         if (dialogue && typeof window.vEncounter === 'object' && window.vEncounter.render) {
           window._SVC_CONFIG = window._SVC_CONFIG_BANK;
-          window.vEncounter.render(dialogue, { dialogues: SERVICE_DIALOGUES_BANK });
+          window.vEncounter.render(dialogue, { dialogues: SERVICE_DIALOGUES_BANK, autoOpenChoices: true });
         } else if (typeof vCity.act === 'function') {
           console.warn('[BANK] no dialogue mapped for cb=' + svc.cb + ', fallback vCity.act');
           vCity.act(svc.cb);

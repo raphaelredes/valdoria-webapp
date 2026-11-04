@@ -223,7 +223,7 @@ function _mktBuildMerchantRow(npcKey, merchantData) {
   }
 
   // Click → open PADRAO_ALDRIC dialogue
-  row.addEventListener('click', function(){
+  function openMerchantDlg(opts) {
     if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
       window._SVC_CONFIG = window._SVC_CONFIG_MARKET;
       window.vEncounter.render({
@@ -231,6 +231,7 @@ function _mktBuildMerchantRow(npcKey, merchantData) {
         script: npcDef.script,
         choices: npcDef.choices
       }, {
+        autoOpenChoices: !(opts && opts.autoOpenChoices === false),
         /* sessão #76 FIX: as choices usavam cb 'market_interact_menu_<role>' —
            cbs de BACKEND que NÃO estão registrados no client-mock → clicar
            "Ver inventário/poções/mapas" não fazia NADA (bug reportado: Thorne,
@@ -244,7 +245,7 @@ function _mktBuildMerchantRow(npcKey, merchantData) {
             if (window._popupStack && Array.isArray(window._popupStack)) {
               window._popupStack.push({
                 onClose: function() {
-                  setTimeout(function() { row.click(); }, 50);
+                  setTimeout(function() { openMerchantDlg({ autoOpenChoices: true }); }, 50);
                 }
               });
             }
@@ -255,7 +256,8 @@ function _mktBuildMerchantRow(npcKey, merchantData) {
     } else if (merchantData && merchantData.cb && typeof vCity.act === 'function') {
       vCity.act(merchantData.cb);
     }
-  });
+  }
+  row.addEventListener('click', function(){ openMerchantDlg(); });
 
   return row;
 }

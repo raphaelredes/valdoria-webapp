@@ -661,6 +661,7 @@ function _renderScene(sceneFn) {
   _ensureForestMusic();
   const dialogue = sceneFn();
   vEncounter.render(dialogue, {
+    autoOpenChoices: true,
     onChoice: function(ch) {
       _dispatchPrologueChoice(ch);
     }

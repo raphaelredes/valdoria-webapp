@@ -13590,6 +13590,7 @@ body.perf-lite .vc-action-btn { transition: none; }
             choices: [{ id: 'rise', label: 'Erguer-se do Altar' }]
           }, {
             player: window.CITY_MOCK_PLAYER, closeable: false,
+            autoOpenChoices: true,
             onChoice: function(){
               // 2026-06-21 (user): após "Erguer-se do Altar", a TELA ATUAL deve ser o
               // TEMPLO (não o hub principal). openCityPopup('temple') dismissa o encounter
@@ -13611,6 +13612,50 @@ body.perf-lite .vc-action-btn { transition: none; }
         var gone = (!l || l.offsetParent === null);
         if (gone) { setTimeout(_showTempleAwakening, 600); return; }
         if (_tries++ > 70) { _showTempleAwakening(); return; }
+        setTimeout(_waitLoading, 200);
+      })();
+    })();
+  }
+
+  // VITÓRIA NO PORÃO DA MARTHA → cena de rescaldo no local (cellar aftermath):
+  // Não joga o jogador direto na tela principal da cidade; apresenta narrativa
+  // rica do ninho derrotado e escolhas de ação (vasculhar / falar com Martha / voltar à estalagem).
+  if (params.get('from') === 'cellar_victory') {
+    (function(){
+      function _showCellarAftermath(){
+        if (!window.vCityServer || !window.vCityServer.isRemote || !window.vCityServer.isRemote() ||
+            !window.vEncounter || typeof window.vEncounter.render !== 'function') return;
+        window.vCityServer.cityAction('inn.cellar_aftermath', {}).then(function(res){
+          if (!res || !res.ok || !res.script || !window.vEncounter) return;
+          window.vEncounter.render({
+            npc: res.npc || { name: 'Porão da Pena-Dourada', desc: 'Ninho dos Roedores', portrait: '/shared/img/npcs/martha.webp' },
+            script: res.script,
+            choices: res.choices || []
+          }, {
+            player: window.CITY_MOCK_PLAYER, closeable: true,
+            autoOpenChoices: true,
+            onChoice: function(ch){
+              if (ch && ch.id === 'search_nest') {
+                _resolveCityChoice('inn', 'martha', 'search_nest', window.CITY_MOCK_PLAYER, res.npc, {});
+                return;
+              }
+              if (ch && ch.id === 'report_martha') {
+                try { window.vEncounter.close(); } catch(_){}
+                _openCityDialogue('inn', 'martha', window.CITY_MOCK_PLAYER);
+                return;
+              }
+              try { window.vEncounter.close(); } catch(_){}
+              if (typeof openCityPopup === 'function') openCityPopup('inn');
+            }
+          });
+        }).catch(function(_e){ if (window.console && console.warn) console.warn('[CITY] cellar_aftermath', _e); });
+      }
+      var _tries = 0;
+      (function _waitLoading(){
+        var l = document.getElementById('loading');
+        var gone = (!l || l.offsetParent === null);
+        if (gone) { setTimeout(_showCellarAftermath, 600); return; }
+        if (_tries++ > 70) { _showCellarAftermath(); return; }
         setTimeout(_waitLoading, 200);
       })();
     })();
@@ -22527,7 +22572,7 @@ function _openLegendNpc(key){
         { type: 'speech', speaker: npc.name, text: quotes[key] || '' }
       ],
       choices: [{ id: 'close', label: 'Outra hora' }]
-    }, { onChoice: function(){} });
+    }, { onChoice: function(){}, autoOpenChoices: true });
   } catch(e){ console.warn('[CITY] openLegendNpc:', e); }
 }
 
@@ -26288,7 +26333,7 @@ function _showTempleNpcDialogue(sid){
   if (dialogue && typeof window.vEncounter === 'object' && window.vEncounter.render) {
     // Set _SVC_CONFIG_TEMPLE pra que _dispatchSvcChoice use as reactions corretas
     window._SVC_CONFIG = window._SVC_CONFIG_TEMPLE;
-    window.vEncounter.render(dialogue, { dialogues: window.SERVICE_DIALOGUES_TEMPLE });
+    window.vEncounter.render(dialogue, { dialogues: window.SERVICE_DIALOGUES_TEMPLE, autoOpenChoices: true });
     return;
   }
   // Fallback legacy — usado APENAS se PADRAO_ALDRIC não carregou (defesa).
@@ -28380,7 +28425,7 @@ function _transientListIcon(npc){
 // canonical: TRANSIENT_POOL NPC popup — saudação + chat (linhas ambientes) + items
 // Replica fluxo do bot DEV (market.py L155-200): NPC ambulante mostra greeting,
 // abre inventário com items canonical, cada item com confirm popup → _pay → result.
-function _marketShowTransient(p, npc){
+function _marketShowTransient(p, npc, opts){
   // Sessão #23 v8 (2026-05-22): user pediu VIAJANTES PADRAO_ALDRIC + PNGs
   // zoomable. Migrado de popup simples pra vEncounter.render quando disponível.
   // Imagens em /shared/img/npcs/{npc.id}.webp (migradas pra WebP em 2026-05-27).
@@ -28426,6 +28471,7 @@ function _marketShowTransient(p, npc){
     };
 
     window.vEncounter.render(dialogue, {
+      autoOpenChoices: !(opts && opts.autoOpenChoices === false),
       onChoice: function(ch, _dlg){
         var cb = ch.cb || '';
         if (cb.indexOf('transient-buy:') === 0) {
@@ -28472,7 +28518,7 @@ function _marketShowTransient(p, npc){
                     narrative: '<i>' + npc.name + ' embrulha o item com cuidado.</i><br><br>'
                              + '<b>' + (res.item_added || item.name) + '</b> vai pra sua bolsa.',
                     deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
-                    onContinue: function(){ _marketShowTransient(p, npc); }
+                    onContinue: function(){ _marketShowTransient(p, npc, { autoOpenChoices: true }); }
                   });
                 }).catch(function(e){ if (_proc) _proc.hide(); vToast('Erro de conexão.', 'err'); console.error('[CITY] transient buy', e); });
                 return;
@@ -28484,7 +28530,7 @@ function _marketShowTransient(p, npc){
                 narrative: '<i>' + npc.name + ' embrulha o item com cuidado.</i><br><br>'
                          + '<b>' + item.name + '</b> adicionado à sua bolsa.',
                 deltas: [{ type:'gold', label:'Bolsa', from: preGold, to: p.gold, max: Math.max(preGold, 1), bar: false }],
-                onContinue: function(){ _marketShowTransient(p, npc); }
+                onContinue: function(){ _marketShowTransient(p, npc, { autoOpenChoices: true }); }
               });
             }
           });
@@ -30190,14 +30236,14 @@ function renderRelationsScreen(container, relData, player){
 // MIN_LEVEL=3, MAX_ACTIVE_OFFERS=3, MAX_GOLD_PER_TRADE=5000, COMMISSION 5%, EXPIRY 48h.
 // Ofertas mostradas vêm do DB de outros aventureiros (mock simulando o feed real).
 var TRADE_BOARD_OFFERS = [
-  { id: 'tb_001', icon: _heralIco('ic-stat-attack'), item: 'Espada Curta +1',     price: 350, seller: 'Korin Bladwen',     time: '2h atrás' },
-  { id: 'tb_002', icon: _heralIco('ic-stat-ac'), item: 'Escudo de Aço',       price: 180, seller: 'Brand Stengar',      time: '5h atrás' },
-  { id: 'tb_003', icon: _heralIco('ic-poção'), item: 'Poção de Cura (3x)',  price: 90,  seller: 'Mira Herveth',   time: '7h atrás' },
-  { id: 'tb_004', icon: _heralIco('ic-escriba'), item: 'Pergaminho: Mísseis Mágicos', price: 220, seller: 'Velgar Nyctel', time: '12h atrás' },
-  { id: 'tb_005', icon: _heralIco('ic-ach-colecionador'), item: 'Anel de Proteção',    price: 800, seller: 'Sira Sirvane',    time: '18h atrás' },
-  { id: 'tb_006', icon: _heralIco('ic-patrulheiro'), item: 'Arco Longo Élfico',   price: 450, seller: 'Aenir Zephyrael',      time: '22h atrás' },
-  { id: 'tb_007', icon: _heralIco('ic-bolsa'), item: 'Bolsa de Pedras Preciosas', price: 1200, seller: 'Drogan Aurmund', time: '32h atrás' },
-  { id: 'tb_008', icon: _heralIco('ic-stat-str'), item: 'Luvas de Escalada',   price: 75,  seller: 'Pip Velkar',        time: '40h atrás' }
+  { id: 'tb_001', icon: _heralIco('ic-stat-attack'), item: 'Espada Curta +1',     price: 350, seller: 'Korin Bladwen',     time: 'neste ciclo' },
+  { id: 'tb_002', icon: _heralIco('ic-stat-ac'), item: 'Escudo de Aço',       price: 180, seller: 'Brand Stengar',      time: 'no alvorecer' },
+  { id: 'tb_003', icon: _heralIco('ic-poção'), item: 'Poção de Cura (3x)',  price: 90,  seller: 'Mira Herveth',   time: 'hoje cedo' },
+  { id: 'tb_004', icon: _heralIco('ic-escriba'), item: 'Pergaminho: Mísseis Mágicos', price: 220, seller: 'Velgar Nyctel', time: 'no ciclo anterior' },
+  { id: 'tb_005', icon: _heralIco('ic-ach-colecionador'), item: 'Anel de Proteção',    price: 800, seller: 'Sira Sirvane',    time: 'ontem à noite' },
+  { id: 'tb_006', icon: _heralIco('ic-patrulheiro'), item: 'Arco Longo Élfico',   price: 450, seller: 'Aenir Zephyrael',      time: 'ontem ao entardecer' },
+  { id: 'tb_007', icon: _heralIco('ic-bolsa'), item: 'Bolsa de Pedras Preciosas', price: 1200, seller: 'Drogan Aurmund', time: 'há um dia' },
+  { id: 'tb_008', icon: _heralIco('ic-stat-str'), item: 'Luvas de Escalada',   price: 75,  seller: 'Pip Velkar',        time: 'há dois dias' }
 ];
 
 function _buildTradeBoardMockData(player){
@@ -31053,8 +31099,9 @@ function _buildPassagensMockData(player){
   };
 }
 
-function _openBlackMarketEncounter(p){
+function _openBlackMarketEncounter(p, opts){
   p = p || window.CITY_MOCK_PLAYER;
+  var autoOpen = !(opts && opts.autoOpenChoices === false);
   var storedUnlocked = false;
   try {
     storedUnlocked = localStorage.getItem('valdoria_blackmarket_unlocked_' + (window._charId || 'default')) === '1';
@@ -31100,6 +31147,7 @@ function _openBlackMarketEncounter(p){
       choices: choices
     }, {
       player: p,
+      autoOpenChoices: autoOpen,
       onChoice: function(ch){
         if (!ch || ch.id === 'leave') {
           try { window.vEncounter.close(); } catch(_){}
@@ -31122,6 +31170,7 @@ function _openBlackMarketEncounter(p){
             ]
           }, {
             player: p,
+            autoOpenChoices: true,
             onChoice: function(){
               try { window.vEncounter.close(); } catch(_){}
               window._blackMarketUnlocked = true;
@@ -31161,6 +31210,7 @@ function _openBlackMarketEncounter(p){
               : [{ id: 'leave', label: '↩ Recuar' }]
           }, {
             player: p,
+            autoOpenChoices: true,
             onChoice: function(subCh){
               try { window.vEncounter.close(); } catch(_){}
               if (success && subCh && subCh.id === 'enter') {
@@ -31190,9 +31240,10 @@ function _openBlackMarketEncounter(p){
             ]
           }, {
             player: p,
+            autoOpenChoices: true,
             onChoice: function(subCh){
               if (subCh && subCh.id === 'retry') {
-                _openBlackMarketEncounter(p);
+                _openBlackMarketEncounter(p, { autoOpenChoices: true });
                 return;
               }
               try { window.vEncounter.close(); } catch(_){}
@@ -31948,6 +31999,7 @@ function _showQuestCompletionEncounter(questId, gold, xp, destInfo, onDone) {
       choicesSubtitle: (destInfo && (destInfo.placeName || destInfo.destKey)) || 'Valdoria'
     }, {
       player: p,
+      autoOpenChoices: true,
       progress: { isCityWalk: false, title: '◈ ENTREGA DE MISSÃO', destination: (destInfo && (destInfo.placeName || destInfo.destKey)) || 'Valdoria' },
       inlineChoices: true,
       onChoice: function() {
@@ -35810,7 +35862,7 @@ function _npcHandleTalkEncounter(p, npc, opt, opts){
           var ov = document.getElementById('city-subscreen-popup');
           if (ov) ov.classList.remove('active');
         }
-        _showSharedNpcDialogue(opts);
+        _showSharedNpcDialogue(Object.assign({}, opts, { autoOpenChoices: true }));
       };
     }
     _showShopPopup(npc.id);
@@ -35947,15 +35999,86 @@ function _showSharedNpcDialogue(opts, internalState){
     // da escolha (bug reportado). Agora: saudação+desc só na 1ª abertura; ao
     // responder uma pergunta, mostra SÓ a fala da resposta. Vale p/ todos os NPCs.
     var script = [];
+    var isAnimalNpc = Boolean(npc && (npc._canonKey === 'chicken' || npc._canonKey === 'dog_stray' || npc._canonKey === 'cat_alley' || npc._canonKey === 'pigeon_flock'));
     if (internalState && internalState.answer) {
-      var rawAns = String(internalState.answer.text || '');
-      var leadItal = rawAns.match(/^\s*<i>([\s\S]*?)<\/i>\s*([\s\S]*)$/);
-      if (leadItal && leadItal[2].trim()) {
-        script.push({ type: 'narration', text: leadItal[1].trim() });
-        script.push({ type: 'speech', speaker: npc.name || '', text: leadItal[2].trim() });
+      var rawAns = String(internalState.answer.text || '').trim();
+      var spkName = (npc && npc.name) || 'Cidadão';
+      var paragraphs = rawAns.split(/(?:<br\s*\/?>\s*){2,}|\n\n/).map(function(s){ return s.trim(); }).filter(Boolean);
+      if (isAnimalNpc) {
+        paragraphs.forEach(function(par) {
+          script.push({ type: 'narration', text: par });
+        });
+      } else if (paragraphs.length > 1) {
+        var inlineQuoteRe = /<i>\s*["“«]([\s\S]*?)["”»]\s*<\/i>/;
+        paragraphs.forEach(function(par) {
+          var parenMatch = par.match(/^<i>\s*\(([\s\S]*?)\)\s*<\/i>$/);
+          if (parenMatch) {
+            var pTxt = parenMatch[1].replace(/\s*—\s*\+\d+\s*XP/i, '').trim();
+            if (pTxt) script.push({ type: 'narration', text: pTxt });
+            return;
+          }
+          var pureItalQuote = par.match(/^<i>\s*["“«]([\s\S]*?)["”»]\s*<\/i>$/);
+          if (pureItalQuote) {
+            script.push({ type: 'speech', speaker: spkName, text: pureItalQuote[1].trim() });
+            return;
+          }
+          var pureQuote = par.match(/^["“«]([\s\S]*?)["”»]$/);
+          if (pureQuote) {
+            script.push({ type: 'speech', speaker: spkName, text: pureQuote[1].trim() });
+            return;
+          }
+          if (inlineQuoteRe.test(par)) {
+            var qParts = par.split(inlineQuoteRe);
+            for (var qi = 0; qi < qParts.length; qi++) {
+              if (qi % 2 === 1) {
+                var qSp = qParts[qi].replace(/^[\s"“«]+|[\s"”»]+$/g, '').trim();
+                if (qSp) script.push({ type: 'speech', speaker: spkName, text: qSp });
+              } else {
+                var qNr = qParts[qi].replace(/^[\s—\-:,]+|[\s—\-:]+$/g, '').trim();
+                if (qNr) {
+                  if (/^[a-záàâãéêíóôõúç]/.test(qNr)) qNr = qNr.charAt(0).toUpperCase() + qNr.slice(1);
+                  if (!/[.!?…]$/.test(qNr)) qNr += '.';
+                  script.push({ type: 'narration', text: qNr });
+                }
+              }
+            }
+            return;
+          }
+          script.push({ type: 'narration', text: par });
+        });
       } else {
-        script.push({ type: 'narration', text: (npc.name || 'O interlocutor') + ' ouve com atenção antes de responder.' });
-        script.push({ type: 'speech', speaker: npc.name || '', text: rawAns });
+        var trailingMech = [];
+        rawAns = rawAns.replace(/\s*<b>([^<]+)<\/b>\s*$/g, function(_m, innerB) {
+          if (!/^["“«]/.test(innerB.trim())) {
+            trailingMech.push(innerB.trim());
+            return '';
+          }
+          return _m;
+        }).trim();
+        var leadItal = rawAns.match(/^\s*<i>([\s\S]*?)<\/i>\s*([\s\S]*)$/);
+        if (leadItal && leadItal[2].trim()) {
+          script.push({ type: 'narration', text: leadItal[1].replace(/^\(|\)$/g, '').trim() });
+          script.push({ type: 'speech', speaker: spkName, text: leadItal[2].replace(/^[\s"“«]+|[\s"”»]+$/g, '').trim() });
+        } else if (leadItal && !leadItal[2].trim()) {
+          var innerItal = leadItal[1].trim();
+          if (/^["«“'—]/.test(innerItal)) {
+            script.push({ type: 'narration', text: spkName + ' ouve com atenção antes de responder.' });
+            script.push({ type: 'speech', speaker: spkName, text: innerItal.replace(/^[\s"“«]+|[\s"”»]+$/g, '').trim() });
+          } else {
+            script.push({ type: 'narration', text: innerItal.replace(/^\(|\)$/g, '').trim() });
+          }
+        } else if (!/["“«]/.test(rawAns) && /^(?:Você|Vocês|Entre|O |A |Os |As |Um |Uma |Sob |Do |Crianças|Guardas|Bandeirolas|Enquanto)/i.test(rawAns)) {
+          script.push({ type: 'narration', text: rawAns });
+        } else {
+          script.push({ type: 'narration', text: spkName + ' ouve com atenção antes de responder.' });
+          script.push({ type: 'speech', speaker: spkName, text: rawAns.replace(/^[\s"“«]+|[\s"”»]+$/g, '').trim() });
+        }
+        trailingMech.forEach(function(tm) {
+          script.push({ type: 'narration', text: '<b>' + tm + '</b>' });
+        });
+      }
+      if (script.length > 0 && script[0].type === 'speech') {
+        script.unshift({ type: 'narration', text: spkName + ' ouve com atenção antes de responder.' });
       }
       if (internalState.reward) {
         script.push({
@@ -35965,18 +36088,28 @@ function _showSharedNpcDialogue(opts, internalState){
           items: internalState.reward.items
         });
       }
+    } else if (isAnimalNpc) {
+      script.push({ type: 'narration', text: npc.desc || ((npc.name || 'O animal') + ' circula pela praça.') });
     } else {
       var greeting = _npcGreet(npc) || '— Saudações, viajante.';  // PADRAO_ALDRIC: narração sensorial do Mestre SEMPRE precede a fala (Regra #14)
       var openLeadItal = String(greeting).match(/^\s*<i>([\s\S]*?)<\/i>\s*([\s\S]*)$/);
+      if (openLeadItal && !openLeadItal[2].trim() && /^["«“'—]/.test(openLeadItal[1].trim())) {
+        greeting = openLeadItal[1].trim();
+        openLeadItal = null;
+      }
       if (npc.desc && npc.desc !== greeting) {
         script.push({ type: 'narration', text: npc.desc });
-      } else if (openLeadItal && openLeadItal[1].trim()) {
+        if (openLeadItal && openLeadItal[2].trim()) {
+          script.push({ type: 'narration', text: openLeadItal[1].trim() });
+          greeting = openLeadItal[2].trim();
+        }
+      } else if (openLeadItal && openLeadItal[2].trim()) {
         script.push({ type: 'narration', text: openLeadItal[1].trim() });
-        greeting = openLeadItal[2].trim() || greeting;
+        greeting = openLeadItal[2].trim();
       } else {
         script.push({ type: 'narration', text: (npc.name || 'O habitante') + ' nota sua aproximação e volta o olhar na sua direção.' });
       }
-      script.push({ type: 'speech', speaker: npc.name || '', text: greeting });
+      script.push({ type: 'speech', speaker: npc.name || '', text: greeting.replace(/^[\s"“«]+|[\s"”»]+$/g, '').trim() });
       if (available.length === 0) {
         script.push({ type: 'narration', text: 'Vocês já conversaram sobre todos os assuntos do momento.' });
       }
@@ -35997,6 +36130,7 @@ function _showSharedNpcDialogue(opts, internalState){
       { npc: { id: npc.id, name: npc.name || '', desc: roleDesc, portrait: portrait || '' },
         script: script, choices: choices },
       { player: p, closeable: true,
+        autoOpenChoices: Boolean(!internalState && opts && opts.autoOpenChoices),
         onChoice: function(ch){
           var opt = (npc.talkOptions || []).find(function(o){ return o.id === (ch && ch.id); });
           if (!opt) { try { window.vEncounter.close(); } catch(_){} return; }
@@ -36093,7 +36227,7 @@ function _npcHandleTalk(p, npc, opt, parentRestoreFn){
           ],
           onContinue: function(){
             // Volta pra dialogue do mesmo NPC com option agora marcada como usada
-            _showSharedNpcDialogue({ npc: npc, player: p, parentRestoreFn: parentRestoreFn });
+            _showSharedNpcDialogue({ npc: npc, player: p, parentRestoreFn: parentRestoreFn, autoOpenChoices: true });
           }
         });
       }
@@ -36176,7 +36310,7 @@ function _npcHandleTalk(p, npc, opt, parentRestoreFn){
       deltas: deltas,
       rewards: talkRewards.length ? talkRewards : undefined,
       onContinue: function(){
-        _showSharedNpcDialogue({ npc: npc, player: p, parentRestoreFn: parentRestoreFn });
+        _showSharedNpcDialogue({ npc: npc, player: p, parentRestoreFn: parentRestoreFn, autoOpenChoices: true });
       }
     });
   }
@@ -36477,8 +36611,8 @@ var SQUARE_NPCS = [
       '<i>Bartolomeu joga 3 facas no ar e se curva.</i> "Mais um espectador! Bem-vindo ao show!"'
     ],
     talkOptions: [
-      { id: 'watch',     q: 'Assistir Show',                a: '<i>Bartolomeu faz malabarismos com facas, foge de chamas e dança em corda bamba. A multidão aplaude.</i>' },
-      { id: 'challenge', q: 'Desafio Acrobático (DES)',  a: '<i>Você tenta acompanhar o ato. Bartolomeu te observa com sorriso desafiador — vai precisar de equilíbrio e reflexos pra impressionar.</i>' }
+      { id: 'watch',     q: 'Assistir Show',                a: '<i>Bartolomeu faz malabarismos com facas, foge de chamas e dança em corda bamba enquanto a multidão aplaude.</i> "A arte do risco, meu amigo! Que tal tentar na próxima?"' },
+      { id: 'challenge', q: 'Desafio Acrobático (DES)',  a: '<i>Você tenta acompanhar o ato enquanto Bartolomeu te observa com um sorriso desafiador.</i> "Equilíbrio firme nos calcanhares! Nada mal para quem carrega aço na cintura!"' }
     ]
   },
   {
@@ -36491,7 +36625,7 @@ var SQUARE_NPCS = [
       '<i>Isolde levanta os olhos prateados do pergaminho.</i> "As estrelas guardam mais segredos que os livros."'
     ],
     talkOptions: [
-      { id: 'listen',   q: 'Ouvir Histórias',          a: '<i>Isolde conta sobre as terras do norte e as constelações que guiam viajantes em noites sem lua.</i>' },
+      { id: 'listen',   q: 'Ouvir Histórias',          a: '<i>Isolde aponta para o horizonte e traça constelações no pergaminho.</i> "Nas terras do norte, quando a lua se esconde, apenas as estrelas frias separam o andarilho do abismo."' },
       { id: 'ask_map',  q: 'Locais (10 Valdoritas)',   a: '"Aqui está o caminho pra Caverna do Cristal. Use com sabedoria."', cost: 10 }
     ]
   },
@@ -36543,7 +36677,7 @@ var SQUARE_NPCS = [
       { id: 'ask_news', q: 'Pedir notícias da cidade',
         a: '"Volte sempre que precisar de notícia — eu sei de quase tudo que se conta na cidade."' },
       { id: 'listen_song', q: 'Ouvir uma canção (5 Valdoritas)',
-        a: '<i>Lyana canta uma balada antiga sobre dragões e portões esquecidos. A praça fica em silêncio por um momento.</i>',
+        a: '<i>Lyana dedilha uma balada antiga sobre dragões e portões esquecidos, deixando a praça em silêncio reverente.</i> "Que essa melodia acompanhe seus passos além das muralhas."',
         cost: 5 }
     ]
   }
@@ -41231,7 +41365,7 @@ var CANON_INTERACTION_RESULTS = {
   },
   "cobbler_hans": {
     "repair": [
-      "Você entrega suas botas surradas.\n\nHans vira cada bota, examina a sola, puxa a costura. <i>\"Hmm. Você pisa torto pro lado esquerdo. Vou reforçar aqui e trocar essa sola. Volta em uma hora.\"</i>\n\nEle já está puxando linha encerada antes de você concordar.",
+      "Você entrega suas botas surradas.\n\nHans vira cada bota, examina a sola, puxa a costura. <i>\"Hmm. Você pisa torto pro lado esquerdo. Vou reforçar aqui e trocar essa sola. Volta no pr\u00f3ximo ciclo.\"</i>\n\nEle já está puxando linha encerada antes de você concordar.",
       "Você mostra o rasgo na lateral da bota.\n\n<i>\"Isso aqui foi lâmina. Ou garra. Você anda em lugares perigosos, hein? Vou usar couro duplo. Não rasga de novo.\"</i>\n\nHans trabalha em silêncio concentrado, cada ponto firme e preciso.",
       "Você pede um conserto rápido.\n\n<i>\"Rápido? Não existe rápido e bom. Existe bom e pronto quando estiver pronto.\"</i> Hans aponta para o banco. <i>\"Senta ali. Não demora.\"</i>\n\nO som ritmado do martelo no couro preenche o silêncio como música."
     ],
@@ -41256,7 +41390,7 @@ var CANON_INTERACTION_RESULTS = {
   "potion_seller_nila": {
     "buy_tonic": [
       "Você aponta para um frasco borbulhante de líquido esverdeado.\n\n<i>\"Tônico de Vigor. Gosto horrível, efeito maravilhoso. Beba tudo de uma vez. E não cheire antes.\"</i>\n\nNila entrega o frasco com um sorriso que não alcança os olhos âmbar.",
-      "Você deposita as moedas e Nila seleciona um frasco azulado.\n\n<i>\"Esse lote ficou particularmente bom. Adicionei extrato de raiz-lunar. Vai sentir como se tivesse dormido doze horas.\"</i>\n\nO líquido brilha com uma luminosidade própria, quase hipnótica.",
+      "Você deposita as moedas e Nila seleciona um frasco azulado.\n\n<i>\"Esse lote ficou particularmente bom. Adicionei extrato de raiz-lunar. Vai sentir como se tivesse dormido uma noite inteira.\"</i>\n\nO líquido brilha com uma luminosidade própria, quase hipnótica.",
       "Você hesita antes de pagar.\n\n<i>\"Dúvidas? Normal. Mas já vendi trezentos desses e ninguém voltou reclamando. Bom... ninguém voltou. Brincadeira.\"</i>\n\nNila pisca lentamente e empurra o frasco em sua direção com um dedo lilás."
     ],
     "chat": [
@@ -42357,12 +42491,48 @@ function _renderEncounterOutcome(player, choice, data) {
     });
   }
 
-  // 2. Narração sensorial do resultado
+  // 2. Narração sensorial e falas diretas do resultado (separação canônica 3ª pessoa vs 1ª pessoa)
   if (data.narrative) {
-    scriptLines.push({
-      type: 'narration',
-      text: data.narrative
-    });
+    var rawOutNarr = String(data.narrative).trim();
+    var outQuoteRe = /(?:<(?:b|i)>\s*)?["“«]([\s\S]*?)["”»](?:\s*<\/(?:b|i)>)?/;
+    if (outQuoteRe.test(rawOutNarr)) {
+      var oParts = rawOutNarr.split(outQuoteRe);
+      for (var oi = 0; oi < oParts.length; oi++) {
+        if (oi % 2 === 1) {
+          var qText = oParts[oi].replace(/^[\s"“«]+|[\s"”»]+$/g, '').trim();
+          if (!qText) continue;
+          var prevChunk = (oParts[oi - 1] || '').replace(/<[^>]+>/g, ' ').trim();
+          var lastSent = prevChunk.split(/[.!?…]+/).map(function(s){ return s.trim(); }).filter(Boolean).pop() || '';
+          var isPlayerQuote = /^(?:Você\s+(?:recua|joga|se\s+ajoelha|se\s+planta|dá\s+um\s+passo)|Tira\s+duas\s+Valdoritas|Aperta\s+o\s+pulso|Solta\s+o\s+pulso)/i.test(lastSent)
+            || /^(?:Mestra\s+—|Calma\s+—|PARA,\s+IRMÃO|Vai\.\s|Não\s+tem\s+irmã\s+doente|Algumas\s+conversas\s+não\s+devem|Que\s+a\s+próxima\s+estrofe)/i.test(qText);
+          if (isPlayerQuote) {
+            var pSpk = (player && player.name && player.name !== 'Você') ? player.name : 'Você';
+            scriptLines.push({ type: 'speech', is_player: true, speaker: pSpk, text: qText });
+          } else {
+            var npcSpk = dnpc.name || 'Habitante';
+            if (npcSpk === 'Praça Central') {
+              if (/Aldric/i.test(prevChunk)) npcSpk = 'Guarda Aldric';
+              else if (/guarda/i.test(prevChunk)) npcSpk = 'Guarda da Praça';
+              else if (/mercador/i.test(prevChunk)) npcSpk = 'Mercador';
+              else if (/bardo/i.test(prevChunk)) npcSpk = 'Bardo de Rua';
+              else if (/mendigo/i.test(prevChunk)) npcSpk = 'Mendigo';
+              else if (/criança/i.test(prevChunk)) npcSpk = 'Criança';
+              else if (/vidente|véu/i.test(prevChunk)) npcSpk = 'Vidente';
+              else if (/brigão|irmãos/i.test(prevChunk)) npcSpk = 'Cidadão';
+            }
+            scriptLines.push({ type: 'speech', speaker: npcSpk, text: qText });
+          }
+        } else {
+          var nChunk = oParts[oi].trim();
+          if (nChunk) scriptLines.push({ type: 'narration', text: nChunk });
+        }
+      }
+    } else {
+      scriptLines.push({
+        type: 'narration',
+        text: rawOutNarr
+      });
+    }
   }
 
   // 3. Bloco canônico estruturado de Recompensa (XP / Valdoritas / Itens / Efeito)
@@ -42423,6 +42593,7 @@ function _renderEncounterOutcome(player, choice, data) {
       choices: outcomeChoices
     }, {
       player: player,
+      autoOpenChoices: true,
       onChoice: function(ch) {
         if (typeof ch.cb === 'function') ch.cb();
         else continueAction();
@@ -42475,7 +42646,7 @@ function _resolveInteractiveChoiceLOCAL(player, choice) {
       ? '<span style="color:#7bc67b;font-weight:700;">Sucesso</span>'
       : '<span style="color:#e05353;font-weight:700;">Falha</span>';
 
-    rolledLineText = '<b>🎲 Teste de ' + statLabel + ' (CD ' + choice.dc + '):</b> '
+    rolledLineText = '<b>Teste de ' + statLabel + ' (CD ' + choice.dc + '):</b> '
       + 'd20 [' + roll + '] ' + modStr + ' = <b>' + total + '</b> vs CD ' + choice.dc
       + ' — ' + statusBadge;
 
@@ -42634,7 +42805,7 @@ function _resolveInteractiveChoiceREMOTE(player, choice) {
         ? '<span style="color:#7bc67b;font-weight:700;">Sucesso</span>'
         : '<span style="color:#e05353;font-weight:700;">Falha</span>';
 
-      rolledLineText = '<b>🎲 Teste de ' + statLabel + ' (CD ' + res.dc + '):</b> '
+      rolledLineText = '<b>Teste de ' + statLabel + ' (CD ' + res.dc + '):</b> '
         + 'd20 [' + res.d20 + '] ' + modStr + ' = <b>' + res.total + '</b> vs CD ' + res.dc
         + ' — ' + statusBadge;
       diceData = {
@@ -42744,7 +42915,7 @@ var CANON_FLAVORS_POOLS = {
   "listen": [
     "Você capta fragmentos de uma canção antiga que ecoa entre as paredes de pedra da praça.",
     "O som de martelos na forja do ferreiro se mistura com o pregão dos vendedores ambulantes.",
-    "Os sinos da catedral dobram ao longe, marcando a passagem das horas em Valdoria.",
+    "Os sinos da catedral dobram ao longe, marcando a passagem dos ciclos do dia em Valdoria.",
     "Você ouve risadas vindas da estalagem — alguém está contando histórias de aventuras.",
     "O murmúrio da fonte de pedra se mistura com o farfalhar das bandeirolas coloridas.",
     "Uma melodia de flauta de madeira flutua pelo ar, vinda de algum canto escondido da praça.",
@@ -42757,7 +42928,7 @@ var CANON_FLAVORS_POOLS = {
   "listen_story": [
     "Você capta fragmentos de uma canção antiga que ecoa entre as paredes de pedra da praça.",
     "O som de martelos na forja do ferreiro se mistura com o pregão dos vendedores ambulantes.",
-    "Os sinos da catedral dobram ao longe, marcando a passagem das horas em Valdoria.",
+    "Os sinos da catedral dobram ao longe, marcando a passagem dos ciclos do dia em Valdoria.",
     "Você ouve risadas vindas da estalagem — alguém está contando histórias de aventuras.",
     "O murmúrio da fonte de pedra se mistura com o farfalhar das bandeirolas coloridas.",
     "Uma melodia de flauta de madeira flutua pelo ar, vinda de algum canto escondido da praça.",
@@ -42770,7 +42941,7 @@ var CANON_FLAVORS_POOLS = {
   "listen_poem": [
     "Você capta fragmentos de uma canção antiga que ecoa entre as paredes de pedra da praça.",
     "O som de martelos na forja do ferreiro se mistura com o pregão dos vendedores ambulantes.",
-    "Os sinos da catedral dobram ao longe, marcando a passagem das horas em Valdoria.",
+    "Os sinos da catedral dobram ao longe, marcando a passagem dos ciclos do dia em Valdoria.",
     "Você ouve risadas vindas da estalagem — alguém está contando histórias de aventuras.",
     "O murmúrio da fonte de pedra se mistura com o farfalhar das bandeirolas coloridas.",
     "Uma melodia de flauta de madeira flutua pelo ar, vinda de algum canto escondido da praça.",
@@ -42858,7 +43029,7 @@ var CANON_FLAVORS_ALL = [
   "A conversa toca em rotas comerciais distantes — alguém menciona um ferreiro nas montanhas que trabalha com minério raro.",
   "Você capta fragmentos de uma canção antiga que ecoa entre as paredes de pedra da praça.",
   "O som de martelos na forja do ferreiro se mistura com o pregão dos vendedores ambulantes.",
-  "Os sinos da catedral dobram ao longe, marcando a passagem das horas em Valdoria.",
+  "Os sinos da catedral dobram ao longe, marcando a passagem dos ciclos do dia em Valdoria.",
   "Você ouve risadas vindas da estalagem — alguém está contando histórias de aventuras.",
   "O murmúrio da fonte de pedra se mistura com o farfalhar das bandeirolas coloridas.",
   "Uma melodia de flauta de madeira flutua pelo ar, vinda de algum canto escondido da praça.",
@@ -46912,10 +47083,11 @@ function _buildSquareMockData(player){
   };
 }
 
-function _squareShowBountyOfficerDialogue(p){
+function _squareShowBountyOfficerDialogue(p, opts){
   p = p || window.CITY_MOCK_PLAYER || null;
+  var autoOpen = !(opts && opts.autoOpenChoices === false);
   if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) {
-    _openCityDialogue('square', 'bounty_officer', p);
+    _openCityDialogue('square', 'bounty_officer', p, { autoOpenChoices: autoOpen });
     return;
   }
   if (window.vEncounter && typeof window.vEncounter.render === 'function') {
@@ -46963,6 +47135,7 @@ function _squareShowBountyOfficerDialogue(p){
     }, {
       player: p,
       closeable: true,
+      autoOpenChoices: autoOpen,
       onChoice: function(ch){
         if (ch && ch.id === 'open_challenge') {
           try { window.vEncounter.close(); } catch(_){}
@@ -46993,12 +47166,13 @@ function _squareShowBountyOfficerDialogue(p){
           }, {
             player: p,
             closeable: true,
+            autoOpenChoices: true,
             onChoice: function(ch2){
               if (ch2 && ch2.id === 'open_challenge') {
                 try { window.vEncounter.close(); } catch(_){}
                 _showDailyChallengeEpicPopup(p);
               } else if (ch2 && ch2.id === 'back') {
-                _squareShowBountyOfficerDialogue(p);
+                _squareShowBountyOfficerDialogue(p, { autoOpenChoices: true });
               } else {
                 try { window.vEncounter.close(); } catch(_){}
               }
@@ -47049,6 +47223,7 @@ function _squareArtistClosed(p, res){
     choices: [{ id: 'leave', label: 'Seguir caminho' }]
   }, {
     player: window.CITY_MOCK_PLAYER, closeable: true,
+    autoOpenChoices: true,
     onChoice: function(){ try { window.vEncounter.close(); } catch(_e){} }
   });
 }
@@ -47073,11 +47248,12 @@ function _squareArtistShow(p, data, idx, withScene){
       { id: 'leave', label: 'Seguir caminho' }
     ]
   }, {
+    autoOpenChoices: true,
     player: window.CITY_MOCK_PLAYER,
     onChoice: function(ch){
       var cid = (ch && ch.id) || '';
       if (cid === 'tip'){ _squareArtistTip(p, data, perf); }
-      else if (cid === 'next'){ try { window.vEncounter.close(); } catch(_e){} _squareArtistShow(p, data, idx + 1, false); }
+      else if (cid === 'next'){ _squareArtistShow(p, data, idx + 1, false); }
       else { try { window.vEncounter.close(); } catch(_e){} }
     }
   });
@@ -47163,6 +47339,7 @@ function _squareArtistResult(p, data, perf, res){
     choices: choices
   }, {
     player: window.CITY_MOCK_PLAYER,
+    autoOpenChoices: true,
     onChoice: function(ch){
       var cid = (ch && ch.id) || '';
       try { window.vEncounter.close(); } catch(_e){}
@@ -48643,6 +48820,7 @@ function _squareShowExploreEvent(p){
       choices: choices
     }, {
       player: p, closeable: true,
+      autoOpenChoices: true,
       onChoice: function(c){
         var ch = (c && c._ch) || ((ev.choices || []).filter(function(x){ return x.id === (c && c.id); })[0]);
         if (!ch) { try { window.vEncounter.close(); } catch(_){} return; }
@@ -48756,7 +48934,8 @@ function _squareShowObjectsPopup(p){
 // O SERVIDOR constrói a fala + stakes (service.square_gamble_intro) e a reação ao
 // resultado (res.reaction); o cliente renderiza via vEncounter e mantém o dado 3D.
 // Mecânica: town_square_minigames.resolve_gamble (1d20 vs casa, even-money, 3/dia).
-function _squareShowGamblePopup(p){
+function _squareShowGamblePopup(p, opts){
+  var autoOpen = !(opts && opts.autoOpenChoices === false);
   // ÉPICO (PADRAO_ALDRIC + vEncounter): o SERVIDOR constrói a fala de Vharro + as
   // stakes (service.square_gamble_intro); o cliente só renderiza + mantém o dado 3D.
   if (!window.vCityServer || !window.vCityServer.isRemote() ||
@@ -48775,6 +48954,7 @@ function _squareShowGamblePopup(p){
       choices: choices
     }, {
       player: window.CITY_MOCK_PLAYER,
+      autoOpenChoices: autoOpen,
       onChoice: function(ch){
         var choiceId = (ch && ch.id) || '';
         if (choiceId && choiceId.indexOf('bet_') === 0){
@@ -48891,7 +49071,7 @@ function _squareShowGambleResult(p, stake, res, preGoldBeforeStake){
     onChoice: function(ch){
       var cid = (ch && ch.id) || '';
       try { window.vEncounter.close(); } catch(_e){}
-      if (cid === 'again'){ _squareShowGamblePopup(p); }
+      if (cid === 'again'){ _squareShowGamblePopup(p, { autoOpenChoices: true }); }
     }
   });
 }
@@ -48950,7 +49130,8 @@ function _squareShowVendorPopup(p){
   }
   _squareRenderVendor(p, _squareGetDailyVendor());
 }
-function _squareRenderVendor(p, vendor, bought){
+function _squareRenderVendor(p, vendor, bought, opts){
+  var autoOpen = !(opts && opts.autoOpenChoices === false);
   window._squareVendorVisited = true;
   // Itens unicos/dia (A): o servidor manda `bought` (indices comprados HOJE) -> somem das
   // opcoes. _avail preserva o indice ORIGINAL (item_idx enviado ao servidor) ao filtrar.
@@ -48991,7 +49172,7 @@ function _squareRenderVendor(p, vendor, bought){
         ],
         onContinue: function() {
           if (_bought.length < (v.items || []).length) {
-            _squareRenderVendor(p, v, _bought);
+            _squareRenderVendor(p, v, _bought, { autoOpenChoices: true });
           } else {
             _squareTxnReturnToHub();
           }
@@ -49027,7 +49208,7 @@ function _squareRenderVendor(p, vendor, bought){
     }, {
       player: p, closeable: true,
       onChoice: function(ch){
-        if (!ch || ch.id === 'back') { _squareRenderVendor(p, v, _bought); return; }
+        if (!ch || ch.id === 'back') { _squareRenderVendor(p, v, _bought, { autoOpenChoices: true }); return; }
         try { window.vEncounter.close(); } catch(_){}
         _vendorDoBuy(it, v);
       }
@@ -49069,7 +49250,7 @@ function _squareRenderVendor(p, vendor, bought){
     if (!_avail.length) script.push({ type: 'narration', text: 'O pano de feira está quase vazio — você já levou hoje tudo o que ' + (vendor.name.split(',')[0]) + ' tinha de interessante.' });
     choices.push({ id: 'leave', label: '↩ "Quem sabe outra hora."' });
     window.vEncounter.render({ npc: npc, script: script, choices: choices }, {
-      player: p, closeable: true,
+      player: p, closeable: true, autoOpenChoices: autoOpen,
       onChoice: function(ch){
         if (ch && ch._item) { _buyItem(ch._item, vendor); }
         else { try { window.vEncounter.close(); } catch(_){} }
@@ -54946,6 +55127,7 @@ function _showMarketPeacefulArrival(item) {
       {
         player: window.CITY_MOCK_PLAYER,
         closeable: true,
+        autoOpenChoices: true,
         onChoice: function () {
           try { window.vEncounter.close(); } catch (_) {}
         }
@@ -58642,8 +58824,9 @@ function _guildShowRecruitFicha(it, p){
 // (barganha com d20 server-side, hire respeitando a barganha). D1: npc_id viaja
 // DENTRO do node (raiz '<npc_id>', sub-node '<npc_id>:ficha') — NUNCA como campo
 // separado. O cliente só renderiza via vEncounter e posta choice_id+node.
-function _openRecrutaDialogue(npcId, p){
+function _openRecrutaDialogue(npcId, p, opts){
   p = p || window.CITY_MOCK_PLAYER || null;
+  var autoOpen = !(opts && opts.autoOpenChoices === false);
   if (!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote())) {
     // LOCAL/dev (file://) → fallback legado client-side.
     if (typeof _guildShowRecruitFicha === 'function') _guildShowRecruitFicha({ id: npcId }, p);
@@ -58653,7 +58836,7 @@ function _openRecrutaDialogue(npcId, p){
   // D1: node = npcId (raiz). NÃO mandar npc_id como campo separado.
   window.vCityServer.cityAction('dialogue.get', { venue: 'recruta', node: npcId }).then(function(data){
     if (!data || !data.ok) { if (typeof vToast === 'function') vToast('Não foi possível conversar.', 'warn'); return; }
-    _renderCityDialogue('recruta', data, p, { npcId: npcId });
+    _renderCityDialogue('recruta', data, p, { npcId: npcId, autoOpenChoices: autoOpen });
   }).catch(function(e){
     console.error('[CITY] recruta dialogue get failed', e);
     if (typeof vToast === 'function') vToast('Erro ao conversar.', 'warn');
@@ -59294,6 +59477,7 @@ function _guildShowParty(p){
 
           window.vEncounter.render({ npc: npc, script: script, choices: choices }, {
             player: p, closeable: true,
+            autoOpenChoices: true,
             onChoice: function(ch){
               try { window.vEncounter.close(); } catch(_){}
               if (ch && ch.id === 'ficha' && allyIdx > 0 && typeof _showStatusPopup === 'function') {
@@ -63643,6 +63827,7 @@ function _commerceConfirm(o){
     ]
   }, {
     player: window.CITY_MOCK_PLAYER || null, closeable: true,
+    autoOpenChoices: true,
     onChoice: function(ch){
       try { window.vEncounter.close(); } catch(_e){}
       if (!ch || ch.id !== 'confirm') { if (typeof o.onBack === 'function') o.onBack(); return; }
@@ -64257,7 +64442,7 @@ function _maybeElaraPoisonDelivery(){
             window.vEncounter.render(
               { npc: res.npc, script: res.result_script,
                 choices: [{ id: 'ok', label: 'Tenho o veneno. Obrigado, Irmã.', cb: 'close' }] },
-              { closeable: true, onChoice: function(){ try { window.vEncounter.close(); } catch(_c){} } }
+              { closeable: true, autoOpenChoices: true, onChoice: function(){ try { window.vEncounter.close(); } catch(_c){} } }
             );
           } catch(_r){ console.warn('[CITY] elara_poison render failed', _r); }
         }, 350);
@@ -66305,6 +66490,7 @@ function _startLyanaEncounter(p, forceDay){
     };
     window.vEncounter.render(NIGHT_DIALOGUE, {
       player: p,
+      autoOpenChoices: true,
       onChoice: function(ch){
         if (!ch) return;
         if (ch.id === 'wait_dawn') {
@@ -66379,7 +66565,7 @@ function _startLyanaEncounter(p, forceDay){
       ]
     };
     window._SVC_CONFIG = window._SVC_CONFIG_INN || { faction: 'lyana', factionLabel: 'Lyana, Herbalista' };
-    window.vEncounter.render(RESCUE_ACK_DIALOGUE, { player: p });
+    window.vEncounter.render(RESCUE_ACK_DIALOGUE, { player: p, autoOpenChoices: true });
     return;
   }
 
@@ -66398,9 +66584,13 @@ function _startLyanaEncounter(p, forceDay){
       text: 'Ao ouvir o nome do pai, a respiração de Lyana tranca no peito e as cores fogem de seu rosto por um instante. Ela estende as mãos trêmulas para o pergaminho e reconhece a caligrafia vigorosa e o sinete rubro. Rompe o lacre de cera vermelha com reverência e lê as linhas familiares com avidez.'
     },
     {
+      type: 'narration',
+      text: 'Lyana aperta o pergaminho contra o peito, com lágrimas de alívio nos olhos.'
+    },
+    {
       type: 'speech',
       speaker: 'Lyana',
-      text: '<i>(aperta o pergaminho contra o peito, em lágrimas de alívio)</i> "Ele está vivo! <b>Meu pai está vivo!</b> Pelos Quatro, foram três luas de silêncio e agonia sem saber se a estrada o havia engolido... Mas ele fala de runas que sangram quando há lua nova e pede o cristal de selamento... Aventureiro, você tirou um fardo esmagador do meu coração. Tome esta recompensa por ter trazido a carta com segurança."'
+      text: 'Ele está vivo! Meu pai está vivo! Pelos Quatro, foram três luas de silêncio e agonia sem saber se a estrada o havia engolido... Mas ele fala de runas que sangram quando há lua nova e pede o cristal de selamento... Aventureiro, você tirou um fardo esmagador do meu coração. Tome esta recompensa por ter trazido a carta com segurança.'
     }
   ];
 
@@ -66428,9 +66618,9 @@ function _startLyanaEncounter(p, forceDay){
       check: { skill: 'investigation', dc: 13 },
       continueDialogue: 'approach-curious',
       resultNarration: 'Você cruza as datas da carta com o que sabe sobre o alinhamento das luas. O padrão salta aos olhos: toda menção às runas coincide com o auge da lua nova — e o pedido do cristal veio três dias antes da próxima conjunção! O cristal não é um amuleto comum, mas uma fechadura arcanotécnica para estancar fendas.',
-      resultText: '<i>(Lyana empalidece de espanto, depois assente)</i> "Você enxerga o que ele enxerga... Papai dizia que as runas só sangram quando algo do outro lado empurra. O cristal fecha essa passagem. Guarde este Bálsamo Restaurador com você... e se um dia vir uma runa úmida, não a toque."',
+      resultText: '<i>(empalidece de espanto, depois assente)</i> "Você enxerga o que ele enxerga... Papai dizia que as runas só sangram quando algo do outro lado empurra. O cristal fecha essa passagem. Guarde este Bálsamo Restaurador com você... e se um dia vir uma runa úmida, não a toque."',
       resultNarrationFail: 'As linhas da carta se recusam a formar padrão claro. Datas cifradas em runeiro antigo — peças demais para decifrar às pressas na praça.',
-      resultTextFail: '<i>(Lyana dobra a carta, protetora)</i> "Me perdoe. Já disse mais do que devia — papai sempre pediu segredo sobre as runas. Quando ele voltar das montanhas, perguntaremos a ele."'
+      resultTextFail: '<i>(dobra a carta, protetora)</i> "Me perdoe. Já disse mais do que devia — papai sempre pediu segredo sobre as runas. Quando ele voltar das montanhas, perguntaremos a ele."'
     },
     {
       id: 'comfort',
@@ -66441,9 +66631,9 @@ function _startLyanaEncounter(p, forceDay){
       check: { skill: 'persuasion', dc: 12 },
       continueDialogue: 'approach-comfort',
       resultNarration: 'Suas palavras firmes e compassivas dissipam a sombra de desespero que nublava o olhar da jovem herbalista. A postura dela se apruma, e ela respira sem o peso do pânico.',
-      resultText: '<i>(Lyana sorri pela primeira vez, os olhos marejados)</i> "Obrigada... Eu precisava ouvir isso. Que a bênção da terra acompanhe cada passo da sua jornada."',
+      resultText: '<i>(sorri pela primeira vez, os olhos marejados)</i> "Obrigada... Eu precisava ouvir isso. Que a bênção da terra acompanhe cada passo da sua jornada."',
       resultNarrationFail: 'Lyana assente de forma mecânica, ainda dominada pela incerteza da estrada do norte.',
-      resultTextFail: '<i>(Lyana suspira)</i> "Espero que os deuses ouçam você, andarilho."'
+      resultTextFail: '<i>(suspira)</i> "Espero que os deuses ouçam você, andarilho."'
     }
   ];
 
@@ -66587,9 +66777,9 @@ function _startLyanaEncounter(p, forceDay){
         check: { skill: 'perception', dc: 11 },
         continueDialogue: 'approach-talk',
         resultNarration: 'Você apura o olhar entre a multidão. Lyana está agachada perto da fonte, amarrando raízes com dedos trêmulos. Seus olhos verdes erguem-se a cada minuto na direção dos Portões, demonstrando a angústia de quem aguarda notícias vitais há três luas. No peito dela brilha um camafeu com uma runa idêntica à do pergaminho selado.',
-        resultText: '<i>(Lyana percebe sua aproximação atenta e ergue-se com o coração aos saltos)</i> "Você... você caminha com o porte de quem vem da estrada dos Portões! Diga-me... você traz notícias de meu pai?!"',
+        resultText: '<i>(percebe sua aproximação atenta e ergue-se com o coração aos saltos)</i> "Você... você caminha com o porte de quem vem da estrada dos Portões! Diga-me... você traz notícias de meu pai?!"',
         resultNarrationFail: 'O vozerio dos mercadores e a movimentação da feira dispersam sua atenção preliminar. Você simplesmente contorna a fonte e se aproxima da tenda onde a jovem separa maços de folhas verdes.',
-        resultTextFail: '<i>(Lyana ergue os olhos de suas ervas e ajeita o avental)</i> "Saudações, viajante. Em que posso ajudá-lo na tenda de ervas?"'
+        resultTextFail: '<i>(ergue os olhos de suas ervas e ajeita o avental)</i> "Saudações, viajante. Em que posso ajudá-lo na tenda de ervas?"'
       },
       {
         id: 'approach-insight',
@@ -66600,9 +66790,9 @@ function _startLyanaEncounter(p, forceDay){
         check: { skill: 'insight', dc: 12 },
         continueDialogue: 'approach-talk',
         resultNarration: 'Você lê a tensão nos ombros e na respiração dela. O medo dela não tem origem em dívidas ou perigos urbanos: é o pavor sufocante de uma filha que teme receber notícias fúnebres sobre a expedição do pai.',
-        resultText: '<i>(Lyana aperta um maço de alfazema contra o peito)</i> "Você tem o olhar compreensivo de quem reconhece o fardo da aflição... Por favor, diga se soube de algo na estrada."',
+        resultText: '<i>(aperta um maço de alfazema contra o peito)</i> "Você tem o olhar compreensivo de quem reconhece o fardo da aflição... Por favor, diga se soube de algo na estrada."',
         resultNarrationFail: 'A jovem mantém postura compenetrada em seu ofício botânico sobre a esteira, sem deixar transparecer emoções evidentes de imediato.',
-        resultTextFail: '<i>(Lyana ergue a cabeça cordialmente ao notar sua presença)</i> "Saudações, andarilho. Em que posso ser útil?"'
+        resultTextFail: '<i>(ergue a cabeça cordialmente ao notar sua presença)</i> "Saudações, andarilho. Em que posso ser útil?"'
       },
       (isDruidOrRanger ? {
         id: 'approach-nature',
@@ -66613,9 +66803,9 @@ function _startLyanaEncounter(p, forceDay){
         check: { skill: 'nature', dc: 10 },
         continueDialogue: 'approach-talk',
         resultNarration: 'Você reconhece o aroma acre de Raiz-de-Mandrágora selvagem e Folhas de Meimendro — ingredientes ancestrais que só um conhecedor dos ermos colhe sob luas propícias para selar febres e venenos profanos.',
-        resultText: '<i>(Lyana sorri com genuína surpresa)</i> "Reconhece estas folhas? Sinto a bênção da floresta em seus passos. Poucos na cidade entendem a voz das raízes."',
+        resultText: '<i>(sorri com genuína surpresa)</i> "Reconhece estas folhas? Sinto a bênção da floresta em seus passos. Poucos na cidade entendem a voz das raízes."',
         resultNarrationFail: 'Você observa apenas um punhado de raízes e folhas verdes frescas estendidas sobre o pano.',
-        resultTextFail: '<i>(Lyana saúda gentilmente)</i> "Bem-vindo à banca de ervas, viajante."'
+        resultTextFail: '<i>(saúda gentilmente)</i> "Bem-vindo à banca de ervas, viajante."'
       } : null),
       {
         id: 'approach-direct',
@@ -66629,7 +66819,7 @@ function _startLyanaEncounter(p, forceDay){
   };
 
   window._SVC_CONFIG = window._SVC_CONFIG_INN || { faction: 'lyana', factionLabel: 'Lyana, Herbalista' };
-  window.vEncounter.render(APPROACH_DIALOGUE, { dialogues: LYANA_SUB, player: p });
+  window.vEncounter.render(APPROACH_DIALOGUE, { dialogues: LYANA_SUB, player: p, autoOpenChoices: true });
 }
 window._startLyanaEncounter = _startLyanaEncounter;
 
@@ -68525,7 +68715,7 @@ function _openGuildQuestOfferEncounter(qid){
       ],
       choices: [
         { id: 'accept', label: 'Aceitar a Missão', result: 'accept_quest', _questId: qid },
-        { id: 'decline', label: 'Recusar', result: 'close' }
+        { id: 'decline', label: 'Recusar', cb: 'close' }
       ]
     }, {
       inlineChoices: true,
@@ -69023,9 +69213,16 @@ var TIME_MONTHS_SHORT = [
   'Cae', 'Vex', 'Ver', 'Lyr', 'Sol', 'Pyr',
   'Mes', 'Rus', 'Thr', 'Cor', 'Gla', 'Nyc'
 ];
-var TIME_PERIOD_BOUNDS = [[5,8,'dawn'],[8,17,'day'],[17,20,'dusk']];  // night = default
-var TIME_PERIOD_EMOJI = { dawn: '', day: '', dusk: '', night: '' };
-var TIME_PERIOD_LABEL = { dawn: 'Amanhecer', day: 'Dia', dusk: 'Entardecer', night: 'Noite' };
+var TIME_PERIOD_BOUNDS = [
+  [0, 5, 'late_night'],
+  [5, 8, 'dawn'],
+  [8, 12, 'day'],
+  [12, 17, 'afternoon'],
+  [17, 20, 'dusk'],
+  [20, 24, 'night']
+];
+var TIME_PERIOD_EMOJI = { late_night: '', dawn: '', day: '', afternoon: '', dusk: '', night: '' };
+var TIME_PERIOD_LABEL = { late_night: 'Madrugada', dawn: 'Amanhecer', day: 'Dia', afternoon: 'Tarde', dusk: 'Entardecer', night: 'Noite' };
 
 function _getCurrentGameTime(){
   var realNow = Date.now() / 1000;
@@ -69084,8 +69281,10 @@ function _getGameWeather(dayOfYear){
 // _ctbIconHTML devolvia o emoji cru e as period-*.webp ficavam mortas em toda
 // tela do HUD. day→period-noon (sol a pino). Mismatch clássico Canonical Keys PT/EN.
 var TOPBAR_PERIOD_PNG = {
+  late_night: 'period-night',
   dawn:  'period-dawn',
   day:   'period-noon',
+  afternoon: 'period-noon',
   dusk:  'period-dusk',
   night: 'period-night',
 };
@@ -69325,9 +69524,9 @@ function _showCityWeatherPopup(){
     + '      <span class="cwo-metric-sub">' + feel + '</span>'
     + '    </div>'
     + '    <div class="cwo-metric-card">'
-    + '      <span class="cwo-metric-label">HORÁRIO &amp; CICLO</span>'
-    + '      <span class="cwo-metric-val">' + periodIcon + ' ' + hh + ':' + mm + '</span>'
-    + '      <span class="cwo-metric-sub">' + plabel + '</span>'
+    + '      <span class="cwo-metric-label">CICLO DO DIA</span>'
+    + '      <span class="cwo-metric-val">' + periodIcon + ' ' + plabel + '</span>'
+    + '      <span class="cwo-metric-sub">Luz e Atmosfera</span>'
     + '    </div>'
     + '    <div class="cwo-metric-card">'
     + '      <span class="cwo-metric-label">DATA NO REINO</span>'
@@ -69395,7 +69594,7 @@ function renderCityTopBar(){
     + '  </span>'
     + '  <span style="color:rgba(196,149,58,0.4);font-size:11px;line-height:1;user-select:none;">•</span>'
     + '  <span class="ctb-item ctb-time" style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-gold-light,#e8c45a);font-weight:600;gap:3px;white-space:nowrap;">'
-    + '    ' + periodIcon + ' ' + hh + ':' + mm
+    + '    ' + periodIcon + ' ' + plabel
     + '  </span>'
     + '  <span style="color:rgba(196,149,58,0.4);font-size:11px;line-height:1;user-select:none;">•</span>'
     + '  <span class="ctb-item ctb-weather" style="font-size:calc(11px * var(--v-font-scale, 1));color:var(--v-text,#d4c8b0);font-weight:600;gap:3px;white-space:nowrap;">'
@@ -69548,10 +69747,10 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'ask',   label: '"Me conte mais sobre sua fé e sua história."', renown: 1 },
       { id: 'boon',  label: '"Pedir uma bênção especial para a estrada."',
         check: { skill: 'persuasion', dc: 14 },
-        resultNarration: '{name} fecha os olhos e estende a mão. Uma luz dourada envolve suas mãos por um instante, transmitindo calma e vigor.',
-        resultText: 'Você sente o espírito revigorado. <b>+1 dado de inspiração</b> guardado até o próximo descanso.',
-        resultNarrationFail: '{name} sorri com gentileza e balança a cabeça. "A fé pede paciência e propósito genuíno. As divindades sabem a hora certa."',
-        resultTextFail: 'A oração termina em silêncio suave. Nenhuma graça extraordinária concedida desta vez.' },
+        resultNarration: '{name} fecha os olhos e estende a mão. Uma luz dourada envolve suas mãos por um instante, transmitindo calma e vigor. Você sente o espírito revigorado (<b>+1 dado de inspiração</b> guardado até o próximo descanso).',
+        resultText: '"Que esta centelha sagrada ilumine seus passos quando a sombra tentar fazer você hesitar."',
+        resultNarrationFail: '{name} sorri com gentileza e balança a cabeça. A oração termina em silêncio suave, sem graça extraordinária concedida desta vez.',
+        resultTextFail: '"A fé pede paciência e propósito genuíno. As divindades sabem a hora certa."' },
       { id: 'leave', label: '↩ "Fique em paz com suas preces."', renown: 0 }
     ]
   },
@@ -69566,10 +69765,10 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'story',   label: '"Me conte sobre uma batalha marcante do seu passado."', renown: 1 },
       { id: 'spar',    label: '"Um treino rápido para aquecer os reflexos."',
         check: { skill: 'athletics', dc: 13 },
-        resultNarration: 'Vocês trocam golpes firmes por alguns instantes. Com um movimento ágil, {name} encontra uma brecha, sorri e elogia sua guarda.',
-        resultText: 'Você aprendeu uma nova manobra de combate. <b>Vantagem no primeiro ataque</b> do próximo combate.',
-        resultNarrationFail: 'Você dá um passo em falso no piso irregular. {name} segura seu braço a tempo de evitar a queda, com um olhar avaliador.',
-        resultTextFail: 'Um leve estiramento no pulso. <b>Desvantagem no primeiro ataque</b> do próximo combate.' },
+        resultNarration: 'Vocês trocam golpes firmes por alguns instantes. Com um movimento ágil, {name} encontra uma brecha, sorri e elogia sua guarda. Você aprendeu uma nova manobra de combate (<b>Vantagem no primeiro ataque</b> do próximo combate).',
+        resultText: '"Belo jogo de pés! Mantenha o cotovelo firme assim e nenhum inimigo passará pela sua guarda."',
+        resultNarrationFail: 'Você dá um passo em falso no piso irregular. {name} segura seu braço a tempo de evitar a queda, mas você sente um leve estiramento no pulso (<b>Desvantagem no primeiro ataque</b> do próximo combate).',
+        resultTextFail: '"Cuidado com o apoio do pé traseiro! No barro da estrada, um deslize desses custa caro."' },
       { id: 'leave',   label: '↩ "Termine de cuidar do equipamento."', renown: 0 }
     ]
   },
@@ -69584,10 +69783,10 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'theory', label: '"Poderia me explicar como funciona o fluxo da Trama Arcana?"', renown: 1 },
       { id: 'scribe', label: '"Transcrever um pergaminho para apoiar o grupo."',
         check: { skill: 'arcana', dc: 15 },
-        resultNarration: '{name} estende uma folha de velino virgem, traçando runas que brilham em azul suave antes de assentar na tinta fresca.',
-        resultText: 'Recebeu um <b>Pergaminho de Mísseis Mágicos</b> (uso único até o próximo descanso).',
-        resultNarrationFail: '{name} sopra a tinta com ar pensativo. "A ressonância arcana dispersou antes da fixação. Precisaremos de outro momento."',
-        resultTextFail: 'A folha se esfarela em pequenas faíscas. Pergaminho inutilizado.' },
+        resultNarration: '{name} estende uma folha de velino virgem, traçando runas que brilham em azul suave antes de assentar na tinta fresca. Você recebeu um <b>Pergaminho de Mísseis Mágicos</b> (uso único até o próximo descanso).',
+        resultText: '"As sílabas estão seladas. Pronuncie o gatilho com clareza quando precisar de disparo certeiro."',
+        resultNarrationFail: '{name} sopra a tinta com ar pensativo enquanto a folha se esfarela em pequenas faíscas, inutilizando o pergaminho.',
+        resultTextFail: '"A ressonância arcana dispersou antes da fixação. Precisaremos de outro momento."' },
       { id: 'leave',  label: '↩ "Bom estudo com o grimório."', renown: 0 }
     ]
   },
@@ -69602,10 +69801,10 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'past',  label: '"De onde você veio antes de se juntar ao grupo?"', renown: 1 },
       { id: 'lift',  label: '"Sondar os arredores e conseguir algo útil na multidão discretamente"',
         check: { skill: 'stealth', dc: 14 },
-        resultNarration: '{name} se esgueira pela multidão com passos silenciosos e volta em instantes, deslizando uma bolsa pesada para suas mãos.',
-        resultText: 'Recebeu <b>+8 Valdoritas</b> sem levantar suspeitas.',
-        resultNarrationFail: 'Um transeunte esbarra com rispidez e {name} recua depressa, gesticulando para disfarçar.',
-        resultTextFail: 'Guardas olham com desconfiança nesta direção.' },
+        resultNarration: '{name} se esgueira pela multidão com passos silenciosos e volta em instantes, deslizando uma bolsa pesada para suas mãos. Você recebeu <b>+8 Valdoritas</b> sem levantar suspeitas.',
+        resultText: '"Mãos leves, bolsos cheios. Ninguém deu falta de nada por aqui."',
+        resultNarrationFail: 'Um transeunte esbarra com rispidez e {name} recua depressa, gesticulando para disfarçar enquanto guardas olham com desconfiança nesta direção.',
+        resultTextFail: '"Os olhos da patrulha estão atentos demais agora. Melhor deixarmos a poeira baixar."' },
       { id: 'leave', label: '↩ "Fique de olhos abertos por aí."', renown: 0 }
     ]
   },
@@ -69620,10 +69819,10 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'nature', label: '"Me conte sobre a fauna e as trilhas desta região."', renown: 1 },
       { id: 'forage', label: '"Buscar ervas curativas nas redondezas."',
         check: { skill: 'survival', dc: 13 },
-        resultNarration: '{name} some por alguns minutos na mata rasteira e volta trazendo ramos frescos de raízes medicinais.',
-        resultText: 'Recebeu <b>2× Erva Curativa</b> (cura 1d4+1 PV fora de combate).',
-        resultNarrationFail: '{name} retorna limpando a terra das botas. "O solo por aqui está seco demais; a colheita rendeu apenas mato comum."',
-        resultTextFail: 'Nenhum ingrediente útil encontrado desta vez.' },
+        resultNarration: '{name} some por alguns minutos na mata rasteira e volta trazendo ramos frescos de raízes medicinais. Você recebeu <b>2× Erva Curativa</b> (cura 1d4+1 PV fora de combate).',
+        resultText: '"Folhas frescas e de boa seiva. Mastigue ou faça um emplastro se o aço inimigo rasgar a pele."',
+        resultNarrationFail: '{name} retorna limpando a terra das botas, sem encontrar nenhum ingrediente útil desta vez.',
+        resultTextFail: '"O solo por aqui está seco demais; a colheita rendeu apenas mato comum."' },
       { id: 'leave',  label: '↩ "Continue observando as trilhas."', renown: 0 }
     ]
   },
@@ -69638,10 +69837,10 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'oath',  label: '"Me conte como fez seu juramento sagrado."', renown: 1 },
       { id: 'imbue', label: '"Abençoar minha arma com energia radiante."',
         check: { skill: 'religion', dc: 14 },
-        resultNarration: '{name} pousa a mão sobre sua lâmina e sussurra uma bênção. Um brilho dourado e quente percorre o metal.',
-        resultText: 'Sua arma recebe <b>+1d8 de dano radiante</b> no primeiro ataque bem-sucedido.',
-        resultNarrationFail: '{name} afasta a mão devagar, sentindo a energia dispersar. "A determinação precisa de foco interior. Tentaremos novamente quando o coração estiver sereno."',
-        resultTextFail: 'A bênção não se fixou na lâmina.' },
+        resultNarration: '{name} pousa a mão sobre sua lâmina e sussurra uma bênção. Um brilho dourado e quente percorre o metal, concedendo <b>+1d8 de dano radiante</b> no primeiro ataque bem-sucedido.',
+        resultText: '"Que o fulgor do juramento guie seu braço e dissipe as trevas diante de nós."',
+        resultNarrationFail: '{name} afasta a mão devagar, sentindo a energia dispersar sem que a bênção se fixe na lâmina.',
+        resultTextFail: '"A determinação precisa de foco interior. Tentaremos novamente quando o coração estiver sereno."' },
       { id: 'leave', label: '↩ "Que a luz continue guiando seus passos."', renown: 0 }
     ]
   },
@@ -69656,10 +69855,10 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'tale',    label: '"Me conte a melhor história que ouviu pela estrada."', renown: 1 },
       { id: 'gossip',  label: '"Sondar os boatos mais quentes da taverna."',
         check: { skill: 'persuasion', dc: 12 },
-        resultNarration: '{name} se mistura aos frequentadores da taverna e volta em pouco tempo com um sorriso malicioso e uma pista valiosa.',
-        resultText: 'Descobriu informações sobre uma <b>área de interesse</b> nos arredores.',
-        resultNarrationFail: '{name} volta enxugando uma caneca virada na roupa. "Um beberrão desastrado começou uma briga antes que eu pudesse ouvir o final da história."',
-        resultTextFail: 'A conversa na taverna terminou sem boatos úteis.' },
+        resultNarration: '{name} se mistura aos frequentadores da taverna e volta em pouco tempo com um sorriso malicioso, revelando informações sobre uma <b>área de interesse</b> nos arredores.',
+        resultText: '"Ouvi duas mesas comentando sobre um esconderijo antigo aqui perto. Vale a pena conferirmos!"',
+        resultNarrationFail: '{name} volta enxugando uma caneca virada na roupa. A conversa na taverna terminou sem boatos úteis.',
+        resultTextFail: '"Um beberrão desastrado começou uma briga antes que eu pudesse ouvir o final da história."' },
       { id: 'leave',   label: '↩ "Continue afinando seus acordes."', renown: 0 }
     ]
   },
@@ -69674,10 +69873,10 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'animal',  label: '"Qual forma selvagem você mais gosta de assumir?"', renown: 1 },
       { id: 'totem',   label: '"Invocar um espírito protetor para guardar nosso descanso."',
         check: { skill: 'nature', dc: 13 },
-        resultNarration: '{name} entoa uma cantiga suave. Uma brisa fresca envolve seus ombros, trazendo uma sensação agradável de vigilância e proteção.',
-        resultText: 'Recebeu <b>Espírito Sentinela</b> (protege contra surpresas no próximo descanso).',
-        resultNarrationFail: 'O vento dispersa as folhas secas pelo chão. {name} suspira. "A agitação da cidade abafa a voz dos espíritos agora."',
-        resultTextFail: 'Nenhum presságio se manifestou.' },
+        resultNarration: '{name} entoa uma cantiga suave. Uma brisa fresca envolve seus ombros, concedendo <b>Espírito Sentinela</b> (protege contra surpresas no próximo descanso).',
+        resultText: '"Os ventos e as folhas vigiarão nosso sono. Nenhum passo furtivo se aproximará sem aviso."',
+        resultNarrationFail: 'O vento dispersa as folhas secas pelo chão sem que nenhum presságio se manifeste. {name} suspira.',
+        resultTextFail: '"A agitação da cidade abafa a voz dos espíritos agora."' },
       { id: 'leave',   label: '↩ "Fique em harmonia com os animais."', renown: 0 }
     ]
   },
@@ -69692,10 +69891,10 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'wisdom', label: '"Compartilhe um ensinamento do seu monastério."', renown: 1 },
       { id: 'focus',  label: '"Me ajude a concentrar o fluxo de energia."',
         check: { stat: 'wis', dc: 13 },
-        resultNarration: '{name} orienta o ritmo da sua respiração com toques precisos. Em poucos segundos, sua mente alcança uma clareza cristalina.',
-        resultText: 'Recebeu <b>Vantagem em salvaguardas de Sabedoria</b> nas próximas 8 horas.',
-        resultNarrationFail: 'O barulho da praça quebra sua concentração. {name} assente com calma. "A mente silencia aos poucos; não tente forçar o rio."',
-        resultTextFail: 'A mente continuou agitada. Nenhum bônus aplicado.' },
+        resultNarration: '{name} orienta o ritmo da sua respiração com toques precisos. Em poucos segundos, sua mente alcança clareza cristalina, concedendo <b>Vantagem em salvaguardas de Sabedoria</b> durante o próximo ciclo.',
+        resultText: '"Sente o centro firme? Quando a mente está límpida, nenhuma ilusão ou terror encontra abrigo."',
+        resultNarrationFail: 'O barulho da praça quebra sua concentração e a mente continua agitada, sem bônus aplicado. {name} assente com calma.',
+        resultTextFail: '"A mente silencia aos poucos; não tente forçar o rio."' },
       { id: 'leave',  label: '↩ "Continue em sua meditação."', renown: 0 }
     ]
   },
@@ -69710,10 +69909,10 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'tribe', label: '"Me conte sobre os costumes da sua terra natal."', renown: 1 },
       { id: 'arm',   label: '"Uma queda de braço rápida para testar a força."',
         check: { skill: 'athletics', dc: 15 },
-        resultNarration: 'Após trinta segundos de tensão e risadas, você consegue empurrar o braço de {name} contra a mesa. Ele solta uma gargalhada entusiasmada.',
-        resultText: 'Ganhou o respeito do companheiro! Recebeu <b>+5 Valdoritas</b> da aposta amigável.',
-        resultNarrationFail: 'Com um puxão explosivo, {name} bate seu braço na mesa e dá um tapinha nas suas costas rindo alto.',
-        resultTextFail: 'Você pagou <b>5 Valdoritas</b> pela rodada, mas ganhou um sorriso de admiração.' },
+        resultNarration: 'Após instantes de tensão e risadas, você consegue empurrar o braço de {name} contra a mesa. Você ganhou o respeito do companheiro e recebeu <b>+5 Valdoritas</b> da aposta amigável!',
+        resultText: '"Hah! Que força bruta nos tendões! Aqui estão suas moedas, conquistadas no braço!"',
+        resultNarrationFail: 'Com um puxão explosivo, {name} bate seu braço na mesa e dá um tapinha nas suas costas rindo alto. Você pagou <b>5 Valdoritas</b> pela rodada, mas ganhou um sorriso de admiração.',
+        resultTextFail: '"Quase me virou o pulso! Na próxima vez vou precisar usar as duas mãos!"' },
       { id: 'leave', label: '↩ "Aproveite a sua refeição."', renown: 0 }
     ]
   },
@@ -69728,10 +69927,10 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'origin', label: '"Como você descobriu essa centelha mágica em você?"', renown: 1 },
       { id: 'spark',  label: '"Emprestar uma fagulha de energia elemental para minha arma."',
         check: { stat: 'cha', dc: 14 },
-        resultNarration: '{name} toca a sua arma com a ponta dos dedos. Um arco elétrico cintilante percorre o gume, zumbindo com energia pura.',
-        resultText: 'Recebeu <b>+1d6 de dano elemental</b> no primeiro ataque acertado.',
-        resultNarrationFail: 'A faísca faísca e se apaga antes de se fixar. {name} dá de ombros. "O poder hoje quer dançar solto, não ficar preso no ferro."',
-        resultTextFail: 'A energia não se acumulou.' },
+        resultNarration: '{name} toca a sua arma com a ponta dos dedos. Um arco elétrico cintilante percorre o gume, concedendo <b>+1d6 de dano elemental</b> no primeiro ataque acertado.',
+        resultText: '"Segure firme pelo punho! Essa centelha está faminta para saltar no primeiro alvo que encontrar."',
+        resultNarrationFail: 'A centelha estala e se apaga antes de se fixar, sem acumular energia. {name} dá de ombros.',
+        resultTextFail: '"O poder hoje quer dançar solto, não ficar preso no ferro."' },
       { id: 'leave',  label: '↩ "Fique à vontade com seus encantamentos."', renown: 0 }
     ]
   },
@@ -69746,10 +69945,10 @@ var ALLY_DIALOGUE_TEMPLATES = {
       { id: 'gift',    label: '"Pedir um presságio de proteção para nosso próximo combate."', renown: 2 },
       { id: 'whisper', label: '"Consultar o Patrono sobre o destino do nosso grupo."',
         check: { skill: 'intimidation', dc: 14 },
-        resultNarration: '{name} fecha os olhos. Uma brisa gélida passa entre vocês e seus olhos brilham por um instante com sabedoria oculta.',
-        resultText: 'Recebeu <b>Visão Obscura</b> — vantagem na primeira salvaguarda contra efeitos mágicos.',
-        resultNarrationFail: '{name} balança a cabeça em silêncio. "O véu permaneceu fechado. Algumas respostas precisam ser conquistadas pela espada."',
-        resultTextFail: 'Nenhuma resposta foi obtida desta vez.' },
+        resultNarration: '{name} fecha os olhos. Uma brisa gélida passa entre vocês e seus olhos brilham com sabedoria oculta, concedendo <b>Visão Obscura</b> (vantagem na primeira salvaguarda contra efeitos mágicos).',
+        resultText: '"Os sussurros além do véu revelaram os fios ocultos. Nenhuma armadilha arcana pegará você desprevenido."',
+        resultNarrationFail: '{name} balança a cabeça em silêncio; nenhuma resposta foi obtida desta vez.',
+        resultTextFail: '"O véu permaneceu fechado. Algumas respostas precisam ser conquistadas pela espada."' },
       { id: 'leave',   label: '↩ "Nos vemos mais tarde nas sombras."', renown: 0 }
     ]
   }
@@ -70845,10 +71044,10 @@ function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
         id: 'check_camp_campfire',
         label: '"Venha, me conte como você aprendeu a sobreviver nestas paragens."',
         check: { skill: skill, dc: dc }, deltaApproval: 4,
-        resultNarration: displayName + ' sorri abertamente e passa os minutos seguintes compartilhando memórias valiosas e truques de sobrevivência.',
-        resultText: 'A conversa fortaleceu a afinidade entre vocês. <b>+4 de Aprovação</b>.',
-        resultNarrationFail: displayName + ' dá um sorriso tímido. "Uma longa história para outra noite. Hoje prefiro só escutar o fogo."',
-        resultTextFail: 'A conversa permaneceu amigável, mas reservada.'
+        resultNarration: displayName + ' sorri abertamente e passa os minutos seguintes compartilhando memórias valiosas e truques de sobrevivência. A conversa fortaleceu a afinidade entre vocês (<b>+4 de Aprovação</b>).',
+        resultText: '"Pouca gente sabe ouvir de verdade na estrada. Se mantivermos os olhos abertos e o fogo baixo, nenhuma emboscada nos pega."',
+        resultNarrationFail: displayName + ' dá um sorriso tímido. A conversa permaneceu amigável, mas reservada.',
+        resultTextFail: '"Uma longa história para outra noite. Hoje prefiro só escutar o fogo."'
       },
       {
         id: 'prov_camp_campfire',
@@ -70884,10 +71083,10 @@ function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
         id: 'check_backstory_secret',
         label: '"Você fala com cautela, mas vejo que há algo mais profundo guardado no seu peito."',
         check: { skill: skill, dc: dc }, deltaApproval: 5,
-        resultNarration: 'Sua percepção atinge o cerne da questão. ' + displayName + ' respira fundo e confidencia um segredo importante de suas origens.',
-        resultText: 'Um laço de profunda confiança foi estabelecido! <b>+5 de Aprovação</b>.',
-        resultNarrationFail: displayName + ' desvia o olhar com delicadeza. "Algumas portas é melhor manter fechadas por enquanto."',
-        resultTextFail: 'O assunto foi mantido em sigilo respeitoso.'
+        resultNarration: 'Sua percepção atinge o cerne da questão. ' + displayName + ' respira fundo e confidencia um segredo importante de suas origens. Um laço de profunda confiança foi estabelecido (<b>+5 de Aprovação</b>).',
+        resultText: '"Nunca contei isso a mais ninguém... mas depois de tudo o que passamos lado a lado, sei que meu passado está seguro com você."',
+        resultNarrationFail: displayName + ' desvia o olhar com delicadeza. O assunto foi mantido em sigilo respeitoso.',
+        resultTextFail: '"Algumas portas é melhor manter fechadas por enquanto."'
       },
       {
         id: 'prov_backstory_secret',
@@ -70923,10 +71122,10 @@ function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
         id: 'check_morals_faith',
         label: '"As crenças e os deuses testam nossos limites, mas a convicção nasce das nossas escolhas."',
         check: { skill: skill, dc: dc }, deltaApproval: 4,
-        resultNarration: displayName + ' reflete sobre suas palavras com profunda admiração filosófica.',
-        resultText: 'A troca de ideias ampliou o respeito mútuo. <b>+4 de Aprovação</b>.',
-        resultNarrationFail: displayName + ' sorri suavemente. "Filosofia interessante, embora a prática na lama seja bem mais crua."',
-        resultTextFail: 'A conversa encerrou sem desacordos.'
+        resultNarration: displayName + ' reflete sobre suas palavras com profunda admiração filosófica. A troca de ideias ampliou o respeito mútuo (<b>+4 de Aprovação</b>).',
+        resultText: '"É raro encontrar alguém que pense assim nestas estradas. Suas palavras têm peso — e fico contente em marchar ao seu lado."',
+        resultNarrationFail: displayName + ' sorri suavemente. A conversa encerrou sem desacordos.',
+        resultTextFail: '"Filosofia interessante, embora a prática na lama seja bem mais crua."'
       },
       {
         id: 'prov_morals_faith',
@@ -70962,10 +71161,10 @@ function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
         id: 'check_combat_bonds',
         label: '"Se você cobrir minha retaguarda enquanto avanço, podemos quebrar qualquer formação inimiga."',
         check: { skill: skill, dc: dc }, deltaApproval: 4,
-        resultNarration: displayName + ' vibra com a estratégia proposta e ajusta os detalhes da manobra conjunta.',
-        resultText: 'Sinergia tática aprimorada! <b>+4 de Aprovação</b>.',
-        resultNarrationFail: displayName + ' avalia o plano com prudência. "Arriscado demais sem suporte lateral. Melhor mantermos a formação padrão."',
-        resultTextFail: 'A tática permaneceu a usual.'
+        resultNarration: displayName + ' vibra com a estratégia proposta e ajusta os detalhes da manobra conjunta. Sinergia tática aprimorada (<b>+4 de Aprovação</b>).',
+        resultText: '"Bem pensado! No próximo confronto, dê o sinal que eu fecho a brecha no seu flanco no mesmo instante."',
+        resultNarrationFail: displayName + ' avalia o plano com prudência. A tática permaneceu a usual.',
+        resultTextFail: '"Arriscado demais sem suporte lateral. Melhor mantermos a formação padrão."'
       },
       {
         id: 'prov_combat_bonds',
@@ -71001,10 +71200,10 @@ function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
         id: 'check_personal_favor',
         label: '"Me dê os detalhes concretos desse problema. Toda situação tem uma brecha que podemos explorar."',
         check: { skill: skill, dc: dc }, deltaApproval: 5,
-        resultNarration: displayName + ' expõe os detalhes da missão com clareza, encontrando esperança na sua capacidade analítica.',
-        resultText: 'Missão pessoal mapeada com sucesso! <b>+5 de Aprovação</b>.',
-        resultNarrationFail: displayName + ' hesita um momento. "Ainda faltam algumas peças nesse quebra-cabeça. Trarei novidades quando tiver certeza."',
-        resultTextFail: 'O assunto foi adiado temporariamente.'
+        resultNarration: displayName + ' expõe os detalhes da missão com clareza, encontrando esperança na sua capacidade analítica. Missão pessoal mapeada com sucesso (<b>+5 de Aprovação</b>).',
+        resultText: '"Com esse plano temos uma chance real de resolver tudo sem cair em armadilhas. Quando chegarmos lá, faremos exatamente como você disse."',
+        resultNarrationFail: displayName + ' hesita um momento. O assunto foi adiado temporariamente.',
+        resultTextFail: '"Ainda faltam algumas peças nesse quebra-cabeça. Trarei novidades quando tiver certeza."'
       },
       {
         id: 'prov_personal_favor',
@@ -71040,10 +71239,10 @@ function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
         id: 'check_romance_courtship',
         label: '"Seus olhos dizem muito mais do que suas palavras. O que você realmente sente agora?"',
         check: { skill: skill, dc: dc }, deltaApproval: 5,
-        resultNarration: displayName + ' sustenta o seu olhar por longos segundos, desarmando completamente qualquer hesitação e revelando seu afeto sincero.',
-        resultText: 'Momento de íntima cumplicidade e romance! <b>+5 de Aprovação</b>.',
-        resultNarrationFail: displayName + ' desvia o olhar com um sorriso envergonhado. "Você sempre sabe como me desconcertar... mas ainda é cedo para dizer tudo."',
-        resultTextFail: 'O momento passou com carinho e timidez.'
+        resultNarration: displayName + ' sustenta o seu olhar por longos segundos, desarmando completamente qualquer hesitação e revelando seu afeto sincero. Momento de íntima cumplicidade (<b>+5 de Aprovação</b>).',
+        resultText: '"Com você aqui, até o peso da estrada desaparece. Não quero mais esconder o quanto você significa para mim."',
+        resultNarrationFail: displayName + ' desvia o olhar com um sorriso envergonhado. O momento passou com carinho e timidez.',
+        resultTextFail: '"Você sempre sabe como me desconcertar... mas ainda é cedo para dizer tudo."'
       },
       {
         id: 'prov_romance_courtship',
@@ -71079,10 +71278,10 @@ function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
         id: 'check_sparring_challenge',
         label: '"Tente quebrar minha defesa se puder. Vou te mostrar um contra-ataque que aprendi na estrada."',
         check: { skill: skill, dc: dc }, deltaApproval: 5,
-        resultNarration: 'Você executa uma finta perfeita seguida de um bloqueio limpo. ' + displayName + ' arregala os olhos e comemora a beleza da manobra.',
-        resultText: 'Maestria reconhecida no treino! <b>+5 de Aprovação</b>.',
-        resultNarrationFail: displayName + ' esquiva com facilidade do seu avanço e toca seu ombro de brincadeira. "Boa tentativa, mas a sua base abriu demais!"',
-        resultTextFail: 'O treino terminou com risadas amigáveis.'
+        resultNarration: 'Você executa uma finta perfeita seguida de um bloqueio limpo. ' + displayName + ' arregala os olhos e comemora a beleza da manobra. Maestria reconhecida no treino (<b>+5 de Aprovação</b>).',
+        resultText: '"Impressionante! Esse contra-ataque foi impecável — vou precisar treinar dobrado para não cair nessa finta de novo!"',
+        resultNarrationFail: displayName + ' esquiva com facilidade do seu avanço e toca seu ombro de brincadeira. O treino terminou com risadas amigáveis.',
+        resultTextFail: '"Boa tentativa, mas a sua base abriu demais!"'
       },
       {
         id: 'prov_sparring_challenge',
@@ -71271,7 +71470,7 @@ function _getAvailableAllyTopics(idx) {
 }
 window._getAvailableAllyTopics = _getAvailableAllyTopics;
 
-function _showAllyTopicsMenu(idx) {
+function _showAllyTopicsMenu(idx, opts) {
   var m = (window.GROUP_MEMBERS || [])[idx];
   if (!m || m.dead || m.isPlayer) return;
   var cls = _allyTplKey(m.cls);
@@ -71315,17 +71514,23 @@ function _showAllyTopicsMenu(idx) {
     return {
       id: 'topic_' + t.key,
       label: t.label,
-      cb: function() { _showAllyTopicDialogue(idx, t.key); }
+      isSubmenu: true,
+      cb: function() { _showAllyTopicDialogue(idx, t.key, { autoOpenChoices: true, isSubmenu: true }); }
     };
   });
 
   choices.push({
     id: 'back_to_ally_main',
     label: '↩ Voltar às ações gerais',
-    cb: function() { _showAllyDialogue(idx); }
+    isSubmenu: true,
+    cb: function() { _showAllyDialogue(idx, { autoOpenChoices: true, isSubmenu: true }); }
   });
 
   var dlg = {
+    autoOpenChoices: true,
+    isSubmenu: true,
+    choicesTitle: 'Interagir com ' + displayName,
+    choicesSubtitle: 'Escolha um tópico para conversar',
     npc: {
       id: 'ally_topics_' + idx,
       name: displayName,
@@ -71336,19 +71541,11 @@ function _showAllyTopicsMenu(idx) {
     },
     script: isAtCampfire ? [
       {
-        type: 'narration',
-        text: 'As brasas da fogueira estalam suavemente na noite. Você e ' + displayName + ' sentam-se próximos ao fogo, aproveitando a quietude do acampamento para conversar.'
-      },
-      {
         type: 'speech',
         speaker: displayName,
         text: 'O calor da fogueira ajuda a relaxar depois de tanta marcha. O que você tem em mente esta noite?'
       }
     ] : [
-      {
-        type: 'narration',
-        text: 'Você se aproxima de ' + displayName + ' para uma conversa mais próxima. Na tranquilidade de uma pausa, os laços entre companheiros se fortalecem com palavras e escuta atenta.'
-      },
       {
         type: 'speech',
         speaker: displayName,
@@ -71358,9 +71555,41 @@ function _showAllyTopicsMenu(idx) {
     choices: choices
   };
 
+  if (window.vEncounter && typeof window.vEncounter.isOpen === 'function' && window.vEncounter.isOpen()) {
+    if (typeof window.vEncounter.attachData === 'function') {
+      window.vEncounter.attachData({
+        choices: choices,
+        choicesTitle: 'Interagir com ' + displayName,
+        choicesSubtitle: 'Escolha um tópico para conversar'
+      }, {
+        onChoice: function(ch) {
+          if (typeof ch.cb === 'function') {
+            try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY-TOPICS-MENU] cb failed', e); }
+          }
+        }
+      });
+    }
+    if (typeof window.vEncounter.openChoices === 'function') {
+      window.vEncounter.openChoices(choices, {
+        title: 'Interagir com ' + displayName,
+        npcName: 'Escolha um tópico para conversar',
+        isSubmenu: true,
+        dialogue: dlg,
+        onChoice: function(ch) {
+          if (typeof ch.cb === 'function') {
+            try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY-TOPICS-MENU] cb failed', e); }
+          }
+        }
+      });
+    }
+    return;
+  }
+
   if (window.vEncounter && typeof window.vEncounter.render === 'function') {
     window.vEncounter.render(dlg, {
       closeable: true,
+      autoOpenChoices: (opts && typeof opts.autoOpenChoices === 'boolean') ? opts.autoOpenChoices : true,
+      isSubmenu: true,
       onChoice: function(ch) {
         if (typeof ch.cb === 'function') {
           try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY-TOPICS-MENU] cb failed', e); }
@@ -71371,11 +71600,12 @@ function _showAllyTopicsMenu(idx) {
 }
 window._showAllyTopicsMenu = _showAllyTopicsMenu;
 
-function _showAllyTopicDialogue(idx, topicKey) {
+function _showAllyTopicDialogue(idx, topicKey, opts) {
   var m = (window.GROUP_MEMBERS || [])[idx];
   if (!m || m.dead || m.isPlayer) return;
   var cls = _allyTplKey(m.cls);
   var displayName = (m.name || '').split(/\s+/)[0];
+  var _allyNpcId = 'ally_' + (m.name || ('idx' + idx));
   var allyPort = (typeof _resolveAllyPortraitUrl === 'function') ? _resolveAllyPortraitUrl(m) : null;
   var allyGender = (typeof _resolveAllyGender === 'function') ? _resolveAllyGender(m) : 'male';
   var heraldicId = (typeof _cgpHeraldicIcon === 'function') ? _cgpHeraldicIcon(m.cls) : 'ic-aldeao';
@@ -71416,17 +71646,17 @@ function _showAllyTopicDialogue(idx, topicKey) {
         {
           id: 'back_to_topics_menu',
           label: '↩ Escolher outro assunto',
-          cb: function() { _showAllyTopicsMenu(idx); }
+          cb: function() { _showAllyTopicsMenu(idx, { autoOpenChoices: true }); }
         },
         {
           id: 'back_to_ally_main',
           label: '↩ "Gostaria de falar de outro assunto."',
-          cb: function() { _showAllyDialogue(idx); }
+          cb: function() { _showAllyDialogue(idx, { autoOpenChoices: true }); }
         }
       ]
     };
     if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-      window.vEncounter.render(exhaustedDialogue, { closeable: true });
+      window.vEncounter.render(exhaustedDialogue, { closeable: true, autoOpenChoices: true });
     }
     return;
   }
@@ -71459,15 +71689,21 @@ function _showAllyTopicDialogue(idx, topicKey) {
   fullChoices.push({
     id: 'back_to_topics_menu',
     label: '↩ Escolher outro assunto',
-    cb: function() { _showAllyTopicsMenu(idx); }
+    isSubmenu: true,
+    cb: function() { _showAllyTopicsMenu(idx, { autoOpenChoices: true, isSubmenu: true }); }
   });
   fullChoices.push({
     id: 'back_to_ally_main',
     label: '↩ Voltar às ações gerais',
-    cb: function() { _showAllyDialogue(idx); }
+    isSubmenu: true,
+    cb: function() { _showAllyDialogue(idx, { autoOpenChoices: true, isSubmenu: true }); }
   });
 
   var dlg = {
+    autoOpenChoices: true,
+    isSubmenu: true,
+    choicesTitle: displayName + ' · ' + cfg.title,
+    choicesSubtitle: displayName,
     npc: {
       id: 'ally_' + (m.name || ('idx' + idx)) + '_' + topicKey,
       name: displayName,
@@ -71483,6 +71719,7 @@ function _showAllyTopicDialogue(idx, topicKey) {
   if (window.vEncounter && typeof window.vEncounter.render === 'function') {
     window.vEncounter.render(dlg, {
       closeable: true,
+      autoOpenChoices: (opts && typeof opts.autoOpenChoices === 'boolean') ? opts.autoOpenChoices : true,
       onChoice: function(ch) {
         if (typeof ch.cb === 'function') {
           try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY-TOPIC] cb failed', e); }
@@ -71532,6 +71769,7 @@ function _showAllyTopicDialogue(idx, topicKey) {
         if (ch._replyScript && window.vEncounter && typeof window.vEncounter.render === 'function') {
           if (typeof _npcMarkUsed === 'function' && ch.id) {
             _npcMarkUsed(_allyNpcId, ch.id);
+            _npcMarkUsed(_allyNpcId, topicKey + ':' + ch.id);
           }
           if (typeof _markAllyChoiceUsed === 'function' && ch.id) {
             _markAllyChoiceUsed(displayName, 'lore', ch.id, null, m);
@@ -71542,19 +71780,36 @@ function _showAllyTopicDialogue(idx, topicKey) {
           var remTopics = (typeof _getAvailableAllyTopics === 'function') ? _getAvailableAllyTopics(idx) : [];
           var replyChoices = [];
           if (remInTopic.length > 0) {
-            replyChoices.push({ id: 'more_in_topic', label: '↩ Continuar sobre este assunto', cb: function() { _showAllyTopicDialogue(idx, topicKey); } });
+            replyChoices.push({ id: 'more_in_topic', label: '↩ Continuar sobre este assunto', isSubmenu: true, isReturn: true, cb: function() { _showAllyTopicDialogue(idx, topicKey, { autoOpenChoices: true, isSubmenu: true }); } });
           }
           if (remTopics.length > 0) {
-            replyChoices.push({ id: 'back_to_topics', label: '↩ Escolher outro assunto', cb: function() { _showAllyTopicsMenu(idx); } });
+            replyChoices.push({
+              id: 'back_to_topics',
+              label: '↩ Escolher outro assunto',
+              isSubmenu: true,
+              isReturn: true,
+              cb: function() { _showAllyTopicsMenu(idx, { autoOpenChoices: true, isSubmenu: true }); }
+            });
           }
-          replyChoices.push({ id: 'back_to_ally_main', label: '↩ "Gostaria de falar de outro assunto."', cb: function() { _showAllyDialogue(idx); } });
+          replyChoices.push({
+            id: 'back_to_ally_main',
+            label: '↩ "Gostaria de falar de outro assunto."',
+            isSubmenu: true,
+            isReturn: true,
+            cb: function() { _showAllyDialogue(idx, { autoOpenChoices: true, isSubmenu: true }); }
+          });
           replyChoices.push({ id: 'leave', label: '↩ "Até mais tarde."', cb: 'close' });
           window.vEncounter.render({
             npc: dlg.npc,
+            isSubmenu: true,
+            choicesTitle: displayName + ' · Conversa',
+            choicesSubtitle: cfg.title,
             script: ch._replyScript,
             choices: replyChoices
           }, {
             closeable: true,
+            autoOpenChoices: true,
+            isSubmenu: true,
             onChoice: function(rc) {
               if (typeof rc.cb === 'function') { rc.cb(); return; }
               try { window.vEncounter.close(); } catch(_) {}
@@ -71662,6 +71917,7 @@ function _showCompanionRelationshipTutorial(optAllyName, onDone) {
   if (window.vEncounter && typeof window.vEncounter.render === 'function') {
     window.vEncounter.render(dlg, {
       closeable: true,
+      autoOpenChoices: true,
       onChoice: function(ch) {
         if (typeof ch.cb === 'function') {
           try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY-TUTORIAL] cb failed', e); }
@@ -71701,7 +71957,7 @@ function _getAvailableGiftItems() {
 }
 window._getAvailableGiftItems = _getAvailableGiftItems;
 
-function _showAllyGiftDialogue(idx) {
+function _showAllyGiftDialogue(idx, opts) {
   var m = (window.GROUP_MEMBERS || [])[idx];
   if (!m || m.dead || m.isPlayer) return;
   var cls = _allyTplKey(m.cls);
@@ -71741,12 +71997,14 @@ function _showAllyGiftDialogue(idx) {
         {
           id: 'back_from_gifts',
           label: '↩ "Pensando bem, vamos falar de outra coisa."',
-          cb: function() { _showAllyDialogue(idx); }
+          isSubmenu: true,
+          isReturn: true,
+          cb: function() { _showAllyDialogue(idx, { autoOpenChoices: true, isSubmenu: true, isReturn: true }); }
         }
       ]
     };
     if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-      window.vEncounter.render(emptyDlg, { closeable: true });
+      window.vEncounter.render(emptyDlg, { closeable: true, autoOpenChoices: true });
     }
     return;
   }
@@ -71768,7 +72026,7 @@ function _showAllyGiftDialogue(idx) {
     var delta = isFav ? 10 : 5;
     return {
       id: 'gift_' + itemName,
-      label: '🎁 Entregar ' + itemName + ' (' + itemQty + ' na mochila)',
+      label: '◆ Entregar ' + itemName + ' (' + itemQty + ' na mochila)',
       cb: function() {
         if (typeof _removeItemFromInventory === 'function') {
           _removeItemFromInventory(itemName, 1);
@@ -71817,10 +72075,14 @@ function _showAllyGiftDialogue(idx) {
   giftChoices.push({
     id: 'back_from_gifts',
     label: '↩ "Pensando bem, vamos falar de outra coisa."',
-    cb: function() { _showAllyDialogue(idx); }
+    cb: function() { _showAllyDialogue(idx, { autoOpenChoices: true }); }
   });
 
   var dlg = {
+    autoOpenChoices: true,
+    isSubmenu: true,
+    choicesTitle: 'Presentear ' + displayName,
+    choicesSubtitle: 'Itens da mochila',
     npc: {
       id: 'ally_gift_' + idx,
       name: displayName,
@@ -71831,10 +72093,6 @@ function _showAllyGiftDialogue(idx) {
     },
     script: [
       {
-        type: 'narration',
-        text: 'Você abre sua mochila de viagem diante de ' + displayName + '. Um pequeno gesto de generosidade fortalece a cumplicidade e estreita os laços da comitiva.'
-      },
-      {
         type: 'speech',
         speaker: displayName,
         text: 'O que você tem aí? Não precisava se incomodar comigo... mas confesso que aprecio a consideração.'
@@ -71843,9 +72101,102 @@ function _showAllyGiftDialogue(idx) {
     choices: giftChoices
   };
 
+  if (opts && opts.isSubmenu && window.vEncounter && typeof window.vEncounter.isOpen === 'function' && window.vEncounter.isOpen()) {
+    if (typeof window.vEncounter.attachData === 'function') {
+      window.vEncounter.attachData({
+        choices: giftChoices,
+        choicesTitle: 'Presentear ' + displayName,
+        choicesSubtitle: 'Itens da mochila'
+      }, {
+        onChoice: function(ch) {
+          if (typeof ch.cb === 'function') {
+            try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY-GIFT] cb failed', e); }
+            if (ch._replyScript && window.vEncounter && typeof window.vEncounter.render === 'function') {
+              var moreGiftsAfter = (typeof _getAvailableGiftItems === 'function') ? _getAvailableGiftItems() : [];
+              var postGiftChoices = [];
+              if (moreGiftsAfter.length > 0) {
+                postGiftChoices.push({ id: 'more_gifts', label: '◆ Oferecer outro presente ▸', isSubmenu: true, cb: function() { _showAllyGiftDialogue(idx, { autoOpenChoices: true, isSubmenu: true }); } });
+              }
+              postGiftChoices.push({ id: 'back_to_ally_main', label: '↩ "Gostaria de falar de outro assunto."', isSubmenu: true, isReturn: true, cb: function() { _showAllyDialogue(idx, { autoOpenChoices: true, isSubmenu: true, isReturn: true }); } });
+              postGiftChoices.push({ id: 'leave', label: '↩ "Até mais tarde."', cb: 'close' });
+              window.vEncounter.render({
+                npc: dlg.npc,
+                isSubmenu: true,
+                choicesTitle: displayName + ' · Presente',
+                choicesSubtitle: displayName,
+                script: ch._replyScript,
+                choices: postGiftChoices
+              }, {
+                closeable: true,
+                autoOpenChoices: true,
+                isSubmenu: true,
+                onChoice: function(rc) {
+                  if (typeof rc.cb === 'function') { rc.cb(); return; }
+                  try { window.vEncounter.close(); } catch(_) {}
+                }
+              });
+              return;
+            }
+            return;
+          }
+          if (ch.cb === 'close') {
+            try { window.vEncounter.close(); } catch(_) {}
+            return;
+          }
+        }
+      });
+    }
+    if (typeof window.vEncounter.openChoices === 'function') {
+      window.vEncounter.openChoices(giftChoices, {
+        title: 'Presentear ' + displayName,
+        npcName: 'Itens da mochila',
+        isSubmenu: true,
+        dialogue: dlg,
+        onChoice: function(ch) {
+          if (typeof ch.cb === 'function') {
+            try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY-GIFT] cb failed', e); }
+            if (ch._replyScript && window.vEncounter && typeof window.vEncounter.render === 'function') {
+              var moreGiftsAfter = (typeof _getAvailableGiftItems === 'function') ? _getAvailableGiftItems() : [];
+              var postGiftChoices = [];
+              if (moreGiftsAfter.length > 0) {
+                postGiftChoices.push({ id: 'more_gifts', label: '◆ Oferecer outro presente ▸', isSubmenu: true, cb: function() { _showAllyGiftDialogue(idx, { autoOpenChoices: true, isSubmenu: true }); } });
+              }
+              postGiftChoices.push({ id: 'back_to_ally_main', label: '↩ "Gostaria de falar de outro assunto."', isSubmenu: true, isReturn: true, cb: function() { _showAllyDialogue(idx, { autoOpenChoices: true, isSubmenu: true, isReturn: true }); } });
+              postGiftChoices.push({ id: 'leave', label: '↩ "Até mais tarde."', cb: 'close' });
+              window.vEncounter.render({
+                npc: dlg.npc,
+                isSubmenu: true,
+                choicesTitle: displayName + ' · Presente',
+                choicesSubtitle: displayName,
+                script: ch._replyScript,
+                choices: postGiftChoices
+              }, {
+                closeable: true,
+                autoOpenChoices: true,
+                isSubmenu: true,
+                onChoice: function(rc) {
+                  if (typeof rc.cb === 'function') { rc.cb(); return; }
+                  try { window.vEncounter.close(); } catch(_) {}
+                }
+              });
+              return;
+            }
+            return;
+          }
+          if (ch.cb === 'close') {
+            try { window.vEncounter.close(); } catch(_) {}
+            return;
+          }
+        }
+      });
+    }
+    return;
+  }
+
   if (window.vEncounter && typeof window.vEncounter.render === 'function') {
     window.vEncounter.render(dlg, {
       closeable: true,
+      autoOpenChoices: (opts && typeof opts.autoOpenChoices === 'boolean') ? opts.autoOpenChoices : true,
       onChoice: function(ch) {
         if (typeof ch.cb === 'function') {
           try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY-GIFT] cb failed', e); }
@@ -71853,16 +72204,21 @@ function _showAllyGiftDialogue(idx) {
             var moreGiftsAfter = (typeof _getAvailableGiftItems === 'function') ? _getAvailableGiftItems() : [];
             var postGiftChoices = [];
             if (moreGiftsAfter.length > 0) {
-              postGiftChoices.push({ id: 'more_gifts', label: '🎁 Oferecer outro presente', cb: function() { _showAllyGiftDialogue(idx); } });
+              postGiftChoices.push({ id: 'more_gifts', label: '◆ Oferecer outro presente ▸', isSubmenu: true, cb: function() { _showAllyGiftDialogue(idx, { autoOpenChoices: true, isSubmenu: true }); } });
             }
-            postGiftChoices.push({ id: 'back_to_ally_main', label: '↩ "Gostaria de falar de outro assunto."', cb: function() { _showAllyDialogue(idx); } });
+            postGiftChoices.push({ id: 'back_to_ally_main', label: '↩ "Gostaria de falar de outro assunto."', isSubmenu: true, isReturn: true, cb: function() { _showAllyDialogue(idx, { autoOpenChoices: true, isSubmenu: true, isReturn: true }); } });
             postGiftChoices.push({ id: 'leave', label: '↩ "Até mais tarde."', cb: 'close' });
             window.vEncounter.render({
               npc: dlg.npc,
+              isSubmenu: true,
+              choicesTitle: displayName + ' · Presente',
+              choicesSubtitle: displayName,
               script: ch._replyScript,
               choices: postGiftChoices
             }, {
               closeable: true,
+              autoOpenChoices: true,
+              isSubmenu: true,
               onChoice: function(rc) {
                 if (typeof rc.cb === 'function') { rc.cb(); return; }
                 try { window.vEncounter.close(); } catch(_) {}
@@ -71960,8 +72316,8 @@ function _markAllyIntroduced(m, cls) {
 window._isAllyIntroduced = _isAllyIntroduced;
 window._markAllyIntroduced = _markAllyIntroduced;
 
-// _showAllyDialogue(memberIdx) — Menu Geral do Companheiro
-function _showAllyDialogue(idx){
+// _showAllyDialogue(memberIdx, opts) — Menu Geral do Companheiro
+function _showAllyDialogue(idx, opts){
   var m = (window.GROUP_MEMBERS || [])[idx];
   if (!m || m.dead || m.isPlayer) return;
   var cls = _allyTplKey(m.cls);
@@ -72075,7 +72431,8 @@ function _showAllyDialogue(idx){
     primaryChoices.push({
       id: 'nav_topics_menu',
       label: '◆ Interagir ▸',
-      cb: function() { _showAllyTopicsMenu(idx); }
+      isSubmenu: true,
+      cb: function() { _showAllyTopicsMenu(idx, { autoOpenChoices: true, isSubmenu: true }); }
     });
   }
   primaryChoices.push({
@@ -72094,7 +72451,7 @@ function _showAllyDialogue(idx){
               var ov = document.getElementById('city-subscreen-popup');
               if (ov) ov.classList.remove('active');
             }
-            _showAllyDialogue(idx);
+            _showAllyDialogue(idx, { autoOpenChoices: true });
           };
         }
         if (typeof _showStatusPopup === 'function') _showStatusPopup(idx);
@@ -72105,8 +72462,9 @@ function _showAllyDialogue(idx){
   if (availableGifts.length > 0) {
     primaryChoices.push({
       id: 'nav_gift',
-      label: 'Oferecer um presente da mochila ▸',
-      cb: function() { _showAllyGiftDialogue(idx); }
+      label: '◆ Oferecer um presente da mochila ▸',
+      isSubmenu: true,
+      cb: function() { _showAllyGiftDialogue(idx, { autoOpenChoices: true, isSubmenu: true }); }
     });
   }
 
@@ -72114,6 +72472,9 @@ function _showAllyDialogue(idx){
   combinedChoices.push({ id: 'leave', label: '↩ "Até mais tarde."', cb: 'close', renownDelta: 0 });
 
   var dlg = {
+    isSubmenu: !!(opts && opts.isSubmenu),
+    choicesTitle: 'Ações com ' + displayName,
+    choicesSubtitle: displayName,
     npc: {
       id: _allyNpcId,
       name: displayName,
@@ -72125,9 +72486,96 @@ function _showAllyDialogue(idx){
     script: personalizedScript,
     choices: combinedChoices
   };
+  if (opts && opts.isSubmenu && window.vEncounter && typeof window.vEncounter.isOpen === 'function' && window.vEncounter.isOpen()) {
+    if (typeof window.vEncounter.attachData === 'function') {
+      window.vEncounter.attachData({
+        choices: combinedChoices,
+        choicesTitle: 'Ações com ' + displayName,
+        choicesSubtitle: displayName
+      }, {
+        onChoice: function(ch) {
+          if (typeof ch.cb === 'function') {
+            try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY] cb failed', e); }
+            return;
+          }
+          if (ch._replyScript && window.vEncounter && typeof window.vEncounter.render === 'function') {
+            window.vEncounter.render({
+              npc: dlg.npc,
+              isSubmenu: true,
+              choicesTitle: displayName + ' · Diálogo',
+              choicesSubtitle: displayName,
+              script: ch._replyScript,
+              choices: [
+                { id: 'back_to_ally_main', label: '↩ "Gostaria de falar de outro assunto."', isSubmenu: true, isReturn: true, cb: function() { _showAllyDialogue(idx, { autoOpenChoices: true, isSubmenu: true }); } },
+                { id: 'leave', label: '↩ "Até mais tarde."', cb: 'close', renownDelta: 0 }
+              ]
+            }, {
+              closeable: true,
+              autoOpenChoices: true,
+              isSubmenu: true,
+              onChoice: function(rc) {
+                if (typeof rc.cb === 'function') { rc.cb(); return; }
+                try { window.vEncounter.close(); } catch(_) {}
+              }
+            });
+            return;
+          }
+          if (typeof window._dispatchSvcChoice === 'function') {
+            var handled = window._dispatchSvcChoice(ch, dlg, {});
+            if (handled) return;
+          }
+          try { window.vEncounter.close(); } catch(_) {}
+        }
+      });
+    }
+    if (typeof window.vEncounter.openChoices === 'function') {
+      window.vEncounter.openChoices(combinedChoices, {
+        title: 'Ações com ' + displayName,
+        npcName: displayName,
+        isSubmenu: true,
+        dialogue: dlg,
+        onChoice: function(ch) {
+          if (typeof ch.cb === 'function') {
+            try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY] cb failed', e); }
+            return;
+          }
+          if (ch._replyScript && window.vEncounter && typeof window.vEncounter.render === 'function') {
+            window.vEncounter.render({
+              npc: dlg.npc,
+              isSubmenu: true,
+              choicesTitle: displayName + ' · Diálogo',
+              choicesSubtitle: displayName,
+              script: ch._replyScript,
+              choices: [
+                { id: 'back_to_ally_main', label: '↩ "Gostaria de falar de outro assunto."', isSubmenu: true, isReturn: true, cb: function() { _showAllyDialogue(idx, { autoOpenChoices: true, isSubmenu: true }); } },
+                { id: 'leave', label: '↩ "Até mais tarde."', cb: 'close', renownDelta: 0 }
+              ]
+            }, {
+              closeable: true,
+              autoOpenChoices: true,
+              isSubmenu: true,
+              onChoice: function(rc) {
+                if (typeof rc.cb === 'function') { rc.cb(); return; }
+                try { window.vEncounter.close(); } catch(_) {}
+              }
+            });
+            return;
+          }
+          if (typeof window._dispatchSvcChoice === 'function') {
+            var handled = window._dispatchSvcChoice(ch, dlg, {});
+            if (handled) return;
+          }
+          try { window.vEncounter.close(); } catch(_) {}
+        }
+      });
+    }
+    return;
+  }
+
   if (window.vEncounter && typeof window.vEncounter.render === 'function') {
     window.vEncounter.render(dlg, {
       closeable: true,
+      autoOpenChoices: !(opts && opts.autoOpenChoices === false),
       onChoice: function(ch) {
         if (typeof ch.cb === 'function') {
           try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY] cb failed', e); }
@@ -72138,11 +72586,12 @@ function _showAllyDialogue(idx){
             npc: dlg.npc,
             script: ch._replyScript,
             choices: [
-              { id: 'back_to_ally_main', label: '↩ "Gostaria de falar de outro assunto."', cb: function() { _showAllyDialogue(idx); } },
+              { id: 'back_to_ally_main', label: '↩ "Gostaria de falar de outro assunto."', isSubmenu: true, isReturn: true, cb: function() { _showAllyDialogue(idx, { autoOpenChoices: true, isSubmenu: true }); } },
               { id: 'leave', label: '↩ "Até mais tarde."', cb: 'close' }
             ]
           }, {
             closeable: true,
+            autoOpenChoices: false,
             onChoice: function(rc) {
               if (typeof rc.cb === 'function') { rc.cb(); return; }
               try { window.vEncounter.close(); } catch(_) {}
@@ -72436,7 +72885,7 @@ function renderCityGroupPanel(){
     btn.addEventListener('click', function(ev){
       ev.stopPropagation();
       var idx = parseInt(btn.getAttribute('data-chat-idx'), 10);
-      if (typeof _showAllyDialogue === 'function') _showAllyDialogue(idx);
+      if (typeof _showAllyDialogue === 'function') _showAllyDialogue(idx, { autoOpenChoices: true });
     });
   });
 
@@ -75225,7 +75674,8 @@ window._cartCloseRegionLoreModal = _cartCloseRegionLoreModal;
  * NPC provedor de rações de marcha e suprimentos básicos de viagem,
  * instalado junto às muralhas dos Portões de Valdoria (city_gates).
  * ========================================================================== */
-function _cartOpenTiborShop() {
+function _cartOpenTiborShop(opts) {
+  var autoOpen = !(opts && opts.autoOpenChoices === false);
   if (typeof haptic === 'function') haptic('light');
   var p = (typeof window !== 'undefined' && window.CITY_MOCK_PLAYER) || {};
   var currentRations = 0;
@@ -75301,6 +75751,7 @@ function _cartOpenTiborShop() {
       compact: true
     }, {
       player: p,
+      autoOpenChoices: autoOpen,
       onChoice: function(ch) {
         if (!ch || ch.id === 'close_shop') {
           if (window.vEncounter && typeof window.vEncounter.close === 'function') {
@@ -75352,9 +75803,10 @@ function _handleTiborPurchase(cost, qty) {
         compact: true
       }, {
         player: p,
+        autoOpenChoices: true,
         onChoice: function(ch) {
           if (ch && ch.id === 'try_again') {
-            _cartOpenTiborShop();
+            _cartOpenTiborShop({ autoOpenChoices: true });
           } else {
             if (window.vEncounter && typeof window.vEncounter.close === 'function') {
               window.vEncounter.close();
@@ -75412,9 +75864,10 @@ function _handleTiborPurchase(cost, qty) {
       compact: true
     }, {
       player: p,
+      autoOpenChoices: true,
       onChoice: function(ch) {
         if (ch && ch.id === 'buy_more') {
-          _cartOpenTiborShop();
+          _cartOpenTiborShop({ autoOpenChoices: true });
         } else {
           if (window.vEncounter && typeof window.vEncounter.close === 'function') {
             window.vEncounter.close();
@@ -75457,9 +75910,10 @@ function _showTiborStarvationAdvice() {
       compact: true
     }, {
       player: p,
+      autoOpenChoices: true,
       onChoice: function(ch) {
         if (ch && ch.id === 'back_to_shop') {
-          _cartOpenTiborShop();
+          _cartOpenTiborShop({ autoOpenChoices: true });
         } else if (ch && ch.id === 'tech_rules') {
           _showTiborTechnicalRules();
         } else {
@@ -75498,7 +75952,7 @@ function _showTiborTechnicalRules() {
         },
         {
           type: 'narration',
-          text: '<b>◆ Recuperação em Descanso Longo:</b> Ingerir ração completa e água limpa durante um Descanso Longo de 8 horas permite recuperar 1 nível de exaustão acumulado.'
+          text: '<b>◆ Recuperação em Descanso Longo:</b> Ingerir ração completa e água limpa durante um Descanso Longo completo permite recuperar 1 nível de exaustão acumulado.'
         }
       ],
       choices: [
@@ -75510,9 +75964,10 @@ function _showTiborTechnicalRules() {
       compact: true
     }, {
       player: p,
+      autoOpenChoices: true,
       onChoice: function(ch) {
         if (ch && ch.id === 'back_to_shop') {
-          _cartOpenTiborShop();
+          _cartOpenTiborShop({ autoOpenChoices: true });
         } else {
           if (window.vEncounter && typeof window.vEncounter.close === 'function') {
             window.vEncounter.close();
@@ -76787,6 +77242,7 @@ if (typeof window._openDirectionalRoadCrossroads !== 'function') {
                   inline: true
                 }, {
                   player: window.CITY_MOCK_PLAYER || {},
+                  autoOpenChoices: true,
                   onChoice: function(ch) {
                     var isAct = (ch && ch.id === 'enc_act');
                     var d20 = 1 + Math.floor(Math.random() * 20);
@@ -76803,6 +77259,7 @@ if (typeof window._openDirectionalRoadCrossroads !== 'function') {
                       choices: [{ id: 'enc_end', label: 'Retornar' }],
                       inline: true
                     }, {
+                      autoOpenChoices: true,
                       onChoice: function() {
                         if (window.vEncounter && typeof window.vEncounter.close === 'function') window.vEncounter.close();
                         _openCartLocationPopup(biome);
@@ -77791,7 +78248,7 @@ var MARTHA_ENCOUNTERS = {
   }
 };
 
-function _openMarthaDialogue(p, encounterKey){
+function _openMarthaDialogue(p, encounterKey, opts){
   encounterKey = encounterKey || 'greeting';
   var enc = MARTHA_ENCOUNTERS[encounterKey];
   if (!enc) { console.warn('[MARTHA] unknown encounter:', encounterKey); return; }
@@ -77800,6 +78257,7 @@ function _openMarthaDialogue(p, encounterKey){
     enc.script = _marthaGreeting(p);
     enc.choices = _marthaChoicesAfter([]);
   }
+  enc.autoOpenChoices = !(opts && opts.autoOpenChoices === false);
   if (typeof _renderEncounterPopup === 'function') {
     _renderEncounterPopup(enc, 'inn_npc_inn_martha', p);
   }
@@ -77828,27 +78286,27 @@ function _cellarPost(path, body){
 }
 
 function _enterMarthaCellar(p){
-  // LOCAL ou sem auth → diálogo client-side (aceitação da quest).
+  // LOCAL ou sem auth → diálogo server-driven da Martha
   if (!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote())) {
-    _openMarthaDialogue(p, 'cellar');
+    _openCityDialogue('inn', 'martha', p);
     return;
   }
   if (window.vProcessing) { try { window.vProcessing.show({ text: 'Descendo ao porão...' }); } catch(_){} }
   _cellarPost('/api/inn/cellar/init', {}).then(function(data){
     if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
-    // quest_not_ready (não aceita / já resolvida) → diálogo da Martha
-    if (!data || !data.ok) { _openMarthaDialogue(p, 'cellar'); return; }
+    // quest_not_ready (não aceita / já resolvida) → diálogo da Martha server-driven
+    if (!data || !data.ok) { _openCityDialogue('inn', 'martha', p); return; }
     _cellarNpc = data.npc || null;
     if (window.vEncounter && window.vEncounter.render) {
       window.vEncounter.render(
         { npc: data.npc, script: data.script, choices: data.choices },
-        { player: p, closeable: true, onChoice: function(ch){ _resolveCellarChoice(p, ch && ch.id); } }
+        { player: p, closeable: true, autoOpenChoices: true, onChoice: function(ch){ _resolveCellarChoice(p, ch && ch.id); } }
       );
     }
   }).catch(function(e){
     if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
     console.error('[CELLAR] init failed', e);
-    _openMarthaDialogue(p, 'cellar');
+    _openCityDialogue('inn', 'martha', p);
   });
 }
 
@@ -77892,7 +78350,7 @@ function _handleCellarResult(p, data){
   if (res === 'poison_fail' && data.combat_url) {
     window.vEncounter.render(
       { npc: npc, script: script, choices: [{ id: 'go', label: 'Resolver no aço' }] },
-      { player: p, onChoice: function(){ _goToCombatFromCity(data.combat_url); } }
+      { player: p, autoOpenChoices: true, onChoice: function(){ _goToCombatFromCity(data.combat_url); } }
     );
     return;
   }
@@ -77900,7 +78358,7 @@ function _handleCellarResult(p, data){
   var doneLabel = (res === 'poison_success') ? '✔ Voltar à estalagem' : '↩ Voltar';
   window.vEncounter.render(
     { npc: npc, script: script, choices: [{ id: 'done', label: doneLabel }] },
-    { player: p, onChoice: function(){ try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); } }
+    { player: p, autoOpenChoices: true, onChoice: function(){ try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); } }
   );
 }
 
@@ -77939,7 +78397,7 @@ function _enterSewer(p){
           script: data.script,
           choices: data.choices
         },
-        { player: p, closeable: true, onChoice: function(ch){ _resolveSewerChoice(p, ch && ch.id); } }
+        { player: p, closeable: true, autoOpenChoices: true, onChoice: function(ch){ _resolveSewerChoice(p, ch && ch.id); } }
       );
     }
   }).catch(function(e){
@@ -77981,6 +78439,7 @@ function _handleSewerResult(p, data){
     },
     {
       player: p,
+      autoOpenChoices: true,
       onChoice: function(){
         try { window.vEncounter.close(); } catch(_){}
         if (typeof refreshHud === 'function') refreshHud();
@@ -78035,6 +78494,7 @@ if (typeof ACTION_HANDLERS !== 'undefined') {
           ]
         }, {
           player: pl,
+          autoOpenChoices: true,
           onChoice: function(){
             try { window.vEncounter.close(); } catch(_){}
             if (typeof _openCityMapModal === 'function') {
@@ -78086,7 +78546,7 @@ function _enterQuestCombat(questId, p){
     if (window.vEncounter && window.vEncounter.render) {
       window.vEncounter.render(
         { npc: data.npc || null, script: data.script, choices: data.choices },
-        { player: p, closeable: true, onChoice: function(ch){ _resolveQuestCombatChoice(questId, p, ch && ch.id); } }
+        { player: p, closeable: true, autoOpenChoices: true, onChoice: function(ch){ _resolveQuestCombatChoice(questId, p, ch && ch.id); } }
       );
     }
   }).catch(function(e){
@@ -78117,7 +78577,7 @@ function _handleQuestCombatResult(p, data){
   var script = Array.isArray(data.script) ? data.script : [];
   window.vEncounter.render(
     { npc: data.npc || null, script: script, choices: [{ id: 'done', label: '↩ Voltar' }] },
-    { player: p, onChoice: function(){ try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); } }
+    { player: p, autoOpenChoices: true, onChoice: function(){ try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); } }
   );
 }
 
@@ -78158,7 +78618,7 @@ function _enterQuestTurnin(questId, p){
     if (window.vEncounter && window.vEncounter.render) {
       window.vEncounter.render(
         { npc: data.npc || null, script: data.script, choices: data.choices },
-        { player: p, closeable: true, onChoice: function(ch){ _resolveQuestTurninChoice(questId, p, ch && ch.id); } }
+        { player: p, closeable: true, autoOpenChoices: true, onChoice: function(ch){ _resolveQuestTurninChoice(questId, p, ch && ch.id); } }
       );
     }
   }).catch(function(e){
@@ -78189,7 +78649,7 @@ function _handleQuestTurninResult(p, data){
     var ls = Array.isArray(data.script) ? data.script : [];
     window.vEncounter.render(
       { npc: data.npc || null, script: ls, choices: [{ id: 'done', label: '↩ Voltar' }] },
-      { player: p, onChoice: function(){ try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); } }
+      { player: p, autoOpenChoices: true, onChoice: function(){ try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); } }
     );
     return;
   }
@@ -78198,7 +78658,7 @@ function _handleQuestTurninResult(p, data){
   var done = [{ type: 'narration', text: data.message || '<b>Missão concluída!</b>' }];
   window.vEncounter.render(
     { npc: data.npc || null, script: done, choices: [{ id: 'done', label: '↩ Voltar' }] },
-    { player: p, onChoice: function(){
+    { player: p, autoOpenChoices: true, onChoice: function(){
         try { window.vEncounter.close(); } catch(_){}
         // re-hidrata o estado do servidor (quest concluída sai das ativas)
         try { if (window.vCityServer && window.vCityServer.quest && window.vCityServer.quest.state) { window.vCityServer.quest.state().then(function(r){ if (r && r.quests && typeof _applyServerQuests === 'function') _applyServerQuests(r.quests); if (typeof renderCurrentScreen === 'function') renderCurrentScreen(); }); } } catch(_){}
@@ -78279,6 +78739,7 @@ function _arrivalRenderNode(node){
   window.vEncounter.render(
     { npc: node.npc, script: node.script, choices: node.choices },
     { player: window.CITY_MOCK_PLAYER, closeable: false,
+      autoOpenChoices: true,
       handlerType: 'arrival', encId: (_arrivalState && _arrivalState.encId), action: (_arrivalState && _arrivalState.action),
       onChoice: function(ch){ _arrivalChoice(ch && ch.id); } }
   );
@@ -78780,6 +79241,7 @@ function _showCityWalkArrival(dest, narrativeText, proceedFn) {
       choicesSubtitle: dest.name
     }, {
       player: p,
+      autoOpenChoices: true,
       progress: { isCityWalk: true, title: '◈ A CAMINHO: ' + dest.name.toUpperCase(), destination: dest.name, district: dest.district },
       inlineChoices: true,
       onChoice: function() {
@@ -78861,6 +79323,7 @@ function _startCityWalk(targetKey, proceedFn, opts) {
       choicesSubtitle: 'A caminho de ' + dest.name
     }, {
       player: p,
+      autoOpenChoices: true,
       progress: { isCityWalk: true, title: '◈ A CAMINHO: ' + dest.name.toUpperCase(), destination: dest.name, district: dest.district },
       onChoice: function(selected) {
         var ch = selected._ev || selected;
@@ -79583,6 +80046,7 @@ function _renderCompanionSpontaneousBanterScene(banter, proceedAfterFn) {
     choicesSubtitle: banter.companion_name
   }, {
     player: p,
+    autoOpenChoices: true,
     onChoice: function(selected) {
       var cid = banter.companion_id;
       var chid = selected.id;
@@ -79666,7 +80130,7 @@ function _handleBanterResolved(result, targetNpc, proceedAfterFn) {
       label: '↩ Conversar mais com ' + (targetNpc.name || 'o companheiro'),
       cb: function() {
         window._encounterActive = false;
-        _showAllyDialogue(matchedIdx);
+        _showAllyDialogue(matchedIdx, { autoOpenChoices: true });
       }
     });
   }
@@ -79678,6 +80142,7 @@ function _handleBanterResolved(result, targetNpc, proceedAfterFn) {
     choices: banterEndChoices
   }, {
     player: (typeof CITY_MOCK_PLAYER !== 'undefined') ? CITY_MOCK_PLAYER : (window.CITY_MOCK_PLAYER || {}),
+    autoOpenChoices: true,
     onChoice: function(ch) {
       if (ch && typeof ch.cb === 'function') {
         ch.cb();
@@ -80057,8 +80522,9 @@ function _pushTavernGromReturnHook(p){
   }
 }
 
-function _openCityDialogue(venue, node, p){
+function _openCityDialogue(venue, node, p, opts){
   p = p || window.CITY_MOCK_PLAYER || null;
+  var autoOpen = !(opts && opts.autoOpenChoices === false);
   if (!(window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote())) {
     if (typeof vToast === 'function') vToast('Disponível no jogo.', 'info');
     return;
@@ -80084,7 +80550,7 @@ function _openCityDialogue(venue, node, p){
       return;
     }
     var resolvedRoot = (node && node !== 'greeting') ? node : _getVenueRootNode(venue, data, initCtx);
-    var dlgCtx = { rootNode: resolvedRoot };
+    var dlgCtx = { rootNode: resolvedRoot, autoOpenChoices: autoOpen };
 
     var choiceHandler = function(ch){
       if (ch && typeof ch.cb === 'function') { ch.cb(ch); return; }
@@ -80118,18 +80584,19 @@ function _openCityDialogue(venue, node, p){
         _showSkillCheckTacticalModal(venue, data.node || resolvedRoot, ch, p, data, dlgCtx);
       }
       else if (data && data.node) { _resolveCityChoice(venue, data.node, ch && ch.id, p, data.npc, dlgCtx); }
-      else if (ch && ch.node) { _openCityDialogue(venue, ch.node, p); }
+      else if (ch && ch.node) { _openCityDialogue(venue, ch.node, p, { autoOpenChoices: true }); }
       else { try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); }
     };
 
     var attached = false;
     if (window.vEncounter && typeof window.vEncounter.attachData === 'function') {
-      attached = window.vEncounter.attachData(data, { onChoice: choiceHandler });
+      attached = window.vEncounter.attachData(data, { onChoice: choiceHandler, autoOpenChoices: autoOpen });
     }
     if (!attached) {
       // Prepend a narrativa de aproximação do Mestre como Página 1 da conversa:
       // o jogador tem a descrição narrativa sensorial antes das falas dos personagens.
-      if (data.script && Array.isArray(data.script) && approach.narration) {
+      // REGRA SOBERANA: Em visitas de retorno, NUNCA executa intros descritivas/teatrais.
+      if (!data.is_return && data.script && Array.isArray(data.script) && approach.narration) {
         data.script = [{ type: 'dm', text: approach.narration }].concat(data.script);
       }
       _renderCityDialogue(venue, data, p, dlgCtx);
@@ -80253,9 +80720,9 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
 
   var attitudeNote = '';
   if (npcAttitude === 'friendly') {
-    attitudeNote = '<br>🤝 Atitude Amigável: +2 de bônus social em testes de interação.';
+    attitudeNote = '<br>◆ Atitude Amigável: +2 de bônus social em testes de interação.';
   } else if (npcAttitude === 'hostile') {
-    attitudeNote = '<br>😠 Atitude Hostil: -5 de penalidade social em testes de interação.';
+    attitudeNote = '<br>◆ Atitude Hostil: -5 de penalidade social em testes de interação.';
   }
 
   var choices = [];
@@ -80264,7 +80731,7 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
   if (hasInsp && hasGuidance && hasBardic) {
     choices.push({
       id: 'roll_self_all_buffs',
-      label: (isPersuasion ? '🗣️ [Persuasão] Argumentar com foco total' : isIntimidation ? '⚔️ [Intimidação] Pressionar com foco total' : ('🎲 [' + sklLabel + '] Agir com foco total')) + ' (Vantagem 2d20 +1d4 +1d6)',
+      label: (isPersuasion ? '◆ [Persuasão] Argumentar com foco total' : isIntimidation ? '⚔ [Intimidação] Pressionar com foco total' : ('⚀ [' + sklLabel + '] Agir com foco total')) + ' (Vantagem 2d20 +1d4 +1d6)',
       title: 'Agir com Todos os Bônus Disponíveis',
       subtitle: sklLabel + ' · Vantagem (2d20) · CD ' + dc,
       desc: 'Você combina todos os seus recursos ativos: Inspiração de Mesa (Vantagem 2d20), a bênção de Orientação (+1d4) e o ritmo de Inspiração Bárdica (+1d6).',
@@ -80279,7 +80746,7 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
   if (hasInsp && hasGuidance && !hasBardic) {
     choices.push({
       id: 'roll_self_insp_guidance',
-      label: (isPersuasion ? '🗣️ [Persuasão] Argumentar com foco e bênção' : isIntimidation ? '⚔️ [Intimidação] Pressionar com foco e bênção' : ('🎲 [' + sklLabel + '] Agir com foco e bênção')) + ' (Vantagem 2d20 +1d4)',
+      label: (isPersuasion ? '◆ [Persuasão] Argumentar com foco e bênção' : isIntimidation ? '⚔ [Intimidação] Pressionar com foco e bênção' : ('⚀ [' + sklLabel + '] Agir com foco e bênção')) + ' (Vantagem 2d20 +1d4)',
       title: 'Argumentar com Inspiração e Orientação',
       subtitle: sklLabel + ' · Vantagem (2d20) · CD ' + dc,
       desc: 'Você utiliza sua Inspiração de Mesa para rolar com Vantagem combinada à bênção divinatória da Orientação (+1d4).',
@@ -80294,7 +80761,7 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
   if (hasInsp && !hasGuidance && !hasBardic) {
     choices.push({
       id: 'roll_self_insp',
-      label: (isPersuasion ? '⭐ [Inspiração] Argumentar com determinação máxima' : isIntimidation ? '⭐ [Inspiração] Pressionar com determinação máxima' : ('⭐ [Inspiração] Agir com determinação máxima')) + ' (Vantagem 2d20)',
+      label: (isPersuasion ? '✦ [Inspiração] Argumentar com determinação máxima' : isIntimidation ? '✦ [Inspiração] Pressionar com determinação máxima' : ('✦ [Inspiração] Agir com determinação máxima')) + ' (Vantagem 2d20)',
       title: 'Argumentar com Inspiração de Mesa',
       subtitle: sklLabel + ' · Vantagem (2d20) · CD ' + dc,
       desc: 'Você consome sua Inspiração de Mesa ativa para rolar com Vantagem (dois dados d20, escolhendo o maior).',
@@ -80309,7 +80776,7 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
   if (hasBardic && hasGuidance && !hasInsp) {
     choices.push({
       id: 'roll_self_bard_guidance',
-      label: (isPersuasion ? '🗣️ [Persuasão] Argumentar com bênção e melodia' : isIntimidation ? '⚔️ [Intimidação] Pressionar com bênção e ritmo' : ('🎲 [' + sklLabel + '] Agir com bênção e melodia')) + ' (+1d4 +1d6)',
+      label: (isPersuasion ? '◆ [Persuasão] Argumentar com bênção e melodia' : isIntimidation ? '⚔ [Intimidação] Pressionar com bênção e ritmo' : ('⚀ [' + sklLabel + '] Agir com bênção e melodia')) + ' (+1d4 +1d6)',
       title: 'Argumentar com Orientação e Bardo',
       subtitle: sklLabel + ' · Dificuldade CD ' + dc,
       desc: 'Você soma o bônus divinatório da Orientação (+1d4) e o ritmo da Inspiração Bárdica (+1d6) ao seu teste.',
@@ -80323,7 +80790,7 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
   if (hasBardic && !hasGuidance && !hasInsp) {
     choices.push({
       id: 'roll_self_bard',
-      label: (isPersuasion ? '🎵 [Inspiração Bárdica] Argumentar no ritmo da melodia' : isIntimidation ? '🎵 [Inspiração Bárdica] Pressionar no ritmo do bardo' : ('🎵 [Inspiração Bárdica] Testar no ritmo da melodia')) + ' (+1d6)',
+      label: (isPersuasion ? '✦ [Inspiração Bárdica] Argumentar no ritmo da melodia' : isIntimidation ? '✦ [Inspiração Bárdica] Pressionar no ritmo do bardo' : ('✦ [Inspiração Bárdica] Testar no ritmo da melodia')) + ' (+1d6)',
       title: 'Argumentar com Inspiração Bárdica',
       subtitle: sklLabel + ' · Bônus +1d6 · CD ' + dc,
       desc: 'Você canaliza a Inspiração Bárdica concedida por um bardo da comitiva para somar +1d6 ao seu teste de habilidade.',
@@ -80337,7 +80804,7 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
   if (hasGuidance && !hasBardic && !hasInsp) {
     choices.push({
       id: 'roll_self_guidance',
-      label: (isPersuasion ? '🕊️ [Orientação] Argumentar sob a bênção divina' : isIntimidation ? '🕊️ [Orientação] Pressionar sob a bênção divina' : ('🕊️ [Orientação] Testar sob a bênção divina')) + ' (+1d4)',
+      label: (isPersuasion ? '✦ [Orientação] Argumentar sob a bênção divina' : isIntimidation ? '✦ [Orientação] Pressionar sob a bênção divina' : ('✦ [Orientação] Testar sob a bênção divina')) + ' (+1d4)',
       title: 'Argumentar com Orientação Divina',
       subtitle: sklLabel + ' · Bônus +1d4 · CD ' + dc,
       desc: 'Você conjura o truque divinatório Orientação para adicionar +1d4 ao total de sua rolagem.',
@@ -80352,7 +80819,7 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
   // Rolagem Direta Normal (sem consumir bônus limitados ou caso queira teste padrão)
   choices.push({
     id: 'roll_self_normal',
-    label: isPersuasion ? '🗣️ [Persuasão] Argumentar pessoalmente com diplomacia (1d20)' : isIntimidation ? '⚔️ [Intimidação] Pressionar pessoalmente com firmeza (1d20)' : ('🎲 [' + sklLabel + '] Realizar rolagem padrão (1d20)'),
+    label: isPersuasion ? '◆ [Persuasão] Argumentar pessoalmente com diplomacia (1d20)' : isIntimidation ? '⚔ [Intimidação] Pressionar pessoalmente com firmeza (1d20)' : ('⚀ [' + sklLabel + '] Realizar rolagem padrão (1d20)'),
     title: isPersuasion ? 'Negociar com Diplomacia Pessoal' : isIntimidation ? 'Pressionar com Firmeza Pessoal' : ('Teste de ' + sklLabel),
     subtitle: sklLabel + ' · Dificuldade CD ' + dc,
     desc: 'Você conduz a conversa pessoalmente, confiando na sua própria eloquência e presença contra a CD ' + dc + '.',
@@ -80368,7 +80835,7 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
     if (isRecruit) {
       choices.push({
         id: 'roll_self_bribe',
-        label: '🍺 [Sinal de Boa-fé: 10 💰] Pagar uma rodada para quebrar o gelo (Vantagem 2d20)',
+        label: '◆ [Sinal de Boa-fé: 10 Valdoritas] Pagar uma rodada para quebrar o gelo (Vantagem 2d20)',
         title: 'Pagar uma Rodada e Oferecer Sinal (10 Valdoritas)',
         subtitle: sklLabel + ' · Vantagem (2d20) · CD ' + dc,
         desc: 'Você paga uma rodada na taverna da guilda e oferece 10 Valdoritas como sinal adiantado. O gesto amigável desarma a postura mercenária do aventureiro, concedendo Vantagem imediata no teste de negociação.',
@@ -80383,7 +80850,7 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
     } else {
       choices.push({
         id: 'roll_self_bribe',
-        label: '💰 [Oferta Discreta: 10 💰] Oferecer moedas para facilitar o acordo (Vantagem 2d20)',
+        label: '◆ [Oferta Discreta: 10 Valdoritas] Oferecer moedas para facilitar o acordo (Vantagem 2d20)',
         title: 'Oferecer um Agrado em Moedas (10 Valdoritas)',
         subtitle: sklLabel + ' · Vantagem (2d20) · CD ' + dc,
         desc: 'Você desliza 10 Valdoritas discretamente para abrir caminhos e obter Vantagem no teste de interação social.',
@@ -80401,11 +80868,11 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
   if (hasFriends) {
     choices.push({
       id: 'roll_self_friends',
-      label: '🎭 [Truque Amizade] Encantar o interlocutor com magia arcana (Vantagem 2d20 · ⚠️ Risco)',
+      label: '◆ [Truque Amizade] Encantar o interlocutor com magia arcana (Vantagem 2d20 · ◆ Risco)',
       title: 'Canalizar o Truque Arcano Amizade',
       subtitle: sklLabel + ' · Vantagem (2d20) · CD ' + dc,
       desc: 'Você conjura sutilmente o truque Amizade para dobrar o interesse e a simpatia do interlocutor, obtendo Vantagem imediata no teste de Carisma.',
-      possibleResults: '✦ Vantagem: Rola 2d20 escolhendo o maior valor.<br><span style="color:#df7262;">⚠️ Consequência: Quando a magia cessar (em cerca de 1 minuto), o alvo perceberá claramente que foi manipulado magicamente e reagirá com descontentamento ou hostilidade.</span>' + attitudeNote,
+      possibleResults: '✦ Vantagem: Rola 2d20 escolhendo o maior valor.<br><span style="color:#df7262;">◆ Consequência: Quando a magia cessar (em cerca de 1 minuto), o alvo perceberá claramente que foi manipulado magicamente e reagirá com descontentamento ou hostilidade.</span>' + attitudeNote,
       dc: dc,
       skill: skl,
       advantage: true,
@@ -80417,7 +80884,7 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
   if (hasThaum) {
     choices.push({
       id: 'roll_self_thaum',
-      label: '⚡ [Taumaturgia] Intimidar com presença sobrenatural (Vantagem 2d20)',
+      label: '✦ [Taumaturgia] Intimidar com presença sobrenatural (Vantagem 2d20)',
       title: 'Manifestar Taumaturgia Sobrenatural',
       subtitle: sklLabel + ' · Vantagem (2d20) · CD ' + dc,
       desc: 'Você manifesta maravilhas sobrenaturais menores (olhos brilhantes, voz trovejante) para obter Vantagem em Intimidação.',
@@ -80438,7 +80905,7 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
     var cName = (cOpt.name && cOpt.name !== 'Companheiro') ? cOpt.name : (cClassFmt ? ('Companheiro ' + cClassFmt) : 'Companheiro da comitiva');
     var compTitle = cClassFmt ? (cName + ' (' + cClassFmt + ')') : cName;
     var cBonusStr = (cOpt.bonus >= 0 ? '+' : '') + cOpt.bonus;
-    var cPrefix = cOpt.is_better ? '⭐ [Especialista: ' : '👥 [Companheiro: ';
+    var cPrefix = cOpt.is_better ? '✦ [Especialista: ' : '◆ [Companheiro: ';
     var cBuffs = (hasGuidance ? ' + Orientação' : '') + (hasBardic ? ' + Bardo' : '');
     choices.push({
       id: 'roll_comp_' + cOpt.companion_id,
@@ -80459,7 +80926,7 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
     });
   }
 
-  // 4. Opções de Prestar Auxílio / Ação de Ajuda de Companheiro (D&D 5e PHB p. 175 & BG3)
+  // 4. Opções de Prestar Auxílio / Ação de Ajuda de Companheiro (D&D 5e & BG3)
   for (var j = 0; j < assistOptions.length; j++) {
     var hOpt = assistOptions[j];
     var hRawClass = (hOpt.raw_class || hOpt.class || '').trim();
@@ -80469,7 +80936,7 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
     var hBuffs = (hasGuidance ? ' + Orientação' : '') + (hasBardic ? ' + Bardo' : '');
     choices.push({
       id: 'roll_help_' + hOpt.companion_id,
-      label: '🤝 [Auxílio Mútuo: ' + hCompTitle + '] Argumentar em conjunto (Vantagem 2d20)' + hBuffs,
+      label: '◆ [Auxílio Mútuo: ' + hCompTitle + '] Argumentar em conjunto (Vantagem 2d20)' + hBuffs,
       title: 'Trabalhar em Conjunto com ' + hName,
       subtitle: sklLabel + ' · Vantagem (2d20) · CD ' + dc,
       desc: 'Você e ' + hCompTitle + ' unem argumentos e presença. O companheiro intervém ativamente no diálogo, concedendo Vantagem (rola 2d20 e escolhe o maior) e fortalecendo o vínculo da comitiva (+1 Aprovação).',
@@ -80504,13 +80971,14 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
   var encounterOpts = {
     player: p,
     closeable: true,
+    autoOpenChoices: true,
     venue: venue,
     node: node,
     handlerType: 'city_dialogue',
     customState: { ctx: ctx },
     onChoice: function(selected){
       if (selected && selected._is_back) {
-        _renderCityDialogue(venue, data, p, ctx);
+        _renderCityDialogue(venue, data, p, Object.assign({}, ctx || {}, { autoOpenChoices: true }));
         return;
       }
       var tact = (selected && selected._tactical_options) || null;
@@ -80527,7 +80995,7 @@ function _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx){
       dialogue: encounterDialogue,
       onChoice: function(selected) {
         if (selected && selected._is_back) {
-          _renderCityDialogue(venue, data, p, ctx);
+          _renderCityDialogue(venue, data, p, Object.assign({}, ctx || {}, { autoOpenChoices: true }));
           return;
         }
         var tact = (selected && selected._tactical_options) || null;
@@ -80549,6 +81017,7 @@ function _renderCityDialogue(venue, data, p, ctx){
   window.vEncounter.render(
     { npc: data.npc, script: data.script, choices: data.choices },
     { player: p, closeable: true,
+      autoOpenChoices: !(ctx && ctx.autoOpenChoices === false),
       venue: venue, node: node, handlerType: 'city_dialogue', customState: { ctx: ctx },
       onClose: function() {
         if (venue === 'recruta' && typeof _guildShowRecruits === 'function') {
@@ -80596,7 +81065,7 @@ function _renderCityDialogue(venue, data, p, ctx){
           _showSkillCheckTacticalModal(venue, node, ch, p, data, ctx);
         }
         else if (node) { _resolveCityChoice(venue, node, ch && ch.id, p, data.npc, ctx); }
-        else if (ch && ch.node) { _openCityDialogue(venue, ch.node, p); }
+        else if (ch && ch.node) { _openCityDialogue(venue, ch.node, p, { autoOpenChoices: true }); }
         else { try { window.vEncounter.close(); } catch(_){} if (typeof refreshHud === 'function') refreshHud(); }
     } }
   );
@@ -80617,7 +81086,7 @@ function _openCityScreen(venue, cb, p, npc, ctx){
       var backChoice = {
         id: 'return_venue_root',
         label: '↩ "Gostaria de tratar de outro assunto."',
-        cb: function() { _openCityDialogue(venue, rootNode, p); }
+        cb: function() { _openCityDialogue(venue, rootNode, p, { autoOpenChoices: true }); }
       };
       if (closeIdx >= 0) data.choices.splice(closeIdx, 0, backChoice);
       else data.choices.push(backChoice);
@@ -80710,14 +81179,69 @@ function _resolveCityChoice(venue, node, choiceId, p, npc, ctx, tacticalOptions)
   if (tacticalOptions) payload.tactical_options = tacticalOptions;
   window.vCityServer.cityAction('dialogue.choice', payload).then(function(data){
     if (!data || !data.ok) { if (typeof vToast === 'function') vToast('Não foi possível agir.', 'warn'); return; }
-    _handleCityDialogueResult(venue, data, p, npc, ctx);
+    _handleCityDialogueResult(venue, data, p, npc, ctx, choiceId, node);
   }).catch(function(e){
     console.error('[CITY-DIALOGUE] choice failed', e);
     if (typeof vToast === 'function') vToast('Erro ao agir.', 'warn');
   });
 }
 
-function _handleCityDialogueResult(venue, data, p, npc, ctx){
+function _showQuestAcquiredPopup(questData, onProceed){
+  if (!questData) {
+    if (typeof onProceed === 'function') onProceed();
+    return;
+  }
+  var prev = document.getElementById('quest-acquired-modal-overlay');
+  if (prev) prev.remove();
+
+  var ov = document.createElement('div');
+  ov.id = 'quest-acquired-modal-overlay';
+  ov.className = 'enc-popup-overlay active';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(8,5,3,0.85);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:99995;padding:16px;box-sizing:border-box;';
+
+  var title = questData.title || 'Nova Missão';
+  var contractor = questData.contractor || 'Contratante Local';
+  var location = questData.location || 'Valdoria';
+  var objective = questData.objective || 'Cumprir os objetivos designados.';
+  var reward = questData.reward || 'Recompensas heráldicas a definir.';
+  var alternatives = questData.alternatives || '';
+
+  var altHtml = alternatives ? (
+    '<div style="margin-top:10px;padding:8px 10px;background:rgba(196,149,58,0.1);border-left:3px solid var(--v-gold,#c4953a);border-radius:4px;font-size:12px;color:var(--v-text-dim,#d4c8b0);">'
+    + '<strong style="color:var(--v-gold-bright,#f4d27a);display:block;margin-bottom:2px;">CAMINHOS DISPONÍVEIS:</strong>'
+    + alternatives
+    + '</div>'
+  ) : '';
+
+  ov.innerHTML = ''
+    + '<div class="enc-popup-card" style="background:#14100c;border:1px solid var(--v-gold,#c4953a);border-radius:12px;padding:22px;max-width:400px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,0.8);color:var(--v-text,#d4c8b0);font-family:var(--v-font,sans-serif);animation:encFadeIn 0.25s ease-out;">'
+    +   '<div style="text-align:center;font-family:\'Cinzel\',serif;font-size:12px;letter-spacing:2px;color:var(--v-gold,#c4953a);margin-bottom:6px;">◆ MISSÃO ADQUIRIDA ◆</div>'
+    +   '<h3 style="text-align:center;font-family:\'Cinzel\',serif;font-size:17px;color:var(--v-gold-bright,#f4d27a);margin:0 0 14px 0;line-height:1.3;">' + title + '</h3>'
+    +   '<div style="background:rgba(0,0,0,0.3);border:1px solid rgba(196,149,58,0.2);border-radius:8px;padding:12px;margin-bottom:14px;font-size:13px;line-height:1.5;">'
+    +     '<div style="margin-bottom:6px;"><span style="color:var(--v-gold,#c4953a);font-weight:bold;">Contratante:</span> ' + contractor + '</div>'
+    +     '<div style="margin-bottom:6px;"><span style="color:var(--v-gold,#c4953a);font-weight:bold;">Local:</span> ' + location + '</div>'
+    +     '<div style="margin-bottom:6px;"><span style="color:var(--v-gold,#c4953a);font-weight:bold;">Objetivo:</span> ' + objective + '</div>'
+    +     '<div style="margin-bottom:2px;"><span style="color:#48bb78;font-weight:bold;">Recompensas:</span> ' + reward + '</div>'
+    +     altHtml
+    +   '</div>'
+    +   '<button type="button" id="btn-quest-acquired-ok" style="width:100%;background:linear-gradient(180deg,#c4953a 0%,#8e651e 100%);color:#14100c;font-family:\'Cinzel\',serif;font-weight:bold;font-size:13px;letter-spacing:1px;padding:12px;border:none;border-radius:6px;cursor:pointer;transition:filter 0.2s;">PROSSEGUIR</button>'
+    + '</div>';
+
+  document.body.appendChild(ov);
+
+  var btn = ov.querySelector('#btn-quest-acquired-ok');
+  var closeFn = function(){
+    try { ov.remove(); } catch(_){}
+    if (typeof onProceed === 'function') onProceed();
+  };
+  if (btn) btn.addEventListener('click', closeFn);
+  ov.addEventListener('click', function(e){ if (e.target === ov) closeFn(); });
+}
+
+function _handleCityDialogueResult(venue, data, p, npc, ctx, choiceId, fromNode){
+  if (data && data.quest_acquired && typeof _showQuestAcquiredPopup === 'function') {
+    _showQuestAcquiredPopup(data.quest_acquired);
+  }
   if (data && data.allies && typeof _syncPartyWithGroupMembers === 'function') {
     try { _syncPartyWithGroupMembers(data.allies); } catch(_){}
   }
@@ -80812,7 +81336,7 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
         // D4: Exibe result_script da barganha (fala do arquétipo + novo preço) com botão para retornar à raiz do recruta.
         var nid = (ctx && ctx.npcId) || (data.npc && (data.npc.id || data.npc.npc_id));
         if (venue === 'recruta' && nid && (!data.result_script || !window.vEncounter || !window.vEncounter.render)) {
-          _openRecrutaDialogue(nid, p);
+          _openRecrutaDialogue(nid, p, { autoOpenChoices: true });
         }
         else if (data.result_script && window.vEncounter && window.vEncounter.render) {
           var targetNpc = data.npc || npc || { name: 'Aventureiro' };
@@ -80822,7 +81346,7 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
               diceResultChoices.push({
                 id: 'return_recruit_root',
                 label: '↩ Continuar negociação',
-                cb: function() { _openRecrutaDialogue(nid, p); }
+                cb: function() { _openRecrutaDialogue(nid, p, { autoOpenChoices: true }); }
               });
               diceResultChoices.push({
                 id: 'done',
@@ -80837,14 +81361,14 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
                   id: 'return_sub_node',
                   label: '↩ Continuar neste assunto',
                   cb: function() {
-                    _openCityDialogue(venue, currentNodeD, p);
+                    _openCityDialogue(venue, currentNodeD, p, { autoOpenChoices: true });
                   }
                 });
                 diceResultChoices.push({
                   id: 'return_venue_root',
                   label: '↩ "Gostaria de falar de outro assunto."',
                   cb: function() {
-                    _openCityDialogue(venue, rootNodeD, p);
+                    _openCityDialogue(venue, rootNodeD, p, { autoOpenChoices: true });
                   }
                 });
               } else {
@@ -80852,7 +81376,7 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
                   id: 'return_venue_root',
                   label: '↩ "Gostaria de ver outra coisa."',
                   cb: function() {
-                    _openCityDialogue(venue, rootNodeD, p);
+                    _openCityDialogue(venue, rootNodeD, p, { autoOpenChoices: true });
                   }
                 });
               }
@@ -80867,10 +81391,15 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
           }
           window.vEncounter.render(
             { npc: targetNpc, script: data.result_script, choices: diceResultChoices },
-            { player: p, onChoice: function(ch){
+            { player: p, autoOpenChoices: true, onChoice: function(ch){
                 if (ch && typeof ch.cb === 'function') { ch.cb(ch); return; }
                 if (ch && ch.node) {
                   _resolveCityChoice(venue, ch.node, ch.id, p, targetNpc, ctx);
+                  return;
+                }
+                if (ch && ch.id === 'back') {
+                  var rNodeD = _getVenueRootNode(venue, data, ctx);
+                  _openCityDialogue(venue, rNodeD, p, { autoOpenChoices: true });
                   return;
                 }
                 try { window.vEncounter.close(); } catch(_){}
@@ -80885,7 +81414,30 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx){
     return;
   }
   // sub-node aberto (greeting → rooms/meal/relax/shortrest; recruta → ficha/raiz)
-  if (data.choices && data.script && data.node) { _renderCityDialogue(venue, data, p, ctx); return; }
+  if (data.choices && data.script && data.node) {
+    var rootN = _getVenueRootNode(venue, data, ctx);
+    var _SVC_CATEGORY_NODES = { rooms:1, meal:1, relax:1, shortrest:1, drinks:1, carousing:1, pitfight:1, games:1, mercenaries:1, adventurers:1, gather:1, bard:1, bulletin:1 };
+    var cid = String(choiceId || '');
+    var isBackChoice = Boolean(
+      cid === 'back' ||
+      cid.indexOf('back_') === 0 ||
+      cid.indexOf('return_') === 0 ||
+      cid === 'voltar_ficha'
+    );
+    var isTransitionToRoot = Boolean(
+      fromNode && fromNode !== data.node && (data.node === rootN || data.node === 'greeting' || data.node === 'welcome')
+    );
+    var isMenuOrReturn = Boolean(
+      data.is_return ||
+      isBackChoice ||
+      isTransitionToRoot ||
+      _SVC_CATEGORY_NODES[data.node] ||
+      (venue === 'recruta' && String(data.node).indexOf(':ficha') === -1)
+    );
+    var nextCtx = Object.assign({}, ctx || {}, { autoOpenChoices: isMenuOrReturn });
+    _renderCityDialogue(venue, data, p, nextCtx);
+    return;
+  }
   // efeito aplicado → atualiza HUD + narra consequência PADRAO_ALDRIC
   if (data.result_script) {
     _applyHudFromDialogue(data);
@@ -80920,7 +81472,7 @@ function _renderCompanionApprovalBG3(scList) {
         var _recChoices = (data.choices && data.choices.length) ? data.choices : [{ id: 'done', label: 'Voltar' }];
         window.vEncounter.render(
           { npc: data.npc || npc || { name: 'Aventureiro' }, script: data.result_script, choices: _recChoices },
-          { player: p, onChoice: function(ch){
+          { player: p, autoOpenChoices: true, onChoice: function(ch){
               if (ch && ch.node) {
                 _resolveCityChoice('recruta', ch.node, ch.id, p, data.npc, { npcId: (ctx && ctx.npcId) || (data.npc && (data.npc.id || data.npc.npc_id)) });
                 return;
@@ -80968,14 +81520,14 @@ function _renderCompanionApprovalBG3(scList) {
               id: 'return_sub_node',
               label: '↩ Continuar neste assunto',
               cb: function() {
-                _openCityDialogue(venue, currentNode, p);
+                _openCityDialogue(venue, currentNode, p, { autoOpenChoices: true });
               }
             });
             resultChoices.push({
               id: 'return_venue_root',
               label: '↩ "Gostaria de falar de outro assunto."',
               cb: function() {
-                _openCityDialogue(venue, rootNode, p);
+                _openCityDialogue(venue, rootNode, p, { autoOpenChoices: true });
               }
             });
           } else {
@@ -80983,7 +81535,7 @@ function _renderCompanionApprovalBG3(scList) {
               id: 'return_venue_root',
               label: '↩ "Gostaria de ver outra coisa."',
               cb: function() {
-                _openCityDialogue(venue, rootNode, p);
+                _openCityDialogue(venue, rootNode, p, { autoOpenChoices: true });
               }
             });
           }
@@ -80999,8 +81551,17 @@ function _renderCompanionApprovalBG3(scList) {
 
       window.vEncounter.render(
         { npc: targetNpc, script: data.result_script, choices: resultChoices },
-        { player: p, onChoice: function(ch){
-            if (typeof ch.cb === 'function') { ch.cb(); return; }
+        { player: p, autoOpenChoices: true, onChoice: function(ch){
+            if (ch && typeof ch.cb === 'function') { ch.cb(ch); return; }
+            if (ch && ch.node) {
+              _resolveCityChoice(venue, ch.node, ch.id, p, targetNpc, ctx);
+              return;
+            }
+            if (ch && ch.id === 'back') {
+              var rNode = _getVenueRootNode(venue, data, ctx);
+              _openCityDialogue(venue, rNode, p, { autoOpenChoices: true });
+              return;
+            }
             try { window.vEncounter.close(); } catch(_){}
             if (typeof refreshHud === 'function') refreshHud();
             if (venue === 'inn' && typeof _renderCityPopup === 'function') {
@@ -81135,13 +81696,13 @@ function _marketWelcomeThenShop(showMarket){
     var p = window.CITY_MOCK_PLAYER || null;
     window.vEncounter.render(
       { npc: data.npc, script: data.script, choices: data.choices },
-      { player: p, closeable: false, onChoice: function(ch){
+      { player: p, closeable: false, autoOpenChoices: true, onChoice: function(ch){
           window.vCityServer.cityAction('dialogue.choice', { venue: 'market', node: 'welcome', choice_id: (ch && ch.id) || 'accept' }).then(function(res){
             if (res && res.ok && typeof _applyHudFromDialogue === 'function') _applyHudFromDialogue(res);
             if (res && res.ok && res.result_script && window.vEncounter && window.vEncounter.render) {
               window.vEncounter.render(
                 { npc: res.npc || data.npc, script: res.result_script, choices: [{ id: 'done', label: 'Entrar no Mercado' }] },
-                { player: p, onChoice: function(){ try { window.vEncounter.close(); } catch(_){} _go(); } }
+                { player: p, autoOpenChoices: true, onChoice: function(){ try { window.vEncounter.close(); } catch(_){} _go(); } }
               );
             } else { try { window.vEncounter.close(); } catch(_){} _go(); }
           }).catch(function(){ try { window.vEncounter.close(); } catch(_){} _go(); });
@@ -81344,7 +81905,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     id: 'mer_thorne_metal',
     npc: 'mer_thorne',
     script: [
-      { type: 'narration', text: '<i>"Como conseguiu o mithral?"</i>' },
+      { type: 'narration', text: 'Você pergunta a Thorne como ele conseguiu o mithral.' },
       { type: 'speech', speaker: 'Thorne', text: '"Caravana do norte. <i>Caro.</i> Mas a qualidade compensa — quem usa mithral, sobrevive."' }
     ],
     choices: 'auto'  // populated em _openMerchantDialogue
@@ -81353,7 +81914,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     id: 'mer_thorne_repair',
     npc: 'mer_thorne',
     script: [
-      { type: 'narration', text: '<i>"Conserta equipamento?"</i>' },
+      { type: 'narration', text: 'Você pergunta se ele faz consertos no equipamento.' },
       { type: 'speech', speaker: 'Thorne', text: '"Pequenos amassados, conserto sim. Dez Valdoritas e fica como novo."' },
       { type: 'narration', text: 'Thorne examina suas armas com olhos de quem mede metal por som.' }
     ],
@@ -81371,7 +81932,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     id: 'mer_thorne_history',
     npc: 'mer_thorne',
     script: [
-      { type: 'narration', text: '<i>"Há quanto tempo é ferreiro?"</i>' },
+      { type: 'narration', text: 'Você pergunta há quanto tempo ele trabalha na forja.' },
       { type: 'speech', speaker: 'Thorne', text: '"Quarenta anos. Aprendi com meu pai nas montanhas Brakenhall. <i>Forjei pra dois reis e três bandidos.</i> Bandidos pagaram melhor."' }
     ],
     choices: 'auto'
@@ -81385,7 +81946,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     id: 'mer_mirena_craft',
     npc: 'mer_mirena',
     script: [
-      { type: 'narration', text: '<i>"Faz poções customizadas?"</i>' },
+      { type: 'narration', text: 'Você pergunta se ela prepara poções sob encomenda.' },
       { type: 'speech', speaker: 'Mirena Virelle', text: '"Faço. <i>Mas precisa de ingredientes raros e tempo.</i> Volta com lista específica — e bolsa pesada."' }
     ],
     choices: 'auto'
@@ -81394,7 +81955,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     id: 'mer_mirena_origin',
     npc: 'mer_mirena',
     script: [
-      { type: 'narration', text: '<i>"De onde aprendeu alquimia?"</i>' },
+      { type: 'narration', text: 'Você pergunta onde ela aprendeu a arte da alquimia.' },
       { type: 'speech', speaker: 'Mirena Virelle', text: '"Aprendiz da Bruxa Veldrina por dezessete anos."' },
       { type: 'narration', text: 'Os olhos de Mirena se desviam por um instante, perdidos em alguma memória.' },
       { type: 'speech', speaker: 'Mirena Virelle', text: '"Ela morreu numa poção experimental. <i>Eu vivi. Aprendi.</i>"' }
@@ -81410,7 +81971,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     id: 'mer_velithra_sockets',
     npc: 'mer_velithra',
     script: [
-      { type: 'narration', text: '<i>"Como funcionam os encaixes?"</i>' },
+      { type: 'narration', text: 'Você pergunta como funcionam os encaixes de gemas.' },
       { type: 'speech', speaker: 'Velithra Aelmira', text: '"Equipamento precisa ter <i>slot</i>. A forja de Thorne pode adicionar slots — cem Valdoritas cada. Aí trago a gema certa para você."' }
     ],
     choices: 'auto'
@@ -81419,7 +81980,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     id: 'mer_velithra_enchant',
     npc: 'mer_velithra',
     script: [
-      { type: 'narration', text: '<i>"Encanta itens?"</i>' },
+      { type: 'narration', text: 'Você pergunta se ela realiza encantamentos em equipamentos.' },
       { type: 'speech', speaker: 'Velithra Aelmira', text: '"Encanto. Duzentas Valdoritas — <i>mas resultado é aleatório</i>. Só pra corajosos."' },
       { type: 'narration', text: 'Velithra sorri de lado, como quem oferece um jogo de azar elegante.' }
     ],
@@ -81442,7 +82003,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     id: 'mer_corvus_custom',
     npc: 'mer_corvus',
     script: [
-      { type: 'narration', text: '<i>"Que tipo de mapa custom?"</i>' },
+      { type: 'narration', text: 'Você pergunta que tipos de mapas especiais ele traça.' },
       { type: 'speech', speaker: 'Corvus Veltharion', text: '"Floresta do Sussurro. Catacumbas Esquecidas. Montanhas Brakenhall. Pântano dos Mortos."' },
       { type: 'speech', speaker: 'Corvus Veltharion', text: '"Duzentas Valdoritas por região — <i>e três dias de trabalho</i>. Tinta de cor especial pra cada uma."' }
     ],
@@ -81452,7 +82013,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     id: 'mer_corvus_rare',
     npc: 'mer_corvus',
     script: [
-      { type: 'narration', text: '<i>"Tem mapas raros?"</i>' },
+      { type: 'narration', text: 'Você pergunta se ele guarda algum mapa raro fora da vista.' },
       { type: 'narration', text: 'Corvus baixa a voz e olha rápido pra ambos os lados, como quem confessa pecado.' },
       { type: 'speech', speaker: 'Corvus Veltharion', text: '"Tenho <i>um</i>. Cidade Submersa. <b>Mil Valdoritas.</b> Não vendo pra qualquer um — <i>e quando vendo, depois não durmo</i>."' }
     ],
@@ -81467,7 +82028,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
   // ═══ GARLEN — Cambista (X-6.5.51EE 2026-05-19) ═════════════════
   // Garlen estava faltando em RECURRING_NPCS — _openMerchantDialogue
   // falhava silenciosamente (encActive=false). Adicionado encounter
-  // browse + topic 'trade' (mecânica trade goods PHB).
+  // browse + topic 'trade' (mecânica trade goods).
   garlen_browse: {
     id: 'mer_garlen_browse', npc: 'mer_garlen', _isBrowse: true, script: [], choices: []
   },
@@ -81475,9 +82036,9 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     id: 'mer_garlen_trade',
     npc: 'mer_garlen',
     script: [
-      { type: 'narration', text: '<i>"Como funciona o câmbio?"</i>' },
+      { type: 'narration', text: 'Você pergunta como funciona o câmbio de mercadorias.' },
       { type: 'narration', text: 'Garlen pesa uma moeda na palma da mão, depois outra. Sorri sem alegria.' },
-      { type: 'speech', speaker: 'Garlen Castellor', text: '"Trade goods têm preço <i>estável</i>. Sal, especiarias, ferro bruto — pago e cobro o mesmo. Sem pechinchar."' },
+      { type: 'speech', speaker: 'Garlen Castellor', text: '"Mercadorias de escambo têm preço <i>estável</i>. Sal, especiarias, ferro bruto — pago e cobro o mesmo. Sem pechinchar."' },
       { type: 'speech', speaker: 'Garlen Castellor', text: '"É o jeito honesto. Quem mexe com peso, sabe que <i>cada grama conta</i>."' }
     ],
     choices: 'auto'
@@ -81486,7 +82047,7 @@ var MARKET_MERCHANT_ENCOUNTERS = {
     id: 'mer_garlen_history',
     npc: 'mer_garlen',
     script: [
-      { type: 'narration', text: '<i>"Há quanto tempo faz câmbio?"</i>' },
+      { type: 'narration', text: 'Você pergunta há quanto tempo ele trabalha como cambista.' },
       { type: 'speech', speaker: 'Garlen Castellor', text: '"Vinte e oito anos. Aprendi com meu pai — joalheiro nas terras do sul. Ele dizia: <i>pesos não mentem, gente sim</i>."' },
       { type: 'narration', text: 'Garlen ergue uma sobrancelha, ajeita o pince-nez.' },
       { type: 'speech', speaker: 'Garlen Castellor', text: '"Por isso prefiro lidar com mercadoria. Mercadoria é simples — tem peso, tem valor. Gente é complicada."' }
@@ -81520,10 +82081,11 @@ function _marketShowColleagueGossip(p, merchant){
   var absent = _marketAbsentColleagues(merchant, p);
   var bjornFix = (merchant.id === 'tentmaker') ? 'bjorn' : merchant.id;
   var npcKey = 'mer_' + bjornFix;
+  var spkName = (merchant && merchant.name) || 'Mercador';
   var script = [];
   if (!absent.length){
     script.push({ type: 'narration', text: '<i>Você pergunta pelo movimento das bancas vizinhas. O mercador corre o olhar pelo pátio antes de responder.</i>' });
-    script.push({ type: 'speech', speaker: npcKey, text: '"Hoje? Todos no posto, pelo que vi. Banca cheia — é raro."' });
+    script.push({ type: 'speech', speaker: spkName, text: '"Hoje? Todos no posto, pelo que vi. Banca cheia — é raro."' });
   } else {
     script.push({ type: 'narration', text: '<i>Você pergunta se viu os outros mercadores hoje.</i>' });
     absent.forEach(function(c){
@@ -81531,7 +82093,7 @@ function _marketShowColleagueGossip(p, merchant){
       var where = (lc.indexOf('ausente') >= 0)
         ? 'não deu as caras hoje — ninguém sabe ao certo'
         : ('está ' + lc);  // "está na taverna" / "está no templo" / "está na praça"
-      script.push({ type: 'speech', speaker: npcKey,
+      script.push({ type: 'speech', speaker: spkName,
         text: '"' + c.firstName + ', o(a) ' + (c.role || '').toLowerCase() + '? ' + where.charAt(0).toUpperCase() + where.slice(1) + '."' });
     });
     script.push({ type: 'narration', text: '<i>Se precisar falar com eles, talvez valha procurar pela cidade — ou voltar mais tarde.</i>' });
@@ -81633,10 +82195,11 @@ function _addInventoryItem(itemName, qty){
 }
 window._addInventoryItem = _addInventoryItem;
 
-function _thorneShowCustomForge(p, merchant, subTopic){
+function _thorneShowCustomForge(p, merchant, subTopic, opts){
   p = p || window.CITY_MOCK_PLAYER || {};
   var bjornFix = (merchant.id === 'tentmaker') ? 'bjorn' : merchant.id;
   var npcKey = 'mer_' + bjornFix;
+  var spkName = (merchant && merchant.name) || 'Thorne';
 
   // Subtópico: Informações sobre onde encontrar Mithral
   if (subTopic === 'lore_mithral'){
@@ -81644,8 +82207,8 @@ function _thorneShowCustomForge(p, merchant, subTopic){
       id: 'mer_thorne_lore_mithral',
       npc: npcKey,
       script: [
-        { type: 'narration', text: '<i>"Onde posso encontrar Lingotes de Mithral?"</i>' },
-        { type: 'speech', speaker: npcKey, text: '"Mithral não brota no quintal. Os anões extraíam veios profundos nas montanhas do norte antes das antigas guerras. Hoje em dia, você encontra lingotes guardados em câmaras secretas de ruínas antigas, tesouros de monstros ancestrais, ou raramente com caravanas nobres. Se encontrar um lingote, guarde com a vida e traga direto para a minha bigorna."' }
+        { type: 'narration', text: 'Você pergunta a Thorne onde pode encontrar Lingotes de Mithral.' },
+        { type: 'speech', speaker: spkName, text: '"Mithral não brota no quintal. Os anões extraíam veios profundos nas montanhas do norte antes das antigas guerras. Hoje em dia, você encontra lingotes guardados em câmaras secretas de ruínas antigas, tesouros de monstros ancestrais, ou raramente com caravanas nobres. Se encontrar um lingote, guarde com a vida e traga direto para a minha bigorna."' }
       ],
       choices: [
         { id: 'back_forge', label: '← Voltar às encomendas', result: 'goto_dialog', _encounterRef: 'mer_thorne_custom_forge' }
@@ -81758,7 +82321,7 @@ function _thorneShowCustomForge(p, merchant, subTopic){
       if (order.successRoll){
         var claimScript = [
           { type: 'narration', text: 'Thorne sopra as fagulhas incandescentes e retira a peça reluzente do tanque de têmpera em óleo estelar. O brilho prateado-azulado do mithral reflete a luz da oficina.' },
-          { type: 'speech', speaker: npcKey, text: '"Aqui está, aventureiro. ' + order.item + ' concluída com maestria absoluta! A têmpera segurou firme e o metal canta no ar. Honre essa obra-prima."' },
+          { type: 'speech', speaker: spkName, text: '"Aqui está, aventureiro. ' + order.item + ' concluída com maestria absoluta! A têmpera segurou firme e o metal canta no ar. Honre essa obra-prima."' },
           { type: 'narration', text: '<b>Sucesso na Forja!</b> Você recebeu a sua encomenda concluída: <b>' + order.item + '</b>!' }
         ];
         var claimEnc = {
@@ -81779,7 +82342,7 @@ function _thorneShowCustomForge(p, merchant, subTopic){
           : '"O mithral é implacável, rapaz. Na terceira têmpera no óleo estelar, uma microfratura invisível correu pela espinha da lâmina e ela partiu. Trabalhei três dias sem descanso, mas o metal recusou a dobra. Sinto muito... essa liga não perdoa falhas."';
         var failScript = [
           { type: 'narration', text: 'Thorne apoia as mãos calejadas sobre a bigorna, com a cabeça baixa e o semblante pesaroso. Diante dele repousam fragmentos partidos de metal azulado e cinzas escuras.' },
-          { type: 'speech', speaker: npcKey, text: failText },
+          { type: 'speech', speaker: spkName, text: failText },
           { type: 'narration', text: '<b>A forja falhou.</b> ' + (isBreastplate ? 'Thorne devolveu <b>1x Lingote de Mithral</b> recuperado do refugo.' : 'Os materiais foram consumidos no calor da forja.') }
         ];
         var failChoices = [
@@ -81797,7 +82360,7 @@ function _thorneShowCustomForge(p, merchant, subTopic){
     } else {
       var waitScript = [
         { type: 'narration', text: 'Thorne ergue a máscara de proteção e enxuga o suor da testa. Na bigorna, a forma inacabada de ' + order.item + ' repousa sob as brasas.' },
-        { type: 'speech', speaker: npcKey, text: '"Sua encomenda de <b>' + order.item + '</b> está tomando forma. O mithral exige têmpera lenta e batidas precisas — qualquer pressa arruinaria a liga."' },
+        { type: 'speech', speaker: spkName, text: '"Sua encomenda de <b>' + order.item + '</b> está tomando forma. O mithral exige têmpera lenta e batidas precisas — qualquer pressa arruinaria a liga."' },
         { type: 'narration', text: 'Prazo restante estimado: <b>' + order.daysRemaining + ' dia(s)</b> de trabalho na forja. Você pode aguardar na cidade ou explorar as redondezas.' }
       ];
       var waitChoices = [
@@ -81819,7 +82382,7 @@ function _thorneShowCustomForge(p, merchant, subTopic){
   var mithralIngots = _countInventoryItem('Lingote de Mithral');
   var script = [
     { type: 'narration', text: 'Thorne apoia os braços musculosos sobre a bigorna e encara você com respeito profissional.' },
-    { type: 'speech', speaker: npcKey, text: '"Mithral não é ferro qualquer para eu deixar pronto na vitrine acumulando pó. Peças dessa estirpe só ganham vida sob encomenda direta. Traga a matéria-prima e pague a mão de obra da forja, e eu bato a obra-prima para você."' },
+    { type: 'speech', speaker: spkName, text: '"Mithral não é ferro qualquer para eu deixar pronto na vitrine acumulando pó. Peças dessa estirpe só ganham vida sob encomenda direta. Traga a matéria-prima e pague a mão de obra da forja, e eu bato a obra-prima para você."' },
     { type: 'narration', text: 'Você possui atualmente: <b>' + mithralIngots + 'x Lingote de Mithral</b> na mochila.' }
   ];
   var choices = [
@@ -81832,13 +82395,14 @@ function _thorneShowCustomForge(p, merchant, subTopic){
     id: 'mer_thorne_custom_forge',
     npc: npcKey,
     script: script,
-    choices: choices
+    choices: choices,
+    autoOpenChoices: Boolean(opts && opts.autoOpenChoices)
   };
   if (typeof _renderEncounterPopup === 'function') _renderEncounterPopup(enc, 'market_npc_' + merchant.id, p);
 }
 window._thorneShowCustomForge = _thorneShowCustomForge;
 
-function _openMerchantDialogue(p, merchantId, topicKey){
+function _openMerchantDialogue(p, merchantId, topicKey, opts){
   // Encontra o merchant em MARKET_MERCHANTS pra ler talkOptions/role/desc
   var merchant = (typeof MARKET_MERCHANTS !== 'undefined')
     ? MARKET_MERCHANTS.filter(function(m){ return m.id === merchantId || m.id === merchantId.replace('mer_',''); })[0]
@@ -81863,7 +82427,7 @@ function _openMerchantDialogue(p, merchantId, topicKey){
 
   // Tópico dinâmico "custom_forge": forja sob encomenda de Mithral de Thorne
   if (topicKey === 'custom_forge' || topicKey === 'confirm_sword' || topicKey === 'confirm_breastplate' || topicKey === 'lore_mithral'){
-    _thorneShowCustomForge(p, merchant, topicKey);
+    _thorneShowCustomForge(p, merchant, topicKey, opts);
     return;
   }
 
@@ -81874,7 +82438,8 @@ function _openMerchantDialogue(p, merchantId, topicKey){
       id: 'mer_' + merchant.id + '_greeting',
       npc: npcKey,
       script: greetScript,
-      choices: _merchantBuildTopicChoices(merchant)
+      choices: _merchantBuildTopicChoices(merchant),
+      autoOpenChoices: Boolean(opts && opts.autoOpenChoices)
     };
     if (typeof _renderEncounterPopup === 'function'){
       _renderEncounterPopup(greetEnc, 'market_npc_' + merchant.id, p);
@@ -81911,7 +82476,7 @@ function _openMerchantDialogue(p, merchantId, topicKey){
             var subOv = document.getElementById('city-subscreen-popup');
             if (subOv) subOv.classList.remove('active');
           }
-          _openMerchantDialogue(p, merchant.id, 'greeting');
+          _openMerchantDialogue(p, merchant.id, 'greeting', { autoOpenChoices: true });
         };
       }
       // Mantém compat com NPCs que tem shop via CANON_MARKET_SHOPS por id original
@@ -82067,7 +82632,7 @@ window._openAldricGuardDialog = function(player){
   return window._openNpcDialogue('aldric', player);
 };
 
-function _renderNpcNode(player, dialogueData, nodeId, npcKey){
+function _renderNpcNode(player, dialogueData, nodeId, npcKey, opts){
   var dialogue = window.dialogueEngine.buildVEncounterDialogue(npcKey, nodeId, dialogueData, player);
   if (!dialogue) {
     /* sessão #88: id de node do grafo só no console */
@@ -82084,6 +82649,7 @@ function _renderNpcNode(player, dialogueData, nodeId, npcKey){
 
   window.vEncounter.render(dialogue, {
     player: player,
+    autoOpenChoices: !!(opts && opts.autoOpenChoices),
     onChoice: function(choice, _dialogue){
       var original = choice._original || {};
       var nextTarget = original.target || original.next || '';
@@ -82123,7 +82689,7 @@ function _renderNpcNode(player, dialogueData, nodeId, npcKey){
                   _renderNpcNode(player, dialogueData, targetAfterRoll, npcKey);
                 } else {
                   var rootNode = window.dialogueEngine.resolveStartNode(dialogueData.timeline, player, npcKey, 'start');
-                  _renderNpcNode(player, dialogueData, rootNode, npcKey);
+                  _renderNpcNode(player, dialogueData, rootNode, npcKey, { autoOpenChoices: true });
                 }
               }
             });
@@ -82143,7 +82709,8 @@ function _renderNpcNode(player, dialogueData, nodeId, npcKey){
         return;
       }
       if (nextTarget) {
-        _renderNpcNode(player, dialogueData, nextTarget, npcKey);
+        var isBackNav = (String(choice.label || '').indexOf('↩') >= 0 || nextTarget === 'start' || String(nextTarget).indexOf('start_') === 0);
+        _renderNpcNode(player, dialogueData, nextTarget, npcKey, { autoOpenChoices: isBackNav });
       } else {
         if (typeof window.vEncounter.close === 'function') window.vEncounter.close();
       }
@@ -84244,6 +84811,7 @@ function _openCorvusGreetingDialog(player, opts) {
     triggers: [],
     script: script,
     choices: corvusChoices,
+    autoOpenChoices: !!(opts && opts.autoOpenChoices),
     onDone: function(p){
       p._encountered_npcs = p._encountered_npcs || {};
       p._encountered_npcs.corvus_greeted = true;
@@ -84321,11 +84889,14 @@ function _renderEncounterViaVEncounter(enc, originalAction, player, npc) {
     if (c.cost) n.cost = c.cost;
     if (c.icon) n.icon = c.icon;
     if (c.effect && typeof c.effect.renown === 'number') n.renownDelta = c.effect.renown;
+    n.isSubmenu = Boolean(c.isSubmenu || (c.result === 'goto_dialog'));
+    n.isReturn = Boolean(c.isReturn || (c.id && (c.id === 'back' || c.id === 'leave' || String(c.id).startsWith('back_'))));
     n._original = c;
     return n;
   });
-  window.vEncounter.render({ npc: dnpc, script: script, choices: choices }, {
+  window.vEncounter.render({ npc: dnpc, script: script, choices: choices, autoOpenChoices: !!enc.autoOpenChoices }, {
     player: player || (window.CITY_MOCK_PLAYER || null),
+    autoOpenChoices: !!enc.autoOpenChoices,
     onChoice: function (ch) {
       _onEncounterChoice(enc, ch._original || ch, originalAction, player);
     }
@@ -85946,7 +86517,8 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
         npc: parentEnc.npc,
         triggers: parentEnc.triggers,
         script: parentEnc.script.slice(-2),
-        choices: remCh.length ? remCh : parentEnc.choices
+        choices: remCh.length ? remCh : parentEnc.choices,
+        autoOpenChoices: true
       };
       _renderEncounterPopup(contEnc, originalAction, player);
     }
@@ -86018,7 +86590,7 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
       script: [
         { type: 'narration', text: 'Mestre Corvus larga a régua de latão e apoia as duas mãos no balcão, encarando você com o olhar satisfeito de quem ouve a pergunta certa.' },
         { type: 'speech', speaker: 'Mestre Corvus', text: '— Os <b>Marcos</b>? Excelente pergunta, viajante. Poucos se dão ao trabalho de entender a terra que pisam antes de sangrar nela.' },
-        { type: 'speech', speaker: 'Mestre Corvus', text: '— Quando nossos ancestrais ergueram as muralhas de Valdoria, batedores destemidos marcharam em direção aos quatro pontos cardeais. A cada hora de caminhada constante e vigilante, cravavam um monólito de basalto negro nas estradas. Essa distância é o nosso Marco — cerca de três milhas no rigor da marcha.' },
+        { type: 'speech', speaker: 'Mestre Corvus', text: '— Quando nossos ancestrais ergueram as muralhas de Valdoria, batedores destemidos marcharam em direção aos quatro pontos cardeais. A cada trecho de caminhada constante e vigilante, cravavam um monólito de basalto negro nas estradas. Essa distância é o nosso Marco — cerca de três milhas no rigor da marcha.' },
         { type: 'speech', speaker: 'Mestre Corvus', text: '— Hoje, muitos desses marcos foram derrubados por terremotos ou devorados pela vegetação. Por isso, quando você consulta seus mapas, a distância é uma <b>estimativa</b>. A estrada nunca é rígida: atalhos e desvios são incertezas tiradas nos dados do relevo e da sua perícia — um batedor atento pode cortar preciosos marcos nos dados, enquanto um passo em falso nos atira em desvios imprevistos.' },
         { type: 'narration', text: '<i>Dica de Corvus:</i> Se você encontrar um antigo monólito dos marcos abandonado pelas planícies, examine sua base — os primeiros batedores costumavam selar anotações de rota em nichos de chumbo.' }
       ],
@@ -86030,7 +86602,7 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
     };
     _renderEncounterPopup(inquiryEnc, 'open_cartografia', player);
   } else if (choice.result === 'corvus_return_greeting') {
-    setTimeout(function(){ _openCorvusGreetingDialog(player); }, 80);
+    setTimeout(function(){ _openCorvusGreetingDialog(player, { autoOpenChoices: true }); }, 80);
   } else if (choice.result === 'continue_to_cart') {
     // Continua pra abrir cartografia
     if (typeof navigateTo === 'function') navigateTo('cartografia');
@@ -86069,7 +86641,8 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
               npc: chanceParent.npc,
               triggers: chanceParent.triggers,
               script: chanceParent.script.slice(-2),
-              choices: remInteractiveChoices
+              choices: remInteractiveChoices,
+              autoOpenChoices: true
             };
             _renderEncounterPopup(resumeEnc, originalAction, player);
           };
@@ -86105,9 +86678,10 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
       // merchantId pode ter underscore (raro, mas seguro): assume primeiro chunk
       var mId = parts[0];
       var tKey = parts.slice(1).join('_');
-      setTimeout(function(){ _openMerchantDialogue(player, mId, tKey); }, 80);
+      var isMenuReturn = (tKey === 'greeting' || tKey === 'custom_forge');
+      setTimeout(function(){ _openMerchantDialogue(player, mId, tKey, { autoOpenChoices: isMenuReturn }); }, 80);
     } else if (encRef && typeof MARTHA_ENCOUNTERS !== 'undefined' && MARTHA_ENCOUNTERS[encRef]) {
-      setTimeout(function(){ _openMarthaDialogue(player, encRef); }, 80);
+      setTimeout(function(){ _openMarthaDialogue(player, encRef, { autoOpenChoices: true, isSubmenu: true }); }, 80);
     } else if (encRef && typeof window['_open' + encRef + 'Dialogue'] === 'function') {
       setTimeout(function(){ window['_open' + encRef + 'Dialogue'](player); }, 80);
     }
@@ -86122,7 +86696,7 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
     var days = choice._days || 3;
     if (_countInventoryItem('Lingote de Mithral') < ingots || (typeof _pay === 'function' && !_pay(player, cost))) {
       if (typeof vToast === 'function') vToast('Recursos insuficientes para a encomenda.', 'warn');
-      setTimeout(function(){ _openMerchantDialogue(player, 'thorne', 'custom_forge'); }, 80);
+      setTimeout(function(){ _openMerchantDialogue(player, 'thorne', 'custom_forge', { autoOpenChoices: true }); }, 80);
       return;
     }
     _consumeInventoryItem('Lingote de Mithral', ingots);
@@ -86162,7 +86736,7 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
       if (typeof refreshHud === 'function') refreshHud();
       if (typeof vToast === 'function') vToast('Você obteve: ' + claimedItem + '!', 'success');
     }
-    setTimeout(function(){ _openMerchantDialogue(player, 'thorne', 'greeting'); }, 80);
+    setTimeout(function(){ _openMerchantDialogue(player, 'thorne', 'greeting', { autoOpenChoices: true }); }, 80);
   } else if (choice.result === 'thorne_forge_failed_dismiss') {
     var salvage = choice._salvageItem;
     if (salvage) {
@@ -86171,7 +86745,7 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
     }
     _setThorneForgeOrder(player, null);
     if (typeof refreshHud === 'function') refreshHud();
-    setTimeout(function(){ _openMerchantDialogue(player, 'thorne', 'greeting'); }, 80);
+    setTimeout(function(){ _openMerchantDialogue(player, 'thorne', 'greeting', { autoOpenChoices: true }); }, 80);
   } else if (choice.result === 'thorne_forge_advance_day') {
     var orderAdv = _getThorneForgeOrder(player);
     if (orderAdv && orderAdv.daysRemaining > 0) {
@@ -86180,7 +86754,7 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
       _setThorneForgeOrder(player, orderAdv);
       if (typeof vToast === 'function') vToast('Um dia se passou na forja de Thorne.', 'info');
     }
-    setTimeout(function(){ _openMerchantDialogue(player, 'thorne', 'custom_forge'); }, 80);
+    setTimeout(function(){ _openMerchantDialogue(player, 'thorne', 'custom_forge', { autoOpenChoices: true }); }, 80);
   } else if (choice.result === 'merchant_pay') {
     // 2026-05-18 PADRAO_ALDRIC para mercadores: choice de serviço pago
     // (repair, enchant, etc). Cobra gold + aplica effect + mostra result popup.
@@ -86199,7 +86773,7 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
     if (typeof _pay !== 'function' || !_pay(player, cost)){
       // Sem gold suficiente — re-abre greeting com toast
       if (typeof vToast === 'function') vToast('Valdoritas insuficientes.', 'warn');
-      setTimeout(function(){ _openMerchantDialogue(player, mId, 'greeting'); }, 80);
+      setTimeout(function(){ _openMerchantDialogue(player, mId, 'greeting', { autoOpenChoices: true }); }, 80);
       return;
     }
     // Apply effect (gold já debitado por _pay; aplica XP/HP/MP extras)
@@ -86224,7 +86798,7 @@ function _onEncounterChoice(enc, choice, originalAction, player) {
         narrative: resultText,
         deltas: deltas,
         onContinue: function(){
-          _openMerchantDialogue(player, mId, 'greeting');
+          _openMerchantDialogue(player, mId, 'greeting', { autoOpenChoices: true });
         }
       });
     }
@@ -87202,7 +87776,7 @@ function _closeCartographerPopup() {
   if (window._corvusReturnToDialoguePlayer && typeof _openCorvusGreetingDialog === 'function') {
     var retP = window._corvusReturnToDialoguePlayer;
     window._corvusReturnToDialoguePlayer = null;
-    setTimeout(function(){ _openCorvusGreetingDialog(retP); }, 60);
+    setTimeout(function(){ _openCorvusGreetingDialog(retP, { autoOpenChoices: true }); }, 60);
   }
 }
 

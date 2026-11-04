@@ -46,8 +46,11 @@ var GARRICK_DIALOGUE = {
   },
   script: [
     { type: 'narration', text: 'A oficina respira em fumaça e brasa. O forno central ruge — uma boca de ferro forjado com chamas alaranjadas dançando atrás de grade de aço. Ao lado, a bigorna principal: chumbo maciço, marcada por décadas de golpes, lustrosa onde o metal a beijou cem mil vezes.' },
-    { type: 'speech', speaker: 'Mestre Garrick', text: 'Cuidado com o chão. <i>(martela uma vez, pausa pra olhar)</i> Tem prego solto, ferro caído, e brasa que pula da forja sem aviso. O que você veio fazer aqui? Eu não vendo curiosidade — só trabalho.' },
-    { type: 'speech', speaker: 'Mestre Garrick', text: 'Faço seis coisas. <i>(conta nos dedos calejados)</i> Forjo arma nova. Reparo dano. Aprimoro o que você tem. Encanto se você trouxer a runa. Desconstruo se for desperdício. E faço encomenda se pagar bem.' }
+    { type: 'speech', speaker: 'Mestre Garrick', text: 'Cuidado com o chão.' },
+    { type: 'narration', text: 'Garrick martela o ferro uma vez e faz uma pausa para avaliar você de alto a baixo.' },
+    { type: 'speech', speaker: 'Mestre Garrick', text: 'Tem prego solto, ferro caído, e brasa que pula da forja sem aviso. O que você veio fazer aqui? Eu não vendo curiosidade — só trabalho.' },
+    { type: 'narration', text: 'Garrick vai contando nos grossos dedos calejados.' },
+    { type: 'speech', speaker: 'Mestre Garrick', text: 'Faço seis coisas: forjo arma nova, reparo dano, aprimoro o que você tem, encanto se você trouxer a runa, desconstruo se for desperdício e aceito encomenda se pagar bem.' }
   ],
   choices: [
     // task #70 (2026-05-20): cb's alinhadas com backend canonical em crafting_ui.py.
@@ -102,6 +105,7 @@ function _wksOpenProfession(t){
       { id: 'leave',   label: '"Volto outra hora."', cb: 'close' }
     ]
   }, {
+    autoOpenChoices: true,
     onChoice: function(ch){
       try { window.vEncounter.close(); } catch(_e){}
       if (ch && ch.id !== 'leave' && (ch.cb || '') !== 'close' && typeof vCity === 'object' && vCity.act) {
@@ -168,6 +172,7 @@ function renderWorkshopHub(container, data) {
       // LOCAL (dev file://): preview com o mock client-side.
       window._SVC_CONFIG = window._SVC_CONFIG_WORKSHOP;
       window.vEncounter.render(GARRICK_DIALOGUE, {
+        autoOpenChoices: true,
         onChoice: function(ch){
           try { window.vEncounter.close(); } catch(_e){}
           if (ch && ch.id !== 'leave' && (ch.cb || '') !== 'close' && typeof vCity === 'object' && vCity.act) {

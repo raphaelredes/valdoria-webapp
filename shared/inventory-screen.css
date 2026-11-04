@@ -170,6 +170,27 @@
 
 .vinv-overlay.active { display: flex; }
 
+.vinv-overlay.vinv-overlay--standalone-detail {
+  display: flex !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  pointer-events: auto !important;
+  z-index: 99999 !important;
+}
+
+.vinv-overlay--standalone-detail .vinv-panel {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.vinv-overlay--standalone-detail .vinv-panel > *:not([data-region="detail"]) {
+  display: none !important;
+}
+
 
 
 /* 2026-05-17: Overlay CONTAINED (mounted inside #frame/#app simulator host).

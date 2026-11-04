@@ -41,7 +41,9 @@ var THESSIL_DIALOGUE = {
   },
   script: [
     { type: 'narration', text: 'A câmara de Eirik é um santuário de pergaminhos e glifos. Estantes alcançam o teto, abarrotadas de manuscritos encadernados em couro escuro. Um cheiro de pena queimada, tinta de carvão e algo metálico — magia em estado bruto — paira no ar. Eirik ergue os olhos de um pergaminho aberto, traça um glifo no ar, e reconhece você.' },
-    { type: 'speech', speaker: 'Eirik', text: 'A Câmara está aberta. <i>(pousa a pena de corvo no tinteiro)</i> Trouxe fragmentos? Três do mesmo tier forjam uma runa aleatória. É lei antiga, não tradição minha. Do que você precisa?' }
+    { type: 'speech', speaker: 'Eirik', text: 'A Câmara está aberta.' },
+    { type: 'narration', text: 'Eirik pousa calmamente a pena de corvo no tinteiro de bronze.' },
+    { type: 'speech', speaker: 'Eirik', text: 'Trouxe fragmentos? Três do mesmo tier forjam uma runa aleatória. É lei antiga, não tradição minha. Do que você precisa?' }
   ],
   choices: [
     // task #70 (2026-05-20): cb's alinhadas com backend canonical em market_rune_scribe.py.
@@ -130,7 +132,7 @@ function renderRuneScribe(container, data) {
     if (typeof vCity === 'object' && typeof vCity.act === 'function') {
       vCity.act('rune_npc_rune_eirik');
     } else if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
-      window.vEncounter.render(THESSIL_DIALOGUE);  // fallback legado (file:// sem dispatch)
+      window.vEncounter.render(THESSIL_DIALOGUE, { autoOpenChoices: true });  // fallback legado (file:// sem dispatch)
     }
   });
   body.appendChild(npcRow);

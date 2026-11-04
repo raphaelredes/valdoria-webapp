@@ -23869,9 +23869,15 @@ window.__onIntroTap = function() {
 
         }
 
-        if (line.type === 'speech') {
+        if (line.type === 'speech' || line.type === 'player_speech') {
 
-          div.className = 'enc-line enc-speech';
+          var _pObj = (window.S && window.S.player) || window.CURRENT_PLAYER || null;
+
+          var _pName = (_pObj && (_pObj.name || _pObj.char_name)) || (window.S && window.S.playerName) || 'Aventureiro';
+
+          var _isPlayerLine = (line.type === 'player_speech' || line.is_player === true || line.speaker === '{player_name}' || line.speaker === '{player}' || line.speaker === 'Você' || line.speaker === _pName);
+
+          div.className = 'enc-line enc-speech' + (_isPlayerLine ? ' enc-speech-player' : '');
 
           /* GUARD anti-vazamento (sessão #88, paridade com vEncounter): speaker
 
@@ -23879,9 +23885,9 @@ window.__onIntroTap = function() {
 
              cai pro nome do NPC do evento (rt.npc/npc_data) ou some. */
 
-          if (line.speaker) {
+          var _spk = _isPlayerLine ? _pName : (line.speaker ? String(line.speaker) : '');
 
-            var _spk = String(line.speaker);
+          if (_spk) {
 
             if (/^[a-z0-9_]+$/.test(_spk)) {
 
@@ -82308,7 +82314,7 @@ function _resolveOutcomeScriptForPlayer(script, outcome, player) {
 
     var spk = String(copy.speaker || '').trim();
 
-    var isPlayer = (copy.type === 'speech' && (spk === '{player_name}' || spk === 'player' || spk === 'Você' || copy.is_player || copy.player_speech));
+    var isPlayer = (copy.type === 'player_speech' || (copy.type === 'speech' && (spk === '{player_name}' || spk === '{player}' || spk === 'player' || spk === 'Você' || copy.is_player || copy.player_speech)));
 
 
 
@@ -82321,6 +82327,8 @@ function _resolveOutcomeScriptForPlayer(script, outcome, player) {
       chosen = _resolveGenderTokens(chosen, pGender);
 
       chosen = chosen.replace(/\{player_name\}/g, pName);
+
+      copy.type = 'speech';
 
       copy.text = chosen;
 
@@ -82354,7 +82362,7 @@ function _resolveOutcomeScriptForPlayer(script, outcome, player) {
 
     if (!fallbackText) {
 
-      fallbackText = 'Com determinação e atenção redobrada, o caminho segue adiante.';
+      fallbackText = 'Mantenho os olhos abertos e o passo firme — sigo em frente com cautela.';
 
     }
 
@@ -82466,19 +82474,23 @@ function _renderEventScriptAsAldric(elOrId, script, opts) {
 
     var span = document.createElement('span');
 
-    var isSpeech = (line.type === 'speech');
+    var rawSpk = String(line.speaker || '').trim();
+
+    var isPlayerLine = Boolean(line.type === 'player_speech' || line.is_player || rawSpk === '{player_name}' || rawSpk === '{player}' || rawSpk === 'player' || rawSpk === 'Você' || (pName && rawSpk === pName));
+
+    var isSpeech = (line.type === 'speech' || line.type === 'player_speech' || isPlayerLine);
 
     if (isSpeech) {
 
-      span.className = 'event-text-speech' + (line.is_player ? ' event-text-speech--player' : '');
+      span.className = 'event-text-speech' + (isPlayerLine ? ' event-text-speech--player' : '');
 
-      var spk = String(line.speaker || '').trim();
+      var spk = rawSpk;
 
-      if (spk === '{player_name}' || spk === 'player') spk = (pName !== 'Você') ? pName : 'Você';
+      if (isPlayerLine) spk = (pName !== 'Você') ? pName : 'Você';
 
-      // guard anti-vazamento: nunca renderiza key snake_case pura como speaker (#88)
+      // guard anti-vazamento: nunca renderiza key snake_case pura como speaker (#88), exceto nome do jogador
 
-      if (spk && !/^[a-z0-9_]+$/.test(spk)) span.setAttribute('data-speaker', spk);
+      if (spk && (isPlayerLine || !/^[a-z0-9_]+$/.test(spk))) span.setAttribute('data-speaker', spk);
 
     } else {
 
@@ -84356,11 +84368,19 @@ function _explResolveFallbackEventPortrait(ev) {
 
     for (var i = 0; i < ev.script.length; i++) {
 
-      if (ev.script[i] && ev.script[i].speaker) {
+      var ln = ev.script[i];
 
-        speaker = String(ev.script[i].speaker).toLowerCase();
+      if (ln && ln.speaker && !ln.is_player && ln.type !== 'player_speech') {
 
-        break;
+        var candSpk = String(ln.speaker).trim().toLowerCase();
+
+        if (candSpk && candSpk !== '{player_name}' && candSpk !== '{player}' && candSpk !== 'player' && candSpk !== 'você' && candSpk !== 'voce') {
+
+          speaker = candSpk;
+
+          break;
+
+        }
 
       }
 
@@ -85042,6 +85062,8 @@ function _explShowEventVEnc(ev) {
 
       handlerType: 'expl_event',
 
+      autoOpenChoices: true,
+
       customState: { ev: ev },
 
       onChoice: function (ch) {
@@ -85402,6 +85424,8 @@ function _explShowOutcomeVEnc(ev, oc) {
 
       handlerType: 'expl_event_outcome',
 
+      autoOpenChoices: true,
+
       customState: { ev: ev, oc: oc },
 
       onChoice: function () { _explEventVEncFinish(oc); }
@@ -85667,13 +85691,21 @@ function _explTileBodyNode(rt) {
 
   var script = (Array.isArray(rt.script) && rt.script.length) ? rt.script.slice() : null;
 
-  // voiceLine = fala do PROPRIO personagem (VoiceLineLayer) → narracao italica no topo.
+  // voiceLine = fala do PROPRIO personagem (VoiceLineLayer) → balão de fala de 1ª pessoa após a cena.
 
   if (rt.voiceLine) {
 
     if (!script) script = (rt.body ? [{ type: 'narration', text: rt.body }] : []);
 
-    script.unshift({ type: 'narration', text: '<i>' + rt.voiceLine + '</i>' });
+    var pVoiceName = (window.S && window.S.player && window.S.player.name) || 'Você';
+
+    var cleanVoice = String(rt.voiceLine).replace(/^\s*["“«]+|["”»]+\s*$/g, '').trim();
+
+    if (cleanVoice) {
+
+      script.push({ type: 'speech', is_player: true, speaker: pVoiceName, text: cleanVoice });
+
+    }
 
   }
 
@@ -85716,6 +85748,8 @@ function _explShowTileVEnc(rt) {
     handlerType: 'expl_tile',
 
     customState: { rt: rt },
+
+    autoOpenChoices: true,
 
     onChoice: function (ch) { _explTileVEncResolve(rt, ch); }
 
@@ -85890,6 +85924,8 @@ function _explShowTileOutcomeVEnc(rt, choice, outcome, rollResult) {
       player: S.player, closeable: false,
 
       handlerType: 'expl_tile_outcome',
+
+      autoOpenChoices: true,
 
       customState: { rt: rt, choice: choice, outcome: outcome, rollResult: rollResult, chain: chain },
 
@@ -92158,6 +92194,8 @@ function _renderWildernessCompanionBanterScene(banter, proceedAfterFn) {
 
     player: p,
 
+    autoOpenChoices: true,
+
     onChoice: function(selected) {
 
       var cid = banter.companion_id;
@@ -92320,6 +92358,8 @@ function _handleWildBanterResolved(result, targetNpc, proceedAfterFn) {
   }, {
 
     player: (window.S && window.S.player) ? window.S.player : {},
+
+    autoOpenChoices: true,
 
     onChoice: function(ch) {
 
@@ -97937,6 +97977,7 @@ function _runLocalPerimeterSweep(originInfo, biomeObj) {
           inline: true
         }, {
           player: S.player,
+          autoOpenChoices: true,
           onChoice: function () {
             if (window.vEncounter && typeof window.vEncounter.close === 'function') window.vEncounter.close();
             window._openDirectionalRoadCrossroads(originInfo.nodeId);
@@ -112574,7 +112615,7 @@ function _openCampfireChat() {
 
 
 
-function _showCampfireAllyPicker(alliesList) {
+function _showCampfireAllyPicker(alliesList, opts) {
 
   var choices = alliesList.map(function(ally, idx) {
 
@@ -112585,13 +112626,10 @@ function _showCampfireAllyPicker(alliesList) {
     return {
 
       id: 'pick_ally_' + idx,
-
       label: '◆ ' + aName + ' (' + aCls + ') ▸',
-
+      isSubmenu: true,
       cb: function() {
-
-        _showCampfireCompanionTopics(ally);
-
+        _showCampfireCompanionTopics(ally, { autoOpenChoices: true, isSubmenu: true });
       }
 
     };
@@ -112605,6 +112643,10 @@ function _showCampfireAllyPicker(alliesList) {
     id: 'cancel_picker',
 
     label: '↩ Voltar ao Acampamento',
+
+    isSubmenu: true,
+
+    isReturn: true,
 
     cb: function() {
 
@@ -112662,6 +112704,12 @@ function _showCampfireAllyPicker(alliesList) {
 
     }, {
 
+      autoOpenChoices: true,
+
+      isSubmenu: !!(opts && opts.isSubmenu),
+
+      isReturn: !!(opts && opts.isReturn),
+
       onClose: function() { window._isAtCampfire = false; }
 
     });
@@ -112680,7 +112728,7 @@ function _getCampfireAlliesList() {
   return [];
 }
 
-function _showCampfireCompanionTopics(ally) {
+function _showCampfireCompanionTopics(ally, opts) {
 
   window._isAtCampfire = true;
 
@@ -112725,13 +112773,10 @@ function _showCampfireCompanionTopics(ally) {
     return {
 
       id: 'camp_top_' + t.key,
-
       label: isDone ? t.doneLabel : t.label,
-
+      isSubmenu: true,
       cb: function() {
-
-        _showCampfireTopicDialogue(ally, t.key);
-
+        _showCampfireTopicDialogue(ally, t.key, { autoOpenChoices: true, isSubmenu: true });
       }
 
     };
@@ -112743,8 +112788,10 @@ function _showCampfireCompanionTopics(ally) {
     choices.push({
       id: 'camp_switch_ally',
       label: '↩ Conversar com outro companheiro',
+      isSubmenu: true,
+      isReturn: true,
       cb: function() {
-        _showCampfireAllyPicker(allAllies);
+        _showCampfireAllyPicker(allAllies, { autoOpenChoices: true, isSubmenu: true });
       }
     });
   }
@@ -112813,6 +112860,9 @@ function _showCampfireCompanionTopics(ally) {
 
     }, {
 
+      autoOpenChoices: true,
+      isSubmenu: !!(opts && opts.isSubmenu),
+      isReturn: !!(opts && opts.isReturn),
       onClose: function() { window._isAtCampfire = false; }
 
     });
@@ -112823,7 +112873,7 @@ function _showCampfireCompanionTopics(ally) {
 
 
 
-function _showCampfireTopicDialogue(ally, topicKey) {
+function _showCampfireTopicDialogue(ally, topicKey, opts) {
 
   var displayName = (ally.name || 'Companheiro').split(/\s+/)[0];
 
@@ -113360,16 +113410,18 @@ function _showCampfireTopicDialogue(ally, topicKey) {
             postCampChoices.push({
               id: 'more_in_topic',
               label: '↩ Continuar sobre este assunto',
+              isSubmenu: true,
               cb: function() {
-                _showCampfireTopicDialogue(ally, topicKey);
+                _showCampfireTopicDialogue(ally, topicKey, { autoOpenChoices: true, isSubmenu: true });
               }
             });
           }
           postCampChoices.push({
             id: 'back_to_topics',
             label: '↩ Escolher outro assunto',
+            isSubmenu: true,
             cb: function() {
-              _showCampfireCompanionTopics(ally);
+              _showCampfireCompanionTopics(ally, { autoOpenChoices: true, isSubmenu: true });
             }
           });
           var campAllies = _getCampfireAlliesList();
@@ -113377,8 +113429,10 @@ function _showCampfireTopicDialogue(ally, topicKey) {
             postCampChoices.push({
               id: 'camp_switch_ally',
               label: '↩ Conversar com outro companheiro',
+              isSubmenu: true,
+              isReturn: true,
               cb: function() {
-                _showCampfireAllyPicker(campAllies);
+                _showCampfireAllyPicker(campAllies, { autoOpenChoices: true, isSubmenu: true });
               }
             });
           }
@@ -113433,6 +113487,9 @@ function _showCampfireTopicDialogue(ally, topicKey) {
 
           }, {
 
+            autoOpenChoices: true,
+            isSubmenu: !!(opts && opts.isSubmenu),
+            isReturn: !!(opts && opts.isReturn),
             onClose: function() { window._isAtCampfire = false; }
 
           });
@@ -113453,9 +113510,13 @@ function _showCampfireTopicDialogue(ally, topicKey) {
 
     label: '↩ Voltar aos Assuntos',
 
+    isSubmenu: true,
+
+    isReturn: true,
+
     cb: function() {
 
-      _showCampfireCompanionTopics(ally);
+      _showCampfireCompanionTopics(ally, { autoOpenChoices: true, isSubmenu: true });
 
     }
 
@@ -113506,6 +113567,8 @@ function _showCampfireTopicDialogue(ally, topicKey) {
       choices: choices
 
     }, {
+
+      autoOpenChoices: true,
 
       onClose: function() { window._isAtCampfire = false; }
 

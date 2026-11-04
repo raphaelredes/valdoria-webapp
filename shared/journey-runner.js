@@ -294,6 +294,7 @@
         showHp: false, /* #91 (user): remove barra permanente; ficha resumida exibida somente quando houver impacto */
         inlineChoices: cfg.inline === true,
         compact: cfg.compact || false,
+        autoOpenChoices: !(cfg && cfg.autoOpenChoices === false),
         onChoice: function (ch) { if (typeof cfg.onChoice === 'function') cfg.onChoice(ch); }
       }
     );
@@ -629,11 +630,17 @@
 
     var script = (scriptLines || []).slice();
 
-    // Se temos especialista e ainda não colocamos fala nesta tela, insere nota de orientação
+    // Se temos especialista e ainda não colocamos fala nesta tela, insere fala de orientação
     if (ori && ori.hasSpecialist && ori.speech && !script.some(function(l){ return l.speaker === ori.speaker; })) {
+      var pCurr = _player();
+      var pCurrName = (pCurr && (pCurr.name || pCurr.char_name)) || '';
+      var oriSpk = ori.speaker || ori.label || 'Batedor';
+      var isOriPlayer = (oriSpk === pCurrName || oriSpk === 'Você' || ori.isPlayer === true);
       script.push({
-        type: 'narration',
-        text: '<b>' + (ori.label || 'Batedor') + ':</b> <i>"' + ori.speech + '"</i>'
+        type: 'speech',
+        is_player: isOriPlayer,
+        speaker: oriSpk,
+        text: String(ori.speech).replace(/^["“]|["”]$/g, '')
       });
     } else if (!ori || !ori.hasSpecialist) {
       // Pistas sensoriais sutis do ambiente (D&D 5e)
@@ -745,7 +752,7 @@
       script: [
         { type: 'narration', text: 'Você desembainha suas armas e assume postura de combate contra <b>' + foeName + '</b>!' }
       ],
-      choices: [{ id: 'jrn_fight_now', label: '⚔️ Iniciar combate' }],
+      choices: [{ id: 'jrn_fight_now', label: '⚔ Iniciar combate' }],
       inline: true,
       onChoice: function () {
         var cb = j.opts.onCombat;
@@ -882,6 +889,14 @@
         _applyJourneyCondition(p, pickedCond);
       }
     }
+    var npcReplySpeech = '';
+    if (hz && hz.npc && hz.npc.name && narr) {
+      var mNpcQuote = String(narr).match(/^([\s\S]+?[.!?])\s*["“]([^"”]+)["”]\s*$/);
+      if (mNpcQuote) {
+        narr = mNpcQuote[1].trim();
+        npcReplySpeech = mNpcQuote[2].trim();
+      }
+    }
     var body = narr;
     // Ajuste dinâmico de distância em Marcos com Rolagem de Dados D&D 5e (Ordem do Usuário 2026-10):
     // Desvios e atalhos NUNCA usam valores fixos (+3 ou -3); decorrem de cálculo tirado nos dados!
@@ -921,7 +936,7 @@
     if (targetCh && targetCh.consume_item && JD().consumeItem) {
       var itemConsumed = JD().consumeItem(p, targetCh.consume_item);
       if (itemConsumed) {
-        body += '<br><br><b>🎒 Item consumido:</b> 1x ' + itemConsumed;
+        body += '<br><br><b>◆ Item consumido:</b> 1x ' + itemConsumed;
         try {
           if (global.S && S.player && S.player !== p) {
             S.player.inventory = p.inventory;
@@ -936,7 +951,7 @@
     if (targetCh && targetCh.consume_gold && JD().consumeGold) {
       var goldPaid = JD().consumeGold(p, targetCh.consume_gold);
       if (goldPaid > 0) {
-        body += '<br><br><b>🪙 Custo pago:</b> ' + goldPaid + (goldPaid === 1 ? ' moeda de ouro' : ' moedas de ouro');
+        body += '<br><br><b>◆ Custo pago:</b> ' + goldPaid + (goldPaid === 1 ? ' moeda de ouro' : ' moedas de ouro');
         try {
           if (global.S && S.player && S.player !== p) {
             S.player.gold = p.gold;
@@ -946,9 +961,9 @@
       }
     }
 
-    // Recuperação de armas de arremesso (D&D 5e: armas de arremesso são 100% recuperáveis)
+    // Recuperação de armas de arremesso
     if (targetCh && targetCh.recovered_item) {
-      body += '<br><br><b>🗡️ Arma de Arremesso:</b> ' + targetCh.recovered_item + ' recolhida do solo (regra D&D 5e).';
+      body += '<br><br><b>◆ Arma de Arremesso:</b> ' + targetCh.recovered_item + ' recolhida do solo.';
     }
 
     if (success && targetCh && targetCh.giveItem) {
@@ -1055,6 +1070,9 @@
       scriptLines.push({ type: 'speech', is_player: true, speaker: pSpeaker, text: pSpeech });
     }
     scriptLines.push({ type: 'narration', text: body });
+    if (npcReplySpeech && hz && hz.npc && hz.npc.name) {
+      scriptLines.push({ type: 'speech', speaker: hz.npc.name, text: npcReplySpeech });
+    }
     if (rewardXp > 0) {
       scriptLines.push({
         type: 'reward',
@@ -1081,8 +1099,8 @@
         npc: (hz && hz.npc) || null,
         script: scriptLines,
         choices: [
-          { id: 'jrn_hostile_fight', label: '⚔️ Enfrentar ' + foeName, enemyId: hostileEnemyId, isCombat: true },
-          { id: 'jrn_hostile_flee', label: '🏃 Romper em fuga desesperada', isFlee: true }
+          { id: 'jrn_hostile_fight', label: '⚔ Enfrentar ' + foeName, enemyId: hostileEnemyId, isCombat: true },
+          { id: 'jrn_hostile_flee', label: '▸ Romper em fuga desesperada', isFlee: true }
         ],
         inline: true,
         onChoice: function (c) {

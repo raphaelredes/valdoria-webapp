@@ -106,6 +106,56 @@
     } catch(_e){}
     return abilityMod + prof;
   }
+  /**
+   * Separa narração em 3ª pessoa e fala direta em 1ª pessoa caso estejam misturadas
+   * ou invertidas entre resultNarration e resultText / reactions.
+   */
+  function _splitMixedNarrationAndSpeech(rawNarration, rawSpeech) {
+    var narr = String(rawNarration || '').trim();
+    var spk = String(rawSpeech || '').trim();
+
+    // 1. Se a narração termina com uma fala entre aspas e o campo de fala NÃO tem aspas
+    // (ex.: narração tinha 'Wrenna sorri. "Filosofia interessante..."' e fala tinha 'A conversa encerrou sem desacordos.')
+    var mNarrQuote = narr.match(/^([\s\S]+?[.!?])\s*((?:<i>\([^)]+\)<\/i>\s*)?["“][^"”]+["”])\s*$/);
+    if (mNarrQuote && spk && !/["“]/.test(spk)) {
+      var extractedQuote = mNarrQuote[2].trim();
+      var summaryText = spk;
+      narr = (mNarrQuote[1].trim() + ' ' + summaryText).trim();
+      spk = extractedQuote;
+    }
+
+    // 2. Se o campo de fala começa com narração em 3ª pessoa antes da fala entre aspas
+    // (ex.: 'Aldwin fecha o livro com som seco. <i>(voz cortante)</i> "Você escolheu..."')
+    var mSpkMixed = spk.match(/^([^"“]+?[.!?])\s+((?:<i>\([^)]+\)<\/i>\s*)?["“][\s\S]+)$/);
+    if (mSpkMixed && !/^<i>/.test(mSpkMixed[1].trim())) {
+      var prefixNarr = mSpkMixed[1].trim();
+      spk = mSpkMixed[2].trim();
+      narr = narr ? (narr + ' ' + prefixNarr) : prefixNarr;
+    }
+
+    // 3. Extrai notificações mecânicas <b>...</b> da fala para a narração, nunca na boca do NPC
+    // (ex.: '<b>+1d8+3 HP recuperado.</b>', '<b>Empréstimo registrado.</b>', '<b> — Hovel: ...</b>')
+    spk = spk.replace(/\s*<b>([\s\S]*?)<\/b>\.?/gi, function(match, inner) {
+      var cleanInner = String(inner || '').replace(/^\s*[—–-]\s*/, '').trim();
+      if (cleanInner) {
+        var cleanTag = '<b>' + cleanInner + '</b>';
+        if (narr.indexOf(cleanInner) === -1) {
+          narr = (narr ? narr + ' ' : '') + cleanTag;
+        }
+      }
+      return '';
+    }).trim();
+
+    // 4. Limpa aspas duplas quebradas ao redor de rubricas <i>(...)</i> e aspas externas redundantes na fala
+    spk = spk.replace(/["”]\s*(<i>\([^)]+\)<\/i>)\s*["“]?/g, ' $1 ')
+             .replace(/^["“]\s*/, '')
+             .replace(/\s*["”]$/, '')
+             .replace(/\s{2,}/g, ' ')
+             .trim();
+
+    return { narration: narr, speech: spk };
+  }
+
   window._diceCheckSvc = function(opts) {
     var ov = document.getElementById('encounter-overlay');
     ov.innerHTML = '';
@@ -149,10 +199,10 @@
     function showResult(roll) {
       var resEl = card.querySelector('#dice-result');
       var statusTxt, statusColor;
-      if (roll.critSuccess) { statusTxt = '⚜ ACERTO CRÍTICO! ⚜'; statusColor = '#fff4d0'; }
-      else if (roll.critFail) { statusTxt = '✗ FALHA CRÍTICA'; statusColor = '#d04848'; }
+      if (roll.critSuccess) { statusTxt = 'ACERTO CRÍTICO!'; statusColor = '#fff4d0'; }
+      else if (roll.critFail) { statusTxt = 'FALHA CRÍTICA'; statusColor = '#d04848'; }
       else if (roll.success) { statusTxt = '✓ SUCESSO'; statusColor = '#7ad06b'; }
-      else { statusTxt = '✗ FALHA'; statusColor = '#d04848'; }
+      else { statusTxt = 'FALHA'; statusColor = '#d04848'; }
       resEl.innerHTML =
         '<div style="font-size:11px;color:#a09484;letter-spacing:1.5px;margin-bottom:6px;">Rolagem d20 ' + roll.d20 + ' ' + (roll.mod>=0?'+':'') + roll.mod + ' = <b>' + roll.total + '</b> vs CD ' + roll.dc + '</div>'
         + '<div style="font-size:18px;color:' + statusColor + ';font-weight:700;letter-spacing:2px;">' + statusTxt + '</div>';
@@ -239,10 +289,19 @@
             var _reactions = (window._SVC_CONFIG && window._SVC_CONFIG.reactions) || {};
             var _rkey = deltaR >= 3 ? 'very_positive' : deltaR > 0 ? 'positive'
               : deltaR <= -2 ? 'very_negative' : deltaR < 0 ? 'negative' : 'neutral';
-            rText = _reactions[_rkey] || (success
-              ? 'O olhar diante de você se ilumina — a sorte sorriu desta vez.'
-              : 'Um aceno breve encerra o assunto. Não foi desta vez.');
+            if (_reactions[_rkey]) {
+              rText = _reactions[_rkey];
+            } else if (success) {
+              rNarration = 'O olhar diante de você se ilumina — a sorte sorriu desta vez.';
+              rText = '"Muito bem. Vejo que sabe do que está falando."';
+            } else {
+              rNarration = 'Um aceno breve encerra o assunto. Não foi desta vez.';
+              rText = '"Não foi desta vez. Quem sabe em outra ocasião."';
+            }
           }
+          var _splitRes = _splitMixedNarrationAndSpeech(rNarration, rText);
+          rNarration = _splitRes.narration;
+          rText = _splitRes.speech;
           var _npcObj = (opts.dialogue && opts.dialogue.npc) || null;
           var _npcName = (_npcObj && _npcObj.name) || '';
 
@@ -348,7 +407,7 @@
               targetNode.script = prependedScript.concat(targetNode.script || []);
             }
             if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-              window.vEncounter.render(targetNode, { dialogues: opts.dialogues, player: opts.player });
+              window.vEncounter.render(targetNode, { dialogues: opts.dialogues, player: opts.player, autoOpenChoices: true });
             } else if (typeof window._renderEncounterPopup === 'function') {
               window._renderEncounterPopup(targetNode);
             } else {
@@ -383,13 +442,17 @@
                 outcomeChoices.push({
                   id: 'back_to_topics',
                   label: '↩ Escolher outro assunto',
-                  cb: function() { window._showAllyTopicsMenu(mIdx); }
+                  isSubmenu: true,
+                  isReturn: true,
+                  cb: function() { window._showAllyTopicsMenu(mIdx, { autoOpenChoices: true, isSubmenu: true }); }
                 });
               }
               outcomeChoices.push({
                 id: 'back_to_ally_main',
                 label: '↩ "Gostaria de falar de outro assunto."',
-                cb: function() { window._showAllyDialogue(mIdx); }
+                isSubmenu: true,
+                isReturn: true,
+                cb: function() { window._showAllyDialogue(mIdx, { autoOpenChoices: true, isSubmenu: true }); }
               });
               outcomeChoices.push({
                 id: 'close',
@@ -402,9 +465,11 @@
                 outcomeChoices.push({
                   id: 'back_to_npc_root',
                   label: '↩ "Gostaria de tratar de outro assunto."',
+                  isSubmenu: true,
+                  isReturn: true,
                   cb: function() {
                     if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-                      window.vEncounter.render(_rootDlg, { dialogues: opts.dialogues, player: opts.player });
+                      window.vEncounter.render(_rootDlg, { dialogues: opts.dialogues, player: opts.player, autoOpenChoices: true, isSubmenu: true });
                     } else if (typeof window._renderEncounterPopup === 'function') {
                       window._renderEncounterPopup(_rootDlg);
                     }
@@ -423,6 +488,7 @@
               }, {
                 player: opts.player,
                 closeable: true,
+                autoOpenChoices: true,
                 onChoice: function(rc) {
                   if (typeof rc.cb === 'function') { rc.cb(); return; }
                   try { window.vEncounter.close(); } catch(_) {}
@@ -521,13 +587,19 @@
      pra cidade + exploracao + futuro) sobre _renderEncounterPopup (legacy,
      cidade-only). Fallback ao legacy mantido pra compat com mockups antigos. */
   function _renderViaCanonical(dialogue, extraOpts) {
-    if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-      window.vEncounter.render(dialogue, extraOpts || {
-        onChoice: function(rc) {
-          if (rc && typeof rc.cb === 'function') { rc.cb(); return; }
-          try { window.vEncounter.close(); } catch(_) {}
+    var opts = Object.assign({
+      autoOpenChoices: true,
+      onChoice: function(rc) {
+        if (rc && typeof rc.cb === 'function') { rc.cb(); return; }
+        if (rc && rc.cb && rc.cb !== 'close' && typeof window._dispatchSvcChoice === 'function') {
+          if (window._dispatchSvcChoice(rc, dialogue, (extraOpts && extraOpts.dialogues) || {})) return;
         }
-      });
+        try { window.vEncounter.close(); } catch(_) {}
+      }
+    }, extraOpts || {});
+    if (opts.autoOpenChoices == null) opts.autoOpenChoices = true;
+    if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+      window.vEncounter.render(dialogue, opts);
       return true;
     }
     if (typeof window._renderEncounterPopup === 'function') {
@@ -600,7 +672,7 @@
         label: '↩ "Gostaria de tratar de outro assunto."',
         cb: function() {
           if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-            window.vEncounter.render(_rootDlg, { dialogues: dialogues });
+            window.vEncounter.render(_rootDlg, { dialogues: dialogues, autoOpenChoices: true });
           } else if (typeof window._renderEncounterPopup === 'function') {
             window._renderEncounterPopup(_rootDlg);
           }
@@ -615,14 +687,17 @@
     }
     reactionChoices.push({ id: 'continue', label: '↩ "Até logo."', cb: 'close' });
 
+    var _opNarr = 'Você dirige a palavra a ' + _who + ': <i>"' + optionLabel.replace(/^"|"$/g,'') + '"</i>';
+    var _opSplit = _splitMixedNarrationAndSpeech(_opNarr, resp);
+    var _opScript = [];
+    if (_opSplit.narration) _opScript.push({ type: 'narration', text: _opSplit.narration });
+    if (_opSplit.speech) _opScript.push({ type: 'speech', speaker: npc.name, text: _opSplit.speech });
+
     _renderViaCanonical({
       npc: npc,
-      script: [
-        { type: 'narration', text: 'Você dirige a palavra a ' + _who + ': <i>"' + optionLabel.replace(/^"|"$/g,'') + '"</i>' },
-        { type: 'speech', speaker: npc.name, text: resp }
-      ],
+      script: _opScript,
       choices: reactionChoices
-    });
+    }, { dialogues: dialogues, autoOpenChoices: true });
     window._applyRenownDelta(faction, renownDelta);
     _dispatchBackendAction(ch); /* task #62: bot DEV apply effect */
     if (typeof window.vToast === 'function' && renownDelta !== 0) {
@@ -666,10 +741,10 @@
     if (ch && Array.isArray(ch.resultScript) && ch.resultScript.length > 0) {
       script = ch.resultScript;
     } else {
-      script = [
-        { type: 'narration', text: specificNarration },
-        { type: 'speech', speaker: npc.name, text: specificMsg }
-      ];
+      var _purSplit = _splitMixedNarrationAndSpeech(specificNarration, specificMsg);
+      script = [];
+      if (_purSplit.narration) script.push({ type: 'narration', text: _purSplit.narration });
+      if (_purSplit.speech) script.push({ type: 'speech', speaker: npc.name, text: _purSplit.speech });
     }
 
     var _rootDlgP = (dialogues && dialogues.greeting) || dialogue || null;
@@ -680,7 +755,7 @@
         label: '↩ "Gostaria de tratar de outro assunto."',
         cb: function() {
           if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-            window.vEncounter.render(_rootDlgP, { dialogues: dialogues });
+            window.vEncounter.render(_rootDlgP, { dialogues: dialogues, autoOpenChoices: true });
           } else if (typeof window._renderEncounterPopup === 'function') {
             window._renderEncounterPopup(_rootDlgP);
           }
@@ -699,7 +774,7 @@
       npc: npc,
       script: script,
       choices: purchaseChoices
-    });
+    }, { dialogues: dialogues, autoOpenChoices: true });
     window._applyRenownDelta(faction, renownDelta);
     _dispatchBackendAction(ch); /* task #62: bot DEV apply effect */
     if (typeof window.vToast === 'function' && renownDelta !== 0) {
@@ -780,7 +855,9 @@
         replyChoices.push({
           id: 'back_to_ally_main',
           label: '↩ "Gostaria de falar de outro assunto."',
-          cb: function() { window._showAllyDialogue(mIdx); }
+          isSubmenu: true,
+          isReturn: true,
+          cb: function() { window._showAllyDialogue(mIdx, { autoOpenChoices: true, isSubmenu: true }); }
         });
         replyChoices.push({ id: '_ally_reply_done', label: '↩ "Até mais tarde."', cb: 'close' });
       } else {
@@ -792,6 +869,7 @@
         choices: replyChoices
       }, {
         closeable: true,
+        autoOpenChoices: false,
         onChoice: function(rc) {
           if (typeof rc.cb === 'function') { rc.cb(); return; }
           try { window.vEncounter.close(); } catch(_) {}
@@ -878,19 +956,19 @@
         var rootMap = { temple: 'aldric', bank: 'aldwin', tavern: 'grom', inn: 'martha', market: 'thorne', guild: 'tavira', arena: 'vorhan', runes: 'eirik', workshop: 'garrick' };
         var vName = faction === 'runes' ? 'rune' : faction;
         var rNode = rootMap[faction] || 'aldric';
-        window._openCityDialogue(vName, rNode);
+        window._openCityDialogue(vName, rNode, null, { autoOpenChoices: true });
         return true;
       }
       if (faction === 'temple' && typeof BREVON_DIALOGUE === 'object' && window.vEncounter) {
-        window.vEncounter.render(BREVON_DIALOGUE, { dialogues: dialogues || window.SERVICE_DIALOGUES_TEMPLE });
+        window.vEncounter.render(BREVON_DIALOGUE, { dialogues: dialogues || window.SERVICE_DIALOGUES_TEMPLE, autoOpenChoices: true });
         return true;
       }
       if (faction === 'bank' && typeof ALDWIN_DIALOGUE === 'object' && window.vEncounter) {
-        window.vEncounter.render(ALDWIN_DIALOGUE, { dialogues: dialogues || window.SERVICE_DIALOGUES_BANK });
+        window.vEncounter.render(ALDWIN_DIALOGUE, { dialogues: dialogues || window.SERVICE_DIALOGUES_BANK, autoOpenChoices: true });
         return true;
       }
       if (dialogue && window.vEncounter && typeof window.vEncounter.render === 'function') {
-        window.vEncounter.render(dialogue, { dialogues: dialogues });
+        window.vEncounter.render(dialogue, { dialogues: dialogues, autoOpenChoices: true });
         return true;
       }
     }
@@ -901,27 +979,28 @@
       if (ch.continueDialogue && dialogues && dialogues[ch.continueDialogue]) {
         // task #68 fix: prefer canonical engine
         if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-          window.vEncounter.render(dialogues[ch.continueDialogue], { dialogues: dialogues });
+          window.vEncounter.render(dialogues[ch.continueDialogue], { dialogues: dialogues, autoOpenChoices: true });
         } else if (typeof window._renderEncounterPopup === 'function') {
           window._renderEncounterPopup(dialogues[ch.continueDialogue]);
         }
       } else if (window.vEncounter && typeof window.vEncounter.render === 'function' && dialogue) {
         var npcObj = dialogue.npc || { name: 'NPC' };
-        var ackNarr = (window._SVC_CONFIG && window._SVC_CONFIG.confirmMsgs && window._SVC_CONFIG.confirmMsgs.narration)
+        var rawAckNarr = (window._SVC_CONFIG && window._SVC_CONFIG.confirmMsgs && window._SVC_CONFIG.confirmMsgs.narration)
           || (npcObj.name + ' assente com discrição, registrando suas palavras.');
-        var ackSpeech = (window._SVC_CONFIG && window._SVC_CONFIG.confirmMsgs && window._SVC_CONFIG.confirmMsgs.generic)
+        var rawAckSpeech = (window._SVC_CONFIG && window._SVC_CONFIG.confirmMsgs && window._SVC_CONFIG.confirmMsgs.generic)
           || 'Entendido. Trataremos disso com a devida atenção.';
+        var ackSplit = _splitMixedNarrationAndSpeech(rawAckNarr, rawAckSpeech);
         window.vEncounter.render({
           npc: npcObj,
           script: [
-            { type: 'narration', text: ackNarr },
-            { type: 'speech', speaker: npcObj.name || 'NPC', text: ackSpeech.replace(/^"|"$/g, '') }
+            { type: 'narration', text: ackSplit.narration },
+            { type: 'speech', speaker: npcObj.name || 'NPC', text: ackSplit.speech.replace(/^"|"$/g, '') }
           ],
           choices: [
             { id: 'return_venue_root', label: '↩ "Mudar de assunto."', cb: 'return_venue_root' },
             { id: 'leave', label: 'Encerrar conversa', cb: 'close' }
           ]
-        }, { dialogues: dialogues });
+        }, { dialogues: dialogues, autoOpenChoices: true });
       } else {
         if (window.vEncounter && typeof window.vEncounter.close === 'function') {
           window.vEncounter.close();
@@ -940,8 +1019,9 @@
     var nextDlgKey = (dialogues && dialogues[ch.id]) ? ch.id : (cb && dialogues && dialogues[cb]) ? cb : null;
     if (nextDlgKey) {
       if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-        // Preserve opts.dialogues pra chain continuar funcionando
-        window.vEncounter.render(dialogues[nextDlgKey], { dialogues: dialogues });
+        var isLoreSubnode = (nextDlgKey.indexOf('about_') === 0);
+        // Preserve opts.dialogues pra chain continuar funcionando e auto-abre submenu de serviço
+        window.vEncounter.render(dialogues[nextDlgKey], { dialogues: dialogues, autoOpenChoices: true });
       } else if (typeof window._renderEncounterPopup === 'function') {
         window._renderEncounterPopup(dialogues[nextDlgKey]); // legacy fallback
       }
@@ -1024,15 +1104,15 @@
       if (typeof window.vToast === 'function') {
         var parts = [];
         if (applied.item_given) {
-          var emoji = applied.item_given.emoji || '🎁';
+          var itemGlyph = applied.item_given.glyph || '◆';
           var qty = applied.item_given.qty || 1;
-          parts.push(emoji + ' ' + applied.item_given.name + (qty > 1 ? ' x' + qty : ''));
+          parts.push(itemGlyph + ' ' + applied.item_given.name + (qty > 1 ? ' x' + qty : ''));
         }
         if (applied.gold_delta) {
           parts.push((applied.gold_delta > 0 ? '+' : '') + applied.gold_delta + ' Valdoritas');
         }
         if (applied.effect && applied.effect.name) {
-          parts.push('✨ ' + applied.effect.name);
+          parts.push('◆ ' + applied.effect.name);
         }
         if (parts.length) {
           var positive = (applied.gold_delta || 0) >= 0 && (applied.renown_delta || 0) >= 0;

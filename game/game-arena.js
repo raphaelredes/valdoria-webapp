@@ -96,7 +96,9 @@ var VORHAN_DIALOGUE = {
   },
   script: [
     { type: 'narration', text: 'Vorhan \u00E9 colossal \u2014 dois metros, cicatrizes desenhando mapas em seu rosto, armadura de couro batido suja do sangue de mil combates. Atr\u00E1s dele, o coliseu zumbe com a multid\u00E3o. Ele mede voc\u00EA com o olhar de quem j\u00E1 viu mil aventureiros prometer e n\u00E3o cumprir.' },
-    { type: 'speech', speaker: 'Mestre Vorhan', text: 'Veio lutar ou tagarelar? <i>(cruza os bra\u00E7os calejados)</i> A Arena n\u00E3o tolera covardes. Ganhe duas vezes seguidas e a multid\u00E3o lembrar\u00E1. Perca mais que ganha e ningu\u00E9m vai sequer ao funeral.' }
+    { type: 'speech', speaker: 'Mestre Vorhan', text: 'Veio lutar ou tagarelar?' },
+    { type: 'narration', text: 'Vorhan cruza os bra\u00E7os calejados, fitando voc\u00EA com severidade.' },
+    { type: 'speech', speaker: 'Mestre Vorhan', text: 'A Arena n\u00E3o tolera covardes. Ganhe duas vezes seguidas e a multid\u00E3o lembrar\u00E1. Perca mais que ganha e ningu\u00E9m vai sequer ao funeral.' }
   ],
   choices: [
     // task #70 (2026-05-20): cb's alinhadas com backend canonical em arena_manager.py.
@@ -262,7 +264,7 @@ function _renderArenaMain(el, d) {
             window._openCityDialogue('arena', 'vorhan');
         } else if (typeof window.vEncounter === 'object' && window.vEncounter.render) {
             window._SVC_CONFIG = window._SVC_CONFIG_ARENA;
-            window.vEncounter.render(VORHAN_DIALOGUE);
+            window.vEncounter.render(VORHAN_DIALOGUE, { autoOpenChoices: true });
         }
     });
     frag.appendChild(npcRow);
