@@ -4109,12 +4109,13 @@
           var isClosingChoice = Boolean(
             ch.cb === 'close' || ch.id === 'leave' || ch.id === 'close' || ch.id === '_enc_auto_close'
           );
+          var _hasScriptReaction = Boolean(
+            ch._replyScript || ch.replyScript || ch.resultScript || ch.script ||
+            (ch.result && ch.result !== 'goto_dialog' && ch.result !== 'more_in_topic')
+          );
           var _isSub = Boolean(
-            !isClosingChoice && (
-            ch.isSubmenu || ch.isCategory || ch.isReturn || ch._replyScript || ch.replyScript || ch.resultScript ||
-            (typeof ch.cb === 'function') ||
-            (opts.isSubmenu && ch.cb !== 'close' && ch.id !== 'leave') ||
-            (opts.dialogue && opts.dialogue.isSubmenu && ch.cb !== 'close' && ch.id !== 'leave') ||
+            !isClosingChoice && !_hasScriptReaction && (
+            ch.isSubmenu || ch.isCategory || ch.isReturn ||
             (ch.id && (
               String(ch.id).startsWith("topic_") ||
               String(ch.id).startsWith("camp_top_") ||
@@ -5351,9 +5352,15 @@
       }
     });
 
+    var _isExplicitNoAutoOpen = Boolean(
+      (opts && opts.autoOpenChoices === false) ||
+      (dialogue && dialogue.autoOpenChoices === false)
+    );
     var _isNavContext = Boolean(
+      !_isExplicitNoAutoOpen && (
       (opts && (opts.autoOpenChoices === true || opts.isSubmenu || opts.isReturn || opts.isOutcome)) ||
       (dialogue && (dialogue.autoOpenChoices === true || dialogue.isSubmenu || dialogue.isReturn || dialogue.isOutcome))
+      )
     );
     var _autoOpenPending = !(opts && opts.autoOpenChoices === false) && !(dialogue && dialogue.autoOpenChoices === false);
 
@@ -5477,12 +5484,13 @@
       var isClosingChoice = Boolean(
         ch.cb === 'close' || ch.id === 'leave' || ch.id === 'close' || ch.id === '_enc_auto_close'
       );
+      var _hasScriptReaction = Boolean(
+        ch._replyScript || ch.replyScript || ch.resultScript || ch.script ||
+        (ch.result && ch.result !== 'goto_dialog' && ch.result !== 'more_in_topic')
+      );
       var _isSubInternal = Boolean(
-        !isClosingChoice && (
-        ch.isSubmenu || ch.isCategory || ch.isReturn || ch._replyScript || ch.replyScript || ch.resultScript ||
-        (typeof ch.cb === 'function') ||
-        (opts.isSubmenu && ch.cb !== 'close' && ch.id !== 'leave') ||
-        (dialogue && dialogue.isSubmenu && ch.cb !== 'close' && ch.id !== 'leave') ||
+        !isClosingChoice && !_hasScriptReaction && (
+        ch.isSubmenu || ch.isCategory || ch.isReturn ||
         (ch.id && (
           String(ch.id).startsWith("topic_") ||
           String(ch.id).startsWith("camp_top_") ||
@@ -5758,7 +5766,14 @@
     var newPages = _groupScriptIntoPages(combinedScript);
     inst.setPages(newPages);
 
-    var wantAutoOpen = Boolean(
+    var _isAttachExplicitNo = Boolean(
+      (newOpts && newOpts.autoOpenChoices === false) ||
+      (data && data.autoOpenChoices === false)
+    );
+    if (_isAttachExplicitNo && inst.opts) {
+      inst.opts.autoOpenChoices = false;
+    }
+    var wantAutoOpen = !_isAttachExplicitNo && Boolean(
       (newOpts && newOpts.autoOpenChoices) ||
       (data && data.autoOpenChoices) ||
       (inst.opts && inst.opts.autoOpenChoices)

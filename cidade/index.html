@@ -71766,9 +71766,13 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
         cb: function() { _showAllyDialogue(idx, { autoOpenChoices: true, isSubmenu: true }); }
       });
       replyChoices.push({ id: 'leave', label: '↩ "Até mais tarde."', cb: 'close' });
-          window.vEncounter.render({
+      try {
+        if (window.vEncounter && typeof window.vEncounter.closeChoices === 'function') {
+          window.vEncounter.closeChoices(true);
+        }
+      } catch(_) {}
+      window.vEncounter.render({
             npc: dlg.npc,
-            isSubmenu: true,
             choicesTitle: displayName + ' · Conversa',
             choicesSubtitle: cfg.title,
             script: ch._replyScript,
@@ -71776,8 +71780,7 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
           }, {
             closeable: true,
             autoOpenChoices: false,
-        isSubmenu: true,
-        onChoice: function(rc) {
+            onChoice: function(rc) {
           if (typeof rc.cb === 'function') { rc.cb(); return; }
           try { window.vEncounter.close(); } catch(_) {}
         }
