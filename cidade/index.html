@@ -71822,7 +71822,6 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
         npcName: displayName,
         isSubmenu: true,
         dialogue: dlg,
-        contextSpeech: topicSpeech,
         onChoice: _handleAllyTopicChoice
       });
     }
@@ -72586,7 +72585,7 @@ function _showAllyDialogue(idx, opts){
   if (window.vEncounter && typeof window.vEncounter.render === 'function') {
     window.vEncounter.render(dlg, {
       closeable: true,
-      autoOpenChoices: !(opts && opts.autoOpenChoices === false),
+      autoOpenChoices: Boolean(opts && opts.autoOpenChoices === true),
       onChoice: function(ch) {
         if (typeof ch.cb === 'function') {
           try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY] cb failed', e); }
@@ -72896,7 +72895,7 @@ function renderCityGroupPanel(){
     btn.addEventListener('click', function(ev){
       ev.stopPropagation();
       var idx = parseInt(btn.getAttribute('data-chat-idx'), 10);
-      if (typeof _showAllyDialogue === 'function') _showAllyDialogue(idx, { autoOpenChoices: true });
+      if (typeof _showAllyDialogue === 'function') _showAllyDialogue(idx, { autoOpenChoices: false });
     });
   });
 

@@ -3828,29 +3828,9 @@
                         '<span class="enc-cho-title-orn">✦</span>' +
                         (ctxName ? '<div class="enc-cho-title-sub">' + ctxName + '</div>' : '');
 
-    var contextSpeech = opts.contextSpeech || (opts.dialogue && opts.dialogue.contextSpeech) || '';
-    if (!contextSpeech && opts.dialogue && Array.isArray(opts.dialogue.script)) {
-      for (var _si = opts.dialogue.script.length - 1; _si >= 0; _si--) {
-        var _sLine = opts.dialogue.script[_si];
-        if (_sLine && (_sLine.type === 'speech' || _sLine.type === 'player_speech') && _sLine.text) {
-          contextSpeech = _cleanSpeechText(_sLine.text);
-          break;
-        }
-      }
-    }
     if (speechEl) {
-      var isSubmenuTransition = Boolean(
-        opts.isSubmenu || (opts.dialogue && opts.dialogue.isSubmenu) ||
-        opts.showSpeechContext ||
-        (typeof title === 'string' && (title.indexOf('Resposta') >= 0 || title.indexOf('Conversa') >= 0 || title.indexOf('Interagir') >= 0))
-      );
-      if (contextSpeech && isSubmenuTransition) {
-        speechEl.innerHTML = '“' + _coinify(contextSpeech) + '”';
-        speechEl.style.display = '';
-      } else {
-        speechEl.innerHTML = '';
-        speechEl.style.display = 'none';
-      }
+      speechEl.innerHTML = '';
+      speechEl.style.display = 'none';
     }
 
     // Separate guide button if compact
