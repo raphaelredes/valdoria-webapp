@@ -267,12 +267,14 @@
 # logs admin-only, reduz dramaticamente a janela de exposição.
 # Spec: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
 /play/
-  Cache-Control: no-cache
+  Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+  Pragma: no-cache
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
 
 /cidade/
-  Cache-Control: no-cache
+  Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+  Pragma: no-cache
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
 

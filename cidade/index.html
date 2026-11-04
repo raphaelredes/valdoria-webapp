@@ -71646,15 +71646,41 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
         {
           id: 'back_to_topics_menu',
           label: '↩ Escolher outro assunto',
+          isSubmenu: true,
           cb: function() { _showAllyTopicsMenu(idx, { autoOpenChoices: true }); }
         },
         {
           id: 'back_to_ally_main',
           label: '↩ "Gostaria de falar de outro assunto."',
+          isSubmenu: true,
           cb: function() { _showAllyDialogue(idx, { autoOpenChoices: true }); }
         }
       ]
     };
+    if (window.vEncounter && typeof window.vEncounter.isOpen === 'function' && window.vEncounter.isOpen()) {
+      var exhaustedChoices = exhaustedDialogue.choices;
+      if (typeof window.vEncounter.attachData === 'function') {
+        window.vEncounter.attachData({
+          npc: exhaustedDialogue.npc,
+          choices: exhaustedChoices,
+          choicesTitle: displayName + ' · ' + cfg.title,
+          choicesSubtitle: 'Assunto já explorado'
+        });
+      }
+      if (typeof window.vEncounter.openChoices === 'function') {
+        window.vEncounter.openChoices(exhaustedChoices, {
+          title: displayName + ' · ' + cfg.title,
+          npcName: displayName,
+          isSubmenu: true,
+          dialogue: exhaustedDialogue,
+          contextSpeech: 'Nós já conversamos com franqueza sobre isso. É reconfortante saber que posso contar com a sua escuta e compreensão na estrada.',
+          onChoice: function(ch) {
+            if (typeof ch.cb === 'function') ch.cb();
+          }
+        });
+      }
+      return;
+    }
     if (window.vEncounter && typeof window.vEncounter.render === 'function') {
       window.vEncounter.render(exhaustedDialogue, { closeable: true, autoOpenChoices: true });
     }
@@ -71716,89 +71742,85 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
     choices: fullChoices
   };
 
-  if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-    window.vEncounter.render(dlg, {
-      closeable: true,
-      autoOpenChoices: (opts && typeof opts.autoOpenChoices === 'boolean') ? opts.autoOpenChoices : true,
-      onChoice: function(ch) {
-        if (typeof ch.cb === 'function') {
-          try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY-TOPIC] cb failed', e); }
-          return;
-        }
+  function _handleAllyTopicChoice(ch) {
+    if (typeof ch.cb === 'function') {
+      try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY-TOPIC] cb failed', e); }
+      return;
+    }
 
-        var allyStorageKey = _allyStorageKey(m, idx);
-        if (typeof _markAllyChoiceUsed === 'function') {
-          _markAllyChoiceUsed(allyStorageKey, topicKey, ch.id, null, m);
-        }
+    var allyStorageKey = _allyStorageKey(m, idx);
+    if (typeof _markAllyChoiceUsed === 'function') {
+      _markAllyChoiceUsed(allyStorageKey, topicKey, ch.id, null, m);
+    }
 
-        // Se a escolha possui um teste de perícia (check), delega para a rolagem 3D canônica
-        if (ch.check && typeof window._dispatchSvcChoice === 'function') {
-          var dispatched = window._dispatchSvcChoice(ch, dlg, {});
-          if (dispatched) return;
-        }
+    // Se a escolha possui um teste de perícia (check), delega para a rolagem 3D canônica
+    if (ch.check && typeof window._dispatchSvcChoice === 'function') {
+      var dispatched = window._dispatchSvcChoice(ch, dlg, {});
+      if (dispatched) return;
+    }
 
-        // Aplica impacto de aprovação dinamicamente (somente escolhas sem teste)
-        var delta = ch.deltaApproval || 0;
-        if (delta !== 0) {
-          var oldApr = (m.approval != null) ? m.approval : 0;
-          m.approval = Math.max(-100, Math.min(100, oldApr + delta));
-          if (typeof vToast === 'function') {
-            vToast(displayName + ': Aprovação ' + (delta >= 0 ? '+' : '') + delta + ' (' + m.approval + ')');
-          }
-        }
+    // Aplica impacto de aprovação dinamicamente (somente escolhas sem teste)
+    var delta = ch.deltaApproval || 0;
+    if (delta !== 0) {
+      var oldApr = (m.approval != null) ? m.approval : 0;
+      m.approval = Math.max(-100, Math.min(100, oldApr + delta));
+      if (typeof vToast === 'function') {
+        vToast(displayName + ': Aprovação ' + (delta >= 0 ? '+' : '') + delta + ' (' + m.approval + ')');
+      }
+    }
 
-        // Dispara sincronização remota via API quando online
-        if (typeof fetch === 'function') {
-          var token = (typeof _getStoredToken === 'function') ? _getStoredToken() : (localStorage.getItem('token') || '');
-          fetch('/api/ally/interact-choice', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': token ? ('Bearer ' + token) : ''
-            },
-            body: JSON.stringify({
-              user_id: (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.id) || 1,
-              ally_id: m.id || ('adv_' + idx),
-              ally_class: m.cls,
-              topic: topicKey,
-              choice_id: ch.id
-            })
-          }).catch(function() {});
-        }
+    // Dispara sincronização remota via API quando online
+    if (typeof fetch === 'function') {
+      var token = (typeof _getStoredToken === 'function') ? _getStoredToken() : (localStorage.getItem('token') || '');
+      fetch('/api/ally/interact-choice', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? ('Bearer ' + token) : ''
+        },
+        body: JSON.stringify({
+          user_id: (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.id) || 1,
+          ally_id: m.id || ('adv_' + idx),
+          ally_class: m.cls,
+          topic: topicKey,
+          choice_id: ch.id
+        })
+      }).catch(function() {});
+    }
 
-        if (ch._replyScript && window.vEncounter && typeof window.vEncounter.render === 'function') {
-          if (typeof _npcMarkUsed === 'function' && ch.id) {
-            _npcMarkUsed(_allyNpcId, ch.id);
-            _npcMarkUsed(_allyNpcId, topicKey + ':' + ch.id);
-          }
-          if (typeof _markAllyChoiceUsed === 'function' && ch.id) {
-            _markAllyChoiceUsed(displayName, 'lore', ch.id, null, m);
-          }
-          var remInTopic = (topicNode.choices || []).filter(function(c) {
-            return !_isAllyChoiceUsed(allyStorageKey, topicKey, c.id, m);
-          });
-          var remTopics = (typeof _getAvailableAllyTopics === 'function') ? _getAvailableAllyTopics(idx) : [];
-          var replyChoices = [];
-          if (remInTopic.length > 0) {
-            replyChoices.push({ id: 'more_in_topic', label: '↩ Continuar sobre este assunto', isSubmenu: true, isReturn: true, cb: function() { _showAllyTopicDialogue(idx, topicKey, { autoOpenChoices: true, isSubmenu: true }); } });
-          }
-          if (remTopics.length > 0) {
-            replyChoices.push({
-              id: 'back_to_topics',
-              label: '↩ Escolher outro assunto',
-              isSubmenu: true,
-              isReturn: true,
-              cb: function() { _showAllyTopicsMenu(idx, { autoOpenChoices: true, isSubmenu: true }); }
-            });
-          }
-          replyChoices.push({
-            id: 'back_to_ally_main',
-            label: '↩ "Gostaria de falar de outro assunto."',
-            isSubmenu: true,
-            isReturn: true,
-            cb: function() { _showAllyDialogue(idx, { autoOpenChoices: true, isSubmenu: true }); }
-          });
-          replyChoices.push({ id: 'leave', label: '↩ "Até mais tarde."', cb: 'close' });
+    if (ch._replyScript && window.vEncounter && typeof window.vEncounter.render === 'function') {
+      if (typeof _npcMarkUsed === 'function' && ch.id) {
+        _npcMarkUsed(_allyNpcId, ch.id);
+        _npcMarkUsed(_allyNpcId, topicKey + ':' + ch.id);
+      }
+      if (typeof _markAllyChoiceUsed === 'function' && ch.id) {
+        _markAllyChoiceUsed(displayName, 'lore', ch.id, null, m);
+      }
+      var remInTopic = (topicNode.choices || []).filter(function(c) {
+        return !_isAllyChoiceUsed(allyStorageKey, topicKey, c.id, m);
+      });
+      var remTopics = (typeof _getAvailableAllyTopics === 'function') ? _getAvailableAllyTopics(idx) : [];
+      var replyChoices = [];
+      if (remInTopic.length > 0) {
+        replyChoices.push({ id: 'more_in_topic', label: '↩ Continuar sobre este assunto', isSubmenu: true, isReturn: true, cb: function() { _showAllyTopicDialogue(idx, topicKey, { autoOpenChoices: true, isSubmenu: true }); } });
+      }
+      if (remTopics.length > 0) {
+        replyChoices.push({
+          id: 'back_to_topics',
+          label: '↩ Escolher outro assunto',
+          isSubmenu: true,
+          isReturn: true,
+          cb: function() { _showAllyTopicsMenu(idx, { autoOpenChoices: true, isSubmenu: true }); }
+        });
+      }
+      replyChoices.push({
+        id: 'back_to_ally_main',
+        label: '↩ "Gostaria de falar de outro assunto."',
+        isSubmenu: true,
+        isReturn: true,
+        cb: function() { _showAllyDialogue(idx, { autoOpenChoices: true, isSubmenu: true }); }
+      });
+      replyChoices.push({ id: 'leave', label: '↩ "Até mais tarde."', cb: 'close' });
           window.vEncounter.render({
             npc: dlg.npc,
             isSubmenu: true,
@@ -71808,22 +71830,63 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
             choices: replyChoices
           }, {
             closeable: true,
-            autoOpenChoices: true,
-            isSubmenu: true,
-            onChoice: function(rc) {
-              if (typeof rc.cb === 'function') { rc.cb(); return; }
-              try { window.vEncounter.close(); } catch(_) {}
-            }
-          });
-          return;
+            autoOpenChoices: false,
+        isSubmenu: true,
+        onChoice: function(rc) {
+          if (typeof rc.cb === 'function') { rc.cb(); return; }
+          try { window.vEncounter.close(); } catch(_) {}
         }
+      });
+      return;
+    }
 
-        if (typeof window._dispatchSvcChoice === 'function') {
-          var handled = window._dispatchSvcChoice(ch, dlg, {});
-          if (handled) return;
+    if (typeof window._dispatchSvcChoice === 'function') {
+      var handled = window._dispatchSvcChoice(ch, dlg, {});
+      if (handled) return;
+    }
+    try { window.vEncounter.close(); } catch(_) {}
+  }
+
+  // Transição inteligente in-overlay se o encounter já estiver aberto
+  if (window.vEncounter && typeof window.vEncounter.isOpen === 'function' && window.vEncounter.isOpen()) {
+    var topicSpeech = '';
+    if (topicNode.script && topicNode.script.length) {
+      for (var _tsi = topicNode.script.length - 1; _tsi >= 0; _tsi--) {
+        if (topicNode.script[_tsi].type === 'speech' && topicNode.script[_tsi].text) {
+          topicSpeech = topicNode.script[_tsi].text;
+          break;
         }
-        try { window.vEncounter.close(); } catch(_) {}
       }
+    }
+    if (typeof window.vEncounter.attachData === 'function') {
+      window.vEncounter.attachData({
+        npc: dlg.npc,
+        choices: fullChoices,
+        choicesTitle: displayName + ' · ' + cfg.title,
+        choicesSubtitle: displayName
+      }, {
+        onChoice: _handleAllyTopicChoice
+      });
+    }
+    if (typeof window.vEncounter.openChoices === 'function') {
+      window.vEncounter.openChoices(fullChoices, {
+        title: displayName + ' · ' + cfg.title,
+        npcName: displayName,
+        isSubmenu: true,
+        dialogue: dlg,
+        contextSpeech: topicSpeech,
+        onChoice: _handleAllyTopicChoice
+      });
+    }
+    return;
+  }
+
+  if (window.vEncounter && typeof window.vEncounter.render === 'function') {
+    window.vEncounter.render(dlg, {
+      closeable: true,
+      autoOpenChoices: (opts && typeof opts.autoOpenChoices === 'boolean') ? opts.autoOpenChoices : true,
+      isSubmenu: true,
+      onChoice: _handleAllyTopicChoice
     });
   }
 }

@@ -3868,6 +3868,7 @@
 
     choices.forEach(function(ch, idx) {
       var row = document.createElement('button');
+      row.type = 'button';
       row.className = 'enc-cho-row' + (isCompact ? ' enc-cho-row--compact' : '');
       row.style.setProperty('--idx', idx);
       var choiceKey = ch.id || ch.cb || ('choice_' + idx);
@@ -4146,15 +4147,11 @@
             closeChoices(true);
           }
           if (typeof ch.cb === 'function') {
-            setTimeout(function() {
-              try { ch.cb(ch, opts.dialogue); } catch (_eCb) { console.warn('[ENC] ch.cb threw', _eCb); }
-            }, 0);
+            try { ch.cb(ch, opts.dialogue); } catch (_eCb) { console.warn('[ENC] ch.cb threw', _eCb); }
             return;
           }
           if (typeof opts.onChoice === 'function') {
-            setTimeout(function() {
-              opts.onChoice(ch);
-            }, 0);
+            try { opts.onChoice(ch); } catch (_eOnCh) { console.warn('[ENC] opts.onChoice threw', _eOnCh); }
           }
         }
       });
