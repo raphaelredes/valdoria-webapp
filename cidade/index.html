@@ -71861,7 +71861,326 @@ function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
     ];
   }
 
-  return { script: script, choices: choices, contextHint: contextHint };
+
+  // === SISTEMA PROGRESSIVO EM 3 ETAPAS (Sondagem -> Explicação/Mentira/Dedução -> Compromisso) ===
+  var topicMeta = {
+    personal_favor: {
+      subjectName: lore.favorTitle.split('·')[0].trim(),
+      subjectDetail: (lore.favorTitle.split('·')[1] || lore.favorTitle).trim(),
+      cue: (cls === 'ladino')
+        ? 'queimou um bilhete selado com cera negra hoje cedo e evita olhar para os mensageiros das docas'
+        : 'guarda um aviso reservado na mochila e observa a estrada com preocupação incomum',
+      cueItem: (cls === 'ladino')
+        ? 'aquela moeda marcada com o cunho de um corvo negro que você escondeu na bolsa'
+        : 'aquele selo antigo que você carrega escondido junto a ' + lore.campItem,
+      revealNarr: (cls === 'ladino')
+        ? (displayName + ' suspira, gira entre os dedos uma moeda marcada com um corvo negro e olha ao redor para garantir que ninguém mais está ouvindo.')
+        : (displayName + ' respira fundo, olha ao redor com cautela e decide abrir o jogo sobre o que vem tirando seu sossego.'),
+      revealSpeech: (cls === 'ladino')
+        ? 'Você repara em detalhes demais... Mas já que marchamos juntos, merece saber. Esse cunho é da Guilda das Sombras — o sindicato clandestino que controla o contrabando nas docas. Quando deixei o bando deles, forjaram uma dívida falsa no meu nome para me chantagear. Você já ouviu falar da Guilda das Sombras ou sabe como eles operam?'
+        : ('Você tem olhos atentos. Trata-se de ' + lore.favorTitle.split('·')[0].trim() + ' — uma pendência ligada a ' + (lore.favorTitle.split('·')[1] || lore.favorTitle).trim().toLowerCase() + '. Você já ouviu falar sobre esse caso nas estradas de Valdoria?'),
+      explainNarr: (cls === 'ladino')
+        ? (displayName + ' assente com seriedade e desenha discretamente na poeira o esquema do depósito portuário.')
+        : (displayName + ' assente com seriedade e expõe todos os detalhes práticos da situação para contextualizar você.'),
+      explainSpeech: (cls === 'ladino')
+        ? 'Eles não aceitam que ninguém saia do sindicato de mãos limpas. Criaram uma nota promissória falsificada no meu nome e trancaram no livro-caixa, dentro de um cofre de ferro com armadilha de sino no depósito clandestino das docas. Enquanto esse papel existir, cobradores virão atrás de mim.'
+        : ('Funciona assim: a situação envolve ' + (lore.favorTitle.split('·')[1] || lore.favorTitle).trim().toLowerCase() + '. Sozinho é quase impossível passar pela vigilância do local, mas com um plano limpo conseguiremos resolver tudo de uma vez.'),
+      lieLabel: (cls === 'ladino')
+        ? '[CAR 13] "Conheço muito bem a fama da Guilda das Sombras e já lidei com figurões piores do que eles no submundo. Pode falar de igual para igual comigo."'
+        : ('[CAR 13] "Conheço muito bem os rumores sobre ' + lore.favorTitle.split('·')[0].trim() + ' e já lidei com casos idênticos antes. Pode abrir os detalhes comigo."'),
+      lieDesc: 'Mentir (Teste de Enganação) · Fingir que já conhece a fundo o assunto para impressionar ' + displayName,
+      lieSuccNarr: 'Sua postura fria e segura convence ' + displayName + ' de que você já tem experiência de sobra no assunto. O respeito pela sua vivência aumenta (<b>+4 de Aprovação</b>).',
+      lieSuccSpeech: (cls === 'ladino')
+        ? '"Bom saber que não estou falando com um iniciante! Então você já imagina o truque deles: forjaram uma nota promissória no meu nome e trancaram no cofre de ferro do depósito das docas, guardado por vigias e uma armadilha de sino."'
+        : ('"Excelente saber que você já conhece esse terreno! O ponto crítico agora é lidarmos com ' + (lore.favorTitle.split('·')[1] || lore.favorTitle).trim().toLowerCase() + ' antes que a situação se complique."'),
+      lieFailNarr: displayName + ' semicerra os olhos e solta um riso curto pelo nariz, percebendo na hora que você está blefando.',
+      lieFailSpeech: (cls === 'ladino')
+        ? '"Você mente mal demais para quem quer pagar de veterano do submundo — deu para ver no seu olhar que nunca ouviu falar da Guilda das Sombras! Mas gostei da tentativa de me apoiar. Escute: eles forjaram uma nota promissória no meu nome e trancaram num cofre de ferro com armadilha de sino no depósito das docas."'
+        : ('"Não precisa inventar histórias para me impressionar — deu para notar que você ainda não conhecia os detalhes! Mas agradeço a disposição. O problema real envolve ' + (lore.favorTitle.split('·')[1] || lore.favorTitle).trim().toLowerCase() + '."'),
+      loreLabel: (cls === 'ladino')
+        ? '[INT 13] "Já ouvi rumores sobre sindicatos portuários que forjam notas em livros-caixa para chantagear ex-membros. É assim que a Guilda das Sombras prende você?"'
+        : ('[INT 13] "Pelo que conheço das crônicas locais, isso envolve ' + (lore.favorTitle.split('·')[1] || lore.favorTitle).trim().toLowerCase() + '. Estou certo?"'),
+      loreDesc: 'Teste de Investigação · Deduzir os detalhes a partir de rumores e indícios',
+      loreSuccNarr: displayName + ' arregala os olhos, genuinamente impressionada com sua sagacidade e leitura rápida do caso (<b>+4 de Aprovação</b>).',
+      loreSuccSpeech: (cls === 'ladino')
+        ? '"Na mosca! Você conhece mesmo os podres da cidade. Eles forjaram uma nota promissória no meu nome e trancaram no cofre de ferro do depósito clandestino das docas, protegido por vigias e uma armadilha de sino."'
+        : ('"Dedução impecável! É exatamente isso: precisamos lidar com ' + (lore.favorTitle.split('·')[1] || lore.favorTitle).trim().toLowerCase() + ' com máxima precisão."'),
+      loreFailNarr: displayName + ' balança a cabeça de leve, corrigindo com paciência os detalhes que faltavam na sua suposição.',
+      loreFailSpeech: (cls === 'ladino')
+        ? '"Quase isso, mas a Guilda das Sombras é ainda mais calculista: eles forjaram uma nota promissória no meu nome e trancaram num cofre de ferro com armadilha de sino no depósito das docas."'
+        : ('"Chegou perto, mas o verdadeiro obstáculo está em ' + (lore.favorTitle.split('·')[1] || lore.favorTitle).trim().toLowerCase() + '."')
+    },
+    backstory_secret: {
+      subjectName: lore.backstoryTitle.split('·')[0].trim(),
+      subjectDetail: (lore.backstoryTitle.split('·')[1] || lore.backstoryTitle).trim(),
+      cue: 'fica em silêncio olhando para a estrada vazia sempre que passamos por viajantes vindos da sua antiga região',
+      cueItem: 'as marcas antigas em ' + lore.campItem,
+      revealNarr: displayName + ' toca involuntariamente ' + lore.campItem + ' e baixa a guarda por um instante, decidindo compartilhar parte de sua origem.',
+      revealSpeech: 'Não costumo falar disso com estranhos, mas você conquistou meu respeito. Antes de entrar para a comitiva, vivi tempos difíceis: ' + (isFem ? lore.backstoryOriginFem : lore.backstoryOrigin) + '. Você já tinha ouvido rumores sobre ' + lore.backstoryTitle.split('·')[0].trim() + '?',
+      explainNarr: displayName + ' respira fundo e relata o contexto daquela época para que você compreenda toda a história.',
+      explainSpeech: 'Naquele tempo, precisei tomar uma decisão sem volta envolvendo ' + lore.backstorySecretEvent + '. Foi o que forjou quem sou hoje, mas ainda deixou cicatrizes e inimigos atentos.',
+      lieLabel: '[CAR 13] "Claro, a história sobre ' + lore.backstoryTitle.split('·')[0].trim() + ' corre por todas as tavernas. Eu já sabia de cada detalhe antes mesmo de viajarmos juntos."',
+      lieDesc: 'Mentir (Teste de Enganação) · Fingir que já conhecia toda a história de origem de ' + displayName,
+      lieSuccNarr: displayName + ' acredita que sua fama antiga já havia chegado aos seus ouvidos e se surpreende com sua discrição (<b>+4 de Aprovação</b>).',
+      lieSuccSpeech: '"E mesmo sabendo de tudo você nunca me julgou na frente do grupo... Isso mostra caráter. O momento mais tenso foi justamente ' + lore.backstorySecretEvent + '."',
+      lieFailNarr: displayName + ' arqueia uma sobrancelha com um meio-sorriso, percebendo na hora que você inventou aquilo.',
+      lieFailSpeech: '"Ninguém nas tavernas sabe dessa história porque eu nunca contei! Não precisa fingir que já sabia. A verdade é que tudo girou em torno de ' + lore.backstorySecretEvent + '."',
+      loreLabel: '[INT 13] "Lembro de relatos antigos sobre ' + lore.backstoryTitle.split('·')[0].trim() + '. Você estava lá durante ' + lore.backstorySecretEvent + '?"',
+      loreDesc: 'Teste de Intuição/História · Ligar os relatos antigos à origem de ' + displayName,
+      loreSuccNarr: displayName + ' olha para você com admiração sincera ao perceber que você conectou os fatos corretamente (<b>+4 de Aprovação</b>).',
+      loreSuccSpeech: '"Pouca gente liga os pontos com tanta clareza. Sim, eu estava lá durante ' + lore.backstorySecretEvent + ', e aquilo mudou minha vida para sempre."',
+      loreFailNarr: displayName + ' corrige gentilmente os rumores que você ouviu na estrada.',
+      loreFailSpeech: '"Os boatos de taverna exageram metade e esquecem o principal. O que realmente aconteceu foi ' + lore.backstorySecretEvent + '."'
+    },
+    morals_faith: {
+      subjectName: lore.moralsTitle.split('·')[0].trim(),
+      subjectDetail: (lore.moralsTitle.split('·')[1] || lore.moralsTitle).trim(),
+      cue: 'observou em silêncio como tratamos os moradores locais e tomou uma decisão firme sem hesitar',
+      cueItem: 'a maneira disciplinada como você carrega ' + lore.campItem,
+      revealNarr: displayName + ' cruza os braços com serenidade e compartilha a filosofia que guia seus passos.',
+      revealSpeech: 'Aqui fora, sem um código próprio, qualquer aventureiro se perde. Eu sigo ' + lore.moralsCreed + ': ' + lore.moralsVirtue + '. Você conhece essa visão ou segue outra filosofia na estrada?',
+      explainNarr: displayName + ' explica com clareza de onde nasceu essa convicção moral.',
+      explainSpeech: 'Vi muita gente poderosa usar leis e discursos bonitos apenas para explorar os fracos. Por isso decidi que minhas ações seriam guiadas por ' + lore.moralsCreed + ', custe o que custar.',
+      lieLabel: '[CAR 13] "Eu sigo exatamente o mesmo preceito de ' + lore.moralsTitle.split('·')[0].trim() + ' desde que comecei a andar por Valdoria, sem nunca ter tido uma única dúvida."',
+      lieDesc: 'Mentir (Teste de Enganação) · Fingir alinhamento moral absoluto e sem dilemas',
+      lieSuccNarr: displayName + ' sente firmeza nas suas palavras e assente com forte aprovação (<b>+4 de Aprovação</b>).',
+      lieSuccSpeech: '"Encontrar alguém que compartilha de ' + lore.moralsCreed + ' com tanta certeza torna nossa aliança muito mais forte."',
+      lieFailNarr: displayName + ' percebe o exagero no seu tom de voz e balança a cabeça com franqueza.',
+      lieFailSpeech: '"Não precisa dizer apenas o que acha que quero ouvir — todo mundo tem dilemas na estrada. O importante para mim é respeitarmos ' + lore.moralsCreed + '."',
+      loreLabel: '[INT 13] "Essa postura lembra a tradição de ' + lore.moralsTitle.split('·')[0].trim() + ', que coloca ' + lore.moralsCreed + ' acima de interesses pessoais."',
+      loreDesc: 'Teste de Religião/Filosofia · Reconhecer as raízes do código ético de ' + displayName,
+      loreSuccNarr: displayName + ' sorri com respeito intelectual diante da sua compreensão sobre seus princípios (<b>+4 de Aprovação</b>).',
+      loreSuccSpeech: '"Você compreendeu a essência do meu código na primeira conversa. É exatamente por ' + lore.moralsCreed + ' que luto todos os dias."',
+      loreFailNarr: displayName + ' esclarece a diferença entre a teoria dos livros e sua vivência prática.',
+      loreFailSpeech: '"Mais do que doutrina de livros, meu compromisso com ' + lore.moralsCreed + ' nasceu do que vi nas ruas e estradas."'
+    },
+    combat_bonds: {
+      subjectName: lore.combatTitle.split('·')[0].trim(),
+      subjectDetail: (lore.combatTitle.split('·')[1] || lore.combatTitle).trim(),
+      cue: 'estava revisando o equilíbrio de ' + lore.combatWeapon + ' e medindo os ângulos da nossa formação de marcha',
+      cueItem: 'o desgaste de batalha em ' + lore.combatWeapon,
+      revealNarr: displayName + ' apoia a mão em ' + lore.combatWeapon + ' e avalia a postura de combate da comitiva.',
+      revealSpeech: 'Em combate, cada segundo conta. Minha especialidade com ' + lore.combatWeapon + ' é ' + lore.combatRole + '. Você já lutou em conjunto usando a tática de ' + lore.combatTitle.split('·')[0].trim() + '?',
+      explainNarr: displayName + ' demonstra com gestos curtos como funciona sua movimentação no campo de batalha.',
+      explainSpeech: 'Funciona de forma simples e letal: basta ' + lore.combatTactic + '. Assim nenhum inimigo consegue cercar nossa linha ou quebrar nossa guarda.',
+      lieLabel: '[CAR 13] "Domino a formação de ' + lore.combatTitle.split('·')[0].trim() + ' de olhos fechados; já liderei dezenas de cercos usando exatamente esse movimento."',
+      lieDesc: 'Mentir (Teste de Enganação) · Gabar-se de experiência veterana nessa formação específica',
+      lieSuccNarr: displayName + ' acredita na sua bagagem tática e ganha confiança extra para agir no seu flanco (<b>+4 de Aprovação</b>).',
+      lieSuccSpeech: '"Ótimo! Se você já domina o tempo de ' + lore.combatTitle.split('·')[0].trim() + ', poderemos executar a manobra de ' + lore.combatTactic + ' sem hesitar."',
+      lieFailNarr: displayName + ' nota um detalhe técnico fora do lugar na sua explicação e dá um sorriso irônico.',
+      lieFailSpeech: '"Pela posição dos seus pés deu para ver que você está exagerando o currículo! Mas não tem problema — na prática, o segredo é ' + lore.combatTactic + '."',
+      loreLabel: '[FOR 13] "Conheço a mecânica de ' + lore.combatTitle.split('·')[0].trim() + ': o segredo é sincronizar o tempo para ' + lore.combatTactic + '."',
+      loreDesc: 'Teste de Atletismo/Tática · Demonstrar domínio técnico da formação de combate',
+      loreSuccNarr: displayName + ' acompanha seu movimento técnico e confirma que o tempo de resposta entre vocês é perfeito (<b>+4 de Aprovação</b>).',
+      loreSuccSpeech: '"Leitura de combate impecável! Com essa noção de espaço para ' + lore.combatTactic + ', seremos imbatíveis no próximo encontro."',
+      loreFailNarr: displayName + ' corrige o ângulo do seu ombro com um toque rápido e instrutivo.',
+      loreFailSpeech: '"Quase lá, mas se fechar demais o ângulo ficamos expostos. O ideal é ' + lore.combatTactic + '."'
+    },
+    romance_courtship: {
+      subjectName: lore.romanceTitle.split('·')[0].trim(),
+      subjectDetail: (lore.romanceTitle.split('·')[1] || lore.romanceTitle).trim(),
+      cue: 'costuma ' + lore.romanceHabit + ', mas hoje permaneceu por perto em silêncio procurando a sua companhia',
+      cueItem: 'o olhar mais demorado e sereno que ' + displayName + ' dirigiu a você quando o grupo parou',
+      revealNarr: displayName + ' respira devagar, deixando de lado o hábito de ' + lore.romanceHabit + ' ao perceber que vocês estão a sós.',
+      revealSpeech: 'Normalmente prefiro manter distância e focar apenas na sobrevivência da estrada... mas com você tem sido diferente. Você já tinha percebido isso ou achou que era só impressão?',
+      explainNarr: displayName + ' fala com uma sinceridade desarmada rara de se ver durante as marchas.',
+      explainSpeech: 'Não é fácil baixar a guarda em um mundo tão perigoso, mas a confiança que construímos faz eu me sentir seguro ao seu lado como há muito tempo não sentia.',
+      lieLabel: '[CAR 12] "Eu sabia desde o primeiro dia em que nos vimos que você não tirava os olhos de mim — nada me escapa."',
+      lieDesc: 'Mentir com charme (Teste de Enganação) · Fingir que já sabia de tudo desde o início',
+      lieSuccNarr: displayName + ' solta uma risada encantada diante da sua autoconfiança, com um leve rubor no rosto (<b>+4 de Aprovação</b>).',
+      lieSuccSpeech: '"Convencido! Mas confesso que esse seu jeito seguro de si foi justamente o que começou a desmontar as minhas defesas."',
+      lieFailNarr: displayName + ' ri suavemente ao notar o seu blefe galanteador.',
+      lieFailSpeech: '"Que mentira deslavada — no primeiro dia você mal sabia o meu nome! Mas gosto de ver você tentando me ganhar no charme."',
+      loreLabel: '[CAR 12] "Percebi pelos pequenos gestos: mesmo tentando ' + lore.romanceHabit + ', você sempre guarda o lugar ao meu lado."',
+      loreDesc: 'Teste de Persuasão · Mostrar atenção genuína aos gestos sutis de ' + displayName,
+      loreSuccNarr: displayName + ' sustenta seu olhar com emoção sincera ao ver que seus gestos silenciosos foram notados (<b>+4 de Aprovação</b>).',
+      loreSuccSpeech: '"Você enxerga além da minha armadura... É verdade, estar perto de você se tornou a melhor parte dos meus dias."',
+      loreFailNarr: displayName + ' desvia o olhar por um segundo com um sorriso tímido.',
+      loreFailSpeech: '"Talvez eu ainda seja reservado demais... mas sim, gosto muito da sua companhia."'
+    },
+    sparring_challenge: {
+      subjectName: lore.sparringTitle.split('·')[0].trim(),
+      subjectDetail: (lore.sparringTitle.split('·')[1] || lore.sparringTitle).trim(),
+      cue: 'estava aquecendo os punhos e ombros em movimentos rápidos de sombra, procurando um parceiro de treino',
+      cueItem: 'a postura de prontidão e o giro técnico de ' + lore.combatWeapon,
+      revealNarr: displayName + ' assume uma base equilibrada e convida você com um gesto esportivo.',
+      revealSpeech: 'O corpo enferruja se esperarmos apenas pelas emboscadas da estrada. Costumo praticar ' + lore.sparringDrill + ' para manter o reflexo em dia. Você conhece as regras desse exercício técnico?',
+      explainNarr: displayName + ' mostra a distância segura dos golpes e o objetivo do exercício.',
+      explainSpeech: 'O objetivo não é ferir com força bruta, e sim testar ' + lore.sparringDrill + ': quem tocar a guarda do outro ou desviar três ataques em sequência vence a rodada.',
+      lieLabel: '[CAR 13] "Fui campeão invicto exatamente nessa modalidade de ' + lore.sparringTitle.split('·')[1].trim().toLowerCase() + ' antes de vir para cá."',
+      lieDesc: 'Mentir (Teste de Enganação) · Blefar sobre ser mestre invicto no exercício para intimidar no treino',
+      lieSuccNarr: displayName + ' leva a sério sua fama declarada e entra em guarda máxima com respeito redobrado (<b>+4 de Aprovação</b>).',
+      lieSuccSpeech: '"Um campeão da modalidade na nossa comitiva? Então não vou economizar velocidade — prepare-se para ' + lore.sparringDrill + '!"',
+      lieFailNarr: displayName + ' analisa sua guarda por um segundo e cai na risada ao perceber o blefe.',
+      lieFailSpeech: '"Campeão invicto com o calcanhar levantado desse jeito? Boa tentativa de blefe! Venha, vou mostrar como funciona ' + lore.sparringDrill + '."',
+      loreLabel: '[DES 13] "Conheço a base de ' + lore.sparringTitle.split('·')[1].trim().toLowerCase() + ': o segredo é manter o centro baixo durante ' + lore.sparringDrill + '."',
+      loreDesc: 'Teste de Acrobacia · Demonstrar postura técnica correta para o exercício',
+      loreSuccNarr: displayName + ' aprova imediatamente seu equilíbrio corporal e postura de guarda (<b>+4 de Aprovação</b>).',
+      loreSuccSpeech: '"Base firme e olhos atentos! Vejo que este treino de ' + lore.sparringDrill + ' será de alto nível."',
+      loreFailNarr: displayName + ' dá um toque leve no seu cotovelo para ajustar a altura da sua guarda.',
+      loreFailSpeech: '"Quase isso — só mantenha os cotovelos mais próximos do tronco durante ' + lore.sparringDrill + '."'
+    },
+    camp_campfire: {
+      subjectName: 'Vigília Noturna',
+      subjectDetail: 'Hábitos de Acampamento e Sentinela',
+      cue: 'sentou-se perto das brasas cuidando silenciosamente de ' + lore.campItem + ' enquanto observa a escuridão além das árvores',
+      cueItem: 'o cuidado meticuloso com ' + lore.campItem + ' à luz do fogo',
+      revealNarr: displayName + ' aquece as mãos perto das chamas e compartilha como costuma passar as noites de acampamento.',
+      revealSpeech: 'Cada aventureiro tem seu ritual antes da sentinela. Eu reviso ' + lore.campItem + ' e uso a vigília para ' + lore.campNightSkill + '. Você já conhece os sinais noturnos destas matas?',
+      explainNarr: displayName + ' aponta para a linha escura das árvores ao redor do acampamento, explicando o que observar.',
+      explainSpeech: 'O segredo na vigília é manter a fogueira baixa para não cegar nossa visão periférica e usar o silêncio para ' + lore.campNightSkill + '.',
+      lieLabel: '[CAR 13] "Conheço cada som desta floresta de olhos fechados; já acampei sozinho em lugares dez vezes mais perigosos sem nunca precisar de ajuda."',
+      lieDesc: 'Mentir (Teste de Enganação) · Gabar-se de experiência solitária infalível nos ermos',
+      lieSuccNarr: displayName + ' confia na sua experiência de acampamento e relaxa os ombros junto ao fogo (<b>+4 de Aprovação</b>).',
+      lieSuccSpeech: '"Bom saber que temos mais um veterano da noite no grupo. Então dividir o turno para ' + lore.campNightSkill + ' será tranquilo."',
+      lieFailNarr: displayName + ' sorri ao ver você pisar em um galho seco enquanto falava.',
+      lieFailSpeech: '"Para quem conhece cada som da mata, esse galho seco debaixo da sua bota entregou você! Não precisa inventar — eu mostro como ' + lore.campNightSkill + '."',
+      loreLabel: '[CAR 13] "Sei que manter o fogo baixo preserva a visão noturna e ajuda a ' + lore.campNightSkill + '."',
+      loreDesc: 'Teste de Persuasão/Sobrevivência · Compartilhar conhecimento real de vigília',
+      loreSuccNarr: displayName + ' acena com satisfação ao ver que vocês têm a mesma disciplina de acampamento (<b>+4 de Aprovação</b>).',
+      loreSuccSpeech: '"Exatamente. Com nós dois alinhados para ' + lore.campNightSkill + ', o grupo pode dormir em paz."',
+      loreFailNarr: displayName + ' acrescenta uma dica prática sobre o vento noturno.',
+      loreFailSpeech: '"Isso ajuda, mas também precisamos observar a direção do vento para ' + lore.campNightSkill + '."'
+    }
+  };
+
+  var tm = topicMeta[topicKey] || topicMeta.personal_favor;
+  var s1Ids = ['s1_emp_' + topicKey, 's1_prag_' + topicKey, 's1_check_' + topicKey, 's1_prov_' + topicKey];
+  var s2Ids = ['s2_honest_' + topicKey, 's2_lie_' + topicKey, 's2_lore_' + topicKey, 's2_direct_' + topicKey];
+  var s3Ids = ['s3_emp_' + topicKey, 's3_prag_' + topicKey, 's3_check_' + topicKey, 's3_prov_' + topicKey];
+
+  var stage1Choices = [
+    {
+      id: s1Ids[0],
+      backendId: 'emp_' + topicKey,
+      stage: 1,
+      stageSiblings: s1Ids,
+      stageTitle: 'Etapa 1/3 · Puxar Assunto · ' + tm.subjectName,
+      label: '"Notei que você ' + tm.cue + '. Está tudo bem ou há algo em que eu possa ajudar?"',
+      desc: 'Sondar com empatia o que você observou no comportamento de ' + displayName,
+      deltaApproval: 2, renownDelta: 1, cb: 'close',
+      _replyScript: [
+        { type: 'narration', text: tm.revealNarr },
+        { type: 'speech', speaker: displayName, text: tm.revealSpeech }
+      ]
+    },
+    {
+      id: s1Ids[1],
+      backendId: 'prag_' + topicKey,
+      stage: 1,
+      stageSiblings: s1Ids,
+      stageTitle: 'Etapa 1/3 · Puxar Assunto · ' + tm.subjectName,
+      label: '"Reparei que você ' + tm.cue + '. Se isso tem relação com a nossa jornada, é melhor conversarmos abertamente."',
+      desc: 'Perguntar de forma direta e prática sobre o indício observado',
+      deltaApproval: 1, renownDelta: 0, cb: 'close',
+      _replyScript: [
+        { type: 'narration', text: tm.revealNarr },
+        { type: 'speech', speaker: displayName, text: tm.revealSpeech }
+      ]
+    },
+    {
+      id: s1Ids[2],
+      backendId: 'check_' + topicKey,
+      stage: 1,
+      stageSiblings: s1Ids,
+      stageTitle: 'Etapa 1/3 · Puxar Assunto · ' + tm.subjectName,
+      label: '[SAB 13] "Observei ' + tm.cueItem + '. Há uma história por trás disso que você ainda não contou ao grupo, não é?"',
+      desc: 'Teste de Intuição · Ler os sinais sutis de ' + displayName + ' para iniciar o assunto',
+      check: { skill: 'insight', dc: 13 }, deltaApproval: 3,
+      resultNarration: tm.revealNarr + ' Sua percepção aguçada conquista a confiança imediata de ' + displayName + ' (<b>+3 de Aprovação</b>).',
+      resultText: '"' + tm.revealSpeech + '"',
+      resultNarrationFail: tm.revealNarr,
+      resultTextFail: '"' + tm.revealSpeech + '"'
+    },
+    {
+      id: s1Ids[3],
+      backendId: 'prov_' + topicKey,
+      stage: 1,
+      stageSiblings: s1Ids,
+      stageTitle: 'Etapa 1/3 · Puxar Assunto · ' + tm.subjectName,
+      label: '"Vi que você ' + tm.cue + '. Vai contar para o grupo o que está acontecendo ou pretende guardar segredo?"',
+      desc: 'Pressionar ' + displayName + ' a revelar o motivo de sua atitude',
+      deltaApproval: 0, renownDelta: 0, cb: 'close',
+      _replyScript: [
+        { type: 'narration', text: tm.revealNarr },
+        { type: 'speech', speaker: displayName, text: tm.revealSpeech }
+      ]
+    }
+  ];
+
+  var stage2Choices = [
+    {
+      id: s2Ids[0],
+      backendId: 'emp_' + topicKey,
+      stage: 2,
+      stageSiblings: s2Ids,
+      stageTitle: 'Etapa 2/3 · ' + tm.subjectName + ' (Explicação)',
+      label: '"Confesso que eu não sabia disso. Pode me explicar melhor como funciona essa questão de ' + tm.subjectName + '?"',
+      desc: 'Ser sincero dizendo que não conhecia e pedir que ' + displayName + ' explique a história',
+      deltaApproval: 3, renownDelta: 1, cb: 'close',
+      _replyScript: [
+        { type: 'narration', text: tm.explainNarr },
+        { type: 'speech', speaker: displayName, text: tm.explainSpeech }
+      ]
+    },
+    {
+      id: s2Ids[1],
+      backendId: 'check_' + topicKey,
+      stage: 2,
+      stageSiblings: s2Ids,
+      stageTitle: 'Etapa 2/3 · ' + tm.subjectName + ' (Explicação)',
+      label: tm.lieLabel,
+      desc: tm.lieDesc,
+      check: { skill: 'deception', dc: 13 }, deltaApproval: 4,
+      resultNarration: tm.lieSuccNarr,
+      resultText: tm.lieSuccSpeech,
+      resultNarrationFail: tm.lieFailNarr,
+      resultTextFail: tm.lieFailSpeech
+    },
+    {
+      id: s2Ids[2],
+      backendId: 'check_' + topicKey,
+      stage: 2,
+      stageSiblings: s2Ids,
+      stageTitle: 'Etapa 2/3 · ' + tm.subjectName + ' (Explicação)',
+      label: tm.loreLabel,
+      desc: tm.loreDesc,
+      check: { skill: skill, dc: 13 }, deltaApproval: 4,
+      resultNarration: tm.loreSuccNarr,
+      resultText: tm.loreSuccSpeech,
+      resultNarrationFail: tm.loreFailNarr,
+      resultTextFail: tm.loreFailSpeech
+    },
+    {
+      id: s2Ids[3],
+      backendId: 'prag_' + topicKey,
+      stage: 2,
+      stageSiblings: s2Ids,
+      stageTitle: 'Etapa 2/3 · ' + tm.subjectName + ' (Explicação)',
+      label: '"Não conhecia os detalhes sobre ' + tm.subjectName + ', mas quero entender o lado prático. Como isso nos afeta?"',
+      desc: 'Pedir uma explicação objetiva e direta sobre os fatos',
+      deltaApproval: 2, renownDelta: 0, cb: 'close',
+      _replyScript: [
+        { type: 'narration', text: tm.explainNarr },
+        { type: 'speech', speaker: displayName, text: tm.explainSpeech }
+      ]
+    }
+  ];
+
+  var stage3Choices = choices.map(function(c, idxC) {
+    var origId = c.id;
+    var s3Id = s3Ids[idxC] || ('s3_' + origId);
+    return Object.assign({}, c, {
+      id: s3Id,
+      backendId: origId,
+      stage: 3,
+      stageSiblings: s3Ids,
+      stageTitle: 'Etapa 3/3 · Decisão · ' + contextHint
+    });
+  });
+
+  var allProgressiveChoices = stage1Choices.concat(stage2Choices).concat(stage3Choices);
+  return { script: script, choices: allProgressiveChoices, contextHint: contextHint };
 }
 
 function _allyStorageKey(m, idx) {
@@ -72184,9 +72503,16 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
   var cfg = ALLY_TOPIC_CONFIG[topicKey] || ALLY_TOPIC_CONFIG.camp_campfire;
 
   var allyStorageKey = _allyStorageKey(m, idx);
-  var availableChoices = topicNode.choices.filter(function(c) {
+  var allUnusedChoices = topicNode.choices.filter(function(c) {
     return !_isAllyChoiceUsed(allyStorageKey, topicKey, c.id, m);
   });
+  var activeStage = (allUnusedChoices.length > 0 && allUnusedChoices[0].stage) ? allUnusedChoices[0].stage : 1;
+  var availableChoices = allUnusedChoices.filter(function(c) {
+    return (c.stage || 1) === activeStage;
+  });
+  var activeStageTitle = (availableChoices.length > 0 && availableChoices[0].stageTitle)
+    ? availableChoices[0].stageTitle
+    : (topicNode.contextHint || displayName);
 
   if (availableChoices.length === 0) {
     var remTopics = (typeof _getAvailableAllyTopics === 'function') ? _getAvailableAllyTopics(idx) : [];
@@ -72201,6 +72527,9 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
   var fullChoices = availableChoices.map(function(c) {
     return {
       id: c.id,
+      backendId: c.backendId || c.id,
+      stage: c.stage || 1,
+      stageSiblings: c.stageSiblings || [c.id],
       label: c.label,
       desc: c.desc || '',
       cb: c.cb || 'close',
@@ -72241,7 +72570,7 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
     autoOpenChoices: true,
     isSubmenu: true,
     choicesTitle: displayName + ' · ' + cfg.title,
-    choicesSubtitle: topicNode.contextHint || displayName,
+    choicesSubtitle: activeStageTitle,
     npc: {
       id: 'ally_' + (m.name || ('idx' + idx)) + '_' + topicKey,
       name: displayName,
@@ -72261,8 +72590,17 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
     }
 
     var allyStorageKey = _allyStorageKey(m, idx);
+    var idsToMark = (ch.stageSiblings && ch.stageSiblings.length) ? ch.stageSiblings : [ch.id];
     if (typeof _markAllyChoiceUsed === 'function') {
-      _markAllyChoiceUsed(allyStorageKey, topicKey, ch.id, null, m);
+      idsToMark.forEach(function(sid) {
+        _markAllyChoiceUsed(allyStorageKey, topicKey, sid, null, m);
+      });
+    }
+    if (typeof _npcMarkUsed === 'function') {
+      idsToMark.forEach(function(sid) {
+        _npcMarkUsed(_allyNpcId, sid);
+        _npcMarkUsed(_allyNpcId, topicKey + ':' + sid);
+      });
     }
 
     // Se a escolha possui um teste de perícia (check), delega para a rolagem 3D canônica
@@ -72300,7 +72638,8 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
           ally_id: m.id || ('adv_' + idx),
           ally_class: m.cls,
           topic: topicKey,
-          choice_id: ch.id
+          choice_id: ch.id,
+          stage_siblings: ch.stageSiblings || [ch.id]
         })
       }).catch(function() {});
     }
@@ -72383,7 +72722,7 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
         npc: dlg.npc,
         choices: fullChoices,
         choicesTitle: displayName + ' · ' + cfg.title,
-        choicesSubtitle: topicNode.contextHint || displayName
+        choicesSubtitle: activeStageTitle
       }, {
         onChoice: _handleAllyTopicChoice
       });
@@ -72391,7 +72730,7 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
     if (typeof window.vEncounter.openChoices === 'function') {
       window.vEncounter.openChoices(fullChoices, {
         title: displayName + ' · ' + cfg.title,
-        npcName: topicNode.contextHint || displayName,
+        npcName: activeStageTitle,
         isSubmenu: true,
         dialogue: dlg,
         onChoice: _handleAllyTopicChoice
