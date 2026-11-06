@@ -3809,9 +3809,9 @@
     function _stripMetaStageSpoilers(s) {
       if (!s) return '';
       return String(s)
-        .replace(/\b(?:Etapa|Fase|Estágio|Estagio|Parte)\s*\d+(?:\s*\/\s*\d+)?\s*(?:[·:\-–—]\s*)?/gi, '')
+        .replace(/\b(?:Etapa|Fase|Estágio|Estagio|Passo|Parte)\s*\d+(?:\s*\/\s*\d+)?\s*(?:[·:\-–—]\s*)?/gi, '')
         .replace(/\b(?:Puxar\s+Assunto|Sondagem\s+Inicial|Decisão)\s*(?:[·:\-–—]\s*)?/gi, '')
-        .replace(/\s*\((?:Explicação|Explicacao|Decisão|Decisao|Sondagem|Introdução)\)/gi, '')
+        .replace(/\s*\((?:Explicação|Explicacao|Decisão|Decisao|Sondagem|Introdução|Relembrar)\)/gi, '')
         .replace(/^\s*[·:\-–—]+\s*|\s*[·:\-–—]+\s*$/g, '')
         .trim();
     }
@@ -3904,6 +3904,7 @@
       /* sessão #88: choice sem label NUNCA vira botão vazio (só chevron) —
          fallback 'Continuar' + warn pro error-reporter. */
       var _choLabel = _stripEmojis((ch.label && String(ch.label).trim()) || 'Continuar');
+      _choLabel = _stripMetaStageSpoilers(_choLabel);
       if (!ch.label) console.warn('[ENC] choice sem label', ch.id || ch.cb || '');
       // Sanitização robusta: remove marcações como [CD 14 Furtividade], [Persuasão CD 12], etc. em qualquer posição da string
       _choLabel = _choLabel.replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').replace(/^\[\s*AÇÃO\s*\]\s*/i, '').trim();
@@ -4003,7 +4004,7 @@
         } else if (ch.id === 'jrn_cancel') {
           titleText = 'Permanecer na cidade';
           subText = 'Suspender viagem em segurança';
-        } else if (ch.desc) {
+        } else if (ch.desc && (!hasSpeech || ch.cost || ch.itemName)) {
           subText = _stripEmojis(ch.desc).replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').trim();
           var _normSpeech = String(speechClean || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
           var _normSub = String(subText || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
@@ -4011,6 +4012,9 @@
           if (_normSub && (_normSub === _normSpeech || _normSub === _normLabel)) {
             subText = '';
           }
+        }
+        if (hasSpeech && !ch.cost && !ch.itemName) {
+          subText = '';
         }
 
         var statHint = '';
