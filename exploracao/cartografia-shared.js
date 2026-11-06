@@ -6980,7 +6980,7 @@
 
 
 
-  // === D&D 5e Barômetro & Ventos de Marcha (Fase 20) ===
+  // === D&D 5e Barômetro & Ventos de Marcha ===
 
   var _BIOME_PREVAILING_WINDS = {
 
@@ -42569,7 +42569,7 @@
 
       defense.defenseTitle = 'Chave de Transição Planar de Emergência para Refúgio Seguro';
 
-      defense.planarAndCampSafety = 'O conjurador mantém a haste de Transição Planar sintonizada com um santuário da guilda ou templo consagrado (Fase 320) posicionada no centro do bivaque; caso o acampamento seja emboscado por forças avassaladoras, um comando verbal imediato une a comitiva e a teleporta instantaneamente para a segurança.',
+      defense.planarAndCampSafety = 'O conjurador mantém a haste de Transição Planar sintonizada com um santuário da guilda ou templo consagrado posicionada no centro do bivaque; caso o acampamento seja emboscado por forças avassaladoras, um comando verbal imediato une a comitiva e a teleporta instantaneamente para a segurança.',
 
       defense.planarAndCouncilWatch = 'Confere tranquilidade psicológica e foco tático aos membros do grupo, sabendo que existe um protocolo de escape infalível contra extermínio da comitiva.',
 
@@ -42611,7 +42611,7 @@
 
       saveType: 'Abjuração',
 
-      covertMechanics: 'Bardo, Clérigo, Patrulheiro ou Mago (3º círculo, pó de diamante de 25 PO consumido, duração 8 horas sem concentração) blinda um alvo voluntário ou a comitiva contra qualquer tentativa de localização mágica: o grupo não pode ser visto por sensores de Clarividência, Olho Arcano ou Vidência (Fase 317, 318), nem detectado por Localizar Criatura ou magias de rastreamento arcano!',
+      covertMechanics: 'Bardo, Clérigo, Patrulheiro ou Mago (3º círculo, pó de diamante de 25 PO consumido, duração 8 horas sem concentração) blinda um alvo voluntário ou a comitiva contra qualquer tentativa de localização mágica: o grupo não pode ser visto por sensores de Clarividência, Olho Arcano ou Vidência, nem detectado por Localizar Criatura ou magias de rastreamento arcano!',
 
       pioneerMitigation: 'Comitivas rivais ou patrulhas que usem bolas de cristal e adivinhações recebem apenas névoa cinzenta estática ao tentar sintonizar os aventureiros.',
 
@@ -42661,7 +42661,7 @@
 
       covert.saveType = 'Abjuração';
 
-      covert.covertMechanics = 'Bardo ou Mago (8º círculo, duração 24 horas sem concentração) confere blindagem mental impenetrável: imunidade a dano psíquico, imunidade a qualquer magia de leitura de emoções ou pensamentos (Detectar Pensamentos, Fase 310), imunidade à condição Enfeitiçado e bloqueio total até mesmo da magia Desejo contra a mente do alvo!';
+      covert.covertMechanics = 'Bardo ou Mago (8º círculo, duração 24 horas sem concentração) confere blindagem mental impenetrável: imunidade a dano psíquico, imunidade a qualquer magia de leitura de emoções ou pensamentos (Detectar Pensamentos), imunidade à condição Enfeitiçado e bloqueio total até mesmo da magia Desejo contra a mente do alvo!';
 
       covert.pioneerMitigation = 'Anula completamente a espionagem telepática de bruxos, devoradores de mentes ou aberrações durante negociações de alta tensão.';
 
@@ -42719,7 +42719,7 @@
 
       defense.defenseTitle = 'Silêncio Telepático e Conselho de Guerra com Manto Mental';
 
-      defense.veilAndCampSafety = 'Líderes de comitivas aliadas reunidos na fogueira (Fase 315) sob proteção de Manto Mental e Vínculo Telepático de Rary deliberam estratégias de cerco sem emitir sons audíveis e sem que espiões psíquicos leiam suas memórias.',
+      defense.veilAndCampSafety = 'Líderes de comitivas aliadas reunidos na fogueira sob proteção de Manto Mental e Vínculo Telepático de Rary deliberam estratégias de cerco sem emitir sons audíveis e sem que espiões psíquicos leiam suas memórias.',
 
       defense.veilAndCouncilWatch = 'A blindagem impede sondagens telepáticas externas e neutraliza tentativas de charme ou controle mental contra os guardas de plantão.',
 
@@ -43141,7 +43141,7 @@
 
       defenseTitle: 'Limiar Invisível da Mansão Magnífica e Lista de Entrada Designada',
 
-      sanctuaryAndCampSafety: 'Ao montar o acampamento de alto nível, o conjurador designa nominalmente os membros da sua comitiva (e de comitivas aliadas presentes na encruzilhada, Fase 315) autorizados a cruzar o portal da Mansão Magnífica de Mordenkainen antes de fechar a entrada invisível.',
+      sanctuaryAndCampSafety: 'Ao montar o acampamento de alto nível, o conjurador designa nominalmente os membros da sua comitiva (e de comitivas aliadas presentes na encruzilhada) autorizados a cruzar o portal da Mansão Magnífica de Mordenkainen antes de fechar a entrada invisível.',
 
       sanctuaryAndCouncilWatch: 'Como o exterior não exibe barraca nem fogueira, patrulhas inimigas e predadores passam pelo nó sem perceber que 10 a 20 aventureiros repousam no plano extradimensional logo acima.',
 
@@ -43159,7 +43159,7 @@
 
       defense.defenseTitle = 'Banquete dos 100 Servos e Restauração Estratégica em Conselho de Guerra';
 
-      defense.sanctuaryAndCampSafety = 'Dentro da Mansão Magnífica ou da Fortaleza Poderosa, os 100 servos translúcidos preparam as camas, cuidam dos equipamentos e servem o banquete enquanto os líderes das comitivas comparam mapas regionais (Fase 315) e sequências de Círculos de Teletransporte (Fase 319).';
+      defense.sanctuaryAndCampSafety = 'Dentro da Mansão Magnífica ou da Fortaleza Poderosa, os 100 servos translúcidos preparam as camas, cuidam dos equipamentos e servem o banquete enquanto os líderes das comitivas comparam mapas regionais e sequências de Círculos de Teletransporte.';
 
       defense.sanctuaryAndCouncilWatch = 'Combinado ao Banquete (6º círculo, taça incrustada de 1.000 PO), até 12 aventureiros curam doenças e venenos, tornam-se imunes a veneno e amedrontamento, têm vantagem em testes de Sabedoria e ganham +2d10 PV máximos por 24 horas!';
 
@@ -43213,7 +43213,7 @@
 
       fastTravelMechanics: 'Bardo, Feiticeiro ou Mago (5º círculo, giz raro e tintas infundidas com gemas preciosas no valor de 50 PO consumidos, tempo de conjuração 1 minuto) desenha um círculo de 3 metros de diâmetro no chão conectando o nó atual a um círculo permanente de teletransporte no mesmo plano cuja sequência de sigilos o conjurador conheça; o portal permanece aberto até o final do próximo turno, permitindo que duas comitivas aliadas inteiras atravessem instantaneamente entre províncias!',
 
-      pioneerMitigation: 'Aprender uma nova sequência de sigilos exige estudá-la por 1 minuto (ou recebê-la de outra comitiva amiga na troca de mapas da Fase 315).',
+      pioneerMitigation: 'Aprender uma nova sequência de sigilos exige estudá-la por 1 minuto (ou recebê-la de outra comitiva amiga na troca de mapas das expedições).',
 
       rescueAndStabilization: 'Permite evacuar aventureiros gravemente feridos diretamente de um marco remoto para um templo urbano.',
 
@@ -43235,7 +43235,7 @@
 
       fastTravel.fastTravelMechanics = 'Druida (6º círculo, duração 1 rodada) cria um elo mágico entre uma planta inanimada Grande ou maior no nó atual e outra planta de mesmo tamanho a qualquer distância no mesmo plano que o conjurador já tenha visto ou tocado pelo menos uma vez; qualquer criatura pode entrar na árvore de origem e sair na árvore de destino usando 1,5m de deslocamento!',
 
-      fastTravel.pioneerMitigation = 'Marcação de carvalhos ancestrais, sequoias e baobás nos nós visitados com avisos Druídicos (Fase 303) para construir uma rede florestal de resposta rápida.',
+      fastTravel.pioneerMitigation = 'Marcação de carvalhos ancestrais, sequoias e baobás nos nós visitados com avisos Druídicos para construir uma rede florestal de resposta rápida.',
 
       fastTravel.rescueAndStabilization = 'Ao contrário do Círculo de Teletransporte, não consome componentes materiais caros de 50 PO a cada uso.';
 
@@ -43293,7 +43293,7 @@
 
       teleportAnchorAndCampSafety: 'Quando o grupo descobre um Círculo de Teletransporte ancestral em uma ruína ou templo das 300 Fases, o Mago ou Bardo dedica 1 minuto para memorizar a sequência única de sigilos e 1 hora no bivaque para gravá-la em seu caderno de cartografia.',
 
-      teleportAnchorAndWardWatch: 'Permite compartilhar a sequência de sigilos com comitivas aliadas (Fase 315) para que múltiplos grupos possam convergir para aquele nó em futuras expedições.',
+      teleportAnchorAndWardWatch: 'Permite compartilhar a sequência de sigilos com comitivas aliadas para que múltiplos grupos possam convergir para aquele nó em futuras expedições.',
 
       campRestAndSafetyGuards: 'Transforma ruínas distantes em pontos de salto estratégicos permanentes para a guilda.',
 
@@ -43411,7 +43411,7 @@
 
       sensor.saveType = 'Sabedoria';
 
-      sensor.sensorScoutingMechanics = 'Segundo a regra canônica do PHB (p. 222, 264, 286), uma criatura que possa ver objetos invisíveis — através da magia Ver o Invisível (2º círculo), Lanterna de Revelação, Visão da Verdade (Truesight) ou Sentido Cego — enxerga o sensor de Clarividência, Olho Arcano ou Vidência como um orbe luminoso intangível do tamanho de um punho flutuando no ar!',
+      sensor.sensorScoutingMechanics = 'uma criatura que possa ver objetos invisíveis — através da magia Ver o Invisível (2º círculo), Lanterna de Revelação, Visão da Verdade (Truesight) ou Sentido Cego — enxerga o sensor de Clarividência, Olho Arcano ou Vidência como um orbe luminoso intangível do tamanho de um punho flutuando no ar!',
 
       sensor.pioneerMitigation = 'Conjuração de Dissipar Magia (CD 13 a 15) diretamente sobre o orbe luminoso avistado para cegar imediatamente o espião remoto.',
 
@@ -43661,7 +43661,7 @@
 
       saveType: 'Sabedoria',
 
-      witnessSpellMechanics: 'Bardo, Druida ou Patrulheiro (1º círculo ritual, duração 10 minutos, PHB p. 242; Baldur’s Gate 3) compreende e se comunica verbalmente com bestas locais (corvos de carniça, lobos, corujas, marmotas ou cavalos desgarrados); os animais funcionam como testemunhas oculares e olfativas vivas do nó do Pointcrawl, podendo relatar quantas comitivas ou monstros passaram pela estrada no último dia, qual direção tomaram na bifurcação e se carregavam tochas ou feridos sangrando.',
+      witnessSpellMechanics: 'Bardo, Druida ou Patrulheiro (1º círculo ritual, duração 10 minutos) compreende e se comunica verbalmente com bestas locais (corvos de carniça, lobos, corujas, marmotas ou cavalos desgarrados); os animais funcionam como testemunhas oculares e olfativas vivas do nó do Pointcrawl, podendo relatar quantas comitivas ou monstros passaram pela estrada no último dia, qual direção tomaram na bifurcação e se carregavam tochas ou feridos sangrando.',
 
       pioneerMitigation: 'Oferta de rações frescas ou teste de Sabedoria (Adestrar Animais) / Carisma (Persuasão) CD 13 para que uma besta arisca aceite prestar um pequeno favor de observação ao grupo.',
 
@@ -43697,9 +43697,9 @@
 
       witness.saveType = 'Sabedoria';
 
-      witness.witnessSpellMechanics = 'Bardo ou Clérigo (3º círculo, incenso aceso, alcance 3m, PHB p. 243; Baldur’s Gate 3) concede semblante de vida a um cadáver na beira da estrada que ainda possua boca e não seja morto-vivo; o conjurador faz até 5 perguntas (exigindo compartilhar um idioma que o falecido conhecia em vida, Fase 306!). O cadáver conhece apenas o que sabia até o momento da morte (quem o atacou, qual era o rosto/voz do assassino ou onde escondeu sua mochila), e a magia não pode ser lançada novamente no mesmo corpo por 10 dias.';
+      witness.witnessSpellMechanics = 'Bardo ou Clérigo (3º círculo, incenso aceso, alcance 3m) concede semblante de vida a um cadáver na beira da estrada que ainda possua boca e não seja morto-vivo; o conjurador faz até 5 perguntas (exigindo compartilhar um idioma que o falecido conhecia em vida). O cadáver conhece apenas o que sabia até o momento da morte (quem o atacou, qual era o rosto/voz do assassino ou onde escondeu sua mochila), e a magia não pode ser lançada novamente no mesmo corpo por 10 dias.';
 
-      witness.pioneerMitigation = 'Uso de Disfarçar-se (Fase 312) caso o conjurador pertença a uma facção que o cadáver reconheceria como inimiga, evitando respostas crípticas ou evasivas.';
+      witness.pioneerMitigation = 'Uso de Disfarçar-se caso o conjurador pertença a uma facção que o cadáver reconheceria como inimiga, evitando respostas crípticas ou evasivas.';
 
       witness.rescueAndStabilization = 'Revela a identidade real de saqueadores que massacraram caravanas na rota e permite recuperar relíquias ocultas.';
 
@@ -43715,7 +43715,7 @@
 
       witness.pioneerMitigation = 'Execução do ritual em cumes ou clareiras naturais (a magia não funciona em masmorras construídas de pedra talhada ou cidades).';
 
-      witness.rescueAndStabilization = 'Antecipa em vários nós de distância a presença de chefes regionais ou santuários planares (Fase 300).';
+      witness.rescueAndStabilization = 'Antecipa em vários nós de distância a presença de chefes regionais ou santuários planares.';
 
     }
 
@@ -43759,7 +43759,7 @@
 
       defense.defenseTitle = 'Perímetro Vivo de Arbustos Despertos e Crescer Plantas';
 
-      defense.communeAndCampSafety = 'Utilizando Crescer Plantas (3º círculo, PHB p. 229 — exigindo 4 metros de deslocamento para cada 1 metro percorrido na vegetação espessa!) e sentinelas botânicas criadas com Despertar (Awaken, 5º círculo, ágata de 1.000 PO), o bivaque é cercado por guardiões vegetais que parecem arbustos comuns enquanto permanecem imóveis.';
+      defense.communeAndCampSafety = 'Utilizando Crescer Plantas (3º círculo — exigindo 4 metros de deslocamento para cada 1 metro percorrido na vegetação espessa!) e sentinelas botânicas criadas com Despertar (Awaken, 5º círculo, ágata de 1.000 PO), o bivaque é cercado por guardiões vegetais que parecem arbustos comuns enquanto permanecem imóveis.';
 
       defense.communeAndWitnessWatch = 'Qualquer intruso que tente se esgueirar pela mata fechada ao redor das tendas fica reduzido a um quarto de sua velocidade normal e é denunciado pelo sussurro das árvores.';
 
@@ -43811,7 +43811,7 @@
 
       saveType: 'Sabedoria',
 
-      convergenceMechanics: 'Quando duas comitivas se encontram no mesmo nó da rota ou respondem a um sinal de socorro (Trompa/Píroforos da Fase 301, Ave Mensageira da Fase 305 ou Enviar Mensagem da Fase 308) e selam pacto de aliança, o encontro culmina na Coalescência Tática para o motor Combat2: os aventureiros dos dois grupos entram juntos na ordem de Iniciativa compartilhando auras de Paladino (Aura de Proteção), bênçãos de Clérigo, inspiração de Bardo e Vínculo Telepático de Rary (Fase 310) para enfrentar dragões, chefes de masmorra ou emboscadas de guerra que nenhuma comitiva isolada sobreviveria sozinha!',
+      convergenceMechanics: 'Quando duas comitivas se encontram no mesmo nó da rota ou respondem a um sinal de socorro (Trompa/Píroforos das expedições, Ave Mensageira das expedições ou Enviar Mensagem das expedições) e selam pacto de aliança, o encontro culmina na Coalescência Tática para o motor Combat2: os aventureiros dos dois grupos entram juntos na ordem de Iniciativa compartilhando auras de Paladino (Aura de Proteção), bênçãos de Clérigo, inspiração de Bardo e Vínculo Telepático de Rary para enfrentar dragões, chefes de masmorra ou emboscadas de guerra que nenhuma comitiva isolada sobreviveria sozinha!',
 
       pioneerMitigation: 'Sincronização prévia de papéis de vanguarda, flanqueamento e suporte de cura antes de iniciar o confronto conjunto.',
 
@@ -43847,7 +43847,7 @@
 
       conv.saveType = 'Carisma';
 
-      conv.convergenceMechanics = 'A dezenas de quilômetros da cidade mais próxima, o encontro entre duas comitivas funciona como uma feira de sobrevivência: um grupo rico em ouro mas sem água ou flechas pode negociar com outra comitiva o escambo direto de Rações de Viagem, antídotos, cordas de seda, metade de um par de Pedras de Mensagem (Fase 308) ou a conjuração cooperativa de Restauração Menor, Remover Maldição e Identificação.',
+      conv.convergenceMechanics = 'A dezenas de quilômetros da cidade mais próxima, o encontro entre duas comitivas funciona como uma feira de sobrevivência: um grupo rico em ouro mas sem água ou flechas pode negociar com outra comitiva o escambo direto de Rações de Viagem, antídotos, cordas de seda, metade de um par de Pedras de Mensagem ou a conjuração cooperativa de Restauração Menor, Remover Maldição e Identificação.',
 
       conv.pioneerMitigation = 'Avaliação justa de valor e raridade local (Sabedoria [Intuição] ou Carisma [Persuasão] CD 13) sem depender de tabelas de lojas urbanas.',
 
@@ -43861,9 +43861,9 @@
 
       conv.saveType = 'Carisma';
 
-      conv.convergenceMechanics = 'Quando duas comitivas rivais (Fase 313) disputam o direito de passagem por uma ponte estreita, o controle de um santuário de Linha de Ley (Fase 300) ou a posse de uma relíquia sem desejar o massacre total dos dois bandos, os líderes podem acordar um Duelo de Campeões no Combat2 (1 contra 1 até a rendição ou golpe não-letal a 0 PV, PHB p. 198 — Nocauteando uma Criatura), enquanto os demais membros formam o círculo de testemunhas.',
+      conv.convergenceMechanics = 'Quando duas comitivas rivais disputam o direito de passagem por uma ponte estreita, o controle de um santuário de Linha de Ley ou a posse de uma relíquia sem desejar o massacre total dos dois bandos, os líderes podem acordar um Duelo de Campeões no Combat2 (1 contra 1 até a rendição ou golpe não-letal a 0 PV — Nocauteando uma Criatura), enquanto os demais membros formam o círculo de testemunhas.',
 
-      conv.pioneerMitigation = 'Juramento do tratado de duelo dentro de uma Zona da Verdade (Fase 310) para garantir que o grupo perdedor respeitará o resultado.',
+      conv.pioneerMitigation = 'Juramento do tratado de duelo dentro de uma Zona da Verdade para garantir que o grupo perdedor respeitará o resultado.',
 
       conv.rescueAndStabilization = 'Uso de ataques corpo a corpo declarados como não-letais para que o campeão derrotado caia inconsciente e estável a 0 PV sem morrer.';
 
@@ -43893,7 +43893,7 @@
 
       allianceAndCampSafety: 'Quando duas comitivas unem seus bivaques em um único acampamento fortificado para passar a noite nos ermos, o efetivo de até 8 aventureiros permite manter Sentinelas em dupla em todos os turnos da madrugada sem prejudicar as 6 horas de sono de ninguém.',
 
-      allianceAndSharedWatch: 'Os dois Sentinelas de cada turno somam apoio mútuo (Ação Ajudar, PHB p. 192 — concedendo Vantagem em Sabedoria [Percepção], equivalente a +5 na Percepção Passiva noturna!) e combinam Cabana de Leomund com Alarme perimetral.',
+      allianceAndSharedWatch: 'Os dois Sentinelas de cada turno somam apoio mútuo (Ação Ajudar — concedendo Vantagem em Sabedoria [Percepção], equivalente a +5 na Percepção Passiva noturna!) e combinam Cabana de Leomund com Alarme perimetral.',
 
       campRestAndSafetyGuards: 'Transforma a noite mais perigosa dos ermos em uma fortaleza impenetrável de camaradagem e prontidão tática.',
 
@@ -43909,11 +43909,11 @@
 
       defense.defenseTitle = 'Ceia Comunitária de Acampamento e Discurso de Líder Inspirador',
 
-      defense.allianceAndCampSafety = 'Ao redor da fogueira compartilhada, um aventureiro com o talento Líder Inspirador (Inspiring Leader, PHB p. 167 — 10 minutos de discurso ou narrativa de batalha) inspira até 6 companheiros presentes (incluindo membros da comitiva aliada!), concedendo Pontos de Vida Temporários iguais ao `nível do personagem + modificador de Carisma`.';
+      defense.allianceAndCampSafety = 'Ao redor da fogueira compartilhada, um aventureiro com o talento Líder Inspirador (Inspiring Leader — 10 minutos de discurso ou narrativa de batalha) inspira até 6 companheiros presentes (incluindo membros da comitiva aliada!), concedendo Pontos de Vida Temporários iguais ao `nível do personagem + modificador de Carisma`.';
 
       defense.allianceAndSharedWatch = 'Complementado pelo talento Cozinheiro (Chef) ou rações especiais preparadas pelo Provedor, todos iniciam a marcha do dia seguinte com reserva extra de vitalidade.',
 
-      defense.campRestAndSafetyGuards = 'Consolida os laços do grafo de memória episódica (Fase 313) com bônus mecânico imediato para o próximo confronto no Combat2.';
+      defense.campRestAndSafetyGuards = 'Consolida os laços do grafo de memória episódica com bônus mecânico imediato para o próximo confronto no Combat2.';
 
     } else if (dt === 'song_of_rest_and_healer_kit_cooperative_recovery') {
 
@@ -43983,9 +43983,9 @@
 
       journey.saveType = 'Destreza';
 
-      journey.pointcrawlRoleMechanics = 'O Batedor avança furtivamente à frente da comitiva conectando a travessia do nó diretamente ao banco das 300 Fases Geomorfológicas (`cartografia-shared.js`); através de Destreza (Furtividade) e Inteligência (Investigação ou Natureza), o Batedor identifica pontes de neve ocultas, crostas salinas quebradiças, gases vulcânicos, glifos de Gíria de Ladrão (Fase 302) ou avisos Druídicos (Fase 303) antes que o grupo inteiro pise na armadilha natural — concedendo Vantagem na salvaguarda de mitigação para toda a comitiva!',
+      journey.pointcrawlRoleMechanics = 'O Batedor avança furtivamente à frente da comitiva conectando a travessia do nó diretamente ao rotas dos ermos (`cartografia-shared.js`); através de Destreza (Furtividade) e Inteligência (Investigação ou Natureza), o Batedor identifica pontes de neve ocultas, crostas salinas quebradiças, gases vulcânicos, glifos de Gíria de Ladrão ou avisos Druídicos antes que o grupo inteiro pise na armadilha natural — concedendo Vantagem na salvaguarda de mitigação para toda a comitiva!',
 
-      journey.pioneerMitigation = 'Sinalização silenciosa por Espelho de Aço (Fase 301) ou truque Mensagem (Fase 307) para guiar os passos dos companheiros pesados.',
+      journey.pioneerMitigation = 'Sinalização silenciosa por Espelho de Aço ou truque Mensagem para guiar os passos dos companheiros pesados.',
 
       journey.rescueAndStabilization = 'Ancoragem preventiva de corda de seda de 15m pelo Batedor para içar qualquer membro que escorregue no obstáculo.';
 
@@ -43997,7 +43997,7 @@
 
       journey.saveType = 'Sabedoria';
 
-      journey.pointcrawlRoleMechanics = 'Apenas aventureiros que não estejam distraídos desenhando mapas, forrageando ou rastreando contribuem com sua Sabedoria (Percepção) Passiva para notar perigos ocultos e outras comitivas na estrada; o Sentinela dedica 100% da sua atenção ao redor e à retaguarda, determinando o Grau de Revelação da Névoa de Identidade (Fase 311) e impedindo que o grupo sofra a condição Surpreso ao cruzar com predadores ou bandos furtivos.',
+      journey.pointcrawlRoleMechanics = 'Apenas aventureiros que não estejam distraídos desenhando mapas, forrageando ou rastreando contribuem com sua Sabedoria (Percepção) Passiva para notar perigos ocultos e outras comitivas na estrada; o Sentinela dedica 100% da sua atenção ao redor e à retaguarda, determinando o Grau de Revelação da Névoa de Identidade e impedindo que o grupo sofra a condição Surpreso ao cruzar com predadores ou bandos furtivos.',
 
       journey.pioneerMitigation = 'Escolha do aventureiro com maior Sabedoria, proficiência/especialização em Percepção ou talento Alerta (+5 na Iniciativa e imune a Surpresa).',
 
@@ -44311,7 +44311,7 @@
 
       intro.saveType = 'Sabedoria';
 
-      intro.introductionMechanics = 'Disfarçar o rosto ou fechar o elmo completo não altera a voz! Assim que um personagem disfarçado pronuncia sua primeira fala no encontro diante de alguém que já o conhece (Selo ◈), o motor dispara um teste de Sabedoria (Percepção Auditiva ou Intuição) contra a Enganação do disfarçado; se o ouvinte passar, reconhece o timbre inconfundível da voz ou o maneirismo de segurar a empunhadura ("Espere... eu conheço essa voz! Você é Kaelen!"), a menos que o disfarçado possua o talento Ator (Actor, PHB p. 165 — vantagem em Enganação e imitação perfeita de vozes!).';
+      intro.introductionMechanics = 'Disfarçar o rosto ou fechar o elmo completo não altera a voz! Assim que um personagem disfarçado pronuncia sua primeira fala no encontro diante de alguém que já o conhece (Selo ◈), o motor dispara um teste de Sabedoria (Percepção Auditiva ou Intuição) contra a Enganação do disfarçado; se o ouvinte passar, reconhece o timbre inconfundível da voz ou o maneirismo de segurar a empunhadura ("Espere... eu conheço essa voz! Você é Kaelen!"), a menos que o disfarçado possua o talento Ator (Actor — vantagem em Enganação e imitação perfeita de vozes!).';
 
       intro.pioneerMitigation = 'Comunicar-se apenas por acenos de cabeça, Gíria de Ladrão gestual ou Mente Desperta quando estiver infiltrado diante de antigos conhecidos.';
 
@@ -44663,7 +44663,7 @@
 
       defense.parleyAndTelepathicWatch = 'Ambos os grupos declaram abertamente dentro da esfera de 4,5 metros que não atacarão nem furtarão os companheiros de acampamento durante o descanso longo.';
 
-      defense.campRestAndSafetyGuards = 'Estabelece confiança mecânica verificável para a troca de mapas e vigília conjunta (Fase 315).';
+      defense.campRestAndSafetyGuards = 'Estabelece confiança mecânica verificável para a troca de mapas e vigília conjunta.';
 
     } else if (dt === 'mental_privacy_and_deception_screen_bivouac') {
 
@@ -45047,7 +45047,7 @@
 
       whisper.saveType = 'Inteligência';
 
-      whisper.whisperMechanics = 'Combinação de Ilusão Menor (PHB p. 251, alcance 9m, sem componente verbal!) para gerar sussurros discretos junto ao ouvido de um aliado ou projetar uma insígnia ilusória dentro de um baú, e Taumaturgia para criar murmúrios espectrais ou batidas distantes que desviam a atenção de sentinelas enquanto duas comitivas conversam.';
+      whisper.whisperMechanics = 'Combinação de Ilusão Menor (alcance 9m, sem componente verbal!) para gerar sussurros discretos junto ao ouvido de um aliado ou projetar uma insígnia ilusória dentro de um baú, e Taumaturgia para criar murmúrios espectrais ou batidas distantes que desviam a atenção de sentinelas enquanto duas comitivas conversam.';
 
       whisper.pioneerMitigation = 'Escolha de Ilusão Menor quando o silêncio vocal do conjurador é obrigatório (apenas componente somático e um pouco de lã).';
 
@@ -65049,7 +65049,7 @@
 
       tepuiBridgeAndBeacon: 'Totalmente imune às enxurradas do platô superior e às nuvens de insetos da selva lá embaixo, com vista panorâmica sobre o mar de nuvens.',
 
-      campRestAndSafetyGuards: 'Consagra o Marco Bicentenário (Fase 200) garantindo descanso longo lendário, enxuto e inexpugnável para toda a comitiva.',
+      campRestAndSafetyGuards: 'Consagra o Marco Bicentenário garantindo descanso longo lendário, enxuto e inexpugnável para toda a comitiva.',
 
       icon: '⛺🏞️',
 

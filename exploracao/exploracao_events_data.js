@@ -12312,7 +12312,7 @@ window.__EXPLORACAO_EVENTS = {
         }
       },
       {
-        "label": "Voltar com ajuda (etapa 2 da missão)",
+        "label": "Retornar com cordas e reforços para resgatar Wennick",
         "outcome_ok": {
           "text": "Você volta após lidar com o troll. Içam ele juntos. Em gratidão, ele te dá a bolsa de Valdoritas que carregava.",
           "reward_gold": 40,

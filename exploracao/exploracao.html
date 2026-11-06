@@ -112744,36 +112744,31 @@ function _showCampfireCompanionTopics(ally, opts) {
 
   var topics = [
 
-    { key: 'camp_campfire',      label: '◆ Ao redor da fogueira ▸',          doneLabel: '✓ Ao redor da fogueira (Relembrar) ▸' },
+    { key: 'camp_campfire',      label: '◆ Ao redor da fogueira ▸' },
 
-    { key: 'backstory_secret',   label: '◆ Segredos e o passado ▸',          doneLabel: '✓ Segredos e o passado (Relembrar) ▸' },
+    { key: 'backstory_secret',   label: '◆ Segredos e o passado ▸' },
 
-    { key: 'morals_faith',       label: '◆ Princípios e crenças ▸',          doneLabel: '✓ Princípios e crenças (Relembrar) ▸' },
+    { key: 'morals_faith',       label: '◆ Princípios e crenças ▸' },
 
-    { key: 'combat_bonds',       label: '◆ Táticas e laços de batalha ▸',    doneLabel: '✓ Táticas e laços de batalha (Relembrar) ▸' },
+    { key: 'combat_bonds',       label: '◆ Táticas e laços de batalha ▸' },
 
-    { key: 'personal_favor',     label: '◆ Assunto pessoal e favor ▸',       doneLabel: '✓ Assunto pessoal e favor (Relembrar) ▸' },
+    { key: 'personal_favor',     label: '◆ Assunto pessoal e favor ▸' },
 
-    { key: 'romance_courtship',  label: '◆ Confidências a dois [Afeto] ▸',   doneLabel: '✓ Confidências a dois [Afeto] (Relembrar) ▸' },
+    { key: 'romance_courtship',  label: '◆ Confidências a dois [Afeto] ▸' },
 
-    { key: 'sparring_challenge', label: '◆ Desafio de treino rápido ▸',      doneLabel: '✓ Desafio de treino rápido (Relembrar) ▸' }
+    { key: 'sparring_challenge', label: '◆ Desafio de treino rápido ▸' }
 
   ];
 
   var freshTopics = topics.filter(function(t) {
     return !ally._campfireTopicsDone[t.key];
   });
-  var revisitedTopics = topics.filter(function(t) {
-    return !!ally._campfireTopicsDone[t.key];
-  });
-  var orderedTopics = freshTopics.concat(revisitedTopics);
 
-  var choices = orderedTopics.map(function(t) {
-    var isDone = !!ally._campfireTopicsDone[t.key];
+  var choices = freshTopics.map(function(t) {
     return {
 
       id: 'camp_top_' + t.key,
-      label: isDone ? t.doneLabel : t.label,
+      label: t.label,
       isSubmenu: true,
       cb: function() {
         _showCampfireTopicDialogue(ally, t.key, { autoOpenChoices: true, isSubmenu: true });
