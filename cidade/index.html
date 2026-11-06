@@ -70977,325 +70977,891 @@ var ALLY_TOPIC_CONFIG = {
   sparring_challenge: { id: 'sparring_challenge', label: '◆ Desafio de treino rápido ▸',     title: 'Desafio de Treino',     dc: 13, skill: 'acrobatics',    skillLabel: 'Acrobacia' },
 };
 
+var ALLY_CLASS_TOPIC_LORE = {
+  ladino: {
+    campItem: 'as gazuas de aço temperado e o par de adagas curtas',
+    campNightSkill: 'identificar passos furtivos e emboscadas na escuridão da mata',
+    campVigilPlace: 'os telhados úmidos e becos da cidade',
+    backstoryTitle: 'Sindicato dos Becos · Ruptura no Distrito Velho',
+    backstoryOrigin: 'cresceu órfão nos becos do Distrito Velho e rompeu com o sindicato de contrabandistas para não entregar inocentes',
+    backstoryOriginFem: 'cresceu órfã nos becos do Distrito Velho e rompeu com o sindicato de contrabandistas para não entregar inocentes',
+    backstoryThreat: 'algum antigo contrabandista do Distrito Velho',
+    backstorySecretEvent: 'a noite em que você queimou o carregamento do sindicato no Distrito Velho antes de abandonar os becos',
+    backstoryShadow: 'as sombras do sindicato do Distrito Velho',
+    backstoryReplyEmp: 'Crescer nos becos ensina a desconfiar até da própria sombra, mas ao seu lado finalmente sinto que tenho um grupo de verdade.',
+    backstoryReplyPrag: 'Os contrabandistas do Distrito Velho sabem que minhas adagas não erram no escuro. Se vierem atrás de nós, vão se arrepender.',
+    backstoryCheckSuccNarr: 'Sua leitura atinge o ponto exato. {name} baixa a voz e revela como sabotou a emboscada do sindicato no Distrito Velho para salvar famílias das docas. Um vínculo de profunda confiança foi firmado (<b>+5 de Aprovação</b>).',
+    backstoryCheckSuccText: '"Naquela noite no Distrito Velho, jurei que nunca mais trabalharia para quem lucra com o desespero alheio. Você é a primeira pessoa para quem conto toda a verdade."',
+    backstoryCheckFailText: '"O que ficou nas cinzas do Distrito Velho deve continuar enterrado por enquanto. Quem sabe em outra ocasião."',
+    moralsTitle: 'Código das Ruas · Justiça Além dos Decretos Nobres',
+    moralsVirtue: 'desconfia das leis dos nobres, mas reparte moedas com os órfãos das docas e jamais abandona um parceiro',
+    moralsCreed: 'o código de honra das ruas e a proteção de quem não tem escudo',
+    moralsReplyEmp: 'Os tribunais dos nobres só protegem quem tem brasão. Na rua, a palavra dada a um companheiro vale mais do que qualquer pergaminho.',
+    moralsReplyPrag: 'Falou minha língua. Nas estradas de Valdoria, lei sem lâmina afiada na cintura é só convite para salteador.',
+    moralsCheckSuccText: '"Meu limite é claro: nunca roubar de quem passa fome e nunca trair quem sangra ao meu lado na estrada. Fico contente que pense como eu."',
+    combatTitle: 'Flanqueamento nas Sombras · Sincronia de Adagas',
+    combatWeapon: 'suas adagas gêmeas',
+    combatRole: 'vigiar nossas sombras e atacar pelos flancos',
+    combatTactic: 'eu travar o escudo do alvo principal na frente para você entrar pelo ponto cego com ataque furtivo',
+    combatManeuver: 'forçar a guarda do líder inimigo para o lado, abrindo brecha na couraça para suas adagas',
+    combatProvoke: 'emboscar sentinelas distraídas nos becos é fácil, mas quero ver se suas adagas mantêm essa precisão quando estivermos cercados por monstros',
+    favorTitle: 'A Marca das Sombras · Nota Promissória Forjada no Cofre das Docas',
+    favorEmp: '"Vi os avisos da Guilda das Sombras cobrando aquela nota promissória forjada no seu nome. Você é do nosso grupo — vamos invadir o depósito das docas e queimar esse registro juntos."',
+    favorEmpDesc: 'Apoiar {name} e destruir a nota forjada no depósito clandestino das docas',
+    favorEmpReplyNarr: '{name} abre um sorriso aliviado e sincero, tocando o cabo da adaga com gratidão.',
+    favorEmpReplyText: 'Ouvir isso tira um peso imenso das minhas costas. Com você cobrindo a entrada do depósito das docas, aquela nota promissória forjada vai virar cinzas.',
+    favorPrag: '"Se os cobradores da Guilda das Sombras vierem atrás de você por causa do livro-caixa nas docas, o grupo inteiro vira alvo. Precisamos destruir essa nota falsificada antes que nos embosquem."',
+    favorPragDesc: 'Eliminar a ameaça da Guilda das Sombras antes que afete a segurança da comitiva',
+    favorPragReplyText: 'Exatamente o que penso. O cofre de ferro fica no depósito clandestino das docas; se agirmos antes da troca da guarda, apagamos meu nome do livro-caixa sem deixar rastro.',
+    favorCheck: '"Me mostre o esboço do depósito clandestino das docas. Se estudarmos a ronda dos vigias e a armadilha de sino no cofre de ferro, acharemos uma brecha para apagar sua dívida sem alarde."',
+    favorCheckDesc: 'Analisar as rotas dos vigias das docas e o mecanismo do cofre da Guilda das Sombras',
+    favorCheckSuccNarr: '{name} espalha um pergaminho rabiscado a carvão e aponta as entradas das docas, impressionada com sua visão tática. O plano de infiltração contra a Guilda das Sombras foi traçado (<b>+5 de Aprovação</b>).',
+    favorCheckSuccText: '"Com essa rota pelos caixotes e o corte no fio do sino, abriremos o cofre de ferro em dois minutos. Quando chegarmos às docas, faremos exatamente como você planejou."',
+    favorCheckFailText: '"Os vigias das docas mudaram o turno ontem. Vou confirmar o esquema da armadilha de sino antes de arriscarmos o pescoço."',
+    favorProv: '"Deixar uma nota promissória falsificada nas mãos da Guilda das Sombras nas docas foi descuido seu. Espero que essa dívida clandestina não traga assassinos para o nosso acampamento."',
+    favorProvDesc: 'Cobrar cautela sobre a pendência com o sindicato clandestino das docas',
+    favorProvReplyText: 'Aquela dívida foi forjada porque me recusei a extorquir moradores das docas. Eu sei cuidar das minhas sombras — só compartilhei o assunto porque confio no grupo.',
+    romanceTitle: 'Longe das Sombras · Confiança sem Máscaras',
+    romanceHabit: 'viver alerta nas sombras com ironia e adagas prontas',
+    sparringTitle: 'Treino de Reflexos · Fintas e Desarme de Adagas',
+    sparringDrill: 'esquiva curta, leitura de fintas e desarme de adagas com bainhas fechadas'
+  },
+  guerreiro: {
+    campItem: 'a espada longa veterana e a pedra de amolar de grão fino',
+    campNightSkill: 'ler o terreno ao redor do acampamento e posicionar sentinelas contra ataques noturnos',
+    campVigilPlace: 'os quartéis e muralhas de pedra',
+    backstoryTitle: 'A Companhia de Karreth · Sobrevivente da Emboscada',
+    backstoryOrigin: 'sobreviveu à emboscada que dizimou a antiga companhia mercenária de Karreth no desfiladeiro',
+    backstoryOriginFem: 'sobreviveu à emboscada que dizimou a antiga companhia mercenária de Karreth no desfiladeiro',
+    backstoryThreat: 'os salteadores que traíram a companhia de Karreth',
+    backstorySecretEvent: 'o dia em que a companhia de Karreth foi cercada no desfiladeiro por ordens de um contratante traidor',
+    backstoryShadow: 'os fantasmas do desfiladeiro de Karreth',
+    backstoryReplyEmp: 'Perder meus irmãos de escudo em Karreth quase me fez largar a espada, mas marchar com este grupo devolveu meu propósito.',
+    backstoryReplyPrag: 'Aprendi a lição no sangue daquele desfiladeiro. Ninguém pega nossa vanguarda desprevenida enquanto eu empunhar aço.',
+    backstoryCheckSuccNarr: '{name} toca a cicatriz no antebraço e relata como segurou a retaguarda no desfiladeiro de Karreth para salvar os recrutas mais jovens. Um laço de respeito marcial foi selado (<b>+5 de Aprovação</b>).',
+    backstoryCheckSuccText: '"Carrego os nomes dos caídos de Karreth gravados no couro da minha bainha. Saber que luto ao lado de alguém honrado honra a memória deles."',
+    backstoryCheckFailText: '"As lembranças do cerco de Karreth ainda pesam demais para uma conversa rápida. Outro dia falamos disso."',
+    moralsTitle: 'Código do Escudo · Disciplina e Honra de Campanha',
+    moralsVirtue: 'mantém a disciplina de soldado, mas recusa contratos que massacrem aldeões indefesos',
+    moralsCreed: 'a honra marcial de proteger quem marcha atrás do seu escudo',
+    moralsReplyEmp: 'Um guerreiro sem código não passa de um carniceiro pago. Meu escudo existe para manter os nossos de pé.',
+    moralsReplyPrag: 'Na linha de frente, hesitação mata. Disciplina e formação cerrada salvam mais vidas do que discursos.',
+    moralsCheckSuccText: '"Jurei nunca mais erguer minha espada por contratantes corruptos que sacrificam seus próprios homens. Minha lealdade pertence a quem luta ombro a ombro comigo."',
+    combatTitle: 'Parede de Escudos · Formação de Vanguarda',
+    combatWeapon: 'sua espada e seu escudo pesado',
+    combatRole: 'segurar o impacto da linha de frente',
+    combatTactic: 'fecharmos a parede de escudos no centro para quebrar a investida inimiga antes do contra-ataque',
+    combatManeuver: 'travar a arma do campeão inimigo com meu avanço para você desferir o golpe decisivo na brecha',
+    combatProvoke: 'segurar bandidos de estrada no escudo é simples, mas quero ver se sua base aguenta o tranco quando uma fera gigante avançar',
+    favorTitle: 'O Estandarte de Karreth · Relíquia da Companhia Emboscada',
+    favorEmp: '"Soube que o bando de salteadores das colinas ainda exibe o estandarte rasgado da sua antiga companhia de Karreth. Vamos rastrear o covil deles e recuperar essa insígnia juntos."',
+    favorEmpDesc: 'Ajudar {name} a reaver o estandarte de seus antigos companheiros caídos',
+    favorEmpReplyNarr: '{name} fecha o punho sobre o peito em uma continência solene e emocionada.',
+    favorEmpReplyText: 'Aquele estandarte bordado é tudo o que restou dos meus irmãos de armas de Karreth. Recuperá-lo ao seu lado será uma honra que jamais esquecerei.',
+    favorPrag: '"Se o bando que roubou o estandarte de Karreth continua atacando nas estradas próximas, logo cruzaremos com eles. Melhor atacarmos o covil deles primeiro com vantagem tática."',
+    favorPragDesc: 'Neutralizar o bando de salteadores e recuperar o estandarte de Karreth com planejamento',
+    favorPragReplyText: 'Pensamento de comandante. O chefe dos salteadores usa o estandarte de Karreth como troféu no acampamento das ravinas; se cortarmos as sentinelas primeiro, tomamos o covil.',
+    favorCheck: '"Me descreva o terreno onde a companhia de Karreth foi emboscada e os rastros atuais dos salteadores. Podemos localizar o covil deles e recuperar o estandarte sem cair em armadilhas."',
+    favorCheckDesc: 'Analisar as rotas dos salteadores para resgatar o Estandarte de Karreth',
+    favorCheckSuccNarr: '{name} traça no chão a rota do desfiladeiro e os pontos de vigia do bando. O plano tático para recuperar o Estandarte de Karreth está pronto (<b>+5 de Aprovação</b>).',
+    favorCheckSuccText: '"Você enxergou a falha na paliçada deles na hora. Quando marcharmos sobre o covil, o estandarte de Karreth voltará para casa."',
+    favorCheckFailText: '"Os batedores do bando mudaram de vale após a última chuva. Preciso confirmar a posição do covil antes de avançarmos."',
+    favorProv: '"Deixar o estandarte da companhia de Karreth nas mãos de salteadores comuns por tanto tempo fere o orgulho de qualquer soldado. Hora de resolver essa pendência."',
+    favorProvDesc: 'Desafiar {name} a recuperar a honra da antiga companhia de Karreth',
+    favorProvReplyText: 'Não houve um único dia em que eu tenha esquecido aquele tecido manchado de sangue. Quando estivermos diante do chefe deles, minha lâmina cobrará cada ano de espera.',
+    romanceTitle: 'Abaixo da Armadura · Lealdade Além do Campo de Batalha',
+    romanceHabit: 'manter a postura rígida de veterano de guerra atrás da couraça de aço',
+    sparringTitle: 'Treino de Vanguarda · Postura de Base e Contra-Golpe',
+    sparringDrill: 'jogo de pés, bloqueio de impacto e transição rápida entre defesa e estocada'
+  },
+  clerigo: {
+    campItem: 'o símbolo sagrado de prata e os unguentos de cura',
+    campNightSkill: 'entoar preces silenciosas de vigília e perceber presenças profanas na penumbra',
+    campVigilPlace: 'os claustros silenciosos do templo',
+    backstoryTitle: 'A Queda da Capela · As Cinzas da Consagração',
+    backstoryOrigin: 'sobreviveu ao ataque noturno que incendiou a antiga capela onde recebeu sua consagração aos Quatro',
+    backstoryOriginFem: 'sobreviveu ao ataque noturno que incendiou a antiga capela onde recebeu sua consagração aos Quatro',
+    backstoryThreat: 'os profanadores que saquearam sua antiga capela',
+    backstorySecretEvent: 'a noite em que a capela do interior foi profanada e você precisou escolher entre salvar os noviços ou guardar o altar',
+    backstoryShadow: 'a culpa pelas ruínas da capela incendiada',
+    backstoryReplyEmp: 'Tirei os noviços pelas chamas naquela noite, mas o som do teto desabando sobre o altar nunca saiu da minha memória. Sua empatia conforta meu espírito.',
+    backstoryReplyPrag: 'Os vivos vêm sempre antes das pedras do templo.Hoje carrego minha fé no escudo e nas mãos que curam nosso grupo.',
+    backstoryCheckSuccNarr: '{name} segura o símbolo sagrado de prata e compartilha a promessa que fez ao antigo mentor antes da capela ruir. A compreensão espiritual aproximou vocês (<b>+5 de Aprovação</b>).',
+    backstoryCheckSuccText: '"Meu mentor disse que o verdadeiro templo caminha na estrada ao lado de quem precisa de luz. Ao seu lado, compreendo o que ele quis dizer."',
+    backstoryCheckFailText: '"As cicatrizes daquela noite na capela ainda pedem recolhimento e oração. Conversaremos sobre isso mais adiante."',
+    moralsTitle: 'Luz na Estrada · Misericórdia e Firmeza Divina',
+    moralsVirtue: 'oferece cura aos feridos sem cobrar tributo, mas não hesita em abater criaturas que corrompem os inocentes',
+    moralsCreed: 'a compaixão ativa dos Quatro unida à firmeza contra a corrupção',
+    moralsReplyEmp: 'A luz que não aquece os desesperados na lama da estrada é apenas vaidade de vitral. Fico feliz que enxergue a verdadeira fé.',
+    moralsReplyPrag: 'Os Quatro nos deram mãos para curar, mas também nos deram aço para defender o rebanho quando os lobos atacam.',
+    moralsCheckSuccText: '"A verdadeira devoção não se mede pela pompa dos templos, mas pela coragem de permanecer justo quando ninguém está olhando."',
+    combatTitle: 'Proteção Sagrada · Escudo da Fé e Retaguarda',
+    combatWeapon: 'sua maça consagrada e suas preces de proteção',
+    combatRole: 'sustentar a linha com bênçãos e fechar nossos ferimentos sob pressão',
+    combatTactic: 'mantermos formação próxima para que sua prece de proteção cubra a vanguarda no momento do choque',
+    combatManeuver: 'eu atrair a investida das criaturas enquanto você canaliza a luz sagrada para quebrar a resistência delas',
+    combatProvoke: 'entoar bênçãos na retaguarda ajuda muito, mas quero ver se sua maça aguenta o combate fechado quando o inimigo furar o cerco',
+    favorTitle: 'O Cálice da Capela Esquecida · Relíquia nas Catacumbas Profanadas',
+    favorEmp: '"Você mencionou que o Cálice Sagrado da sua antiga capela ainda jaz nas catacumbas profanadas. Conte comigo para descermos àquela cripta e purificarmos o altar juntos."',
+    favorEmpDesc: 'Apoiar {name} na missão de resgatar e purificar o Cálice da Capela Esquecida',
+    favorEmpReplyNarr: '{name} inclina a cabeça com profunda gratidão, traçando um gesto luminoso de bênção.',
+    favorEmpReplyText: 'Resgatar o Cálice da Capela Esquecida devolverá a paz às almas que caíram lá. Saber que tenho sua coragem ao meu lado fortalece minha fé.',
+    favorPrag: '"Se sombras errantes continuam se espalhando a partir das catacumbas da Capela Esquecida, aquela cripta é uma ameaça para toda a região. Precisamos purificar o Cálice antes que a corrupção cresça."',
+    favorPragDesc: 'Conter a profanação nas catacumbas da capela e recuperar a relíquia sagrada',
+    favorPragReplyText: 'Você tem toda razão. Enquanto o Cálice permanecer profanado no subsolo da capela, a névoa sombria continuará atraindo mortos-vivos para a estrada.',
+    favorCheck: '"Me conte o que os registros litúrgicos dizem sobre a planta das catacumbas da Capela Esquecida. Se soubermos onde fica o relicário, purificaremos o Cálice sem cair nas sombras errantes."',
+    favorCheckDesc: 'Investigar a estrutura das catacumbas e o ritual de purificação do Cálice',
+    favorCheckSuccNarr: '{name} descreve os arcos subterrâneos da capela e os selos dos Quatro necessários para consagrar o altar. O caminho para resgatar o Cálice está mapeado (<b>+5 de Aprovação</b>).',
+    favorCheckSuccText: '"Com essa preparação e a água benta pronta antes de abrirmos a câmara do altar, as sombras não resistirão. Partiremos assim que você der a ordem."',
+    favorCheckFailText: '"As passagens inferiores desabaram no incêndio; ainda preciso recordar quais galerias da cripta permanecem acessíveis."',
+    favorProv: '"Deixar o Cálice Sagrado da sua ordem abandonado em uma cripta profanada por tanto tempo não combina com sua devoção. Quando vamos limpar aquela capela?"',
+    favorProvDesc: 'Cobrar ação direta para resgatar o Cálice da Capela Esquecida',
+    favorProvReplyText: 'Cada noite longe daquele altar pesa nas minhas preces. Não me faltava vontade, faltava um grupo forte o bastante para encarar o que habita aquela cripta.',
+    romanceTitle: 'Prece Compartilhada · Serenidade Entre Duas Almas',
+    romanceHabit: 'cuidar das dores de todos no grupo mantendo as próprias emoções em sereno recolhimento',
+    sparringTitle: 'Treino de Guarda · Defesa com Escudo e Maça',
+    sparringDrill: 'manutenção de equilíbrio sob impacto, desvio com escudo e proteção de concentração'
+  },
+  mago: {
+    campItem: 'o grimório encadernado em couro e o frasco de tinta de prata',
+    campNightSkill: 'traçar alarmes rúnicos sutis no perímetro e decifrar constelações arcanas',
+    campVigilPlace: 'as bibliotecas silenciosas da academia arcana',
+    backstoryTitle: 'A Torre de Istrad · O Experimento Proibido',
+    backstoryOrigin: 'deixou o círculo arcano de Istrad após denunciar os experimentos imprudentes de seu antigo arquimago',
+    backstoryOriginFem: 'deixou o círculo arcano de Istrad após denunciar os experimentos imprudentes de sua antiga arquimaga',
+    backstoryThreat: 'os emissários do círculo de Istrad',
+    backstorySecretEvent: 'a noite em que a falha de contenção na Torre de Istrad quase abriu uma fenda planar e você salvou os aprendizes',
+    backstoryShadow: 'o exílio imposto pelo conselho de Istrad',
+    backstoryReplyEmp: 'Ser banido da Torre de Istrad por dizer a verdade doeu, mas prefiro caminhar na lama com companheiros íntegros do que calar diante da arrogância.',
+    backstoryReplyPrag: 'Conhecimento arcano não pertence a uma torre trancada. Na estrada com nosso grupo, minha magia tem utilidade real.',
+    backstoryCheckSuccNarr: '{name} abre uma página cifrada do grimório e mostra o diagrama da falha planar que impediu na Torre de Istrad. O respeito intelectual entre vocês se aprofundou (<b>+5 de Aprovação</b>).',
+    backstoryCheckSuccText: '"Poucas mentes fora da academia compreendem o risco que contive naquela noite em Istrad. É um privilégio raro conversar com alguém tão perspicaz."',
+    backstoryCheckFailText: '"As equações daquele incidente em Istrad exigem calma para serem explicadas. Retomaremos o assunto em outra pausa."',
+    moralsTitle: 'Ética Arcana · Poder com Responsabilidade',
+    moralsVirtue: 'Domina magias destrutivas, mas recusa usar encantamentos que quebrem o livre-arbítrio de inocentes',
+    moralsCreed: 'o rigor do saber arcano guiado pela responsabilidade sobre cada feitiço lançado',
+    moralsReplyEmp: 'Magia sem freio ético destrói primeiro quem a conjura. Fico aliviado em viajar com quem respeita essa fronteira.',
+    moralsReplyPrag: 'Precisão e economia de mana vencem batalhas. Desperdiçar poder arcano por vaidade é erro de aprendiz.',
+    moralsCheckSuccText: '"O verdadeiro domínio arcano não está em incendiar um campo inteiro, mas em saber exatamente qual runa manter selada."',
+    combatTitle: 'Artilharia Arcana · Canalização e Cobertura',
+    combatWeapon: 'seu cajado rúnico e suas magias de área',
+    combatRole: 'controlar o campo e dizimar formações inimigas à distância',
+    combatTactic: 'eu segurar os inimigos agrupados no estreito enquanto você conjura sua magia sem que ninguém quebre sua concentração',
+    combatManeuver: 'atrair os arqueiros e batedores inimigos para fora de posição, deixando o corredor livre para o seu disparo arcano',
+    combatProvoke: 'recitar fórmulas atrás da linha de frente é confortável, mas quero ver se você mantém a frieza quando um inimigo colar no seu cajado',
+    favorTitle: 'As Páginas Proibidas de Istrad · Fólios Roubados no Mercado Clandestino',
+    favorEmp: '"Soube que três páginas prohibidas do tomo ancestral de Istrad foram vendidas no mercado clandestino. Vamos rastrear o receptador e recuperar esses fólios antes que alguém invoque uma tragédia."',
+    favorEmpDesc: 'Ajudar {name} a recuperar as três páginas arrancadas do tomo de Istrad',
+    favorEmpReplyNarr: '{name} fecha o grimório com cuidado e assente com visível alívio e gratidão.',
+    favorEmpReplyText: 'Aquelas três páginas contêm fórmulas de conjuração instáveis demais para mãos leigas. Com o seu apoio, reuniremos o tomo de Istrad antes que um desastre aconteça.',
+    favorPrag: '"Se um aprendiz incauto tentar ler as Páginas Proibidas de Istrad perto da cidade, o colapso arcano afetará a todos nós. Precisamos confiscar esses fólios do receptador imediatamente."',
+    favorPragDesc: 'Impedir o uso imprudente dos fólios de Istrad para proteger a região',
+    favorPragReplyText: 'Análise perfeita. O receptador escondeu a primeira página com uma runa de retenção; agindo rápido, desfazemos o selo e recolhemos os três fólios.',
+    favorCheck: '"Me explique a assinatura mágica da tinta de prata usada nas Páginas Proibidas de Istrad. Se rastrearmos a ressonância da runa de retenção, acharemos o comprador sem alertar o mercado negro."',
+    favorCheckDesc: 'Rastrear a ressonância arcana dos três fólios roubados de Istrad',
+    favorCheckSuccNarr: '{name} traça no ar a frequência rúnica das folhas perdidas, entusiasmado com seu raciocínio analítico. A localização das Páginas Proibidas de Istrad foi deduzida (<b>+5 de Aprovação</b>).',
+    favorCheckSuccText: '"Brilhante! Triangular o pulso da tinta de prata sob a luz lunar nos levará direto ao esconderijo dos três fólios."',
+    favorCheckFailText: '"A runa de retenção está mascarada por interferência local; ainda preciso recalibrar meus reagentes antes de rastreá-la."',
+    favorProv: '"Deixar três páginas de conjuração perigosa escaparem da biblioteca de Istrad foi um belo descuido acadêmico. Espero que a gente recupere isso antes que exploda na nossa cara."',
+    favorProvDesc: 'Cobrar providências sobre o roubo das Páginas Proibidas de Istrad',
+    favorProvReplyText: 'O furto ocorreu enquanto a academia dormia, mas assumi a missão de corrigi-lo pessoalmente. Com aço e magia alinhados, nenhum receptador ficará no nosso caminho.',
+    romanceTitle: 'Além dos Pergaminhos · Calor Humano Entre as Estrelas',
+    romanceHabit: 'esconder os sentimentos atrás de livros antigos, teorias arcanas e postura reservada',
+    sparringTitle: 'Treino de Reflexo Arcano · Concentração Sob Pressão',
+    sparringDrill: 'esquiva curta contra investidas físicas mantendo o foco mental para conjuração rápida'
+  }
+};
+
+// Preenche as demais classes canônicas com variações específicas de suas missões pessoais e arquétipos
+(function() {
+  var extraClasses = {
+    patrulheiro: {
+      campItem: 'o arco longo de teixo e as penas de flecha',
+      campNightSkill: 'ler os rastros na terra úmida e distinguir o canto das corujas de sinais de emboscada',
+      campVigilPlace: 'as copas silenciosas das fronteiras selvagens',
+      backstoryTitle: 'A Patrulha da Fronteira · A Trilha Perdida na Nevasca',
+      backstoryOrigin: 'guiou colonos pelas montanhas do norte quando uma caçada ilegal provocou uma avalanche nas ravinas',
+      backstoryOriginFem: 'guiou colonos pelas montanhas do norte quando uma caçada ilegal provocou uma avalanche nas ravinas',
+      backstoryThreat: 'os caçadores clandestinos das ravinas do norte',
+      backstorySecretEvent: 'o inverno em que você rastreou os contrabandistas de peles sob a nevasca para resgatar os vigias isolados',
+      backstoryShadow: 'as lembranças geladas do Pico Nevado',
+      moralsTitle: 'Lei da Mata · Caça Justa e Equilíbrio Selvagem',
+      moralsVirtue: 'abate apenas o necessário para a sobrevivência e jamais tolera caçadores que usam venenos cruéis',
+      moralsCreed: 'o respeito às trilhas selvagens e a proteção de quem viaja sem guia',
+      combatTitle: 'Olhos de Falcão · Cobertura de Arco e Emboscada',
+      combatWeapon: 'seu arco longo e suas flechas certeiras',
+      combatRole: 'abater alvos à distância e alertar sobre flanqueamentos na mata',
+      combatTactic: 'eu prender o avanço inimigo na clareira enquanto suas flechas derrubam os conjuradores e arqueiros deles',
+      combatManeuver: 'forçar o inimigo a sair da cobertura das árvores direto para a linha de tiro do seu arco',
+      combatProvoke: 'acertar alvos de longe em cima de um galho é tranquilo, mas quero ver sua precisão quando a briga encostar no corpo a corpo',
+      favorTitle: 'A Fera Ferida do Pico Nevado · Predador Envenenado nas Ravinas',
+      favorEmp: '"Você falou sobre o grande predador atingido por dardos envenenados de caçadores ilegais no Pico Nevado. Vamos rastrear a criatura nas ravinas e extrair o veneno antes que ela morra ou ataque viajantes."',
+      favorEmpDesc: 'Rastrear e salvar a Fera Ferida do Pico Nevado com bálsamo silvestre',
+      favorEmpReplyText: 'Aquela criatura protege o equilíbrio da montanha há anos e só está agressiva por causa do veneno nos dardos. Com sua ajuda, vamos acalmá-la e curar a ferida.',
+      favorPrag: '"Se a Fera Ferida do Pico Nevado continuar enlouquecida de dor pelos dardos envenenados, nenhuma caravana passará viva pelas ravinas. Precisamos rastreá-la e resolver isso logo."',
+      favorPragDesc: 'Garantir a segurança da rota da montanha tratando o predador ferido',
+      favorPragReplyText: 'Concordo. Os caçadores ilegais deixaram a fera furiosa perto da trilha principal; se seguirmos o rastro de galhos quebrados hoje, evitamos um massacre na estrada.',
+      favorCheck: '"Me mostre as amostras de sangue e a ponta do dardo que você achou na trilha do Pico Nevado. Se identificarmos a toxina dos caçadores, prepararemos o bálsamo certo antes de entrar na ravina."',
+      favorCheckDesc: 'Analisar o veneno dos caçadores ilegais e os rastros nas ravinas',
+      favorCheckSuccNarr: '{name} examina a erva da montanha com você e identifica o antídoto exato contra a toxina dos dardos. O rastreamento da Fera Ferida está pronto (<b>+5 de Aprovação</b>).',
+      favorCheckSuccText: '"Olhar de mestre rastreador! Com esse emplastro de zimbro pronto, conseguiremos extrair a ponta envenenada assim que acalmarmos o animal."',
+      favorCheckFailText: '"O vento forte apagou parte das pegadas na ravina alta; preciso verificar mais um trecho da trilha antes de subirmos."',
+      favorProv: '"Um patrulheiro veterano deixar caçadores ilegais envenenarem a maior fera do Pico Nevado debaixo do próprio nariz? Vamos logo consertar isso nas ravinas."',
+      favorProvDesc: 'Cobrar ação rápida contra os caçadores ilegais do Pico Nevado',
+      favorProvReplyText: 'Eles agiram na calada da tempestade, mas deixaram pegadas claras na lama. Quando terminarmos de curar a fera, os caçadores serão os próximos.',
+      romanceTitle: 'Silêncio da Floresta · Companhia Sob as Estrelas',
+      romanceHabit: 'preferir a solidão silenciosa das trilhas do que a proximidade das pessoas',
+      sparringTitle: 'Treino de Reflexo Silvestre · Esquiva eSaque Rápido',
+      sparringDrill: 'transição rápida entre arco e lâmina curta com esquiva em terreno irregular'
+    },
+    paladino: {
+      campItem: 'o escudo gravado com o brasão do juramento e a flanela de polimento',
+      campNightSkill: 'manter vigília inabalável e inspirar coragem contra os terrores noturnos',
+      campVigilPlace: 'os salões de vigília da ordem sagrada',
+      backstoryTitle: 'O Cerco da Fronteira · O Juramento Sob Fogo',
+      backstoryOrigin: 'manteve o portão de uma fortaleza sitiada quando parte de sua antiga ordem recuou diante da horda',
+      backstoryOriginFem: 'manteve o portão de uma fortaleza sitiada quando parte de sua antiga ordem recuou diante da horda',
+      backstoryThreat: 'os desertores que quebraram o juramento no cerco',
+      backstorySecretEvent: 'a madrugada em que você segurou a brecha da muralha até a evacuação completa dos moradores',
+      backstoryShadow: 'a divisão dolorosa de sua antiga ordem de cavalaria',
+      moralsTitle: 'O Peso do Juramento · Justiça com Redenção',
+      moralsVirtue: 'cumpre os votos sagrados com rigor, mas acredita que todo pecador arrependido merece chance de redenção',
+      moralsCreed: 'a honra inabalável do juramento aliada à clemência para quem busca se reerguer',
+      combatTitle: 'Muralha Radiante · Aura de Proteção e Golpe Divino',
+      combatWeapon: 'sua lâmina consagrada e seu escudo reluzente',
+      combatRole: 'ancorar a frente de batalha com sua aura de coragem e punir os inimigos mais perigosos',
+      combatTactic: 'avançarmos lado a lado dentro da sua aura protetora para que nenhum medo ou feitiço quebre nossa linha',
+      combatManeuver: 'eu abrir a guarda do líder inimigo para você descarregar seu golpe divino com força total',
+      combatProvoke: 'brilhar na armadura polida impressiona na cidade, mas quero ver se esse fervor todo sustenta o grupo quando a luta ficar brutal',
+      favorTitle: 'A Redenção do Desertor · Antigo Irmão de Juramento na Vila Remota',
+      favorEmp: '"Você me contou sobre o seu antigo irmão de juramento que fugiu daquele cerco desesperado e hoje vive escondido na vila remota. Vamos encontrá-lo juntos e dar a ele a chance de redenção que você busca."',
+      favorEmpDesc: 'Acompanhar {name} até a vila remota para julgar e redimir o antigo companheiro',
+      favorEmpReplyText: 'Não busco vingança cega, mas o peso daquele voto quebrado precisa de resposta. Ir até a cabana dele ao seu lado me dará a serenidade necessária para ser justo.',
+      favorPrag: '"Se o desertor da sua ordem anda armado nos arredores da vila remota, precisamos saber se ele ainda é confiável ou se virou mercenário. Vamos confrontá-lo com cautela."',
+      favorPragDesc: 'Localizar o antigo irmão de juramento e avaliar suas reais intenções',
+      favorPragReplyText: 'Prudência justa. O medo que o fez fugir do cerco pode tê-lo mudado; conversaremos na cabana abandonada, mas manteremos nossas guardas prontas.',
+      favorCheck: '"Me relate os relatos dos andarilhos sobre o eremita armado na vila remota. Se compreendermos como ele tem protegido os moradores locais, saberemos se o arrependimento dele é sincero antes do confronto."',
+      favorCheckDesc: 'Investigar os atos recentes do desertor na vila remota antes do julgamento',
+      favorCheckSuccNarr: '{name} analisa com você os relatos de que o antigo cavaleiro tem defendido camponeses sem cobrar nada. O caminho para a Redenção do Desertor ficou claro (<b>+5 de Aprovação</b>).',
+      favorCheckSuccText: '"Suas palavras iluminaram meu julgamento. Ele busca expiar a falha do cerco em silêncio — quando o encontrarmos na cabana, renovaremos o juramento sob a luz da manhã."',
+      favorCheckFailText: '"As pistas dos viajantes ainda são contraditórias; preciso meditar sobre nossos votos antes de bater à porta dele."',
+      favorProv: '"Carregar a vergonha de um irmão de ordem desertor por tanto tempo só mancha o seu brasão. Vamos logo até essa vila remota encerrar essa história."',
+      favorProvDesc: 'Exigir resolução firme para o caso do desertor da ordem',
+      favorProvReplyText: 'A honra da minha ordem exige verdade, não pressa sanguinária. Mas concordo que o tempo de espera acabou: partiremos ao encontro dele.',
+      romanceTitle: 'Voto do Coração · Devoção Além do Dever',
+      romanceHabit: 'colocar o dever sagrado e o código de honra acima de qualquer desejo pessoal',
+      sparringTitle: 'Treino de Cavalaria · Guarda de Escudo e Contra-Ataque',
+      sparringDrill: 'resistência de impacto no escudo e precisão de estocada em combate cerrado'
+    },
+    bardo: {
+      campItem: 'o alaúde de jacarandá e o caderno de crônicas e baladas',
+      campNightSkill: 'elevar o moral da comitiva com acordes suaves e captar rumores nas estradas',
+      campVigilPlace: 'os salões vibrantes do Conservatório e das tavernas',
+      backstoryTitle: 'A Canção Proibida · O Exílio dos Salões da Corte',
+      backstoryOrigin: 'foi expulso dos salões da nobreza após cantar versos que denunciavam a traição dos conselheiros reais',
+      backstoryOriginFem: 'foi expulsa dos salões da nobreza após cantar versos que denunciavam a traição dos conselheiros reais',
+      backstoryThreat: 'os censores e agentes dos nobres corruptos',
+      backstorySecretEvent: 'a noite do banquete em que você trocou a ode encomendada pela verdade sobre o sacrifício do antigo monarca',
+      backstoryShadow: 'a perseguição dos nobres que tentaram silenciar sua música',
+      moralsTitle: 'A Voz da Verdade · Memória e Liberdade',
+      moralsVirtue: 'usa o humor e a música como escudo, mas recusa distorcer a história para agradar poderosos',
+      moralsCreed: 'a preservação da verdade histórica e da esperança do povo através da arte',
+      combatTitle: 'Cadência de Batalha · Inspiração e Lâmina Ágil',
+      combatWeapon: 'seu florete ágil e seus acordes de inspiração',
+      combatRole: 'inspirar nossos ataques no momento exato e desestabilizar a concentração inimiga',
+      combatTactic: 'sincronizarmos o avanço com o seu acorde de inspiração para rompermos a defesa deles no primeiro turno',
+      combatManeuver: 'eu chamar a atenção da linha de frente enquanto você usa sua palavra dissonante para abrir a guarda do líder',
+      combatProvoke: 'tocar alaúde e fazer piada acalma o acampamento, mas quero ver se seu florete acompanha o ritmo quando o cerco apertar',
+      favorTitle: 'A Balada do Rei Solitário · Versos Proibidos na Cripta Antiga',
+      favorEmp: '"Você falou sobre a Balada do Rei Solitário, que foi proibida por nobres corruptos. Vamos até a cripta antiga copiar os versos originais entalhados na pedra para que você cante a verdade ao povo."',
+      favorEmpDesc: 'Ajudar {name} a resgatar os versos entalhados na cripta e restaurar a balada histórica',
+      favorEmpReplyText: 'Resgatar esses versos da pedra fria e cantá-los na taverna diante do povo será a maior obra da minha vida. Obrigado por acreditar na força dessa história!',
+      favorPrag: '"Se os nobres corruptos têm medo do que está escrito nas estelas da cripta sobre o Rei Solitário, esses versos são uma arma política valiosa. Vamos copiá-los antes que mandem destruir as pedras."',
+      favorPragDesc: 'Garantir as provas históricas da cripta antes que sejam apagadas',
+      favorPragReplyText: 'Bem pensado! Já houve tentativas de raspar as inscrições do cemitério antigo; se formos preparados com carvão e pergaminho, copiamos tudo em segurança.',
+      favorCheck: '"Me mostre os fragmentos métricos que você já conhece da Balada do Rei Solitário. Se decifrarmos a rima arcaica antes de entrar na cripta, saberemos exatamente em qual estela procurar os versos perdidos."',
+      favorCheckDesc: 'Decifrar a estrutura poética antiga para localizar as estelas corretas na cripta',
+      favorCheckSuccNarr: '{name} dedilha uma melodia baixa e completa a estrofe com a sua ajuda, identificando a câmara exata do mausoléu real. A busca pela Balada do Rei Solitário avançou (<b>+5 de Aprovação</b>).',
+      favorCheckSuccText: '"Harmonia impecável! A terceira estrofe aponta direto para a estela do oriente na cripta. Com isso, copiaremos a canção inteira sob o luar."',
+      favorCheckFailText: '"O dialeto antigo usado pelo cronista real tem armadilhas de tradução; preciso revisar mais um pergaminho antes de descermos à cripta."',
+      favorProv: '"Um bardo que fala tanto da Balada do Rei Solitário, mas ainda não teve coragem de entrar no cemitério para copiar os versos da cripta? Vamos logo resolver isso."',
+      favorProvDesc: 'Desafiar {name} a buscar os versos proibidos na cripta',
+      favorProvReplyText: 'Coragem poética nunca me faltou, meu caro! Só precisava de alguém com pulso firme para segurar os mortos-vivos enquanto eu copio a letra.',
+      romanceTitle: 'Melodia para Dois · Versos Sem Plateia',
+      romanceHabit: 'transformar tudo em espetáculo e galanteio para esconder o que sente de verdade',
+      sparringTitle: 'Treino de Esgrima · Jogo de Pernas e Finta de Florete',
+      sparringDrill: 'cadência de passos, esquiva lateral e estocada rápida de esgrima'
+    },
+    druida: {
+      campItem: 'o cajado de carvalho vivo e o ramo de visgo sagrado',
+      campNightSkill: 'escutar o aviso das raízes e dos animais noturnos antes que qualquer perigo se aproxime',
+      campVigilPlace: 'os círculos de pedra sob as árvores anciãs',
+      backstoryTitle: 'O Bosque Cinzento · A Cicatriz da Forja Clandestina',
+      backstoryOrigin: 'deixou o isolamento do círculo silvestre quando o avanço de fundições ilegais começou a secar as nascentes antigas',
+      backstoryOriginFem: 'deixou o isolamento do círculo silvestre quando o avanço de fundições ilegais começou a secar as nascentes antigas',
+      backstoryThreat: 'os exploradores ilegais que envenenam os bosques',
+      backstorySecretEvent: 'o dia em que a árvore anciã do seu círculo começou a verter seiva negra por causa dos rejeitos lançados no desfiladeiro',
+      backstoryShadow: 'o definhamento silencioso do seu bosque natal',
+      moralsTitle: 'A Lei das Estações · Equilíbrio entre Civilização e Selva',
+      moralsVirtue: 'compreende que mortais precisam de lenha e abrigo, mas combate sem trégua a ganância que envenena a terra',
+      moralsCreed: 'a preservação do ciclo vital das matas e nascentes de Valdoria',
+      combatTitle: 'Fúria da Natureza · Vinhas e Forma Selvagem',
+      combatWeapon: 'seu cajado elemental e suas raízes constritoras',
+      combatRole: 'prender o avanço inimigo no solo e proteger nossos flancos com força primordial',
+      combatTactic: 'você enraizar a vanguarda inimiga com vinhas para que nosso grupo neutralize um alvo por vez',
+      combatManeuver: 'eu atrair os inimigos para o terreno úmido onde suas magias da natureza têm alcance total',
+      combatProvoke: 'falar com árvores e passarinhos é bonito, mas quero ver se sua fúria selvagem dá conta quando o aço e o fogo dominarem o campo',
+      favorTitle: 'As Raízes Envenenadas · Escória Alquímica na Fonte do Bosque Sagrado',
+      favorEmp: '"Você me contou que os resíduos de uma fundição clandestina estão envenenando o lençol de água e matando a árvore anciã do bosque. Vamos até o desfiladeiro selar esse duto tóxico e purificar a fonte juntos."',
+      favorEmpDesc: 'Ajudar {name} a desmantelar a fundição clandestina e salvar a árvore anciã',
+      favorEmpReplyText: 'A árvore anciã guarda a memória de séculos deste vale. Saber que você está disposto a lutar pelas raízes dela renova minha esperança nos habitantes das cidades.',
+      favorPrag: '"Se a escória alquímica daquela fundição clandestina continuar infiltrando no lençol freático, a água de todo o vale ficará intragável. Precisamos fechar aquela forja no desfiladeiro quanto antes."',
+      favorPragDesc: 'Conter a contaminação hídrica do desfiladeiro por segurança estratégica',
+      favorPragReplyText: 'Nenhuma muralha sobrevive quando a água apodrece. Se destruirmos as caldeiras clandestinas no desfiladeiro, a chuva purificadora fará o resto.',
+      favorCheck: '"Me mostre as folhas manchadas e o lodo que você recolheu perto da nascente. Se analisarmos o composto alquímico nos resíduos, encontraremos a direção exata do duto subterrâneo no desfiladeiro."',
+      favorCheckDesc: 'Identificar a origem química da escória para localizar o duto oculto',
+      favorCheckSuccNarr: '{name} examina os cristais ácidos no lodo com você e identifica a fenda rochosa por onde a fundição despeja o veneno. O plano para salvar as Raízes Envenenadas está traçado (<b>+5 de Aprovação</b>).',
+      favorCheckSuccText: '"Sua percepção é digna dos antigos guardiões do círculo! Selaremos o duto na rocha matriz e realizaremos o rito de purificação na fonte."',
+      favorCheckFailText: '"A correnteza subterrânea espalhou o lodo por várias fendas; preciso ouvir as raízes mais perto do desfiladeiro antes de avançarmos."',
+      favorProv: '"Um guardião da natureza deixar uma forja clandestina envenenar a árvore anciã do próprio bosque sem derrubar tudo na hora? Vamos logo pôr fim a essa fundição."',
+      favorProvDesc: 'Cobrar ação imediata contra os poluidores do desfiladeiro',
+      favorProvReplyText: 'A fúria cega faz desmoronar a própria montanha. Mas a hora da paciência passou: vamos arrancar aquela forja como erva daninha.',
+      romanceTitle: 'Orvalho e Raiz · Sintonia Natural a Dois',
+      romanceHabit: 'manter a mente distante nos ciclos da floresta e na voz do vento',
+      sparringTitle: 'Treino de Equilíbrio · Fluidez como Água e Rocha',
+      sparringDrill: 'defesa circular com bastão e manutenção de base firme em terreno instável'
+    },
+    monge: {
+      campItem: 'as faixas de linho dos punhos e as contas de meditação',
+      campNightSkill: 'controlar a respiração no frio noturno e perceber vibrações de passos pelo solo',
+      campVigilPlace: 'os pátios silenciosos do monastério nas alturas',
+      backstoryTitle: 'O Monastério das Nuvens · O Incêndio no Cume',
+      backstoryOrigin: 'desceu das montanhas após o incêndio que destruiu seu monastério e lançou o sino sagrado no abismo',
+      backstoryOriginFem: 'desceu das montanhas após o incêndio que destruiu seu monastério e lançou o sino sagrado no abismo',
+      backstoryThreat: 'os saqueadores das ravinas que profanaram as ruínas do monastério',
+      backstorySecretEvent: 'a noite de fumaça no cume em que você carregou os pergaminhos de treino enquanto o sino de bronze despencava no desfiladeiro',
+      backstoryShadow: 'o silêncio dos mestres caídos no monastério incendiado',
+      moralsTitle: 'O Caminho do Centro · Disciplina sem Ódio',
+      moralsVirtue: 'domina golpes capazes de partir rochas, mas jamais luta movido por raiva ou desejo de humilhar o oponente',
+      moralsCreed: 'a harmonia entre mente serena e ação precisa para interromper a violência',
+      combatTitle: 'Fluxo de Golpes · Mobilidade e Atordoamento',
+      combatWeapon: 'seus punhos enfaixados e seu bastão ágil',
+      combatRole: 'atravessar a linha inimiga como o vento e atordoar os alvos mais perigosos',
+      combatTactic: 'eu segurar a frente pesada enquanto você salta pelos flancos para interromper e atordoar o conjurador inimigo',
+      combatManeuver: 'abrir um corredor na formação deles para você encaixar sua sequência de golpes nos pontos de pressão',
+      combatProvoke: 'meditar e dar socos no ar parece ótimo no treino, mas quero ver se punhos sem armadura aguentam quando enfrentarmos feras encouraçadas',
+      favorTitle: 'O Sino do Monastério Perdido · O Badalo Sagrado Roubado nas Ravinas',
+      favorEmp: '"Você me contou que o badalo do sino sagrado do seu monastério incendiado foi roubado por bandidos das ravinas. Vamos recuperar essa relíquia e tocar o sino no abismo para dar descanso às almas dos seus mestres."',
+      favorEmpDesc: 'Ajudar {name} a reaver o badalo sagrado e realizar o rito fúnebre dos monges',
+      favorEmpReplyText: 'Sem as badaladas do repouso, o espírito da tradição do meu templo permanece suspenso. Subir aquelas escarpas ao seu lado trará paz aos meus mestres.',
+      favorPrag: '"Se o bando das ravinas guarda o badalo de bronze do seu monastério no baú do acampamento deles, podemos neutralizar os saqueadores da rota da montanha e recuperar a relíquia na mesma operação."',
+      favorPragDesc: 'Recuperar o badalo sagrado enquanto limpamos o acampamento de bandidos nas ravinas',
+      favorPragReplyText: 'Dois propósitos cumpridos em um único movimento, como ensina a arte marcial. O acampamento deles fica na plataforma rochosa logo acima do abismo.',
+      favorCheck: '"Me descreva as escarpas do desfiladeiro onde o sino de bronze caiu e a posição das tendas dos bandidos. Se escalarmos pelo lado do vento, tomaremos o badalo do baú antes que alcancem as armas."',
+      favorCheckDesc: 'Planejar a escalada tática e a recuperação do badalo no acampamento das ravinas',
+      favorCheckSuccNarr: '{name} desenha na terra os pontos de apoio da rocha e a localização do sino caído. A rota para o Sino do Monastério Perdido foi definida com perfeição (<b>+5 de Aprovação</b>).',
+      favorCheckSuccText: '"Sua mente vê o caminho na pedra com clareza cristalina. Recuperaremos o badalo e faremos o bronze sagrado ressoar pelas montanhas."',
+      favorCheckFailText: '"Os ventos do desfiladeiro mudam conforme a estação; preciso observar a escarpa mais de perto antes de escolhermos a rota de subida."',
+      favorProv: '"Tanta disciplina e meditação, mas o badalo sagrado do seu monastério continua jogado no baú de bandidos comuns nas ravinas? Hora de buscá-lo."',
+      favorProvDesc: 'Incitar {name} a agir para recuperar a relíquia do monastério',
+      favorProvReplyText: 'A paciência aguarda o instante exato do golpe, não a omissão. Agora que temos força reunida, nenhuma ravina nos deterá.',
+      romanceTitle: 'Quietude Compartilhada ·Dois Corações no Mesmo Ritmo',
+      romanceHabit: 'manter o desapego sereno e o controle absoluto sobre cada batimento cardíaco',
+      sparringTitle: 'Treino de Mãos Vazias · Desvio de Fluxo e Equilíbrio',
+      sparringDrill: 'redirecionamento da força do oponente, esquiva curta e velocidade de punho'
+    },
+    barbaro: {
+      campItem: 'o machado pesado de lâmina larga e o amuleto de osso tribal',
+      campNightSkill: 'sentir o cheiro de predadores no vento frio e manter a fogueira acesa contra a geada',
+      campVigilPlace: 'as estepes geladas das terras altas',
+      backstoryTitle: 'O Inverno de Sangue · A Queda do Clã do Lobo',
+      backstoryOrigin: 'viu sua tribo nas cordilheiras ser dispersada após um inverno cruel seguido pelo saque de mercadores de escravos e troféus',
+      backstoryOriginFem: 'viu sua tribo nas cordilheiras ser dispersada após um inverno cruel seguido pelo saque de mercadores de escravos e troféus',
+      backstoryThreat: 'os saqueadores que profanaram os totens do seu clã',
+      backstorySecretEvent: 'a tempestade de neve em que você enfrentou três saqueadores de mãos limpas para garantir a retirada dos anciãos da tribo',
+      backstoryShadow: 'as piras apagadas da sua aldeia nas montanhas',
+      moralsTitle: 'Palavra de Sangue · Verdade Direta sem Falsidade Urbana',
+      moralsVirtue: 'despreza as mentiras educadas da cidade, mas defende até a última gota de sangue quem divide o pão e a batalha consigo',
+      moralsCreed: 'a lealdade feroz do clã e a honra provada em atos, não em contratos de papel',
+      combatTitle: 'Fúria da Avalancha · Quebra de Linha com Machado',
+      combatWeapon: 'seu machado de duas mãos e sua fúria indomável',
+      combatRole: 'abrir a formação inimiga ao meio e absorver os golpes mais brutais',
+      combatTactic: 'você avançar em fúria partindo os escudos da frente enquanto eu elimino quem tentar flanquear você',
+      combatManeuver: 'eu empurrar os inimigos para perto do seu giro de machado para derrubarmos dois de uma vez',
+      combatProvoke: 'gritar e bater o machado assusta recrutas, mas quero ver se você não perde a cabeça quando enfrentarmos um inimigo técnico',
+      favorTitle: 'O Totem do Clã Esquecido · Crânio do Lobo Ancestral na Tenda do Mercador',
+      favorEmp: '"Você me contou que um comerciante inescrupuloso exibe o crânio do lobo ancestral, o totem sagrado da sua tribo, como troféu. Vamos interceptar o comboio dele, resgatar o totem e acender a pira fúnebre nas montanhas."',
+      favorEmpDesc: 'Ajudar {name} a recuperar o Totem do Clã Esquecido e honrar seus ancestrais',
+      favorEmpReplyText: 'Você fala como verdadeiro irmão de clã! Quando o crânio do lobo ancestral voltar às piras do cume, os espíritos da minha tribo finalmente descansarão.',
+      favorPrag: '"Se o mercador que roubou o Totem do Clã Esquecido viaja pela rota comercial com escolta armada, precisamos abordá-lo antes que ele venda a relíquia para longe de Valdoria."',
+      favorPragDesc: 'Interceptar o comboio do mercador na rota comercial antes que o totem desapareça',
+      favorPragReplyText: 'Bem pensado. Se ele cruzar a fronteira com o totem na carroça, nunca mais o alcançaremos. Vamos emboscar a rota dele no passo da colina.',
+      favorCheck: '"Me diga quais marcas tribais estão entalhadas no crânio do lobo ancestral e a rota habitual da caravana desse mercador. Assim provaremos o roubo ou tomaremos o totem sem que a guarda da estrada interfira."',
+      favorCheckDesc: 'Rastrear o comboio do mercador e planejar a retomada do Totem do Clã Esquecido',
+      favorCheckSuccNarr: '{name} mostra o entalhe idêntico no próprio bracelete de couro e confirma o ponto de parada da caravana. O plano para reaver o Totem do Clã Esquecido está fechado (<b>+5 de Aprovação</b>).',
+      favorCheckSuccText: '"Pelo sangue dos ancestrais, seu plano é certeiro! Tomaremos o totem na parada do comboio e subiremos a cordilheira para a pira sagrada."',
+      favorCheckFailText: '"As carroças de comércio mudaram de estrada por causa da lama; vou farejar em qual estalagem aquele mercador parou."',
+      favorProv: '"Deixar um mercadorzinho exibir o totem sagrado do seu clã como enfeite de tenda sem partir a carroça dele ao meio? Onde está a fúria da sua tribo?"',
+      favorProvDesc: 'Provocar o brio guerreiro de {name} para resgatar o totem ancestral',
+      favorProvReplyText: 'Meu sangue ferve toda noite pensando naquele crânio sagrado preso em correntes! Prepare as armas — a tenda daquele mercador vai conhecer a fúria da montanha.',
+      romanceTitle: 'Chama sob a Geada · Lealdade Indomável do Coração',
+      romanceHabit: 'demonstrar afeto apenas através de proteção feroz em batalha e silêncio orgulhoso',
+      sparringTitle: 'Treino de Força Bruta · Resistência e Impacto',
+      sparringDrill: 'disputa de alavanca corporal, absorção de carga e esquiva contra golpes pesados'
+    },
+    feiticeiro: {
+      campItem: 'o broche canalizador e as fagulhas que dançam entre os dedos',
+      campNightSkill: 'sentir a eletricidade do ar antes das tempestades e iluminar as trevas com pulso inato',
+      campVigilPlace: 'os picos batidos pelo vento onde a magia corre solta',
+      backstoryTitle: 'O Sangue da Tempestade · O Despertar Incontrolável',
+      backstoryOrigin: 'precisou deixar sua vila natal quando a primeira tempestade arcana despertou o poder dormente em seu próprio sangue',
+      backstoryOriginFem: 'precisou deixar sua vila natal quando a primeira tempestade arcana despertou o poder dormente em seu próprio sangue',
+      backstoryThreat: 'os caçadores de conjuradores que temem magia inata',
+      backstorySecretEvent: 'a noite de trovoada em que seu poder despertou sozinho para repelir saqueadores, mas assustou aqueles que você amava',
+      backstoryShadow: 'o temor de perder o controle sobre a centelha do próprio sangue',
+      moralsTitle: 'Dom Natural · Liberdade sem Correntes',
+      moralsVirtue: 'rejeita quem trata a magia inata como maldição e usa seu dom para proteger quem é perseguido',
+      moralsCreed: 'a aceitação da própria natureza sem deixar que o poder consuma a humanidade',
+      combatTitle: 'Surto Elemental · Metamagia e Explosão',
+      combatWeapon: 'sua centelha inata e seus feitiços moldados por metamagia',
+      combatRole: 'descarregar rajadas elementais duplicadas quando o inimigo menos espera',
+      combatTactic: 'eu atrair os inimigos para longe de você enquanto você molda o feitiço para atingir apenas os alvos certos',
+      combatManeuver: 'quebrar a linha de escudos deles no instante em que suas fagulhas arcanas estiverem prontas para disparar',
+      combatProvoke: 'ter magia correndo nas veias de berço parece fácil, mas quero ver se você controla essa tempestade quando o cansaço bater',
+      favorTitle: 'A Centelha Descontrolada · Gema Condutora nas Cavernas de Cristal',
+      favorEmp: '"Tenho visto como as tempestades sobrecarregam seu sangue arcano. Vamos até as cavernas de cristal buscar a gema condutora para estabilizar sua centelha antes que ela machuque você."',
+      favorEmpDesc: 'Ajudar {name} a encontrar a gema prismática nas cavernas de cristal',
+      favorEmpReplyText: 'Pouca gente percebe a dor que sinto quando o ar carrega de magia. Descer à caverna prismática com você ao meu lado me dá coragem para domar essa centelha.',
+      favorPrag: '"Se uma sobrecarga da sua Centelha Descontrolada acontecer no meio de um combate fechado, podemos todos ser atingidos. Precisamos buscar logo a gema estabilizadora nas cavernas de cristal."',
+      favorPragDesc: 'Estabilizar o fluxo arcano de {name} para evitar acidentes táticos na comitiva',
+      favorPragReplyText: 'Não tiro sua razão. A gema condutora da caverna prismática absorve o excesso elemental; fundida ao meu broche, meu poder ficará firme como aço.',
+      favorCheck: '"Me deixe analisar o padrão das fagulhas nas suas mãos quando o tempo fecha. Se medirmos a frequência do seu sangue arcano, saberemos qual cristal da caverna prismática ressoa sem rachar."',
+      favorCheckDesc: 'Estudar a ressonância elemental para escolher a gema condutora exata',
+      favorCheckSuccNarr: '{name} estende a mão faiscante e, com a sua leitura precisa, identifica o tom prismático ideal para conter os surtos. O caminho para domar a Centelha Descontrolada está aberto (<b>+5 de Aprovação</b>).',
+      favorCheckSuccText: '"Incrível! Nem eu tinha percebido que o pulso estabiliza no espectro azul-safira. Na caverna de cristal, saberemos exatamente qual gema colher."',
+      favorCheckFailText: '"A estática no ar hoje está forte demais para medir a ressonância; tentaremos novamente antes de entrar nas cavernas."',
+      favorProv: '"Viver com medo da própria magia explodir a cada trovoada não é jeito de andar pela estrada. Vamos logo buscar esse cristal nas cavernas."',
+      favorProvDesc: 'Desafiar {name} a dominar definitivamente sua centelha inata',
+      favorProvReplyText: 'Eu não temo meu poder — só respeito a força da tempestade. Mas você tem razão: é hora de buscar aquela gema e mostrar quem manda nesse sangue.',
+      romanceTitle: 'Centelha e Calma · O Toque que Serena a Tempestade',
+      romanceHabit: 'manter distância física nos momentos de tensão por receio de que suas fagulhas arcanas firam quem está perto',
+      sparringTitle: 'Treino de Canalização · Disparo Rápido e Esquiva',
+      sparringDrill: 'controle de pulso mágico em movimento e reação rápida contra investidas'
+    },
+    bruxo: {
+      campItem: 'o anel de ferro frio gravado com runas antigas e o talismã de pacto',
+      campNightSkill: 'enxergar perfeitamente na escuridão densa e pressentir sussurros do além',
+      campVigilPlace: 'as encruzilhadas nebulosas sob a lua minguante',
+      backstoryTitle: 'O Juramento na Encruzilhada · O Preço da Sobrevivência',
+      backstoryOrigin: 'selou um pacto desesperado com uma entidade ancestral para salvar sua aldeia de uma praga sombria quando ninguém mais respondeu',
+      backstoryOriginFem: 'selou um pacto desesperado com uma entidade ancestral para salvar sua aldeia de uma praga sombria quando ninguém mais respondeu',
+      backstoryThreat: 'os cobradores ocultos e presságios do seu patrono',
+      backstorySecretEvent: 'a meia-noite em que você aceitou a marca no anel de ferro em troca da salvação daqueles que estavam morrendo',
+      backstoryShadow: 'as cláusulas sussurradas pelo seu patrono nas horas de silêncio',
+      moralsTitle: 'Luz nas Sombras · Usar as Trevas Contra o Mal',
+      moralsVirtue: 'carrega um poder de origem sombria, mas escolhe usá-lo para abater monstros que as ordens comuns temem enfrentar',
+      moralsCreed: 'a determinação de ser senhor do próprio destino apesar do preço do pacto',
+      combatTitle: 'Rajada Oculta · Maldições e Visão nas Trevas',
+      combatWeapon: 'sua rajada mística e suas maldições debilitantes',
+      combatRole: 'enfraquecer o alvo principal com maldições e atingir inimigos escondidos na escuridão',
+      combatTactic: 'você lançar sua maldição no líder inimigo logo no início para que meus golpes causem o dobro de estrago na guarda dele',
+      combatManeuver: 'eu empurrar o inimigo na direção da sua rajada mística para quebrarmos a formação deles',
+      combatProvoke: 'depender de poder emprestado por um patrono parece um atalho perigoso; quero ver como você se vira quando a conta chegar',
+      favorTitle: 'O Preço do Juramento Oculto · O Rito da Adaga sob o Freixo Relampejado',
+      favorEmp: '"Sei que o seu patrono está exigindo aquele tributo à meia-noite: enterrar a adaga de ferro sob o freixo atingido por raio. Não vou deixar você encarar as sombras desse rito sozinho — irei com você."',
+      favorEmpDesc: 'Acompanhar {name} até a colina do freixo calcinado para cumprir e conter o rito do patrono',
+      favorEmpReplyText: 'Poucos teriam coragem de pisar naquela colina à meia-noite quando o patrono sussurra. Ter sua lâmina guardando minhas costas durante o rito significa tudo para mim.',
+      favorPrag: '"Se o seu patrono continuar perturbando seu descanso até que a adaga de ferro seja enterrada sob o freixo relampejado, seu foco em combate vai cair. Vamos cumprir logo esse rito na colina e encerrar a cobrança."',
+      favorPragDesc: 'Resolver a exigência do patrono para manter {name} em plena capacidade na jornada',
+      favorPragReplyText: 'Frio e exato. O contrato oculto exige apenas a adaga enterrada e o solo selado com sal negro sob o freixo calcinado; cumprido o rito, o patrono silencia.',
+      favorCheck: '"Me mostre as inscrições no seu anel de ferro e os termos exatos do tributo sob o freixo atingido por raio. Se prepararmos o círculo de sal negro antes de você sussurrar o nome três vezes, impediremos que sombras extras atravessem."',
+      favorCheckDesc: 'Analisar as cláusulas ocultas do rito para bloquear manifestações hostis na colina',
+      favorCheckSuccNarr: '{name} examina as runas do anel com você e identifica a brecha ritualística que contém as sombras do patrono. O rito de O Preço do Juramento Oculto está seguro (<b>+5 de Aprovação</b>).',
+      favorCheckSuccText: '"Astúcia brilhante! Selando as raízes do freixo calcinado com sal negro na ordem inversa, pago o tributo sem dar um polegar a mais de poder à entidade."',
+      favorCheckFailText: '"As letras no anel de ferro mudam conforme a fase da lua; preciso decifrar o último verso antes de subirmos a colina."',
+      favorProv: '"Deixar uma entidade sombria puxar suas rédeas a cada noite não combina com quem diz mandar no próprio destino. Vamos logo enterrar essa adaga no freixo e calar essa voz."',
+      favorProvDesc: 'Desafiar {name} a quitar o tributo do patrono sem hesitação',
+      favorProvReplyText: 'Ninguém puxa minhas rédeas — todo acordo tem impostos, e eu pago os meus com ferro e sal. Vamos até aquela colina mostrar ao patrono que não temo o escuro.',
+      romanceTitle: 'Além do Pacto · Um Vínculo Escolhido Livremente',
+      romanceHabit: 'guardar segredos atrás de um olhar enigmático para não envolver ninguém no peso do seu pacto',
+      sparringTitle: 'Treino de Combate Oculto · Finta e Disparo Místico',
+      sparringDrill: 'manutenção de distância tática, leitura de intenções e reação contra emboscadas'
+    }
+  };
+
+  Object.keys(extraClasses).forEach(function(k) {
+    var d = extraClasses[k];
+    d.backstoryReplyEmp = d.backstoryReplyEmp || ('Compartilhar a história de como deixei meu passado para trás tira um peso antigo do peito. Obrigado por caminhar ao meu lado com tanta lealdade.');
+    d.backstoryReplyPrag = d.backstoryReplyPrag || ('O que passou serviu para forjar minha determinação. Se qualquer inimigo do passado cruzar nossa estrada, encontrará nossa comitiva pronta.');
+    d.backstoryCheckSuccNarr = d.backstoryCheckSuccNarr || ('Sua intuição toca o cerne da memória de {name}, que confidencia os detalhes daquele capítulo decisivo. Um laço de profunda confiança foi firmado (<b>+5 de Aprovação</b>).');
+    d.backstoryCheckSuccText = d.backstoryCheckSuccText || ('"Poucas pessoas em Valdoria ouviram essa história até o fim. Saber que você compreende minhas cicatrizes fortalece minha lealdade a este grupo."');
+    d.backstoryCheckFailText = d.backstoryCheckFailText || ('"Algumas lembranças ainda exigem silêncio antes de serem ditas por completo. Conversaremos mais adiante."');
+    d.moralsReplyEmp = d.moralsReplyEmp || ('É reconfortante saber que marcho ao lado de alguém que compreende meus princípios e não mede tudo apenas em moedas.');
+    d.moralsReplyPrag = d.moralsReplyPrag || ('Concordo. Princípios firmes precisam caminhar junto com preparo e vigilância para que o grupo sobreviva.');
+    d.moralsCheckSuccText = d.moralsCheckSuccText || ('"Nossas escolhas na hora do perigo definem quem somos de verdade. Fico honrado em dividir a estrada com alguém de convicção tão clara."');
+    d.favorEmpReplyNarr = d.favorEmpReplyNarr || ('{name} aperta sua mão com firmeza e visível emoção diante do seu apoio irrestrito.');
+    ALLY_CLASS_TOPIC_LORE[k] = d;
+  });
+})();
+
 function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
   var cfg = ALLY_TOPIC_CONFIG[topicKey] || ALLY_TOPIC_CONFIG.camp_campfire;
   var dc = cfg.dc || 13;
   var skill = cfg.skill || 'persuasion';
-  var skillLabel = cfg.skillLabel || 'Persuasão';
-  var isFem = (m && (m.gender === 'female' || (m.name && String(m.name).toLowerCase().indexOf('wrenna') === 0)));
+  var isFem = Boolean(m && (m.gender === 'female' || (m.name && /^(?:wrenna|lyra|val[eé]ria|elora|sarah|mirela|freya|astrid|kiara|sylph|nyx|talia|helena)/i.test(String(m.name).trim()))));
+  var lore = ALLY_CLASS_TOPIC_LORE[cls] || ALLY_CLASS_TOPIC_LORE.guerreiro;
+  function _fmt(str) {
+    return String(str || '').replace(/\{name\}/g, displayName);
+  }
 
   var intros = {
     camp_campfire: [
-      { type: 'narration', text: 'A fogueira crepita com pequenas centelhas douradas subindo para o céu estrelado. ' + displayName + ' senta-se próximo às brasas, o calor suavizando o cansaço da marcha.' },
-      { type: 'speech', speaker: displayName, text: 'A noite está fresca, mas o fogo ajuda a relaxar. Poucas coisas valem tanto quanto uma conversa honesta depois de um dia de marcha puxada. O que você tem em mente?' }
+      { type: 'narration', text: 'A fogueira crepita lançando centelhas douradas na penumbra enquanto ' + displayName + ' cuida de ' + lore.campItem + ' perto das brasas.' },
+      { type: 'speech', speaker: displayName, text: 'A noite está fresca, mas o fogo ajuda a descansar da marcha. O que você gostaria de conversar antes da vigília?' }
     ],
     backstory_secret: [
-      { type: 'narration', text: displayName + ' fica em silêncio por um instante, o olhar pensativo revisitando lembranças antigas que o tempo não apagou.' },
-      { type: 'speech', speaker: displayName, text: 'Minha jornada não começou ontem. Deixei para trás lugares e histórias que nem sempre são fáceis de recordar... mas quem não tem suas marcas?' }
+      { type: 'narration', text: displayName + ' observa a estrada com olhar pensativo, recordando o tempo em que ' + (isFem ? lore.backstoryOriginFem : lore.backstoryOrigin) + '.' },
+      { type: 'speech', speaker: displayName, text: 'Cada um de nós carrega marcas de antes de entrar para a comitiva. Você queria perguntar sobre a minha história?' }
     ],
     morals_faith: [
-      { type: 'narration', text: displayName + ' gesticula com moderação, a postura demonstrando a reflexão séria de quem já enfrentou dilemas complicados na estrada.' },
-      { type: 'speech', speaker: displayName, text: 'O mundo não é preto no branco. Às vezes escolhas difíceis precisam ser feitas para que o grupo sobreviva. Qual é o seu limite moral?' }
+      { type: 'narration', text: displayName + ' mantém uma postura serena e firme, refletindo sobre ' + lore.moralsCreed + '.' },
+      { type: 'speech', speaker: displayName, text: 'As estradas de Valdoria testam o caráter de qualquer aventureiro. Como você enxerga o nosso código de conduta?' }
     ],
     combat_bonds: [
-      { type: 'narration', text: displayName + ' examina o equipamento de viagem com olhar metódico, assentindo com respeito ao notar sua presença.' },
-      { type: 'speech', speaker: displayName, text: 'Nosso ritmo de combate tem evoluído bem. Saber que posso confiar na sua cobertura quando o cerco aperta faz toda a diferença. Estamos prontos para o que vier.' }
+      { type: 'narration', text: displayName + ' confere ' + lore.combatWeapon + ' com olhar metódico, pronto para ' + lore.combatRole + '.' },
+      { type: 'speech', speaker: displayName, text: 'Nossa sintonia em batalha tem salvado o grupo. Quer alinhar nossas táticas para o próximo confronto?' }
     ],
     personal_favor: [
-      { type: 'narration', text: displayName + ' respira fundo, hesitando um segundo antes de quebrar a reserva habitual com um tom sincero e confidencial.' },
-      { type: 'speech', speaker: displayName, text: 'Há uma questão pessoal da qual não consigo me desvencilhar por conta própria. Se você puder me dar uma força quando a hora chegar, eu nunca esquecerei.' }
+      { type: 'narration', text: displayName + ' baixa o tom de voz com seriedade ao tratar de sua questão pendente: ' + lore.favorTitle + '.' },
+      { type: 'speech', speaker: displayName, text: 'Há uma pendência pessoal que não consigo resolver sem apoio confiável. Podemos falar sobre isso?' }
     ],
     romance_courtship: [
-      { type: 'narration', text: 'A brisa noturna agita suavemente as copas das árvores. ' + displayName + ' ergue os olhos devagar, um brilho cálido e desarmado transparecendo na penumbra.' },
-      { type: 'speech', speaker: displayName, text: 'O acampamento finalmente silenciou... e pela primeira vez hoje sinto que podemos respirar com calma. Gosto da sua companhia. O que trouxe você até aqui agora?' }
+      { type: 'narration', text: 'Longe da agitação, ' + displayName + ' deixa de lado o hábito de ' + lore.romanceHabit + ' e sustenta seu olhar com suavidade.' },
+      { type: 'speech', speaker: displayName, text: 'Finalmente um momento de calma apenas entre nós dois. O que trouxe você para perto agora?' }
     ],
     sparring_challenge: [
-      { type: 'narration', text: displayName + ' assume uma postura ágil e equilibrada, os olhos brilhando com a centelha sadia da competição entre parceiros.' },
-      { type: 'speech', speaker: displayName, text: 'Um treino leve antes do descanso afasta a rigidez muscular e mantém os reflexos vivos. Guarda alta — me mostre o que aprendeu hoje!' }
+      { type: 'narration', text: displayName + ' assume postura de prontidão para um exercício de ' + lore.sparringDrill + '.' },
+      { type: 'speech', speaker: displayName, text: 'Um treino técnico mantém os reflexos vivos para a estrada. Como quer conduzir esta disputa?' }
     ]
   };
 
   var script = intros[topicKey] || intros.camp_campfire;
-
-  // Escolhas ricas contextualizadas para cada tópico
+  var contextHint = displayName;
   var choices = [];
 
   if (topicKey === 'camp_campfire') {
+    contextHint = 'Vigília Noturna · ' + lore.campItem.charAt(0).toUpperCase() + lore.campItem.slice(1);
     choices = [
       {
         id: 'emp_camp_campfire',
-        label: '"A estrada cansa, mas uma conversa tranquila ao seu lado renova o ânimo para o que vier."',
+        label: '"Deixe ' + lore.campItem + ' de lado por um instante e sente-se mais perto das brasas. Dividir esta fogueira com você renova o ânimo para a estrada."',
+        desc: 'Momento de camaradagem junto ao fogo do acampamento',
         deltaApproval: 5, renownDelta: 2, cb: 'close',
         _replyScript: [
-          { type: 'narration', text: displayName + ' relaxa os ombros e sorri calorosamente, sentindo a sinceridade das palavras.' },
-          { type: 'speech', speaker: displayName, text: 'É bom ouvir isso. Saber que temos companheirismo de verdade torna qualquer marcha mais leve.' }
+          { type: 'narration', text: displayName + ' guarda ' + lore.campItem + ', relaxa os ombros e sorri calorosamente perto do fogo.' },
+          { type: 'speech', speaker: displayName, text: 'É bom ouvir isso. Saber que temos companheirismo verdadeiro torna qualquer marcha por Valdoria mais leve.' }
         ]
       },
       {
         id: 'prag_camp_campfire',
-        label: '"Aproveite para descansar e revisar as provisões. Amanhã a marcha começa cedo."',
+        label: '"Aproveite o calor da fogueira para revisar ' + lore.campItem + ' e descansar. Eu assumo o primeiro turno de vigília antes da alvorada."',
+        desc: 'Organizar os turnos de sentinela e a manutenção do equipamento',
         deltaApproval: 2, renownDelta: 1, cb: 'close',
         _replyScript: [
-          { type: 'narration', text: displayName + ' assente com aprovação prática, organizando as bolsas de viagem.' },
-          { type: 'speech', speaker: displayName, text: 'Tem razão. O descanso é tão importante quanto a lâmina afiada.' }
+          { type: 'narration', text: displayName + ' assente com aprovação prática, terminando de ajustar o equipamento de viagem.' },
+          { type: 'speech', speaker: displayName, text: 'Combinado. Descanso bem dividido mantém o grupo inteiro vivo quando o sol nascer.' }
         ]
       },
       {
         id: 'check_camp_campfire',
-        label: '"Venha, me conte como você aprendeu a sobreviver nestas paragens."',
+        label: '"Durante a vigília desta noite, me ensine como você faz para ' + lore.campNightSkill + '."',
+        desc: 'Aprender técnicas práticas de vigília noturna com ' + displayName,
         check: { skill: skill, dc: dc }, deltaApproval: 4,
-        resultNarration: displayName + ' sorri abertamente e passa os minutos seguintes compartilhando memórias valiosas e truques de sobrevivência. A conversa fortaleceu a afinidade entre vocês (<b>+4 de Aprovação</b>).',
-        resultText: '"Pouca gente sabe ouvir de verdade na estrada. Se mantivermos os olhos abertos e o fogo baixo, nenhuma emboscada nos pega."',
-        resultNarrationFail: displayName + ' dá um sorriso tímido. A conversa permaneceu amigável, mas reservada.',
-        resultTextFail: '"Uma longa história para outra noite. Hoje prefiro só escutar o fogo."'
+        resultNarration: displayName + ' sorri com satisfação e passa a vigília demonstrando na prática como ' + lore.campNightSkill + '. A afinidade entre vocês cresceu (<b>+4 de Aprovação</b>).',
+        resultText: '"Você aprende rápido! Com os dois atentos a esses sinais na escuridão, nenhuma emboscada nos pegará de surpresa."',
+        resultNarrationFail: displayName + ' tenta demonstrar a técnica, mas o cansaço da marcha pesa nos seus olhos.',
+        resultTextFail: '"Essa técnica exige ouvidos descansados. Na próxima parada de acampamento tentamos de novo."'
       },
       {
         id: 'prov_camp_campfire',
-        label: '"Duvido que você aguente o primeiro turno de vigília sem cochilar nas brasas."',
+        label: '"Quem está acostumado com ' + lore.campVigilPlace + ' aguenta mesmo o turno de vigília no mato frio sem cochilar perto das brasas?"',
+        desc: 'Provocar um desafio bem-humorado sobre a resistência na vigília',
         deltaApproval: 1, renownDelta: 0, cb: 'close',
         _replyScript: [
-          { type: 'narration', text: displayName + ' solta uma risada desafiadora e ajeita a postura.' },
-          { type: 'speech', speaker: displayName, text: 'Está duvidando da minha vigília? Vamos ver quem vai estar de pé quando o sol nascer!' }
+          { type: 'narration', text: displayName + ' solta uma risada desafiadora e ajeita a postura junto à fogueira.' },
+          { type: 'speech', speaker: displayName, text: 'Está duvidando da minha vigília? Vamos ver quem vai estar mais desperto quando o amanhecer chegar!' }
         ]
       }
     ];
   } else if (topicKey === 'backstory_secret') {
+    contextHint = lore.backstoryTitle;
     choices = [
       {
         id: 'emp_backstory_secret',
-        label: '"Todo mundo carrega marcas do passado. O que importa é quem você escolhe ser hoje."',
+        label: '"Sei que você ' + (isFem ? lore.backstoryOriginFem : lore.backstoryOrigin) + '. O que importa para mim é a pessoa leal que caminha ao nosso lado hoje."',
+        desc: 'Acolher a história de origem de ' + displayName + ' (' + lore.backstoryTitle.split('·')[0].trim() + ')',
         deltaApproval: 5, renownDelta: 2, cb: 'close',
         _replyScript: [
-          { type: 'narration', text: displayName + ' suspira com alívio, sentindo o peso das lembranças diminuir.' },
-          { type: 'speech', speaker: displayName, text: 'Obrigado por entender. Poucas pessoas olham além das cicatrizes da estrada.' }
+          { type: 'narration', text: displayName + ' respira fundo com alívio sincero, sentindo que suas origens são compreendidas sem julgamento.' },
+          { type: 'speech', speaker: displayName, text: _fmt(lore.backstoryReplyEmp) }
         ]
       },
       {
         id: 'prag_backstory_secret',
-        label: '"O passado ficou para trás. Se alguma dívida antiga bater à porta, resolveremos com aço."',
+        label: '"O seu passado ficou para trás, mas se ' + lore.backstoryThreat + ' cruzar nossa estrada para cobrar contas antigas, responderemos com aço."',
+        desc: 'Garantir proteção mútua contra inimigos antigos do passado de ' + displayName,
         deltaApproval: 2, renownDelta: 1, cb: 'close',
         _replyScript: [
-          { type: 'narration', text: displayName + ' acena com determinação prática e um olhar confiante.' },
-          { type: 'speech', speaker: displayName, text: 'Direto ao ponto. É desse tipo de determinação que nosso grupo precisa.' }
+          { type: 'narration', text: displayName + ' acena com determinação firme e olhar confiante.' },
+          { type: 'speech', speaker: displayName, text: _fmt(lore.backstoryReplyPrag) }
         ]
       },
       {
         id: 'check_backstory_secret',
-        label: '"Você fala com cautela, mas vejo que há algo mais profundo guardado no seu peito."',
+        label: '"Você sempre fala com cautela sobre ' + lore.backstorySecretEvent + '. O que realmente aconteceu naquela ocasião?"',
+        desc: 'Conquistar a confiança de ' + displayName + ' para ouvir os detalhes ocultos de seu passado',
         check: { skill: skill, dc: dc }, deltaApproval: 5,
-        resultNarration: 'Sua percepção atinge o cerne da questão. ' + displayName + ' respira fundo e confidencia um segredo importante de suas origens. Um laço de profunda confiança foi estabelecido (<b>+5 de Aprovação</b>).',
-        resultText: '"Nunca contei isso a mais ninguém... mas depois de tudo o que passamos lado a lado, sei que meu passado está seguro com você."',
-        resultNarrationFail: displayName + ' desvia o olhar com delicadeza. O assunto foi mantido em sigilo respeitoso.',
-        resultTextFail: '"Algumas portas é melhor manter fechadas por enquanto."'
+        resultNarration: _fmt(lore.backstoryCheckSuccNarr),
+        resultText: _fmt(lore.backstoryCheckSuccText),
+        resultNarrationFail: displayName + ' desvia o olhar com respeito contido, preferindo guardar os detalhes mais dolorosos por ora.',
+        resultTextFail: _fmt(lore.backstoryCheckFailText)
       },
       {
         id: 'prov_backstory_secret',
-        label: '"Parece que você ainda foge da própria sombra. Quando vai encarar o que deixou para trás?"',
+        label: '"Notei que você ainda fica tenso quando falamos de ' + lore.backstoryShadow + '. Até quando vai carregar esse fantasma nas costas?"',
+        desc: 'Questionar diretamente o peso que o passado ainda exerce sobre ' + displayName,
         deltaApproval: 0, renownDelta: 0, cb: 'close',
         _replyScript: [
-          { type: 'narration', text: displayName + ' cerra os olhos com firmeza, encarando você sem recuar.' },
-          { type: 'speech', speaker: displayName, text: 'Eu não fujo de nada. Apenas escolho a hora certa de acertar as contas.' }
+          { type: 'narration', text: displayName + ' cerra os olhos com firmeza, sustentando sua pergunta sem recuar.' },
+          { type: 'speech', speaker: displayName, text: 'Eu não fujo do que vivi. Apenas escolho o momento certo de acertar cada conta pendente.' }
         ]
       }
     ];
   } else if (topicKey === 'morals_faith') {
+    contextHint = lore.moralsTitle;
     choices = [
       {
         id: 'emp_morals_faith',
-        label: '"A justiça deste mundo pode ser imperfeita, mas lutar pelo que é certo sempre vale a pena."',
+        label: '"Admiro como você ' + lore.moralsVirtue + '. Manter esses princípios em um mundo tão duro mostra sua verdadeira grandeza."',
+        desc: 'Valorizar o código de conduta de ' + displayName + ' (' + lore.moralsTitle.split('·')[0].trim() + ')',
         deltaApproval: 5, renownDelta: 2, cb: 'close',
         _replyScript: [
-          { type: 'narration', text: displayName + ' assente com respeito sincero, admirando seus princípios.' },
-          { type: 'speech', speaker: displayName, text: 'Concordo plenamente. É reconfortante viajar ao lado de quem compartilha dessa visão.' }
+          { type: 'narration', text: displayName + ' assente com respeito genuíno diante do reconhecimento de seus valores.' },
+          { type: 'speech', speaker: displayName, text: _fmt(lore.moralsReplyEmp) }
         ]
       },
       {
         id: 'prag_morals_faith',
-        label: '"Na hora do perigo, sobrevive quem age com rapidez. Dogmas não param lâminas inimigas."',
+        label: '"Respeito ' + lore.moralsCreed + ', mas na hora da emboscada precisamos agir sem hesitação para garantir que o grupo volte vivo."',
+        desc: 'Equilibrar os princípios morais de ' + displayName + ' com o pragmatismo de sobrevivência',
         deltaApproval: 2, renownDelta: 1, cb: 'close',
         _replyScript: [
-          { type: 'narration', text: displayName + ' reconhece a sobriedade pragmática com um leve aceno.' },
-          { type: 'speech', speaker: displayName, text: 'Visão realista. Idealismo sem capacidade de sobrevivência vira túmulo rápido.' }
+          { type: 'narration', text: displayName + ' pondera suas palavras e concorda com um gesto sóbrio.' },
+          { type: 'speech', speaker: displayName, text: _fmt(lore.moralsReplyPrag) }
         ]
       },
       {
         id: 'check_morals_faith',
-        label: '"As crenças e os deuses testam nossos limites, mas a convicção nasce das nossas escolhas."',
+        label: '"Sabendo que você preza por ' + lore.moralsCreed + ', qual é a escolha mais difícil que já precisou fazer quando a lei e a justiça entraram em conflito?"',
+        desc: 'Debater profundamente a filosofia e o limite ético de ' + displayName,
         check: { skill: skill, dc: dc }, deltaApproval: 4,
-        resultNarration: displayName + ' reflete sobre suas palavras com profunda admiração filosófica. A troca de ideias ampliou o respeito mútuo (<b>+4 de Aprovação</b>).',
-        resultText: '"É raro encontrar alguém que pense assim nestas estradas. Suas palavras têm peso — e fico contente em marchar ao seu lado."',
-        resultNarrationFail: displayName + ' sorri suavemente. A conversa encerrou sem desacordos.',
-        resultTextFail: '"Filosofia interessante, embora a prática na lama seja bem mais crua."'
+        resultNarration: displayName + ' reflete com profunda admiração pela sua maturidade filosófica. A conversa fortaleceu o respeito mútuo (<b>+4 de Aprovação</b>).',
+        resultText: _fmt(lore.moralsCheckSuccText),
+        resultNarrationFail: displayName + ' esboça um meio-sorriso pensativo, encerrando o debate sem atritos.',
+        resultTextFail: '"Filosofia profunda para o meio da jornada. Na prática da estrada, a resposta raramente é simples."'
       },
       {
         id: 'prov_morals_faith',
-        label: '"Essa nobreza soa bonita na teoria, mas na lama da estrada a sobrevivência fala mais alto."',
+        label: '"Defender ' + lore.moralsCreed + ' funciona quando estamos seguros, mas quero ver se esse código resiste quando a fome e o perigo apertarem de verdade."',
+        desc: 'Colocar à prova a firmeza dos princípios de ' + displayName,
         deltaApproval: 1, renownDelta: 0, cb: 'close',
         _replyScript: [
-          { type: 'narration', text: displayName + ' mantém a compostura, firme em suas convicções.' },
-          { type: 'speech', speaker: displayName, text: 'Se abandonarmos nossos valores na primeira lama, não seremos melhores do que os monstros que caçamos.' }
+          { type: 'narration', text: displayName + ' mantém a postura inabalável, encarando o seu questionamento com seriedade.' },
+          { type: 'speech', speaker: displayName, text: 'Se abandonarmos nossos princípios no primeiro aperto da estrada, não seremos diferentes dos monstros que caçamos.' }
         ]
       }
     ];
   } else if (topicKey === 'combat_bonds') {
+    contextHint = lore.combatTitle;
     choices = [
       {
         id: 'emp_combat_bonds',
-        label: '"Saber que posso confiar nas suas costas me dá a coragem necessária na linha de frente."',
+        label: '"Saber que posso contar com ' + lore.combatWeapon + ' para ' + lore.combatRole + ' me dá confiança total para avançar na linha de frente."',
+        desc: 'Reconhecer a importância tática de ' + displayName + ' nos combates do grupo',
         deltaApproval: 5, renownDelta: 2, cb: 'close',
         _replyScript: [
-          { type: 'narration', text: displayName + ' bate a mão aberta no peito com lealdade vibrante.' },
-          { type: 'speech', speaker: displayName, text: 'E pode contar com isso. Enquanto eu puder empunhar minha arma, você nunca estará sem apoio na linha de frente.' }
+          { type: 'narration', text: displayName + ' toca ' + lore.combatWeapon + ' com lealdade vibrante e assente com firmeza.' },
+          { type: 'speech', speaker: displayName, text: 'Pode contar comigo de olhos fechados. Enquanto eu estiver de pé, ninguém passará pela nossa guarda.' }
         ]
       },
       {
         id: 'prag_combat_bonds',
-        label: '"Vamos repassar nossos ângulos de cobertura e sinais de recuo para não termos surpresas."',
+        label: '"Vamos alinhar nossa formação: que tal ' + lore.combatTactic + ' para não desperdiçarmos recursos?"',
+        desc: 'Definir protocolo tático de combate em dupla com ' + displayName,
         deltaApproval: 3, renownDelta: 1, cb: 'close',
         _replyScript: [
-          { type: 'narration', text: displayName + ' esboça os movimentos no ar com precisão tática.' },
-          { type: 'speech', speaker: displayName, text: 'Perfeito. Alinhamento tático impecável economiza poções e sangue.' }
+          { type: 'narration', text: displayName + ' analisa os ângulos de ataque e concorda com precisão tática.' },
+          { type: 'speech', speaker: displayName, text: 'Perfeito. Coordenação limpa economiza poções, vigor e sangue nos encontros difíceis.' }
         ]
       },
       {
         id: 'check_combat_bonds',
-        label: '"Se você cobrir minha retaguarda enquanto avanço, podemos quebrar qualquer formação inimiga."',
+        label: '"Tive uma ideia para combinarmos ' + lore.combatWeapon + ' com o meu avanço: posso ' + lore.combatManeuver + '. Vamos ensaiar esse sinal?"',
+        desc: 'Propor manobra combinada de alto impacto com ' + displayName,
         check: { skill: skill, dc: dc }, deltaApproval: 4,
         resultNarration: displayName + ' vibra com a estratégia proposta e ajusta os detalhes da manobra conjunta. Sinergia tática aprimorada (<b>+4 de Aprovação</b>).',
         resultText: '"Bem pensado! No próximo confronto, dê o sinal que eu fecho a brecha no seu flanco no mesmo instante."',
-        resultNarrationFail: displayName + ' avalia o plano com prudência. A tática permaneceu a usual.',
-        resultTextFail: '"Arriscado demais sem suporte lateral. Melhor mantermos a formação padrão."'
+        resultNarrationFail: displayName + ' avalia o tempo de execução da manobra com cautela.',
+        resultTextFail: '"O tempo de resposta dessa transição ainda é arriscado sem cobertura lateral. Melhor mantermos a formação padrão por enquanto."'
       },
       {
         id: 'prov_combat_bonds',
-        label: '"Quero ver se você mantém esse ritmo quando enfrentarmos monstros de verdade e o cerco apertar."',
+        label: '"Até agora vimos lutas fáceis: ' + lore.combatProvoke + '."',
+        desc: 'Espicaçar o brio combativo de ' + displayName + ' para os próximos confrontos',
         deltaApproval: 1, renownDelta: 0, cb: 'close',
         _replyScript: [
-          { type: 'narration', text: displayName + ' ergue uma sobrancelha com um sorriso irônico e afiado.' },
-          { type: 'speech', speaker: displayName, text: 'Fique de olho na minha lâmina no próximo combate. Depois você me diz se meu ritmo é bom ou não!' }
+          { type: 'narration', text: displayName + ' ergue uma sobrancelha com um sorriso confiante e afiado.' },
+          { type: 'speech', speaker: displayName, text: 'Fique de olho em mim no próximo combate pesado. Depois você me diz quem precisou de cobertura!' }
         ]
       }
     ];
   } else if (topicKey === 'personal_favor') {
+    contextHint = lore.favorTitle;
     choices = [
       {
         id: 'emp_personal_favor',
-        label: '"Seja o que for, você faz parte do nosso grupo. Vamos resolver isso juntos."',
+        label: _fmt(lore.favorEmp),
+        desc: _fmt(lore.favorEmpDesc),
         deltaApproval: 6, renownDelta: 2, cb: 'close',
         _replyScript: [
-          { type: 'narration', text: displayName + ' abre um sorriso emocionado e aliviado, apertando sua mão com firmeza.' },
-          { type: 'speech', speaker: displayName, text: 'Sua lealdade não tem preço. Guardarei esse compromisso com a minha vida.' }
+          { type: 'narration', text: _fmt(lore.favorEmpReplyNarr) },
+          { type: 'speech', speaker: displayName, text: _fmt(lore.favorEmpReplyText) }
         ]
       },
       {
         id: 'prag_personal_favor',
-        label: '"Se essa pendência colocar o grupo em perigo, precisamos agir com antecedência."',
+        label: _fmt(lore.favorPrag),
+        desc: _fmt(lore.favorPragDesc),
         deltaApproval: 2, renownDelta: 1, cb: 'close',
         _replyScript: [
-          { type: 'narration', text: displayName + ' assente seriamente, compreendendo a prudência.' },
-          { type: 'speech', speaker: displayName, text: 'Compreendo perfeitamente. Vamos planejar isso de forma limpa e sem riscos desnecessários.' }
+          { type: 'narration', text: displayName + ' assente com seriedade estratégica, reconhecendo a visão prática.' },
+          { type: 'speech', speaker: displayName, text: _fmt(lore.favorPragReplyText) }
         ]
       },
       {
         id: 'check_personal_favor',
-        label: '"Me dê os detalhes concretos desse problema. Toda situação tem uma brecha que podemos explorar."',
+        label: _fmt(lore.favorCheck),
+        desc: _fmt(lore.favorCheckDesc),
         check: { skill: skill, dc: dc }, deltaApproval: 5,
-        resultNarration: displayName + ' expõe os detalhes da missão com clareza, encontrando esperança na sua capacidade analítica. Missão pessoal mapeada com sucesso (<b>+5 de Aprovação</b>).',
-        resultText: '"Com esse plano temos uma chance real de resolver tudo sem cair em armadilhas. Quando chegarmos lá, faremos exatamente como você disse."',
-        resultNarrationFail: displayName + ' hesita um momento. O assunto foi adiado temporariamente.',
-        resultTextFail: '"Ainda faltam algumas peças nesse quebra-cabeça. Trarei novidades quando tiver certeza."'
+        resultNarration: _fmt(lore.favorCheckSuccNarr),
+        resultText: _fmt(lore.favorCheckSuccText),
+        resultNarrationFail: displayName + ' hesita um instante ao revisar os riscos da empreitada.',
+        resultTextFail: _fmt(lore.favorCheckFailText)
       },
       {
         id: 'prov_personal_favor',
-        label: '"Deixar pendências pelo caminho é descuido. Espero que isso não nos traga encrencas."',
+        label: _fmt(lore.favorProv),
+        desc: _fmt(lore.favorProvDesc),
         deltaApproval: -1, renownDelta: 0, cb: 'close',
         _replyScript: [
-          { type: 'narration', text: displayName + ' contrai a mandíbula por um segundo, contendo o incômodo.' },
-          { type: 'speech', speaker: displayName, text: 'Eu sei lidar com os meus problemas. Só pedi ajuda porque confiei no grupo.' }
+          { type: 'narration', text: displayName + ' contrai o maxilar por um segundo, respondendo com orgulho firme.' },
+          { type: 'speech', speaker: displayName, text: _fmt(lore.favorProvReplyText) }
         ]
       }
     ];
   } else if (topicKey === 'romance_courtship') {
+    contextHint = lore.romanceTitle;
     choices = [
       {
         id: 'emp_romance_courtship',
-        label: '"Sua presença torna toda essa jornada mais especial. Fico muito feliz de estarmos juntos aqui."',
+        label: '"Perto dos outros você costuma ' + lore.romanceHabit + ', mas fico feliz que comigo você se sinta seguro para baixar a guarda e sorrir."',
+        desc: 'Demonstrar afeto sincero e acolhimento íntimo a ' + displayName,
         deltaApproval: 6, renownDelta: 2, cb: 'close',
         _replyScript: [
           { type: 'narration', text: displayName + ' aproxima-se um passo, um rubor suave surgindo no rosto com um sorriso afetuoso.' },
-          { type: 'speech', speaker: displayName, text: 'Eu sinto o mesmo... Estar ao seu lado faz qualquer perigo parecer pequeno.' }
+          { type: 'speech', speaker: displayName, text: 'Eu sinto o mesmo... Estar ao seu lado faz todo o peso e o perigo da estrada parecerem pequenos.' }
         ]
       },
       {
         id: 'prag_romance_courtship',
-        label: '"A estrada é dura, mas ter alguém de confiança mútua faz tudo valer a pena."',
+        label: '"Nossa rotina é cercada de riscos, mas construir essa cumplicidade a dois com você faz cada provação da viagem valer a pena."',
+        desc: 'Valorizar a parceria afetiva e a confiança construída na jornada',
         deltaApproval: 3, renownDelta: 1, cb: 'close',
         _replyScript: [
           { type: 'narration', text: displayName + ' pousa a mão suavemente sobre a sua com serenidade e carinho.' },
-          { type: 'speech', speaker: displayName, text: 'Confiança é o laço mais precioso que podíamos ter construído.' }
+          { type: 'speech', speaker: displayName, text: 'Confiança e afeto verdadeiro são o laço mais raro que poderíamos ter encontrado em Valdoria.' }
         ]
       },
       {
         id: 'check_romance_courtship',
-        label: '"Seus olhos dizem muito mais do que suas palavras. O que você realmente sente agora?"',
+        label: '"Mesmo quando você tenta ' + lore.romanceHabit + ', seus olhos entregam o que sente. Não precisa esconder o quanto significa para mim quando estamos a sós."',
+        desc: 'Desarmar a reserva emocional de ' + displayName + ' com sensibilidade',
         check: { skill: skill, dc: dc }, deltaApproval: 5,
-        resultNarration: displayName + ' sustenta o seu olhar por longos segundos, desarmando completamente qualquer hesitação e revelando seu afeto sincero. Momento de íntima cumplicidade (<b>+5 de Aprovação</b>).',
-        resultText: '"Com você aqui, até o peso da estrada desaparece. Não quero mais esconder o quanto você significa para mim."',
-        resultNarrationFail: displayName + ' desvia o olhar com um sorriso envergonhado. O momento passou com carinho e timidez.',
-        resultTextFail: '"Você sempre sabe como me desconcertar... mas ainda é cedo para dizer tudo."'
+        resultNarration: displayName + ' sustenta o seu olhar por longos segundos, desarmando qualquer hesitação e revelando seu afeto sincero. Momento de íntima cumplicidade (<b>+5 de Aprovação</b>).',
+        resultText: '"Com você aqui, não preciso de armadura nem de disfarces. Não quero mais esconder o quanto você é especial para mim."',
+        resultNarrationFail: displayName + ' desvia o olhar com um sorriso tímido e afetuoso.',
+        resultTextFail: '"Você sempre sabe como me desconcertar... mas me dê só mais um tempo para colocar em palavras tudo o que sinto."'
       },
       {
         id: 'prov_romance_courtship',
-        label: isFem ? '"Você é sempre tão misteriosa ou só fica tímida quando estamos a sós?"' : '"Você é sempre tão misterioso ou só fica tímido quando estamos a sós?"',
+        label: isFem
+          ? '"Você sempre faz questão de ' + lore.romanceHabit + ', ou só perde a pose quando fica perto demais de mim?"'
+          : '"Você sempre faz questão de ' + lore.romanceHabit + ', ou só perde a pose quando fica perto demais de mim?"',
+        desc: 'Flertar com bom humor e quebrar o gelo com ' + displayName,
         deltaApproval: 2, renownDelta: 0, cb: 'close',
         _replyScript: [
-          { type: 'narration', text: displayName + ' solta uma risada doce e divertida, balançando a cabeça com charme.' },
-          { type: 'speech', speaker: displayName, text: 'Eu, com vergonha? Você que se cuide, aventureiro destemido.' }
+          { type: 'narration', text: displayName + ' solta uma risada baixa e charmosa, balançando a cabeça.' },
+          { type: 'speech', speaker: displayName, text: 'Eu, perdendo a pose? Cuidado com as provocações, ou vou cobrar essa ousadia depois da vigília.' }
         ]
       }
     ];
   } else if (topicKey === 'sparring_challenge') {
+    contextHint = lore.sparringTitle;
     choices = [
       {
         id: 'emp_sparring_challenge',
-        label: '"Um treino limpo e sem rancor. O melhor jeito de afinarmos nossos reflexos."',
+        label: '"Vamos fazer uma rodada amistosa de ' + lore.sparringDrill + '. Treinar ao seu lado é o melhor jeito de afinar nossos reflexos."',
+        desc: 'Iniciar treino técnico amistoso de ' + lore.sparringTitle.split('·')[1].trim().toLowerCase(),
         deltaApproval: 4, renownDelta: 2, cb: 'close',
         _replyScript: [
-          { type: 'narration', text: displayName + ' gira a arma com maestria e assume a postura inicial com entusiasmo.' },
-          { type: 'speech', speaker: displayName, text: 'É essa a atitude! Vamos ver como você reage a esse jogo de pernas!' }
+          { type: 'narration', text: displayName + ' assume a postura inicial de treino com entusiasmo e camaradagem.' },
+          { type: 'speech', speaker: displayName, text: 'É essa a atitude! Vamos ver como você reage a esta sequência de movimentos!' }
         ]
       },
       {
         id: 'prag_sparring_challenge',
-        label: '"Guarda alta e movimentos curtos. Treino serve para consertar erros antes da batalha real."',
+        label: '"Foco em ' + lore.sparringDrill + ': movimentos curtos e correção de guarda para não repetirmos brechas no combate real."',
+        desc: 'Treinar correção tática de postura e defesa com ' + displayName,
         deltaApproval: 2, renownDelta: 1, cb: 'close',
         _replyScript: [
-          { type: 'narration', text: displayName + ' concorda com firmeza, ajustando a base com seriedade técnica.' },
-          { type: 'speech', speaker: displayName, text: 'Disciplina primeiro. Mostre o que tem de melhor!' }
+          { type: 'narration', text: displayName + ' concorda com seriedade técnica, ajustando a base para o exercício.' },
+          { type: 'speech', speaker: displayName, text: 'Disciplina em primeiro lugar. Suor no treinamento poupa sangue na batalha.' }
         ]
       },
       {
         id: 'check_sparring_challenge',
-        label: '"Tente quebrar minha defesa se puder. Vou te mostrar um contra-ataque que aprendi na estrada."',
+        label: '"Mostre sua melhor técnica em ' + lore.sparringDrill + '. Vou antecipar o seu movimento e encaixar um contra-ataque limpo!"',
+        desc: 'Testar perícia prática em duelo técnico contra ' + displayName,
         check: { skill: skill, dc: dc }, deltaApproval: 5,
-        resultNarration: 'Você executa uma finta perfeita seguida de um bloqueio limpo. ' + displayName + ' arregala os olhos e comemora a beleza da manobra. Maestria reconhecida no treino (<b>+5 de Aprovação</b>).',
-        resultText: '"Impressionante! Esse contra-ataque foi impecável — vou precisar treinar dobrado para não cair nessa finta de novo!"',
-        resultNarrationFail: displayName + ' esquiva com facilidade do seu avanço e toca seu ombro de brincadeira. O treino terminou com risadas amigáveis.',
-        resultTextFail: '"Boa tentativa, mas a sua base abriu demais!"'
+        resultNarration: 'Você lê a finta no instante exato e executa o contra-golpe durante o exercício de ' + lore.sparringDrill + '. ' + displayName + ' comemora a precisão da manobra (<b>+5 de Aprovação</b>).',
+        resultText: '"Impressionante! Sua leitura de tempo foi impecável — vou precisar suar dobrado para superar esse reflexo na próxima!"',
+        resultNarrationFail: displayName + ' escapa com agilidade do seu avanço durante o exercício e toca seu ombro de forma esportiva.',
+        resultTextFail: '"Boa tentativa, mas sua guarda abriu meio segundo antes da hora! Vamos repetir a base."'
       },
       {
         id: 'prov_sparring_challenge',
-        label: '"Prepare-se para beijar a poeira. Vou te mostrar como se luta de verdade!"',
+        label: '"Você se orgulha tanto de dominar ' + lore.sparringDrill + ', mas aposto que hoje quem vai beijar a poeira do treino é você!"',
+        desc: 'Desafiar ' + displayName + ' para uma disputa acirrada de habilidade',
         deltaApproval: 2, renownDelta: 0, cb: 'close',
         _replyScript: [
-          { type: 'narration', text: displayName + ' abre um sorriso feroz e empolgado, partindo para o duelo com vigor.' },
-          { type: 'speech', speaker: displayName, text: 'Adoro quem tem sangue nos olhos! Venha com tudo!' }
+          { type: 'narration', text: displayName + ' abre um sorriso competitivo e avança para o exercício com vigor.' },
+          { type: 'speech', speaker: displayName, text: 'Adoro quando você entra no treino com sangue nos olhos! Em guarda — mostre o que sabe!' }
         ]
       }
     ];
   }
 
-  return { script: script, choices: choices };
+  return { script: script, choices: choices, contextHint: contextHint };
 }
 
 function _allyStorageKey(m, idx) {
@@ -71636,6 +72202,7 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
     return {
       id: c.id,
       label: c.label,
+      desc: c.desc || '',
       cb: c.cb || 'close',
       _oneShot: true,
       _replyScript: c._replyScript,
@@ -71674,7 +72241,7 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
     autoOpenChoices: true,
     isSubmenu: true,
     choicesTitle: displayName + ' · ' + cfg.title,
-    choicesSubtitle: displayName,
+    choicesSubtitle: topicNode.contextHint || displayName,
     npc: {
       id: 'ally_' + (m.name || ('idx' + idx)) + '_' + topicKey,
       name: displayName,
@@ -71816,7 +72383,7 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
         npc: dlg.npc,
         choices: fullChoices,
         choicesTitle: displayName + ' · ' + cfg.title,
-        choicesSubtitle: displayName
+        choicesSubtitle: topicNode.contextHint || displayName
       }, {
         onChoice: _handleAllyTopicChoice
       });
@@ -71824,7 +72391,7 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
     if (typeof window.vEncounter.openChoices === 'function') {
       window.vEncounter.openChoices(fullChoices, {
         title: displayName + ' · ' + cfg.title,
-        npcName: displayName,
+        npcName: topicNode.contextHint || displayName,
         isSubmenu: true,
         dialogue: dlg,
         onChoice: _handleAllyTopicChoice

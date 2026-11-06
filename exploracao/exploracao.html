@@ -112880,6 +112880,23 @@ function _showCampfireTopicDialogue(ally, topicKey, opts) {
   var allyPort = ally.portrait || ally.port || null;
 
   var allyGender = ally.gender || 'female';
+  var _rawCls = String(ally.cls || ally.class || 'guerreiro').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  var _campQuestByCls = {
+    ladino: { title: 'A Marca das Sombras', action: 'invadir o depósito das docas e queimar a nota promissória forjada pela Guilda das Sombras' },
+    guerreiro: { title: 'O Estandarte de Karreth', action: 'rastrear o covil dos salteadores e recuperar o estandarte da sua antiga companhia' },
+    clerigo: { title: 'O Cálice da Capela Esquecida', action: 'descer às catacumbas profanadas e purificar o Cálice Sagrado dos Quatro' },
+    sacerdotisa: { title: 'O Cálice da Capela Esquecida', action: 'descer às catacumbas profanadas e purificar o Cálice Sagrado dos Quatro' },
+    mago: { title: 'As Páginas Proibidas de Istrad', action: 'recuperar os três fólios arcanos roubados antes que causem um desastre' },
+    patrulheiro: { title: 'A Fera Ferida do Pico Nevado', action: 'rastrear o predador atingido por dardos envenenados nas ravinas e curá-lo' },
+    paladino: { title: 'A Redenção do Desertor', action: 'localizar o antigo irmão de juramento na vila remota e julgar seu arrependimento' },
+    bardo: { title: 'A Balada do Rei Solitário', action: 'copiar os versos proibidos entalhados na cripta antiga e cantá-los ao povo' },
+    druida: { title: 'As Raízes Envenenadas', action: 'selar o duto de escória tóxica da forja clandestina e salvar a árvore anciã' },
+    monge: { title: 'O Sino do Monastério Perdido', action: 'recuperar o badalo de bronze no acampamento das ravinas e tocar o sino sagrado' },
+    barbaro: { title: 'O Totem do Clã Esquecido', action: 'resgatar o crânio do lobo ancestral da tenda do mercador e acender a pira no cume' },
+    feiticeiro: { title: 'A Centelha Descontrolada', action: 'buscar a gema condutora nas cavernas de cristal para estabilizar seu sangue arcano' },
+    bruxo: { title: 'O Preço do Juramento Oculto', action: 'enterrar a adaga de ferro sob o freixo atingido por raio e selar o rito com sal negro' }
+  };
+  var _cq = _campQuestByCls[_rawCls] || _campQuestByCls.guerreiro;
 
 
 
@@ -113135,11 +113152,11 @@ function _showCampfireTopicDialogue(ally, topicKey, opts) {
 
     personal_favor: {
 
-      title: 'Assunto Pessoal e Favor',
+      title: 'Assunto Pessoal · ' + _cq.title,
 
-      narration: displayName + ' inclina-se para a frente, diminuindo o tom de voz para que o vento não leve as palavras.',
+      narration: displayName + ' inclina-se para a frente junto às brasas, diminuindo o tom de voz para tratar de ' + _cq.title + '.',
 
-      speech: 'Tem uma questão pessoal que preciso resolver em breve. Uma dívida que não posso deixar em aberto. Posso contar com você quando chegar a hora?',
+      speech: 'Há uma pendência que não posso deixar em aberto: precisamos ' + _cq.action + '. Posso contar com você quando chegar a hora?',
 
       choices: [
 
@@ -113147,11 +113164,11 @@ function _showCampfireTopicDialogue(ally, topicKey, opts) {
 
           id: 'emp',
 
-          label: '"A sua causa é a nossa causa. Vamos resolver isso juntos, não importa o perigo."',
+          label: '"Sobre \'' + _cq.title + '\': a sua causa é a nossa causa. Vamos ' + _cq.action + ' juntos, não importa o perigo."',
 
           delta: 8,
 
-          reply: 'Eu sabia que podia contar com você. Não vou esquecer essa lealdade.'
+          reply: 'Eu sabia que podia contar com você para ' + _cq.action + '. Não vou esquecer essa lealdade.'
 
         },
 
@@ -113159,11 +113176,11 @@ function _showCampfireTopicDialogue(ally, topicKey, opts) {
 
           id: 'prag',
 
-          label: '"Se isso não colocar a comitiva em perigo desnecessário, você tem o meu apoio."',
+          label: '"Se a pendência de \'' + _cq.title + '\' puder colocar a comitiva em risco, precisamos nos antecipar e ' + _cq.action + ' com planejamento."',
 
           delta: 4,
 
-          reply: 'Justo. Vamos planejar cada detalhe com antecedência para evitar surpresas.'
+          reply: 'Justo. Vamos planejar cada detalhe antes de ' + _cq.action + ' para evitar emboscadas.'
 
         },
 
@@ -113171,11 +113188,11 @@ function _showCampfireTopicDialogue(ally, topicKey, opts) {
 
           id: 'check',
 
-          label: '[Persuasão] "Você tem sido leal desde o primeiro dia. Minha espada é sua."',
+          label: '[Persuasão] "Você tem sido leal desde o primeiro dia. Me dê os detalhes de \'' + _cq.title + '\' — minha lâmina está com você para ' + _cq.action + '."',
 
           delta: 7,
 
-          reply: 'Obrigado de verdade. Saber que tenho você ao meu lado me tira um peso imenso do peito.'
+          reply: 'Obrigado de verdade. Saber que tenho você ao meu lado para ' + _cq.action + ' me tira um peso imenso do peito.'
 
         },
 
@@ -113183,11 +113200,11 @@ function _showCampfireTopicDialogue(ally, topicKey, opts) {
 
           id: 'prov',
 
-          label: '"Só se a recompensa ou o desafio valerem a caminhada extra!"',
+          label: '"Deixar \'' + _cq.title + '\' pendente por tanto tempo é descuido! Vamos logo ' + _cq.action + ' assim que o caminho abrir."',
 
           delta: 3,
 
-          reply: 'Hah! Pode ter certeza de que você não vai se arrepender da empreitada.'
+          reply: 'Hah! Pode ter certeza de que quando formos ' + _cq.action + ', não vai faltar ação.'
 
         }
 
