@@ -72417,19 +72417,7 @@ function _showAllyTopicsMenu(idx, opts) {
       portraitHTML: portraitHTML,
       gender: allyGender
     },
-    script: isAtCampfire ? [
-      {
-        type: 'speech',
-        speaker: displayName,
-        text: 'O calor da fogueira ajuda a relaxar depois de tanta marcha. O que você tem em mente esta noite?'
-      }
-    ] : [
-      {
-        type: 'speech',
-        speaker: displayName,
-        text: 'Sempre temos tempo para conversar. O que você gostaria de colocar em pauta hoje?'
-      }
-    ],
+    script: [],
     choices: choices
   };
 
@@ -72478,50 +72466,34 @@ function _showAllyTopicsMenu(idx, opts) {
 }
 window._showAllyTopicsMenu = _showAllyTopicsMenu;
 
-function _showAllyTopicDialogue(idx, topicKey, opts) {
+function _buildAllyStageChoices(idx, topicKey) {
   var m = (window.GROUP_MEMBERS || [])[idx];
-  if (!m || m.dead || m.isPlayer) return;
+  if (!m || m.dead || m.isPlayer) return [];
   var cls = _allyTplKey(m.cls);
   var displayName = (m.name || '').split(/\s+/)[0];
-  var _allyNpcId = 'ally_' + (m.name || ('idx' + idx));
-  var allyPort = (typeof _resolveAllyPortraitUrl === 'function') ? _resolveAllyPortraitUrl(m) : null;
-  var allyGender = (typeof _resolveAllyGender === 'function') ? _resolveAllyGender(m) : 'male';
-  var heraldicId = (typeof _cgpHeraldicIcon === 'function') ? _cgpHeraldicIcon(m.cls) : 'ic-aldeao';
-  var portraitHTML = (window.vAssets && typeof vAssets.classIconHTML === 'function')
-    ? vAssets.classIconHTML(heraldicId, '100%')
-    : '<svg viewBox="0 0 120 120" style="width:100%;height:100%"><use href="#' + heraldicId + '"/></svg>';
-
   var topicNode = _buildClientAllyTopicNode(cls, topicKey, displayName, m);
-  var cfg = ALLY_TOPIC_CONFIG[topicKey] || ALLY_TOPIC_CONFIG.camp_campfire;
-
   var allyStorageKey = _allyStorageKey(m, idx);
-  var allUnusedChoices = topicNode.choices.filter(function(c) {
+  var allUnused = (topicNode.choices || []).filter(function(c) {
     return !_isAllyChoiceUsed(allyStorageKey, topicKey, c.id, m);
   });
-  var activeStage = (allUnusedChoices.length > 0 && allUnusedChoices[0].stage) ? allUnusedChoices[0].stage : 1;
-  var availableChoices = allUnusedChoices.filter(function(c) {
+  if (!allUnused.length) return [];
+  var activeStage = (allUnused[0].stage) ? allUnused[0].stage : 1;
+  var available = allUnused.filter(function(c) {
     return (c.stage || 1) === activeStage;
   });
-
-  if (availableChoices.length === 0) {
-    var remTopics = (typeof _getAvailableAllyTopics === 'function') ? _getAvailableAllyTopics(idx) : [];
-    if (remTopics.length > 0) {
-      _showAllyTopicsMenu(idx, { autoOpenChoices: true, isSubmenu: true });
-    } else {
-      _showAllyDialogue(idx, { autoOpenChoices: true, isSubmenu: true });
-    }
-    return;
-  }
-
-  var fullChoices = availableChoices.map(function(c) {
+  return available.map(function(c) {
     return {
       id: c.id,
       backendId: c.backendId || c.id,
       stage: c.stage || 1,
       stageSiblings: c.stageSiblings || [c.id],
       label: c.label,
-      desc: c.desc || '',
-      cb: c.cb || 'close',
+      desc: '',
+      cb: function() {
+        if (typeof window._dispatchAllyTopicChoice === 'function') {
+          window._dispatchAllyTopicChoice(idx, topicKey, c);
+        }
+      },
       _oneShot: true,
       _replyScript: c._replyScript,
       deltaApproval: c.deltaApproval || 0,
@@ -72541,7 +72513,38 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
       }
     };
   });
+}
+window._getAllyNextStageChoices = _buildAllyStageChoices;
 
+function _showAllyTopicDialogue(idx, topicKey, opts) {
+  var m = (window.GROUP_MEMBERS || [])[idx];
+  if (!m || m.dead || m.isPlayer) return;
+  var cls = _allyTplKey(m.cls);
+  var displayName = (m.name || '').split(/\s+/)[0];
+  var _allyNpcId = 'ally_' + (m.name || ('idx' + idx));
+  var allyPort = (typeof _resolveAllyPortraitUrl === 'function') ? _resolveAllyPortraitUrl(m) : null;
+  var allyGender = (typeof _resolveAllyGender === 'function') ? _resolveAllyGender(m) : 'male';
+  var heraldicId = (typeof _cgpHeraldicIcon === 'function') ? _cgpHeraldicIcon(m.cls) : 'ic-aldeao';
+  var portraitHTML = (window.vAssets && typeof vAssets.classIconHTML === 'function')
+    ? vAssets.classIconHTML(heraldicId, '100%')
+    : '<svg viewBox="0 0 120 120" style="width:100%;height:100%"><use href="#' + heraldicId + '"/></svg>';
+
+  var topicNode = _buildClientAllyTopicNode(cls, topicKey, displayName, m);
+  var cfg = ALLY_TOPIC_CONFIG[topicKey] || ALLY_TOPIC_CONFIG.camp_campfire;
+
+  var stageChoices = _buildAllyStageChoices(idx, topicKey);
+
+  if (stageChoices.length === 0) {
+    var remTopics = (typeof _getAvailableAllyTopics === 'function') ? _getAvailableAllyTopics(idx) : [];
+    if (remTopics.length > 0) {
+      _showAllyTopicsMenu(idx, { autoOpenChoices: true, isSubmenu: true });
+    } else {
+      _showAllyDialogue(idx, { autoOpenChoices: true, isSubmenu: true });
+    }
+    return;
+  }
+
+  var fullChoices = stageChoices.slice();
   fullChoices.push({
     id: 'back_to_topics_menu',
     label: '↩ Escolher outro assunto',
@@ -72554,6 +72557,7 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
     isSubmenu: true,
     cb: function() { _showAllyDialogue(idx, { autoOpenChoices: true, isSubmenu: true }); }
   });
+  fullChoices.push({ id: 'leave', label: '↩ "Até mais tarde."', cb: 'close' });
 
   var dlg = {
     autoOpenChoices: true,
@@ -72573,11 +72577,6 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
   };
 
   function _handleAllyTopicChoice(ch) {
-    if (typeof ch.cb === 'function') {
-      try { ch.cb(ch, dlg); } catch(e) { console.warn('[ALLY-TOPIC] cb failed', e); }
-      return;
-    }
-
     var allyStorageKey = _allyStorageKey(m, idx);
     var idsToMark = (ch.stageSiblings && ch.stageSiblings.length) ? ch.stageSiblings : [ch.id];
     if (typeof _markAllyChoiceUsed === 'function') {
@@ -72641,12 +72640,15 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
       if (typeof _markAllyChoiceUsed === 'function' && ch.id) {
         _markAllyChoiceUsed(displayName, 'lore', ch.id, null, m);
       }
+      var nextStageChoices = _buildAllyStageChoices(idx, topicKey);
       var remInTopic = (topicNode.choices || []).filter(function(c) {
         return !_isAllyChoiceUsed(allyStorageKey, topicKey, c.id, m);
       });
       var remTopics = (typeof _getAvailableAllyTopics === 'function') ? _getAvailableAllyTopics(idx) : [];
       var replyChoices = [];
-      if (remInTopic.length > 0) {
+      if (nextStageChoices.length > 0) {
+        replyChoices = replyChoices.concat(nextStageChoices);
+      } else if (remInTopic.length > 0) {
         replyChoices.push({ id: 'more_in_topic', label: '↩ Continuar sobre este assunto', isSubmenu: true, isReturn: true, cb: function() { _showAllyTopicDialogue(idx, topicKey, { autoOpenChoices: true, isSubmenu: true }); } });
       }
       if (remTopics.length > 0) {
@@ -72660,7 +72662,7 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
       }
       replyChoices.push({
         id: 'back_to_ally_main',
-        label: '↩ "Gostaria de falar de outro assunto."',
+        label: '↩ Voltar às ações gerais',
         isSubmenu: true,
         isReturn: true,
         cb: function() { _showAllyDialogue(idx, { autoOpenChoices: true, isSubmenu: true }); }
@@ -72694,6 +72696,7 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
     }
     try { window.vEncounter.close(); } catch(_) {}
   }
+  window._dispatchAllyTopicChoice = _handleAllyTopicChoice;
 
   // Transição inteligente in-overlay se o encounter já estiver aberto
   if (window.vEncounter && typeof window.vEncounter.isOpen === 'function' && window.vEncounter.isOpen()) {

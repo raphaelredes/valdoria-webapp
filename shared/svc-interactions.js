@@ -450,19 +450,13 @@
             }
             var outcomeChoices = [];
             if (mIdx != null && typeof window._showAllyDialogue === 'function') {
-              var _remTopics = (typeof window._getAvailableAllyTopics === 'function') ? window._getAvailableAllyTopics(mIdx) : null;
-              if (aSrc && aSrc.topic && typeof window._showAllyTopicDialogue === 'function') {
-                var _hasMoreInTopic = _remTopics ? _remTopics.some(function(rt) { return rt && rt.key === aSrc.topic; }) : false;
-                if (_hasMoreInTopic) {
-                  outcomeChoices.push({
-                    id: 'more_in_topic',
-                    label: '↩ Continuar sobre este assunto',
-                    isSubmenu: true,
-                    isReturn: true,
-                    cb: function() { window._showAllyTopicDialogue(mIdx, aSrc.topic, { autoOpenChoices: true, isSubmenu: true }); }
-                  });
-                }
+              var nextStageChoices = (aSrc && aSrc.topic && typeof window._getAllyNextStageChoices === 'function')
+                ? window._getAllyNextStageChoices(mIdx, aSrc.topic)
+                : [];
+              if (nextStageChoices.length > 0) {
+                outcomeChoices = outcomeChoices.concat(nextStageChoices);
               }
+              var _remTopics = (typeof window._getAvailableAllyTopics === 'function') ? window._getAvailableAllyTopics(mIdx) : null;
               if (aSrc && aSrc.topic && typeof window._showAllyTopicsMenu === 'function' && (!_remTopics || _remTopics.length > 0)) {
                 outcomeChoices.push({
                   id: 'back_to_topics',
@@ -474,7 +468,7 @@
               }
               outcomeChoices.push({
                 id: 'back_to_ally_main',
-                label: '↩ "Gostaria de falar de outro assunto."',
+                label: '↩ Voltar às ações gerais',
                 isSubmenu: true,
                 isReturn: true,
                 cb: function() { window._showAllyDialogue(mIdx, { autoOpenChoices: true, isSubmenu: true }); }
