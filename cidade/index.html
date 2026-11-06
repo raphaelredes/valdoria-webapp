@@ -72055,9 +72055,8 @@ function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
       backendId: 'emp_' + topicKey,
       stage: 1,
       stageSiblings: s1Ids,
-      stageTitle: 'Etapa 1/3 · Puxar Assunto · ' + tm.subjectName,
       label: '"Notei que você ' + tm.cue + '. Está tudo bem ou há algo em que eu possa ajudar?"',
-      desc: 'Sondar com empatia o que você observou no comportamento de ' + displayName,
+      desc: '',
       deltaApproval: 2, renownDelta: 1, cb: 'close',
       _replyScript: [
         { type: 'narration', text: tm.revealNarr },
@@ -72069,9 +72068,8 @@ function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
       backendId: 'prag_' + topicKey,
       stage: 1,
       stageSiblings: s1Ids,
-      stageTitle: 'Etapa 1/3 · Puxar Assunto · ' + tm.subjectName,
       label: '"Reparei que você ' + tm.cue + '. Se isso tem relação com a nossa jornada, é melhor conversarmos abertamente."',
-      desc: 'Perguntar de forma direta e prática sobre o indício observado',
+      desc: '',
       deltaApproval: 1, renownDelta: 0, cb: 'close',
       _replyScript: [
         { type: 'narration', text: tm.revealNarr },
@@ -72083,9 +72081,8 @@ function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
       backendId: 'check_' + topicKey,
       stage: 1,
       stageSiblings: s1Ids,
-      stageTitle: 'Etapa 1/3 · Puxar Assunto · ' + tm.subjectName,
       label: '[SAB 13] "Observei ' + tm.cueItem + '. Há uma história por trás disso que você ainda não contou ao grupo, não é?"',
-      desc: 'Teste de Intuição · Ler os sinais sutis de ' + displayName + ' para iniciar o assunto',
+      desc: '',
       check: { skill: 'insight', dc: 13 }, deltaApproval: 3,
       resultNarration: tm.revealNarr + ' Sua percepção aguçada conquista a confiança imediata de ' + displayName + ' (<b>+3 de Aprovação</b>).',
       resultText: '"' + tm.revealSpeech + '"',
@@ -72097,9 +72094,8 @@ function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
       backendId: 'prov_' + topicKey,
       stage: 1,
       stageSiblings: s1Ids,
-      stageTitle: 'Etapa 1/3 · Puxar Assunto · ' + tm.subjectName,
       label: '"Vi que você ' + tm.cue + '. Vai contar para o grupo o que está acontecendo ou pretende guardar segredo?"',
-      desc: 'Pressionar ' + displayName + ' a revelar o motivo de sua atitude',
+      desc: '',
       deltaApproval: 0, renownDelta: 0, cb: 'close',
       _replyScript: [
         { type: 'narration', text: tm.revealNarr },
@@ -72114,9 +72110,8 @@ function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
       backendId: 'emp_' + topicKey,
       stage: 2,
       stageSiblings: s2Ids,
-      stageTitle: 'Etapa 2/3 · ' + tm.subjectName + ' (Explicação)',
       label: '"Confesso que eu não sabia disso. Pode me explicar melhor como funciona essa questão de ' + tm.subjectName + '?"',
-      desc: 'Ser sincero dizendo que não conhecia e pedir que ' + displayName + ' explique a história',
+      desc: '',
       deltaApproval: 3, renownDelta: 1, cb: 'close',
       _replyScript: [
         { type: 'narration', text: tm.explainNarr },
@@ -72128,9 +72123,8 @@ function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
       backendId: 'check_' + topicKey,
       stage: 2,
       stageSiblings: s2Ids,
-      stageTitle: 'Etapa 2/3 · ' + tm.subjectName + ' (Explicação)',
       label: tm.lieLabel,
-      desc: tm.lieDesc,
+      desc: '',
       check: { skill: 'deception', dc: 13 }, deltaApproval: 4,
       resultNarration: tm.lieSuccNarr,
       resultText: tm.lieSuccSpeech,
@@ -72142,9 +72136,8 @@ function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
       backendId: 'check_' + topicKey,
       stage: 2,
       stageSiblings: s2Ids,
-      stageTitle: 'Etapa 2/3 · ' + tm.subjectName + ' (Explicação)',
       label: tm.loreLabel,
-      desc: tm.loreDesc,
+      desc: '',
       check: { skill: skill, dc: 13 }, deltaApproval: 4,
       resultNarration: tm.loreSuccNarr,
       resultText: tm.loreSuccSpeech,
@@ -72156,9 +72149,8 @@ function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
       backendId: 'prag_' + topicKey,
       stage: 2,
       stageSiblings: s2Ids,
-      stageTitle: 'Etapa 2/3 · ' + tm.subjectName + ' (Explicação)',
       label: '"Não conhecia os detalhes sobre ' + tm.subjectName + ', mas quero entender o lado prático. Como isso nos afeta?"',
-      desc: 'Pedir uma explicação objetiva e direta sobre os fatos',
+      desc: '',
       deltaApproval: 2, renownDelta: 0, cb: 'close',
       _replyScript: [
         { type: 'narration', text: tm.explainNarr },
@@ -72175,7 +72167,7 @@ function _buildClientAllyTopicNode(cls, topicKey, displayName, m) {
       backendId: origId,
       stage: 3,
       stageSiblings: s3Ids,
-      stageTitle: 'Etapa 3/3 · Decisão · ' + contextHint
+      desc: ''
     });
   });
 
@@ -72510,9 +72502,6 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
   var availableChoices = allUnusedChoices.filter(function(c) {
     return (c.stage || 1) === activeStage;
   });
-  var activeStageTitle = (availableChoices.length > 0 && availableChoices[0].stageTitle)
-    ? availableChoices[0].stageTitle
-    : (topicNode.contextHint || displayName);
 
   if (availableChoices.length === 0) {
     var remTopics = (typeof _getAvailableAllyTopics === 'function') ? _getAvailableAllyTopics(idx) : [];
@@ -72569,8 +72558,8 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
   var dlg = {
     autoOpenChoices: true,
     isSubmenu: true,
-    choicesTitle: displayName + ' · ' + cfg.title,
-    choicesSubtitle: activeStageTitle,
+    choicesTitle: displayName,
+    choicesSubtitle: cfg.title,
     npc: {
       id: 'ally_' + (m.name || ('idx' + idx)) + '_' + topicKey,
       name: displayName,
@@ -72721,16 +72710,16 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
       window.vEncounter.attachData({
         npc: dlg.npc,
         choices: fullChoices,
-        choicesTitle: displayName + ' · ' + cfg.title,
-        choicesSubtitle: activeStageTitle
+        choicesTitle: displayName,
+        choicesSubtitle: cfg.title
       }, {
         onChoice: _handleAllyTopicChoice
       });
     }
     if (typeof window.vEncounter.openChoices === 'function') {
       window.vEncounter.openChoices(fullChoices, {
-        title: displayName + ' · ' + cfg.title,
-        npcName: activeStageTitle,
+        title: displayName,
+        npcName: cfg.title,
         isSubmenu: true,
         dialogue: dlg,
         onChoice: _handleAllyTopicChoice

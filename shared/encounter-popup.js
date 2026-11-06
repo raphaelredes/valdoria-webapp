@@ -3806,8 +3806,17 @@
     var oldGuide = card ? card.querySelector('.enc-cho-guide-btn') : null;
     if (oldGuide && oldGuide.parentNode) oldGuide.parentNode.removeChild(oldGuide);
 
-    var title = _stripEmojis(opts.title || 'Escolher ação');
-    var ctxName = _stripEmojis(opts.npcName || '');
+    function _stripMetaStageSpoilers(s) {
+      if (!s) return '';
+      return String(s)
+        .replace(/\b(?:Etapa|Fase|Estágio|Estagio|Parte)\s*\d+(?:\s*\/\s*\d+)?\s*(?:[·:\-–—]\s*)?/gi, '')
+        .replace(/\b(?:Puxar\s+Assunto|Sondagem\s+Inicial|Decisão)\s*(?:[·:\-–—]\s*)?/gi, '')
+        .replace(/\s*\((?:Explicação|Explicacao|Decisão|Decisao|Sondagem|Introdução)\)/gi, '')
+        .replace(/^\s*[·:\-–—]+\s*|\s*[·:\-–—]+\s*$/g, '')
+        .trim();
+    }
+    var title = _stripMetaStageSpoilers(_stripEmojis(opts.title || 'Escolher ação')) || 'Escolher ação';
+    var ctxName = _stripMetaStageSpoilers(_stripEmojis(opts.npcName || ''));
 
     var isCompact = opts.compact === true ||
                     (typeof title === 'string' && title.toLowerCase().indexOf('prepara') !== -1 && title.toLowerCase().indexOf('viagem') !== -1) ||
@@ -4035,18 +4044,9 @@
             ? ('<span class="enc-cho-speech enc-cho-thought">' + _coinify(speechClean) + '</span>')
             : ('<span class="enc-cho-speech">“' + _coinify(speechClean) + '”</span>');
           mainContent = tagPill + speechFormatted;
-          subDesc = _stripEmojis(ch.desc || subText || '');
-          if (subDesc) {
-            subDesc = subDesc.replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').trim();
-            // Anti-repetição (Ordem do Usuário 2026-10): se a descrição for idêntica à fala ou label,
-            // omite a duplicação em vez de repetir o mesmo texto no topo e rodapé do card
-            var _normSpeech = String(speechClean || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
-            var _normSub = String(subDesc || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
-            var _normLabel = String(_choLabel || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
-            if (_normSub && (_normSub === _normSpeech || _normSub === _normLabel)) {
-              subDesc = '';
-            }
-          }
+          // REGRA SOBERANA (Ordem do Usuário 2026-11): Falas diretas entre aspas ("...") NUNCA exibem
+          // sub-descrição editorial/metalinguística abaixo da fala (exceto se for item de compra).
+          subDesc = (ch.cost || ch.itemName) ? _stripEmojis(ch.desc || subText || '') : '';
         } else {
           mainContent = tagPill
             ? (tagPill + '<span class="enc-cho-action-label">' + _coinify(_choLabel) + '</span>')
