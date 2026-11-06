@@ -157,6 +157,11 @@
   }
 
   window._diceCheckSvc = function(opts) {
+    try {
+      if (window.vEncounter && typeof window.vEncounter.closeChoices === 'function') {
+        window.vEncounter.closeChoices(true);
+      }
+    } catch (_eCloseCho) {}
     var ov = document.getElementById('encounter-overlay');
     ov.innerHTML = '';
     var card = document.createElement('div');
@@ -407,7 +412,7 @@
               targetNode.script = prependedScript.concat(targetNode.script || []);
             }
             if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-              window.vEncounter.render(targetNode, { dialogues: opts.dialogues, player: opts.player, autoOpenChoices: true });
+              window.vEncounter.render(targetNode, { dialogues: opts.dialogues, player: opts.player, autoOpenChoices: false });
             } else if (typeof window._renderEncounterPopup === 'function') {
               window._renderEncounterPopup(targetNode);
             } else {
@@ -438,7 +443,20 @@
             }
             var outcomeChoices = [];
             if (mIdx != null && typeof window._showAllyDialogue === 'function') {
-              if (aSrc && aSrc.topic && typeof window._showAllyTopicsMenu === 'function') {
+              var _remTopics = (typeof window._getAvailableAllyTopics === 'function') ? window._getAvailableAllyTopics(mIdx) : null;
+              if (aSrc && aSrc.topic && typeof window._showAllyTopicDialogue === 'function') {
+                var _hasMoreInTopic = _remTopics ? _remTopics.some(function(rt) { return rt && rt.key === aSrc.topic; }) : false;
+                if (_hasMoreInTopic) {
+                  outcomeChoices.push({
+                    id: 'more_in_topic',
+                    label: '↩ Continuar sobre este assunto',
+                    isSubmenu: true,
+                    isReturn: true,
+                    cb: function() { window._showAllyTopicDialogue(mIdx, aSrc.topic, { autoOpenChoices: true, isSubmenu: true }); }
+                  });
+                }
+              }
+              if (aSrc && aSrc.topic && typeof window._showAllyTopicsMenu === 'function' && (!_remTopics || _remTopics.length > 0)) {
                 outcomeChoices.push({
                   id: 'back_to_topics',
                   label: '↩ Escolher outro assunto',
@@ -488,7 +506,7 @@
               }, {
                 player: opts.player,
                 closeable: true,
-                autoOpenChoices: true,
+                autoOpenChoices: false,
                 onChoice: function(rc) {
                   if (typeof rc.cb === 'function') { rc.cb(); return; }
                   try { window.vEncounter.close(); } catch(_) {}
@@ -670,9 +688,11 @@
       reactionChoices.push({
         id: 'return_npc_root',
         label: '↩ "Gostaria de tratar de outro assunto."',
+        isSubmenu: true,
+        isReturn: true,
         cb: function() {
           if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-            window.vEncounter.render(_rootDlg, { dialogues: dialogues, autoOpenChoices: true });
+            window.vEncounter.render(_rootDlg, { dialogues: dialogues, autoOpenChoices: true, isSubmenu: true });
           } else if (typeof window._renderEncounterPopup === 'function') {
             window._renderEncounterPopup(_rootDlg);
           }
@@ -682,6 +702,8 @@
       reactionChoices.push({
         id: 'return_venue_root',
         label: '↩ "Gostaria de tratar de outro assunto."',
+        isSubmenu: true,
+        isReturn: true,
         cb: 'return_venue_root'
       });
     }
@@ -697,7 +719,7 @@
       npc: npc,
       script: _opScript,
       choices: reactionChoices
-    }, { dialogues: dialogues, autoOpenChoices: true });
+    }, { dialogues: dialogues, autoOpenChoices: false });
     window._applyRenownDelta(faction, renownDelta);
     _dispatchBackendAction(ch); /* task #62: bot DEV apply effect */
     if (typeof window.vToast === 'function' && renownDelta !== 0) {
@@ -753,9 +775,11 @@
       purchaseChoices.push({
         id: 'return_npc_root',
         label: '↩ "Gostaria de tratar de outro assunto."',
+        isSubmenu: true,
+        isReturn: true,
         cb: function() {
           if (window.vEncounter && typeof window.vEncounter.render === 'function') {
-            window.vEncounter.render(_rootDlgP, { dialogues: dialogues, autoOpenChoices: true });
+            window.vEncounter.render(_rootDlgP, { dialogues: dialogues, autoOpenChoices: true, isSubmenu: true });
           } else if (typeof window._renderEncounterPopup === 'function') {
             window._renderEncounterPopup(_rootDlgP);
           }
@@ -765,6 +789,8 @@
       purchaseChoices.push({
         id: 'return_venue_root',
         label: '↩ "Gostaria de tratar de outro assunto."',
+        isSubmenu: true,
+        isReturn: true,
         cb: 'return_venue_root'
       });
     }
@@ -774,7 +800,7 @@
       npc: npc,
       script: script,
       choices: purchaseChoices
-    }, { dialogues: dialogues, autoOpenChoices: true });
+    }, { dialogues: dialogues, autoOpenChoices: false });
     window._applyRenownDelta(faction, renownDelta);
     _dispatchBackendAction(ch); /* task #62: bot DEV apply effect */
     if (typeof window.vToast === 'function' && renownDelta !== 0) {

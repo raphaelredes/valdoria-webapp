@@ -113487,9 +113487,7 @@ function _showCampfireTopicDialogue(ally, topicKey, opts) {
 
           }, {
 
-            autoOpenChoices: true,
-            isSubmenu: !!(opts && opts.isSubmenu),
-            isReturn: !!(opts && opts.isReturn),
+            autoOpenChoices: false,
             onClose: function() { window._isAtCampfire = false; }
 
           });

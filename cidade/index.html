@@ -71700,6 +71700,11 @@ function _showAllyTopicDialogue(idx, topicKey, opts) {
 
     // Se a escolha possui um teste de perícia (check), delega para a rolagem 3D canônica
     if (ch.check && typeof window._dispatchSvcChoice === 'function') {
+      try {
+        if (window.vEncounter && typeof window.vEncounter.closeChoices === 'function') {
+          window.vEncounter.closeChoices(true);
+        }
+      } catch(_) {}
       var dispatched = window._dispatchSvcChoice(ch, dlg, {});
       if (dispatched) return;
     }
@@ -72509,9 +72514,13 @@ function _showAllyDialogue(idx, opts){
             return;
           }
           if (ch._replyScript && window.vEncounter && typeof window.vEncounter.render === 'function') {
+            try {
+              if (window.vEncounter && typeof window.vEncounter.closeChoices === 'function') {
+                window.vEncounter.closeChoices(true);
+              }
+            } catch(_) {}
             window.vEncounter.render({
               npc: dlg.npc,
-              isSubmenu: true,
               choicesTitle: displayName + ' · Diálogo',
               choicesSubtitle: displayName,
               script: ch._replyScript,
@@ -72521,8 +72530,7 @@ function _showAllyDialogue(idx, opts){
               ]
             }, {
               closeable: true,
-              autoOpenChoices: true,
-              isSubmenu: true,
+              autoOpenChoices: false,
               onChoice: function(rc) {
                 if (typeof rc.cb === 'function') { rc.cb(); return; }
                 try { window.vEncounter.close(); } catch(_) {}
@@ -72550,9 +72558,13 @@ function _showAllyDialogue(idx, opts){
             return;
           }
           if (ch._replyScript && window.vEncounter && typeof window.vEncounter.render === 'function') {
+            try {
+              if (window.vEncounter && typeof window.vEncounter.closeChoices === 'function') {
+                window.vEncounter.closeChoices(true);
+              }
+            } catch(_) {}
             window.vEncounter.render({
               npc: dlg.npc,
-              isSubmenu: true,
               choicesTitle: displayName + ' · Diálogo',
               choicesSubtitle: displayName,
               script: ch._replyScript,
@@ -72562,8 +72574,7 @@ function _showAllyDialogue(idx, opts){
               ]
             }, {
               closeable: true,
-              autoOpenChoices: true,
-              isSubmenu: true,
+              autoOpenChoices: false,
               onChoice: function(rc) {
                 if (typeof rc.cb === 'function') { rc.cb(); return; }
                 try { window.vEncounter.close(); } catch(_) {}
@@ -81356,6 +81367,8 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx, choiceId, fromNode)
               diceResultChoices.push({
                 id: 'return_recruit_root',
                 label: '↩ Continuar negociação',
+                isSubmenu: true,
+                isReturn: true,
                 cb: function() { _openRecrutaDialogue(nid, p, { autoOpenChoices: true }); }
               });
               diceResultChoices.push({
@@ -81370,6 +81383,8 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx, choiceId, fromNode)
                 diceResultChoices.push({
                   id: 'return_sub_node',
                   label: '↩ Continuar neste assunto',
+                  isSubmenu: true,
+                  isReturn: true,
                   cb: function() {
                     _openCityDialogue(venue, currentNodeD, p, { autoOpenChoices: true });
                   }
@@ -81377,6 +81392,8 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx, choiceId, fromNode)
                 diceResultChoices.push({
                   id: 'return_venue_root',
                   label: '↩ "Gostaria de falar de outro assunto."',
+                  isSubmenu: true,
+                  isReturn: true,
                   cb: function() {
                     _openCityDialogue(venue, rootNodeD, p, { autoOpenChoices: true });
                   }
@@ -81385,6 +81402,8 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx, choiceId, fromNode)
                 diceResultChoices.push({
                   id: 'return_venue_root',
                   label: '↩ "Gostaria de ver outra coisa."',
+                  isSubmenu: true,
+                  isReturn: true,
                   cb: function() {
                     _openCityDialogue(venue, rootNodeD, p, { autoOpenChoices: true });
                   }
@@ -81401,7 +81420,7 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx, choiceId, fromNode)
           }
           window.vEncounter.render(
             { npc: targetNpc, script: data.result_script, choices: diceResultChoices },
-            { player: p, autoOpenChoices: true, onChoice: function(ch){
+            { player: p, autoOpenChoices: false, onChoice: function(ch){
                 if (ch && typeof ch.cb === 'function') { ch.cb(ch); return; }
                 if (ch && ch.node) {
                   _resolveCityChoice(venue, ch.node, ch.id, p, targetNpc, ctx);
@@ -81529,6 +81548,8 @@ function _renderCompanionApprovalBG3(scList) {
             resultChoices.push({
               id: 'return_sub_node',
               label: '↩ Continuar neste assunto',
+              isSubmenu: true,
+              isReturn: true,
               cb: function() {
                 _openCityDialogue(venue, currentNode, p, { autoOpenChoices: true });
               }
@@ -81536,6 +81557,8 @@ function _renderCompanionApprovalBG3(scList) {
             resultChoices.push({
               id: 'return_venue_root',
               label: '↩ "Gostaria de falar de outro assunto."',
+              isSubmenu: true,
+              isReturn: true,
               cb: function() {
                 _openCityDialogue(venue, rootNode, p, { autoOpenChoices: true });
               }
@@ -81544,6 +81567,8 @@ function _renderCompanionApprovalBG3(scList) {
             resultChoices.push({
               id: 'return_venue_root',
               label: '↩ "Gostaria de ver outra coisa."',
+              isSubmenu: true,
+              isReturn: true,
               cb: function() {
                 _openCityDialogue(venue, rootNode, p, { autoOpenChoices: true });
               }
@@ -81561,7 +81586,7 @@ function _renderCompanionApprovalBG3(scList) {
 
       window.vEncounter.render(
         { npc: targetNpc, script: data.result_script, choices: resultChoices },
-        { player: p, autoOpenChoices: true, onChoice: function(ch){
+        { player: p, autoOpenChoices: false, onChoice: function(ch){
             if (ch && typeof ch.cb === 'function') { ch.cb(ch); return; }
             if (ch && ch.node) {
               _resolveCityChoice(venue, ch.node, ch.id, p, targetNpc, ctx);

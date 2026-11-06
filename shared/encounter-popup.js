@@ -4091,6 +4091,8 @@
           );
           var _hasScriptReaction = Boolean(
             ch._replyScript || ch.replyScript || ch.resultScript || ch.script ||
+            ch.check || ch.resultNarration || ch.resultText ||
+            (typeof ch.cb === 'string' && (ch.cb.indexOf('dice:') === 0 || ch.cb.indexOf('opinion-') === 0 || ch.cb.indexOf('-confirm') > 0)) ||
             (ch.result && ch.result !== 'goto_dialog' && ch.result !== 'more_in_topic')
           );
           var _isSub = Boolean(
@@ -5466,6 +5468,8 @@
       );
       var _hasScriptReaction = Boolean(
         ch._replyScript || ch.replyScript || ch.resultScript || ch.script ||
+        ch.check || ch.resultNarration || ch.resultText ||
+        (typeof ch.cb === 'string' && (ch.cb.indexOf('dice:') === 0 || ch.cb.indexOf('opinion-') === 0 || ch.cb.indexOf('-confirm') > 0)) ||
         (ch.result && ch.result !== 'goto_dialog' && ch.result !== 'more_in_topic')
       );
       var _isSubInternal = Boolean(
