@@ -426,13 +426,13 @@
         return {
           kind: 'free',
           label: 'Grátis',
-          tip: 'Free Object Interaction (PHB p.190) — 1 sacar/guardar grátis por turno'
+          tip: 'Interação livre — 1 sacar ou guardar grátis por turno'
         };
       case 'off_hand':
         return {
           kind: 'action',
           label: '1 Ação',
-          tip: 'Sacar arma secundária ou equipar escudo consome a Ação (PHB p.144, p.190)'
+          tip: 'Sacar arma secundária ou equipar escudo consome uma Ação'
         };
       case 'cloak':
       case 'amulet':
@@ -442,28 +442,28 @@
         return {
           kind: 'action',
           label: '1 Ação',
-          tip: 'Trocar acessório requer Use an Object (PHB p.190)'
+          tip: 'Trocar acessório consome uma Ação'
         };
       case 'head':
         return {
           kind: 'blocked',
           label: 'Impossível',
-          tip: 'Vestir elmo: 1 minuto (PHB p.144 — Donning and Doffing). Impraticável em combate.'
+          tip: 'Vestir elmo leva 1 minuto. Impraticável durante o combate.'
         };
       case 'chest':
         return {
           kind: 'blocked',
           label: 'Impossível',
-          tip: 'Vestir armadura: 5–10 minutos (PHB p.144). Impossível em combate.'
+          tip: 'Vestir armadura leva vários minutos. Impossível durante o combate.'
         };
       case 'feet':
         return {
           kind: 'blocked',
           label: 'Impossível',
-          tip: 'Trocar botas: 1 minuto (PHB p.144 — equivalente armadura leve).'
+          tip: 'Trocar calçados leva 1 minuto. Impraticável em combate.'
         };
       default:
-        return { kind: 'action', label: '1 Ação', tip: 'Use an Object — consome a Ação (PHB p.190)' };
+        return { kind: 'action', label: '1 Ação', tip: 'Interação complexa — consome uma Ação' };
     }
   }
 
@@ -1430,8 +1430,8 @@
         });
         warnings.push({
           title: 'Desativa Artes Marciais',
-          text: 'Desativa Artes Marciais e Movimento sem Armadura de Monge (PHB p.78).',
-          techText: 'DESATIVA ARTES MARCIAIS: Golpes desarmados e agilidade mística desativados (PHB p.78).',
+          text: 'Desativa Artes Marciais e Movimento sem Armadura de Monge.',
+          techText: 'DESATIVA ARTES MARCIAIS: Golpes desarmados e agilidade mística desativados.',
           shortText: '⚠️ Desativa Artes Marciais',
           type: 'warn'
         });
@@ -1457,8 +1457,8 @@
       if (isHeavyArmor) {
         warnings.push({
           title: 'Desativa Fúria de Bárbaro',
-          text: 'Armaduras pesadas desativam os benefícios da Fúria de Bárbaro (PHB p.48).',
-          techText: 'DESATIVA FÚRIA: Bônus de dano de fúria e resistências a dano desativados (PHB p.48).',
+          text: 'Armaduras pesadas desativam os benefícios da Fúria de Bárbaro.',
+          techText: 'DESATIVA FÚRIA: Bônus de dano de fúria e resistências a dano desativados.',
           shortText: '⚠️ Desativa Bônus de Fúria',
           type: 'warn'
         });
@@ -1472,15 +1472,15 @@
       if (lacksProf) {
         warnings.push({
           title: 'Bloqueio Total de Magias',
-          text: 'Sem proficiência em armaduras: Você NÃO poderá conjurar nenhuma magia enquanto vesti-la (PHB p.144)!',
-          techText: 'BLOQUEIO TOTAL DE MAGIAS: Impossível conjurar qualquer feitiço, truque ou ritual enquanto vestir armadura sem proficiência (PHB p.144).',
+          text: 'Sem proficiência em armaduras: Você NÃO poderá conjurar nenhuma magia enquanto vesti-la!',
+          techText: 'BLOQUEIO TOTAL DE MAGIAS: Impossível conjurar qualquer feitiço, truque ou ritual enquanto vestir armadura sem proficiência.',
           shortText: '❌ Bloqueia Conjuração de Magias',
           type: 'danger'
         });
         warnings.push({
           title: 'Desvantagem em Força e Destreza',
-          text: 'Desvantagem em qualquer teste de atributo, salvaguarda ou ataque envolvendo Força ou Destreza (PHB p.144).',
-          techText: 'DESVANTAGEM: Todas as jogadas e testes de Força e Destreza sofrem Desvantagem contínua (PHB p.144).',
+          text: 'Desvantagem em qualquer teste de atributo, salvaguarda ou ataque envolvendo Força ou Destreza.',
+          techText: 'DESVANTAGEM: Todas as jogadas e testes de Força e Destreza sofrem Desvantagem contínua.',
           shortText: '❌ Desvantagem em FOR e DES',
           type: 'danger'
         });
@@ -1490,8 +1490,8 @@
       if (isMetal && (isArmor || isShield)) {
         warnings.push({
           title: 'Tabu Sagrado de Druida',
-          text: 'Druidas têm tabu sagrado e não vestem armaduras nem usam escudos de metal (PHB p.65).',
-          techText: 'TABU SAGRADO: Druidas recusam usar armaduras ou escudos metálicos (PHB p.65).',
+          text: 'Druidas têm tabu sagrado e não vestem armaduras nem usam escudos de metal.',
+          techText: 'TABU SAGRADO: Druidas recusam usar armaduras ou escudos metálicos.',
           shortText: '❌ Druida: Proibido Metal',
           type: 'danger'
         });
@@ -1501,8 +1501,8 @@
     if (isHeavyArmor && strScore < 13 && !isMountainDwarf && race !== 'anao' && race !== 'dwarf') {
       warnings.push({
         title: 'Penalidade de Deslocamento',
-        text: 'Força insuficiente (< 13): reduz sua velocidade de deslocamento em 3 metros (PHB p.144).',
-        techText: 'PENALIDADE DE VELOCIDADE: Redução de 3 metros no deslocamento (PHB p.144).',
+        text: 'Força insuficiente (< 13): reduz sua velocidade de deslocamento em 3 metros.',
+        techText: 'PENALIDADE DE VELOCIDADE: Redução de 3 metros no deslocamento.',
         shortText: '⚠️ Força Baixa (-3m)',
         type: 'warn'
       });

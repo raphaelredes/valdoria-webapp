@@ -99,7 +99,7 @@
       items: [
         {
           title: '💰 Venda de Espólios',
-          desc: 'Venda armas excedentes, gemas preciosas e despojos de criaturas abatidas por <strong>60% do valor de tabela PHB</strong>.'
+          desc: 'Venda armas excedentes, gemas preciosas e despojos de criaturas abatidas por <strong>60% do valor de tabela comercial</strong>.'
         },
         {
           title: '🧪 Suprimentos Essenciais',
