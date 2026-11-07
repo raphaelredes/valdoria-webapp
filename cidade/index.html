@@ -18908,6 +18908,22 @@ body.perf-lite .vc-action-btn { transition: none; }
 
     }
 
+    .cfm-fog-canvas {
+
+      position: absolute;
+
+      inset: 0;
+
+      width: 100%;
+
+      height: 100%;
+
+      pointer-events: none;
+
+      z-index: 5;
+
+    }
+
     .cfm-pins-layer {
 
       position: absolute;
@@ -18915,6 +18931,8 @@ body.perf-lite .vc-action-btn { transition: none; }
       inset: 0;
 
       pointer-events: none;
+
+      z-index: 15;
 
     }
 
@@ -26936,7 +26954,7 @@ body.perf-lite .vc-action-btn { transition: none; }
 
     // pra garantir que cidade ↔ exploracao tenham mapas IDÊNTICOS.
 
-    document.write('<script src="./cartografia-shared.js?v=' + (window.VBUNDLE_HASH || 'v') + '_20261107_regional_nav_v26"><\/script>');
+    document.write('<script src="./cartografia-shared.js?v=' + (window.VBUNDLE_HASH || 'v') + '_20261107_regional_nav_v27"><\/script>');
 
   </script>
 
@@ -28502,7 +28520,9 @@ body.perf-lite .vc-action-btn { transition: none; }
 
       }
 
-      p.owned_maps = Array.isArray(picked.owned_maps) ? picked.owned_maps.slice() : [];
+      p.owned_maps = (window.CartShared && typeof CartShared.extractPlayerMaps === 'function')
+        ? CartShared.extractPlayerMaps({ inventory: p.inventory, owned_maps: picked.owned_maps, metadata: picked.metadata || p.metadata })
+        : (Array.isArray(picked.owned_maps) ? picked.owned_maps.slice() : []);
 
       p.maps_owned = p.owned_maps.slice();
 
@@ -29270,7 +29290,9 @@ body.perf-lite .vc-action-btn { transition: none; }
           ? picked.inventory.map(function(_it){ return (typeof _it === 'string') ? _it : ((_it && _it.name) || ''); }).filter(Boolean)
           : [];
 
-        p.owned_maps = Array.isArray(picked.owned_maps) ? picked.owned_maps.slice() : [];
+        p.owned_maps = (window.CartShared && typeof CartShared.extractPlayerMaps === 'function')
+          ? CartShared.extractPlayerMaps({ inventory: p.inventory, owned_maps: picked.owned_maps, metadata: picked.metadata || p.metadata })
+          : (Array.isArray(picked.owned_maps) ? picked.owned_maps.slice() : []);
 
         p.maps_owned = p.owned_maps.slice();
 
@@ -149632,9 +149654,9 @@ function renderCartographyCanvas(el){
 
       apiBase: (window._VALDORIA_API_BASE || window._API_BASE || (new URLSearchParams(location.search).get('api') || '')).replace(/\/$/, ''),
 
-      getKnownLocations: function(){ return (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.known_locations) || []; },
+      getKnownLocations: function(){ var p = window.CITY_MOCK_PLAYER; return (window.CartShared && CartShared.extractDiscoveredLocations) ? CartShared.extractDiscoveredLocations(p) : ((p && p.known_locations) || []); },
 
-      getOwnedMaps: function(){ var p = window.CITY_MOCK_PLAYER; return (p && (p.owned_maps || p.maps_owned)) || []; },
+      getOwnedMaps: function(){ var p = window.CITY_MOCK_PLAYER; return (window.CartShared && CartShared.extractPlayerMaps) ? CartShared.extractPlayerMaps(p) : ((p && (p.owned_maps || p.maps_owned)) || []); },
 
       getPlayerBiomeKey: _cartGetPlayerBiome,
 
@@ -150156,9 +150178,9 @@ function _renderCartProvinceBar() {
 
   var p = window.CITY_MOCK_PLAYER || {};
 
-  var known = p.known_locations || ['plains'];
+  var known = (window.CartShared && CartShared.extractDiscoveredLocations) ? CartShared.extractDiscoveredLocations(p) : (p.known_locations || ['plains']);
 
-  var ownedMaps = p.owned_maps || [];
+  var ownedMaps = (window.CartShared && CartShared.extractPlayerMaps) ? CartShared.extractPlayerMaps(p) : (p.owned_maps || []);
 
   var discProvs = (window.CartShared && CartShared.getDiscoveredProvinces) 
 
@@ -150618,9 +150640,9 @@ function _wireCartEvents(){
 
         var p = window.CITY_MOCK_PLAYER || {};
 
-        var known = p.known_locations || ['plains'];
+        var known = (window.CartShared && CartShared.extractDiscoveredLocations) ? CartShared.extractDiscoveredLocations(p) : (p.known_locations || ['plains']);
 
-        var ownedMaps = p.owned_maps || [];
+        var ownedMaps = (window.CartShared && CartShared.extractPlayerMaps) ? CartShared.extractPlayerMaps(p) : (p.owned_maps || []);
 
         var discProvs = (window.CartShared && CartShared.getDiscoveredProvinces) 
 
@@ -150654,9 +150676,9 @@ function _wireCartEvents(){
 
         var p = window.CITY_MOCK_PLAYER || {};
 
-        var known = p.known_locations || ['plains'];
+        var known = (window.CartShared && CartShared.extractDiscoveredLocations) ? CartShared.extractDiscoveredLocations(p) : (p.known_locations || ['plains']);
 
-        var ownedMaps = p.owned_maps || [];
+        var ownedMaps = (window.CartShared && CartShared.extractPlayerMaps) ? CartShared.extractPlayerMaps(p) : (p.owned_maps || []);
 
         var discProvs = (window.CartShared && CartShared.getDiscoveredProvinces) 
 
@@ -150828,7 +150850,7 @@ function _cartPopulateWaypointsList(filter, query) {
 
   var p = window.CITY_MOCK_PLAYER || {};
 
-  var known = p.known_locations || ['plains'];
+  var known = (window.CartShared && CartShared.extractDiscoveredLocations) ? CartShared.extractDiscoveredLocations(p) : (p.known_locations || ['plains']);
 
   var curLoc = _cartGetPlayerBiome();
 
@@ -153323,17 +153345,30 @@ function _cartOpenRegionLoreModal(provKey) {
 
 
   var landmarksHtml = '';
+  var _loreP = window.CITY_MOCK_PLAYER || {};
+  var _loreKnown = (window.CartShared && CartShared.extractDiscoveredLocations) ? CartShared.extractDiscoveredLocations(_loreP) : (_loreP.known_locations || ['plains']);
+  var _loreMaps = (window.CartShared && CartShared.extractPlayerMaps) ? CartShared.extractPlayerMaps(_loreP) : (_loreP.owned_maps || []);
+  var _loreRegNodes = (reg && Array.isArray(reg.nodes)) ? reg.nodes : [];
+  var _loreFullMap = (window.CartShared && CartShared.isNodeDiscovered) ? CartShared.isNodeDiscovered('__full_map__', provKey, [], _loreMaps) : false;
 
-  (lore.landmarks || []).forEach(function(lm) {
-
-    landmarksHtml += '<div style="padding:5px 0;border-bottom:1px solid rgba(196,149,58,0.15);">'
-
-      + '<span style="font-size:12px;font-weight:700;color:#dbb668;">◆ ' + lm.name + ':</span> '
-
-      + '<span style="font-size:12px;color:#c4b69c;">' + lm.desc + '</span>'
-
-      + '</div>';
-
+  (lore.landmarks || []).forEach(function(lm, lmIdx) {
+    var matchedNode = _loreRegNodes.find(function(rn) {
+      return rn && rn.name && lm.name && rn.name.toLowerCase() === lm.name.toLowerCase();
+    }) || _loreRegNodes[lmIdx];
+    var isLmDiscovered = _loreFullMap || (matchedNode && window.CartShared && CartShared.isNodeDiscovered
+      ? CartShared.isNodeDiscovered(matchedNode.id, provKey, _loreKnown, _loreMaps)
+      : false);
+    if (isLmDiscovered) {
+      landmarksHtml += '<div style="padding:5px 0;border-bottom:1px solid rgba(196,149,58,0.15);">'
+        + '<span style="font-size:12px;font-weight:700;color:#dbb668;">◆ ' + lm.name + ':</span> '
+        + '<span style="font-size:12px;color:#c4b69c;">' + lm.desc + '</span>'
+        + '</div>';
+    } else {
+      landmarksHtml += '<div style="padding:5px 0;border-bottom:1px solid rgba(196,149,58,0.12);opacity:0.65;">'
+        + '<span style="font-size:12px;font-weight:700;color:#8c7a5b;">◇ Marco Inexplorado:</span> '
+        + '<span style="font-size:12px;color:#8a7d68;font-style:italic;">Território encoberto pela névoa cartográfica. Explore as estradas da região ou adquira o mapa regional com Mestre Corvus.</span>'
+        + '</div>';
+    }
   });
 
 
@@ -154846,9 +154881,9 @@ function _cartHandleClick(mx, my){
 
     var p = window.CITY_MOCK_PLAYER || {};
 
-    var known = p.known_locations || ['plains'];
+    var known = (window.CartShared && CartShared.extractDiscoveredLocations) ? CartShared.extractDiscoveredLocations(p) : (p.known_locations || ['plains']);
 
-    var ownedMaps = p.owned_maps || [];
+    var ownedMaps = (window.CartShared && CartShared.extractPlayerMaps) ? CartShared.extractPlayerMaps(p) : (p.owned_maps || []);
 
     if (window.CartShared && CartShared.isProvinceDiscovered && !CartShared.isProvinceDiscovered(provId, known, ownedMaps)) {
 
@@ -156884,9 +156919,9 @@ var _cartEngine = (window.CartShared && CartShared.createWorldCart) ? CartShared
 
   apiBase: (window._VALDORIA_API_BASE || window._API_BASE || (new URLSearchParams(location.search).get('api') || '')).replace(/\/$/, ''),
 
-  getKnownLocations: function(){ return (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.known_locations) || []; },
+  getKnownLocations: function(){ var p = window.CITY_MOCK_PLAYER; return (window.CartShared && CartShared.extractDiscoveredLocations) ? CartShared.extractDiscoveredLocations(p) : ((p && p.known_locations) || []); },
 
-  getOwnedMaps: function(){ var p = window.CITY_MOCK_PLAYER; return (p && (p.owned_maps || p.maps_owned)) || []; },
+  getOwnedMaps: function(){ var p = window.CITY_MOCK_PLAYER; return (window.CartShared && CartShared.extractPlayerMaps) ? CartShared.extractPlayerMaps(p) : ((p && (p.owned_maps || p.maps_owned)) || []); },
 
   getPlayerBiomeKey: _cartGetPlayerBiome,
 

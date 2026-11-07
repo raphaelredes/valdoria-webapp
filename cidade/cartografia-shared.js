@@ -163350,7 +163350,7 @@
 
 
 
-      + '.cfm-pins-layer { position: absolute; inset: 0; pointer-events: none; }'
+      + '.cfm-pins-layer { position: absolute; inset: 0; pointer-events: none; z-index: 15; }'
 
 
 
@@ -164817,6 +164817,9 @@
 
     function _renderRegionalFog() {
       if (!fogCanvas) return;
+      fogCanvas.style.position = 'absolute';
+      fogCanvas.style.inset = '0';
+      fogCanvas.style.zIndex = '5';
       fogCanvas.style.display = 'block';
       fogCanvas.style.pointerEvents = 'none';
       fogCanvas.style.width = '100%';
@@ -164859,8 +164862,8 @@
             || isNodeDiscovered(n.id, key, known, []);
           if (!nodeOpen) return;
 
-          var nx = (n.x <= 1 ? (n.x * fw) : n.x);
-          var ny = (n.y <= 1 ? (n.y * fh) : n.y);
+          var nx = (n.x <= 1 ? (n.x * fw) : ((n.x / 100) * fw));
+          var ny = (n.y <= 1 ? (n.y * fh) : ((n.y / 100) * fh));
           var grad = fctx.createRadialGradient(nx, ny, baseR * 0.22, nx, ny, baseR);
           grad.addColorStop(0, 'rgba(0, 0, 0, 1.0)');
           grad.addColorStop(0.70, 'rgba(0, 0, 0, 0.95)');
