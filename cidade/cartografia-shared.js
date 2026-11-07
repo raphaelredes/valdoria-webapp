@@ -164388,11 +164388,23 @@
 
     }
 
+    var inCity = (typeof extraOpts.isInsideCity === 'boolean')
+
+      ? extraOpts.isInsideCity
+
+      : (typeof window !== 'undefined' && typeof window._currentScreen !== 'undefined' && !window.__EXPLORE_MODE);
+
+    var journeySubtext = inCity
+
+      ? 'Sua comitiva deixará a segurança da cidade para avançar pelas estradas da região.'
+
+      : 'Sua comitiva avançará pela estrada rumo ao novo marco da região.';
+
     descHtml += '<div style="font-size:13px; line-height:1.55; color:#d8cdb8;">Deseja iniciar a marcha rumo a <b style="color:#ffd685;">' + destName + '</b>?<br>'
 
       + '<span style="font-size:11.5px; color:#a09484; display:block; margin-top:5px;">'
 
-      + 'Sua comitiva deixará a segurança da cidade para avançar pelas estradas da região.'
+      + journeySubtext
 
       + '</span></div>';
 
@@ -164978,6 +164990,8 @@
 
 
 
+          closeRegionalMapModal();
+
           var targetBiome = resolveRegionalBiomeNode(n.id, key) || n;
 
 
@@ -165108,7 +165122,7 @@
 
             // Cancelado / Voltar ao Mapa: permanece no mapa regional
 
-          });
+          }, { isInsideCity: isInsideCity, region: reg, provKey: key });
 
 
 
@@ -165460,13 +165474,29 @@
 
 
 
-      fogCanvas.width = fw;
+      var dpr = (typeof window !== 'undefined' && window.devicePixelRatio && window.devicePixelRatio > 1)
 
-      fogCanvas.height = fh;
+        ? Math.min(window.devicePixelRatio, 2)
+
+        : 1;
+
+      fogCanvas.width = Math.round(fw * dpr);
+
+      fogCanvas.height = Math.round(fh * dpr);
+
+      fogCanvas.style.width = fw + 'px';
+
+      fogCanvas.style.height = fh + 'px';
 
       var fctx = fogCanvas.getContext('2d');
 
       if (!fctx) return;
+
+      if (typeof fctx.setTransform === 'function') {
+
+        fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      }
 
       fctx.clearRect(0, 0, fw, fh);
 
@@ -165700,7 +165730,13 @@
 
 
 
-    window.addEventListener('resize', _rfmResizeHandler);
+    if (typeof window !== 'undefined') {
+      if (window._rfmResizeHandler) {
+        window.removeEventListener('resize', window._rfmResizeHandler);
+      }
+      window._rfmResizeHandler = _rfmResizeHandler;
+      window.addEventListener('resize', _rfmResizeHandler);
+    }
 
 
 
@@ -165785,6 +165821,14 @@
 
 
     document.body.classList.remove('city-modal-open');
+
+    if (typeof window !== 'undefined' && window._rfmResizeHandler) {
+
+      window.removeEventListener('resize', window._rfmResizeHandler);
+
+      window._rfmResizeHandler = null;
+
+    }
 
 
 
