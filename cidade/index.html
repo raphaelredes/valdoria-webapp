@@ -155346,13 +155346,13 @@ function _openCartLocationPopup(biome){
 
   var rationsNote = (horasViagem <= 8)
 
-    ? '🍖 Suprimentos: Viagem de 1 dia de marcha leve (sem necessidade de descanso longo na estrada).'
+    ? '◆ Suprimentos: Viagem de 1 dia de marcha leve (sem necessidade de descanso longo na estrada).'
 
     : (horasViagem <= 16)
 
-      ? '🍖 Suprimentos: 1 Ração de viagem por aventureiro · 1 Descanso Longo em acampamento selvagem.'
+      ? '◆ Suprimentos: 1 Ração de viagem por aventureiro · 1 Descanso Longo em acampamento selvagem.'
 
-      : '🍖 Suprimentos: ~' + Math.ceil(horasViagem / 12) + ' Rações de viagem por aventureiro · Marcha árdua com paradas em terrenos hostis.';
+      : '◆ Suprimentos: ~' + Math.ceil(horasViagem / 12) + ' Rações de viagem por aventureiro · Marcha árdua com paradas em terrenos hostis.';
 
 
 
@@ -155360,9 +155360,9 @@ function _openCartLocationPopup(biome){
 
     ? '<div class="clp-dnd-terrain">'
 
-    + '  <div class="clp-terrain-tag">🏔️ ' + dndInfo.terrain + '</div>'
+    + '  <div class="clp-terrain-tag">◆ ' + dndInfo.terrain + '</div>'
 
-    + '  <div class="clp-hazard-note">⚠️ ' + dndInfo.hazard + '<br>🛡️ ' + dndInfo.saves + '<br>' + (dndInfo.foraging ? '🌿 ' + dndInfo.foraging + '<br>' : '') + rationsNote + '</div>'
+    + '  <div class="clp-hazard-note">◇ ' + dndInfo.hazard + '<br>◇ Salvaguardas: ' + dndInfo.saves + '<br>' + (dndInfo.foraging ? '◇ Forrageamento: ' + dndInfo.foraging + '<br>' : '') + rationsNote + '</div>'
 
     + '</div>'
 
@@ -156292,13 +156292,13 @@ function _openCartLocationPopup(biome){
 
       var paceRationsNote = (curHours <= 8)
 
-        ? '🍖 Suprimentos: Viagem de 1 dia de marcha leve (sem necessidade de descanso longo na estrada).'
+        ? '◆ Suprimentos: Viagem de 1 dia de marcha leve (sem necessidade de descanso longo na estrada).'
 
         : (curHours <= 16)
 
-          ? '🍖 Suprimentos: 1 Ração de viagem por aventureiro · 1 Descanso Longo em acampamento selvagem.'
+          ? '◆ Suprimentos: 1 Ração de viagem por aventureiro · 1 Descanso Longo em acampamento selvagem.'
 
-          : '🍖 Suprimentos: ~' + Math.ceil(curHours / 12) + ' Rações de viagem por aventureiro · Marcha árdua com paradas em terrenos hostis.';
+          : '◆ Suprimentos: ~' + Math.ceil(curHours / 12) + ' Rações de viagem por aventureiro · Marcha árdua com paradas em terrenos hostis.';
 
 
 
@@ -156306,7 +156306,7 @@ function _openCartLocationPopup(biome){
 
       if (hazardEl && dndInfo) {
 
-        hazardEl.innerHTML = '⚠️ ' + dndInfo.hazard + '<br>🛡️ ' + dndInfo.saves + '<br>' + (dndInfo.foraging ? '🌿 ' + dndInfo.foraging + '<br>' : '') + paceRationsNote;
+        hazardEl.innerHTML = '◇ ' + dndInfo.hazard + '<br>◇ Salvaguardas: ' + dndInfo.saves + '<br>' + (dndInfo.foraging ? '◇ Forrageamento: ' + dndInfo.foraging + '<br>' : '') + paceRationsNote;
 
       }
 
