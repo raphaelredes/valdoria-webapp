@@ -160548,7 +160548,7 @@
 
 
 
-        if (low.indexOf('pântano') >= 0 || low.indexOf('pantano') >= 0 || low.indexOf('map_swamp') >= 0) {
+        if (low.indexOf('pântano') >= 0 || low.indexOf('pantano') >= 0 || low.indexOf('map_swamp') >= 0 || low.indexOf('cemitério') >= 0 || low.indexOf('cemiterio') >= 0 || low.indexOf('map_graveyard') >= 0) {
 
 
 
@@ -165757,35 +165757,35 @@
 
     // Seleção inicial: se informado ou se o aventureiro estiver em um dos nós desta região
 
+    var normPLoc = pLoc ? normalizeRegionalNodeId(pLoc) : null;
 
+    var normInitialId = initialNodeId ? normalizeRegionalNodeId(initialNodeId) : null;
 
-    var targetInitId = initialNodeId || (pLoc && nodes.some(function(item){ return item.id === pLoc; }) ? pLoc : null);
+    var foundNode = null;
 
+    if (normInitialId && Array.isArray(nodes)) {
 
+      foundNode = nodes.find(function(item){
 
-    if (!targetInitId && pLoc === 'plains' && nodes.some(function(item){ return item.id === 'green_fields'; })) {
+        return item.id === initialNodeId || normalizeRegionalNodeId(item.id) === normInitialId;
 
-
-
-      targetInitId = 'green_fields';
-
-
+      });
 
     }
 
+    if (!foundNode && normPLoc && Array.isArray(nodes)) {
 
+      foundNode = nodes.find(function(item){
 
-    if (targetInitId && Array.isArray(nodes)) {
+        return item.id === pLoc || normalizeRegionalNodeId(item.id) === normPLoc;
 
+      });
 
+    }
 
-      var foundNode = nodes.find(function(item){ return item.id === targetInitId; });
+    if (foundNode) {
 
-
-
-      if (foundNode) _selectRegionalNode(foundNode);
-
-
+      _selectRegionalNode(foundNode);
 
     }
 
