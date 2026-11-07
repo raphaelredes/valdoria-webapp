@@ -513,9 +513,17 @@
       var rc = (typeof JD().RARE_COMBAT_CHANCE === 'number') ? JD().RARE_COMBAT_CHANCE : 0;
       if (rc > 0 && (Math.random() * 100) < rc) { _rareCombat(); return; }
     }
-    var risk = (typeof JD().RISK_CHANCE === 'number') ? JD().RISK_CHANCE : 55;
+    var risk = (JD().getRiskChance) ? JD().getRiskChance(j.biome) : ((typeof JD().RISK_CHANCE === 'number') ? JD().RISK_CHANCE : 75);
     var hasHaz = (Math.random() * 100) < risk;
-    if (!hasHaz) { _safe(); return; }
+    if (!hasHaz && j.consecutiveSafe >= 1 && j.step < j.total) {
+      hasHaz = true;
+    }
+    if (!hasHaz) {
+      j.consecutiveSafe = (j.consecutiveSafe || 0) + 1;
+      _safe();
+      return;
+    }
+    j.consecutiveSafe = 0;
     var hz = JD().pickFreshHazard ? JD().pickFreshHazard(j.biome, _player(), j.usedHaz) : null;
     if (!hz) { _safe(); return; }
     // pickFreshHazard já empurra hz.title em j.usedHaz (anti-repeat sessão+24h).
@@ -630,18 +638,27 @@
 
     var script = (scriptLines || []).slice();
 
-    // Se temos especialista e ainda não colocamos fala nesta tela, insere fala de orientação
-    if (ori && ori.hasSpecialist && ori.speech && !script.some(function(l){ return l.speaker === ori.speaker; })) {
-      var pCurr = _player();
-      var pCurrName = (pCurr && (pCurr.name || pCurr.char_name)) || '';
-      var oriSpk = ori.speaker || ori.label || 'Batedor';
-      var isOriPlayer = (oriSpk === pCurrName || oriSpk === 'Você' || ori.isPlayer === true);
-      script.push({
-        type: 'speech',
-        is_player: isOriPlayer,
-        speaker: oriSpk,
-        text: String(ori.speech).replace(/^["“]|["”]$/g, '')
-      });
+    // Se temos orientação de especialista ou instrumentos/mapas
+    if (ori && ori.hasSpecialist && ori.speech) {
+      if (ori.isNarration || ori.specialistType === 'instrument' || ori.specialistType === 'keen_mind' || !ori.speaker) {
+        if (!script.some(function(l){ return l.type === 'narration' && l.text && l.text.indexOf(String(ori.speech).substring(0, 25)) >= 0; })) {
+          script.push({
+            type: 'narration',
+            text: ori.speech
+          });
+        }
+      } else if (!script.some(function(l){ return l.speaker === ori.speaker; })) {
+        var pCurr = _player();
+        var pCurrName = (pCurr && (pCurr.name || pCurr.char_name)) || '';
+        var oriSpk = ori.speaker || ori.label || 'Batedor';
+        var isOriPlayer = (oriSpk === pCurrName || oriSpk === 'Você' || ori.isPlayer === true);
+        script.push({
+          type: 'speech',
+          is_player: isOriPlayer,
+          speaker: oriSpk,
+          text: String(ori.speech).replace(/^["“]|["”]$/g, '')
+        });
+      }
     } else if (!ori || !ori.hasSpecialist) {
       // Pistas sensoriais sutis do ambiente (D&D 5e)
       var ratio = distLeft / Math.max(1, distTotal);

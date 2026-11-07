@@ -2021,7 +2021,7 @@ var DEPARTURES = {
     /* ============ LOGICA ============ */
 
     /* -------- politica de risco / etapas -------- */
-    var RISK_CHANCE = 55;
+    var RISK_CHANCE = 75;
     /* #3 (user 2026-06-16): combate RARO de viagem (emboscada). Chance por etapa,
        SÓ dispara em jornada com opts.onCombat (exploração REMOTE/LOCAL com combate
        real — nunca na cidade mock). Vence -> retoma a viagem até o destino; perde
@@ -3142,7 +3142,7 @@ var DEPARTURES = {
             };
         }
 
-        // 3. Antecedente Forasteiro / Andarilho (Outlander - Wanderer, PHB p. 136)
+        // 3. Antecedente Forasteiro / Andarilho (Andarilho dos Ermos)
         var bg = String(t.bg || '').toLowerCase();
         var hasOutlander = (bg.indexOf('forasteiro') >= 0 || bg.indexOf('outlander') >= 0 || bg.indexOf('andarilho') >= 0 || bg.indexOf('guia') >= 0);
         if (hasOutlander) {
@@ -3156,7 +3156,7 @@ var DEPARTURES = {
             };
         }
 
-        // 4. Perícia de Sobrevivência (Sabedoria / Survival, PHB p. 182)
+        // 4. Perícia de Sobrevivência (Perícia de Sobrevivência)
         var isSurvival = false;
         if (global.DndRules && typeof DndRules.isProficient === 'function') {
             isSurvival = DndRules.isProficient(p, 'wis', 'survival') || DndRules.isProficient(p, 'survival');
@@ -3172,29 +3172,31 @@ var DEPARTURES = {
             };
         }
 
-        // 5. Instrumentos de Cartografia / Bússola / Mapas de Corvus (XGtE p. 79)
+        // 5. Instrumentos de Cartografia / Bússola / Mapas de Viagem
         var hasCompass = hasItem(p, 'bussola') || hasItem(p, 'bussola magica') || hasItem(p, 'bussola_magica');
         var hasMap = (p.owned_maps && p.owned_maps.length > 0) || (p.maps_owned && p.maps_owned.length > 0) || hasItem(p, 'mapa');
         if (hasCompass || hasMap) {
             return {
                 hasSpecialist: true,
                 specialistType: 'instrument',
+                isNarration: true,
                 label: 'Navegação',
                 badge: '[Cartas & Bússola: ~' + distLeft + distUnit + ']',
-                speech: 'Consultando a agulha de navegação e as anotações cartográficas de viagem, a estimativa precisa indica ' + distLeft + distUnit + ' até ' + dest + '.',
-                speaker: 'Navegação'
+                speech: 'Consultando a agulha de navegação e as cartas cartográficas de viagem, a comitiva confirma que restam cerca de ' + distLeft + distUnit + ' até ' + dest + '.',
+                speaker: null
             };
         }
 
-        // 6. Talento Mente Aguçada (Keen Mind, PHB p. 167)
+        // 6. Talento Mente Aguçada (Orientação Absoluta)
         if (p.keen_mind || p.talento_mente_agucada || (p.feats && p.feats.indexOf('keen_mind') >= 0)) {
             return {
                 hasSpecialist: true,
                 specialistType: 'keen_mind',
+                isNarration: true,
                 label: 'Mente Aguçada',
                 badge: '[Mente Aguçada: ~' + distLeft + distUnit + ']',
-                speech: 'O norte absoluto e o ângulo das sombras não deixam dúvida: restam exatamente cerca de ' + distLeft + distUnit + ' de caminhada antes do anoitecer.',
-                speaker: 'Mente Aguçada'
+                speech: 'Pelo norte absoluto e o ângulo das sombras, a comitiva confirma que restam cerca de ' + distLeft + distUnit + ' de caminhada até ' + dest + '.',
+                speaker: null
             };
         }
 
@@ -3217,7 +3219,7 @@ var DEPARTURES = {
         var biome = (j && j.biome) || 'plains';
         var isReturn = (dest === 'Valdoria' || (j && j.isReturn) || (j && j.opts && (j.opts.direction === 'return' || j.opts.isReturn)));
 
-        // Verificação de Rações de Viagem (D&D 5e PHB p. 185 - Comida e Água)
+        // Verificação de Rações de Viagem (Suprimentos e Rações de Viagem)
         var currentRations = 0;
         var inv = (player && Array.isArray(player.inventory) && player.inventory.length)
             ? player.inventory
@@ -3400,6 +3402,10 @@ var DEPARTURES = {
         SAFE: SAFE,
         DEPARTURES: DEPARTURES,
         RISK_CHANCE: RISK_CHANCE,
+        getRiskChance: function(biome) {
+            if (!biome || biome === 'plains') return 60;
+            return 80;
+        },
         RARE_COMBAT_CHANCE: RARE_COMBAT_CHANCE,
         stepsForDistance: stepsForDistance,
         pickFreshHazard: pickFreshHazard,

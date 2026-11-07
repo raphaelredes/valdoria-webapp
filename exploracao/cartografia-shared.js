@@ -163982,7 +163982,7 @@
 
 
 
-      return pr.id !== 'world' && isProvinceDiscovered(pr.id, known, ownedMaps);
+      return pr.id !== 'world' && isProvinceDiscovered(pr.id, known, ownedMaps, pLoc);
 
 
 
@@ -164090,25 +164090,23 @@
 
     if (typeof window !== 'undefined') {
 
-      if (typeof window.navigateTo === 'function' && typeof window._currentScreen !== 'undefined') {
+      var isExploreContext = !!(window.__EXPLORE_MODE || (window.location && window.location.pathname && window.location.pathname.indexOf('exploracao') >= 0));
+
+      if (isExploreContext) {
+
+        isInsideCity = false;
+
+      } else if (typeof window.navigateTo === 'function' && typeof window._currentScreen !== 'undefined') {
 
         isInsideCity = true;
 
-      }
+      } else {
 
-      var pLocCheck = (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.location) || (pObj && pObj.location) || '';
+        var pLocCheck = (window.CITY_MOCK_PLAYER && window.CITY_MOCK_PLAYER.location) || (pObj && pObj.location) || '';
 
-      if (pLocCheck && (pLocCheck.indexOf('city_') === 0 || pLocCheck === 'city_gates')) {
+        if (pLocCheck && (pLocCheck.indexOf('city_') === 0 || pLocCheck === 'city_gates')) {
 
-        isInsideCity = true;
-
-      }
-
-      if (window.__EXPLORE_MODE || (window.S && window.S.hexGrid) || (typeof window.startReturnToCity === 'function')) {
-
-        if (!pLocCheck || (pLocCheck.indexOf('city_') !== 0 && pLocCheck !== 'city_gates')) {
-
-          isInsideCity = false;
+          isInsideCity = true;
 
         }
 
@@ -164855,10 +164853,11 @@
 
         fctx.globalCompositeOperation = 'destination-out';
 
-        // 1) Clareiras circulares nos marcos conhecidos
+        // 1) Clareiras circulares nos marcos conhecidos e na comitiva
         nodes.forEach(function(n) {
-          var nodeOpen = (known && known.indexOf(n.id) >= 0)
-            || (!isInsideCity && pLoc && normalizeRegionalNodeId(pLoc) === normalizeRegionalNodeId(n.id))
+          var isPlayerHere = !!(pLoc && normalizeRegionalNodeId(pLoc) === normalizeRegionalNodeId(n.id));
+          var nodeOpen = isPlayerHere
+            || (known && known.indexOf(n.id) >= 0)
             || isNodeDiscovered(n.id, key, known, []);
           if (!nodeOpen) return;
 
