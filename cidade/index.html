@@ -26926,7 +26926,7 @@ body.perf-lite .vc-action-btn { transition: none; }
 
     // pra garantir que cidade ↔ exploracao tenham mapas IDÊNTICOS.
 
-    document.write('<script src="./cartografia-shared.js?v=' + (window.VBUNDLE_HASH || 'v') + '_20261107_regional_nav_v4"><\/script>');
+    document.write('<script src="./cartografia-shared.js?v=' + (window.VBUNDLE_HASH || 'v') + '_20261107_regional_nav_v5"><\/script>');
 
   </script>
 
@@ -148058,11 +148058,21 @@ function _buildExploracaoSnap(mapId) {
 
     xp: p.xp || 0,
 
-    inv: Array.isArray(p.inventory) ? p.inventory.map(function(it){
+    inv: (function(){
 
-      return { i: it.id || it.name || '?', q: it.count || it.qty || 1 };
+      var rawInv = (typeof MOCK_PLAYER_INVENTORY !== 'undefined' && Array.isArray(MOCK_PLAYER_INVENTORY) && MOCK_PLAYER_INVENTORY.length > 0)
 
-    }) : [],
+        ? MOCK_PLAYER_INVENTORY
+
+        : (Array.isArray(p.inventory) ? p.inventory : []);
+
+      return rawInv.map(function(it){
+
+        return { i: it.id || it.n || it.name || '?', q: it.q || it.count || it.qty || 1 };
+
+      });
+
+    })(),
 
     // 2026-05-12: quest details completos (era só {id, step}) pra exploracao
 
@@ -148699,6 +148709,28 @@ function _cityTravelInfo(mapId) {
       var e = cb.find(function (b) { return b.key === id; });
 
       if (!e && MAP2CART[id]) e = cb.find(function (b) { return b.key === MAP2CART[id]; });
+
+      if (!e && window.CartShared && typeof CartShared.getLocationProvince === 'function') {
+
+        var prov = CartShared.getLocationProvince(id);
+
+        if (prov) {
+
+          e = {
+
+            key: id,
+
+            biome: prov.id,
+
+            x: prov.cx || 0.5,
+
+            y: prov.cy || 0.5
+
+          };
+
+        }
+
+      }
 
       return e || null;
 

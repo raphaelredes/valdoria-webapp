@@ -159088,7 +159088,7 @@
 
 
 
-      locKeys: ['plains', 'green_fields', 'orc_tribe', 'bandit_fortress', 'forest', 'goblin_nest', 'elven_ruins', 'mountain', 'dragon_pass', 'korthag', 'cave', 'troll_cave', 'underground_caverns', 'crystal_depths', 'swamp', 'deep_swamp', 'desert', 'graveyard', 'ancestral_graveyard', 'snow', 'volcanic', 'valkrest', 'salty_coast', 'black_peaks', 'eldritch_mire', 'ashen_badlands', 'elder_woods', 'glacial_rift'],
+      locKeys: ['plains', 'green_fields', 'orc_tribe', 'bandit_fortress', 'forest', 'goblin_nest', 'elven_ruins', 'mountain', 'dragon_pass', 'korthag', 'cave', 'troll_cave', 'underground_caverns', 'crystal_depths', 'swamp', 'deep_swamp', 'desert', 'graveyard', 'ancestral_graveyard', 'snow', 'volcanic', 'valkrest', 'salty_coast', 'black_peaks', 'eldritch_mire', 'ashen_badlands', 'elder_woods', 'glacial_rift', 'shipwreck_cove', 'lighthouse_ruins', 'sunken_tomb', 'crypt_shadows', 'frost_cave', 'obsidian_ridge'],
 
 
 
@@ -159632,7 +159632,11 @@
 
 
 
-        desert: { rx: 0.50, ry: 0.50, name: 'Deserto Dourado', marcos: 3 }
+        desert: { rx: 0.50, ry: 0.50, name: 'Deserto Dourado', marcos: 3 },
+
+
+
+        sunken_tomb: { rx: 0.52, ry: 0.74, name: 'Tumba das Areias', marcos: 4 }
 
 
 
@@ -159640,7 +159644,15 @@
 
 
 
-      regionalPaths: []
+      regionalPaths: [
+
+
+
+        ['desert', 'sunken_tomb']
+
+
+
+      ]
 
 
 
@@ -159708,7 +159720,15 @@
 
 
 
-        salty_coast: { rx: 0.50, ry: 0.50, name: 'Costa Salgada', marcos: 3 }
+        salty_coast: { rx: 0.50, ry: 0.50, name: 'Costa Salgada', marcos: 3 },
+
+
+
+        shipwreck_cove: { rx: 0.28, ry: 0.65, name: 'Cala dos Naufrágios', marcos: 3 },
+
+
+
+        lighthouse_ruins: { rx: 0.72, ry: 0.32, name: 'Farol Abandonado', marcos: 4 }
 
 
 
@@ -159716,7 +159736,19 @@
 
 
 
-      regionalPaths: []
+      regionalPaths: [
+
+
+
+        ['salty_coast', 'shipwreck_cove'],
+
+
+
+        ['salty_coast', 'lighthouse_ruins']
+
+
+
+      ]
 
 
 
@@ -159788,7 +159820,11 @@
 
 
 
-        glacial_rift: { rx: 0.68, ry: 0.56, name: 'Abismo Glacial', marcos: 6 }
+        glacial_rift: { rx: 0.68, ry: 0.56, name: 'Abismo Glacial', marcos: 6 },
+
+
+
+        frost_cave: { rx: 0.32, ry: 0.70, name: 'Caverna de Gelo', marcos: 4 }
 
 
 
@@ -159800,7 +159836,11 @@
 
 
 
-        ['snow', 'glacial_rift']
+        ['snow', 'glacial_rift'],
+
+
+
+        ['snow', 'frost_cave']
 
 
 
@@ -159876,7 +159916,11 @@
 
 
 
-        valkrest: { rx: 0.74, ry: 0.56, name: 'Valkrest (Acampamento)', marcos: 5 }
+        valkrest: { rx: 0.74, ry: 0.56, name: 'Valkrest (Acampamento)', marcos: 5 },
+
+
+
+        obsidian_ridge: { rx: 0.48, ry: 0.76, name: 'Crista de Obsidiana', marcos: 5 }
 
 
 
@@ -159888,7 +159932,11 @@
 
 
 
-        ['volcanic', 'valkrest']
+        ['volcanic', 'valkrest'],
+
+
+
+        ['volcanic', 'obsidian_ridge']
 
 
 
@@ -160240,7 +160288,11 @@
 
 
 
-    'burning_crater': 'volcanic'
+    'burning_crater': 'volcanic',
+
+
+
+    'salty_coast': 'coast'
 
 
 
@@ -160284,7 +160336,11 @@
 
 
 
-    'volcanic': 'burning_crater'
+    'volcanic': 'burning_crater',
+
+
+
+    'coast': 'salty_coast'
 
 
 
@@ -164582,23 +164638,7 @@
 
 
 
-    var key = provKey || 'plains';
-
-
-
-    var isCurrentDisc = discProvs.some(function(pr){ return pr.id === key; });
-
-
-
-    if (!isCurrentDisc && discProvs.length > 0) {
-
-
-
-      key = discProvs[0].id;
-
-
-
-    }
+    var key = provKey || (discProvs.length > 0 ? discProvs[0].id : 'plains');
 
 
 
