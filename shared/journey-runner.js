@@ -327,10 +327,13 @@
             _cancel();
           } else if (ch && ch.id === 'jrn_buy_provisions_tibor') {
             _cancel();
+            var resumeJourney = function () {
+              if (typeof _confirm === 'function') _confirm();
+            };
             if (typeof global._cartOpenTiborShop === 'function') {
-              global._cartOpenTiborShop();
+              global._cartOpenTiborShop({ onDone: resumeJourney });
             } else if (typeof _cartOpenTiborShop === 'function') {
-              _cartOpenTiborShop();
+              _cartOpenTiborShop({ onDone: resumeJourney });
             }
           } else if (ch && ch.isPrep) {
             _prepStance(ch);

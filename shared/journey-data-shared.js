@@ -3268,11 +3268,15 @@ var DEPARTURES = {
         ];
 
         var choices = [];
-        if (!isReturn && currentRations < steps) {
+        if (!isReturn) {
             choices.push({
                 id: 'jrn_buy_provisions_tibor',
-                label: 'Comprar Rações com Tibor nos Portões',
-                desc: 'Adquirir rações de viagem na banca de suprimentos antes de cruzar os portões.'
+                label: (currentRations < steps)
+                    ? 'Comprar Rações com Tibor nos Portões'
+                    : 'Comprar Rações Extras com Tibor',
+                desc: (currentRations < steps)
+                    ? 'Adquirir rações de viagem na banca de suprimentos antes de cruzar os portões.'
+                    : 'Abastecer rações adicionais nos portões para maior segurança durante a marcha.'
             });
         }
 

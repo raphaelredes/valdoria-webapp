@@ -168100,13 +168100,13 @@
         onChoice: function(ch) {
 
           if (!ch || ch.id === 'leave_tibor') {
-
             if (window.vEncounter && typeof window.vEncounter.close === 'function') window.vEncounter.close();
-
-            if (typeof _cartRenderCarousel === 'function') _cartRenderCarousel();
-
+            if (opts && typeof opts.onDone === 'function') {
+              opts.onDone();
+            } else if (typeof _cartRenderCarousel === 'function') {
+              _cartRenderCarousel();
+            }
             return;
-
           }
 
           if (ch.id === 'lore_starvation') {
@@ -168162,32 +168162,77 @@
             p.gold = gold - ch.cost;
 
             var added = false;
-
             inv.forEach(function(it) {
-
               if (it && typeof it === 'object' && (it.id === 'rations' || it.name === 'Rações de Viagem')) {
-
                 it.q = (it.q || 1) + ch.qty;
-
                 added = true;
-
               }
-
             });
-
             if (!added) {
-
               inv.push({ id: 'rations', name: 'Rações de Viagem', q: ch.qty, type: 'consumable' });
-
             }
+
+            var totalRations = 0;
+            inv.forEach(function(it) {
+              if (!it) return;
+              var n = (typeof it === 'string' ? it : (it.n || it.name || '')).toLowerCase();
+              if (n.indexOf('raç') >= 0 || n.indexOf('rac') >= 0 || n.indexOf('ration') >= 0) {
+                var q = (typeof it === 'object' && it.q != null) ? it.q : 1;
+                if (n.indexOf('7 dias') >= 0) q = q * 7;
+                totalRations += q;
+              }
+            });
 
             if (typeof vToast === 'function') vToast('+' + ch.qty + ' Rações adquiridas (' + ch.cost + ' PO pago)', 'ok');
 
-            if (window.vEncounter && typeof window.vEncounter.close === 'function') window.vEncounter.close();
-
-            if (typeof _cartRenderCarousel === 'function') _cartRenderCarousel();
-
-          }
+            window.vEncounter.render({
+              npc: {
+                name: 'Tibor — Provedor da Estrada',
+                desc: 'Assistente dos Armazéns de Garlen · Portões de Valdoria',
+                portrait: portraitPath
+              },
+              script: [
+                {
+                  type: 'narration',
+                  text: 'Tibor amarra o fardo de rações com corda de cânhamo impermeável e o entrega a você com presteza. Moedas de ouro tintilam na caixinha de madeira do rapaz.'
+                },
+                {
+                  type: 'speech',
+                  speaker: 'Tibor — Provedor da Estrada',
+                  text: 'Perfeito! Aqui estão suas ' + ch.qty + ' ração(ões) bem guardadas. Agora você tem um total de ' + totalRations + ' rações na mochila. Andarilho bem alimentado não cai em emboscada de pernas bambas!'
+                },
+                {
+                  type: 'reward',
+                  title: '◆ ITENS ADQUIRIDOS ◆',
+                  items: ['+' + ch.qty + ' Rações de Viagem'],
+                  gold_cost: ch.cost,
+                  item_label: 'Item Adquirido'
+                }
+              ],
+              choices: [
+                { id: 'buy_more', label: 'Comprar mais provisões', desc: 'Abastecer ainda mais rações para a comitiva.' },
+                { id: 'done', label: '↩ Pronto para partir', desc: 'Retornar aos preparativos de viagem.' }
+              ],
+              choicesTitle: 'Compra Realizada com Sucesso',
+              compact: true
+            }, {
+              player: p,
+              autoOpenChoices: true,
+              onChoice: function(subCh) {
+                if (subCh && subCh.id === 'buy_more') {
+                  _cartOpenTiborShop(opts ? Object.assign({}, opts, { autoOpenChoices: true }) : { autoOpenChoices: true });
+                } else {
+                  if (window.vEncounter && typeof window.vEncounter.close === 'function') {
+                    window.vEncounter.close();
+                  }
+                  if (opts && typeof opts.onDone === 'function') {
+                    opts.onDone();
+                  } else if (typeof _cartRenderCarousel === 'function') {
+                    _cartRenderCarousel();
+                  }
+                }
+              }
+            });}
 
         }
 

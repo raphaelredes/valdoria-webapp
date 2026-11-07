@@ -1066,8 +1066,11 @@
      achar a imagem WebP da recompensa. */
   function _rewardItemSlug(name) {
     try {
-      return String(name).normalize('NFD').replace(/[̀-ͯ]/g, '')
+      var clean = String(name).replace(/^\+?\s*\d+\s*x?\s*/i, '');
+      var slug = clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      if (slug === 'racao-de-viagem' || slug === 'racoes' || slug === 'racao') return 'racoes-de-viagem';
+      return slug;
     } catch (_e) { return ''; }
   }
 
@@ -1087,13 +1090,19 @@
     } else if (kind === 'item') {
       var slug = _rewardItemSlug(name);
       var img = null;
-      if (slug && window.vItems && typeof window.vItems.has === 'function' && window.vItems.has(slug)) {
+      if (slug) {
         img = document.createElement('img');
         img.className = 'enc-reward-item-img';
         img.alt = '';
         img.loading = 'lazy';
-        img.src = ((window.vItemsConfig && window.vItemsConfig.pngBase) || '/shared/img/items/') + slug + '.webp';
-        img.setAttribute('onerror', "this.style.display='none';this.parentNode.innerHTML='<span class=\"vitem-placeholder-symbol\" style=\"font-size:1.2em;color:#dfbf78;font-weight:700;\">◆</span>';");
+        var base = (window.vItemsConfig && window.vItemsConfig.pngBase) || '';
+        if (!base) {
+          base = (typeof window !== 'undefined' && window.location && window.location.protocol === 'file:')
+            ? '../valdoria-webapp/shared/img/items/'
+            : '/shared/img/items/';
+        }
+        img.src = base + slug + '.webp';
+        img.setAttribute('onerror', "this.style.display='none';if(this.parentNode)this.parentNode.innerHTML='<span class=\"vitem-placeholder-symbol\" style=\"font-size:1.2em;color:#dfbf78;font-weight:700;\">◆</span>';");
         ic.appendChild(img);
       } else {
         var fallbackIco = '◆';
@@ -1113,12 +1122,35 @@
       rows.push(['quest', String(line.quest_accept || line.quest), 'Missão Aceita']);
     }
     if (line.gold && line.gold > 0) rows.push(['gold', '+' + (line.gold | 0) + ' Valdoritas', 'Tesouro']);
+    if (line.gold_cost && line.gold_cost > 0) {
+      rows.push(['gold', '-' + (line.gold_cost | 0) + ' Valdoritas', 'Custo Pago']);
+    } else if (line.cost && line.cost > 0 && !(line.gold && line.gold > 0)) {
+      rows.push(['gold', '-' + (line.cost | 0) + ' Valdoritas', 'Custo Pago']);
+    }
     if (line.xp && line.xp > 0) rows.push(['xp', '+' + (line.xp | 0) + ' XP', 'Experiência']);
     (line.items || []).forEach(function (it) {
       if (it) {
-        var itName = String(it);
-        var itLabel = (itName.toLowerCase().indexOf('mapa') >= 0 || itName.toLowerCase().indexOf('pergaminho') >= 0) ? 'Documento / Mapa' : 'Item Obtido';
-        rows.push(['item', itName.indexOf('+') === 0 ? itName : ('+1 ' + itName), itLabel]);
+        var itName = '';
+        var itLabel = line.item_label || '';
+        if (typeof it === 'object') {
+          var q = it.qty || it.q || 1;
+          var baseName = it.name || it.n || 'Item';
+          itName = (q > 1 ? ('+' + q + ' ') : '+1 ') + baseName;
+          if (it.label) itLabel = it.label;
+        } else {
+          itName = String(it);
+          if (itName.indexOf('+') !== 0) itName = '+1 ' + itName;
+        }
+        if (!itLabel) {
+          if (itName.toLowerCase().indexOf('mapa') >= 0 || itName.toLowerCase().indexOf('pergaminho') >= 0) {
+            itLabel = 'Documento / Mapa';
+          } else if (line.title && /adquirid/i.test(line.title)) {
+            itLabel = 'Item Adquirido';
+          } else {
+            itLabel = 'Item Obtido';
+          }
+        }
+        rows.push(['item', itName, itLabel]);
       }
     });
     if (line.effect) rows.push(['effect', String(line.effect), 'Efeito']);
