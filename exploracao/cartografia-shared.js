@@ -13926,19 +13926,19 @@
 
 
 
-      s: { name: 'Céu Limpo', icon: '☀️', hazardMod: 0, effect: 'Visibilidade aberta; marcha sem penalidades climáticas.' },
+      s: { name: 'Céu Limpo', icon: '◆', hazardMod: 0, effect: 'Visibilidade aberta; marcha sem penalidades climáticas.' },
 
 
 
-      r: { name: 'Chuva Contínua', icon: '🌧️', hazardMod: 2, effect: 'Terreno escorregadio (+2 CD em testes físicos de marcha). Dificuldade para acender fogueiras sem abrigo.' },
+      r: { name: 'Chuva Contínua', icon: '◆', hazardMod: 2, effect: 'Terreno escorregadio (+2 CD em testes físicos de marcha). Dificuldade para acender fogueiras sem abrigo.' },
 
 
 
-      t: { name: 'Tempestade com Raios', icon: '⛈️', hazardMod: 3, effect: 'Visibilidade obscurecida e ventania. Desvantagem em testes de Percepção auditiva/visual à distância.' },
+      t: { name: 'Tempestade com Raios', icon: '◆', hazardMod: 3, effect: 'Visibilidade obscurecida e ventania. Desvantagem em testes de Percepção auditiva/visual à distância.' },
 
 
 
-      f: { name: 'Névoa Densa', icon: '🌫️', hazardMod: 2, effect: 'Visibilidade limitada. Desvantagem em testes de Percepção visual além de curta distância.' },
+      f: { name: 'Névoa Densa', icon: '◆', hazardMod: 2, effect: 'Visibilidade limitada. Desvantagem em testes de Percepção visual além de curta distância.' },
 
 
 
@@ -14542,11 +14542,11 @@
 
 
 
-      threats: ['🐺 Lobos da Floresta (ND 1/4)', '🕷️ Aranhas Gigantes (ND 1)', '🌿 Dríades Espinhosas (ND 2)'],
+      threats: ['Lobos da Floresta (ND 1/4)', 'Aranhas Gigantes (ND 1)', 'Dríades Espinhosas (ND 2)'],
 
 
 
-      apex: '🐻 Urso-Coruja Feroz (ND 3)',
+      apex: 'Urso-Coruja Feroz (ND 3)',
 
 
 
@@ -14562,11 +14562,11 @@
 
 
 
-      threats: ['🐗 Javalis Selvagens (ND 1/4)', '🏹 Salteadores da Estrada (ND 1/2)', '👹 Goblins Saqueadores (ND 1)'],
+      threats: ['Javalis Selvagens (ND 1/4)', 'Salteadores da Estrada (ND 1/2)', 'Goblins Saqueadores (ND 1)'],
 
 
 
-      apex: '🦁 Manticora Alada (ND 3)',
+      apex: 'Manticora Alada (ND 3)',
 
 
 
@@ -14582,11 +14582,11 @@
 
 
 
-      threats: ['🐊 Crocodilos do Lodo (ND 1/2)', '🧟 Carniçais Pantanosos (ND 1)', '🦎 Trogloditas Fétidos (ND 1)'],
+      threats: ['Crocodilos do Lodo (ND 1/2)', 'Carniçais Pantanosos (ND 1)', 'Trogloditas Fétidos (ND 1)'],
 
 
 
-      apex: '🐍 Hidra das Águas Negras (ND 5)',
+      apex: 'Hidra das Águas Negras (ND 5)',
 
 
 
@@ -14602,11 +14602,11 @@
 
 
 
-      threats: ['🦅 Harpias das Encostas (ND 1)', '🪨 Gigantes da Colina (ND 5)', '👹 Ogros Montanheses (ND 2)'],
+      threats: ['Harpias das Encostas (ND 1)', 'Gigantes da Colina (ND 5)', 'Ogros Montanheses (ND 2)'],
 
 
 
-      apex: '🐉 Jovem Dragão Vermelho (ND 10)',
+      apex: 'Jovem Dragão Vermelho (ND 10)',
 
 
 
@@ -14622,11 +14622,11 @@
 
 
 
-      threats: ['🦂 Escorpiões Gigantes (ND 3)', '💀 Múmias do Vale Seco (ND 3)', '🌪️ Serpentes de Areia (ND 1)'],
+      threats: ['Escorpiões Gigantes (ND 3)', 'Múmias do Vale Seco (ND 3)', 'Serpentes de Areia (ND 1)'],
 
 
 
-      apex: '🐛 Verme da Areia Colossal (ND 7)',
+      apex: 'Verme da Areia Colossal (ND 7)',
 
 
 
@@ -14642,11 +14642,11 @@
 
 
 
-      threats: ['🦇 Morcegos Gigantes (ND 1/4)', '🍄 Fungos Violetas (ND 1)', '🕷️ Aranhas Espectrais (ND 3)'],
+      threats: ['Morcegos Gigantes (ND 1/4)', 'Fungos Violetas (ND 1)', 'Aranhas Espectrais (ND 3)'],
 
 
 
-      apex: '👁️ Observador das Profundezas (ND 8)',
+      apex: 'Observador das Profundezas (ND 8)',
 
 
 
@@ -14822,7 +14822,7 @@
 
 
 
-      icon: '🧭',
+      icon: '◆',
 
 
 
@@ -14878,7 +14878,7 @@
 
 
 
-      icon: '📜',
+      icon: '◆',
 
 
 
@@ -15002,7 +15002,7 @@
 
 
 
-      icon: '🚶',
+      icon: '◆',
 
 
 
@@ -15038,7 +15038,7 @@
 
 
 
-      icon: '🐎',
+      icon: '◆',
 
 
 
@@ -15178,7 +15178,7 @@
 
 
 
-      icon: '🚶',
+      icon: '◆',
 
 
 
@@ -15234,7 +15234,7 @@
 
 
 
-      icon: '🐾',
+      icon: '◆',
 
 
 
@@ -15382,7 +15382,7 @@
 
 
 
-      label = '🟢 Baixo Risco (~' + totalRisk + '% Chance de Emboscada)';
+      label = '◆ Baixo Risco (~' + totalRisk + '% Chance de Emboscada)';
 
 
 
@@ -15394,7 +15394,7 @@
 
 
 
-      label = '🟡 Risco Moderado (~' + totalRisk + '% Chance de Emboscada)';
+      label = '◆ Risco Moderado (~' + totalRisk + '% Chance de Emboscada)';
 
 
 
@@ -15406,7 +15406,7 @@
 
 
 
-      label = '🟠 Alto Risco (~' + totalRisk + '% Chance de Emboscada · Patrulhas Ativas)';
+      label = '◆ Alto Risco (~' + totalRisk + '% Chance de Emboscada · Patrulhas Ativas)';
 
 
 
@@ -15418,7 +15418,7 @@
 
 
 
-      label = '🔴 Risco Extremo (~' + totalRisk + '% Chance de Emboscada · Zona Mortal)';
+      label = '◆ Risco Extremo (~' + totalRisk + '% Chance de Emboscada · Zona Mortal)';
 
 
 
@@ -18658,7 +18658,7 @@
 
 
 
-    ctx.fillText('🧭 Rumo: ' + m.bearingCode + ' (' + m.degrees + '°) · 🚶 ~' + m.hoursFoot + 'h', mx, my + 3);
+    ctx.fillText('◆ Rumo: ' + m.bearingCode + ' (' + m.degrees + '°) · ~' + m.hoursFoot + 'h a pé', mx, my + 3);
 
 
 
@@ -18674,7 +18674,7 @@
 
 
 
-    ctx.fillText('🐎 ~' + m.hoursHorse + 'h montaria · 🛒 ~' + m.hoursWagon + 'h caravana', mx, my + 15);
+    ctx.fillText('~' + m.hoursHorse + 'h montaria · ~' + m.hoursWagon + 'h caravana', mx, my + 15);
 
 
 
@@ -19848,7 +19848,7 @@
 
 
 
-    ctx.fillText('🎯 ALVO FOCADO', 0, -30);
+    ctx.fillText('◆ ALVO FOCADO', 0, -30);
 
 
 
@@ -19928,7 +19928,7 @@
 
 
 
-    var label = '🟢 Marcha Livre (Carga Leve)';
+    var label = '◆ Marcha Livre (Carga Leve)';
 
 
 
@@ -19988,7 +19988,7 @@
 
 
 
-      label = '🔴 Sobrecarga Severa (-20 pés)';
+      label = '◆ Sobrecarga Severa (-20 pés)';
 
 
 
@@ -20016,7 +20016,7 @@
 
 
 
-      label = '🟡 Sobrecarga Leve (-10 pés)';
+      label = '◆ Sobrecarga Leve (-10 pés)';
 
 
 
@@ -20368,11 +20368,11 @@
 
 
 
-      { key: 'foot',  name: 'A Pé',        icon: '🚶', speedMph: 3.0, feature: 'Mochilas prontas e sentidos aguçados' },
+      { key: 'foot',  name: 'A Pé',        icon: '◆', speedMph: 3.0, feature: 'Mochilas prontas e sentidos aguçados' },
 
 
 
-      { key: 'horse', name: 'Montaria',    icon: '🐎', speedMph: 4.0, feature: '+33% Velocidade em estradas; consome ração de forragem' },
+      { key: 'horse', name: 'Montaria',    icon: '◆', speedMph: 4.0, feature: '+33% Velocidade em estradas; consome ração de forragem' },
 
 
 
@@ -20380,7 +20380,7 @@
 
 
 
-      { key: 'boat',  name: 'Barco Fluvial', icon: '⛵', speedMph: 5.0, feature: 'Velocidade fluvial acelerada; sem fadiga de marcha' }
+      { key: 'boat',  name: 'Barco Fluvial', icon: '◆', speedMph: 5.0, feature: 'Velocidade fluvial acelerada; sem fadiga de marcha' }
 
 
 
@@ -20477,21 +20477,7 @@
 
 
     function _formatHour(val) {
-
-
-
-      var hh = Math.floor(val) % 24;
-
-
-
-      var mm = Math.round((val - Math.floor(val)) * 60);
-
-
-
-      return (hh < 10 ? '0' : '') + hh + ':' + (mm < 10 ? '0' : '') + mm;
-
-
-
+      return _periodName(val);
     }
 
 
@@ -20501,37 +20487,13 @@
 
 
     function _periodName(val) {
-
-
-
       var hh = Math.floor(val) % 24;
-
-
-
-      if (hh >= 5 && hh < 8) return 'Alvorecer';
-
-
-
-      if (hh >= 8 && hh < 12) return 'Manhã';
-
-
-
-      if (hh >= 12 && hh < 14) return 'Meio-Dia';
-
-
-
-      if (hh >= 14 && hh < 18) return 'Tarde';
-
-
-
-      if (hh >= 18 && hh < 21) return 'Crepúsculo';
-
-
-
-      return 'Noite Fechada';
-
-
-
+      if (hh >= 0 && hh < 5) return 'Madrugada';
+      if (hh >= 5 && hh < 8) return 'Amanhecer';
+      if (hh >= 8 && hh < 12) return 'Dia';
+      if (hh >= 12 && hh < 17) return 'Tarde';
+      if (hh >= 17 && hh < 20) return 'Entardecer';
+      return 'Noite';
     }
 
 
@@ -20540,7 +20502,7 @@
 
 
 
-    var depStr = 'Dia 1, ' + _formatHour(curH) + ' (' + _periodName(curH) + ')';
+    var depStr = 'Dia 1 · ' + _periodName(curH);
 
 
 
@@ -20624,7 +20586,7 @@
 
 
 
-          duration: '8h de Descanso Longo'
+          duration: 'Descanso Longo'
 
 
 
@@ -20656,7 +20618,7 @@
 
 
 
-    var arrStr = 'Dia ' + currentDay + ', ' + _formatHour(clock) + ' (' + _periodName(clock) + ')';
+    var arrStr = 'Dia ' + currentDay + ' · ' + _periodName(clock);
 
 
 
@@ -21872,7 +21834,7 @@
 
 
 
-        title: '❄️ Frio Extremo',
+        title: '◆ Frio Extremo',
 
 
 
@@ -21956,7 +21918,7 @@
 
 
 
-        title: '☀️ Calor Escaldante',
+        title: '◆ Calor Escaldante',
 
 
 
@@ -21988,7 +21950,7 @@
 
 
 
-        mitigationText: 'Consumo dobrado de água (2 galões/dia) e descanso em sombras nas horas mais quentes (11h-15h).',
+        mitigationText: 'Consumo dobrado de água (2 galões/dia) e descanso em sombras nas horas mais quentes (no pico do sol da Tarde).',
 
 
 
@@ -22032,7 +21994,7 @@
 
 
 
-        title: '🌪️ Intempérie Severa',
+        title: '◆ Intempérie Severa',
 
 
 
@@ -22616,7 +22578,7 @@
 
 
 
-      r: { name: 'Chuva Moderada', icon: '🌧️' },
+      r: { name: 'Chuva Moderada', icon: '◆' },
 
 
 
@@ -22624,11 +22586,11 @@
 
 
 
-      f: { name: 'Nevoeiro Denso', icon: '🌫️' },
+      f: { name: 'Nevoeiro Denso', icon: '◆' },
 
 
 
-      w: { name: 'Ventos Cortantes', icon: '🌬️' }
+      w: { name: 'Ventos Cortantes', icon: '◆' }
 
 
 
@@ -23508,7 +23470,7 @@
 
 
 
-      var icon = bObj.settlement || bObj.isOrigin ? '🏛️' : (bObj.isSanctuary ? '🌀' : '📍');
+      var icon = bObj.settlement || bObj.isOrigin ? '◆' : (bObj.isSanctuary ? '◇' : '◆');
 
 
 
@@ -23569,216 +23531,58 @@
 
 
   function calcCampWatchShifts(partySize, options) {
-
-
-
     options = options || {};
-
-
-
     var pSize = Math.max(1, partySize || 4);
-
-
-
     var startH = (typeof options.startHour === 'number') ? options.startHour : 20;
 
-
-
-
-
-
-
     var shifts = [
-
-
-
       {
-
-
-
         shiftIndex: 1,
-
-
-
-        timeRange: '20:00 - 22:00',
-
-
-
-        periodLabel: 'Primeira Vigília (Crepúsculo)',
-
-
-
+        timeRange: 'Início da Noite',
+        periodLabel: 'Primeira Vigília (Entardecer/Noite)',
         riskFactor: '5% (Baixo)',
-
-
-
         riskColor: '#4ade80',
-
-
-
         desc: 'Inspeção inicial do perímetro do acampamento e alimentação da fogueira.'
-
-
-
       },
-
-
-
       {
-
-
-
         shiftIndex: 2,
-
-
-
-        timeRange: '22:00 - 00:00',
-
-
-
+        timeRange: 'Plena Noite',
         periodLabel: 'Vigília da Meia-Noite (Silêncio)',
-
-
-
         riskFactor: '10% (Moderado)',
-
-
-
         riskColor: '#facc15',
-
-
-
         desc: 'Ronda silenciosa ao redor das barracas e checagem de montarias e arreios.'
-
-
-
       },
-
-
-
       {
-
-
-
         shiftIndex: 3,
-
-
-
-        timeRange: '00:00 - 02:00',
-
-
-
+        timeRange: 'Profunda Madrugada',
         periodLabel: 'Vigília da Madrugada (Hora Sombria)',
-
-
-
         riskFactor: '18% (Crítico)',
-
-
-
         riskColor: '#ef4444',
-
-
-
         desc: 'Momento de maior atividade de predadores alfa e criaturas noturnas; vigilância atenta mandatória.'
-
-
-
       },
-
-
-
       {
-
-
-
         shiftIndex: 4,
-
-
-
-        timeRange: '02:00 - 04:00',
-
-
-
+        timeRange: 'Fim da Madrugada / Amanhecer',
         periodLabel: 'Vigília do Alvorecer (Neblina Matinal)',
-
-
-
         riskFactor: '8% (Moderado)',
-
-
-
         riskColor: '#fb923c',
-
-
-
         desc: 'Névoa baixa da manhã; preparo de brasas para o desjejum da comitiva.'
-
-
-
       }
-
-
-
     ];
 
-
-
-
-
-
-
     var tranceNote = options.hasTrance
-
-
-
-      ? 'Aventureiros élficos necessitam de apenas 4h de transe meditativo e podem cobrir 2 turnos inteiros de vigília sem sofrer exaustão.'
-
-
-
-      : 'Cada aventureiro cobre 1 turno de 2 horas de vigília leve durante o descanso longo de 8 horas.';
-
-
-
-
-
-
+      ? 'Aventureiros élficos necessitam de apenas um período de transe meditativo e podem cobrir 2 turnos inteiros de vigília sem sofrer exaustão.'
+      : 'Cada aventureiro cobre 1 turno de vigília leve durante o descanso longo.';
 
     return {
-
-
-
       totalShifts: 4,
-
-
-
       shiftDurationHours: 2,
-
-
-
       totalCampHours: 8,
-
-
-
       shifts: shifts,
-
-
-
       tranceNote: tranceNote,
-
-
-
       criticalShift: 'Turno 3 (Madrugada: Silêncio e Névoa Fria)',
-
-
-
-      dndRef: 'PHB p. 186 / DMG p. 111'
-
-
-
+      dndRef: 'Descanso Longo & Vigília'
     };
-
-
 
   }
 
@@ -25584,7 +25388,7 @@
 
 
 
-      social: { name: 'Encontro Social', icon: '🗣️', color: '#60a5fa' },
+      social: { name: 'Encontro Social', icon: '◆', color: '#60a5fa' },
 
 
 
@@ -25592,7 +25396,7 @@
 
 
 
-      hazard: { name: 'Perigo Ambiental', icon: '⚠️', color: '#fb923c' }
+      hazard: { name: 'Perigo Ambiental', icon: '◇', color: '#fb923c' }
 
 
 
@@ -29060,15 +28864,15 @@
 
 
 
-      mule: { name: 'Mula de Carga', baseCapacity: 420, baseSpeedMod: 0, fodder: 10, costCp: 800, icon: '🫏' },
+      mule: { name: 'Mula de Carga', baseCapacity: 420, baseSpeedMod: 0, fodder: 10, costCp: 800, icon: '◆' },
 
 
 
-      draft_horse: { name: 'Cavalo de Tração', baseCapacity: 540, baseSpeedMod: 0, fodder: 15, costCp: 5000, icon: '🐎' },
+      draft_horse: { name: 'Cavalo de Tração', baseCapacity: 540, baseSpeedMod: 0, fodder: 15, costCp: 5000, icon: '◆' },
 
 
 
-      riding_horse: { name: 'Cavalo de Montaria', baseCapacity: 480, baseSpeedMod: 25, fodder: 15, costCp: 7500, icon: '🏇' },
+      riding_horse: { name: 'Cavalo de Montaria', baseCapacity: 480, baseSpeedMod: 25, fodder: 15, costCp: 7500, icon: '◆' },
 
 
 
@@ -29076,11 +28880,11 @@
 
 
 
-      camel: { name: 'Camelo do Deserto', baseCapacity: 480, baseSpeedMod: 0, fodder: 10, costCp: 5000, icon: '🐫' },
+      camel: { name: 'Camelo do Deserto', baseCapacity: 480, baseSpeedMod: 0, fodder: 10, costCp: 5000, icon: '◆' },
 
 
 
-      ox: { name: 'Boi de Puxa', baseCapacity: 540, baseSpeedMod: -15, fodder: 20, costCp: 1500, icon: '🐂' }
+      ox: { name: 'Boi de Puxa', baseCapacity: 540, baseSpeedMod: -15, fodder: 20, costCp: 1500, icon: '◆' }
 
 
 
@@ -154197,10 +154001,7 @@
 
 
     var campText = (campCount > 0)
-
-
-
-      ? (campCount + ' Acampamento(s) com Descanso Longo (8h cada) · Postura: ' + (campKey === 'vigilant' ? '🛡️ Vigília Atenta' : (campKey === 'stealth' ? '🕯️ Acampamento Oculto' : '⛺ Repouso Pleno')))
+      ? (campCount + ' Acampamento(s) com Descanso Longo · Postura: ' + (campKey === 'vigilant' ? '◆ Vigília Atenta' : (campKey === 'stealth' ? '◆ Acampamento Oculto' : '◆ Repouso Pleno')))
 
 
 
@@ -154213,10 +154014,7 @@
 
 
     var forcedMarchWarning = (travelHours > 8 && campCount === 0)
-
-
-
-      ? ('⚠️ ALERTA DE MARCHA FORÇADA: Salvaguarda de CON CD ' + (10 + Math.floor(travelHours - 8)) + ' contra Exaustão Nível 1.')
+      ? ('◆ ALERTA DE MARCHA FORÇADA: Salvaguarda de CON CD ' + (10 + Math.floor(travelHours - 8)) + ' contra Exaustão Nível 1.')
 
 
 
@@ -154244,7 +154042,7 @@
 
 
 
-    out.push('📜 ITINERÁRIO DE EXPEDIÇÃO · LENDAS DE VALDORIA');
+    out.push('◆ ITINERÁRIO DE EXPEDIÇÃO · LENDAS DE VALDORIA');
 
 
 
@@ -154252,11 +154050,11 @@
 
 
 
-    out.push('📍 Origem:     ' + orig.name + ' (' + biomePT(orig.biome || orig.key) + ' · ' + origProv.name + ')');
+    out.push('◆ Origem:     ' + orig.name + ' (' + biomePT(orig.biome || orig.key) + ' · ' + origProv.name + ')');
 
 
 
-    out.push('🎯 Destino:    ' + targ.name + ' (' + biomePT(targ.biome || targ.key) + ' · ' + targProv.name + ')');
+    out.push('◆ Destino:    ' + targ.name + ' (' + biomePT(targ.biome || targ.key) + ' · ' + targProv.name + ')');
 
 
 
@@ -154284,7 +154082,7 @@
 
 
 
-    out.push('• Ritmo da Comitiva:  ' + (paceKey === 'fast' ? '⚡ Rápido (30 mi/dia)' : (paceKey === 'stealth' ? '🐾 Furtivo (18 mi/dia)' : '🚶 Normal (24 mi/dia)')));
+    out.push('• Ritmo da Comitiva:  ' + (paceKey === 'fast' ? '◆ Rápido (30 mi/dia)' : (paceKey === 'stealth' ? '◆ Furtivo (18 mi/dia)' : '◆ Normal (24 mi/dia)')));
 
 
 
@@ -154304,11 +154102,12 @@
 
 
 
-    out.push('⏳ LOGÍSTICA & SOBREVIVÊNCIA:');
+    out.push('◆ LOGÍSTICA & SOBREVIVÊNCIA:');
 
 
 
-    out.push('• Duração Estimada:   ' + travelHours + ' Horas de Viagem');
+    var durEstimada = (travelHours <= 4) ? 'Meio dia de marcha' : ((travelHours <= 8) ? '1 dia de marcha' : (Math.ceil(travelHours / 8) + ' dias de marcha'));
+    out.push('• Duração Estimada:   ' + durEstimada);
 
 
 
@@ -154396,7 +154195,7 @@
 
 
 
-    out.push('⚔️ AMEAÇAS & RECURSOS DO BIOMA:');
+    out.push('⚔ AMEAÇAS & RECURSOS DO BIOMA:');
 
 
 
@@ -154460,7 +154259,7 @@
 
 
 
-      out.push('• Refúgio Próximo:    ' + nearSanc.name + ' (' + nearSanc.distanceMiles + ' mi a ' + nearSanc.bearingCode + ', ~' + nearSanc.travelHours + 'h)');
+      out.push('• Refúgio Próximo:    ' + nearSanc.name + ' (' + nearSanc.distanceMiles + ' mi a ' + nearSanc.bearingCode + ')');
 
 
 
@@ -154524,7 +154323,7 @@
 
 
 
-    var restRec = calcCampRestRecovery(horasViagem > 8 ? 'long' : 'short', {
+    var restRec = calcCampRestRecovery(travelHours > 8 ? 'long' : 'short', {
 
 
 
@@ -158993,22 +158792,11 @@
 
 
   function locArtHtml(biome){
-
-
-
     if (!biome) return '';
-
-
-
     var key = biome.key || '';
-
-
-
     var ico = biome.ico || '';
-
-
-
-    return '<img class="clp-loc-img" alt="" src="/shared/img/map/locations/' + key + '.webp" '
+    var imgBase = (typeof window !== 'undefined' && window.location && window.location.protocol === 'file:') ? './shared/img/map/locations/' : '/shared/img/map/locations/';
+    return '<img class="clp-loc-img" alt="" src="' + imgBase + key + '.webp"  '
 
 
 
@@ -160164,11 +159952,11 @@
 
 
 
-    city_gates: 'plains', city_square: 'plains', city_tavern: 'plains', city_guild: 'plains', city_temple: 'plains',
+    cidade: 'plains', city: 'plains', city_gates: 'plains', city_square: 'plains', city_tavern: 'plains', city_guild: 'plains', city_temple: 'plains',
 
 
 
-    plains: 'plains', green_fields: 'plains', orc_tribe: 'plains', bandit_fortress: 'plains', ashen_badlands: 'plains',
+    plains: 'plains', green_fields: 'plains', orc_tribe: 'plains', bandit_fortress: 'plains', ashen_badlands: 'plains', badlands: 'plains',
 
 
 
@@ -160176,7 +159964,7 @@
 
 
 
-    forest: 'forest', whispering_woods: 'forest', goblin_nest: 'forest', elven_ruins: 'forest', elder_woods: 'forest',
+    forest: 'forest', whispering_woods: 'forest', goblin_nest: 'forest', elven_ruins: 'forest', elder_woods: 'forest', ancient_forest: 'forest',
 
 
 
@@ -160184,7 +159972,7 @@
 
 
 
-    mountain: 'mountain', stone_peaks: 'mountain', korthag: 'mountain', dragon_pass: 'mountain', black_peaks: 'mountain',
+    mountain: 'mountain', stone_peaks: 'mountain', korthag: 'mountain', dragon_pass: 'mountain', black_peaks: 'mountain', dark_mountain: 'mountain',
 
 
 
@@ -160200,7 +159988,7 @@
 
 
 
-    swamp: 'swamp', misty_marshes: 'swamp', deep_swamp: 'swamp', eldritch_mire: 'swamp', sunken_temple: 'swamp',
+    swamp: 'swamp', misty_marshes: 'swamp', deep_swamp: 'swamp', eldritch_mire: 'swamp', eldritch_swamp: 'swamp', sunken_temple: 'swamp',
 
 
 
@@ -160232,7 +160020,7 @@
 
 
 
-    snow: 'snow', frozen_waste: 'snow', glacial_rift: 'snow', frost_cave: 'snow',
+    snow: 'snow', frozen_waste: 'snow', glacial_rift: 'snow', frozen_abyss: 'snow', frost_cave: 'snow',
 
 
 
@@ -160352,650 +160140,190 @@
 
 
 
-  function extractPlayerMaps(pObj) {
-
-
-
-    if (!pObj && typeof window !== 'undefined') {
-
-
-
-      pObj = (window.CITY_PLAYER || window.PLAYER || (window.S && window.S.player) || window.CITY_MOCK_PLAYER) || {};
-
-
-
+  function _normalizeCanonicalRegionalMap(rawName) {
+    if (!rawName) return null;
+    var s = String(rawName).trim().toLowerCase();
+    if (!s) return null;
+    // Excluir explicitamente mapas de pista/missão que NÃO são mapas regionais de Corvus
+    if (
+      s.indexOf('espólio') >= 0 || s.indexOf('espolio') >= 0 ||
+      s.indexOf('taverna') >= 0 || s.indexOf('mina') >= 0 ||
+      s.indexOf('veldrin') >= 0 || s.indexOf('batedor') >= 0 ||
+      s.indexOf('contraband') >= 0 || s.indexOf('tesouro') >= 0
+    ) {
+      return null;
     }
+    var hasMapaWord = s.indexOf('mapa') >= 0;
+    var hasMapPrefix = s.indexOf('map_') === 0;
+    if (!hasMapaWord && !hasMapPrefix) return null;
 
+    if (s === 'mapa de valdória' || s === 'mapa de valdoria' || s === 'mapa-mestre' || s === 'mapa mestre' || s === 'mapa mundi' || s === 'map_world') {
+      return '__ALL__';
+    }
+    if (s === 'mapa das planícies' || s === 'mapa das planicies' || s === 'map_plains' || (hasMapaWord && (s.indexOf('planície') >= 0 || s.indexOf('planicie') >= 0))) {
+      return 'Mapa das Planícies';
+    }
+    if (s === 'mapa da floresta' || s === 'map_forest' || (hasMapaWord && s.indexOf('floresta') >= 0)) {
+      return 'Mapa da Floresta';
+    }
+    if (s === 'mapa do pântano' || s === 'mapa do pantano' || s === 'mapa do cemitério' || s === 'mapa do cemiterio' || s === 'map_swamp' || s === 'map_graveyard' || (hasMapaWord && (s.indexOf('pântano') >= 0 || s.indexOf('pantano') >= 0 || s.indexOf('cemitério') >= 0 || s.indexOf('cemiterio') >= 0))) {
+      return 'Mapa do Pântano';
+    }
+    if (s === 'mapa das montanhas' || s === 'mapa das cavernas' || s === 'map_mountain' || s === 'map_cave' || (hasMapaWord && (s.indexOf('montanha') >= 0 || s.indexOf('caverna') >= 0))) {
+      return 'Mapa das Montanhas';
+    }
+    if (s === 'mapa do deserto' || s === 'map_desert' || (hasMapaWord && s.indexOf('deserto') >= 0)) {
+      return 'Mapa do Deserto';
+    }
+    if (s === 'mapa do ermo gelado' || s === 'map_snow' || (hasMapaWord && (s.indexOf('gelo') >= 0 || s.indexOf('gelado') >= 0 || s.indexOf('gélid') >= 0 || s.indexOf('gelid') >= 0 || s.indexOf('boreal') >= 0))) {
+      return 'Mapa do Ermo Gelado';
+    }
+    if (s === 'mapa vulcânico' || s === 'mapa vulcanico' || s === 'map_volcanic' || (hasMapaWord && (s.indexOf('vulc') >= 0 || s.indexOf('terras de fogo') >= 0))) {
+      return 'Mapa Vulcânico';
+    }
+    if (s === 'mapa da costa' || s === 'mapa de khors' || s === 'map_coast' || (hasMapaWord && (s.indexOf('costa') >= 0 || s.indexOf('litoral') >= 0 || s.indexOf('khors') >= 0))) {
+      return 'Mapa da Costa';
+    }
+    return null;
+  }
 
-
+  function extractPlayerMaps(pObj) {
+    if (!pObj && typeof window !== 'undefined') {
+      pObj = (window.CITY_PLAYER || window.PLAYER || (window.S && window.S.player) || window.CITY_MOCK_PLAYER) || {};
+    }
     if (!pObj) pObj = {};
-
-
-
     var res = [];
-
-
+    var allCanonicalMaps = ['Mapa das Planícies', 'Mapa da Floresta', 'Mapa do Pântano', 'Mapa das Montanhas', 'Mapa do Deserto', 'Mapa do Ermo Gelado', 'Mapa Vulcânico', 'Mapa da Costa'];
+    var addCanonicalMap = function(rawEntry) {
+      var name = (typeof rawEntry === 'string') ? rawEntry : ((rawEntry && (rawEntry.name || rawEntry.n || rawEntry.id)) || '');
+      var norm = _normalizeCanonicalRegionalMap(name);
+      if (!norm) return;
+      if (norm === '__ALL__') {
+        for (var k = 0; k < allCanonicalMaps.length; k++) {
+          if (res.indexOf(allCanonicalMaps[k]) < 0) res.push(allCanonicalMaps[k]);
+        }
+        if (res.indexOf('Mapa de Valdória') < 0) res.push('Mapa de Valdória');
+        return;
+      }
+      if (res.indexOf(norm) < 0) res.push(norm);
+    };
 
     var rawOwned = pObj.owned_maps || pObj.maps_owned || (pObj.metadata && (pObj.metadata.owned_maps || pObj.metadata.maps_owned));
-
-
-
     if (Array.isArray(rawOwned)) {
-
-
-
-      for (var i = 0; i < rawOwned.length; i++) {
-
-
-
-        var m = rawOwned[i];
-
-
-
-        if (m && res.indexOf(m) < 0) res.push(m);
-
-
-
-      }
-
-
-
+      for (var i = 0; i < rawOwned.length; i++) addCanonicalMap(rawOwned[i]);
     }
-
-
-
-    // Extract from inventory items (strings or {id, name} objects)
-
-
+    var cartoDelivered = pObj.metadata && pObj.metadata.cartographer && pObj.metadata.cartographer.delivered_maps;
+    if (Array.isArray(cartoDelivered)) {
+      for (var cd = 0; cd < cartoDelivered.length; cd++) addCanonicalMap(cartoDelivered[cd]);
+    }
 
     var inv = pObj.inventory;
-
-
-
     if (typeof window !== 'undefined') {
-
-
-
-      if (Array.isArray(window.__EXPLORE_SERVER_INV) && window.__EXPLORE_SERVER_INV.length) {
-
-
-
+      if (Array.isArray(window.__EXPLORE_SERVER_INV)) {
         inv = window.__EXPLORE_SERVER_INV;
-
-
-
-      } else if (window.S && Array.isArray(window.S.inventory) && window.S.inventory.length) {
-
-
-
+      } else if (window.S && Array.isArray(window.S.inventory)) {
         inv = window.S.inventory;
-
-
-
+      } else if (!Array.isArray(inv) && Array.isArray(window.MOCK_PLAYER_INVENTORY) && window._cityRealPlayerReady) {
+        inv = window.MOCK_PLAYER_INVENTORY;
       }
-
-
-
     }
-
-
-
-    if ((!inv || !inv.length) && typeof window !== 'undefined') {
-
-
-
-      try {
-
-
-
-        var rawShared = localStorage.getItem('valdoria_shared_inventory_v1');
-
-
-
-        if (rawShared) {
-
-
-
-          var parsed = JSON.parse(rawShared);
-
-
-
-          if (Array.isArray(parsed)) inv = parsed;
-
-
-
-        }
-
-
-
-      } catch(_) {}
-
-
-
+    // Somente ler localStorage em modo simulador local (file:), NUNCA em produção/dev remoto (http:/https:)
+    if (!Array.isArray(inv) && typeof window !== 'undefined') {
+      var isHttpRemote = !!(window.location && (window.location.protocol === 'http:' || window.location.protocol === 'https:'));
+      var isServerMode = !!(window._cityRealPlayerReady || window.__EXPLORE_MODE === 'remote' || (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()));
+      if (!isHttpRemote && !isServerMode) {
+        try {
+          var rawShared = localStorage.getItem('valdoria_shared_inventory_v1');
+          if (rawShared) {
+            var parsed = JSON.parse(rawShared);
+            if (Array.isArray(parsed)) inv = parsed;
+          }
+        } catch(_) {}
+      }
     }
-
-
 
     if (Array.isArray(inv)) {
-
-
-
       for (var j = 0; j < inv.length; j++) {
-
-
-
-        var it = inv[j];
-
-
-
-        var name = (typeof it === 'string') ? it : ((it && (it.name || it.id)) || '');
-
-
-
-        var low = name.toLowerCase();
-
-
-
-        if (!low) continue;
-
-
-
-        if (low.indexOf('mapa de valdória') >= 0 || low.indexOf('mapa de valdoria') >= 0 || low.indexOf('mapa mundi') >= 0 || low.indexOf('map_world') >= 0) {
-
-
-
-          var allMaps = ['Mapa das Planícies', 'Mapa da Floresta', 'Mapa do Pântano', 'Mapa das Montanhas', 'Mapa do Deserto', 'Mapa do Ermo Gelado', 'Mapa Vulcânico', 'Mapa da Costa'];
-
-
-
-          for (var k = 0; k < allMaps.length; k++) {
-
-
-
-            if (res.indexOf(allMaps[k]) < 0) res.push(allMaps[k]);
-
-
-
-          }
-
-
-
-        }
-
-
-
-        if (low.indexOf('planície') >= 0 || low.indexOf('planicie') >= 0 || low.indexOf('map_plains') >= 0) {
-
-
-
-          if (res.indexOf('Mapa das Planícies') < 0) res.push('Mapa das Planícies');
-
-
-
-        }
-
-
-
-        if (low.indexOf('floresta') >= 0 || low.indexOf('espólio') >= 0 || low.indexOf('espolio') >= 0 || low.indexOf('map_forest') >= 0) {
-
-
-
-          if (res.indexOf('Mapa da Floresta') < 0) res.push('Mapa da Floresta');
-
-
-
-        }
-
-
-
-        if (low.indexOf('pântano') >= 0 || low.indexOf('pantano') >= 0 || low.indexOf('map_swamp') >= 0 || low.indexOf('cemitério') >= 0 || low.indexOf('cemiterio') >= 0 || low.indexOf('map_graveyard') >= 0) {
-
-
-
-          if (res.indexOf('Mapa do Pântano') < 0) res.push('Mapa do Pântano');
-
-
-
-        }
-
-
-
-        if (low.indexOf('montanha') >= 0 || low.indexOf('caverna') >= 0 || low.indexOf('map_mountain') >= 0 || low.indexOf('map_cave') >= 0) {
-
-
-
-          if (res.indexOf('Mapa das Montanhas') < 0) res.push('Mapa das Montanhas');
-
-
-
-        }
-
-
-
-        if (low.indexOf('deserto') >= 0 || low.indexOf('taverna') >= 0 || low.indexOf('map_desert') >= 0) {
-
-
-
-          if (res.indexOf('Mapa do Deserto') < 0) res.push('Mapa do Deserto');
-
-
-
-        }
-
-
-
-        if (low.indexOf('gelo') >= 0 || low.indexOf('gelado') >= 0 || low.indexOf('boreal') >= 0 || low.indexOf('map_snow') >= 0) {
-
-
-
-          if (res.indexOf('Mapa do Ermo Gelado') < 0) res.push('Mapa do Ermo Gelado');
-
-
-
-        }
-
-
-
-        if (low.indexOf('vulc') >= 0 || low.indexOf('fogo') >= 0 || low.indexOf('map_volcanic') >= 0) {
-
-
-
-          if (res.indexOf('Mapa Vulcânico') < 0) res.push('Mapa Vulcânico');
-
-
-
-        }
-
-
-
-        if (low.indexOf('costa') >= 0 || low.indexOf('litoral') >= 0 || low.indexOf('map_coast') >= 0) {
-
-
-
-          if (res.indexOf('Mapa da Costa') < 0) res.push('Mapa da Costa');
-
-
-
-        }
-
-
-
+        addCanonicalMap(inv[j]);
       }
-
-
-
     }
-
-
-
     return res;
-
-
-
   }
 
 
 
-
-
-
+  var _CITY_BUILDING_KEYS = {
+    'inn': 1, 'tavern': 1, 'market': 1, 'guild': 1, 'temple': 1, 'arena': 1,
+    'bank': 1, 'blacksmith': 1, 'forge': 1, 'runes': 1, 'festival': 1,
+    'gates': 1, 'square': 1, 'alley': 1, 'graveyard_city': 1
+  };
 
   function extractDiscoveredLocations(pObj) {
-
-
-
     var locs = [];
-
-
-
     var addLoc = function(l) {
-
-
-
       if (!l) return;
-
-
-
-      var str = String(l);
-
-
-
+      var str = String(l).trim();
+      if (!str || _CITY_BUILDING_KEYS[str]) return;
       if (locs.indexOf(str) < 0) locs.push(str);
-
-
-
       var canon = _SERVER_TO_CANONICAL_KEY[str];
-
-
-
       if (canon && locs.indexOf(canon) < 0) locs.push(canon);
-
-
-
       var rev = _CANONICAL_TO_SERVER_KEY[str];
-
-
-
       if (rev && locs.indexOf(rev) < 0) locs.push(rev);
-
-
-
     };
-
-
-
     if (typeof window !== 'undefined') {
-
-
-
       if (Array.isArray(window.__EXPLORE_KNOWN)) {
-
-
-
         window.__EXPLORE_KNOWN.forEach(addLoc);
-
-
-
       }
-
-
-
       if (Array.isArray(window.__EXPLORE_DISCOVERED_DUNGEONS)) {
-
-
-
         window.__EXPLORE_DISCOVERED_DUNGEONS.forEach(addLoc);
-
-
-
       }
-
-
-
       if (window.S && Array.isArray(window.S.known_locations)) {
-
-
-
         window.S.known_locations.forEach(addLoc);
-
-
-
       }
-
-
-
       if (window.S && Array.isArray(window.S.visitedBiomes)) {
-
-
-
         window.S.visitedBiomes.forEach(addLoc);
-
-
-
       }
-
-
-
       if (window.CITY_PLAYER) {
-
-
-
         if (Array.isArray(window.CITY_PLAYER.known_locations)) window.CITY_PLAYER.known_locations.forEach(addLoc);
-
-
-
-        if (Array.isArray(window.CITY_PLAYER.discovered_locations)) window.CITY_PLAYER.discovered_locations.forEach(addLoc);
-
-
-
+        if (Array.isArray(window.CITY_PLAYER.world_discovered_locations)) window.CITY_PLAYER.world_discovered_locations.forEach(addLoc);
         if (window.CITY_PLAYER.metadata) {
-
-
-
           if (Array.isArray(window.CITY_PLAYER.metadata.known_locations)) window.CITY_PLAYER.metadata.known_locations.forEach(addLoc);
-
-
-
           if (Array.isArray(window.CITY_PLAYER.metadata.discovered_locations)) window.CITY_PLAYER.metadata.discovered_locations.forEach(addLoc);
-
-
-
         }
-
-
-
       }
-
-
-
       if (window.PLAYER) {
-
-
-
         if (Array.isArray(window.PLAYER.known_locations)) window.PLAYER.known_locations.forEach(addLoc);
-
-
-
-        if (Array.isArray(window.PLAYER.discovered_locations)) window.PLAYER.discovered_locations.forEach(addLoc);
-
-
-
+        if (Array.isArray(window.PLAYER.world_discovered_locations)) window.PLAYER.world_discovered_locations.forEach(addLoc);
         if (window.PLAYER.metadata) {
-
-
-
           if (Array.isArray(window.PLAYER.metadata.known_locations)) window.PLAYER.metadata.known_locations.forEach(addLoc);
-
-
-
           if (Array.isArray(window.PLAYER.metadata.discovered_locations)) window.PLAYER.metadata.discovered_locations.forEach(addLoc);
-
-
-
         }
-
-
-
       }
-
-
-
     }
-
-
-
     if (pObj) {
-
-
-
       if (Array.isArray(pObj.known_locations)) {
-
-
-
         pObj.known_locations.forEach(addLoc);
-
-
-
       }
-
-
-
-      if (Array.isArray(pObj.discovered_locations)) {
-
-
-
+      if (Array.isArray(pObj.world_discovered_locations)) {
+        pObj.world_discovered_locations.forEach(addLoc);
+      } else if (Array.isArray(pObj.discovered_locations) && !pObj._discoveryHydrated) {
         pObj.discovered_locations.forEach(addLoc);
-
-
-
       }
-
-
-
       if (pObj.metadata) {
-
-
-
         if (Array.isArray(pObj.metadata.known_locations)) pObj.metadata.known_locations.forEach(addLoc);
-
-
-
         if (Array.isArray(pObj.metadata.discovered_locations)) pObj.metadata.discovered_locations.forEach(addLoc);
-
-
-
       }
-
-
-
       var dungeons = pObj.discovered_dungeons || (pObj.metadata && pObj.metadata.discovered_dungeons);
-
-
-
       if (dungeons && typeof dungeons === 'object') {
-
-
-
         var dKeys = Object.keys(dungeons);
-
-
-
         for (var di = 0; di < dKeys.length; di++) {
-
-
-
           var d = dungeons[dKeys[di]];
-
-
-
           var locId = (d && d.location_id) || dKeys[di];
-
-
-
           addLoc(locId);
-
-
-
         }
-
-
-
       }
-
-
-
     }
-
-
-
-    var quests = pObj.quests;
-
-
-
-    if (quests && typeof quests === 'object') {
-
-
-
-      var qValues = Array.isArray(quests) ? quests : Object.values(quests);
-
-
-
-      for (var qi = 0; qi < qValues.length; qi++) {
-
-
-
-        var q = qValues[qi];
-
-
-
-        if (!q) continue;
-
-
-
-        var qid = q.id || q.quest_id || '';
-
-
-
-        var desc = (q.description || q.desc || '') + ' ' + (q.title || '');
-
-
-
-        var low = (qid + ' ' + desc).toLowerCase();
-
-
-
-        if (low.indexOf('floresta') >= 0 || low.indexOf('goblin') >= 0 || low.indexOf('élfica') >= 0 || low.indexOf('elfica') >= 0) {
-
-
-
-          addLoc('forest');
-
-
-
-        }
-
-
-
-        if (low.indexOf('deserto') >= 0 || low.indexOf('oásis') >= 0 || low.indexOf('oasis') >= 0) {
-
-
-
-          addLoc('desert');
-
-
-
-        }
-
-
-
-        if (low.indexOf('cemitério') >= 0 || low.indexOf('cemiterio') >= 0) {
-
-
-
-          addLoc('graveyard');
-
-
-
-        }
-
-
-
-        if (low.indexOf('pântano') >= 0 || low.indexOf('pantano') >= 0) {
-
-
-
-          addLoc('swamp');
-
-
-
-        }
-
-
-
-        if (low.indexOf('montanha') >= 0 || low.indexOf('korthag') >= 0) {
-
-
-
-          addLoc('mountain');
-
-
-
-        }
-
-
-
-      }
-
-
-
-    }
-
-
-
     return locs;
-
-
-
   }
 
 
@@ -162630,6 +161958,10 @@
 
   var _REGIONAL_NODE_NORMALIZE = {
 
+    'cidade': 'green_fields',
+
+    'city': 'green_fields',
+
     'city_gates': 'green_fields',
 
     'plains': 'green_fields',
@@ -162654,7 +161986,17 @@
 
     'burning_crater': 'volcanic',
 
-    'coast': 'salty_coast'
+    'coast': 'salty_coast',
+
+    'badlands': 'ashen_badlands',
+
+    'dark_mountain': 'black_peaks',
+
+    'eldritch_swamp': 'eldritch_mire',
+
+    'ancient_forest': 'elder_woods',
+
+    'frozen_abyss': 'glacial_rift'
 
   };
 
@@ -162682,7 +162024,21 @@
 
     'volcanic': 'burning_crater',
 
-    'coast': 'salty_coast'
+    'coast': 'salty_coast',
+
+    'badlands': 'ashen_badlands',
+
+    'dark_mountain': 'black_peaks',
+
+    'eldritch_swamp': 'eldritch_mire',
+
+    'ancient_forest': 'elder_woods',
+
+    'frozen_abyss': 'glacial_rift',
+
+    'cidade': 'city_gates',
+
+    'city': 'city_gates'
 
   };
 
@@ -164034,7 +163390,7 @@
 
 
 
-      + '.cfm-drawer { background: linear-gradient(180deg, #221810 0%, #140e09 100%); border-top: 1.5px solid rgba(196, 149, 58, 0.45); padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-sizing: border-box; min-height: 52px; z-index: 100; }'
+      + '.cfm-drawer { background: linear-gradient(180deg, #221810 0%, #140e09 100%); border-top: 1.5px solid rgba(196, 149, 58, 0.45); padding: 8px 14px max(8px, env(safe-area-inset-bottom, 8px)) 14px !important; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-sizing: border-box; min-height: 52px; z-index: 100; }'
 
 
 
@@ -164138,7 +163494,7 @@
 
     var card = document.createElement('div');
 
-    card.style.cssText = 'position:relative; width:100%; max-width:375px; max-height:92vh; display:flex; flex-direction:column; overflow:hidden; padding:18px 18px 16px; background:linear-gradient(180deg, #241c13 0%, #16110b 45%, #0e0a07 100%); border:1.5px solid #d4a34b; border-radius:14px; box-shadow:0 16px 48px rgba(0,0,0,0.92), 0 0 0 1px rgba(255,214,133,0.18), inset 0 0 24px rgba(196,149,58,0.14); text-align:center; box-sizing:border-box;';
+    card.style.cssText = 'position:relative; width:100%; max-width:375px; max-height:min(92vh, 92dvh, 580px) !important; display:flex; flex-direction:column; overflow:hidden; padding:18px 18px 16px; background:linear-gradient(180deg, #241c13 0%, #16110b 45%, #0e0a07 100%); border:1.5px solid #d4a34b; border-radius:14px; box-shadow:0 16px 48px rgba(0,0,0,0.92), 0 0 0 1px rgba(255,214,133,0.18), inset 0 0 24px rgba(196,149,58,0.14); text-align:center; box-sizing:border-box;';
 
 
 
@@ -164222,7 +163578,7 @@
 
     var desc = document.createElement('div');
 
-    desc.style.cssText = 'color:#d8cdb8; font-size:13px; line-height:1.55; margin-bottom:12px; padding:10px 14px; background:rgba(12,9,6,0.7); border-left:2.5px solid #d4a34b; border-radius:0 6px 6px 0; text-align:left; box-shadow:inset 0 0 10px rgba(0,0,0,0.5);';
+    desc.style.cssText = 'color:#d8cdb8; font-size:13px; line-height:1.55; margin-bottom:12px; padding:10px 14px; background:rgba(12,9,6,0.7); border-left:2.5px solid #d4a34b; border-radius:0 6px 6px 0; text-align:left; box-shadow:inset 0 0 10px rgba(0,0,0,0.5); overflow-y:auto; flex:1 1 auto; min-height:0; -webkit-overflow-scrolling:touch;';
 
     desc.innerHTML = opts.desc || '';
 
@@ -165460,286 +164816,159 @@
 
 
     function _renderRegionalFog() {
-
       if (!fogCanvas) return;
-
       fogCanvas.style.display = 'block';
-
       fogCanvas.style.pointerEvents = 'none';
+      fogCanvas.style.width = '100%';
+      fogCanvas.style.height = '100%';
 
-
-
-      var rect = fogCanvas.getBoundingClientRect();
-
-      var fw = Math.round(rect.width) || fogCanvas.offsetWidth || 380;
-
-      var fh = Math.round(rect.height) || fogCanvas.offsetHeight || 520;
-
+      var stageEl = fogCanvas.parentElement || fogCanvas;
+      var rect = stageEl.getBoundingClientRect ? stageEl.getBoundingClientRect() : fogCanvas.getBoundingClientRect();
+      var fw = Math.round(rect && rect.width) || stageEl.offsetWidth || fogCanvas.offsetWidth || 380;
+      var fh = Math.round(rect && rect.height) || stageEl.offsetHeight || fogCanvas.offsetHeight || 520;
       if (fw <= 0 || fh <= 0) {
-
         setTimeout(_renderRegionalFog, 60);
-
         return;
-
       }
-
-
 
       var dpr = (typeof window !== 'undefined' && window.devicePixelRatio && window.devicePixelRatio > 1)
-
         ? Math.min(window.devicePixelRatio, 2)
-
         : 1;
-
       fogCanvas.width = Math.round(fw * dpr);
-
       fogCanvas.height = Math.round(fh * dpr);
-
-      fogCanvas.style.width = fw + 'px';
-
-      fogCanvas.style.height = fh + 'px';
-
       var fctx = fogCanvas.getContext('2d');
-
       if (!fctx) return;
-
       if (typeof fctx.setTransform === 'function') {
-
         fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
       }
-
       fctx.clearRect(0, 0, fw, fh);
-
-
 
       var baseR = Math.min(fw, fh) * 0.165;
 
-
-
       if (!isFullMapUnlocked) {
-
         fctx.save();
-
         fctx.fillStyle = '#000000';
-
         fctx.fillRect(0, 0, fw, fh);
-
-
 
         fctx.globalCompositeOperation = 'destination-out';
 
-
-
         // 1) Clareiras circulares nos marcos conhecidos
-
-        nodes.forEach(function(n, nIdx) {
-
+        nodes.forEach(function(n) {
           var nodeOpen = (known && known.indexOf(n.id) >= 0)
-
             || (!isInsideCity && pLoc && normalizeRegionalNodeId(pLoc) === normalizeRegionalNodeId(n.id))
-
-            || isNodeDiscovered(n.id, key, known, [])
-
-            || (nIdx === 0);
-
+            || isNodeDiscovered(n.id, key, known, []);
           if (!nodeOpen) return;
 
-
-
           var nx = (n.x <= 1 ? (n.x * fw) : n.x);
-
           var ny = (n.y <= 1 ? (n.y * fh) : n.y);
-
           var grad = fctx.createRadialGradient(nx, ny, baseR * 0.22, nx, ny, baseR);
-
           grad.addColorStop(0, 'rgba(0, 0, 0, 1.0)');
-
           grad.addColorStop(0.70, 'rgba(0, 0, 0, 0.95)');
-
           grad.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
-
           fctx.fillStyle = grad;
-
           fctx.beginPath();
-
           fctx.arc(nx, ny, baseR, 0, Math.PI * 2);
-
           fctx.fill();
-
         });
-
-
 
         // 2) Corredores direcionais progressivos ao longo das estradas exploradas (marco a marco)
-
         var corridorR = baseR * 0.64;
-
         roadSegments.forEach(function(seg) {
-
           var sx0 = seg.x0 * fw;
-
           var sy0 = seg.y0 * fh;
-
           var sx1 = seg.x1 * fw;
-
           var sy1 = seg.y1 * fh;
-
           var steps = Math.max(6, Math.round(18 * seg.frac));
-
           for (var si = 1; si <= steps; si++) {
-
             var t = (si / steps) * seg.frac;
-
             var cx = sx0 + (sx1 - sx0) * t;
-
             var cy = sy0 + (sy1 - sy0) * t;
-
             var cGrad = fctx.createRadialGradient(cx, cy, corridorR * 0.18, cx, cy, corridorR);
-
             cGrad.addColorStop(0, 'rgba(0, 0, 0, 1.0)');
-
             cGrad.addColorStop(0.66, 'rgba(0, 0, 0, 0.92)');
-
             cGrad.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
-
             fctx.fillStyle = cGrad;
-
             fctx.beginPath();
-
             fctx.arc(cx, cy, corridorR, 0, Math.PI * 2);
-
             fctx.fill();
-
           }
-
         });
-
         fctx.restore();
-
       }
-
-
 
       // 3) Trilha cartografada em ouro envelhecido + pipas dos Marcos conquistados
-
       if (roadSegments.length > 0) {
-
         fctx.save();
-
         fctx.globalCompositeOperation = 'source-over';
-
         roadSegments.forEach(function(seg) {
-
           var sx0 = seg.x0 * fw;
-
           var sy0 = seg.y0 * fh;
-
           var sxEnd = (seg.x0 + (seg.x1 - seg.x0) * seg.frac) * fw;
-
           var syEnd = (seg.y0 + (seg.y1 - seg.y0) * seg.frac) * fh;
 
-
-
           fctx.beginPath();
-
           fctx.setLineDash([6, 5]);
-
           fctx.strokeStyle = seg.isFull ? 'rgba(255, 214, 133, 0.72)' : 'rgba(255, 214, 133, 0.55)';
-
           fctx.lineWidth = 2.2;
-
           fctx.moveTo(sx0, sy0);
-
           fctx.lineTo(sxEnd, syEnd);
-
           fctx.stroke();
-
           fctx.setLineDash([]);
 
-
-
           var totalPips = Math.max(2, seg.totalMarcos || 3);
-
           var clearedPips = Math.min(totalPips, seg.marcosCleared || 0);
-
           for (var mi = 1; mi <= clearedPips; mi++) {
-
             if (mi === totalPips && !seg.isFrontier) continue; // destino ja possui pino proprio
-
             var mt = (mi / totalPips);
-
             if (mt > seg.frac + 0.02) break;
-
             var mx = (seg.x0 + (seg.x1 - seg.x0) * mt) * fw;
-
             var my = (seg.y0 + (seg.y1 - seg.y0) * mt) * fh;
-
             fctx.fillStyle = '#ffd685';
-
             fctx.strokeStyle = '#18110a';
-
             fctx.lineWidth = 1.5;
-
             fctx.beginPath();
-
             fctx.moveTo(mx, my - 4.5);
-
             fctx.lineTo(mx + 4.5, my);
-
             fctx.lineTo(mx, my + 4.5);
-
             fctx.lineTo(mx - 4.5, my);
-
             fctx.closePath();
-
             fctx.fill();
-
             fctx.stroke();
-
           }
-
         });
-
         fctx.restore();
-
       }
-
     }
 
+    // Seleção inicial: se informado ou se o aventureiro estiver em um dos nós desta região
+    var normPLoc = pLoc ? normalizeRegionalNodeId(pLoc) : null;
+    var normInitialId = initialNodeId ? normalizeRegionalNodeId(initialNodeId) : null;
+    var foundNode = null;
+    if (normInitialId && Array.isArray(nodes)) {
+      foundNode = nodes.find(function(item){
+        return item.id === initialNodeId || normalizeRegionalNodeId(item.id) === normInitialId;
+      });
+    }
+    if (!foundNode && normPLoc && Array.isArray(nodes)) {
+      foundNode = nodes.find(function(item){
+        return item.id === pLoc || normalizeRegionalNodeId(item.id) === normPLoc;
+      });
+    }
+    if (foundNode) {
+      _selectRegionalNode(foundNode);
+    }
 
-
-
-
-
+    modal.style.display = 'flex';
+    document.body.classList.add('city-modal-open');
 
     _renderRegionalFog();
-
-
-
     imgEl.onload = function() { _renderRegionalFog(); };
 
-
-
     var _rfmResizeHandler = function() {
-
-
-
       if (modal && modal.style.display !== 'none') {
-
-
-
         _renderRegionalFog();
-
-
-
       }
-
-
-
     };
-
-
 
     if (typeof window !== 'undefined') {
       if (window._rfmResizeHandler) {
@@ -165748,61 +164977,6 @@
       window._rfmResizeHandler = _rfmResizeHandler;
       window.addEventListener('resize', _rfmResizeHandler);
     }
-
-
-
-
-
-
-
-    // Seleção inicial: se informado ou se o aventureiro estiver em um dos nós desta região
-
-    var normPLoc = pLoc ? normalizeRegionalNodeId(pLoc) : null;
-
-    var normInitialId = initialNodeId ? normalizeRegionalNodeId(initialNodeId) : null;
-
-    var foundNode = null;
-
-    if (normInitialId && Array.isArray(nodes)) {
-
-      foundNode = nodes.find(function(item){
-
-        return item.id === initialNodeId || normalizeRegionalNodeId(item.id) === normInitialId;
-
-      });
-
-    }
-
-    if (!foundNode && normPLoc && Array.isArray(nodes)) {
-
-      foundNode = nodes.find(function(item){
-
-        return item.id === pLoc || normalizeRegionalNodeId(item.id) === normPLoc;
-
-      });
-
-    }
-
-    if (foundNode) {
-
-      _selectRegionalNode(foundNode);
-
-    }
-
-
-
-
-
-
-
-    modal.style.display = 'flex';
-
-
-
-    document.body.classList.add('city-modal-open');
-
-
-
   }
 
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-11-07T08:41:07Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-11-07T17:24:22Z - do not edit directly, edit source -->
 
 
 
@@ -18063,7 +18063,7 @@ window.__onIntroTap = function() {
 
             <span class="camp-card-title camp-card-t-short">Descanso Curto</span>
 
-            <span class="camp-pill camp-pill-short">1 Hora</span>
+            <span class="camp-pill camp-pill-short">Descanso Breve</span>
 
           </div>
 
@@ -18111,7 +18111,7 @@ window.__onIntroTap = function() {
 
             <span class="camp-card-title camp-card-t-long">Descanso Longo</span>
 
-            <span class="camp-pill camp-pill-long">8 Horas</span>
+            <span class="camp-pill camp-pill-long">Repouso Pleno</span>
 
           </div>
 
@@ -18207,13 +18207,13 @@ window.__onIntroTap = function() {
 
       <div class="camp-confirm-header">
 
-        <div class="camp-confirm-icon-box" id="camp-confirm-icon">⏳</div>
+        <div class="camp-confirm-icon-box" id="camp-confirm-icon">◆</div>
 
         <div>
 
           <h3 class="camp-confirm-title" id="camp-confirm-title">Confirmar Descanso</h3>
 
-          <div class="camp-confirm-duration" id="camp-confirm-duration">Duração estimada: 1 hora</div>
+          <div class="camp-confirm-duration" id="camp-confirm-duration">Duração estimada: Breve intervalo</div>
 
         </div>
 
@@ -18567,7 +18567,7 @@ window.__onIntroTap = function() {
 
             <div class="epm-opt-badge-row">
 
-              <span class="epm-opt-icon">🛡</span>
+              <span class="epm-opt-icon">◆</span>
 
               <span class="epm-opt-name">Cauteloso</span>
 
@@ -18593,7 +18593,7 @@ window.__onIntroTap = function() {
 
             <div class="epm-opt-badge-row">
 
-              <span class="epm-opt-icon">⚖</span>
+              <span class="epm-opt-icon">◆</span>
 
               <span class="epm-opt-name">Normal</span>
 
@@ -18619,7 +18619,7 @@ window.__onIntroTap = function() {
 
             <div class="epm-opt-badge-row">
 
-              <span class="epm-opt-icon">⚡</span>
+              <span class="epm-opt-icon">◆</span>
 
               <span class="epm-opt-name">Rápido</span>
 
@@ -26091,15 +26091,15 @@ body.perf-lite .stub-popup-voice { animation: none; }
 
       if (d20 === 20) {
 
-        degText = '🌟 SUCESSO CRÍTICO';
+        degText = '◆ SUCESSO CRÍTICO';
 
       } else if (d20 === 1) {
 
-        degText = '💀 FALHA CRÍTICA';
+        degText = '◇ FALHA CRÍTICA';
 
       } else if (margin >= 5) {
 
-        degText = '✨ SUCESSO EXCEPCIONAL (+' + margin + ')';
+        degText = '◆ SUCESSO EXCEPCIONAL (+' + margin + ')';
 
       } else if (success) {
 
@@ -26107,11 +26107,11 @@ body.perf-lite .stub-popup-voice { animation: none; }
 
       } else if (margin >= -2) {
 
-        degText = '⚠️ FALHA MARGINAL (' + margin + ')';
+        degText = '◇ FALHA MARGINAL (' + margin + ')';
 
       } else if (margin <= -5) {
 
-        degText = '💥 FALHA CATASTRÓFICA (' + margin + ')';
+        degText = '◇ FALHA CATASTRÓFICA (' + margin + ')';
 
       } else {
 
@@ -31267,13 +31267,17 @@ window.__explFetchTO = function(url, opts, ms) {
 
   var API_BASE = window.__EXPLORE_API_BASE;
 
-  var PEEK_TOKEN = window.__EXPLORE_TOKEN;
-
-
-
   function _bearer() {
 
-    return { 'Authorization': 'Bearer ' + PEEK_TOKEN, 'Content-Type': 'application/json' };
+    var _tok = window.__EXPLORE_TOKEN
+
+      || (typeof window._getExploreSessionToken === 'function' ? window._getExploreSessionToken() : '')
+
+      || window.__EXPLORE_MOTOR_TOKEN
+
+      || '';
+
+    return { 'Authorization': 'Bearer ' + _tok, 'Content-Type': 'application/json' };
 
   }
 
@@ -31281,7 +31285,13 @@ window.__explFetchTO = function(url, opts, ms) {
 
   function _motorToken() {
 
-    return window.__EXPLORE_MOTOR_TOKEN || '';
+    return window.__EXPLORE_MOTOR_TOKEN
+
+      || (typeof window._getExploreSessionToken === 'function' ? window._getExploreSessionToken() : '')
+
+      || window.__EXPLORE_TOKEN
+
+      || '';
 
   }
 
@@ -42227,7 +42237,7 @@ const FIXED_MAPS = {
 
             outcome_ok: { _long_rest: true,
 
-              text: 'Você monta vigilia intercalada e dorme as 8 horas inteiras. Acorda renovado, pronto para a batalha.' } },
+              text: 'Você monta vigília intercalada e repousa plenamente. Acorda renovado, pronto para a batalha.' } },
 
           { label: 'Consagrar as brasas com prece protetora',
 
@@ -42253,7 +42263,7 @@ const FIXED_MAPS = {
 
             only_race: ['elfo', 'meio_elfo'],
 
-            desc: 'Meditacao racial — 4 horas de semiconsciencia vigilante',
+            desc: 'Meditação racial — transe meditativo vigilante',
 
             outcome_ok: { text: 'Você mantem a percepcao ativa em transe silencioso. Seu espirito se recupera enquanto seus ouvidos rastreiam os passos ao redor.', hp_gain: 3, mp_gain: 3, xp: 20, _flag: 'elven_trance_refreshed' } },
 
@@ -43548,7 +43558,7 @@ const FIXED_MAPS = {
           { id: 'long_rest', label: 'Descanso Longo (1× por masmorra)',
             desc: 'HP/MP cheios + remove 1 nível de Exaustão. Apenas 1 vez nesta masmorra.',
             outcome_ok: { _long_rest: true,
-              text: 'A comitiva organiza turnos de sentinela junto à fogueira e descansa as 8 horas inteiras. Todos acordam alertas e revigorados.' } },
+              text: 'A comitiva organiza turnos de sentinela junto à fogueira e descansa plenamente. Todos acordam alertas e revigorados.' } },
           { label: 'Harmonizar com os espíritos da floresta',
             only_class: ['druida', 'patrulheiro'],
             skill: 'wis', dc: 11,
@@ -43807,8 +43817,8 @@ const FIXED_MAPS = {
           { id: 'long_rest', label: 'Descanso Longo (1× por masmorra)',
             desc: 'HP/MP cheios + remove 1 nível de Exaustão. Apenas 1 vez nesta masmorra.',
             outcome_ok: { _long_rest: true,
-              text: 'Com vigília atenta nos corredores, a comitiva descansa as 8 horas necessárias e acorda revigorada.' } },
-          { id: 'camp_companion_banter', label: '🗣️ Dialogar com a Comitiva ao Redor do Fogo',
+              text: 'Com vigília atenta nos corredores, a comitiva completa o repouso pleno e acorda revigorada.' } },
+          { id: 'camp_companion_banter', label: '◆ Dialogar com a Comitiva ao Redor do Fogo',
             desc: 'Reunir os aliados ao calor das brasas para conversar, avaliar os ânimos e estreitar laços',
             outcome_ok: { _companion_banter: true, text: 'Você convida seus companheiros para uma pausa ao redor das chamas.' } },
           { label: 'Revisar gazuas e mapas de rotas (Ladino)',
@@ -44037,8 +44047,8 @@ const FIXED_MAPS = {
           { id: 'long_rest', label: 'Descanso Longo (1× por masmorra)',
             desc: 'HP/MP cheios + remove 1 nível de Exaustão. Apenas 1 vez nesta masmorra.',
             outcome_ok: { _long_rest: true,
-              text: 'A comitiva organiza vigília dupla com tochas protegidas e descansa as 8 horas inteiras. Todos acordam vigorosos e prontos para descer ao poço.' } },
-          { id: 'camp_companion_banter', label: '🗣️ Dialogar com a Comitiva ao Redor do Fogo',
+              text: 'A comitiva organiza vigília dupla com tochas protegidas e descansa plenamente. Todos acordam vigorosos e prontos para descer ao poço.' } },
+          { id: 'camp_companion_banter', label: '◆ Dialogar com a Comitiva ao Redor do Fogo',
             desc: 'Reunir os aliados ao calor das brasas para conversar, avaliar os ânimos e estreitar laços',
             outcome_ok: { _companion_banter: true, text: 'Você reúne seus aliados para uma conversa franca ao pé das brasas.' } },
           { label: 'Harmonizar com os veios de rocha ancestral (Anão)',
@@ -44263,8 +44273,8 @@ const FIXED_MAPS = {
           { id: 'long_rest', label: 'Descanso Longo (1× por masmorra)',
             desc: 'HP/MP cheios + remove 1 nível de Exaustão. Apenas 1 vez nesta masmorra.',
             outcome_ok: { _long_rest: true,
-              text: 'Com sentinela atenta sobre os degraus secos, o grupo repousa as 8 horas inteiras e renova seus feitiços e energias.' } },
-          { id: 'camp_companion_banter', label: '🗣️ Dialogar com a Comitiva ao Redor do Fogo',
+              text: 'Com sentinela atenta sobre os degraus secos, o grupo completa o repouso pleno e renova seus feitiços e energias.' } },
+          { id: 'camp_companion_banter', label: '◆ Dialogar com a Comitiva ao Redor do Fogo',
             desc: 'Reunir os aliados ao calor das brasas para conversar, avaliar os ânimos e estreitar laços',
             outcome_ok: { _companion_banter: true, text: 'Você convida seus aliados para uma conversa acolhedora junto ao fogo.' } },
           { label: 'Purificar o lodo das botas com prece da aurora (Clérigo/Paladino)',
@@ -45175,7 +45185,7 @@ const FIXED_MAPS = {
 
       'Um velho no bar conta lendas de quando a cratera ainda respirava fogo todas as noites.',
 
-      'Forjas trabalham 24h — o calor vulcânico é a forja natural mais perfeita do continente.',
+      'Forjas trabalham dia e noite sem cessar — o calor vulcânico é a forja natural mais perfeita do continente.',
 
       'Uma criança joga pedras em fendas de lava por diversão — moradores nem se impressionam mais.',
 
@@ -45324,8 +45334,8 @@ const FIXED_MAPS = {
           { id: 'long_rest', label: 'Descanso Longo (1× por masmorra)',
             desc: 'HP/MP cheios + remove 1 nível de Exaustão. Apenas 1 vez nesta masmorra.',
             outcome_ok: { _long_rest: true,
-              text: 'Sob a proteção dos selos de prata da capela, a comitiva repousa as 8 horas completas e restaura suas forças.' } },
-          { id: 'camp_companion_banter', label: '🗣️ Dialogar com a Comitiva ao Redor do Fogo',
+              text: 'Sob a proteção dos selos de prata da capela, a comitiva repousa plenamente e restaura suas forças.' } },
+          { id: 'camp_companion_banter', label: '◆ Dialogar com a Comitiva ao Redor do Fogo',
             desc: 'Reunir os aliados junto às chamas consagradas para conversar, avaliar os ânimos e estreitar laços',
             outcome_ok: { _companion_banter: true, text: 'Você reúne seus companheiros em torno do braseiro silencioso das catacumbas.' } },
           { label: 'Entoar litania de proteção contra os inquietos (Clérigo/Paladino)',
@@ -45535,7 +45545,7 @@ const FIXED_MAPS = {
             desc: 'HP/MP cheios + remove 1 nivel de Exaustao. Apenas 1 vez nesta masmorra.',
             outcome_ok: {
               _long_rest: true,
-              text: 'Sob o circulo consagrado, a comitiva mantem vigilia atenta e descansa as 8 horas inteiras, renovando suas forcas e magias.'
+              text: 'Sob o círculo consagrado, a comitiva mantém vigília atenta e completa o repouso pleno, renovando suas forças e magias.'
             }
           },
           {
@@ -45794,7 +45804,7 @@ const FIXED_MAPS = {
             desc: 'HP/MP cheios + remove 1 nivel de Exaustao. Apenas 1 vez nesta masmorra.',
             outcome_ok: {
               _long_rest: true,
-              text: 'Com sentinelas discretas observando a fumaca, a comitiva descansa as 8 horas inteiras e se prepara para o fogo do dragao.'
+              text: 'Com sentinelas discretas observando a fumaça, a comitiva descansa plenamente e se prepara para o fogo do dragão.'
             }
           },
           {
@@ -45991,7 +46001,7 @@ const FIXED_MAPS = {
             desc: 'HP/MP cheios + remove 1 nivel de Exaustao. Apenas 1 vez nesta masmorra.',
             outcome_ok: {
               _long_rest: true,
-              text: 'Com vigilia atenta aos uivos da nevasca, o grupo descansa as 8 horas inteiras e se revigora plenamente.'
+              text: 'Com vigília atenta aos uivos da nevasca, o grupo completa o repouso pleno e se revigora plenamente.'
             }
           },
           {
@@ -46188,7 +46198,7 @@ const FIXED_MAPS = {
             desc: 'HP/MP cheios + remove 1 nivel de Exaustao. Apenas 1 vez nesta masmorra.',
             outcome_ok: {
               _long_rest: true,
-              text: 'A comitiva descansa as 8 horas com vigilia armada, pronta para o embate contra o monstro regenerativo.'
+              text: 'A comitiva descansa plenamente sob vigília armada, pronta para o embate contra o monstro regenerativo.'
             }
           },
           {
@@ -46388,7 +46398,7 @@ const FIXED_MAPS = {
             desc: 'HP/MP cheios + remove 1 nivel de Exaustao. Apenas 1 vez nesta masmorra.',
             outcome_ok: {
               _long_rest: true,
-              text: 'Com sentinelas discretas observando as sombras dos obeliscos, a comitiva descansa as 8 horas inteiras.'
+              text: 'Com sentinelas discretas observando as sombras dos obeliscos, a comitiva descansa plenamente.'
             }
           },
           {
@@ -46584,7 +46594,7 @@ const FIXED_MAPS = {
             desc: 'HP/MP cheios + remove 1 nivel de Exaustao. Apenas 1 vez nesta masmorra.',
             outcome_ok: {
               _long_rest: true,
-              text: 'A comitiva descansa as 8 horas inteiras em vigilia contra os vapores toxicos.'
+              text: 'A comitiva completa o repouso pleno em vigília contra os vapores tóxicos.'
             }
           },
           {
@@ -46780,7 +46790,7 @@ const FIXED_MAPS = {
             desc: 'HP/MP cheios + remove 1 nivel de Exaustao. Apenas 1 vez nesta masmorra.',
             outcome_ok: {
               _long_rest: true,
-              text: 'Sob a paz do santuario arcanico, a comitiva repousa as 8 horas inteiras e renova seus canais magicos.'
+              text: 'Sob a paz do santuário arcânico, a comitiva repousa plenamente e renova seus canais mágicos.'
             }
           },
           {
@@ -47338,7 +47348,7 @@ const FIXED_MAPS = {
             desc: 'HP/MP cheios + remove 1 nivel de Exaustao. Apenas 1 vez nesta masmorra.',
             outcome_ok: {
               _long_rest: true,
-              text: 'Com vigilia armada e tochas veladas, a comitiva descansa as 8 horas inteiras.'
+              text: 'Com vigília armada e tochas veladas, a comitiva descansa plenamente.'
             }
           },
           {
@@ -71166,7 +71176,7 @@ const LIGHT_SOURCES = {
 
     id: 'daylight', label: 'Luz do Dia', icon: '',
 
-    desc: 'Magia Divina de 3º nível (Clérigo). Esfera de luz natural por 1 hora (+3 visão). Consome slot.',
+    desc: 'Magia Divina de 3º nível (Clérigo). Esfera de luz natural contínua (+3 visão). Consome slot.',
 
     vision_bonus: 3,
 
@@ -74581,7 +74591,7 @@ function drawTacticalBeacon(ctx) {
   ctx.font = '13px sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('🎯', s.x, s.y - h);
+  ctx.fillText('◆', s.x, s.y - h);
 
   ctx.font = '700 8.5px Cinzel, serif';
   ctx.fillStyle = '#38bdf8';
@@ -79176,7 +79186,7 @@ function _vinvExpAutoEquipSmart() {
 
     vToast(changes.length
 
-      ? '⚡ Auto-equipado: ' + changes.length + ' item(ns) otimizado(s)!'
+      ? '◆ Auto-equipado: ' + changes.length + ' item(ns) otimizado(s)!'
 
       : '✓ Você já está com o melhor conjunto para sua classe e raça.', 'ok');
 
@@ -82948,7 +82958,7 @@ function openEventModal() {
 
       const itQty = typeof ch.consume_item === 'object' ? (ch.consume_item.qty || 1) : 1;
 
-      itTag.textContent = '🪢 Consome: ' + itQty + 'x ' + itName;
+      itTag.textContent = '◇ Consome: ' + itQty + 'x ' + itName;
 
       btn.appendChild(itTag);
 
@@ -82962,7 +82972,7 @@ function openEventModal() {
 
       const reqQty = typeof ch.requires_item === 'object' ? (ch.requires_item.qty || 1) : 1;
 
-      reqTag.textContent = '📦 Requer: ' + reqQty + 'x ' + reqName;
+      reqTag.textContent = '◆ Requer: ' + reqQty + 'x ' + reqName;
 
       btn.appendChild(reqTag);
 
@@ -83043,12 +83053,15 @@ function _engageForcedCombat(ev) {
   }
 
   try {
-
     const modal = document.getElementById('event-modal');
-
     if (modal) modal.classList.remove('visible');
-
   } catch (_) {}
+
+  if (window._activeRoadExpedition) {
+    window._activeRoadExpedition.combatPending = true;
+    window._activeRoadExpedition.ts = Date.now();
+    try { sessionStorage.setItem('vld_active_road_exp_v1', JSON.stringify(window._activeRoadExpedition)); } catch (_) {}
+  }
 
   S.event = null;
 
@@ -83456,14 +83469,20 @@ function resolveChoice(idx) {
 
     LOG('API', 'remote_event_choice idx=' + idx + ' label=' + (ch.label || '?'));
 
-    window.ExploracaoAPI.eventChoice(idx).then(function(res) {
-
+    var extraPayload = { event_id: (S.event && S.event.id) || '' };
+    window.ExploracaoAPI.eventChoice(idx, extraPayload).then(function(res) {
       if (!res || res.error) {
-
+        if (res && res.error === 'no_pending_event') {
+          LOGW('API', 'event_choice no_pending_event -> fallback local resolve');
+          if (ch.skill) {
+            rollSkillCheck(ch, function (success, total) { applyChoiceOutcome(ch, success, total, ch.dc); });
+          } else {
+            applyChoiceOutcome(ch, true, null, null);
+          }
+          return;
+        }
         _remoteEventChoiceError(res && res.error);  // M6: não fabrica — erro recuperável
-
         return;
-
       }
 
       var oc = res.outcome || {};
@@ -83525,9 +83544,12 @@ function resolveChoice(idx) {
       }
 
     }).catch(function(e) {
-
-      _remoteEventChoiceError((e && e.message) || 'rejected');  // M6: não fabrica
-
+      LOGW('API', 'event_choice rejected -> fallback local resolve: ' + ((e && e.message) || 'rejected'));
+      if (ch.skill) {
+        rollSkillCheck(ch, function (success, total) { applyChoiceOutcome(ch, success, total, ch.dc); });
+      } else {
+        applyChoiceOutcome(ch, true, null, null);
+      }
     });
 
     return;
@@ -85014,7 +85036,7 @@ function _explShowEventVEnc(ev) {
 
   _explVEncResolving = false;
 
-  try { if (oc && Array.isArray(oc.loot) && oc.loot.length) _appendExploreLootToInventory(oc.loot); } catch (_) {}
+  try { if (typeof oc !== 'undefined' && oc && Array.isArray(oc.loot) && oc.loot.length) _appendExploreLootToInventory(oc.loot); } catch (_) {}
 
   if (!ev) return;
 
@@ -85118,6 +85140,154 @@ function _explShowEventVEnc(ev) {
 
 
 
+// Local outcome builder para resiliência offline/local/fallback (D&D 5e RAW)
+
+function _explBuildLocalOutcome(ch, success, total, dc) {
+
+  var margin = (typeof total === 'number' && typeof dc === 'number') ? (dc - total) : null;
+
+  var tier = success ? 'success' : (ch.outcome_partial && margin !== null && margin <= 2 ? 'partial' : 'failure');
+
+  var outcome = (tier === 'success') ? (ch.outcome_ok || {}) : (tier === 'partial' ? (ch.outcome_partial || ch.outcome_ok || {}) : (ch.outcome_fail || ch.outcome_ok || {}));
+
+  var dHp = 0, dMp = 0, dGold = 0, dXp = 0;
+
+  if (outcome.hp_delta != null) dHp = Number(outcome.hp_delta) || 0;
+
+  else if (outcome.hp_loss) dHp = -(Number(outcome.hp_loss) || 0);
+
+  else if (outcome.hp_gain) dHp = Number(outcome.hp_gain) || 0;
+
+  if (outcome.mp_delta != null) dMp = Number(outcome.mp_delta) || 0;
+
+  else if (outcome.mp_loss) dMp = -(Number(outcome.mp_loss) || 0);
+
+  else if (outcome.mp_gain) dMp = Number(outcome.mp_gain) || 0;
+
+  if (outcome.gold_delta != null) dGold = Number(outcome.gold_delta) || 0;
+
+  else if (outcome.reward_gold) dGold = Number(outcome.reward_gold) || 0;
+
+  else if (outcome.gold_gain) dGold = Number(outcome.gold_gain) || 0;
+
+  if (outcome.xp_delta != null) dXp = Number(outcome.xp_delta) || 0;
+
+  else if (outcome.reward_xp) dXp = Number(outcome.reward_xp) || 0;
+
+  else if (outcome.xp_gain) dXp = Number(outcome.xp_gain) || 0;
+
+
+
+  if (window.S && window.S.player) {
+
+    if (dHp !== 0) window.S.player.hp = Math.max(0, Math.min(window.S.player.mhp || 20, (window.S.player.hp || 20) + dHp));
+
+    if (dMp !== 0 && window.S.player.mmp) window.S.player.mp = Math.max(0, Math.min(window.S.player.mmp || 10, (window.S.player.mp || 0) + dMp));
+
+    if (dGold > 0) { window.S.gold = (window.S.gold || 0) + dGold; window.S.player.gold = (window.S.player.gold || 0) + dGold; }
+
+    if (dXp > 0) window.S.player.xp = (window.S.player.xp || 0) + dXp;
+
+  }
+
+  if (typeof updateHud === 'function') updateHud();
+
+
+
+  var p = (window.S && window.S.player) || {};
+
+  var abilMod = 0;
+
+  if (ch.skill) {
+
+    var sKey = String(ch.skill).toLowerCase();
+
+    var abils = p.abilities || {};
+
+    abilMod = Number(abils[sKey] || abils[sKey.slice(0, 3)] || 0);
+
+  }
+
+  var d20Rolled = (typeof total === 'number') ? Math.max(1, Math.min(20, total - abilMod)) : 12;
+
+
+
+  return {
+
+    tier: tier,
+
+    text: outcome.text || outcome.flavor || '',
+
+    script: outcome.script || null,
+
+    delta: { hp: dHp, mp: dMp, gold: dGold, xp: dXp },
+
+    check: ch.skill ? {
+
+      d20: d20Rolled,
+
+      total: total != null ? total : (d20Rolled + abilMod),
+
+      dc: dc || 10,
+
+      success: success,
+
+      degree: tier === 'success' ? 'success' : (tier === 'partial' ? 'marginal_failure' : 'failure'),
+
+      degree_label: tier === 'success' ? 'Sucesso' : (tier === 'partial' ? 'Sucesso Parcial' : 'Falha')
+
+    } : null,
+
+    loot: outcome.loot || []
+
+  };
+
+}
+
+
+
+function _explLocalVEncResolve(ev, realCh) {
+
+  _explVEncResolving = true;
+
+  try { window.vEncounter.close(); } catch (_) {}
+
+  if (realCh.skill) {
+
+    if (typeof rollSkillCheck === 'function') {
+
+      rollSkillCheck(realCh, function (success, total) {
+
+        var oc = _explBuildLocalOutcome(realCh, success, total, realCh.dc);
+
+        _explShowOutcomeVEnc(ev, oc);
+
+      });
+
+    } else {
+
+      var fakeTotal = 12 + ((window.S && window.S.player && window.S.player.abilities && window.S.player.abilities[realCh.skill]) || 0);
+
+      var fakeSuccess = fakeTotal >= (realCh.dc || 10);
+
+      var oc = _explBuildLocalOutcome(realCh, fakeSuccess, fakeTotal, realCh.dc);
+
+      _explShowOutcomeVEnc(ev, oc);
+
+    }
+
+  } else {
+
+    var oc = _explBuildLocalOutcome(realCh, true, null, null);
+
+    _explShowOutcomeVEnc(ev, oc);
+
+  }
+
+}
+
+
+
 // Resolve a escolha no MOTOR; anima o d20 do servidor; renderiza o outcome no
 
 // vEncounter. _explVEncResolving guarda contra duplo-clique (1 resolucao por vez).
@@ -85128,6 +85298,16 @@ function _explEventVEncResolve(ev, ch) {
 
   var idx = (ch && typeof ch._idx === 'number') ? ch._idx : -1;
 
+  if (idx < 0 && ch && ch.id && typeof ch.id === 'string' && /^__expl_ch_(\d+)$/.test(ch.id)) {
+    idx = parseInt(ch.id.replace('__expl_ch_', ''), 10);
+  }
+  if (idx < 0 && ch && ch.label && Array.isArray(ev.choices)) {
+    idx = ev.choices.findIndex(function (c) { return c && c.label === ch.label; });
+  }
+  if (idx < 0 && Array.isArray(ev.choices) && ev.choices.length === 1) {
+    idx = 0;
+  }
+
   if (idx < 0 || !ev.choices || !ev.choices[idx]) {
 
     LOGW('EVENT', 'vencounter_bad_choice idx=' + idx);
@@ -85136,25 +85316,99 @@ function _explEventVEncResolve(ev, ch) {
 
   }
 
-  if (!(window.ExploracaoAPI && window.ExploracaoAPI.hasToken())) {
+  var realCh = ev.choices[idx];
 
-    // Sem token = nao-remoto: o gate nao deveria deixar chegar aqui (defensivo).
 
-    LOGW('EVENT', 'vencounter_resolve_no_token');
+
+  var hasRemote = !!(
+
+    window.__EXPLORE_MODE === 'remote'
+
+    && window.ExploracaoAPI
+
+    && typeof window.ExploracaoAPI.eventChoice === 'function'
+
+    && (
+
+      (typeof window.ExploracaoAPI.hasToken === 'function' && window.ExploracaoAPI.hasToken())
+
+      || (typeof window._getExploreSessionToken === 'function' && window._getExploreSessionToken())
+
+      || window.__EXPLORE_MOTOR_TOKEN
+
+      || window.__EXPLORE_TOKEN
+
+    )
+
+  );
+
+
+
+  if (!hasRemote) {
+
+    LOGW('EVENT', 'vencounter_resolve_no_remote_token -> fallback local');
+
+    _explLocalVEncResolve(ev, realCh);
 
     return;
 
   }
 
+
+
   _explVEncResolving = true;
 
-  var realCh = ev.choices[idx];
+  var navBtn = document.querySelector('.enc-nav-action') || document.querySelector('.enc-btn-primary');
+
+  if (navBtn) {
+
+    navBtn.style.opacity = '0.6';
+
+    navBtn.style.pointerEvents = 'none';
+
+  }
+
+
+
+  var safetyTimeout = setTimeout(function () {
+
+    if (_explVEncResolving) {
+
+      _explVEncResolving = false;
+
+      if (navBtn) {
+
+        navBtn.style.opacity = '';
+
+        navBtn.style.pointerEvents = '';
+
+      }
+
+    }
+
+  }, 10000);
+
+
 
   LOG('API', 'vencounter_event_choice idx=' + idx + ' label=' + (realCh.label || '?'));
 
-  window.ExploracaoAPI.eventChoice(idx).then(function (res) {
+  var extraPayload = { event_id: (ev && ev.id) || (S.event && S.event.id) || (window.vEncounter && window.vEncounter._activeState && window.vEncounter._activeState.customState && window.vEncounter._activeState.customState.ev && window.vEncounter._activeState.customState.ev.id) || '' };
 
-    if (!res || res.error) { _explEventVEncError(ev, res && res.error); return; }
+  window.ExploracaoAPI.eventChoice(idx, extraPayload).then(function (res) {
+
+    clearTimeout(safetyTimeout);
+
+    if (!res || res.error) {
+
+      LOGW('API', 'vencounter_event_choice remote error=' + ((res && res.error) || 'unknown') + ' -> fallback local resolve');
+
+      _explLocalVEncResolve(ev, realCh);
+
+      return;
+
+    }
+
+    _explVEncResolving = false;
 
     var oc = res.outcome || {};
 
@@ -85202,7 +85456,11 @@ function _explEventVEncResolve(ev, ch) {
 
   }).catch(function (e) {
 
-    _explEventVEncError(ev, (e && e.message) || 'rejected');
+    clearTimeout(safetyTimeout);
+
+    LOGW('API', 'vencounter_event_choice remote rejected err=' + ((e && e.message) || 'rejected') + ' -> fallback local resolve');
+
+    _explLocalVEncResolve(ev, realCh);
 
   });
 
@@ -85210,23 +85468,29 @@ function _explEventVEncResolve(ev, ch) {
 
 
 
-// M6 (SUPREME RULE #0): erro RECUPERAVEL — NUNCA fabrica. Avisa e reabre o corpo
-
-// pro jogador retentar (o servidor decide a resolucao).
-
 function _explEventVEncError(ev, reason) {
 
   _explVEncResolving = false;
 
-  try { if (oc && Array.isArray(oc.loot) && oc.loot.length) _appendExploreLootToInventory(oc.loot); } catch (_) {}
+  var navBtn = document.querySelector('.enc-nav-action') || document.querySelector('.enc-btn-primary');
 
-  LOGW('API', 'vencounter_event_choice recoverable_error reason=' + (reason || '?')
+  if (navBtn) {
 
-    + ' — nao fabrica (SUPREME RULE #0)');
+    navBtn.style.opacity = '';
 
-  try { if (typeof vToast === 'function') vToast('Falha ao resolver (rede). Toque na opcao novamente.', 'warn'); } catch (_) {}
+    navBtn.style.pointerEvents = '';
 
-  _explShowEventVEnc(ev);
+  }
+
+  LOGW('API', 'vencounter_event_choice recoverable_error reason=' + (reason || '?'));
+
+  var toastFn = (typeof window.vToast === 'function') ? window.vToast : (typeof window.showToast === 'function' ? window.showToast : null);
+
+  if (toastFn) {
+
+    try { toastFn('Falha na comunicação com o servidor. Toque na opção para tentar novamente.', 'warn', 3500); } catch (_) {}
+
+  }
 
 }
 
@@ -85240,13 +85504,23 @@ function _explEventVEncError(ev, reason) {
 
 // S._eventChain (__venc) pro Continuar (_explEventVEncFinish) renderizar o
 
-// proximo passo via vEncounter. SEM fabricar (M6).
+// proximo passo via vEncounter.
 
 function _explDungeonVEncResolve(ev, ch) {
 
   if (_explVEncResolving) return;
 
   var idx = (ch && typeof ch._idx === 'number') ? ch._idx : -1;
+
+  if (idx < 0 && ch && ch.id && typeof ch.id === 'string' && /^__expl_ch_(\d+)$/.test(ch.id)) {
+    idx = parseInt(ch.id.replace('__expl_ch_', ''), 10);
+  }
+  if (idx < 0 && ch && ch.label && Array.isArray(ev.choices)) {
+    idx = ev.choices.findIndex(function (c) { return c && c.label === ch.label; });
+  }
+  if (idx < 0 && Array.isArray(ev.choices) && ev.choices.length === 1) {
+    idx = 0;
+  }
 
   if (idx < 0 || !ev.choices || !ev.choices[idx]) {
 
@@ -85256,13 +85530,17 @@ function _explDungeonVEncResolve(ev, ch) {
 
   }
 
+  var realCh = ev.choices[idx];
+
   var _api = (window.__EXPLORE_API_BASE || '').replace(/\/$/, '');
 
   var _tok = (typeof window._getExploreSessionToken === 'function' ? window._getExploreSessionToken() : '') || window.__EXPLORE_MOTOR_TOKEN || window.__EXPLORE_TOKEN;
 
   if (!_tok || !_api || typeof window.__explFetchTO !== 'function') {
 
-    LOGW('EVENT', 'vencounter_dungeon_no_token');
+    LOGW('EVENT', 'vencounter_dungeon_no_token -> fallback local');
+
+    _explLocalVEncResolve(ev, realCh);
 
     return;
 
@@ -85270,7 +85548,35 @@ function _explDungeonVEncResolve(ev, ch) {
 
   _explVEncResolving = true;
 
-  var realCh = ev.choices[idx];
+  var navBtn = document.querySelector('.enc-nav-action') || document.querySelector('.enc-btn-primary');
+
+  if (navBtn) {
+
+    navBtn.style.opacity = '0.6';
+
+    navBtn.style.pointerEvents = 'none';
+
+  }
+
+  var safetyTimeout = setTimeout(function () {
+
+    if (_explVEncResolving) {
+
+      _explVEncResolving = false;
+
+      if (navBtn) {
+
+        navBtn.style.opacity = '';
+
+        navBtn.style.pointerEvents = '';
+
+      }
+
+    }
+
+  }, 10000);
+
+
 
   var _body = JSON.stringify({
 
@@ -85292,7 +85598,19 @@ function _explDungeonVEncResolve(ev, ch) {
 
   }, 12000).then(function (resp) { return resp.json(); }).then(function (res) {
 
-    if (!res || res.error) { _explEventVEncError(ev, res && res.error); return; }
+    clearTimeout(safetyTimeout);
+
+    if (!res || res.error) {
+
+      LOGW('API', 'vencounter_dungeon remote error=' + ((res && res.error) || 'unknown') + ' -> fallback local resolve');
+
+      _explLocalVEncResolve(ev, realCh);
+
+      return;
+
+    }
+
+    _explVEncResolving = false;
 
     var oc = res.outcome || {};
 
@@ -85330,7 +85648,15 @@ function _explDungeonVEncResolve(ev, ch) {
 
     }
 
-  }).catch(function (e) { _explEventVEncError(ev, (e && e.message) || 'rejected'); });
+  }).catch(function (e) {
+
+    clearTimeout(safetyTimeout);
+
+    LOGW('API', 'vencounter_dungeon remote rejected err=' + ((e && e.message) || 'rejected') + ' -> fallback local resolve');
+
+    _explLocalVEncResolve(ev, realCh);
+
+  });
 
 }
 
@@ -85520,6 +85846,8 @@ function _explEventVEncFinish(oc) {
 
   }
 
+  var _returnCrossroadsNode = (S.event && S.event.__returnToCrossroadsNode) || null;
+
   try { window.vEncounter.close(); } catch (_) {}
 
   S.event = null;
@@ -85530,18 +85858,32 @@ function _explEventVEncFinish(oc) {
 
   scheduleRender();
 
+  var roadExp = window._activeRoadExpedition;
+  if (!roadExp) {
+    try {
+      var _rawExp = sessionStorage.getItem('vld_active_road_exp_v1');
+      if (_rawExp) {
+        roadExp = JSON.parse(_rawExp);
+        window._activeRoadExpedition = roadExp;
+      }
+    } catch (_) {}
+  }
   if (oc && oc.combat_trigger) {
-    if (window._activeRoadExpedition) {
-      window._activeRoadExpedition.combatPending = true;
-      window._activeRoadExpedition.ts = Date.now();
-      try { sessionStorage.setItem('vld_active_road_exp_v1', JSON.stringify(window._activeRoadExpedition)); } catch (_) {}
+    if (roadExp) {
+      roadExp.combatPending = true;
+      roadExp.ts = Date.now();
+      try { sessionStorage.setItem('vld_active_road_exp_v1', JSON.stringify(roadExp)); } catch (_) {}
+    } else if (_returnCrossroadsNode) {
+      try { sessionStorage.setItem('vld_preselect_road_edge', ''); } catch (_) {}
     }
     _explFinalizeCombatRedirect(oc);
   } else if (S.ph !== 'defeat' && window._activeDungeonDelverId && typeof _openPointcrawlDungeonDelver === 'function') {
     var activeDg = window._activeDungeonDelverId;
     setTimeout(function () { _openPointcrawlDungeonDelver(activeDg); }, 120);
-  } else if (S.ph !== 'defeat' && window._activeRoadExpedition && !window._activeRoadExpedition.combatPending && typeof window._onRoadMarcoEventResolved === 'function') {
+  } else if (S.ph !== 'defeat' && roadExp && !roadExp.combatPending && typeof window._onRoadMarcoEventResolved === 'function') {
     setTimeout(function () { window._onRoadMarcoEventResolved(); }, 100);
+  } else if (S.ph !== 'defeat' && _returnCrossroadsNode && typeof window._openDirectionalRoadCrossroads === 'function') {
+    setTimeout(function () { window._openDirectionalRoadCrossroads(_returnCrossroadsNode); }, 120);
   }
 
 }
@@ -85557,6 +85899,12 @@ function _explEventVEncFinish(oc) {
 function _explFinalizeCombatRedirect(oc) {
 
   LOG('API', 'vencounter combat_redirect enemy=' + oc.combat_trigger.enemy_id);
+
+  if (window._activeRoadExpedition) {
+    window._activeRoadExpedition.combatPending = true;
+    window._activeRoadExpedition.ts = Date.now();
+    try { sessionStorage.setItem('vld_active_road_exp_v1', JSON.stringify(window._activeRoadExpedition)); } catch (_) {}
+  }
 
   setTimeout(function () {
 
@@ -86522,7 +86870,7 @@ function rollBlindPerceptionCheck(ev, onDone) {
 
       result.className = 'failure';
 
-      result.innerHTML = '☠ 1 NATURAL! FALHA CRÍTICA ☠';
+      result.innerHTML = '◇ 1 NATURAL! FALHA CRÍTICA ◇';
 
     } else if (isSuccess) {
 
@@ -86592,19 +86940,19 @@ function rollBlindPerceptionCheck(ev, onDone) {
 
     if (isNat20) {
 
-      narrText = '🎲 <b>Teste de Sentidos (✦ 20 Natural! Sucesso Crítico ✦)</b> — Seus instintos aguçados captam a aproximação furtiva muito antes do bote. Você avista as sombras rasteiras entre a vegetação antes que elas notem sua vigília! O grupo ganha a Vantagem da Surpresa!';
+      narrText = '◆ <b>Teste de Sentidos (✦ 20 Natural! Sucesso Crítico ✦)</b> — Seus instintos aguçados captam a aproximação furtiva muito antes do bote. Você avista as sombras rasteiras entre a vegetação antes que elas notem sua vigília! O grupo ganha a Vantagem da Surpresa!';
 
     } else if (isSuccess) {
 
-      narrText = '🎲 <b>Teste de Sentidos (D20: ' + d20 + modSign + totalMod + ' = ' + total + ' vs CD ' + stealthDC + ' · SUCESSO)</b> — Seus ouvidos atentos captam o som sutil de folhas secas se quebrando e a respiração pesada na vegetação. Você saca sua arma a tempo e encara as feras nos olhos! Você não foi pego desprevenido.';
+      narrText = '◆ <b>Teste de Sentidos (D20: ' + d20 + modSign + totalMod + ' = ' + total + ' vs CD ' + stealthDC + ' · SUCESSO)</b> — Seus ouvidos atentos captam o som sutil de folhas secas se quebrando e a respiração pesada na vegetação. Você saca sua arma a tempo e encara as feras nos olhos! Você não foi pego desprevenido.';
 
     } else if (isNat1) {
 
-      narrText = '🎲 <b>Teste de Sentidos (☠ 1 Natural! Falha Crítica ☠)</b> — Uma distração momentânea no caminho deixa sua retaguarda completamente exposta. Os atacantes rompem a folhagem em investida brutal sem chance de reação! Emboscada total!';
+      narrText = '◆ <b>Teste de Sentidos (◆ 1 Natural! Falha Crítica ◆)</b> — Uma distração momentânea no caminho deixa sua retaguarda completamente exposta. Os atacantes rompem a folhagem em investida brutal sem chance de reação! Emboscada total!';
 
     } else {
 
-      narrText = '🎲 <b>Teste de Sentidos (D20: ' + d20 + modSign + totalMod + ' = ' + total + ' vs CD ' + stealthDC + ' · FALHA)</b> — O silêncio do ermo parecia total até que o estalar violento rompe a calma. De repente, formas ferozes saltam das sombras direto contra a sua retaguarda! Emboscada!';
+      narrText = '◆ <b>Teste de Sentidos (D20: ' + d20 + modSign + totalMod + ' = ' + total + ' vs CD ' + stealthDC + ' · FALHA)</b> — O silêncio do ermo parecia total até que o estalar violento rompe a calma. De repente, formas ferozes saltam das sombras direto contra a sua retaguarda! Emboscada!';
 
     }
 
@@ -86820,15 +87168,15 @@ function rollSkillCheck(choice, cb) {
 
     if (d20 === 20) {
 
-      degText = '🌟 SUCESSO CRÍTICO';
+      degText = '◆ SUCESSO CRÍTICO';
 
     } else if (d20 === 1) {
 
-      degText = '💀 FALHA CRÍTICA';
+      degText = '◇ FALHA CRÍTICA';
 
     } else if (margin >= 5) {
 
-      degText = '✨ SUCESSO EXCEPCIONAL (+' + margin + ')';
+      degText = '◆ SUCESSO EXCEPCIONAL (+' + margin + ')';
 
     } else if (success) {
 
@@ -86836,11 +87184,11 @@ function rollSkillCheck(choice, cb) {
 
     } else if (margin >= -2) {
 
-      degText = '⚠️ FALHA MARGINAL (' + margin + ')';
+      degText = '◇ FALHA MARGINAL (' + margin + ')';
 
     } else if (margin <= -5) {
 
-      degText = '💥 FALHA CATASTRÓFICA (' + margin + ')';
+      degText = '◇ FALHA CATASTRÓFICA (' + margin + ')';
 
     } else {
 
@@ -87546,7 +87894,7 @@ function applyChoiceOutcome(choice, success, total, dc) {
 
       if (_djId) {
 
-        consItems.push({ kind: 'reward', ico: '📦', text: '+' + (_djQty > 1 ? _djQty + 'x ' : '') + _djId });
+        consItems.push({ kind: 'reward', ico: '◆', text: '+' + (_djQty > 1 ? _djQty + 'x ' : '') + _djId });
 
       }
 
@@ -87690,6 +88038,8 @@ function closeEventModal() {
 
   }
 
+  var _returnCrossroadsNode = (S.event && S.event.__returnToCrossroadsNode) || null;
+
   document.getElementById('event-modal').classList.remove('visible');
 
   S.event = null;
@@ -87704,67 +88054,60 @@ function closeEventModal() {
 
   if (pendingCombat) {
 
+    if (window._activeRoadExpedition) {
+      window._activeRoadExpedition.combatPending = true;
+      window._activeRoadExpedition.ts = Date.now();
+      try { sessionStorage.setItem('vld_active_road_exp_v1', JSON.stringify(window._activeRoadExpedition)); } catch (_) {}
+    }
+
     LOG('DUNGEON', 'pending combat firing enemy=' + pendingCombat.enemy
-
       + ' lookup_name=' + (pendingCombat.lookup_name || '-')
-
       + ' effects=' + JSON.stringify(pendingCombat.preCombatEffects || []));
 
     setTimeout(function() {
-
       triggerCombatScreen({
-
         enemyId: pendingCombat.enemy,
-
         surprise: pendingCombat.surprise,
-
         lookup_name: pendingCombat.lookup_name,
-
         preCombatEffects: pendingCombat.preCombatEffects || [],
-
         narrative: pendingCombat.narrative || ''  /* #17 fix (review): path _pendingCombat (combate de masmorra) tambem propaga a narrativa */
-
       });
-
     }, 350);
-
   }
 
   if (pendingGameOver) {
-
     LOG('DUNGEON', 'pending game_over firing — booting templo (city_gates)');
-
     setTimeout(function () {
-
       // Templo = city_gates (mapa hub inicial; spawn padrao M15).
-
       // _fromMap nao seta — chegada do templo e fresh, nao edge transition.
-
       setupChoices._fromMap = null;
-
       setupChoices.map = 'city_gates';
-
       // Limpa estado de masmorra ANTES do boot (encounters triggered, dungeon flags
-
       // sao preservadas em S._dungeonState pra journal historico, mas a entrada
-
       // de masmorra fica resetada caso jogador volte e tente de novo).
-
       S._dungeonEncountersTriggered = {};
-
       dmNarrate({ text: 'Os portoes de Valdoria se abrem. Você esta de volta — vivo, mas marcado.', type: 'event' });
-
       boot();
-
     }, 350);
-
   }
 
+  var roadExpResolv = window._activeRoadExpedition;
+  if (!roadExpResolv) {
+    try {
+      var _rawResolv = sessionStorage.getItem('vld_active_road_exp_v1');
+      if (_rawResolv) {
+        roadExpResolv = JSON.parse(_rawResolv);
+        window._activeRoadExpedition = roadExpResolv;
+      }
+    } catch (_) {}
+  }
   if (!chained && !pendingCombat && !pendingGameOver && S.ph !== 'defeat' && window._activeDungeonDelverId && typeof _openPointcrawlDungeonDelver === 'function') {
     var activeDg = window._activeDungeonDelverId;
     setTimeout(function () { _openPointcrawlDungeonDelver(activeDg); }, 120);
-  } else if (!chained && !pendingCombat && !pendingGameOver && S.ph !== 'defeat' && window._activeRoadExpedition && !window._activeRoadExpedition.combatPending && typeof window._onRoadMarcoEventResolved === 'function') {
+  } else if (!chained && !pendingCombat && !pendingGameOver && S.ph !== 'defeat' && roadExpResolv && !roadExpResolv.combatPending && typeof window._onRoadMarcoEventResolved === 'function') {
     setTimeout(function () { window._onRoadMarcoEventResolved(); }, 100);
+  } else if (!chained && !pendingCombat && !pendingGameOver && S.ph !== 'defeat' && _returnCrossroadsNode && typeof window._openDirectionalRoadCrossroads === 'function') {
+    setTimeout(function () { window._openDirectionalRoadCrossroads(_returnCrossroadsNode); }, 120);
   }
 
 }
@@ -87774,6 +88117,11 @@ function closeEventModal() {
 function triggerDefeat(reason) {
 
   LOG('DEFEAT', 'triggerDefeat reason=' + reason + ' hp=' + S.player.hp + ' exh=' + S.player.exh);
+
+  try { if (window.vEncounter && typeof window.vEncounter.close === 'function') window.vEncounter.close(); } catch (_) {}
+  try { if (typeof _closeDirectionalRoadModal === 'function') _closeDirectionalRoadModal(); } catch (_) {}
+  try { sessionStorage.removeItem('vld_active_road_exp_v1'); } catch (_) {}
+  try { sessionStorage.removeItem('vld_active_dg_delver'); } catch (_) {}
 
   S.ph = 'defeat';
 
@@ -87842,6 +88190,11 @@ async function triggerReturnToCity(opts) {
     + ' gold=' + (window.__exploreRewards.gold_gained || 0)
 
     + ' items=' + ((window.__exploreRewards.items_gained && window.__exploreRewards.items_gained.length) || 0));
+
+  try { if (window.vEncounter && typeof window.vEncounter.close === 'function') window.vEncounter.close(); } catch (_) {}
+  try { if (typeof _closeDirectionalRoadModal === 'function') _closeDirectionalRoadModal(); } catch (_) {}
+  try { sessionStorage.removeItem('vld_active_road_exp_v1'); } catch (_) {}
+  try { sessionStorage.removeItem('vld_active_dg_delver'); } catch (_) {}
 
   S.ph = 'return';
 
@@ -88259,7 +88612,7 @@ function _registerDungeonDiscovery(dgId) {
 
 function closeDungeonOverlay(entered) {
 
-  document.getElementById('dungeon-overlay').classList.remove('visible');
+  if (_dungOverlay) _dungOverlay.classList.remove('visible');
 
   const dg = S._currentDungeon;
 
@@ -88559,7 +88912,7 @@ async function confirmEdgeTransition(_skipJourney) {
 
       && window.JourneyRunner && typeof JourneyRunner.start === 'function') {
 
-    document.getElementById('dungeon-overlay').classList.remove('visible');
+    if (_dungOverlay) _dungOverlay.classList.remove('visible');
 
     var _tgt = (typeof FIXED_MAPS !== 'undefined') ? FIXED_MAPS[ed.targetMap] : null;
 
@@ -88613,9 +88966,9 @@ async function confirmEdgeTransition(_skipJourney) {
 
   S._pendingEdge = null;
 
-  document.getElementById('dungeon-overlay').classList.remove('visible');
+  if (_dungOverlay) _dungOverlay.classList.remove('visible');
 
-  document.getElementById('dungeon-enter').textContent = 'Entrar';
+  if (_dungEnter) _dungEnter.textContent = 'Entrar';
 
 
 
@@ -89775,9 +90128,9 @@ function confirmQuestDelivery() {
 
   S._pendingDelivery = null;
 
-  document.getElementById('dungeon-overlay').classList.remove('visible');
+  if (_dungOverlay) _dungOverlay.classList.remove('visible');
 
-  document.getElementById('dungeon-enter').textContent = 'Entrar';
+  if (_dungEnter) _dungEnter.textContent = 'Entrar';
 
   if (q) completeQuest(q.id);
 
@@ -91440,7 +91793,14 @@ function closePartyPopup() {
 
   const pp = document.getElementById('party-popup');
 
-  if (pp) pp.classList.remove('show');
+  if (pp) {
+    pp.classList.remove('show');
+    pp.classList.remove('visible');
+  }
+
+  if (document.body.classList.contains('pointcrawl-mode') && typeof _openCurrentNodePointcrawlHub === 'function') {
+    setTimeout(function () { _openCurrentNodePointcrawlHub(); }, 80);
+  }
 
 }
 
@@ -91618,7 +91978,7 @@ function renderPartyPopup() {
 
     var hasMpParty = window.vPartyClient.getState() && window.vPartyClient.getState().session_id;
 
-    var _btnLabel = hasMpParty ? '👥 Comitiva Multiplayer (Ativa)' : '👥 Reunir Comitiva Multiplayer';
+    var _btnLabel = hasMpParty ? '◆ Comitiva Multiplayer (Ativa)' : '◆ Reunir Comitiva Multiplayer';
 
     _mpSec.innerHTML = '<button type="button" class="party-pace-btn" style="width:100%; padding:10px; border-color:#d4af37; background:linear-gradient(180deg, #3a2c17, #1f180e); color:#f3dfa2; font-weight:bold;">' + _btnLabel + '</button>';
 
@@ -91932,7 +92292,7 @@ function _updateCampDetails() {
 
   const shortFormula = document.getElementById('camp-short-formula');
 
-  if (shortFormula) shortFormula.textContent = '💚 1d' + dieSides + ' ' + conStr;
+  if (shortFormula) shortFormula.textContent = '◆ 1d' + dieSides + ' ' + conStr;
 
 
 
@@ -91966,7 +92326,7 @@ function _updateCampDetails() {
 
     const hdRec = Math.max(1, Math.floor((p.mhd || 2) / 2));
 
-    longHdGain.textContent = '🎲 +' + hdRec + ' HD';
+    longHdGain.textContent = '◆ +' + hdRec + ' HD';
 
   }
 
@@ -91976,7 +92336,7 @@ function _updateCampDetails() {
 
   if (longExhChip) {
 
-    longExhChip.textContent = (p.exh || 0) > 0 ? '🛡 -1 Exaustão (' + p.exh + ')' : '🛡 0 Exaustão';
+    longExhChip.textContent = (p.exh || 0) > 0 ? '◆ -1 Exaustão (' + p.exh + ')' : '◆ 0 Exaustão';
 
   }
 
@@ -92026,7 +92386,7 @@ function _updateCampDetails() {
 
       if (chatCountChip) {
 
-        chatCountChip.textContent = '👥 ' + alliesList.length + ' companheiro' + (alliesList.length > 1 ? 's' : '');
+        chatCountChip.textContent = '◆ ' + alliesList.length + ' companheiro' + (alliesList.length > 1 ? 's' : '');
 
       }
 
@@ -92262,7 +92622,7 @@ function _fallbackWildBanterChoiceResolve(selected, banter, targetNpc, proceedAf
 
   var sign = delta > 0 ? '+' : '';
 
-  var icon = delta > 0 ? '✦' : (delta < 0 ? '💔' : '◈');
+  var icon = delta > 0 ? '✦' : (delta < 0 ? '◇' : '◈');
 
   var verb = delta > 0 ? 'aprovou' : (delta < 0 ? 'desaprovou' : 'ouviu');
 
@@ -92560,7 +92920,7 @@ function openCampOverlay() {
 
     if (typeof vToast === 'function') {
 
-      vToast('🌊 Não é possível acampar sobre a água! Procure terra firme para descansar.', 'warn');
+      vToast('◆ Não é possível acampar sobre a água! Procure terra firme para descansar.', 'warn');
 
     }
 
@@ -92572,7 +92932,7 @@ function openCampOverlay() {
 
     if (typeof vToast === 'function') {
 
-      vToast('🔥 Não é possível acampar sobre a lava derretida!', 'warn');
+      vToast('◆ Não é possível acampar sobre a lava derretida!', 'warn');
 
     }
 
@@ -92729,6 +93089,10 @@ function closeCampOverlay() {
   }
 
   try { if (window.CampFire) window.CampFire.destroy(); } catch (_) {}
+
+  if (document.body.classList.contains('pointcrawl-mode') && typeof _openCurrentNodePointcrawlHub === 'function') {
+    setTimeout(function () { _openCurrentNodePointcrawlHub(); }, 80);
+  }
 
 }
 
@@ -93418,7 +93782,7 @@ function _applyServerShortRest(p, healed, serverState, banter) {
 
       if (typeof vToast === 'function') {
 
-        var bTxt = banter.speech ? ('💬 ' + banter.speaker + ': "' + banter.speech + '"') : ('💬 ' + banter.speaker + ': ' + banter.narration);
+        var bTxt = banter.speech ? ('◆ ' + banter.speaker + ': "' + banter.speech + '"') : ('◆ ' + banter.speaker + ': ' + banter.narration);
 
         vToast(bTxt, 'info');
 
@@ -93544,19 +93908,19 @@ function _promptCampActionConfirm(actionType, onConfirm) {
 
     if (titleEl) titleEl.textContent = 'Descanso Curto';
 
-    if (durationEl) durationEl.textContent = 'Duração: 1 hora no mundo';
+    if (durationEl) durationEl.textContent = 'Duração: Pausa breve de repouso';
 
-    if (iconEl) iconEl.textContent = '☕';
+    if (iconEl) iconEl.textContent = '◆';
 
-    if (descEl) descEl.textContent = 'Você fará uma pausa de 1 hora ao redor da fogueira para recuperar o fôlego, beber água e estancar ferimentos.';
+    if (descEl) descEl.textContent = 'Você fará uma pausa breve ao redor da fogueira para recuperar o fôlego, beber água e estancar ferimentos.';
 
 
 
-    _addFact('🎲', '<strong>Custo:</strong> Consome 1 Dado de Vida (disponível: ' + curHd + '/' + maxHd + ')');
+    _addFact('◆', '<strong>Custo:</strong> Consome 1 Dado de Vida (disponível: ' + curHd + '/' + maxHd + ')');
 
-    _addFact('💚', '<strong>Cura esperada:</strong> 1d' + dieSides + ' ' + conStr + ' PV (rolagem autoritativa 3D)');
+    _addFact('◆', '<strong>Cura esperada:</strong> 1d' + dieSides + ' ' + conStr + ' PV (rolagem autoritativa 3D)');
 
-    _addFact('⏳', '<strong>Tempo:</strong> Avança 1 hora no relógio da exploração');
+    _addFact('◇', '<strong>Tempo:</strong> Consome parte do ciclo de viagem atual');
 
 
 
@@ -93566,7 +93930,7 @@ function _promptCampActionConfirm(actionType, onConfirm) {
 
         warnEl.style.display = 'block';
 
-        warnEl.innerHTML = '⚠️ <strong>Atenção:</strong> Você não possui Dados de Vida disponíveis. O descanso curto não recuperará PV. Realize um Descanso Longo para recuperar seus dados.';
+        warnEl.innerHTML = '◇ <strong>Atenção:</strong> Você não possui Dados de Vida disponíveis. O descanso curto não recuperará PV. Realize um Descanso Longo para recuperar seus dados.';
 
       }
 
@@ -93576,7 +93940,7 @@ function _promptCampActionConfirm(actionType, onConfirm) {
 
         warnEl.style.display = 'block';
 
-        warnEl.innerHTML = 'ℹ️ <strong>Nota:</strong> Seus Pontos de Vida já estão no máximo (' + curHp + '/' + maxHp + '). 1 Dado de Vida será consumido mesmo assim.';
+        warnEl.innerHTML = '◆ <strong>Nota:</strong> Seus Pontos de Vida já estão no máximo (' + curHp + '/' + maxHp + '). 1 Dado de Vida será consumido mesmo assim.';
 
       }
 
@@ -93586,11 +93950,11 @@ function _promptCampActionConfirm(actionType, onConfirm) {
 
     if (titleEl) titleEl.textContent = 'Descanso Longo';
 
-    if (durationEl) durationEl.textContent = 'Duração: 8 horas no mundo';
+    if (durationEl) durationEl.textContent = 'Duração: Repouso pleno do dia';
 
-    if (iconEl) iconEl.textContent = '⛺';
+    if (iconEl) iconEl.textContent = '◆';
 
-    if (descEl) descEl.textContent = 'Você montará acampamento para 8 horas de sono e descanso prolongado para restaurar energias e curar o corpo.';
+    if (descEl) descEl.textContent = 'Você montará acampamento para sono e descanso prolongado para restaurar energias e curar o corpo.';
 
 
 
@@ -93598,13 +93962,13 @@ function _promptCampActionConfirm(actionType, onConfirm) {
 
     _addFact('✦', '<strong>Recuperação total:</strong> 100% de PV (' + maxHp + ') e PM (' + maxMp + ')');
 
-    _addFact('🎲', '<strong>Dados de Vida:</strong> Recupera metade do limite (+ ' + hdRec + ' HD, até máx ' + maxHd + ')');
+    _addFact('◆', '<strong>Dados de Vida:</strong> Recupera metade do limite (+ ' + hdRec + ' HD, até máx ' + maxHd + ')');
 
-    _addFact('🛡', '<strong>Condições:</strong> Reduz 1 nível de Exaustão (atual: ' + curExh + ') e remove efeitos temporários');
+    _addFact('◆', '<strong>Condições:</strong> Reduz 1 nível de Exaustão (atual: ' + curExh + ') e remove efeitos temporários');
 
-    _addFact('⛺', '<strong>Equipamento:</strong> Exige Barraca ou Kit de Acampamento no inventário para o campo');
+    _addFact('◆', '<strong>Equipamento:</strong> Exige Barraca ou Kit de Acampamento no inventário para o campo');
 
-    _addFact('⏳', '<strong>Tempo:</strong> Avança 8 horas no relógio da exploração');
+    _addFact('◆', '<strong>Tempo:</strong> Avança para o próximo ciclo do dia');
 
 
 
@@ -93998,7 +94362,7 @@ function doLongRest() {
 
                 if (typeof vToast === 'function') {
 
-                  var bTxt = res.campfire_banter.speech ? ('💬 ' + res.campfire_banter.speaker + ': "' + res.campfire_banter.speech + '"') : ('💬 ' + res.campfire_banter.speaker + ': ' + res.campfire_banter.narration);
+                  var bTxt = res.campfire_banter.speech ? ('◆ ' + res.campfire_banter.speaker + ': "' + res.campfire_banter.speech + '"') : ('◆ ' + res.campfire_banter.speaker + ': ' + res.campfire_banter.narration);
 
                   vToast(bTxt, 'info');
 
@@ -95032,7 +95396,7 @@ const MATERIALS_DB = {
 
   iron_axe_head: { name: 'Cabeça de Machado de Ferro', icon: '', desc: 'Lâmina pesada de machado orc, ainda afiada.',
 
-    uses: ['Forja: 12 Valdoritas em ferreiro', 'Reforjar em machado de batalha (+1 dmg)', 'Componente de arma de duas mãos'] },
+    uses: ['Forja: 12 Valdoritas em ferreiro', 'Reforjar em machado de batalha (+1 de dano)', 'Componente de arma de duas mãos'] },
 
   // === Swamp ===
 
@@ -95100,7 +95464,7 @@ const MATERIALS_DB = {
 
   echo_gland: { name: 'Glândula Ecoica', icon: '', desc: 'Órgão de ecolocalização.',
 
-    uses: ['Alquimia: Visão no Escuro temporária (1h)'] },
+    uses: ['Alquimia: Visão no Escuro temporária'] },
 
   // === Volcanic ===
 
@@ -95114,7 +95478,7 @@ const MATERIALS_DB = {
 
   fire_essence: { name: 'Essência de Fogo Elemental', icon: '', desc: 'Fragmento de elemental capturado.',
 
-    uses: ['Potencializar magias de fogo (+1d6 dmg)', 'Componente raro: Invocar Elemental'] },
+    uses: ['Potencializar magias de fogo (+1d6 de dano de fogo)', 'Componente raro: Invocar Elemental'] },
 
   magma_core: { name: 'Núcleo de Magma', icon: '', desc: 'Pedra escaldante, pulsa com calor.',
 
@@ -96231,6 +96595,13 @@ function _drawCartNodeV2(ctx, b, w, h){
 // === Pin do personagem V2 (Fase 5.4 — "VOCÊ ESTÁ AQUI") ===
 
 var _MAP_ID_TO_CART_KEY = {
+  cidade: 'plains',
+  city: 'plains',
+  badlands: 'plains',
+  dark_mountain: 'mountain',
+  eldritch_swamp: 'swamp',
+  ancient_forest: 'forest',
+  frozen_abyss: 'snow',
   city_gates: 'plains',
   green_fields: 'plains',
   bandit_fortress: 'plains',
@@ -96286,7 +96657,15 @@ var _CART_KEY_TO_MAP_ID = {
   graveyard: 'ancient_cemetery',
   snow: 'frozen_waste',
   volcanic: 'burning_crater',
-  coast: 'salty_coast'
+  coast: 'salty_coast',
+  badlands: 'ashen_badlands',
+  dark_mountain: 'black_peaks',
+  eldritch_swamp: 'eldritch_mire',
+  ancient_forest: 'elder_woods',
+  frozen_abyss: 'glacial_rift',
+  green_fields: 'green_fields',
+  cidade: 'city_gates',
+  city: 'city_gates'
 };
 function _cartResolveMapId(keyOrMapId) {
   if (!keyOrMapId) return 'city_gates';
@@ -96399,12 +96778,12 @@ function _openCartProvincePreviewPopup(prov) {
 
   card.innerHTML = ''
     + '<div class="clp-body clp-prov-preview" style="overflow-x:hidden !important;max-width:100%;box-sizing:border-box;">'
-    + '  <div class="clp-icon" style="font-size:42px;margin:4px 0 8px;line-height:1;">' + (prov.icon || '🗺️') + '</div>'
+    + '  <div class="clp-icon" style="font-size:42px;margin:4px 0 8px;line-height:1;">' + (prov.icon || '◆') + '</div>'
     + '  <h2 class="clp-prov-title" style="margin:2px 0 4px;">' + prov.name + '</h2>'
     + '  <div class="clp-prov-sub" style="margin-bottom:8px;">Mapa Regional do Reino de Valdória</div>'
     + '  <p class="clp-prov-desc" style="margin:0 0 12px;padding:0 8px;">' + (prov.desc || 'Uma vasta região com seus próprios mistérios e perigos.') + '</p>'
     + '  <div class="clp-prov-stats" style="margin:0 0 12px;display:flex;justify-content:center;overflow-x:hidden !important;">'
-    + '    <div class="clp-prov-stat-pill" style="display:inline-block;white-space:nowrap;">📍 ' + knownCount + ' / ' + locKeys.length + ' locais mapeados</div>'
+    + '    <div class="clp-prov-stat-pill" style="display:inline-block;white-space:nowrap;">◆ ' + knownCount + ' / ' + locKeys.length + ' locais mapeados</div>'
     + '  </div>'
     + '</div>'
     + '<div class="clp-buttons">'
@@ -96496,7 +96875,7 @@ function _openCartLocationPopup(biome){
     stanceTip = 'Perigo Extremo! Ritmo Furtivo fortemente recomendado.';
   }
 
-  var isNight = (typeof S !== 'undefined' && S && S.dayPhase === 'night') || (typeof window._getCurrentGameTime === 'function' && window._getCurrentGameTime().hour >= 20);
+  var isNight = (typeof S !== 'undefined' && S && (S.dayPhase === 'night' || S.dayPhase === 'late_night')) || (typeof window._getCurrentGameTime === 'function' && (function(){ var t = window._getCurrentGameTime(); return t.period ? (t.period === 'night' || t.period === 'late_night') : (t.hour >= 20 || t.hour < 5); })());
   var hasDarkvision = !!(p.darkvision || (p.race && ['elf', 'dwarf', 'drow', 'half-orc', 'tiefling'].indexOf(p.race.toLowerCase()) >= 0));
   var hasTorch = !!(p.torch_active || p.has_light || (p.inventory && p.inventory.some(function(it){ return it.id === 'torch' || it.id === 'lantern'; })));
   var nightVisionHtml = isNight ? (hasDarkvision
@@ -96511,7 +96890,7 @@ function _openCartLocationPopup(biome){
   var weatherHtml = weatherInfo ? '<div class="clp-weather-note" style="margin:4px 0 6px;font-size:11.5px;color:#93c5fd;background:rgba(20,30,45,0.7);padding:4px 8px;border-radius:3px;border-left:3px solid #60a5fa;text-align:left;">' + weatherInfo.icon + ' <b>Condição Climática:</b> ' + weatherInfo.name + '<br><span style="font-style:italic;color:#cbd5e1;">' + weatherInfo.effect + '</span></div>' : '';
 
   var curPace = window._cartSelectedPace || 'normal';
-  var encounterRisk = (window.CartShared && CartShared.calcEncounterRisk) ? CartShared.calcEncounterRisk(biome, { pace: curPace, isNight: isNight, weather: curWeather, hours: horasViagem }) : { label: '🟢 Zona Segura (0%)', color: '#a3e635' };
+  var encounterRisk = (window.CartShared && CartShared.calcEncounterRisk) ? CartShared.calcEncounterRisk(biome, { pace: curPace, isNight: isNight, weather: curWeather, hours: horasViagem }) : { label: '◆ Zona Segura (0%)', color: '#a3e635' };
 
   card.innerHTML = ''
     + '<div class="clp-body">'
@@ -96556,7 +96935,7 @@ function _openCartLocationPopup(biome){
           + '<span style="font-size:11px;color:#a09484;">Encontro dos Ermos</span>'
           + '</div>'
           + '<div style="color:#d2be90;margin-bottom:3px;">' + enc.description + '</div>'
-          + '<div style="color:#fde047;font-size:11px;"><b>🎲 Perícia Sugerida:</b> ' + enc.checkRequired + '</div>';
+          + '<div style="color:#fde047;font-size:11px;"><b>◆ Perícia Sugerida:</b> ' + enc.checkRequired + '</div>';
       }
     };
   }
@@ -96568,7 +96947,7 @@ function _openCartLocationPopup(biome){
       e.stopPropagation();
       if (window.CartShared && CartShared.toggleLocPinned) {
         var nowPinned = CartShared.toggleLocPinned(biome.key);
-        pinBtn.innerHTML = nowPinned ? '📍 Alfinete Ativo (Remover)' : '📌 Fixar no Diário de Rotas';
+        pinBtn.innerHTML = nowPinned ? '◆ Alfinete Ativo (Remover)' : '◇ Fixar no Diário de Rotas';
         pinBtn.style.color = nowPinned ? '#ffd700' : '#d2be90';
         pinBtn.style.borderColor = nowPinned ? '#ffd700' : 'rgba(196,149,58,0.55)';
         if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) {
@@ -96645,7 +97024,7 @@ function _openCartLocationPopup(biome){
 
         function notifyCopied() {
           if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_scroll');
-          copyItineraryBtn.textContent = '✅ Copiado!';
+          copyItineraryBtn.textContent = '✓ Copiado!';
           copyItineraryBtn.style.color = '#86efac';
           copyItineraryBtn.style.borderColor = '#86efac';
           setTimeout(function(){
@@ -96722,7 +97101,7 @@ function _openCartLocationPopup(biome){
 
         function notifyCopied() {
           if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_scroll');
-          copyItineraryBtn.textContent = '✅ Copiado!';
+          copyItineraryBtn.textContent = '✓ Copiado!';
           copyItineraryBtn.style.color = '#86efac';
           copyItineraryBtn.style.borderColor = '#86efac';
           setTimeout(function(){
@@ -96814,11 +97193,11 @@ function _openCartLocationPopup(biome){
       if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_click');
       if (campNote) {
         if (cType === 'vigilant') {
-          campNote.textContent = '🛡️ Vigília Atenta: Revezamento rigoroso de sentinelas (+5 na Percepção Passiva contra surpresas à noite).';
+          campNote.textContent = '◆ Vigília Atenta: Revezamento rigoroso de sentinelas (+5 na Percepção Passiva contra surpresas à noite).';
         } else if (cType === 'stealth') {
-          campNote.textContent = '🕯️ Acampamento Oculto: Fogueira baixa oculta nas sombras (-15% no risco de atrair patrulhas noturnas).';
+          campNote.textContent = '◆ Acampamento Oculto: Fogueira baixa oculta nas sombras (-15% no risco de atrair patrulhas noturnas).';
         } else {
-          campNote.textContent = '⛺ Repouso Pleno: Foco na recuperação de PV e recursos dos membros do grupo.';
+          campNote.textContent = '◆ Repouso Pleno: Foco na recuperação de PV e recursos dos membros do grupo.';
         }
       }
       var newRisk2 = (window.CartShared && CartShared.calcEncounterRisk) ? CartShared.calcEncounterRisk(biome, { pace: window._cartSelectedPace || 'normal', isNight: isNight, weather: curWeather, hours: horasViagem, campStance: cType, formation: window._cartSelectedFormation || 'standard' }) : null;
@@ -96851,9 +97230,9 @@ function _openCartLocationPopup(biome){
         if (fType === 'standard') {
           formNote.textContent = 'Fila Indiana: Batedor na frente, comitiva equilibrada para reações rápidas.';
         } else if (fType === 'defensive') {
-          formNote.textContent = '🛡️ Formação Fechada: Escudos erguidos e retaguarda reforçada (-10% no risco de emboscada).';
+          formNote.textContent = '◆ Formação Fechada: Escudos erguidos e retaguarda reforçada (-10% no risco de emboscada).';
         } else {
-          formNote.textContent = '🐾 Vanguarda Dispersa: Batedor 30 pés adiante (+5 na Percepção Passiva para detectar armadilhas e pistas antecipadamente).';
+          formNote.textContent = '◆ Vanguarda Dispersa: Batedor 30 pés adiante (+5 na Percepção Passiva para detectar armadilhas e pistas antecipadamente).';
         }
       }
       var newRisk3 = (window.CartShared && CartShared.calcEncounterRisk) ? CartShared.calcEncounterRisk(biome, { pace: window._cartSelectedPace || 'normal', isNight: isNight, weather: curWeather, hours: horasViagem, campStance: window._cartSelectedCampStance || 'vigilant', formation: fType, transport: window._cartSelectedTransport || 'foot' }) : null;
@@ -96884,11 +97263,11 @@ function _openCartLocationPopup(biome){
       if (typeof ValdoriaAudio !== 'undefined' && ValdoriaAudio.playSFX) ValdoriaAudio.playSFX('sfx_click');
       if (transNote) {
         if (tType === 'foot') {
-          transNote.textContent = '🚶 A Pé (Infantaria): 3 milhas/hora · Carga padrão em mochilas e armas prontas.';
+          transNote.textContent = '◆ A Pé (Infantaria): 3 milhas/hora · Carga padrão em mochilas e armas prontas.';
         } else if (tType === 'horse') {
-          transNote.textContent = '🐎 Montaria (Cavalos de Viagem): +33% de velocidade em estrada · Reduz horas de viagem.';
+          transNote.textContent = '◆ Montaria (Cavalos de Viagem): +33% de velocidade em estrada · Reduz horas de viagem.';
         } else {
-          transNote.textContent = '🛒 Caravana / Carroça: Tendas e provisões protegidas (-10% no risco de emboscada).';
+          transNote.textContent = '◆ Caravana / Carroça: Tendas e provisões protegidas (-10% no risco de emboscada).';
         }
       }
       var pType = window._cartSelectedPace || 'normal';
@@ -96915,9 +97294,9 @@ function _openCartLocationPopup(biome){
           if (fmDesc) {
             var dc = 10 + (curHours - 8);
             var stops = Math.max(1, Math.floor((curHours - 1) / 8));
-            fmDesc.innerHTML = 'Jornada de <b>~' + curHours + 'h</b> excede o limite diário de 8 horas.<br>'
+            fmDesc.innerHTML = 'Jornada contínua excede o limite seguro de marcha diária.<br>'
               + '• <b>Sem acampamento:</b> Salvaguarda de <b>CON CD ' + dc + '</b> contra 1 Nível de Exaustão.<br>'
-              + '• <b>Com acampamento (' + stops + ' parada' + (stops > 1 ? 's' : '') + '):</b> A marcha é fracionada em dias de 8h, anulando o risco de exaustão!';
+              + '• <b>Com acampamento (' + stops + ' parada' + (stops > 1 ? 's' : '') + '):</b> A marcha é fracionada em jornadas com repouso, anulando o risco de exaustão!';
           }
         } else {
           fmWarn.style.display = 'none';
@@ -96947,11 +97326,11 @@ function _openCartLocationPopup(biome){
         if (rType === 'scout') {
           roleNote.textContent = 'Sentinela Atenta: +5 na Percepção Passiva · Evita surpresa em emboscadas inimigas.';
         } else if (rType === 'navigator') {
-          roleNote.textContent = '🧭 Guia da Rota: Imunidade a desvios e desorientação de marcha sob névoa ou tempestade.';
+          roleNote.textContent = '◆ Guia da Rota: Imunidade a desvios e desorientação de marcha sob névoa ou tempestade.';
         } else if (rType === 'forager') {
-          roleNote.textContent = '🌿 Caçador Forrageador: Caça e água garantidas ao viajar em ritmo normal ou lento sem consumir rações.';
+          roleNote.textContent = '◆ Caçador Forrageador: Caça e água garantidas ao viajar em ritmo normal ou lento sem consumir rações.';
         } else {
-          roleNote.textContent = '📜 Mestre Cartógrafo: Registra marcos e acidentes geográficos para o diário da comitiva.';
+          roleNote.textContent = '◆ Mestre Cartógrafo: Registra marcos e acidentes geográficos para o diário da comitiva.';
         }
       }
       var newRiskR = (window.CartShared && CartShared.calcEncounterRisk)
@@ -97450,6 +97829,7 @@ function _hydrateExploreKnown(){
     + 'body.pointcrawl-mode #pointcrawl-dungeon-modal {'
     + '  z-index: 100050 !important;'
     + '}'
+    + 'body.pointcrawl-mode #camp-confirm-modal,'
     + 'body.pointcrawl-mode #confirm-overlay,'
     + 'body.pointcrawl-mode #cart-back-prompt {'
     + '  z-index: 100060 !important;'
@@ -97622,10 +98002,14 @@ function _pointcrawlOpenCamp() {
 }
 
 function _pointcrawlOpenParty() {
+  if (typeof openPartyPopup === 'function') {
+    openPartyPopup();
+    return;
+  }
   var btn = document.getElementById('btn-party');
   if (btn) { btn.click(); return; }
   var pp = document.getElementById('party-popup');
-  if (pp) pp.classList.add('visible');
+  if (pp) pp.classList.add('show');
 }
 
 function _doPointcrawlForage() {
@@ -97636,6 +98020,11 @@ function _doPointcrawlForage() {
   }
   if (window.__EXPLORE_MODE === 'remote' && window.ExploracaoAPI && typeof window.ExploracaoAPI.forage === 'function' && window.ExploracaoAPI.hasToken && window.ExploracaoAPI.hasToken()) {
     _doForage();
+    setTimeout(function () {
+      if (document.body.classList.contains('pointcrawl-mode') && typeof _openCurrentNodePointcrawlHub === 'function') {
+        _openCurrentNodePointcrawlHub();
+      }
+    }, 350);
     return;
   }
   // Resolutor canônico D&D 5e para modo Simulador / Pointcrawl local
@@ -97647,17 +98036,27 @@ function _doPointcrawlForage() {
   var d20 = 1 + Math.floor(Math.random() * 20);
   var total = d20 + wisMod;
   var ok = total >= dc;
-  if (ok) {
-    var heal = 2 + Math.floor(Math.random() * 4);
-    p.hp = Math.min(p.mhp || 20, (p.hp || 20) + heal);
-    if (typeof updateHud === 'function') updateHud();
-    var msgOk = '🌿 Sobrevivência ' + total + ' (d20=' + d20 + '+' + wisMod + ') vs CD ' + dc + ': Ervas e provisões coletadas (+' + heal + ' PV)!';
-    if (typeof dmNarrate === 'function') dmNarrate({ text: msgOk, type: 'event' });
-    if (typeof vToast === 'function') vToast(msgOk, 'ok', 4000);
+  var finishLocalForage = function () {
+    if (ok) {
+      var heal = 2 + Math.floor(Math.random() * 4);
+      p.hp = Math.min(p.mhp || 20, (p.hp || 20) + heal);
+      if (typeof updateHud === 'function') updateHud();
+      var msgOk = '◆ Sobrevivência ' + total + ' (d20=' + d20 + '+' + wisMod + ') vs CD ' + dc + ': Ervas e provisões coletadas (+' + heal + ' PV)!';
+      if (typeof dmNarrate === 'function') dmNarrate({ text: msgOk, type: 'event' });
+      if (typeof vToast === 'function') vToast(msgOk, 'ok', 4000);
+    } else {
+      var msgFail = '◇ Sobrevivência ' + total + ' (d20=' + d20 + '+' + wisMod + ') vs CD ' + dc + ': Nenhum suprimento próprio para consumo encontrado neste trecho.';
+      if (typeof dmNarrate === 'function') dmNarrate({ text: msgFail, type: 'ambient' });
+      if (typeof vToast === 'function') vToast(msgFail, 'warn', 4000);
+    }
+    if (document.body.classList.contains('pointcrawl-mode') && typeof _openCurrentNodePointcrawlHub === 'function') {
+      _openCurrentNodePointcrawlHub();
+    }
+  };
+  if (typeof _animateDice3D === 'function') {
+    _animateDice3D(d20, wisMod, total, dc, ok, finishLocalForage);
   } else {
-    var msgFail = '🌿 Sobrevivência ' + total + ' (d20=' + d20 + '+' + wisMod + ') vs CD ' + dc + ': Nenhum suprimento próprio para consumo encontrado neste trecho.';
-    if (typeof dmNarrate === 'function') dmNarrate({ text: msgFail, type: 'ambient' });
-    if (typeof vToast === 'function') vToast(msgFail, 'warn', 4000);
+    finishLocalForage();
   }
 }
 
@@ -97678,18 +98077,18 @@ function _showDungeonDiscoveryModal(dg, biome, checkInfo) {
 
   var modal = document.createElement('div');
   modal.id = 'incursion-discovery-modal';
-  modal.className = 'explore-modal-overlay';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:12px;z-index:2700;';
+  modal.className = 'explore-modal-overlay drm-modal-wrap';
+  modal.style.cssText = 'position:fixed !important;inset:0 !important;width:100% !important;max-width:480px !important;margin:0 auto !important;height:100vh !important;height:100dvh !important;background:rgba(0,0,0,0.88) !important;display:flex !important;align-items:center !important;justify-content:center !important;padding:8px !important;z-index:100055 !important;overflow:hidden !important;-webkit-overflow-scrolling:touch !important;';
   modal.innerHTML = ''
-    + '<div class="em-card" style="max-width:420px;width:100%;background:#16100b;border:1.5px solid #ffd685;border-radius:8px;overflow:hidden;box-shadow:0 12px 36px rgba(0,0,0,0.95);animation:fadeIn 0.22s ease-out;">'
-    + '  <div style="position:relative;height:120px;background:#20140c url(' + imgUrl + ') center/cover no-repeat;border-bottom:1px solid rgba(196,149,58,0.5);">'
+    + '<div class="em-card" style="max-width:420px;width:100%;max-height:min(calc(100vh - 16px), calc(100dvh - 16px), 640px) !important;display:flex;flex-direction:column;background:#16100b;border:1.5px solid #ffd685;border-radius:8px;overflow:hidden;box-shadow:0 12px 36px rgba(0,0,0,0.95);animation:fadeIn 0.22s ease-out;">'
+    + '  <div style="position:relative;height:110px;flex-shrink:0;background:#20140c url(' + imgUrl + ') center/cover no-repeat;border-bottom:1px solid rgba(196,149,58,0.5);">'
     + '    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,8,6,0.3),rgba(16,11,7,0.95));"></div>'
     + '    <div style="position:absolute;bottom:8px;left:12px;right:12px;text-align:left;">'
     + '      <div style="font-size:11px;color:#ffd700;font-family:Cinzel,serif;font-weight:700;letter-spacing:1px;">◆ INCURSÃO DESCOBERTA NOS ERMOS</div>'
     + '      <div style="font-family:Cinzel,serif;font-size:15px;color:#fff;font-weight:700;text-shadow:0 2px 6px #000;">' + dg.name + '</div>'
     + '    </div>'
     + '  </div>'
-    + '  <div style="padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:8px;">'
+    + '  <div style="padding:10px 12px;text-align:left;display:flex;flex-direction:column;gap:8px;overflow-y:auto;flex:1 1 auto;min-height:0;-webkit-overflow-scrolling:touch;">'
     + '    <div style="padding:6px 10px;background:rgba(196,149,58,0.15);border:1px solid rgba(196,149,58,0.4);border-radius:5px;font-size:11px;color:#ffd685;">'
     +        rollText
     + '    </div>'
@@ -97724,37 +98123,65 @@ function _injectDirectionalRoadStyles() {
   var st = document.createElement('style');
   st.id = 'directional-road-styles';
   st.textContent = ''
-    + '#directional-road-modal { position: fixed; inset: 0; z-index: 100045 !important; background: rgba(6, 4, 3, 0.88); display: flex; align-items: center; justify-content: center; padding: 10px; box-sizing: border-box; max-width: 480px; margin: 0 auto; overflow-x: hidden; }'
-    + '.drm-card { width: 100%; max-width: 448px; max-height: calc(100dvh - 20px); background: linear-gradient(180deg, #1b140d 0%, #100b07 100%); border: 1.5px solid rgba(196, 149, 58, 0.72); border-radius: 8px; box-shadow: 0 14px 40px rgba(0, 0, 0, 0.96); display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box; }'
-    + '.drm-header { padding: 10px 12px; background: linear-gradient(180deg, #24190f 0%, #150f09 100%); border-bottom: 1px solid rgba(196, 149, 58, 0.45); display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }'
+    + '#directional-road-modal, .drm-modal-wrap { position: fixed !important; inset: 0 !important; width: 100% !important; max-width: 480px !important; margin: 0 auto !important; height: 100vh !important; height: 100dvh !important; z-index: 100055 !important; background: rgba(6, 4, 3, 0.88) !important; backdrop-filter: blur(4px) !important; -webkit-backdrop-filter: blur(4px) !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; padding: max(6px, env(safe-area-inset-top, 6px)) 8px max(8px, env(safe-area-inset-bottom, 8px)) 8px !important; box-sizing: border-box !important; overflow: hidden !important; pointer-events: auto !important; }'
+    + '.drm-card { width: 100% !important; max-width: 440px !important; max-height: min(96vh, 96dvh, 660px) !important; margin: auto 0 !important; background: linear-gradient(180deg, #1b140d 0%, #100b07 100%) !important; border: 1.5px solid rgba(196, 149, 58, 0.72) !important; border-radius: 8px !important; box-shadow: 0 14px 40px rgba(0, 0, 0, 0.96) !important; display: flex !important; flex-direction: column !important; overflow: hidden !important; box-sizing: border-box !important; flex-shrink: 0 !important; }'
+    + '.drm-header { padding: 7px 12px; min-height: 36px; background: linear-gradient(180deg, #24190f 0%, #150f09 100%); border-bottom: 1px solid rgba(196, 149, 58, 0.45); display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }'
     + '.drm-header-titles { min-width: 0; flex: 1; text-align: left; }'
-    + '.drm-kicker { font-family: "Cinzel", Georgia, serif; font-size: 11px; font-weight: 700; color: #c4953a; letter-spacing: 0.9px; text-transform: uppercase; }'
-    + '.drm-title { font-family: "Cinzel", Georgia, serif; font-size: 14px; font-weight: 700; color: #ffd685; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }'
-    + '.drm-close-btn { font-family: "Cinzel", Georgia, serif; font-size: 11.5px; font-weight: 700; color: #ffd685; background: linear-gradient(180deg, #2c1f13 0%, #18110a 100%); border: 1px solid rgba(196, 149, 58, 0.65); border-radius: 5px; padding: 5px 9px; cursor: pointer; touch-action: manipulation; flex-shrink: 0; }'
+    + '.drm-kicker { font-family: "Cinzel", Georgia, serif; font-size: 10px; font-weight: 700; color: #c4953a; letter-spacing: 0.8px; text-transform: uppercase; }'
+    + '.drm-title { font-family: "Cinzel", Georgia, serif; font-size: 13px; font-weight: 700; color: #ffd685; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }'
+    + '.drm-close-btn { font-family: "Cinzel", Georgia, serif; font-size: 11px; font-weight: 700; color: #ffd685; background: linear-gradient(180deg, #2c1f13 0%, #18110a 100%); border: 1px solid rgba(196, 149, 58, 0.65); border-radius: 5px; padding: 4px 8px; cursor: pointer; touch-action: manipulation; flex-shrink: 0; }'
     + '.drm-close-btn:active { transform: scale(0.96); }'
-    + '.drm-body { padding: 10px 12px 12px; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; gap: 9px; text-align: left; box-sizing: border-box; }'
-    + '.drm-pace-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; background: rgba(12, 9, 6, 0.78); padding: 5px; border: 1px solid rgba(196, 149, 58, 0.3); border-radius: 6px; }'
-    + '.drm-pace-btn { background: rgba(28, 20, 13, 0.85); border: 1px solid rgba(196, 149, 58, 0.28); border-radius: 4px; padding: 5px 4px; color: #cbb68c; font-family: "Cinzel", Georgia, serif; font-size: 11px; font-weight: 700; cursor: pointer; text-align: center; touch-action: manipulation; }'
+    + '.drm-body { padding: 6px 8px 8px !important; overflow-y: auto !important; overflow-x: hidden !important; -webkit-overflow-scrolling: touch !important; overscroll-behavior: contain !important; touch-action: pan-y !important; display: flex !important; flex-direction: column !important; gap: 5px !important; text-align: left !important; box-sizing: border-box !important; flex: 1 1 auto !important; min-height: 0 !important; scrollbar-width: thin !important; scrollbar-color: rgba(196, 149, 58, 0.45) rgba(10, 7, 5, 0.4) !important; }'
+    + '.drm-body > * { flex-shrink: 0 !important; }'
+    + '.drm-body::-webkit-scrollbar { width: 4px; }'
+    + '.drm-body::-webkit-scrollbar-thumb { background: rgba(196, 149, 58, 0.45); border-radius: 2px; }'
+    + '.drm-body::-webkit-scrollbar-track { background: rgba(10, 7, 5, 0.4); }'
+    + '.drm-pace-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: rgba(12, 9, 6, 0.8); padding: 3px; border: 1px solid rgba(196, 149, 58, 0.3); border-radius: 5px; flex-shrink: 0; }'
+    + '.drm-pace-btn { background: rgba(28, 20, 13, 0.85); border: 1px solid rgba(196, 149, 58, 0.28); border-radius: 4px; padding: 3px 2px; min-height: 24px; color: #cbb68c; font-family: "Cinzel", Georgia, serif; font-size: 10px; font-weight: 700; cursor: pointer; text-align: center; touch-action: manipulation; }'
     + '.drm-pace-btn.active { background: linear-gradient(180deg, #473218 0%, #2a1d0e 100%); border-color: #ffd685; color: #ffd685; box-shadow: 0 0 8px rgba(196, 149, 58, 0.35); }'
-    + '.drm-pace-hint { font-size: 11px; color: #b8a47e; text-align: center; margin-top: -3px; font-style: italic; }'
-    + '.drm-road-card { background: linear-gradient(180deg, rgba(31, 22, 15, 0.96) 0%, rgba(19, 13, 9, 0.98) 100%); border: 1px solid rgba(196, 149, 58, 0.42); border-radius: 6px; padding: 9px 10px; display: flex; flex-direction: column; gap: 6px; box-sizing: border-box; overflow-x: hidden; }'
-    + '.drm-road-card.preselected { border-color: #ffd685; box-shadow: 0 0 12px rgba(255, 214, 133, 0.28); }'
-    + '.drm-road-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }'
-    + '.drm-compass-pill { display: inline-flex; align-items: center; gap: 4px; background: #2d1f11; border: 1px solid rgba(255, 214, 133, 0.6); color: #ffd685; font-family: "Cinzel", Georgia, serif; font-size: 11.5px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }'
-    + '.drm-threat-pill { display: inline-flex; align-items: center; gap: 4px; font-family: "Cinzel", Georgia, serif; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }'
-    + '.drm-road-name { font-family: "Cinzel", Georgia, serif; font-size: 13px; font-weight: 700; color: #f6e7c8; line-height: 1.25; word-break: break-word; }'
-    + '.drm-dest-line { font-size: 11.5px; color: #dec99e; display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }'
-    + '.drm-marcos-track { display: flex; align-items: center; justify-content: space-between; gap: 6px; background: rgba(10, 7, 5, 0.68); border: 1px solid rgba(196, 149, 58, 0.24); border-radius: 4px; padding: 5px 8px; font-size: 11px; color: #e8d5ae; flex-wrap: wrap; }'
-    + '.drm-marcos-pips { font-family: monospace; font-size: 12px; letter-spacing: 1px; color: #ffd685; font-weight: 700; }'
-    + '.drm-memory-box { font-size: 11.5px; color: #cbb68c; line-height: 1.4; border-left: 2px solid rgba(196, 149, 58, 0.55); padding-left: 8px; word-break: break-word; }'
-    + '.drm-act-btn { width: 100%; min-height: 36px; background: linear-gradient(180deg, #49341a 0%, #2a1d0d 100%); border: 1.5px solid #c4953a; border-radius: 5px; color: #ffd685; font-family: "Cinzel", Georgia, serif; font-size: 11.5px; font-weight: 700; padding: 7px 10px; cursor: pointer; touch-action: manipulation; display: flex; align-items: center; justify-content: center; gap: 6px; text-align: center; box-sizing: border-box; }'
+    + '.drm-pace-hint { font-size: 10px; color: #b8a47e; text-align: center; margin-top: -2px; font-style: italic; line-height: 1.2; }'
+    + '.drm-road-card { background: linear-gradient(180deg, rgba(31, 22, 15, 0.96) 0%, rgba(19, 13, 9, 0.98) 100%) !important; border: 1.5px solid rgba(196, 149, 58, 0.45) !important; border-radius: 6px !important; padding: 5px 8px !important; display: flex !important; flex-direction: column !important; gap: 3px !important; box-sizing: border-box !important; overflow: visible !important; flex-shrink: 0 !important; cursor: pointer !important; transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease !important; }'
+    + '.drm-road-card:hover { border-color: rgba(255, 214, 133, 0.75) !important; background: linear-gradient(180deg, rgba(42, 30, 20, 0.98) 0%, rgba(26, 18, 12, 0.98) 100%) !important; }'
+    + '.drm-road-card.preselected { border-color: #ffd685 !important; box-shadow: 0 0 10px rgba(255, 214, 133, 0.28) !important; }'
+    + '.drm-road-card > * { flex-shrink: 0 !important; overflow: visible !important; }'
+    + '.drm-road-header { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 6px !important; flex-wrap: wrap !important; }'
+    + '.drm-road-bearing { display: flex !important; align-items: center !important; gap: 6px !important; min-width: 0 !important; flex: 1 1 auto !important; }'
+    + '.drm-compass-pill { display: inline-flex !important; align-items: center !important; gap: 4px !important; background: #2d1f11 !important; border: 1px solid rgba(255, 214, 133, 0.6) !important; color: #ffd685 !important; font-family: "Cinzel", Georgia, serif !important; font-size: 10.5px !important; font-weight: 700 !important; padding: 1px 5px !important; border-radius: 4px !important; letter-spacing: 0.3px !important; flex-shrink: 0 !important; }'
+    + '.drm-road-name { font-family: "Cinzel", Georgia, serif !important; font-size: 12px !important; font-weight: 700 !important; color: #f6e7c8 !important; line-height: 1.2 !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }'
+    + '.drm-road-badges { display: flex !important; align-items: center !important; gap: 4px !important; flex-shrink: 0 !important; }'
+    + '.drm-threat-pill { display: inline-flex !important; align-items: center !important; gap: 3px !important; font-family: "Cinzel", Georgia, serif !important; font-size: 9.5px !important; font-weight: 700 !important; padding: 1px 5px !important; border-radius: 4px !important; }'
+    + '.drm-marcos-pill { display: inline-flex !important; align-items: center !important; gap: 3px !important; font-size: 10px !important; color: #dec99e !important; font-weight: 600 !important; font-family: monospace !important; }'
+    + '.drm-road-footer { display: flex !important; flex-direction: column !important; align-items: stretch !important; gap: 5px !important; margin-top: 2px !important; }'
+    + '.drm-dest-inline { font-size: 11px !important; color: #dec99e !important; line-height: 1.3 !important; white-space: normal !important; overflow: visible !important; }'
+    + '.drm-dest-inline b { color: #ffd685 !important; }'
+    + '.drm-road-clue { color: #b8a47e !important; font-style: italic !important; font-size: 10px !important; display: block !important; margin-top: 1px !important; }'
+    + '.drm-act-btn { width: 100% !important; min-height: 30px !important; background: linear-gradient(180deg, #49341a 0%, #2a1d0d 100%) !important; border: 1.5px solid #c4953a !important; border-radius: 5px !important; color: #ffd685 !important; font-family: "Cinzel", Georgia, serif !important; font-size: 10.5px !important; font-weight: 700 !important; padding: 4px 8px !important; cursor: pointer !important; touch-action: manipulation !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 5px !important; text-align: center !important; box-sizing: border-box !important; margin-top: 1px !important; flex-shrink: 0 !important; transition: transform 0.1s ease, filter 0.1s ease !important; }'
+    + '.drm-act-btn:hover { filter: brightness(1.1); }'
     + '.drm-act-btn:active { transform: scale(0.98); }'
+    + '.drm-act-btn.drm-road-btn { width: 100% !important; min-height: 32px !important; margin-top: 2px !important; padding: 5px 10px !important; font-size: 11px !important; flex-shrink: 0 !important; }'
     + '.drm-act-btn.secondary { background: linear-gradient(180deg, #281d13 0%, #16100a 100%); border-color: rgba(196, 149, 58, 0.48); color: #e4cfa4; }'
     + '.drm-act-btn.return-safe { background: linear-gradient(180deg, #1d2b1f 0%, #101912 100%); border-color: rgba(134, 239, 172, 0.52); color: #bbf7d0; }'
-    + '.drm-vitals-strip { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; padding: 6px 9px; background: rgba(12, 9, 6, 0.82); border: 1px solid rgba(196, 149, 58, 0.3); border-radius: 5px; font-size: 11px; color: #e8d5ae; }'
-    + '.drm-omen-box { padding: 8px 10px; background: rgba(29, 21, 13, 0.88); border: 1px solid rgba(196, 149, 58, 0.42); border-radius: 6px; font-size: 12px; color: #f0dfc0; line-height: 1.45; word-break: break-word; }'
-    + '.drm-roll-banner { padding: 7px 9px; background: rgba(196, 149, 58, 0.14); border: 1px solid rgba(255, 214, 133, 0.45); border-radius: 5px; font-size: 11.5px; color: #ffd685; line-height: 1.4; }'
-    + '.drm-attr-tag { display: inline-block; background: linear-gradient(180deg, #3b2a12 0%, #241809 100%); border: 1px solid #eab308; color: #fde047; font-family: "Cinzel", Georgia, serif; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 3px; margin-right: 4px; }';
+    + '.drm-dual-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; }'
+    + '.drm-vitals-strip { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px; padding: 4px 8px; background: rgba(12, 9, 6, 0.82); border: 1px solid rgba(196, 149, 58, 0.3); border-radius: 5px; font-size: 10px; color: #e8d5ae; }'
+    + '.drm-marcos-track { display: flex; align-items: center; justify-content: space-between; gap: 6px; background: rgba(10, 7, 5, 0.68); border: 1px solid rgba(196, 149, 58, 0.24); border-radius: 4px; padding: 4px 8px; font-size: 10px; color: #e8d5ae; flex-wrap: wrap; }'
+    + '.drm-marcos-pips { font-family: monospace; font-size: 11px; letter-spacing: 1px; color: #ffd685; font-weight: 700; }'
+    + '.drm-omen-box { padding: 5px 8px; background: rgba(29, 21, 13, 0.88); border: 1px solid rgba(196, 149, 58, 0.42); border-radius: 5px; font-size: 11px; color: #f0dfc0; line-height: 1.35; word-break: break-word; }'
+    + '.drm-roll-banner { padding: 5px 8px; background: rgba(196, 149, 58, 0.14); border: 1px solid rgba(255, 214, 133, 0.45); border-radius: 5px; font-size: 10.5px; color: #ffd685; line-height: 1.3; }'
+    + '.drm-attr-tag { display: inline-block; background: linear-gradient(180deg, #3b2a12 0%, #241809 100%); border: 1px solid #eab308; color: #fde047; font-family: "Cinzel", Georgia, serif; font-size: 10px; font-weight: 700; padding: 1px 4px; border-radius: 3px; margin-right: 4px; }'
+    + '@media (max-width: 380px) {'
+    + '  .drm-road-footer { flex-direction: column !important; align-items: stretch !important; gap: 3px !important; }'
+    + '  .drm-act-btn.drm-road-btn { width: 100% !important; min-width: 0 !important; }'
+    + '  .drm-dual-btn-row { grid-template-columns: 1fr; }'
+    + '}'
+    + '@media (max-height: 640px) {'
+    + '  #directional-road-modal { padding: 3px !important; }'
+    + '  .drm-card { max-height: calc(100vh - 6px) !important; max-height: calc(100dvh - 6px) !important; }'
+    + '  .drm-header { padding: 4px 8px; min-height: 30px; }'
+    + '  .drm-title { font-size: 11.5px; }'
+    + '  .drm-body { padding: 4px 6px 6px !important; gap: 3px !important; }'
+    + '  .drm-road-card { padding: 3px 6px !important; gap: 2px !important; }'
+    + '  .drm-act-btn { min-height: 26px !important; font-size: 9.5px !important; padding: 2px 5px !important; }'
+    + '}';
   document.head.appendChild(st);
 }
 
@@ -97875,6 +98302,10 @@ function _pickLocalBiomeRoadEvent(biomeKey) {
 }
 
 function _closeDirectionalRoadModal() {
+  if (window._roadCrossroadsKeyHandler) {
+    try { window.removeEventListener('keydown', window._roadCrossroadsKeyHandler); } catch (_) {}
+    window._roadCrossroadsKeyHandler = null;
+  }
   var existing = document.getElementById('directional-road-modal');
   if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
 }
@@ -98020,13 +98451,15 @@ function _runLocalPerimeterSweep(originInfo, biomeObj) {
         _explSyncStateFromServer(res.state);
       }
       if (res && res.event) {
-        S.event = Object.assign({}, res.event, { resolved: null, __remote: true });
+        S.event = Object.assign({}, res.event, { resolved: null, __remote: true, __returnToCrossroadsNode: originInfo.nodeId });
         S.ph = 'event';
         if (typeof _explEventUsesVEncounter === 'function' && _explEventUsesVEncounter(S.event)) {
           _explShowEventVEnc(S.event);
         } else if (typeof openEventModal === 'function') {
           openEventModal();
         }
+      } else {
+        window._openDirectionalRoadCrossroads(originInfo.nodeId);
       }
     }).catch(function () {
       window._openDirectionalRoadCrossroads(originInfo.nodeId);
@@ -98037,9 +98470,11 @@ function _runLocalPerimeterSweep(originInfo, biomeObj) {
   var localEv = _pickLocalBiomeRoadEvent(localBiome);
   if (localEv && typeof openEventModal === 'function') {
     S.biome = localBiome;
-    S.event = Object.assign({}, localEv, { resolved: null });
+    S.event = Object.assign({}, localEv, { resolved: null, __returnToCrossroadsNode: originInfo.nodeId });
     S.ph = 'event';
     openEventModal();
+  } else {
+    window._openDirectionalRoadCrossroads(originInfo.nodeId);
   }
 }
 
@@ -98113,8 +98548,13 @@ function _startOrAdvanceRoadStep(road, originInfo, nextMarcoIndex) {
     }).then(function (res) {
       if (!res || res.error) {
         if (typeof vToast === 'function') vToast('Não foi possível avançar pela estrada agora. Tente novamente.', 'warn', 3200);
-        _saveRoadExpeditionSession(null);
-        window._openDirectionalRoadCrossroads(originInfo.nodeId, road.edgeId);
+        if (isContinuation && prevExp) {
+          _saveRoadExpeditionSession(prevExp);
+          _renderRoadMilestoneDecisionModal(prevExp, {});
+        } else {
+          _saveRoadExpeditionSession(null);
+          window._openDirectionalRoadCrossroads(originInfo.nodeId, road.edgeId);
+        }
         return;
       }
       if (res.state && typeof _explSyncStateFromServer === 'function') {
@@ -98135,18 +98575,28 @@ function _startOrAdvanceRoadStep(road, originInfo, nextMarcoIndex) {
         window._onRoadMarcoEventResolved();
       }
     }).catch(function () {
-      _saveRoadExpeditionSession(null);
-      window._openDirectionalRoadCrossroads(originInfo.nodeId, road.edgeId);
+      if (typeof vToast === 'function') vToast('Falha temporária de comunicação na estrada. Tente novamente.', 'warn', 3200);
+      if (isContinuation && prevExp) {
+        _saveRoadExpeditionSession(prevExp);
+        _renderRoadMilestoneDecisionModal(prevExp, {});
+      } else {
+        _saveRoadExpeditionSession(null);
+        window._openDirectionalRoadCrossroads(originInfo.nodeId, road.edgeId);
+      }
     });
     return;
   }
 
   // Modo Simulador / Local: usa encontros reais de bioma de __EXPLORACAO_EVENTS / EVENTS_POOL
   var evLocal = _pickLocalBiomeRoadEvent(exp.biome);
-  if (evLocal && typeof openEventModal === 'function') {
+  if (evLocal) {
     S.event = Object.assign({}, evLocal, { resolved: null, __roadExpedition: true });
     S.ph = 'event';
-    openEventModal();
+    if (typeof _explEventUsesVEncounter === 'function' && _explEventUsesVEncounter(S.event)) {
+      _explShowEventVEnc(S.event);
+    } else if (typeof openEventModal === 'function') {
+      openEventModal();
+    }
   } else {
     window._onRoadMarcoEventResolved();
   }
@@ -98168,7 +98618,7 @@ function _renderRoadMilestoneDecisionModal(exp, decisionData) {
 
   var modal = document.createElement('div');
   modal.id = 'directional-road-modal';
-  modal.className = 'explore-modal-overlay';
+  modal.className = 'explore-modal-overlay drm-modal-wrap';
 
   if (isCompleted) {
     _saveRoadExpeditionSession(null);
@@ -98224,7 +98674,7 @@ function _renderRoadMilestoneDecisionModal(exp, decisionData) {
       + '  </div>'
       + '</div>';
 
-    (document.getElementById('frame') || document.body).appendChild(modal);
+    document.body.appendChild(modal);
 
     modal.querySelector('#drm-btn-open-map').onclick = function () {
       _closeDirectionalRoadModal();
@@ -98266,6 +98716,20 @@ function _renderRoadMilestoneDecisionModal(exp, decisionData) {
     ? exp.road.displayDestName
     : ('◆ Rumo ' + exp.bearingLabel);
 
+  var subBtns = [];
+  if (vestigeAvailable) {
+    subBtns.push('<button type="button" class="drm-act-btn secondary" id="drm-btn-vestige"><span class="enc-cho-bg3-tag drm-attr-tag">[' + bestTagAttr + ' ' + vestigeDc + ']</span> Investigar Vestígio</button>');
+  }
+  if (bivouacAvailable) {
+    subBtns.push('<button type="button" class="drm-act-btn secondary" id="drm-btn-bivouac">◆ Bivaque Rápido (1×)</button>');
+  }
+  var subBtnsHtml = '';
+  if (subBtns.length === 2) {
+    subBtnsHtml = '<div class="drm-dual-btn-row">' + subBtns[0] + subBtns[1] + '</div>';
+  } else if (subBtns.length === 1) {
+    subBtnsHtml = subBtns[0];
+  }
+
   modal.innerHTML = ''
     + '<div class="drm-card">'
     + '  <div class="drm-header">'
@@ -98295,17 +98759,12 @@ function _renderRoadMilestoneDecisionModal(exp, decisionData) {
     + '      <span style="color:#86efac;">Trecho ' + exp.marcoIndex + '/' + exp.totalMarcos + ' já salvo no mapa</span>'
     + '    </div>'
     + '    <button type="button" class="drm-act-btn" id="drm-btn-continue">◆ Continuar Rumo ' + exp.bearingArrow + ' ' + exp.bearingLabel + ' (Marco ' + (exp.marcoIndex + 1) + ' de ' + exp.totalMarcos + ')</button>'
-    + (vestigeAvailable
-        ? '<button type="button" class="drm-act-btn secondary" id="drm-btn-vestige"><span class="enc-cho-bg3-tag drm-attr-tag">[' + bestTagAttr + ' ' + vestigeDc + ']</span> Investigar Vestígio na Margem</button>'
-        : '')
-    + (bivouacAvailable
-        ? '<button type="button" class="drm-act-btn secondary" id="drm-btn-bivouac">◆ Bivaque Rápido na Margem (Recuperar Fôlego · 1×)</button>'
-        : '')
+    +      subBtnsHtml
     + '    <button type="button" class="drm-act-btn return-safe" id="drm-btn-return">← Retornar em Segurança para ' + originName + '</button>'
     + '  </div>'
     + '</div>';
 
-  (document.getElementById('frame') || document.body).appendChild(modal);
+  document.body.appendChild(modal);
 
   var feedbackBox = modal.querySelector('#drm-inline-feedback');
   var isRemote = (window.__EXPLORE_MODE === 'remote'
@@ -98352,6 +98811,45 @@ function _renderRoadMilestoneDecisionModal(exp, decisionData) {
         if (vestigeBtn.parentNode) vestigeBtn.parentNode.removeChild(vestigeBtn);
       };
 
+      var doLocalVestigeRoll = function () {
+        var d20 = 1 + Math.floor(Math.random() * 20);
+        var useInt = intMod >= wisMod;
+        var modVal = useInt ? intMod : wisMod;
+        var tot = d20 + modVal;
+        var ok = tot >= vestigeDc;
+        var chkLocal = {
+          d20: d20, mod: modVal, total: tot, dc: vestigeDc, success: ok,
+          skill_label: useInt ? 'Investigação' : 'Sobrevivência'
+        };
+        var deltaLocal = { xp: ok ? 20 : 5, gold: ok ? 5 : 0, hp: ok ? 0 : -2 };
+        var narrLocal = ok
+          ? 'Entre as pedras laterais da estrada, você decifra marcas antigas de batedores, registra um atalho firme no mapa e recupera moedas ocultas.'
+          : 'O barranco lateral cede sob suas botas ao afastar a mata fechada. Você recua com escoriações leves (-2 PV), sem achar passagem segura.';
+        var doneLocalAnim = function () {
+          if (S && S.player) {
+            S.player.xp = Number(S.player.xp || 0) + deltaLocal.xp;
+            S.gold = Number(S.gold || 0) + deltaLocal.gold;
+            S.player.gold = S.gold;
+            if (!ok) S.player.hp = Math.max(1, Number(S.player.hp || 10) - 2);
+            if (typeof updateHud === 'function') updateHud();
+          }
+          if (ok && window.CartShared && typeof CartShared.recordLocalRoadProgress === 'function') {
+            CartShared.recordLocalRoadProgress(exp.edgeId, {
+              marcos_cleared: exp.marcoIndex,
+              total_marcos: exp.totalMarcos,
+              shortcut: true,
+              clue: 'Atalho cartografado no Marco ' + exp.marcoIndex
+            });
+          }
+          showVestigeResult(chkLocal, narrLocal, deltaLocal);
+        };
+        if (typeof _animateDice3D === 'function') {
+          _animateDice3D(d20, modVal, tot, vestigeDc, ok, doneLocalAnim);
+        } else {
+          doneLocalAnim();
+        }
+      };
+
       if (isRemote) {
         window.ExploracaoAPI.roadDecision({
           action: 'investigate_vestige',
@@ -98362,7 +98860,10 @@ function _renderRoadMilestoneDecisionModal(exp, decisionData) {
           total_marcos: exp.totalMarcos,
           biome: exp.biome
         }).then(function (res) {
-          if (!res || !res.ok || !res.check) return;
+          if (!res || !res.ok || !res.check) {
+            doLocalVestigeRoll();
+            return;
+          }
           if (res.state && typeof _explSyncStateFromServer === 'function') {
             _explSyncStateFromServer(res.state);
           }
@@ -98373,45 +98874,13 @@ function _renderRoadMilestoneDecisionModal(exp, decisionData) {
           } else {
             doneAnim();
           }
+        }).catch(function () {
+          doLocalVestigeRoll();
         });
         return;
       }
 
-      // Modo Local: rolagem obrigatoria d20 + mod vs CD
-      var d20 = 1 + Math.floor(Math.random() * 20);
-      var useInt = intMod >= wisMod;
-      var modVal = useInt ? intMod : wisMod;
-      var tot = d20 + modVal;
-      var ok = tot >= vestigeDc;
-      var chkLocal = {
-        d20: d20, mod: modVal, total: tot, dc: vestigeDc, success: ok,
-        skill_label: useInt ? 'Investigação' : 'Sobrevivência'
-      };
-      var deltaLocal = { xp: ok ? 20 : 5, gold: ok ? 5 : 0, hp: ok ? 0 : -2 };
-      if (S && S.player) {
-        S.player.xp = Number(S.player.xp || 0) + deltaLocal.xp;
-        S.gold = Number(S.gold || 0) + deltaLocal.gold;
-        S.player.gold = S.gold;
-        if (!ok) S.player.hp = Math.max(1, Number(S.player.hp || 10) - 2);
-        if (typeof updateHud === 'function') updateHud();
-      }
-      if (ok && window.CartShared && typeof CartShared.recordLocalRoadProgress === 'function') {
-        CartShared.recordLocalRoadProgress(exp.edgeId, {
-          marcos_cleared: exp.marcoIndex,
-          total_marcos: exp.totalMarcos,
-          shortcut: true,
-          clue: 'Atalho cartografado no Marco ' + exp.marcoIndex
-        });
-      }
-      var narrLocal = ok
-        ? 'Entre as pedras laterais da estrada, você decifra marcas antigas de batedores, registra um atalho firme no mapa e recupera moedas ocultas.'
-        : 'O barranco lateral cede sob suas botas ao afastar a mata fechada. Você recua com escoriações leves (-2 PV), sem achar passagem segura.';
-      var doneLocalAnim = function () { showVestigeResult(chkLocal, narrLocal, deltaLocal); };
-      if (typeof _animateDice3D === 'function') {
-        _animateDice3D(d20, modVal, tot, vestigeDc, ok, doneLocalAnim);
-      } else {
-        doneLocalAnim();
-      }
+      doLocalVestigeRoll();
     };
   }
 
@@ -98438,6 +98907,16 @@ function _renderRoadMilestoneDecisionModal(exp, decisionData) {
         if (bivBtn.parentNode) bivBtn.parentNode.removeChild(bivBtn);
       };
 
+      var doLocalBivouac = function () {
+        var conMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(p, 'con') : 1;
+        var heal = Math.max(2, (1 + Math.floor(Math.random() * 8)) + conMod);
+        var beforeHp = Number(p.hp || 10);
+        p.hp = Math.min(Number(p.mhp || 20), beforeHp + heal);
+        if (typeof tickDayPhase === 'function') { try { tickDayPhase(); } catch (_) {} }
+        if (typeof updateHud === 'function') updateHud();
+        renderBivouacFeedback(Math.max(0, p.hp - beforeHp));
+      };
+
       if (isRemote) {
         window.ExploracaoAPI.roadDecision({
           action: 'bivouac',
@@ -98450,18 +98929,18 @@ function _renderRoadMilestoneDecisionModal(exp, decisionData) {
           if (res && res.state && typeof _explSyncStateFromServer === 'function') {
             _explSyncStateFromServer(res.state);
           }
+          if (!res || !res.ok) {
+            doLocalBivouac();
+            return;
+          }
           renderBivouacFeedback((res && res.bivouac && res.bivouac.healed_hp) || 0);
+        }).catch(function () {
+          doLocalBivouac();
         });
         return;
       }
 
-      var conMod = (typeof _getAbilityMod === 'function') ? _getAbilityMod(p, 'con') : 1;
-      var heal = Math.max(2, (1 + Math.floor(Math.random() * 8)) + conMod);
-      var beforeHp = Number(p.hp || 10);
-      p.hp = Math.min(Number(p.mhp || 20), beforeHp + heal);
-      if (typeof tickDayPhase === 'function') { try { tickDayPhase(); } catch (_) {} }
-      if (typeof updateHud === 'function') updateHud();
-      renderBivouacFeedback(Math.max(0, p.hp - beforeHp));
+      doLocalBivouac();
     };
   }
 
@@ -98532,6 +99011,15 @@ function _renderRoadMilestoneDecisionModal(exp, decisionData) {
 
 window._onRoadMarcoEventResolved = function () {
   var exp = window._activeRoadExpedition;
+  if (!exp) {
+    try {
+      var _raw = sessionStorage.getItem('vld_active_road_exp_v1');
+      if (_raw) {
+        exp = JSON.parse(_raw);
+        window._activeRoadExpedition = exp;
+      }
+    } catch (_) {}
+  }
   if (!exp || exp.combatPending) return;
   if (typeof S !== 'undefined' && S && (S.ph === 'defeat' || (S.player && S.player.hp <= 0))) {
     _saveRoadExpeditionSession(null);
@@ -98700,30 +99188,31 @@ window._openDirectionalRoadCrossroads = function (fromNodeOrBiome, preselectEdge
     }
 
     var memLines = [];
-    if (r.shortcut) memLines.push('<span style="color:#86efac;">✓ Atalho dos pioneiros demarcado</span>');
+    if (r.shortcut) memLines.push('<span style="color:#86efac;">✓ Atalho demarcado</span>');
     if (Array.isArray(r.clues) && r.clues.length) {
-      memLines.push('• Memória da Rota: ' + r.clues[r.clues.length - 1]);
+      memLines.push('• ' + r.clues[r.clues.length - 1]);
     } else {
-      memLines.push('• Sinais na Entrada: ' + (r.entryOmen || 'Trilha marcada por pedras antigas.'));
+      memLines.push('• ' + (r.entryOmen || 'Trilha marcada por pedras antigas.'));
     }
 
+    var memText = memLines.length ? (' · ' + memLines.join(' · ')) : '';
     var isPre = (preselectEdgeId && r.edgeId === preselectEdgeId);
     return ''
-      + '<div class="drm-road-card' + (isPre ? ' preselected' : '') + '">'
-      + '  <div class="drm-road-top">'
-      + '    <span class="drm-compass-pill">' + roadArrow + ' ' + roadBearingLabel + (r.isFrontier ? ' · Fronteira' : '') + '</span>'
-      + '    <span class="drm-threat-pill" style="color:' + r.dangerBadgeColor + ';border:1px solid ' + r.dangerBorderColor + ';background:' + r.dangerBgColor + ';">' + r.recommendedLevelLabel + ' · ' + r.dangerTierLabel + '</span>'
+      + '<div class="drm-road-card' + (isPre ? ' preselected' : '') + '" data-road-idx="' + idx + '" role="button" tabindex="0">'
+      + '  <div class="drm-road-header">'
+      + '    <div class="drm-road-bearing">'
+      + '      <span class="drm-compass-pill">' + roadArrow + ' ' + roadBearingLabel + (r.isFrontier ? ' · Fronteira' : '') + '</span>'
+      + '      <span class="drm-road-name">' + r.roadName + '</span>'
+      + '    </div>'
+      + '    <div class="drm-road-badges">'
+      + '      <span class="drm-threat-pill" style="color:' + r.dangerBadgeColor + ';border:1px solid ' + r.dangerBorderColor + ';background:' + r.dangerBgColor + ';">' + r.recommendedLevelLabel + ' · ' + r.dangerTierLabel + '</span>'
+      + '      <span class="drm-marcos-pill">' + _formatMarcosPips(r.marcosCleared, r.totalMarcos) + ' ' + r.marcosCleared + '/' + r.totalMarcos + '</span>'
+      + '    </div>'
       + '  </div>'
-      + '  <div class="drm-road-name">' + r.roadName + '</div>'
-      + '  <div class="drm-dest-line">'
-      + '    <span><b>Destino:</b> ' + r.displayDestName + '</span>'
+      + '  <div class="drm-road-footer">'
+      + '    <div class="drm-dest-inline">Destino: <b>' + r.displayDestName + '</b><span class="drm-road-clue">' + memText + '</span></div>'
+      + '    <button type="button" class="drm-act-btn drm-road-btn" data-road-idx="' + idx + '">' + btnLabel + '</button>'
       + '  </div>'
-      + '  <div class="drm-marcos-track">'
-      + '    <span class="drm-marcos-pips">' + _formatMarcosPips(r.marcosCleared, r.totalMarcos) + '</span>'
-      + '    <span>' + r.marcosCleared + '/' + r.totalMarcos + ' Marcos</span>'
-      + '  </div>'
-      + '  <div class="drm-memory-box">' + memLines.join('<br>') + '</div>'
-      + '  <button type="button" class="drm-act-btn" data-road-idx="' + idx + '">' + btnLabel + '</button>'
       + '</div>';
   }).join('');
 
@@ -98733,7 +99222,7 @@ window._openDirectionalRoadCrossroads = function (fromNodeOrBiome, preselectEdge
 
   var modal = document.createElement('div');
   modal.id = 'directional-road-modal';
-  modal.className = 'explore-modal-overlay';
+  modal.className = 'explore-modal-overlay drm-modal-wrap';
   modal.innerHTML = ''
     + '<div class="drm-card">'
     + '  <div class="drm-header">'
@@ -98755,14 +99244,37 @@ window._openDirectionalRoadCrossroads = function (fromNodeOrBiome, preselectEdge
     + '  </div>'
     + '</div>';
 
-  (document.getElementById('frame') || document.body).appendChild(modal);
+  document.body.appendChild(modal);
+
+  function _closeCrossroadsAndReturn() {
+    if (window._roadCrossroadsKeyHandler) {
+      try { window.removeEventListener('keydown', window._roadCrossroadsKeyHandler); } catch (_) {}
+      window._roadCrossroadsKeyHandler = null;
+    }
+    _closeDirectionalRoadModal();
+    if (document.body.classList.contains('pointcrawl-mode')) {
+      var rfModal = document.getElementById('regional-map-fullscreen-modal');
+      var isRfmVisible = rfModal && rfModal.style.display !== 'none';
+      if (!isRfmVisible && typeof _openCurrentNodePointcrawlHub === 'function') {
+        _openCurrentNodePointcrawlHub();
+      }
+    }
+  }
+
+  function _onCrossroadsKeyDown(e) {
+    if (e.key === 'Escape' || e.key === 'Esc') {
+      _closeCrossroadsAndReturn();
+    }
+  }
+  window._roadCrossroadsKeyHandler = _onCrossroadsKeyDown;
+  window.addEventListener('keydown', _onCrossroadsKeyDown);
 
   modal.querySelector('#drm-btn-close').onclick = function () {
-    _closeDirectionalRoadModal();
+    _closeCrossroadsAndReturn();
   };
   modal.addEventListener('click', function (e) {
     if (e.target === modal) {
-      _closeDirectionalRoadModal();
+      _closeCrossroadsAndReturn();
       return;
     }
     var paceBtn = e.target.closest('[data-pace]');
@@ -98780,15 +99292,18 @@ window._openDirectionalRoadCrossroads = function (fromNodeOrBiome, preselectEdge
       if (hintEl && paceHints[newPace]) hintEl.textContent = paceHints[newPace];
       return;
     }
-    var roadBtn = e.target.closest('[data-road-idx]');
-    if (roadBtn) {
-      var rIdx = parseInt(roadBtn.getAttribute('data-road-idx'), 10);
+    var roadTarget = e.target.closest('[data-road-idx]');
+    if (roadTarget) {
+      e.preventDefault();
+      e.stopPropagation();
+      var rIdx = parseInt(roadTarget.getAttribute('data-road-idx'), 10);
       var chosen = roads[rIdx];
       if (!chosen) return;
       var startMarco = (chosen.completed || chosen.marcosCleared >= chosen.totalMarcos)
         ? 1
         : (chosen.marcosCleared + 1);
       _startOrAdvanceRoadStep(chosen, originInfo, startMarco);
+      return;
     }
   });
 
@@ -98846,7 +99361,7 @@ function _openPointcrawlDungeonDelver(dgId) {
   var chambersHtml = dgMap.dungeonEncounters.map(function(enc, idx){
     var cMeta = catLabels[enc.category] || { ico: '◆', tag: 'Câmara', color: '#d2be90' };
     var done = !!(typeof S !== 'undefined' && S && S._dungeonEncountersTriggered && S._dungeonEncountersTriggered[enc.id] && !enc.repeatable);
-    return '<div class="pcd-chamber-card" data-enc-idx="' + idx + '" style="background:rgba(24,18,12,0.92);border:1px solid ' + (done ? 'rgba(74,222,128,0.45)' : 'rgba(196,149,58,0.45)') + ';border-radius:6px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;">'
+    return '<div class="pcd-chamber-card" data-enc-idx="' + idx + '" style="flex-shrink:0;background:rgba(24,18,12,0.92);border:1px solid ' + (done ? 'rgba(74,222,128,0.45)' : 'rgba(196,149,58,0.45)') + ';border-radius:6px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;">'
       + '<div style="text-align:left;flex:1;">'
       + '  <div style="font-size:11px;color:' + cMeta.color + ';font-family:Cinzel,serif;font-weight:700;">ETAPA ' + (idx + 1) + ' · ' + cMeta.ico + ' ' + cMeta.tag.toUpperCase() + (done ? ' <span style="color:#4ade80;">(CONCLUÍDA)</span>' : '') + '</div>'
       + '  <div style="font-family:Cinzel,serif;font-size:11.5px;color:#f4d49a;font-weight:700;margin-top:1px;">' + enc.title + '</div>'
@@ -98857,18 +99372,18 @@ function _openPointcrawlDungeonDelver(dgId) {
   }).join('');
 
   var bossInfo = dgMap.boss
-    ? '<div style="margin:6px 0 8px;padding:6px 10px;background:rgba(120,20,20,0.28);border:1px solid rgba(248,113,113,0.45);border-radius:5px;font-size:11px;color:#fecaca;text-align:left;">'
+    ? '<div style="flex-shrink:0;margin:2px 0 4px;padding:6px 10px;background:rgba(120,20,20,0.28);border:1px solid rgba(248,113,113,0.45);border-radius:5px;font-size:11px;color:#fecaca;text-align:left;">'
       + '◆ <b>Senhor da Masmorra:</b> ' + dgMap.boss.name + ' (ND ' + dgMap.boss.cr + ' · Nível Sugerido ' + dgMap.boss.sugLvl + '+)'
       + '</div>'
     : '';
 
   var modal = document.createElement('div');
   modal.id = 'pointcrawl-dungeon-modal';
-  modal.className = 'explore-modal-overlay';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.82);display:flex;align-items:center;justify-content:center;padding:12px;z-index:265;';
+  modal.className = 'explore-modal-overlay drm-modal-wrap';
+  modal.style.cssText = 'position:fixed !important;inset:0 !important;width:100% !important;max-width:480px !important;margin:0 auto !important;height:100vh !important;height:100dvh !important;background:rgba(0,0,0,0.88) !important;display:flex !important;align-items:center !important;justify-content:center !important;padding:8px !important;z-index:100055 !important;overflow:hidden !important;-webkit-overflow-scrolling:touch !important;';
   modal.innerHTML = ''
-    + '<div class="em-card" style="max-width:430px;width:100%;max-height:88vh;display:flex;flex-direction:column;background:#16100b;border:1.5px solid #c4953a;border-radius:8px;overflow:hidden;box-shadow:0 12px 32px rgba(0,0,0,0.9);">'
-    + '  <div style="position:relative;height:125px;background:url(' + imgUrl + ') center/cover no-repeat;border-bottom:1px solid rgba(196,149,58,0.4);">'
+    + '<div class="em-card" style="max-width:430px;width:100%;max-height:min(calc(100vh - 16px), calc(100dvh - 16px), 640px) !important;display:flex;flex-direction:column;background:#16100b;border:1.5px solid #c4953a;border-radius:8px;overflow:hidden;box-shadow:0 12px 32px rgba(0,0,0,0.9);">'
+    + '  <div style="position:relative;height:110px;flex-shrink:0;background:url(' + imgUrl + ') center/cover no-repeat;border-bottom:1px solid rgba(196,149,58,0.4);">'
     + '    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,8,6,0.25),rgba(16,11,7,0.94));"></div>'
     + '    <button type="button" id="pcd-close-btn" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.65);border:1px solid #c4953a;color:#f4d49a;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;">✕</button>'
     + '    <div style="position:absolute;bottom:8px;left:12px;right:12px;text-align:left;">'
@@ -98876,22 +99391,24 @@ function _openPointcrawlDungeonDelver(dgId) {
     + '      <div style="font-family:Cinzel,serif;font-size:15px;color:#fff;font-weight:700;text-shadow:0 2px 6px #000;">' + dgMap.name + '</div>'
     + '    </div>'
     + '  </div>'
-    + '  <div style="padding:10px 12px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:6px;">'
+    + '  <div style="padding:10px 12px;overflow-y:auto;flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:6px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;">'
     +      bossInfo
     +      chambersHtml
     + '  </div>'
-    + '  <div style="padding:8px 12px;border-top:1px solid rgba(196,149,58,0.25);display:flex;justify-content:flex-end;background:rgba(10,7,5,0.9);">'
+    + '  <div style="padding:8px 12px max(8px, env(safe-area-inset-bottom, 8px)) 12px !important;flex-shrink:0;border-top:1px solid rgba(196,149,58,0.25);display:flex;justify-content:flex-end;background:rgba(10,7,5,0.9);">'
     + '    <button type="button" id="pcd-exit-btn" style="background:rgba(40,30,20,0.9);border:1px solid rgba(196,149,58,0.5);color:#d2be90;font-family:Cinzel,serif;font-size:11.5px;padding:6px 14px;border-radius:4px;cursor:pointer;">Retornar ao Mapa Regional</button>'
     + '  </div>'
     + '</div>';
 
-  var frame = document.getElementById('frame') || document.body;
-  frame.appendChild(modal);
+  document.body.appendChild(modal);
 
   function closePcd() {
     window._activeDungeonDelverId = null;
     try { sessionStorage.removeItem('vld_active_dg_delver'); } catch (_) {}
     if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
+    if (document.body.classList.contains('pointcrawl-mode') && typeof _openCurrentNodePointcrawlHub === 'function') {
+      setTimeout(function () { _openCurrentNodePointcrawlHub(); }, 60);
+    }
   }
   modal.querySelector('#pcd-close-btn').onclick = closePcd;
   modal.querySelector('#pcd-exit-btn').onclick = closePcd;
@@ -98917,7 +99434,7 @@ function _openPointcrawlDungeonDelver(dgId) {
         S.event._encId = enc.id;
         S.event._hexId = enc.col + ',' + enc.row;
       }
-      if (window.__EXPLORE_MODE === 'remote' && window.vEncounter && typeof window.vEncounter.render === 'function' && typeof _explShowEventVEnc === 'function') {
+      if (typeof _explShowEventVEnc === 'function' && (window.__EXPLORE_MODE === 'remote' || (typeof _explEventUsesVEncounter === 'function' && _explEventUsesVEncounter(S.event)))) {
         _explShowEventVEnc(S.event);
       } else {
         var evModal = document.getElementById('event-modal');
@@ -99069,11 +99586,11 @@ function openCartography() {
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
     + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#86efac;font-size:11.5px;margin-bottom:4px;">SUPRIMENTOS & ACAMPAMENTOS</div>'
-    + '          <p style="margin:2px 0;">Jornadas acima de 8 horas exigem paradas de Descanso Longo (8h) em acampamentos na estrada e 1 Ração de Viagem por aventureiro. Em biomas férteis, testes de Sobrevivência permitem caçar e colher água potável.</p>'
+    + '          <p style="margin:2px 0;">Jornadas extensas exigem paradas de Descanso Longo (Repouso Pleno) em acampamentos na estrada e 1 Ração de Viagem por aventureiro. Em biomas férteis, testes de Sobrevivência permitem caçar e colher água potável.</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
     + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#f87171;font-size:11.5px;margin-bottom:4px;">MARCHA FORÇADA & EXAUSTÃO</div>'
-    + '          <p style="margin:2px 0;">O limite de marcha contínua segura é de 8 horas por dia. Cada hora adicional exige Salvaguarda de Constituição (CD 10 + 1 por hora além de 8). Em caso de falha, o aventureiro sofre 1 Nível de Exaustão. Fracionar a rota com acampamentos de Descanso Longo (8h) anula a penalidade.</p>'
+    + '          <p style="margin:2px 0;">O limite de marcha contínua segura é de um dia padrão de viagem. Marcha prolongada além do limite diário exige Salvaguarda de Constituição contra Exaustão. Fracionar a rota com acampamentos de Descanso Longo anula a penalidade.</p>'
     + '        </div>'
     + '        <div style="background:rgba(25,18,10,0.6);border:1px solid rgba(196,149,58,0.25);border-radius:4px;padding:8px;">'
     + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#fde047;font-size:11.5px;margin-bottom:4px;">MODOS DE TRANSPORTE & CARAVANAS</div>'
@@ -99129,7 +99646,7 @@ function openCartography() {
     + '        <button class="cam-filter-pill" data-wprov="forest" type="button" style="font-size:11px;padding:2px 6px;">Florestas</button>'
     + '        <button class="cam-filter-pill" data-wprov="desert" type="button" style="font-size:11px;padding:2px 6px;">Dunas</button>'
     + '        <button class="cam-filter-pill" data-wprov="mountain" type="button" style="font-size:11px;padding:2px 6px;">Cordilheira</button>'
-    + '        <button class="cam-filter-pill" data-wprov="swamp" type="button" style="font-size:11px;padding:2px 6px;">🐸 Pântanos</button>'
+    + '        <button class="cam-filter-pill" data-wprov="swamp" type="button" style="font-size:11px;padding:2px 6px;">◆ Pântanos</button>'
     + '      </div>'
     + '      <div class="cam-grid" id="xcart-waypoints-list" style="max-height:50vh;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:10px;"></div>'
     + '    </div>'
@@ -99401,8 +99918,8 @@ function _renderXCartProvinceBar() {
                     (prov.id === 'snow') ? 'Ermo Gelado' :
                     (prov.id === 'volcanic') ? 'Vulcânico' : prov.name;
     var qTitle = _getXCartProvinceActiveQuest(prov.id);
-    var qBadge = qTitle ? ' <span title="Contrato ativo: ' + qTitle + '" style="color:#ffd685;font-size:11px;">📜</span>' : '';
-    chip.innerHTML = '<span>' + (prov.icon || '📍') + '</span> ' + shortName + qBadge;
+    var qBadge = qTitle ? ' <span title="Contrato ativo: ' + qTitle + '" style="color:#ffd685;font-size:11px;">◆ </span>' : '';
+    chip.innerHTML = '<span>' + (prov.icon || '◆') + '</span> ' + shortName + qBadge;
     chip.onclick = function(e){
       e.preventDefault();
       _xcartFocusProvince(prov.id);
@@ -100085,7 +100602,7 @@ function _xcartPopulateWaypointsList(filter, query) {
   });
 
   if (items.length === 0) {
-    listEl.innerHTML = '<div style="padding:16px;text-align:center;color:#a09484;font-style:italic;font-size:11px;">Nenhum marco ou santuário disponível neste filtro. Fixe locais no mapa com o botão 📌 para acessá-los rapidamente aqui!</div>';
+    listEl.innerHTML = '<div style="padding:16px;text-align:center;color:#a09484;font-style:italic;font-size:11px;">Nenhum marco ou santuário disponível neste filtro. Fixe locais no mapa com o botão ◆ para acessá-los rapidamente aqui!</div>';
     return;
   }
 
@@ -100098,20 +100615,20 @@ function _xcartPopulateWaypointsList(filter, query) {
     var distMilhas = Math.max(6, marcos * 8);
 
     var badge = item.isCurrent ? '<span style="font-size:11px;background:#2e7d32;color:#fff;padding:1px 6px;border-radius:10px;">Você está aqui</span>'
-      : item.isSanctuary ? '<span style="font-size:11px;background:rgba(196,149,58,0.25);border:1px solid #ffd700;color:#ffd700;padding:1px 6px;border-radius:10px;">🏛️ Santuário</span>'
-      : item.isPin ? '<span style="font-size:11px;background:rgba(218,165,32,0.25);border:1px solid #ffd700;color:#ffd700;padding:1px 6px;border-radius:10px;">📍 Alfinete</span>'
-      : '<span style="font-size:11px;background:rgba(196,149,58,0.2);color:#d2be90;padding:1px 6px;border-radius:10px;">🌀 Marco</span>';
+      : item.isSanctuary ? '<span style="font-size:11px;background:rgba(196,149,58,0.25);border:1px solid #ffd700;color:#ffd700;padding:1px 6px;border-radius:10px;">◆ Santuário</span>'
+      : item.isPin ? '<span style="font-size:11px;background:rgba(218,165,32,0.25);border:1px solid #ffd700;color:#ffd700;padding:1px 6px;border-radius:10px;">◆ Alfinete</span>'
+      : '<span style="font-size:11px;background:rgba(196,149,58,0.2);color:#d2be90;padding:1px 6px;border-radius:10px;">◆ Marco</span>';
 
     html += '<div class="cam-item" style="cursor:pointer;flex-direction:row;align-items:center;justify-content:space-between;padding:8px 12px;" onclick="_xcartFocusWaypoint(\'' + b.key + '\')">'
       + '  <div style="display:flex;align-items:center;gap:10px;">'
-      + '    <span style="font-size:22px;">' + (b.ico || '📍') + '</span>'
+      + '    <span style="font-size:22px;">' + (b.ico || '◆') + '</span>'
       + '    <div>'
       + '      <div style="font-family:Cinzel,serif;font-weight:700;color:#f4d49a;font-size:12px;">' + (b.regionalName || b.name) + ' ' + badge + '</div>'
       + '      <div style="font-size:11px;color:#a09484;">' + provName + ' · ~' + distMilhas + ' milhas (<span class="marcos-lore-link" role="button" tabindex="0" title="Toque para entender a medida em Marcos">~' + marcos + ' marcos</span>)</div>'
-      + ((window.CartShared && CartShared.getLocNote && CartShared.getLocNote(b.key)) ? '<div style="font-size:11.5px;color:#fcd34d;font-style:italic;margin-top:2px;">📝 "' + CartShared.getLocNote(b.key) + '"</div>' : '')
+      + ((window.CartShared && CartShared.getLocNote && CartShared.getLocNote(b.key)) ? '<div style="font-size:11.5px;color:#fcd34d;font-style:italic;margin-top:2px;">◆ "' + CartShared.getLocNote(b.key) + '"</div>' : '')
       + '    </div>'
       + '  </div>'
-      + '  <button class="xcart-dock-btn" type="button" style="height:26px;font-size:11.5px;padding:0 8px;">🔍 Focar</button>'
+      + '  <button class="xcart-dock-btn" type="button" style="height:26px;font-size:11.5px;padding:0 8px;">◆ Focar</button>'
       + '</div>';
   });
   listEl.innerHTML = html;
@@ -100469,7 +100986,7 @@ function _xcartFocusWaypoint(key) {
           var isActive = (curMode.provinceId === prov.id) || (curMode.mode === 'world' && prov.id === 'world');
           item.className = 'cam-item' + (isActive ? ' active' : '');
           var qTitle = _getXCartProvinceActiveQuest(prov.id);
-          var qBadge = qTitle ? '<span class="cam-q-badge">📜 ' + qTitle + '</span>' : '';
+          var qBadge = qTitle ? '<span class="cam-q-badge">◆ ' + qTitle + '</span>' : '';
           var locKeys = prov.locKeys || [];
           var knownCount = locKeys.filter(function(k){ return known.indexOf(k) >= 0; }).length;
           var pct = locKeys.length > 0 ? Math.round((knownCount / locKeys.length) * 100) : 100;
@@ -100479,14 +100996,14 @@ function _xcartFocusWaypoint(key) {
             '  <div style="width:' + pct + '%;height:100%;background:' + (pct === 100 ? '#4ade80' : '#c4953a') + ';transition:width 0.3s ease;"></div>' +
             '</div>';
           var metaHtml = (prov.id === 'world')
-            ? '<div class="cam-item-meta">🗺️ Mapa Geral de Valdória</div>'
-            : '<div class="cam-item-meta">📍 ' + knownCount + ' / ' + locKeys.length + ' locais mapeados (' + pct + '%)' + compBadge + qBadge + progBarHtml + '</div>';
+            ? '<div class="cam-item-meta">◆ Mapa Geral de Valdória</div>'
+            : '<div class="cam-item-meta">◆ ' + knownCount + ' / ' + locKeys.length + ' locais mapeados (' + pct + '%)' + compBadge + qBadge + progBarHtml + '</div>';
           var dossierHtml = (prov.id === 'world') ? '' :
             '<div class="cam-item-dossier" style="display:flex;flex-wrap:wrap;gap:3px;margin:3px 0;font-size:11px;">' +
             '  <span style="background:rgba(196,149,58,0.22);border:1px solid rgba(196,149,58,0.4);color:#ffd700;padding:1px 5px;border-radius:2px;">⚔️ ' + (prov.tier || 'Tier 1') + '</span>' +
-            '  <span style="background:rgba(20,30,45,0.6);border:1px solid rgba(147,197,253,0.3);color:#93c5fd;padding:1px 5px;border-radius:2px;">🌬️ ' + (prov.winds || 'Ventos') + '</span>' +
+            '  <span style="background:rgba(20,30,45,0.6);border:1px solid rgba(147,197,253,0.3);color:#93c5fd;padding:1px 5px;border-radius:2px;">◆ ' + (prov.winds || 'Ventos') + '</span>' +
             '</div>';
-          item.innerHTML = '<div class="cam-item-title">' + (prov.icon || '🗺️') + ' ' + (prov.name || prov.id) + '</div>'
+          item.innerHTML = '<div class="cam-item-title">' + (prov.icon || '◆') + ' ' + (prov.name || prov.id) + '</div>'
                          + '<div class="cam-item-sub">' + (prov.desc || 'Província de Valdória') + '</div>'
                          + dossierHtml
                          + metaHtml;
@@ -100602,14 +101119,14 @@ function _setXCartFilter(f) {
   var btn = document.getElementById('xcart-filter-toggle-btn');
   if (btn) {
     var labels = {
-      all: '🎯 Todos',
-      settlements: '🏛️ Cidades',
+      all: '◆ Todos',
+      settlements: '◆ Cidades',
       wilderness: '⚔️ Ermos',
-      quests: '📜 Contratos',
-      pinned: '📌 Fixados',
-      notes: '📝 Anotações'
+      quests: '◆ Contratos',
+      pinned: '◆ Fixados',
+      notes: '◆ Anotações'
     };
-    btn.innerHTML = labels[f] || '🎯 Todos';
+    btn.innerHTML = labels[f] || '◆ Todos';
   }
   _xcartDraw();
 }
@@ -101123,20 +101640,20 @@ function _xcartShowTooltip(b, mx, my){
   var horas = Math.max(2, Math.round(distMilhas / 3));
 
   var isPinned = (window.CartShared && CartShared.isLocPinned) ? CartShared.isLocPinned(b.key) : false;
-  var pinHtml = isPinned ? '<div style="font-size:11.5px;color:#ffd700;margin-top:2px;font-weight:600;">📍 Fixado no Diário de Rotas</div>' : '';
+  var pinHtml = isPinned ? '<div style="font-size:11.5px;color:#ffd700;margin-top:2px;font-weight:600;">◆ Fixado no Diário de Rotas</div>' : '';
 
   var activeQuestTitle = '';
   if (typeof _getXCartProvinceActiveQuest === 'function') {
     var pId = (window.CartShared && CartShared.getLocationProvince) ? CartShared.getLocationProvince(b.key) : '';
     if (pId) activeQuestTitle = _getXCartProvinceActiveQuest(pId);
   }
-  var questHtml = activeQuestTitle ? '<div style="font-size:11.5px;color:#ffd685;margin-top:2px;">📜 Missão: ' + activeQuestTitle + '</div>' : '';
+  var questHtml = activeQuestTitle ? '<div style="font-size:11.5px;color:#ffd685;margin-top:2px;">◆ Missão: ' + activeQuestTitle + '</div>' : '';
 
   var dndInfo = (window.CartShared && CartShared.getBiomeDndInfo) ? CartShared.getBiomeDndInfo(b.biome || b.key) : null;
-  var dndHtml = dndInfo ? '<div style="font-size:11px;color:#81c784;margin-top:2px;">🛡️ ' + dndInfo.saves + '</div>' : '';
+  var dndHtml = dndInfo ? '<div style="font-size:11px;color:#81c784;margin-top:2px;">◆ ' + dndInfo.saves + '</div>' : '';
   var foragingHtml = (dndInfo && dndInfo.foraging) ? '<div style="font-size:11px;color:#a3e635;margin-top:2px;">' + dndInfo.foraging + '</div>' : '';
   var customNote = (window.CartShared && CartShared.getLocNote) ? CartShared.getLocNote(b.key) : '';
-  var noteHtml = customNote ? '<div style="font-size:11px;color:#fcd34d;margin-top:2px;font-style:italic;background:rgba(255,215,0,0.12);padding:2px 5px;border-radius:3px;">📝 Nota: "' + customNote + '"</div>' : '';
+  var noteHtml = customNote ? '<div style="font-size:11px;color:#fcd34d;margin-top:2px;font-style:italic;background:rgba(255,215,0,0.12);padding:2px 5px;border-radius:3px;">◆ Nota: "' + customNote + '"</div>' : '';
 
   var distHtml = (b.isOrigin || b.key === 'plains') ? '' :
     '<div style="font-size:11.5px;color:#e6d3a3;margin-top:2px;">~' + distMilhas + ' milhas (<span class="marcos-lore-link" role="button" tabindex="0" title="Toque para entender a medida em Marcos">~' + marcos + ' marcos</span> · ~' + horas + 'h a pé)</div>';
@@ -101144,7 +101661,7 @@ function _xcartShowTooltip(b, mx, my){
   var vm = (_xcartEngine && typeof _xcartEngine.getViewMode === 'function') ? _xcartEngine.getViewMode() : { mode: 'world' };
   var hintText = (vm.mode === 'world') ? 'Duplo clique para Mapa Regional' : 'Duplo clique para Iniciar Viagem';
 
-  tip.innerHTML = '<div class="ctip-title">' + (b.ico || '📍') + ' ' + (b.regionalName || b.name) + '</div>'
+  tip.innerHTML = '<div class="ctip-title">' + (b.ico || '◆') + ' ' + (b.regionalName || b.name) + '</div>'
                 + '<div class="ctip-meta">'
                 + '  <span class="ctip-threat" style="color:' + threatColor + ';">● ' + threatText + '</span>'
                 + '  <span>•</span>'
@@ -102642,7 +103159,7 @@ function updateTopBar() {
 
       biomeEl.classList.add('tb-biome--dungeon');
 
-      biomeEl.textContent = '🏰 MASMORRA';
+      biomeEl.textContent = '◆ MASMORRA';
 
       const dungName = (S.mapDef && S.mapDef.name) ? S.mapDef.name : 'Interior Fortificado';
 
@@ -102748,7 +103265,7 @@ const TB_BIOME_INFO = {
 
   cave:      { ico: '', name: 'Caverna',    desc: 'Túneis úmidos onde a luz não alcança. Cuidado com o que espreita.', effects: ['Escuridão total — Tocha/Luz obrigatória', 'Encontros de criaturas das profundezas (CR maior)', 'Quedas e armadilhas frequentes (DEX saves)', 'Eco delata sua presença'] },
 
-  dungeon:   { ico: '🏰', name: 'Masmorra',   desc: 'Estrutura fortificada e confinada. Paredes de rocha, estacas e sentinelas em alerta.', effects: ['Sem céu aberto — intempéries externas não afetam o interior', 'Visibilidade restrita ao alcance de tochas e magias de luz', 'Encontros hostis e sentinelas em posições defensivas', 'Descanso longo limitado a locais seguros (fogueira central)'] },
+  dungeon:   { ico: '◆', name: 'Masmorra',   desc: 'Estrutura fortificada e confinada. Paredes de rocha, estacas e sentinelas em alerta.', effects: ['Sem céu aberto — intempéries externas não afetam o interior', 'Visibilidade restrita ao alcance de tochas e magias de luz', 'Encontros hostis e sentinelas em posições defensivas', 'Descanso longo limitado a locais seguros (fogueira central)'] },
 
   mountain:  { ico: '', name: 'Montanha',  desc: 'Picos rochosos e penhascos. O ar fica rarefeito.', effects: ['Terreno difícil — movimento custa o dobro', 'Quedas perigosas (DEX DC 14)', 'Encontros: trolls, ogros, águias', 'Frio noturno (CON saves)'] },
 
@@ -102772,11 +103289,11 @@ const TB_WEATHER_INFO = {
 
   t: { ico: '', name: 'Tempestade', desc: 'Trovões e raios. A natureza te avisa: pare.', effects: ['Movimento muito lento', 'Risco de raio (DEX DC 15) em áreas abertas', 'Visibilidade quase nula', 'Encontros aleatórios reduzidos (criaturas se escondem)'] },
 
-  snow:      { ico: '❄️', name: 'Neve / Nevasca', desc: 'Frio congelante e rajadas brancas cortam o horizonte.', effects: ['Visibilidade reduzida a 1 hex sob nevasca', 'Terreno escorregadio e passos lentos', 'Risco de exaustão por frio sem abrigo ou agasalho (CD 10)', 'Rastreamento na neve fresca facilitado'] },
+  snow:      { ico: '◆', name: 'Neve / Nevasca', desc: 'Frio congelante e rajadas brancas cortam o horizonte.', effects: ['Visibilidade reduzida a 1 hex sob nevasca', 'Terreno escorregadio e passos lentos', 'Risco de exaustão por frio sem abrigo ou agasalho (CD 10)', 'Rastreamento na neve fresca facilitado'] },
 
-  dungeon:   { ico: '🔥', name: 'Confinado', desc: 'Ar denso e pesado, aquecido por tochas e fogueiras de guerra.', effects: ['Protegido contra chuvas ou ventos do exterior', 'Fumaça e sombras podem camuflar aproximações', 'Sons ecoam pelas galerias e corredores de pedra'] },
+  dungeon:   { ico: '◆', name: 'Confinado', desc: 'Ar denso e pesado, aquecido por tochas e fogueiras de guerra.', effects: ['Protegido contra chuvas ou ventos do exterior', 'Fumaça e sombras podem camuflar aproximações', 'Sons ecoam pelas galerias e corredores de pedra'] },
 
-  confinado: { ico: '🔥', name: 'Confinado', desc: 'Ar denso e pesado, aquecido por tochas e fogueiras de guerra.', effects: ['Protegido contra chuvas ou ventos do exterior', 'Fumaça e sombras podem camuflar aproximações', 'Sons ecoam pelas galerias e corredores de pedra'] },
+  confinado: { ico: '◆', name: 'Confinado', desc: 'Ar denso e pesado, aquecido por tochas e fogueiras de guerra.', effects: ['Protegido contra chuvas ou ventos do exterior', 'Fumaça e sombras podem camuflar aproximações', 'Sons ecoam pelas galerias e corredores de pedra'] },
 
 };
 
@@ -102790,7 +103307,7 @@ const TB_PHASE_INFO = {
 
   dawn:    { ico: '', name: 'Aurora',      desc: 'O primeiro raio dourado. Esperança renova.', effects: ['Visibilidade volta gradualmente', 'Mortos-vivos recuam', 'Bônus pra cura matinal (+1d4 HP)', 'NPCs camponeses começam o dia'] },
 
-  torches: { ico: '🕯️', name: 'Luz de Tochas / Penumbra', desc: 'O interior não recebe luz solar direta. A iluminação é gerada por tochas e braseiros.', effects: ['Penumbra fora do raio direto das tochas', 'Tochas ativas ampliam o raio de visão e afastam emboscadas', 'Fontes mágicas de luz clareiam a escuridão circundante'] },
+  torches: { ico: '◆', name: 'Luz de Tochas / Penumbra', desc: 'O interior não recebe luz solar direta. A iluminação é gerada por tochas e braseiros.', effects: ['Penumbra fora do raio direto das tochas', 'Tochas ativas ampliam o raio de visão e afastam emboscadas', 'Fontes mágicas de luz clareiam a escuridão circundante'] },
 
 };
 
@@ -104726,8 +105243,8 @@ function _showExploreHelp(explicitCtx) {
       title: 'Guia da Tela — Acampamento & Bivaque',
       section: 'Descanso Curto, Longo & Vigília',
       tips: [
-        '<b>Descanso Curto (1h):</b> gaste seus <b>Dados de Vida</b> para enfaixar ferimentos e recuperar PV sem precisar montar acampamento pesado.',
-        '<b>Descanso Longo (8h):</b> consome 1 Ração de Viagem, restaura PV e PM ao máximo e recupera metade dos Dados de Vida.',
+        '<b>Descanso Curto (Breve):</b> gaste seus <b>Dados de Vida</b> para enfaixar ferimentos e recuperar PV sem precisar montar acampamento pesado.',
+        '<b>Descanso Longo:</b> consome 1 Ração de Viagem, restaura PV e PM ao máximo e recupera metade dos Dados de Vida.',
         '<b>Vigília &amp; Emboscadas:</b> acampar em regiões perigosas pode atrair predadores noturnos. Designar um Sentinela reduz drasticamente o risco de surpresa.'
       ]
     },
@@ -104785,11 +105302,11 @@ function _showExploreHelp(explicitCtx) {
     + '<div class="em-section">Atalhos &amp; Outros Guias</div>'
 
     + '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">'
-    +   '<button type="button" class="xcart-dock-btn" onclick="_showExploreHelp(\'cartografia\')" style="font-size:11px;padding:4px 8px;">🗺️ Mapa</button>'
-    +   '<button type="button" class="xcart-dock-btn" onclick="_showExploreHelp(\'event\')" style="font-size:11px;padding:4px 8px;">🎲 Eventos</button>'
-    +   '<button type="button" class="xcart-dock-btn" onclick="_showExploreHelp(\'camp\')" style="font-size:11px;padding:4px 8px;">⛺ Acampar</button>'
-    +   '<button type="button" class="xcart-dock-btn" onclick="_showExploreHelp(\'party\')" style="font-size:11px;padding:4px 8px;">👥 Comitiva</button>'
-    +   '<button type="button" class="xcart-dock-btn" onclick="_showExploreHelp(\'dungeon\')" style="font-size:11px;padding:4px 8px;">🏰 Masmorras</button>'
+    +   '<button type="button" class="xcart-dock-btn" onclick="_showExploreHelp(\'cartografia\')" style="font-size:11px;padding:4px 8px;">◆ Mapa</button>'
+    +   '<button type="button" class="xcart-dock-btn" onclick="_showExploreHelp(\'event\')" style="font-size:11px;padding:4px 8px;">◆ Eventos</button>'
+    +   '<button type="button" class="xcart-dock-btn" onclick="_showExploreHelp(\'camp\')" style="font-size:11px;padding:4px 8px;">◆ Acampar</button>'
+    +   '<button type="button" class="xcart-dock-btn" onclick="_showExploreHelp(\'party\')" style="font-size:11px;padding:4px 8px;">◆ Comitiva</button>'
+    +   '<button type="button" class="xcart-dock-btn" onclick="_showExploreHelp(\'dungeon\')" style="font-size:11px;padding:4px 8px;">◆ Masmorras</button>'
     + '</div>'
 
     + tip('<b>Mochila:</b> itens e equipamento. <b>Ficha:</b> seus atributos e exaustão. <b>Hall:</b> retorna à cidade ou troca de personagem.')
@@ -104893,7 +105410,9 @@ function bindQuickActions() {
 
   // sem entender o porquê. Agora dá toast explicando.
 
-  document.getElementById('btn-camp').addEventListener('click', () => {
+  var _btnCamp = document.getElementById('btn-camp');
+  if (_btnCamp) {
+    _btnCamp.addEventListener('click', () => {
 
     if (S.ph !== 'idle') {
 
@@ -104917,7 +105436,7 @@ function bindQuickActions() {
 
       if (typeof vToast === 'function') {
 
-        vToast('🌊 Não é possível acampar sobre a água! Procure terra firme para descansar.', 'warn');
+        vToast('◆ Não é possível acampar sobre a água! Procure terra firme para descansar.', 'warn');
 
       }
 
@@ -104929,7 +105448,7 @@ function bindQuickActions() {
 
       if (typeof vToast === 'function') {
 
-        vToast('🔥 Não é possível acampar sobre a lava derretida!', 'warn');
+        vToast('◆ Não é possível acampar sobre a lava derretida!', 'warn');
 
       }
 
@@ -104938,8 +105457,8 @@ function bindQuickActions() {
     }
 
     openCampOverlay();
-
-  });
+    });
+  }
 
   // X-6.5.19: IDs do HTML real portado de explore/index.html
 
@@ -105483,13 +106002,16 @@ function bindQuickActions() {
 
   /* setupHexNavSizeButtons removido 2026-07-06 (controlava o tamanho do D-pad). */
 
-  document.getElementById('btn-cartografia').addEventListener('click', _openCartographyWithPrompt);
+  var _btnCart = document.getElementById('btn-cartografia');
+  if (_btnCart) _btnCart.addEventListener('click', _openCartographyWithPrompt);
 
   // V2.7: btn-download-log removido. Console global downloadExploracaoLogs() continua.
 
-  document.getElementById('cart-close-btn').addEventListener('click', closeCartography);
+  var _cartClose = document.getElementById('cart-close-btn');
+  if (_cartClose) _cartClose.addEventListener('click', closeCartography);
 
-  document.getElementById('cart-canvas').addEventListener('click', onCartographyClick);
+  var _cartCanvas = document.getElementById('cart-canvas') || document.getElementById('xcart-canvas');
+  if (_cartCanvas) _cartCanvas.addEventListener('click', onCartographyClick);
 
   // X-6.5.51l: cart zoom + center on player
 
@@ -105803,15 +106325,13 @@ function bindQuickActions() {
 
 
 
-  lightBtn.addEventListener('click', (e) => {
-
-    e.stopPropagation();
-
-    renderLightMenu();
-
-    lightWrap.classList.toggle('open');
-
-  });
+  if (lightBtn) {
+    lightBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      renderLightMenu();
+      if (lightWrap) lightWrap.classList.toggle('open');
+    });
+  }
 
 
 
@@ -105823,31 +106343,38 @@ function bindQuickActions() {
 
   });
 
-  document.getElementById('defeat-restart').addEventListener('click', () => {
+  var _defRestart = document.getElementById('defeat-restart');
+  if (_defRestart) {
+    _defRestart.addEventListener('click', () => {
+      var _defOverlay = document.getElementById('defeat-overlay');
+      if (_defOverlay) _defOverlay.classList.remove('visible');
+      boot();
+    });
+  }
 
-    document.getElementById('defeat-overlay').classList.remove('visible');
+  var _confOk = document.getElementById('confirm-ok');
+  if (_confOk) _confOk.addEventListener('click', onConfirmOk);
 
-    boot();
-
-  });
-
-  document.getElementById('confirm-ok').addEventListener('click', onConfirmOk);
-
-  document.getElementById('confirm-back').addEventListener('click', onConfirmBack);
+  var _confBack = document.getElementById('confirm-back');
+  if (_confBack) _confBack.addEventListener('click', onConfirmBack);
 
 
 
   // Dungeon overlay buttons (handles: dungeon entrance | edge transition | quest delivery)
 
-  document.getElementById('dungeon-back').addEventListener('click', () => {
+  var _dungBack = document.getElementById('dungeon-back');
+  if (_dungBack) {
+    _dungBack.addEventListener('click', () => {
+      var _dungOverlay = document.getElementById('dungeon-overlay');
+      var _dungEnter = document.getElementById('dungeon-enter');
 
     if (S._pendingEdge) {
 
       S._pendingEdge = null;
 
-      document.getElementById('dungeon-overlay').classList.remove('visible');
+      if (_dungOverlay) _dungOverlay.classList.remove('visible');
 
-      document.getElementById('dungeon-enter').textContent = 'Entrar';
+      if (_dungEnter) _dungEnter.textContent = 'Entrar';
 
       if (S.ph !== 'defeat') S.ph = 'idle';
 
@@ -105857,9 +106384,9 @@ function bindQuickActions() {
 
       S._pendingDelivery = null;
 
-      document.getElementById('dungeon-overlay').classList.remove('visible');
+      if (_dungOverlay) _dungOverlay.classList.remove('visible');
 
-      document.getElementById('dungeon-enter').textContent = 'Entrar';
+      if (_dungEnter) _dungEnter.textContent = 'Entrar';
 
       if (S.ph !== 'defeat') S.ph = 'idle';
 
@@ -105870,22 +106397,19 @@ function bindQuickActions() {
     } else {
 
       closeDungeonOverlay(false);
-
     }
+    });
+  }
 
-  });
-
-  document.getElementById('dungeon-enter').addEventListener('click', () => {
-
-    // V3.2: ambush agora abre tela de combate direto, sem dungeon-overlay intermediário
-
-    if (S._pendingEdge) confirmEdgeTransition();
-
-    else if (S._pendingDelivery) confirmQuestDelivery();
-
-    else closeDungeonOverlay(true);
-
-  });
+  var _dungEnterBtn = document.getElementById('dungeon-enter');
+  if (_dungEnterBtn) {
+    _dungEnterBtn.addEventListener('click', () => {
+      // V3.2: ambush agora abre tela de combate direto, sem dungeon-overlay intermediário
+      if (S._pendingEdge) confirmEdgeTransition();
+      else if (S._pendingDelivery) confirmQuestDelivery();
+      else closeDungeonOverlay(true);
+    });
+  }
 
   // V3.3: combate é delegado a simuladores/combate.html via window.location.href
 
@@ -105895,7 +106419,8 @@ function bindQuickActions() {
 
   // Journal bindings
 
-  document.getElementById('journal-close-btn').addEventListener('click', closeQuestJournal);
+  var _jourClose = document.getElementById('journal-close-btn');
+  if (_jourClose) _jourClose.addEventListener('click', closeQuestJournal);
 
   // X-6.5.51e: legacy #quest-indicator continua wired (ja nao aparece visualmente
 
@@ -106102,9 +106627,11 @@ function _drawTacticalRadar() {
 
   // Location + Detail popups (bestiário/compêndio)
 
-  document.getElementById('loc-close-btn').addEventListener('click', closeLocationPopup);
+  var _locClose = document.getElementById('loc-close-btn');
+  if (_locClose) _locClose.addEventListener('click', closeLocationPopup);
 
-  document.getElementById('detail-close-btn').addEventListener('click', closeDetailPopup);
+  var _detClose = document.getElementById('detail-close-btn');
+  if (_detClose) _detClose.addEventListener('click', closeDetailPopup);
 
 
 
@@ -110621,24 +111148,30 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
 /* === Popup Cartografia — Localidade Selecionada (Fase 5.5) === */
 
 #cart-loc-popup {
-  position: absolute;
-  inset: 0;
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100% !important;
+  max-width: 480px !important;
+  margin: 0 auto !important;
+  height: 100vh !important;
+  height: 100dvh !important;
   background: rgba(10,8,6,0.95);
-  z-index: 9050;
+  z-index: 100020 !important;
   display: none;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  padding: max(8px, env(safe-area-inset-top, 8px)) 8px max(8px, env(safe-area-inset-bottom, 8px)) 8px !important;
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   box-sizing: border-box;
 }
 
-#cart-loc-popup.active { display: flex; }
+#cart-loc-popup.active { display: flex !important; }
 
 .clp-card {
   width: 100%;
   max-width: 380px;
-  max-height: calc(100% - 12px);
+  max-height: min(calc(100vh - 16px), calc(100dvh - 16px), 620px) !important;
   height: auto;
   display: flex;
   flex-direction: column;
@@ -110688,11 +111221,18 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
 }
 
 #cart-loc-popup,
-#cart-loc-popup *,
+#cart-loc-popup * {
+  box-sizing: border-box !important;
+}
+
+#cart-loc-popup,
 .clp-prov-preview,
 .clp-prov-stats {
   overflow-x: hidden !important;
-  box-sizing: border-box !important;
+}
+
+.clp-body > * {
+  flex-shrink: 0;
 }
 
 @keyframes clp-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
@@ -110802,6 +111342,7 @@ body.silhouettes-demo-mode #silhouettes-demo-hud { display: block; }
   width: 100%;
   margin-top: 6px;
   padding-top: 6px;
+  padding-bottom: max(6px, env(safe-area-inset-bottom, 6px)) !important;
   border-top: 1px solid rgba(196,149,58,0.25);
   box-sizing: border-box;
 }
@@ -112423,15 +112964,15 @@ function _showCartPromptMenu(){
 
     card.innerHTML = ''
 
-      + '<h2>🗺️ Navegação & Retorno</h2>'
+      + '<h2>◆ Navegação & Retorno</h2>'
 
       + '<p>Você está explorando as terras ermas de Valdoria.<br>Deseja consultar o mapa do mundo ou retornar à segurança da cidade?</p>'
 
       + '<div class="cbp-buttons">'
 
-      + '  <button class="cbp-btn cbp-btn-no" data-cbp="open-map" style="background:rgba(196,149,58,0.18);border-color:#c4953a;color:#f0e2cc">🗺️ Ver Mapa de Valdoria (Cartografia)</button>'
+      + '  <button class="cbp-btn cbp-btn-no" data-cbp="open-map" style="background:rgba(196,149,58,0.18);border-color:#c4953a;color:#f0e2cc">◆ Ver Mapa de Valdoria (Cartografia)</button>'
 
-      + '  <button class="cbp-btn cbp-btn-yes" data-cbp="ask-return">🏛️ Voltar para a Cidade</button>'
+      + '  <button class="cbp-btn cbp-btn-yes" data-cbp="ask-return">◆ Voltar para a Cidade</button>'
 
       + '  <button class="cbp-btn cbp-btn-no" data-cbp="close-prompt" style="opacity:0.85">✕ Continuar Explorando</button>'
 

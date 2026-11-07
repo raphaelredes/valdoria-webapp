@@ -45,50 +45,95 @@ function _hubEsc(s) {
 
 // === SYNC_REGION: _LOC_MAP BEGIN ===
 var _LOC_MAP = (function(){
+
     function S(id) { return '<svg viewBox="0 0 120 120"><use href="#' + id + '"/></svg>'; }
+
     return {
+
         'tavern':           { ico: S('ic-taverna'), nm: 'Taverna' },
+
         'taverna':          { ico: S('ic-taverna'), nm: 'Taverna' },
+
         'inn':              { ico: S('ic-estalagem'), nm: 'Estalagem' },
+
         'estalagem':        { ico: S('ic-estalagem'), nm: 'Estalagem' },
+
         'open_inn':         { ico: S('ic-estalagem'), nm: 'Estalagem' },
+
         'arena':            { ico: S('ic-arena'),    nm: 'Arena' },
+
         'arena_main':       { ico: S('ic-arena'),    nm: 'Arena' },
+
         'market':           { ico: S('ic-mercado'),  nm: 'Mercado' },
+
         'mercado':          { ico: S('ic-mercado'),  nm: 'Mercado' },
+
         'city_locations':   { ico: S('ic-portoes'),  nm: 'Cidade' },
+
         'action_city_locations': { ico: S('ic-portoes'), nm: 'Cidade' },
+
         'guild':            { ico: S('ic-paladino'), nm: 'Guilda' },
+
         'guilda':           { ico: S('ic-paladino'), nm: 'Guilda' },
+
         'temple':           { ico: S('ic-templo'),   nm: 'Templo' },
+
         'templo':           { ico: S('ic-templo'),   nm: 'Templo' },
+
         'gates':            { ico: S('ic-portoes'),  nm: 'Portões' },
+
         'portoes':          { ico: S('ic-portoes'),  nm: 'Portões' },
+
         'passagens':        { ico: S('ic-portoes'),  nm: 'Passagens' },
+
         'passages':         { ico: S('ic-portoes'),  nm: 'Passagens' },
+
         'sewer':            { ico: S('ic-portoes'),  nm: 'Esgoto' },
+
         'square':           { ico: S('ic-praca'),    nm: 'Praça' },
+
         'praca':            { ico: S('ic-praca'),    nm: 'Praça' },
+
         'bank':             { ico: S('ic-banco'),    nm: 'Banco' },
+
         'banco':            { ico: S('ic-banco'),    nm: 'Banco' },
+
         'action_quests':    { ico: S('ic-missões'),  nm: 'Missões' },
+
         'quests':           { ico: S('ic-missões'),  nm: 'Missões' },
+
         'daily_challenge':  { ico: S('ic-desafio'),  nm: 'Desafio' },
+
         'action_codex':     { ico: S('ic-compendio'),nm: 'Compêndio' },
+
         'codex':            { ico: S('ic-compendio'),nm: 'Compêndio' },
+
         'festival':         { ico: S('ic-festival'), nm: 'Festival' },
+
         'league_':          { ico: S('ic-desafio'),  nm: 'Liga' },
+
         'manage_':          { ico: S('ic-grupo'),    nm: 'Contas' },
+
         'open_workshop':    { ico: S('ic-oficina'),  nm: 'Oficina' },
+
         'rel_':             { ico: S('ic-vínculos'), nm: 'Vínculos' },
+
         'rune_scribe':      { ico: S('ic-runas'),    nm: 'Runas' },
+
         'shadow_alley':     { ico: S('ic-portoes'),  nm: 'Beco' },
+
         'workshop_':        { ico: S('ic-oficina'),  nm: 'Oficina' },
+
         'cartografia':      { ico: S('ic-cartografia'), nm: 'Mapa' },
+
         'travel':           { ico: S('ic-cartografia'), nm: 'Viajar' },
+
         'druid':            { ico: S('ic-druida'),   nm: 'Druida' },
+
         'ach_':             { ico: S('ic-desafio'),  nm: 'Conquistas' }
+
     };
+
 })();
 // === SYNC_REGION END ===
 
@@ -154,380 +199,1173 @@ function _hubCoin(size) {
  */
 // === SYNC_REGION: renderHubScreen BEGIN ===
 function renderHubScreen(el, screen) {
+
     el.className = 'hub-screen';
+
     var frag = document.createDocumentFragment();
 
+
+
     /* Flatten all buttons from rows into a single list */
+
     var allBtns = [];
+
     var rows = screen.buttons || [];
+
     for (var ri = 0; ri < rows.length; ri++) {
+
         var row = rows[ri];
+
         if (!row) continue;
+
         for (var bi = 0; bi < row.length; bi++) {
+
             if (row[bi]) allBtns.push(row[bi]);
+
         }
+
     }
+
+
 
     /* ── 1. Suggested Action ─────────────────────────────────── */
+
     var sa = screen.suggested_action;
+
     if (sa && sa.text) {
+
         var suggestEl = _hubDiv('hub-suggest');
+
         suggestEl.textContent = sa.text;
+
         suggestEl.style.cursor = 'pointer';
+
         suggestEl.addEventListener('click', function () {
+
             if (typeof haptic === 'function') haptic('medium');
+
             if (sa.cb && typeof doAction === 'function') doAction(sa.cb);
+
         });
+
         frag.appendChild(suggestEl);
+
     }
+
+
 
     /* ── 2. CTA — "PARTIR PARA AVENTURA" ─────────────────────── */
+
     var ctaBtn = null;
+
     for (var ci = 0; ci < allBtns.length; ci++) {
+
         if (_isCTA(allBtns[ci])) { ctaBtn = allBtns[ci]; break; }
+
     }
+
     if (ctaBtn) {
+
         var ctaEl = _hubBtn('hub-cta', ctaBtn.text || 'PARTIR PARA AVENTURA', ctaBtn.cb);
+
         frag.appendChild(ctaEl);
+
     }
+
+
 
         /* ── 2.1 Botões das Regiões da Capital (Estilo Clássico com Desenhos Ilustrados) ─── */
+
     var locsWrap = _hubDiv('hub-locations-section');
+
     locsWrap.innerHTML = ''
+
       + '<div class="hub-locations-header">'
+
       + '  <span>Locais de Valdoria</span>'
+
       + '</div>';
 
+
+
     var grid = document.createElement('div');
+
     grid.className = 'hub-locations-grid';
 
+
+
     var hubRegions = [
+
       { id: 'city_south', name: 'Portões do Sul', img: '/shared/img/map/city_districts/city_south.webp' },
+
       { id: 'city_market', name: 'Praça Mercantil', img: '/shared/img/map/city_districts/city_market.webp' },
+
       { id: 'city_military', name: 'Arena & Quartel', img: '/shared/img/map/city_districts/city_military.webp' },
+
       { id: 'city_high', name: 'Acrópole Sagrada', img: '/shared/img/map/city_districts/city_high.webp' }
+
     ];
 
+
+
+    var readyLocsHub = (typeof _getReadyQuestDeliveryLocations === 'function') ? _getReadyQuestDeliveryLocations() : { districtIds: {} };
+
     hubRegions.forEach(function(reg) {
+
       var card = document.createElement('div');
+
       card.className = 'hub-loc-card';
+
       card.setAttribute('data-did', reg.id);
+
+      var hasTurninDist = !!(readyLocsHub && readyLocsHub.districtIds && readyLocsHub.districtIds[reg.id]);
+
       card.innerHTML = ''
+
         + '<div class="hlc-thumb">'
+
         + '  <img src="' + reg.img + '" alt="' + reg.name + '" class="hlc-img">'
+
+        + (hasTurninDist ? '<div class="hlc-quest-turnin-badge" title="Missão pronta para entrega">?</div>' : '')
+
         + '</div>'
+
         + '<div class="hlc-name">' + reg.name + '</div>';
 
+
+
       var imgEl = card.querySelector('.hlc-img');
+
       if (imgEl) {
+
         var attempts = 0;
+
         imgEl.onerror = function() {
+
           attempts++;
+
           var fallbacks = [
+
             '../shared/img/map/city_districts/' + reg.id + '.webp',
+
             'shared/img/map/city_districts/' + reg.id + '.webp',
+
             './shared/img/map/city_districts/' + reg.id + '.webp'
+
           ];
+
           if (attempts <= fallbacks.length) {
+
             this.src = fallbacks[attempts - 1];
+
           }
+
         };
+
       }
 
+
+
       card.addEventListener('click', function() {
+
         if (typeof haptic === 'function') haptic('light');
+
         _openCityMapModal(reg.id);
+
       });
+
       grid.appendChild(card);
+
     });
 
+
+
     locsWrap.appendChild(grid);
+
     frag.appendChild(locsWrap);
 
+
+
 /* ── 7. Quest Mini Tracker ───────────────────────────────── */
-    var qt = screen.quest_tracker;
-    if (qt && qt.quests && qt.quests.length > 0) {
-        for (var qi = 0; qi < qt.quests.length; qi++) {
-            frag.appendChild(_buildQuestRow(qt.quests[qi]));
-        }
-    }
+
+    /* Removido da tela principal por ordem do usuário (2026-10). Missões prontas
+
+       são sinalizadas via interrogação vermelha épica pulsante nos cards de destino
+
+       e dentro dos círculos dos marcos no mapa regional. Sub-tela Missões/Diário
+
+       mantém acompanhamento completo. */
+
+
 
     /* ── 8. Progress Strip ───────────────────────────────────── */
+
     var ps = screen.progress_strip;
+
     var pStats = screen.player_stats;
+
     if (ps || (pStats && pStats.kills > 0)) {
+
         var progRow = _hubDiv('hub-prog');
 
+
+
         if (ps) {
+
             /* Liga */
+
             var leagueCard = _hubDiv('hub-prog-card');
+
             leagueCard.style.cursor = 'pointer';
+
             leagueCard.addEventListener('click', function () {
+
                 if (typeof haptic === 'function') haptic('light');
+
                 if (ps.league_cb && typeof doAction === 'function') doAction(ps.league_cb);
+
             });
+
             // ps.league_icon agora é ID heráldico (ic-liga-bronze/prata/ouro/...)
+
             var leagueIconId = ps.league_icon || 'ic-liga-bronze';
+
             var leagueColor = ps.league_color || '#cd7f32';
+
             var leagueVal = _hubDiv('hp-val');
+
             leagueVal.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:' + leagueColor + ';"><use href="#' + leagueIconId + '"/></svg>' + (ps.league_xp || 0).toLocaleString('pt-BR');
+
             leagueCard.appendChild(leagueVal);
+
             var leagueLbl = _hubDiv('hp-lbl');
+
             leagueLbl.textContent = ps.league_name || 'Liga';
+
             leagueCard.appendChild(leagueLbl);
+
             progRow.appendChild(leagueCard);
 
+
+
             /* Conquistas */
+
             var achCard = _hubDiv('hub-prog-card');
+
             achCard.style.cursor = 'pointer';
+
             achCard.addEventListener('click', function () {
+
                 if (typeof haptic === 'function') haptic('light');
+
                 if (ps.ach_cb && typeof doAction === 'function') doAction(ps.ach_cb);
+
             });
+
             var achVal = _hubDiv('hp-val');
+
             achVal.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:' + (HERALDIC_COLORS['ic-trofeu'] || '#e8d878') + ';"><use href="#ic-trofeu"/></svg>' + (ps.ach_unlocked || 0) + '/' + (ps.ach_total || 0);
+
             achCard.appendChild(achVal);
+
             var achLbl = _hubDiv('hp-lbl');
+
             achLbl.textContent = 'Conquistas';
+
             achCard.appendChild(achLbl);
+
             progRow.appendChild(achCard);
+
         }
+
+
 
         /* Combat stats (from _player_stats) */
+
         if (pStats && pStats.kills > 0) {
+
             var killCard = _hubDiv('hub-prog-card');
+
             killCard.style.cursor = 'pointer';
+
             killCard.addEventListener('click', function () {
+
                 if (typeof haptic === 'function') haptic('light');
+
                 if (typeof doAction === 'function') doAction(pStats.kills_cb || 'kills_log');
+
             });
+
             var killVal = _hubDiv('hp-val');
+
             killVal.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:' + (HERALDIC_COLORS['ic-ach-algoz'] || '#c43020') + ';"><use href="#ic-ach-algoz"/></svg>' + pStats.kills;
+
             killCard.appendChild(killVal);
+
             var killLbl = _hubDiv('hp-lbl');
+
             killLbl.textContent = 'Abates';
+
             killCard.appendChild(killLbl);
+
             progRow.appendChild(killCard);
+
         }
+
         if (pStats && pStats.streak > 0) {
+
             var streakCard = _hubDiv('hub-prog-card');
+
             streakCard.style.cursor = 'pointer';
+
             streakCard.addEventListener('click', function () {
+
                 if (typeof haptic === 'function') haptic('light');
+
                 if (typeof doAction === 'function') doAction(pStats.streak_cb || 'streak_log');
+
             });
+
             var streakVal = _hubDiv('hp-val');
+
             streakVal.innerHTML = '<svg viewBox="0 0 120 120" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;color:#ff8a4a;"><use href="#ic-ach-indomavel"/></svg>' + pStats.streak;
+
             streakCard.appendChild(streakVal);
+
             var streakLbl = _hubDiv('hp-lbl');
+
             streakLbl.textContent = 'Sequência';
+
             streakCard.appendChild(streakLbl);
+
             progRow.appendChild(streakCard);
+
         }
+
+
 
         frag.appendChild(progRow);
+
     }
+
+
 
     /* ── 8b. Daily Challenge Badge ──────────────────────────── */
+
     var dcb = screen.daily_challenge_badge;
+
     if (dcb && !dcb.completed && dcb.dungeon_name) {
+
         var dcEl = _hubDiv('hub-dc-badge');
+
         dcEl.style.cursor = 'pointer';
+
         dcEl.addEventListener('click', function () {
+
             if (typeof haptic === 'function') haptic('light');
+
             if (typeof doAction === 'function') doAction('daily_challenge_main');
+
         });
+
         /* Sess\u00E3o #64 (2026-05-30): sem emoji de lobo \u2014 user pediu s\u00F3 texto. */
+
         dcEl.textContent = 'Desafio: ' + dcb.dungeon_name;
+
         frag.appendChild(dcEl);
+
     }
 
+
+
     /* ── 9. DM Tip ───────────────────────────────────────────── */
+
     /* DM Tip REMOVIDO 2026-05-08 (X-6.5.51AQ): irrelevante, jogador n\u00E3o l\u00EA,
+
        ocupava espa\u00E7o no hub. Conte\u00FAdo `_dm_tip` do backend \u00E9 ignorado. */
 
+
+
     /* Append everything to the container */
+
     el.appendChild(frag);
+
 }
 
-/* ── MODAL POPUP EM TELA CHEIA: MAPA DA CIDADE DE VALDORIA ──────────────── */
-// Dados das 4 Regiões Urbanas de Valdoria (D&D 5e - Retículo Cartográfico Canônico)
-var CITY_DISTRICTS_DATA = {
-  'city_south': {
-    id: 'city_south',
-    name: 'Portões do Sul',
-    fullName: 'Portões do Sul & Muralhas de Valdoria',
-    img: '/shared/img/map/city_districts/city_south.webp',
-    landmarks: [
-      { id: 'loc_gates', name: 'Portões de Valdoria', x: 50, y: 64, cb: 'explore_main', desc: 'Muralhas fortificadas, sentinelas de vigília e saída sul rumo às planícies.', btnText: 'Ir até os' },
-      { id: 'loc_tavern', name: 'Taverna do Javali Bêbado', x: 25, y: 46, cb: 'tavern', desc: 'Canecas cheias de hidromel, lareira crepitante, descanso e boatos das estradas.', btnText: 'Ir até a' },
-      { id: 'loc_inn', name: 'Estalagem do Grifo', x: 75, y: 46, cb: 'inn', desc: 'Aposentos confortáveis, descanso reparador e adega subterrânea sob os cuidados de Martha.', btnText: 'Ir até a' },
-      { id: 'loc_sewer', name: 'Grade do Esgoto', x: 16, y: 18, cb: 'passagens_open_sewer', desc: 'Duto pluvial sob a muralha sul. Acesso trancado por correntes, ligado a rumores de infestações subterrâneas.', btnText: 'Ir até a' }
-    ]
-  },
-  'city_market': {
-    id: 'city_market',
-    name: 'Praça Mercantil',
-    fullName: 'Praça Mercantil & Grande Mercado',
-    img: '/shared/img/map/city_districts/city_market.webp',
-    landmarks: [
-      { id: 'loc_square', name: 'Praça Central', x: 50, y: 52, cb: 'square', desc: 'O coração pulsante da capital: pregoeiros, bardos, jogos de dados e contratações.', btnText: 'Ir até a' },
-      { id: 'loc_market', name: 'Mercado Central', x: 24, y: 72, cb: 'market', desc: 'Bancas de mercadores, ferreiros, boticários, armaduras e suprimentos de marcha.', btnText: 'Ir até o' },
-      { id: 'loc_bank', name: 'Banco & Cofre', x: 76, y: 35, cb: 'bank', desc: 'Cofres de pedra maciça, cambistas juramentados e guarda segura para suas riquezas.', btnText: 'Ir até o' },
-      { id: 'loc_workshop', name: 'Oficina & Forja', x: 24, y: 32, cb: 'open_workshop', desc: 'Forjas incandescentes, conserto de lâminas, bigornas e aprimoramento de armas.', btnText: 'Ir até a' }
-    ]
-  },
-  'city_military': {
-    id: 'city_military',
-    name: 'Arena & Quartel',
-    fullName: 'Arena do Coliseu & Quartel da Guilda',
-    img: '/shared/img/map/city_districts/city_military.webp',
-    landmarks: [
-      { id: 'loc_arena', name: 'Arena do Coliseu', x: 28, y: 50, cb: 'arena', desc: 'Fosso circular de combate com torneios sangrentos, aplausos e glória militar.', btnText: 'Ir até a' },
-      { id: 'loc_guild', name: 'Guilda dos Mercenários', x: 72, y: 50, cb: 'guild', desc: 'Quartel de guerreiros experientes sob a comandante Tavira: recrutamento e gestão.', btnText: 'Ir até a' }
-    ]
-  },
-  'city_high': {
-    id: 'city_high',
-    name: 'Acrópole Sagrada',
-    fullName: 'Acrópole Sagrada & Santuário da Luz',
-    img: '/shared/img/map/city_districts/city_high.webp',
-    landmarks: [
-      { id: 'loc_temple', name: 'Templo da Luz Sagrada', x: 30, y: 44, cb: 'temple', desc: 'Altar divino onde sacerdotes concedem bênçãos, curas milagrosas e ritos sagrados.', btnText: 'Ir até o' },
-      { id: 'loc_runes', name: 'Escriba Rúnico', x: 76, y: 46, cb: 'rune_scribe', desc: 'Pergaminhos místicos, encantamentos arcanos, transmutação e runas de poder.', btnText: 'Ir até o' },
-      { id: 'loc_festival', name: 'Festival da Capital', x: 50, y: 78, cb: 'festival', desc: 'Música festiva, torneios de pontaria, hidromel e comemorações nas ruas.', btnText: 'Ir até o' }
-    ]
+
+
+// Helper canônico: mapeia missões ativas prontas para entrega aos distritos, marcos, telas e serviços da cidade
+
+function _getReadyQuestDeliveryLocations() {
+
+  var res = {
+
+    districtIds: {},
+
+    landmarkIds: {},
+
+    venueKeys: {},
+
+    actionCbs: {},
+
+    npcNames: {},
+
+    readyQuests: []
+
+  };
+
+  var activeList = (typeof QUESTS_ACTIVE !== 'undefined' && Array.isArray(QUESTS_ACTIVE)) ? QUESTS_ACTIVE : [];
+
+  for (var i = 0; i < activeList.length; i++) {
+
+    var q = activeList[i];
+
+    if (!q) continue;
+
+    var progressStr = String(q.progress || '');
+
+    var isReady = q.ready === true
+
+      || q.status === 'ready'
+
+      || q.status === 'completed_pending_turnin'
+
+      || progressStr.indexOf('✓') >= 0
+
+      || progressStr.toLowerCase().indexOf('pronto') >= 0
+
+      || progressStr.toLowerCase().indexOf('conclu') >= 0;
+
+    if (!isReady && typeof q.progress === 'string') {
+
+      var parts = q.progress.split('/');
+
+      if (parts.length === 2) {
+
+        var cur = parseInt(parts[0], 10);
+
+        var tot = parseInt(parts[1], 10);
+
+        if (!isNaN(cur) && !isNaN(tot) && tot > 0 && cur >= tot) {
+
+          isReady = true;
+
+        }
+
+      }
+
+    }
+
+    if (!isReady && q.current !== undefined && q.target !== undefined && q.current >= q.target && q.target > 0) {
+
+      isReady = true;
+
+    }
+
+    if (!isReady && q.current !== undefined && q.required !== undefined && q.current >= q.required && q.required > 0) {
+
+      isReady = true;
+
+    }
+
+    if (!isReady) continue;
+
+
+
+    var dest = null;
+
+    if (typeof _getQuestDeliveryDestination === 'function') {
+
+      dest = _getQuestDeliveryDestination(q.serverId || q.id, q);
+
+    }
+
+    var destKey = (dest && dest.destKey) || '';
+
+    var placeName = (dest && dest.placeName) || '';
+
+    var npcName = (dest && dest.npcName) || '';
+
+    var actionCb = (dest && dest.actionCb) || '';
+
+    var qTitle = String(q.title || '');
+
+
+
+    var targetLandmark = null;
+
+    var targetDistrict = null;
+
+
+
+    if (placeName === 'Praça Central' || npcName === 'Lyana' || destKey === 'square' || /lyana|praça|fonte/i.test(qTitle)) {
+
+      targetLandmark = 'loc_square';
+
+      targetDistrict = 'city_market';
+
+      destKey = 'square';
+
+      if (!actionCb) actionCb = 'square_investigate_open';
+
+    } else if (destKey === 'market' || /mercado|thorne|ferreiro|mirena|sylvi|erlan/i.test(qTitle)) {
+
+      targetLandmark = 'loc_market';
+
+      targetDistrict = 'city_market';
+
+      destKey = 'market';
+
+    } else if (destKey === 'workshop' || /oficina|forja/i.test(qTitle)) {
+
+      targetLandmark = 'loc_workshop';
+
+      targetDistrict = 'city_market';
+
+      destKey = 'workshop';
+
+    } else if (destKey === 'bank' || /banco|cofre/i.test(qTitle)) {
+
+      targetLandmark = 'loc_bank';
+
+      targetDistrict = 'city_market';
+
+      destKey = 'bank';
+
+    } else if (destKey === 'inn' || /estalagem|martha|adega|porão/i.test(qTitle)) {
+
+      targetLandmark = 'loc_inn';
+
+      targetDistrict = 'city_south';
+
+      destKey = 'inn';
+
+      if (!actionCb) actionCb = 'inn_cellar_quest';
+
+    } else if (destKey === 'tavern' || /taverna|grom|javali/i.test(qTitle)) {
+
+      targetLandmark = 'loc_tavern';
+
+      targetDistrict = 'city_south';
+
+      destKey = 'tavern';
+
+      if (!actionCb) actionCb = 'tavern_drinks_open';
+
+    } else if (destKey === 'gates' || /portões|aldric|brael|fronteira|tomás/i.test(qTitle)) {
+
+      targetLandmark = 'loc_gates';
+
+      targetDistrict = 'city_south';
+
+      destKey = 'gates';
+
+      if (!actionCb) actionCb = 'gates_guard_open';
+
+    } else if (destKey === 'sewer' || destKey === 'shadow_alley' || /esgoto|grade|beco|sombras|velithra/i.test(qTitle)) {
+
+      targetLandmark = 'loc_sewer';
+
+      targetDistrict = 'city_south';
+
+      destKey = 'shadow_alley';
+
+      if (!actionCb) actionCb = 'shadow_alley_dealer';
+
+    } else if (destKey === 'guild' || /guilda|tavira|helga|recrutamento/i.test(qTitle)) {
+
+      targetLandmark = 'loc_guild';
+
+      targetDistrict = 'city_military';
+
+      destKey = 'guild';
+
+      if (!actionCb) actionCb = 'guild_bounties_open';
+
+    } else if (destKey === 'arena' || /arena|coliseu|brakos/i.test(qTitle)) {
+
+      targetLandmark = 'loc_arena';
+
+      targetDistrict = 'city_military';
+
+      destKey = 'arena';
+
+      if (!actionCb) actionCb = 'arena_challenge_open';
+
+    } else if (destKey === 'temple' || /templo|altar|luz|elara|maeve/i.test(qTitle)) {
+
+      targetLandmark = 'loc_temple';
+
+      targetDistrict = 'city_high';
+
+      destKey = 'temple';
+
+      if (!actionCb) actionCb = 'temple_bless';
+
+    } else if (destKey === 'runes' || /escriba|rúnico|runas/i.test(qTitle)) {
+
+      targetLandmark = 'loc_runes';
+
+      targetDistrict = 'city_high';
+
+      destKey = 'runes';
+
+    } else if (destKey === 'festival' || /festival|jogos/i.test(qTitle)) {
+
+      targetLandmark = 'loc_festival';
+
+      targetDistrict = 'city_high';
+
+      destKey = 'festival';
+
+    }
+
+
+
+    if (targetDistrict) res.districtIds[targetDistrict] = true;
+
+    if (targetLandmark) res.landmarkIds[targetLandmark] = true;
+
+    if (destKey)        res.venueKeys[destKey] = true;
+
+    if (actionCb)       res.actionCbs[actionCb] = true;
+
+    if (npcName) {
+
+      res.npcNames[npcName.toLowerCase()] = true;
+
+      var simpleName = npcName.toLowerCase().replace(/^(mestra|irmã|capitã|guarda|vigia|mestre)\s+/, '').split(/[\s,]/)[0];
+
+      if (simpleName) res.npcNames[simpleName] = true;
+
+    }
+
+    res.readyQuests.push({
+
+      id: q.serverId || q.id,
+
+      title: qTitle,
+
+      destKey: destKey,
+
+      landmarkId: targetLandmark,
+
+      districtId: targetDistrict,
+
+      actionCb: actionCb,
+
+      npcName: npcName
+
+    });
+
   }
+
+  return res;
+
+}
+
+
+
+// Verifica se um serviço ou opção de localidade corresponde a uma entrega de missão pronta
+
+function _isServiceQuestTurnin(venueKey, svc, readyLocs) {
+
+  if (!svc) return false;
+
+  if (svc.hasQuestTurnin === true) return true;
+
+  readyLocs = readyLocs || (typeof _getReadyQuestDeliveryLocations === 'function' ? _getReadyQuestDeliveryLocations() : null);
+
+  if (!readyLocs || !readyLocs.readyQuests || readyLocs.readyQuests.length === 0) return false;
+
+
+
+  var cb = String(svc.cb || '');
+
+  var lbl = String(svc.label || svc.name || '').toLowerCase();
+
+
+
+  // Match direto por actionCb
+
+  if (cb && readyLocs.actionCbs && readyLocs.actionCbs[cb]) return true;
+
+
+
+  // Match por prefixos conhecidos
+
+  for (var targetCb in readyLocs.actionCbs) {
+
+    if (targetCb && (cb.indexOf(targetCb) === 0 || targetCb.indexOf(cb) === 0)) return true;
+
+  }
+
+
+
+  // Match contextual por venueKey e keywords do serviço
+
+  var vKey = String(venueKey || '').toLowerCase();
+
+  var names = readyLocs.npcNames || {};
+
+
+
+  if (vKey === 'square') {
+
+    if ((names['lyana'] || names['lyana, a herbalista']) && (/investigar|npcs/i.test(lbl) || /square_investigate/i.test(cb))) return true;
+
+    if (readyLocs.actionCbs['square_bounty_officer_open'] && (/oficial|recompensa/i.test(lbl) || /bounty_officer/i.test(cb))) return true;
+
+  } else if (vKey === 'inn') {
+
+    if (names['martha'] && (/porão|adega|martha/i.test(lbl) || /cellar/i.test(cb))) return true;
+
+  } else if (vKey === 'tavern') {
+
+    if (names['grom'] && (/balcão|bebidas|refeições|grom/i.test(lbl) || /drinks/i.test(cb))) return true;
+
+  } else if (vKey === 'guild') {
+
+    if ((names['tavira'] || names['mestra tavira']) && (/contrato|caçada|recompensa/i.test(lbl) || /bounties|quests/i.test(cb))) return true;
+
+    if ((names['helga'] || names['capitã helga']) && (/treino|pátio|helga/i.test(lbl) || /training|hall/i.test(cb))) return true;
+
+  } else if (vKey === 'market') {
+
+    if (names['thorne'] && (/thorne|ferreiro|forja/i.test(lbl) || /blacksmith|weapons/i.test(cb))) return true;
+
+    if (names['sylvi'] && (/sylvi|erva|herbalista/i.test(lbl) || /herbs|alchemy/i.test(cb))) return true;
+
+    if (names['erlan'] && (/erlan|padaria/i.test(lbl) || /bakery/i.test(cb))) return true;
+
+    if (names['mirena'] && (/mirena|alquimi/i.test(lbl) || /alchemist/i.test(cb))) return true;
+
+  } else if (vKey === 'temple') {
+
+    if ((names['elara'] || names['irmã elara']) && (/bênção|elara/i.test(lbl) || /bless/i.test(cb))) return true;
+
+    if (names['maeve'] && (/altar|maeve/i.test(lbl) || /altar/i.test(cb))) return true;
+
+  } else if (vKey === 'gates') {
+
+    if ((names['aldric'] || names['guarda aldric']) && (/posto|guarda|aldric/i.test(lbl) || /guard/i.test(cb))) return true;
+
+    if (names['brael'] && (/batedor|brael/i.test(lbl) || /scout/i.test(cb))) return true;
+
+    if ((names['tomás'] || names['tomas']) && (/sentinela|tomás|ameias/i.test(lbl) || /patrol/i.test(cb))) return true;
+
+  } else if (vKey === 'arena') {
+
+    if ((names['brakos'] || names['mestre da arena']) && (/desafio|arena|combate/i.test(lbl) || /challenge|daily/i.test(cb))) return true;
+
+  } else if (vKey === 'shadow_alley' || vKey === 'sewer') {
+
+    if (names['velithra'] && (/velithra|contato|sombras/i.test(lbl) || /shadow|dealer/i.test(cb))) return true;
+
+  }
+
+
+
+  return false;
+
+}
+
+
+
+// Anota uma lista de serviços com hasQuestTurnin
+
+function _annotateServicesWithQuestTurnin(venueKey, services) {
+
+  if (!services || !Array.isArray(services)) return services;
+
+  var readyLocs = (typeof _getReadyQuestDeliveryLocations === 'function') ? _getReadyQuestDeliveryLocations() : null;
+
+  if (!readyLocs) return services;
+
+  services.forEach(function(s) {
+
+    if (_isServiceQuestTurnin(venueKey, s, readyLocs)) {
+
+      s.hasQuestTurnin = true;
+
+    }
+
+  });
+
+  return services;
+
+}
+
+
+
+/* ── MODAL POPUP EM TELA CHEIA: MAPA DA CIDADE DE VALDORIA ──────────────── */
+
+// Dados das 4 Regiões Urbanas de Valdoria (D&D 5e - Retículo Cartográfico Canônico)
+
+var CITY_DISTRICTS_DATA = {
+
+  'city_south': {
+
+    id: 'city_south',
+
+    name: 'Portões do Sul',
+
+    fullName: 'Portões do Sul & Muralhas de Valdoria',
+
+    img: '/shared/img/map/city_districts/city_south.webp',
+
+    landmarks: [
+
+      { id: 'loc_gates', name: 'Portões de Valdoria', x: 44, y: 66, cb: 'explore_main', desc: 'Muralhas fortificadas, sentinelas de vigília e saída sul rumo às planícies.', btnText: 'Ir até os' },
+
+      { id: 'loc_tavern', name: 'Taverna do Javali Bêbado', x: 18, y: 37, cb: 'tavern', desc: 'Canecas cheias de hidromel, lareira crepitante, descanso e boatos das estradas.', btnText: 'Ir até a' },
+
+      { id: 'loc_inn', name: 'Estalagem do Grifo', x: 76, y: 38, cb: 'inn', desc: 'Aposentos confortáveis, descanso reparador e adega subterrânea sob os cuidados de Martha.', btnText: 'Ir até a' },
+
+      { id: 'loc_sewer', name: 'Grade do Esgoto', x: 16, y: 18, cb: 'passagens_open_sewer', desc: 'Duto pluvial sob a muralha sul. Acesso trancado por correntes, ligado a rumores de infestações subterrâneas.', btnText: 'Ir até a' }
+
+    ]
+
+  },
+
+  'city_market': {
+
+    id: 'city_market',
+
+    name: 'Praça Mercantil',
+
+    fullName: 'Praça Mercantil & Grande Mercado',
+
+    img: '/shared/img/map/city_districts/city_market.webp',
+
+    landmarks: [
+
+      { id: 'loc_square', name: 'Praça Central', x: 50, y: 52, cb: 'square', desc: 'O coração pulsante da capital: pregoeiros, bardos, jogos de dados e contratações.', btnText: 'Ir até a' },
+
+      { id: 'loc_market', name: 'Mercado Central', x: 51, y: 82, cb: 'market', desc: 'Bancas de mercadores, ferreiros, boticários, armaduras e suprimentos de marcha.', btnText: 'Ir até o' },
+
+      { id: 'loc_bank', name: 'Banco & Cofre', x: 24, y: 32, cb: 'bank', desc: 'Cofres de pedra maciça, cambistas juramentados e guarda segura para suas riquezas.', btnText: 'Ir até o' },
+
+      { id: 'loc_workshop', name: 'Oficina & Forja', x: 76, y: 35, cb: 'open_workshop', desc: 'Forjas incandescentes, conserto de lâminas, bigornas e aprimoramento de armas.', btnText: 'Ir até a' }
+
+    ]
+
+  },
+
+  'city_military': {
+
+    id: 'city_military',
+
+    name: 'Arena & Quartel',
+
+    fullName: 'Arena do Coliseu & Quartel da Guilda',
+
+    img: '/shared/img/map/city_districts/city_military.webp',
+
+    landmarks: [
+
+      { id: 'loc_arena', name: 'Arena do Coliseu', x: 27, y: 55, cb: 'arena', desc: 'Fosso circular de combate com torneios sangrentos, aplausos e glória militar.', btnText: 'Ir até a' },
+
+      { id: 'loc_guild', name: 'Guilda dos Mercenários', x: 78, y: 35, cb: 'guild', desc: 'Quartel de guerreiros experientes sob a comandante Tavira: recrutamento e gestão.', btnText: 'Ir até a' }
+
+    ]
+
+  },
+
+  'city_high': {
+
+    id: 'city_high',
+
+    name: 'Acrópole Sagrada',
+
+    fullName: 'Acrópole Sagrada & Santuário da Luz',
+
+    img: '/shared/img/map/city_districts/city_high.webp',
+
+    landmarks: [
+
+      { id: 'loc_temple', name: 'Templo da Luz Sagrada', x: 30, y: 44, cb: 'temple', desc: 'Altar divino onde sacerdotes concedem bênçãos, curas milagrosas e ritos sagrados.', btnText: 'Ir até o' },
+
+      { id: 'loc_runes', name: 'Escriba Rúnico', x: 76, y: 46, cb: 'rune_scribe', desc: 'Pergaminhos místicos, encantamentos arcanos, transmutação e runas de poder.', btnText: 'Ir até o' },
+
+      { id: 'loc_festival', name: 'Festival da Capital', x: 50, y: 78, cb: 'festival', desc: 'Música festiva, torneios de pontaria, hidromel e comemorações nas ruas.', btnText: 'Ir até o' }
+
+    ]
+
+  }
+
 };
+
+
 
 var _currentCityDistrict = 'city_south';
 
+
+
 function _openCityMapModal(initialDistrictId, initialLandmarkId) {
+
   var modal = document.getElementById('city-map-fullscreen-modal');
+
   if (!modal) {
+
     modal = document.createElement('div');
+
     modal.id = 'city-map-fullscreen-modal';
+
     modal.className = 'city-map-fullscreen-modal';
+
     document.body.appendChild(modal);
+
   }
+
+
 
   _currentCityDistrict = (initialDistrictId && CITY_DISTRICTS_DATA[initialDistrictId]) ? initialDistrictId : 'city_south';
+
   var district = CITY_DISTRICTS_DATA[_currentCityDistrict];
 
+
+
   modal.innerHTML = ''
+
     + '<div class="cfm-header">'
+
     + '  <div class="cfm-header-title"><span id="cfm-header-text">' + district.fullName + '</span></div>'
+
     + '  <button type="button" class="cfm-close-btn" onclick="_closeCityMapModal()">✕ Fechar</button>'
+
     + '</div>'
+
     + '<div class="cfm-viewport">'
+
     + '  <div class="cfm-stage">'
+
     + '    <img class="cfm-img" id="cfm-city-img" src="' + district.img + '" alt="Mapa do Local">'
+
     + '    <div class="cfm-pins-layer" id="cfm-pins-layer"></div>'
+
     + '  </div>'
+
     + '</div>'
+
     + '<div class="cfm-drawer" id="cfm-drawer">'
+
     + '  <div class="cfm-drawer-info">'
+
     + '    <div class="cfm-drawer-name" id="cfm-drawer-name"><span class="cfm-prompt-hint">Toque em um local no mapa</span></div>'
+
     + '  </div>'
+
     + '  <button type="button" class="cfm-drawer-action-btn" id="cfm-drawer-act-btn" style="display:none;"></button>'
+
     + '</div>';
 
+
+
   var cityImgEl = modal.querySelector('#cfm-city-img');
+
   var pinsLayer = modal.querySelector('#cfm-pins-layer');
+
   var drawerName = modal.querySelector('#cfm-drawer-name');
+
   var drawerBtn = modal.querySelector('#cfm-drawer-act-btn');
+
   var headerText = modal.querySelector('#cfm-header-text');
 
+
+
   function _wireImageFallbacks(imgEl, distId) {
+
     var attempts = 0;
+
     imgEl.onerror = function() {
+
       attempts++;
+
       var fallbacks = [
+
         '/shared/img/map/city_districts/' + distId + '.webp',
+
         '../shared/img/map/city_districts/' + distId + '.webp',
+
         'shared/img/map/city_districts/' + distId + '.webp',
+
         './shared/img/map/city_districts/' + distId + '.webp'
+
       ];
+
       if (attempts < fallbacks.length) {
+
         this.src = fallbacks[attempts];
+
       }
+
     };
+
   }
+
+
 
   function _selectLandmark(lm) {
+
     drawerName.textContent = lm.name;
+
     drawerBtn.textContent = lm.btnText;
+
     drawerBtn.style.display = 'inline-flex';
+
     drawerBtn.onclick = function() {
+
       if (typeof haptic === 'function') haptic('medium');
+
       if (lm.cb) {
+
         if (lm.cb !== 'passagens_open_sewer') {
+
           _closeCityMapModal();
+
         }
+
         if (typeof doAction === 'function') doAction(lm.cb);
+
       }
+
     };
 
+
+
     var pins = pinsLayer.querySelectorAll('.cfm-pin');
+
     pins.forEach(function(p) {
+
       p.classList.toggle('active', p.getAttribute('data-id') === lm.id);
+
     });
+
   }
+
+
 
   function _renderDistrictPins(distData) {
+
     pinsLayer.innerHTML = '';
+
     var lms = distData.landmarks || [];
+
     if (lms.length === 0) return;
 
+
+
+    var readyLocs = (typeof _getReadyQuestDeliveryLocations === 'function') ? _getReadyQuestDeliveryLocations() : { landmarkIds: {} };
+
     lms.forEach(function(lm) {
+
       var pin = document.createElement('div');
+
       pin.className = 'cfm-pin';
+
       pin.setAttribute('data-id', lm.id);
+
       pin.style.left = lm.x + '%';
+
       pin.style.top = lm.y + '%';
 
+
+
+      var hasTurnin = !!(readyLocs && readyLocs.landmarkIds && readyLocs.landmarkIds[lm.id]);
+
+      if (hasTurnin) pin.classList.add('has-quest-turnin');
+
+
+
       pin.innerHTML = ''
-        + '<div class="cfm-pin-reticle"></div>'
+
+        + '<div class="cfm-pin-reticle">'
+
+        + (hasTurnin ? '<div class="cfm-quest-turnin-badge" aria-label="Missão pronta para entrega">?</div>' : '')
+
+        + '</div>'
+
         + '<div class="cfm-pin-badge">' + lm.name + '</div>';
 
+
+
       pin.addEventListener('click', function(e) {
+
         e.stopPropagation();
+
         if (typeof haptic === 'function') haptic('light');
+
         _selectLandmark(lm);
+
       });
 
+
+
       pinsLayer.appendChild(pin);
+
     });
 
+
+
     // Estado inicial: nenhum local selecionado por padrão
+
     drawerName.innerHTML = '<span class="cfm-prompt-hint">Toque em um local no mapa</span>';
+
     drawerBtn.style.display = 'none';
+
     drawerBtn.onclick = null;
+
   }
+
+
 
   _wireImageFallbacks(cityImgEl, _currentCityDistrict);
+
   _renderDistrictPins(district);
 
+
+
   if (initialLandmarkId && district && Array.isArray(district.landmarks)) {
+
     var foundLm = district.landmarks.find(function(l){ return l.id === initialLandmarkId; });
+
     if (foundLm) _selectLandmark(foundLm);
+
   }
+
+
 
   modal.style.display = 'flex';
+
   document.body.classList.add('city-modal-open');
+
 }
+
+
 
 function _closeCityMapModal() {
+
   var modal = document.getElementById('city-map-fullscreen-modal');
+
   if (modal) {
+
     modal.style.display = 'none';
+
   }
+
   document.body.classList.remove('city-modal-open');
+
 }
 
+
+
 window._openCityMapModal = _openCityMapModal;
+
 window._closeCityMapModal = _closeCityMapModal;
+
 window._toggleHallSubmenu = _toggleHallSubmenu;
+
 window._openFooterSubItem = _openFooterSubItem;
 // === SYNC_REGION END ===
 
@@ -543,44 +1381,83 @@ window._openFooterSubItem = _openFooterSubItem;
  */
 // === SYNC_REGION: _buildHubAlly BEGIN ===
 function _buildHubAlly(a) {
+
     var card = _hubDiv('hub-ally');
+
     if (a.type === 'player') card.classList.add('player');
+
     if (a.dead) card.classList.add('dead');
 
+
+
     /* Emoji icon */
+
     var ico = _hubSpan('ha-ico', a.ico || '');
+
     card.appendChild(ico);
 
+
+
     /* Info column: name + bars */
+
     var info = _hubDiv('ha-info');
 
+
+
     /* Name + Level */
+
     var nameEl = _hubDiv('ha-name');
+
     nameEl.textContent = a.n || '';
+
     if (a.l > 0) {
+
         var lvlEl = _hubSpan('ha-lvl', ' Nv' + a.l);
+
         nameEl.appendChild(lvlEl);
+
     }
+
     info.appendChild(nameEl);
 
+
+
     /* HP bar (3px) */
+
     if (a.mhp > 0 && !a.dead) {
+
         var hpPct = Math.min(100, Math.max(0, Math.round((a.hp / a.mhp) * 100)));
+
         info.appendChild(_hubMiniBar('hp', hpPct));
+
     } else if (a.dead) {
+
         var deadLbl = _hubDiv('ha-dead');
+
         deadLbl.textContent = '\uD83D\uDC80';
+
         info.appendChild(deadLbl);
+
     }
+
+
 
     /* MP bar (3px) — only if ally has mana */
+
     if (a.mmp > 0 && !a.dead) {
+
         var mpPct = Math.min(100, Math.max(0, Math.round((a.mp / a.mmp) * 100)));
+
         info.appendChild(_hubMiniBar('mp', mpPct));
+
     }
 
+
+
     card.appendChild(info);
+
     return card;
+
 }
 // === SYNC_REGION END ===
 
@@ -611,83 +1488,161 @@ function _hubMiniBar(type, pct) {
  */
 // === SYNC_REGION: _buildLocCell BEGIN ===
 /* 2026-05-16: city location PNG map — generated by scripts/generate_city_icons.py.
+
    16 locais × 4 setores. Keyed por callback (loc.cb em CITY_LOCATIONS). */
+
 var CITY_LOC_PNG_AVAILABLE = {
+
     'tavern': 1, 'inn': 1, 'rel_main': 1, 'action_quests': 1,
+
     'market': 1, 'bank': 1, 'open_workshop': 1, 'rune_scribe': 1,
+
     'guild': 1, 'gates': 1, 'arena': 1, 'daily_challenge': 1,
+
     'temple': 1, 'square': 1, 'action_codex': 1, 'festival': 1
+
 };
+
 function _cityLocIconHTML(cb, fallbackIco) {
+
     if (cb && CITY_LOC_PNG_AVAILABLE[cb]) {
+
         var base = '../valdoria-webapp/shared/img/city/';
+
         var loc = (typeof location !== 'undefined') ? location.href : '';
+
         if (loc.indexOf('file://') === 0) {
+
             base = '../valdoria-webapp/shared/img/city/';
+
         }
+
         /* Sessão #28 (2026-05-24): ?v=<bundle-hash> força cache bust pra browsers
+
            que tinham as PNGs com Cache-Control:immutable do header anterior.
+
            Sem isso, browsers servem versão velha (1.5MB) por até 1 ano sem nem
+
            consultar o servidor. Tier C (no-cache + ETag) só pega efeito em URLs
+
            novas — daí o sufixo. Date.now() fallback se bundle hash falhar.
+
            Sessão #56 (2026-05-28): FIX P0 cidade images — formato dos arquivos
+
            é .webp (gerado via OpenAI + Pillow + save_optimized kind='scenery'),
+
            NÃO .png. Antes o <img src="...tavern.png"> 404ava + onerror sumia o
+
            elemento. User reportou: "imagens taverna/missões/mercado/templo não
+
            aparecem". Fix: src usa .webp matching o filesystem. */
+
         var v = (typeof window !== 'undefined' && window.VBUNDLE_HASH) || Date.now();
+
         return '<img class="hl-ico-img" src="' + base + cb + '.webp?v=' + v + '" ' +
+
                'alt="" loading="lazy" ' +
+
                'onerror="this.onerror=null;this.outerHTML=\'\'">';
+
     }
+
     if (typeof fallbackIco === 'string' && fallbackIco.indexOf('<svg') === 0) {
+
         return fallbackIco;
+
     }
+
     return fallbackIco || '';
+
 }
+
 function _buildLocCell(ico, name, btn) {
+
     var cell = _hubDiv('hub-loc');
 
+
+
     /* USER REQUEST 2026-05-05: data-cb pra CSS aplicar cor temática por local
+
        (evita "tudo gold" — cada local tem sua cor heráldica natural). */
+
     if (btn && btn.cb) cell.setAttribute('data-cb', btn.cb);
 
+
+
     /* Sessão #63 (2026-05-30) — User pediu as IMAGENS geradas dos locais de
+
        volta, EM DESTAQUE no topo do card. Histórico: #56 mostrava como
+
        iconezinho 36px lateral; #62 removeu (user achou "ícone ao lado do nome"
+
        poluído); agora user quer as ilustrações .webp visíveis como thumbnail
+
        proeminente. _cityLocIconHTML retorna <img .webp> p/ locais em
+
        CITY_LOC_PNG_AVAILABLE; layout via .hl-thumb (CSS no <style> inline).
+
        Só adiciona se há imagem real (.webp) — fallback SVG/vazio = só nome. */
+
     var thumbHtml = (typeof _cityLocIconHTML === 'function') ? _cityLocIconHTML(btn && btn.cb, ico) : '';
+
     if (thumbHtml && thumbHtml.indexOf('<img') === 0) {
+
         var thumb = _hubDiv('hl-thumb');
+
         thumb.innerHTML = thumbHtml;
+
         cell.appendChild(thumb);
+
     }
+
+
 
     /* Label */
+
     var nmEl = _hubDiv('hl-nm');
+
     nmEl.textContent = name;
+
     cell.appendChild(nmEl);
 
+
+
     /* Badge (se o texto do botao tem "(N)") */
+
     var badgeCount = _extractBadge(btn.text);
+
     if (badgeCount > 0) {
+
         var badge = _hubDiv('hl-badge');
+
         badge.textContent = String(badgeCount);
+
         cell.appendChild(badge);
+
     }
+
+
 
     /* Click handler */
+
     if (btn.cb) {
+
         cell.addEventListener('click', function () {
+
             if (typeof haptic === 'function') haptic('medium');
+
             if (typeof doAction === 'function') doAction(btn.cb);
+
         });
+
     }
 
+
+
     return cell;
+
 }
 // === SYNC_REGION END ===
 
@@ -698,37 +1653,69 @@ function _buildLocCell(ico, name, btn) {
  */
 // === SYNC_REGION: _buildQuestRow BEGIN ===
 function _buildQuestRow(q) {
+
     var row = _hubDiv('hub-quest');
+
     row.style.cursor = 'pointer';
 
+
+
     /* Icon */
+
     var icoEl = _hubSpan('hq-ico');
+
     icoEl.innerHTML = _uiIcoImg('missoes', 'ui-ico-img');
+
     row.appendChild(icoEl);
 
+
+
     /* Title text */
+
     var textEl = _hubSpan('hq-text');
+
     textEl.textContent = q.title || '';
+
     row.appendChild(textEl);
 
+
+
     /* Status indicator */
+
     var statusEl = _hubSpan('hq-status');
+
     if (q.ready) {
+
         statusEl.textContent = '\u2713'; /* check mark — pronta para entregar */
+
     } else {
+
         statusEl.textContent = (q.stage || 0) + '/' + (q.total || 0);
+
     }
+
     row.appendChild(statusEl);
 
+
+
     /* Click -> quest detail */
+
     if (q.cb) {
+
         row.addEventListener('click', function () {
+
             if (typeof haptic === 'function') haptic('light');
+
             if (typeof doAction === 'function') doAction(q.cb);
+
         });
+
     }
 
+
+
     return row;
+
 }
 // === SYNC_REGION END ===
 

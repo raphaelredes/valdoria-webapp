@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-11-07T05:40:27Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-11-07T15:54:58Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -22008,7 +22008,7 @@ async function simResolveEndTurnConditions(s, unitIdx) {
                 await new Promise(function (res) {
                     showDice(d20, res, u, null, {
                         postResult: function () {
-                            var _kicker = '🛡️ SALVAGUARDA DE FIM DE TURNO (' + abPt + ')';
+                            var _kicker = '◆ SALVAGUARDA DE FIM DE TURNO (' + abPt + ')';
                             var _rows = [
                                 { l: 'Dado (d20)', v: String(d20) },
                                 { l: 'Mod ' + abPt, v: (smod >= 0 ? '+' : '') + smod },
@@ -22022,7 +22022,7 @@ async function simResolveEndTurnConditions(s, unitIdx) {
                                 _pills.push('<span class="dmg-pill dmg-pill--crit">✗ Falha (Efeito Mantém-se)</span>');
                             }
                             if (_rsAdv && _rsAdv.adv) {
-                                _pills.push('<span class="dmg-pill dmg-pill--type">✨ ' + escHtml(_rsAdv.label || 'Vantagem Racial') + '</span>');
+                                _pills.push('<span class="dmg-pill dmg-pill--type">✦ ' + escHtml(_rsAdv.label || 'Vantagem Racial') + '</span>');
                             }
                             _pills.push('<span class="dmg-pill dmg-pill--conc">Condição: ' + escHtml(_condLbl) + '</span>');
 
@@ -22064,7 +22064,7 @@ async function simResolveEndTurnConditions(s, unitIdx) {
                 if (_rsEl && typeof spawnSkillImpactLabel === 'function') {
                     spawnSkillImpactLabel(
                         _rsEl,
-                        ok ? ('🔓 LIVRE: ' + String(_condLbl).toUpperCase() + '!') : ('🔒 MANTEVE: ' + String(_condLbl).toUpperCase() + '!'),
+                        ok ? ('◆ LIVRE: ' + String(_condLbl).toUpperCase() + '!') : ('◇ RETIDO: ' + String(_condLbl).toUpperCase() + '!'),
                         ok ? 'heal' : 'condition'
                     );
                 }
@@ -22667,11 +22667,11 @@ function _simSaveAdvDetails(defender, ability, skill) {
         defender.se.forEach(function (st) {
             if (!st || (st.turnsLeft != null && st.turnsLeft <= 0)) return;
             /* Restrained (PHB App.A): desvantagem em saves DES */
-            if (st.restrained && ab === 'dex') disReasons.push('🕸️ Contido (TR DES)');
+            if (st.restrained && ab === 'dex') disReasons.push('◇ Contido (TR DES)');
             /* magicSaveAdvantage: saves contra magia com vantagem (Contramágica, Prot Magia) */
-            if (st.magicSaveAdvantage) advReasons.push('✨ Resistência à Magia');
+            if (st.magicSaveAdvantage) advReasons.push('✦ Resistência à Magia');
             /* Generic flags for future use */
-            if (st.saveAdvantage) advReasons.push(st.n ? ('✨ ' + st.n) : '✨ Vantagem em TR');
+            if (st.saveAdvantage) advReasons.push(st.n ? ('✦ ' + st.n) : '✦ Vantagem em TR');
             if (st.saveDisadvantage) disReasons.push(st.n ? ('' + st.n) : 'Desvantagem em TR');
         });
     }
@@ -23462,7 +23462,7 @@ function simCalcHitChanceDnd5e(s, attacker, defender, skill) {
     var atkParts = ['Prof +' + profVal];
     if (attrVal !== 0) atkParts.push('Atrib ' + (attrVal >= 0 ? '+' : '') + attrVal + (attacker.attr ? ' ' + attacker.attr : ''));
     if (statusAtk !== 0) atkParts.push('Buffs ' + (statusAtk >= 0 ? '+' : '') + statusAtk);
-    if (elevBonus !== 0) atkParts.push((elevBonus > 0 ? '⛰️ Elevado +' : '▼ Baixo ') + elevBonus);
+    if (elevBonus !== 0) atkParts.push((elevBonus > 0 ? '▲ Elevado +' : '▼ Baixo ') + elevBonus);
 
     var acParts = ['Base ' + baseAc];
     if (statusAc !== 0) acParts.push('Efeitos ' + (statusAc >= 0 ? '+' : '') + statusAc);
@@ -23605,45 +23605,45 @@ function simResolveUnitTraitsDnd5e(u) {
         var extraAtks = (typeof simClassExtraAttacks === 'function') ? simClassExtraAttacks(cls, lvl) : 0;
         if (extraAtks > 0) {
             var totAtks = 1 + extraAtks;
-            addTrait('Ataque Extra (' + totAtks + '×)', '⚔️', 'Realiza ' + totAtks + ' ataques com arma na ação Atacar .');
+            addTrait('Ataque Extra (' + totAtks + '×)', '⚔', 'Realiza ' + totAtks + ' ataques com arma na ação Atacar .');
         }
         if (u.critRange && u.critRange < 20) {
-            addTrait('Crítico Aprimorado (' + u.critRange + '–20)', '🎯', 'Acertos críticos nas rolagens naturais de ' + u.critRange + ' a 20 .');
+            addTrait('Crítico Aprimorado (' + u.critRange + '–20)', '◆', 'Acertos críticos nas rolagens naturais de ' + u.critRange + ' a 20 .');
         }
         if (cls === 'Ladino') {
             var snkDice = Math.ceil(lvl / 2);
-            addTrait('Ataque Furtivo (' + snkDice + 'd6)', '🗡️', '+' + snkDice + 'd6 de dano extra 1×/turno com Vantagem ou aliado adjacente ao alvo .');
-            if (lvl >= 5) addTrait('Esquiva Sobrenatural (Nv 5)', '💨', 'Usa Reação para reduzir à metade o dano de um ataque que possa ver .');
-            if (lvl >= 7) addTrait('Evasão (Nv 7)', '🛡️', 'TR de DES para metade do dano: 0 dano em sucesso, metade em falha .');
+            addTrait('Ataque Furtivo (' + snkDice + 'd6)', '◆', '+' + snkDice + 'd6 de dano extra 1×/turno com Vantagem ou aliado adjacente ao alvo .');
+            if (lvl >= 5) addTrait('Esquiva Sobrenatural (Nv 5)', '◇', 'Usa Reação para reduzir à metade o dano de um ataque que possa ver .');
+            if (lvl >= 7) addTrait('Evasão (Nv 7)', '◆', 'TR de DES para metade do dano: 0 dano em sucesso, metade em falha .');
         }
         if (cls === 'Monge') {
-            addTrait('Artes Marciais (1d' + (u.die || 4) + ')', '🥋', 'Dado de dano desarmado/monge escalado pelo nível .');
-            if (lvl >= 3) addTrait('Defletir Projéteis (Nv 3)', '🏹', 'Reação para reduzir o dano de ataques à distância em 1d10 + DES + nível .');
-            if (lvl >= 7) addTrait('Evasão (Nv 7)', '🛡️', 'TR de DES para metade do dano: 0 dano em sucesso, metade em falha .');
+            addTrait('Artes Marciais (1d' + (u.die || 4) + ')', '◆', 'Dado de dano desarmado/monge escalado pelo nível .');
+            if (lvl >= 3) addTrait('Defletir Projéteis (Nv 3)', '◆', 'Reação para reduzir o dano de ataques à distância em 1d10 + DES + nível .');
+            if (lvl >= 7) addTrait('Evasão (Nv 7)', '◆', 'TR de DES para metade do dano: 0 dano em sucesso, metade em falha .');
         }
         if (cls === 'Paladino' && lvl >= 6) {
             var chaMod = Math.max(1, Math.floor(((u.cha || 14) - 10) / 2));
-            addTrait('Aura de Proteção (+' + chaMod + ')', '✨', 'Concede +' + chaMod + ' em todos os Testes de Resistência a até 3m .');
+            addTrait('Aura de Proteção (+' + chaMod + ')', '✦', 'Concede +' + chaMod + ' em todos os Testes de Resistência a até 3m .');
         }
         if (cls === 'Bárbaro') {
-            addTrait('Defesa Sem Armadura & Fúria', '🔥', 'Resistência a dano físico contundente, cortante e perfurante enquanto em Fúria .');
+            addTrait('Defesa Sem Armadura & Fúria', '◆', 'Resistência a dano físico contundente, cortante e perfurante enquanto em Fúria .');
             if (lvl >= 2) addTrait('Sentido de Perigo (Nv 2)', '⚡', 'Vantagem em Testes de Resistência de Destreza contra efeitos visíveis .');
         }
         if (u.arcaneWardMax > 0) {
-            addTrait('Égide Arcana (' + (u.arcaneWardHp || 0) + '/' + u.arcaneWardMax + ' PV)', '🛡️', 'Barreira mágica de Abjuração que absorve dano antes dos PV .');
+            addTrait('Égide Arcana (' + (u.arcaneWardHp || 0) + '/' + u.arcaneWardMax + ' PV)', '◆', 'Barreira mágica de Abjuração que absorve dano antes dos PV .');
         }
         if (u.superiorityDice > 0) {
-            addTrait('Dados de Superioridade (' + u.superiorityDice + '×)', '⚔️', 'Manobras táticas do Mestre de Batalha (Ripostar, Aparar, Ataque de Derrubar — ).');
+            addTrait('Dados de Superioridade (' + u.superiorityDice + '×)', '⚔', 'Manobras táticas do Mestre de Batalha (Ripostar, Aparar, Ataque de Derrubar — ).');
         }
         if (u.wildShapeUses != null && cls === 'Druida' && lvl >= 2) {
-            addTrait('Forma Selvagem (' + u.wildShapeUses + ' usos)', '🐾', 'Transforma-se em besta com PV e ataques próprios .');
+            addTrait('Forma Selvagem (' + u.wildShapeUses + ' usos)', '✦', 'Transforma-se em besta com PV e ataques próprios .');
         }
         if (u.protect_player_when_low) {
-            addTrait('Guarda-Costas Leal', '🛡️', 'Prioriza interceptar inimigos e proteger o aventureiro quando ferido.');
+            addTrait('Guarda-Costas Leal', '◆', 'Prioriza interceptar inimigos e proteger o aventureiro quando ferido.');
         }
     } else {
         if ((u.multiAttack | 0) > 1) {
-            addTrait('Ataque Múltiplo (' + u.multiAttack + '×)', '⚔️', 'Realiza ' + u.multiAttack + ' ataques no mesmo turno de combate.');
+            addTrait('Ataque Múltiplo (' + u.multiAttack + '×)', '⚔', 'Realiza ' + u.multiAttack + ' ataques no mesmo turno de combate.');
         }
         if (u.packTactics) {
             addTrait('Táticas de Matilha', '🐺', 'Recebe Vantagem nas rolagens de ataque quando um aliado não-incapacitado está adjacente ao alvo.');
@@ -24897,7 +24897,7 @@ function describeDeathSavePreview(u, r, postState) {
         resLabel = 'Crítico (Recupera 1 PV)';
         resNote = '20 Natural! O combatente recupera 1 PV de imediato, desperta e volta a agir.';
         resPills.push('<span class="dmg-pill dmg-pill--crit">20 Natural</span>');
-        resPills.push('<span class="dmg-pill dmg-pill--buff">✨ Recupera 1 PV</span>');
+        resPills.push('<span class="dmg-pill dmg-pill--buff">✦ Recupera 1 PV</span>');
         resPills.push('<span class="dmg-pill dmg-pill--save">Consciência Restaurada</span>');
         ruleLine = '20 Natural no teste contra a morte recupera 1 PV de imediato e acorda.';
     } else if (r === 1) {
@@ -24908,7 +24908,7 @@ function describeDeathSavePreview(u, r, postState) {
             ? 'Natural 1! Acumulou 2 falhas, atingindo 3 falhas e causando o falecimento do personagem.'
             : 'Natural 1! A gravidade dos ferimentos inflige duas falhas imediatas no teste de morte!';
         resPills.push('<span class="dmg-pill dmg-pill--crit">1 Natural (2 Falhas)</span>');
-        if (isDeadNow) resPills.push('<span class="dmg-pill dmg-pill--vuln">💀 Óbito</span>');
+        if (isDeadNow) resPills.push('<span class="dmg-pill dmg-pill--vuln">◇ Óbito</span>');
         ruleLine = '1 Natural conta como duas falhas no teste contra a morte.';
     } else if (r >= 10) {
         resTitle = isStableNow ? 'ESTABILIZOU (3 Sucessos)' : 'Sucesso no teste de morte';
@@ -24928,7 +24928,7 @@ function describeDeathSavePreview(u, r, postState) {
             ? 'Três falhas acumuladas resultam no falecimento do personagem.'
             : 'Rolagem ' + r + ' < 10 falhou! Acumula ' + nf + '/3 falhas (3 falhas causam a morte).';
         resPills.push('<span class="dmg-pill dmg-pill--crit">✗ Falha (<10)</span>');
-        if (isDeadNow) resPills.push('<span class="dmg-pill dmg-pill--vuln">💀 Óbito</span>');
+        if (isDeadNow) resPills.push('<span class="dmg-pill dmg-pill--vuln">◇ Óbito</span>');
         ruleLine = isDeadNow ? 'Três falhas acumuladas resultam em morte.' : 'Acumula ' + nf + '/3 falhas.';
     }
 
@@ -57004,52 +57004,52 @@ async function __combatAnimateOneEvent(ev) {
                     : (kind === 'reaction_sentinel'
                         ? 'SENTINELA!'
                         : (kind === 'reaction_riposte'
-                            ? '⚔️ RESPOSTA!'
+                            ? '⚔ RESPOSTA!'
                             : (kind === 'reaction_retaliation'
-                                ? '🔥 RETALIAÇÃO!'
+                                ? '◆ RETALIAÇÃO!'
                                 : (kind === 'reaction_giant_killer'
-                                    ? '🏹 MATADOR DE GIGANTES!'
+                                    ? '◆ MATADOR DE GIGANTES!'
                                     : (kind === 'whirlwind_sub'
-                                        ? '🌪️ ATAQUE GIRATÓRIO!'
+                                        ? '◆ ATAQUE GIRATÓRIO!'
                                         : (kind === 'volley_sub'
-                                            ? '🏹 SALVA DE FLECHAS!'
+                                            ? '◆ SALVA DE FLECHAS!'
                                             : (kind === 'horde_breaker_sub'
-                                                ? '⚔️ QUEBRADOR DE HORDAS!'
+                                                ? '⚔ QUEBRADOR DE HORDAS!'
                                                 : (kind === 'split_enchantment_sub'
-                                                    ? '✨ ENCANTAMENTO DIVIDIDO!'
+                                                    ? '✦ ENCANTAMENTO DIVIDIDO!'
                                                     : (ev.skillName ? (ev.skillName.toUpperCase() + _attackSeqSuffix + '!') : ('ATAQUE' + _attackSeqSuffix + '!')))))))))));
             spawnSkillImpactLabel(elT, _lblTxt, ev.crit ? 'crit' : 'attack');
             if (ev.sneakAttack && ev.sneakTotal) {
-                spawnSkillImpactLabel(elT, '🗡️ ATAQUE FURTIVO (+' + (ev.sneakTotal | 0) + ')!', 'crit');
+                spawnSkillImpactLabel(elT, '◆ ATAQUE FURTIVO (+' + (ev.sneakTotal | 0) + ')!', 'crit');
             }
             if (ev.divineSmite && ev.smiteTotal) {
                 spawnSkillImpactLabel(elT, '✦ PUNIÇÃO DIVINA (+' + (ev.smiteTotal | 0) + ')!', 'crit');
             }
             if (ev.flanked) {
-                spawnSkillImpactLabel(elT, '⚔️ FLANQUEADO (+VANTAGEM)!', 'attack');
+                spawnSkillImpactLabel(elT, '⚔ FLANQUEADO (+VANTAGEM)!', 'attack');
             }
             if (_isRemImm) {
-                spawnSkillImpactLabel(elT, '🚫 IMUNE (0 DANO)!', 'buff');
+                spawnSkillImpactLabel(elT, '◇ IMUNE (0 DANO)!', 'buff');
             } else if (_isRemVuln) {
-                spawnSkillImpactLabel(elT, '💥 VULNERABILIDADE (2× DANO)!', 'crit');
+                spawnSkillImpactLabel(elT, '◆ VULNERABILIDADE (2× DANO)!', 'crit');
             } else if (_isRemRes) {
-                spawnSkillImpactLabel(elT, '🛡️ RESISTÊNCIA (½ DANO)!', 'buff');
+                spawnSkillImpactLabel(elT, '◆ RESISTÊNCIA (½ DANO)!', 'buff');
             }
             if (ev.uncannyDodge) {
-                spawnSkillImpactLabel(elT, '🛡️ ESQUIVA SOBRENATURAL (½ DANO)!', 'buff');
+                spawnSkillImpactLabel(elT, '◆ ESQUIVA SOBRENATURAL (½ DANO)!', 'buff');
             }
             if (ev.heavyArmorMasterReduced > 0) {
-                spawnSkillImpactLabel(elT, '🛡️ ARMADURA PESADA (-' + (ev.heavyArmorMasterReduced | 0) + ')!', 'buff');
+                spawnSkillImpactLabel(elT, '◆ ARMADURA PESADA (-' + (ev.heavyArmorMasterReduced | 0) + ')!', 'buff');
             }
             var _deflectAmt = (ev.deflectReduction || (ev.deflectMissiles && ev.deflectMissiles.reduced) || 0) | 0;
             if (_deflectAmt > 0) {
-                spawnSkillImpactLabel(elT, '✋ DESVIAR PROJÉTEIS (-' + _deflectAmt + ')!', 'buff');
+                spawnSkillImpactLabel(elT, '◆ DESVIAR PROJÉTEIS (-' + _deflectAmt + ')!', 'buff');
             }
             if (ev.parry && ev.parry.reduced > 0) {
-                spawnSkillImpactLabel(elT, '⚔️ APARAR (-' + (ev.parry.reduced | 0) + ')!', 'buff');
+                spawnSkillImpactLabel(elT, '⚔ APARAR (-' + (ev.parry.reduced | 0) + ')!', 'buff');
             }
             if (ev.tempHpAbsorbed > 0) {
-                spawnSkillImpactLabel(elT, '🛡️ PV TEMP ABSORVEU ' + (ev.tempHpAbsorbed | 0) + '!', 'buff');
+                spawnSkillImpactLabel(elT, '◆ PV TEMP ABSORVEU ' + (ev.tempHpAbsorbed | 0) + '!', 'buff');
             }
         }
         if (typeof _spawnFloatingDmgNumber === 'function' && tU) {
@@ -57259,7 +57259,7 @@ async function __combatAnimateOneEvent(ev) {
                                 title: isNat20 ? 'NATURAL 20' : (isNat1 ? 'NATURAL 1' : (isSuccess ? 'Sucesso no teste de morte' : 'Falha no teste de morte')),
                                 cls: isNat20 ? 'crit' : (isSuccess ? 'hit' : 'miss'),
                                 subStructured: {
-                                    kicker: '💀 SALVAGUARDA CONTRA A MORTE',
+                                    kicker: '◆ SALVAGUARDA CONTRA A MORTE',
                                     trackerHtml: trackerHtmlF,
                                     rows: [
                                         { l: 'd20 Rolado', v: String(ev.d20) },
@@ -57312,10 +57312,10 @@ async function __combatAnimateOneEvent(ev) {
                 spawnSkillImpactLabel(dsEl, '✕ NAT 1: DUAS FALHAS!', 'fumble');
             } else if (ev.d20 >= 10) {
                 var isStable = (targetUnit_ds && targetUnit_ds.stable) || ev.stable;
-                spawnSkillImpactLabel(dsEl, isStable ? '✦ ESTABILIZOU (3 SUCESSOS)!' : '🛡️ SUCESSO CONTRA A MORTE!', 'buff');
+                spawnSkillImpactLabel(dsEl, isStable ? '✦ ESTABILIZOU (3 SUCESSOS)!' : '✦ SUCESSO CONTRA A MORTE!', 'buff');
             } else {
                 var isDead = (targetUnit_ds && targetUnit_ds.isDead) || ev.isDead;
-                spawnSkillImpactLabel(dsEl, isDead ? '☠️ FALECEU (3 FALHAS)!' : '💥 FALHA CONTRA A MORTE!', 'miss');
+                spawnSkillImpactLabel(dsEl, isDead ? '◇ FALECEU (3 FALHAS)!' : '◇ FALHA CONTRA A MORTE!', 'miss');
             }
         }
         if (ev.d20 === 20 && dsUid && typeof playBuffVfxOnCell === 'function') {
@@ -57572,8 +57572,8 @@ async function __combatAnimateOneEvent(ev) {
             scEl.classList.add('buff-flash');
             if (typeof spawnSkillImpactLabel === 'function' && kind !== 'summon_attack') {
                 var _sumTxt = kind === 'summon_expire'
-                    ? '💨 INVOCAÇÃO DISSIPADA!'
-                    : '🐾 +' + (ev.summonCount || ev.count || 1) + ' ' + String(ev.summonName || ev.summonKind || 'INVOCADO').toUpperCase() + '!';
+                    ? '◇ INVOCAÇÃO DISSIPADA!'
+                    : '✦ +' + (ev.summonCount || ev.count || 1) + ' ' + String(ev.summonName || ev.summonKind || 'INVOCADO').toUpperCase() + '!';
                 spawnSkillImpactLabel(scEl, _sumTxt, kind === 'summon_expire' ? 'miss' : 'buff');
             }
         }
@@ -57606,7 +57606,7 @@ async function __combatAnimateOneEvent(ev) {
                 var _csCond = String(ev.conditionName || ev.condName || ev.condition || 'CONDIÇÃO').toUpperCase();
                 spawnSkillImpactLabel(
                     csEl,
-                    ev.saveSuccess ? ('🛡️ LIBERTO (' + _csCond + ')!') : ('⛓️ MANTEVE ' + _csCond),
+                    ev.saveSuccess ? ('◆ LIBERTO (' + _csCond + ')!') : ('◇ RETIDO ' + _csCond),
                     ev.saveSuccess ? 'buff' : 'miss'
                 );
             }
@@ -57637,10 +57637,10 @@ async function __combatAnimateOneEvent(ev) {
                 var _ccTxt = '';
                 var _ccTone = 'buff';
                 if (kind === 'concentration_lost') {
-                    _ccTxt = '💔 CONCENTRAÇÃO QUEBRADA' + (ev.spellName ? ' (' + ev.spellName + ')' : '') + '!';
+                    _ccTxt = '◇ CONCENTRAÇÃO QUEBRADA' + (ev.spellName ? ' (' + ev.spellName + ')' : '') + '!';
                     _ccTone = 'miss';
                 } else if (ev.saveSuccess === false) {
-                    _ccTxt = '💥 CONCENTRAÇÃO FALHOU' + _concScore + '!';
+                    _ccTxt = '◇ CONCENTRAÇÃO FALHOU' + _concScore + '!';
                     _ccTone = 'miss';
                 } else {
                     _ccTxt = '◈ CONCENTRAÇÃO MANTIDA' + _concScore + '!';
@@ -57690,7 +57690,7 @@ async function __combatAnimateOneEvent(ev) {
                     _evU.legendary_resistances_used = Math.max(0, _lrMax - ev.remaining);
                     _evU.legendaryResistancesUsed = _evU.legendary_resistances_used;
                 }
-                _lblTxt = '👑 RESISTÊNCIA LENDÁRIA!' + (ev.remaining != null ? ' (' + ev.remaining + ' rest.)' : '');
+                _lblTxt = '✦ RESISTÊNCIA LENDÁRIA!' + (ev.remaining != null ? ' (' + ev.remaining + ' rest.)' : '');
                 _lblTone = 'buff';
             } else if (kind === 'legendary_action' || kind === 'legendary_action_used') {
                 if (_evU && ev.remaining != null) {
@@ -57700,7 +57700,7 @@ async function __combatAnimateOneEvent(ev) {
                 var _laName = String(ev.actionName || ev.name || ev.skillName || 'AÇÃO LENDÁRIA').toUpperCase();
                 var _laMax = (ev.max != null) ? ev.max : ((_evU && (_evU.legendary_actions_max || _evU.legendaryActionsMax)) || 3);
                 var _laRem = ev.remaining != null ? (' (' + ev.remaining + '/' + _laMax + ')') : '';
-                _lblTxt = '👑 AÇÃO LENDÁRIA: ' + _laName + '!' + _laRem;
+                _lblTxt = '✦ AÇÃO LENDÁRIA: ' + _laName + '!' + _laRem;
                 _lblTone = 'buff';
             } else if (kind === 'save_result') {
                 var _svRaw = ev.saveAbility || ev.ability || ev.save || 'TR';
@@ -57709,42 +57709,42 @@ async function __combatAnimateOneEvent(ev) {
                 var _svDc = ev.dc != null ? ev.dc : ev.saveDc;
                 var _svScore = (_svTot != null && _svDc != null) ? ' [' + _svTot + ' vs CD ' + _svDc + ']' : '';
                 var _svOk = ev.success !== undefined ? !!ev.success : !!ev.saveSuccess;
-                _lblTxt = _svOk ? ('🛡️ TR ' + _svAb + ' PASSOU' + _svScore + '!') : ('💥 TR ' + _svAb + ' FALHOU' + _svScore + '!');
+                _lblTxt = _svOk ? ('◆ TR ' + _svAb + ' PASSOU' + _svScore + '!') : ('◇ TR ' + _svAb + ' FALHOU' + _svScore + '!');
                 _lblTone = _svOk ? 'save' : 'miss';
             } else if (kind === 'condition_apply') {
-                _lblTxt = '⛓️ +' + String(ev.conditionName || ev.condName || ev.condition || 'CONDIÇÃO').toUpperCase() + '!';
+                _lblTxt = '◇ +' + String(ev.conditionName || ev.condName || ev.condition || 'CONDIÇÃO').toUpperCase() + '!';
                 _lblTone = 'condition';
             } else if (kind === 'condition_expire') {
-                _lblTxt = '✨ FIM: ' + String(ev.conditionName || ev.condName || ev.condition || 'CONDIÇÃO').toUpperCase();
+                _lblTxt = '✦ FIM: ' + String(ev.conditionName || ev.condName || ev.condition || 'CONDIÇÃO').toUpperCase();
                 _lblTone = 'buff';
             } else if (kind === 'banished' || kind === 'maze_banish') {
-                _lblTxt = kind === 'maze_banish' ? '🌀 BANIDO AO LABIRINTO!' : '🌀 BANIDO DO PLANO!';
+                _lblTxt = kind === 'maze_banish' ? '◇ BANIDO AO LABIRINTO!' : '◇ BANIDO DO PLANO!';
                 _lblTone = 'crit';
             } else if (kind === 'maze_escape') {
-                _lblTxt = '🌀 ESCAPOU DO LABIRINTO!';
+                _lblTxt = '◆ ESCAPOU DO LABIRINTO!';
                 _lblTone = 'buff';
             } else if (kind === 'instant_kill' || kind === 'power_word_kill') {
-                _lblTxt = ev.disintegrated ? '💥 DESINTEGRADO EM CINZAS!' : '☠️ MORTE INSTANTÂNEA!';
+                _lblTxt = ev.disintegrated ? '◇ DESINTEGRADO EM CINZAS!' : '◇ MORTE INSTANTÂNEA!';
                 _lblTone = 'crit';
             } else if (kind === 'destroy_undead') {
-                _lblTxt = '☀️ MORTO-VIVO DESTRUÍDO!';
+                _lblTxt = '✦ MORTO-VIVO DESTRUÍDO!';
                 _lblTone = 'crit';
             } else if (kind === 'time_stop') {
-                _lblTxt = '⏳ PARAR O TEMPO (+' + (ev.extraTurns || 2) + ' TURNOS)!';
+                _lblTxt = '✦ PARAR O TEMPO (+' + (ev.extraTurns || 2) + ' TURNOS)!';
                 _lblTone = 'buff';
             } else if (kind === 'wildshape_transform') {
-                _lblTxt = '🐾 FORMA SELVAGEM: ' + String(ev.formName || 'FERA').toUpperCase() + '!';
+                _lblTxt = '✦ FORMA SELVAGEM: ' + String(ev.formName || 'FERA').toUpperCase() + '!';
                 _lblTone = 'buff';
             } else if (kind === 'wildshape_revert') {
-                _lblTxt = '🐾 FORMA NORMAL RESTAURADA';
+                _lblTxt = '✦ FORMA NORMAL RESTAURADA';
                 _lblTone = 'miss';
             } else if (kind === 'sanctuary_save') {
-                _lblTxt = ev.saveSuccess === false ? '✨ SANTUÁRIO BLOQUEOU!' : '⚔️ SUPEROU SANTUÁRIO!';
+                _lblTxt = ev.saveSuccess === false ? '✦ SANTUÁRIO BLOQUEOU!' : '⚔ SUPEROU SANTUÁRIO!';
                 _lblTone = ev.saveSuccess === false ? 'buff' : 'hit';
             } else if (kind === 'rebuke_damage') {
                 var _rDmg = ev.dmgTotal != null ? ev.dmgTotal : (ev.dmg || ev.damage || 0);
                 var _svTxt = ev.saveSuccess ? ' (TR Metade)' : '';
-                _lblTxt = '🔥 -' + _rDmg + ' PV REPREENSÃO' + _svTxt + '!';
+                _lblTxt = '◆ -' + _rDmg + ' PV REPREENSÃO' + _svTxt + '!';
                 _lblTone = 'hit';
                 if (typeof _spawnFloatingDmgNumber === 'function' && _evU) {
                     try {

@@ -12636,7 +12636,13 @@ LOG SINK (Fase 7):
 
 #cart-loc-popup,
 
-#cart-loc-popup *,
+#cart-loc-popup * {
+
+  box-sizing: border-box !important;
+
+}
+
+#cart-loc-popup,
 
 .clp-prov-preview,
 
@@ -12644,7 +12650,11 @@ LOG SINK (Fase 7):
 
   overflow-x: hidden !important;
 
-  box-sizing: border-box !important;
+}
+
+.clp-body > * {
+
+  flex-shrink: 0;
 
 }
 
@@ -26496,7 +26506,7 @@ body.perf-lite .vc-action-btn { transition: none; }
 
           <button class="csg-btn csg-btn-tour" id="csg-tour-btn">
 
-            <span class="csg-btn-ico">🎯</span>
+            <span class="csg-btn-ico">◆</span>
 
             <span class="csg-btn-text">Destacar</span>
 
@@ -26926,7 +26936,7 @@ body.perf-lite .vc-action-btn { transition: none; }
 
     // pra garantir que cidade ↔ exploracao tenham mapas IDÊNTICOS.
 
-    document.write('<script src="./cartografia-shared.js?v=' + (window.VBUNDLE_HASH || 'v') + '_20261107_regional_nav_v7"><\/script>');
+    document.write('<script src="./cartografia-shared.js?v=' + (window.VBUNDLE_HASH || 'v') + '_20261107_regional_nav_v26"><\/script>');
 
   </script>
 
@@ -28480,11 +28490,21 @@ body.perf-lite .vc-action-btn { transition: none; }
 
           });
 
+          p.inventory = picked.inventory.map(function(_it){ return (typeof _it === 'string') ? _it : ((_it && _it.name) || ''); }).filter(Boolean);
+
           if (typeof _syncInventoryToLocalStorage === 'function') _syncInventoryToLocalStorage();
 
         } catch(_inve){ console.warn('[CITY] inventory hydrate failed:', _inve); }
 
+      } else {
+
+        p.inventory = [];
+
       }
+
+      p.owned_maps = Array.isArray(picked.owned_maps) ? picked.owned_maps.slice() : [];
+
+      p.maps_owned = p.owned_maps.slice();
 
       // INV-CITY-02 (auditoria 2026-06-27): favoritos/locked REAIS do servidor.
 
@@ -28768,7 +28788,21 @@ body.perf-lite .vc-action-btn { transition: none; }
 
         });
 
+        p.world_discovered_locations = p.known_locations.slice();
+
         console.log('[CITY] known_locations hydrated from server:', p.known_locations.length, 'locations:', p.known_locations.join(','));
+
+      } else {
+
+        p.known_locations = ['plains'];
+
+        p.world_discovered_locations = ['plains'];
+
+      }
+
+      if (typeof _cartRenderCarousel === 'function') {
+
+        try { _cartRenderCarousel(); } catch (_crce) {}
 
       }
 
@@ -29220,7 +29254,29 @@ body.perf-lite .vc-action-btn { transition: none; }
 
           });
 
+          p.world_discovered_locations = p.known_locations.slice();
+
           console.log('[CITY] known_locations hydrated from server (fallback):', p.known_locations.length, 'locations:', p.known_locations.join(','));
+
+        } else {
+
+          p.known_locations = ['plains'];
+
+          p.world_discovered_locations = ['plains'];
+
+        }
+
+        p.inventory = Array.isArray(picked.inventory)
+          ? picked.inventory.map(function(_it){ return (typeof _it === 'string') ? _it : ((_it && _it.name) || ''); }).filter(Boolean)
+          : [];
+
+        p.owned_maps = Array.isArray(picked.owned_maps) ? picked.owned_maps.slice() : [];
+
+        p.maps_owned = p.owned_maps.slice();
+
+        if (typeof _cartRenderCarousel === 'function') {
+
+          try { _cartRenderCarousel(); } catch (_crceFb) {}
 
         }
 
@@ -36236,7 +36292,7 @@ function _showDeleteCharConfirm(charId, charName){
 
       + 'border-radius: var(--v-radius-sm, 6px); padding: var(--v-space-md-lg, 10px) var(--v-space-lg, 12px); margin-bottom: var(--v-space-md-lg, 10px);">'
 
-      + '<p style="margin: 0 0 6px; font-size: calc(13px * var(--v-font-scale, 1)); color: var(--v-gold, #c4953a); font-weight: 700;">⏳ Recuperação fácil — 15 dias</p>'
+      + '<p style="margin: 0 0 6px; font-size: calc(13px * var(--v-font-scale, 1)); color: var(--v-gold, #c4953a); font-weight: 700;">◆ Recuperação fácil — 15 dias</p>'
 
       + '<p style="margin: 0; font-size: calc(12px * var(--v-font-scale, 1)); color: var(--v-text-dim, #a09484); line-height: 1.5;">'
 
@@ -36642,7 +36698,7 @@ function _loadHallArchivedChars(){
 
         statusBadge = '<div style="font-size: calc(10px * var(--v-font-scale, 1)); color: ' + badgeColor + '; margin-top: var(--v-space-xs, 2px); font-weight: 700;">'
 
-                    + '⏳ ' + drOC + ' dia' + (drOC === 1 ? '' : 's') + ' para recuperar'
+                    + '◆ ' + drOC + ' dia' + (drOC === 1 ? '' : 's') + ' para recuperar'
 
                     + '</div>';
 
@@ -45974,13 +46030,13 @@ function _showLeaguePopup(p){
 
     + '<div style="display:flex; align-items:center; gap:8px;">'
 
-    +   '<span style="font-size:16px;">⏳</span>'
+    +   '<span style="font-size:16px;color:#c4953a;">◆</span>'
 
     +   '<div>'
 
     +     '<div style="font-size:11px; color:var(--v-text-dim,#a09484); text-transform:uppercase; letter-spacing:0.5px;">Fechamento da Rodada</div>'
 
-    +     '<div style="font-family:Cinzel,serif; font-weight:700; font-size:11.5px; color:#ffd700;">Segunda-feira 00:00 · ' + cdStr + ' restantes</div>'
+    +     '<div style="font-family:Cinzel,serif; font-weight:700; font-size:11.5px; color:#ffd700;">Segunda-feira (Alvorecer) · ' + cdStr + ' restantes</div>'
 
     +   '</div>'
 
@@ -72904,7 +72960,15 @@ function _syncInventoryToLocalStorage() {
 
   // O write fica só em LOCAL (file://, dev tool) como bridge entre simuladores.
 
-  if (window.vCityServer && vCityServer.isRemote && vCityServer.isRemote()) return;
+  var _isHttpRemote = typeof window !== 'undefined' && window.location && (window.location.protocol === 'http:' || window.location.protocol === 'https:');
+
+  if ((window.vCityServer && vCityServer.isRemote && vCityServer.isRemote()) || _isHttpRemote) {
+
+    try { localStorage.removeItem(SHARED_INVENTORY_KEY); } catch (_eRm) {}
+
+    return;
+
+  }
 
   try {
 
@@ -131546,7 +131610,7 @@ var SUBSCREEN_DATA = {
 
     header: 'Recrutar Aliados',
 
-    flavor: 'Mestra Tavira aponta o quadro de contratos. Aventureiros prontos para marchar com você (máx 3 no grupo · rotação 12h).',
+    flavor: 'Mestra Tavira aponta o quadro de contratos. Aventureiros prontos para marchar com você (máx 3 no grupo · rotação periódica).',
 
     buttons: [
 
@@ -133838,7 +133902,7 @@ var ACTION_HANDLERS = {
 
       desc: 'Hora de descanso. Gasta 1 Hit Die para recuperar HP.<br><br>' +
 
-            '<b>Tempo:</b> 1 hora · <b>Custo:</b> Grátis<br>' +
+            '<b>Tempo:</b> Pausa breve · <b>Custo:</b> Grátis<br>' +
 
             '<b>Recuperação:</b> 1d8 + CON modifier',
 
@@ -135154,9 +135218,9 @@ var ACTION_HANDLERS = {
 
   },
 
-  'tavern_bard':            function(p){ vToast('O bardo entoa "A Balada de Valdrak". +1 morale por 2 horas.'); _gainXp(p, 5); },
+  'tavern_bard':            function(p){ vToast('O bardo entoa "A Balada de Valdrak". +1 morale durante este ciclo.'); _gainXp(p, 5); },
 
-  'tavern_blackmarket':     function(p){ var hour = new Date().getHours(); if (hour < 20 && hour > 6) { vToast('Beco Sombrio fechado. O Vulto só atende à noite (20h-6h).'); return; } navigateTo('shadow_alley'); },
+  'tavern_blackmarket':     function(p){ var _p = (typeof TimeSystem !== 'undefined' && TimeSystem.get_period) ? TimeSystem.get_period() : 'night'; if (_p !== 'night' && _p !== 'late_night') { vToast('Beco Sombrio fechado. O Vulto só atende na calada da Noite ou Madrugada.'); return; } navigateTo('shadow_alley'); },
 
 
 
@@ -136154,7 +136218,7 @@ var ACTION_HANDLERS = {
 
   'codex_race_human':       function(p){ vToast('Humano — versátil. +1 todos atributos OU 2 atributos +1 + skill + feat.'); },
 
-  'codex_race_elf':         function(p){ vToast('Elfo — gracioso, longevo. +2 DEX. Trance (4h sleep). Darkvision. Fey ancestry.'); },
+  'codex_race_elf':         function(p){ vToast('Elfo — gracioso, longevo. +2 DEX. Trance (meditação). Darkvision. Fey ancestry.'); },
 
   'codex_race_dwarf':       function(p){ vToast('Anão — robusto, leal. +2 CON. Darkvision. Resistência veneno. Stonecunning.'); },
 
@@ -136244,7 +136308,7 @@ var ACTION_HANDLERS = {
 
   // Festival
 
-  'festival_events':        function(p){ vToast('Eventos hoje: Desfile (16h), Espetáculo de fogos (22h). Não-perder!'); },
+  'festival_events':        function(p){ vToast('Eventos hoje: Desfile (Entardecer), Espetáculo de fogos (Noite). Não perder!'); },
 
   'festival_currency':      function(p){ vToast('Grãos da Colheita: 0 / 100. Ganha jogando minigames. Troca por items raros.'); },
 
@@ -149286,15 +149350,15 @@ function renderCartographyCanvas(el){
 
     + '        <button class="cam-filter-pill active" data-filter="all" type="button">Todos</button>'
 
-    + '        <button class="cam-filter-pill" data-filter="settlements" type="button">🏛️ Cidades</button>'
+    + '        <button class="cam-filter-pill" data-filter="settlements" type="button">Cidades</button>'
 
-    + '        <button class="cam-filter-pill" data-filter="wilderness" type="button">⚔️ Terras Ermas</button>'
+    + '        <button class="cam-filter-pill" data-filter="wilderness" type="button">Terras Ermas</button>'
 
-    + '        <button class="cam-filter-pill" data-filter="quests" type="button">📜 Contratos</button>'
+    + '        <button class="cam-filter-pill" data-filter="quests" type="button">Contratos</button>'
 
-    + '        <button class="cam-filter-pill" data-filter="mapped" type="button">🗺️ Cartas</button>'
+    + '        <button class="cam-filter-pill" data-filter="mapped" type="button">Cartas</button>'
 
-    + '        <button class="cam-filter-pill" data-filter="pinned" type="button">📌 Fixados</button>'
+    + '        <button class="cam-filter-pill" data-filter="pinned" type="button">Fixados</button>'
 
     + '        <button class="cam-filter-pill" data-filter="unexplored" type="button">🧭 Inexplorados</button>'
 
@@ -149388,7 +149452,7 @@ function renderCartographyCanvas(el){
 
     + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#86efac;font-size:11.5px;margin-bottom:4px;">SUPRIMENTOS & ACAMPAMENTOS</div>'
 
-    + '          <p style="margin:2px 0;">Jornadas acima de 8 horas exigem paradas de Descanso Longo (8h) em acampamentos na estrada e 1 Ração de Viagem por aventureiro. Em biomas férteis, testes de Sobrevivência permitem caçar e colher água potável.</p>'
+    + '          <p style="margin:2px 0;">Jornadas extensas exigem paradas de Descanso Longo (Repouso Pleno) em acampamentos na estrada e 1 Ração de Viagem por aventureiro. Em biomas férteis, testes de Sobrevivência permitem caçar e colher água potável.</p>'
 
     + '        </div>'
 
@@ -149396,7 +149460,7 @@ function renderCartographyCanvas(el){
 
     + '          <div style="font-family:Cinzel,serif;font-weight:700;color:#f87171;font-size:11.5px;margin-bottom:4px;">MARCHA FORÇADA & EXAUSTÃO</div>'
 
-    + '          <p style="margin:2px 0;">O limite de marcha contínua segura é de 8 horas por dia. Cada hora adicional exige Salvaguarda de Constituição (CD 10 + 1 por hora além de 8). Em caso de falha, o aventureiro sofre 1 Nível de Exaustão. Fracionar a rota com acampamentos de Descanso Longo (8h) anula a penalidade.</p>'
+    + '          <p style="margin:2px 0;">O limite de marcha contínua segura é de um dia padrão de viagem. Marcha prolongada além do limite diário exige Salvaguarda de Constituição contra Exaustão. Fracionar a rota com acampamentos de Descanso Longo anula a penalidade.</p>'
 
     + '        </div>'
 
@@ -150844,7 +150908,7 @@ function _cartPopulateWaypointsList(filter, query) {
 
   if (items.length === 0) {
 
-    listEl.innerHTML = '<div style="padding:16px;text-align:center;color:#a09484;font-style:italic;font-size:11px;">Nenhum marco ou santuário disponível neste filtro. Fixe locais no mapa com o botão 📌 para acessá-los rapidamente aqui!</div>';
+    listEl.innerHTML = '<div style="padding:16px;text-align:center;color:#a09484;font-style:italic;font-size:11px;">Nenhum marco ou santuário disponível neste filtro. Fixe locais no mapa com o botão de fixar para acessá-los rapidamente aqui!</div>';
 
     return;
 
@@ -150870,11 +150934,11 @@ function _cartPopulateWaypointsList(filter, query) {
 
     var badge = item.isCurrent ? '<span style="font-size:11px;background:#2e7d32;color:#fff;padding:1px 6px;border-radius:10px;">Você está aqui</span>'
 
-      : item.isSanctuary ? '<span style="font-size:11px;background:rgba(196,149,58,0.25);border:1px solid #ffd700;color:#ffd700;padding:1px 6px;border-radius:10px;">🏛️ Santuário</span>'
+      : item.isSanctuary ? '<span style="font-size:11px;background:rgba(196,149,58,0.25);border:1px solid #ffd700;color:#ffd700;padding:1px 6px;border-radius:10px;">◆ Santuário</span>'
 
-      : item.isPin ? '<span style="font-size:11px;background:rgba(218,165,32,0.25);border:1px solid #ffd700;color:#ffd700;padding:1px 6px;border-radius:10px;">📍 Alfinete</span>'
+      : item.isPin ? '<span style="font-size:11px;background:rgba(218,165,32,0.25);border:1px solid #ffd700;color:#ffd700;padding:1px 6px;border-radius:10px;">◆ Alfinete</span>'
 
-      : '<span style="font-size:11px;background:rgba(196,149,58,0.2);color:#d2be90;padding:1px 6px;border-radius:10px;">🌀 Marco</span>';
+      : '<span style="font-size:11px;background:rgba(196,149,58,0.2);color:#d2be90;padding:1px 6px;border-radius:10px;">◆ Marco</span>';
 
 
 
@@ -150890,7 +150954,7 @@ function _cartPopulateWaypointsList(filter, query) {
 
       + '      <div style="font-size:11px;color:#a09484;">' + provName + ' · ~' + distMilhas + ' milhas (~' + marcos + ' marcos)</div>'
 
-      + ((window.CartShared && CartShared.getLocNote && CartShared.getLocNote(b.key)) ? '<div style="font-size:11.5px;color:#fcd34d;font-style:italic;margin-top:2px;">📝 "' + CartShared.getLocNote(b.key) + '"</div>' : '')
+      + ((window.CartShared && CartShared.getLocNote && CartShared.getLocNote(b.key)) ? '<div style="font-size:11.5px;color:#fcd34d;font-style:italic;margin-top:2px;">◆ "' + CartShared.getLocNote(b.key) + '"</div>' : '')
 
       + '    </div>'
 
@@ -152000,21 +152064,21 @@ function _setCartFilter(f) {
 
     var labels = {
 
-      all: '🎯 Todos',
+      all: '◆ Todos',
 
-      settlements: '🏛️ Cidades',
+      settlements: '◆ Cidades',
 
-      wilderness: '⚔️ Ermos',
+      wilderness: '◆ Ermos',
 
-      quests: '📜 Contratos',
+      quests: '◆ Contratos',
 
-      pinned: '📌 Fixados',
+      pinned: '◆ Fixados',
 
-      notes: '📝 Anotações'
+      notes: '◆ Anotações'
 
     };
 
-    btn.innerHTML = labels[f] || '🎯 Todos';
+    btn.innerHTML = labels[f] || '◆ Todos';
 
   }
 
@@ -156122,11 +156186,11 @@ function _openCartLocationPopup(biome){
 
             var stops = Math.max(1, Math.floor((curHours - 1) / 8));
 
-            fmDesc.innerHTML = 'Jornada de <b>~' + curHours + 'h</b> excede o limite diário de 8 horas.<br>'
+            fmDesc.innerHTML = 'Jornada contínua excede o limite seguro de marcha diária.<br>'
 
               + '• <b>Sem acampamento:</b> Salvaguarda de <b>CON CD ' + dc + '</b> contra 1 Nível de Exaustão.<br>'
 
-              + '• <b>Com acampamento (' + stops + ' parada' + (stops > 1 ? 's' : '') + '):</b> A marcha é fracionada em dias de 8h, anulando o risco de exaustão!';
+              + '• <b>Com acampamento (' + stops + ' parada' + (stops > 1 ? 's' : '') + '):</b> A marcha é fracionada em jornadas com repouso, anulando o risco de exaustão!';
 
           }
 
@@ -176290,6 +176354,8 @@ function _checkOrderReady(player) {
 
       }
 
+      player.owned_maps = player.maps_owned.slice();
+
       // Revela locais associados
 
       var def = CORVUS_MAPS.find(function(m){ return m.name === o.map; });
@@ -176453,6 +176519,8 @@ function _openCartographerPopup(player, opts) {
           });
 
           player.maps_owned = (resp.delivered_maps || []).slice();
+
+          player.owned_maps = player.maps_owned.slice();
 
           player.game_day = serverDay;
 

@@ -15057,7 +15057,7 @@ window.__EXPLORACAO_EVENTS = {
       },
       {
         "id": "arcana_overload_runes",
-        "label": "🔮 [Arcanismo CD 13] Canalizar mana nos glifos da montanha para enfraquecer a sombra",
+        "label": "◆ [Arcanismo CD 13] Canalizar mana nos glifos da montanha para enfraquecer a sombra",
         "skill": "arcana",
         "dc": 13,
         "outcome_ok": {
@@ -40787,7 +40787,7 @@ window.__EXPLORACAO_EVENTS = {
         }
       },
       {
-        "label": "[🏃 Romper em fuga desesperada]",
+        "label": "◇ (Romper em fuga desesperada)",
         "isFlee": true,
         "outcome_ok": {
           "text": "Você aproveita a discussão ruidosa do monstro para afastar-se pelas encostas inferiores.",
@@ -42286,7 +42286,7 @@ window.__EXPLORACAO_EVENTS = {
         }
       },
       {
-        "label": "[🏃 Romper em fuga desesperada]",
+        "label": "◇ (Romper em fuga desesperada)",
         "isFlee": true,
         "outcome_ok": {
           "text": "Você dispara em zigue-zague pelas árvores torcidas antes que as cabeças alcancem seu rastro.",
@@ -44176,7 +44176,7 @@ window.__EXPLORACAO_EVENTS = {
         }
       },
       {
-        "label": "[🏃 Romper em fuga desesperada]",
+        "label": "◇ (Romper em fuga desesperada)",
         "isFlee": true,
         "outcome_ok": {
           "text": "Você aproveita os meandros do cânion para romper em corrida veloz sob a cobertura das falésias.",
@@ -45616,7 +45616,7 @@ window.__EXPLORACAO_EVENTS = {
         }
       },
       {
-        "label": "[🏃 Romper em fuga desesperada]",
+        "label": "◇ (Romper em fuga desesperada)",
         "isFlee": true,
         "outcome_ok": {
           "text": "Você dispara pela mata fechada buscando áreas com copas baixas onde ela não possa pular.",
@@ -46990,7 +46990,7 @@ window.__EXPLORACAO_EVENTS = {
         }
       },
       {
-        "label": "[🏃 Romper em fuga desesperada]",
+        "label": "◇ (Romper em fuga desesperada)",
         "isFlee": true,
         "outcome_ok": {
           "text": "Você recua velozmente pela encosta antes que os passos largos do titã fechem o cerco.",
@@ -47108,7 +47108,7 @@ window.__EXPLORACAO_EVENTS = {
         }
       },
       {
-        "label": "[🏃 Romper em fuga desesperada]",
+        "label": "◇ (Romper em fuga desesperada)",
         "isFlee": true,
         "outcome_ok": {
           "text": "Você desce deslizando pelo declive de gelo, usando a gravidade para afastar-se do cerco lupino.",
