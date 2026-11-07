@@ -26926,7 +26926,7 @@ body.perf-lite .vc-action-btn { transition: none; }
 
     // pra garantir que cidade ↔ exploracao tenham mapas IDÊNTICOS.
 
-    document.write('<script src="./cartografia-shared.js?v=' + (window.VBUNDLE_HASH || 'v') + '_20261103_epic_confirm_v3"><\/script>');
+    document.write('<script src="./cartografia-shared.js?v=' + (window.VBUNDLE_HASH || 'v') + '_20261107_regional_nav_v4"><\/script>');
 
   </script>
 
@@ -148176,7 +148176,9 @@ function _buildExploracaoUrl(mapIdOrBiome) {
 
     'snow':      'frozen_waste',
 
-    'volcanic':  'burning_crater'
+    'volcanic':  'burning_crater',
+
+    'coast':     'salty_coast'
 
   };
 
@@ -148333,6 +148335,8 @@ function _travelToBiome(mapIdOrBiome, displayName){
     'snow':      'frozen_waste',        // Ermo Congelado
 
     'volcanic':  'burning_crater',      // Cratera Vulcânica
+
+    'coast':     'salty_coast',         // Litoral da Tormenta
 
     // outros map_ids específicos (green_fields, orc_tribe, korthag, etc.) passam direto
 
@@ -148678,7 +148682,9 @@ function _cityTravelInfo(mapId) {
 
     misty_marshes: 'swamp', stone_peaks: 'mountain', golden_sands: 'desert',
 
-    ancient_cemetery: 'graveyard', frozen_waste: 'snow', burning_crater: 'volcanic'
+    ancient_cemetery: 'graveyard', frozen_waste: 'snow', burning_crater: 'volcanic',
+
+    salty_coast: 'coast', coast: 'coast'
 
   };
 

@@ -2392,6 +2392,21 @@ var DEPARTURES = {
             } else if (tok.length > 3 && tok.slice(-1) === 's' && tok.slice(-2) !== 'ss') {
                 tok = tok.slice(0, -1);
             }
+            // Equivalencia bilingue e IDs canonicos (D&D 5e / SQLite)
+            var itemAliases = {
+                'ration': 'racao', 'rations': 'racao',
+                'torch': 'tocha', 'torches': 'tocha',
+                'rope': 'corda', 'ropes': 'corda',
+                'potion': 'pocao', 'potions': 'pocao',
+                'shield': 'escudo', 'shields': 'escudo',
+                'dagger': 'adaga', 'daggers': 'adaga',
+                'bow': 'arco', 'bows': 'arco',
+                'arrow': 'flecha', 'arrows': 'flecha',
+                'tent': 'tenda', 'tents': 'tenda',
+                'compass': 'bussola', 'compasses': 'bussola',
+                'waterskin': 'cantil', 'canteen': 'cantil'
+            };
+            if (itemAliases[tok]) tok = itemAliases[tok];
             tokens.push(tok);
         }
         return tokens.join(' ');
