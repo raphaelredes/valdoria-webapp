@@ -152774,6 +152774,35 @@ function _cartRenderCarousel() {
 
     + '</div>';
 
+  // 2026-11-07: Alerta Diegético do Tibor (Versão 10: O Sacolejo da Carroça)
+  var currentRations = 0;
+  var inv = (p && Array.isArray(p.inventory)) ? p.inventory : ((typeof window !== 'undefined' && Array.isArray(window.MOCK_PLAYER_INVENTORY)) ? window.MOCK_PLAYER_INVENTORY : []);
+  inv.forEach(function(it) {
+    if (!it) return;
+    var n = (typeof it === 'string' ? it : (it.n || it.name || '')).toLowerCase();
+    if (n.indexOf('raç') >= 0 || n.indexOf('rac') >= 0 || n.indexOf('ration') >= 0) {
+      var q = (typeof it === 'object' && it.q != null) ? it.q : 1;
+      if (n.indexOf('7 dias') >= 0) q = q * 7;
+      currentRations += q;
+    }
+  });
+
+  var neededRations = (reg.days || 1) * 2;
+  if (currentRations < neededRations) {
+    if (typeof showTiborCartAlert === 'function') {
+      showTiborCartAlert({
+        container: wrap,
+        text: 'Carroça cheia, estrada leve! A marcha até ' + reg.name + ' consome ' + neededRations + ' rações e você tem ' + currentRations + '. Não vá cruzar os portões de barriga vazia!',
+        btnLabel: 'Ver Provisões',
+        onDone: function() {
+          if (typeof _cartRenderCarousel === 'function') _cartRenderCarousel();
+        }
+      });
+    }
+  } else {
+    if (typeof hideTiborCartAlert === 'function') hideTiborCartAlert();
+  }
+
 }
 
 window._cartRenderCarousel = _cartRenderCarousel;
@@ -153575,6 +153604,277 @@ function _cartOpenTiborShop(opts) {
 }
 
 window._cartOpenTiborShop = _cartOpenTiborShop;
+
+  // ─── TIBOR CART ALERT (Versão 10 — O Sacolejo da Carroça) ───
+  function _ensureTiborAlertStyles() {
+    if (document.getElementById('tibor-cart-alert-styles')) return;
+    var st = document.createElement('style');
+    st.id = 'tibor-cart-alert-styles';
+    st.textContent = ''
+      + '.tibor-cart-alert-anchor {'
+      + '  position: relative;'
+      + '  margin-top: 10px;'
+      + '  display: flex;'
+      + '  align-items: flex-end;'
+      + '  gap: 12px;'
+      + '  z-index: 50;'
+      + '  pointer-events: auto;'
+      + '  user-select: none;'
+      + '  transition: opacity 0.25s ease, transform 0.25s ease;'
+      + '}'
+      + '.tibor-cart-alert-anchor.fixed-bottom {'
+      + '  position: fixed;'
+      + '  bottom: 20px;'
+      + '  left: 16px;'
+      + '  right: 16px;'
+      + '  max-width: 440px;'
+      + '  margin: 0 auto;'
+      + '  z-index: 1000;'
+      + '}'
+      + '.tibor-cart-alert-anchor.tibor-alert-hiding {'
+      + '  opacity: 0;'
+      + '  transform: translateY(12px) scale(0.95);'
+      + '  pointer-events: none;'
+      + '}'
+      + '.tibor-bubble-avatar {'
+      + '  width: 62px;'
+      + '  height: 62px;'
+      + '  border-radius: 50%;'
+      + '  border: 2px solid #ffd685;'
+      + '  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7), 0 0 12px rgba(255, 214, 133, 0.35);'
+      + '  overflow: hidden;'
+      + '  flex-shrink: 0;'
+      + '  position: relative;'
+      + '  background: #14100c;'
+      + '  cursor: pointer;'
+      + '  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);'
+      + '}'
+      + '.tibor-bubble-avatar:hover {'
+      + '  transform: scale(1.05);'
+      + '}'
+      + '.tibor-bubble-avatar img {'
+      + '  width: 100%;'
+      + '  height: 100%;'
+      + '  object-fit: cover;'
+      + '  display: block;'
+      + '}'
+      + '.tibor-speech-bubble {'
+      + '  flex: 1;'
+      + '  background: linear-gradient(135deg, #241c16 0%, #17130f 100%);'
+      + '  border: 1px solid #ffd685;'
+      + '  border-radius: 12px;'
+      + '  padding: 10px 14px;'
+      + '  position: relative;'
+      + '  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), inset 0 0 12px rgba(196, 149, 58, 0.08);'
+      + '  font-size: 0.82rem;'
+      + '  color: #e8d8b8;'
+      + '  line-height: 1.35;'
+      + '}'
+      + '.tibor-speech-bubble::before {'
+      + '  content: "";'
+      + '  position: absolute;'
+      + '  bottom: 18px;'
+      + '  left: -8px;'
+      + '  width: 0;'
+      + '  height: 0;'
+      + '  border-top: 8px solid transparent;'
+      + '  border-bottom: 8px solid transparent;'
+      + '  border-right: 9px solid #ffd685;'
+      + '}'
+      + '.tibor-speech-bubble::after {'
+      + '  content: "";'
+      + '  position: absolute;'
+      + '  bottom: 19px;'
+      + '  left: -6px;'
+      + '  width: 0;'
+      + '  height: 0;'
+      + '  border-top: 7px solid transparent;'
+      + '  border-bottom: 7px solid transparent;'
+      + '  border-right: 8px solid #241c16;'
+      + '}'
+      + '.bubble-speaker {'
+      + '  font-family: \'Cinzel\', serif;'
+      + '  font-size: 0.72rem;'
+      + '  font-weight: 700;'
+      + '  color: #ffd685;'
+      + '  letter-spacing: 0.5px;'
+      + '  margin-bottom: 4px;'
+      + '  display: flex;'
+      + '  align-items: center;'
+      + '  justify-content: space-between;'
+      + '}'
+      + '.bubble-close-btn {'
+      + '  background: transparent;'
+      + '  border: none;'
+      + '  color: #a0907a;'
+      + '  font-size: 0.95rem;'
+      + '  cursor: pointer;'
+      + '  padding: 0 4px;'
+      + '  line-height: 1;'
+      + '}'
+      + '.bubble-close-btn:hover {'
+      + '  color: #ffd685;'
+      + '}'
+      + '.bubble-cta {'
+      + '  margin-top: 8px;'
+      + '  display: flex;'
+      + '  gap: 6px;'
+      + '}'
+      + '.bubble-btn {'
+      + '  flex: 1;'
+      + '  padding: 6px 12px;'
+      + '  background: linear-gradient(180deg, #c4953a, #91681f);'
+      + '  border: 1px solid #ffd685;'
+      + '  border-radius: 5px;'
+      + '  font-family: \'Cinzel\', serif;'
+      + '  font-size: 0.75rem;'
+      + '  font-weight: 700;'
+      + '  color: #14100c;'
+      + '  cursor: pointer;'
+      + '  transition: all 0.15s ease;'
+      + '  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);'
+      + '  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);'
+      + '}'
+      + '.bubble-btn:hover {'
+      + '  filter: brightness(1.15);'
+      + '  transform: translateY(-1px);'
+      + '}'
+      + '/* ─── V10 Keyframes: O Sacolejo da Carroça ─── */'
+      + '.v10-active .tibor-bubble-avatar {'
+      + '  animation: v10CartRumble 0.75s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards;'
+      + '}'
+      + '.v10-active .tibor-speech-bubble {'
+      + '  animation: v10BubbleRumble 0.5s 0.25s ease-out both;'
+      + '}'
+      + '@keyframes v10CartRumble {'
+      + '  0% { transform: translateX(-80px) translateY(20px); opacity: 0; }'
+      + '  25% { transform: translateX(-40px) translateY(-10px); opacity: 0.6; }'
+      + '  50% { transform: translateX(-15px) translateY(8px); opacity: 0.9; }'
+      + '  75% { transform: translateX(5px) translateY(-4px); opacity: 1; }'
+      + '  90% { transform: translateX(-2px) translateY(2px); }'
+      + '  100% { transform: translateX(0) translateY(0); opacity: 1; }'
+      + '}'
+      + '@keyframes v10BubbleRumble {'
+      + '  0% { transform: rotate(-5deg) scale(0.85); opacity: 0; }'
+      + '  60% { transform: rotate(3deg) scale(1.02); opacity: 1; }'
+      + '  100% { transform: rotate(0deg) scale(1); opacity: 1; }'
+      + '}';
+    document.head.appendChild(st);
+  }
+
+  function _playTiborCartSound() {
+    try {
+      var AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      if (!window.__tiborAudioCtx) window.__tiborAudioCtx = new AudioCtx();
+      var ctx = window.__tiborAudioCtx;
+      if (ctx.state === 'suspended') ctx.resume();
+      var t = ctx.currentTime;
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(110, t);
+      osc.frequency.exponentialRampToValueAtTime(70, t + 0.25);
+      gain.gain.setValueAtTime(0.2, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+      osc.start(t);
+      osc.stop(t + 0.28);
+    } catch (_e) {}
+  }
+
+  function showTiborCartAlert(opts) {
+    opts = opts || {};
+    if (!opts.force) {
+      try {
+        if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('tibor_cart_alert_dismissed') === '1') {
+          return;
+        }
+      } catch (_e) {}
+    }
+
+    _ensureTiborAlertStyles();
+
+    var old = document.getElementById('tibor-cart-alert');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+
+    var container = opts.container;
+    if (!container && typeof document !== 'undefined') {
+      container = document.getElementById('cart-carousel-wrap') || document.body;
+    }
+    if (!container) return;
+
+    var isFixed = (container === document.body);
+    var anchor = document.createElement('div');
+    anchor.id = 'tibor-cart-alert';
+    anchor.className = 'tibor-cart-alert-anchor v10-active' + (isFixed ? ' fixed-bottom' : '');
+
+    var portraitPath = '/shared/img/npcs/mercador-apressado.webp';
+    if (typeof window !== 'undefined' && window.location && window.location.protocol === 'file:') {
+      portraitPath = '/shared/img/npcs/mercador-apressado.webp';
+    }
+
+    var text = opts.text || 'Carroça cheia, estrada leve! O caminho consome rações. Não vá cruzar os portões de barriga vazia!';
+    var speaker = opts.speaker || 'TIBOR · PORTÕES';
+    var btnLabel = opts.btnLabel || 'Ver Provisões';
+
+    anchor.innerHTML = ''
+      + '<div class="tibor-bubble-avatar" onclick="window._onTiborAlertClick(' + (opts.onDone ? '{onDone:' + opts.onDone + '}' : '') + ')" title="Tibor · Provedor da Estrada">'
+      + '  <img src="' + portraitPath + '" alt="Tibor">'
+      + '</div>'
+      + '<div class="tibor-speech-bubble">'
+      + '  <div class="bubble-speaker">'
+      + '    <span>' + speaker + '</span>'
+      + '    <button type="button" class="bubble-close-btn" onclick="window._dismissTiborAlert(event)" title="Dispensar">✕</button>'
+      + '  </div>'
+      + '  <div class="bubble-text">' + text + '</div>'
+      + '  <div class="bubble-cta">'
+      + '    <button type="button" class="bubble-btn" onclick="window._onTiborAlertClick(' + (opts.onDone ? '{onDone:' + opts.onDone + '}' : '') + ')">' + btnLabel + '</button>'
+      + '  </div>'
+      + '</div>';
+
+    container.appendChild(anchor);
+    _playTiborCartSound();
+  }
+
+  function hideTiborCartAlert() {
+    var el = document.getElementById('tibor-cart-alert');
+    if (!el) return;
+    el.classList.add('tibor-alert-hiding');
+    setTimeout(function() {
+      if (el && el.parentNode) el.parentNode.removeChild(el);
+    }, 250);
+  }
+
+  function _onTiborAlertClick(opts) {
+    if (typeof haptic === 'function') haptic('medium');
+    _playTiborCartSound();
+    hideTiborCartAlert();
+    if (typeof _cartOpenTiborShop === 'function') {
+      _cartOpenTiborShop(opts || {});
+    } else if (typeof window._cartOpenTiborShop === 'function') {
+      window._cartOpenTiborShop(opts || {});
+    }
+  }
+
+  function _dismissTiborAlert(e) {
+    if (e && e.stopPropagation) e.stopPropagation();
+    try {
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem('tibor_cart_alert_dismissed', '1');
+      }
+    } catch (_e) {}
+    hideTiborCartAlert();
+  }
+
+  window._ensureTiborAlertStyles = _ensureTiborAlertStyles;
+  window._playTiborCartSound = _playTiborCartSound;
+  window.showTiborCartAlert = showTiborCartAlert;
+  window.hideTiborCartAlert = hideTiborCartAlert;
+  window._onTiborAlertClick = _onTiborAlertClick;
+  window._dismissTiborAlert = _dismissTiborAlert;
+
 
 
 
