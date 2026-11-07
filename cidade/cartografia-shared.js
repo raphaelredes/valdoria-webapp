@@ -162734,27 +162734,27 @@
 
     if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) {
 
-      return { code: 'N', label: 'Norte', glyph: '\u2191', angleDeg: 90 };
+      return { code: 'N', label: 'Norte', glyph: '\u2191', arrow: '\u2191', angleDeg: 90 };
 
     }
 
     var deg = Math.atan2(-dy, dx) * 180 / Math.PI;
 
-    if (deg >= -22.5 && deg < 22.5) return { code: 'L', label: 'Leste', glyph: '\u2192', angleDeg: deg };
+    if (deg >= -22.5 && deg < 22.5) return { code: 'L', label: 'Leste', glyph: '\u2192', arrow: '\u2192', angleDeg: deg };
 
-    if (deg >= 22.5 && deg < 67.5) return { code: 'NE', label: 'Nordeste', glyph: '\u2197', angleDeg: deg };
+    if (deg >= 22.5 && deg < 67.5) return { code: 'NE', label: 'Nordeste', glyph: '\u2197', arrow: '\u2197', angleDeg: deg };
 
-    if (deg >= 67.5 && deg < 112.5) return { code: 'N', label: 'Norte', glyph: '\u2191', angleDeg: deg };
+    if (deg >= 67.5 && deg < 112.5) return { code: 'N', label: 'Norte', glyph: '\u2191', arrow: '\u2191', angleDeg: deg };
 
-    if (deg >= 112.5 && deg < 157.5) return { code: 'NO', label: 'Noroeste', glyph: '\u2196', angleDeg: deg };
+    if (deg >= 112.5 && deg < 157.5) return { code: 'NO', label: 'Noroeste', glyph: '\u2196', arrow: '\u2196', angleDeg: deg };
 
-    if (deg >= -67.5 && deg < -22.5) return { code: 'SE', label: 'Sudeste', glyph: '\u2198', angleDeg: deg };
+    if (deg >= -67.5 && deg < -22.5) return { code: 'SE', label: 'Sudeste', glyph: '\u2198', arrow: '\u2198', angleDeg: deg };
 
-    if (deg >= -112.5 && deg < -67.5) return { code: 'S', label: 'Sul', glyph: '\u2193', angleDeg: deg };
+    if (deg >= -112.5 && deg < -67.5) return { code: 'S', label: 'Sul', glyph: '\u2193', arrow: '\u2193', angleDeg: deg };
 
-    if (deg >= -157.5 && deg < -112.5) return { code: 'SO', label: 'Sudoeste', glyph: '\u2199', angleDeg: deg };
+    if (deg >= -157.5 && deg < -112.5) return { code: 'SO', label: 'Sudoeste', glyph: '\u2199', arrow: '\u2199', angleDeg: deg };
 
-    return { code: 'O', label: 'Oeste', glyph: '\u2190', angleDeg: deg };
+    return { code: 'O', label: 'Oeste', glyph: '\u2190', arrow: '\u2190', angleDeg: deg };
 
   }
 
@@ -165410,6 +165410,11 @@
 
         drawerName.textContent = seg.bearing.glyph + ' ' + seg.roadName + ' (' + seg.marcosCleared + '/' + seg.totalMarcos + ' Marcos)';
 
+        var pins = pinsLayer.querySelectorAll('.cfm-pin');
+        pins.forEach(function(p) {
+          p.classList.toggle('active', p.getAttribute('data-id') === ('frontier_' + seg.edgeId));
+        });
+
         var playerAtOrigin = !isInsideCity && !!(pLoc && normalizeRegionalNodeId(pLoc) === normalizeRegionalNodeId(seg.fromNodeId));
 
         if (playerAtOrigin && typeof window !== 'undefined' && typeof window._openDirectionalRoadCrossroads === 'function') {
@@ -165423,6 +165428,8 @@
           drawerBtn.onclick = function() {
 
             if (typeof haptic === 'function') haptic('medium');
+
+            closeRegionalMapModal();
 
             window._openDirectionalRoadCrossroads(seg.fromNodeId, seg.edgeId);
 

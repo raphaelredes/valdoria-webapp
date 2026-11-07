@@ -98070,7 +98070,7 @@ function _startOrAdvanceRoadStep(road, originInfo, nextMarcoIndex) {
     toNodeTrueName: road.toNodeTrueName,
     roadName: road.roadName,
     bearingLabel: (road.bearing && road.bearing.label) || 'Adiante',
-    bearingArrow: (road.bearing && road.bearing.arrow) || '→',
+    bearingArrow: (road.bearing && (road.bearing.arrow || road.bearing.glyph)) || '→',
     biome: road.biome || 'plains',
     marcoIndex: nextMarcoIndex,
     totalMarcos: road.totalMarcos || 3,
@@ -98264,7 +98264,7 @@ function _renderRoadMilestoneDecisionModal(exp, decisionData) {
   var originName = (exp.originInfo && exp.originInfo.nodeName) || 'Origem';
   var destPreviewLabel = (exp.road && (exp.road.physicallyKnown || exp.road.completed || exp.road.hasCorvusGuide))
     ? exp.road.displayDestName
-    : ('? Rumo ' + exp.bearingLabel);
+    : ('◆ Rumo ' + exp.bearingLabel);
 
   modal.innerHTML = ''
     + '<div class="drm-card">'
@@ -98690,11 +98690,13 @@ window._openDirectionalRoadCrossroads = function (fromNodeOrBiome, preselectEdge
 
   var roadsHtml = roads.map(function (r, idx) {
     var nextMarco = (r.completed || r.marcosCleared >= r.totalMarcos) ? 1 : (r.marcosCleared + 1);
-    var btnLabel = '◆ Seguir Rumo ' + r.bearing.arrow + ' ' + r.bearing.label + ' (Marco 1 de ' + r.totalMarcos + ')';
+    var roadArrow = (r.bearing && (r.bearing.arrow || r.bearing.glyph)) || '→';
+    var roadBearingLabel = (r.bearing && r.bearing.label) || 'Adiante';
+    var btnLabel = '◆ Seguir Rumo ' + roadArrow + ' ' + roadBearingLabel + ' (Marco 1 de ' + r.totalMarcos + ')';
     if (!r.completed && r.marcosCleared > 0 && r.marcosCleared < r.totalMarcos) {
-      btnLabel = '◆ Retomar Rumo ' + r.bearing.arrow + ' ' + r.bearing.label + ' (Marco ' + nextMarco + ' de ' + r.totalMarcos + ')';
+      btnLabel = '◆ Retomar Rumo ' + roadArrow + ' ' + roadBearingLabel + ' (Marco ' + nextMarco + ' de ' + r.totalMarcos + ')';
     } else if (r.completed) {
-      btnLabel = '→ Percorrer Estrada Conhecida (' + r.bearing.label + ')';
+      btnLabel = '→ Percorrer Estrada Conhecida (' + roadBearingLabel + ')';
     }
 
     var memLines = [];
@@ -98709,7 +98711,7 @@ window._openDirectionalRoadCrossroads = function (fromNodeOrBiome, preselectEdge
     return ''
       + '<div class="drm-road-card' + (isPre ? ' preselected' : '') + '">'
       + '  <div class="drm-road-top">'
-      + '    <span class="drm-compass-pill">' + r.bearing.arrow + ' ' + r.bearing.label + (r.isFrontier ? ' · Fronteira' : '') + '</span>'
+      + '    <span class="drm-compass-pill">' + roadArrow + ' ' + roadBearingLabel + (r.isFrontier ? ' · Fronteira' : '') + '</span>'
       + '    <span class="drm-threat-pill" style="color:' + r.dangerBadgeColor + ';border:1px solid ' + r.dangerBorderColor + ';background:' + r.dangerBgColor + ';">' + r.recommendedLevelLabel + ' · ' + r.dangerTierLabel + '</span>'
       + '  </div>'
       + '  <div class="drm-road-name">' + r.roadName + '</div>'
