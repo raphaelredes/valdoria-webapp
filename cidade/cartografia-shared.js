@@ -162352,10 +162352,6 @@
 
 
 
-          { id: 'ashen_badlands', name: 'Terras Devastadas', ico: '', x: 0.70, y: 0.35, maxCR: 5.0, maxHP: 150, desc: 'Desfiladeiros profundos de terra vermelha onde a vegetação secou por completo.' },
-
-
-
           { id: 'sunken_tomb', name: 'Tumba das Areias', ico: '', x: 0.52, y: 0.74, maxCR: 5.0, maxHP: 150, desc: 'Entrada esculpida em arenito vermelho parcialmente soterrada pelas dunas em movimento.' }
 
 
@@ -162880,11 +162876,11 @@
 
     { a: 'desert', provA: 'desert', b: 'sunken_tomb', provB: 'desert', name: 'Rota dos Obeliscos Soterrados', marcos: 3, minLvl: 4, maxLvl: 5, biome: 'desert', omen: 'Pontas de pilares de arenito emergem das dunas em movimento.' },
 
-    { a: 'sunken_tomb', provA: 'desert', b: 'ashen_badlands', provB: 'desert', name: 'Fenda dos Escorpioes Rubros', marcos: 3, minLvl: 4, maxLvl: 6, biome: 'badlands', omen: 'Ravinas de arenito vermelho sobem das dunas fundas rumo ao plato seco.' },
+    { a: 'sunken_tomb', provA: 'desert', b: 'ashen_badlands', provB: 'plains', isFrontier: true, borderA: { x: 0.88, y: 0.28 }, borderB: { x: 0.76, y: 0.94 }, name: 'Fenda dos Escorpioes Rubros', marcos: 3, minLvl: 4, maxLvl: 6, biome: 'badlands', omen: 'Ravinas de arenito vermelho sobem das dunas fundas rumo ao plato seco.' },
 
-    { a: 'desert', provA: 'desert', b: 'ashen_badlands', provB: 'desert', name: 'Canion do Vento Escaldante', marcos: 3, minLvl: 4, maxLvl: 6, biome: 'badlands', omen: 'O areal abre caminho para paredoes de argila vermelha rachada.' },
+    { a: 'desert', provA: 'desert', b: 'ashen_badlands', provB: 'plains', isFrontier: true, borderA: { x: 0.88, y: 0.18 }, borderB: { x: 0.76, y: 0.94 }, name: 'Canion do Vento Escaldante', marcos: 3, minLvl: 4, maxLvl: 6, biome: 'badlands', omen: 'O areal abre caminho para paredoes de argila vermelha rachada.' },
 
-    { a: 'ashen_badlands', provA: 'desert', b: 'volcanic', provB: 'volcanic', isFrontier: true, borderA: { x: 0.88, y: 0.12 }, borderB: { x: 0.22, y: 0.90 }, name: 'Fronteira da Escoria Ardente', marcos: 4, minLvl: 5, maxLvl: 8, biome: 'volcanic', omen: 'Cinzas quentes caem sobre a terra seca na direcao da caldeira.' },
+    { a: 'ashen_badlands', provA: 'plains', b: 'volcanic', provB: 'volcanic', isFrontier: true, borderA: { x: 0.94, y: 0.62 }, borderB: { x: 0.22, y: 0.90 }, name: 'Fronteira da Escoria Ardente', marcos: 4, minLvl: 5, maxLvl: 8, biome: 'volcanic', omen: 'Cinzas quentes caem sobre a terra seca na direcao da caldeira.' },
 
     { a: 'ashen_badlands', provA: 'plains', b: 'salty_coast', provB: 'coast', isFrontier: true, borderA: { x: 0.94, y: 0.82 }, borderB: { x: 0.10, y: 0.80 }, name: 'Ravina da Maresia Distante', marcos: 3, minLvl: 3, maxLvl: 5, biome: 'coast', omen: 'Gaivotas marinhas sobrevoam o fim dos desfiladeiros secos.' },
 
@@ -163259,6 +163255,10 @@
       'plains:volcanic:volcanic': { x: 0.94, y: 0.62 },
 
       'desert:bandit_fortress:plains': { x: 0.48, y: 0.06 },
+
+      'desert:ashen_badlands:plains': { x: 0.88, y: 0.18 },
+
+      'plains:ashen_badlands:desert': { x: 0.76, y: 0.94 },
 
       'desert:orc_tribe:plains': { x: 0.72, y: 0.06 },
 
