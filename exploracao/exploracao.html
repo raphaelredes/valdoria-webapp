@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/exploracao.html AT 2026-11-03T02:00:47Z - do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/exploracao.html AT 2026-11-07T08:41:07Z - do not edit directly, edit source -->
 
 
 
@@ -85537,6 +85537,9 @@ function _explEventVEncFinish(oc) {
       try { sessionStorage.setItem('vld_active_road_exp_v1', JSON.stringify(window._activeRoadExpedition)); } catch (_) {}
     }
     _explFinalizeCombatRedirect(oc);
+  } else if (S.ph !== 'defeat' && window._activeDungeonDelverId && typeof _openPointcrawlDungeonDelver === 'function') {
+    var activeDg = window._activeDungeonDelverId;
+    setTimeout(function () { _openPointcrawlDungeonDelver(activeDg); }, 120);
   } else if (S.ph !== 'defeat' && window._activeRoadExpedition && !window._activeRoadExpedition.combatPending && typeof window._onRoadMarcoEventResolved === 'function') {
     setTimeout(function () { window._onRoadMarcoEventResolved(); }, 100);
   }
@@ -87757,7 +87760,10 @@ function closeEventModal() {
 
   }
 
-  if (!chained && !pendingCombat && !pendingGameOver && S.ph !== 'defeat' && window._activeRoadExpedition && !window._activeRoadExpedition.combatPending && typeof window._onRoadMarcoEventResolved === 'function') {
+  if (!chained && !pendingCombat && !pendingGameOver && S.ph !== 'defeat' && window._activeDungeonDelverId && typeof _openPointcrawlDungeonDelver === 'function') {
+    var activeDg = window._activeDungeonDelverId;
+    setTimeout(function () { _openPointcrawlDungeonDelver(activeDg); }, 120);
+  } else if (!chained && !pendingCombat && !pendingGameOver && S.ph !== 'defeat' && window._activeRoadExpedition && !window._activeRoadExpedition.combatPending && typeof window._onRoadMarcoEventResolved === 'function') {
     setTimeout(function () { window._onRoadMarcoEventResolved(); }, 100);
   }
 
@@ -97676,7 +97682,7 @@ function _showDungeonDiscoveryModal(dg, biome, checkInfo) {
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:12px;z-index:2700;';
   modal.innerHTML = ''
     + '<div class="em-card" style="max-width:420px;width:100%;background:#16100b;border:1.5px solid #ffd685;border-radius:8px;overflow:hidden;box-shadow:0 12px 36px rgba(0,0,0,0.95);animation:fadeIn 0.22s ease-out;">'
-    + '  <div style="position:relative;height:120px;background:url(' + imgUrl + ') center/cover no-repeat;border-bottom:1px solid rgba(196,149,58,0.5);">'
+    + '  <div style="position:relative;height:120px;background:#20140c url(' + imgUrl + ') center/cover no-repeat;border-bottom:1px solid rgba(196,149,58,0.5);">'
     + '    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,8,6,0.3),rgba(16,11,7,0.95));"></div>'
     + '    <div style="position:absolute;bottom:8px;left:12px;right:12px;text-align:left;">'
     + '      <div style="font-size:11px;color:#ffd700;font-family:Cinzel,serif;font-weight:700;letter-spacing:1px;">◆ INCURSÃO DESCOBERTA NOS ERMOS</div>'
@@ -98595,6 +98601,16 @@ window._tryResumeRoadExpeditionAfterCombat = function () {
   try {
     var raw = sessionStorage.getItem('vld_active_road_exp_v1');
     if (!raw) {
+      var activeDg = sessionStorage.getItem('vld_active_dg_delver');
+      if (activeDg) {
+        sessionStorage.removeItem('vld_active_dg_delver');
+        setTimeout(function () {
+          if (typeof _openPointcrawlDungeonDelver === 'function') {
+            _openPointcrawlDungeonDelver(activeDg);
+          }
+        }, 220);
+        return;
+      }
       var queuedEdge = sessionStorage.getItem('vld_preselect_road_edge');
       if (queuedEdge) {
         sessionStorage.removeItem('vld_preselect_road_edge');
@@ -98871,6 +98887,8 @@ function _openPointcrawlDungeonDelver(dgId) {
   frame.appendChild(modal);
 
   function closePcd() {
+    window._activeDungeonDelverId = null;
+    try { sessionStorage.removeItem('vld_active_dg_delver'); } catch (_) {}
     if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
   }
   modal.querySelector('#pcd-close-btn').onclick = closePcd;
@@ -98882,7 +98900,9 @@ function _openPointcrawlDungeonDelver(dgId) {
     var idx = parseInt(card.getAttribute('data-enc-idx'), 10);
     var enc = dgMap.dungeonEncounters[idx];
     if (!enc) return;
-    closePcd();
+    window._activeDungeonDelverId = dgId;
+    try { sessionStorage.setItem('vld_active_dg_delver', dgId); } catch (_) {}
+    if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
     if (typeof S !== 'undefined' && S) {
       if (!S._dungeonEncountersTriggered) S._dungeonEncountersTriggered = {};
       if (!enc.repeatable) S._dungeonEncountersTriggered[enc.id] = true;
