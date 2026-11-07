@@ -1075,7 +1075,7 @@
     ]
    },
    "rumors_sewer_detail": {
-    "text": "(Grom se aproxima tanto que você sente o cheiro de hidromel) 'Os cânticos... um mendigo que dorme perto da grade do esgoto veio contar. Disse que achou que era alucinação da bebida, mas outro mendigo ouviu a mesma coisa.'\n\n'Vozes em coro. Em alguma língua que não é Comum. Todo quarto crescente, depois da meia-noite.'\n\n(Ele aperta a caneca) 'Alguém tá fazendo ritual lá embaixo, {player_name}. E ritual feito em esgoto nunca é coisa boa.'",
+    "text": "(Grom se aproxima tanto que você sente o cheiro de hidromel) 'Os cânticos... um mendigo que dorme perto da grade do esgoto veio contar. Disse que achou que era alucinação da bebida, mas outro mendigo ouviu a mesma coisa.'\n\n'Vozes em coro. Em alguma língua que não é Comum. Todo quarto crescente, durante a Madrugada.'\n\n(Ele aperta a caneca) 'Alguém tá fazendo ritual lá embaixo, {player_name}. E ritual feito em esgoto nunca é coisa boa.'",
     "choices": [
      {
       "text": "Ritual em esgoto... vou investigar.",
@@ -1106,7 +1106,7 @@
      },
      {
       "type": "narration",
-      "text": "Todo quarto crescente, depois da meia-noite.'\n\n(Ele aperta a caneca) 'Alguém tá fazendo ritual lá embaixo, {player_name}."
+      "text": "Todo quarto crescente, durante a Madrugada.'\n\n(Ele aperta a caneca) 'Alguém tá fazendo ritual lá embaixo, {player_name}."
      },
      {
       "type": "narration",
@@ -2437,7 +2437,7 @@
     "choices": []
    },
    "persuade_secret_success": {
-    "text": "(Grom te olha por um longo momento. Depois olha em volta. Depois te olha de novo.)\n\n'Beco Sombrio, hein?' (Ele abaixa a voz até ser quase inaudível) 'Tá, escuta. Eu vejo muita coisa daqui. Gente que entra, gente que sai, gente que desaparece.'\n\n'Tem um cara — chamam de Vulto. Nunca vi o rosto dele. Ele opera no Beco, depois da meia-noite. Vende coisas que não deveria existir. Armas, venenos, informação.'\n\n'Se quiser encontrá-lo, procure a marca de uma adaga na parede da terceira viela à esquerda depois do mercado. Mas {player_name}...' (Ele te agarra pelo braço) '...cuidado. O que entra naquele beco nem sempre sai.'",
+    "text": "(Grom te olha por um longo momento. Depois olha em volta. Depois te olha de novo.)\n\n'Beco Sombrio, hein?' (Ele abaixa a voz até ser quase inaudível) 'Tá, escuta. Eu vejo muita coisa daqui. Gente que entra, gente que sai, gente que desaparece.'\n\n'Tem um cara — chamam de Vulto. Nunca vi o rosto dele. Ele opera no Beco, durante a Madrugada. Vende coisas que não deveria existir. Armas, venenos, informação.'\n\n'Se quiser encontrá-lo, procure a marca de uma adaga na parede da terceira viela à esquerda depois do mercado. Mas {player_name}...' (Ele te agarra pelo braço) '...cuidado. O que entra naquele beco nem sempre sai.'",
     "choices": [
      {
       "text": "Obrigado, Grom. Vou ter cuidado.",
@@ -2479,7 +2479,7 @@
      },
      {
       "type": "narration",
-      "text": "Ele opera no Beco, depois da meia-noite."
+      "text": "Ele opera no Beco, durante a Madrugada."
      },
      {
       "type": "narration",
@@ -2582,7 +2582,7 @@
     ]
    },
    "quest_brawl_accepted": {
-    "text": "(Grom abre um sorriso aliviado) 'Sabia que podia contar com você. Fica de olho nos tipos que chegam depois da meia-noite. O líder deles tem uma cicatriz no queixo — sempre senta no canto mais escuro.'\n\n'Não sei se é briga por diversão ou se tem alguém pagando pra destruir meu negócio. Descubra isso e eu te devo uma grande.'",
+    "text": "(Grom abre um sorriso aliviado) 'Sabia que podia contar com você. Fica de olho nos tipos que chegam durante a Madrugada. O líder deles tem uma cicatriz no queixo — sempre senta no canto mais escuro.'\n\n'Não sei se é briga por diversão ou se tem alguém pagando pra destruir meu negócio. Descubra isso e eu te devo uma grande.'",
     "choices": [
      {
       "text": "Vou ficar de olho.",
@@ -2596,7 +2596,7 @@
      },
      {
       "type": "narration",
-      "text": "Fica de olho nos tipos que chegam depois da meia-noite."
+      "text": "Fica de olho nos tipos que chegam durante a Madrugada."
      },
      {
       "type": "narration",
@@ -3054,7 +3054,7 @@
    "O bardo que morava aqui fugiu com a filha do mercador. Não tive tempo de cobrar a conta dele.",
    "Thorne é o único que sabe lidar com aço de verdade nesta cidade. Os outros são uma vergonha.",
    "Andam dizendo que o templo está escondendo algo. A Irmã Elara anda com uma cara de enterro ultimamente.",
-   "Se vir alguém com capuz preto nos becos depois da meia-noite, finja que não viu. Conselho de graça.",
+   "Se vir alguém com capuz preto nos becos durante a Madrugada, finja que não viu. Conselho de graça.",
    "Meu olho perdido ainda dói quando vai chover. Melhor previsão do tempo que qualquer mago oferece.",
    "Este balcão de carvalho aguentou mais brigas que as muralhas. E ainda está de pé. Como eu.",
    "Braun, o Marcado, bebe aqui toda semana. Um olho só, como eu. Dois caolhos numa taverna — começamos um clube.",

@@ -2236,9 +2236,9 @@
 
             html += `
             <div class="pending-item" style="cursor:pointer;border-color:var(--v-gold-30);margin-top:10px;" onclick="openMulticlassSubScreen()">
-                <div class="pending-icon">⚔️</div>
+                <div class="pending-icon">◆</div>
                 <div class="pending-text">
-                    <b>Aptidão Multiclasse (PHB p. 163)</b>
+                    <b>Aptidão Multiclasse</b>
                     <small id="mcSummaryHint">${sel.multiclass_choice ? 'Multiclasse selecionada: ' + ((CLASS_INFO[sel.multiclass_choice] || {}).name || sel.multiclass_choice) : 'Consulte requisitos e elegibilidade de novas classes'}</small>
                 </div>
                 <div class="pending-badge" id="mcSummaryBadge" style="${sel.multiclass_choice ? 'background:#4a9;color:#fff;' : 'background:var(--v-gold-20);color:var(--v-gold);border:1px solid var(--v-gold-50);'}">${sel.multiclass_choice ? ((CLASS_INFO[sel.multiclass_choice] || {}).name || sel.multiclass_choice) : 'Ver ▸'}</div>
@@ -2256,7 +2256,7 @@
             var html = '<button class="lu-sub-back" onclick="closeSubScreen()">← Voltar ao Resumo</button>';
             html += '<div class="section-title" style="margin-top:0;">Aptidão Multiclasse</div>';
             html += '<div class="dm-bubble" style="font-size:12px;margin-bottom:12px;">' +
-                    'No D&D 5e (PHB p. 163), para avançar em uma nova classe, o aventureiro deve atingir os atributos mínimos ' +
+                    'Pela tradição dos mestres de armas e artes arcanas, para avançar em uma nova classe, o aventureiro deve atingir os atributos mínimos ' +
                     '<b>tanto da classe atual quanto da classe pretendida</b>.</div>';
 
             html += '<div style="background:var(--v-bg-card,#2e2520);border:1px solid var(--v-border,#4a3828);border-radius:8px;padding:10px;margin-bottom:12px;">' +

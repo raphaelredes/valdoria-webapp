@@ -386,12 +386,12 @@
                 var tgLink = document.getElementById('cta-telegram');
                 if (tgLink) tgLink.style.display = 'none';
                 if (portal) {
-                    portal.textContent = 'Tentar Novamente';
+                    portal.textContent = 'Retornar à Cidade';
                     portal.href = 'javascript:void(0)';
                     portal.addEventListener('click', function (ev) {
                         ev.preventDefault();
-                        // Recarrega a URL atual (mesma rota que deu 404)
-                        location.reload();
+                        var search = location.search || '';
+                        location.href = '/cidade/' + search;
                     });
                 }
             } catch (e) { /* fallback silencioso */ }

@@ -1075,7 +1075,7 @@
     ]
    },
    "quest_smugglers_accepted": {
-    "text": "(Aldric relaxa os ombros — pela primeira vez, parece aliviado) 'Bom. Muito bom.'\n\n'O portão lateral fica a sudoeste das muralhas. Observe entre a meia-noite e as duas horas da manhã. Se ver carroças ou figuras encapuzadas, siga-as. Descubra o que carregam e de onde vem.'\n\n(Ele te entrega uma lanterna pequena) 'Tome. Lanterna de vigia. Luz fraca, alcance curto — perfeita pra não ser notado. E lembre-se: observe primeiro, aja depois.'",
+    "text": "(Aldric relaxa os ombros — pela primeira vez, parece aliviado) 'Bom. Muito bom.'\n\n'O portão lateral fica a sudoeste das muralhas. Observe durante o silêncio da Madrugada. Se ver carroças ou figuras encapuzadas, siga-as. Descubra o que carregam e de onde vem.'\n\n(Ele te entrega uma lanterna pequena) 'Tome. Lanterna de vigia. Luz fraca, alcance curto — perfeita pra não ser notado. E lembre-se: observe primeiro, aja depois.'",
     "choices": [
      {
       "text": "Entendido. Vigiarei os portões.",
@@ -1093,7 +1093,7 @@
      },
      {
       "type": "narration",
-      "text": "Observe entre a meia-noite e as duas horas da manhã."
+      "text": "Observe durante o silêncio da Madrugada."
      },
      {
       "type": "narration",

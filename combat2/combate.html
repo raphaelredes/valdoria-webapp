@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-11-03T22:33:54Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-11-07T05:40:27Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -15879,6 +15879,177 @@ canvas#vfxCanvas,
   border: 1px solid rgba(255, 200, 100, 0.55);
   color: #ffe0a0;
 }
+
+/* ============================================================================
+   SISTEMA UNIVERSAL DE VISUALIZAÇÃO AVANÇADA (DIVULGAÇÃO PROGRESSIVA D&D 5e)
+   & MELHORIAS VISUAIS ÉPICAS DO COMBATE (2026-11)
+   ============================================================================ */
+.v-adv-wrap {
+  width: 100%;
+  margin-top: 6px;
+  box-sizing: border-box;
+}
+.v-adv-toggle-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: linear-gradient(180deg, rgba(38, 29, 20, 0.88) 0%, rgba(22, 16, 11, 0.94) 100%);
+  border: 1px solid rgba(196, 149, 58, 0.42);
+  border-radius: 7px;
+  color: #d4b26a;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: calc(10px * var(--v-font-scale, 1));
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 220, 140, 0.1), 0 2px 5px rgba(0, 0, 0, 0.45);
+  box-sizing: border-box;
+}
+.v-adv-toggle-btn:hover {
+  border-color: rgba(255, 214, 128, 0.78);
+  color: #ffe299;
+  background: linear-gradient(180deg, rgba(54, 41, 27, 0.92) 0%, rgba(30, 22, 14, 0.96) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 220, 140, 0.2), 0 0 10px rgba(196, 149, 58, 0.3);
+}
+.v-adv-toggle-btn:active {
+  transform: scale(0.98);
+}
+.v-adv-toggle-btn.is-open {
+  border-color: rgba(232, 196, 90, 0.75);
+  color: #ffe299;
+  background: linear-gradient(180deg, rgba(58, 44, 28, 0.95) 0%, rgba(28, 20, 12, 0.98) 100%);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.v-adv-toggle-ico {
+  font-size: 12px;
+  line-height: 1;
+  opacity: 0.92;
+}
+.v-adv-toggle-chev {
+  margin-left: auto;
+  font-size: 11px;
+  line-height: 1;
+  transition: transform 0.22s ease;
+  color: var(--v-gold, #c4953a);
+}
+.v-adv-toggle-btn.is-open .v-adv-toggle-chev {
+  transform: rotate(180deg);
+}
+.v-adv-drawer {
+  display: none;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 11px;
+  background: linear-gradient(180deg, rgba(16, 12, 8, 0.94) 0%, rgba(10, 8, 5, 0.97) 100%);
+  border: 1px solid rgba(196, 149, 58, 0.42);
+  border-top: none;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  color: #cfc2aa;
+  font-family: var(--v-font, 'MedievalSharp'), serif;
+  font-size: calc(11.5px * var(--v-font-scale, 1));
+  line-height: 1.45;
+  text-align: left;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.65), 0 4px 12px rgba(0, 0, 0, 0.5);
+  animation: udcFadeIn 0.2s ease;
+}
+.v-adv-drawer.is-open {
+  display: block;
+}
+.v-adv-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 0;
+  border-bottom: 1px dashed rgba(196, 149, 58, 0.16);
+}
+.v-adv-row:last-child {
+  border-bottom: none;
+}
+.v-adv-k {
+  color: #a89a82;
+  font-size: calc(11px * var(--v-font-scale, 1));
+  flex-shrink: 0;
+}
+.v-adv-v {
+  color: #f0dfbc;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-weight: 700;
+  font-size: calc(11px * var(--v-font-scale, 1));
+  text-align: right;
+}
+.v-adv-note {
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(196, 149, 58, 0.2);
+  color: #bdb098;
+  font-size: calc(11px * var(--v-font-scale, 1));
+  line-height: 1.42;
+}
+/* Resumo primário limpo nos modais de confirmação */
+.v-primary-impact-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 4px;
+}
+.v-primary-impact-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 16px;
+  background: rgba(20, 15, 10, 0.82);
+  border: 1px solid rgba(196, 149, 58, 0.45);
+  color: #ffd680;
+  font-family: var(--v-font-display, 'Cinzel'), serif;
+  font-size: calc(11.5px * var(--v-font-scale, 1));
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  box-shadow: inset 0 1px 0 rgba(255, 220, 140, 0.12), 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+.v-primary-impact-pill--dmg {
+  color: #ff9e80;
+  border-color: rgba(224, 96, 64, 0.55);
+}
+.v-primary-impact-pill--heal {
+  color: #8ce89a;
+  border-color: rgba(88, 196, 112, 0.55);
+}
+.v-primary-impact-pill--acc {
+  color: #ffe08a;
+  border-color: rgba(218, 175, 72, 0.6);
+}
+/* Toggle de Visualização Avançada no Diário de Combate */
+.lp-log-adv-bar {
+  display: flex;
+  justify-content: center;
+  padding: 2px 4px 6px;
+}
+.lp-log-adv-bar .v-adv-toggle-btn {
+  max-width: 290px;
+  border-radius: 16px;
+  padding: 5px 12px;
+}
+/* Melhorias visuais gerais: Arena, Tokens, Fila de Iniciativa e Cards Táticos */
+#turn-queue .tl-node.active {
+  box-shadow: 0 0 12px rgba(232, 196, 90, 0.55), inset 0 0 6px rgba(255, 225, 140, 0.35);
+}
+.tc-card, .tam-card, .mc-card {
+  box-shadow:
+    0 14px 38px rgba(0, 0, 0, 0.88),
+    0 0 24px rgba(196, 149, 58, 0.18),
+    inset 0 1px 0 rgba(255, 220, 140, 0.16) !important;
+}
 </style>
 <script>
 /* Garante classe no <html> (copias antigas) e reaplica skin no fim da cascata após todos os CSS do CDN. */
@@ -22590,7 +22761,7 @@ function _simBreathWeaponSkill(ancestry, lvl) {
         damageSpec: { n: n, d: 6, flat: 0 },
         combatOnceId: 'breath_weapon', isRacial: true,
         desc: 'Sopro de ' + (PT[ancestry] || ancestry) + ' (' + n + 'd6, TR p/ metade). 1× por combate.',
-        helpDnd5e: 'Sopro Dracônico (— traço racial do Draconato): exala energia em área; TR (CD 8+CON+prof), metade em sucesso. Escala 2d6/3d6/4d6/5d6 (nv 1/6/11/16). 1×/descanso — na arena, 1×/combate.'
+        helpDnd5e: 'Sopro Dracônico (traço racial do Draconato): exala energia em área; TR (CD 8+CON+prof), metade em sucesso. Escala 2d6/3d6/4d6/5d6 (nv 1/6/11/16). 1× por combate.'
     };
 }
 
@@ -22604,7 +22775,7 @@ function _simTieflingRebukeSkill() {
         damageSpec: { n: 3, d: 10, flat: 0 },  /* REVIEW [0]: 2º nível = 3d10  */
         combatOnceId: 'hellish_rebuke_racial', isRacial: true,
         desc: 'Reação: 3d10 fogo em quem te feriu (TR DES p/ metade). 1× por combate.',
-        helpDnd5e: 'Repreensão Infernal (— Legado Infernal do Tiefling, nv 3): REAÇÃO ao receber dano; agressor faz TR de DES ou sofre 3d10 de fogo (metade em sucesso) — conjurada como magia de 2º NÍVEL.'
+        helpDnd5e: 'Repreensão Infernal (Legado Infernal do Tiefling, nv 3): REAÇÃO ao receber dano; agressor faz TR de DES ou sofre 3d10 de fogo (metade em sucesso) — conjurada como magia de 2º NÍVEL.'
     };
 }
 
@@ -22627,7 +22798,7 @@ function _simSkillFaerieFire(dc) {
         },
         combatOnceId: 'drow_faerie_fire', isRacial: true,
         desc: 'Delineia o alvo em luz (TR DES): atacantes têm vantagem contra ele. Concentração. 1× por combate.',
-        helpDnd5e: 'Fogo Feérico / Faerie Fire (— Magia Drow nv3): o alvo faz TR de DES ou fica DELINEADO por luz — todo ataque contra ele tem vantagem e ele não pode se beneficiar de invisibilidade. Concentração. 1×/dia — na arena, 1×/combate.'
+        helpDnd5e: 'Fogo Feérico (Magia Drow nv3): o alvo faz TR de DES ou fica DELINEADO por luz — todo ataque contra ele tem vantagem e ele não pode se beneficiar de invisibilidade. Concentração. 1× por combate.'
     };
 }
 function _simSkillDarkness() {
@@ -22639,7 +22810,7 @@ function _simSkillDarkness() {
         },
         combatOnceId: 'darkness_racial', isRacial: true,
         desc: 'Envolve-se em escuridão mágica: atacantes não te enxergam (desvantagem). Concentração. 1× por combate.',
-        helpDnd5e: 'Escuridão / Darkness (— Magia Drow nv5 / Legado de Asmodeus nv5): cria escuridão mágica que bloqueia até visão no escuro. Arena: atacantes ficam com DESVANTAGEM (não te enxergam). Concentração. 1×/dia — na arena, 1×/combate.'
+        helpDnd5e: 'Escuridão (Magia Drow nv5 / Legado de Asmodeus nv5): cria escuridão mágica que bloqueia até visão no escuro; atacantes ficam com DESVANTAGEM. Concentração. 1× por combate.'
     };
 }
 function _simSkillBurningHands(dc) {
@@ -22650,7 +22821,7 @@ function _simSkillBurningHands(dc) {
         damageSpec: { n: 3, d: 6, flat: 0 },
         combatOnceId: 'mephistopheles_burning_hands', isRacial: true,
         desc: 'Cone de fogo: 3d6 em área (TR DES p/ metade). 1× por combate.',
-        helpDnd5e: 'Mãos Flamejantes / Burning Hands (— Legado de Mephistopheles nv3): cone de fogo, 3d6 a cada alvo; TR DES p/ metade. Conjurada como magia de 1º nível. 1×/dia — na arena, 1×/combate.'
+        helpDnd5e: 'Mãos Flamejantes (Legado de Mephistopheles nv3): cone de fogo, 3d6 a cada alvo; TR DES p/ metade. Conjurada como magia de 1º nível. 1× por combate.'
     };
 }
 function _simSkillRayOfSickness(dc) {
@@ -22666,7 +22837,7 @@ function _simSkillRayOfSickness(dc) {
         },
         combatOnceId: 'baalzebul_ray_sickness', isRacial: true,
         desc: 'Raio venenoso: 2d8 + alvo Envenenado (TR CON). 1× por combate.',
-        helpDnd5e: 'Raio Doentio / Ray of Sickness (— Legado de Baalzebul nv3): ataque de magia à distância; 2d8 veneno e o alvo faz TR de CON ou fica ENVENENADO (desvantagem em ataques). 1×/dia — na arena, 1×/combate.'
+        helpDnd5e: 'Raio Doentio (Legado de Baalzebul nv3): ataque de magia à distância; 2d8 veneno e o alvo faz TR de CON ou fica ENVENENADO (desvantagem em ataques). 1× por combate.'
     };
 }
 function _simSkillInvisibility() {
@@ -22679,7 +22850,7 @@ function _simSkillInvisibility() {
         },
         combatOnceId: 'dispater_invisibility', isRacial: true,
         desc: 'Fica invisível: seus ataques com vantagem, atacantes com desvantagem (quebra ao atacar). 1× por combate.',
-        helpDnd5e: 'Invisibilidade / Invisibility (— Legado de Dispater nv5): você fica invisível; seus ataques têm vantagem e atacantes têm desvantagem. Quebra ao atacar/conjurar. Concentração. 1×/dia — na arena, 1×/combate.'
+        helpDnd5e: 'Invisibilidade (Legado de Dispater nv5): você fica invisível; seus ataques têm vantagem e atacantes têm desvantagem. Quebra ao atacar/conjurar. Concentração. 1× por combate.'
     };
 }
 // Drow: Fogo Feérico (nv3) + Escuridão (nv5). dc = CD racial (8+CHA+prof).
@@ -23371,7 +23542,7 @@ function simCalcSaveFailChanceDnd5e(s, caster, defender, skill) {
             coverBonus: coverBonus,
             paladinAuraBonus: paladinAuraBonus,
             saveAdvState: 'auto_fail',
-            breakdown: 'FALHA AUTOMÁTICA em TR de ' + saveAbPt + ' (Alvo incapacitado/paralisado — Condição D&D 5e)'
+            breakdown: 'FALHA AUTOMÁTICA em TR de ' + saveAbPt + ' (Alvo incapacitado/paralisado)'
         };
     }
 
@@ -23786,7 +23957,7 @@ function addDeathFailuresAndMaybeDie(s, u, n) {
     ensureDeathSaves(u);
     var add = Math.max(0, n | 0);
     u.deathSaves.f = Math.min(3, (u.deathSaves.f | 0) + add);
-    s.log.push(u.n + ' sofre ' + add + ' falha(s) automática(s) no teste de morte (dano a 0 PV — D&D 5e ).');
+    s.log.push(u.n + ' sofre ' + add + ' falha(s) automática(s) no teste de morte (dano a 0 PV).');
     try {
         var _actorUid = (typeof unitUidForOrderIndex === 'function' && s && s.order) ? unitUidForOrderIndex(s, s.order.indexOf(u)) : (u.id || (u.t === 'p' ? 'p' : ''));
         var _cellEl = _actorUid ? document.querySelector('[data-unit-id="' + _actorUid + '"]') : null;
@@ -24728,7 +24899,7 @@ function describeDeathSavePreview(u, r, postState) {
         resPills.push('<span class="dmg-pill dmg-pill--crit">20 Natural</span>');
         resPills.push('<span class="dmg-pill dmg-pill--buff">✨ Recupera 1 PV</span>');
         resPills.push('<span class="dmg-pill dmg-pill--save">Consciência Restaurada</span>');
-        ruleLine = 'D&D 5e: 20 Natural no teste contra a morte recupera 1 PV de imediato e acorda.';
+        ruleLine = '20 Natural no teste contra a morte recupera 1 PV de imediato e acorda.';
     } else if (r === 1) {
         resTitle = isDeadNow ? 'FALECIMENTO (3 Falhas)' : 'NATURAL 1';
         resCls = 'miss';
@@ -24738,7 +24909,7 @@ function describeDeathSavePreview(u, r, postState) {
             : 'Natural 1! A gravidade dos ferimentos inflige duas falhas imediatas no teste de morte!';
         resPills.push('<span class="dmg-pill dmg-pill--crit">1 Natural (2 Falhas)</span>');
         if (isDeadNow) resPills.push('<span class="dmg-pill dmg-pill--vuln">💀 Óbito</span>');
-        ruleLine = 'D&D 5e: 1 Natural conta como duas falhas no teste contra a morte.';
+        ruleLine = '1 Natural conta como duas falhas no teste contra a morte.';
     } else if (r >= 10) {
         resTitle = isStableNow ? 'ESTABILIZOU (3 Sucessos)' : 'Sucesso no teste de morte';
         resCls = 'hit';
@@ -24998,6 +25169,76 @@ function escHtml(str) {
     });
 }
 
+/** Sanitizador diegético universal: remove citações a manuais (PHB/DMG/MM/SRD/D&D 5e) e parênteses órfãos. */
+function simCleanDiegeticText(str) {
+    if (str == null) return '';
+    return String(str)
+        .replace(/\s*\((?:D&D\s*5e\s*)?(?:PHB|DMG|MM|XGE|XGtE|TCoE|SRD)[^)]*\)/gi, '')
+        .replace(/\b(?:PHB|DMG|MM|XGE|XGtE|TCoE|SRD)\s+p\.\s*\d+(?:\s*[-–]\s*\d+)?\s*[—\-:]?\s*/gi, '')
+        .replace(/\b(?:PHB|DMG|MM|SRD)\s+App\.?\s*A\s*[—\-:]?\s*/gi, '')
+        .replace(/\bD&D\s*5e\b\s*[—\-:]?\s*/gi, '')
+        .replace(/\(\s*[,/—\-–]+\s*(?:p\.\s*\d+|\d+)?\s*\)/gi, '')
+        .replace(/,\s*\)/g, ')')
+        .replace(/\(\s*,\s*/g, '(')
+        .replace(/\s+[—\-]\s*\)/g, ')')
+        .replace(/\(\s*\)/g, '')
+        .replace(/\s{2,}/g, ' ')
+        .trim();
+}
+
+/** Constrói um bloco universal de Visualização Avançada (botão colapsável + gaveta técnica). */
+function buildAdvancedViewDrawerHtml(title, contentHtml, opts) {
+    if (!contentHtml) return '';
+    opts = opts || {};
+    var isOpen = !!opts.open;
+    var btnLabel = title || 'Visualização Avançada (Regras & Cálculo)';
+    var wrapStyle = opts.style ? ' style="' + opts.style + '"' : '';
+    return '<div class="v-adv-wrap"' + wrapStyle + '>' +
+        '<button type="button" class="v-adv-toggle-btn' + (isOpen ? ' is-open' : '') + '" aria-expanded="' + (isOpen ? 'true' : 'false') + '">' +
+            '<span class="v-adv-toggle-ico">⚙</span>' +
+            '<span>' + escHtml(btnLabel) + '</span>' +
+            '<span class="v-adv-toggle-chev">▾</span>' +
+        '</button>' +
+        '<div class="v-adv-drawer' + (isOpen ? ' is-open' : '') + '">' + contentHtml + '</div>' +
+    '</div>';
+}
+
+/* Delegação global para todos os botões .v-adv-toggle-btn em qualquer modal/card do combate */
+if (typeof document !== 'undefined' && !window.__vAdvToggleDelegated) {
+    window.__vAdvToggleDelegated = true;
+    document.addEventListener('click', function (ev) {
+        var btn = ev.target && ev.target.closest ? ev.target.closest('.v-adv-toggle-btn') : null;
+        if (!btn) return;
+        if (btn.hasAttribute('data-log-adv-toggle')) return; // tratado no Diário de Combate
+        ev.stopPropagation();
+        var wrap = btn.parentElement;
+        var drawer = wrap ? wrap.querySelector('.v-adv-drawer') : null;
+        if (!drawer) return;
+        var openNow = !drawer.classList.contains('is-open');
+        drawer.classList.toggle('is-open', openNow);
+        btn.classList.toggle('is-open', openNow);
+        btn.setAttribute('aria-expanded', openNow ? 'true' : 'false');
+    });
+}
+
+/** Simplifica uma linha técnica de log para leitura narrativa limpa quando a Visualização Avançada está desativada. */
+function simStripLogTechnicalMath(ln) {
+    if (!ln || typeof ln !== 'string') return '';
+    var s = simCleanDiegeticText(ln);
+    // 1. Ataque padrão com rolagem e dano: " — d20 15+3=18 vs CA 15 | 2d10 [7+3]+3 = 13" -> " causando 13 de dano"
+    s = s.replace(/\s*—\s*d20\s+[^|]+?\s*\|\s*[^=]+?=\s*(\d+)\s*(?:de\s+dano)?/gi, ' causando $1 de dano');
+    // 2. Ataque errado com rolagem: " — d20 4+3=7 vs CA 15" -> ""
+    s = s.replace(/\s*—\s*d20\s+[^.|]+?\bvs\s+(?:CA|CD)\s*\d+(?:\s*\([^)]*\))?/gi, '');
+    // 3. Fórmulas de dados entre colchetes: " [8d6: 4+5...=32]+0" ou " [1d8: 5]+3" -> ""
+    s = s.replace(/\s*\[\d+d\d+:[^\]]*\]\s*(?:[+\-]\s*\d+)?/gi, '');
+    // 4. Testes de resistência detalhados: "TR DES 15+3=18 vs CD 15 SUCESSO" -> "TR DES: SUCESSO"
+    s = s.replace(/\b(TR\s+[A-ZÇÃÕ]{3})\s+\d+\s*[+\-]\s*\d+\s*=\s*\d+\s*vs\s*CD\s*\d+\s*/gi, '$1: ');
+    // 5. Comparações brutas entre colchetes/parênteses: " [16 vs 12]" ou " (d20 14+2=16 vs CD 13)"
+    s = s.replace(/\s*\[\d+\s*vs\s*\d+\]/gi, '');
+    s = s.replace(/\s*\(\s*d20[^)]*vs\s*(?:CA|CD)\s*\d+[^)]*\)/gi, '');
+    return s.replace(/\s{2,}/g, ' ').trim();
+}
+
 /** Destaca inteiros em texto já escapado (CA, d20, PV, CD, etc.). */
 function simHighlightNumbersInEscaped(esc) {
     return String(esc || '').replace(/\b(\d+)\b/g, function (_, n) {
@@ -25048,8 +25289,9 @@ function simClassifyLogLineDnd5e(ln) {
 }
 
 /** Uma linha do array s.log -> HTML (marcadores internos + números). */
-function simBuildLogEntryHtml(ln, filterCat) {
-    if (typeof ln !== 'string') ln = String(ln == null ? '' : ln); ln = ln.replace(/\s*\((?:D&D\s*5e\s*)?(?:PHB|DMG|MM|XGE|XGtE|TCoE|SRD)[^)]*\)/gi, '').replace(/\s*\(D&D\s*5e\s*\)/gi, '');
+function simBuildLogEntryHtml(ln, filterCat, showAdvMath) {
+    if (typeof ln !== 'string') ln = String(ln == null ? '' : ln);
+    ln = simCleanDiegeticText(ln);
     if (ln === '::SIM_OPEN::') {
         if (filterCat && filterCat !== 'all') return '';
         return '<div class="lp-log-block lp-log-block--open" role="presentation"><div class="lp-log-open-line">Início do combate</div></div>';
@@ -25073,15 +25315,17 @@ function simBuildLogEntryHtml(ln, filterCat) {
     }
     var meta = simClassifyLogLineDnd5e(ln);
     if (filterCat && filterCat !== 'all' && meta.cat !== filterCat) return '';
-    return '<div class="lp-log-line" data-log-cat="' + meta.cat + '">' + meta.badge + simHighlightNumbersInEscaped(escHtml(ln)) + '</div>';
+    var isAdv = (showAdvMath !== undefined) ? !!showAdvMath : !!window._combatLogShowAdvMath;
+    var displayLn = isAdv ? ln : simStripLogTechnicalMath(ln);
+    return '<div class="lp-log-line" data-log-cat="' + meta.cat + '">' + meta.badge + simHighlightNumbersInEscaped(escHtml(displayLn)) + '</div>';
 }
 
 /** HTML completo do log (ordem cronológica). */
-function simBuildCombatLogHtml(s, filterCat) {
+function simBuildCombatLogHtml(s, filterCat, showAdvMath) {
     var lines = (s && s.log) ? s.log.slice() : [];
     if (!lines.length) return '<div class="lp-empty">Sem entradas ainda.</div>';
     var html = '';
-    lines.forEach(function (ln) { html += simBuildLogEntryHtml(ln, filterCat || 'all'); });
+    lines.forEach(function (ln) { html += simBuildLogEntryHtml(ln, filterCat || 'all', showAdvMath); });
     return html || '<div class="lp-empty">Nenhum registro nesta categoria.</div>';
 }
 
@@ -25564,7 +25808,7 @@ function showCombatScreenGuide(explicitTopic) {
         },
         init: {
             title: 'INICIATIVA & FILA DE TURNOS',
-            sub: 'Ordem de Combate D&D 5e',
+            sub: 'Ordem Tática de Combate',
             items: [
                 '<b>◆ Rolagem de Iniciativa (1d20 + DES):</b> No início do confronto, cada combatente rola 1d20 somado ao modificador de Destreza para definir a ordem de atuação.',
                 '<b>◆ Barra de Iniciativa no Topo:</b> Exibe a sequência da rodada atual (R1, R2...) e o clima do campo de batalha. Toque em qualquer retrato para inspecionar PV, CA e condições daquela unidade.',
@@ -26921,43 +27165,34 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
                 if (aooNames.indexOf(uN) < 0) aooNames.push(uN);
             }
             if (isDisengaged) {
-                chips.push({ kind: 'danger', text: 'Sentinela ignora Desengajar: ' + aooNames.join(', ') + '' });
+                chips.push({ kind: 'danger', text: 'Sentinela ignora Desengajar: ' + aooNames.join(', ') });
             } else {
-                chips.push({ kind: 'danger', text: 'AoO (' + provokedAoOList.length + '): ' + aooNames.join(', ') });
+                chips.push({ kind: 'danger', text: 'Ataque de Oportunidade (' + provokedAoOList.length + '): ' + aooNames.join(', ') });
             }
         } else if (isDisengaged) {
-            chips.push({ kind: 'good', text: '💨 Desengajado (Sem AoO, )' });
+            chips.push({ kind: 'good', text: '💨 Desengajado (Movimento Seguro)' });
         }
         if (crossesDifficultTerrain) {
-            chips.push({ kind: 'warn', text: '🌱 Terreno Difícil (Custo 2× — )' });
+            chips.push({ kind: 'warn', text: '🌱 Terreno Difícil' });
         }
         if (encounteredHazards.length > 0) {
             for (var eh = 0; eh < Math.min(2, encounteredHazards.length); eh++) {
                 var hz = encounteredHazards[eh];
                 var hzName = hz.name || hz.label || 'Perigo';
                 var hzSym = hz.symbol || hz.ico || '🔥';
-                if (hz.hazard_kind === 'damage' || hz.damage_dice || hz.type === 'fire' || hz.type === 'electrified_water') {
-                    var dDice = (hz.damage_dice && typeof hz.damage_dice === 'object') ? (hz.damage_dice.n + 'd' + hz.damage_dice.d) : (hz.damage_dice || '1d4');
-                    var dType = hz.damage_type || (hz.type === 'fire' ? 'fogo' : 'dano');
-                    chips.push({ kind: 'danger', text: hzSym + ' ' + hzName + ' (' + dDice + ' ' + dType + ')' });
-                } else if (hz.hazard_kind === 'save_prone' || hz.type === 'ice') {
-                    var dc = hz.save_dc || 10;
-                    chips.push({ kind: 'warn', text: hzSym + ' ' + hzName + ' (CD ' + dc + ' DES ou Caído)' });
-                } else {
-                    chips.push({ kind: 'danger', text: hzSym + ' Cruza ' + hzName });
-                }
+                chips.push({ kind: 'danger', text: hzSym + ' ' + hzName });
             }
         } else if (crossesHazard) {
             chips.push({ kind: 'danger', text: '🔥 Cruza Terreno Perigoso' });
         }
         if (destFlanksEnemy) {
-            chips.push({ kind: 'good', text: '⚔ Flanqueia ' + destFlanksEnemy + ' (+Vantagem)' });
+            chips.push({ kind: 'good', text: '⚔ Flanqueia ' + destFlanksEnemy });
         }
         if (destElev > 0) {
-            chips.push({ kind: 'good', text: '⛰️ Elevado +' + (destElev === 2 ? '3m' : '1,5m') + ' (+2 Atq Dist.)' });
+            chips.push({ kind: 'good', text: '⛰️ Terreno Elevado (+' + (destElev === 2 ? '3m' : '1,5m') + ')' });
         }
         if (destCoverBonus > 0) {
-            chips.push({ kind: 'info', text: '⛨ Cobertura +' + destCoverBonus + ' CA' });
+            chips.push({ kind: 'info', text: '⛨ Cobertura no Destino' });
         }
         if (chips.length === 0) {
             chips.push({ kind: 'good', text: '✓ Rota Segura' });
@@ -26965,7 +27200,7 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
 
         showBfTacticalPreviewBar({
             tone: isRouteHazard ? 'hazard' : (destFlanksEnemy || destElev > 0 ? 'adv' : 'normal'),
-            title: '📍 Mover ' + totalM + ' (' + totalCostHexes + 'h) · Restam ' + remainingMeters,
+            title: '📍 Mover ' + totalM + ' · Restam ' + remainingMeters,
             chips: chips,
             primaryLabel: isRouteHazard ? 'Mover' : '✓ Mover',
             primaryDanger: isRouteHazard,
@@ -26980,7 +27215,7 @@ function drawMovementPathPreview(fromCol, fromRow, toCol, toRow, options) {
                     handlePlayerMoveTo(tc, tr);
                 }
             },
-            infoLabel: 'ℹ',
+            infoLabel: '⚙ Detalhes',
             onInfo: function () {
                 var tc = toCol, tr = toRow;
                 _previewMoveHex = null;
@@ -27339,7 +27574,8 @@ function computeTargetHitPreview(actor, target, skill) {
         var abPt = (typeof simAbilityLabelPt === 'function') ? simAbilityLabelPt(ab) : ab.toUpperCase();
         return {
             mode: 'save',
-            label: 'TR ' + abPt + ' vs CD ' + dc + ' (~' + failChance + '% falha)',
+            label: '~' + failChance + '% Efeito (' + abPt + ')',
+            techLabel: 'TR ' + abPt + ' vs CD ' + dc + ' (~' + failChance + '% falha)',
             failChance: failChance,
             dc: dc,
             ability: ab
@@ -27375,7 +27611,8 @@ function computeTargetHitPreview(actor, target, skill) {
         var sign = atkTot >= 0 ? '+' : '';
         return {
             mode: 'attack',
-            label: 'Acerto: ~' + hitPercentStr + '% (d20' + sign + atkTot + ' vs CA ' + effAc + ')',
+            label: 'Acerto: ~' + hitPercentStr + '%',
+            techLabel: 'Acerto: ~' + hitPercentStr + '% (d20' + sign + atkTot + ' vs CA ' + effAc + ')',
             hitChance: hitPercentStr,
             effAc: effAc,
             atkTot: atkTot
@@ -27407,8 +27644,8 @@ function previewTacticalTargetOnBoard(targetIdx) {
         ? simComputeCover(currentState, pUnit, tUnit)
         : { cover: 'none', bonus: 0 };
     var covLabel = (covInfo.cover === 'three_quarters')
-        ? '⛨ ¾ Cobertura (+5 CA)'
-        : ((covInfo.cover === 'half') ? '⛨ ½ Cobertura (+2 CA)' : '');
+        ? '⛨ ¾ Cobertura'
+        : ((covInfo.cover === 'half') ? '⛨ ½ Cobertura' : '');
     var flkInfo = (!isShove && !reachInfo.isRanged && tUnit.t === 'e' && typeof simCheckFlanking === 'function')
         ? simCheckFlanking(pUnit, tUnit, currentState.order)
         : null;
@@ -27441,7 +27678,7 @@ function previewTacticalTargetOnBoard(targetIdx) {
     if (tUnit.t === 'e' && !isShove && typeof computeTargetHitPreview === 'function') {
         var hpv = computeTargetHitPreview(pUnit, tUnit, _pendingSkill);
         if (hpv && hpv.label) {
-            chips.push({ kind: hpv.mode === 'save' ? 'warn' : 'good', text: '🎲 ' + hpv.label });
+            chips.push({ kind: hpv.mode === 'save' ? 'warn' : 'good', text: '🎯 ' + hpv.label });
         }
     }
 
@@ -27454,13 +27691,13 @@ function previewTacticalTargetOnBoard(targetIdx) {
             ? (simHasCondition(tUnit, 'paralyzed') || simHasCondition(tUnit, 'unconscious'))
             : !!(tUnit.paralyzed || tUnit.unconscious);
         if (isTargetHelpless && (aimRes.distHex || 1) <= 1 && !isShove) {
-            chips.push({ kind: 'good', text: '✦ Acerto é Crítico (Alvo Imóvel a 1,5m, )' });
+            chips.push({ kind: 'good', text: '✦ Acerto é Crítico (Alvo Imóvel a 1,5m)' });
         }
         if (advDetails && advDetails.state === 'cancelled') {
-            chips.push({ kind: 'info', text: '⚖ Anuladas (Vantagem vs Desvantagem, )' });
+            chips.push({ kind: 'info', text: '⚖ Normal (Vantagem e Desvantagem anuladas)' });
         } else if (aimRes.canFlank) {
             var pName = (flkInfo && flkInfo.partner && flkInfo.partner.n) ? flkInfo.partner.n.split(' ')[0] : 'Aliado';
-            chips.push({ kind: 'good', text: '▲ Flanqueio c/ ' + pName + ' (+Vantagem)' });
+            chips.push({ kind: 'good', text: '▲ Flanqueio c/ ' + pName });
         } else if (advPreview === 'advantage' || (advDetails && advDetails.state === 'advantage')) {
             var advText = '▲ Vantagem';
             if (advDetails && advDetails.advReasons && advDetails.advReasons.length > 0) {
@@ -27477,7 +27714,7 @@ function previewTacticalTargetOnBoard(targetIdx) {
                 else if (_r.indexOf('Alvo petrificado') !== -1) advText = '▲ Vantagem (Alvo Petrificado)';
                 else if (_r.indexOf('Atacante invisível') !== -1) advText = '▲ Vantagem (Invisível)';
                 else if (_r.indexOf('Ajudado por aliado') !== -1) advText = '▲ Vantagem (Ajudado)';
-                else advText = '▲ Vantagem (' + _r.replace(/ \(PHB.*\)/, '') + ')';
+                else advText = '▲ Vantagem (' + simCleanDiegeticText(_r) + ')';
             }
             chips.push({ kind: 'good', text: advText });
         } else if (advPreview === 'disadvantage' || (advDetails && advDetails.state === 'disadvantage')) {
@@ -27495,17 +27732,17 @@ function previewTacticalTargetOnBoard(targetIdx) {
                 else if (_dr.indexOf('Alvo invisível') !== -1) disText = '▼ Desvantagem (Alvo Invisível)';
                 else if (_dr.indexOf('Protegido por aliado') !== -1) disText = '▼ Desvantagem (Estilo Proteção)';
                 else if (_dr.indexOf('Exaustão') !== -1) disText = '▼ Desvantagem (Exaustão)';
-                else disText = '▼ Desvantagem (' + _dr.replace(/ \(PHB.*\)/, '') + ')';
+                else disText = '▼ Desvantagem (' + simCleanDiegeticText(_dr) + ')';
             }
             chips.push({ kind: 'warn', text: disText });
         }
         if (aimRes.elevDelta > 0) {
-            chips.push({ kind: 'good', text: '⛰️ Terreno Elevado (+2 Atq)' });
+            chips.push({ kind: 'good', text: '⛰️ Terreno Elevado' });
         } else if (aimRes.elevDelta < 0) {
-            chips.push({ kind: 'warn', text: '▼ Terreno Baixo (-2 Atq)' });
+            chips.push({ kind: 'warn', text: '▼ Terreno Baixo' });
         }
         if (covInfo.bonus > 0) {
-            chips.push({ kind: 'info', text: '⛨ +' + covInfo.bonus + ' CA (' + (covInfo.blockerName || 'Cobertura') + ')' });
+            chips.push({ kind: 'info', text: '⛨ Cobertura (' + (covInfo.blockerName || 'Obstáculo') + ')' });
         }
         var predDmgType = (_pendingSkill && _pendingSkill.dmgType)
             ? _pendingSkill.dmgType
@@ -29245,7 +29482,7 @@ function showMoveConfirm(tCol, tRow) {
                 }
             }
             if (flankedEnemies.length > 0) {
-                destBenefits.push('▲ <strong>Flanqueia ' + escHtml(flankedEnemies.join(', ')) + '</strong>: confere Vantagem (2d20kh1) em ataques corpo a corpo');
+                destBenefits.push('▲ <strong>Flanqueia ' + escHtml(flankedEnemies.join(', ')) + '</strong>: confere Vantagem em ataques corpo a corpo');
             }
         }
         if (typeof simComputeCover === 'function') {
@@ -29258,7 +29495,7 @@ function showMoveConfirm(tCol, tRow) {
                 }
             }
             if (bestCovBonus > 0) {
-                destBenefits.push('⛨ <strong>Cobertura Tática (+' + bestCovBonus + ' CA / DES)</strong> contra disparos e magias inimigas');
+                destBenefits.push('⛨ <strong>Cobertura Tática</strong> contra disparos e magias inimigas');
             }
         }
     }
@@ -29277,25 +29514,26 @@ function showMoveConfirm(tCol, tRow) {
     var destCoordStr = colLetter + (tRow + 1);
 
     var costExtraTag = '';
-    if (hasDifficult && hasClimbCost) costExtraTag = ' <span style="color:#f59e0b;font-size:11px;">(Terreno Difícil ◆ + Aclive ▲)</span>';
-    else if (hasDifficult) costExtraTag = ' <span style="color:#f59e0b;font-size:11px;">(Terreno Difícil ◆)</span>';
-    else if (hasClimbCost) costExtraTag = ' <span style="color:#fde68a;font-size:11px;">(Subida de Elevação ▲)</span>';
+    if (hasDifficult && hasClimbCost) costExtraTag = ' <span style="color:#f59e0b;font-size:11px;">(Terreno Difícil + Aclive)</span>';
+    else if (hasDifficult) costExtraTag = ' <span style="color:#f59e0b;font-size:11px;">(Terreno Difícil)</span>';
+    else if (hasClimbCost) costExtraTag = ' <span style="color:#fde68a;font-size:11px;">(Subida de Elevação)</span>';
 
     var html = '';
     html += '<div class="tcc-title">Confirmar Movimento</div>';
-    html += '<div class="tcc-preview" style="padding:10px 14px;background:rgba(20,15,10,0.6);border-radius:6px;margin-bottom:12px;display:flex;align-items:center;">';
+    html += '<div class="tcc-preview" style="padding:10px 14px;background:rgba(20,15,10,0.6);border-radius:6px;margin-bottom:10px;display:flex;align-items:center;">';
     html += '<div style="margin-right:12px;color:var(--v-gold,#c4953a);display:flex;align-items:center;">' + _combatDistanceIconSVG(24) + '</div>';
     html += '<div class="tcc-info">';
-    html += '<div class="tcc-name">Destino: Hexágono ' + destCoordStr + (destElev > 0 ? ' (▲ +' + (destElev * 1.5).toFixed(1).replace('.', ',') + 'm)' : '') + '</div>';
-    html += '<div class="tcc-stats"><span class="tcc-n-key">' + dM + '</span> (' + dHexes + ' hexes)</div>';
+    html += '<div class="tcc-name">Deslocamento de ' + costM + (destElev > 0 ? ' (Terreno Elevado +' + (destElev * 1.5).toFixed(1).replace('.', ',') + 'm)' : '') + '</div>';
+    html += '<div class="tcc-stats">Restará <span class="tcc-n-key">' + remainingAfterM + '</span> de deslocamento neste turno' + costExtraTag + '</div>';
     html += '</div></div>';
 
-    html += '<div class="tcc-dmg" style="margin-bottom:12px;">';
-    html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Distância da rota</span><span class="tcc-dmg-val"><strong>' + dM + '</strong></span></div>';
-    html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Custo de movimento</span><span class="tcc-dmg-val"><strong>' + costM + '</strong>' + costExtraTag + '</span></div>';
-    html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Disponível agora</span><span class="tcc-dmg-val">' + currentMoveM + '</span></div>';
-    html += '<div class="tcc-dmg-row crit" style="border-top:1px dashed rgba(196,149,58,0.3);padding-top:6px;"><span class="tcc-dmg-lbl">Restará após mover</span><span class="tcc-dmg-val" style="color:#a3e635;font-weight:bold;">' + remainingAfterM + ' de ' + totalSpeedM + '</span></div>';
-    html += '</div>';
+    var advMoveHtml = '' +
+        '<div class="v-adv-row"><span class="v-adv-k">Coordenada de Destino</span><span class="v-adv-v">Hexágono ' + escHtml(destCoordStr) + '</span></div>' +
+        '<div class="v-adv-row"><span class="v-adv-k">Distância Geométrica</span><span class="v-adv-v">' + dM + ' (' + dHexes + ' hexes)</span></div>' +
+        '<div class="v-adv-row"><span class="v-adv-k">Custo Efetivo da Rota</span><span class="v-adv-v">' + costM + ' (' + totalCost + ' hexes)</span></div>' +
+        '<div class="v-adv-row"><span class="v-adv-k">Deslocamento Restante</span><span class="v-adv-v">' + remainingAfterM + ' / ' + totalSpeedM + ' (' + remainingAfterHexes + 'h)</span></div>' +
+        (hasDifficult || hasClimbCost ? '<div class="v-adv-note">Regra de Terreno: cada hexágono de terreno difícil ou subida de elevação consome 1,5m adicional de movimento.</div>' : '');
+    html += buildAdvancedViewDrawerHtml('Visualização Avançada (Custo & Regras)', advMoveHtml, { style: 'margin-bottom:10px;' });
 
     if (destBenefits.length > 0) {
         html += '<div style="background:rgba(22,60,34,0.45);border:1px solid rgba(74,222,128,0.45);border-radius:6px;padding:8px 11px;margin-bottom:12px;font-size:11.5px;color:#d1fae5;line-height:1.45;">';
@@ -29915,7 +30153,7 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     var proneBadge = '';
     if (fogState !== 'shrouded' && u.alive && !u.isDead && isProne) {
         classes += ' token--prone';
-        proneBadge = '<div class="token-prone-chip" title="D&D 5e (/ p. 292): Caído no chão! Ataques corpo a corpo a 1,5m têm Vantagem; ataques à distância têm Desvantagem.">▾ Caído</div>';
+        proneBadge = '<div class="token-prone-chip" title="Caído no chão! Ataques corpo a corpo a 1,5m têm Vantagem; ataques à distância têm Desvantagem.">▾ Caído</div>';
     }
 
     // Condições Ativas Adicionais D&D 5e (-292) + Forma Selvagem + Aura de Proteção (Progressive Disclosure: max 2 + overflow)
@@ -30110,7 +30348,7 @@ function buildHexTokenHTML(u, utype, uid, activeId, cx, cy, s, fogState) {
     var deathSavesBadge = '';
     if ((isPlayer || isAlly) && u.hp <= 0 && !u.isDead) {
         if (u.stable) {
-            deathSavesBadge = '<div class="token-stable-chip" title="D&D 5e (–198): Estabilizado a 0 PV (inconsciente, mas não precisa fazer salvaguardas contra a morte)">✦ Estável</div>';
+            deathSavesBadge = '<div class="token-stable-chip" title="Estabilizado a 0 PV (inconsciente, mas não precisa fazer salvaguardas contra a morte)">✦ Estável</div>';
         } else if (u.dying) {
             var ds = u.deathSaves || { s: 0, f: 0 };
             var dsSucc = Math.max(0, Math.min(3, parseInt(ds.s, 10) || 0));
@@ -32654,7 +32892,7 @@ function openConditionPopup(payload) {
 
     var tag = document.createElement('div');
     tag.className = 'v8-cond-popup-tag';
-    tag.textContent = payload.kind === 'debuff' ? 'Debuff · Condição D&D 5e' : 'Buff · Benefício D&D 5e';
+    tag.textContent = payload.kind === 'debuff' ? 'Debuff · Condição de Combate' : 'Buff · Benefício Ativo';
     card.appendChild(tag);
 
     var title = document.createElement('div');
@@ -32685,11 +32923,11 @@ function openConditionPopup(payload) {
     if (payload.rule && String(payload.rule).trim()) {
         var ruleHead = document.createElement('div');
         ruleHead.className = 'v8-cond-popup-rule-head';
-        ruleHead.textContent = '◆ Regra D&D 5e ◆';
+        ruleHead.textContent = '◆ Efeito Mecânico ◆';
         card.appendChild(ruleHead);
         var rule = document.createElement('div');
         rule.className = 'v8-cond-popup-rule';
-        rule.textContent = payload.rule;
+        rule.textContent = simCleanDiegeticText(payload.rule);
         card.appendChild(rule);
     }
 
@@ -32988,64 +33226,45 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
 
     var dtBadgeHtml = '<span class="dmg-pill dmg-pill--type" style="border:1px solid ' + dtInfo.col + ';color:' + dtInfo.col + ';"><span aria-hidden="true">' + dtInfo.ico + '</span> ' + escHtml(dtInfo.lb) + '</span>';
 
-    if (crit && rolls.length > 1) {
-        var l1 = document.createElement('div');
-        l1.className = 'dmg-sum-line';
-        l1.innerHTML = 'Crítico — dados de arma (' + rolls.length + 'd' + die + '): ' + rolls.map(function (v) { return simRollSpan(v, 'drl-num--die'); }).join(' + ');
-        box.appendChild(l1);
-        var l2 = document.createElement('div');
-        l2.className = 'dmg-sum-line dmg-sum-em';
-        l2.innerHTML = 'Soma dos dados: ' + simRollSpan(sumDice, 'drl-num--partial');
-        box.appendChild(l2);
-        var l3 = document.createElement('div');
-        l3.className = 'dmg-sum-line';
-        l3.innerHTML = 'Total: ' + simRollSpan(sumDice, 'drl-num--partial') + ' + ' + simRollSpan(mod, 'drl-num--mod') + ' (' + escHtml(String(attr)) + ') = ' + simRollSpan(total, 'drl-num--total') + ' ' + dtBadgeHtml;
-        box.appendChild(l3);
-    } else {
-        var one = document.createElement('div');
-        one.className = 'dmg-sum-line';
-        if (rolls.length <= 1) {
-            one.innerHTML = '1d' + die + ': ' + simRollSpan(rolls[0] || 0, 'drl-num--die') + (mod ? ' + ' + simRollSpan(mod, 'drl-num--mod') + ' (<span class="drl-paren-mod">' + escHtml(String(attr)) + '</span>)' : '') + ' = ' + simRollSpan(total, 'drl-num--total') + ' ' + dtBadgeHtml;
-        } else {
-            var rbits = rolls.map(function (v) { return simRollSpan(v, 'drl-num--die'); }).join(' + ');
-            one.innerHTML = rolls.length + 'd' + die + ': ' + rbits + ' = ' + simRollSpan(sumDice, 'drl-num--partial') + (mod ? ' + ' + simRollSpan(mod, 'drl-num--mod') + ' (' + escHtml(String(attr)) + ')' : '') + ' = ' + simRollSpan(total, 'drl-num--total') + ' ' + dtBadgeHtml;
-        }
-        box.appendChild(one);
-    }
+    var finalDmgShown = (reductionMeta && typeof reductionMeta.appliedTotal === 'number') ? reductionMeta.appliedTotal : total;
+    var mainImpactLine = document.createElement('div');
+    mainImpactLine.className = 'dmg-sum-line dmg-sum-em';
+    mainImpactLine.innerHTML = (crit ? '💥 <strong>Golpe Crítico!</strong> ' : 'Impacto: ') + simRollSpan(finalDmgShown, 'drl-num--total') + ' ' + dtBadgeHtml;
+    box.appendChild(mainImpactLine);
 
-    // Pílulas táticas D&D 5e (Resistência, Vulnerabilidade, Imunidade, TR, Concentração, Evasão, Buffs)
+    // Pílulas táticas (Resistência, Vulnerabilidade, Imunidade, TR, Concentração, Evasão, Buffs)
     var tacticalPills = [];
     if (crit) {
-        tacticalPills.push('<span class="dmg-pill dmg-pill--crit">💥 Crítico (Dados Dobrados)</span>');
+        tacticalPills.push('<span class="dmg-pill dmg-pill--crit">💥 Crítico</span>');
     }
     if (reductionMeta.isImmune) {
-        tacticalPills.push('<span class="dmg-pill dmg-pill--immune">🚫 Imunidade a ' + escHtml(dtInfo.lb) + ' (0 Dano)</span>');
+        tacticalPills.push('<span class="dmg-pill dmg-pill--immune">🚫 Imune a ' + escHtml(dtInfo.lb) + '</span>');
     } else if (reductionMeta.isVulnerable) {
-        tacticalPills.push('<span class="dmg-pill dmg-pill--vuln">💥 Vulnerabilidade (2× Dano)</span>');
+        tacticalPills.push('<span class="dmg-pill dmg-pill--vuln">💥 Vulnerável (2×)</span>');
     } else if (reductionMeta.isResistant || reductionMeta.rageResisted) {
-        var rSrc = reductionMeta.rageResisted ? 'Fúria' : 'Resistência';
-        tacticalPills.push('<span class="dmg-pill dmg-pill--resist">🛡️ ' + rSrc + ' a ' + escHtml(dtInfo.lb) + ' (½)</span>');
+        var rSrc = reductionMeta.rageResisted ? 'Fúria' : 'Resistente';
+        tacticalPills.push('<span class="dmg-pill dmg-pill--resist">🛡️ ' + rSrc + ' (½)</span>');
     }
     if (reductionMeta.saveSuccess === true) {
         var abLabel = (typeof simAbilityLabelPt === 'function') ? simAbilityLabelPt(reductionMeta.saveAbility) : String(reductionMeta.saveAbility || 'DES').toUpperCase();
-        var svTxt = reductionMeta.saveNegates ? 'Sucesso (0 Dano)' : 'Sucesso (½)';
+        var svTxt = reductionMeta.saveNegates ? 'Resistiu (0 Dano)' : 'Resistiu (½)';
         if (reductionMeta.evasion || reductionMeta.evasionUsed) {
-            svTxt = 'Sucesso • Evasão (0 Dano)';
+            svTxt = 'Evasão (0 Dano)';
         }
-        tacticalPills.push('<span class="dmg-pill dmg-pill--save">✦ TR ' + abLabel + ' ' + svTxt + '</span>');
+        tacticalPills.push('<span class="dmg-pill dmg-pill--save">✦ ' + abLabel + ': ' + svTxt + '</span>');
     } else if (reductionMeta.saveSuccess === false) {
         var abLabel = (typeof simAbilityLabelPt === 'function') ? simAbilityLabelPt(reductionMeta.saveAbility) : String(reductionMeta.saveAbility || 'DES').toUpperCase();
         if (reductionMeta.evasion || reductionMeta.evasionUsed) {
-            tacticalPills.push('<span class="dmg-pill dmg-pill--save">✦ TR ' + abLabel + ' Falha • Evasão (½)</span>');
+            tacticalPills.push('<span class="dmg-pill dmg-pill--save">✦ ' + abLabel + ': Evasão (½)</span>');
         } else {
-            tacticalPills.push('<span class="dmg-pill dmg-pill--vuln">✗ Falha TR ' + abLabel + ' (Dano Pleno)</span>');
+            tacticalPills.push('<span class="dmg-pill dmg-pill--vuln">✗ Falha em ' + abLabel + '</span>');
         }
     }
     if (reductionMeta.evasion || reductionMeta.evasionUsed) {
         tacticalPills.push('<span class="dmg-pill dmg-pill--buff">🛡️ Evasão</span>');
     }
     if (reductionMeta.aoeSharedDamage) {
-        tacticalPills.push('<span class="dmg-pill dmg-pill--type">◆ Dano de Área</span>');
+        tacticalPills.push('<span class="dmg-pill dmg-pill--type">◆ Dano em Área</span>');
     }
     if (reductionMeta.heavyArmorMaster > 0) {
         tacticalPills.push('<span class="dmg-pill dmg-pill--resist">🛡️ Armadura Pesada (−' + reductionMeta.heavyArmorMaster + ')</span>');
@@ -33061,12 +33280,12 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
     }
     if (reductionMeta.concRes && reductionMeta.concRes.tested) {
         if (reductionMeta.concRes.success) {
-            tacticalPills.push('<span class="dmg-pill dmg-pill--conc-pass">✦ Concentração Mantida (TR ' + reductionMeta.concRes.total + ' vs CD ' + reductionMeta.concRes.dc + ')</span>');
+            tacticalPills.push('<span class="dmg-pill dmg-pill--conc-pass">✦ Concentração Mantida</span>');
         } else {
-            tacticalPills.push('<span class="dmg-pill dmg-pill--conc-fail">💥 Concentração Quebrada (TR ' + reductionMeta.concRes.total + ' vs CD ' + reductionMeta.concRes.dc + ')</span>');
+            tacticalPills.push('<span class="dmg-pill dmg-pill--conc-fail">💥 Concentração Quebrada</span>');
         }
     } else if (reductionMeta.hasConcentration) {
-        tacticalPills.push('<span class="dmg-pill dmg-pill--conc">🧠 TR CON CD ' + (reductionMeta.concDc || 10) + ' (Concentração)</span>');
+        tacticalPills.push('<span class="dmg-pill dmg-pill--conc">🧠 Concentração Testada</span>');
     }
     // Bônus de habilidades (Marca do Caçador, Punição Divina, etc.)
     if (reductionMeta.bonusPack && reductionMeta.bonusPack.entries && reductionMeta.bonusPack.entries.length) {
@@ -33131,7 +33350,7 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
         if (reductionMeta.isImmune) reason = 'Alvo imune a ' + dtInfo.lb;
         else if (reductionMeta.isVulnerable) reason = 'Vulnerabilidade dobra o dano de ' + dtInfo.lb;
         else if (reductionMeta.evasion || reductionMeta.evasionUsed) reason = reductionMeta.saveSuccess ? 'Evasão anulou completamente o dano (0 dano)' : 'Evasão reduziu o dano à metade';
-        else if (reductionMeta.saveSuccess) reason = reductionMeta.saveNegates ? 'O alvo anulou o efeito no TR (0 dano)' : 'O alvo se esquivou (TR bem-sucedido: metade)';
+        else if (reductionMeta.saveSuccess) reason = reductionMeta.saveNegates ? 'O alvo anulou o efeito na salvaguarda (0 dano)' : 'O alvo se esquivou (metade do dano)';
         else if (reductionMeta.rageResisted) reason = 'A Fúria do alvo absorveu metade do golpe';
         else if (reductionMeta.isResistant) reason = 'Resistência do alvo reduziu o dano à metade';
         else if (reductionMeta.uncannyDodge) reason = 'Esquiva Sobrenatural reduziu o dano à metade';
@@ -33149,38 +33368,43 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
         box.appendChild(reductionLine);
     }
 
-    // Progressive Disclosure: botão compacto para visualizar a fórmula detalhada pontualmente
+    // Progressive Disclosure: botão compacto para visualizar a fórmula detalhada sob demanda
     var toggleBtn = document.createElement('button');
     toggleBtn.type = 'button';
     toggleBtn.className = 'dmg-inspect-toggle-btn';
     toggleBtn.setAttribute('aria-expanded', 'false');
-    toggleBtn.innerHTML = 'Detalhes da Regra';
+    toggleBtn.innerHTML = '⚙ Visualização Avançada (Dados &amp; Regra)';
 
     var breakdownEl = document.createElement('div');
     breakdownEl.className = 'dmg-math-breakdown';
 
     var rowsHtml = '';
+    if (crit && rolls.length > 1) {
+        rowsHtml += '<div class="dmg-math-breakdown-row"><span>Dados Críticos (' + rolls.length + 'd' + die + '):</span><strong>' + rolls.join(' + ') + ' = ' + sumDice + '</strong></div>';
+    } else {
+        rowsHtml += '<div class="dmg-math-breakdown-row"><span>Dados de Dano (' + rolls.length + 'd' + die + '):</span><strong>[' + rolls.join(' + ') + '] = ' + sumDice + '</strong></div>';
+    }
+    var baseMod = (typeof reductionMeta.baseMod === 'number') ? reductionMeta.baseMod : mod;
+    if (baseMod) rowsHtml += '<div class="dmg-math-breakdown-row"><span>Modificador:</span><strong>+' + baseMod + ' (' + escHtml(String(attr)) + ')</strong></div>';
+    rowsHtml += '<div class="dmg-math-breakdown-row"><span>Soma Bruta:</span><strong>' + total + ' (' + escHtml(dtInfo.lb) + ')</strong></div>';
     if (reductionMeta && reductionMeta.multiSeqText) {
         rowsHtml += '<div class="dmg-math-breakdown-row"><span>Sequência de Ataque:</span><strong>' + escHtml(reductionMeta.multiSeqText) + '</strong></div>';
     }
     if (reductionMeta && (reductionMeta.reactionKind || reductionMeta.oa)) {
-        var _rkRule = 'Ataque de Oportunidade (Reação, )';
-        if (reductionMeta.reactionKind === 'reaction_sentinel') _rkRule = 'Sentinela (Reação quando inimigo ataca aliado adjacente, )';
-        else if (reductionMeta.reactionKind === 'reaction_riposte') _rkRule = 'Resposta (Reação com Manobra quando inimigo erra ataque corpo a corpo, )';
-        else if (reductionMeta.reactionKind === 'reaction_retaliation') _rkRule = 'Retaliação (Reação quando sofre dano enquanto em Fúria, )';
-        else if (reductionMeta.reactionKind === 'reaction_giant_killer') _rkRule = 'Matador de Gigantes (Reação quando criatura Grande ou maior erra ataque, )';
-        else if (reductionMeta.reactionKind === 'reaction_opportunist') _rkRule = 'Oportunista (Reação quando criatura é atingida por outro atacante, )';
-        else if (reductionMeta.reactionKind === 'reaction_soul_of_vengeance') _rkRule = 'Alma da Vingança (Reação quando alvo do Voto ataca outro alvo, )';
-        else if (reductionMeta.reactionKind === 'reaction_stand_against_the_tide') _rkRule = 'Contra a Maré (Reação redirecionando ataque inimigo que errou, )';
-        else if (reductionMeta.reactionKind === 'whirlwind_sub') _rkRule = 'Ataque Giratório (Ação atacando todos os inimigos a até 1,5m, )';
-        else if (reductionMeta.reactionKind === 'volley_sub') _rkRule = 'Salva de Flechas (Ação atacando alvos em cubo de 3m à distância, )';
-        else if (reductionMeta.reactionKind === 'horde_breaker_sub') _rkRule = 'Quebrador de Hordas (1 ataque adicional contra criatura a 1,5m do alvo, )';
-        else if (reductionMeta.reactionKind === 'split_enchantment_sub') _rkRule = 'Encantamento Dividido (Magia de alvo único alvejando dois alvos, )';
+        var _rkRule = 'Ataque de Oportunidade (Reação)';
+        if (reductionMeta.reactionKind === 'reaction_sentinel') _rkRule = 'Sentinela (Reação quando inimigo ataca aliado adjacente)';
+        else if (reductionMeta.reactionKind === 'reaction_riposte') _rkRule = 'Resposta (Reação com Manobra quando inimigo erra ataque corpo a corpo)';
+        else if (reductionMeta.reactionKind === 'reaction_retaliation') _rkRule = 'Retaliação (Reação quando sofre dano enquanto em Fúria)';
+        else if (reductionMeta.reactionKind === 'reaction_giant_killer') _rkRule = 'Matador de Gigantes (Reação quando criatura Grande ou maior erra ataque)';
+        else if (reductionMeta.reactionKind === 'reaction_opportunist') _rkRule = 'Oportunista (Reação quando criatura é atingida por outro atacante)';
+        else if (reductionMeta.reactionKind === 'reaction_soul_of_vengeance') _rkRule = 'Alma da Vingança (Reação quando alvo do Voto ataca outro alvo)';
+        else if (reductionMeta.reactionKind === 'reaction_stand_against_the_tide') _rkRule = 'Contra a Maré (Reação redirecionando ataque inimigo que errou)';
+        else if (reductionMeta.reactionKind === 'whirlwind_sub') _rkRule = 'Ataque Giratório (Ação atacando todos os inimigos a até 1,5m)';
+        else if (reductionMeta.reactionKind === 'volley_sub') _rkRule = 'Salva de Flechas (Ação atacando alvos em cubo de 3m à distância)';
+        else if (reductionMeta.reactionKind === 'horde_breaker_sub') _rkRule = 'Quebrador de Hordas (1 ataque adicional contra criatura a 1,5m do alvo)';
+        else if (reductionMeta.reactionKind === 'split_enchantment_sub') _rkRule = 'Encantamento Dividido (Magia de alvo único alvejando dois alvos)';
         rowsHtml += '<div class="dmg-math-breakdown-row"><span>Economia de Ação / Regra:</span><strong>' + escHtml(_rkRule) + '</strong></div>';
     }
-    rowsHtml += '<div class="dmg-math-breakdown-row"><span>Dados de Dano:</span><strong>' + rolls.length + 'd' + die + ' [' + rolls.join('+') + '] = ' + sumDice + '</strong></div>';
-    var baseMod = (typeof reductionMeta.baseMod === 'number') ? reductionMeta.baseMod : mod;
-    if (baseMod) rowsHtml += '<div class="dmg-math-breakdown-row"><span>Modificador:</span><strong>+' + baseMod + ' (' + escHtml(String(attr)) + ')</strong></div>';
     if (reductionMeta.bonusPack && reductionMeta.bonusPack.entries && reductionMeta.bonusPack.entries.length) {
         for (var _bpi2 = 0; _bpi2 < reductionMeta.bonusPack.entries.length; _bpi2++) {
             var _bp2 = reductionMeta.bonusPack.entries[_bpi2];
@@ -33204,9 +33428,11 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
     }
     rowsHtml += '<div class="dmg-math-breakdown-row"><span>Tipo de Dano:</span><strong>' + dtInfo.ico + ' ' + escHtml(dtInfo.lb) + '</strong></div>';
     if (reductionMeta && typeof reductionMeta.appliedTotal === 'number' && reductionMeta.appliedTotal !== total) {
-        rowsHtml += '<div class="dmg-math-breakdown-row"><span>Dano Final:</span><strong style="color:#e8a070;">' + total + ' → ' + reductionMeta.appliedTotal + '</strong></div>';
+        rowsHtml += '<div class="dmg-math-breakdown-row"><span>Dano Final Aplicado:</span><strong style="color:#e8a070;">' + total + ' → ' + reductionMeta.appliedTotal + '</strong></div>';
     }
-    if (reductionMeta && reductionMeta.hasConcentration) {
+    if (reductionMeta.concRes && reductionMeta.concRes.tested) {
+        rowsHtml += '<div class="dmg-math-breakdown-row"><span>Teste de Concentração:</span><strong>TR CON ' + reductionMeta.concRes.total + ' vs CD ' + reductionMeta.concRes.dc + ' (' + (reductionMeta.concRes.success ? 'Mantida' : 'Quebrada') + ')</strong></div>';
+    } else if (reductionMeta && reductionMeta.hasConcentration) {
         rowsHtml += '<div class="dmg-math-breakdown-row"><span>Salvaguarda de Concentração:</span><strong>TR CON CD ' + (reductionMeta.concDc || 10) + '</strong></div>';
     }
     if (reductionMeta && reductionMeta.aoeSharedDamage) {
@@ -33219,8 +33445,8 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
             : 'Falha no TR — Sofre dano pleno';
         if (reductionMeta.evasion || reductionMeta.evasionUsed) {
             svResultTxt = reductionMeta.saveSuccess
-                ? 'Sucesso no TR — Evasão anulou o dano (0 dano, )'
-                : 'Falha no TR — Evasão garantiu metade do dano (½, )';
+                ? 'Sucesso no TR — Evasão anulou o dano (0 dano)'
+                : 'Falha no TR — Evasão garantiu metade do dano (½)';
         }
         rowsHtml += '<div class="dmg-math-breakdown-row"><span>Salvaguarda ' + abLabel + ':</span><strong>' + svResultTxt + '</strong></div>';
     }
@@ -33232,11 +33458,11 @@ function appendDamageRollSummary(parent, rolls, die, dmgMod, crit, actor, reduct
         if (isOpen) {
             breakdownEl.classList.remove('is-open');
             toggleBtn.setAttribute('aria-expanded', 'false');
-            toggleBtn.innerHTML = 'Detalhes da Regra';
+            toggleBtn.innerHTML = '⚙ Visualização Avançada (Dados &amp; Regra)';
         } else {
             breakdownEl.classList.add('is-open');
             toggleBtn.setAttribute('aria-expanded', 'true');
-            toggleBtn.innerHTML = 'Detalhes da Regra';
+            toggleBtn.innerHTML = '▴ Ocultar Visualização Avançada';
         }
     });
 
@@ -35407,7 +35633,7 @@ function _updateActionSheetState(s) {
                 ecoBar.appendChild(concPill);
             }
             concPill.textContent = '✦ Conc: ' + curConc;
-            concPill.title = 'D&D 5e: Concentrando em ' + curConc + '. Conjurar outra magia de concentração encerrará esta.';
+            concPill.title = 'Concentrando em ' + curConc + '. Conjurar outra magia de concentração encerrará esta.';
         } else if (concPill) {
             concPill.remove();
         }
@@ -36903,7 +37129,7 @@ function render(s) {
         html += '<div class="tsh-header">';
         html += '<span class="tsh-badge-action">' + hudTypeBadge + '</span>';
         html += '<strong class="tsh-title">' + hudIconHtml + escHtml(hudTitle) + '</strong>';
-        html += '<span class="tsh-reach-chip" title="Regras D&D 5e: alcance máximo desta ação">' + _combatTargetIconSVG(11) + ' Alcance: ' + reachMeta.label + '</span>';
+        html += '<span class="tsh-reach-chip" title="Alcance máximo desta ação">' + _combatTargetIconSVG(11) + ' Alcance: ' + reachMeta.label + '</span>';
         html += '</div>';
         html += '<div class="tsh-instruction">' + hintSub + '</div>';
         html += '</div>';
@@ -37028,7 +37254,7 @@ function render(s) {
 
                 /* 3. Action Dock Primário Fixo (Opção 1) */
                 html += '<div class="opt1-action-dock">';
-                html += '<div class="opt1-economy-row" role="status" aria-label="Recursos do Turno D&D 5e">' +
+                html += '<div class="opt1-economy-row" role="status" aria-label="Recursos do Turno">' +
                     '<span class="econ-pill ' + (actAvail ? 'active' : 'spent') + '" title="' + (actAvail ? 'Ação Principal disponível' : 'Ação Principal já gasta') + '">◆ Ação' + (actAvail ? '' : ' ✕') + '</span>' +
                     '<span class="econ-pill ' + (bnsAvail ? 'active' : 'spent') + '" title="' + (bnsAvail ? 'Ação Bônus disponível' : 'Ação Bônus já gasta') + '">▲ Bônus' + (bnsAvail ? '' : ' ✕') + '</span>' +
                     '<span class="econ-pill ' + (movLeft > 0 ? 'active' : 'spent') + '" title="Deslocamento restante no turno">👣 ' + formatHexDistanceMeters(movLeft) + '</span>' +
@@ -37348,19 +37574,19 @@ function bindActions() {
                     var uPrefix = uObj ? (uObj.n + ' · ') : '';
                     var cTip = clickedChip.getAttribute('title') || clickedChip.textContent.trim();
                     var cText = clickedChip.textContent.trim();
-                    var cTitle = '📜 Regra Tática D&D 5e';
+                    var cTitle = '📜 Efeito Tático';
                     var cTone = 'adv';
                     if (clickedChip.classList.contains('token-conc-chip')) {
                         cTitle = '◈ Concentração';
                         cTone = 'adv';
                     } else if (clickedChip.classList.contains('token-prone-chip')) {
-                        cTitle = '▾ Caído / Prone ';
+                        cTitle = '▾ Caído';
                         cTone = 'hazard';
                     } else if (clickedChip.classList.contains('token-death-saves')) {
                         cTitle = '💀 Salvaguardas contra a Morte';
                         cTone = 'hazard';
                     } else if (clickedChip.classList.contains('token-stable-chip')) {
-                        cTitle = '✦ Estabilizado (–198)';
+                        cTitle = '✦ Estabilizado';
                         cTone = 'adv';
                     } else if (clickedChip.classList.contains('token-elev-chip')) {
                         cTitle = '▲ Terreno Elevado';
@@ -38123,7 +38349,7 @@ function showTargetActionMenu(targetIdx, uid) {
     // Lista de Ações do Leque
     html += '<div class="tam-actions-list">';
 
-    // 1. ATACAR (com Cálculo Canônico de Chance de Acerto D&D 5e estilo BG3/Solasta)
+    // 1. ATACAR (com Cálculo Canônico de Chance de Acerto estilo BG3/Solasta)
     var atkDisabled = !isActionAvailable;
     var hitCalc = (typeof simCalcHitChanceDnd5e === 'function') ? simCalcHitChanceDnd5e(s, p, u, null) : { hitPct: 65, critPct: 5, totalAtk: p.atk || 4 };
     var hitCol = hitCalc.hitPct >= 75 ? '#68d391' : (hitCalc.hitPct >= 50 ? '#ffd54f' : (hitCalc.hitPct >= 30 ? '#ffb74d' : '#fc8181'));
@@ -38134,6 +38360,9 @@ function showTargetActionMenu(targetIdx, uid) {
     var atkMod = (hitCalc.totalAtk >= 0 ? '+' : '') + hitCalc.totalAtk;
     var dmgModN = p.dmgMod || 0;
     var atkDie = p.die ? ('1d' + p.die + (dmgModN > 0 ? '+' + dmgModN : (dmgModN < 0 ? dmgModN : ''))) : 'Dano';
+    var minDmgTam = p.die ? Math.max(1, 1 + dmgModN) : 1;
+    var maxDmgTam = p.die ? Math.max(1, p.die + dmgModN) : 4;
+    var dmgRangeTam = p.die ? (minDmgTam + '–' + maxDmgTam) : 'Dano';
     var extraAtksTam = (typeof simClassExtraAttacks === 'function') ? simClassExtraAttacks(p.cls, p.lvl || 1) : 0;
     var extraTagTam = extraAtksTam > 0 ? ' · ' + (1 + extraAtksTam) + '× golpes' : '';
 
@@ -38141,7 +38370,7 @@ function showTargetActionMenu(targetIdx, uid) {
     html +=   '<div class="tam-act-ico">⚔</div>';
     html +=   '<div class="tam-act-text">';
     html +=     '<div class="tam-act-label" style="display:flex;align-items:center;justify-content:space-between;gap:6px;"><span>Atacar com ' + escHtml(atkWeapon) + '</span><span style="font-size:11px;font-weight:800;color:' + hitCol + ';background:rgba(0,0,0,0.45);border:1px solid ' + hitCol + ';border-radius:4px;padding:1px 6px;">🎯 ' + hitCalc.hitPct + '%</span></div>';
-    html +=     '<div class="tam-act-desc">' + atkMod + ' vs CA ' + hitCalc.effectiveAc + ' · Dano ' + atkDie + extraTagTam + ' · ' + atkReason + '</div>';
+    html +=     '<div class="tam-act-desc">Dano estimado ' + dmgRangeTam + extraTagTam + ' · ' + atkReason + '</div>';
     html +=   '</div>';
     html +=   '<div class="tam-act-chev">▸</div>';
     html += '</button>';
@@ -38157,11 +38386,11 @@ function showTargetActionMenu(targetIdx, uid) {
     html +=   '<div class="tam-act-chev">▸</div>';
     html += '</button>';
 
-    // 3. EMPURRAR OU DERRUBAR (SHOVE - )
+    // 3. EMPURRAR OU DERRUBAR (SHOVE)
     var shoveDisabled = !isActionAvailable || !isAdjacent;
     var shoveDesc = !isActionAvailable
         ? 'Ação principal já gasta neste turno'
-        : (!isAdjacent ? 'Requer adjacência (1,5m · atual ' + distM + ')' : 'Teste oposto de Atletismo para derrubar ou afastar 1,5m');
+        : (!isAdjacent ? 'Requer adjacência (1,5m · atual ' + distM + ')' : 'Derrubar no chão ou afastar 1,5m');
     html += '<button type="button" class="tam-act-btn tam-act--shove' + (shoveDisabled ? ' is-disabled' : '') + '" data-tam-act="shove">';
     html +=   '<div class="tam-act-ico">💨</div>';
     html +=   '<div class="tam-act-text">';
@@ -38171,12 +38400,12 @@ function showTargetActionMenu(targetIdx, uid) {
     html +=   '<div class="tam-act-chev">▸</div>';
     html += '</button>';
 
-    // 3.1 AGARRAR (GRAPPLE - )
+    // 3.1 AGARRAR (GRAPPLE)
     var isAlreadyGrappled = !!u.grappled;
     var grappleDisabled = !isActionAvailable || !isAdjacent || isAlreadyGrappled;
     var grappleDesc = !isActionAvailable
         ? 'Ação principal já gasta neste turno'
-        : (!isAdjacent ? 'Requer adjacência (1,5m · atual ' + distM + ')' : (isAlreadyGrappled ? 'Alvo já está agarrado (deslocamento 0m)' : 'Teste oposto de Atletismo para imobilizar o deslocamento (0m)'));
+        : (!isAdjacent ? 'Requer adjacência (1,5m · atual ' + distM + ')' : (isAlreadyGrappled ? 'Alvo já está agarrado (deslocamento 0m)' : 'Imobilizar o deslocamento do alvo no lugar'));
     html += '<button type="button" class="tam-act-btn tam-act--grapple' + (grappleDisabled ? ' is-disabled' : '') + '" data-tam-act="grapple">';
     html +=   '<div class="tam-act-ico">✊</div>';
     html +=   '<div class="tam-act-text">';
@@ -38186,11 +38415,11 @@ function showTargetActionMenu(targetIdx, uid) {
     html +=   '<div class="tam-act-chev">▸</div>';
     html += '</button>';
 
-    // 3.2 AJUDAR ALIADO CONTRA ESTE ALVO (HELP - )
+    // 3.2 AJUDAR ALIADO CONTRA ESTE ALVO (HELP)
     var helpDisabled = !isActionAvailable || !isAdjacent;
     var helpDesc = !isActionAvailable
         ? 'Ação principal já gasta neste turno'
-        : (!isAdjacent ? 'Requer adjacência (1,5m · atual ' + distM + ')' : 'Distrai este alvo para conceder Vantagem no próximo ataque de um companheiro');
+        : (!isAdjacent ? 'Requer adjacência (1,5m · atual ' + distM + ')' : 'Distrair alvo para conceder Vantagem a um companheiro');
     html += '<button type="button" class="tam-act-btn tam-act--help' + (helpDisabled ? ' is-disabled' : '') + '" data-tam-act="help">';
     html +=   '<div class="tam-act-ico">🤝</div>';
     html +=   '<div class="tam-act-text">';
@@ -38225,6 +38454,15 @@ function showTargetActionMenu(targetIdx, uid) {
     html +=   '</div>';
     html +=   '<div class="tam-act-chev">▸</div>';
     html += '</button>';
+
+    var strModTam = Math.floor(((p.str || 10) - 10) / 2);
+    var strModStr = (strModTam >= 0 ? '+' : '') + strModTam;
+    var tamAdvHtml = '';
+    tamAdvHtml += '<div class="v-adv-row"><span class="v-adv-k">Ataque vs Defesa</span><span class="v-adv-v">' + atkMod + ' vs CA ' + hitCalc.effectiveAc + ' (Crítico: ' + (hitCalc.critPct || 5) + '%)</span></div>';
+    tamAdvHtml += '<div class="v-adv-row"><span class="v-adv-k">Fórmula de Dano</span><span class="v-adv-v">' + escHtml(atkDie) + extraTagTam + '</span></div>';
+    tamAdvHtml += '<div class="v-adv-row"><span class="v-adv-k">Manobras (Empurrar/Agarrar)</span><span class="v-adv-v">Atletismo (' + strModStr + ') vs Atletismo/Acrobacia do Alvo</span></div>';
+    tamAdvHtml += '<div class="v-adv-row"><span class="v-adv-k">Distância no Tabuleiro</span><span class="v-adv-v">' + distM + ' (' + distHex + (distHex === 1 ? ' hexágono' : ' hexágonos') + ')</span></div>';
+    html += buildAdvancedViewDrawerHtml('Visualização Avançada (Cálculos & CDs)', tamAdvHtml);
 
     html += '</div>'; // .tam-actions-list
 
@@ -38961,9 +39199,9 @@ function __combatShowShieldPrompt(ev) {
             mathHtml += '<span class="tcc-rx-ac">' + esc(ev.ac != null ? ev.ac : '?') + '</span>';
         }
 
-        var title = 'Reação — D&D 5e';
+        var title = 'Reação Tática';
         var triggerLabel = 'Ataque Inimigo';
-        var triggerWho = '<strong>' + esc(nm) + '</strong> acerta em você (' + (ev.total != null ? ('total ' + esc(ev.total) + ' vs CA ' + esc(ev.ac != null ? ev.ac : '?')) : 'ataque confirmado') + ').';
+        var triggerWho = '<strong>' + esc(nm) + '</strong> acerta um golpe em você.';
 
         var reactionPills = [];
         reactionPills.push('<span class="dmg-pill dmg-pill--buff">1 Reação / Rodada</span>');
@@ -38987,24 +39225,24 @@ function __combatShowShieldPrompt(ev) {
         var comparisonHtml = '';
         if ((ev.shieldAvailable || ev.subtype === 'shield') && ev.ac != null && ev.total != null) {
             if ((ev.ac + 5) > ev.total) {
-                comparisonHtml += '<div class="tcc-rx-comparison tcc-rx-comparison--win">🛡️ Com Escudo: CA ' + ev.ac + ' + 5 = <strong>' + (ev.ac + 5) + '</strong> &gt; ' + ev.total + ' → <strong>ATAQUE ERRA!</strong></div>';
+                comparisonHtml += '<div class="tcc-rx-comparison tcc-rx-comparison--win">🛡️ Com Escudo: sua defesa sobe e o <strong>ATAQUE ERRA!</strong></div>';
             } else {
-                comparisonHtml += '<div class="tcc-rx-comparison tcc-rx-comparison--loss">Com Escudo: CA ' + ev.ac + ' + 5 = <strong>' + (ev.ac + 5) + '</strong> ≤ ' + ev.total + ' → <strong>Ainda Acerta!</strong> (+5 CA protege próximos ataques)</div>';
+                comparisonHtml += '<div class="tcc-rx-comparison tcc-rx-comparison--loss">Com Escudo: o golpe ainda acerta, mas <strong>+5 CA protege contra os próximos ataques</strong></div>';
             }
         }
         if (ev.uncannyAvailable || ev.subtype === 'uncanny_dodge') {
             comparisonHtml += '<div class="tcc-rx-comparison tcc-rx-comparison--info">💨 Esquiva Sobrenatural: <strong>Reduz o dano sofrido à METADE (½)</strong> contra este ataque.</div>';
         }
         if (ev.rebukeAvailable || ev.subtype === 'rebuke') {
-            comparisonHtml += '<div class="tcc-rx-comparison tcc-rx-comparison--chance">🔥 Repreensão Infernal : Contra-ataque de <strong>2d10 de fogo</strong> contra ' + esc(nm) + '.</div>';
+            comparisonHtml += '<div class="tcc-rx-comparison tcc-rx-comparison--chance">🔥 Repreensão Infernal: Contra-ataque de chamas contra ' + esc(nm) + '.</div>';
         }
 
         var dRows = [
             { l: 'Combatente', v: ev.targetName || 'Aventureiro' },
             { l: 'Atacante', v: nm },
             { l: 'Ataque Inimigo', v: String(ev.total != null ? ev.total : '?') + (ev.d20 != null ? (' (d20: ' + ev.d20 + ' + atk: ' + (ev.atk != null ? ev.atk : '?') + ')') : '') },
-            { l: 'Sua CA', v: String(ev.ac != null ? ev.ac : '?') },
-            { l: 'Regra de Reação', v: '— Você possui 1 reação por rodada. Ela se esgota até o início do seu próximo turno.' }
+            { l: 'Sua CA', v: String(ev.ac != null ? ev.ac : '?') + ((ev.shieldAvailable || ev.subtype === 'shield') && ev.ac != null ? (' → ' + (ev.ac + 5) + ' com Escudo') : '') },
+            { l: 'Regra de Reação', v: 'Você possui 1 reação por rodada. Ela se esgota até o início do seu próximo turno.' }
         ];
         if (ev.shieldAvailable || ev.subtype === 'shield') {
             dRows.push({ l: 'Escudo Arcano', v: '+5 de CA retroativo contra o ataque-gatilho e todos os ataques seguintes até o início do seu próximo turno.' });
@@ -39013,14 +39251,13 @@ function __combatShowShieldPrompt(ev) {
             dRows.push({ l: 'Esquiva Sobrenatural', v: 'Ladino usa reação ao ser atingido por um atacante visível para reduzir o dano à metade.' });
         }
         if (ev.rebukeAvailable || ev.subtype === 'rebuke') {
-            dRows.push({ l: 'Repreensão Infernal ', v: 'Reação imediata ao sofrer dano para banhar o atacante em chamas infernais (TR de Destreza para metade).' });
+            dRows.push({ l: 'Repreensão Infernal', v: 'Reação imediata ao sofrer dano para banhar o atacante em chamas infernais (2d10 fogo, TR de Destreza reduz à metade).' });
         }
 
         var html = '<div class="tcc-title"><span class="tcc-rx-hex"></span>' + esc(title) + '</div>';
         html += '<div class="tcc-rx-trigger">';
         html += '<span class="tcc-rx-trigger-label">' + esc(triggerLabel) + '</span>';
         html += '<div class="tcc-rx-trigger-who">' + triggerWho + '</div>';
-        if (mathHtml) html += '<div class="tcc-rx-math">' + mathHtml + '</div>';
         if (comparisonHtml) html += comparisonHtml;
         html += '</div>';
 
@@ -39028,13 +39265,14 @@ function __combatShowShieldPrompt(ev) {
             html += '<div class="drl-structured-pills" style="margin-bottom:8px;justify-content:center;">' + reactionPills.join(' ') + '</div>';
         }
 
-        html += '<div style="text-align:center;margin:6px 0 10px;">';
-        html += '<button type="button" class="dmg-inspect-toggle-btn" aria-expanded="false">Detalhes da Regra</button>';
-        html += '<div class="dmg-math-breakdown" style="display:none;">';
+        var rxAdvHtml = '';
+        if (mathHtml) {
+            rxAdvHtml += '<div class="tcc-rx-math" style="margin-bottom:6px;">' + mathHtml + '</div>';
+        }
         dRows.forEach(function (rw) {
-            html += '<div class="dmg-math-breakdown-row"><span>' + esc(rw.l) + ':</span><strong>' + esc(rw.v) + '</strong></div>';
+            rxAdvHtml += '<div class="v-adv-row"><span class="v-adv-k">' + esc(rw.l) + '</span><span class="v-adv-v">' + esc(rw.v) + '</span></div>';
         });
-        html += '</div></div>';
+        html += buildAdvancedViewDrawerHtml('Visualização Avançada (Cálculo & Regras)', rxAdvHtml);
 
         html += '<div class="tcc-actions">';
         html += '<button type="button" class="action-btn" data-rs="none">Não usar</button>';
@@ -39150,7 +39388,7 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             titleTxt = 'Rea\u00e7\u00e3o \u2014 Escudo Arcano';
             triggerLabel = 'Cr\u00edtico Natural';
             triggerWho = '<strong>' + esc(aName) + '</strong> rolou <strong>NATURAL 20</strong> em voc\u00ea.';
-            effectHtml = '+5 CA aplicado, mas <strong>cr\u00edtico natural atravessa qualquer CA</strong> . O golpe cr\u00edtico ainda passa.';
+            effectHtml = '+5 CA aplicado, mas <strong>cr\u00edtico natural atravessa qualquer CA</strong>. O golpe cr\u00edtico ainda passa.';
             warnHtml = 'A barreira +5 CA persiste contra <em>pr\u00f3ximos ataques</em> da rodada \u2014 pode compensar a rea\u00e7\u00e3o gasta.';
             acceptLbl = 'Aceitar cr\u00edtico';
             useLbl = 'Usar (buff persiste)';
@@ -39159,7 +39397,7 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             triggerLabel = 'Magia Inimiga';
             triggerWho = '<strong>' + esc(aName) + '</strong> est\u00e1 conjurando magia em voc\u00ea.';
             mathHtml = '';
-            effectHtml = '+3 CA e vantagem em TR contra magia por 2 rodadas (simplificado).';
+            effectHtml = '+3 CA e vantagem contra magia por 2 rodadas.';
             warnHtml = 'Sua rea\u00e7\u00e3o desta rodada ser\u00e1 gasta.';
             acceptLbl = 'Deixar passar';
             useLbl = 'Usar Contram\u00e1gica';
@@ -39168,39 +39406,35 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             titleTxt = 'Rea\u00e7\u00e3o \u2014 Repreens\u00e3o Infernal';
             triggerLabel = 'Acertou Voc\u00ea';
             triggerWho = '<strong>' + esc(aName) + '</strong> te atingiu \u2014 invoque chamas dos planos inferiores para queim\u00e1-lo.';
-            effectHtml = '<strong>' + esc(aName) + '</strong> faz TR DES; em falha sofre <strong>2d10 de fogo</strong>, em sucesso metade .';
+            effectHtml = '<strong>' + esc(aName) + '</strong> é envolvido em chamas infernais (metade do dano se resistir).';
             warnHtml = 'Dano retroativo sobre quem acabou de te atingir \u2014 n\u00e3o pode ser anulado por CA. Gasta sua rea\u00e7\u00e3o.';
             acceptLbl = 'Deixar passar';
             useLbl = 'Queimar';
         } else if (variant === 'deflect') {
-            /* V1.7 Sprint-2 (2026-04-21) — Desviar Projéteis Monge nv3.
-               Reação ao ser acertado por ataque à distância: reduz dano 1d10+DEX+nvMonge.
-               Se reduz a 0 e < 60m: pode gastar 1 Ki pra contra-atacar (stub: sem deflect attack). */
+            /* V1.7 Sprint-2 (2026-04-21) — Desviar Projéteis Monge nv3. */
             titleTxt = 'Rea\u00e7\u00e3o \u2014 Desviar Proj\u00e9teis';
             triggerLabel = 'Ataque \u00e0 Dist\u00e2ncia';
             triggerWho = '<strong>' + esc(aName) + '</strong> disparou em voc\u00ea \u2014 desvie do proj\u00e9til com reflexos sobrenaturais.';
-            effectHtml = 'Voc\u00ea reduz o dano em <strong>1d10 + mod DES + n\u00edvel Monge</strong> . Se zerar, o proj\u00e9til cai no ch\u00e3o inofensivo.';
+            effectHtml = 'Voc\u00ea amortece o impacto do proj\u00e9til com as m\u00e3os. Se zerar o dano, o proj\u00e9til cai no ch\u00e3o inofensivo.';
             warnHtml = 'N\u00e3o anula o acerto \u2014 apenas o dano. Gasta sua rea\u00e7\u00e3o. Sem custo de Ki para desviar.';
             acceptLbl = 'Aceitar dano';
             useLbl = 'Desviar';
         } else if (variant === 'cutting') {
-            /* V1.7 Sprint-2 (2026-04-21) — Palavras Cortantes Bardo Colégio do Saber nv3.
-               Reação quando inimigo rola ataque/teste/dano: subtrai 1 Inspiração (1d6-1d12) da rolagem. */
+            /* V1.7 Sprint-2 (2026-04-21) — Palavras Cortantes Bardo Colégio do Saber nv3. */
             titleTxt = 'Rea\u00e7\u00e3o \u2014 Palavras Cortantes';
             triggerLabel = 'Ataque Inimigo';
-            triggerWho = '<strong>' + esc(aName) + '</strong> te atacou \u2014 zombe-o com palavras cortantes para afetar sua miss\u00e3o.';
-            effectHtml = 'Subtrai <strong>1d6</strong> do total do ataque (\u2014 escala d8 nv 5, d10 nv 10, d12 nv 15). Pode transformar o acerto em erro retroativamente.';
+            triggerWho = '<strong>' + esc(aName) + '</strong> te atacou \u2014 zombe-o com palavras cortantes para afetar sua mira.';
+            effectHtml = 'Desconcentra o atacante e reduz sua precisão. Pode transformar o acerto em erro retroativamente.';
             warnHtml = 'Gasta 1 uso de Inspira\u00e7\u00e3o + sua rea\u00e7\u00e3o. N\u00e3o funciona se o alvo for imune a efeitos encantadores.';
             acceptLbl = 'Deixar passar';
             useLbl = 'Cortar';
         } else if (variant === 'uncanny') {
-            /* V1.7 Sprint-9 (2026-04-21 closeout) — Esquiva Sobrenatural Ladino nv5.
-               Reação quando atacante visível acerta: reduz dano à METADE. */
+            /* V1.7 Sprint-9 (2026-04-21 closeout) — Esquiva Sobrenatural Ladino nv5. */
             titleTxt = 'Rea\u00e7\u00e3o \u2014 Esquiva Sobrenatural';
             triggerLabel = 'Acertou Voc\u00ea';
             triggerWho = '<strong>' + esc(aName) + '</strong> acertou voc\u00ea \u2014 voc\u00ea se desvia parcialmente no \u00faltimo instante.';
-            effectHtml = 'Reduz o dano do ataque \u00e0 <strong>METADE</strong> (arredondado pra baixo) \u2014 . N\u00e3o anula o acerto.';
-            warnHtml = 'S\u00f3 funciona em ataques vistos. N\u00e3o reduz dano de TR (\u00e1reas). Gasta sua rea\u00e7\u00e3o.';
+            effectHtml = 'Reduz o dano do ataque \u00e0 <strong>METADE</strong>. N\u00e3o anula o acerto.';
+            warnHtml = 'S\u00f3 funciona em ataques vistos. N\u00e3o reduz dano de \u00e1reas. Gasta sua rea\u00e7\u00e3o.';
             acceptLbl = 'Aceitar dano';
             useLbl = 'Esquivar';
         } else {
@@ -39208,8 +39442,8 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             titleTxt = 'Rea\u00e7\u00e3o \u2014 Escudo Arcano';
             triggerLabel = 'Ataque Acerta';
             triggerWho = '<strong>' + esc(aName) + '</strong> acerta em voc\u00ea.';
-            effectHtml = '+5 CA aplicado ao ataque-gatilho e a todos os ataques at\u00e9 o in\u00edcio do seu pr\u00f3ximo turno .';
-            warnHtml = 'Se (CA + 5) &gt; total do ataque, o golpe vira erro retroativamente.';
+            effectHtml = '+5 CA aplicado ao ataque-gatilho e a todos os ataques at\u00e9 o in\u00edcio do seu pr\u00f3ximo turno.';
+            warnHtml = 'Se a nova defesa superar o ataque, o golpe vira erro retroativamente.';
             acceptLbl = 'Aceitar golpe';
             useLbl = 'Usar Escudo';
         }
@@ -39233,16 +39467,16 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             ruleDetailText = 'Intercepta e encerra a conjuração inimiga no momento do disparo.';
         } else if (variant === 'rebuke') {
             reactionPills.push('<span class="dmg-pill dmg-pill--crit">🔥 2d10 Fogo no Inimigo</span>');
-            ruleDetailText = 'Reação ao sofrer dano, envolvendo o agressor em chamas infernais (TR Destreza para metade).';
+            ruleDetailText = 'Reação ao sofrer dano, envolvendo o agressor em chamas infernais (2d10 fogo, TR Destreza para metade).';
         } else if (variant === 'deflect') {
             reactionPills.push('<span class="dmg-pill dmg-pill--save">✋ Reduz 1d10+DES+Nível</span>');
-            ruleDetailText = 'Monge usa reação para amortecer o projétil disparado à distância.';
+            ruleDetailText = 'Monge usa reação para amortecer o projétil disparado à distância (1d10 + mod DES + nível de Monge).';
         } else if (variant === 'cutting') {
-            reactionPills.push('<span class="dmg-pill dmg-pill--save">🎭 Subtrai 1d6 do Ataque</span>');
-            ruleDetailText = 'Bardo do Saber gasta 1 dado de inspiração para reduzir a rolagem de ataque de um oponente visível.';
+            reactionPills.push('<span class="dmg-pill dmg-pill--save">🎭 Subtrai Inspiração</span>');
+            ruleDetailText = 'Bardo do Saber gasta 1 dado de inspiração (1d6, escalando d8 nv 5, d10 nv 10, d12 nv 15) para reduzir a rolagem de ataque de um oponente visível.';
         } else if (variant === 'uncanny') {
             reactionPills.push('<span class="dmg-pill dmg-pill--save">💨 Dano à Metade (½)</span>');
-            ruleDetailText = 'Ladino desvia agilmente, absorvendo apenas metade do impacto de um ataque visível.';
+            ruleDetailText = 'Ladino desvia agilmente, absorvendo apenas metade do impacto (arredondado para baixo) de um ataque visível.';
         } else {
             // shield normal
             if (effAc != null && total != null && (effAc + 5) > total) {
@@ -39258,27 +39492,26 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             { l: 'Origem do Ataque', v: aName },
             { l: 'Reação Tática', v: skName },
             { l: 'Custo de Recursos', v: (skCost > 0 ? (skCost + ' Mana + 1 Reação') : '1 Reação') },
-            { l: 'Regra de Reação', v: '— Você possui 1 reação por rodada. Ela se esgota até o início do seu próximo turno.' },
+            { l: 'Regra de Reação', v: 'Você possui 1 reação por rodada. Ela se esgota até o início do seu próximo turno.' },
             { l: 'Efeito Canônico', v: ruleDetailText }
         ];
         var comparisonHtml = '';
         if (variant === 'shield' && effAc != null && total != null) {
             if ((effAc + 5) > total) {
-                comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--win">🛡️ Com Escudo: CA ' + effAc + ' + 5 = <strong>' + (effAc + 5) + '</strong> &gt; ' + total + ' → <strong>ATAQUE ERRA!</strong></div>';
+                comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--win">🛡️ Com Escudo: sua defesa supera o golpe → <strong>ATAQUE ERRA!</strong></div>';
             } else {
-                comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--loss">Com Escudo: CA ' + effAc + ' + 5 = <strong>' + (effAc + 5) + '</strong> ≤ ' + total + ' → <strong>Ainda Acerta!</strong> (+5 CA protege próximos ataques)</div>';
+                comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--loss">Com Escudo: o golpe ainda acerta, mas <strong>+5 CA protege contra próximos ataques</strong></div>';
             }
         } else if (variant === 'cutting' && effAc != null && total != null) {
             var _tLvl = (target && target.lvl) || 1;
             var _maxCut = _tLvl >= 15 ? 12 : (_tLvl >= 10 ? 10 : (_tLvl >= 5 ? 8 : 6));
             var _diff = total - effAc + 1;
             if (_diff <= 1) {
-                comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--win">🎵 Palavras Cortantes (1d' + _maxCut + '): Superou a CA por 1 ponto → <strong>subtrai 1d' + _maxCut + ' para forçar o erro!</strong></div>';
+                comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--win">🎵 Palavras Cortantes: o golpe passou por 1 ponto → <strong>força o erro!</strong></div>';
             } else if (_diff <= _maxCut) {
-                var _chancePct = Math.round(((_maxCut - _diff + 1) / _maxCut) * 100);
-                comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--win">🎵 Palavras Cortantes (1d' + _maxCut + '): Precisa subtrair ' + _diff + ' ou mais do ataque para anular o golpe!</div>';
+                comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--win">🎵 Palavras Cortantes: chance de anular o golpe (precisa reduzir ' + _diff + '+ na rolagem)!</div>';
             } else {
-                comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--loss">Palavras Cortantes (1d' + _maxCut + '): Superou a CA por ' + (_diff - 1) + ' pontos (máx do dado: ' + _maxCut + ') — não evitará o acerto.</div>';
+                comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--loss">Palavras Cortantes: margem do ataque é muito alta — não evitará o acerto.</div>';
             }
         } else if (variant === 'deflect') {
             var _dexSc = (target && target.dex != null) ? target.dex : 14;
@@ -39286,13 +39519,13 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
             var _mLvl = (target && target.lvl != null) ? target.lvl : 1;
             var _minD = 1 + _dMod + _mLvl;
             var _maxD = 10 + _dMod + _mLvl;
-            comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--info">✋ Redução Estimada: 1d10 + ' + _dMod + ' (DES) + ' + _mLvl + ' (Monge) = <strong>' + _minD + ' a ' + _maxD + ' PV reduzidos</strong> (se zerar dano, projétil cai inofensivo)</div>';
+            comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--info">✋ Redução Estimada: <strong>' + _minD + ' a ' + _maxD + ' PV absorvidos</strong> (se zerar dano, projétil cai inofensivo)</div>';
         } else if (variant === 'uncanny') {
             comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--info">💨 Esquiva Sobrenatural: <strong>Reduz o dano sofrido à METADE (½)</strong> contra este ataque.</div>';
         } else if (variant === 'mm') {
             comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--win">✨ Imunidade Absoluta: Escudo Arcano <strong>anula 100% dos dardos</strong> de Mísseis Mágicos.</div>';
         } else if (variant === 'rebuke') {
-            comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--chance">🔥 Contra-ataque Infernal: <strong>' + esc(aName) + '</strong> sofre <strong>2d10 de fogo</strong> (TR Destreza para metade).</div>';
+            comparisonHtml = '<div class="tcc-rx-comparison tcc-rx-comparison--chance">🔥 Contra-ataque Infernal: <strong>' + esc(aName) + '</strong> sofre <strong>2 à 20 de fogo</strong> (metade se resistir).</div>';
         }
 
         var html = '';
@@ -39300,7 +39533,6 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
         html += '<div class="tcc-rx-trigger">';
         html += '<span class="tcc-rx-trigger-label">' + esc(triggerLabel) + '</span>';
         html += '<div class="tcc-rx-trigger-who">' + triggerWho + '</div>';
-        if (mathHtml) html += '<div class="tcc-rx-math">' + mathHtml + '</div>';
         if (comparisonHtml) html += comparisonHtml;
         html += '</div>';
         html += '<div class="drl-structured-pills" style="margin-bottom:8px;justify-content:center;">' + reactionPills.join(' ') + '</div>';
@@ -39308,13 +39540,14 @@ function showShieldReactionPromptLocal(target, actor, d20, atkExtra, total, effA
         html += '<p class="tcc-rx-effect-body">' + effectHtml + '</p>';
         html += '</div>';
         html += '<div class="tcc-rx-warn">' + warnHtml + '</div>';
-        html += '<div style="text-align:center;margin:6px 0 10px;">';
-        html += '<button type="button" class="dmg-inspect-toggle-btn" aria-expanded="false">Detalhes da Regra</button>';
-        html += '<div class="dmg-math-breakdown">';
+        var rxLocalAdvHtml = '';
+        if (mathHtml) {
+            rxLocalAdvHtml += '<div class="tcc-rx-math" style="margin-bottom:6px;">' + mathHtml + '</div>';
+        }
         dRows.forEach(function (rw) {
-            html += '<div class="dmg-math-breakdown-row"><span>' + esc(rw.l) + ':</span><strong>' + esc(rw.v) + '</strong></div>';
+            rxLocalAdvHtml += '<div class="v-adv-row"><span class="v-adv-k">' + esc(rw.l) + '</span><span class="v-adv-v">' + esc(rw.v) + '</span></div>';
         });
-        html += '</div></div>';
+        html += buildAdvancedViewDrawerHtml('Visualização Avançada (Cálculo & Regras)', rxLocalAdvHtml);
         html += '<div class="tcc-actions">';
         html += '<button type="button" class="action-btn" data-rs="0">' + esc(acceptLbl) + '</button>';
         html += '<button type="button" class="action-btn primary" data-rs="1">' + useLbl + '</button>';
@@ -41528,9 +41761,9 @@ async function passPlayerMetaAction(kind, opts) {
 function getLatestCombatLogMessage(s) {
     if (!s || !s.log || !s.log.length) return 'Batalha iniciada. Escolha sua ação no dock abaixo.';
     for (var i = s.log.length - 1; i >= 0; i--) {
-        var line = String(s.log[i] || '').trim().replace(/\s*\((?:D&D\s*5e\s*)?(?:PHB|DMG|MM|XGE|XGtE|TCoE|SRD)[^)]*\)/gi, '').replace(/\s*\(D&D\s*5e\s*\)/gi, '');
+        var line = String(s.log[i] || '').trim();
         if (!line || /^::/.test(line)) continue;
-        return line;
+        return simStripLogTechnicalMath(line);
     }
     return 'Batalha iniciada. Escolha sua ação no dock abaixo.';
 }
@@ -41555,16 +41788,24 @@ function openCombatLog() {
         else if (cl.cat === 'cond') cntCond++;
     }
 
-    var html = '<div class="lp-title">Diário Tático de Combate</div>';
-    html += '<div class="lp-sub">Rodada ' + (s.rn || 1) + ' · ' + cntAtk + ' ataques' + (cntCrit ? ' (' + cntCrit + ' crít.)' : '') + ' · ' + cntCond + ' testes/condições</div>';
-    html += '<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin:4px 0 6px 0;" data-log-filters>';
+    var curCat = 'all';
+    var showAdv = !!window._combatLogShowAdvMath;
+    var html = '<div class="lp-title">Diário de Combate</div>';
+    html += '<div class="lp-sub">Rodada ' + (s.rn || 1) + ' · ' + cntAtk + ' ataques' + (cntCrit ? ' (' + cntCrit + ' crít.)' : '') + ' · ' + cntCond + ' eventos táticos</div>';
+    html += '<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin:4px 0 4px 0;" data-log-filters>';
     html += '<button type="button" data-log-filter="all" style="background:rgba(212,175,55,0.25);border:1px solid #d4af37;color:#ffd700;border-radius:4px;padding:3px 8px;font-size:11.5px;font-weight:700;cursor:pointer;">Todos</button>';
     html += '<button type="button" data-log-filter="atk" style="background:rgba(25,20,16,0.75);border:1px solid rgba(196,149,58,0.35);color:#d4c8b0;border-radius:4px;padding:3px 8px;font-size:11.5px;font-weight:600;cursor:pointer;">⚔ Ataques (' + cntAtk + ')</button>';
     html += '<button type="button" data-log-filter="heal" style="background:rgba(25,20,16,0.75);border:1px solid rgba(196,149,58,0.35);color:#d4c8b0;border-radius:4px;padding:3px 8px;font-size:11.5px;font-weight:600;cursor:pointer;">✚ Curas (' + cntHeal + ')</button>';
-    html += '<button type="button" data-log-filter="cond" style="background:rgba(25,20,16,0.75);border:1px solid rgba(196,149,58,0.35);color:#d4c8b0;border-radius:4px;padding:3px 8px;font-size:11.5px;font-weight:600;cursor:pointer;">◈ Regras & TRs (' + cntCond + ')</button>';
+    html += '<button type="button" data-log-filter="cond" style="background:rgba(25,20,16,0.75);border:1px solid rgba(196,149,58,0.35);color:#d4c8b0;border-radius:4px;padding:3px 8px;font-size:11.5px;font-weight:600;cursor:pointer;">◈ Condições (' + cntCond + ')</button>';
     html += '</div>';
+    html += '<div class="lp-log-adv-bar">' +
+        '<button type="button" class="v-adv-toggle-btn' + (showAdv ? ' is-open' : '') + '" data-log-adv-toggle="1" aria-pressed="' + (showAdv ? 'true' : 'false') + '">' +
+            '<span class="v-adv-toggle-ico">⚙</span>' +
+            '<span data-log-adv-lbl>' + (showAdv ? 'Ocultar Dados & Cálculos Técnicos' : 'Visualização Avançada (Dados & Cálculos)') + '</span>' +
+        '</button>' +
+    '</div>';
     html += '<div class="lp-log-scroll" data-log-scroll>';
-    html += simBuildCombatLogHtml(s, 'all');
+    html += simBuildCombatLogHtml(s, curCat, showAdv);
     html += '</div><button type="button" class="lp-close" data-close="1">Fechar</button>';
     setHTML(card, html);
     ov.appendChild(card);
@@ -41574,7 +41815,7 @@ function openCombatLog() {
     var filterBtns = card.querySelectorAll('[data-log-filter]');
     for (var bi = 0; bi < filterBtns.length; bi++) {
         filterBtns[bi].addEventListener('click', function () {
-            var cat = this.getAttribute('data-log-filter') || 'all';
+            curCat = this.getAttribute('data-log-filter') || 'all';
             for (var bj = 0; bj < filterBtns.length; bj++) {
                 var active = filterBtns[bj] === this;
                 filterBtns[bj].style.background = active ? 'rgba(212,175,55,0.25)' : 'rgba(25,20,16,0.75)';
@@ -41582,7 +41823,22 @@ function openCombatLog() {
                 filterBtns[bj].style.color = active ? '#ffd700' : '#d4c8b0';
             }
             if (scrollEl) {
-                setHTML(scrollEl, simBuildCombatLogHtml(s, cat));
+                setHTML(scrollEl, simBuildCombatLogHtml(s, curCat, showAdv));
+                scrollEl.scrollTop = scrollEl.scrollHeight;
+            }
+        });
+    }
+    var advBtn = card.querySelector('[data-log-adv-toggle]');
+    if (advBtn) {
+        advBtn.addEventListener('click', function () {
+            showAdv = !showAdv;
+            window._combatLogShowAdvMath = showAdv;
+            advBtn.classList.toggle('is-open', showAdv);
+            advBtn.setAttribute('aria-pressed', showAdv ? 'true' : 'false');
+            var lbl = advBtn.querySelector('[data-log-adv-lbl]');
+            if (lbl) lbl.textContent = showAdv ? 'Ocultar Dados & Cálculos Técnicos' : 'Visualização Avançada (Dados & Cálculos)';
+            if (scrollEl) {
+                setHTML(scrollEl, simBuildCombatLogHtml(s, curCat, showAdv));
                 scrollEl.scrollTop = scrollEl.scrollHeight;
             }
         });
@@ -41880,7 +42136,7 @@ function openSkillHelpMini(overlayEl, skill) {
     mini.className = 'lp-help-card';
     var tag = document.createElement('div');
     tag.className = 'lp-help-tag';
-    tag.textContent = 'Referência tática D&D 5e';
+    tag.textContent = 'Regras & Mecânica';
     var title = document.createElement('div');
     title.className = 'lp-help-title';
     title.textContent = skill.n;
@@ -41956,7 +42212,10 @@ function openSkillHelpMini(overlayEl, skill) {
             .replace(/\bSave\s+(?:STR|FOR)\b/gi, 'TR de Força')
             .replace(/\bSave\s+(?:CHA|CAR)\b/gi, 'TR de Carisma')
             .replace(/\(só Attack, Dash, Disengage, Hide, ou Use an Object\)/gi, '(apenas Atacar, Disparar, Desengajar, Esconder-se ou Usar Objeto)')
+            .replace(/\bNo D&D 5e,\s*/gi, '')
+            .replace(/\bReferência:\s*/gi, '')
             .trim();
+        trimmed = simCleanDiegeticText(trimmed);
         if (!trimmed) return;
 
         var pr = document.createElement('p');
@@ -42311,31 +42570,32 @@ function _buildSkillListHtml(skills, filter, resIco, resValue, page, pageSize) {
         var resBadgeHtml = '<span class="lp-item-res-badge res-' + resKind + '" title="' +
             (resKind === 'bonus' ? 'Ação Bônus (▲)' : resKind === 'reaction' ? 'Reação ()' : 'Ação (◆)') +
             '" aria-hidden="true">' + resGlyph + '</span>';
-        /* Chips táticos compactos D&D 5e (Dano/Cura escalonado por nível, Tipo, Alcance, TR/CD, Concentração) */
+        /* Chips táticos compactos (Impacto estimado, Tipo, Alcance, Resistência, Concentração) */
         var tacMetaParts = [];
         if (sk.kind === 'attack') {
             if (sk.autoHit && sk.magicMissiles) {
                 var mmCnt = (sk.magicMissiles.count || 3) + ((sk.magicMissiles.scaleByCasterLevel && pCur) ? Math.floor(Math.max(0, (pCur.lvl || 1) - 1) / 2) : 0);
-                tacMetaParts.push('<span style="color:#90caf9;font-weight:700;">' + mmCnt + '× (1d4+1) Energia · Auto-Acerto</span>');
+                tacMetaParts.push('<span style="color:#90caf9;font-weight:700;">' + (mmCnt * 2) + '–' + (mmCnt * 5) + ' Energia (' + mmCnt + ' dardos) · Auto-Acerto</span>');
             } else if (typeof simTargetAttackDamagePreview === 'function' && pCur) {
                 var skPr = simTargetAttackDamagePreview(pCur, sk);
                 if (!skPr.noDamage) {
                     var dtInf = (typeof simDmgTypeInfoPt === 'function') ? simDmgTypeInfoPt(sk.dmgType || 'slashing') : { lb: 'Dano', ico: '⚔️', col: '#ffd54f' };
-                    tacMetaParts.push('<span style="color:' + dtInf.col + ';font-weight:700;">' + escHtml(skPr.dmgFormula) + ' ' + dtInf.ico + ' ' + escHtml(dtInf.lb) + '</span>');
+                    var rangeLbl = (skPr.minDmg != null && skPr.maxDmg != null) ? (skPr.minDmg + '–' + skPr.maxDmg) : skPr.dmgFormula;
+                    tacMetaParts.push('<span style="color:' + dtInf.col + ';font-weight:700;">' + escHtml(rangeLbl) + ' ' + dtInf.ico + ' ' + escHtml(dtInf.lb) + '</span>');
                 }
             }
         } else if (sk.kind === 'heal' && sk.healSpec) {
             var hs = sk.healSpec;
-            var hForm = (hs.n > 0 && hs.d > 0) ? (hs.n + 'd' + hs.d + (hs.flat ? '+' + hs.flat : '') + (hs.modLevel && pCur ? '+' + (pCur.lvl || 1) : '')) : ('+' + (hs.flat || 5));
-            tacMetaParts.push('<span style="color:#81c784;font-weight:700;">💚 ' + escHtml(hForm) + (sk.tempHp ? ' PV Temp' : ' PV') + '</span>');
+            var hBonus = (hs.flat || 0) + (hs.modLevel && pCur ? (pCur.lvl || 1) : 0);
+            var hRange = (hs.n > 0 && hs.d > 0) ? ((hs.n + hBonus) + '–' + (hs.n * hs.d + hBonus)) : ('+' + (hs.flat || 5));
+            tacMetaParts.push('<span style="color:#81c784;font-weight:700;">💚 ' + escHtml(hRange) + (sk.tempHp ? ' PV Temp' : ' PV') + '</span>');
         } else if (sk.buffSim && sk.buffSim.turns) {
             tacMetaParts.push('<span style="color:#b39ddb;">⏱ ' + sk.buffSim.turns + ' rodadas</span>');
         }
         var saveAbRaw = (sk.save && sk.save.ability) ? sk.save.ability : (sk.saveAbility || null);
         if (saveAbRaw) {
             var abPt = (typeof simAbilityLabelPt === 'function') ? simAbilityLabelPt(saveAbRaw) : String(saveAbRaw).toUpperCase();
-            var skDc = (sk.save && sk.save.dc | 0) || (typeof simSpellSaveDc === 'function' && pCur ? simSpellSaveDc(pCur) : 13);
-            tacMetaParts.push('<span style="color:#ffd54f;font-weight:700;">TR ' + escHtml(abPt) + ' CD ' + skDc + '</span>');
+            tacMetaParts.push('<span style="color:#ffd54f;font-weight:700;">Resistência: ' + escHtml(abPt) + '</span>');
         }
         if (sk.afterAttackEnemyDebuff && sk.afterAttackEnemyDebuff.n) {
             tacMetaParts.push('<span style="color:#ef5350;font-weight:700;">' + escHtml(sk.afterAttackEnemyDebuff.ico || '🔒') + ' ' + escHtml(sk.afterAttackEnemyDebuff.n) + '</span>');
@@ -42785,56 +43045,72 @@ function showSkillUseConfirmPopup(skill) {
         sub.className = 'mm-confirm-sub';
         sub.textContent = skill.desc || '';
 
-        /* Bloco Tático D&D 5e (Padrão Solasta / BG3): Fórmula escalonada, Alcance, Salvaguarda/CD e Concentração */
+        /* Resumo Tático Limpo (Camada Primária) + Gaveta de Visualização Avançada */
         var dndBox = document.createElement('div');
         dndBox.className = 'mm-confirm-dnd-box';
-        dndBox.style.cssText = 'background:rgba(12,10,8,0.68);border:1px solid rgba(196,149,58,0.35);border-radius:8px;padding:7px 10px;margin:6px 0;font-size:11px;line-height:1.45;text-align:left;display:flex;flex-direction:column;gap:3px;';
-        var dndRows = [];
+        dndBox.style.cssText = 'background:rgba(12,10,8,0.68);border:1px solid rgba(196,149,58,0.35);border-radius:8px;padding:7px 10px;margin:6px 0;font-size:11px;line-height:1.45;text-align:left;display:flex;flex-direction:column;gap:4px;';
+        var primaryRows = [];
+        var advSkillRows = [];
         if (window._preselectedTargetIdx != null && currentState && currentState.order && currentState.order[window._preselectedTargetIdx]) {
             var tgtPre = currentState.order[window._preselectedTargetIdx];
             if (tgtPre && tgtPre.alive) {
                 var tgtDist = (pCur && pCur.pos && tgtPre.pos) ? hexDistance(pCur.pos.col, pCur.pos.row, tgtPre.pos.col, tgtPre.pos.row) : 1;
                 var tgtDistM = formatHexDistanceMeters(tgtDist);
                 var tgtAc = (typeof getEffectiveAc === 'function') ? getEffectiveAc(tgtPre) : (tgtPre.ac || 10);
-                dndRows.push('<div style="background:rgba(196,149,58,0.22);border:1px solid rgba(196,149,58,0.5);border-radius:6px;padding:3px 7px;margin-bottom:2px;"><span style="color:#ffd700;font-weight:700;">🎯 Alvo Selecionado: ' + escHtml(tgtPre.n) + '</span> <span style="color:var(--v-text-dim,#a09484);">(' + tgtDistM + ' · CA ' + tgtAc + ')</span></div>');
+                primaryRows.push('<div style="background:rgba(196,149,58,0.22);border:1px solid rgba(196,149,58,0.5);border-radius:6px;padding:3px 7px;margin-bottom:2px;"><span style="color:#ffd700;font-weight:700;">🎯 Alvo Selecionado: ' + escHtml(tgtPre.n) + '</span> <span style="color:var(--v-text-dim,#a09484);">(' + tgtDistM + ')</span></div>');
+                advSkillRows.push('<div class="v-adv-row"><span class="v-adv-k">Defesa do Alvo</span><span class="v-adv-v">CA ' + tgtAc + ' · Distância ' + tgtDistM + ' (' + tgtDist + ' hex)</span></div>');
             }
         }
         if (skill.kind === 'attack' && pCur) {
             if (skill.autoHit && skill.magicMissiles) {
                 var mmCount = (skill.magicMissiles.count || 3) + (skill.magicMissiles.scaleByCasterLevel ? Math.floor(Math.max(0, (pCur.lvl || 1) - 1) / 2) : 0);
-                dndRows.push('<div><span style="color:var(--v-text-dim,#a09484);">Dano:</span> <strong style="color:#90caf9;">' + mmCount + '× (1d4 + 1) Energia</strong> <span style="opacity:0.85;">(Acerto Automático)</span></div>');
+                primaryRows.push('<div><span style="color:var(--v-text-dim,#a09484);">Impacto Estimado:</span> <strong style="color:#90caf9;">' + (mmCount * 2) + ' a ' + (mmCount * 5) + ' de Energia</strong> <span style="opacity:0.85;">(' + mmCount + ' dardos · Acerto Automático)</span></div>');
+                advSkillRows.push('<div class="v-adv-row"><span class="v-adv-k">Fórmula de Dano</span><span class="v-adv-v">' + mmCount + ' × (1d4 + 1) Energia</span></div>');
             } else if (typeof simTargetAttackDamagePreview === 'function') {
                 var prConfirm = simTargetAttackDamagePreview(pCur, skill);
                 var dtConfirm = (typeof simDmgTypeInfoPt === 'function') ? simDmgTypeInfoPt(skill.dmgType || 'slashing') : { lb: 'Físico', ico: '⚔️', col: '#ffd54f' };
-                dndRows.push('<div><span style="color:var(--v-text-dim,#a09484);">Dano (Nv ' + (pCur.lvl || 1) + '):</span> <strong style="color:' + dtConfirm.col + ';">' + escHtml(prConfirm.dmgFormula) + '</strong> (' + prConfirm.minDmg + '–' + prConfirm.maxDmg + ') · ' + dtConfirm.ico + ' ' + escHtml(dtConfirm.lb) + '</div>');
+                primaryRows.push('<div><span style="color:var(--v-text-dim,#a09484);">Impacto Estimado:</span> <strong style="color:' + dtConfirm.col + ';">' + prConfirm.minDmg + ' a ' + prConfirm.maxDmg + '</strong> · ' + dtConfirm.ico + ' ' + escHtml(dtConfirm.lb) + '</div>');
+                advSkillRows.push('<div class="v-adv-row"><span class="v-adv-k">Fórmula (Nv ' + (pCur.lvl || 1) + ')</span><span class="v-adv-v">' + escHtml(prConfirm.dmgFormula) + ' (' + escHtml(dtConfirm.lb) + ')</span></div>');
             }
             if (skill.save && skill.save.ability) {
                 var dcConfirm = (skill.save.dc | 0) || (typeof simSpellSaveDc === 'function' ? simSpellSaveDc(pCur) : 13);
-                dndRows.push('<div><span style="color:var(--v-text-dim,#a09484);">Salvaguarda:</span> <strong style="color:#ffd54f;">TR ' + escHtml(String(skill.save.ability).toUpperCase()) + ' vs CD ' + dcConfirm + '</strong></div>');
+                var abNamePt = (typeof simAbilityLabelPt === 'function') ? simAbilityLabelPt(skill.save.ability) : String(skill.save.ability).toUpperCase();
+                primaryRows.push('<div><span style="color:var(--v-text-dim,#a09484);">Defesa do Alvo:</span> <strong style="color:#ffd54f;">Resistência de ' + escHtml(abNamePt) + '</strong></div>');
+                advSkillRows.push('<div class="v-adv-row"><span class="v-adv-k">Salvaguarda</span><span class="v-adv-v">TR ' + escHtml(String(skill.save.ability).toUpperCase()) + ' vs CD ' + dcConfirm + '</span></div>');
             } else if (!skill.autoHit) {
                 var isSpAtk = !!(skill.scale === 'cantrip' || skill.isSpell);
                 var atkBVal = (isSpAtk && typeof simSpellAttackBonus === 'function') ? simSpellAttackBonus(pCur) : (pCur.atk || 0);
-                dndRows.push('<div><span style="color:var(--v-text-dim,#a09484);">Rolagem:</span> <strong style="color:#e8c45a;">1d20 + ' + atkBVal + ' vs CA</strong></div>');
+                advSkillRows.push('<div class="v-adv-row"><span class="v-adv-k">Rolagem de Ataque</span><span class="v-adv-v">1d20 + ' + atkBVal + ' vs CA</span></div>');
             }
             if (typeof formatDndActionReach === 'function') {
                 var rConfirm = formatDndActionReach(pCur, skill);
-                var aoeNote = skill.aoeRadius ? ' · Área: ' + formatHexDistanceMeters(skill.aoeRadius) + ' (' + skill.aoeRadius + 'h)' : '';
-                dndRows.push('<div><span style="color:var(--v-text-dim,#a09484);">Alcance:</span> <strong>' + escHtml(rConfirm.label) + aoeNote + '</strong></div>');
+                var aoeNoteClean = skill.aoeRadius ? ' · Área: ' + formatHexDistanceMeters(skill.aoeRadius) : '';
+                primaryRows.push('<div><span style="color:var(--v-text-dim,#a09484);">Alcance:</span> <strong>' + escHtml(rConfirm.label) + aoeNoteClean + '</strong></div>');
+                if (skill.aoeRadius) {
+                    advSkillRows.push('<div class="v-adv-row"><span class="v-adv-k">Geometria de Área</span><span class="v-adv-v">' + formatHexDistanceMeters(skill.aoeRadius) + ' (' + skill.aoeRadius + ' hexágonos de raio)</span></div>');
+                }
             }
         } else if (skill.kind === 'heal' && skill.healSpec) {
             var hsC = skill.healSpec;
+            var hBonusC = (hsC.flat || 0) + (hsC.modLevel && pCur ? (pCur.lvl || 1) : 0);
+            var hRangeC = (hsC.n > 0 && hsC.d > 0) ? ((hsC.n + hBonusC) + ' a ' + (hsC.n * hsC.d + hBonusC)) : ('+' + (hsC.flat || 5));
             var hFormC = (hsC.n > 0 && hsC.d > 0) ? (hsC.n + 'd' + hsC.d + (hsC.flat ? ' + ' + hsC.flat : '') + (hsC.modLevel && pCur ? ' + ' + (pCur.lvl || 1) + ' (Nível)' : '')) : ('+' + (hsC.flat || 5));
-            dndRows.push('<div><span style="color:var(--v-text-dim,#a09484);">Restauração:</span> <strong style="color:#81c784;">💚 ' + escHtml(hFormC) + (skill.tempHp ? ' PV Temporários' : ' PV') + '</strong></div>');
+            primaryRows.push('<div><span style="color:var(--v-text-dim,#a09484);">Restauração Estimada:</span> <strong style="color:#81c784;">💚 ' + escHtml(hRangeC) + (skill.tempHp ? ' PV Temporários' : ' PV') + '</strong></div>');
+            advSkillRows.push('<div class="v-adv-row"><span class="v-adv-k">Fórmula de Cura</span><span class="v-adv-v">' + escHtml(hFormC) + '</span></div>');
         } else if (skill.buffSim && skill.buffSim.turns) {
-            dndRows.push('<div><span style="color:var(--v-text-dim,#a09484);">Duração:</span> <strong style="color:#b39ddb;">⏱ ' + skill.buffSim.turns + ' rodadas</strong></div>');
+            primaryRows.push('<div><span style="color:var(--v-text-dim,#a09484);">Duração:</span> <strong style="color:#b39ddb;">⏱ ' + skill.buffSim.turns + ' rodadas</strong></div>');
         }
         if (skill.concentration) {
             var activeConc = (pCur && pCur.concentrating && (pCur.concentrating.spellName || pCur.concentrating.n)) || (currentState && currentState.concentration && currentState.concentration.casterIdx === currentState.p_idx && currentState.concentration.spellName) || null;
             if (activeConc) {
-                dndRows.push('<div style="color:#ffb74d;font-weight:700;margin-top:2px;">Substituirá sua concentração ativa em "' + escHtml(activeConc) + '" </div>');
+                primaryRows.push('<div style="color:#ffb74d;font-weight:700;margin-top:2px;">⚠️ Substituirá sua concentração ativa em "' + escHtml(activeConc) + '"</div>');
             } else {
-                dndRows.push('<div style="color:#a5d6a7;">◈ Exige Concentração D&D 5e </div>');
+                primaryRows.push('<div style="color:#a5d6a7;">◈ Exige Concentração Ativa</div>');
             }
+            advSkillRows.push('<div class="v-adv-row"><span class="v-adv-k">Regra de Concentração</span><span class="v-adv-v">Apenas 1 magia de concentração ativa; sofrer dano exige TR CON (CD 10 ou metade do dano)</span></div>');
+        }
+        if (advSkillRows.length) {
+            primaryRows.push(buildAdvancedViewDrawerHtml('Visualização Avançada (Fórmulas & Regras)', advSkillRows.join('')));
         }
 
         var btns = document.createElement('div');
@@ -42858,8 +43134,8 @@ function showSkillUseConfirmPopup(skill) {
         card.appendChild(nameEl);
         card.appendChild(meta);
         if (skill.desc) card.appendChild(sub);
-        if (dndRows.length) {
-            setHTML(dndBox, dndRows.join(''));
+        if (primaryRows.length) {
+            setHTML(dndBox, primaryRows.join(''));
             card.appendChild(dndBox);
         }
         card.appendChild(btns);
@@ -44247,17 +44523,21 @@ function openFleeInfoOverlay() {
     card.className = 'flee-info-card';
     var title = document.createElement('div');
     title.className = 'flee-info-title';
-    title.textContent = 'Fugir do combate';
+    title.textContent = 'Fugir do Combate';
     var chance = document.createElement('div');
     chance.className = 'flee-info-chance';
-    chance.innerHTML = 'Chance de passar no teste (aprox.): <em>' + pct + '%</em> · ' + successFaces + ' em 20 faces no d20';
+    chance.innerHTML = 'Chance estimada de escapar: <em>' + pct + '%</em>';
     var body = document.createElement('div');
     body.className = 'flee-info-body';
+    var advFleeHtml =
+        '<div class="v-adv-row"><span class="v-adv-k">Teste de Perícia</span><span class="v-adv-v">Destreza (Acrobacia) · 1d20 ' + dexStr + '</span></div>' +
+        '<div class="v-adv-row"><span class="v-adv-k">Classe de Dificuldade</span><span class="v-adv-v">CD ' + DC + ' (' + oaCount + ' ' + (oaCount === 1 ? 'inimigo ativo' : 'inimigos ativos') + ')</span></div>' +
+        '<div class="v-adv-row"><span class="v-adv-k">Probabilidade no d20</span><span class="v-adv-v">' + successFaces + ' em 20 faces (' + pct + '%)</span></div>';
     body.innerHTML =
-        '<p>Fugir exige um teste de <strong>Destreza (Acrobacia)</strong> para se desvencilhar dos inimigos em combate corpo a corpo.</p>' +
-        '<p><strong>CD ' + DC + '</strong> (aumenta com mais inimigos vivos — hoje <strong>' + oaCount + '</strong>): <strong>1d20 ' + dexStr + '</strong>.</p>' +
-        '<p><strong>Se passar:</strong> você sai do combate em segurança.</p>' +
-        '<p><strong>Se falhar:</strong> cada inimigo vivo aproveita a brecha e faz um ataque de oportunidade contra você. Se ainda tiver PV, permanece no combate; se cair a 0, seguem os testes de morte.</p>';
+        '<p>Você tenta encontrar uma brecha e se desvencilhar dos <strong>' + oaCount + '</strong> oponentes alertas ao seu redor.</p>' +
+        '<p><strong>Se escapar:</strong> você deixa o campo de batalha em segurança.</p>' +
+        '<p><strong>Se falhar:</strong> cada inimigo próximo aproveita sua guarda baixa e desfere um <strong>Ataque de Oportunidade</strong> imediato.</p>' +
+        buildAdvancedViewDrawerHtml('Visualização Avançada (Cálculo de Fuga)', advFleeHtml);
     var actions = document.createElement('div');
     actions.className = 'flee-info-actions';
     var btnCancel = document.createElement('button');
@@ -44511,11 +44791,11 @@ function showTargetConfirm(tgtIdx) {
     var effectiveAc = u.ac + (coverInfo.bonus || 0);
 
     var distHex = (p.pos && u.pos && typeof hexDistance === 'function') ? hexDistance(p.pos.col, p.pos.row, u.pos.col, u.pos.row) : null;
-    var distStr = distHex !== null ? (distHex * 1.5).toFixed(1).replace('.0', '') + 'm (' + distHex + ' hexes)' : '';
+    var distStr = distHex !== null ? (distHex * 1.5).toFixed(1).replace('.0', '') + 'm' : '';
 
     var reachMeta = (typeof formatDndActionReach === 'function')
         ? formatDndActionReach(p, skill)
-        : { reachHex: 1, label: '1,5m (5 pés)', meters: '1,5m' };
+        : { reachHex: 1, label: '1,5m', meters: '1,5m' };
     var inReach = distHex !== null ? (distHex <= reachMeta.reachHex) : true;
     var reachStatusBadge = inReach
         ? ' <span style="color:var(--v-gold-bright,#e8c45a);font-weight:600;">· No Alcance (' + reachMeta.label + ') ✦</span>'
@@ -44527,8 +44807,9 @@ function showTargetConfirm(tgtIdx) {
     html += '<div class="tcc-dmg">';
     var isSaveSpell = !!(skill && skill.save);
     var isAutoHitSpell = !!(skill && (skill.autoHit || skill.magicMissiles));
+    var preAdvMathHtml = '';
 
-    /* Banner Informativo de Área de Efeito (-205) */
+    /* Banner Informativo de Área de Efeito */
     if (skill && typeof simComputeSkillAoeGeometry === 'function' && u.pos && u.pos.col != null) {
         var aoeGeo = simComputeSkillAoeGeometry(p, u.pos.col, u.pos.row, skill);
         if (aoeGeo && aoeGeo.radiusHex > 0) {
@@ -44546,23 +44827,24 @@ function showTargetConfirm(tgtIdx) {
                 : '';
             html += '<div style="background:linear-gradient(90deg, rgba(234,88,12,0.22), rgba(20,16,12,0.85));border:1px solid rgba(251,146,60,0.6);border-radius:6px;padding:6px 10px;margin-bottom:6px;">'
                 + '<div style="display:flex;justify-content:space-between;align-items:center;">'
-                + '<span style="font-family:Cinzel,serif;font-size:12px;font-weight:800;color:#fdba74;">💥 ' + aoeShapePt.toUpperCase() + ' DE ' + aoeRadiusM + ' (' + aoeGeo.radiusHex + ' hexes)</span>'
+                + '<span style="font-family:Cinzel,serif;font-size:12px;font-weight:800;color:#fdba74;">💥 ' + aoeShapePt.toUpperCase() + ' DE ' + aoeRadiusM + '</span>'
                 + '<span style="font-size:11px;color:#fed7aa;background:rgba(0,0,0,0.4);border:1px solid rgba(251,146,60,0.4);padding:1px 6px;border-radius:4px;">🎯 ' + nEnemies + ' Alvo(s) Hostil(is)</span>'
                 + '</div>'
                 + '<div style="font-size:11px;color:#fdba74;opacity:0.9;margin-top:2px;">Afeta todas as criaturas na área a partir do ponto de mira.</div>'
                 + ffWarning
                 + '</div>';
+            preAdvMathHtml += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Geometria de Área</span><span class="tcc-dmg-val">' + aoeShapePt + ' de ' + aoeRadiusM + ' (' + aoeGeo.radiusHex + ' hexágonos)</span></div>';
         }
     }
 
-    /* Medidor Visual de Probabilidade & Limiares D&D 5e (Padrão Baldur's Gate 3 / Solasta) */
+    /* Medidor Visual de Probabilidade & Limiares (Padrão Baldur's Gate 3 / Solasta) */
     if (skill && skill.powerWordKill) {
         var _pwkLethal = (u.hp <= 100);
         html += '<div style="background:linear-gradient(90deg, rgba(' + (_pwkLethal ? '46,204,113,0.22' : '231,76,60,0.22') + '), rgba(20,16,12,0.75));border:1px solid ' + (_pwkLethal ? '#2ecc71' : '#e74c3c') + ';border-radius:6px;padding:6px 10px;margin-bottom:6px;">'
             + '<div style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:' + (_pwkLethal ? '#7cdb7c' : '#ff8585') + ';">'
             + (_pwkLethal ? '☠️ MORTE INSTANTÂNEA (≤ 100 PV)' : '🛡️ ACIMA DO LIMIAR (> 100 PV)') + '</div>'
             + '<div style="font-size:11.5px;color:#c9b896;">'
-            + (_pwkLethal ? 'Alvo com ' + u.hp + ' PV morre imediatamente sem Teste de Resistência .' : 'Alvo tem ' + u.hp + ' PV — a magia não surte efeito acima de 100 PV .')
+            + (_pwkLethal ? 'Alvo com ' + u.hp + ' PV morre imediatamente sem resistência.' : 'Alvo tem ' + u.hp + ' PV — a magia não surte efeito acima de 100 PV.')
             + '</div></div>';
     } else if (skill && skill.hpThreshold) {
         var _thrOk = (u.hp <= skill.hpThreshold);
@@ -44572,49 +44854,49 @@ function showTargetConfirm(tgtIdx) {
             + '<div style="font-size:11.5px;color:#c9b896;">Alvo está com ' + u.hp + ' PV (limiar da magia: ' + skill.hpThreshold + ' PV).</div></div>';
     } else if (skill && skill.sleepHpPool) {
         html += '<div style="background:linear-gradient(90deg, rgba(129,140,248,0.22), rgba(20,16,12,0.75));border:1px solid rgba(129,140,248,0.55);border-radius:6px;padding:6px 10px;margin-bottom:6px;">'
-            + '<div style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:#c7d2fe;">💤 PISCINA DE PV (' + skill.sleepHpPool.n + 'd' + skill.sleepHpPool.d + ' vs ' + u.hp + ' PV)</div>'
-            + '<div style="font-size:11.5px;color:#b8a9c9;">Sem Salvaguarda: adormece se o total rolado igualar ou superar os PV atuais .</div></div>';
+            + '<div style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:#c7d2fe;">💤 SONO ARCANO (Alvo com ' + u.hp + ' PV)</div>'
+            + '<div style="font-size:11.5px;color:#b8a9c9;">Adormece se o poder do feitiço igualar ou superar os PV atuais.</div></div>';
+        preAdvMathHtml += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Piscina de Dados</span><span class="tcc-dmg-val">' + skill.sleepHpPool.n + 'd' + skill.sleepHpPool.d + ' vs ' + u.hp + ' PV atuais (Sem Salvaguarda)</span></div>';
     } else if (skill && skill.mazeBanish) {
         html += '<div style="background:linear-gradient(90deg, rgba(162,155,254,0.22), rgba(20,16,12,0.75));border:1px solid rgba(162,155,254,0.55);border-radius:6px;padding:6px 10px;margin-bottom:6px;">'
-            + '<div style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:#d6bcfa;">🌀 BANIMENTO AUTOMÁTICO (SEM TR)</div>'
-            + '<div style="font-size:11.5px;color:#b8a9c9;">Alvo banido para semiplano labiríntico; exige teste de INT CD 20 para escapar .</div></div>';
+            + '<div style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:#d6bcfa;">🌀 BANIMENTO AUTOMÁTICO</div>'
+            + '<div style="font-size:11.5px;color:#b8a9c9;">Alvo banido para um semiplano labiríntico.</div></div>';
+        preAdvMathHtml += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Regra de Fuga</span><span class="tcc-dmg-val">Sem salvaguarda inicial; exige teste de Inteligência CD 20 para escapar</span></div>';
     } else if (isAutoHitSpell) {
         html += '<div style="background:linear-gradient(90deg, rgba(162,155,254,0.22), rgba(20,16,12,0.75));border:1px solid rgba(162,155,254,0.55);border-radius:6px;padding:6px 10px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">'
             + '<div><div style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:#d6bcfa;">✦ 100% ACERTO AUTOMÁTICO</div>'
-            + '<div style="font-size:11.5px;color:#b8a9c9;">Infalível (— Mísseis Mágicos atingem automaticamente)</div></div>'
+            + '<div style="font-size:11.5px;color:#b8a9c9;">Projéteis teleguiados — atingem o alvo infalivelmente</div></div>'
             + '</div>';
     } else if (isSaveSpell && typeof simCalcSaveFailChanceDnd5e === 'function') {
         var svProb = simCalcSaveFailChanceDnd5e(s, p, u, skill);
         var svCol = svProb.failPct >= 65 ? '#7cdb7c' : (svProb.failPct >= 40 ? '#ffd54f' : '#ff8585');
         html += '<div style="background:linear-gradient(90deg, rgba(40,32,20,0.85), rgba(20,16,12,0.75));border:1px solid rgba(212,175,55,0.45);border-radius:6px;padding:6px 10px;margin-bottom:6px;">'
             + '<div style="display:flex;justify-content:space-between;align-items:baseline;">'
-            + '<span style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:' + svCol + ';">🎯 ' + svProb.failPct + '% CHANCE DE FALHA NO TR</span>'
-            + '<span style="font-size:11.5px;color:#c9b896;">Alvo resiste com ' + svProb.minRollToSave + '+ no d20</span>'
+            + '<span style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:' + svCol + ';">🎯 ' + svProb.failPct + '% CHANCE DE SUCESSO</span>'
+            + '<span style="font-size:11.5px;color:#c9b896;">Chance de superar a resistência do alvo</span>'
             + '</div>'
             + '<div style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;margin:4px 0;">'
             + '<div style="height:100%;width:' + svProb.failPct + '%;background:' + svCol + ';"></div>'
             + '</div>'
-            + '<div style="font-size:11.5px;color:#a09484;">Salvaguarda do Alvo: <strong style="color:#e8dfc8;">' + escHtml(svProb.breakdown) + '</strong></div>'
             + '</div>';
+        preAdvMathHtml += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Salvaguarda do Alvo</span><span class="tcc-dmg-val">' + escHtml(svProb.breakdown) + ' (resiste com ' + svProb.minRollToSave + '+ no d20)</span></div>';
     } else if (!isSaveSpell && typeof simCalcHitChanceDnd5e === 'function') {
         var hitProb = simCalcHitChanceDnd5e(s, p, u, skill);
         var hitCol = hitProb.pct >= 65 ? '#7cdb7c' : (hitProb.pct >= 40 ? '#ffd54f' : '#ff8585');
         html += '<div style="background:linear-gradient(90deg, rgba(40,32,20,0.85), rgba(20,16,12,0.75));border:1px solid rgba(212,175,55,0.45);border-radius:6px;padding:6px 10px;margin-bottom:6px;">'
             + '<div style="display:flex;justify-content:space-between;align-items:baseline;">'
             + '<span style="font-family:Cinzel,serif;font-size:13px;font-weight:800;color:' + hitCol + ';">🎯 ' + hitProb.pct + '% CHANCE DE ACERTO</span>'
-            + '<span style="font-size:11.5px;color:#ffd700;">Crítico: ' + hitProb.critPct + '% (d20 ≥ ' + hitProb.critMin + ')</span>'
+            + '<span style="font-size:11.5px;color:#ffd700;">Crítico: ' + hitProb.critPct + '%</span>'
             + '</div>'
             + '<div style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;margin:4px 0;">'
             + '<div style="height:100%;width:' + hitProb.pct + '%;background:' + hitCol + ';"></div>'
             + '</div>'
-            + '<div style="font-size:11.5px;color:#a09484;display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;">'
-            + '<span>Rolagem: <strong style="color:#e8dfc8;">' + escHtml(hitProb.atkBreakdown) + '</strong></span>'
-            + '<span>Defesa: <strong style="color:#e8dfc8;">' + escHtml(hitProb.acBreakdown) + '</strong> (d20 ≥ ' + hitProb.neededRoll + ')</span>'
-            + '</div>'
             + '</div>';
+        preAdvMathHtml += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Rolagem de Ataque</span><span class="tcc-dmg-val">' + escHtml(hitProb.atkBreakdown) + ' (Crítico: d20 ≥ ' + hitProb.critMin + ')</span></div>';
+        preAdvMathHtml += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Defesa do Alvo</span><span class="tcc-dmg-val">' + escHtml(hitProb.acBreakdown) + ' (acerta com d20 ≥ ' + hitProb.neededRoll + ')</span></div>';
     }
 
-    /* Alertas Contextuais Inteligentes D&D 5e (Exibidos imediatamente quando relevantes para a ação atual) */
+    /* Alertas Contextuais Inteligentes (Exibidos imediatamente quando relevantes para a ação atual) */
     var _canonRawDt = String(rawDmgType || '').toLowerCase().trim();
     var _hasDirectDmg = (!isSaveSpell ? true : (minDmg > 0 || maxDmg > 0)) && (!pr || !pr.noDamage);
     if (_canonRawDt && _hasDirectDmg) {
@@ -44634,7 +44916,7 @@ function showTargetConfirm(tgtIdx) {
         var _reqTag = String(skill.requiresTargetTag).toLowerCase();
         var _uTags = [].concat(u.tags || [], u.creatureType ? [u.creatureType] : [], u.type ? [u.type] : []).map(function (t) { return String(t).toLowerCase(); });
         if (_uTags.length > 0 && _uTags.indexOf(_reqTag) === -1) {
-            html += '<div style="background:rgba(180,30,30,0.28);border:1px solid #ff6b6b;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:11.5px;color:#fecaca;font-weight:700;text-align:center;">🚫 TIPO DE CRIATURA INVÁLIDO: Exige alvo ' + escHtml(_reqTag.toUpperCase()) + ' </div>';
+            html += '<div style="background:rgba(180,30,30,0.28);border:1px solid #ff6b6b;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:11.5px;color:#fecaca;font-weight:700;text-align:center;">🚫 TIPO DE CRIATURA INVÁLIDO: Exige alvo ' + escHtml(_reqTag.toUpperCase()) + '</div>';
         }
     }
     if (skill && skill.concentration && (p.concentrationSpell || p.concentrating)) {
@@ -44644,13 +44926,13 @@ function showTargetConfirm(tgtIdx) {
     if (isSaveSpell && legRes > 0) {
         var _legRem = Math.max(0, legRes - legResUsed);
         if (_legRem > 0) {
-            html += '<div style="background:rgba(217,119,6,0.22);border:1px solid #f59e0b;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:11.5px;color:#fde68a;font-weight:700;text-align:center;">◈ RESISTÊNCIA LENDÁRIA: ' + _legRem + '/' + legRes + ' restantes — O alvo pode escolher passar no TR</div>';
+            html += '<div style="background:rgba(217,119,6,0.22);border:1px solid #f59e0b;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:11.5px;color:#fde68a;font-weight:700;text-align:center;">◈ RESISTÊNCIA LENDÁRIA: ' + _legRem + '/' + legRes + ' restantes — O alvo pode escolher resistir</div>';
         } else {
             html += '<div style="background:rgba(30,130,60,0.22);border:1px solid #4ade80;border-radius:4px;padding:4px 8px;margin-bottom:5px;font-size:11.5px;color:#bbf7d0;text-align:center;">👑 Resistências Lendárias Esgotadas (0/' + legRes + ') — O alvo sofrerá o efeito se falhar!</div>';
         }
     }
     if (u.reactionSpent || u.reaction_spent) {
-        html += '<div style="background:rgba(59,130,246,0.18);border:1px solid rgba(96,165,250,0.5);border-radius:4px;padding:3px 8px;margin-bottom:5px;font-size:11.5px;color:#bfdbfe;text-align:center;"><strong>Reação Gasta:</strong> Este alvo não pode reagir (sem Escudo Arcano ou Ataque de Oportunidade).</div>';
+        html += '<div style="background:rgba(59,130,246,0.18);border:1px solid rgba(96,165,250,0.5);border-radius:4px;padding:3px 8px;margin-bottom:5px;font-size:11.5px;color:#bfdbfe;text-align:center;"><strong>Reação Gasta:</strong> Este alvo não pode reagir neste turno.</div>';
     }
 
     /* Linhas Essenciais Compactas (Sempre Visíveis) */
@@ -44661,10 +44943,12 @@ function showTargetConfirm(tgtIdx) {
         var rawAb = String((skill.save && skill.save.ability) || skill.saveAbility || 'con').toLowerCase();
         var saveAb = (typeof simAbilityLabelPt === 'function') ? simAbilityLabelPt(rawAb) : rawAb.toUpperCase();
         var saveDc = (skill.save.dc | 0) || (typeof simSpellSaveDc === 'function' ? simSpellSaveDc(p) : 13);
-        var dexCoverNote = ((rawAb === 'dex' || saveAb === 'DES') && coverInfo.bonus > 0) ? ' (+ ' + coverInfo.bonus + ' Cobertura no TR)' : '';
-        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Salvaguarda</span><span class="tcc-dmg-val"><span class="tcc-n-key">TR ' + saveAb + dexCoverNote + '</span> <span class="tcc-vs">vs</span> <span class="tcc-n-ca">CD ' + saveDc + '</span></span></div>';
+        var dexCoverNote = ((rawAb === 'dex' || saveAb === 'DES') && coverInfo.bonus > 0) ? ' (+ ' + coverInfo.bonus + ' Cobertura)' : '';
+        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Resistência Exigida</span><span class="tcc-dmg-val"><span class="tcc-n-key">' + saveAb + dexCoverNote + '</span></span></div>';
+        preAdvMathHtml += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Classe de Dificuldade</span><span class="tcc-dmg-val">TR ' + saveAb + ' vs CD ' + saveDc + '</span></div>';
         if (minDmg > 0 || maxDmg > 0) {
-            html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano (' + escHtml(dmgTypeInfo.pt) + ')</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span> <span style="color:' + dmgTypeInfo.col + ';font-size:11.5px;">' + dmgTypeInfo.ico + '</span>)</span></div>';
+            html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Impacto (' + escHtml(dmgTypeInfo.pt) + ')</span><span class="tcc-dmg-val"><span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span> <span style="color:' + dmgTypeInfo.col + ';font-size:11.5px;">' + dmgTypeInfo.ico + '</span></span></div>';
+            preAdvMathHtml += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Fórmula de Dano</span><span class="tcc-dmg-val">' + dmgFormula + ' (' + escHtml(dmgTypeInfo.pt) + ')</span></div>';
         } else if (skill.afterAttackEnemyDebuff || (skill.save && skill.save.onFailApply)) {
             var _effObj = skill.afterAttackEnemyDebuff || skill.save.onFailApply;
             var debuffN = _effObj.n || 'Condição';
@@ -44677,18 +44961,25 @@ function showTargetConfirm(tgtIdx) {
             acDisplay += ' <span style="font-size:11px;opacity:0.85;">(' + u.ac + ' + ' + coverInfo.bonus + ' ' + (coverInfo.cover === 'half' ? '½ Cobertura' : '¾ Cobertura') + ')</span>';
         }
         var effAtkVal = (p.atk | 0) + (elevMod.bonus | 0);
-        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque</span><span class="tcc-dmg-val"><span class="tcc-n-muted">d20</span>' + advBadge + ' + <span class="tcc-n-key">' + effAtkVal + '</span> <span class="tcc-vs">vs</span> ' + acDisplay + '</span></div>';
-        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Dano (' + escHtml(dmgTypeInfo.pt) + ')</span><span class="tcc-dmg-val">' + dmgFormula + ' (<span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span> <span style="color:' + dmgTypeInfo.col + ';font-size:11.5px;">' + dmgTypeInfo.ico + '</span>)</span></div>';
+        if (advBadge) {
+            html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Condição Tática</span><span class="tcc-dmg-val">' + advBadge + '</span></div>';
+        }
+        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Impacto (' + escHtml(dmgTypeInfo.pt) + ')</span><span class="tcc-dmg-val"><span class="tcc-n-key">' + minDmg + '–' + maxDmg + '</span> <span style="color:' + dmgTypeInfo.col + ';font-size:11.5px;">' + dmgTypeInfo.ico + '</span></span></div>';
+        preAdvMathHtml += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Fórmula de Ataque</span><span class="tcc-dmg-val">d20 + ' + effAtkVal + ' vs ' + acDisplay + '</span></div>';
+        preAdvMathHtml += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Fórmula de Dano</span><span class="tcc-dmg-val">' + dmgFormula + ' (' + minDmg + '–' + maxDmg + ')</span></div>';
     }
 
-    /* Gaveta Colapsável de Divulgação Progressiva (Detalhes & Matemática D&D 5e sob demanda) */
-    var drawerHtml = '';
+    /* Gaveta Colapsável de Divulgação Progressiva (Detalhes & Matemática sob demanda) */
+    var drawerHtml = preAdvMathHtml;
+    if (distHex !== null) {
+        drawerHtml += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Distância em Grade</span><span class="tcc-dmg-val">' + distStr + ' (' + distHex + (distHex === 1 ? ' hexágono' : ' hexágonos') + ')</span></div>';
+    }
     if (!isSaveSpell) {
-        drawerHtml += '<div class="tcc-dmg-row crit"><span class="tcc-dmg-lbl">Crítico (nat 20)</span><span class="tcc-dmg-val">' + critFormula + ' (<span class="tcc-n-key">' + critMin + '–' + critMax + '</span>)</span></div>';
+        drawerHtml += '<div class="tcc-dmg-row crit"><span class="tcc-dmg-lbl">Crítico (20 natural)</span><span class="tcc-dmg-val">' + critFormula + ' (<span class="tcc-n-key">' + critMin + '–' + critMax + '</span>)</span></div>';
         if (!skill && typeof simClassExtraAttacks === 'function') {
             var _xAtks = simClassExtraAttacks(p.cls, p.lvl);
             if (_xAtks >= 1) {
-                drawerHtml += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque Extra</span><span class="tcc-dmg-val" style="color:#7cdb7c;font-weight:700;">⚔ ' + (1 + _xAtks) + '× golpes nesta Ação de Ataque </span></div>';
+                drawerHtml += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Ataque Extra</span><span class="tcc-dmg-val" style="color:#7cdb7c;font-weight:700;">⚔ ' + (1 + _xAtks) + '× golpes nesta Ação de Ataque</span></div>';
             }
         }
     }
@@ -44788,7 +45079,7 @@ function showTargetConfirm(tgtIdx) {
     }
 
     if (drawerHtml) {
-        html += '<button type="button" class="tcc-details-toggle" data-tcc-toggle="details"><span>▾ Detalhes &amp; Matemática Tática</span><span data-tcc-arrow>▸</span></button>';
+        html += '<button type="button" class="tcc-details-toggle" data-tcc-toggle="details"><span>⚙ Visualização Avançada (Matemática &amp; Regras)</span><span data-tcc-arrow>▸</span></button>';
         html += '<div class="tcc-details-drawer" data-tcc-drawer="details">' + drawerHtml + '</div>';
     }
     html += '</div>';
@@ -44915,14 +45206,17 @@ function showShoveChoiceModal(targetIdx) {
         msgEl.style.textAlign = 'left';
         msgEl.style.fontSize = '12px';
         msgEl.style.lineHeight = '1.45';
+        var shoveAdvHtml =
+            '<div class="v-adv-row"><span class="v-adv-k">Teste Oposto</span><span class="v-adv-v">Força (Atletismo) vs Atletismo/Acrobacia do Alvo</span></div>' +
+            '<div class="v-adv-row"><span class="v-adv-k">Derrubar (Caído)</span><span class="v-adv-v">Vantagem corpo a corpo (1,5m); Desvantagem à distância</span></div>' +
+            '<div class="v-adv-row"><span class="v-adv-k">Empurrar</span><span class="v-adv-v">Desloca o alvo 1,5m (1 hexágono) na direção oposta</span></div>' +
+            '<div class="v-adv-row"><span class="v-adv-k">Economia de Ação</span><span class="v-adv-v">Consome 1 Ação Principal</span></div>';
         msgEl.innerHTML =
-            '<div style="margin-bottom:6px;"><strong>O Que Está Sendo Escolhido:</strong><br>' +
-            'Você usa uma ação de ataque para desestabilizar ou arremessar o oponente com sua força física.</div>' +
-            '<div style="margin-bottom:6px;"><strong>Consequências & Benefícios:</strong><br>' +
-            '• <em>Teste Resistido:</em> Seu Força (Atletismo) vs maior entre Força (Atletismo) e Destreza (Acrobacia) do alvo.<br>' +
-            '• <strong>Derrubar (Caído):</strong> Alvo fica Caído. Ataques corpo a corpo contra ele têm <strong>Vantagem</strong>; ataques à distância sofrem Desvantagem.<br>' +
-            '• <strong>Empurrar (1,5m):</strong> Move o alvo 1 hexágono para trás, afastando-o da área ou projetando contra perigos de terreno.<br>' +
-            '• <em>Custo:</em> Gasta sua Ação principal (e desloca-se até o alvo se necessário).</div>' +
+            '<div style="margin-bottom:6px;">Você usa sua força física para desestabilizar ou arremessar <strong>' + escHtml(u.n || 'o oponente') + '</strong>:</div>' +
+            '<div style="margin-bottom:6px;">' +
+            '• <strong>Derrubar no Chão:</strong> deixa o alvo vulnerável a golpes próximos.<br>' +
+            '• <strong>Empurrar (1,5m):</strong> afasta o inimigo ou o projeta contra perigos do terreno.</div>' +
+            buildAdvancedViewDrawerHtml('Visualização Avançada (Regras & Dados)', shoveAdvHtml) +
             '<div style="text-align:center;font-weight:600;color:var(--v-gold-bright,#e8c45a);margin-top:6px;">Escolha a manobra desejada:</div>';
 
         var row = document.createElement('div');
@@ -45016,14 +45310,14 @@ function showGrappleConfirmModal(targetIdx) {
         msgEl.style.textAlign = 'left';
         msgEl.style.fontSize = '12px';
         msgEl.style.lineHeight = '1.45';
+        var grappleAdvHtml =
+            '<div class="v-adv-row"><span class="v-adv-k">Teste Oposto</span><span class="v-adv-v">Força (Atletismo) vs Atletismo/Acrobacia do Alvo</span></div>' +
+            '<div class="v-adv-row"><span class="v-adv-k">Condição Agarrado</span><span class="v-adv-v">Deslocamento reduzido a 0m; escapar exige 1 Ação</span></div>' +
+            '<div class="v-adv-row"><span class="v-adv-k">Economia de Ação</span><span class="v-adv-v">Consome 1 Ação Principal</span></div>';
         msgEl.innerHTML =
-            '<div style="margin-bottom:6px;"><strong>O Que Está Sendo Escolhido:</strong><br>' +
-            'Você tenta subjugar o oponente usando uma de suas mãos para imobilizá-lo com sua força física.</div>' +
-            '<div style="margin-bottom:6px;"><strong>Consequências & Benefícios:</strong><br>' +
-            '• <em>Teste Resistido:</em> Seu teste de Força (Atletismo) vs maior entre Força (Atletismo) ou Destreza (Acrobacia) do alvo.<br>' +
-            '• <strong>Condição Agarrado:</strong> O deslocamento do alvo é reduzido a <strong>0 metros</strong> até que ele se liberte ou você seja afastado.<br>' +
-            '• O alvo pode gastar uma Ação em seu turno para tentar escapar do agarrão.<br>' +
-            '• <em>Custo:</em> Gasta sua Ação principal (e desloca-se até o alvo se necessário).</div>';
+            '<div style="margin-bottom:6px;">Você tenta subjugar <strong>' + escHtml(u.n || 'o oponente') + '</strong> com uma mão livre para impedi-lo de se mover.</div>' +
+            '<div style="margin-bottom:6px;">• <strong>Sucesso:</strong> imobiliza o deslocamento do alvo no lugar até que ele consiga escapar.</div>' +
+            buildAdvancedViewDrawerHtml('Visualização Avançada (Regras & Dados)', grappleAdvHtml);
 
         var row = document.createElement('div');
         row.className = 'sim-skip-confirm-actions';
@@ -45089,13 +45383,14 @@ function showHelpChoiceModal(targetIdx) {
         msgEl.style.textAlign = 'left';
         msgEl.style.fontSize = '12px';
         msgEl.style.lineHeight = '1.45';
+        var helpAdvHtml =
+            '<div class="v-adv-row"><span class="v-adv-k">Efeito Mecânico</span><span class="v-adv-v">Vantagem (2d20, escolhe o maior) no 1º ataque aliado</span></div>' +
+            '<div class="v-adv-row"><span class="v-adv-k">Duração</span><span class="v-adv-v">Até o próximo ataque aliado ou início do seu próximo turno</span></div>' +
+            '<div class="v-adv-row"><span class="v-adv-k">Economia de Ação</span><span class="v-adv-v">Consome 1 Ação Principal (requer adjacência 1,5m)</span></div>';
         msgEl.innerHTML =
-            '<div style="margin-bottom:6px;"><strong>O Que Está Sendo Escolhido:</strong><br>' +
-            'Você finta, cerca e cria uma distração direta contra este inimigo para abrir uma brecha de ataque.</div>' +
-            '<div style="margin-bottom:6px;"><strong>Consequências & Benefícios:</strong><br>' +
-            '• O próximo ataque realizado por um aliado contra este alvo antes do seu próximo turno terá <strong>VANTAGEM</strong>.<br>' +
-            '• A distração encerra assim que o aliado desferir o primeiro ataque.<br>' +
-            '• <em>Custo:</em> Gasta sua Ação principal (e desloca-se até o alvo se necessário).</div>';
+            '<div style="margin-bottom:6px;">Você finta e pressiona <strong>' + escHtml(u.n || 'o inimigo') + '</strong> para abrir uma brecha certeira na guarda dele.</div>' +
+            '<div style="margin-bottom:6px;">• O próximo ataque de um companheiro contra este alvo terá <strong>VANTAGEM</strong>.</div>' +
+            buildAdvancedViewDrawerHtml('Visualização Avançada (Regras & Dados)', helpAdvHtml);
 
         var row = document.createElement('div');
         row.className = 'sim-skip-confirm-actions';
@@ -45165,13 +45460,14 @@ function showHideConfirmModal() {
         msgEl.style.textAlign = 'left';
         msgEl.style.fontSize = '12px';
         msgEl.style.lineHeight = '1.45';
+        var hideAdvHtml =
+            '<div class="v-adv-row"><span class="v-adv-k">Teste de Perícia</span><span class="v-adv-v">Destreza (Furtividade) vs Percepção Passiva inimiga</span></div>' +
+            '<div class="v-adv-row"><span class="v-adv-k">Condição Oculto</span><span class="v-adv-v">Vantagem ao atacar; inimigos atacam com Desvantagem</span></div>' +
+            '<div class="v-adv-row"><span class="v-adv-k">Economia de Ação</span><span class="v-adv-v">' + escHtml(costText) + '</span></div>';
         msgEl.innerHTML =
-            '<div style="margin-bottom:6px;"><strong>O Que Está Sendo Escolhido:</strong><br>' +
-            'Você tenta se esgueirar pelas sombras ou cobertura do cenário para ocultar sua posição.</div>' +
-            '<div style="margin-bottom:6px;"><strong>Consequências & Benefícios:</strong><br>' +
-            '• Realiza teste de <strong>Destreza (Furtividade)</strong> vs maior Percepção Passiva dos inimigos vivos.<br>' +
-            '• <em>Sucesso:</em> Concede condição <strong>Oculto</strong> (Vantagem no próximo ataque, Desvantagem em ataques sofridos). Encerra ao atacar.<br>' +
-            '• <em>Custo:</em> ' + costText + '</div>';
+            '<div style="margin-bottom:6px;">Você procura abrigo nas sombras ou obstáculos do cenário para ocultar sua presença.</div>' +
+            '<div style="margin-bottom:6px;">• <strong>Sucesso:</strong> você fica <strong>Oculto</strong>, ganhando Vantagem no próximo golpe e dificultando ataques inimigos.</div>' +
+            buildAdvancedViewDrawerHtml('Visualização Avançada (Regras & Dados)', hideAdvHtml);
 
         var row = document.createElement('div');
         row.className = 'sim-skip-confirm-actions';
@@ -45263,13 +45559,17 @@ function showHealTargetConfirm(tgtIdx) {
         (inconsc ? ' <span class="tcc-down-tag">(inconsciente)</span>' : '') + '</div>';
     html += simFormatTargetConditionPills(u);
     if (inconsc && !isBuffAlly) {
-        html += '<div class="tcc-phb-note">Qualquer cura recebida com 0 PV estabiliza o aventureiro e devolve a consciência com esses PV.</div>';
+        html += '<div class="tcc-phb-note">Restabelece o companheiro caído e devolve a consciência.</div>';
     }
     html += '</div></div>';
     if (!isBuffAlly) {
         html += '<div class="tcc-dmg">';
-        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">Fórmula de Cura</span><span class="tcc-dmg-val">' + escHtml(mm.formula) + '</span></div>';
-        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">PV recuperados</span><span class="tcc-dmg-val">' + mm.min + '–' + mm.max + '</span></div>';
+        html += '<div class="tcc-dmg-row"><span class="tcc-dmg-lbl">PV recuperados</span><span class="tcc-dmg-val" style="color:#86efac;font-weight:700;">+' + mm.min + ' a +' + mm.max + ' PV</span></div>';
+        var healAdvHtml =
+            '<div class="v-adv-row"><span class="v-adv-k">Fórmula de Cura</span><span class="v-adv-v">' + escHtml(mm.formula) + '</span></div>' +
+            '<div class="v-adv-row"><span class="v-adv-k">PV Projetado</span><span class="v-adv-v">' + Math.min(u.mhp, (u.hp || 0) + mm.min) + '–' + Math.min(u.mhp, (u.hp || 0) + mm.max) + ' / ' + u.mhp + ' PV</span></div>' +
+            (inconsc ? '<div class="v-adv-row"><span class="v-adv-k">Estabilização (0 PV)</span><span class="v-adv-v">Qualquer cura recebida a 0 PV estabiliza, limpa testes de morte e restaura a consciência</span></div>' : '');
+        html += buildAdvancedViewDrawerHtml('Visualização Avançada (Fórmula & Regras)', healAdvHtml);
         html += '</div>';
     } else {
         // Buff ally — mostra descrição em vez de rolagem de cura
@@ -45997,7 +46297,7 @@ function appendMagicMissileVolleySummary(parent, groupList, darts, s) {
     });
 
     dRows.push({
-        l: 'Regra D&D 5e',
+        l: 'Propriedade Arcana',
         v: 'Três dardos de força brilhante atingem alvos visíveis simultaneamente sem rolagem de ataque ou salvaguarda.'
     });
 
@@ -46705,18 +47005,6 @@ function showAllySpellOverlay(actor, target, dart, s, skill, themeKey) {
             var metrics = document.createElement('div');
             metrics.className = 'drl-structured-metrics';
             if (dart.rolls && dart.rolls.length > 0) {
-                var cellRoll = document.createElement('div');
-                cellRoll.className = 'drl-structured-cell';
-                cellRoll.innerHTML = '<span class="drl-structured-lbl">Rolagem</span><span class="drl-structured-val">' + dart.rolls.length + 'd' + dart.d + ' [' + dart.rolls.join('+') + ']' + '</span>';
-                metrics.appendChild(cellRoll);
-
-                if (dart.flat) {
-                    var cellMod = document.createElement('div');
-                    cellMod.className = 'drl-structured-cell';
-                    cellMod.innerHTML = '<span class="drl-structured-lbl">Modificador</span><span class="drl-structured-val">+' + dart.flat + '</span>';
-                    metrics.appendChild(cellMod);
-                }
-
                 var cellTotal = document.createElement('div');
                 cellTotal.className = 'drl-structured-cell';
                 cellTotal.innerHTML = '<span class="drl-structured-lbl">Cura Total</span><span class="drl-structured-val" style="color:#86efac;">+' + dart.dmg + ' PV</span>';
@@ -46749,7 +47037,7 @@ function showAllySpellOverlay(actor, target, dart, s, skill, themeKey) {
             toggleBtn.type = 'button';
             toggleBtn.className = 'drl-structured-toggle-btn';
             toggleBtn.setAttribute('aria-expanded', 'false');
-            toggleBtn.textContent = 'Detalhes da Regra';
+            toggleBtn.textContent = '⚙ Visualização Avançada (Dados & Regra)';
 
             var detailsBody = document.createElement('div');
             detailsBody.className = 'drl-structured-details-body';
@@ -47378,7 +47666,7 @@ function showRayOfFrostOverlay(actor, target, dart, s) {
 
             var cellSlow = document.createElement('div');
             cellSlow.className = 'drl-structured-cell';
-            cellSlow.innerHTML = '<span class="drl-structured-lbl">Lentidão</span><span class="drl-structured-val" style="color:#38bdf8;">−3m (2h)</span>';
+            cellSlow.innerHTML = '<span class="drl-structured-lbl">Lentidão</span><span class="drl-structured-val" style="color:#38bdf8;">−3m</span>';
             metrics.appendChild(cellSlow);
 
             structCard.appendChild(metrics);
@@ -47396,7 +47684,7 @@ function showRayOfFrostOverlay(actor, target, dart, s) {
             toggleBtn.type = 'button';
             toggleBtn.className = 'drl-structured-toggle-btn';
             toggleBtn.setAttribute('aria-expanded', 'false');
-            toggleBtn.textContent = 'Detalhes da Regra';
+            toggleBtn.textContent = '⚙ Visualização Avançada (Dados & Regra)';
 
             var detailsBody = document.createElement('div');
             detailsBody.className = 'drl-structured-details-body';
@@ -47406,7 +47694,7 @@ function showRayOfFrostOverlay(actor, target, dart, s) {
                 { l: 'Magia', v: 'Raio Gélido (Truque de Evocação)' },
                 { l: 'Alvo Atingido', v: target ? target.n : 'Alvo' },
                 { l: 'Rolagem de Dano', v: dart.rolls.length + 'd' + dart.d + ': (' + rollBreakdown + ')' },
-                { l: 'Efeito Secundário', v: 'Velocidade do alvo é reduzida em 3 metros (10 pés / 2 hexes) até o início do seu próximo turno.' },
+                { l: 'Efeito Secundário', v: 'Velocidade do alvo é reduzida em 3 metros (2 hexágonos) até o início do seu próximo turno.' },
                 { l: 'Mecânica', v: 'Um feixe gélido de luz atinge o alvo, causando dano de frio e desacelerando seu movimento com geada mística.' }
             ];
 
@@ -47621,16 +47909,11 @@ function showTurnUndeadSummaryOverlay(caster, results, dc, skill, s) {
 
         var kicker = document.createElement('div');
         kicker.className = 'drl-structured-kicker';
-        kicker.textContent = '☀️ Canalizar Divindade (Clérigo) · Raio de 9m (6 Hexes)';
+        kicker.textContent = '☀️ Canalizar Divindade (Clérigo) · Raio de 9m';
         structCard.appendChild(kicker);
 
         var metrics = document.createElement('div');
         metrics.className = 'drl-structured-metrics';
-
-        var cellDc = document.createElement('div');
-        cellDc.className = 'drl-structured-cell';
-        cellDc.innerHTML = '<span class="drl-structured-lbl">CD Magia</span><span class="drl-structured-val">CD ' + dc + '</span>';
-        metrics.appendChild(cellDc);
 
         var cellTurned = document.createElement('div');
         cellTurned.className = 'drl-structured-cell';
@@ -47652,8 +47935,8 @@ function showTurnUndeadSummaryOverlay(caster, results, dc, skill, s) {
         var pillsWrap = document.createElement('div');
         pillsWrap.className = 'drl-structured-pills';
         var pills = [
-            '<span class="dmg-pill dmg-pill--buff">☀️ Canalizar Divindade (-59)</span>',
-            '<span class="dmg-pill dmg-pill--save">✨ TR Sabedoria CD ' + dc + '</span>'
+            '<span class="dmg-pill dmg-pill--buff">☀️ Canalizar Divindade</span>',
+            '<span class="dmg-pill dmg-pill--save">✨ Resistência de Sabedoria</span>'
         ];
         if (turnedCount > 0) {
             pills.push('<span class="dmg-pill dmg-pill--debuff">🏃 Fuga Forçada (3 Rodadas)</span>');
@@ -47666,7 +47949,7 @@ function showTurnUndeadSummaryOverlay(caster, results, dc, skill, s) {
         toggleBtn.type = 'button';
         toggleBtn.className = 'drl-structured-toggle-btn';
         toggleBtn.setAttribute('aria-expanded', 'false');
-        toggleBtn.textContent = 'Detalhes da Regra';
+        toggleBtn.textContent = '⚙ Visualização Avançada (Dados & Regra)';
 
         var detailsBody = document.createElement('div');
         detailsBody.className = 'drl-structured-details-body';
@@ -47684,7 +47967,7 @@ function showTurnUndeadSummaryOverlay(caster, results, dc, skill, s) {
         });
 
         dRows.push({
-            l: 'Regra D&D 5e',
+            l: 'Regra Canônica',
             v: 'Como uma ação, você ergue o símbolo sagrado e ora. Cada morto-vivo a até 9m que possa ver ou ouvir deve fazer uma salvaguarda de Sabedoria. Se falhar, fica expulso por 1 minuto (ou até sofrer dano). Uma criatura expulsa deve gastar seus turnos tentando fugir, não pode usar reações e só pode usar Disparada ou Esquivar.'
         });
 
@@ -47870,20 +48153,15 @@ function showFireballSpellOverlay(actor, target, dart, s) {
 
                         var kicker = document.createElement('div');
                         kicker.className = 'drl-structured-kicker';
-                        kicker.textContent = '🔥 Evocação de 3º Círculo · Área Esfera 6m (4 Hexes)';
+                        kicker.textContent = '🔥 Evocação de 3º Círculo · Esfera de 6m';
                         structCard.appendChild(kicker);
 
                         var metrics = document.createElement('div');
                         metrics.className = 'drl-structured-metrics';
 
-                        var cellRolled = document.createElement('div');
-                        cellRolled.className = 'drl-structured-cell';
-                        cellRolled.innerHTML = '<span class="drl-structured-lbl">Rolado</span><span class="drl-structured-val">' + dart.dmg + ' (' + diceBadgeText + ')</span>';
-                        metrics.appendChild(cellRolled);
-
                         var cellSave = document.createElement('div');
                         cellSave.className = 'drl-structured-cell';
-                        cellSave.innerHTML = '<span class="drl-structured-lbl">TR DES</span><span class="drl-structured-val" style="color:' + (sv.success ? '#7cdb7c' : '#ff8a4a') + ';">' + svTotalStr + ' vs CD ' + svDcStr + '</span>';
+                        cellSave.innerHTML = '<span class="drl-structured-lbl">Reflexos</span><span class="drl-structured-val" style="color:' + (sv.success ? '#7cdb7c' : '#ff8a4a') + ';">' + (sv.success ? 'Esquivou (½)' : 'Atingido em Cheio') + '</span>';
                         metrics.appendChild(cellSave);
 
                         var cellFinal = document.createElement('div');
@@ -47899,11 +48177,10 @@ function showFireballSpellOverlay(actor, target, dart, s) {
                             '<span class="dmg-pill dmg-pill--type">🔥 Dano de Fogo</span>'
                         ];
                         if (sv.success) {
-                            fbPills.push('<span class="dmg-pill dmg-pill--save">✓ TR Sucesso (Metade do Dano)</span>');
+                            fbPills.push('<span class="dmg-pill dmg-pill--save">✓ Resistiu (Metade do Dano)</span>');
                         } else {
-                            fbPills.push('<span class="dmg-pill dmg-pill--crit">TR Falha (Dano Total)</span>');
+                            fbPills.push('<span class="dmg-pill dmg-pill--crit">Impacto Pleno</span>');
                         }
-                        fbPills.push('<span class="dmg-pill dmg-pill--resist">CD ' + svDcStr + ' Destreza</span>');
                         pillsWrap.innerHTML = fbPills.join(' ');
                         structCard.appendChild(pillsWrap);
 
@@ -47911,7 +48188,7 @@ function showFireballSpellOverlay(actor, target, dart, s) {
                         toggleBtn.type = 'button';
                         toggleBtn.className = 'drl-structured-toggle-btn';
                         toggleBtn.setAttribute('aria-expanded', 'false');
-                        toggleBtn.textContent = 'Detalhes da Regra';
+                        toggleBtn.textContent = '⚙ Visualização Avançada (Dados & Regra)';
 
                         var detailsBody = document.createElement('div');
                         detailsBody.className = 'drl-structured-details-body';
@@ -47922,8 +48199,8 @@ function showFireballSpellOverlay(actor, target, dart, s) {
                             { l: 'Alvo', v: target ? target.n : 'Alvo' },
                             { l: 'Salvaguarda', v: 'TR Destreza ' + svTotalStr + ' vs CD ' + svDcStr + ' (' + (sv.success ? 'Sucesso: sofre metade' : 'Falha: sofre dano total') + ')' },
                             { l: 'Rolagem de Dano', v: diceBadgeText + ': (' + rollMath + ')' },
-                            { l: 'Resolução D&D 5e', v: sv.success ? (dart.dmg + ' / 2 = ' + finalDmg + ' PV de fogo') : (dart.dmg + ' PV de fogo pleno') },
-                            { l: 'Mecânica', v: 'Cada criatura em uma esfera de 6m de raio deve fazer uma salvaguarda de Destreza. Sofre 8d6 de dano de fogo se falhar, ou metade se obtiver sucesso.' }
+                            { l: 'Cálculo Final', v: sv.success ? (dart.dmg + ' / 2 = ' + finalDmg + ' PV de fogo') : (dart.dmg + ' PV de fogo pleno') },
+                            { l: 'Mecânica', v: 'Cada criatura em uma esfera de 6m de raio (4 hexágonos) deve fazer uma salvaguarda de Destreza. Sofre 8d6 de dano de fogo se falhar, ou metade se obtiver sucesso.' }
                         ];
 
                         detailsBody.innerHTML = dRows.map(function (rw) {
@@ -48708,12 +48985,12 @@ function showDiceRuleDetailsModal(rows) {
     header.className = 'dice-details-modal-header';
     var title = document.createElement('h3');
     title.className = 'dice-details-modal-title';
-    title.textContent = 'Detalhes da Regra';
+    title.textContent = '⚙ Visualização Avançada (Dados & Regras)';
     var closeBtn = document.createElement('button');
     closeBtn.type = 'button';
     closeBtn.className = 'dice-details-modal-close';
     closeBtn.textContent = '✕';
-    closeBtn.setAttribute('aria-label', 'Fechar detalhes da regra');
+    closeBtn.setAttribute('aria-label', 'Fechar visualização avançada');
     closeBtn.addEventListener('click', function (e) {
         e.stopPropagation();
         modal.remove();
@@ -48727,7 +49004,7 @@ function showDiceRuleDetailsModal(rows) {
     rows.forEach(function (dRow) {
         var rowEl = document.createElement('div');
         rowEl.className = 'drl-details-row';
-        rowEl.innerHTML = '<span>' + escHtml(dRow.l) + ':</span> <strong>' + escHtml(dRow.v) + '</strong>';
+        rowEl.innerHTML = '<span>' + escHtml(simCleanDiegeticText(dRow.l)) + ':</span> <strong>' + escHtml(simCleanDiegeticText(dRow.v)) + '</strong>';
         body.appendChild(rowEl);
     });
     card.appendChild(body);
@@ -48981,26 +49258,8 @@ function showDice(value, cb, actor, context, opts) {
                 if (sStruct.kicker) {
                     var kickerEl = document.createElement('div');
                     kickerEl.className = 'drl-structured-kicker';
-                    kickerEl.textContent = sStruct.kicker;
+                    kickerEl.textContent = simCleanDiegeticText(sStruct.kicker);
                     structWrap.appendChild(kickerEl);
-                }
-                if (Array.isArray(sStruct.rows) && sStruct.rows.length) {
-                    var rowsEl = document.createElement('div');
-                    rowsEl.className = 'drl-structured-metrics';
-                    sStruct.rows.forEach(function (r) {
-                        var cell = document.createElement('div');
-                        cell.className = 'drl-structured-cell';
-                        var lbl = document.createElement('span');
-                        lbl.className = 'drl-structured-lbl';
-                        lbl.textContent = r.l;
-                        var val = document.createElement('span');
-                        val.className = 'drl-structured-val';
-                        val.textContent = r.v;
-                        cell.appendChild(lbl);
-                        cell.appendChild(val);
-                        rowsEl.appendChild(cell);
-                    });
-                    structWrap.appendChild(rowsEl);
                 }
                 if (sStruct.trackerHtml) {
                     var trackerEl = document.createElement('div');
@@ -49011,24 +49270,39 @@ function showDice(value, cb, actor, context, opts) {
                 if (Array.isArray(sStruct.pills) && sStruct.pills.length) {
                     var pillsWrap = document.createElement('div');
                     pillsWrap.className = 'drl-structured-pills';
-                    pillsWrap.innerHTML = sStruct.pills.join(' ');
+                    pillsWrap.innerHTML = sStruct.pills.map(function (p) { return simCleanDiegeticText(p); }).join(' ');
                     structWrap.appendChild(pillsWrap);
                 }
                 if (sStruct.note) {
                     var noteEl = document.createElement('div');
                     noteEl.className = 'drl-structured-note';
-                    noteEl.textContent = sStruct.note;
+                    noteEl.textContent = simCleanDiegeticText(sStruct.note);
                     structWrap.appendChild(noteEl);
                 }
+                var advModalRows = [];
+                if (Array.isArray(sStruct.rows) && sStruct.rows.length) {
+                    sStruct.rows.forEach(function (r) {
+                        if (r && r.l != null && r.v != null) {
+                            advModalRows.push({ l: String(r.l), v: String(r.v) });
+                        }
+                    });
+                }
                 if (sStruct.details && Array.isArray(sStruct.details.rows) && sStruct.details.rows.length) {
+                    sStruct.details.rows.forEach(function (dr) {
+                        if (dr && dr.l != null && dr.v != null) {
+                            advModalRows.push({ l: String(dr.l), v: String(dr.v) });
+                        }
+                    });
+                }
+                if (advModalRows.length) {
                     var toggleBtn = document.createElement('button');
                     toggleBtn.type = 'button';
                     toggleBtn.className = 'drl-structured-toggle-btn';
                     toggleBtn.setAttribute('aria-expanded', 'false');
-                    toggleBtn.textContent = 'Detalhes da Regra';
+                    toggleBtn.textContent = '⚙ Visualização Avançada (Dados & Regra)';
                     toggleBtn.addEventListener('click', function (e) {
                         e.stopPropagation();
-                        showDiceRuleDetailsModal(sStruct.details.rows);
+                        showDiceRuleDetailsModal(advModalRows);
                     });
                     structWrap.appendChild(toggleBtn);
                 }
@@ -49037,8 +49311,8 @@ function showDice(value, cb, actor, context, opts) {
             } else if (info.subHtml || info.sub) {
                 var sub = document.createElement('div');
                 sub.className = 'drl-sub';
-                if (info.subHtml) sub.innerHTML = info.subHtml;
-                else sub.textContent = info.sub;
+                if (info.subHtml) sub.innerHTML = simCleanDiegeticText(info.subHtml);
+                else sub.textContent = simCleanDiegeticText(info.sub);
                 resultEl.appendChild(sub);
             }
             resultEl.className = 'dice-result-label visible ' + (info.cls || '');
@@ -49687,14 +49961,10 @@ function showHealDice(rolls, die, mod, actor, target, oldHp, newHp, rolledTotal,
                             rev.textContent = 'Consciência restaurada — o combatente volta a agir quando for o seu turno.';
                             stack.appendChild(rev);
                         }
-                        var rollBreak = document.createElement('div');
-                        rollBreak.className = 'cell-heal-roll-breakdown';
-                        rollBreak.innerHTML = simFormatHealBreakdownHTML(rolls, mod, totalRolled);
-                        stack.appendChild(rollBreak);
                         if (gained < totalRolled && totalRolled > 0) {
                             var note = document.createElement('div');
                             note.className = 'cell-heal-roll-note';
-                            note.textContent = 'Rolagem ' + totalRolled + ' PV · PV máximo limitou o ganho';
+                            note.textContent = 'PV máximo atingido (' + newHp + '/' + target.mhp + ' PV)';
                             stack.appendChild(note);
                         }
 
@@ -49702,29 +49972,28 @@ function showHealDice(rolls, die, mod, actor, target, oldHp, newHp, rolledTotal,
                         var pillsWrap = document.createElement('div');
                         pillsWrap.className = 'drl-structured-pills';
                         var healPills = [];
-                        healPills.push('<span class="dmg-pill dmg-pill--buff">✨ +' + gained + ' PV</span>');
+                        healPills.push('<span class="dmg-pill dmg-pill--buff">✨ +' + gained + ' PV Restaurados</span>');
                         if (showReviveLine) {
                             healPills.push('<span class="dmg-pill dmg-pill--save">Consciência Restaurada</span>');
                         }
                         if (gained < totalRolled && totalRolled > 0) {
-                            healPills.push('<span class="dmg-pill dmg-pill--resist">PV Máx Limitou Ganho</span>');
+                            healPills.push('<span class="dmg-pill dmg-pill--resist">PV Máximo</span>');
                         }
-                        healPills.push('<span class="dmg-pill dmg-pill--type">' + rolls.length + dieType + (mod ? (mod > 0 ? '+' + mod : mod) : '') + '</span>');
                         pillsWrap.innerHTML = healPills.join(' ');
                         stack.appendChild(pillsWrap);
 
-                        /* Gaveta colapsável de regras D&D 5e */
+                        /* Gaveta colapsável de regras */
                         var toggleBtn = document.createElement('button');
                         toggleBtn.type = 'button';
                         toggleBtn.className = 'dmg-inspect-toggle-btn';
                         toggleBtn.setAttribute('aria-expanded', 'false');
-                        toggleBtn.textContent = 'Detalhes da Regra';
+                        toggleBtn.textContent = '⚙ Visualização Avançada (Dados & Regra)';
                         var detailsBody = document.createElement('div');
                         detailsBody.className = 'dmg-math-breakdown';
                         var dRows = [
                             { l: 'Alvo', v: target.n },
                             { l: 'Habilidade', v: sk },
-                            { l: 'Fórmula D&D 5e', v: rolls.length + dieType + (mod ? (mod > 0 ? ' +' + mod : ' ' + mod) : '') },
+                            { l: 'Fórmula de Cura', v: rolls.length + dieType + (mod ? (mod > 0 ? ' +' + mod : ' ' + mod) : '') },
                             { l: 'Rolagem dos Dados', v: rolls.join(' + ') + (mod ? (mod > 0 ? ' +' + mod : ' ' + mod) : '') + ' = ' + totalRolled + ' PV' },
                             { l: 'Ganho Efetivo', v: '+' + gained + ' PV (' + oldHp + ' ➔ ' + newHp + '/' + (target.mhp || target.hp) + ')' },
                             { l: 'Mecânica', v: 'Pontos de vida recuperados não excedem o PV máximo. A criatura desperta de imediato ao recuperar PV a 0.' }
@@ -50320,9 +50589,10 @@ function openUnitDetail(uid) {
     html += '<div class="udc-stats">';
     var hpPct = Math.round((u.hp / u.mhp) * 100);
     var hpCls = vBarHpClass(hpPct);
+    var udcAdvStatsHtml = '';
 
     if (u.t === 'e' && !isKnown) {
-        // D&D 5e Fog of War: Condição vital descritiva sem números exatos de PV
+        // Fog of War: Condição vital descritiva sem números exatos de PV
         var vitalLabel = '';
         if (!u.alive || (u.hp != null && u.hp <= 0)) vitalLabel = 'Derrotado (0 PV)';
         else if (hpPct >= 100) vitalLabel = 'Ileso / Vigoroso';
@@ -50334,19 +50604,19 @@ function openUnitDetail(uid) {
         html += '<div class="udc-stat"><span class="udc-stat-lbl">Condição Vital</span><span class="udc-stat-val ' + hpCls + '" style="font-size:11.5px;">' + vitalLabel + '</span></div>';
         
         var acEstimate;
-        if (u.ac >= 18) acEstimate = 'Armadura Pesada Aparente (~18+)';
-        else if (u.ac >= 15) acEstimate = 'Couro Reforçado / Média (~15–17)';
-        else if (u.ac >= 12) acEstimate = 'Pele Grossa / Leve (~12–14)';
-        else acEstimate = 'Sem Proteção Aparente (~10–11)';
+        if (u.ac >= 18) acEstimate = 'Armadura Pesada (~18+)';
+        else if (u.ac >= 15) acEstimate = 'Proteção Média (~15–17)';
+        else if (u.ac >= 12) acEstimate = 'Proteção Leve (~12–14)';
+        else acEstimate = 'Sem Armadura (~10–11)';
         html += '<div class="udc-stat"><span class="udc-stat-lbl">Proteção</span><span class="udc-stat-val" style="color:#d4c8b0; font-size:11px;">' + acEstimate + '</span></div>';
         html += '<div class="udc-stat"><span class="udc-stat-lbl">Postura</span><span class="udc-stat-val" style="color:#ffb090;">Agressiva</span></div>';
-        html += '<div class="udc-stat"><span class="udc-stat-lbl">Dano Visível</span><span class="udc-stat-val">' + (u.die ? ('1d' + u.die) : 'Ataque Físico') + '</span></div>';
-        html += '<div class="udc-stat"><span class="udc-stat-lbl">Proficiência</span><span class="udc-stat-val" style="color:var(--v-text-dim,#a09484);">? (Não Avaliado)</span></div>';
         if (uAtksPerTurn > 1) {
             html += '<div class="udc-stat"><span class="udc-stat-lbl">Ataques/Turno</span><span class="udc-stat-val" style="color:#7cdb7c;">' + uAtksPerTurn + '×</span></div>';
         }
+        udcAdvStatsHtml += '<div class="v-adv-row"><span class="v-adv-k">Dano Visível</span><span class="v-adv-v">' + (u.die ? ('1d' + u.die) : 'Ataque Físico') + '</span></div>';
+        udcAdvStatsHtml += '<div class="v-adv-row"><span class="v-adv-k">Bônus de Proficiência</span><span class="v-adv-v">? (Desconhecido)</span></div>';
     } else {
-        var tempHpSuffix = (u.tempHp && u.tempHp > 0) ? ' <span style="color:#7dd3fc;font-weight:800;" title="Pontos de Vida Temporários ">+' + (u.tempHp | 0) + '🛡</span>' : '';
+        var tempHpSuffix = (u.tempHp && u.tempHp > 0) ? ' <span style="color:#7dd3fc;font-weight:800;" title="Pontos de Vida Temporários">+' + (u.tempHp | 0) + '🛡</span>' : '';
         html += '<div class="udc-stat"><span class="udc-stat-lbl">PV</span><span class="udc-stat-val ' + hpCls + '">' + u.hp + ' / ' + u.mhp + tempHpSuffix + '</span></div>';
         if (typeof _wsIsTransformed === 'function' && _wsIsTransformed(u)) {
             var _udcWsName = (u.wildShape && u.wildShape.form_name) || 'Besta';
@@ -50356,22 +50626,26 @@ function openUnitDetail(uid) {
             html += '<div class="udc-stat"><span class="udc-stat-lbl">' + escHtml(u.res.name) + '</span><span class="udc-stat-val res ' + u.res.type + '">' + u.res.ico + ' ' + u.res.value + ' / ' + u.res.max + '</span></div>';
         }
         var acB = getStatusAcBonus(u);
-        html += '<div class="udc-stat"><span class="udc-stat-lbl">CA</span><span class="udc-stat-val">' + u.ac + (acB ? ' +' + acB : '') + '</span></div>';
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">Defesa (CA)</span><span class="udc-stat-val">' + u.ac + (acB ? ' +' + acB : '') + '</span></div>';
         var atkB = getAtkFlatFromStatuses(u);
-        html += '<div class="udc-stat"><span class="udc-stat-lbl">Ataque</span><span class="udc-stat-val">+' + u.atk + (atkB ? ' +' + atkB + ' temp' : '') + '</span></div>';
-        html += '<div class="udc-stat"><span class="udc-stat-lbl">Dano</span><span class="udc-stat-val">' + (u.die ? ('1d' + u.die + uDmgModStr) : 'Arma') + (uDmgTypeInfo ? ' <span style="font-size: 11px;color:' + uDmgTypeInfo.col + ';">(' + escHtml(uDmgTypeInfo.pt) + ')</span>' : '') + '</span></div>';
-        html += '<div class="udc-stat"><span class="udc-stat-lbl">Proficiência</span><span class="udc-stat-val" style="color:#ffd700;">+' + profBonus + '</span></div>';
+        var minU = u.die ? Math.max(1, 1 + uDmgMod) : 1;
+        var maxU = u.die ? Math.max(1, u.die + uDmgMod) : 4;
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">Dano Estimado</span><span class="udc-stat-val">' + (u.die ? (minU + '–' + maxU) : 'Arma') + (uDmgTypeInfo ? ' <span style="font-size: 11px;color:' + uDmgTypeInfo.col + ';">(' + escHtml(uDmgTypeInfo.pt) + ')</span>' : '') + '</span></div>';
         if (uAtksPerTurn > 1) {
             html += '<div class="udc-stat"><span class="udc-stat-lbl">Ataques/Turno</span><span class="udc-stat-val" style="color:#7cdb7c;">' + uAtksPerTurn + '×</span></div>';
         }
+        udcAdvStatsHtml += '<div class="v-adv-row"><span class="v-adv-k">Bônus de Ataque</span><span class="v-adv-v">+' + u.atk + (atkB ? ' (+' + atkB + ' temp)' : '') + '</span></div>';
+        udcAdvStatsHtml += '<div class="v-adv-row"><span class="v-adv-k">Fórmula de Dano</span><span class="v-adv-v">' + (u.die ? ('1d' + u.die + uDmgModStr) : 'Arma') + (uDmgTypeInfo ? ' (' + escHtml(uDmgTypeInfo.pt) + ')' : '') + '</span></div>';
+        udcAdvStatsHtml += '<div class="v-adv-row"><span class="v-adv-k">Bônus de Proficiência</span><span class="v-adv-v">+' + profBonus + '</span></div>';
         if (u.spellSaveDc || (u.spellSlots && u.spellSlots.max)) {
             var uDc = u.spellSaveDc || (typeof simSpellSaveDc === 'function' ? simSpellSaveDc(u) : 12);
-            html += '<div class="udc-stat"><span class="udc-stat-lbl">CD Magia</span><span class="udc-stat-val" style="color:#a29bfe;">CD ' + uDc + '</span></div>';
+            udcAdvStatsHtml += '<div class="v-adv-row"><span class="v-adv-k">CD de Magia</span><span class="v-adv-v">CD ' + uDc + '</span></div>';
         }
     }
 
     if (u.speed != null) {
-        html += '<div class="udc-stat"><span class="udc-stat-lbl">Deslocamento</span><span class="udc-stat-val">' + formatHexDistanceMeters(u.speed) + ' (' + u.speed + 'h)</span></div>';
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">Deslocamento</span><span class="udc-stat-val">' + formatHexDistanceMeters(u.speed) + '</span></div>';
+        udcAdvStatsHtml += '<div class="v-adv-row"><span class="v-adv-k">Deslocamento em Grade</span><span class="v-adv-v">' + formatHexDistanceMeters(u.speed) + ' (' + u.speed + ' hexágonos)</span></div>';
     }
     if (u.init !== undefined && u.initRevealed) {
         html += '<div class="udc-stat"><span class="udc-stat-lbl">Iniciativa</span><span class="udc-stat-val">' + u.init + '</span></div>';
@@ -50379,13 +50653,15 @@ function openUnitDetail(uid) {
     if (u.pos) {
         var colLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
         var posLabel = (colLetters[u.pos.col] || u.pos.col) + (u.pos.row + 1);
-        html += '<div class="udc-stat"><span class="udc-stat-lbl">Posição</span><span class="udc-stat-val">' + posLabel + ' (col ' + u.pos.col + ', lin ' + u.pos.row + ')</span></div>';
+        html += '<div class="udc-stat"><span class="udc-stat-lbl">Posição</span><span class="udc-stat-val">' + posLabel + '</span></div>';
+        udcAdvStatsHtml += '<div class="v-adv-row"><span class="v-adv-k">Coordenadas</span><span class="v-adv-v">' + posLabel + ' (coluna ' + u.pos.col + ', linha ' + u.pos.row + ')</span></div>';
         if (currentState && currentState.order && currentState.order[currentState.p_idx]) {
             var pU = currentState.order[currentState.p_idx];
             if (pU && pU.pos && u !== pU) {
                 var dH = hexDistance(pU.pos.col, pU.pos.row, u.pos.col, u.pos.row);
                 var dM = formatHexDistanceMeters(dH);
-                html += '<div class="udc-stat"><span class="udc-stat-lbl">Distância</span><span class="udc-stat-val">' + dM + ' (' + dH + 'h)</span></div>';
+                html += '<div class="udc-stat"><span class="udc-stat-lbl">Distância</span><span class="udc-stat-val">' + dM + '</span></div>';
+                udcAdvStatsHtml += '<div class="v-adv-row"><span class="v-adv-k">Distância em Grade</span><span class="v-adv-v">' + dM + ' (' + dH + (dH === 1 ? ' hexágono' : ' hexágonos') + ')</span></div>';
             }
         }
     }
@@ -50398,11 +50674,15 @@ function openUnitDetail(uid) {
         html += '</div>';
     } else if (u.desc) {
         html += '<div class="udc-section"><div class="udc-section-title">Bestiário & Lore</div>';
-        html += '<div style="font-size:11px; color:#d8cbb3; font-style:italic; line-height:1.4; background:rgba(20,16,12,0.55); border-left:2px solid #d4af37; padding:5px 8px; border-radius:0 4px 4px 0;">' + escHtml(u.desc) + '</div>';
+        html += '<div style="font-size:11px; color:#d8cbb3; font-style:italic; line-height:1.4; background:rgba(20,16,12,0.55); border-left:2px solid #d4af37; padding:5px 8px; border-radius:0 4px 4px 0;">' + escHtml(simCleanDiegeticText(u.desc)) + '</div>';
         html += '</div>';
     }
 
-    /* Atributos D&D 5e (6-way com ícones e modificadores) */
+    /* Construção do Bloco Técnico para a Gaveta de Visualização Avançada (Atributos, Salvaguardas & Defesas) */
+    var udcTechDrawerHtml = '';
+    if (udcAdvStatsHtml) {
+        udcTechDrawerHtml += '<div style="margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid rgba(196,149,58,0.2);">' + udcAdvStatsHtml + '</div>';
+    }
     var _attrBase = '../shared/img/levelup/attrs/';
     var statsData = [
         { k: 'str', lb: 'FOR', v: (u.str != null ? u.str : (u.strength != null ? u.strength : 10)), png: 'forca.webp' },
@@ -50412,11 +50692,11 @@ function openUnitDetail(uid) {
         { k: 'wis', lb: 'SAB', v: (u.wis != null ? u.wis : (u.wisdom != null ? u.wisdom : 10)), png: 'sabedoria.webp' },
         { k: 'cha', lb: 'CAR', v: (u.cha != null ? u.cha : (u.charisma != null ? u.charisma : 10)), png: 'carisma.webp' }
     ];
-    html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Atributos</summary>';
-    html += '<div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">';
+    udcTechDrawerHtml += '<div class="udc-section-title" style="margin-top:4px;">Atributos</div>';
+    udcTechDrawerHtml += '<div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:6px;">';
     for (var si = 0; si < statsData.length; si++) {
         var sObj = statsData[si];
-        html += '<div style="display:flex; align-items:center; gap:5px; background:rgba(15,12,8,.55); border:1px solid var(--v-border,#4a3828); border-radius:6px; padding:4px 6px;">'
+        udcTechDrawerHtml += '<div style="display:flex; align-items:center; gap:5px; background:rgba(15,12,8,.55); border:1px solid var(--v-border,#4a3828); border-radius:6px; padding:4px 6px;">'
             + '<img src="' + _attrBase + sObj.png + '" alt="" style="width:22px; height:22px; object-fit:contain; flex-shrink:0;" onerror="this.style.display=\'none\';" />'
             + '<div style="flex:1; min-width:0; line-height:1.1;">'
             + '<div style="font-size: 11px; color:var(--v-text-dim,#a09484);">' + sObj.lb + '</div>';
@@ -50434,69 +50714,49 @@ function openUnitDetail(uid) {
                 qualVal = sObj.v >= 16 ? 'Muito Robusto' : (sObj.v >= 14 ? 'Robusto' : (sObj.v <= 8 ? 'Frágil' : 'Padrão'));
                 qualCol = sObj.v >= 14 ? '#ffd700' : '#d4c8b0';
             }
-            html += '<div style="font-family:Cinzel,serif; font-size:11px; font-weight:700; color:' + qualCol + ';">' + qualVal + '</div>';
+            udcTechDrawerHtml += '<div style="font-family:Cinzel,serif; font-size:11px; font-weight:700; color:' + qualCol + ';">' + qualVal + '</div>';
         } else {
             var sMod = Math.floor((sObj.v - 10) / 2);
             var sModStr = (sMod >= 0 ? '+' : '') + sMod;
             var sModCol = sMod > 0 ? '#7cdb7c' : (sMod < 0 ? '#e07c7c' : '#a09484');
-            html += '<div style="font-family:Cinzel,serif; font-size:13px; font-weight:700; color:#ffd700;">' + sObj.v + ' <span style="font-size: 11px; color:' + sModCol + '; font-weight:600;">' + sModStr + '</span></div>';
+            udcTechDrawerHtml += '<div style="font-family:Cinzel,serif; font-size:13px; font-weight:700; color:#ffd700;">' + sObj.v + ' <span style="font-size: 11px; color:' + sModCol + '; font-weight:600;">' + sModStr + '</span></div>';
         }
 
-        html += '</div></div>';
+        udcTechDrawerHtml += '</div></div>';
     }
-    html += '</div>';
-    if (u.t === 'e' && !isKnown) {
-        html += '<div style="font-size:11px; color:var(--v-text-dim,#a09484); margin-top:5px; font-style:italic; line-height:1.35;">Avaliação física visual. Atributos mentais são revelados ao derrotar ou estudar a espécie.</div>';
-    }
-    html += '</details>';
+    udcTechDrawerHtml += '</div>';
 
-    /* Salvaguardas D&D 5e */
+    /* Salvaguardas */
     if (u.t === 'e' && !isKnown) {
-        html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Salvaguardas</summary>';
-        html += '<div style="font-size:11px; color:#c4b49c; font-style:italic; padding:6px 8px; background:rgba(20,14,10,0.5); border:1px solid rgba(196,149,58,0.2); border-radius:4px; line-height:1.4;">'
+        udcTechDrawerHtml += '<div class="udc-section-title">Salvaguardas</div>';
+        udcTechDrawerHtml += '<div style="font-size:11px; color:#c4b49c; font-style:italic; padding:6px 8px; margin-bottom:6px; background:rgba(20,14,10,0.5); border:1px solid rgba(196,149,58,0.2); border-radius:4px; line-height:1.4;">'
             + 'Salvaguardas e bônus permanecem ocultos sob névoa de guerra até serem testados durante o combate ou catalogados após a vitória.'
-            + '</div></details>';
+            + '</div>';
     } else {
         var profSaves = u.saving_throw_proficiencies || [];
-        html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Salvaguardas</summary>';
-        html += '<div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:4px;">';
+        udcTechDrawerHtml += '<div class="udc-section-title">Salvaguardas</div>';
+        udcTechDrawerHtml += '<div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:4px; margin-bottom:6px;">';
         for (var si2 = 0; si2 < statsData.length; si2++) {
             var sObj2 = statsData[si2];
             var isSaveProf = (profSaves.indexOf(sObj2.k) >= 0 || profSaves.indexOf(sObj2.lb.toLowerCase()) >= 0);
             var baseSaveMod = Math.floor((sObj2.v - 10) / 2);
             var totalSave = isSaveProf ? (baseSaveMod + profBonus) : baseSaveMod;
             var saveStr = (totalSave >= 0 ? '+' : '') + totalSave;
-            html += '<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(20,16,12,0.6); border:1px solid ' + (isSaveProf ? 'rgba(196,149,58,0.5)' : 'rgba(74,56,40,0.4)') + '; border-radius:4px; padding:2px 6px; font-size:11px;">'
+            udcTechDrawerHtml += '<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(20,16,12,0.6); border:1px solid ' + (isSaveProf ? 'rgba(196,149,58,0.5)' : 'rgba(74,56,40,0.4)') + '; border-radius:4px; padding:2px 6px; font-size:11px;">'
                 + '<span style="color:' + (isSaveProf ? '#ffd700' : 'rgba(160,148,132,0.5)') + '; font-size: 11px; margin-right:3px;">' + (isSaveProf ? '●' : '○') + '</span>'
                 + '<span style="color:var(--v-text-dim,#a09484); font-weight:700;">' + sObj2.lb + '</span>'
                 + '<span style="color:' + (isSaveProf ? '#ffd700' : '#d4c8b0') + '; font-weight:700;">' + saveStr + '</span>'
                 + '</div>';
         }
-        html += '</div></details>';
-    }
-
-    /* Traços, Passivas & Regras D&D 5e */
-    var uTraits = (typeof simResolveUnitTraitsDnd5e === 'function') ? simResolveUnitTraitsDnd5e(u) : (u.traits || []);
-    if (uTraits && uTraits.length) {
-        html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Traços & Características</summary>';
-        html += '<div style="display:flex; flex-direction:column; gap:5px;">';
-        for (var ti = 0; ti < uTraits.length; ti++) {
-            var trObj = uTraits[ti];
-            if (!trObj || !trObj.n) continue;
-            html += '<div style="background:rgba(22,18,14,0.72); border:1px solid rgba(196,149,58,0.38); border-radius:5px; padding:4px 8px; font-size:11px; line-height:1.35;">'
-                + '<div style="color:#ffd700; font-weight:700;">' + escHtml(trObj.ico || '✦') + ' ' + escHtml(trObj.n) + '</div>'
-                + (trObj.desc ? '<div style="color:#d4c8b0; font-size: 11px; margin-top:1px;">' + escHtml(trObj.desc) + '</div>' : '')
-                + '</div>';
-        }
-        html += '</div></details>';
+        udcTechDrawerHtml += '</div>';
     }
 
     /* Defesas, Resistências e Imunidades */
     if (u.t === 'e' && !isKnown) {
-        html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Propriedades & Defesas</summary>';
-        html += '<div style="font-size:11px; color:#c4b49c; font-style:italic; padding:6px 8px; background:rgba(20,14,10,0.5); border:1px solid rgba(196,149,58,0.2); border-radius:4px; line-height:1.4;">'
+        udcTechDrawerHtml += '<div class="udc-section-title">Propriedades & Defesas</div>';
+        udcTechDrawerHtml += '<div style="font-size:11px; color:#c4b49c; font-style:italic; padding:6px 8px; background:rgba(20,14,10,0.5); border:1px solid rgba(196,149,58,0.2); border-radius:4px; line-height:1.4;">'
             + 'Vulnerabilidades e resistências serão reveladas conforme forem testadas com seus ataques ou após registrar a vitória.'
-            + '</div></details>';
+            + '</div>';
     } else {
         var _udcFmtDmgList = function (arr) {
             return arr.map(function (dt) {
@@ -50509,14 +50769,30 @@ function openUnitDetail(uid) {
         var hasImm = (u.immunities && u.immunities.length);
         var hasCondImm = (u.condition_immunities && u.condition_immunities.length);
         if (hasRes || hasVuln || hasImm || hasCondImm) {
-            html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Propriedades & Defesas</summary>';
-            html += '<div style="display:flex; flex-direction:column; gap:3px; font-size:11px; line-height:1.3;">';
-            if (hasVuln) html += '<div style="color:#ff8a4a;"><b>▲ Vulnerável (2× dano):</b> ' + escHtml(_udcFmtDmgList(u.vulnerabilities)) + '</div>';
-            if (hasRes) html += '<div style="color:#ffd700;"><b>⛨ Resistências (½ dano):</b> ' + escHtml(_udcFmtDmgList(u.resistances)) + '</div>';
-            if (hasImm) html += '<div style="color:#7cdb7c;"><b>✦ Imunidades a Dano (0 dano):</b> ' + escHtml(_udcFmtDmgList(u.immunities)) + '</div>';
-            if (hasCondImm) html += '<div style="color:#9adfe8;"><b>◈ Imunidades a Condições:</b> ' + escHtml(u.condition_immunities.join(', ')) + '</div>';
-            html += '</div></details>';
+            udcTechDrawerHtml += '<div class="udc-section-title">Propriedades & Defesas</div>';
+            udcTechDrawerHtml += '<div style="display:flex; flex-direction:column; gap:3px; font-size:11px; line-height:1.3;">';
+            if (hasVuln) udcTechDrawerHtml += '<div style="color:#ff8a4a;"><b>▲ Vulnerável (2× dano):</b> ' + escHtml(_udcFmtDmgList(u.vulnerabilities)) + '</div>';
+            if (hasRes) udcTechDrawerHtml += '<div style="color:#ffd700;"><b>⛨ Resistências (½ dano):</b> ' + escHtml(_udcFmtDmgList(u.resistances)) + '</div>';
+            if (hasImm) udcTechDrawerHtml += '<div style="color:#7cdb7c;"><b>✦ Imunidades a Dano (0 dano):</b> ' + escHtml(_udcFmtDmgList(u.immunities)) + '</div>';
+            if (hasCondImm) udcTechDrawerHtml += '<div style="color:#9adfe8;"><b>◈ Imunidades a Condições:</b> ' + escHtml(u.condition_immunities.join(', ')) + '</div>';
+            udcTechDrawerHtml += '</div>';
         }
+    }
+
+    /* Traços & Características */
+    var uTraits = (typeof simResolveUnitTraitsDnd5e === 'function') ? simResolveUnitTraitsDnd5e(u) : (u.traits || []);
+    if (uTraits && uTraits.length) {
+        html += '<details class="udc-section udc-section--collapsible" open><summary class="udc-section-title">Traços & Características</summary>';
+        html += '<div style="display:flex; flex-direction:column; gap:5px;">';
+        for (var ti = 0; ti < uTraits.length; ti++) {
+            var trObj = uTraits[ti];
+            if (!trObj || !trObj.n) continue;
+            html += '<div style="background:rgba(22,18,14,0.72); border:1px solid rgba(196,149,58,0.38); border-radius:5px; padding:4px 8px; font-size:11px; line-height:1.35;">'
+                + '<div style="color:#ffd700; font-weight:700;">' + escHtml(trObj.ico || '✦') + ' ' + escHtml(simCleanDiegeticText(trObj.n)) + '</div>'
+                + (trObj.desc ? '<div style="color:#d4c8b0; font-size: 11px; margin-top:1px;">' + escHtml(simCleanDiegeticText(trObj.desc)) + '</div>' : '')
+                + '</div>';
+        }
+        html += '</div></details>';
     }
 
     /* Habilidades */
@@ -50737,7 +51013,7 @@ function openUnitDetail(uid) {
             var turnLbl = (st.turnsLeft != null)
                 ? formatTurnsLeftLabel(st)
                 : (st.repeatSave ? 'Salvaguarda no fim de cada turno' : (st.id === 'reaction_spent' ? 'Recupera no início do próximo turno' : (st.id === 'surprised' ? 'Até o fim da 1ª rodada' : (st.id === 'dodge' ? 'Até o início do próximo turno' : (st.id === 'acao_desengajar' ? 'Até o fim do turno' : 'Ativo')))));
-            var ruleText = st.condRule || (ruleInfo && ruleInfo.rule) || '';
+            var ruleText = simCleanDiegeticText(st.condRule || (ruleInfo && ruleInfo.rule) || '');
 
             html += '<div class="' + rowCls.trim() + '">';
             html += '<div class="udc-sfx-ico">' + escHtml(dispIco) + '</div><div>';
@@ -50751,6 +51027,7 @@ function openUnitDetail(uid) {
         html += '<div class="udc-empty" style="padding:6px 0 2px;font-size:11px;color:var(--v-text-dim,#a09484);">— sem condições ou efeitos ativos —</div>';
     }
     html += '</details>';
+    html += buildAdvancedViewDrawerHtml('Visualização Avançada (Atributos, Salvaguardas & Defesas)', udcTechDrawerHtml);
 
     setHTML(card, html);
     card.querySelector('.udc-close').addEventListener('click', function () {
@@ -53727,7 +54004,7 @@ async function playTurn(aIdx, tIdx, opts) {
             } else {
                 (target.se = target.se || []).push({
                     id: (_coh.condition || 'petrified'), kind: 'debuff', ico: '',
-                    n: 'Petrificado', dndCondition: 'Petrificado (Condição D&D 5e)',
+                    n: 'Petrificado', dndCondition: 'Petrificado',
                     turnsLeft: Math.max(1, (+_coh.turns || 3)), tickCombat2: true,
                     skipTurn: true, speed0: true, targetedAdvantage: true,
                     autoFailStrDex: true, resistAllDmg: true,

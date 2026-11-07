@@ -3362,7 +3362,7 @@
           sTxt = _cleanSpeechText(_colonM[2]);
           detectedSub = _colonM[1].trim();
         } else {
-          var _tm = _lblTrim.match(/^\[(.*?)\]\s*(.*)$/);
+          var _tm = _lblTrim.match(/^(?:[◆◇⚔\s]*)\s*\[(.*?)\]\s*(.*)$/);
           if (_tm) {
             var _pot = _tm[2].trim();
             var _qParen = _pot.match(/^([“"][^”"]+[”"])\s*(?:\((.*?)\))?$/);
@@ -3370,6 +3370,8 @@
               sTxt = _cleanSpeechText(_qParen[1]);
               if (_qParen[2]) detectedSub = _qParen[2].trim();
             } else if (_pot.indexOf('“') === 0 || (_pot.indexOf('"') === 0 && _pot.length > 2)) {
+              sTxt = _cleanSpeechText(_pot);
+            } else if (_pot.charAt(0) === '(' && _pot.charAt(_pot.length - 1) === ')') {
               sTxt = _cleanSpeechText(_pot);
             }
           } else if (_lblTrim.indexOf('— "') === 0 || _lblTrim.indexOf('— “') === 0 || _lblTrim.indexOf('“') === 0 || (_lblTrim.indexOf('"') === 0 && _lblTrim.length > 2)) {
@@ -3546,7 +3548,7 @@
           '<div class="enc-cd-section-title">O Que Está Sendo Escolhido</div>' +
           '<div class="enc-cd-box">Você decide declinar a incumbência neste momento, priorizando sua sobrevivência e recusando o peso deste fardo.</div>' +
         '</div>';
-    } else if (ch.desc) {
+    } else if (ch.desc && !sTxt) {
       var _cDesc = _stripEmojis(ch.desc).trim();
       var _normDesc = _cDesc.replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
       var _normTitle = String(titleText || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
@@ -3554,11 +3556,11 @@
       if (_normDesc && _normDesc !== _normSpeech && _normDesc !== _normTitle && _normDesc !== _normSub) {
         descHtml =
           '<div class="enc-cd-section">' +
-            '<div class="enc-cd-section-title">' + (sTxt ? 'Ação e Intenção' : 'O Que Está Sendo Escolhido') + '</div>' +
+            '<div class="enc-cd-section-title">O Que Está Sendo Escolhido</div>' +
             '<div class="enc-cd-box">' + _cDesc + '</div>' +
           '</div>';
       }
-    } else {
+    } else if (!sTxt) {
       var intentText = (detectedSub || '').trim();
       var _normIntent = intentText.replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
       var _normTitle = String(titleText || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
@@ -3566,7 +3568,7 @@
       if (_normIntent && _normIntent !== _normSpeech && _normIntent !== _normTitle && _normIntent !== _normSub) {
         descHtml =
           '<div class="enc-cd-section">' +
-            '<div class="enc-cd-section-title">' + (sTxt ? 'Ação e Intenção' : 'O Que Está Sendo Escolhido') + '</div>' +
+            '<div class="enc-cd-section-title">O Que Está Sendo Escolhido</div>' +
             '<div class="enc-cd-box">' + _stripEmojis(_coinify(intentText)) + '</div>' +
           '</div>';
       }
@@ -3933,7 +3935,7 @@
             speechClean = _cleanSpeechText(_colonM[2]);
             subText = _colonM[1].trim();
           } else {
-            var _tagMatch = _trimmed.match(/^\[(.*?)\]\s*(.*)$/);
+            var _tagMatch = _trimmed.match(/^(?:[◆◇⚔\s]*)\s*\[(.*?)\]\s*(.*)$/);
           if (_tagMatch) {
             var _rawTag = _tagMatch[1].trim();
             var _potSpeech = _tagMatch[2].trim();
@@ -3964,7 +3966,7 @@
         }
       }
     }
-    if (!tagText && !ch.badge && ch.stat && ch.dc && !ch.skill) {
+    if (!tagText && !ch.badge && ch.stat && ch.dc) {
       var _STAT_ABBR = {
         str: 'FOR', strength: 'FOR', forca: 'FOR', força: 'FOR',
         dex: 'DES', dexterity: 'DES', destreza: 'DES',
@@ -4398,6 +4400,18 @@
         _script.push({ type: 'narration', _checkHint: true, text: '⚀ ' + l.check_hint.phrase });
       }
     });
+    var _isReturnMode = Boolean(
+      (opts && (opts.isReturn || opts.is_return)) ||
+      (dialogue && (dialogue.isReturn || dialogue.is_return))
+    );
+    if (_isReturnMode) {
+      var speechOnlyScript = _script.filter(function(n) {
+        return n && (n.type === 'speech' || n.type === 'dialogue');
+      });
+      if (speechOnlyScript.length > 0) {
+        _script = speechOnlyScript;
+      }
+    }
     var pages = _groupScriptIntoPages(_script);
     var currentPage = 0;
 

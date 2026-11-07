@@ -702,7 +702,7 @@
     ]
    },
    "martha_secret": {
-    "text": "(Ela abaixa a voz e te olha de cima a baixo) Você fala como quem conhece as sombras. Infelizmente, o velho Barnaby partiu há semanas... mas se precisar de contatos, fique de olho nos becos depois da meia-noite. Alguns 'comerciantes noturnos' ainda frequentam a região.",
+    "text": "(Ela abaixa a voz e te olha de cima a baixo) Você fala como quem conhece as sombras. Infelizmente, o velho Barnaby partiu há semanas... mas se precisar de contatos, fique de olho nos becos durante a Madrugada. Alguns 'comerciantes noturnos' ainda frequentam a região.",
     "choices": [
      {
       "text": "Entendi. Ficarei atento.",
@@ -722,7 +722,7 @@
      },
      {
       "type": "narration",
-      "text": "Infelizmente, o velho Barnaby partiu há semanas... mas se precisar de contatos, fique de olho nos becos depois da meia-noite."
+      "text": "Infelizmente, o velho Barnaby partiu há semanas... mas se precisar de contatos, fique de olho nos becos durante a Madrugada."
      },
      {
       "type": "narration",
@@ -755,7 +755,7 @@
     ]
    },
    "martha_secret_reminder": {
-    "text": "(Martha olha ao redor e sussurra) Já te falei sobre isso, querido... os becos depois da meia-noite. Os 'comerciantes noturnos' ainda frequentam a região. O velho Barnaby se foi há semanas, mas os contatos dele continuam operando por lá. Fique esperto.",
+    "text": "(Martha olha ao redor e sussurra) Já te falei sobre isso, querido... os becos durante a Madrugada. Os 'comerciantes noturnos' ainda frequentam a região. O velho Barnaby se foi há semanas, mas os contatos dele continuam operando por lá. Fique esperto.",
     "choices": [
      {
       "text": "Certo. Obrigado pela lembrança.",
@@ -765,7 +765,7 @@
     "script": [
      {
       "type": "narration",
-      "text": "(Martha olha ao redor e sussurra) Já te falei sobre isso, querido... os becos depois da meia-noite."
+      "text": "(Martha olha ao redor e sussurra) Já te falei sobre isso, querido... os becos durante a Madrugada."
      },
      {
       "type": "narration",
@@ -4211,7 +4211,7 @@
    "Se vir o bardo, diga que ele ainda me deve três canecas e meia. A meia conta porque ele derrubou no chão.",
    "O hidromel do Javali Bêbado é forte demais para mim. Grom coloca alguma coisa a mais ali, tenho certeza.",
    "As noites são longas quando se está sozinha. Por isso eu gosto quando os aventureiros passam por aqui.",
-   "Cuidado com os becos escuros à meia-noite. Já vi coisas... e fingi que não vi.",
+   "Cuidado com os becos escuros pela Madrugada. Já vi coisas... e fingi que não vi.",
    "Elara no templo anda com uma expressão estranha. Algo a preocupa, mas ela não me conta.",
    "Os aventureiros costumam trazer Valdoritas antigas. Algumas são de reinos que nem existem mais.",
    "O clima está mudando, sinto isso em meus ossos. As estrelas dizem que tempos difíceis virão.",

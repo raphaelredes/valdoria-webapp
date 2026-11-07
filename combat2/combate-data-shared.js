@@ -67,46 +67,46 @@ var BESTIARY = [
        ND (CR), XP, tipos de dano, resistências/vulnerabilidades/imunidades, traços e lore. */
     { n: 'Goblin',                    hp: 7,  ac: 15, atk: 4, die: 6,  dex: 14, str: 8,  con: 10, int: 10, wis: 8,  cha: 8,  cr: 0.25, xp: 50,   dmgType: 'slashing',    ico: '', dmgMod: 2, attr: 'DEX', tags: ['humanoid'],
       desc: 'Um batedor goblin de pele esverdeada e olhos vermelhos maliciosos, mestre em emboscadas furtivas.',
-      traits: [{ n: 'Escape Ágil (MM p.166)', ico: '💨', desc: 'Acostumado a desengajar e esconder-se rapidamente entre as sombras.' }] },
+      traits: [{ n: 'Escape Ágil', ico: '💨', desc: 'Acostumado a desengajar e esconder-se rapidamente entre as sombras.' }] },
     { n: 'Orc',                       hp: 15, ac: 13, atk: 5, die: 12, dex: 12, str: 16, con: 16, int: 7,  wis: 11, cha: 10, cr: 0.5,  xp: 100,  dmgType: 'slashing',    ico: '', dmgMod: 3, attr: 'STR', tags: ['humanoid'],
       desc: 'Um saqueador orc de presas proeminentes e músculos marcados por cicatrizes, empunhando um machado grande.',
-      traits: [{ n: 'Agressivo (MM p.246)', ico: '🔥', desc: 'Avança com ferocidade implacável em direção ao adversário mais próximo.' }] },
+      traits: [{ n: 'Agressivo', ico: '🔥', desc: 'Avança com ferocidade implacável em direção ao adversário mais próximo.' }] },
     { n: 'Esqueleto',                 hp: 13, ac: 13, atk: 4, die: 6,  dex: 14, str: 10, con: 15, int: 6,  wis: 8,  cha: 5,  cr: 0.25, xp: 50,   dmgType: 'piercing',    ico: '', dmgMod: 2, attr: 'STR', tags: ['undead'],
       vulnerabilities: ['bludgeoning'], immunities: ['poison'], conditionImmunities: ['poisoned', 'exhaustion'],
       desc: 'Ossos animados por necromancia profana, com órbitas brilhando em chamas azuladas frias.',
-      traits: [{ n: 'Natureza Morta-Viva (MM p.272)', ico: '💀', desc: 'Vulnerável a dano contundente; imune a veneno e exaustão.' }] },
+      traits: [{ n: 'Natureza Morta-Viva', ico: '💀', desc: 'Vulnerável a dano contundente; imune a veneno e exaustão.' }] },
     { n: 'Aranha Gigante',            hp: 26, ac: 14, atk: 5, die: 8,  dex: 16, str: 14, con: 12, int: 2,  wis: 11, cha: 4,  cr: 1,    xp: 200,  dmgType: 'piercing',    ico: '', dmgMod: 3, attr: 'STR', tags: ['beast'],
       desc: 'Predadora aracnídea de oito olhos reluzentes cujas presas gotejam veneno paralisante.',
       traits: [
-        { n: 'Escalada de Aranha (MM p.328)', ico: '🕸️', desc: 'Move-se por superfícies difíceis e teias sem penalidade de movimento.' },
+        { n: 'Escalada de Aranha', ico: '🕸️', desc: 'Move-se por superfícies difíceis e teias sem penalidade de movimento.' },
         { n: 'Presas Venenosas (CD 11 CON)', ico: '🧪', desc: 'Suas mordidas injetam toxina corrosiva nas vítimas.' }
       ] },
     { n: 'Sapo Gigante',              hp: 18, ac: 11, atk: 3, die: 6,  dex: 13, str: 15, con: 13, int: 2,  wis: 10, cha: 3,  cr: 1,    xp: 200,  dmgType: 'piercing',    ico: '', dmgMod: 2, attr: 'STR', tags: ['beast'],
       desc: 'Anfíbio colossal dos pântanos, capaz de saltar distâncias absurdas e capturar presas com sua língua pegajosa.',
-      traits: [{ n: 'Salto Parado & Anfíbio (MM p.329)', ico: '🐸', desc: 'Adaptação total à água e botes repentinos de longo alcance.' }] },
+      traits: [{ n: 'Salto Parado & Anfíbio', ico: '🐸', desc: 'Adaptação total à água e botes repentinos de longo alcance.' }] },
     { n: 'Homem-Lagarto',             hp: 22, ac: 15, atk: 4, die: 6,  dex: 10, str: 15, con: 13, int: 7,  wis: 12, cha: 7,  cr: 0.5,  xp: 100,  dmgType: 'bludgeoning', ico: '', dmgMod: 2, attr: 'STR', tags: ['humanoid'],
       desc: 'Guerreiro reptiliano de escamas espessas e escudo espinhoso, defensor implacável dos pântanos.',
       traits: [
         { n: 'Armadura Natural (CA 15)', ico: '🛡️', desc: 'Escamas rígidas e escudo pesado oferecem alta proteção física.' },
-        { n: 'Prender a Respiração (MM p.204)', ico: '🌊', desc: 'Capaz de emboscar submerso por até 15 minutos.' }
+        { n: 'Prender a Respiração', ico: '🌊', desc: 'Capaz de emboscar submerso por até 15 minutos.' }
       ] },
     { n: 'Crocodilo',                 hp: 19, ac: 12, atk: 4, die: 10, dex: 10, str: 15, con: 14, int: 2,  wis: 10, cha: 5,  cr: 0.5,  xp: 100,  dmgType: 'piercing',    ico: '', dmgMod: 2, attr: 'STR', tags: ['beast'],
       desc: 'Réptil encouraçado de mandíbulas esmagadoras que espreita nas águas turvas.',
-      traits: [{ n: 'Mandíbula Esmagadora (MM p.320)', ico: '🐊', desc: 'Mordida de alto impacto capaz de prender o alvo (CD 12 FOR).' }] },
+      traits: [{ n: 'Mandíbula Esmagadora', ico: '🐊', desc: 'Mordida de alto impacto capaz de prender o alvo (CD 12 FOR).' }] },
     { n: 'Cobra Constritora Gigante', hp: 60, ac: 12, atk: 6, die: 10, dex: 14, str: 19, con: 12, int: 1,  wis: 10, cha: 3,  cr: 2,    xp: 450,  dmgType: 'bludgeoning', ico: '', dmgMod: 4, attr: 'STR', tags: ['beast'],
       desc: 'Serpente titânica de musculatura colossal capaz de triturar armaduras de aço em seu enlace.',
-      traits: [{ n: 'Constrição (MM p.324)', ico: '🐍', desc: 'Envolve a presa com força brutal (FOR 19), restringindo seus movimentos.' }] },
+      traits: [{ n: 'Constrição', ico: '🐍', desc: 'Envolve a presa com força brutal (FOR 19), restringindo seus movimentos.' }] },
     { n: 'Bruxa Verde',               hp: 82, ac: 17, atk: 6, die: 8,  dex: 12, str: 18, con: 16, int: 13, wis: 14, cha: 14, cr: 3,    xp: 700,  dmgType: 'slashing',    ico: '‍', dmgMod: 3, attr: 'INT', tags: ['fey'],
       desc: 'Feérica ancestral e malévola de pele verrugosa que tece ilusões, maldições e tormentos nos pântanos.',
       traits: [
-        { n: 'Passagem Invisível (MM p.177)', ico: '👁️', desc: 'Usa magia feérica para ocultar sua presença e emboscar viajantes.' },
+        { n: 'Passagem Invisível', ico: '👁️', desc: 'Usa magia feérica para ocultar sua presença e emboscar viajantes.' },
         { n: 'Garras de Ferro (FOR 18)', ico: '🩸', desc: 'Apesar da aparência decrépita, possui força física sobre-humana.' }
       ] },
     { n: 'Mímico',                    hp: 58, ac: 12, atk: 5, die: 8,  dex: 12, str: 17, con: 15, int: 5,  wis: 13, cha: 8,  cr: 2,    xp: 450,  dmgType: 'bludgeoning', ico: '', dmgMod: 3, attr: 'STR', tags: ['monstrosity'],
       immunities: ['acid'], conditionImmunities: ['prone'],
       desc: 'Predador metamorfo que assume a forma de baús e objetos inanimados para devorar aventureiros incautos.',
       traits: [
-        { n: 'Adesivo & Agarre (MM p.220)', ico: '🪤', desc: 'Adere a qualquer coisa que o toque; imune a ácido e à condição prostrado.' },
+        { n: 'Adesivo & Agarre', ico: '🪤', desc: 'Adere a qualquer coisa que o toque; imune a ácido e à condição prostrado.' },
         { n: 'Mordida Ácida', ico: '🧪', desc: 'Mandíbulas repletas de presas e enzimas digestivas corrosivas.' }
       ] },
     /* V1.7 Stage-CASTERS (2026-04-21) — Inimigos que castam magia (PHB Monster
@@ -116,7 +116,7 @@ var BESTIARY = [
     { n: 'Acólito', hp: 9, ac: 10, atk: 2, die: 4, dex: 10, wis: 14, con: 10, int: 10, cha: 11, str: 10, cr: 0.25, xp: 50, dmgType: 'bludgeoning', ico: '', dmgMod: 0, attr: 'WIS',
       isCaster: true, sugLvl: 1, tags: ['humanoid'], saving_throw_proficiencies: ['wis', 'cha'],
       desc: 'Devoto iniciado nos mistérios divinos, capaz de canalizar preces de luz e restauração.',
-      traits: [{ n: 'Conjuração Divina (Nv 1)', ico: '✨', desc: 'Conjurador de 1º nível (SAB, CD 12): Chama Sagrada e Curar Ferimentos (MM p.342).' }],
+      traits: [{ n: 'Conjuração Divina (Nv 1)', ico: '✨', desc: 'Conjurador de 1º nível (SAB, CD 12): Chama Sagrada e Curar Ferimentos.' }],
       res: { type: 'mp', name: 'Mana', ico: '', max: 4 },
       castProb: 0.7,
       /* MM p.342: Acolyte — Spellcasting 1st level. Cantrips: light, sacred flame, thaumaturgy.
@@ -147,7 +147,7 @@ var BESTIARY = [
       isCaster: true, sugLvl: 4, tags: ['humanoid'], saving_throw_proficiencies: ['wis', 'cha'],
       desc: 'Líder de seita sombria cuja devoção fanática lhe concede poderes necróticos e resistência mental.',
       traits: [
-        { n: 'Devoção Sombria (MM p.345)', ico: '🕯️', desc: 'Vantagem em salvaguardas contra ser enfeitiçado ou amedrontado.' },
+        { n: 'Devoção Sombria', ico: '🕯️', desc: 'Vantagem em salvaguardas contra ser enfeitiçado ou amedrontado.' },
         { n: 'Conjuração Sombria (Nv 4)', ico: '☠️', desc: 'Canaliza Infligir Ferimentos (3d10 necrótico) e Chama Sagrada.' }
       ],
       res: { type: 'mp', name: 'Mana', ico: '', max: 8 },
@@ -165,7 +165,7 @@ var BESTIARY = [
       isCaster: true, sugLvl: 9, tags: ['humanoid'], saving_throw_proficiencies: ['int', 'wis'],
       desc: 'Arcanista veterano envolto em runas de proteção, capaz de dizimar esquadrões inteiros com Bola de Fogo.',
       traits: [
-        { n: 'Conjuração Arcana (Nv 9)', ico: '🔥', desc: 'Conjurador de 9º nível (INT, CD 15, +7 ataque mágico — MM p.347).' },
+        { n: 'Conjuração Arcana (Nv 9)', ico: '🔥', desc: 'Conjurador de 9º nível (INT, CD 15, +7 ataque mágico).' },
         { n: 'Reação: Escudo Arcano (+5 CA)', ico: '🛡️', desc: 'Conjura Escudo como reação ao ser atingido por um ataque.' }
       ],
       res: { type: 'mp', name: 'Mana', ico: '', max: 15 },
@@ -191,33 +191,33 @@ var BESTIARY = [
     { n: 'Lobo',                      hp: 11, ac: 13, atk: 4, die: 8,  dex: 15, str: 12, con: 12, wis: 12, int: 3,  cha: 6,  cr: 0.25, xp: 50,   dmgType: 'piercing',    ico: '', dmgMod: 2, attr: 'STR', tags: ['beast'],
       desc: 'Predador feroz das terras selvagens que caça em alcateia, cercando suas presas com precisão letal.',
       traits: [
-        { n: 'Táticas de Matilha (MM p.341)', ico: '🐺', desc: 'Recebe Vantagem nas rolagens de ataque quando um aliado está adjacente ao alvo.' },
+        { n: 'Táticas de Matilha', ico: '🐺', desc: 'Recebe Vantagem nas rolagens de ataque quando um aliado está adjacente ao alvo.' },
         { n: 'Audição e Olfato Aguçados', ico: '👁️', desc: 'Sentidos apurados para rastrear presas na mata fechada.' }
       ] },
     { n: 'Bandido',                   hp: 11, ac: 12, atk: 3, die: 6,  dex: 12, str: 11, con: 12, wis: 10, int: 10, cha: 10, cr: 0.125, xp: 25,  dmgType: 'slashing',    ico: '', dmgMod: 1, attr: 'DEX', tags: ['humanoid'],
       desc: 'Salteador de estradas de olhar calculista, armado com cimitarra e besta leve.',
-      traits: [{ n: 'Emboscada de Estrada (MM p.343)', ico: '🗡️', desc: 'Ataca viajantes em grupo visando alvos vulneráveis.' }] },
+      traits: [{ n: 'Emboscada de Estrada', ico: '🗡️', desc: 'Ataca viajantes em grupo visando alvos vulneráveis.' }] },
     { n: 'Orc Guerreiro',             hp: 22, ac: 14, atk: 5, die: 12, dex: 12, str: 16, con: 16, wis: 11, int: 7,  cha: 10, cr: 0.5,  xp: 100,  dmgType: 'slashing',    ico: '', dmgMod: 3, attr: 'STR', tags: ['humanoid'],
       desc: 'Veterano de guerra orc em cota de malha pesada, sedento por combate direto.',
-      traits: [{ n: 'Fúria de Batalha (MM p.246)', ico: '⚔️', desc: 'Desfere golpes brutais de machado grande (1d12 + FOR).' }] },
+      traits: [{ n: 'Fúria de Batalha', ico: '⚔️', desc: 'Desfere golpes brutais de machado grande (1d12 + FOR).' }] },
     { n: 'Fogo-Fátuo',                hp: 22, ac: 19, atk: 4, die: 10, dex: 28, str: 1,  con: 10, wis: 14, int: 13, cha: 11, cr: 2,    xp: 450,  dmgType: 'lightning',   ico: '', dmgMod: 4, attr: 'DEX', tags: ['undead'],
       immunities: ['lightning', 'poison'], resistances: ['acid', 'cold', 'fire', 'necrotic', 'thunder'], conditionImmunities: ['exhaustion', 'grappled', 'paralyzed', 'poisoned', 'prone', 'restrained', 'unconscious'],
       desc: 'Orbe espectral de luz malévola que atrai viajantes para pântanos mortais e se alimenta de seu desespero.',
       traits: [
-        { n: 'Incorpóreo & Esquivo (CA 19)', ico: '✨', desc: 'DES 28 (+9) e corpo espectral resistente a quase todos os elementos (MM p.301).' },
+        { n: 'Incorpóreo & Esquivo (CA 19)', ico: '✨', desc: 'DES 28 (+9) e corpo espectral resistente a quase todos os elementos.' },
         { n: 'Choque Elétrico', ico: '⚡', desc: 'Descarga elétrica letal ao toque.' }
       ] },
     { n: 'Troll',                     hp: 84, ac: 15, atk: 7, die: 12, dex: 13, str: 18, con: 20, wis: 9,  int: 7,  cha: 7,  cr: 5,    xp: 1800, dmgType: 'slashing',    ico: '', dmgMod: 4, attr: 'STR', tags: ['giant'],
       vulnerabilities: ['fire', 'acid'], saving_throw_proficiencies: ['con'],
       desc: 'Gigante monstruoso de carne esverdeada e borrachenta cujas feridas se fecham diante dos olhos.',
       traits: [
-        { n: 'Regeneração (MM p.291)', ico: '🩸', desc: 'Regenera tecido rapidamente; vulnerável a fogo e ácido que suprimem sua cura.' },
+        { n: 'Regeneração', ico: '🩸', desc: 'Regenera tecido rapidamente; vulnerável a fogo e ácido que suprimem sua cura.' },
         { n: 'Garras e Mordida Voraz', ico: '👹', desc: 'Força descomunal (FOR 18, CON 20) capaz de dilacerar armaduras.' }
       ] },
     { n: 'Zumbi',                     hp: 22, ac: 8,  atk: 3, die: 6,  dex: 6,  str: 13, con: 16, wis: 6,  int: 3,  cha: 5,  cr: 0.25, xp: 50,   dmgType: 'bludgeoning', ico: '', dmgMod: 1, attr: 'STR', tags: ['undead'],
       immunities: ['poison'], conditionImmunities: ['poisoned'], saving_throw_proficiencies: ['wis'],
       desc: 'Cadáver reanimado que avança implacavelmente, ignorando ferimentos que derrubariam qualquer mortal.',
-      traits: [{ n: 'Fortitude de Morto-Vivo (MM p.316)', ico: '🧟', desc: 'CON 16 (+3) e imune a veneno; resiste a golpes fatais exceto dano radiante ou crítico.' }] },
+      traits: [{ n: 'Fortitude de Morto-Vivo', ico: '🧟', desc: 'CON 16 (+3) e imune a veneno; resiste a golpes fatais exceto dano radiante ou crítico.' }] },
 ];
 
 var CHAR_NAMES = ['Kael', 'Elara', 'Thorne', 'Miriel', 'Garrick', 'Sylas', 'Vaela', 'Rurik', 'Isen', 'Brynn'];
@@ -231,7 +231,7 @@ var CHAR_CLASSES = [
             helpDnd5e: 'Referência: talento Golpe Desleal (PHB) e estilos com arma de duas mãos / pesada.\nNo D&D 5e, o ataque corpo a corpo ou à distância ainda usa 1d20 + bônus de ataque contra a CA do alvo. Se errar, não há dano.\nNeste fluxo: após acertar, o dano é 2d10 + modificador de atributo (STR), sem a opção PHB de −5 no ataque / +10 no dano.\nCrítico no d20: role o dado de dano de arma uma vez a mais antes do modificador.' },
         { n: 'Postura Defensiva', ico: '', cost: 1, kind: 'buff', desc: '+2 CA até o fim do próximo turno (estilo Defesa)',
             helpDnd5e: 'Referência: Estilo de Combate Defesa (PHB): +2 na CA até o início do próximo turno do guerreiro, se estiver usando armadura.\nNão exige reação; é passivo enquanto o estilo estiver ativo.\nNeste modo: bônus simplificado aplicado como mensagem de estado até o fluxo integrar turnos completos.',
-            buffSim: { id: 'postura_def', vfx: 'shield', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Postura de defesa (estilo)', condRule: 'PHB — Estilo de Combate Defesa: +2 na CA com armadura. Neste modo: +2 CA até após a próxima sequência de turnos dos outros combatentes.', acBonus: 2 } },
+            buffSim: { id: 'postura_def', vfx: 'shield', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Postura de defesa (estilo)', condRule: 'Estilo de Combate Defesa: +2 na CA com armadura. Neste modo: +2 CA até após a próxima sequência de turnos dos outros combatentes.', acBonus: 2 } },
         { n: 'Investida', ico: '', cost: 2, kind: 'attack', desc: 'Investida: 1d10 + STR; depois −2 CA até o próximo turno (stub)',
             damageSpec: { n: 1, d: 10 },
             afterAttackSelfDebuff: {
@@ -385,7 +385,7 @@ var CHAR_CLASSES = [
             helpDnd5e: 'Mísseis Mágicos (1º nível): 3 dardos que acertam automaticamente; cada um rola 1d4+1 de força. Sem atributo. Autohit vs CA.\nUpcast: +1 dardo por nível acima do 1º.\nArena (escala por nível do caster): nv 1-2: 3 dardos · nv 3-4: 4 · nv 5-6: 5 · nv 7-8: 6 · nv 9+: 7.' },
         { n: 'Escudo Arcano', ico: '', cost: 1, kind: 'buff', reactionOnly: true, desc: 'Reação: +5 na CA até o início do próximo turno', shieldSpell: true,
             helpDnd5e: 'Referência: Escudo: 1 reação quando é atingido por um ataque ou acertado por magia de Mísseis Mágicos; +5 na CA incluindo contra o gatilho; dura até o início do próximo turno do mago.\nNão gasta concentração.\nV1.7 (2026-04-21) — AGORA É REAÇÃO VERDADEIRA: aparece popup quando inimigo acertar você; gastar 1 Mana aplica +5 CA e pode transformar acerto em erro. Não pode mais ser castada em ação própria.',
-            buffSim: { id: 'escudo_arcano', vfx: 'arcane', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Escudo (magia)', condRule: 'PHB p.275 — Reação: +5 na CA contra o gatilho e até o início do próximo turno do conjurador.', acBonus: 5 } },
+            buffSim: { id: 'escudo_arcano', vfx: 'arcane', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Escudo (magia)', condRule: 'Reação: +5 na CA contra o gatilho e até o início do próximo turno do conjurador.', acBonus: 5 } },
         /* V1.7 Sprint-17 Ronda 27 (2026-04-21 QA PHB p.271) — Ray of Frost é CANTRIP.
            PHB RAW: truque (Mago/Feiticeiro). Cost 2 → 0. Scale cantrip já estava correto. */
         { n: 'Raio Gélido', ico: '', cost: 0, kind: 'attack', dmgType: 'cold', desc: 'Truque: atk mágico ranged 1d8 frio (escala cantrip) + reduz velocidade 3m.',
@@ -397,7 +397,7 @@ var CHAR_CLASSES = [
                 turns: 1,
                 n: 'Deslocamento reduzido',
                 ico: '',
-                dndCondition: 'Velocidade reduzida (truque; não aplica Lentidão PHB)'
+                dndCondition: 'Velocidade reduzida (truque)'
             },
             helpDnd5e: 'Raio Gélido / Ray of Frost (truque Mago/Feiticeiro): atk magia ranged; 1d8 frio; em acerto reduz velocidade 3m até início do próximo turno.\nEscala cantrip: 2d8 nv5, 3d8 nv11, 4d8 nv17.\nV1.7 Sprint-17 Ronda 27 (2026-04-21 QA PHB p.271): cost 2 → 0 (cantrips não gastam slot RAW).' },
         /* V1.7 Sprint-17 Ronda 27 (2026-04-21 QA PHB p.257) — Relâmpago era duplicata de Lightning Bolt
@@ -410,12 +410,12 @@ var CHAR_CLASSES = [
         { n: 'Contramágica', ico: '', cost: 3, kind: 'buff', reactionOnly: true, shieldSpell: true, minLevel: 5,
             desc: 'Reação: +3 CA e vantagem contra magias por 2 turnos. Dissipa parcialmente magia inimiga.',
             helpDnd5e: 'Contramágica: reação para interromper outra magia em conjuração (nível 3 do espaço ou menor é dissipada automaticamente; acima exige teste).\nV1.7 (2026-04-21) — AGORA É REAÇÃO VERDADEIRA: aparece popup quando você for atingido por ataque/magia; gastar 3 Mana aplica +3 CA e vantagem em TR contra magia por 2 rodadas. Não pode mais ser castada em ação própria.',
-            buffSim: { id: 'contramagica', vfx: 'arcane', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Contramágica', condRule: 'PHB p.237 — Reação: +3 CA e vantagem em TR contra magia por 2 rodadas.', acBonus: 3, magicSaveAdvantage: true } },
+            buffSim: { id: 'contramagica', vfx: 'arcane', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Contramágica', condRule: 'Reação: +3 CA e vantagem em TR contra magia por 2 rodadas.', acBonus: 3, magicSaveAdvantage: true } },
         /* V1.7 NEW SKILLS (2026-04-21) — Passo Brumoso (Misty Step PHB p.260) BA teleport 9m */
         { n: 'Passo Brumoso', ico: '', cost: 2, kind: 'buff', bonus: true, minLevel: 3,
             desc: 'Ação bônus (2º nível, nv 3+): teleport 9m — reposicionamento tático (vantagem no próximo ataque).',
             helpDnd5e: 'Passo Brumoso / Misty Step (2º nível): **AÇÃO BÔNUS**; teleport até 9m pra local que você pode ver.\nArena stub (sem grid): traduzido em vantagem no próximo ataque (reposicionamento tático após o teleport).',
-            buffSim: { id: 'passo_brumoso', vfx: 'arcane', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Passo Brumoso', condRule: 'PHB p.260 — teleport 9m. Stub arena: vantagem próximo ataque.', atkAdvantage: true } },
+            buffSim: { id: 'passo_brumoso', vfx: 'arcane', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Passo Brumoso', condRule: 'teleport 9m. vantagem próximo ataque.', atkAdvantage: true } },
         /* V1.7 Sprint-5 (2026-04-21 closeout) — Sono (Sleep PHB p.276) Mago nv 1.
            Upgrade PHB: TR SAB em falha → INCONSCIENTE (Unconscious PHB Appendix A):
            prone + incapacitated + crit melee em 1.5m + atacantes advantage + auto-fail STR/DEX.
@@ -431,7 +431,7 @@ var CHAR_CLASSES = [
                nv 7-8 (4th) 11d8 · nv 9+ (5th) 13d8. Antes era fixo 5d8 (divergência RAW). */
             sleepHpPool: { n: 5, d: 8, scaleByCasterLevel: { breakpoints: [[3, 2], [5, 4], [7, 6], [9, 8]] } },
             helpDnd5e: 'Sono / Sleep (Mago/Bardo nv 1): 1 action; rola 5d8 HP total. Criaturas em 6m em ordem crescente de HP atual adormecem (se total cobrir). Sem TR.\n1 min ou até sofrer dano / alguém gastar ação acordando.\nInconsciente (PHB Appendix A): incapacitado, prone, auto-falha TRs FOR/DES, atacantes em 1,5m fazem crit auto, outros atacantes com vantagem.\nUpcast: +2d8 por nível acima do 1º.\nNÃO AFETA: undead ou criaturas imunes a charme (elfos imunes).\nV1.7 Sprint-17 (2026-04-21): sleepHpPool implementado — check HP vs 5d8 rolado (antes era TR WIS stub).\nV1.7 Sprint-17 Ronda 25 (2026-04-21 QA PHB p.276): upcast scaling adicionado. Nv 3 (2nd): 7d8, nv 9+ (5th): 13d8 — permite pegar alvos com HP maior conforme Mago evolui.',
-            afterAttackEnemyDebuff: { id: 'sleep_unconscious', turns: 3, n: 'Inconsciente', ico: '', skipTurn: true, critMelee: true, targetedAdvantage: true, prone: true, autoFailStrDex: true, wakeOnDamage: true, dndCondition: 'Inconsciente (PHB App.A — Sono)' } },
+            afterAttackEnemyDebuff: { id: 'sleep_unconscious', turns: 3, n: 'Inconsciente', ico: '', skipTurn: true, critMelee: true, targetedAdvantage: true, prone: true, autoFailStrDex: true, wakeOnDamage: true, dndCondition: 'Inconsciente (Sono)' } },
         /* V1.7 Sprint-6 (2026-04-21 closeout) — Invisibilidade (Invisibility PHB p.255) Mago nv 2.
            Aplica condição INVISÍVEL (PHB Appendix A) em SELF (ou aliado alvo): ataques SEUS
            têm advantage + atacantes CONTRA você têm disadvantage. Dura 1h ou até atacar.
@@ -439,7 +439,7 @@ var CHAR_CLASSES = [
         { n: 'Invisibilidade', ico: '', cost: 3, kind: 'buff', minLevel: 3,
             desc: 'Torna-se INVISÍVEL: atk advantage + atacantes disadvantage 3 rodadas.',
             helpDnd5e: 'Invisibilidade / Invisibility (2º nível): concentração até 1h. Alvo fica invisível, equipamento some junto. Efeito termina se alvo ATACAR ou CASTAR magia.\nInvisível (PHB Appendix A): atacantes contra você com desvantagem, SEUS ataques com vantagem (bônus de heavily obscured / unseen attacker).\nArena: self-buff 3 rodadas + `endOnAttack:true` (PHB RAW: próximo atk quebra).',
-            buffSim: { id: 'invisibility', vfx: 'arcane', decOn: 'round', turns: 3, kind: 'buff', condName: 'Invisível', condRule: 'PHB p.255 — atk advantage + atacantes disadv. Quebra ao atacar.', atkAdvantage: true, attackerDisadvantage: true, endOnAttack: true, concentration: true, dndCondition: 'Invisível (PHB App.A — Invisibilidade)' } },
+            buffSim: { id: 'invisibility', vfx: 'arcane', decOn: 'round', turns: 3, kind: 'buff', condName: 'Invisível', condRule: 'atk advantage + atacantes disadv. Quebra ao atacar.', atkAdvantage: true, attackerDisadvantage: true, endOnAttack: true, concentration: true, dndCondition: 'Invisível (Invisibilidade)' } },
         /* V1.7 Sprint-6 (2026-04-21 closeout) — Cegueira/Surdez (Blindness/Deafness PHB p.224) Mago nv 2.
            Aplica condição CEGO (PHB Appendix A): atk disadv + atacantes adv. TR CON no cast + ao fim de cada turno. */
         { n: 'Cegueira', ico: '👁', cost: 3, kind: 'attack', minLevel: 3, dmgType: 'necrotic',
@@ -447,7 +447,7 @@ var CHAR_CLASSES = [
             desc: 'Cega alvo à distância: TR CON ou CEGO 3 rodadas; TR CON ao fim do turno.',
             damageSpec: { n: 0, d: 0 }, save: { ability: 'con' },
             helpDnd5e: 'Cegueira/Surdez / Blindness-Deafness (2º nível): escolhe Cegueira OU Surdez. Alvo faz TR CON; em falha fica cego (ou surdo) até 1 min. Sem concentração! TR CON repetido ao fim de cada turno.\nCego (PHB Appendix A): não pode ver, atk com desvantagem, atacantes com vantagem, falha auto em checks que requerem visão.\nArena: 0 dano + debuff Cego 3 rodadas com repeatSave CON (sem concentração — diferencial vs Hold Person).',
-            afterAttackEnemyDebuff: { id: 'blindness', turns: 3, n: 'Cego', ico: '👁', atkDisadvantage: true, targetedAdvantage: true, repeatSave: { ability: 'con' }, dndCondition: 'Cego (PHB App.A — Cegueira)' } },
+            afterAttackEnemyDebuff: { id: 'blindness', turns: 3, n: 'Cego', ico: '👁', atkDisadvantage: true, targetedAdvantage: true, repeatSave: { ability: 'con' }, dndCondition: 'Cego (Cegueira)' } },
         /* V1.7 Sprint-7 (2026-04-21 closeout) — Raio Doentio (Ray of Sickness PHB p.271) Mago nv 1.
            2d8 veneno + TR CON ou ENVENENADO (Poisoned PHB App.A) — atk disadv + ability disadv. */
         { n: 'Raio Doentio', ico: '', cost: 2, kind: 'attack', dmgType: 'poison',
@@ -459,7 +459,7 @@ var CHAR_CLASSES = [
             /* V1.7 Sprint-17 (2026-04-21 QA PHB audit) — Raio Doentio duração:
                PHB p.271 "Poisoned until end of target's next turn" = ~1 rodada, não 3.
                Corrigido: turns 3 → 1. */
-            afterAttackEnemyDebuff: { id: 'ray_sickness_poisoned', turns: 1, n: 'Envenenado', ico: '', atkDisadvantage: true, dndCondition: 'Envenenado (PHB App.A — Raio Doentio, until end of next turn)' } },
+            afterAttackEnemyDebuff: { id: 'ray_sickness_poisoned', turns: 1, n: 'Envenenado', ico: '', atkDisadvantage: true, dndCondition: 'Envenenado (Raio Doentio, until end of next turn)' } },
         /* Pressa (Haste PHB p.251): Mago/Feiticeiro nv 3 */
         { n: 'Pressa', ico: '', cost: 3, kind: 'buff', minLevel: 5,
             desc: 'Acelera o alvo: velocidade dobrada, +2 CA, vantagem em testes de Destreza e 1 ataque adicional por turno sob concentração (3 rodadas).',
@@ -469,7 +469,7 @@ var CHAR_CLASSES = [
                        '• Defesa Ágil: Concede +2 de bônus na Classe de Armadura (CA) e vantagem em Testes de Resistência de Destreza.\n' +
                        '• Ação Adicional: A cada turno, concede uma ação extra para desferir 1 ataque adicional, Disparar, Desengajar ou Esconder-se.\n' +
                        '• Letargia Posterior: Ao término da concentração, uma onda passageira de cansaço afeta o alvo.',
-            buffSim: { id: 'haste', vfx: 'bless', decOn: 'round', turns: 3, kind: 'buff', condName: 'Pressa', condRule: 'PHB p.251 — +2 CA + 1 ataque extra/turno + concentração.', acBonus: 2, concentration: true } },
+            buffSim: { id: 'haste', vfx: 'bless', decOn: 'round', turns: 3, kind: 'buff', condName: 'Pressa', condRule: '+2 CA + 1 ataque extra/turno + concentração.', acBonus: 2, concentration: true } },
         /* Lentidão (Slow PHB p.277): Mago/Feiticeiro nv 3 */
         { n: 'Lentidão', ico: '', cost: 3, kind: 'attack', minLevel: 5, dmgType: 'psychic',
             desc: 'Distorção temporal em área: cubo de 12m onde alvos sofrem velocidade pela metade, -2 CA, desvantagem em ataques e restrição de ações.',
@@ -480,7 +480,7 @@ var CHAR_CLASSES = [
                        '• Penalidades Táticas: A velocidade é reduzida pela metade, sofre -2 na CA e -2 em Testes de Resistência de Destreza.\n' +
                        '• Ações Limitadas: Ataques sofrem desvantagem e alvos só podem executar 1 Ação ou 1 Ação Bônus por turno, nunca ambas.\n' +
                        '• Teste Recorrente: No final de cada turno, o alvo pode repetir o teste para encerrar o efeito.',
-            afterAttackEnemyDebuff: { id: 'slow_spell', turns: 3, n: 'Lento', ico: '', atkDisadvantage: true, skipBonus: true, speed0: true, repeatSave: { ability: 'wis' }, concentration: true, dndCondition: 'Lento (PHB — Slow)' } },
+            afterAttackEnemyDebuff: { id: 'slow_spell', turns: 3, n: 'Lento', ico: '', atkDisadvantage: true, skipBonus: true, speed0: true, repeatSave: { ability: 'wis' }, concentration: true, dndCondition: 'Lento (Slow)' } },
         /* Invisibilidade Maior (Greater Invisibility PHB p.250): Mago/Bardo/Feiticeiro nv 4 */
         { n: 'Invisibilidade Maior', ico: '', cost: 4, kind: 'buff', minLevel: 7,
             desc: 'Camuflagem arcana total: o alvo fica invisível por 3 rodadas sob concentração, mantendo o efeito mesmo após atacar ou conjurar.',
@@ -488,7 +488,7 @@ var CHAR_CLASSES = [
                        'Magia de 4º nível (Mago / Feiticeiro / Bardo). Tempo de conjuração: 1 Ação. Duração: Concentração até 1 minuto.\n' +
                        '• Vantagem Tática: O alvo torna-se completamente invisível. Seus ataques recebem vantagem e ataques contra ele sofrem desvantagem.\n' +
                        '• Invisibilidade Persistente: Ao contrário da versão básica, o efeito NÃO se dissipa quando o alvo ataca ou conjura magias.',
-            buffSim: { id: 'greater_invisibility', vfx: 'arcane', decOn: 'round', turns: 3, kind: 'buff', condName: 'Invisível (Maior)', condRule: 'PHB p.250 — atk adv + atacantes disadv. NÃO quebra ao atacar.', atkAdvantage: true, attackerDisadvantage: true, concentration: true, dndCondition: 'Invisível (PHB App.A — Greater Invisibility)' } },
+            buffSim: { id: 'greater_invisibility', vfx: 'arcane', decOn: 'round', turns: 3, kind: 'buff', condName: 'Invisível (Maior)', condRule: 'atk adv + atacantes disadv. NÃO quebra ao atacar.', atkAdvantage: true, attackerDisadvantage: true, concentration: true, dndCondition: 'Invisível (Greater Invisibility)' } },
         /* Palavra do Poder: Atordoar (Power Word Stun PHB p.266) */
         { n: 'Palavra Poder: Atordoar', ico: '', cost: 7, kind: 'attack', minLevel: 15, dmgType: 'psychic',
             desc: 'Comando imperativo avassalador: se o alvo possuir 150 PV ou menos, é atordoado imediatamente sem direito a teste inicial.',
@@ -498,7 +498,7 @@ var CHAR_CLASSES = [
                        '• Limiar de Vitalidade: Se o alvo tiver 150 Pontos de Vida ou menos, fica Atordoado na hora, sem teste de resistência.\n' +
                        '• Condição Atordoado: Incapacitado de agir ou reagir, ataques contra ele têm vantagem e falha automaticamente em testes de Força e Destreza.\n' +
                        '• Recuperação: No final de cada um de seus turnos, o alvo pode realizar um Teste de Resistência de Constituição para se recuperar.',
-            afterAttackEnemyDebuff: { id: 'power_word_stun', turns: 3, n: 'Atordoado (Palavra)', ico: '', skipTurn: true, targetedAdvantage: true, autoFailStrDex: true, repeatSave: { ability: 'con' }, dndCondition: 'Atordoado (PHB — Power Word Stun)' } },
+            afterAttackEnemyDebuff: { id: 'power_word_stun', turns: 3, n: 'Atordoado (Palavra)', ico: '', skipTurn: true, targetedAdvantage: true, autoFailStrDex: true, repeatSave: { ability: 'con' }, dndCondition: 'Atordoado (Power Word Stun)' } },
         /* Graxa (Grease PHB p.249) */
         { n: 'Graxa', ico: '', cost: 2, kind: 'attack', dmgType: 'acid',
             desc: 'Solo escorregadio: cobre uma área de 3m; criaturas em pé devem passar em TR de Destreza ou caem prostradas.',
@@ -508,7 +508,7 @@ var CHAR_CLASSES = [
                        '• Área de Efeito: Cobre uma superfície de 3 metros com substância viscosa e escorregadia.\n' +
                        '• Derrubada: Criaturas na área ao ser conjurada ou que entrem nela devem ser bem-sucedidas em um Teste de Resistência de Destreza ou cairão Prostradas.\n' +
                        '• Vantagem Tática: Criaturas prostradas sofrem desvantagem em seus ataques e concedem vantagem a atacantes corpo-a-corpo adjacentes.',
-            afterAttackEnemyDebuff: { id: 'grease_prone', turns: 2, n: 'Prostrado (Graxa)', ico: '', atkDisadvantage: true, prone: true, dndCondition: 'Prostrado (PHB App.A — Grease)' } },
+            afterAttackEnemyDebuff: { id: 'grease_prone', turns: 2, n: 'Prostrado (Graxa)', ico: '', atkDisadvantage: true, prone: true, dndCondition: 'Prostrado (Grease)' } },
         /* V1.7 Sprint-15 (2026-04-21 closeout review) — Hipnose (Hypnotic Pattern PHB p.252):
            Mago/Bardo/Feiticeiro/Bruxo nv 3. AOE cubo 9m; TR SAB ou Incapacitated. */
         { n: 'Hipnose', ico: '', cost: 3, kind: 'attack', minLevel: 5, dmgType: 'psychic',
@@ -517,7 +517,7 @@ var CHAR_CLASSES = [
             helpDnd5e: 'Hipnose / Hypnotic Pattern (Mago/Bardo/Feiticeiro/Bruxo nv 3): 1 action; cubo 9m. Criaturas na área fazem TR SAB; em falha, INCAPACITADAS + velocidade 0 + encantadas. Efeito quebra se sofrer dano ou alguém usar ação pra acordar.\nArena: 0 dano + debuff Incapacitated (skipTurn + speed0) 3 rodadas + repeatSave SAB + wakeOnDamage.',
             /* V1.7 Sprint-17 Ronda 16 (2026-04-21 QA PHB p.252) — Hypnotic Pattern
                é concentração 1 min. Adicionada flag pra quebrar se caster perder conc. */
-            afterAttackEnemyDebuff: { id: 'hypnotic_pattern', turns: 3, n: 'Incapacitado (Hipnose)', ico: '', skipTurn: true, speed0: true, wakeOnDamage: true, repeatSave: { ability: 'wis' }, concentration: true, dndCondition: 'Incapacitado (PHB App.A — Hypnotic Pattern)' } },
+            afterAttackEnemyDebuff: { id: 'hypnotic_pattern', turns: 3, n: 'Incapacitado (Hipnose)', ico: '', skipTurn: true, speed0: true, wakeOnDamage: true, repeatSave: { ability: 'wis' }, concentration: true, dndCondition: 'Incapacitado (Hypnotic Pattern)' } },
         /* V1.7 Sprint-15 (2026-04-21 closeout review) — Nuvem Tóxica (Cloudkill PHB p.231):
            Mago nv 5. AOE esfera 6m 5d8 poison TR CON metade. Concentração 10 min. */
         /* V1.7 Sprint-17 (2026-04-21 QA PHB p.231) — Cloudkill upcast +1d8/slot acima 5º. */
@@ -531,7 +531,7 @@ var CHAR_CLASSES = [
             desc: 'Ranged: atk magia; em acerto alvo com atk disadv (concentração).',
             damageSpec: { n: 0, d: 0 },
             helpDnd5e: 'Raio de Enfraquecimento / Ray of Enfeeblement (Mago/Bruxo nv 2): 1 action; concentração 1 min. Atk magia ranged; em acerto alvo sofre METADE do dano em ataques com FOR. Ao fim de cada turno, TR CON; sucesso termina efeito.\nArena stub: atk ranged + afterAttackEnemyDebuff atkDisadvantage 3 rodadas + repeatSave CON + concentration. Simplificação: atkDisadv aproxima "half dmg STR atks".',
-            afterAttackEnemyDebuff: { id: 'enfeeblement', turns: 3, n: 'Enfraquecido', ico: '', atkDisadvantage: true, repeatSave: { ability: 'con' }, concentration: true, dndCondition: 'Enfraquecido (PHB — Ray of Enfeeblement)' } },
+            afterAttackEnemyDebuff: { id: 'enfeeblement', turns: 3, n: 'Enfraquecido', ico: '', atkDisadvantage: true, repeatSave: { ability: 'con' }, concentration: true, dndCondition: 'Enfraquecido (Ray of Enfeeblement)' } },
         /* V1.7 Sprint-14 (2026-04-21 closeout review) — Névoa Ardente (Scorching Ray PHB p.273):
            Mago nv 2. 3 raios, cada 2d6 fogo. Reusa magicMissiles pattern (autoHit multi-dart). */
         /* V1.7 Sprint-17 Ronda 18 (2026-04-21 QA PHB p.273) — Scorching Ray RAW:
@@ -592,7 +592,7 @@ var CHAR_CLASSES = [
             desc: 'Truque: ataque de magia toque — 1d8 elétrico + alvo perde reação próxima.',
             damageSpec: { n: 1, d: 8 }, scale: 'cantrip',
             helpDnd5e: 'Choque Elétrico / Shocking Grasp (Mago/Feiticeiro cantrip): 1 action; ataque de magia corpo-a-corpo (com vantagem vs criatura usando armadura de metal). Em acerto, 1d8 elétrico + alvo NÃO pode tomar REAÇÃO até o início do próximo turno.\nEscala cantrip: 2d8 nv5, 3d8 nv11, 4d8 nv17.\nArena stub: 1d8 lightning + debuff reactionSpent:true (impede reação via skipBonus + flag custom noReaction). Sem hook dedicado pra reação bloqueada ainda — stub documental.',
-            afterAttackEnemyDebuff: { id: 'shocking_grasp_noreact', turns: 1, n: 'Sem Reação', ico: '', skipBonus: true, dndCondition: 'Sem Reação (Shocking Grasp — PHB p.276)' } },
+            afterAttackEnemyDebuff: { id: 'shocking_grasp_noreact', turns: 1, n: 'Sem Reação', ico: '', skipBonus: true, dndCondition: 'Sem Reação (Shocking Grasp)' } },
         /* V1.7 Sprint-7 (2026-04-21 closeout) — Transmutar em Pedra (Flesh to Stone PHB p.247) Mago nv 6.
            TR CON (repetido 3x — falha 3 vezes vira PETRIFICADO); arena simplified: 1 TR falhado → Petrificado.
            Petrificado PHB App.A: incapacitated + speed0 + unaware + atacantes adv + auto-fail STR/DEX + resistance all dmg. */
@@ -600,7 +600,7 @@ var CHAR_CLASSES = [
             desc: 'Transmuta alvo em pedra: TR CON ou PETRIFICADO 3 rodadas.',
             damageSpec: { n: 0, d: 0 }, save: { ability: 'con' },
             helpDnd5e: 'Transmutar em Pedra / Flesh to Stone (6º nível): concentração até 1 min. Alvo carne-e-osso faz TR CON; em falha fica Contido. Ao final de cada turno deve repetir TR — 3 falhas consecutivas = PETRIFICADO (permanente sem dispel). 3 sucessos consecutivos = magia termina.\nPetrificado (PHB App.A): incapacitado, não pode ver/mover, atacantes com vantagem, auto-falha TRs FOR/DES, RESISTÊNCIA a TODO dano, imune a veneno/doença.\nArena stub: 0 dano + debuff Petrificado 3 rodadas (compressão) + repeatSave CON + concentração.',
-            afterAttackEnemyDebuff: { id: 'flesh_to_stone', turns: 3, n: 'Petrificado', ico: '', skipTurn: true, speed0: true, targetedAdvantage: true, autoFailStrDex: true, resistAllDmg: true, repeatSave: { ability: 'con' }, concentration: true, dndCondition: 'Petrificado (PHB App.A — Flesh to Stone)' } },
+            afterAttackEnemyDebuff: { id: 'flesh_to_stone', turns: 3, n: 'Petrificado', ico: '', skipTurn: true, speed0: true, targetedAdvantage: true, autoFailStrDex: true, resistAllDmg: true, repeatSave: { ability: 'con' }, concentration: true, dndCondition: 'Petrificado (Flesh to Stone)' } },
         /* V1.6 (2026-05-16) — Mão Arcana / Bigby's Hand (Mago nv 9 / 5th-level
            spell). Conjura mão arcana flutuante. Stub: usa MESMA infra de Spiritual Weapon
            (kind: 'summon_attached') com Clenched Fist como ataque BA recorrente. Difere
@@ -856,9 +856,9 @@ var CHAR_CLASSES = [
         { n: 'Ataque Assassino', ico: '', cost: 2, kind: 'buff', bonus: true, minLevel: 3,
             requiresSubclass: 'assassin', /* REVIEW-#90 [8/17/25]: exclusiva do Assassino. */
             combatOnceId: 'assassinate',
-            desc: 'Subclass Assassin PHB p.97 (1x/combate): próximo ataque com vantagem + crit em 14-20.',
+            desc: 'Assassino (1x/combate): próximo ataque com vantagem e crítico em 14–20.',
             helpDnd5e: 'Assassinato / Assassinate (Ladino Assassino nv 3): vantagem em atk vs criaturas que ainda não agiram no combate. Qualquer acerto em criatura SURPRESA é crítico automático.\nV1.7 Sprint-10 (2026-04-21 closeout): arena stub como AÇÃO BÔNUS 1x/combate — aplica buff atkAdvantage + critRange:14 (crit em 14-20) no próximo ataque. Representa surpresa tática condensada.',
-            buffSim: { id: 'assassinate', vfx: 'shadow', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Ataque Assassino', condRule: 'PHB p.97 — vantagem + crit range estendido 1 atk.', atkAdvantage: true, critRange: 14 } },
+            buffSim: { id: 'assassinate', vfx: 'shadow', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Ataque Assassino', condRule: 'vantagem + crit range estendido 1 atk.', atkAdvantage: true, critRange: 14 } },
         /* V1.7 Sprint-17 (2026-04-21 QA audit #2) — Esquiva RE-ADICIONADA ao sim.
            PHB p.192 Dodge action — skill pró-ativa com acBonus:2 + attackAdvantage 2 turnos.
            Removida acidentalmente no Sprint 9 quando renomeei a outra pra Esquiva Sobrenatural.
@@ -869,7 +869,7 @@ var CHAR_CLASSES = [
            aparece em combate: inimigos atacando com desvantagem). */
         { n: 'Esquiva', ico: '', cost: 1, kind: 'buff', desc: 'Ação Esquivar: atacantes com DESVANTAGEM até o início do seu próximo turno.',
             helpDnd5e: 'Ação Esquivar / Dodge (qualquer classe): ação padrão de combate. Até o início do seu próximo turno:\n• Atacantes visíveis têm DESVANTAGEM em ataques contra você\n• Você tem VANTAGEM em TRs de DES (não modelado em arena de combate direto)\n\nArena: buffSim enemyAtkDisadvantage (PHB-correto) por 1 fase NPC (= until start of next turn). Não dá atk adv pro player — isso seria erro RAW.\nDiferente de Esquiva Sobrenatural (Ladino nv 5 Uncanny Dodge — reação halve dmg).',
-            buffSim: { id: 'esquiva', vfx: 'dodge', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Esquivar', condRule: 'PHB p.192 — Dodge action: atacantes com desvantagem até o início do seu próximo turno.', enemyAtkDisadvantage: true, dndCondition: 'Esquivar (atacantes com desvantagem)' } },
+            buffSim: { id: 'esquiva', vfx: 'dodge', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Esquivar', condRule: 'Dodge action: atacantes com desvantagem até o início do seu próximo turno.', enemyAtkDisadvantage: true, dndCondition: 'Esquivar (atacantes com desvantagem)' } },
         /* V1.7 Sprint-9 (2026-04-21 closeout) — Esquiva Sobrenatural PHB-fiel REAL: REAÇÃO quando atacante visível acerta → metade do dano. Agora `reactionOnly:true` —
            skill SÓ trigga via reaction_prompt pós-hit (igual Escudo Arcano/Repreensão Infernal).
            Flag `uncannyDodgeReaction:true` marca o tipo (pro hook distinguir de Shield). */
@@ -884,10 +884,10 @@ var CHAR_CLASSES = [
         /* V1.7 EFFECT-ADD (2026-04-21) — Passos Silenciosos: +vantagem próximo ataque + 1 CA defensivo */
         { n: 'Passos Silenciosos', ico: '', cost: 1, kind: 'buff', blessSpell: true, targetAlly: true, desc: 'Esconde aliado (ou você): vantagem no próximo ataque + 1 CA defensivo (3 turnos).',
             helpDnd5e: 'Referência: Pass Without Trace. stub para Ladino — vantagem no próximo ataque (flanqueamento furtivo) + leve bonus defensivo por 3 turnos. Representação simplificada de ocultamento tático.\nV1.7 EFFECT-ADD (2026-04-21): buff era vazio — agora aplica atkAdvantage + acBonus:1.',
-            buffSim: { id: 'passos_silenciosos', vfx: 'silent', decOn: 'after_npc', turns: 3, kind: 'buff', condName: 'Passos furtivos', condRule: 'PHB — Vantagem + 1 CA por ocultamento.', atkAdvantage: true, acBonus: 1 } },
+            buffSim: { id: 'passos_silenciosos', vfx: 'silent', decOn: 'after_npc', turns: 3, kind: 'buff', condName: 'Passos furtivos', condRule: 'Vantagem + 1 CA por ocultamento.', atkAdvantage: true, acBonus: 1 } },
         { n: 'Ação Ardilosa', ico: '', cost: 1, kind: 'buff', bonus: true, minLevel: 2, desc: 'Ação bônus: Esconder/Desengajar/Correr — traduz em vantagem no próximo ataque.',
             helpDnd5e: 'Ação Ardilosa / Cunning Action (Ladino nível 2): **AÇÃO BÔNUS** para Desengajar, Esconder ou Correr (qualquer uma). Neste fluxo: convertida em vantagem no próximo ataque (o efeito tático mais comum após uma ação ardilosa).\nV1.7 (2026-04-21) alinhamento PHB: era sem flag `bonus` — consumia AÇÃO principal (divergência). Agora `bonus:true` libera ação pra atacar no mesmo turno (RAW).\nV1.7 Sprint-17 Ronda 24 (2026-04-21 QA audit PHB p.96): adicionada flag `minLevel: 2` (antes faltava — Ladino nv 1 tinha acesso indevido).',
-            buffSim: { id: 'acao_ardilosa', vfx: 'arcane', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Ação Ardilosa', condRule: 'PHB p.96 — BA; vantagem no próximo ataque (Desengajar/Esconder/Correr traduzido).', atkAdvantage: true } },
+            buffSim: { id: 'acao_ardilosa', vfx: 'arcane', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Ação Ardilosa', condRule: 'BA; vantagem no próximo ataque (Desengajar/Esconder/Correr traduzido).', atkAdvantage: true } },
         { n: 'Golpe Mortal', ico: '', cost: 3, kind: 'attack', desc: 'Acerto devastador em ponto vital: 3d6 + DEX de dano perfurante.',
             requiresSubclass: 'assassin', /* REVIEW-#90 [8/17/25]: exclusiva do Assassino. — paridade c/ motor C3.5 */
             damageSpec: { n: 3, d: 6 }, dmgType: 'piercing',
@@ -900,7 +900,7 @@ var CHAR_CLASSES = [
                só DEX save area. Antes era halfDmg (stub que reduzia qualquer dano).
                Agora halfDmgDexSaveOnly: 0 dano em sucesso DEX, metade em falha DEX.
                Outros ataques (melee direto, save não-DEX) NÃO ganham redução. */
-            buffSim: { id: 'reflexos_evasivos', vfx: 'dodge', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Reflexos Evasivos', condRule: 'PHB p.96 — Evasão: 0 dano em sucesso TR DES área; metade em falha.', halfDmgDexSaveOnly: true } },
+            buffSim: { id: 'reflexos_evasivos', vfx: 'dodge', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Reflexos Evasivos', condRule: 'Evasão: 0 dano em sucesso TR DES área; metade em falha.', halfDmgDexSaveOnly: true } },
         /* Subclasse Trapaceiro Arcano (Arcane Trickster nv 13 e 17) */
         { n: 'Truque Versátil', ico: '🖐️', cost: 0, bonus: true, kind: 'buff',
             minLevel: 13, requiresSubclass: 'arcane_trickster',
@@ -928,7 +928,7 @@ var CHAR_CLASSES = [
             helpDnd5e: 'Referência: Bênção (PHB): concentração até 1 minuto; até três alvos no início do turno de cada um somam 1d4 em novas rolagens de ataque ou resistência que fizerem antes do fim do turno.\nPerda de concentração segue PHB (dano, incapacitado, etc.).\nNeste modo: bônus simplificado por alguns turnos de combate.',
             /* V1.7 Sprint-17 Ronda 17 (2026-04-21 QA PHB p.219) — Bless agora
                adiciona +1d4 em saves também (PHB: atk OR save, sim auto). */
-            buffSim: { id: 'bless', vfx: 'bless', decOn: 'round', turns: 3, kind: 'buff', condName: 'Bênção', condRule: 'PHB p.219 — Concentração; 1d4 em atk OU TR no turno do alvo.', atkBonusDie: { n: 1, d: 4 }, saveBonusDie: { n: 1, d: 4 }, concentration: true, rollApply: { n: 1, d: 4 } } },
+            buffSim: { id: 'bless', vfx: 'bless', decOn: 'round', turns: 3, kind: 'buff', condName: 'Bênção', condRule: 'Concentração; 1d4 em atk OU TR no turno do alvo.', atkBonusDie: { n: 1, d: 4 }, saveBonusDie: { n: 1, d: 4 }, concentration: true, rollApply: { n: 1, d: 4 } } },
         { n: 'Repreensão Divina', ico: '', cost: 3, kind: 'attack', desc: 'Canalizar dano radiante: ataque vs CA; 3d6 se acertar; sem CD para metade',
             damageSpec: { n: 3, d: 6 },
             helpDnd5e: 'Nome e números são adaptação livre para esta pré-visualização (inspirado em magias de ataque com dano radiante, ex.: Raio Guiador).\nNo D&D 5e, se o efeito exige ataque (arma ou magia), compara-se 1d20 + bônus de ataque com a CA do alvo. Se o total for menor que a CA, o ataque erra e não causa dano. Não é acerto automático.\nO texto “sem esquivar o dano” aqui significa: não há teste de resistência de Destreza (nem outro atributo) para reduzir o dano pela metade depois de acertar — ou aplica os 3d6 radiantes inteiros, ou 0 se errar.\nIsso é diferente de magias que pedem só CD (ex.: Rajada Solar de área) ou de Mísseis Mágicos, que não usam ataque.' },
@@ -942,7 +942,7 @@ var CHAR_CLASSES = [
         { n: 'Escudo da Fé', ico: '', cost: 1, kind: 'buff', bonus: true, shieldSpell: true, targetAlly: true,
             desc: 'Ação bônus: +2 CA em aliado (concentração).',
             helpDnd5e: 'Escudo da Fé / Shield of Faith (Clérigo/Paladino nv 1): **AÇÃO BÔNUS**; concentração 10 min. Campo protetor em criatura tocada; +2 CA enquanto durar.\nArena: buffSim acBonus:2 + concentration + targetAlly.',
-            buffSim: { id: 'shield_of_faith', vfx: 'sanctuary', decOn: 'round', turns: 3, kind: 'buff', condName: 'Escudo da Fé', condRule: 'PHB p.275 — +2 CA concentração.', acBonus: 2, concentration: true } },
+            buffSim: { id: 'shield_of_faith', vfx: 'sanctuary', decOn: 'round', turns: 3, kind: 'buff', condName: 'Escudo da Fé', condRule: '+2 CA concentração.', acBonus: 2, concentration: true } },
         /* V1.7 Sprint-16 (2026-04-21 closeout review) — Massa de Cura (Mass Healing Word PHB p.259):
            Clérigo/Bardo nv 3. BA heal múltiplos aliados. */
         /* V1.7 Sprint-17 (2026-04-21 QA PHB p.259) — Mass Healing Word useCastingMod dinâmico (WIS/CHA mod). */
@@ -958,7 +958,7 @@ var CHAR_CLASSES = [
         { n: 'Proteção contra Energia', ico: '', cost: 3, kind: 'buff', minLevel: 5,
             desc: 'Self: resistência a dano (concentração 1h).',
             helpDnd5e: 'Proteção contra Energia / Protection from Energy (Clérigo/Druida/Mago/Patrulheiro/Feiticeiro nv 3): 1 action; concentração 1h. Escolhe tipo de dano (ácido/frio/fogo/elétrico/trovão); alvo tem RESISTÊNCIA (metade dano) a esse tipo.\nArena stub: buffSim halfDmg genérico (todas resistências — simplificação sem tracking de tipo específico) 3 rodadas + concentration.',
-            buffSim: { id: 'prot_energy', vfx: 'shield', decOn: 'round', turns: 3, kind: 'buff', condName: 'Proteção contra Energia', condRule: 'PHB p.270 — resistência a dano (concentração).', halfDmg: true, concentration: true } },
+            buffSim: { id: 'prot_energy', vfx: 'shield', decOn: 'round', turns: 3, kind: 'buff', condName: 'Proteção contra Energia', condRule: 'resistência a dano (concentração).', halfDmg: true, concentration: true } },
         /* V1.7 Sprint-15 (2026-04-21 closeout review) — Curar (Heal PHB p.251):
            Clérigo/Druida nv 6. 70 HP healing + remove doenças/cegueira/surdez. */
         /* V1.7 Sprint-17 Ronda 27 (2026-04-21 QA PHB p.250) — Heal upcast +10/slot acima 6º.
@@ -974,7 +974,7 @@ var CHAR_CLASSES = [
             desc: 'Banir (4º nível nv 7+): TR CAR ou ALVO REMOVIDO do combate 3 rodadas (concentração).',
             damageSpec: { n: 0, d: 0 }, save: { ability: 'cha' },
             helpDnd5e: 'Banir / Banishment (Clérigo/Paladino/Mago/Bardo nv 4): 1 action; concentração 1 min. TR CAR; em falha, alvo é banido (desaparece). Criaturas nativas deste plano retornam em 1 min; extraplanares exiladas.\nUpcast: +1 alvo por nível acima do 4º.\nArena stub: 0 dano + debuff skipTurn (alvo "desaparece" = não age) 3 rodadas + repeatSave CHA + concentration.',
-            afterAttackEnemyDebuff: { id: 'banishment', turns: 3, n: 'Banido', ico: '', skipTurn: true, speed0: true, repeatSave: { ability: 'cha' }, concentration: true, dndCondition: 'Banido (PHB — Banishment; alvo desaparece)' } },
+            afterAttackEnemyDebuff: { id: 'banishment', turns: 3, n: 'Banido', ico: '', skipTurn: true, speed0: true, repeatSave: { ability: 'cha' }, concentration: true, dndCondition: 'Banido (Banishment; alvo desaparece)' } },
         /* V1.7 Sprint-14 (2026-04-21 closeout review) — Raio Guiador (Guiding Bolt PHB p.249):
            Clérigo nv 1. Ranged spell atk 4d6 radiant + próximo atk contra alvo tem vantagem.
            Reusa damageSpec + ranged + afterAttackEnemyDebuff (com targetedAdvantage para aliados). */
@@ -1004,7 +1004,7 @@ var CHAR_CLASSES = [
         /* V1.7 Sprint-11 (2026-04-21 closeout review) — Santuário PHB-FIX: Casting Time 1 BONUS ACTION. Adicionada flag `bonus:true` (era ação principal). */
         { n: 'Santuário', ico: '', cost: 1, kind: 'buff', bonus: true, shieldSpell: true, targetAlly: true, desc: 'Ação bônus: atacante faz TR SAB ou escolhe outro alvo.',
             helpDnd5e: 'Referência: Santuário (PHB): bônus em criatura; quem for atacar ou lançar magia ofensiva nela faz teste de resistência de Sabedoria (CD = 8 + bônus de proficiência + modificador de SAB de conjuração). Em falha, escolhe outro alvo ou perde o ataque/magia (alguns efeitos em área ainda podem incluí-la conforme PHB).\nNão dá CA nem dano; é proteção por CD.\nNeste modo: resumo tático até integração completa de CD.',
-            buffSim: { id: 'santuário', vfx: 'sanctuary', decOn: 'round', turns: 3, kind: 'buff', sanctuary: true, condName: 'Santuário', condRule: 'PHB — atacante rola TR de Sabedoria vs CD (8 + prof + SAB do conjurador) antes de cada ataque no alvo; em falha, ataque anulado. Duração: 3 rodadas simplificadas.' } },
+            buffSim: { id: 'santuário', vfx: 'sanctuary', decOn: 'round', turns: 3, kind: 'buff', sanctuary: true, condName: 'Santuário', condRule: 'atacante rola TR de Sabedoria vs CD (8 + prof + SAB do conjurador) antes de cada ataque no alvo; em falha, ataque anulado. Duração: 3 rodadas simplificadas.' } },
         /* V1.7 Sprint-17 (2026-04-21 QA PHB p.248) — Palavra Guia = Guiding Bolt.
            Era stub SEM mecânica de vantagem (só narrava no log). Agora com ranged:true
            + afterAttackEnemyDebuff targetedAdvantage turns:1 igual "Raio Guiador"
@@ -1021,7 +1021,7 @@ var CHAR_CLASSES = [
             /* V1.7 Sprint-17 (2026-04-21 QA) — adicionado magicSaveAdvantage:true
                que já existia na data mas faltava no buff (desc mencionava "vantagem
                em salvaguardas contra magia" mas flag não estava). */
-            buffSim: { id: 'protecao_divina', vfx: 'shield', decOn: 'round', turns: 3, kind: 'buff', condName: 'Proteção Divina', condRule: 'PHB — +2 CA e vantagem em TR contra magia.', acBonus: 2, magicSaveAdvantage: true } },
+            buffSim: { id: 'protecao_divina', vfx: 'shield', decOn: 'round', turns: 3, kind: 'buff', condName: 'Proteção Divina', condRule: '+2 CA e vantagem em TR contra magia.', acBonus: 2, magicSaveAdvantage: true } },
         /* V1 Invocações Phase 2 (2026-04-18) — Arma Espiritual reimplementada
            como summon_attached fiel ao PHB p.278: cast bonus, ataques BA por
            round, sem concentração, dura 10 rounds. Substitui versão buff legacy. */
@@ -1059,7 +1059,7 @@ var CHAR_CLASSES = [
             desc: 'Paralisa humanoide: TR SAB ou PARALISADO 3 rodadas; TR SAB ao fim do turno.',
             damageSpec: { n: 0, d: 0 }, save: { ability: 'wis' },
             helpDnd5e: 'Imobilizar Pessoa / Hold Person (2º nível): alvo humanoide faz TR SAB; em falha fica PARALISADO até o fim da duração (1 min concentração). Ao fim de cada turno, pode repetir TR SAB.\nParalisado (PHB Appendix A): incapacitado (não atk/reação), auto-falha TRs FOR e DES, ataques em 1,5m são críticos automáticos, atacantes têm vantagem.\nArena: 0 dano + debuff Paralisado 3 rodadas com repeatSave SAB + skipTurn + critMelee + targetedAdvantage.',
-            afterAttackEnemyDebuff: { id: 'hold_person_paralyzed', turns: 3, n: 'Paralisado', ico: '', skipTurn: true, critMelee: true, targetedAdvantage: true, autoFailStrDex: true, repeatSave: { ability: 'wis' }, concentration: true, dndCondition: 'Paralisado (PHB App.A — Imobilizar Pessoa)' } },
+            afterAttackEnemyDebuff: { id: 'hold_person_paralyzed', turns: 3, n: 'Paralisado', ico: '', skipTurn: true, critMelee: true, targetedAdvantage: true, autoFailStrDex: true, repeatSave: { ability: 'wis' }, concentration: true, dndCondition: 'Paralisado (Imobilizar Pessoa)' } },
         /* Fase 4C: Canalizar Divindade — Expulsar Mortos-Vivos (Turn Undead PHB p.58).
            No FIM da lista de propósito (não desloca slots das skills anteriores). */
         { n: 'Expulsar Mortos-Vivos', ico: '†', cost: 0, kind: 'attack', dmgType: 'radiant', minLevel: 2, multiTarget: true, requiresTargetTag: ['undead'], combatOnceId: 'channel_divinity', save: { ability: 'wis' },
@@ -1067,7 +1067,7 @@ var CHAR_CLASSES = [
             damageSpec: { n: 0, d: 0 },
             desc: 'Canalizar Divindade: mortos-vivos fazem TR de SAB ou são Expulsos (fogem e perdem o turno). 1×/combate.',
             helpDnd5e: 'Expulsar Mortos-Vivos / Turn Undead: cada morto-vivo que vê/ouve o Clérigo faz um TR de Sabedoria (CD de magia). Em falha, é "expulso" por 1 min ou até sofrer dano — gasta os turnos fugindo e não pode agir.\nArena (sem grelha): TR SAB vs CD; em falha, Expulso (skipTurn 3 rodadas, termina ao sofrer dano). Só afeta mortos-vivos (auto-alveja todos os undead vivos). 1×/combate; sem mortos-vivos, não gasta o uso.',
-            afterAttackEnemyDebuff: { id: 'turned', turns: 3, n: 'Expulso', ico: '»', skipTurn: true, wakeOnDamage: true, dndCondition: 'Expulso (Turn Undead — PHB p.58)' } },
+            afterAttackEnemyDebuff: { id: 'turned', turns: 3, n: 'Expulso', ico: '»', skipTurn: true, wakeOnDamage: true, dndCondition: 'Expulso (Turn Undead)' } },
         /* V1.14 (2026-10-15) — Animar Mortos (Animate Dead).
            Mago/Clérigo nv 5+. Ergue um Esqueleto Servo (sem concentração). */
         { n: 'Animar Mortos', ico: '💀', cost: 5, kind: 'summon_undead', minLevel: 5, concentration: false,
@@ -1303,7 +1303,7 @@ var CHAR_CLASSES = [
            +CHA mod (min +1) em TODOS os saves. Antes era +1 CA (divergência — PHB é save).
            Stub: aplica em self; ideal seria aura 10ft incluindo aliados. */
         { n: 'Aura de Proteção', ico: '', cost: 1, kind: 'buff', minLevel: 6, desc: 'Aura sagrada: +CAR mod em todos os TRs por 3 rodadas (min +1).',
-            buffSim: { id: 'aura_prot', vfx: 'shield', decOn: 'round', turns: 3, kind: 'buff', condName: 'Aura de Proteção', condRule: 'PHB p.85 — +CAR mod em TODOS os TRs (mín +1).', saveBonusFromCasterCha: true } },
+            buffSim: { id: 'aura_prot', vfx: 'shield', decOn: 'round', turns: 3, kind: 'buff', condName: 'Aura de Proteção', condRule: '+CAR mod em TODOS os TRs (mín +1).', saveBonusFromCasterCha: true } },
         { n: 'Golpe Guidado', ico: '', cost: 2, kind: 'attack', desc: 'Ataque sagrado: 1d8 + força de arma',
             damageSpec: { n: 1, d: 8 },
             helpDnd5e: 'Ataque com arma corpo a corpo; dano 1d8 + STR neste fluxo.' },
@@ -1314,7 +1314,7 @@ var CHAR_CLASSES = [
         { n: 'Juramento de Inimizade', ico: '', cost: 2, kind: 'buff', bonus: true, minLevel: 3, targetEnemy: true, desc: 'Ação bônus (Juramento Vingança nv 3+): marca inimigo — vantagem em ataques CONTRA ELE.',
             blessSpell: true,
             helpDnd5e: 'Juramento de Inimizade / Vow of Enmity (Paladino Juramento da Vingança nv 3): **AÇÃO BÔNUS**. Escolha 1 criatura visível em 3m; você tem VANTAGEM em rolagens de ataque contra essa criatura por 1 min (concentração) OU até ela ficar com 0 HP / inconsciente.\nV1.7 Sprint-10 (2026-04-21 closeout): adicionada flag `bonus:true` (PHB-FIX — era ação principal). Stub 3 rodadas + concentração. Vantagem aplicada ao próprio caster (arena sem target-tracking).',
-            buffSim: { id: 'juramento_inimizade', vfx: 'bless', decOn: 'round', turns: 3, kind: 'buff', condName: 'Juramento de Inimizade', condRule: 'PHB p.88 — Vantagem em ataques contra alvo marcado (PHB RAW target-specific). Concentração.', atkAdvantage: true, markedTargetOnly: true, concentration: true } },
+            buffSim: { id: 'juramento_inimizade', vfx: 'bless', decOn: 'round', turns: 3, kind: 'buff', condName: 'Juramento de Inimizade', condRule: 'Vantagem em ataques contra alvo marcado. Concentração.', atkAdvantage: true, markedTargetOnly: true, concentration: true } },
         /* V1.7 Sprint-17 (2026-04-21 QA PHB p.235) — Palavra Imperiosa / Command
            RAW: 0 dano + TR SAB + grovel (prostrado) em falha. Antes era stub com
            3d6 radiante (divergência — Command é enchantment sem dano). */
@@ -1339,7 +1339,7 @@ var CHAR_CLASSES = [
             helpDnd5e: 'Golpe Marcante / Branding Smite (Paladino 2º nível): **AÇÃO BÔNUS**; concentração até 1 min. Próximo ataque corpo-a-corpo com arma que acertar infringe +2d6 radiante extra. Alvo emite luz fraca (3m raio) por 1 min — revela invisibilidade e atrapalha esconder-se.\nArena stub: buff BA com dmgBonusDie:{n:2,d:6} no próximo ataque; condição "Marcado (luz fraca)" também aplica atkDisadvantage no NPC (representa a luz que revela e atrapalha).',
             /* V1.7 Sprint-17 Ronda 11 (2026-04-21 QA PHB p.219) — Branding Smite upcast
                +1d6 por slot acima do 2º. Paladino nv 5 (2nd) 2d6, nv 9 (3rd) 3d6, etc. */
-            buffSim: { id: 'golpe_marcante', vfx: 'bless', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Golpe Marcante', condRule: 'PHB p.219 — próximo ataque +2d6 radiante (escala +1d6/slot); alvo emite luz 3m.', dmgBonusDie: { n: 2, d: 6, scaleByCasterLevel: { breakpoints: [[9, 1], [13, 2], [17, 3]] } }, concentration: true, consumeOnHit: true } },
+            buffSim: { id: 'golpe_marcante', vfx: 'bless', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Golpe Marcante', condRule: 'próximo ataque +2d6 radiante (escala +1d6/slot); alvo emite luz 3m.', dmgBonusDie: { n: 2, d: 6, scaleByCasterLevel: { breakpoints: [[9, 1], [13, 2], [17, 3]] } }, concentration: true, consumeOnHit: true } },
         /* V1.7 Sprint-17 (2026-04-21 QA PHB p.281) — Thunderous Smite 1st level, Paladino nv 2+. */
         { n: 'Golpe Trovejante', ico: '', cost: 2, kind: 'buff', bonus: true, minLevel: 2,
             desc: 'Ação bônus (1º nível, nv 2+): próximo ataque +2d6 trovão, TR FOR ou prostrado.',
@@ -1347,14 +1347,14 @@ var CHAR_CLASSES = [
             /* V1.7 Sprint-17 Ronda 29 (2026-04-21 QA PHB p.281) — Thunderous Smite upcast:
                +1d6 por slot acima 1º. Paladino half caster: nv 2 (1st) 2d6, nv 5 (2nd) 3d6,
                nv 9 (3rd) 4d6, nv 13 (4th) 5d6, nv 17 (5th) 6d6. Antes era fixo 2d6. */
-            buffSim: { id: 'golpe_trovejante', vfx: 'thunder', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Golpe Trovejante', condRule: 'PHB p.281 — próximo ataque +2d6 trovão (escala +1d6/slot acima 1º) + TR FOR ou prostrado.', dmgBonusDie: { n: 2, d: 6, scaleByCasterLevel: { breakpoints: [[5, 1], [9, 2], [13, 3], [17, 4]] } }, concentration: true, nextHitAppliesDebuff: { id: 'trovejante_prone', turns: 1, n: 'Prostrado', ico: '', atkDisadvantage: true, dndCondition: 'Prostrado (Thunderous Smite — desvantagem próximo ataque)' } } },
+            buffSim: { id: 'golpe_trovejante', vfx: 'thunder', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Golpe Trovejante', condRule: 'próximo ataque +2d6 trovão (escala +1d6/slot acima 1º) + TR FOR ou prostrado.', dmgBonusDie: { n: 2, d: 6, scaleByCasterLevel: { breakpoints: [[5, 1], [9, 2], [13, 3], [17, 4]] } }, concentration: true, nextHitAppliesDebuff: { id: 'trovejante_prone', turns: 1, n: 'Prostrado', ico: '', atkDisadvantage: true, dndCondition: 'Prostrado (Thunderous Smite — desvantagem próximo ataque)' } } },
         /* V1.7 Sprint-17 (2026-04-21 QA resource audit) — Arma Mágica (Magic Weapon PHB p.257):
            Paladino/Mago nv 2. PHB RAW: 1 AÇÃO, concentração 1h. Antes era stub `bonus:true`
            (divergência PHB admitida no comentário anterior). CORRIGIDO pra 1 ação RAW. */
         { n: 'Arma Mágica', ico: '', cost: 2, kind: 'buff', isSpell: true, minLevel: 5,
             desc: 'Ação (2º nível, Paladino/Mago nv 5+): arma vira mágica +1 (concentração 1h).',
             helpDnd5e: 'Arma Mágica / Magic Weapon (Paladino/Mago nv 2): **1 AÇÃO**; concentração 1h. Arma não-mágica tocada vira mágica +1 em atk e dano.\nUpcast: +2 nv 4, +3 nv 6.\nArena: buffSim atkFlat:1 + dmgFlat:1 + concentration. Bônus por turno até concentração quebrar.\nV1.7 Sprint-17 (2026-04-21 audit): era stub `bonus:true` — corrigido pra 1 ação RAW PHB.',
-            buffSim: { id: 'magic_weapon', vfx: 'bless', decOn: 'round', turns: 3, kind: 'buff', condName: 'Arma Mágica', condRule: 'PHB p.257 — +1 atk + dano (concentração).', atkFlat: 1, dmgFlat: 1, concentration: true } },
+            buffSim: { id: 'magic_weapon', vfx: 'bless', decOn: 'round', turns: 3, kind: 'buff', condName: 'Arma Mágica', condRule: '+1 atk + dano (concentração).', atkFlat: 1, dmgFlat: 1, concentration: true } },
         /* V1.7 Sprint-14 (2026-04-21 closeout review) — Golpe Flamejante (Searing Smite PHB p.273):
            Paladino nv 1. BA + próximo atk em acerto → +1d6 fogo imediato + 1d6 fogo/turno TR CON.
            Reusa Smite pattern + concentration + ongoing DOT stub. */
@@ -1364,7 +1364,7 @@ var CHAR_CLASSES = [
             helpDnd5e: 'Golpe Flamejante / Searing Smite (Paladino 1º nível): **AÇÃO BÔNUS**; concentração até 1 min. Próximo ataque corpo-a-corpo com arma que acertar causa +1d6 fogo; alvo pega fogo. No início de cada turno do alvo até a magia terminar, TR CON — em falha, 1d6 fogo; sucesso = apagou fogo.\nUpcast: +1d6 por nível acima do 1º.\nArena stub: buff BA dmgBonusDie:{n:1,d:6} próximo atk + concentration. DOT ongoing não modelado (stub inicial similar a Bruxaria).',
             /* V1.7 Sprint-17 Ronda 11 (2026-04-21 QA PHB p.273) — Searing Smite upcast
                +1d6 por slot acima do 1º. Paladino nv 2 base 1d6, nv 5 (2nd) 2d6, nv 9 (3rd) 3d6. */
-            buffSim: { id: 'searing_smite', vfx: 'bless', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Golpe Flamejante', condRule: 'PHB p.273 — próximo atk +1d6 fogo (escala +1d6/slot).', dmgBonusDie: { n: 1, d: 6, scaleByCasterLevel: { breakpoints: [[5, 1], [9, 2], [13, 3], [17, 4]] } }, concentration: true, consumeOnHit: true } },
+            buffSim: { id: 'searing_smite', vfx: 'bless', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Golpe Flamejante', condRule: 'próximo atk +1d6 fogo (escala +1d6/slot).', dmgBonusDie: { n: 1, d: 6, scaleByCasterLevel: { breakpoints: [[5, 1], [9, 2], [13, 3], [17, 4]] } }, concentration: true, consumeOnHit: true } },
         /* V1.7 Sprint-13 (2026-04-21 closeout review) — Golpe Fulminante (Blinding Smite PHB p.219):
            Paladino nv 3. BA + próximo atk em acerto → +3d8 radiante + alvo TR CON ou CEGO.
            Reusa Smite pattern (igual Trovejante/Marcante/Irado) + nextHitAppliesDebuff Cego. */
@@ -1374,12 +1374,12 @@ var CHAR_CLASSES = [
             helpDnd5e: 'Golpe Fulminante / Blinding Smite (Paladino 3º nível): **AÇÃO BÔNUS**; concentração até 1 min. Próximo ataque com arma corpo-a-corpo que acertar causa +3d8 radiante; alvo faz TR CON ou fica CEGO até a magia terminar.\nArena stub: buff BA dmgBonusDie:{n:3,d:8} no próximo ataque + afterAttackEnemyDebuff Cego (atkDisadvantage+targetedAdvantage+repeatSave CON) 3 rodadas.',
             /* V1.7 Sprint-17 Ronda 11 (2026-04-21 QA PHB p.219) — Blinding Smite upcast
                +1d8 por slot acima do 3º. Paladino nv 9 (3rd) 3d8 base, nv 13 (4th) 4d8, nv 17 (5th) 5d8. */
-            buffSim: { id: 'golpe_fulminante', vfx: 'bless', decOn: 'after_npc', turns: 10, kind: 'buff', condName: 'Golpe Fulminante', condRule: 'PHB p.219 — próximo atk +3d8 radiante (escala +1d8/slot acima 3º) + TR CON ou Cego.', dmgBonusDie: { n: 3, d: 8, scaleByCasterLevel: { breakpoints: [[13, 1], [17, 2]] } }, dmgBonusType: 'radiant', concentration: true, consumeOnHit: true, nextHitAppliesDebuff: { id: 'blinding_smite_blind', turns: 3, n: 'Cego', ico: '👁', atkDisadvantage: true, targetedAdvantage: true, repeatSave: { ability: 'con' }, dndCondition: 'Cego (PHB App.A — Blinding Smite)' } } },
+            buffSim: { id: 'golpe_fulminante', vfx: 'bless', decOn: 'after_npc', turns: 10, kind: 'buff', condName: 'Golpe Fulminante', condRule: 'próximo atk +3d8 radiante (escala +1d8/slot acima 3º) + TR CON ou Cego.', dmgBonusDie: { n: 3, d: 8, scaleByCasterLevel: { breakpoints: [[13, 1], [17, 2]] } }, dmgBonusType: 'radiant', concentration: true, consumeOnHit: true, nextHitAppliesDebuff: { id: 'blinding_smite_blind', turns: 3, n: 'Cego', ico: '👁', atkDisadvantage: true, targetedAdvantage: true, repeatSave: { ability: 'con' }, dndCondition: 'Cego (Blinding Smite)' } } },
         /* V1.24 (D&D 5e PHB p.275) — Staggering Smite 4th level, Paladino nv 13+. */
         { n: 'Golpe Estonteante', ico: '💫', cost: 4, kind: 'buff', bonus: true, minLevel: 13,
             desc: 'Ação bônus (4º nível, nv 13+): próximo atk +4d6 psíquico + TR SAB ou ESTONTEADO.',
             helpDnd5e: 'Golpe Estonteante / Staggering Smite (Paladino 4º nível): **AÇÃO BÔNUS**; concentração até 1 min. Próximo ataque com arma que acertar causa +4d6 psíquico extra; alvo faz TR SAB ou fica ESTONTEADO (desvantagem em ataques e testes, sem reações) até o fim do seu próximo turno.\nArena: buff BA dmgBonusDie:{n:4,d:6} psíquico + nextHitAppliesDebuff Estonteado.',
-            buffSim: { id: 'golpe_estonteante', vfx: 'shadow', decOn: 'after_npc', turns: 10, kind: 'buff', condName: 'Golpe Estonteante', condRule: 'PHB p.275 — próximo atk +4d6 psíquico + TR SAB ou Estonteado.', dmgBonusDie: { n: 4, d: 6 }, dmgBonusType: 'psychic', concentration: true, consumeOnHit: true, nextHitAppliesDebuff: { id: 'staggering_smite_staggered', turns: 1, n: 'Estonteado', ico: '😵', atkDisadvantage: true, skipBonus: true, reactionDisabled: true, staggered: true, saveOnHit: { ability: 'wis' }, dndCondition: 'Estonteado (Destruição Estonteante — PHB p.275)' } } },
+            buffSim: { id: 'golpe_estonteante', vfx: 'shadow', decOn: 'after_npc', turns: 10, kind: 'buff', condName: 'Golpe Estonteante', condRule: 'próximo atk +4d6 psíquico + TR SAB ou Estonteado.', dmgBonusDie: { n: 4, d: 6 }, dmgBonusType: 'psychic', concentration: true, consumeOnHit: true, nextHitAppliesDebuff: { id: 'staggering_smite_staggered', turns: 1, n: 'Estonteado', ico: '😵', atkDisadvantage: true, skipBonus: true, reactionDisabled: true, staggered: true, saveOnHit: { ability: 'wis' }, dndCondition: 'Estonteado (Destruição Estonteante)' } } },
         /* V1.7 Sprint-17 (2026-04-21 QA PHB p.289) — Wrathful Smite 1st level, Paladino nv 2+. */
         { n: 'Golpe Irado', ico: '', cost: 1, kind: 'buff', bonus: true, minLevel: 2,
             desc: 'Ação bônus (1º nível, nv 2+): próximo ataque +1d6 psíquico, TR SAB ou amedrontado.',
@@ -1387,7 +1387,7 @@ var CHAR_CLASSES = [
             /* V1.7 Sprint-17 Ronda 29 (2026-04-21 QA PHB p.289) — Wrathful Smite upcast:
                +1d6 por slot acima 1º. Paladino half caster: nv 2 (1st) 1d6, nv 5 (2nd) 2d6,
                nv 9 (3rd) 3d6, nv 13 (4th) 4d6, nv 17 (5th) 5d6. Antes era fixo 1d6. */
-            buffSim: { id: 'golpe_irado', vfx: 'shadow', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Golpe Irado', condRule: 'PHB p.289 — próximo ataque +1d6 psíquico (escala +1d6/slot acima 1º) + TR SAB ou amedrontado.', dmgBonusDie: { n: 1, d: 6, scaleByCasterLevel: { breakpoints: [[5, 1], [9, 2], [13, 3], [17, 4]] } }, concentration: true, nextHitAppliesDebuff: { id: 'irado_frightened', turns: 2, n: 'Amedrontado', ico: '', atkDisadvantage: true, skipBonus: true, dndCondition: 'Amedrontado (Wrathful Smite — desvantagem + perde BA)' } } },
+            buffSim: { id: 'golpe_irado', vfx: 'shadow', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Golpe Irado', condRule: 'próximo ataque +1d6 psíquico (escala +1d6/slot acima 1º) + TR SAB ou amedrontado.', dmgBonusDie: { n: 1, d: 6, scaleByCasterLevel: { breakpoints: [[5, 1], [9, 2], [13, 3], [17, 4]] } }, concentration: true, nextHitAppliesDebuff: { id: 'irado_frightened', turns: 2, n: 'Amedrontado', ico: '', atkDisadvantage: true, skipBonus: true, dndCondition: 'Amedrontado (Wrathful Smite — desvantagem + perde BA)' } } },
         /* Features de Subclasse e Níveis Altos do Paladino. */
         { n: 'Arma Sagrada', ico: '⚔️', cost: 1, kind: 'buff', bonus: true, minLevel: 3,
             requiresSubclass: 'devotion',
@@ -1429,7 +1429,7 @@ var CHAR_CLASSES = [
                Corrigido pra turns:10 RAW + decOn:'round' (era 'after_npc' — mais curto
                ainda). Fúria termina também se Bárbaro não atacou/sofreu dano — lógica
                PHB mais complexa não modelada em stub. */
-            buffSim: { id: 'furia', vfx: 'shield', decOn: 'round', turns: 10, kind: 'buff', condName: 'Fúria', condRule: 'PHB p.48 — +2/+3/+4 dano + RESISTÊNCIA 50% B/P/S + vantagem STR + sem magias. 1 min / 10 rodadas.', rageDmg: true, rageResistance: true, strCheckAdvantage: true, noCastWhileRaging: true } },
+            buffSim: { id: 'furia', vfx: 'shield', decOn: 'round', turns: 10, kind: 'buff', condName: 'Fúria', condRule: '+2/+3/+4 dano + RESISTÊNCIA 50% B/P/S + vantagem STR + sem magias. 1 min / 10 rodadas.', rageDmg: true, rageResistance: true, strCheckAdvantage: true, noCastWhileRaging: true } },
         { n: 'Ataque Brutal', ico: '', cost: 2, kind: 'attack', desc: 'Golpe selvagem: 2d12 + STR',
             damageSpec: { n: 2, d: 12 },
             helpDnd5e: 'Resumo: dois dados de arma grande; crítico adiciona mais 1d12.' },
@@ -1448,7 +1448,7 @@ var CHAR_CLASSES = [
             desc: 'Ação: substitui 1 ataque por tentativa de agarrar — TR FOR; falha = AGARRADO 3 rodadas.',
             damageSpec: { n: 0, d: 0 }, save: { ability: 'str' },
             helpDnd5e: 'Agarrar / Grapple (ação de combate base): você **substitui um ataque** da ação Attack por tentativa de agarrar. Teste FOR(Atletismo) vs FOR(Atletismo) OU DES(Acrobacia) do alvo (stub: TR FOR simples). Em falha do alvo, fica AGARRADO.\nAgarrado (PHB App.A): velocidade 0 + atk adv contra o alvo (flanqueamento). Alvo pode tentar escapar com FOR/DES ao fim do turno.\nV1.7 Sprint-11 (2026-04-21 closeout review): REMOVIDA flag `bonus:true` (divergência) — PHB p.195 diz que Grapple é parte da ação Attack, não BA. Arena: kind attack + 0 dmg + debuff 3 rodadas + speed0 + repeatSave FOR.',
-            afterAttackEnemyDebuff: { id: 'grappled', turns: 3, n: 'Agarrado', ico: '', speed0: true, repeatSave: { ability: 'str' }, dndCondition: 'Agarrado (PHB App.A — Agarrar)' } },
+            afterAttackEnemyDebuff: { id: 'grappled', turns: 3, n: 'Agarrado', ico: '', speed0: true, repeatSave: { ability: 'str' }, dndCondition: 'Agarrado (Agarrar)' } },
         /* V1.7 Sprint-10 (2026-04-21 closeout) — Ataque Temerário PHB-fiel REAL: FREE ACTION toggle declarado no PRIMEIRO ataque do turno (não consome ação nem BA).
            Vantagem em TODOS os ataques STR melee desse turno; atacantes têm vantagem até
            início do próximo turno do Bárbaro.
@@ -1456,18 +1456,18 @@ var CHAR_CLASSES = [
            atacar logo após ativar) + buffSim aplica atkAdvantage + selfAtkVulnerable.
            firstAttackToggle:true documenta intent (PHB: declarado no 1º atk, não pré-cast). */
         { n: 'Temerário', ico: '', cost: 0, kind: 'buff', grantsExtraAction: true, firstAttackToggle: true, minLevel: 2,
-            desc: 'FREE PHB p.48: ativa no 1º ataque — vantagem em todos atk STR; atacantes com vantagem 1 turno.',
+            desc: 'Ação livre no 1º ataque: vantagem em todos os ataques com Força; atacantes recebem vantagem contra você por 1 turno.',
             helpDnd5e: 'Ataque Imprudente / Reckless Attack (Bárbaro nv 2): FEATURE DE CLASSE (não consome ação). Quando você faz seu primeiro ataque do turno, pode atacar RECKLESSLY — ganha vantagem em TODOS os ataques com arma baseados em FOR este turno, mas atacantes têm vantagem contra você até início da sua próxima rodada.\nV1.7 Sprint-10 (2026-04-21): cost 0 (PHB free action) + grantsExtraAction:true (reseta actionSpent pra permitir atacar logo após ativar). BuffSim aplica ambos: atkAdvantage (ofensivo) + selfAtkVulnerable (defensivo).\nV1.7 Sprint-17 Ronda 24 (2026-04-21 QA audit PHB p.48): adicionada flag `minLevel: 2` (antes faltava — disponível em nv 1 violava PHB RAW).',
-            buffSim: { id: 'temerario', vfx: 'bless', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Temerário', condRule: 'PHB p.48 — Vantagem em atk FOR, inimigos vantagem contra você.', atkAdvantage: true, selfAtkVulnerable: true } },
+            buffSim: { id: 'temerario', vfx: 'bless', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Temerário', condRule: 'Vantagem em atk FOR, inimigos vantagem contra você.', atkAdvantage: true, selfAtkVulnerable: true } },
         { n: 'Rugido Feroz', ico: '', cost: 2, kind: 'buff', minLevel: 10, desc: 'Rugido que amedronta inimigos visíveis: desvantagem em ataques contra você por 2 turnos.',
             requiresSubclass: 'berserker', /* REVIEW-#90 [8/17/25]: Presença Intimidante (Berserker PHB p.49) — paridade c/ motor C3.5 */
             blessSpell: true,
             helpDnd5e: 'Presença Intimidante (Bárbaro nível 10): ação para amedrontar uma criatura até 30m; TR SAB (CD 8 + prof + CAR). Em falha, fica amedrontada por concentração de 1 min.\nNeste fluxo: área simplificada — todos inimigos ficam com desvantagem em ataques contra você por 2 rodadas.\nV1.7 Sprint-17 Ronda 24 (2026-04-21 QA audit PHB p.49): adicionada flag `minLevel: 10` (antes faltava — Bárbaro nv 1-9 tinha acesso indevido).',
-            buffSim: { id: 'rugido_feroz', vfx: 'bless', decOn: 'round', turns: 2, kind: 'buff', condName: 'Rugido Feroz', condRule: 'PHB — Inimigos amedrontados = desvantagem em ataques enquanto você estiver à vista.', enemyAtkDisadvantage: true } },
+            buffSim: { id: 'rugido_feroz', vfx: 'bless', decOn: 'round', turns: 2, kind: 'buff', condName: 'Rugido Feroz', condRule: 'Inimigos amedrontados = desvantagem em ataques enquanto você estiver à vista.', enemyAtkDisadvantage: true } },
         /* V1.7 Sprint-17 Ronda 24 (2026-04-21 QA PHB p.49) — Frenzy Berserker nv 3+.
            Antes dizia "PHB p.48 nv 2+" e minLevel:2 (divergência dupla: página E nível).
            PHB p.49 RAW: Berserker é SUBCLASS acessada no nv 3, Frenzy é o feature. */
-        { n: 'Fúria Devastadora', ico: '', cost: 2, kind: 'attack', minLevel: 3, desc: 'Ataque brutal (PHB p.49 Berserker nv 3+) que só funciona em Fúria: 1d12 + STR extra.',
+        { n: 'Fúria Devastadora', ico: '', cost: 2, kind: 'attack', minLevel: 3, desc: 'Ataque brutal de Berserker que exige Fúria ativa: 1d12 + FOR de dano extra.',
             requiresSubclass: 'berserker', /* REVIEW-#90 [8/17/25]: Frenesi (Berserker PHB p.49) — paridade c/ motor C3.5 */
             damageSpec: { n: 1, d: 12 }, dmgType: 'slashing',
             requiresBuff: 'furia',
@@ -1535,7 +1535,7 @@ var CHAR_CLASSES = [
            targetEnemy:true → auto-pick primeiro inimigo vivo. Bônus +1d6 SÓ contra alvo marcado. */
         { n: 'Marca do Caçador', ico: '', cost: 1, kind: 'buff', bonus: true, targetEnemy: true, desc: 'Ação bônus: marca o primeiro inimigo vivo — seus ataques contra ele ganham +1d6 de dano.',
             helpDnd5e: 'Marca do Caçador / Hunter\'s Mark (Patrulheiro nv 1): **AÇÃO BÔNUS**; concentração até 1h; +1d6 de dano por ataque contra o **alvo marcado** (dano de força); pode mover a marca com outra ação bônus se o alvo morrer.\nV1.7 (2026-04-21): targetEnemy:true → auto-pick 1º inimigo vivo. Bônus +1d6 SÓ contra alvo marcado (PHB RAW). Atacar outros alvos não ganha bônus.',
-            buffSim: { id: 'marca_cacador', vfx: 'bless', decOn: 'round', turns: 3, kind: 'buff', condName: 'Marca do Caçador', condRule: 'PHB p.251 — BA cast; +1d6 dano por ataque contra alvo marcado (concentração).', dmgBonusDie: { n: 1, d: 6 }, concentration: true, markedTargetOnly: true } },
+            buffSim: { id: 'marca_cacador', vfx: 'bless', decOn: 'round', turns: 3, kind: 'buff', condName: 'Marca do Caçador', condRule: 'BA cast; +1d6 dano por ataque contra alvo marcado (concentração).', dmgBonusDie: { n: 1, d: 6 }, concentration: true, markedTargetOnly: true } },
         { n: 'Tiro Certeiro', ico: '', cost: 2, kind: 'attack', desc: 'Disparo pesado: 2d8 + DEX',
             damageSpec: { n: 2, d: 8 },
             helpDnd5e: 'Dois dados de dano no acerto; vs CA normal.' },
@@ -1551,7 +1551,7 @@ var CHAR_CLASSES = [
         { n: 'Passo Oculto', ico: '', cost: 1, kind: 'buff', desc: 'Encobre aliado (ou você) em névoa: vantagem em ataques até ser detectado (próximos 2 ataques).',
             shieldSpell: true, targetAlly: true,
             helpDnd5e: 'Passar sem Rastro: +10 em Furtividade para alvos ao alcance. Neste fluxo: simplificado para vantagem nos próximos 2 ataques do patrulheiro.',
-            buffSim: { id: 'passo_oculto', vfx: 'silent', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Passo Oculto', condRule: 'PHB — +10 Furtividade; vantagem em ataques à distância enquanto oculto.', atkAdvantage: true } },
+            buffSim: { id: 'passo_oculto', vfx: 'silent', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Passo Oculto', condRule: '+10 Furtividade; vantagem em ataques à distância enquanto oculto.', atkAdvantage: true } },
         { n: 'Invocar Lobo', ico: '', cost: 3, kind: 'buff',
             desc: 'Invoca um lobo espiritual aliado que luta por 3 rodadas (11 PV, CA 13, ataca 2d4+2).',
             summonBeast: {
@@ -1611,7 +1611,7 @@ var CHAR_CLASSES = [
                Patrulheiro half caster: nv 2 (1st), nv 5 (2nd), nv 9 (3rd), nv 13 (4th), nv 17 (5th). */
             /* V1.7 Sprint-17 Ronda 28 (2026-04-21 QA PHB App.A Restrained): adicionado
                `restrained:true` no nextHitAppliesDebuff (ativa desvantagem TR DES). */
-            buffSim: { id: 'ensnaring_strike', vfx: 'bless', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Golpe de Armadilha (pronto)', condRule: 'PHB p.242 — próximo atk aplica Contido + 1d6 piercing (escala +1d6/slot).', dmgBonusDie: { n: 1, d: 6, scaleByCasterLevel: { breakpoints: [[5, 1], [9, 2], [13, 3], [17, 4]] } }, concentration: true, nextHitAppliesDebuff: { id: 'ensnared_restrained', turns: 3, n: 'Contido (Enredado)', ico: '', atkDisadvantage: true, targetedAdvantage: true, speed0: true, restrained: true, repeatSave: { ability: 'str' }, dndCondition: 'Contido (PHB App.A — Golpe de Armadilha)' } } },
+            buffSim: { id: 'ensnaring_strike', vfx: 'bless', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Golpe de Armadilha (pronto)', condRule: 'próximo atk aplica Contido + 1d6 piercing (escala +1d6/slot).', dmgBonusDie: { n: 1, d: 6, scaleByCasterLevel: { breakpoints: [[5, 1], [9, 2], [13, 3], [17, 4]] } }, concentration: true, nextHitAppliesDebuff: { id: 'ensnared_restrained', turns: 3, n: 'Contido (Enredado)', ico: '', atkDisadvantage: true, targetedAdvantage: true, speed0: true, restrained: true, repeatSave: { ability: 'str' }, dndCondition: 'Contido (Golpe de Armadilha)' } } },
         /* V1.7 Sprint-12 (2026-04-21 closeout review) — Chuva de Espinhos (Hail of Thorns PHB p.251):
            Patrulheiro nv 1. BA cast + próximo atk ranged em acerto → AOE 1d10 piercing em 1.5m TR DEX metade. */
         { n: 'Chuva de Espinhos', ico: '', cost: 2, kind: 'buff', bonus: true,
@@ -1619,7 +1619,7 @@ var CHAR_CLASSES = [
             helpDnd5e: 'Chuva de Espinhos / Hail of Thorns (Patrulheiro nv 1): **AÇÃO BÔNUS**; concentração até 1 min. No próximo ataque à distância com arma que você acertar, chuva de espinhos cai em 1,5m; criaturas nesse raio fazem TR DES; em falha 1d10 piercing, em sucesso metade.\nArena stub: buff BA concentration; próximo atk ranged ganha dmgBonusDie:1d10 (representa AOE aplicado ao alvo primário em arena sem área).',
             /* V1.7 Sprint-17 Ronda 15 (2026-04-21 QA PHB p.251) — Hail of Thorns
                upcast: +1d10 per slot above 1st. Cap PHB: max 6d10. */
-            buffSim: { id: 'hail_of_thorns', vfx: 'bless', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Chuva de Espinhos (pronta)', condRule: 'PHB p.251 — próximo atk ranged +1d10 AOE (escala +1d10/slot).', dmgBonusDie: { n: 1, d: 10, scaleByCasterLevel: { breakpoints: [[5, 1], [9, 2], [13, 3], [17, 4]] } }, concentration: true, consumeOnHit: true } },
+            buffSim: { id: 'hail_of_thorns', vfx: 'bless', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Chuva de Espinhos (pronta)', condRule: 'próximo atk ranged +1d10 AOE (escala +1d10/slot).', dmgBonusDie: { n: 1, d: 10, scaleByCasterLevel: { breakpoints: [[5, 1], [9, 2], [13, 3], [17, 4]] } }, concentration: true, consumeOnHit: true } },
         /* V1.16 (2026-10-16) — Conjurar Seres da Floresta (Conjure Woodland Beings).
            Patrulheiro nv 13+. Invoca 2 Sátiros da Floresta (Concentração). */
         { n: 'Conjurar Seres da Floresta', ico: '🧚', cost: 6, kind: 'summon_fey', minLevel: 13, concentration: true,
@@ -1707,7 +1707,7 @@ var CHAR_CLASSES = [
         { n: 'Inspiração', ico: '', cost: 1, kind: 'buff', bonus: true, desc: 'Ação bônus: concede dado de inspiração a outro aliado — escala com seu nível (d6/d8/d10/d12).',
             blessSpell: true, targetAlly: 'other',
             helpDnd5e: 'Inspiração do Bardo / Bardic Inspiration: **AÇÃO BÔNUS**. Uma criatura **diferente do Bardo** ao alcance recebe 1d6 (nível 1-4), 1d8 (5-9), 1d10 (10-14), 1d12 (15+). Pode adicionar o dado a um ataque, TR ou teste nos próximos 10 min.\nV1.7 Stage-FIX (2026-04-21): flag bonus:true adicionada.\nV1.7 Sprint-17 (2026-04-21): targetAlly:"other" — não pode mais castar em si mesmo (PHB RAW).',
-            buffSim: { id: 'inspiracao', vfx: 'bless', decOn: 'round', turns: 3, kind: 'buff', condName: 'Inspiração do Bardo', condRule: 'PHB p.53 — BA cast; +1dX por ataque (tamanho escala por nível).', bardicInspiration: true } },
+            buffSim: { id: 'inspiracao', vfx: 'bless', decOn: 'round', turns: 3, kind: 'buff', condName: 'Inspiração do Bardo', condRule: 'BA cast; +1dX por ataque (tamanho escala por nível).', bardicInspiration: true } },
         /* V1.7 EFFECT-ADD (2026-04-21) — trovão estrondoso: alvo perde próxima BA (atordoado pelo som) */
         { n: 'Golpe Arcano', ico: '', cost: 2, kind: 'attack', desc: 'Truque: 2d6 de trovão + alvo perde próxima ação bônus.',
             damageSpec: { n: 2, d: 6 }, dmgType: 'thunder',
@@ -1753,7 +1753,7 @@ var CHAR_CLASSES = [
             desc: 'Enchant: TR SAB ou ENCANTADO 3 rodadas (afeta qualquer criatura).',
             damageSpec: { n: 0, d: 0 }, save: { ability: 'wis' },
             helpDnd5e: 'Enfeitiçar Monstros / Charm Monster (Bardo/Druida/Feiticeiro/Bruxo/Mago nv 4): 1 action; alvo qualquer criatura (não só humanoide como Charm Person). TR SAB; em falha ENCANTADO por 1h ou até dano. Vantagem TR se em combate.\nUpcast: +1 alvo por nível acima do 4º.\nArena: reusa pattern de Charm Person — 0 dano + debuff Charmed (cantAtkCaster + targetedAdvantage) 3 rodadas + repeatSave SAB.',
-            afterAttackEnemyDebuff: { id: 'charm_monster', turns: 3, n: 'Encantado (Monstros)', ico: '', cantAtkCaster: true, targetedAdvantage: true, repeatSave: { ability: 'wis' }, dndCondition: 'Enfeitiçado (PHB App.A — Charm Monster)' } },
+            afterAttackEnemyDebuff: { id: 'charm_monster', turns: 3, n: 'Encantado (Monstros)', ico: '', cantAtkCaster: true, targetedAdvantage: true, repeatSave: { ability: 'wis' }, dndCondition: 'Enfeitiçado (Charm Monster)' } },
         /* V1.7 Sprint-6 (2026-04-21 closeout) — Enfeitiçar Pessoa (Charm Person PHB p.226) Bardo nv 1.
            Aplica condição ENFEITIÇADO (PHB Appendix A): alvo não pode atacar o conjurador nem
            alvejá-lo com efeito hostil; conjurador tem advantage em interações sociais com alvo.
@@ -1763,7 +1763,7 @@ var CHAR_CLASSES = [
             desc: 'Encantamento: TR SAB ou ENFEITIÇADO — não pode atacar você.',
             damageSpec: { n: 0, d: 0 }, save: { ability: 'wis' },
             helpDnd5e: 'Enfeitiçar Pessoa / Charm Person (Bardo/Mago/Feiticeiro/Bruxo/Druida nv 1): alvo humanoide faz TR SAB (com vantagem se em combate). Em falha fica ENCANTADO por 1h ou até você/aliados atacá-lo.\nEnfeitiçado (PHB Appendix A): não pode atacar/alvejar o conjurador com habilidades/magias hostis; conjurador com vantagem em testes sociais contra o alvo. NÃO incapacita (PHB-fix: old D&D tinha skip_turn — removido PHB 5e).\nArena stub: 0 dano + debuff Encantado 3 rodadas + flag `cantAtkCaster:true` + `targetedAdvantage:true` (representa aliados tirarem vantagem do estado).',
-            afterAttackEnemyDebuff: { id: 'charm_person', turns: 3, n: 'Encantado', ico: '', cantAtkCaster: true, targetedAdvantage: true, repeatSave: { ability: 'wis' }, dndCondition: 'Enfeitiçado (PHB App.A — Charm Person)' } },
+            afterAttackEnemyDebuff: { id: 'charm_person', turns: 3, n: 'Encantado', ico: '', cantAtkCaster: true, targetedAdvantage: true, repeatSave: { ability: 'wis' }, dndCondition: 'Enfeitiçado (Charm Person)' } },
         /* V1.7 NEW (2026-04-21) — Palavras Cortantes (Cutting Words PHB p.55) — REAÇÃO Bardo nv3 (Lore) */
         { n: 'Palavras Cortantes', ico: '', cost: 1, kind: 'buff', reactionOnly: true,
             desc: 'REAÇÃO (Bardo Colégio do Saber nv 3): quando inimigo rola ataque/teste, subtrai 1 dado de Inspiração (1d6/1d8/1d10/1d12 por nível) da rolagem.',
@@ -1800,11 +1800,11 @@ var CHAR_CLASSES = [
         /* V1.7 Sprint-17 (2026-04-21 QA PHB p.78) — Patient Defense Monge nv 2+. */
         { n: 'Defesa Paciente', ico: '', cost: 1, kind: 'buff', bonus: true, minLevel: 2, desc: 'Ação bônus: gasta 1 Ki para Esquivar — atacantes rolam com DESVANTAGEM até início do próximo turno.',
             helpDnd5e: 'Defesa Paciente / Patient Defense (Monge nível 2): **AÇÃO BÔNUS**; gasta 1 ponto de Ki; ação Esquivar (Dodge) no turno.\nPHB: ataques contra você ficam com DESVANTAGEM até o início do seu próximo turno (se puder ver o atacante). TRs de Destreza com vantagem.\nV1.7 Stage-FIX (2026-04-21): era `acBonus:2` stub — agora usa `enemyAtkDisadvantage:true` PHB-fiel (d20 do atacante rola com desvantagem, mecanicamente mais forte que +2 CA).',
-            buffSim: { id: 'defesa_paciente', vfx: 'dodge', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Defesa Paciente', condRule: 'PHB p.78 — BA + 1 Ki: atacantes visíveis rolam com DESVANTAGEM até início do próximo turno do monge.', enemyAtkDisadvantage: true } },
+            buffSim: { id: 'defesa_paciente', vfx: 'dodge', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Defesa Paciente', condRule: 'BA + 1 Ki: atacantes visíveis rolam com DESVANTAGEM até início do próximo turno do monge.', enemyAtkDisadvantage: true } },
         /* V1.7 Sprint-17 (2026-04-21 QA PHB p.78) — Step of the Wind Monge nv 2+. */
         { n: 'Passo do Vento', ico: '', cost: 1, kind: 'buff', bonus: true, minLevel: 2, desc: 'Ação bônus: gasta 1 Ki para Correr ou Desengajar — vantagem no próximo ataque.',
             helpDnd5e: 'Passo do Vento / Step of the Wind (Monge nível 2): **AÇÃO BÔNUS**; gasta 1 ponto de Ki; faz a ação Correr (Dash) ou Desengajar (Disengage).\nAlém disso: distância de salto dobrada pelo turno.\nNo arena: traduzido em vantagem no próximo ataque (efeito tático mais comum — posicionamento flanco).',
-            buffSim: { id: 'passo_vento', vfx: 'silent', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Passo do Vento', condRule: 'PHB p.78 — BA + 1 Ki: Correr/Desengajar traduzido em vantagem no próximo ataque.', atkAdvantage: true } },
+            buffSim: { id: 'passo_vento', vfx: 'silent', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Passo do Vento', condRule: 'BA + 1 Ki: Correr/Desengajar traduzido em vantagem no próximo ataque.', atkAdvantage: true } },
         /* V1.7 Sprint-17 (2026-04-21 QA PHB audit) — Golpe Atordoante custo corrigido:
            PHB p.79 RAW = 1 Ki (rider on attack). Antes era cost:2 (inconsistente com
            desc que já falava "1 Ki"). Corrigido pra cost:1 PHB-fiel. */
@@ -1815,7 +1815,7 @@ var CHAR_CLASSES = [
             /* V1.7 Sprint-17 Ronda 17 (2026-04-21 QA PHB App.A Stunned) — Atordoado
                completo: incapacitated + speed0 + autoFailStrDex + atacantes
                vantagem. Antes só tinha skipTurn (incompleto). */
-            afterAttackEnemyDebuff: { id: 'atordoado_monge', turns: 1, n: 'Atordoado', ico: '', skipTurn: true, speed0: true, targetedAdvantage: true, autoFailStrDex: true, saveOnHit: { ability: 'con' }, dndCondition: 'Atordoado (PHB App.A — Stunning Strike)' } },
+            afterAttackEnemyDebuff: { id: 'atordoado_monge', turns: 1, n: 'Atordoado', ico: '', skipTurn: true, speed0: true, targetedAdvantage: true, autoFailStrDex: true, saveOnHit: { ability: 'con' }, dndCondition: 'Atordoado (Stunning Strike)' } },
         /* V1.7 Sprint-12 (2026-04-21 closeout review) — Corpo Calmo (Stillness of Mind PHB p.79):
            Monge nv 7. Ação que remove efeitos Charmed ou Frightened do próprio monge. */
         /* V1.7 Sprint-17 (2026-04-21 QA PHB p.79) — Stillness of Mind Monge nv 7+. */
@@ -1906,7 +1906,7 @@ var CHAR_CLASSES = [
         { n: 'Passar sem Rastro', ico: '', cost: 2, kind: 'buff',
             desc: 'Self: +10 stealth → vantagem próximo atk (concentração).',
             helpDnd5e: 'Passar sem Deixar Rastro / Pass Without Trace (Druida/Patrulheiro nv 2): 1 action; concentração 1h. Caster e aliados em 9m ganham +10 em testes de Furtividade + impossíveis de rastrear (exceto magia).\nArena stub: buffSim atkAdvantage (representa surpresa tática da furtividade) + concentration 3 rodadas. Stealth checks não existem em combate.',
-            buffSim: { id: 'pass_without_trace', vfx: 'silent', decOn: 'after_npc', turns: 3, kind: 'buff', condName: 'Passar sem Rastro', condRule: 'PHB p.264 — +10 stealth → vantagem atk (stub).', atkAdvantage: true, concentration: true } },
+            buffSim: { id: 'pass_without_trace', vfx: 'silent', decOn: 'after_npc', turns: 3, kind: 'buff', condName: 'Passar sem Rastro', condRule: '+10 stealth → vantagem atk (stub).', atkAdvantage: true, concentration: true } },
         /* V1.7 Sprint-13 (2026-04-21 closeout review) — Produzir Chama (Produce Flame PHB p.270):
            Druida cantrip. Cria chama na mão (luz 3m) + ranged spell atk 1d8 fogo.
            Reusa damageSpec + scale:cantrip + ranged. */
@@ -1923,14 +1923,14 @@ var CHAR_CLASSES = [
             helpDnd5e: 'Enredar / Entangle (Druida nv 1): plantas crescem num quadrado de 6m. Criaturas na área fazem TR FOR; em falha, ficam CONTIDAS (Restrained: atk disadv, atacantes atk adv, speed 0). Ao fim de cada turno, a criatura pode gastar ação pra repetir o TR.\nArena: dano 0 + debuff Contido por 3 rodadas, com repeatSave FOR.',
             /* V1.7 Sprint-17 Ronda 28 (2026-04-21 QA PHB App.A Restrained): adicionado flag
                `restrained:true` para ativar desvantagem em TRs DES (via _simSaveAdvState). */
-            afterAttackEnemyDebuff: { id: 'entangle_restrained', turns: 3, n: 'Contido', ico: '', atkDisadvantage: true, targetedAdvantage: true, speed0: true, restrained: true, repeatSave: { ability: 'str' }, dndCondition: 'Contido (Restrained PHB App.A — Enredar)' } },
+            afterAttackEnemyDebuff: { id: 'entangle_restrained', turns: 3, n: 'Contido', ico: '', atkDisadvantage: true, targetedAdvantage: true, speed0: true, restrained: true, repeatSave: { ability: 'str' }, dndCondition: 'Contido (Enredar)' } },
         /* V1.7 Sprint-15 (2026-04-21 closeout review) — Crescimento Espinhoso (Spike Growth PHB p.278):
            Druida/Patrulheiro nv 2. AOE 6m terrain difícil + 2d4 piercing/1.5m movido. Concentração 10min. */
         { n: 'Crescimento Espinhoso', ico: '', cost: 2, kind: 'attack', minLevel: 3, dmgType: 'piercing',
             desc: 'Terreno: AOE 6m — 2d4 piercing + speed reduzido (concentração).',
             damageSpec: { n: 2, d: 4 }, multiTarget: true,
             helpDnd5e: 'Crescimento Espinhoso / Spike Growth (Druida/Patrulheiro nv 2): 1 action; concentração 10 min. AOE 6m raio com espinhos. Criaturas que moverem na área sofrem 2d4 piercing por 1,5m movido. Terreno difícil.\nArena stub: 0 dmg AOE único no cast + debuff speed0 + cold dmg 1x (simplificação — ongoing terrain não modelado sem grid).',
-            afterAttackEnemyDebuff: { id: 'spike_growth', turns: 3, n: 'Terreno Espinhoso', ico: '', speed0: true, dndCondition: 'Terreno Espinhoso (PHB — Spike Growth; speed reduzido)' } },
+            afterAttackEnemyDebuff: { id: 'spike_growth', turns: 3, n: 'Terreno Espinhoso', ico: '', speed0: true, dndCondition: 'Terreno Espinhoso (Spike Growth; speed reduzido)' } },
         /* V1.7 Sprint-15 (2026-04-21 closeout review) — Plaga de Insetos (Insect Plague PHB p.253):
            Druida/Clérigo nv 5. AOE esfera 6m 4d10 piercing TR CON metade. Concentração 10min. */
         /* V1.7 Sprint-17 (2026-04-21 QA PHB p.253) — Insect Plague upcast +1d10/slot acima 5º. */
@@ -1958,7 +1958,7 @@ var CHAR_CLASSES = [
             desc: 'Doença: TR CON ou ENVENENADO 3 rodadas (atk/checks com desvantagem).',
             damageSpec: { n: 0, d: 0 }, save: { ability: 'con' },
             helpDnd5e: 'Contágio / Contagion (Druida/Clérigo nv 5): toca alvo com doença. Atk magia melee; em hit alvo fica ENVENENADO. TR CON fim de cada turno: 3 sucessos = encerra, 3 falhas = doença inflige (7 tipos PHB).\nEnvenenado (PHB App.A): atk/ability checks com desvantagem.\nArena stub: 0 dano + debuff Envenenado 3 rodadas + repeatSave CON.\nV1.7 Sprint-17 Ronda 18 (2026-04-21): era Exausto (divergência PHB) — corrigido pra Poisoned RAW.',
-            afterAttackEnemyDebuff: { id: 'contagion_poisoned', turns: 3, n: 'Envenenado (Contágio)', ico: '', atkDisadvantage: true, abilityCheckDisadv: true, repeatSave: { ability: 'con' }, dndCondition: 'Envenenado (PHB App.A — Contágio)' } },
+            afterAttackEnemyDebuff: { id: 'contagion_poisoned', turns: 3, n: 'Envenenado (Contágio)', ico: '', atkDisadvantage: true, abilityCheckDisadv: true, repeatSave: { ability: 'con' }, dndCondition: 'Envenenado (Contágio)' } },
         { n: 'Conjurar Animais', ico: '', cost: 5, kind: 'summon_pack',
             minLevel: 5,
             desc: 'Conjura espíritos feéricos na forma de 4 lobos espirituais (TR 1/4, Pack Tactics, Concentração).',
@@ -2209,7 +2209,7 @@ var CHAR_CLASSES = [
             helpDnd5e: 'Raio Caótico / Chaos Bolt (Sorcerer exclusivo nível 1): ataque de magia; role 2d8 — tipo do dano é determinado pela soma (1:Ácido, 2:Frio, 3:Fogo, 4:Força, 5:Elétrico, 6:Necrótico, 7:Psíquico, 8:Radiante, 9:Trovão, 10-12:Veneno). Se 2d8 mostrarem mesmo número: salta pra alvo próximo.\nNo arena: dano fixo 2d8 force (tipo aleatório + salto simplificados).' },
         { n: 'Metamagia: Duplicar', ico: '', cost: 3, kind: 'buff', bonus: true, minLevel: 3, desc: 'Ação bônus: próxima magia de ataque alvo único atinge 2 alvos.',
             helpDnd5e: 'Feitiço Duplicado / Twinned Spell (Feiticeiro Metamagic): gasta pontos de feitiçaria = nível da magia (mín 1). Quando lança magia alvo único, pode direcionar a segundo alvo.\nNo arena: stub como buff bônus que marca próximo ataque como vantagem + 1d6 extra (representa o "segundo alvo" condensado).\nV1.7 Sprint-17 Ronda 24 (2026-04-21 QA audit PHB p.101): adicionada flag `minLevel: 3` (PHB RAW — Feiticeiro escolhe 2 Metamagics no nv 3, nunca no nv 1-2).',
-            buffSim: { id: 'metamagia_duplicar', vfx: 'arcane', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Metamagia: Duplicar', condRule: 'PHB p.101 — próxima magia alvo único atinge 2 alvos. Stub arena: vantagem + 1d6 dano no próximo ataque.', atkAdvantage: true, dmgBonusDie: { n: 1, d: 6 } } },
+            buffSim: { id: 'metamagia_duplicar', vfx: 'arcane', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Metamagia: Duplicar', condRule: 'próxima magia alvo único atinge 2 alvos. vantagem + 1d6 dano no próximo ataque.', atkAdvantage: true, dmgBonusDie: { n: 1, d: 6 } } },
         /* V1.28 (2026-10-21) — Metamagia: Magia Sutil / Subtle Spell (Feiticeiro nv 3+). */
         { n: 'Metamagia: Magia Sutil', ico: '🤫', cost: 1, kind: 'buff', bonus: true, minLevel: 3,
             desc: 'Metamagia: Magia Sutil (1 Ponto de Feitiçaria): conjura sem componentes verbais ou somáticos, imune a Contramágica e silêncio.',
@@ -2219,18 +2219,18 @@ var CHAR_CLASSES = [
         { n: 'Passo Brumoso', ico: '', cost: 2, kind: 'buff', bonus: true, minLevel: 3,
             desc: 'Ação bônus (2º nível, nv 3+): teleport 9m — reposicionamento (vantagem próximo ataque).',
             helpDnd5e: 'Passo Brumoso / Misty Step (2º nível): **AÇÃO BÔNUS**; teleport 9m.\nStub arena: vantagem no próximo ataque (reposicionamento tático).',
-            buffSim: { id: 'passo_brumoso', vfx: 'arcane', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Passo Brumoso', condRule: 'PHB p.260 — teleport 9m. Stub: vantagem próximo ataque.', atkAdvantage: true } },
+            buffSim: { id: 'passo_brumoso', vfx: 'arcane', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Passo Brumoso', condRule: 'teleport 9m. vantagem próximo ataque.', atkAdvantage: true } },
         /* V1.7 NEW (2026-04-21) — Metamagia: Acelerar (Quickened Spell PHB p.101) */
         /* V1.7 Sprint-17 Ronda 24 (2026-04-21 QA audit PHB p.101): adicionada `minLevel: 3`
            (PHB RAW — Metamagics só disponível no nv 3+ Feiticeiro). */
         { n: 'Metamagia: Acelerar', ico: '', cost: 2, kind: 'buff', bonus: true, minLevel: 3,
             desc: 'Ação bônus: próxima magia de ação vira bônus — dispara rápido (vantagem + crítico estendido).',
             helpDnd5e: 'Feitiço Acelerado / Quickened Spell (Feiticeiro Metamagic): gasta 2 pontos de feitiçaria; a próxima magia que você lançar neste turno com tempo de 1 ação vira 1 ação bônus.\nArena stub: aplica vantagem + crítico estendido (19-20) no próximo ataque mágico (representa a velocidade do cast).\nV1.7 Sprint-17 Ronda 24 (2026-04-21 QA audit PHB p.101): adicionada flag `minLevel: 3`.',
-            buffSim: { id: 'metamagia_acelerar', vfx: 'arcane', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Metamagia: Acelerar', condRule: 'PHB p.101 — próxima magia ação vira bônus. Stub: vantagem + d6 no próximo ataque.', atkAdvantage: true, dmgBonusDie: { n: 1, d: 6 } } },
+            buffSim: { id: 'metamagia_acelerar', vfx: 'arcane', decOn: 'after_npc', turns: 1, kind: 'buff', condName: 'Metamagia: Acelerar', condRule: 'próxima magia ação vira bônus. vantagem + d6 no próximo ataque.', atkAdvantage: true, dmgBonusDie: { n: 1, d: 6 } } },
         { n: 'Contramágica', ico: '', cost: 3, kind: 'buff', reactionOnly: true, shieldSpell: true, minLevel: 5,
             desc: 'Reação: +3 CA e vantagem contra magias por 2 turnos. Dissipa parcialmente magia inimiga.',
             helpDnd5e: 'Contramágica: reação para interromper outra magia em conjuração (nível 3 do espaço ou menor é dissipada automaticamente; acima exige teste).\nV1.7 (2026-04-21) — AGORA É REAÇÃO VERDADEIRA: aparece popup quando você for atingido por ataque/magia; gastar 3 Mana aplica +3 CA e vantagem em TR contra magia por 2 rodadas. Não pode mais ser castada em ação própria.',
-            buffSim: { id: 'contramagica', vfx: 'arcane', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Contramágica', condRule: 'PHB p.237 — Reação: +3 CA e vantagem em TR contra magia por 2 rodadas.', acBonus: 3, magicSaveAdvantage: true } },
+            buffSim: { id: 'contramagica', vfx: 'arcane', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Contramágica', condRule: 'Reação: +3 CA e vantagem em TR contra magia por 2 rodadas.', acBonus: 3, magicSaveAdvantage: true } },
         /* V1.21 (2026-10-16) — Desintegrar (Disintegrate).
            Feiticeiro nv 11+. 10d6+40 dano de força (TR Destreza anula). Reduzir a 0 PV desintegra em cinzas. */
         { n: 'Desintegrar', ico: '⚡', cost: 6, kind: 'attack', minLevel: 11,
@@ -2364,7 +2364,7 @@ var CHAR_CLASSES = [
            targetEnemy:true → auto-pick primeiro inimigo vivo. Bônus +1d6 SÓ contra alvo marcado. */
         { n: 'Maldição', ico: '', cost: 1, kind: 'buff', bonus: true, targetEnemy: true, desc: 'Ação bônus: amaldiçoa primeiro inimigo — seus ataques contra ele ganham +1d6 necrótico.',
             helpDnd5e: 'Maldição / Hex (Bruxo nível 1): **AÇÃO BÔNUS**; amaldiçoa criatura; seus ataques contra **essa criatura** causam +1d6 necrótico adicional. Concentração até 1h. Se alvo morrer, pode mover a maldição com BA.\nV1.7 (2026-04-21): targetEnemy:true → auto-pick 1º inimigo vivo. Bônus SÓ contra alvo amaldiçoado (PHB RAW).',
-            buffSim: { id: 'maldicao_hex', vfx: 'shadow', decOn: 'round', turns: 3, kind: 'buff', condName: 'Maldição (Hex)', condRule: 'PHB p.251 — BA cast; +1d6 necrótico por ataque contra alvo marcado (concentração).', dmgBonusDie: { n: 1, d: 6 }, concentration: true, markedTargetOnly: true } },
+            buffSim: { id: 'maldicao_hex', vfx: 'shadow', decOn: 'round', turns: 3, kind: 'buff', condName: 'Maldição (Hex)', condRule: 'BA cast; +1d6 necrótico por ataque contra alvo marcado (concentração).', dmgBonusDie: { n: 1, d: 6 }, concentration: true, markedTargetOnly: true } },
         { n: 'Repreensão Infernal', ico: '', cost: 2, kind: 'attack', reactionOnly: true, desc: 'REAÇÃO: quando você é atingido por ataque — alvo faz TR DES ou toma 2d10 fogo.',
             damageSpec: { n: 2, d: 10 }, dmgType: 'fire', save: { ability: 'dex' },
             helpDnd5e: 'Repreensão Infernal / Hellish Rebuke (Bruxo nível 1): **REAÇÃO** tomada quando você é atingido por ataque e vê o atacante. Alvo faz TR DES; em falha, 2d10 fogo; em sucesso, metade.\nV1.7 Stage 7 (2026-04-21): reactionOnly:true — só triggada via reaction_prompt quando NPC te acerta (mesma infra do Escudo Arcano PHB p.275).' },
@@ -2382,7 +2382,7 @@ var CHAR_CLASSES = [
             desc: 'Cone: TR SAB ou AMEDRONTADO + fugir 3 rodadas.',
             damageSpec: { n: 0, d: 0 }, save: { ability: 'wis' }, multiTarget: true,
             helpDnd5e: 'Medo / Fear (Bruxo/Mago/Feiticeiro/Bardo nv 3): 1 action; concentração 1 min. Cone 9m; criaturas fazem TR SAB; em falha, FICAM AMEDRONTADAS e DERRUBAM o que estão segurando + usam movimento pra fugir do caster (Dash).\nAmedrontado (PHB App.A): desvantagem em atk e checks enquanto fonte do medo visível.\nArena: 0 dano + debuff Frightened (atkDisadv + skipBonus) 3 rodadas + repeatSave SAB + concentration.',
-            afterAttackEnemyDebuff: { id: 'fear_spell', turns: 3, n: 'Amedrontado (Medo)', ico: '', atkDisadvantage: true, skipBonus: true, repeatSave: { ability: 'wis' }, concentration: true, dndCondition: 'Amedrontado (PHB App.A — Fear)' } },
+            afterAttackEnemyDebuff: { id: 'fear_spell', turns: 3, n: 'Amedrontado (Medo)', ico: '', atkDisadvantage: true, skipBonus: true, repeatSave: { ability: 'wis' }, concentration: true, dndCondition: 'Amedrontado (Fear)' } },
         /* V1.7 Sprint-13 (2026-04-21 closeout review) — Bruxaria (Witch Bolt PHB p.289):
            Bruxo/Feiticeiro/Mago nv 1. Ranged spell atk 1d12 lightning + concentration ongoing
            (BA turnos seguintes pra 1d12 automático no mesmo alvo).
@@ -2403,14 +2403,14 @@ var CHAR_CLASSES = [
                upcast: +5 tempHp + 5 cold retaliation per slot above 1st.
                Bruxo slot progression: nv 1 (1st)=5, nv 3 (2nd)=10, nv 5 (3rd)=15,
                nv 7 (4th)=20, nv 9+ (5th)=25. */
-            buffSim: { id: 'armor_of_agathys', vfx: 'arcane', decOn: 'round', turns: 3, kind: 'buff', condName: 'Armadura de Agathys', condRule: 'PHB p.215 — 5 PV temp (+5/slot) + 5 cold retaliation melee.', tempHp: 5, tempHpScaleByLevel: { breakpoints: [[3, 5], [5, 10], [7, 15], [9, 20]] }, coldRetaliation: 5 } },
+            buffSim: { id: 'armor_of_agathys', vfx: 'arcane', decOn: 'round', turns: 3, kind: 'buff', condName: 'Armadura de Agathys', condRule: '5 PV temp (+5/slot) + 5 cold retaliation melee.', tempHp: 5, tempHpScaleByLevel: { breakpoints: [[3, 5], [5, 10], [7, 15], [9, 20]] }, coldRetaliation: 5 } },
         /* V1.7 Sprint-12 (2026-04-21 closeout review) — Golpe de Lâmina Sombria (Shadow Blade PHB p.275):
            Bruxo/Feiticeiro/Mago nv 2. BA cast — invoca arma 2d8 psychic + vantagem em atk em escuridão.
            Arena stub: BA buff com dmgBonusDie:2d8 próximo atk (concentração). */
         { n: 'Lâmina Sombria', ico: '', cost: 2, kind: 'buff', bonus: true, minLevel: 3,
             desc: 'Ação bônus: invoca arma sombria — próximo atk +2d8 psíquico.',
             helpDnd5e: 'Golpe de Lâmina Sombria / Shadow Blade (Bruxo/Feiticeiro/Mago nv 2): **AÇÃO BÔNUS**; concentração até 1 min. Invoca espada de sombras (2d8 psíquico, finesse/light/thrown); vantagem em atk contra alvos em escuridão/penumbra. Upcast: +1d8 no nv 3, +2d8 no nv 5, +3d8 no nv 7.\nArena stub: buff BA concentration; próximo atk ganha dmgBonusDie:2d8 psychic. Em stub arena sem luz-tracking, não aplica vantagem automática.',
-            buffSim: { id: 'shadow_blade', vfx: 'shadow', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Lâmina Sombria', condRule: 'PHB p.275 — próximo atk +2d8 psíquico.', dmgBonusDie: { n: 2, d: 8 }, concentration: true } },
+            buffSim: { id: 'shadow_blade', vfx: 'shadow', decOn: 'after_npc', turns: 2, kind: 'buff', condName: 'Lâmina Sombria', condRule: 'próximo atk +2d8 psíquico.', dmgBonusDie: { n: 2, d: 8 }, concentration: true } },
         /* V1.19 (2026-10-16) — Conjurar Seres Feéricos (Conjure Fey / Arcanum Místico).
            Bruxo nv 11+. Invoca 1 Nobre Eladrin (Concentração). */
         { n: 'Conjurar Seres Feéricos', ico: '🧝', cost: 1, kind: 'summon_greater_fey', minLevel: 11, concentration: true,
