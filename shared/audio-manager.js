@@ -185,28 +185,60 @@ function _injectCSS(){const style=document.createElement('style');style.textCont
             .va-backdrop.open {
                 display: block;
             }
-            /* ── Footer audio button (matches .btn-action) ── */
+            /* ── Footer audio button (matches .btn-action e .fb-btn) ── */
             .va-footer-btn {
-                display: flex;
+                display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                background: var(--v-bg-raised, #332a22);
-                border: 1px solid var(--v-border, #4a3828);
-                border-radius: 8px;
-                color: var(--v-text-faint, #8a7a68);
+                background: linear-gradient(180deg, rgba(64,48,26,0.92), rgba(34,25,14,0.96));
+                border: 1px solid rgba(232,196,90,0.55);
+                border-radius: var(--v-radius-sm, 6px);
+                color: #ffe89e;
                 cursor: pointer;
-                padding: 8px 3px;
-                min-height: 40px;
-                font-size: 14px;
-                flex: 0 0 40px;
-                transition: color var(--v-transition), border-color var(--v-transition);
+                padding: var(--v-space-xs, 2px);
+                min-height: 32px;
+                max-width: 32px;
+                min-width: 32px;
+                flex: 0 0 32px;
+                box-sizing: border-box;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.45), inset 0 1px 0 rgba(232,196,90,0.22);
+                transition: border-color var(--v-transition, 0.15s), background var(--v-transition, 0.15s), transform 0.1s;
+            }
+            .va-footer-btn:hover {
+                border-color: #ffd685;
+                color: #ffe89e;
+                background: linear-gradient(180deg, rgba(82,62,34,0.95), rgba(46,34,18,0.98));
+                box-shadow: 0 2px 8px rgba(0,0,0,0.55), 0 0 8px rgba(232,196,90,0.35);
             }
             .va-footer-btn.va-playing {
-                color: var(--v-gold, #c4953a);
-                border-color: rgba(196,149,58,0.3);
+                border-color: rgba(232,196,90,0.85);
             }
             .va-footer-btn:active {
-                transform: scale(0.95);
+                transform: scale(0.94);
+            }
+            /* ── Volume badge estilo Guia de Ajuda (.v-help-qbadge) ── */
+            .v-volume-badge {
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                border: 1.5px solid #e8c45a;
+                background: radial-gradient(circle at 35% 30%, rgba(232,196,90,0.38), rgba(40,28,14,0.96));
+                color: #ffe89e;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                text-shadow: 0 0 8px rgba(232,196,90,0.9), 0 1px 2px rgba(0,0,0,0.95);
+                box-shadow: 0 2px 6px rgba(0,0,0,0.65), 0 0 10px rgba(196,149,58,0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+                flex-shrink: 0;
+                pointer-events: none;
+                box-sizing: border-box;
+            }
+            .v-volume-badge svg {
+                width: 14px;
+                height: 14px;
+                fill: currentColor;
+                filter: drop-shadow(0 0 3px rgba(232,196,90,0.85));
+                display: block;
             }
             /* ── Floating fallback (non-footer webapps) ── */
             .va-float {
@@ -307,7 +339,7 @@ let _isEmbedded=false;let _footerObserver=null;let _embedObserver=null;let _embe
 if(window.__audioForceFloat){_createFloatingBtn();return;}
 const footerEl=document.getElementById('footer-quick');if(footerEl&&footerEl.children.length>0){_embedInFooter(footerEl);return;}
 if(_footerObserver){_footerObserver.disconnect();_footerObserver=null;}const observer=new MutationObserver(()=>{const el=document.getElementById('footer-quick');if(el&&el.children.length>0&&!_isEmbedded){const floatEl=document.getElementById('va-float');if(floatEl)floatEl.remove();const oldBtn=document.getElementById('va-btn');if(oldBtn)oldBtn.remove();_embedInFooter(el);}});observer.observe(document.body,{childList:true,subtree:true});_footerObserver=observer;setTimeout(()=>{if(!document.getElementById('va-btn')){if(document.getElementById('dev-game-iframe'))return; /* noqa: preflight */_createFloatingBtn();}},3000);}
-function _embedInFooter(footerEl){_isEmbedded=true;_embedTime=Date.now();const btn=document.createElement('button');btn.className='va-footer-btn';btn.id='va-btn';btn.setAttribute('aria-label','Ajustar volume');_updateBtnIcon(btn);const buttons=footerEl.querySelectorAll('.btn-action');let settingsBtn=null;for(const b of buttons){if(b.textContent.includes('⚙')||b.textContent.includes('\u2699')){settingsBtn=b;break;}}
+function _embedInFooter(footerEl){_isEmbedded=true;_embedTime=Date.now();const btn=document.createElement('button');btn.className='va-footer-btn fb-btn fb-icon-only';btn.id='va-btn';btn.setAttribute('aria-label','Ajustar volume');_updateBtnIcon(btn);const buttons=footerEl.querySelectorAll('.btn-action, .fb-btn');let settingsBtn=null;for(const b of buttons){if(b.dataset&&b.dataset.action==='settings'){settingsBtn=b;break;}if(b.textContent.includes('⚙')||b.textContent.includes('\u2699')){settingsBtn=b;break;}}
 if(settingsBtn&&settingsBtn.nextSibling){footerEl.insertBefore(btn,settingsBtn.nextSibling);}else if(settingsBtn){footerEl.appendChild(btn);}else{footerEl.appendChild(btn);}
 btn.addEventListener('click',(e)=>{e.stopPropagation();if(Date.now()-_embedTime<400)return;_dismissHint(btn);_togglePopup();});_createPopup();if(_footerObserver){_footerObserver.disconnect();_footerObserver=null;}if(_embedObserver){_embedObserver.disconnect();_embedObserver=null;}const mo=new MutationObserver(()=>{_closePopup();if(!document.getElementById('va-btn')&&_isEmbedded){if(_reEmbedDebounce)clearTimeout(_reEmbedDebounce);_reEmbedDebounce=setTimeout(()=>{_reEmbedDebounce=null;const el=document.getElementById('footer-quick');if(el&&el.children.length>0&&!document.getElementById('va-btn')){_isEmbedded=false;_embedInFooter(el);}},150);}});mo.observe(footerEl,{childList:true});_embedObserver=mo;if(!_hintShownThisSession){_hintShownThisSession=true;_showFirstTimeHint(btn);}}
 function _createFloatingBtn(){_embedTime=Date.now();const wrap=document.createElement('div');wrap.className='va-float';wrap.id='va-float';const btn=document.createElement('button');btn.className='va-float-btn';btn.id='va-btn';btn.setAttribute('aria-label','Ajustar volume');_updateBtnIcon(btn);wrap.appendChild(btn);document.body.appendChild(wrap);btn.addEventListener('click',(e)=>{e.stopPropagation();if(Date.now()-_embedTime<400)return;_dismissHint(btn);_togglePopup();});_createPopup();function _updateOffset(){var bar=document.getElementById('bottom-panel')||document.getElementById('bottom-bar');if(bar&&bar.offsetHeight>0){document.documentElement.style.setProperty('--va-bottom-offset',(bar.offsetHeight+8)+'px');}}
@@ -336,14 +368,37 @@ const _tryShow=()=>{const loading=document.querySelector('.loading:not(.hidden),
 if(_hintDismissed)return;if(btn)btn.classList.add('va-hint-pulse');setTimeout(()=>{_dismissHint(btn);},5000);};setTimeout(_tryShow,1500);}
 function _dismissHint(btn){if(_hintDismissed)return;_hintDismissed=true;try{localStorage.setItem(HINT_KEY,'1');}catch(e){console.warn('[AUDIO_MANAGER]',e);}
 if(btn)btn.classList.remove('va-hint-pulse');}
-/* 2026-06-14 (user): o botao de volume usa as imagens OpenAI (vol-mute/low/
-   high.webp) — as MESMAS do combate (_SIM_VOL_ICONS) — em vez de SVG outline
-   inline. Regra "Glifos de UI: Imagem Gerada, nao SVG". Compartilhado: vale pra
-   TODAS as webapps que usam o botao. Via DOM (createElement) — sem innerHTML.
-   Path absoluto em webapp; '../shared/...' em file:// (simulador). */
-var _VOL_ICON_BASE=(function(){var b='/shared/img/combat/ui/';try{if(typeof location!=='undefined'&&String(location.href).indexOf('file://')===0)b='../shared/img/combat/ui/';}catch(_eVol){}return b;})();
-function _volSetBtnImg(btn,name){while(btn.firstChild)btn.removeChild(btn.firstChild);var im=document.createElement('img');im.src=_VOL_ICON_BASE+name+'.webp';im.alt='';im.draggable=false;im.onerror=function(){im.style.display='none';};btn.appendChild(im);}
-function _updateBtnIcon(btn){if(!btn)return;if(_muted||_musicMuted||_volume===0){_volSetBtnImg(btn,'vol-mute');btn.title='Som desativado';btn.classList.remove('va-playing');}else if(_volume<0.5){_volSetBtnImg(btn,'vol-low');btn.title='Volume: '+Math.round(_volume*100)+'%';btn.classList.toggle('va-playing',!!(_audio&&!_audio.paused));}else{_volSetBtnImg(btn,'vol-high');btn.title='Volume: '+Math.round(_volume*100)+'%';btn.classList.toggle('va-playing',!!(_audio&&!_audio.paused));}}
+/* USER REQUEST 2026-11: Botao de volume com desenho dourado e nitido no padrao
+   do Guia de Ajuda (.v-help-qbadge), garantindo alta visibilidade e elegancia visual. */
+var _VOL_SVGS = {
+  mute: '<svg viewBox="0 0 24 24" class="v-badge-svg" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27l4.73 4.73H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>',
+  low: '<svg viewBox="0 0 24 24" class="v-badge-svg" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>',
+  high: '<svg viewBox="0 0 24 24" class="v-badge-svg" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>'
+};
+function _volSetBtnBadge(btn, state){
+  while(btn.firstChild)btn.removeChild(btn.firstChild);
+  var span=document.createElement('span');
+  span.className='v-volume-badge';
+  span.setAttribute('aria-hidden','true');
+  span.innerHTML=_VOL_SVGS[state]||_VOL_SVGS.high;
+  btn.appendChild(span);
+}
+function _updateBtnIcon(btn){
+  if(!btn)return;
+  if(_muted||_musicMuted||_volume===0){
+    _volSetBtnBadge(btn,'mute');
+    btn.title='Som desativado';
+    btn.classList.remove('va-playing');
+  } else if(_volume<0.5){
+    _volSetBtnBadge(btn,'low');
+    btn.title='Volume: '+Math.round(_volume*100)+'%';
+    btn.classList.toggle('va-playing',!!(_audio&&!_audio.paused));
+  } else {
+    _volSetBtnBadge(btn,'high');
+    btn.title='Volume: '+Math.round(_volume*100)+'%';
+    btn.classList.toggle('va-playing',!!(_audio&&!_audio.paused));
+  }
+}
 function _syncUI(){const btn=document.getElementById('va-btn');_updateBtnIcon(btn);if(_popupOpen)_updatePopupUI();}
 function createMuteButton(){const span=document.createElement('span');span.style.display='none';return span;}
 function toggleMusic(){_musicMuted=!_musicMuted;try{localStorage.setItem(MUSIC_MUTED_KEY,_musicMuted?'1':'0');}catch(e){console.warn('[AUDIO_MANAGER]',e);}if(_musicMuted){if(_audio)_audio.volume=0;_muted=true;try{localStorage.setItem(STORAGE_KEY,'1');}catch(e){console.warn('[AUDIO_MANAGER]',e);}}else{_muted=false;try{localStorage.setItem(STORAGE_KEY,'0');}catch(e){console.warn('[AUDIO_MANAGER]',e);}if(_audio&&!_audio.paused){_audio.volume=_volume*0.5;/*music cap 50%*/}else if(_pendingTrack||_currentTrack){_playTrack(_pendingTrack||_currentTrack);}}

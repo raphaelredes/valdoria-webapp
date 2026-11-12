@@ -5349,7 +5349,10 @@
         choices = [{ id: '_enc_auto_close', label: 'Fechar', cb: 'close' }];
       }
       var isQuestScreen = _isQuestDecisionScreen(dialogue, choices);
-      var useInline = opts.inlineChoices === true || choices.length === 1 || isQuestScreen;
+      /* Regra Canônica de UX: quando há 2 ou mais opções, exibe SEMPRE o menu
+         principal '⚔ ESCOLHER AÇÃO' que abre o modal overlay estruturado (.enc-choice).
+         Nunca força inlineChoices só por ser tela de quest. */
+      var useInline = opts.inlineChoices === true || (choices.length === 1 && !opts.forceMenu);
       var btns = [];
       _openChoicesModal = null;
       if (useInline) {
