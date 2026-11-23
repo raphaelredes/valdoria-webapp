@@ -133576,7 +133576,11 @@ function _startLyanaEncounter(p, forceDay){
       label: '◆ [INT 12] (Arcano) "Conte-me sobre os extratos que estabilizam as runas sangrentas."',
       desc: 'Trocar moedas por saberes esotéricos sobre reagentes botânicos e o cristal protetor.',
       check: { skill: 'arcana', dc: 12 },
-      continueDialogue: 'lyana-confirm-deliver-arcane'
+      continueDialogue: 'lyana-confirm-deliver-arcane',
+      resultNarration: 'Seu domínio sobre reagentes místicos impressiona a jovem herbalista, que reconhece em você alguém capaz de compreender os cadernos de Eirik.',
+      resultText: '<i>(abre o estojo de veludo com reverência)</i> "Você conhece a linguagem das essências. Vou entregar a você a resina que papai guardava para estabilizar runas."',
+      resultNarrationFail: 'Os termos arcanos escapam à precisão necessária na agitação da praça, mas Lyana percebe seu interesse genuíno pelo estudo do pai.',
+      resultTextFail: '<i>(assente com gentileza)</i> "As fórmulas de papai são complexas mesmo para iniciados, mas compartilharei com você a essência protetora que ele deixou."'
     },
     {
       id: 'lyana-confirm-deliver-nature',
@@ -133585,7 +133589,11 @@ function _startLyanaEncounter(p, forceDay){
       label: '◆ [SAB 11] (Sobrevivência) "Aceito trocar a prata por unguentos e raízes de marcha."',
       desc: 'Obter preparados botânicos de campo para resistir aos rigores das estradas rochosas.',
       check: { skill: 'nature', dc: 11 },
-      continueDialogue: 'lyana-confirm-deliver-nature'
+      continueDialogue: 'lyana-confirm-deliver-nature',
+      resultNarration: 'Sua leitura calejada da flora das escarpas conquista imediata confiança de Lyana, que separa seus melhores preparados de campo.',
+      resultText: '<i>(entrega o embrulho de linho com entusiasmo)</i> "Seus olhos conhecem as trilhas altas. Estas raízes de ginseng e este bálsamo manterão seu passo firme."',
+      resultNarrationFail: 'Você confunde algumas espécies da flora alpina, mas Lyana compreende a necessidade prática de quem enfrenta a marcha nas montanhas.',
+      resultTextFail: '<i>(sorri de modo acolhedor)</i> "A flora das alturas engana até batedores experientes. Leve estas raízes preparadas para não sofrer na subida."'
     },
     {
       id: 'lyana-confirm-deliver-martial',
@@ -133594,7 +133602,11 @@ function _startLyanaEncounter(p, forceDay){
       label: '◆ [CON 11] (Marcial) "Seu pai é resistente. Se precisar de escolta armada, conte com meu aço."',
       desc: 'Oferecer prontidão de proteção e honra de armas à família do escriba.',
       check: { skill: 'athletics', dc: 11 },
-      continueDialogue: 'lyana-confirm-deliver-martial'
+      continueDialogue: 'lyana-confirm-deliver-martial',
+      resultNarration: 'Sua postura inabalável e a firmeza do seu juramento transmitem segurança imediata a Lyana e aos guardas próximos.',
+      resultText: '<i>(pousa a mão no peito, aliviada)</i> "Sua presença impõe respeito, andarilho. Aceite a paga e estas provisões reforçadas como selo da nossa aliança."',
+      resultNarrationFail: 'O cansaço da estrada pesa nos seus ombros ao prestar o juramento, mas Lyana reconhece a sinceridade e a honra da sua oferta.',
+      resultTextFail: '<i>(inclina a cabeça com gratidão)</i> "Mesmo exausto da viagem, você ainda oferece seu aço. Jamais esquecerei sua lealdade à nossa família."'
     },
     {
       id: 'lyana-confirm-deliver-social',
@@ -133603,7 +133615,11 @@ function _startLyanaEncounter(p, forceDay){
       label: '◆ [CAR 12] (Social) "Uma expedição assim atrai olhares. Quem mais sabia da partida dele?"',
       desc: 'Sondar os rumores da praça e obter orientações sobre as rotas vigiadas.',
       check: { skill: 'persuasion', dc: 12 },
-      continueDialogue: 'lyana-confirm-deliver-social'
+      continueDialogue: 'lyana-confirm-deliver-social',
+      resultNarration: 'Seu tato diplomático e olhar atento fazem Lyana baixar a guarda e confiar a você os rumores mais delicados sobre a partida de Eirik.',
+      resultText: '<i>(aproxima-se em tom confidencial)</i> "Você sabe ouvir o que as ruas calam. Veja este rascunho — mostra o atalho que papai usou para evitar curiosos."',
+      resultNarrationFail: 'Sua pergunta soa direta demais em meio ao movimento da feira, deixando Lyana momentaneamente cautelosa antes de ceder um sussurro.',
+      resultTextFail: '<i>(olha ao redor com prudência)</i> "Fale baixo, as paredes da praça têm ouvidos... Tome este traçado discreto e guarde segredo sobre a rota."'
     },
     {
       id: 'curious',
@@ -133655,7 +133671,11 @@ function _startLyanaEncounter(p, forceDay){
       label: '◆ [INT 12] (Arcano) "Prefiro conhecimentos e essências sobre as runas das montanhas."',
       desc: 'Adquirir saberes místicos e um Bálsamo Restaurador como recompensa especial.',
       check: { skill: 'arcana', dc: 12 },
-      continueDialogue: 'lyana-confirm-deliver-arcane'
+      continueDialogue: 'lyana-confirm-deliver-arcane',
+      resultNarration: 'Seu domínio sobre reagentes místicos impressiona a jovem herbalista, que reconhece em você alguém capaz de compreender os cadernos de Eirik.',
+      resultText: '<i>(abre o estojo de veludo com reverência)</i> "Você conhece a linguagem das essências. Vou entregar a você a resina que papai guardava para estabilizar runas."',
+      resultNarrationFail: 'Os termos arcanos escapam à precisão necessária na agitação da praça, mas Lyana percebe seu interesse genuíno pelo estudo do pai.',
+      resultTextFail: '<i>(assente com gentileza)</i> "As fórmulas de papai são complexas mesmo para iniciados, mas compartilharei com você a essência protetora que ele deixou."'
     },
     {
       id: 'lyana-confirm-deliver-nature',
@@ -133664,7 +133684,11 @@ function _startLyanaEncounter(p, forceDay){
       label: '◆ [SAB 11] (Sobrevivência) "Aceito trocar a prata por unguentos e ervas de marcha."',
       desc: 'Receber unguentos botânicos e dicas da flora medicinal.',
       check: { skill: 'nature', dc: 11 },
-      continueDialogue: 'lyana-confirm-deliver-nature'
+      continueDialogue: 'lyana-confirm-deliver-nature',
+      resultNarration: 'Sua leitura calejada da flora das escarpas conquista imediata confiança de Lyana, que separa seus melhores preparados de campo.',
+      resultText: '<i>(entrega o embrulho de linho com entusiasmo)</i> "Seus olhos conhecem as trilhas altas. Estas raízes de ginseng e este bálsamo manterão seu passo firme."',
+      resultNarrationFail: 'Você confunde algumas espécies da flora alpina, mas Lyana compreende a necessidade prática de quem enfrenta a marcha nas montanhas.',
+      resultTextFail: '<i>(sorri de modo acolhedor)</i> "A flora das alturas engana até batedores experientes. Leve estas raízes preparadas para não sofrer na subida."'
     },
     {
       id: 'lyana-confirm-deliver-martial',
@@ -133673,7 +133697,11 @@ function _startLyanaEncounter(p, forceDay){
       label: '◆ [CON 11] (Marcial) "Seu pai é resistente. Conte com meu aço para escoltá-lo."',
       desc: 'Oferecer lealdade marcial e receber a gratidão da praça.',
       check: { skill: 'athletics', dc: 11 },
-      continueDialogue: 'lyana-confirm-deliver-martial'
+      continueDialogue: 'lyana-confirm-deliver-martial',
+      resultNarration: 'Sua postura inabalável e a firmeza do seu juramento transmitem segurança imediata a Lyana e aos guardas próximos.',
+      resultText: '<i>(pousa a mão no peito, aliviada)</i> "Sua presença impõe respeito, andarilho. Aceite a paga e estas provisões reforçadas como selo da nossa aliança."',
+      resultNarrationFail: 'O cansaço da estrada pesa nos seus ombros ao prestar o juramento, mas Lyana reconhece a sinceridade e a honra da sua oferta.',
+      resultTextFail: '<i>(inclina a cabeça com gratidão)</i> "Mesmo exausto da viagem, você ainda oferece seu aço. Jamais esquecerei sua lealdade à nossa família."'
     },
     {
       id: 'lyana-confirm-deliver-social',
@@ -133682,7 +133710,11 @@ function _startLyanaEncounter(p, forceDay){
       label: '◆ [CAR 12] (Social) "Há mais detalhes sobre as trilhas do norte que eu deva saber?"',
       desc: 'Investigar as rotas e obter bênçãos de navegação.',
       check: { skill: 'persuasion', dc: 12 },
-      continueDialogue: 'lyana-confirm-deliver-social'
+      continueDialogue: 'lyana-confirm-deliver-social',
+      resultNarration: 'Seu tato diplomático e olhar atento fazem Lyana baixar a guarda e confiar a você os rumores mais delicados sobre a partida de Eirik.',
+      resultText: '<i>(aproxima-se em tom confidencial)</i> "Você sabe ouvir o que as ruas calam. Veja este rascunho — mostra o atalho que papai usou para evitar curiosos."',
+      resultNarrationFail: 'Sua pergunta soa direta demais em meio ao movimento da feira, deixando Lyana momentaneamente cautelosa antes de ceder um sussurro.',
+      resultTextFail: '<i>(olha ao redor com prudência)</i> "Fale baixo, as paredes da praça têm ouvidos... Tome este traçado discreto e guarde segredo sobre a rota."'
     }
   ];
 
