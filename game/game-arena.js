@@ -830,6 +830,13 @@ function _arenaServicesGrid(services) {
         var card = _div('svc');
         if (svc.disabled) card.classList.add('disabled');
         card.setAttribute('data-svc', svc.cb || '');
+        if (svc.hasQuestTurnin || (typeof _isServiceQuestTurnin === 'function' && _isServiceQuestTurnin('arena', svc))) {
+            card.classList.add('has-quest-turnin');
+            var qb = _div('hlc-quest-turnin-badge');
+            qb.textContent = '?';
+            qb.title = 'Missão pronta para entrega';
+            card.appendChild(qb);
+        }
 
         var ico = _div('svc-ico');
         var meta = ARENA_SVC_META[svc.cb || ''];

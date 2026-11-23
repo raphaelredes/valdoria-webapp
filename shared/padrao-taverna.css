@@ -757,13 +757,17 @@
 .sqr-card.has-quest-turnin,
 .subscreen-btn.has-quest-turnin,
 .aaa-sub-item.has-quest-turnin,
+.vc-service-card.has-quest-turnin,
+.vc-action-btn.has-quest-turnin,
 .inn-svc.has-quest-turnin {
+  position: relative;
   border-color: rgba(255, 68, 68, 0.85) !important;
   box-shadow: 0 0 14px rgba(255, 40, 40, 0.32), inset 0 0 8px rgba(255, 40, 40, 0.18) !important;
 }
 
 .row-npc.has-quest-turnin,
-.inn-npc.has-quest-turnin {
+.inn-npc.has-quest-turnin,
+.vc-action-btn.has-quest-turnin {
   position: relative;
   border-color: rgba(255, 68, 68, 0.85) !important;
   box-shadow: 0 0 14px rgba(255, 40, 40, 0.32), inset 0 0 8px rgba(255, 40, 40, 0.18) !important;
@@ -775,7 +779,19 @@
   right: 34px;
 }
 
-.sqr-card.has-quest-turnin .sqr-card-badge {
+.vc-action-btn.has-quest-turnin .hlc-quest-turnin-badge {
+  top: 6px;
+  right: 8px;
+}
+
+.sqr-card.has-quest-turnin .sqr-card-badge,
+.svc.has-quest-turnin .svc-badge,
+.svc.has-quest-turnin .tmp-svc-tier,
+.vc-service-card.has-quest-turnin .vc-badge,
+.inn-svc.has-quest-turnin .svc-badge,
+.tmp-svc.has-quest-turnin .svc-badge,
+.gld-card.has-quest-turnin .svc-badge,
+.act-item.has-quest-turnin .svc-badge {
   right: auto;
   left: 4px;
 }

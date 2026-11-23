@@ -82,8 +82,8 @@
 
   // === MOOD_TIERS ===========================================================
   // Mood é derivado de (renown + interaction_history + time_of_day).
-  // Tabela de thresholds com base no Renown D&D 5e DMG p.22:
-  //   ≥ 25 → friendly (heróico/notório)
+  // Tabela de thresholds com base no Renome:
+  //   ≥ 25 → friendly (venerado/notório)
   //   ≥ 10 → warm (confiado/respeitado)
   //   ≥ 0  → neutral (desconhecido)
   //   < 0  → cold (rispidez prévia)
@@ -165,14 +165,26 @@
 
   // === Time of day ==========================================================
   // Usado pra atmosfera (NPC sonolento à noite, energético de manhã, etc.).
+  // Usa o ciclo orgânico do mundo de Valdoria (não hora real do sistema).
   // Pode ser sobrescrito via window._npcForceTimeOfDay (para tests).
   window._npcGetTimeOfDay = function(){
     if (window._npcForceTimeOfDay) return window._npcForceTimeOfDay;
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) return 'morning';
-    if (hour >= 12 && hour < 18) return 'afternoon';
-    if (hour >= 18 && hour < 22) return 'evening';
-    return 'night';
+    var period = 'day';
+    try {
+      if (typeof window._getCurrentGameTime === 'function' && typeof window._getGamePeriod === 'function') {
+        var gt = window._getCurrentGameTime();
+        if (gt && typeof gt.hour === 'number') {
+          period = window._getGamePeriod(gt.hour) || 'day';
+        }
+      } else if (typeof window.vGamePeriod === 'string' && window.vGamePeriod) {
+        period = window.vGamePeriod;
+      }
+    } catch(e){}
+    if (period === 'dawn' || period === 'day') return 'morning';
+    if (period === 'afternoon') return 'afternoon';
+    if (period === 'dusk') return 'evening';
+    if (period === 'night' || period === 'late_night') return 'night';
+    return 'morning';
   };
 
   // === Mood resolution ======================================================
@@ -323,7 +335,8 @@
         // Log + toast opcional
         try {
           if (typeof window.vToast === 'function') {
-            window.vToast('Algo desbloqueado em ' + targetNpc, 'info');
+            var npcLabel = (window.NPC_DISPLAY_NAMES && window.NPC_DISPLAY_NAMES[targetNpc]) || targetNpc;
+            window.vToast('Algo desbloqueado para ' + npcLabel, 'info');
           }
         } catch(e){}
         return true;

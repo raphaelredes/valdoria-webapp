@@ -148,6 +148,13 @@ function _fstBuildSvcCard(opts) {
   var card = vCity.el('div', 'svc');
   if (opts.done) card.classList.add('disabled');
   card.setAttribute('data-svc', opts.cb || '');
+  if (opts.hasQuestTurnin || (typeof _isServiceQuestTurnin === 'function' && _isServiceQuestTurnin('festival', opts))) {
+    card.classList.add('has-quest-turnin');
+    var qb = vCity.el('div', 'hlc-quest-turnin-badge');
+    qb.textContent = '?';
+    qb.title = 'Missão pronta para entrega';
+    card.appendChild(qb);
+  }
 
   if (opts.done) {
     var badge = vCity.el('div', 'svc-badge');

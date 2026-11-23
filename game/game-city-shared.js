@@ -226,6 +226,20 @@ function serviceCard(svc) {
 
   if (svc.disabled) card.classList.add('disabled');
 
+  if (svc.hasQuestTurnin || (typeof _isServiceQuestTurnin === 'function' && _isServiceQuestTurnin(svc.venue || '', svc))) {
+
+    card.classList.add('has-quest-turnin');
+
+    var qb = el('div', 'hlc-quest-turnin-badge');
+
+    qb.textContent = '?';
+
+    qb.title = 'Missão pronta para entrega';
+
+    card.appendChild(qb);
+
+  }
+
 
 
   /* Icon — suporta SVG heraldico, IMG portrait (innerHTML) ou emoji (textContent)
@@ -549,6 +563,20 @@ function actionList(items) {
     (function (item) {
 
       var btn = el('button', 'vc-action-btn');
+
+      if (item.hasQuestTurnin || (typeof _isServiceQuestTurnin === 'function' && _isServiceQuestTurnin(item.venue || '', item))) {
+
+        btn.classList.add('has-quest-turnin');
+
+        var qbAct = el('span', 'hlc-quest-turnin-badge');
+
+        qbAct.textContent = '?';
+
+        qbAct.title = 'Missão pronta para entrega';
+
+        btn.appendChild(qbAct);
+
+      }
 
       if (item.icon) {
 

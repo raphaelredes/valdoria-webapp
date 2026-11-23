@@ -952,7 +952,7 @@
       window._diceCheckSvc({
         ability: parts[1],
         dc: parseInt(parts[2], 10),
-        mod: parseInt(parts[3].replace('+',''), 10) || 0,
+        mod: parseInt(String(parts[3] || '0').replace('+',''), 10) || 0,
         npc: dialogue.npc,
         label: ch.label,
         faction: (window._SVC_CONFIG && window._SVC_CONFIG.faction),

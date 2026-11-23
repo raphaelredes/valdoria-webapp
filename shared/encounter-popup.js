@@ -77,6 +77,16 @@
     }).replace(/\s{2,}/g, ' ');
   }
 
+  function _stripMetaStageSpoilers(s) {
+    if (!s) return '';
+    return String(s)
+      .replace(/\b(?:Etapa|Fase|Estágio|Estagio|Passo|Parte)\s*\d+(?:\s*\/\s*\d+)?\s*(?:[·:\-–—]\s*)?/gi, '')
+      .replace(/\b(?:Puxar\s+Assunto|Sondagem\s+Inicial|Decisão)\s*(?:[·:\-–—]\s*)?/gi, '')
+      .replace(/\s*\((?:Explicação|Explicacao|Decisão|Decisao|Sondagem|Introdução|Relembrar)\)/gi, '')
+      .replace(/^\s*[·:\-–—]+\s*|\s*[·:\-–—]+\s*$/g, '')
+      .trim();
+  }
+
   /* Ordem do Usuário 2026-10: Sanitização canônica de falas/quotes de escolhas.
      Remove pontuação redundante (travessão '—', dashes, aspas duplicadas ou aninhadas)
      que causava o erro de aparecer '“— "' antes ou '."”' depois da fala nos cards de escolha. */
@@ -1144,7 +1154,7 @@
         if (!itLabel) {
           if (itName.toLowerCase().indexOf('mapa') >= 0 || itName.toLowerCase().indexOf('pergaminho') >= 0) {
             itLabel = 'Documento / Mapa';
-          } else if (line.title && /adquirid/i.test(line.title)) {
+          } else if ((line.gold_cost > 0 || (line.cost > 0 && !(line.gold && line.gold > 0))) || (line.title && /adquirid/i.test(line.title))) {
             itLabel = 'Item Adquirido';
           } else {
             itLabel = 'Item Obtido';
@@ -1155,11 +1165,12 @@
     });
     if (line.effect) rows.push(['effect', String(line.effect), 'Efeito']);
     if (!rows.length) return null;
+    var _isPurchaseBlock = !!(line.gold_cost > 0 || (line.cost > 0 && !(line.gold && line.gold > 0)));
     var box = document.createElement('div');
     box.className = 'enc-reward';
     var title = document.createElement('div');
     title.className = 'enc-reward-title';
-    title.textContent = line.title || (line.quest_accept || line.quest ? '❖ Missão Aceita & Espólios ❖' : '◆ Recompensa ◆');
+    title.textContent = line.title || (_isPurchaseBlock ? '◆ ITENS ADQUIRIDOS ◆' : (line.quest_accept || line.quest ? '❖ Missão Aceita & Espólios ❖' : '◆ Recompensa ◆'));
     box.appendChild(title);
     rows.forEach(function (r) {
       var row = document.createElement('div');
@@ -2416,14 +2427,14 @@
       subtitle: 'Sangue Nobre Arcano · Graça Mágica',
       desc: 'Carrega com destaque a vertente nobre dos altos elfos, mantendo um truque arcano na ponta dos dedos.',
       traits: '• Um truque arcano de Mago à escolha.\n• Carisma e atributos versáteis da herança meio-élfica.',
-      rules: 'SCAG p. 116. Combina flexibilidade social com utilidade mística imediata.'
+      rules: 'Combina flexibilidade social com utilidade mística imediata.'
     },
     'meio_elfo_da_floresta': {
       title: 'Meio-Elfo da Floresta · Sub-raça',
       subtitle: 'Passos Ligeiros dos Ermos · Agilidade Primitiva',
       desc: 'Herda a agilidade dos elfos silvestres, movendo-se com passos rápidos pela mata.',
       traits: '• Deslocamento aumentado para 10,5 metros (7 hexes) ou Máscara da Natureza.',
-      rules: 'SCAG p. 116. Maior mobilidade tática em campo aberto e combate em turnos.'
+      rules: 'Maior mobilidade tática em campo aberto e combate em turnos.'
     },
     'draconato_cromatico': {
       title: 'Draconato Cromático · Sub-raça',
@@ -3847,15 +3858,6 @@
     var oldGuide = card ? card.querySelector('.enc-cho-guide-btn') : null;
     if (oldGuide && oldGuide.parentNode) oldGuide.parentNode.removeChild(oldGuide);
 
-    function _stripMetaStageSpoilers(s) {
-      if (!s) return '';
-      return String(s)
-        .replace(/\b(?:Etapa|Fase|Estágio|Estagio|Passo|Parte)\s*\d+(?:\s*\/\s*\d+)?\s*(?:[·:\-–—]\s*)?/gi, '')
-        .replace(/\b(?:Puxar\s+Assunto|Sondagem\s+Inicial|Decisão)\s*(?:[·:\-–—]\s*)?/gi, '')
-        .replace(/\s*\((?:Explicação|Explicacao|Decisão|Decisao|Sondagem|Introdução|Relembrar)\)/gi, '')
-        .replace(/^\s*[·:\-–—]+\s*|\s*[·:\-–—]+\s*$/g, '')
-        .trim();
-    }
     var title = _stripMetaStageSpoilers(_stripEmojis(opts.title || 'Escolher ação')) || 'Escolher ação';
     var ctxName = _stripMetaStageSpoilers(_stripEmojis(opts.npcName || ''));
 
@@ -3951,12 +3953,26 @@
       _choLabel = _choLabel.replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').replace(/^\[\s*AÇÃO\s*\]\s*/i, '').trim();
 
       var tagText = ch.tag || (ch.badge && String(ch.badge).replace(/^\[|\]$/g, '')) || '';
-      if (tagText && tagText.toUpperCase() === 'AÇÃO') tagText = '';
+      if (tagText && (tagText.toUpperCase() === 'AÇÃO' || (dcBadge && /(?:^|\s)CD(?:\s|\d|$)|\d+\s*CD/i.test(tagText)))) {
+        tagText = '';
+      }
       var tagPill = tagText ? '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>' : '';
       var hasSpeech = !!(ch.speech && String(ch.speech).trim());
       var speechClean = '';
-      if (!hasSpeech && ch.label) {
-        var _trimmed = String(ch.label).trim();
+      var subText = '';
+      var _trimmed = String(_choLabel || '').trim();
+      var _leadTagMatch = _trimmed.match(/^(?:[◆◇⚔\s]*)\s*\[(.*?)\]\s*(.*)$/);
+      if (_leadTagMatch) {
+        var _rawLeadTag = _leadTagMatch[1].trim();
+        var _afterLeadTag = _leadTagMatch[2].trim();
+        if (!tagText && _rawLeadTag && _rawLeadTag.toUpperCase() !== 'AÇÃO' && !(dcBadge && /(?:^|\s)CD(?:\s|\d|$)|\d+\s*CD/i.test(_rawLeadTag))) {
+          tagText = _rawLeadTag;
+          tagPill = '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>';
+        }
+        _choLabel = _afterLeadTag;
+        _trimmed = _afterLeadTag;
+      }
+      if (!hasSpeech && _trimmed) {
         var _dashM = _trimmed.match(/^([^—–]+?)\s*[—–]\s*([“"][^”"]+[”"])\s*(?:\((.*?)\))?$/);
         if (_dashM) {
           hasSpeech = true;
@@ -3964,7 +3980,7 @@
           subText = _dashM[1].trim();
           if (_dashM[3] && !tagText) {
             tagText = _dashM[3].trim();
-            if (tagText.toUpperCase() === 'AÇÃO') tagText = '';
+            if (tagText.toUpperCase() === 'AÇÃO' || (dcBadge && /(?:^|\s)CD(?:\s|\d|$)|\d+\s*CD/i.test(tagText))) tagText = '';
             tagPill = tagText ? '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>' : '';
           }
         } else {
@@ -3974,58 +3990,42 @@
             speechClean = _cleanSpeechText(_colonM[2]);
             subText = _colonM[1].trim();
           } else {
-            var _tagMatch = _trimmed.match(/^(?:[◆◇⚔\s]*)\s*\[(.*?)\]\s*(.*)$/);
-          if (_tagMatch) {
-            var _rawTag = _tagMatch[1].trim();
-            var _potSpeech = _tagMatch[2].trim();
-            if (!tagText && _rawTag) {
-              tagText = _rawTag;
-              if (tagText.toUpperCase() === 'AÇÃO') tagText = '';
-              tagPill = tagText ? '<span class="enc-cho-bg3-tag">[' + _stripEmojis(tagText).toUpperCase() + ']</span>' : '';
-            }
-            _choLabel = _potSpeech;
-            var _qParen = _potSpeech.match(/^([“"][^”"]+[”"])\s*(?:\((.*?)\))?$/);
+            var _qParen = _trimmed.match(/^([“"][^”"]+[”"])\s*(?:\((.*?)\))?$/);
             if (_qParen) {
               hasSpeech = true;
               speechClean = _cleanSpeechText(_qParen[1]);
               if (_qParen[2] && !subText) {
                 subText = _qParen[2].trim();
               }
-            } else if (_potSpeech.indexOf('“') === 0 || (_potSpeech.indexOf('"') === 0 && _potSpeech.length > 2)) {
+            } else if (_trimmed.indexOf('— "') === 0 || _trimmed.indexOf('— “') === 0 || _trimmed.indexOf('“') === 0 || (_trimmed.indexOf('"') === 0 && _trimmed.length > 2)) {
               hasSpeech = true;
-              speechClean = _cleanSpeechText(_potSpeech);
-            } else if (_potSpeech.charAt(0) === '(' && _potSpeech.charAt(_potSpeech.length - 1) === ')') {
-              hasSpeech = true;
-              speechClean = _cleanSpeechText(_potSpeech);
+              speechClean = _cleanSpeechText(_trimmed);
             }
-          } else if (_trimmed.indexOf('— "') === 0 || _trimmed.indexOf('— “') === 0 || _trimmed.indexOf('“') === 0 || (_trimmed.indexOf('"') === 0 && _trimmed.length > 2)) {
-            hasSpeech = true;
-            speechClean = _cleanSpeechText(_trimmed);
           }
         }
       }
-    }
-    if (!tagText && !ch.badge && ch.stat && ch.dc) {
-      var _STAT_ABBR = {
-        str: 'FOR', strength: 'FOR', forca: 'FOR', força: 'FOR',
-        dex: 'DES', dexterity: 'DES', destreza: 'DES',
-        con: 'CON', constitution: 'CON', constituicao: 'CON', constituição: 'CON',
-        int: 'INT', intelligence: 'INT', inteligencia: 'INT', inteligência: 'INT',
-        wis: 'SAB', wisdom: 'SAB', sabedoria: 'SAB',
-        cha: 'CAR', charisma: 'CAR', carisma: 'CAR'
-      };
-      var statAbbr = _STAT_ABBR[String(ch.stat).toLowerCase()] || String(ch.stat).substring(0, 3).toUpperCase();
-      tagText = statAbbr + ' ' + ch.dc;
-      tagPill = '<span class="enc-cho-bg3-tag">[' + tagText + ']</span>';
-    }
-    if (hasSpeech && !speechClean) {
+      if (!tagText && !ch.badge && ch.stat && ch.dc) {
+        var _STAT_ABBR = {
+          str: 'FOR', strength: 'FOR', forca: 'FOR', força: 'FOR',
+          dex: 'DES', dexterity: 'DES', destreza: 'DES',
+          con: 'CON', constitution: 'CON', constituicao: 'CON', constituição: 'CON',
+          int: 'INT', intelligence: 'INT', inteligencia: 'INT', inteligência: 'INT',
+          wis: 'SAB', wisdom: 'SAB', sabedoria: 'SAB',
+          cha: 'CAR', charisma: 'CAR', carisma: 'CAR'
+        };
+        var statAbbr = _STAT_ABBR[String(ch.stat).toLowerCase()] || String(ch.stat).substring(0, 3).toUpperCase();
+        tagText = statAbbr + ' ' + ch.dc;
+        tagPill = '<span class="enc-cho-bg3-tag">[' + tagText + ']</span>';
+      }
+      if (hasSpeech && !speechClean) {
         speechClean = _cleanSpeechText(ch.speech);
       }
       if (speechClean) {
         speechClean = speechClean.replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').trim();
       }
+      var _isParenAction = !hasSpeech && _choLabel.charAt(0) === '(' && _choLabel.charAt(_choLabel.length - 1) === ')';
 
-      if (!tagPill && ch.badge) {
+      if (!tagPill && ch.badge && !(dcBadge && /(?:^|\s)CD(?:\s|\d|$)|\d+\s*CD/i.test(String(ch.badge)))) {
         _choLabel = '<span class="enc-cho-badge-pill" style="display:inline-block;padding:1px 6px;margin-right:6px;font-size:10px;font-weight:700;border:1px solid rgba(196,149,58,0.5);border-radius:4px;color:#c4953a;background:rgba(196,149,58,0.12);text-transform:uppercase;letter-spacing:0.5px;">' + _stripEmojis(ch.badge) + '</span>' + _choLabel;
       }
 
@@ -4034,7 +4034,7 @@
       if (isCompact) {
         var speechFormattedCompact = _isThought ? _coinify(speechClean) : ('“' + _coinify(speechClean) + '”');
         var titleText = hasSpeech ? (tagPill + speechFormattedCompact) : (tagPill ? (tagPill + ' ' + _choLabel) : _choLabel);
-        var subText = '';
+        if (_isParenAction && !ch.cost && !ch.itemName) subText = '';
         if (_choLabel.indexOf(':') !== -1 && !hasSpeech) {
           var lp = _choLabel.split(':');
           titleText = lp[0].trim();
@@ -4045,7 +4045,7 @@
         } else if (ch.id === 'jrn_cancel') {
           titleText = 'Permanecer na cidade';
           subText = 'Suspender viagem em segurança';
-        } else if (ch.desc && (!hasSpeech || ch.cost || ch.itemName)) {
+        } else if (ch.desc && (!hasSpeech || ch.cost || ch.itemName) && (!_isParenAction || ch.cost || ch.itemName)) {
           subText = _stripEmojis(ch.desc).replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').trim();
           var _normSpeech = String(speechClean || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
           var _normSub = String(subText || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
@@ -4096,7 +4096,7 @@
           mainContent = tagPill
             ? (tagPill + '<span class="enc-cho-action-label">' + _coinify(_choLabel) + '</span>')
             : _coinify(_choLabel);
-          subDesc = _stripEmojis(ch.desc || '');
+          subDesc = (_isParenAction && !ch.cost && !ch.itemName) ? '' : _stripEmojis(ch.desc || '');
           if (subDesc) {
             subDesc = subDesc.replace(/\s*\[[^\]]*(?:CD\s*\d+|\d+\s*CD)[^\]]*\]\s*/gi, ' ').trim();
             var _normSubNoSpeech = String(subDesc || '').replace(/[“”.!?,;:\s"']/g, '').toLowerCase();
@@ -4538,12 +4538,18 @@
         if (opts && opts.fallbackNpc && opts.fallbackNpc.name === _firstSpk) {
           dialogue.npc = _vNpcResolve(opts.fallbackNpc, opts) || dialogue.npc;
         } else if (_firstSpk === 'Lyra Cantarriba') {
-          dialogue.npc = {
+          dialogue.npc = _vNpcResolve({
             id: 'npc_tavern_lyra',
             name: 'Lyra Cantarriba',
             desc: 'Bardisa · broche de pena do Conservatório de Valdoria',
-            portrait: '../shared/img/npcs/lyra-bardisa.webp'
-          };
+            portrait: _normalizePortraitPath('../valdoria-webapp/shared/img/npcs/lyra-bardisa.webp')
+          }, opts);
+        } else {
+          dialogue.npc = _vNpcResolve({
+            id: dialogue.npc.id || '',
+            name: _firstSpk,
+            desc: ''
+          }, opts) || dialogue.npc;
         }
       }
     }
@@ -5366,13 +5372,13 @@
             var isAccept = (cid === 'accept' || cid.indexOf('accept') >= 0 || cid === 'unlock' || clabel.indexOf('aceitar') >= 0 || clabel.indexOf('aceito') >= 0 || cres === 'accept_quest' || cres === 'discovery_unlock' || !!ch._questId || !!ch.quest_id);
             if (isAccept) {
               btn.className = 'enc-btn enc-btn-primary enc-btn-quest-accept';
-              btn.innerHTML = '⚔ ' + _stripEmojis((ch.label && String(ch.label).trim()) || 'Aceitar Missão');
+              btn.innerHTML = '⚔ ' + (_stripMetaStageSpoilers(_stripEmojis((ch.label && String(ch.label).trim()) || 'Aceitar Missão')) || 'Aceitar Missão');
             } else {
               btn.className = 'enc-btn enc-btn-secondary enc-btn-quest-decline';
-              btn.innerHTML = '✕ ' + _stripEmojis((ch.label && String(ch.label).trim()) || 'Recusar');
+              btn.innerHTML = '✕ ' + (_stripMetaStageSpoilers(_stripEmojis((ch.label && String(ch.label).trim()) || 'Recusar')) || 'Recusar');
             }
           } else {
-            btn.innerHTML = _stripEmojis(_coinify((ch.label && String(ch.label).trim()) || 'Continuar'));
+            btn.innerHTML = _stripMetaStageSpoilers(_stripEmojis(_coinify((ch.label && String(ch.label).trim()) || 'Continuar'))) || 'Continuar';
           }
           btn.addEventListener('click', function() {
             var confirmOpts = {
@@ -5691,7 +5697,7 @@
     var incomingScript = (data.script && Array.isArray(data.script)) ? data.script : [];
     var combinedScript;
 
-    if (isReturn && inst.opts && inst.opts.pendingRemote) {
+    if (isReturn) {
       // REGRA SOBERANA: Em visitas de retorno, NUNCA mantém a narração teatral de aproximação.
       // O script é estritamente a fala curta e viva de retorno do NPC.
       combinedScript = incomingScript.filter(function(n) {
@@ -5748,7 +5754,7 @@
       return true;
     }
 
-    if (isReturn && inst.opts && inst.opts.pendingRemote && typeof inst.renderPage === 'function') {
+    if (isReturn && typeof inst.renderPage === 'function') {
       inst.setCurrentPage(0);
       inst.renderPage(0);
       _saveActiveState(dialogue, inst.opts, 0);

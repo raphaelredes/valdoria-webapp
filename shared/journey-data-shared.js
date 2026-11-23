@@ -912,7 +912,7 @@ var HAZARDS = {
 
     { title: 'Eco Estranho',
       enemyId: 'troglodyte',
-      npc: { name: 'Troglodita Perseguidor', enemyId: 'troglodyte', desc: 'Predador subterrâneo que rasteja pelas sombras', portrait: '../shared/img/npcs/troglodita-caverna.webp' },
+      npc: { name: 'Troglodita Perseguidor', enemyId: 'troglodyte', desc: 'Predador subterrâneo que rasteja pelas sombras', portrait: '../shared/img/combat/enemies/troglodita.webp' },
       script: [
         { type: 'narration', text: 'Você ouve seus passos voltando como eco — mas os ecos não estão sincronizados. Há mais ecos do que passos.' },
         { type: 'narration', text: 'Você para. Os ecos param. Mas há um milissegundo a mais, um eco que se atrasa. Algo está te imitando.' }
@@ -950,7 +950,7 @@ var HAZARDS = {
   graveyard: [
     { title: 'Espíritos Inquietos',
       enemyId: 'skeleton',
-      npc: { name: 'Espectros das Lápides', enemyId: 'skeleton', desc: 'Espíritos angustiados que guardam os túmulos', portrait: '../shared/img/npcs/espectro-tumba.webp' },
+      npc: { name: 'Espectros das Lápides', enemyId: 'skeleton', desc: 'Espíritos angustiados que guardam os túmulos', portrait: '../shared/img/combat/enemies/espectro.webp' },
       script: [
         { type: 'narration', text: 'O ar fica gelado, denso. Vultos translúcidos cercam você — não veem você, mas sentem você.' },
         { type: 'narration', text: 'Sussurros sem palavras. Mãos sem corpos passando rente ao seu rosto.' },

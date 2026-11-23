@@ -57726,6 +57726,8 @@ function _buildMarketMockData(player){
 
     _annotateServicesWithQuestTurnin('market', extras);
 
+    _annotateServicesWithQuestTurnin('market', wandering);
+
   }
 
 
@@ -58328,6 +58330,12 @@ function _buildWorkshopMockData(player){
 
   var totalRecipes = WORKSHOP_TOOLS.reduce(function(sum, t){ return sum + t.recipe_count; }, 0);
 
+  if (typeof _annotateServicesWithQuestTurnin === 'function') {
+
+    _annotateServicesWithQuestTurnin('workshop', WORKSHOP_TOOLS);
+
+  }
+
   return {
 
     type: 'hub',
@@ -58420,21 +58428,7 @@ function _buildRuneScribeMockData(player){
 
   var lvl = player.level || 1;
 
-  return {
-
-    type: 'craft_menu',
-
-    npc_emoji: '',
-
-    npc_name: 'Eirik',  // canonical _NPC_NAME (market_rune_scribe.py L24)
-
-    npc_role: 'Escriba Rúnico',
-
-    // sessão #76: Inscrever/Ver Inscritas movidos do rodapé global pra DENTRO de
-
-    // cada card de fragmento (tier_actions). Rodapé fica só com "Comprar Fragmentos".
-
-    tiers: [
+  var tiers = [
 
       {
 
@@ -58496,7 +58490,29 @@ function _buildRuneScribeMockData(player){
 
       }
 
-    ],
+    ];
+
+  if (typeof _annotateServicesWithQuestTurnin === 'function') {
+
+    _annotateServicesWithQuestTurnin('runes', tiers);
+
+  }
+
+  return {
+
+    type: 'craft_menu',
+
+    npc_emoji: '',
+
+    npc_name: 'Eirik',  // canonical _NPC_NAME (market_rune_scribe.py L24)
+
+    npc_role: 'Escriba Rúnico',
+
+    // sessão #76: Inscrever/Ver Inscritas movidos do rodapé global pra DENTRO de
+
+    // cada card de fragmento (tier_actions). Rodapé fica só com "Comprar Fragmentos".
+
+    tiers: tiers,
 
     actions: [
 
@@ -58782,6 +58798,32 @@ function _buildFestivalMockData(player){
 
   if (!_festivalIsActive()) dayNum = 0;
 
+  var events = fest.event_ids.map(function(eid){
+
+    var e = FESTIVAL_EVENT_DB[eid];
+
+    return {
+
+      cb: 'festival_event_' + eid,
+
+      icon: e.icon,
+
+      name: e.name,
+
+      cost: e.cost,
+
+      played: (window._festivalDone || []).indexOf(eid) !== -1
+
+    };
+
+  });
+
+  if (typeof _annotateServicesWithQuestTurnin === 'function') {
+
+    _annotateServicesWithQuestTurnin('festival', events);
+
+  }
+
   return {
 
     fest_icon: fest.icon,
@@ -58798,25 +58840,7 @@ function _buildFestivalMockData(player){
 
     gold: player.gold,
 
-    events: fest.event_ids.map(function(eid){
-
-      var e = FESTIVAL_EVENT_DB[eid];
-
-      return {
-
-        cb: 'festival_event_' + eid,
-
-        icon: e.icon,
-
-        name: e.name,
-
-        cost: e.cost,
-
-        played: (window._festivalDone || []).indexOf(eid) !== -1
-
-      };
-
-    })
+    events: events
 
   };
 
@@ -62312,9 +62336,17 @@ function _buildGatesMockData(player){
 
   ];
 
+  var wanderingNpcs = [
+
+    { id: 'tibor', name: 'Tibor — Provedor de Marcha', desc: 'Assistente de Suprimentos dos Armazéns de Garlen', cb: 'gates_buy_rations' }
+
+  ];
+
   if (typeof _annotateServicesWithQuestTurnin === 'function') {
 
     _annotateServicesWithQuestTurnin('gates', actions);
+
+    _annotateServicesWithQuestTurnin('gates', wanderingNpcs);
 
   }
 
@@ -62330,11 +62362,7 @@ function _buildGatesMockData(player){
 
     services: actions,
 
-    wandering_npcs: [
-
-      { id: 'tibor', name: 'Tibor — Provedor de Marcha', desc: 'Assistente de Suprimentos dos Armazéns de Garlen', cb: 'gates_buy_rations' }
-
-    ]
+    wandering_npcs: wanderingNpcs
 
   };
 
@@ -62460,7 +62488,7 @@ function _buildPassagensMockData(player){
 
     type: 'hub',
 
-    bannerImg: '/shared/img/city/portoes-banner.webp',
+    bannerImg: '/shared/img/city/muralha-banner.webp',
 
     bannerTitle: 'PASSAGENS & ARREDORES',
 
@@ -63570,7 +63598,41 @@ function _srvAcceptQuest(serverId){
 
       _applyServerQuests(r.quests);
 
-      if (typeof vToast==='function') vToast(r.toast || 'Missão aceita!');
+      var _qaPayload = r.quest_acquired || null;
+
+      if (!_qaPayload && typeof QUESTS_ACTIVE !== 'undefined') {
+
+        var _foundQ = QUESTS_ACTIVE.filter(function(q){ return q && (q.serverId === serverId || q.id === serverId); })[0];
+
+        if (_foundQ) {
+
+          _qaPayload = {
+
+            title: _foundQ.title || 'Nova Missão',
+
+            contractor: _foundQ.npc || 'Guilda dos Aventureiros',
+
+            location: 'Valdoria',
+
+            objective: _foundQ.desc || _foundQ.whatToDo || 'Cumprir os objetivos designados.',
+
+            reward: (_foundQ.reward ? '+' + _foundQ.reward + ' Valdoritas' : '') + (_foundQ.xp ? (_foundQ.reward ? ' · ' : '') + '+' + _foundQ.xp + ' XP' : '')
+
+          };
+
+        }
+
+      }
+
+      if (_qaPayload && typeof _showQuestAcquiredPopup === 'function') {
+
+        _showQuestAcquiredPopup(_qaPayload);
+
+      } else if (typeof vToast==='function') {
+
+        vToast(r.toast || 'Missão aceita!');
+
+      }
 
       _refreshServerBoard().then(function(){ if (typeof renderCurrentScreen==='function') renderCurrentScreen(); });
 
@@ -63636,7 +63698,7 @@ function _srvCompleteQuest(serverId){
 
           _refreshServerBoard().then(function(){ if (typeof renderCurrentScreen === 'function') renderCurrentScreen(); });
 
-        });
+        }, rw.items || []);
 
       } else {
 
@@ -63768,9 +63830,9 @@ var _QUEST_DELIVERY_DESTINATIONS = {
 
   'qa_lyana':           { destKey: 'square', npcName: 'Lyana', placeName: 'Praça Central', actionCb: 'square_investigate_open', encounterFn: function(){ if (typeof _startLyanaEncounter === 'function') _startLyanaEncounter(); } },
 
-  'quest_martha_cellar':{ destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada', actionCb: 'inn_cellar_quest', encounterFn: function(){ if (typeof ACTION_HANDLERS !== 'undefined' && ACTION_HANDLERS['quest_cellar_deliver']) ACTION_HANDLERS['quest_cellar_deliver'](); else _srvCompleteQuest('quest_martha_cellar'); } },
+  'quest_martha_cellar':{ destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada', actionCb: 'inn_cellar_quest', encounterFn: function(){ if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) { if (typeof _openCityDialogue === 'function') _openCityDialogue('inn', 'cellar_complete', window.CITY_MOCK_PLAYER); else _srvCompleteQuest('quest_martha_cellar'); } else if (typeof ACTION_HANDLERS !== 'undefined' && ACTION_HANDLERS['quest_cellar_deliver']) { ACTION_HANDLERS['quest_cellar_deliver'](); } } },
 
-  'cellar':             { destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada', actionCb: 'inn_cellar_quest', encounterFn: function(){ if (typeof ACTION_HANDLERS !== 'undefined' && ACTION_HANDLERS['quest_cellar_deliver']) ACTION_HANDLERS['quest_cellar_deliver'](); else _srvCompleteQuest('cellar'); } },
+  'cellar':             { destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada', actionCb: 'inn_cellar_quest', encounterFn: function(){ if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) { if (typeof _openCityDialogue === 'function') _openCityDialogue('inn', 'cellar_complete', window.CITY_MOCK_PLAYER); else _srvCompleteQuest('quest_martha_cellar'); } else if (typeof ACTION_HANDLERS !== 'undefined' && ACTION_HANDLERS['quest_cellar_deliver']) { ACTION_HANDLERS['quest_cellar_deliver'](); } } },
 
   'quest_martha_journal':{ destKey: 'inn', npcName: 'Martha', placeName: 'Estalagem Pena-Dourada', actionCb: 'inn_cellar_quest' },
 
@@ -64206,7 +64268,7 @@ _QUEST_COMPLETION_SCENES['quest_defend'] = _QUEST_COMPLETION_SCENES['defend'];
 
 
 
-function _showQuestCompletionEncounter(questId, gold, xp, destInfo, onDone) {
+function _showQuestCompletionEncounter(questId, gold, xp, destInfo, onDone, items) {
 
   var p = (typeof CITY_MOCK_PLAYER !== 'undefined') ? CITY_MOCK_PLAYER : (window.CITY_MOCK_PLAYER || {});
 
@@ -64244,11 +64306,21 @@ function _showQuestCompletionEncounter(questId, gold, xp, destInfo, onDone) {
 
   if (comp && window.vEncounter && typeof vEncounter.render === 'function') {
 
+    var compScript = Array.isArray(comp.script) ? comp.script.slice() : [];
+
+    var compItems = Array.isArray(items) ? items : ((destInfo && Array.isArray(destInfo.items)) ? destInfo.items : []);
+
+    if (((gold && gold > 0) || (xp && xp > 0) || compItems.length > 0) && !compScript.some(function(ln){ return ln && ln.type === 'reward'; })) {
+
+      compScript.push({ type: 'reward', title: '◆ RECOMPENSA ◆', gold: gold || 0, xp: xp || 0, items: compItems });
+
+    }
+
     vEncounter.render({
 
       npc: comp.npc,
 
-      script: comp.script,
+      script: compScript,
 
       choices: [
 
@@ -64312,11 +64384,11 @@ function _srvQuestDetail(serverId){
 
   if (!sq){ if (typeof vToast==='function') vToast('Missão não encontrada'); return; }
 
-  var ready = (sq.progress||'').indexOf('✓') >= 0;
+  var ready = Boolean(sq.ready === true || sq.status === 'ready' || sq.status === 'completed_pending_turnin' || (sq.progress||'').indexOf('✓') >= 0);
 
   var destInfo = _getQuestDeliveryDestination(serverId, sq);
 
-  var deliverLabel = '🚶 A caminho de ' + (destInfo.npcName || destInfo.placeName || 'entregar');
+  var deliverLabel = '◆ A caminho de ' + (destInfo.npcName || destInfo.placeName || 'entregar');
 
 
 
@@ -124746,6 +124818,48 @@ function _buildBankMockData(player){
 
   var greetingLine = greetingPool[Math.floor(Math.random() * greetingPool.length)];
 
+  var bankServices = [
+
+    { icon: _heralIco('ic-banco'), label: 'Depositar',       cb: 'bank_deposit_menu' },
+
+    { icon: _heralIco('ic-banco'), label: 'Retirar',         cb: 'bank_withdraw_menu' },
+
+    { icon: _heralIco('ic-banco'), label: 'Guardar Item',    cb: 'bank_deposit_item_menu',
+
+      badge: itemCount > 0 ? String(itemCount) : '' },
+
+    { icon: _heralIco('ic-banco'), label: 'Recuperar Item',  cb: 'bank_withdraw_item_menu',
+
+      disabled: itemCount === 0,
+
+      badge: itemCount > 0 ? String(itemCount) : '' },
+
+    { icon: _heralIco('ic-banco'), label: 'Seguro',          cb: 'bank_insurance_menu',
+
+      badge: ins ? (insLeft + 't') : '' },
+
+    { icon: _heralIco('ic-banco'), label: 'Investir',        cb: 'bank_invest_menu',
+
+      badge: activeInvest > 0 ? String(activeInvest) : '' },
+
+    // canonical: bank_loans.py LOAN_TIERS — emprestimo com juros (3 tiers)
+
+    { icon: _heralIco('ic-banco'), label: 'Empréstimos',     cb: 'bank_loans_menu',
+
+      badge: window._bankActiveLoan ? '' : '' },
+
+    { icon: _heralIco('ic-banco'), label: 'Comprar Terreno', cb: 'bank_property_menu',
+
+      badge: propBadge }
+
+  ];
+
+  if (typeof _annotateServicesWithQuestTurnin === 'function') {
+
+    _annotateServicesWithQuestTurnin('bank', bankServices);
+
+  }
+
   return {
 
     type: 'hub',
@@ -124762,41 +124876,7 @@ function _buildBankMockData(player){
 
     loan_overdue: false,
 
-    services: [
-
-      { icon: _heralIco('ic-banco'), label: 'Depositar',       cb: 'bank_deposit_menu' },
-
-      { icon: _heralIco('ic-banco'), label: 'Retirar',         cb: 'bank_withdraw_menu' },
-
-      { icon: _heralIco('ic-banco'), label: 'Guardar Item',    cb: 'bank_deposit_item_menu',
-
-        badge: itemCount > 0 ? String(itemCount) : '' },
-
-      { icon: _heralIco('ic-banco'), label: 'Recuperar Item',  cb: 'bank_withdraw_item_menu',
-
-        disabled: itemCount === 0,
-
-        badge: itemCount > 0 ? String(itemCount) : '' },
-
-      { icon: _heralIco('ic-banco'), label: 'Seguro',          cb: 'bank_insurance_menu',
-
-        badge: ins ? (insLeft + 't') : '' },
-
-      { icon: _heralIco('ic-banco'), label: 'Investir',        cb: 'bank_invest_menu',
-
-        badge: activeInvest > 0 ? String(activeInvest) : '' },
-
-      // canonical: bank_loans.py LOAN_TIERS — emprestimo com juros (3 tiers)
-
-      { icon: _heralIco('ic-banco'), label: 'Empréstimos',     cb: 'bank_loans_menu',
-
-        badge: window._bankActiveLoan ? '' : '' },
-
-      { icon: _heralIco('ic-banco'), label: 'Comprar Terreno', cb: 'bank_property_menu',
-
-        badge: propBadge }
-
-    ]
+    services: bankServices
 
   };
 
@@ -136115,7 +136195,7 @@ var ACTION_HANDLERS = {
 
       if (typeof closeCityPopup === 'function') closeCityPopup(true);
 
-      _startCityWalk('market', function(){
+      _startCityWalk('square', function(){
 
         _startLyanaEncounter(p);
 
@@ -136343,9 +136423,9 @@ var ACTION_HANDLERS = {
 
   'quest_cellar_locate':        function(p){ _questGotoMap('cellar', 'Investigar a Adega'); },
 
-  'quest_cellar_details':       function(p){ vToast('Investigar a Adega da Estalagem. Recompensa: 60 Valdoritas + 80 XP.'); },
+  'quest_cellar_details':       function(p){ vToast('Investigar a Adega da Estalagem. Recompensa: 50 Valdoritas + 150 XP.'); },
 
-  'quest_cellar_deliver':       function(p){ _deliverQuest('cellar', 60, 80, 'Martha aperta sua mão. +60 Valdoritas +80 XP. A adega está limpa — missão completa!'); },
+  'quest_cellar_deliver':       function(p){ if (window.vCityServer && window.vCityServer.isRemote && window.vCityServer.isRemote()) { if (typeof _openCityDialogue === 'function') _openCityDialogue('inn', 'cellar_complete', p || window.CITY_MOCK_PLAYER); else _srvCompleteQuest('quest_martha_cellar'); return; } var _atInn = (typeof _currentScreen !== 'undefined' && _currentScreen === 'inn'); _deliverQuest('cellar', 50, 150, 'Martha aperta sua mão. +50 Valdoritas +150 XP. A adega está limpa — missão completa!', _atInn); },
 
   'quest_cellar_abandon':       function(p){ _abandonQuest('cellar', 'Investigar a Adega', '-5 afinidade com Martha'); },
 
@@ -137637,9 +137717,9 @@ function _openGuildQuestOfferEncounter(qid){
 
   // Apresentação estruturada com vEncounter
 
-  if (typeof window.vEncounter !== 'undefined' && typeof window.vEncounter.open === 'function') {
+  if (typeof window.vEncounter !== 'undefined' && typeof window.vEncounter.render === 'function') {
 
-    window.vEncounter.open({
+    window.vEncounter.render({
 
       id: 'guild_quest_offer_' + qid,
 
@@ -137841,9 +137921,29 @@ function _acceptQuest(qid){
 
   }
 
-  vToast('Missão aceita: ' + d.title + '. +' + d.reward + ' V + ' + d.xp + ' XP ao concluir.');
-
   if (typeof closeCityPopup === 'function') closeCityPopup();
+
+  if (typeof _showQuestAcquiredPopup === 'function') {
+
+    _showQuestAcquiredPopup({
+
+      title: d.title || 'Nova Missão',
+
+      contractor: d.npc || 'Contratante Local',
+
+      location: d.location || 'Valdoria',
+
+      objective: _wt || d.desc || 'Cumprir os objetivos designados.',
+
+      reward: (d.reward ? '+' + d.reward + ' Valdoritas' : '') + (d.xp ? (d.reward ? ' · ' : '') + '+' + d.xp + ' XP' : '')
+
+    });
+
+  } else {
+
+    vToast('Missão aceita: ' + d.title + '. +' + d.reward + ' V + ' + d.xp + ' XP ao concluir.');
+
+  }
 
   if (typeof renderCurrentScreen === 'function' && _currentScreen === 'hub') {
 
@@ -159825,41 +159925,57 @@ function _enterQuestTurnin(questId, p){
 
   }
 
-  if (window.vProcessing) { try { window.vProcessing.show({ text: 'Indo até o local...' }); } catch(_){} }
+  var _doInitTurnin = function(){
 
-  _cellarPost('/api/quest_turnin/init', { quest_id: questId }).then(function(data){
+    if (window.vProcessing) { try { window.vProcessing.show({ text: 'Indo até o local...' }); } catch(_){} }
 
-    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    _cellarPost('/api/quest_turnin/init', { quest_id: questId }).then(function(data){
 
-    if (!data || !data.ok) {
+      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
 
-      if (typeof vToast === 'function') vToast('A entrega não está disponível agora.', 'warn');
+      if (!data || !data.ok) {
 
-      return;
+        if (typeof vToast === 'function') vToast('A entrega não está disponível agora.', 'warn');
 
-    }
+        return;
 
-    if (window.vEncounter && window.vEncounter.render) {
+      }
 
-      window.vEncounter.render(
+      if (window.vEncounter && window.vEncounter.render) {
 
-        { npc: data.npc || null, script: data.script, choices: data.choices },
+        window.vEncounter.render(
 
-        { player: p, closeable: true, autoOpenChoices: true, onChoice: function(ch){ _resolveQuestTurninChoice(questId, p, ch && ch.id); } }
+          { npc: data.npc || null, script: data.script, choices: data.choices },
 
-      );
+          { player: p, closeable: true, autoOpenChoices: true, onChoice: function(ch){ _resolveQuestTurninChoice(questId, p, ch && ch.id); } }
 
-    }
+        );
 
-  }).catch(function(e){
+      }
 
-    if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
+    }).catch(function(e){
 
-    console.error('[QUEST-TURNIN] init failed', e);
+      if (window.vProcessing) { try { window.vProcessing.hide(); } catch(_){} }
 
-    if (typeof vToast === 'function') vToast('Erro ao iniciar a entrega.', 'warn');
+      console.error('[QUEST-TURNIN] init failed', e);
 
-  });
+      if (typeof vToast === 'function') vToast('Erro ao iniciar a entrega.', 'warn');
+
+    });
+
+  };
+
+  var _tDest = (typeof _getQuestDeliveryDestination === 'function') ? _getQuestDeliveryDestination(questId) : null;
+
+  if (_tDest && _tDest.destKey && typeof _currentScreen !== 'undefined' && _currentScreen !== _tDest.destKey && typeof _startCityWalk === 'function') {
+
+    _startCityWalk(_tDest.destKey, _doInitTurnin, { questId: questId, npcName: _tDest.npcName });
+
+  } else {
+
+    _doInitTurnin();
+
+  }
 
 }
 
@@ -159920,6 +160036,20 @@ function _handleQuestTurninResult(p, data){
   // re-hidrata quests/board (a quest agora está concluída no servidor).
 
   var done = [{ type: 'narration', text: data.message || '<b>Missão concluída!</b>' }];
+
+  var _rwObj = (data && data.rewards && typeof data.rewards === 'object') ? data.rewards : data;
+
+  var _rwGold = (_rwObj && (_rwObj.gold || _rwObj.gold_delta)) ? ((_rwObj.gold || _rwObj.gold_delta) | 0) : 0;
+
+  var _rwXp = (_rwObj && (_rwObj.xp || _rwObj.xp_delta)) ? ((_rwObj.xp || _rwObj.xp_delta) | 0) : 0;
+
+  var _rwItems = (_rwObj && Array.isArray(_rwObj.items)) ? _rwObj.items : [];
+
+  if (_rwGold > 0 || _rwXp > 0 || _rwItems.length > 0) {
+
+    done.push({ type: 'reward', title: '◆ RECOMPENSA ◆', gold: _rwGold, xp: _rwXp, items: _rwItems });
+
+  }
 
   window.vEncounter.render(
 
@@ -161037,7 +161167,7 @@ function _showCityWalkArrival(dest, narrativeText, proceedFn) {
 
     } else {
 
-      var venuePortrait = (dest && dest.portrait) || (baseDest && baseDest.portrait) || _getCityVenueCrestOrBanner(dest.key || dest.placeName);
+      var venuePortrait = (dest && (dest.portrait || dest.venuePortrait)) || _getCityVenueCrestOrBanner(dest.key || dest.placeName);
 
       arrivalNpc = {
 
@@ -164821,9 +164951,9 @@ function _vNumberPrompt(opts){
 
   var max = (typeof opts.max === 'number' && opts.max > 0) ? Math.floor(opts.max) : 999999;
 
-  var ov = document.createElement('div');
+  var ov = document.createElement('dialog');
 
-  ov.setAttribute('style', 'position:fixed;inset:0;z-index:var(--v-z-critical,10000);display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.62);');
+  ov.setAttribute('style', 'position:fixed;inset:0;z-index:var(--v-z-critical,10000);display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.62);margin:0;padding:0;border:none;max-width:none;max-height:none;width:100vw;height:100vh;color:inherit;');
 
   var card = document.createElement('div');
 
@@ -164887,9 +165017,11 @@ function _vNumberPrompt(opts){
 
   ov.appendChild(card);
 
-  function _close(){ try { ov.parentNode && ov.parentNode.removeChild(ov); } catch(_){} }
+  function _close(){ try { if (ov.open && typeof ov.close === 'function') ov.close(); } catch(_){} try { ov.parentNode && ov.parentNode.removeChild(ov); } catch(_){} }
 
   cancel.addEventListener('click', _close);
+
+  ov.addEventListener('cancel', function(e){ e.preventDefault(); _close(); });
 
   ov.addEventListener('click', function(e){ if(e.target===ov) _close(); });
 
@@ -164912,6 +165044,8 @@ function _vNumberPrompt(opts){
   field.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); _confirm(); } });
 
   if (window.vOverlay && window.vOverlay.add) window.vOverlay.add(ov); else document.body.appendChild(ov);
+
+  try { if (typeof ov.showModal === 'function' && !ov.open) ov.showModal(); } catch(_){}
 
   setTimeout(function(){ try { field.focus(); } catch(_){} }, 60);
 
@@ -164997,13 +165131,13 @@ function _showQuestAcquiredPopup(questData, onProceed){
 
 
 
-  var ov = document.createElement('div');
+  var ov = document.createElement('dialog');
 
   ov.id = 'quest-acquired-modal-overlay';
 
   ov.className = 'enc-popup-overlay active';
 
-  ov.style.cssText = 'position:fixed;inset:0;background:rgba(8,5,3,0.85);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:99995;padding:16px;box-sizing:border-box;';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(8,5,3,0.85);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:99995;padding:16px;margin:0;border:none;max-width:none;max-height:none;width:100vw;height:100vh;color:inherit;box-sizing:border-box;';
 
 
 
@@ -165065,11 +165199,15 @@ function _showQuestAcquiredPopup(questData, onProceed){
 
   document.body.appendChild(ov);
 
+  try { if (typeof ov.showModal === 'function' && !ov.open) ov.showModal(); } catch(_){}
+
 
 
   var btn = ov.querySelector('#btn-quest-acquired-ok');
 
   var closeFn = function(){
+
+    try { if (ov.open && typeof ov.close === 'function') ov.close(); } catch(_){}
 
     try { ov.remove(); } catch(_){}
 
@@ -165079,6 +165217,8 @@ function _showQuestAcquiredPopup(questData, onProceed){
 
   if (btn) btn.addEventListener('click', closeFn);
 
+  ov.addEventListener('cancel', function(e){ e.preventDefault(); closeFn(); });
+
   ov.addEventListener('click', function(e){ if (e.target === ov) closeFn(); });
 
 }
@@ -165086,6 +165226,36 @@ function _showQuestAcquiredPopup(questData, onProceed){
 
 
 function _handleCityDialogueResult(venue, data, p, npc, ctx, choiceId, fromNode){
+
+  function _renderCompanionApprovalBG3(scList) {
+
+    if (!scList || !scList.length || typeof vToast !== 'function') return;
+
+    for (var i = 0; i < scList.length; i++) {
+
+      var sc = scList[i];
+
+      if (sc && (sc.type === 'affinity' || sc.type === 'approval')) {
+
+        var delta = Number(sc.delta || 0);
+
+        var text = sc.text || '';
+
+        var msg = text;
+
+        if (!msg.startsWith('✦')) {
+
+          msg = '✦ ' + msg;
+
+        }
+
+        vToast(msg, delta >= 0 ? 'ok' : 'warn');
+
+      }
+
+    }
+
+  }
 
   if (data && data.quest_acquired && typeof _showQuestAcquiredPopup === 'function') {
 
@@ -165323,7 +165493,7 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx, choiceId, fromNode)
 
               var rootNodeD = _getVenueRootNode(venue, data, ctx);
 
-              var currentNodeD = (data && data.node) || node || '';
+              var currentNodeD = (data && data.node) || fromNode || '';
 
               if (currentNodeD && currentNodeD !== rootNodeD && currentNodeD !== 'greeting' && currentNodeD !== 'welcome') {
 
@@ -165507,38 +165677,6 @@ function _handleCityDialogueResult(venue, data, p, npc, ctx, choiceId, fromNode)
 
     _applyHudFromDialogue(data);
 
-function _renderCompanionApprovalBG3(scList) {
-
-  if (!scList || !scList.length || typeof vToast !== 'function') return;
-
-  for (var i = 0; i < scList.length; i++) {
-
-    var sc = scList[i];
-
-    if (sc && (sc.type === 'affinity' || sc.type === 'approval')) {
-
-      var delta = Number(sc.delta || 0);
-
-      var text = sc.text || '';
-
-      var msg = text;
-
-      if (!msg.startsWith('✦')) {
-
-        msg = '✦ ' + msg;
-
-      }
-
-      vToast(msg, delta >= 0 ? 'ok' : 'warn');
-
-    }
-
-  }
-
-}
-
-
-
     if (data.stat_changes && data.stat_changes.length) {
 
       _renderCompanionApprovalBG3(data.stat_changes);
@@ -165637,7 +165775,7 @@ function _renderCompanionApprovalBG3(scList) {
 
           } else if (spkName === 'Lyra Cantarriba') {
 
-            targetNpc = { name: 'Lyra Cantarriba', desc: 'Bardisa · broche de pena do Conservatório de Valdoria', portrait: '../shared/img/npcs/lyra-bardisa.webp' };
+            targetNpc = { name: 'Lyra Cantarriba', desc: 'Bardisa · broche de pena do Conservatório de Valdoria', portrait: (typeof window._normalizePortraitPath === 'function' ? window._normalizePortraitPath('/shared/img/npcs/lyra-bardisa.webp') : '/shared/img/npcs/lyra-bardisa.webp') };
 
           }
 
@@ -165653,7 +165791,7 @@ function _renderCompanionApprovalBG3(scList) {
 
           var rootNode = _getVenueRootNode(venue, data, ctx);
 
-          var currentNode = (data && data.node) || node || '';
+          var currentNode = (data && data.node) || fromNode || '';
 
           if (currentNode && currentNode !== rootNode && currentNode !== 'greeting' && currentNode !== 'welcome') {
 
@@ -180225,23 +180363,29 @@ function _isServiceQuestTurnin(venueKey, svc, readyLocs) {
 
 
 
-  // Match por prefixos conhecidos
+  // Match por prefixos conhecidos (somente com cb não-vazio!)
 
-  for (var targetCb in readyLocs.actionCbs) {
+  if (cb) {
 
-    if (targetCb && (cb.indexOf(targetCb) === 0 || targetCb.indexOf(cb) === 0)) return true;
+    for (var targetCb in readyLocs.actionCbs) {
+
+      if (targetCb && (cb.indexOf(targetCb) === 0 || targetCb.indexOf(cb) === 0)) return true;
+
+    }
 
   }
 
+  // Match direto por id / npcId / dialogueNode contra readyLocs.npcNames
 
+  var svcId = String(svc.npcId || svc.id || svc.dialogueNode || '').toLowerCase();
+
+  var names = readyLocs.npcNames || {};
+
+  if (svcId && names[svcId]) return true;
 
   // Match contextual por venueKey e keywords do serviço
 
   var vKey = String(venueKey || '').toLowerCase();
-
-  var names = readyLocs.npcNames || {};
-
-
 
   if (vKey === 'square') {
 
@@ -180275,7 +180419,7 @@ function _isServiceQuestTurnin(venueKey, svc, readyLocs) {
 
   } else if (vKey === 'temple') {
 
-    if ((names['elara'] || names['irmã elara']) && (/bênção|elara/i.test(lbl) || /bless/i.test(cb))) return true;
+    if ((names['elara'] || names['irmã elara']) && (/bênção|cura|elara/i.test(lbl) || /bless|heal/i.test(cb))) return true;
 
     if (names['maeve'] && (/altar|maeve/i.test(lbl) || /altar/i.test(cb))) return true;
 
@@ -180289,7 +180433,23 @@ function _isServiceQuestTurnin(venueKey, svc, readyLocs) {
 
   } else if (vKey === 'arena') {
 
-    if ((names['brakos'] || names['mestre da arena']) && (/desafio|arena|combate/i.test(lbl) || /challenge|daily/i.test(cb))) return true;
+    if ((names['brakos'] || names['vorhan'] || names['mestre da arena']) && (/desafio|arena|combate/i.test(lbl) || /challenge|daily/i.test(cb))) return true;
+
+  } else if (vKey === 'bank') {
+
+    if ((names['aldwin'] || names['aldwin de tholram']) && (/depositar|retirar|cofre|aldwin/i.test(lbl) || /bank_/i.test(cb))) return true;
+
+  } else if (vKey === 'workshop') {
+
+    if ((names['garrick'] || names['mestre garrick']) && (/forja|ferreiro|armas|armaduras|garrick/i.test(lbl) || /workshop_/i.test(cb))) return true;
+
+  } else if (vKey === 'runes') {
+
+    if ((names['eirik'] || names['thessil'] || names['escriba rúnico']) && (/runa|fragmento|inscrever|eirik|thessil/i.test(lbl) || /rune_/i.test(cb))) return true;
+
+  } else if (vKey === 'festival') {
+
+    if ((names['olmiro'] || names['olmiro, o festeiro']) && (/festival|prova|olmiro/i.test(lbl) || /festival_/i.test(cb))) return true;
 
   } else if (vKey === 'shadow_alley' || vKey === 'sewer') {
 

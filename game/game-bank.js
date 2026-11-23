@@ -483,6 +483,13 @@ function _bnkBuildServices(services) {
     var card = vCity.el('div', 'svc');
     if (svc.disabled) card.classList.add('disabled');
     card.setAttribute('data-svc', svc.cb || '');
+    if (svc.hasQuestTurnin || (typeof _isServiceQuestTurnin === 'function' && _isServiceQuestTurnin('bank', svc))) {
+      card.classList.add('has-quest-turnin');
+      var qb = vCity.el('div', 'hlc-quest-turnin-badge');
+      qb.textContent = '?';
+      qb.title = 'Missão pronta para entrega';
+      card.appendChild(qb);
+    }
 
     // Lookup meta canonical
     var meta = BANK_SVC_META[svc.cb] || {};

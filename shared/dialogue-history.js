@@ -368,10 +368,12 @@
     { id: 'square', label: 'Praça Central', icon: 'ic-praca' },
     { id: 'tavern', label: 'Taverna do Javali', icon: 'ic-taverna' },
     { id: 'inn', label: 'Estalagem da Colina', icon: 'ic-estalagem' },
-    { id: 'market', label: 'Mercado de Eldoria', icon: 'ic-mercado' },
+    { id: 'market', label: 'Mercado de Valdoria', icon: 'ic-mercado' },
     { id: 'bank', label: 'Banco de Tholram', icon: 'ic-banco' },
-    { id: 'temple', label: 'Templo dos Deuses', icon: 'ic-templo' },
+    { id: 'guild', label: 'Guilda dos Aventureiros', icon: 'ic-guilda' },
+    { id: 'temple', label: 'Templo dos Quatro', icon: 'ic-templo' },
     { id: 'workshop', label: 'Oficina & Forja', icon: 'ic-oficina' },
+    { id: 'runes', label: 'Câmara do Escriba', icon: 'ic-runas' },
     { id: 'arena', label: 'Arena de Duelos', icon: 'ic-arena' },
     { id: 'journey', label: 'Viagens & Estradas', icon: 'ic-bussola' },
     { id: 'other', label: 'Outros Encontros', icon: 'ic-dialogo' }
@@ -389,34 +391,40 @@
     var npcDesc = String(npc.desc || '').toLowerCase();
     var all = loc + ' ' + npcName + ' ' + npcId + ' ' + npcDesc;
 
-    if (all.indexOf('gate') >= 0 || all.indexOf('portão') >= 0 || all.indexOf('portao') >= 0 || all.indexOf('aldric') >= 0 || all.indexOf('guarda') >= 0) {
+    if (all.indexOf('gate') >= 0 || all.indexOf('portão') >= 0 || all.indexOf('portao') >= 0 || all.indexOf('aldric') >= 0 || all.indexOf('tibor') >= 0 || all.indexOf('guarda') >= 0) {
       return 'gates';
     }
-    if (all.indexOf('tavern') >= 0 || all.indexOf('taverna') >= 0 || all.indexOf('grom') >= 0 || all.indexOf('lyra') >= 0 || all.indexOf('javali') >= 0 || all.indexOf('bardo') >= 0) {
+    if (all.indexOf('tavern') >= 0 || all.indexOf('taverna') >= 0 || all.indexOf('grom') >= 0 || all.indexOf('javali') >= 0 || (all.indexOf('lyra') >= 0 && all.indexOf('cantarriba') >= 0) || all.indexOf('bardo') >= 0) {
       return 'tavern';
     }
     if (all.indexOf('inn') >= 0 || all.indexOf('estalagem') >= 0 || all.indexOf('martha') >= 0 || all.indexOf('quarto') >= 0 || all.indexOf('hospede') >= 0) {
       return 'inn';
     }
-    if (all.indexOf('market') >= 0 || all.indexOf('mercado') >= 0 || all.indexOf('thorne') >= 0 || all.indexOf('mirena') >= 0 || all.indexOf('velithra') >= 0 || all.indexOf('corvus') >= 0 || all.indexOf('bjorn') >= 0 || all.indexOf('barraca') >= 0) {
+    if (all.indexOf('guild') >= 0 || all.indexOf('guilda') >= 0 || all.indexOf('tavira') >= 0 || all.indexOf('braun') >= 0 || all.indexOf('helga') >= 0 || all.indexOf('recruta') >= 0) {
+      return 'guild';
+    }
+    if (all.indexOf('rune') >= 0 || all.indexOf('runa') >= 0 || all.indexOf('eirik') >= 0 || all.indexOf('thessil') >= 0 || all.indexOf('lyra silvershade') >= 0 || all.indexOf('escriba') >= 0) {
+      return 'runes';
+    }
+    if (all.indexOf('market') >= 0 || all.indexOf('mercado') >= 0 || all.indexOf('thorne') >= 0 || all.indexOf('mirena') >= 0 || all.indexOf('velithra') >= 0 || all.indexOf('corvus') >= 0 || all.indexOf('bjorn') >= 0 || all.indexOf('garlen') >= 0 || all.indexOf('berta') >= 0 || all.indexOf('barraca') >= 0) {
       return 'market';
     }
     if (all.indexOf('bank') >= 0 || all.indexOf('banco') >= 0 || all.indexOf('aldwin') >= 0 || all.indexOf('tholram') >= 0 || all.indexOf('cofre') >= 0) {
       return 'bank';
     }
-    if (all.indexOf('temple') >= 0 || all.indexOf('templo') >= 0 || all.indexOf('elara') >= 0 || all.indexOf('deuses') >= 0 || all.indexOf('clérigo') >= 0 || all.indexOf('clerigo') >= 0) {
+    if (all.indexOf('temple') >= 0 || all.indexOf('templo') >= 0 || all.indexOf('elara') >= 0 || all.indexOf('brevon') >= 0 || all.indexOf('aldwynn') >= 0 || all.indexOf('miriel') >= 0 || all.indexOf('theron') >= 0 || all.indexOf('varek') >= 0 || all.indexOf('orenthia') >= 0 || all.indexOf('quatro') >= 0 || all.indexOf('clérigo') >= 0 || all.indexOf('clerigo') >= 0) {
       return 'temple';
     }
-    if (all.indexOf('workshop') >= 0 || all.indexOf('oficina') >= 0 || all.indexOf('ferreiro') >= 0 || all.indexOf('forja') >= 0 || all.indexOf('bigorna') >= 0 || all.indexOf('alchemist') >= 0) {
+    if (all.indexOf('workshop') >= 0 || all.indexOf('oficina') >= 0 || all.indexOf('garrick') >= 0 || all.indexOf('ferreiro') >= 0 || all.indexOf('forja') >= 0 || all.indexOf('bigorna') >= 0 || all.indexOf('alchemist') >= 0) {
       return 'workshop';
     }
-    if (all.indexOf('arena') >= 0 || all.indexOf('pit_fight') >= 0 || all.indexOf('duelo') >= 0 || all.indexOf('combate') >= 0) {
+    if (all.indexOf('arena') >= 0 || all.indexOf('vorhan') >= 0 || all.indexOf('brakos') >= 0 || all.indexOf('pit_fight') >= 0 || all.indexOf('duelo') >= 0 || all.indexOf('combate') >= 0) {
       return 'arena';
     }
     if (all.indexOf('journey') >= 0 || all.indexOf('viagem') >= 0 || all.indexOf('estrada') >= 0 || all.indexOf('floresta') >= 0 || all.indexOf('trilha') >= 0 || all.indexOf('explor') >= 0) {
       return 'journey';
     }
-    if (all.indexOf('square') >= 0 || all.indexOf('praça') >= 0 || all.indexOf('praca') >= 0 || all.indexOf('chafariz') >= 0 || all.indexOf('mendigo') >= 0 || all.indexOf('taviel') >= 0) {
+    if (all.indexOf('square') >= 0 || all.indexOf('praça') >= 0 || all.indexOf('praca') >= 0 || all.indexOf('chafariz') >= 0 || all.indexOf('lyana') >= 0 || all.indexOf('vane') >= 0 || all.indexOf('vharro') >= 0 || all.indexOf('drax') >= 0 || all.indexOf('kyle') >= 0 || all.indexOf('mendigo') >= 0 || all.indexOf('taviel') >= 0) {
       return 'square';
     }
 

@@ -175,6 +175,13 @@ function renderRuneScribe(container, data) {
         var t = data.tiers[i];
         var card = vCity.el('div', 'svc');
         card.style.cssText = 'flex-direction:column;align-items:stretch;gap:6px;padding:10px;';
+        if (t.hasQuestTurnin || (typeof _isServiceQuestTurnin === 'function' && _isServiceQuestTurnin('runes', t))) {
+          card.classList.add('has-quest-turnin');
+          var qb = vCity.el('div', 'hlc-quest-turnin-badge');
+          qb.textContent = '?';
+          qb.title = 'Missão pronta para entrega';
+          card.appendChild(qb);
+        }
 
         var hdr = _rnsEl('div', '');
         hdr.style.cssText = 'display:flex;align-items:center;gap:8px;';

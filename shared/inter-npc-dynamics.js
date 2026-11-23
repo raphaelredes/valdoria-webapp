@@ -122,6 +122,11 @@
 
   // ── Efeito Ondulação Social (Ripple Effect) ──────────────────────────────────
 
+  function _npcLabel(k){
+    if (global.NPC_DISPLAY_NAMES && global.NPC_DISPLAY_NAMES[k]) return global.NPC_DISPLAY_NAMES[k];
+    return _cap(k);
+  }
+
   function processRipple(player, sourceNpcKey, delta){
     if (!delta || _rippleRecursionGuard || !global.NPC_RELATIONS) return;
     _rippleRecursionGuard = true;
@@ -137,32 +142,34 @@
         var strength = rel.strength != null ? rel.strength : 0.5;
         var observerDelta = 0;
         var toastMsg = '';
+        var obsLabel = _npcLabel(observerKey);
+        var srcLabel = _npcLabel(sourceNpcKey);
 
-        if (relType === 'old_friend' || relType === 'mentor' || relType === 'peer' || relType === 'sibling') {
+        if (relType === 'old_friend' || relType === 'mentor' || relType === 'peer' || relType === 'sibling' || relType === 'symbiotic_craft' || relType === 'fair_patron') {
           var factor = (relType === 'old_friend') ? 0.5 : ((relType === 'mentor') ? 0.6 : 0.4);
           observerDelta = Math.round(delta * strength * factor);
           if (observerDelta > 0) {
-            toastMsg = '◆ ' + _cap(observerKey) + ' soube do seu auxílio a ' + _cap(sourceNpcKey);
+            toastMsg = '◆ ' + obsLabel + ' soube do seu auxílio a ' + srcLabel;
           } else if (observerDelta < 0) {
-            toastMsg = '◇ ' + _cap(observerKey) + ' desaprovou sua conduta com ' + _cap(sourceNpcKey);
+            toastMsg = '◇ ' + obsLabel + ' desaprovou sua conduta com ' + srcLabel;
           }
         } else if (relType === 'rival') {
           // Rivalidade gera ciúme competitivo em atos favoráveis
           if (delta > 0) {
             observerDelta = Math.round(-1 * delta * strength * 0.35);
             if (observerDelta < 0) {
-              toastMsg = '◇ ' + _cap(observerKey) + ' olhou com desdém sua proximidade com ' + _cap(sourceNpcKey);
+              toastMsg = '◇ ' + obsLabel + ' olhou com desdém sua proximidade com ' + srcLabel;
             }
           } else if (delta < 0) {
             observerDelta = Math.round(Math.abs(delta) * strength * 0.25);
             if (observerDelta > 0) {
-              toastMsg = '◆ ' + _cap(observerKey) + ' aprovou sua postura firme perante ' + _cap(sourceNpcKey);
+              toastMsg = '◆ ' + obsLabel + ' aprovou sua postura firme perante ' + srcLabel;
             }
           }
         } else if (relType === 'creditor') {
           if (delta > 0) {
             observerDelta = Math.max(1, Math.round(delta * 0.25));
-            toastMsg = '◆ ' + _cap(observerKey) + ' apreciou sua influência benéfica sobre ' + _cap(sourceNpcKey);
+            toastMsg = '◆ ' + obsLabel + ' apreciou sua influência benéfica sobre ' + srcLabel;
           }
         }
 
@@ -186,7 +193,7 @@
 
   function triggerPartyApproval(player, triggerKey, contextLabel){
     if (!triggerKey) return [];
-    var p = player || global.CITY_MOCK_PLAYER || null;
+    var p = player || global.vPlayer || global.CITY_MOCK_PLAYER || null;
     if (!p) return [];
 
     var party = p.party || [];

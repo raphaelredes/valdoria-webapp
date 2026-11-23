@@ -244,6 +244,13 @@ function renderWorkshopHub(container, data) {
     var t = data.tools[i];
     var card = vCity.el('div', 'svc');
     card.setAttribute('data-svc', t.cb || '');
+    if (t.hasQuestTurnin || (typeof _isServiceQuestTurnin === 'function' && _isServiceQuestTurnin('workshop', t))) {
+      card.classList.add('has-quest-turnin');
+      var qb = vCity.el('div', 'hlc-quest-turnin-badge');
+      qb.textContent = '?';
+      qb.title = 'Missão pronta para entrega';
+      card.appendChild(qb);
+    }
     var ico = vCity.el('div', 'svc-ico');
     // emoji ban: backend não envia mais emoji; fallback WebP genérico da oficina.
     ico.innerHTML = t.emoji || '<img src="../shared/img/ui/oficina.webp" alt="" style="width:100%;height:100%;object-fit:contain" onerror="this.style.display=\'none\'">';

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- SYNCED FROM simuladores/combate.html AT 2026-11-07T15:54:58Z — do not edit directly, edit source -->
+<!-- SYNCED FROM simuladores/combate.html AT 2026-11-23T14:28:46Z — do not edit directly, edit source -->
 
 <!-- SYNCED FROM simuladores/combate.html AT 2026-05-19T02:43:47Z — do not edit directly, edit source -->
 
@@ -21695,7 +21695,7 @@ function pushBuffSim(u, sim, skillIco, skillName) {
         if (droppedConc.length && typeof currentState !== 'undefined' && currentState && currentState.log) {
             currentState.log.push(u.n + ' perde concentração em ' + droppedConc.join(', ') +
                 ' ao conjurar ' + (skillName || sim.condName || 'nova magia') + ' (' +
-                (sim.rageDmg ? ' — Fúria impede concentração, p.49' : '') + ').');
+                (sim.rageDmg ? ' — Fúria impede concentração' : '') + ').');
         }
     }
     u.se = u.se.filter(function (x) { return x.id !== id; });
@@ -28015,7 +28015,7 @@ function formatDndActionReach(unit, skill) {
                 reachHex: 24,
                 meters: '36m',
                 feet: 120,
-                label: '36m (120 pés · 24h)',
+                label: '36m (120 pés · 24 hex)',
                 badge: '120 pés',
                 isRanged: true,
                 isMelee: false

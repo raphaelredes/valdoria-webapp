@@ -174,6 +174,13 @@ function renderGatesHub(container, data) {
       var card = vCity.el('div', 'svc');
       if (svc.disabled) card.classList.add('disabled');
       card.setAttribute('data-svc', svc.cb || '');
+      if (svc.hasQuestTurnin || (typeof _isServiceQuestTurnin === 'function' && _isServiceQuestTurnin('gates', svc))) {
+        card.classList.add('has-quest-turnin');
+        var qb = vCity.el('div', 'hlc-quest-turnin-badge');
+        qb.textContent = '?';
+        qb.title = 'Missão pronta para entrega';
+        card.appendChild(qb);
+      }
 
       var meta = GTS_SVC_META[svc.cb] || {};
       if (svc.quest) {
